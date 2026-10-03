@@ -81,6 +81,14 @@ pub enum Error {
     /// The supplied passphrase cannot authenticate the complete encrypted vault.
     #[error("vault unlock failed")]
     VaultUnlockFailed,
+    /// An OpenSSH-style configuration could not be imported safely.
+    #[error("invalid SSH configuration at line {line}: {reason}")]
+    OpenSshConfig {
+        /// One-based source line, or zero when the error is not tied to a line.
+        line: usize,
+        /// Stable reason that is safe to display without echoing configuration values.
+        reason: &'static str,
+    },
     /// The loaded vault is stale, belongs to another store, or disk changed.
     #[error("vault snapshot is stale or disk changed; reload before saving")]
     VaultConflict,

@@ -34,6 +34,8 @@
 
 最新连接组织与动态代理增量见 [集成记录](testing/records/2026-10-03-library-socks-integration.md)：持久化嵌套目录树、空目录导入、标签编辑、连接移动、可恢复回收站及最近 50 次成功连接；旧分组保留名称并自动迁移。目录同时改名/移动使用 `update_folder` 一次校验最终树。最近记录排队等待当前保存完成，并在入队及保存时检查目的地快照；编辑目的地清除旧成功记录。异步连接通过 `runtime_bridge` 执行，完成后按当前可见弹窗恢复焦点。
 
+连接管理器同时提供 **导入 SSH 配置**：从剪贴板读取受限 OpenSSH 子集，只接受精确 Host、HostName、Port、User、IdentityFile、ProxyJump 及调用方显式提供的 Include 内容；通配/条件/ProxyCommand 等语义会进入警告报告，解析和路由错误保持连接库不变。实现、设计和测试边界见 [OpenSSH 导入记录](testing/records/2026-10-03-openssh-import.md) 与 [ADR 0023](adr/0023-openssh-config-import.md)。
+
 动态 SOCKS5 仅绑定回环，IPv4/IPv6/域名经 SSH CONNECT；正常停止保留 SSH，异常通道清理到期可断开共享 SSH，并以同 socket shutdown 兜底。界面提供实际代理 URI、复制、逐行停止与汇总状态；不包含 UDP/BIND、代理认证或保存规则。详见 [专项记录](testing/records/2026-10-03-dynamic-socks.md)。
 
 ## AI 模块
@@ -128,7 +130,7 @@ shell/exec/SFTP 通道在打开前即由独立任务持有，覆盖迟到确认�
 
 ## 待补的完整性
 
-连接批量组织与永久回收清理 UI、凭据备份/恢复与跨文件事务、外部 ProxyCommand、keyboard-interactive、远端进程的断线恢复、交互 shell 可编程补全、逐目标模板参数/任务依赖/持久化批量审计、传输自动恢复/并行、ACL/所有权/文件差异、TCP 协议级服务健康、更多监控、同步、打包和 Windows/Linux 原生验收均需继续追踪。当前 TCP 探测只证明远程主机完成握手，不代表协议或应用已就绪。终端搜索目前只搜索活动标签的本地滚动区，不读取远端文件或重新执行命令。
+连接批量组织与永久回收清理 UI、凭据备份/恢复与跨文件事务、外部 ProxyCommand、键盘交互认证的 UI 提示收集、远端进程的断线恢复、交互 shell 可编程补全、逐目标模板参数/任务依赖/持久化批量审计、传输自动恢复/并行、ACL/所有权/文件差异、TCP 协议级服务健康、更多监控、同步、打包和 Windows/Linux 原生验收均需继续追踪。当前 TCP 探测只证明远程主机完成握手，不代表协议或应用已就绪。终端搜索目前只搜索活动标签的本地滚动区，不读取远端文件或重新执行命令。
 
 工具栏已接入“关于/更新”面板：它显示内置变更日志和项目主页，用户点击后在后台检查固定 GitHub Release，下载当前平台资产并验证同一发布的 SHA-256。已校验包保存在唯一临时目录，可从面板查看；因为签名、公证、安装权限、运行中替换和回滚尚未完成三平台验收，当前版本不会覆盖现有安装。设计与验证见 `adr/0021-about-and-update-panel.md` 和 `testing/records/2026-10-03-update-panel.md`。
 

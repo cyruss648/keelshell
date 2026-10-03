@@ -354,6 +354,8 @@ impl Workspace {
                     .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.open_form(window,cx))))
                 .child(Button::new("import-connections").compact().icon(IconName::Download).label(t(cx,"导入 JSON","Import JSON"))
                     .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.import_connections(window,cx))))
+                .child(Button::new("import-openssh").compact().icon(IconName::Download).label(t(cx,"导入 SSH 配置","Import SSH config"))
+                    .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.import_openssh_connections(window,cx))))
                 .child(Button::new("export-connections").compact().icon(IconName::Upload).label(t(cx,"导出 JSON","Export JSON"))
                     .on_click(cx.listener(|view,_,_,cx|view.export_connections(cx))))
                 .child(div().flex_1().min_w(px(120.)).child(Input::new(&self.search).small())))

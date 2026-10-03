@@ -9,6 +9,7 @@ use crate::{
     AppState, Connection, Error, ImportReport, SCHEMA_VERSION, Settings, SnapshotRevision, Snippet,
     ValidationError,
     model::{MAX_CONNECTIONS, MAX_DOCUMENT_BYTES, schema, text, validate_connections},
+    parse_openssh_config, parse_openssh_config_with_includes,
 };
 
 const MAX_FOLDERS: usize = 10_000;
@@ -539,6 +540,89 @@ impl AppState {
             added: imported.added,
             skipped,
         })
+    }
+
+    /// Import exact SSH profiles from an OpenSSH-style document.
+    ///
+    /// The document is parsed without filesystem or environment access.  Use
+    /// [`Self::import_openssh_config_with_includes`] when Include contents have
+    /// already been selected and read by a caller-owned worker.  Imported
+    /// profiles receive fresh local IDs and never carry vault references.
+    pub fn import_openssh_config(&mut self, input: &str) -> Result<ImportReport, Error> {
+        Ok(self.import_openssh_config_report(input)?.imported)
+    }
+
+    /// Parse and import an OpenSSH document while preserving skipped items for review.
+    pub fn import_openssh_config_report(
+        &mut self,
+        input: &str,
+    ) -> Result<crate::OpenSshImportReport, Error> {
+        let config = parse_openssh_config(input)?;
+        let warnings = config.warnings.clone();
+        let imported = self.import_parsed_openssh(config)?;
+        Ok(crate::OpenSshImportReport { imported, warnings })
+    }
+
+    /// Import an OpenSSH-style document with caller-supplied Include contents.
+    ///
+    /// The map is matched literally by Include path; this method does not read
+    /// files or expand paths.  Include resolution should therefore happen in a
+    /// bounded background worker with an explicit user-selected file set.
+    pub fn import_openssh_config_with_includes(
+        &mut self,
+        input: &str,
+        includes: &BTreeMap<String, String>,
+    ) -> Result<ImportReport, Error> {
+        Ok(self
+            .import_openssh_config_with_includes_report(input, includes)?
+            .imported)
+    }
+
+    /// Parse and import with caller-selected Include contents and a review report.
+    pub fn import_openssh_config_with_includes_report(
+        &mut self,
+        input: &str,
+        includes: &BTreeMap<String, String>,
+    ) -> Result<crate::OpenSshImportReport, Error> {
+        let config = parse_openssh_config_with_includes(input, includes)?;
+        let warnings = config.warnings.clone();
+        let imported = self.import_parsed_openssh(config)?;
+        Ok(crate::OpenSshImportReport { imported, warnings })
+    }
+
+    fn import_parsed_openssh(
+        &mut self,
+        config: crate::OpenSshConfig,
+    ) -> Result<ImportReport, Error> {
+        let mut incoming = AppState::default();
+        let mut aliases = HashMap::with_capacity(config.entries.len());
+        for entry in &config.entries {
+            let id = entry.connection.id;
+            if aliases.insert(entry.alias.clone(), id).is_some() {
+                return Err(Error::OpenSshConfig {
+                    line: entry.source_line,
+                    reason: "duplicate Host aliases are ambiguous",
+                });
+            }
+            incoming.connections.push(entry.connection.clone());
+        }
+        // Resolve jump aliases only after every profile has been indexed.  A
+        // missing alias fails closed instead of silently becoming a direct hop.
+        for (entry, connection) in config.entries.iter().zip(incoming.connections.iter_mut()) {
+            if let Some(alias) = &entry.proxy_jump {
+                connection.jump_host = Some(*aliases.get(alias).ok_or(Error::OpenSshConfig {
+                    line: entry.source_line,
+                    reason: "ProxyJump references an unknown Host alias",
+                })?);
+            }
+        }
+        incoming.validate_connection_library()?;
+        self.validate_connection_library()?;
+        let mut candidate = self.clone();
+        let imported = crate::routes::import_profiles(&mut candidate, &incoming, &HashMap::new())?;
+        candidate.validate_connection_library()?;
+        *self = candidate;
+        Ok(imported)
     }
 
     pub(crate) fn validate_connection_library(&self) -> Result<(), ValidationError> {

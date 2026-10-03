@@ -36,6 +36,12 @@ pub enum SshAuth {
     Agent,
     /// An ephemeral password, erased when this value is dropped.
     Password(Zeroizing<String>),
+    /// Answer server keyboard-interactive prompts with ephemeral responses.
+    /// Responses are consumed in prompt order and are never logged or serialized.
+    KeyboardInteractive {
+        /// One response per server prompt, in order.
+        responses: Vec<Zeroizing<String>>,
+    },
     /// A private key file and optional ephemeral passphrase.
     PrivateKey {
         /// File loaded only after the host identity is verified.
@@ -429,6 +435,9 @@ impl SshSession {
                 .authenticate_password(&options.username, password.as_str())
                 .await?
                 .success(),
+            SshAuth::KeyboardInteractive { responses } => {
+                authenticate_keyboard_interactive(&mut handle, &options.username, responses).await?
+            }
             SshAuth::PrivateKey { path, passphrase } => {
                 let path = path.clone();
                 let passphrase = passphrase.clone();
@@ -902,6 +911,82 @@ fn check_output(output: &ExecOutput, more: usize, limit: usize) -> Result<()> {
     }
 }
 
+const MAX_KEYBOARD_INTERACTIVE_PROMPTS: usize = 8;
+const MAX_KEYBOARD_INTERACTIVE_TEXT: usize = 16 * 1024;
+
+fn validate_keyboard_interactive(
+    name: &str,
+    instructions: &str,
+    prompts: &[client::Prompt],
+    responses: &[Zeroizing<String>],
+    response_offset: usize,
+) -> Result<(Vec<String>, usize)> {
+    if name.len() > MAX_KEYBOARD_INTERACTIVE_TEXT
+        || instructions.len() > MAX_KEYBOARD_INTERACTIVE_TEXT
+        || prompts.len() > MAX_KEYBOARD_INTERACTIVE_PROMPTS
+    {
+        return Err(SessionError::Invalid(
+            "keyboard-interactive challenge is too large",
+        ));
+    }
+    let mut answers = Vec::with_capacity(prompts.len());
+    for (index, prompt) in prompts.iter().enumerate() {
+        let response_index = response_offset.saturating_add(index);
+        if prompt.prompt.len() > MAX_KEYBOARD_INTERACTIVE_TEXT {
+            return Err(SessionError::Invalid(
+                "keyboard-interactive prompt is too large",
+            ));
+        }
+        let Some(response) = responses.get(response_index) else {
+            return Err(SessionError::Credential(
+                "keyboard-interactive response is missing".to_owned(),
+            ));
+        };
+        if response.len() > MAX_KEYBOARD_INTERACTIVE_TEXT {
+            return Err(SessionError::Invalid(
+                "keyboard-interactive response is too large",
+            ));
+        }
+        answers.push(response.to_string());
+    }
+    Ok((answers, prompts.len()))
+}
+
+async fn authenticate_keyboard_interactive(
+    handle: &mut client::Handle<Client>,
+    username: &str,
+    responses: &[Zeroizing<String>],
+) -> Result<bool> {
+    use client::KeyboardInteractiveAuthResponse;
+    let mut next = handle
+        .authenticate_keyboard_interactive_start(username, None::<String>)
+        .await?;
+    let mut response_offset = 0usize;
+    loop {
+        next = match next {
+            KeyboardInteractiveAuthResponse::Success => return Ok(true),
+            KeyboardInteractiveAuthResponse::Failure { .. } => return Ok(false),
+            KeyboardInteractiveAuthResponse::InfoRequest {
+                name,
+                instructions,
+                prompts,
+            } => {
+                let (answers, consumed) = validate_keyboard_interactive(
+                    &name,
+                    &instructions,
+                    &prompts,
+                    responses,
+                    response_offset,
+                )?;
+                response_offset = response_offset.saturating_add(consumed);
+                handle
+                    .authenticate_keyboard_interactive_respond(answers)
+                    .await?
+            }
+        };
+    }
+}
+
 async fn authenticate_agent(handle: &mut client::Handle<Client>, username: &str) -> Result<bool> {
     #[cfg(unix)]
     let mut agent = russh::keys::agent::client::AgentClient::connect_env()
@@ -943,8 +1028,57 @@ mod tests {
     };
     use std::time::Duration;
 
-    use super::{RetryPolicy, SshOptions, SshSession, retry_with_policy};
+    use super::{
+        RetryPolicy, SshOptions, SshSession, retry_with_policy, validate_keyboard_interactive,
+    };
     use crate::SessionError;
+    use russh::client;
+    use zeroize::Zeroizing;
+
+    #[test]
+    fn keyboard_interactive_answers_are_bounded_and_ordered() {
+        let prompts = vec![
+            client::Prompt {
+                prompt: "Password:".into(),
+                echo: false,
+            },
+            client::Prompt {
+                prompt: "OTP:".into(),
+                echo: false,
+            },
+        ];
+        let responses = vec![
+            Zeroizing::new("secret".into()),
+            Zeroizing::new("123456".into()),
+        ];
+        let result = validate_keyboard_interactive("login", "", &prompts, &responses, 0);
+        assert!(result.is_ok());
+        let (answers, consumed) = match result {
+            Ok(value) => value,
+            Err(error) => panic!("valid keyboard-interactive prompts: {error}"),
+        };
+        assert_eq!(answers, vec!["secret", "123456"]);
+        assert_eq!(consumed, 2);
+    }
+
+    #[test]
+    fn keyboard_interactive_missing_response_does_not_echo_prompt_or_secret() {
+        let prompts = vec![client::Prompt {
+            prompt: "Password:".into(),
+            echo: false,
+        }];
+        let result = validate_keyboard_interactive("", "", &prompts, &[], 0);
+        assert!(result.is_err());
+        let error = match result {
+            Ok(_) => panic!("missing response must fail"),
+            Err(error) => error,
+        };
+        assert_eq!(
+            error.to_string(),
+            "SSH credential provider: keyboard-interactive response is missing"
+        );
+        assert!(!error.to_string().contains("Password"));
+    }
 
     #[test]
     fn retry_policy_clamps_attempts_and_caps_exponential_backoff() {

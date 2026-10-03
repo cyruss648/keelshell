@@ -12,6 +12,7 @@ mod completion;
 mod connection_library;
 mod error;
 mod model;
+mod openssh;
 mod proxy;
 mod reconnect;
 mod routes;
@@ -36,6 +37,11 @@ pub use error::{Error, ValidationError};
 pub use model::{
     AiSettings, AppState, AuthMethod, Connection, ImportReport, Language, SCHEMA_VERSION, Settings,
     SnapshotRevision, Snippet, Theme,
+};
+pub use openssh::{
+    MAX_OPENSSH_CONFIG_BYTES, MAX_OPENSSH_ENTRIES, MAX_OPENSSH_INCLUDE_DEPTH,
+    MAX_OPENSSH_LINE_BYTES, OpenSshConfig, OpenSshEntry, OpenSshImportReport, OpenSshWarning,
+    parse_openssh_config, parse_openssh_config_with_includes,
 };
 pub use proxy::{ConnectionProxy, ProxyAuthentication, ProxyKind};
 pub use reconnect::ReconnectPolicy;

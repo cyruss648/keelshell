@@ -640,6 +640,32 @@ async fn connection_library_clipboard_import_favorite_export_and_delete_persist(
     );
 }
 
+#[gpui_kit::test]
+async fn connection_library_imports_reviewable_openssh_config_from_clipboard(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount(cx, Vec::new());
+    let document = "Host app\n HostName app.example.test\n User deploy\n Port 2222\nHost web-*\n HostName ignored.example.test\n User deploy\n";
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        cx.write_to_clipboard(ClipboardItem::new_string(document.into()));
+        window.click("import-openssh", cx);
+    })
+    .checked("import OpenSSH text through the production manager");
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).saving
+    })
+    .await;
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        assert_eq!(workspace.state.connections.len(), 1);
+        let connection = &workspace.state.connections[0];
+        assert_eq!(connection.name, "app");
+        assert_eq!(connection.host, "app.example.test");
+        assert_eq!(connection.port, 2222);
+        assert!(workspace.status.render(cx).contains("审阅"));
+    });
+}
+
 fn password_profile() -> Connection {
     let mut profile = Connection::new("测试凭据", "127.0.0.1", "fixture-user");
     profile.auth = keelshell_core::AuthMethod::Password;

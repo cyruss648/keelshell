@@ -147,6 +147,7 @@ enum AfterSave {
         added: usize,
         skipped: usize,
         folders_added: usize,
+        warnings: usize,
     },
     ConnectionFavorite {
         favorite: bool,
@@ -1192,6 +1193,7 @@ impl Workspace {
                         added: report.added,
                         skipped: report.skipped,
                         folders_added,
+                        warnings: 0,
                     },
                     window,
                     cx,
@@ -1350,10 +1352,10 @@ impl Workspace {
                             AfterSave::Trust { attempt, index } => {
                                 view.finish_host_trust(attempt, index, window, cx);
                             }
-                            AfterSave::ConnectionsImported { added, skipped, folders_added } => {
+                            AfterSave::ConnectionsImported { added, skipped, folders_added, warnings } => {
                                 view.status = Message::new(
-                                    format!("已导入 {added} 条连接和 {folders_added} 个文件夹，跳过 {skipped} 条重复记录。"),
-                                    format!("Imported {added} connections and {folders_added} folders; skipped {skipped} duplicates."),
+                                    format!("已导入 {added} 条连接和 {folders_added} 个文件夹，跳过 {skipped} 条重复记录；有 {warnings} 项配置需要审阅。"),
+                                    format!("Imported {added} connections and {folders_added} folders; skipped {skipped} duplicates; {warnings} config items need review."),
                                 );
                             }
                             AfterSave::ConnectionFavorite { favorite } => {
@@ -1471,6 +1473,62 @@ impl Workspace {
         })
         .detach();
         cx.notify();
+    }
+
+    fn import_openssh_connections(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.saving {
+            self.status = Message::new(
+                "请等待当前保存完成，再导入 SSH 配置。",
+                "Wait for the current save to finish before importing SSH configuration.",
+            );
+            cx.notify();
+            return;
+        }
+        let Some(document) = cx.read_from_clipboard().and_then(|item| item.text()) else {
+            self.status = Message::new(
+                "剪贴板中没有可读取的 SSH 配置。",
+                "The clipboard does not contain readable SSH configuration.",
+            );
+            cx.notify();
+            return;
+        };
+        let mut candidate = self.state.clone();
+        match candidate.import_openssh_config_report(&document) {
+            Ok(report) if candidate == self.state => {
+                self.status = Message::new(
+                    format!(
+                        "没有新增连接，跳过 {} 条重复记录；有 {} 项需审阅。",
+                        report.imported.skipped,
+                        report.warnings.len()
+                    ),
+                    format!(
+                        "No connections added; skipped {} duplicates; {} items need review.",
+                        report.imported.skipped,
+                        report.warnings.len()
+                    ),
+                );
+                cx.notify();
+            }
+            Ok(report) => self.persist(
+                candidate,
+                AfterSave::ConnectionsImported {
+                    added: report.imported.added,
+                    skipped: report.imported.skipped,
+                    folders_added: 0,
+                    warnings: report.warnings.len(),
+                },
+                window,
+                cx,
+            ),
+            Err(error) => {
+                self.status = Message::detail(
+                    "SSH 配置导入失败，未修改连接库",
+                    "SSH configuration import failed; the library was not changed",
+                    error,
+                );
+                cx.notify();
+            }
+        }
     }
     fn run_command(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.command_surface_blocked() {
