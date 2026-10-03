@@ -29,6 +29,7 @@ python3 scripts/check.py
 - `cargo test -p keelshell-core --test routes --locked`：27 项通过。
 - `cargo test -p keelshell-app --bin keelshell-app --locked`：246 项通过。
 - `python3 scripts/check.py`：整仓测试、文档测试和依赖策略通过；OpenSSH 互操作测试按脚本配置保持忽略。
+- GitHub Quality `37157850288`：macOS 26、Ubuntu 24.04、Windows 2025 三个平台的打包回归、Rust 质量门禁和配置启用的 OpenSSH 互操作步骤全部通过。
 
 ## 证据边界
 
