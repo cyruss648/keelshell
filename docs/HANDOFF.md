@@ -134,7 +134,7 @@ shell/exec/SFTP 通道在打开前即由独立任务持有，覆盖迟到确认�
 
 ## 迁移核验
 
-本阶段最终提交 `2ee0693c02f1ceca4796d5ccc500ff48a487bd6a` 已推送到公开仓库；本地门禁和 [Quality 37125780395](https://github.com/cyruss648/keelshell/actions/runs/37125780395) 均通过。旧产品别名已从可达 Git 历史清理，详细证据见 `testing/records/2026-10-03-final-feature-slice.md`。
+本阶段功能提交 `2ee0693c02f1ceca4796d5ccc500ff48a487bd6a` 与验收记录提交 `184d214d38480d21e05ab5638d3cc3e741e7a1e1` 已推送到公开仓库；功能提交的三平台验证见 [Quality 37125780395](https://github.com/cyruss648/keelshell/actions/runs/37125780395)，验收记录提交的三平台验证见 [Quality 37127192429](https://github.com/cyruss648/keelshell/actions/runs/37127192429)。旧产品别名已从可达 Git 历史清理，详细证据见 `testing/records/2026-10-03-final-feature-slice.md`。
 
 目录通过同一文件系统 rename 移动，82 个源码/配置文件 SHA256 前后一致；迁移时 Git HEAD 与 porcelain status 前后一致，旧目录不存在。`git fsck --full` 初次发现 Finder 的 `.git/refs/.DS_Store`，已可恢复地移至 ignored `work/relocation-quarantine/refs/.DS_Store`，复检通过。迁移后的历史清理和远端更新见上方最终验收记录。
 
