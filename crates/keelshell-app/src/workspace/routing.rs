@@ -37,6 +37,23 @@ pub(super) fn same_route(a: &ConnectionRoute, b: &ConnectionRoute) -> bool {
 }
 
 impl Workspace {
+    pub(super) fn route_is_ephemeral(&self) -> bool {
+        self.connect_route
+            .as_ref()
+            .is_some_and(|route| route.ephemeral)
+    }
+
+    pub(super) fn ephemeral_route_matches(&self, connection: &Connection) -> bool {
+        self.connect_route.as_ref().is_some_and(|route| {
+            route.ephemeral
+                && route
+                    .snapshot
+                    .hops()
+                    .get(route.current)
+                    .is_some_and(|current| vault::same_destination(current, connection))
+        })
+    }
+
     pub(super) fn editing_active_route(&self, id: uuid::Uuid) -> bool {
         self.connect_route
             .as_ref()
@@ -128,7 +145,7 @@ impl Workspace {
         true
     }
 
-    /// Start a direct SSH route from the empty-workspace one-time form.
+    /// Start a direct SSH route from the no-session one-time form.
     ///
     /// The route is intentionally kept outside the saved connection library;
     /// only host trust state may be persisted after an explicit fingerprint
@@ -564,6 +581,7 @@ impl Workspace {
                             view.prepare_route_hop(window, cx);
                         } else {
                             let snapshot = route.snapshot.clone();
+                            let ephemeral = route.ephemeral;
                             view.connect_route = None;
                             if let Some(ticket) = reconnect {
                                 if !view.finish_reconnect(ticket, session, snapshot, window, cx) {
@@ -580,7 +598,7 @@ impl Workspace {
                                     window,
                                     cx,
                                 );
-                                if let Some(terminal) = view.tabs.get(view.active) {
+                                if !ephemeral && let Some(terminal) = view.tabs.get(view.active) {
                                     view.bind_remote_tab(terminal.entity_id(), snapshot);
                                 }
                             }

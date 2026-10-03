@@ -220,6 +220,7 @@ impl Workspace {
             let locked = login.mode == LoginMode::Unlock;
             let save = login.mode == LoginMode::Save;
             let agent = matches!(login.connection.auth, AuthMethod::Agent);
+            let ephemeral = self.route_is_ephemeral();
             let proxy_auth = !save && super::vault::needs_proxy_password(&login.connection);
             let description = if locked {
                 t(
@@ -264,7 +265,7 @@ impl Workspace {
                             view.login_mode(LoginMode::Once, window, cx)
                         })),
                 );
-            } else if !agent {
+            } else if !agent && !ephemeral {
                 modes = modes.child(
                     Button::new("save-credential-mode")
                         .ghost()
@@ -275,7 +276,7 @@ impl Workspace {
                         })),
                 );
             }
-            if login.connection.credential_ref.is_some() {
+            if login.connection.credential_ref.is_some() && !ephemeral {
                 if !locked {
                     modes = modes.child(
                         Button::new("unlock-credential-mode")
@@ -457,7 +458,7 @@ impl Workspace {
                 .id("ssh-connection-progress")
                 .test_support()
                 .absolute()
-                .left(px(16.))
+                .right(px(16.))
                 .bottom(px(40.))
                 .w(px(420.))
                 .max_w(relative(0.92))

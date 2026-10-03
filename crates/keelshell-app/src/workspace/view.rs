@@ -5,31 +5,26 @@ use gpui_kit::assets::IconName;
 
 impl Workspace {
     fn empty_workspace_body(&self, cx: &mut Context<Self>) -> AnyElement {
-        if self.state.connections.is_empty() {
-            div()
-                .size_full()
-                .flex_1()
-                .min_h_0()
-                .flex()
-                .flex_col()
-                .child(
-                    div()
-                        .h(px(250.))
-                        .flex_shrink_0()
-                        .child(self.quick_connect_surface(cx)),
-                )
-                .child(
-                    div()
-                        .id("empty-library")
-                        .size_full()
-                        .flex_1()
-                        .min_h_0()
-                        .child(self.connection_table(cx)),
-                )
-                .into_any_element()
-        } else {
-            self.connection_table(cx)
-        }
+        div()
+            .size_full()
+            .flex_1()
+            .min_h_0()
+            .flex()
+            .flex_col()
+            .child(
+                div()
+                    .h(px(300.))
+                    .flex_shrink_0()
+                    .child(self.quick_connect_surface(cx)),
+            )
+            .child(
+                div()
+                    .id("connection-library")
+                    .flex_1()
+                    .min_h_0()
+                    .child(self.connection_table(cx)),
+            )
+            .into_any_element()
     }
 
     fn quick_connect_surface(&self, cx: &mut Context<Self>) -> AnyElement {
@@ -336,11 +331,7 @@ impl Render for Workspace {
             );
         }
         let body = if self.tabs.is_empty() {
-            if self.state.connections.is_empty() {
-                self.empty_workspace_body(cx)
-            } else {
-                self.connection_table(cx)
-            }
+            self.empty_workspace_body(cx)
         } else {
             let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(BORDER));
             for pane in self.displayed_terminals() {

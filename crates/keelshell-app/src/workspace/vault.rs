@@ -211,10 +211,12 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        let ephemeral = self.route_is_ephemeral();
         if let Some(login) = &mut self.login {
             if login.busy
                 || self.saving
                 || matches!(login.connection.auth, AuthMethod::Agent) && mode != LoginMode::Once
+                || ephemeral && mode != LoginMode::Once
             {
                 return;
             }
@@ -226,13 +228,19 @@ impl Workspace {
         }
     }
 
-    fn login_is_current(&self, connection: &Connection) -> bool {
-        self.state.connections.iter().any(|current| {
+    pub(super) fn login_is_current(&self, connection: &Connection) -> bool {
+        let route_current = self.login.as_ref().is_some_and(|login| {
+            self.login_route_identity(connection).as_ref() == Some(&login.route_identity)
+        });
+        if !route_current {
+            return false;
+        }
+        let saved_profile = self.state.connections.iter().any(|current| {
             same_destination(current, connection)
                 && current.credential_ref == connection.credential_ref
-        }) && self.login.as_ref().is_some_and(|login| {
-            self.login_route_identity(connection).as_ref() == Some(&login.route_identity)
-        })
+        });
+        let ephemeral_route = self.ephemeral_route_matches(connection);
+        saved_profile || ephemeral_route
     }
 
     pub(super) fn submit_login(&mut self, window: &mut Window, cx: &mut Context<Self>) {
@@ -240,6 +248,15 @@ impl Workspace {
             return;
         };
         if login.busy || self.saving || self.connecting {
+            return;
+        }
+        let ephemeral = self.route_is_ephemeral();
+        if ephemeral && login.mode != LoginMode::Once {
+            self.status = Message::new(
+                "临时连接只能使用本次凭据，不能保存到凭据库。",
+                "One-time connections can only use an ephemeral secret; they cannot save to the vault.",
+            );
+            self.cancel_login(window, cx);
             return;
         }
         if !self.login_is_current(&login.connection) {
@@ -384,6 +401,12 @@ impl Workspace {
                                 AfterSave::CredentialLinked { prompt, connection: Box::new(connection) },
                                 window,
                                 cx,
+                            );
+                        } else {
+                            view.cancel_login(window, cx);
+                            view.status = Message::new(
+                                "临时连接不能保存凭据，已取消本次操作。",
+                                "A one-time connection cannot save credentials; the operation was cancelled.",
                             );
                         }
                     }

@@ -107,7 +107,7 @@ struct ConnectionForm {
     reconnect_editor: Entity<ReconnectEditor>,
 }
 
-/// Draft for the empty-workspace SSH entry point.
+/// Draft for the no-session SSH entry point.
 ///
 /// It intentionally contains only endpoint and authentication-mode inputs. A
 /// submitted draft becomes an in-memory [`Connection`] and is never handed to
@@ -815,6 +815,24 @@ impl Workspace {
                 cx,
             )
         });
+        for (field, zh, en) in [
+            (
+                &self.quick_connect.host,
+                "主机或 IP 地址",
+                "Host or IP address",
+            ),
+            (&self.quick_connect.port, "端口", "Port"),
+            (&self.quick_connect.username, "SSH 用户名", "SSH username"),
+            (
+                &self.quick_connect.key,
+                "私钥路径（可选，留空使用 SSH Agent）",
+                "Private key path (optional; empty uses SSH agent)",
+            ),
+        ] {
+            field.update(cx, |input, cx| {
+                input.set_placeholder(t(cx, zh, en), window, cx)
+            });
+        }
         if let Some(form) = &self.form {
             for (field, zh, en) in [
                 (&form.name, "连接名称", "Connection name"),
@@ -1101,7 +1119,7 @@ impl Workspace {
         Ok(connection)
     }
 
-    /// Submit the empty-workspace draft through the regular SSH route and
+    /// Submit the no-session draft through the regular SSH route and
     /// authentication flow. This never writes the draft to the connection
     /// library; successful one-time sessions are therefore absent from the
     /// persistent recent-profile list as well.

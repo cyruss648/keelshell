@@ -39,7 +39,7 @@ The interface defaults to Simplified Chinese and supports English. The project t
 
 | Workflow | Available functionality |
 | --- | --- |
-| **Connections** | When the library is empty, start a one-time SSH session from the Quick connect form without writing a profile, or explicitly save it as a connection; nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing, source locations, and confirmation review; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
+| **Connections** | When no remote session is active, start a one-time SSH session from the Quick connect form without writing a profile, or explicitly save it as a connection; nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing, source locations, and confirmation review; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
 | **Remote terminals** | Session tabs and a two-pane split, ANSI/VT emulation, scrollback search, selection, paste, and CJK input |
 | **Command workflow** | Per-session command history; multiline snippets with explicit parameters and full command previews; local history/snippet suggestions and explicitly requested remote command and path completion |
 | **Batch commands** | Select connected SSH sessions, review the command, targets, concurrency, and timeout, then run independent jobs with per-target exit status and output, stop-pending-on-failure, and cancellation |
@@ -111,7 +111,7 @@ If you use [mise](https://mise.jdx.dev/), run `mise install` in the repository.
 
 ### Your first connection
 
-1. When the library is empty, fill in **Quick connect** with the server address, port, and username to start a one-time SSH session; to reuse it later, choose **Save as connection…** and then explicitly save the profile in the editor. With existing profiles, select **New connection** to create a persistent configuration.
+1. When no remote session is active, fill in **Quick connect** with the server address, port, and username to start a one-time SSH session; to reuse it later, choose **Save as connection…** and then explicitly save the profile in the editor. Existing profiles remain available in the library and through **New connection**.
 2. Connect, verify the server fingerprint against a trusted source, and approve it. A changed saved fingerprint blocks the connection until you review it again.
 3. Use the remote terminal and file panel in the session tab. Host status is available for Linux servers. Configure a provider and model whenever you want AI assistance.
 

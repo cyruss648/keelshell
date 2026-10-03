@@ -164,17 +164,39 @@ fn quick_connect_uses_the_ephemeral_route_and_does_not_save_a_profile(cx: &mut T
         });
         window.render_frame(cx);
         window.click("quick-connect", cx);
+        window.render_frame(cx);
+        assert!(
+            window.try_find("save-credential-mode").is_none(),
+            "one-time authentication must not expose vault save"
+        );
     })
     .checked("start one-time SSH connection from the empty workspace");
     fixture.workspace.read_with(cx, |workspace, _| {
         assert!(workspace.connect_route.is_some());
-        assert!(
-            workspace.login.is_some(),
-            "password mode reuses SSH login UI"
-        );
+        let login = workspace
+            .login
+            .as_ref()
+            .checked_option("password mode reuses SSH login UI");
+        assert!(workspace.login_is_current(&login.connection));
+        assert!(matches!(login.mode, super::vault::LoginMode::Once));
         assert!(workspace.state.connections.is_empty());
         assert!(!workspace.saving);
     });
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            let login = workspace
+                .login
+                .as_ref()
+                .checked_option("quick login remains open");
+            login.secret.update(cx, |input, cx| {
+                input.set_value("one-time-secret", window, cx)
+            });
+            workspace.submit_login(window, cx);
+            assert!(workspace.connect_route.is_some());
+            assert!(workspace.connecting);
+        });
+    })
+    .checked("submit one-time password without rejecting the ephemeral route");
     cx.update_window(fixture.window, |_, window, cx| {
         fixture.workspace.update(cx, |workspace, cx| {
             workspace.cancel_connect_route(window, cx);
@@ -189,6 +211,18 @@ fn quick_connect_uses_the_ephemeral_route_and_does_not_save_a_profile(cx: &mut T
             .connections
             .is_empty()
     );
+}
+
+#[gpui_kit::test]
+fn quick_connect_remains_visible_with_saved_profiles(cx: &mut TestAppContext) {
+    let profile = Connection::new("Saved SSH", "saved.example.test", "operator");
+    let fixture = mount(cx, vec![profile]);
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.try_find("quick-connect-surface").is_some());
+        assert_eq!(window.find("new-connection").label(), Some("新建连接"));
+    })
+    .checked("keep one-time entry point beside the saved library");
 }
 
 #[gpui_kit::test]
