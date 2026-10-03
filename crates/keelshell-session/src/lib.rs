@@ -23,6 +23,7 @@ pub use completion::{
 pub use error::{Result, SessionError};
 pub use events::SessionEvent;
 pub use ssh::{
-    ConnectionEnd, ConnectionState, ExecOutput, ProxyCredentials, ProxyError, ProxyKind,
-    RetryPolicy, ShellEnd, SshAuth, SshOptions, SshProxy, SshSession, SshShell, SshShellWriter,
+    ConnectionEnd, ConnectionState, ExecOutput, KeyboardInteractiveChallenge,
+    KeyboardInteractivePrompt, ProxyCredentials, ProxyError, ProxyKind, RetryPolicy, ShellEnd,
+    SshAuth, SshOptions, SshProxy, SshSession, SshShell, SshShellWriter,
 };

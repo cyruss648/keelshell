@@ -37,6 +37,9 @@ use keelshell_core::{AppState, StateStore};
 use std::sync::Arc;
 
 fn main() {
+    if updater::run_update_helper() {
+        return;
+    }
     let path = match std::env::var_os("KEELSHELL_DATA_DIR") {
         Some(path) => std::path::PathBuf::from(path).join("state.json"),
         None => match StateStore::default_path() {

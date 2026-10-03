@@ -215,13 +215,86 @@ impl Workspace {
     }
 
     pub(super) fn authentication_modal(&self, cx: &mut Context<Self>) -> AnyElement {
-        let (height, title, body, footer) = if let Some(login) = &self.login {
+        let (height, title, body, footer) = if let Some(prompt) = &self.keyboard_interactive {
+            let title_text = if prompt.name.trim().is_empty() {
+                t(cx, "键盘交互认证", "Keyboard-interactive authentication")
+            } else {
+                prompt.name.as_str()
+            };
+            let body = div()
+                .id("keyboard-interactive-content")
+                .test_support()
+                .flex_shrink_0()
+                .min_w_0()
+                .flex()
+                .flex_col()
+                .gap_3()
+                .child(self.connection_route_status(cx))
+                .when(!prompt.instructions.trim().is_empty(), |body| {
+                    body.child(
+                        div()
+                            .id("keyboard-interactive-instructions")
+                            .text_sm()
+                            .text_color(rgb(MUTED))
+                            .child(prompt.instructions.clone()),
+                    )
+                })
+                .children(prompt.fields.iter().enumerate().map(|(index, field)| {
+                    div()
+                        .id(("keyboard-interactive-field", index))
+                        .flex_shrink_0()
+                        .min_w_0()
+                        .flex()
+                        .flex_col()
+                        .gap_1()
+                        .child(div().text_sm().child(field.prompt.clone()))
+                        .child(
+                            Input::new(&field.answer)
+                                .id(("keyboard-interactive-answer", index))
+                                .disabled(false),
+                        )
+                }));
+            let footer = div()
+                .flex()
+                .justify_end()
+                .gap_2()
+                .child(
+                    Button::new("cancel-keyboard-interactive")
+                        .ghost()
+                        .label(t(cx, "取消连接", "Cancel connection"))
+                        .on_click(cx.listener(|view, _, window, cx| {
+                            view.cancel_keyboard_interactive(window, cx)
+                        })),
+                )
+                .child(
+                    Button::new("submit-keyboard-interactive")
+                        .primary()
+                        .label(t(cx, "提交并继续", "Submit and continue"))
+                        .on_click(cx.listener(|view, _, window, cx| {
+                            view.submit_keyboard_interactive(window, cx)
+                        })),
+                );
+            (
+                px(560.),
+                div()
+                    .text_lg()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(title_text.to_owned())
+                    .into_any_element(),
+                body.into_any_element(),
+                footer.into_any_element(),
+            )
+        } else if let Some(login) = &self.login {
             use super::vault::LoginMode;
             let locked = login.mode == LoginMode::Unlock;
             let save = login.mode == LoginMode::Save;
             let agent = matches!(login.connection.auth, AuthMethod::Agent);
             let ephemeral = self.route_is_ephemeral();
             let proxy_auth = !save && super::vault::needs_proxy_password(&login.connection);
+            let keyboard_interactive = self
+                .connect_route
+                .as_ref()
+                .is_some_and(|route| route.keyboard_interactive);
             let description = if locked {
                 t(
                     cx,
@@ -273,6 +346,21 @@ impl Workspace {
                         .label(t(cx, "保存到凭据库…", "Save in vault…"))
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.login_mode(LoginMode::Save, window, cx)
+                        })),
+                );
+            }
+            if !agent && !save && !locked {
+                modes = modes.child(
+                    Button::new("keyboard-interactive-mode")
+                        .ghost()
+                        .disabled(login.busy || self.saving)
+                        .label(if keyboard_interactive {
+                            t(cx, "使用密码/私钥认证", "Use password/key authentication")
+                        } else {
+                            t(cx, "使用键盘交互 / MFA", "Use keyboard-interactive / MFA")
+                        })
+                        .on_click(cx.listener(|view, _, window, cx| {
+                            view.toggle_keyboard_interactive(window, cx)
                         })),
                 );
             }

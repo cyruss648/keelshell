@@ -21,7 +21,7 @@ use russh::client;
 use russh::keys::{HashAlg, PrivateKeyWithHashAlg, PublicKeyOrCertificate, load_secret_key};
 use russh::{ChannelMsg, ChannelWriteHalf, Disconnect};
 use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, oneshot};
 use tokio::task::JoinHandle;
 use tokio::time::{Instant, timeout_at};
 use zeroize::Zeroizing;
@@ -42,6 +42,24 @@ pub enum SshAuth {
         /// One response per server prompt, in order.
         responses: Vec<Zeroizing<String>>,
     },
+    /// Ask the application to collect each server challenge at connection time.
+    ///
+    /// The sender and every answer are ephemeral. A dropped response is treated
+    /// as an explicit cancellation and never falls back to an empty answer.
+    KeyboardInteractivePrompted {
+        /// Bounded channel used to deliver one server challenge at a time.
+        challenges: mpsc::Sender<KeyboardInteractiveChallenge>,
+    },
+    /// Authenticate with a private key and then collect server-driven MFA
+    /// prompts. The key passphrase and challenge answers remain ephemeral.
+    PrivateKeyKeyboardInteractive {
+        /// Private key path loaded only after host identity verification.
+        path: PathBuf,
+        /// Optional in-memory key decryption passphrase.
+        passphrase: Option<Zeroizing<String>>,
+        /// Bounded channel used to deliver one server challenge at a time.
+        challenges: mpsc::Sender<KeyboardInteractiveChallenge>,
+    },
     /// A private key file and optional ephemeral passphrase.
     PrivateKey {
         /// File loaded only after the host identity is verified.
@@ -49,6 +67,29 @@ pub enum SshAuth {
         /// Decryption passphrase, never persisted by this crate.
         passphrase: Option<Zeroizing<String>>,
     },
+}
+
+/// One server keyboard-interactive challenge awaiting an explicit UI answer.
+///
+/// The response channel is intentionally one-shot: a challenge cannot be
+/// replayed after cancellation or after the owning route changes.
+pub struct KeyboardInteractiveChallenge {
+    /// Optional server-provided challenge name.
+    pub name: String,
+    /// Optional server-provided instructions.
+    pub instructions: String,
+    /// Ordered prompts for this challenge batch.
+    pub prompts: Vec<KeyboardInteractivePrompt>,
+    /// Send `Some` with one ephemeral answer per prompt, or `None` to cancel.
+    pub response: oneshot::Sender<Option<Vec<Zeroizing<String>>>>,
+}
+
+/// One bounded keyboard-interactive prompt.
+pub struct KeyboardInteractivePrompt {
+    /// Server-provided text. It is displayed as untrusted text only.
+    pub prompt: String,
+    /// Whether the server allows the answer to be displayed while typing.
+    pub echo: bool,
 }
 
 /// Connection options. The caller owns the association between host/port and its
@@ -438,6 +479,14 @@ impl SshSession {
             SshAuth::KeyboardInteractive { responses } => {
                 authenticate_keyboard_interactive(&mut handle, &options.username, responses).await?
             }
+            SshAuth::KeyboardInteractivePrompted { challenges } => {
+                authenticate_keyboard_interactive_prompted(
+                    &mut handle,
+                    &options.username,
+                    challenges,
+                )
+                .await?
+            }
             SshAuth::PrivateKey { path, passphrase } => {
                 let path = path.clone();
                 let passphrase = passphrase.clone();
@@ -455,6 +504,42 @@ impl SshSession {
                     )
                     .await?
                     .success()
+            }
+            SshAuth::PrivateKeyKeyboardInteractive {
+                path,
+                passphrase,
+                challenges,
+            } => {
+                let path = path.clone();
+                let passphrase = passphrase.clone();
+                let key = tokio::task::spawn_blocking(move || {
+                    load_secret_key(path, passphrase.as_deref().map(String::as_str))
+                })
+                .await
+                .map_err(|_| SessionError::Worker)?
+                .map_err(|error| SessionError::Credential(error.to_string()))?;
+                let hash = handle.best_supported_rsa_hash().await?.flatten();
+                let key_result = handle
+                    .authenticate_publickey(
+                        &options.username,
+                        PrivateKeyWithHashAlg::new(Arc::new(key), hash),
+                    )
+                    .await?;
+                match key_result {
+                    client::AuthResult::Success => true,
+                    client::AuthResult::Failure {
+                        partial_success: true,
+                        ..
+                    } => {
+                        authenticate_keyboard_interactive_prompted(
+                            &mut handle,
+                            &options.username,
+                            challenges,
+                        )
+                        .await?
+                    }
+                    client::AuthResult::Failure { .. } => false,
+                }
             }
             SshAuth::Agent => authenticate_agent(&mut handle, &options.username).await?,
         };
@@ -987,6 +1072,95 @@ async fn authenticate_keyboard_interactive(
     }
 }
 
+async fn authenticate_keyboard_interactive_prompted(
+    handle: &mut client::Handle<Client>,
+    username: &str,
+    challenges: &mpsc::Sender<KeyboardInteractiveChallenge>,
+) -> Result<bool> {
+    use client::KeyboardInteractiveAuthResponse;
+    let mut next = handle
+        .authenticate_keyboard_interactive_start(username, None::<String>)
+        .await?;
+    loop {
+        next = match next {
+            KeyboardInteractiveAuthResponse::Success => return Ok(true),
+            KeyboardInteractiveAuthResponse::Failure { .. } => return Ok(false),
+            KeyboardInteractiveAuthResponse::InfoRequest {
+                name,
+                instructions,
+                prompts,
+            } => {
+                if name.len() > MAX_KEYBOARD_INTERACTIVE_TEXT
+                    || instructions.len() > MAX_KEYBOARD_INTERACTIVE_TEXT
+                    || prompts.len() > MAX_KEYBOARD_INTERACTIVE_PROMPTS
+                {
+                    return Err(SessionError::Invalid(
+                        "keyboard-interactive challenge is too large",
+                    ));
+                }
+                let prompts = prompts
+                    .into_iter()
+                    .map(|prompt| {
+                        if prompt.prompt.len() > MAX_KEYBOARD_INTERACTIVE_TEXT {
+                            return Err(SessionError::Invalid(
+                                "keyboard-interactive prompt is too large",
+                            ));
+                        }
+                        Ok(KeyboardInteractivePrompt {
+                            prompt: prompt.prompt,
+                            echo: prompt.echo,
+                        })
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                let expected = prompts.len();
+                let (response, received) = oneshot::channel();
+                challenges
+                    .send(KeyboardInteractiveChallenge {
+                        name,
+                        instructions,
+                        prompts,
+                        response,
+                    })
+                    .await
+                    .map_err(|_| {
+                        SessionError::Credential(
+                            "keyboard-interactive response channel closed".to_owned(),
+                        )
+                    })?;
+                let answers = received.await.map_err(|_| {
+                    SessionError::Credential(
+                        "keyboard-interactive response was cancelled".to_owned(),
+                    )
+                })?;
+                let Some(answers) = answers else {
+                    return Err(SessionError::Credential(
+                        "keyboard-interactive response was cancelled".to_owned(),
+                    ));
+                };
+                if answers.len() != expected {
+                    return Err(SessionError::Credential(
+                        "keyboard-interactive response count mismatch".to_owned(),
+                    ));
+                }
+                let answers = answers
+                    .into_iter()
+                    .map(|answer| {
+                        if answer.len() > MAX_KEYBOARD_INTERACTIVE_TEXT {
+                            return Err(SessionError::Invalid(
+                                "keyboard-interactive response is too large",
+                            ));
+                        }
+                        Ok(answer.to_string())
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                handle
+                    .authenticate_keyboard_interactive_respond(answers)
+                    .await?
+            }
+        };
+    }
+}
+
 async fn authenticate_agent(handle: &mut client::Handle<Client>, username: &str) -> Result<bool> {
     #[cfg(unix)]
     let mut agent = russh::keys::agent::client::AgentClient::connect_env()
@@ -1021,6 +1195,7 @@ async fn authenticate_agent(handle: &mut client::Handle<Client>, username: &str)
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used)]
 mod tests {
     use std::sync::{
         Arc,
@@ -1029,10 +1204,12 @@ mod tests {
     use std::time::Duration;
 
     use super::{
-        RetryPolicy, SshOptions, SshSession, retry_with_policy, validate_keyboard_interactive,
+        KeyboardInteractiveChallenge, KeyboardInteractivePrompt, RetryPolicy, SshOptions,
+        SshSession, retry_with_policy, validate_keyboard_interactive,
     };
     use crate::SessionError;
     use russh::client;
+    use tokio::sync::{mpsc, oneshot};
     use zeroize::Zeroizing;
 
     #[test]
@@ -1078,6 +1255,28 @@ mod tests {
             "SSH credential provider: keyboard-interactive response is missing"
         );
         assert!(!error.to_string().contains("Password"));
+    }
+
+    #[tokio::test]
+    async fn prompted_keyboard_interactive_challenge_is_one_shot_and_cancelable() {
+        let (sender, mut receiver) = mpsc::channel(1);
+        let (response, received) = oneshot::channel();
+        sender
+            .send(KeyboardInteractiveChallenge {
+                name: "MFA".into(),
+                instructions: "Approve the sign-in".into(),
+                prompts: vec![KeyboardInteractivePrompt {
+                    prompt: "Code".into(),
+                    echo: false,
+                }],
+                response,
+            })
+            .await
+            .expect("test channel remains open");
+        let challenge = receiver.recv().await.expect("challenge delivered");
+        challenge.response.send(None).expect("one-shot is open");
+        assert!(received.await.expect("cancellation delivered").is_none());
+        assert!(receiver.try_recv().is_err());
     }
 
     #[test]

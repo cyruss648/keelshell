@@ -1,7 +1,10 @@
 //! Workspace composition: connection library, terminal tabs and reviewed commands.
 use gpui_kit::prelude::FluentBuilder;
-use keelshell_session::{RetryPolicy, SessionError, SshAuth, SshOptions, SshSession};
+use keelshell_session::{
+    KeyboardInteractiveChallenge, RetryPolicy, SessionError, SshAuth, SshOptions, SshSession,
+};
 use std::{collections::HashMap, sync::Arc, time::Duration};
+use tokio::sync::{mpsc, oneshot};
 use zeroize::Zeroizing;
 
 use crate::i18n::{self, Message, t};
@@ -68,6 +71,36 @@ struct LoginPrompt {
     message: Option<Message>,
     pin: Option<String>,
     route_identity: keelshell_core::RouteIdentity,
+}
+
+struct KeyboardInteractiveField {
+    prompt: String,
+    answer: Entity<InputState>,
+}
+
+struct KeyboardInteractivePrompt {
+    route_id: uuid::Uuid,
+    index: usize,
+    name: String,
+    instructions: String,
+    fields: Vec<KeyboardInteractiveField>,
+    response: Option<oneshot::Sender<Option<Vec<Zeroizing<String>>>>>,
+}
+
+impl KeyboardInteractivePrompt {
+    fn clear_inputs(&self, window: &mut Window, cx: &mut App) {
+        for field in &self.fields {
+            field.answer.update(cx, |input, cx| {
+                input.set_value("", window, cx);
+            });
+        }
+    }
+
+    fn focus(&self, window: &mut Window, cx: &mut App) {
+        if let Some(field) = self.fields.first() {
+            field.answer.read(cx).focus_handle(cx).focus(window, cx);
+        }
+    }
 }
 struct HostApproval {
     attempt: uuid::Uuid,
@@ -254,6 +287,7 @@ pub struct Workspace {
     remote_sessions: HashMap<EntityId, SshSession>,
     command_histories: HashMap<EntityId, CommandHistory>,
     login: Option<LoginPrompt>,
+    keyboard_interactive: Option<KeyboardInteractivePrompt>,
     host_approval: Option<HostApproval>,
     connecting: bool,
     connect_route: Option<routing::ConnectRoute>,
@@ -522,6 +556,7 @@ impl Workspace {
             remote_sessions: HashMap::new(),
             command_histories: HashMap::new(),
             login: None,
+            keyboard_interactive: None,
             host_approval: None,
             connecting: false,
             connect_route: None,
@@ -1017,6 +1052,11 @@ impl Workspace {
                     view.update_panel_subscription = None;
                     view.focus_current_surface(window, cx);
                     cx.notify();
+                }
+                UpdatePanelEvent::Restart => {
+                    view.update_panel = None;
+                    view.update_panel_subscription = None;
+                    crate::terminal::shutdown_and_quit(cx);
                 }
             },
         ));

@@ -39,7 +39,7 @@ The interface defaults to Simplified Chinese and supports English. The project t
 
 | Workflow | Available functionality |
 | --- | --- |
-| **Connections** | When no remote session is active, start a one-time SSH session from the Quick connect form without writing a profile, or explicitly save it as a connection; nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing, source locations, and confirmation review; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
+| **Connections** | When no remote session is active, start a one-time SSH session from the Quick connect form without writing a profile, or explicitly save it as a connection; nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing, source locations, and confirmation review; password, private key, and SSH Agent authentication; explicitly switch a login attempt to keyboard-interactive/MFA prompts with one-time answers; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
 | **Remote terminals** | Session tabs and a two-pane split, ANSI/VT emulation, scrollback search, selection, paste, and CJK input |
 | **Command workflow** | Per-session command history; multiline snippets with explicit parameters and full command previews; local history/snippet suggestions and explicitly requested remote command and path completion |
 | **Batch commands** | Select connected SSH sessions, review the command, targets, concurrency, and timeout, then run independent jobs with per-target exit status and output, stop-pending-on-failure, and cancellation |
@@ -47,7 +47,7 @@ The interface defaults to Simplified Chinese and supports English. The project t
 | **Host status** | Linux CPU, memory, load, uptime, disk capacity, network counters, processes, and listening socket diagnostics |
 | **Port forwarding** | Local/remote TCP forwarding and a loopback SOCKS5 proxy, with actual listener addresses, status, and stop controls |
 | **AI assistance** | Named provider profiles, model discovery and connection testing, context selection, request previews, answers, and command suggestions; replies can become session-bound diagnostic plans with step-by-step review |
-| **About and updates** | In-app project link, version and changelog; platform-aware GitHub Release checks, downloads and SHA-256 verification with a staged package |
+| **About and updates** | In-app project link, version and changelog; platform-aware GitHub Release checks, downloads and SHA-256 verification with opt-in install and restart |
 
 Pausing waits for in-flight operations to be acknowledged before showing “Paused.” To resume a partial file or directory, explicitly select the source and destination, review the content verification, and confirm; after reconnecting or restarting, create a new resumption plan. See the [transfer verification record](docs/testing/records/2026-10-03-sftp-resume.md).
 
@@ -87,7 +87,7 @@ After a restart, explicitly saved AI keys must be unlocked with the master passw
 
 Building from source is recommended during development. Versioned packages will be available from [GitHub Releases](https://github.com/cyruss648/keelshell/releases), with SHA-256 checksums.
 
-Open **About / updates** from the toolbar to read the bundled changelog, check for a new version and download the matching release package. Downloads stay in a private temporary directory and are verified against the checksum published with the release. The app does not overwrite a running installation until signing, permissions and rollback paths have passed native validation on all targets.
+Open **About / updates** from the toolbar to read the bundled changelog, check for a new version and download the matching release package. Downloads stay in a private temporary directory and are verified against the checksum published with the release. **Install and restart** starts a separate helper that revalidates the package manifest, replaces only listed files, and rolls back on failure. Development builds or non-standard installations remain reviewable for manual installation; signing, permissions and native installation acceptance still need to be completed in each release environment.
 
 | Platform | Build targets | Package |
 | --- | --- | --- |

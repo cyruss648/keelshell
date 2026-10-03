@@ -10,6 +10,7 @@ use std::{
     time::Duration,
 };
 
+use gpui_kit::component::input::InputState;
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, ClipboardItem, Entity, Focusable, TestAppContext,
     WindowBounds, WindowOptions, point, px, size,
@@ -18,7 +19,7 @@ use gpui_kit::{
 use keelshell_core::{AppState, Connection, Language, StateStore};
 use keelshell_session::SessionEvent;
 
-use super::Workspace;
+use super::{KeyboardInteractiveField, KeyboardInteractivePrompt, Workspace};
 use crate::i18n;
 use crate::terminal::{TerminalCommand, TerminalView};
 
@@ -168,6 +169,16 @@ fn quick_connect_uses_the_ephemeral_route_and_does_not_save_a_profile(cx: &mut T
         assert!(
             window.try_find("save-credential-mode").is_none(),
             "one-time authentication must not expose vault save"
+        );
+        assert!(window.try_find("keyboard-interactive-mode").is_some());
+        window.click("keyboard-interactive-mode", cx);
+        assert!(
+            fixture
+                .workspace
+                .read(cx)
+                .connect_route
+                .as_ref()
+                .is_some_and(|route| route.keyboard_interactive)
         );
     })
     .checked("start one-time SSH connection from the empty workspace");
@@ -1231,6 +1242,106 @@ async fn vault_successful_unlock_authenticates_over_real_loopback_ssh(cx: &mut T
     })
     .checked("close authenticated fixture session");
     server.abort();
+}
+
+#[gpui_kit::test]
+fn keyboard_interactive_prompt_is_ephemeral_and_cancelable(cx: &mut TestAppContext) {
+    let mut profile = Connection::new("MFA target", "mfa.example.test", "operator");
+    profile.auth = keelshell_core::AuthMethod::Password;
+    let fixture = mount(cx, vec![profile.clone()]);
+    let mut receiver = cx
+        .update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.request_connect(profile.clone(), window, cx);
+                let route = workspace
+                    .connect_route
+                    .as_mut()
+                    .checked_option("keyboard-interactive route");
+                route.keyboard_interactive = true;
+                let route_id = route.id;
+                let (sender, receiver) = tokio::sync::oneshot::channel();
+                let answer = cx.new(|cx| {
+                    InputState::new(window, cx)
+                        .masked(true)
+                        .placeholder("Enter this response")
+                });
+                answer.update(cx, |input, cx| input.set_value("123456", window, cx));
+                workspace.keyboard_interactive = Some(KeyboardInteractivePrompt {
+                    route_id,
+                    index: 0,
+                    name: "Duo MFA".into(),
+                    instructions: "Approve the sign-in, then enter the code.".into(),
+                    fields: vec![KeyboardInteractiveField {
+                        prompt: "One-time code".into(),
+                        answer,
+                    }],
+                    response: Some(sender),
+                });
+                receiver
+            })
+        })
+        .checked("prepare keyboard-interactive MFA prompt");
+    cx.update_window(fixture.window, |_, window, cx| {
+        for language in [Language::ZhCn, Language::En] {
+            i18n::set_language(language, cx);
+            window.render_frame(cx);
+            assert!(window.try_find("keyboard-interactive-content").is_some());
+            assert!(window.try_find("submit-keyboard-interactive").is_some());
+            assert_eq!(
+                window.find("submit-keyboard-interactive").label(),
+                Some(if language == Language::En {
+                    "Submit and continue"
+                } else {
+                    "提交并继续"
+                })
+            );
+        }
+        window.click("submit-keyboard-interactive", cx);
+        fixture.workspace.read_with(cx, |workspace, _| {
+            assert!(workspace.keyboard_interactive.is_none());
+        });
+    })
+    .checked("submit keyboard-interactive MFA prompt");
+    assert!(matches!(
+        receiver.try_recv(),
+        Ok(Some(answers)) if answers.len() == 1 && answers[0].as_str() == "123456"
+    ));
+
+    let mut receiver = cx
+        .update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |workspace, cx| {
+                let route_id = workspace
+                    .connect_route
+                    .as_ref()
+                    .map(|route| route.id)
+                    .checked_option("route after submitted challenge");
+                let (sender, receiver) = tokio::sync::oneshot::channel();
+                let answer = cx.new(|cx| InputState::new(window, cx).masked(true));
+                workspace.keyboard_interactive = Some(KeyboardInteractivePrompt {
+                    route_id,
+                    index: 0,
+                    name: "Duo MFA".into(),
+                    instructions: String::new(),
+                    fields: vec![KeyboardInteractiveField {
+                        prompt: "One-time code".into(),
+                        answer,
+                    }],
+                    response: Some(sender),
+                });
+                receiver
+            })
+        })
+        .checked("prepare second keyboard-interactive prompt");
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("cancel-keyboard-interactive", cx);
+        fixture.workspace.read_with(cx, |workspace, _| {
+            assert!(workspace.keyboard_interactive.is_none());
+            assert!(workspace.connect_route.is_none());
+        });
+    })
+    .checked("cancel keyboard-interactive MFA prompt");
+    assert!(matches!(receiver.try_recv(), Ok(None)));
 }
 
 mod command_workflows;

@@ -25,7 +25,7 @@ pub(super) fn needs_proxy_password(connection: &Connection) -> bool {
 }
 
 impl LoginPrompt {
-    fn clear_inputs(&self, window: &mut Window, cx: &mut App) {
+    pub(super) fn clear_inputs(&self, window: &mut Window, cx: &mut App) {
         for input in [
             &self.secret,
             &self.proxy_secret,
@@ -222,6 +222,11 @@ impl Workspace {
             }
             login.clear_inputs(window, cx);
             login.mode = mode;
+            if mode != LoginMode::Once
+                && let Some(route) = &mut self.connect_route
+            {
+                route.keyboard_interactive = false;
+            }
             login.message = None;
             login.focus(window, cx);
             cx.notify();

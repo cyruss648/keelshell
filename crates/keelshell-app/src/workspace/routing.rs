@@ -5,7 +5,7 @@ use keelshell_core::{ConnectionRoute, RouteIdentity};
 use tokio::sync::watch;
 
 pub(super) struct ConnectRoute {
-    id: uuid::Uuid,
+    pub(super) id: uuid::Uuid,
     snapshot: ConnectionRoute,
     /// One-time quick connections have no profile in `AppState`; their route
     /// snapshot is immutable for the lifetime of this attempt.
@@ -14,6 +14,10 @@ pub(super) struct ConnectRoute {
     upstream: Option<SshSession>,
     waiting_for_save: bool,
     cancel: watch::Sender<bool>,
+    /// Receiver owned by the UI bridge for server keyboard-interactive prompts.
+    pub(super) keyboard_interactive_receiver: Option<mpsc::Receiver<KeyboardInteractiveChallenge>>,
+    /// Whether this attempt opted into server-driven keyboard-interactive auth.
+    pub(super) keyboard_interactive: bool,
     pub(super) reconnect: Option<super::reconnect::Ticket>,
     pub(super) background: bool,
     pub(super) awaiting_interaction: bool,
@@ -34,6 +38,10 @@ pub(super) fn same_route(a: &ConnectionRoute, b: &ConnectionRoute) -> bool {
             .iter()
             .zip(b.hops())
             .all(|(a, b)| vault::same_destination(a, b))
+}
+
+fn route_is_keyboard_interactive(route: &ConnectRoute) -> bool {
+    route.keyboard_interactive
 }
 
 impl Workspace {
@@ -137,6 +145,8 @@ impl Workspace {
             upstream: None,
             waiting_for_save: false,
             cancel,
+            keyboard_interactive_receiver: None,
+            keyboard_interactive: false,
             reconnect: None,
             background: false,
             awaiting_interaction: false,
@@ -186,6 +196,8 @@ impl Workspace {
             upstream: None,
             waiting_for_save: false,
             cancel,
+            keyboard_interactive_receiver: None,
+            keyboard_interactive: false,
             reconnect: None,
             background: false,
             awaiting_interaction: false,
@@ -342,6 +354,80 @@ impl Workspace {
         self.prepare_login(connection, None, window, cx);
     }
 
+    /// Toggle the explicit server-driven keyboard-interactive/MFA flow.
+    ///
+    /// This choice is held only for the current route attempt. It never changes
+    /// the saved profile or enters the credential vault.
+    pub(super) fn toggle_keyboard_interactive(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.saving {
+            return;
+        }
+        let Some(login) = &mut self.login else {
+            return;
+        };
+        if login.busy {
+            return;
+        }
+        let Some(route) = &mut self.connect_route else {
+            return;
+        };
+        route.keyboard_interactive = !route.keyboard_interactive;
+        login.clear_inputs(window, cx);
+        login.message = None;
+        login.focus(window, cx);
+        cx.notify();
+    }
+
+    pub(super) fn submit_keyboard_interactive(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let Some(mut prompt) = self.keyboard_interactive.take() else {
+            return;
+        };
+        let valid = self.connect_route.as_ref().is_some_and(|route| {
+            route.id == prompt.route_id
+                && route.current == prompt.index
+                && route_is_keyboard_interactive(route)
+        }) && self.route_is_current();
+        if !valid {
+            let _ = prompt.response.take().map(|response| response.send(None));
+            prompt.clear_inputs(window, cx);
+            cx.notify();
+            return;
+        }
+        let answers = prompt
+            .fields
+            .iter()
+            .map(|field| Zeroizing::new(field.answer.read(cx).value().to_string()))
+            .collect::<Vec<_>>();
+        prompt.clear_inputs(window, cx);
+        if let Some(response) = prompt.response.take() {
+            let _ = response.send(Some(answers));
+        }
+        self.focus_current_surface(window, cx);
+        cx.notify();
+    }
+
+    pub(super) fn cancel_keyboard_interactive(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if let Some(mut prompt) = self.keyboard_interactive.take() {
+            prompt.clear_inputs(window, cx);
+            if let Some(response) = prompt.response.take() {
+                let _ = response.send(None);
+            }
+        }
+        self.cancel_connect_route(window, cx);
+    }
+
     pub(super) fn resume_connect_route(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if !self.saving
             && !self.connecting
@@ -371,6 +457,12 @@ impl Workspace {
         self.connect_route = None;
         self.connecting = false;
         self.host_approval = None;
+        if let Some(mut prompt) = self.keyboard_interactive.take() {
+            prompt.clear_inputs(window, cx);
+            if let Some(response) = prompt.response.take() {
+                let _ = response.send(None);
+            }
+        }
         if !background || self.login.is_some() {
             self.clear_login(window, cx);
         }
@@ -462,27 +554,42 @@ impl Workspace {
             self.route_changed(window, cx);
             return;
         }
-        let Some(route) = &self.connect_route else {
-            return;
+        let (scope, id, index, reconnect, background, keyboard_interactive, parent, mut cancelled) = {
+            let Some(route) = &self.connect_route else {
+                return;
+            };
+            if !route
+                .snapshot
+                .hops()
+                .get(route.current)
+                .is_some_and(|hop| vault::same_destination(hop, &connection))
+            {
+                self.route_changed(window, cx);
+                return;
+            }
+            let Some(scope) = route.snapshot.host_key_scope(route.current) else {
+                return;
+            };
+            (
+                scope,
+                route.id,
+                route.current,
+                route.reconnect,
+                route.background,
+                route.keyboard_interactive,
+                route.upstream.clone(),
+                route.cancel.subscribe(),
+            )
         };
-        if !route
-            .snapshot
-            .hops()
-            .get(route.current)
-            .is_some_and(|hop| vault::same_destination(hop, &connection))
-        {
-            self.route_changed(window, cx);
-            return;
+        let (keyboard_sender, keyboard_receiver) = if keyboard_interactive {
+            let (sender, receiver) = mpsc::channel(1);
+            (Some(sender), Some(receiver))
+        } else {
+            (None, None)
+        };
+        if let Some(route) = &mut self.connect_route {
+            route.keyboard_interactive_receiver = keyboard_receiver;
         }
-        let Some(scope) = route.snapshot.host_key_scope(route.current) else {
-            return;
-        };
-        let id = route.id;
-        let index = route.current;
-        let reconnect = route.reconnect;
-        let background = route.background;
-        let parent = route.upstream.clone();
-        let mut cancelled = route.cancel.subscribe();
         let mut options = SshOptions::new(connection.host.clone(), connection.username.clone());
         options.port = connection.port;
         options.proxy = connection
@@ -511,11 +618,26 @@ impl Workspace {
             pin.or_else(|| self.state.host_key_for_scope(&scope).map(str::to_owned));
         options.auth = match &connection.auth {
             AuthMethod::Agent => SshAuth::Agent,
-            AuthMethod::Password => SshAuth::Password(secret),
+            AuthMethod::Password if keyboard_interactive => match keyboard_sender {
+                Some(challenges) => SshAuth::KeyboardInteractivePrompted { challenges },
+                None => SshAuth::Password(secret),
+            },
+            AuthMethod::PrivateKey { path } if keyboard_interactive => match keyboard_sender {
+                Some(challenges) => SshAuth::PrivateKeyKeyboardInteractive {
+                    path: path.clone(),
+                    passphrase: (!secret.is_empty()).then_some(secret),
+                    challenges,
+                },
+                None => SshAuth::PrivateKey {
+                    path: path.clone(),
+                    passphrase: (!secret.is_empty()).then_some(secret),
+                },
+            },
             AuthMethod::PrivateKey { path } => SshAuth::PrivateKey {
                 path: path.clone(),
                 passphrase: (!secret.is_empty()).then_some(secret),
             },
+            AuthMethod::Password => SshAuth::Password(secret),
         };
         options.timeout = Duration::from_secs(15);
         self.connecting = true;
@@ -555,6 +677,7 @@ impl Workspace {
             cx.background_executor().clone(),
             operation,
         );
+        self.listen_keyboard_interactive(id, index, window, cx);
         cx.spawn_in(window, async move |this, cx| {
             let result = job.await.unwrap_or(Some(Err(SessionError::Worker)));
             let _ = this.update_in(cx, |view, window, cx| {
@@ -656,6 +779,73 @@ impl Workspace {
         })
         .detach();
         cx.notify();
+    }
+
+    fn listen_keyboard_interactive(
+        &mut self,
+        route_id: uuid::Uuid,
+        index: usize,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let Some(mut receiver) = self
+            .connect_route
+            .as_mut()
+            .and_then(|route| route.keyboard_interactive_receiver.take())
+        else {
+            return;
+        };
+        cx.spawn_in(window, async move |this, cx| {
+            while let Some(challenge) = receiver.recv().await {
+                let _ = this.update_in(cx, |view, window, cx| {
+                    let valid = view.connect_route.as_ref().is_some_and(|route| {
+                        route.id == route_id
+                            && route.current == index
+                            && route_is_keyboard_interactive(route)
+                    }) && view.route_is_current();
+                    if !valid || view.keyboard_interactive.is_some() {
+                        let _ = challenge.response.send(None);
+                        return;
+                    }
+                    let fields = challenge
+                        .prompts
+                        .into_iter()
+                        .map(|prompt| KeyboardInteractiveField {
+                            prompt: prompt.prompt,
+                            answer: cx.new(|cx| {
+                                InputState::new(window, cx)
+                                    .masked(!prompt.echo)
+                                    .placeholder(t(cx, "输入本次回答", "Enter this response"))
+                            }),
+                        })
+                        .collect();
+                    view.keyboard_interactive = Some(KeyboardInteractivePrompt {
+                        route_id,
+                        index,
+                        name: challenge.name,
+                        instructions: challenge.instructions,
+                        fields,
+                        response: Some(challenge.response),
+                    });
+                    if let Some(prompt) = &view.keyboard_interactive {
+                        prompt.focus(window, cx);
+                    }
+                    cx.notify();
+                });
+                if this
+                    .update_in(cx, |view, _, _| {
+                        !view
+                            .connect_route
+                            .as_ref()
+                            .is_some_and(|route| route.id == route_id && route.current == index)
+                    })
+                    .unwrap_or(true)
+                {
+                    break;
+                }
+            }
+        })
+        .detach();
     }
 
     fn present_route_approval(

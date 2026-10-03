@@ -13,9 +13,12 @@ serde.workspace = true
 serde_json.workspace = true
 reqwest.workspace = true
 sha2.workspace = true
+flate2.workspace = true
+tar.workspace = true
 tempfile.workspace = true
 tokio.workspace = true
 uuid.workspace = true
+zip.workspace = true
 chrono.workspace = true
 keelshell-ai = { path = "../keelshell-ai" }
 keelshell-core = { path = "../keelshell-core" }
