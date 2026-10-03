@@ -10,8 +10,8 @@ use gpui_kit::{
     *,
 };
 use keelshell_ai::{
-    AiError, CommandProposal, ContextDraft, PreparedRequest, ProviderClient, ProviderConfig,
-    RequestCancellation,
+    AiError, CommandProposal, ContextDraft, DiagnosticPlan, DiagnosticRisk, PreparedRequest,
+    ProviderClient, ProviderConfig, RequestCancellation,
 };
 use keelshell_core::{AiAuthentication, AiProfileCatalog, NamedAiProfile};
 use tokio::runtime::Runtime;
@@ -49,6 +49,7 @@ pub struct AssistantPanel {
     busy: bool,
     preview: bool,
     suggestions: Vec<String>,
+    diagnostic_plan: Option<DiagnosticPlan>,
     request_revision: u64,
     response_target: Option<(String, String)>,
     _subscriptions: Vec<Subscription>,
@@ -102,6 +103,7 @@ impl AssistantPanel {
             busy: false,
             preview: false,
             suggestions: Vec::new(),
+            diagnostic_plan: None,
             request_revision: 0,
             response_target: None,
             _subscriptions: subscriptions,
@@ -226,6 +228,7 @@ impl AssistantPanel {
         self.preview = false;
         self.response.clear();
         self.suggestions.clear();
+        self.diagnostic_plan = None;
         self.response_target = None;
         self.status = Message::new(
             "请求已修改，请重新预览后再发送；旧请求已取消。",
@@ -333,6 +336,7 @@ impl AssistantPanel {
         self.status = Message::new("正在等待模型服务回复…", "Waiting for provider…");
         self.response.clear();
         self.suggestions.clear();
+        self.diagnostic_plan = None;
         self.preview = false;
         let job = crate::runtime_bridge::spawn(
             &self.runtime,
@@ -384,6 +388,7 @@ impl AssistantPanel {
                 self.response_target = Some(target);
                 self.response = text;
                 self.suggestions = shell_blocks(&self.response);
+                self.diagnostic_plan = None;
                 self.status = Message::new(
                     "已收到回复。命令建议需先审阅，再送入输入框。",
                     "Response received. Suggestions require review before use.",
@@ -427,6 +432,59 @@ impl AssistantPanel {
             Ok(command) => cx.emit(AssistantEvent::Suggestion {
                 command,
                 session_id,
+            }),
+            Err(error) => self.status = ai_error(&error),
+        }
+        cx.notify();
+    }
+
+    fn build_diagnostic_plan(&mut self, cx: &mut Context<Self>) {
+        if self.response.is_empty() {
+            return;
+        }
+        match DiagnosticPlan::from_response(
+            self.host.clone(),
+            self.session_id.clone(),
+            &self.context,
+            &self.response,
+        ) {
+            Ok(plan) => {
+                let count = plan.steps().len();
+                self.status = Message::new(
+                    format!("已生成 {count} 步诊断计划；每一步仍需单独审核。"),
+                    format!("Generated {count}-step diagnostic plan; review each step separately."),
+                );
+                self.diagnostic_plan = Some(plan);
+            }
+            Err(error) => self.status = ai_error(&error),
+        }
+        cx.notify();
+    }
+
+    fn suggest_diagnostic_step(&mut self, index: usize, cx: &mut Context<Self>) {
+        let Some(plan) = self.diagnostic_plan.as_ref() else {
+            return;
+        };
+        let Ok(review) = plan.review_step(index, Duration::from_secs(120)) else {
+            self.status = ai_error(&AiError::InvalidDiagnosticPlan);
+            cx.notify();
+            return;
+        };
+        let proposal = match review.into_proposal(plan, &self.session_id) {
+            Ok(proposal) => proposal,
+            Err(error) => {
+                self.status = ai_error(&error);
+                cx.notify();
+                return;
+            }
+        };
+        match proposal
+            .review(Duration::from_secs(120))
+            .and_then(|ticket| ticket.into_suggestion(&proposal, &self.session_id))
+        {
+            Ok(command) => cx.emit(AssistantEvent::Suggestion {
+                command,
+                session_id: self.session_id.clone(),
             }),
             Err(error) => self.status = ai_error(&error),
         }
@@ -642,6 +700,65 @@ impl Render for AssistantPanel {
                             cx.write_to_clipboard(ClipboardItem::new_string(view.response.clone()))
                         })),
                 );
+            content = content.child(
+                Button::new("build-diagnostic-plan")
+                    .ghost()
+                    .label(t(cx, "整理为诊断计划", "Build diagnostic plan"))
+                    .on_click(cx.listener(|view, _, _, cx| view.build_diagnostic_plan(cx))),
+            );
+            if let Some(plan) = self.diagnostic_plan.as_ref() {
+                let mut plan_view = div()
+                    .p_2()
+                    .rounded(px(6.))
+                    .bg(rgb(0xf6f8fb))
+                    .border_1()
+                    .border_color(rgb(0xdce3ec))
+                    .flex()
+                    .flex_col()
+                    .gap_2()
+                    .child(div().text_xs().font_weight(FontWeight::SEMIBOLD).child(t(
+                        cx,
+                        "诊断计划（逐步审核）",
+                        "Diagnostic plan (step-by-step review)",
+                    )))
+                    .child(div().text_xs().text_color(rgb(0x66758b)).child(format!(
+                        "{} · context {} · response {}",
+                        plan.target(),
+                        &plan.context_fingerprint()[..12],
+                        &plan.response_fingerprint()[..12],
+                    )));
+                for (index, step) in plan.steps().iter().enumerate() {
+                    let risk = match step.risk() {
+                        DiagnosticRisk::ReadOnly => t(cx, "只读候选", "Read-only candidate"),
+                        DiagnosticRisk::ReviewRequired => t(cx, "需要重点审核", "Review required"),
+                    };
+                    plan_view = plan_view.child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap_1()
+                            .child(div().text_xs().font_family("monospace").child(format!(
+                                "{}. {}",
+                                index + 1,
+                                step.command()
+                            )))
+                            .child(div().text_xs().text_color(rgb(0x66758b)).child(format!(
+                                "line {} · {}",
+                                step.source_line(),
+                                risk
+                            )))
+                            .child(
+                                Button::new(("review-diagnostic-step", index))
+                                    .ghost()
+                                    .label(t(cx, "送入命令审阅区", "Place in command review"))
+                                    .on_click(cx.listener(move |view, _, _, cx| {
+                                        view.suggest_diagnostic_step(index, cx)
+                                    })),
+                            ),
+                    );
+                }
+                content = content.child(plan_view);
+            }
             for (index, command) in self.suggestions.iter().enumerate() {
                 content = content.child(
                     div()
@@ -706,6 +823,10 @@ fn ai_error(error: &AiError) -> Message {
         AiError::InvalidProposal => "命令、目标主机或会话信息不完整，无法送入审阅区。",
         AiError::ReviewMismatch => "命令或目标会话已变化，请重新审阅。",
         AiError::ReviewExpired => "命令审阅已过期，请重新审阅。",
+        AiError::InvalidDiagnosticPlan => "诊断计划无效，请重新生成。",
+        AiError::DiagnosticPlanTooLarge => "诊断计划超过大小或步骤限制，请缩小回复。",
+        AiError::NoDiagnosticSteps => "回复中没有完整的 shell 诊断步骤。",
+        AiError::DiagnosticPlanMismatch => "诊断计划或会话已变化，请重新生成并审核。",
         _ => return provider_error(error),
     };
     Message::new(zh, error.to_string())

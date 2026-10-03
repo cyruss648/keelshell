@@ -30,6 +30,8 @@ impl<T, E: std::fmt::Debug> Checked<T> for Result<T, E> {
 }
 struct Control {
     commands: AtomicUsize,
+    sockets: AtomicUsize,
+    probes: AtomicUsize,
     inspecting: AtomicUsize,
     terminating: AtomicUsize,
     inspect: Semaphore,
@@ -39,6 +41,8 @@ impl Default for Control {
     fn default() -> Self {
         Self {
             commands: AtomicUsize::new(0),
+            sockets: AtomicUsize::new(0),
+            probes: AtomicUsize::new(0),
             inspecting: AtomicUsize::new(0),
             terminating: AtomicUsize::new(0),
             inspect: Semaphore::new(0),
@@ -78,7 +82,17 @@ impl server::Handler for Peer {
         self.0.commands.fetch_add(1, Ordering::Release);
         session.channel_success(id)?;
         let command = String::from_utf8_lossy(data);
-        let (body, status) = if command.contains("@@KS:process@@") {
+        let (body, status) = if command.contains("ss -H -lntup") {
+            self.0.sockets.fetch_add(1, Ordering::Release);
+            (
+                "tcp LISTEN 0 128 127.0.0.1:2222 0.0.0.0:* users:((\"fixture\",pid=42,fd=3))\n"
+                    .into(),
+                0,
+            )
+        } else if command.contains("command -v nc") {
+            self.0.probes.fetch_add(1, Ordering::Release);
+            ("@@KS:probe@@\n0\n".into(), 0)
+        } else if command.contains("@@KS:process@@") {
             self.0.inspecting.fetch_add(1, Ordering::Release);
             let permit = self
                 .0
@@ -217,6 +231,46 @@ impl Harness {
         })
         .checked("review process through production action");
     }
+
+    fn load_sockets(&self, cx: &mut TestAppContext) {
+        cx.update_window(self.window, |_, _, cx| {
+            self.panel
+                .update(cx, |panel, cx| panel.run(Job::Sockets, cx));
+        })
+        .checked("load sockets through production action");
+    }
+}
+
+#[gpui_kit::test]
+async fn tcp_socket_probe_is_explicit_and_keeps_the_result_reviewable(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    h.load_sockets(cx);
+    cx.wait_for(h.window, Duration::from_secs(5), |_, _| {
+        h.control.sockets.load(Ordering::Acquire) == 1
+    })
+    .await;
+    h.idle(cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.try_find(("probe-socket", 0_usize)).is_some());
+        window.click(("probe-socket", 0_usize), cx);
+    })
+    .checked("start TCP probe through explicit row action");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, _| {
+        h.control.probes.load(Ordering::Acquire) == 1
+    })
+    .await;
+    h.idle(cx).await;
+    h.panel.read_with(cx, |panel, cx| {
+        let result = match panel.probes.values().next() {
+            Some(result) => result,
+            None => panic!("probe result missing"),
+        };
+        assert!(result.reachable);
+        assert_eq!(result.port, 2222);
+        assert!(panel.status.render(cx).contains("可建立连接"));
+    });
 }
 
 #[gpui_kit::test]

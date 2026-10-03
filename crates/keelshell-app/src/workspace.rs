@@ -38,6 +38,7 @@ use crate::jump_host_picker::JumpHostPicker;
 use crate::proxy_editor::ProxyEditor;
 use crate::snippet_editor::{SnippetEditor, SnippetEditorEvent};
 use crate::terminal::TerminalView;
+use crate::updater::{UpdatePanel, UpdatePanelEvent};
 use crate::vault_settings::{VaultSettings, VaultSettingsEvent};
 
 use crate::design::{ACCENT, BORDER, CANVAS as BG, MUTED, SURFACE as PANEL};
@@ -205,6 +206,8 @@ pub struct Workspace {
     ai_settings_subscription: Option<Subscription>,
     vault_settings: Option<Entity<VaultSettings>>,
     vault_settings_subscription: Option<Subscription>,
+    update_panel: Option<Entity<UpdatePanel>>,
+    update_panel_subscription: Option<Subscription>,
     command_target: Option<EntityId>,
     command_revision: u64,
     command_record_history: bool,
@@ -448,6 +451,8 @@ impl Workspace {
             ai_settings_subscription: None,
             vault_settings: None,
             vault_settings_subscription: None,
+            update_panel: None,
+            update_panel_subscription: None,
             command_target: None,
             command_revision: 0,
             command_record_history: true,
@@ -531,6 +536,9 @@ impl Workspace {
                 self.ai_settings = None;
                 self.ai_settings_subscription = None;
             }
+        } else if self.update_panel.is_some() {
+            self.update_panel = None;
+            self.update_panel_subscription = None;
         } else if self.login.is_some() {
             self.cancel_login(window, cx);
         } else if self.host_approval.is_some() {
@@ -924,6 +932,32 @@ impl Workspace {
             },
         ));
         self.ai_settings = Some(panel);
+        cx.notify();
+    }
+    fn open_updates(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.show_batch
+            || self.ai_settings.is_some()
+            || self.vault_settings.is_some()
+            || self.update_panel.is_some()
+            || self.snippet_modal_open()
+            || self.connect_route.is_some()
+        {
+            return;
+        }
+        let panel = cx.new(|cx| UpdatePanel::new(self.runtime.clone(), window, cx));
+        self.update_panel_subscription = Some(cx.subscribe_in(
+            &panel,
+            window,
+            |view, _panel, event, window, cx| match event {
+                UpdatePanelEvent::Close => {
+                    view.update_panel = None;
+                    view.update_panel_subscription = None;
+                    view.focus_current_surface(window, cx);
+                    cx.notify();
+                }
+            },
+        ));
+        self.update_panel = Some(panel);
         cx.notify();
     }
     fn toggle_assistant(&mut self, _: &ToggleAssistant, _: &mut Window, cx: &mut Context<Self>) {

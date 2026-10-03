@@ -46,7 +46,8 @@ The interface defaults to Simplified Chinese and supports English. The project t
 | **Remote files** | SFTP browsing, file and recursive directory uploads/downloads, transfer review, progress, pause/continue and cancellation, content-verified file and directory resumption, directory creation, rename and delete, text viewing and reviewed saves |
 | **Host status** | Linux CPU, memory, load, uptime, disk capacity, network counters, processes, and listening socket diagnostics |
 | **Port forwarding** | Local/remote TCP forwarding and a loopback SOCKS5 proxy, with actual listener addresses, status, and stop controls |
-| **AI assistance** | Named provider profiles, model discovery and connection testing, context selection, request previews, answers, and command suggestions |
+| **AI assistance** | Named provider profiles, model discovery and connection testing, context selection, request previews, answers, and command suggestions; replies can become session-bound diagnostic plans with step-by-step review |
+| **About and updates** | In-app project link, version and changelog; platform-aware GitHub Release checks, downloads and SHA-256 verification with a staged package |
 
 Pausing waits for in-flight operations to be acknowledged before showing “Paused.” To resume a partial file or directory, explicitly select the source and destination, review the content verification, and confirm; after reconnecting or restarting, create a new resumption plan. See the [transfer verification record](docs/testing/records/2026-10-03-sftp-resume.md).
 
@@ -85,6 +86,8 @@ After a restart, explicitly saved AI keys must be unlocked with the master passw
 ## Getting started
 
 Building from source is recommended during development. Versioned packages will be available from [GitHub Releases](https://github.com/cyruss648/keelshell/releases), with SHA-256 checksums.
+
+Open **About / updates** from the toolbar to read the bundled changelog, check for a new version and download the matching release package. Downloads stay in a private temporary directory and are verified against the checksum published with the release. The app does not overwrite a running installation until signing, permissions and rollback paths have passed native validation on all targets.
 
 | Platform | Build targets | Package |
 | --- | --- | --- |

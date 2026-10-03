@@ -22,7 +22,7 @@
 
 ## 当前实现与证据
 
-最新主线继续增加了六个可验证的远程工作流切片：连接库支持 JSON 剪贴板导入/导出、收藏和删除；每个 SSH 标签拥有仅驻留内存的有界命令历史；SFTP 提供单 worker FIFO 队列、分块进度与边界取消并已接入文件面板；Linux 监控面板可按需读取监听 TCP/UDP 端口；SSH 初次连接对瞬态传输失败使用可取消的有界退避重试；终端提供限定在活动 SSH 标签滚动区内的搜索覆盖层、上一项/下一项定位和匹配高亮。对应实现与记录分别见 `testing/records/2026-10-03-connection-library.md`、`testing/records/2026-10-03-command-history.md`、`testing/records/2026-10-03-files-transfer-queue.md`、`testing/records/2026-10-03-transfer-queue.md`、`testing/records/2026-10-03-socket-diagnostics.md`、`testing/records/2026-10-03-connect-retry.md` 和 `testing/records/2026-10-03-terminal-search.md`。
+最新主线继续增加了六个可验证的远程工作流切片：连接库支持 JSON 剪贴板导入/导出、收藏和删除；每个 SSH 标签拥有仅驻留内存的有界命令历史；SFTP 提供单 worker FIFO 队列、分块进度与边界取消并已接入文件面板；Linux 监控面板可按需读取监听 TCP/UDP 端口，并能从 TCP 行显式发起由远程主机执行的固定 `nc -z` 连接探测；SSH 初次连接对瞬态传输失败使用可取消的有界退避重试；终端提供限定在活动 SSH 标签滚动区内的搜索覆盖层、上一项/下一项定位和匹配高亮。对应实现与记录分别见 `testing/records/2026-10-03-connection-library.md`、`testing/records/2026-10-03-command-history.md`、`testing/records/2026-10-03-files-transfer-queue.md`、`testing/records/2026-10-03-transfer-queue.md`、`testing/records/2026-10-03-socket-diagnostics.md`、`testing/records/2026-10-03-tcp-service-probe.md`、`testing/records/2026-10-03-connect-retry.md` 和 `testing/records/2026-10-03-terminal-search.md`。
 
 - 删除本地 PTY 产品后端和依赖。`events.rs` 承载 SSH/界面共享事件；`remote_only.rs` 扫描产品边界，使用 Cargo 运行时目录以支持移动后的构建缓存。
 - `workspace.rs` 管生命周期与保存，`workspace/view.rs` 管布局，`workspace/modals.rs` 管连接/认证弹窗。`design.rs` 统一白色/浅灰/蓝色控件主题。
@@ -128,7 +128,9 @@ shell/exec/SFTP 通道在打开前即由独立任务持有，覆盖迟到确认�
 
 ## 待补的完整性
 
-连接批量组织与永久回收清理 UI、凭据备份/恢复与跨文件事务、外部 ProxyCommand、keyboard-interactive、远端进程的断线恢复、交互 shell 可编程补全、逐目标模板参数/任务依赖/持久化批量审计、传输自动恢复/并行、ACL/所有权/文件差异、服务探测、更多监控、同步、打包和 Windows/Linux 原生验收均需继续追踪。终端搜索目前只搜索活动标签的本地滚动区，不读取远端文件或重新执行命令。
+连接批量组织与永久回收清理 UI、凭据备份/恢复与跨文件事务、外部 ProxyCommand、keyboard-interactive、远端进程的断线恢复、交互 shell 可编程补全、逐目标模板参数/任务依赖/持久化批量审计、传输自动恢复/并行、ACL/所有权/文件差异、TCP 协议级服务健康、更多监控、同步、打包和 Windows/Linux 原生验收均需继续追踪。当前 TCP 探测只证明远程主机完成握手，不代表协议或应用已就绪。终端搜索目前只搜索活动标签的本地滚动区，不读取远端文件或重新执行命令。
+
+工具栏已接入“关于/更新”面板：它显示内置变更日志和项目主页，用户点击后在后台检查固定 GitHub Release，下载当前平台资产并验证同一发布的 SHA-256。已校验包保存在唯一临时目录，可从面板查看；因为签名、公证、安装权限、运行中替换和回滚尚未完成三平台验收，当前版本不会覆盖现有安装。设计与验证见 `adr/0021-about-and-update-panel.md` 和 `testing/records/2026-10-03-update-panel.md`。
 
 ## 迁移核验
 

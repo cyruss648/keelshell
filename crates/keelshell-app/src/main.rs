@@ -22,6 +22,7 @@ mod snippet_parameters;
 mod ssh_bridge;
 mod terminal;
 mod tunnels;
+mod updater;
 mod vault_settings;
 mod workspace;
 

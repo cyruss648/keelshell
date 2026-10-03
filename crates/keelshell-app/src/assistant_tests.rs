@@ -1,4 +1,4 @@
-use super::{AssistantPanel, PreparedRequest, shell_blocks};
+use super::{AssistantEvent, AssistantPanel, PreparedRequest, shell_blocks};
 use crate::{ai_settings::EphemeralCredentials, i18n::set_language};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
@@ -404,6 +404,87 @@ fn only_extracts_closed_explicit_shell_blocks() {
     );
     assert!(shell_blocks("```sh\nrm -rf /").is_empty());
 }
+
+#[gpui_kit::test]
+fn diagnostic_plan_requires_explicit_build_and_keeps_session_binding(cx: &mut TestAppContext) {
+    let (_, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        panel.finish_request(
+            panel.request_revision,
+            ("ops@server.example:22".into(), "session-A".into()),
+            Ok("The load is high.\n```sh\nuptime\n```\n```bash\nrm -rf /tmp/unknown\n```".into()),
+            cx,
+        );
+        assert!(panel.diagnostic_plan.is_none());
+        panel.build_diagnostic_plan(cx);
+        let plan = panel
+            .diagnostic_plan
+            .as_ref()
+            .unwrap_or_else(|| panic!("explicit build creates a plan"));
+        assert_eq!(plan.steps().len(), 2);
+        assert_eq!(plan.session_id(), "session-A");
+        assert_eq!(plan.steps()[0].command(), "uptime");
+        assert_eq!(
+            plan.steps()[1].risk(),
+            keelshell_ai::DiagnosticRisk::ReviewRequired
+        );
+
+        let review = plan
+            .review_step(0, Duration::from_secs(60))
+            .unwrap_or_else(|error| panic!("review step: {error}"));
+        let proposal = review
+            .into_proposal(plan, "session-A")
+            .unwrap_or_else(|error| panic!("proposal: {error}"));
+        assert_eq!(proposal.command, "uptime");
+        assert!(panel.diagnostic_plan.is_some());
+        panel.invalidate_session("session-A", cx);
+        assert!(panel.diagnostic_plan.is_none());
+    });
+}
+
+#[gpui_kit::test]
+fn diagnostic_plan_buttons_only_emit_reviewable_text(cx: &mut TestAppContext) {
+    let (window, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        panel.finish_request(
+            panel.request_revision,
+            ("ops@server.example:22".into(), "session-A".into()),
+            Ok("```sh\nss -ltn\n```".into()),
+            cx,
+        );
+    });
+    let observed = Arc::new(std::sync::Mutex::new(None::<(String, String)>));
+    let copy = observed.clone();
+    let _subscription = cx.update(|cx| {
+        cx.subscribe(&panel, move |_, event: &AssistantEvent, _| {
+            if let AssistantEvent::Suggestion {
+                command,
+                session_id,
+            } = event
+            {
+                let Ok(mut value) = copy.lock() else {
+                    return;
+                };
+                *value = Some((command.clone(), session_id.clone()));
+            }
+        })
+    });
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("build-diagnostic-plan", cx);
+        window.render_frame(cx);
+        window.click(("review-diagnostic-step", 0_usize), cx);
+    })
+    .unwrap_or_else(|error| panic!("diagnostic plan buttons: {error}"));
+    cx.run_until_parked();
+    let observed = observed
+        .lock()
+        .ok()
+        .and_then(|value| value.clone())
+        .unwrap_or_else(|| panic!("step emits a review suggestion"));
+    assert_eq!(observed, ("ss -ltn".into(), "session-A".into()));
+}
+
 #[test]
 fn rejects_terminal_control_in_suggestion() {
     assert!(shell_blocks("```bash\necho \u{1b}[2J\n``` ").is_empty());

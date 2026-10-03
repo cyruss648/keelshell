@@ -37,7 +37,7 @@ ps -ww -eo pid=,user=,pcpu=,pmem=,args= || exit 65
 const SOCKETS_SCRIPT: &str = r#"LC_ALL=C; export LC_ALL
 if [ "$(uname -s)" != Linux ]; then exit 64; fi
 command -v ss >/dev/null 2>&1 || exit 66
-ss -H -lntup || exit 65
+ss -H -lntupn || exit 65
 "#;
 
 /// Typed monitor failure; remote output is never interpolated into an error.
@@ -63,6 +63,9 @@ pub enum MonitorError {
     /// Process identity changed, disappeared or cannot be inspected.
     #[error("process changed or exited; refresh and review it again")]
     ProcessChanged,
+    /// A socket row changed between display and the explicit probe.
+    #[error("socket changed; refresh and review it again")]
+    SocketChanged,
     /// A PID outside the permitted numeric range was selected.
     #[error("only a numeric PID greater than 1 may receive SIGTERM")]
     InvalidPid,
@@ -302,6 +305,25 @@ pub struct SocketInfo {
     pub process: Option<String>,
 }
 
+/// Result of an explicit, read-only TCP connect check for a listening socket.
+///
+/// The probe sends no application bytes. `reachable` means that the remote
+/// `nc` command completed the TCP handshake; it does not establish protocol
+/// health, authentication, or readiness beyond the kernel accept path.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TcpProbeResult {
+    /// Address used by the remote probe. Wildcard listeners are mapped to the
+    /// loopback address so the result is deterministic and does not leave the
+    /// target host.
+    pub host: String,
+    /// TCP port checked by the remote probe.
+    pub port: u16,
+    /// Whether the TCP handshake was accepted.
+    pub reachable: bool,
+    /// Exit status returned by `nc`; zero means reachable.
+    pub probe_status: u32,
+}
+
 /// An inspected process identity bound to its kernel start tick.
 ///
 /// It is created only after rechecking a selected process and is valid for one
@@ -370,6 +392,36 @@ impl LinuxMonitor {
                 "Linux ss is required for socket diagnostics",
             )),
             _ => parse_sockets(&checked_text(output, "socket collection")?),
+        }
+    }
+
+    /// Probe one TCP listening row through the authenticated remote host.
+    ///
+    /// Only endpoint data parsed from a fresh `ss` row is accepted. The
+    /// command requires `nc`, has a two-second connect timeout and emits a
+    /// fixed marker; no user-provided shell text is executed and no payload is
+    /// sent after the handshake. UDP rows are intentionally unsupported.
+    pub async fn probe_tcp(&self, socket: &SocketInfo) -> MonitorResult<TcpProbeResult> {
+        if socket.protocol != "tcp" {
+            return Err(MonitorError::Unsupported(
+                "only TCP listening sockets support a connect probe",
+            ));
+        }
+        let current = self.listening_sockets().await?;
+        if !current.iter().any(|candidate| candidate == socket) {
+            return Err(MonitorError::SocketChanged);
+        }
+        let (host, port) = probe_endpoint(&socket.local)?;
+        let command = format!(
+            "LC_ALL=C; export LC_ALL\nif [ \"$(uname -s)\" != Linux ]; then exit 64; fi\ncommand -v nc >/dev/null 2>&1 || exit 66\nstatus=0\nnc -z -w 2 {host} {port} >/dev/null 2>&1 || status=$?\nprintf '@@KS:probe@@\\n%s\\n' \"$status\"\n",
+            host = shell_literal(&host)
+        );
+        let output = self.session.exec_limited(&command, 4 * 1024).await?;
+        match output.exit_status {
+            Some(66) => Err(MonitorError::Unsupported(
+                "Linux nc is required for TCP connect probes",
+            )),
+            _ => parse_probe(checked_text(output, "TCP probe")?.as_str(), host, port),
         }
     }
 
@@ -497,6 +549,64 @@ pub fn parse_sockets(input: &str) -> MonitorResult<Vec<SocketInfo>> {
         });
     }
     Ok(sockets)
+}
+
+/// Parse the fixed probe marker and retain the `nc` status for review.
+pub fn parse_probe(input: &str, host: String, port: u16) -> MonitorResult<TcpProbeResult> {
+    if input.len() > 1024 {
+        return Err(MonitorError::InvalidData("probe output exceeds 1 KiB"));
+    }
+    let status = input
+        .strip_prefix("@@KS:probe@@\n")
+        .and_then(|value| value.lines().next())
+        .ok_or(MonitorError::InvalidData("missing probe marker"))?
+        .parse::<u32>()
+        .map_err(|_| MonitorError::InvalidData("probe status"))?;
+    if status > 255 {
+        return Err(MonitorError::InvalidData("probe status range"));
+    }
+    Ok(TcpProbeResult {
+        host,
+        port,
+        reachable: status == 0,
+        probe_status: status,
+    })
+}
+
+fn probe_endpoint(local: &str) -> MonitorResult<(String, u16)> {
+    let (host, port) = if let Some(rest) = local.strip_prefix('[') {
+        let (host, port) = rest
+            .split_once("]:")
+            .ok_or(MonitorError::InvalidData("invalid IPv6 socket endpoint"))?;
+        (host, port)
+    } else {
+        local
+            .rsplit_once(':')
+            .ok_or(MonitorError::InvalidData("invalid socket endpoint"))?
+    };
+    let port = port
+        .parse::<u16>()
+        .map_err(|_| MonitorError::InvalidData("socket port"))?;
+    let host = match host {
+        "*" | "0.0.0.0" => "127.0.0.1",
+        "::" | "[::]" => "::1",
+        value => value,
+    };
+    if host.is_empty()
+        || host.starts_with('-')
+        || host.chars().any(|character| {
+            !(character.is_ascii_alphanumeric() || matches!(character, '.' | ':' | '%' | '_' | '-'))
+        })
+    {
+        return Err(MonitorError::InvalidData("unsafe socket address"));
+    }
+    Ok((host.to_owned(), port))
+}
+
+fn shell_literal(value: &str) -> String {
+    // probe_endpoint excludes shell metacharacters; quotes still keep the
+    // fixed command robust if a future endpoint parser admits a safe name.
+    format!("'{value}'")
 }
 
 fn checked_text(output: ExecOutput, operation: &'static str) -> MonitorResult<String> {
@@ -937,6 +1047,14 @@ mod tests {
                 (SAMPLE.to_owned(), 0)
             } else if command == PROCESSES_SCRIPT {
                 (PROCESS_ROWS.to_owned(), 0)
+            } else if command == SOCKETS_SCRIPT {
+                (
+                    "tcp LISTEN 0 128 127.0.0.1:2222 0.0.0.0:* users:((\"fixture\",pid=42,fd=3))\n"
+                        .into(),
+                    0,
+                )
+            } else if command.contains("command -v nc") {
+                ("@@KS:probe@@\n0\n".into(), 0)
             } else if command.contains("@@KS:process@@") {
                 (
                     format!(
@@ -1031,6 +1149,7 @@ mod tests {
                     .all(|command| !command.contains("kill -TERM"))
             );
         }
+
         monitor.terminate(identity).await?;
         let commands = server
             .commands
@@ -1039,6 +1158,46 @@ mod tests {
         assert_eq!(commands.len(), 4);
         assert!(commands[3].starts_with("pid=42; expected=12345\n"));
         assert!(commands[3].contains("kill -TERM \"$pid\""));
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn loopback_ssh_tcp_probe_is_bounded_and_does_not_send_payload()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let (server, monitor) = fixture(false).await?;
+        let socket = SocketInfo {
+            protocol: "tcp".into(),
+            state: "LISTEN".into(),
+            local: "127.0.0.1:2222".into(),
+            peer: "0.0.0.0:*".into(),
+            process: Some("users:((\"fixture\",pid=42,fd=3))".into()),
+        };
+        let result = monitor.probe_tcp(&socket).await?;
+        assert!(result.reachable);
+        assert_eq!(result.port, 2222);
+        {
+            let commands = server
+                .commands
+                .lock()
+                .map_err(|_| "fixture lock poisoned")?;
+            assert_eq!(commands.len(), 2);
+            assert_eq!(commands[0], SOCKETS_SCRIPT);
+            assert!(commands[1].contains("nc -z -w 2 '127.0.0.1' 2222"));
+            assert!(!commands[1].contains("echo "));
+        }
+        let stale = SocketInfo {
+            process: None,
+            ..socket
+        };
+        assert!(matches!(
+            monitor.probe_tcp(&stale).await,
+            Err(MonitorError::SocketChanged)
+        ));
+        let commands = server
+            .commands
+            .lock()
+            .map_err(|_| "fixture lock poisoned")?;
+        assert_eq!(commands.len(), 3);
         Ok(())
     }
 
@@ -1096,6 +1255,34 @@ mod tests {
                 .iter()
                 .all(|command| !command.contains("kill -TERM"))
         );
+        Ok(())
+    }
+
+    #[test]
+    fn tcp_probe_parses_reachability_and_rejects_unsafe_endpoints() -> MonitorResult<()> {
+        let reachable = parse_probe("@@KS:probe@@\n0\n", "127.0.0.1".into(), 8080)?;
+        assert_eq!(reachable.probe_status, 0);
+        assert!(reachable.reachable);
+        let refused = parse_probe("@@KS:probe@@\n111\n", "127.0.0.1".into(), 8080)?;
+        assert!(!refused.reachable);
+        assert_eq!(refused.probe_status, 111);
+
+        let socket = SocketInfo {
+            protocol: "tcp".into(),
+            state: "LISTEN".into(),
+            local: "127.0.0.1:8080".into(),
+            peer: "0.0.0.0:*".into(),
+            process: None,
+        };
+        assert_eq!(probe_endpoint(&socket.local)?, ("127.0.0.1".into(), 8080));
+        assert_eq!(probe_endpoint("0.0.0.0:22")?, ("127.0.0.1".into(), 22));
+        assert_eq!(probe_endpoint("[::]:22")?, ("::1".into(), 22));
+        assert!(probe_endpoint("127.0.0.1:22;id").is_err());
+        assert!(probe_endpoint("-dash:22").is_err());
+        assert!(matches!(
+            parse_probe("@@KS:probe@@\n256\n", "127.0.0.1".into(), 8080),
+            Err(MonitorError::InvalidData("probe status range"))
+        ));
         Ok(())
     }
 

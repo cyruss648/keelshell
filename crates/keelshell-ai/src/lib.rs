@@ -25,6 +25,7 @@
 #![deny(missing_docs)]
 
 mod context;
+mod diagnostics;
 mod discovery;
 mod error_category;
 mod provider;
@@ -32,6 +33,7 @@ mod redact;
 mod review;
 
 pub use context::{ApprovedRequest, ContextDraft, PreparedRequest};
+pub use diagnostics::{DiagnosticPlan, DiagnosticReview, DiagnosticRisk, DiagnosticStep};
 pub use discovery::{
     CONNECTIVITY_PROMPT, ConnectivityReport, ModelCatalog, ProviderClient, ProviderEndpoint,
     RequestCancellation,
@@ -115,4 +117,16 @@ pub enum AiError {
     /// A review ticket is too old to authorize insertion.
     #[error("Command review expired; review the proposal again")]
     ReviewExpired,
+    /// The assistant response could not be converted into a bounded diagnostic plan.
+    #[error("Diagnostic plan is invalid or missing a valid target, session or step")]
+    InvalidDiagnosticPlan,
+    /// The selected response or one of its command blocks exceeds the plan limits.
+    #[error("Diagnostic plan exceeds the bounded response, step or command limit")]
+    DiagnosticPlanTooLarge,
+    /// The response contained no closed shell block suitable for a diagnostic step.
+    #[error("Assistant response contains no closed shell diagnostic steps")]
+    NoDiagnosticSteps,
+    /// The plan or active session changed after the step review was issued.
+    #[error("Diagnostic plan or active session changed; review the step again")]
+    DiagnosticPlanMismatch,
 }

@@ -28,6 +28,11 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: python packaging/release.py validate-ref --tag "$RELEASE_TAG"
+      - name: Changelog contains the release entry
+        if: github.event_name == 'push'
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: python scripts/changelog.py check --version "${RELEASE_VERSION#v}"
       - name: Packaging regression tests
         run: python -m unittest discover -s packaging -p 'test_*.py' -v
   build:

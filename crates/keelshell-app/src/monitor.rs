@@ -6,6 +6,7 @@ use crate::design::{ACCENT, BORDER, CANVAS, MUTED, SURFACE, TEXT};
 mod tests;
 use gpui_kit::assets::IconName;
 use std::{
+    collections::BTreeMap,
     sync::{
         Arc,
         atomic::{AtomicBool, Ordering},
@@ -25,13 +26,14 @@ use keelshell_session::{
     SshSession,
     monitor::{
         LinuxMonitor, MonitorError, MonitorResult, ProcessIdentity, ProcessInfo, SampleRates,
-        Snapshot, SocketInfo,
+        Snapshot, SocketInfo, TcpProbeResult,
     },
 };
 
 enum Job {
     Refresh,
     Sockets,
+    Probe(SocketInfo),
     Inspect(ProcessInfo),
     Terminate(ProcessIdentity),
 }
@@ -49,6 +51,10 @@ enum Outcome {
         processes: MonitorResult<Vec<ProcessInfo>>,
     },
     Sockets(MonitorResult<Vec<SocketInfo>>),
+    Probed {
+        socket: SocketInfo,
+        result: MonitorResult<TcpProbeResult>,
+    },
     Inspected(MonitorResult<ProcessIdentity>),
     Terminated(MonitorResult<()>),
 }
@@ -67,6 +73,7 @@ pub struct MonitorPanel {
     rates: SampleRates,
     processes: Vec<ProcessInfo>,
     sockets: Vec<SocketInfo>,
+    probes: BTreeMap<String, TcpProbeResult>,
     process_page: usize,
     last_sample: Option<Instant>,
     last_process_sample: Option<Instant>,
@@ -117,6 +124,7 @@ impl MonitorPanel {
             rates: SampleRates::default(),
             processes: Vec::new(),
             sockets: Vec::new(),
+            probes: BTreeMap::new(),
             process_page: 0,
             last_sample: None,
             last_process_sample: None,
@@ -226,6 +234,7 @@ impl MonitorPanel {
                         format!("Loaded {} listening sockets.", sockets.len()),
                     );
                     self.sockets = sockets;
+                    self.probes.clear();
                 }
                 Err(error) => {
                     let (zh, en) = error_text(&error);
@@ -234,6 +243,37 @@ impl MonitorPanel {
                         format!("Socket diagnostics failed: {en}"),
                     );
                     self.sockets.clear();
+                }
+            },
+            Outcome::Probed { socket, result } => match result {
+                Ok(probe) => {
+                    self.status = Message::new(
+                        if probe.reachable {
+                            format!("TCP {}:{} 可建立连接。", probe.host, probe.port)
+                        } else {
+                            format!(
+                                "TCP {}:{} 未建立连接（nc 状态 {}）。",
+                                probe.host, probe.port, probe.probe_status
+                            )
+                        },
+                        if probe.reachable {
+                            format!("TCP {}:{} accepted a connection.", probe.host, probe.port)
+                        } else {
+                            format!(
+                                "TCP {}:{} did not accept a connection (nc status {}).",
+                                probe.host, probe.port, probe.probe_status
+                            )
+                        },
+                    );
+                    self.probes.insert(socket_key(&socket), probe);
+                }
+                Err(error) => {
+                    let (zh, en) = error_text(&error);
+                    self.status = Message::new(
+                        format!("TCP 探测失败：{zh}"),
+                        format!("TCP probe failed: {en}"),
+                    );
+                    self.probes.remove(&socket_key(&socket));
                 }
             },
             Outcome::Inspected(result) => match result {
@@ -284,6 +324,10 @@ impl MonitorPanel {
         self.status = match &job {
             Job::Refresh => Message::new("正在刷新主机状态…", "Refreshing from the host…"),
             Job::Sockets => Message::new("正在读取监听端口…", "Reading listening sockets…"),
+            Job::Probe(_) => Message::new(
+                "正在执行只读 TCP 连接探测…",
+                "Running a read-only TCP connect probe…",
+            ),
             Job::Inspect(_) => Message::new(
                 "正在核对进程身份，请稍候…",
                 "Checking process identity before confirmation…",
@@ -371,6 +415,10 @@ async fn execute_job(monitor: LinuxMonitor, job: Job, cancel: &AtomicBool) -> Ou
             }
         }
         Job::Sockets => Outcome::Sockets(monitor.listening_sockets().await),
+        Job::Probe(socket) => Outcome::Probed {
+            result: monitor.probe_tcp(&socket).await,
+            socket,
+        },
         Job::Inspect(process) => Outcome::Inspected(monitor.inspect_process(&process).await),
         Job::Terminate(identity) => Outcome::Terminated(monitor.terminate(identity).await),
     }
@@ -413,10 +461,15 @@ fn error_text(error: &MonitorError) -> (String, String) {
         },
         MonitorError::InvalidData(_) => "采集响应不完整或格式不受支持".into(),
         MonitorError::ProcessChanged => "进程已退出或身份发生变化，请刷新后重新核对".into(),
+        MonitorError::SocketChanged => "监听端口已变化，请刷新后重新探测".into(),
         MonitorError::InvalidPid => "只允许向大于 1 的有效 PID 发送终止信号".into(),
         MonitorError::ReviewExpired => "进程确认已过期，请重新核对".into(),
     };
     (zh, error.to_string())
+}
+
+fn socket_key(socket: &SocketInfo) -> String {
+    format!("{}|{}|{}", socket.protocol, socket.local, socket.peer)
 }
 
 fn metric(label: &str, value: String, ratio: Option<f32>, color: u32) -> impl IntoElement {
@@ -738,39 +791,63 @@ impl Render for MonitorPanel {
                 "Click Sockets above to load",
             )));
         } else {
-            for socket in self.sockets.iter().take(12) {
+            for (socket_index, socket) in self.sockets.iter().take(12).enumerate() {
+                let probe_key = socket_key(socket);
                 let process = socket
                     .process
                     .as_deref()
                     .map(|value| format!(" · {value}"))
                     .unwrap_or_default();
-                sockets = sockets.child(
-                    div()
-                        .flex()
-                        .gap_1()
-                        .text_xs()
-                        .border_b_1()
-                        .border_color(rgb(BORDER))
-                        .child(
-                            div()
-                                .w(px(42.))
-                                .text_color(rgb(MUTED))
-                                .child(socket.protocol.clone()),
-                        )
-                        .child(
-                            div()
-                                .w(px(54.))
-                                .text_color(rgb(MUTED))
-                                .child(socket.state.clone()),
-                        )
-                        .child(
-                            div()
-                                .flex_1()
-                                .min_w_0()
-                                .truncate()
-                                .child(format!("{} → {}{}", socket.local, socket.peer, process)),
-                        ),
-                );
+                let mut row = div()
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .text_xs()
+                    .border_b_1()
+                    .border_color(rgb(BORDER))
+                    .child(
+                        div()
+                            .w(px(42.))
+                            .text_color(rgb(MUTED))
+                            .child(socket.protocol.clone()),
+                    )
+                    .child(
+                        div()
+                            .w(px(54.))
+                            .text_color(rgb(MUTED))
+                            .child(socket.state.clone()),
+                    )
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .truncate()
+                            .child(format!("{} → {}{}", socket.local, socket.peer, process)),
+                    );
+                if socket.protocol == "tcp" {
+                    let selected = socket.clone();
+                    row = row.child(
+                        Button::new(("probe-socket", socket_index))
+                            .disabled(self.busy || self.suspended || self.pending.is_some())
+                            .ghost()
+                            .compact()
+                            .rounded(px(6.))
+                            .label(t(cx, "探测", "Probe"))
+                            .on_click(cx.listener(move |panel, _, _, cx| {
+                                if !panel.busy && panel.pending.is_none() {
+                                    panel.run(Job::Probe(selected.clone()), cx);
+                                }
+                            })),
+                    );
+                }
+                if let Some(probe) = self.probes.get(&probe_key) {
+                    row = row.child(
+                        div()
+                            .text_color(rgb(if probe.reachable { 0x247a52 } else { 0xb42318 }))
+                            .child(if probe.reachable { "✓" } else { "×" }),
+                    );
+                }
+                sockets = sockets.child(row);
             }
             if self.sockets.len() > 12 {
                 sockets = sockets.child(

@@ -354,6 +354,16 @@ impl Render for Workspace {
                             })),
                     )
                     .child(
+                        Button::new("about-updates")
+                            .icon(IconName::Package)
+                            .ghost()
+                            .compact()
+                            .label(t(cx, "关于/更新", "About / updates"))
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                view.open_updates(window, cx)
+                            })),
+                    )
+                    .child(
                         Button::new("language")
                             .ghost()
                             .compact()
@@ -668,6 +678,30 @@ impl Render for Workspace {
                                 .w(px(900.))
                                 .max_w_full()
                                 .h(px(650.))
+                                .max_h_full()
+                                .bg(rgb(crate::design::SURFACE))
+                                .rounded_lg()
+                                .shadow_lg()
+                                .overflow_hidden()
+                                .child(panel),
+                        ),
+                )
+            })
+            .when_some(self.update_panel.clone(), |el, panel| {
+                el.child(
+                    div()
+                        .absolute()
+                        .inset_0()
+                        .occlude()
+                        .bg(rgba(0x17243a66))
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .child(
+                            div()
+                                .w(px(760.))
+                                .max_w_full()
+                                .h(px(600.))
                                 .max_h_full()
                                 .bg(rgb(crate::design::SURFACE))
                                 .rounded_lg()
