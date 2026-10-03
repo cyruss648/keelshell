@@ -37,6 +37,7 @@ impl Workspace {
             || self.vault_settings.is_some()
             || self.ai_settings.is_some()
             || self.show_connections
+            || self.openssh_review.is_some()
             || self.form.is_some()
             || self.folder_form.is_some()
             || self.destination_prompt.is_some()

@@ -26,6 +26,8 @@
 
 ## 当前实现与证据
 
+2026-10-04 的 OpenSSH 导入增量已把剪贴板解析改为候选审阅流程：解析支持常见空格和 `key=value` 指令写法，候选连接、跳板、认证类型、来源行与 Include 来源会在确认弹窗中展示；未知/语义敏感/重复指令及 Host 块内 Include 会保留为可定位警告。确认后才写入连接库，取消保持原状态。核心 52 项单元测试、7 项 OpenSSH 集成测试，以及应用侧确认/取消 GPUI 回归已通过；完整整仓门禁与本次提交的多平台 Quality 需以本轮提交后的记录为准。
+
 最新主线继续增加了六个可验证的远程工作流切片：连接库支持 JSON 剪贴板导入/导出、收藏和删除；每个 SSH 标签拥有仅驻留内存的有界命令历史；SFTP 提供单 worker FIFO 队列、分块进度与边界取消并已接入文件面板；Linux 监控面板可按需读取监听 TCP/UDP 端口，并能从 TCP 行显式发起由远程主机执行的固定 `nc -z` 连接探测；SSH 初次连接对瞬态传输失败使用可取消的有界退避重试；终端提供限定在活动 SSH 标签滚动区内的搜索覆盖层、上一项/下一项定位和匹配高亮。对应实现与记录分别见 `testing/records/2026-10-03-connection-library.md`、`testing/records/2026-10-03-command-history.md`、`testing/records/2026-10-03-files-transfer-queue.md`、`testing/records/2026-10-03-transfer-queue.md`、`testing/records/2026-10-03-socket-diagnostics.md`、`testing/records/2026-10-03-tcp-service-probe.md`、`testing/records/2026-10-03-connect-retry.md` 和 `testing/records/2026-10-03-terminal-search.md`。
 
 - 删除本地 PTY 产品后端和依赖。`events.rs` 承载 SSH/界面共享事件；`remote_only.rs` 扫描产品边界，使用 Cargo 运行时目录以支持移动后的构建缓存。

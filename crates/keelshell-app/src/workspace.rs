@@ -20,6 +20,7 @@ mod credentials;
 mod library;
 mod library_view;
 mod modals;
+mod openssh_review;
 mod reconnect;
 mod reconnect_editor;
 mod remote_completion;
@@ -40,6 +41,7 @@ use crate::snippet_editor::{SnippetEditor, SnippetEditorEvent};
 use crate::terminal::TerminalView;
 use crate::updater::{UpdatePanel, UpdatePanelEvent};
 use crate::vault_settings::{VaultSettings, VaultSettingsEvent};
+use openssh_review::OpenSshImportReview;
 
 use crate::design::{ACCENT, BORDER, CANVAS as BG, MUTED, SURFACE as PANEL};
 
@@ -192,6 +194,7 @@ pub struct Workspace {
     search: Entity<InputState>,
     command: Entity<TextareaState>,
     form: Option<ConnectionForm>,
+    openssh_review: Option<OpenSshImportReview>,
     status: Message,
     show_connections: bool,
     library_filter: LibraryFilter,
@@ -433,6 +436,7 @@ impl Workspace {
             search,
             command,
             form: None,
+            openssh_review: None,
             status: load_error
                 .map(|error| Message::detail("配置加载失败", "Configuration failed", error))
                 .unwrap_or_else(|| {
@@ -514,6 +518,7 @@ impl Workspace {
             || self.vault_settings.is_some()
             || self.ai_settings.is_some()
             || self.snippet_modal_open()
+            || self.openssh_review.is_some()
         {
             self.focus_current_surface(window, cx);
             return;
@@ -526,6 +531,8 @@ impl Workspace {
         // Modal close takes precedence so a keyboard shortcut cannot close its underlying SSH tab.
         if self.show_batch {
             self.show_batch = false;
+        } else if self.openssh_review.is_some() {
+            self.cancel_openssh_import(window, cx);
         } else if self.discard_archive.take().is_some() {
             cx.notify();
         } else if self.snippet_modal_open() {
@@ -1476,7 +1483,7 @@ impl Workspace {
     }
 
     fn import_openssh_connections(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.saving {
+        if self.saving || self.openssh_review.is_some() {
             self.status = Message::new(
                 "请等待当前保存完成，再导入 SSH 配置。",
                 "Wait for the current save to finish before importing SSH configuration.",
@@ -1494,7 +1501,7 @@ impl Workspace {
         };
         let mut candidate = self.state.clone();
         match candidate.import_openssh_config_report(&document) {
-            Ok(report) if candidate == self.state => {
+            Ok(report) if report.imported.added == 0 && report.warnings.is_empty() => {
                 self.status = Message::new(
                     format!(
                         "没有新增连接，跳过 {} 条重复记录；有 {} 项需审阅。",
@@ -1509,17 +1516,15 @@ impl Workspace {
                 );
                 cx.notify();
             }
-            Ok(report) => self.persist(
-                candidate,
-                AfterSave::ConnectionsImported {
-                    added: report.imported.added,
-                    skipped: report.imported.skipped,
-                    folders_added: 0,
-                    warnings: report.warnings.len(),
-                },
-                window,
-                cx,
-            ),
+            Ok(report) => {
+                self.openssh_review = Some(OpenSshImportReview::new(candidate, report));
+                self.status = Message::new(
+                    "请审阅 SSH 配置导入内容，确认后才会保存。",
+                    "Review the SSH import; nothing is saved until you confirm.",
+                );
+                self.focus_current_surface(window, cx);
+                cx.notify();
+            }
             Err(error) => {
                 self.status = Message::detail(
                     "SSH 配置导入失败，未修改连接库",

@@ -635,6 +635,7 @@ impl Render for Workspace {
             .child(self.connection_manager(cx))
             .child(self.connection_form(cx))
             .child(self.library_modal(cx))
+            .child(self.openssh_import_modal(cx))
             .child(self.authentication_modal(cx))
             .child(self.snippet_modal(cx))
             .child(self.archive_confirmation(cx))

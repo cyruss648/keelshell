@@ -35,6 +35,8 @@ pub struct OpenSshEntry {
     pub proxy_jump: Option<String>,
     /// One-based line where the alias block began.
     pub source_line: usize,
+    /// Literal Include key that supplied this entry, or `None` for the root clipboard text.
+    pub source: Option<String>,
 }
 
 /// A source item that was ignored during a safe import.
@@ -42,6 +44,10 @@ pub struct OpenSshEntry {
 pub struct OpenSshWarning {
     /// One-based source line, or zero for a document-wide warning.
     pub line: usize,
+    /// Literal Include key that supplied this warning, or `None` for the root clipboard text.
+    pub source: Option<String>,
+    /// Lower-case directive name when the warning concerns one directive.
+    pub directive: Option<String>,
     /// Stable explanation suitable for a review UI.
     pub reason: &'static str,
 }
@@ -51,6 +57,8 @@ pub struct OpenSshWarning {
 pub struct OpenSshImportReport {
     /// Profiles and duplicate counts produced by the normal library importer.
     pub imported: crate::ImportReport,
+    /// Parsed profiles shown to the user before the candidate state is saved.
+    pub entries: Vec<OpenSshEntry>,
     /// Unsupported directives and skipped blocks.
     pub warnings: Vec<OpenSshWarning>,
 }
@@ -96,7 +104,7 @@ pub fn parse_openssh_config_with_includes(
         directives: Vec::new(),
         warnings: Vec::new(),
     };
-    parser.parse_document(input, 0, None)?;
+    parser.parse_document(input, 0, None, Scope::Global)?;
     parser.finish()
 }
 
@@ -113,6 +121,7 @@ struct Directive {
     key: String,
     args: Vec<String>,
     line: usize,
+    source: Option<String>,
 }
 
 struct Parser<'a> {
@@ -120,7 +129,7 @@ struct Parser<'a> {
     total_bytes: usize,
     used_includes: HashSet<String>,
     include_names: Vec<String>,
-    aliases: Vec<(String, usize)>,
+    aliases: Vec<(String, usize, Option<String>)>,
     seen_aliases: HashSet<String>,
     directives: Vec<Directive>,
     warnings: Vec<OpenSshWarning>,
@@ -132,7 +141,8 @@ impl<'a> Parser<'a> {
         input: &str,
         depth: usize,
         source_name: Option<&str>,
-    ) -> Result<(), Error> {
+        initial_scope: Scope,
+    ) -> Result<Scope, Error> {
         if depth > MAX_OPENSSH_INCLUDE_DEPTH {
             return Err(config_error(0, "include nesting is too deep"));
         }
@@ -144,7 +154,7 @@ impl<'a> Parser<'a> {
             return Err(config_error(0, "configuration exceeds the size limit"));
         }
 
-        let mut scope = Scope::Global;
+        let mut scope = initial_scope;
         for (index, raw_line) in input.split('\n').enumerate() {
             let line = index + 1;
             let raw_line = raw_line.strip_suffix('\r').unwrap_or(raw_line);
@@ -158,15 +168,17 @@ impl<'a> Parser<'a> {
             if tokens.is_empty() {
                 continue;
             }
-            let key = tokens[0].to_ascii_lowercase();
-            let args = tokens[1..].to_vec();
+            let (raw_key, args) = split_directive(tokens, line)?;
+            let key = raw_key.to_ascii_lowercase();
             match key.as_str() {
                 "host" => {
                     if args.len() != 1 {
-                        self.warnings.push(OpenSshWarning {
+                        self.push_warning(
                             line,
-                            reason: "Host pattern block was skipped",
-                        });
+                            Some("host"),
+                            "Host pattern block was skipped",
+                            source_name,
+                        );
                         scope = Scope::Ignored;
                         continue;
                     }
@@ -176,10 +188,12 @@ impl<'a> Parser<'a> {
                         continue;
                     }
                     if alias.contains(['*', '?', '!']) {
-                        self.warnings.push(OpenSshWarning {
+                        self.push_warning(
                             line,
-                            reason: "wildcard Host block was skipped",
-                        });
+                            Some("host"),
+                            "wildcard Host block was skipped",
+                            source_name,
+                        );
                         scope = Scope::Ignored;
                         continue;
                     }
@@ -190,37 +204,61 @@ impl<'a> Parser<'a> {
                     if self.aliases.len() >= MAX_OPENSSH_ENTRIES {
                         return Err(config_error(line, "too many Host entries"));
                     }
-                    self.aliases.push((alias.clone(), line));
+                    self.aliases
+                        .push((alias.clone(), line, source_name.map(ToOwned::to_owned)));
                     scope = Scope::Alias(alias);
                 }
                 "include" => {
+                    if !matches!(&scope, Scope::Global) {
+                        self.push_warning(
+                            line,
+                            Some("include"),
+                            "Include inside a Host or ignored block was skipped",
+                            source_name,
+                        );
+                        continue;
+                    }
                     if args.len() != 1 {
-                        self.warnings.push(OpenSshWarning { line, reason: "Include directive was skipped because its exact content was not supplied" });
+                        self.push_warning(
+                            line,
+                            Some("include"),
+                            "Include directive was skipped because its exact content was not supplied",
+                            source_name,
+                        );
                         continue;
                     }
                     let include_name = args[0].clone();
                     if validate_include_name(&include_name, line).is_err() {
-                        self.warnings.push(OpenSshWarning {
+                        self.push_warning(
                             line,
-                            reason: "Include path pattern was skipped",
-                        });
+                            Some("include"),
+                            "Include path pattern was skipped",
+                            source_name,
+                        );
                         continue;
                     }
                     if !self.used_includes.insert(include_name.clone()) {
                         return Err(config_error(line, "duplicate or cyclic Include"));
                     }
                     let Some(included) = self.includes.get(&include_name) else {
-                        self.warnings.push(OpenSshWarning { line, reason: "Include directive was skipped because its exact content was not supplied" });
+                        self.push_warning(
+                            line,
+                            Some("include"),
+                            "Include directive was skipped because its exact content was not supplied",
+                            source_name,
+                        );
                         continue;
                     };
                     self.include_names.push(include_name.clone());
-                    self.parse_document(included, depth + 1, Some(&include_name))?;
+                    let _ = self.parse_document(
+                        included,
+                        depth + 1,
+                        Some(&include_name),
+                        Scope::Global,
+                    )?;
                 }
                 "match" => {
-                    self.warnings.push(OpenSshWarning {
-                        line,
-                        reason: "Match block was skipped",
-                    });
+                    self.push_warning(line, Some("match"), "Match block was skipped", source_name);
                     scope = Scope::Ignored;
                     continue;
                 }
@@ -232,13 +270,15 @@ impl<'a> Parser<'a> {
                 | "canonicalizemaxdots"
                 | "canonicaldomains"
                 | "identityagent" => {
-                    self.warnings.push(OpenSshWarning {
+                    self.push_warning(
                         line,
-                        reason: "connection-semantic directive was skipped",
-                    });
+                        Some(key.as_str()),
+                        "connection-semantic directive was skipped",
+                        source_name,
+                    );
                     continue;
                 }
-                _ => {
+                "hostname" | "port" | "user" | "identityfile" | "proxyjump" => {
                     if matches!(&scope, Scope::Ignored) {
                         continue;
                     }
@@ -252,14 +292,35 @@ impl<'a> Parser<'a> {
                         key,
                         args,
                         line,
+                        source: source_name.map(ToOwned::to_owned),
                     });
+                }
+                _ => {
+                    self.push_warning(
+                        line,
+                        Some(key.as_str()),
+                        "unsupported directive was skipped",
+                        source_name,
+                    );
                 }
             }
         }
-        // Keep the argument in the signature to make recursive source tracking
-        // explicit; line numbers remain local to each supplied document.
-        let _ = source_name;
-        Ok(())
+        Ok(scope)
+    }
+
+    fn push_warning(
+        &mut self,
+        line: usize,
+        directive: Option<&str>,
+        reason: &'static str,
+        source_name: Option<&str>,
+    ) {
+        self.warnings.push(OpenSshWarning {
+            line,
+            source: source_name.map(ToOwned::to_owned),
+            directive: directive.map(ToOwned::to_owned),
+            reason,
+        });
     }
 
     fn finish(self) -> Result<OpenSshConfig, Error> {
@@ -269,14 +330,17 @@ impl<'a> Parser<'a> {
                 "configuration contains no exact Host entries",
             ));
         }
+        let mut warnings = self.warnings;
         let mut entries = Vec::with_capacity(self.aliases.len());
-        for (alias, source_line) in self.aliases {
+        let mut warned_duplicates = HashSet::new();
+        for (alias, source_line, source) in self.aliases {
             let mut host = alias.clone();
             let mut port = 22_u16;
             let mut username = String::new();
             let mut identity: Option<PathBuf> = None;
             let mut proxy_jump = None;
             let mut seen = HashSet::new();
+            let mut seen_in_scope = HashSet::new();
 
             // OpenSSH evaluates matching blocks in source order and keeps the
             // first value obtained for each option. Specific blocks should be
@@ -287,7 +351,22 @@ impl<'a> Parser<'a> {
                 // OpenSSH uses the first obtained value for these options.  We
                 // preserve that deterministic rule instead of silently applying
                 // a later block's value.
+                let scope_key = (directive.key.clone(), directive.scope.clone());
+                let duplicate_in_scope = !seen_in_scope.insert(scope_key);
                 if !seen.insert(directive.key.as_str()) {
+                    let warning_key = (
+                        directive.source.clone(),
+                        directive.line,
+                        directive.key.clone(),
+                    );
+                    if duplicate_in_scope && warned_duplicates.insert(warning_key) {
+                        warnings.push(OpenSshWarning {
+                            line: directive.line,
+                            source: directive.source.clone(),
+                            directive: Some(directive.key.clone()),
+                            reason: "duplicate directive was ignored after the first value",
+                        });
+                    }
                     continue;
                 }
                 let value = one_arg(directive, &directive.key)?;
@@ -349,12 +428,13 @@ impl<'a> Parser<'a> {
                 connection,
                 proxy_jump,
                 source_line,
+                source,
             });
         }
         Ok(OpenSshConfig {
             entries,
             includes: self.include_names,
-            warnings: self.warnings,
+            warnings,
         })
     }
 }
@@ -374,6 +454,40 @@ fn one_arg<'a>(directive: &'a Directive, key: &str) -> Result<&'a str, Error> {
         ));
     }
     Ok(directive.args[0].as_str())
+}
+
+/// Split the directive keyword from its arguments, accepting OpenSSH's
+/// optional `=` separator.  The separator may be attached to either side or
+/// surrounded by whitespace (`Port=2200`, `Port =2200`, `Port= 2200`, and
+/// `Port = 2200`).  Keeping this normalization before directive dispatch
+/// prevents a supported option from being silently treated as an unknown key.
+fn split_directive(tokens: Vec<String>, line: usize) -> Result<(String, Vec<String>), Error> {
+    let mut tokens = tokens.into_iter();
+    let first = tokens
+        .next()
+        .ok_or_else(|| config_error(line, "directive is missing a keyword"))?;
+    if let Some((key, value)) = first.split_once('=') {
+        if key.is_empty() {
+            return Err(config_error(line, "directive keyword is empty"));
+        }
+        let mut args = Vec::new();
+        if !value.is_empty() {
+            args.push(value.to_owned());
+        }
+        args.extend(tokens);
+        return Ok((key.to_owned(), args));
+    }
+
+    let mut args: Vec<String> = tokens.collect();
+    if let Some(second) = args.first_mut() {
+        if second == "=" {
+            args.remove(0);
+        } else if let Some(value) = second.strip_prefix('=') {
+            let value = value.to_owned();
+            args[0] = value;
+        }
+    }
+    Ok((first, args))
 }
 
 fn tokenize(line: &str, line_number: usize) -> Result<Vec<String>, Error> {
@@ -627,6 +741,99 @@ Host *
         };
         assert_eq!(selected.entries.len(), 2);
         assert_eq!(selected.includes, vec!["conf.d/team"]);
+    }
+
+    #[test]
+    fn include_inside_an_exact_host_is_skipped_without_guessing_scope() {
+        let mut includes = BTreeMap::new();
+        includes.insert("conf.d/team".to_owned(), "User included\n".to_owned());
+        let input = "Host app\n Include conf.d/team\n User outer\n HostName app.internal\n\nHost other\n User other-root\n HostName other.internal\n";
+        let parsed = match parse_openssh_config_with_includes(input, &includes) {
+            Ok(parsed) => parsed,
+            Err(error) => panic!("scoped include should parse: {error}"),
+        };
+        assert_eq!(parsed.entries[0].connection.username, "outer");
+        assert_eq!(parsed.entries[1].connection.username, "other-root");
+        assert!(parsed.warnings.iter().any(|warning| {
+            warning.reason == "Include inside a Host or ignored block was skipped"
+        }));
+    }
+
+    #[test]
+    fn unsupported_and_duplicate_directives_are_review_warnings() {
+        let input = "Host app\n HostName app.internal\n User deploy\n AddressFamily inet6\n IdentityFile ~/.ssh/one\n IdentityFile ~/.ssh/two\n StrictHostKeyChecking yes\n";
+        let parsed = match parse_openssh_config(input) {
+            Ok(parsed) => parsed,
+            Err(error) => panic!("unsupported directives should remain reviewable: {error}"),
+        };
+        assert!(parsed.warnings.iter().any(|warning| {
+            warning.directive.as_deref() == Some("addressfamily")
+                && warning.reason == "unsupported directive was skipped"
+        }));
+        assert!(parsed.warnings.iter().any(|warning| {
+            warning.directive.as_deref() == Some("identityfile")
+                && warning.reason == "duplicate directive was ignored after the first value"
+        }));
+        assert!(
+            parsed
+                .warnings
+                .iter()
+                .any(|warning| { warning.directive.as_deref() == Some("stricthostkeychecking") })
+        );
+    }
+
+    #[test]
+    fn accepts_open_ssh_equals_separators() {
+        let input = "Host=app\n HostName = app.internal\n User=deploy\n Port =2208\n IdentityFile= ~/.ssh/id_ed25519\n";
+        let parsed = match parse_openssh_config(input) {
+            Ok(parsed) => parsed,
+            Err(error) => panic!("equals-separated directives should parse: {error}"),
+        };
+        let entry = &parsed.entries[0];
+        assert_eq!(entry.alias, "app");
+        assert_eq!(entry.connection.host, "app.internal");
+        assert_eq!(entry.connection.username, "deploy");
+        assert_eq!(entry.connection.port, 2208);
+        assert_eq!(
+            entry.connection.auth,
+            AuthMethod::PrivateKey {
+                path: PathBuf::from("~/.ssh/id_ed25519")
+            }
+        );
+    }
+
+    #[test]
+    fn warns_when_global_directives_are_duplicated() {
+        let input = "Host *\n IdentityFile ~/.ssh/one\n IdentityFile ~/.ssh/two\nHost app\n HostName app.internal\n User deploy\n";
+        let parsed = match parse_openssh_config(input) {
+            Ok(parsed) => parsed,
+            Err(error) => panic!("duplicate global directives should remain reviewable: {error}"),
+        };
+        assert!(parsed.warnings.iter().any(|warning| {
+            warning.directive.as_deref() == Some("identityfile")
+                && warning.reason == "duplicate directive was ignored after the first value"
+        }));
+    }
+
+    #[test]
+    fn include_inside_ignored_host_pattern_is_not_imported() {
+        let mut includes = BTreeMap::new();
+        includes.insert(
+            "conf.d/team".to_owned(),
+            "Host included\n User inc\n HostName inc.internal\n".to_owned(),
+        );
+        let parsed = match parse_openssh_config_with_includes(
+            "Host *.skip\n Include conf.d/team\nHost app\n User deploy\n HostName app.internal\n",
+            &includes,
+        ) {
+            Ok(parsed) => parsed,
+            Err(error) => panic!("ignored include should remain reviewable: {error}"),
+        };
+        assert_eq!(parsed.entries.len(), 1);
+        assert_eq!(parsed.entries[0].alias, "app");
+        assert!(parsed.warnings.iter().any(|warning| {
+            warning.reason == "Include inside a Host or ignored block was skipped"
+        }));
     }
 
     #[test]

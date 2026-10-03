@@ -558,9 +558,14 @@ impl AppState {
         input: &str,
     ) -> Result<crate::OpenSshImportReport, Error> {
         let config = parse_openssh_config(input)?;
+        let entries = config.entries.clone();
         let warnings = config.warnings.clone();
         let imported = self.import_parsed_openssh(config)?;
-        Ok(crate::OpenSshImportReport { imported, warnings })
+        Ok(crate::OpenSshImportReport {
+            imported,
+            entries,
+            warnings,
+        })
     }
 
     /// Import an OpenSSH-style document with caller-supplied Include contents.
@@ -585,9 +590,14 @@ impl AppState {
         includes: &BTreeMap<String, String>,
     ) -> Result<crate::OpenSshImportReport, Error> {
         let config = parse_openssh_config_with_includes(input, includes)?;
+        let entries = config.entries.clone();
         let warnings = config.warnings.clone();
         let imported = self.import_parsed_openssh(config)?;
-        Ok(crate::OpenSshImportReport { imported, warnings })
+        Ok(crate::OpenSshImportReport {
+            imported,
+            entries,
+            warnings,
+        })
     }
 
     fn import_parsed_openssh(

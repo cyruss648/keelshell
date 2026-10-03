@@ -39,7 +39,7 @@ The interface defaults to Simplified Chinese and supports English. The project t
 
 | Workflow | Available functionality |
 | --- | --- |
-| **Connections** | Nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing and review warnings; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
+| **Connections** | Nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing, source locations, and confirmation review; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
 | **Remote terminals** | Session tabs and a two-pane split, ANSI/VT emulation, scrollback search, selection, paste, and CJK input |
 | **Command workflow** | Per-session command history; multiline snippets with explicit parameters and full command previews; local history/snippet suggestions and explicitly requested remote command and path completion |
 | **Batch commands** | Select connected SSH sessions, review the command, targets, concurrency, and timeout, then run independent jobs with per-target exit status and output, stop-pending-on-failure, and cancellation |

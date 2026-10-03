@@ -652,17 +652,48 @@ async fn connection_library_imports_reviewable_openssh_config_from_clipboard(
         window.click("import-openssh", cx);
     })
     .checked("import OpenSSH text through the production manager");
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        assert!(workspace.state.connections.is_empty());
+        assert!(workspace.openssh_review.is_some());
+        assert!(workspace.status.render(cx).contains("审阅"));
+    });
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("confirm-openssh-import", cx);
+    })
+    .checked("confirm the reviewed OpenSSH import");
     cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
         !fixture.workspace.read(cx).saving
     })
     .await;
-    fixture.workspace.read_with(cx, |workspace, cx| {
+    fixture.workspace.read_with(cx, |workspace, _| {
         assert_eq!(workspace.state.connections.len(), 1);
         let connection = &workspace.state.connections[0];
         assert_eq!(connection.name, "app");
         assert_eq!(connection.host, "app.example.test");
         assert_eq!(connection.port, 2222);
-        assert!(workspace.status.render(cx).contains("审阅"));
+        assert!(workspace.openssh_review.is_none());
+    });
+}
+
+#[gpui_kit::test]
+async fn cancelling_reviewable_openssh_import_keeps_library_unchanged(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    let document = "Host app\n HostName app.example.test\n User deploy\n";
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        cx.write_to_clipboard(ClipboardItem::new_string(document.into()));
+        window.click("import-openssh", cx);
+    })
+    .checked("open the OpenSSH import review");
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("cancel-openssh-import", cx);
+    })
+    .checked("cancel the OpenSSH import review");
+    fixture.workspace.read_with(cx, |workspace, _| {
+        assert!(workspace.state.connections.is_empty());
+        assert!(workspace.openssh_review.is_none());
     });
 }
 
