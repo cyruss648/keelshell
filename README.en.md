@@ -39,7 +39,7 @@ The interface defaults to Simplified Chinese and supports English. The project t
 
 | Workflow | Available functionality |
 | --- | --- |
-| **Connections** | Nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, and JSON import/export; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
+| **Connections** | Nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing and review warnings; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
 | **Remote terminals** | Session tabs and a two-pane split, ANSI/VT emulation, scrollback search, selection, paste, and CJK input |
 | **Command workflow** | Per-session command history; multiline snippets with explicit parameters and full command previews; local history/snippet suggestions and explicitly requested remote command and path completion |
 | **Batch commands** | Select connected SSH sessions, review the command, targets, concurrency, and timeout, then run independent jobs with per-target exit status and output, stop-pending-on-failure, and cancellation |
@@ -114,6 +114,8 @@ If you use [mise](https://mise.jdx.dev/), run `mise install` in the repository.
 1. Select **New connection**, enter the server address, port, and username, and choose password, private-key, or SSH Agent authentication.
 2. Connect, verify the server fingerprint against a trusted source, and approve it. A changed saved fingerprint blocks the connection until you review it again.
 3. Use the remote terminal and file panel in the session tab. Host status is available for Linux servers. Configure a provider and model whenever you want AI assistance.
+
+If you already maintain an OpenSSH config, copy its text and select **Import SSH config**. The importer accepts only exact Host, HostName, Port, User, IdentityFile, ProxyJump, and explicitly supplied Include content; wildcard, conditional, and ProxyCommand entries are reported for review and are never executed.
 
 ## Documentation
 
