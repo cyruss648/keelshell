@@ -21,6 +21,7 @@
 - `python3 scripts/check.py`：通过。包含格式、Clippy、依赖策略和工作区全量测试。
 - `python3 -m unittest discover -s packaging -p 'test_release.py' -v`：18 项通过。
 - `python3 -m unittest discover -s packaging -p 'test_publish.py' -v`：29 项通过。
+- GitHub Actions Quality `37119306924`（提交 `790bf1c`）：macOS 26、Ubuntu 24.04、Windows 2025 全部通过；macOS/Linux 另有 4 项 OpenSSH 互通通过，Windows 按工作流条件跳过该服务器步骤。
 - `cargo check -p keelshell-app --all-targets`：通过。
 
 ## 实现边界
