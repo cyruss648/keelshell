@@ -1,7 +1,8 @@
 use std::fs;
 
 use keelshell_core::{
-    AppState, AuthMethod, Connection, Error, MAX_JUMP_HOSTS, RouteIdentity, StateStore,
+    AppState, AuthMethod, Connection, ConnectionRoute, Error, MAX_JUMP_HOSTS, RouteIdentity,
+    StateStore,
 };
 use uuid::Uuid;
 
@@ -84,6 +85,30 @@ fn direct_profiles_and_old_documents_keep_single_endpoint_identity() -> TestResu
         identity
     );
     Ok(())
+}
+
+#[test]
+fn direct_ephemeral_route_does_not_require_a_saved_profile() -> TestResult {
+    let connection = Connection::new("One time", "quick.example.test", "operator");
+    let id = connection.id;
+    let route = ConnectionRoute::direct(connection.clone())?;
+    assert_eq!(route.hops(), &[connection]);
+    assert_eq!(route.identity().endpoints().len(), 1);
+    assert_eq!(route.identity().endpoints()[0].host, "quick.example.test");
+    assert!(route.host_key_scope(0).is_some());
+    assert!(AppState::default().connection_route(id).is_err());
+    Ok(())
+}
+
+#[test]
+fn direct_ephemeral_route_rejects_saved_route_metadata() {
+    let mut connection = Connection::new("One time", "quick.example.test", "operator");
+    connection.jump_host = Some(Uuid::new_v4());
+    assert!(ConnectionRoute::direct(connection).is_err());
+
+    let mut connection = Connection::new("One time", "quick.example.test", "operator");
+    connection.credential_ref = Some(Uuid::new_v4());
+    assert!(ConnectionRoute::direct(connection).is_err());
 }
 
 #[test]

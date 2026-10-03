@@ -4,6 +4,185 @@ use crate::design::{SELECTED, TEXT};
 use gpui_kit::assets::IconName;
 
 impl Workspace {
+    fn empty_workspace_body(&self, cx: &mut Context<Self>) -> AnyElement {
+        if self.state.connections.is_empty() {
+            div()
+                .size_full()
+                .flex_1()
+                .min_h_0()
+                .flex()
+                .flex_col()
+                .child(
+                    div()
+                        .h(px(250.))
+                        .flex_shrink_0()
+                        .child(self.quick_connect_surface(cx)),
+                )
+                .child(
+                    div()
+                        .id("empty-library")
+                        .size_full()
+                        .flex_1()
+                        .min_h_0()
+                        .child(self.connection_table(cx)),
+                )
+                .into_any_element()
+        } else {
+            self.connection_table(cx)
+        }
+    }
+
+    fn quick_connect_surface(&self, cx: &mut Context<Self>) -> AnyElement {
+        let field = |label: &'static str, id: &'static str, state: &Entity<InputState>| {
+            div()
+                .flex()
+                .flex_col()
+                .gap_1()
+                .min_w_0()
+                .child(div().text_xs().text_color(rgb(MUTED)).child(label))
+                .child(Input::new(state).id(id))
+        };
+        let auth_label = if self.quick_password {
+            t(
+                cx,
+                "认证方式：密码（连接时询问）",
+                "Authentication: password (ask on connect)",
+            )
+        } else if self.quick_connect.key.read(cx).value().trim().is_empty() {
+            t(cx, "认证方式：SSH Agent", "Authentication: SSH agent")
+        } else {
+            t(cx, "认证方式：私钥文件", "Authentication: private key")
+        };
+        div()
+            .id("quick-connect-surface")
+            .test_support()
+            .flex_1()
+            .min_h_0()
+            .flex()
+            .items_center()
+            .justify_center()
+            .bg(rgb(BG))
+            .p_4()
+            .child(
+                div()
+                    .w(px(680.))
+                    .max_w(relative(0.96))
+                    .bg(rgb(PANEL))
+                    .border_1()
+                    .border_color(rgb(BORDER))
+                    .rounded_lg()
+                    .shadow_lg()
+                    .p_6()
+                    .flex()
+                    .flex_col()
+                    .gap_2()
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap_1()
+                            .child(
+                                div()
+                                    .text_xl()
+                                    .font_weight(FontWeight::SEMIBOLD)
+                                    .child(t(cx, "快速连接", "Quick connect")),
+                            )
+                            .child(
+                                div().text_sm().text_color(rgb(MUTED)).child(t(
+                                    cx,
+                                    "输入 SSH 端点即可开始一次性远程会话。此处不会保存连接配置。",
+                                    "Enter an SSH endpoint to start a one-time remote session. This draft is not saved.",
+                                )),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .flex()
+                            .gap_3()
+                            .child(div().flex_1().min_w_0().child(field(
+                                t(cx, "主机或 IP 地址", "Host or IP address"),
+                                "quick-host",
+                                &self.quick_connect.host,
+                            )))
+                            .child(div().w(px(100.)).flex_shrink_0().child(field(
+                                t(cx, "端口", "Port"),
+                                "quick-port",
+                                &self.quick_connect.port,
+                            )))
+                            .child(div().flex_1().min_w_0().child(field(
+                                t(cx, "SSH 用户名", "SSH username"),
+                                "quick-username",
+                                &self.quick_connect.username,
+                            ))),
+                    )
+                    .child(
+                        div()
+                            .flex()
+                            .items_end()
+                            .gap_3()
+                            .child(
+                                Button::new("quick-auth-mode")
+                                    .ghost()
+                                    .label(auth_label)
+                                    .tooltip(t(
+                                        cx,
+                                        "点击切换 Agent/私钥与密码认证；密码仅在本次连接中使用",
+                                        "Click to switch between agent/key and password authentication; the password is used only for this connection",
+                                    ))
+                                    .on_click(cx.listener(|view, _, _, cx| {
+                                        view.quick_password = !view.quick_password;
+                                        cx.notify();
+                                    })),
+                            )
+                            .when(!self.quick_password, |row| {
+                                row.child(div().flex_1().min_w_0().child(field(
+                                    t(
+                                        cx,
+                                        "私钥路径（可选）",
+                                        "Private key path (optional)",
+                                    ),
+                                    "quick-key",
+                                    &self.quick_connect.key,
+                                )))
+                            }),
+                    )
+                    .child(
+                        div()
+                            .flex()
+                            .flex_wrap()
+                            .justify_end()
+                            .gap_2()
+                            .child(
+                                Button::new("quick-open-manager")
+                                    .ghost()
+                                    .label(t(cx, "打开连接管理器", "Open connection manager"))
+                                    .on_click(cx.listener(|view, _, window, cx| {
+                                        view.open_connections(&OpenConnections, window, cx)
+                                    })),
+                            )
+                            .child(
+                                Button::new("save-quick-profile")
+                                    .ghost()
+                                    .label(t(cx, "保存为连接…", "Save as connection…"))
+                                    .disabled(self.saving)
+                                    .on_click(cx.listener(|view, _, window, cx| {
+                                        view.save_quick_as_profile(window, cx)
+                                    })),
+                            )
+                            .child(
+                                Button::new("quick-connect")
+                                    .primary()
+                                    .label(t(cx, "连接", "Connect"))
+                                    .disabled(self.connecting || self.saving)
+                                    .on_click(cx.listener(|view, _, window, cx| {
+                                        view.connect_quick(window, cx)
+                                    })),
+                            ),
+                    ),
+            )
+            .into_any_element()
+    }
+
     fn connection_manager(&self, cx: &mut Context<Self>) -> AnyElement {
         if !self.show_connections {
             return div().into_any_element();
@@ -157,7 +336,11 @@ impl Render for Workspace {
             );
         }
         let body = if self.tabs.is_empty() {
-            self.connection_table(cx)
+            if self.state.connections.is_empty() {
+                self.empty_workspace_body(cx)
+            } else {
+                self.connection_table(cx)
+            }
         } else {
             let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(BORDER));
             for pane in self.displayed_terminals() {

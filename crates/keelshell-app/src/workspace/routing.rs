@@ -7,6 +7,9 @@ use tokio::sync::watch;
 pub(super) struct ConnectRoute {
     id: uuid::Uuid,
     snapshot: ConnectionRoute,
+    /// One-time quick connections have no profile in `AppState`; their route
+    /// snapshot is immutable for the lifetime of this attempt.
+    ephemeral: bool,
     current: usize,
     upstream: Option<SshSession>,
     waiting_for_save: bool,
@@ -61,6 +64,13 @@ impl Workspace {
         let Some(route) = &self.connect_route else {
             return false;
         };
+        if route.ephemeral {
+            return route.snapshot.hops().len() == 1
+                && route.reconnect.is_none()
+                && route.snapshot.hops().first().is_some_and(|target| {
+                    target.jump_host.is_none() && target.credential_ref.is_none()
+                });
+        }
         let Some(target) = route.snapshot.hops().last() else {
             return false;
         };
@@ -105,6 +115,7 @@ impl Workspace {
         self.connect_route = Some(ConnectRoute {
             id: uuid::Uuid::new_v4(),
             snapshot,
+            ephemeral: false,
             current: 0,
             upstream: None,
             waiting_for_save: false,
@@ -115,6 +126,55 @@ impl Workspace {
             deferred_approval: None,
         });
         true
+    }
+
+    /// Start a direct SSH route from the empty-workspace one-time form.
+    ///
+    /// The route is intentionally kept outside the saved connection library;
+    /// only host trust state may be persisted after an explicit fingerprint
+    /// approval. Credentials continue through the same login prompt and are
+    /// never copied into `AppState`.
+    pub(super) fn request_ephemeral_connect(
+        &mut self,
+        connection: Connection,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.connecting || self.saving || self.connect_route.is_some() {
+            self.status = Message::new(
+                "请先完成或取消当前连接。",
+                "Finish or cancel the current connection first.",
+            );
+            cx.notify();
+            return;
+        }
+        let snapshot = match ConnectionRoute::direct(connection) {
+            Ok(snapshot) => snapshot,
+            Err(error) => {
+                self.status = Message::detail(
+                    "快速连接参数无效",
+                    "Quick connection parameters are invalid",
+                    error,
+                );
+                cx.notify();
+                return;
+            }
+        };
+        let (cancel, _) = watch::channel(false);
+        self.connect_route = Some(ConnectRoute {
+            id: uuid::Uuid::new_v4(),
+            snapshot,
+            ephemeral: true,
+            current: 0,
+            upstream: None,
+            waiting_for_save: false,
+            cancel,
+            reconnect: None,
+            background: false,
+            awaiting_interaction: false,
+            deferred_approval: None,
+        });
+        self.prepare_route_hop(window, cx);
     }
 
     pub(super) fn request_connect(
@@ -338,6 +398,7 @@ impl Workspace {
             return;
         }
         if let Some(route) = &mut self.connect_route
+            && !route.ephemeral
             && let Some(target) = route.snapshot.hops().last()
             && let Ok(snapshot) = self.state.connection_route(target.id)
         {

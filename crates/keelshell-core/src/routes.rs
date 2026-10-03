@@ -117,6 +117,32 @@ pub struct ConnectionRoute {
 }
 
 impl ConnectionRoute {
+    /// Build a direct route for a one-time SSH connection.
+    ///
+    /// This constructor deliberately does not add the profile to [`AppState`].
+    /// Callers can use the returned route for host-key scoping and transport
+    /// setup while keeping one-time connection metadata out of the persistent
+    /// connection library. Jump hosts are intentionally not accepted here;
+    /// saved routes should use [`AppState::connection_route`] so every hop is
+    /// resolved against the validated library.
+    pub fn direct(connection: Connection) -> Result<Self, ValidationError> {
+        connection.validate()?;
+        if connection.jump_host.is_some() || connection.credential_ref.is_some() {
+            return Err(route_error(
+                "direct routes cannot contain jump hosts or credential references",
+            ));
+        }
+        let endpoint = endpoint_from(&connection)?;
+        let identity = RouteIdentity {
+            version: identity_version(std::slice::from_ref(&endpoint)),
+            endpoints: vec![endpoint],
+        };
+        Ok(Self {
+            hops: vec![connection],
+            identity,
+        })
+    }
+
     /// Return saved profiles in connection order, first hop through target.
     pub fn hops(&self) -> &[Connection] {
         &self.hops

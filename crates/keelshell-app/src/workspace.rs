@@ -107,6 +107,19 @@ struct ConnectionForm {
     reconnect_editor: Entity<ReconnectEditor>,
 }
 
+/// Draft for the empty-workspace SSH entry point.
+///
+/// It intentionally contains only endpoint and authentication-mode inputs. A
+/// submitted draft becomes an in-memory [`Connection`] and is never handed to
+/// `StateStore`; the user must explicitly choose “Save as connection” to open
+/// the persistent editor.
+struct QuickConnectForm {
+    host: Entity<InputState>,
+    port: Entity<InputState>,
+    username: Entity<InputState>,
+    key: Entity<InputState>,
+}
+
 impl ConnectionForm {
     fn signature(&self, cx: &App) -> Vec<String> {
         let mut signature = vec![
@@ -194,6 +207,8 @@ pub struct Workspace {
     search: Entity<InputState>,
     command: Entity<TextareaState>,
     form: Option<ConnectionForm>,
+    quick_connect: QuickConnectForm,
+    quick_password: bool,
     openssh_review: Option<OpenSshImportReview>,
     status: Message,
     show_connections: bool,
@@ -285,6 +300,26 @@ impl Workspace {
                 "Enter a command and review its target",
             ))
         });
+        let quick_connect = QuickConnectForm {
+            host: input(
+                t(cx, "主机或 IP 地址", "Host or IP address"),
+                "",
+                window,
+                cx,
+            ),
+            port: input(t(cx, "端口", "Port"), "22", window, cx),
+            username: input(t(cx, "SSH 用户名", "SSH username"), "", window, cx),
+            key: input(
+                t(
+                    cx,
+                    "私钥路径（可选，留空使用 SSH Agent）",
+                    "Private key path (optional; empty uses SSH agent)",
+                ),
+                "",
+                window,
+                cx,
+            ),
+        };
         let completion_directory = input(
             t(
                 cx,
@@ -436,6 +471,8 @@ impl Workspace {
             search,
             command,
             form: None,
+            quick_connect,
+            quick_password: false,
             openssh_review: None,
             status: load_error
                 .map(|error| Message::detail("配置加载失败", "Configuration failed", error))
@@ -1027,6 +1064,93 @@ impl Workspace {
         }
         cx.notify();
     }
+
+    fn quick_connection(&self, cx: &App) -> Result<Connection, Message> {
+        let host = self.quick_connect.host.read(cx).value().trim().to_owned();
+        let username = self
+            .quick_connect
+            .username
+            .read(cx)
+            .value()
+            .trim()
+            .to_owned();
+        let port = self.quick_connect.port.read(cx).value().trim().to_owned();
+        let port = port.parse::<u16>().map_err(|_| {
+            Message::new(
+                "端口须为 1 至 65535 的整数",
+                "Port must be a number from 1 to 65535",
+            )
+        })?;
+        let key = self.quick_connect.key.read(cx).value().trim().to_owned();
+        let mut connection = Connection::new(format!("{username}@{host}"), host, username);
+        connection.port = port;
+        connection.auth = if self.quick_password {
+            AuthMethod::Password
+        } else if key.is_empty() {
+            AuthMethod::Agent
+        } else {
+            AuthMethod::PrivateKey { path: key.into() }
+        };
+        connection.validate().map_err(|error| {
+            Message::detail(
+                "快速连接参数无效",
+                "Quick connection parameters are invalid",
+                error,
+            )
+        })?;
+        Ok(connection)
+    }
+
+    /// Submit the empty-workspace draft through the regular SSH route and
+    /// authentication flow. This never writes the draft to the connection
+    /// library; successful one-time sessions are therefore absent from the
+    /// persistent recent-profile list as well.
+    pub(super) fn connect_quick(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if !self.tabs.is_empty() {
+            return;
+        }
+        let connection = match self.quick_connection(cx) {
+            Ok(connection) => connection,
+            Err(message) => {
+                self.status = message;
+                cx.notify();
+                return;
+            }
+        };
+        self.request_ephemeral_connect(connection, window, cx);
+    }
+
+    /// Copy the one-time endpoint draft into the normal connection editor.
+    /// Persistence still requires the editor's explicit Save action.
+    pub(super) fn save_quick_as_profile(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.saving || !self.tabs.is_empty() {
+            return;
+        }
+        let host = self.quick_connect.host.read(cx).value().to_string();
+        let port = self.quick_connect.port.read(cx).value().to_string();
+        let username = self.quick_connect.username.read(cx).value().to_string();
+        let key = self.quick_connect.key.read(cx).value().to_string();
+        let name = format!("{}@{}", username.trim(), host.trim());
+        let password = self.quick_password;
+        self.open_form(window, cx);
+        if let Some(form) = self.form.as_ref() {
+            form.name
+                .update(cx, |input, cx| input.set_value(name, window, cx));
+            form.host
+                .update(cx, |input, cx| input.set_value(host, window, cx));
+            form.port
+                .update(cx, |input, cx| input.set_value(port, window, cx));
+            form.username
+                .update(cx, |input, cx| input.set_value(username, window, cx));
+            form.key
+                .update(cx, |input, cx| input.set_value(key, window, cx));
+        }
+        if let Some(form) = self.form.as_mut() {
+            form.password = password;
+        }
+        cx.notify();
+    }
+
     fn save_connection(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.saving {
             return;

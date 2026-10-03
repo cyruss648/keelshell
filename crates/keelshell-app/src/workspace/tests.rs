@@ -145,6 +145,89 @@ fn empty_split_and_new_session_never_create_a_fallback_shell(cx: &mut TestAppCon
 }
 
 #[gpui_kit::test]
+fn quick_connect_uses_the_ephemeral_route_and_does_not_save_a_profile(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.quick_connect.host.update(cx, |input, cx| {
+                input.set_value("quick.example.test", window, cx)
+            });
+            workspace
+                .quick_connect
+                .port
+                .update(cx, |input, cx| input.set_value("2208", window, cx));
+            workspace
+                .quick_connect
+                .username
+                .update(cx, |input, cx| input.set_value("operator", window, cx));
+            workspace.quick_password = true;
+        });
+        window.render_frame(cx);
+        window.click("quick-connect", cx);
+    })
+    .checked("start one-time SSH connection from the empty workspace");
+    fixture.workspace.read_with(cx, |workspace, _| {
+        assert!(workspace.connect_route.is_some());
+        assert!(
+            workspace.login.is_some(),
+            "password mode reuses SSH login UI"
+        );
+        assert!(workspace.state.connections.is_empty());
+        assert!(!workspace.saving);
+    });
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.cancel_connect_route(window, cx);
+        });
+    })
+    .checked("cancel one-time SSH connection");
+    assert!(
+        fixture
+            .store
+            .load()
+            .checked("reload quick state")
+            .connections
+            .is_empty()
+    );
+}
+
+#[gpui_kit::test]
+fn quick_connect_save_action_only_opens_the_persistent_editor(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.quick_connect.host.update(cx, |input, cx| {
+                input.set_value("save.example.test", window, cx)
+            });
+            workspace
+                .quick_connect
+                .username
+                .update(cx, |input, cx| input.set_value("operator", window, cx));
+        });
+        window.render_frame(cx);
+        window.click("save-quick-profile", cx);
+    })
+    .checked("open the persistent connection editor explicitly");
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        let form = match workspace.form.as_ref() {
+            Some(form) => form,
+            None => panic!("save action opens editor"),
+        };
+        assert_eq!(form.host.read(cx).value(), "save.example.test");
+        assert_eq!(form.username.read(cx).value(), "operator");
+        assert!(workspace.state.connections.is_empty());
+    });
+    assert!(
+        fixture
+            .store
+            .load()
+            .checked("reload unsaved quick state")
+            .connections
+            .is_empty()
+    );
+}
+
+#[gpui_kit::test]
 async fn language_switch_preserves_profiles_and_unsaved_drafts_after_persistence(
     cx: &mut TestAppContext,
 ) {
