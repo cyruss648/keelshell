@@ -1,0 +1,36 @@
+name: Prepare native build
+description: Install the locked Rust toolchain and native GPUI dependencies
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.14'
+    - name: Linux dependencies
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential clang cmake pkg-config libclang-dev libasound2-dev libfontconfig-dev libwayland-dev libxkbcommon-x11-dev libx11-xcb-dev libssl-dev libzstd-dev libvulkan-dev libvulkan1 desktop-file-utils
+    - name: Windows shader compiler
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $sdkRoot = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+        $fxc = Get-ChildItem "$sdkRoot\*\x64\fxc.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+        if (-not $fxc) { throw 'Windows SDK fxc.exe is required for GPUI Release shaders' }
+        "GPUI_FXC_PATH=$($fxc.FullName)" >> $env:GITHUB_ENV
+        $source = Join-Path $env:RUNNER_TEMP 'keelshell-shader-check.hlsl'
+        $compiled = Join-Path $env:RUNNER_TEMP 'keelshell-shader-check.cso'
+        'float4 main() : SV_Target { return float4(1, 1, 1, 1); }' | Set-Content -Encoding utf8NoBOM $source
+        & $fxc.FullName /T ps_5_0 /E main /Fo $compiled $source
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path $compiled)) { throw 'Windows SDK shader compilation failed' }
+    - name: Rust toolchain
+      shell: bash
+      run: |
+        rustup show
+        rustc -Vv
+    - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      with:
+        cache-on-failure: 'true'
+        key: ${{ runner.os }}-${{ runner.arch }}

@@ -1,0 +1,24 @@
+[package]
+name = "keelshell-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+description = "Validated connection profiles and durable local state for KeelShell"
+
+[dependencies]
+argon2.workspace = true
+base64.workspace = true
+chacha20poly1305.workspace = true
+rand.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+directories.workspace = true
+thiserror.workspace = true
+tempfile.workspace = true
+url.workspace = true
+zeroize.workspace = true
+
+[lints]
+workspace = true

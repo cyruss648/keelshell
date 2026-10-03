@@ -1,0 +1,131 @@
+<p align="center">
+  <img src="assets/icons/png/256.png" width="112" height="112" alt="KeelShell application icon">
+</p>
+
+<h1 align="center">KeelShell</h1>
+
+<p align="center">
+  <strong>Connect to your servers. Stay focused on your work.</strong><br>
+  A native SSH workspace built with Rust and GPUI Kit, bringing terminals, remote files, host status, and AI assistance together.
+</p>
+
+<p align="center"><a href="README.md">简体中文</a> · English</p>
+
+<p align="center">
+  <a href="https://github.com/cyruss648/keelshell/actions/workflows/ci.yml"><img src="https://github.com/cyruss648/keelshell/actions/workflows/ci.yml/badge.svg" alt="Quality"></a>
+  <a href="https://github.com/cyruss648/keelshell/actions/workflows/release.yml"><img src="https://github.com/cyruss648/keelshell/actions/workflows/release.yml/badge.svg" alt="Release"></a>
+</p>
+
+<p align="center">
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#ai-that-keeps-you-in-control">AI assistance</a> ·
+  <a href="docs/README.md">Documentation</a> ·
+  <a href="docs/ROADMAP.md">Roadmap</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+> **Development preview:** [Building from source](#build-from-source) is recommended today. Basic SSH, SFTP, session management, and reviewed AI requests are implemented, including transfer pause, continue, and content-verified resumption; manual reconnection in the original tab and optional bounded automatic reconnection are available. See the [capability ledger](docs/product/CAPABILITIES.md) for implementation and verification status.
+
+![KeelShell remote terminal, host status, and SFTP workspace](assets/screenshots/workspace-macos.jpg)
+
+<p align="center"><sub>A native macOS development build connected to an isolated loopback SSH/SFTP fixture. The interface is evolving.</sub></p>
+
+KeelShell is for developers and operators who work with servers, logs, and remote files every day. Terminals, files, and host status follow the current SSH session as you switch tabs. The command bar keeps the destination visible, and AI suggestions are yours to review and execute.
+
+The interface defaults to Simplified Chinese and supports English. The project targets macOS, Windows, and Linux, with a focus on remote SSH workflows. AI assistance is optional: server connections and SFTP file operations work independently.
+
+## Features
+
+| Workflow | Available functionality |
+| --- | --- |
+| **Connections** | Nested folders, tags, favorites, recent connections, and restorable trash; profile editing/copying, search, and JSON import/export; password, private key, and SSH Agent authentication; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
+| **Remote terminals** | Session tabs and a two-pane split, ANSI/VT emulation, scrollback search, selection, paste, and CJK input |
+| **Command workflow** | Per-session command history; multiline snippets with explicit parameters and full command previews; local history/snippet suggestions and explicitly requested remote command and path completion |
+| **Batch commands** | Select connected SSH sessions, review the command, targets, concurrency, and timeout, then run independent jobs with per-target exit status and output, stop-pending-on-failure, and cancellation |
+| **Remote files** | SFTP browsing, file and recursive directory uploads/downloads, transfer review, progress, pause/continue and cancellation, content-verified file and directory resumption, directory creation, rename and delete, text viewing and reviewed saves |
+| **Host status** | Linux CPU, memory, load, uptime, disk capacity, network counters, processes, and listening socket diagnostics |
+| **Port forwarding** | Local/remote TCP forwarding and a loopback SOCKS5 proxy, with actual listener addresses, status, and stop controls |
+| **AI assistance** | Named provider profiles, model discovery and connection testing, context selection, request previews, answers, and command suggestions |
+
+Pausing waits for in-flight operations to be acknowledged before showing “Paused.” To resume a partial file or directory, explicitly select the source and destination, review the content verification, and confirm; after reconnecting or restarting, create a new resumption plan. See the [transfer verification record](docs/testing/records/2026-10-03-sftp-resume.md).
+
+After disconnection, output and drafts are retained. Reconnection rechecks the complete route and server identities; click Continue when authentication is required. Review old commands again before running them. Transfers and tunnels are not restarted automatically. See the [reconnection verification record](docs/testing/records/2026-10-03-reconnection.md).
+
+Click **Complete remotely** in the command bar, or press `Ctrl+Space`, to look up the command name or literal path at the caret. Relative paths use the displayed completion directory, which can be taken from the file panel or SFTP base; insertion uses the full path. A candidate replaces only the current word, preserving multiline and Unicode input for review before execution. The independent PATH query does not include interactive shell aliases, functions, or temporary environment changes; the terminal's own Tab completion remains available. See the [completion design and verification record](docs/testing/records/2026-10-03-remote-completion.md).
+
+Enable parameters in the snippet editor to use `{{name}}` for literal values supplied this time. Review the preview before inserting it into the command bar; expanded commands skip session history by default. Batch tasks require explicit selection of connected sessions and run through independent SSH exec channels after review, without inheriting the interactive terminal's current directory. Cancellation cannot confirm that a remote process has stopped. See the [parameter and batch verification record](docs/testing/records/2026-10-03-parameterized-snippets-batch-exec.md) for this increment's validation status.
+
+## AI that keeps you in control
+
+1. **Configure a provider.** Create a named profile, choose a model, and optionally discover models or test the connection. The current backend supports Chat Completions-compatible endpoints, including self-hosted services.
+2. **Choose the context.** Select terminal content, inspect the redacted request, and send it when ready.
+3. **Review the suggestions.** Read the response, place any suggested command in the command bar, and confirm its content and destination before executing it.
+
+API keys stay in memory by default and can be explicitly saved encrypted. Saving and unlocking a configuration make no network requests. Additional protocols and assistant workflows are tracked in the [roadmap](docs/ROADMAP.md).
+
+<details>
+<summary>View AI settings</summary>
+
+![KeelShell provider settings, model discovery, and connection testing](assets/screenshots/ai-settings-macos.jpg)
+
+The screenshot uses a local mock service and contains no real provider credentials.
+
+</details>
+
+<details>
+<summary>How credentials are stored</summary>
+
+SSH passwords and private-key passphrases are used for one connection by default. A proxy username can be stored in the profile; its password is used only for the current connection. Explicitly saved SSH credentials go into a local vault encrypted with a master password, which is required again for every connection. Unlinking removes the profile reference while retaining the encrypted entry. Vault management supports inspection and removal of unlinked entries, along with master-password rotation.
+
+After a restart, explicitly saved AI keys must be unlocked with the master password and applied to the assistant. Changing the service endpoint clears the old key reference. Connection JSON exports exclude local credential references and host-trust records.
+
+</details>
+
+## Getting started
+
+Building from source is recommended during development. Versioned packages will be available from [GitHub Releases](https://github.com/cyruss648/keelshell/releases), with SHA-256 checksums.
+
+| Platform | Build targets | Package |
+| --- | --- | --- |
+| macOS 15+ | Apple Silicon / Intel | ZIP containing the `.app` bundle |
+| Windows | ARM64 / x64 | ZIP containing the executable and icon |
+| Linux | ARM64 / x64; Ubuntu 24.04 baseline | `.tar.gz` with the executable and desktop resources |
+
+See the [release verification record](docs/testing/records/2026-10-03-release.md) for actual build and desktop acceptance status. Distribution does not yet include macOS Developer ID signing, notarization, or Windows code signing. Packaging and tag-triggered publication are documented in [Releasing](docs/RELEASING.md).
+
+### Build from source
+
+Prepare the [platform build dependencies](.github/actions/setup-build/action.yml), install Rustup and Python 3.11+, and clone the repository. `rust-toolchain.toml` selects the pinned Rust toolchain.
+
+```sh
+git clone https://github.com/cyruss648/keelshell.git
+cd keelshell
+cargo run -p keelshell-app --locked
+```
+
+If you use [mise](https://mise.jdx.dev/), run `mise install` in the repository.
+
+### Your first connection
+
+1. Select **New connection**, enter the server address, port, and username, and choose password, private-key, or SSH Agent authentication.
+2. Connect, verify the server fingerprint against a trusted source, and approve it. A changed saved fingerprint blocks the connection until you review it again.
+3. Use the remote terminal and file panel in the session tab. Host status is available for Linux servers. Configure a provider and model whenever you want AI assistance.
+
+## Documentation
+
+| Looking for | Start here |
+| --- | --- |
+| Available features and current limitations | [Capability ledger](docs/product/CAPABILITIES.md) |
+| Product workflows, interaction rules, and plans | [Product design](docs/product/PRODUCT.md) · [Roadmap](docs/ROADMAP.md) |
+| Repository structure, local development, and check commands | [Contributing](CONTRIBUTING.md) |
+| Test coverage and platform verification | [Testing strategy](docs/testing/STRATEGY.md) · [Test records](docs/testing/records/) |
+| Platform packages, checksums, and tag-triggered releases | [Releasing](docs/RELEASING.md) |
+
+## Contributing
+
+Report bugs, share feedback, and propose improvements through [Issues](https://github.com/cyruss648/keelshell/issues). Reproduction steps, anonymized profiles, and platform verification results are all useful. Start with [Contributing](CONTRIBUTING.md) for code and documentation changes.
+
+## Acknowledgements
+
+Built with [Rust](https://www.rust-lang.org/), [GPUI Kit](https://gpui-kit.com/), [Alacritty](https://github.com/alacritty/alacritty), [russh](https://github.com/Eugeny/russh), and their communities. Thank you to everyone maintaining these projects.

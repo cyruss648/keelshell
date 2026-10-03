@@ -1,0 +1,258 @@
+use std::{fs, fs::OpenOptions, io::Write, path::Path};
+
+use keelshell_core::{
+    AiAuthentication, AiCustomHeader, AiModelReasoning, AiPreset, AiProfileCatalog, AiProxy,
+    AiReasoningCapability, AiReasoningSelection, AiSecretRef, AppState, Error, NamedAiProfile,
+    Settings, StateStore,
+};
+use serde_json::{Value, json};
+use uuid::Uuid;
+
+type TestResult = Result<(), Box<dyn std::error::Error>>;
+
+fn profile(name: &str) -> NamedAiProfile {
+    let mut profile = NamedAiProfile::draft(AiPreset::OpenAiCompatible);
+    profile.name = name.into();
+    profile.endpoint = "https://example.test/v1/chat/completions".into();
+    profile.model = "chosen-model".into();
+    profile
+}
+
+fn write_private(path: &Path, value: &Value) -> TestResult {
+    let mut options = OpenOptions::new();
+    options.create(true).write(true).truncate(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    options.open(path)?.write_all(&serde_json::to_vec(value)?)?;
+    Ok(())
+}
+
+fn legacy_document(
+    endpoint: &str,
+    enabled: bool,
+    model: &str,
+) -> Result<Value, Box<dyn std::error::Error>> {
+    let mut value = serde_json::to_value(AppState::default())?;
+    value["settings"]
+        .as_object_mut()
+        .ok_or("Settings must serialize as an object")?
+        .remove("ai_profiles");
+    value["settings"]["ai"] = json!({"base_url":endpoint,"enabled":enabled,"model":model});
+    Ok(value)
+}
+
+#[test]
+fn legacy_schema_one_migrates_on_read_and_persists_stable_named_identity() -> TestResult {
+    for endpoint in [
+        "https://example.test/v1",
+        "https://example.test/v1/chat/completions",
+        "https://example.test/v1/chat/completions/",
+    ] {
+        let directory = tempfile::tempdir()?;
+        let path = directory.path().join("state.json");
+        write_private(&path, &legacy_document(endpoint, true, "chosen-model")?)?;
+        let original = fs::read(&path)?;
+        let store = StateStore::new(&path);
+        let state = store.load()?;
+        assert_eq!(
+            fs::read(&path)?,
+            original,
+            "loading must not rewrite the file"
+        );
+        let active = state
+            .settings
+            .ai_profiles
+            .active()
+            .ok_or("missing migrated profile")?;
+        assert_eq!(active.endpoint, "https://example.test/v1/chat/completions");
+        assert_eq!(active.model, "chosen-model");
+        assert_eq!(active.name, "默认配置");
+        let id = active.id;
+        let saved = store.save(&state)?;
+        let reopened = StateStore::new(&path).load()?;
+        assert_eq!(reopened, saved);
+        assert_eq!(reopened.settings.ai_profiles.active_id, Some(id));
+        assert!(fs::read_to_string(&path)?.contains("ai_profiles"));
+    }
+    Ok(())
+}
+
+#[test]
+fn explicit_empty_or_disabled_catalog_never_resurrects_legacy_selection() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let path = directory.path().join("state.json");
+    let mut document = legacy_document("https://example.test/v1", true, "legacy-model")?;
+    document["settings"]["ai_profiles"] = serde_json::to_value(AiProfileCatalog::default())?;
+    write_private(&path, &document)?;
+    let store = StateStore::new(&path);
+    let mut state = store.load()?;
+    assert!(state.settings.ai_profiles.profiles.is_empty());
+    let named = profile("Replacement");
+    let id = named.id;
+    state.settings.ai_profiles.upsert(named)?;
+    // A saved but inactive configuration must stay inactive despite legacy.enabled.
+    state = store.save(&state)?;
+    assert!(
+        StateStore::new(&path)
+            .load()?
+            .settings
+            .ai_profiles
+            .active_id
+            .is_none()
+    );
+    state.settings.ai_profiles.activate(id)?;
+    state = store.save(&state)?;
+    assert!(state.settings.ai_profiles.remove(id).is_some());
+    store.save(&state)?;
+    let reopened = StateStore::new(path).load()?;
+    assert!(reopened.settings.ai_profiles.profiles.is_empty());
+    assert!(reopened.settings.ai_profiles.active_id.is_none());
+    Ok(())
+}
+
+#[test]
+fn legacy_disabled_and_unselected_models_preserve_user_intent() -> TestResult {
+    let unselected: AppState =
+        serde_json::from_value(legacy_document("http://localhost:11434/v1", false, "")?)?;
+    assert!(unselected.settings.ai_profiles.profiles.is_empty());
+    let disabled: AppState = serde_json::from_value(legacy_document(
+        "https://example.test/v1",
+        false,
+        "chosen-model",
+    )?)?;
+    assert_eq!(disabled.settings.ai_profiles.profiles.len(), 1);
+    assert!(disabled.settings.ai_profiles.active_id.is_none());
+    // An enabled legacy entry with no model is invalid, never silently invented.
+    assert!(
+        serde_json::from_value::<AppState>(legacy_document("https://example.test/v1", true, "",)?)
+            .is_err()
+    );
+    Ok(())
+}
+
+#[test]
+fn named_configuration_metadata_and_references_survive_real_disk_roundtrip() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let store = StateStore::new(directory.path().join("state.json"));
+    let mut state = store.load()?;
+    let mut named = profile("自定义供应商");
+    named.authentication = AiAuthentication::Bearer {
+        credential: Some(AiSecretRef::SecretStore { id: Uuid::new_v4() }),
+    };
+    named.custom_headers = vec![AiCustomHeader {
+        name: "X-Tenant".into(),
+        value_ref: AiSecretRef::Environment {
+            name: "KEELSHELL_TENANT".into(),
+        },
+    }];
+    named.proxy = AiProxy::Explicit {
+        url: "socks5h://localhost:1080".into(),
+        credentials: None,
+    };
+    named.context_window_tokens = Some(32_768);
+    named.max_output_tokens = Some(4096);
+    named.reasoning_by_model.insert(
+        named.model.clone(),
+        AiModelReasoning {
+            capability: AiReasoningCapability::TokenBudget {
+                min: 1024,
+                max: 4096,
+            },
+            selection: AiReasoningSelection::Budget(2048),
+        },
+    );
+    assert!(named.validate_current_transport().is_err());
+    state.settings.ai_profiles.upsert(named)?;
+    let saved = store.save(&state)?;
+    assert_eq!(StateStore::new(store.path()).load()?, saved);
+    assert!(!saved.export_connections()?.contains("KEELSHELL_TENANT"));
+    Ok(())
+}
+
+#[test]
+fn invalid_catalog_edit_cannot_replace_a_valid_state_file() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let store = StateStore::new(directory.path().join("state.json"));
+    let mut state = store.save(&store.load()?)?;
+    let original = fs::read(store.path())?;
+    state.settings.ai_profiles.active_id = Some(Uuid::new_v4());
+    assert!(matches!(store.save(&state), Err(Error::Validation(_))));
+    assert_eq!(fs::read(store.path())?, original);
+    Ok(())
+}
+
+#[test]
+fn null_catalog_unknown_fields_and_failed_migration_preserve_original_bytes() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let path = directory.path().join("state.json");
+    let mut null = legacy_document("https://example.test/v1", true, "chosen-model")?;
+    null["settings"]["ai_profiles"] = Value::Null;
+    let mut unknown = serde_json::to_value(AppState::default())?;
+    unknown["settings"]["api_key"] = json!("do-not-store");
+    let insecure = legacy_document("http://remote.example.test/v1", true, "chosen-model")?;
+    for document in [null, unknown, insecure] {
+        write_private(&path, &document)?;
+        let original = fs::read(&path)?;
+        let store = StateStore::new(&path);
+        assert!(store.load().is_err());
+        assert!(store.save(&AppState::default()).is_err());
+        assert_eq!(fs::read(&path)?, original);
+    }
+    Ok(())
+}
+
+#[test]
+fn unit_metadata_variants_refuse_inline_secret_fields() -> TestResult {
+    for value in [
+        json!({"kind":"none","api_key":"never-store"}),
+        json!({"kind":"bearer","credential":null,"api_key":"never-store"}),
+    ] {
+        assert!(serde_json::from_value::<AiAuthentication>(value).is_err());
+    }
+    assert!(
+        serde_json::from_value::<AiProxy>(json!({
+            "kind":"direct","password":"never-store"
+        }))
+        .is_err()
+    );
+    for kind in ["unknown", "unsupported", "thinking_toggle"] {
+        assert!(
+            serde_json::from_value::<AiReasoningCapability>(json!({
+                "kind":kind,"api_key":"never-store"
+            }))
+            .is_err()
+        );
+    }
+    assert!(
+        serde_json::from_value::<AiReasoningSelection>(json!({
+            "kind":"provider_default","api_key":"never-store"
+        }))
+        .is_err()
+    );
+    // Valid empty variants still round-trip; strict decoding must not break defaults.
+    let default = Settings::default();
+    assert_eq!(
+        serde_json::from_value::<Settings>(serde_json::to_value(&default)?)?,
+        default
+    );
+    Ok(())
+}
+
+#[test]
+fn bearer_vault_reference_is_supported_but_environment_resolution_is_not() -> TestResult {
+    let mut named = profile("Vault provider");
+    named.authentication = AiAuthentication::Bearer {
+        credential: Some(AiSecretRef::SecretStore { id: Uuid::new_v4() }),
+    };
+    named.validate_current_transport()?;
+    named.authentication = AiAuthentication::Bearer {
+        credential: Some(AiSecretRef::Environment {
+            name: "UNRESOLVED_KEY".into(),
+        }),
+    };
+    assert!(named.validate_current_transport().is_err());
+    Ok(())
+}

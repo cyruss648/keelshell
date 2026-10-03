@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.5
+Type=Application
+Name=KeelShell
+Name[zh_CN]=KeelShell
+GenericName=Remote SSH Manager
+GenericName[zh_CN]=远程 SSH 管理工具
+Comment=Manage SSH sessions, remote files, and reviewed AI assistance
+Comment[zh_CN]=管理 SSH 会话、远程文件与可审核的 AI 辅助
+Exec=keelshell-app
+TryExec=keelshell-app
+Icon=keelshell
+StartupWMClass=keelshell
+Terminal=false
+Categories=Network;System;Utility;
+Keywords=SSH;SFTP;Terminal;AI;

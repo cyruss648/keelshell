@@ -1,0 +1,403 @@
+//! Remote browser layout and explicit file-operation controls.
+use super::*;
+
+impl Render for FilesPanel {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let mut navigation = div()
+            .id("remote-directory-tree")
+            .w(px(152.))
+            .flex_shrink_0()
+            .h_full()
+            .overflow_y_scroll()
+            .border_r_1()
+            .border_color(rgb(BORDER))
+            .bg(rgb(SURFACE))
+            .child(
+                div()
+                    .h(px(28.))
+                    .px_2()
+                    .flex()
+                    .items_center()
+                    .bg(rgb(CANVAS))
+                    .border_b_1()
+                    .border_color(rgb(BORDER))
+                    .child(t(cx, "目录", "Directories")),
+            );
+        let current = self.directory.as_deref().unwrap_or("/");
+        let mut ancestors = vec![("/".to_owned(), "/".to_owned())];
+        let mut path = String::new();
+        for component in current.split('/').filter(|part| !part.is_empty()) {
+            path.push('/');
+            path.push_str(component);
+            ancestors.push((component.to_owned(), path.clone()));
+        }
+        for (index, (name, path)) in ancestors.into_iter().enumerate() {
+            let active = self.directory.as_ref() == Some(&path);
+            navigation = navigation.child(
+                div()
+                    .id(("directory-ancestor", index))
+                    .h(px(28.))
+                    .pl(px(7. + index.min(5) as f32 * 9.))
+                    .pr_2()
+                    .flex()
+                    .items_center()
+                    .cursor_pointer()
+                    .overflow_hidden()
+                    .bg(rgb(if active { SELECTED } else { SURFACE }))
+                    .gap_2()
+                    .child(IconName::FolderOpen)
+                    .child(name)
+                    .on_click(cx.listener(move |view, _, window, cx| {
+                        view.run(Operation::List(path.clone()), window, cx)
+                    })),
+            );
+        }
+        for (index, entry) in self
+            .entries
+            .iter()
+            .filter(|entry| entry.is_directory)
+            .enumerate()
+        {
+            let path = entry.path.clone();
+            navigation = navigation.child(
+                div()
+                    .id(("directory-child", index))
+                    .h(px(28.))
+                    .pl_5()
+                    .pr_2()
+                    .flex()
+                    .items_center()
+                    .cursor_pointer()
+                    .overflow_hidden()
+                    .gap_2()
+                    .child(IconName::Folder)
+                    .child(entry.name.clone())
+                    .on_click(cx.listener(move |view, _, window, cx| {
+                        view.run(Operation::List(path.clone()), window, cx)
+                    })),
+            );
+        }
+        let mut list = div()
+            .id("remote-files")
+            .flex_1()
+            .min_h_0()
+            .overflow_y_scroll()
+            .flex()
+            .flex_col();
+        for (index, entry) in self.entries.iter().enumerate() {
+            let selected = self
+                .selected
+                .as_ref()
+                .is_some_and(|item| item.path == entry.path);
+            let item = entry.clone();
+            let open = entry.clone();
+            list = list.child(
+                div()
+                    .id(("remote-entry", index))
+                    .h(px(28.))
+                    .flex_shrink_0()
+                    .flex()
+                    .items_center()
+                    .bg(rgb(if selected {
+                        SELECTED
+                    } else if index % 2 == 0 {
+                        SURFACE
+                    } else {
+                        CANVAS
+                    }))
+                    .cursor_pointer()
+                    .on_click(cx.listener(move |view, _, window, cx| {
+                        view.selected = Some(item.clone());
+                        if let Some(mode) = item.permissions {
+                            view.mode.update(cx, |input, cx| {
+                                input.set_value(format!("{:04o}", mode & 0o7777), window, cx);
+                            });
+                        }
+                        cx.notify();
+                    }))
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w(px(150.))
+                            .px_2()
+                            .overflow_hidden()
+                            .flex()
+                            .items_center()
+                            .gap_2()
+                            .child(
+                                div()
+                                    .text_color(rgb(if entry.is_directory {
+                                        ACCENT
+                                    } else {
+                                        MUTED
+                                    }))
+                                    .child(if entry.is_directory {
+                                        IconName::Folder
+                                    } else if entry.is_symlink {
+                                        IconName::Link
+                                    } else {
+                                        IconName::FileText
+                                    }),
+                            )
+                            .child(div().min_w_0().text_ellipsis().child(entry.name.clone())),
+                    )
+                    .child(table_cell(size_label(entry.size), 88.))
+                    .child(table_cell(type_label(entry, cx), 76.))
+                    .child(table_cell(modified_label(entry.modified), 143.))
+                    .child(table_cell(permissions_label(entry), 100.))
+                    .child(
+                        div().w(px(60.)).flex_shrink_0().child(
+                            Button::new(("open-remote", index))
+                                .disabled(self.suspended)
+                                .ghost()
+                                .compact()
+                                .rounded(px(6.))
+                                .label(if entry.is_directory {
+                                    t(cx, "打开", "Open")
+                                } else {
+                                    t(cx, "编辑", "Edit")
+                                })
+                                .on_click(cx.listener(move |view, _, window, cx| {
+                                    if open.is_directory {
+                                        view.run(Operation::List(open.path.clone()), window, cx);
+                                    } else {
+                                        view.request_read(open.clone(), window, cx);
+                                    }
+                                })),
+                        ),
+                    ),
+            );
+        }
+        if self.entries.is_empty() && !self.busy {
+            list = list.child(div().p_3().text_color(rgb(MUTED)).child(t(
+                cx,
+                "当前目录没有文件",
+                "This directory is empty",
+            )));
+        }
+        let table = div()
+            .id("remote-files-table")
+            .flex_1()
+            .min_w_0()
+            .h_full()
+            .overflow_x_scroll()
+            .child(
+                div()
+                    .min_w(px(650.))
+                    .h_full()
+                    .flex()
+                    .flex_col()
+                    .child(
+                        div()
+                            .h(px(28.))
+                            .flex_shrink_0()
+                            .flex()
+                            .items_center()
+                            .bg(rgb(CANVAS))
+                            .border_b_1()
+                            .border_color(rgb(BORDER))
+                            .child(div().flex_1().min_w(px(150.)).px_2().child(t(
+                                cx,
+                                "文件名",
+                                "Name",
+                            )))
+                            .child(table_cell(t(cx, "大小", "Size"), 88.))
+                            .child(table_cell(t(cx, "类型", "Type"), 76.))
+                            .child(table_cell(t(cx, "修改时间 (UTC)", "Modified (UTC)"), 143.))
+                            .child(table_cell(t(cx, "权限", "Permissions"), 100.))
+                            .child(table_cell(t(cx, "操作", "Action"), 60.)),
+                    )
+                    .child(list),
+            );
+        let mut body = div()
+            .flex_1()
+            .min_h_0()
+            .flex()
+            .child(navigation)
+            .child(table);
+        if let Some((path, _)) = &self.editing {
+            body = body.child(div().w(px(320.)).flex_shrink_0().h_full().min_h_0().flex().flex_col().border_l_1().border_color(rgb(BORDER))
+                .child(div().h(px(28.)).px_2().flex().items_center().bg(rgb(CANVAS)).overflow_hidden().child(format!("{} · {path}",t(cx,"编辑","Edit"))))
+                .child(div().flex_1().min_h_0().p_1().child(Textarea::new(&self.editor).h(relative(1.)).font_family("monospace")))
+                .child(div().p_1().border_t_1().border_color(rgb(BORDER)).child(Button::new("save-remote-file").disabled(self.suspended).icon(IconName::Save).primary().compact().rounded(px(6.)).label(t(cx,"审核并保存","Review save"))
+                    .on_click(cx.listener(|view,_,_,cx| {
+                        if let Some((path,original)) = &view.editing {
+                            let content = view.editor.read(cx).value().as_bytes().to_vec();
+                            if content.len() > 1024*1024 {
+                                view.status = Message::new("编辑内容超过 1 MiB，请使用外部编辑器后上传", "Content exceeds 1 MiB; use an external editor and upload instead"); cx.notify(); return;
+                            }
+                            view.confirm(Message::new(format!("将 {} 替换为审核后的 {} 字节内容？",path,content.len()),format!("Replace {} with the reviewed {} bytes?",path,content.len())),Operation::Save {path:path.clone(),original:original.clone(),content},cx);
+                        }
+                    })))));
+        }
+        let selection = self
+            .selected
+            .as_ref()
+            .map(|entry| format!("{} {}", t(cx, "已选：", "Selected:"), entry.name))
+            .unwrap_or_else(|| t(cx, "未选择文件", "No file selected").to_owned());
+        let has_selection = self.selected.is_some();
+        let downloadable = self
+            .selected
+            .as_ref()
+            .is_some_and(|entry| !entry.is_symlink);
+        let mut panel = div().w_full().min_w_0().h_full().min_h_0().flex().flex_col().bg(rgb(SURFACE)).text_color(rgb(TEXT)).text_xs()
+            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_b_1().border_color(rgb(BORDER))
+                .child(div().text_color(rgb(ACCENT)).child(IconName::FolderOpen))
+                .child(div().text_color(rgb(MUTED)).child(t(cx,"远程目录","Remote path")))
+                .child(div().flex_1().min_w_0().child(Input::new(&self.path).small().rounded(px(6.))))
+                .child(Button::new("parent-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).label(t(cx,"上级","Up")).on_click(cx.listener(|view,_,window,cx| {
+                    if let Some(directory) = &view.directory { view.run(Operation::List(format!("{}/..",directory.trim_end_matches('/'))),window,cx); }
+                })))
+                .child(Button::new("refresh-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::RefreshCw).label(t(cx,"刷新","Refresh")).on_click(cx.listener(|view,_,window,cx|view.run(Operation::List(view.path.read(cx).value().to_string()),window,cx))))
+                .child(div().max_w(px(220.)).text_ellipsis().text_color(rgb(MUTED)).child(self.host.clone())))
+            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().bg(rgb(CANVAS)).text_color(rgb(MUTED)).child(t(cx, "上一会话快照 · 草稿可复制，远程操作已停用", "Previous session snapshot · Copy drafts; remote actions are disabled"))))
+            .child(body)
+            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().bg(rgb(CANVAS)).border_t_1().border_color(rgb(BORDER))
+                .child(div().w(px(150.)).flex_shrink_0().text_ellipsis().text_color(rgb(if has_selection {TEXT} else {MUTED})).child(selection.to_owned()))
+                .child(div().w(px(180.)).child(Input::new(&self.name).small().rounded(px(6.))))
+                .child(Button::new("mkdir").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::FolderPlus).label(t(cx,"新建目录","New folder")).on_click(cx.listener(|view,_,_,cx| {
+                    if let Some(path) = view.new_remote_path(cx) { view.confirm(Message::new(format!("创建目录 {path}？"),format!("Create directory {path}?")),Operation::Mkdir(path),cx); } cx.notify();
+                })))
+                .child(div().h(px(16.)).w(px(1.)).bg(rgb(BORDER)))
+                .child(Button::new("rename").ghost().compact().rounded(px(6.)).icon(IconName::Pencil).label(t(cx,"重命名","Rename")).disabled(self.suspended || !has_selection).on_click(cx.listener(|view,_,_,cx| {
+                    if let (Some(entry),Some(path)) = (view.selected.clone(),view.new_remote_path(cx)) { view.confirm(Message::new(format!("将 {} 重命名为 {path}？",entry.path),format!("Rename {} to {path}?",entry.path)),Operation::Rename(entry.path,path),cx); } cx.notify();
+                })))
+                .child(Button::new("delete-file").ghost().compact().rounded(px(6.)).icon(IconName::Trash).label(t(cx,"删除","Delete")).disabled(self.suspended || !has_selection).text_color(rgb(if self.suspended { MUTED } else { 0xb42318 })).on_click(cx.listener(|view,_,_,cx| {
+                    if let Some(entry) = view.selected.clone() { view.confirm(Message::new(format!("永久删除 {}？",entry.path),format!("Delete {} permanently?",entry.path)),Operation::Delete(entry),cx); }
+                })))
+                .child(div().h(px(16.)).w(px(1.)).bg(rgb(BORDER)))
+                .child(div().w(px(118.)).flex_shrink_0().child(Input::new(&self.mode).small().rounded(px(6.))))
+                .child(Button::new("chmod-file").ghost().compact().rounded(px(6.)).icon(IconName::Lock).label(t(cx,"改权限","Permissions")).disabled(self.suspended || self.busy || !has_selection).on_click(cx.listener(|view,_,_,cx| {
+                    let Some(entry) = view.selected.clone() else { return; };
+                    if entry.is_symlink {
+                        view.status = Message::new("为避免跟随链接误改目标，符号链接不支持修改权限", "Permission changes on symbolic links are disabled to avoid following a link");
+                    } else if entry.permissions.is_none() {
+                        view.status = Message::new("服务器未返回可审核的权限位，请刷新后重试", "The server did not return reviewable mode bits; refresh and try again");
+                    } else {
+                        match parse_permissions_mode(&view.mode.read(cx).value()) {
+                            Ok(mode) => view.confirm(Message::new(format!("将 {} 的 POSIX 权限改为 {:04o}？仅修改权限位，不修改内容、所有者或时间。", entry.path, mode), format!("Change {} POSIX permissions to {:04o}? Only mode bits change; content, ownership and timestamps stay untouched.", entry.path, mode)), Operation::SetPermissions(entry, mode), cx),
+                            Err(detail) => view.status = Message::new(format!("权限格式无效：{detail}"), format!("Invalid permissions: {detail}")),
+                        }
+                    }
+                    cx.notify();
+                })))
+            .child(div().id("file-transfer-tools").h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_t_1().border_color(rgb(BORDER)).overflow_x_scroll()
+                .child(Button::new("file-resume-mode").ghost().compact().disabled(self.suspended || self.busy || self.pending.is_some())
+                    .when(self.resume_mode, |button| button.primary()).label(t(cx,"续传模式","Resume mode"))
+                    .on_click(cx.listener(|view,_,_,cx| {
+                        view.resume_mode = !view.resume_mode;
+                        view.status = if view.resume_mode { Message::new("续传上传：选择远端已有部分文件/目录；续传下载：填写已有本地目标。先校验，再确认追加。", "Resume upload: select the existing remote file/folder. Resume download: enter the existing local destination. Verify first, then confirm append.") } else { Message::new("普通上传可替换同名文件；普通下载仅新建本地目标。", "Normal uploads may replace files; normal downloads create new local destinations only.") };
+                        cx.notify();
+                    })))
+                .child(div().flex_1().min_w(px(150.)).child(Input::new(&self.local).small().rounded(px(6.))))
+                .child(Button::new("upload-file").ghost().compact().rounded(px(6.)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                    let local = PathBuf::from(view.local.read(cx).value().to_string());
+                    if view.resume_mode {
+                        if let Some(entry) = &view.selected && !entry.is_directory && !entry.is_symlink {
+                            view.run(Operation::PlanResume(TransferSpec::upload(local,entry.path.clone()),false),window,cx);
+                        } else { view.status = Message::new("请先选择远端已有部分文件", "Select the existing remote partial file first"); cx.notify(); }
+                        return;
+                    }
+                    if let Some(name) = local.file_name().and_then(|name|name.to_str()) {
+                        let Some(remote) = view.remote_child(name) else {cx.notify(); return;};
+                        view.confirm(Message::new(format!("通过传输队列上传到 {remote}？同名远端文件可能被替换，取消时可能保留部分文件。"),format!("Upload to {remote} through the transfer queue? An existing remote file may be replaced, and cancellation may leave a partial file.")),Operation::Upload(local,remote),cx);
+                    } else { view.status=Message::new("请输入有效的本地文件路径", "Enter a valid local file path");cx.notify(); }
+                })))
+                .child(Button::new("upload-directory").ghost().compact().rounded(px(6.)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                    let local = PathBuf::from(view.local.read(cx).value().to_string());
+                    if view.resume_mode {
+                        if let Some(entry) = &view.selected && entry.is_directory && !entry.is_symlink {
+                            view.run(Operation::PlanResume(TransferSpec::upload(local,entry.path.clone()),true),window,cx);
+                        } else { view.status = Message::new("请先选择远端已有部分目录", "Select the existing remote partial folder first"); cx.notify(); }
+                        return;
+                    }
+                    if let Some(name) = local.file_name().and_then(|name|name.to_str()) {
+                        let Some(remote) = view.remote_child(name) else {cx.notify(); return;};
+                        view.run(Operation::PlanDirectory(TransferSpec::upload(local, remote)), window, cx);
+                    } else { view.status=Message::new("请输入本地目录的绝对路径", "Enter the absolute local directory path");cx.notify(); }
+                })))
+                .child(Button::new("download-file").ghost().compact().rounded(px(6.)).icon(IconName::Download).label(if self.resume_mode {t(cx,"续传选中项","Resume selected")} else {t(cx,"下载选中项","Download selected")}).disabled(self.suspended || !downloadable || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                    if let Some(entry) = &view.selected && !entry.is_symlink {
+                        let local = PathBuf::from(view.local.read(cx).value().to_string());
+                        if view.resume_mode {
+                            view.run(Operation::PlanResume(TransferSpec::download(entry.path.clone(),local),entry.is_directory),window,cx);
+                            return;
+                        }
+                        if entry.is_directory {
+                            view.run(Operation::PlanDirectory(TransferSpec::download(entry.path.clone(), local)), window, cx);
+                            return;
+                        }
+                        view.confirm(Message::new(format!("将 {} 下载到 {}？不覆盖已有文件；中断时可能保留未完成的下载。",entry.path,local.display()),format!("Download {} to {}? Existing files are preserved; an interruption may leave a partial download.",entry.path,local.display())),Operation::Download(entry.path.clone(),local),cx);
+                    }
+                })))));
+        if self.transfer.is_some() {
+            panel = panel.child(self.transfer_card(cx));
+        }
+        if let Some((message, _)) = &self.pending {
+            panel = panel.child(confirmation_bar(
+                format!("{} · {}", self.host, message.render(cx)),
+                Button::new("confirm-file-operation")
+                    .primary()
+                    .compact()
+                    .rounded(px(6.))
+                    .label(t(cx, "确认", "Confirm"))
+                    .on_click(cx.listener(|view, _, window, cx| view.execute_pending(window, cx))),
+                Button::new("cancel-file-operation")
+                    .ghost()
+                    .compact()
+                    .rounded(px(6.))
+                    .label(t(cx, "取消", "Cancel"))
+                    .on_click(cx.listener(|view, _, _, cx| {
+                        view.pending = None;
+                        cx.notify();
+                    })),
+            ));
+        }
+        panel.child(
+            div()
+                .min_h(px(24.))
+                .px_2()
+                .flex_shrink_0()
+                .flex()
+                .items_center()
+                .gap_2()
+                .border_t_1()
+                .border_color(rgb(BORDER))
+                .bg(rgb(CANVAS))
+                .child(div().text_color(rgb(MUTED)).child(if self.busy {
+                    IconName::RefreshCw
+                } else {
+                    IconName::Info
+                }))
+                .child(
+                    div()
+                        .max_w(px(320.))
+                        .text_ellipsis()
+                        .text_color(rgb(MUTED))
+                        .child(format!(
+                            "{} {}",
+                            t(cx, "当前位置：", "Location:"),
+                            self.directory.as_deref().unwrap_or("—")
+                        )),
+                )
+                .child(
+                    div()
+                        .flex_1()
+                        .text_color(rgb(MUTED))
+                        .child(self.status.render(cx)),
+                )
+                .when(self.busy && self.transfer.is_none(), |view| {
+                    view.child(
+                        Button::new("cancel-active-file-operation")
+                            .ghost()
+                            .compact()
+                            .rounded(px(6.))
+                            .label(t(cx, "取消操作", "Cancel operation"))
+                            .on_click(cx.listener(|view, _, _, cx| {
+                                view.cancel_active(cx);
+                            })),
+                    )
+                }),
+        )
+    }
+}

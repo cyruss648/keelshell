@@ -1,0 +1,1082 @@
+//! SFTP browser and bounded UTF-8 editor. Mutations are explicit reviewed actions.
+use crate::i18n::{Message, t};
+use gpui_kit::prelude::FluentBuilder;
+use gpui_kit::{
+    component::{
+        Disableable, Sizable,
+        button::{Button, ButtonVariants},
+        input::{Input, InputState, Textarea, TextareaState},
+    },
+    *,
+};
+use keelshell_session::{
+    SessionError, SshSession,
+    sftp::{
+        DirectoryResumePlan, DirectoryTransferPlan, FileResumePlan, RemoteEntry, SftpSession,
+        TransferDirection, TransferEvent, TransferSpec,
+    },
+};
+use std::{
+    path::PathBuf,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+        mpsc,
+    },
+    time::Duration,
+};
+
+mod transfer;
+mod view;
+mod worker;
+use transfer::{TransferPhase, TransferStatus, TransferUpdate};
+use worker::operate;
+
+use crate::design::{ACCENT, BORDER, CANVAS, MUTED, SELECTED, SURFACE, TEXT};
+use gpui_kit::assets::IconName;
+#[derive(Clone)]
+enum Operation {
+    List(String),
+    Read(RemoteEntry),
+    Mkdir(String),
+    Rename(String, String),
+    Delete(RemoteEntry),
+    SetPermissions(RemoteEntry, u32),
+    Upload(PathBuf, String),
+    Download(String, PathBuf),
+    PlanDirectory(TransferSpec),
+    TransferDirectory(DirectoryTransferPlan),
+    PlanResume(TransferSpec, bool),
+    ResumeFile(FileResumePlan),
+    ResumeDirectory(DirectoryResumePlan),
+    Save {
+        path: String,
+        original: Vec<u8>,
+        content: Vec<u8>,
+    },
+}
+enum Outcome {
+    Listed(String, Vec<RemoteEntry>),
+    Read(String, Vec<u8>),
+    Saved(String, Vec<u8>),
+    Done(Message),
+    PlannedDirectory(DirectoryTransferPlan),
+    PlannedFileResume(FileResumePlan),
+    PlannedDirectoryResume(DirectoryResumePlan),
+}
+
+enum WorkerMessage {
+    Progress(Message),
+    Transfer(TransferUpdate),
+    Result(Box<Result<Outcome, FileFailure>>),
+}
+
+pub struct FilesPanel {
+    session: Option<SshSession>,
+    suspended: bool,
+    host: String,
+    runtime: Arc<tokio::runtime::Runtime>,
+    // The input is a navigation draft; mutations use only this canonical directory.
+    directory: Option<String>,
+    path: Entity<InputState>,
+    name: Entity<InputState>,
+    mode: Entity<InputState>,
+    local: Entity<InputState>,
+    editor: Entity<TextareaState>,
+    entries: Vec<RemoteEntry>,
+    selected: Option<RemoteEntry>,
+    editing: Option<(String, Vec<u8>)>,
+    status: Message,
+    busy: bool,
+    pending: Option<(Message, Operation)>,
+    operation_stop: Option<Arc<AtomicBool>>,
+    operation_id: Option<uuid::Uuid>,
+    transfer_pause: Option<tokio::sync::watch::Sender<bool>>,
+    transfer: Option<TransferStatus>,
+    resume_mode: bool,
+}
+impl Drop for FilesPanel {
+    fn drop(&mut self) {
+        if let Some(stop) = &self.operation_stop {
+            stop.store(true, Ordering::Release);
+        }
+    }
+}
+fn field(placeholder: &str, value: &str, window: &mut Window, cx: &mut App) -> Entity<InputState> {
+    cx.new(|cx| {
+        let mut input = InputState::new(window, cx).placeholder(placeholder.to_owned());
+        input.set_value(value.to_owned(), window, cx);
+        input
+    })
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum PathError {
+    DirectoryRequired,
+    InvalidName,
+}
+impl PathError {
+    fn message(&self) -> Message {
+        match self {
+            Self::DirectoryRequired => Message::new(
+                "请先成功打开远程目录，再修改文件",
+                "Open a remote directory successfully before changing files",
+            ),
+            Self::InvalidName => Message::new(
+                "请输入不含路径分隔符或控制字符的单个文件名",
+                "Enter one file or folder name without separators or control characters",
+            ),
+        }
+    }
+}
+
+/// Join only a canonical absolute directory and one literal name, never a draft path.
+fn child_path(directory: Option<&str>, name: &str) -> Result<String, PathError> {
+    let directory = directory
+        .filter(|path| path.starts_with('/') && !path.chars().any(char::is_control))
+        .ok_or(PathError::DirectoryRequired)?;
+    if name.is_empty()
+        || matches!(name, "." | "..")
+        || name.contains(['/', '\\'])
+        || name.chars().any(char::is_control)
+    {
+        return Err(PathError::InvalidName);
+    }
+    Ok(format!("{}/{}", directory.trim_end_matches('/'), name))
+}
+
+/// Parse the explicit POSIX mode input used by the reviewed permissions action.
+/// Three digits are accepted as shorthand for a leading zero; no symbolic mode
+/// expressions or shell syntax are interpreted.
+fn parse_permissions_mode(value: &str) -> Result<u32, &'static str> {
+    let value = value.trim();
+    if !(3..=4).contains(&value.len()) || !value.bytes().all(|byte| (b'0'..=b'7').contains(&byte)) {
+        return Err("enter a three- or four-digit octal mode between 0000 and 7777");
+    }
+    u32::from_str_radix(value, 8).map_err(|_| "enter a valid octal mode")
+}
+
+#[derive(Debug)]
+enum FileFailure {
+    Transport(String),
+    Cancelled,
+    CancelledBeforeStart,
+    InvalidEditor,
+    Conflict,
+    Symlink,
+    Cleanup,
+    WorkerStopped,
+    DirectoryTransfer {
+        destination: String,
+        error: Box<FileFailure>,
+    },
+}
+impl From<SessionError> for FileFailure {
+    fn from(error: SessionError) -> Self {
+        Self::Transport(error.to_string())
+    }
+}
+impl std::fmt::Display for FileFailure {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Transport(detail) => f.write_str(detail),
+            Self::Cancelled => {
+                f.write_str("File operation cancelled; remote outcome may be unknown")
+            }
+            Self::CancelledBeforeStart => {
+                f.write_str("File operation cancelled before SFTP initialization")
+            }
+            Self::InvalidEditor => f.write_str("Editor accepts UTF-8 files up to 1 MiB"),
+            Self::Conflict => f.write_str("Remote file changed since opening"),
+            Self::Symlink => f.write_str("Permission changes on symbolic links are disabled"),
+            Self::Cleanup => f.write_str("Operation completed but SFTP cleanup failed"),
+            Self::WorkerStopped => f.write_str("File worker stopped without a result"),
+            Self::DirectoryTransfer { destination, error } => {
+                write!(f, "{error}; inspect partial directory {destination}")
+            }
+        }
+    }
+}
+impl FileFailure {
+    fn is_cancelled(&self) -> bool {
+        match self {
+            Self::Cancelled | Self::CancelledBeforeStart => true,
+            Self::DirectoryTransfer { error, .. } => error.is_cancelled(),
+            _ => false,
+        }
+    }
+
+    fn message(&self) -> Message {
+        match self {
+            Self::Transport(detail) => Message::new(
+                format!("文件操作失败：{detail}。远端结果可能未知，请检查后再重试。"),
+                format!(
+                    "File operation failed: {detail}. Remote completion may be unknown; inspect before retrying."
+                ),
+            ),
+            Self::Cancelled => Message::new(
+                "操作已取消；请先检查远端结果。临时文件或未完成的本地下载可能仍存在。",
+                "Operation cancelled; inspect the remote result. A staged file or partial local download may remain.",
+            ),
+            Self::CancelledBeforeStart => Message::new(
+                "已在打开 SFTP 前取消操作",
+                "Operation cancelled before opening SFTP",
+            ),
+            Self::InvalidEditor => Message::new(
+                "编辑器仅支持不超过 1 MiB 的 UTF-8 文件",
+                "The editor accepts UTF-8 files up to 1 MiB",
+            ),
+            Self::Conflict => Message::new(
+                "远程文件已被修改，请重新打开后再保存",
+                "The remote file changed since opening; reload before saving",
+            ),
+            Self::Symlink => Message::new(
+                "为避免跟随链接误改目标，符号链接不支持修改权限",
+                "Permission changes on symbolic links are disabled to avoid following a link",
+            ),
+            Self::Cleanup => Message::new(
+                "操作已完成，但 SFTP 清理失败；请检查后再重试",
+                "Operation completed, but SFTP cleanup failed; inspect before retrying",
+            ),
+            Self::DirectoryTransfer { destination, error } => Message::new(
+                format!(
+                    "目录传输未完成：{error}。请检查目标 {destination}；可能保留部分文件，不会自动清理。"
+                ),
+                format!(
+                    "Directory transfer incomplete: {error}. Inspect {destination}; partial files may remain and are not removed automatically."
+                ),
+            ),
+            Self::WorkerStopped => Message::new(
+                "文件工作线程未返回结果便结束",
+                "File worker stopped without a result",
+            ),
+        }
+    }
+}
+
+async fn cancellation(stop: &AtomicBool) {
+    while !stop.load(Ordering::Acquire) {
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+}
+
+fn transfer_progress_message(
+    direction: TransferDirection,
+    transferred: u64,
+    total: Option<u64>,
+) -> Message {
+    let verb_zh = match direction {
+        TransferDirection::Upload => "上传中",
+        TransferDirection::Download => "下载中",
+    };
+    let verb_en = match direction {
+        TransferDirection::Upload => "Uploading",
+        TransferDirection::Download => "Downloading",
+    };
+    let progress_zh = total.map_or_else(
+        || format!("{transferred} 字节"),
+        |total| format!("{transferred} / {total} 字节"),
+    );
+    let progress_en = total.map_or_else(
+        || format!("{transferred} bytes"),
+        |total| format!("{transferred} / {total} bytes"),
+    );
+    Message::new(
+        format!("{verb_zh}：{progress_zh}"),
+        format!("{verb_en}: {progress_en}"),
+    )
+}
+
+fn resume_progress_message(
+    transferred: u64,
+    total: Option<u64>,
+    existing: u64,
+    directory: bool,
+) -> Message {
+    let total = total.map_or_else(|| "—".to_owned(), |total| total.to_string());
+    if directory {
+        return Message::new(
+            format!(
+                "目录续传已确认 {transferred} / {total} 字节（含已复核前缀）；审核时原有 {existing} 字节"
+            ),
+            format!(
+                "Folder continuation: {transferred} / {total} confirmed bytes (includes rechecked prefixes); {existing} existing bytes at review"
+            ),
+        );
+    }
+    let added = transferred.saturating_sub(existing);
+    Message::new(
+        format!("续传进度（含已验证部分）：{transferred} / {total} 字节；本次新增 {added} 字节"),
+        format!(
+            "Continuation progress (includes verified content): {transferred} / {total} bytes; {added} new bytes"
+        ),
+    )
+}
+
+fn send_worker_progress(progress: &mpsc::SyncSender<WorkerMessage>, message: Message) {
+    // Progress is advisory and may be coalesced when the GPUI frame is busy;
+    // the terminal result always uses the blocking sender below.
+    let _ = progress.try_send(WorkerMessage::Progress(message));
+}
+
+impl FilesPanel {
+    pub fn new(
+        session: SshSession,
+        host: String,
+        runtime: Arc<tokio::runtime::Runtime>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        let mut panel = Self {
+            session: Some(session),
+            suspended: false,
+            host,
+            runtime,
+            directory: None,
+            path: field(t(cx, "远程目录", "Remote directory"), ".", window, cx),
+            name: field(
+                t(cx, "文件名 / 新建目录", "New name / folder"),
+                "",
+                window,
+                cx,
+            ),
+            mode: field(
+                t(cx, "权限（八进制）", "Permissions (octal)"),
+                "",
+                window,
+                cx,
+            ),
+            local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
+            editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
+            entries: Vec::new(),
+            selected: None,
+            editing: None,
+            status: Message::new("正在打开 SFTP…", "Opening SFTP…"),
+            busy: false,
+            pending: None,
+            operation_stop: None,
+            operation_id: None,
+            transfer_pause: None,
+            transfer: None,
+            resume_mode: false,
+        };
+        panel.run(Operation::List(".".into()), window, cx);
+        panel
+    }
+    /// Preserve local drafts and completed records while retiring remote capabilities.
+    pub fn suspend(&mut self, cx: &mut Context<Self>) {
+        if self.suspended {
+            return;
+        }
+        self.suspended = true;
+        self.session = None;
+        self.pending = None;
+        self.cancel_active(cx);
+        cx.notify();
+    }
+
+    /// Explicitly selected, loaded directory of this live file panel; never a shell cwd.
+    pub(crate) fn completion_directory(&self) -> Option<&str> {
+        (!self.suspended)
+            .then_some(self.directory.as_deref())
+            .flatten()
+    }
+
+    /// Whether dropping this snapshot would lose an unsaved editor draft.
+    pub fn has_unsaved_draft(&self, cx: &App) -> bool {
+        let content = self.editor.read(cx).value();
+        self.editing
+            .as_ref()
+            .map_or(!content.is_empty(), |(_, original)| {
+                content.as_bytes() != original
+            })
+    }
+
+    /// Immutable in-memory version for explicit archive-discard consent.
+    pub fn draft_snapshot(&self, cx: &App) -> SharedString {
+        self.editor.read(cx).value()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn seed_draft_for_test(
+        &mut self,
+        path: &str,
+        original: &str,
+        draft: &str,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.editing = Some((path.to_owned(), original.as_bytes().to_vec()));
+        self.editor.update(cx, |editor, cx| {
+            editor.set_value(draft.to_owned(), window, cx)
+        });
+    }
+
+    /// Retain live transport/editor state while updating only translated hints.
+    pub fn refresh_locale(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        for (input, zh, en) in [
+            (&self.path, "远程目录", "Remote directory"),
+            (&self.name, "文件名 / 新建目录", "New name / folder"),
+            (&self.mode, "权限（八进制）", "Permissions (octal)"),
+            (&self.local, "本地传输路径", "Local transfer path"),
+        ] {
+            let placeholder = t(cx, zh, en);
+            input.update(cx, |input, cx| {
+                input.set_placeholder(placeholder, window, cx)
+            });
+        }
+        cx.notify();
+    }
+    fn run(&mut self, operation: Operation, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
+            return;
+        };
+        if self.busy {
+            self.status = Message::new(
+                "请等待或取消当前文件操作",
+                "Wait for or cancel the active file operation",
+            );
+            cx.notify();
+            return;
+        }
+        if let Operation::List(path) = &operation
+            && (path.trim().is_empty() || path.chars().any(char::is_control))
+        {
+            self.status = Message::new(
+                "请输入不含控制字符的有效远程目录",
+                "Enter a nonempty remote directory without control characters",
+            );
+            cx.notify();
+            return;
+        }
+        self.busy = true;
+        self.pending = None;
+        let operation_id = uuid::Uuid::new_v4();
+        self.operation_id = Some(operation_id);
+        self.transfer = operation.transfer_status();
+        self.status = match &operation {
+            Operation::PlanDirectory(_) => Message::new(
+                "正在扫描目录，完成后需确认…",
+                "Scanning directory; confirmation is required before transfer…",
+            ),
+            Operation::TransferDirectory(_) => Message::new(
+                "正在复核已审核的目录…",
+                "Rechecking the reviewed directory…",
+            ),
+            Operation::PlanResume(..) => Message::new(
+                "正在只读校验源与已有部分内容，完成后需审核确认…",
+                "Verifying the source and existing content without writing; review is required…",
+            ),
+            Operation::ResumeFile(_) | Operation::ResumeDirectory(_) => Message::new(
+                "正在复核已审核的续传内容…",
+                "Rechecking the reviewed continuation…",
+            ),
+            _ => Message::new("正在处理…", "Working…"),
+        };
+        let editor_before = self.editor.read(cx).value().to_string();
+        let review_only = matches!(
+            &operation,
+            Operation::PlanResume(..) | Operation::PlanDirectory(_)
+        );
+        let navigation_before = self.path.read(cx).value().to_string();
+        let runtime = self.runtime.clone();
+        let stop = Arc::new(AtomicBool::new(false));
+        self.operation_stop = Some(stop.clone());
+        let worker_stop = stop.clone();
+        let (pause, pause_receiver) = tokio::sync::watch::channel(false);
+        self.transfer_pause = self.transfer.as_ref().map(|_| pause);
+        let (sender, receiver) = mpsc::sync_channel(16);
+        if let Err(error) =
+            crate::terminal::spawn_transport_worker("keelshell-sftp", stop, move || {
+                let result = runtime.block_on(operate(
+                    session,
+                    operation,
+                    worker_stop,
+                    pause_receiver,
+                    &sender,
+                ));
+                let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
+                let _ = sender.send(WorkerMessage::Result(Box::new(result)));
+                completion
+            })
+        {
+            self.busy = false;
+            self.operation_stop = None;
+            self.operation_id = None;
+            self.transfer_pause = None;
+            if let Some(transfer) = &mut self.transfer {
+                transfer.phase = TransferPhase::Failed;
+            }
+            self.status =
+                Message::detail("无法启动文件工作线程", "Unable to start file worker", error);
+            cx.notify();
+            return;
+        }
+        let executor = cx.background_executor().clone();
+        cx.spawn_in(window,async move |this,cx| {
+            let result = loop {
+                match receiver.try_recv() {
+                    Ok(WorkerMessage::Result(result)) => break *result,
+                    Ok(WorkerMessage::Progress(message)) => {
+                        if this
+                            .update_in(cx, |view, _, cx| {
+                            if view.operation_id != Some(operation_id) { return; }
+                            if !view.suspended && !view.transfer.as_ref().is_some_and(|state| matches!(state.phase,TransferPhase::Pausing|TransferPhase::Paused|TransferPhase::Resuming|TransferPhase::Cancelling)) {
+                                view.status = message;
+                            }
+                            cx.notify();
+                            })
+                            .is_err()
+                        {
+                            return;
+                        }
+                    }
+                    Ok(WorkerMessage::Transfer(event)) => {
+                        if this.update_in(cx, |view, _, cx| {
+                            if view.operation_id != Some(operation_id) { return; }
+                            if let Some(transfer) = &mut view.transfer {
+                                transfer.update(event);
+                                if transfer.phase != TransferPhase::Cancelling {
+                                    match event {
+                                        TransferUpdate::Paused(..) => view.status = Message::new("传输已暂停；继续将使用原源路径、目标和 SSH 会话。", "Transfer paused; continuing preserves its source, destination and SSH session."),
+                                        TransferUpdate::Resumed(..) => view.status = Message::new("正在继续原传输…", "Continuing the original transfer…"),
+                                        _ => {}
+                                    }
+                                }
+                            }
+                            cx.notify();
+                        }).is_err() { return; }
+                    }
+                    Err(mpsc::TryRecvError::Disconnected) => {
+                        break Err(FileFailure::WorkerStopped)
+                    }
+                    Err(mpsc::TryRecvError::Empty) => {},
+                }
+                executor.timer(Duration::from_millis(16)).await;
+                if this.update_in(cx,|_,_,_|()).is_err() { return; }
+            };
+            let _ = this.update_in(cx,|view,window,cx| {
+                if view.operation_id != Some(operation_id) { return; }
+                view.busy = false;
+                view.operation_stop = None;
+                view.operation_id = None;
+                view.transfer_pause = None;
+                if let Some(transfer) = &mut view.transfer {
+                    transfer.phase = match &result {
+                        Ok(_) => TransferPhase::Completed,
+                        Err(error) if error.is_cancelled() => TransferPhase::Cancelled,
+                        Err(_) => TransferPhase::Failed,
+                    };
+                }
+                if view.suspended {
+                    // A late worker may acknowledge a write, but may not replace the
+                    // archived editor, its original baseline, or an approved plan.
+                    view.status = match &result {
+                        Ok(_) => Message::new("旧会话任务已完成；保留归档内容。", "Previous session task completed; archived contents retained."),
+                        Err(error) => Message::detail("旧会话任务结束", "Previous session task ended", error),
+                    };
+                    cx.notify();
+                    return;
+                }
+                match result {
+                    Ok(Outcome::Listed(path,entries)) => {
+                        if view.path.read(cx).value().as_ref() == navigation_before.as_str() {
+                            view.path.update(cx,|input,cx|input.set_value(path.clone(),window,cx));
+                        }
+                        view.directory = Some(path);
+                        view.status = Message::new(format!("共 {} 项",entries.len()),format!("{} entries",entries.len()));
+                        view.entries = entries;
+                        view.selected = None;
+                    }
+                    Ok(Outcome::Read(path,content)) => {
+                        if view.editor.read(cx).value().as_ref() == editor_before.as_str() {
+                            view.editor.update(cx,|input,cx|input.set_value(String::from_utf8_lossy(&content).into_owned(),window,cx));
+                            view.status = Message::new(format!("正在编辑 {path} · {} 字节",content.len()),format!("Editing {path} · {} bytes",content.len()));
+                            view.editing = Some((path,content));
+                        } else {
+                            view.status = Message::new("加载期间检测到新编辑，已保留当前内容；请在准备好后重新打开文件。", "Your edits changed while loading; preserved the editor. Open the file again when ready.");
+                        }
+                    }
+                    Ok(Outcome::Saved(path,content)) => {
+                        if view.editing.as_ref().is_some_and(|(current,_)| current == &path) {
+                            let dirty = view.editor.read(cx).value().as_bytes() != content;
+                            view.editing = Some((path,content));
+                            view.status = if dirty { Message::new("已保存审核版本；后续编辑尚未保存", "Saved the reviewed version; newer edits remain unsaved") } else { Message::new("远程文件已原子保存", "Remote file saved atomically") };
+                        }
+                    }
+                    Ok(Outcome::Done(message)) => view.status = message,
+                    Ok(Outcome::PlannedDirectory(plan)) => {
+                        view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
+                        view.pending = Some((directory_review_message(&plan), Operation::TransferDirectory(plan)));
+                    }
+                    Ok(Outcome::PlannedFileResume(plan)) => {
+                        view.status = Message::new("部分内容校验通过，请审核续传", "Existing content verified; review continuation");
+                        view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), None), Operation::ResumeFile(plan)));
+                    }
+                    Ok(Outcome::PlannedDirectoryResume(plan)) => {
+                        view.status = Message::new("部分目录校验通过，请审核续传", "Existing tree verified; review continuation");
+                        view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan)));
+                    }
+                    Err(error) => view.status = if review_only {
+                        Message::detail("审核未完成，尚未开始传输", "Review incomplete; transfer not started", error)
+                    } else { error.message() },
+                }
+                cx.notify();
+            });
+        }).detach();
+        cx.notify();
+    }
+    fn remote_child(&mut self, name: &str) -> Option<String> {
+        match child_path(self.directory.as_deref(), name) {
+            Ok(path) => Some(path),
+            Err(error) => {
+                self.status = error.message();
+                None
+            }
+        }
+    }
+    fn new_remote_path(&mut self, cx: &Context<Self>) -> Option<String> {
+        let name = self.name.read(cx).value().trim().to_owned();
+        self.remote_child(&name)
+    }
+    fn request_read(&mut self, entry: RemoteEntry, window: &mut Window, cx: &mut Context<Self>) {
+        let dirty = self
+            .editing
+            .as_ref()
+            .is_some_and(|(_, original)| self.editor.read(cx).value().as_bytes() != original);
+        if dirty {
+            self.confirm(
+                Message::new(
+                    format!("放弃未保存的编辑并打开 {}？", entry.path),
+                    format!("Discard unsaved edits and open {}?", entry.path),
+                ),
+                Operation::Read(entry),
+                cx,
+            );
+        } else {
+            self.run(Operation::Read(entry), window, cx);
+        }
+    }
+    fn confirm(&mut self, message: Message, operation: Operation, cx: &mut Context<Self>) {
+        if self.suspended {
+            return;
+        }
+        if self.busy {
+            self.status = Message::new(
+                "请等待或取消当前文件操作",
+                "Wait for or cancel the active file operation",
+            );
+        } else {
+            self.pending = Some((message, operation));
+        }
+        cx.notify();
+    }
+    fn execute_pending(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.suspended {
+            return;
+        }
+        if self.busy {
+            return;
+        }
+        if let Some((_, Operation::Save { content, .. })) = &self.pending
+            && self.editor.read(cx).value().as_bytes() != content
+        {
+            self.pending = None;
+            self.status = Message::new(
+                "审核后内容已修改，请重新审核再保存。",
+                "Editor changed after review. Review the new contents before saving.",
+            );
+            cx.notify();
+            return;
+        }
+        if let Some((_, operation)) = self.pending.take() {
+            self.run(operation, window, cx);
+        }
+    }
+}
+
+fn directory_review_message(plan: &DirectoryTransferPlan) -> Message {
+    let (source, target) = match plan.direction() {
+        TransferDirection::Upload => (
+            plan.local_path().display().to_string(),
+            plan.remote_path().to_owned(),
+        ),
+        TransferDirection::Download => (
+            plan.remote_path().to_owned(),
+            plan.local_path().display().to_string(),
+        ),
+    };
+    Message::new(
+        format!(
+            "源：{source}\n目标：{target}\n{} 个文件 · {} 个目录 · {} 字节。仅新建目标，不跟随符号链接。\n上限：32 层 / 10000 项 / 16 GiB / 15 分钟。取消或失败会保留部分目录；确认传输？",
+            plan.files(),
+            plan.directories(),
+            plan.bytes()
+        ),
+        format!(
+            "Source: {source}\nDestination: {target}\n{} files · {} directories · {} bytes. New destination only; symlinks are refused.\nLimits: 32 levels / 10000 entries / 16 GiB / 15 minutes. Failure or cancellation leaves a partial tree. Transfer?",
+            plan.files(),
+            plan.directories(),
+            plan.bytes()
+        ),
+    )
+}
+
+fn resume_review_message(
+    direction: TransferDirection,
+    local: &std::path::Path,
+    remote: &str,
+    total: u64,
+    existing: u64,
+    tree: Option<(usize, usize)>,
+) -> Message {
+    let (source, target) = match direction {
+        TransferDirection::Upload => (local.display().to_string(), remote.to_owned()),
+        TransferDirection::Download => (remote.to_owned(), local.display().to_string()),
+    };
+    let counts_en = tree.map_or_else(String::new, |(files, dirs)| {
+        format!("{files} files / {dirs} directories · ")
+    });
+    let counts_zh = tree.map_or_else(String::new, |(files, dirs)| {
+        format!("{files} 个文件 / {dirs} 个目录 · ")
+    });
+    Message::new(
+        format!(
+            "续传源：{source}\n续传目标：{target}\n{counts_zh}已校验部分 {existing} / {total} 字节；待补充 {} 字节。\n仅在已有内容与源一致时追加；执行前会重新校验，不覆盖不同内容。取消或失败可保留部分目标。确认续传？",
+            total.saturating_sub(existing)
+        ),
+        format!(
+            "Resume source: {source}\nResume destination: {target}\n{counts_en}Verified existing content: {existing} / {total} bytes; {} bytes remain.\nAppend only when existing content matches the source; rechecked before writing. Different content is never overwritten. Cancellation or failure may leave partial output. Continue?",
+            total.saturating_sub(existing)
+        ),
+    )
+}
+
+impl Operation {
+    fn transfer_status(&self) -> Option<TransferStatus> {
+        let (spec, directory, continuation) = match self {
+            Self::Upload(local, remote) => (TransferSpec::upload(local, remote), false, false),
+            Self::Download(remote, local) => (TransferSpec::download(remote, local), false, false),
+            Self::TransferDirectory(plan) => (
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                true,
+                false,
+            ),
+            Self::ResumeFile(plan) => (
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                false,
+                true,
+            ),
+            Self::ResumeDirectory(plan) => (
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                true,
+                true,
+            ),
+            _ => return None,
+        };
+        let mut status = TransferStatus::new(spec, directory, continuation);
+        status.reviewed_existing = match self {
+            Self::ResumeFile(plan) => plan.existing_bytes(),
+            Self::ResumeDirectory(plan) => plan.existing_bytes(),
+            _ => 0,
+        };
+        Some(status)
+    }
+}
+
+fn size_label(size: Option<u64>) -> String {
+    let Some(size) = size else {
+        return "—".into();
+    };
+    if size < 1024 {
+        return format!("{size} B");
+    }
+    if size < 1024 * 1024 {
+        return format!("{:.1} KiB", size as f64 / 1024.);
+    }
+    if size < 1024 * 1024 * 1024 {
+        return format!("{:.1} MiB", size as f64 / (1024. * 1024.));
+    }
+    format!("{:.1} GiB", size as f64 / (1024. * 1024. * 1024.))
+}
+fn permissions_label(entry: &RemoteEntry) -> String {
+    let Some(mode) = entry.permissions else {
+        return "—".into();
+    };
+    let mut chars = vec![if entry.is_symlink {
+        'l'
+    } else if entry.is_directory {
+        'd'
+    } else {
+        '-'
+    }];
+    for (index, bit) in [
+        0o400, 0o200, 0o100, 0o040, 0o020, 0o010, 0o004, 0o002, 0o001,
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        chars.push(if mode & bit != 0 {
+            ['r', 'w', 'x'][index % 3]
+        } else {
+            '-'
+        });
+    }
+    for (index, flag, marked, unmarked) in [
+        (3, 0o4000, 's', 'S'),
+        (6, 0o2000, 's', 'S'),
+        (9, 0o1000, 't', 'T'),
+    ] {
+        if mode & flag != 0 {
+            chars[index] = if chars[index] == 'x' {
+                marked
+            } else {
+                unmarked
+            };
+        }
+    }
+    chars.into_iter().collect()
+}
+fn modified_label(timestamp: Option<u32>) -> String {
+    timestamp
+        .and_then(|value| chrono::DateTime::from_timestamp(i64::from(value), 0))
+        .map(|value| value.format("%Y/%m/%d %H:%M").to_string())
+        .unwrap_or_else(|| "—".into())
+}
+fn type_label(entry: &RemoteEntry, cx: &App) -> &'static str {
+    if entry.is_symlink {
+        t(cx, "符号链接", "Link")
+    } else if entry.is_directory {
+        t(cx, "文件夹", "Folder")
+    } else {
+        t(cx, "文件", "File")
+    }
+}
+fn table_cell(text: impl Into<SharedString>, width: f32) -> impl IntoElement {
+    div()
+        .w(px(width))
+        .flex_shrink_0()
+        .px_2()
+        .overflow_hidden()
+        .child(text.into())
+}
+
+fn confirmation_bar(message: String, confirm: Button, cancel: Button) -> impl IntoElement {
+    div()
+        .id("file-confirmation-bar")
+        .w_full()
+        .min_w_0()
+        .px_2()
+        .py_1()
+        .flex_shrink_0()
+        .flex()
+        .items_center()
+        .gap_2()
+        .bg(rgb(0xfff8eb))
+        .border_t_1()
+        .border_color(rgb(0xf2d19b))
+        .child(
+            div()
+                .id("file-confirmation-message")
+                .flex_1()
+                .min_w_0()
+                .max_h(px(96.))
+                .overflow_y_scroll()
+                .overflow_x_scroll()
+                .whitespace_normal()
+                .child(message)
+                .test_support(),
+        )
+        // Actions cannot participate in the path text's min-content width.
+        // Long unbroken names remain inspectable inside the scrollable body.
+        .child(
+            div()
+                .flex()
+                .flex_shrink_0()
+                .items_center()
+                .gap_2()
+                .child(confirm)
+                .child(cancel),
+        )
+        .test_support()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        FileFailure, TransferDirection, child_path, modified_label, parse_permissions_mode,
+        permissions_label, size_label, transfer_progress_message,
+    };
+    use keelshell_session::sftp::RemoteEntry;
+
+    #[test]
+    fn mutation_requires_a_loaded_absolute_directory() {
+        for directory in [
+            None,
+            Some(""),
+            Some("."),
+            Some("draft/relative"),
+            Some("/bad\npath"),
+        ] {
+            assert!(child_path(directory, "notes.txt").is_err());
+        }
+        assert_eq!(
+            child_path(Some("/home/operator"), "notes.txt"),
+            Ok("/home/operator/notes.txt".to_owned())
+        );
+    }
+
+    #[test]
+    fn remote_child_keeps_root_and_unicode_names_literal() {
+        assert_eq!(
+            child_path(Some("/"), "说明.txt"),
+            Ok("/说明.txt".to_owned())
+        );
+        assert_eq!(
+            child_path(Some("/var/log/"), "app log.txt"),
+            Ok("/var/log/app log.txt".to_owned())
+        );
+        assert_eq!(
+            child_path(Some("/tmp"), "$(command); file"),
+            Ok("/tmp/$(command); file".to_owned())
+        );
+    }
+
+    #[test]
+    fn remote_child_rejects_traversal_and_display_control_characters() {
+        for name in [
+            "",
+            ".",
+            "..",
+            "../victim",
+            "one/two",
+            "one\\two",
+            "bad\0name",
+            "bad\nname",
+            "\u{1b}[2J",
+        ] {
+            assert!(
+                child_path(Some("/home/operator"), name).is_err(),
+                "{name:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn permission_input_is_strict_octal_without_symbolic_or_shell_syntax() {
+        assert_eq!(parse_permissions_mode("0640"), Ok(0o640));
+        assert_eq!(parse_permissions_mode("640"), Ok(0o640));
+        for value in ["", "64", "06400", "0780", "u+rw", "$(id)", " 0640x"] {
+            assert!(parse_permissions_mode(value).is_err(), "{value:?}");
+        }
+    }
+
+    fn entry(mode: Option<u32>, directory: bool, symlink: bool) -> RemoteEntry {
+        RemoteEntry {
+            name: "sample".into(),
+            path: "/sample".into(),
+            size: None,
+            is_directory: directory,
+            is_symlink: symlink,
+            permissions: mode,
+            modified: None,
+        }
+    }
+
+    #[test]
+    fn permission_columns_preserve_special_bits_and_entry_types() {
+        assert_eq!(
+            permissions_label(&entry(Some(0o100644), false, false)),
+            "-rw-r--r--"
+        );
+        assert_eq!(
+            permissions_label(&entry(Some(0o41777), true, false)),
+            "drwxrwxrwt"
+        );
+        assert_eq!(
+            permissions_label(&entry(Some(0o104640), false, false)),
+            "-rwSr-----"
+        );
+        assert_eq!(
+            permissions_label(&entry(Some(0o120777), false, true)),
+            "lrwxrwxrwx"
+        );
+        assert_eq!(permissions_label(&entry(None, false, false)), "—");
+    }
+
+    #[test]
+    fn metadata_columns_distinguish_missing_zero_and_utc_time() {
+        assert_eq!(size_label(None), "—");
+        assert_eq!(size_label(Some(0)), "0 B");
+        assert_eq!(size_label(Some(1536)), "1.5 KiB");
+        assert_eq!(modified_label(None), "—");
+        assert_eq!(modified_label(Some(0)), "1970/01/01 00:00");
+        assert_eq!(modified_label(Some(946_684_800)), "2000/01/01 00:00");
+        assert_eq!(modified_label(Some(1_709_164_800)), "2024/02/29 00:00");
+    }
+
+    #[gpui_kit::test]
+    fn transfer_progress_messages_localize_known_and_unknown_totals(
+        cx: &mut gpui_kit::TestAppContext,
+    ) {
+        cx.update(|cx| {
+            let upload = transfer_progress_message(TransferDirection::Upload, 1024, Some(4096));
+            assert_eq!(upload.render(cx), "上传中：1024 / 4096 字节");
+            crate::i18n::set_language(keelshell_core::Language::En, cx);
+            assert_eq!(upload.render(cx), "Uploading: 1024 / 4096 bytes");
+            let download = transfer_progress_message(TransferDirection::Download, 512, None);
+            assert_eq!(download.render(cx), "Downloading: 512 bytes");
+            crate::i18n::set_language(keelshell_core::Language::ZhCn, cx);
+            assert_eq!(download.render(cx), "下载中：512 字节");
+        });
+    }
+
+    #[gpui_kit::test]
+    fn existing_file_error_retranslates_without_rewriting_remote_detail(
+        cx: &mut gpui_kit::TestAppContext,
+    ) {
+        let error = FileFailure::Transport("/srv/服务.conf: permission denied".into()).message();
+        cx.update(|cx| {
+            assert!(error.render(cx).starts_with("文件操作失败："));
+            crate::i18n::set_language(keelshell_core::Language::En, cx);
+            assert!(error.render(cx).starts_with("File operation failed:"));
+            assert!(
+                error
+                    .render(cx)
+                    .contains("/srv/服务.conf: permission denied")
+            );
+            crate::i18n::set_language(keelshell_core::Language::ZhCn, cx);
+            assert!(
+                error
+                    .render(cx)
+                    .contains("/srv/服务.conf: permission denied")
+            );
+        });
+    }
+}
+
+#[cfg(test)]
+#[path = "files/layout_tests.rs"]
+mod layout_tests;
+#[cfg(test)]
+mod transfer_tests;
+
+#[cfg(test)]
+#[expect(
+    dead_code,
+    reason = "The protocol fixture exposes controls used by several independent suites"
+)]
+#[path = "../../keelshell-session/tests/fixtures/sftp.rs"]
+pub(crate) mod sftp_test_filesystem;
