@@ -17,8 +17,11 @@ fn public_sync_plan_keeps_deletes_explicit_and_carries_source_revalidation() {
             )
             .with_content_hash(content),
         ];
+    let destination_hash =
+        hash_directory_content(b"old app").unwrap_or_else(|error| panic!("hash: {error}"));
     let right = [
-        DirectoryEntrySnapshot::new("deploy/app.bin", DirectoryEntryKind::File, Some(4), Some(1)),
+        DirectoryEntrySnapshot::new("deploy/app.bin", DirectoryEntryKind::File, Some(4), Some(1))
+            .with_content_hash(destination_hash),
         DirectoryEntrySnapshot::new("old.cfg", DirectoryEntryKind::File, Some(2), Some(1)),
     ];
     let report =
@@ -36,12 +39,21 @@ fn public_sync_plan_keeps_deletes_explicit_and_carries_source_revalidation() {
             path,
             source_kind: DirectoryEntryKind::File,
             expected_source_hash: Some(hash),
-            expected_source_size: Some(5)
+            expected_source_size: Some(5),
+            expected_destination_kind: Some(DirectoryEntryKind::File),
+            expected_destination_size: Some(4),
+            expected_destination_hash: Some(destination_hash),
+            ..
         } if path == "deploy/app.bin" && hash == &content
     )));
     assert!(plan.operations().iter().any(|operation| matches!(
         operation,
-        DirectorySyncOperation::Delete { path } if path == "old.cfg"
+        DirectorySyncOperation::Delete {
+            path,
+            expected_destination_kind: DirectoryEntryKind::File,
+            expected_destination_size: Some(2),
+            ..
+        } if path == "old.cfg"
     )));
     let confirmed = plan
         .clone()

@@ -42,11 +42,23 @@ pub enum DirectorySyncOperation {
         expected_source_hash: Option<DirectoryContentHash>,
         /// Optional byte size observed at planning time for source revalidation.
         expected_source_size: Option<u64>,
+        /// Destination kind observed at planning time, when the path existed.
+        expected_destination_kind: Option<DirectoryEntryKind>,
+        /// Destination size observed at planning time, when available.
+        expected_destination_size: Option<u64>,
+        /// Destination digest observed at planning time, when available.
+        expected_destination_hash: Option<DirectoryContentHash>,
     },
     /// Delete one destination-only path after an additional explicit review.
     Delete {
         /// Normalized relative path to delete.
         path: String,
+        /// Destination kind observed at planning time.
+        expected_destination_kind: DirectoryEntryKind,
+        /// Destination size observed at planning time, when available.
+        expected_destination_size: Option<u64>,
+        /// Destination digest observed at planning time, when available.
+        expected_destination_hash: Option<DirectoryContentHash>,
     },
 }
 
@@ -142,6 +154,12 @@ pub enum DirectorySyncPlanError {
         /// Relative path of the malformed row.
         path: String,
     },
+    /// A malformed comparison row did not include the selected destination side.
+    #[error("directory sync row has no destination entry: {path}")]
+    MissingDestination {
+        /// Relative path of the malformed row.
+        path: String,
+    },
 }
 
 /// Failure while acknowledging a plan.
@@ -174,21 +192,26 @@ pub fn plan_directory_sync(
                 });
             }
             (DirectorySyncDirection::LeftToRight, DirectoryEntryStatus::LeftOnly)
-            | (DirectorySyncDirection::LeftToRight, DirectoryEntryStatus::Changed) => {
-                Some(copy_operation(row.left.as_ref(), &row.path)?)
-            }
+            | (DirectorySyncDirection::LeftToRight, DirectoryEntryStatus::Changed) => Some(
+                copy_operation(row.left.as_ref(), row.right.as_ref(), &row.path)?,
+            ),
             (DirectorySyncDirection::RightToLeft, DirectoryEntryStatus::RightOnly)
-            | (DirectorySyncDirection::RightToLeft, DirectoryEntryStatus::Changed) => {
-                Some(copy_operation(row.right.as_ref(), &row.path)?)
-            }
-            (DirectorySyncDirection::LeftToRight, DirectoryEntryStatus::RightOnly)
-            | (DirectorySyncDirection::RightToLeft, DirectoryEntryStatus::LeftOnly) => {
+            | (DirectorySyncDirection::RightToLeft, DirectoryEntryStatus::Changed) => Some(
+                copy_operation(row.right.as_ref(), row.left.as_ref(), &row.path)?,
+            ),
+            (DirectorySyncDirection::LeftToRight, DirectoryEntryStatus::RightOnly) => {
                 match delete_policy {
                     DirectorySyncDeletePolicy::PreserveDestination => None,
                     DirectorySyncDeletePolicy::IncludeDeletes => {
-                        Some(DirectorySyncOperation::Delete {
-                            path: row.path.clone(),
-                        })
+                        Some(delete_operation(row.right.as_ref(), &row.path)?)
+                    }
+                }
+            }
+            (DirectorySyncDirection::RightToLeft, DirectoryEntryStatus::LeftOnly) => {
+                match delete_policy {
+                    DirectorySyncDeletePolicy::PreserveDestination => None,
+                    DirectorySyncDeletePolicy::IncludeDeletes => {
+                        Some(delete_operation(row.left.as_ref(), &row.path)?)
                     }
                 }
             }
@@ -207,19 +230,40 @@ pub fn plan_directory_sync(
 }
 
 fn copy_operation(
-    entry: Option<&DirectoryEntrySnapshot>,
+    source: Option<&DirectoryEntrySnapshot>,
+    destination: Option<&DirectoryEntrySnapshot>,
     path: &str,
 ) -> Result<DirectorySyncOperation, DirectorySyncPlanError> {
-    let Some(entry) = entry else {
+    let Some(source) = source else {
         return Err(DirectorySyncPlanError::MissingSource {
             path: path.to_owned(),
         });
     };
     Ok(DirectorySyncOperation::Copy {
-        path: entry.path.clone(),
-        source_kind: entry.kind,
-        expected_source_hash: entry.content_hash,
-        expected_source_size: entry.size,
+        path: source.path.clone(),
+        source_kind: source.kind,
+        expected_source_hash: source.content_hash,
+        expected_source_size: source.size,
+        expected_destination_kind: destination.map(|entry| entry.kind),
+        expected_destination_size: destination.and_then(|entry| entry.size),
+        expected_destination_hash: destination.and_then(|entry| entry.content_hash),
+    })
+}
+
+fn delete_operation(
+    destination: Option<&DirectoryEntrySnapshot>,
+    path: &str,
+) -> Result<DirectorySyncOperation, DirectorySyncPlanError> {
+    let Some(destination) = destination else {
+        return Err(DirectorySyncPlanError::MissingDestination {
+            path: path.to_owned(),
+        });
+    };
+    Ok(DirectorySyncOperation::Delete {
+        path: destination.path.clone(),
+        expected_destination_kind: destination.kind,
+        expected_destination_size: destination.size,
+        expected_destination_hash: destination.content_hash,
     })
 }
 
@@ -244,6 +288,9 @@ fn plan_digest(
                 source_kind,
                 expected_source_hash,
                 expected_source_size,
+                expected_destination_kind,
+                expected_destination_size,
+                expected_destination_hash,
             } => {
                 bytes.push(0);
                 bytes.extend_from_slice(path.as_bytes());
@@ -256,10 +303,36 @@ fn plan_digest(
                 });
                 bytes.extend_from_slice(&expected_source_size.unwrap_or_default().to_be_bytes());
                 bytes.extend_from_slice(&expected_source_hash.unwrap_or_default());
+                bytes.push(match expected_destination_kind {
+                    Some(DirectoryEntryKind::File) => 0,
+                    Some(DirectoryEntryKind::Directory) => 1,
+                    Some(DirectoryEntryKind::Symlink) => 2,
+                    Some(DirectoryEntryKind::Other) => 3,
+                    None => 0xff,
+                });
+                bytes.extend_from_slice(
+                    &expected_destination_size.unwrap_or_default().to_be_bytes(),
+                );
+                bytes.extend_from_slice(&expected_destination_hash.unwrap_or_default());
             }
-            DirectorySyncOperation::Delete { path } => {
+            DirectorySyncOperation::Delete {
+                path,
+                expected_destination_kind,
+                expected_destination_size,
+                expected_destination_hash,
+            } => {
                 bytes.push(1);
                 bytes.extend_from_slice(path.as_bytes());
+                bytes.push(match expected_destination_kind {
+                    DirectoryEntryKind::File => 0,
+                    DirectoryEntryKind::Directory => 1,
+                    DirectoryEntryKind::Symlink => 2,
+                    DirectoryEntryKind::Other => 3,
+                });
+                bytes.extend_from_slice(
+                    &expected_destination_size.unwrap_or_default().to_be_bytes(),
+                );
+                bytes.extend_from_slice(&expected_destination_hash.unwrap_or_default());
             }
         }
         bytes.push(0xff);
@@ -354,7 +427,7 @@ mod tests {
             DirectorySyncDeletePolicy::IncludeDeletes,
         )
         .unwrap_or_else(|error| panic!("plan: {error}"));
-        assert!(plan.operations().iter().any(|operation| matches!(operation, DirectorySyncOperation::Delete { path } if path == "remote")));
+        assert!(plan.operations().iter().any(|operation| matches!(operation, DirectorySyncOperation::Delete { path, expected_destination_kind: DirectoryEntryKind::File, .. } if path == "remote")));
     }
 
     #[test]
