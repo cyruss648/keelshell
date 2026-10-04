@@ -1,23 +1,33 @@
 # AI transport contract
 
-The crate implements two explicit wire formats: OpenAI-compatible Chat
-Completions and the OpenAI Responses API. Both use explicit Bearer or no
-authentication. Named configuration metadata belongs in `keelshell-core`; the
-transport does not load profiles, resolve credential references, read environment
-variables for credentials, or execute local provider processes.
+The crate implements three explicit wire formats: OpenAI-compatible Chat
+Completions, the OpenAI Responses API, and Anthropic Messages. OpenAI-compatible
+requests use explicit Bearer or no authentication. Anthropic requests use
+`x-api-key` and always send `anthropic-version: 2023-06-01`; they never send the
+key as a Bearer token. Named configuration metadata belongs in `keelshell-core`;
+the transport does not load profiles, resolve credential references, read
+environment variables for credentials, or execute local provider processes.
 
 `ProviderEndpoint::new` validates a complete provider URL independently of model
-selection. `models_endpoint()` replaces only a literal `/chat/completions` or
-`/responses` suffix with `/models`, keeping the scheme, host, port and prefix.
+selection. `models_endpoint()` replaces only a literal `/chat/completions`,
+`/responses`, or Anthropic `/messages` suffix with `/models`, keeping the scheme,
+host, port and prefix. Anthropic model listing follows the provider's bounded
+cursor pages (`limit=1000`, `after_id`) and rejects missing cursors, repeated
+cursors, more than 4096 IDs, or more than 64 pages instead of silently
+returning an incomplete catalog.
 A custom endpoint which does not support this convention fails without guessing
 another route; a manually entered model remains possible.
 
 `ProviderConfig::new` retains Chat Completions as the compatibility default.
-`ProviderConfig::new_with_protocol` binds either protocol to the immutable
-preview. Responses previews use `instructions`, `input`, `model` and
-`stream: false`; their parser accepts only closed `message` items containing
-`output_text`. No tools, function calls, remote files or autonomous actions are
-enabled by this adapter.
+`ProviderConfig::new_with_protocol` binds one protocol to the immutable preview.
+Responses previews use `instructions`, `input`, `model` and `stream: false`; the
+parser accepts only closed `message` items containing `output_text`. Anthropic
+previews use `model`, `system`, `messages`, `max_tokens` (4096 by default) and
+`stream: false`; `ContextDraft::prepare_with_max_tokens` can choose a bounded
+1–1,000,000 token budget. Its parser requires an assistant message and accepts
+only `text` blocks. Thinking and tool blocks are never converted to displayed
+text, and a response containing only those blocks is rejected. No tools, function
+calls, remote files or autonomous actions are enabled by these adapters.
 
 `ProviderClient` provides three asynchronous operations:
 
@@ -49,7 +59,8 @@ while a request was running. A cancellation token is one-way; each new operation
 needs a fresh token.
 
 `tests/discovery_http.rs` uses bounded loopback HTTP fixtures for exact paths,
-fixed probe bodies, immutable approvals, malformed models, response limits,
+fixed probe bodies, Anthropic headers and paginated model pages, immutable approvals,
+malformed models, response limits,
 status categories, redirects, header/body timeouts, and cancellation. Proxy
 environment isolation uses a bounded subprocess, avoiding unsafe process-wide
 environment changes in a parallel Rust test process. These tests are transport

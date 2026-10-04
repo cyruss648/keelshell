@@ -45,10 +45,32 @@ impl Server {
         declared_length: bool,
         body_delay: Duration,
     ) -> TestResult<Self> {
+        Self::start_at_protocol(
+            path,
+            ProviderProtocol::ChatCompletions,
+            status,
+            body,
+            declared_length,
+            body_delay,
+        )
+    }
+
+    fn start_at_protocol(
+        path: &str,
+        protocol: ProviderProtocol,
+        status: u16,
+        body: &str,
+        declared_length: bool,
+        body_delay: Duration,
+    ) -> TestResult<Self> {
         let listener = TcpListener::bind("127.0.0.1:0")?;
         listener.set_nonblocking(true)?;
         let address = listener.local_addr()?;
-        let provider = ProviderConfig::new(&format!("http://{address}{path}"), "fixture-model")?;
+        let provider = ProviderConfig::new_with_protocol(
+            &format!("http://{address}{path}"),
+            "fixture-model",
+            protocol,
+        )?;
         let body = body.to_owned();
         let handle = thread::spawn(move || {
             let started = Instant::now();
@@ -164,6 +186,18 @@ fn responses_answer(content: &str) -> String {
     .to_string()
 }
 
+fn anthropic_answer(content: &str) -> String {
+    serde_json::json!({
+        "id": "msg_fixture",
+        "type": "message",
+        "role": "assistant",
+        "model": "fixture-model",
+        "content": [{"type": "text", "text": content}],
+        "stop_reason": "end_turn"
+    })
+    .to_string()
+}
+
 #[test]
 fn real_request_equals_preview_and_excludes_selected_secrets() -> TestResult {
     let server = Server::start(
@@ -245,6 +279,108 @@ fn responses_request_equals_preview_and_extracts_output_text() -> TestResult {
             .is_some_and(|value| value.contains("connection refused"))
     );
     assert!(recorded.headers.starts_with("POST /v1/responses HTTP/1.1"));
+    Ok(())
+}
+
+#[test]
+fn anthropic_request_equals_preview_uses_x_api_key_and_exact_messages_fields() -> TestResult {
+    let server = Server::start_at_protocol(
+        "/v1/messages",
+        ProviderProtocol::AnthropicMessages,
+        200,
+        &anthropic_answer("Review the SSH listener"),
+        true,
+        Duration::ZERO,
+    )?;
+    let prepared = ContextDraft::new("Explain the selected failure")
+        .add_selection("selected output", "connection refused")
+        .prepare_with_max_tokens(&server.provider, &[], 8192, 8192)?;
+    let preview = prepared.preview_json().to_owned();
+    let reply = client(4096)?.send(prepared.approve(), Some("anthropic-fixture-key"))?;
+    assert_eq!(reply.text(), "Review the SSH listener");
+    let recorded = server.finish()?;
+    assert_eq!(recorded.body, preview);
+    let lower = recorded.headers.to_ascii_lowercase();
+    assert!(lower.contains("x-api-key: anthropic-fixture-key\r\n"));
+    assert!(lower.contains("anthropic-version: 2023-06-01\r\n"));
+    assert!(!lower.contains("authorization:"));
+    let payload: serde_json::Value = serde_json::from_str(&recorded.body)?;
+    assert_eq!(payload["model"], "fixture-model");
+    assert_eq!(payload["max_tokens"], 8192);
+    assert_eq!(payload["stream"], false);
+    assert!(payload["system"].is_string());
+    assert_eq!(payload["messages"][0]["role"], "user");
+    assert!(payload.get("tools").is_none());
+    Ok(())
+}
+
+#[test]
+fn anthropic_version_is_sent_without_an_api_key_and_non_text_blocks_are_never_text() -> TestResult {
+    let server = Server::start_at_protocol(
+        "/v1/messages",
+        ProviderProtocol::AnthropicMessages,
+        200,
+        &anthropic_answer("OK"),
+        true,
+        Duration::ZERO,
+    )?;
+    let request = ContextDraft::new("hello").prepare(&server.provider, &[], 100)?;
+    let reply = client(4096)?.send(request.approve(), None)?;
+    assert_eq!(reply.text(), "OK");
+    let recorded = server.finish()?;
+    let lower = recorded.headers.to_ascii_lowercase();
+    assert!(lower.contains("anthropic-version: 2023-06-01\r\n"));
+    assert!(!lower.contains("x-api-key:"));
+
+    for (body, expected) in [
+        (
+            serde_json::json!({
+                "role":"assistant", "model":"fixture-model",
+                "content":[{"type":"thinking","thinking":"private reasoning"},{"type":"text","text":"visible"}]
+            }).to_string(),
+            Ok("visible"),
+        ),
+        (
+            serde_json::json!({
+                "role":"assistant", "content":[{"type":"tool_use","id":"tool","name":"x","input":{}}]
+            }).to_string(),
+            Err(AiError::EmptyReply),
+        ),
+        (
+            serde_json::json!({
+                "role":"assistant", "content":[{"type":"thinking","thinking":"private reasoning"}]
+            }).to_string(),
+            Err(AiError::EmptyReply),
+        ),
+        (
+            serde_json::json!({
+                "role":"user", "content":[{"type":"text","text":"spoof"}]
+            }).to_string(),
+            Err(AiError::InvalidResponse),
+        ),
+        (
+            serde_json::json!({
+                "role":"assistant", "content":[{"type":"text"}]
+            }).to_string(),
+            Err(AiError::InvalidResponse),
+        ),
+    ] {
+        let server = Server::start_at_protocol(
+            "/v1/messages",
+            ProviderProtocol::AnthropicMessages,
+            200,
+            &body,
+            true,
+            Duration::ZERO,
+        )?;
+        let request = ContextDraft::new("hello").prepare(&server.provider, &[], 100)?;
+        let result = client(4096)?.send(request.approve(), None);
+        match expected {
+            Ok(text) => assert_eq!(result?.text(), text),
+            Err(error) => assert!(matches!(result, Err(actual) if actual == error)),
+        }
+        server.finish()?;
+    }
     Ok(())
 }
 

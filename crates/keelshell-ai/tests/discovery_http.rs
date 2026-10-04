@@ -121,6 +121,69 @@ impl Fixture {
     }
 }
 
+/// Multi-request fixture used to prove Anthropic pagination does not silently
+/// stop after the first model page.
+struct PagedFixture {
+    endpoint: ProviderEndpoint,
+    recorded: oneshot::Receiver<Vec<Recorded>>,
+    task: JoinHandle<io::Result<()>>,
+}
+
+impl PagedFixture {
+    async fn start(replies: Vec<Reply>) -> TestResult<Self> {
+        let listener = TcpListener::bind("127.0.0.1:0").await?;
+        let endpoint = ProviderEndpoint::new_with_protocol(
+            &format!("http://{}/tenant/v1/messages", listener.local_addr()?),
+            ProviderProtocol::AnthropicMessages,
+        )?;
+        let (send, recorded) = oneshot::channel();
+        let task = tokio::spawn(async move {
+            timeout(FIXTURE_LIMIT, async move {
+                let mut requests = Vec::with_capacity(replies.len());
+                for reply in replies {
+                    let (mut stream, _) = listener.accept().await?;
+                    requests.push(read_request(&mut stream).await?);
+                    let framing = match reply.framing {
+                        Framing::Length => format!("Content-Length: {}\r\n", reply.body.len()),
+                        Framing::Eof => String::new(),
+                        Framing::Chunked => "Transfer-Encoding: chunked\r\n".into(),
+                    };
+                    let headers = format!(
+                        "HTTP/1.1 {} Fixture\r\nContent-Type: application/json\r\n{framing}Connection: close\r\n\r\n",
+                        reply.status
+                    );
+                    stream.write_all(headers.as_bytes()).await?;
+                    let body = match reply.framing {
+                        Framing::Chunked => {
+                            format!("{:x}\r\n{}\r\n0\r\n\r\n", reply.body.len(), reply.body)
+                        }
+                        _ => reply.body,
+                    };
+                    stream.write_all(body.as_bytes()).await?;
+                }
+                let _ = send.send(requests);
+                Ok(())
+            })
+            .await
+            .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "HTTP fixture deadline"))?
+        });
+        Ok(Self {
+            endpoint,
+            recorded,
+            task,
+        })
+    }
+
+    async fn observed(&mut self) -> TestResult<Vec<Recorded>> {
+        Ok(timeout(FIXTURE_LIMIT, &mut self.recorded).await??)
+    }
+
+    async fn finish(self) -> TestResult {
+        timeout(FIXTURE_LIMIT, self.task).await???;
+        Ok(())
+    }
+}
+
 async fn read_request(stream: &mut TcpStream) -> io::Result<Recorded> {
     let mut bytes = Vec::new();
     let header_end = loop {
@@ -183,6 +246,19 @@ fn responses_answer(model: Option<&str>) -> String {
                 "content": [{"type": "output_text", "text": "OK"}]
             }
         ]
+    });
+    if let Some(model) = model {
+        json["model"] = model.into();
+    }
+    json.to_string()
+}
+
+fn anthropic_answer(model: Option<&str>) -> String {
+    let mut json = serde_json::json!({
+        "id": "msg_fixture",
+        "type": "message",
+        "role": "assistant",
+        "content": [{"type": "text", "text": "OK"}]
     });
     if let Some(model) = model {
         json["model"] = model.into();
@@ -282,6 +358,102 @@ async fn responses_probe_uses_input_and_parses_output_text() -> TestResult {
     assert_eq!(json["stream"], false);
     assert_eq!(json["input"], CONNECTIVITY_PROMPT);
     assert!(json.get("messages").is_none());
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn anthropic_discovery_probe_uses_messages_auth_and_version_header() -> TestResult {
+    let mut fixture = Fixture::start_at(
+        "/tenant/v1/messages",
+        Reply::json(anthropic_answer(Some("anthropic-model"))),
+    )
+    .await?;
+    let provider = ProviderConfig::new_with_protocol(
+        fixture.endpoint.as_str(),
+        "requested-model",
+        ProviderProtocol::AnthropicMessages,
+    )?;
+    let report = client(4096)?
+        .test_connection(
+            &provider,
+            Some("anthropic-fixture-key"),
+            &RequestCancellation::new(),
+        )
+        .await?;
+    assert_eq!(report.actual_model(), Some("anthropic-model"));
+    let request = fixture.observed().await?;
+    let lower = request.headers.to_ascii_lowercase();
+    assert!(
+        request
+            .headers
+            .starts_with("POST /tenant/v1/messages HTTP/1.1\r\n")
+    );
+    assert!(lower.contains("x-api-key: anthropic-fixture-key\r\n"));
+    assert!(lower.contains("anthropic-version: 2023-06-01\r\n"));
+    assert!(!lower.contains("authorization:"));
+    let json: serde_json::Value = serde_json::from_str(&request.body)?;
+    assert_eq!(json["model"], "requested-model");
+    assert_eq!(json["max_tokens"], 4096);
+    assert_eq!(json["stream"], false);
+    assert!(json["system"].is_string());
+    assert_eq!(json["messages"][0]["role"], "user");
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn anthropic_model_discovery_follows_bounded_pages_without_silent_truncation() -> TestResult {
+    let mut fixture = PagedFixture::start(vec![
+        Reply::json(
+            r#"{"data":[{"type":"model","id":"claude-a"}],"has_more":true,"last_id":"cursor-1"}"#,
+        ),
+        Reply::json(r#"{"data":[{"type":"model","id":"claude-b"}],"has_more":false}"#),
+    ])
+    .await?;
+    let catalog = client(4096)?
+        .discover_models(
+            &fixture.endpoint,
+            Some("anthropic-fixture-key"),
+            &RequestCancellation::new(),
+        )
+        .await?;
+    assert_eq!(catalog.models(), &["claude-a", "claude-b"]);
+    assert!(!catalog.truncated());
+    let requests = fixture.observed().await?;
+    assert_eq!(requests.len(), 2);
+    for request in &requests {
+        let lower = request.headers.to_ascii_lowercase();
+        assert!(lower.contains("x-api-key: anthropic-fixture-key\r\n"));
+        assert!(lower.contains("anthropic-version: 2023-06-01\r\n"));
+        assert!(!lower.contains("authorization:"));
+        assert!(request.body.is_empty());
+    }
+    assert!(
+        requests[0]
+            .headers
+            .starts_with("GET /tenant/v1/models?limit=1000 HTTP/1.1\r\n")
+    );
+    assert!(
+        requests[1]
+            .headers
+            .starts_with("GET /tenant/v1/models?limit=1000&after_id=cursor-1 HTTP/1.1\r\n")
+    );
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn anthropic_model_discovery_rejects_has_more_without_cursor() -> TestResult {
+    let mut fixture = Fixture::start_at(
+        "/tenant/v1/messages",
+        Reply::json(r#"{"data":[{"id":"claude-a"}],"has_more":true}"#),
+    )
+    .await?;
+    assert_eq!(
+        client(4096)?
+            .discover_models(&fixture.endpoint, None, &RequestCancellation::new())
+            .await,
+        Err(AiError::InvalidModelCatalog)
+    );
+    fixture.observed().await?;
     fixture.finish().await
 }
 

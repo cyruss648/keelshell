@@ -17,7 +17,7 @@ use zeroize::Zeroizing;
 
 use super::AiSettingsPanel;
 use crate::{
-    ai_credentials::{self, Completion, VaultAction},
+    ai_credentials::{self, Completion, VaultAction, uses_api_key_authentication},
     i18n::{Message, t},
 };
 
@@ -58,7 +58,7 @@ impl AiSettingsPanel {
         let Some(profile) = self.profile() else {
             return;
         };
-        if !matches!(profile.authentication, AiAuthentication::Bearer { .. }) {
+        if !uses_api_key_authentication(&profile.authentication) {
             return;
         }
         if let Err(error) = profile.validate_current_transport() {
@@ -124,8 +124,16 @@ impl AiSettingsPanel {
             .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
         {
             self.credentials.remove(&profile.id);
-            if unlink && matches!(profile.authentication, AiAuthentication::Bearer { .. }) {
-                profile.authentication = AiAuthentication::Bearer { credential: None };
+            if unlink && uses_api_key_authentication(&profile.authentication) {
+                let header = matches!(&profile.authentication, AiAuthentication::Header { .. });
+                profile.authentication = if header {
+                    AiAuthentication::Header {
+                        name: "x-api-key".into(),
+                        credential: None,
+                    }
+                } else {
+                    AiAuthentication::Bearer { credential: None }
+                };
             }
             self.changed(false, cx);
             self.load_editor(window, cx);
@@ -257,8 +265,16 @@ impl AiSettingsPanel {
                     .iter_mut()
                     .find(|p| p.id == profile.id)
                 {
-                    profile.authentication = AiAuthentication::Bearer {
-                        credential: Some(AiSecretRef::SecretStore { id: reference }),
+                    let header = matches!(&profile.authentication, AiAuthentication::Header { .. });
+                    profile.authentication = if header {
+                        AiAuthentication::Header {
+                            name: "x-api-key".into(),
+                            credential: Some(AiSecretRef::SecretStore { id: reference }),
+                        }
+                    } else {
+                        AiAuthentication::Bearer {
+                            credential: Some(AiSecretRef::SecretStore { id: reference }),
+                        }
                     };
                 }
                 self.changed(false, cx);

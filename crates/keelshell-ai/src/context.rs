@@ -64,6 +64,25 @@ impl ContextDraft {
         secrets: &[&str],
         byte_budget: usize,
     ) -> Result<PreparedRequest, AiError> {
+        self.prepare_with_max_tokens(provider, secrets, byte_budget, DEFAULT_MAX_TOKENS)
+    }
+
+    /// Produce an immutable preview while selecting the provider output budget.
+    ///
+    /// Anthropic Messages requires `max_tokens`; the compatibility [`prepare`]
+    /// method uses [`DEFAULT_MAX_TOKENS`]. Other protocols retain their existing
+    /// wire shape and ignore this value after validating it, so callers can use
+    /// one settings path for all providers.
+    pub fn prepare_with_max_tokens(
+        self,
+        provider: &ProviderConfig,
+        secrets: &[&str],
+        byte_budget: usize,
+        max_tokens: u32,
+    ) -> Result<PreparedRequest, AiError> {
+        if max_tokens == 0 || max_tokens > MAX_MAX_TOKENS {
+            return Err(AiError::InvalidMaxTokens);
+        }
         self.validate(secrets, byte_budget)?;
         let redactor = Redactor::new(secrets);
         let (prompt, mut report) = redactor.redact(&self.prompt);
@@ -116,6 +135,19 @@ impl ContextDraft {
                 };
                 serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?
             }
+            ProviderProtocol::AnthropicMessages => {
+                let payload = AnthropicRequest {
+                    model: provider.model(),
+                    system: SYSTEM_PROMPT,
+                    messages: [AnthropicMessage {
+                        role: "user",
+                        content: &user_content,
+                    }],
+                    max_tokens,
+                    stream: false,
+                };
+                serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?
+            }
         };
         if json.len() > MAX_INPUT_BYTES {
             return Err(AiError::ContextTooLarge);
@@ -153,6 +185,9 @@ impl ContextDraft {
         Ok(())
     }
 }
+
+const DEFAULT_MAX_TOKENS: u32 = 4096;
+const MAX_MAX_TOKENS: u32 = 1_000_000;
 
 fn sanitize_budgeted(
     input: &str,
@@ -205,6 +240,21 @@ struct ResponsesRequest<'a> {
     stream: bool,
     instructions: &'a str,
     input: &'a str,
+}
+
+#[derive(Serialize)]
+struct AnthropicRequest<'a> {
+    model: &'a str,
+    system: &'a str,
+    messages: [AnthropicMessage<'a>; 1],
+    max_tokens: u32,
+    stream: bool,
+}
+
+#[derive(Serialize)]
+struct AnthropicMessage<'a> {
+    role: &'a str,
+    content: &'a str,
 }
 
 /// Redacted, immutable request awaiting the user's explicit confirmation.
@@ -340,6 +390,41 @@ mod tests {
         let input = json["input"].as_str().ok_or(AiError::InvalidResponse)?;
         assert!(input.contains("connection refused"));
         assert!(json.get("messages").is_none());
+        Ok(())
+    }
+
+    #[test]
+    fn anthropic_preview_has_exact_messages_shape_and_configurable_budget() -> Result<(), AiError> {
+        let provider = ProviderConfig::new_with_protocol(
+            "https://example.test/v1/messages",
+            "claude-test",
+            ProviderProtocol::AnthropicMessages,
+        )?;
+        let request = ContextDraft::new("explain the selected failure")
+            .add_selection("output", "connection refused")
+            .prepare_with_max_tokens(&provider, &[], 4096, 8192)?;
+        let json: serde_json::Value =
+            serde_json::from_str(request.preview_json()).map_err(|_| AiError::InvalidResponse)?;
+        assert_eq!(json["model"], "claude-test");
+        assert_eq!(json["max_tokens"], 8192);
+        assert_eq!(json["stream"], false);
+        assert!(
+            json["system"]
+                .as_str()
+                .is_some_and(|s| s.contains("untrusted data"))
+        );
+        assert_eq!(json["messages"][0]["role"], "user");
+        assert!(
+            json["messages"][0]["content"]
+                .as_str()
+                .is_some_and(|s| s.contains("connection refused"))
+        );
+        assert!(json.get("instructions").is_none());
+        assert!(json.get("input").is_none());
+        assert!(matches!(
+            ContextDraft::new("question").prepare_with_max_tokens(&provider, &[], 4096, 0),
+            Err(AiError::InvalidMaxTokens)
+        ));
         Ok(())
     }
 }

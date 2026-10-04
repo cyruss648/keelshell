@@ -20,8 +20,9 @@ AI 配置模型已经区分 Chat Completions、Responses 和 Anthropic Messages�
 4. `/responses` 与 `/chat/completions` 都只能按字面后缀推导同源 `/models`；
    其它路径在发起网络请求前失败。
 5. 设置页提供中英文协议选择。切换已知后缀时同步替换路径并清除临时密钥；
-   自定义未知路径保持原样并要求用户自行审核地址。Anthropic Messages 继续显示
-   为尚未接入，不能静默降级为 Chat Completions。
+   自定义未知路径保持原样并要求用户自行审核地址。Anthropic Messages 的独立接入
+   由后续 [ADR 0030](0030-anthropic-messages-transport.md) 决定，不能静默降级为
+   Chat Completions。
 
 ## 验证边界
 

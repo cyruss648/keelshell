@@ -22,14 +22,17 @@ pub enum AiApiStyle {
     ChatCompletions,
     /// OpenAI Responses request/response format.
     Responses,
-    /// Anthropic Messages; configuration metadata only until its adapter exists.
+    /// Anthropic Messages request/response format.
     AnthropicMessages,
 }
 impl AiApiStyle {
     /// Whether the current KeelShell transport implements this body format.
     /// This does not assert provider availability or model compatibility.
     pub const fn supports_current_transport(self) -> bool {
-        matches!(self, Self::ChatCompletions | Self::Responses)
+        matches!(
+            self,
+            Self::ChatCompletions | Self::Responses | Self::AnthropicMessages
+        )
     }
 }
 
@@ -37,7 +40,7 @@ impl AiApiStyle {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AiPreset {
-    /// Anthropic's native Messages endpoint; not yet executable by this client.
+    /// Anthropic's native Messages endpoint.
     Claude,
     /// OpenAI Chat Completions.
     OpenAi,
@@ -53,7 +56,7 @@ pub enum AiPreset {
     Ollama,
     /// A manually configured chat/completions endpoint.
     OpenAiCompatible,
-    /// A manually configured Anthropic endpoint; metadata only for now.
+    /// A manually configured Anthropic Messages endpoint.
     AnthropicCompatible,
     /// A user-selected endpoint and declared API format.
     Custom,
@@ -498,8 +501,9 @@ impl NamedAiProfile {
     /// Validate options understood by the current HTTP adapter without network
     /// access. Persistable metadata can describe future adapters, but discovery,
     /// connection tests and completion requests must call this gate before use.
-    /// A caller must still enforce `None` versus `Bearer` authentication and
-    /// supply a transient credential for the latter; this method resolves none.
+    /// Authentication is checked against the selected protocol, but no secret
+    /// is resolved here. The transport caller still supplies a transient value
+    /// for a configured credential reference.
     pub fn validate_current_transport(&self) -> Result<(), ValidationError> {
         self.validate()?;
         if !self.api_style.supports_current_transport() {
@@ -508,6 +512,27 @@ impl NamedAiProfile {
                 "this API style has no implemented transport",
             ));
         }
+        let authentication_supported = match self.api_style {
+            AiApiStyle::ChatCompletions | AiApiStyle::Responses => matches!(
+                &self.authentication,
+                AiAuthentication::None
+                    | AiAuthentication::Bearer {
+                        credential: None | Some(AiSecretRef::SecretStore { .. })
+                    }
+            ),
+            // Anthropic's native API uses x-api-key. Keep the accepted header
+            // exact so a later adapter cannot accidentally send a bearer token
+            // or arbitrary user-selected header as provider authentication.
+            AiApiStyle::AnthropicMessages => match &self.authentication {
+                AiAuthentication::None => true,
+                AiAuthentication::Header { name, credential }
+                    if name.eq_ignore_ascii_case("x-api-key") =>
+                {
+                    matches!(credential, None | Some(AiSecretRef::SecretStore { .. }))
+                }
+                _ => false,
+            },
+        };
         if !self.custom_headers.is_empty()
             || self.proxy != AiProxy::Direct
             || self.context_window_tokens.is_some()
@@ -516,13 +541,7 @@ impl NamedAiProfile {
                 .reasoning_by_model
                 .get(&self.model)
                 .is_some_and(|setting| setting.selection != AiReasoningSelection::ProviderDefault)
-            || !matches!(
-                self.authentication,
-                AiAuthentication::None
-                    | AiAuthentication::Bearer {
-                        credential: None | Some(AiSecretRef::SecretStore { .. })
-                    }
-            )
+            || !authentication_supported
         {
             return Err(invalid(
                 "ai.profile",
@@ -532,11 +551,17 @@ impl NamedAiProfile {
         Ok(())
     }
 
-    /// Produce legacy chat preferences only when no advanced option would be
-    /// silently lost. Authentication is not represented by [`AiSettings`], so
-    /// callers must retain this profile and honor its authentication separately.
+    /// Produce legacy chat preferences only when no protocol or advanced option
+    /// would be silently lost. The legacy shape has no protocol field, so only
+    /// Chat Completions can be projected into it.
     /// Never persist this projection as a replacement for the named catalog.
     pub fn legacy_projection(&self, enabled: bool) -> Result<AiSettings, ValidationError> {
+        if self.api_style != AiApiStyle::ChatCompletions {
+            return Err(invalid(
+                "ai.profile.api_style",
+                "legacy settings support Chat Completions only",
+            ));
+        }
         self.validate_current_transport()?;
         Ok(AiSettings {
             enabled,
@@ -1052,14 +1077,19 @@ mod tests {
     }
 
     #[test]
-    fn unsupported_protocols_and_advanced_options_are_not_silently_downgraded()
+    fn implemented_protocols_and_advanced_options_are_not_silently_downgraded()
     -> Result<(), Box<dyn std::error::Error>> {
         let mut catalog = AiProfileCatalog::default();
         let mut profile = profile("Test");
         profile.api_style = AiApiStyle::AnthropicMessages;
+        profile.endpoint = "https://api.anthropic.com/v1/messages".into();
+        profile.authentication = AiAuthentication::Header {
+            name: "x-api-key".into(),
+            credential: Some(AiSecretRef::SecretStore { id: Uuid::new_v4() }),
+        };
         let id = profile.id;
         catalog.upsert(profile.clone())?;
-        assert!(catalog.activate(id).is_err());
+        catalog.activate(id)?;
         assert!(profile.legacy_projection(true).is_err());
         profile.api_style = AiApiStyle::ChatCompletions;
         profile.proxy = AiProxy::Explicit {
@@ -1078,6 +1108,66 @@ mod tests {
             credentials: None,
         };
         assert!(profile.validate().is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn anthropic_transport_requires_x_api_key_header_and_secret_store_or_transient_value()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let draft = NamedAiProfile::draft(AiPreset::Claude);
+        assert_eq!(draft.api_style, AiApiStyle::AnthropicMessages);
+        assert_eq!(draft.endpoint, "https://api.anthropic.com/v1/messages");
+        assert!(matches!(
+            draft.authentication,
+            AiAuthentication::Header {
+                name,
+                credential: None
+            } if name.eq_ignore_ascii_case("x-api-key")
+        ));
+
+        let mut profile = profile("Anthropic");
+        profile.api_style = AiApiStyle::AnthropicMessages;
+        profile.endpoint = "https://api.anthropic.com/v1/messages".into();
+        profile.authentication = AiAuthentication::Header {
+            name: "X-API-Key".into(),
+            credential: None,
+        };
+        profile.validate_current_transport()?;
+        profile.authentication = AiAuthentication::Header {
+            name: "x-api-key".into(),
+            credential: Some(AiSecretRef::SecretStore { id: Uuid::new_v4() }),
+        };
+        profile.validate_current_transport()?;
+
+        for authentication in [
+            AiAuthentication::Bearer { credential: None },
+            AiAuthentication::Header {
+                name: "authorization".into(),
+                credential: Some(AiSecretRef::SecretStore { id: Uuid::new_v4() }),
+            },
+            AiAuthentication::Header {
+                name: "x-api-key".into(),
+                credential: Some(AiSecretRef::Environment {
+                    name: "ANTHROPIC_API_KEY".into(),
+                }),
+            },
+        ] {
+            profile.authentication = authentication;
+            assert!(profile.validate_current_transport().is_err());
+        }
+
+        profile.authentication = AiAuthentication::Header {
+            name: "x-api-key".into(),
+            credential: None,
+        };
+        profile.max_output_tokens = Some(4096);
+        assert!(profile.validate_current_transport().is_err());
+        profile.max_output_tokens = None;
+        profile.custom_headers.push(AiCustomHeader {
+            name: "x-tenant".into(),
+            value_ref: AiSecretRef::SecretStore { id: Uuid::new_v4() },
+        });
+        assert!(profile.validate_current_transport().is_err());
         Ok(())
     }
 }

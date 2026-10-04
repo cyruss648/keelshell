@@ -13,13 +13,13 @@ use keelshell_ai::{
     AiError, CommandProposal, ContextDraft, DiagnosticPlan, DiagnosticRisk, PreparedRequest,
     ProviderClient, ProviderConfig, ProviderProtocol, RequestCancellation,
 };
-use keelshell_core::{AiApiStyle, AiAuthentication, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{AiApiStyle, AiProfileCatalog, NamedAiProfile};
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
 
 use crate::{
-    ai_settings::{EphemeralCredentials, provider_error},
+    ai_settings::{EphemeralCredentials, provider_error, uses_api_key},
     i18n::{Message, t},
 };
 
@@ -258,7 +258,7 @@ impl AssistantPanel {
             cx.notify();
             return;
         }
-        if matches!(profile.authentication, AiAuthentication::Bearer { .. })
+        if uses_api_key(&profile.authentication)
             && self.key.as_ref().is_none_or(|key| key.is_empty())
         {
             self.status = Message::new(
@@ -271,14 +271,7 @@ impl AssistantPanel {
         let protocol = match profile.api_style {
             AiApiStyle::ChatCompletions => ProviderProtocol::ChatCompletions,
             AiApiStyle::Responses => ProviderProtocol::Responses,
-            AiApiStyle::AnthropicMessages => {
-                self.status = Message::new(
-                    "当前尚未接入 Anthropic Messages 传输。",
-                    "Anthropic Messages transport is not implemented yet.",
-                );
-                cx.notify();
-                return;
-            }
+            AiApiStyle::AnthropicMessages => ProviderProtocol::AnthropicMessages,
         };
         let result = ProviderConfig::new_with_protocol(&profile.endpoint, &profile.model, protocol)
             .and_then(|provider| {
@@ -335,7 +328,7 @@ impl AssistantPanel {
         let key = if self
             .profile
             .as_ref()
-            .is_some_and(|p| matches!(p.authentication, AiAuthentication::Bearer { .. }))
+            .is_some_and(|p| uses_api_key(&p.authentication))
         {
             self.key.clone()
         } else {

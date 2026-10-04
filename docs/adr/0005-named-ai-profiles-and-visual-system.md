@@ -10,7 +10,7 @@
 2. 目录与凭据分离。状态文件只存元数据及凭据引用；当前 UI 密钥以 Zeroizing 内存值保留，遮罩显示，不落普通 JSON。供应商变化清除旧临时密钥。
 3. 所有 HTTP 都来自显式动作。发现只推导同源模型目录；测试发送固定无用户上下文提示；聊天使用用户看过并确认的准确 JSON。修改上下文、问题、配置或密钥使预览失效。
 4. 请求 revision 与配置草稿 revision 分离。取消和旧结果不覆盖新任务；保存快照不覆盖保存期间的新输入；错误保留草稿。命令建议固定到原会话，进入可编辑审阅栏，不自动执行。
-5. 请求协议必须逐一实现并补 HTTP 契约测试。当前已接通 Chat Completions 与 Responses；Anthropic Messages 和高级参数仍由 transport 显式拒绝，不能把类型化元数据静默降级为已实现能力。Responses 的后续决策见 [ADR 0029](0029-ai-responses-transport.md)。
+5. 请求协议必须逐一实现并补 HTTP 契约测试。当前已接通 Chat Completions、Responses 与 Anthropic Messages；自定义请求头、代理、Token/推理参数和 Agent 工作流仍由 transport 显式拒绝，不能把类型化元数据静默降级为已实现能力。Responses 与 Anthropic 的后续决策见 [ADR 0029](0029-ai-responses-transport.md) 和 [ADR 0030](0030-anthropic-messages-transport.md)。
 6. 统一浅灰画布、白色面板、蓝色强调、轻边框、6/12 px 圆角与 GPUI Kit 图标。工作区采用顶部会话、左侧监控、中央终端、底部文件/命令/隧道的分区。窄窗口 AI 优先保留可操作的终端面积。
 7. 品牌图标是白色底板、蓝青几何 K 和外部透明。原始生成源保留，平台转换可校验复现。Mac ICNS、Windows ICO 和 Linux hicolor 各自接入原生打包身份。
 

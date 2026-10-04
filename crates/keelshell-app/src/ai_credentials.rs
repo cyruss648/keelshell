@@ -24,6 +24,24 @@ pub(crate) enum Completion {
     Cancelled,
 }
 
+pub(crate) fn uses_api_key_authentication(authentication: &AiAuthentication) -> bool {
+    match authentication {
+        AiAuthentication::Bearer { .. } => true,
+        AiAuthentication::Header { name, .. } => name.eq_ignore_ascii_case("x-api-key"),
+        AiAuthentication::None => false,
+    }
+}
+
+fn authentication_binding(authentication: &AiAuthentication) -> Option<&'static str> {
+    match authentication {
+        AiAuthentication::Bearer { .. } => Some("bearer"),
+        AiAuthentication::Header { name, .. } if name.eq_ignore_ascii_case("x-api-key") => {
+            Some("header:x-api-key")
+        }
+        AiAuthentication::None | AiAuthentication::Header { .. } => None,
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct BoundKey {
@@ -43,9 +61,16 @@ impl Drop for BoundKey {
 
 pub(crate) fn reference(profile: &NamedAiProfile) -> Option<Uuid> {
     match &profile.authentication {
-        AiAuthentication::Bearer {
-            credential: Some(AiSecretRef::SecretStore { id }),
-        } => Some(*id),
+        authentication if uses_api_key_authentication(authentication) => match authentication {
+            AiAuthentication::Bearer {
+                credential: Some(AiSecretRef::SecretStore { id }),
+            }
+            | AiAuthentication::Header {
+                credential: Some(AiSecretRef::SecretStore { id }),
+                ..
+            } => Some(*id),
+            _ => None,
+        },
         _ => None,
     }
 }
@@ -56,7 +81,9 @@ fn encode(profile: &NamedAiProfile, key: Zeroizing<String>) -> Result<Zeroizing<
         profile_id: profile.id,
         endpoint: profile.endpoint.clone(),
         api_style: profile.api_style,
-        authentication: "bearer".into(),
+        authentication: authentication_binding(&profile.authentication)
+            .ok_or(Error::VaultEntryMismatch)?
+            .into(),
         key: key.to_string(),
     };
     serde_json::to_string(&payload)
@@ -73,8 +100,7 @@ fn decode(
         || payload.profile_id != profile.id
         || payload.endpoint != profile.endpoint
         || payload.api_style != profile.api_style
-        || payload.authentication != "bearer"
-        || !matches!(profile.authentication, AiAuthentication::Bearer { .. })
+        || authentication_binding(&profile.authentication) != Some(payload.authentication.as_str())
     {
         return Err(Error::VaultEntryMismatch);
     }
@@ -94,7 +120,7 @@ pub(crate) fn operate(
     cancelled: &AtomicBool,
 ) -> Result<Completion, Error> {
     profile.validate_current_transport()?;
-    if !matches!(profile.authentication, AiAuthentication::Bearer { .. }) {
+    if !uses_api_key_authentication(&profile.authentication) {
         return Err(Error::VaultEntryMismatch);
     }
     if action == VaultAction::Save && (key.is_empty() || key.contains('\0')) {

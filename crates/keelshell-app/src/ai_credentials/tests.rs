@@ -1,5 +1,5 @@
 use super::*;
-use keelshell_core::{AiPreset, AppState, StateStore};
+use keelshell_core::{AiApiStyle, AiAuthentication, AiPreset, AppState, StateStore};
 
 struct Fixture(std::path::PathBuf);
 impl Fixture {
@@ -165,5 +165,51 @@ fn resaving_uses_new_entry_and_cancelled_admission_writes_nothing() -> Result<()
         .as_str(),
         "first"
     );
+    Ok(())
+}
+
+#[test]
+fn anthropic_x_api_key_roundtrips_as_a_distinct_vault_binding() -> Result<(), Error> {
+    let fixture = Fixture::new();
+    let mut profile = profile();
+    profile.api_style = AiApiStyle::AnthropicMessages;
+    profile.endpoint = "https://api.anthropic.com/v1/messages".into();
+    profile.authentication = AiAuthentication::Header {
+        name: "x-api-key".into(),
+        credential: None,
+    };
+    let cancelled = AtomicBool::new(false);
+    let Completion::Saved(id) = operate(
+        fixture.path(),
+        &profile,
+        VaultAction::Save,
+        secret("master anthropic"),
+        secret("sk-ant-fixture"),
+        &cancelled,
+    )?
+    else {
+        panic!("save must return reference");
+    };
+    profile.authentication = AiAuthentication::Header {
+        name: "X-API-KEY".into(),
+        credential: Some(AiSecretRef::SecretStore { id }),
+    };
+    let Completion::Unlocked(key) = operate(
+        fixture.path(),
+        &profile,
+        VaultAction::Unlock,
+        secret("master anthropic"),
+        secret(""),
+        &cancelled,
+    )?
+    else {
+        panic!("unlock must return key");
+    };
+    assert_eq!(key.as_str(), "sk-ant-fixture");
+    let data = std::fs::read_to_string(fixture.path())?;
+    assert!(!data.contains("sk-ant-fixture"));
+    let vault = VaultStore::new(fixture.path()).load("master anthropic")?;
+    let payload = vault.get(id, profile.id, CredentialKind::AiApiKey)?;
+    assert!(payload.contains("header:x-api-key"));
     Ok(())
 }

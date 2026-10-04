@@ -75,6 +75,9 @@ pub enum AiError {
         "AI timeout must be nonzero and at most 300 seconds; response limit must be 1 byte to 8 MiB"
     )]
     InvalidLimits,
+    /// The requested provider output token budget is outside the bounded range.
+    #[error("AI max_tokens must be between 1 and 1000000")]
+    InvalidMaxTokens,
     /// HTTP client initialization failed.
     #[error("AI HTTP client could not be initialized")]
     ClientInitialization,

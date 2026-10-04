@@ -46,7 +46,7 @@ The interface defaults to Simplified Chinese and supports English. The project t
 | **Remote files** | SFTP browsing, file and recursive directory uploads/downloads, transfer review, progress, pause/continue and cancellation, content-verified file and directory resumption, an explicit read-only recovery check for failed transfers in the same SSH session, directory creation, rename and delete, text viewing, local diff preview against the read baseline, reviewed saves, and a bounded metadata snapshot/read-only directory comparison card in the file panel |
 | **Host status** | Linux CPU, memory, load, uptime, disk capacity, network counters, processes, and listening socket diagnostics |
 | **Port forwarding** | Local/remote TCP forwarding and a loopback SOCKS5 proxy, with actual listener addresses, status, and stop controls |
-| **AI assistance** | Named provider profiles, Chat Completions/Responses model discovery and connection testing, context selection, exact protocol request previews, answers, and command suggestions; replies can become session-bound diagnostic plans with step-by-step review |
+| **AI assistance** | Named provider profiles, Chat Completions/Responses/Anthropic Messages model discovery and connection testing, context selection, exact protocol request previews, answers, and command suggestions; replies can become session-bound diagnostic plans with step-by-step review |
 | **About and updates** | In-app project link, version and changelog; platform-aware GitHub Release checks, downloads and SHA-256 verification with opt-in install and restart |
 
 Pausing waits for in-flight operations to be acknowledged before showing “Paused.” To resume a partial file or directory, explicitly select the source and destination, review the content verification, and confirm; after reconnecting or restarting, create a new resumption plan. See the [transfer verification record](docs/testing/records/2026-10-03-sftp-resume.md).
@@ -59,7 +59,7 @@ Enable parameters in the snippet editor to use `{{name}}` for literal values sup
 
 ## AI that keeps you in control
 
-1. **Configure a provider.** Create a named profile, choose a model, and optionally discover models or test the connection. The current backend supports Chat Completions and Responses endpoints, including self-hosted services.
+1. **Configure a provider.** Create a named profile, choose a model, and optionally discover models or test the connection. The current backend supports Chat Completions, Responses, and Anthropic Messages endpoints, including self-hosted services; Anthropic requests use x-api-key and an explicitly reviewable Messages preview.
 2. **Choose the context.** Select terminal content, inspect the redacted request, and send it when ready.
 3. **Review the suggestions.** Read the response, place any suggested command in the command bar, and confirm its content and destination before executing it.
 

@@ -133,11 +133,7 @@ impl Render for AiSettingsPanel {
             }
             form = form
                 .child(presets)
-                .child(label(
-                    cx,
-                    "请求协议",
-                    "Request protocol",
-                ))
+                .child(label(cx, "请求协议", "Request protocol"))
                 .child(
                     div()
                         .flex()
@@ -157,12 +153,28 @@ impl Render for AiSettingsPanel {
                                 .on_click(cx.listener(|panel, _, window, cx| {
                                     panel.set_api_style(AiApiStyle::Responses, window, cx)
                                 })),
+                        )
+                        .child(
+                            Button::new("ai-api-style-anthropic")
+                                .label("Anthropic Messages")
+                                .selected(profile.api_style == AiApiStyle::AnthropicMessages)
+                                .on_click(cx.listener(|panel, _, window, cx| {
+                                    panel.set_api_style(AiApiStyle::AnthropicMessages, window, cx)
+                                })),
                         ),
                 )
                 .child(label(
                     cx,
-                    "Responses 使用 /responses 地址；Anthropic Messages 尚未接入。",
-                    "Responses uses a /responses endpoint; Anthropic Messages is not implemented yet.",
+                    if profile.api_style == AiApiStyle::AnthropicMessages {
+                        "Anthropic Messages 使用 /messages 地址和 x-api-key。"
+                    } else {
+                        "Responses 使用 /responses 地址；请求仍需人工审阅。"
+                    },
+                    if profile.api_style == AiApiStyle::AnthropicMessages {
+                        "Anthropic Messages uses /messages and x-api-key."
+                    } else {
+                        "Responses uses a /responses endpoint; requests still require review."
+                    },
                 ))
                 .child(label(cx, "完整请求地址", "Full request endpoint"))
                 .child(Input::new(&self.endpoint).id("ai-profile-endpoint"))
@@ -172,6 +184,11 @@ impl Render for AiSettingsPanel {
                     "HTTPS or loopback HTTP only; no automatic endpoint probing.",
                 ));
             let bearer = matches!(profile.authentication, AiAuthentication::Bearer { .. });
+            let header = matches!(
+                &profile.authentication,
+                AiAuthentication::Header { name, .. }
+                    if name.eq_ignore_ascii_case("x-api-key")
+            );
             form = form.child(label(cx, "认证方式", "Authentication")).child(
                 div()
                     .flex()
@@ -185,6 +202,14 @@ impl Render for AiSettingsPanel {
                             })),
                     )
                     .child(
+                        Button::new("ai-auth-header")
+                            .label(t(cx, "x-api-key", "x-api-key"))
+                            .selected(header)
+                            .on_click(cx.listener(|panel, _, window, cx| {
+                                panel.set_header_authentication(window, cx)
+                            })),
+                    )
+                    .child(
                         Button::new("ai-auth-none")
                             .label(t(cx, "无认证", "No authentication"))
                             .selected(matches!(profile.authentication, AiAuthentication::None))
@@ -193,7 +218,7 @@ impl Render for AiSettingsPanel {
                             })),
                     ),
             );
-            if bearer {
+            if bearer || header {
                 form = form
                     .child(Input::new(&self.key).id("ai-profile-key"))
                     .child(self.vault_controls(cx));

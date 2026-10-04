@@ -27,6 +27,19 @@ use vault::VaultPrompt;
 /// Temporary keys indexed by profile identity. Never serialize or debug this map.
 pub type EphemeralCredentials = BTreeMap<Uuid, Zeroizing<String>>;
 
+/// Whether the selected profile uses one transient API-key value.
+///
+/// The wire adapter chooses the header scheme from the immutable protocol. The
+/// settings and assistant layers only need to know whether a value must be
+/// resolved; they must not infer a bearer header from this predicate.
+pub(crate) fn uses_api_key(authentication: &AiAuthentication) -> bool {
+    match authentication {
+        AiAuthentication::Bearer { .. } => true,
+        AiAuthentication::Header { name, .. } => name.eq_ignore_ascii_case("x-api-key"),
+        AiAuthentication::None => false,
+    }
+}
+
 /// Persistence is owned by the workspace. Apply carries an immutable metadata
 /// and credential snapshot; the panel closes only after persistence succeeds.
 pub enum AiSettingsEvent {
@@ -298,10 +311,15 @@ impl AiSettingsPanel {
             profile.name.clone_from(&values.name);
             profile.endpoint.clone_from(&values.endpoint);
             profile.model.clone_from(&values.model);
-            if (endpoint_changed || key_changed)
-                && matches!(profile.authentication, AiAuthentication::Bearer { .. })
-            {
-                profile.authentication = AiAuthentication::Bearer { credential: None };
+            if endpoint_changed || key_changed {
+                match &mut profile.authentication {
+                    AiAuthentication::Bearer { credential }
+                    | AiAuthentication::Header {
+                        name: _,
+                        credential,
+                    } => *credential = None,
+                    AiAuthentication::None => {}
+                }
             }
             if values.key.is_empty() {
                 self.credentials.remove(&profile.id);
@@ -414,10 +432,13 @@ impl AiSettingsPanel {
             profile.preset = preset;
             profile.api_style = preset.api_style();
             profile.endpoint = preset.endpoint().into();
-            profile.authentication = if preset == AiPreset::Ollama {
-                AiAuthentication::None
-            } else {
-                AiAuthentication::Bearer { credential: None }
+            profile.authentication = match preset.api_style() {
+                AiApiStyle::AnthropicMessages => AiAuthentication::Header {
+                    name: "x-api-key".into(),
+                    credential: None,
+                },
+                _ if preset == AiPreset::Ollama => AiAuthentication::None,
+                _ => AiAuthentication::Bearer { credential: None },
             };
             // A credential for one destination is never carried to another preset.
             self.credentials.remove(&profile.id);
@@ -440,17 +461,33 @@ impl AiSettingsPanel {
         let old_endpoint = profile.endpoint.clone();
         profile.api_style = style;
         profile.endpoint = match style {
-            AiApiStyle::ChatCompletions => {
-                replace_protocol_suffix(&old_endpoint, "/responses", "/chat/completions")
-            }
-            AiApiStyle::Responses => {
-                replace_protocol_suffix(&old_endpoint, "/chat/completions", "/responses")
-            }
-            AiApiStyle::AnthropicMessages => old_endpoint.clone(),
+            AiApiStyle::ChatCompletions => replace_protocol_suffixes(
+                &old_endpoint,
+                &["/responses", "/messages"],
+                "/chat/completions",
+            ),
+            AiApiStyle::Responses => replace_protocol_suffixes(
+                &old_endpoint,
+                &["/chat/completions", "/messages"],
+                "/responses",
+            ),
+            AiApiStyle::AnthropicMessages => replace_protocol_suffixes(
+                &old_endpoint,
+                &["/chat/completions", "/responses"],
+                "/messages",
+            ),
         };
-        if profile.endpoint != old_endpoint {
-            self.credentials.remove(&profile.id);
-        }
+        // The authentication scheme belongs to the protocol. Even a custom
+        // endpoint whose suffix cannot be rewritten must not retain a bearer
+        // credential when switching to Anthropic, or vice versa.
+        profile.authentication = match style {
+            AiApiStyle::AnthropicMessages => AiAuthentication::Header {
+                name: "x-api-key".into(),
+                credential: None,
+            },
+            _ => AiAuthentication::Bearer { credential: None },
+        };
+        self.credentials.remove(&profile.id);
         self.changed(true, cx);
         self.load_editor(window, cx);
     }
@@ -474,6 +511,29 @@ impl AiSettingsPanel {
                 AiAuthentication::Bearer { credential: None }
             } else {
                 AiAuthentication::None
+            };
+            self.changed(true, cx);
+            self.load_editor(window, cx);
+        }
+    }
+
+    fn set_header_authentication(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        self.sync_editor(cx);
+        if let Some(profile) = self
+            .selected
+            .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
+        {
+            if matches!(
+                &profile.authentication,
+                AiAuthentication::Header { name, .. }
+                    if name.eq_ignore_ascii_case("x-api-key")
+            ) {
+                return;
+            }
+            self.credentials.remove(&profile.id);
+            profile.authentication = AiAuthentication::Header {
+                name: "x-api-key".into(),
+                credential: None,
             };
             self.changed(true, cx);
             self.load_editor(window, cx);
@@ -573,14 +633,13 @@ impl AiSettingsPanel {
         }
         let key = match &profile.authentication {
             AiAuthentication::None => None,
-            AiAuthentication::Bearer { .. } => self
+            AiAuthentication::Bearer { .. } | AiAuthentication::Header { .. } => self
                 .credentials
                 .get(&profile.id)
                 .filter(|key| !key.is_empty())
                 .cloned(),
-            _ => None,
         };
-        if matches!(profile.authentication, AiAuthentication::Bearer { .. }) && key.is_none() {
+        if uses_api_key(&profile.authentication) && key.is_none() {
             self.status = Message::new(
                 "请填写临时 API 密钥或解锁已保存的密钥，或明确选择无认证。",
                 "Enter a temporary API key or unlock the saved key, or explicitly select no authentication.",
@@ -608,14 +667,12 @@ impl AiSettingsPanel {
                 let protocol = match profile.api_style {
                     AiApiStyle::ChatCompletions => ProviderProtocol::ChatCompletions,
                     AiApiStyle::Responses => ProviderProtocol::Responses,
-                    AiApiStyle::AnthropicMessages => {
-                        return Err(AiError::UnsupportedProtocol);
-                    }
+                    AiApiStyle::AnthropicMessages => ProviderProtocol::AnthropicMessages,
                 };
                 match kind {
                     OperationKind::Models => client
                         .discover_models(
-                            &ProviderEndpoint::new(&profile.endpoint)?,
+                            &ProviderEndpoint::new_with_protocol(&profile.endpoint, protocol)?,
                             api_key,
                             &cancellation,
                         )
@@ -691,9 +748,9 @@ impl AiSettingsPanel {
     }
 }
 
-fn replace_protocol_suffix(endpoint: &str, old: &str, new: &str) -> String {
-    endpoint
-        .strip_suffix(old)
+fn replace_protocol_suffixes(endpoint: &str, old: &[&str], new: &str) -> String {
+    old.iter()
+        .find_map(|suffix| endpoint.strip_suffix(suffix))
         .map_or_else(|| endpoint.to_owned(), |prefix| format!("{prefix}{new}"))
 }
 

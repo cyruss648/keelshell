@@ -8,10 +8,11 @@
 
 - 批量任务现在支持受限的逐目标元数据模板：`{{name}}`、`{{host}}`、`{{port}}`、`{{user}}` 和 `{{endpoint}}`。模板只读取已保存路由或一次性会话的非敏感元数据，在本地展开；未知变量和不支持的上下文会在审核前拒绝。审核面板逐目标展示最终命令，确认前不会发起 SSH 请求，确认后按目标绑定执行。审计摘要的命令摘要同时覆盖源文本与逐目标绑定，但仍不保存命令正文、输出、地址或凭据。实现见 `crates/keelshell-core/src/batch_template.rs`、`crates/keelshell-app/src/batch_commands.rs`，设计与证据见 [ADR 0027](adr/0027-reviewed-per-target-batch-templates.md) 和 [测试记录](testing/records/2026-10-04-reviewed-batch-templates.md)。
 - 失败的文件或目录传输现在会在同一活动 SSH 会话中保留一个显式恢复提议。点击“检查并续传”只会创建新的只读校验计划，之后仍需用户审阅并确认；它不会自动重放、自动重连、跨会话复用或绕过现有内容校验。只有实际开始过的失败传输可产生提议；列表/规划操作本身不会产生新的提议，且只有失败卡片在非忙碌、无待审核时才能使用既有提议。只读计划不会改写旧失败卡的终态，状态变化后的旧点击会被再次拒绝。实现见 `crates/keelshell-app/src/files.rs`，设计与证据见 [ADR 0026](adr/0026-explicit-transfer-recovery-proposal.md) 和 [测试记录](testing/records/2026-10-04-transfer-recovery.md)。
-- AI transport 现在按配置快照显式区分 Chat Completions 与 Responses。设置页可切换协议，已知 `/chat/completions` 与 `/responses` 后缀会同步替换并清除旧临时密钥；Responses 预览使用 `instructions`/`input`，回复只接受 `output_text`，不会启用 tools 或自动操作。协议契约、回环 HTTP 和 GPUI 回归见 [ADR 0029](adr/0029-ai-responses-transport.md) 与 [测试记录](testing/records/2026-10-04-ai-responses.md)。
+- AI transport 现在按配置快照显式区分 Chat Completions、Responses 与 Anthropic Messages。设置页可切换协议，已知 `/chat/completions`、`/responses` 和 `/messages` 后缀会同步替换并清除旧临时密钥；Responses 预览使用 `instructions`/`input`，Anthropic 预览使用 `system`/`messages`/`max_tokens`，回复分别只接受 `output_text` 或 assistant `text` blocks，不会启用 tools 或自动操作。Anthropic 使用 `x-api-key` 和固定版本头，模型发现按有界游标分页。协议契约、回环 HTTP 和 GPUI 回归见 [ADR 0029](adr/0029-ai-responses-transport.md)、[ADR 0030](adr/0030-anthropic-messages-transport.md)、[测试记录](testing/records/2026-10-04-ai-responses.md) 与 [Anthropic 记录](testing/records/2026-10-04-anthropic-messages.md)。
+- Anthropic Messages 增量已完成本地整仓验证：`cargo test -p keelshell-ai --locked` 通过 30 个单测、19 个发现回环测试、11 个请求回环测试和 1 个 doctest；`keelshell-core` 70 个单测及集成/文档测试、`keelshell-app` 269 个 GPUI/业务测试通过；工作区严格 Clippy 和 `scripts/check.py` 通过。回环 fixture 不证明供应商账户、计费、真实模型质量或 Windows/Linux 原生桌面交互，边界见 [Anthropic 记录](testing/records/2026-10-04-anthropic-messages.md)。
 - 文件工作层新增有界本地目录快照 worker、SFTP 远程元数据快照和纯核心比较引擎。文件面板现在可以显式发起只读“比较目录”，目标绑定最近一次成功加载的 canonical 远程目录，显示一致、变化、仅本地、仅远端和待确认统计，并列出前 100 条相对路径结果；缺失字段标为 `Uncertain`，超过深度/条目/路径边界直接失败。内容哈希、同步计划和差异应用仍未接入。设计与证据见 [ADR 0028](adr/0028-bounded-directory-comparison.md) 和 [测试记录](testing/records/2026-10-04-directory-compare.md)。
 - 本轮新增切片在本机完成 `cargo fmt --all -- --check`、严格 Clippy 和完整 workspace 门禁：应用 267 项、核心 69 项、会话库 64 项、批量集成 14 项、SSH loopback 95 项，OpenSSH 外部互操作 6 项因未提供 `KEELSHELL_OPENSSH_*` 环境而忽略，doctest 全部通过。GPUI 还新增中英文 accessibility label 回归，记录见 [可访问名称记录](testing/records/2026-10-04-accessibility-labels.md)。后续修复提交 `cf7c4a6` 的 GitHub [Quality 37181528476](https://github.com/cyruss648/keelshell/actions/runs/37181528476) 已在 macOS 26、Ubuntu 24.04、Windows 2025 成功，覆盖目录比较 UI、canonical 目标绑定、worker 取消边界和可访问性改动；流水线证明构建、测试与打包路径，不等同于 Windows/Linux 原生桌面交互验收。
-- 仍未关闭的产品差距包括自动传输恢复与并行调度、任务依赖/编排/定时、交互 shell 可编程补全、目录比较的内容哈希/同步计划/差异应用、更丰富的网络协议诊断、Anthropic/Agent 等更多 AI 工作流，以及 Windows/Linux 原生窗口验收、签名/公证和已安装目录更新验收。
+- 仍未关闭的产品差距包括自动传输恢复与并行调度、任务依赖/编排/定时、交互 shell 可编程补全、目录比较的内容哈希/同步计划/差异应用、更丰富的网络协议诊断、Anthropic 高级参数/Agent 等更多 AI 工作流，以及 Windows/Linux 原生窗口验收、签名/公证和已安装目录更新验收。
 
 ## 当前产品要求（优先于旧文档）
 
@@ -60,11 +61,11 @@
 
 `keelshell-core/src/ai_profiles.rs` 与 Settings 实现命名配置目录、默认项、供应商/协议/认证引用、高级参数元数据及旧配置迁移。配置 JSON 严格校验，API Key 不序列化。
 
-`keelshell-ai/src/discovery.rs` 实现可取消的异步模型发现、固定无终端上下文的连接测试、已审核 payload 发送。模型地址按完整 Chat Completions 或 Responses endpoint 同源推导；没有自动跨地址尝试、重定向或重试。响应大小、模型/地址长度、超时和错误分类均受限。
+`keelshell-ai/src/discovery.rs` 实现可取消的异步模型发现、固定无终端上下文的连接测试、已审核 payload 发送。模型地址按完整 Chat Completions、Responses 或 Anthropic Messages endpoint 同源推导；没有自动跨地址尝试、重定向或重试。响应大小、模型/地址长度、超时和错误分类均受限。
 
 `ai_settings.rs` / `ai_settings/view.rs` 独立配置页支持多配置 CRUD、默认项、预设、端点、模型、临时遮罩密钥、发现、测试和取消。保存采用 revision 快照，不覆盖保存期间的新编辑。助手选择临时配置不改变已保存默认项。
 
-当前请求后端支持 Chat Completions 与 Responses 两种显式协议；Anthropic、自定义请求头、代理、Token/推理参数尚未接通，请求验证明确拒绝，不能静默丢弃这些设置。Responses 请求使用 `instructions`、`input` 和 `output_text`，切换协议会安全替换已知 URL 后缀并清除旧密钥。AI 密钥默认驻留内存，现支持显式加密保存、每次启动后主密码解锁、清除临时密钥及解除关联。后台保存只更新草稿引用，Apply 成功才更新工作区与助手；目的地/认证/预设变化会清除旧密钥和引用。设计见 `adr/0009-ai-encrypted-credentials.md`，专项见 `testing/records/2026-10-03-ai-encrypted-credentials.md` 与本轮 AI transport 测试记录。
+当前请求后端支持 Chat Completions、Responses 与 Anthropic Messages 三种显式协议；Anthropic 使用 `system`、`messages`、有界 `max_tokens`、`x-api-key` 和固定版本头，回复只读取 assistant `text` blocks。切换协议会安全替换已知 URL 后缀并清除旧密钥。自定义请求头、代理、Token/推理参数和 Agent 工作流尚未接通，请求验证明确拒绝，不能静默丢弃这些设置。AI 密钥默认驻留内存，现支持显式加密保存、每次启动后主密码解锁、清除临时密钥及解除关联。
 
 SSH 密码与私钥口令已接入显式保存、每次主密码解锁和解除关联流程。凭据库 schema 2 认证完整 manifest，保存时检查经过认证的文件快照；加密 payload 绑定连接目的地，配置中只保存不透明引用。解除关联不会删除加密条目；vault 与 state 两次写入不是一个事务，失败可能留下孤立密文。后台已开始的保存可在关闭弹窗后完成，但不会自动连接。设计及边界见 `adr/0006-authenticated-credential-vault.md`，验收见 `testing/records/2026-10-03-vault-search-integration.md`。
 

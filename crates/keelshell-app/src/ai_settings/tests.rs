@@ -246,6 +246,23 @@ fn protocol_switch_updates_only_supported_suffix_and_clears_key(cx: &mut TestApp
                 panel.profile().map(|profile| profile.endpoint.as_str()),
                 Some("https://provider.example/v1/chat/completions")
             );
+            panel.set_api_style(AiApiStyle::AnthropicMessages, window, cx);
+            assert_eq!(
+                panel.profile().map(|profile| profile.endpoint.as_str()),
+                Some("https://provider.example/v1/messages")
+            );
+            assert_eq!(
+                panel.profile().map(|profile| &profile.authentication),
+                Some(&AiAuthentication::Header {
+                    name: "x-api-key".into(),
+                    credential: None,
+                })
+            );
+            panel.set_api_style(AiApiStyle::ChatCompletions, window, cx);
+            assert!(matches!(
+                panel.profile().map(|profile| &profile.authentication),
+                Some(AiAuthentication::Bearer { credential: None })
+            ));
         });
     })
     .unwrap_or_else(|error| panic!("switch protocol: {error}"));

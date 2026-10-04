@@ -70,6 +70,7 @@ impl AiError {
             | Self::InvalidBudget
             | Self::Serialization
             | Self::InvalidLimits
+            | Self::InvalidMaxTokens
             | Self::InvalidApiKey
             | Self::CredentialInContext
             | Self::UnsupportedProtocol => AiErrorCategory::Configuration,

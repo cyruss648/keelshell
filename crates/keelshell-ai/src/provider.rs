@@ -20,6 +20,8 @@ pub enum ProviderProtocol {
     ChatCompletions,
     /// OpenAI Responses API requests and `output_text` message items.
     Responses,
+    /// Anthropic Messages API requests and assistant text blocks.
+    AnthropicMessages,
 }
 
 /// A validated complete provider endpoint, model and explicit protocol, without credentials.
@@ -52,7 +54,7 @@ impl ProviderConfig {
         model: &str,
         protocol: ProviderProtocol,
     ) -> Result<Self, AiError> {
-        let endpoint = ProviderEndpoint::new(endpoint)?.url;
+        let endpoint = ProviderEndpoint::new_with_protocol(endpoint, protocol)?.url;
         if !valid_model(model) {
             return Err(AiError::InvalidModel);
         }
@@ -138,10 +140,23 @@ impl AiClient {
             if payload_contains_secret(&request.json, key) {
                 return Err(AiError::CredentialInContext);
             }
-            let value = Zeroizing::new(format!("Bearer {key}"));
+            let value = Zeroizing::new(match protocol {
+                ProviderProtocol::AnthropicMessages => key.to_owned(),
+                ProviderProtocol::ChatCompletions | ProviderProtocol::Responses => {
+                    format!("Bearer {key}")
+                }
+            });
             let mut header = HeaderValue::from_str(&value).map_err(|_| AiError::InvalidApiKey)?;
             header.set_sensitive(true);
-            builder = builder.header(AUTHORIZATION, header);
+            builder = match protocol {
+                ProviderProtocol::AnthropicMessages => builder.header("x-api-key", header),
+                ProviderProtocol::ChatCompletions | ProviderProtocol::Responses => {
+                    builder.header(AUTHORIZATION, header)
+                }
+            };
+        }
+        if protocol == ProviderProtocol::AnthropicMessages {
+            builder = builder.header("anthropic-version", "2023-06-01");
         }
         let response = builder.body(request.json).send().map_err(|error| {
             if error.is_timeout() {
@@ -259,6 +274,7 @@ pub(crate) fn parse_assistant_response(
     match protocol {
         ProviderProtocol::ChatCompletions => parse_chat_response(body, api_key),
         ProviderProtocol::Responses => parse_responses_response(body, api_key),
+        ProviderProtocol::AnthropicMessages => parse_anthropic_response(body, api_key),
     }
 }
 
@@ -322,6 +338,42 @@ fn parse_responses_response(
     })
 }
 
+fn parse_anthropic_response(
+    body: &[u8],
+    api_key: Option<&str>,
+) -> Result<ParsedAssistantResponse, AiError> {
+    let response: AnthropicResponse =
+        serde_json::from_slice(body).map_err(|_| AiError::InvalidResponse)?;
+    if response.role != "assistant"
+        || response.model.as_ref().is_some_and(|model| {
+            !valid_model(model) || api_key.is_some_and(|key| model.contains(key))
+        })
+    {
+        return Err(AiError::InvalidResponse);
+    }
+    let mut text = String::new();
+    for block in response.content {
+        match block.kind.as_str() {
+            "text" => {
+                let Some(value) = block.text else {
+                    return Err(AiError::InvalidResponse);
+                };
+                text.push_str(&value);
+            }
+            // Tool and thinking blocks are intentionally never rendered as text.
+            "tool_use" | "thinking" | "redacted_thinking" => {}
+            _ => {}
+        }
+    }
+    if text.trim().is_empty() {
+        return Err(AiError::EmptyReply);
+    }
+    Ok(ParsedAssistantResponse {
+        text,
+        model: response.model,
+    })
+}
+
 #[derive(Deserialize)]
 struct ChatResponse {
     choices: Vec<Choice>,
@@ -352,6 +404,20 @@ struct ResponsesContent {
     #[serde(rename = "type")]
     kind: String,
     text: String,
+}
+
+#[derive(Deserialize)]
+struct AnthropicResponse {
+    role: String,
+    content: Vec<AnthropicContent>,
+    model: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct AnthropicContent {
+    #[serde(rename = "type")]
+    kind: String,
+    text: Option<String>,
 }
 
 #[cfg(test)]

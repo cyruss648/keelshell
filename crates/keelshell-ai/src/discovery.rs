@@ -28,12 +28,30 @@ pub const CONNECTIVITY_PROMPT: &str = "Reply with the single word OK. This is a 
 #[derive(Clone, PartialEq, Eq)]
 pub struct ProviderEndpoint {
     pub(crate) url: Url,
+    pub(crate) protocol: ProviderProtocol,
 }
 
 impl ProviderEndpoint {
     /// Accept verified HTTPS or loopback HTTP, without URL authentication,
     /// query, fragment, whitespace or control characters.
     pub fn new(endpoint: &str) -> Result<Self, AiError> {
+        // Preserve the original constructor's path-based discovery behavior for
+        // existing callers while new_with_protocol remains the authority for
+        // authentication and wire-format selection.
+        let protocol = if endpoint.ends_with("/messages") {
+            ProviderProtocol::AnthropicMessages
+        } else if endpoint.ends_with("/responses") {
+            ProviderProtocol::Responses
+        } else {
+            ProviderProtocol::ChatCompletions
+        };
+        Self::new_with_protocol(endpoint, protocol)
+    }
+
+    /// Validate an endpoint while binding its wire protocol for discovery and
+    /// authentication. The protocol is explicit so `/messages` is never guessed
+    /// to be an OpenAI-compatible endpoint.
+    pub fn new_with_protocol(endpoint: &str, protocol: ProviderProtocol) -> Result<Self, AiError> {
         if endpoint.len() > 2048
             || endpoint
                 .chars()
@@ -58,7 +76,7 @@ impl ProviderEndpoint {
         {
             return Err(AiError::InvalidEndpoint);
         }
-        Ok(Self { url })
+        Ok(Self { url, protocol })
     }
 
     /// Exact normalized provider destination to show in the configuration UI.
@@ -67,16 +85,29 @@ impl ProviderEndpoint {
     }
 
     /// Derive the model catalog URL by replacing a literal final
-    /// `/chat/completions` or `/responses` with `/models`, retaining the origin
-    /// and path prefix.
+    /// `/chat/completions`, `/responses` or Anthropic `/messages` with
+    /// `/models`, retaining the origin and path prefix.
     ///
     /// Unknown paths fail before network access. No endpoint is guessed, probed
     /// or followed to another host when this convention is unsupported.
     pub fn models_endpoint(&self) -> Result<String, AiError> {
         let path = self.url.path();
+        let suffix = match self.protocol {
+            ProviderProtocol::ChatCompletions => "/chat/completions",
+            ProviderProtocol::Responses => "/responses",
+            ProviderProtocol::AnthropicMessages => "/messages",
+        };
         let prefix = path
-            .strip_suffix("/chat/completions")
-            .or_else(|| path.strip_suffix("/responses"))
+            .strip_suffix(suffix)
+            .or_else(|| {
+                // `ProviderEndpoint::new` predates explicit protocol selection and
+                // historically accepted both OpenAI endpoint suffixes for discovery.
+                // Keep that constructor compatible while protocol-aware constructors
+                // remain strict for Anthropic `/messages`.
+                (self.protocol == ProviderProtocol::ChatCompletions)
+                    .then(|| path.strip_suffix("/responses"))
+                    .flatten()
+            })
             .ok_or(AiError::UnsupportedDiscoveryEndpoint)?;
         let mut models = self.url.clone();
         models.set_path(&format!("{prefix}/models"));
@@ -134,6 +165,7 @@ impl RequestCancellation {
 #[derive(Clone, PartialEq, Eq)]
 pub struct ModelCatalog {
     models: Vec<String>,
+    truncated: bool,
 }
 
 impl ModelCatalog {
@@ -141,12 +173,20 @@ impl ModelCatalog {
     pub fn models(&self) -> &[String] {
         &self.models
     }
+
+    /// Whether the provider explicitly indicated more pages than this bounded
+    /// catalog could return. Current transports reject this case rather than
+    /// exposing a silently incomplete list; the flag remains for future APIs.
+    pub fn truncated(&self) -> bool {
+        self.truncated
+    }
 }
 
 impl fmt::Debug for ModelCatalog {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("ModelCatalog")
             .field("count", &self.models.len())
+            .field("truncated", &self.truncated)
             .finish()
     }
 }
@@ -228,20 +268,57 @@ impl ProviderClient {
     ) -> Result<ModelCatalog, AiError> {
         let url = endpoint.models_endpoint()?;
         self.bounded(cancellation, async {
-            let body = self.request(Method::GET, &url, None, api_key).await?;
-            let raw: RawCatalog =
-                serde_json::from_slice(&body).map_err(|_| AiError::InvalidModelCatalog)?;
-            if raw.data.len() > 4096
-                || raw.data.iter().any(|model| {
+            let mut models = Vec::new();
+            let mut after_id: Option<String> = None;
+            let mut pages = 0usize;
+            loop {
+                pages += 1;
+                if pages > 64 {
+                    return Err(AiError::InvalidModelCatalog);
+                }
+                let page_url = if endpoint.protocol == ProviderProtocol::AnthropicMessages {
+                    let mut parsed = Url::parse(&url).map_err(|_| AiError::InvalidModelCatalog)?;
+                    parsed.query_pairs_mut().append_pair("limit", "1000");
+                    if let Some(cursor) = after_id.as_deref() {
+                        parsed.query_pairs_mut().append_pair("after_id", cursor);
+                    }
+                    parsed.into()
+                } else {
+                    url.clone()
+                };
+                let body = self
+                    .request(Method::GET, &page_url, None, api_key, endpoint.protocol)
+                    .await?;
+                let raw: RawCatalog =
+                    serde_json::from_slice(&body).map_err(|_| AiError::InvalidModelCatalog)?;
+                if raw.data.iter().any(|model| {
                     !valid_model(&model.id) || api_key.is_some_and(|key| model.id.contains(key))
-                })
-            {
-                return Err(AiError::InvalidModelCatalog);
+                }) {
+                    return Err(AiError::InvalidModelCatalog);
+                }
+                if models.len().saturating_add(raw.data.len()) > 4096 {
+                    return Err(AiError::InvalidModelCatalog);
+                }
+                let has_more = raw.has_more;
+                let last_id = raw.last_id;
+                models.extend(raw.data.into_iter().map(|model| model.id));
+                if endpoint.protocol != ProviderProtocol::AnthropicMessages || !has_more {
+                    break;
+                }
+                let Some(next) = last_id.filter(|id| !id.is_empty()) else {
+                    return Err(AiError::InvalidModelCatalog);
+                };
+                if after_id.as_deref() == Some(next.as_str()) {
+                    return Err(AiError::InvalidModelCatalog);
+                }
+                after_id = Some(next);
             }
-            let mut models: Vec<_> = raw.data.into_iter().map(|model| model.id).collect();
             models.sort();
             models.dedup();
-            Ok(ModelCatalog { models })
+            Ok(ModelCatalog {
+                models,
+                truncated: false,
+            })
         })
         .await
     }
@@ -268,12 +345,26 @@ impl ProviderClient {
                 "input": CONNECTIVITY_PROMPT,
             })
             .to_string(),
+            ProviderProtocol::AnthropicMessages => serde_json::json!({
+                "model": provider.model(),
+                "system": "Reply with the single word OK. This is a connection test.",
+                "messages": [{"role": "user", "content": CONNECTIVITY_PROMPT}],
+                "max_tokens": 4096,
+                "stream": false,
+            })
+            .to_string(),
         };
         reject_context_credential(&body, api_key)?;
         let started = Instant::now();
         self.bounded(cancellation, async {
             let body = self
-                .request(Method::POST, provider.endpoint(), Some(body), api_key)
+                .request(
+                    Method::POST,
+                    provider.endpoint(),
+                    Some(body),
+                    api_key,
+                    provider.protocol(),
+                )
                 .await?;
             let response = parse_assistant_response(&body, provider.protocol(), api_key)?;
             Ok(ConnectivityReport {
@@ -299,7 +390,7 @@ impl ProviderClient {
         reject_context_credential(&json, api_key)?;
         self.bounded(cancellation, async {
             let body = self
-                .request(Method::POST, &endpoint, Some(json), api_key)
+                .request(Method::POST, &endpoint, Some(json), api_key, protocol)
                 .await?;
             let response = parse_assistant_response(&body, protocol, api_key)?;
             let (text, _) =
@@ -327,16 +418,30 @@ impl ProviderClient {
         url: &str,
         body: Option<String>,
         api_key: Option<&str>,
+        protocol: ProviderProtocol,
     ) -> Result<Zeroizing<Vec<u8>>, AiError> {
         let mut builder = self.client.request(method, url);
         if let Some(key) = api_key {
             if key.is_empty() || key.chars().any(char::is_control) {
                 return Err(AiError::InvalidApiKey);
             }
-            let value = Zeroizing::new(format!("Bearer {key}"));
+            let value = Zeroizing::new(match protocol {
+                ProviderProtocol::AnthropicMessages => key.to_owned(),
+                ProviderProtocol::ChatCompletions | ProviderProtocol::Responses => {
+                    format!("Bearer {key}")
+                }
+            });
             let mut header = HeaderValue::from_str(&value).map_err(|_| AiError::InvalidApiKey)?;
             header.set_sensitive(true);
-            builder = builder.header(AUTHORIZATION, header);
+            builder = match protocol {
+                ProviderProtocol::AnthropicMessages => builder.header("x-api-key", header),
+                ProviderProtocol::ChatCompletions | ProviderProtocol::Responses => {
+                    builder.header(AUTHORIZATION, header)
+                }
+            };
+        }
+        if protocol == ProviderProtocol::AnthropicMessages {
+            builder = builder.header("anthropic-version", "2023-06-01");
         }
         if let Some(body) = body {
             builder = builder.header(CONTENT_TYPE, "application/json").body(body);
@@ -380,6 +485,10 @@ fn reject_context_credential(body: &str, api_key: Option<&str>) -> Result<(), Ai
 #[derive(Deserialize)]
 struct RawCatalog {
     data: Vec<RawModel>,
+    #[serde(default)]
+    has_more: bool,
+    #[serde(default)]
+    last_id: Option<String>,
 }
 #[derive(Deserialize)]
 struct RawModel {
@@ -407,6 +516,10 @@ mod tests {
             (
                 "https://api.example/v1beta/openai/chat/completions",
                 "https://api.example/v1beta/openai/models",
+            ),
+            (
+                "https://api.example/v1/messages",
+                "https://api.example/v1/models",
             ),
             (
                 "https://api.example/v1/responses",

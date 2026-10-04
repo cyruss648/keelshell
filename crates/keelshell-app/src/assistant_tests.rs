@@ -6,7 +6,9 @@ use gpui_kit::{
     test::{TestAppContextExt, TestWindowExt},
 };
 use keelshell_ai::RequestCancellation;
-use keelshell_core::{AiAuthentication, AiPreset, AiProfileCatalog, Language, NamedAiProfile};
+use keelshell_core::{
+    AiApiStyle, AiAuthentication, AiPreset, AiProfileCatalog, Language, NamedAiProfile,
+};
 use std::{
     io::{Read, Write},
     net::TcpListener,
@@ -276,15 +278,40 @@ fn focus_and_language_changes_preserve_the_exact_preview(cx: &mut TestAppContext
 fn unsupported_configuration_and_missing_bearer_key_never_prepare(cx: &mut TestAppContext) {
     let (_, panel) = mount(cx);
     panel.update(cx, |panel, cx| {
-        let mut profile = profile("Needs key");
-        profile.authentication = AiAuthentication::Bearer { credential: None };
-        panel.set_profile(Some(profile.clone()), None, cx);
+        let mut needs_key = profile("Needs key");
+        needs_key.authentication = AiAuthentication::Bearer { credential: None };
+        panel.set_profile(Some(needs_key.clone()), None, cx);
         panel.prepare(cx);
         assert!(panel.prepared.is_none());
-        profile.max_output_tokens = Some(100);
-        panel.set_profile(Some(profile), Some(Zeroizing::new("temporary".into())), cx);
+        needs_key.max_output_tokens = Some(100);
+        panel.set_profile(
+            Some(needs_key),
+            Some(Zeroizing::new("temporary".into())),
+            cx,
+        );
         panel.prepare(cx);
         assert!(panel.prepared.is_none());
+
+        let mut anthropic = profile("Anthropic");
+        anthropic.api_style = AiApiStyle::AnthropicMessages;
+        anthropic.endpoint = "http://127.0.0.1:9911/v1/messages".into();
+        anthropic.authentication = AiAuthentication::Header {
+            name: "x-api-key".into(),
+            credential: None,
+        };
+        panel.set_profile(
+            Some(anthropic),
+            Some(Zeroizing::new("temporary-anthropic".into())),
+            cx,
+        );
+        panel.prepare(cx);
+        let preview = panel
+            .prepared
+            .as_ref()
+            .map(PreparedRequest::preview_json)
+            .unwrap_or_else(|| panic!("Anthropic profile should prepare"));
+        assert!(preview.contains("\"max_tokens\": 4096"));
+        assert!(preview.contains("\"system\""));
     });
 }
 
