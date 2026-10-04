@@ -67,6 +67,7 @@ impl Workspace {
             && self.form.is_none()
             && self.folder_form.is_none()
             && self.destination_prompt.is_none()
+            && self.library_batch_prompt.is_none()
     }
 
     pub(super) fn open_vault_settings(&mut self, window: &mut Window, cx: &mut Context<Self>) {

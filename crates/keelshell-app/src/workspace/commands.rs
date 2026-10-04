@@ -42,6 +42,7 @@ impl Workspace {
             || self.form.is_some()
             || self.folder_form.is_some()
             || self.destination_prompt.is_some()
+            || self.library_batch_prompt.is_some()
             || self.login.is_some()
             || self.host_approval.is_some()
     }

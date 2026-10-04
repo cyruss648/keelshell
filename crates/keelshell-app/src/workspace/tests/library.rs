@@ -890,3 +890,5 @@ async fn asynchronous_ssh_success_preserves_folder_editor_focus(cx: &mut TestApp
     .checked("close test session");
     server.abort();
 }
+
+mod bulk;

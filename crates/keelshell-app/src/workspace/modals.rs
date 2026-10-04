@@ -6,7 +6,7 @@ use gpui_kit::component::popover::Popover;
 #[cfg(test)]
 mod tests;
 
-fn framed_modal(
+pub(super) fn framed_modal(
     cx: &App,
     id: &'static str,
     height: Pixels,

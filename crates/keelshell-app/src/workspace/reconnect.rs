@@ -117,6 +117,27 @@ fn maximum(policy: ReconnectPolicy) -> usize {
 }
 
 impl Workspace {
+    pub(super) fn library_session_references(
+        &self,
+        profile: uuid::Uuid,
+        cx: &App,
+    ) -> Vec<EntityId> {
+        self.tabs
+            .iter()
+            .filter(|tab| {
+                tab.read(cx).is_open()
+                    && self.remote_sessions.contains_key(&tab.entity_id())
+                    && self
+                        .reconnect_bindings
+                        .get(&tab.entity_id())
+                        .is_some_and(|binding| {
+                            binding.route.hops().iter().any(|hop| hop.id == profile)
+                        })
+            })
+            .map(Entity::entity_id)
+            .collect()
+    }
+
     pub(super) fn batch_route_description(&self, id: EntityId) -> Option<(String, String)> {
         let route = &self.reconnect_bindings.get(&id)?.route;
         let name = route.hops().last()?.name.clone();
