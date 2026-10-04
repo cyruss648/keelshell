@@ -1,7 +1,7 @@
 //! Final authorization binds parameter review and batch work to live entities.
 use super::*;
 use crate::{
-    batch_commands::{BatchPanel, BatchPanelEvent, Destination, Review},
+    batch_commands::{BatchAuditDraft, BatchPanel, BatchPanelEvent, Destination, Review},
     snippet_parameters::{SnippetParameters, SnippetParametersEvent},
 };
 
@@ -13,6 +13,66 @@ pub(super) struct ParameterTicket {
 }
 
 impl Workspace {
+    pub(super) fn record_batch_audit(
+        &mut self,
+        draft: BatchAuditDraft,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let record = match keelshell_core::BatchAuditRecord::from_digest(
+            draft.command_digest,
+            library::now_seconds(),
+            draft.profile_ids,
+            keelshell_core::BatchAuditSummary {
+                target_count: draft.target_count,
+                succeeded: draft.succeeded as usize,
+                failed: draft.failed as usize,
+                unknown: draft.unknown as usize,
+                not_started: draft.not_started as usize,
+                cancelled: draft.cancelled,
+                stopped_after_failure: draft.stopped_after_failure,
+            },
+        ) {
+            Ok(record) => record,
+            Err(error) => {
+                self.status = Message::detail(
+                    "批量审计摘要无效，未保存",
+                    "Batch audit summary was invalid and was not saved",
+                    &error,
+                );
+                cx.notify();
+                return;
+            }
+        };
+        self.pending_batch_audits.push(record);
+        self.flush_batch_audits(window, cx);
+    }
+
+    pub(super) fn flush_batch_audits(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.saving
+            || self.vault_settings.is_some()
+            || self.snippet_modal_open()
+            || self.pending_batch_audits.is_empty()
+        {
+            return;
+        }
+        let records = std::mem::take(&mut self.pending_batch_audits);
+        let mut candidate = self.state.clone();
+        for record in &records {
+            if let Err(error) = candidate.record_batch_audit(record.clone()) {
+                self.pending_batch_audits = records;
+                self.status = Message::detail(
+                    "批量审计摘要未保存",
+                    "Batch audit summary was not saved",
+                    &error,
+                );
+                cx.notify();
+                return;
+            }
+        }
+        self.persist(candidate, AfterSave::BatchAudit { records }, window, cx);
+    }
+
     pub(super) fn open_snippet_parameters(
         &mut self,
         source: keelshell_core::Snippet,
@@ -113,11 +173,13 @@ impl Workspace {
                 .map(|tab| {
                     let entity = tab.entity_id();
                     let endpoint = self.remote_hosts.get(&entity).cloned().unwrap_or_default();
+                    let profile_id = self.batch_profile_id(entity);
                     let (name, route) = self
                         .batch_route_description(entity)
                         .unwrap_or_else(|| (tab.read(cx).title.clone(), endpoint.clone()));
                     Destination {
                         id: uuid::Uuid::new_v4(),
+                        profile_id,
                         entity,
                         name,
                         endpoint,
@@ -140,6 +202,9 @@ impl Workspace {
                         match event {
                             BatchPanelEvent::Start(review) => {
                                 view.start_reviewed_batch(panel.clone(), review, window, cx)
+                            }
+                            BatchPanelEvent::Completed(audit) => {
+                                view.record_batch_audit(audit.clone(), window, cx)
                             }
                             BatchPanelEvent::Hide => {
                                 view.show_batch = false;

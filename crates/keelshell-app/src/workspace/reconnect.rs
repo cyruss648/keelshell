@@ -137,6 +137,14 @@ impl Workspace {
             .join(" → ");
         Some((name, description))
     }
+
+    /// Return the saved target profile identity for audit metadata. Ephemeral
+    /// quick connections have no binding and therefore return `None`.
+    pub(super) fn batch_profile_id(&self, id: EntityId) -> Option<uuid::Uuid> {
+        self.reconnect_bindings
+            .get(&id)
+            .and_then(|binding| binding.route.hops().last().map(|hop| hop.id))
+    }
     pub(super) fn bind_remote_tab(&mut self, id: EntityId, route: ConnectionRoute) {
         let policy = route
             .hops()

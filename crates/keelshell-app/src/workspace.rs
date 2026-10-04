@@ -218,6 +218,9 @@ enum AfterSave {
         name: String,
     },
     RecentSaved,
+    BatchAudit {
+        records: Vec<keelshell_core::BatchAuditRecord>,
+    },
     SnippetSaved {
         panel: EntityId,
     },
@@ -249,6 +252,7 @@ pub struct Workspace {
     folder_form: Option<FolderForm>,
     destination_prompt: Option<DestinationPrompt>,
     pending_recents: Vec<(Connection, keelshell_core::ConnectionRoute, u64)>,
+    pending_batch_audits: Vec<keelshell_core::BatchAuditRecord>,
     overlay_focus: FocusHandle,
     saving: bool,
     show_assistant: bool,
@@ -518,6 +522,7 @@ impl Workspace {
             folder_form: None,
             destination_prompt: None,
             pending_recents: Vec::new(),
+            pending_batch_audits: Vec::new(),
             overlay_focus: cx.focus_handle(),
             saving: false,
             show_assistant: false,
@@ -1587,6 +1592,12 @@ impl Workspace {
                             AfterSave::RecentSaved => {
                                 view.status = Message::new("已连接，最近使用记录已保存", "Connected; recent usage saved");
                             }
+                            AfterSave::BatchAudit { .. } => {
+                                view.status = Message::new(
+                                    "批量审计摘要已保存（不含命令正文、输出或主机地址）",
+                                    "Batch audit summary saved (without command text, output or host addresses)",
+                                );
+                            }
                             AfterSave::CredentialLinked { prompt, connection } => {
                                 view.finish_credential_save(prompt, *connection, window, cx);
                             }
@@ -1594,6 +1605,9 @@ impl Workspace {
                         if route_changed { view.status=Message::new("配置已保存；连接路线已变化，当前连接尝试已取消。", "Profile saved; the route changed, so the current connection attempt was cancelled."); }
                     }
                     Err(error) => {
+                        if let AfterSave::BatchAudit { records } = &after {
+                            view.pending_batch_audits.extend(records.iter().cloned());
+                        }
                         if matches!(&after, AfterSave::SnippetSaved { .. }) && let Some(panel) = &view.snippet_editor {
                             panel.update(cx, |panel, cx| panel.set_error(Message::detail("保存失败，草稿已保留；配置冲突时请重启后重试", "Save failed; draft preserved. Restart after a configuration conflict", &error), cx));
                         }
@@ -1654,6 +1668,7 @@ impl Workspace {
                 view.resume_connect_route(window, cx);
                 if saved_successfully {
                     view.flush_recent_connections(window, cx);
+                    view.flush_batch_audits(window, cx);
                 } else {
                     view.pending_recents.clear();
                 }

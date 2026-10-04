@@ -425,6 +425,7 @@ impl Workspace {
         self.parameter_ticket = None;
         self.focus_current_surface(window, cx);
         self.flush_recent_connections(window, cx);
+        self.flush_batch_audits(window, cx);
         cx.notify();
     }
 

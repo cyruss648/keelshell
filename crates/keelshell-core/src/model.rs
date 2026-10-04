@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
-    AiProfileCatalog, ConnectionFolder, ConnectionProxy, DeletedConnection, Error,
-    RecentConnection, ReconnectPolicy, ValidationError,
+    AiProfileCatalog, BatchAuditRecord, ConnectionFolder, ConnectionProxy, DeletedConnection,
+    Error, RecentConnection, ReconnectPolicy, ValidationError,
 };
 
 /// Current persisted state and connection-export schema. Unknown versions fail closed.
@@ -483,6 +483,9 @@ pub struct AppState {
     pub recent_connections: Vec<RecentConnection>,
     /// User command templates, initially populated with read-only Linux diagnostics.
     pub snippets: Vec<Snippet>,
+    /// Bounded non-secret history of reviewed SSH batch executions.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub batch_audits: Vec<BatchAuditRecord>,
     /// Non-secret preferences.
     pub settings: Settings,
     /// Explicitly trusted host identities, keyed by normalized `[host]:port`.
@@ -508,6 +511,7 @@ impl PartialEq for AppState {
             && self.deleted_connections == other.deleted_connections
             && self.recent_connections == other.recent_connections
             && self.snippets == other.snippets
+            && self.batch_audits == other.batch_audits
             && self.settings == other.settings
             && self.known_hosts == other.known_hosts
             && self.route_known_hosts == other.route_known_hosts
@@ -545,6 +549,7 @@ impl Default for AppState {
             deleted_connections: Vec::new(),
             recent_connections: Vec::new(),
             snippets,
+            batch_audits: Vec::new(),
             settings: Settings::default(),
             known_hosts: BTreeMap::new(),
             route_known_hosts: BTreeMap::new(),
@@ -579,6 +584,7 @@ impl AppState {
                 return Err(ValidationError::new("snippet.id", "must be unique").into());
             }
         }
+        crate::batch_audit::validate_batch_audits(&self.batch_audits)?;
         self.settings.validate()?;
         Ok(())
     }

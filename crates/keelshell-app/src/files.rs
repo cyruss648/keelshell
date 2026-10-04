@@ -9,6 +9,7 @@ use gpui_kit::{
     },
     *,
 };
+use keelshell_core::diff_utf8;
 use keelshell_session::{
     SessionError, SshSession,
     sftp::{
@@ -86,6 +87,7 @@ pub struct FilesPanel {
     entries: Vec<RemoteEntry>,
     selected: Option<RemoteEntry>,
     editing: Option<(String, Vec<u8>)>,
+    diff_preview: Option<SharedString>,
     status: Message,
     busy: bool,
     pending: Option<(Message, Operation)>,
@@ -351,6 +353,7 @@ impl FilesPanel {
             entries: Vec::new(),
             selected: None,
             editing: None,
+            diff_preview: None,
             status: Message::new("正在打开 SFTP…", "Opening SFTP…"),
             busy: false,
             pending: None,
@@ -593,6 +596,7 @@ impl FilesPanel {
                             view.editor.update(cx,|input,cx|input.set_value(String::from_utf8_lossy(&content).into_owned(),window,cx));
                             view.status = Message::new(format!("正在编辑 {path} · {} 字节",content.len()),format!("Editing {path} · {} bytes",content.len()));
                             view.editing = Some((path,content));
+                            view.diff_preview = None;
                         } else {
                             view.status = Message::new("加载期间检测到新编辑，已保留当前内容；请在准备好后重新打开文件。", "Your edits changed while loading; preserved the editor. Open the file again when ready.");
                         }
@@ -601,6 +605,7 @@ impl FilesPanel {
                         if view.editing.as_ref().is_some_and(|(current,_)| current == &path) {
                             let dirty = view.editor.read(cx).value().as_bytes() != content;
                             view.editing = Some((path,content));
+                            view.diff_preview = None;
                             view.status = if dirty { Message::new("已保存审核版本；后续编辑尚未保存", "Saved the reviewed version; newer edits remain unsaved") } else { Message::new("远程文件已原子保存", "Remote file saved atomically") };
                         }
                     }
@@ -692,6 +697,63 @@ impl FilesPanel {
         if let Some((_, operation)) = self.pending.take() {
             self.run(operation, window, cx);
         }
+    }
+
+    /// Build a bounded, read-only unified diff for the current remote-file draft.
+    /// The preview never sends data or mutates the remote file; saving still requires
+    /// the existing explicit review confirmation.
+    fn toggle_diff_preview(&mut self, cx: &mut Context<Self>) {
+        if self.diff_preview.is_some() {
+            self.diff_preview = None;
+            self.status = Message::new("已隐藏差异预览", "Diff preview hidden");
+            cx.notify();
+            return;
+        }
+        let Some((path, original)) = self.editing.as_ref() else {
+            self.status = Message::new("请先打开远程文件", "Open a remote file first");
+            cx.notify();
+            return;
+        };
+        let draft = self.editor.read(cx).value();
+        match diff_utf8(original, draft.as_bytes()) {
+            Ok(diff) => {
+                match diff.render(&format!("{path} (remote)"), &format!("{path} (draft)")) {
+                    Ok(rendered) if rendered.is_empty() => {
+                        self.diff_preview = Some("（当前草稿与远端内容相同）\n(No changes between the draft and the remote file.)".into());
+                        self.status = Message::new(
+                            "当前草稿与远端内容相同",
+                            "The draft matches the remote file",
+                        );
+                    }
+                    Ok(rendered) if rendered.len() <= 128 * 1024 => {
+                        self.diff_preview = Some(rendered.into());
+                        self.status = Message::new(
+                            "差异已生成，请核对后再保存",
+                            "Diff generated; review it before saving",
+                        );
+                    }
+                    Ok(_) => {
+                        self.status = Message::new(
+                            "差异预览超过 128 KiB，请缩小编辑范围后再查看",
+                            "Diff preview exceeds 128 KiB; narrow the edit before viewing",
+                        );
+                    }
+                    Err(error) => {
+                        self.status = Message::new(
+                            format!("无法生成差异：{error}"),
+                            format!("Unable to generate diff: {error}"),
+                        );
+                    }
+                }
+            }
+            Err(error) => {
+                self.status = Message::new(
+                    format!("无法生成差异：{error}"),
+                    format!("Unable to generate diff: {error}"),
+                );
+            }
+        }
+        cx.notify();
     }
 }
 

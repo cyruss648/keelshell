@@ -87,6 +87,8 @@ impl<'de> Deserialize<'de> for AppState {
             #[serde(default)]
             recent_connections: Vec<RecentConnection>,
             snippets: Vec<Snippet>,
+            #[serde(default)]
+            batch_audits: Vec<crate::BatchAuditRecord>,
             settings: Settings,
             #[serde(default)]
             known_hosts: BTreeMap<String, String>,
@@ -103,6 +105,7 @@ impl<'de> Deserialize<'de> for AppState {
             deleted_connections: wire.deleted_connections,
             recent_connections: wire.recent_connections,
             snippets: wire.snippets,
+            batch_audits: wire.batch_audits,
             settings: wire.settings,
             known_hosts: wire.known_hosts,
             route_known_hosts: wire.route_known_hosts,

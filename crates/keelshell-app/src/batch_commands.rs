@@ -8,7 +8,24 @@ use gpui_kit::{
 use keelshell_session::{
     BatchEvent, BatchHandle, BatchOptions, BatchPolicy, BatchRowReceipt, BatchTarget,
 };
+use sha2::{Digest, Sha256};
 use uuid::Uuid;
+
+/// Non-sensitive metadata emitted after a reviewed batch reaches a terminal
+/// state. The command text, endpoints and command output are deliberately not
+/// included; the workspace may persist this as an audit trail.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct BatchAuditDraft {
+    pub command_digest: [u8; 32],
+    pub profile_ids: Vec<Uuid>,
+    pub target_count: usize,
+    pub succeeded: u32,
+    pub failed: u32,
+    pub unknown: u32,
+    pub not_started: u32,
+    pub cancelled: bool,
+    pub stopped_after_failure: bool,
+}
 
 use crate::i18n::{Message, t};
 
@@ -20,6 +37,9 @@ mod view;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Destination {
     pub id: Uuid,
+    /// Saved profile identity when the session came from the connection library.
+    /// One-time sessions intentionally keep this empty.
+    pub profile_id: Option<Uuid>,
     pub entity: EntityId,
     pub name: String,
     pub endpoint: String,
@@ -38,6 +58,7 @@ pub(crate) struct Review {
 
 pub(crate) enum BatchPanelEvent {
     Start(Review),
+    Completed(BatchAuditDraft),
     Hide,
     New,
 }
@@ -61,6 +82,7 @@ pub(crate) struct BatchPanel {
     handle: Option<BatchHandle>,
     complete: bool,
     cancelling: bool,
+    audit_emitted: bool,
     detail: Option<Uuid>,
     detail_text: SharedString,
     message: Option<Message>,
@@ -107,6 +129,7 @@ impl BatchPanel {
             handle: None,
             complete: false,
             cancelling: false,
+            audit_emitted: false,
             detail: None,
             detail_text: "".into(),
             message: None,
@@ -322,6 +345,10 @@ impl BatchPanel {
                     "Worker returned no complete receipt; missing outcomes are unknown. Do not retry automatically.",
                 ));
             }
+            if !self.audit_emitted {
+                self.audit_emitted = true;
+                cx.emit(BatchPanelEvent::Completed(self.audit_draft()));
+            }
             changed = true;
         }
         if changed {
@@ -404,6 +431,53 @@ impl BatchPanel {
             })
             .unwrap_or_default()
             .into();
+    }
+
+    fn audit_draft(&self) -> BatchAuditDraft {
+        let mut succeeded = 0;
+        let mut failed = 0;
+        let mut unknown = 0;
+        let mut not_started = 0;
+        let mut profile_ids = Vec::new();
+        for row in self.rows.iter().filter(|row| row.selected) {
+            if let Some(id) = row.destination.profile_id {
+                profile_ids.push(id);
+            }
+            match row.receipt.as_ref().map(|receipt| receipt.outcome) {
+                Some(keelshell_session::BatchOutcome::Exited { code: 0 }) => succeeded += 1,
+                Some(keelshell_session::BatchOutcome::Exited { .. })
+                | Some(keelshell_session::BatchOutcome::Rejected) => failed += 1,
+                Some(keelshell_session::BatchOutcome::Unknown { .. }) | None => unknown += 1,
+                Some(keelshell_session::BatchOutcome::NotStarted { .. }) => not_started += 1,
+            }
+        }
+        profile_ids.sort_unstable();
+        profile_ids.dedup();
+        let command = self
+            .review
+            .as_ref()
+            .map(|review| review.command.as_str())
+            .unwrap_or_default();
+        BatchAuditDraft {
+            command_digest: Sha256::digest(command.as_bytes()).into(),
+            profile_ids,
+            target_count: self.rows.iter().filter(|row| row.selected).count(),
+            succeeded,
+            failed,
+            unknown,
+            not_started,
+            cancelled: self.cancelling,
+            stopped_after_failure: self.rows.iter().any(|row| {
+                row.receipt.as_ref().is_some_and(|receipt| {
+                    matches!(
+                        receipt.outcome,
+                        keelshell_session::BatchOutcome::NotStarted {
+                            reason: keelshell_session::BatchNotStartedReason::StoppedAfterFailure
+                        }
+                    )
+                })
+            }),
+        }
     }
 }
 

@@ -8,8 +8,10 @@
 #![deny(missing_docs)]
 
 mod ai_profiles;
+mod batch_audit;
 mod completion;
 mod connection_library;
+mod diff;
 mod error;
 mod model;
 mod openssh;
@@ -25,6 +27,9 @@ pub use ai_profiles::{
     AiApiStyle, AiAuthentication, AiCustomHeader, AiModelReasoning, AiPreset, AiProfileCatalog,
     AiProxy, AiReasoningCapability, AiReasoningSelection, AiSecretRef, NamedAiProfile,
 };
+pub use batch_audit::{
+    BatchAuditRecord, BatchAuditSummary, MAX_BATCH_AUDIT_TARGETS, MAX_BATCH_AUDITS, command_sha256,
+};
 pub use completion::{
     CompletionAnalysis, CompletionEdit, CompletionError, CompletionPlan, CompletionQuery,
     CompletionUnsupported, LiteralCandidate, MAX_COMPLETION_INPUT_BYTES, MAX_COMPLETION_PATH_BYTES,
@@ -32,6 +37,11 @@ pub use completion::{
 };
 pub use connection_library::{
     ConnectionFolder, DeletedConnection, FolderRow, MAX_RECENT_CONNECTIONS, RecentConnection,
+};
+pub use diff::{
+    DEFAULT_DIFF_CONTEXT_LINES, DiffError, DiffHunk, DiffLine, DiffLineKind, DiffSide,
+    MAX_DIFF_CONTEXT_LINES, MAX_DIFF_INPUT_BYTES, MAX_DIFF_LINES, MAX_DIFF_OUTPUT_BYTES,
+    UnifiedDiff, diff_text, diff_text_with_context, diff_utf8,
 };
 pub use error::{Error, ValidationError};
 pub use model::{

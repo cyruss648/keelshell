@@ -5,7 +5,7 @@ use gpui_kit::{
     App, Window,
     component::{WindowExt, input::AnyInputState},
 };
-use keelshell_core::Snippet;
+use keelshell_core::{BatchAuditRecord, BatchAuditSummary, Snippet};
 #[path = "batch_peer.rs"]
 mod peer;
 
@@ -59,6 +59,67 @@ fn open_parameters(fixture: &Fixture, snippet: &Snippet, cx: &mut TestAppContext
     })
     .checked("open actual parameter review and enter literal value");
     cx.run_until_parked();
+}
+
+fn pending_audit(command: &str) -> BatchAuditRecord {
+    BatchAuditRecord::new(
+        command,
+        1_725_000_000,
+        vec![],
+        BatchAuditSummary {
+            target_count: 1,
+            succeeded: 1,
+            failed: 0,
+            unknown: 0,
+            not_started: 0,
+            cancelled: false,
+            stopped_after_failure: false,
+        },
+    )
+    .checked("create pending batch audit")
+}
+
+#[gpui_kit::test]
+fn closing_snippet_modal_flushes_pending_batch_audits(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    let audit = pending_audit("printf 'snippet-close'");
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.pending_batch_audits.push(audit.clone());
+            workspace.open_snippet_editor(None, window, cx);
+            workspace.close_snippet_modal(window, cx);
+            assert!(workspace.saving);
+        });
+    })
+    .checked("close snippet modal and flush pending batch audit");
+    cx.run_until_parked();
+    let persisted = fixture.store.load().checked("reload snippet-close audit");
+    assert_eq!(persisted.batch_audits, vec![audit]);
+}
+
+#[gpui_kit::test]
+fn closing_vault_modal_flushes_pending_batch_audits(cx: &mut TestAppContext) {
+    use crate::vault_settings::VaultSettingsEvent;
+
+    let fixture = mount(cx, Vec::new());
+    let audit = pending_audit("printf 'vault-close'");
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.pending_batch_audits.push(audit.clone());
+            workspace.open_vault_settings(window, cx);
+            let panel = workspace
+                .vault_settings
+                .clone()
+                .checked_option("vault panel is open");
+            panel.update(cx, |_, cx| {
+                cx.emit(VaultSettingsEvent::Close { message: None })
+            });
+        });
+    })
+    .checked("close vault modal and flush pending batch audit");
+    cx.run_until_parked();
+    let persisted = fixture.store.load().checked("reload vault-close audit");
+    assert_eq!(persisted.batch_audits, vec![audit]);
 }
 
 #[gpui_kit::test]
@@ -219,6 +280,7 @@ async fn batch_exec_requires_review_preserves_exact_bytes_and_separates_terminal
     assert!(h.servers.iter().all(|s| s.requests().is_empty()));
     h.confirm(cx);
     h.complete(cx).await;
+    cx.run_until_parked();
     for server in &h.servers {
         assert_eq!(server.requests(), vec![text.as_bytes().to_vec()]);
     }
@@ -226,6 +288,18 @@ async fn batch_exec_requires_review_preserves_exact_bytes_and_separates_terminal
     h.fixture
         .workspace
         .read_with(cx, |view, _| assert!(view.command_histories.is_empty()));
+    let audit = h
+        .fixture
+        .store
+        .load()
+        .checked("reload persisted batch audit")
+        .batch_audits;
+    assert_eq!(audit.len(), 1);
+    assert_eq!(audit[0].target_count, 2);
+    assert_eq!(audit[0].succeeded, 1);
+    assert_eq!(audit[0].failed, 1);
+    let encoded = serde_json::to_string(&audit[0]).checked("serialize persisted batch audit");
+    assert!(!encoded.contains(text));
     cx.update_window(h.fixture.window, |_, window, cx| {
         window.render_frame(cx);
         assert!(window.try_find("batch-confirm").is_none());

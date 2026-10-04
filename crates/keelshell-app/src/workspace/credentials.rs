@@ -92,6 +92,7 @@ impl Workspace {
                         view.vault_settings = None;
                         view.vault_settings_subscription = None;
                         view.flush_recent_connections(window, cx);
+                        view.flush_batch_audits(window, cx);
                         if let Some(message) = message {
                             view.status = message.clone();
                         }

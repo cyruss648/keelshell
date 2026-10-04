@@ -1,5 +1,6 @@
 //! Remote browser layout and explicit file-operation controls.
 use super::*;
+use gpui_kit::component::scroll::ScrollableElement;
 
 impl Render for FilesPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
@@ -216,19 +217,106 @@ impl Render for FilesPanel {
             .child(navigation)
             .child(table);
         if let Some((path, _)) = &self.editing {
-            body = body.child(div().w(px(320.)).flex_shrink_0().h_full().min_h_0().flex().flex_col().border_l_1().border_color(rgb(BORDER))
-                .child(div().h(px(28.)).px_2().flex().items_center().bg(rgb(CANVAS)).overflow_hidden().child(format!("{} · {path}",t(cx,"编辑","Edit"))))
-                .child(div().flex_1().min_h_0().p_1().child(Textarea::new(&self.editor).h(relative(1.)).font_family("monospace")))
-                .child(div().p_1().border_t_1().border_color(rgb(BORDER)).child(Button::new("save-remote-file").disabled(self.suspended).icon(IconName::Save).primary().compact().rounded(px(6.)).label(t(cx,"审核并保存","Review save"))
-                    .on_click(cx.listener(|view,_,_,cx| {
-                        if let Some((path,original)) = &view.editing {
-                            let content = view.editor.read(cx).value().as_bytes().to_vec();
-                            if content.len() > 1024*1024 {
-                                view.status = Message::new("编辑内容超过 1 MiB，请使用外部编辑器后上传", "Content exceeds 1 MiB; use an external editor and upload instead"); cx.notify(); return;
-                            }
-                            view.confirm(Message::new(format!("将 {} 替换为审核后的 {} 字节内容？",path,content.len()),format!("Replace {} with the reviewed {} bytes?",path,content.len())),Operation::Save {path:path.clone(),original:original.clone(),content},cx);
-                        }
-                    })))));
+            let mut editor_panel = div()
+                .w(px(320.))
+                .flex_shrink_0()
+                .h_full()
+                .min_h_0()
+                .flex()
+                .flex_col()
+                .border_l_1()
+                .border_color(rgb(BORDER))
+                .child(
+                    div()
+                        .h(px(28.))
+                        .px_2()
+                        .flex()
+                        .items_center()
+                        .bg(rgb(CANVAS))
+                        .overflow_hidden()
+                        .child(format!("{} · {path}", t(cx, "编辑", "Edit"))),
+                )
+                .child(
+                    div()
+                        .flex_1()
+                        .min_h_0()
+                        .p_1()
+                        .child(Textarea::new(&self.editor).h(relative(1.)).font_family("monospace")),
+                )
+                .child(
+                    div()
+                        .p_1()
+                        .border_t_1()
+                        .border_color(rgb(BORDER))
+                        .flex()
+                        .gap_1()
+                        .child(
+                            Button::new("toggle-remote-diff")
+                                .disabled(self.suspended)
+                                .icon(IconName::FileDiff)
+                                .ghost()
+                                .compact()
+                                .rounded(px(6.))
+                                .label(if self.diff_preview.is_some() {
+                                    t(cx, "隐藏差异", "Hide diff")
+                                } else {
+                                    t(cx, "查看差异", "View diff")
+                                })
+                                .on_click(cx.listener(|view, _, _, cx| {
+                                    view.toggle_diff_preview(cx)
+                                })),
+                        )
+                        .child(
+                            Button::new("save-remote-file")
+                                .disabled(self.suspended)
+                                .icon(IconName::Save)
+                                .primary()
+                                .compact()
+                                .rounded(px(6.))
+                                .label(t(cx, "审核并保存", "Review save"))
+                                .on_click(cx.listener(|view, _, _, cx| {
+                                    if let Some((path, original)) = &view.editing {
+                                        let content = view.editor.read(cx).value().as_bytes().to_vec();
+                                        if content.len() > 1024 * 1024 {
+                                            view.status = Message::new(
+                                                "编辑内容超过 1 MiB，请使用外部编辑器后上传",
+                                                "Content exceeds 1 MiB; use an external editor and upload instead",
+                                            );
+                                            cx.notify();
+                                            return;
+                                        }
+                                        view.confirm(
+                                            Message::new(
+                                                format!("将 {} 替换为审核后的 {} 字节内容？", path, content.len()),
+                                                format!("Replace {} with the reviewed {} bytes?", path, content.len()),
+                                            ),
+                                            Operation::Save {
+                                                path: path.clone(),
+                                                original: original.clone(),
+                                                content,
+                                            },
+                                            cx,
+                                        );
+                                    }
+                                })),
+                        ),
+                );
+            if let Some(diff) = &self.diff_preview {
+                editor_panel = editor_panel.child(
+                    div()
+                        .h(px(220.))
+                        .min_h_0()
+                        .border_t_1()
+                        .border_color(rgb(BORDER))
+                        .bg(rgb(0x1e2430))
+                        .overflow_y_scrollbar()
+                        .p_2()
+                        .text_color(rgb(0xd8dee9))
+                        .font_family("monospace")
+                        .child(diff.clone()),
+                );
+            }
+            body = body.child(editor_panel);
         }
         let selection = self
             .selected
