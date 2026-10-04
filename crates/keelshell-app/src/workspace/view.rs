@@ -4,7 +4,7 @@ use crate::design::{SELECTED, TEXT};
 use gpui_kit::assets::IconName;
 
 impl Workspace {
-    fn empty_workspace_body(&self, cx: &mut Context<Self>) -> AnyElement {
+    fn empty_workspace_body(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
         div()
             .size_full()
             .flex_1()
@@ -22,7 +22,7 @@ impl Workspace {
                     .id("connection-library")
                     .flex_1()
                     .min_h_0()
-                    .child(self.connection_table(cx)),
+                    .child(self.connection_table(width, cx)),
             )
             .into_any_element()
     }
@@ -178,7 +178,7 @@ impl Workspace {
             .into_any_element()
     }
 
-    fn connection_manager(&self, cx: &mut Context<Self>) -> AnyElement {
+    fn connection_manager(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
         if !self.show_connections {
             return div().into_any_element();
         }
@@ -192,9 +192,14 @@ impl Workspace {
             .justify_center()
             .child(
                 div()
+                    .id("connection-manager-dialog")
+                    .test_support()
                     .w(px(1280.))
                     .h(px(560.))
                     .max_w_full()
+                    .max_h_full()
+                    .min_w_0()
+                    .min_h_0()
                     .bg(rgb(PANEL))
                     .border_1()
                     .border_color(rgb(BORDER))
@@ -228,7 +233,13 @@ impl Workspace {
                                     })),
                             ),
                     )
-                    .child(div().flex_1().min_h_0().child(self.connection_table(cx))),
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_h_0()
+                            .min_w_0()
+                            .child(self.connection_table(width.min(px(1280.)), cx)),
+                    ),
             )
             .into_any_element()
     }
@@ -269,6 +280,7 @@ impl Render for Workspace {
         self.maintain_command_workflows(cx);
         self.refresh_command_suggestions(window, cx);
         let viewport = window.viewport_size();
+        let assistant_width = px(380.).min(viewport.width * 0.42);
         // At compact widths keep the terminal usable while the assistant is open.
         let show_monitor = !self.tabs.is_empty()
             && viewport.width >= px(900.)
@@ -341,7 +353,15 @@ impl Render for Workspace {
             );
         }
         let body = if self.tabs.is_empty() {
-            self.empty_workspace_body(cx)
+            self.empty_workspace_body(
+                viewport.width
+                    - if self.show_assistant {
+                        assistant_width
+                    } else {
+                        px(0.)
+                    },
+                cx,
+            )
         } else {
             let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(BORDER));
             for pane in self.displayed_terminals() {
@@ -792,7 +812,9 @@ impl Render for Workspace {
                     .when(self.show_assistant, |el| {
                         el.child(
                             div()
-                                .w(px(380.))
+                                .w(assistant_width)
+                                .min_w_0()
+                                .overflow_hidden()
                                 .flex_shrink_0()
                                 .h_full()
                                 .bg(rgb(PANEL))
@@ -817,7 +839,7 @@ impl Render for Workspace {
                     .child(terminal_status)
                     .child(self.status.render(cx)),
             )
-            .child(self.connection_manager(cx))
+            .child(self.connection_manager(viewport.width, cx))
             .child(self.connection_form(cx))
             .child(self.library_modal(cx))
             .child(self.openssh_import_modal(cx))

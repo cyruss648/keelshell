@@ -1,6 +1,14 @@
 //! Connection manager with a persistent folder tree, recent usage and recoverable deletion.
 use super::*;
-use gpui_kit::{assets::IconName, component::Selectable};
+use crate::jump_host_picker::endpoint;
+use gpui_kit::{
+    assets::IconName,
+    component::{Selectable, tooltip::Tooltip},
+};
+
+fn action_label(action: &str, connection: &Connection) -> String {
+    format!("{action}: {} · {}", connection.name, endpoint(connection))
+}
 
 fn cell(text: String, width: f32) -> Div {
     div()
@@ -20,10 +28,18 @@ fn timestamp(seconds: u64) -> String {
 }
 
 impl Workspace {
-    pub(super) fn connection_table(&self, cx: &mut Context<Self>) -> AnyElement {
+    pub(super) fn connection_table(
+        &self,
+        available_width: Pixels,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        // Wide windows retain comparable columns; compact regions keep each
+        // target's identity beside its actions rather than hiding them off-screen.
+        let stacked = available_width < px(760.);
         let query = self.search.read(cx).value();
         let trash = self.library_filter == LibraryFilter::Trash;
         let recent = self.library_filter == LibraryFilter::Recent;
+        let cards = available_width < px(if recent { 1280. } else { 1240. });
         let profiles: Vec<(&Connection, Option<u64>)> = match self.library_filter {
             LibraryFilter::Trash => self
                 .state
@@ -74,66 +90,133 @@ impl Workspace {
             let profile = connection.clone();
             let edit = connection.clone();
             let id = connection.id;
+            let target = format!("{} · {}", connection.name, endpoint(connection));
+            let favorite = Button::new(("favorite", index))
+                .ghost()
+                .compact()
+                .label(if connection.favorite { "★" } else { "☆" })
+                .accessibility_label(action_label(
+                    if connection.favorite {
+                        t(cx, "取消收藏", "Remove from favorites")
+                    } else {
+                        t(cx, "添加收藏", "Add to favorites")
+                    },
+                    connection,
+                ))
+                .tooltip(t(cx, "切换收藏", "Toggle favorite"))
+                .disabled(self.saving || trash)
+                .on_click(
+                    cx.listener(move |view, _, window, cx| view.toggle_favorite(id, window, cx)),
+                );
             let mut row = div()
                 .id(("connection-row", index))
-                .h(px(38.))
+                .test_support()
+                .role(Role::Group)
+                .aria_label(target.clone())
+                .tooltip(move |window, cx| Tooltip::new(target.clone()).build(window, cx))
+                .min_w_0()
                 .flex_shrink_0()
                 .flex()
-                .items_center()
                 .bg(rgb(if index % 2 == 0 { PANEL } else { 0xf8fafd }))
                 .border_b_1()
                 .border_color(rgb(0xedf1f6))
-                .child(
-                    Button::new(("favorite", index))
-                        .ghost()
-                        .compact()
-                        .label(if connection.favorite { "★" } else { "☆" })
-                        .accessibility_label(format!(
-                            "{}: {}",
-                            if connection.favorite {
-                                t(cx, "取消收藏", "Remove from favorites")
-                            } else {
-                                t(cx, "添加收藏", "Add to favorites")
-                            },
-                            connection.name,
-                        ))
-                        .tooltip(t(cx, "切换收藏", "Toggle favorite"))
-                        .disabled(self.saving || trash)
-                        .on_click(cx.listener(move |view, _, window, cx| {
-                            view.toggle_favorite(id, window, cx)
-                        })),
-                )
-                .child(cell(connection.name.clone(), 155.))
-                .child(cell(connection.host.clone(), 145.))
-                .child(cell(connection.port.to_string(), 56.))
-                .child(cell(connection.username.clone(), 90.))
-                .child(cell(
-                    self.folder_label(self.state.folder_id_of(id), cx),
-                    130.,
-                ));
-            if let Some(time) = time {
-                row = row.child(cell(timestamp(time), 190.));
-            } else {
-                row = row.child(cell(connection.tags.join(", "), 120.));
-            }
-            if trash {
+                .when(cards, |row| row.flex_col().p_2().gap_2())
+                .when(!cards, |row| row.h(px(38.)).items_center());
+            if cards {
                 row = row.child(
+                    div()
+                        .flex()
+                        .items_start()
+                        .gap_2()
+                        .min_w_0()
+                        .child(favorite)
+                        .child(
+                            div()
+                                .flex_1()
+                                .min_w_0()
+                                .flex()
+                                .flex_col()
+                                .gap_1()
+                                .child(
+                                    div()
+                                        .id(("connection-name", index))
+                                        .test_support()
+                                        .role(Role::Label)
+                                        .aria_label(connection.name.clone())
+                                        .text_ellipsis()
+                                        .font_weight(FontWeight::SEMIBOLD)
+                                        .child(connection.name.clone()),
+                                )
+                                .child(
+                                    div()
+                                        .id(("connection-endpoint", index))
+                                        .test_support()
+                                        .role(Role::Label)
+                                        .aria_label(endpoint(connection))
+                                        .text_ellipsis()
+                                        .text_xs()
+                                        .text_color(rgb(MUTED))
+                                        .child(endpoint(connection)),
+                                )
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(rgb(MUTED))
+                                        .text_ellipsis()
+                                        .child(format!(
+                                            "{} · {}",
+                                            self.folder_label(self.state.folder_id_of(id), cx),
+                                            time.map(timestamp)
+                                                .unwrap_or_else(|| connection.tags.join(", "))
+                                        )),
+                                ),
+                        ),
+                );
+            } else {
+                row = row
+                    .child(favorite)
+                    .child(cell(connection.name.clone(), 155.))
+                    .child(cell(connection.host.clone(), 145.))
+                    .child(cell(connection.port.to_string(), 56.))
+                    .child(cell(connection.username.clone(), 90.))
+                    .child(cell(
+                        self.folder_label(self.state.folder_id_of(id), cx),
+                        130.,
+                    ));
+                row = if let Some(time) = time {
+                    row.child(cell(timestamp(time), 190.))
+                } else {
+                    row.child(cell(connection.tags.join(", "), 120.))
+                };
+            }
+            let mut actions = div()
+                .id(("connection-actions", index))
+                .test_support()
+                .flex()
+                .items_center()
+                .min_w_0()
+                .flex_shrink_0()
+                .when(cards, |actions| actions.flex_wrap().gap_1());
+            if trash {
+                actions = actions.child(
                     Button::new(("restore", index))
                         .ghost()
                         .compact()
                         .label(t(cx, "恢复", "Restore"))
+                        .accessibility_label(action_label(t(cx, "恢复", "Restore"), connection))
                         .disabled(self.saving)
                         .on_click(cx.listener(move |view, _, window, cx| {
                             view.restore_connection(id, window, cx)
                         })),
                 );
             } else {
-                row = row
+                actions = actions
                     .child(
                         Button::new(("connect", index))
                             .ghost()
                             .compact()
                             .label(t(cx, "连接", "Connect"))
+                            .accessibility_label(action_label(t(cx, "连接", "Connect"), connection))
                             .disabled(self.connecting || self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.request_connect(profile.clone(), window, cx)
@@ -144,6 +227,7 @@ impl Workspace {
                             .ghost()
                             .compact()
                             .label(t(cx, "编辑", "Edit"))
+                            .accessibility_label(action_label(t(cx, "编辑", "Edit"), connection))
                             .disabled(self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.edit_connection(edit.clone(), window, cx)
@@ -154,6 +238,7 @@ impl Workspace {
                             .ghost()
                             .compact()
                             .label(t(cx, "移动", "Move"))
+                            .accessibility_label(action_label(t(cx, "移动", "Move"), connection))
                             .disabled(self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.open_destination(DestinationTarget::Connection(id), window, cx)
@@ -164,6 +249,7 @@ impl Workspace {
                             .ghost()
                             .compact()
                             .label(t(cx, "复制", "Copy"))
+                            .accessibility_label(action_label(t(cx, "复制", "Copy"), connection))
                             .disabled(self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 let mut candidate = view.state.clone();
@@ -182,13 +268,17 @@ impl Workspace {
                             .ghost()
                             .compact()
                             .label(t(cx, "移入回收站", "Trash"))
+                            .accessibility_label(action_label(
+                                t(cx, "移入回收站", "Trash"),
+                                connection,
+                            ))
                             .disabled(self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.delete_connection(id, window, cx)
                             })),
                     );
             }
-            rows = rows.child(row);
+            rows = rows.child(row.child(actions));
         }
         if count == 0 {
             rows=rows.child(div().p_5().text_color(rgb(MUTED)).child(if trash {
@@ -241,11 +331,11 @@ impl Workspace {
         ];
         let mut tree = div()
             .id("connection-folders")
-            .w(px(200.))
-            .h_full()
             .flex_shrink_0()
+            .min_w_0()
+            .when(stacked, |tree| tree.w_full().h(px(100.)).border_b_1())
+            .when(!stacked, |tree| tree.w(px(200.)).h_full().border_r_1())
             .overflow_y_scroll()
-            .border_r_1()
             .border_color(rgb(BORDER))
             .bg(rgb(PANEL))
             .p_2()
@@ -363,7 +453,7 @@ impl Workspace {
                 if trash || recent { 190. } else { 120. },
             ));
         div().flex().flex_col().size_full().text_sm().bg(rgb(PANEL))
-            .child(div().min_h(px(46.)).px_3().py_2().flex_shrink_0().flex().items_center().gap_2()
+            .child(div().min_h(px(46.)).px_3().py_2().flex_shrink_0().flex().flex_wrap().items_center().gap_2()
                 .border_b_1().border_color(rgb(BORDER))
                 .child(Button::new("new-connection").compact().icon(IconName::Plus).label(t(cx,"新建连接","New connection"))
                     .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.open_form(window,cx))))
@@ -374,10 +464,12 @@ impl Workspace {
                     .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.import_openssh_connections(window,cx))))
                 .child(Button::new("export-connections").compact().icon(IconName::Upload).label(t(cx,"导出 JSON","Export JSON"))
                     .on_click(cx.listener(|view,_,_,cx|view.export_connections(cx))))
-                .child(div().flex_1().min_w(px(120.)).child(Input::new(&self.search).small().aria_label(t(cx,"搜索连接","Search connections")))))
-            .child(div().flex_1().min_h_0().flex().child(tree)
+                .child(div().flex_1().min_w(px(120.)).when(stacked,|search|search.w_full())
+                    .child(Input::new(&self.search).small().aria_label(t(cx,"搜索连接","Search connections")))))
+            .child(div().flex_1().min_h_0().min_w_0().flex().when(stacked,|body|body.flex_col()).child(tree)
                 .child(div().id("connection-table-scroll").flex_1().min_w_0().overflow_x_scroll()
-                    .child(div().min_w(px(if trash {1010.} else {1160.})).size_full().flex().flex_col().child(header).child(rows))))
+                    .child(div().min_w_0().size_full().flex().flex_col()
+                        .when(!cards,|table|table.min_w(px(if trash {880.} else if recent {1070.} else {1010.})).child(header)).child(rows))))
             .child(div().h(px(28.)).flex_shrink_0().px_3().flex().items_center().text_xs().text_color(rgb(MUTED))
                 .border_t_1().border_color(rgb(BORDER)).child(if trash {
                     format!("{} · {count}",t(cx,"仅移除连接配置，不会删除服务器或凭据库条目","Profile metadata only; servers and encrypted vault entries are retained"))

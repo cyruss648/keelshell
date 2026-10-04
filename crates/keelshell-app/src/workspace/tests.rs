@@ -53,6 +53,15 @@ struct Fixture {
 }
 
 fn mount(cx: &mut TestAppContext, profiles: Vec<Connection>) -> Fixture {
+    mount_sized(cx, profiles, 1280., 840.)
+}
+
+fn mount_sized(
+    cx: &mut TestAppContext,
+    profiles: Vec<Connection>,
+    width: f32,
+    height: f32,
+) -> Fixture {
     let directory = std::env::temp_dir().join(format!("keelshell-ui-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir(&directory).checked("create isolated state directory");
     let guard = TemporaryState(directory.clone());
@@ -77,7 +86,7 @@ fn mount(cx: &mut TestAppContext, profiles: Vec<Connection>) -> Fixture {
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(Bounds::new(
                     point(px(0.), px(0.)),
-                    size(px(1280.), px(840.)),
+                    size(px(width), px(height)),
                 ))),
                 ..Default::default()
             },
@@ -96,6 +105,38 @@ fn mount(cx: &mut TestAppContext, profiles: Vec<Connection>) -> Fixture {
         store,
         _state_directory: guard,
     }
+}
+
+#[gpui_kit::test]
+async fn update_panel_close_has_a_localized_name_and_closes_the_real_panel(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount(cx, Vec::new());
+    for (language, label) in [
+        (Language::ZhCn, "关闭关于与更新"),
+        (Language::En, "Close about and updates"),
+    ] {
+        cx.update_window(fixture.window, |_, window, cx| {
+            i18n::set_language(language, cx);
+            window.render_frame(cx);
+            window.click("about-updates", cx);
+            window.render_frame(cx);
+            assert!(fixture.workspace.read(cx).update_panel.is_some());
+            assert_eq!(window.find("close-update-panel").label(), Some(label));
+            window.click("close-update-panel", cx);
+        })
+        .checked("close the actual update panel without checking or installing an update");
+        cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
+            fixture.workspace.read(cx).update_panel.is_none()
+        })
+        .await;
+        cx.update_window(fixture.window, |_, window, cx| {
+            window.render_frame(cx);
+            assert!(window.try_find("close-update-panel").is_none());
+        })
+        .checked("closed panel no longer exposes its control");
+    }
+    cx.update(|cx| i18n::set_language(Language::ZhCn, cx));
 }
 
 #[gpui_kit::test]

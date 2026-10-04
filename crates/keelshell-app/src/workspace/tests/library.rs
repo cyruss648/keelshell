@@ -1,5 +1,236 @@
 use super::*;
 use crate::workspace::library::{DestinationTarget, LibraryFilter};
+use gpui_kit::{Bounds, Pixels};
+
+fn contained(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
+    inner.origin.x >= outer.origin.x
+        && inner.origin.y >= outer.origin.y
+        && inner.right() <= outer.right()
+        && inner.bottom() <= outer.bottom()
+}
+
+#[gpui_kit::test]
+fn wide_connection_manager_retains_columns_and_visible_actions(cx: &mut TestAppContext) {
+    let fixture = mount_sized(
+        cx,
+        vec![Connection::new("审核主机", "192.0.2.10", "operator")],
+        1440.,
+        900.,
+    );
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_connections = true;
+            cx.notify();
+        });
+        for language in [Language::ZhCn, Language::En] {
+            i18n::set_language(language, cx);
+            window.render_frame(cx);
+            let dialog = window.find("connection-manager-dialog").bounds();
+            let manager = window.within("connection-manager-dialog");
+            // The wide layout keeps the table rather than rendering a card.
+            assert!(manager.try_find(("connection-endpoint", 0_usize)).is_none());
+            let row = manager.find(("connection-row", 0_usize)).bounds();
+            assert!(contained(row, dialog));
+            for id in ["connect", "edit", "move", "duplicate", "delete", "favorite"] {
+                let action = manager.find((id, 0_usize));
+                assert!(action.visible());
+                assert!(
+                    contained(action.bounds(), row),
+                    "wide {id} escaped: {:?}",
+                    action.bounds()
+                );
+                assert!(
+                    action
+                        .label()
+                        .checked_option("complete accessible target")
+                        .contains("审核主机 · operator@192.0.2.10:22")
+                );
+            }
+        }
+        i18n::set_language(Language::ZhCn, cx);
+    })
+    .checked("wide manager columns with complete accessible target identities");
+}
+
+#[gpui_kit::test]
+fn compact_library_keeps_identity_and_actions_visible_with_assistant_open(cx: &mut TestAppContext) {
+    for width in [480., 760., 1100.] {
+        let fixture = mount_sized(
+            cx,
+            vec![Connection::new("审核主机", "192.0.2.10", "operator")],
+            width,
+            900.,
+        );
+        cx.update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.show_assistant = true;
+                cx.notify();
+            });
+            for language in [Language::ZhCn, Language::En] {
+                i18n::set_language(language, cx);
+                window.render_frame(cx);
+                let row = window.find(("connection-row", 0_usize)).bounds();
+                assert!(
+                    contained(row, window.bounds()),
+                    "row escaped {width}: {row:?}"
+                );
+                for (id, label) in [
+                    ("connection-name", "审核主机"),
+                    ("connection-endpoint", "operator@192.0.2.10:22"),
+                ] {
+                    let identity = window.find((id, 0_usize));
+                    assert_eq!(identity.label(), Some(label));
+                    assert!(identity.visible());
+                    assert!(contained(identity.bounds(), row));
+                }
+                for id in ["connect", "edit", "move", "duplicate", "delete", "favorite"] {
+                    let action = window.find((id, 0_usize));
+                    assert!(action.visible(), "{id} hidden at {width}");
+                    assert!(
+                        contained(action.bounds(), row),
+                        "{id} escaped {width}: {:?}",
+                        action.bounds()
+                    );
+                }
+            }
+            window.click(("edit", 0_usize), cx);
+            assert_eq!(
+                fixture
+                    .workspace
+                    .read(cx)
+                    .form
+                    .as_ref()
+                    .checked_option("real profile editor")
+                    .id,
+                Some(fixture.workspace.read(cx).state.connections[0].id)
+            );
+            window.click("cancel-connection", cx);
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.show_connections = true;
+                cx.notify();
+            });
+            for language in [Language::ZhCn, Language::En] {
+                i18n::set_language(language, cx);
+                window.render_frame(cx);
+                let dialog = window.find("connection-manager-dialog").bounds();
+                assert!(contained(dialog, window.bounds()));
+                let manager = window.within("connection-manager-dialog");
+                let row = manager.find(("connection-row", 0_usize)).bounds();
+                assert!(contained(row, dialog));
+                for id in [
+                    "connect",
+                    "edit",
+                    "move",
+                    "duplicate",
+                    "delete",
+                    "favorite",
+                    "connection-name",
+                    "connection-endpoint",
+                ] {
+                    let control = manager.find((id, 0_usize));
+                    assert!(control.visible(), "manager {id} hidden at {width}");
+                    assert!(contained(control.bounds(), row));
+                }
+            }
+            window
+                .within("connection-manager-dialog")
+                .click(("edit", 0_usize), cx);
+            assert!(fixture.workspace.read(cx).form.is_some());
+            window.click("cancel-connection", cx);
+            i18n::set_language(Language::ZhCn, cx);
+        })
+        .checked("compact production library with assistant and real edit action");
+    }
+}
+
+#[gpui_kit::test]
+fn connection_actions_distinguish_same_names_by_complete_endpoint_in_both_languages(
+    cx: &mut TestAppContext,
+) {
+    let mut first = Connection::new("同名连接", "192.0.2.10", "operator");
+    first.favorite = true;
+    let mut second = Connection::new("同名连接", "2001:db8::10", "deploy");
+    second.port = 2222;
+    let deleted_id = second.id;
+    let fixture = mount(cx, vec![first, second]);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for language in [Language::ZhCn, Language::En] {
+            i18n::set_language(language, cx);
+            window.render_frame(cx);
+            for (index, endpoint, favorite) in [
+                (0_usize, "operator@192.0.2.10:22", true),
+                (1_usize, "deploy@[2001:db8::10]:2222", false),
+            ] {
+                let target = format!("同名连接 · {endpoint}");
+                assert_eq!(
+                    window.find(("connection-row", index)).label(),
+                    Some(target.as_str())
+                );
+                assert_eq!(
+                    window.find(("connection-row", index)).role(),
+                    Some(gpui_kit::Role::Group)
+                );
+                let actions = if language == Language::En {
+                    [
+                        ("connect", "Connect"),
+                        ("edit", "Edit"),
+                        ("move", "Move"),
+                        ("duplicate", "Copy"),
+                        ("delete", "Trash"),
+                        (
+                            "favorite",
+                            if favorite {
+                                "Remove from favorites"
+                            } else {
+                                "Add to favorites"
+                            },
+                        ),
+                    ]
+                } else {
+                    [
+                        ("connect", "连接"),
+                        ("edit", "编辑"),
+                        ("move", "移动"),
+                        ("duplicate", "复制"),
+                        ("delete", "移入回收站"),
+                        (
+                            "favorite",
+                            if favorite {
+                                "取消收藏"
+                            } else {
+                                "添加收藏"
+                            },
+                        ),
+                    ]
+                };
+                for (id, action) in actions {
+                    let expected = format!("{action}: 同名连接 · {endpoint}");
+                    assert_eq!(window.find((id, index)).label(), Some(expected.as_str()));
+                }
+            }
+        }
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace
+                .state
+                .soft_delete_connection(deleted_id, 1)
+                .checked("trash synthetic profile");
+            workspace.library_filter = LibraryFilter::Trash;
+            cx.notify();
+        });
+        for (language, action) in [(Language::ZhCn, "恢复"), (Language::En, "Restore")] {
+            i18n::set_language(language, cx);
+            window.render_frame(cx);
+            let expected = format!("{action}: 同名连接 · deploy@[2001:db8::10]:2222");
+            assert_eq!(
+                window.find(("restore", 0_usize)).label(),
+                Some(expected.as_str())
+            );
+            assert!(window.try_find(("connect", 0_usize)).is_none());
+        }
+        i18n::set_language(Language::ZhCn, cx);
+    })
+    .checked("assert production control names for active and recoverable SSH profiles");
+}
 
 async fn saved(fixture: &Fixture, cx: &mut TestAppContext) {
     cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {

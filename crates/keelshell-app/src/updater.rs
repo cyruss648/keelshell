@@ -453,6 +453,8 @@ impl Render for UpdatePanel {
                             .ghost()
                             .compact()
                             .label("×")
+                            .accessibility_label(t(cx, "关闭关于与更新", "Close about and updates"))
+                            .tooltip(t(cx, "关闭关于与更新", "Close about and updates"))
                             .on_click(cx.listener(|panel, _, _, cx| panel.close(cx))),
                     ),
             )
