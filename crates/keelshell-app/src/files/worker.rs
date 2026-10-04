@@ -1,5 +1,97 @@
 //! Session-bound SFTP worker and acknowledged transfer control.
 use super::*;
+use std::path::{Path, PathBuf};
+
+const MAX_COMPARE_DEPTH: usize = 32;
+
+/// Read a bounded local tree for the read-only directory comparison action.
+///
+/// The worker already runs on a dedicated transport thread, so filesystem I/O
+/// never blocks the GPUI event loop. Symlinks are represented as entries and
+/// are never traversed. Relative paths are built from directory-entry names so
+/// the local root cannot escape into a comparison key.
+fn snapshot_local_tree(
+    root: &Path,
+    stop: &AtomicBool,
+) -> Result<Vec<DirectoryEntrySnapshot>, FileFailure> {
+    if !root.is_absolute() {
+        return Err(FileFailure::Comparison(
+            "local comparison root must be absolute".to_owned(),
+        ));
+    }
+    let snapshot = crate::directory_compare::snapshot_local_directory(
+        root,
+        keelshell_core::MAX_DIRECTORY_COMPARE_ENTRIES,
+        MAX_COMPARE_DEPTH,
+    )
+    .map_err(|error| FileFailure::Comparison(error.to_string()))?;
+    if stop.load(Ordering::Acquire) {
+        return Err(FileFailure::Cancelled);
+    }
+    Ok(snapshot)
+}
+
+fn remote_relative_path(root: &str, path: &str) -> Option<String> {
+    let root = root.trim_end_matches('/');
+    if root.is_empty() {
+        path.strip_prefix('/')
+            .filter(|path| !path.is_empty())
+            .map(str::to_owned)
+    } else {
+        path.strip_prefix(root)
+            .and_then(|path| path.strip_prefix('/'))
+            .filter(|path| !path.is_empty())
+            .map(str::to_owned)
+    }
+}
+
+async fn compare_directories(
+    sftp: Arc<SftpSession>,
+    local_root: PathBuf,
+    remote_root: String,
+    stop: &AtomicBool,
+) -> Result<Outcome, FileFailure> {
+    let local = snapshot_local_tree(&local_root, stop)?;
+    let remote_root = sftp.canonicalize(&remote_root).await?;
+    let remote_entries = sftp
+        .snapshot_tree_limited(
+            &remote_root,
+            keelshell_core::MAX_DIRECTORY_COMPARE_ENTRIES,
+            MAX_COMPARE_DEPTH,
+        )
+        .await?;
+    let mut remote = Vec::with_capacity(remote_entries.len());
+    for entry in remote_entries {
+        let Some(path) = remote_relative_path(&remote_root, &entry.path) else {
+            return Err(FileFailure::Comparison(format!(
+                "remote snapshot entry is outside the selected root: {}",
+                entry.path
+            )));
+        };
+        let kind = if entry.is_symlink {
+            DirectoryEntryKind::Symlink
+        } else if entry.is_directory {
+            DirectoryEntryKind::Directory
+        } else {
+            DirectoryEntryKind::File
+        };
+        remote.push(DirectoryEntrySnapshot::new(
+            path,
+            kind,
+            (kind == DirectoryEntryKind::File)
+                .then_some(entry.size)
+                .flatten(),
+            entry.modified.map(u64::from),
+        ));
+    }
+    let report = keelshell_core::compare_directories(&local, &remote)
+        .map_err(|error| FileFailure::Comparison(error.to_string()))?;
+    Ok(Outcome::Compared(DirectoryComparison {
+        local: local_root,
+        remote: remote_root,
+        report,
+    }))
+}
 
 async fn queued_transfer(
     sftp: Arc<SftpSession>,
@@ -219,6 +311,9 @@ pub(super) async fn operate(
                 let plan = sftp.plan_directory_transfer(spec).await?;
                 Ok(Outcome::PlannedDirectory(plan))
             }
+            Operation::Compare(local, remote) => {
+                compare_directories(sftp.clone(), local, remote, &stop).await
+            }
             Operation::PlanResume(spec, directory) => {
                 if directory {
                     Ok(Outcome::PlannedDirectoryResume(
@@ -336,5 +431,38 @@ pub(super) async fn operate(
             _ => Err(FileFailure::Cleanup),
         },
         Err(error) => Err(error),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{FileFailure, snapshot_local_tree};
+    use std::fs;
+    use std::sync::atomic::{AtomicBool, Ordering};
+
+    #[test]
+    fn local_snapshot_adapter_is_bounded_and_honors_cancellation() {
+        let root = tempfile::tempdir().unwrap_or_else(|error| panic!("temp root: {error}"));
+        fs::create_dir(root.path().join("nested"))
+            .unwrap_or_else(|error| panic!("nested: {error}"));
+        fs::write(root.path().join("nested").join("file.txt"), b"data")
+            .unwrap_or_else(|error| panic!("file: {error}"));
+
+        let stop = AtomicBool::new(false);
+        let snapshot = snapshot_local_tree(root.path(), &stop)
+            .unwrap_or_else(|error| panic!("snapshot: {error}"));
+        assert_eq!(
+            snapshot
+                .iter()
+                .map(|entry| entry.path.as_str())
+                .collect::<Vec<_>>(),
+            ["nested", "nested/file.txt"]
+        );
+
+        stop.store(true, Ordering::Release);
+        assert!(matches!(
+            snapshot_local_tree(root.path(), &stop),
+            Err(FileFailure::Cancelled)
+        ));
     }
 }

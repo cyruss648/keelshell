@@ -2,6 +2,85 @@
 use super::*;
 use gpui_kit::component::scroll::ScrollableElement;
 
+fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl IntoElement {
+    let report = &comparison.report;
+    let summary = format!(
+        "{} same · {} changed · {} left only · {} right only · {} uncertain",
+        report.same_count(),
+        report.changed_count(),
+        report.left_only_count(),
+        report.right_only_count(),
+        report.uncertain_count(),
+    );
+    let mut rows = div().flex().flex_col().gap_1();
+    for row in report.rows().iter().take(100) {
+        rows = rows.child(
+            div()
+                .flex()
+                .gap_2()
+                .child(
+                    div()
+                        .w(px(92.))
+                        .flex_shrink_0()
+                        .child(compare_status_label(row.status, cx)),
+                )
+                .child(div().min_w_0().text_ellipsis().child(row.path.clone())),
+        );
+    }
+    if report.rows().len() > 100 {
+        rows = rows.child(
+            div()
+                .text_color(rgb(MUTED))
+                .child(match crate::i18n::language(cx) {
+                    keelshell_core::Language::ZhCn => {
+                        format!("仅显示前 100 / {} 项", report.rows().len())
+                    }
+                    keelshell_core::Language::En => {
+                        format!("Showing the first 100 of {} entries", report.rows().len())
+                    }
+                }),
+        );
+    }
+    div()
+        .id("directory-comparison-card")
+        .mx_2()
+        .my_1()
+        .p_2()
+        .max_h(px(240.))
+        .overflow_y_scroll()
+        .border_1()
+        .border_color(rgb(BORDER))
+        .bg(rgb(CANVAS))
+        .child(
+            div()
+                .flex()
+                .gap_2()
+                .child(IconName::FileDiff)
+                .child(t(
+                    cx,
+                    "目录比较（只读）",
+                    "Directory comparison (read-only)",
+                ))
+                .child(div().flex_1().text_color(rgb(MUTED)).child(summary)),
+        )
+        .child(div().text_color(rgb(MUTED)).child(format!(
+            "{} ↔ {}",
+            comparison.local.display(),
+            comparison.remote
+        )))
+        .child(rows)
+}
+
+fn compare_status_label(status: DirectoryEntryStatus, cx: &App) -> SharedString {
+    match status {
+        DirectoryEntryStatus::Same => t(cx, "一致", "Same").into(),
+        DirectoryEntryStatus::Changed => t(cx, "已变化", "Changed").into(),
+        DirectoryEntryStatus::LeftOnly => t(cx, "仅本地", "Local only").into(),
+        DirectoryEntryStatus::RightOnly => t(cx, "仅远端", "Remote only").into(),
+        DirectoryEntryStatus::Uncertain => t(cx, "待确认", "Uncertain").into(),
+    }
+}
+
 impl Render for FilesPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let mut navigation = div()
@@ -417,7 +496,22 @@ impl Render for FilesPanel {
                         }
                         view.confirm(Message::new(format!("将 {} 下载到 {}？不覆盖已有文件；中断时可能保留未完成的下载。",entry.path,local.display()),format!("Download {} to {}? Existing files are preserved; an interruption may leave a partial download.",entry.path,local.display())),Operation::Download(entry.path.clone(),local),cx);
                     }
+                })))
+                .child(Button::new("compare-directories").ghost().compact().rounded(px(6.)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                    let local = PathBuf::from(view.local.read(cx).value().trim());
+                    let remote = view.path.read(cx).value().trim().to_owned();
+                    if !local.is_absolute() {
+                        view.status = Message::new("请输入本地目录的绝对路径", "Enter an absolute local directory path");
+                    } else if remote.is_empty() || remote.chars().any(char::is_control) {
+                        view.status = Message::new("请输入有效的远程目录", "Enter a valid remote directory");
+                    } else {
+                        view.run(Operation::Compare(local, remote), window, cx);
+                    }
+                    cx.notify();
                 })))));
+        if let Some(comparison) = &self.comparison {
+            panel = panel.child(directory_compare_card(comparison, cx));
+        }
         if self.transfer.is_some() {
             panel = panel.child(self.transfer_card(cx));
         }

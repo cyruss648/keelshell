@@ -9,7 +9,10 @@ use gpui_kit::{
     },
     *,
 };
-use keelshell_core::diff_utf8;
+use keelshell_core::{
+    DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
+    diff_utf8,
+};
 use keelshell_session::{
     SessionError, SshSession,
     sftp::{
@@ -50,6 +53,7 @@ enum Operation {
     PlanResume(TransferSpec, bool),
     ResumeFile(FileResumePlan),
     ResumeDirectory(DirectoryResumePlan),
+    Compare(PathBuf, String),
     Save {
         path: String,
         original: Vec<u8>,
@@ -64,6 +68,7 @@ enum Outcome {
     PlannedDirectory(DirectoryTransferPlan),
     PlannedFileResume(FileResumePlan),
     PlannedDirectoryResume(DirectoryResumePlan),
+    Compared(DirectoryComparison),
 }
 
 enum WorkerMessage {
@@ -101,6 +106,13 @@ pub struct FilesPanel {
     transfer: Option<TransferStatus>,
     recovery: Option<RecoveryCandidate>,
     resume_mode: bool,
+    comparison: Option<DirectoryComparison>,
+}
+
+struct DirectoryComparison {
+    local: PathBuf,
+    remote: String,
+    report: DirectoryCompareReport,
 }
 
 /// A failed transfer can offer a new read-only verification step, but never a
@@ -217,6 +229,7 @@ enum FileFailure {
         destination: String,
         error: Box<FileFailure>,
     },
+    Comparison(String),
 }
 
 /// Return a terminal phase only for an operation that actually transferred
@@ -258,6 +271,7 @@ impl std::fmt::Display for FileFailure {
             Self::DirectoryTransfer { destination, error } => {
                 write!(f, "{error}; inspect partial directory {destination}")
             }
+            Self::Comparison(detail) => write!(f, "Directory comparison failed: {detail}"),
         }
     }
 }
@@ -309,6 +323,10 @@ impl FileFailure {
                 format!(
                     "Directory transfer incomplete: {error}. Inspect {destination}; partial files may remain and are not removed automatically."
                 ),
+            ),
+            Self::Comparison(detail) => Message::new(
+                format!("目录比较失败：{detail}"),
+                format!("Directory comparison failed: {detail}"),
             ),
             Self::WorkerStopped => Message::new(
                 "文件工作线程未返回结果便结束",
@@ -426,6 +444,7 @@ impl FilesPanel {
             transfer: None,
             recovery: None,
             resume_mode: false,
+            comparison: None,
         };
         panel.run(Operation::List(".".into()), window, cx);
         panel
@@ -521,6 +540,9 @@ impl FilesPanel {
             // a hidden recovery proposal after the user leaves its card.
             self.recovery = None;
         }
+        if !matches!(&operation, Operation::Compare(..)) {
+            self.comparison = None;
+        }
         if let Operation::List(path) = &operation
             && (path.trim().is_empty() || path.chars().any(char::is_control))
         {
@@ -558,6 +580,10 @@ impl FilesPanel {
             Operation::ResumeFile(_) | Operation::ResumeDirectory(_) => Message::new(
                 "正在复核已审核的续传内容…",
                 "Rechecking the reviewed continuation…",
+            ),
+            Operation::Compare(_, _) => Message::new(
+                "正在读取两侧目录快照（只读）…",
+                "Reading both directory snapshots (read-only)…",
             ),
             _ => Message::new("正在处理…", "Working…"),
         };
@@ -708,6 +734,18 @@ impl FilesPanel {
                     Ok(Outcome::PlannedDirectoryResume(plan)) => {
                         view.status = Message::new("部分目录校验通过，请审核续传", "Existing tree verified; review continuation");
                         view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan)));
+                    }
+                    Ok(Outcome::Compared(comparison)) => {
+                        let review_count = comparison.report.review_count();
+                        view.comparison = Some(comparison);
+                        view.status = if review_count == 0 {
+                            Message::new("两侧目录已按可用元数据匹配", "The directories match on available metadata")
+                        } else {
+                            Message::new(
+                                format!("目录比较完成：{review_count} 项需要审核"),
+                                format!("Directory comparison complete: {review_count} entries need review"),
+                            )
+                        };
                     }
                     Err(error) => view.status = if review_only {
                         Message::detail("审核未完成，尚未开始传输", "Review incomplete; transfer not started", error)
@@ -1008,6 +1046,7 @@ impl Operation {
             | Self::SetPermissions(_, _)
             | Self::PlanDirectory(_)
             | Self::PlanResume(..)
+            | Self::Compare(..)
             | Self::Save { .. } => None,
         }
     }

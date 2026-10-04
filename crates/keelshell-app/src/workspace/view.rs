@@ -35,7 +35,7 @@ impl Workspace {
                 .gap_1()
                 .min_w_0()
                 .child(div().text_xs().text_color(rgb(MUTED)).child(label))
-                .child(Input::new(state).id(id))
+                .child(Input::new(state).id(id).aria_label(label))
         };
         let auth_label = if self.quick_password {
             t(
@@ -216,6 +216,11 @@ impl Workspace {
                                     .ghost()
                                     .compact()
                                     .label("×")
+                                    .accessibility_label(t(
+                                        cx,
+                                        "关闭连接管理器",
+                                        "Close connection manager",
+                                    ))
                                     .on_click(cx.listener(|view, _, window, cx| {
                                         view.show_connections = false;
                                         view.focus_current_surface(window, cx);
@@ -323,6 +328,11 @@ impl Render for Workspace {
                             .ghost()
                             .compact()
                             .label("×")
+                            .accessibility_label(format!(
+                                "{}: {}",
+                                t(cx, "关闭 SSH 会话", "Close SSH session"),
+                                terminal.read(cx).title,
+                            ))
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.active = index;
                                 view.close_tab(&CloseTab, window, cx);
@@ -491,6 +501,7 @@ impl Render for Workspace {
                             .icon(IconName::Plus)
                             .ghost()
                             .compact()
+                            .accessibility_label(t(cx, "新建 SSH 会话", "New SSH session"))
                             .tooltip(t(cx, "新建 SSH 会话", "New SSH session"))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_connections(&OpenConnections, window, cx)

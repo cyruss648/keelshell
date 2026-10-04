@@ -111,8 +111,27 @@ fn first_launch_is_chinese_without_a_local_or_remote_terminal(cx: &mut TestAppCo
         assert!(workspace.panels.is_empty());
         assert_eq!(window.find("new-connection").label(), Some("新建连接"));
         assert_eq!(window.find("language").label(), Some("中文 / EN"));
+        assert_eq!(window.find("new-session").label(), Some("新建 SSH 会话"));
+        assert_eq!(window.find("quick-host").label(), Some("主机或 IP 地址"));
+        assert_eq!(window.find("quick-port").label(), Some("端口"));
+        assert_eq!(window.find("quick-username").label(), Some("SSH 用户名"));
+        assert_eq!(window.find("quick-key").label(), Some("私钥路径（可选）"));
         assert!(window.try_find(("session-tab", 0_usize)).is_none());
         assert!(window.try_find("run-command").is_none());
+        i18n::set_language(Language::En, cx);
+        window.render_frame(cx);
+        assert_eq!(window.find("new-session").label(), Some("New SSH session"));
+        assert_eq!(
+            window.find("quick-host").label(),
+            Some("Host or IP address")
+        );
+        assert_eq!(window.find("quick-port").label(), Some("Port"));
+        assert_eq!(window.find("quick-username").label(), Some("SSH username"));
+        assert_eq!(
+            window.find("quick-key").label(),
+            Some("Private key path (optional)")
+        );
+        i18n::set_language(Language::ZhCn, cx);
     })
     .checked("draw empty Chinese workspace");
 }

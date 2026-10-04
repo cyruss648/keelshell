@@ -376,7 +376,7 @@ fn terminal_search_output_invalidation_query_reset_and_locale_keep_input_local(
         window.press(search_shortcut(), cx);
         assert_eq!(
             window.find("terminal-search-input").label(),
-            Some("搜索远程终端输出…")
+            Some("搜索当前终端")
         );
         window.input("needle", cx);
     })
@@ -399,7 +399,7 @@ fn terminal_search_output_invalidation_query_reset_and_locale_keep_input_local(
         window.render_frame(cx);
         assert_eq!(
             window.find("terminal-search-input").label(),
-            Some("Search remote output…")
+            Some("Search current terminal")
         );
         assert_eq!(window.find("terminal-search-input").value(), Some("needle"));
         assert_eq!(

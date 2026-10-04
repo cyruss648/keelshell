@@ -88,6 +88,15 @@ impl Workspace {
                         .ghost()
                         .compact()
                         .label(if connection.favorite { "★" } else { "☆" })
+                        .accessibility_label(format!(
+                            "{}: {}",
+                            if connection.favorite {
+                                t(cx, "取消收藏", "Remove from favorites")
+                            } else {
+                                t(cx, "添加收藏", "Add to favorites")
+                            },
+                            connection.name,
+                        ))
                         .tooltip(t(cx, "切换收藏", "Toggle favorite"))
                         .disabled(self.saving || trash)
                         .on_click(cx.listener(move |view, _, window, cx| {
@@ -276,6 +285,7 @@ impl Workspace {
                         .ghost()
                         .compact()
                         .label("+")
+                        .accessibility_label(t(cx, "新建文件夹", "New folder"))
                         .tooltip(t(cx, "新建文件夹", "New folder"))
                         .disabled(self.saving)
                         .on_click(cx.listener(|view, _, window, cx| {
@@ -310,6 +320,11 @@ impl Workspace {
                             .ghost()
                             .compact()
                             .label("…")
+                            .accessibility_label(format!(
+                                "{}: {}",
+                                t(cx, "管理文件夹", "Manage folder"),
+                                self.folder_label(Some(id), cx),
+                            ))
                             .tooltip(t(cx, "管理文件夹", "Manage folder"))
                             .disabled(self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
@@ -359,7 +374,7 @@ impl Workspace {
                     .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.import_openssh_connections(window,cx))))
                 .child(Button::new("export-connections").compact().icon(IconName::Upload).label(t(cx,"导出 JSON","Export JSON"))
                     .on_click(cx.listener(|view,_,_,cx|view.export_connections(cx))))
-                .child(div().flex_1().min_w(px(120.)).child(Input::new(&self.search).small())))
+                .child(div().flex_1().min_w(px(120.)).child(Input::new(&self.search).small().aria_label(t(cx,"搜索连接","Search connections")))))
             .child(div().flex_1().min_h_0().flex().child(tree)
                 .child(div().id("connection-table-scroll").flex_1().min_w_0().overflow_x_scroll()
                     .child(div().min_w(px(if trash {1010.} else {1160.})).size_full().flex().flex_col().child(header).child(rows))))

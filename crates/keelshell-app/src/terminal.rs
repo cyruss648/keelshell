@@ -738,16 +738,23 @@ impl TerminalView {
                         .items_center()
                         .gap_1()
                         .child(
-                            div()
-                                .flex_1()
-                                .min_w_0()
-                                .child(Input::new(input).id("terminal-search-input").small()),
+                            div().flex_1().min_w_0().child(
+                                Input::new(input)
+                                    .id("terminal-search-input")
+                                    .small()
+                                    .aria_label(t(cx, "搜索当前终端", "Search current terminal")),
+                            ),
                         )
                         .child(
                             Button::new("terminal-search-previous")
                                 .ghost()
                                 .compact()
                                 .label("↑")
+                                .accessibility_label(t(
+                                    cx,
+                                    "上一个搜索结果",
+                                    "Previous search result",
+                                ))
                                 .tooltip(t(cx, "上一个（Shift+Enter）", "Previous (Shift+Enter)"))
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.move_search(SearchDirection::Previous, cx)
@@ -758,6 +765,7 @@ impl TerminalView {
                                 .ghost()
                                 .compact()
                                 .label("↓")
+                                .accessibility_label(t(cx, "下一个搜索结果", "Next search result"))
                                 .tooltip(t(cx, "下一个（Enter）", "Next (Enter)"))
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.move_search(SearchDirection::Next, cx)
@@ -768,6 +776,7 @@ impl TerminalView {
                                 .ghost()
                                 .compact()
                                 .label("×")
+                                .accessibility_label(t(cx, "关闭终端搜索", "Close terminal search"))
                                 .tooltip(t(cx, "关闭搜索（Esc）", "Close search (Esc)"))
                                 .on_click(
                                     cx.listener(|view, _, window, cx| {
