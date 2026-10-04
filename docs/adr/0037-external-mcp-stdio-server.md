@@ -41,7 +41,7 @@ stdio stdout只输出SDK JSON-RPC；binary诊断仅stderr静态消息，不拼�
 - backend默认并发8，可信构造范围1–8；满时返回 `BUSY`，不排队扩容。
 - SDK调度前的framing另有32项预算：输入frame占一项，只有实际stdout/stream flush成功才归还一项，backend完成/响应排队不能归还。超额直接关闭，不继续生成BUSY响应扩容；限制也覆盖tools/list、畸形/空JSON、notification。当前固定服务不发送unsolicited progress/subscription；将来扩展这些消息须改为按request ID关联准入。无响应通知、客户端放弃的请求保守保留槽位，因此累计耗尽预算会关闭此连接；响应被及时读取的正常客户端可持续调用。
 - 完整序列化tool result最多256 KiB，包括legacy文本兼容副本及JSON转义，超量拒绝。
-- EOF、读失败与reader析构撤销此transport的生命周期token，在service返回前释放owned backend future，不影响其他连接的策略。writer也监听同一token，使已blocked的write/flush退出并释放SDK writer mutex；完整SDK收尾另有2秒deadline。断开时可能丢失或截断最后在途响应，不承诺已发生I/O回滚。
+- EOF、读失败与 I/O 所有者析构撤销此transport的生命周期token，在service返回前释放owned backend future，不影响其他连接的策略。writer也监听同一token，使已blocked的write/flush退出；SDK与两个I/O task收尾共同使用2秒deadline。错误帧在SDK接收取消下的所有权修复见[ADR0042](0042-mcp-message-ownership-during-receive-cancellation.md)。断开时可能丢失或截断最后在途响应，不承诺已发生I/O回滚。
 - RPC取消通过SDK cancellation token释放拥有的backend future。2026规范禁止继续发送该取消请求的消息，SDK会丢弃其迟到响应；库直调仍有typed `Cancelled`，后续协议请求保持可用。
 
 失败结果使用固定枚举，覆盖关闭、越权、未连接、旧会话、撤权、取消、超时、繁忙、非法参数、超量与私有后端失败。不转发可能含敏感数据的底层错误。

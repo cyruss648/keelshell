@@ -1,5 +1,7 @@
 # 开发路线
 
+MCP stdio 错误响应的接收取消窗口已用真实 SDK 与 ID4 进程超时证实；连接拥有的 I/O task 和有界 queue 已实现本地修复，971普通+8doc及默认/2 MiB控制器门禁通过。新的独立复审无P1/P2，另以原3秒read完成200次/4并发真实进程验证；新源码 CI 待完成，见[记录](testing/records/2026-10-04-mcp-response-cancellation.md)，不沿用旧 Windows/macOS CI 结果。
+
 更新：2026-10-04。目标是完整的远程 SSH 管理与运维工作流，并增加参考 DBX 的 AI 配置与辅助能力。最新进展、代码接续与未验证模块见 [交接记录](HANDOFF.md)。
 
 新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通并完成macOS安装版CLI→回环服务原生问答/取消。MCP已接通受认证桌面桥接和macOS受控读取/人工审阅/撤权闭环，整合门禁963普通+8文档、6脚本通过。其余视觉矩阵、Agent/订阅登录、供应商MCP互通和其他平台原生继续实施。
