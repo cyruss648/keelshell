@@ -6,12 +6,18 @@
 //! [`DirectoryEntryStatus::Uncertain`] instead of being treated as equality;
 //! a later content check can therefore remain an explicit, reviewed action.
 
+use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 
 /// Maximum number of entries accepted from either snapshot.
 pub const MAX_DIRECTORY_COMPARE_ENTRIES: usize = 10_000;
 /// Maximum UTF-8 bytes in one normalized, relative entry path.
 pub const MAX_DIRECTORY_COMPARE_PATH_BYTES: usize = 4_096;
+/// Maximum bytes accepted by one content-hash operation.
+pub const MAX_DIRECTORY_HASH_BYTES: usize = 64 * 1024 * 1024;
+
+/// A SHA-256 digest for a bounded regular-file payload.
+pub type DirectoryContentHash = [u8; 32];
 
 /// Which snapshot side caused a validation error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,6 +53,9 @@ pub struct DirectoryEntrySnapshot {
     pub size: Option<u64>,
     /// Modification time in seconds since the Unix epoch, when provided.
     pub modified: Option<u64>,
+    /// SHA-256 content digest when the caller explicitly read and hashed the
+    /// regular file within the configured byte bound.
+    pub content_hash: Option<DirectoryContentHash>,
 }
 
 impl DirectoryEntrySnapshot {
@@ -67,8 +76,49 @@ impl DirectoryEntrySnapshot {
             kind,
             size,
             modified,
+            content_hash: None,
         }
     }
+
+    /// Attach a content digest to this snapshot.
+    ///
+    /// The method does not read from a filesystem. Callers must obtain the
+    /// bytes through their own bounded worker and use [`hash_directory_content`].
+    pub fn with_content_hash(mut self, content_hash: DirectoryContentHash) -> Self {
+        self.content_hash = Some(content_hash);
+        self
+    }
+}
+
+/// A bounded content hashing failure.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum DirectoryHashError {
+    /// The supplied payload exceeds the per-file bound.
+    #[error("directory content exceeds the {limit} byte hash limit")]
+    TooManyBytes {
+        /// Maximum bytes accepted by the operation.
+        limit: usize,
+        /// Number of bytes supplied by the caller.
+        bytes: usize,
+    },
+}
+
+/// Hash one already-read file payload with SHA-256 under a strict byte bound.
+///
+/// The function has no filesystem or network side effects. It exists so a
+/// worker can hash local or SFTP bytes consistently before passing the digest
+/// into a comparison snapshot. Directories, symlinks and special files must
+/// not be represented as content-hashed files by callers.
+pub fn hash_directory_content(bytes: &[u8]) -> Result<DirectoryContentHash, DirectoryHashError> {
+    if bytes.len() > MAX_DIRECTORY_HASH_BYTES {
+        return Err(DirectoryHashError::TooManyBytes {
+            limit: MAX_DIRECTORY_HASH_BYTES,
+            bytes: bytes.len(),
+        });
+    }
+    let mut hasher = Sha256::new();
+    hasher.update(bytes);
+    Ok(hasher.finalize().into())
 }
 
 /// A validation failure before comparison begins.
@@ -330,12 +380,26 @@ fn classify_metadata(
         || matches!((left.size, right.size), (Some(left), Some(right)) if left != right)
         || matches!((left.modified, right.modified), (Some(left), Some(right)) if left != right)
     {
+        // A matching file digest proves content equality even when metadata
+        // such as mtime differs across local and remote filesystems.
+        if left.kind == DirectoryEntryKind::File
+            && right.kind == DirectoryEntryKind::File
+            && matches!((left.size, right.size), (Some(left), Some(right)) if left == right)
+            && matches!((left.content_hash, right.content_hash), (Some(left), Some(right)) if left == right)
+        {
+            return DirectoryEntryStatus::Same;
+        }
         return DirectoryEntryStatus::Changed;
     }
-    if (left.kind == DirectoryEntryKind::File && (left.size.is_none() || right.size.is_none()))
-        || left.modified.is_none()
-        || right.modified.is_none()
-    {
+    if left.kind == DirectoryEntryKind::File {
+        match (left.content_hash, right.content_hash) {
+            (Some(left), Some(right)) if left != right => return DirectoryEntryStatus::Changed,
+            (Some(_), Some(_)) => {}
+            (Some(_), None) | (None, Some(_)) => return DirectoryEntryStatus::Uncertain,
+            (None, None) => {}
+        }
+    }
+    if left.modified.is_none() || right.modified.is_none() {
         DirectoryEntryStatus::Uncertain
     } else {
         DirectoryEntryStatus::Same
@@ -415,6 +479,7 @@ mod tests {
             kind: DirectoryEntryKind::File,
             size: Some(1),
             modified: Some(1),
+            content_hash: None,
         };
         assert!(matches!(
             compare_directories(&[invalid], &[]),
@@ -441,5 +506,31 @@ mod tests {
                 ..
             })
         ));
+    }
+
+    #[test]
+    fn content_hash_is_stable_and_bounded() {
+        let left = hash_directory_content(b"same").unwrap_or_else(|error| panic!("hash: {error}"));
+        let right = hash_directory_content(b"same").unwrap_or_else(|error| panic!("hash: {error}"));
+        assert_eq!(left, right);
+        assert_ne!(
+            left,
+            hash_directory_content(b"different").unwrap_or_else(|error| panic!("hash: {error}"))
+        );
+        let oversized = vec![0_u8; MAX_DIRECTORY_HASH_BYTES + 1];
+        assert!(matches!(
+            hash_directory_content(&oversized),
+            Err(DirectoryHashError::TooManyBytes { .. })
+        ));
+    }
+
+    #[test]
+    fn matching_hash_proves_file_content_even_when_mtime_differs() {
+        let hash = hash_directory_content(b"same").unwrap_or_else(|error| panic!("hash: {error}"));
+        let left = [file("file", 4, 1).with_content_hash(hash)];
+        let right = [file("file", 4, 99).with_content_hash(hash)];
+        let report = compare_directories(&left, &right)
+            .unwrap_or_else(|error| panic!("comparison: {error}"));
+        assert_eq!(report.rows()[0].status, DirectoryEntryStatus::Same);
     }
 }

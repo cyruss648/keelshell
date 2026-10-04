@@ -14,6 +14,7 @@ mod completion;
 mod connection_library;
 mod diff;
 mod directory_compare;
+mod directory_sync;
 mod error;
 mod model;
 mod openssh;
@@ -50,8 +51,14 @@ pub use diff::{
 };
 pub use directory_compare::{
     DirectoryCompareError, DirectoryCompareReport, DirectoryCompareRow, DirectoryCompareSide,
-    DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
-    MAX_DIRECTORY_COMPARE_ENTRIES, MAX_DIRECTORY_COMPARE_PATH_BYTES, compare_directories,
+    DirectoryContentHash, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
+    DirectoryHashError, MAX_DIRECTORY_COMPARE_ENTRIES, MAX_DIRECTORY_COMPARE_PATH_BYTES,
+    MAX_DIRECTORY_HASH_BYTES, compare_directories, hash_directory_content,
+};
+pub use directory_sync::{
+    ConfirmedDirectorySync, DirectorySyncConfirmError, DirectorySyncDeletePolicy,
+    DirectorySyncDirection, DirectorySyncOperation, DirectorySyncPlan, DirectorySyncPlanError,
+    DirectorySyncReviewToken, plan_directory_sync,
 };
 pub use error::{Error, ValidationError};
 pub use model::{
