@@ -16,7 +16,7 @@ use keelshell_session::SshSession;
 use keelshell_session::forwarding::{DynamicForward, LocalForward, RemoteForward};
 use tokio::runtime::Runtime;
 
-use crate::i18n::{Message, t};
+use crate::i18n::{LocalizedTooltipExt, Message, t};
 use crate::terminal::spawn_transport_worker;
 
 #[derive(Clone, Copy, PartialEq)]
@@ -498,7 +498,7 @@ impl Render for TunnelsPanel {
                             .ghost()
                             .compact()
                             .rounded(px(6.))
-                            .tooltip(t(cx, "复制代理地址", "Copy proxy address"))
+                            .localized_tooltip("复制代理地址", "Copy proxy address")
                             .on_click(move |_, _, cx| {
                                 cx.write_to_clipboard(ClipboardItem::new_string(address.clone()))
                             }),

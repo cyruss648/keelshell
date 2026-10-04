@@ -1,5 +1,6 @@
 //! Remote workspace composition: compact tabs, host monitor, terminal, command bar, files.
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::assets::IconName;
 use gpui_kit::component::Selectable;
 
@@ -120,11 +121,7 @@ impl Workspace {
                                 Button::new("quick-auth-mode")
                                     .ghost()
                                     .label(auth_label)
-                                    .tooltip(t(
-                                        cx,
-                                        "点击切换 Agent/私钥与密码认证；密码仅在本次连接中使用",
-                                        "Click to switch between agent/key and password authentication; the password is used only for this connection",
-                                    ))
+                                    .localized_tooltip("点击切换 Agent/私钥与密码认证；密码仅在本次连接中使用", "Click to switch between agent/key and password authentication; the password is used only for this connection")
                                     .on_click(cx.listener(|view, _, _, cx| {
                                         view.quick_password = !view.quick_password;
                                         cx.notify();
@@ -531,7 +528,7 @@ impl Render for Workspace {
                             .ghost()
                             .compact()
                             .accessibility_label(t(cx, "新建 SSH 会话", "New SSH session"))
-                            .tooltip(t(cx, "新建 SSH 会话", "New SSH session"))
+                            .localized_tooltip("新建 SSH 会话", "New SSH session")
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_connections(&OpenConnections, window, cx)
                             })),
@@ -587,7 +584,7 @@ impl Render for Workspace {
                                 Button::new(id).ghost().compact().label(label)
                                     .selected(self.state.settings.theme == theme)
                                     .disabled(self.saving || self.vault_settings.is_some() || self.snippet_modal_open())
-                                    .tooltip(t(cx, "设置应用外观；跟随系统会自动响应系统变化", "Select appearance; System follows platform changes"))
+                                    .localized_tooltip("设置应用外观；跟随系统会自动响应系统变化", "Select appearance; System follows platform changes")
                                     .on_click(cx.listener(move |view, _, window, cx| view.select_theme(theme, window, cx)))
                             }))
                     )
@@ -790,7 +787,7 @@ impl Render for Workspace {
                                             Button::new("new-command-draft")
                                                 .ghost().compact()
                                                 .label(t(cx, "新命令", "New command"))
-                                                .tooltip(t(cx, "清空当前草稿，重新选择目标与历史设置", "Clear this draft and reset its target and history choice"))
+                                                .localized_tooltip("清空当前草稿，重新选择目标与历史设置", "Clear this draft and reset its target and history choice")
                                                 .disabled(self.command_surface_blocked())
                                                 .on_click(cx.listener(|view, _, window, cx| {
                                                     if view.command_surface_blocked() { return; }
@@ -863,7 +860,7 @@ impl Render for Workspace {
                     .child(div().min_w_0().text_ellipsis().child(self.status.render(cx)))
                     .child(
                         Button::new("mcp-settings").ghost().compact().label(self.mcp_toolbar_label())
-                            .tooltip(t(cx, "对外 MCP 授权与命令审阅", "External MCP grants and command review"))
+                            .localized_tooltip("对外 MCP 授权与命令审阅", "External MCP grants and command review")
                             .on_click(cx.listener(|view, _, window, cx| view.open_mcp(window, cx))),
                     ),
             )

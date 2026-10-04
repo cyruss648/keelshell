@@ -16,7 +16,7 @@ use keelshell_session::SessionEvent;
 use crate::emulator::{
     Emulator, MouseAction, SearchDirection, SearchOutcome, encode_key, encode_mouse,
 };
-use crate::i18n::{Message, t};
+use crate::i18n::{LocalizedTooltipExt, Message, t};
 use gpui_kit::component::input::{Enter, Escape, Input, InputEvent as FieldEvent, InputState};
 use gpui_kit::component::{
     Sizable,
@@ -756,7 +756,10 @@ impl TerminalView {
                                     "上一个搜索结果",
                                     "Previous search result",
                                 ))
-                                .tooltip(t(cx, "上一个（Shift+Enter）", "Previous (Shift+Enter)"))
+                                .localized_tooltip(
+                                    "上一个（Shift+Enter）",
+                                    "Previous (Shift+Enter)",
+                                )
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.move_search(SearchDirection::Previous, cx)
                                 })),
@@ -767,7 +770,7 @@ impl TerminalView {
                                 .compact()
                                 .label("↓")
                                 .accessibility_label(t(cx, "下一个搜索结果", "Next search result"))
-                                .tooltip(t(cx, "下一个（Enter）", "Next (Enter)"))
+                                .localized_tooltip("下一个（Enter）", "Next (Enter)")
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.move_search(SearchDirection::Next, cx)
                                 })),
@@ -778,7 +781,7 @@ impl TerminalView {
                                 .compact()
                                 .label("×")
                                 .accessibility_label(t(cx, "关闭终端搜索", "Close terminal search"))
-                                .tooltip(t(cx, "关闭搜索（Esc）", "Close search (Esc)"))
+                                .localized_tooltip("关闭搜索（Esc）", "Close search (Esc)")
                                 .on_click(
                                     cx.listener(|view, _, window, cx| {
                                         view.close_search(window, cx)

@@ -1,5 +1,6 @@
 //! Compact, explicit query controls; local and remote candidates never share an insertion mode.
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 
 impl Workspace {
     pub(in crate::workspace) fn remote_completion_controls(
@@ -48,11 +49,10 @@ impl Workspace {
                             .ghost()
                             .compact()
                             .label(t(cx, "远端补全", "Complete remotely"))
-                            .tooltip(t(
-                                cx,
+                            .localized_tooltip(
                                 "远端补全 · Ctrl+Space（只查询，不执行）",
                                 "Remote completion · Ctrl+Space (query only)",
-                            ))
+                            )
                             .disabled(!ready || busy)
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.request_remote_completion(false, window, cx)
