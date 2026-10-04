@@ -180,6 +180,42 @@ async fn malformed_shapes_and_unsupported_actions_have_bounded_protocol_errors()
 }
 
 #[tokio::test]
+async fn concurrent_malformed_frames_and_requests_return_every_reply_without_pollution() {
+    let mut clients = tokio::task::JoinSet::new();
+    for _ in 0..4 {
+        clients.spawn(async {
+            let mut client = Client::spawn();
+            client.initialize().await;
+            // 24 requests plus the unreplied initialized notification remain
+            // inside the original 32-frame budget even before any output flush.
+            for id in 2..=13 {
+                client.send(json!({"jsonrpc":"2.0","id":id,"method":"tools/list","params":{}})).await;
+                client.send(json!({"jsonrpc":"2.0","id":id+100,"method":9,"params":{"secret":"private-probe-marker"}})).await;
+            }
+            let mut valid = std::collections::BTreeSet::new();
+            let mut invalid = 0;
+            for _ in 0..24 {
+                let reply = client.read().await;
+                assert!(!reply.to_string().contains("private-probe-marker"));
+                if reply["error"]["code"] == -32600 {
+                    assert!(reply["id"].is_null());
+                    invalid += 1;
+                } else {
+                    assert_eq!(reply["result"]["tools"].as_array().unwrap().len(), 7);
+                    assert!(valid.insert(reply["id"].as_u64().unwrap()), "duplicate reply");
+                }
+            }
+            assert_eq!(invalid, 12);
+            assert_eq!(valid, (2..=13).collect());
+            client.finish().await;
+        });
+    }
+    while let Some(result) = clients.join_next().await {
+        result.unwrap();
+    }
+}
+
+#[tokio::test]
 async fn oversized_unterminated_input_closes_process_with_static_diagnostic() {
     let mut client = Client::spawn();
     let bytes = vec![b'x'; keelshell_mcp::MAX_REQUEST_BYTES + 8192];
@@ -229,6 +265,28 @@ async fn idle_client_cannot_keep_process_alive_after_startup_deadline() {
     // Keep stdin open without sending bytes; this exercises Tokio's blocking
     // stdin worker as well as the protocol startup deadline.
     let status = tokio::time::timeout(Duration::from_secs(12), client.child.wait())
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(!status.success());
+    let mut stderr = String::new();
+    client
+        .child
+        .stderr
+        .take()
+        .unwrap()
+        .read_to_string(&mut stderr)
+        .await
+        .unwrap();
+    assert_eq!(stderr, "MCP startup failed or exceeded its deadline\n");
+    assert!(client.output.next_line().await.unwrap().is_none());
+}
+
+#[tokio::test]
+async fn input_eof_before_initialize_remains_a_static_startup_failure() {
+    let mut client = Client::spawn();
+    drop(client.input.take());
+    let status = tokio::time::timeout(Duration::from_secs(3), client.child.wait())
         .await
         .unwrap()
         .unwrap();

@@ -17,6 +17,8 @@ use tokio_util::sync::CancellationToken;
 
 use crate::KeelShellMcpServer;
 
+mod channel;
+
 /// Maximum bytes in one newline-delimited request, including its newline.
 /// Exceeding this bound closes the transport instead of accumulating input.
 pub const MAX_REQUEST_BYTES: usize = 128 * 1024;
@@ -80,12 +82,15 @@ where
 {
     let budget = Arc::new(FrameBudget::default());
     let server = server.with_connection_lifecycle(closed.clone());
-    let transport = (
+    let (transport, mut io_tasks) = channel::MessageTransport::new(
         BoundedReader {
             inner: reader,
             line_bytes: 0,
             failed: false,
-            closed: closed.clone(),
+            // The reader actor classifies EOF/failure before publishing it to
+            // the shared connection token. A child token prevents startup from
+            // mistaking that I/O completion for external revocation.
+            closed: closed.child_token(),
             budget: budget.clone(),
         },
         BoundedWriter {
@@ -94,26 +99,53 @@ where
             pending_flush: 0,
             closing: Box::pin(closed.clone().cancelled_owned()),
         },
+        closed.clone(),
     );
-    let service = tokio::select! {
+    let startup = tokio::select! {
         biased;
-        _ = closed.cancelled() => return Ok(()),
+        _ = closed.cancelled() => None,
         result = tokio::time::timeout(Duration::from_secs(10), server.serve(transport)) => {
-            result.map_err(|_| StdioFailure::Startup)?.map_err(|_| StdioFailure::Startup)?
+            Some(result)
+        }
+    };
+    let service = match startup {
+        Some(Ok(Ok(service))) => service,
+        _ => {
+            let result = if startup.is_none() && !io_tasks.input_ended() && !io_tasks.failed() {
+                Ok(())
+            } else {
+                Err(StdioFailure::Startup)
+            };
+            io_tasks.stop();
+            tokio::time::timeout(Duration::from_secs(2), io_tasks.join())
+                .await
+                .map_err(|_| StdioFailure::Shutdown)??;
+            return result;
         }
     };
     let sdk_cancel = service.cancellation_token();
     let mut waiting = Box::pin(service.waiting());
-    tokio::select! {
-        result = &mut waiting => { result.map_err(|_| StdioFailure::Runtime)?; }
-        _ = closed.cancelled() => {
-            sdk_cancel.cancel();
-            tokio::time::timeout(Duration::from_secs(2), &mut waiting)
-                .await.map_err(|_| StdioFailure::Shutdown)?
-                .map_err(|_| StdioFailure::Runtime)?;
-        }
+    let completed = tokio::select! {
+        result = &mut waiting => Some(result),
+        _ = closed.cancelled() => None,
+    };
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
+    io_tasks.stop();
+    if completed.is_none() {
+        sdk_cancel.cancel();
     }
-    if budget.exhausted.load(Ordering::Acquire) {
+    tokio::time::timeout_at(deadline, async {
+        let sdk_result = match completed {
+            Some(result) => result,
+            None => waiting.await,
+        };
+        let io_result = io_tasks.join().await;
+        sdk_result.map_err(|_| StdioFailure::Runtime)?;
+        io_result
+    })
+    .await
+    .map_err(|_| StdioFailure::Shutdown)??;
+    if budget.exhausted.load(Ordering::Acquire) || io_tasks.failed() {
         return Err(StdioFailure::Runtime);
     }
     Ok(())

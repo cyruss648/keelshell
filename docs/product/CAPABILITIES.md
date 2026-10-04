@@ -1,5 +1,7 @@
 # Capability ledger
 
+MCP protocol error output now belongs to bounded connection I/O tasks and survives SDK receive cancellation. The local gate passed 971 ordinary tests, 8 doctests and both complete CLI controllers. A fresh independent review found no P1/P2 and independently passed 200 real-process runs at four-way concurrency with the original three-second response read. New-source CI remains pending in the [transport record](../testing/records/2026-10-04-mcp-response-cancellation.md); this is separate from desktop, supplier-client and native-platform acceptance.
+
 Updated 2026-10-04. This ledger describes implementation and evidence separately. The target remains the [remote SSH requirements](../research/remote-ssh-requirements.md); a partial row does not waive its missing requirements.
 
 | Area | Implemented in this workspace | Evidence / remaining acceptance |
