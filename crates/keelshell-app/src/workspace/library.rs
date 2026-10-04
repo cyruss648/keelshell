@@ -42,6 +42,10 @@ pub(super) fn now_seconds() -> u64 {
 
 impl Workspace {
     pub(super) fn focus_current_surface(&self, window: &mut Window, cx: &mut App) {
+        if self.mcp.show {
+            self.overlay_focus.focus(window, cx);
+            return;
+        }
         if self.show_batch
             && let Some(panel) = &self.batch_panel
         {

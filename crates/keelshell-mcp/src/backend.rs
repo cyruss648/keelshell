@@ -203,8 +203,11 @@ pub type BackendFuture<'a> =
 /// work when the returned future is dropped. A dropped request cannot establish
 /// that previously admitted remote I/O stopped or that a proposal was removed.
 ///
-/// The standalone executable uses [`DisconnectedBackend`]; there is currently
-/// no desktop IPC implementation, implicit SSH login, or credential access.
+/// Without explicit launch capabilities, the standalone executable uses
+/// [`DisconnectedBackend`]. With capabilities copied from an active desktop
+/// grant, the executable relays stdio through authenticated desktop IPC. The
+/// desktop retains SSH handles and authority; there is no implicit SSH login
+/// or credential access.
 pub trait DesktopBackend: Send + Sync + 'static {
     /// Perform only the typed read or proposal admission represented by the
     /// request. `ProposeCommand` must only enqueue review, never approve/execute.
@@ -228,6 +231,12 @@ pub struct SessionMetadata {
     pub target: SessionIdentity,
     /// Desktop display label, up to 256 bytes.
     pub display_name: String,
+    /// Desktop-selected fragment IDs the user explicitly granted.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub selection_ids: Vec<Uuid>,
+    /// Canonical roots whose visibility was explicitly included in the grant.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub granted_roots: Vec<String>,
 }
 
 /// An SFTP directory entry, with no recursive or executable behavior.

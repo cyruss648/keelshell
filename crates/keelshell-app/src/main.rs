@@ -15,6 +15,7 @@ mod emulator;
 mod files;
 mod i18n;
 mod jump_host_picker;
+mod mcp_bridge;
 mod monitor;
 mod proxy_editor;
 mod runtime_bridge;

@@ -157,7 +157,7 @@ impl ServerHandler for KeelShellMcpServer {
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new("keelshell-mcp", env!("CARGO_PKG_VERSION")))
-            .with_instructions("External-agent server only. Access is disabled until the desktop user grants exact live sessions/tools/paths. Commands create pending desktop review proposals only. There is no client approval, SSH login, credential unlock, arbitrary command execution or generic MCP client. Desktop IPC is not yet connected by this standalone executable.")
+            .with_instructions("External-agent server only. Access is disabled until the desktop user grants exact live sessions/tools/paths. Commands create pending desktop review proposals only. There is no client approval, SSH login, credential unlock, arbitrary command execution or generic MCP client. Explicit temporary launch configuration connects the stdio adapter to the authenticated desktop authority.")
     }
 
     fn supported_protocol_versions(&self) -> Cow<'static, [ProtocolVersion]> {
@@ -321,6 +321,16 @@ fn validate_reply(
             let mut seen = std::collections::BTreeSet::new();
             for session in sessions {
                 if !lease.permits_list_identity(session.target) || !seen.insert(session.target) {
+                    return Err(McpFailure::Forbidden);
+                }
+                if session.selection_ids.len() > 128 || session.granted_roots.len() > 16 {
+                    return Err(McpFailure::OutputLimit);
+                }
+                if !lease.permits_shared_metadata(
+                    session.target,
+                    &session.selection_ids,
+                    &session.granted_roots,
+                ) {
                     return Err(McpFailure::Forbidden);
                 }
                 if session.display_name.len() > 256 {

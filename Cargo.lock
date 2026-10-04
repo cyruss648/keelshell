@@ -4177,6 +4177,7 @@ dependencies = [
  "image",
  "keelshell-ai",
  "keelshell-core",
+ "keelshell-mcp",
  "keelshell-session",
  "reqwest",
  "russh",
@@ -4188,6 +4189,7 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
+ "tokio-util",
  "uuid",
  "winresource",
  "zeroize",
@@ -4217,6 +4219,9 @@ dependencies = [
 name = "keelshell-mcp"
 version = "0.1.0"
 dependencies = [
+ "chacha20poly1305",
+ "hmac 0.13.0",
+ "rand 0.9.5",
  "rmcp",
  "serde",
  "serde_json",
@@ -4225,6 +4230,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "uuid",
+ "zeroize",
 ]
 
 [[package]]

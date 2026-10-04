@@ -22,6 +22,7 @@ mod commands;
 mod credentials;
 mod library;
 mod library_view;
+mod mcp;
 mod modals;
 mod openssh_review;
 mod reconnect;
@@ -301,6 +302,7 @@ pub struct Workspace {
     show_archived: std::collections::HashSet<EntityId>,
     discard_archive: Option<EntityId>,
     _reconnect_poll: Task<()>,
+    mcp: mcp::McpState,
     visible_panel: Option<ToolPanel>,
     terminal_observers: HashMap<EntityId, Subscription>,
     terminal_focus: HashMap<EntityId, Subscription>,
@@ -494,13 +496,26 @@ impl Workspace {
             loop {
                 executor.timer(Duration::from_millis(200)).await;
                 if this
-                    .update_in(cx, |view, window, cx| view.poll_reconnect(window, cx))
+                    .update_in(cx, |view, window, cx| {
+                        view.poll_reconnect(window, cx);
+                        view.maintain_mcp(cx);
+                    })
                     .is_err()
                 {
                     break;
                 }
             }
         });
+        let mcp = mcp::McpState::new(input(
+            t(
+                cx,
+                "授权的 canonical 远程目录",
+                "Granted canonical remote directory",
+            ),
+            "",
+            window,
+            cx,
+        ));
         let snippet_sources = Arc::new(state.snippets.clone());
         Self {
             store,
@@ -575,6 +590,7 @@ impl Workspace {
             show_archived: Default::default(),
             discard_archive: None,
             _reconnect_poll: reconnect_poll,
+            mcp,
             visible_panel: None,
             terminal_observers: HashMap::new(),
             terminal_focus: HashMap::new(),
@@ -595,7 +611,8 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.show_batch
+        if self.mcp.show
+            || self.show_batch
             || self.vault_settings.is_some()
             || self.ai_settings.is_some()
             || self.snippet_modal_open()
@@ -610,7 +627,9 @@ impl Workspace {
     }
     fn close_tab(&mut self, _: &CloseTab, window: &mut Window, cx: &mut Context<Self>) {
         // Modal close takes precedence so a keyboard shortcut cannot close its underlying SSH tab.
-        if self.show_batch {
+        if self.mcp.show {
+            self.mcp.show = false;
+        } else if self.show_batch {
             self.show_batch = false;
         } else if self.openssh_review.is_some() {
             self.cancel_openssh_import(window, cx);
@@ -744,7 +763,10 @@ impl Workspace {
             cx.observe_in(terminal, window, |view, _, window, cx| {
                 view.maintain_remote_completion(window, cx);
                 view.maintain_command_workflows(cx);
-                view.poll_reconnect(window, cx);
+                {
+                    view.poll_reconnect(window, cx);
+                    view.maintain_mcp(cx);
+                };
                 cx.notify();
             }),
         );
@@ -962,6 +984,17 @@ impl Workspace {
             form.jump_picker
                 .update(cx, |picker, cx| picker.refresh_locale(window, cx));
         }
+        self.mcp.root.update(cx, |input, cx| {
+            input.set_placeholder(
+                t(
+                    cx,
+                    "授权的 canonical 远程目录",
+                    "Granted canonical remote directory",
+                ),
+                window,
+                cx,
+            )
+        });
         self.snippet_search.update(cx, |input, cx| {
             input.set_placeholder(
                 t(
@@ -1000,7 +1033,8 @@ impl Workspace {
         self.persist(candidate, AfterSave::None, window, cx);
     }
     fn open_ai_settings(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.show_batch
+        if self.mcp.show
+            || self.show_batch
             || self.ai_settings.is_some()
             || self.vault_settings.is_some()
             || self.snippet_modal_open()
@@ -1067,7 +1101,8 @@ impl Workspace {
         cx.notify();
     }
     fn open_updates(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.show_batch
+        if self.mcp.show
+            || self.show_batch
             || self.ai_settings.is_some()
             || self.vault_settings.is_some()
             || self.update_panel.is_some()
@@ -1098,7 +1133,7 @@ impl Workspace {
         cx.notify();
     }
     fn toggle_assistant(&mut self, _: &ToggleAssistant, _: &mut Window, cx: &mut Context<Self>) {
-        if self.show_batch || self.snippet_modal_open() {
+        if self.mcp.show || self.show_batch || self.snippet_modal_open() {
             return;
         }
         self.show_assistant = !self.show_assistant;
@@ -1521,6 +1556,7 @@ impl Workspace {
                             view.accept_reconnect_trust(*attempt, *index);
                         }
                         view.invalidate_reconnect_profiles(window, cx);
+                        view.maintain_mcp(cx);
                         let route_changed=view.invalidate_changed_route(window,cx);
                         // Appearance does not change suggestion sources or invalidate reviews.
                         if !matches!(&after, AfterSave::Theme) {

@@ -58,6 +58,8 @@ impl DesktopBackend for ControlledBackend {
                     sessions: vec![SessionMetadata {
                         target: target(),
                         display_name: "Protocol fixture".into(),
+                        selection_ids: Vec::new(),
+                        granted_roots: Vec::new(),
                     }],
                 }),
                 Operation::ProposeCommand { target, .. } => {

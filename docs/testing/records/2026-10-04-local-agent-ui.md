@@ -37,4 +37,6 @@
 
 ## 当前待核验
 
-该功能提交的远端Quality结果待追加。未验证Windows/Linux原生窗口/供应商CLI、真实云端账户/订阅登录、任意其他CLI版本或Agent工具编排；不能把headless进程或交叉编译视作这些验收。自定义目录/预算/环境引用和可见逐步流继续按产品计划实施。
+提交`3fe0c98e6916e4981f22e52ca38128af3c948179`的[Quality37208098775](https://github.com/cyruss648/keelshell/actions/runs/37208098775)已完成：macOS/Linux成功，Windows自托管process harness主线程stack overflow，退出`0xc00000fd`，整次CI失败。原Windows日志保存在ignored `work/local-agent-windows-ci-review/run-37208098775-job-111453446256.log`，SHA256为`01f27ebf9dfe95f3a16a4cc6c262200d8b2b2133eeca9868392770390834c43b`。后续修复的新提交与Windows CI另行记录，不修改这次失败结论。
+
+未验证Windows/Linux原生窗口/供应商CLI、真实云端账户/订阅登录、任意其他CLI版本或Agent工具编排；不能把headless进程或交叉编译视作这些验收。自定义目录/预算/环境引用和可见逐步流继续按产品计划实施。

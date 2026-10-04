@@ -69,6 +69,7 @@ pub struct MonitorPanel {
     host: String,
     runtime: Arc<tokio::runtime::Runtime>,
     snapshot: Option<Snapshot>,
+    mcp_sample_id: Option<uuid::Uuid>,
     rates: SampleRates,
     processes: Vec<ProcessInfo>,
     sockets: Vec<SocketInfo>,
@@ -120,6 +121,7 @@ impl MonitorPanel {
             host,
             runtime,
             snapshot: None,
+            mcp_sample_id: None,
             rates: SampleRates::default(),
             processes: Vec::new(),
             sockets: Vec::new(),
@@ -137,6 +139,28 @@ impl MonitorPanel {
         };
         panel.run(Job::Refresh, cx);
         panel
+    }
+
+    /// Share only fixed existing monitoring fields, without collecting new data.
+    pub(crate) fn mcp_snapshot(&self) -> Option<keelshell_mcp::MonitorSnapshot> {
+        if self.suspended {
+            return None;
+        }
+        let snapshot = self.snapshot.as_ref()?;
+        Some(keelshell_mcp::MonitorSnapshot {
+            sample_id: self.mcp_sample_id?,
+            age_milliseconds: self
+                .last_sample?
+                .elapsed()
+                .as_millis()
+                .min(u64::MAX as u128) as u64,
+            cpu_percent: self.rates.cpu_busy_percent,
+            memory_used_bytes: snapshot
+                .memory
+                .available_bytes
+                .map(|available| snapshot.memory.total_bytes.saturating_sub(available)),
+            memory_total_bytes: Some(snapshot.memory.total_bytes),
+        })
     }
 
     /// Stop collection and revoke pending process actions, retaining displayed data.
@@ -188,6 +212,7 @@ impl MonitorPanel {
                             .map(|old| snapshot.rates_since(old))
                             .unwrap_or_default();
                         self.snapshot = Some(snapshot);
+                        self.mcp_sample_id = Some(uuid::Uuid::new_v4());
                         self.last_sample = Some(Instant::now());
                     }
                     Err(error) => {

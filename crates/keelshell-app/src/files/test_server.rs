@@ -1,6 +1,5 @@
 //! In-memory protocol peer shared by production FilesPanel behavior tests.
-use super::super::SshSession;
-use keelshell_session::{SshAuth, SshOptions};
+use keelshell_session::{SshAuth, SshOptions, SshSession};
 use russh::{
     Channel, ChannelId,
     keys::{HashAlg, PrivateKey, ssh_key::private::Ed25519Keypair},
@@ -93,9 +92,9 @@ impl server::Handler for Peer {
     }
 }
 
-pub(super) struct Server {
-    pub(super) filesystem: filesystem::Filesystem,
-    pub(super) active: Arc<AtomicUsize>,
+pub(crate) struct Server {
+    pub(crate) filesystem: filesystem::Filesystem,
+    pub(crate) active: Arc<AtomicUsize>,
     address: std::net::SocketAddr,
     fingerprint: String,
     task: JoinHandle<()>,
@@ -106,7 +105,7 @@ impl Drop for Server {
     }
 }
 impl Server {
-    pub(super) fn new(runtime: &tokio::runtime::Runtime) -> Self {
+    pub(crate) fn new(runtime: &tokio::runtime::Runtime) -> Self {
         let listener = runtime
             .block_on(TcpListener::bind("127.0.0.1:0"))
             .checked("bind file test server");
@@ -141,7 +140,7 @@ impl Server {
             task,
         }
     }
-    pub(super) fn connect(&self, runtime: &tokio::runtime::Runtime) -> SshSession {
+    pub(crate) fn connect(&self, runtime: &tokio::runtime::Runtime) -> SshSession {
         let mut options = SshOptions::new("127.0.0.1", "fixture");
         options.port = self.address.port();
         options.timeout = Duration::from_secs(5);

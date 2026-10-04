@@ -1,7 +1,7 @@
 # ADR 0037：对外 MCP stdio 服务端与桌面授权契约
 
 - 日期：2026-10-04
-- 状态：服务端基础已实现；受认证桌面 IPC、原生审核与真实 SSH 工具桥接待实现
+- 状态：服务端基础已实现；桌面授权、受认证 IPC 与真实 SSH 桥接续见[ADR0039](0039-authenticated-desktop-mcp-ssh-bridge.md)，原生/跨平台验收分别记录
 - 关联：MCP-01、MCP-02、MCP-03、MCP-04；[设计与智能体计划](../product/DESIGN_AND_AGENT_PLAN.md)
 
 ## 决策
@@ -10,7 +10,7 @@
 
 采用官方 Rust SDK `rmcp = "3.5"`，锁定解析版本 `3.5.0`；依赖均保持直接 registry `x.y` 要求。只启用 server、stdio transport，未启用 SDK client、HTTP、OAuth 或第三方连接功能。支持 2026-07-28 的 `server/discover` 和逐请求 `_meta`，并明确支持 2025-11-25、2025-06-18 的 `initialize` 兼容路径。未声明支持其他版本。
 
-独立可执行文件默认 `AccessPolicy::default()`（关闭）及 `DisconnectedBackend`。工具发现可用，调用返回 `DISABLED`；即使可信调用方配置授权，只要没有桌面后端，仍返回 `NOT_CONNECTED`。客户端没有启用/安装授权的方法。此阶段不能宣称外部 Claude Code/Codex 已读取真实桌面 SSH 会话。
+独立可执行文件在没有明确临时ENV配置时，采用 `AccessPolicy::default()`（关闭）及 `DisconnectedBackend`。工具发现可用，调用返回 `DISABLED`；即使可信调用方配置授权，只要没有桌面后端，仍返回 `NOT_CONNECTED`。客户端没有启用/安装授权的方法。桌面生成的明确ENV配置启用[ADR0039](0039-authenticated-desktop-mcp-ssh-bridge.md)认证桥接；没有对应原生记录时，不能宣称外部 Claude Code/Codex 已读取真实桌面 SSH 会话。
 
 ## 固定工具与权限
 
@@ -30,7 +30,7 @@
 
 `PolicyController::replace/disable` 在新版本可见之前撤销旧lease，取消已进入后端的读取及后续准入；返回数据前再次检查lease。更换授权保守地撤销所有旧请求，不尝试复用之前已批准的权限。路径词法校验拒绝相对路径、`.`/`..`、重复/末尾分隔符、反斜线及控制字符，根路径匹配必须完整组件；它不是远程防symlink或TOCTOU保证。
 
-`CommandProposal` 由服务端生成UUID和SHA-256摘要，摘要绑定版本、proposal ID、精确目标与命令字节。桌面未来必须在最多300秒内由真人审核这些内容，单次消费批准，再复核授权/活动session；客户端不能自行选择ID、延长有效期、approve、execute、写文件或解锁vault。首次提案只允许返回匹配ID/摘要的 `PendingCommand`。取消/超时不能证明已经入队的提案被删除，也不能撤回已发生的远端I/O。
+`CommandProposal` 由服务端生成UUID和SHA-256摘要，摘要绑定版本、proposal ID、精确目标与命令字节。桌面必须在最多300秒内由真人审核这些内容，单次消费批准，再复核授权/活动session；客户端不能自行选择ID、延长有效期、approve、execute、写文件或解锁vault。首次提案只允许返回匹配ID/摘要的 `PendingCommand`。取消/超时不能证明已经入队的提案被删除，也不能撤回已发生的远端I/O。
 
 ## 传输与资源边界
 
@@ -46,13 +46,13 @@ stdio stdout只输出SDK JSON-RPC；binary诊断仅stderr静态消息，不拼�
 
 失败结果使用固定枚举，覆盖关闭、越权、未连接、旧会话、撤权、取消、超时、繁忙、非法参数、超量与私有后端失败。不转发可能含敏感数据的底层错误。
 
-## 未来桌面 IPC 契约与缺口
+## 桌面 IPC 契约与验收边界
 
-`DesktopBackend::dispatch(AuthorizedRequest)` 是未来受认证本地IPC的契约，当前没有具体实现。IPC凭据只由用户明确开启后的桌面产生；必须验证本地peer、绑定当前authority，而不能信任客户端自报identity/策略。Bridge的桌面端应原子捕获已连接SSH handle并核对三个identity字段，before admission/before I/O/after await反复检查lease。断线、路线编辑、重连及撤权不能把旧ID映射到新session。
+`DesktopBackend::dispatch(AuthorizedRequest)` 是桌面持有权威的本地IPC契约，由app的有界UI队列实现。IPC能力只由用户明确开启后的桌面产生；[ADR0039](0039-authenticated-desktop-mcp-ssh-bridge.md)以双向HMAC证明能力持有者，并以方向AEAD保护正文，不宣称OS peer/可执行身份。Bridge绑定当前authority，不能信任客户端自报identity/策略。桌面端原子捕获已连接SSH handle并核对三个identity字段，before admission/before I/O/after await反复检查lease。断线、路线编辑、重连及撤权不能把旧ID映射到新session。
 
 SFTP后端必须在真实transport重新canonicalize与检查授权根、拒绝symlink/特殊对象、验证类型/完整长度并保持取消/超时cleanup。固定监控只能返回允许的缓存字段。提案只进入原生人工审核机制；get-action-status必须核对提案归属与当前scope。不自动代登录SSH、信任变更host key或解锁凭据。已发出的远程读取没有事务取消承诺。
 
-尚未完成：桌面启用/授权UI、IPC认证与进程身份、active-session映射、真实terminal/SFTP/monitor桥接、人工提案批准与单次消费/到期、外部真实CLI配置及互通、打包独立binary、Windows/Linux native进程验收。测试中的受控后端没有远程操作能力。
+桌面启用/授权UI、IPC能力认证、active-session映射、明确terminal选区、真实SFTP、有界缓存monitor、人工提案批准与单次消费/到期在后续桥接切片实现，见[桌面验证记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。外部真实供应商CLI配置互通、完整原生GUI、打包独立binary及Windows/Linux native进程验收仍须对应证据；基础记录里的受控backend没有远程操作能力。
 
 ## 来源与验证
 

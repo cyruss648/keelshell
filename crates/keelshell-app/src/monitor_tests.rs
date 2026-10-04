@@ -118,6 +118,8 @@ impl server::Handler for Peer {
                 .map_err(|_| russh::Error::Disconnect)?;
             permit.forget();
             (String::new(), 0)
+        } else if command.contains("cat /proc/stat") {
+            ("@@KS:platform@@\nLinux\n@@KS:stat@@\ncpu 100 20 30 400 50 0 0 0\nbtime 1700000000\n@@KS:meminfo@@\nMemTotal: 1024 kB\nMemAvailable: 256 kB\n@@KS:loadavg@@\n1.25 0.50 0.25 1/100 45\n@@KS:uptime@@\n100.00 75.00\n@@KS:net@@\nInter-| Receive | Transmit\n face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed\n lo: 100 1 0 0 0 0 0 0 200 1 0 0 0 0 0 0\n@@KS:df@@\nFilesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\n@@KS:end@@\n".into(), 0)
         } else if command.contains("ps -ww -eo") {
             ("42 tester 2.5 1.0 fixture-worker\n".into(), 0)
         } else {
@@ -350,4 +352,32 @@ async fn suspended_monitor_retains_one_sent_sigterm_receipt_without_replaying_it
         assert!(panel.pending.is_none() && panel.monitor.is_none() && panel.paused);
     });
     assert_eq!(h.control.terminating.load(Ordering::Acquire), 1);
+}
+
+#[gpui_kit::test]
+async fn mcp_monitor_reads_existing_fixed_cache_without_collecting_and_suspension_denies(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    let commands = h.control.commands.load(Ordering::Acquire);
+    let first = h
+        .panel
+        .read_with(cx, |panel, _| panel.mcp_snapshot())
+        .unwrap_or_else(|| panic!("existing monitor cache"));
+    let second = h
+        .panel
+        .read_with(cx, |panel, _| panel.mcp_snapshot())
+        .unwrap_or_else(|| panic!("same cached sample"));
+    assert_eq!(first.sample_id, second.sample_id);
+    assert!(second.age_milliseconds >= first.age_milliseconds);
+    assert_eq!(first.memory_total_bytes, Some(1048576));
+    assert_eq!(h.control.commands.load(Ordering::Acquire), commands);
+    h.panel.update(cx, |panel, cx| panel.suspend(cx));
+    assert!(
+        h.panel
+            .read_with(cx, |panel, _| panel.mcp_snapshot())
+            .is_none()
+    );
+    assert_eq!(h.control.commands.load(Ordering::Acquire), commands);
 }

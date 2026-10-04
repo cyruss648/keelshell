@@ -49,6 +49,7 @@ KeelShell 面向每天需要连接服务器、查看日志和处理远程文件�
 | **主机状态** | Linux CPU、内存、负载、运行时间、磁盘容量、网络计数、进程列表与监听端口诊断 |
 | **端口转发** | 本地/远端 TCP 转发与回环 SOCKS5 代理，显示实际监听地址、运行状态并停止隧道 |
 | **AI 助手** | 模型 API / Codex CLI / Claude Code 命名配置、Chat Completions/Responses/Anthropic Messages 模型发现与连接测试、上下文选择、协议精确请求预览、输出 Token 上限与保守上下文窗口预算、回答与命令建议；可把回复整理成绑定会话的逐步诊断计划，仍需逐条审核 |
+| **对外 MCP** | 默认关闭，向外部智能体提供明确授权的活动会话、终端片段、SFTP 目录/文件和监控缓存读取；命令只能提交提案，由应用用户审阅后执行，可即时撤销授权 |
 | **关于与更新** | 应用内项目主页、版本与变更日志；按平台检查 GitHub Release、下载并校验 SHA-256，可选安全安装并重启 |
 
 暂停会等待在途操作确认，再显示“已暂停”。需要续传已有部分文件或目录时，手动选择源与目标，审核内容校验结果后继续；重连或重启后可重新创建续传计划。当前验证范围见[传输验收记录](docs/testing/records/2026-10-03-sftp-resume.md)。
@@ -71,7 +72,7 @@ AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解�
 
 应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。本地 CLI Ask 已通过实际安装版到回环服务的 macOS 窗口问答与取消验证；不复用订阅登录，没有 CLI 工具执行。专业视觉升级、Agent 工作流及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力。
 
-对外 MCP 的独立 stdio 服务端基础已实现并通过独立复审，默认关闭，工具限于授权读取和待人工审阅的命令提案。桌面授权与真实 SSH 桥接仍在开发，当前服务尚不能访问应用会话，详见[服务端验证](docs/testing/records/2026-10-04-mcp-stdio-server.md)。
+对外 MCP 已接通独立 stdio 伴随程序、桌面授权与真实 SSH/SFTP 桥接，默认关闭。macOS 隔离服务上的原生联调已验证明确片段/文件读取、越权拒绝、人工批准与拒绝、运行中撤权及重启回到关闭；这是自有外部协议客户端的验证，实际 Codex/Claude Code MCP 互通与其他平台原生验收仍待完成。使用见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)，证据见[桌面桥接记录](docs/testing/records/2026-10-04-mcp-desktop-bridge.md)。
 
 <details>
 <summary>查看 AI 配置界面</summary>

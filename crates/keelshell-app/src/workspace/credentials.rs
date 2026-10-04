@@ -54,6 +54,7 @@ pub(super) fn credential_references(state: &AppState) -> BTreeSet<Uuid> {
 impl Workspace {
     pub(super) fn can_open_vault(&self) -> bool {
         !self.saving
+            && !self.mcp.show
             && !self.show_batch
             && !self.snippet_modal_open()
             && !self.connecting

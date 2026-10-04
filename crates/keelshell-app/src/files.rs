@@ -1577,6 +1577,8 @@ mod tests {
 #[path = "files/layout_tests.rs"]
 mod layout_tests;
 #[cfg(test)]
+pub(crate) mod test_server;
+#[cfg(test)]
 mod transfer_tests;
 
 #[cfg(test)]

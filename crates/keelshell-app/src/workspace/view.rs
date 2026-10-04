@@ -280,6 +280,7 @@ impl Workspace {
 impl Render for Workspace {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
+        self.maintain_mcp(cx);
         self.maintain_remote_completion(window, cx);
         self.maintain_command_workflows(cx);
         self.refresh_command_suggestions(window, cx);
@@ -848,18 +849,23 @@ impl Render for Workspace {
             )
             .child(
                 div()
-                    .h(px(24.))
+                    .h(px(30.))
                     .px_3()
                     .flex_shrink_0()
                     .flex()
                     .items_center()
-                    .justify_between()
+                    .gap_3()
                     .border_t_1()
                     .border_color(rgb(visual.border))
                     .text_xs()
                     .text_color(rgb(visual.muted))
-                    .child(terminal_status)
-                    .child(self.status.render(cx)),
+                    .child(div().flex_1().min_w_0().text_ellipsis().child(terminal_status))
+                    .child(div().min_w_0().text_ellipsis().child(self.status.render(cx)))
+                    .child(
+                        Button::new("mcp-settings").ghost().compact().label(self.mcp_toolbar_label())
+                            .tooltip(t(cx, "对外 MCP 授权与命令审阅", "External MCP grants and command review"))
+                            .on_click(cx.listener(|view, _, window, cx| view.open_mcp(window, cx))),
+                    ),
             )
             .child(self.connection_manager(viewport.width, cx))
             .child(self.connection_form(cx))
@@ -869,6 +875,7 @@ impl Render for Workspace {
             .child(self.snippet_modal(cx))
             .child(self.archive_confirmation(cx))
             .child(self.batch_modal(cx))
+            .child(self.mcp_modal(cx))
             .when_some(self.ai_settings.clone(), |el, panel| {
                 el.child(
                     div()

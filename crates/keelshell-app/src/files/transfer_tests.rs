@@ -14,9 +14,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-#[path = "test_server.rs"]
-mod test_server;
-use test_server::{Checked, Server};
+use super::test_server::{Checked, Server};
 
 struct LocalDirectory(PathBuf);
 impl Drop for LocalDirectory {

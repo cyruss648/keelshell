@@ -24,11 +24,13 @@ chrono.workspace = true
 keelshell-ai = { path = "../keelshell-ai" }
 keelshell-core = { path = "../keelshell-core" }
 keelshell-session = { path = "../keelshell-session" }
+keelshell-mcp = { path = "../keelshell-mcp" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 image.workspace = true
 
 [dev-dependencies]
+tokio-util.workspace = true
 gpui-kit = { workspace = true, features = ["test-support"] }
 russh.workspace = true
 russh-sftp.workspace = true

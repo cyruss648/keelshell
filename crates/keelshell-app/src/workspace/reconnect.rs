@@ -185,7 +185,7 @@ impl Workspace {
         );
     }
 
-    fn binding_current(&self, binding: &TabBinding) -> bool {
+    pub(super) fn binding_current(&self, binding: &TabBinding) -> bool {
         binding.route.hops().last().is_some_and(|target| {
             self.state.connection_route(target.id).is_ok_and(|current| {
                 binding.route.same_reconnect_target(&current)

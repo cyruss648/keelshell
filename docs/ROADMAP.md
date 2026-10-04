@@ -2,7 +2,7 @@
 
 更新：2026-10-04。目标是完整的远程 SSH 管理与运维工作流，并增加参考 DBX 的 AI 配置与辅助能力。最新进展、代码接续与未验证模块见 [交接记录](HANDOFF.md)。
 
-新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通，929普通+8文档、47打包、新独立审查和macOS安装版CLI→回环服务原生问答/取消通过。其余视觉矩阵、Agent/订阅登录与MCP桌面桥接继续实施。
+新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通并完成macOS安装版CLI→回环服务原生问答/取消。MCP已接通受认证桌面桥接和macOS受控读取/人工审阅/撤权闭环，整合门禁963普通+8文档、6脚本通过。其余视觉矩阵、Agent/订阅登录、供应商MCP互通和其他平台原生继续实施。
 
 | 阶段 | 范围 | 状态 |
 |---|---|---|
@@ -30,7 +30,7 @@ OpenSSH 配置导入已接入安全子集：精确 Host、HostName、Port、User
 | D1 | UI-01/02/06：System/Light/Dark、语义token、设计资料库 | 主题基础已实现：System默认/旧配置迁移、窗口通知、语义palette、显式切换/后台保存；866普通+6文档、47打包和新独立审查通过；macOS两会话/草稿/明暗重启证实。真实OS变化、900×580原生、全屏矩阵与Windows/Linux原生未关闭，见[主题记录](testing/records/2026-10-04-system-themes.md) |
 | D2 | UI-03/04/05：丰富但克制的控件、专业工作区、模态/日志/滚动 | 继续实施；主题token基础见D1。按连接/终端/文件任务/AI设置逐屏升级；修复英文SFTP页脚在AI打开时裁切、已展开tooltip语言滞留及背景模态AX隔离；独立截图审查与最小原生窗口验收 |
 | A1 | 共享API/LocalAgent配置、上下文与授权契约 | 已实现显式backend、旧配置API默认、路径/地址独立校验、准确stdin预览、版本/能力探针、取消/revision与vault v2精确backend/path绑定；详见[ADR0040](adr/0040-named-local-agent-settings-and-reviewed-asks.md) |
-| A2 | MCP-01至04：KeelShell对外MCP | 独立stdio服务端基础已实现：默认关闭、七项固定工具、会话/路线/工具/路径授权契约、有界读取与待审提案、撤权/取消和输入输出背压；34普通+1文档与新独立进程复审通过。桌面IPC、真实SSH桥接及原生人工批准尚未接通；外部Claude Code/Codex真实调用后才能关闭，见[服务端记录](testing/records/2026-10-04-mcp-stdio-server.md) |
+| A2 | MCP-01至04：KeelShell对外MCP | 默认关闭的stdio伴随程序、双向认证/方向AEAD桌面IPC、精确活动SSH句柄、七项固定工具和原生人工审阅已接通。新独立复审、963普通+8文档整合门禁与macOS受控片段/SFTP读取、越权拒绝、批准/拒绝、撤权及重启闭环通过。实际Claude Code/Codex MCP、文件修改提案、最终发布包及其他平台原生仍待验证/实施，见[桌面记录](testing/records/2026-10-04-mcp-desktop-bridge.md)及[指南](product/EXTERNAL_MCP.md) |
 | A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | Codex0.160.0/Claude2.1.285固定Ask后端与应用接通；独立空目录/受控环境、完整JSONL终态与owned进程清理；929普通+8文档、47打包、新独立审查与macOS实际安装版→自有SSE窗口问答/取消/重启密钥失效通过。仅显式API密钥，不复用订阅登录；自定义工作目录/预算/环境引用、可见步骤流、Agent与Windows/Linux原生继续开发/验证，见[记录](testing/records/2026-10-04-local-agent-ui.md) |
 
 D1先于后续新界面，原有后端与任务目标继续保留。全部新增条目的细节、参考与验收见正式计划；“本地智能体”不是本地terminal管理，也不等于模型离线。

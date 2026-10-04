@@ -32,6 +32,7 @@ impl Workspace {
 
     pub(super) fn command_surface_blocked(&self) -> bool {
         self.snippet_modal_open()
+            || self.mcp.show
             || self.show_batch
             || self.discard_archive.is_some()
             || self.vault_settings.is_some()

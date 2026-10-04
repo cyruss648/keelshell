@@ -255,6 +255,26 @@ impl AuthorizationLease {
         &self.policy.grants
     }
 
+    pub(crate) fn permits_shared_metadata(
+        &self,
+        identity: SessionIdentity,
+        selections: &[Uuid],
+        paths: &[String],
+    ) -> bool {
+        self.policy
+            .grants
+            .iter()
+            .find(|grant| grant.identity == identity)
+            .is_some_and(|grant| {
+                (selections.is_empty() || grant.tools.contains(&ToolKind::ReadSelection))
+                    && selections.iter().all(|id| grant.selections.contains(id))
+                    && (paths.is_empty()
+                        || grant.tools.contains(&ToolKind::SftpList)
+                        || grant.tools.contains(&ToolKind::SftpRead))
+                    && paths.iter().all(|path| grant.paths.contains(path))
+            })
+    }
+
     pub(crate) fn permits_list_identity(&self, identity: SessionIdentity) -> bool {
         self.policy
             .grants

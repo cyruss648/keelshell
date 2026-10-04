@@ -61,7 +61,23 @@ where
     R: AsyncRead + Send + Unpin + 'static,
     W: AsyncWrite + Send + Unpin + 'static,
 {
-    let closed = CancellationToken::new();
+    serve_stream_with_shutdown(server, reader, writer, CancellationToken::new()).await
+}
+
+/// Serve an authenticated desktop stream with externally owned cancellation.
+/// Cancellation reaches tool futures and explicitly stops the SDK service;
+/// cleanup is awaited for at most two seconds. The caller must authenticate
+/// transport peers and keep authority in the desktop process.
+pub async fn serve_stream_with_shutdown<R, W>(
+    server: KeelShellMcpServer,
+    reader: R,
+    writer: W,
+    closed: CancellationToken,
+) -> Result<(), StdioFailure>
+where
+    R: AsyncRead + Send + Unpin + 'static,
+    W: AsyncWrite + Send + Unpin + 'static,
+{
     let budget = Arc::new(FrameBudget::default());
     let server = server.with_connection_lifecycle(closed.clone());
     let transport = (
@@ -79,14 +95,19 @@ where
             closing: Box::pin(closed.clone().cancelled_owned()),
         },
     );
-    let service = tokio::time::timeout(Duration::from_secs(10), server.serve(transport))
-        .await
-        .map_err(|_| StdioFailure::Startup)?
-        .map_err(|_| StdioFailure::Startup)?;
+    let service = tokio::select! {
+        biased;
+        _ = closed.cancelled() => return Ok(()),
+        result = tokio::time::timeout(Duration::from_secs(10), server.serve(transport)) => {
+            result.map_err(|_| StdioFailure::Startup)?.map_err(|_| StdioFailure::Startup)?
+        }
+    };
+    let sdk_cancel = service.cancellation_token();
     let mut waiting = Box::pin(service.waiting());
     tokio::select! {
         result = &mut waiting => { result.map_err(|_| StdioFailure::Runtime)?; }
         _ = closed.cancelled() => {
+            sdk_cancel.cancel();
             tokio::time::timeout(Duration::from_secs(2), &mut waiting)
                 .await.map_err(|_| StdioFailure::Shutdown)?
                 .map_err(|_| StdioFailure::Runtime)?;

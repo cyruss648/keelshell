@@ -6,7 +6,7 @@
 
 - 明暗两种主题，默认跟随系统，显式切换与配置持久化；采用更丰富但克制的元素/语义色和专业一致的视觉。主题基础已完成System默认、明暗切换/保存与语义palette；866普通+6文档、47打包、新独立审查及macOS部分原生通过，边界见[主题记录](testing/records/2026-10-04-system-themes.md)。
 - AI配置新增本地Claude Code/Codex CLI，不限模型API；提供MCP服务端给外部智能体调用。用户明确排除KeelShell接入其他第三方MCP服务的通用客户端，后续不得扩大该范围。
-- 独立`keelshell-mcp` stdio服务端基础已实现，官方`rmcp = "3.5"`、默认关闭，七项固定工具只提供授权读取/待审提案；34普通+1文档、新独立审查及背压/洪泛真实进程复核通过。当前binary使用DisconnectedBackend，桌面IPC、真实SSH和原生人工批准未接通；不能宣称外部智能体已读到应用会话。见[ADR0037](adr/0037-external-mcp-stdio-server.md)与[记录](testing/records/2026-10-04-mcp-stdio-server.md)。
+- 独立`keelshell-mcp` stdio服务端已接通受认证桌面IPC、真实SSH/SFTP句柄与人工批准，官方`rmcp = "3.5"`、默认关闭，七项固定工具只提供授权读取/待审提案。与CLI合并的本机门禁963普通+8文档、6脚本通过，新独立复审关闭；macOS受控原生证实OS复制启动配置、片段/目录/文件读取、越权拒绝、精确提案执行/拒绝、运行中撤权结果未知和重启默认关闭。真实供应商客户端MCP、最终发布包和Windows/Linux原生仍须验收；当前原生包显式复制companion不作为发布打包证明。见[ADR0039](adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[记录](testing/records/2026-10-04-mcp-desktop-bridge.md)与[指南](product/EXTERNAL_MCP.md)。
 - 正式任务ID、顺序、架构边界与验收见[设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)，参考选型和现有skills见[设计资料库](design/README.md)，来源/版本核对见[计划记录](testing/records/2026-10-04-design-agent-planning.md)。先收敛已开始后端，再建立主题基础；新增界面复用同一体系。
 - 主题实现已复用System/Dark/Light字段，不升schema，默认/缺字段为System，保留旧明示Light；Kit模式与palette同步，保存成功才应用，系统回调不写配置，主题保存不推进命令来源revision。真实OS变化/最小原生窗口/WindowsLinux原生仍未验收，见[ADR0036](adr/0036-system-appearance-and-semantic-palette.md)。
 - 用户追加并行工程要求：允许多个子代理/worktree并行不相关功能，完成后新开独立代理评审与功能复核，合并后及时清理分支/worktree/临时进程或容器；可使用本机Podman建立隔离服务真实联调，不能将容器或模拟视为目标桌面验收。
@@ -16,6 +16,7 @@
 - 命名AI配置已显式区分模型API、Codex CLI与Claude Code，旧metadata默认API；路径/base URL校验、probe、临时密钥/vault v2精确绑定、完整stdin审核与后台Ask/取消已接通。最终本机门禁929普通+8文档、6脚本、自托管进程harness、strictClippy/fmt/x.y与47打包通过；新独立core/app复审无剩余可复现P1/P2。
 - 最终macOS包SHA与原生证据见[记录](testing/records/2026-10-04-local-agent-ui.md)：实际安装版Codex0.160.0/Claude2.1.285→自有SSE问答，选择125字节SSH上下文、长JSON滚动/显式发送、建议入审核区、语言/主题保留、慢请求取消、重启密钥缺失均证实；退出后owned PIDs/listeners/scratch均清理。没有云端账户或客户SSH验收。
 - 使用见[指南](product/LOCAL_AGENTS.md)；固定单次Ask不继承现有项目/hooks/MCP/订阅登录。Agent、目录/预算/环境编辑与Windows/Linux native继续保留。新功能提交的远端CI另行追加。对外MCP方向不变，独立于内置Ask。
+- 提交`3fe0c98`的[Quality37208098775](https://github.com/cyruss648/keelshell/actions/runs/37208098775)中macOS/Linux成功，Windows自托管process harness主线程stack overflow，整次CI失败。原失败保留；后续堆缓冲与2 MiB控制器回归修复须以其新提交Windows CI核验，不能沿用本机结果声称修复已被Windows接受。
 
 ## 2026-10-04 继续交接（覆盖下方历史状态）
 

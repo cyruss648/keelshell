@@ -1,4 +1,5 @@
 //! Production review surfaces backed by separately authenticated loopback exec peers.
+use super::batch_peer as peer;
 use super::*;
 use crate::command_suggestions::SuggestionSource;
 use gpui_kit::{
@@ -7,8 +8,6 @@ use gpui_kit::{
     point, px,
 };
 use keelshell_core::{BatchAuditRecord, BatchAuditSummary, Snippet};
-#[path = "batch_peer.rs"]
-mod peer;
 
 fn seed(fixture: &Fixture, cx: &mut TestAppContext) -> Snippet {
     let mut snippet = Snippet::new("参数化检查", "printf '%s\\n' {{path}}");

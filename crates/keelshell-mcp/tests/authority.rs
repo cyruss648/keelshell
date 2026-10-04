@@ -69,6 +69,8 @@ impl DesktopBackend for Backend {
                     sessions: vec![SessionMetadata {
                         target: target(),
                         display_name: "隔离SSH".into(),
+                        selection_ids: Vec::new(),
+                        granted_roots: Vec::new(),
                     }],
                 },
                 Operation::ReadSelection {
@@ -472,6 +474,8 @@ async fn leaked_or_duplicate_sessions_fail_closed() {
         sessions: vec![SessionMetadata {
             target: other,
             display_name: "private".into(),
+            selection_ids: Vec::new(),
+            granted_roots: Vec::new(),
         }],
     });
     assert_eq!(
@@ -483,6 +487,8 @@ async fn leaked_or_duplicate_sessions_fail_closed() {
     let entry = SessionMetadata {
         target: target(),
         display_name: "ok".into(),
+        selection_ids: Vec::new(),
+        granted_roots: Vec::new(),
     };
     *backend.replacement.lock().unwrap() = Some(BackendReply::Sessions {
         sessions: vec![entry.clone(), entry],
@@ -666,4 +672,50 @@ fn policy_and_runtime_configuration_reject_unbounded_or_duplicate_grants() {
             .is_err()
         );
     }
+}
+
+#[tokio::test]
+async fn session_metadata_cannot_disclose_ungranted_selection_ids_or_roots() {
+    let backend = Arc::new(Backend::default());
+    let server = make_server(backend.clone(), enabled(&tools()));
+    for entry in [
+        SessionMetadata {
+            target: target(),
+            display_name: "ok".into(),
+            selection_ids: vec![Uuid::new_v4()],
+            granted_roots: vec![],
+        },
+        SessionMetadata {
+            target: target(),
+            display_name: "ok".into(),
+            selection_ids: vec![],
+            granted_roots: vec!["/outside".into()],
+        },
+    ] {
+        *backend.replacement.lock().unwrap() = Some(BackendReply::Sessions {
+            sessions: vec![entry],
+        });
+        assert_eq!(
+            invoke(&server, ToolKind::ListSessions, json!({}))
+                .await
+                .unwrap_err(),
+            McpFailure::Forbidden
+        );
+    }
+    let controller = enabled(&[ToolKind::ListSessions]);
+    let server = make_server(backend.clone(), controller);
+    *backend.replacement.lock().unwrap() = Some(BackendReply::Sessions {
+        sessions: vec![SessionMetadata {
+            target: target(),
+            display_name: "ok".into(),
+            selection_ids: vec![selection()],
+            granted_roots: vec!["/approved".into()],
+        }],
+    });
+    assert_eq!(
+        invoke(&server, ToolKind::ListSessions, json!({}))
+            .await
+            .unwrap_err(),
+        McpFailure::Forbidden
+    );
 }

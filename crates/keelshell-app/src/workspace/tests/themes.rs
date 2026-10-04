@@ -52,6 +52,13 @@ fn minimum_window_keeps_bilingual_appearance_and_workspace_actions_visible(
                     );
                     previous_right = bounds.right();
                 }
+                let mcp = window.find("mcp-settings");
+                let bounds = mcp.bounds();
+                assert!(mcp.visible());
+                assert!(bounds.size.width > px(0.) && bounds.size.height > px(0.));
+                assert!(bounds.right() <= window.bounds().right());
+                assert!(bounds.bottom() <= window.bounds().bottom());
+                assert!(bounds.origin.y > window.bounds().origin.y + px(42.));
             }
             i18n::set_language(Language::ZhCn, cx);
         })
