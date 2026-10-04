@@ -22,6 +22,7 @@ use crate::{Result, SessionError};
 mod control;
 mod directory;
 mod file_resume;
+mod inspection;
 use control::{TransferContext, TransferControl};
 pub use directory::{DirectoryResumePlan, DirectoryTransferPlan};
 pub use file_resume::FileResumePlan;

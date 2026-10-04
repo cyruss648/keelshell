@@ -51,12 +51,12 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
                 }),
         );
     }
-    div()
+    let mut card = div()
         .id("directory-comparison-card")
         .mx_2()
         .my_1()
         .p_2()
-        .max_h(px(240.))
+        .max_h(px(140.))
         .overflow_y_scroll()
         .border_1()
         .border_color(rgb(BORDER))
@@ -78,7 +78,19 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
             comparison.local.display(),
             comparison.remote
         )))
-        .child(rows)
+        .child(rows);
+    if let Some(plan) = &comparison.sync_plan {
+        let direction = if plan.direction() == DirectorySyncDirection::LeftToRight {
+            t(cx, "本地 → 远端", "Local → remote")
+        } else {
+            t(cx, "远端 → 本地", "Remote → local")
+        };
+        card = card.child(div().text_color(rgb(ACCENT)).child(match crate::i18n::language(cx) {
+            keelshell_core::Language::ZhCn => format!("内容已校验 · {direction} · {} 项 · 保留目标独有项", plan.operation_count()),
+            keelshell_core::Language::En => format!("Content verified · {direction} · {} operations · preserve destination-only entries", plan.operation_count()),
+        }));
+    }
+    card
 }
 
 fn compare_status_label(status: DirectoryEntryStatus, cx: &App) -> SharedString {
@@ -457,7 +469,7 @@ impl Render for FilesPanel {
                         }
                     }
                     cx.notify();
-                })))
+                }))))
             .child(div().id("file-transfer-tools").h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_t_1().border_color(rgb(BORDER)).overflow_x_scroll()
                 .child(Button::new("file-resume-mode").ghost().compact().disabled(self.suspended || self.busy || self.pending.is_some())
                     .when(self.resume_mode, |button| button.primary()).label(t(cx,"续传模式","Resume mode"))
@@ -521,8 +533,98 @@ impl Render for FilesPanel {
                         view.run(Operation::Compare(local, remote), window, cx);
                     }
                     cx.notify();
-                })))));
+                }))));
         if let Some(comparison) = &self.comparison {
+            let can_apply = comparison
+                .sync_plan
+                .as_ref()
+                .is_some_and(|p| p.operation_count() > 0);
+            let disabled = self.suspended || self.busy || self.pending.is_some();
+            panel = panel.child(
+                div()
+                    .mx_2()
+                    .flex_shrink_0()
+                    .flex()
+                    .flex_wrap()
+                    .gap_1()
+                    .child(
+                        Button::new("plan-sync-to-remote")
+                            .ghost()
+                            .compact()
+                            .label(t(cx, "校验本地 → 远端", "Verify local → remote"))
+                            .disabled(disabled)
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                if view.busy || view.pending.is_some() {
+                                    return;
+                                }
+                                if let Some(c) = &view.comparison {
+                                    view.run(
+                                        Operation::PlanDirectorySync(
+                                            c.local.clone(),
+                                            c.remote.clone(),
+                                            DirectorySyncDirection::LeftToRight,
+                                            DirectorySyncDeletePolicy::PreserveDestination,
+                                        ),
+                                        window,
+                                        cx,
+                                    );
+                                }
+                            })),
+                    )
+                    .child(
+                        Button::new("plan-sync-to-local")
+                            .ghost()
+                            .compact()
+                            .label(t(cx, "校验远端 → 本地", "Verify remote → local"))
+                            .disabled(disabled)
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                if view.busy || view.pending.is_some() {
+                                    return;
+                                }
+                                if let Some(c) = &view.comparison {
+                                    view.run(
+                                        Operation::PlanDirectorySync(
+                                            c.local.clone(),
+                                            c.remote.clone(),
+                                            DirectorySyncDirection::RightToLeft,
+                                            DirectorySyncDeletePolicy::PreserveDestination,
+                                        ),
+                                        window,
+                                        cx,
+                                    );
+                                }
+                            })),
+                    )
+                    .child(
+                        Button::new("review-directory-sync")
+                            .primary()
+                            .compact()
+                            .label(t(cx, "审核同步", "Review sync"))
+                            .disabled(disabled || !can_apply)
+                            .on_click(cx.listener(|view, _, _, cx| view.request_sync_review(cx))),
+                    )
+                    .child(
+                        Button::new("close-directory-comparison")
+                            .ghost()
+                            .compact()
+                            .icon(IconName::X)
+                            .label(t(cx, "收起比较", "Hide comparison"))
+                            .disabled(self.busy)
+                            .on_click(cx.listener(|view, _, _, cx| {
+                                if view.busy {
+                                    return;
+                                }
+                                if matches!(
+                                    &view.pending,
+                                    Some((_, Operation::ApplyDirectorySync(_)))
+                                ) {
+                                    view.pending = None;
+                                }
+                                view.comparison = None;
+                                cx.notify();
+                            })),
+                    ),
+            );
             panel = panel.child(directory_compare_card(comparison, cx));
         }
         if self.transfer.is_some() {

@@ -11,7 +11,7 @@ use gpui_kit::{
 };
 use keelshell_core::{
     DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
-    diff_utf8,
+    DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, diff_utf8,
 };
 use keelshell_session::{
     SessionError, SshSession,
@@ -30,6 +30,7 @@ use std::{
     time::Duration,
 };
 
+mod sync;
 mod transfer;
 mod view;
 mod worker;
@@ -54,6 +55,13 @@ enum Operation {
     ResumeFile(FileResumePlan),
     ResumeDirectory(DirectoryResumePlan),
     Compare(PathBuf, String),
+    PlanDirectorySync(
+        PathBuf,
+        String,
+        DirectorySyncDirection,
+        DirectorySyncDeletePolicy,
+    ),
+    ApplyDirectorySync(Box<DirectorySyncComparison>),
     Save {
         path: String,
         original: Vec<u8>,
@@ -69,6 +77,7 @@ enum Outcome {
     PlannedFileResume(FileResumePlan),
     PlannedDirectoryResume(DirectoryResumePlan),
     Compared(DirectoryComparison),
+    DirectorySyncPlanned(DirectorySyncComparison),
 }
 
 enum WorkerMessage {
@@ -113,6 +122,15 @@ struct DirectoryComparison {
     local: PathBuf,
     remote: String,
     report: DirectoryCompareReport,
+    sync_plan: Option<DirectorySyncPlan>,
+}
+
+#[derive(Clone)]
+struct DirectorySyncComparison {
+    local: PathBuf,
+    remote: String,
+    report: DirectoryCompareReport,
+    plan: DirectorySyncPlan,
 }
 
 /// A failed transfer can offer a new read-only verification step, but never a
@@ -540,7 +558,10 @@ impl FilesPanel {
             // a hidden recovery proposal after the user leaves its card.
             self.recovery = None;
         }
-        if !matches!(&operation, Operation::Compare(..)) {
+        if !matches!(
+            &operation,
+            Operation::Compare(..) | Operation::PlanDirectorySync(..)
+        ) {
             self.comparison = None;
         }
         if let Operation::List(path) = &operation
@@ -585,12 +606,22 @@ impl FilesPanel {
                 "正在读取两侧目录快照（只读）…",
                 "Reading both directory snapshots (read-only)…",
             ),
+            Operation::PlanDirectorySync(..) => Message::new(
+                "正在读取两侧文件内容并生成审核计划（只读）…",
+                "Reading both sides and generating a reviewable plan (read-only)…",
+            ),
+            Operation::ApplyDirectorySync(..) => Message::new(
+                "正在复核审核快照并同步目录…",
+                "Rechecking reviewed snapshots and synchronizing directories…",
+            ),
             _ => Message::new("正在处理…", "Working…"),
         };
         let editor_before = self.editor.read(cx).value().to_string();
         let review_only = matches!(
             &operation,
-            Operation::PlanResume(..) | Operation::PlanDirectory(_)
+            Operation::PlanResume(..)
+                | Operation::PlanDirectory(_)
+                | Operation::PlanDirectorySync(..)
         );
         let navigation_before = self.path.read(cx).value().to_string();
         let runtime = self.runtime.clone();
@@ -737,7 +768,12 @@ impl FilesPanel {
                     }
                     Ok(Outcome::Compared(comparison)) => {
                         let review_count = comparison.report.review_count();
-                        view.comparison = Some(comparison);
+                        view.comparison = Some(DirectoryComparison {
+                            local: comparison.local,
+                            remote: comparison.remote,
+                            report: comparison.report,
+                            sync_plan: None,
+                        });
                         view.status = if review_count == 0 {
                             Message::new("两侧目录已按可用元数据匹配", "The directories match on available metadata")
                         } else {
@@ -746,6 +782,19 @@ impl FilesPanel {
                                 format!("Directory comparison complete: {review_count} entries need review"),
                             )
                         };
+                    }
+                    Ok(Outcome::DirectorySyncPlanned(comparison)) => {
+                        let operation_count = comparison.plan.operation_count();
+                        view.comparison = Some(DirectoryComparison {
+                            local: comparison.local,
+                            remote: comparison.remote,
+                            report: comparison.report,
+                            sync_plan: Some(comparison.plan),
+                        });
+                        view.status = Message::new(
+                            format!("内容校验完成：已生成 {operation_count} 项审核计划；当前仅预览，不会写入"),
+                            format!("Content verification complete: {operation_count} reviewed operations; preview only, nothing was written"),
+                        );
                     }
                     Err(error) => view.status = if review_only {
                         Message::detail("审核未完成，尚未开始传输", "Review incomplete; transfer not started", error)
@@ -827,6 +876,33 @@ impl FilesPanel {
         }
         if let Some((_, operation)) = self.pending.take() {
             self.run(operation, window, cx);
+        }
+    }
+
+    fn request_sync_review(&mut self, cx: &mut Context<Self>) {
+        if self.busy || self.suspended || self.pending.is_some() {
+            return;
+        }
+        let Some(comparison) = &self.comparison else {
+            return;
+        };
+        let Some(plan) = &comparison.sync_plan else {
+            return;
+        };
+        let review = DirectorySyncComparison {
+            local: comparison.local.clone(),
+            remote: comparison.remote.clone(),
+            report: comparison.report.clone(),
+            plan: plan.clone(),
+        };
+        match sync::review_message(&review) {
+            Ok(message) => {
+                self.confirm(message, Operation::ApplyDirectorySync(Box::new(review)), cx)
+            }
+            Err(error) => {
+                self.status = error.message();
+                cx.notify();
+            }
         }
     }
 
@@ -1047,6 +1123,8 @@ impl Operation {
             | Self::PlanDirectory(_)
             | Self::PlanResume(..)
             | Self::Compare(..)
+            | Self::ApplyDirectorySync(..)
+            | Self::PlanDirectorySync(..)
             | Self::Save { .. } => None,
         }
     }

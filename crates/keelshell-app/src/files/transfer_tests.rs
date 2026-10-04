@@ -152,6 +152,241 @@ fn selected(path: &str, directory: bool) -> RemoteEntry {
 }
 
 #[gpui_kit::test]
+async fn directory_sync_reviews_exact_content_and_uploads_only_after_confirmation(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    h.source("changed.txt", b"new!");
+    h.source("local-only.txt", b"local");
+    h.seed("/changed.txt", b"old!");
+    h.seed("/remote-only.txt", b"keep");
+    h.local_input(cx, &h.local.0);
+    h.click(cx, "compare-directories");
+    h.idle(cx).await;
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.panel.read_with(cx, |panel, _| {
+        let comparison = panel
+            .comparison
+            .as_ref()
+            .unwrap_or_else(|| panic!("content comparison"));
+        assert_eq!(
+            comparison.report.changed_count(),
+            1,
+            "equal-size files with different bytes differ"
+        );
+        assert_eq!(
+            comparison
+                .sync_plan
+                .as_ref()
+                .unwrap_or_else(|| panic!("sync plan"))
+                .operation_count(),
+            2
+        );
+    });
+    assert_eq!(h.read("/changed.txt"), b"old!");
+    h.click(cx, "review-directory-sync");
+    h.click(cx, "cancel-file-operation");
+    assert_eq!(h.read("/changed.txt"), b"old!");
+    h.click(cx, "review-directory-sync");
+    h.click(cx, "close-directory-comparison");
+    h.panel.read_with(cx, |panel, _| {
+        assert!(panel.comparison.is_none());
+        assert!(panel.pending.is_none());
+    });
+    assert_eq!(h.read("/changed.txt"), b"old!");
+    h.click(cx, "compare-directories");
+    h.idle(cx).await;
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.click(cx, "review-directory-sync");
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read("/changed.txt"), b"new!");
+    assert_eq!(h.read("/local-only.txt"), b"local");
+    assert_eq!(h.read("/remote-only.txt"), b"keep");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 2);
+}
+
+#[gpui_kit::test]
+async fn directory_sync_rechecks_destination_and_source_before_any_write(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    h.source("a.txt", b"new!");
+    h.seed("/a.txt", b"old!");
+    h.local_input(cx, &h.local.0);
+    h.click(cx, "compare-directories");
+    h.idle(cx).await;
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.click(cx, "review-directory-sync");
+    h.seed("/a.txt", b"edit");
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read("/a.txt"), b"edit");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+    h.click(cx, "compare-directories");
+    h.idle(cx).await;
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.click(cx, "review-directory-sync");
+    h.source("a.txt", b"late");
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read("/a.txt"), b"edit");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}
+
+#[gpui_kit::test]
+async fn directory_sync_downloads_atomically_and_keeps_review_actions_visible(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    let existing = h.source("changed.txt", b"old!");
+    let only = h.source("local-only.txt", b"keep");
+    h.seed("/changed.txt", b"new!");
+    h.runtime.block_on(async {
+        let sftp = h.session.sftp().await.checked("directory seed SFTP");
+        sftp.mkdir("/nested").await.checked("seed remote directory");
+        sftp.write("/nested/file.txt", b"nested")
+            .await
+            .checked("seed nested remote file");
+        sftp.close().await.checked("close seed directory SFTP");
+    });
+    h.local_input(cx, &h.local.0);
+    h.click(cx, "compare-directories");
+    h.idle(cx).await;
+    h.click(cx, "plan-sync-to-local");
+    h.idle(cx).await;
+    assert_eq!(
+        std::fs::read(&existing).checked("unchanged preview"),
+        b"old!"
+    );
+    for language in [Language::En, Language::ZhCn] {
+        cx.update_window(h.window, |_, window, cx| {
+            i18n::set_language(language, cx);
+            window.resize(size(px(480.), px(440.)));
+            window.bounds_changed(cx);
+            window.render_frame(cx);
+            for id in [
+                "plan-sync-to-remote",
+                "plan-sync-to-local",
+                "review-directory-sync",
+            ] {
+                let button = window.find(id);
+                let bounds = button.bounds();
+                assert!(
+                    button.visible()
+                        && bounds.right() <= window.bounds().right()
+                        && bounds.bottom() <= window.bounds().bottom(),
+                    "{id}: {bounds:?}"
+                );
+            }
+        })
+        .checked("narrow bilingual sync plan");
+    }
+    h.click(cx, "review-directory-sync");
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(
+        std::fs::read(&existing).checked("download replacement"),
+        b"new!"
+    );
+    assert_eq!(
+        std::fs::read(&only).checked("local only preserved"),
+        b"keep"
+    );
+    assert_eq!(
+        std::fs::read(h.local.0.join("nested/file.txt")).checked("nested download"),
+        b"nested"
+    );
+}
+
+#[gpui_kit::test]
+async fn directory_sync_refuses_unavailable_atomic_rename_without_truncating_target(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    h.source("a.txt", b"new!");
+    h.seed("/a.txt", b"old!");
+    h.local_input(cx, &h.local.0);
+    h.click(cx, "compare-directories");
+    h.idle(cx).await;
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.server.filesystem.set_atomic_unsupported(true);
+    h.click(cx, "review-directory-sync");
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read("/a.txt"), b"old!");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}
+
+#[gpui_kit::test]
+async fn directory_sync_refuses_links_case_collisions_and_retired_session_reviews(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    h.source("a.txt", b"local");
+    h.server
+        .filesystem
+        .insert_symlink("/link")
+        .checked("seed remote link");
+    h.local_input(cx, &h.local.0);
+    h.click(cx, "compare-directories");
+    h.idle(cx).await;
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.panel.read_with(cx, |panel, _| {
+        assert!(
+            panel
+                .comparison
+                .as_ref()
+                .is_none_or(|c| c.sync_plan.is_none())
+        )
+    });
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+    h.runtime.block_on(async {
+        let sftp = h.session.sftp().await.checked("remove fixture link");
+        sftp.remove("/link").await.checked("remove link");
+        sftp.write("/A.txt", b"remote")
+            .await
+            .checked("case-colliding file");
+        sftp.close().await.checked("close case seed");
+    });
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.panel.read_with(cx, |panel, _| {
+        assert!(
+            panel
+                .comparison
+                .as_ref()
+                .is_none_or(|c| c.sync_plan.is_none())
+        )
+    });
+    assert_eq!(h.read("/A.txt"), b"remote");
+    h.runtime.block_on(async {
+        let sftp = h.session.sftp().await.checked("remove case collision");
+        sftp.remove("/A.txt").await.checked("remove case file");
+        sftp.close().await.checked("close collision removal");
+    });
+    h.click(cx, "plan-sync-to-remote");
+    h.idle(cx).await;
+    h.click(cx, "review-directory-sync");
+    h.panel.update(cx, |panel, cx| panel.suspend(cx));
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel
+            .update(cx, |panel, cx| panel.execute_pending(window, cx))
+    })
+    .checked("stale pending confirmation");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}
+
+#[gpui_kit::test]
 async fn upload_pause_acknowledges_a_stable_boundary_and_continue_preserves_destination(
     cx: &mut TestAppContext,
 ) {

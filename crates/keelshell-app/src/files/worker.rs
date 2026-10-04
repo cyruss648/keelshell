@@ -10,7 +10,7 @@ const MAX_COMPARE_DEPTH: usize = 32;
 /// never blocks the GPUI event loop. Symlinks are represented as entries and
 /// are never traversed. Relative paths are built from directory-entry names so
 /// the local root cannot escape into a comparison key.
-fn snapshot_local_tree(
+pub(super) fn snapshot_local_tree(
     root: &Path,
     stop: &AtomicBool,
 ) -> Result<Vec<DirectoryEntrySnapshot>, FileFailure> {
@@ -31,7 +31,7 @@ fn snapshot_local_tree(
     Ok(snapshot)
 }
 
-fn remote_relative_path(root: &str, path: &str) -> Option<String> {
+pub(super) fn remote_relative_path(root: &str, path: &str) -> Option<String> {
     let root = root.trim_end_matches('/');
     if root.is_empty() {
         path.strip_prefix('/')
@@ -93,6 +93,7 @@ async fn compare_directories(
         local: local_root,
         remote: remote_root,
         report,
+        sync_plan: None,
     }))
 }
 
@@ -316,6 +317,39 @@ pub(super) async fn operate(
             }
             Operation::Compare(local, remote) => {
                 compare_directories(sftp.clone(), local, remote, &stop).await
+            }
+            Operation::PlanDirectorySync(local, remote, direction, policy) => {
+                let comparison = tokio::time::timeout(
+                    Duration::from_secs(30),
+                    super::sync::plan(&sftp, local, remote, direction, policy, &stop),
+                )
+                .await
+                .map_err(|_| {
+                    FileFailure::Comparison("content review exceeded 30 seconds".into())
+                })??;
+                Ok(Outcome::DirectorySyncPlanned(comparison))
+            }
+            Operation::ApplyDirectorySync(review) => {
+                let destination = if review.plan.direction() == DirectorySyncDirection::LeftToRight
+                {
+                    review.remote.clone()
+                } else {
+                    review.local.display().to_string()
+                };
+                tokio::time::timeout(
+                    Duration::from_secs(15 * 60),
+                    super::sync::apply(&sftp, *review, &stop, progress),
+                )
+                .await
+                .unwrap_or_else(|_| {
+                    Err(FileFailure::Comparison(
+                        "directory synchronization exceeded 15 minutes".into(),
+                    ))
+                })
+                .map_err(|error| FileFailure::DirectoryTransfer {
+                    destination,
+                    error: Box::new(error),
+                })
             }
             Operation::PlanResume(spec, directory) => {
                 if directory {

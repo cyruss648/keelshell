@@ -144,6 +144,63 @@ async fn pause_after_progress(handle: &mut TransferHandle, existing: u64) -> Tes
 
 #[tokio::test]
 #[ignore = "requires a disposable OpenSSH loopback server and KEELSHELL_OPENSSH_* settings"]
+async fn openssh_checked_content_reads_inspect_regular_files_and_refuse_truncation() -> TestResult {
+    tokio::time::timeout(Duration::from_secs(60), async {
+        let fixture = Fixture::connect().await?;
+        fixture
+            .sftp
+            .write(&fixture.path("checked.bin"), b"checked-content")
+            .await?;
+        fixture.sftp.write(&fixture.path("empty.bin"), b"").await?;
+        let inspected = fixture
+            .sftp
+            .inspect_entry(&fixture.path("checked.bin"))
+            .await?
+            .ok_or("checked file is missing")?;
+        assert!(!inspected.is_directory && !inspected.is_symlink);
+        assert_eq!(inspected.size, Some(15));
+        assert_eq!(
+            fixture
+                .sftp
+                .read_regular(&fixture.path("checked.bin"), 15)
+                .await?,
+            b"checked-content"
+        );
+        assert!(
+            fixture
+                .sftp
+                .read_regular(&fixture.path("checked.bin"), 14)
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            fixture
+                .sftp
+                .read_regular(&fixture.path("empty.bin"), 0)
+                .await?,
+            b""
+        );
+        assert!(
+            fixture
+                .sftp
+                .read_regular(&fixture.directory, 100)
+                .await
+                .is_err()
+        );
+        assert!(
+            fixture
+                .sftp
+                .inspect_entry(&fixture.path("missing.bin"))
+                .await?
+                .is_none()
+        );
+        fixture.close(&["checked.bin", "empty.bin"], &[]).await
+    })
+    .await?
+}
+
+#[tokio::test]
+#[ignore = "requires a disposable OpenSSH loopback server and KEELSHELL_OPENSSH_* settings"]
 async fn openssh_file_resume_revalidates_content_and_works_on_a_new_connection() -> TestResult {
     tokio::time::timeout(Duration::from_secs(120), async {
         let mut fixture = Fixture::connect().await?;
