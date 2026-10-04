@@ -1,6 +1,6 @@
 # 工作区、连接库与依赖任务整合 — 2026-10-05
 
-状态：连接库、文件响应布局及依赖流程UI已合入 `feature/workspace-workflow-library`，各自与冻结整合范围的独立复审通过。标准双程序macOS开发包完成受控SSH/SFTP、标签审核/保存及两任务退出0/7，但在900×580英文/Light/AI/真实Files组合发现终端约37px的新P2。紧凑工作区修复已实现，完整Workspace/Files和候选场景、根新1031普通+8文档+6脚本/57打包门禁通过；fresh紧凑独立复审与新macOS包八组合/补全原生闭环PASS，新源码远端CI仍待提交后追加。先前通过结果不覆盖后续源码变化，见[紧凑原生记录](2026-10-05-compact-workspace-native.md)。
+状态：连接库、文件响应布局及依赖流程UI经整合分支合入 `main`，生产提交 `40824f0` 已推送并核对精确远端SHA，各自与冻结整合范围的独立复审通过。标准双程序macOS开发包完成受控SSH/SFTP、标签审核/保存及两任务退出0/7，但在900×580英文/Light/AI/真实Files组合发现终端约37px的新P2。紧凑工作区修复已实现，完整Workspace/Files和候选场景、根新1031普通+8文档+6脚本/57打包门禁通过；fresh紧凑独立复审与新macOS包八组合/补全原生闭环PASS，新源码Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败。先前通过结果不覆盖后续源码变化，见[紧凑原生记录](2026-10-05-compact-workspace-native.md)。
 
 ## 范围与来源
 
@@ -51,7 +51,7 @@
 | 整仓格式、严格 Clippy、Rust/文档/脚本测试、x.y 与默认/2 MiB控制器 | 紧凑预算修复前通过：1030普通+8文档、6脚本，应用361项属于1030普通；默认/显式2 MiB完整CLI控制器各通过，RUST_MIN_STACK未设置。修复后1031普通+8文档+6脚本/57打包的独立新范围在末节记录 |
 | 独立整合审查、单独 OpenSSH 与打包校验 | 冻结范围PASS，无剩余可复现P1/P2；独立126工作区、30工作流和1混合测试的集合有重叠，不相加；另2补充探针通过。根9项系统OpenSSH（4.15s）和57打包通过 |
 | 标准双程序 macOS 包与真实小窗口、文件/库/工作流 SSH/SFTP | 开发包commit=null，精确256生产hash与独立冻结快照一致；实际标签审核前不写盘、确认后恰好2目标改变；两条受控SSH及SFTP、完整两任务审核、成功0/失败7及输出通过。900×580实际Files+AI发现终端约37px的新P2，后续新包八组合/补全闭环通过，另在末节与原生记录归属 |
-| 新合并源码远端 Quality | 待推送后追加精确源码 SHA、三平台及 OpenSSH 步骤结果 |
+| 新合并源码远端 Quality | 生产提交40824f0已推送，Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败；最终三平台及OpenSSH结果另行追加 |
 
 原生 Windows/Linux、背景模态 AX 隔离、完整屏幕阅读器路径、真实系统样式变化、任务级持久化审计、定时/自定义参数映射、供应商 MCP、签名/安装更新与最终 Release 仍开放。本轮成功的 GPUI 或 TCP 证据不关闭这些边界。
 
@@ -213,5 +213,33 @@ MCP仍为 `069bbb239b5382f5c5203172ffd9fe080f7dc124c1fe1ab2de2e7d2a3477f53d`；
 两个独立review的target/private-tmp在无owned进程后删除，source/probe/失败日志保留，
 追加cache-cleanup回执不改原36/39冻结清单；新cache-cleanup SHA-256为
 `a7c9ad174e19348a7d88bb7fdd064d0a786b4f05f1bf514a359e27388a436596`。
-本切片本地门禁/独立审查/有限原生验证完成；新源码提交、推送和远端Quality尚待根追加，
+本切片本地门禁/独立审查/有限原生验证完成；生产提交40824f0已推送main，其Quality最终失败见下节，
 未沿用前一提交CI，也未创建或证明新的Release/安装更新。
+
+## 提交、远端绑定与新 Quality
+
+生产修复提交为 `40824f00ae9385f380b36c0abecf41b043c11a4e`，已以fast-forward
+合入并推送 `main`。根逐项读取提交tree的256个生产文件，与新原生
+`source-build.json`完全相同；原开发包仍保留`build.commit=null`，不能重写成
+正式提交构建或Release。`git ls-remote`确认远端main精确指向此提交，
+当次tracked工作区clean、main/origin ahead/behind为0/0；已合整合分支
+以非force方式删除。回执在`commit-push-verification.json`保留。
+
+[Quality37232614315](https://github.com/cyruss648/keelshell/actions/runs/37232614315)
+以此精确生产提交运行并已结束failure；此前提交的成功CI不覆盖此范围。
+Ubuntu成功：1031普通+8文档、6脚本、57打包，默认/显式2 MiB控制器均4624字节；
+普通12项ignored另含Linux /proc手工采样，独立9项OpenSSH通过13.96秒，
+owned进程与临时根清理通过、ancestry_unverified为空。Windows成功：1011普通+8文档、
+6脚本列出/1跳过、57打包列出/4跳过，两控制器均4968字节；OpenSSH按平台跳过。
+macOS部分1018普通通过、1失败，文档和显式2 MiB未执行，OpenSSH被跳过。
+失败为`directory_limit_failure_and_timeout_release_remote_handles`在
+`SSH connect/authenticate`返回Timeout，未进入其目录超时/清理断言；
+套件94通过/1失败，workspace返回101。原API日志183750字节，SHA-256
+`320320f78ee4186c2ec08c13b13278383a852caa017f3c39b4cbb9fe4ddf7df6`。
+根核验旧run49项SHA/bytes；其清单SHA-256为
+`873ae54625acddbc4c2bf79ab2be89f221cb02a5610324c95fe84ab1de8470a6`，
+报告为`ebc12b8feda15877a052b9585226843c997a1c35b0506d3d6e2f435ede32ca50`。
+原失败不重跑、不覆盖，测试夹具修复和新提交CI另行记录。此处后续文档提交独立于生产源码
+提交，不能把开发包或CI视为签名、安装、更新或Windows/Linux GUI验收。
+
+后续两文件SSH夹具修复完成最终作者95项/12专项、根整仓工程门禁、9项本机OpenSSH及GUI/MCP构建。新独立复审无剩余P1/P2；修复提交CI继续按[夹具记录](2026-10-05-ssh-timeout-fixture-stability.md)归属；原408失败与各次原生包快照保留，不用旧候选或中断gate替代最终结果。

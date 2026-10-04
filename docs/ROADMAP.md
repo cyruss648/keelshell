@@ -1,6 +1,8 @@
 # 开发路线
 
-2026-10-05 工作区整合：连接库批量组织/永久清理、手工依赖工作流与文件响应布局已合入并通过独立整合审查；依赖工作流支持1–128个任务、32个已认证SSH目标及逐任务回执，文件区保留至少64px真实条目空间和固定审核操作。旧macOS开发包完成受控标签与双任务退出0/7，但实际小窗口发现终端约37px；新单行补全布局及32完整Files/16完整候选GPUI场景已修复该渲染预算，根门禁1031普通+8文档+6脚本、两种完整CLI控制器和57打包通过。fresh紧凑独立复审和新macOS包900×580八组合/显式补全闭环通过，新源码远端CI待提交后追加，旧包及GPUI场景不作为新原生通过，见[整合记录](testing/records/2026-10-05-workspace-workflows-integration.md)。
+2026-10-05 工作区整合：连接库批量组织/永久清理、手工依赖工作流与文件响应布局已合入并通过独立整合审查；依赖工作流支持1–128个任务、32个已认证SSH目标及逐任务回执，文件区保留至少64px真实条目空间和固定审核操作。旧macOS开发包完成受控标签与双任务退出0/7，但实际小窗口发现终端约37px；新单行补全布局及32完整Files/16完整候选GPUI场景已修复该渲染预算，根门禁1031普通+8文档+6脚本、两种完整CLI控制器和57打包通过。fresh紧凑独立复审和新macOS包900×580八组合/显式补全闭环通过，生产提交40824f0已推送main并核对精确SHA，新Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败，旧包及GPUI场景不作为新原生通过，见[整合记录](testing/records/2026-10-05-workspace-workflows-integration.md)。
+
+SSH夹具增量：原408 CI失败仍保留；最终两文件测试修复已通过作者95项/12专项及根整仓工程门禁、9项系统OpenSSH和GUI/MCP构建。新独立复审无剩余P1/P2，95项及6项私有补充探针通过；修复提交CI单独核验，不沿用存在TCP探针副作用的旧候选通过结果，也不改变产品连接限时或将旧UI包改作新提交原生验收。见[夹具记录](testing/records/2026-10-05-ssh-timeout-fixture-stability.md)。
 
 此前 MCP 源码基线：MCP stdio 错误响应的接收取消窗口已用真实 SDK 与 ID4 进程超时证实；连接拥有的 I/O task 和有界 queue 已修复。最终根门禁989普通+8doc+6脚本、默认/2 MiB完整控制器、格式/严格Clippy/x.y通过；transport与新增首条短提案滚轮回归均经fresh独立审查，无P1/P2。生产修复34cff1b与新增回归958903c的三平台Quality及macOS/Linux OpenSSH均成功，新增回归三平台实际通过，见[Quality37220102376](https://github.com/cyruss648/keelshell/actions/runs/37220102376)。标准macOS双程序开发包完成隔离SSH/SFTP读取、人工批准/拒绝、撤权与重启原生闭环；供应商MCP、Windows/Linux原生、六目标Release与实际安装更新未关闭，见[记录](testing/records/2026-10-04-mcp-response-cancellation.md)。
 

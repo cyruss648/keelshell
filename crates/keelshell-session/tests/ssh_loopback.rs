@@ -5,7 +5,7 @@ use std::error::Error;
 use std::net::SocketAddr;
 use std::sync::{
     Arc, Mutex,
-    atomic::{AtomicBool, AtomicU32, Ordering},
+    atomic::{AtomicU32, Ordering},
 };
 use std::time::Duration;
 
@@ -52,8 +52,11 @@ mod upstream_proxy;
 struct Fixture {
     channels: HashMap<ChannelId, Channel<server::Msg>>,
     filesystem: sftp_fixture::Filesystem,
-    delay_forward: Arc<AtomicBool>,
+    forward_ack_gate: Arc<sftp_fixture::ResponseGate>,
+    auth_delay: Arc<AtomicU32>,
+    password_authentications: Arc<AtomicU32>,
     bound_port: Arc<AtomicU32>,
+    forward_listeners: Arc<AtomicU32>,
     forwards: HashMap<u32, JoinHandle<()>>,
     direct_requests: Arc<Mutex<Vec<(String, u32)>>>,
     direct_delay: Arc<AtomicU32>,
@@ -66,6 +69,15 @@ impl Drop for Fixture {
     }
 }
 
+// The lease moves into the listener future before spawn, so even an abort
+// before its first poll records release of the actual owned listener.
+struct ForwardListenerLease(Arc<AtomicU32>);
+impl Drop for ForwardListenerLease {
+    fn drop(&mut self) {
+        self.0.fetch_sub(1, Ordering::AcqRel);
+    }
+}
+
 impl server::Handler for Fixture {
     type Error = russh::Error;
 
@@ -74,6 +86,11 @@ impl server::Handler for Fixture {
         user: &str,
         password: &str,
     ) -> Result<server::Auth, Self::Error> {
+        let delay = self.auth_delay.load(Ordering::Acquire);
+        if delay != 0 {
+            tokio::time::sleep(Duration::from_millis(u64::from(delay))).await;
+        }
+        self.password_authentications.fetch_add(1, Ordering::AcqRel);
         Ok(
             if user == "fixture" && password == "ephemeral-test-password" {
                 server::Auth::Accept
@@ -187,9 +204,12 @@ impl server::Handler for Fixture {
         *port = u32::from(listener.local_addr()?.port());
         let port = *port;
         self.bound_port.store(port, Ordering::Release);
+        self.forward_listeners.fetch_add(1, Ordering::AcqRel);
+        let listener_lease = ForwardListenerLease(self.forward_listeners.clone());
         let address = address.to_owned();
         let handle = session.handle();
         self.forwards.insert(port, tokio::spawn(async move {
+            let _listener_lease = listener_lease;
             let mut streams = tokio::task::JoinSet::new();
             loop {
                 tokio::select! {
@@ -202,8 +222,11 @@ impl server::Handler for Fixture {
                 }
             }
         }));
-        if self.delay_forward.load(Ordering::Acquire) {
-            tokio::time::sleep(Duration::from_millis(400)).await;
+        if self.forward_ack_gate.is_armed() {
+            self.forward_ack_gate
+                .hold()
+                .await
+                .map_err(|_| russh::Error::Disconnect)?;
         }
         Ok(true)
     }
@@ -277,8 +300,11 @@ impl server::Handler for Fixture {
 
 struct Server {
     filesystem: sftp_fixture::Filesystem,
-    delay_forward: Arc<AtomicBool>,
+    forward_ack_gate: Arc<sftp_fixture::ResponseGate>,
+    auth_delay: Arc<AtomicU32>,
+    password_authentications: Arc<AtomicU32>,
     bound_port: Arc<AtomicU32>,
+    forward_listeners: Arc<AtomicU32>,
     address: SocketAddr,
     fingerprint: String,
     task: JoinHandle<()>,
@@ -305,15 +331,21 @@ async fn serve() -> Result<Server, Box<dyn Error>> {
     let listener = TcpListener::bind("127.0.0.1:0").await?;
     let address = listener.local_addr()?;
     let filesystem = sftp_fixture::Filesystem::default();
-    let delay_forward = Arc::new(AtomicBool::new(false));
+    let forward_ack_gate = Arc::new(sftp_fixture::ResponseGate::default());
+    let auth_delay = Arc::new(AtomicU32::new(0));
+    let password_authentications = Arc::new(AtomicU32::new(0));
     let bound_port = Arc::new(AtomicU32::new(0));
+    let forward_listeners = Arc::new(AtomicU32::new(0));
     let direct_requests = Arc::new(Mutex::new(Vec::new()));
     let direct_delay = Arc::new(AtomicU32::new(0));
     let shared_requests = direct_requests.clone();
     let shared_direct_delay = direct_delay.clone();
     let shared_fs = filesystem.clone();
-    let shared_delay = delay_forward.clone();
+    let shared_forward_gate = forward_ack_gate.clone();
+    let shared_auth_delay = auth_delay.clone();
+    let shared_authentications = password_authentications.clone();
     let shared_port = bound_port.clone();
+    let shared_listeners = forward_listeners.clone();
     let (disconnect, shutdown) = tokio::sync::watch::channel(false);
     let task = tokio::spawn(async move {
         let mut clients = tokio::task::JoinSet::new();
@@ -322,7 +354,7 @@ async fn serve() -> Result<Server, Box<dyn Error>> {
                 accepted = listener.accept() => {
                     let Ok((socket, _)) = accepted else { break; };
                     let config = config.clone();
-                    let fixture = Fixture { filesystem: shared_fs.clone(), delay_forward: shared_delay.clone(), bound_port: shared_port.clone(), channels: HashMap::new(), forwards: HashMap::new(), direct_requests: shared_requests.clone(), direct_delay: shared_direct_delay.clone() };
+                    let fixture = Fixture { filesystem: shared_fs.clone(), forward_ack_gate: shared_forward_gate.clone(), auth_delay: shared_auth_delay.clone(), password_authentications: shared_authentications.clone(), bound_port: shared_port.clone(), forward_listeners: shared_listeners.clone(), channels: HashMap::new(), forwards: HashMap::new(), direct_requests: shared_requests.clone(), direct_delay: shared_direct_delay.clone() };
                     let mut shutdown = shutdown.clone();
                     clients.spawn(async move {
                         if let Ok(mut session) = server::run_stream(config, socket, fixture).await {
@@ -340,8 +372,11 @@ async fn serve() -> Result<Server, Box<dyn Error>> {
     });
     Ok(Server {
         filesystem,
-        delay_forward,
+        forward_ack_gate,
+        auth_delay,
+        password_authentications,
         bound_port,
+        forward_listeners,
         address,
         fingerprint,
         task,
@@ -361,6 +396,38 @@ fn options(server: &Server) -> SshOptions {
         auth: SshAuth::Password(Zeroizing::new("ephemeral-test-password".into())),
         timeout: Duration::from_secs(3),
     }
+}
+
+async fn connect_after_delayed_authentication(
+    server: &Server,
+) -> Result<SshSession, Box<dyn Error>> {
+    // Timeout tests must reach the initialized operation. A setup deliberately
+    // slower than the old 100 ms budget proves they no longer test handshaking.
+    let delay = Duration::from_millis(150);
+    server.auth_delay.store(150, Ordering::Release);
+    let started = std::time::Instant::now();
+    let session = SshSession::connect(options(server)).await?;
+    assert!(started.elapsed() >= delay);
+    assert_eq!(server.password_authentications.load(Ordering::Acquire), 1);
+    eprintln!(
+        "fixture authentication completed after {:?}; setup and operation budget {:?}",
+        started.elapsed(),
+        options(server).timeout,
+    );
+    Ok(session)
+}
+
+async fn wait_for_fixture(
+    condition: impl Fn() -> bool,
+    failure: &'static str,
+) -> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(3), async {
+        while !condition() {
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .map_err(|_| failure.into())
 }
 
 #[tokio::test]
@@ -831,27 +898,55 @@ async fn remote_forward_transports_bytes_and_is_cancelled() -> Result<(), Box<dy
 async fn directory_limit_failure_and_timeout_release_remote_handles() -> Result<(), Box<dyn Error>>
 {
     let server = serve().await?;
-    let mut opts = options(&server);
-    opts.timeout = Duration::from_millis(100);
-    let session = SshSession::connect(opts).await?;
+    let session = connect_after_delayed_authentication(&server).await?;
     let sftp = session.sftp().await?;
     sftp.write("/data", b"x").await?;
     assert!(matches!(
         sftp.list_limited("/", 0).await,
         Err(SessionError::EntryLimit(0))
     ));
-    assert!(sftp.list("/error").await.is_err());
+    wait_for_fixture(
+        || server.filesystem.active_directory_handles() == 0,
+        "directory handle leaked after entry limit",
+    )
+    .await?;
     assert!(matches!(
-        sftp.list("/stall").await,
-        Err(SessionError::Timeout(_))
+        sftp.list("/error").await,
+        Err(SessionError::Sftp(_))
     ));
-    let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
-    while server.filesystem.active_directory_handles() != 0 {
-        if tokio::time::Instant::now() >= deadline {
-            return Err("directory handle leaked after cancellation".into());
-        }
-        tokio::time::sleep(Duration::from_millis(10)).await;
-    }
+    wait_for_fixture(
+        || server.filesystem.active_directory_handles() == 0,
+        "directory handle leaked after server error",
+    )
+    .await?;
+    server.filesystem.stall_directory_reads();
+    let started = std::time::Instant::now();
+    let (listed, observed) = tokio::join!(sftp.list("/stall"), async {
+        wait_for_fixture(
+            || server.filesystem.directory_reads_stalled() == 1,
+            "list never reached the gated SFTP READDIR",
+        )
+        .await?;
+        assert_eq!(server.filesystem.active_directory_handles(), 1);
+        eprintln!("fixture SFTP READDIR entered with one allocated directory handle");
+        Ok::<_, Box<dyn Error>>(())
+    });
+    // Release only after the operation has returned: a load-sensitive fixed
+    // delay could acknowledge the request before its timeout ever occurs.
+    server.filesystem.release_directory_reads();
+    observed?;
+    assert!(matches!(listed, Err(SessionError::Timeout("SFTP list"))));
+    wait_for_fixture(
+        || server.filesystem.active_directory_handles() == 0,
+        "directory handle leaked after cancellation",
+    )
+    .await?;
+    eprintln!(
+        "fixture SFTP list timed out after {:?}; directory handles cleaned",
+        started.elapsed(),
+    );
+    // A list timeout closes its dedicated subsystem, not the shared SSH link.
+    assert_eq!(sftp.list("/").await?.len(), 1);
     session.close().await?;
     Ok(())
 }
@@ -964,26 +1059,58 @@ async fn reviewed_permissions_support_a_directory_and_return_fresh_metadata()
 async fn unknown_remote_forward_allocation_disconnects_and_releases_listener()
 -> Result<(), Box<dyn Error>> {
     let server = serve().await?;
-    server.delay_forward.store(true, Ordering::Release);
-    let mut opts = options(&server);
-    opts.timeout = Duration::from_millis(100);
-    let session = SshSession::connect(opts).await?;
+    let session = connect_after_delayed_authentication(&server).await?;
+    server.forward_ack_gate.arm();
+    let started = std::time::Instant::now();
+    let (forwarded, observed) = tokio::join!(
+        session.forward_remote("127.0.0.1".into(), 0, "127.0.0.1:9".parse()?),
+        async {
+            wait_for_fixture(
+                || server.forward_ack_gate.entered() == 1,
+                "forward never reached the gated allocation acknowledgement",
+            )
+            .await?;
+            let port = server.bound_port.load(Ordering::Acquire);
+            assert_ne!(port, 0, "fixture bound before withholding acknowledgement");
+            assert_eq!(server.forward_listeners.load(Ordering::Acquire), 1);
+            // Binding a second listener verifies allocation without accepting
+            // a probe stream that could itself terminate the fixture listener.
+            let probe = tokio::time::timeout(
+                Duration::from_secs(1),
+                TcpListener::bind(("127.0.0.1", port as u16)),
+            )
+            .await?;
+            assert!(matches!(probe, Err(error) if error.kind() == std::io::ErrorKind::AddrInUse));
+            eprintln!("fixture remote forward entered with one bound allocated listener");
+            Ok::<_, Box<dyn Error>>(())
+        }
+    );
+    server.forward_ack_gate.release();
+    observed?;
     assert!(matches!(
-        session
-            .forward_remote("127.0.0.1".into(), 0, "127.0.0.1:9".parse()?)
-            .await,
-        Err(SessionError::Timeout(_))
+        forwarded,
+        Err(SessionError::Timeout("remote forward"))
     ));
     let port = server.bound_port.load(Ordering::Acquire);
-    assert_ne!(port, 0, "fixture bound before withholding acknowledgement");
-    let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
-    while TcpStream::connect(("127.0.0.1", port as u16)).await.is_ok() {
-        if tokio::time::Instant::now() >= deadline {
-            return Err("remote listener survived uncertain allocation".into());
-        }
-        tokio::time::sleep(Duration::from_millis(10)).await;
-    }
+    wait_for_fixture(
+        || session.is_closed() && server.forward_listeners.load(Ordering::Acquire) == 0,
+        "uncertain allocation did not close SSH and release its owned listener",
+    )
+    .await?;
+    let probe = tokio::time::timeout(
+        Duration::from_secs(1),
+        TcpStream::connect(("127.0.0.1", port as u16)),
+    )
+    .await?;
+    assert!(
+        probe.is_err(),
+        "remote listener survived uncertain allocation"
+    );
     assert!(session.exec("must no longer run").await.is_err());
+    eprintln!(
+        "fixture remote forward timed out after {:?}; listener cleaned and SSH closed",
+        started.elapsed(),
+    );
     Ok(())
 }
 

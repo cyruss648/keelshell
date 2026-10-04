@@ -97,4 +97,6 @@
 
 `native-result.json` SHA-256为 `96954fc8a20cd564949e2fc3f624a8d32420166eb7bcd0709c818b3710422235`；根cleanup回执为 `5abd4261d56ce39a2c47a7c9fa5ee6cad9a84cbaa7018f8e4ae9fabd9a76ba45`。新 `native-record-evidence-manifest.json`登记52项metadata/source清单、日志、19 JPEG/AX、controller、结果及清理，排除data凭据、stage二进制/资源和tmp，其SHA-256为 `802827059486ab2aee71e1f7125d7a9e693651ba3fdb6065d6267521c775e43d`（8759字节）；文档只读verification为 `4523775fa3fc0fd23ca2122a47a0b594cd053b89a159802ae2d99fdaed9545e3`（8691字节）。根另逐SHA/bytes核验全部52项通过，回执在 `work/workspace-integration-evidence-20261005/compact-native-verification.json`。
 
-约37px原生P2在本次受控macOS紧凑布局范围关闭。新源码远端CI待提交后追加；Windows/Linux桌面、OS主题真实变化/背景AX、完整键盘/IME与视觉矩阵、其他文件/工作流业务原生路径、供应商MCP、正式Release/已安装更新继续开放。根实际删除两个独立review的idle target/private-tmp，追加清理回执，原36/39冻结清单和source/probe/失败证据保持。文档与ADR可单独更新，不声称它们与各次审查snapshot逐字节相同。
+约37px原生P2在本次受控macOS紧凑布局范围关闭。生产提交40824f0已推送main，新Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败；Windows/Linux桌面、OS主题真实变化/背景AX、完整键盘/IME与视觉矩阵、其他文件/工作流业务原生路径、供应商MCP、正式Release/已安装更新继续开放。根实际删除两个独立review的idle target/private-tmp，追加清理回执，原36/39冻结清单和source/probe/失败证据保持。文档与ADR可单独更新，不声称它们与各次审查snapshot逐字节相同。
+
+后续仅测试夹具的修复、原CI失败及新源码验证见[SSH夹具记录](2026-10-05-ssh-timeout-fixture-stability.md)。这两个测试文件与本记录开发包的256文件快照不同；新本机构建和测试不重新归属上述19张截图或新建桌面验收。

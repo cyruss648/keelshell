@@ -7,6 +7,38 @@ use std::sync::{
     Arc,
     atomic::{AtomicBool, AtomicUsize, Ordering},
 };
+use std::time::Duration;
+
+/// Holds a fixture response until the test has observed its operation timeout.
+/// The fallback deadline also bounds cleanup if the test fails before release.
+#[derive(Default)]
+pub struct ResponseGate {
+    armed: AtomicBool,
+    entered: AtomicUsize,
+    release: tokio::sync::Notify,
+}
+
+impl ResponseGate {
+    pub fn arm(&self) {
+        self.armed.store(true, Ordering::Release);
+    }
+    pub fn is_armed(&self) -> bool {
+        self.armed.load(Ordering::Acquire)
+    }
+    pub fn entered(&self) -> usize {
+        self.entered.load(Ordering::Acquire)
+    }
+    pub fn release(&self) {
+        // notify_one retains a permit if the handler has not yet been polled.
+        self.release.notify_one();
+    }
+    pub async fn hold(&self) -> Result<(), ()> {
+        self.entered.fetch_add(1, Ordering::AcqRel);
+        tokio::time::timeout(Duration::from_secs(10), self.release.notified())
+            .await
+            .map_err(|_| ())
+    }
+}
 
 #[derive(Default)]
 pub struct Filesystem {
@@ -22,6 +54,7 @@ pub struct Filesystem {
     transfer_writes: Arc<AtomicUsize>,
     invalid_transfer_read: Arc<AtomicUsize>,
     injected_name: Arc<std::sync::Mutex<Option<String>>>,
+    directory_read_gate: Arc<ResponseGate>,
 }
 
 impl Clone for Filesystem {
@@ -39,10 +72,20 @@ impl Clone for Filesystem {
             transfer_writes: self.transfer_writes.clone(),
             invalid_transfer_read: self.invalid_transfer_read.clone(),
             injected_name: self.injected_name.clone(),
+            directory_read_gate: self.directory_read_gate.clone(),
         }
     }
 }
 impl Filesystem {
+    pub fn stall_directory_reads(&self) {
+        self.directory_read_gate.arm();
+    }
+    pub fn directory_reads_stalled(&self) -> usize {
+        self.directory_read_gate.entered()
+    }
+    pub fn release_directory_reads(&self) {
+        self.directory_read_gate.release();
+    }
     pub fn set_invalid_transfer_read(&self, mode: usize) {
         self.invalid_transfer_read.store(mode, Ordering::Release);
     }
@@ -333,7 +376,14 @@ impl russh_sftp::server::Handler for Filesystem {
     }
     async fn readdir(&mut self, id: u32, handle: String) -> Result<Name, StatusCode> {
         if handle == "/stall" {
-            tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+            if self.directory_read_gate.is_armed() {
+                self.directory_read_gate
+                    .hold()
+                    .await
+                    .map_err(|_| StatusCode::Failure)?;
+            } else {
+                tokio::time::sleep(Duration::from_millis(200)).await;
+            }
         }
         if handle == "/error" {
             return Err(StatusCode::PermissionDenied);
