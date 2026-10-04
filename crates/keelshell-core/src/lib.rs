@@ -10,6 +10,7 @@
 mod ai_profiles;
 mod batch_audit;
 mod batch_template;
+mod batch_workflow;
 mod completion;
 mod connection_library;
 mod diff;
@@ -35,6 +36,12 @@ pub use batch_audit::{
 };
 pub use batch_template::{
     BATCH_TEMPLATE_VARIABLES, BatchCommandTemplate, BatchTargetContext, BatchTemplateError,
+};
+pub use batch_workflow::{
+    BatchTaskOutcome, BatchTaskSkipReason, BatchTaskSpec, BatchTaskStatus, BatchWorkflowError,
+    BatchWorkflowLedger, BatchWorkflowPlan, BatchWorkflowReviewToken, ConfirmedBatchWorkflow,
+    MAX_BATCH_TASK_COMMAND_BYTES, MAX_BATCH_TASK_DEPENDENCIES, MAX_BATCH_WORKFLOW_COMMAND_BYTES,
+    MAX_BATCH_WORKFLOW_TARGETS, MAX_BATCH_WORKFLOW_TASKS,
 };
 pub use completion::{
     CompletionAnalysis, CompletionEdit, CompletionError, CompletionPlan, CompletionQuery,
