@@ -45,26 +45,32 @@ jobs:
             platform: macos
             target: aarch64-apple-darwin
             executable: keelshell-app
+            mcp_executable: keelshell-mcp
           - os: macos-26-intel
             platform: macos
             target: x86_64-apple-darwin
             executable: keelshell-app
+            mcp_executable: keelshell-mcp
           - os: windows-2025
             platform: windows
             target: x86_64-pc-windows-msvc
             executable: keelshell-app.exe
+            mcp_executable: keelshell-mcp.exe
           - os: windows-11-arm
             platform: windows
             target: aarch64-pc-windows-msvc
             executable: keelshell-app.exe
+            mcp_executable: keelshell-mcp.exe
           - os: ubuntu-24.04
             platform: linux
             target: x86_64-unknown-linux-gnu
             executable: keelshell-app
+            mcp_executable: keelshell-mcp
           - os: ubuntu-24.04-arm
             platform: linux
             target: aarch64-unknown-linux-gnu
             executable: keelshell-app
+            mcp_executable: keelshell-mcp
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
@@ -83,10 +89,10 @@ jobs:
           echo "KEELSHELL_BUILD_COMMIT=$(git rev-parse 'HEAD^{commit}')" >> "$GITHUB_ENV"
       - name: Quality gate
         run: python scripts/check.py
-      - name: Release binary
-        run: cargo build -p keelshell-app --release --locked --target ${{ matrix.target }}
+      - name: Release application and MCP companion
+        run: cargo build -p keelshell-app -p keelshell-mcp --release --locked --target ${{ matrix.target }}
       - name: Stage platform package
-        run: python packaging/package.py ${{ matrix.platform }} --binary target/${{ matrix.target }}/release/${{ matrix.executable }} --output work/stage --target ${{ matrix.target }}
+        run: python packaging/package.py ${{ matrix.platform }} --binary target/${{ matrix.target }}/release/${{ matrix.executable }} --mcp-binary target/${{ matrix.target }}/release/${{ matrix.mcp_executable }} --output work/stage --target ${{ matrix.target }}
       - name: Native package inspection
         run: python packaging/inspect_native.py --platform ${{ matrix.platform }} --stage work/stage --target ${{ matrix.target }}
       - name: Archive and verify architecture

@@ -125,6 +125,9 @@ struct PackageManifest {
     version: String,
     target: Option<String>,
     binary_sha256: String,
+    // Schema 1 remains readable by old helpers, which already install every
+    // listed file. Missing companion fields get an explicit error in new apps.
+    mcp_binary_sha256: Option<String>,
     icon_source_sha256: String,
     installed: bool,
     signed_by_packaging_script: bool,
@@ -136,11 +139,20 @@ struct PackageManifest {
 struct UpdateFile {
     relative: PathBuf,
     digest: String,
+    executable: bool,
 }
 
 #[derive(Debug, Clone)]
 struct UpdatePlan {
     files: Vec<UpdateFile>,
+}
+
+/// Classifies backups as disposable only after this exact staging payload has
+/// completed installation. Finalization consumes the proof once.
+#[derive(Debug)]
+struct CommittedUpdate {
+    payload: PathBuf,
+    executable: PathBuf,
 }
 
 #[derive(Debug)]
@@ -752,11 +764,14 @@ pub fn run_update_helper() -> bool {
     };
     let relaunch = current_exe.clone();
     let result = apply_update(&source, &install_root, &current_exe, &target);
-    cleanup_staging_root(&source);
-    // A failed copy is rolled back by `install_plan`; relaunch the preserved
-    // old executable so a transient file lock does not leave the user without
-    // a running application.
-    let _ = Command::new(result.unwrap_or(relaunch)).spawn();
+    let restart = result
+        .as_ref()
+        .map(|committed| committed.executable.clone())
+        .unwrap_or(relaunch);
+    if finish_update_staging(&source, result) {
+        // Ordinary failures have restored all old images before returning.
+        let _ = Command::new(restart).spawn();
+    }
     if helper_path
         .as_deref()
         .and_then(Path::file_name)
@@ -768,6 +783,50 @@ pub fn run_update_helper() -> bool {
         let _ = helper_path.as_deref().map(fs::remove_file);
     }
     true
+}
+
+fn finish_update_staging(payload: &Path, result: Result<CommittedUpdate, UpdateError>) -> bool {
+    let recovery_required = match result {
+        Ok(committed) => committed.payload != payload,
+        Err(UpdateError::RecoveryRequired) => true,
+        // Preflight failures must not erase unclassified old files even when
+        // their error did not originate from the installation loop.
+        Err(_) => ensure_no_update_recovery(payload).is_err(),
+    };
+    if recovery_required {
+        // A failed rollback may leave the only old image in .backup. Retain
+        // this exact owned stage and do not launch a partially restored app.
+        let diagnostic = concat!(
+            "自动安装回滚未完成。已保留此目录中的 .backup 原文件备份；请恢复后再重试。\n",
+            "Update rollback did not complete. The old-file backups in .backup were preserved; restore them before retrying.\n"
+        );
+        // An existing marker may be an old diagnostic or an unfamiliar object.
+        // Do not overwrite it or follow a link while preserving recovery data.
+        if let Ok(mut file) = fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(payload.join("recovery-required.txt"))
+        {
+            let _ = file.write_all(diagnostic.as_bytes());
+        }
+        eprintln!("{diagnostic}Preserved staging: {}", payload.display());
+        false
+    } else {
+        cleanup_staging_root(payload);
+        true
+    }
+}
+
+fn ensure_no_update_recovery(payload: &Path) -> Result<(), UpdateError> {
+    for name in [".backup", "recovery-required.txt"] {
+        match fs::symlink_metadata(payload.join(name)) {
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+            // Presence and metadata errors both mean that absence of old
+            // recoverable images has not been established.
+            _ => return Err(UpdateError::RecoveryRequired),
+        }
+    }
+    Ok(())
 }
 
 fn cleanup_staging_root(payload: &Path) {
@@ -933,7 +992,7 @@ fn validate_payload(payload: &Path, release: &ReleaseInfo) -> Result<UpdatePlan,
     let manifest: PackageManifest =
         serde_json::from_slice(&fs::read(&manifest_path).map_err(|_| UpdateError::Storage)?)
             .map_err(|_| UpdateError::Invalid)?;
-    let _binary = validate_manifest_receipt(&manifest)?;
+    let binaries = validate_manifest_receipt(&manifest)?;
     let version = release.tag.strip_prefix('v').ok_or(UpdateError::Invalid)?;
     if manifest.schema_version != 1
         || manifest.platform != platform_name()
@@ -954,10 +1013,12 @@ fn validate_payload(payload: &Path, release: &ReleaseInfo) -> Result<UpdatePlan,
             return Err(UpdateError::Invalid);
         }
         let path = payload.join(&relative);
+        ensure_no_symlink_ancestors(payload, &path)?;
         let metadata = fs::symlink_metadata(&path).map_err(|_| UpdateError::Invalid)?;
         if !metadata.file_type().is_file() || metadata.len() > MAX_FILE_BYTES {
             return Err(UpdateError::Invalid);
         }
+        validate_executable_mode(&metadata, binaries.contains(&name.as_str()))?;
         total = total.saturating_add(metadata.len());
         if total > MAX_UNPACKED_BYTES || hex_file_digest(&path)? != digest.to_ascii_lowercase() {
             return Err(UpdateError::Invalid);
@@ -965,6 +1026,7 @@ fn validate_payload(payload: &Path, release: &ReleaseInfo) -> Result<UpdatePlan,
         files.push(UpdateFile {
             relative,
             digest: digest.to_ascii_lowercase(),
+            executable: binaries.contains(&name.as_str()),
         });
     }
     files.sort_by(|left, right| left.relative.cmp(&right.relative));
@@ -1002,11 +1064,33 @@ fn packaged_binary_path(platform: &str) -> Option<&'static str> {
     }
 }
 
+fn packaged_mcp_path(platform: &str) -> Option<&'static str> {
+    match platform {
+        "macos" => Some("KeelShell.app/Contents/MacOS/keelshell-mcp"),
+        "linux" => Some("usr/bin/keelshell-mcp"),
+        "windows" => Some("keelshell-mcp.exe"),
+        _ => None,
+    }
+}
+
+fn validate_executable_mode(metadata: &fs::Metadata, executable: bool) -> Result<(), UpdateError> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if executable && metadata.permissions().mode() & 0o111 == 0 {
+            return Err(UpdateError::Invalid);
+        }
+    }
+    #[cfg(not(unix))]
+    let _ = (metadata, executable);
+    Ok(())
+}
+
 fn is_sha256(value: &str) -> bool {
     value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
-fn validate_manifest_receipt(manifest: &PackageManifest) -> Result<&'static str, UpdateError> {
+fn validate_manifest_receipt(manifest: &PackageManifest) -> Result<[&'static str; 2], UpdateError> {
     if !is_sha256(&manifest.binary_sha256)
         || !is_sha256(&manifest.icon_source_sha256)
         || manifest.installed
@@ -1020,7 +1104,22 @@ fn validate_manifest_receipt(manifest: &PackageManifest) -> Result<&'static str,
     if !is_sha256(digest) || !digest.eq_ignore_ascii_case(&manifest.binary_sha256) {
         return Err(UpdateError::Invalid);
     }
-    Ok(binary)
+    let companion = packaged_mcp_path(&manifest.platform).ok_or(UpdateError::Invalid)?;
+    let companion_digest = manifest
+        .mcp_binary_sha256
+        .as_deref()
+        .ok_or(UpdateError::IncompletePackage)?;
+    let digest = manifest
+        .files
+        .get(companion)
+        .ok_or(UpdateError::IncompletePackage)?;
+    if !is_sha256(companion_digest)
+        || !is_sha256(digest)
+        || !digest.eq_ignore_ascii_case(companion_digest)
+    {
+        return Err(UpdateError::Invalid);
+    }
+    Ok([binary, companion])
 }
 
 fn hex_file_digest(path: &Path) -> Result<String, UpdateError> {
@@ -1144,7 +1243,10 @@ fn apply_update(
     install_root: &Path,
     current_exe: &Path,
     target: &str,
-) -> Result<PathBuf, UpdateError> {
+) -> Result<CommittedUpdate, UpdateError> {
+    // Check before executable, manifest, or other ordinary preflight errors:
+    // a prior failed restore can legitimately leave the executable absent.
+    ensure_no_update_recovery(payload)?;
     if !payload.is_absolute() || !install_root.is_absolute() || !current_exe.is_absolute() {
         return Err(UpdateError::Install);
     }
@@ -1165,7 +1267,12 @@ fn apply_update(
     let deadline = Instant::now() + Duration::from_secs(30);
     loop {
         match install_plan(payload, install_root, &plan) {
-            Ok(()) => return Ok(current_exe.to_path_buf()),
+            Ok(()) => {
+                return Ok(CommittedUpdate {
+                    payload: payload.to_path_buf(),
+                    executable: current_exe.to_path_buf(),
+                });
+            }
             Err(UpdateError::Busy) if Instant::now() < deadline => {
                 std::thread::sleep(Duration::from_millis(200));
             }
@@ -1183,7 +1290,7 @@ fn validate_payload_for_helper(payload: &Path, target: &str) -> Result<UpdatePla
     let manifest: PackageManifest =
         serde_json::from_slice(&fs::read(&path).map_err(|_| UpdateError::Storage)?)
             .map_err(|_| UpdateError::Invalid)?;
-    let _binary = validate_manifest_receipt(&manifest)?;
+    let binaries = validate_manifest_receipt(&manifest)?;
     let expected_target = target_triples()
         .into_iter()
         .find(|candidate| *candidate == target)
@@ -1209,6 +1316,7 @@ fn validate_payload_for_helper(payload: &Path, target: &str) -> Result<UpdatePla
         if !metadata.file_type().is_file() || metadata.len() > MAX_FILE_BYTES {
             return Err(UpdateError::Invalid);
         }
+        validate_executable_mode(&metadata, binaries.contains(&name.as_str()))?;
         total = total.saturating_add(metadata.len());
         if total > MAX_UNPACKED_BYTES || hex_file_digest(&source)? != digest.to_ascii_lowercase() {
             return Err(UpdateError::Invalid);
@@ -1216,6 +1324,7 @@ fn validate_payload_for_helper(payload: &Path, target: &str) -> Result<UpdatePla
         files.push(UpdateFile {
             relative,
             digest: digest.to_ascii_lowercase(),
+            executable: binaries.contains(&name.as_str()),
         });
     }
     files.sort_by(|left, right| left.relative.cmp(&right.relative));
@@ -1223,11 +1332,7 @@ fn validate_payload_for_helper(payload: &Path, target: &str) -> Result<UpdatePla
 }
 
 fn install_plan(payload: &Path, install_root: &Path, plan: &UpdatePlan) -> Result<(), UpdateError> {
-    let backup_root = payload.join(".backup");
-    if backup_root.exists() {
-        fs::remove_dir_all(&backup_root).map_err(|_| UpdateError::Storage)?;
-    }
-    fs::create_dir(&backup_root).map_err(|_| UpdateError::Storage)?;
+    let backup_root = claim_update_backup(payload, |path| fs::create_dir(path))?;
     let mut installed = Vec::new();
     let mut backups = Vec::new();
     for file in &plan.files {
@@ -1238,6 +1343,12 @@ fn install_plan(payload: &Path, install_root: &Path, plan: &UpdatePlan) -> Resul
                 return Err(UpdateError::Install);
             }
             ensure_no_symlink_ancestors(install_root, &destination)?;
+            ensure_no_symlink_ancestors(payload, &source)?;
+            let metadata = fs::symlink_metadata(&source).map_err(|_| UpdateError::Invalid)?;
+            if !metadata.file_type().is_file() {
+                return Err(UpdateError::Invalid);
+            }
+            validate_executable_mode(&metadata, file.executable)?;
             let source_digest = hex_file_digest(&source)?;
             if source_digest != file.digest {
                 return Err(UpdateError::Checksum);
@@ -1263,12 +1374,25 @@ fn install_plan(payload: &Path, install_root: &Path, plan: &UpdatePlan) -> Resul
         match result {
             Ok(destination) => installed.push(destination),
             Err(error) => {
-                rollback_install(&installed, &backups);
+                rollback_install(&installed, &backups)?;
+                fs::remove_dir_all(&backup_root).map_err(|_| UpdateError::RecoveryRequired)?;
                 return Err(error);
             }
         }
     }
     Ok(())
+}
+
+fn claim_update_backup(
+    payload: &Path,
+    create_directory: impl FnOnce(&Path) -> io::Result<()>,
+) -> Result<PathBuf, UpdateError> {
+    ensure_no_update_recovery(payload)?;
+    let backup = payload.join(".backup");
+    // Another helper can claim the namespace after the absence check. Any
+    // failed atomic claim leaves its ownership ambiguous; never clean it up.
+    create_directory(&backup).map_err(|_| UpdateError::RecoveryRequired)?;
+    Ok(backup)
 }
 
 fn ensure_no_symlink_ancestors(root: &Path, destination: &Path) -> Result<(), UpdateError> {
@@ -1319,12 +1443,12 @@ fn copy_new_file(source: &Path, destination: &Path) -> Result<(), UpdateError> {
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            if let Ok(mode) = input
+            let mode = input
                 .metadata()
                 .map(|metadata| metadata.permissions().mode())
-            {
-                let _ = fs::set_permissions(&temporary, fs::Permissions::from_mode(mode & 0o777));
-            }
+                .map_err(|_| UpdateError::Storage)?;
+            fs::set_permissions(&temporary, fs::Permissions::from_mode(mode & 0o777))
+                .map_err(|_| UpdateError::Storage)?;
         }
         // The destination was moved to the backup before this function is
         // called. Renaming a fully written and synced temporary file avoids
@@ -1345,12 +1469,23 @@ fn copy_new_file(source: &Path, destination: &Path) -> Result<(), UpdateError> {
     result
 }
 
-fn rollback_install(installed: &[PathBuf], backups: &[(PathBuf, PathBuf)]) {
+fn rollback_install(
+    installed: &[PathBuf],
+    backups: &[(PathBuf, PathBuf)],
+) -> Result<(), UpdateError> {
+    let mut failed = false;
     for path in installed.iter().rev() {
-        let _ = fs::remove_file(path);
+        if let Err(error) = fs::remove_file(path) {
+            failed |= error.kind() != io::ErrorKind::NotFound;
+        }
     }
     for (destination, backup) in backups.iter().rev() {
-        let _ = fs::rename(backup, destination);
+        failed |= fs::rename(backup, destination).is_err();
+    }
+    if failed {
+        Err(UpdateError::RecoveryRequired)
+    } else {
+        Ok(())
     }
 }
 
@@ -1515,17 +1650,19 @@ fn parse_checksum(value: &str, file_name: &str) -> Option<String> {
     Some(checksum)
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum UpdateError {
     Network,
     Http(u16),
     TooLarge,
     Invalid,
+    IncompletePackage,
     AssetMissing,
     Checksum,
     Storage,
     Busy,
     Install,
+    RecoveryRequired,
 }
 
 impl UpdateError {
@@ -1552,6 +1689,10 @@ impl UpdateError {
                 "发布元数据或校验文件无效，已停止。",
                 "Release metadata or checksum data was invalid. The operation stopped.",
             ),
+            Self::IncompletePackage => Message::new(
+                "安装包缺少必需的 MCP 伴随程序或校验信息，已停止更新。请从发布页获取完整的新版本安装包。",
+                "The package lacks the required MCP companion or its checksum. Updating stopped. Get a complete newer package from the release page.",
+            ),
             Self::Checksum => Message::new(
                 "SHA-256 校验不匹配，未保存安装包。",
                 "SHA-256 mismatch. The package was not saved.",
@@ -1568,6 +1709,10 @@ impl UpdateError {
                 "自动安装失败，原安装未被替换。请从发布页手动安装。",
                 "Automatic installation failed and the existing installation was preserved. Install manually from the release page.",
             ),
+            Self::RecoveryRequired => Message::new(
+                "自动安装回滚未完成，已保留更新暂存目录和原文件备份并停止重启。请先恢复备份再重试。",
+                "Update rollback did not complete. Staging and old-file backups were preserved, and restart stopped. Restore the backups before retrying.",
+            ),
         }
     }
 }
@@ -1576,6 +1721,273 @@ impl UpdateError {
 #[allow(clippy::expect_used)]
 mod tests {
     use super::*;
+
+    fn set_test_executable(path: &Path) {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(path, fs::Permissions::from_mode(0o755)).expect("executable mode");
+        }
+        #[cfg(not(unix))]
+        let _ = path;
+    }
+
+    fn companion_payload() -> (tempfile::TempDir, PathBuf, String, serde_json::Value) {
+        let directory = tempfile::tempdir().expect("temporary update directory");
+        let payload = directory.path().join("payload");
+        let binary_name = packaged_binary_path(platform_name()).expect("platform app path");
+        let companion_name = packaged_mcp_path(platform_name()).expect("platform MCP path");
+        for (name, bytes) in [
+            (binary_name, b"new application".as_slice()),
+            (companion_name, b"new companion".as_slice()),
+        ] {
+            let path = payload.join(name);
+            fs::create_dir_all(path.parent().expect("executable parent"))
+                .expect("executable parent");
+            fs::write(&path, bytes).expect("executable");
+            set_test_executable(&path);
+        }
+        let binary_digest =
+            hex_file_digest(&payload.join(binary_name)).expect("application digest");
+        let companion_digest =
+            hex_file_digest(&payload.join(companion_name)).expect("companion digest");
+        let target = target_triple().expect("release target");
+        let manifest = serde_json::json!({
+            "schema_version": 1, "platform": platform_name(), "version": "99.0.0", "target": target,
+            "binary_sha256": binary_digest, "mcp_binary_sha256": companion_digest,
+            "icon_source_sha256": "0".repeat(64), "installed": false, "signed_by_packaging_script": false,
+            "native_acceptance": "not performed by this script",
+            "files": {binary_name: binary_digest, companion_name: companion_digest},
+        });
+        write_test_manifest(&payload, &manifest);
+        (directory, payload, target, manifest)
+    }
+
+    fn write_test_manifest(payload: &Path, manifest: &serde_json::Value) {
+        fs::write(
+            payload.join("package-manifest.json"),
+            serde_json::to_vec(manifest).expect("manifest JSON"),
+        )
+        .expect("manifest");
+    }
+
+    fn owned_companion_payload() -> (tempfile::TempDir, PathBuf, String) {
+        let (_original, source, target, _manifest) = companion_payload();
+        let directory = tempfile::Builder::new()
+            .prefix("keelshell-update-repeat-entry-test-")
+            .tempdir()
+            .expect("owned staging");
+        let payload = directory.path().join("payload");
+        fs::rename(source, &payload).expect("move isolated payload into owned stage");
+        (directory, payload, target)
+    }
+
+    fn assert_repeated_recovery_entry_preserves_backup(scenario: &str) {
+        let (directory, payload, target) = owned_companion_payload();
+        let install = tempfile::tempdir().expect("isolated installation");
+        let binary_name = packaged_binary_path(platform_name()).expect("binary");
+        let binary = install.path().join(binary_name);
+        fs::create_dir_all(binary.parent().expect("parent")).expect("binary parent");
+        fs::write(&binary, b"old application").expect("old application");
+        let backup = payload.join(".backup").join(binary_name);
+        fs::create_dir_all(backup.parent().expect("parent")).expect("backup parent");
+        fs::write(&backup, b"only recoverable old image").expect("old backup");
+        let first_result = apply_update(&payload, install.path(), &binary, &target);
+        assert_eq!(
+            first_result.as_ref().err().copied(),
+            Some(UpdateError::RecoveryRequired)
+        );
+        assert!(!finish_update_staging(&payload, first_result));
+        match scenario {
+            "invalid-manifest" => fs::write(payload.join("package-manifest.json"), b"invalid")
+                .expect("invalid manifest"),
+            "missing-manifest" => {
+                fs::remove_file(payload.join("package-manifest.json")).expect("remove manifest")
+            }
+            "missing-executable" => fs::remove_file(&binary).expect("remove executable"),
+            _ => panic!("unknown recovery fixture scenario"),
+        }
+        let result = apply_update(&payload, install.path(), &binary, &target);
+        let error = result.as_ref().err().copied();
+        let restart = finish_update_staging(&payload, result);
+        eprintln!(
+            "repeated recovery {scenario}: error={:?}, restart={restart}, backup={}",
+            error,
+            backup.exists()
+        );
+        assert!(!restart, "recovery entry must not permit restart");
+        assert_eq!(error, Some(UpdateError::RecoveryRequired));
+        assert_eq!(
+            fs::read(backup).expect("unique old image retained"),
+            b"only recoverable old image"
+        );
+        assert!(directory.path().exists());
+    }
+
+    #[::core::prelude::v1::test]
+    fn repeated_recovery_entry_preserves_backup_when_executable_is_missing() {
+        assert_repeated_recovery_entry_preserves_backup("missing-executable");
+    }
+
+    #[::core::prelude::v1::test]
+    fn repeated_recovery_entry_preserves_backup_when_manifest_is_invalid() {
+        assert_repeated_recovery_entry_preserves_backup("invalid-manifest");
+    }
+
+    #[::core::prelude::v1::test]
+    fn repeated_recovery_entry_preserves_backup_when_manifest_is_missing() {
+        assert_repeated_recovery_entry_preserves_backup("missing-manifest");
+    }
+
+    #[::core::prelude::v1::test]
+    fn ordinary_error_finalization_preserves_unclassified_backup() {
+        let (directory, payload, _target) = owned_companion_payload();
+        let backup = payload.join(".backup/old-image");
+        fs::create_dir(backup.parent().expect("parent")).expect("backup directory");
+        fs::write(&backup, b"only old image").expect("backup");
+        assert!(!finish_update_staging(&payload, Err(UpdateError::Install)));
+        assert_eq!(fs::read(backup).expect("retained image"), b"only old image");
+        assert!(directory.path().exists());
+    }
+
+    #[::core::prelude::v1::test]
+    fn committed_result_cannot_classify_another_stagings_backup() {
+        let (_committed_stage, payload, target) = owned_companion_payload();
+        let install = tempfile::tempdir().expect("isolated installation");
+        let binary = install
+            .path()
+            .join(packaged_binary_path(platform_name()).expect("binary"));
+        fs::create_dir_all(binary.parent().expect("parent")).expect("binary parent");
+        fs::write(&binary, b"old application").expect("old application");
+        let committed = apply_update(&payload, install.path(), &binary, &target)
+            .expect("committed isolated update");
+        let (other_directory, other_payload, _target) = owned_companion_payload();
+        let backup = other_payload.join(".backup/old-image");
+        fs::create_dir(backup.parent().expect("parent")).expect("other backup");
+        fs::write(&backup, b"only other old image").expect("other image");
+        assert!(!finish_update_staging(&other_payload, Ok(committed)));
+        assert_eq!(
+            fs::read(backup).expect("other old image retained"),
+            b"only other old image"
+        );
+        assert!(other_directory.path().exists());
+    }
+
+    #[::core::prelude::v1::test]
+    fn backup_claim_race_keeps_the_other_attempts_old_image() {
+        let (directory, payload, _target) = owned_companion_payload();
+        let result = claim_update_backup(&payload, |backup| {
+            // Insert a real competing claim after the absence check and before
+            // this attempt's atomic mkdir, without relying on scheduler timing.
+            fs::create_dir(backup)?;
+            fs::write(backup.join("old-image"), b"only competing old image")?;
+            fs::create_dir(backup)
+        });
+        assert_eq!(result.err(), Some(UpdateError::RecoveryRequired));
+        assert!(!finish_update_staging(&payload, Err(UpdateError::Storage)));
+        assert_eq!(
+            fs::read(payload.join(".backup/old-image")).expect("competing old image retained"),
+            b"only competing old image"
+        );
+        assert!(directory.path().exists());
+    }
+
+    #[::core::prelude::v1::test]
+    fn recovery_marker_alone_blocks_entry_and_ordinary_error_finalization() {
+        let (directory, payload, target) = owned_companion_payload();
+        let marker = payload.join("recovery-required.txt");
+        fs::write(&marker, b"preserved recovery instructions").expect("marker");
+        let install = tempfile::tempdir().expect("isolated installation");
+        let binary = install
+            .path()
+            .join(packaged_binary_path(platform_name()).expect("binary"));
+        assert_eq!(
+            apply_update(&payload, install.path(), &binary, &target).err(),
+            Some(UpdateError::RecoveryRequired)
+        );
+        assert!(!finish_update_staging(&payload, Err(UpdateError::Invalid)));
+        assert_eq!(
+            fs::read(marker).expect("unchanged marker"),
+            b"preserved recovery instructions"
+        );
+        assert!(directory.path().exists());
+    }
+
+    #[cfg(unix)]
+    #[::core::prelude::v1::test]
+    fn backup_metadata_error_is_not_treated_as_absence() {
+        let directory = tempfile::Builder::new()
+            .prefix("keelshell-update-metadata-test-")
+            .tempdir()
+            .expect("owned staging");
+        let payload = directory.path().join("payload");
+        std::os::unix::fs::symlink("payload", &payload).expect("self-referential payload link");
+        let error = fs::symlink_metadata(payload.join(".backup")).expect_err("metadata loop");
+        assert_ne!(error.kind(), io::ErrorKind::NotFound);
+        let install = tempfile::tempdir().expect("isolated installation");
+        let binary = install.path().join("missing-executable");
+        let target = target_triple().expect("target");
+        assert_eq!(
+            apply_update(&payload, install.path(), &binary, &target).err(),
+            Some(UpdateError::RecoveryRequired)
+        );
+        assert!(!finish_update_staging(&payload, Err(UpdateError::Install)));
+        assert!(directory.path().exists());
+        assert!(
+            fs::symlink_metadata(payload)
+                .expect("preserved payload link")
+                .is_symlink()
+        );
+    }
+
+    #[cfg(unix)]
+    #[::core::prelude::v1::test]
+    fn recovery_marker_link_does_not_modify_its_external_target() {
+        let (directory, payload, target) = owned_companion_payload();
+        let outside = tempfile::tempdir().expect("isolated outside marker target");
+        let target_file = outside.path().join("instructions");
+        fs::write(&target_file, b"keep external instructions").expect("target");
+        std::os::unix::fs::symlink(&target_file, payload.join("recovery-required.txt"))
+            .expect("marker link");
+        let install = tempfile::tempdir().expect("isolated installation");
+        let binary = install.path().join("missing-executable");
+        let result = apply_update(&payload, install.path(), &binary, &target);
+        assert_eq!(
+            result.as_ref().err().copied(),
+            Some(UpdateError::RecoveryRequired)
+        );
+        assert!(!finish_update_staging(&payload, result));
+        assert_eq!(
+            fs::read(target_file).expect("outside instructions preserved"),
+            b"keep external instructions"
+        );
+        assert!(directory.path().exists());
+    }
+
+    fn test_release(target: &str) -> ReleaseInfo {
+        ReleaseInfo {
+            tag: "v99.0.0".into(),
+            name: String::new(),
+            body: String::new(),
+            url: String::new(),
+            published_at: None,
+            archive_name: package_name("v99.0.0", target).expect("archive name"),
+            archive_url: String::new(),
+            checksum_url: String::new(),
+            archive_size: 0,
+        }
+    }
+
+    fn assert_both_validators_reject(payload: &Path, target: &str, error: UpdateError) {
+        assert_eq!(
+            validate_payload(payload, &test_release(target)).err(),
+            Some(error)
+        );
+        assert_eq!(
+            validate_payload_for_helper(payload, target).err(),
+            Some(error)
+        );
+    }
 
     #[::core::prelude::v1::test]
     fn package_names_bind_version_and_target() {
@@ -1711,7 +2123,13 @@ mod tests {
         let binary = payload.join(binary_name);
         std::fs::create_dir_all(binary.parent().expect("binary parent")).expect("binary parent");
         std::fs::write(&binary, b"verified binary").expect("binary");
+        set_test_executable(&binary);
         let digest = hex_file_digest(&binary).expect("digest");
+        let companion_name = packaged_mcp_path(platform_name()).expect("current platform MCP");
+        let companion = payload.join(companion_name);
+        std::fs::write(&companion, b"verified companion").expect("companion");
+        set_test_executable(&companion);
+        let companion_digest = hex_file_digest(&companion).expect("companion digest");
         let target = target_triple().expect("current release target");
         let manifest = serde_json::json!({
             "schema_version": 1,
@@ -1719,11 +2137,12 @@ mod tests {
             "version": "99.0.0",
             "target": target,
             "binary_sha256": digest,
+            "mcp_binary_sha256": companion_digest,
             "icon_source_sha256": "0".repeat(64),
             "installed": false,
             "signed_by_packaging_script": false,
             "native_acceptance": "not performed by this script",
-            "files": {binary_name: digest},
+            "files": {binary_name: digest, companion_name: companion_digest},
         });
         std::fs::write(
             payload.join("package-manifest.json"),
@@ -1731,7 +2150,7 @@ mod tests {
         )
         .expect("manifest");
         let plan = validate_payload_for_helper(&payload, &target).expect("valid manifest");
-        assert_eq!(plan.files.len(), 1);
+        assert_eq!(plan.files.len(), 2);
         std::fs::write(&binary, b"tampered").expect("tamper");
         assert!(matches!(
             validate_payload_for_helper(&payload, &target),
@@ -1769,7 +2188,7 @@ mod tests {
     }
 
     #[::core::prelude::v1::test]
-    fn install_plan_rolls_back_replaced_files() {
+    fn install_plan_replaces_file_and_retains_backup_until_cleanup() {
         let directory = tempfile::tempdir().expect("temporary update directory");
         let payload = directory.path().join("payload");
         let install = directory.path().join("install");
@@ -1783,6 +2202,7 @@ mod tests {
             files: vec![UpdateFile {
                 relative: PathBuf::from("keelshell-app.exe"),
                 digest: hex_file_digest(&source).expect("source digest"),
+                executable: false,
             }],
         };
         install_plan(&payload, &install, &plan).expect("install");
@@ -1790,6 +2210,248 @@ mod tests {
         assert_eq!(
             std::fs::read(payload.join(".backup/keelshell-app.exe")).expect("backup"),
             b"old"
+        );
+    }
+
+    #[::core::prelude::v1::test]
+    fn companion_receipt_is_required_by_download_and_helper() {
+        let (_directory, payload, target, original) = companion_payload();
+        let companion_name = packaged_mcp_path(platform_name()).expect("companion path");
+        for missing_field in [true, false] {
+            let mut manifest = original.clone();
+            if missing_field {
+                manifest
+                    .as_object_mut()
+                    .expect("manifest object")
+                    .remove("mcp_binary_sha256");
+            } else {
+                manifest["files"]
+                    .as_object_mut()
+                    .expect("files object")
+                    .remove(companion_name);
+            }
+            write_test_manifest(&payload, &manifest);
+            assert_both_validators_reject(&payload, &target, UpdateError::IncompletePackage);
+        }
+        let mut manifest = original;
+        manifest["mcp_binary_sha256"] = serde_json::json!("0".repeat(64));
+        write_test_manifest(&payload, &manifest);
+        assert_both_validators_reject(&payload, &target, UpdateError::Invalid);
+    }
+
+    #[::core::prelude::v1::test]
+    fn companion_bytes_and_regular_file_are_required_before_installation() {
+        let (_directory, payload, target, _manifest) = companion_payload();
+        let companion = payload.join(packaged_mcp_path(platform_name()).expect("companion path"));
+        fs::write(&companion, b"changed companion").expect("tamper companion");
+        assert_both_validators_reject(&payload, &target, UpdateError::Invalid);
+        fs::remove_file(&companion).expect("remove companion");
+        assert_both_validators_reject(&payload, &target, UpdateError::Invalid);
+        fs::create_dir(&companion).expect("directory instead of executable");
+        assert_both_validators_reject(&payload, &target, UpdateError::Invalid);
+    }
+
+    #[cfg(unix)]
+    #[::core::prelude::v1::test]
+    fn both_executable_modes_are_required_by_download_helper_and_install() {
+        use std::os::unix::fs::PermissionsExt;
+        let (directory, payload, target, _manifest) = companion_payload();
+        let plan = validate_payload_for_helper(&payload, &target).expect("validated plan");
+        let install = directory.path().join("install");
+        fs::create_dir(&install).expect("install directory");
+        for name in [
+            packaged_binary_path(platform_name()).expect("binary"),
+            packaged_mcp_path(platform_name()).expect("companion"),
+        ] {
+            let path = payload.join(name);
+            fs::set_permissions(&path, fs::Permissions::from_mode(0o644)).expect("nonexecutable");
+            assert_both_validators_reject(&payload, &target, UpdateError::Invalid);
+            assert!(matches!(
+                install_plan(&payload, &install, &plan),
+                Err(UpdateError::Invalid)
+            ));
+            assert!(
+                !install
+                    .join(packaged_binary_path(platform_name()).expect("binary"))
+                    .exists()
+            );
+            assert!(
+                !install
+                    .join(packaged_mcp_path(platform_name()).expect("companion"))
+                    .exists()
+            );
+            set_test_executable(&path);
+        }
+    }
+
+    #[cfg(unix)]
+    #[::core::prelude::v1::test]
+    fn companion_symlink_is_rejected_by_both_validators() {
+        let (directory, payload, target, _manifest) = companion_payload();
+        let companion = payload.join(packaged_mcp_path(platform_name()).expect("companion"));
+        let outside = directory.path().join("outside");
+        fs::rename(&companion, &outside).expect("move companion");
+        std::os::unix::fs::symlink(&outside, &companion).expect("companion symlink");
+        assert_both_validators_reject(&payload, &target, UpdateError::Install);
+    }
+
+    #[::core::prelude::v1::test]
+    fn validated_update_installs_app_and_companion_in_isolated_directory() {
+        let (directory, payload, target) = owned_companion_payload();
+        let installation = tempfile::tempdir().expect("isolated installation");
+        let install = installation.path();
+        let binary_name = packaged_binary_path(platform_name()).expect("binary");
+        let companion_name = packaged_mcp_path(platform_name()).expect("companion");
+        for (name, bytes) in [
+            (binary_name, b"old application".as_slice()),
+            (companion_name, b"old companion".as_slice()),
+        ] {
+            let path = install.join(name);
+            fs::create_dir_all(path.parent().expect("parent")).expect("parent");
+            fs::write(path, bytes).expect("old executable");
+        }
+        let unlisted = install.join("personal-file");
+        fs::write(&unlisted, b"preserve").expect("unlisted file");
+        let binary = install.join(binary_name);
+        let committed = apply_update(&payload, install, &binary, &target).expect("apply update");
+        assert_eq!(committed.executable, binary);
+        assert_eq!(
+            fs::read(install.join(binary_name)).expect("updated app"),
+            b"new application"
+        );
+        assert_eq!(
+            fs::read(install.join(companion_name)).expect("updated MCP"),
+            b"new companion"
+        );
+        assert_eq!(
+            fs::read(payload.join(".backup").join(binary_name)).expect("old app backup"),
+            b"old application"
+        );
+        assert_eq!(
+            fs::read(payload.join(".backup").join(companion_name)).expect("old MCP backup"),
+            b"old companion"
+        );
+        assert_eq!(fs::read(unlisted).expect("unlisted file"), b"preserve");
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(
+                fs::metadata(install.join(companion_name))
+                    .expect("installed mode")
+                    .permissions()
+                    .mode()
+                    & 0o777,
+                0o755
+            );
+        }
+        assert!(finish_update_staging(&payload, Ok(committed)));
+        assert!(!directory.path().exists(), "committed backup cleanup");
+        assert_eq!(
+            fs::read(binary).expect("installed app remains"),
+            b"new application"
+        );
+        assert_eq!(
+            fs::read(install.join(companion_name)).expect("installed MCP remains"),
+            b"new companion"
+        );
+    }
+
+    #[::core::prelude::v1::test]
+    fn late_failure_restores_both_images_or_removes_new_companion() {
+        for old_companion in [true, false] {
+            let (directory, payload, target, mut manifest) = companion_payload();
+            let failure_name = "zz-late-failure";
+            let failure = payload.join(failure_name);
+            fs::write(&failure, b"verified resource").expect("resource");
+            manifest["files"][failure_name] =
+                serde_json::json!(hex_file_digest(&failure).expect("resource digest"));
+            write_test_manifest(&payload, &manifest);
+            let plan = validate_payload_for_helper(&payload, &target).expect("valid plan");
+            fs::write(&failure, b"changed after validation").expect("late corruption");
+            let install = directory.path().join("install");
+            let binary_name = packaged_binary_path(platform_name()).expect("binary");
+            let companion_name = packaged_mcp_path(platform_name()).expect("companion");
+            let binary = install.join(binary_name);
+            let companion = install.join(companion_name);
+            fs::create_dir_all(binary.parent().expect("parent")).expect("parent");
+            fs::write(&binary, b"old application").expect("old app");
+            if old_companion {
+                fs::write(&companion, b"old companion").expect("old MCP");
+            }
+            assert_eq!(
+                install_plan(&payload, &install, &plan).err(),
+                Some(UpdateError::Checksum)
+            );
+            assert_eq!(fs::read(binary).expect("restored app"), b"old application");
+            if old_companion {
+                assert_eq!(fs::read(companion).expect("restored MCP"), b"old companion");
+            } else {
+                assert!(!companion.exists());
+            }
+            assert!(!payload.join(".backup").exists());
+            assert!(!install.join(failure_name).exists());
+        }
+    }
+
+    #[::core::prelude::v1::test]
+    fn failed_rollback_retains_old_backup_and_prevents_next_attempt() {
+        let (directory, payload, target, _manifest) = companion_payload();
+        let install = directory.path().join("install");
+        let binary_name = packaged_binary_path(platform_name()).expect("binary");
+        let binary = install.join(binary_name);
+        fs::create_dir_all(&binary).expect("blocking directory");
+        let backup = payload.join(".backup").join(binary_name);
+        fs::create_dir_all(backup.parent().expect("backup parent")).expect("backup parent");
+        fs::write(&backup, b"only old application image").expect("old backup");
+        assert_eq!(
+            rollback_install(&[], &[(binary, backup.clone())]).err(),
+            Some(UpdateError::RecoveryRequired)
+        );
+        let plan = validate_payload_for_helper(&payload, &target).expect("valid plan");
+        assert_eq!(
+            install_plan(&payload, &install, &plan).err(),
+            Some(UpdateError::RecoveryRequired)
+        );
+        assert_eq!(
+            fs::read(backup).expect("preserved old backup"),
+            b"only old application image"
+        );
+        assert!(payload.exists());
+    }
+
+    #[::core::prelude::v1::test]
+    fn helper_finalization_keeps_failed_recovery_and_blocks_restart() {
+        let directory = tempfile::Builder::new()
+            .prefix("keelshell-update-test-")
+            .tempdir()
+            .expect("owned staging");
+        let payload = directory.path().join("payload");
+        let backup = payload.join(".backup/keelshell-app");
+        fs::create_dir_all(backup.parent().expect("parent")).expect("backup parent");
+        fs::write(&backup, b"only old image").expect("backup");
+        assert!(!finish_update_staging(
+            &payload,
+            Err(UpdateError::RecoveryRequired)
+        ));
+        assert_eq!(
+            fs::read(&backup).expect("retained backup"),
+            b"only old image"
+        );
+        let diagnostic =
+            fs::read_to_string(payload.join("recovery-required.txt")).expect("recovery diagnostic");
+        assert!(
+            diagnostic.contains("回滚未完成") && diagnostic.contains("rollback did not complete")
+        );
+        let restored = tempfile::tempdir().expect("isolated restored installation");
+        let restored_image = restored.path().join("old-image");
+        fs::rename(&backup, &restored_image).expect("explicit old-image restoration");
+        fs::remove_dir(payload.join(".backup")).expect("remove restored backup directory");
+        fs::remove_file(payload.join("recovery-required.txt")).expect("clear recovery marker");
+        assert!(finish_update_staging(&payload, Err(UpdateError::Install)));
+        assert!(!directory.path().exists());
+        assert_eq!(
+            fs::read(restored_image).expect("restored image"),
+            b"only old image"
         );
     }
 

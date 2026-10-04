@@ -12,6 +12,11 @@ import shutil
 import subprocess
 import sys
 
+try:
+    from . import release
+except ImportError:
+    import release
+
 
 def run(*command: str) -> str:
     result = subprocess.run(command, check=True, text=True, stdout=subprocess.PIPE,
@@ -83,30 +88,33 @@ def main() -> None:
     expected_os = {"macos": "darwin", "linux": "linux", "windows": "win32"}[args.platform]
     if sys.platform != expected_os:
         raise ValueError("Package inspection must run on the native target OS")
+    release.validate_stage(args.stage, args.platform, args.target, release.version())
+    binaries = [args.stage / name for name in (release.BINARIES[args.platform], release.MCP_BINARIES[args.platform])]
     if args.platform == "macos":
         contents = args.stage / "KeelShell.app" / "Contents"
         info = contents / "Info.plist"
         run("plutil", "-lint", str(info))
         if plistlib.loads(info.read_bytes())["LSMinimumSystemVersion"] != "15.0":
             raise ValueError("Unexpected macOS minimum version")
-        binary = contents / "MacOS" / "keelshell-app"
-        if not os.access(binary, os.X_OK):
-            raise ValueError("macOS application is not executable")
-        run("otool", "-L", str(binary))
-        build = run("xcrun", "vtool", "-show-build", str(binary))
-        minimums = re.findall(r"^\s*minos\s+(\d+)\.(\d+)(?:\.(\d+))?\s*$", build, re.MULTILINE)
-        if not minimums or any(tuple(int(n or "0") for n in value) > (15, 0, 0) for value in minimums):
-            raise ValueError("Mach-O deployment target exceeds the advertised macOS 15.0 minimum")
+        for binary in binaries:
+            if not os.access(binary, os.X_OK):
+                raise ValueError("macOS packaged executable is not executable")
+            run("otool", "-L", str(binary))
+            build = run("xcrun", "vtool", "-show-build", str(binary))
+            minimums = re.findall(r"^\s*minos\s+(\d+)\.(\d+)(?:\.(\d+))?\s*$", build, re.MULTILINE)
+            if not minimums or any(tuple(int(n or "0") for n in value) > (15, 0, 0) for value in minimums):
+                raise ValueError("Mach-O deployment target exceeds the advertised macOS 15.0 minimum")
     elif args.platform == "linux":
-        binary = args.stage / "usr" / "bin" / "keelshell-app"
         run("desktop-file-validate", str(args.stage / "usr/share/applications/keelshell.desktop"))
-        run("readelf", "-h", str(binary))
-        dependencies = run("ldd", str(binary))
-        if "not found" in dependencies:
-            raise ValueError("Linux runtime libraries are missing on the baseline runner")
+        for binary in binaries:
+            run("readelf", "-h", str(binary))
+            dependencies = run("ldd", str(binary))
+            if "not found" in dependencies:
+                raise ValueError("Linux runtime libraries are missing on the baseline runner")
     else:
         windows_resources(args.stage / "keelshell-app.exe")
-        windows_dependencies(args.stage / "keelshell-app.exe")
+        for binary in binaries:
+            windows_dependencies(binary)
     print(f"Native package structure inspected: {args.target}; GUI acceptance remains separate")
 
 

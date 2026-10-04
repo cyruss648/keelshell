@@ -16,11 +16,13 @@
 | Linux ARM64 | ubuntu-24.04-arm | aarch64-unknown-linux-gnu | tar.gz，usr/bin 与桌面资源 |
 
 包名 `KeelShell-{version}-{target}.zip` 或 `.tar.gz`，每包有 `.sha256`，整体有 `SHA256SUMS`。
-每个包中有 `package-manifest.json`，包含文件哈希、版本、目标、Git commit、工作流 run ID、Rust 版本与图标来源哈希。
+每个包中有 `package-manifest.json`，包含文件哈希、主程序/MCP伴随程序各自的SHA-256、版本、目标、Git commit、工作流 run ID、Rust 版本与图标来源哈希。
 macOS 最低版本 15.0；Linux 以 Ubuntu 24.04 的运行库为基线，使用 Wayland/X11 与 Vulkan；不能承诺任意 Linux 发行版兼容。
 Windows 使用 MSVC 与 Windows SDK，Release 着色器依赖 `fxc.exe`。应用使用 GPUI 的 asInvoker/PerMonitorV2 manifest，避免重复嵌入。
 
-这些包目前没有 Developer ID 签名、公证或 Windows 代码签名；不是安装器或自动更新源。
+所有目标都在主程序同目录包含 `keelshell-mcp`（Windows 为 `.exe`）。打包显式接收同次构建的两个 binary；归档和完整集合校验都检查它们的目标架构、摘要及 Unix 执行位。schema 保持 1 并新增必需 `mcp_binary_sha256`，旧 helper 可按 `files` 新增 companion，新版更新预检和 helper 拒绝缺少它的包。设计与当前证据见 [ADR0041](adr/0041-mcp-companion-packaging-and-update-recovery.md) 和 [companion记录](testing/records/2026-10-04-mcp-companion-packaging.md)。
+
+这些包目前没有 Developer ID 签名、公证或 Windows 代码签名；不是安装器。应用只在用户显式操作后下载、校验并调用更新 helper。运行中的 MCP stdio 进程需由外部智能体重启才使用新 image；Windows 占用可能触发有界重试与回滚。回滚失败会保留该次 staging/原文件备份并停止重启，不会把失败备份当成过期文件清理。临时 staging 与安装目录跨文件系统时，备份 rename 可能被拒绝；实际安装目录的三平台更新验收仍未完成。
 自动测试、二进制架构与资源检查，不替代图形桌面启动、真实 SSH/SFTP 服务互操作和用户验收。
 
 ## 不发布的演练
