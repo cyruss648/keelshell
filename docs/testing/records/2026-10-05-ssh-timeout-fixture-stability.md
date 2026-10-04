@@ -1,6 +1,6 @@
 # SSH 超时夹具的阶段与资源清理 — 2026-10-05
 
-状态：最终夹具的作者验证、根整仓、本机OpenSSH及新独立复审通过，无剩余P1/P2。修复提交与新CI另行追加；原408的远端失败保留。
+状态：最终夹具的作者验证、根整仓、本机OpenSSH及新独立复审通过，无剩余P1/P2；修复提交`f09651b`已推送main；新Quality37235821726结束failure，macOS/Linux成功，Windows远端转发场景的后置TCP观察超时。原408的远端失败保留；Windows观察修正另建范围，尚未关闭三平台门禁。
 
 ## 原失败与范围
 
@@ -79,5 +79,44 @@ gate保持阻塞直到显式释放、提前释放许可不丢失，未释放时1
 报告为`2351d781e36896873fd4232b32e1fe585a22a0a5fdb4851b88746156f6e96926`。
 两个审查scope的源码/二进制/失败独立保存，自有cache在根核验后另行清理，不改原manifest。
 
-提交推送与新提交CI的完整回执另行追加。
+## 提交、远端与清理
+
+修复提交`f09651b742ecd987e9ebe88ca5aa7e51e0bd8e8f`以fast-forward合入并推送main，
+`git ls-remote`核对精确远端SHA；当次工作区clean、main/origin ahead/behind为0/0，
+本地`feature/ssh-timeout-fixture-stability`已非force删除。根逐项读取提交tree，256源码/工程hash与最终门禁freeze一致。
+新[Quality37235821726](https://github.com/cyruss648/keelshell/actions/runs/37235821726)精确绑定此提交；
+实际结束为failure：macOS/Linux全job成功；Windows远端转发测试已完成认证和监听分配，但随后返回`Elapsed(())`，suite92通过/1失败。完整分平台数量与新artifact清理已由独立证据核验，见下表。没有取消、重跑或覆盖旧408失败run。
+
+根已逐SHA/bytes核验新CI132份证据，manifest SHA-256为
+`d7b48c25b4862992e057de45bf2653c88ac52e9539b57ad1ad6348a49044b2db`，
+report.md为`f6be2db1f4d87959dad5c6f6eb49ff417f02306e8f59f87ad53acc703b36383d`。
+
+| f096实际平台 | 普通通过/失败/忽略 | 文档 | 脚本执行/跳过 | 打包执行/跳过 | 默认/显式2 MiB CLI future |
+| --- | --- | --- | --- | --- | --- |
+| macOS 26 | 1031/0/11 | 8通过 | 6/0 | 57/0 | 4624/4624字节 |
+| Ubuntu 24.04 | 1031/0/12 | 8通过 | 6/0 | 57/0 | 4624/4624字节 |
+| Windows 2025 | 998/1/11，因失败提前停止 | 未执行 | 5/1 | 53/4 | 4968/未执行 |
+
+macOS/Linux回环suite各95通过；Windows按平台实际93项，92通过/1失败，10.51秒，认证177.1352ms。
+不能把Windows停止前数量当作完整预期1011普通+8文档。
+macOS OpenSSH artifact11316000852实际9通过、20.639秒，58个birth identities；
+Linux artifact11315403902实际9通过、12.467秒，75个birth identities。
+两份ZIP digest与metadata匹配，result/tests.log及日志字节数一致，owned/observed清理与临时根移除为true，ancestry_unverified为空；Windows按平台跳过。
+首轮API拒绝ANSI、整run未结束时gh拒绝日志、suite关联受stdout/stderr交错影响的parser记录均保留，
+最终API与gh逐项计数及summary绑定一致。读取错误不是CI错误，也不覆盖原始错误。
+
+按冻结源码与阶段日志追踪，已打印监听分配marker后唯一可以传播裸`Elapsed(())`的位置，是后置`TcpStream::connect`的1秒观察；之前的精确remote-forward超时断言、SSHclosed与监听lease清零等待已通过。此为控制流与日志定位，不推断Windows内核返回延迟原因，不将`Elapsed`当作连接拒绝，也不把本次总体failure改写为通过。下一版考虑在同一IP/port以before bind拒绝、after bind成功直接观察OS监听资源释放，继续保留精确操作超时和生命周期条件。
+
+作者1个、独立审查3个owned target及各自空TMP已实际删除；操作前后无owned编译/测试进程，
+原95/62文件manifest前后保持。作者cache-cleanup SHA-256为
+`4545e2d6ea3e9a751e699b05aecca2c5730986adfffb9c2fed285a3389004dd1`，独立审查为
+`0a447143fa1f6401b8c6d7e5d7bc59dc159f1c3af4d6d8895b9612e45cf9202c`；根核对两个回执及六条路径实际不存在。
+旧源码、诊断artifact、所有失败和冻结记录保留；根公共target未动。
+中断整仓遗留的自有private scratch在进程组归零后删除，原日志与中断分类保留，不保留其临时测试凭据文件。
+
+根30份本机/范围/构建/审查核验/推送清理证据的manifest SHA-256为
+`5f19e6fd1c8d3518de44a4331faa40ec4d83d6b80ca5175668679ffaac050b58`；远端新CI独立目录另建manifest。
+本次没有创建新标签或Release，不改变GUI安装，也不关闭供应商MCP、三平台桌面或已安装应用更新边界。
 原UI开发包仍归属408工作树快照；这些测试夹具改动不能将其重写成新提交的标准包、Release或新增桌面验收。
+
+Windows单文件观察修正及其新的作者/独立/根门禁与提交CI按[下一记录](2026-10-05-windows-forward-observer.md)归属；本记录f096及原408结果不重写。

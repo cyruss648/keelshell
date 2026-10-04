@@ -2,7 +2,7 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
-## 2026-10-05 工作区整合与紧凑布局（已推送，夹具本机修复通过，新CI待核验）
+## 2026-10-05 工作区整合与紧凑布局（已推送，macOS/Linux CI通过，Windows观察待修）
 
 连接库、依赖工作流 UI 与文件响应布局均已合入 `main`（生产提交 `40824f0`），三个增量及其冻结整合范围的独立复审通过。标准macOS开发包完成受控标签审核/保存、两条SSH/SFTP及依赖任务退出0/7，但实际900×580英文/Light/AI/Files组合暴露终端约37px的新P2；紧凑补全布局与完整工作区回归已实现，新根整仓门禁通过，fresh独立复审与新macOS包八组合/补全原生闭环PASS，新源码已推送并核对远端精确SHA，Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败。本节覆盖下方历史“编辑器待接入”和“页脚待修”等状态；旧包不能关闭后续修复。见[整合记录](testing/records/2026-10-05-workspace-workflows-integration.md)与[紧凑原生记录](testing/records/2026-10-05-compact-workspace-native.md)。
 
@@ -13,7 +13,9 @@
 
 根混合真实TCP回归的审核互斥已修复，剩余静态tooltip已补齐，冻结整合审查PASS。紧凑修复后的新根门禁通过1031普通（含362项应用）+8文档+6脚本、格式/workspace严格Clippy/x.y、默认与显式2 MiB完整CLI控制器（future4624字节）及57打包；11项默认忽略为2项供应商选择测试和9项OpenSSH。前一冻结源码9项系统OpenSSH已通过，紧凑修复未改transport/打包源码，本轮不复跑，后续新源码CI单独核验。GUI/MCP新native build通过；fresh紧凑独立复审127工作区/31工作流/12补全集合及80正常/40候选场景通过，集合重叠不相加；新标准双程序包以commit=null和256源码hash绑定，实际900×580八组合与7候选/末行滚轮/Files恢复通过；仅连接一个自有echo夹具，没有新文件写入/工作流执行/云AI/MCP验证。四个owned进程、两个监听/临时根清理，两个审查cache也实际删除，源码/失败留存；根接续是验证新源码CI，不将本切片扩为全产品/其他平台原生验收。MCP仍向外部智能体提供服务端，内置CLI Ask单独负责问答；内部桌面IPC客户端不是第三方MCP入口，29文件定向审查PASS但不证明供应商互通。
 
-夹具修复更新：只修改两个session测试文件，先以150ms延迟完成认证，再观察真实READDIR/句柄或监听lease/AddrInUse后验证精确操作超时与清理。最终作者95项及两目标各6次、根1031普通+8文档+6脚本、严格工程门禁、57打包、9项本机系统OpenSSH与GUI/MCP build通过；旧TCP探针副作用候选及共享源中断的gate均保留且不作验收。新独立复审无剩余P1/P2，95项及6项私有补充探针通过且62证据经根核验；修复提交及三平台CI结果继续追加，见[夹具验证](testing/records/2026-10-05-ssh-timeout-fixture-stability.md)。旧原生UI包仍属于408快照。
+夹具修复更新：只修改两个session测试文件，先以150ms延迟完成认证，再观察真实READDIR/句柄或监听lease/AddrInUse后验证精确操作超时与清理。最终作者95项及两目标各6次、根1031普通+8文档+6脚本、严格工程门禁、57打包、9项本机系统OpenSSH与GUI/MCP build通过；旧TCP探针副作用候选及共享源中断的gate均保留且不作验收。新独立复审无剩余P1/P2，95项及6项私有补充探针通过且62证据经根核验；测试修复f09651b已推送main并核对256源码/工程hash及远端SHA，新Quality37235821726结束failure：macOS/Linux成功，Windows在远端转发已分配/清理后的1秒TCP观察超时，下一观察修正另建范围；两套审查owned cache均清理、原95/62证据保留，最终三平台CI结果继续追加，见[夹具验证](testing/records/2026-10-05-ssh-timeout-fixture-stability.md)。旧原生UI包仍属于408快照。
+
+Windows观察更新：唯一后置TCP探针已改为相同1秒期限内单次复绑原完整端点，保留before AddrInUse、精确转发超时、SSHclosed与lease0。最终作者95项/12专项/工程门禁、根1031普通+8文档+6脚本及fresh独立95/7探针复审通过，无剩余P1/P2；新提交WindowsCI仍待核验，见[观察记录](testing/records/2026-10-05-windows-forward-observer.md)。只改一个测试文件，不迁移原生包或扩张产品限时。
 
 ## 2026-10-04 新增用户要求
 

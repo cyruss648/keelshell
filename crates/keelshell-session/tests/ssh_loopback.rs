@@ -1097,18 +1097,16 @@ async fn unknown_remote_forward_allocation_disconnects_and_releases_listener()
         "uncertain allocation did not close SSH and release its owned listener",
     )
     .await?;
-    let probe = tokio::time::timeout(
-        Duration::from_secs(1),
-        TcpStream::connect(("127.0.0.1", port as u16)),
-    )
-    .await?;
-    assert!(
-        probe.is_err(),
-        "remote listener survived uncertain allocation"
-    );
+    // Rebinding proves OS port release without depending on how quickly a
+    // closed-port connection reports refusal on each platform.
+    let released_address = SocketAddr::from(([127, 0, 0, 1], port as u16));
+    let rebound =
+        tokio::time::timeout(Duration::from_secs(1), TcpListener::bind(released_address)).await??;
+    assert_eq!(rebound.local_addr()?, released_address);
+    drop(rebound);
     assert!(session.exec("must no longer run").await.is_err());
     eprintln!(
-        "fixture remote forward timed out after {:?}; listener cleaned and SSH closed",
+        "fixture remote forward timed out after {:?}; exact endpoint rebound and SSH closed",
         started.elapsed(),
     );
     Ok(())
