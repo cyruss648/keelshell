@@ -1,4 +1,5 @@
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::{
     component::{
         Disableable, Sizable,
@@ -128,7 +129,7 @@ impl BatchPanel {
                                     .compact()
                                     .label(if row.selected { "☑" } else { "☐" })
                                     .disabled(!row.available)
-                                    .tooltip(t(cx, "选择此 SSH 会话", "Select this SSH session"))
+                                    .localized_tooltip("选择此 SSH 会话", "Select this SSH session")
                                     .on_click(cx.listener(move |panel, _, _, cx| {
                                         if panel.editable()
                                             && let Some(row) = panel.rows.get_mut(index)

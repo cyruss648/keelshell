@@ -89,3 +89,14 @@ bounded owned SSH fixtures. They do not prove GPU screenshots, customer SSH,
 Windows/Linux native windows, OS signals, signed/notarized packages or deployed
 releases. Independent review and integrated native exercise are delegated to
 the root task after this slice freezes; this record does not claim their result.
+
+## 整合负责人核对的独立复审
+
+冻结作者提交 `eabd37f1c91041ea0ac0f452878cf0f5487ab435` 经独立代理只读复审，无剩余可复现 P1/P2。437 个跟踪文件前后 SHA-256 一致，HEAD 与干净状态不变。根任务核对了 39 项证据清单，完整 diff 的 SHA-256 为 `43ec90116d19426264743cacea3dcc0aa01a42725fddf71f1690bcd6e346e60b`，独立报告为 `ec4b6335eb942809acbc2f251f69a2118e2b9550de4b65cfbc928c0a847c46db`。
+
+- 独立 core：321 普通测试与 4 文档测试通过。
+- 独立连接库 GPUI：24 项通过，含真实 TCP SSH 会话身份失效与软删除后会话保持；没有设置 `RUST_MIN_STACK`。
+- 独立 strict workspace/all-target Clippy、fmt 与 `x.y` 策略通过。
+- 源码副本的 5 个补充探针通过：900×580 双语/明暗永久清理审核页脚、精确焦点、主题/语言实际保存后的审核保留，以及原始滚轮将第二行选择按钮完全滚入视口后点击成功。额外显式 2 MiB 线程只重复工具栏/审核两个布局场景。
+
+早期探针的未注册观察点、过滚与按钮部分可见时点击失败保留在 ignored `work/library-bulk-review-20261005/`，包含失败源码、最终探针与 SHA 清单；不把探针错误归为产品缺陷，也不删除失败记录。作者证据已逐份 SHA 核对复制到主工作区。此处尚不声称根任务最终整仓门禁、合并后的新程序原生、其他平台原生或新提交 CI 已通过。

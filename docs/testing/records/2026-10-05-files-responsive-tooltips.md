@@ -135,3 +135,21 @@ need to verify the patched file/footer/tooltip in the real workspace. Windows an
 Linux native desktops, customer systems, all transfer/editor states and complete
 screen-reader/modal isolation remain unverified. This document does not close
 those boundaries or reuse baseline screenshots as after-fix acceptance.
+
+## Fresh independent follow-up review
+
+The reviewer independently checked frozen `15c00b3e10189af96997d45f71ee3caecdb87a95`,
+including all 21 Files UI/protocol tests, formatting, direct dependency policy and
+strict app all-target Clippy. A copied-source strengthened matrix also passed all
+176 scenes, retaining exact long bilingual drafts, selection and editor contents,
+requiring a real 28px row and invariant Confirm/Cancel coordinates outside the
+tools scroll viewport. The minimum browser/tools heights were 64px/50px. No
+reproducible P1/P2 remained. This is a focused independent run, not a new execution
+of the author's full workspace gate or native acceptance.
+
+Root verified all 33 entries in `work/file-workspace-fix-review-20261005/evidence-manifest.json`
+and the unchanged HEAD/clean status/433 tracked hashes before and after review.
+Manifest SHA-256: `361c24db1bd6cb00f0b5d5bfff086b5c24478d813e40137c835ccb5243deee6b`.
+The original failed evidence and lifecycle-label correction remain retained.
+The complete merged workspace, macOS painted pixels and keyboard/tooltip behavior
+are tracked separately in the [integration record](2026-10-05-workspace-workflows-integration.md).

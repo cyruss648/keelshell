@@ -84,6 +84,8 @@ cards. The exact-target cancellation regression remains in place.
 The tooltip regression observes its actually painted role/label and bounds after
 hover, then switches English→Chinese→English with an unchanged mouse position.
 
-The new code still requires independent review and integrated macOS native
-screenshots. Native Windows/Linux, real customer servers, comprehensive screen
+The frozen follow-up passed a fresh independent review: 21 Files UI/protocol
+tests, the 176-scene production-theme matrix, a strengthened copied-source probe,
+formatting, dependency policy and strict app Clippy. Integrated macOS native
+screenshots remain pending. Native Windows/Linux, real customer servers, comprehensive screen
 reader navigation and modal accessibility isolation are outside this slice.

@@ -127,6 +127,7 @@ impl Workspace {
             || self.vault_settings.is_some()
             || self.snippet_modal_open()
             || self.show_batch
+            || self.show_workflow
             || self.mcp.show
             || self.ai_settings.is_some()
         {

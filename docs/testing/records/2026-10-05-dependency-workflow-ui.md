@@ -175,3 +175,22 @@ freeze's gate and native build do not accept this changed source.
   `native-layout-build.log` and `native-layout-build-receipt.json` bind this new
   build. This worktree did not launch, package or install it; neither renderer
   geometry nor a native build proves native pixel/AX/target acceptance.
+
+## Fresh independent entry-layout follow-up review
+
+Frozen `cdaa20210dcd639c93e4324e7e8a882877090004` passed independent
+29 app workflow tests, formatting, direct dependency policy and whole-workspace
+all-target strict Clippy with `RUST_MIN_STACK` unset. No concrete P1/P2 remained
+in the five-file correction. The actual GPUI mouse helper dispatches move/down/up;
+the two held SSH fixtures each observed one original exec with no replay or PTY
+writes while both command panels were hidden, reopened and cancelled. The
+textarea setter checks draft preservation, not native keyboard acceptance.
+
+Root verified all 14 evidence entries and unchanged HEAD/clean status/438 tracked
+hashes in `work/workflow-ui-fix-review-20261005/`. Report SHA-256:
+`6351871975bab109fad5bfabf1f7ef6bb6a57bfd2c42583ae2df0310990aa6ef`; evidence manifest
+SHA-256: `aca8f7009b838b81f998baee1c197195cb084ee7cdcd0235e52f1ee2ed9b715e`.
+The earlier 128-task/32-target copied-source and OpenSSH runs remain evidence of
+the original freeze, not new native or final merged-source acceptance. Final
+shared-hook checks and native behavior are tracked in the
+[integration record](2026-10-05-workspace-workflows-integration.md).

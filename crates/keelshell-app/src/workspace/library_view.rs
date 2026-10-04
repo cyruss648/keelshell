@@ -1,5 +1,6 @@
 //! Connection manager with a persistent folder tree, recent usage and recoverable deletion.
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use crate::jump_host_picker::endpoint;
 use gpui_kit::{
     assets::IconName,
@@ -163,7 +164,7 @@ impl Workspace {
                 },
                 connection,
             ))
-            .tooltip(t(cx, "切换收藏", "Toggle favorite"))
+            .localized_tooltip("切换收藏", "Toggle favorite")
             .disabled(self.saving || trash)
             .on_click(cx.listener(move |view, _, window, cx| view.toggle_favorite(id, window, cx)));
         let mut row = div()
@@ -449,7 +450,7 @@ impl Workspace {
                         .compact()
                         .label("+")
                         .accessibility_label(t(cx, "新建文件夹", "New folder"))
-                        .tooltip(t(cx, "新建文件夹", "New folder"))
+                        .localized_tooltip("新建文件夹", "New folder")
                         .disabled(self.saving)
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.open_folder_form(None, window, cx)
@@ -487,7 +488,7 @@ impl Workspace {
                                 t(cx, "管理文件夹", "Manage folder"),
                                 self.folder_label(Some(id), cx),
                             ))
-                            .tooltip(t(cx, "管理文件夹", "Manage folder"))
+                            .localized_tooltip("管理文件夹", "Manage folder")
                             .disabled(self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.open_folder_form(Some(id), window, cx)
@@ -578,11 +579,10 @@ impl Workspace {
                         "从剪贴板导入 SSH 配置",
                         "Import SSH config from clipboard",
                     ))
-                    .tooltip(t(
-                        cx,
+                    .localized_tooltip(
                         "从剪贴板导入受限 OpenSSH 配置",
                         "Import the supported OpenSSH subset from the clipboard",
-                    ))
+                    )
                     .disabled(self.saving)
                     .on_click(cx.listener(|view, _, window, cx| {
                         view.import_openssh_connections(window, cx)

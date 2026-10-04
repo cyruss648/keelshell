@@ -1,10 +1,12 @@
 //! Compact, explicit query controls; local and remote candidates never share an insertion mode.
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
+use gpui_kit::assets::IconName;
 
 impl Workspace {
     pub(in crate::workspace) fn remote_completion_controls(
         &self,
+        compact: bool,
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
@@ -14,18 +16,98 @@ impl Workspace {
             .is_some_and(|tab| tab.read(cx).is_open())
             && !self.command_surface_blocked();
         let busy = self.remote_completion.worker.is_some();
-        div()
+        let directory = div()
+            .id("completion-directory-field")
+            .test_support()
+            .flex_1()
+            .min_w_0()
+            .localized_tooltip(
+                "补全基准目录独立于终端工作目录，只用于显式补全查询",
+                "The completion directory is separate from terminal cwd and only used for explicit queries",
+            )
+            .child(
+                Input::new(&self.remote_completion.directory)
+                    .small()
+                    .aria_label(t(cx, "补全基准目录 · 独立于终端工作目录", "Completion directory · separate from terminal cwd"))
+                    .disabled(!ready),
+            );
+        let complete =
+            Button::new("remote-complete")
+                .ghost()
+                .compact()
+                .label(t(cx, "远端补全", "Complete remotely"))
+                .localized_tooltip(
+                    "远端补全 · Ctrl+Space（只查询，不执行）",
+                    "Remote completion · Ctrl+Space (query only)",
+                )
+                .disabled(!ready || busy)
+                .on_click(cx.listener(|view, _, window, cx| {
+                    view.request_remote_completion(false, window, cx)
+                }));
+        let files = Button::new("completion-use-files")
+            .ghost()
+            .compact()
+            .when(compact, |button| {
+                button.icon(IconName::FolderOpen).accessibility_label(t(
+                    cx,
+                    "文件目录",
+                    "Files directory",
+                ))
+            })
+            .when(!compact, |button| {
+                button.label(t(cx, "文件目录", "Files directory"))
+            })
+            .localized_tooltip(
+                "将当前文件面板目录用作补全基准目录",
+                "Use the current Files directory for completion",
+            )
+            .disabled(!ready)
+            .on_click(
+                cx.listener(|view, _, window, cx| view.use_files_completion_directory(window, cx)),
+            );
+        let base = Button::new("completion-read-base")
+            .ghost()
+            .compact()
+            .when(compact, |button| {
+                button
+                    .icon(IconName::Folder)
+                    .accessibility_label(t(cx, "SFTP 起点", "SFTP base"))
+            })
+            .when(!compact, |button| {
+                button.label(t(cx, "SFTP 起点", "SFTP base"))
+            })
+            .localized_tooltip(
+                "显式读取 SFTP 起点并用作补全基准目录",
+                "Explicitly read the SFTP base for completion",
+            )
+            .disabled(!ready || busy)
+            .on_click(
+                cx.listener(|view, _, window, cx| view.request_remote_completion(true, window, cx)),
+            );
+        let controls = div()
             .id("remote-completion-controls")
             .test_support()
             .flex_shrink_0()
             .px_2()
-            .py_1()
             .bg(rgb(visual.surface))
             .border_t_1()
             .border_color(rgb(visual.border))
             .flex()
+            .gap_1();
+        if compact {
+            // Only presentation changes: query handlers and persistent input entities
+            // are shared with the spacious layout, and no query starts on resize.
+            return controls
+                .items_center()
+                .child(directory)
+                .child(complete)
+                .child(files)
+                .child(base)
+                .into_any_element();
+        }
+        controls
+            .py_1()
             .flex_col()
-            .gap_1()
             .child(
                 div()
                     .flex()
@@ -44,20 +126,7 @@ impl Workspace {
                                 "Completion directory · separate from terminal cwd",
                             )),
                     )
-                    .child(
-                        Button::new("remote-complete")
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "远端补全", "Complete remotely"))
-                            .localized_tooltip(
-                                "远端补全 · Ctrl+Space（只查询，不执行）",
-                                "Remote completion · Ctrl+Space (query only)",
-                            )
-                            .disabled(!ready || busy)
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.request_remote_completion(false, window, cx)
-                            })),
-                    ),
+                    .child(complete),
             )
             .child(
                 div()
@@ -65,38 +134,9 @@ impl Workspace {
                     .items_center()
                     .gap_1()
                     .min_w_0()
-                    .child(
-                        div()
-                            .id("completion-directory-field")
-                            .test_support()
-                            .flex_1()
-                            .min_w_0()
-                            .child(
-                                Input::new(&self.remote_completion.directory)
-                                    .small()
-                                    .disabled(!ready),
-                            ),
-                    )
-                    .child(
-                        Button::new("completion-use-files")
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "文件目录", "Files directory"))
-                            .disabled(!ready)
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.use_files_completion_directory(window, cx)
-                            })),
-                    )
-                    .child(
-                        Button::new("completion-read-base")
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "SFTP 起点", "SFTP base"))
-                            .disabled(!ready || busy)
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.request_remote_completion(true, window, cx)
-                            })),
-                    ),
+                    .child(directory)
+                    .child(files)
+                    .child(base),
             )
             .into_any_element()
     }

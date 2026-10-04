@@ -288,6 +288,9 @@ impl Render for Workspace {
             && viewport.width >= px(900.)
             && (!self.show_assistant || viewport.width >= px(1280.));
         let tool_height = px(340.).min(viewport.height * 0.40);
+        // Keep the existing tool budget: secondary completion controls use one
+        // row in short windows so Files and command review cannot crush the terminal.
+        let compact_command_tools = viewport.height < px(700.);
         let active_id = self.tabs.get(self.active).map(Entity::entity_id);
         let mut tabs = div()
             .flex_1()
@@ -607,6 +610,8 @@ impl Render for Workspace {
                     .when(show_monitor, |el| {
                         el.child(
                             div()
+                                .id("monitor-column")
+                                .test_support()
                                 .w(px(260.))
                                 .h_full()
                                 .flex_shrink_0()
@@ -630,6 +635,7 @@ impl Render for Workspace {
                                         .flex_shrink_0()
                                         .px_2()
                                         .py_1()
+                                        .when(compact_command_tools, |bar| bar.py_0())
                                         .bg(rgb(visual.surface))
                                         .flex()
                                         .items_center()
@@ -753,7 +759,7 @@ impl Render for Workspace {
                                                 })),
                                         ),
                                 )
-                                .child(self.remote_completion_controls(cx))
+                                .child(self.remote_completion_controls(compact_command_tools, cx))
                                 .child(
                                     div()
                                         .id("command-actions")
@@ -766,6 +772,7 @@ impl Render for Workspace {
                                         .flex_wrap()
                                         .items_center()
                                         .gap_2()
+                                        .when(compact_command_tools, |row| row.py(px(2.)).gap_1())
                                         .child(
                                             Button::new("command-history-policy")
                                                 .ghost()

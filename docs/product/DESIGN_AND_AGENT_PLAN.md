@@ -1,8 +1,8 @@
 # 界面设计与智能体能力计划
 
-更新：2026-10-04。状态：主题基础已实现并部分验收；对外MCP已接通stdio伴随程序、受认证桌面IPC、真实SSH/SFTP及原生人工审阅，独立复审与macOS受控闭环通过；本地CLI Ask后端/命名设置/密钥引用/审核已接通并通过整仓门禁、新独立审查和macOS回环问答/取消。完整视觉矩阵、Agent、供应商客户端MCP互通和其他平台原生继续实施。本文覆盖后续主题、视觉体系、MCP 服务端与本地智能体接入；不取代既有远程 SSH 目标。
+更新：2026-10-05。状态：主题基础已实现并部分验收；对外MCP已接通stdio伴随程序、受认证桌面IPC、真实SSH/SFTP及原生人工审阅，独立复审与macOS受控闭环通过；本地CLI Ask后端/命名设置/密钥引用/审核已接通并通过整仓门禁、新独立审查和macOS回环问答/取消。完整视觉矩阵、Agent、供应商客户端MCP互通和其他平台原生继续实施。本文覆盖后续主题、视觉体系、MCP 服务端与本地智能体接入；不取代既有远程 SSH 目标。
 
-用户明确要求 MCP 是 **KeelShell 向其他智能体提供能力**。不开发在 KeelShell 内连接任意第三方 MCP 服务的通用 MCP 客户端。应用调用本地 Claude Code/Codex CLI 与对外 MCP 服务是两个独立入口，可以共用受控远程工具和审核机制。
+用户明确要求 MCP 是 **KeelShell 向其他智能体提供能力**。不开发在 KeelShell 内连接任意第三方 MCP 服务的通用 MCP 客户端。应用调用本地 Claude Code/Codex CLI 与对外 MCP 服务是两个独立入口：前者为应用内 AI 提供推理后端，后者让外部智能体调用 KeelShell 已授权的能力。命令及后续文件修改能力均采用提案与桌面人工审阅；外部客户端不能自行批准或执行。
 
 服务端使用官方Rust SDK，提供默认关闭的stdio入口、七项固定工具、会话/路线授权契约、撤权/取消、有界读取与待审命令提案。受认证桌面IPC与真实SSH/SFTP句柄已接通；963普通+8文档整合门禁和新独立复审通过，macOS实际窗口证实选择性读取、人工执行/拒绝与运行中撤权。无能力环境仍默认拒绝。实际Codex/Claude Code MCP互通、文件修改提案及其他平台原生尚未完成，因此MCP-01至04不整体关闭；见[ADR0039](../adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)与[接入指南](EXTERNAL_MCP.md)。
 
@@ -38,7 +38,7 @@
 
 本地智能体进程属于 AI 后台服务，不属于本地终端管理。它也不代表模型离线：CLI可能使用云端账户、网络与自身日志策略，发送前须展示运行方与上下文；不能因“本地CLI”隐藏数据发送边界。
 
-服务端工具命名暂拟为 `keelshell_list_sessions`、`keelshell_read_selection`、`keelshell_sftp_list`、`keelshell_sftp_read`、`keelshell_monitor_snapshot`、`keelshell_propose_command` 和 `keelshell_get_action_status`，最终以版本化schema为准。一般SSH文本不具有可靠的只读判定；执行提案沿用现有人工审核，不提供模型自行解锁或确认的捷径。
+当前服务端提供 `keelshell_list_sessions`、`keelshell_read_selection`、`keelshell_sftp_list`、`keelshell_sftp_read`、`keelshell_monitor_snapshot`、`keelshell_propose_command` 和 `keelshell_get_action_status`，参数以实现中的版本化schema为准。一般SSH文本不具有可靠的只读判定；执行提案沿用现有人工审核，不提供模型自行解锁或确认的捷径。
 
 ## 工程顺序
 
