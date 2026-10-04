@@ -52,3 +52,7 @@
 
 - [参数片段与批量 exec 设计](adr/0016-parameterized-snippets-and-batch-exec.md)：显式模板、字面引用、审核快照、有界调度与未知结果。
 - [参数与批量命令验收](testing/records/2026-10-03-parameterized-snippets-batch-exec.md)：已通过领域/协议/组件专项，最终整仓、OpenSSH、原生与 CI 结果分层记录。
+
+
+- [界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：系统明暗主题、专业视觉、本地Claude Code/Codex和对外MCP服务端，明确尚未实现的范围。
+- [设计资料库](design/README.md)：参考选型、语义token/组件规范的维护方式和可用技能。

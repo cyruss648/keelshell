@@ -69,6 +69,8 @@ KeelShell 面向每天需要连接服务器、查看日志和处理远程文件�
 
 AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解锁配置本身不会联网。更多协议与辅助工作流见[路线图](docs/ROADMAP.md)。
 
+系统明暗主题、统一视觉体系、本地 Claude Code/Codex 智能体及对外 MCP 服务已纳入[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)，尚未接通；MCP 只向外部智能体提供 KeelShell 能力。
+
 <details>
 <summary>查看 AI 配置界面</summary>
 

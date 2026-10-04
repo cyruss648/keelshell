@@ -67,6 +67,8 @@ Enable parameters in the snippet editor to use `{{name}}` for literal values sup
 
 API keys stay in memory by default and can be explicitly saved encrypted. Saving and unlocking a configuration make no network requests. Additional protocols and assistant workflows are tracked in the [roadmap](docs/ROADMAP.md).
 
+System-following light/dark themes, a coherent visual system, local Claude Code/Codex adapters and a KeelShell MCP server for external agents are in the [development plan](docs/product/DESIGN_AND_AGENT_PLAN.md), and are not available yet.
+
 <details>
 <summary>View AI settings</summary>
 

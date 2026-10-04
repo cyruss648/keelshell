@@ -6,6 +6,8 @@
 
 本文是目标与验收计划。真实实现状态见[能力清单](../product/CAPABILITIES.md)，当前交互见[产品设计](../product/PRODUCT.md)，历史界面研究的证据限制见[工作区观察摘记](remote-workspace-reference.md)。
 
+2026-10-04新增：默认系统明暗主题、统一专业界面、本地Claude Code/Codex智能体，以及对外MCP服务端，见[正式计划](../product/DESIGN_AND_AGENT_PLAN.md)。本地AI进程不构成本地terminal管理；不增加通用第三方MCP客户端。此处历史浅色方案不覆盖新主题要求。
+
 ## 1. 远程 SSH 能力矩阵
 
 以下是 KeelShell 自身的实现与验收目标，不是已实现清单或外部产品事实。未知兼容项必须通过实际协议与原生测试核实。没有真实数据路径的卡片、表格、按钮、示例连接只能标记演示，不能记为功能完成。
