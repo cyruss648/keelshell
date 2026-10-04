@@ -52,6 +52,7 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
     }
     let mut card = div()
         .id("directory-comparison-card")
+        .flex_shrink_0()
         .mx_2()
         .my_1()
         .p_2()
@@ -77,7 +78,8 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
             comparison.local.display(),
             comparison.remote
         )))
-        .child(rows);
+        .child(rows)
+        .test_support();
     if let Some(plan) = &comparison.sync_plan {
         let direction = if plan.direction() == DirectorySyncDirection::LeftToRight {
             t(cx, "本地 → 远端", "Local → remote")
@@ -189,7 +191,8 @@ impl Render for FilesPanel {
             .min_h_0()
             .overflow_y_scroll()
             .flex()
-            .flex_col();
+            .flex_col()
+            .test_support();
         for (index, entry) in self.entries.iter().enumerate() {
             let selected = self
                 .selected
@@ -271,7 +274,8 @@ impl Render for FilesPanel {
                                     }
                                 })),
                         ),
-                    ),
+                    )
+                    .test_support(),
             );
         }
         if self.entries.is_empty() && !self.busy {
@@ -287,6 +291,7 @@ impl Render for FilesPanel {
             .min_w_0()
             .h_full()
             .overflow_x_scroll()
+            .test_support()
             .child(
                 div()
                     .min_w(px(650.))
@@ -315,26 +320,41 @@ impl Render for FilesPanel {
                     )
                     .child(list),
             );
-        let mut body = div()
+        let body = div()
             .id("file-browsing-area")
             .flex_1()
-            .min_h_0()
+            // Reserve the 28px header, a real 28px entry and scrollbar space.
+            // Toolbars and secondary cards must scroll instead of taking this.
+            .min_h(px(64.))
             .flex()
             .child(navigation)
             .child(table);
+        let mut tools = div()
+            .id("file-tools-scroll")
+            .flex_1()
+            .min_h_0()
+            .overflow_y_scroll()
+            .track_scroll(&self.tools_scroll)
+            .vertical_scrollbar(&self.tools_scroll)
+            .flex()
+            .flex_col()
+            .test_support();
+        let mut editor_card = None;
         if let Some((path, _)) = &self.editing {
             let mut editor_panel = div()
-                .w(px(320.))
+                .id("remote-file-editor")
+                .w_full()
                 .flex_shrink_0()
-                .h_full()
+                .h(px(if self.diff_preview.is_some() { 268. } else { 180. }))
                 .min_h_0()
                 .flex()
                 .flex_col()
-                .border_l_1()
+                .border_t_1()
                 .border_color(rgb(visual.border))
                 .child(
                     div()
                         .h(px(28.))
+                        .flex_shrink_0()
                         .px_2()
                         .flex()
                         .items_center()
@@ -352,9 +372,11 @@ impl Render for FilesPanel {
                 .child(
                     div()
                         .p_1()
+                        .flex_shrink_0()
                         .border_t_1()
                         .border_color(rgb(visual.border))
                         .flex()
+                        .flex_wrap()
                         .gap_1()
                         .child(
                             Button::new("toggle-remote-diff")
@@ -410,7 +432,8 @@ impl Render for FilesPanel {
             if let Some(diff) = &self.diff_preview {
                 editor_panel = editor_panel.child(
                     div()
-                        .h(px(220.))
+                        .h(px(88.))
+                        .flex_shrink_0()
                         .min_h_0()
                         .border_t_1()
                         .border_color(rgb(visual.border))
@@ -422,7 +445,7 @@ impl Render for FilesPanel {
                         .child(diff.clone()),
                 );
             }
-            body = body.child(editor_panel);
+            editor_card = Some(editor_panel.test_support());
         }
         let selection = self
             .selected
@@ -434,19 +457,105 @@ impl Render for FilesPanel {
             .selected
             .as_ref()
             .is_some_and(|entry| !entry.is_symlink);
-        let mut panel = div().w_full().min_w_0().h_full().min_h_0().flex().flex_col().bg(rgb(visual.surface)).text_color(rgb(visual.text)).text_xs()
-            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_b_1().border_color(rgb(visual.border))
-                .child(div().text_color(rgb(visual.accent)).child(IconName::FolderOpen))
-                .child(div().text_color(rgb(visual.muted)).child(t(cx,"远程目录","Remote path")))
-                .child(div().flex_1().min_w_0().child(Input::new(&self.path).small().rounded(px(6.))))
-                .child(Button::new("parent-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).label(t(cx,"上级","Up")).on_click(cx.listener(|view,_,window,cx| {
-                    if let Some(directory) = &view.directory { view.run(Operation::List(format!("{}/..",directory.trim_end_matches('/'))),window,cx); }
-                })))
-                .child(Button::new("refresh-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::RefreshCw).label(t(cx,"刷新","Refresh")).on_click(cx.listener(|view,_,window,cx|view.run(Operation::List(view.path.read(cx).value().to_string()),window,cx))))
-                .child(div().max_w(px(160.)).min_w_0().text_ellipsis().text_color(rgb(visual.muted)).child(self.host.clone())))
-            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().bg(rgb(visual.canvas)).text_color(rgb(visual.muted)).child(t(cx, "上一会话快照 · 草稿可复制，远程操作已停用", "Previous session snapshot · Copy drafts; remote actions are disabled"))))
-            .child(body.test_support())
-            .when(self.pending.is_none(), |panel| panel
+        let mut panel = div()
+            .w_full()
+            .min_w_0()
+            .h_full()
+            .min_h_0()
+            .flex()
+            .flex_col()
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
+            .text_xs()
+            .child(
+                div()
+                    .h(px(38.))
+                    .px_3()
+                    .flex_shrink_0()
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .border_b_1()
+                    .border_color(rgb(visual.border))
+                    .child(
+                        div()
+                            .text_color(rgb(visual.accent))
+                            .child(IconName::FolderOpen),
+                    )
+                    .child(div().text_color(rgb(visual.muted)).child(t(
+                        cx,
+                        "远程目录",
+                        "Remote path",
+                    )))
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .child(Input::new(&self.path).small().rounded(px(6.))),
+                    )
+                    .child(
+                        Button::new("parent-files")
+                            .disabled(self.suspended)
+                            .ghost()
+                            .compact()
+                            .rounded(px(6.))
+                            .icon(IconName::ArrowUp)
+                            .label(t(cx, "上级", "Up"))
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                if let Some(directory) = &view.directory {
+                                    view.run(
+                                        Operation::List(format!(
+                                            "{}/..",
+                                            directory.trim_end_matches('/')
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                }
+                            })),
+                    )
+                    .child(
+                        Button::new("refresh-files")
+                            .disabled(self.suspended)
+                            .ghost()
+                            .compact()
+                            .rounded(px(6.))
+                            .icon(IconName::RefreshCw)
+                            .label(t(cx, "刷新", "Refresh"))
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                view.run(
+                                    Operation::List(view.path.read(cx).value().to_string()),
+                                    window,
+                                    cx,
+                                )
+                            })),
+                    )
+                    .child(
+                        div()
+                            .max_w(px(160.))
+                            .min_w_0()
+                            .text_ellipsis()
+                            .text_color(rgb(visual.muted))
+                            .child(self.host.clone()),
+                    ),
+            )
+            .when(self.suspended, |panel| {
+                panel.child(
+                    div()
+                        .px_3()
+                        .py_1()
+                        .flex_shrink_0()
+                        .bg(rgb(visual.canvas))
+                        .text_color(rgb(visual.muted))
+                        .child(t(
+                            cx,
+                            "上一会话快照 · 草稿可复制，远程操作已停用",
+                            "Previous session snapshot · Copy drafts; remote actions are disabled",
+                        )),
+                )
+            })
+            .child(body.test_support());
+        tools = tools.when(self.pending.is_none(), |panel| panel
             .child(div().id("file-mutation-tools").min_h(px(38.)).px_3().py_1().flex_shrink_0().flex().flex_wrap().items_center().gap_2().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border))
                 .child(div().w(px(150.)).flex_shrink_0().text_ellipsis().text_color(rgb(if has_selection {visual.text} else {visual.muted})).child(selection.to_owned()))
                 .child(div().id("file-name-draft").w(px(180.)).flex_shrink_0().child(Input::new(&self.name).small().rounded(px(6.))).test_support())
@@ -540,13 +649,16 @@ impl Render for FilesPanel {
                     }
                     cx.notify();
                 })))));
+        if let Some(editor) = editor_card {
+            tools = tools.child(editor);
+        }
         if let Some(comparison) = &self.comparison {
             let can_apply = comparison
                 .sync_plan
                 .as_ref()
                 .is_some_and(|p| p.operation_count() > 0);
             let disabled = self.suspended || self.busy || self.pending.is_some();
-            panel = panel.child(
+            tools = tools.child(
                 div()
                     .mx_2()
                     .flex_shrink_0()
@@ -631,11 +743,12 @@ impl Render for FilesPanel {
                             })),
                     ),
             );
-            panel = panel.child(directory_compare_card(comparison, cx));
+            tools = tools.child(directory_compare_card(comparison, cx));
         }
         if self.transfer.is_some() {
-            panel = panel.child(self.transfer_card(cx));
+            tools = tools.child(self.transfer_card(cx));
         }
+        panel = panel.child(tools);
         if let Some((message, _)) = &self.pending {
             panel = panel.child(confirmation_bar(
                 cx,

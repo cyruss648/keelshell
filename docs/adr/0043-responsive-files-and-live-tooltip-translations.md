@@ -21,13 +21,28 @@ shrink into clipped labels, and the transfer row no longer relies on horizontal
 scrolling to expose its final action. The header limits the secondary host label
 so the navigation input and primary navigation actions retain space.
 
+Independent review of the first implementation (`85eb16a`) found that wrapping
+still consumed the workspace's fixed 232px minimum file area. A 28px browsing
+area showed only its header; completed transfers and comparisons could remove
+the browser entirely. The corrected layout reserves at least 64px for the table
+header, one actual 28px SFTP row and scrollbar space. A single bounded vertical
+scroll area contains the action rows, editor, comparison and transfer cards.
+The Kit scrollbar and ordinary GPUI scroll handle expose all controls
+without allowing their natural height to push browsing or status outside the
+file panel. The editor uses the full action-area width, so it no longer narrows
+the file list when the assistant is open. Its content and diff retain their
+existing drafts and reviewed save behavior.
+
 When an operation awaits explicit confirmation, the pending review temporarily
 replaces the two action rows. Its complete source/destination text, Confirm and
 Cancel use the existing bounded review component. The hidden inputs retain their
-entities and values; cancelling restores the controls and drafts. This prevents
-the wrapped toolbar plus a long review from pushing approval out of a minimum
-window and keeps the user focused on the exact pending operation. It does not
-change the confirmation or worker logic.
+entities and values; cancelling restores the controls and drafts. Review text is
+complete in its scrollable viewport, capped at 48px; Confirm/Cancel stay outside
+the action scroll area. Existing comparison and transfer controls remain
+reachable by scrolling during review, including the comparison close action
+that cancels its own pending sync. This budgets long review messages alongside
+secondary states without losing a real file row. It does not change confirmation
+targets or worker logic.
 
 File diff previews use the application's semantic canvas/text tokens in both
 appearances, extending ADR 0036's file-preview decision. Terminal ANSI/OSC colors
@@ -54,11 +69,18 @@ in the application to make the test pass.
 ## Verification and limits
 
 Real GPUI rendering checks both languages, Light/Dark, 900×580 and 1440×900,
-assistant on/off, all eleven file actions, fixed input widths and at least one
-remaining browsing row. The scene mounts production FilesPanel and AssistantPanel
+assistant on/off, all eleven file actions reached by platform wheel input,
+fixed input widths and an actually loaded/painted SFTP data row inside the list,
+table and browser bounds. The scene mounts production FilesPanel and AssistantPanel
 and reserves the same monitor width; it does not claim to be a full workspace or
-a native desktop screenshot. A controlled TCP SSH/SFTP test clicks the wrapped
-controls, checks exact reviewed targets, cancels, and verifies no file mutation.
+a native desktop screenshot. Further production-theme scenes cover actual
+running/paused/completed uploads, directory comparison, editor/diff, pending
+long-path upload/save and suspended snapshots. Tests click the first data row,
+scroll to controls, confirm and read back uploaded bytes, pause/resume, open an
+actual file, cancel save and verify the remote file and unsent draft. Comparison
+starts a new workflow and retires the previous transfer card; these tests retain
+that production lifecycle rather than inventing simultaneous comparison/transfer
+cards. The exact-target cancellation regression remains in place.
 The tooltip regression observes its actually painted role/label and bounds after
 hover, then switches English→Chinese→English with an unchanged mouse position.
 
