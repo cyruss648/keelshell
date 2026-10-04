@@ -71,6 +71,8 @@ AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解�
 
 应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。专业视觉升级、本地 Claude Code/Codex 智能体及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力。
 
+对外 MCP 的独立 stdio 服务端基础已实现并通过独立复审，默认关闭，工具限于授权读取和待人工审阅的命令提案。桌面授权与真实 SSH 桥接仍在开发，当前服务尚不能访问应用会话，详见[服务端验证](docs/testing/records/2026-10-04-mcp-stdio-server.md)。
+
 <details>
 <summary>查看 AI 配置界面</summary>
 

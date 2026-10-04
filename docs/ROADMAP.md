@@ -30,7 +30,7 @@ OpenSSH 配置导入已接入安全子集：精确 Host、HostName、Port、User
 | D1 | UI-01/02/06：System/Light/Dark、语义token、设计资料库 | 主题基础已实现：System默认/旧配置迁移、窗口通知、语义palette、显式切换/后台保存；866普通+6文档、47打包和新独立审查通过；macOS两会话/草稿/明暗重启证实。真实OS变化、900×580原生、全屏矩阵与Windows/Linux原生未关闭，见[主题记录](testing/records/2026-10-04-system-themes.md) |
 | D2 | UI-03/04/05：丰富但克制的控件、专业工作区、模态/日志/滚动 | 继续实施；主题token基础见D1。按连接/终端/文件任务/AI设置逐屏升级；修复英文SFTP页脚在AI打开时裁切、已展开tooltip语言滞留及背景模态AX隔离；独立截图审查与最小原生窗口验收 |
 | A1 | 共享API/LocalAgent配置、上下文与授权契约 | 已规划；配置与凭据引用分离，明确运行方与发送范围；支持能力检测而不是伪造endpoint |
-| A2 | MCP-01至04：KeelShell对外MCP | 已规划；stdio应用桥接、连接/工具作用域、受限读取、应用端精确审核和撤权；外部Claude Code/Codex真实调用后才能关闭 |
+| A2 | MCP-01至04：KeelShell对外MCP | 独立stdio服务端基础已实现：默认关闭、七项固定工具、会话/路线/工具/路径授权契约、有界读取与待审提案、撤权/取消和输入输出背压；34普通+1文档与新独立进程复审通过。桌面IPC、真实SSH桥接及原生人工批准尚未接通；外部Claude Code/Codex真实调用后才能关闭，见[服务端记录](testing/records/2026-10-04-mcp-stdio-server.md) |
 | A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | 已规划；先检测/Ask/结构化流，再受限工具/审批；三平台进程清理、真实CLI版本互通与旧会话隔离须分别证明 |
 
 D1先于后续新界面，原有后端与任务目标继续保留。全部新增条目的细节、参考与验收见正式计划；“本地智能体”不是本地terminal管理，也不等于模型离线。

@@ -69,6 +69,8 @@ API keys stay in memory by default and can be explicitly saved encrypted. Saving
 
 Appearance supports System, Light and Dark, defaulting to System and preserving SSH sessions and unsent drafts when switched. macOS switching and restart persistence are verified; native checks on other platforms and the full visual matrix remain open. See the [theme record](docs/testing/records/2026-10-04-system-themes.md). The visual refresh, local Claude Code/Codex adapters and a KeelShell MCP server for external agents continue under the [development plan](docs/product/DESIGN_AND_AGENT_PLAN.md).
 
+The independent MCP stdio server foundation is implemented and independently reviewed. It defaults disabled and offers scoped reads and command proposals for human review. Desktop authorization and real SSH bridging remain in development; the current server cannot access application sessions. See the [server record](docs/testing/records/2026-10-04-mcp-stdio-server.md).
+
 <details>
 <summary>View AI settings</summary>
 

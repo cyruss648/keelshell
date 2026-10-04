@@ -6,6 +6,7 @@
 
 - 明暗两种主题，默认跟随系统，显式切换与配置持久化；采用更丰富但克制的元素/语义色和专业一致的视觉。主题基础已完成System默认、明暗切换/保存与语义palette；866普通+6文档、47打包、新独立审查及macOS部分原生通过，边界见[主题记录](testing/records/2026-10-04-system-themes.md)。
 - AI配置新增本地Claude Code/Codex CLI，不限模型API；提供MCP服务端给外部智能体调用。用户明确排除KeelShell接入其他第三方MCP服务的通用客户端，后续不得扩大该范围。
+- 独立`keelshell-mcp` stdio服务端基础已实现，官方`rmcp = "3.5"`、默认关闭，七项固定工具只提供授权读取/待审提案；34普通+1文档、新独立审查及背压/洪泛真实进程复核通过。当前binary使用DisconnectedBackend，桌面IPC、真实SSH和原生人工批准未接通；不能宣称外部智能体已读到应用会话。见[ADR0037](adr/0037-external-mcp-stdio-server.md)与[记录](testing/records/2026-10-04-mcp-stdio-server.md)。
 - 正式任务ID、顺序、架构边界与验收见[设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)，参考选型和现有skills见[设计资料库](design/README.md)，来源/版本核对见[计划记录](testing/records/2026-10-04-design-agent-planning.md)。先收敛已开始后端，再建立主题基础；新增界面复用同一体系。
 - 主题实现已复用System/Dark/Light字段，不升schema，默认/缺字段为System，保留旧明示Light；Kit模式与palette同步，保存成功才应用，系统回调不写配置，主题保存不推进命令来源revision。真实OS变化/最小原生窗口/WindowsLinux原生仍未验收，见[ADR0036](adr/0036-system-appearance-and-semantic-palette.md)。
 - 用户追加并行工程要求：允许多个子代理/worktree并行不相关功能，完成后新开独立代理评审与功能复核，合并后及时清理分支/worktree/临时进程或容器；可使用本机Podman建立隔离服务真实联调，不能将容器或模拟视为目标桌面验收。
