@@ -7,10 +7,12 @@
 ## 已验证
 
 - `cargo check -p keelshell-app --locked` 通过。
-- `cargo test -p keelshell-app --locked -- --test-threads=4` 通过，260 项测试通过。
+- `cargo test -p keelshell-app --locked -- --test-threads=4` 通过，当前工作区 263 项测试通过。
 - `recovery_candidate_is_derived_only_from_started_transfer_operations` 通过：实际上传/下载操作可以生成候选，`PlanResume` 和目录浏览等只读操作不会被当作已开始的传输。
 - 恢复按钮只在当前文件面板仍绑定同一会话令牌、面板未挂起、传输已失败且没有其他操作运行时显示。
 - 恢复按钮只调用新的 `PlanResume` 只读校验；计划完成后仍进入既有确认栏，不会直接写入目标。
+- `PlanResume` 的成功、失败或取消不会把旧失败传输卡改成完成或取消；只有真实写入操作才更新传输终态。
+- 恢复按钮处理器在执行前重新核对会话、失败阶段、忙碌和待审核条件；状态变化后的旧点击不会替换现有审核，也不会清除待审核操作。
 - 面板挂起时会清除恢复候选并更换令牌；晚到的工作线程结果不能跨面板恢复旧操作。
 
 ## 未验证边界

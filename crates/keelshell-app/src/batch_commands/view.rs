@@ -222,12 +222,12 @@ impl Render for BatchPanel {
                 .when_some(self.review.as_ref(),|el,review| el.child(div().id("batch-review").test_support().flex_shrink_0().min_w_0().p_3().rounded_md().bg(rgb(CANVAS)).flex().flex_col().gap_2()
                     .child(hint(format!("{} {} · {} {}s · {}",t(cx,"并发","Concurrency"),review.concurrency,t(cx,"单主机超时","Per-host timeout"),review.timeout_seconds,if review.stop_after_failure {t(cx,"失败后停止等待项","Stop pending on failure")} else {t(cx,"失败后继续","Continue on failure")})))
                     .child(hint(t(cx,"模板源（仅支持 {{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；以下为每个目标的最终命令）","Template source (supports only {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; final command per target follows)")))
-                    .child(div().id("batch-reviewed-command").test_support().font_family("monospace").child(review.command.clone()))
+                    .child(div().id("batch-reviewed-command").test_support().min_w_0().whitespace_normal().font_family("monospace").child(review.command.clone()))
                     .child({
-                        let mut rendered = div().id("batch-reviewed-target-commands").test_support().flex().flex_col().gap_2().max_h(px(320.));
+                        let mut rendered = div().id("batch-reviewed-target-commands").test_support().min_h_0().flex().flex_col().gap_2().max_h(px(320.)).overflow_y_scroll();
                         for (index, (id, command)) in review.commands.iter().enumerate() {
                             let label = self.rows.iter().find(|row| row.destination.id == *id).map(|row| row.destination.endpoint.clone()).unwrap_or_else(|| id.to_string());
-                            rendered = rendered.child(div().id(("batch-reviewed-target-command", index)).test_support().min_w_0().p_2().rounded_md().bg(rgb(SURFACE)).child(hint(label)).child(div().font_family("monospace").child(command.clone())));
+                            rendered = rendered.child(div().id(("batch-reviewed-target-command", index)).test_support().min_w_0().p_2().rounded_md().bg(rgb(SURFACE)).child(hint(label)).child(div().min_w_0().whitespace_normal().font_family("monospace").child(command.clone())));
                         }
                         rendered
                     })))

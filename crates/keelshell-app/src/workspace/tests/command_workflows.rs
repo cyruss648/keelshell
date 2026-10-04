@@ -2,8 +2,9 @@
 use super::*;
 use crate::command_suggestions::SuggestionSource;
 use gpui_kit::{
-    App, Window,
+    App, ScrollDelta, Window,
     component::{WindowExt, input::AnyInputState},
+    point, px,
 };
 use keelshell_core::{BatchAuditRecord, BatchAuditSummary, Snippet};
 #[path = "batch_peer.rs"]
@@ -287,6 +288,21 @@ async fn batch_template_review_binds_distinct_target_commands_and_separates_term
         );
         assert!(
             window
+                .try_find(("batch-reviewed-target-command", 1_usize))
+                .is_some()
+        );
+        let list = window.find("batch-reviewed-target-commands").bounds();
+        let last = window
+            .find(("batch-reviewed-target-command", 1_usize))
+            .bounds();
+        window.scroll(
+            "batch-reviewed-target-commands",
+            ScrollDelta::Pixels(point(px(0.), list.origin.y + px(8.) - last.bottom())),
+            cx,
+        );
+        window.render_frame(cx);
+        assert!(
+            window
                 .find(("batch-reviewed-target-command", 1_usize))
                 .visible()
         );
@@ -335,6 +351,26 @@ async fn batch_template_review_binds_distinct_target_commands_and_separates_term
     });
     assert!(clip.contains("fixture stdout"));
     assert!(!clip.contains('\u{1b}'));
+}
+
+#[gpui_kit::test]
+async fn batch_literal_review_preserves_exact_bytes_and_separates_terminal_history(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx, [0, 7]);
+    let text = "printf '中文'\nprintf 'two'";
+    h.prepare(text, "2", cx);
+    assert!(h.servers.iter().all(|server| server.requests().is_empty()));
+    h.confirm(cx);
+    h.complete(cx).await;
+    cx.run_until_parked();
+    for server in &h.servers {
+        assert_eq!(server.requests(), vec![text.as_bytes().to_vec()]);
+    }
+    assert!(h.panes.iter().all(|pane| writes(pane).is_empty()));
+    h.fixture
+        .workspace
+        .read_with(cx, |view, _| assert!(view.command_histories.is_empty()));
 }
 
 #[gpui_kit::test]

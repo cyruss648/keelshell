@@ -126,6 +126,22 @@ fn recovery_is_available(
         && phase == Some(TransferPhase::Failed)
         && candidate.is_some_and(|candidate| candidate.session_token == session_token)
 }
+
+/// Guard the explicit recovery click against state that can change after the
+/// card was rendered. A pending approval must remain untouched when the click
+/// is rejected; the caller may still be waiting for the user to confirm it.
+fn recovery_request_is_allowed(
+    candidate: Option<&RecoveryCandidate>,
+    session_token: uuid::Uuid,
+    session_available: bool,
+    suspended: bool,
+    busy: bool,
+    pending: bool,
+    phase: Option<TransferPhase>,
+) -> bool {
+    session_available
+        && recovery_is_available(candidate, session_token, suspended, busy, pending, phase)
+}
 impl Drop for FilesPanel {
     fn drop(&mut self) {
         if let Some(stop) = &self.operation_stop {
@@ -202,6 +218,23 @@ enum FileFailure {
         error: Box<FileFailure>,
     },
 }
+
+/// Return a terminal phase only for an operation that actually transferred
+/// bytes. Read-only plans must leave an older failed transfer card untouched.
+fn terminal_transfer_phase(
+    is_transfer: bool,
+    result: &Result<Outcome, FileFailure>,
+) -> Option<TransferPhase> {
+    if !is_transfer {
+        return None;
+    }
+    Some(match result {
+        Ok(_) => TransferPhase::Completed,
+        Err(error) if error.is_cancelled() => TransferPhase::Cancelled,
+        Err(_) => TransferPhase::Failed,
+    })
+}
+
 impl From<SessionError> for FileFailure {
     fn from(error: SessionError) -> Self {
         Self::Transport(error.to_string())
@@ -559,8 +592,10 @@ impl FilesPanel {
             self.operation_stop = None;
             self.operation_id = None;
             self.transfer_pause = None;
-            self.recovery = None;
-            if let Some(transfer) = &mut self.transfer {
+            if is_transfer {
+                self.recovery = None;
+            }
+            if is_transfer && let Some(transfer) = &mut self.transfer {
                 transfer.phase = TransferPhase::Failed;
             }
             self.status =
@@ -617,12 +652,10 @@ impl FilesPanel {
                 view.operation_stop = None;
                 view.operation_id = None;
                 view.transfer_pause = None;
-                if let Some(transfer) = &mut view.transfer {
-                    transfer.phase = match &result {
-                        Ok(_) => TransferPhase::Completed,
-                        Err(error) if error.is_cancelled() => TransferPhase::Cancelled,
-                        Err(_) => TransferPhase::Failed,
-                    };
+                if let Some(phase) = terminal_transfer_phase(is_transfer, &result)
+                    && let Some(transfer) = &mut view.transfer
+                {
+                    transfer.phase = phase;
                 }
                 if view.suspended {
                     // A late worker may acknowledge a write, but may not replace the
@@ -833,13 +866,39 @@ impl FilesPanel {
         let Some(candidate) = self.recovery.as_ref() else {
             return;
         };
-        if self.suspended || self.session.is_none() || candidate.session_token != self.session_token
-        {
+        let session_valid = !self.suspended
+            && self.session.is_some()
+            && candidate.session_token == self.session_token;
+        let phase = self.transfer.as_ref().map(|transfer| transfer.phase);
+        let allowed = recovery_request_is_allowed(
+            Some(candidate),
+            self.session_token,
+            self.session.is_some(),
+            self.suspended,
+            self.busy,
+            self.pending.is_some(),
+            phase,
+        );
+        if !allowed {
+            if !session_valid || phase != Some(TransferPhase::Failed) {
+                self.recovery = None;
+            }
             self.status = Message::new(
-                "恢复建议已失效，请在当前 SSH 会话中重新选择源和目标",
-                "The recovery proposal is stale; choose the source and destination again in the current SSH session",
+                if self.busy {
+                    "当前文件操作仍在进行，请等待完成后再恢复"
+                } else if self.pending.is_some() {
+                    "当前操作仍待审核，请先处理审核栏"
+                } else {
+                    "恢复建议已失效，请在当前 SSH 会话中重新选择源和目标"
+                },
+                if self.busy {
+                    "A file operation is still running; wait before recovery"
+                } else if self.pending.is_some() {
+                    "An operation is awaiting review; handle the review bar first"
+                } else {
+                    "The recovery proposal is stale; choose the source and destination again in the current SSH session"
+                },
             );
-            self.recovery = None;
             cx.notify();
             return;
         }
@@ -1116,9 +1175,10 @@ fn confirmation_bar(message: String, confirm: Button, cancel: Button) -> impl In
 #[cfg(test)]
 mod tests {
     use super::{
-        FileFailure, Operation, RecoveryCandidate, TransferDirection, TransferPhase, child_path,
-        modified_label, parse_permissions_mode, permissions_label, recovery_is_available,
-        size_label, transfer_progress_message,
+        FileFailure, Operation, Outcome, RecoveryCandidate, TransferDirection, TransferPhase,
+        child_path, modified_label, parse_permissions_mode, permissions_label,
+        recovery_is_available, recovery_request_is_allowed, size_label, terminal_transfer_phase,
+        transfer_progress_message,
     };
     use keelshell_session::sftp::RemoteEntry;
 
@@ -1243,6 +1303,68 @@ mod tests {
             false,
             Some(TransferPhase::Failed),
         ));
+    }
+
+    #[test]
+    fn read_only_resume_plan_never_rewrites_failed_transfer_phase() {
+        let success: Result<Outcome, FileFailure> =
+            Ok(Outcome::Done(crate::i18n::Message::empty()));
+        let failed: Result<Outcome, FileFailure> = Err(FileFailure::WorkerStopped);
+        let cancelled: Result<Outcome, FileFailure> = Err(FileFailure::Cancelled);
+        for result in [&success, &failed, &cancelled] {
+            assert_eq!(terminal_transfer_phase(false, result), None);
+        }
+        assert_eq!(
+            terminal_transfer_phase(true, &success),
+            Some(TransferPhase::Completed)
+        );
+        assert_eq!(
+            terminal_transfer_phase(true, &failed),
+            Some(TransferPhase::Failed)
+        );
+        assert_eq!(
+            terminal_transfer_phase(true, &cancelled),
+            Some(TransferPhase::Cancelled)
+        );
+    }
+
+    #[test]
+    fn recovery_click_guard_rejects_changed_state_without_requiring_a_new_candidate() {
+        let token = uuid::Uuid::new_v4();
+        let candidate = RecoveryCandidate {
+            session_token: token,
+            spec: keelshell_session::sftp::TransferSpec::download(
+                "/srv/source.txt",
+                "/tmp/source.txt",
+            ),
+            directory: false,
+        };
+        assert!(recovery_request_is_allowed(
+            Some(&candidate),
+            token,
+            true,
+            false,
+            false,
+            false,
+            Some(TransferPhase::Failed),
+        ));
+        for (session_available, suspended, busy, pending, phase) in [
+            (false, false, false, false, Some(TransferPhase::Failed)),
+            (true, true, false, false, Some(TransferPhase::Failed)),
+            (true, false, true, false, Some(TransferPhase::Failed)),
+            (true, false, false, true, Some(TransferPhase::Failed)),
+            (true, false, false, false, Some(TransferPhase::Completed)),
+        ] {
+            assert!(!recovery_request_is_allowed(
+                Some(&candidate),
+                token,
+                session_available,
+                suspended,
+                busy,
+                pending,
+                phase,
+            ));
+        }
     }
 
     fn entry(mode: Option<u32>, directory: bool, symlink: bool) -> RemoteEntry {
