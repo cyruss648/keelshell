@@ -134,3 +134,85 @@ owned monitor于900秒期限终止GUI（exit -15），fixture正常退出0并删
 `cleanup-receipt.json`确认五个owned PID不存在、夹具监听消失、private
 TMPDIR为空，profile不含临时MCP能力或密码。新的批准/拒绝/运行中撤权、
 重启默认关闭和Windows/Linux原生仍需分别验收。
+
+
+### 原生复核与首条提案回归 — 2026-10-05
+
+第二次标准包另存`work/mcp-final-native-pass2-20261005/`。源码提交
+`34cff1b`的生产文件与前次门禁/首次包相同；再次标准构建、双程序打包、
+原生结构检查及六文件归档检查通过。GUI/MCP SHA与首次包相同，ZIP
+SHA-256为`fe7122e091569a7592db3448780637eb44ee17367eec8c0f49b0dc385e9c98e3`；
+仍为开发包（build_commit:null），没有安装或发布。
+
+本轮GUI/真实SSH/SFTP/独立stdio完成前次所有读取检查、首次精确命令
+批准成功并显示中文stdout/stderr、第二提案人工拒绝、第三挂起提案
+Running后关闭授权。GUI显示OutcomeUnknown且不含输出，旧stdio失效
+（adapter exit1）；这不证明远端进程停止。之后浅色/英文下重新只授予
+ListSessions，Cmd-Q退出、同一隔离profile重启，确认默认关闭、没有
+授权/选区/提案，复制与授权按钮禁用，英文/浅色设置保留。
+
+本次CUA在正文发送`down`时处于顶部未移动；发送`up`时正文向上移动，
+精确命令和审批/拒绝按钮完整进入视口，随后实际点击完成流程。这是
+此次原生自动化输入的观察，不推导系统滚轮设置或所有用户设备行为。
+独立GPUI探针亦否定零滚动范围假说，没有修改生产布局来处理未证明
+缺陷。首次240秒未完成的尝试仍保留，不覆盖其receipt。
+
+独立只读探针在冻结副本上使用既有grant按钮及后台canonical校验，
+验证37字节实际read_selection与`/approved`授权。六/七项工具、中文/
+英文、1440×900/900×580形成八种state；32项原始MouseMoveEvent与
+ScrollWheelEvent覆盖正文中央/左空白边缘、Pixels/Lines单位，要求
+审批按钮实际位移并完整进入正文、固定footer不动。该夹具仅验证
+SFTP会话布局，无SSH执行，不代替上方combined原生业务。最终receipt
+SHA-256 `3f2dd6d14b0491619c3ef5844d51da3680f914352ab454bc42394343c56ed0d9`，
+最终log SHA-256 `721b87224f9f48524655cd978ee9c2f6581f98bef1c5671da8f54d7fb0d7e638`。
+探针准备期间四份失败log、初版helper说明和最终正常按钮setup分别保留。
+
+根将有意义的首条短提案场景整理为独立测试module；只新增test覆盖，
+无生产源码变化。新的独立审查与最终门禁结果另行追加。原生owned
+GUI、restart、Probe、client、adapter、fixture均退出，fixture root删除、
+监听消失、private TMPDIR为空，profile无临时MCP能力/密码，见本轮
+`native-flow-receipt.json`及`cleanup-receipt.json`。
+
+整合提交已推送开发分支，远端exact ref核对及ahead/behind 0/0；
+[Quality 37217653868](https://github.com/cyruss648/keelshell/actions/runs/37217653868)
+已在macOS/Ubuntu/Windows全部成功，macOS/Linux独立OpenSSH互通也成功；完整CI日志另存并校验，不代表Windows/Linux原生GUI。SDK author worktree已可恢复
+归档，全部2108份ignored证据已SHA复制保留，已合SDK本地分支删除。
+供应商MCP客户端、Windows/Linux原生窗口、六目标Release、签名/
+公证与实际安装更新继续保留验收边界。
+
+根新增test整理的两次编译失败（TestAppContext读取方式、平台事件所有权）
+分别保留targeted与targeted-repaired日志；修正后专项通过1项，最终回归
+source重新冻结，不作为生产transport失败。
+
+
+### 新增回归的最终根门禁与独立审查 — 2026-10-05
+
+冻结基线`34cff1bd6607dc1c15a2048ae724928ae99ea267`，四文件staged tree
+`c21c023b7b267367804306874d711c49991dade0`；新增回归source SHA-256
+`20260f553f1322fa2192dbf36326623ce6afff88b8acbd92aa1290e12cca8abd`。
+生产源码不变，只补测试与验收记录。最终根完整workspace门禁通过989普通、
+8文档、6脚本测试、默认及额外2 MiB完整CLI控制器，格式、全工作区all-target
+strict Clippy与x.y策略通过。10项外部配置测试未提供环境而忽略；不以此
+代替供应商CLI或OpenSSH业务验收。门禁log SHA-256：
+`799c9759a3acf9cb476e33874b5077e2b05d57fbdb934f93e5d68a5dee863f44`。
+打包源码未变化，沿用此前57项本地打包回归，不重复计入Rust测试数。
+
+新开独立reviewer未参与实现或原探针，完整导出并冻结429份index文件，
+验证前后SHA一致；独立source/CoW target上MCP UI专项9项通过（正文6.88秒），
+格式、app all-target strict Clippy及x.y通过，private TMPDIR为空；没有
+可复现P1/P2。其新委派只读证据reviewer核对18项probe evidence、32原始
+事件/8种geometry、标准包/原生flow/清理receipt，也无P1/P2。报告SHA-256
+`7f54baa51f48b8fb375013541d8e8cfaada1faf9049a9f8a293434f104c37456`；
+receipt SHA-256
+`1fea49e1e17eacebe3fad2e8d2db1e6209721e9265504cd6152c1725375468a9`。
+未把独立专项或probe当作原生OS输入或新一轮整仓检查。上游`block 0.1.6`
+future-compatibility notice保留，不是strict Clippy失败。
+
+生产提交34cff1b的Quality37217653868完整日志SHA-256
+`b98e220f4a5c8675aab6cf50a261cd1e2131d5a0da7e4e5a9e737e61277fa372`：
+macOS/Ubuntu各988普通+8doc，Windows968普通+8doc；两种完整CLI控制器
+三平台均成功。打包macOS/Linux各57通过，Windows53通过/4个Unix条件跳过；
+脚本macOS/Linux6通过，Windows5通过/1条件跳过；macOS/Linux各8项独立
+OpenSSH成功，owned进程/临时数据清理成功。此CI基线没有本次新增回归，
+新增源码提交的远端CI另行记录；Windows/Linux原生GUI、供应商MCP与正式
+发布/安装边界保持不变。根与reviewer完整失败和成功日志均在ignored work保留。

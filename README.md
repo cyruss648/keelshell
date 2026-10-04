@@ -72,7 +72,7 @@ AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解�
 
 应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。本地 CLI Ask 已通过实际安装版到回环服务的 macOS 窗口问答与取消验证；不复用订阅登录，没有 CLI 工具执行。专业视觉升级、Agent 工作流及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力。
 
-对外 MCP 已接通独立 stdio 伴随程序、桌面授权与真实 SSH/SFTP 桥接，默认关闭。macOS 隔离服务上的原生联调已验证明确片段/文件读取、越权拒绝、人工批准与拒绝、运行中撤权及重启回到关闭；这是自有外部协议客户端的验证，实际 Codex/Claude Code MCP 互通与其他平台原生验收仍待完成。使用见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)，证据见[桌面桥接记录](docs/testing/records/2026-10-04-mcp-desktop-bridge.md)。
+对外 MCP 已接通独立 stdio 伴随程序、桌面授权与真实 SSH/SFTP 桥接，默认关闭。标准 macOS 双程序开发包在隔离服务上的原生联调已验证明确片段/文件读取、越权拒绝、人工批准与拒绝、运行中撤权及重启回到关闭；这是自有外部协议客户端的验证，实际 Codex/Claude Code MCP 互通与其他平台原生验收仍待完成。使用见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)，证据见[桌面桥接记录](docs/testing/records/2026-10-04-mcp-desktop-bridge.md)和[标准包复核记录](docs/testing/records/2026-10-04-mcp-response-cancellation.md)。
 
 <details>
 <summary>查看 AI 配置界面</summary>

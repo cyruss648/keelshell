@@ -1,4 +1,7 @@
 //! Real GPUI consent/review actions over pinned loopback SSH handles.
+#[path = "mcp_first_proposal.rs"]
+mod first_proposal;
+
 use super::*;
 use gpui_kit::ScrollDelta;
 use keelshell_mcp::{ActionState, KeelShellMcpServer, McpFailure, SessionIdentity, ToolKind};

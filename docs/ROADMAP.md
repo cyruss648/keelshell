@@ -1,10 +1,10 @@
 # 开发路线
 
-MCP stdio 错误响应的接收取消窗口已用真实 SDK 与 ID4 进程超时证实；连接拥有的 I/O task 和有界 queue 已实现本地修复，971普通+8doc及默认/2 MiB控制器门禁通过。新的独立复审无P1/P2，另以原3秒read完成200次/4并发真实进程验证；新源码 CI 待完成，见[记录](testing/records/2026-10-04-mcp-response-cancellation.md)，不沿用旧 Windows/macOS CI 结果。
+MCP stdio 错误响应的接收取消窗口已用真实 SDK 与 ID4 进程超时证实；连接拥有的 I/O task 和有界 queue 已修复。最终根门禁989普通+8doc+6脚本、默认/2 MiB完整控制器、格式/严格Clippy/x.y通过；transport与新增首条短提案滚轮回归均经fresh独立审查，无P1/P2。生产提交34cff1b的三平台Quality及macOS/Linux OpenSSH已成功，新增回归的CI另行记录。标准macOS双程序开发包完成隔离SSH/SFTP读取、人工批准/拒绝、撤权与重启原生闭环；供应商MCP、Windows/Linux原生、六目标Release与实际安装更新未关闭，见[记录](testing/records/2026-10-04-mcp-response-cancellation.md)。
 
-更新：2026-10-04。目标是完整的远程 SSH 管理与运维工作流，并增加参考 DBX 的 AI 配置与辅助能力。最新进展、代码接续与未验证模块见 [交接记录](HANDOFF.md)。
+更新：2026-10-05。目标是完整的远程 SSH 管理与运维工作流，并增加参考 DBX 的 AI 配置与辅助能力。最新进展、代码接续与未验证模块见 [交接记录](HANDOFF.md)。
 
-新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通并完成macOS安装版CLI→回环服务原生问答/取消。MCP已接通受认证桌面桥接和macOS受控读取/人工审阅/撤权闭环，整合门禁963普通+8文档、6脚本通过。其余视觉矩阵、Agent/订阅登录、供应商MCP互通和其他平台原生继续实施。
+新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通并完成macOS安装版CLI→回环服务原生问答/取消。MCP已接通受认证桌面桥接和标准macOS双程序开发包受控读取/人工审阅/撤权闭环，最新整合门禁989普通+8文档、6脚本通过。其余视觉矩阵、Agent/订阅登录、供应商MCP互通和其他平台原生继续实施。
 
 | 阶段 | 范围 | 状态 |
 |---|---|---|
@@ -32,7 +32,7 @@ OpenSSH 配置导入已接入安全子集：精确 Host、HostName、Port、User
 | D1 | UI-01/02/06：System/Light/Dark、语义token、设计资料库 | 主题基础已实现：System默认/旧配置迁移、窗口通知、语义palette、显式切换/后台保存；866普通+6文档、47打包和新独立审查通过；macOS两会话/草稿/明暗重启证实。真实OS变化、900×580原生、全屏矩阵与Windows/Linux原生未关闭，见[主题记录](testing/records/2026-10-04-system-themes.md) |
 | D2 | UI-03/04/05：丰富但克制的控件、专业工作区、模态/日志/滚动 | 继续实施；主题token基础见D1。按连接/终端/文件任务/AI设置逐屏升级；修复英文SFTP页脚在AI打开时裁切、已展开tooltip语言滞留及背景模态AX隔离；独立截图审查与最小原生窗口验收 |
 | A1 | 共享API/LocalAgent配置、上下文与授权契约 | 已实现显式backend、旧配置API默认、路径/地址独立校验、准确stdin预览、版本/能力探针、取消/revision与vault v2精确backend/path绑定；详见[ADR0040](adr/0040-named-local-agent-settings-and-reviewed-asks.md) |
-| A2 | MCP-01至04：KeelShell对外MCP | 默认关闭的stdio伴随程序、双向认证/方向AEAD桌面IPC、精确活动SSH句柄、七项固定工具和原生人工审阅已接通。新独立复审、963普通+8文档整合门禁与macOS受控片段/SFTP读取、越权拒绝、批准/拒绝、撤权及重启闭环通过。实际Claude Code/Codex MCP、文件修改提案、最终发布包及其他平台原生仍待验证/实施，见[桌面记录](testing/records/2026-10-04-mcp-desktop-bridge.md)及[指南](product/EXTERNAL_MCP.md) |
-| A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | Codex0.160.0/Claude2.1.285固定Ask后端与应用接通；独立空目录/受控环境、完整JSONL终态与owned进程清理；929普通+8文档、47打包、新独立审查与macOS实际安装版→自有SSE窗口问答/取消/重启密钥失效通过。首轮新源码Windows CI出现控制器主线程栈溢出；两处读流缓冲已堆分配，尺寸与显式2MiB完整控制器回归通过，修复be9590f2的Windows原生CI已通过两种完整控制器，914普通+8文档；同次Linux另有MCP错误响应超时，整次CI仍失败，见[小栈记录](testing/records/2026-10-04-local-agent-windows-stack.md)。仅显式API密钥，不复用订阅登录；自定义工作目录/预算/环境引用、可见步骤流、Agent与Windows/Linux原生继续开发/验证，见[记录](testing/records/2026-10-04-local-agent-ui.md) |
+| A2 | MCP-01至04：KeelShell对外MCP | 默认关闭的stdio伴随程序、双向认证/方向AEAD桌面IPC、精确活动SSH句柄、七项固定工具和原生人工审阅已接通。fresh独立审查、989普通+8文档+6脚本整合门禁与标准macOS双程序开发包的受控片段/SFTP读取、越权拒绝、批准/拒绝、撤权及重启闭环通过。34cff1b三平台CI与macOS/Linux OpenSSH成功，新增回归CI另行记录。实际Claude Code/Codex MCP、文件修改提案、最终六目标Release及其他平台原生仍待验证/实施，见[标准包记录](testing/records/2026-10-04-mcp-response-cancellation.md)、[桌面记录](testing/records/2026-10-04-mcp-desktop-bridge.md)及[指南](product/EXTERNAL_MCP.md) |
+| A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | Codex0.160.0/Claude2.1.285固定Ask后端与应用接通；独立空目录/受控环境、完整JSONL终态与owned进程清理；929普通+8文档、47打包、新独立审查与macOS实际安装版→自有SSE窗口问答/取消/重启密钥失效通过。首轮新源码Windows CI出现控制器主线程栈溢出；两处读流缓冲已堆分配，尺寸与显式2MiB完整控制器回归通过，修复be9590f2的Windows原生CI已通过两种完整控制器，914普通+8文档；同次Linux另有MCP错误响应超时，整次CI仍失败；SDK取消窗口已修复，后续34cff1b三平台Quality通过，三平台默认与2 MiB完整控制器均成功，原失败记录保留，见[取消修复记录](testing/records/2026-10-04-mcp-response-cancellation.md)与[小栈记录](testing/records/2026-10-04-local-agent-windows-stack.md)。仅显式API密钥，不复用订阅登录；自定义工作目录/预算/环境引用、可见步骤流、Agent与Windows/Linux原生继续开发/验证，见[记录](testing/records/2026-10-04-local-agent-ui.md) |
 
 D1先于后续新界面，原有后端与任务目标继续保留。全部新增条目的细节、参考与验收见正式计划；“本地智能体”不是本地terminal管理，也不等于模型离线。

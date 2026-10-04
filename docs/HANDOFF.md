@@ -1,4 +1,4 @@
-# 开发交接 — 2026-10-04
+# 开发交接 — 2026-10-05
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
@@ -6,7 +6,7 @@
 
 - 明暗两种主题，默认跟随系统，显式切换与配置持久化；采用更丰富但克制的元素/语义色和专业一致的视觉。主题基础已完成System默认、明暗切换/保存与语义palette；866普通+6文档、47打包、新独立审查及macOS部分原生通过，边界见[主题记录](testing/records/2026-10-04-system-themes.md)。
 - AI配置新增本地Claude Code/Codex CLI，不限模型API；提供MCP服务端给外部智能体调用。用户明确排除KeelShell接入其他第三方MCP服务的通用客户端，后续不得扩大该范围。
-- 独立`keelshell-mcp` stdio服务端已接通受认证桌面IPC、真实SSH/SFTP句柄与人工批准，官方`rmcp = "3.5"`、默认关闭，七项固定工具只提供授权读取/待审提案。与CLI合并的本机门禁963普通+8文档、6脚本通过，新独立复审关闭；macOS受控原生证实OS复制启动配置、片段/目录/文件读取、越权拒绝、精确提案执行/拒绝、运行中撤权结果未知和重启默认关闭。真实供应商客户端MCP、最终发布包和Windows/Linux原生仍须验收；当前原生包显式复制companion不作为发布打包证明。见[ADR0039](adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[记录](testing/records/2026-10-04-mcp-desktop-bridge.md)与[指南](product/EXTERNAL_MCP.md)。
+- 独立`keelshell-mcp` stdio服务端已接通受认证桌面IPC、真实SSH/SFTP句柄与人工批准，官方`rmcp = "3.5"`、默认关闭，七项固定工具只提供授权读取/待审提案。与CLI合并的本机门禁963普通+8文档、6脚本通过，新独立复审关闭；macOS受控原生证实OS复制启动配置、片段/目录/文件读取、越权拒绝、精确提案执行/拒绝、运行中撤权结果未知和重启默认关闭。真实供应商客户端MCP、最终发布包和Windows/Linux原生仍须验收；该历史原生包显式复制companion不作为发布打包证明；2026-10-05标准双程序开发包的完整原生闭环见下方整合更新，不代表正式Release或安装更新。见[ADR0039](adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[记录](testing/records/2026-10-04-mcp-desktop-bridge.md)与[指南](product/EXTERNAL_MCP.md)。
 - 正式任务ID、顺序、架构边界与验收见[设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)，参考选型和现有skills见[设计资料库](design/README.md)，来源/版本核对见[计划记录](testing/records/2026-10-04-design-agent-planning.md)。先收敛已开始后端，再建立主题基础；新增界面复用同一体系。
 - 主题实现已复用System/Dark/Light字段，不升schema，默认/缺字段为System，保留旧明示Light；Kit模式与palette同步，保存成功才应用，系统回调不写配置，主题保存不推进命令来源revision。真实OS变化/最小原生窗口/WindowsLinux原生仍未验收，见[ADR0036](adr/0036-system-appearance-and-semantic-palette.md)。
 - 用户追加并行工程要求：允许多个子代理/worktree并行不相关功能，完成后新开独立代理评审与功能复核，合并后及时清理分支/worktree/临时进程或容器；可使用本机Podman建立隔离服务真实联调，不能将容器或模拟视为目标桌面验收。
@@ -14,7 +14,7 @@
 
 ## 2026-10-04 本地智能体接入
 
-2026-10-05整合更新：Linux MCP错误响应超时已由真实锁定SDK的确定性取消探针证明，修复`93f35ca`使用官方codec与两个连接拥有的I/O任务，SDK接收取消不再丢失排队/部分写入的错误响应。新独立审查无P1/P2，原3秒压力与EOF/背压/撤权保持；根整合988普通+8doc+6脚本、额外2 MiB完整CLI控制器、格式/严格Clippy/x.y及57打包通过。失败证据与独立审查已逐份SHA复制到主工作区；标准macOS双程序包实际读取选区/SFTP与越权拒绝通过；首条提案PendingReview后人工操作未完成，滚动/按钮遮挡原因正独立复核，原失败与owned清理回执保留。批准/拒绝/运行中撤权和新源码远端CI仍需追加，见[取消修复记录](testing/records/2026-10-04-mcp-response-cancellation.md)。
+2026-10-05整合更新：Linux MCP错误响应超时已由真实锁定SDK的确定性取消探针证明，修复`93f35ca`使用官方codec与两个连接拥有的I/O任务，SDK接收取消不再丢失排队/部分写入的错误响应。新独立审查无P1/P2，原3秒压力与EOF/背压/撤权保持；根整合988普通+8doc+6脚本、额外2 MiB完整CLI控制器、格式/严格Clippy/x.y及57打包通过。失败证据与独立审查已逐份SHA复制到主工作区；标准macOS双程序包第二轮完成实际选区/SFTP读取、越权拒绝、批准/拒绝、Running撤权结果未知与重启默认关闭；首次人工操作超时保留，后续观察到CUA滚轮方向差异，独立32原始事件场景通过，未改生产布局。根新增首条短提案32原始滚轮场景的最终门禁989普通+8doc+6脚本、默认/2 MiB完整控制器通过；fresh独立审查无P1/P2，独立9项MCP UI、格式/app strictClippy/x.y通过。生产提交34cff1b的Quality37217653868三平台及macOS/Linux OpenSSH全部成功；新增回归的远端CI另行记录，供应商MCP与Windows/Linux原生仍需验证，见[取消修复记录](testing/records/2026-10-04-mcp-response-cancellation.md)。
 
 - 命名AI配置已显式区分模型API、Codex CLI与Claude Code，旧metadata默认API；路径/base URL校验、probe、临时密钥/vault v2精确绑定、完整stdin审核与后台Ask/取消已接通。最终本机门禁929普通+8文档、6脚本、自托管进程harness、strictClippy/fmt/x.y与47打包通过；新独立core/app复审无剩余可复现P1/P2。
 - 最终macOS包SHA与原生证据见[记录](testing/records/2026-10-04-local-agent-ui.md)：实际安装版Codex0.160.0/Claude2.1.285→自有SSE问答，选择125字节SSH上下文、长JSON滚动/显式发送、建议入审核区、语言/主题保留、慢请求取消、重启密钥缺失均证实；退出后owned PIDs/listeners/scratch均清理。没有云端账户或客户SSH验收。

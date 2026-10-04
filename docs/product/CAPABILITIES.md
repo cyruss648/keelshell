@@ -1,8 +1,8 @@
 # Capability ledger
 
-MCP protocol error output now belongs to bounded connection I/O tasks and survives SDK receive cancellation. The local gate passed 971 ordinary tests, 8 doctests and both complete CLI controllers. A fresh independent review found no P1/P2 and independently passed 200 real-process runs at four-way concurrency with the original three-second response read. New-source CI remains pending in the [transport record](../testing/records/2026-10-04-mcp-response-cancellation.md); this is separate from desktop, supplier-client and native-platform acceptance.
+MCP protocol error output now belongs to bounded connection I/O tasks and survives SDK receive cancellation. The final local integration gate passed 989 ordinary tests, 8 doctests, 6 script tests and both complete CLI controllers. Fresh independent reviews found no P1/P2 in the transport repair and new first-proposal wheel-event regression. Production commit `34cff1b` passed Quality on macOS, Ubuntu and Windows, including separate macOS/Linux OpenSSH checks; CI for the newly added regression will be recorded separately. The standard macOS package containing both programs completed native isolated SSH/SFTP reads, human approval/rejection, revocation and restart checks. Supplier MCP clients, Windows/Linux native desktops and installed updates remain open; exact evidence and source boundaries are in the [transport and native record](../testing/records/2026-10-04-mcp-response-cancellation.md).
 
-Updated 2026-10-04. This ledger describes implementation and evidence separately. The target remains the [remote SSH requirements](../research/remote-ssh-requirements.md); a partial row does not waive its missing requirements.
+Updated 2026-10-05. This ledger describes implementation and evidence separately. The target remains the [remote SSH requirements](../research/remote-ssh-requirements.md); a partial row does not waive its missing requirements.
 
 | Area | Implemented in this workspace | Evidence / remaining acceptance |
 |---|---|---|
