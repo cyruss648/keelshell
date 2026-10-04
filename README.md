@@ -101,7 +101,7 @@ AI 密钥显式保存后，重启需要用主密码解锁，再应用到助手�
 | 平台 | 构建目标 | 包格式 |
 | --- | --- | --- |
 | macOS 15+ | Apple Silicon / Intel | `.app` 的 ZIP 包 |
-| Windows | ARM64 / x64 | EXE 与图标的 ZIP 包 |
+| Windows | ARM64 / x64 | GUI / MCP 两项 EXE 与图标的 ZIP 包 |
 | Linux | ARM64 / x64，Ubuntu 24.04 基线 | 包含程序与桌面资源的 `.tar.gz` |
 
 各平台实际构建与桌面验收状态见 [发布记录](docs/testing/records/2026-10-03-release.md)。当前分发流程尚未接入 macOS 签名、公证或 Windows 代码签名。构建、打包与标签发布步骤见 [发布说明](docs/RELEASING.md)。
@@ -113,6 +113,7 @@ AI 密钥显式保存后，重启需要用主密码解锁，再应用到助手�
 ```sh
 git clone https://github.com/cyruss648/keelshell.git
 cd keelshell
+cargo build -p keelshell-app -p keelshell-mcp --locked
 cargo run -p keelshell-app --locked
 ```
 

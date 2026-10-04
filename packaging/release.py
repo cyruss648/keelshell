@@ -39,6 +39,11 @@ BINARIES = {
     "linux": "usr/bin/keelshell-app",
     "windows": "keelshell-app.exe",
 }
+MCP_BINARIES = {
+    "macos": "KeelShell.app/Contents/MacOS/keelshell-mcp",
+    "linux": "usr/bin/keelshell-mcp",
+    "windows": "keelshell-mcp.exe",
+}
 MANIFEST = "package-manifest.json"
 MAX_MANIFEST = 16 * 1024 * 1024
 MAX_MEMBERS = 20_000
@@ -129,7 +134,7 @@ def receipt(data: bytes, platform: str, value: str, target: str) -> dict:
     require(result.get("installed") is False and result.get("signed_by_packaging_script") is False
             and result.get("native_acceptance") == "not performed by this script",
             "Package receipt must retain package.py's explicit acceptance boundaries")
-    for field in ("binary_sha256", "icon_source_sha256"):
+    for field in ("binary_sha256", "mcp_binary_sha256", "icon_source_sha256"):
         require(isinstance(result.get(field), str) and HEX.fullmatch(result[field]) is not None,
                 f"Invalid {field} in package manifest")
     files = result.get("files")
@@ -146,6 +151,8 @@ def receipt(data: bytes, platform: str, value: str, target: str) -> dict:
             "Case-colliding package paths are not portable")
     require(BINARIES[platform] in files, "Package manifest does not contain the executable")
     require(files[BINARIES[platform]] == result["binary_sha256"], "Executable checksum disagrees with receipt")
+    require(MCP_BINARIES[platform] in files, "Package manifest does not contain the MCP companion")
+    require(files[MCP_BINARIES[platform]] == result["mcp_binary_sha256"], "MCP companion checksum disagrees with receipt")
     return result
 
 
@@ -244,11 +251,12 @@ def validate_stage(stage: Path, platform: str, target: str, value: str) -> dict:
     require(directories == ancestors(expected), "Stage has missing or unrecorded directories")
     require(sum(path.stat().st_size for path in files.values()) <= MAX_UNPACKED, "Stage exceeds size limit")
     for name, path in files.items():
-        check_mode(path.stat().st_mode, platform != "windows" and name == BINARIES[platform])
+        check_mode(path.stat().st_mode, platform != "windows" and name in (BINARIES[platform], MCP_BINARIES[platform]))
         if name != MANIFEST:
             require(file_digest(path) == manifest["files"][name], f"Staged checksum mismatch: {name}")
-    with files[BINARIES[platform]].open("rb") as stream:
-        check_binary(stream, target)
+    for name in (BINARIES[platform], MCP_BINARIES[platform]):
+        with files[name].open("rb") as stream:
+            check_binary(stream, target)
     return manifest
 
 
@@ -302,12 +310,13 @@ def validate_archive(path: Path, target: str, value: str) -> None:
         require(set(members) == expected, "Archive has missing or unrecorded files")
         require(directories <= ancestors(expected), "Archive has unrecorded directories")
         for name, (_, mode, member) in members.items():
-            check_mode(mode, platform != "windows" and name == BINARIES[platform])
+            check_mode(mode, platform != "windows" and name in (BINARIES[platform], MCP_BINARIES[platform]))
             with open_member(member) as stream:
                 if name != MANIFEST:
                     require(digest(stream) == manifest["files"][name], f"Archived checksum mismatch: {name}")
-        with open_member(members[BINARIES[platform]][2]) as stream:
-            check_binary(stream, target)
+        for name in (BINARIES[platform], MCP_BINARIES[platform]):
+            with open_member(members[name][2]) as stream:
+                check_binary(stream, target)
 
 
 def archive_stage(platform: str, target: str, stage: Path, output: Path, manifest: Path = ROOT / "Cargo.toml") -> Path:

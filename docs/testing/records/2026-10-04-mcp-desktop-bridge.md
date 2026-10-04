@@ -47,7 +47,7 @@
 
 自有配置目录只有一项127.0.0.1 SSH测试连接，中文/深色起点，未设置AI供应商。SSH/SFTP fixture使用独立临时文件系统；PTY只echo，不执行本地OS shell。固定exec `keelshell-batch-fixture`返回UTF-8 stdout及控制字符stderr，`keelshell-batch-hold`等待channel关闭。它不代表任意生产命令、真实客户主机或独立OpenSSH业务验收。
 
-实际macOS GPUI窗口与OS剪贴板通过CUA操作，自有外部Python stdio客户端通过一次性启动配置连接真正的companion：
+实际macOS GPUI窗口与OS剪贴板通过CUA操作，自有外部Python stdio客户端通过临时启动配置连接真正的companion：
 
 - 核对测试主机指纹并完成密码认证；鼠标选择并明确捕获37字节终端片段，逐项启用六项工具、授权fixture目录，监控工具不勾选。复制配置进入自有掩码输入GUI，经内存stdin交给协议客户端；能力未写文件、argv或日志。
 - stdio initialize协商`2025-11-25`并发现七项工具。只列出一项精确授权活动会话，读取精确片段、目录七项及含中文的70字节welcome文件；未授予的监控调用返回`FORBIDDEN`。

@@ -45,13 +45,14 @@ The containers use PNG alpha, supported by
 ## macOS `.app`
 
 ```sh
-cargo build -p keelshell-app --release --locked
-python3 packaging/package.py macos --binary target/release/keelshell-app --output work/packages/macos-0.1.0
+cargo build -p keelshell-app -p keelshell-mcp --release --locked
+python3 packaging/package.py macos --binary target/release/keelshell-app --mcp-binary target/release/keelshell-mcp --output work/packages/macos-0.1.0
 plutil -lint work/packages/macos-0.1.0/KeelShell.app/Contents/Info.plist
 ```
 
 The staging script checks the Mach-O header and icon hashes, writes
-`Contents/MacOS/keelshell-app` and `Contents/Resources/KeelShell.icns`, and sets
+`Contents/MacOS/keelshell-app`, its adjacent `Contents/MacOS/keelshell-mcp`,
+and `Contents/Resources/KeelShell.icns`, and sets
 `CFBundleIconFile=KeelShell.icns`. It reads the version from the workspace
 manifest. The local bundle identifier is `app.keelshell.desktop`. Chinese is the
 development language with Chinese/English localizations declared. The minimum
@@ -80,11 +81,12 @@ silently emitting an unbranded executable. No SDK is installed by our scripts.
 On a prepared Windows host:
 
 ```powershell
-cargo build -p keelshell-app --release --locked
-python packaging/package.py windows --binary target/release/keelshell-app.exe --output work/packages/windows-0.1.0
+cargo build -p keelshell-app -p keelshell-mcp --release --locked
+python packaging/package.py windows --binary target/release/keelshell-app.exe --mcp-binary target/release/keelshell-mcp.exe --output work/packages/windows-0.1.0
 ```
 
-The script checks the PE signature and stages the binary plus ICO. This is not
+The script checks both PE signatures and stages `keelshell-app.exe`, the adjacent
+`keelshell-mcp.exe`, and the ICO. This is not
 an installer or a resource-loader test. Verify Explorer/taskbar icons, resource
 ID 1, manifest, DPI behavior and launch on native Windows before acceptance.
 
@@ -93,12 +95,12 @@ ID 1, manifest, DPI behavior and launch on native Windows before acceptance.
 On a prepared Linux host:
 
 ```sh
-cargo build -p keelshell-app --release --locked
-python3 packaging/package.py linux --binary target/release/keelshell-app --output work/packages/linux-0.1.0
+cargo build -p keelshell-app -p keelshell-mcp --release --locked
+python3 packaging/package.py linux --binary target/release/keelshell-app --mcp-binary target/release/keelshell-mcp --output work/packages/linux-0.1.0
 desktop-file-validate work/packages/linux-0.1.0/usr/share/applications/keelshell.desktop
 ```
 
-The output contains `usr/bin`, the desktop entry and per-size icons under
+The output contains adjacent `usr/bin/keelshell-app` and `usr/bin/keelshell-mcp`, the desktop entry and per-size icons under
 `usr/share/icons/hicolor`. `Icon=keelshell` uses theme lookup according to the
 [freedesktop icon specification](https://specifications.freedesktop.org/icon-theme/latest/).
 The desktop entry has Chinese/English labels, `Terminal=false` and an executable
@@ -134,7 +136,24 @@ support `.app`/DMG, Linux packages and Windows installers. It is not added to th
 build or invoked here: installer policy, platform signing and native validation
 remain explicit release work.
 
-Every staged folder includes `package-manifest.json` with file and binary hashes,
+Every staged folder requires the explicitly supplied application and MCP binaries.
+It includes `package-manifest.json` with file and separate application/MCP binary hashes,
 source icon identity, version and explicit `installed=false` / native-validation
 boundaries. A successful format conversion or macOS staging run is not evidence
 of Windows/Linux compilation, native execution, installation or distribution.
+
+The manifest keeps schema 1 and adds required `mcp_binary_sha256`. Release validation
+checks both fixed executable paths, their target architectures, file hashes and Unix
+execute bits; native inspection checks both runtime dependencies and macOS minimum
+versions. Windows icon/DPI resources remain an application-only check. Historical
+application helpers can read the extended schema and install the companion through
+the existing `files` list. New application validators reject packages missing the
+companion or its receipt before installation. See [ADR 0041](../docs/adr/0041-mcp-companion-packaging-and-update-recovery.md).
+
+Updates replace both installed images through the reviewed manifest. Running stdio
+MCP processes must be restarted by the external agent to use the new image; a locked
+Windows image may cause bounded retries and rollback. A failed rollback preserves
+its exact staging directory and old-file backups and stops restart/retry. Updates
+across filesystem volumes may fail when moving old files into the staging backup;
+this is a refused installation boundary, not a successful installed update. Real
+installed-directory and Windows/Linux native process acceptance remain separate.

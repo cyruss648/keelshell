@@ -62,11 +62,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("platform", choices=("macos", "linux", "windows"))
     parser.add_argument("--binary", required=True, type=Path)
+    parser.add_argument("--mcp-binary", required=True, type=Path,
+                        help="MCP companion from the same platform/target build")
     parser.add_argument("--target", help="Rust target triple for release provenance")
     parser.add_argument("--output", required=True, type=Path, help="New staging directory; existing destination is rejected")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
+    mcp_binary = args.mcp_binary.resolve(strict=True)
     check_binary(binary, args.platform)
+    check_binary(mcp_binary, args.platform)
     manifest = check_icons()
     version = tomllib.loads((ROOT / "Cargo.toml").read_text())["workspace"]["package"]["version"]
     destination = args.output.resolve()
@@ -80,6 +84,9 @@ def main() -> None:
             executable = contents / "MacOS" / "keelshell-app"
             copy(binary, executable)
             executable.chmod(0o755)
+            companion = contents / "MacOS" / "keelshell-mcp"
+            copy(mcp_binary, companion)
+            companion.chmod(0o755)
             copy(ICONS / "macos" / "KeelShell.icns", contents / "Resources" / "KeelShell.icns")
             info = {
                 "CFBundleIdentifier": "app.keelshell.desktop", "CFBundleName": "KeelShell",
@@ -98,10 +105,14 @@ def main() -> None:
             executable = prefix / "bin" / "keelshell-app"
             copy(binary, executable)
             executable.chmod(0o755)
+            companion = prefix / "bin" / "keelshell-mcp"
+            copy(mcp_binary, companion)
+            companion.chmod(0o755)
             copy(ROOT / "packaging" / "linux" / "keelshell.desktop", prefix / "share" / "applications" / "keelshell.desktop")
             shutil.copytree(ICONS / "linux" / "hicolor", prefix / "share" / "icons" / "hicolor")
         else:
             copy(binary, stage / "keelshell-app.exe")
+            copy(mcp_binary, stage / "keelshell-mcp.exe")
             copy(ICONS / "windows" / "keelshell.ico", stage / "keelshell.ico")
         files = {}
         for path in sorted(stage.rglob("*")):
@@ -110,6 +121,7 @@ def main() -> None:
         receipt = {
             "schema_version": 1, "platform": args.platform, "version": version,
             "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+            "mcp_binary_sha256": hashlib.sha256(mcp_binary.read_bytes()).hexdigest(),
             "icon_source_sha256": manifest["source"]["sha256"], "files": files,
             "installed": False, "signed_by_packaging_script": False,
             "native_acceptance": "not performed by this script",

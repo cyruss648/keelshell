@@ -10,6 +10,7 @@
 - 正式任务ID、顺序、架构边界与验收见[设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)，参考选型和现有skills见[设计资料库](design/README.md)，来源/版本核对见[计划记录](testing/records/2026-10-04-design-agent-planning.md)。先收敛已开始后端，再建立主题基础；新增界面复用同一体系。
 - 主题实现已复用System/Dark/Light字段，不升schema，默认/缺字段为System，保留旧明示Light；Kit模式与palette同步，保存成功才应用，系统回调不写配置，主题保存不推进命令来源revision。真实OS变化/最小原生窗口/WindowsLinux原生仍未验收，见[ADR0036](adr/0036-system-appearance-and-semantic-palette.md)。
 - 用户追加并行工程要求：允许多个子代理/worktree并行不相关功能，完成后新开独立代理评审与功能复核，合并后及时清理分支/worktree/临时进程或容器；可使用本机Podman建立隔离服务真实联调，不能将容器或模拟视为目标桌面验收。
+- MCP伴随程序的六目标发布/更新清单已接通；每个平台包必须包含GUI与MCP、分别绑定SHA/架构/Unix权限，旧的不完整包在写入前拒绝。两轮独立审查发现并关闭回滚备份清理与重复进入缺陷，29项updater、57项打包独立通过；根整合981普通+8文档+6脚本及2 MiB控制器通过。实际macOS开发双程序包已通过标准打包、原生结构/依赖/最低版本检查和归档校验，并在隔离零连接配置中观察到MCP默认关闭、无会话禁用与临时配置/授权生命周期文案；owned monitor终止并确认进程及临时目录清理。原有业务原生联调使用的手工复制包另行记录。最终六目标Release、已安装目录更新、Windows文件占用及新包SSH业务原生仍未验收，见[ADR0041](adr/0041-mcp-companion-packaging-and-update-recovery.md)与[记录](testing/records/2026-10-04-mcp-companion-packaging.md)。
 
 ## 2026-10-04 本地智能体接入
 

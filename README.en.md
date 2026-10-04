@@ -99,7 +99,7 @@ Open **About / updates** from the toolbar to read the bundled changelog, check f
 | Platform | Build targets | Package |
 | --- | --- | --- |
 | macOS 15+ | Apple Silicon / Intel | ZIP containing the `.app` bundle |
-| Windows | ARM64 / x64 | ZIP containing the executable and icon |
+| Windows | ARM64 / x64 | ZIP containing the GUI / MCP executables and icon |
 | Linux | ARM64 / x64; Ubuntu 24.04 baseline | `.tar.gz` with the executable and desktop resources |
 
 See the [release verification record](docs/testing/records/2026-10-03-release.md) for actual build and desktop acceptance status. Distribution does not yet include macOS Developer ID signing, notarization, or Windows code signing. Packaging and tag-triggered publication are documented in [Releasing](docs/RELEASING.md).
@@ -111,6 +111,7 @@ Prepare the [platform build dependencies](.github/actions/setup-build/action.yml
 ```sh
 git clone https://github.com/cyruss648/keelshell.git
 cd keelshell
+cargo build -p keelshell-app -p keelshell-mcp --locked
 cargo run -p keelshell-app --locked
 ```
 

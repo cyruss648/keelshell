@@ -60,6 +60,9 @@ class ReleaseTests(unittest.TestCase):
         binary.parent.mkdir(parents=True, exist_ok=True)
         binary.write_bytes(self.binary(target))
         binary.chmod(0o755)
+        companion = stage / release.MCP_BINARIES[platform]
+        companion.write_bytes(self.binary(target) + b"MCP fixture")
+        companion.chmod(0o755)
         resource = stage / "resources" / "说明.txt"
         resource.parent.mkdir()
         resource.write_text("可审核的发布测试\n", encoding="utf-8")
@@ -69,9 +72,10 @@ class ReleaseTests(unittest.TestCase):
             "platform": platform,
             "version": release.version(self.manifest),
             "binary_sha256": release.file_digest(binary),
+            "mcp_binary_sha256": release.file_digest(companion),
             "icon_source_sha256": "0" * 64,
             "files": {path.relative_to(stage).as_posix(): release.file_digest(path)
-                      for path in (binary, resource)},
+                      for path in (binary, companion, resource)},
             "installed": False,
             "signed_by_packaging_script": False,
             "native_acceptance": "not performed by this script",
@@ -97,7 +101,7 @@ class ReleaseTests(unittest.TestCase):
                 for name, path in sorted(files.items()):
                     data = path.read_bytes()
                     item = tarfile.TarInfo(name)
-                    item.mode = 0o755 if name == release.BINARIES[platform] else 0o644
+                    item.mode = 0o755 if name in (release.BINARIES[platform], release.MCP_BINARIES[platform]) else 0o644
                     item.size = len(data)
                     archive.addfile(item, io.BytesIO(data))
         else:
@@ -105,7 +109,7 @@ class ReleaseTests(unittest.TestCase):
                 for name, path in sorted(files.items()):
                     item = zipfile.ZipInfo(name)
                     item.create_system = 3
-                    item.external_attr = (stat.S_IFREG | (0o755 if name == release.BINARIES[platform] else 0o644)) << 16
+                    item.external_attr = (stat.S_IFREG | (0o755 if name in (release.BINARIES[platform], release.MCP_BINARIES[platform]) else 0o644)) << 16
                     archive.writestr(item, path.read_bytes())
         archive_path.with_name(archive_path.name + ".sha256").write_text(
             f"{release.file_digest(archive_path)}  {archive_path.name}\n", encoding="ascii", newline="\n")
@@ -145,6 +149,7 @@ class ReleaseTests(unittest.TestCase):
                     if sys.platform == "win32" and platform == "windows":
                         expected_mode = (self.root / (target + "-stage") / release.BINARIES[platform]).stat().st_mode & 0o777
                     self.assertEqual(members[release.BINARIES[platform]][1] & 0o777, expected_mode)
+                    self.assertEqual(members[release.MCP_BINARIES[platform]][1] & 0o777, expected_mode)
                     self.assertIn("resources/说明.txt", members)
                 self.assertEqual(archive.with_name(archive.name + ".sha256").read_text(),
                                  f"{release.file_digest(archive)}  {archive.name}\n")
@@ -234,6 +239,55 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             release.validate_stage(stage, "linux", target, "1.2.3")
 
+    def test_companion_receipt_requires_its_field_and_canonical_path(self) -> None:
+        for target, (platform, _) in release.TARGETS.items():
+            stage = self.stage(target)
+            original = (stage / release.MANIFEST).read_bytes()
+            for scenario in ("missing-field", "missing-path", "wrong-hash"):
+                with self.subTest(target=target, scenario=scenario):
+                    data = json.loads(original)
+                    if scenario == "missing-field":
+                        del data["mcp_binary_sha256"]
+                    elif scenario == "missing-path":
+                        del data["files"][release.MCP_BINARIES[platform]]
+                    else:
+                        data["mcp_binary_sha256"] = "0" * 64
+                    with self.assertRaises(ValueError):
+                        release.receipt(json.dumps(data).encode(), platform, "1.2.3", target)
+
+    def test_companion_missing_tampered_wrong_architecture_and_truncated_are_rejected(self) -> None:
+        for target, (platform, architecture) in release.TARGETS.items():
+            stage = self.stage(target)
+            companion = stage / release.MCP_BINARIES[platform]
+            original = companion.read_bytes()
+            original_receipt = (stage / release.MANIFEST).read_bytes()
+            wrong = target.replace(architecture, "aarch64" if architecture == "x86_64" else "x86_64")
+            for scenario in ("missing", "tampered", "wrong-architecture", "truncated"):
+                with self.subTest(target=target, scenario=scenario):
+                    companion.write_bytes(original)
+                    companion.chmod(0o755)
+                    (stage / release.MANIFEST).write_bytes(original_receipt)
+                    if scenario == "missing":
+                        companion.unlink()
+                    elif scenario == "tampered":
+                        companion.write_bytes(b"changed")
+                    else:
+                        companion.write_bytes(self.binary(wrong) if scenario == "wrong-architecture" else original[:12])
+                        checksum = release.file_digest(companion)
+                        self.edit_receipt(stage, lambda data: data.update(mcp_binary_sha256=checksum))
+                        self.edit_receipt(stage, lambda data: data["files"].update({release.MCP_BINARIES[platform]: checksum}))
+                    with self.assertRaises(ValueError):
+                        release.validate_stage(stage, platform, target, "1.2.3")
+
+    @unittest.skipIf(sys.platform == "win32", "Windows permission model does not expose Unix execute bits")
+    def test_unix_companion_permission_cannot_be_lost(self) -> None:
+        for target in ("aarch64-apple-darwin", "x86_64-unknown-linux-gnu"):
+            platform = release.TARGETS[target][0]
+            stage = self.stage(target)
+            (stage / release.MCP_BINARIES[platform]).chmod(0o644)
+            with self.subTest(target=target), self.assertRaises(ValueError):
+                release.validate_stage(stage, platform, target, "1.2.3")
+
     def test_archive_rejects_traversal_symlink_and_unrecorded_members_without_extracting(self) -> None:
         target = "x86_64-apple-darwin"
         archive = self.archive(target)
@@ -303,6 +357,18 @@ class ReleaseTests(unittest.TestCase):
         with zipfile.ZipFile(archive, "w") as rewritten:
             for member, content in entries:
                 rewritten.writestr(member, b"modified" if member.filename == "resources/说明.txt" else content)
+        archive.with_name(archive.name + ".sha256").write_text(f"{release.file_digest(archive)}  {archive.name}\n", encoding="ascii", newline="\n")
+        with self.assertRaises(ValueError):
+            release.verify_collection(archive.parent, [target], self.manifest)
+
+    def test_valid_external_checksum_cannot_hide_changed_companion(self) -> None:
+        target = "aarch64-pc-windows-msvc"
+        archive = self.archive(target)
+        with zipfile.ZipFile(archive) as original:
+            entries = [(member, original.read(member)) for member in original.infolist()]
+        with zipfile.ZipFile(archive, "w") as rewritten:
+            for member, content in entries:
+                rewritten.writestr(member, b"modified" if member.filename == release.MCP_BINARIES["windows"] else content)
         archive.with_name(archive.name + ".sha256").write_text(f"{release.file_digest(archive)}  {archive.name}\n", encoding="ascii", newline="\n")
         with self.assertRaises(ValueError):
             release.verify_collection(archive.parent, [target], self.manifest)

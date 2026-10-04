@@ -159,13 +159,18 @@ class PublicationTests(unittest.TestCase):
             name = release_tools.BINARIES[platform]
             binary = executable(target)
             checksum = hashlib.sha256(binary).hexdigest()
+            companion_name = release_tools.MCP_BINARIES[platform]
+            companion = binary + b"MCP fixture"
+            companion_checksum = hashlib.sha256(companion).hexdigest()
             manifest = {"schema_version": 1, "platform": platform, "version": value,
                         "target": target, "build": {"commit": SHA},
                         "binary_sha256": checksum, "icon_source_sha256": "c" * 64,
-                        "files": {name: checksum}, "installed": False,
+                        "mcp_binary_sha256": companion_checksum,
+                        "files": {name: checksum, companion_name: companion_checksum}, "installed": False,
                         "signed_by_packaging_script": False,
                         "native_acceptance": "not performed by this script"}
-            files = {name: (binary, 0o755), release_tools.MANIFEST: (json.dumps(manifest).encode(), 0o644)}
+            files = {name: (binary, 0o755), companion_name: (companion, 0o755),
+                     release_tools.MANIFEST: (json.dumps(manifest).encode(), 0o644)}
             path = self.directory / release_tools.package_name(value, target)
             # Archive permissions are explicit fixture data. Windows chmod
             # cannot represent Unix execute bits; do not weaken validation or
