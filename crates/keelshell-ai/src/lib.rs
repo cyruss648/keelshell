@@ -28,6 +28,7 @@ mod context;
 mod diagnostics;
 mod discovery;
 mod error_category;
+mod local_agent;
 mod provider;
 mod redact;
 mod review;
@@ -39,6 +40,11 @@ pub use discovery::{
     RequestCancellation,
 };
 pub use error_category::AiErrorCategory;
+pub use local_agent::{
+    ApprovedLocalAsk, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
+    LocalAgentKind, LocalAgentLimits, LocalAgentProbe, LocalAgentReply, LocalAgentVersion,
+    PreparedLocalAsk,
+};
 pub use provider::{AiClient, AssistantReply, ProviderConfig, ProviderProtocol};
 pub use redact::{RedactionReport, Redactor};
 pub use review::{CommandProposal, ReviewTicket};
