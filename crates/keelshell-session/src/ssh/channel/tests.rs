@@ -163,17 +163,45 @@ async fn cancelling_explicit_close_while_protocol_sender_is_full_keeps_cleanup_o
         .ok_or("flood channel")?
         .exec(false, "fill client receiver")
         .await?;
-    // Fill russh's ten-slot command queue after incoming data backpressure has
-    // stopped its protocol task. The final timed-out send proves real blocking.
+
+    // Synchronize on a packet that has actually reached the client's channel
+    // receiver before filling the protocol command queue. Merely awaiting the
+    // exec request is insufficient: the server can still be scheduling the
+    // 160 DATA packets while the keepalives are admitted.
+    {
+        let channel = flood.channel.as_mut().ok_or("flood channel")?;
+        let first = tokio::time::timeout(Duration::from_secs(2), async {
+            loop {
+                match channel.wait().await {
+                    Some(ChannelMsg::Data { data }) => break Ok(data),
+                    Some(_) => {}
+                    None => break Err("flood channel closed before first data"),
+                }
+            }
+        })
+        .await??;
+        assert_eq!(first.as_ref(), b"x", "unexpected first flood packet");
+    }
+
+    // Fill russh's ten-slot command queue only after the protocol has observed
+    // flood data. The final timed-out send proves the actual client protocol
+    // sender is backpressured rather than merely racing the fixture startup.
     let mut blocked = false;
-    for _ in 0..100 {
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+    while tokio::time::Instant::now() < deadline {
         match tokio::time::timeout(
             Duration::from_millis(30),
             fixture.session.handle.send_keepalive(false),
         )
         .await
         {
-            Ok(result) => result?,
+            Ok(result) => {
+                result?;
+                // A ready bounded send does not necessarily yield to the
+                // protocol task. Yield explicitly so incoming DATA can fill
+                // the channel receiver between command sends.
+                tokio::task::yield_now().await;
+            }
             Err(_) => {
                 blocked = true;
                 break;
@@ -184,19 +212,29 @@ async fn cancelling_explicit_close_while_protocol_sender_is_full_keeps_cleanup_o
         blocked,
         "fixture must block the actual client protocol sender"
     );
-    let closing = tokio::spawn(victim.close());
-    tokio::time::sleep(Duration::from_millis(25)).await;
-    assert!(!closing.is_finished(), "CLOSE enqueue must be suspended");
-    closing.abort();
-    assert!(closing.await.is_err());
+    let mut closing = Box::pin(victim.close());
+    assert!(
+        tokio::time::timeout(Duration::from_millis(25), &mut closing)
+            .await
+            .is_err(),
+        "CLOSE enqueue must be suspended"
+    );
+    // Dropping the explicitly cancelled future invokes PendingChannel's
+    // independent Drop owner, which retries the close after the queue drains.
+    drop(closing);
     // Releasing the real receive queue allows the independent Drop owner to
     // enqueue CLOSE; cancelling the caller must not abandon its channel.
     tokio::time::timeout(Duration::from_secs(2), async {
         let channel = flood.channel.as_mut().ok_or("flood channel")?;
-        let mut packets = 0;
+        // The first DATA packet was consumed above. Count it explicitly so the
+        // drain proves that the fixture delivered every one of its 160 packets.
+        let mut packets = 1;
         while packets < 160 {
             match channel.wait().await {
-                Some(ChannelMsg::Data { .. }) => packets += 1,
+                Some(ChannelMsg::Data { data }) => {
+                    assert_eq!(data.as_ref(), b"x", "unexpected flood packet");
+                    packets += 1;
+                }
                 Some(_) => {}
                 None => return Err("flood channel closed early"),
             }
