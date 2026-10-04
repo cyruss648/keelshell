@@ -238,6 +238,18 @@ async fn integration_cases() {
         );
         fixture.assert_clean();
 
+        let started = Instant::now();
+        let answer = fixture
+            .ask("leader-exits-descendant-inherits-pipes")
+            .await
+            .unwrap();
+        assert!(
+            started.elapsed() < Duration::from_secs(4),
+            "inherited pipes must not delay a completed leader to timeout"
+        );
+        assert!(TcpStream::connect(("127.0.0.1", answer.parse::<u16>().unwrap())).is_err());
+        fixture.assert_clean();
+
         let review = fixture
             .config(Duration::from_secs(5))
             .prepare(ContextDraft::new("wait-descendant"), &[], 8192)
@@ -277,6 +289,40 @@ async fn integration_cases() {
         );
         fixture.assert_clean();
     }
+    // Known credentials must be rejected before any version/help/model spawn,
+    // including the escaped nested JSON representation of selected_context.
+    for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
+        let fixture = Fixture::new(kind, "-sensitive");
+        for secret in ["fixture\"value", "fixture\\value", "fixture\"value\\mixed"] {
+            for location in 0..3 {
+                let context = match location {
+                    0 => ContextDraft::new(secret),
+                    1 => ContextDraft::new("complete").add_selection("explicit", secret),
+                    _ => ContextDraft::new("complete").add_selection(secret, "explicit"),
+                };
+                let review = fixture
+                    .config(Duration::from_secs(5))
+                    .prepare(context, &[], 8192)
+                    .unwrap();
+                assert_eq!(
+                    LocalAgentClient
+                        .ask(
+                            review.approve(),
+                            LocalAgentCredential::new(secret).unwrap(),
+                            &RequestCancellation::new()
+                        )
+                        .await
+                        .err(),
+                    Some(LocalAgentError::CredentialInContext)
+                );
+                assert!(
+                    !fixture.root.path().join("spawned-fixture").exists(),
+                    "credential rejection precedes every subprocess"
+                );
+                fixture.assert_clean();
+            }
+        }
+    }
     let future = Fixture::new(LocalAgentKind::Codex, "-future");
     assert_eq!(
         LocalAgentClient
@@ -309,6 +355,9 @@ async fn integration_cases() {
 fn fixture(arguments: &[String]) {
     let executable = std::env::current_exe().unwrap();
     let filename = executable.file_stem().unwrap().to_string_lossy();
+    if filename.contains("sensitive") {
+        std::fs::write(executable.parent().unwrap().join("spawned-fixture"), []).unwrap();
+    }
     let claude = filename.starts_with("claude");
     if arguments == ["--version"] {
         println!(
@@ -401,7 +450,7 @@ fn fixture(arguments: &[String]) {
         "完整中文回答; selected-only".to_owned()
     };
     if question.contains("descendant") {
-        spawn_contained_descendant(executable);
+        spawn_contained_descendant(executable, question.contains("inherits-pipes"));
         let deadline = Instant::now() + Duration::from_secs(2);
         while !Path::new("descendant-port").exists() {
             assert!(Instant::now() < deadline);
@@ -560,12 +609,20 @@ fn descendant() {
     clippy::zombie_processes,
     reason = "intentional process-tree cleanup fixture"
 )]
-fn spawn_contained_descendant(executable: PathBuf) {
+fn spawn_contained_descendant(executable: PathBuf, inherit: bool) {
     Command::new(executable)
         .arg("--fixture-descendant")
         .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
+        .stdout(if inherit {
+            Stdio::inherit()
+        } else {
+            Stdio::null()
+        })
+        .stderr(if inherit {
+            Stdio::inherit()
+        } else {
+            Stdio::null()
+        })
         .spawn()
         .unwrap();
 }

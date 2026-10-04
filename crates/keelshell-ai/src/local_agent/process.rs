@@ -19,7 +19,7 @@ use super::{
     ApprovedLocalAsk, LocalAgentConfig, LocalAgentCredential, LocalAgentError, LocalAgentKind,
     LocalAgentLimits, LocalAgentReply, LocalAgentVersion, protocol::AnswerStream,
 };
-use crate::{Redactor, RequestCancellation};
+use crate::{Redactor, RequestCancellation, provider::payload_contains_secret};
 
 const CLEANUP_DEADLINE: Duration = Duration::from_secs(3);
 const PROBE_DEADLINE: Duration = Duration::from_secs(10);
@@ -128,7 +128,7 @@ impl LocalAgentClient {
             return Err(LocalAgentError::ReviewExpired);
         }
         check_cancelled(cancellation)?;
-        if approved.prepared.stdin.contains(credential.0.as_str()) {
+        if payload_contains_secret(&approved.prepared.stdin, credential.0.as_str()) {
             return Err(LocalAgentError::CredentialInContext);
         }
         let prepared = approved.prepared;
@@ -497,6 +497,8 @@ enum RunOutput {
 struct OwnedChild {
     child: Box<dyn ChildWrapper>,
     cleaned: bool,
+    #[cfg(windows)]
+    observed_job: std::sync::Arc<win32job::Job>,
 }
 
 impl OwnedChild {
@@ -506,17 +508,37 @@ impl OwnedChild {
         #[cfg(unix)]
         command.wrap(process_wrap::tokio::ProcessGroup::leader());
         #[cfg(windows)]
-        command.wrap(process_wrap::tokio::JobObject);
+        let observed_job = {
+            let mut limits = win32job::ExtendedLimitInfo::default();
+            // No BREAKAWAY_OK, SILENT_BREAKAWAY_OK or UI restrictions.
+            limits.limit_kill_on_job_close();
+            let job = std::sync::Arc::new(
+                win32job::Job::create_with_limit_info(&limits)
+                    .map_err(|_| LocalAgentError::SpawnFailed)?,
+            );
+            // All pre_spawn hooks run before creation. JobObject suspends the
+            // child, then ordered wrap_child hooks assign outer -> inner jobs,
+            // and only the inner JobObject hook resumes it.
+            command.wrap(WindowsExitObserver(job.clone()));
+            command.wrap(process_wrap::tokio::JobObject);
+            job
+        };
         command
             .spawn()
             .map(|child| Self {
                 child,
                 cleaned: false,
+                #[cfg(windows)]
+                observed_job,
             })
             .map_err(|_| LocalAgentError::SpawnFailed)
     }
 
     async fn cleanup(&mut self) -> Result<(), LocalAgentError> {
+        if self.cleaned {
+            return Ok(());
+        }
+        let deadline = Instant::now() + CLEANUP_DEADLINE;
         // Reap an already exited leader before signalling its group: on macOS
         // a zombie-only group can otherwise report EPERM rather than ESRCH.
         self.child
@@ -531,7 +553,7 @@ impl OwnedChild {
             if zombie_race {
                 // Reap the leader, then re-signal. Only ESRCH is accepted as
                 // absence; a second EPERM remains a typed cleanup failure.
-                tokio::time::timeout(CLEANUP_DEADLINE, self.child.inner_mut().wait())
+                tokio::time::timeout_at(deadline, self.child.inner_mut().wait())
                     .await
                     .map_err(|_| LocalAgentError::CleanupFailed)?
                     .map_err(|_| LocalAgentError::CleanupFailed)?;
@@ -544,12 +566,55 @@ impl OwnedChild {
                 return Err(LocalAgentError::CleanupFailed);
             }
         }
-        tokio::time::timeout(CLEANUP_DEADLINE, self.child.wait())
+        tokio::time::timeout_at(deadline, self.child.wait())
             .await
             .map_err(|_| LocalAgentError::CleanupFailed)?
             .map_err(|_| LocalAgentError::CleanupFailed)?;
+        #[cfg(windows)]
+        loop {
+            if Instant::now() >= deadline {
+                return Err(LocalAgentError::CleanupFailed);
+            }
+            // process-wrap 10.0.1 may accept an arbitrary Job completion packet.
+            // Confirm the independent outer job contains no live process IDs.
+            let empty = self
+                .observed_job
+                .query_process_id_list()
+                .map_err(|_| LocalAgentError::CleanupFailed)?
+                .is_empty();
+            if Instant::now() >= deadline {
+                return Err(LocalAgentError::CleanupFailed);
+            }
+            if empty {
+                break;
+            }
+            tokio::time::sleep_until((Instant::now() + Duration::from_millis(10)).min(deadline))
+                .await;
+        }
         self.cleaned = true;
         Ok(())
+    }
+}
+
+#[cfg(windows)]
+#[derive(Debug)]
+struct WindowsExitObserver(std::sync::Arc<win32job::Job>);
+
+#[cfg(windows)]
+impl process_wrap::tokio::CommandWrapper for WindowsExitObserver {
+    fn wrap_child(
+        &mut self,
+        child: Box<dyn ChildWrapper>,
+        _core: &CommandWrap,
+    ) -> std::io::Result<Box<dyn ChildWrapper>> {
+        use std::os::windows::io::AsRawHandle;
+        let handle = child
+            .process_handle()
+            .ok_or_else(|| std::io::Error::from(ErrorKind::Unsupported))?;
+        self.0
+            .assign_process(handle.as_raw_handle() as isize)
+            .map_err(std::io::Error::other)?;
+        Ok(child)
     }
 }
 
@@ -617,19 +682,37 @@ async fn run_command(
                     .await
                     .map_err(|_| LocalAgentError::PipeFailed)
             };
-            let (_, stdout, _) = tokio::try_join!(
-                write,
-                read_stdout(stdout, mode, limits, &budget),
-                discard_stderr(stderr, limits.output_bytes, &budget),
-            )?;
-            // Observe the leader first; waiting on the outer Windows Job
-            // wrapper here would wait for descendants before we can kill them.
-            let status = child
-                .child
-                .inner_mut()
-                .wait()
-                .await
-                .map_err(|_| LocalAgentError::ProcessFailed)?;
+            let pipes = async {
+                let (_, output, _) = tokio::try_join!(
+                    write,
+                    read_stdout(stdout, mode, limits, &budget),
+                    discard_stderr(stderr, limits.output_bytes, &budget),
+                )?;
+                Ok::<_, LocalAgentError>(output)
+            };
+            tokio::pin!(pipes);
+            // Wait for the leader concurrently with pipe draining. Descendants
+            // may inherit those pipes; leader exit must trigger their stop
+            // instead of waiting for EOF until the request deadline.
+            let (status, output) = {
+                let leader = child.child.inner_mut().wait();
+                tokio::pin!(leader);
+                tokio::select! {
+                    biased;
+                    status = &mut leader => (status.map_err(|_| LocalAgentError::ProcessFailed)?, None),
+                    output = &mut pipes => {
+                        let output = output?;
+                        (leader.await.map_err(|_| LocalAgentError::ProcessFailed)?, Some(output))
+                    },
+                }
+            };
+            child.cleanup().await?;
+            let stdout = match output {
+                Some(output) => output,
+                None => tokio::time::timeout(CLEANUP_DEADLINE, pipes)
+                    .await
+                    .map_err(|_| LocalAgentError::CleanupFailed)??,
+            };
             if !status.success() {
                 return Err(LocalAgentError::ProcessFailed);
             }
