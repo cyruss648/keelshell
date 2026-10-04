@@ -796,3 +796,53 @@ async fn openssh_batch_exec_preserves_results_policy_and_unknown_timeout() -> Te
     })
     .await?
 }
+
+#[tokio::test]
+#[ignore = "requires a disposable OpenSSH loopback server and KEELSHELL_OPENSSH_* settings"]
+async fn openssh_workflow_ui_collection_keeps_exact_output_and_connection_identity() -> TestResult {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let fixture = Fixture::connect().await?;
+        let second = SshSession::connect(Fixture::options()?).await?;
+        assert!(fixture.ssh.same_connection(&fixture.ssh.clone()));
+        assert!(!fixture.ssh.same_connection(&second));
+        let target = uuid::Uuid::from_u128(201);
+        let task = uuid::Uuid::from_u128(202);
+        let plan = BatchWorkflowPlan::new(vec![BatchTaskSpec {
+            id: task,
+            target_id: target,
+            command: "printf 'workflow collection 中文'; printf 'stderr' >&2".into(),
+            dependencies: vec![],
+        }])?;
+        let fingerprint = plan.review_token();
+        let mut handle = start_workflow(
+            plan.confirm(fingerprint)?,
+            vec![WorkflowBinding {
+                id: target,
+                session: fixture.ssh.clone(),
+            }],
+            WorkflowOptions::default(),
+        )?;
+        let receipt = loop {
+            if let Some(result) = handle.try_finish() {
+                break result?;
+            }
+            tokio::time::sleep(Duration::from_millis(5)).await;
+        };
+        assert_eq!(receipt.fingerprint, fingerprint);
+        assert_eq!(receipt.tasks.len(), 1);
+        let WorkflowTaskResult::Transport { row } = &receipt.tasks[0].result else {
+            return Err("missing actual OpenSSH transport receipt".into());
+        };
+        assert_eq!(row.outcome, BatchOutcome::Exited { code: 0 });
+        assert_eq!(row.stdout, "workflow collection 中文".as_bytes());
+        assert_eq!(row.stderr, b"stderr");
+        let mut events = 0;
+        while handle.try_recv().is_ok() {
+            events += 1;
+        }
+        assert_eq!(events, 2);
+        second.close().await?;
+        fixture.close(&[], &[]).await
+    })
+    .await?
+}

@@ -17,7 +17,7 @@ fn hint(cx: &App, text: impl Into<SharedString>) -> Div {
         .child(text.into())
 }
 
-fn outcome(outcome: &BatchOutcome, cx: &App) -> String {
+pub(crate) fn outcome(outcome: &BatchOutcome, cx: &App) -> String {
     match outcome {
         BatchOutcome::Exited { code } => format!(
             "{} · {code}",

@@ -620,6 +620,8 @@ impl Render for Workspace {
                     })
                     .child(
                         div()
+                            .id("command-column")
+                            .test_support()
                             .flex_1()
                             .min_w_0()
                             .flex()
@@ -757,11 +759,16 @@ impl Render for Workspace {
                                 .child(self.remote_completion_controls(cx))
                                 .child(
                                     div()
+                                        .id("command-actions")
+                                        .test_support()
                                         .flex_shrink_0()
+                                        .min_w_0()
                                         .px_2()
+                                        .py_1()
                                         .flex()
+                                        .flex_wrap()
                                         .items_center()
-                                        .justify_between()
+                                        .gap_2()
                                         .child(
                                             Button::new("command-history-policy")
                                                 .ghost()
@@ -822,7 +829,13 @@ impl Render for Workspace {
                                                 .on_click(cx.listener(|view, _, window, cx| {
                                                     view.open_batch_commands(false, window, cx)
                                                 })),
-                                        ),
+                                        )
+                                        .child(Button::new("command-workflow").ghost().compact()
+                                            .label(if self.workflow_panel.as_ref().is_some_and(|panel|panel.read(cx).is_running()) {
+                                                t(cx,"工作流 · 运行中","Workflow · running")
+                                            } else {t(cx,"依赖工作流","Dependency workflow")})
+                                            .disabled(self.command_surface_blocked())
+                                            .on_click(cx.listener(|view,_,window,cx|view.open_workflow(false,window,cx)))),
                                 )
                                 .child(self.remote_completion_list(cx))
                                 .child(self.suggestion_list(window, cx))
@@ -835,6 +848,8 @@ impl Render for Workspace {
                     .when(self.show_assistant, |el| {
                         el.child(
                             div()
+                                .id("assistant-column")
+                                .test_support()
                                 .w(assistant_width)
                                 .min_w_0()
                                 .overflow_hidden()
@@ -876,6 +891,7 @@ impl Render for Workspace {
             .child(self.snippet_modal(cx))
             .child(self.archive_confirmation(cx))
             .child(self.batch_modal(cx))
+            .child(self.workflow_modal(cx))
             .child(self.mcp_modal(cx))
             .when_some(self.ai_settings.clone(), |el, panel| {
                 el.child(

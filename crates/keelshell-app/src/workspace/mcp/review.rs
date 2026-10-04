@@ -76,21 +76,7 @@ impl Workspace {
     }
 }
 
-/// Keep newline structure while exposing control and direction-changing bytes.
-/// The displayed escapes never replace the immutable bytes used for execution.
-pub(super) fn visible_command(command: &str) -> String {
-    let mut visible = String::new();
-    for ch in command.chars() {
-        if (ch.is_control() && ch != '\n')
-            || matches!(ch, '\u{00ad}' | '\u{061c}' | '\u{180e}' | '\u{200b}'..='\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2060}'..='\u{206f}' | '\u{feff}')
-        {
-            visible.push_str(&format!("\\u{{{:04x}}}", u32::from(ch)));
-        } else {
-            visible.push(ch);
-        }
-    }
-    visible
-}
+pub(super) use crate::command_text::visible_command;
 
 #[cfg(test)]
 mod tests {

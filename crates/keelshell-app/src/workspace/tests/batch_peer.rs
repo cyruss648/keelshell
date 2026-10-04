@@ -77,7 +77,7 @@ impl server::Handler for Peer {
     }
 }
 
-pub(super) struct Server {
+pub(crate) struct Server {
     requests: Arc<Mutex<Vec<Vec<u8>>>>,
     pub session: SshSession,
     task: JoinHandle<()>,
