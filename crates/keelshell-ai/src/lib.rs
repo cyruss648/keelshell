@@ -76,8 +76,13 @@ pub enum AiError {
     )]
     InvalidLimits,
     /// The requested provider output token budget is outside the bounded range.
-    #[error("AI max_tokens must be between 1 and 1000000")]
+    #[error("AI output token limit must be between 1 and 1000000")]
     InvalidMaxTokens,
+    /// The declared context window cannot hold the admitted input and output.
+    #[error(
+        "AI declared context window cannot hold the complete question, framing and output reserve"
+    )]
+    InvalidTokenBudget,
     /// HTTP client initialization failed.
     #[error("AI HTTP client could not be initialized")]
     ClientInitialization,

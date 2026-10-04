@@ -25,6 +25,96 @@ pub(super) fn fixture_profile() -> NamedAiProfile {
     profile
 }
 
+#[gpui_kit::test]
+fn token_edits_cancel_requests_preserve_invalid_drafts_and_pending_save_revision(
+    cx: &mut TestAppContext,
+) {
+    let (window, panel) = mount(cx, fixture_profile());
+    let cancellation = RequestCancellation::new();
+    panel.update(cx, |panel, _| {
+        panel.cancellation = Some(cancellation.clone());
+        panel.operation = Some(OperationKind::Models);
+    });
+    cx.update_window(window, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            panel
+                .context_tokens
+                .update(cx, |field, cx| field.set_value("32768", window, cx));
+            panel
+                .output_tokens
+                .update(cx, |field, cx| field.set_value("8192", window, cx));
+            panel.sync_editor(cx);
+            assert!(cancellation.is_cancelled());
+            assert_eq!(
+                panel.profile().map(|p| p.max_output_tokens),
+                Some(Some(8192))
+            );
+            assert_eq!(
+                panel.profile().map(|p| p.context_window_tokens),
+                Some(Some(32768))
+            );
+            panel.apply(cx);
+            let saved_revision = panel.revision;
+            panel
+                .output_tokens
+                .update(cx, |field, cx| field.set_value("invalid", window, cx));
+            panel.sync_editor(cx);
+            panel.mark_saved(saved_revision, cx);
+            assert!(!panel.saving);
+            assert!(panel.revision > saved_revision);
+            panel.load_editor(window, cx);
+            assert_eq!(panel.output_tokens.read(cx).value(), "invalid");
+            let original = panel.selected.unwrap_or_else(|| panic!("original profile"));
+            let second = fixture_profile();
+            let second_id = second.id;
+            panel.catalog.profiles.push(second);
+            panel.select(second_id, window, cx);
+            panel.select(original, window, cx);
+            assert_eq!(panel.output_tokens.read(cx).value(), "invalid");
+            set_language(Language::En, cx);
+            panel.refresh_locale(window, cx);
+            assert_eq!(panel.output_tokens.read(cx).value(), "invalid");
+            panel.apply(cx);
+            assert!(!panel.saving);
+            panel.start_operation(OperationKind::Test, cx);
+            assert!(panel.operation.is_none());
+        });
+    })
+    .unwrap_or_else(|error| panic!("token editor: {error}"));
+}
+
+#[gpui_kit::test]
+fn native_token_input_event_updates_metadata_and_cancels_inflight_operation(
+    cx: &mut TestAppContext,
+) {
+    let (window, panel) = mount(cx, fixture_profile());
+    let cancellation = RequestCancellation::new();
+    panel.update(cx, |panel, _| {
+        panel.cancellation = Some(cancellation.clone());
+        panel.operation = Some(OperationKind::Test);
+    });
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        panel
+            .read(cx)
+            .output_tokens
+            .read(cx)
+            .focus_handle(cx)
+            .focus(window, cx);
+        window.input("512", cx);
+    })
+    .unwrap_or_else(|error| panic!("native token edit: {error}"));
+    cx.run_until_parked();
+    panel.read_with(cx, |panel, _| {
+        assert_eq!(
+            panel.profile().map(|p| p.max_output_tokens),
+            Some(Some(512))
+        );
+        assert!(cancellation.is_cancelled());
+        assert!(panel.operation.is_none());
+    });
+}
+
 pub(super) fn mount(
     cx: &mut TestAppContext,
     profile: NamedAiProfile,
@@ -384,6 +474,15 @@ async fn manual_discovery_uses_real_loopback_http_and_selection_updates_only_mod
     });
     cx.update_window(window, |_, window, cx| {
         window.render_frame(cx);
+        assert!(
+            window
+                .find(("ai-discovered-model", 0_usize))
+                .bounds()
+                .size
+                .height
+                >= px(28.),
+            "adding advanced fields must not collapse discovered-model hit areas"
+        );
         window.click(("ai-discovered-model", 0_usize), cx);
     })
     .unwrap_or_else(|error| panic!("choose discovered model: {error}"));

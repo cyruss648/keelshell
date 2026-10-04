@@ -57,6 +57,8 @@ struct EditorValues {
     endpoint: String,
     model: String,
     key: Zeroizing<String>,
+    context_tokens: String,
+    output_tokens: String,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -81,6 +83,9 @@ pub struct AiSettingsPanel {
     endpoint: Entity<InputState>,
     model: Entity<InputState>,
     key: Entity<InputState>,
+    context_tokens: Entity<InputState>,
+    output_tokens: Entity<InputState>,
+    token_drafts: BTreeMap<Uuid, (String, String)>,
     editor_values: EditorValues,
     clear_key_pending: bool,
     vault_path: PathBuf,
@@ -127,6 +132,14 @@ impl AiSettingsPanel {
                 .and_then(|id| credentials.get(&id))
                 .cloned()
                 .unwrap_or_default(),
+            context_tokens: profile
+                .and_then(|p| p.context_window_tokens)
+                .map(|v| v.to_string())
+                .unwrap_or_default(),
+            output_tokens: profile
+                .and_then(|p| p.max_output_tokens)
+                .map(|v| v.to_string())
+                .unwrap_or_default(),
         };
         let name = field(
             &values.name,
@@ -167,6 +180,22 @@ impl AiSettingsPanel {
             key.set_value(values.key.to_string(), window, cx);
             key
         });
+        let context_tokens = field(
+            &values.context_tokens,
+            t(
+                cx,
+                "可选；按模型文档填写",
+                "Optional; use the model's documented window",
+            ),
+            window,
+            cx,
+        );
+        let output_tokens = field(
+            &values.output_tokens,
+            t(cx, "可选；1–1000000", "Optional; 1–1000000"),
+            window,
+            cx,
+        );
         // A modal must take keyboard focus as well as occlude pointer input.
         // An empty catalog has no rendered input, so focus the panel itself.
         let focus = cx.focus_handle();
@@ -175,17 +204,24 @@ impl AiSettingsPanel {
         } else {
             focus.focus(window, cx);
         }
-        let subscriptions = [&name, &endpoint, &model, &key]
-            .into_iter()
-            .map(|field| {
-                cx.subscribe_in(field, window, |panel, _, event: &InputEvent, window, cx| {
-                    if matches!(event, InputEvent::Change) {
-                        panel.sync_editor(cx);
-                        panel.clear_pending_key(window, cx);
-                    }
-                })
+        let subscriptions = [
+            &name,
+            &endpoint,
+            &model,
+            &key,
+            &context_tokens,
+            &output_tokens,
+        ]
+        .into_iter()
+        .map(|field| {
+            cx.subscribe_in(field, window, |panel, _, event: &InputEvent, window, cx| {
+                if matches!(event, InputEvent::Change) {
+                    panel.sync_editor(cx);
+                    panel.clear_pending_key(window, cx);
+                }
             })
-            .collect();
+        })
+        .collect();
         Self {
             catalog: catalog.clone(),
             credentials: credentials.clone(),
@@ -195,6 +231,9 @@ impl AiSettingsPanel {
             endpoint,
             model,
             key,
+            context_tokens,
+            output_tokens,
+            token_drafts: BTreeMap::new(),
             editor_values: values,
             clear_key_pending: false,
             vault_path,
@@ -237,6 +276,16 @@ impl AiSettingsPanel {
                 &self.key,
                 "默认仅本次运行有效；可显式加密保存",
                 "Temporary by default; optionally save encrypted",
+            ),
+            (
+                &self.context_tokens,
+                "可选；按模型文档填写",
+                "Optional; use the model's documented window",
+            ),
+            (
+                &self.output_tokens,
+                "可选；1–1000000",
+                "Optional; 1–1000000",
             ),
         ] {
             let hint = t(cx, zh, en);
@@ -285,6 +334,8 @@ impl AiSettingsPanel {
             endpoint: self.endpoint.read(cx).value().to_string(),
             model: self.model.read(cx).value().to_string(),
             key: Zeroizing::new(self.key.read(cx).value().to_string()),
+            context_tokens: self.context_tokens.read(cx).value().to_string(),
+            output_tokens: self.output_tokens.read(cx).value().to_string(),
         }
     }
 
@@ -311,6 +362,17 @@ impl AiSettingsPanel {
             profile.name.clone_from(&values.name);
             profile.endpoint.clone_from(&values.endpoint);
             profile.model.clone_from(&values.model);
+            self.token_drafts.insert(
+                profile.id,
+                (values.context_tokens.clone(), values.output_tokens.clone()),
+            );
+            if let (Ok(context), Ok(output)) = (
+                parse_token_input(&values.context_tokens, 16 * 1024 * 1024),
+                parse_token_input(&values.output_tokens, 1_000_000),
+            ) {
+                profile.context_window_tokens = context;
+                profile.max_output_tokens = output;
+            }
             if endpoint_changed || key_changed {
                 match &mut profile.authentication {
                     AiAuthentication::Bearer { credential }
@@ -350,6 +412,7 @@ impl AiSettingsPanel {
     }
 
     fn load_editor(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let token_draft = self.selected.and_then(|id| self.token_drafts.get(&id));
         let values = EditorValues {
             name: self.profile().map_or_else(String::new, |p| p.name.clone()),
             endpoint: self
@@ -361,12 +424,26 @@ impl AiSettingsPanel {
                 .and_then(|id| self.credentials.get(&id))
                 .cloned()
                 .unwrap_or_default(),
+            context_tokens: token_draft.map(|v| v.0.clone()).unwrap_or_else(|| {
+                self.profile()
+                    .and_then(|p| p.context_window_tokens)
+                    .map(|v| v.to_string())
+                    .unwrap_or_default()
+            }),
+            output_tokens: token_draft.map(|v| v.1.clone()).unwrap_or_else(|| {
+                self.profile()
+                    .and_then(|p| p.max_output_tokens)
+                    .map(|v| v.to_string())
+                    .unwrap_or_default()
+            }),
         };
         for (field, value) in [
             (&self.name, values.name.as_str()),
             (&self.endpoint, &values.endpoint),
             (&self.model, &values.model),
             (&self.key, &values.key),
+            (&self.context_tokens, &values.context_tokens),
+            (&self.output_tokens, &values.output_tokens),
         ] {
             field.update(cx, |field, cx| {
                 field.set_value(value.to_owned(), window, cx)
@@ -554,11 +631,43 @@ impl AiSettingsPanel {
         cx.notify();
     }
 
+    fn token_draft_valid(&self, id: Uuid) -> bool {
+        if let Some((context, output)) = self.token_drafts.get(&id) {
+            return parse_token_input(context, 16 * 1024 * 1024).is_ok()
+                && parse_token_input(output, 1_000_000).is_ok();
+        }
+        self.catalog
+            .profiles
+            .iter()
+            .find(|profile| profile.id == id)
+            .is_some_and(|profile| {
+                profile
+                    .max_output_tokens
+                    .is_none_or(|value| value > 0 && value <= 1_000_000)
+                    && profile
+                        .context_window_tokens
+                        .is_none_or(|value| value > 0 && value <= 16 * 1024 * 1024)
+            })
+    }
+
     fn apply(&mut self, cx: &mut Context<Self>) {
         if self.saving || self.vault_busy() {
             return;
         }
         self.sync_editor(cx);
+        if self
+            .catalog
+            .profiles
+            .iter()
+            .any(|profile| !self.token_draft_valid(profile.id))
+        {
+            self.status = Message::new(
+                "Token 限制必须为空或范围内的正整数，请检查各配置。",
+                "Token limits must be empty or positive integers within range. Check each profile.",
+            );
+            cx.notify();
+            return;
+        }
         if let Err(error) = self.catalog.validate() {
             self.status = Message::detail(
                 "配置尚不完整或名称重复",
@@ -613,6 +722,14 @@ impl AiSettingsPanel {
         let Some(profile) = self.profile().cloned() else {
             return;
         };
+        if !self.token_draft_valid(profile.id) {
+            self.status = Message::new(
+                "请先修正 Token 限制。",
+                "Correct the token limits before requesting.",
+            );
+            cx.notify();
+            return;
+        }
         // Discovery can work before a name/model is entered. Validate a temporary
         // metadata copy without claiming that placeholder values are usable.
         let mut validation = profile.clone();
@@ -679,7 +796,7 @@ impl AiSettingsPanel {
                         .await
                         .map(OperationResult::Models),
                     OperationKind::Test => client
-                        .test_connection(
+                        .test_connection_with_limits(
                             &ProviderConfig::new_with_protocol(
                                 &profile.endpoint,
                                 &profile.model,
@@ -687,6 +804,8 @@ impl AiSettingsPanel {
                             )?,
                             api_key,
                             &cancellation,
+                            profile.max_output_tokens,
+                            profile.context_window_tokens,
                         )
                         .await
                         .map(OperationResult::Test),
@@ -746,6 +865,21 @@ impl AiSettingsPanel {
         }
         cx.notify();
     }
+}
+
+fn parse_token_input(value: &str, maximum: u32) -> Result<Option<u32>, ()> {
+    if value.is_empty() {
+        return Ok(None);
+    }
+    if !value.bytes().all(|byte| byte.is_ascii_digit()) {
+        return Err(());
+    }
+    value
+        .parse::<u32>()
+        .ok()
+        .filter(|value| *value > 0 && *value <= maximum)
+        .map(Some)
+        .ok_or(())
 }
 
 fn replace_protocol_suffixes(endpoint: &str, old: &[&str], new: &str) -> String {

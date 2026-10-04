@@ -332,6 +332,49 @@ async fn fixed_probe_reports_actual_model_without_retaining_provider_text() -> T
 }
 
 #[tokio::test]
+async fn explicit_probe_output_limit_is_bound_to_each_protocol() -> TestResult {
+    for (protocol, path, field, reply) in [
+        (
+            ProviderProtocol::ChatCompletions,
+            "/v1/chat/completions",
+            "max_completion_tokens",
+            answer(None),
+        ),
+        (
+            ProviderProtocol::Responses,
+            "/v1/responses",
+            "max_output_tokens",
+            responses_answer(None),
+        ),
+        (
+            ProviderProtocol::AnthropicMessages,
+            "/v1/messages",
+            "max_tokens",
+            anthropic_answer(None),
+        ),
+    ] {
+        let mut fixture = Fixture::start_at(path, Reply::json(reply)).await?;
+        let provider =
+            ProviderConfig::new_with_protocol(fixture.endpoint.as_str(), "model", protocol)?;
+        client(4096)?
+            .test_connection_with_limits(
+                &provider,
+                None,
+                &RequestCancellation::new(),
+                Some(512),
+                Some(8192),
+            )
+            .await?;
+        let recorded = fixture.observed().await?;
+        let json: serde_json::Value = serde_json::from_str(&recorded.body)?;
+        assert_eq!(json[field], 512);
+        assert!(recorded.body.contains(CONNECTIVITY_PROMPT));
+        fixture.finish().await?;
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn responses_probe_uses_input_and_parses_output_text() -> TestResult {
     let mut fixture = Fixture::start_at(
         "/tenant/v1/responses",

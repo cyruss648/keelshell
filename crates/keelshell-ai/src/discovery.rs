@@ -332,28 +332,59 @@ impl ProviderClient {
         api_key: Option<&str>,
         cancellation: &RequestCancellation,
     ) -> Result<ConnectivityReport, AiError> {
-        let body = match provider.protocol() {
+        self.test_connection_with_limits(provider, api_key, cancellation, None, None)
+            .await
+    }
+
+    /// Send the fixed connectivity prompt with explicit protocol token limits.
+    ///
+    /// No terminal context is accepted. The declared context window uses the
+    /// same conservative UTF-8 byte admission heuristic as request preparation;
+    /// this is not a tokenizer-derived token measurement.
+    pub async fn test_connection_with_limits(
+        &self,
+        provider: &ProviderConfig,
+        api_key: Option<&str>,
+        cancellation: &RequestCancellation,
+        max_output_tokens: Option<u32>,
+        context_window_tokens: Option<u32>,
+    ) -> Result<ConnectivityReport, AiError> {
+        let output = crate::context::output_token_limit(
+            provider.protocol(),
+            max_output_tokens,
+            context_window_tokens,
+        )?;
+        let mut body = match provider.protocol() {
             ProviderProtocol::ChatCompletions => serde_json::json!({
                 "model": provider.model(),
                 "stream": false,
                 "messages": [{"role": "user", "content": CONNECTIVITY_PROMPT}],
-            })
-            .to_string(),
+            }),
             ProviderProtocol::Responses => serde_json::json!({
                 "model": provider.model(),
                 "stream": false,
                 "input": CONNECTIVITY_PROMPT,
-            })
-            .to_string(),
+            }),
             ProviderProtocol::AnthropicMessages => serde_json::json!({
                 "model": provider.model(),
                 "system": "Reply with the single word OK. This is a connection test.",
                 "messages": [{"role": "user", "content": CONNECTIVITY_PROMPT}],
                 "max_tokens": 4096,
                 "stream": false,
-            })
-            .to_string(),
+            }),
         };
+        if let Some(output) = output {
+            let field = match provider.protocol() {
+                ProviderProtocol::ChatCompletions => "max_completion_tokens",
+                ProviderProtocol::Responses => "max_output_tokens",
+                ProviderProtocol::AnthropicMessages => "max_tokens",
+            };
+            body[field] = serde_json::json!(output);
+        }
+        let body = body.to_string();
+        if let Some(context) = context_window_tokens {
+            crate::context::validate_token_capacity(body.len(), output.unwrap_or(4096), context)?;
+        }
         reject_context_credential(&body, api_key)?;
         let started = Instant::now();
         self.bounded(cancellation, async {

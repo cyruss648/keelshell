@@ -23,8 +23,17 @@ another route; a manually entered model remains possible.
 Responses previews use `instructions`, `input`, `model` and `stream: false`; the
 parser accepts only closed `message` items containing `output_text`. Anthropic
 previews use `model`, `system`, `messages`, `max_tokens` (4096 by default) and
-`stream: false`; `ContextDraft::prepare_with_max_tokens` can choose a bounded
-1–1,000,000 token budget. Its parser requires an assistant message and accepts
+`stream: false`. `ContextDraft::prepare_with_limits` accepts optional output and
+declared context limits. Output limits are serialized as `max_completion_tokens`
+for Chat Completions, `max_output_tokens` for Responses, and `max_tokens` for
+Messages, bounded to 1–1,000,000. Compatible endpoints must support the selected
+field; the transport never retries with another field after rejection. An
+omitted limit keeps the old request shape, except Messages still requires 4096.
+A declared context window reserves output (4096 if omitted), system text and
+1024 framing units, then applies a conservative UTF-8 byte budget with worst-case
+JSON escaping. This local heuristic is not a provider tokenizer or a measured
+token count. The complete question must fit; selected context may be truncated
+with omitted bytes shown in the review report. Its parser requires an assistant message and accepts
 only `text` blocks. Thinking and tool blocks are never converted to displayed
 text, and a response containing only those blocks is rejected. No tools, function
 calls, remote files or autonomous actions are enabled by these adapters.
@@ -40,6 +49,8 @@ calls, remote files or autonomous actions are enabled by these adapters.
   called after an explicit user action. Its report contains elapsed time and the
   server's optional actual model field. Missing actual-model metadata must stay
   visibly missing rather than being replaced with the user's requested model.
+  `test_connection_with_limits` uses the same explicit output fields and local
+  context admission policy, with no terminal context.
 - `send_approved` consumes one `ApprovedRequest`, sending its exact prepared JSON
   and provider snapshot. Changing a saved profile cannot alter that snapshot.
   The existing blocking `AiClient::send` remains supported off the UI thread.

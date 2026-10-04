@@ -92,12 +92,14 @@ impl Render for AiSettingsPanel {
             "★ marks the default; the assistant can select another profile.",
         ));
         let profile = self.profile().cloned();
+        // Keep the form at its natural content height inside a scroll viewport.
+        // A constrained flex column would shrink model-result hit areas as
+        // advanced fields are added, leaving partially visible buttons whose
+        // centers are covered by later inputs.
         let mut form = div()
-            .id("ai-profile-form-scroll")
-            .flex_1()
-            .min_w_0()
-            .min_h_0()
-            .overflow_y_scroll()
+            .id("ai-profile-form-content")
+            .w_full()
+            .flex_shrink_0()
             .p_4()
             .flex()
             .flex_col()
@@ -259,8 +261,14 @@ impl Render for AiSettingsPanel {
                 }
                 form = form.child(models);
             }
-            form = form.child(div().mt_2().p_2().bg(rgb(0xf6f8fb)).rounded(px(6.))
-                    .child(label(cx,"高级选项暂不可用：自定义请求头、代理、Token 限制与推理参数。","Advanced options unavailable: custom headers, proxy, token limits and reasoning controls.")))
+            form = form.child(label(cx, "上下文窗口（Token）", "Declared context window (tokens)"))
+                .child(Input::new(&self.context_tokens).id("ai-profile-context-tokens").aria_label(t(cx, "上下文窗口（Token）", "Declared context window (tokens)")))
+                .child(label(cx, "输出上限（Token）", "Output token limit"))
+                .child(Input::new(&self.output_tokens).id("ai-profile-output-tokens").aria_label(t(cx, "输出上限（Token）", "Output token limit")))
+                .child(label(cx, "上下文窗口按保守字节预算限制输入，并预留输出；不是实际 Token 计数。填写窗口但不填写输出时使用 4096。", "The context window limits input using a conservative byte budget and reserves output; it is not a measured token count. A window with no output limit uses 4096."))
+                .child(label(cx, "输出字段：Chat Completions 使用 max_completion_tokens，Responses 使用 max_output_tokens，Messages 使用 max_tokens；兼容服务需支持对应字段。", "Output field: max_completion_tokens for Chat Completions, max_output_tokens for Responses, max_tokens for Messages. Compatible servers must support the selected field."))
+                .child(div().mt_2().p_2().bg(rgb(0xf6f8fb)).rounded(px(6.))
+                    .child(label(cx,"高级选项暂不可用：自定义请求头、代理与推理参数。","Advanced options unavailable: custom headers, proxy and reasoning controls.")))
                 .child(div().flex().gap_2().mt_2()
                     .child(Button::new("ai-profile-default").ghost().label(if self.catalog.active_id == Some(profile.id) { t(cx,"★ 默认配置","★ Default configuration") } else { t(cx,"设为默认","Set as default") })
                         .on_click(cx.listener(|panel, _, _, cx|panel.make_default(cx))))
@@ -284,7 +292,17 @@ impl Render for AiSettingsPanel {
             .flex_col()
             .bg(rgb(0xffffff))
             .text_color(rgb(0x1d2939))
-            .child(div().flex_1().min_h_0().flex().child(list).child(form))
+            .child(
+                div().flex_1().min_h_0().flex().child(list).child(
+                    div()
+                        .id("ai-profile-form-scroll")
+                        .flex_1()
+                        .min_w_0()
+                        .min_h_0()
+                        .overflow_y_scroll()
+                        .child(form),
+                ),
+            )
             .child(
                 div()
                     .p_3()

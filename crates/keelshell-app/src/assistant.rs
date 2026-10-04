@@ -293,7 +293,13 @@ impl AssistantPanel {
                         ),
                         self.context.clone(),
                     )
-                    .prepare(&provider, &secrets, 16 * 1024)
+                    .prepare_with_limits(
+                        &provider,
+                        &secrets,
+                        16 * 1024,
+                        profile.max_output_tokens,
+                        profile.context_window_tokens,
+                    )
             });
         match result {
             Ok(request) => {
@@ -813,6 +819,10 @@ fn ai_error(error: &AiError) -> Message {
         AiError::ContextTooLarge => "上下文或脱敏词列表超过允许大小，请减少所选内容。",
         AiError::EmptyPrompt => "请先填写你想了解的问题。",
         AiError::InvalidBudget => "上下文大小不合要求，问题文本必须完整保留。",
+        AiError::InvalidMaxTokens => "输出 Token 上限必须介于 1 和 1000000。",
+        AiError::InvalidTokenBudget => {
+            "声明的上下文窗口无法容纳完整问题、固定说明和输出预留；请增大窗口或减少输出。"
+        }
         AiError::Serialization => "请求格式化失败，请重新准备请求。",
         AiError::InvalidLimits => "请求超时或回复大小限制不合要求。",
         AiError::ClientInitialization => "无法初始化模型服务的网络客户端。",

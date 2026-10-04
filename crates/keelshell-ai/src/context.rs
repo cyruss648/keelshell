@@ -64,15 +64,15 @@ impl ContextDraft {
         secrets: &[&str],
         byte_budget: usize,
     ) -> Result<PreparedRequest, AiError> {
-        self.prepare_with_max_tokens(provider, secrets, byte_budget, DEFAULT_MAX_TOKENS)
+        self.prepare_with_limits(provider, secrets, byte_budget, None, None)
     }
 
     /// Produce an immutable preview while selecting the provider output budget.
     ///
-    /// Anthropic Messages requires `max_tokens`; the compatibility [`prepare`]
-    /// method uses [`DEFAULT_MAX_TOKENS`]. Other protocols retain their existing
-    /// wire shape and ignore this value after validating it, so callers can use
-    /// one settings path for all providers.
+    /// The exact field is protocol-specific: Chat Completions uses
+    /// `max_completion_tokens`, Responses uses `max_output_tokens`, and Messages
+    /// uses `max_tokens`. Compatible endpoints must implement that field; this
+    /// adapter never retries using a different parameter after a rejection.
     pub fn prepare_with_max_tokens(
         self,
         provider: &ProviderConfig,
@@ -80,10 +80,49 @@ impl ContextDraft {
         byte_budget: usize,
         max_tokens: u32,
     ) -> Result<PreparedRequest, AiError> {
-        if max_tokens == 0 || max_tokens > MAX_MAX_TOKENS {
-            return Err(AiError::InvalidMaxTokens);
-        }
+        self.prepare_with_limits(provider, secrets, byte_budget, Some(max_tokens), None)
+    }
+
+    /// Prepare an exact request with optional output and declared context limits.
+    ///
+    /// A context limit reserves the effective output limit (4096 when omitted),
+    /// system text and framing, then conservatively limits sanitized UTF-8 input
+    /// bytes. This is a local admission heuristic, not a provider tokenizer or a
+    /// measured token count. Escaping is budgeted at its worst-case sixfold
+    /// expansion; optional selections are truncated at character boundaries.
+    /// A question that cannot fit is rejected intact. A declared context limit
+    /// also makes the effective output limit explicit in the reviewed JSON.
+    pub fn prepare_with_limits(
+        self,
+        provider: &ProviderConfig,
+        secrets: &[&str],
+        byte_budget: usize,
+        max_output_tokens: Option<u32>,
+        context_window_tokens: Option<u32>,
+    ) -> Result<PreparedRequest, AiError> {
+        let output_limit = output_token_limit(
+            provider.protocol(),
+            max_output_tokens,
+            context_window_tokens,
+        )?;
         self.validate(secrets, byte_budget)?;
+        let byte_budget = match context_window_tokens {
+            Some(context) => {
+                let input_capacity = context
+                    .checked_sub(output_limit.unwrap_or(DEFAULT_MAX_TOKENS))
+                    .ok_or(AiError::InvalidTokenBudget)?
+                    as usize;
+                let text_capacity = input_capacity
+                    .checked_sub(SYSTEM_PROMPT.len() + TOKEN_FRAMING_RESERVE)
+                    .ok_or(AiError::InvalidTokenBudget)?
+                    / 6;
+                if text_capacity == 0 {
+                    return Err(AiError::InvalidTokenBudget);
+                }
+                byte_budget.min(text_capacity)
+            }
+            None => byte_budget,
+        };
         let redactor = Redactor::new(secrets);
         let (prompt, mut report) = redactor.redact(&self.prompt);
         if prompt.len() > byte_budget {
@@ -108,11 +147,19 @@ impl ContextDraft {
             selections,
         })
         .map_err(|_| AiError::Serialization)?;
+        if let Some(context) = context_window_tokens {
+            validate_token_capacity(
+                SYSTEM_PROMPT.len() + user_content.len(),
+                output_limit.unwrap_or(DEFAULT_MAX_TOKENS),
+                context,
+            )?;
+        }
         let json = match provider.protocol() {
             ProviderProtocol::ChatCompletions => {
                 let payload = ChatRequest {
                     model: provider.model(),
                     stream: false,
+                    max_completion_tokens: output_limit,
                     messages: [
                         ChatMessage {
                             role: "system",
@@ -130,6 +177,7 @@ impl ContextDraft {
                 let payload = ResponsesRequest {
                     model: provider.model(),
                     stream: false,
+                    max_output_tokens: output_limit,
                     instructions: SYSTEM_PROMPT,
                     input: &user_content,
                 };
@@ -143,7 +191,7 @@ impl ContextDraft {
                         role: "user",
                         content: &user_content,
                     }],
-                    max_tokens,
+                    max_tokens: output_limit.unwrap_or(DEFAULT_MAX_TOKENS),
                     stream: false,
                 };
                 serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?
@@ -188,6 +236,45 @@ impl ContextDraft {
 
 const DEFAULT_MAX_TOKENS: u32 = 4096;
 const MAX_MAX_TOKENS: u32 = 1_000_000;
+const MAX_CONTEXT_WINDOW_TOKENS: u32 = 16 * 1024 * 1024;
+const TOKEN_FRAMING_RESERVE: usize = 1024;
+
+pub(crate) fn output_token_limit(
+    protocol: ProviderProtocol,
+    output: Option<u32>,
+    context: Option<u32>,
+) -> Result<Option<u32>, AiError> {
+    if output.is_some_and(|value| value == 0 || value > MAX_MAX_TOKENS) {
+        return Err(AiError::InvalidMaxTokens);
+    }
+    if context.is_some_and(|value| value == 0 || value > MAX_CONTEXT_WINDOW_TOKENS) {
+        return Err(AiError::InvalidTokenBudget);
+    }
+    let output = if context.is_some() || protocol == ProviderProtocol::AnthropicMessages {
+        Some(output.unwrap_or(DEFAULT_MAX_TOKENS))
+    } else {
+        output
+    };
+    if matches!((context, output), (Some(context), Some(output)) if output >= context) {
+        return Err(AiError::InvalidTokenBudget);
+    }
+    Ok(output)
+}
+
+pub(crate) fn validate_token_capacity(
+    input_bytes: usize,
+    output: u32,
+    context: u32,
+) -> Result<(), AiError> {
+    if input_bytes
+        .saturating_add(TOKEN_FRAMING_RESERVE)
+        .saturating_add(output as usize)
+        > context as usize
+    {
+        return Err(AiError::InvalidTokenBudget);
+    }
+    Ok(())
+}
 
 fn sanitize_budgeted(
     input: &str,
@@ -225,6 +312,8 @@ struct SanitizedSelection {
 struct ChatRequest<'a> {
     model: &'a str,
     stream: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    max_completion_tokens: Option<u32>,
     messages: [ChatMessage<'a>; 2],
 }
 
@@ -238,6 +327,8 @@ struct ChatMessage<'a> {
 struct ResponsesRequest<'a> {
     model: &'a str,
     stream: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    max_output_tokens: Option<u32>,
     instructions: &'a str,
     input: &'a str,
 }
@@ -424,6 +515,81 @@ mod tests {
         assert!(matches!(
             ContextDraft::new("question").prepare_with_max_tokens(&provider, &[], 4096, 0),
             Err(AiError::InvalidMaxTokens)
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn explicit_output_limit_is_serialized_by_protocol_without_aliases()
+    -> Result<(), Box<dyn std::error::Error>> {
+        for (protocol, field) in [
+            (ProviderProtocol::ChatCompletions, "max_completion_tokens"),
+            (ProviderProtocol::Responses, "max_output_tokens"),
+            (ProviderProtocol::AnthropicMessages, "max_tokens"),
+        ] {
+            let provider = ProviderConfig::new_with_protocol(
+                "https://example.test/v1/request",
+                "model",
+                protocol,
+            )?;
+            let prepared = ContextDraft::new("question").prepare_with_limits(
+                &provider,
+                &[],
+                8192,
+                Some(512),
+                None,
+            )?;
+            let json: serde_json::Value = serde_json::from_str(prepared.preview_json())?;
+            assert_eq!(json[field], 512);
+            for other in ["max_completion_tokens", "max_output_tokens", "max_tokens"] {
+                if other != field {
+                    assert!(json.get(other).is_none());
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn declared_context_reserves_default_output_and_truncates_utf8_selections()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let prepared = ContextDraft::new("Q")
+            .add_selection("selected", "中文🙂".repeat(2000))
+            .prepare_with_limits(&provider()?, &[], 8192, None, Some(8192))?;
+        let json: serde_json::Value = serde_json::from_str(prepared.preview_json())?;
+        assert_eq!(json["max_completion_tokens"], 4096);
+        assert!(prepared.redaction_report().truncated_bytes > 0);
+        let user = json["messages"][1]["content"]
+            .as_str()
+            .ok_or(AiError::InvalidResponse)?;
+        assert!(user.len() + SYSTEM_PROMPT.len() + TOKEN_FRAMING_RESERVE + 4096 <= 8192);
+        Ok(())
+    }
+
+    #[test]
+    fn impossible_context_or_output_limit_is_rejected_before_review() -> Result<(), AiError> {
+        for (output, context) in [
+            (Some(0), None),
+            (Some(1_000_001), None),
+            (None, Some(4096)),
+            (Some(512), Some(1024)),
+            (Some(512), Some(16_777_217)),
+        ] {
+            assert!(
+                ContextDraft::new("whole question")
+                    .prepare_with_limits(&provider()?, &[], 8192, output, context)
+                    .is_err()
+            );
+        }
+        assert!(matches!(
+            ContextDraft::new("question".repeat(2000)).prepare_with_limits(
+                &provider()?,
+                &[],
+                8192,
+                Some(512),
+                Some(2048)
+            ),
+            Err(AiError::InvalidBudget)
         ));
         Ok(())
     }

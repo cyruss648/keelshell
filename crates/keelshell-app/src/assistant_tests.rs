@@ -77,6 +77,48 @@ fn mount(cx: &mut TestAppContext) -> (AnyWindowHandle, Entity<AssistantPanel>) {
 }
 
 #[gpui_kit::test]
+fn token_profile_change_revokes_exact_request_and_stale_completion(cx: &mut TestAppContext) {
+    let (_, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        let mut selected = panel.profile.clone().unwrap_or_else(|| panic!("profile"));
+        selected.max_output_tokens = Some(512);
+        selected.context_window_tokens = Some(8192);
+        panel.set_profile(Some(selected.clone()), None, cx);
+        panel.prepare(cx);
+        let prepared = panel
+            .prepared
+            .as_ref()
+            .unwrap_or_else(|| panic!("prepared"));
+        let payload: serde_json::Value = serde_json::from_str(prepared.preview_json())
+            .unwrap_or_else(|error| panic!("JSON: {error}"));
+        assert_eq!(payload["max_completion_tokens"], 512);
+        let old_revision = panel.request_revision;
+        let cancellation = RequestCancellation::new();
+        panel.cancellation = Some(cancellation.clone());
+        panel.busy = true;
+        selected.max_output_tokens = Some(1024);
+        panel.set_profile(Some(selected), None, cx);
+        assert!(cancellation.is_cancelled());
+        assert!(panel.prepared.is_none());
+        panel.finish_request(
+            old_revision,
+            ("host".into(), "session-A".into()),
+            Ok("stale".into()),
+            cx,
+        );
+        assert!(panel.response.is_empty());
+        panel.prepare(cx);
+        let prepared = panel
+            .prepared
+            .as_ref()
+            .unwrap_or_else(|| panic!("new prepared"));
+        let payload: serde_json::Value = serde_json::from_str(prepared.preview_json())
+            .unwrap_or_else(|error| panic!("JSON: {error}"));
+        assert_eq!(payload["max_completion_tokens"], 1024);
+    });
+}
+
+#[gpui_kit::test]
 fn native_question_edit_revokes_approved_payload_and_old_reply(cx: &mut TestAppContext) {
     let (window, panel) = mount(cx);
     let (revision, cancellation) = panel.update(cx, |panel, cx| {
@@ -283,7 +325,10 @@ fn unsupported_configuration_and_missing_bearer_key_never_prepare(cx: &mut TestA
         panel.set_profile(Some(needs_key.clone()), None, cx);
         panel.prepare(cx);
         assert!(panel.prepared.is_none());
-        needs_key.max_output_tokens = Some(100);
+        needs_key.proxy = keelshell_core::AiProxy::Explicit {
+            url: "http://127.0.0.1:9080".into(),
+            credentials: None,
+        };
         panel.set_profile(
             Some(needs_key),
             Some(Zeroizing::new("temporary".into())),

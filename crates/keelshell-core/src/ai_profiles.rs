@@ -535,8 +535,6 @@ impl NamedAiProfile {
         };
         if !self.custom_headers.is_empty()
             || self.proxy != AiProxy::Direct
-            || self.context_window_tokens.is_some()
-            || self.max_output_tokens.is_some()
             || self
                 .reasoning_by_model
                 .get(&self.model)
@@ -546,6 +544,24 @@ impl NamedAiProfile {
             return Err(invalid(
                 "ai.profile",
                 "current transport does not implement these options or credential references",
+            ));
+        }
+        if self
+            .max_output_tokens
+            .is_some_and(|value| value > 1_000_000)
+        {
+            return Err(invalid(
+                "ai.profile.max_output",
+                "current transport supports at most 1000000 tokens",
+            ));
+        }
+        if self
+            .context_window_tokens
+            .is_some_and(|context| self.max_output_tokens.unwrap_or(4096) >= context)
+        {
+            return Err(invalid(
+                "ai.profile.context_window",
+                "must leave input capacity after the output reserve (4096 by default)",
             ));
         }
         Ok(())
@@ -563,6 +579,12 @@ impl NamedAiProfile {
             ));
         }
         self.validate_current_transport()?;
+        if self.context_window_tokens.is_some() || self.max_output_tokens.is_some() {
+            return Err(invalid(
+                "ai.profile",
+                "legacy settings cannot preserve token limits",
+            ));
+        }
         Ok(AiSettings {
             enabled,
             base_url: self.endpoint.clone(),
@@ -1161,12 +1183,28 @@ mod tests {
             credential: None,
         };
         profile.max_output_tokens = Some(4096);
-        assert!(profile.validate_current_transport().is_err());
+        profile.validate_current_transport()?;
         profile.max_output_tokens = None;
         profile.custom_headers.push(AiCustomHeader {
             name: "x-tenant".into(),
             value_ref: AiSecretRef::SecretStore { id: Uuid::new_v4() },
         });
+        assert!(profile.validate_current_transport().is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn token_limits_are_supported_but_cannot_be_lost_in_legacy_projection()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let mut profile = profile("Token limits");
+        profile.context_window_tokens = Some(32_768);
+        profile.max_output_tokens = Some(8192);
+        profile.validate_current_transport()?;
+        assert!(profile.legacy_projection(true).is_err());
+        profile.max_output_tokens = Some(1_000_001);
+        assert!(profile.validate_current_transport().is_err());
+        profile.max_output_tokens = None;
+        profile.context_window_tokens = Some(4096);
         assert!(profile.validate_current_transport().is_err());
         Ok(())
     }

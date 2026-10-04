@@ -248,6 +248,44 @@ fn real_request_equals_preview_and_excludes_selected_secrets() -> TestResult {
 }
 
 #[test]
+fn protocol_token_limits_reach_http_as_the_exact_reviewed_body() -> TestResult {
+    for (protocol, path, field, response) in [
+        (
+            ProviderProtocol::ChatCompletions,
+            "/v1/chat/completions",
+            "max_completion_tokens",
+            answer("OK"),
+        ),
+        (
+            ProviderProtocol::Responses,
+            "/v1/responses",
+            "max_output_tokens",
+            responses_answer("OK"),
+        ),
+        (
+            ProviderProtocol::AnthropicMessages,
+            "/v1/messages",
+            "max_tokens",
+            anthropic_answer("OK"),
+        ),
+    ] {
+        let server =
+            Server::start_at_protocol(path, protocol, 200, &response, true, Duration::ZERO)?;
+        let prepared = ContextDraft::new("Explain this failure")
+            .add_selection("output", "diagnostic line\n".repeat(3000))
+            .prepare_with_limits(&server.provider, &[], 16 * 1024, Some(512), Some(8192))?;
+        assert!(prepared.redaction_report().truncated_bytes > 0);
+        let preview = prepared.preview_json().to_owned();
+        assert_eq!(client(4096)?.send(prepared.approve(), None)?.text(), "OK");
+        let recorded = server.finish()?;
+        assert_eq!(recorded.body, preview);
+        let json: serde_json::Value = serde_json::from_str(&recorded.body)?;
+        assert_eq!(json[field], 512);
+    }
+    Ok(())
+}
+
+#[test]
 fn responses_request_equals_preview_and_extracts_output_text() -> TestResult {
     let server = Server::start_at(
         "/v1/responses",
