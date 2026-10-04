@@ -1,0 +1,20 @@
+# 失败传输显式恢复验证记录
+
+日期：2026-10-04
+
+范围：远程 SFTP 文件/目录传输失败后的恢复建议。
+
+## 已验证
+
+- `cargo check -p keelshell-app --locked` 通过。
+- `cargo test -p keelshell-app --locked -- --test-threads=4` 通过，260 项测试通过。
+- `recovery_candidate_is_derived_only_from_started_transfer_operations` 通过：实际上传/下载操作可以生成候选，`PlanResume` 和目录浏览等只读操作不会被当作已开始的传输。
+- 恢复按钮只在当前文件面板仍绑定同一会话令牌、面板未挂起、传输已失败且没有其他操作运行时显示。
+- 恢复按钮只调用新的 `PlanResume` 只读校验；计划完成后仍进入既有确认栏，不会直接写入目标。
+- 面板挂起时会清除恢复候选并更换令牌；晚到的工作线程结果不能跨面板恢复旧操作。
+
+## 未验证边界
+
+- 本记录没有宣称自动恢复、自动重试或并行传输已完成。
+- 未在本轮新增真实 SSH 服务器故障注入；已有 OpenSSH 续传互操作记录继续作为底层内容校验和传输证据。
+- Windows/Linux 原生窗口交互仍需目标平台设备验收。

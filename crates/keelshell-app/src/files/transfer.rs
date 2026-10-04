@@ -259,6 +259,17 @@ impl FilesPanel {
                                     .child(details.clone())
                             }),
                     )
+                    .when(self.can_offer_recovery(), |row| {
+                        row.child(
+                            Button::new("prepare-transfer-recovery")
+                                .primary()
+                                .compact()
+                                .label(t(cx, "检查并续传", "Check and continue"))
+                                .on_click(cx.listener(|view, _, window, cx| {
+                                    view.request_recovery(window, cx)
+                                })),
+                        )
+                    })
                     .when(self.busy, |row| {
                         row.when(
                             matches!(

@@ -138,6 +138,23 @@ impl Workspace {
         Some((name, description))
     }
 
+    /// Return immutable, non-secret metadata for local batch template rendering.
+    /// Quick connections have no saved route, so callers use a conservative
+    /// fallback context based on the visible session label.
+    pub(super) fn batch_template_context(
+        &self,
+        id: EntityId,
+    ) -> Option<keelshell_core::BatchTargetContext> {
+        let target = self.reconnect_bindings.get(&id)?.route.hops().last()?;
+        Some(keelshell_core::BatchTargetContext {
+            name: target.name.clone(),
+            host: target.host.clone(),
+            port: target.port.to_string(),
+            user: target.username.clone(),
+            endpoint: crate::jump_host_picker::endpoint(target),
+        })
+    }
+
     /// Return the saved target profile identity for audit metadata. Ephemeral
     /// quick connections have no binding and therefore return `None`.
     pub(super) fn batch_profile_id(&self, id: EntityId) -> Option<uuid::Uuid> {

@@ -213,6 +213,7 @@ impl Render for BatchPanel {
                 .child(self.destination_list(cx))
                 .when(editable,|el|el.child(div().flex_shrink_0().flex().flex_col().gap_2()
                     .child(hint(t(cx,"命令正文 · 不自动保存历史","Command · never added to terminal history")))
+                    .child(hint(t(cx,"可按目标展开元数据：{{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；下一步审核时逐目标显示最终命令。","Use per-target metadata markers: {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; the next review shows each final command.")))
                     .child(div().id("batch-command-container").test_support().h(px(156.)).flex_shrink_0().child(Textarea::new(&self.command).h_full()))
                     .child(div().flex().flex_wrap().gap_3()
                         .child(div().w(px(140.)).child(hint(t(cx,"并发数 1–8","Concurrency 1–8"))).child(Input::new(&self.concurrency).id("batch-concurrency")))
@@ -220,7 +221,16 @@ impl Render for BatchPanel {
                     .child(Button::new("batch-failure-policy").ghost().small().label(if self.stop_after_failure {t(cx,"失败后停止后续任务","Stop pending work after failure")} else {t(cx,"失败后继续其他任务","Continue other work after failure")}).on_click(cx.listener(|panel,_,_,cx|{if panel.editable(){panel.stop_after_failure = !panel.stop_after_failure;cx.notify();}})))))
                 .when_some(self.review.as_ref(),|el,review| el.child(div().id("batch-review").test_support().flex_shrink_0().min_w_0().p_3().rounded_md().bg(rgb(CANVAS)).flex().flex_col().gap_2()
                     .child(hint(format!("{} {} · {} {}s · {}",t(cx,"并发","Concurrency"),review.concurrency,t(cx,"单主机超时","Per-host timeout"),review.timeout_seconds,if review.stop_after_failure {t(cx,"失败后停止等待项","Stop pending on failure")} else {t(cx,"失败后继续","Continue on failure")})))
-                    .child(div().id("batch-reviewed-command").test_support().font_family("monospace").child(review.command.clone()))))
+                    .child(hint(t(cx,"模板源（仅支持 {{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；以下为每个目标的最终命令）","Template source (supports only {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; final command per target follows)")))
+                    .child(div().id("batch-reviewed-command").test_support().font_family("monospace").child(review.command.clone()))
+                    .child({
+                        let mut rendered = div().id("batch-reviewed-target-commands").test_support().flex().flex_col().gap_2().max_h(px(320.));
+                        for (index, (id, command)) in review.commands.iter().enumerate() {
+                            let label = self.rows.iter().find(|row| row.destination.id == *id).map(|row| row.destination.endpoint.clone()).unwrap_or_else(|| id.to_string());
+                            rendered = rendered.child(div().id(("batch-reviewed-target-command", index)).test_support().min_w_0().p_2().rounded_md().bg(rgb(SURFACE)).child(hint(label)).child(div().font_family("monospace").child(command.clone())));
+                        }
+                        rendered
+                    })))
                 .when(self.handle.is_some()||self.complete,|el|el.child(hint(format!("{} {done}/{selected} · {}",t(cx,"已返回回执","Receipts"),t(cx,"每主机合计输出上限 1 MiB；预览分流显示前 64 KiB。","Combined output limit: 1 MiB per host; each stream preview shows its first 64 KiB."))))
                     .child(div().id("batch-output").test_support().p_3().min_h(px(100.)).flex_shrink_0().bg(rgb(CANVAS)).font_family("monospace").child(self.detail_text.clone())))
                 .child(hint(t(cx,"结果仅保留在本次工作区。取消不能保证远端进程已停止；未知结果不会自动重试。","Results stay in this workspace only. Cancellation cannot confirm remote process termination; unknown outcomes are never retried.")))

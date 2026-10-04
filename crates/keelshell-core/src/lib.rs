@@ -9,6 +9,7 @@
 
 mod ai_profiles;
 mod batch_audit;
+mod batch_template;
 mod completion;
 mod connection_library;
 mod diff;
@@ -29,6 +30,9 @@ pub use ai_profiles::{
 };
 pub use batch_audit::{
     BatchAuditRecord, BatchAuditSummary, MAX_BATCH_AUDIT_TARGETS, MAX_BATCH_AUDITS, command_sha256,
+};
+pub use batch_template::{
+    BATCH_TEMPLATE_VARIABLES, BatchCommandTemplate, BatchTargetContext, BatchTemplateError,
 };
 pub use completion::{
     CompletionAnalysis, CompletionEdit, CompletionError, CompletionPlan, CompletionQuery,

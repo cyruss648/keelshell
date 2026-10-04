@@ -271,19 +271,39 @@ impl Harness {
 }
 
 #[gpui_kit::test]
-async fn batch_exec_requires_review_preserves_exact_bytes_and_separates_terminal_history(
+async fn batch_template_review_binds_distinct_target_commands_and_separates_terminal_history(
     cx: &mut TestAppContext,
 ) {
     let h = Harness::new(cx, [0, 7]);
-    let text = "printf '中文'\nprintf 'two'";
+    let text = "printf '%s' {{endpoint}}";
     h.prepare(text, "2", cx);
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("batch-reviewed-target-commands").visible());
+        assert!(
+            window
+                .find(("batch-reviewed-target-command", 0_usize))
+                .visible()
+        );
+        assert!(
+            window
+                .find(("batch-reviewed-target-command", 1_usize))
+                .visible()
+        );
+    })
+    .checked("inspect per-target rendered batch commands before confirmation");
     assert!(h.servers.iter().all(|s| s.requests().is_empty()));
     h.confirm(cx);
     h.complete(cx).await;
     cx.run_until_parked();
-    for server in &h.servers {
-        assert_eq!(server.requests(), vec![text.as_bytes().to_vec()]);
-    }
+    assert_eq!(
+        h.servers[0].requests(),
+        vec![b"printf '%s' 'fixture-0@example.invalid:22'".to_vec()]
+    );
+    assert_eq!(
+        h.servers[1].requests(),
+        vec![b"printf '%s' 'fixture-1@example.invalid:22'".to_vec()]
+    );
     assert!(h.panes.iter().all(|pane| writes(pane).is_empty()));
     h.fixture
         .workspace

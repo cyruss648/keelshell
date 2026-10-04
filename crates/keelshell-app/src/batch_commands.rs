@@ -5,6 +5,7 @@ use gpui_kit::{
     component::input::{InputState, TextareaState},
     *,
 };
+use keelshell_core::{BatchCommandTemplate, BatchTargetContext};
 use keelshell_session::{
     BatchEvent, BatchHandle, BatchOptions, BatchPolicy, BatchRowReceipt, BatchTarget,
 };
@@ -44,13 +45,18 @@ pub(crate) struct Destination {
     pub name: String,
     pub endpoint: String,
     pub route: String,
+    /// Immutable metadata used only for local per-target template rendering.
+    pub template_context: BatchTargetContext,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Review {
     pub token: Uuid,
     pub targets: Vec<Uuid>,
+    /// Exact source text shown during review and used for the audit digest.
     pub command: String,
+    /// One immutable rendered command per selected target, in row order.
+    pub commands: Vec<(Uuid, String)>,
     pub concurrency: usize,
     pub timeout_seconds: u64,
     pub stop_after_failure: bool,
@@ -202,10 +208,12 @@ impl BatchPanel {
                 "Concurrency must be 1–8; per-host timeout must be 1–300 seconds.",
             ));
         };
+        let commands = render_target_commands(&command, &self.rows)?;
         Ok(Review {
             token,
             targets,
             command,
+            commands,
             concurrency,
             timeout_seconds,
             stop_after_failure: self.stop_after_failure,
@@ -453,13 +461,22 @@ impl BatchPanel {
         }
         profile_ids.sort_unstable();
         profile_ids.dedup();
-        let command = self
+        let digest_input = self
             .review
             .as_ref()
-            .map(|review| review.command.as_str())
+            .map(|review| {
+                let mut input = review.command.clone();
+                for (id, command) in &review.commands {
+                    input.push('\n');
+                    input.push_str(&id.to_string());
+                    input.push('=');
+                    input.push_str(command);
+                }
+                input
+            })
             .unwrap_or_default();
         BatchAuditDraft {
-            command_digest: Sha256::digest(command.as_bytes()).into(),
+            command_digest: Sha256::digest(digest_input.as_bytes()).into(),
             profile_ids,
             target_count: self.rows.iter().filter(|row| row.selected).count(),
             succeeded,
@@ -482,6 +499,37 @@ impl BatchPanel {
 }
 
 impl EventEmitter<BatchPanelEvent> for BatchPanel {}
+
+/// Render one immutable command for each selected target during the review step.
+/// No session, network, retry, or execution operation occurs here.
+fn render_target_commands(command: &str, rows: &[Row]) -> Result<Vec<(Uuid, String)>, Message> {
+    let template = BatchCommandTemplate::compile(command).map_err(|error| {
+        Message::new(
+            format!("批量模板无效：{error}"),
+            format!("Invalid batch template: {error}"),
+        )
+    })?;
+    rows.iter()
+        .filter(|row| row.selected)
+        .map(|row| {
+            let rendered = template
+                .as_ref()
+                .map(|template| template.render(&row.destination.template_context))
+                .transpose()
+                .map_err(|error| {
+                    Message::new(
+                        format!("目标 {} 的模板无法展开：{error}", row.destination.name),
+                        format!(
+                            "Could not render the template for {}: {error}",
+                            row.destination.name
+                        ),
+                    )
+                })?
+                .unwrap_or_else(|| command.to_owned());
+            Ok((row.destination.id, rendered))
+        })
+        .collect()
+}
 
 fn output_preview(bytes: &[u8], cx: &App) -> String {
     const LIMIT: usize = 64 * 1024;

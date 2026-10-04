@@ -74,6 +74,10 @@ enum WorkerMessage {
 
 pub struct FilesPanel {
     session: Option<SshSession>,
+    /// Changes whenever this panel is detached from its authenticated host.
+    /// Recovery proposals carry this token so a stale action cannot cross a
+    /// reconnect/session boundary.
+    session_token: uuid::Uuid,
     suspended: bool,
     host: String,
     runtime: Arc<tokio::runtime::Runtime>,
@@ -95,7 +99,32 @@ pub struct FilesPanel {
     operation_id: Option<uuid::Uuid>,
     transfer_pause: Option<tokio::sync::watch::Sender<bool>>,
     transfer: Option<TransferStatus>,
+    recovery: Option<RecoveryCandidate>,
     resume_mode: bool,
+}
+
+/// A failed transfer can offer a new read-only verification step, but never a
+/// replay. The token binds the proposal to the live authenticated session that
+/// produced the partial output.
+struct RecoveryCandidate {
+    session_token: uuid::Uuid,
+    spec: TransferSpec,
+    directory: bool,
+}
+
+fn recovery_is_available(
+    candidate: Option<&RecoveryCandidate>,
+    session_token: uuid::Uuid,
+    suspended: bool,
+    busy: bool,
+    pending: bool,
+    phase: Option<TransferPhase>,
+) -> bool {
+    !busy
+        && !suspended
+        && !pending
+        && phase == Some(TransferPhase::Failed)
+        && candidate.is_some_and(|candidate| candidate.session_token == session_token)
 }
 impl Drop for FilesPanel {
     fn drop(&mut self) {
@@ -331,6 +360,7 @@ impl FilesPanel {
     ) -> Self {
         let mut panel = Self {
             session: Some(session),
+            session_token: uuid::Uuid::new_v4(),
             suspended: false,
             host,
             runtime,
@@ -361,6 +391,7 @@ impl FilesPanel {
             operation_id: None,
             transfer_pause: None,
             transfer: None,
+            recovery: None,
             resume_mode: false,
         };
         panel.run(Operation::List(".".into()), window, cx);
@@ -373,6 +404,8 @@ impl FilesPanel {
         }
         self.suspended = true;
         self.session = None;
+        self.session_token = uuid::Uuid::new_v4();
+        self.recovery = None;
         self.pending = None;
         self.cancel_active(cx);
         cx.notify();
@@ -442,6 +475,15 @@ impl FilesPanel {
             cx.notify();
             return;
         }
+        let recovery_spec = operation.recovery_spec();
+        let is_transfer = recovery_spec.is_some();
+        if let Some((spec, directory)) = recovery_spec {
+            self.recovery = Some(RecoveryCandidate {
+                session_token: self.session_token,
+                spec,
+                directory,
+            });
+        }
         if let Operation::List(path) = &operation
             && (path.trim().is_empty() || path.chars().any(char::is_control))
         {
@@ -456,7 +498,13 @@ impl FilesPanel {
         self.pending = None;
         let operation_id = uuid::Uuid::new_v4();
         self.operation_id = Some(operation_id);
-        self.transfer = operation.transfer_status();
+        if let Some(status) = operation.transfer_status() {
+            self.transfer = Some(status);
+        } else if !matches!(&operation, Operation::PlanResume(..)) {
+            // Keep a failed transfer card visible while a recovery plan is
+            // being checked; browsing or unrelated operations retire it.
+            self.transfer = None;
+        }
         self.status = match &operation {
             Operation::PlanDirectory(_) => Message::new(
                 "正在扫描目录，完成后需确认…",
@@ -507,6 +555,7 @@ impl FilesPanel {
             self.operation_stop = None;
             self.operation_id = None;
             self.transfer_pause = None;
+            self.recovery = None;
             if let Some(transfer) = &mut self.transfer {
                 transfer.phase = TransferPhase::Failed;
             }
@@ -581,6 +630,7 @@ impl FilesPanel {
                     cx.notify();
                     return;
                 }
+                let succeeded = result.is_ok();
                 match result {
                     Ok(Outcome::Listed(path,entries)) => {
                         if view.path.read(cx).value().as_ref() == navigation_before.as_str() {
@@ -625,6 +675,12 @@ impl FilesPanel {
                     Err(error) => view.status = if review_only {
                         Message::detail("审核未完成，尚未开始传输", "Review incomplete; transfer not started", error)
                     } else { error.message() },
+                }
+                if is_transfer && succeeded {
+                    // A completed transfer has no recovery action. Failed or
+                    // cancelled transfers retain the proposal for an explicit
+                    // user-triggered verification step.
+                    view.recovery = None;
                 }
                 cx.notify();
             });
@@ -755,6 +811,42 @@ impl FilesPanel {
         }
         cx.notify();
     }
+
+    /// Start a fresh, read-only continuation plan after explicit user action.
+    /// This never reuses a stale resume plan and cannot cross a session token.
+    pub(super) fn can_offer_recovery(&self) -> bool {
+        recovery_is_available(
+            self.recovery.as_ref(),
+            self.session_token,
+            self.suspended,
+            self.busy,
+            self.pending.is_some(),
+            self.transfer.as_ref().map(|transfer| transfer.phase),
+        )
+    }
+
+    pub(super) fn request_recovery(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(candidate) = self.recovery.as_ref() else {
+            return;
+        };
+        if self.suspended || self.session.is_none() || candidate.session_token != self.session_token
+        {
+            self.status = Message::new(
+                "恢复建议已失效，请在当前 SSH 会话中重新选择源和目标",
+                "The recovery proposal is stale; choose the source and destination again in the current SSH session",
+            );
+            self.recovery = None;
+            cx.notify();
+            return;
+        }
+        let spec = candidate.spec.clone();
+        let directory = candidate.directory;
+        self.status = Message::new(
+            "正在准备新的续传校验；确认后才会写入目标",
+            "Preparing a new continuation check; nothing will be written until you confirm",
+        );
+        self.run(Operation::PlanResume(spec, directory), window, cx);
+    }
 }
 
 fn directory_review_message(plan: &DirectoryTransferPlan) -> Message {
@@ -815,6 +907,48 @@ fn resume_review_message(
 }
 
 impl Operation {
+    /// Derive a fresh continuation request only from an operation that already
+    /// performed transfer I/O. Review-only plans intentionally return `None`.
+    fn recovery_spec(&self) -> Option<(TransferSpec, bool)> {
+        match self {
+            Self::Upload(local, remote) => Some((TransferSpec::upload(local, remote), false)),
+            Self::Download(remote, local) => Some((TransferSpec::download(remote, local), false)),
+            Self::TransferDirectory(plan) => Some((
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                true,
+            )),
+            Self::ResumeFile(plan) => Some((
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                false,
+            )),
+            Self::ResumeDirectory(plan) => Some((
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                true,
+            )),
+            Self::List(_)
+            | Self::Read(_)
+            | Self::Mkdir(_)
+            | Self::Rename(_, _)
+            | Self::Delete(_)
+            | Self::SetPermissions(_, _)
+            | Self::PlanDirectory(_)
+            | Self::PlanResume(..)
+            | Self::Save { .. } => None,
+        }
+    }
+
     fn transfer_status(&self) -> Option<TransferStatus> {
         let (spec, directory, continuation) = match self {
             Self::Upload(local, remote) => (TransferSpec::upload(local, remote), false, false),
@@ -978,8 +1112,9 @@ fn confirmation_bar(message: String, confirm: Button, cancel: Button) -> impl In
 #[cfg(test)]
 mod tests {
     use super::{
-        FileFailure, TransferDirection, child_path, modified_label, parse_permissions_mode,
-        permissions_label, size_label, transfer_progress_message,
+        FileFailure, Operation, RecoveryCandidate, TransferDirection, TransferPhase, child_path,
+        modified_label, parse_permissions_mode, permissions_label, recovery_is_available,
+        size_label, transfer_progress_message,
     };
     use keelshell_session::sftp::RemoteEntry;
 
@@ -1043,6 +1178,67 @@ mod tests {
         for value in ["", "64", "06400", "0780", "u+rw", "$(id)", " 0640x"] {
             assert!(parse_permissions_mode(value).is_err(), "{value:?}");
         }
+    }
+
+    #[test]
+    fn recovery_candidate_is_derived_only_from_started_transfer_operations() {
+        let spec =
+            keelshell_session::sftp::TransferSpec::upload("/tmp/source.txt", "/srv/source.txt");
+        let candidate = Operation::Upload(spec.local.clone(), spec.remote.clone()).recovery_spec();
+        assert!(candidate.is_some());
+        let Some((recovery, directory)) = candidate else {
+            return;
+        };
+        assert_eq!(recovery, spec);
+        assert!(!directory);
+
+        assert!(Operation::PlanResume(spec, false).recovery_spec().is_none());
+        assert!(Operation::List("/srv".into()).recovery_spec().is_none());
+    }
+
+    #[test]
+    fn recovery_candidate_requires_failed_transfer_and_current_session() {
+        let token = uuid::Uuid::new_v4();
+        let candidate = RecoveryCandidate {
+            session_token: token,
+            spec: keelshell_session::sftp::TransferSpec::download(
+                "/srv/source.txt",
+                "/tmp/source.txt",
+            ),
+            directory: false,
+        };
+        assert!(recovery_is_available(
+            Some(&candidate),
+            token,
+            false,
+            false,
+            false,
+            Some(TransferPhase::Failed),
+        ));
+        for (suspended, busy, pending, phase) in [
+            (true, false, false, Some(TransferPhase::Failed)),
+            (false, true, false, Some(TransferPhase::Failed)),
+            (false, false, true, Some(TransferPhase::Failed)),
+            (false, false, false, Some(TransferPhase::Cancelled)),
+            (false, false, false, Some(TransferPhase::Completed)),
+        ] {
+            assert!(!recovery_is_available(
+                Some(&candidate),
+                token,
+                suspended,
+                busy,
+                pending,
+                phase,
+            ));
+        }
+        assert!(!recovery_is_available(
+            Some(&candidate),
+            uuid::Uuid::new_v4(),
+            false,
+            false,
+            false,
+            Some(TransferPhase::Failed),
+        ));
     }
 
     fn entry(mode: Option<u32>, directory: bool, symlink: bool) -> RemoteEntry {

@@ -177,6 +177,15 @@ impl Workspace {
                     let (name, route) = self
                         .batch_route_description(entity)
                         .unwrap_or_else(|| (tab.read(cx).title.clone(), endpoint.clone()));
+                    let template_context =
+                        self.batch_template_context(entity).unwrap_or_else(|| {
+                            keelshell_core::BatchTargetContext {
+                                name: name.clone(),
+                                host: endpoint.clone(),
+                                endpoint: endpoint.clone(),
+                                ..Default::default()
+                            }
+                        });
                     Destination {
                         id: uuid::Uuid::new_v4(),
                         profile_id,
@@ -184,6 +193,7 @@ impl Workspace {
                         name,
                         endpoint,
                         route,
+                        template_context,
                     }
                 })
                 .collect();
@@ -252,12 +262,17 @@ impl Workspace {
         let targets = destinations
             .into_iter()
             .filter_map(|destination| {
+                let command = review
+                    .commands
+                    .iter()
+                    .find(|(id, _)| *id == destination.id)
+                    .map(|(_, command)| command.clone())?;
                 self.remote_sessions
                     .get(&destination.entity)
                     .map(|session| keelshell_session::BatchTarget {
                         id: destination.id,
                         session: session.clone(),
-                        command: review.command.clone(),
+                        command,
                     })
             })
             .collect();
