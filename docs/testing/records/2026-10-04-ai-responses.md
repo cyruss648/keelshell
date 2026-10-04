@@ -31,4 +31,4 @@ cargo test -p keelshell-app --locked ai_settings::tests -- --nocapture
 覆盖使用本机回环 fixture，不读取真实密钥，不连接付费服务，也不代表 Windows/Linux
 原生桌面验收或所有供应商的协议兼容性。完整工作区门禁（应用 266、核心 69、会话库 64、
 批量集成 14、SSH loopback 95，OpenSSH 外部互操作 6 项因缺少环境而忽略）已通过；跨平台
-Quality [37176372172](https://github.com/cyruss648/keelshell/actions/runs/37176372172) 已在 macOS 26、Ubuntu 24.04 和 Windows 2025 成功；该运行覆盖 Responses 与目录快照提交时的应用 266 项测试。当前工作区又增加了文件面板只读比较和 accessibility label 回归，最新提交会重新触发 Quality；这证明构建、测试和打包路径，不等于 Windows/Linux 原生桌面交互或真实供应商兼容性验收。
+Quality [37179247714](https://github.com/cyruss648/keelshell/actions/runs/37179247714) 已在 macOS 26、Ubuntu 24.04 和 Windows 2025 成功；该运行覆盖 Responses、文件面板只读比较、worker 和 accessibility label 回归，应用测试为 267 项。这证明构建、测试和打包路径，不等于 Windows/Linux 原生桌面交互或真实供应商兼容性验收。

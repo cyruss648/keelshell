@@ -25,4 +25,4 @@ cargo test -p keelshell-app --locked
 
 ## 边界
 
-本记录证明快照适配器、后台本地扫描函数、比较引擎和文件面板只读结果卡片的边界，不证明 Windows/Linux 原生文件选择器、内容哈希同步、同步计划、差异应用、删除策略或生产服务器并发写入语义。当前结果是只读数据，仍需单独的审核计划后才能设计同步操作。GitHub [Quality 37176372172](https://github.com/cyruss648/keelshell/actions/runs/37176372172) 已在三平台完成构建、测试和打包检查。
+本记录证明快照适配器、后台本地扫描函数、比较引擎和文件面板只读结果卡片的边界，不证明 Windows/Linux 原生文件选择器、内容哈希同步、同步计划、差异应用、删除策略或生产服务器并发写入语义。当前结果是只读数据，仍需单独的审核计划后才能设计同步操作。GitHub [Quality 37179247714](https://github.com/cyruss648/keelshell/actions/runs/37179247714) 已在三平台完成构建、测试和打包检查。
