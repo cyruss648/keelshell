@@ -14,7 +14,7 @@
 
 ## 2026-10-04 本地智能体接入
 
-2026-10-05整合更新：Linux MCP错误响应超时已由真实锁定SDK的确定性取消探针证明，修复`93f35ca`使用官方codec与两个连接拥有的I/O任务，SDK接收取消不再丢失排队/部分写入的错误响应。新独立审查无P1/P2，原3秒压力与EOF/背压/撤权保持；根整合988普通+8doc+6脚本、额外2 MiB完整CLI控制器、格式/严格Clippy/x.y及57打包通过。失败证据与独立审查已逐份SHA复制到主工作区；标准macOS双程序包第二轮完成实际选区/SFTP读取、越权拒绝、批准/拒绝、Running撤权结果未知与重启默认关闭；首次人工操作超时保留，后续观察到CUA滚轮方向差异，独立32原始事件场景通过，未改生产布局。根新增首条短提案32原始滚轮场景的最终门禁989普通+8doc+6脚本、默认/2 MiB完整控制器通过；fresh独立审查无P1/P2，独立9项MCP UI、格式/app strictClippy/x.y通过。生产提交34cff1b的Quality37217653868三平台及macOS/Linux OpenSSH全部成功；新增回归的远端CI另行记录，供应商MCP与Windows/Linux原生仍需验证，见[取消修复记录](testing/records/2026-10-04-mcp-response-cancellation.md)。
+2026-10-05整合更新：Linux MCP错误响应超时已由真实锁定SDK的确定性取消探针证明，修复`93f35ca`使用官方codec与两个连接拥有的I/O任务，SDK接收取消不再丢失排队/部分写入的错误响应。新独立审查无P1/P2，原3秒压力与EOF/背压/撤权保持；根整合988普通+8doc+6脚本、额外2 MiB完整CLI控制器、格式/严格Clippy/x.y及57打包通过。失败证据与独立审查已逐份SHA复制到主工作区；标准macOS双程序包第二轮完成实际选区/SFTP读取、越权拒绝、批准/拒绝、Running撤权结果未知与重启默认关闭；首次人工操作超时保留，后续观察到CUA滚轮方向差异，独立32原始事件场景通过，未改生产布局。根新增首条短提案32原始滚轮场景的最终门禁989普通+8doc+6脚本、默认/2 MiB完整控制器通过；fresh独立审查无P1/P2，独立9项MCP UI、格式/app strictClippy/x.y通过。生产提交34cff1b的Quality37217653868三平台及macOS/Linux OpenSSH全部成功；新增回归提交958903c已推送main，Quality37220102376三平台成功，macOS/Linux OpenSSH也通过；已合本地/远端功能分支与worktree、probe/reviewer隔离target均清理，失败证据和源码副本保留。供应商MCP与Windows/Linux原生仍需验证，见[取消修复记录](testing/records/2026-10-04-mcp-response-cancellation.md)。
 
 - 命名AI配置已显式区分模型API、Codex CLI与Claude Code，旧metadata默认API；路径/base URL校验、probe、临时密钥/vault v2精确绑定、完整stdin审核与后台Ask/取消已接通。最终本机门禁929普通+8文档、6脚本、自托管进程harness、strictClippy/fmt/x.y与47打包通过；新独立core/app复审无剩余可复现P1/P2。
 - 最终macOS包SHA与原生证据见[记录](testing/records/2026-10-04-local-agent-ui.md)：实际安装版Codex0.160.0/Claude2.1.285→自有SSE问答，选择125字节SSH上下文、长JSON滚动/显式发送、建议入审核区、语言/主题保留、慢请求取消、重启密钥缺失均证实；退出后owned PIDs/listeners/scratch均清理。没有云端账户或客户SSH验收。

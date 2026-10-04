@@ -216,3 +216,46 @@ macOS/Ubuntu各988普通+8doc，Windows968普通+8doc；两种完整CLI控制器
 OpenSSH成功，owned进程/临时数据清理成功。此CI基线没有本次新增回归，
 新增源码提交的远端CI另行记录；Windows/Linux原生GUI、供应商MCP与正式
 发布/安装边界保持不变。根与reviewer完整失败和成功日志均在ignored work保留。
+
+
+### main 新增回归的三平台 CI — 2026-10-05
+
+提交`958903c9d058f1cdb7a684b1c94df6aaf8e5fd71`已fast-forward合并并推送
+公开仓库main；exact远端ref相同、ahead/behind为0/0、提交后工作区干净。
+[Quality37220102376](https://github.com/cyruss648/keelshell/actions/runs/37220102376)
+最终completed/success，三个job均success，官方run与artifact metadata绑定
+上述完整head。独立只读CI审计逐平台下载实际日志，而非沿用34cff1b结果。
+
+| 平台 | 普通通过 | 文档通过 | Rust忽略 | 脚本通过/跳过 | 打包通过/跳过 | 独立OpenSSH |
+| --- | ---: | ---: | ---: | --- | --- | --- |
+| macOS 26 ARM64 | 989 | 8 | 10 | 6/0 | 57/0 | 8通过 |
+| Ubuntu 24.04 x64 | 989 | 8 | 11 | 6/0 | 57/0 | 8通过 |
+| Windows 2025 x64 | 969 | 8 | 10 | 5/1 | 53/4 | 平台条件跳过 |
+
+三个实际日志均有新增`first_short_proposal_with_selection_and_directory_has_reachable_review`
+完整名称的`... ok`，不是只看到测试发现或编译。格式、strict workspace
+all-target Clippy与x.y策略通过。default与2 MiB完整CLI控制器三平台各两次
+成功；控制器future实际记录Unix4624字节、Windows4968字节。Windows
+打包四项跳过为两项synthetic Unix stage与两项Unix执行权限检查；Linux多
+一项`/proc`人工服务检查忽略。外部供应商CLI测试未提供环境，不能据此
+记为供应商MCP接入。Mac/Linux OpenSSH各八项逐名通过、steps返回0，owned/
+observed进程停止、临时目录删除均true，ancestry_unverified为空。
+
+ignored `work/mcp-main-first-proposal-ci-20261005/`保留本次完整run日志ZIP、
+三份job日志及官方OpenSSH artifacts。完整日志ZIP SHA-256
+`541550ed05fc824d4544c4012c4133634e02c4de789b5fb7675706680ef95b12`；
+Windows实际job log SHA-256
+`458628143edd1e49c7cb60d1fb9fd711c9ee2a73b84f3041063b61247a557572`。
+Mac OpenSSH result SHA-256
+`aada7286c46ca7d6c9124993fae4f4b23d870369fba4f3c05ff7ad441a997b58`；
+Linux result SHA-256
+`7335f7a4759a8f32bbdf1904824483d252c37b0d2c3b95d67c22ef42789a9eb4`。
+
+已合本地/远端功能分支清理，Git仅保留main及主工作区，managed worktree
+均可恢复归档。probe与fresh reviewer均确认无活跃进程或打开文件后，仅
+删除其独立构建target；源码副本、冻结manifest、原失败/成功日志、审查
+报告与receipt前后SHA相同，清理回执另存，root target保留。CI监视任务
+正常退出，无新的本机fixture或容器。本节是源/test提交958903c的验收；
+后续状态文档提交不改变生产或测试source，其CI不与本节结论混用。
+Windows/Linux原生GUI、实际供应商MCP、六目标Release、签名/公证与实际
+安装更新仍未验收，不能因三平台CI成功关闭这些条目。
