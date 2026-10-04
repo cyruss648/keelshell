@@ -122,3 +122,17 @@ The previously completed 47 packaging tests and current macOS UI audit remain
 their own evidence. This transport slice adds no graphical workflow editor and
 does not convert the prior UI audit into native workflow acceptance. Remote CI
 for the new integration commit must be checked separately after pushing.
+
+## Remote source validation
+
+Source commit `9802ce94d34484b5aa6d1d811edd8770b9fe0aa0` passed
+[Quality 37197083353](https://github.com/cyruss648/keelshell/actions/runs/37197083353)
+on macOS 26, Ubuntu 24.04 and Windows 2025. macOS/Ubuntu each passed 859 ordinary
+and six documentation tests; Windows passed 843 ordinary and six documentation
+tests. Standard gates ignored eight opt-in OpenSSH tests; Ubuntu also has one
+platform-conditioned ignored test. Packaging ran 47 tests on each runner, with
+one Unix-permission test skipped on Windows. The separate macOS/Linux OpenSSH
+steps passed. Full CI output is retained in ignored `work/quality-37197083353.log`.
+
+This is runner build/test/package and loopback SSH evidence. It does not close
+native Windows/Linux desktop, complete workflow UI or production acceptance.

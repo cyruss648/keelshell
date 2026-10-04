@@ -7,12 +7,15 @@
 - 明暗两种主题，默认跟随系统，显式切换与配置持久化；采用更丰富但克制的元素/语义色和专业一致的视觉。当前固定Light尚未改变。
 - AI配置新增本地Claude Code/Codex CLI，不限模型API；提供MCP服务端给外部智能体调用。用户明确排除KeelShell接入其他第三方MCP服务的通用客户端，后续不得扩大该范围。
 - 正式任务ID、顺序、架构边界与验收见[设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)，参考选型和现有skills见[设计资料库](design/README.md)，来源/版本核对见[计划记录](testing/records/2026-10-04-design-agent-planning.md)。先收敛已开始后端，再建立主题基础；新增界面复用同一体系。
+- 主题只读入口复核：core已有System/Dark/Light但默认Light且缺字段失败；复用该字段，不升schema、不强改旧明示Light。Kit只有Light/Dark，使用现有工作区外观订阅解析System并原地更新palette；保存偏好避免无意义推进命令来源revision。详细入口与未实现边界见[计划记录](testing/records/2026-10-04-design-agent-planning.md)。
+- 用户追加并行工程要求：允许多个子代理/worktree并行不相关功能，完成后新开独立代理评审与功能复核，合并后及时清理分支/worktree/临时进程或容器；可使用本机Podman建立隔离服务真实联调，不能将容器或模拟视为目标桌面验收。
 
 ## 2026-10-04 继续交接（覆盖下方历史状态）
 
 本节记录当前工作区相对于下方历史交接内容的最新状态。后续实现和验证应以本节、`docs/ROADMAP.md`、能力清单和对应测试记录为准；历史章节保留用于追溯，不代表当前未完成项已经关闭。
 
 - 最新冻结源码（含SSH依赖调度适配器）的整仓门禁通过：859项普通测试、6项文档测试、严格全工作区Clippy、格式和依赖策略；此前47项打包回归通过，新一轮独立8项OpenSSH互通通过。目录合并已完成macOS受控原生双向内容哈希验证。初始AI布局/断言失败和并行编辑时格式失败日志保留；本次提交的三平台CI另行追加，不沿用旧提交结论。
+- 代码提交`9802ce9`已推送，GitHub[Quality 37197083353](https://github.com/cyruss648/keelshell/actions/runs/37197083353)三平台成功：macOS/Ubuntu各859普通+6文档，Windows843普通+6文档；打包47项（Windows一项权限检查跳过），macOS/Linux独立OpenSSH步骤成功。完整源码CI与主题后续计划分别记录，不视为新增主题/MCP验收。
 - 批量依赖计划核心新增1–128个任务、32个目标的确定性拓扑审核和纯内存放行账本，指纹绑定精确命令/目标/依赖；只有前置明确成功才能放行下游，失败/未知/跳过阻止下游，取消不把运行任务标为远端已停止。10项单测、3项公开API集成、1项文档测试通过；纯核心层仍无网络/执行/定时器；后续session适配器已接通捕获会话上的真实SSH依赖调度，11项TCP协议专项及独立8项OpenSSH互通通过。图形工作流编辑器、完整目标/选项审核和任务级持久化仍待接通，见[ADR0035](adr/0035-reviewed-workflow-ssh-adapter.md)及[适配器记录](testing/records/2026-10-04-workflow-ssh-adapter.md)。见[ADR0034](adr/0034-reviewed-batch-dependency-plan.md)和[依赖计划记录](testing/records/2026-10-04-batch-dependency-plan.md)。
 - 独立UI审查后，连接行与操作的可访问名称现含完整连接名称及user@host:port；窄连接区域采用可换行操作卡片和顶部目录树，AI侧栏受窗口42%限制；更新关闭标签双语可辨认。110项工作区回归通过，当前构建原生复审见[独立审查记录](testing/records/2026-10-04-independent-workspace-audit.md)。背景AX模态隔离、最小原生窗口与其余审查缺口继续跟踪。
 
