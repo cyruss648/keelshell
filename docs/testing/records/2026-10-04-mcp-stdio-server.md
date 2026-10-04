@@ -40,7 +40,17 @@ git diff --check
 
 全新fork-none审查agent独立重跑初始29+1/Clippy通过后，发现两个P2：不读stdout时关闭stdin，SDK drain后close仍等待writer mutex；3000条tools/list可让RSS持续增长，backend semaphore不足以约束SDK queued responses。失败证据分别为 `work/mcp-independent-review-backpressure-e9396a4.log` 与 `work/mcp-independent-review-flood-e9396a4.log`。
 
-修复在framing前约束最多32个未对应实际flush的输入frame，覆盖通知/畸形帧，不提前根据backend完成归还；超额关闭而不排队BUSY。writer取消监听使EOF中断Pending write/flush并释放SDK mutex；完整service收尾deadline为2秒，binary runtime shutdown仍有100 ms边界。新增5项单元/真实stdio/byte-stream回归通过，独立修复复核将按修复SHA另行补充。保守预算会让累计无回复通知/放弃请求耗尽后关闭连接，这一限制明确保留。
+修复在framing前约束最多32个未对应实际flush的输入frame，覆盖通知/畸形帧，不提前根据backend完成归还；超额关闭而不排队BUSY。writer取消监听使EOF中断Pending write/flush并释放SDK mutex；完整service收尾deadline为2秒，binary runtime shutdown仍有100 ms边界。新增5项单元/真实stdio/byte-stream回归通过，独立修复复核及修复SHA见下文。保守预算会让累计无回复通知/放弃请求耗尽后关闭连接，这一限制明确保留。
+
+新独立agent对修复SHA `fb45726a01367a4194935f71fdad59dcdccf8149`复核，两个P2均关闭且未发现新阻塞。独立重跑34项普通测试、1项doctest和strict目标Clippy通过，另执行真实手写进程探针：
+
+- 原64-request背压与原3000-request洪泛分别约4 ms/3 ms退出1，因超出总frame预算关闭，不再无限等待或持续扩大响应队列。
+- 19个tools/list后保持stdout打开不读取并关闭stdin，约4 ms退出0；及时读响应的100个tools/list持续成功并exit0。
+- 慢速不读取stdout的洪泛探针RSS从5536 KiB升至最高7056 KiB后预算关闭；这是本机具体探针证据，不是跨平台RSS硬上限承诺。
+- 100000-byte合法RPC id制造大响应后EOF，约127 ms退出0；保留65536-byte未结束尾部，完整newline帧均为合法JSON，确认ADR所述异常断开的在途尾部截断边界。
+- 31个无回复notification后仍能完成一个正常调用，继续通知耗尽预算后关闭，证明正常response不会清掉应保守保留的无回复槽位。
+
+复核证据在 `work/mcp-independent-review-repair-probes-fb45726.log`、`work/mcp-independent-review-repair-boundaries-fb45726.log`、`work/mcp-independent-review-repair-notification-budget-fb45726.log` 及相同前缀的test/clippy日志。全部成功/失败证据另复制到主线ignored `work/mcp-server-evidence-20261004/`并逐文件SHA-256核对。此复核没有编辑源码、执行SSH、调用模型或操作GUI。
 
 ## 尚未验收的边界
 
