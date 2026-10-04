@@ -33,6 +33,7 @@ CLOSE 入队成功只说明协议队列已接收关闭请求，不等于远端�
 - 加强显式关闭测试的观察顺序后，单独重跑 `cargo test -p keelshell-session --test ssh_loopback --locked high_level_close_or_drop_cancels_a_zero_window_sftp_writer -- --test-threads=1`：1 项通过。日志 `work/owned-session-explicit-close-final.log`。此后生产实现未变。
 - 修改的 Rust 文件已格式化；专项 `git diff --check` 通过。
 - 独立审阅指出并复核关闭了三处生命周期缺口：显式关闭 await 期间守卫丢失、上层 SFTP 关闭等待背压写队列、协议 handle 已退出时遗漏物理 TCP 关闭。对应回归均纳入上述测试。
+- 后续 Quality `37164709944` 的 macOS 并发测试发现一个新的关闭竞态：relay 已退出后，SFTP close 的检查与发送之间可能返回 `SendError: channel closed`，即使共享 SSH 仍然可用。提交 `361900b` 让协议关闭哨兵先入队，再取消 relay，并将这一已关闭发送方错误按结构化错误类型视为幂等成功；新增 `sftp_close_after_shared_transport_shutdown_is_idempotent` 回归。修复后本机 session 64 项与 Quality `37166275100` 三平台均通过。
 
 ## 保留的失败与验证边界
 
