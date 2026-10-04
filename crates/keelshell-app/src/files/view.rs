@@ -52,6 +52,7 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
     }
     let mut card = div()
         .id("directory-comparison-card")
+        .flex_shrink_0()
         .mx_2()
         .my_1()
         .p_2()
@@ -77,7 +78,8 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
             comparison.local.display(),
             comparison.remote
         )))
-        .child(rows);
+        .child(rows)
+        .test_support();
     if let Some(plan) = &comparison.sync_plan {
         let direction = if plan.direction() == DirectorySyncDirection::LeftToRight {
             t(cx, "本地 → 远端", "Local → remote")
@@ -189,7 +191,8 @@ impl Render for FilesPanel {
             .min_h_0()
             .overflow_y_scroll()
             .flex()
-            .flex_col();
+            .flex_col()
+            .test_support();
         for (index, entry) in self.entries.iter().enumerate() {
             let selected = self
                 .selected
@@ -271,7 +274,8 @@ impl Render for FilesPanel {
                                     }
                                 })),
                         ),
-                    ),
+                    )
+                    .test_support(),
             );
         }
         if self.entries.is_empty() && !self.busy {
@@ -287,6 +291,7 @@ impl Render for FilesPanel {
             .min_w_0()
             .h_full()
             .overflow_x_scroll()
+            .test_support()
             .child(
                 div()
                     .min_w(px(650.))
@@ -315,25 +320,41 @@ impl Render for FilesPanel {
                     )
                     .child(list),
             );
-        let mut body = div()
+        let body = div()
+            .id("file-browsing-area")
             .flex_1()
-            .min_h_0()
+            // Reserve the 28px header, a real 28px entry and scrollbar space.
+            // Toolbars and secondary cards must scroll instead of taking this.
+            .min_h(px(64.))
             .flex()
             .child(navigation)
             .child(table);
+        let mut tools = div()
+            .id("file-tools-scroll")
+            .flex_1()
+            .min_h_0()
+            .overflow_y_scroll()
+            .track_scroll(&self.tools_scroll)
+            .vertical_scrollbar(&self.tools_scroll)
+            .flex()
+            .flex_col()
+            .test_support();
+        let mut editor_card = None;
         if let Some((path, _)) = &self.editing {
             let mut editor_panel = div()
-                .w(px(320.))
+                .id("remote-file-editor")
+                .w_full()
                 .flex_shrink_0()
-                .h_full()
+                .h(px(if self.diff_preview.is_some() { 268. } else { 180. }))
                 .min_h_0()
                 .flex()
                 .flex_col()
-                .border_l_1()
+                .border_t_1()
                 .border_color(rgb(visual.border))
                 .child(
                     div()
                         .h(px(28.))
+                        .flex_shrink_0()
                         .px_2()
                         .flex()
                         .items_center()
@@ -351,9 +372,11 @@ impl Render for FilesPanel {
                 .child(
                     div()
                         .p_1()
+                        .flex_shrink_0()
                         .border_t_1()
                         .border_color(rgb(visual.border))
                         .flex()
+                        .flex_wrap()
                         .gap_1()
                         .child(
                             Button::new("toggle-remote-diff")
@@ -409,19 +432,20 @@ impl Render for FilesPanel {
             if let Some(diff) = &self.diff_preview {
                 editor_panel = editor_panel.child(
                     div()
-                        .h(px(220.))
+                        .h(px(88.))
+                        .flex_shrink_0()
                         .min_h_0()
                         .border_t_1()
                         .border_color(rgb(visual.border))
-                        .bg(rgb(0x1e2430))
+                        .bg(rgb(visual.canvas))
                         .overflow_y_scrollbar()
                         .p_2()
-                        .text_color(rgb(0xd8dee9))
+                        .text_color(rgb(visual.text))
                         .font_family("monospace")
                         .child(diff.clone()),
                 );
             }
-            body = body.child(editor_panel);
+            editor_card = Some(editor_panel.test_support());
         }
         let selection = self
             .selected
@@ -433,34 +457,121 @@ impl Render for FilesPanel {
             .selected
             .as_ref()
             .is_some_and(|entry| !entry.is_symlink);
-        let mut panel = div().w_full().min_w_0().h_full().min_h_0().flex().flex_col().bg(rgb(visual.surface)).text_color(rgb(visual.text)).text_xs()
-            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_b_1().border_color(rgb(visual.border))
-                .child(div().text_color(rgb(visual.accent)).child(IconName::FolderOpen))
-                .child(div().text_color(rgb(visual.muted)).child(t(cx,"远程目录","Remote path")))
-                .child(div().flex_1().min_w_0().child(Input::new(&self.path).small().rounded(px(6.))))
-                .child(Button::new("parent-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).label(t(cx,"上级","Up")).on_click(cx.listener(|view,_,window,cx| {
-                    if let Some(directory) = &view.directory { view.run(Operation::List(format!("{}/..",directory.trim_end_matches('/'))),window,cx); }
-                })))
-                .child(Button::new("refresh-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::RefreshCw).label(t(cx,"刷新","Refresh")).on_click(cx.listener(|view,_,window,cx|view.run(Operation::List(view.path.read(cx).value().to_string()),window,cx))))
-                .child(div().max_w(px(220.)).text_ellipsis().text_color(rgb(visual.muted)).child(self.host.clone())))
-            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().bg(rgb(visual.canvas)).text_color(rgb(visual.muted)).child(t(cx, "上一会话快照 · 草稿可复制，远程操作已停用", "Previous session snapshot · Copy drafts; remote actions are disabled"))))
-            .child(body)
-            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border))
+        let mut panel = div()
+            .w_full()
+            .min_w_0()
+            .h_full()
+            .min_h_0()
+            .flex()
+            .flex_col()
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
+            .text_xs()
+            .child(
+                div()
+                    .h(px(38.))
+                    .px_3()
+                    .flex_shrink_0()
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .border_b_1()
+                    .border_color(rgb(visual.border))
+                    .child(
+                        div()
+                            .text_color(rgb(visual.accent))
+                            .child(IconName::FolderOpen),
+                    )
+                    .child(div().text_color(rgb(visual.muted)).child(t(
+                        cx,
+                        "远程目录",
+                        "Remote path",
+                    )))
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .child(Input::new(&self.path).small().rounded(px(6.))),
+                    )
+                    .child(
+                        Button::new("parent-files")
+                            .disabled(self.suspended)
+                            .ghost()
+                            .compact()
+                            .rounded(px(6.))
+                            .icon(IconName::ArrowUp)
+                            .label(t(cx, "上级", "Up"))
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                if let Some(directory) = &view.directory {
+                                    view.run(
+                                        Operation::List(format!(
+                                            "{}/..",
+                                            directory.trim_end_matches('/')
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                }
+                            })),
+                    )
+                    .child(
+                        Button::new("refresh-files")
+                            .disabled(self.suspended)
+                            .ghost()
+                            .compact()
+                            .rounded(px(6.))
+                            .icon(IconName::RefreshCw)
+                            .label(t(cx, "刷新", "Refresh"))
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                view.run(
+                                    Operation::List(view.path.read(cx).value().to_string()),
+                                    window,
+                                    cx,
+                                )
+                            })),
+                    )
+                    .child(
+                        div()
+                            .max_w(px(160.))
+                            .min_w_0()
+                            .text_ellipsis()
+                            .text_color(rgb(visual.muted))
+                            .child(self.host.clone()),
+                    ),
+            )
+            .when(self.suspended, |panel| {
+                panel.child(
+                    div()
+                        .px_3()
+                        .py_1()
+                        .flex_shrink_0()
+                        .bg(rgb(visual.canvas))
+                        .text_color(rgb(visual.muted))
+                        .child(t(
+                            cx,
+                            "上一会话快照 · 草稿可复制，远程操作已停用",
+                            "Previous session snapshot · Copy drafts; remote actions are disabled",
+                        )),
+                )
+            })
+            .child(body.test_support());
+        tools = tools.when(self.pending.is_none(), |panel| panel
+            .child(div().id("file-mutation-tools").min_h(px(38.)).px_3().py_1().flex_shrink_0().flex().flex_wrap().items_center().gap_2().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border))
                 .child(div().w(px(150.)).flex_shrink_0().text_ellipsis().text_color(rgb(if has_selection {visual.text} else {visual.muted})).child(selection.to_owned()))
-                .child(div().w(px(180.)).child(Input::new(&self.name).small().rounded(px(6.))))
-                .child(Button::new("mkdir").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::FolderPlus).label(t(cx,"新建目录","New folder")).on_click(cx.listener(|view,_,_,cx| {
+                .child(div().id("file-name-draft").w(px(180.)).flex_shrink_0().child(Input::new(&self.name).small().rounded(px(6.))).test_support())
+                .child(Button::new("mkdir").flex_shrink_0().disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::FolderPlus).label(t(cx,"新建目录","New folder")).on_click(cx.listener(|view,_,_,cx| {
                     if let Some(path) = view.new_remote_path(cx) { view.confirm(Message::new(format!("创建目录 {path}？"),format!("Create directory {path}?")),Operation::Mkdir(path),cx); } cx.notify();
                 })))
                 .child(div().h(px(16.)).w(px(1.)).bg(rgb(visual.border)))
-                .child(Button::new("rename").ghost().compact().rounded(px(6.)).icon(IconName::Pencil).label(t(cx,"重命名","Rename")).disabled(self.suspended || !has_selection).on_click(cx.listener(|view,_,_,cx| {
+                .child(Button::new("rename").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Pencil).label(t(cx,"重命名","Rename")).disabled(self.suspended || !has_selection).on_click(cx.listener(|view,_,_,cx| {
                     if let (Some(entry),Some(path)) = (view.selected.clone(),view.new_remote_path(cx)) { view.confirm(Message::new(format!("将 {} 重命名为 {path}？",entry.path),format!("Rename {} to {path}?",entry.path)),Operation::Rename(entry.path,path),cx); } cx.notify();
                 })))
-                .child(Button::new("delete-file").ghost().compact().rounded(px(6.)).icon(IconName::Trash).label(t(cx,"删除","Delete")).disabled(self.suspended || !has_selection).text_color(rgb(if self.suspended { visual.muted } else { visual.danger })).on_click(cx.listener(|view,_,_,cx| {
+                .child(Button::new("delete-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Trash).label(t(cx,"删除","Delete")).disabled(self.suspended || !has_selection).text_color(rgb(if self.suspended { visual.muted } else { visual.danger })).on_click(cx.listener(|view,_,_,cx| {
                     if let Some(entry) = view.selected.clone() { view.confirm(Message::new(format!("永久删除 {}？",entry.path),format!("Delete {} permanently?",entry.path)),Operation::Delete(entry),cx); }
                 })))
                 .child(div().h(px(16.)).w(px(1.)).bg(rgb(visual.border)))
-                .child(div().w(px(118.)).flex_shrink_0().child(Input::new(&self.mode).small().rounded(px(6.))))
-                .child(Button::new("chmod-file").ghost().compact().rounded(px(6.)).icon(IconName::Lock).label(t(cx,"改权限","Permissions")).disabled(self.suspended || self.busy || !has_selection).on_click(cx.listener(|view,_,_,cx| {
+                .child(div().id("file-mode-draft").w(px(118.)).flex_shrink_0().child(Input::new(&self.mode).small().rounded(px(6.))).test_support())
+                .child(Button::new("chmod-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Lock).label(t(cx,"改权限","Permissions")).disabled(self.suspended || self.busy || !has_selection).on_click(cx.listener(|view,_,_,cx| {
                     let Some(entry) = view.selected.clone() else { return; };
                     if entry.is_symlink {
                         view.status = Message::new("为避免跟随链接误改目标，符号链接不支持修改权限", "Permission changes on symbolic links are disabled to avoid following a link");
@@ -474,8 +585,8 @@ impl Render for FilesPanel {
                     }
                     cx.notify();
                 }))))
-            .child(div().id("file-transfer-tools").h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_t_1().border_color(rgb(visual.border)).overflow_x_scroll()
-                .child(Button::new("file-resume-mode").ghost().compact().disabled(self.suspended || self.busy || self.pending.is_some())
+            .child(div().id("file-transfer-tools").min_h(px(38.)).px_3().py_1().flex_shrink_0().flex().flex_wrap().items_center().gap_2().border_t_1().border_color(rgb(visual.border))
+                .child(Button::new("file-resume-mode").flex_shrink_0().ghost().compact().disabled(self.suspended || self.busy || self.pending.is_some())
                     .when(self.resume_mode, |button| button.primary()).label(t(cx,"续传模式","Resume mode"))
                     .on_click(cx.listener(|view,_,_,cx| {
                         view.resume_mode = !view.resume_mode;
@@ -483,7 +594,7 @@ impl Render for FilesPanel {
                         cx.notify();
                     })))
                 .child(div().flex_1().min_w(px(150.)).child(Input::new(&self.local).small().rounded(px(6.))))
-                .child(Button::new("upload-file").ghost().compact().rounded(px(6.)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("upload-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().to_string());
                     if view.resume_mode {
                         if let Some(entry) = &view.selected && !entry.is_directory && !entry.is_symlink {
@@ -496,7 +607,7 @@ impl Render for FilesPanel {
                         view.confirm(Message::new(format!("通过传输队列上传到 {remote}？同名远端文件可能被替换，取消时可能保留部分文件。"),format!("Upload to {remote} through the transfer queue? An existing remote file may be replaced, and cancellation may leave a partial file.")),Operation::Upload(local,remote),cx);
                     } else { view.status=Message::new("请输入有效的本地文件路径", "Enter a valid local file path");cx.notify(); }
                 })))
-                .child(Button::new("upload-directory").ghost().compact().rounded(px(6.)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("upload-directory").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().to_string());
                     if view.resume_mode {
                         if let Some(entry) = &view.selected && entry.is_directory && !entry.is_symlink {
@@ -509,7 +620,7 @@ impl Render for FilesPanel {
                         view.run(Operation::PlanDirectory(TransferSpec::upload(local, remote)), window, cx);
                     } else { view.status=Message::new("请输入本地目录的绝对路径", "Enter the absolute local directory path");cx.notify(); }
                 })))
-                .child(Button::new("download-file").ghost().compact().rounded(px(6.)).icon(IconName::Download).label(if self.resume_mode {t(cx,"续传选中项","Resume selected")} else {t(cx,"下载选中项","Download selected")}).disabled(self.suspended || !downloadable || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("download-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Download).label(if self.resume_mode {t(cx,"续传选中项","Resume selected")} else {t(cx,"下载选中项","Download selected")}).disabled(self.suspended || !downloadable || self.busy).on_click(cx.listener(|view,_,window,cx| {
                     if let Some(entry) = &view.selected && !entry.is_symlink {
                         let local = PathBuf::from(view.local.read(cx).value().to_string());
                         if view.resume_mode {
@@ -523,7 +634,7 @@ impl Render for FilesPanel {
                         view.confirm(Message::new(format!("将 {} 下载到 {}？不覆盖已有文件；中断时可能保留未完成的下载。",entry.path,local.display()),format!("Download {} to {}? Existing files are preserved; an interruption may leave a partial download.",entry.path,local.display())),Operation::Download(entry.path.clone(),local),cx);
                     }
                 })))
-                .child(Button::new("compare-directories").ghost().compact().rounded(px(6.)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("compare-directories").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().trim());
                     // The path input is a navigation draft. Use the last
                     // successfully loaded canonical directory so a typed but
@@ -537,14 +648,17 @@ impl Render for FilesPanel {
                         view.run(Operation::Compare(local, remote), window, cx);
                     }
                     cx.notify();
-                }))));
+                })))));
+        if let Some(editor) = editor_card {
+            tools = tools.child(editor);
+        }
         if let Some(comparison) = &self.comparison {
             let can_apply = comparison
                 .sync_plan
                 .as_ref()
                 .is_some_and(|p| p.operation_count() > 0);
             let disabled = self.suspended || self.busy || self.pending.is_some();
-            panel = panel.child(
+            tools = tools.child(
                 div()
                     .mx_2()
                     .flex_shrink_0()
@@ -629,11 +743,12 @@ impl Render for FilesPanel {
                             })),
                     ),
             );
-            panel = panel.child(directory_compare_card(comparison, cx));
+            tools = tools.child(directory_compare_card(comparison, cx));
         }
         if self.transfer.is_some() {
-            panel = panel.child(self.transfer_card(cx));
+            tools = tools.child(self.transfer_card(cx));
         }
+        panel = panel.child(tools);
         if let Some((message, _)) = &self.pending {
             panel = panel.child(confirmation_bar(
                 cx,
@@ -673,7 +788,8 @@ impl Render for FilesPanel {
                 }))
                 .child(
                     div()
-                        .max_w(px(320.))
+                        .max_w(px(220.))
+                        .min_w_0()
                         .text_ellipsis()
                         .text_color(rgb(visual.muted))
                         .child(format!(
@@ -685,6 +801,8 @@ impl Render for FilesPanel {
                 .child(
                     div()
                         .flex_1()
+                        .min_w_0()
+                        .text_ellipsis()
                         .text_color(rgb(visual.muted))
                         .child(self.status.render(cx)),
                 )

@@ -2,7 +2,10 @@
 
 use std::fmt::Display;
 
-use gpui_kit::{App, Global};
+use gpui_kit::{
+    App, Global, InteractiveElement, ParentElement, Role, StatefulInteractiveElement, Styled,
+    TestSupportExt, div,
+};
 use keelshell_core::Language;
 
 #[derive(Default)]
@@ -23,6 +26,34 @@ pub fn t(cx: &App, zh: &'static str, en: &'static str) -> &'static str {
         Language::En => en,
     }
 }
+
+/// A tooltip whose visible content follows the live application language.
+///
+/// Kit's string tooltip retains the translation captured by its hover request.
+/// The public GPUI tooltip builder instead owns a Kit tooltip whose element
+/// reads Locale on every render, including while the pointer stays in place.
+/// Use this once per element, without another string or builder tooltip.
+pub(crate) trait LocalizedTooltipExt: InteractiveElement {
+    /// Attach both complete translations without capturing the current locale.
+    fn localized_tooltip(mut self, zh: &'static str, en: &'static str) -> Self {
+        self.interactivity().tooltip(move |window, cx| {
+            gpui_kit::component::tooltip::Tooltip::element(move |_, cx| {
+                let label = t(cx, zh, en);
+                div()
+                    .id("localized-tooltip-content")
+                    .role(Role::Tooltip)
+                    .aria_label(label)
+                    .max_w(gpui_kit::px(420.))
+                    .child(label)
+                    .test_support()
+            })
+            .build(window, cx)
+        });
+        self
+    }
+}
+
+impl<E: InteractiveElement> LocalizedTooltipExt for E {}
 
 /// An owned status retaining both translations so it can change language later.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -73,9 +104,80 @@ pub fn set_language(language: Language, cx: &mut App) {
 
 #[cfg(test)]
 mod tests {
-    use super::{Message, language, set_language, t};
-    use gpui_kit::TestAppContext;
+    use super::{LocalizedTooltipExt, Message, language, set_language, t};
+    use gpui_kit::{
+        AppContext, Bounds, Context, IntoElement, ParentElement, Render, Styled, TestAppContext,
+        Window, WindowBounds, WindowOptions,
+        component::button::{Button, ButtonVariants},
+        div, point, px, size,
+        test::TestWindowExt,
+    };
     use keelshell_core::Language;
+    use std::time::Duration;
+
+    struct TooltipFixture;
+    impl Render for TooltipFixture {
+        fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+            div().size_full().p_4().child(
+                Button::new("live-locale-tooltip")
+                    .ghost()
+                    .label("SSH")
+                    .localized_tooltip("新建 SSH 会话", "New SSH session"),
+            )
+        }
+    }
+
+    #[gpui_kit::test]
+    fn already_open_tooltip_retranslates_without_pointer_movement(cx: &mut TestAppContext) {
+        let (window, _) = cx.update(|cx| {
+            gpui_kit::init(cx);
+            set_language(Language::En, cx);
+            gpui_kit::open_window(
+                WindowOptions {
+                    window_bounds: Some(WindowBounds::Windowed(Bounds::new(
+                        point(px(0.), px(0.)),
+                        size(px(640.), px(400.)),
+                    ))),
+                    ..Default::default()
+                },
+                cx,
+                |_, cx| cx.new(|_| TooltipFixture),
+            )
+            .unwrap_or_else(|error| panic!("tooltip test window: {error}"))
+        });
+        cx.update_window(window, |_, window, cx| {
+            window.render_frame(cx);
+            window.hover("live-locale-tooltip", cx);
+        })
+        .unwrap_or_else(|error| panic!("hover real localized button: {error}"));
+        cx.run_until_parked();
+        cx.dispatcher.advance_clock(Duration::from_secs(1));
+        cx.run_until_parked();
+        cx.update_window(window, |_, window, cx| {
+            window.render_frame(cx);
+            let tooltip = window.find("localized-tooltip-content");
+            assert!(tooltip.visible());
+            assert_eq!(tooltip.label(), Some("New SSH session"));
+        })
+        .unwrap_or_else(|error| panic!("show hovered tooltip after bounded delay: {error}"));
+        for (language, expected) in [
+            (Language::ZhCn, "新建 SSH 会话"),
+            (Language::En, "New SSH session"),
+        ] {
+            cx.update_window(window, |_, window, cx| {
+                let pointer = window.mouse_position();
+                set_language(language, cx);
+                window.render_frame(cx);
+                let tooltip = window.find("localized-tooltip-content");
+                assert!(tooltip.visible());
+                assert_eq!(tooltip.label(), Some(expected));
+                assert_eq!(window.mouse_position(), pointer);
+                assert!(tooltip.bounds().right() <= window.bounds().right());
+                assert!(tooltip.bounds().bottom() <= window.bounds().bottom());
+            })
+            .unwrap_or_else(|error| panic!("translate still-hovered tooltip: {error}"));
+        }
+    }
 
     #[gpui_kit::test]
     fn defaults_to_chinese_and_retranslates_existing_messages(cx: &mut TestAppContext) {

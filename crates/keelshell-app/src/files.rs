@@ -101,6 +101,7 @@ pub struct FilesPanel {
     mode: Entity<InputState>,
     local: Entity<InputState>,
     editor: Entity<TextareaState>,
+    tools_scroll: ScrollHandle,
     entries: Vec<RemoteEntry>,
     selected: Option<RemoteEntry>,
     editing: Option<(String, Vec<u8>)>,
@@ -448,6 +449,7 @@ impl FilesPanel {
             ),
             local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
             editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
+            tools_scroll: ScrollHandle::new(),
             entries: Vec::new(),
             selected: None,
             editing: None,
@@ -1273,7 +1275,9 @@ fn confirmation_bar(
                 .id("file-confirmation-message")
                 .flex_1()
                 .min_w_0()
-                .max_h(px(96.))
+                // Keep review actions visible beside a scrollable full message
+                // even inside the minimum-height Files workspace.
+                .max_h(px(48.))
                 .overflow_y_scroll()
                 .overflow_x_scroll()
                 .whitespace_normal()

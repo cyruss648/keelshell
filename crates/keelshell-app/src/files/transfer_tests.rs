@@ -2,8 +2,8 @@
 use super::{FilesPanel, Operation, TransferPhase};
 use crate::i18n;
 use gpui_kit::{
-    AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
-    point, px, size,
+    AnyWindowHandle, AppContext, Bounds, Entity, InputEvent, TestAppContext, WindowBounds,
+    WindowOptions, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
 };
 use keelshell_core::Language;
@@ -15,6 +15,9 @@ use std::{
 };
 
 use super::test_server::{Checked, Server};
+
+#[path = "workspace_layout_tests.rs"]
+mod workspace_layout_tests;
 
 struct LocalDirectory(PathBuf);
 impl Drop for LocalDirectory {
@@ -32,6 +35,16 @@ struct Harness {
 }
 impl Harness {
     fn new(cx: &mut TestAppContext) -> Self {
+        Self::new_with(cx, mount)
+    }
+    fn new_with(
+        cx: &mut TestAppContext,
+        mount: impl FnOnce(
+            &mut TestAppContext,
+            SshSession,
+            Arc<tokio::runtime::Runtime>,
+        ) -> (AnyWindowHandle, Entity<FilesPanel>),
+    ) -> Self {
         let runtime = Arc::new(
             tokio::runtime::Builder::new_multi_thread()
                 .worker_threads(2)
@@ -108,9 +121,339 @@ impl Harness {
     fn click(&self, cx: &mut TestAppContext, id: &str) {
         cx.update_window(self.window, |_, window, cx| {
             window.render_frame(cx);
+            reveal_file_control(window, cx, id);
             window.click(gpui_kit::SharedString::from(id.to_owned()), cx);
         })
         .checked("click real file control");
+    }
+}
+
+fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id: &str) {
+    if matches!(
+        id,
+        "parent-files" | "refresh-files" | "confirm-file-operation" | "cancel-file-operation"
+    ) || (id == "cancel-active-file-operation"
+        && window.try_find("file-transfer-card").is_none())
+    {
+        return;
+    }
+    for _ in 0..3 {
+        let viewport = window.find("file-tools-scroll").bounds();
+        let target = window.find(gpui_kit::SharedString::from(id.to_owned()));
+        let bounds = target.bounds();
+        if target.visible()
+            && bounds.origin.y >= viewport.origin.y
+            && bounds.bottom() <= viewport.bottom()
+        {
+            return;
+        }
+        // Real platform wheel input at the outer gutter avoids targeting a
+        // child directly or accidentally scrolling a nested comparison/editor.
+        let position = point(
+            viewport.origin.x + px(2.),
+            viewport.origin.y + viewport.size.height / 2.,
+        );
+        window.dispatch_event(
+            gpui_kit::MouseMoveEvent {
+                position,
+                ..Default::default()
+            }
+            .to_platform_input(),
+            cx,
+        );
+        window.dispatch_event(
+            gpui_kit::ScrollWheelEvent {
+                position,
+                delta: gpui_kit::ScrollDelta::Pixels(point(
+                    px(0.),
+                    viewport.origin.y + viewport.size.height / 2.
+                        - bounds.origin.y
+                        - bounds.size.height / 2.,
+                )),
+                ..Default::default()
+            }
+            .to_platform_input(),
+            cx,
+        );
+        window.render_frame(cx);
+    }
+    let viewport = window.find("file-tools-scroll").bounds();
+    let target = window.find(gpui_kit::SharedString::from(id.to_owned()));
+    assert!(
+        target.visible()
+            && target.bounds().origin.y >= viewport.origin.y
+            && target.bounds().bottom() <= viewport.bottom(),
+        "{id} must be reachable with platform scrolling: {:?} in {viewport:?}",
+        target.bounds()
+    );
+}
+
+fn assert_true_file_row(window: &mut gpui_kit::Window) {
+    let row = window.find(("remote-entry", 0_usize));
+    assert!(row.visible(), "an actually loaded SFTP row must be painted");
+    for id in ["file-browsing-area", "remote-files-table", "remote-files"] {
+        let viewport = window.find(id).bounds();
+        assert!(
+            row.bounds().origin.y >= viewport.origin.y
+                && row.bounds().bottom() <= viewport.bottom(),
+            "real data row {:?} escapes {id}: {viewport:?}",
+            row.bounds()
+        );
+    }
+}
+
+/// Uses the real assistant and file entities with the workspace's width/height
+/// budgets. The left reserved space models only the monitor's allocated width;
+/// it does not claim to exercise a monitoring transport or the full workspace.
+struct FilesLayoutScene {
+    files: Entity<FilesPanel>,
+    assistant: Entity<crate::assistant::AssistantPanel>,
+    show_assistant: bool,
+}
+
+impl gpui_kit::Render for FilesLayoutScene {
+    fn render(
+        &mut self,
+        window: &mut gpui_kit::Window,
+        _: &mut gpui_kit::Context<Self>,
+    ) -> impl gpui_kit::IntoElement {
+        use gpui_kit::{
+            InteractiveElement, ParentElement, Styled, TestSupportExt, div, prelude::FluentBuilder,
+        };
+        let viewport = window.viewport_size();
+        let assistant_width = px(380.).min(viewport.width * 0.42);
+        let monitor =
+            viewport.width >= px(900.) && (!self.show_assistant || viewport.width >= px(1280.));
+        div()
+            .size_full()
+            .flex()
+            .when(monitor, |el| el.child(div().w(px(260.)).flex_shrink_0()))
+            .child(
+                div().flex_1().min_w_0().h_full().flex().items_end().child(
+                    div()
+                        .id("files-layout-scene")
+                        .w_full()
+                        .min_w_0()
+                        .h(px(340.).min(viewport.height * 0.40))
+                        .child(self.files.clone())
+                        .test_support(),
+                ),
+            )
+            .when(self.show_assistant, |el| {
+                el.child(
+                    div()
+                        .id("files-layout-assistant")
+                        .w(assistant_width)
+                        .min_w_0()
+                        .flex_shrink_0()
+                        .h_full()
+                        .child(self.assistant.clone())
+                        .test_support(),
+                )
+            })
+    }
+}
+
+fn mount_layout_scene(
+    cx: &mut TestAppContext,
+    session: SshSession,
+    runtime: Arc<tokio::runtime::Runtime>,
+    width: f32,
+    height: f32,
+    show_assistant: bool,
+) -> (AnyWindowHandle, Entity<FilesPanel>) {
+    cx.update(|cx| {
+        gpui_kit::init(cx);
+        let mut files = None;
+        let (window, _) = gpui_kit::open_window(
+            WindowOptions {
+                window_bounds: Some(WindowBounds::Windowed(Bounds::new(
+                    point(px(0.), px(0.)),
+                    size(px(width), px(height)),
+                ))),
+                ..Default::default()
+            },
+            cx,
+            |window, cx| {
+                let panel = cx.new(|cx| {
+                    FilesPanel::new(
+                        session,
+                        "controlled file SSH".into(),
+                        runtime.clone(),
+                        window,
+                        cx,
+                    )
+                });
+                files = Some(panel.clone());
+                let assistant = cx.new(|cx| {
+                    crate::assistant::AssistantPanel::new(
+                        &keelshell_core::AiProfileCatalog::default(),
+                        &crate::ai_settings::EphemeralCredentials::default(),
+                        runtime,
+                        window,
+                        cx,
+                    )
+                });
+                cx.new(|_| FilesLayoutScene {
+                    files: panel,
+                    assistant,
+                    show_assistant,
+                })
+            },
+        )
+        .checked("mount production file panel with real assistant");
+        (window, files.checked_option("capture mounted files entity"))
+    })
+}
+
+#[gpui_kit::test]
+async fn bilingual_file_actions_fit_workspace_budgets_with_real_assistant(cx: &mut TestAppContext) {
+    use gpui_kit::component::ThemeMode;
+    for (width, height) in [(900., 580.), (1440., 900.)] {
+        for show_assistant in [false, true] {
+            let h = Harness::new_with(cx, |cx, session, runtime| {
+                mount_layout_scene(cx, session, runtime, width, height, show_assistant)
+            });
+            h.idle(cx).await;
+            h.seed("/first-real-entry.txt", b"visible SFTP row");
+            cx.update_window(h.window, |_, window, cx| {
+                h.panel.update(cx, |panel, cx| {
+                    panel.run(Operation::List("/".into()), window, cx)
+                });
+            })
+            .checked("load a real non-empty remote directory");
+            h.idle(cx).await;
+            for language in [Language::ZhCn, Language::En] {
+                for theme in [ThemeMode::Light, ThemeMode::Dark] {
+                    cx.update_window(h.window, |_, window, cx| {
+                        i18n::set_language(language, cx);
+                        crate::design::apply(
+                            if theme == ThemeMode::Dark {
+                                keelshell_core::Theme::Dark
+                            } else {
+                                keelshell_core::Theme::Light
+                            },
+                            Some(window),
+                            cx,
+                        );
+                        h.panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
+                        window.render_frame(cx);
+                        let area = window.find("files-layout-scene").bounds();
+                        assert_true_file_row(window);
+                        assert_eq!(window.find("file-name-draft").bounds().size.width, px(180.));
+                        assert_eq!(window.find("file-mode-draft").bounds().size.width, px(118.));
+                        for id in [
+                            "parent-files", "refresh-files", "mkdir", "rename", "delete-file",
+                            "chmod-file", "file-resume-mode", "upload-file", "upload-directory",
+                            "download-file", "compare-directories",
+                        ] {
+                            reveal_file_control(window, cx, id);
+                            let button = window.find(id);
+                            let bounds = button.bounds();
+                            assert!(button.visible(), "{id} hidden: {language:?}/{theme:?}/{width}/{show_assistant}");
+                            assert!(bounds.origin.x >= area.origin.x && bounds.right() <= area.right()
+                                && bounds.origin.y >= area.origin.y && bounds.bottom() <= area.bottom(),
+                                "{id} escapes {language:?}/{theme:?}/{width}/{show_assistant}: {bounds:?} vs {area:?}");
+                            assert!(bounds.size.width > px(20.) && bounds.size.height > px(15.));
+                        }
+                        if show_assistant {
+                            let assistant = window.find("files-layout-assistant");
+                            assert!(assistant.visible());
+                            assert!(area.right() <= assistant.bounds().origin.x);
+                        }
+                    }).checked("verify actual bilingual file-action bounds");
+                }
+            }
+        }
+    }
+}
+
+#[gpui_kit::test]
+async fn wrapped_file_actions_still_review_the_exact_selected_remote_target(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new_with(cx, |cx, session, runtime| {
+        mount_layout_scene(cx, session, runtime, 900., 580., true)
+    });
+    h.idle(cx).await;
+    h.seed("/review-target.txt", b"original reviewed bytes");
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.run(Operation::List("/".into()), window, cx)
+        });
+    })
+    .checked("reload the controlled SFTP entry");
+    h.idle(cx).await;
+    let upload = h.source("upload-source.txt", b"pending upload bytes");
+    for language in [Language::ZhCn, Language::En] {
+        cx.update_window(h.window, |_, window, cx| {
+            i18n::set_language(language, cx);
+            h.panel.update(cx, |panel, cx| {
+                panel.selected = panel
+                    .entries
+                    .iter()
+                    .find(|entry| entry.path == "/review-target.txt")
+                    .cloned();
+                assert!(
+                    panel.selected.is_some(),
+                    "select an actual listed SFTP entry"
+                );
+                panel.name.update(cx, |input, cx| {
+                    input.set_value("review-new-name", window, cx)
+                });
+                panel
+                    .mode
+                    .update(cx, |input, cx| input.set_value("0600", window, cx));
+                panel.refresh_locale(window, cx);
+            });
+        })
+        .checked("retain real selection and drafts while changing language");
+        for id in ["mkdir", "rename", "delete-file", "chmod-file"] {
+            h.click(cx, id);
+            h.panel.read_with(cx, |panel, _| {
+                let operation = &panel
+                    .pending
+                    .as_ref()
+                    .checked_option("review opened by wrapped control")
+                    .1;
+                match (id, operation) {
+                    ("mkdir", Operation::Mkdir(target)) => assert_eq!(target, "/review-new-name"),
+                    ("rename", Operation::Rename(source, target)) => {
+                        assert_eq!(source, "/review-target.txt");
+                        assert_eq!(target, "/review-new-name");
+                    }
+                    ("delete-file", Operation::Delete(entry)) => {
+                        assert_eq!(entry.path, "/review-target.txt")
+                    }
+                    ("chmod-file", Operation::SetPermissions(entry, mode)) => {
+                        assert_eq!(entry.path, "/review-target.txt");
+                        assert_eq!(*mode, 0o600);
+                    }
+                    _ => panic!("{id} opened the wrong operation review"),
+                }
+            });
+            h.click(cx, "cancel-file-operation");
+        }
+        h.local_input(cx, &upload);
+        h.click(cx, "upload-file");
+        h.panel.read_with(cx, |panel, _| {
+            assert!(matches!(&panel.pending.as_ref().checked_option("upload review").1,
+                Operation::Upload(local, remote) if local == &upload && remote == "/upload-source.txt"));
+        });
+        h.click(cx, "cancel-file-operation");
+        let destination = h.local.0.join("unwritten-download.txt");
+        h.local_input(cx, &destination);
+        h.click(cx, "download-file");
+        h.panel.read_with(cx, |panel, _| {
+            assert!(matches!(&panel.pending.as_ref().checked_option("download review").1,
+                Operation::Download(remote, local) if remote == "/review-target.txt" && local == &destination));
+        });
+        h.click(cx, "cancel-file-operation");
+        assert!(
+            !destination.exists(),
+            "a review must not write a local download"
+        );
+        assert_eq!(h.read("/review-target.txt"), b"original reviewed bytes");
     }
 }
 fn mount(
@@ -273,6 +616,7 @@ async fn directory_sync_downloads_atomically_and_keeps_review_actions_visible(
                 "plan-sync-to-local",
                 "review-directory-sync",
             ] {
+                reveal_file_control(window, cx, id);
                 let button = window.find(id);
                 let bounds = button.bounds();
                 assert!(
@@ -431,6 +775,7 @@ async fn upload_pause_acknowledges_a_stable_boundary_and_continue_preserves_dest
             for language in [Language::ZhCn, Language::En] {
                 i18n::set_language(language, cx);
                 window.render_frame(cx);
+                reveal_file_control(window, cx, "file-transfer-card");
                 let card = window.find("file-transfer-card").bounds();
                 assert!(
                     card.right() <= window.bounds().right()
@@ -1115,6 +1460,7 @@ async fn late_save_acknowledges_remote_commit_without_rewriting_the_archived_bas
             input.set_value("reviewed version", window, cx)
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "save-remote-file");
         window.click("save-remote-file", cx);
         window.render_frame(cx);
         window.click("confirm-file-operation", cx);
@@ -1159,6 +1505,7 @@ async fn suspended_editor_revokes_an_existing_save_review_without_losing_the_dra
             input.set_value("reviewed but not sent", window, cx)
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "save-remote-file");
         window.click("save-remote-file", cx);
         assert!(matches!(
             h.panel.read(cx).pending,
