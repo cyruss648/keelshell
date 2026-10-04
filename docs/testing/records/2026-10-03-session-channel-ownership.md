@@ -40,3 +40,15 @@ CLOSE 入队成功只说明协议队列已接收关闭请求，不等于远端�
 早期编译和测试日志保留在忽略的 `work/owned-session-*.log` 中。初版大文件回归尝试写入单个 3 MiB 文件，触及既有回环文件系统每文件 1 MiB 的容量限制；后续改为 4 个 768 KiB 文件，保持累计 3 MiB 的连续传输验证，未放宽产品行为或删除失败证据。
 
 本记录证明本机 macOS 上的真实 SSH 回环与受控背压场景，不代表真实远程主机、长时间网络故障、Windows/Linux 原生运行或三平台发布流水线已验收。正常取消保留 SSH 与异常清理允许断开共享连接的边界应在用户界面中保持一致；整仓门禁及原生桌面验证由集成记录补充。
+
+## 2026-10-04 背压夹具竞态修复
+
+提交 `968c64e` 的 Quality `37188612558` 在 macOS 26 的并发运行中暴露了一个测试夹具竞态：等待 `exec` 只证明请求入队，固定数量的 keepalive 可能在服务端的 160 个 DATA 包填满客户端通道之前完成，因此没有证明实际协议发送队列被阻塞。生产实现没有失败证据。
+
+提交 `0265637` 将回归改为先等待真实 DATA 包，再在有界截止时间内逐次让出调度填充协议队列；关闭路径使用可取消的 `close` future 直接验证 25ms 内仍受背压，丢弃后由 `PendingChannel` 的独立 Drop 所有者继续清理，并从已消费的第一个数据包开始完整排空 160 个包。该改动没有放宽产品断言，也没有加入时间钩子。
+
+- `cargo test -p keelshell-session --locked -- --test-threads=4`：64 项库测试、14 项 batch 集成、95 项 SSH loopback 通过；6 项需要外部 OpenSSH 环境的互操作保持忽略。
+- 目标背压测试连续运行 20 次通过；`cargo clippy -p keelshell-session --all-targets --all-features --locked -- -D warnings` 通过。
+- GitHub Quality `37191144709`：macOS 26、Ubuntu 24.04、Windows 2025 全部通过，包含 Rust 质量门禁、打包回归和 OpenSSH 回环步骤。
+
+这次修复只提高夹具对真实协议背压状态的同步精度，不扩展到远程网络故障、Windows/Linux 原生窗口或发行签名验收。
