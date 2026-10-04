@@ -1,6 +1,6 @@
 # Windows 远端监听释放的被动观察 — 2026-10-05
 
-状态：最终测试修正的作者95项、12次专项、严格工程门禁、根整仓及fresh独立复审通过，无剩余P1/P2。提交与新CI另行追加，尚未关闭三平台门禁。
+状态：最终测试修正的作者95项、12次专项、严格工程门禁、根整仓及fresh独立复审通过，无剩余P1/P2。修正提交`896073a`已推送main，新Quality37238796819三平台全部成功，macOS/Linux实际OpenSSH回执与159份证据经根核验。本次测试修正的三平台源码CI边界已关闭，产品桌面/供应商MCP/Release边界保持独立。
 
 ## 原始失败与定位
 
@@ -88,3 +88,44 @@ owned编译/测试PGID均已退出、0700 TMP为空。作者target与独立审�
 独立审查为`a87945e5e8f8aa0f92201b003d91e960de912861fa419d7ed9f9e532e4622f68`。
 原报告与manifest不重写，源码、冻结binary、dep-info、7项探针与失败日志保留；根公共target未动。
 这是本机macOS Rust进程及真实回环SSH/SFTP，不能替代新提交的WindowsCI、三平台桌面、供应商MCP或Release/安装验证。
+
+## 提交与新CI
+
+测试修正提交`896073ad81e5f9868e6f5eb6fe8c4fcc0f7df348`以fast-forward合入并推送main。
+根逐项读取提交tree，256源码/工程hash与最终gate freeze一致；`git ls-remote`核对精确远端SHA，
+当次工作区clean、main/origin ahead/behind为0/0，`feature/windows-forward-observer`已非force删除。
+七条提交路径为一个测试文件、五条已有文档及本记录，没有修改生产程序、依赖、打包或发布标签。
+408与f096失败run和证据继续冻结。
+
+根本机gate、256源freeze、作者/独立材料核验、cache清理、阶段诊断与提交推送核对共15份冻结材料，
+manifest SHA-256为`3464a7476f7c0f1bcd786d1c2adad3ce611b0153949534c5a53efc0e2feca1cb`。
+CI证据在另一个私有目录建立manifest，不向原15份冻结材料回填。
+
+新[Quality37238796819](https://github.com/cyruss648/keelshell/actions/runs/37238796819)
+精确绑定896提交，attempt1实际completed/success，三平台job全部成功；
+根直接API读回run SHA/status/conclusion一致，两个目标case在三个平台均实际ok，没有取消或重跑。
+
+| 896实际平台 | 普通通过/失败/忽略 | 文档通过 | 脚本执行/跳过 | 打包执行/跳过 | 默认/显式2 MiB CLI future | SSH回环 |
+| --- | --- | --- | --- | --- | --- | --- |
+| macOS 26 | 1031/0/11 | 8 | 6/0 | 57/0 | 4624/4624字节 | 95通过，8.70秒 |
+| Ubuntu 24.04 | 1031/0/12 | 8 | 6/0 | 57/0 | 4624/4624字节 | 95通过，13.12秒 |
+| Windows 2025 | 1011/0/11 | 8 | 5/1 | 53/4 | 4968/4968字节 | 93通过，10.23秒 |
+
+三者x.y策略、格式、workspace严格Clippy、普通/文档测试与完整显式小栈控制器均完成；
+集合与平台之间不相加。Linux额外默认忽略项为`/proc`手工验收；两项供应商测试仍默认opt-in。
+Windows平台条件编译产生93项回环，不能把本机95项强加到其统计。
+
+新macOS ARM64 artifact11317295070实际9通过、22.937秒，62个kernel birth identities；
+新Linux X64 artifact11316519025实际9通过、9.269秒，59个birth identities。
+独立代理及根均实际读取ZIP，digest与GitHub metadata一致，zip成员与落盘材料逐字节一致，
+result/tests.log及日志字节数匹配；owned/observed stopped、temporary removed全为true，
+ancestry_unverified为空、无cleanup错误。Windows OpenSSH按平台跳过，不计作通过。
+
+新CI159份证据逐bytes/SHA与0600权限核验通过，manifest SHA-256为
+`1d3048b163c543dceaf0d6473b3b2c41f326fc335b022f01d02d70580ba47c3a`，
+report.md为`a8884e76ffff2b8253ec39f2d3e218683e072025c1ac0f086220588de2ee0665`，
+report.json为`1858675d7ab8451d3c3d6ac92b74dfaa5a5348ae7a3548d37edb890b07247122`。
+API/gh原始日志保留，running N、实际test行与summary交叉一致；本次无parser/读取失败。
+原f096的132份与408的49份失败证据保持，原开发包与其源freeze不改归属。
+
+本结果关闭单测试文件的三平台源码CI；不代表Windows/Linux GUI、真实供应商MCP工具循环、云模型、六目标正式Release、安装或自动更新通过。

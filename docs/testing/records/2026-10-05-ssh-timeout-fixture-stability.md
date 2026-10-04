@@ -120,3 +120,5 @@ Linux artifact11315403902实际9通过、12.467秒，75个birth identities。
 原UI开发包仍归属408工作树快照；这些测试夹具改动不能将其重写成新提交的标准包、Release或新增桌面验收。
 
 Windows单文件观察修正及其新的作者/独立/根门禁与提交CI按[下一记录](2026-10-05-windows-forward-observer.md)归属；本记录f096及原408结果不重写。
+
+后续修正提交896073a的Quality37238796819三平台实际success，macOS/Linux各1031普通+8文档、Windows1011普通+8文档及两个目标case均通过，两份实际9项OpenSSH及清理回执通过，159份新CI证据经根核验。它关闭下一scope的源码CI，不将本记录两次历史failure改作通过，也不关闭桌面/供应商MCP/Release。

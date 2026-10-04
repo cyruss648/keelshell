@@ -4,6 +4,8 @@
 
 用户明确要求 MCP 是 **KeelShell 向其他智能体提供能力**。不开发在 KeelShell 内连接任意第三方 MCP 服务的通用 MCP 客户端。应用调用本地 Claude Code/Codex CLI 与对外 MCP 服务是两个独立入口：前者为应用内 AI 提供推理后端，后者让外部智能体调用 KeelShell 已授权的能力。命令及后续文件修改能力均采用提案与桌面人工审阅；外部客户端不能自行批准或执行。
 
+真实客户端增量只关闭有限场景：Claude2.1.285已实际协商七schema、调用一次未授权list_sessions并将DISABLED回传同客户端的下一模型请求；没有授权GUI/SSH/SFTP。Codex受限文本前置失败、MCP未执行；授权读取/审批/撤权仍按MCP-01至04继续验收，原失败与独立复审范围更正见[客户端记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)。
+
 服务端使用官方Rust SDK，提供默认关闭的stdio入口、七项固定工具、会话/路线授权契约、撤权/取消、有界读取与待审命令提案。受认证桌面IPC与真实SSH/SFTP句柄已接通；963普通+8文档整合门禁和新独立复审通过，macOS实际窗口证实选择性读取、人工执行/拒绝与运行中撤权。无能力环境仍默认拒绝。实际Codex/Claude Code MCP互通、文件修改提案及其他平台原生尚未完成，因此MCP-01至04不整体关闭；见[ADR0039](../adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)与[接入指南](EXTERNAL_MCP.md)。
 
 ## 界面目标与验收

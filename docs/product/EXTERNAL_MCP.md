@@ -2,7 +2,7 @@
 
 KeelShell 提供 MCP **服务端**。Codex、Claude Code 等外部客户端启动伴随程序 `keelshell-mcp`，它通过受认证的本机 IPC 请求正在运行的 KeelShell；SSH 会话、授权及人工审阅留在桌面应用中。应用内的 API / 本地 CLI Ask 是独立入口，本功能不接入第三方 MCP 服务。
 
-当前已实现七项工具、桌面授权及 SSH/SFTP 桥接，完成独立代码复审、真实 stdio 进程测试与 macOS 隔离 SSH 服务上的原生操作。下方客户端示例按官方文档核对；实际 Codex/Claude Code MCP 互通、其他平台原生窗口及完整发布包仍须单独验收，见[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。
+当前已实现七项工具、桌面授权及 SSH/SFTP 桥接，完成独立代码复审、真实 stdio 进程测试与 macOS 隔离 SSH 服务上的原生操作。实际安装的 Claude Code 另已通过 schema 协商和一次未授权默认拒绝的真实工具结果循环；这一步没有 GUI、SSH 或授权读取。Codex 受限文本前置连接失败、0个模型请求，尚未执行其 MCP 场景，见[真实客户端记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)。下方客户端示例按官方文档核对；实际客户端的授权 SSH/SFTP、审批/撤权、其他平台原生窗口及完整发布包仍须单独验收，见[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。
 
 ## 在应用中授权
 

@@ -2,7 +2,7 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
-## 2026-10-05 工作区整合与紧凑布局（已推送，macOS/Linux CI通过，Windows观察待修）
+## 2026-10-05 工作区整合与紧凑布局（观察修正已推送，三平台CI通过）
 
 连接库、依赖工作流 UI 与文件响应布局均已合入 `main`（生产提交 `40824f0`），三个增量及其冻结整合范围的独立复审通过。标准macOS开发包完成受控标签审核/保存、两条SSH/SFTP及依赖任务退出0/7，但实际900×580英文/Light/AI/Files组合暴露终端约37px的新P2；紧凑补全布局与完整工作区回归已实现，新根整仓门禁通过，fresh独立复审与新macOS包八组合/补全原生闭环PASS，新源码已推送并核对远端精确SHA，Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败。本节覆盖下方历史“编辑器待接入”和“页脚待修”等状态；旧包不能关闭后续修复。见[整合记录](testing/records/2026-10-05-workspace-workflows-integration.md)与[紧凑原生记录](testing/records/2026-10-05-compact-workspace-native.md)。
 
@@ -15,9 +15,11 @@
 
 夹具修复更新：只修改两个session测试文件，先以150ms延迟完成认证，再观察真实READDIR/句柄或监听lease/AddrInUse后验证精确操作超时与清理。最终作者95项及两目标各6次、根1031普通+8文档+6脚本、严格工程门禁、57打包、9项本机系统OpenSSH与GUI/MCP build通过；旧TCP探针副作用候选及共享源中断的gate均保留且不作验收。新独立复审无剩余P1/P2，95项及6项私有补充探针通过且62证据经根核验；测试修复f09651b已推送main并核对256源码/工程hash及远端SHA，新Quality37235821726结束failure：macOS/Linux成功，Windows在远端转发已分配/清理后的1秒TCP观察超时，下一观察修正另建范围；两套审查owned cache均清理、原95/62证据保留，最终三平台CI结果继续追加，见[夹具验证](testing/records/2026-10-05-ssh-timeout-fixture-stability.md)。旧原生UI包仍属于408快照。
 
-Windows观察更新：唯一后置TCP探针已改为相同1秒期限内单次复绑原完整端点，保留before AddrInUse、精确转发超时、SSHclosed与lease0。最终作者95项/12专项/工程门禁、根1031普通+8文档+6脚本及fresh独立95/7探针复审通过，无剩余P1/P2；新提交WindowsCI仍待核验，见[观察记录](testing/records/2026-10-05-windows-forward-observer.md)。只改一个测试文件，不迁移原生包或扩张产品限时。
+Windows观察更新：唯一后置TCP探针已改为相同1秒期限内单次复绑原完整端点，保留before AddrInUse、精确转发超时、SSHclosed与lease0。最终作者95项/12专项/工程门禁、根1031普通+8文档+6脚本及fresh独立95/7探针复审通过，无剩余P1/P2；修正896073a已推送main并核对256源码/工程hash与远端SHA，Quality37238796819三平台实际success：macOS/Linux各1031普通+8文档、Windows1011普通+8文档，两个目标case均ok，默认/显式2 MiB控制器均通过。macOS/Linux各9项实际OpenSSH与owned/TMP清理回执通过，159份新CI证据经根核验，见[观察记录](testing/records/2026-10-05-windows-forward-observer.md)。作者与新独立审查的五条owned cache/TMP路径已实际删除，原55/49及两次失败CI证据保持。只改一个测试文件，不迁移原生包或扩张产品限时；桌面/供应商MCP/Release仍另行验收。
 
 ## 2026-10-04 新增用户要求
+
+2026-10-05外部客户端更新：MCP方向只向外部智能体提供服务端，内置CLI Ask是另一入口。新精确端口/空配置前置中Claude2.1.285实际文本成功，Codex0.160.0保留strict的exec连接失败、0 POST，不能计为通过。另一新scope的真实Claude→生产companion完成七schema协商、唯一list_sessions的DISABLED及同客户端下一Messages结果回传；没有GUI/SSH/授权操作，不关闭完整供应商互通。fresh独立复审通过，无剩余P1/P2；原报告插件范围措辞由独立addendum关闭P2，builtin存在、50ms census仅覆盖已观察身份、companion退出码未采集。原108/80及新13复审材料经根逐bytes/SHA核验，已观察PID/birth、线程/监听与scratch清理，见[客户端记录](testing/records/2026-10-05-external-client-mcp-preflight.md)。
 
 - 明暗两种主题，默认跟随系统，显式切换与配置持久化；采用更丰富但克制的元素/语义色和专业一致的视觉。主题基础已完成System默认、明暗切换/保存与语义palette；866普通+6文档、47打包、新独立审查及macOS部分原生通过，边界见[主题记录](testing/records/2026-10-04-system-themes.md)。
 - AI配置新增本地Claude Code/Codex CLI，不限模型API；提供MCP服务端给外部智能体调用。用户明确排除KeelShell接入其他第三方MCP服务的通用客户端，后续不得扩大该范围。

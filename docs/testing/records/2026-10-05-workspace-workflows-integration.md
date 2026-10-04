@@ -245,3 +245,5 @@ macOS部分1018普通通过、1失败，文档和显式2 MiB未执行，OpenSSH�
 后续两文件SSH夹具修复完成最终作者95项/12专项、根整仓工程门禁、9项本机OpenSSH及GUI/MCP构建。新独立复审无剩余P1/P2；修复提交CI继续按[夹具记录](2026-10-05-ssh-timeout-fixture-stability.md)归属；原408失败与各次原生包快照保留，不用旧候选或中断gate替代最终结果。
 
 f096的新Quality37235821726实际macOS/Linux成功、各1031普通+8文档及独立9项OpenSSH；Windows后置TCP观察超时，整次failure，132份证据经根核验。下一单测试文件修正将同截止的精确端点复绑用于OS资源证明，作者95/12、根整仓及fresh独立95/7探针复审通过，无剩余P1/P2；新提交CI继续按[观察记录](2026-10-05-windows-forward-observer.md)归属。原开发包、前CI和旧scope不重写。
+
+随后896073a的Quality37238796819实际三平台success：macOS/Linux各1031普通+8文档，Windows1011普通+8文档、默认/显式2 MiB完整控制器及两项原失败目标均通过；macOS/Linux新artifact各9项实际OpenSSH和owned/TMP清理通过。159份新CI材料经根逐bytes/SHA核验；此修正只改一个测试文件，关闭源码CI边界，原生UI开发包仍归属原256源码快照，不改为新编译包/Release或Windows/Linux GUI验收。
