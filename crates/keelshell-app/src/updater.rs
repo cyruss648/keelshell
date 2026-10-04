@@ -1550,19 +1550,29 @@ mod tests {
     #[::core::prelude::v1::test]
     fn installation_roots_follow_packaged_layouts() {
         #[cfg(not(windows))]
+        {
+            assert_eq!(
+                installation_root(
+                    Path::new("/opt/keelshell/usr/bin/keelshell-app"),
+                    "x86_64-unknown-linux-gnu"
+                ),
+                Some(PathBuf::from("/opt/keelshell"))
+            );
+            assert_eq!(
+                installation_root(
+                    Path::new("/Applications/KeelShell.app/Contents/MacOS/keelshell-app"),
+                    "aarch64-apple-darwin"
+                ),
+                Some(PathBuf::from("/Applications"))
+            );
+        }
+        #[cfg(windows)]
         assert_eq!(
             installation_root(
-                Path::new("/opt/keelshell/usr/bin/keelshell-app"),
-                "x86_64-unknown-linux-gnu"
+                Path::new(r"C:\Program Files\KeelShell\keelshell-app.exe"),
+                "x86_64-pc-windows-msvc"
             ),
-            Some(PathBuf::from("/opt/keelshell"))
-        );
-        assert_eq!(
-            installation_root(
-                Path::new("/Applications/KeelShell.app/Contents/MacOS/keelshell-app"),
-                "aarch64-apple-darwin"
-            ),
-            Some(PathBuf::from("/Applications"))
+            Some(PathBuf::from(r"C:\Program Files\KeelShell"))
         );
     }
 
