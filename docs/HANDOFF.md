@@ -2,6 +2,16 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
+## 2026-10-05 外部 MCP 授权客户端更新
+
+以下状态优先于下方历史“供应商授权 MCP 未验收 / Codex 文本失败”描述。MCP 方向仍是 KeelShell 服务端向外部智能体提供能力，内置 API / CLI Ask 独立，不做通用第三方 MCP 客户端。
+
+- 新 clean `e16689b` 标准 macOS arm64 GUI/MCP 包与自有 SSH/SFTP 完成实际 Claude Code 2.1.285 授权场景：七 schema、15 次模型 POST、13 条业务 RPC、42 字节明确选区与 UTF-8 文件、授权外路径/未授权 monitor 的 `FORBIDDEN`、错误 route 的 `STALE_SESSION`、桌面批准后的 `succeeded` 与拒绝后的 `rejected` 均回到同一 CLI。桌面明确撤权后，旧 CLI 收到 not-connected 工具错误，未产生第 14 条业务 RPC；不能称新服务端权限拒绝。Claude 自动再启动第二代 companion 尝试重连，两代退出 1、第二代 BrokenPipe/无回复完整保留，CLI 最终精确答复/exit0。模型是自有 SSE、PTY 仅回显、exec 为固定夹具；根 CUA 点击不是外部 AI 自行批准。原两次 helper/迟到 marker 失败保留，新生命周期没有超时，owned GUI/SSH/CLI/两代 companion/端口/线程/private 清理。独立复核已通过该限定范围，无剩余 P1/P2，见[授权原生记录](testing/records/2026-10-05-claude-authorized-mcp.md)。
+- Codex 0.160.0 新 strict 文本复现直接观察到额外 loopback 代理路由被 EPERM 拒绝；只给子环境增加 `NO_PROXY/no_proxy=127.0.0.1` 的新对照实际 1 次 Responses POST、精确 canary、turn.completed/exit0，网络限制不放宽、不改系统代理。旧冻结失败没有 errno，不补写其原因。79 份新诊断与 14 个已观察身份清理已核验；23 份 MCP 适配准备/13 项 synthetic 检查不等于真实 Codex MCP，后者仍待执行。
+- 同一精确 `e16689bcd027a28d8035d271787ad53ab165d0ae` 的 [Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183) 三平台全部 success；macOS/Linux 各1031普通、Windows1011普通，各8doc、严格工程门禁/默认及2 MiB控制器/打包通过，macOS/Linux 各9项 OpenSSH 及owned/TMP清理通过，189份新CI材料逐bytes/hash核验。源码/工程256hash与包内5文件及3binary保持；不是 Windows/Linux GUI、正式六目标 Release、签名/公证或安装自动更新验收。
+
+下一步保留 Codex MCP、完整 Agent 工作流、外部客户端 Running 撤权/重启、其余授权组合和各目标原生/发布验收。不能将这一有限 Claude 切片标为全产品完成。
+
 ## 2026-10-05 工作区整合与紧凑布局（观察修正已推送，三平台CI通过）
 
 连接库、依赖工作流 UI 与文件响应布局均已合入 `main`（生产提交 `40824f0`），三个增量及其冻结整合范围的独立复审通过。标准macOS开发包完成受控标签审核/保存、两条SSH/SFTP及依赖任务退出0/7，但实际900×580英文/Light/AI/Files组合暴露终端约37px的新P2；紧凑补全布局与完整工作区回归已实现，新根整仓门禁通过，fresh独立复审与新macOS包八组合/补全原生闭环PASS，新源码已推送并核对远端精确SHA，Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败。本节覆盖下方历史“编辑器待接入”和“页脚待修”等状态；旧包不能关闭后续修复。见[整合记录](testing/records/2026-10-05-workspace-workflows-integration.md)与[紧凑原生记录](testing/records/2026-10-05-compact-workspace-native.md)。

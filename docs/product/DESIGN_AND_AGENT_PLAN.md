@@ -1,12 +1,12 @@
 # 界面设计与智能体能力计划
 
-更新：2026-10-05。状态：主题基础已实现并部分验收；对外MCP已接通stdio伴随程序、受认证桌面IPC、真实SSH/SFTP及原生人工审阅，独立复审与macOS受控闭环通过；本地CLI Ask后端/命名设置/密钥引用/审核已接通并通过整仓门禁、新独立审查和macOS回环问答/取消。完整视觉矩阵、Agent、供应商客户端MCP互通和其他平台原生继续实施。本文覆盖后续主题、视觉体系、MCP 服务端与本地智能体接入；不取代既有远程 SSH 目标。
+更新：2026-10-05。状态：主题基础已实现并部分验收；对外MCP已接通stdio伴随程序、受认证桌面IPC、真实SSH/SFTP及桌面审阅，源码独立复审与macOS受控闭环通过，实际Claude Code授权调用流程及新独立复核已在限定范围通过；本地CLI Ask后端/命名设置/密钥引用/审核已接通并通过整仓门禁、新独立审查和macOS回环问答/取消。完整视觉矩阵、Agent、Codex MCP、文件修改提案和其他平台原生继续实施。本文覆盖后续主题、视觉体系、MCP 服务端与本地智能体接入；不取代既有远程 SSH 目标。
 
 用户明确要求 MCP 是 **KeelShell 向其他智能体提供能力**。不开发在 KeelShell 内连接任意第三方 MCP 服务的通用 MCP 客户端。应用调用本地 Claude Code/Codex CLI 与对外 MCP 服务是两个独立入口：前者为应用内 AI 提供推理后端，后者让外部智能体调用 KeelShell 已授权的能力。命令及后续文件修改能力均采用提案与桌面人工审阅；外部客户端不能自行批准或执行。
 
-真实客户端增量只关闭有限场景：Claude2.1.285已实际协商七schema、调用一次未授权list_sessions并将DISABLED回传同客户端的下一模型请求；没有授权GUI/SSH/SFTP。Codex受限文本前置失败、MCP未执行；授权读取/审批/撤权仍按MCP-01至04继续验收，原失败与独立复审范围更正见[客户端记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)。
+真实客户端增量只关闭有限场景：Claude Code 2.1.285通过源码`e16689b`的标准macOS双程序包，实际协商七项schema、完成13次tools/call与15次自有模型请求，授权片段/目录/UTF-8文件读取及越权/错误路线拒绝都回传同一客户端。受控UI明确批准首条提案后状态变为成功，拒绝另一条后变为拒绝；撤权后客户端报告连接断开，未记录第 14 次 tools/call RPC，不作为新的服务端授权拒绝。新独立复核已通过该限定范围，无剩余 P1/P2，见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。Codex新文本前置经仅限子进程的回环NO_PROXY修正已通过，实际MCP未执行；新诊断不追溯证明旧失败原因。早期未授权流程、两次授权尝试失败及原复审更正均保留，MCP-01至04不整体关闭。
 
-服务端使用官方Rust SDK，提供默认关闭的stdio入口、七项固定工具、会话/路线授权契约、撤权/取消、有界读取与待审命令提案。受认证桌面IPC与真实SSH/SFTP句柄已接通；963普通+8文档整合门禁和新独立复审通过，macOS实际窗口证实选择性读取、人工执行/拒绝与运行中撤权。无能力环境仍默认拒绝。实际Codex/Claude Code MCP互通、文件修改提案及其他平台原生尚未完成，因此MCP-01至04不整体关闭；见[ADR0039](../adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)与[接入指南](EXTERNAL_MCP.md)。
+服务端使用官方Rust SDK，提供默认关闭的stdio入口、七项固定工具、会话/路线授权契约、撤权/取消、有界读取与待审命令提案。受认证桌面IPC与真实SSH/SFTP句柄已接通，无能力环境仍默认拒绝。源码e16689b的[Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183)三平台成功；该源码CI与实际Claude客户端切片各自记录，均不证明云模型质量、任意shell执行、其他平台桌面或安装更新。实际Codex MCP、文件修改提案及完整跨平台验收继续开放；见[ADR0039](../adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)与[接入指南](EXTERNAL_MCP.md)。
 
 ## 界面目标与验收
 

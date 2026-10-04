@@ -1,5 +1,7 @@
 # 开发路线
 
+2026-10-05 最新对外 MCP 进展：实际安装的 Claude Code 2.1.285 已通过源码 `e16689b` 的标准 macOS 双程序开发包完成七项工具 schema 协商、13 次真实工具调用与 15 次模型请求。授权片段、目录及 UTF-8 文件读取、越界/未授权监控拒绝与失效路线拒绝均经过同一客户端的真实结果回传；受控桌面 UI 明确批准首条提案后返回成功，拒绝另一条后返回拒绝。撤销全部授权后客户端报告连接断开，未记录第 14 次 tools/call RPC，因此不声称新的服务端授权拒绝。独立复核已通过该限定范围，无剩余 P1/P2，见[授权客户端记录](testing/records/2026-10-05-claude-authorized-mcp.md)。Codex 的新受限文本前置已通过，实际 MCP 场景尚未执行。源码基线 `e16689b` 的[Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183)三平台成功；这不关闭其他平台原生、文件修改提案、最终六目标 Release 或已安装更新。
+
 2026-10-05 工作区整合：连接库批量组织/永久清理、手工依赖工作流与文件响应布局已合入并通过独立整合审查；依赖工作流支持1–128个任务、32个已认证SSH目标及逐任务回执，文件区保留至少64px真实条目空间和固定审核操作。旧macOS开发包完成受控标签与双任务退出0/7，但实际小窗口发现终端约37px；新单行补全布局及32完整Files/16完整候选GPUI场景已修复该渲染预算，根门禁1031普通+8文档+6脚本、两种完整CLI控制器和57打包通过。fresh紧凑独立复审和新macOS包900×580八组合/显式补全闭环通过，生产提交40824f0已推送main并核对精确SHA，新Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败，旧包及GPUI场景不作为新原生通过，见[整合记录](testing/records/2026-10-05-workspace-workflows-integration.md)。
 
 SSH夹具增量：原408 CI失败仍保留；最终两文件测试修复已通过作者95项/12专项及根整仓工程门禁、9项系统OpenSSH和GUI/MCP构建。新独立复审无剩余P1/P2，95项及6项私有补充探针通过；修复f09651b已推送，Quality37235821726已结束failure（macOS/Linux成功、Windows后置TCP观察超时），下一观察修正单独核验，不沿用存在TCP探针副作用的旧候选通过结果，也不改变产品连接限时或将旧UI包改作新提交原生验收。见[夹具记录](testing/records/2026-10-05-ssh-timeout-fixture-stability.md)。
@@ -10,7 +12,7 @@ Windows的后置观察已改为同截止内精确端点复绑，作者95/12/工�
 
 更新：2026-10-05。目标是完整的远程 SSH 管理与运维工作流，并增加参考 DBX 的 AI 配置与辅助能力。最新进展、代码接续与未验证模块见 [交接记录](HANDOFF.md)。
 
-新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通并完成macOS安装版CLI→回环服务原生问答/取消。MCP已接通受认证桌面桥接和标准macOS双程序开发包受控读取/人工审阅/撤权闭环，其此前基线门禁989普通+8文档、6脚本通过。其余视觉矩阵、Agent/订阅登录、供应商MCP互通和其他平台原生继续实施。
+新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通并完成macOS安装版CLI→回环服务原生问答/取消。MCP已接通受认证桌面桥接和标准macOS双程序开发包受控读取/桌面审阅/撤权闭环，实际Claude授权客户端流程已完成，新的独立复核已通过该限定范围，无剩余 P1/P2。其余视觉矩阵、Agent/订阅登录、Codex MCP、文件修改提案和其他平台原生继续实施。
 
 | 阶段 | 范围 | 状态 |
 |---|---|---|
@@ -38,9 +40,9 @@ OpenSSH 配置导入已接入安全子集：精确 Host、HostName、Port、User
 | D1 | UI-01/02/06：System/Light/Dark、语义token、设计资料库 | 主题基础已实现：System默认/旧配置迁移、窗口通知、语义palette、显式切换/后台保存；866普通+6文档、47打包和新独立审查通过；macOS两会话/草稿/明暗重启证实。新包900×580中英/明暗/AI八组合原生通过；真实OS变化、完整全屏矩阵与Windows/Linux原生未关闭，见[主题记录](testing/records/2026-10-04-system-themes.md) |
 | D2 | UI-03/04/05：丰富但克制的控件、专业工作区、模态/日志/滚动 | 部分实现并继续实施；主题token基础见D1。连接批量审核、文件操作换行/真实首行/有界工具滚动/固定确认和依赖流程入口换行已合入，分别通过独立GPUI复审；已转换tooltip的语言即时重绘回归通过，余下静态调用点由根整合补齐。旧包小窗口实际发现终端37px后，短窗口补全收为单行并保留输入/文件实体；32完整Files与16完整候选列表GPUI场景、根1031普通+8文档+6脚本/57打包通过。fresh紧凑独立复审和新macOS包八组合/真实补全/Files恢复通过，896提交三平台Quality通过；实际原生终端高度为人工读像素约89/121px，GPUI为精确测量，176文件场景不关闭全屏视觉矩阵或背景模态AX隔离 |
 | A1 | 共享API/LocalAgent配置、上下文与授权契约 | 已实现显式backend、旧配置API默认、路径/地址独立校验、准确stdin预览、版本/能力探针、取消/revision与vault v2精确backend/path绑定；详见[ADR0040](adr/0040-named-local-agent-settings-and-reviewed-asks.md) |
-| A2 | MCP-01至04：KeelShell对外MCP | 默认关闭的stdio伴随程序、双向认证/方向AEAD桌面IPC、精确活动SSH句柄、七项固定工具和原生人工审阅已接通。fresh独立审查、989普通+8文档+6脚本整合门禁与标准macOS双程序开发包的受控片段/SFTP读取、越权拒绝、批准/拒绝、撤权及重启闭环通过。958903c三平台CI与macOS/Linux OpenSSH成功，新增回归在三平台实际通过。实际Claude Code/Codex MCP、文件修改提案、最终六目标Release及其他平台原生仍待验证/实施，见[标准包记录](testing/records/2026-10-04-mcp-response-cancellation.md)、[桌面记录](testing/records/2026-10-04-mcp-desktop-bridge.md)及[指南](product/EXTERNAL_MCP.md) |
+| A2 | MCP-01至04：KeelShell对外MCP | 部分验收：默认关闭的stdio伴随程序、双向认证/方向AEAD桌面IPC、精确活动SSH句柄、七项固定工具和桌面审阅已接通，源码与受控原生基线已有独立复审。实际Claude Code 2.1.285在标准macOS包完成授权读取、越权/路线拒绝、桌面批准/拒绝及同客户端结果回传；撤权后客户端报告连接错误，未记录新的tools/call RPC，不扩张为新的服务端拒绝。新独立复核已通过该限定范围，无剩余 P1/P2，e16689b三平台Quality通过。Codex文本前置已通过但其MCP未执行；文件修改提案、最终六目标Release与其他平台原生仍开放，见[授权客户端记录](testing/records/2026-10-05-claude-authorized-mcp.md)、[标准包记录](testing/records/2026-10-04-mcp-response-cancellation.md)及[指南](product/EXTERNAL_MCP.md) |
 | A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | Codex0.160.0/Claude2.1.285固定Ask后端与应用接通；独立空目录/受控环境、完整JSONL终态与owned进程清理；929普通+8文档、47打包、新独立审查与macOS实际安装版→自有SSE窗口问答/取消/重启密钥失效通过。首轮新源码Windows CI出现控制器主线程栈溢出；两处读流缓冲已堆分配，尺寸与显式2MiB完整控制器回归通过，修复be9590f2的Windows原生CI已通过两种完整控制器，914普通+8文档；同次Linux另有MCP错误响应超时，整次CI仍失败；SDK取消窗口已修复，后续34cff1b三平台Quality通过，三平台默认与2 MiB完整控制器均成功，原失败记录保留，见[取消修复记录](testing/records/2026-10-04-mcp-response-cancellation.md)与[小栈记录](testing/records/2026-10-04-local-agent-windows-stack.md)。仅显式API密钥，不复用订阅登录；自定义工作目录/预算/环境引用、可见步骤流、Agent与Windows/Linux原生继续开发/验证，见[记录](testing/records/2026-10-04-local-agent-ui.md) |
 
 D1先于后续新界面，原有后端与任务目标继续保留。全部新增条目的细节、参考与验收见正式计划；“本地智能体”不是本地terminal管理，也不等于模型离线。
 
-2026-10-05对外MCP客户端增量：真实Claude2.1.285已执行七schema协商及唯一未授权list_sessions→DISABLED→同客户端下一模型请求的结果循环；没有GUI/SSH或授权操作。Codex受限文本前置连接失败、0 POST，其MCP未执行。fresh独立复审通过，无剩余P1/P2，插件范围措辞由只追加更正关闭；108/80作者及13审查材料经根核验，授权SSH/SFTP、审批/拒绝及撤权按A2继续开放，见[记录](testing/records/2026-10-05-external-client-mcp-preflight.md)。
+2026-10-05早期客户端范围保留：首次Claude2.1.285只执行未授权list_sessions→DISABLED→同客户端模型请求的结果循环，没有GUI/SSH；当时Codex文本前置失败且0 POST，原证据及独立复审更正均保留在[前置记录](testing/records/2026-10-05-external-client-mcp-preflight.md)。后续新范围证实Codex尝试连接受限策略禁止的代理端口，仅为子进程加入回环NO_PROXY后直连自有模型服务并文本成功；不把新errno追溯到未采集errno的旧失败。Claude授权流程的新通过范围见本页顶部与A2，不整体关闭MCP-01至04。

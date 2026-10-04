@@ -79,7 +79,7 @@ AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解�
 
 应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。本地 CLI Ask 已通过实际安装版到回环服务的 macOS 窗口问答与取消验证；不复用订阅登录，没有 CLI 工具执行。专业视觉升级、Agent 工作流及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力，不提供访问第三方 MCP 服务的通用客户端。
 
-对外 MCP 已接通独立 stdio 伴随程序、桌面授权与真实 SSH/SFTP 桥接，默认关闭。标准 macOS 双程序开发包在隔离服务上的原生联调已验证明确片段/文件读取、越权拒绝、人工批准与拒绝、运行中撤权及重启回到关闭；这部分使用自有外部协议客户端。另一次实际 Claude Code 验证完成了七项工具 schema 协商和一次未授权调用的拒绝结果回传，见[真实客户端记录](docs/testing/records/2026-10-05-external-client-mcp-preflight.md)。Codex MCP、实际客户端的授权 SSH/SFTP 操作、审批/撤权与其他平台原生验收仍待完成。使用见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)，桌面证据见[桌面桥接记录](docs/testing/records/2026-10-04-mcp-desktop-bridge.md)和[标准包复核记录](docs/testing/records/2026-10-04-mcp-response-cancellation.md)。
+对外 MCP 已接通独立 stdio 伴随程序、桌面授权与真实 SSH/SFTP 桥接，默认关闭。实际安装的 Claude Code 已通过标准 macOS 双程序开发包完成授权片段、目录和文件读取、越权拒绝，以及桌面明确批准后成功、拒绝后保持拒绝的命令提案流程；撤权后，同一客户端报告连接已断开。验证使用自有模型模拟服务与隔离 SSH/SFTP 夹具，独立复核已通过该限定范围，无剩余 P1/P2，不代表云端模型或客户服务器验收，见[授权客户端记录](docs/testing/records/2026-10-05-claude-authorized-mcp.md)。Codex 新文本前置已通过，其实际 MCP 调用、其他平台原生、最终发布包与安装更新仍待验证。使用见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)；历史未授权客户端、运行中撤权和重启证据分别见[前置记录](docs/testing/records/2026-10-05-external-client-mcp-preflight.md)与[标准包复核记录](docs/testing/records/2026-10-04-mcp-response-cancellation.md)。
 
 <details>
 <summary>查看 AI 配置界面</summary>
