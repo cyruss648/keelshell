@@ -1,5 +1,4 @@
 use super::*;
-use crate::design::{ACCENT, BORDER, CANVAS, MUTED, SELECTED, SURFACE, TEXT};
 use gpui_kit::{
     component::{
         Disableable, Sizable,
@@ -10,8 +9,12 @@ use gpui_kit::{
 };
 use keelshell_session::{BatchNotStartedReason, BatchOutcome, BatchUnknownReason};
 
-fn hint(text: impl Into<SharedString>) -> Div {
-    div().text_xs().text_color(rgb(MUTED)).child(text.into())
+fn hint(cx: &App, text: impl Into<SharedString>) -> Div {
+    let visual = crate::design::palette(cx);
+    div()
+        .text_xs()
+        .text_color(rgb(visual.muted))
+        .child(text.into())
 }
 
 fn outcome(outcome: &BatchOutcome, cx: &App) -> String {
@@ -57,6 +60,7 @@ fn outcome(outcome: &BatchOutcome, cx: &App) -> String {
 
 impl BatchPanel {
     fn destination_list(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let editable = self.editable();
         let mut list = div()
             .id("batch-destinations")
@@ -102,11 +106,11 @@ impl BatchPanel {
                 .p_2()
                 .rounded_md()
                 .border_1()
-                .border_color(rgb(BORDER))
+                .border_color(rgb(visual.border))
                 .bg(rgb(if self.detail == Some(id) {
-                    SELECTED
+                    visual.selected
                 } else {
-                    SURFACE
+                    visual.surface
                 }))
                 .flex()
                 .flex_col()
@@ -157,8 +161,8 @@ impl BatchPanel {
                             )
                         }),
                 )
-                .child(hint(row.destination.name.clone()))
-                .child(hint(row.destination.route.clone()));
+                .child(hint(cx, row.destination.name.clone()))
+                .child(hint(cx, row.destination.route.clone()));
             if !editable {
                 item = item.child(
                     div()
@@ -167,20 +171,20 @@ impl BatchPanel {
                             if row.receipt.as_ref().is_some_and(|r| {
                                 matches!(r.outcome, BatchOutcome::Exited { code: 0 })
                             }) {
-                                ACCENT
+                                visual.accent
                             } else {
-                                MUTED
+                                visual.muted
                             },
                         ))
                         .child(status),
                 );
             } else if !row.available {
-                item = item.child(hint(status));
+                item = item.child(hint(cx, status));
             }
             list = list.child(item);
         }
         if self.rows.is_empty() {
-            list = list.child(hint(t(
+            list = list.child(hint(cx, t(
                 cx,
                 "尚无已连接会话。先连接所需 SSH 主机，再新建批量任务。",
                 "No connected sessions. Connect the required SSH hosts, then create a new batch.",
@@ -192,6 +196,7 @@ impl BatchPanel {
 
 impl Render for BatchPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         let editable = self.editable();
         let selected = self.rows.iter().filter(|r| r.selected).count();
         let done = self.rows.iter().filter(|r| r.receipt.is_some()).count();
@@ -204,38 +209,38 @@ impl Render for BatchPanel {
         } else {
             t(cx, "新建批量任务", "New batch task")
         };
-        div().id("batch-panel").test_support().track_focus(&self.focus).key_context("BatchPanel").size_full().min_w_0().min_h_0().flex().flex_col().overflow_hidden().bg(rgb(SURFACE)).text_color(rgb(TEXT)).text_sm()
-            .child(div().flex_shrink_0().p_3().border_b_1().border_color(rgb(BORDER)).flex().flex_col().gap_1()
+        div().id("batch-panel").test_support().track_focus(&self.focus).key_context("BatchPanel").size_full().min_w_0().min_h_0().flex().flex_col().overflow_hidden().bg(rgb(visual.surface)).text_color(rgb(visual.text)).text_sm()
+            .child(div().flex_shrink_0().p_3().border_b_1().border_color(rgb(visual.border)).flex().flex_col().gap_1()
                 .child(div().font_weight(FontWeight::SEMIBOLD).child(title))
-                .child(hint(t(cx,"独立 SSH 命令环境 · 不继承终端 cwd、别名或临时环境变量。","Independent SSH exec environment · terminal cwd, aliases and temporary variables are not inherited."))))
+                .child(hint(cx, t(cx,"独立 SSH 命令环境 · 不继承终端 cwd、别名或临时环境变量。","Independent SSH exec environment · terminal cwd, aliases and temporary variables are not inherited."))))
             .child(div().id("batch-body").test_support().flex_1().min_w_0().min_h_0().overflow_y_scroll().p_3().flex().flex_col().gap_3()
-                .child(hint(format!("{} {selected} / 32",t(cx,"目标会话","Target sessions"))))
+                .child(hint(cx, format!("{} {selected} / 32",t(cx,"目标会话","Target sessions"))))
                 .child(self.destination_list(cx))
                 .when(editable,|el|el.child(div().flex_shrink_0().flex().flex_col().gap_2()
-                    .child(hint(t(cx,"命令正文 · 不自动保存历史","Command · never added to terminal history")))
-                    .child(hint(t(cx,"可按目标展开元数据：{{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；下一步审核时逐目标显示最终命令。","Use per-target metadata markers: {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; the next review shows each final command.")))
+                    .child(hint(cx, t(cx,"命令正文 · 不自动保存历史","Command · never added to terminal history")))
+                    .child(hint(cx, t(cx,"可按目标展开元数据：{{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；下一步审核时逐目标显示最终命令。","Use per-target metadata markers: {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; the next review shows each final command.")))
                     .child(div().id("batch-command-container").test_support().h(px(156.)).flex_shrink_0().child(Textarea::new(&self.command).h_full()))
                     .child(div().flex().flex_wrap().gap_3()
-                        .child(div().w(px(140.)).child(hint(t(cx,"并发数 1–8","Concurrency 1–8"))).child(Input::new(&self.concurrency).id("batch-concurrency")))
-                        .child(div().w(px(160.)).child(hint(t(cx,"单主机超时（秒）","Per-host timeout (s)"))).child(Input::new(&self.timeout).id("batch-timeout"))))
+                        .child(div().w(px(140.)).child(hint(cx, t(cx,"并发数 1–8","Concurrency 1–8"))).child(Input::new(&self.concurrency).id("batch-concurrency")))
+                        .child(div().w(px(160.)).child(hint(cx, t(cx,"单主机超时（秒）","Per-host timeout (s)"))).child(Input::new(&self.timeout).id("batch-timeout"))))
                     .child(Button::new("batch-failure-policy").ghost().small().label(if self.stop_after_failure {t(cx,"失败后停止后续任务","Stop pending work after failure")} else {t(cx,"失败后继续其他任务","Continue other work after failure")}).on_click(cx.listener(|panel,_,_,cx|{if panel.editable(){panel.stop_after_failure = !panel.stop_after_failure;cx.notify();}})))))
-                .when_some(self.review.as_ref(),|el,review| el.child(div().id("batch-review").test_support().flex_shrink_0().min_w_0().p_3().rounded_md().bg(rgb(CANVAS)).flex().flex_col().gap_2()
-                    .child(hint(format!("{} {} · {} {}s · {}",t(cx,"并发","Concurrency"),review.concurrency,t(cx,"单主机超时","Per-host timeout"),review.timeout_seconds,if review.stop_after_failure {t(cx,"失败后停止等待项","Stop pending on failure")} else {t(cx,"失败后继续","Continue on failure")})))
-                    .child(hint(t(cx,"模板源（仅支持 {{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；以下为每个目标的最终命令）","Template source (supports only {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; final command per target follows)")))
+                .when_some(self.review.as_ref(),|el,review| el.child(div().id("batch-review").test_support().flex_shrink_0().min_w_0().p_3().rounded_md().bg(rgb(visual.canvas)).flex().flex_col().gap_2()
+                    .child(hint(cx, format!("{} {} · {} {}s · {}",t(cx,"并发","Concurrency"),review.concurrency,t(cx,"单主机超时","Per-host timeout"),review.timeout_seconds,if review.stop_after_failure {t(cx,"失败后停止等待项","Stop pending on failure")} else {t(cx,"失败后继续","Continue on failure")})))
+                    .child(hint(cx, t(cx,"模板源（仅支持 {{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；以下为每个目标的最终命令）","Template source (supports only {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; final command per target follows)")))
                     .child(div().id("batch-reviewed-command").test_support().min_w_0().whitespace_normal().font_family("monospace").child(review.command.clone()))
                     .child({
                         let mut rendered = div().id("batch-reviewed-target-commands").test_support().min_h_0().flex().flex_col().gap_2().max_h(px(320.)).overflow_y_scroll();
                         for (index, (id, command)) in review.commands.iter().enumerate() {
                             let label = self.rows.iter().find(|row| row.destination.id == *id).map(|row| row.destination.endpoint.clone()).unwrap_or_else(|| id.to_string());
-                            rendered = rendered.child(div().id(("batch-reviewed-target-command", index)).test_support().min_w_0().p_2().rounded_md().bg(rgb(SURFACE)).child(hint(label)).child(div().min_w_0().whitespace_normal().font_family("monospace").child(command.clone())));
+                            rendered = rendered.child(div().id(("batch-reviewed-target-command", index)).test_support().min_w_0().p_2().rounded_md().bg(rgb(visual.surface)).child(hint(cx, label)).child(div().min_w_0().whitespace_normal().font_family("monospace").child(command.clone())));
                         }
                         rendered
                     })))
-                .when(self.handle.is_some()||self.complete,|el|el.child(hint(format!("{} {done}/{selected} · {}",t(cx,"已返回回执","Receipts"),t(cx,"每主机合计输出上限 1 MiB；预览分流显示前 64 KiB。","Combined output limit: 1 MiB per host; each stream preview shows its first 64 KiB."))))
-                    .child(div().id("batch-output").test_support().p_3().min_h(px(100.)).flex_shrink_0().bg(rgb(CANVAS)).font_family("monospace").child(self.detail_text.clone())))
-                .child(hint(t(cx,"结果仅保留在本次工作区。取消不能保证远端进程已停止；未知结果不会自动重试。","Results stay in this workspace only. Cancellation cannot confirm remote process termination; unknown outcomes are never retried.")))
-                .when_some(self.message.as_ref(),|el,message|el.child(div().id("batch-message").test_support().text_color(rgb(0xb14c2c)).child(message.render(cx)))))
-            .child(div().id("batch-footer").test_support().flex_shrink_0().p_3().border_t_1().border_color(rgb(BORDER)).flex().flex_wrap().justify_end().gap_2()
+                .when(self.handle.is_some()||self.complete,|el|el.child(hint(cx, format!("{} {done}/{selected} · {}",t(cx,"已返回回执","Receipts"),t(cx,"每主机合计输出上限 1 MiB；预览分流显示前 64 KiB。","Combined output limit: 1 MiB per host; each stream preview shows its first 64 KiB."))))
+                    .child(div().id("batch-output").test_support().p_3().min_h(px(100.)).flex_shrink_0().bg(rgb(visual.canvas)).font_family("monospace").child(self.detail_text.clone())))
+                .child(hint(cx, t(cx,"结果仅保留在本次工作区。取消不能保证远端进程已停止；未知结果不会自动重试。","Results stay in this workspace only. Cancellation cannot confirm remote process termination; unknown outcomes are never retried.")))
+                .when_some(self.message.as_ref(),|el,message|el.child(div().id("batch-message").test_support().text_color(rgb(visual.warning)).child(message.render(cx)))))
+            .child(div().id("batch-footer").test_support().flex_shrink_0().p_3().border_t_1().border_color(rgb(visual.border)).flex().flex_wrap().justify_end().gap_2()
                 .child(Button::new("batch-hide").ghost().label(t(cx,"返回工作区","Back to workspace")).on_click(cx.listener(|_,_,_,cx|cx.emit(BatchPanelEvent::Hide))))
                 .when(self.handle.is_some(),|el|el.child(Button::new("batch-cancel").label(if self.cancelling {t(cx,"正在停止…","Stopping…")} else {t(cx,"停止任务","Stop batch")}).disabled(self.cancelling).on_click(cx.listener(|panel,_,_,cx|panel.cancel(cx)))))
                 .when(self.review.is_some()&&!self.is_running()&&!self.complete,|el|el.child(Button::new("batch-back").ghost().label(t(cx,"返回修改","Edit plan")).on_click(cx.listener(|panel,_,_,cx|panel.back(cx))))

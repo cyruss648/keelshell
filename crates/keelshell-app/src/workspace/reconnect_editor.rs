@@ -81,13 +81,14 @@ impl ReconnectEditor {
 
 impl Render for ReconnectEditor {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         div().id("reconnect-editor").test_support().flex_shrink_0().min_w_0()
-            .p_3().rounded_md().border_1().border_color(rgb(BORDER)).flex().flex_col().gap_2()
+            .p_3().rounded_md().border_1().border_color(rgb(visual.border)).flex().flex_col().gap_2()
             .child(Button::new("reconnect-policy").ghost().compact()
                 .label(if self.automatic { t(cx, "断线重连：自动", "Reconnect: automatic") }
                     else { t(cx, "断线重连：手动", "Reconnect: manual") })
                 .on_click(cx.listener(|view, _, _, cx| { view.automatic = !view.automatic; cx.notify(); })))
-            .child(div().text_xs().text_color(rgb(MUTED)).child(t(cx,
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx,
                 "仅重建 SSH 会话，不重放命令、传输或隧道。需要凭据时等待你处理。",
                 "Reopens SSH only. Commands, transfers and tunnels are never replayed. Credentials require your action.")))
             .when(self.automatic, |body| body.child(div().flex().flex_wrap().gap_2()
@@ -96,7 +97,7 @@ impl Render for ReconnectEditor {
                     ("reconnect-initial", t(cx, "首次等待（秒）", "Initial delay (s)"), self.initial.clone()),
                     ("reconnect-maximum", t(cx, "最长等待（秒）", "Maximum delay (s)"), self.maximum.clone()),
                 ].into_iter().map(|(id, label, state)| div().w(px(160.)).min_w_0().flex().flex_col().gap_1()
-                    .child(div().text_xs().text_color(rgb(MUTED)).child(label))
+                    .child(div().text_xs().text_color(rgb(visual.muted)).child(label))
                     .child(Input::new(&state).id(id))))))
     }
 }

@@ -33,6 +33,7 @@ impl Workspace {
         available_width: Pixels,
         cx: &mut Context<Self>,
     ) -> AnyElement {
+        let visual = crate::design::palette(cx);
         // Wide windows retain comparable columns; compact regions keep each
         // target's identity beside its actions rather than hiding them off-screen.
         let stacked = available_width < px(760.);
@@ -117,9 +118,13 @@ impl Workspace {
                 .min_w_0()
                 .flex_shrink_0()
                 .flex()
-                .bg(rgb(if index % 2 == 0 { PANEL } else { 0xf8fafd }))
+                .bg(rgb(if index % 2 == 0 {
+                    visual.surface
+                } else {
+                    visual.canvas
+                }))
                 .border_b_1()
-                .border_color(rgb(0xedf1f6))
+                .border_color(rgb(visual.border))
                 .when(cards, |row| row.flex_col().p_2().gap_2())
                 .when(!cards, |row| row.h(px(38.)).items_center());
             if cards {
@@ -155,13 +160,13 @@ impl Workspace {
                                         .aria_label(endpoint(connection))
                                         .text_ellipsis()
                                         .text_xs()
-                                        .text_color(rgb(MUTED))
+                                        .text_color(rgb(visual.muted))
                                         .child(endpoint(connection)),
                                 )
                                 .child(
                                     div()
                                         .text_xs()
-                                        .text_color(rgb(MUTED))
+                                        .text_color(rgb(visual.muted))
                                         .text_ellipsis()
                                         .child(format!(
                                             "{} · {}",
@@ -281,7 +286,7 @@ impl Workspace {
             rows = rows.child(row.child(actions));
         }
         if count == 0 {
-            rows=rows.child(div().p_5().text_color(rgb(MUTED)).child(if trash {
+            rows=rows.child(div().p_5().text_color(rgb(visual.muted)).child(if trash {
                 t(cx,"回收站中没有匹配的连接。删除连接后，可在这里恢复。","No matching connections in trash. Deleted profiles can be restored here.")
             } else if recent {
                 t(cx,"尚无匹配的成功连接记录。连接失败不会计入最近使用。","No matching successful connections yet. Failed attempts are not added to recents.")
@@ -336,8 +341,8 @@ impl Workspace {
             .when(stacked, |tree| tree.w_full().h(px(100.)).border_b_1())
             .when(!stacked, |tree| tree.w(px(200.)).h_full().border_r_1())
             .overflow_y_scroll()
-            .border_color(rgb(BORDER))
-            .bg(rgb(PANEL))
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.surface))
             .p_2()
             .flex()
             .flex_col()
@@ -364,12 +369,11 @@ impl Workspace {
                 .flex()
                 .justify_between()
                 .items_center()
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(rgb(MUTED))
-                        .child(t(cx, "文件夹", "FOLDERS")),
-                )
+                .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                    cx,
+                    "文件夹",
+                    "FOLDERS",
+                )))
                 .child(
                     Button::new("new-folder")
                         .ghost()
@@ -433,10 +437,10 @@ impl Workspace {
             .flex_shrink_0()
             .flex()
             .items_center()
-            .bg(rgb(BG))
-            .text_color(rgb(MUTED))
+            .bg(rgb(visual.canvas))
+            .text_color(rgb(visual.muted))
             .border_b_1()
-            .border_color(rgb(BORDER))
+            .border_color(rgb(visual.border))
             .child(cell("☆".into(), 36.))
             .child(cell(t(cx, "名称", "Name").into(), 155.))
             .child(cell(t(cx, "主机", "Host").into(), 145.))
@@ -452,9 +456,9 @@ impl Workspace {
                 .into(),
                 if trash || recent { 190. } else { 120. },
             ));
-        div().flex().flex_col().size_full().text_sm().bg(rgb(PANEL))
+        div().flex().flex_col().size_full().text_sm().bg(rgb(visual.surface))
             .child(div().min_h(px(46.)).px_3().py_2().flex_shrink_0().flex().flex_wrap().items_center().gap_2()
-                .border_b_1().border_color(rgb(BORDER))
+                .border_b_1().border_color(rgb(visual.border))
                 .child(Button::new("new-connection").compact().icon(IconName::Plus).label(t(cx,"新建连接","New connection"))
                     .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.open_form(window,cx))))
                 .child(Button::new("import-connections").compact().icon(IconName::Download).label(t(cx,"导入 JSON","Import JSON"))
@@ -470,8 +474,8 @@ impl Workspace {
                 .child(div().id("connection-table-scroll").flex_1().min_w_0().overflow_x_scroll()
                     .child(div().min_w_0().size_full().flex().flex_col()
                         .when(!cards,|table|table.min_w(px(if trash {880.} else if recent {1070.} else {1010.})).child(header)).child(rows))))
-            .child(div().h(px(28.)).flex_shrink_0().px_3().flex().items_center().text_xs().text_color(rgb(MUTED))
-                .border_t_1().border_color(rgb(BORDER)).child(if trash {
+            .child(div().h(px(28.)).flex_shrink_0().px_3().flex().items_center().text_xs().text_color(rgb(visual.muted))
+                .border_t_1().border_color(rgb(visual.border)).child(if trash {
                     format!("{} · {count}",t(cx,"仅移除连接配置，不会删除服务器或凭据库条目","Profile metadata only; servers and encrypted vault entries are retained"))
                 }else{
                     format!("{} {count} · {}",t(cx,"连接","Connections"),t(cx,"文件夹筛选包含子文件夹","Folder filters include descendants"))
@@ -479,6 +483,7 @@ impl Workspace {
     }
 
     pub(super) fn library_modal(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let root_choice = t(cx, "未归档 / 根目录", "Unfiled / root");
         let mut body = div()
             .id("library-dialog-body")
@@ -488,9 +493,9 @@ impl Workspace {
             .overflow_y_scroll()
             .p_5()
             .rounded_lg()
-            .bg(rgb(PANEL))
+            .bg(rgb(visual.surface))
             .border_1()
-            .border_color(rgb(BORDER))
+            .border_color(rgb(visual.border))
             .shadow_lg()
             .flex()
             .flex_col()
@@ -503,7 +508,7 @@ impl Workspace {
                     "选择目标文件夹",
                     "Choose destination folder",
                 )))
-                .child(div().text_sm().text_color(rgb(MUTED)).child(t(
+                .child(div().text_sm().text_color(rgb(visual.muted)).child(t(
                     cx,
                     "只调整连接的归档位置，当前 SSH 会话保持连接。",
                     "Move the profile without changing its active SSH session.",
@@ -583,7 +588,7 @@ impl Workspace {
                     },
                 ))
                 .child(Input::new(&form.name).disabled(self.saving))
-                .child(div().text_sm().text_color(rgb(MUTED)).child(t(
+                .child(div().text_sm().text_color(rgb(visual.muted)).child(t(
                     cx,
                     "上级文件夹",
                     "Parent folder",
@@ -624,8 +629,8 @@ impl Workspace {
                         })),
                 );
             }
-            body=body.child(choices).when_some(form.message.clone(),|el,message|el.child(div().text_sm().text_color(rgb(0xb42318)).child(message.render(cx))))
-                .child(div().text_xs().text_color(rgb(MUTED)).child(t(cx,"删除空文件夹前，需移走子文件夹、连接与回收站中的关联连接。","An empty folder can be removed after moving out its children and active or trashed profiles.")))
+            body=body.child(choices).when_some(form.message.clone(),|el,message|el.child(div().text_sm().text_color(rgb(visual.danger)).child(message.render(cx))))
+                .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx,"删除空文件夹前，需移走子文件夹、连接与回收站中的关联连接。","An empty folder can be removed after moving out its children and active or trashed profiles.")))
                 .child(div().flex().justify_between().gap_2()
                     .child(div().when(form.id.is_some(),|el|el.child(Button::new("remove-empty-folder").ghost().disabled(self.saving)
                         .label(t(cx,"删除空文件夹","Remove empty folder")).on_click(cx.listener(|view,_,window,cx|view.remove_empty_folder(window,cx))))))

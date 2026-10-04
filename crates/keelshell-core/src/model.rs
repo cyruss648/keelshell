@@ -302,11 +302,11 @@ impl Language {
 #[serde(rename_all = "snake_case")]
 pub enum Theme {
     /// Follow the platform setting.
-    System,
-    /// Dark UI and terminal colors.
-    Dark,
-    /// Light UI and terminal colors.
     #[default]
+    System,
+    /// Dark application surfaces; the terminal ANSI palette is independent.
+    Dark,
+    /// Light application surfaces; the terminal ANSI palette is independent.
     Light,
 }
 
@@ -392,6 +392,7 @@ impl<'de> Deserialize<'de> for Settings {
             language: Language,
             font_size: f32,
             scrollback_lines: usize,
+            #[serde(default)]
             theme: Theme,
             #[serde(default)]
             ai: AiSettings,
@@ -420,7 +421,7 @@ impl Default for Settings {
             language: Language::default(),
             font_size: 14.0,
             scrollback_lines: 10_000,
-            theme: Theme::Light,
+            theme: Theme::default(),
             ai: AiSettings::default(),
             ai_profiles: AiProfileCatalog::default(),
         }
@@ -849,7 +850,7 @@ mod locale_tests {
         }
         let loaded: Settings = serde_json::from_value(old)?;
         assert_eq!(loaded.language, Language::ZhCn);
-        assert_eq!(loaded.theme, Theme::Light);
+        assert_eq!(loaded.theme, Theme::System);
         assert_eq!(loaded.language.code(), "zh-CN");
         Ok(())
     }
@@ -865,6 +866,34 @@ mod locale_tests {
         assert_eq!(loaded.language, Language::En);
         assert_eq!(loaded.language.code(), "en");
         assert!(text.contains("\"language\":\"en\""));
+        Ok(())
+    }
+
+    #[test]
+    fn missing_theme_follows_system_and_explicit_legacy_choices_survive()
+    -> Result<(), serde_json::Error> {
+        let mut value = serde_json::to_value(Settings::default())?;
+        value
+            .as_object_mut()
+            .ok_or_else(|| {
+                <serde_json::Error as serde::de::Error>::custom(
+                    "settings must serialize as an object",
+                )
+            })?
+            .remove("theme");
+        let loaded: Settings = serde_json::from_value(value)?;
+        assert_eq!(loaded.theme, Theme::System);
+        for theme in [Theme::System, Theme::Light, Theme::Dark] {
+            let settings = Settings {
+                theme,
+                ..Settings::default()
+            };
+            let loaded: Settings = serde_json::from_str(&serde_json::to_string(&settings)?)?;
+            assert_eq!(loaded.theme, theme);
+        }
+        let mut invalid = serde_json::to_value(Settings::default())?;
+        invalid["theme"] = serde_json::json!("unknown");
+        assert!(serde_json::from_value::<Settings>(invalid).is_err());
         Ok(())
     }
 }

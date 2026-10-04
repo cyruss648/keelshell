@@ -813,6 +813,7 @@ impl Workspace {
     }
 
     pub(super) fn reconnect_banner(&self, id: EntityId, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let Some(binding) = self
             .reconnect_bindings
             .get(&id)
@@ -829,7 +830,7 @@ impl Workspace {
             .flex_shrink_0()
             .px_3()
             .py_2()
-            .bg(rgb(PANEL))
+            .bg(rgb(visual.surface))
             .flex()
             .flex_wrap()
             .gap_2()
@@ -876,11 +877,12 @@ impl Workspace {
     }
 
     pub(super) fn archive_confirmation(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let Some(id) = self.discard_archive else {
             return div().into_any_element();
         };
         div().track_focus(&self.overlay_focus).absolute().inset_0().occlude().bg(rgba(0x00000066)).flex().items_center().justify_center()
-            .child(div().id("discard-session-archive").w(px(460.)).max_w_full().p_4().bg(rgb(PANEL)).rounded_lg().flex().flex_col().gap_3()
+            .child(div().id("discard-session-archive").w(px(460.)).max_w_full().p_4().bg(rgb(visual.surface)).rounded_lg().flex().flex_col().gap_3()
                 .child(t(cx, "上次会话包含未保存的文件草稿。继续重连成功后会替换该快照；请先复制需要保留的内容。", "The previous session contains an unsaved file draft. A successful reconnect will replace that snapshot. Copy anything you need first."))
                 .child(div().flex().flex_wrap().gap_2()
                     .child(Button::new("keep-session-archive").ghost().label(t(cx, "保留并查看", "Keep and view"))

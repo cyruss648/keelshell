@@ -37,7 +37,6 @@ mod worker;
 use transfer::{TransferPhase, TransferStatus, TransferUpdate};
 use worker::operate;
 
-use crate::design::{ACCENT, BORDER, CANVAS, MUTED, SELECTED, SURFACE, TEXT};
 use gpui_kit::assets::IconName;
 #[derive(Clone)]
 enum Operation {
@@ -1249,7 +1248,13 @@ fn table_cell(text: impl Into<SharedString>, width: f32) -> impl IntoElement {
         .child(text.into())
 }
 
-fn confirmation_bar(message: String, confirm: Button, cancel: Button) -> impl IntoElement {
+fn confirmation_bar(
+    cx: &App,
+    message: String,
+    confirm: Button,
+    cancel: Button,
+) -> impl IntoElement {
+    let visual = crate::design::palette(cx);
     div()
         .id("file-confirmation-bar")
         .w_full()
@@ -1260,9 +1265,9 @@ fn confirmation_bar(message: String, confirm: Button, cancel: Button) -> impl In
         .flex()
         .items_center()
         .gap_2()
-        .bg(rgb(0xfff8eb))
+        .bg(rgb(visual.danger_surface))
         .border_t_1()
-        .border_color(rgb(0xf2d19b))
+        .border_color(rgb(visual.danger_border))
         .child(
             div()
                 .id("file-confirmation-message")

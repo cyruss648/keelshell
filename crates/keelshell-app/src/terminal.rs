@@ -708,6 +708,7 @@ impl TerminalView {
 
 impl TerminalView {
     fn search_bar(&self, cx: &mut Context<Self>) -> Option<AnyElement> {
+        let visual = crate::design::palette(cx);
         let input = self.search_input.as_ref().filter(|_| self.search_open)?;
         Some(
             div()
@@ -724,10 +725,10 @@ impl TerminalView {
                 .max_w_full()
                 .p_2()
                 .rounded_md()
-                .bg(rgb(crate::design::SURFACE))
-                .text_color(rgb(crate::design::TEXT))
+                .bg(rgb(visual.surface))
+                .text_color(rgb(visual.text))
                 .border_1()
-                .border_color(rgb(crate::design::BORDER))
+                .border_color(rgb(visual.border))
                 .shadow_lg()
                 .flex()
                 .flex_col()
@@ -791,7 +792,7 @@ impl TerminalView {
                         .test_support()
                         .aria_label(self.search_feedback.render(cx))
                         .text_xs()
-                        .text_color(rgb(crate::design::MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(self.search_feedback.render(cx)),
                 )
                 .into_any_element(),

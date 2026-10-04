@@ -7,6 +7,7 @@ impl Workspace {
         window: &Window,
         cx: &mut Context<Self>,
     ) -> AnyElement {
+        let visual = crate::design::palette(cx);
         if !self.command.read(cx).focus_handle(cx).is_focused(window) {
             return div().into_any_element();
         }
@@ -21,7 +22,7 @@ impl Workspace {
             .flex_shrink_0()
             .max_h(px(176.))
             .overflow_y_scroll()
-            .bg(rgb(PANEL));
+            .bg(rgb(visual.surface));
         for (index, ticket) in candidates.into_iter().enumerate() {
             let source = match ticket.source {
                 SuggestionSource::History => t(cx, "历史", "History"),
@@ -45,14 +46,14 @@ impl Workspace {
                     .gap_2()
                     .cursor_pointer()
                     .when(index == self.suggestion_selected, |el| {
-                        el.bg(rgb(crate::design::SELECTED))
+                        el.bg(rgb(visual.selected))
                     })
                     .child(
                         div()
                             .w(px(56.))
                             .flex_shrink_0()
                             .text_xs()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .child(source),
                     )
                     .child(div().w(px(150.)).min_w_0().text_ellipsis().child(title))
@@ -74,12 +75,13 @@ impl Workspace {
         div()
             .flex_shrink_0()
             .border_t_1()
-            .border_color(rgb(BORDER))
+            .border_color(rgb(visual.border))
             .child(list)
             .into_any_element()
     }
 
     pub(in crate::workspace) fn snippet_modal(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let content = if let Some(panel) = &self.snippet_parameters {
             div()
                 .w(px(900.))
@@ -101,7 +103,7 @@ impl Workspace {
                 .child(t(cx,"删除命令片段？","Delete command snippet?"))
                 .child(div().max_h(px(120.)).overflow_hidden().child(snippet.name.clone()))
                 .child(t(cx,"删除本机保存的片段，不会修改命令栏中已填入的内容。", "Deletes the saved snippet; text already inserted in the command bar stays unchanged."))
-                .child(div().text_color(rgb(MUTED)).child(self.status.render(cx)))
+                .child(div().text_color(rgb(visual.muted)).child(self.status.render(cx)))
                 .child(div().flex().justify_end().gap_2()
                     .child(Button::new("cancel-delete-snippet").ghost().disabled(self.saving).label(t(cx,"取消","Cancel")).on_click(cx.listener(|view,_,window,cx|view.close_snippet_modal(window,cx))))
                     .child(Button::new("confirm-delete-snippet").primary().disabled(self.saving).label(t(cx,"确认删除","Delete")).on_click(cx.listener(|view,_,window,cx|view.delete_snippet(window,cx)))))
@@ -121,7 +123,7 @@ impl Workspace {
                 div()
                     .max_w_full()
                     .max_h_full()
-                    .bg(rgb(PANEL))
+                    .bg(rgb(visual.surface))
                     .rounded_lg()
                     .shadow_lg()
                     .overflow_hidden()
@@ -130,12 +132,13 @@ impl Workspace {
             .into_any_element()
     }
     pub(in crate::workspace) fn command_library(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let mut list = div()
             .id("commands-list")
             .size_full()
             .flex()
             .flex_col()
-            .bg(rgb(PANEL))
+            .bg(rgb(visual.surface))
             .child(
                 div()
                     .flex_shrink_0()
@@ -188,7 +191,7 @@ impl Workspace {
                 .flex()
                 .items_center()
                 .justify_between()
-                .bg(rgb(BG))
+                .bg(rgb(visual.canvas))
                 .child(t(
                     cx,
                     "当前会话历史 · 仅本次运行",
@@ -224,7 +227,7 @@ impl Workspace {
                         .items_center()
                         .gap_2()
                         .border_b_1()
-                        .border_color(rgb(BORDER))
+                        .border_color(rgb(visual.border))
                         .child(
                             div()
                                 .flex_1()
@@ -248,7 +251,7 @@ impl Workspace {
                 );
             }
         }
-        rows = rows.child(div().px_3().py_1().bg(rgb(BG)).child(t(
+        rows = rows.child(div().px_3().py_1().bg(rgb(visual.canvas)).child(t(
             cx,
             "保存的命令片段",
             "Saved command snippets",
@@ -283,7 +286,7 @@ impl Workspace {
                     .items_center()
                     .gap_2()
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .child(
                         div()
                             .flex_1()
@@ -304,7 +307,7 @@ impl Workspace {
                                             .min_w_0()
                                             .text_xs()
                                             .text_ellipsis()
-                                            .text_color(rgb(MUTED))
+                                            .text_color(rgb(visual.muted))
                                             .child(snippet.tags.join(" · ")),
                                     ),
                             )
@@ -313,7 +316,7 @@ impl Workspace {
                                     div()
                                         .text_xs()
                                         .text_ellipsis()
-                                        .text_color(rgb(MUTED))
+                                        .text_color(rgb(visual.muted))
                                         .child(snippet.description.clone()),
                                 )
                             })
@@ -371,7 +374,7 @@ impl Workspace {
             );
         }
         if count == 0 {
-            rows = rows.child(div().p_3().text_color(rgb(MUTED)).child(t(
+            rows = rows.child(div().p_3().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "没有匹配片段，可调整搜索或新建片段。",
                 "No matching snippets. Change your search or create one.",

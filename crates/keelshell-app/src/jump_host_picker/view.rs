@@ -1,8 +1,5 @@
 use super::{JumpHostPicker, PAGE_SIZE, endpoint};
-use crate::{
-    design::{ACCENT, BORDER, CANVAS, MUTED, SELECTED, SURFACE, TEXT},
-    i18n::t,
-};
+use crate::i18n::t;
 use gpui_kit::{
     component::{
         Disableable,
@@ -15,6 +12,7 @@ use gpui_kit::{
 
 impl Render for JumpHostPicker {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         let chosen = self
             .selected
             .and_then(|id| {
@@ -37,10 +35,10 @@ impl Render for JumpHostPicker {
             .gap_2()
             .p_3()
             .rounded(px(8.))
-            .bg(rgb(CANVAS))
+            .bg(rgb(visual.canvas))
             .border_1()
-            .border_color(rgb(BORDER))
-            .text_color(rgb(TEXT))
+            .border_color(rgb(visual.border))
+            .text_color(rgb(visual.text))
             .child(
                 div()
                     .flex()
@@ -53,7 +51,7 @@ impl Render for JumpHostPicker {
                             .flex()
                             .flex_col()
                             .gap_1()
-                            .child(div().text_xs().text_color(rgb(MUTED)).child(t(
+                            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                                 cx,
                                 "连接方式",
                                 "Connection route",
@@ -81,7 +79,7 @@ impl Render for JumpHostPicker {
                                     div()
                                         .text_xs()
                                         .font_family("monospace")
-                                        .text_color(rgb(MUTED))
+                                        .text_color(rgb(visual.muted))
                                         .child(endpoint(connection)),
                                 )
                             }),
@@ -105,7 +103,7 @@ impl Render for JumpHostPicker {
                 picker = picker.child(
                     div()
                         .text_xs()
-                        .text_color(rgb(0xb42318))
+                        .text_color(rgb(visual.danger))
                         .child(error.render(cx)),
                 );
             } else {
@@ -126,7 +124,7 @@ impl Render for JumpHostPicker {
                     div()
                         .id("jump-route-preview")
                         .text_xs()
-                        .text_color(rgb(MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(format!(
                             "{names} → {}",
                             t(cx, "当前表单目标", "target in this form")
@@ -170,11 +168,15 @@ impl Render for JumpHostPicker {
                     .px_2()
                     .py_2()
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .items_center()
                     .gap_2()
-                    .bg(rgb(if selected { SELECTED } else { SURFACE }))
+                    .bg(rgb(if selected {
+                        visual.selected
+                    } else {
+                        visual.surface
+                    }))
                     .child(
                         div()
                             .flex_1()
@@ -192,14 +194,14 @@ impl Render for JumpHostPicker {
                                 div()
                                     .text_xs()
                                     .font_family("monospace")
-                                    .text_color(rgb(MUTED))
+                                    .text_color(rgb(visual.muted))
                                     .child(endpoint(connection)),
                             )
                             .when_some(connection.proxy.as_ref(), |el, proxy| {
                                 el.child(
                                     div()
                                         .text_xs()
-                                        .text_color(rgb(MUTED))
+                                        .text_color(rgb(visual.muted))
                                         .child(crate::proxy_editor::proxy_endpoint(proxy)),
                                 )
                             })
@@ -208,21 +210,25 @@ impl Render for JumpHostPicker {
                                     .folder_id_of(connection.id)
                                     .and_then(|folder| self.state.folder_path(folder)),
                                 |el, path| {
-                                    el.child(div().text_xs().text_color(rgb(MUTED)).child(path))
+                                    el.child(
+                                        div().text_xs().text_color(rgb(visual.muted)).child(path),
+                                    )
                                 },
                             )
                             .when(route.hops.len() > 1, |el| {
-                                el.child(div().text_xs().text_color(rgb(MUTED)).child(format!(
-                                    "{} {}",
-                                    route.hops.len(),
-                                    t(cx, "站已存路线", "saved route steps")
-                                )))
+                                el.child(div().text_xs().text_color(rgb(visual.muted)).child(
+                                    format!(
+                                        "{} {}",
+                                        route.hops.len(),
+                                        t(cx, "站已存路线", "saved route steps")
+                                    ),
+                                ))
                             })
                             .when_some(route.error, |el, error| {
                                 el.child(
                                     div()
                                         .text_xs()
-                                        .text_color(rgb(0xb42318))
+                                        .text_color(rgb(visual.danger))
                                         .child(error.render(cx)),
                                 )
                             }),
@@ -244,7 +250,7 @@ impl Render for JumpHostPicker {
             );
         }
         if matches.is_empty() {
-            rows = rows.child(div().p_3().text_sm().text_color(rgb(MUTED)).child(t(
+            rows = rows.child(div().p_3().text_sm().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "没有匹配的已存连接。",
                 "No saved connections match this search.",
@@ -260,7 +266,7 @@ impl Render for JumpHostPicker {
                         .flex_1()
                         .min_w_0()
                         .text_xs()
-                        .text_color(rgb(ACCENT))
+                        .text_color(rgb(visual.accent))
                         .child(format!(
                             "{} / {} · {} {}",
                             self.page + 1,

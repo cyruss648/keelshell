@@ -281,7 +281,8 @@ impl Workspace {
         });
     }
 
-    pub(super) fn batch_modal(&self, _cx: &mut Context<Self>) -> AnyElement {
+    pub(super) fn batch_modal(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let Some(panel) = self.batch_panel.clone().filter(|_| self.show_batch) else {
             return div().into_any_element();
         };
@@ -299,7 +300,7 @@ impl Workspace {
                     .h(px(720.))
                     .max_w_full()
                     .max_h_full()
-                    .bg(rgb(PANEL))
+                    .bg(rgb(visual.surface))
                     .rounded_lg()
                     .shadow_lg()
                     .overflow_hidden()

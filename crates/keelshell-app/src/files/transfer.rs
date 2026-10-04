@@ -182,6 +182,7 @@ impl FilesPanel {
     }
 
     pub(super) fn transfer_card(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let Some(transfer) = &self.transfer else {
             return div().into_any_element();
         };
@@ -213,9 +214,9 @@ impl FilesPanel {
             .min_w_0()
             .px_3()
             .py_2()
-            .bg(rgb(CANVAS))
+            .bg(rgb(visual.canvas))
             .border_t_1()
-            .border_color(rgb(BORDER))
+            .border_color(rgb(visual.border))
             .flex()
             .flex_col()
             .gap_1()
@@ -236,7 +237,7 @@ impl FilesPanel {
                         div()
                             .id("file-transfer-phase")
                             .test_support()
-                            .text_color(rgb(ACCENT))
+                            .text_color(rgb(visual.accent))
                             .child(transfer.phase.label(cx)),
                     )
                     .child(
@@ -333,7 +334,7 @@ impl FilesPanel {
                             .flex_1()
                             .min_w_0()
                             .text_ellipsis()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .child(transfer.destination.clone()),
                     )
                     .child(
@@ -352,9 +353,9 @@ impl FilesPanel {
                     .h(px(3.))
                     .w_full()
                     .rounded_full()
-                    .bg(rgb(BORDER))
+                    .bg(rgb(visual.border))
                     .overflow_hidden()
-                    .child(div().h_full().w(relative(fraction)).bg(rgb(ACCENT))),
+                    .child(div().h_full().w(relative(fraction)).bg(rgb(visual.accent))),
             )
             .into_any_element()
     }

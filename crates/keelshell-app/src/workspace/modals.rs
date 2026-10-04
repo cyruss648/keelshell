@@ -1,18 +1,20 @@
 use super::*;
+use crate::jump_host_picker::endpoint;
 use crate::proxy_editor::{proxy_endpoint, proxy_username};
-use crate::{design::SELECTED, jump_host_picker::endpoint};
 use gpui_kit::component::popover::Popover;
 
 #[cfg(test)]
 mod tests;
 
 fn framed_modal(
+    cx: &App,
     id: &'static str,
     height: Pixels,
     title: AnyElement,
     body: AnyElement,
     footer: AnyElement,
 ) -> AnyElement {
+    let visual = crate::design::palette(cx);
     div()
         .id(id)
         .test_support()
@@ -25,9 +27,9 @@ fn framed_modal(
         .overflow_hidden()
         .rounded_lg()
         .shadow_lg()
-        .bg(rgb(PANEL))
+        .bg(rgb(visual.surface))
         .border_1()
-        .border_color(rgb(BORDER))
+        .border_color(rgb(visual.border))
         .flex()
         .flex_col()
         .child(
@@ -38,7 +40,7 @@ fn framed_modal(
                 .flex_shrink_0()
                 .p_4()
                 .border_b_1()
-                .border_color(rgb(BORDER))
+                .border_color(rgb(visual.border))
                 .child(title),
         )
         .child(
@@ -59,15 +61,16 @@ fn framed_modal(
                 .flex_shrink_0()
                 .min_w_0()
                 .p_3()
-                .bg(rgb(BG))
+                .bg(rgb(visual.canvas))
                 .border_t_1()
-                .border_color(rgb(BORDER))
+                .border_color(rgb(visual.border))
                 .child(footer),
         )
         .into_any_element()
 }
 
 fn route_steps(steps: &[Connection], current: usize, cx: &App) -> AnyElement {
+    let visual = crate::design::palette(cx);
     div()
         .id("connection-route-steps")
         .test_support()
@@ -80,14 +83,18 @@ fn route_steps(steps: &[Connection], current: usize, cx: &App) -> AnyElement {
                 .test_support()
                 .p_2()
                 .rounded(px(6.))
-                .bg(rgb(if index == current { SELECTED } else { BG }))
+                .bg(rgb(if index == current {
+                    visual.selected
+                } else {
+                    visual.canvas
+                }))
                 .flex()
                 .gap_2()
                 .child(
                     div()
                         .w(px(22.))
                         .flex_shrink_0()
-                        .text_color(rgb(ACCENT))
+                        .text_color(rgb(visual.accent))
                         .child((index + 1).to_string()),
                 )
                 .child(
@@ -98,11 +105,9 @@ fn route_steps(steps: &[Connection], current: usize, cx: &App) -> AnyElement {
                         .flex_col()
                         .gap_1()
                         .when_some(connection.proxy.as_ref(), |body, proxy| {
-                            body.child(div().text_xs().text_color(rgb(ACCENT)).child(format!(
-                                "{} → {}",
-                                proxy_endpoint(proxy),
-                                t(cx, "SSH", "SSH")
-                            )))
+                            body.child(div().text_xs().text_color(rgb(visual.accent)).child(
+                                format!("{} → {}", proxy_endpoint(proxy), t(cx, "SSH", "SSH")),
+                            ))
                         })
                         .child(
                             div()
@@ -122,7 +127,7 @@ fn route_steps(steps: &[Connection], current: usize, cx: &App) -> AnyElement {
                             div()
                                 .text_xs()
                                 .font_family("monospace")
-                                .text_color(rgb(MUTED))
+                                .text_color(rgb(visual.muted))
                                 .child(endpoint(connection)),
                         ),
                 )
@@ -132,6 +137,7 @@ fn route_steps(steps: &[Connection], current: usize, cx: &App) -> AnyElement {
 
 impl Workspace {
     fn connection_route_status(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let Some((steps, current)) = self.route_progress(cx) else {
             return div().into_any_element();
         };
@@ -165,7 +171,7 @@ impl Workspace {
             .flex()
             .flex_col()
             .gap_2()
-            .child(div().text_xs().text_color(rgb(ACCENT)).child(title))
+            .child(div().text_xs().text_color(rgb(visual.accent)).child(title))
             .child(
                 div()
                     .text_sm()
@@ -176,15 +182,20 @@ impl Workspace {
                 div()
                     .text_xs()
                     .font_family("monospace")
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .child(endpoint(connection)),
             )
             .when_some(connection.proxy.as_ref(), |body, proxy| {
-                body.child(div().text_xs().text_color(rgb(ACCENT)).child(format!(
-                    "{} · {}",
-                    t(cx, "网络代理", "Network proxy"),
-                    proxy_endpoint(proxy)
-                )))
+                body.child(
+                    div()
+                        .text_xs()
+                        .text_color(rgb(visual.accent))
+                        .child(format!(
+                            "{} · {}",
+                            t(cx, "网络代理", "Network proxy"),
+                            proxy_endpoint(proxy)
+                        )),
+                )
             })
             .child(
                 Popover::new("connection-route-popover")
@@ -215,6 +226,7 @@ impl Workspace {
     }
 
     pub(super) fn authentication_modal(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let (height, title, body, footer) = if let Some(prompt) = &self.keyboard_interactive {
             let title_text = if prompt.name.trim().is_empty() {
                 t(cx, "键盘交互认证", "Keyboard-interactive authentication")
@@ -235,7 +247,7 @@ impl Workspace {
                         div()
                             .id("keyboard-interactive-instructions")
                             .text_sm()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .child(prompt.instructions.clone()),
                     )
                 })
@@ -400,7 +412,12 @@ impl Workspace {
                         "SSH authentication",
                     )))
                 })
-                .child(div().text_sm().text_color(rgb(MUTED)).child(description))
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(rgb(visual.muted))
+                        .child(description),
+                )
                 .when(!locked && !agent, |body| {
                     body.child(
                         Input::new(&login.secret)
@@ -421,15 +438,15 @@ impl Workspace {
                 .child(ssh_auth)
                 .when(proxy_auth, |body| {
                     let proxy=login.connection.proxy.as_ref();
-                    body.child(div().id("proxy-login-section").flex_shrink_0().test_support().min_w_0().p_3().rounded(px(8.)).bg(rgb(BG)).border_1().border_color(rgb(BORDER)).flex().flex_col().gap_2()
+                    body.child(div().id("proxy-login-section").flex_shrink_0().test_support().min_w_0().p_3().rounded(px(8.)).bg(rgb(visual.canvas)).border_1().border_color(rgb(visual.border)).flex().flex_col().gap_2()
                         .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child(t(cx,"代理认证","Proxy authentication")))
-                        .child(div().text_xs().text_color(rgb(MUTED)).child(proxy.map(|proxy| format!("{} · {}",proxy_endpoint(proxy),proxy_username(proxy).unwrap_or_default())).unwrap_or_default()))
+                        .child(div().text_xs().text_color(rgb(visual.muted)).child(proxy.map(|proxy| format!("{} · {}",proxy_endpoint(proxy),proxy_username(proxy).unwrap_or_default())).unwrap_or_default()))
                         .child(Input::new(&login.proxy_secret).id("proxy-password").disabled(login.busy))
-                        .child(div().text_xs().text_color(rgb(MUTED)).child(t(cx,"代理密码仅本次使用。代理认证本身未加密，请使用可信网络。","Proxy password is used for this connection only. Proxy authentication is not encrypted; use a trusted network."))))
+                        .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx,"代理密码仅本次使用。代理认证本身未加密，请使用可信网络。","Proxy password is used for this connection only. Proxy authentication is not encrypted; use a trusted network."))))
                 })
-                .when_some(login.message.clone(),|body,message|body.child(div().id("credential-status").text_sm().text_color(rgb(MUTED)).child(message.render(cx))))
-                .when(login.connection.credential_ref.is_some(),|body|body.child(div().text_xs().text_color(rgb(MUTED)).child(t(cx,"解除关联后将重新询问凭据；加密条目仍保留在本机凭据库。","Unlinking restores the credential prompt; the encrypted entry remains in the local vault."))))
-                .when(login.busy,|body|body.child(div().text_xs().text_color(rgb(MUTED)).child(t(cx,"已开始的保存可能继续完成；关闭后不会自动连接。","An admitted save may finish after closing; no connection will start."))));
+                .when_some(login.message.clone(),|body,message|body.child(div().id("credential-status").text_sm().text_color(rgb(visual.muted)).child(message.render(cx))))
+                .when(login.connection.credential_ref.is_some(),|body|body.child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx,"解除关联后将重新询问凭据；加密条目仍保留在本机凭据库。","Unlinking restores the credential prompt; the encrypted entry remains in the local vault."))))
+                .when(login.busy,|body|body.child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx,"已开始的保存可能继续完成；关闭后不会自动连接。","An admitted save may finish after closing; no connection will start."))));
             let footer = div()
                 .flex()
                 .justify_end()
@@ -479,7 +496,7 @@ impl Workspace {
                             .child(endpoint(&approval.connection)),
                     )
                 })
-                .child(div().text_sm().text_color(rgb(MUTED)).child(t(
+                .child(div().text_sm().text_color(rgb(visual.muted)).child(t(
                     cx,
                     "请与可信来源核对服务器指纹后再接受。",
                     "Compare this fingerprint with a trusted source before accepting it.",
@@ -527,9 +544,9 @@ impl Workspace {
                     .text_lg()
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(rgb(if approval.previous.is_some() {
-                        0xb42318
+                        visual.danger
                     } else {
-                        ACCENT
+                        visual.accent
                     }))
                     .child(if approval.previous.is_some() {
                         t(cx, "服务器指纹已变更", "Server identity changed")
@@ -557,9 +574,9 @@ impl Workspace {
                 .p_3()
                 .rounded_lg()
                 .shadow_lg()
-                .bg(rgb(PANEL))
+                .bg(rgb(visual.surface))
                 .border_1()
-                .border_color(rgb(BORDER))
+                .border_color(rgb(visual.border))
                 .flex()
                 .flex_col()
                 .gap_2()
@@ -585,7 +602,7 @@ impl Workspace {
                         .flex_shrink_0()
                         .overflow_hidden()
                         .text_xs()
-                        .text_color(rgb(MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(self.status.render(cx)),
                 )
                 .child(
@@ -614,6 +631,7 @@ impl Workspace {
             .items_center()
             .justify_center()
             .child(framed_modal(
+                cx,
                 "ssh-authentication",
                 height,
                 title,
@@ -624,6 +642,7 @@ impl Workspace {
     }
 
     pub(super) fn connection_form(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let Some(form) = self.form.as_ref() else {
             return div().into_any_element();
         };
@@ -637,7 +656,7 @@ impl Workspace {
                 .child(
                     div()
                         .text_xs()
-                        .text_color(rgb(MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(label.to_owned()),
                 )
                 .child(Input::new(state))
@@ -653,7 +672,7 @@ impl Workspace {
                 div()
                     .flex_shrink_0()
                     .text_sm()
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .child(t(
                         cx,
                         "连接信息保存在本机，密码在连接时输入。",
@@ -687,12 +706,11 @@ impl Workspace {
                     .flex()
                     .flex_col()
                     .gap_1()
-                    .child(
-                        div()
-                            .text_xs()
-                            .text_color(rgb(MUTED))
-                            .child(t(cx, "文件夹", "FOLDER")),
-                    )
+                    .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                        cx,
+                        "文件夹",
+                        "FOLDER",
+                    )))
                     .child(
                         Button::new("choose-connection-folder")
                             .ghost()
@@ -740,7 +758,7 @@ impl Workspace {
                     .max_h(px(48.))
                     .overflow_y_scroll()
                     .text_xs()
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .child(self.status.render(cx)),
             )
             .child(
@@ -787,6 +805,7 @@ impl Workspace {
             .items_center()
             .justify_center()
             .child(framed_modal(
+                cx,
                 "connection-editor",
                 px(680.),
                 title.into_any_element(),

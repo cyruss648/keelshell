@@ -32,7 +32,6 @@ use sha2::{Digest, Sha256};
 use tokio::runtime::Runtime;
 
 use crate::{
-    design::{ACCENT, BORDER, CANVAS, MUTED, SURFACE, TEXT},
     i18n::{Message, t},
     runtime_bridge,
 };
@@ -376,6 +375,7 @@ impl UpdatePanel {
 
 impl Render for UpdatePanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         let (release, can_download, can_reveal, can_install) = match &self.state {
             PanelState::Available(release) | PanelState::UpToDate(release) => (
                 Some(release),
@@ -398,26 +398,26 @@ impl Render for UpdatePanel {
                 .min_h_0()
                 .overflow_y_scroll()
                 .p_3()
-                .bg(rgb(CANVAS))
+                .bg(rgb(visual.canvas))
                 .border_1()
-                .border_color(rgb(BORDER))
+                .border_color(rgb(visual.border))
                 .rounded(px(6.))
                 .text_xs()
                 .child(
                     div()
                         .text_sm()
-                        .text_color(rgb(TEXT))
+                        .text_color(rgb(visual.text))
                         .child(release.name.clone()),
                 )
                 .child(
                     div()
-                        .text_color(rgb(MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(format!("{} · {}", release.tag, published)),
                 )
                 .child(
                     div()
                         .mt_2()
-                        .text_color(rgb(TEXT))
+                        .text_color(rgb(visual.text))
                         .child(release.body.clone()),
                 )
         });
@@ -432,14 +432,14 @@ impl Render for UpdatePanel {
             .size_full()
             .flex()
             .flex_col()
-            .bg(rgb(SURFACE))
-            .text_color(rgb(TEXT))
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
             .child(
                 div()
                     .flex_shrink_0()
                     .p_3()
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .items_center()
                     .justify_between()
@@ -472,7 +472,7 @@ impl Render for UpdatePanel {
                             .items_center()
                             .justify_between()
                             .child(div().child(format!("KeelShell {CURRENT_VERSION}")))
-                            .child(div().text_xs().text_color(rgb(MUTED)).child(target)),
+                            .child(div().text_xs().text_color(rgb(visual.muted)).child(target)),
                     )
                     .child(
                         div()
@@ -505,10 +505,10 @@ impl Render for UpdatePanel {
                         div()
                             .flex_1()
                             .min_h_0()
-                            .bg(rgb(CANVAS))
+                            .bg(rgb(visual.canvas))
                             .rounded(px(6.))
                             .p_3()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .id("bundled-changelog")
                             .overflow_y_scroll()
                             .child(include_str!("../../../CHANGELOG.md"))
@@ -522,7 +522,7 @@ impl Render for UpdatePanel {
                             body.child(
                                 div()
                                     .text_xs()
-                                    .text_color(rgb(MUTED))
+                                    .text_color(rgb(visual.muted))
                                     .child(format!("SHA-256: {digest}")),
                             )
                         },
@@ -539,7 +539,7 @@ impl Render for UpdatePanel {
                     .child(
                         div()
                             .text_xs()
-                            .text_color(rgb(ACCENT))
+                            .text_color(rgb(visual.accent))
                             .child(self.status.render(cx)),
                     ),
             )
@@ -548,7 +548,7 @@ impl Render for UpdatePanel {
                     .flex_shrink_0()
                     .p_3()
                     .border_t_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .justify_end()
                     .gap_2()

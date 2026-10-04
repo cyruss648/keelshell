@@ -1,6 +1,5 @@
 //! Live Linux monitoring, with a separately confirmed SIGTERM workflow.
 
-use crate::design::{ACCENT, BORDER, CANVAS, MUTED, SURFACE, TEXT};
 #[cfg(test)]
 #[path = "monitor_tests.rs"]
 mod tests;
@@ -472,8 +471,15 @@ fn socket_key(socket: &SocketInfo) -> String {
     format!("{}|{}|{}", socket.protocol, socket.local, socket.peer)
 }
 
-fn metric(label: &str, value: String, ratio: Option<f32>, color: u32) -> impl IntoElement {
-    let mut track = div().h(px(5.)).w_full().rounded_sm().bg(rgb(BORDER));
+fn metric(
+    cx: &App,
+    label: &str,
+    value: String,
+    ratio: Option<f32>,
+    color: u32,
+) -> impl IntoElement {
+    let visual = crate::design::palette(cx);
+    let mut track = div().h(px(5.)).w_full().rounded_sm().bg(rgb(visual.border));
     if let Some(ratio) = ratio.filter(|value| value.is_finite()) {
         track = track.child(
             div()
@@ -493,40 +499,42 @@ fn metric(label: &str, value: String, ratio: Option<f32>, color: u32) -> impl In
                 .justify_between()
                 .gap_2()
                 .text_xs()
-                .child(div().text_color(rgb(MUTED)).child(label.to_owned()))
-                .child(div().text_color(rgb(TEXT)).child(value)),
+                .child(div().text_color(rgb(visual.muted)).child(label.to_owned()))
+                .child(div().text_color(rgb(visual.text)).child(value)),
         )
         .child(track)
 }
 
-fn section(label: &'static str, icon: IconName) -> Div {
+fn section(cx: &App, label: &'static str, icon: IconName) -> Div {
+    let visual = crate::design::palette(cx);
     div()
         .flex()
         .flex_col()
         .gap_2()
         .py_3()
         .border_b_1()
-        .border_color(rgb(BORDER))
+        .border_color(rgb(visual.border))
         .child(
             div()
                 .text_xs()
                 .font_weight(FontWeight::SEMIBOLD)
-                .text_color(rgb(TEXT))
+                .text_color(rgb(visual.text))
                 .flex()
                 .items_center()
                 .gap_2()
-                .child(div().text_color(rgb(MUTED)).child(icon))
+                .child(div().text_color(rgb(visual.muted)).child(icon))
                 .child(label),
         )
 }
 
 impl Render for MonitorPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         let controls = div()
             .px_3()
             .py_2()
             .border_b_1()
-            .border_color(rgb(BORDER))
+            .border_color(rgb(visual.border))
             .flex()
             .flex_col()
             .gap_1()
@@ -537,7 +545,7 @@ impl Render for MonitorPanel {
                     .gap_2()
                     .text_sm()
                     .font_weight(FontWeight::SEMIBOLD)
-                    .child(div().text_color(rgb(ACCENT)).child(IconName::Server))
+                    .child(div().text_color(rgb(visual.accent)).child(IconName::Server))
                     .child(if self.suspended {
                         t(cx, "上一会话监控快照", "Previous session snapshot")
                     } else {
@@ -547,7 +555,7 @@ impl Render for MonitorPanel {
             .child(
                 div()
                     .text_xs()
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .text_ellipsis()
                     .child(self.host.clone()),
             )
@@ -612,7 +620,7 @@ impl Render for MonitorPanel {
                     ),
             )
             .child(
-                div().text_xs().text_color(rgb(MUTED)).child(
+                div().text_xs().text_color(rgb(visual.muted)).child(
                     Message::new(
                         format!(
                             "资源 {} · 进程 {}",
@@ -651,27 +659,30 @@ impl Render for MonitorPanel {
                 used as f32 / total as f32
             }
         });
-        let mut resources = section(t(cx, "资源使用", "Resources"), IconName::Activity)
+        let mut resources = section(cx, t(cx, "资源使用", "Resources"), IconName::Activity)
             .child(metric(
+                cx,
                 t(cx, "CPU", "CPU"),
                 cpu.map(|value| format!("{value:.1}%"))
                     .unwrap_or_else(|| "—".into()),
                 cpu.map(|value| value as f32 / 100.),
-                ACCENT,
+                visual.accent,
             ))
             .child(metric(
+                cx,
                 t(cx, "内存", "Memory"),
                 memory_value,
                 memory_ratio,
-                0x329b83,
+                visual.success,
             ))
             .child(metric(
+                cx,
                 t(cx, "交换空间", "Swap"),
                 swap_used
                     .map(|(used, total)| format!("{} / {}", bytes(used), bytes(total)))
                     .unwrap_or_else(|| "—".into()),
                 swap_ratio,
-                0xc08a31,
+                visual.warning,
             ));
         let load = self
             .snapshot
@@ -711,7 +722,7 @@ impl Render for MonitorPanel {
                     .child(t(cx, "运行时间", "Uptime"))
                     .child(uptime),
             );
-        let mut networks = section(t(cx, "网络", "Network"), IconName::Network);
+        let mut networks = section(cx, t(cx, "网络", "Network"), IconName::Network);
         if let Some(snapshot) = &self.snapshot {
             for interface in &snapshot.networks {
                 let sample = self
@@ -725,7 +736,11 @@ impl Render for MonitorPanel {
                         .flex_col()
                         .gap_1()
                         .text_xs()
-                        .child(div().text_color(rgb(MUTED)).child(interface.name.clone()))
+                        .child(
+                            div()
+                                .text_color(rgb(visual.muted))
+                                .child(interface.name.clone()),
+                        )
                         .child(
                             div()
                                 .flex()
@@ -752,7 +767,7 @@ impl Render for MonitorPanel {
                                 ),
                         )
                         .child(
-                            div().text_color(rgb(MUTED)).child(
+                            div().text_color(rgb(visual.muted)).child(
                                 Message::new(
                                     format!(
                                         "接收 {} · 发送 {}",
@@ -771,21 +786,24 @@ impl Render for MonitorPanel {
                 );
             }
         } else {
-            networks = networks.child(div().text_xs().text_color(rgb(MUTED)).child(t(
+            networks = networks.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "暂无网络采样",
                 "No network sample",
             )));
         }
-        let mut sockets = section(t(cx, "监听端口", "Listening sockets"), IconName::Network).child(
-            div().text_xs().text_color(rgb(MUTED)).child(t(
-                cx,
-                "通过 ss 读取，结果仅供诊断",
-                "Read with ss for diagnostics only",
-            )),
-        );
+        let mut sockets = section(
+            cx,
+            t(cx, "监听端口", "Listening sockets"),
+            IconName::Network,
+        )
+        .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+            cx,
+            "通过 ss 读取，结果仅供诊断",
+            "Read with ss for diagnostics only",
+        )));
         if self.sockets.is_empty() {
-            sockets = sockets.child(div().text_xs().text_color(rgb(MUTED)).child(t(
+            sockets = sockets.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "点击上方“端口”读取",
                 "Click Sockets above to load",
@@ -804,17 +822,17 @@ impl Render for MonitorPanel {
                     .gap_1()
                     .text_xs()
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .child(
                         div()
                             .w(px(42.))
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .child(socket.protocol.clone()),
                     )
                     .child(
                         div()
                             .w(px(54.))
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .child(socket.state.clone()),
                     )
                     .child(
@@ -843,7 +861,11 @@ impl Render for MonitorPanel {
                 if let Some(probe) = self.probes.get(&probe_key) {
                     row = row.child(
                         div()
-                            .text_color(rgb(if probe.reachable { 0x247a52 } else { 0xb42318 }))
+                            .text_color(rgb(if probe.reachable {
+                                visual.success
+                            } else {
+                                visual.danger
+                            }))
                             .child(if probe.reachable { "✓" } else { "×" }),
                     );
                 }
@@ -853,12 +875,13 @@ impl Render for MonitorPanel {
                 sockets = sockets.child(
                     div()
                         .text_xs()
-                        .text_color(rgb(MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(format!("… 还有 {} 个", self.sockets.len() - 12)),
                 );
             }
         }
         let mut disks = section(
+            cx,
             t(cx, "磁盘容量", "Filesystem capacity"),
             IconName::HardDrive,
         );
@@ -866,13 +889,14 @@ impl Render for MonitorPanel {
             for filesystem in &snapshot.filesystems {
                 disks = disks
                     .child(metric(
+                        cx,
                         &filesystem.mount,
                         format!("{}%", filesystem.used_percent),
                         Some(filesystem.used_percent as f32 / 100.),
                         0x448eaa,
                     ))
                     .child(
-                        div().text_xs().text_color(rgb(MUTED)).child(
+                        div().text_xs().text_color(rgb(visual.muted)).child(
                             Message::new(
                                 format!(
                                     "可用 {} / {}",
@@ -890,14 +914,14 @@ impl Render for MonitorPanel {
                     );
             }
         } else {
-            disks = disks.child(div().text_xs().text_color(rgb(MUTED)).child(t(
+            disks = disks.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "暂无磁盘采样",
                 "No filesystem sample",
             )));
         }
-        let mut processes = section(t(cx, "进程", "Processes"), IconName::Cpu).child(
-            div().text_xs().text_color(rgb(MUTED)).child(t(
+        let mut processes = section(cx, t(cx, "进程", "Processes"), IconName::Cpu).child(
+            div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "按 CPU 排序 · 生命周期均值",
                 "CPU order · lifetime average",
@@ -908,7 +932,7 @@ impl Render for MonitorPanel {
                 .flex()
                 .gap_1()
                 .text_xs()
-                .text_color(rgb(MUTED))
+                .text_color(rgb(visual.muted))
                 .child(div().w(px(42.)).child("CPU"))
                 .child(div().w(px(42.)).child(t(cx, "内存", "MEM")))
                 .child(div().flex_1().child(t(cx, "PID / 命令", "PID / Command"))),
@@ -926,7 +950,7 @@ impl Render for MonitorPanel {
                 .gap_1()
                 .py_1()
                 .border_b_1()
-                .border_color(rgb(BORDER))
+                .border_color(rgb(visual.border))
                 .text_xs()
                 .child(
                     div()
@@ -950,7 +974,7 @@ impl Render for MonitorPanel {
             if process.pid > 1 {
                 row = row.child(
                     Button::new(("review-process", process.pid as usize))
-                        .text_color(rgb(0xb42318))
+                        .text_color(rgb(visual.danger))
                         .ghost()
                         .compact()
                         .rounded(px(6.))
@@ -967,7 +991,7 @@ impl Render for MonitorPanel {
             processes = processes.child(row);
         }
         if self.processes.is_empty() {
-            processes = processes.child(div().text_xs().text_color(rgb(MUTED)).child(t(
+            processes = processes.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "暂无进程采样",
                 "No process sample",
@@ -1029,7 +1053,7 @@ impl Render for MonitorPanel {
         let mut confirmation = None;
         if let Some(identity) = &self.pending {
             let process = identity.process();
-            confirmation = Some(div().id("process-confirmation").max_h(px(250.)).overflow_y_scroll().m_2().p_2().bg(rgb(0xfff8eb)).rounded(px(6.)).border_1().border_color(rgb(0xf2d19b)).flex().flex_col().gap_2()
+            confirmation = Some(div().id("process-confirmation").max_h(px(250.)).overflow_y_scroll().m_2().p_2().bg(rgb(visual.danger_surface)).rounded(px(6.)).border_1().border_color(rgb(visual.danger_border)).flex().flex_col().gap_2()
                 .child(div().text_xs().font_weight(FontWeight::SEMIBOLD).child(t(cx, "确认终止进程", "Confirm termination")))
                 .child(div().text_xs().child(self.host.clone()))
                 .child(div().text_xs().child(format!("PID {} · {}", process.pid, process.user)))
@@ -1047,8 +1071,8 @@ impl Render for MonitorPanel {
             .flex_shrink_0()
             .flex()
             .flex_col()
-            .bg(rgb(SURFACE))
-            .text_color(rgb(TEXT))
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
             .child(controls)
             .children(confirmation)
             .child(content)
@@ -1059,11 +1083,11 @@ impl Render for MonitorPanel {
                     .overflow_y_scroll()
                     .px_3()
                     .py_2()
-                    .bg(rgb(CANVAS))
+                    .bg(rgb(visual.canvas))
                     .border_t_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .text_xs()
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .child(self.status.render(cx)),
             )
     }

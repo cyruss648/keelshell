@@ -72,6 +72,7 @@ fn warning_label(reason: &str, cx: &App) -> &'static str {
 
 impl Workspace {
     pub(super) fn openssh_import_modal(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let Some(review) = &self.openssh_review else {
             return div().into_any_element();
         };
@@ -101,15 +102,15 @@ impl Workspace {
                     .test_support()
                     .p_2()
                     .rounded(px(6.))
-                    .bg(rgb(crate::design::CANVAS))
+                    .bg(rgb(visual.canvas))
                     .border_1()
-                    .border_color(rgb(crate::design::BORDER))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .gap_2()
                     .child(
                         div()
                             .w(px(24.))
-                            .text_color(rgb(crate::design::ACCENT))
+                            .text_color(rgb(visual.accent))
                             .child((index + 1).to_string()),
                     )
                     .child(
@@ -128,14 +129,13 @@ impl Workspace {
                                 div()
                                     .text_xs()
                                     .font_family("monospace")
-                                    .text_color(rgb(crate::design::MUTED))
+                                    .text_color(rgb(visual.muted))
                                     .child(format!(
                                         "{}@{}:{}",
                                         connection.username, connection.host, connection.port
                                     )),
                             )
-                            .child(div().text_xs().text_color(rgb(crate::design::MUTED)).child(
-                                format!(
+                            .child(div().text_xs().text_color(rgb(visual.muted)).child(format!(
                                         "{} {}",
                                         t(cx, "来源行", "Source line"),
                                         entry
@@ -143,11 +143,12 @@ impl Workspace {
                                             .as_deref()
                                             .map(|source| format!("{source}:{}", entry.source_line))
                                             .unwrap_or_else(|| entry.source_line.to_string()),
-                                    ),
-                            ))
-                            .child(div().text_xs().text_color(rgb(crate::design::MUTED)).child(
-                                format!("{} · {}", auth_label(&connection.auth, cx), route),
-                            )),
+                                    )))
+                            .child(div().text_xs().text_color(rgb(visual.muted)).child(format!(
+                                "{} · {}",
+                                auth_label(&connection.auth, cx),
+                                route
+                            ))),
                     )
             }));
         let warnings = div()
@@ -167,8 +168,8 @@ impl Workspace {
                     .test_support()
                     .p_2()
                     .rounded(px(6.))
-                    .bg(rgb(0xfff5e6))
-                    .text_color(rgb(0x7a4a00))
+                    .bg(rgb(visual.danger_surface))
+                    .text_color(rgb(visual.warning))
                     .child(format!(
                         "{}{}{}",
                         if warning.line == 0 {
@@ -234,9 +235,9 @@ impl Workspace {
                     .min_h_0()
                     .rounded_lg()
                     .shadow_lg()
-                    .bg(rgb(crate::design::SURFACE))
+                    .bg(rgb(visual.surface))
                     .border_1()
-                    .border_color(rgb(crate::design::BORDER))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .flex_col()
                     .child(
@@ -245,9 +246,9 @@ impl Workspace {
                             .p_4()
                             .flex_shrink_0()
                             .border_b_1()
-                            .border_color(rgb(crate::design::BORDER))
+                            .border_color(rgb(visual.border))
                             .child(div().text_lg().font_weight(FontWeight::SEMIBOLD).child(t(cx, "审阅 SSH 配置导入", "Review SSH import")))
-                            .child(div().mt_1().text_sm().text_color(rgb(crate::design::MUTED)).child(summary)),
+                            .child(div().mt_1().text_sm().text_color(rgb(visual.muted)).child(summary)),
                     )
                     .child(
                         div()
@@ -266,7 +267,7 @@ impl Workspace {
                                 body.child(div().mt_2().text_sm().font_weight(FontWeight::SEMIBOLD).child(format!("{} ({})", t(cx, "需要审阅的配置语义", "Configuration items to review"), report.warnings.len())))
                                     .child(warnings)
                             })
-                            .child(div().mt_2().text_xs().text_color(rgb(crate::design::MUTED)).child(t(
+                            .child(div().mt_2().text_xs().text_color(rgb(visual.muted)).child(t(
                                 cx,
                                 "确认后才会保存到连接库；密码和凭据不会从配置文件导入。",
                                 "Nothing is saved until you confirm. Passwords and credentials are never imported from the configuration.",
@@ -278,9 +279,9 @@ impl Workspace {
                             .test_support()
                             .flex_shrink_0()
                             .p_3()
-                            .bg(rgb(crate::design::CANVAS))
+                            .bg(rgb(visual.canvas))
                             .border_t_1()
-                            .border_color(rgb(crate::design::BORDER))
+                            .border_color(rgb(visual.border))
                             .child(footer),
                     ),
             )

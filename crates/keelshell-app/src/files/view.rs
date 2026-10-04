@@ -3,6 +3,7 @@ use super::*;
 use gpui_kit::component::scroll::ScrollableElement;
 
 fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl IntoElement {
+    let visual = crate::design::palette(cx);
     let report = &comparison.report;
     let summary = match crate::i18n::language(cx) {
         keelshell_core::Language::ZhCn => format!(
@@ -38,18 +39,16 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
         );
     }
     if report.rows().len() > 100 {
-        rows = rows.child(
-            div()
-                .text_color(rgb(MUTED))
-                .child(match crate::i18n::language(cx) {
-                    keelshell_core::Language::ZhCn => {
-                        format!("仅显示前 100 / {} 项", report.rows().len())
-                    }
-                    keelshell_core::Language::En => {
-                        format!("Showing the first 100 of {} entries", report.rows().len())
-                    }
-                }),
-        );
+        rows = rows.child(div().text_color(rgb(visual.muted)).child(
+            match crate::i18n::language(cx) {
+                keelshell_core::Language::ZhCn => {
+                    format!("仅显示前 100 / {} 项", report.rows().len())
+                }
+                keelshell_core::Language::En => {
+                    format!("Showing the first 100 of {} entries", report.rows().len())
+                }
+            },
+        ));
     }
     let mut card = div()
         .id("directory-comparison-card")
@@ -59,8 +58,8 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
         .max_h(px(140.))
         .overflow_y_scroll()
         .border_1()
-        .border_color(rgb(BORDER))
-        .bg(rgb(CANVAS))
+        .border_color(rgb(visual.border))
+        .bg(rgb(visual.canvas))
         .child(
             div()
                 .flex()
@@ -71,9 +70,9 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
                     "目录比较（只读）",
                     "Directory comparison (read-only)",
                 ))
-                .child(div().flex_1().text_color(rgb(MUTED)).child(summary)),
+                .child(div().flex_1().text_color(rgb(visual.muted)).child(summary)),
         )
-        .child(div().text_color(rgb(MUTED)).child(format!(
+        .child(div().text_color(rgb(visual.muted)).child(format!(
             "{} ↔ {}",
             comparison.local.display(),
             comparison.remote
@@ -85,7 +84,7 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
         } else {
             t(cx, "远端 → 本地", "Remote → local")
         };
-        card = card.child(div().text_color(rgb(ACCENT)).child(match crate::i18n::language(cx) {
+        card = card.child(div().text_color(rgb(visual.accent)).child(match crate::i18n::language(cx) {
             keelshell_core::Language::ZhCn => format!("内容已校验 · {direction} · {} 项 · 保留目标独有项", plan.operation_count()),
             keelshell_core::Language::En => format!("Content verified · {direction} · {} operations · preserve destination-only entries", plan.operation_count()),
         }));
@@ -105,6 +104,7 @@ fn compare_status_label(status: DirectoryEntryStatus, cx: &App) -> SharedString 
 
 impl Render for FilesPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         let mut navigation = div()
             .id("remote-directory-tree")
             .w(px(152.))
@@ -112,17 +112,17 @@ impl Render for FilesPanel {
             .h_full()
             .overflow_y_scroll()
             .border_r_1()
-            .border_color(rgb(BORDER))
-            .bg(rgb(SURFACE))
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.surface))
             .child(
                 div()
                     .h(px(28.))
                     .px_2()
                     .flex()
                     .items_center()
-                    .bg(rgb(CANVAS))
+                    .bg(rgb(visual.canvas))
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .child(t(cx, "目录", "Directories")),
             );
         let current = self.directory.as_deref().unwrap_or("/");
@@ -145,7 +145,11 @@ impl Render for FilesPanel {
                     .items_center()
                     .cursor_pointer()
                     .overflow_hidden()
-                    .bg(rgb(if active { SELECTED } else { SURFACE }))
+                    .bg(rgb(if active {
+                        visual.selected
+                    } else {
+                        visual.surface
+                    }))
                     .gap_2()
                     .child(IconName::FolderOpen)
                     .child(name)
@@ -201,11 +205,11 @@ impl Render for FilesPanel {
                     .flex()
                     .items_center()
                     .bg(rgb(if selected {
-                        SELECTED
+                        visual.selected
                     } else if index % 2 == 0 {
-                        SURFACE
+                        visual.surface
                     } else {
-                        CANVAS
+                        visual.canvas
                     }))
                     .cursor_pointer()
                     .on_click(cx.listener(move |view, _, window, cx| {
@@ -229,9 +233,9 @@ impl Render for FilesPanel {
                             .child(
                                 div()
                                     .text_color(rgb(if entry.is_directory {
-                                        ACCENT
+                                        visual.accent
                                     } else {
-                                        MUTED
+                                        visual.muted
                                     }))
                                     .child(if entry.is_directory {
                                         IconName::Folder
@@ -271,7 +275,7 @@ impl Render for FilesPanel {
             );
         }
         if self.entries.is_empty() && !self.busy {
-            list = list.child(div().p_3().text_color(rgb(MUTED)).child(t(
+            list = list.child(div().p_3().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "当前目录没有文件",
                 "This directory is empty",
@@ -295,9 +299,9 @@ impl Render for FilesPanel {
                             .flex_shrink_0()
                             .flex()
                             .items_center()
-                            .bg(rgb(CANVAS))
+                            .bg(rgb(visual.canvas))
                             .border_b_1()
-                            .border_color(rgb(BORDER))
+                            .border_color(rgb(visual.border))
                             .child(div().flex_1().min_w(px(150.)).px_2().child(t(
                                 cx,
                                 "文件名",
@@ -326,14 +330,14 @@ impl Render for FilesPanel {
                 .flex()
                 .flex_col()
                 .border_l_1()
-                .border_color(rgb(BORDER))
+                .border_color(rgb(visual.border))
                 .child(
                     div()
                         .h(px(28.))
                         .px_2()
                         .flex()
                         .items_center()
-                        .bg(rgb(CANVAS))
+                        .bg(rgb(visual.canvas))
                         .overflow_hidden()
                         .child(format!("{} · {path}", t(cx, "编辑", "Edit"))),
                 )
@@ -348,7 +352,7 @@ impl Render for FilesPanel {
                     div()
                         .p_1()
                         .border_t_1()
-                        .border_color(rgb(BORDER))
+                        .border_color(rgb(visual.border))
                         .flex()
                         .gap_1()
                         .child(
@@ -408,7 +412,7 @@ impl Render for FilesPanel {
                         .h(px(220.))
                         .min_h_0()
                         .border_t_1()
-                        .border_color(rgb(BORDER))
+                        .border_color(rgb(visual.border))
                         .bg(rgb(0x1e2430))
                         .overflow_y_scrollbar()
                         .p_2()
@@ -429,32 +433,32 @@ impl Render for FilesPanel {
             .selected
             .as_ref()
             .is_some_and(|entry| !entry.is_symlink);
-        let mut panel = div().w_full().min_w_0().h_full().min_h_0().flex().flex_col().bg(rgb(SURFACE)).text_color(rgb(TEXT)).text_xs()
-            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_b_1().border_color(rgb(BORDER))
-                .child(div().text_color(rgb(ACCENT)).child(IconName::FolderOpen))
-                .child(div().text_color(rgb(MUTED)).child(t(cx,"远程目录","Remote path")))
+        let mut panel = div().w_full().min_w_0().h_full().min_h_0().flex().flex_col().bg(rgb(visual.surface)).text_color(rgb(visual.text)).text_xs()
+            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_b_1().border_color(rgb(visual.border))
+                .child(div().text_color(rgb(visual.accent)).child(IconName::FolderOpen))
+                .child(div().text_color(rgb(visual.muted)).child(t(cx,"远程目录","Remote path")))
                 .child(div().flex_1().min_w_0().child(Input::new(&self.path).small().rounded(px(6.))))
                 .child(Button::new("parent-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).label(t(cx,"上级","Up")).on_click(cx.listener(|view,_,window,cx| {
                     if let Some(directory) = &view.directory { view.run(Operation::List(format!("{}/..",directory.trim_end_matches('/'))),window,cx); }
                 })))
                 .child(Button::new("refresh-files").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::RefreshCw).label(t(cx,"刷新","Refresh")).on_click(cx.listener(|view,_,window,cx|view.run(Operation::List(view.path.read(cx).value().to_string()),window,cx))))
-                .child(div().max_w(px(220.)).text_ellipsis().text_color(rgb(MUTED)).child(self.host.clone())))
-            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().bg(rgb(CANVAS)).text_color(rgb(MUTED)).child(t(cx, "上一会话快照 · 草稿可复制，远程操作已停用", "Previous session snapshot · Copy drafts; remote actions are disabled"))))
+                .child(div().max_w(px(220.)).text_ellipsis().text_color(rgb(visual.muted)).child(self.host.clone())))
+            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().bg(rgb(visual.canvas)).text_color(rgb(visual.muted)).child(t(cx, "上一会话快照 · 草稿可复制，远程操作已停用", "Previous session snapshot · Copy drafts; remote actions are disabled"))))
             .child(body)
-            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().bg(rgb(CANVAS)).border_t_1().border_color(rgb(BORDER))
-                .child(div().w(px(150.)).flex_shrink_0().text_ellipsis().text_color(rgb(if has_selection {TEXT} else {MUTED})).child(selection.to_owned()))
+            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border))
+                .child(div().w(px(150.)).flex_shrink_0().text_ellipsis().text_color(rgb(if has_selection {visual.text} else {visual.muted})).child(selection.to_owned()))
                 .child(div().w(px(180.)).child(Input::new(&self.name).small().rounded(px(6.))))
                 .child(Button::new("mkdir").disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::FolderPlus).label(t(cx,"新建目录","New folder")).on_click(cx.listener(|view,_,_,cx| {
                     if let Some(path) = view.new_remote_path(cx) { view.confirm(Message::new(format!("创建目录 {path}？"),format!("Create directory {path}?")),Operation::Mkdir(path),cx); } cx.notify();
                 })))
-                .child(div().h(px(16.)).w(px(1.)).bg(rgb(BORDER)))
+                .child(div().h(px(16.)).w(px(1.)).bg(rgb(visual.border)))
                 .child(Button::new("rename").ghost().compact().rounded(px(6.)).icon(IconName::Pencil).label(t(cx,"重命名","Rename")).disabled(self.suspended || !has_selection).on_click(cx.listener(|view,_,_,cx| {
                     if let (Some(entry),Some(path)) = (view.selected.clone(),view.new_remote_path(cx)) { view.confirm(Message::new(format!("将 {} 重命名为 {path}？",entry.path),format!("Rename {} to {path}?",entry.path)),Operation::Rename(entry.path,path),cx); } cx.notify();
                 })))
-                .child(Button::new("delete-file").ghost().compact().rounded(px(6.)).icon(IconName::Trash).label(t(cx,"删除","Delete")).disabled(self.suspended || !has_selection).text_color(rgb(if self.suspended { MUTED } else { 0xb42318 })).on_click(cx.listener(|view,_,_,cx| {
+                .child(Button::new("delete-file").ghost().compact().rounded(px(6.)).icon(IconName::Trash).label(t(cx,"删除","Delete")).disabled(self.suspended || !has_selection).text_color(rgb(if self.suspended { visual.muted } else { visual.danger })).on_click(cx.listener(|view,_,_,cx| {
                     if let Some(entry) = view.selected.clone() { view.confirm(Message::new(format!("永久删除 {}？",entry.path),format!("Delete {} permanently?",entry.path)),Operation::Delete(entry),cx); }
                 })))
-                .child(div().h(px(16.)).w(px(1.)).bg(rgb(BORDER)))
+                .child(div().h(px(16.)).w(px(1.)).bg(rgb(visual.border)))
                 .child(div().w(px(118.)).flex_shrink_0().child(Input::new(&self.mode).small().rounded(px(6.))))
                 .child(Button::new("chmod-file").ghost().compact().rounded(px(6.)).icon(IconName::Lock).label(t(cx,"改权限","Permissions")).disabled(self.suspended || self.busy || !has_selection).on_click(cx.listener(|view,_,_,cx| {
                     let Some(entry) = view.selected.clone() else { return; };
@@ -470,7 +474,7 @@ impl Render for FilesPanel {
                     }
                     cx.notify();
                 }))))
-            .child(div().id("file-transfer-tools").h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_t_1().border_color(rgb(BORDER)).overflow_x_scroll()
+            .child(div().id("file-transfer-tools").h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_2().border_t_1().border_color(rgb(visual.border)).overflow_x_scroll()
                 .child(Button::new("file-resume-mode").ghost().compact().disabled(self.suspended || self.busy || self.pending.is_some())
                     .when(self.resume_mode, |button| button.primary()).label(t(cx,"续传模式","Resume mode"))
                     .on_click(cx.listener(|view,_,_,cx| {
@@ -632,6 +636,7 @@ impl Render for FilesPanel {
         }
         if let Some((message, _)) = &self.pending {
             panel = panel.child(confirmation_bar(
+                cx,
                 format!("{} · {}", self.host, message.render(cx)),
                 Button::new("confirm-file-operation")
                     .primary()
@@ -659,9 +664,9 @@ impl Render for FilesPanel {
                 .items_center()
                 .gap_2()
                 .border_t_1()
-                .border_color(rgb(BORDER))
-                .bg(rgb(CANVAS))
-                .child(div().text_color(rgb(MUTED)).child(if self.busy {
+                .border_color(rgb(visual.border))
+                .bg(rgb(visual.canvas))
+                .child(div().text_color(rgb(visual.muted)).child(if self.busy {
                     IconName::RefreshCw
                 } else {
                     IconName::Info
@@ -670,7 +675,7 @@ impl Render for FilesPanel {
                     div()
                         .max_w(px(320.))
                         .text_ellipsis()
-                        .text_color(rgb(MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(format!(
                             "{} {}",
                             t(cx, "当前位置：", "Location:"),
@@ -680,7 +685,7 @@ impl Render for FilesPanel {
                 .child(
                     div()
                         .flex_1()
-                        .text_color(rgb(MUTED))
+                        .text_color(rgb(visual.muted))
                         .child(self.status.render(cx)),
                 )
                 .when(self.busy && self.transfer.is_none(), |view| {

@@ -1,6 +1,6 @@
 //! Actual GPUI layout regression for the production confirmation component.
 use super::confirmation_bar;
-use crate::{design::SURFACE, i18n::t};
+use crate::i18n::t;
 use gpui_kit::test::TestWindowExt;
 use gpui_kit::{
     AppContext, Bounds, Context, InteractiveElement, IntoElement, ParentElement, Pixels, Render,
@@ -17,6 +17,7 @@ struct ConfirmationFixture {
 }
 impl Render for ConfirmationFixture {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         div().size_full().flex().items_end().p_4().child(
             div()
                 .id("file-panel-fixture")
@@ -25,9 +26,10 @@ impl Render for ConfirmationFixture {
                 .min_w_0()
                 .flex()
                 .flex_col()
-                .bg(rgb(SURFACE))
+                .bg(rgb(visual.surface))
                 .child(div().flex_1().min_h_0())
                 .child(confirmation_bar(
+                    cx,
                     self.message.clone(),
                     Button::new("confirm-file-operation")
                         .primary()

@@ -27,14 +27,16 @@ fn preset_label(preset: AiPreset, cx: &App) -> &'static str {
 }
 
 fn label(cx: &App, zh: &'static str, en: &'static str) -> Div {
+    let visual = crate::design::palette(cx);
     div()
         .text_xs()
-        .text_color(rgb(0x66758b))
+        .text_color(rgb(visual.muted))
         .child(t(cx, zh, en))
 }
 
 impl Render for AiSettingsPanel {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         self.clear_pending_key(window, cx);
         let mut list = div()
             .id("ai-profile-list")
@@ -45,9 +47,9 @@ impl Render for AiSettingsPanel {
             .flex_col()
             .gap_2()
             .p_3()
-            .bg(rgb(0xf6f8fb))
+            .bg(rgb(visual.canvas))
             .border_r_1()
-            .border_color(rgb(0xdce3ec))
+            .border_color(rgb(visual.border))
             .child(label(cx, "AI 配置", "AI configurations"))
             .child(
                 Button::new("ai-profile-create")
@@ -244,7 +246,7 @@ impl Render for AiSettingsPanel {
                     .flex_wrap()
                     .gap_1()
                     .p_2()
-                    .bg(rgb(0xf6f8fb));
+                    .bg(rgb(visual.canvas));
                 for (index, model) in self.models.iter().enumerate() {
                     let model = model.clone();
                     models = models.child(
@@ -267,7 +269,7 @@ impl Render for AiSettingsPanel {
                 .child(Input::new(&self.output_tokens).id("ai-profile-output-tokens").aria_label(t(cx, "输出上限（Token）", "Output token limit")))
                 .child(label(cx, "上下文窗口按保守字节预算限制输入，并预留输出；不是实际 Token 计数。填写窗口但不填写输出时使用 4096。", "The context window limits input using a conservative byte budget and reserves output; it is not a measured token count. A window with no output limit uses 4096."))
                 .child(label(cx, "输出字段：Chat Completions 使用 max_completion_tokens，Responses 使用 max_output_tokens，Messages 使用 max_tokens；兼容服务需支持对应字段。", "Output field: max_completion_tokens for Chat Completions, max_output_tokens for Responses, max_tokens for Messages. Compatible servers must support the selected field."))
-                .child(div().mt_2().p_2().bg(rgb(0xf6f8fb)).rounded(px(6.))
+                .child(div().mt_2().p_2().bg(rgb(visual.canvas)).rounded(px(6.))
                     .child(label(cx,"高级选项暂不可用：自定义请求头、代理与推理参数。","Advanced options unavailable: custom headers, proxy and reasoning controls.")))
                 .child(div().flex().gap_2().mt_2()
                     .child(Button::new("ai-profile-default").ghost().label(if self.catalog.active_id == Some(profile.id) { t(cx,"★ 默认配置","★ Default configuration") } else { t(cx,"设为默认","Set as default") })
@@ -290,8 +292,8 @@ impl Render for AiSettingsPanel {
             .min_h_0()
             .flex()
             .flex_col()
-            .bg(rgb(0xffffff))
-            .text_color(rgb(0x1d2939))
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
             .child(
                 div().flex_1().min_h_0().flex().child(list).child(
                     div()
@@ -307,7 +309,7 @@ impl Render for AiSettingsPanel {
                 div()
                     .p_3()
                     .border_t_1()
-                    .border_color(rgb(0xdce3ec))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .items_center()
                     .gap_3()
@@ -315,7 +317,7 @@ impl Render for AiSettingsPanel {
                         div()
                             .flex_1()
                             .text_xs()
-                            .text_color(rgb(0x2878e3))
+                            .text_color(rgb(visual.accent))
                             .child(self.status.render(cx)),
                     )
                     .child(

@@ -67,7 +67,7 @@ Enable parameters in the snippet editor to use `{{name}}` for literal values sup
 
 API keys stay in memory by default and can be explicitly saved encrypted. Saving and unlocking a configuration make no network requests. Additional protocols and assistant workflows are tracked in the [roadmap](docs/ROADMAP.md).
 
-System-following light/dark themes, a coherent visual system, local Claude Code/Codex adapters and a KeelShell MCP server for external agents are in the [development plan](docs/product/DESIGN_AND_AGENT_PLAN.md), and are not available yet.
+Appearance supports System, Light and Dark, defaulting to System and preserving SSH sessions and unsent drafts when switched. macOS switching and restart persistence are verified; native checks on other platforms and the full visual matrix remain open. See the [theme record](docs/testing/records/2026-10-04-system-themes.md). The visual refresh, local Claude Code/Codex adapters and a KeelShell MCP server for external agents continue under the [development plan](docs/product/DESIGN_AND_AGENT_PLAN.md).
 
 <details>
 <summary>View AI settings</summary>

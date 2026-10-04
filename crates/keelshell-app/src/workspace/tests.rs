@@ -1409,5 +1409,6 @@ mod commands;
 mod credentials;
 mod library;
 mod routes;
+mod themes;
 
 mod remote_completion;

@@ -30,10 +30,7 @@ mod workspace;
 #[cfg(test)]
 mod ui_tests;
 
-use gpui_kit::{
-    component::{Theme, ThemeMode},
-    *,
-};
+use gpui_kit::*;
 use keelshell_core::{AppState, StateStore};
 use std::sync::Arc;
 
@@ -78,8 +75,7 @@ fn main() {
         .run(move |cx| {
             cx.set_app_identity("app.keelshell.desktop", "KeelShell");
             gpui_kit::init(cx);
-            Theme::change(ThemeMode::Light, None, cx);
-            design::install(cx);
+            design::apply(state.settings.theme, None, cx);
             i18n::set_language(state.settings.language, cx);
             workspace::bind_keys(cx);
             terminal::install_shutdown(cx);

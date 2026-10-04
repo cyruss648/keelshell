@@ -6,6 +6,7 @@ impl Workspace {
         &self,
         cx: &mut Context<Self>,
     ) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let ready = self
             .tabs
             .get(self.active)
@@ -18,9 +19,9 @@ impl Workspace {
             .flex_shrink_0()
             .px_2()
             .py_1()
-            .bg(rgb(PANEL))
+            .bg(rgb(visual.surface))
             .border_t_1()
-            .border_color(rgb(BORDER))
+            .border_color(rgb(visual.border))
             .flex()
             .flex_col()
             .gap_1()
@@ -34,7 +35,7 @@ impl Workspace {
                             .flex_1()
                             .min_w_0()
                             .text_xs()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .text_ellipsis()
                             .child(t(
                                 cx,
@@ -104,6 +105,7 @@ impl Workspace {
         &self,
         cx: &mut Context<Self>,
     ) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let state = &self.remote_completion;
         if !state.visible() || self.command_surface_blocked() {
             return div().into_any_element();
@@ -114,9 +116,9 @@ impl Workspace {
             .flex_shrink_0()
             .flex()
             .flex_col()
-            .bg(rgb(PANEL))
+            .bg(rgb(visual.surface))
             .border_t_1()
-            .border_color(rgb(BORDER))
+            .border_color(rgb(visual.border))
             .child(
                 div()
                     .flex()
@@ -129,7 +131,7 @@ impl Workspace {
                             .flex_1()
                             .min_w_0()
                             .text_xs()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .text_ellipsis()
                             .child(
                                 state
@@ -165,12 +167,12 @@ impl Workspace {
                     .text_xs()
                     .min_w_0()
                     .text_ellipsis()
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .child(format!("{} · {host}", t(cx, "查询目标", "Query target"))),
             );
         }
         if state.ticket.as_ref().is_some_and(|ticket| ticket.commands) {
-            content=content.child(div().px_2().pb_1().text_xs().text_color(rgb(MUTED))
+            content=content.child(div().px_2().pb_1().text_xs().text_color(rgb(visual.muted))
                 .child(t(cx,"远端 PATH · 独立 SSH 查询环境，不包含交互终端的别名、函数。", "Remote PATH · independent SSH query environment; no interactive aliases or functions.")));
         } else if let Some(directory) = &state.resolved_directory {
             content = content.child(
@@ -189,18 +191,23 @@ impl Workspace {
             );
         }
         if state.limited || state.skipped > 0 {
-            content = content.child(div().px_2().pb_1().text_xs().text_color(rgb(MUTED)).child(
-                format!(
-                    "{} · {} {}",
-                    t(
-                        cx,
-                        "结果受限；可缩短查询范围",
-                        "Limited results; narrow the query"
-                    ),
-                    state.skipped,
-                    t(cx, "项已跳过", "entries skipped")
-                ),
-            ));
+            content = content.child(
+                div()
+                    .px_2()
+                    .pb_1()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(format!(
+                        "{} · {} {}",
+                        t(
+                            cx,
+                            "结果受限；可缩短查询范围",
+                            "Limited results; narrow the query"
+                        ),
+                        state.skipped,
+                        t(cx, "项已跳过", "entries skipped")
+                    )),
+            );
         }
         let mut list = div()
             .id("remote-completion-list")
@@ -231,15 +238,13 @@ impl Workspace {
                     .items_center()
                     .gap_2()
                     .cursor_pointer()
-                    .when(index == state.selected, |row| {
-                        row.bg(rgb(crate::design::SELECTED))
-                    })
+                    .when(index == state.selected, |row| row.bg(rgb(visual.selected)))
                     .child(
                         div()
                             .w(px(65.))
                             .flex_shrink_0()
                             .text_xs()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .child(source),
                     )
                     .child(

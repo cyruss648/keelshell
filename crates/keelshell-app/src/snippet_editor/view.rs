@@ -1,8 +1,5 @@
 use super::SnippetEditor;
-use crate::{
-    design::{ACCENT, BORDER, CANVAS, MUTED, SURFACE, TEXT},
-    i18n::t,
-};
+use crate::i18n::t;
 use gpui_kit::{
     component::{
         Disableable,
@@ -13,12 +10,14 @@ use gpui_kit::{
     *,
 };
 
-fn label(text: &'static str) -> Div {
-    div().text_xs().text_color(rgb(MUTED)).child(text)
+fn label(cx: &App, text: &'static str) -> Div {
+    let visual = crate::design::palette(cx);
+    div().text_xs().text_color(rgb(visual.muted)).child(text)
 }
 
 impl Render for SnippetEditor {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         self.refresh_template_feedback(cx);
         div()
             .id("snippet-editor")
@@ -31,15 +30,15 @@ impl Render for SnippetEditor {
             .flex()
             .flex_col()
             .overflow_hidden()
-            .bg(rgb(SURFACE))
-            .text_color(rgb(TEXT))
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
             .text_sm()
             .child(
                 div()
                     .flex_shrink_0()
                     .p_4()
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .flex_col()
                     .gap_1()
@@ -48,7 +47,7 @@ impl Render for SnippetEditor {
                     } else {
                         t(cx, "新建命令片段", "New command snippet")
                     }))
-                    .child(label(t(
+                    .child(label(cx, t(
                         cx,
                         "保存常用命令，使用时先填入命令栏审核。",
                         "Save reusable commands and review them in the command bar before running.",
@@ -72,7 +71,7 @@ impl Render for SnippetEditor {
                             .flex()
                             .flex_col()
                             .gap_1()
-                            .child(label(t(cx, "名称", "Name")))
+                            .child(label(cx, t(cx, "名称", "Name")))
                             .child(Input::new(&self.name).id("snippet-name").disabled(self.saving)),
                     )
                     .child(
@@ -81,7 +80,7 @@ impl Render for SnippetEditor {
                             .flex()
                             .flex_col()
                             .gap_1()
-                            .child(label(t(cx, "说明 · 可选", "Description · optional")))
+                            .child(label(cx, t(cx, "说明 · 可选", "Description · optional")))
                             .child(Input::new(&self.description).id("snippet-description").disabled(self.saving)),
                     )
                     .child(
@@ -90,28 +89,28 @@ impl Render for SnippetEditor {
                             .flex()
                             .flex_col()
                             .gap_1()
-                            .child(label(t(cx, "标签 · 逗号分隔", "Tags · comma-separated")))
+                            .child(label(cx, t(cx, "标签 · 逗号分隔", "Tags · comma-separated")))
                             .child(Input::new(&self.tags).id("snippet-tags").disabled(self.saving)),
                     )
                     .child(
                         div().flex_shrink_0().flex().flex_col().gap_2()
                             .child(div().flex().items_center().gap_2()
-                                .child(div().flex_1().min_w_0().child(label(t(cx,"变量参数 · 显式启用", "Parameters · opt in"))))
+                                .child(div().flex_1().min_w_0().child(label(cx, t(cx,"变量参数 · 显式启用", "Parameters · opt in"))))
                                 .child(Button::new("snippet-parameters-toggle").ghost().label(if self.parameterized {t(cx,"已启用", "Enabled")}else{t(cx,"未启用", "Disabled")}).disabled(self.saving).on_click(cx.listener(|editor,_,_,cx|editor.toggle_parameters(cx)))))
                             .when(self.parameterized,|body|body
-                                .child(label(t(cx,"使用 {{name}}；填写值时自动作为字面参数引用，不要给变量加引号。", "Use {{name}}. Values are quoted as literal arguments; do not quote placeholders.")))
+                                .child(label(cx, t(cx,"使用 {{name}}；填写值时自动作为字面参数引用，不要给变量加引号。", "Use {{name}}. Values are quoted as literal arguments; do not quote placeholders.")))
                                 .child(div().text_xs().font_family("monospace").child("cat {{path}} · tar --file={{archive}}"))
                                 .when_some(self.template_feedback.as_ref(),|body,feedback| {
                                     if let Some(error)=&feedback.error {
-                                        body.child(div().id("snippet-template-feedback").test_support().text_xs().text_color(rgb(0xb42318)).child(error.render(cx)))
+                                        body.child(div().id("snippet-template-feedback").test_support().text_xs().text_color(rgb(visual.danger)).child(error.render(cx)))
                                     } else {
-                                        body.child(div().id("snippet-template-feedback").test_support().max_h(px(72.)).overflow_y_scroll().text_xs().text_color(rgb(MUTED)).child(
+                                        body.child(div().id("snippet-template-feedback").test_support().max_h(px(72.)).overflow_y_scroll().text_xs().text_color(rgb(visual.muted)).child(
                                             if feedback.variables.is_empty(){t(cx,"未检测到变量，可保留为无参数模板。", "No variables detected; this can remain a template without parameters.").to_owned()}
                                             else{format!("{}: {}",t(cx,"使用时填写", "Fill when using"),feedback.variables.join(", "))}
                                         ))
                                     }
                                 }))
-                            .when(!self.parameterized,|body|body.child(label(t(cx,"按原文保存和填入，{{name}} 不会自动转换。", "Saved and inserted verbatim; {{name}} is not interpreted.")))),
+                            .when(!self.parameterized,|body|body.child(label(cx, t(cx,"按原文保存和填入，{{name}} 不会自动转换。", "Saved and inserted verbatim; {{name}} is not interpreted.")))),
                     )
                     .child(
                         div()
@@ -119,7 +118,7 @@ impl Render for SnippetEditor {
                             .flex()
                             .flex_col()
                             .gap_1()
-                            .child(label(t(cx, "命令 · 支持多行", "Command · multiple lines supported")))
+                            .child(label(cx, t(cx, "命令 · 支持多行", "Command · multiple lines supported")))
                             .child(
                                 div()
                                     .id("snippet-command-container")
@@ -145,9 +144,9 @@ impl Render for SnippetEditor {
                     .flex_shrink_0()
                     .min_w_0()
                     .p_3()
-                    .bg(rgb(CANVAS))
+                    .bg(rgb(visual.canvas))
                     .border_t_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .flex_col()
                     .gap_2()
@@ -155,7 +154,7 @@ impl Render for SnippetEditor {
                         div()
                             .id("snippet-plaintext-notice")
                             .text_xs()
-                            .text_color(rgb(MUTED))
+                            .text_color(rgb(visual.muted))
                             .child(t(
                                 cx,
                                 "片段以明文保存在本机。请勿填写密码、API 密钥或其他机密。",
@@ -170,7 +169,7 @@ impl Render for SnippetEditor {
                                 .max_h(px(64.))
                                 .overflow_y_scroll()
                                 .text_xs()
-                                .text_color(rgb(0xb42318))
+                                .text_color(rgb(visual.danger))
                                 .child(error.render(cx)),
                         )
                     })
@@ -185,7 +184,7 @@ impl Render for SnippetEditor {
                                     .flex_1()
                                     .min_w_0()
                                     .text_xs()
-                                    .text_color(rgb(ACCENT))
+                                    .text_color(rgb(visual.accent))
                                     .child(if self.saving { t(cx, "正在保存…", "Saving…") } else { "" }),
                             )
                             .child(

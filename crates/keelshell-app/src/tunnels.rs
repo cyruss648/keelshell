@@ -1,6 +1,5 @@
 //! TCP tunnel owners with explicit listener addresses and verified stop outcomes.
 
-use crate::design::{ACCENT, BORDER, CANVAS, MUTED, SURFACE, TEXT};
 use gpui_kit::assets::IconName;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
@@ -449,6 +448,7 @@ fn tunnel_error(error: &str) -> Message {
 
 impl Render for TunnelsPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         let mut rows = div()
             .id("tunnels-list")
             .flex_1()
@@ -465,16 +465,28 @@ impl Render for TunnelsPanel {
                 .flex()
                 .items_center()
                 .gap_2()
-                .bg(rgb(if index % 2 == 0 { SURFACE } else { CANVAS }))
+                .bg(rgb(if index % 2 == 0 {
+                    visual.surface
+                } else {
+                    visual.canvas
+                }))
                 .border_b_1()
-                .border_color(rgb(BORDER))
-                .child(div().text_color(rgb(MUTED)).child(IconName::ArrowLeftRight))
+                .border_color(rgb(visual.border))
+                .child(
+                    div()
+                        .text_color(rgb(visual.muted))
+                        .child(IconName::ArrowLeftRight),
+                )
                 .child(div().flex_1().min_w_0().child(row.description.render(cx)))
                 .child(
                     div()
                         .w(px(280.))
                         .flex_shrink_0()
-                        .text_color(rgb(if row.failed { 0xb42318 } else { MUTED }))
+                        .text_color(rgb(if row.failed {
+                            visual.danger
+                        } else {
+                            visual.muted
+                        }))
                         .child(row.status.render(cx)),
                 );
             if !row.finished {
@@ -530,7 +542,7 @@ impl Render for TunnelsPanel {
                     .flex()
                     .items_center()
                     .gap_2()
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .child(IconName::Network)
                     .child(t(
                         cx,
@@ -564,32 +576,32 @@ impl Render for TunnelsPanel {
                 ),
             )
         };
-        div().h_full().min_h_0().flex().flex_col().bg(rgb(SURFACE)).text_color(rgb(TEXT)).text_xs()
-            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_3().bg(rgb(CANVAS)).border_b_1().border_color(rgb(BORDER))
-                .child(div().text_color(rgb(ACCENT)).child(IconName::Network))
+        div().h_full().min_h_0().flex().flex_col().bg(rgb(visual.surface)).text_color(rgb(visual.text)).text_xs()
+            .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_3().bg(rgb(visual.canvas)).border_b_1().border_color(rgb(visual.border))
+                .child(div().text_color(rgb(visual.accent)).child(IconName::Network))
                 .child(div().font_weight(FontWeight::SEMIBOLD).child(t(cx,"端口转发","Port forwarding")))
-                .child(div().flex_1().text_color(rgb(MUTED)).child(self.host.clone()))
+                .child(div().flex_1().text_color(rgb(visual.muted)).child(self.host.clone()))
                 .child(Button::new("tunnel-local").ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).selected(self.direction==Direction::Local).label(t(cx,"本地转发","Local forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Local;cx.notify();})))
                 .child(Button::new("tunnel-remote").ghost().compact().rounded(px(6.)).icon(IconName::ArrowDown).selected(self.direction==Direction::Remote).label(t(cx,"远程转发","Remote forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Remote;cx.notify();})))
                 .child(Button::new("tunnel-dynamic").ghost().compact().rounded(px(6.)).icon(IconName::Network).selected(self.direction==Direction::Dynamic).label(t(cx,"动态 SOCKS5","Dynamic SOCKS5")).on_click(cx.listener(|view,_,window,cx| {view.direction=Direction::Dynamic;view.bind_host.read(cx).focus_handle(cx).focus(window,cx);cx.notify();}))))
-            .child(div().px_3().py_3().flex_shrink_0().flex().items_end().gap_2().border_b_1().border_color(rgb(BORDER))
+            .child(div().px_3().py_3().flex_shrink_0().flex().items_end().gap_2().border_b_1().border_color(rgb(visual.border))
                 .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"监听地址","Bind host")).child(Input::new(&self.bind_host).small().rounded(px(6.))))
                 .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"监听端口","Bind port")).child(Input::new(&self.bind_port).small().rounded(px(6.))))
                 .when(self.direction != Direction::Dynamic, |row| row
-                .child(div().pb_2().text_color(rgb(MUTED)).child(IconName::ArrowRight))
+                .child(div().pb_2().text_color(rgb(visual.muted)).child(IconName::ArrowRight))
                 .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"目标地址","Destination host")).child(Input::new(&self.target_host).small().rounded(px(6.))))
                 .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"目标端口","Destination port")).child(Input::new(&self.target_port).small().rounded(px(6.)))))
-                .when(self.direction == Direction::Dynamic, |row| row.child(div().flex_1().pb_2().text_color(rgb(MUTED)).child(t(cx,"在客户端设置 SOCKS5 代理，并启用代理端 DNS。", "Set a SOCKS5 proxy in your client and enable proxy-side DNS."))))
+                .when(self.direction == Direction::Dynamic, |row| row.child(div().flex_1().pb_2().text_color(rgb(visual.muted)).child(t(cx,"在客户端设置 SOCKS5 代理，并启用代理端 DNS。", "Set a SOCKS5 proxy in your client and enable proxy-side DNS."))))
                 .child(Button::new("start-tunnel").disabled(self.suspended).icon(IconName::Play).primary().compact().rounded(px(6.)).label(t(cx,"启动隧道","Start tunnel")).on_click(cx.listener(|view,_,_,cx|view.start(cx)))))
-            .child(div().px_3().py_1().flex_shrink_0().flex().items_center().gap_2().text_color(rgb(MUTED)).bg(rgb(CANVAS)).child(IconName::Info).child(exposure.render(cx)))
-            .child(div().px_3().py_1().flex_shrink_0().text_color(rgb(MUTED)).child(if self.direction == Direction::Dynamic { t(cx,"仅本机回环，无代理认证；支持 TCP CONNECT，不支持 UDP/BIND。", "Loopback only, no proxy authentication; TCP CONNECT supported, UDP/BIND unsupported.") } else { t(cx,"默认仅监听回环地址；非回环地址可能允许其他设备访问。", "Loopback is the default. A non-loopback address may allow access from other devices.") }))
-            .child(div().h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(CANVAS)).border_y_1().border_color(rgb(BORDER))
+            .child(div().px_3().py_1().flex_shrink_0().flex().items_center().gap_2().text_color(rgb(visual.muted)).bg(rgb(visual.canvas)).child(IconName::Info).child(exposure.render(cx)))
+            .child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(if self.direction == Direction::Dynamic { t(cx,"仅本机回环，无代理认证；支持 TCP CONNECT，不支持 UDP/BIND。", "Loopback only, no proxy authentication; TCP CONNECT supported, UDP/BIND unsupported.") } else { t(cx,"默认仅监听回环地址；非回环地址可能允许其他设备访问。", "Loopback is the default. A non-loopback address may allow access from other devices.") }))
+            .child(div().h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(visual.canvas)).border_y_1().border_color(rgb(visual.border))
                 .child(div().flex_1().child(t(cx,"转发方向 / 端点","Direction / endpoints")))
                 .child(div().w(px(280.)).child(t(cx,"状态","Status")))
                 .child(div().w(px(45.)).child(t(cx,"操作","Action"))))
-            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(MUTED)).child(t(cx, "上一会话隧道记录 · 不会自动重建", "Previous session tunnels · Never restarted automatically"))))
+            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(t(cx, "上一会话隧道记录 · 不会自动重建", "Previous session tunnels · Never restarted automatically"))))
             .child(rows)
-            .child(div().min_h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(CANVAS)).border_t_1().border_color(rgb(BORDER)).text_color(rgb(MUTED)).child(self.status.render(cx)))
+            .child(div().min_h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border)).text_color(rgb(visual.muted)).child(self.status.render(cx)))
     }
 }
 

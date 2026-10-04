@@ -1,7 +1,7 @@
 //! Remote workspace composition: compact tabs, host monitor, terminal, command bar, files.
 use super::*;
-use crate::design::{SELECTED, TEXT};
 use gpui_kit::assets::IconName;
+use gpui_kit::component::Selectable;
 
 impl Workspace {
     fn empty_workspace_body(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
@@ -28,13 +28,14 @@ impl Workspace {
     }
 
     fn quick_connect_surface(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let field = |label: &'static str, id: &'static str, state: &Entity<InputState>| {
             div()
                 .flex()
                 .flex_col()
                 .gap_1()
                 .min_w_0()
-                .child(div().text_xs().text_color(rgb(MUTED)).child(label))
+                .child(div().text_xs().text_color(rgb(visual.muted)).child(label))
                 .child(Input::new(state).id(id).aria_label(label))
         };
         let auth_label = if self.quick_password {
@@ -56,15 +57,15 @@ impl Workspace {
             .flex()
             .items_center()
             .justify_center()
-            .bg(rgb(BG))
+            .bg(rgb(visual.canvas))
             .p_4()
             .child(
                 div()
                     .w(px(680.))
                     .max_w(relative(0.96))
-                    .bg(rgb(PANEL))
+                    .bg(rgb(visual.surface))
                     .border_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .rounded_lg()
                     .shadow_lg()
                     .p_6()
@@ -83,7 +84,7 @@ impl Workspace {
                                     .child(t(cx, "快速连接", "Quick connect")),
                             )
                             .child(
-                                div().text_sm().text_color(rgb(MUTED)).child(t(
+                                div().text_sm().text_color(rgb(visual.muted)).child(t(
                                     cx,
                                     "输入 SSH 端点即可开始一次性远程会话。此处不会保存连接配置。",
                                     "Enter an SSH endpoint to start a one-time remote session. This draft is not saved.",
@@ -179,6 +180,7 @@ impl Workspace {
     }
 
     fn connection_manager(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         if !self.show_connections {
             return div().into_any_element();
         }
@@ -200,9 +202,9 @@ impl Workspace {
                     .max_h_full()
                     .min_w_0()
                     .min_h_0()
-                    .bg(rgb(PANEL))
+                    .bg(rgb(visual.surface))
                     .border_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .rounded_lg()
                     .overflow_hidden()
                     .shadow_lg()
@@ -244,6 +246,7 @@ impl Workspace {
             .into_any_element()
     }
     fn monitor_column(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         if let Some(monitor) = self
             .tabs
             .get(self.active)
@@ -254,7 +257,7 @@ impl Workspace {
         }
         div()
             .size_full()
-            .bg(rgb(PANEL))
+            .bg(rgb(visual.surface))
             .text_sm()
             .child(
                 div()
@@ -263,10 +266,10 @@ impl Workspace {
                     .flex()
                     .items_center()
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .child(t(cx, "主机信息", "Host information")),
             )
-            .child(div().p_3().text_color(rgb(MUTED)).child(t(
+            .child(div().p_3().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "连接 SSH 主机后显示系统、CPU、内存、进程、网络和磁盘信息。",
                 "Connect an SSH host to view system, CPU, memory, processes, network and disks.",
@@ -276,6 +279,7 @@ impl Workspace {
 }
 impl Render for Workspace {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         self.maintain_remote_completion(window, cx);
         self.maintain_command_workflows(cx);
         self.refresh_command_suggestions(window, cx);
@@ -300,7 +304,7 @@ impl Render for Workspace {
                     .px_4()
                     .flex()
                     .items_center()
-                    .bg(rgb(PANEL))
+                    .bg(rgb(visual.surface))
                     .child(t(cx, "快速连接", "Quick connect")),
             );
         }
@@ -316,9 +320,13 @@ impl Render for Workspace {
                     .items_center()
                     .gap_3()
                     .cursor_pointer()
-                    .bg(rgb(if self.active == index { SELECTED } else { BG }))
+                    .bg(rgb(if self.active == index {
+                        visual.selected
+                    } else {
+                        visual.canvas
+                    }))
                     .border_r_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .on_click(cx.listener(move |view, _, window, cx| {
                         view.cancel_remote_completion(cx);
                         view.active = index;
@@ -329,7 +337,7 @@ impl Render for Workspace {
                     }))
                     .child(terminal.read(cx).title.clone())
                     .when(terminal.read(cx).end_reason().is_some(), |tab| {
-                        tab.child(div().text_xs().text_color(rgb(MUTED)).child(t(
+                        tab.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                             cx,
                             "已断开",
                             "Offline",
@@ -363,7 +371,7 @@ impl Render for Workspace {
                 cx,
             )
         } else {
-            let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(BORDER));
+            let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(visual.border));
             for pane in self.displayed_terminals() {
                 let id = pane.entity_id();
                 area = area.child(
@@ -379,7 +387,7 @@ impl Render for Workspace {
                         .bg(rgb(0x0c121b))
                         .border_t_2()
                         .border_color(rgb(if Some(id) == active_id {
-                            ACCENT
+                            visual.accent
                         } else {
                             0x0c121b
                         }))
@@ -420,8 +428,8 @@ impl Render for Workspace {
             .items_center()
             .border_t_1()
             .border_b_1()
-            .border_color(rgb(BORDER))
-            .bg(rgb(BG));
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.canvas));
         for (id, kind, zh, en) in [
             ("files", ToolPanel::Files, "文件", "Files"),
             ("commands", ToolPanel::Commands, "命令", "Commands"),
@@ -488,8 +496,8 @@ impl Render for Workspace {
             .size_full()
             .flex()
             .flex_col()
-            .bg(rgb(BG))
-            .text_color(rgb(TEXT))
+            .bg(rgb(visual.canvas))
+            .text_color(rgb(visual.text))
             .text_sm()
             .font_family(".SystemUIFont")
             .on_action(cx.listener(Self::open_connections))
@@ -504,7 +512,7 @@ impl Render for Workspace {
                     .flex()
                     .items_center()
                     .border_b_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .child(
                         Button::new("connection-manager")
                             .ghost()
@@ -569,6 +577,20 @@ impl Render for Workspace {
                             })),
                     )
                     .child(
+                        div().id("appearance-selector").test_support().flex().gap_1()
+                            .children([
+                                (keelshell_core::Theme::System, "theme-system", t(cx, "跟随系统", "System")),
+                                (keelshell_core::Theme::Light, "theme-light", t(cx, "浅色", "Light")),
+                                (keelshell_core::Theme::Dark, "theme-dark", t(cx, "深色", "Dark")),
+                            ].into_iter().map(|(theme, id, label)| {
+                                Button::new(id).ghost().compact().label(label)
+                                    .selected(self.state.settings.theme == theme)
+                                    .disabled(self.saving || self.vault_settings.is_some() || self.snippet_modal_open())
+                                    .tooltip(t(cx, "设置应用外观；跟随系统会自动响应系统变化", "Select appearance; System follows platform changes"))
+                                    .on_click(cx.listener(move |view, _, window, cx| view.select_theme(theme, window, cx)))
+                            }))
+                    )
+                    .child(
                         Button::new("language")
                             .ghost()
                             .compact()
@@ -591,7 +613,7 @@ impl Render for Workspace {
                                 .h_full()
                                 .flex_shrink_0()
                                 .border_r_1()
-                                .border_color(rgb(BORDER))
+                                .border_color(rgb(visual.border))
                                 .child(self.monitor_column(cx)),
                         )
                     })
@@ -608,7 +630,7 @@ impl Render for Workspace {
                                         .flex_shrink_0()
                                         .px_2()
                                         .py_1()
-                                        .bg(rgb(PANEL))
+                                        .bg(rgb(visual.surface))
                                         .flex()
                                         .items_center()
                                         .gap_2()
@@ -618,9 +640,9 @@ impl Render for Workspace {
                                                 .text_xs()
                                                 .text_ellipsis()
                                                 .text_color(rgb(if reviewed_id != active_id {
-                                                    0xb14c2c
+                                                    visual.warning
                                                 } else {
-                                                    MUTED
+                                                    visual.muted
                                                 }))
                                                 .child(reviewed_target),
                                         )
@@ -817,9 +839,9 @@ impl Render for Workspace {
                                 .overflow_hidden()
                                 .flex_shrink_0()
                                 .h_full()
-                                .bg(rgb(PANEL))
+                                .bg(rgb(visual.surface))
                                 .border_l_1()
-                                .border_color(rgb(BORDER))
+                                .border_color(rgb(visual.border))
                                 .child(self.assistant.clone()),
                         )
                     }),
@@ -833,9 +855,9 @@ impl Render for Workspace {
                     .items_center()
                     .justify_between()
                     .border_t_1()
-                    .border_color(rgb(BORDER))
+                    .border_color(rgb(visual.border))
                     .text_xs()
-                    .text_color(rgb(MUTED))
+                    .text_color(rgb(visual.muted))
                     .child(terminal_status)
                     .child(self.status.render(cx)),
             )
@@ -863,7 +885,7 @@ impl Render for Workspace {
                                 .max_w_full()
                                 .h(px(700.))
                                 .max_h_full()
-                                .bg(rgb(crate::design::SURFACE))
+                                .bg(rgb(visual.surface))
                                 .rounded_lg()
                                 .shadow_lg()
                                 .overflow_hidden()
@@ -887,7 +909,7 @@ impl Render for Workspace {
                                 .max_w_full()
                                 .h(px(650.))
                                 .max_h_full()
-                                .bg(rgb(crate::design::SURFACE))
+                                .bg(rgb(visual.surface))
                                 .rounded_lg()
                                 .shadow_lg()
                                 .overflow_hidden()
@@ -911,7 +933,7 @@ impl Render for Workspace {
                                 .max_w_full()
                                 .h(px(600.))
                                 .max_h_full()
-                                .bg(rgb(crate::design::SURFACE))
+                                .bg(rgb(visual.surface))
                                 .rounded_lg()
                                 .shadow_lg()
                                 .overflow_hidden()

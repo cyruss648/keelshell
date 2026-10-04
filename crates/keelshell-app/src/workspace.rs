@@ -46,8 +46,6 @@ use crate::updater::{UpdatePanel, UpdatePanelEvent};
 use crate::vault_settings::{VaultSettings, VaultSettingsEvent};
 use openssh_review::OpenSshImportReview;
 
-use crate::design::{ACCENT, BORDER, CANVAS as BG, MUTED, SURFACE as PANEL};
-
 actions!(
     keelshell,
     [
@@ -178,6 +176,7 @@ impl ConnectionForm {
 
 enum AfterSave {
     None,
+    Theme,
     Ai {
         panel: WeakEntity<AiSettingsPanel>,
         credentials: EphemeralCredentials,
@@ -325,6 +324,10 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
+        crate::design::apply(state.settings.theme, Some(window), cx);
+        let appearance_subscription = cx.observe_window_appearance(window, |view, window, cx| {
+            view.on_appearance_changed(window.appearance(), window, cx);
+        });
         let search = input(
             t(cx, "搜索连接名称、主机、用户…", "Search connections…"),
             "",
@@ -576,6 +579,7 @@ impl Workspace {
             terminal_observers: HashMap::new(),
             terminal_focus: HashMap::new(),
             _subscriptions: vec![
+                appearance_subscription,
                 subscription,
                 assistant_subscription,
                 command_subscription,
@@ -807,6 +811,31 @@ impl Workspace {
         self.toggle_panel(ToolPanel::Files, window, cx);
         self.focus_current_surface(window, cx);
     }
+    fn on_appearance_changed(
+        &mut self,
+        appearance: WindowAppearance,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.state.settings.theme == keelshell_core::Theme::System {
+            crate::design::sync_system(appearance, window, cx);
+        }
+    }
+
+    fn select_theme(
+        &mut self,
+        theme: keelshell_core::Theme,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.state.settings.theme == theme {
+            return;
+        }
+        let mut candidate = self.state.clone();
+        candidate.settings.theme = theme;
+        self.persist(candidate, AfterSave::Theme, window, cx);
+    }
+
     fn switch_language(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.saving || self.vault_settings.is_some() {
             return;
@@ -1493,11 +1522,18 @@ impl Workspace {
                         }
                         view.invalidate_reconnect_profiles(window, cx);
                         let route_changed=view.invalidate_changed_route(window,cx);
-                        view.snippet_sources = Arc::new(view.state.snippets.clone());
-                        view.command_sources_revision = view.command_sources_revision.wrapping_add(1);
+                        // Appearance does not change suggestion sources or invalidate reviews.
+                        if !matches!(&after, AfterSave::Theme) {
+                            view.snippet_sources = Arc::new(view.state.snippets.clone());
+                            view.command_sources_revision = view.command_sources_revision.wrapping_add(1);
+                        }
                         view.status = Message::new("已保存到本机", "Saved locally");
                         match after {
                             AfterSave::None => {}
+                            AfterSave::Theme => {
+                                crate::design::apply(view.state.settings.theme, Some(window), cx);
+                                view.status = Message::new("外观偏好已保存", "Appearance preference saved");
+                            }
                             AfterSave::SnippetSaved { panel } => {
                                 if view.snippet_editor.as_ref().is_some_and(|editor| editor.entity_id() == panel) {
                                     view.snippet_editor = None; view.snippet_subscription = None;

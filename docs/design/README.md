@@ -1,6 +1,6 @@
 # KeelShell 设计资料库
 
-状态：2026-10-04建立；主题与新视觉体系待实现。需求、优先级与验收见[界面与智能体计划](../product/DESIGN_AND_AGENT_PLAN.md)。当前真实窗口证据见[独立审查](../testing/records/2026-10-04-independent-workspace-audit.md)。
+状态：2026-10-04建立；[主题基础与token](THEMES.md)已实现，完整视觉升级与三平台原生矩阵继续推进。需求、优先级与验收见[界面与智能体计划](../product/DESIGN_AND_AGENT_PLAN.md)。当前真实窗口证据见[独立审查](../testing/records/2026-10-04-independent-workspace-audit.md)。
 
 ## 参考选型
 

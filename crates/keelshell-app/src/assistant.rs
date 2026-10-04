@@ -513,8 +513,9 @@ impl Drop for AssistantPanel {
 impl EventEmitter<AssistantEvent> for AssistantPanel {}
 impl Render for AssistantPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
         let profile_choices = if self.selecting_profile {
-            let mut choices = div().p_2().bg(rgb(0xf6f8fb)).flex().flex_col().gap_1();
+            let mut choices = div().p_2().bg(rgb(visual.canvas)).flex().flex_col().gap_1();
             for (index, profile) in self.profiles.profiles.iter().enumerate() {
                 let id = profile.id;
                 choices = choices.child(
@@ -543,7 +544,7 @@ impl Render for AssistantPanel {
                 "AI 助手",
                 "AI assistant",
             )))
-            .child(div().text_xs().text_color(rgb(0x66758b)).child(t(
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "解释远端输出、排查问题、准备命令。",
                 "Explain remote output, investigate issues, and prepare commands.",
@@ -580,7 +581,7 @@ impl Render for AssistantPanel {
                     ),
             )
             .child(
-                div().text_xs().text_color(rgb(0x66758b)).child(
+                div().text_xs().text_color(rgb(visual.muted)).child(
                     self.profile
                         .as_ref()
                         .map(|p| p.model.clone())
@@ -590,11 +591,17 @@ impl Render for AssistantPanel {
                 ),
             )
             .children(profile_choices)
-            .child(div().mt_1().text_xs().text_color(rgb(0x66758b)).child(t(
-                cx,
-                "上下文 · 由你主动选择",
-                "Context · explicitly selected",
-            )))
+            .child(
+                div()
+                    .mt_1()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "上下文 · 由你主动选择",
+                        "Context · explicitly selected",
+                    )),
+            )
             .child(
                 div()
                     .flex()
@@ -620,25 +627,22 @@ impl Render for AssistantPanel {
                             })),
                     ),
             )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(rgb(0x66758b))
-                    .child(if self.context.is_empty() {
-                        t(
-                            cx,
-                            "尚未附加远端终端内容",
-                            "No remote terminal context attached",
-                        )
-                        .to_owned()
-                    } else {
-                        Message::new(
-                            format!("{} · {} 字节", self.host, self.context.len()),
-                            format!("{} · {} bytes", self.host, self.context.len()),
-                        )
-                        .render(cx)
-                    }),
-            )
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(
+                if self.context.is_empty() {
+                    t(
+                        cx,
+                        "尚未附加远端终端内容",
+                        "No remote terminal context attached",
+                    )
+                    .to_owned()
+                } else {
+                    Message::new(
+                        format!("{} · {} 字节", self.host, self.context.len()),
+                        format!("{} · {} bytes", self.host, self.context.len()),
+                    )
+                    .render(cx)
+                },
+            ))
             .child(Textarea::new(&self.prompt))
             .child(
                 Button::new("prepare-request")
@@ -654,7 +658,7 @@ impl Render for AssistantPanel {
             .child(
                 div()
                     .text_xs()
-                    .text_color(rgb(0x2878e3))
+                    .text_color(rgb(visual.accent))
                     .child(self.status.render(cx)),
             );
         if self.busy {
@@ -679,9 +683,9 @@ impl Render for AssistantPanel {
                     div()
                         .p_2()
                         .rounded(px(6.))
-                        .bg(rgb(0xf6f8fb))
+                        .bg(rgb(visual.canvas))
                         .border_1()
-                        .border_color(rgb(0xdce3ec))
+                        .border_color(rgb(visual.border))
                         .text_xs()
                         .font_family("monospace")
                         .child(request.preview_json().to_owned()),
@@ -699,7 +703,7 @@ impl Render for AssistantPanel {
                 .child(
                     div()
                         .border_t_1()
-                        .border_color(rgb(0xdce3ec))
+                        .border_color(rgb(visual.border))
                         .pt_3()
                         .text_sm()
                         .child(self.response.clone()),
@@ -722,9 +726,9 @@ impl Render for AssistantPanel {
                 let mut plan_view = div()
                     .p_2()
                     .rounded(px(6.))
-                    .bg(rgb(0xf6f8fb))
+                    .bg(rgb(visual.canvas))
                     .border_1()
-                    .border_color(rgb(0xdce3ec))
+                    .border_color(rgb(visual.border))
                     .flex()
                     .flex_col()
                     .gap_2()
@@ -733,7 +737,7 @@ impl Render for AssistantPanel {
                         "诊断计划（逐步审核）",
                         "Diagnostic plan (step-by-step review)",
                     )))
-                    .child(div().text_xs().text_color(rgb(0x66758b)).child(format!(
+                    .child(div().text_xs().text_color(rgb(visual.muted)).child(format!(
                         "{} · context {} · response {}",
                         plan.target(),
                         &plan.context_fingerprint()[..12],
@@ -754,7 +758,7 @@ impl Render for AssistantPanel {
                                 index + 1,
                                 step.command()
                             )))
-                            .child(div().text_xs().text_color(rgb(0x66758b)).child(format!(
+                            .child(div().text_xs().text_color(rgb(visual.muted)).child(format!(
                                 "line {} · {}",
                                 step.source_line(),
                                 risk
@@ -776,9 +780,9 @@ impl Render for AssistantPanel {
                     div()
                         .p_2()
                         .rounded(px(6.))
-                        .bg(rgb(0xf6f8fb))
+                        .bg(rgb(visual.canvas))
                         .border_1()
-                        .border_color(rgb(0xdce3ec))
+                        .border_color(rgb(visual.border))
                         .flex()
                         .flex_col()
                         .gap_2()
@@ -804,8 +808,8 @@ impl Render for AssistantPanel {
             .min_w_0()
             .flex()
             .flex_col()
-            .bg(rgb(0xffffff))
-            .text_color(rgb(0x1d2939))
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
             .child(content)
     }
 }

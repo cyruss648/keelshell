@@ -69,7 +69,7 @@ KeelShell 面向每天需要连接服务器、查看日志和处理远程文件�
 
 AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解锁配置本身不会联网。更多协议与辅助工作流见[路线图](docs/ROADMAP.md)。
 
-系统明暗主题、统一视觉体系、本地 Claude Code/Codex 智能体及对外 MCP 服务已纳入[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)，尚未接通；MCP 只向外部智能体提供 KeelShell 能力。
+应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。专业视觉升级、本地 Claude Code/Codex 智能体及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力。
 
 <details>
 <summary>查看 AI 配置界面</summary>

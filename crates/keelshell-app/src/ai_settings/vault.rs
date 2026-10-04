@@ -300,13 +300,14 @@ impl AiSettingsPanel {
     }
 
     pub(super) fn vault_controls(&self, cx: &mut Context<Self>) -> Div {
+        let visual = crate::design::palette(cx);
         let reference = self.profile().and_then(ai_credentials::reference);
         let has_key = self
             .selected
             .and_then(|id| self.credentials.get(&id))
             .is_some_and(|key| !key.is_empty());
-        let mut content = div().flex().flex_col().gap_2().p_2().rounded(px(6.)).bg(rgb(0xf6f8fb))
-            .child(div().text_xs().text_color(rgb(0x66758b)).child(if reference.is_some() {
+        let mut content = div().flex().flex_col().gap_2().p_2().rounded(px(6.)).bg(rgb(visual.canvas))
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(if reference.is_some() {
                 if has_key { t(cx, "已关联加密密钥 · 本次运行已解锁", "Encrypted key linked · unlocked in this process") }
                 else { t(cx, "已关联加密密钥 · 需要主密码解锁", "Encrypted key linked · master password required") }
             } else { t(cx, "密钥默认仅驻留内存；仅点击加密保存才写入凭据库。", "Keys stay in memory unless you explicitly save them encrypted.") }))
@@ -315,7 +316,7 @@ impl AiSettingsPanel {
                 .child(Button::new("ai-key-unlock").ghost().label(t(cx, "解锁密钥", "Unlock key")).disabled(self.saving || self.vault_busy() || reference.is_none()).on_click(cx.listener(|panel, _, window, cx| panel.begin_vault(VaultAction::Unlock, window, cx))))
                 .child(Button::new("ai-key-lock").ghost().label(t(cx, "清除临时密钥", "Clear temporary key")).disabled(self.saving || self.vault_busy() || !has_key).on_click(cx.listener(|panel, _, window, cx| panel.unlink_or_lock(false, window, cx))))
                 .child(Button::new("ai-key-unlink").ghost().label(t(cx, "解除关联", "Unlink key")).disabled(self.saving || self.vault_busy() || reference.is_none()).on_click(cx.listener(|panel, _, window, cx| panel.unlink_or_lock(true, window, cx)))))
-            .child(div().text_xs().text_color(rgb(0x66758b)).child(t(cx, "更改地址、预设或认证会清除草稿密钥与关联。清除与解除关联需应用后对助手生效。", "Changing endpoint, preset or authentication clears the draft key and reference. Apply clearing/unlinking to update the assistant.")));
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx, "更改地址、预设或认证会清除草稿密钥与关联。清除与解除关联需应用后对助手生效。", "Changing endpoint, preset or authentication clears the draft key and reference. Apply clearing/unlinking to update the assistant.")));
         if let Some(prompt) = &self.vault_prompt {
             content = content
                 .child(
