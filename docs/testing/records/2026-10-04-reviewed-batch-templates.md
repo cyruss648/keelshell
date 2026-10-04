@@ -21,7 +21,7 @@ cargo test -p keelshell-app --locked batch_template_review_binds_distinct_target
 cargo test -p keelshell-app --locked batch_literal_review_preserves_exact_bytes_and_separates_terminal_history -- --nocapture
 ```
 
-结果：核心模板测试 4 项通过；应用逐目标审核与 loopback 执行回归通过；应用检查通过。完整工作区门禁和跨平台 Quality 需要在父任务合并本切片后重新执行。
+结果：核心模板测试 4 项通过；应用逐目标审核与 loopback 执行回归通过；本机完整 workspace 门禁通过（应用 263、核心 66、会话库 64、批量集成 14、SSH loopback 94，doctest 全部通过；OpenSSH 外部互操作 6 项因缺少环境而忽略）。GitHub [Quality 37172838871](https://github.com/cyruss648/keelshell/actions/runs/37172838871) 在 macOS 26、Ubuntu 24.04、Windows 2025 全部成功。该流水线验证构建、测试和打包路径，不替代 Windows/Linux 原生桌面交互验收。
 
 ## 边界
 

@@ -8,7 +8,7 @@
 
 - 批量任务现在支持受限的逐目标元数据模板：`{{name}}`、`{{host}}`、`{{port}}`、`{{user}}` 和 `{{endpoint}}`。模板只读取已保存路由或一次性会话的非敏感元数据，在本地展开；未知变量和不支持的上下文会在审核前拒绝。审核面板逐目标展示最终命令，确认前不会发起 SSH 请求，确认后按目标绑定执行。审计摘要的命令摘要同时覆盖源文本与逐目标绑定，但仍不保存命令正文、输出、地址或凭据。实现见 `crates/keelshell-core/src/batch_template.rs`、`crates/keelshell-app/src/batch_commands.rs`，设计与证据见 [ADR 0027](adr/0027-reviewed-per-target-batch-templates.md) 和 [测试记录](testing/records/2026-10-04-reviewed-batch-templates.md)。
 - 失败的文件或目录传输现在会在同一活动 SSH 会话中保留一个显式恢复提议。点击“检查并续传”只会创建新的只读校验计划，之后仍需用户审阅并确认；它不会自动重放、自动重连、跨会话复用或绕过现有内容校验。只有实际开始过的失败传输可产生提议；列表/规划操作本身不会产生新的提议，且只有失败卡片在非忙碌、无待审核时才能使用既有提议。只读计划不会改写旧失败卡的终态，状态变化后的旧点击会被再次拒绝。实现见 `crates/keelshell-app/src/files.rs`，设计与证据见 [ADR 0026](adr/0026-explicit-transfer-recovery-proposal.md) 和 [测试记录](testing/records/2026-10-04-transfer-recovery.md)。
-- 本轮新增切片在本机完成 `cargo fmt --all -- --check`、严格 Clippy、核心模板测试、GPUI 批量逐目标回归、文件恢复状态回归和完整 workspace 门禁；完整结果应在本次 feature 提交及其 GitHub Quality 运行完成后补入发布/验收记录。远程 Quality 的三平台检查证明构建、测试与打包路径，不等同于 Windows/Linux 原生桌面交互验收。
+- 本轮新增切片在本机完成 `cargo fmt --all -- --check`、严格 Clippy、核心模板测试、GPUI 批量逐目标回归、文件恢复状态回归和完整 workspace 门禁：应用 263 项、核心 66 项、会话库 64 项、批量集成 14 项、SSH loopback 94 项，OpenSSH 外部互操作 6 项因未提供 `KEELSHELL_OPENSSH_*` 环境而忽略，doctest 全部通过。GitHub [Quality 37172838871](https://github.com/cyruss648/keelshell/actions/runs/37172838871) 已在 macOS 26、Ubuntu 24.04、Windows 2025 成功；流水线证明构建、测试与打包路径，不等同于 Windows/Linux 原生桌面交互验收。
 - 仍未关闭的产品差距包括自动传输恢复与并行调度、任务依赖/编排/定时、交互 shell 可编程补全、同步与目录比较、更丰富的网络协议诊断、更多 AI 协议与 Agent 工作流，以及 Windows/Linux 原生窗口验收、签名/公证和已安装目录更新验收。
 
 ## 当前产品要求（优先于旧文档）
