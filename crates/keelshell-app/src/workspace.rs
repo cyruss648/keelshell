@@ -21,6 +21,7 @@ mod command_workflows;
 mod commands;
 mod credentials;
 mod library;
+mod library_bulk;
 mod library_view;
 mod mcp;
 mod modals;
@@ -218,6 +219,11 @@ enum AfterSave {
         name: String,
     },
     RecentSaved,
+    LibraryBatch {
+        token: uuid::Uuid,
+        action: keelshell_core::ConnectionLibraryAction,
+        ids: Vec<uuid::Uuid>,
+    },
     BatchAudit {
         records: Vec<keelshell_core::BatchAuditRecord>,
     },
@@ -251,6 +257,9 @@ pub struct Workspace {
     library_filter: LibraryFilter,
     folder_form: Option<FolderForm>,
     destination_prompt: Option<DestinationPrompt>,
+    library_selection: std::collections::BTreeSet<uuid::Uuid>,
+    library_batch_prompt: Option<library_bulk::LibraryBatchPrompt>,
+    library_trash_undo: Vec<uuid::Uuid>,
     pending_recents: Vec<(Connection, keelshell_core::ConnectionRoute, u64)>,
     pending_batch_audits: Vec<keelshell_core::BatchAuditRecord>,
     overlay_focus: FocusHandle,
@@ -539,6 +548,9 @@ impl Workspace {
             library_filter: LibraryFilter::All,
             folder_form: None,
             destination_prompt: None,
+            library_selection: Default::default(),
+            library_batch_prompt: None,
+            library_trash_undo: Vec::new(),
             pending_recents: Vec::new(),
             pending_batch_audits: Vec::new(),
             overlay_focus: cx.focus_handle(),
@@ -611,7 +623,8 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.mcp.show
+        if self.library_batch_prompt.is_some()
+            || self.mcp.show
             || self.show_batch
             || self.vault_settings.is_some()
             || self.ai_settings.is_some()
@@ -651,6 +664,10 @@ impl Workspace {
             self.cancel_login(window, cx);
         } else if self.host_approval.is_some() {
             self.cancel_connect_route(window, cx);
+        } else if self.library_batch_prompt.is_some() {
+            if !self.saving {
+                self.close_library_batch(window, cx);
+            }
         } else if self.destination_prompt.is_some() {
             if !self.saving {
                 self.close_destination(window, cx);
@@ -867,6 +884,7 @@ impl Workspace {
             Language::En => Language::ZhCn,
         };
         i18n::set_language(language, cx);
+        self.refresh_library_batch_locale(window, cx);
         if let Some(panel) = &self.snippet_parameters {
             panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
         }
@@ -1033,7 +1051,8 @@ impl Workspace {
         self.persist(candidate, AfterSave::None, window, cx);
     }
     fn open_ai_settings(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.mcp.show
+        if self.library_batch_prompt.is_some()
+            || self.mcp.show
             || self.show_batch
             || self.ai_settings.is_some()
             || self.vault_settings.is_some()
@@ -1140,6 +1159,10 @@ impl Workspace {
         cx.notify();
     }
     fn open_form(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.library_batch_prompt.is_some() {
+            self.focus_current_surface(window, cx);
+            return;
+        }
         if self.saving {
             self.status = Message::new(
                 "请等待当前保存完成，再编辑其他连接。",
@@ -1486,7 +1509,6 @@ impl Workspace {
         }
     }
     fn delete_connection(&mut self, id: uuid::Uuid, window: &mut Window, cx: &mut Context<Self>) {
-        self.cancel_reconnect_for_profile(id, window, cx);
         if self.saving {
             return;
         }
@@ -1552,6 +1574,7 @@ impl Workspace {
                 match result {
                     Ok(saved) => {
                         view.state = saved;
+                        view.maintain_library_selection();
                         if let AfterSave::Trust { attempt, index } = &after {
                             view.accept_reconnect_trust(*attempt, *index);
                         }
@@ -1664,6 +1687,9 @@ impl Workspace {
                             AfterSave::RecentSaved => {
                                 view.status = Message::new("已连接，最近使用记录已保存", "Connected; recent usage saved");
                             }
+                            AfterSave::LibraryBatch { token, action, ids } => {
+                                view.finish_library_batch(token, action, ids, window, cx);
+                            }
                             AfterSave::BatchAudit { .. } => {
                                 view.status = Message::new(
                                     "批量审计摘要已保存（不含命令正文、输出或主机地址）",
@@ -1688,6 +1714,10 @@ impl Workspace {
                             "Save failed; draft retained. If configuration changed, restart before retrying",
                             &error,
                         );
+                        if matches!(&after, AfterSave::LibraryBatch { .. })
+                            && let Some(prompt) = &mut view.library_batch_prompt {
+                            prompt.message = Some(organization_failure.clone());
+                        }
                         if matches!(&after, AfterSave::FolderSaved { .. } | AfterSave::FolderRemoved { .. })
                             && let Some(form) = &mut view.folder_form {
                             form.message = Some(organization_failure.clone());
@@ -1945,6 +1975,10 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if self.library_batch_prompt.is_some() {
+            self.focus_current_surface(window, cx);
+            return;
+        }
         if self.saving {
             return;
         }

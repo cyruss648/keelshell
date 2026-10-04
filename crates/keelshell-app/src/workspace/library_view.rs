@@ -5,6 +5,7 @@ use gpui_kit::{
     assets::IconName,
     component::{Selectable, tooltip::Tooltip},
 };
+use keelshell_core::ConnectionLibraryAction;
 
 fn action_label(action: &str, connection: &Connection) -> String {
     format!("{action}: {} · {}", connection.name, endpoint(connection))
@@ -88,202 +89,8 @@ impl Workspace {
             .enumerate()
         {
             count += 1;
-            let profile = connection.clone();
-            let edit = connection.clone();
-            let id = connection.id;
-            let target = format!("{} · {}", connection.name, endpoint(connection));
-            let favorite = Button::new(("favorite", index))
-                .ghost()
-                .compact()
-                .label(if connection.favorite { "★" } else { "☆" })
-                .accessibility_label(action_label(
-                    if connection.favorite {
-                        t(cx, "取消收藏", "Remove from favorites")
-                    } else {
-                        t(cx, "添加收藏", "Add to favorites")
-                    },
-                    connection,
-                ))
-                .tooltip(t(cx, "切换收藏", "Toggle favorite"))
-                .disabled(self.saving || trash)
-                .on_click(
-                    cx.listener(move |view, _, window, cx| view.toggle_favorite(id, window, cx)),
-                );
-            let mut row = div()
-                .id(("connection-row", index))
-                .test_support()
-                .role(Role::Group)
-                .aria_label(target.clone())
-                .tooltip(move |window, cx| Tooltip::new(target.clone()).build(window, cx))
-                .min_w_0()
-                .flex_shrink_0()
-                .flex()
-                .bg(rgb(if index % 2 == 0 {
-                    visual.surface
-                } else {
-                    visual.canvas
-                }))
-                .border_b_1()
-                .border_color(rgb(visual.border))
-                .when(cards, |row| row.flex_col().p_2().gap_2())
-                .when(!cards, |row| row.h(px(38.)).items_center());
-            if cards {
-                row = row.child(
-                    div()
-                        .flex()
-                        .items_start()
-                        .gap_2()
-                        .min_w_0()
-                        .child(favorite)
-                        .child(
-                            div()
-                                .flex_1()
-                                .min_w_0()
-                                .flex()
-                                .flex_col()
-                                .gap_1()
-                                .child(
-                                    div()
-                                        .id(("connection-name", index))
-                                        .test_support()
-                                        .role(Role::Label)
-                                        .aria_label(connection.name.clone())
-                                        .text_ellipsis()
-                                        .font_weight(FontWeight::SEMIBOLD)
-                                        .child(connection.name.clone()),
-                                )
-                                .child(
-                                    div()
-                                        .id(("connection-endpoint", index))
-                                        .test_support()
-                                        .role(Role::Label)
-                                        .aria_label(endpoint(connection))
-                                        .text_ellipsis()
-                                        .text_xs()
-                                        .text_color(rgb(visual.muted))
-                                        .child(endpoint(connection)),
-                                )
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(rgb(visual.muted))
-                                        .text_ellipsis()
-                                        .child(format!(
-                                            "{} · {}",
-                                            self.folder_label(self.state.folder_id_of(id), cx),
-                                            time.map(timestamp)
-                                                .unwrap_or_else(|| connection.tags.join(", "))
-                                        )),
-                                ),
-                        ),
-                );
-            } else {
-                row = row
-                    .child(favorite)
-                    .child(cell(connection.name.clone(), 155.))
-                    .child(cell(connection.host.clone(), 145.))
-                    .child(cell(connection.port.to_string(), 56.))
-                    .child(cell(connection.username.clone(), 90.))
-                    .child(cell(
-                        self.folder_label(self.state.folder_id_of(id), cx),
-                        130.,
-                    ));
-                row = if let Some(time) = time {
-                    row.child(cell(timestamp(time), 190.))
-                } else {
-                    row.child(cell(connection.tags.join(", "), 120.))
-                };
-            }
-            let mut actions = div()
-                .id(("connection-actions", index))
-                .test_support()
-                .flex()
-                .items_center()
-                .min_w_0()
-                .flex_shrink_0()
-                .when(cards, |actions| actions.flex_wrap().gap_1());
-            if trash {
-                actions = actions.child(
-                    Button::new(("restore", index))
-                        .ghost()
-                        .compact()
-                        .label(t(cx, "恢复", "Restore"))
-                        .accessibility_label(action_label(t(cx, "恢复", "Restore"), connection))
-                        .disabled(self.saving)
-                        .on_click(cx.listener(move |view, _, window, cx| {
-                            view.restore_connection(id, window, cx)
-                        })),
-                );
-            } else {
-                actions = actions
-                    .child(
-                        Button::new(("connect", index))
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "连接", "Connect"))
-                            .accessibility_label(action_label(t(cx, "连接", "Connect"), connection))
-                            .disabled(self.connecting || self.saving)
-                            .on_click(cx.listener(move |view, _, window, cx| {
-                                view.request_connect(profile.clone(), window, cx)
-                            })),
-                    )
-                    .child(
-                        Button::new(("edit", index))
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "编辑", "Edit"))
-                            .accessibility_label(action_label(t(cx, "编辑", "Edit"), connection))
-                            .disabled(self.saving)
-                            .on_click(cx.listener(move |view, _, window, cx| {
-                                view.edit_connection(edit.clone(), window, cx)
-                            })),
-                    )
-                    .child(
-                        Button::new(("move", index))
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "移动", "Move"))
-                            .accessibility_label(action_label(t(cx, "移动", "Move"), connection))
-                            .disabled(self.saving)
-                            .on_click(cx.listener(move |view, _, window, cx| {
-                                view.open_destination(DestinationTarget::Connection(id), window, cx)
-                            })),
-                    )
-                    .child(
-                        Button::new(("duplicate", index))
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "复制", "Copy"))
-                            .accessibility_label(action_label(t(cx, "复制", "Copy"), connection))
-                            .disabled(self.saving)
-                            .on_click(cx.listener(move |view, _, window, cx| {
-                                let mut candidate = view.state.clone();
-                                match candidate.duplicate_connection(id) {
-                                    Ok(_) => view.persist(candidate, AfterSave::None, window, cx),
-                                    Err(error) => {
-                                        view.status =
-                                            Message::detail("复制失败", "Copy failed", error)
-                                    }
-                                }
-                                cx.notify();
-                            })),
-                    )
-                    .child(
-                        Button::new(("delete", index))
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "移入回收站", "Trash"))
-                            .accessibility_label(action_label(
-                                t(cx, "移入回收站", "Trash"),
-                                connection,
-                            ))
-                            .disabled(self.saving)
-                            .on_click(cx.listener(move |view, _, window, cx| {
-                                view.delete_connection(id, window, cx)
-                            })),
-                    );
-            }
-            rows = rows.child(row.child(actions));
+            rows =
+                rows.child(self.connection_library_row(index, connection, time, cards, trash, cx));
         }
         if count == 0 {
             rows=rows.child(div().p_5().text_color(rgb(visual.muted)).child(if trash {
@@ -294,6 +101,269 @@ impl Workspace {
                 t(cx,"没有匹配的 SSH 连接。新建连接，或选择其他文件夹。","No matching SSH connections. Add a profile or choose another folder.")
             }));
         }
+        let tree = self.library_folder_tree(stacked, cx);
+        let header = self.library_table_header(trash, recent, cx);
+        div().flex().flex_col().size_full().text_sm().bg(rgb(visual.surface))
+            .child(self.library_import_toolbar(stacked,cx))
+            .child(self.library_batch_toolbar(cx))
+            .child(div().flex_1().min_h_0().min_w_0().flex().when(stacked,|body|body.flex_col()).child(tree)
+                .child(div().id("connection-table-scroll").flex_1().min_w_0().overflow_x_scroll()
+                    .child(div().min_w_0().size_full().flex().flex_col()
+                        .when(!cards,|table|table.min_w(px(if trash {880.} else if recent {1070.} else {1010.})).child(header)).child(rows))))
+            .child(div().h(px(28.)).flex_shrink_0().px_3().flex().items_center().text_xs().text_color(rgb(visual.muted))
+                .border_t_1().border_color(rgb(visual.border)).child(if trash {
+                    format!("{} · {count}",t(cx,"仅移除连接配置，不会删除服务器或凭据库条目","Profile metadata only; servers and encrypted vault entries are retained"))
+                }else{
+                    format!("{} {count} · {}",t(cx,"连接","Connections"),t(cx,"文件夹筛选包含子文件夹","Folder filters include descendants"))
+                })).into_any_element()
+    }
+
+    fn connection_library_row(
+        &self,
+        index: usize,
+        connection: &Connection,
+        time: Option<u64>,
+        cards: bool,
+        trash: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let profile = connection.clone();
+        let edit = connection.clone();
+        let id = connection.id;
+        let target = format!("{} · {}", connection.name, endpoint(connection));
+        let select = Button::new(("library-select", index))
+            .ghost()
+            .compact()
+            .label(if self.library_selection.contains(&id) {
+                "☑"
+            } else {
+                "☐"
+            })
+            .selected(self.library_selection.contains(&id))
+            .accessibility_label(action_label(
+                if self.library_selection.contains(&id) {
+                    t(cx, "取消选择", "Deselect")
+                } else {
+                    t(cx, "选择连接", "Select profile")
+                },
+                connection,
+            ))
+            .disabled(self.saving)
+            .on_click(cx.listener(move |view, _, _, cx| view.toggle_library_selection(id, cx)));
+        let favorite = Button::new(("favorite", index))
+            .ghost()
+            .compact()
+            .label(if connection.favorite { "★" } else { "☆" })
+            .accessibility_label(action_label(
+                if connection.favorite {
+                    t(cx, "取消收藏", "Remove from favorites")
+                } else {
+                    t(cx, "添加收藏", "Add to favorites")
+                },
+                connection,
+            ))
+            .tooltip(t(cx, "切换收藏", "Toggle favorite"))
+            .disabled(self.saving || trash)
+            .on_click(cx.listener(move |view, _, window, cx| view.toggle_favorite(id, window, cx)));
+        let mut row = div()
+            .id(("connection-row", index))
+            .test_support()
+            .role(Role::Group)
+            .aria_label(target.clone())
+            .tooltip(move |window, cx| Tooltip::new(target.clone()).build(window, cx))
+            .min_w_0()
+            .flex_shrink_0()
+            .flex()
+            .bg(rgb(if index.is_multiple_of(2) {
+                visual.surface
+            } else {
+                visual.canvas
+            }))
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            .when(cards, |row| row.flex_col().p_2().gap_2())
+            .when(!cards, |row| row.h(px(38.)).items_center());
+        if cards {
+            row = row.child(
+                div()
+                    .flex()
+                    .items_start()
+                    .gap_2()
+                    .min_w_0()
+                    .child(select)
+                    .child(favorite)
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .flex()
+                            .flex_col()
+                            .gap_1()
+                            .child(
+                                div()
+                                    .id(("connection-name", index))
+                                    .test_support()
+                                    .role(Role::Label)
+                                    .aria_label(connection.name.clone())
+                                    .text_ellipsis()
+                                    .font_weight(FontWeight::SEMIBOLD)
+                                    .child(connection.name.clone()),
+                            )
+                            .child(
+                                div()
+                                    .id(("connection-endpoint", index))
+                                    .test_support()
+                                    .role(Role::Label)
+                                    .aria_label(endpoint(connection))
+                                    .text_ellipsis()
+                                    .text_xs()
+                                    .text_color(rgb(visual.muted))
+                                    .child(endpoint(connection)),
+                            )
+                            .child(
+                                div()
+                                    .text_xs()
+                                    .text_color(rgb(visual.muted))
+                                    .text_ellipsis()
+                                    .child(format!(
+                                        "{} · {}",
+                                        self.folder_label(self.state.folder_id_of(id), cx),
+                                        time.map(timestamp)
+                                            .unwrap_or_else(|| connection.tags.join(", "))
+                                    )),
+                            ),
+                    ),
+            );
+        } else {
+            row = row
+                .child(select)
+                .child(favorite)
+                .child(cell(connection.name.clone(), 155.))
+                .child(cell(connection.host.clone(), 145.))
+                .child(cell(connection.port.to_string(), 56.))
+                .child(cell(connection.username.clone(), 90.))
+                .child(cell(
+                    self.folder_label(self.state.folder_id_of(id), cx),
+                    130.,
+                ));
+            row = if let Some(time) = time {
+                row.child(cell(timestamp(time), 190.))
+            } else {
+                row.child(cell(connection.tags.join(", "), 120.))
+            };
+        }
+        let mut actions = div()
+            .id(("connection-actions", index))
+            .test_support()
+            .flex()
+            .items_center()
+            .min_w_0()
+            .flex_shrink_0()
+            .when(cards, |actions| actions.flex_wrap().gap_1());
+        if trash {
+            actions = actions
+                .child(
+                    Button::new(("restore", index))
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "恢复", "Restore"))
+                        .accessibility_label(action_label(t(cx, "恢复", "Restore"), connection))
+                        .disabled(self.saving)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            view.restore_connection(id, window, cx)
+                        })),
+                )
+                .child(
+                    Button::new(("library-purge", index))
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "永久删除…", "Delete permanently…"))
+                        .accessibility_label(action_label(
+                            t(cx, "永久删除连接配置", "Permanently delete profile"),
+                            connection,
+                        ))
+                        .disabled(self.saving)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            view.open_library_batch(
+                                vec![id],
+                                ConnectionLibraryAction::Purge,
+                                false,
+                                window,
+                                cx,
+                            )
+                        })),
+                );
+        } else {
+            actions = actions
+                .child(
+                    Button::new(("connect", index))
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "连接", "Connect"))
+                        .accessibility_label(action_label(t(cx, "连接", "Connect"), connection))
+                        .disabled(self.connecting || self.saving)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            view.request_connect(profile.clone(), window, cx)
+                        })),
+                )
+                .child(
+                    Button::new(("edit", index))
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "编辑", "Edit"))
+                        .accessibility_label(action_label(t(cx, "编辑", "Edit"), connection))
+                        .disabled(self.saving)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            view.edit_connection(edit.clone(), window, cx)
+                        })),
+                )
+                .child(
+                    Button::new(("move", index))
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "移动", "Move"))
+                        .accessibility_label(action_label(t(cx, "移动", "Move"), connection))
+                        .disabled(self.saving)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            view.open_destination(DestinationTarget::Connection(id), window, cx)
+                        })),
+                )
+                .child(
+                    Button::new(("duplicate", index))
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "复制", "Copy"))
+                        .accessibility_label(action_label(t(cx, "复制", "Copy"), connection))
+                        .disabled(self.saving)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            let mut candidate = view.state.clone();
+                            match candidate.duplicate_connection(id) {
+                                Ok(_) => view.persist(candidate, AfterSave::None, window, cx),
+                                Err(error) => {
+                                    view.status = Message::detail("复制失败", "Copy failed", error)
+                                }
+                            }
+                            cx.notify();
+                        })),
+                )
+                .child(
+                    Button::new(("delete", index))
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "移入回收站", "Trash"))
+                        .accessibility_label(action_label(t(cx, "移入回收站", "Trash"), connection))
+                        .disabled(self.saving)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            view.delete_connection(id, window, cx)
+                        })),
+                );
+        }
+        row.child(actions).into_any_element()
+    }
+
+    fn library_folder_tree(&self, stacked: bool, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let filters = [
             (
                 "all-connections",
@@ -356,8 +426,7 @@ impl Workspace {
                     .selected(self.library_filter == filter)
                     .label(format!("{label}  {total}"))
                     .on_click(cx.listener(move |view, _, _, cx| {
-                        view.library_filter = filter;
-                        cx.notify();
+                        view.set_library_filter(filter, cx);
                     })),
             );
         }
@@ -405,8 +474,7 @@ impl Workspace {
                             .label(folder.name)
                             .tooltip(self.folder_label(Some(id), cx))
                             .on_click(cx.listener(move |view, _, _, cx| {
-                                view.library_filter = LibraryFilter::Folder(Some(id));
-                                cx.notify();
+                                view.set_library_filter(LibraryFilter::Folder(Some(id)), cx);
                             })),
                     )
                     .child(
@@ -427,6 +495,16 @@ impl Workspace {
                     ),
             );
         }
+        tree.into_any_element()
+    }
+
+    fn library_table_header(
+        &self,
+        trash: bool,
+        recent: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let time_header = if trash {
             t(cx, "删除时间", "Deleted")
         } else {
@@ -441,6 +519,7 @@ impl Workspace {
             .text_color(rgb(visual.muted))
             .border_b_1()
             .border_color(rgb(visual.border))
+            .child(cell(t(cx, "选择", "Select").into(), 36.))
             .child(cell("☆".into(), 36.))
             .child(cell(t(cx, "名称", "Name").into(), 155.))
             .child(cell(t(cx, "主机", "Host").into(), 145.))
@@ -456,30 +535,78 @@ impl Workspace {
                 .into(),
                 if trash || recent { 190. } else { 120. },
             ));
-        div().flex().flex_col().size_full().text_sm().bg(rgb(visual.surface))
-            .child(div().min_h(px(46.)).px_3().py_2().flex_shrink_0().flex().flex_wrap().items_center().gap_2()
-                .border_b_1().border_color(rgb(visual.border))
-                .child(Button::new("new-connection").compact().icon(IconName::Plus).label(t(cx,"新建连接","New connection"))
-                    .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.open_form(window,cx))))
-                .child(Button::new("import-connections").compact().icon(IconName::Download).label(t(cx,"导入 JSON","Import JSON"))
-                    .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.import_connections(window,cx))))
-                .child(Button::new("import-openssh").compact().icon(IconName::Download).label(t(cx,"从剪贴板导入 SSH 配置","Import SSH config from clipboard"))
-                    .tooltip(t(cx,"从剪贴板导入受限 OpenSSH 配置","Import the supported OpenSSH subset from the clipboard"))
-                    .disabled(self.saving).on_click(cx.listener(|view,_,window,cx|view.import_openssh_connections(window,cx))))
-                .child(Button::new("export-connections").compact().icon(IconName::Upload).label(t(cx,"导出 JSON","Export JSON"))
-                    .on_click(cx.listener(|view,_,_,cx|view.export_connections(cx))))
-                .child(div().flex_1().min_w(px(120.)).when(stacked,|search|search.w_full())
-                    .child(Input::new(&self.search).small().aria_label(t(cx,"搜索连接","Search connections")))))
-            .child(div().flex_1().min_h_0().min_w_0().flex().when(stacked,|body|body.flex_col()).child(tree)
-                .child(div().id("connection-table-scroll").flex_1().min_w_0().overflow_x_scroll()
-                    .child(div().min_w_0().size_full().flex().flex_col()
-                        .when(!cards,|table|table.min_w(px(if trash {880.} else if recent {1070.} else {1010.})).child(header)).child(rows))))
-            .child(div().h(px(28.)).flex_shrink_0().px_3().flex().items_center().text_xs().text_color(rgb(visual.muted))
-                .border_t_1().border_color(rgb(visual.border)).child(if trash {
-                    format!("{} · {count}",t(cx,"仅移除连接配置，不会删除服务器或凭据库条目","Profile metadata only; servers and encrypted vault entries are retained"))
-                }else{
-                    format!("{} {count} · {}",t(cx,"连接","Connections"),t(cx,"文件夹筛选包含子文件夹","Folder filters include descendants"))
-                })).into_any_element()
+        header.into_any_element()
+    }
+
+    fn library_import_toolbar(&self, stacked: bool, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        div()
+            .min_h(px(46.))
+            .px_3()
+            .py_2()
+            .flex_shrink_0()
+            .flex()
+            .flex_wrap()
+            .items_center()
+            .gap_2()
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            .child(
+                Button::new("new-connection")
+                    .compact()
+                    .icon(IconName::Plus)
+                    .label(t(cx, "新建连接", "New connection"))
+                    .disabled(self.saving)
+                    .on_click(cx.listener(|view, _, window, cx| view.open_form(window, cx))),
+            )
+            .child(
+                Button::new("import-connections")
+                    .compact()
+                    .icon(IconName::Download)
+                    .label(t(cx, "导入 JSON", "Import JSON"))
+                    .disabled(self.saving)
+                    .on_click(
+                        cx.listener(|view, _, window, cx| view.import_connections(window, cx)),
+                    ),
+            )
+            .child(
+                Button::new("import-openssh")
+                    .compact()
+                    .icon(IconName::Download)
+                    .label(t(
+                        cx,
+                        "从剪贴板导入 SSH 配置",
+                        "Import SSH config from clipboard",
+                    ))
+                    .tooltip(t(
+                        cx,
+                        "从剪贴板导入受限 OpenSSH 配置",
+                        "Import the supported OpenSSH subset from the clipboard",
+                    ))
+                    .disabled(self.saving)
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        view.import_openssh_connections(window, cx)
+                    })),
+            )
+            .child(
+                Button::new("export-connections")
+                    .compact()
+                    .icon(IconName::Upload)
+                    .label(t(cx, "导出 JSON", "Export JSON"))
+                    .on_click(cx.listener(|view, _, _, cx| view.export_connections(cx))),
+            )
+            .child(
+                div()
+                    .flex_1()
+                    .min_w(px(120.))
+                    .when(stacked, |search| search.w_full())
+                    .child(Input::new(&self.search).small().aria_label(t(
+                        cx,
+                        "搜索连接",
+                        "Search connections",
+                    ))),
+            )
+            .into_any_element()
     }
 
     pub(super) fn library_modal(&self, cx: &mut Context<Self>) -> AnyElement {

@@ -14,6 +14,7 @@ mod batch_template;
 mod batch_workflow;
 mod completion;
 mod connection_library;
+mod connection_library_batch;
 mod diff;
 mod directory_compare;
 mod directory_sync;
@@ -53,6 +54,7 @@ pub use completion::{
 pub use connection_library::{
     ConnectionFolder, DeletedConnection, FolderRow, MAX_RECENT_CONNECTIONS, RecentConnection,
 };
+pub use connection_library_batch::{ConnectionLibraryAction, ConnectionLibraryBatchError};
 pub use diff::{
     DEFAULT_DIFF_CONTEXT_LINES, DiffError, DiffHunk, DiffLine, DiffLineKind, DiffSide,
     MAX_DIFF_CONTEXT_LINES, MAX_DIFF_INPUT_BYTES, MAX_DIFF_LINES, MAX_DIFF_OUTPUT_BYTES,

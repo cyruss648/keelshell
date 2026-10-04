@@ -77,7 +77,7 @@ impl Workspace {
         }
         if let Some(login) = &self.login {
             login.focus(window, cx);
-        } else if self.host_approval.is_some() {
+        } else if self.host_approval.is_some() || self.library_batch_prompt.is_some() {
             self.overlay_focus.focus(window, cx);
         } else if let Some(prompt) = &self.destination_prompt {
             prompt.focus.focus(window, cx);
