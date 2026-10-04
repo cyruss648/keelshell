@@ -32,6 +32,7 @@ TEST_COMMAND = [
     "--locked", "--", "--ignored", "--test-threads=1",
 ]
 CLEANUP_RESERVE = 12.0
+PROCESS_TABLE_TIMEOUT = 3.0
 
 
 class InteropFailure(Exception):
@@ -128,10 +129,16 @@ def process_table(deadline):
     remaining = deadline - time.monotonic()
     if remaining <= 0:
         raise InteropFailure("Deadline reached while inspecting owned processes")
-    result = subprocess.run(
-        ["ps", "-eo", "pid="], capture_output=True, text=True,
-        check=True, timeout=min(0.5, remaining),
-    )
+    # Loaded CI hosts can take more than 0.5 seconds to enumerate processes.
+    # Keep a bounded probe inside the existing overall deadline; a timeout must
+    # fail closed rather than masquerade as an empty process table.
+    try:
+        result = subprocess.run(
+            ["ps", "-eo", "pid="], capture_output=True, text=True,
+            check=True, timeout=min(PROCESS_TABLE_TIMEOUT, remaining),
+        )
+    except subprocess.TimeoutExpired as error:
+        raise InteropFailure("Process inventory exceeded its bounded deadline") from error
     table = {}
     for value in result.stdout.split():
         if time.monotonic() >= deadline:

@@ -39,6 +39,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="keelshell-check-") as scratch:
         env = dict(os.environ, TMPDIR=str(Path(scratch).resolve()))
         for command in [
+            [sys.executable, "-m", "unittest", "discover", "-s", "scripts", "-p", "test_*.py"],
             ["cargo", "fmt", "--all", "--check"],
             ["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
             ["cargo", "test", "--workspace", "--locked", "--", "--test-threads=4"],

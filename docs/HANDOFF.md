@@ -15,6 +15,7 @@
 
 本节记录当前工作区相对于下方历史交接内容的最新状态。后续实现和验证应以本节、`docs/ROADMAP.md`、能力清单和对应测试记录为准；历史章节保留用于追溯，不代表当前未完成项已经关闭。
 
+- 主题`8ee085d`与MCP基础整合`6644245`的本机整仓门禁通过900普通+7文档、格式/严格Clippy/依赖策略，47打包通过。MCP原worktree的22份日志已复制并逐份SHA-256核对，已合分支删除、worktree可恢复归档。文档提交`c66b7e2`的CI三平台Rust/打包和Linux OpenSSH成功，但macOS测试脚本`ps`单次0.5秒超时；失败回执仍保留。伴随修复保持overall截止与身份清理，将单次枚举上限改为3秒；六项脚本回归与本机独立八项OpenSSH通过，新增源码CI另行验证，见[修复记录](testing/records/2026-10-04-openssh-process-inventory.md)。
 - 最新冻结源码（含SSH依赖调度适配器）的整仓门禁通过：859项普通测试、6项文档测试、严格全工作区Clippy、格式和依赖策略；此前47项打包回归通过，新一轮独立8项OpenSSH互通通过。目录合并已完成macOS受控原生双向内容哈希验证。初始AI布局/断言失败和并行编辑时格式失败日志保留；本次提交的三平台CI另行追加，不沿用旧提交结论。
 - 代码提交`9802ce9`已推送，GitHub[Quality 37197083353](https://github.com/cyruss648/keelshell/actions/runs/37197083353)三平台成功：macOS/Ubuntu各859普通+6文档，Windows843普通+6文档；打包47项（Windows一项权限检查跳过），macOS/Linux独立OpenSSH步骤成功。完整源码CI与主题后续计划分别记录，不视为新增主题/MCP验收。
 - 批量依赖计划核心新增1–128个任务、32个目标的确定性拓扑审核和纯内存放行账本，指纹绑定精确命令/目标/依赖；只有前置明确成功才能放行下游，失败/未知/跳过阻止下游，取消不把运行任务标为远端已停止。10项单测、3项公开API集成、1项文档测试通过；纯核心层仍无网络/执行/定时器；后续session适配器已接通捕获会话上的真实SSH依赖调度，11项TCP协议专项及独立8项OpenSSH互通通过。图形工作流编辑器、完整目标/选项审核和任务级持久化仍待接通，见[ADR0035](adr/0035-reviewed-workflow-ssh-adapter.md)及[适配器记录](testing/records/2026-10-04-workflow-ssh-adapter.md)。见[ADR0034](adr/0034-reviewed-batch-dependency-plan.md)和[依赖计划记录](testing/records/2026-10-04-batch-dependency-plan.md)。
