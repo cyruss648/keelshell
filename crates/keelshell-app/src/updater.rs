@@ -79,12 +79,44 @@ struct ReleaseInfo {
     archive_size: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 struct StagedUpdate {
     release: ReleaseInfo,
     digest: String,
     archive: PathBuf,
     payload: PathBuf,
+    cleanup: Option<StageCleanup>,
+}
+
+/// Owns a downloaded staging root until the update is either abandoned or
+/// handed to the detached helper. Keeping this guard with the ready state
+/// prevents failed downloads and closed panels from leaking release archives.
+#[derive(Debug)]
+struct StageCleanup {
+    root: PathBuf,
+    armed: bool,
+}
+
+impl StageCleanup {
+    fn disarm(mut self) {
+        self.armed = false;
+    }
+}
+
+impl Drop for StageCleanup {
+    fn drop(&mut self) {
+        if self.armed {
+            let _ = fs::remove_dir_all(&self.root);
+        }
+    }
+}
+
+impl StagedUpdate {
+    fn disarm_cleanup(&mut self) {
+        if let Some(cleanup) = self.cleanup.take() {
+            cleanup.disarm();
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -92,8 +124,12 @@ struct PackageManifest {
     schema_version: u64,
     platform: String,
     version: String,
-    #[serde(default)]
     target: Option<String>,
+    binary_sha256: String,
+    icon_source_sha256: String,
+    installed: bool,
+    signed_by_packaging_script: bool,
+    native_acceptance: String,
     files: BTreeMap<String, String>,
 }
 
@@ -108,7 +144,7 @@ struct UpdatePlan {
     files: Vec<UpdateFile>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 enum PanelState {
     Idle,
     Checking,
@@ -247,8 +283,15 @@ impl UpdatePanel {
         cx.notify();
     }
 
-    fn install(&mut self, staged: StagedUpdate, window: &mut Window, cx: &mut Context<Self>) {
-        if !matches!(self.state, PanelState::Ready(_)) {
+    fn install(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let mut staged = match std::mem::replace(&mut self.state, PanelState::Installing) {
+            PanelState::Ready(staged) => staged,
+            state => {
+                self.state = state;
+                return;
+            }
+        };
+        if !matches!(self.state, PanelState::Installing) {
             return;
         }
         let Some(target) = self.current_target.clone() else {
@@ -257,6 +300,7 @@ impl UpdatePanel {
                 "No release asset matches this platform, so automatic installation is unavailable.",
                 cx,
             );
+            drop(staged);
             return;
         };
         let current_exe = match env::current_exe() {
@@ -267,6 +311,7 @@ impl UpdatePanel {
                     "The current executable could not be located; automatic installation stopped.",
                     cx,
                 );
+                drop(staged);
                 return;
             }
         };
@@ -276,14 +321,14 @@ impl UpdatePanel {
                 "This executable is not a replaceable installed package. Install manually from the release page.",
                 cx,
             );
+            drop(staged);
             return;
         };
-        self.state = PanelState::Installing;
         self.status = Message::new(
             "正在启动安全安装助手；程序将关闭并在成功后重启。",
             "Starting the safe installer helper. The app will close and restart after a successful update.",
         );
-        let payload = staged.payload;
+        let payload = staged.payload.clone();
         let current_exe_for_helper = current_exe.clone();
         let target_for_helper = target.clone();
         match spawn_update_helper(
@@ -295,6 +340,7 @@ impl UpdatePanel {
             Ok(()) => {
                 // The helper owns the extracted payload after this point. The
                 // old process exits before any destination file is changed.
+                staged.disarm_cleanup();
                 cx.notify();
                 let _ = window;
                 cx.emit(UpdatePanelEvent::Restart);
@@ -302,6 +348,7 @@ impl UpdatePanel {
             Err(error) => {
                 self.state = PanelState::Failed;
                 self.status = error.message();
+                drop(staged);
                 cx.notify();
             }
         }
@@ -536,8 +583,8 @@ impl Render for UpdatePanel {
                                 .primary()
                                 .label(t(cx, "自动安装并重启", "Install and restart"))
                                 .on_click(cx.listener(|panel, _, window, cx| {
-                                    if let PanelState::Ready(staged) = &panel.state {
-                                        panel.install(staged.clone(), window, cx)
+                                    if matches!(panel.state, PanelState::Ready(_)) {
+                                        panel.install(window, cx)
                                     }
                                 })),
                         )
@@ -642,22 +689,32 @@ async fn download_and_stage(release: ReleaseInfo) -> Result<StagedUpdate, Update
             std::process::id(),
             uuid::Uuid::new_v4()
         ));
-        fs::create_dir(&directory).map_err(|_| UpdateError::Storage)?;
-        let archive = directory.join(&release.archive_name);
-        fs::write(&archive, &bytes).map_err(|_| UpdateError::Storage)?;
-        let payload = directory.join("payload");
-        fs::create_dir(&payload).map_err(|_| UpdateError::Storage)?;
-        extract_archive(&archive, &payload)?;
-        let plan = validate_payload(&payload, &release)?;
-        if plan.files.is_empty() {
-            return Err(UpdateError::Invalid);
+        let result = (|| {
+            fs::create_dir(&directory).map_err(|_| UpdateError::Storage)?;
+            let archive = directory.join(&release.archive_name);
+            fs::write(&archive, &bytes).map_err(|_| UpdateError::Storage)?;
+            let payload = directory.join("payload");
+            fs::create_dir(&payload).map_err(|_| UpdateError::Storage)?;
+            extract_archive(&archive, &payload)?;
+            let plan = validate_payload(&payload, &release)?;
+            if plan.files.is_empty() {
+                return Err(UpdateError::Invalid);
+            }
+            Ok(StagedUpdate {
+                release,
+                archive,
+                payload,
+                digest: actual,
+                cleanup: Some(StageCleanup {
+                    root: directory.clone(),
+                    armed: true,
+                }),
+            })
+        })();
+        if result.is_err() {
+            let _ = fs::remove_dir_all(&directory);
         }
-        Ok(StagedUpdate {
-            release,
-            archive,
-            payload,
-            digest: actual,
-        })
+        result
     })
     .await
     .map_err(|_| UpdateError::Storage)?
@@ -693,6 +750,7 @@ pub fn run_update_helper() -> bool {
     };
     let relaunch = current_exe.clone();
     let result = apply_update(&source, &install_root, &current_exe, &target);
+    cleanup_staging_root(&source);
     // A failed copy is rolled back by `install_plan`; relaunch the preserved
     // old executable so a transient file lock does not leave the user without
     // a running application.
@@ -708,6 +766,21 @@ pub fn run_update_helper() -> bool {
         let _ = helper_path.as_deref().map(fs::remove_file);
     }
     true
+}
+
+fn cleanup_staging_root(payload: &Path) {
+    let Some(root) = payload.parent() else {
+        return;
+    };
+    let temp = env::temp_dir();
+    let is_expected_root = payload.file_name().is_some_and(|name| name == "payload")
+        && root.parent().is_some_and(|parent| parent == temp)
+        && root
+            .file_name()
+            .is_some_and(|name| name.to_string_lossy().starts_with("keelshell-update-"));
+    if is_expected_root {
+        let _ = fs::remove_dir_all(root);
+    }
 }
 
 fn extract_archive(archive: &Path, destination: &Path) -> Result<(), UpdateError> {
@@ -858,6 +931,7 @@ fn validate_payload(payload: &Path, release: &ReleaseInfo) -> Result<UpdatePlan,
     let manifest: PackageManifest =
         serde_json::from_slice(&fs::read(&manifest_path).map_err(|_| UpdateError::Storage)?)
             .map_err(|_| UpdateError::Invalid)?;
+    let _binary = validate_manifest_receipt(&manifest)?;
     let version = release.tag.strip_prefix('v').ok_or(UpdateError::Invalid)?;
     if manifest.schema_version != 1
         || manifest.platform != platform_name()
@@ -915,6 +989,36 @@ fn platform_name() -> &'static str {
         "windows" => "windows",
         _ => "unknown",
     }
+}
+
+fn packaged_binary_path(platform: &str) -> Option<&'static str> {
+    match platform {
+        "macos" => Some("KeelShell.app/Contents/MacOS/keelshell-app"),
+        "linux" => Some("usr/bin/keelshell-app"),
+        "windows" => Some("keelshell-app.exe"),
+        _ => None,
+    }
+}
+
+fn is_sha256(value: &str) -> bool {
+    value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+
+fn validate_manifest_receipt(manifest: &PackageManifest) -> Result<&'static str, UpdateError> {
+    if !is_sha256(&manifest.binary_sha256)
+        || !is_sha256(&manifest.icon_source_sha256)
+        || manifest.installed
+        || manifest.signed_by_packaging_script
+        || manifest.native_acceptance != "not performed by this script"
+    {
+        return Err(UpdateError::Invalid);
+    }
+    let binary = packaged_binary_path(&manifest.platform).ok_or(UpdateError::Invalid)?;
+    let digest = manifest.files.get(binary).ok_or(UpdateError::Invalid)?;
+    if !is_sha256(digest) || !digest.eq_ignore_ascii_case(&manifest.binary_sha256) {
+        return Err(UpdateError::Invalid);
+    }
+    Ok(binary)
 }
 
 fn hex_file_digest(path: &Path) -> Result<String, UpdateError> {
@@ -1077,6 +1181,7 @@ fn validate_payload_for_helper(payload: &Path, target: &str) -> Result<UpdatePla
     let manifest: PackageManifest =
         serde_json::from_slice(&fs::read(&path).map_err(|_| UpdateError::Storage)?)
             .map_err(|_| UpdateError::Invalid)?;
+    let _binary = validate_manifest_receipt(&manifest)?;
     let expected_target = target_triples()
         .into_iter()
         .find(|candidate| *candidate == target)
@@ -1184,12 +1289,22 @@ fn ensure_no_symlink_ancestors(root: &Path, destination: &Path) -> Result<(), Up
 }
 
 fn copy_new_file(source: &Path, destination: &Path) -> Result<(), UpdateError> {
+    let parent = destination.parent().ok_or(UpdateError::Install)?;
+    let name = destination
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or(UpdateError::Install)?;
+    let temporary = parent.join(format!(
+        ".{name}.keelshell-update-{}-{}",
+        std::process::id(),
+        uuid::Uuid::new_v4()
+    ));
     let result = (|| {
         let mut input = File::open(source).map_err(|_| UpdateError::Storage)?;
         let mut output = fs::OpenOptions::new()
             .write(true)
             .create_new(true)
-            .open(destination)
+            .open(&temporary)
             .map_err(|error| {
                 if error.kind() == io::ErrorKind::AlreadyExists {
                     UpdateError::Busy
@@ -1206,15 +1321,24 @@ fn copy_new_file(source: &Path, destination: &Path) -> Result<(), UpdateError> {
                 .metadata()
                 .map(|metadata| metadata.permissions().mode())
             {
-                let _ = fs::set_permissions(destination, fs::Permissions::from_mode(mode & 0o777));
+                let _ = fs::set_permissions(&temporary, fs::Permissions::from_mode(mode & 0o777));
             }
         }
+        // The destination was moved to the backup before this function is
+        // called. Renaming a fully written and synced temporary file avoids
+        // exposing a partially copied executable if the helper is stopped
+        // during the copy.
+        fs::rename(&temporary, destination).map_err(|error| {
+            if error.kind() == io::ErrorKind::AlreadyExists {
+                UpdateError::Busy
+            } else {
+                UpdateError::Storage
+            }
+        })?;
         Ok(())
     })();
     if result.is_err() {
-        // A failed copy may have created a partial destination. Remove it so
-        // rollback can restore the previous file from the backup.
-        let _ = fs::remove_file(destination);
+        let _ = fs::remove_file(&temporary);
     }
     result
 }
@@ -1581,7 +1705,9 @@ mod tests {
         let directory = tempfile::tempdir().expect("temporary update directory");
         let payload = directory.path().join("payload");
         std::fs::create_dir_all(&payload).expect("payload");
-        let binary = payload.join("keelshell-app.exe");
+        let binary_name = packaged_binary_path(platform_name()).expect("current platform");
+        let binary = payload.join(binary_name);
+        std::fs::create_dir_all(binary.parent().expect("binary parent")).expect("binary parent");
         std::fs::write(&binary, b"verified binary").expect("binary");
         let digest = hex_file_digest(&binary).expect("digest");
         let target = target_triple().expect("current release target");
@@ -1590,7 +1716,12 @@ mod tests {
             "platform": platform_name(),
             "version": "99.0.0",
             "target": target,
-            "files": {"keelshell-app.exe": digest},
+            "binary_sha256": digest,
+            "icon_source_sha256": "0".repeat(64),
+            "installed": false,
+            "signed_by_packaging_script": false,
+            "native_acceptance": "not performed by this script",
+            "files": {binary_name: digest},
         });
         std::fs::write(
             payload.join("package-manifest.json"),
@@ -1600,6 +1731,35 @@ mod tests {
         let plan = validate_payload_for_helper(&payload, &target).expect("valid manifest");
         assert_eq!(plan.files.len(), 1);
         std::fs::write(&binary, b"tampered").expect("tamper");
+        assert!(matches!(
+            validate_payload_for_helper(&payload, &target),
+            Err(UpdateError::Invalid)
+        ));
+    }
+
+    #[::core::prelude::v1::test]
+    fn helper_manifest_rejects_missing_platform_binary_or_receipt_boundaries() {
+        let directory = tempfile::tempdir().expect("temporary update directory");
+        let payload = directory.path().join("payload");
+        std::fs::create_dir_all(&payload).expect("payload");
+        let target = target_triple().expect("current release target");
+        let manifest = serde_json::json!({
+            "schema_version": 1,
+            "platform": platform_name(),
+            "version": "99.0.0",
+            "target": target,
+            "binary_sha256": "0".repeat(64),
+            "icon_source_sha256": "0".repeat(64),
+            "installed": false,
+            "signed_by_packaging_script": false,
+            "native_acceptance": "not performed by this script",
+            "files": {"package-manifest.json": "0".repeat(64)},
+        });
+        std::fs::write(
+            payload.join("package-manifest.json"),
+            serde_json::to_vec(&manifest).expect("manifest JSON"),
+        )
+        .expect("manifest");
         assert!(matches!(
             validate_payload_for_helper(&payload, &target),
             Err(UpdateError::Invalid)
@@ -1629,5 +1789,45 @@ mod tests {
             std::fs::read(payload.join(".backup/keelshell-app.exe")).expect("backup"),
             b"old"
         );
+    }
+
+    #[::core::prelude::v1::test]
+    fn staging_cleanup_is_owned_until_helper_handoff() {
+        let directory = tempfile::tempdir().expect("temporary staging parent");
+        let root = directory.path().join("staging");
+        std::fs::create_dir(&root).expect("staging root");
+        {
+            let _cleanup = StageCleanup {
+                root: root.clone(),
+                armed: true,
+            };
+        }
+        assert!(!root.exists());
+
+        let root = directory.path().join("handed-off");
+        std::fs::create_dir(&root).expect("handed-off root");
+        let cleanup = StageCleanup {
+            root: root.clone(),
+            armed: true,
+        };
+        cleanup.disarm();
+        assert!(root.exists());
+    }
+
+    #[::core::prelude::v1::test]
+    fn helper_cleanup_removes_only_our_temp_staging_root() {
+        let root = env::temp_dir().join(format!("keelshell-update-test-{}", uuid::Uuid::new_v4()));
+        let payload = root.join("payload");
+        std::fs::create_dir_all(&payload).expect("payload");
+        cleanup_staging_root(&payload);
+        assert!(!root.exists());
+
+        let unrelated =
+            env::temp_dir().join(format!("keelshell-not-update-{}", uuid::Uuid::new_v4()));
+        let unrelated_payload = unrelated.join("payload");
+        std::fs::create_dir_all(&unrelated_payload).expect("unrelated payload");
+        cleanup_staging_root(&unrelated_payload);
+        assert!(unrelated.exists());
+        std::fs::remove_dir_all(unrelated).expect("unrelated cleanup");
     }
 }
