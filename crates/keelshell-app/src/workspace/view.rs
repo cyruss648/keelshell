@@ -620,6 +620,8 @@ impl Render for Workspace {
                     })
                     .child(
                         div()
+                            .id("command-column")
+                            .test_support()
                             .flex_1()
                             .min_w_0()
                             .flex()
@@ -757,11 +759,16 @@ impl Render for Workspace {
                                 .child(self.remote_completion_controls(cx))
                                 .child(
                                     div()
+                                        .id("command-actions")
+                                        .test_support()
                                         .flex_shrink_0()
+                                        .min_w_0()
                                         .px_2()
+                                        .py_1()
                                         .flex()
+                                        .flex_wrap()
                                         .items_center()
-                                        .justify_between()
+                                        .gap_2()
                                         .child(
                                             Button::new("command-history-policy")
                                                 .ghost()
@@ -841,6 +848,8 @@ impl Render for Workspace {
                     .when(self.show_assistant, |el| {
                         el.child(
                             div()
+                                .id("assistant-column")
+                                .test_support()
                                 .w(assistant_width)
                                 .min_w_0()
                                 .overflow_hidden()

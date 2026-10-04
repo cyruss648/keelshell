@@ -2,6 +2,8 @@
 
 在命令区点击“依赖工作流”，可把当前命令作为第一个任务草稿。任务和输出
 只保留在本次应用工作区，关闭应用后不恢复，也不写入普通批量审计或命令历史。
+最小窗口打开 AI 助手时，命令区的历史策略、新命令、批量任务和依赖工作流按钮
+会按可用宽度换行，保留完整文字；正在运行的任务可通过同一入口重新打开。
 
 1. 先连接需要的 SSH 主机。工作流只列出当前已认证且仍在线的会话，不会自行连接。
 2. 为每个任务填写命令、可选名称，并显式选择 SSH 目标。使用“添加任务”和
@@ -27,6 +29,9 @@ select each authenticated session and its prerequisite tasks. Set concurrency,
 per-task timeout and failure policy. **Next: complete review** shows every task's
 full source and rendered command, endpoint, route, session binding and dependencies.
 Only **Confirm all tasks and execute** sends SSH requests.
+The four command-area actions wrap to fit a compact window with the AI sidebar
+open, keeping complete labels visible. The same entries reopen retained running
+batch or dependency workflows.
 
 Choose **Task output** to inspect the complete captured bounded stdout/stderr and
 transport receipt. Pending dependencies require explicit successful exits. Failed,

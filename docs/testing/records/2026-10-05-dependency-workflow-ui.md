@@ -109,3 +109,69 @@ build/link check; this worktree did not launch, install or package the applicati
 Native macOS workflow acceptance, native Windows/Linux acceptance, release
 packaging, production hosts and final independent integration review remain
 separate gates; build, renderer and localhost SSH evidence cannot close them.
+
+## Entry layout correction after independent review
+
+The initial feature freeze `2834122b0417368b8e32e2daf4155fbf9d1cc08f` received one
+independent P2 finding. At 900×580 in English with the AI sidebar open, the
+`Dependency workflow` action occupied x=454..628 while the command column ended
+at x=522. Its final 106 pixels entered the later-painted opaque AI sidebar. The
+renderer could still open the panel with a center click; the finding concerns
+overflow and covered action text, not a wholly unreachable action. Review cutoff
+was `2026-10-04T18:57:18.517615+00:00`, with all 438 tracked file hashes and the
+clean source state unchanged. Later 128-task/32-target independent probes ran on
+a separate copy of that original freeze and do not accept this correction.
+
+The command-action row now wraps within the existing command column, retains all
+four complete localized labels, uses consistent spacing, and grows vertically
+without rebuilding the textarea or changing action handlers. Three renderer
+test IDs expose the actual command column, action row and assistant column.
+Neither connection metadata nor transport execution was changed.
+
+Two new production Workspace/GPUI/TCP regressions cover Light/Dark × Chinese/
+English × AI open/closed × 900×580/1440×900. The default-label case also checks
+both history-policy labels in each of the 16 combinations. Assertions require
+all four actions to have positive visible geometry entirely inside the command
+row/column, no action overlap, a command textarea at least 120×60, non-overlapping
+Run action, and a terminal at least 80 pixels high. The narrow English/AI layout
+must use a second row and the wide layout retains one row. Theme/sidebar changes
+preserve the command entity, source, target and revision. Actual renderer clicks
+toggle history, clear the command, and open/hide the ordinary batch and workflow
+editors without sending an exec request or terminal write.
+
+The running-label case starts separately reviewed real TCP SSH `hold` attempts
+on the two captured connections, hides both owned panels and verifies both
+running entry labels in the same 16 layout combinations. Reopening each entry
+then cancels local waits and collects its original run without replay; each
+fixture receives exactly one request. The command text only selects fixture
+responses and is never interpreted by a shell.
+
+`work/workflow-ui-layout/` preserves the original independent report/probe with
+SHA-256 and this correction's runs. `layout-before-fix.log` proves the new test
+failed on the original row with the exact x=454..628 versus x=522 bounds. The
+first corrected default-label test passed. The final new-source verification
+and native build results are recorded below. A fresh
+independent review and integrated native GUI acceptance are required; the old
+freeze's gate and native build do not accept this changed source.
+
+- `python3 scripts/check.py` passed on the corrected source: dependency policy,
+  six Python script tests, formatting, strict locked whole-workspace/all-targets
+  Clippy, 1005 ordinary tests and eight documentation tests, plus the separate
+  2 MiB local-agent controller with all scenario groups passing. Eleven opt-in
+  tests remained ignored in the ordinary run. Evidence: `gate-layout-final.log`.
+- `cargo test -p keelshell-app --locked workflow -- --test-threads=4` passed all
+  29 cases in 8.80 seconds; this includes both new entry regressions and all 27
+  previous workflow/ordinary-batch/related-modal cases. The two new entry cases
+  also passed independently in 7.82 seconds. Evidence:
+  `app-workflow-layout-final.log` and `layout-after-fix-final.log`.
+- The new-source isolated system OpenSSH run passed all nine tests in 5.727
+  seconds. Its receipt confirms owned/observed processes stopped, no unverified
+  ancestry identities and removal of the private temporary directory. Evidence:
+  `openssh-layout-final/result.json`; generated key material was removed.
+- `cargo build -p keelshell-app --locked` passed on the corrected production
+  source. The new executable is Mach-O arm64 and links AppKit/CoreText and the
+  other native system frameworks. Its SHA-256 is
+  `8506ac0f774c11549c316fe050680f4ac5fd3f5ab6ced2051b28e89dc6ffb122`.
+  `native-layout-build.log` and `native-layout-build-receipt.json` bind this new
+  build. This worktree did not launch, package or install it; neither renderer
+  geometry nor a native build proves native pixel/AX/target acceptance.

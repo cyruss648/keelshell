@@ -57,6 +57,15 @@ rejected, uncertain and skipped prerequisites block descendants. Continue permit
 independent branches; stop-after-failure prevents pending replacement admissions
 while collecting separately admitted tasks.
 
+The workspace command-action row wraps inside its actual central column with
+consistent spacing. Its four complete localized actions remain available beside
+the AI sidebar at the 900×580 minimum window. Natural row height keeps the last
+action within the command area without shortening labels or combining the
+separate command textarea with the wrapping actions. Wide layouts retain one
+action line. Running ordinary-batch and workflow labels use the same constraint;
+appearance, language and sidebar changes preserve the command input entity,
+source and target binding.
+
 The UI polls bounded state events without blocking. `WorkflowHandle::try_finish`
 nonblockingly collects the authoritative aggregate exactly once, leaving queued
 events intact. The panel validates the complete aggregate fingerprint, actual

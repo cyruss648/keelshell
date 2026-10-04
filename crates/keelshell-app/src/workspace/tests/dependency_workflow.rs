@@ -2,9 +2,66 @@
 use super::batch_peer as peer;
 use super::*;
 use gpui_kit::{
-    App, ElementId, ScrollDelta, Window,
+    App, ElementId, Pixels, ScrollDelta, Window,
     component::{WindowExt, input::AnyInputState},
 };
+
+fn contained(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
+    inner.origin.x >= outer.origin.x
+        && inner.origin.y >= outer.origin.y
+        && inner.right() <= outer.right()
+        && inner.bottom() <= outer.bottom()
+}
+
+fn assert_entry_layout(window: &mut Window, cx: &mut App) {
+    window.render_frame(cx);
+    let column = window.find("command-column").bounds();
+    let actions = window.find("command-actions").bounds();
+    assert!(contained(column, window.bounds()), "column {column:?}");
+    assert!(
+        contained(actions, column),
+        "actions {actions:?}, column {column:?}"
+    );
+    let mut previous = Vec::<Bounds<Pixels>>::new();
+    for id in [
+        "command-history-policy",
+        "new-command-draft",
+        "command-batch",
+        "command-workflow",
+    ] {
+        let button = window.find(id);
+        let bounds = button.bounds();
+        assert!(button.visible() && button.label().is_some(), "{id} hidden");
+        assert!(bounds.size.width > px(0.) && bounds.size.height > px(0.));
+        assert!(
+            contained(bounds, actions),
+            "{id} {bounds:?} escapes actions {actions:?} in column {column:?}"
+        );
+        for other in &previous {
+            assert!(
+                bounds.right() <= other.origin.x
+                    || other.right() <= bounds.origin.x
+                    || bounds.bottom() <= other.origin.y
+                    || other.bottom() <= bounds.origin.y,
+                "{id} {bounds:?} overlaps another action {other:?}"
+            );
+        }
+        previous.push(bounds);
+    }
+    let input = window.find("command-input-container");
+    let input_bounds = input.bounds();
+    assert!(input.visible() && contained(input_bounds, column));
+    assert!(
+        input_bounds.size.width >= px(120.) && input_bounds.size.height >= px(60.),
+        "unusable command input {input_bounds:?}"
+    );
+    assert!(input_bounds.bottom() <= actions.origin.y);
+    let run = window.find("run-command").bounds();
+    assert!(contained(run, column) && input_bounds.right() <= run.origin.x);
+    if let Some(assistant) = window.try_find("assistant-column") {
+        assert!(column.right() <= assistant.bounds().origin.x);
+    }
+}
 
 fn click_visible(window: &mut Window, id: impl Into<ElementId> + Clone, cx: &mut App) {
     window.render_frame(cx);
@@ -104,6 +161,240 @@ impl Harness {
         })
         .await;
     }
+}
+
+#[gpui_kit::test]
+fn dependency_workflow_entry_actions_fit_and_operate_with_themes_languages_and_ai(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    for (width, height) in [(900., 580.), (1440., 900.)] {
+        cx.simulate_window_resize(h.fixture.window, size(px(width), px(height)));
+        cx.run_until_parked();
+        for theme in [keelshell_core::Theme::Light, keelshell_core::Theme::Dark] {
+            for language in [Language::ZhCn, Language::En] {
+                for assistant in [false, true] {
+                    cx.update_window(h.fixture.window, |_, window, cx| {
+                        let draft = h.fixture.workspace.read(cx);
+                        let before = (
+                            draft.command.entity_id(),
+                            draft.command.read(cx).value().to_string(),
+                            draft.command_target,
+                            draft.command_revision,
+                        );
+                        i18n::set_language(language, cx);
+                        crate::design::apply(theme, Some(window), cx);
+                        h.fixture.workspace.update(cx, |view, cx| {
+                            view.show_assistant = assistant;
+                            view.state.settings.theme = theme;
+                            view.state.settings.language = language;
+                            cx.notify();
+                        });
+                        let draft = h.fixture.workspace.read(cx);
+                        assert_eq!(
+                            (
+                                draft.command.entity_id(),
+                                draft.command.read(cx).value().to_string(),
+                                draft.command_target,
+                                draft.command_revision,
+                            ),
+                            before,
+                            "appearance and AI layout retain input identity and draft binding"
+                        );
+                        assert_eq!(window.viewport_size(), size(px(width), px(height)));
+                        for history in [false, true] {
+                            h.fixture.workspace.update(cx, |view, cx| {
+                                view.command_record_history = history;
+                                cx.notify();
+                            });
+                            assert_entry_layout(window, cx);
+                            let terminal = window
+                                .find(("terminal-pane", h.panes[0].terminal.entity_id()))
+                                .bounds();
+                            assert!(
+                                terminal.size.height >= px(80.),
+                                "terminal collapsed {terminal:?}"
+                            );
+                            let first = window.find("command-history-policy").bounds();
+                            let last = window.find("command-workflow").bounds();
+                            if width == 900. && assistant && language == Language::En {
+                                assert!(
+                                    last.origin.y > first.origin.y,
+                                    "compact English entry must wrap"
+                                );
+                            } else if width == 1440. {
+                                assert_eq!(
+                                    last.origin.y, first.origin.y,
+                                    "wide actions remain on one line"
+                                );
+                            }
+                            window.click("command-history-policy", cx);
+                            assert_eq!(
+                                h.fixture.workspace.read(cx).command_record_history,
+                                !history
+                            );
+                        }
+                        window.click("command-input-container", cx);
+                        replace(window, "layout-entry-seed", cx);
+                    })
+                    .checked(
+                        "both history labels and input fit the actual production command column",
+                    );
+                    cx.run_until_parked();
+                    cx.update_window(h.fixture.window, |_, window, cx| {
+                        window.render_frame(cx);
+                        window.click("new-command-draft", cx);
+                        assert!(
+                            h.fixture
+                                .workspace
+                                .read(cx)
+                                .command
+                                .read(cx)
+                                .value()
+                                .is_empty()
+                        );
+                        window.click("command-input-container", cx);
+                        replace(window, "layout-entry-seed", cx);
+                    })
+                    .checked("new-command action clears the real focused textarea");
+                    cx.run_until_parked();
+                    cx.update_window(h.fixture.window, |_, window, cx| {
+                        window.render_frame(cx);
+                        window.click("command-batch", cx);
+                        window.render_frame(cx);
+                        assert!(h.fixture.workspace.read(cx).show_batch);
+                        window.click("batch-hide", cx);
+                    })
+                    .checked("ordinary batch entry remains reachable");
+                    cx.run_until_parked();
+                    cx.update_window(h.fixture.window, |_, window, cx| {
+                        assert_entry_layout(window, cx);
+                        window.click("command-workflow", cx);
+                        window.render_frame(cx);
+                        assert!(h.fixture.workspace.read(cx).show_workflow);
+                        assert!(window.find("workflow-hide").visible());
+                        click_visible(window, "workflow-command-container", cx);
+                        match window
+                            .focused_input(cx)
+                            .unwrap_or_else(|| panic!("workflow input"))
+                        {
+                            AnyInputState::Textarea(field) => {
+                                assert_eq!(field.read(cx).value(), "layout-entry-seed")
+                            }
+                            _ => panic!("workflow command textarea"),
+                        }
+                        window.click("workflow-hide", cx);
+                    })
+                    .checked(
+                        "workflow entry opens the production editor with retained command text",
+                    );
+                    cx.run_until_parked();
+                    assert!(h.servers.iter().all(|server| server.requests().is_empty()));
+                    assert!(h.panes.iter().all(|pane| writes(pane).is_empty()));
+                }
+            }
+        }
+    }
+}
+
+#[gpui_kit::test]
+async fn dependency_workflow_entry_running_labels_fit_while_two_captured_runs_are_hidden(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.prepare("hold", cx);
+    h.confirm(cx);
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("workflow-hide", cx);
+    })
+    .checked("retain running dependency workflow behind its entry");
+    cx.run_until_parked();
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("command-batch", cx);
+        window.render_frame(cx);
+        window.click(("batch-select", 1_usize), cx);
+        window.click("batch-review-button", cx);
+    })
+    .checked("prepare separate ordinary batch on the second captured connection");
+    cx.run_until_parked();
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("batch-confirm", cx);
+    })
+    .checked("human approval starts the separately owned ordinary batch");
+    cx.run_until_parked();
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("batch-hide", cx);
+    })
+    .checked("retain ordinary batch behind its running entry");
+    cx.run_until_parked();
+    cx.wait_for(h.fixture.window, Duration::from_secs(5), |_, _| {
+        h.servers
+            .iter()
+            .all(|server| server.requests() == vec![b"hold".to_vec()])
+    })
+    .await;
+    for (width, height) in [(900., 580.), (1440., 900.)] {
+        cx.simulate_window_resize(h.fixture.window, size(px(width), px(height)));
+        cx.run_until_parked();
+        for theme in [keelshell_core::Theme::Light, keelshell_core::Theme::Dark] {
+            for language in [Language::ZhCn, Language::En] {
+                for assistant in [false, true] {
+                    cx.update_window(h.fixture.window, |_, window, cx| {
+                        i18n::set_language(language, cx);
+                        crate::design::apply(theme, Some(window), cx);
+                        h.fixture.workspace.update(cx, |view, cx| {
+                            view.show_assistant = assistant;
+                            cx.notify();
+                        });
+                        assert_entry_layout(window, cx);
+                        let (batch, workflow) = if language == Language::En {
+                            ("Batch · running", "Workflow · running")
+                        } else {
+                            ("批量任务 · 运行中", "工作流 · 运行中")
+                        };
+                        assert_eq!(window.find("command-batch").label(), Some(batch));
+                        assert_eq!(window.find("command-workflow").label(), Some(workflow));
+                    })
+                    .checked("both actual running labels fit the production command column");
+                }
+            }
+        }
+    }
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.click("command-batch", cx);
+        window.render_frame(cx);
+        window.click("batch-cancel", cx);
+        window.click("batch-hide", cx);
+    })
+    .checked("running batch entry reopens the original run for local cancellation");
+    cx.run_until_parked();
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("command-workflow", cx);
+        window.render_frame(cx);
+        window.click("workflow-cancel", cx);
+    })
+    .checked("running workflow entry reopens the original run for local cancellation");
+    h.complete(cx).await;
+    cx.wait_for(h.fixture.window, Duration::from_secs(5), |_, cx| {
+        h.fixture
+            .workspace
+            .read(cx)
+            .batch_panel
+            .as_ref()
+            .is_some_and(|panel| !panel.read(cx).is_running())
+    })
+    .await;
+    assert!(
+        h.servers
+            .iter()
+            .all(|server| server.requests() == vec![b"hold".to_vec()])
+    );
+    assert!(h.panes.iter().all(|pane| writes(pane).is_empty()));
 }
 
 #[gpui_kit::test]
