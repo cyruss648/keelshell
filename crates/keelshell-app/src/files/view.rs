@@ -4,14 +4,24 @@ use gpui_kit::component::scroll::ScrollableElement;
 
 fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl IntoElement {
     let report = &comparison.report;
-    let summary = format!(
-        "{} same · {} changed · {} left only · {} right only · {} uncertain",
-        report.same_count(),
-        report.changed_count(),
-        report.left_only_count(),
-        report.right_only_count(),
-        report.uncertain_count(),
-    );
+    let summary = match crate::i18n::language(cx) {
+        keelshell_core::Language::ZhCn => format!(
+            "{} 一致 · {} 已变化 · {} 仅本地 · {} 仅远端 · {} 待确认",
+            report.same_count(),
+            report.changed_count(),
+            report.left_only_count(),
+            report.right_only_count(),
+            report.uncertain_count(),
+        ),
+        keelshell_core::Language::En => format!(
+            "{} same · {} changed · {} local only · {} remote only · {} uncertain",
+            report.same_count(),
+            report.changed_count(),
+            report.left_only_count(),
+            report.right_only_count(),
+            report.uncertain_count(),
+        ),
+    };
     let mut rows = div().flex().flex_col().gap_1();
     for row in report.rows().iter().take(100) {
         rows = rows.child(
@@ -499,12 +509,15 @@ impl Render for FilesPanel {
                 })))
                 .child(Button::new("compare-directories").ghost().compact().rounded(px(6.)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().trim());
-                    let remote = view.path.read(cx).value().trim().to_owned();
+                    // The path input is a navigation draft. Use the last
+                    // successfully loaded canonical directory so a typed but
+                    // unsubmitted path cannot change the comparison target.
+                    let remote = view.directory.clone();
                     if !local.is_absolute() {
                         view.status = Message::new("请输入本地目录的绝对路径", "Enter an absolute local directory path");
-                    } else if remote.is_empty() || remote.chars().any(char::is_control) {
+                    } else if remote.as_deref().is_none_or(|path| path.is_empty() || path.chars().any(char::is_control)) {
                         view.status = Message::new("请输入有效的远程目录", "Enter a valid remote directory");
-                    } else {
+                    } else if let Some(remote) = remote {
                         view.run(Operation::Compare(local, remote), window, cx);
                     }
                     cx.notify();

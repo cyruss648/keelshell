@@ -60,6 +60,9 @@ async fn compare_directories(
             MAX_COMPARE_DEPTH,
         )
         .await?;
+    if stop.load(Ordering::Acquire) {
+        return Err(FileFailure::Cancelled);
+    }
     let mut remote = Vec::with_capacity(remote_entries.len());
     for entry in remote_entries {
         let Some(path) = remote_relative_path(&remote_root, &entry.path) else {
@@ -436,7 +439,7 @@ pub(super) async fn operate(
 
 #[cfg(test)]
 mod tests {
-    use super::{FileFailure, snapshot_local_tree};
+    use super::{FileFailure, remote_relative_path, snapshot_local_tree};
     use std::fs;
     use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -464,5 +467,22 @@ mod tests {
             snapshot_local_tree(root.path(), &stop),
             Err(FileFailure::Cancelled)
         ));
+    }
+
+    #[test]
+    fn remote_snapshot_paths_are_relative_only_inside_the_selected_root() {
+        assert_eq!(
+            remote_relative_path("/", "/var/log/app.log"),
+            Some("var/log/app.log".to_owned())
+        );
+        assert_eq!(
+            remote_relative_path("/srv/app", "/srv/app/config.toml"),
+            Some("config.toml".to_owned())
+        );
+        assert_eq!(
+            remote_relative_path("/srv/app", "/srv/app-old/config.toml"),
+            None
+        );
+        assert_eq!(remote_relative_path("/srv/app", "/srv/app"), None);
     }
 }
