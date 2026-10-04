@@ -33,6 +33,7 @@ use crate::i18n::{Message, t};
 #[cfg(test)]
 mod tests;
 mod view;
+pub(crate) use view::outcome;
 
 /// Metadata captured from an already authenticated terminal, never from output.
 #[derive(Clone, Debug, PartialEq, Eq)]

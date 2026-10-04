@@ -125,7 +125,7 @@ impl Workspace {
         cx.notify();
     }
 
-    fn live_batch_entities(&self, cx: &App) -> std::collections::HashSet<EntityId> {
+    pub(super) fn live_batch_entities(&self, cx: &App) -> std::collections::HashSet<EntityId> {
         self.tabs
             .iter()
             .filter(|tab| {
@@ -140,10 +140,44 @@ impl Workspace {
     }
 
     pub(super) fn maintain_command_workflows(&mut self, cx: &mut Context<Self>) {
+        self.maintain_workflow(cx);
         if let Some(panel) = self.batch_panel.clone() {
             let live = self.live_batch_entities(cx);
             panel.update(cx, |panel, cx| panel.update_available(&live, cx));
         }
+    }
+
+    pub(super) fn batch_destinations(&self, cx: &App) -> Vec<Destination> {
+        let live = self.live_batch_entities(cx);
+        self.tabs
+            .iter()
+            .filter(|tab| live.contains(&tab.entity_id()))
+            .map(|tab| {
+                let entity = tab.entity_id();
+                let endpoint = self.remote_hosts.get(&entity).cloned().unwrap_or_default();
+                let profile_id = self.batch_profile_id(entity);
+                let (name, route) = self
+                    .batch_route_description(entity)
+                    .unwrap_or_else(|| (tab.read(cx).title.clone(), endpoint.clone()));
+                let template_context = self.batch_template_context(entity).unwrap_or_else(|| {
+                    keelshell_core::BatchTargetContext {
+                        name: name.clone(),
+                        host: endpoint.clone(),
+                        endpoint: endpoint.clone(),
+                        ..Default::default()
+                    }
+                });
+                Destination {
+                    id: uuid::Uuid::new_v4(),
+                    profile_id,
+                    entity,
+                    name,
+                    endpoint,
+                    route,
+                    template_context,
+                }
+            })
+            .collect()
     }
 
     pub(super) fn open_batch_commands(
@@ -165,38 +199,7 @@ impl Workspace {
         }
         self.cancel_remote_completion(cx);
         if fresh || self.batch_panel.is_none() {
-            let live = self.live_batch_entities(cx);
-            let destinations = self
-                .tabs
-                .iter()
-                .filter(|tab| live.contains(&tab.entity_id()))
-                .map(|tab| {
-                    let entity = tab.entity_id();
-                    let endpoint = self.remote_hosts.get(&entity).cloned().unwrap_or_default();
-                    let profile_id = self.batch_profile_id(entity);
-                    let (name, route) = self
-                        .batch_route_description(entity)
-                        .unwrap_or_else(|| (tab.read(cx).title.clone(), endpoint.clone()));
-                    let template_context =
-                        self.batch_template_context(entity).unwrap_or_else(|| {
-                            keelshell_core::BatchTargetContext {
-                                name: name.clone(),
-                                host: endpoint.clone(),
-                                endpoint: endpoint.clone(),
-                                ..Default::default()
-                            }
-                        });
-                    Destination {
-                        id: uuid::Uuid::new_v4(),
-                        profile_id,
-                        entity,
-                        name,
-                        endpoint,
-                        route,
-                        template_context,
-                    }
-                })
-                .collect();
+            let destinations = self.batch_destinations(cx);
             let text = self.command.read(cx).value().to_string();
             let panel = cx.new(|cx| BatchPanel::new(destinations, text, window, cx));
             self.batch_subscription =

@@ -1404,10 +1404,11 @@ fn keyboard_interactive_prompt_is_ephemeral_and_cancelable(cx: &mut TestAppConte
     assert!(matches!(receiver.try_recv(), Ok(None)));
 }
 
-mod batch_peer;
+pub(crate) mod batch_peer;
 mod command_workflows;
 mod commands;
 mod credentials;
+mod dependency_workflow;
 mod library;
 mod routes;
 mod themes;

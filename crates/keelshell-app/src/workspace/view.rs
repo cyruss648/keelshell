@@ -822,7 +822,13 @@ impl Render for Workspace {
                                                 .on_click(cx.listener(|view, _, window, cx| {
                                                     view.open_batch_commands(false, window, cx)
                                                 })),
-                                        ),
+                                        )
+                                        .child(Button::new("command-workflow").ghost().compact()
+                                            .label(if self.workflow_panel.as_ref().is_some_and(|panel|panel.read(cx).is_running()) {
+                                                t(cx,"工作流 · 运行中","Workflow · running")
+                                            } else {t(cx,"依赖工作流","Dependency workflow")})
+                                            .disabled(self.command_surface_blocked())
+                                            .on_click(cx.listener(|view,_,window,cx|view.open_workflow(false,window,cx)))),
                                 )
                                 .child(self.remote_completion_list(cx))
                                 .child(self.suggestion_list(window, cx))
@@ -875,6 +881,7 @@ impl Render for Workspace {
             .child(self.snippet_modal(cx))
             .child(self.archive_confirmation(cx))
             .child(self.batch_modal(cx))
+            .child(self.workflow_modal(cx))
             .child(self.mcp_modal(cx))
             .when_some(self.ai_settings.clone(), |el, panel| {
                 el.child(

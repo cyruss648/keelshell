@@ -56,6 +56,7 @@ impl Workspace {
         !self.saving
             && !self.mcp.show
             && !self.show_batch
+            && !self.show_workflow
             && !self.snippet_modal_open()
             && !self.connecting
             && self.connect_route.is_none()

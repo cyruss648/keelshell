@@ -9,6 +9,7 @@ mod assistant;
 mod batch_commands;
 mod command_history;
 mod command_suggestions;
+mod command_text;
 mod design;
 mod directory_compare;
 mod emulator;
@@ -26,6 +27,7 @@ mod terminal;
 mod tunnels;
 mod updater;
 mod vault_settings;
+mod workflow_commands;
 mod workspace;
 
 #[cfg(test)]

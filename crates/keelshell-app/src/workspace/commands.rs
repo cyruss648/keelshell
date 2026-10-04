@@ -34,6 +34,7 @@ impl Workspace {
         self.snippet_modal_open()
             || self.mcp.show
             || self.show_batch
+            || self.show_workflow
             || self.discard_archive.is_some()
             || self.vault_settings.is_some()
             || self.ai_settings.is_some()

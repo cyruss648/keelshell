@@ -46,6 +46,12 @@ impl Workspace {
             self.overlay_focus.focus(window, cx);
             return;
         }
+        if self.show_workflow
+            && let Some(panel) = &self.workflow_panel
+        {
+            panel.update(cx, |panel, cx| panel.focus(window, cx));
+            return;
+        }
         if self.show_batch
             && let Some(panel) = &self.batch_panel
         {

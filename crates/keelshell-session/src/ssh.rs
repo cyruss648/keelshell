@@ -815,6 +815,15 @@ impl SshSession {
         self.handle.is_closed() || self.transport.is_closed()
     }
 
+    /// Whether both handles share the exact authenticated encrypted connection.
+    ///
+    /// This compares connection ownership, not an endpoint or username. A newly
+    /// authenticated connection to the same server is deliberately different.
+    /// Callers can use this when revalidating an ephemeral human review.
+    pub fn same_connection(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.handle, &other.handle)
+    }
+
     /// Abnormal channel cleanup cannot abandon an unconfirmed remote resource.
     /// If protocol disconnect stalls, stop this session's socket or channel relay.
     pub(crate) async fn close_or_abort(&self) -> Result<()> {

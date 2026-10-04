@@ -216,6 +216,28 @@ impl WorkflowHandle {
     pub fn is_finished(&self) -> bool {
         self.worker.is_finished()
     }
+    /// Collect a ready aggregate without blocking, returning `None` while pending.
+    ///
+    /// A returned receipt consumes the aggregate exactly once; queued events are
+    /// still available. Calling again returns `WorkerLost`, as does `finish`
+    /// after this method has collected the receipt. This permits a native UI to
+    /// reconcile its event rows with the authoritative complete aggregate.
+    pub fn try_finish(&mut self) -> Option<Result<WorkflowReceipt, WorkflowError>> {
+        let Some(receiver) = self.receipt.as_mut() else {
+            return Some(Err(WorkflowError::WorkerLost));
+        };
+        match receiver.try_recv() {
+            Ok(receipt) => {
+                self.receipt = None;
+                Some(receipt)
+            }
+            Err(oneshot::error::TryRecvError::Empty) => None,
+            Err(oneshot::error::TryRecvError::Closed) => {
+                self.receipt = None;
+                Some(Err(WorkflowError::WorkerLost))
+            }
+        }
+    }
     /// Collect the complete receipt without consuming events. Cancelling this
     /// future drops the handle and aborts its owned scheduler and task set.
     pub async fn finish(mut self) -> Result<WorkflowReceipt, WorkflowError> {

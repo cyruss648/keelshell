@@ -620,3 +620,63 @@ async fn maximum_graph_has_bounded_concurrency_and_unread_events_share_terminal_
     })
     .await
 }
+
+#[tokio::test]
+async fn nonblocking_aggregate_collection_keeps_queued_events_and_compares_actual_connections()
+-> TestResult {
+    bounded(async {
+        let server = Server::start(Opening::Normal).await?;
+        let ssh = server.connect().await?;
+        let replacement = server.connect().await?;
+        assert!(ssh.same_connection(&ssh.clone()));
+        assert!(!ssh.same_connection(&replacement));
+        let mut handle = start_workflow(
+            confirmed(vec![task(1, 101, "hold-aggregate", &[])])?,
+            vec![binding(101, &ssh)],
+            options(),
+        )?;
+        assert!(handle.try_finish().is_none());
+        until(|| {
+            server
+                .observed
+                .command_count()
+                .is_ok_and(|count| count == 1)
+        })
+        .await?;
+        server.observed.release("hold-aggregate")?;
+        let receipt = tokio::time::timeout(Duration::from_secs(5), async {
+            loop {
+                if let Some(result) = handle.try_finish() {
+                    break result;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await??;
+        assert_eq!(
+            outcome(&receipt.tasks[0])?,
+            BatchOutcome::Exited { code: 0 }
+        );
+        let mut started = 0;
+        let mut finished = 0;
+        while let Ok(event) = handle.try_recv() {
+            match event {
+                WorkflowEvent::Started { .. } => started += 1,
+                WorkflowEvent::Finished { task } => {
+                    finished += 1;
+                    assert!(std::sync::Arc::ptr_eq(&task, &receipt.tasks[0]));
+                }
+            }
+        }
+        assert_eq!((started, finished), (1, 1));
+        assert!(matches!(
+            handle.try_finish(),
+            Some(Err(WorkflowError::WorkerLost))
+        ));
+        assert!(!ssh.is_closed() && !replacement.is_closed());
+        ssh.close().await?;
+        replacement.close().await?;
+        Ok(())
+    })
+    .await
+}

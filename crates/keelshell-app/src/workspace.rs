@@ -29,10 +29,11 @@ mod reconnect;
 mod reconnect_editor;
 mod remote_completion;
 mod routing;
+mod workflow_commands;
 use library::{DestinationPrompt, DestinationTarget, FolderForm, LibraryFilter};
 use reconnect_editor::ReconnectEditor;
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;
 mod vault;
 mod view;
 
@@ -287,6 +288,9 @@ pub struct Workspace {
     batch_panel: Option<Entity<crate::batch_commands::BatchPanel>>,
     batch_subscription: Option<Subscription>,
     show_batch: bool,
+    workflow_panel: Option<Entity<crate::workflow_commands::WorkflowPanel>>,
+    workflow_subscription: Option<Subscription>,
+    show_workflow: bool,
     runtime: Arc<tokio::runtime::Runtime>,
     remote_sessions: HashMap<EntityId, SshSession>,
     command_histories: HashMap<EntityId, CommandHistory>,
@@ -575,6 +579,9 @@ impl Workspace {
             batch_panel: None,
             batch_subscription: None,
             show_batch: false,
+            workflow_panel: None,
+            workflow_subscription: None,
+            show_workflow: false,
             runtime,
             remote_sessions: HashMap::new(),
             command_histories: HashMap::new(),
@@ -613,6 +620,7 @@ impl Workspace {
     ) {
         if self.mcp.show
             || self.show_batch
+            || self.show_workflow
             || self.vault_settings.is_some()
             || self.ai_settings.is_some()
             || self.snippet_modal_open()
@@ -629,6 +637,8 @@ impl Workspace {
         // Modal close takes precedence so a keyboard shortcut cannot close its underlying SSH tab.
         if self.mcp.show {
             self.mcp.show = false;
+        } else if self.show_workflow {
+            self.show_workflow = false;
         } else if self.show_batch {
             self.show_batch = false;
         } else if self.openssh_review.is_some() {
@@ -873,6 +883,9 @@ impl Workspace {
         if let Some(panel) = &self.batch_panel {
             panel.update(cx, |panel, cx| panel.refresh_locale(cx));
         }
+        if let Some(panel) = &self.workflow_panel {
+            panel.update(cx, |panel, cx| panel.refresh_locale(cx));
+        }
         self.remote_completion.directory.update(cx, |input, cx| {
             input.set_placeholder(
                 t(
@@ -1035,6 +1048,7 @@ impl Workspace {
     fn open_ai_settings(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.mcp.show
             || self.show_batch
+            || self.show_workflow
             || self.ai_settings.is_some()
             || self.vault_settings.is_some()
             || self.snippet_modal_open()
@@ -1103,6 +1117,7 @@ impl Workspace {
     fn open_updates(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.mcp.show
             || self.show_batch
+            || self.show_workflow
             || self.ai_settings.is_some()
             || self.vault_settings.is_some()
             || self.update_panel.is_some()
@@ -1133,7 +1148,7 @@ impl Workspace {
         cx.notify();
     }
     fn toggle_assistant(&mut self, _: &ToggleAssistant, _: &mut Window, cx: &mut Context<Self>) {
-        if self.mcp.show || self.show_batch || self.snippet_modal_open() {
+        if self.mcp.show || self.show_batch || self.show_workflow || self.snippet_modal_open() {
             return;
         }
         self.show_assistant = !self.show_assistant;
