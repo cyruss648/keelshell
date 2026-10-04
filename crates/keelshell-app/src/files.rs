@@ -483,6 +483,10 @@ impl FilesPanel {
                 spec,
                 directory,
             });
+        } else if !matches!(&operation, Operation::PlanResume(..)) {
+            // A browse/edit/mutation action is a new workflow; do not retain
+            // a hidden recovery proposal after the user leaves its card.
+            self.recovery = None;
         }
         if let Operation::List(path) = &operation
             && (path.trim().is_empty() || path.chars().any(char::is_control))
