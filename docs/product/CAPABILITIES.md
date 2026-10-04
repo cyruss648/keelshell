@@ -28,6 +28,8 @@ System-default light/dark theme foundations are implemented with the partial nat
 
 ## Evidence rules
 
+The initial local-agent source CI passed on macOS/Linux but its Windows self-hosted process controller failed with `STATUS_STACK_OVERFLOW`. The pipe buffers now use direct heap allocation, with future-size limits and an additional complete-controller run on an explicit 2 MiB stack. The repaired source still requires new Windows native CI; see the [stack regression record](../testing/records/2026-10-04-local-agent-windows-stack.md). Local small-stack results do not close that Windows acceptance boundary.
+
 - A successful SFTP call proves the protocol acknowledgement observed; it does not establish durability after remote power loss. “Paused” is shown only after the transfer worker acknowledges the pause and any in-flight writes have been acknowledged. Resumption verifies content but does not provide exclusive control against an external writer.
 - OpenSSH interoperability uses a separate disposable localhost server with generated keys and strict host pinning. The four transfer tests have existing macOS/Linux CI evidence in the [transfer verification record](../testing/records/2026-10-03-sftp-resume.md). A fifth completion test passed locally with all four transfer tests; its own CI evidence is tracked in the [completion record](../testing/records/2026-10-03-remote-completion.md). This does not establish Windows OpenSSH compatibility or native desktop acceptance.
 - The GUI fixture is a disposable, loopback-only SSH/SFTP server. Its echo terminal does not execute OS commands. It cannot establish arbitrary production-server compatibility.

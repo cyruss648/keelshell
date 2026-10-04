@@ -37,6 +37,41 @@ fn main() {
     {
         fixture(&arguments);
     } else {
+        fn future_size<F>(_: impl FnOnce() -> F) -> usize {
+            std::mem::size_of::<F>()
+        }
+        let controller_size = future_size(integration_cases);
+        eprintln!("local agent integration controller future: {controller_size} bytes");
+        assert!(
+            controller_size < 16 * 1024,
+            "controller embeds oversized process futures: {controller_size} bytes"
+        );
+        if arguments
+            .first()
+            .is_some_and(|arg| arg == "--controller-small-stack")
+        {
+            // Exercise the identical controller without relying on the native
+            // process main stack. The normal CI entry point remains unchanged.
+            std::thread::Builder::new()
+                .name("local-agent-small-stack".into())
+                .stack_size(2 * 1024 * 1024)
+                .spawn(|| {
+                    tokio::runtime::Builder::new_multi_thread()
+                        .worker_threads(2)
+                        .enable_all()
+                        .build()
+                        .unwrap()
+                        .block_on(async {
+                            tokio::time::timeout(Duration::from_secs(45), integration_cases())
+                                .await
+                                .expect("small-stack controller exceeded its overall deadline");
+                        });
+                })
+                .unwrap()
+                .join()
+                .unwrap();
+            return;
+        }
         tokio::runtime::Builder::new_multi_thread()
             .worker_threads(2)
             .enable_all()
@@ -121,7 +156,11 @@ impl Fixture {
             for entry in std::fs::read_dir(&self.scratch).unwrap() {
                 let path = entry.unwrap().path().join("workspace/descendant-port");
                 if let Ok(text) = std::fs::read_to_string(path) {
-                    return text.parse().unwrap();
+                    // The child may have created/truncated the file before its
+                    // port write finishes. Keep the original readiness bound.
+                    if let Ok(port) = text.parse() {
+                        return port;
+                    }
                 }
             }
             assert!(

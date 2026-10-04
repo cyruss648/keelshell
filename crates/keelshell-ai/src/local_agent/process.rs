@@ -752,14 +752,16 @@ async fn read_stdout(
     budget: &AtomicUsize,
 ) -> Result<RunOutput, LocalAgentError> {
     let mut bytes = Zeroizing::new(Vec::new());
-    let mut chunk = [0_u8; 8192];
+    // This buffer spans await points and would otherwise be copied through
+    // nested join/select state machines on the caller's native thread stack.
+    let mut chunk = vec![0_u8; 8192];
     let mut protocol = match mode {
         OutputMode::Text => None,
         OutputMode::Protocol(kind) => Some(AnswerStream::new(kind, limits)),
     };
     loop {
         let count = reader
-            .read(&mut chunk)
+            .read(chunk.as_mut_slice())
             .await
             .map_err(|_| LocalAgentError::PipeFailed)?;
         if count == 0 {
@@ -807,10 +809,10 @@ async fn discard_stderr(
     budget: &AtomicUsize,
 ) -> Result<(), LocalAgentError> {
     let mut discarded = 0usize;
-    let mut chunk = [0_u8; 8192];
+    let mut chunk = vec![0_u8; 8192];
     loop {
         let count = reader
-            .read(&mut chunk)
+            .read(chunk.as_mut_slice())
             .await
             .map_err(|_| LocalAgentError::PipeFailed)?;
         if count == 0 {
@@ -845,6 +847,71 @@ async fn observe_cancellation(cancellation: &RequestCancellation) {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn local_agent_futures_keep_pipe_buffers_on_the_heap() {
+        fn pipe_size<F>(_: impl FnOnce(tokio::io::Empty, &'static AtomicUsize) -> F) -> usize {
+            std::mem::size_of::<F>()
+        }
+        fn probe_size<F>(
+            _: impl FnOnce(
+                &'static LocalAgentClient,
+                &'static LocalAgentConfig,
+                &'static RequestCancellation,
+            ) -> F,
+        ) -> usize {
+            std::mem::size_of::<F>()
+        }
+        fn ask_size<F>(
+            _: impl FnOnce(
+                &'static LocalAgentClient,
+                ApprovedLocalAsk,
+                LocalAgentCredential,
+                &'static RequestCancellation,
+            ) -> F,
+        ) -> usize {
+            std::mem::size_of::<F>()
+        }
+        // Measure the unpolled state machines without spawning a CLI or using
+        // credentials. Nested select/join futures must not embed pipe buffers.
+        let sizes = [
+            (
+                "stdout",
+                pipe_size(|reader, budget| {
+                    read_stdout(
+                        reader,
+                        OutputMode::Text,
+                        LocalAgentLimits::default(),
+                        budget,
+                    )
+                }),
+                4 * 1024,
+            ),
+            (
+                "stderr",
+                pipe_size(|reader, budget| discard_stderr(reader, 1024 * 1024, budget)),
+                4 * 1024,
+            ),
+            (
+                "probe",
+                probe_size(|client, config, cancellation| client.probe(config, cancellation)),
+                16 * 1024,
+            ),
+            (
+                "ask",
+                ask_size(|client, approved, credential, cancellation| {
+                    client.ask(approved, credential, cancellation)
+                }),
+                16 * 1024,
+            ),
+        ];
+        for (name, size, _) in sizes {
+            eprintln!("local agent {name} future: {size} bytes");
+        }
+        for (name, size, limit) in sizes {
+            assert!(size < limit, "local agent {name} future uses {size} bytes");
+        }
+    }
 
     #[test]
     fn version_parser_does_not_accept_prefix_guesses_or_future_versions() {

@@ -43,6 +43,7 @@ def main():
             ["cargo", "fmt", "--all", "--check"],
             ["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
             ["cargo", "test", "--workspace", "--locked", "--", "--test-threads=4"],
+            ["cargo", "test", "-p", "keelshell-ai", "--test", "local_agent_process", "--locked", "--", "--controller-small-stack"],
         ]:
             print("Running: " + " ".join(command), flush=True)
             subprocess.run(command, cwd=ROOT, env=env, check=True)
