@@ -1549,6 +1549,7 @@ mod tests {
 
     #[::core::prelude::v1::test]
     fn installation_roots_follow_packaged_layouts() {
+        #[cfg(not(windows))]
         assert_eq!(
             installation_root(
                 Path::new("/opt/keelshell/usr/bin/keelshell-app"),
