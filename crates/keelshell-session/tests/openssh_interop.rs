@@ -4,9 +4,12 @@
 
 use std::{error::Error, path::PathBuf, sync::Arc, time::Duration};
 
+use keelshell_core::{BatchTaskSkipReason, BatchTaskSpec, BatchWorkflowPlan};
 use keelshell_session::{
-    SshAuth, SshOptions, SshSession,
+    BatchOutcome, SshAuth, SshOptions, SshSession, WorkflowBinding, WorkflowOptions,
+    WorkflowTaskResult,
     sftp::{SftpSession, TransferEvent, TransferHandle, TransferSpec},
+    start_workflow,
 };
 use russh::keys::{HashAlg, PublicKey};
 
@@ -140,6 +143,97 @@ async fn pause_after_progress(handle: &mut TransferHandle, existing: u64) -> Tes
             _ => {}
         }
     }
+}
+
+#[tokio::test]
+#[ignore = "requires a disposable OpenSSH loopback server and KEELSHELL_OPENSSH_* settings"]
+async fn openssh_reviewed_workflow_runs_dependencies_and_blocks_failed_descendants() -> TestResult {
+    tokio::time::timeout(Duration::from_secs(60), async {
+        let fixture = Fixture::connect().await?;
+        let target = uuid::Uuid::from_u128(101);
+        let id = uuid::Uuid::from_u128;
+        // Only the caller-created disposable path is interpolated; quote it as
+        // one POSIX shell word rather than relying on its current random name.
+        let marker = format!(
+            "'{}'",
+            fixture.path("workflow-marker").replace('\'', "'\\''")
+        );
+        let task = |value, command: String, dependencies: Vec<_>| BatchTaskSpec {
+            id: id(value),
+            target_id: target,
+            command,
+            dependencies,
+        };
+        let plan = BatchWorkflowPlan::new(vec![
+            task(5, "printf independent".into(), vec![]),
+            task(4, "printf should-not-run".into(), vec![id(3)]),
+            task(3, "exit 7".into(), vec![id(2)]),
+            task(2, format!("cat {marker}"), vec![id(1)]),
+            task(1, format!("printf first > {marker}"), vec![]),
+        ])?;
+        let fingerprint = plan.review_token();
+        let receipt = start_workflow(
+            plan.confirm(fingerprint)?,
+            vec![WorkflowBinding {
+                id: target,
+                session: fixture.ssh.clone(),
+            }],
+            WorkflowOptions {
+                timeout: Duration::from_secs(5),
+                ..Default::default()
+            },
+        )?
+        .finish()
+        .await?;
+        assert_eq!(receipt.fingerprint, fingerprint);
+        assert!(!receipt.cancelled && !receipt.stopped_after_failure);
+        assert_eq!(receipt.tasks.len(), 5);
+        for (value, expected_code, expected_stdout) in [
+            (1, 0, b"".as_slice()),
+            (2, 0, b"first".as_slice()),
+            (3, 7, b"".as_slice()),
+            (5, 0, b"independent".as_slice()),
+        ] {
+            let result = receipt
+                .tasks
+                .iter()
+                .find(|task| task.id == id(value))
+                .ok_or("workflow task receipt is missing")?;
+            assert_eq!(result.target_id, target);
+            let WorkflowTaskResult::Transport { row } = &result.result else {
+                return Err("expected an OpenSSH transport receipt".into());
+            };
+            assert_eq!(row.id, id(value));
+            assert_eq!(
+                row.outcome,
+                BatchOutcome::Exited {
+                    code: expected_code
+                }
+            );
+            assert_eq!(row.stdout, expected_stdout);
+            assert!(row.stderr.is_empty());
+        }
+        let skipped = receipt
+            .tasks
+            .iter()
+            .find(|task| task.id == id(4))
+            .ok_or("failed descendant receipt is missing")?;
+        assert_eq!(
+            skipped.result,
+            WorkflowTaskResult::Skipped {
+                reason: BatchTaskSkipReason::DependencyNotSucceeded { dependency: id(3) },
+            }
+        );
+        assert_eq!(
+            fixture
+                .sftp
+                .read_regular(&fixture.path("workflow-marker"), 5)
+                .await?,
+            b"first"
+        );
+        fixture.close(&["workflow-marker"], &[]).await
+    })
+    .await?
 }
 
 #[tokio::test]

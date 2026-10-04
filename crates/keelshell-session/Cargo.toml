@@ -6,6 +6,7 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+keelshell-core = { path = "../keelshell-core" }
 thiserror.workspace = true
 tokio = { workspace = true, features = ["signal"] }
 russh.workspace = true

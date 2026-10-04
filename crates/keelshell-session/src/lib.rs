@@ -12,6 +12,7 @@ pub mod forwarding;
 pub mod monitor;
 pub mod sftp;
 pub mod ssh;
+pub mod workflow;
 
 pub use batch::{
     BatchError, BatchEvent, BatchHandle, BatchNotStartedReason, BatchOptions, BatchOutcome,
@@ -26,4 +27,8 @@ pub use ssh::{
     ConnectionEnd, ConnectionState, ExecOutput, KeyboardInteractiveChallenge,
     KeyboardInteractivePrompt, ProxyCredentials, ProxyError, ProxyKind, RetryPolicy, ShellEnd,
     SshAuth, SshOptions, SshProxy, SshSession, SshShell, SshShellWriter,
+};
+pub use workflow::{
+    WorkflowBinding, WorkflowError, WorkflowEvent, WorkflowHandle, WorkflowOptions,
+    WorkflowReceipt, WorkflowTaskReceipt, WorkflowTaskResult, start_workflow,
 };
