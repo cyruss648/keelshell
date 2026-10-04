@@ -29,6 +29,8 @@ Claude 的固定环境关闭非必要流量、反馈调查、官方 marketplace 
 
 ## 输出与生命周期
 
+stdout/stderr 的固定读流分块直接在堆上分配，避免跨 `await` 的数组进入嵌套 join/select 和公开 probe/Ask Future。叶子、公开请求和自托管完整控制器保留尺寸回归，完整进程场景额外在显式 2 MiB 栈上运行；常规入口不扩大原生进程主线程栈。原 Windows CI 栈溢出与修复前后证据见[小栈记录](../testing/records/2026-10-04-local-agent-windows-stack.md)，新的 Windows 原生 CI 仍待验证。
+
 stdout 按 JSONL 有界增量解析，支持分割的 UTF-8 和 CRLF。总输出、单行、完整回答与帧数分别设界限；stderr 有独立上限，边读边丢弃，不回显供应商错误、凭据或上下文。完整 assistant 文本和最终成功回执必须同时成立，非零退出、未知工具事件、乱序、重复、末行缺失换行与截断均拒绝。思考内容或工具结果不会成为答案。已知推理凭据在回答中被再次遮蔽。
 
 进程使用 `process-wrap` 的 Unix Process Group / Windows Job Object。所有已等待的终态都先停止所属进程树，再等待有界清理，随后移除 scratch。管道读写与 leader 退出同时被观察；leader 退出后立即停止容器，再有界排空并验证已写入的协议，避免继承管道的后代拖延到请求超时。输出协议或界限错误即时终止，不等待 leader 自然退出。macOS zombie-only group 可能短暂返回 EPERM：先回收 leader 再重新发送信号，第二次 EPERM 仍失败，只有已不存在的进程组可以被接受。`process-wrap 10.0.1` 的 Windows completion-port wait 未区分 Job 消息类型，不能单独证明后代已停止。因此增加 `win32job` 公共 safe API 的最小外层 observer：它在登记顺序上位于内层 JobObject 之前，后者在实际 spawn 前暂停进程；observer 先分配外层 Job，内层再分配并恢复线程。`OwnedChild` 保持外层 handle 生命周期，仅开启 kill-on-close，不开启 breakaway 或 UI restrictions。发送内层 terminate 并 await 后，在同一个三秒清理期限内查询外层 PID 列表为空才置清理成功，任意查询错误或到期 typed 失败；固定约 1024 PID 缓冲上限也不会被转为空列表。

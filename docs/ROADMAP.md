@@ -31,6 +31,6 @@ OpenSSH 配置导入已接入安全子集：精确 Host、HostName、Port、User
 | D2 | UI-03/04/05：丰富但克制的控件、专业工作区、模态/日志/滚动 | 继续实施；主题token基础见D1。按连接/终端/文件任务/AI设置逐屏升级；修复英文SFTP页脚在AI打开时裁切、已展开tooltip语言滞留及背景模态AX隔离；独立截图审查与最小原生窗口验收 |
 | A1 | 共享API/LocalAgent配置、上下文与授权契约 | 已实现显式backend、旧配置API默认、路径/地址独立校验、准确stdin预览、版本/能力探针、取消/revision与vault v2精确backend/path绑定；详见[ADR0040](adr/0040-named-local-agent-settings-and-reviewed-asks.md) |
 | A2 | MCP-01至04：KeelShell对外MCP | 默认关闭的stdio伴随程序、双向认证/方向AEAD桌面IPC、精确活动SSH句柄、七项固定工具和原生人工审阅已接通。新独立复审、963普通+8文档整合门禁与macOS受控片段/SFTP读取、越权拒绝、批准/拒绝、撤权及重启闭环通过。实际Claude Code/Codex MCP、文件修改提案、最终发布包及其他平台原生仍待验证/实施，见[桌面记录](testing/records/2026-10-04-mcp-desktop-bridge.md)及[指南](product/EXTERNAL_MCP.md) |
-| A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | Codex0.160.0/Claude2.1.285固定Ask后端与应用接通；独立空目录/受控环境、完整JSONL终态与owned进程清理；929普通+8文档、47打包、新独立审查与macOS实际安装版→自有SSE窗口问答/取消/重启密钥失效通过。仅显式API密钥，不复用订阅登录；自定义工作目录/预算/环境引用、可见步骤流、Agent与Windows/Linux原生继续开发/验证，见[记录](testing/records/2026-10-04-local-agent-ui.md) |
+| A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | Codex0.160.0/Claude2.1.285固定Ask后端与应用接通；独立空目录/受控环境、完整JSONL终态与owned进程清理；929普通+8文档、47打包、新独立审查与macOS实际安装版→自有SSE窗口问答/取消/重启密钥失效通过。首轮新源码Windows CI出现控制器主线程栈溢出；两处读流缓冲已堆分配，尺寸与显式2MiB完整控制器回归通过，修复be9590f2的Windows原生CI已通过两种完整控制器，914普通+8文档；同次Linux另有MCP错误响应超时，整次CI仍失败，见[小栈记录](testing/records/2026-10-04-local-agent-windows-stack.md)。仅显式API密钥，不复用订阅登录；自定义工作目录/预算/环境引用、可见步骤流、Agent与Windows/Linux原生继续开发/验证，见[记录](testing/records/2026-10-04-local-agent-ui.md) |
 
 D1先于后续新界面，原有后端与任务目标继续保留。全部新增条目的细节、参考与验收见正式计划；“本地智能体”不是本地terminal管理，也不等于模型离线。

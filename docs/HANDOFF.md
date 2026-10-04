@@ -16,7 +16,7 @@
 - 命名AI配置已显式区分模型API、Codex CLI与Claude Code，旧metadata默认API；路径/base URL校验、probe、临时密钥/vault v2精确绑定、完整stdin审核与后台Ask/取消已接通。最终本机门禁929普通+8文档、6脚本、自托管进程harness、strictClippy/fmt/x.y与47打包通过；新独立core/app复审无剩余可复现P1/P2。
 - 最终macOS包SHA与原生证据见[记录](testing/records/2026-10-04-local-agent-ui.md)：实际安装版Codex0.160.0/Claude2.1.285→自有SSE问答，选择125字节SSH上下文、长JSON滚动/显式发送、建议入审核区、语言/主题保留、慢请求取消、重启密钥缺失均证实；退出后owned PIDs/listeners/scratch均清理。没有云端账户或客户SSH验收。
 - 使用见[指南](product/LOCAL_AGENTS.md)；固定单次Ask不继承现有项目/hooks/MCP/订阅登录。Agent、目录/预算/环境编辑与Windows/Linux native继续保留。新功能提交的远端CI另行追加。对外MCP方向不变，独立于内置Ask。
-- 提交`3fe0c98`的[Quality37208098775](https://github.com/cyruss648/keelshell/actions/runs/37208098775)中macOS/Linux成功，Windows自托管process harness主线程stack overflow，整次CI失败。原失败保留；后续堆缓冲与2 MiB控制器回归修复须以其新提交Windows CI核验，不能沿用本机结果声称修复已被Windows接受。
+- 提交`3fe0c98`的[Quality37208098775](https://github.com/cyruss648/keelshell/actions/runs/37208098775)中macOS/Linux成功，Windows自托管process harness主线程stack overflow，整次CI失败。堆缓冲与2 MiB控制器修复`be9590f2`的新[Quality37210745161](https://github.com/cyruss648/keelshell/actions/runs/37210745161)中Windows与macOS成功，Windows914普通+8doc及两种控制器通过；同次Linux发生既有MCP错误响应3秒超时，整次CI仍失败。根40次4并发复查也复现一次，原因未证明，不放宽期限。根合并门禁964普通+8doc+6脚本通过，见[小栈记录](testing/records/2026-10-04-local-agent-windows-stack.md)。
 
 ## 2026-10-04 继续交接（覆盖下方历史状态）
 
