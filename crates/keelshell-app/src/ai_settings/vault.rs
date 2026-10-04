@@ -61,7 +61,7 @@ impl AiSettingsPanel {
         if !uses_api_key_authentication(&profile.authentication) {
             return;
         }
-        if let Err(error) = profile.validate_current_transport() {
+        if let Err(error) = super::validate_selected_transport(profile) {
             self.status =
                 Message::detail("请先补全配置", "Complete this configuration first", error);
             cx.notify();
@@ -316,7 +316,7 @@ impl AiSettingsPanel {
                 .child(Button::new("ai-key-unlock").ghost().label(t(cx, "解锁密钥", "Unlock key")).disabled(self.saving || self.vault_busy() || reference.is_none()).on_click(cx.listener(|panel, _, window, cx| panel.begin_vault(VaultAction::Unlock, window, cx))))
                 .child(Button::new("ai-key-lock").ghost().label(t(cx, "清除临时密钥", "Clear temporary key")).disabled(self.saving || self.vault_busy() || !has_key).on_click(cx.listener(|panel, _, window, cx| panel.unlink_or_lock(false, window, cx))))
                 .child(Button::new("ai-key-unlink").ghost().label(t(cx, "解除关联", "Unlink key")).disabled(self.saving || self.vault_busy() || reference.is_none()).on_click(cx.listener(|panel, _, window, cx| panel.unlink_or_lock(true, window, cx)))))
-            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx, "更改地址、预设或认证会清除草稿密钥与关联。清除与解除关联需应用后对助手生效。", "Changing endpoint, preset or authentication clears the draft key and reference. Apply clearing/unlinking to update the assistant.")));
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx, "更改地址、调用方式、CLI 路径或认证会清除草稿密钥与关联。清除与解除关联需应用后对助手生效。", "Changing endpoint, invocation, CLI path or authentication clears the draft key and reference. Apply clearing/unlinking to update the assistant.")));
         if let Some(prompt) = &self.vault_prompt {
             content = content
                 .child(

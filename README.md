@@ -48,7 +48,7 @@ KeelShell 面向每天需要连接服务器、查看日志和处理远程文件�
 | **远程文件** | SFTP 浏览、文件与递归目录上传下载、传输审核、进度、暂停/继续与取消，内容校验后续传文件和目录；失败传输可在同一 SSH 会话中显式发起新的只读续传校验；支持新建目录、重命名、删除、审核式 POSIX 权限修改、文本查看、基于读取基线的本地差异预览和审核保存；文件面板提供元数据比较、SHA-256 内容校验及确认后的双向目录合并，保留目标独有项 |
 | **主机状态** | Linux CPU、内存、负载、运行时间、磁盘容量、网络计数、进程列表与监听端口诊断 |
 | **端口转发** | 本地/远端 TCP 转发与回环 SOCKS5 代理，显示实际监听地址、运行状态并停止隧道 |
-| **AI 助手** | 多个命名服务配置、Chat Completions/Responses/Anthropic Messages 模型发现与连接测试、上下文选择、协议精确请求预览、输出 Token 上限与保守上下文窗口预算、回答与命令建议；可把回复整理成绑定会话的逐步诊断计划，仍需逐条审核 |
+| **AI 助手** | 模型 API / Codex CLI / Claude Code 命名配置、Chat Completions/Responses/Anthropic Messages 模型发现与连接测试、上下文选择、协议精确请求预览、输出 Token 上限与保守上下文窗口预算、回答与命令建议；可把回复整理成绑定会话的逐步诊断计划，仍需逐条审核 |
 | **关于与更新** | 应用内项目主页、版本与变更日志；按平台检查 GitHub Release、下载并校验 SHA-256，可选安全安装并重启 |
 
 暂停会等待在途操作确认，再显示“已暂停”。需要续传已有部分文件或目录时，手动选择源与目标，审核内容校验结果后继续；重连或重启后可重新创建续传计划。当前验证范围见[传输验收记录](docs/testing/records/2026-10-03-sftp-resume.md)。
@@ -63,13 +63,13 @@ KeelShell 面向每天需要连接服务器、查看日志和处理远程文件�
 
 ## AI，由你掌握操作节奏
 
-1. **配置服务。** 创建命名配置，选择模型，按需发现模型或测试连接。当前支持兼容 Chat Completions、Responses 和 Anthropic Messages 的接口，包括自建服务；Anthropic 请求使用 x-api-key 和人工可审阅的 Messages 预览。
+1. **配置服务。** 创建命名配置，选择模型 API、Codex CLI 或 Claude Code。API 支持 Chat Completions、Responses 和 Anthropic Messages，包括自建服务；可按需发现模型或测试连接。本地 CLI 填写原生可执行路径、基础地址、显式密钥和模型，检查只验证版本/能力；使用步骤与支持范围见[本地智能体指南](docs/product/LOCAL_AGENTS.md)。
 2. **选择上下文。** 选取终端内容，检查脱敏后的实际请求，再手动发送。
 3. **审阅建议。** 阅读回答，将需要的命令填入命令栏，确认内容和目标后执行。
 
 AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解锁配置本身不会联网。更多协议与辅助工作流见[路线图](docs/ROADMAP.md)。
 
-应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。专业视觉升级、本地 Claude Code/Codex 智能体及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力。
+应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。本地 CLI Ask 已通过实际安装版到回环服务的 macOS 窗口问答与取消验证；不复用订阅登录，没有 CLI 工具执行。专业视觉升级、Agent 工作流及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力。
 
 对外 MCP 的独立 stdio 服务端基础已实现并通过独立复审，默认关闭，工具限于授权读取和待人工审阅的命令提案。桌面授权与真实 SSH 桥接仍在开发，当前服务尚不能访问应用会话，详见[服务端验证](docs/testing/records/2026-10-04-mcp-stdio-server.md)。
 

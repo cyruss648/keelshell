@@ -213,3 +213,103 @@ fn anthropic_x_api_key_roundtrips_as_a_distinct_vault_binding() -> Result<(), Er
     assert!(payload.contains("header:x-api-key"));
     Ok(())
 }
+
+#[test]
+fn legacy_binding_unlocks_only_api_and_v2_requires_exact_executable() -> Result<(), Error> {
+    let profile = profile();
+    let mut legacy: serde_json::Value =
+        serde_json::from_str(&encode(&profile, secret("fixture-private-key"))?)
+            .map_err(|_| Error::VaultCorrupt)?;
+    legacy["version"] = serde_json::json!(1);
+    legacy
+        .as_object_mut()
+        .unwrap_or_else(|| panic!("object"))
+        .remove("backend");
+    let legacy = Zeroizing::new(serde_json::to_string(&legacy).map_err(|_| Error::VaultCorrupt)?);
+    assert_eq!(
+        decode(&profile, legacy.clone())?.as_str(),
+        "fixture-private-key"
+    );
+    let mut local = profile.clone();
+    local.backend = AiBackend::LocalAgent {
+        agent: keelshell_core::AiLocalAgent::Codex,
+        executable: std::env::temp_dir()
+            .join("codex-fixture")
+            .to_string_lossy()
+            .into_owned(),
+    };
+    assert!(matches!(
+        decode(&local, legacy),
+        Err(Error::VaultEntryMismatch)
+    ));
+    let payload = encode(&local, secret("fixture-private-key"))?;
+    assert_eq!(
+        decode(&local, payload.clone())?.as_str(),
+        "fixture-private-key"
+    );
+    if let AiBackend::LocalAgent { executable, .. } = &mut local.backend {
+        *executable = std::env::temp_dir()
+            .join("different-cli")
+            .to_string_lossy()
+            .into_owned();
+    }
+    assert!(matches!(
+        decode(&local, payload),
+        Err(Error::VaultEntryMismatch)
+    ));
+    Ok(())
+}
+
+#[test]
+fn local_encrypted_key_roundtrip_preserves_process_only_unlock() -> Result<(), Error> {
+    let fixture = Fixture::new();
+    let mut profile = profile();
+    profile.backend = AiBackend::LocalAgent {
+        agent: keelshell_core::AiLocalAgent::Codex,
+        executable: std::env::temp_dir()
+            .join("not-executed-codex-fixture")
+            .to_string_lossy()
+            .into_owned(),
+    };
+    profile.api_style = AiApiStyle::Responses;
+    profile.endpoint = "https://api.openai.com/v1".into();
+    let cancelled = AtomicBool::new(false);
+    let Completion::Saved(id) = operate(
+        fixture.path(),
+        &profile,
+        VaultAction::Save,
+        secret("fixture-master"),
+        secret("fixture-private-key"),
+        &cancelled,
+    )?
+    else {
+        panic!("saved reference");
+    };
+    profile.authentication = AiAuthentication::Bearer {
+        credential: Some(AiSecretRef::SecretStore { id }),
+    };
+    let state_store = StateStore::new(fixture.0.join("state.json"));
+    let mut state = state_store.load()?;
+    state.settings.ai_profiles.upsert(profile.clone())?;
+    state_store.save(&state)?;
+    let state = state_store.load()?;
+    let reopened = &state.settings.ai_profiles.profiles[0];
+    let Completion::Unlocked(key) = operate(
+        fixture.path(),
+        reopened,
+        VaultAction::Unlock,
+        secret("fixture-master"),
+        secret(""),
+        &cancelled,
+    )?
+    else {
+        panic!("unlocked");
+    };
+    assert_eq!(key.as_str(), "fixture-private-key");
+    for path in [fixture.path(), state_store.path().to_owned()] {
+        let text = std::fs::read_to_string(path)?;
+        assert!(!text.contains("fixture-private-key"));
+        assert!(!text.contains("fixture-master"));
+    }
+    Ok(())
+}

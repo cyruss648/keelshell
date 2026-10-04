@@ -1,7 +1,7 @@
 //! Named API configurations. This module stores metadata and credential
 //! references only; it neither resolves secrets nor starts local executables.
 
-use crate::{AiSettings, ValidationError};
+use crate::{AiBackend, AiLocalAgent, AiSettings, ValidationError};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, HashSet},
@@ -345,11 +345,15 @@ pub struct NamedAiProfile {
     pub id: Uuid,
     /// User-visible name, unique within a catalog ignoring letter case.
     pub name: String,
+    /// Explicit execution choice. Missing metadata in older profiles stays API.
+    #[serde(default)]
+    pub backend: AiBackend,
     /// Editable preset provenance; it is not a verified provider identity.
     pub preset: AiPreset,
     /// Explicit request/response protocol.
     pub api_style: AiApiStyle,
-    /// Complete HTTPS request endpoint; HTTP is allowed only on loopback.
+    /// Complete HTTP request endpoint or a local CLI's inference base URL.
+    /// Requires HTTPS except for explicitly selected loopback HTTP services.
     pub endpoint: String,
     /// Explicit model ID; never filled with an assumed latest model.
     pub model: String,
@@ -373,6 +377,7 @@ impl fmt::Debug for NamedAiProfile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("NamedAiProfile")
             .field("id", &self.id)
+            .field("backend", &self.backend)
             .field("preset", &self.preset)
             .field("api_style", &self.api_style)
             .finish_non_exhaustive()
@@ -386,6 +391,7 @@ impl NamedAiProfile {
         Self {
             id: Uuid::new_v4(),
             name: String::new(),
+            backend: AiBackend::Api,
             preset,
             api_style: preset.api_style(),
             endpoint: preset.endpoint().into(),
@@ -412,8 +418,9 @@ impl NamedAiProfile {
             return Err(invalid("ai.profile.id", "cannot be nil"));
         }
         bounded("ai.profile.name", &self.name, 120, true)?;
+        self.backend.validate()?;
         model_id(&self.model)?;
-        endpoint(&self.endpoint)?;
+        endpoint(&self.endpoint, self.backend != AiBackend::Api)?;
         let mut names = HashSet::new();
         match &self.authentication {
             AiAuthentication::None => {}
@@ -506,6 +513,12 @@ impl NamedAiProfile {
     /// for a configured credential reference.
     pub fn validate_current_transport(&self) -> Result<(), ValidationError> {
         self.validate()?;
+        if self.backend != AiBackend::Api {
+            return Err(invalid(
+                "ai.profile.backend",
+                "this profile requires the local CLI adapter",
+            ));
+        }
         if !self.api_style.supports_current_transport() {
             return Err(invalid(
                 "ai.profile.api_style",
@@ -562,6 +575,54 @@ impl NamedAiProfile {
             return Err(invalid(
                 "ai.profile.context_window",
                 "must leave input capacity after the output reserve (4096 by default)",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Validate supported local Ask metadata without probing or starting a CLI.
+    /// The application must separately detect capabilities and resolve a key.
+    /// Token controls and advanced routing are rejected rather than silently lost.
+    pub fn validate_local_agent_transport(&self) -> Result<(), ValidationError> {
+        self.validate()?;
+        let AiBackend::LocalAgent { agent, .. } = self.backend else {
+            return Err(invalid(
+                "ai.profile.backend",
+                "this profile requires the HTTP adapter",
+            ));
+        };
+        let authentication_supported = match agent {
+            AiLocalAgent::Codex => {
+                self.api_style == AiApiStyle::Responses
+                    && matches!(
+                        self.authentication,
+                        AiAuthentication::Bearer {
+                            credential: None | Some(AiSecretRef::SecretStore { .. })
+                        }
+                    )
+            }
+            AiLocalAgent::ClaudeCode => {
+                self.api_style == AiApiStyle::AnthropicMessages
+                    && matches!(
+                        &self.authentication,
+                        AiAuthentication::Header { name, credential: None | Some(AiSecretRef::SecretStore { .. }) }
+                            if name.eq_ignore_ascii_case("x-api-key")
+                    )
+            }
+        };
+        if !authentication_supported
+            || !self.custom_headers.is_empty()
+            || self.proxy != AiProxy::Direct
+            || self.max_output_tokens.is_some()
+            || self.context_window_tokens.is_some()
+            || self
+                .reasoning_by_model
+                .get(&self.model)
+                .is_some_and(|setting| setting.selection != AiReasoningSelection::ProviderDefault)
+        {
+            return Err(invalid(
+                "ai.profile",
+                "local Ask requires its fixed protocol and explicit key; advanced API options are unsupported",
             ));
         }
         Ok(())
@@ -824,7 +885,7 @@ fn clean_url(field: &'static str, value: &str) -> Result<Url, ValidationError> {
     Ok(parsed)
 }
 
-fn endpoint(value: &str) -> Result<(), ValidationError> {
+fn endpoint(value: &str, allow_origin: bool) -> Result<(), ValidationError> {
     let parsed = clean_url("ai.profile.endpoint", value)?;
     let loopback = match parsed.host() {
         Some(Host::Ipv4(ip)) => ip.is_loopback(),
@@ -838,7 +899,7 @@ fn endpoint(value: &str) -> Result<(), ValidationError> {
             "requires HTTPS except for an explicit loopback HTTP endpoint",
         ));
     }
-    if matches!(parsed.path(), "" | "/") {
+    if !allow_origin && matches!(parsed.path(), "" | "/") {
         return Err(invalid(
             "ai.profile.endpoint",
             "must be the full request endpoint, not only an API origin",

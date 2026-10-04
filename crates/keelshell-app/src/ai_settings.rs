@@ -8,10 +8,14 @@ use gpui_kit::{
     *,
 };
 use keelshell_ai::{
-    AiError, AiErrorCategory, ConnectivityReport, ModelCatalog, ProviderClient, ProviderConfig,
+    AiError, AiErrorCategory, ConnectivityReport, LocalAgentClient, LocalAgentConfig,
+    LocalAgentError, LocalAgentKind, LocalAgentProbe, ModelCatalog, ProviderClient, ProviderConfig,
     ProviderEndpoint, ProviderProtocol, RequestCancellation,
 };
-use keelshell_core::{AiApiStyle, AiAuthentication, AiPreset, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{
+    AiApiStyle, AiAuthentication, AiBackend, AiLocalAgent, AiPreset, AiProfileCatalog,
+    NamedAiProfile,
+};
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
@@ -54,6 +58,7 @@ pub enum AiSettingsEvent {
 #[derive(Clone, PartialEq, Eq)]
 struct EditorValues {
     name: String,
+    executable: String,
     endpoint: String,
     model: String,
     key: Zeroizing<String>,
@@ -61,10 +66,11 @@ struct EditorValues {
     output_tokens: String,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OperationKind {
     Models,
     Test,
+    LocalProbe,
 }
 
 enum OperationResult {
@@ -80,6 +86,7 @@ pub struct AiSettingsPanel {
     selected: Option<Uuid>,
     focus: FocusHandle,
     name: Entity<InputState>,
+    executable: Entity<InputState>,
     endpoint: Entity<InputState>,
     model: Entity<InputState>,
     key: Entity<InputState>,
@@ -126,6 +133,7 @@ impl AiSettingsPanel {
         let profile = selected.and_then(|id| catalog.profiles.iter().find(|p| p.id == id));
         let values = EditorValues {
             name: profile.map_or_else(String::new, |p| p.name.clone()),
+            executable: profile.map_or_else(String::new, executable_value),
             endpoint: profile.map_or_else(String::new, |p| p.endpoint.clone()),
             model: profile.map_or_else(String::new, |p| p.model.clone()),
             key: selected
@@ -155,8 +163,18 @@ impl AiSettingsPanel {
             &values.endpoint,
             t(
                 cx,
-                "完整的 chat/completions 地址",
-                "Full chat/completions URL",
+                "模型 API 完整请求地址 / CLI 服务基础地址",
+                "Full API request URL / CLI service base URL",
+            ),
+            window,
+            cx,
+        );
+        let executable = field(
+            &values.executable,
+            t(
+                cx,
+                "本地 CLI 可执行文件的绝对路径",
+                "Absolute path to the native CLI executable",
             ),
             window,
             cx,
@@ -206,6 +224,7 @@ impl AiSettingsPanel {
         }
         let subscriptions = [
             &name,
+            &executable,
             &endpoint,
             &model,
             &key,
@@ -228,6 +247,7 @@ impl AiSettingsPanel {
             selected,
             focus,
             name,
+            executable,
             endpoint,
             model,
             key,
@@ -258,14 +278,19 @@ impl AiSettingsPanel {
     pub fn refresh_locale(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         for (field, zh, en) in [
             (
+                &self.executable,
+                "本地 CLI 可执行文件的绝对路径",
+                "Absolute path to the native CLI executable",
+            ),
+            (
                 &self.name,
                 "例如：日常运维助手",
                 "For example: Operations assistant",
             ),
             (
                 &self.endpoint,
-                "完整的 chat/completions 地址",
-                "Full chat/completions URL",
+                "模型 API 完整请求地址 / CLI 服务基础地址",
+                "Full API request URL / CLI service base URL",
             ),
             (
                 &self.model,
@@ -331,6 +356,7 @@ impl AiSettingsPanel {
     fn read_values(&self, cx: &App) -> EditorValues {
         EditorValues {
             name: self.name.read(cx).value().to_string(),
+            executable: self.executable.read(cx).value().to_string(),
             endpoint: self.endpoint.read(cx).value().to_string(),
             model: self.model.read(cx).value().to_string(),
             key: Zeroizing::new(self.key.read(cx).value().to_string()),
@@ -347,7 +373,8 @@ impl AiSettingsPanel {
         if values == self.editor_values {
             return;
         }
-        let endpoint_changed = values.endpoint != self.editor_values.endpoint;
+        let endpoint_changed = values.endpoint != self.editor_values.endpoint
+            || values.executable != self.editor_values.executable;
         let key_changed = values.key != self.editor_values.key;
         if endpoint_changed {
             // Reject the old field value even before its queued UI clear runs.
@@ -362,6 +389,9 @@ impl AiSettingsPanel {
             profile.name.clone_from(&values.name);
             profile.endpoint.clone_from(&values.endpoint);
             profile.model.clone_from(&values.model);
+            if let AiBackend::LocalAgent { executable, .. } = &mut profile.backend {
+                executable.clone_from(&values.executable);
+            }
             self.token_drafts.insert(
                 profile.id,
                 (values.context_tokens.clone(), values.output_tokens.clone()),
@@ -415,6 +445,7 @@ impl AiSettingsPanel {
         let token_draft = self.selected.and_then(|id| self.token_drafts.get(&id));
         let values = EditorValues {
             name: self.profile().map_or_else(String::new, |p| p.name.clone()),
+            executable: self.profile().map_or_else(String::new, executable_value),
             endpoint: self
                 .profile()
                 .map_or_else(String::new, |p| p.endpoint.clone()),
@@ -439,6 +470,7 @@ impl AiSettingsPanel {
         };
         for (field, value) in [
             (&self.name, values.name.as_str()),
+            (&self.executable, &values.executable),
             (&self.endpoint, &values.endpoint),
             (&self.model, &values.model),
             (&self.key, &values.key),
@@ -502,6 +534,9 @@ impl AiSettingsPanel {
             return;
         }
         self.sync_editor(cx);
+        if self.profile().is_some_and(|p| p.backend != AiBackend::Api) {
+            return;
+        }
         if let Some(profile) = self
             .selected
             .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
@@ -526,6 +561,9 @@ impl AiSettingsPanel {
 
     fn set_api_style(&mut self, style: AiApiStyle, window: &mut Window, cx: &mut Context<Self>) {
         self.sync_editor(cx);
+        if self.profile().is_some_and(|p| p.backend != AiBackend::Api) {
+            return;
+        }
         let Some(profile) = self
             .selected
             .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
@@ -571,6 +609,9 @@ impl AiSettingsPanel {
 
     fn set_authentication(&mut self, bearer: bool, window: &mut Window, cx: &mut Context<Self>) {
         self.sync_editor(cx);
+        if self.profile().is_some_and(|p| p.backend != AiBackend::Api) {
+            return;
+        }
         if let Some(profile) = self
             .selected
             .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
@@ -596,6 +637,9 @@ impl AiSettingsPanel {
 
     fn set_header_authentication(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.sync_editor(cx);
+        if self.profile().is_some_and(|p| p.backend != AiBackend::Api) {
+            return;
+        }
         if let Some(profile) = self
             .selected
             .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
@@ -622,12 +666,142 @@ impl AiSettingsPanel {
         let Some(profile) = self.profile() else {
             return;
         };
-        if let Err(error) = profile.validate_current_transport() {
+        if let Err(error) = validate_selected_transport(profile) {
             self.status = Message::detail("无法设为默认配置", "Cannot set default profile", error);
         } else {
             self.catalog.active_id = self.selected;
             self.changed(false, cx);
         }
+        cx.notify();
+    }
+
+    fn set_backend(
+        &mut self,
+        agent: Option<AiLocalAgent>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.sync_editor(cx);
+        let Some(profile) = self
+            .selected
+            .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
+        else {
+            return;
+        };
+        let current = match profile.backend {
+            AiBackend::Api => None,
+            AiBackend::LocalAgent { agent, .. } => Some(agent),
+        };
+        if current == agent {
+            return;
+        }
+        // Destination, executable and authentication form one approval boundary.
+        // Switching adapters cannot carry keys or unsupported HTTP controls.
+        self.credentials.remove(&profile.id);
+        self.token_drafts.remove(&profile.id);
+        profile.max_output_tokens = None;
+        profile.context_window_tokens = None;
+        profile.custom_headers.clear();
+        profile.proxy = keelshell_core::AiProxy::Direct;
+        profile.reasoning_by_model.clear();
+        profile.model.clear();
+        if let Some(agent) = agent {
+            profile.backend = AiBackend::LocalAgent {
+                agent,
+                executable: String::new(),
+            };
+            profile.preset = AiPreset::Custom;
+            match agent {
+                AiLocalAgent::Codex => {
+                    profile.api_style = AiApiStyle::Responses;
+                    profile.endpoint = "https://api.openai.com/v1".into();
+                    profile.authentication = AiAuthentication::Bearer { credential: None };
+                }
+                AiLocalAgent::ClaudeCode => {
+                    profile.api_style = AiApiStyle::AnthropicMessages;
+                    profile.endpoint = "https://api.anthropic.com".into();
+                    profile.authentication = AiAuthentication::Header {
+                        name: "x-api-key".into(),
+                        credential: None,
+                    };
+                }
+            }
+        } else {
+            profile.backend = AiBackend::Api;
+            profile.preset = AiPreset::OpenAiCompatible;
+            profile.api_style = AiApiStyle::ChatCompletions;
+            profile.endpoint = AiPreset::OpenAiCompatible.endpoint().into();
+            profile.authentication = AiAuthentication::Bearer { credential: None };
+        }
+        self.changed(true, cx);
+        self.load_editor(window, cx);
+    }
+
+    fn start_local_probe(&mut self, cx: &mut Context<Self>) {
+        if self.vault_prompt.is_some() {
+            return;
+        }
+        self.sync_editor(cx);
+        let Some(profile) = self.profile() else {
+            return;
+        };
+        let config = match local_agent_config(profile, true) {
+            Ok(config) => config,
+            Err(error) => {
+                self.status = local_agent_error(error);
+                cx.notify();
+                return;
+            }
+        };
+        self.cancel_operation(false, cx);
+        let cancellation = RequestCancellation::new();
+        self.cancellation = Some(cancellation.clone());
+        self.operation = Some(OperationKind::LocalProbe);
+        let revision = self.operation_revision;
+        self.status = Message::new(
+            "正在检查 CLI 版本与能力；不发送模型请求…",
+            "Checking CLI version and capabilities; no inference request…",
+        );
+        let job = crate::runtime_bridge::spawn(
+            &self.runtime,
+            cx.background_executor().clone(),
+            async move { LocalAgentClient.probe(&config, &cancellation).await },
+        );
+        self._job = Some(cx.spawn(async move |this, cx| {
+            let result = job.await.unwrap_or(Err(LocalAgentError::PipeFailed));
+            let _ = this.update(cx, |panel, cx| {
+                panel.finish_local_probe(revision, result, cx)
+            });
+        }));
+        cx.notify();
+    }
+
+    fn finish_local_probe(
+        &mut self,
+        revision: u64,
+        result: Result<LocalAgentProbe, LocalAgentError>,
+        cx: &mut Context<Self>,
+    ) {
+        if revision != self.operation_revision {
+            return;
+        }
+        self.operation = None;
+        self.cancellation = None;
+        self.status = match result {
+            Ok(probe) => Message::new(
+                format!(
+                    "{} {} 检查通过；发送时将再次核对，不代表模型连接已测试。",
+                    probe.kind().label(),
+                    probe.version()
+                ),
+                format!(
+                    "{} {} capabilities checked; admission repeats on send. Inference connectivity was not tested.",
+                    probe.kind().label(),
+                    probe.version()
+                ),
+            ),
+            Err(error) => local_agent_error(error),
+        };
         cx.notify();
     }
 
@@ -715,6 +889,10 @@ impl AiSettingsPanel {
     }
 
     fn start_operation(&mut self, kind: OperationKind, cx: &mut Context<Self>) {
+        if kind == OperationKind::LocalProbe {
+            self.start_local_probe(cx);
+            return;
+        }
         if self.vault_prompt.is_some() {
             return;
         }
@@ -774,6 +952,7 @@ impl AiSettingsPanel {
             OperationKind::Test => {
                 Message::new("正在发送固定连接测试…", "Sending a fixed connection test…")
             }
+            OperationKind::LocalProbe => Message::empty(),
         };
         let job = crate::runtime_bridge::spawn(
             &self.runtime,
@@ -809,6 +988,7 @@ impl AiSettingsPanel {
                         )
                         .await
                         .map(OperationResult::Test),
+                    OperationKind::LocalProbe => Err(AiError::InvalidEndpoint),
                 }
             },
         );
@@ -865,6 +1045,130 @@ impl AiSettingsPanel {
         }
         cx.notify();
     }
+}
+
+fn executable_value(profile: &NamedAiProfile) -> String {
+    match &profile.backend {
+        AiBackend::Api => String::new(),
+        AiBackend::LocalAgent { executable, .. } => executable.clone(),
+    }
+}
+
+fn validate_selected_transport(
+    profile: &NamedAiProfile,
+) -> Result<(), keelshell_core::ValidationError> {
+    match profile.backend {
+        AiBackend::Api => profile.validate_current_transport(),
+        AiBackend::LocalAgent { .. } => profile.validate_local_agent_transport(),
+    }
+}
+
+/// Construct immutable CLI metadata without filesystem lookup or process I/O.
+/// Probe placeholders are limited to capability detection and cannot become an
+/// approved inference request or silently change stored model/name values.
+pub(crate) fn local_agent_config(
+    profile: &NamedAiProfile,
+    probing: bool,
+) -> Result<LocalAgentConfig, LocalAgentError> {
+    let mut metadata = profile.clone();
+    if probing {
+        if metadata.name.trim().is_empty() {
+            metadata.name = "CLI capability probe".into();
+        }
+        if metadata.model.is_empty() {
+            metadata.model = "capability-probe-only".into();
+        }
+    }
+    metadata
+        .validate_local_agent_transport()
+        .map_err(|_| LocalAgentError::InvalidConfiguration)?;
+    let AiBackend::LocalAgent { agent, executable } = &metadata.backend else {
+        return Err(LocalAgentError::InvalidConfiguration);
+    };
+    let kind = match agent {
+        AiLocalAgent::Codex => LocalAgentKind::Codex,
+        AiLocalAgent::ClaudeCode => LocalAgentKind::ClaudeCode,
+    };
+    LocalAgentConfig::new(
+        kind,
+        PathBuf::from(executable),
+        std::env::temp_dir(),
+        metadata.model,
+    )?
+    .with_inference_endpoint(&metadata.endpoint)
+}
+
+/// Translate typed local failures without displaying paths, stderr or context.
+pub(crate) fn local_agent_error(error: LocalAgentError) -> Message {
+    if let LocalAgentError::Context(error) = &error {
+        return provider_error(error);
+    }
+    let (zh, en) = match error {
+        LocalAgentError::InvalidConfiguration | LocalAgentError::InvalidLimits => (
+            "CLI 配置无效；请检查绝对路径、模型和受支持的选项。",
+            "Invalid CLI configuration; check the absolute path, model and supported options.",
+        ),
+        LocalAgentError::InvalidEndpoint => (
+            "推理服务地址无效；仅支持无凭据的 HTTPS 或回环 HTTP。",
+            "Invalid inference URL; use HTTPS or loopback HTTP without URL credentials.",
+        ),
+        LocalAgentError::UnsupportedExecutable => (
+            "请选择原生 CLI 可执行文件，不能使用 .cmd 或 .bat 启动器。",
+            "Select a native CLI executable, not a .cmd or .bat launcher.",
+        ),
+        LocalAgentError::SpawnFailed => (
+            "无法启动 CLI；请检查路径和执行权限。",
+            "Cannot start CLI; check its path and executable permissions.",
+        ),
+        LocalAgentError::UnsupportedVersion | LocalAgentError::IsolationUnsupported => (
+            "该 CLI 版本或能力尚未通过兼容核对，请使用已验证版本。",
+            "CLI version or capabilities are outside the checked compatibility set. Use a verified version.",
+        ),
+        LocalAgentError::MissingCredential => (
+            "请填写或解锁显式 API 密钥；本切片不复用 CLI 订阅登录。",
+            "Enter or unlock an explicit API key; CLI subscription logins are not reused by this adapter.",
+        ),
+        LocalAgentError::CredentialInContext => (
+            "密钥格式无效或仍出现在审核上下文中；请重新脱敏。",
+            "Credential is invalid or still appears in reviewed context. Redact and review again.",
+        ),
+        LocalAgentError::ReviewExpired => (
+            "CLI 审核已过期，请重新审阅后发送。",
+            "CLI review expired. Prepare and review again.",
+        ),
+        LocalAgentError::Timeout => (
+            "CLI 本地超时；推理服务可能已开始处理。",
+            "CLI timed out locally; inference may already have begun.",
+        ),
+        LocalAgentError::Cancelled => (
+            "CLI 本地调用已取消；推理服务可能已开始处理。",
+            "Local CLI invocation cancelled; inference may already have begun.",
+        ),
+        LocalAgentError::CleanupFailed | LocalAgentError::ScratchFailed => (
+            "CLI 进程或临时数据清理未能确认。",
+            "CLI process or temporary-data cleanup could not be confirmed.",
+        ),
+        LocalAgentError::OutputTooLarge => {
+            ("CLI 输出超过有界限制。", "CLI output exceeded its bound.")
+        }
+        LocalAgentError::UnexpectedOperation => (
+            "CLI 尝试了问答范围之外的工具或 Hook，已拒绝。",
+            "CLI attempted a tool or hook outside Ask scope and was rejected.",
+        ),
+        LocalAgentError::InvalidProtocol | LocalAgentError::EmptyReply => (
+            "CLI 未返回完整的受支持文本回复。",
+            "CLI did not return a complete supported textual reply.",
+        ),
+        LocalAgentError::InferenceFailed | LocalAgentError::ProcessFailed => (
+            "CLI 或推理服务失败；未自动重试。",
+            "CLI or inference failed; no automatic retry.",
+        ),
+        _ => (
+            "CLI 通信失败；未自动重试。",
+            "CLI communication failed; no automatic retry.",
+        ),
+    };
+    Message::new(zh, en)
 }
 
 fn parse_token_input(value: &str, maximum: u32) -> Result<Option<u32>, ()> {

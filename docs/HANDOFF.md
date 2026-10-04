@@ -11,11 +11,17 @@
 - 主题实现已复用System/Dark/Light字段，不升schema，默认/缺字段为System，保留旧明示Light；Kit模式与palette同步，保存成功才应用，系统回调不写配置，主题保存不推进命令来源revision。真实OS变化/最小原生窗口/WindowsLinux原生仍未验收，见[ADR0036](adr/0036-system-appearance-and-semantic-palette.md)。
 - 用户追加并行工程要求：允许多个子代理/worktree并行不相关功能，完成后新开独立代理评审与功能复核，合并后及时清理分支/worktree/临时进程或容器；可使用本机Podman建立隔离服务真实联调，不能将容器或模拟视为目标桌面验收。
 
+## 2026-10-04 本地智能体接入
+
+- 命名AI配置已显式区分模型API、Codex CLI与Claude Code，旧metadata默认API；路径/base URL校验、probe、临时密钥/vault v2精确绑定、完整stdin审核与后台Ask/取消已接通。最终本机门禁929普通+8文档、6脚本、自托管进程harness、strictClippy/fmt/x.y与47打包通过；新独立core/app复审无剩余可复现P1/P2。
+- 最终macOS包SHA与原生证据见[记录](testing/records/2026-10-04-local-agent-ui.md)：实际安装版Codex0.160.0/Claude2.1.285→自有SSE问答，选择125字节SSH上下文、长JSON滚动/显式发送、建议入审核区、语言/主题保留、慢请求取消、重启密钥缺失均证实；退出后owned PIDs/listeners/scratch均清理。没有云端账户或客户SSH验收。
+- 使用见[指南](product/LOCAL_AGENTS.md)；固定单次Ask不继承现有项目/hooks/MCP/订阅登录。Agent、目录/预算/环境编辑与Windows/Linux native继续保留。新功能提交的远端CI另行追加。对外MCP方向不变，独立于内置Ask。
+
 ## 2026-10-04 继续交接（覆盖下方历史状态）
 
 本节记录当前工作区相对于下方历史交接内容的最新状态。后续实现和验证应以本节、`docs/ROADMAP.md`、能力清单和对应测试记录为准；历史章节保留用于追溯，不代表当前未完成项已经关闭。
 
-- 主题`8ee085d`与MCP基础整合`6644245`的本机整仓门禁通过900普通+7文档、格式/严格Clippy/依赖策略，47打包通过。MCP原worktree的22份日志已复制并逐份SHA-256核对，已合分支删除、worktree可恢复归档。文档提交`c66b7e2`的CI三平台Rust/打包和Linux OpenSSH成功，但macOS测试脚本`ps`单次0.5秒超时；失败回执仍保留。伴随修复保持overall截止与身份清理，将单次枚举上限改为3秒；六项脚本回归与本机独立八项OpenSSH通过，新增源码CI另行验证，见[修复记录](testing/records/2026-10-04-openssh-process-inventory.md)。
+- 主题`8ee085d`与MCP基础整合`6644245`的本机整仓门禁通过900普通+7文档、格式/严格Clippy/依赖策略，47打包通过。MCP原worktree的22份日志已复制并逐份SHA-256核对，已合分支删除、worktree可恢复归档。文档提交`c66b7e2`的CI三平台Rust/打包和Linux OpenSSH成功，但macOS测试脚本`ps`单次0.5秒超时；失败回执仍保留。伴随修复保持overall截止与身份清理，将单次枚举上限改为3秒；六项脚本回归与本机独立八项OpenSSH通过，修复提交3137712的Quality37201272070三平台成功，macOS/Linux各独立8项OpenSSH且owned清理全部通过；该CI不代表本地CLI新源码，见[修复记录](testing/records/2026-10-04-openssh-process-inventory.md)。
 - 最新冻结源码（含SSH依赖调度适配器）的整仓门禁通过：859项普通测试、6项文档测试、严格全工作区Clippy、格式和依赖策略；此前47项打包回归通过，新一轮独立8项OpenSSH互通通过。目录合并已完成macOS受控原生双向内容哈希验证。初始AI布局/断言失败和并行编辑时格式失败日志保留；本次提交的三平台CI另行追加，不沿用旧提交结论。
 - 代码提交`9802ce9`已推送，GitHub[Quality 37197083353](https://github.com/cyruss648/keelshell/actions/runs/37197083353)三平台成功：macOS/Ubuntu各859普通+6文档，Windows843普通+6文档；打包47项（Windows一项权限检查跳过），macOS/Linux独立OpenSSH步骤成功。完整源码CI与主题后续计划分别记录，不视为新增主题/MCP验收。
 - 批量依赖计划核心新增1–128个任务、32个目标的确定性拓扑审核和纯内存放行账本，指纹绑定精确命令/目标/依赖；只有前置明确成功才能放行下游，失败/未知/跳过阻止下游，取消不把运行任务标为远端已停止。10项单测、3项公开API集成、1项文档测试通过；纯核心层仍无网络/执行/定时器；后续session适配器已接通捕获会话上的真实SSH依赖调度，11项TCP协议专项及独立8项OpenSSH互通通过。图形工作流编辑器、完整目标/选项审核和任务级持久化仍待接通，见[ADR0035](adr/0035-reviewed-workflow-ssh-adapter.md)及[适配器记录](testing/records/2026-10-04-workflow-ssh-adapter.md)。见[ADR0034](adr/0034-reviewed-batch-dependency-plan.md)和[依赖计划记录](testing/records/2026-10-04-batch-dependency-plan.md)。

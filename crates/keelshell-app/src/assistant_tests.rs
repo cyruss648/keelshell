@@ -1,4 +1,4 @@
-use super::{AssistantEvent, AssistantPanel, PreparedRequest, shell_blocks};
+use super::{AssistantEvent, AssistantPanel, PreparedAssistantRequest, shell_blocks};
 use crate::{ai_settings::EphemeralCredentials, i18n::set_language};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
@@ -284,7 +284,7 @@ fn focus_and_language_changes_preserve_the_exact_preview(cx: &mut TestAppContext
         let payload = panel
             .prepared
             .as_ref()
-            .map(PreparedRequest::preview_json)
+            .map(PreparedAssistantRequest::preview_json)
             .unwrap_or_else(|| panic!("fixture prepares"))
             .to_owned();
         (
@@ -306,7 +306,10 @@ fn focus_and_language_changes_preserve_the_exact_preview(cx: &mut TestAppContext
     panel.read_with(cx, |panel, cx| {
         assert_eq!(panel.request_revision, revision);
         assert_eq!(
-            panel.prepared.as_ref().map(PreparedRequest::preview_json),
+            panel
+                .prepared
+                .as_ref()
+                .map(PreparedAssistantRequest::preview_json),
             Some(payload.as_str())
         );
         assert_eq!(panel.profile, selected);
@@ -353,7 +356,7 @@ fn unsupported_configuration_and_missing_bearer_key_never_prepare(cx: &mut TestA
         let preview = panel
             .prepared
             .as_ref()
-            .map(PreparedRequest::preview_json)
+            .map(PreparedAssistantRequest::preview_json)
             .unwrap_or_else(|| panic!("Anthropic profile should prepare"));
         assert!(preview.contains("\"max_tokens\": 4096"));
         assert!(preview.contains("\"system\""));
@@ -439,7 +442,7 @@ async fn approved_send_delivers_delayed_tokio_reply_after_gpui_waits(cx: &mut Te
         let preview = panel
             .prepared
             .as_ref()
-            .map(PreparedRequest::preview_json)
+            .map(PreparedAssistantRequest::preview_json)
             .unwrap_or_else(|| panic!("reviewed request"))
             .to_owned();
         panel.send(cx);
@@ -603,5 +606,286 @@ fn locked_reference_blocks_preview_and_key_or_reference_changes_revoke_it(cx: &m
         selected.endpoint = "https://other.example/v1/chat/completions".into();
         panel.set_profile(Some(selected), None, cx);
         assert!(panel.prepared.is_none());
+    });
+}
+
+fn local_profile(agent: keelshell_core::AiLocalAgent) -> NamedAiProfile {
+    use keelshell_core::{AiBackend, AiLocalAgent};
+    let mut profile = profile("Local CLI");
+    profile.backend = AiBackend::LocalAgent {
+        agent,
+        executable: std::env::temp_dir()
+            .join(format!("keelshell-nonexistent-{}", uuid::Uuid::new_v4()))
+            .to_string_lossy()
+            .into_owned(),
+    };
+    match agent {
+        AiLocalAgent::Codex => {
+            profile.api_style = AiApiStyle::Responses;
+            profile.endpoint = "https://api.openai.com/v1".into();
+            profile.authentication = AiAuthentication::Bearer { credential: None };
+        }
+        AiLocalAgent::ClaudeCode => {
+            profile.api_style = AiApiStyle::AnthropicMessages;
+            profile.endpoint = "https://api.anthropic.com".into();
+            profile.authentication = AiAuthentication::Header {
+                name: "x-api-key".into(),
+                credential: None,
+            };
+        }
+    }
+    profile
+}
+
+#[gpui_kit::test]
+fn local_review_requires_explicit_key_redacts_context_and_survives_language(
+    cx: &mut TestAppContext,
+) {
+    let (handle, panel) = mount(cx);
+    cx.update_window(handle, |_, window, cx| {
+        for agent in [
+            keelshell_core::AiLocalAgent::Codex,
+            keelshell_core::AiLocalAgent::ClaudeCode,
+        ] {
+            panel.update(cx, |panel, cx| {
+                let profile = local_profile(agent);
+                panel.set_profile(Some(profile.clone()), None, cx);
+                panel.prepare(cx);
+                assert!(
+                    panel.prepared.is_none(),
+                    "subscription/environment login never substitutes for an explicit key"
+                );
+                panel.set_profile(
+                    Some(profile),
+                    Some(Zeroizing::new("fixture-quote-\"-slash-\\-key".into())),
+                    cx,
+                );
+                panel.set_context(
+                    "selected fixture-quote-\"-slash-\\-key text".into(),
+                    "fixture-host".into(),
+                    "fixture-session".into(),
+                    cx,
+                );
+                panel.prepare(cx);
+                let PreparedAssistantRequest::Local(request) = panel
+                    .prepared
+                    .as_ref()
+                    .unwrap_or_else(|| panic!("CLI review: {}", panel.status.render(cx)))
+                else {
+                    panic!("must not prepare HTTP");
+                };
+                assert!(!request.preview_stdin().contains("fixture-quote-"));
+                let payload: serde_json::Value = serde_json::from_str(request.preview_json())
+                    .unwrap_or_else(|_| panic!("review JSON"));
+                assert_eq!(payload["model"], "fixture-model");
+                assert_eq!(
+                    payload["inference_endpoint"],
+                    panel
+                        .profile
+                        .as_ref()
+                        .unwrap_or_else(|| panic!("profile"))
+                        .endpoint
+                );
+                assert!(
+                    payload["credential"]
+                        .as_str()
+                        .unwrap_or_else(|| panic!("policy"))
+                        .contains("subscription login not reused")
+                );
+                assert!(request.redaction_report().total_redactions() > 0);
+                let before = request.preview_json().to_owned();
+                assert!(!panel.busy);
+                assert!(
+                    panel._job.is_none(),
+                    "preparation performs no filesystem/process lookup"
+                );
+                set_language(Language::En, cx);
+                panel.refresh_locale(window, cx);
+                assert_eq!(
+                    panel
+                        .prepared
+                        .as_ref()
+                        .unwrap_or_else(|| panic!("same review"))
+                        .preview_json(),
+                    before
+                );
+                set_language(Language::ZhCn, cx);
+            });
+        }
+    })
+    .unwrap_or_else(|_| panic!("CLI review languages"));
+}
+
+#[gpui_kit::test]
+fn local_executable_change_cancels_inflight_and_rejects_old_completion(cx: &mut TestAppContext) {
+    let (_, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        let mut profile = local_profile(keelshell_core::AiLocalAgent::Codex);
+        let key = Some(Zeroizing::new("fixture-key".into()));
+        panel.set_profile(Some(profile.clone()), key.clone(), cx);
+        panel.prepare(cx);
+        assert!(matches!(
+            panel.prepared,
+            Some(PreparedAssistantRequest::Local(_))
+        ));
+        let revision = panel.request_revision;
+        let cancellation = RequestCancellation::new();
+        panel.cancellation = Some(cancellation.clone());
+        panel.busy = true;
+        if let keelshell_core::AiBackend::LocalAgent { executable, .. } = &mut profile.backend {
+            *executable = std::env::temp_dir()
+                .join("new-cli")
+                .to_string_lossy()
+                .into_owned();
+        }
+        panel.set_profile(Some(profile), key, cx);
+        assert!(cancellation.is_cancelled());
+        assert!(panel.prepared.is_none());
+        panel.finish_reply(
+            revision,
+            ("old-target".into(), "old-session".into()),
+            Ok("```sh\nwrong-target\n```".into()),
+            cx,
+        );
+        assert!(panel.response.is_empty());
+        assert!(panel.suggestions.is_empty());
+        assert!(panel.response_target.is_none());
+    });
+}
+
+#[gpui_kit::test]
+async fn approved_local_failure_returns_on_gpui_without_http_fallback(cx: &mut TestAppContext) {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap_or_else(|_| panic!("owned endpoint"));
+    listener
+        .set_nonblocking(true)
+        .unwrap_or_else(|_| panic!("nonblocking endpoint"));
+    let (handle, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        let mut profile = local_profile(keelshell_core::AiLocalAgent::Codex);
+        profile.endpoint = format!(
+            "http://{}",
+            listener.local_addr().unwrap_or_else(|_| panic!("endpoint"))
+        );
+        panel.set_profile(
+            Some(profile),
+            Some(Zeroizing::new("fixture-key".into())),
+            cx,
+        );
+        panel.prepare(cx);
+        assert!(matches!(
+            panel.prepared,
+            Some(PreparedAssistantRequest::Local(_))
+        ));
+        panel.send(cx);
+        assert!(panel.busy);
+    });
+    cx.wait_for(handle, Duration::from_secs(5), |_, cx| !panel.read(cx).busy)
+        .await;
+    panel.read_with(cx, |panel, cx| {
+        assert!(panel.status.render(cx).contains("无法启动 CLI"));
+        assert!(panel.response.is_empty());
+        assert!(panel.suggestions.is_empty());
+        assert!(panel.response_target.is_none());
+        assert!(panel.prepared.is_none(), "send consumes its review once");
+    });
+    assert!(
+        matches!(listener.accept(), Err(error) if error.kind() == std::io::ErrorKind::WouldBlock)
+    );
+}
+
+#[gpui_kit::test]
+fn native_local_profile_choice_revokes_http_review_and_selects_cli(cx: &mut TestAppContext) {
+    let (handle, panel) = mount(cx);
+    let local = local_profile(keelshell_core::AiLocalAgent::ClaudeCode);
+    let id = local.id;
+    panel.update(cx, |panel, cx| {
+        let mut catalog = panel.profiles.clone();
+        catalog.profiles.push(local);
+        let mut keys = EphemeralCredentials::new();
+        keys.insert(id, Zeroizing::new("fixture-key".into()));
+        panel.set_profiles(&catalog, &keys, cx);
+        panel.prepare(cx);
+        assert!(matches!(
+            panel.prepared,
+            Some(PreparedAssistantRequest::Api(_))
+        ));
+    });
+    cx.update_window(handle, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("assistant-profile", cx);
+        window.click(("assistant-profile-choice", 2_usize), cx);
+    })
+    .unwrap_or_else(|error| panic!("select local profile: {error}"));
+    panel.update(cx, |panel, cx| {
+        assert_eq!(panel.profile.as_ref().map(|p| p.id), Some(id));
+        assert!(
+            panel.prepared.is_none(),
+            "selecting CLI revokes the old HTTP review"
+        );
+        panel.prepare(cx);
+        assert!(matches!(
+            panel.prepared,
+            Some(PreparedAssistantRequest::Local(_))
+        ));
+        assert!(!panel.busy);
+    });
+}
+
+#[gpui_kit::test]
+fn long_cli_review_scrolls_to_visible_send_in_both_languages(cx: &mut TestAppContext) {
+    let (handle, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        panel.set_profile(
+            Some(local_profile(keelshell_core::AiLocalAgent::Codex)),
+            Some(Zeroizing::new("fixture-key".into())),
+            cx,
+        );
+        panel.set_context(
+            "controlled remote context\n".repeat(500),
+            "fixture-host".into(),
+            "fixture-session".into(),
+            cx,
+        );
+        panel.prepare(cx);
+        assert!(matches!(
+            panel.prepared,
+            Some(PreparedAssistantRequest::Local(_))
+        ));
+    });
+    cx.update_window(handle, |_, window, cx| {
+        for language in [Language::ZhCn, Language::En] {
+            set_language(language, cx);
+            panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
+            window.render_frame(cx);
+            let viewport = window.find("assistant-scroll").bounds();
+            let natural = window.find("assistant-content").bounds();
+            assert!(
+                natural.size.height > viewport.size.height,
+                "review retains its natural content height"
+            );
+            window.scroll(
+                "assistant-scroll",
+                gpui_kit::ScrollDelta::Lines(point(0., -1000.)),
+                cx,
+            );
+            let send = window.find("send-approved-request");
+            assert!(
+                send.visible(),
+                "send visible after scrolling with {language:?}"
+            );
+            assert!(
+                send.bounds().bottom() <= viewport.bottom(),
+                "send stays inside scroll viewport"
+            );
+            assert!(send.bounds().origin.y >= viewport.origin.y);
+            assert!(send.bounds().size.height >= px(28.));
+        }
+        set_language(Language::ZhCn, cx);
+    })
+    .unwrap_or_else(|error| panic!("scroll CLI review: {error}"));
+    panel.read_with(cx, |panel, _| {
+        assert!(!panel.busy, "scroll and locale refresh do not send");
+        assert!(panel.prepared.is_some());
+        assert!(panel._job.is_none());
     });
 }

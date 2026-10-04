@@ -1,14 +1,96 @@
 use std::{fs, fs::OpenOptions, io::Write, path::Path};
 
 use keelshell_core::{
-    AiAuthentication, AiCustomHeader, AiModelReasoning, AiPreset, AiProfileCatalog, AiProxy,
-    AiReasoningCapability, AiReasoningSelection, AiSecretRef, AppState, Error, NamedAiProfile,
-    Settings, StateStore,
+    AiApiStyle, AiAuthentication, AiBackend, AiCustomHeader, AiLocalAgent, AiModelReasoning,
+    AiPreset, AiProfileCatalog, AiProxy, AiReasoningCapability, AiReasoningSelection, AiSecretRef,
+    AppState, Error, NamedAiProfile, Settings, StateStore,
 };
 use serde_json::{Value, json};
 use uuid::Uuid;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
+
+#[test]
+fn missing_backend_preserves_api_intent_without_rewriting_metadata() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let path = directory.path().join("state.json");
+    let mut state = AppState::default();
+    let profile = profile("Existing API");
+    let id = profile.id;
+    state.settings.ai_profiles.upsert(profile)?;
+    state.settings.ai_profiles.activate(id)?;
+    let mut wire = serde_json::to_value(state)?;
+    wire["settings"]["ai_profiles"]["profiles"][0]
+        .as_object_mut()
+        .ok_or("profile object missing")?
+        .remove("backend");
+    write_private(&path, &wire)?;
+    let before = fs::read(&path)?;
+    let loaded = StateStore::new(&path).load()?;
+    let profile = loaded
+        .settings
+        .ai_profiles
+        .active()
+        .ok_or("active profile missing")?;
+    assert_eq!(profile.backend, AiBackend::Api);
+    profile.validate_current_transport()?;
+    assert_eq!(fs::read(path)?, before);
+    Ok(())
+}
+
+#[test]
+fn local_agent_metadata_roundtrips_and_never_falls_back_to_http() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let store = StateStore::new(directory.path().join("state.json"));
+    let mut state = store.load()?;
+    let mut profile = profile("Local Ask");
+    profile.backend = AiBackend::LocalAgent {
+        agent: AiLocalAgent::Codex,
+        executable: directory
+            .path()
+            .join("codex")
+            .to_string_lossy()
+            .into_owned(),
+    };
+    profile.api_style = AiApiStyle::Responses;
+    profile.endpoint = "https://example.test/v1".to_owned();
+    profile.validate_local_agent_transport()?;
+    assert!(profile.validate_current_transport().is_err());
+    assert!(profile.legacy_projection(true).is_err());
+    let id = profile.id;
+    state.settings.ai_profiles.upsert(profile.clone())?;
+    state.settings.ai_profiles.activate(id)?;
+    let saved = store.save(&state)?;
+    let loaded = StateStore::new(store.path()).load()?;
+    assert_eq!(saved, loaded);
+    assert_eq!(loaded.settings.ai_profiles.active(), Some(&profile));
+    assert!(
+        !directory.path().join("codex").exists(),
+        "metadata operations must not start or create an executable"
+    );
+    Ok(())
+}
+
+#[test]
+fn local_agent_request_rejects_api_options_or_wrong_authentication() -> TestResult {
+    let mut profile = profile("Claude Ask");
+    profile.backend = AiBackend::LocalAgent {
+        agent: AiLocalAgent::ClaudeCode,
+        executable: "/opt/keelshell-fixture/claude".to_owned(),
+    };
+    profile.api_style = AiApiStyle::AnthropicMessages;
+    profile.authentication = AiAuthentication::Header {
+        name: "x-api-key".into(),
+        credential: None,
+    };
+    profile.validate_local_agent_transport()?;
+    profile.max_output_tokens = Some(1024);
+    assert!(profile.validate_local_agent_transport().is_err());
+    profile.max_output_tokens = None;
+    profile.authentication = AiAuthentication::None;
+    assert!(profile.validate_local_agent_transport().is_err());
+    Ok(())
+}
 
 fn profile(name: &str) -> NamedAiProfile {
     let mut profile = NamedAiProfile::draft(AiPreset::OpenAiCompatible);

@@ -7,6 +7,7 @@
 
 #![deny(missing_docs)]
 
+mod ai_backends;
 mod ai_profiles;
 mod batch_audit;
 mod batch_template;
@@ -27,6 +28,7 @@ mod snippets;
 mod store;
 mod vault;
 
+pub use ai_backends::{AiBackend, AiLocalAgent};
 pub use ai_profiles::{
     AiApiStyle, AiAuthentication, AiCustomHeader, AiModelReasoning, AiPreset, AiProfileCatalog,
     AiProxy, AiReasoningCapability, AiReasoningSelection, AiSecretRef, NamedAiProfile,

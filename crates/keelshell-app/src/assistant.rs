@@ -10,16 +10,19 @@ use gpui_kit::{
     *,
 };
 use keelshell_ai::{
-    AiError, CommandProposal, ContextDraft, DiagnosticPlan, DiagnosticRisk, PreparedRequest,
-    ProviderClient, ProviderConfig, ProviderProtocol, RequestCancellation,
+    AiError, CommandProposal, ContextDraft, DiagnosticPlan, DiagnosticRisk, LocalAgentClient,
+    LocalAgentCredential, LocalAgentError, PreparedLocalAsk, PreparedRequest, ProviderClient,
+    ProviderConfig, ProviderProtocol, RedactionReport, RequestCancellation,
 };
-use keelshell_core::{AiApiStyle, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{AiApiStyle, AiBackend, AiProfileCatalog, NamedAiProfile};
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
 
 use crate::{
-    ai_settings::{EphemeralCredentials, provider_error, uses_api_key},
+    ai_settings::{
+        EphemeralCredentials, local_agent_config, local_agent_error, provider_error, uses_api_key,
+    },
     i18n::{Message, t},
 };
 
@@ -28,6 +31,34 @@ pub enum AssistantEvent {
     OpenSettings,
     SelectProfile(Uuid),
     Suggestion { command: String, session_id: String },
+}
+
+enum PreparedAssistantRequest {
+    Api(PreparedRequest),
+    Local(PreparedLocalAsk),
+}
+
+impl PreparedAssistantRequest {
+    fn preview_json(&self) -> &str {
+        match self {
+            Self::Api(request) => request.preview_json(),
+            Self::Local(request) => request.preview_json(),
+        }
+    }
+
+    fn destination(&self) -> &str {
+        match self {
+            Self::Api(request) => request.provider().endpoint(),
+            Self::Local(request) => request.config().inference_endpoint(),
+        }
+    }
+
+    fn redaction_report(&self) -> RedactionReport {
+        match self {
+            Self::Api(request) => request.redaction_report(),
+            Self::Local(request) => request.redaction_report(),
+        }
+    }
 }
 
 pub struct AssistantPanel {
@@ -43,7 +74,7 @@ pub struct AssistantPanel {
     context: String,
     host: String,
     session_id: String,
-    prepared: Option<PreparedRequest>,
+    prepared: Option<PreparedAssistantRequest>,
     response: String,
     status: Message,
     busy: bool,
@@ -249,7 +280,11 @@ impl AssistantPanel {
             cx.notify();
             return;
         };
-        if let Err(error) = profile.validate_current_transport() {
+        let validation = match profile.backend {
+            AiBackend::Api => profile.validate_current_transport(),
+            AiBackend::LocalAgent { .. } => profile.validate_local_agent_transport(),
+        };
+        if let Err(error) = validation {
             self.status = Message::detail(
                 "该配置当前不可用",
                 "This configuration is not currently usable",
@@ -273,34 +308,44 @@ impl AssistantPanel {
             AiApiStyle::Responses => ProviderProtocol::Responses,
             AiApiStyle::AnthropicMessages => ProviderProtocol::AnthropicMessages,
         };
-        let result = ProviderConfig::new_with_protocol(&profile.endpoint, &profile.model, protocol)
-            .and_then(|provider| {
-                // All explicitly configured temporary credentials are redacted,
-                // including one belonging to another saved profile.
-                let secrets: Vec<&str> = self
-                    .credentials
-                    .values()
-                    .map(|key| key.as_str())
-                    .chain(self.key.as_ref().map(|key| key.as_str()))
-                    .collect();
-                ContextDraft::new(self.prompt.read(cx).value().to_string())
-                    .with_host_label(self.host.clone())
-                    .add_selection(
-                        t(
-                            cx,
-                            "用户选择的远端终端文本",
-                            "Explicitly selected remote terminal text",
-                        ),
-                        self.context.clone(),
-                    )
-                    .prepare_with_limits(
-                        &provider,
-                        &secrets,
-                        16 * 1024,
-                        profile.max_output_tokens,
-                        profile.context_window_tokens,
-                    )
-            });
+        // Every configured transient credential participates in redaction, even
+        // when it belongs to a different profile or invocation adapter.
+        let secrets: Vec<&str> = self
+            .credentials
+            .values()
+            .map(|key| key.as_str())
+            .chain(self.key.as_ref().map(|key| key.as_str()))
+            .collect();
+        let context = ContextDraft::new(self.prompt.read(cx).value().to_string())
+            .with_host_label(self.host.clone())
+            .add_selection(
+                t(
+                    cx,
+                    "用户选择的远端终端文本",
+                    "Explicitly selected remote terminal text",
+                ),
+                self.context.clone(),
+            );
+        let result = match profile.backend {
+            AiBackend::Api => {
+                ProviderConfig::new_with_protocol(&profile.endpoint, &profile.model, protocol)
+                    .and_then(|provider| {
+                        context.prepare_with_limits(
+                            &provider,
+                            &secrets,
+                            16 * 1024,
+                            profile.max_output_tokens,
+                            profile.context_window_tokens,
+                        )
+                    })
+                    .map(PreparedAssistantRequest::Api)
+                    .map_err(|error| ai_error(&error))
+            }
+            AiBackend::LocalAgent { .. } => local_agent_config(profile, false)
+                .and_then(|config| config.prepare(context, &secrets, 16 * 1024))
+                .map(PreparedAssistantRequest::Local)
+                .map_err(local_agent_error),
+        };
         match result {
             Ok(request) => {
                 let report = request.redaction_report();
@@ -319,7 +364,7 @@ impl AssistantPanel {
                 self.prepared = Some(request);
                 self.preview = true;
             }
-            Err(error) => self.status = ai_error(&error),
+            Err(error) => self.status = error,
         }
         cx.notify();
     }
@@ -354,21 +399,39 @@ impl AssistantPanel {
             &self.runtime,
             cx.background_executor().clone(),
             async move {
-                let client = ProviderClient::new(Duration::from_secs(60), 1024 * 1024)?;
-                client
-                    .send_approved(
-                        request.approve(),
-                        key.as_ref().map(|key| key.as_str()),
-                        &cancellation,
-                    )
-                    .await
-                    .map(|reply| reply.into_text())
+                match request {
+                    PreparedAssistantRequest::Api(request) => {
+                        let client = ProviderClient::new(Duration::from_secs(60), 1024 * 1024)
+                            .map_err(|error| ai_error(&error))?;
+                        client
+                            .send_approved(
+                                request.approve(),
+                                key.as_ref().map(|key| key.as_str()),
+                                &cancellation,
+                            )
+                            .await
+                            .map(|reply| reply.into_text())
+                            .map_err(|error| ai_error(&error))
+                    }
+                    PreparedAssistantRequest::Local(request) => {
+                        let credential =
+                            LocalAgentCredential::new(key.as_ref().map_or("", |key| key.as_str()))
+                                .map_err(local_agent_error)?;
+                        LocalAgentClient
+                            .ask(request.approve(), credential, &cancellation)
+                            .await
+                            .map(|reply| reply.text().to_owned())
+                            .map_err(local_agent_error)
+                    }
+                }
             },
         );
         self._job = Some(cx.spawn(async move |this, cx| {
-            let result = job.await.unwrap_or(Err(AiError::Transport));
+            let result = job
+                .await
+                .unwrap_or_else(|_| Err(local_agent_error(LocalAgentError::PipeFailed)));
             let _ = this.update(cx, |panel, cx| {
-                panel.finish_request(revision, response_target, result, cx)
+                panel.finish_reply(revision, response_target, result, cx)
             });
         }));
         cx.notify();
@@ -383,11 +446,27 @@ impl AssistantPanel {
         cx.notify();
     }
 
+    #[cfg(test)]
     fn finish_request(
         &mut self,
         revision: u64,
         target: (String, String),
         result: Result<String, AiError>,
+        cx: &mut Context<Self>,
+    ) {
+        self.finish_reply(
+            revision,
+            target,
+            result.map_err(|error| ai_error(&error)),
+            cx,
+        );
+    }
+
+    fn finish_reply(
+        &mut self,
+        revision: u64,
+        target: (String, String),
+        result: Result<String, Message>,
         cx: &mut Context<Self>,
     ) {
         if self.request_revision != revision {
@@ -406,7 +485,7 @@ impl AssistantPanel {
                     "Response received. Suggestions require review before use.",
                 );
             }
-            Err(error) => self.status = ai_error(&error),
+            Err(error) => self.status = error,
         }
         cx.notify();
     }
@@ -522,7 +601,12 @@ impl Render for AssistantPanel {
                     Button::new(("assistant-profile-choice", index))
                         .ghost()
                         .label(profile.name.clone())
-                        .disabled(profile.validate_current_transport().is_err())
+                        .disabled(match profile.backend {
+                            AiBackend::Api => profile.validate_current_transport().is_err(),
+                            AiBackend::LocalAgent { .. } => {
+                                profile.validate_local_agent_transport().is_err()
+                            }
+                        })
                         .on_click(cx.listener(move |panel, _, _, cx| panel.select_profile(id, cx))),
                 );
             }
@@ -531,10 +615,10 @@ impl Render for AssistantPanel {
             None
         };
         let mut content = div()
-            .id("assistant-scroll")
-            .flex_1()
-            .min_h_0()
-            .overflow_y_scroll()
+            .id("assistant-content")
+            .test_support()
+            .w_full()
+            .flex_shrink_0()
             .flex()
             .flex_col()
             .gap_3()
@@ -673,12 +757,9 @@ impl Render for AssistantPanel {
             && let Some(request) = self.prepared.as_ref()
         {
             content = content
-                .child(
-                    div().text_xs().child(
-                        Message::detail("发送至", "Destination", request.provider().endpoint())
-                            .render(cx),
-                    ),
-                )
+                .child(div().text_xs().child(
+                    Message::detail("发送至", "Destination", request.destination()).render(cx),
+                ))
                 .child(
                     div()
                         .p_2()
@@ -805,12 +886,21 @@ impl Render for AssistantPanel {
         }
         div()
             .h_full()
+            .min_h_0()
             .min_w_0()
             .flex()
             .flex_col()
             .bg(rgb(visual.surface))
             .text_color(rgb(visual.text))
-            .child(content)
+            .child(
+                div()
+                    .id("assistant-scroll")
+                    .test_support()
+                    .flex_1()
+                    .min_h_0()
+                    .overflow_y_scroll()
+                    .child(content),
+            )
     }
 }
 

@@ -7,7 +7,8 @@ use gpui_kit::{
 };
 use keelshell_ai::{AiError, RequestCancellation};
 use keelshell_core::{
-    AiApiStyle, AiAuthentication, AiPreset, AiProfileCatalog, Language, NamedAiProfile,
+    AiApiStyle, AiAuthentication, AiBackend, AiLocalAgent, AiPreset, AiProfileCatalog, AiSecretRef,
+    Language, NamedAiProfile,
 };
 use std::{
     io::{Read, Write},
@@ -119,6 +120,15 @@ pub(super) fn mount(
     cx: &mut TestAppContext,
     profile: NamedAiProfile,
 ) -> (AnyWindowHandle, Entity<AiSettingsPanel>) {
+    mount_sized(cx, profile, 1000., 900.)
+}
+
+fn mount_sized(
+    cx: &mut TestAppContext,
+    profile: NamedAiProfile,
+    width: f32,
+    height: f32,
+) -> (AnyWindowHandle, Entity<AiSettingsPanel>) {
     cx.update(gpui_kit::init);
     let catalog = AiProfileCatalog {
         active_id: Some(profile.id),
@@ -136,7 +146,7 @@ pub(super) fn mount(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(Bounds::new(
                     point(px(0.), px(0.)),
-                    size(px(1000.), px(900.)),
+                    size(px(width), px(height)),
                 ))),
                 ..Default::default()
             },
@@ -542,4 +552,188 @@ fn opening_and_emptying_settings_keep_keyboard_focus_inside_the_modal(cx: &mut T
         );
     })
     .unwrap_or_else(|error| panic!("modal keyboard focus: {error}"));
+}
+
+#[gpui_kit::test]
+fn backend_switch_clears_destination_credentials_and_api_options(cx: &mut TestAppContext) {
+    let (handle, panel) = mount(cx, fixture_profile());
+    let cancellation = RequestCancellation::new();
+    cx.update_window(handle, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            panel.key.update(cx, |input, cx| input.set_value("fixture-key", window, cx));
+            panel.context_tokens.update(cx, |input, cx| input.set_value("32768", window, cx));
+            panel.sync_editor(cx);
+            panel.cancellation = Some(cancellation.clone());
+            panel.operation = Some(OperationKind::Models);
+            panel.set_backend(Some(AiLocalAgent::Codex), window, cx);
+            assert!(cancellation.is_cancelled());
+            assert!(panel.operation.is_none());
+            assert!(panel.credentials.is_empty());
+            assert!(panel.key.read(cx).value().is_empty());
+            assert!(panel.token_drafts.is_empty());
+            let profile = panel.profile().unwrap_or_else(|| panic!("selected profile"));
+            assert_eq!(profile.api_style, AiApiStyle::Responses);
+            assert_eq!(profile.endpoint, "https://api.openai.com/v1");
+            assert_eq!(profile.authentication, AiAuthentication::Bearer { credential: None });
+            assert!(profile.max_output_tokens.is_none());
+            assert!(profile.context_window_tokens.is_none());
+            panel.set_backend(Some(AiLocalAgent::ClaudeCode), window, cx);
+            assert!(matches!(&panel.profile().unwrap_or_else(|| panic!("Claude")).authentication, AiAuthentication::Header { name, credential: None } if name == "x-api-key"));
+            panel.set_backend(None, window, cx);
+            assert_eq!(panel.profile().unwrap_or_else(|| panic!("API")).backend, AiBackend::Api);
+        });
+    }).unwrap_or_else(|_| panic!("backend switch window"));
+}
+
+fn local_profile() -> NamedAiProfile {
+    let mut profile = fixture_profile();
+    profile.backend = AiBackend::LocalAgent {
+        agent: AiLocalAgent::Codex,
+        executable: std::env::temp_dir()
+            .join(format!("keelshell-nonexistent-{}", uuid::Uuid::new_v4()))
+            .to_string_lossy()
+            .into_owned(),
+    };
+    profile.api_style = AiApiStyle::Responses;
+    profile.endpoint = "https://api.openai.com/v1".into();
+    profile.authentication = AiAuthentication::Bearer { credential: None };
+    profile
+}
+
+#[gpui_kit::test]
+fn executable_edits_revoke_key_reference_and_queued_change_cannot_restore_it(
+    cx: &mut TestAppContext,
+) {
+    let mut profile = local_profile();
+    profile.authentication = AiAuthentication::Bearer {
+        credential: Some(AiSecretRef::SecretStore {
+            id: uuid::Uuid::new_v4(),
+        }),
+    };
+    let (handle, panel) = mount(cx, profile);
+    let cancellation = RequestCancellation::new();
+    cx.update_window(handle, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            panel.key.update(cx, |input, cx| {
+                input.set_value("old-fixture-key", window, cx)
+            });
+            panel.sync_editor(cx);
+            panel.catalog.profiles[0].authentication = AiAuthentication::Bearer {
+                credential: Some(AiSecretRef::SecretStore {
+                    id: uuid::Uuid::new_v4(),
+                }),
+            };
+            panel.cancellation = Some(cancellation.clone());
+            panel.operation = Some(OperationKind::LocalProbe);
+            panel.executable.update(cx, |input, cx| {
+                input.set_value(
+                    std::env::temp_dir()
+                        .join("replacement-cli")
+                        .to_string_lossy()
+                        .into_owned(),
+                    window,
+                    cx,
+                )
+            });
+            panel.sync_editor(cx);
+            // This edit arrives before the native key field's queued clear.
+            panel
+                .name
+                .update(cx, |input, cx| input.set_value("Renamed", window, cx));
+            panel.sync_editor(cx);
+            assert!(cancellation.is_cancelled());
+            assert!(panel.credentials.is_empty());
+            assert_eq!(
+                panel
+                    .profile()
+                    .unwrap_or_else(|| panic!("profile"))
+                    .authentication,
+                AiAuthentication::Bearer { credential: None }
+            );
+            panel.clear_pending_key(window, cx);
+            assert!(panel.key.read(cx).value().is_empty());
+            assert!(panel.operation.is_none());
+        });
+    })
+    .unwrap_or_else(|_| panic!("CLI path change"));
+    cx.run_until_parked();
+    panel.read_with(cx, |panel, _| assert!(panel.credentials.is_empty()));
+}
+
+#[gpui_kit::test]
+async fn local_probe_failure_uses_worker_and_cannot_fall_back_to_http(cx: &mut TestAppContext) {
+    let listener =
+        TcpListener::bind("127.0.0.1:0").unwrap_or_else(|_| panic!("owned loopback listener"));
+    listener
+        .set_nonblocking(true)
+        .unwrap_or_else(|_| panic!("nonblocking"));
+    let mut profile = local_profile();
+    profile.endpoint = format!(
+        "http://{}",
+        listener.local_addr().unwrap_or_else(|_| panic!("address"))
+    );
+    profile.model.clear();
+    let (handle, panel) = mount(cx, profile);
+    panel.update(cx, |panel, cx| {
+        panel.start_operation(OperationKind::Models, cx);
+        assert!(
+            panel.operation.is_none(),
+            "HTTP discovery is refused for a CLI profile"
+        );
+        panel.start_operation(OperationKind::LocalProbe, cx);
+        assert_eq!(panel.operation, Some(OperationKind::LocalProbe));
+    });
+    cx.wait_for(handle, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).operation.is_none()
+    })
+    .await;
+    panel.read_with(cx, |panel, cx| {
+        assert!(
+            panel
+                .profile()
+                .unwrap_or_else(|| panic!("profile"))
+                .model
+                .is_empty()
+        );
+        assert!(panel.status.render(cx).contains("无法启动 CLI"));
+    });
+    assert!(
+        matches!(listener.accept(), Err(error) if error.kind() == std::io::ErrorKind::WouldBlock)
+    );
+}
+
+#[gpui_kit::test]
+fn local_config_keeps_bilingual_controls_in_minimum_scroll_view(cx: &mut TestAppContext) {
+    let (handle, panel) = mount_sized(cx, local_profile(), 900., 580.);
+    cx.update_window(handle, |_, window, cx| {
+        for language in [Language::ZhCn, Language::En] {
+            set_language(language, cx);
+            panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
+            window.render_frame(cx);
+            let viewport = window.find("ai-profile-form-scroll").bounds();
+            let content = window.find("ai-profile-form-content").bounds();
+            assert!(
+                content.size.height > viewport.size.height,
+                "long local form scrolls"
+            );
+            for id in [
+                "ai-backend-api",
+                "ai-backend-codex",
+                "ai-backend-claude",
+                "ai-profile-executable",
+                "ai-settings-apply",
+                "ai-settings-cancel",
+            ] {
+                let element = window.find(id);
+                assert!(element.visible(), "{id} visible with {language:?}");
+                assert!(
+                    element.bounds().right() <= window.bounds().right(),
+                    "{id} contained"
+                );
+                assert!(element.bounds().size.width > px(0.));
+            }
+        }
+        set_language(Language::ZhCn, cx);
+    })
+    .unwrap_or_else(|_| panic!("minimum local form"));
 }

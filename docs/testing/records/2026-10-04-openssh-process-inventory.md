@@ -48,3 +48,20 @@ no unverified ancestry and the temporary credential directory removed. Logs and
 receipt are retained in ignored `work/openssh-theme-mcp-20261004/` and its sibling
 launcher log. This does not establish production SSH or Windows/Linux desktop
 acceptance, and the next exact-source remote CI result remains to be checked.
+
+## Exact-source remote CI
+
+The correction commit `313771245104f88fb1071cbc8479cf9899746041` passed
+[Quality 37201272070](https://github.com/cyruss648/keelshell/actions/runs/37201272070)
+on macOS26, Ubuntu24.04 and Windows2025. macOS/Linux each passed900 ordinary
+and7 doctests; Windows passed884 ordinary and7 doctests. The47 packaging suite
+passed, with the Unix-only permission assertion skipped on Windows; the six
+script cases similarly record one POSIX-only skip there.
+
+The independent OpenSSH steps each passed all8 tests: macOS15.712s with56 tracked
+identities, Linux10.885s with67. Both receipts confirm all owned processes stopped,
+temporary credentials removed and no unverified daemon ancestry. Complete logs
+and artifacts remain at ignored `work/quality-37201272070.log` and
+`work/ci-37201272070/`. The GitHub run's exact SHA and terminal success were read
+back after completion. This proves the harness correction on its source revision;
+it does not cover the subsequent local-CLI or desktop-MCP changes.

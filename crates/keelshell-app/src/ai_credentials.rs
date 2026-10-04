@@ -6,7 +6,8 @@ use std::{
 };
 
 use keelshell_core::{
-    AiApiStyle, AiAuthentication, AiSecretRef, CredentialKind, Error, NamedAiProfile, VaultStore,
+    AiApiStyle, AiAuthentication, AiBackend, AiSecretRef, CredentialKind, Error, NamedAiProfile,
+    VaultStore,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -50,6 +51,8 @@ struct BoundKey {
     endpoint: String,
     api_style: AiApiStyle,
     authentication: String,
+    #[serde(default)]
+    backend: Option<AiBackend>,
     key: String,
 }
 
@@ -77,13 +80,14 @@ pub(crate) fn reference(profile: &NamedAiProfile) -> Option<Uuid> {
 
 fn encode(profile: &NamedAiProfile, key: Zeroizing<String>) -> Result<Zeroizing<String>, Error> {
     let payload = BoundKey {
-        version: 1,
+        version: 2,
         profile_id: profile.id,
         endpoint: profile.endpoint.clone(),
         api_style: profile.api_style,
         authentication: authentication_binding(&profile.authentication)
             .ok_or(Error::VaultEntryMismatch)?
             .into(),
+        backend: Some(profile.backend.clone()),
         key: key.to_string(),
     };
     serde_json::to_string(&payload)
@@ -96,7 +100,15 @@ fn decode(
     payload: Zeroizing<String>,
 ) -> Result<Zeroizing<String>, Error> {
     let mut payload: BoundKey = serde_json::from_str(&payload).map_err(|_| Error::VaultCorrupt)?;
-    if payload.version != 1
+    // Existing v1 ciphertext remains usable only by its original HTTP adapter.
+    // V2 additionally binds the exact CLI type/path; metadata edits cannot make
+    // the vault silently deliver an old API key to another executable.
+    let backend_matches = match payload.version {
+        1 => payload.backend.is_none() && profile.backend == AiBackend::Api,
+        2 => payload.backend.as_ref() == Some(&profile.backend),
+        _ => false,
+    };
+    if !backend_matches
         || payload.profile_id != profile.id
         || payload.endpoint != profile.endpoint
         || payload.api_style != profile.api_style
@@ -119,7 +131,10 @@ pub(crate) fn operate(
     key: Zeroizing<String>,
     cancelled: &AtomicBool,
 ) -> Result<Completion, Error> {
-    profile.validate_current_transport()?;
+    match profile.backend {
+        AiBackend::Api => profile.validate_current_transport()?,
+        AiBackend::LocalAgent { .. } => profile.validate_local_agent_transport()?,
+    }
     if !uses_api_key_authentication(&profile.authentication) {
         return Err(Error::VaultEntryMismatch);
     }
