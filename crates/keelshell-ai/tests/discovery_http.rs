@@ -9,7 +9,7 @@ use std::{
 
 use keelshell_ai::{
     AiError, AiErrorCategory, CONNECTIVITY_PROMPT, ContextDraft, ProviderClient, ProviderConfig,
-    ProviderEndpoint, RequestCancellation,
+    ProviderEndpoint, ProviderProtocol, RequestCancellation,
 };
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -65,11 +65,12 @@ struct Fixture {
 
 impl Fixture {
     async fn start(reply: Reply) -> TestResult<Self> {
+        Self::start_at("/tenant/v1/chat/completions", reply).await
+    }
+
+    async fn start_at(path: &str, reply: Reply) -> TestResult<Self> {
         let listener = TcpListener::bind("127.0.0.1:0").await?;
-        let endpoint = ProviderEndpoint::new(&format!(
-            "http://{}/tenant/v1/chat/completions",
-            listener.local_addr()?
-        ))?;
+        let endpoint = ProviderEndpoint::new(&format!("http://{}{path}", listener.local_addr()?))?;
         let (send, recorded) = oneshot::channel();
         let (sent, headers_sent) = oneshot::channel();
         let task = tokio::spawn(async move {
@@ -173,6 +174,22 @@ fn answer(model: Option<&str>) -> String {
     json.to_string()
 }
 
+fn responses_answer(model: Option<&str>) -> String {
+    let mut json = serde_json::json!({
+        "output": [
+            {"type": "reasoning", "id": "reasoning_fixture"},
+            {
+                "type": "message",
+                "content": [{"type": "output_text", "text": "OK"}]
+            }
+        ]
+    });
+    if let Some(model) = model {
+        json["model"] = model.into();
+    }
+    json.to_string()
+}
+
 #[tokio::test]
 async fn discovery_get_preserves_prefix_and_sends_only_explicit_authentication() -> TestResult {
     let mut fixture = Fixture::start(Reply::json(
@@ -236,6 +253,36 @@ async fn fixed_probe_reports_actual_model_without_retaining_provider_text() -> T
         fixture.finish().await?;
     }
     Ok(())
+}
+
+#[tokio::test]
+async fn responses_probe_uses_input_and_parses_output_text() -> TestResult {
+    let mut fixture = Fixture::start_at(
+        "/tenant/v1/responses",
+        Reply::json(responses_answer(Some("responses-model"))),
+    )
+    .await?;
+    let provider = ProviderConfig::new_with_protocol(
+        fixture.endpoint.as_str(),
+        "requested-model",
+        ProviderProtocol::Responses,
+    )?;
+    let report = client(4096)?
+        .test_connection(&provider, None, &RequestCancellation::new())
+        .await?;
+    assert_eq!(report.actual_model(), Some("responses-model"));
+    let request = fixture.observed().await?;
+    assert!(
+        request
+            .headers
+            .starts_with("POST /tenant/v1/responses HTTP/1.1\r\n")
+    );
+    let json: serde_json::Value = serde_json::from_str(&request.body)?;
+    assert_eq!(json["model"], "requested-model");
+    assert_eq!(json["stream"], false);
+    assert_eq!(json["input"], CONNECTIVITY_PROMPT);
+    assert!(json.get("messages").is_none());
+    fixture.finish().await
 }
 
 #[tokio::test]

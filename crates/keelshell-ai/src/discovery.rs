@@ -1,4 +1,4 @@
-//! Explicit settings operations for one validated Chat Completions destination.
+//! Explicit settings operations for one validated AI provider destination.
 
 use std::{
     fmt,
@@ -15,7 +15,9 @@ use tokio::sync::watch;
 use url::{Host, Url};
 use zeroize::Zeroizing;
 
-use crate::provider::{payload_contains_secret, valid_model};
+use crate::provider::{
+    ProviderProtocol, parse_assistant_response, payload_contains_secret, valid_model,
+};
 use crate::{AiError, ApprovedRequest, AssistantReply, ProviderConfig, Redactor};
 
 /// Exact prompt used only after the user explicitly requests a connection test.
@@ -59,21 +61,22 @@ impl ProviderEndpoint {
         Ok(Self { url })
     }
 
-    /// Exact normalized chat destination to show in the configuration UI.
+    /// Exact normalized provider destination to show in the configuration UI.
     pub fn as_str(&self) -> &str {
         self.url.as_str()
     }
 
-    /// Derive the model catalog URL by replacing the literal final
-    /// `/chat/completions` with `/models`, retaining the origin and path prefix.
+    /// Derive the model catalog URL by replacing a literal final
+    /// `/chat/completions` or `/responses` with `/models`, retaining the origin
+    /// and path prefix.
     ///
     /// Unknown paths fail before network access. No endpoint is guessed, probed
     /// or followed to another host when this convention is unsupported.
     pub fn models_endpoint(&self) -> Result<String, AiError> {
-        let prefix = self
-            .url
-            .path()
+        let path = self.url.path();
+        let prefix = path
             .strip_suffix("/chat/completions")
+            .or_else(|| path.strip_suffix("/responses"))
             .ok_or(AiError::UnsupportedDiscoveryEndpoint)?;
         let mut models = self.url.clone();
         models.set_path(&format!("{prefix}/models"));
@@ -252,19 +255,27 @@ impl ProviderClient {
         api_key: Option<&str>,
         cancellation: &RequestCancellation,
     ) -> Result<ConnectivityReport, AiError> {
-        let body = serde_json::json!({
-            "model": provider.model(),
-            "stream": false,
-            "messages": [{"role": "user", "content": CONNECTIVITY_PROMPT}],
-        })
-        .to_string();
+        let body = match provider.protocol() {
+            ProviderProtocol::ChatCompletions => serde_json::json!({
+                "model": provider.model(),
+                "stream": false,
+                "messages": [{"role": "user", "content": CONNECTIVITY_PROMPT}],
+            })
+            .to_string(),
+            ProviderProtocol::Responses => serde_json::json!({
+                "model": provider.model(),
+                "stream": false,
+                "input": CONNECTIVITY_PROMPT,
+            })
+            .to_string(),
+        };
         reject_context_credential(&body, api_key)?;
         let started = Instant::now();
         self.bounded(cancellation, async {
             let body = self
                 .request(Method::POST, provider.endpoint(), Some(body), api_key)
                 .await?;
-            let response = parse_chat(&body, api_key)?;
+            let response = parse_assistant_response(&body, provider.protocol(), api_key)?;
             Ok(ConnectivityReport {
                 elapsed: started.elapsed(),
                 actual_model: response.model,
@@ -282,17 +293,15 @@ impl ProviderClient {
         cancellation: &RequestCancellation,
     ) -> Result<AssistantReply, AiError> {
         let request = request.0;
-        reject_context_credential(&request.json, api_key)?;
+        let protocol = request.provider.protocol();
+        let endpoint = request.provider.endpoint().to_owned();
+        let json = request.json;
+        reject_context_credential(&json, api_key)?;
         self.bounded(cancellation, async {
             let body = self
-                .request(
-                    Method::POST,
-                    request.provider.endpoint(),
-                    Some(request.json),
-                    api_key,
-                )
+                .request(Method::POST, &endpoint, Some(json), api_key)
                 .await?;
-            let response = parse_chat(&body, api_key)?;
+            let response = parse_assistant_response(&body, protocol, api_key)?;
             let (text, _) =
                 Redactor::new(&api_key.into_iter().collect::<Vec<_>>()).redact(&response.text);
             Ok(AssistantReply { text })
@@ -376,46 +385,6 @@ struct RawCatalog {
 struct RawModel {
     id: String,
 }
-#[derive(Deserialize)]
-struct RawChat {
-    choices: Vec<RawChoice>,
-    model: Option<String>,
-}
-#[derive(Deserialize)]
-struct RawChoice {
-    message: RawMessage,
-}
-#[derive(Deserialize)]
-struct RawMessage {
-    content: Option<String>,
-}
-struct ParsedChat {
-    text: String,
-    model: Option<String>,
-}
-
-fn parse_chat(body: &[u8], api_key: Option<&str>) -> Result<ParsedChat, AiError> {
-    let raw: RawChat = serde_json::from_slice(body).map_err(|_| AiError::InvalidResponse)?;
-    if raw
-        .model
-        .as_ref()
-        .is_some_and(|model| !valid_model(model) || api_key.is_some_and(|key| model.contains(key)))
-    {
-        return Err(AiError::InvalidResponse);
-    }
-    let text = raw
-        .choices
-        .into_iter()
-        .next()
-        .and_then(|choice| choice.message.content)
-        .filter(|text| !text.trim().is_empty())
-        .ok_or(AiError::EmptyReply)?;
-    Ok(ParsedChat {
-        text,
-        model: raw.model,
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -439,6 +408,10 @@ mod tests {
                 "https://api.example/v1beta/openai/chat/completions",
                 "https://api.example/v1beta/openai/models",
             ),
+            (
+                "https://api.example/v1/responses",
+                "https://api.example/v1/models",
+            ),
         ] {
             assert_eq!(ProviderEndpoint::new(chat)?.models_endpoint()?, models);
         }
@@ -453,6 +426,7 @@ mod tests {
             "/chat/%63ompletions",
             "/chat/completions/other",
             "/v1/models",
+            "/responses/other",
         ] {
             let endpoint = ProviderEndpoint::new(&format!("https://example.test{path}"))?;
             assert_eq!(

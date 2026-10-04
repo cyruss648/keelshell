@@ -10,6 +10,7 @@ mod batch_commands;
 mod command_history;
 mod command_suggestions;
 mod design;
+mod directory_compare;
 mod emulator;
 mod files;
 mod i18n;

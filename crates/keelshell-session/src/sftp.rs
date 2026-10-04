@@ -1,11 +1,14 @@
 //! SFTP operations on the authenticated SSH transport, without shell commands.
 
-use std::path::{Path, PathBuf};
 use std::sync::{
     Arc, Mutex,
     atomic::{AtomicU64, Ordering},
 };
 use std::time::Duration;
+use std::{
+    collections::{HashSet, VecDeque},
+    path::{Path, PathBuf},
+};
 
 use russh_sftp::client::RawSftpSession;
 use russh_sftp::protocol::{FileAttributes, OpenFlags, Packet, StatusCode};
@@ -41,6 +44,9 @@ pub struct RemoteEntry {
     /// Modification timestamp in seconds since Unix epoch, when available.
     pub modified: Option<u32>,
 }
+
+/// Maximum directory depth accepted by [`SftpSession::snapshot_tree_limited`].
+pub const MAX_SNAPSHOT_DEPTH: usize = 32;
 
 /// Direction of a queued remote file transfer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -310,6 +316,74 @@ impl SftpSession {
             Ok(entries)
         })
         .await
+    }
+
+    /// Collect a bounded recursive snapshot without following symbolic links.
+    ///
+    /// The returned entries retain absolute remote paths and are sorted by
+    /// path for deterministic review. `max_depth` counts child directories
+    /// below `path`; zero lists only the immediate children. A depth boundary
+    /// is rejected if a directory would have to be omitted, rather than
+    /// returning a report that looks complete while silently missing entries.
+    /// This method only reads SFTP metadata and does not hash or mutate files.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Invalid` for zero limits or a depth above
+    /// [`MAX_SNAPSHOT_DEPTH`], `EntryLimit` when the tree is larger than the
+    /// requested bound, or the underlying SFTP error.
+    pub async fn snapshot_tree_limited(
+        &self,
+        path: &str,
+        max_entries: usize,
+        max_depth: usize,
+    ) -> Result<Vec<RemoteEntry>> {
+        valid_path(path)?;
+        if max_entries == 0 || max_depth > MAX_SNAPSHOT_DEPTH {
+            return Err(SessionError::Invalid("invalid remote snapshot limits"));
+        }
+        let root = if path == "/" {
+            "/".to_owned()
+        } else {
+            path.trim_end_matches('/').to_owned()
+        };
+        let mut pending = VecDeque::from([(root, 0usize)]);
+        let mut entries = Vec::new();
+        let mut seen = HashSet::new();
+        while let Some((directory, depth)) = pending.pop_front() {
+            if entries.len() >= max_entries {
+                return Err(SessionError::EntryLimit(max_entries));
+            }
+            let remaining = max_entries.saturating_sub(entries.len());
+            let page = match self.list_limited(&directory, remaining).await {
+                Ok(page) => page,
+                Err(SessionError::EntryLimit(_)) => {
+                    return Err(SessionError::EntryLimit(max_entries));
+                }
+                Err(error) => return Err(error),
+            };
+            for entry in page {
+                if !seen.insert(entry.path.clone()) {
+                    return Err(SessionError::Invalid(
+                        "remote snapshot contains duplicate paths",
+                    ));
+                }
+                if entries.len() == max_entries {
+                    return Err(SessionError::EntryLimit(max_entries));
+                }
+                if entry.is_directory && !entry.is_symlink {
+                    if depth == max_depth {
+                        return Err(SessionError::Invalid(
+                            "remote snapshot exceeds the requested depth",
+                        ));
+                    }
+                    pending.push_back((entry.path.clone(), depth + 1));
+                }
+                entries.push(entry);
+            }
+        }
+        entries.sort_by(|left, right| left.path.cmp(&right.path));
+        Ok(entries)
     }
 
     /// Resolve a path using the remote filesystem's canonicalization semantics.

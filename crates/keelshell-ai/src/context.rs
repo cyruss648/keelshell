@@ -3,7 +3,7 @@ use std::fmt;
 use serde::Serialize;
 use zeroize::Zeroizing;
 
-use crate::{AiError, ProviderConfig, RedactionReport, Redactor};
+use crate::{AiError, ProviderConfig, ProviderProtocol, RedactionReport, Redactor};
 
 const MAX_INPUT_BYTES: usize = 1024 * 1024;
 const MAX_CONTEXT_BYTES: usize = 65_536;
@@ -89,21 +89,34 @@ impl ContextDraft {
             selections,
         })
         .map_err(|_| AiError::Serialization)?;
-        let payload = ChatRequest {
-            model: provider.model(),
-            stream: false,
-            messages: [
-                ChatMessage {
-                    role: "system",
-                    content: SYSTEM_PROMPT,
-                },
-                ChatMessage {
-                    role: "user",
-                    content: &user_content,
-                },
-            ],
+        let json = match provider.protocol() {
+            ProviderProtocol::ChatCompletions => {
+                let payload = ChatRequest {
+                    model: provider.model(),
+                    stream: false,
+                    messages: [
+                        ChatMessage {
+                            role: "system",
+                            content: SYSTEM_PROMPT,
+                        },
+                        ChatMessage {
+                            role: "user",
+                            content: &user_content,
+                        },
+                    ],
+                };
+                serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?
+            }
+            ProviderProtocol::Responses => {
+                let payload = ResponsesRequest {
+                    model: provider.model(),
+                    stream: false,
+                    instructions: SYSTEM_PROMPT,
+                    input: &user_content,
+                };
+                serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?
+            }
         };
-        let json = serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?;
         if json.len() > MAX_INPUT_BYTES {
             return Err(AiError::ContextTooLarge);
         }
@@ -184,6 +197,14 @@ struct ChatRequest<'a> {
 struct ChatMessage<'a> {
     role: &'a str,
     content: &'a str,
+}
+
+#[derive(Serialize)]
+struct ResponsesRequest<'a> {
+    model: &'a str,
+    stream: bool,
+    instructions: &'a str,
+    input: &'a str,
 }
 
 /// Redacted, immutable request awaiting the user's explicit confirmation.
@@ -295,6 +316,30 @@ mod tests {
             ContextDraft::new(" \n").prepare(&provider()?, &[], 4096),
             Err(AiError::EmptyPrompt)
         ));
+        Ok(())
+    }
+
+    #[test]
+    fn responses_preview_uses_explicit_input_and_instructions() -> Result<(), AiError> {
+        let provider = ProviderConfig::new_with_protocol(
+            "https://example.test/v1/responses",
+            "responses-model",
+            ProviderProtocol::Responses,
+        )?;
+        let request = ContextDraft::new("explain the selected failure")
+            .add_selection("output", "connection refused")
+            .prepare(&provider, &[], 4096)?;
+        let json: serde_json::Value =
+            serde_json::from_str(request.preview_json()).map_err(|_| AiError::InvalidResponse)?;
+        assert_eq!(json["model"], "responses-model");
+        assert_eq!(json["stream"], false);
+        let instructions = json["instructions"]
+            .as_str()
+            .ok_or(AiError::InvalidResponse)?;
+        assert!(instructions.contains("untrusted data"));
+        let input = json["input"].as_str().ok_or(AiError::InvalidResponse)?;
+        assert!(input.contains("connection refused"));
+        assert!(json.get("messages").is_none());
         Ok(())
     }
 }

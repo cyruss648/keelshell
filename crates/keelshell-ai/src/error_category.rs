@@ -71,7 +71,8 @@ impl AiError {
             | Self::Serialization
             | Self::InvalidLimits
             | Self::InvalidApiKey
-            | Self::CredentialInContext => AiErrorCategory::Configuration,
+            | Self::CredentialInContext
+            | Self::UnsupportedProtocol => AiErrorCategory::Configuration,
         }
     }
 }

@@ -10,7 +10,19 @@ use zeroize::Zeroizing;
 
 use crate::{AiError, ApprovedRequest, Redactor, discovery::ProviderEndpoint};
 
-/// A validated complete chat-completions endpoint and model, without credentials.
+/// Request/response wire formats implemented by the provider transport.
+///
+/// Each protocol has a dedicated immutable preview and response parser. The
+/// transport never infers a format from the URL or model name.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ProviderProtocol {
+    /// OpenAI-compatible `/chat/completions` messages.
+    ChatCompletions,
+    /// OpenAI Responses API requests and `output_text` message items.
+    Responses,
+}
+
+/// A validated complete provider endpoint, model and explicit protocol, without credentials.
 ///
 /// Supply the full URL, for example `https://provider.example/v1/chat/completions`.
 /// Query strings, URL credentials and fragments are rejected. HTTP is limited to
@@ -19,6 +31,7 @@ use crate::{AiError, ApprovedRequest, Redactor, discovery::ProviderEndpoint};
 pub struct ProviderConfig {
     endpoint: Url,
     model: String,
+    protocol: ProviderProtocol,
 }
 
 impl fmt::Debug for ProviderConfig {
@@ -28,8 +41,17 @@ impl fmt::Debug for ProviderConfig {
 }
 
 impl ProviderConfig {
-    /// Validate a full endpoint URL and nonempty model identifier.
+    /// Validate a full endpoint URL and nonempty model identifier using chat completions.
     pub fn new(endpoint: &str, model: &str) -> Result<Self, AiError> {
+        Self::new_with_protocol(endpoint, model, ProviderProtocol::ChatCompletions)
+    }
+
+    /// Validate a full endpoint, model and explicit wire protocol.
+    pub fn new_with_protocol(
+        endpoint: &str,
+        model: &str,
+        protocol: ProviderProtocol,
+    ) -> Result<Self, AiError> {
         let endpoint = ProviderEndpoint::new(endpoint)?.url;
         if !valid_model(model) {
             return Err(AiError::InvalidModel);
@@ -37,6 +59,7 @@ impl ProviderConfig {
         Ok(Self {
             endpoint,
             model: model.to_owned(),
+            protocol,
         })
     }
 
@@ -48,6 +71,11 @@ impl ProviderConfig {
     /// Provider-specific model identifier.
     pub fn model(&self) -> &str {
         &self.model
+    }
+
+    /// Explicit wire protocol bound to this immutable request target.
+    pub fn protocol(&self) -> ProviderProtocol {
+        self.protocol
     }
 }
 
@@ -98,6 +126,7 @@ impl AiClient {
         api_key: Option<&str>,
     ) -> Result<AssistantReply, AiError> {
         let request = request.0;
+        let protocol = request.provider.protocol;
         let mut builder = self
             .client
             .post(request.provider.endpoint.clone())
@@ -150,20 +179,10 @@ impl AiClient {
         if body.len() > self.max_response_bytes {
             return Err(AiError::ResponseTooLarge);
         }
-        let response: ChatResponse =
-            serde_json::from_slice(&body).map_err(|_| AiError::InvalidResponse)?;
-        let message = response
-            .choices
-            .into_iter()
-            .next()
-            .ok_or(AiError::EmptyReply)?
-            .message;
-        let text = message.content.ok_or(AiError::EmptyReply)?;
-        if text.trim().is_empty() {
-            return Err(AiError::EmptyReply);
-        }
+        let parsed = parse_assistant_response(&body, protocol, api_key)?;
         // A provider may echo the authorization key. Never reflect that key into UI.
-        let (text, _) = Redactor::new(&api_key.into_iter().collect::<Vec<_>>()).redact(&text);
+        let (text, _) =
+            Redactor::new(&api_key.into_iter().collect::<Vec<_>>()).redact(&parsed.text);
         Ok(AssistantReply { text })
     }
 }
@@ -227,8 +246,86 @@ impl fmt::Debug for AssistantReply {
 }
 
 #[derive(Deserialize)]
+pub(crate) struct ParsedAssistantResponse {
+    pub(crate) text: String,
+    pub(crate) model: Option<String>,
+}
+
+pub(crate) fn parse_assistant_response(
+    body: &[u8],
+    protocol: ProviderProtocol,
+    api_key: Option<&str>,
+) -> Result<ParsedAssistantResponse, AiError> {
+    match protocol {
+        ProviderProtocol::ChatCompletions => parse_chat_response(body, api_key),
+        ProviderProtocol::Responses => parse_responses_response(body, api_key),
+    }
+}
+
+fn parse_chat_response(
+    body: &[u8],
+    api_key: Option<&str>,
+) -> Result<ParsedAssistantResponse, AiError> {
+    let response: ChatResponse =
+        serde_json::from_slice(body).map_err(|_| AiError::InvalidResponse)?;
+    if response
+        .model
+        .as_ref()
+        .is_some_and(|model| !valid_model(model) || api_key.is_some_and(|key| model.contains(key)))
+    {
+        return Err(AiError::InvalidResponse);
+    }
+    let message = response
+        .choices
+        .into_iter()
+        .next()
+        .ok_or(AiError::EmptyReply)?
+        .message;
+    let text = message.content.ok_or(AiError::EmptyReply)?;
+    if text.trim().is_empty() {
+        return Err(AiError::EmptyReply);
+    }
+    Ok(ParsedAssistantResponse {
+        text,
+        model: response.model,
+    })
+}
+
+fn parse_responses_response(
+    body: &[u8],
+    api_key: Option<&str>,
+) -> Result<ParsedAssistantResponse, AiError> {
+    let response: ResponsesResponse =
+        serde_json::from_slice(body).map_err(|_| AiError::InvalidResponse)?;
+    if response
+        .model
+        .as_ref()
+        .is_some_and(|model| !valid_model(model) || api_key.is_some_and(|key| model.contains(key)))
+    {
+        return Err(AiError::InvalidResponse);
+    }
+    let text = response
+        .output
+        .into_iter()
+        .filter(|item| item.kind == "message")
+        .filter_map(|item| item.content)
+        .flatten()
+        .filter(|content| content.kind == "output_text")
+        .map(|content| content.text)
+        .collect::<String>();
+    if text.trim().is_empty() {
+        return Err(AiError::EmptyReply);
+    }
+    Ok(ParsedAssistantResponse {
+        text,
+        model: response.model,
+    })
+}
+
+#[derive(Deserialize)]
 struct ChatResponse {
     choices: Vec<Choice>,
+    model: Option<String>,
 }
 #[derive(Deserialize)]
 struct Choice {
@@ -237,6 +334,24 @@ struct Choice {
 #[derive(Deserialize)]
 struct Message {
     content: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct ResponsesResponse {
+    output: Vec<ResponsesOutput>,
+    model: Option<String>,
+}
+#[derive(Deserialize)]
+struct ResponsesOutput {
+    #[serde(rename = "type")]
+    kind: String,
+    content: Option<Vec<ResponsesContent>>,
+}
+#[derive(Deserialize)]
+struct ResponsesContent {
+    #[serde(rename = "type")]
+    kind: String,
+    text: String,
 }
 
 #[cfg(test)]

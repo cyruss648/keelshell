@@ -39,7 +39,7 @@ pub use discovery::{
     RequestCancellation,
 };
 pub use error_category::AiErrorCategory;
-pub use provider::{AiClient, AssistantReply, ProviderConfig};
+pub use provider::{AiClient, AssistantReply, ProviderConfig, ProviderProtocol};
 pub use redact::{RedactionReport, Redactor};
 pub use review::{CommandProposal, ReviewTicket};
 
@@ -52,8 +52,8 @@ pub enum AiError {
         "AI endpoint must use HTTPS, or HTTP on loopback, without URL credentials, query or fragment"
     )]
     InvalidEndpoint,
-    /// Model discovery requires a literal `/chat/completions` path suffix.
-    #[error("Model discovery requires an endpoint ending in /chat/completions")]
+    /// Model discovery requires a literal `/chat/completions` or `/responses` path suffix.
+    #[error("Model discovery requires an endpoint ending in /chat/completions or /responses")]
     UnsupportedDiscoveryEndpoint,
     /// The model name is missing or contains unsupported control characters.
     #[error("AI model must be a nonempty name of at most 200 bytes without whitespace or controls")]
@@ -100,7 +100,7 @@ pub enum AiError {
     #[error("AI provider response exceeded the configured byte limit")]
     ResponseTooLarge,
     /// The response does not match the supported chat-completions schema.
-    #[error("AI provider returned invalid chat-completions JSON")]
+    #[error("AI provider returned invalid supported-protocol JSON")]
     InvalidResponse,
     /// A models response has an invalid shape, identifier, or more than 4096 entries.
     #[error("AI provider returned an invalid or excessively large model catalog")]
@@ -108,6 +108,9 @@ pub enum AiError {
     /// The provider returned no non-whitespace textual answer.
     #[error("AI provider returned an empty textual answer")]
     EmptyReply,
+    /// The profile's declared protocol has no transport adapter in this build.
+    #[error("AI provider protocol is not implemented")]
+    UnsupportedProtocol,
     /// A command proposal does not identify valid text, host and session.
     #[error("Command proposal requires nonempty command, target and session; NUL is not allowed")]
     InvalidProposal,

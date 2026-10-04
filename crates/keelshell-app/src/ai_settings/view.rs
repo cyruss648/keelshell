@@ -6,7 +6,7 @@ use gpui_kit::{
     },
     *,
 };
-use keelshell_core::{AiAuthentication, AiPreset};
+use keelshell_core::{AiApiStyle, AiAuthentication, AiPreset};
 
 use super::{AiSettingsPanel, OperationKind};
 use crate::i18n::t;
@@ -135,8 +135,34 @@ impl Render for AiSettingsPanel {
                 .child(presets)
                 .child(label(
                     cx,
-                    "支持 Chat Completions；其他 API 风格尚未接入。",
-                    "Chat Completions is supported; other API styles are not available yet.",
+                    "请求协议",
+                    "Request protocol",
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap_2()
+                        .child(
+                            Button::new("ai-api-style-chat")
+                                .label("Chat Completions")
+                                .selected(profile.api_style == AiApiStyle::ChatCompletions)
+                                .on_click(cx.listener(|panel, _, window, cx| {
+                                    panel.set_api_style(AiApiStyle::ChatCompletions, window, cx)
+                                })),
+                        )
+                        .child(
+                            Button::new("ai-api-style-responses")
+                                .label("Responses")
+                                .selected(profile.api_style == AiApiStyle::Responses)
+                                .on_click(cx.listener(|panel, _, window, cx| {
+                                    panel.set_api_style(AiApiStyle::Responses, window, cx)
+                                })),
+                        ),
+                )
+                .child(label(
+                    cx,
+                    "Responses 使用 /responses 地址；Anthropic Messages 尚未接入。",
+                    "Responses uses a /responses endpoint; Anthropic Messages is not implemented yet.",
                 ))
                 .child(label(cx, "完整请求地址", "Full request endpoint"))
                 .child(Input::new(&self.endpoint).id("ai-profile-endpoint"))

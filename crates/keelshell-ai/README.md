@@ -1,15 +1,23 @@
 # AI transport contract
 
-The crate implements the Chat Completions wire format with explicit Bearer or no
+The crate implements two explicit wire formats: OpenAI-compatible Chat
+Completions and the OpenAI Responses API. Both use explicit Bearer or no
 authentication. Named configuration metadata belongs in `keelshell-core`; the
 transport does not load profiles, resolve credential references, read environment
 variables for credentials, or execute local provider processes.
 
-`ProviderEndpoint::new` validates a complete chat URL independently of model
-selection. `models_endpoint()` replaces only the literal `/chat/completions`
-suffix with `/models`, keeping the scheme, host, port and prefix. A custom
-endpoint which does not support this convention fails without guessing another
-route; a manually entered model remains possible.
+`ProviderEndpoint::new` validates a complete provider URL independently of model
+selection. `models_endpoint()` replaces only a literal `/chat/completions` or
+`/responses` suffix with `/models`, keeping the scheme, host, port and prefix.
+A custom endpoint which does not support this convention fails without guessing
+another route; a manually entered model remains possible.
+
+`ProviderConfig::new` retains Chat Completions as the compatibility default.
+`ProviderConfig::new_with_protocol` binds either protocol to the immutable
+preview. Responses previews use `instructions`, `input`, `model` and
+`stream: false`; their parser accepts only closed `message` items containing
+`output_text`. No tools, function calls, remote files or autonomous actions are
+enabled by this adapter.
 
 `ProviderClient` provides three asynchronous operations:
 
@@ -17,10 +25,11 @@ route; a manually entered model remains possible.
   provider model identifiers. The bounded response must contain at most 4096
   identifiers, each satisfying the same validation as `ProviderConfig::model`.
 - `test_connection` sends only `CONNECTIVITY_PROMPT`, the selected model, and
-  `stream: false`. It is a billable provider request and must only be called after
-  an explicit user action. Its report contains elapsed time and the server's
-  optional actual model field. Missing actual-model metadata must stay visibly
-  missing rather than being replaced with the user's requested model.
+  `stream: false` in the selected protocol (`messages` for Chat Completions,
+  `input` for Responses). It is a billable provider request and must only be
+  called after an explicit user action. Its report contains elapsed time and the
+  server's optional actual model field. Missing actual-model metadata must stay
+  visibly missing rather than being replaced with the user's requested model.
 - `send_approved` consumes one `ApprovedRequest`, sending its exact prepared JSON
   and provider snapshot. Changing a saved profile cannot alter that snapshot.
   The existing blocking `AiClient::send` remains supported off the UI thread.

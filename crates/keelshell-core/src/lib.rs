@@ -13,6 +13,7 @@ mod batch_template;
 mod completion;
 mod connection_library;
 mod diff;
+mod directory_compare;
 mod error;
 mod model;
 mod openssh;
@@ -46,6 +47,11 @@ pub use diff::{
     DEFAULT_DIFF_CONTEXT_LINES, DiffError, DiffHunk, DiffLine, DiffLineKind, DiffSide,
     MAX_DIFF_CONTEXT_LINES, MAX_DIFF_INPUT_BYTES, MAX_DIFF_LINES, MAX_DIFF_OUTPUT_BYTES,
     UnifiedDiff, diff_text, diff_text_with_context, diff_utf8,
+};
+pub use directory_compare::{
+    DirectoryCompareError, DirectoryCompareReport, DirectoryCompareRow, DirectoryCompareSide,
+    DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
+    MAX_DIRECTORY_COMPARE_ENTRIES, MAX_DIRECTORY_COMPARE_PATH_BYTES, compare_directories,
 };
 pub use error::{Error, ValidationError};
 pub use model::{

@@ -20,7 +20,7 @@ const MAX_TOKENS: u32 = 16 * 1024 * 1024;
 pub enum AiApiStyle {
     /// OpenAI-compatible chat/completions request and response bodies.
     ChatCompletions,
-    /// OpenAI Responses; configuration metadata only until its adapter exists.
+    /// OpenAI Responses request/response format.
     Responses,
     /// Anthropic Messages; configuration metadata only until its adapter exists.
     AnthropicMessages,
@@ -29,7 +29,7 @@ impl AiApiStyle {
     /// Whether the current KeelShell transport implements this body format.
     /// This does not assert provider availability or model compatibility.
     pub const fn supports_current_transport(self) -> bool {
-        matches!(self, Self::ChatCompletions)
+        matches!(self, Self::ChatCompletions | Self::Responses)
     }
 }
 

@@ -6,7 +6,9 @@ use gpui_kit::{
     test::{TestAppContextExt, TestWindowExt},
 };
 use keelshell_ai::{AiError, RequestCancellation};
-use keelshell_core::{AiAuthentication, AiPreset, AiProfileCatalog, Language, NamedAiProfile};
+use keelshell_core::{
+    AiApiStyle, AiAuthentication, AiPreset, AiProfileCatalog, Language, NamedAiProfile,
+};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -216,6 +218,37 @@ fn preset_changes_clear_credentials_and_locale_keeps_values(cx: &mut TestAppCont
         });
     })
     .unwrap_or_else(|error| panic!("presets and locale: {error}"));
+    cx.run_until_parked();
+}
+
+#[gpui_kit::test]
+fn protocol_switch_updates_only_supported_suffix_and_clears_key(cx: &mut TestAppContext) {
+    let (window, panel) = mount(cx, fixture_profile());
+    cx.update_window(window, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            panel.key.update(cx, |key, cx| {
+                key.set_value("fixture-private-key", window, cx)
+            });
+            panel.sync_editor(cx);
+            panel.set_api_style(AiApiStyle::Responses, window, cx);
+            assert_eq!(
+                panel.profile().map(|profile| profile.api_style),
+                Some(AiApiStyle::Responses)
+            );
+            assert_eq!(
+                panel.profile().map(|profile| profile.endpoint.as_str()),
+                Some("https://provider.example/v1/responses")
+            );
+            assert!(panel.credentials.is_empty());
+            assert!(panel.key.read(cx).value().is_empty());
+            panel.set_api_style(AiApiStyle::ChatCompletions, window, cx);
+            assert_eq!(
+                panel.profile().map(|profile| profile.endpoint.as_str()),
+                Some("https://provider.example/v1/chat/completions")
+            );
+        });
+    })
+    .unwrap_or_else(|error| panic!("switch protocol: {error}"));
     cx.run_until_parked();
 }
 

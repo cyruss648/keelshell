@@ -11,9 +11,9 @@ use gpui_kit::{
 };
 use keelshell_ai::{
     AiError, CommandProposal, ContextDraft, DiagnosticPlan, DiagnosticRisk, PreparedRequest,
-    ProviderClient, ProviderConfig, RequestCancellation,
+    ProviderClient, ProviderConfig, ProviderProtocol, RequestCancellation,
 };
-use keelshell_core::{AiAuthentication, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{AiApiStyle, AiAuthentication, AiProfileCatalog, NamedAiProfile};
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
@@ -268,27 +268,40 @@ impl AssistantPanel {
             cx.notify();
             return;
         }
-        let result = ProviderConfig::new(&profile.endpoint, &profile.model).and_then(|provider| {
-            // All explicitly configured temporary credentials are redacted,
-            // including one belonging to another saved profile.
-            let secrets: Vec<&str> = self
-                .credentials
-                .values()
-                .map(|key| key.as_str())
-                .chain(self.key.as_ref().map(|key| key.as_str()))
-                .collect();
-            ContextDraft::new(self.prompt.read(cx).value().to_string())
-                .with_host_label(self.host.clone())
-                .add_selection(
-                    t(
-                        cx,
-                        "用户选择的远端终端文本",
-                        "Explicitly selected remote terminal text",
-                    ),
-                    self.context.clone(),
-                )
-                .prepare(&provider, &secrets, 16 * 1024)
-        });
+        let protocol = match profile.api_style {
+            AiApiStyle::ChatCompletions => ProviderProtocol::ChatCompletions,
+            AiApiStyle::Responses => ProviderProtocol::Responses,
+            AiApiStyle::AnthropicMessages => {
+                self.status = Message::new(
+                    "当前尚未接入 Anthropic Messages 传输。",
+                    "Anthropic Messages transport is not implemented yet.",
+                );
+                cx.notify();
+                return;
+            }
+        };
+        let result = ProviderConfig::new_with_protocol(&profile.endpoint, &profile.model, protocol)
+            .and_then(|provider| {
+                // All explicitly configured temporary credentials are redacted,
+                // including one belonging to another saved profile.
+                let secrets: Vec<&str> = self
+                    .credentials
+                    .values()
+                    .map(|key| key.as_str())
+                    .chain(self.key.as_ref().map(|key| key.as_str()))
+                    .collect();
+                ContextDraft::new(self.prompt.read(cx).value().to_string())
+                    .with_host_label(self.host.clone())
+                    .add_selection(
+                        t(
+                            cx,
+                            "用户选择的远端终端文本",
+                            "Explicitly selected remote terminal text",
+                        ),
+                        self.context.clone(),
+                    )
+                    .prepare(&provider, &secrets, 16 * 1024)
+            });
         match result {
             Ok(request) => {
                 let report = request.redaction_report();

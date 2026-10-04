@@ -544,6 +544,42 @@ async fn sftp_packets_cover_crud_limits_and_streaming_transfer() -> Result<(), B
 }
 
 #[tokio::test]
+async fn sftp_tree_snapshot_is_sorted_bounded_and_depth_explicit() -> Result<(), Box<dyn Error>> {
+    let server = serve().await?;
+    let session = SshSession::connect(options(&server)).await?;
+    let sftp = session.sftp().await?;
+    sftp.mkdir("/tree").await?;
+    sftp.mkdir("/tree/nested").await?;
+    sftp.write("/tree/z.txt", b"z").await?;
+    sftp.write("/tree/nested/a.txt", b"a").await?;
+
+    let snapshot = sftp.snapshot_tree_limited("/tree", 8, 2).await?;
+    let paths = snapshot
+        .iter()
+        .map(|entry| entry.path.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(paths, ["/tree/nested", "/tree/nested/a.txt", "/tree/z.txt"]);
+    assert!(snapshot.iter().all(|entry| !entry.is_symlink));
+    assert!(matches!(
+        sftp.snapshot_tree_limited("/tree", 8, 0).await,
+        Err(SessionError::Invalid(
+            "remote snapshot exceeds the requested depth"
+        ))
+    ));
+    assert!(matches!(
+        sftp.snapshot_tree_limited("/tree", 2, 2).await,
+        Err(SessionError::EntryLimit(2))
+    ));
+    assert!(matches!(
+        sftp.snapshot_tree_limited("/tree", 0, 2).await,
+        Err(SessionError::Invalid("invalid remote snapshot limits"))
+    ));
+    sftp.close().await?;
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
 async fn sftp_transfer_queue_reports_progress_and_cancels_pending_work()
 -> Result<(), Box<dyn Error>> {
     let server = serve().await?;

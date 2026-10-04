@@ -9,9 +9,9 @@ use gpui_kit::{
 };
 use keelshell_ai::{
     AiError, AiErrorCategory, ConnectivityReport, ModelCatalog, ProviderClient, ProviderConfig,
-    ProviderEndpoint, RequestCancellation,
+    ProviderEndpoint, ProviderProtocol, RequestCancellation,
 };
-use keelshell_core::{AiAuthentication, AiPreset, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{AiApiStyle, AiAuthentication, AiPreset, AiProfileCatalog, NamedAiProfile};
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
@@ -426,6 +426,35 @@ impl AiSettingsPanel {
         }
     }
 
+    fn set_api_style(&mut self, style: AiApiStyle, window: &mut Window, cx: &mut Context<Self>) {
+        self.sync_editor(cx);
+        let Some(profile) = self
+            .selected
+            .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
+        else {
+            return;
+        };
+        if profile.api_style == style {
+            return;
+        }
+        let old_endpoint = profile.endpoint.clone();
+        profile.api_style = style;
+        profile.endpoint = match style {
+            AiApiStyle::ChatCompletions => {
+                replace_protocol_suffix(&old_endpoint, "/responses", "/chat/completions")
+            }
+            AiApiStyle::Responses => {
+                replace_protocol_suffix(&old_endpoint, "/chat/completions", "/responses")
+            }
+            AiApiStyle::AnthropicMessages => old_endpoint.clone(),
+        };
+        if profile.endpoint != old_endpoint {
+            self.credentials.remove(&profile.id);
+        }
+        self.changed(true, cx);
+        self.load_editor(window, cx);
+    }
+
     fn set_authentication(&mut self, bearer: bool, window: &mut Window, cx: &mut Context<Self>) {
         self.sync_editor(cx);
         if let Some(profile) = self
@@ -576,6 +605,13 @@ impl AiSettingsPanel {
             async move {
                 let client = ProviderClient::new(Duration::from_secs(30), 1024 * 1024)?;
                 let api_key = key.as_ref().map(|key| key.as_str());
+                let protocol = match profile.api_style {
+                    AiApiStyle::ChatCompletions => ProviderProtocol::ChatCompletions,
+                    AiApiStyle::Responses => ProviderProtocol::Responses,
+                    AiApiStyle::AnthropicMessages => {
+                        return Err(AiError::UnsupportedProtocol);
+                    }
+                };
                 match kind {
                     OperationKind::Models => client
                         .discover_models(
@@ -587,7 +623,11 @@ impl AiSettingsPanel {
                         .map(OperationResult::Models),
                     OperationKind::Test => client
                         .test_connection(
-                            &ProviderConfig::new(&profile.endpoint, &profile.model)?,
+                            &ProviderConfig::new_with_protocol(
+                                &profile.endpoint,
+                                &profile.model,
+                                protocol,
+                            )?,
                             api_key,
                             &cancellation,
                         )
@@ -649,6 +689,12 @@ impl AiSettingsPanel {
         }
         cx.notify();
     }
+}
+
+fn replace_protocol_suffix(endpoint: &str, old: &str, new: &str) -> String {
+    endpoint
+        .strip_suffix(old)
+        .map_or_else(|| endpoint.to_owned(), |prefix| format!("{prefix}{new}"))
 }
 
 impl Drop for AiSettingsPanel {

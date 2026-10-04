@@ -8,7 +8,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use keelshell_ai::{AiClient, AiError, ContextDraft, ProviderConfig};
+use keelshell_ai::{AiClient, AiError, ContextDraft, ProviderConfig, ProviderProtocol};
 
 type TestResult<T = ()> = Result<T, Box<dyn Error>>;
 
@@ -29,13 +29,26 @@ impl Server {
         declared_length: bool,
         body_delay: Duration,
     ) -> TestResult<Self> {
+        Self::start_at(
+            "/v1/chat/completions",
+            status,
+            body,
+            declared_length,
+            body_delay,
+        )
+    }
+
+    fn start_at(
+        path: &str,
+        status: u16,
+        body: &str,
+        declared_length: bool,
+        body_delay: Duration,
+    ) -> TestResult<Self> {
         let listener = TcpListener::bind("127.0.0.1:0")?;
         listener.set_nonblocking(true)?;
         let address = listener.local_addr()?;
-        let provider = ProviderConfig::new(
-            &format!("http://{address}/v1/chat/completions"),
-            "fixture-model",
-        )?;
+        let provider = ProviderConfig::new(&format!("http://{address}{path}"), "fixture-model")?;
         let body = body.to_owned();
         let handle = thread::spawn(move || {
             let started = Instant::now();
@@ -135,6 +148,22 @@ fn answer(content: &str) -> String {
     serde_json::json!({"choices":[{"message":{"role":"assistant","content":content}}]}).to_string()
 }
 
+fn responses_answer(content: &str) -> String {
+    serde_json::json!({
+        "id": "resp_fixture",
+        "model": "responses-model",
+        "output": [
+            {"type": "reasoning", "id": "reasoning_fixture"},
+            {
+                "type": "message",
+                "role": "assistant",
+                "content": [{"type": "output_text", "text": content}]
+            }
+        ]
+    })
+    .to_string()
+}
+
 #[test]
 fn real_request_equals_preview_and_excludes_selected_secrets() -> TestResult {
     let server = Server::start(
@@ -181,6 +210,41 @@ fn real_request_equals_preview_and_excludes_selected_secrets() -> TestResult {
     let payload: serde_json::Value = serde_json::from_str(&recorded.body)?;
     assert_eq!(payload["model"], "fixture-model");
     assert_eq!(payload["stream"], false);
+    Ok(())
+}
+
+#[test]
+fn responses_request_equals_preview_and_extracts_output_text() -> TestResult {
+    let server = Server::start_at(
+        "/v1/responses",
+        200,
+        &responses_answer("Review the SSH listener"),
+        true,
+        Duration::ZERO,
+    )?;
+    let provider = ProviderConfig::new_with_protocol(
+        server.provider.endpoint(),
+        "responses-model",
+        ProviderProtocol::Responses,
+    )?;
+    let prepared = ContextDraft::new("Explain the selected failure")
+        .add_selection("selected output", "connection refused")
+        .prepare(&provider, &[], 8192)?;
+    let preview = prepared.preview_json().to_owned();
+    let reply = client(4096)?.send(prepared.approve(), None)?;
+    assert_eq!(reply.text(), "Review the SSH listener");
+    let recorded = server.finish()?;
+    assert_eq!(recorded.body, preview);
+    let payload: serde_json::Value = serde_json::from_str(&recorded.body)?;
+    assert_eq!(payload["model"], "responses-model");
+    assert_eq!(payload["stream"], false);
+    assert!(payload["instructions"].is_string());
+    assert!(
+        payload["input"]
+            .as_str()
+            .is_some_and(|value| value.contains("connection refused"))
+    );
+    assert!(recorded.headers.starts_with("POST /v1/responses HTTP/1.1"));
     Ok(())
 }
 
