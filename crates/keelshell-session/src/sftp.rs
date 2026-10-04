@@ -645,7 +645,23 @@ impl SftpSession {
     /// cleanup preserves SSH; a stalled protocol close can force shared shutdown.
     /// Completion is not a remote acknowledgement or a rollback of file writes.
     pub async fn close(&self) -> Result<()> {
-        // Do not wait for a raw writer to consume its queued close sentinel.
+        // Queue the sentinel while the relay is still alive. Cancelling the
+        // relay first races the upstream writer's receiver and can turn an
+        // otherwise successful cleanup into `SendError: channel closed`.
+        let close_result = deadline(
+            self.timeout.min(Duration::from_secs(2)),
+            "SFTP close",
+            async {
+                match self.inner.close().await {
+                    Ok(()) => Ok(()),
+                    Err(error) if sftp_close_is_already_closed(&error) => Ok(()),
+                    Err(error) => Err(sftp_error(error)),
+                }
+            },
+        )
+        .await;
+
+        // Do not wait for a raw writer to consume the queued close sentinel.
         self.channel_owner.cancel();
         let pending = self
             .cleanups
@@ -655,13 +671,19 @@ impl SftpSession {
         for task in pending {
             let _ = task.await;
         }
-        deadline(
-            self.timeout.min(Duration::from_secs(2)),
-            "SFTP close",
-            async { self.inner.close().await.map_err(sftp_error) },
-        )
-        .await
+        close_result
     }
+}
+
+// russh-sftp 3.0 wraps a closed writer receiver in `UnexpectedBehavior` rather
+// than exposing a dedicated channel-closed variant. Keep this compatibility
+// check in one place so a future upstream variant can be matched structurally.
+fn sftp_close_is_already_closed(error: &russh_sftp::client::error::Error) -> bool {
+    matches!(
+        error,
+        russh_sftp::client::error::Error::UnexpectedBehavior(message)
+            if message == "SendError: channel closed"
+    )
 }
 
 fn valid_reviewed_entry(entry: &RemoteEntry) -> Result<()> {
@@ -1075,6 +1097,21 @@ impl Drop for DirectoryChannel {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn closed_writer_send_error_is_idempotent_but_other_errors_are_not() {
+        assert!(sftp_close_is_already_closed(
+            &russh_sftp::client::error::Error::UnexpectedBehavior(
+                "SendError: channel closed".into()
+            )
+        ));
+        assert!(!sftp_close_is_already_closed(
+            &russh_sftp::client::error::Error::UnexpectedBehavior("SendError: other".into())
+        ));
+        assert!(!sftp_close_is_already_closed(
+            &russh_sftp::client::error::Error::Timeout
+        ));
+    }
 
     #[test]
     fn resume_future_keeps_large_buffers_on_the_heap() {

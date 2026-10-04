@@ -467,6 +467,20 @@ async fn owned_sftp_stream_moves_large_payloads_and_closes_without_ssh_disconnec
 }
 
 #[tokio::test]
+async fn sftp_close_after_shared_transport_shutdown_is_idempotent() -> Result<(), Box<dyn Error>> {
+    let server = serve().await?;
+    let session = SshSession::connect(server.options(Duration::from_secs(5))).await?;
+    let sftp = session.sftp().await?;
+
+    // The shared SSH shutdown closes the relay before the SFTP owner gets its
+    // cleanup turn. `SftpSession::close` must treat that already-closed writer
+    // as a completed local cleanup and must not mask the original shutdown.
+    session.close().await?;
+    sftp.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
 async fn high_level_close_or_drop_cancels_a_zero_window_sftp_writer() -> Result<(), Box<dyn Error>>
 {
     for explicit_close in [true, false] {
