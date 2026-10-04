@@ -23,4 +23,4 @@ cargo test -p keelshell-app --offline directory_compare -- --nocapture
 
 ## 边界
 
-本记录证明快照适配器和比较引擎的边界，不证明本地目录扫描已在 UI worker 中接通，也不证明 Windows/Linux 原生文件选择器、内容哈希同步、差异应用、删除策略或生产服务器并发写入语义。当前结果是只读数据，仍需应用层审核计划后才能设计同步操作。
+本记录证明快照适配器、后台本地扫描函数和比较引擎的边界，不证明可视化同步面板、Windows/Linux 原生文件选择器、内容哈希同步、差异应用、删除策略或生产服务器并发写入语义。当前结果是只读数据，仍需应用层审核计划后才能设计同步操作。GitHub [Quality 37176372172](https://github.com/cyruss648/keelshell/actions/runs/37176372172) 已在三平台完成构建、测试和打包检查。
