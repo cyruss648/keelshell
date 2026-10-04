@@ -1,6 +1,11 @@
 use std::{
+    future::Future,
     io,
     pin::Pin,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+    },
     task::{Context, Poll},
     time::Duration,
 };
@@ -16,6 +21,13 @@ use crate::KeelShellMcpServer;
 /// Exceeding this bound closes the transport instead of accumulating input.
 pub const MAX_REQUEST_BYTES: usize = 128 * 1024;
 
+/// Maximum input frames without successfully flushed output frames. Counting
+/// notifications and abandoned requests conservatively bounds SDK dispatch and
+/// pending output too. They retain a slot until this connection ends.
+/// The fixed service emits no unsolicited progress/subscription messages;
+/// adding those would require correlating admission to request IDs instead.
+pub const MAX_PENDING_FRAMES: usize = 32;
+
 /// Static transport diagnostics. Private protocol bodies and I/O details are
 /// never interpolated into stderr or public errors.
 #[derive(Debug, Error)]
@@ -26,6 +38,9 @@ pub enum StdioFailure {
     /// The negotiated stdio service did not shut down normally.
     #[error("MCP transport stopped unexpectedly")]
     Runtime,
+    /// EOF/error was observed but complete SDK cleanup exceeded two seconds.
+    #[error("MCP shutdown exceeded its deadline")]
+    Shutdown,
 }
 
 /// Serve MCP on stdin/stdout. Stdout contains SDK JSON-RPC only. The standalone
@@ -47,22 +62,131 @@ where
     W: AsyncWrite + Send + Unpin + 'static,
 {
     let closed = CancellationToken::new();
+    let budget = Arc::new(FrameBudget::default());
     let server = server.with_connection_lifecycle(closed.clone());
     let transport = (
         BoundedReader {
             inner: reader,
             line_bytes: 0,
             failed: false,
-            closed,
+            closed: closed.clone(),
+            budget: budget.clone(),
         },
-        writer,
+        BoundedWriter {
+            inner: writer,
+            budget: budget.clone(),
+            pending_flush: 0,
+            closing: Box::pin(closed.clone().cancelled_owned()),
+        },
     );
     let service = tokio::time::timeout(Duration::from_secs(10), server.serve(transport))
         .await
         .map_err(|_| StdioFailure::Startup)?
         .map_err(|_| StdioFailure::Startup)?;
-    service.waiting().await.map_err(|_| StdioFailure::Runtime)?;
+    let mut waiting = Box::pin(service.waiting());
+    tokio::select! {
+        result = &mut waiting => { result.map_err(|_| StdioFailure::Runtime)?; }
+        _ = closed.cancelled() => {
+            tokio::time::timeout(Duration::from_secs(2), &mut waiting)
+                .await.map_err(|_| StdioFailure::Shutdown)?
+                .map_err(|_| StdioFailure::Runtime)?;
+        }
+    }
+    if budget.exhausted.load(Ordering::Acquire) {
+        return Err(StdioFailure::Runtime);
+    }
     Ok(())
+}
+
+#[derive(Default)]
+struct FrameBudget {
+    pending: AtomicUsize,
+    exhausted: AtomicBool,
+}
+
+impl FrameBudget {
+    fn admit(&self) -> bool {
+        if self
+            .pending
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |pending| {
+                (pending < MAX_PENDING_FRAMES).then_some(pending + 1)
+            })
+            .is_err()
+        {
+            self.exhausted.store(true, Ordering::Release);
+            false
+        } else {
+            true
+        }
+    }
+
+    fn flushed(&self, frames: usize) {
+        let _ = self
+            .pending
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |pending| {
+                Some(pending.saturating_sub(frames))
+            });
+    }
+}
+
+struct BoundedWriter<W> {
+    inner: W,
+    budget: Arc<FrameBudget>,
+    pending_flush: usize,
+    closing: Pin<Box<dyn Future<Output = ()> + Send>>,
+}
+
+impl<W: AsyncWrite + Unpin> BoundedWriter<W> {
+    fn check_closing(&mut self, cx: &mut Context<'_>) -> io::Result<()> {
+        if self.closing.as_mut().poll(cx).is_ready() {
+            Err(io::Error::new(
+                io::ErrorKind::BrokenPipe,
+                "MCP input closed",
+            ))
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl<W: AsyncWrite + Unpin> AsyncWrite for BoundedWriter<W> {
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        bytes: &[u8],
+    ) -> Poll<io::Result<usize>> {
+        if let Err(error) = self.check_closing(cx) {
+            return Poll::Ready(Err(error));
+        }
+        match Pin::new(&mut self.inner).poll_write(cx, bytes) {
+            Poll::Ready(Ok(count)) => {
+                self.pending_flush += bytes[..count].iter().filter(|byte| **byte == b'\n').count();
+                Poll::Ready(Ok(count))
+            }
+            other => other,
+        }
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        if let Err(error) = self.check_closing(cx) {
+            return Poll::Ready(Err(error));
+        }
+        match Pin::new(&mut self.inner).poll_flush(cx) {
+            Poll::Ready(Ok(())) => {
+                self.budget.flushed(self.pending_flush);
+                self.pending_flush = 0;
+                Poll::Ready(Ok(()))
+            }
+            other => other,
+        }
+    }
+
+    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        if let Err(error) = self.check_closing(cx) {
+            return Poll::Ready(Err(error));
+        }
+        Pin::new(&mut self.inner).poll_shutdown(cx)
+    }
 }
 
 struct BoundedReader<R> {
@@ -70,6 +194,7 @@ struct BoundedReader<R> {
     line_bytes: usize,
     failed: bool,
     closed: CancellationToken,
+    budget: Arc<FrameBudget>,
 }
 
 impl<R> Drop for BoundedReader<R> {
@@ -114,6 +239,14 @@ impl<R: AsyncRead + Unpin> AsyncRead for BoundedReader<R> {
                         )));
                     }
                     if *byte == b'\n' {
+                        if !self.budget.admit() {
+                            self.failed = true;
+                            self.closed.cancel();
+                            return Poll::Ready(Err(io::Error::new(
+                                io::ErrorKind::InvalidData,
+                                "MCP input frame budget exceeded",
+                            )));
+                        }
                         self.line_bytes = 0;
                     }
                 }
@@ -135,6 +268,18 @@ mod tests {
     use super::*;
     use tokio::io::AsyncReadExt;
 
+    #[test]
+    fn frame_budget_does_not_expand_when_backend_completion_precedes_output_flush() {
+        let budget = FrameBudget::default();
+        for _ in 0..MAX_PENDING_FRAMES {
+            assert!(budget.admit());
+        }
+        assert!(!budget.admit());
+        budget.flushed(1);
+        assert!(budget.admit());
+        assert!(!budget.admit());
+    }
+
     #[tokio::test]
     async fn request_bound_includes_newline_and_resets_between_messages() {
         let mut first = vec![b'x'; MAX_REQUEST_BYTES - 1];
@@ -145,6 +290,7 @@ mod tests {
             line_bytes: 0,
             failed: false,
             closed: CancellationToken::new(),
+            budget: Arc::new(FrameBudget::default()),
         };
         let mut result = Vec::new();
         reader.read_to_end(&mut result).await.unwrap();
@@ -160,6 +306,7 @@ mod tests {
             line_bytes: 0,
             failed: false,
             closed: CancellationToken::new(),
+            budget: Arc::new(FrameBudget::default()),
         };
         let mut result = Vec::new();
         assert_eq!(

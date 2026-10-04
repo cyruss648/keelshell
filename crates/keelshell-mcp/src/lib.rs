@@ -27,4 +27,6 @@ mod transport;
 pub use backend::*;
 pub use policy::*;
 pub use server::KeelShellMcpServer;
-pub use transport::{MAX_REQUEST_BYTES, StdioFailure, serve_stdio, serve_stream};
+pub use transport::{
+    MAX_PENDING_FRAMES, MAX_REQUEST_BYTES, StdioFailure, serve_stdio, serve_stream,
+};

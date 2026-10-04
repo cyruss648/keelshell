@@ -245,3 +245,91 @@ async fn idle_client_cannot_keep_process_alive_after_startup_deadline() {
     assert_eq!(stderr, "MCP startup failed or exceeded its deadline\n");
     assert!(client.output.next_line().await.unwrap().is_none());
 }
+
+#[tokio::test]
+async fn unread_stdout_then_eof_still_exits_within_shutdown_deadline() {
+    let mut client = Client::spawn();
+    client.initialize().await;
+    for id in 2..=20 {
+        client
+            .send(json!({"jsonrpc":"2.0","id":id,"method":"tools/list","params":{}}))
+            .await;
+    }
+    // Keep stdout open and unread. Its pipe must not be closed to unblock exit.
+    drop(client.input.take());
+    let status = tokio::time::timeout(Duration::from_secs(3), client.child.wait())
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(status.success());
+    let mut stderr = String::new();
+    client
+        .child
+        .stderr
+        .take()
+        .unwrap()
+        .read_to_string(&mut stderr)
+        .await
+        .unwrap();
+    assert!(stderr.is_empty());
+}
+
+#[tokio::test]
+async fn flooding_unread_stdout_closes_at_frame_budget_without_unbounded_busy_replies() {
+    let mut client = Client::spawn();
+    client.initialize().await;
+    let mut flood = Vec::new();
+    for id in 2..=3001 {
+        flood.extend_from_slice(
+            &serde_json::to_vec(
+                &json!({"jsonrpc":"2.0","id":id,"method":"tools/list","params":{}}),
+            )
+            .unwrap(),
+        );
+        flood.push(b'\n');
+    }
+    let _ = tokio::time::timeout(
+        Duration::from_secs(3),
+        client.input.as_mut().unwrap().write_all(&flood),
+    )
+    .await
+    .unwrap();
+    // stdin and stdout remain open; overload itself closes the process.
+    let status = tokio::time::timeout(Duration::from_secs(3), client.child.wait())
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(!status.success());
+    let mut stderr = String::new();
+    client
+        .child
+        .stderr
+        .take()
+        .unwrap()
+        .read_to_string(&mut stderr)
+        .await
+        .unwrap();
+    assert_eq!(stderr, "MCP transport stopped unexpectedly\n");
+    let mut replies = 0;
+    while let Some(line) = client.output.next_line().await.unwrap() {
+        serde_json::from_str::<Value>(&line).unwrap();
+        replies += 1;
+    }
+    assert!(replies <= keelshell_mcp::MAX_PENDING_FRAMES);
+}
+
+#[tokio::test]
+async fn responsive_client_can_make_more_than_a_frame_budgets_worth_of_calls() {
+    let mut client = Client::spawn();
+    client.initialize().await;
+    for id in 2..=101 {
+        client.send(json!({"jsonrpc":"2.0","id":id,"method":"tools/call","params":{"name":"keelshell_list_sessions","arguments":{}}})).await;
+        let response = client.read().await;
+        assert_eq!(response["id"], id);
+        assert_eq!(
+            response["result"]["structuredContent"]["error"]["code"],
+            "DISABLED"
+        );
+    }
+    client.finish().await;
+}

@@ -14,15 +14,15 @@ python3 scripts/check.py --policy-only
 git diff --check
 ```
 
-- 4项单元测试：路径词法/完整组件、含newline输入边界与多消息重置、超量输入永久关闭。
+- 5项单元测试：路径词法/完整组件、含newline输入边界与多消息重置、超量输入永久关闭，以及完成后台工作不能提前归还frame预算。
 - 15项公开库集成测试：默认关闭不dispatch、显式scope仍需connectedbackend、固定读取UTF-8、工具/连接/selection/重连/路线边界、遍历/sibling路径、未知字段和approve/exec/unlock/write/connect拒绝、唯一摘要命令提案、空/NUL/超量命令、后端目标/selection/提案不匹配、枚举泄漏/重复、字节与JSON转义输出边界、撤权/取消/超时释放ownedfuture、并发满不扩容、scope/runtime配置约束。
-- 6项实际stdio子进程集成：独立手写JSON客户端（不用SDK client）验证2025-11-25初始化、七项工具schema、默认DISABLED、新版2026-07-28 discover与逐请求metadata、缺失metadata/不支持版本、错误请求形状/非法参数/未知方法、超量未结束输入、静态脱敏诊断、EOF正常退出、不回显argv及客户端保持stdin打开但不发数据时10秒启动截止后的进程退出。进程均由测试owned、kill-on-drop，未接触SSH/凭据。
-- 4项同协议byte-stream集成：2025-06-18兼容握手、授权读取及pending命令提案、撤权后拒绝与无context回传、RPC cancellation notification释放拥有的pendingbackend并允许后续请求、关闭输入在service返回前释放in-flight backend。
+- 9项实际stdio子进程集成：独立手写JSON客户端（不用SDK client）验证2025-11-25初始化、七项工具schema、默认DISABLED、新版2026-07-28 discover与逐请求metadata、缺失metadata/不支持版本、错误请求形状/非法参数/未知方法、超量未结束输入、静态脱敏诊断、EOF正常退出、不回显argv及客户端保持stdin打开但不发数据时10秒启动截止后的进程退出。新增stdout保持打开但不读取后EOF仍退出、3000条洪泛在总frame预算关闭且不扩容BUSY响应、及时读取的正常客户端连续100条请求不受错误的生命周期总数限制。进程均由测试owned、kill-on-drop，未接触SSH/凭据。
+- 5项同协议byte-stream集成：2025-06-18兼容握手、授权读取及pending命令提案、撤权后拒绝与无context回传、RPC cancellation notification释放拥有的pendingbackend并允许后续请求、关闭输入在service返回前释放in-flight backend；新增512-byte输出缓冲及实际Pending write/flush计数证明发生背压后，EOF仍在1秒内完成整个SDK收尾。
 - 1项rustdoc：默认关闭、明确安装桌面grant及撤权的公开API。
 
-合计29项普通测试和1项doctest，0失败/忽略。严格目标Clippy通过；所有直接registry为x.y，rmcp解析3.5.0、tokio-util解析0.7.19。该worktree没有改动既有app/core/session/AI行为，合并后的整仓门禁和本提交三平台CI须由主线单独记录。
+合计34项普通测试和1项doctest，0失败/忽略。严格目标Clippy通过；所有直接registry为x.y，rmcp解析3.5.0、tokio-util解析0.7.19。该worktree没有改动既有app/core/session/AI行为，合并后的整仓门禁和本提交三平台CI须由主线单独记录。
 
-通过日志保存在ignored `work/mcp-tests-final-accepted.log`、`work/mcp-clippy-final-accepted.log`；最初20项通过记录为 `work/mcp-tests-first.log`。本地记录不提交请求内容、客户日志、地址或凭据。
+通过日志保存在ignored `work/mcp-tests-review-repair-first.log`、`work/mcp-clippy-review-repair-first.log`；最初20项通过记录为 `work/mcp-tests-first.log`。本地记录不提交请求内容、客户日志、地址或凭据。
 
 ## 发现与修复
 
@@ -35,6 +35,12 @@ git diff --check
 覆盖SDK默认unknown-method回显行为，服务端显式返回固定Method Not Found文案；新增私密method名称不进入错误内容的真实stdio断言。
 
 前期编译发现sha2 0.11数组没有LowerHex及测试helper变量遮蔽，修复了摘要hex编码与helper命名；没有因此削弱授权断言。
+
+## 新独立审查及修复
+
+全新fork-none审查agent独立重跑初始29+1/Clippy通过后，发现两个P2：不读stdout时关闭stdin，SDK drain后close仍等待writer mutex；3000条tools/list可让RSS持续增长，backend semaphore不足以约束SDK queued responses。失败证据分别为 `work/mcp-independent-review-backpressure-e9396a4.log` 与 `work/mcp-independent-review-flood-e9396a4.log`。
+
+修复在framing前约束最多32个未对应实际flush的输入frame，覆盖通知/畸形帧，不提前根据backend完成归还；超额关闭而不排队BUSY。writer取消监听使EOF中断Pending write/flush并释放SDK mutex；完整service收尾deadline为2秒，binary runtime shutdown仍有100 ms边界。新增5项单元/真实stdio/byte-stream回归通过，独立修复复核将按修复SHA另行补充。保守预算会让累计无回复通知/放弃请求耗尽后关闭连接，这一限制明确保留。
 
 ## 尚未验收的边界
 

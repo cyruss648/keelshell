@@ -1,17 +1,23 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::{
+    io,
+    pin::Pin,
     sync::{
         Arc,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
     },
+    task::{Context, Poll},
     time::Duration,
 };
 
 use keelshell_mcp::*;
 use serde_json::{Value, json};
 use tokio::{
-    io::{AsyncBufReadExt, AsyncWriteExt, BufReader, DuplexStream, Lines, ReadHalf, WriteHalf},
+    io::{
+        AsyncBufReadExt, AsyncWrite, AsyncWriteExt, BufReader, DuplexStream, Lines, ReadHalf,
+        WriteHalf,
+    },
     sync::Notify,
     task::JoinHandle,
 };
@@ -72,9 +78,46 @@ struct Client {
     reader: Lines<BufReader<ReadHalf<DuplexStream>>>,
     writer: WriteHalf<DuplexStream>,
     server: JoinHandle<Result<(), StdioFailure>>,
+    backpressure_polls: Arc<AtomicUsize>,
 }
+
+struct PressureWriter {
+    inner: WriteHalf<DuplexStream>,
+    polls: Arc<AtomicUsize>,
+}
+impl AsyncWrite for PressureWriter {
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        bytes: &[u8],
+    ) -> Poll<io::Result<usize>> {
+        let result = Pin::new(&mut self.inner).poll_write(cx, bytes);
+        if result.is_pending() {
+            self.polls.fetch_add(1, Ordering::SeqCst);
+        }
+        result
+    }
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        let result = Pin::new(&mut self.inner).poll_flush(cx);
+        if result.is_pending() {
+            self.polls.fetch_add(1, Ordering::SeqCst);
+        }
+        result
+    }
+    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.inner).poll_shutdown(cx)
+    }
+}
+
 impl Client {
     async fn connect(backend: Arc<dyn DesktopBackend>) -> (Self, PolicyController) {
+        Self::connect_with_capacity(backend, 256 * 1024).await
+    }
+
+    async fn connect_with_capacity(
+        backend: Arc<dyn DesktopBackend>,
+        capacity: usize,
+    ) -> (Self, PolicyController) {
         let policy = PolicyController::default();
         let grant = SessionGrant::new(
             target(),
@@ -88,14 +131,23 @@ impl Client {
             .unwrap();
         let server =
             KeelShellMcpServer::new(backend, policy.clone(), 2, Duration::from_secs(2)).unwrap();
-        let (client, server_io) = tokio::io::duplex(256 * 1024);
+        let (client, server_io) = tokio::io::duplex(capacity);
         let (read, write) = tokio::io::split(server_io);
-        let server = tokio::spawn(serve_stream(server, read, write));
+        let backpressure_polls = Arc::new(AtomicUsize::new(0));
+        let server = tokio::spawn(serve_stream(
+            server,
+            read,
+            PressureWriter {
+                inner: write,
+                polls: backpressure_polls.clone(),
+            },
+        ));
         let (read, writer) = tokio::io::split(client);
         let mut client = Self {
             reader: BufReader::new(read).lines(),
             writer,
             server,
+            backpressure_polls,
         };
         client.send(json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"raw-stream-test","version":"1.0"}}})).await;
         assert_eq!(
@@ -234,4 +286,24 @@ async fn closing_input_releases_owned_backend_before_service_returns() {
         .await
         .unwrap();
     assert!(backend.dropped.load(Ordering::SeqCst));
+}
+
+#[tokio::test]
+async fn eof_interrupts_proven_output_backpressure_and_finishes_sdk_cleanup() {
+    let (mut client, _policy) =
+        Client::connect_with_capacity(Arc::new(ControlledBackend::default()), 512).await;
+    let baseline = client.backpressure_polls.load(Ordering::SeqCst);
+    client
+        .send(json!({"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}))
+        .await;
+    tokio::time::timeout(Duration::from_secs(1), async {
+        while client.backpressure_polls.load(Ordering::SeqCst) == baseline {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+        }
+    })
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(1), client.finish())
+        .await
+        .unwrap();
 }
