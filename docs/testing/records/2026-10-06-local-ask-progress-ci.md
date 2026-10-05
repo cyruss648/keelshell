@@ -31,3 +31,8 @@ macOS check-run 的一条failure明确托管运行器多次领取失败，另三
 ## 2f7ca1e 的新阶段证据
 
 [Quality37377310693](https://github.com/cyruss648/keelshell/actions/runs/37377310693) attempt1对应精确2f7ca1e，三个job实际执行。Linux/macOS成功；Windows默认完整控制器完成626条记录、38次TCP、future5440字节，73.497253秒。26次实际ConnectionRefused/10061耗时52.451005秒，已超过额外小栈45秒整体预算；小栈在序号370记录期限到达，整体failure。新Windows预算候选与全部原日志hash见[独立记录](2026-10-06-windows-small-stack-budget.md)，尚待新Windows执行。这组新阶段事实不追溯证明早期cfac未采集pending的根因。
+
+
+## 5b6b7b4 的预算修正验证
+
+[Quality37381858939](https://github.com/cyruss648/keelshell/actions/runs/37381858939) attempt1精确5b6b7b4三平台实际成功。Windows默认/2MiB入口分别71.242069/69.283210秒完成626阶段、38原TCP及5440字节future；90秒整体预算已实际覆盖小栈完整控制器。新非作者复核通过该test-only范围，源码按精确提交快进整合。全部原失败、原日志hash与各平台计数见[预算记录](2026-10-06-windows-small-stack-budget.md)；早期cfac的未采集pending仍UNKNOWN，不追溯改写其根因，也不将此源码CI升级为桌面/供应商/发布验收。

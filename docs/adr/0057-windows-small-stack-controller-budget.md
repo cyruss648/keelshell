@@ -1,6 +1,6 @@
 # ADR 0057 — Windows 小栈控制器的整体测试预算
 
-日期：2026-10-06。状态：候选，待独立审查与 Windows CI 验证。
+日期：2026-10-06。状态：已采纳；新非作者审查及精确源码三平台 CI 通过。
 
 ## 依据
 
@@ -16,4 +16,4 @@ Windows 的额外小栈整体测试预算改为 90 秒；其他平台保留 45 �
 
 ## 验证与限制
 
-候选的本机完整门禁、独立审查及新 Windows CI 分别记录在[测试记录](../testing/records/2026-10-06-windows-small-stack-budget.md)。只有新源码的 Windows 实际执行完成全部控制器，才能报告此项修正通过；macOS 编译或测试不能替代它。此次源码 CI 也不证明 Windows 桌面、供应商 CLI 或安装更新已验收。
+候选的本机完整门禁、独立审查及新 Windows CI 分别记录在[测试记录](../testing/records/2026-10-06-windows-small-stack-budget.md)。精确5b6b7b4的新 Windows 默认与额外 2 MiB 控制器已实际完成全部626条记录、38次TCP及原覆盖，小栈耗时69.283210秒；本项测试预算修正通过。macOS编译或测试不替代该 Windows 结果。此次源码 CI 也不证明 Windows 桌面、供应商 CLI 或安装更新已验收。

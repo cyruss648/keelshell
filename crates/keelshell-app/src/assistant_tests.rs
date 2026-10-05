@@ -1703,6 +1703,9 @@ mod local_progress;
 #[path = "assistant_tests/redaction_boundaries.rs"]
 mod redaction_boundaries;
 
+#[path = "assistant_tests/command_review_target.rs"]
+mod command_review_target;
+
 #[gpui_kit::test]
 fn inactive_proxy_basic_reply_is_redacted_and_late_reply_after_clear_is_discarded(
     cx: &mut TestAppContext,

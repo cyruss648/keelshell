@@ -20,6 +20,9 @@ use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
 
+#[path = "assistant/command_review_target.rs"]
+mod command_review_target;
+
 use crate::{
     ai_settings::{
         EphemeralCredentials, local_agent_config, local_agent_error, provider_error, uses_api_key,
@@ -734,6 +737,11 @@ impl AssistantPanel {
     }
 
     fn suggest(&mut self, index: usize, cx: &mut Context<Self>) {
+        if let Some(reason) = self.review_target_unavailable() {
+            self.status = reason;
+            cx.notify();
+            return;
+        }
         let Some(command) = self.suggestions.get(index).cloned() else {
             return;
         };
@@ -776,12 +784,15 @@ impl AssistantPanel {
         if self.response.is_empty() {
             return;
         }
-        match DiagnosticPlan::from_response(
-            self.host.clone(),
-            self.session_id.clone(),
-            &self.context,
-            &self.response,
-        ) {
+        if let Some(reason) = self.review_target_unavailable() {
+            self.status = reason;
+            cx.notify();
+            return;
+        }
+        let Some((target, session_id)) = self.response_target.clone() else {
+            return;
+        };
+        match DiagnosticPlan::from_response(target, session_id, &self.context, &self.response) {
             Ok(plan) => {
                 let count = plan.steps().len();
                 self.status = Message::new(
@@ -796,15 +807,28 @@ impl AssistantPanel {
     }
 
     fn suggest_diagnostic_step(&mut self, index: usize, cx: &mut Context<Self>) {
+        if let Some(reason) = self.review_target_unavailable() {
+            self.status = reason;
+            cx.notify();
+            return;
+        }
+        let Some((target, session_id)) = self.response_target.as_ref() else {
+            return;
+        };
         let Some(plan) = self.diagnostic_plan.as_ref() else {
             return;
         };
+        if plan.target() != target || plan.session_id() != session_id {
+            self.status = ai_error(&AiError::DiagnosticPlanMismatch);
+            cx.notify();
+            return;
+        }
         let Ok(review) = plan.review_step(index, Duration::from_secs(120)) else {
             self.status = ai_error(&AiError::InvalidDiagnosticPlan);
             cx.notify();
             return;
         };
-        let proposal = match review.into_proposal(plan, &self.session_id) {
+        let proposal = match review.into_proposal(plan, session_id) {
             Ok(proposal) => proposal,
             Err(error) => {
                 self.status = ai_error(&error);
@@ -814,11 +838,11 @@ impl AssistantPanel {
         };
         match proposal
             .review(Duration::from_secs(120))
-            .and_then(|ticket| ticket.into_suggestion(&proposal, &self.session_id))
+            .and_then(|ticket| ticket.into_suggestion(&proposal, session_id))
         {
             Ok(command) => cx.emit(AssistantEvent::Suggestion {
                 command,
-                session_id: self.session_id.clone(),
+                session_id: session_id.clone(),
             }),
             Err(error) => self.status = ai_error(&error),
         }
@@ -1021,6 +1045,7 @@ impl Render for AssistantPanel {
         if !self.response.is_empty() {
             // Provider output stays plain text and never triggers implicit requests.
             content = content
+                .child(self.review_target_view("assistant-response-target".into(), cx))
                 .child(
                     div()
                         .border_t_1()
@@ -1037,12 +1062,15 @@ impl Render for AssistantPanel {
                             cx.write_to_clipboard(ClipboardItem::new_string(view.response.clone()))
                         })),
                 );
-            content = content.child(
-                Button::new("build-diagnostic-plan")
-                    .ghost()
-                    .label(t(cx, "整理为诊断计划", "Build diagnostic plan"))
-                    .on_click(cx.listener(|view, _, _, cx| view.build_diagnostic_plan(cx))),
-            );
+            content = content
+                .child(self.review_target_view("diagnostic-review-target".into(), cx))
+                .child(
+                    Button::new("build-diagnostic-plan")
+                        .ghost()
+                        .disabled(self.review_target_unavailable().is_some())
+                        .label(t(cx, "整理为诊断计划", "Build diagnostic plan"))
+                        .on_click(cx.listener(|view, _, _, cx| view.build_diagnostic_plan(cx))),
+                );
             if let Some(plan) = self.diagnostic_plan.as_ref() {
                 let mut plan_view = div()
                     .p_2()
@@ -1085,8 +1113,15 @@ impl Render for AssistantPanel {
                                 risk
                             )))
                             .child(
+                                self.review_target_view(
+                                    ("diagnostic-step-target", index).into(),
+                                    cx,
+                                ),
+                            )
+                            .child(
                                 Button::new(("review-diagnostic-step", index))
                                     .ghost()
+                                    .disabled(self.review_target_unavailable().is_some())
                                     .label(t(cx, "送入命令审阅区", "Place in command review"))
                                     .on_click(cx.listener(move |view, _, _, cx| {
                                         view.suggest_diagnostic_step(index, cx)
@@ -1114,8 +1149,12 @@ impl Render for AssistantPanel {
                                 .child(command.clone()),
                         )
                         .child(
+                            self.review_target_view(("suggestion-review-target", index).into(), cx),
+                        )
+                        .child(
                             Button::new(("review-suggestion", index))
                                 .ghost()
+                                .disabled(self.review_target_unavailable().is_some())
                                 .label(t(cx, "送入命令审阅区", "Place in command review"))
                                 .on_click(
                                     cx.listener(move |view, _, _, cx| view.suggest(index, cx)),

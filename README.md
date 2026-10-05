@@ -35,7 +35,7 @@
 
 KeelShell 面向每天需要连接服务器、查看日志和处理远程文件的开发者与运维人员。终端、文件和主机状态跟随当前 SSH 会话，切换标签即可切换工作目标。命令栏持续显示目标，AI 建议经过审阅后再由你执行。
 
-界面默认使用简体中文，可切换英文。项目面向 macOS、Windows 和 Linux，专注远程 SSH 工作流。AI 是可选功能，连接服务器与 SFTP 文件操作均可独立使用。
+界面默认使用简体中文，可切换英文；外观默认跟随系统，也可选择浅色或深色。项目面向 macOS、Windows 和 Linux，专注远程 SSH 工作流。AI 是可选功能，连接服务器与 SFTP 文件操作均可独立使用。
 
 ## 功能
 
@@ -73,7 +73,7 @@ KeelShell 面向每天需要连接服务器、查看日志和处理远程文件�
 
 1. **配置服务。** 创建命名配置，选择模型 API、Codex CLI 或 Claude Code。API 支持 Chat Completions、Responses 和 Anthropic Messages，包括自建服务；可按需发现模型或测试连接。本地 CLI 填写原生可执行路径、基础地址、显式密钥和模型，检查只验证版本/能力；使用步骤与支持范围见[本地智能体指南](docs/product/LOCAL_AGENTS.md)。
 2. **选择上下文。** 选取终端内容，检查脱敏后的实际请求，再手动发送。
-3. **审阅建议。** 阅读回答，将需要的命令填入命令栏，确认内容和目标后执行。
+3. **审阅建议。** 阅读回答及其捕获的 SSH 主机与会话，将需要的命令填入命令栏，确认内容和目标后执行。未绑定或失效的目标会在按钮旁说明原因，需要先明确选择终端上下文，再重新生成回复。
 
 AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解锁配置本身不会联网。更多协议与辅助工作流见[路线图](docs/ROADMAP.md)。
 
@@ -81,11 +81,11 @@ AI 密钥默认仅保存在内存中，也可显式加密保存。保存和解�
 
 API 配置还可设置自定义请求头与显式 HTTP(S)/SOCKS5 代理，用于模型发现、连接测试和审核后的提问。值可来自本次运行、环境引用或加密凭据库；预览显示实际目的地与路由，秘密值不会写入配置元数据。设置及使用方式见[API 请求选项](docs/product/AI_REQUEST_OPTIONS.md)。
 
-应用支持跟随系统、浅色和深色三种外观，默认跟随系统，切换保留 SSH 会话和未发送草稿；macOS 切换与偏好重启已验证，其他平台原生与完整视觉矩阵仍待完成。见[主题验证](docs/testing/records/2026-10-04-system-themes.md)。本地 CLI Ask 已通过实际安装版到回环服务的 macOS 窗口问答与取消验证；不复用订阅登录，没有 CLI 工具执行。专业视觉升级、Agent 工作流及对外 MCP 服务继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进；MCP 只向外部智能体提供 KeelShell 能力，不提供访问第三方 MCP 服务的通用客户端。
+应用内 AI 与对外 MCP 是两个独立入口。本地 CLI Ask 使用显式 API 凭据、隔离目录和受控环境，当前不复用订阅登录；受限 Agent 工作流继续按[开发计划](docs/product/DESIGN_AND_AGENT_PLAN.md)推进。
 
-外部智能体也可提交现有 UTF-8 文件的完整替换提案。KeelShell 展示完整路径、内容摘要和全部差异，只有应用用户确认后才会写入；拒绝或失效提案不会自动重试。新文件提案已通过独立工程复核、主树完整检查及 macOS 自有八工具客户端的批准、拒绝和已观察并发修改拦截；供应商新工具与其他平台原生仍待验证，见[文件提案指南](docs/product/MCP_FILE_CHANGES.md)。
+对外 MCP 通过独立 stdio 伴随程序连接正在运行的 KeelShell。用户选择可访问的 SSH 会话、终端片段、目录和工具；外部智能体可以读取授权信息，也可以提交命令或现有 UTF-8 文件替换提案。应用显示精确目标与完整内容或差异，由用户确认；拒绝、撤权或失效后不会自动重试。配置步骤和八项工具见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)及[文件提案指南](docs/product/MCP_FILE_CHANGES.md)。KeelShell 不提供访问任意第三方 MCP 服务的通用客户端。
 
-对外 MCP 已接通独立 stdio 伴随程序、桌面授权与真实 SSH/SFTP 桥接，默认关闭。实际安装的 Claude Code 已通过标准 macOS 双程序开发包完成授权片段、目录和文件读取、越权拒绝，以及桌面明确批准后成功、拒绝后保持拒绝的命令提案流程；撤权后，同一客户端报告连接已断开。验证使用自有模型模拟服务与隔离 SSH/SFTP 夹具，独立复核已通过该限定范围，无剩余 P1/P2，不代表云端模型或客户服务器验收，见[授权客户端记录](docs/testing/records/2026-10-05-claude-authorized-mcp.md)。Codex 新文本前置已通过；新的实际 MCP 尝试只完成七项工具目录协商，首笔模型请求出现额外工具且没有 KeelShell 目录，验证在业务调用前停止。两次失败保留，见[Codex 尝试记录](docs/testing/records/2026-10-05-codex-authorized-mcp-failure.md)；实际 MCP 读取、其他平台原生、最终发布包与安装更新仍待验证。使用见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)；历史未授权客户端、运行中撤权和重启证据分别见[前置记录](docs/testing/records/2026-10-05-external-client-mcp-preflight.md)与[标准包复核记录](docs/testing/records/2026-10-04-mcp-response-cancellation.md)。
+macOS 已完成限定的原生流程及 Claude Code 授权调用验证；Codex 完整 MCP 业务、完整主题/语言/最小窗口矩阵、Windows/Linux 桌面和安装更新验收仍开放。实际范围与失败证据见[能力清单](docs/product/CAPABILITIES.md)、[主题记录](docs/testing/records/2026-10-04-system-themes.md)及[测试记录](docs/testing/records/)。
 
 <details>
 <summary>查看 AI 配置界面</summary>

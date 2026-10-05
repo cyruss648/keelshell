@@ -23,6 +23,7 @@ use super::{KeyboardInteractiveField, KeyboardInteractivePrompt, Workspace};
 use crate::i18n;
 use crate::terminal::{TerminalCommand, TerminalView};
 
+mod ai_command_review_target;
 mod ai_metadata;
 
 trait Checked<T> {
