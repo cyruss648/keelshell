@@ -1,14 +1,14 @@
 # 界面设计与智能体能力计划
 
-更新：2026-10-05。状态：主题基础已实现并部分验收；对外MCP已接通stdio伴随程序、受认证桌面IPC、真实SSH/SFTP及桌面审阅，源码独立复审与macOS受控闭环通过，实际Claude Code授权调用流程及新独立复核已在限定范围通过；本地CLI Ask后端/命名设置/密钥引用/审核已接通并通过整仓门禁、新独立审查和macOS回环问答/取消。完整视觉矩阵、Agent、Codex MCP、文件修改提案和其他平台原生继续实施。本文覆盖后续主题、视觉体系、MCP 服务端与本地智能体接入；不取代既有远程 SSH 目标。
+更新：2026-10-05。状态：主题基础已实现并部分验收；对外MCP已接通stdio伴随程序、受认证桌面IPC、真实SSH/SFTP及桌面审阅，源码独立复审与macOS受控闭环通过，实际Claude Code授权调用流程及新独立复核已在限定范围通过；本地CLI Ask后端/命名设置/密钥引用/审核已接通并通过整仓门禁、新独立审查和macOS回环问答/取消。新增第八项文件修改提案已通过独立复核、主树完整门禁与macOS自有外部客户端的实际批准/拒绝/已观察并发修改拦截；供应商第八工具、完整视觉矩阵、Agent、Codex MCP和其他平台原生继续实施。本文覆盖后续主题、视觉体系、MCP 服务端与本地智能体接入；不取代既有远程 SSH 目标。
 
-用户明确要求 MCP 是 **KeelShell 向其他智能体提供能力**。不开发在 KeelShell 内连接任意第三方 MCP 服务的通用 MCP 客户端。应用调用本地 Claude Code/Codex CLI 与对外 MCP 服务是两个独立入口：前者为应用内 AI 提供推理后端，后者让外部智能体调用 KeelShell 已授权的能力。命令及后续文件修改能力均采用提案与桌面人工审阅；外部客户端不能自行批准或执行。
+用户明确要求 MCP 是 **KeelShell 向其他智能体提供能力**。不开发在 KeelShell 内连接任意第三方 MCP 服务的通用 MCP 客户端。应用调用本地 Claude Code/Codex CLI 与对外 MCP 服务是两个独立入口：前者为应用内 AI 提供推理后端，后者让外部智能体调用 KeelShell 已授权的能力。命令及现有文件修改能力均采用提案与桌面人工审阅；外部客户端不能自行批准或执行。
 
-新的默认拒绝入口实验已在实际 Codex 请求观察到七项工具名称，但完整授权流程继续验收；该目录观察没有有效桌面授权或业务调用，见[目录记录](../testing/records/2026-10-05-codex-catalog-direction.md)。受审文件修改提案的作者候选已冻结，等待新独立审查与整合/原生验证；API请求头/代理A已在新独立复核发现非活动代理派生秘密边界P1，整合停止，新B只修该缺口。当前状态与剩余门禁见[交接](../HANDOFF.md)，旧七项工具材料不验收第八项文件提案。
+新的默认拒绝入口实验已在实际 Codex 请求观察到七项工具名称，但完整授权流程继续验收；该目录观察没有有效桌面授权或业务调用，见[目录记录](../testing/records/2026-10-05-codex-catalog-direction.md)。受审文件修改提案B已在主线a909609提交推送，21份Rust冻结源码相等，根1077普通+8doc+6脚本及严格检查通过，新源码绑定的macOS八工具自有客户端真实文件审阅闭环通过；首次人工操作失败保持。新精确CI为Linux/Windows成功、macOS一项重授权状态测试失败，整体failure；新同步修正已通过全新非作者复核和主树1083普通+8doc+6脚本完整门禁，新提交CI另核验，见[CI记录](../testing/records/2026-10-05-mcp-file-proposals-ci.md)。API请求头/代理A/B/C秘密边界失败保持；D全配置保留草稿秘密修复作者和新非作者完整门禁均通过1109普通+8doc+6脚本，但新的9请求HTTP及GPUI来源反例证实请求头名称秘密P1，D禁止整合；E网络与Apply/持久化保护通过作者1121普通+8doc+6脚本，等待最终冻结和新独立复审。当前状态与剩余门禁见[交接](../HANDOFF.md)，旧七项工具材料不验收第八项文件提案。
 
 真实客户端增量只关闭有限场景：Claude Code 2.1.285通过源码`e16689b`的标准macOS双程序包，实际协商七项schema、完成13次tools/call与15次自有模型请求，授权片段/目录/UTF-8文件读取及越权/错误路线拒绝都回传同一客户端。受控UI明确批准首条提案后状态变为成功，拒绝另一条后变为拒绝；撤权后客户端报告连接断开，未记录第 14 次 tools/call RPC，不作为新的服务端授权拒绝。新独立复核已通过该限定范围，无剩余 P1/P2，见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。Codex新文本前置经仅限子进程的回环NO_PROXY修正已通过，新的实际MCP尝试协商七项工具，但首笔模型请求缺少KeelShell目录且包含额外工具，安全门在业务调用前停止；两次失败保留，读取/审阅闭环未通过，见[Codex尝试记录](../testing/records/2026-10-05-codex-authorized-mcp-failure.md)。新诊断不追溯证明旧失败原因。早期未授权流程、两次授权尝试失败及原复审更正均保留，MCP-01至04不整体关闭。
 
-服务端使用官方Rust SDK，提供默认关闭的stdio入口、七项固定工具、会话/路线授权契约、撤权/取消、有界读取与待审命令提案。受认证桌面IPC与真实SSH/SFTP句柄已接通，无能力环境仍默认拒绝。源码e16689b的[Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183)三平台成功；该源码CI与实际Claude客户端切片各自记录，均不证明云模型质量、任意shell执行、其他平台桌面或安装更新。实际Codex MCP、文件修改提案及完整跨平台验收继续开放；见[ADR0039](../adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)与[接入指南](EXTERNAL_MCP.md)。
+服务端使用官方Rust SDK，提供默认关闭的stdio入口、八项固定工具、会话/路线授权契约、撤权/取消、有界读取与待审命令提案。受认证桌面IPC与真实SSH/SFTP句柄已接通，无能力环境仍默认拒绝。源码e16689b的[Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183)三平台成功；该源码CI与实际Claude客户端切片各自记录，均不证明云模型质量、任意shell执行、其他平台桌面或安装更新。实际Codex MCP、供应商文件修改提案及完整跨平台验收继续开放；见[ADR0039](../adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)与[接入指南](EXTERNAL_MCP.md)。
 
 ## 界面目标与验收
 
@@ -42,7 +42,7 @@
 
 本地智能体进程属于 AI 后台服务，不属于本地终端管理。它也不代表模型离线：CLI可能使用云端账户、网络与自身日志策略，发送前须展示运行方与上下文；不能因“本地CLI”隐藏数据发送边界。
 
-当前服务端提供 `keelshell_list_sessions`、`keelshell_read_selection`、`keelshell_sftp_list`、`keelshell_sftp_read`、`keelshell_monitor_snapshot`、`keelshell_propose_command` 和 `keelshell_get_action_status`，参数以实现中的版本化schema为准。一般SSH文本不具有可靠的只读判定；执行提案沿用现有人工审核，不提供模型自行解锁或确认的捷径。
+当前服务端提供 `keelshell_list_sessions`、`keelshell_read_selection`、`keelshell_sftp_list`、`keelshell_sftp_read`、`keelshell_monitor_snapshot`、`keelshell_propose_command`、`keelshell_propose_file_change` 和 `keelshell_get_action_status`，参数以实现中的版本化schema为准。一般SSH文本不具有可靠的只读判定；执行提案沿用现有人工审核，不提供模型自行解锁或确认的捷径。
 
 ## 工程顺序
 

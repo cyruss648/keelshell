@@ -132,6 +132,77 @@ impl Drop for TransferWriteHold {
 }
 
 #[derive(Default)]
+struct CanonicalPathGate {
+    state: tokio::sync::watch::Sender<Option<Arc<CanonicalPathState>>>,
+}
+struct CanonicalPathState {
+    path: String,
+    entered: AtomicUsize,
+    expired: AtomicBool,
+}
+impl CanonicalPathGate {
+    async fn hold(&self, path: &str, deadline: Duration) -> Result<(), ()> {
+        let mut state = self.state.subscribe();
+        let owned = match state.borrow_and_update().as_ref() {
+            Some(owned) if owned.path == path => owned.clone(),
+            _ => return Ok(()),
+        };
+        owned.entered.fetch_add(1, Ordering::AcqRel);
+        let result = tokio::time::timeout(deadline, async {
+            loop {
+                if !state
+                    .borrow_and_update()
+                    .as_ref()
+                    .is_some_and(|current| Arc::ptr_eq(current, &owned))
+                {
+                    return Ok(());
+                }
+                state.changed().await.map_err(|_| ())?;
+            }
+        })
+        .await;
+        match result {
+            Ok(result) => result,
+            Err(_) => {
+                owned.expired.store(true, Ordering::Release);
+                Err(())
+            }
+        }
+    }
+}
+
+/// Holds only REALPATH replies for an exact fixture path until this owner drops.
+/// The fallback deadline bounds cleanup after a failed or unwinding test.
+pub struct CanonicalPathHold {
+    gate: Arc<CanonicalPathGate>,
+    owned: Arc<CanonicalPathState>,
+}
+impl CanonicalPathHold {
+    pub fn entered(&self) -> usize {
+        self.owned.entered.load(Ordering::Acquire)
+    }
+    pub fn expired(&self) -> bool {
+        self.owned.expired.load(Ordering::Acquire)
+    }
+    pub fn release(self) {}
+}
+impl Drop for CanonicalPathHold {
+    fn drop(&mut self) {
+        self.gate.state.send_if_modified(|state| {
+            if state
+                .as_ref()
+                .is_some_and(|current| Arc::ptr_eq(current, &self.owned))
+            {
+                *state = None;
+                true
+            } else {
+                false
+            }
+        });
+    }
+}
+
+#[derive(Default)]
 pub struct Filesystem {
     state: std::sync::Arc<std::sync::Mutex<FileState>>,
     open_handles: std::sync::Arc<std::sync::atomic::AtomicUsize>,
@@ -147,6 +218,7 @@ pub struct Filesystem {
     invalid_transfer_read: Arc<AtomicUsize>,
     injected_name: Arc<std::sync::Mutex<Option<String>>>,
     directory_read_gate: Arc<ResponseGate>,
+    canonical_path_gate: Arc<CanonicalPathGate>,
 }
 
 impl Clone for Filesystem {
@@ -166,10 +238,36 @@ impl Clone for Filesystem {
             invalid_transfer_read: self.invalid_transfer_read.clone(),
             injected_name: self.injected_name.clone(),
             directory_read_gate: self.directory_read_gate.clone(),
+            canonical_path_gate: self.canonical_path_gate.clone(),
         }
     }
 }
 impl Filesystem {
+    /// Observe a production root validation on one exact path without delaying
+    /// unrelated SFTP operations or releasing another test owner's hold.
+    pub fn hold_canonical_path(&self, path: &str) -> Result<CanonicalPathHold, &'static str> {
+        let owned = Arc::new(CanonicalPathState {
+            path: path.to_owned(),
+            entered: AtomicUsize::new(0),
+            expired: AtomicBool::new(false),
+        });
+        let mut armed = false;
+        self.canonical_path_gate.state.send_if_modified(|state| {
+            if state.is_some() {
+                return false;
+            }
+            *state = Some(owned.clone());
+            armed = true;
+            true
+        });
+        if !armed {
+            return Err("fixture already has an owned REALPATH hold");
+        }
+        Ok(CanonicalPathHold {
+            gate: self.canonical_path_gate.clone(),
+            owned,
+        })
+    }
     pub fn stall_directory_reads(&self) {
         self.directory_read_gate.arm();
     }
@@ -592,10 +690,110 @@ impl russh_sftp::server::Handler for Filesystem {
         Ok(Name { id, files })
     }
     async fn realpath(&mut self, id: u32, path: String) -> Result<Name, StatusCode> {
+        self.canonical_path_gate
+            .hold(&path, Duration::from_secs(10))
+            .await
+            .map_err(|_| StatusCode::Failure)?;
         Ok(Name {
             id,
             files: vec![File::dummy(if path == "." { "/".into() } else { path })],
         })
+    }
+}
+
+#[cfg(test)]
+mod canonical_path_gate_tests {
+    use super::*;
+    use std::{future::Future, task::Poll};
+
+    async fn poll_held_once(future: &mut std::pin::Pin<Box<impl Future<Output = Result<(), ()>>>>) {
+        std::future::poll_fn(|cx| {
+            assert!(future.as_mut().poll(cx).is_pending());
+            Poll::Ready(())
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn exact_path_hold_survives_clones_and_releases_on_owner_drop()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let filesystem = Filesystem::default();
+        let held = filesystem.hold_canonical_path("/approved/missing")?;
+        let clone = filesystem.clone();
+        assert!(clone.hold_canonical_path("/another").is_err());
+        assert!(
+            clone
+                .canonical_path_gate
+                .hold("/approved", Duration::from_secs(1))
+                .await
+                .is_ok()
+        );
+        let gate = clone.canonical_path_gate.clone();
+        let mut pending = Box::pin(gate.hold("/approved/missing", Duration::from_secs(1)));
+        poll_held_once(&mut pending).await;
+        drop(clone);
+        poll_held_once(&mut pending).await;
+        assert_eq!(held.entered(), 1);
+        assert!(!held.expired());
+        drop(held);
+        assert!(pending.await.is_ok());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn release_before_poll_and_old_handler_do_not_consume_new_hold()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let filesystem = Filesystem::default();
+        filesystem.hold_canonical_path("/same")?.release();
+        assert!(
+            filesystem
+                .canonical_path_gate
+                .hold("/same", Duration::from_secs(1))
+                .await
+                .is_ok()
+        );
+        let old = filesystem.hold_canonical_path("/same")?;
+        let mut pending = Box::pin(
+            filesystem
+                .canonical_path_gate
+                .hold("/same", Duration::from_secs(1)),
+        );
+        poll_held_once(&mut pending).await;
+        old.release();
+        let current = filesystem.hold_canonical_path("/same")?;
+        assert!(pending.await.is_ok());
+        assert_eq!(current.entered(), 0);
+        let mut next = Box::pin(
+            filesystem
+                .canonical_path_gate
+                .hold("/same", Duration::from_secs(1)),
+        );
+        poll_held_once(&mut next).await;
+        assert_eq!(current.entered(), 1);
+        assert!(!current.expired());
+        current.release();
+        assert!(next.await.is_ok());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn expired_reply_stays_owned_until_drop_and_cannot_rearm_silently()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let filesystem = Filesystem::default();
+        let held = filesystem.hold_canonical_path("/expired")?;
+        assert!(
+            filesystem
+                .canonical_path_gate
+                .hold("/expired", Duration::from_millis(1))
+                .await
+                .is_err()
+        );
+        assert_eq!(held.entered(), 1);
+        assert!(held.expired());
+        assert!(filesystem.hold_canonical_path("/expired").is_err());
+        held.release();
+        assert!(filesystem.hold_canonical_path("/expired").is_ok());
+        Ok(())
     }
 }
 

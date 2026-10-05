@@ -2,6 +2,14 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
+## 2026-10-05 文件提案 CI 失败与 API D 新隐私缺口
+
+重授权测试同步修正已通过作者1083普通+8doc+6脚本完整门禁和全新非作者限定复核（3app/3session门控、19MCP、105真实TCP、6脚本及严格检查）；disabled点击补充反例证明无效入口不会伪造操作开始。根逐bytes/hash保存28/29作者与99/100复核材料，精确两份测试Rust已导入，生产/依赖/锁/工具链不变，主树完整门禁439.533秒通过1083普通+8doc+6脚本、严格检查和两控制器，工程输入前后相等。作者/复核工作区已可恢复归档，实际目录/cache消失，证明保留。原7s界面/5s产品限时保持，不认定原CI具体原因，见[同步记录](testing/records/2026-10-05-mcp-grant-readiness.md)。API E同时补齐网络与Apply/持久化前的秘密metadata拒绝，作者最终门禁1121普通+8doc+6脚本通过；正在完成构建和冻结，新独立复审尚未执行，D不可整合。
+
+精确 `a909609c2bf64455ad48ec6c1704bdd68ec3df9c` 已推送且远端核对一致；[Quality37306263578](https://github.com/cyruss648/keelshell/actions/runs/37306263578) 整体 failure，Linux/Windows success、macOS app389通过/1失败。失败发生于失败重授权测试点击后立即检查 busy；具体 CI 时序原因未确立。完整原日志与133proof/134归档经非作者和根核验保留，新的测试同步候选在独立工作区诊断。见[CI记录](testing/records/2026-10-05-mcp-file-proposals-ci.md)。
+
+API D 新独立完整门禁1109普通+8doc+6脚本通过，但另一个正常自有HTTP反例实证P1：已知秘密作为另一配置合法自定义请求头名称时，3协议×发现/测试/Ask的9请求均实际发出该名称，审核摘要却隐藏它。真实GPUI草稿来源确认另记，0网络。D禁止整合；E仅修metadata名称的已知秘密边界并重新审查，原D和此前C失败不覆盖。MCP仍仅向外部智能体提供能力。
+
 ## 2026-10-05 文件提案主树与新 macOS 八工具闭环
 
 MCP文件提案B的新非作者限定复核通过后，21份Rust源码与冻结逐SHA相等导入主树；根完整门禁382.385秒通过1077普通+8doc+6脚本、fmt/严格workspace all-targets Clippy/x.y与默认/2MiB控制器，原11ignored保持。显式MAC15新GUI/MCP+fixture构建、标准双程序打包及原生检查通过，输入前后/与门禁相等。新原生应用连接自有TCP SSH/SFTP；自有外部客户端协商八工具并实际读取，人工完整审阅批准后精确字节/摘要读回，拒绝后不变，提案后独立修改再批准被拒并保留外部内容。首轮屏幕外AX操作未进入审阅、授权变更及EOF失败保留，具体原因未确立；第二轮先滚动到可见按钮的闭环exit0，不改产品源码。最终撤权；两次companion、GUI、fixture出生身份消失，SSH与控制监听/线程关闭、私有目录清理，HTTP0/0不计API验收。见[文件提案记录](testing/records/2026-10-05-mcp-file-proposals.md)。新提交CI另核验；第八工具供应商、最小原生六组合、Windows/Linux原生、Release/安装更新仍开放，不转移旧七工具证据。

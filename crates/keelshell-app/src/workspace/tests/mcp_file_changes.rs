@@ -211,6 +211,11 @@ async fn mcp_file_failed_regrant_releases_finished_preparation_and_keeps_old_sco
     for _ in 0..2 {
         let job = queue_file_request(&h, target, cx);
         let held = hold_preparation(&h, cx).await;
+        let validation = h
+            .files
+            .filesystem
+            .hold_canonical_path("/approved/missing")
+            .checked("own exact production regrant REALPATH response");
         cx.update_window(h.fixture.window, |_, window, cx| {
             h.fixture.workspace.update(cx, |view, cx| {
                 view.mcp.root.update(cx, |input, cx| {
@@ -220,9 +225,20 @@ async fn mcp_file_failed_regrant_releases_finished_preparation_and_keeps_old_sco
             });
             window.render_frame(cx);
             window.click("mcp-grant-session", cx);
-            assert!(h.fixture.workspace.read(cx).mcp.busy);
         })
         .checked("start production regrant against missing canonical directory");
+        // A click alone does not prove validation is still in flight. Hold the
+        // real response and observe admission before asserting its busy state.
+        cx.wait_for(h.fixture.window, Duration::from_secs(7), |_, _| {
+            validation.entered() == 1
+        })
+        .await;
+        assert!(!validation.expired());
+        h.fixture.workspace.read_with(cx, |view, _| {
+            assert!(view.mcp.busy);
+            assert_eq!(view.mcp_test_preparing_count(), 1);
+        });
+        validation.release();
         cx.wait_for(h.fixture.window, Duration::from_secs(7), |_, cx| {
             h.fixture
                 .workspace
