@@ -1,8 +1,12 @@
 # 开发路线
 
+功能源码已提交并推送 `cfac02eab96d1791660bfafeb9bda9552c7f4cfe`：本地Ask真实进度、两项已独立复核的test-only补充及配套文档。根实际核对remote main、0/0、推送时干净及260工程提交字节与完整门禁相等。本机第二门禁1171普通+8doc+6脚本/严格检查/两控制器通过，MAC15新构建、57打包及标准包检查通过。精确[Quality37367209582](https://github.com/cyruss648/keelshell/actions/runs/37367209582) attempt1整体failure：Linux完整通过；Windows1152普通+8doc通过，但额外2MiB控制器45秒总期限超时，具体pending场景UNKNOWN；macOS因托管arm64容量未获运行器、未执行。原失败保持，见[本次CI](testing/records/2026-10-06-local-ask-progress-ci.md)。
+
+新版真实macOS GPUI/Codex0.160.0→自有SSE完成中文浅色的等待、取消、新请求及旧尾释放隔离、最终回复与人工送入命令栏/清空；建议实际为[REDACTED]，未执行。GUI/SSH明确wait/reap、HTTP0、private删除，根三个已记录出生fresh absent及双端口errno61；不声称完整供应商后代普查。900×580逻辑窗口、全部8事实行、其余七个计划组合与其他平台原生保持开放，见[部分原生记录](testing/records/2026-10-06-local-ask-progress-native.md)。MCP仅向外部智能体提供KeelShell能力，内置Ask独立。已合入的五个受管工作树可恢复归档并核验checkout/target消失，根保留全部失败及复核材料；没有新Release或安装更新。下方为历史时点，不能覆盖此状态。
+
 最终Ask与两项test-only补充已在主副本整合，新非作者限定复核及根第二完整门禁通过1171普通+8doc+6脚本/严格检查/两控制器，260输入前后相等；源码未提交/推送，新MAC15双程序构建、57打包回归及标准包结构检查通过；新版原生窗口与新CI另行验收。第一次MCP超时和已推送bd9预算CI失败的原因分别未知，原记录不改，见[整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。以下旧整合“失败/待复核”属历史时点，由本段覆盖。
 
-当前已推送提交为bd9f5e；其[Quality37356943845](https://github.com/cyruss648/keelshell/actions/runs/37356943845)整体failure：macOS自托管CLI控制器在预算清理后断言失败，普通已完成80通过/0失败/2ignored，具体分支与原因未知；Windows1139普通+8doc、Linux1158普通+8doc完整通过，目录新回归实际ok。136/137封包与258提交输入经根读回，见[新CI记录](testing/records/2026-10-06-catalog-probe-lifecycle-ci.md)。自有进程生命周期诊断在独立树进行，原本机通过与原CI失败分别保留。
+历史bd9提交；其[Quality37356943845](https://github.com/cyruss648/keelshell/actions/runs/37356943845)整体failure：macOS自托管CLI控制器在预算清理后断言失败，普通已完成80通过/0失败/2ignored，具体分支与原因未知；Windows1139普通+8doc、Linux1158普通+8doc完整通过，目录新回归实际ok。136/137封包与258提交输入经根读回，见[新CI记录](testing/records/2026-10-06-catalog-probe-lifecycle-ci.md)。自有进程生命周期诊断在独立树进行，原本机通过与原CI失败分别保留。
 
 Ask候选已通过作者与限定独立复审并导入主工作副本，但根完整门禁314.920秒exit1：MCP无效环境子进程2秒output超时，普通已完成930通过/1失败/2ignored，doc及额外2MiB未到达。格式/x.y/6脚本/严格Clippy通过，260工程输入前后相等。Ask未提交或推送；独立启动诊断、新源码CI及新版原生仍待完成，见[整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。
 

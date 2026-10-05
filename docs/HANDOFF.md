@@ -1,6 +1,10 @@
 # 开发交接 — 2026-10-06
 
-当前提交为已推送的 `bd9f5efa69bba8cdd484807116da3bd9b9243a42`，只包含模型目录测试夹具修正及其记录。[Quality37356943845](https://github.com/cyruss648/keelshell/actions/runs/37356943845) 已结束整体failure：macOS普通已完成80通过/0失败/2ignored，随后自托管CLI控制器在预算清理后的监听关闭断言失败；该控制器没有普通test-result计数，具体timeout/cancel分支、出生身份及端口原因未知。Windows1139普通+8doc、Linux1158普通+8doc完整通过，目录三新增及隐私实际ok；136/137原日志/API/源码封包经根全量读回，258提交blob另实际核验。新的独立工作区捕获自有进程清理事实，原本机通过不关闭本次CI失败，见[新CI记录](testing/records/2026-10-06-catalog-probe-lifecycle-ci.md)。
+功能源码已提交并推送 `cfac02eab96d1791660bfafeb9bda9552c7f4cfe`：本地Ask真实进度、两项已独立复核的test-only补充及配套文档。根实际核对remote main、0/0、推送时干净及260工程提交字节与完整门禁相等。本机第二门禁1171普通+8doc+6脚本/严格检查/两控制器通过，MAC15新构建、57打包及标准包检查通过。精确[Quality37367209582](https://github.com/cyruss648/keelshell/actions/runs/37367209582) attempt1整体failure：Linux完整通过；Windows1152普通+8doc通过，但额外2MiB控制器45秒总期限超时，具体pending场景UNKNOWN；macOS因托管arm64容量未获运行器、未执行。原失败保持，见[本次CI](testing/records/2026-10-06-local-ask-progress-ci.md)。
+
+新版真实macOS GPUI/Codex0.160.0→自有SSE完成中文浅色的等待、取消、新请求及旧尾释放隔离、最终回复与人工送入命令栏/清空；建议实际为[REDACTED]，未执行。GUI/SSH明确wait/reap、HTTP0、private删除，根三个已记录出生fresh absent及双端口errno61；不声称完整供应商后代普查。900×580逻辑窗口、全部8事实行、其余七个计划组合与其他平台原生保持开放，见[部分原生记录](testing/records/2026-10-06-local-ask-progress-native.md)。MCP仅向外部智能体提供KeelShell能力，内置Ask独立。已合入的五个受管工作树可恢复归档并核验checkout/target消失，根保留全部失败及复核材料；没有新Release或安装更新。下方为历史时点，不能覆盖此状态。
+
+历史bd9提交只包含模型目录测试夹具修正及其记录。[Quality37356943845](https://github.com/cyruss648/keelshell/actions/runs/37356943845) 已结束整体failure：macOS普通已完成80通过/0失败/2ignored，随后自托管CLI控制器在预算清理后的监听关闭断言失败；该控制器没有普通test-result计数，具体timeout/cancel分支、出生身份及端口原因未知。Windows1139普通+8doc、Linux1158普通+8doc完整通过，目录三新增及隐私实际ok；136/137原日志/API/源码封包经根全量读回，258提交blob另实际核验。新的独立工作区捕获自有进程清理事实，原本机通过不关闭本次CI失败，见[新CI记录](testing/records/2026-10-06-catalog-probe-lifecycle-ci.md)。
 
 本地Ask真实过程显示的候选和两份test-only补充已在主副本整合：Ask作者/限定非作者复审、预算/MCP新非作者复核材料均经根全量读回，唯一预算fixture调用交汇保留Ask继承pipes与ACK开关。根定向默认32.209秒/2MiB11.239秒通过；第二完整门禁254.296秒exit0，1171普通/0失败/11ignored、8doc、6脚本、fmt/x.y/严格Clippy与两控制器通过，future5040字节，260工程输入前后相等。第一次314.920秒MCP2秒output超时及bd9 CI预算失败分别保持UNKNOWN，不推断后来通过解释旧机制。源码尚未提交/推送；新MAC15 GUI/MCP构建、57打包回归及标准包原生结构检查通过，新原生窗口/供应商和新精确CI尚待。见[主树整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。
 
