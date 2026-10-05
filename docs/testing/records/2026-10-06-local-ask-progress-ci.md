@@ -27,3 +27,7 @@ macOS check-run 的一条failure明确托管运行器多次领取失败，另三
 2026-10-05 20:57 UTC 的新只读API快照确认：旧cfac的attempt2已completed/cancelled；Mac check-run明确说明同main并发组有更高优先级等待请求而取消，并附arm64容量notice。Windows/Linux的attempt2步骤、时间及结论与attempt1相等，不作为新执行。取消操作者仍未知。
 
 后续文档检查点ad0912c的Quality37370415166 attempt1为completed/failure，但三个job均completed/cancelled、runner_id=0、steps为空，没有checkout或测试执行。该run的取消原因未读取，保持UNKNOWN，不能将顶层failure称为产品断言失败，也不代表任何平台通过。18份新原始API/收据材料已由根核对，独立读取仅4个GET，未改变旧失败。后续源码提交CI须按自己的精确head单独检查。
+
+## 2f7ca1e 的新阶段证据
+
+[Quality37377310693](https://github.com/cyruss648/keelshell/actions/runs/37377310693) attempt1对应精确2f7ca1e，三个job实际执行。Linux/macOS成功；Windows默认完整控制器完成626条记录、38次TCP、future5440字节，73.497253秒。26次实际ConnectionRefused/10061耗时52.451005秒，已超过额外小栈45秒整体预算；小栈在序号370记录期限到达，整体failure。新Windows预算候选与全部原日志hash见[独立记录](2026-10-06-windows-small-stack-budget.md)，尚待新Windows执行。这组新阶段事实不追溯证明早期cfac未采集pending的根因。

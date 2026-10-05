@@ -88,6 +88,12 @@ static SMALL_STACK: AtomicBool = AtomicBool::new(false);
 static RECORDS: AtomicUsize = AtomicUsize::new(0);
 const RECORD_LIMIT: usize = 1024;
 
+// Windows loopback refusal probes took about two seconds each in the complete
+// controller (26 probes / 52.5 s in CI). Give that same coverage a bounded total
+// budget; individual Ask/cancellation deadlines and the 2 MiB stack stay fixed.
+const SMALL_STACK_CONTROLLER_DEADLINE: Duration =
+    Duration::from_secs(if cfg!(windows) { 90 } else { 45 });
+
 #[derive(serde::Serialize)]
 struct StageRecord {
     mode: &'static str,
@@ -225,12 +231,15 @@ fn main() {
                         .build()
                         .unwrap()
                         .block_on(async {
-                            tokio::time::timeout(Duration::from_secs(45), integration_cases())
-                                .await
-                                .inspect_err(|_| {
-                                    mark(None, Stage::Controller, Phase::DeadlineExceeded, None);
-                                })
-                                .expect("small-stack controller exceeded its overall deadline");
+                            tokio::time::timeout(
+                                SMALL_STACK_CONTROLLER_DEADLINE,
+                                integration_cases(),
+                            )
+                            .await
+                            .inspect_err(|_| {
+                                mark(None, Stage::Controller, Phase::DeadlineExceeded, None);
+                            })
+                            .expect("small-stack controller exceeded its overall deadline");
                         });
                 })
                 .unwrap()
