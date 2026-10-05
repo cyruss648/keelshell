@@ -4,7 +4,7 @@
 
 用户明确要求 MCP 是 **KeelShell 向其他智能体提供能力**。不开发在 KeelShell 内连接任意第三方 MCP 服务的通用 MCP 客户端。应用调用本地 Claude Code/Codex CLI 与对外 MCP 服务是两个独立入口：前者为应用内 AI 提供推理后端，后者让外部智能体调用 KeelShell 已授权的能力。命令及后续文件修改能力均采用提案与桌面人工审阅；外部客户端不能自行批准或执行。
 
-真实客户端增量只关闭有限场景：Claude Code 2.1.285通过源码`e16689b`的标准macOS双程序包，实际协商七项schema、完成13次tools/call与15次自有模型请求，授权片段/目录/UTF-8文件读取及越权/错误路线拒绝都回传同一客户端。受控UI明确批准首条提案后状态变为成功，拒绝另一条后变为拒绝；撤权后客户端报告连接断开，未记录第 14 次 tools/call RPC，不作为新的服务端授权拒绝。新独立复核已通过该限定范围，无剩余 P1/P2，见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。Codex新文本前置经仅限子进程的回环NO_PROXY修正已通过，实际MCP未执行；新诊断不追溯证明旧失败原因。早期未授权流程、两次授权尝试失败及原复审更正均保留，MCP-01至04不整体关闭。
+真实客户端增量只关闭有限场景：Claude Code 2.1.285通过源码`e16689b`的标准macOS双程序包，实际协商七项schema、完成13次tools/call与15次自有模型请求，授权片段/目录/UTF-8文件读取及越权/错误路线拒绝都回传同一客户端。受控UI明确批准首条提案后状态变为成功，拒绝另一条后变为拒绝；撤权后客户端报告连接断开，未记录第 14 次 tools/call RPC，不作为新的服务端授权拒绝。新独立复核已通过该限定范围，无剩余 P1/P2，见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。Codex新文本前置经仅限子进程的回环NO_PROXY修正已通过，新的实际MCP尝试协商七项工具，但首笔模型请求缺少KeelShell目录且包含额外工具，安全门在业务调用前停止；两次失败保留，读取/审阅闭环未通过，见[Codex尝试记录](../testing/records/2026-10-05-codex-authorized-mcp-failure.md)。新诊断不追溯证明旧失败原因。早期未授权流程、两次授权尝试失败及原复审更正均保留，MCP-01至04不整体关闭。
 
 服务端使用官方Rust SDK，提供默认关闭的stdio入口、七项固定工具、会话/路线授权契约、撤权/取消、有界读取与待审命令提案。受认证桌面IPC与真实SSH/SFTP句柄已接通，无能力环境仍默认拒绝。源码e16689b的[Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183)三平台成功；该源码CI与实际Claude客户端切片各自记录，均不证明云模型质量、任意shell执行、其他平台桌面或安装更新。实际Codex MCP、文件修改提案及完整跨平台验收继续开放；见[ADR0039](../adr/0039-authenticated-desktop-mcp-ssh-bridge.md)、[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)与[接入指南](EXTERNAL_MCP.md)。
 

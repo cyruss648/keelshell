@@ -4,7 +4,7 @@ KeelShell 提供 MCP **服务端**。Codex、Claude Code 等外部客户端启�
 
 当前已实现七项工具、桌面授权及 SSH/SFTP 桥接，完成独立代码复审、真实 stdio 进程测试与 macOS 隔离 SSH 服务上的原生操作。实际安装的 Claude Code 2.1.285 已通过标准 macOS 双程序开发包完成七项 schema 协商、13 次真实工具调用与 15 次模型请求的授权流程：明确片段、目录和 UTF-8 文件读取；越界路径与未授权监控返回 `FORBIDDEN`，错误路线返回 `STALE_SESSION`；桌面批准后提案从等待变为成功，另一提案在桌面拒绝后变为拒绝。桌面操作由受控 UI 自动化执行，独立复核已通过该限定范围，无剩余 P1/P2；模型模拟服务与 SSH/SFTP 夹具均自有隔离，不代表云模型质量、任意 OS shell 或客户服务器验收。见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。
 
-撤权后，同一 Claude 客户端收到 `is_error=true` 的连接已断开结果，未记录第 14 次 tools/call RPC；这证明本次客户端后续访问不可用，不是新请求到达服务端后再次授权拒绝的证据。原默认拒绝及运行中撤权/重启证据继续保留在[前置记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)与[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。Codex 0.160.0 的新文本前置在仅为子进程补充回环 `NO_PROXY` / `no_proxy` 后通过；原失败保持，尚未执行其实际 MCP 场景。其他平台原生窗口、文件修改提案及完整发布包仍须单独验收。
+撤权后，同一 Claude 客户端收到 `is_error=true` 的连接已断开结果，未记录第 14 次 tools/call RPC；这证明本次客户端后续访问不可用，不是新请求到达服务端后再次授权拒绝的证据。原默认拒绝及运行中撤权/重启证据继续保留在[前置记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)与[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。Codex 0.160.0 的新文本前置在仅为子进程补充回环 `NO_PROXY` / `no_proxy` 后通过；原失败保持；新的实际 MCP 尝试协商七项生产工具后，首笔模型请求缺少 KeelShell 目录并包含额外工具，停止于业务调用之前，两次失败均保留。实际读取和完整审阅场景仍未通过，见[Codex 尝试记录](../testing/records/2026-10-05-codex-authorized-mcp-failure.md)。其他平台原生窗口、文件修改提案及完整发布包仍须单独验收。
 
 ## 在应用中授权
 

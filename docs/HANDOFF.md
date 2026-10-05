@@ -2,6 +2,16 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
+## 2026-10-05 Ask 预算、弹窗与 MCP EOF 整合通过
+
+三个增量均已整合并通过非作者独立复核。根最终门禁通过 1053 普通、8 文档、6 脚本测试、格式/严格 Clippy/x.y 与默认/2 MiB 控制器；原弹窗 A/B 失败保持，最终 C 的 11 原/8 私有模态回归通过。显式 macOS 15.0 新双程序开发包完成隔离原生预算保存/无效草稿/中英明暗、当前 AX 背景节点移除、键盘触发焦点返回及同一 SSH 前后回显；没有新供应商或云调用，不关闭旧 AX 对象、屏幕阅读器或其它平台原生。自有进程、端口和私有数据已清理。原 Linux CI 失败保留，新提交 CI 待单独确认，见[整合记录](testing/records/2026-10-05-ai-modal-mcp-integration.md)、[预算记录](testing/records/2026-10-05-local-agent-limits.md)、[EOF记录](testing/records/2026-10-05-mcp-startup-eof.md)。
+
+## 2026-10-05 Codex 尝试与最新 CI 更正
+
+MCP 仍仅由 KeelShell 向外部智能体提供服务。新的 Codex 0.160.0 授权只读尝试没有通过：首轮执行前脚本误解析功能表，0 POST/未 MCP exec；新范围只协商七项目录，首笔模型请求缺少 KeelShell 工具且含额外工具，安全门停止，实际 1 POST/0 业务 RPC。额外工具来源未知，原字节及两次失败保留；自有客户端与原生 GUI/SSH 已清理，根已明确撤销全部授权。新的非作者只读复核确认失败证据一致、无剩余限定范围P1/P2，15份证明由根核验复制；失败仍未关闭，详见[Codex 尝试记录](testing/records/2026-10-05-codex-authorized-mcp-failure.md)。该限定失败覆盖下方历史“Codex MCP 未执行”，不替代原 Claude 授权通过。
+
+最新精确 `40d092c` 的 [Quality37244888512](https://github.com/cyruss648/keelshell/actions/runs/37244888512) 已结束 failure（macOS/Windows success、Linux MCP EOF 退出断言失败），Linux OpenSSH 未执行；旧 e166 三平台通过保持为旧范围。完整失败日志保留；新的 EOF 分类修复已通过作者工程门禁及新非作者独立复审并整合至主工作区，根整合门禁与新提交 CI 尚待完成。
+
 ## 2026-10-05 外部 MCP 授权客户端更新
 
 以下状态优先于下方历史“供应商授权 MCP 未验收 / Codex 文本失败”描述。MCP 方向仍是 KeelShell 服务端向外部智能体提供能力，内置 API / CLI Ask 独立，不做通用第三方 MCP 客户端。
