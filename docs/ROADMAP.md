@@ -1,5 +1,13 @@
 # 开发路线
 
+最终Ask与两项test-only补充已在主副本整合，新非作者限定复核及根第二完整门禁通过1171普通+8doc+6脚本/严格检查/两控制器，260输入前后相等；源码未提交/推送，新MAC15双程序构建、57打包回归及标准包结构检查通过；新版原生窗口与新CI另行验收。第一次MCP超时和已推送bd9预算CI失败的原因分别未知，原记录不改，见[整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。以下旧整合“失败/待复核”属历史时点，由本段覆盖。
+
+当前已推送提交为bd9f5e；其[Quality37356943845](https://github.com/cyruss648/keelshell/actions/runs/37356943845)整体failure：macOS自托管CLI控制器在预算清理后断言失败，普通已完成80通过/0失败/2ignored，具体分支与原因未知；Windows1139普通+8doc、Linux1158普通+8doc完整通过，目录新回归实际ok。136/137封包与258提交输入经根读回，见[新CI记录](testing/records/2026-10-06-catalog-probe-lifecycle-ci.md)。自有进程生命周期诊断在独立树进行，原本机通过与原CI失败分别保留。
+
+Ask候选已通过作者与限定独立复审并导入主工作副本，但根完整门禁314.920秒exit1：MCP无效环境子进程2秒output超时，普通已完成930通过/1失败/2ignored，doc及额外2MiB未到达。格式/x.y/6脚本/严格Clippy通过，260工程输入前后相等。Ask未提交或推送；独立启动诊断、新源码CI及新版原生仍待完成，见[整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。
+
+MCP只向外部智能体提供KeelShell能力，内置Ask独立。两项test-only作者候选已冻结并经根读回：预算诊断最终1158普通+8doc、MCP子进程守卫1164普通+8doc完整门禁通过；新的非作者正在分别复核，主树尚未导入，不替代原失败原因。Codex观察器G1原Unknown反例及A准入失败cleanup反例均保留；B的62离线测试和新非作者62复核通过，仅关闭离线缺口，不给native READY。G2仅设计未实现，原F缺退出回执原因未知。顶部覆盖下方历史时点，不把辅助脚本或源码检查当作完整外部客户端/跨平台原生验收。
+
 模型目录夹具的两份测试修正已精确导入主线：header/body共享3秒总期限、接受连接恢复阻塞模式、异常退出取消/shutdown/join及真实GET1/noPOST断言；原5秒界面/观测限制保持。作者完整门禁431.334秒通过1158普通+8doc+6脚本/严格检查/两控制器，新的非作者24项及私有异常清理反例/严格检查通过；28/29和67/68封包已根全读回，主线258工程输入与最终门禁相等。生产/依赖/锁/工具链不变；新Windows CI尚待，原8d failure保留。见[修正记录](testing/records/2026-10-06-catalog-probe-owned-lifecycle.md)。
 
 最新主线 `8d074b014a9ef863944eadca02cbf190125443c7` 的 [Quality37351046635](https://github.com/cyruss648/keelshell/actions/runs/37351046635) 已结束整体 failure：macOS/Linux 各1155普通+8doc完整通过；Windows app428通过/1失败，当前已完成539普通/1失败/2ignored，doc和额外2MiB控制器未到达。失败是已有模型目录隐私测试夹具读取HTTP请求头返回10035，再因观测通道断开失败；本次没有测量请求头字节或到达时序，不认定产品泄露。SystemRoot双路径对照仍实际通过。原日志、149/150独立封包已保留；根正在另一个工作区修正测试I/O，不改变生产代码，原e821成功不关闭这次失败。见[本次CI](testing/records/2026-10-06-windows-catalog-probe-ci.md)。

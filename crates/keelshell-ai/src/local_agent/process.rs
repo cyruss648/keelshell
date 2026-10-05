@@ -17,7 +17,8 @@ use zeroize::Zeroizing;
 
 use super::{
     ApprovedLocalAsk, LocalAgentConfig, LocalAgentCredential, LocalAgentError, LocalAgentKind,
-    LocalAgentLimits, LocalAgentReply, LocalAgentVersion, protocol::AnswerStream,
+    LocalAgentLimits, LocalAgentReply, LocalAgentVersion, LocalAskProgress, LocalAskStage,
+    protocol::AnswerStream,
 };
 use crate::{Redactor, RequestCancellation, provider::payload_contains_secret};
 
@@ -124,6 +125,34 @@ impl LocalAgentClient {
         credential: LocalAgentCredential,
         cancellation: &RequestCancellation,
     ) -> Result<LocalAgentReply, LocalAgentError> {
+        self.ask_inner(approved, credential, cancellation, None)
+            .await
+    }
+
+    /// Invoke a reviewed Ask while reporting bounded, nonblocking lifecycle facts.
+    ///
+    /// The producer belongs to this request and is consumed here. Dropping or
+    /// neglecting its receiver never changes protocol validation, cancellation,
+    /// or cleanup. Stages contain no supplier output or request content; only
+    /// this method's final result establishes success after all cleanup gates.
+    pub async fn ask_with_progress(
+        &self,
+        approved: ApprovedLocalAsk,
+        credential: LocalAgentCredential,
+        cancellation: &RequestCancellation,
+        progress: LocalAskProgress,
+    ) -> Result<LocalAgentReply, LocalAgentError> {
+        self.ask_inner(approved, credential, cancellation, Some(progress))
+            .await
+    }
+
+    async fn ask_inner(
+        &self,
+        approved: ApprovedLocalAsk,
+        credential: LocalAgentCredential,
+        cancellation: &RequestCancellation,
+        progress: Option<LocalAskProgress>,
+    ) -> Result<LocalAgentReply, LocalAgentError> {
         if approved.approved_at.elapsed() > APPROVAL_LIFETIME {
             return Err(LocalAgentError::ReviewExpired);
         }
@@ -134,8 +163,11 @@ impl LocalAgentClient {
         let prepared = approved.prepared;
         let deadline = Instant::now() + prepared.config.limits.timeout;
         let scratch = Scratch::create(&prepared.config).await?;
+        observe(progress.as_ref(), LocalAskStage::WorkspaceReady);
         let result = async {
+            observe(progress.as_ref(), LocalAskStage::CheckingCli);
             let probe = probe_in(&prepared.config, &scratch, deadline, cancellation).await?;
+            observe(progress.as_ref(), LocalAskStage::CliAdmitted);
             check_cancelled(cancellation)?;
             let mut command = base_command(&prepared.config, &scratch);
             match prepared.config.kind {
@@ -196,6 +228,7 @@ impl LocalAgentClient {
                 prepared.config.limits,
                 deadline,
                 cancellation,
+                progress.as_ref(),
             )
             .await?;
             match output {
@@ -212,6 +245,7 @@ impl LocalAgentClient {
             }
         }
         .await;
+        observe(progress.as_ref(), LocalAskStage::Finalizing);
         scratch.close().await?;
         result
     }
@@ -474,6 +508,7 @@ async fn capture(
         limits,
         deadline,
         cancellation,
+        None,
     )
     .await?
     {
@@ -641,12 +676,14 @@ async fn run_command(
     limits: LocalAgentLimits,
     deadline: Instant,
     cancellation: &RequestCancellation,
+    progress: Option<&LocalAskProgress>,
 ) -> Result<RunOutput, LocalAgentError> {
     check_cancelled(cancellation)?;
     if Instant::now() >= deadline {
         return Err(LocalAgentError::Timeout);
     }
     let mut child = OwnedChild::spawn(command)?;
+    observe(progress, LocalAskStage::ProcessStarted);
     let stdin = child
         .child
         .stdin()
@@ -680,12 +717,15 @@ async fn run_command(
                 stdin
                     .shutdown()
                     .await
-                    .map_err(|_| LocalAgentError::PipeFailed)
+                    .map_err(|_| LocalAgentError::PipeFailed)?;
+                drop(stdin);
+                observe(progress, LocalAskStage::InputDelivered);
+                Ok::<_, LocalAgentError>(())
             };
             let pipes = async {
                 let (_, output, _) = tokio::try_join!(
                     write,
-                    read_stdout(stdout, mode, limits, &budget),
+                    read_stdout(stdout, mode, limits, &budget, progress),
                     discard_stderr(stderr, limits.output_bytes, &budget),
                 )?;
                 Ok::<_, LocalAgentError>(output)
@@ -706,6 +746,7 @@ async fn run_command(
                     },
                 }
             };
+            observe(progress, LocalAskStage::Finalizing);
             child.cleanup().await?;
             let stdout = match output {
                 Some(output) => output,
@@ -730,8 +771,15 @@ async fn run_command(
     };
     // Cleanup also runs after a successful leader exit: a child may have closed
     // its pipes and kept running. Never preserve those contained descendants.
+    observe(progress, LocalAskStage::Finalizing);
     child.cleanup().await?;
     result
+}
+
+fn observe(progress: Option<&LocalAskProgress>, stage: LocalAskStage) {
+    if let Some(progress) = progress {
+        progress.observe(stage);
+    }
 }
 
 fn add_bytes(budget: &AtomicUsize, bytes: usize, limit: usize) -> Result<(), LocalAgentError> {
@@ -750,6 +798,7 @@ async fn read_stdout(
     mode: OutputMode,
     limits: LocalAgentLimits,
     budget: &AtomicUsize,
+    progress: Option<&LocalAskProgress>,
 ) -> Result<RunOutput, LocalAgentError> {
     let mut bytes = Zeroizing::new(Vec::new());
     // This buffer spans await points and would otherwise be copied through
@@ -775,6 +824,14 @@ async fn read_stdout(
                         bytes.pop();
                     }
                     protocol.frame(&bytes)?;
+                    // A complete frame must pass every adapter invariant before
+                    // its receipt becomes visible. This is still not an answer.
+                    if protocol.started() {
+                        observe(progress, LocalAskStage::ProtocolStarted);
+                    }
+                    if protocol.completed() {
+                        observe(progress, LocalAskStage::ProtocolCompleted);
+                    }
                     bytes.clear();
                 } else {
                     if bytes.len() >= limits.line_bytes {
@@ -883,6 +940,7 @@ mod tests {
                         OutputMode::Text,
                         LocalAgentLimits::default(),
                         budget,
+                        None,
                     )
                 }),
                 4 * 1024,
@@ -972,6 +1030,7 @@ mod tests {
             OutputMode::Protocol(LocalAgentKind::Codex),
             LocalAgentLimits::default(),
             &budget,
+            None,
         )
         .await
         .unwrap();
@@ -986,7 +1045,8 @@ mod tests {
                 bytes,
                 OutputMode::Protocol(LocalAgentKind::Codex),
                 LocalAgentLimits::default(),
-                &AtomicUsize::new(0)
+                &AtomicUsize::new(0),
+                None,
             )
             .await
             .unwrap(),

@@ -13,3 +13,5 @@
 新的非作者在独立工作区与独立cache上执行最终24项，实际全部通过；目录反例记录GET1、admittedfalse、postedsecretfalse、workerjoinedtrue。追加私有全serve反例验证头等待约1400ms及正文两块仍在约2995ms共享期限失败；接收断开、真实workerpanic及已接受连接unwind均关闭peer、释放owner并join。恢复两源及258工程输入后格式、diff、x.y及严格整工作区all-targets Clippy实际通过。独立封包67payload/68归档文件已根全量逐bytes/SHA读回，manifest SHA-256 `24e1c32b9e44484720eb401446b14ba574db2830f9baf5bf85d889e83710715a`，tar400180字节/SHA-256 `e9020a681ac3293e1859de7fd980c6bb4e67b2bba811366747fefa377dfcf931`。首次只读策略文件搜索rg退出2已保留，6项正式命令均exit0；不作为Windows或原生桌面验收。
 
 作者封包28payload/29归档文件，manifest SHA-256 `fd460e3b98d714c0795dbed19f28d91bc87d5a407f40d3cd7ac2647625787ada`；tar141758字节、SHA-256 `5049cee4a37a97cdd4514643090c4bdf070aae1bcea9d61322fe82b20284f269`，根已全量核验。原始失败、首次lint失败、初步源码审查、候选快照及限定未验证范围都保持。打包与生产字节不变，本次未重复包装/GUI/供应商/云模型/客户SSH；新Windows CI继续单独核验。
+
+后续已精确提交并推送bd9f5e；[新源码CI](2026-10-06-catalog-probe-lifecycle-ci.md)的Windows/Linux完整通过，实际运行目录三新增和隐私回归。macOS在更早的本地CLI预算控制器失败，目录harness未到达，所以整体CI仍failure。新CI原136/137封包及258提交blob经根核验；这不关闭macOS失败、Ask整合或原生验收。

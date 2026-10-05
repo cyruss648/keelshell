@@ -10,11 +10,15 @@ use std::{
     time::Duration,
 };
 use tokio::{
-    io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader, Lines, ReadHalf, WriteHalf},
+    io::{
+        AsyncBufReadExt, AsyncRead, AsyncReadExt, AsyncWriteExt, BufReader, Lines, ReadHalf,
+        WriteHalf,
+    },
     net::{TcpListener, TcpStream},
     process::Command,
     sync::Notify,
 };
+use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
 fn target() -> SessionIdentity {
@@ -264,13 +268,221 @@ fn copied_fields_reject_partial_remote_and_invalid_capability_formats() {
     assert!(!format!("{client:?}").contains(&secret));
 }
 
+const CHILD_PIPE_LIMIT: usize = 32 * 1024;
+const CHILD_OUTPUT_DEADLINE: Duration = Duration::from_secs(2);
+const CHILD_CLEANUP_DEADLINE: Duration = Duration::from_secs(1);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum CapturePhase {
+    Spawn,
+    Wait,
+    StdoutRead,
+    StderrRead,
+    StdoutQuota,
+    StderrQuota,
+    Deadline,
+    Cancelled,
+}
+
+#[derive(Debug)]
+enum CleanupIssue {
+    Kill,
+    Wait,
+    Deadline,
+}
+
+struct PipeCapture {
+    bytes: Vec<u8>,
+    observed_bytes: usize,
+    eof: bool,
+}
+
+impl Default for PipeCapture {
+    fn default() -> Self {
+        Self {
+            bytes: Vec::with_capacity(CHILD_PIPE_LIMIT),
+            observed_bytes: 0,
+            eof: false,
+        }
+    }
+}
+
+// Failed assertions must not dump captured protocol bodies into a test log.
+impl std::fmt::Debug for PipeCapture {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("PipeCapture")
+            .field("observed_bytes", &self.observed_bytes)
+            .field("retained_bytes", &self.bytes.len())
+            .field("eof", &self.eof)
+            .finish()
+    }
+}
+
+#[derive(Debug)]
+struct OwnedOutput {
+    pid: Option<u32>,
+    status: std::process::ExitStatus,
+    stdout: PipeCapture,
+    stderr: PipeCapture,
+}
+
+struct CaptureFailure {
+    iteration: usize,
+    pid: Option<u32>,
+    phase: CapturePhase,
+    status: Option<std::process::ExitStatus>,
+    stdout: PipeCapture,
+    stderr: PipeCapture,
+    kill_requested: bool,
+    reaped: bool,
+    cleanup_issue: Option<CleanupIssue>,
+}
+
+impl std::fmt::Debug for CaptureFailure {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("CaptureFailure")
+            .field("iteration", &self.iteration)
+            .field("pid", &self.pid)
+            .field("phase", &self.phase)
+            .field("status", &self.status)
+            .field("stdout", &self.stdout)
+            .field("stderr", &self.stderr)
+            .field("kill_requested", &self.kill_requested)
+            .field("reaped", &self.reaped)
+            .field("cleanup_issue", &self.cleanup_issue)
+            .finish()
+    }
+}
+
+async fn capture_pipe<R: AsyncRead + Unpin>(
+    mut reader: R,
+    capture: &mut PipeCapture,
+    quota: CapturePhase,
+    read_error: CapturePhase,
+) -> Result<(), CapturePhase> {
+    let mut chunk = [0_u8; 4096];
+    loop {
+        // Read at most one extra byte to distinguish an exact-limit EOF from
+        // overflow, while retaining no more than the fixed pipe quota.
+        let remaining = CHILD_PIPE_LIMIT - capture.bytes.len();
+        let read_size = chunk.len().min(remaining + 1);
+        let count = reader
+            .read(&mut chunk[..read_size])
+            .await
+            .map_err(|_| read_error)?;
+        if count == 0 {
+            capture.eof = true;
+            return Ok(());
+        }
+        capture.observed_bytes += count;
+        capture
+            .bytes
+            .extend_from_slice(&chunk[..count.min(remaining)]);
+        if count > remaining {
+            return Err(quota);
+        }
+    }
+}
+
+async fn capture_owned_child(
+    mut command: Command,
+    iteration: usize,
+    cancelled: CancellationToken,
+) -> Result<OwnedOutput, CaptureFailure> {
+    command
+        .kill_on_drop(true)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+    // This is the original total spawn/output budget, per environment pair.
+    // Cleanup has a separate budget and can never turn a deadline into success.
+    let deadline = tokio::time::Instant::now() + CHILD_OUTPUT_DEADLINE;
+    let mut child = command.spawn().map_err(|_| CaptureFailure {
+        iteration,
+        pid: None,
+        phase: CapturePhase::Spawn,
+        status: None,
+        stdout: PipeCapture::default(),
+        stderr: PipeCapture::default(),
+        kill_requested: false,
+        reaped: false,
+        cleanup_issue: None,
+    })?;
+    let pid = child.id();
+    let stdout_reader = child.stdout.take().unwrap();
+    let stderr_reader = child.stderr.take().unwrap();
+    let mut stdout = PipeCapture::default();
+    let mut stderr = PipeCapture::default();
+    let mut status = None;
+    // The three futures remain owned here; there are no detached reader tasks.
+    // Cancelling this select drops the read handles before explicit child reap.
+    let result = tokio::select! {
+        biased;
+        _ = cancelled.cancelled() => Err(CapturePhase::Cancelled),
+        output = tokio::time::timeout_at(deadline, async {
+            tokio::try_join!(
+                async {
+                    status = Some(child.wait().await.map_err(|_| CapturePhase::Wait)?);
+                    Ok(())
+                },
+                capture_pipe(stdout_reader, &mut stdout, CapturePhase::StdoutQuota, CapturePhase::StdoutRead),
+                capture_pipe(stderr_reader, &mut stderr, CapturePhase::StderrQuota, CapturePhase::StderrRead),
+            ).map(|_| ())
+        }) => output.unwrap_or(Err(CapturePhase::Deadline)),
+    };
+    // A ready future can win against an already elapsed Tokio timer; require
+    // real completion within the unchanged total deadline before success.
+    let result = if result.is_ok() && tokio::time::Instant::now() >= deadline {
+        Err(CapturePhase::Deadline)
+    } else {
+        result
+    };
+    if let Err(phase) = result {
+        let mut kill_requested = false;
+        let mut cleanup_issue = None;
+        if status.is_none() {
+            kill_requested = true;
+            if child.start_kill().is_err() {
+                cleanup_issue = Some(CleanupIssue::Kill);
+            }
+            match tokio::time::timeout(CHILD_CLEANUP_DEADLINE, child.wait()).await {
+                Ok(Ok(exit)) => status = Some(exit),
+                Ok(Err(_)) => cleanup_issue = Some(CleanupIssue::Wait),
+                Err(_) => cleanup_issue = Some(CleanupIssue::Deadline),
+            }
+        }
+        return Err(CaptureFailure {
+            iteration,
+            pid,
+            phase,
+            reaped: status.is_some(),
+            status,
+            stdout,
+            stderr,
+            kill_requested,
+            cleanup_issue,
+        });
+    }
+    Ok(OwnedOutput {
+        pid,
+        status: status.unwrap(),
+        stdout,
+        stderr,
+    })
+}
+
 #[tokio::test]
 async fn binary_rejects_partial_or_invalid_environment_without_stdout_fallback() {
-    for (address, secret) in [
+    for (iteration, (address, secret)) in [
         (Some("127.0.0.1:1"), None),
         (None, Some("abcd")),
         (Some("0.0.0.0:1"), Some("abcd")),
-    ] {
+    ]
+    .into_iter()
+    .enumerate()
+    {
         let mut command = Command::new(env!("CARGO_BIN_EXE_keelshell-mcp"));
         command
             .kill_on_drop(true)
@@ -282,15 +494,25 @@ async fn binary_rejects_partial_or_invalid_environment_without_stdout_fallback()
         if let Some(secret) = secret {
             command.env(MCP_SECRET_ENV, secret);
         }
-        let result = tokio::time::timeout(Duration::from_secs(2), command.output())
+        let result = capture_owned_child(command, iteration, CancellationToken::new())
             .await
-            .unwrap()
-            .unwrap();
-        assert!(!result.status.success());
-        assert!(result.stdout.is_empty());
-        assert_eq!(
-            String::from_utf8(result.stderr).unwrap().trim(),
-            "invalid MCP desktop launch configuration"
+            .unwrap_or_else(|failure| panic!("{failure:?}"));
+        assert!(
+            !result.status.success(),
+            "environment iteration {iteration}: unexpected success"
+        );
+        assert!(
+            result.stdout.bytes.is_empty(),
+            "environment iteration {iteration}: unexpected stdout {:?}",
+            result.stdout
+        );
+        assert!(
+            std::str::from_utf8(&result.stderr.bytes)
+                .ok()
+                .map(str::trim)
+                == Some("invalid MCP desktop launch configuration"),
+            "environment iteration {iteration}: static rejection mismatch {:?}",
+            result.stderr
         );
     }
 }
@@ -446,4 +668,181 @@ async fn unread_stdio_output_and_input_eof_cannot_keep_the_adapter_or_host_alive
         .await
         .unwrap()
         .unwrap();
+}
+
+const OUTPUT_FIXTURE_MODE: &str = "KEELSHELL_MCP_OUTPUT_TEST_FIXTURE";
+const OUTPUT_FIXTURE_READY: &str = "KEELSHELL_MCP_OUTPUT_TEST_READY";
+
+fn output_fixture(mode: &str) -> Command {
+    let mut command = Command::new(std::env::current_exe().unwrap());
+    command
+        .arg("--exact")
+        .arg("owned_output_fixture")
+        .arg("--nocapture")
+        .arg("--test-threads=1")
+        .env(OUTPUT_FIXTURE_MODE, mode)
+        .env_remove(OUTPUT_FIXTURE_READY);
+    command
+}
+
+// The test executable itself is the portable, self-owned child fixture. Normal
+// test runs do nothing here; only explicitly launched fixture children emit.
+#[test]
+fn owned_output_fixture() {
+    use std::io::Write;
+    let Ok(mode) = std::env::var(OUTPUT_FIXTURE_MODE) else {
+        return;
+    };
+    let mut stdout = std::io::stdout().lock();
+    let mut stderr = std::io::stderr().lock();
+    match mode.as_str() {
+        "clean" => {
+            stdout.write_all(b"fixture-complete-stdout\n").unwrap();
+            stderr.write_all(b"fixture-complete-stderr\n").unwrap();
+            stdout.flush().unwrap();
+            stderr.flush().unwrap();
+            return;
+        }
+        "stderr-limit-eof" => {
+            stderr.write_all(&vec![b'x'; CHILD_PIPE_LIMIT]).unwrap();
+            stderr.flush().unwrap();
+            return;
+        }
+        "partial" => {
+            stdout.write_all(b"fixture-partial-stdout").unwrap();
+            stderr.write_all(b"fixture-partial-stderr").unwrap();
+        }
+        "stdout-quota" => stdout
+            .write_all(&vec![b'x'; CHILD_PIPE_LIMIT + 4096])
+            .unwrap(),
+        "stderr-quota" => stderr
+            .write_all(&vec![b'x'; CHILD_PIPE_LIMIT + 4096])
+            .unwrap(),
+        _ => panic!("unknown owned output fixture mode"),
+    }
+    stdout.flush().unwrap();
+    stderr.flush().unwrap();
+    if let Some(path) = std::env::var_os(OUTPUT_FIXTURE_READY) {
+        std::fs::write(path, std::process::id().to_string()).unwrap();
+    }
+    // Finite fallback if the parent guard fails; successful tests kill/reap
+    // these deliberately idle children within their original output budget.
+    std::thread::sleep(Duration::from_secs(10));
+    panic!("owned output fixture exceeded its expected parent cleanup");
+}
+
+#[tokio::test]
+async fn owned_output_capture_waits_for_exit_and_both_eofs() {
+    let result = capture_owned_child(output_fixture("clean"), 100, CancellationToken::new())
+        .await
+        .unwrap();
+    assert!(result.pid.is_some());
+    assert!(result.status.success());
+    assert!(result.stdout.eof && result.stderr.eof);
+    assert!(
+        result
+            .stdout
+            .bytes
+            .windows(b"fixture-complete-stdout\n".len())
+            .any(|part| part == b"fixture-complete-stdout\n")
+    );
+    assert_eq!(result.stderr.bytes, b"fixture-complete-stderr\n");
+}
+
+#[tokio::test]
+async fn owned_output_capture_preserves_partial_timeout_and_reaps() {
+    let failure = capture_owned_child(output_fixture("partial"), 101, CancellationToken::new())
+        .await
+        .unwrap_err();
+    assert_eq!(failure.phase, CapturePhase::Deadline);
+    assert!(failure.pid.is_some() && failure.reaped && failure.kill_requested);
+    assert!(failure.cleanup_issue.is_none(), "{failure:?}");
+    assert!(!failure.stdout.eof && !failure.stderr.eof);
+    assert!(
+        failure
+            .stdout
+            .bytes
+            .windows(22)
+            .any(|part| part == b"fixture-partial-stdout")
+    );
+    assert_eq!(failure.stderr.bytes, b"fixture-partial-stderr");
+    assert!(!format!("{failure:?}").contains("fixture-partial"));
+}
+
+#[tokio::test]
+async fn owned_output_capture_bounds_each_pipe_and_reaps() {
+    for (iteration, mode, expected) in [
+        (102, "stdout-quota", CapturePhase::StdoutQuota),
+        (103, "stderr-quota", CapturePhase::StderrQuota),
+    ] {
+        let failure =
+            capture_owned_child(output_fixture(mode), iteration, CancellationToken::new())
+                .await
+                .unwrap_err();
+        assert_eq!(failure.phase, expected);
+        assert!(failure.pid.is_some() && failure.reaped, "{failure:?}");
+        assert!(failure.cleanup_issue.is_none(), "{failure:?}");
+        let pipe = if mode == "stdout-quota" {
+            &failure.stdout
+        } else {
+            &failure.stderr
+        };
+        assert_eq!(pipe.observed_bytes, CHILD_PIPE_LIMIT + 1);
+        assert_eq!(pipe.bytes.len(), CHILD_PIPE_LIMIT);
+        assert!(!pipe.eof);
+    }
+}
+
+#[tokio::test]
+async fn owned_output_capture_explicit_cancel_reaps_a_ready_child() {
+    let temporary = std::env::temp_dir().join(format!("keelshell-owned-output-{}", Uuid::new_v4()));
+    std::fs::create_dir(&temporary).unwrap();
+    let ready = temporary.join("ready-pid");
+    let mut command = output_fixture("partial");
+    command.env(OUTPUT_FIXTURE_READY, &ready);
+    let cancelled = CancellationToken::new();
+    let capture = capture_owned_child(command, 104, cancelled.clone());
+    let cancel_after_ready = async {
+        let observed = tokio::time::timeout(CHILD_OUTPUT_DEADLINE, async {
+            loop {
+                if let Ok(text) = std::fs::read_to_string(&ready)
+                    && let Ok(pid) = text.parse::<u32>()
+                {
+                    break pid;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .ok();
+        // Always complete the capture/cleanup future before asserting readiness.
+        cancelled.cancel();
+        observed
+    };
+    let (result, ready_pid) = tokio::join!(capture, cancel_after_ready);
+    std::fs::remove_dir_all(&temporary).unwrap();
+    let failure = result.unwrap_err();
+    assert!(
+        ready_pid.is_some(),
+        "fixture did not become ready: {failure:?}"
+    );
+    assert_eq!(failure.phase, CapturePhase::Cancelled);
+    assert_eq!(failure.pid, ready_pid);
+    assert!(failure.reaped && failure.kill_requested, "{failure:?}");
+    assert!(failure.cleanup_issue.is_none(), "{failure:?}");
+}
+
+#[tokio::test]
+async fn owned_output_capture_accepts_exact_quota_followed_by_eof() {
+    let result = capture_owned_child(
+        output_fixture("stderr-limit-eof"),
+        105,
+        CancellationToken::new(),
+    )
+    .await
+    .unwrap();
+    assert!(result.status.success());
+    assert!(result.stdout.eof && result.stderr.eof);
+    assert_eq!(result.stderr.observed_bytes, CHILD_PIPE_LIMIT);
+    assert_eq!(result.stderr.bytes.len(), CHILD_PIPE_LIMIT);
 }

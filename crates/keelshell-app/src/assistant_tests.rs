@@ -1697,6 +1697,9 @@ include!("assistant_tests/inactive_basic_probe.rs");
 #[path = "assistant_tests/retained_drafts.rs"]
 mod retained_drafts;
 
+#[path = "assistant_tests/local_progress.rs"]
+mod local_progress;
+
 #[gpui_kit::test]
 fn inactive_proxy_basic_reply_is_redacted_and_late_reply_after_clear_is_discarded(
     cx: &mut TestAppContext,
@@ -1735,7 +1738,7 @@ fn inactive_proxy_basic_reply_is_redacted_and_late_reply_after_clear_is_discarde
         let revision = panel.request_revision;
         panel.finish_reply(
             revision,
-            ("host".into(), "session-A".into()),
+            ("ops@server.example:22".into(), "session-A".into()),
             Ok(format!(
                 "ordinary reply {basic}; Basic {basic}\n```shell\nprintf '{basic}'\n```"
             )),

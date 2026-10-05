@@ -11,8 +11,9 @@ use gpui_kit::{
 };
 use keelshell_ai::{
     AiError, CommandProposal, ContextDraft, DiagnosticPlan, DiagnosticRisk, LocalAgentClient,
-    LocalAgentCredential, LocalAgentError, PreparedLocalAsk, PreparedRequest, ProviderClient,
-    ProviderConfig, ProviderProtocol, RedactionReport, RequestCancellation,
+    LocalAgentCredential, LocalAgentError, LocalAskProgress, LocalAskStage, PreparedLocalAsk,
+    PreparedRequest, ProviderClient, ProviderConfig, ProviderProtocol, RedactionReport,
+    RequestCancellation,
 };
 use keelshell_core::{AiApiStyle, AiBackend, AiProfileCatalog, NamedAiProfile};
 use tokio::runtime::Runtime;
@@ -36,6 +37,77 @@ pub enum AssistantEvent {
 enum PreparedAssistantRequest {
     Api(PreparedRequest),
     Local(PreparedLocalAsk),
+}
+
+struct LocalRequestProgress {
+    revision: u64,
+    target: (String, String),
+    facts: Vec<LocalAskStage>,
+    outcome: Option<bool>,
+    expanded: bool,
+}
+
+impl LocalRequestProgress {
+    fn new(revision: u64, target: (String, String)) -> Self {
+        Self {
+            revision,
+            target,
+            facts: Vec::with_capacity(8),
+            outcome: None,
+            expanded: false,
+        }
+    }
+
+    fn headline(&self) -> Message {
+        match self.outcome {
+            Some(true) => Message::new(
+                "回复已验证，清理已完成",
+                "Reply verified; cleanup completed",
+            ),
+            Some(false) => Message::new(
+                "请求未成功，未采用候选回复",
+                "Request failed; candidate reply not accepted",
+            ),
+            None if self.facts.contains(&LocalAskStage::Finalizing) => {
+                stage_message(LocalAskStage::Finalizing)
+            }
+            None => self
+                .facts
+                .last()
+                .copied()
+                .map(stage_message)
+                .unwrap_or_else(|| Message::new("准备本地请求…", "Preparing local request…")),
+        }
+    }
+}
+
+fn stage_message(stage: LocalAskStage) -> Message {
+    match stage {
+        LocalAskStage::WorkspaceReady => {
+            Message::new("隔离工作区已创建", "Isolated workspace created")
+        }
+        LocalAskStage::CheckingCli => {
+            Message::new("正在检查版本与能力", "Checking version and capabilities")
+        }
+        LocalAskStage::CliAdmitted => {
+            Message::new("版本与能力已准入", "Version and capabilities admitted")
+        }
+        LocalAskStage::ProcessStarted => Message::new("Ask 进程已启动", "Ask process started"),
+        LocalAskStage::InputDelivered => {
+            Message::new("审核输入已写入并关闭", "Reviewed stdin written and closed")
+        }
+        LocalAskStage::ProtocolStarted => {
+            Message::new("协议开始回执已验证", "Protocol start receipt validated")
+        }
+        LocalAskStage::ProtocolCompleted => Message::new(
+            "协议结束回执已验证，仍待最终检查",
+            "Protocol end receipt validated; final checks pending",
+        ),
+        LocalAskStage::Finalizing => Message::new(
+            "正在收尾，尚未确认清理完成",
+            "Finalizing; cleanup not yet confirmed",
+        ),
+    }
 }
 
 impl PreparedAssistantRequest {
@@ -129,6 +201,7 @@ pub struct AssistantPanel {
     diagnostic_plan: Option<DiagnosticPlan>,
     request_revision: u64,
     response_target: Option<(String, String)>,
+    local_progress: Option<LocalRequestProgress>,
     _subscriptions: Vec<Subscription>,
 }
 
@@ -184,6 +257,7 @@ impl AssistantPanel {
             diagnostic_plan: None,
             request_revision: 0,
             response_target: None,
+            local_progress: None,
             _subscriptions: subscriptions,
         }
     }
@@ -313,9 +387,10 @@ impl AssistantPanel {
         self.suggestions.clear();
         self.diagnostic_plan = None;
         self.response_target = None;
+        self.local_progress = None;
         self.status = Message::new(
-            "请求已修改，请重新预览后再发送；旧请求已取消。",
-            "Request changed. Preview again before sending; the old request was cancelled.",
+            "请求已修改，请重新预览后再发送；已请求取消旧请求。",
+            "Request changed. Preview again before sending; cancellation of the old request was requested.",
         );
         cx.notify();
     }
@@ -466,12 +541,13 @@ impl AssistantPanel {
         self.suggestions.clear();
         self.diagnostic_plan = None;
         self.preview = false;
-        let job = crate::runtime_bridge::spawn(
-            &self.runtime,
-            cx.background_executor().clone(),
-            async move {
-                match request {
-                    PreparedAssistantRequest::Api(request) => {
+        self.local_progress = None;
+        match request {
+            PreparedAssistantRequest::Api(request) => {
+                let job = crate::runtime_bridge::spawn(
+                    &self.runtime,
+                    cx.background_executor().clone(),
+                    async move {
                         let client = ProviderClient::new_with_options(
                             Duration::from_secs(60),
                             1024 * 1024,
@@ -487,36 +563,116 @@ impl AssistantPanel {
                             .await
                             .map(|reply| reply.into_text())
                             .map_err(|error| ai_error(&error))
-                    }
-                    PreparedAssistantRequest::Local(request) => {
+                    },
+                );
+                self._job = Some(cx.spawn(async move |this, cx| {
+                    let result = job
+                        .await
+                        .unwrap_or_else(|_| Err(local_agent_error(LocalAgentError::PipeFailed)));
+                    let _ = this.update(cx, |panel, cx| {
+                        panel.finish_reply(revision, response_target, result, cx)
+                    });
+                }));
+            }
+            PreparedAssistantRequest::Local(request) => {
+                self.local_progress =
+                    Some(LocalRequestProgress::new(revision, response_target.clone()));
+                let (progress, receiver) = LocalAskProgress::channel();
+                let job = crate::runtime_bridge::spawn_local_ask(
+                    &self.runtime,
+                    cx.background_executor().clone(),
+                    receiver,
+                    async move {
                         let credential =
                             LocalAgentCredential::new(key.as_ref().map_or("", |key| key.as_str()))
                                 .map_err(local_agent_error)?;
                         LocalAgentClient
-                            .ask(request.approve(), credential, &cancellation)
+                            .ask_with_progress(
+                                request.approve(),
+                                credential,
+                                &cancellation,
+                                progress,
+                            )
                             .await
                             .map(|reply| reply.text().to_owned())
                             .map_err(local_agent_error)
+                    },
+                );
+                self._job = Some(cx.spawn(async move |this, cx| {
+                    loop {
+                        match job.next().await {
+                            Ok(crate::runtime_bridge::LocalAskEvent::Stage(stage)) => {
+                                if this
+                                    .update(cx, |panel, cx| {
+                                        panel.observe_local_stage(
+                                            revision,
+                                            &response_target,
+                                            stage,
+                                            cx,
+                                        )
+                                    })
+                                    .is_err()
+                                {
+                                    break;
+                                }
+                            }
+                            event => {
+                                let result = match event {
+                                    Ok(crate::runtime_bridge::LocalAskEvent::Complete(result)) => {
+                                        result
+                                    }
+                                    _ => Err(local_agent_error(LocalAgentError::PipeFailed)),
+                                };
+                                let _ = this.update(cx, |panel, cx| {
+                                    panel.finish_reply(revision, response_target, result, cx)
+                                });
+                                break;
+                            }
+                        }
                     }
-                }
-            },
-        );
-        self._job = Some(cx.spawn(async move |this, cx| {
-            let result = job
-                .await
-                .unwrap_or_else(|_| Err(local_agent_error(LocalAgentError::PipeFailed)));
-            let _ = this.update(cx, |panel, cx| {
-                panel.finish_reply(revision, response_target, result, cx)
-            });
-        }));
+                }));
+            }
+        }
         cx.notify();
+    }
+
+    fn observe_local_stage(
+        &mut self,
+        revision: u64,
+        target: &(String, String),
+        stage: LocalAskStage,
+        cx: &mut Context<Self>,
+    ) {
+        if !self.busy
+            || self.request_revision != revision
+            || self.host != target.0
+            || self.session_id != target.1
+        {
+            return;
+        }
+        let Some(progress) = &mut self.local_progress else {
+            return;
+        };
+        if progress.revision != revision
+            || &progress.target != target
+            || progress.outcome.is_some()
+            || progress.facts.contains(&stage)
+        {
+            return;
+        }
+        // Only eight typed facts can exist. Never infer missing predecessors or
+        // accept a supplier string as an executable Agent step.
+        if progress.facts.len() < LocalAskStage::ALL.len() {
+            progress.facts.push(stage);
+            cx.notify();
+        }
     }
 
     fn cancel(&mut self, cx: &mut Context<Self>) {
         self.invalidate_request(cx);
         self.status = Message::new(
-            "已取消本地请求；服务端可能已处理发送的内容。",
-            "Local request cancelled; the provider may already have processed sent content.",
+            "已请求取消；后台正在停止并清理，服务端可能已处理发送的内容。",
+            "Cancellation requested; background stopping and cleanup are pending. The provider may have processed sent content.",
         );
         cx.notify();
     }
@@ -544,8 +700,15 @@ impl AssistantPanel {
         result: Result<String, Message>,
         cx: &mut Context<Self>,
     ) {
-        if self.request_revision != revision {
+        if self.request_revision != revision || self.host != target.0 || self.session_id != target.1
+        {
             return;
+        }
+        if let Some(progress) = &mut self.local_progress
+            && progress.revision == revision
+            && progress.target == target
+        {
+            progress.outcome = Some(result.is_ok());
         }
         self.busy = false;
         self.cancellation = None;
@@ -825,14 +988,6 @@ impl Render for AssistantPanel {
                     .text_color(rgb(visual.accent))
                     .child(self.status.render(cx)),
             );
-        if self.busy {
-            content = content.child(
-                Button::new("assistant-cancel-request")
-                    .ghost()
-                    .label(t(cx, "取消请求", "Cancel request"))
-                    .on_click(cx.listener(|panel, _, _, cx| panel.cancel(cx))),
-            );
-        }
         if self.preview
             && let Some(request) = self.prepared.as_ref()
         {
@@ -969,6 +1124,103 @@ impl Render for AssistantPanel {
                 );
             }
         }
+        let request_bar = if self.busy || self.local_progress.is_some() {
+            let mut bar = div()
+                .id("assistant-request-bar")
+                .test_support()
+                .flex_shrink_0()
+                .p_3()
+                .border_b_1()
+                .border_color(rgb(visual.border))
+                .bg(rgb(visual.canvas))
+                .flex()
+                .flex_col()
+                .gap_2();
+            if let Some(progress) = &self.local_progress {
+                let color = match progress.outcome {
+                    Some(true) => visual.success,
+                    Some(false) => visual.danger,
+                    None => visual.accent,
+                };
+                bar = bar
+                    .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                        cx,
+                        "本地 Ask · 请求进度",
+                        "Local Ask · Request progress",
+                    )))
+                    .child(
+                        div()
+                            .id("local-ask-headline")
+                            .test_support()
+                            .text_xs()
+                            .text_color(rgb(color))
+                            .child(progress.headline().render(cx)),
+                    )
+                    .child(
+                        Button::new("local-ask-toggle-facts")
+                            .ghost()
+                            .icon(IconName::ChevronDown)
+                            .label(
+                                Message::new(
+                                    format!("事实记录 ({})", progress.facts.len()),
+                                    format!("Observed facts ({})", progress.facts.len()),
+                                )
+                                .render(cx),
+                            )
+                            .on_click(cx.listener(|panel, _, _, cx| {
+                                if let Some(progress) = &mut panel.local_progress {
+                                    progress.expanded = !progress.expanded;
+                                }
+                                cx.notify();
+                            })),
+                    );
+                if progress.expanded {
+                    bar = bar
+                        .child(
+                            div()
+                                .id("local-ask-facts")
+                                .test_support()
+                                .max_h(px(144.))
+                                .overflow_y_scroll()
+                                .flex()
+                                .flex_col()
+                                .gap_1()
+                                .children(progress.facts.iter().enumerate().map(
+                                    |(index, stage)| {
+                                        div()
+                                            .id(("local-ask-fact", index))
+                                            .test_support()
+                                            .text_xs()
+                                            .text_color(rgb(visual.muted))
+                                            .child(stage_message(*stage).render(cx))
+                                    },
+                                )),
+                        )
+                        .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                            cx,
+                            "事实可能交错；结束回执不代表请求成功。",
+                            "Facts may interleave; an end receipt does not establish success.",
+                        )));
+                }
+            } else {
+                bar = bar.child(div().text_xs().text_color(rgb(visual.accent)).child(t(
+                    cx,
+                    "正在等待模型服务回复…",
+                    "Waiting for provider…",
+                )));
+            }
+            if self.busy {
+                bar = bar.child(
+                    Button::new("assistant-cancel-request")
+                        .ghost()
+                        .label(t(cx, "取消请求", "Cancel request"))
+                        .on_click(cx.listener(|panel, _, _, cx| panel.cancel(cx))),
+                );
+            }
+            Some(bar)
+        } else {
+            None
+        };
         div()
             .h_full()
             .min_h_0()
@@ -977,6 +1229,7 @@ impl Render for AssistantPanel {
             .flex_col()
             .bg(rgb(visual.surface))
             .text_color(rgb(visual.text))
+            .children(request_bar)
             .child(
                 div()
                     .id("assistant-scroll")

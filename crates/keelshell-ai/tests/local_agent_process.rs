@@ -16,7 +16,8 @@ use std::{
 
 use keelshell_ai::{
     ContextDraft, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
-    LocalAgentKind, LocalAgentLimits, RequestCancellation,
+    LocalAgentKind, LocalAgentLimits, LocalAskProgress, LocalAskProgressReceiver, LocalAskStage,
+    RequestCancellation,
 };
 use serde_json::{Value, json};
 use tempfile::TempDir;
@@ -27,7 +28,12 @@ fn main() {
         .first()
         .is_some_and(|arg| arg == "--fixture-descendant")
     {
-        descendant();
+        descendant(true);
+    } else if arguments
+        .first()
+        .is_some_and(|arg| arg == "--fixture-descendant-no-ack")
+    {
+        descendant(false);
     } else if std::env::current_exe()
         .unwrap()
         .file_stem()
@@ -170,6 +176,20 @@ impl Fixture {
             tokio::time::sleep(Duration::from_millis(10)).await;
         }
     }
+
+    fn descendant_identity(&self) -> Value {
+        if let Ok(entries) = std::fs::read_dir(&self.scratch) {
+            for entry in entries.flatten() {
+                let path = entry.path().join("workspace/descendant-identity");
+                if let Ok(text) = std::fs::read_to_string(path) {
+                    return serde_json::from_str(&text)
+                        .unwrap_or_else(|_| json!({"error":"invalid_identity"}));
+                }
+            }
+        }
+        // Missing diagnostics must not panic before the owned Ask finishes.
+        json!({"error":"missing_identity"})
+    }
 }
 
 fn credential() -> LocalAgentCredential {
@@ -196,6 +216,7 @@ async fn integration_cases() {
         );
         fixture.assert_clean();
         Box::pin(configured_budget_cases(&fixture)).await;
+        Box::pin(progress_cases(&fixture)).await;
 
         for (question, expected) in [
             ("truncate", LocalAgentError::InvalidProtocol),
@@ -363,6 +384,7 @@ async fn integration_cases() {
             }
         }
     }
+    Box::pin(progress_admission_cases()).await;
     let future = Fixture::new(LocalAgentKind::Codex, "-future");
     assert_eq!(
         LocalAgentClient
@@ -390,6 +412,282 @@ async fn integration_cases() {
     println!(
         "local agent process integration: all assertions/scenario groups passed; no supplier CLI or model calls"
     );
+}
+
+async fn progress_admission_cases() {
+    for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
+        let fixture = Fixture::new(kind, "-future");
+        let (progress, receiver) = LocalAskProgress::channel();
+        let task = start_progress_ask(&fixture, "complete", progress, &RequestCancellation::new());
+        assert_eq!(
+            tokio::time::timeout(Duration::from_secs(5), task)
+                .await
+                .unwrap()
+                .unwrap(),
+            Err(LocalAgentError::UnsupportedVersion)
+        );
+        let mut facts = Vec::new();
+        drain_facts(&receiver, &mut facts);
+        assert_eq!(
+            facts,
+            [
+                LocalAskStage::WorkspaceReady,
+                LocalAskStage::CheckingCli,
+                LocalAskStage::Finalizing
+            ]
+        );
+        fixture.assert_clean();
+    }
+    let fixture = Fixture::new(LocalAgentKind::Codex, "-unsafe");
+    let (progress, receiver) = LocalAskProgress::channel();
+    let task = start_progress_ask(&fixture, "complete", progress, &RequestCancellation::new());
+    assert_eq!(
+        tokio::time::timeout(Duration::from_secs(5), task)
+            .await
+            .unwrap()
+            .unwrap(),
+        Err(LocalAgentError::IsolationUnsupported)
+    );
+    let mut facts = Vec::new();
+    drain_facts(&receiver, &mut facts);
+    assert_eq!(
+        facts,
+        [
+            LocalAskStage::WorkspaceReady,
+            LocalAskStage::CheckingCli,
+            LocalAskStage::Finalizing
+        ]
+    );
+    fixture.assert_clean();
+}
+
+fn start_progress_ask(
+    fixture: &Fixture,
+    question: &str,
+    progress: LocalAskProgress,
+    signal: &RequestCancellation,
+) -> tokio::task::JoinHandle<Result<String, LocalAgentError>> {
+    let review = fixture
+        .config(Duration::from_secs(5))
+        .prepare(ContextDraft::new(question), &[], 8192)
+        .unwrap();
+    let signal = signal.clone();
+    tokio::spawn(async move {
+        LocalAgentClient
+            .ask_with_progress(review.approve(), credential(), &signal, progress)
+            .await
+            .map(|reply| reply.text().to_owned())
+    })
+}
+
+fn drain_facts(receiver: &LocalAskProgressReceiver, facts: &mut Vec<LocalAskStage>) {
+    while let Ok(stage) = receiver.try_recv() {
+        assert!(!facts.contains(&stage), "duplicate lifecycle fact");
+        facts.push(stage);
+        assert!(facts.len() <= 8, "unbounded lifecycle history");
+    }
+}
+
+async fn wait_progress_gate(
+    fixture: &Fixture,
+    receiver: &LocalAskProgressReceiver,
+    facts: &mut Vec<LocalAskStage>,
+    required: LocalAskStage,
+) -> PathBuf {
+    let deadline = Instant::now() + Duration::from_secs(3);
+    loop {
+        drain_facts(receiver, facts);
+        for tree in std::fs::read_dir(&fixture.scratch).unwrap() {
+            let workspace = tree.unwrap().path().join("workspace");
+            if workspace.join("progress-ready").is_file() && facts.contains(&required) {
+                return workspace;
+            }
+        }
+        assert!(
+            Instant::now() < deadline,
+            "actual progress/gate not observed: {facts:?}"
+        );
+        tokio::time::sleep(Duration::from_millis(5)).await;
+    }
+}
+
+async fn progress_cases(fixture: &Fixture) {
+    let (progress, receiver) = LocalAskProgress::channel();
+    let task = start_progress_ask(
+        fixture,
+        "progress-final-gate",
+        progress,
+        &RequestCancellation::new(),
+    );
+    let mut facts = Vec::new();
+    let workspace = wait_progress_gate(
+        fixture,
+        &receiver,
+        &mut facts,
+        LocalAskStage::ProtocolStarted,
+    )
+    .await;
+    assert!(facts.contains(&LocalAskStage::WorkspaceReady));
+    assert!(facts.contains(&LocalAskStage::CheckingCli));
+    assert!(facts.contains(&LocalAskStage::CliAdmitted));
+    assert!(facts.contains(&LocalAskStage::ProcessStarted));
+    assert!(facts.contains(&LocalAskStage::InputDelivered));
+    assert!(!facts.contains(&LocalAskStage::ProtocolCompleted));
+    assert!(!facts.contains(&LocalAskStage::Finalizing));
+    assert!(
+        !task.is_finished(),
+        "candidate text must not complete Ask before final receipt"
+    );
+    std::fs::write(workspace.join("progress-release"), b"release").unwrap();
+    let reply = tokio::time::timeout(Duration::from_secs(5), task)
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert!(reply.contains("完整中文回答"));
+    drain_facts(&receiver, &mut facts);
+    assert_eq!(facts.len(), 8);
+    fixture.assert_clean();
+
+    for question in ["progress-nonzero-gate", "progress-cancel-descendant-gate"] {
+        let signal = RequestCancellation::new();
+        let (progress, receiver) = LocalAskProgress::channel();
+        let task = start_progress_ask(fixture, question, progress, &signal);
+        let mut facts = Vec::new();
+        let workspace = wait_progress_gate(
+            fixture,
+            &receiver,
+            &mut facts,
+            LocalAskStage::ProtocolCompleted,
+        )
+        .await;
+        assert!(
+            !task.is_finished(),
+            "validated end receipt cannot bypass process/cleanup"
+        );
+        let port = if question.contains("descendant") {
+            Some(fixture.descendant_port().await)
+        } else {
+            None
+        };
+        if let Some(port) = port {
+            assert!(TcpStream::connect(("127.0.0.1", port)).is_ok());
+            signal.cancel();
+        } else {
+            std::fs::write(workspace.join("progress-release"), b"release").unwrap();
+        }
+        let error = tokio::time::timeout(Duration::from_secs(5), task)
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap_err();
+        assert_eq!(
+            error,
+            if port.is_some() {
+                LocalAgentError::Cancelled
+            } else {
+                LocalAgentError::ProcessFailed
+            }
+        );
+        if let Some(port) = port {
+            assert!(TcpStream::connect(("127.0.0.1", port)).is_err());
+        }
+        drain_facts(&receiver, &mut facts);
+        assert!(facts.contains(&LocalAskStage::Finalizing));
+        fixture.assert_clean();
+    }
+
+    for (question, expected, started, ended) in [
+        ("malformed", LocalAgentError::InvalidProtocol, false, false),
+        (
+            "out-of-order",
+            LocalAgentError::InvalidProtocol,
+            false,
+            false,
+        ),
+        ("tool", LocalAgentError::UnexpectedOperation, true, false),
+        ("late", LocalAgentError::InvalidProtocol, true, true),
+    ] {
+        let (progress, receiver) = LocalAskProgress::channel();
+        let task = start_progress_ask(fixture, question, progress, &RequestCancellation::new());
+        let result = tokio::time::timeout(Duration::from_secs(5), task)
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(result, Err(expected));
+        let mut facts = Vec::new();
+        drain_facts(&receiver, &mut facts);
+        assert_eq!(facts.contains(&LocalAskStage::ProtocolStarted), started);
+        assert_eq!(facts.contains(&LocalAskStage::ProtocolCompleted), ended);
+        fixture.assert_clean();
+    }
+
+    // Observability is optional: unread and already closed consumers must not
+    // delay normal protocol delivery or cancellation of actual owned children.
+    for closed in [false, true] {
+        let (progress, receiver) = LocalAskProgress::channel();
+        let receiver = if closed {
+            drop(receiver);
+            None
+        } else {
+            Some(receiver)
+        };
+        let task = start_progress_ask(fixture, "complete", progress, &RequestCancellation::new());
+        assert!(
+            tokio::time::timeout(Duration::from_secs(5), task)
+                .await
+                .unwrap()
+                .unwrap()
+                .is_ok()
+        );
+        drop(receiver);
+        fixture.assert_clean();
+        let (progress, receiver) = LocalAskProgress::channel();
+        let receiver = if closed {
+            drop(receiver);
+            None
+        } else {
+            Some(receiver)
+        };
+        let task = start_progress_ask(
+            fixture,
+            "leader-exits-descendant-inherits-pipes",
+            progress,
+            &RequestCancellation::new(),
+        );
+        let answer = tokio::time::timeout(Duration::from_secs(5), task)
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        assert!(
+            TcpStream::connect(("127.0.0.1", answer.parse::<u16>().unwrap())).is_err(),
+            "end receipt with inherited pipes still requires descendant cleanup"
+        );
+        drop(receiver);
+        fixture.assert_clean();
+        let signal = RequestCancellation::new();
+        let (progress, receiver) = LocalAskProgress::channel();
+        let receiver = if closed {
+            drop(receiver);
+            None
+        } else {
+            Some(receiver)
+        };
+        let task = start_progress_ask(fixture, "wait-descendant", progress, &signal);
+        let port = fixture.descendant_port().await;
+        signal.cancel();
+        assert_eq!(
+            tokio::time::timeout(Duration::from_secs(5), task)
+                .await
+                .unwrap()
+                .unwrap(),
+            Err(LocalAgentError::Cancelled)
+        );
+        assert!(TcpStream::connect(("127.0.0.1", port)).is_err());
+        drop(receiver);
+        fixture.assert_clean();
+    }
 }
 
 // Exercise the same user-facing factory used by the GPUI metadata adapter;
@@ -437,7 +735,8 @@ async fn configured_budget_cases(fixture: &Fixture) {
         Some(LocalAgentError::OutputTooLarge)
     );
     fixture.assert_clean();
-    for cancel in [false, true] {
+    for (cancel, expected_ack) in [(false, true), (true, true), (false, false)] {
+        let diagnostic_began = Instant::now();
         let limits = LocalAgentLimits::for_ask(
             Duration::from_secs(if cancel { 30 } else { 2 }),
             1024,
@@ -447,7 +746,15 @@ async fn configured_budget_cases(fixture: &Fixture) {
         let review = fixture
             .config(Duration::from_secs(5))
             .with_limits(limits)
-            .prepare(ContextDraft::new("wait-descendant"), &[], 8192)
+            .prepare(
+                ContextDraft::new(if expected_ack {
+                    "wait-descendant"
+                } else {
+                    "wait-descendant-no-ack"
+                }),
+                &[],
+                8192,
+            )
             .unwrap();
         let cancellation = RequestCancellation::new();
         let child_signal = cancellation.clone();
@@ -457,25 +764,73 @@ async fn configured_budget_cases(fixture: &Fixture) {
                 .await
         });
         let port = fixture.descendant_port().await;
-        assert!(TcpStream::connect(("127.0.0.1", port)).is_ok());
-        if cancel {
+        let identity = fixture.descendant_identity();
+        let ready_deadline = diagnostic_began + Duration::from_secs(if cancel { 30 } else { 2 });
+        // Diagnostic reads consume the existing operation budget. Capture the
+        // original connect verdict once; errors must not detach the Ask task.
+        let ready_connected = TcpStream::connect(("127.0.0.1", port)).is_ok();
+        let ready_accepted = descendant_ack(port, ready_deadline);
+        let ready_elapsed = diagnostic_began.elapsed().as_micros();
+        eprintln!(
+            "budget-cleanup-diagnostic {}",
+            json!({"phase":"ready", "kind":format!("{:?}",fixture.kind),"cancel":cancel,"expected_ack":expected_ack,"elapsed_us":ready_elapsed,"identity":identity,"wall_ns":wall_ns(),"accepted":diagnostic_ack(&ready_accepted),"connected":ready_connected,"port":port})
+        );
+        let expected_pid = identity["pid"]
+            .as_u64()
+            .and_then(|pid| u32::try_from(pid).ok());
+        let ready_ok = ready_connected
+            && ready_accepted
+                .as_ref()
+                .is_ok_and(|pid| Some(*pid) == expected_pid);
+        if cancel || !ready_ok {
             cancellation.cancel();
         }
-        let result = tokio::time::timeout(Duration::from_secs(5), task)
+        // Retain the original five-second join bound; any post-return ACK also
+        // uses this same absolute deadline, never a new relative wait budget.
+        let join_deadline = Instant::now() + Duration::from_secs(5);
+        let result = tokio::time::timeout_at(tokio::time::Instant::from_std(join_deadline), task)
             .await
             .unwrap()
             .unwrap();
+        let result_elapsed = diagnostic_began.elapsed().as_micros();
+        let after = TcpStream::connect(("127.0.0.1", port));
+        let connected_elapsed = diagnostic_began.elapsed().as_micros();
+        let accepted = after.as_ref().ok().map(|stream| {
+            stream
+                .try_clone()
+                .and_then(|stream| ack_stream(stream, join_deadline))
+        });
+        eprintln!(
+            "budget-cleanup-diagnostic {}",
+            json!({"phase":"returned","kind":format!("{:?}",fixture.kind),"cancel":cancel,"expected_ack":expected_ack,"result_elapsed_us":result_elapsed,"connect_elapsed_us":connected_elapsed,"identity":identity,"wall_ns":wall_ns(),"result":result.as_ref().err().map(|error|format!("{error:?}")),"connected":after.is_ok(),"connect_error":after.as_ref().err().map(|error|format!("{:?}:{}",error.kind(),error.raw_os_error().unwrap_or(0))),"accepted":accepted.as_ref().map(diagnostic_ack),"port":port})
+        );
+        if expected_ack {
+            assert!(
+                ready_ok,
+                "budget fixture was not ready: kind={:?}, cancel={cancel}",
+                fixture.kind
+            );
+        } else {
+            // A real peer which accepts but sends no PID must still cause the
+            // cancellation path to finish before the diagnostic is rejected.
+            assert!(ready_connected);
+            assert!(ready_accepted.is_err());
+            assert!(!ready_ok);
+        }
         assert_eq!(
             result.err(),
-            Some(if cancel {
+            Some(if cancel || !expected_ack {
                 LocalAgentError::Cancelled
             } else {
                 LocalAgentError::Timeout
             })
         );
+        // The optional ACK cannot change or retry this immediate verdict.
         assert!(
-            TcpStream::connect(("127.0.0.1", port)).is_err(),
-            "configured budget request cleaned its contained descendant"
+            after.is_err(),
+            "configured budget request cleaned its contained descendant: kind={:?}, cancel={cancel}, pid={}, port={port}",
+            fixture.kind,
+            identity["pid"]
         );
         fixture.assert_clean();
     }
@@ -491,7 +846,9 @@ fn fixture(arguments: &[String]) {
     if arguments == ["--version"] {
         println!(
             "{}",
-            if claude {
+            if claude && filename.contains("future") {
+                "2.1.286 (Claude Code)"
+            } else if claude {
                 "2.1.285 (Claude Code)"
             } else if filename.contains("future") {
                 "codex-cli 0.161.0"
@@ -584,6 +941,14 @@ fn fixture(arguments: &[String]) {
         println!("not-json-private-fixture-secret");
         return;
     }
+    if question == "out-of-order" {
+        emit(if claude {
+            json!({"type":"assistant","message":{"id":"a","role":"assistant","content":[]}})
+        } else {
+            json!({"type":"turn.started"})
+        });
+        return;
+    }
     let mut answer = if question == "echo-credential" {
         "fixture_ephemeral_token".to_owned()
     } else {
@@ -596,7 +961,11 @@ fn fixture(arguments: &[String]) {
         answer = "中".repeat(342);
     }
     if question.contains("descendant") {
-        spawn_contained_descendant(executable, question.contains("inherits-pipes"));
+        spawn_contained_descendant(
+            executable,
+            question.contains("inherits-pipes") || question == "progress-cancel-descendant-gate",
+            !question.ends_with("no-ack"),
+        );
         let deadline = Instant::now() + Duration::from_secs(2);
         while !Path::new("descendant-port").exists() {
             assert!(Instant::now() < deadline);
@@ -621,6 +990,9 @@ fn fixture(arguments: &[String]) {
         emit(
             json!({"type":"assistant","parent_tool_use_id":null,"message":{"id":"a","role":"assistant","content":[{"type":"text","text":answer}]}}),
         );
+        if question == "progress-final-gate" {
+            progress_gate();
+        }
         if question == "truncate" {
             print!(
                 "{}",
@@ -641,17 +1013,39 @@ fn fixture(arguments: &[String]) {
         emit(
             json!({"type":"item.completed","item":{"id":"a","type":"agent_message","text":answer}}),
         );
+        if question == "progress-final-gate" {
+            progress_gate();
+        }
         if question == "truncate" {
             print!("{}", json!({"type":"turn.completed","usage":{}}));
             return;
         }
         emit(json!({"type":"turn.completed","usage":{}}));
     }
+    if question == "progress-nonzero-gate" {
+        progress_gate();
+        std::process::exit(7);
+    }
+    if question == "progress-cancel-descendant-gate" {
+        progress_gate();
+    }
     if question == "late" {
         emit(json!({"type":"unreviewed-late-event"}));
     }
     if question == "nonzero" {
         std::process::exit(7);
+    }
+}
+
+fn progress_gate() {
+    std::fs::write("progress-ready", b"ready").unwrap();
+    let deadline = Instant::now() + Duration::from_secs(3);
+    while !Path::new("progress-release").is_file() {
+        assert!(
+            Instant::now() < deadline,
+            "controller did not release owned gate"
+        );
+        std::thread::sleep(Duration::from_millis(5));
     }
 }
 
@@ -738,15 +1132,90 @@ fn emit(value: Value) {
     }
 }
 
-fn descendant() {
+fn descendant(acknowledge: bool) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    std::fs::write(
+        "descendant-identity",
+        json!({"pid":std::process::id()}).to_string(),
+    )
+    .unwrap();
     std::fs::write(
         "descendant-port",
         listener.local_addr().unwrap().port().to_string(),
     )
     .unwrap();
-    std::thread::sleep(Duration::from_secs(30));
+    {
+        listener.set_nonblocking(true).unwrap();
+        let deadline = Instant::now() + Duration::from_secs(30);
+        while Instant::now() < deadline {
+            match listener.accept() {
+                Ok((mut stream, _)) => {
+                    stream
+                        .set_write_timeout(Some(Duration::from_millis(100)))
+                        .unwrap();
+                    if acknowledge {
+                        let _ = stream.write(&std::process::id().to_be_bytes());
+                    } else {
+                        std::thread::sleep(Duration::from_millis(200));
+                    }
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                    std::thread::sleep(Duration::from_millis(1))
+                }
+                Err(error) => panic!("owned fixture accept failed: {error}"),
+            }
+        }
+    }
     drop(listener);
+}
+
+fn descendant_ack(port: u16, deadline: Instant) -> std::io::Result<u32> {
+    let remaining = deadline
+        .checked_duration_since(Instant::now())
+        .filter(|remaining| !remaining.is_zero())
+        .ok_or(std::io::ErrorKind::TimedOut)?;
+    let address = std::net::SocketAddr::from(([127, 0, 0, 1], port));
+    ack_stream(
+        TcpStream::connect_timeout(&address, remaining.min(Duration::from_millis(100)))?,
+        deadline,
+    )
+}
+
+fn ack_stream(mut stream: TcpStream, deadline: Instant) -> std::io::Result<u32> {
+    let mut bytes = [0; 4];
+    let mut used = 0;
+    while used < bytes.len() {
+        let remaining = deadline
+            .checked_duration_since(Instant::now())
+            .filter(|remaining| !remaining.is_zero())
+            .ok_or(std::io::ErrorKind::TimedOut)?;
+        stream.set_read_timeout(Some(remaining.min(Duration::from_millis(100))))?;
+        let n = stream.read(&mut bytes[used..])?;
+        if n == 0 {
+            return Err(std::io::ErrorKind::UnexpectedEof.into());
+        }
+        if Instant::now() >= deadline {
+            return Err(std::io::ErrorKind::TimedOut.into());
+        }
+        used += n;
+    }
+    Ok(u32::from_be_bytes(bytes))
+}
+
+fn diagnostic_ack(result: &std::io::Result<u32>) -> Value {
+    match result {
+        Ok(pid) => json!({"pid":pid}),
+        Err(error) => {
+            json!({"error_kind":format!("{:?}",error.kind()),"raw_os_error":error.raw_os_error()})
+        }
+    }
+}
+
+fn wall_ns() -> u128 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos()
 }
 
 // The fixture deliberately leaves a contained descendant after its leader
@@ -755,9 +1224,13 @@ fn descendant() {
     clippy::zombie_processes,
     reason = "intentional process-tree cleanup fixture"
 )]
-fn spawn_contained_descendant(executable: PathBuf, inherit: bool) {
+fn spawn_contained_descendant(executable: PathBuf, inherit: bool, acknowledge: bool) {
     Command::new(executable)
-        .arg("--fixture-descendant")
+        .arg(if acknowledge {
+            "--fixture-descendant"
+        } else {
+            "--fixture-descendant-no-ack"
+        })
         .stdin(Stdio::null())
         .stdout(if inherit {
             Stdio::inherit()

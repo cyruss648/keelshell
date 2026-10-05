@@ -56,6 +56,14 @@ impl AnswerStream {
         Ok((self.answer, self.frames))
     }
 
+    pub(super) fn started(&self) -> bool {
+        self.started
+    }
+
+    pub(super) fn completed(&self) -> bool {
+        self.completed
+    }
+
     fn replace_answer(&mut self, text: &str) -> Result<(), LocalAgentError> {
         if text.len() > self.limits.answer_bytes {
             return Err(LocalAgentError::OutputTooLarge);

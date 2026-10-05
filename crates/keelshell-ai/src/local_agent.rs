@@ -6,6 +6,7 @@
 
 mod config;
 mod process;
+mod progress;
 mod protocol;
 
 use std::{fmt, time::Instant};
@@ -17,6 +18,7 @@ use crate::{AiError, ContextDraft, ProviderConfig, ProviderProtocol, RedactionRe
 
 pub use config::{LocalAgentConfig, LocalAgentKind, LocalAgentLimits, LocalAgentVersion};
 pub use process::{LocalAgentClient, LocalAgentProbe};
+pub use progress::{LocalAskProgress, LocalAskProgressReceiver, LocalAskStage};
 
 /// CLI failures omit process output, user paths, context and credential values.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]

@@ -1,5 +1,13 @@
 # 开发交接 — 2026-10-06
 
+当前提交为已推送的 `bd9f5efa69bba8cdd484807116da3bd9b9243a42`，只包含模型目录测试夹具修正及其记录。[Quality37356943845](https://github.com/cyruss648/keelshell/actions/runs/37356943845) 已结束整体failure：macOS普通已完成80通过/0失败/2ignored，随后自托管CLI控制器在预算清理后的监听关闭断言失败；该控制器没有普通test-result计数，具体timeout/cancel分支、出生身份及端口原因未知。Windows1139普通+8doc、Linux1158普通+8doc完整通过，目录三新增及隐私实际ok；136/137原日志/API/源码封包经根全量读回，258提交blob另实际核验。新的独立工作区捕获自有进程清理事实，原本机通过不关闭本次CI失败，见[新CI记录](testing/records/2026-10-06-catalog-probe-lifecycle-ci.md)。
+
+本地Ask真实过程显示的候选和两份test-only补充已在主副本整合：Ask作者/限定非作者复审、预算/MCP新非作者复核材料均经根全量读回，唯一预算fixture调用交汇保留Ask继承pipes与ACK开关。根定向默认32.209秒/2MiB11.239秒通过；第二完整门禁254.296秒exit0，1171普通/0失败/11ignored、8doc、6脚本、fmt/x.y/严格Clippy与两控制器通过，future5040字节，260工程输入前后相等。第一次314.920秒MCP2秒output超时及bd9 CI预算失败分别保持UNKNOWN，不推断后来通过解释旧机制。源码尚未提交/推送；新MAC15 GUI/MCP构建、57打包回归及标准包原生结构检查通过，新原生窗口/供应商和新精确CI尚待。见[主树整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。
+
+两项有限诊断均未复现产品P1/P2，原CI/根失败原因保持未知。预算作者1158普通+8doc门禁/两控制器、MCP守卫作者1164普通+8doc门禁通过，分别258与518tracked/其中258编译输入相等。新非作者预算默认/2MiB、wrong PID/缺metadata/ACK限时反例及恢复后严格检查通过，完整封装202payload/203归档经根读回；旧194列明范围封包保留，补齐嵌套manifest不改变原运行。MCP原16项/4私有边界及恢复combined258的严格检查通过，131payload/132归档根全量读回。两项生产清理/入口不变，原立即TCP和原2秒/三pair均保持；根最终输入与完整门禁事实见上一段。
+
+对外MCP观察器G1原独立反例证实Unknown被归Gone的P2；根A区分身份状态后57离线通过，但新非作者又证实准入失败fallback仅因direct Popen reap即认证cleanup的P2，整体仍PROBE_ABORTED。A246/247失败封包已根读回；另B仅使该fallback cleanup-pass恒false、保留实际leader wait字段，原62测试和新的非作者62复核全部通过，185/186独立材料已根全读回。原G1/A失败不改，不能给native READY；G2仅设计/未实现，旧Codex F缺owned_exit原因仍未知。这不认定产品原生故障，见[身份前置记录](testing/records/2026-10-06-mcp-observer-identity-preflight.md)。MCP始终向外部智能体提供KeelShell能力，内置Ask独立；下方旧“正在执行/尚未push”等为历史时点，由顶部当前状态覆盖。
+
 模型目录夹具的两份测试修正已精确导入主线：header/body共享3秒总期限、接受连接恢复阻塞模式、异常退出取消/shutdown/join及真实GET1/noPOST断言；原5秒界面/观测限制保持。作者完整门禁431.334秒通过1158普通+8doc+6脚本/严格检查/两控制器，新的非作者24项及私有异常清理反例/严格检查通过；28/29和67/68封包已根全读回，主线258工程输入与最终门禁相等。生产/依赖/锁/工具链不变；新Windows CI尚待，原8d failure保留。见[修正记录](testing/records/2026-10-06-catalog-probe-owned-lifecycle.md)。
 
 最新主线 `8d074b014a9ef863944eadca02cbf190125443c7` 的 [Quality37351046635](https://github.com/cyruss648/keelshell/actions/runs/37351046635) 已结束整体 failure：macOS/Linux 各1155普通+8doc完整通过；Windows app428通过/1失败，当前已完成539普通/1失败/2ignored，doc和额外2MiB控制器未到达。失败是已有模型目录隐私测试夹具读取HTTP请求头返回10035，再因观测通道断开失败；本次没有测量请求头字节或到达时序，不认定产品泄露。SystemRoot双路径对照仍实际通过。原日志、149/150独立封包已保留；根正在另一个工作区修正测试I/O，不改变生产代码，原e821成功不关闭这次失败。见[本次CI](testing/records/2026-10-06-windows-catalog-probe-ci.md)。

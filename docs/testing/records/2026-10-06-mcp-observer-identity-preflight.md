@@ -1,0 +1,23 @@
+# 外部 MCP 观察器的身份与清理前置 — 2026-10-06
+
+本记录只涉及ignored目录中的离线验证脚本，不修改KeelShell产品Rust或扩大MCP授权。MCP方向保持KeelShell向外部智能体提供服务；本观察器不是应用内第三方MCP客户端。没有GUI、真实供应商CLI、模型、SSH、监听或native启动，G2实际endpoint/census尚未实现。
+
+## 原G1身份缺口与A
+
+原G136项通过后，新的非作者13项反例中11通过、2失败，证实同一P2：libproc short/read-error被归为Gone，已准入且真实存活的自有后代在受控EPERM读取注入下可得到cleanup-pass。实际process/birth/父子关系及最终真实清理均有证据，但读取故障是受控注入，不能声称kernel真实EPERM或解释旧Codex F缺退出回执的原因。原91/92复核材料与G1冻结164/165保持。
+
+根A仅在新的私有候选区分Absent/Unknown、保留不可变已知birth与清理义务，Unknown不signal、不作为关系种子、不让cleanup-pass成立，第二准入栅栏Unknown保留此前birth以拒绝后续PID复用；Driver也不能据Unknown删除私有目录。原36、原非作者13及新增pure8共57通过，7helper输入前后相等。首次准备漏source-binding文件的失败保留，不计完整成功。A114/115封存，未给native READY。
+
+## A的新非作者反例
+
+另一私有副本独立重跑原57通过，追加5项中4通过/1失败：初始birth准入返回受控Unknown、真实直接Popen自然exit0并wait-reaped后，fallback写admission-failed及cleanup-pass=true。整体结果仍PROBE_ABORTED、零signal和零forward；失败证明cleanup子回执过度认证，不能说整体已放行或产品原生发生缺陷。
+
+A246payload/247归档完整材料已根逐bytes/SHA读回。原wrapper/readback/log、自己的首次漏upstream准备错误及封包旧基线比较错误都保存；它们分别属于reviewer准备，不改写A产品或原P2。七个wrapper实际wait/reap、无timeout/外层signal，私有TMP空后删除；本轮136真实已知birth读回gone或复用，纯mock排除，不声称完整census。
+
+## 新B与当前边界
+
+B相对冻结A只改fallback：没有有效birth准入时cleanup-pass始终false；直接Popen的实际wait/reaped/returncode仍单独保留。根原样执行非作者5项，再执行此前57项，合计62实际通过。12份源/测试/runner输入前后相等，五个wrapper实际reap、无timeout/外层signal、TMP空后删除；保存的真实已知birth新鲜读回gone或复用，纯mock排除。
+
+B89payload/90归档冻结，manifest SHA-256 `6ece3e6224a211753be887ea12014cf54bc808897af1322c101ecaf887faa72c`，tar101579字节/SHA-256 `02e2c6b3b32923f5c6eb63e95f8639f8496583a3f4af8571aa27f9ef897212d7`。新的非作者delta复审进行中；A失败材料不覆盖。即使离线helper通过，真实proxy连接/认证、当前CLI/binary/signature、实际八工具wire、关系census与供应商业务也须分别验证，不能自动升级native准入。原F缺owned_exit的具体原因始终未知。
+
+后续新的非作者限定delta复审已通过，原62全部actualpass、五wrapper实际回收/无timeout或外层signal/TMP空后删除，12输入前后相等。本轮73真实保存birth的新鲜读回gone或复用，纯mock和作者历史birth排除。admission反例现在cleanup-pass=false、leader实际reaped/exit0、整体PROBE_ABORTED、零signal和零forward；原Unknown恢复/第二栅栏/私有目录保留反例也原样通过，无新限定P1/P2。185payload/186归档材料已根完整逐bytes/SHA读回，manifest SHA-256 `32b7df81a1065952226fd949bfb1f064ee11fea26d3f9f272b38cf3b7de32012`，tar319926字节/SHA-256 `6c0c23aeafb8f92836008591f4a5a243fb4d93c18f14c778702a5a2b19135738`。这仅关闭离线helper身份与回执边界，G2/native和原F原因继续开放。

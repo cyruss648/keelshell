@@ -44,7 +44,7 @@ pub use error_category::AiErrorCategory;
 pub use local_agent::{
     ApprovedLocalAsk, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
     LocalAgentKind, LocalAgentLimits, LocalAgentProbe, LocalAgentReply, LocalAgentVersion,
-    PreparedLocalAsk,
+    LocalAskProgress, LocalAskProgressReceiver, LocalAskStage, PreparedLocalAsk,
 };
 pub use provider::{AiClient, AssistantReply, ProviderConfig, ProviderProtocol};
 pub use redact::{RedactionReport, Redactor};
