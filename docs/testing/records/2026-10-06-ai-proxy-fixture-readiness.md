@@ -2,6 +2,8 @@
 
 日期：2026-10-06。本记录接续 [c7 首次三平台 CI 失败](2026-10-05-ai-request-options-ci.md)，不改写原失败。候选基于 `c7b6b1a76161c757a08cef3de2c21f740986e4fe`，位于独立的 `feature/ai-proxy-fixture-readiness` 分支。作者检查、根证据读回及新的非作者限定复核已完成。本提交用于诊断分支；新源码 CI 结果尚未确认，未整合 main。
 
+推送回读：诊断提交 `3f26ffe78d13b21421bec53eabbca6b6e1104dd0` 已推送公开仓库，该远端分支精确相等、ahead/behind 0/0、分支工作树干净；提交中的258工程输入与已通过完整门禁相等。main仍为c7；[Quality37341962489](https://github.com/cyruss648/keelshell/actions/runs/37341962489) 已实际启动，当前没有最终验收结论。该段是推送后的主工作树交接更新，不代表另一次源码提交。
+
 ## 修改范围
 
 仅两份测试源码变化：`crates/keelshell-app/src/assistant_tests.rs` 与 `crates/keelshell-ai/tests/request_options_http.rs`。生产代码、依赖、Cargo.lock 和工具链不变。

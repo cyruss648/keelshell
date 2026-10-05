@@ -61,6 +61,14 @@ impl IsolatedChildReceipt {
 }
 
 fn isolated_child(mode: Option<&str>, limit: Duration) -> TestResult<IsolatedChildReceipt> {
+    isolated_child_environment(mode, limit, true)
+}
+
+fn isolated_child_environment(
+    mode: Option<&str>,
+    limit: Duration,
+    include_system_root: bool,
+) -> TestResult<IsolatedChildReceipt> {
     tokio::runtime::Builder::new_current_thread().enable_all().build()?.block_on(async {
         use process_wrap::tokio::{CommandWrap, KillOnDrop};
         use std::process::Stdio;
@@ -77,6 +85,12 @@ fn isolated_child(mode: Option<&str>, limit: Duration) -> TestResult<IsolatedChi
             .env("HTTPS_PROXY", "http://127.0.0.1:9")
             .env("ALL_PROXY", "http://127.0.0.1:9")
             .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
+        // Winsock provider DLL paths may contain %SystemRoot%; keep this OS value
+        // without inheriting PATH, credentials, proxy exclusions or user settings.
+        if cfg!(windows) && include_system_root
+            && let Some(system_root) = std::env::var_os("SystemRoot") {
+            command.env("SystemRoot", system_root);
+        }
         if let Some(mode) = mode {
             command.env("KEELSHELL_REQUEST_OPTIONS_DIAGNOSTIC_MODE", mode);
         }
@@ -202,6 +216,37 @@ fn explicit_proxy_ignores_environment_exclusions_in_isolated_process() -> TestRe
         "isolated proxy fixture failed: {}",
         receipt.diagnostic()
     );
+    Ok(())
+}
+
+#[cfg(windows)]
+#[test]
+fn windows_proxy_child_compares_cleared_and_explicit_system_root() -> TestResult {
+    use std::io::Write;
+
+    let cleared = isolated_child_environment(None, Duration::from_secs(8), false)?;
+    assert!(cleared.reaped && cleared.stdout_closed && cleared.stderr_closed);
+    let cleared_result = if cleared.success() {
+        // An absolute provider catalog can work without this variable. Report the
+        // observed control, rather than assuming every Windows installation fails.
+        "real-http-completed"
+    } else {
+        assert_eq!(cleared.failure, Some("child nonzero exit"));
+        assert!(
+            String::from_utf8_lossy(&cleared.stderr).contains("code: 10106"),
+            "unexpected cleared-environment control: {}",
+            cleared.diagnostic()
+        );
+        "provider-init-10106"
+    };
+    let supported = isolated_child(None, Duration::from_secs(8))?;
+    assert!(supported.success(), "{}", supported.diagnostic());
+    // A bounded, static receipt bypasses libtest's success-output capture so CI
+    // records which control actually occurred; no OS path or environment value.
+    writeln!(
+        std::io::stderr(),
+        "Windows proxy environment control: cleared={cleared_result}; explicit-SystemRoot=real-http-completed; both-reaped-and-EOF"
+    )?;
     Ok(())
 }
 

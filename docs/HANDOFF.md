@@ -1,5 +1,15 @@
 # 开发交接 — 2026-10-06
 
+最新非作者30/31封包已冻结并经根全量读回，SystemRoot候选仅一测试45行增量，源与门禁/复核精确相等；即将追加诊断分支，新Windows实际对照尚未执行。并行本地Ask过程显示已有两适配器自有controller与真实GPUI专项通过，严格整仓Clippy及assistant33项通过；完整门禁/打包/独立复审和新原生仍待完成，不使用编译或布局场景关闭产品验收。MCP方向明确为KeelShell向外部智能体提供服务，内置API/本地CLI Ask是独立入口。
+
+最小SystemRoot候选已获新非作者限定PASS：独立18HTTP实测、原门禁/258输入读回完成，只有45行测试增量，未伪cfg运行Windows。即将追加诊断分支，Windows实际control仍未执行；根不先整合main。对照需读取“清空环境”的实际分类以及明确SystemRoot后的真实HTTP完成/reap/EOF短回执，不能只据test名ok或本机通过认定原因。
+
+最新候选检查已通过：SystemRoot最小测试差量完整门禁303.024822秒、1155普通+8doc+6脚本/严格检查/两控制器通过，258输入前后相等，只有一测试区别于3f26；17/18冻结包已交新的非作者复核。Windows实际对照未执行，不称修复；3f26原CI独立144/145完整包已根读回，Unix各9项OpenSSH及限定出生回执核验，Windows10106仍失败。并行本地Ask进度仅AI库首次定向编译通过，app/行为验证尚未完成。
+
+当前3f26诊断CI已明确 failure：macOS/Linux完整Rust与OpenSSH成功，Windows前置AI HTTP为17/1，实际child exit101及OS10106已捕获，reap/双EOF为true。新的test-only SystemRoot最小环境候选在旧诊断工作树准备，本机18HTTP通过、完整门禁运行中；Windows对照及非作者未完成，不先整合。新独立local-ask-stages工作树并行实施真实本地Ask进度，尚无功能/测试验收；两增量分开管理。见[诊断CI](testing/records/2026-10-06-ai-proxy-fixture-readiness-ci.md)与[系统环境候选](testing/records/2026-10-06-windows-proxy-system-root.md)。下方“CI尚未结束”保留为历史。
+
+诊断分支已推送：`3f26ffe78d13b21421bec53eabbca6b6e1104dd0` 位于 `feature/ai-proxy-fixture-readiness`，远端exact、0/0及该分支干净状态已核验，258工程提交字节与完整门禁相等。[Quality37341962489](https://github.com/cyruss648/keelshell/actions/runs/37341962489) 已启动、结果尚未确认；main仍为c7，主工作树只保留本轮文档更新。非作者继续只读核对新CI，Windows原原因保持未知，未整合/未验收。
+
 2026-10-06 测试候选：c7 的三平台失败保持；独立 `feature/ai-proxy-fixture-readiness` 仅修改两份测试，原请求与限时保持，生产/依赖/锁/工具链不变。作者完整门禁1155普通+8doc+6脚本、严格检查/两控制器及57打包通过，48/49冻结证据经根读回；新的非作者18HTTP/4夹具/1真实GPUI与有价值的私有负例复核PASS，临时源恢复及258输入相等。此增量先提交诊断分支，新CI结果尚未确认、未整合main。Windows原child原因未知，先获取实际stderr，不以本机通过关闭失败。见[就绪时序与诊断记录](testing/records/2026-10-06-ai-proxy-fixture-readiness.md)。MCP仍仅向外部智能体提供能力。
 
 最新源码CI已明确失败：F功能提交 `c7b6b1a76161c757a08cef3de2c21f740986e4fe` 已推送并核对远端、0/0与干净状态；[Quality37332920375](https://github.com/cyruss648/keelshell/actions/runs/37332920375) 三个平台均Rust gate失败。macOS/Linux新代理界面夹具accept超时，Windows新隔离代理child失败但原stderr丢弃、原因未知。原ZIP及独立277proof/278归档经根逐字节读回保全；新独立候选只诊断/修复测试生命周期与有界child可观测性，不改生产或放宽限时，尚未整合或验收。下方本机1146通过与macOS限定原生事实保持原范围，不能关闭本次CI。见[首次F源码CI](testing/records/2026-10-05-ai-request-options-ci.md)。

@@ -1,5 +1,7 @@
 # 界面设计与智能体能力计划
 
+2026-10-06 当前工程状态：3f26诊断CI的macOS/Linux完整检查成功、Windows隔离child失败并实际捕获OS10106；原因对照仍待执行。新的单测试SystemRoot候选已通过1155普通+8doc+6脚本完整本机门禁和新非作者限定复核，30/31复核材料经根完整读回，先追加诊断分支获取真实Windows对照，不先整合main。另一个独立工作区正在实施本地Ask真实过程显示与固定取消交互，专项测试通过但完整门禁、独立复审和新版原生尚未完成。见[诊断CI](../testing/records/2026-10-06-ai-proxy-fixture-readiness-ci.md)与[系统环境候选](../testing/records/2026-10-06-windows-proxy-system-root.md)。下方较早的工程进度保留为历史；MCP仍仅向外部智能体提供能力。
+
 2026-10-06 工程状态：代理测试就绪与有界child诊断候选已冻结，作者1155普通+8doc+6脚本完整门禁/57打包通过；新的非作者限定专项及私有负例复核PASS，258输入恢复相等，未整合main。原c7三平台失败不改写，Windows原因仍未知，本增量先提交诊断分支获取实际stderr，新CI另行核验；见[记录](../testing/records/2026-10-06-ai-proxy-fixture-readiness.md)。对外MCP方向及UI/Agent产品目标保持。
 
 当前源码CI边界：F提交c7b6b1a的Quality37332920375三平台均失败，原日志保留。新的测试夹具时序/child诊断候选在独立树准备，未整合；本机门禁和限定macOS原生事实不代替新源码CI通过，见[失败记录](../testing/records/2026-10-05-ai-request-options-ci.md)。对外MCP方向不变。

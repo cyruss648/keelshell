@@ -1,5 +1,11 @@
 # 开发路线
 
+最小Windows系统环境候选已通过303秒完整本机门禁与新非作者18HTTP/限定差量复核，258工程输入相等。下一步追加诊断分支采集Windows实际paired回执；未整合main、不关闭原失败。并行本地Ask进度继续独立开发。
+
+2026-10-06 后续：3f26诊断CI为Unix成功/Windows失败，实际10106已捕获；最小SystemRoot测试候选本机18HTTP通过、完整门禁进行中，未复审/未Windows验收。另一个独立工作树实施本地Ask真实进度，未整合。最新范围见[诊断CI](testing/records/2026-10-06-ai-proxy-fixture-readiness-ci.md)与[候选](testing/records/2026-10-06-windows-proxy-system-root.md)，原c7失败保持。
+
+当前诊断提交为 `3f26ffe`，已推送独立分支并核对远端、0/0和该分支干净状态；[新Quality37341962489](https://github.com/cyruss648/keelshell/actions/runs/37341962489) 尚无最终结果。main仍c7，后续根据实际Windows日志处理，不先合入或关闭原CI失败。
+
 2026-10-06：新的代理就绪/隔离child诊断候选仅改两份测试，作者完整门禁1155普通+8doc+6脚本、严格检查与57打包通过，根48/49证据读回完成；新非作者限定专项/私有负例复核PASS，258工程输入恢复相等，未整合main。c7原三平台失败保留，Windows具体原因未知，此增量先提交诊断分支采集真实错误，新CI另行核验；见[候选记录](testing/records/2026-10-06-ai-proxy-fixture-readiness.md)。
 
 2026-10-05 最新CI：F功能提交c7b6b1a已推送；[Quality37332920375](https://github.com/cyruss648/keelshell/actions/runs/37332920375) 三平台Rust gate均失败。macOS/Linux新代理界面夹具超时、Windows隔离child失败原因未知，全部原日志保留；新的测试生命周期/有界诊断候选在独立树准备，未整合。前一本机门禁与原生六组合不关闭本次CI，见[失败记录](testing/records/2026-10-05-ai-request-options-ci.md)。
