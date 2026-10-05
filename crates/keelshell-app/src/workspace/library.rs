@@ -42,56 +42,87 @@ pub(super) fn now_seconds() -> u64 {
 
 impl Workspace {
     pub(super) fn focus_current_surface(&self, window: &mut Window, cx: &mut App) {
-        if self.mcp.show {
-            self.overlay_focus.focus(window, cx);
+        if let Some(kind) = self.active_modal() {
+            if kind == modal_scope::ModalKind::Vault
+                && let Some(panel) = &self.vault_settings
+            {
+                panel.update(cx, |panel, cx| {
+                    panel.update_references(credentials::credential_references(&self.state), cx)
+                });
+            }
+            if self.modal_scope.current == Some(kind)
+                && self.modal_focus.contains_focused(window, cx)
+            {
+                return;
+            }
+            match kind {
+                modal_scope::ModalKind::KeyboardInteractive => {
+                    if let Some(prompt) = &self.keyboard_interactive {
+                        prompt.focus(window, cx);
+                    }
+                }
+                modal_scope::ModalKind::Login => {
+                    if let Some(login) = &self.login {
+                        login.focus(window, cx);
+                    }
+                }
+                modal_scope::ModalKind::SnippetEditor => {
+                    if let Some(panel) = &self.snippet_editor {
+                        panel.update(cx, |panel, cx| panel.focus(window, cx));
+                    }
+                }
+                modal_scope::ModalKind::SnippetParameters => {
+                    if let Some(panel) = &self.snippet_parameters {
+                        panel.update(cx, |panel, cx| panel.focus(window, cx));
+                    }
+                }
+                modal_scope::ModalKind::Manager => {
+                    self.search.read(cx).focus_handle(cx).focus(window, cx)
+                }
+                modal_scope::ModalKind::Connection => {
+                    if let Some(form) = &self.form {
+                        form.name.read(cx).focus_handle(cx).focus(window, cx);
+                    }
+                }
+                modal_scope::ModalKind::Folder => {
+                    if let Some(form) = &self.folder_form {
+                        form.name.read(cx).focus_handle(cx).focus(window, cx);
+                    }
+                }
+                modal_scope::ModalKind::Destination => {
+                    if let Some(prompt) = &self.destination_prompt {
+                        prompt.focus.focus(window, cx);
+                    }
+                }
+                modal_scope::ModalKind::AiSettings | modal_scope::ModalKind::Updates => {}
+                modal_scope::ModalKind::Mcp
+                | modal_scope::ModalKind::LibraryBatch
+                | modal_scope::ModalKind::SnippetDelete
+                | modal_scope::ModalKind::Archive
+                | modal_scope::ModalKind::HostApproval => self.overlay_focus.focus(window, cx),
+                modal_scope::ModalKind::Vault => {
+                    if let Some(panel) = &self.vault_settings {
+                        panel.update(cx, |panel, cx| panel.focus(window, cx));
+                    }
+                }
+                modal_scope::ModalKind::Batch => {
+                    if let Some(panel) = &self.batch_panel {
+                        panel.update(cx, |panel, cx| panel.focus(window, cx));
+                    }
+                }
+                modal_scope::ModalKind::Workflow => {
+                    if let Some(panel) = &self.workflow_panel {
+                        panel.update(cx, |panel, cx| panel.focus(window, cx));
+                    }
+                }
+                _ => {
+                    self.modal_focus.focus(window, cx);
+                    window.focus_next(cx);
+                }
+            }
             return;
         }
-        if self.show_workflow
-            && let Some(panel) = &self.workflow_panel
-        {
-            panel.update(cx, |panel, cx| panel.focus(window, cx));
-            return;
-        }
-        if self.show_batch
-            && let Some(panel) = &self.batch_panel
-        {
-            panel.update(cx, |panel, cx| panel.focus(window, cx));
-            return;
-        }
-        if let Some(panel) = &self.snippet_parameters {
-            panel.update(cx, |panel, cx| panel.focus(window, cx));
-            return;
-        }
-        if let Some(panel) = &self.vault_settings {
-            panel.update(cx, |panel, cx| {
-                panel.update_references(credentials::credential_references(&self.state), cx);
-                panel.focus(window, cx);
-            });
-            return;
-        }
-        if let Some(panel) = &self.snippet_editor {
-            panel.update(cx, |panel, cx| panel.focus(window, cx));
-            return;
-        }
-        if self.snippet_delete.is_some() {
-            self.overlay_focus.focus(window, cx);
-            return;
-        }
-        // AI settings already owns a panel/input focus; do not interrupt its draft.
-        if self.ai_settings.is_some() {
-            return;
-        }
-        if let Some(login) = &self.login {
-            login.focus(window, cx);
-        } else if self.host_approval.is_some() || self.library_batch_prompt.is_some() {
-            self.overlay_focus.focus(window, cx);
-        } else if let Some(prompt) = &self.destination_prompt {
-            prompt.focus.focus(window, cx);
-        } else if let Some(form) = &self.folder_form {
-            form.name.read(cx).focus_handle(cx).focus(window, cx);
-        } else if let Some(form) = &self.form {
-            form.name.read(cx).focus_handle(cx).focus(window, cx);
-        } else if self.visible_panel == Some(ToolPanel::Commands) && !self.show_connections {
+        if self.visible_panel == Some(ToolPanel::Commands) && !self.show_connections {
             self.snippet_search
                 .read(cx)
                 .focus_handle(cx)

@@ -820,6 +820,7 @@ impl Workspace {
                         })
                         .collect();
                     view.keyboard_interactive = Some(KeyboardInteractivePrompt {
+                        identity: uuid::Uuid::new_v4(),
                         route_id,
                         index,
                         name: challenge.name,

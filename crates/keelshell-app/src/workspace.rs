@@ -24,6 +24,7 @@ mod library;
 mod library_bulk;
 mod library_view;
 mod mcp;
+mod modal_scope;
 mod modals;
 mod openssh_review;
 mod reconnect;
@@ -80,6 +81,8 @@ struct KeyboardInteractiveField {
 }
 
 struct KeyboardInteractivePrompt {
+    // Route/hop and zero input fields can recur across distinct challenges.
+    identity: uuid::Uuid,
     route_id: uuid::Uuid,
     index: usize,
     name: String,
@@ -264,6 +267,10 @@ pub struct Workspace {
     pending_recents: Vec<(Connection, keelshell_core::ConnectionRoute, u64)>,
     pending_batch_audits: Vec<keelshell_core::BatchAuditRecord>,
     overlay_focus: FocusHandle,
+    modal_focus: FocusHandle,
+    surface_focus: FocusHandle,
+    modal_button_focus: std::cell::RefCell<HashMap<ElementId, WeakFocusHandle>>,
+    modal_scope: modal_scope::ModalScope,
     saving: bool,
     show_assistant: bool,
     assistant: Entity<AssistantPanel>,
@@ -558,6 +565,10 @@ impl Workspace {
             pending_recents: Vec::new(),
             pending_batch_audits: Vec::new(),
             overlay_focus: cx.focus_handle(),
+            modal_focus: cx.focus_handle(),
+            surface_focus: cx.focus_handle(),
+            modal_button_focus: std::cell::RefCell::new(HashMap::new()),
+            modal_scope: modal_scope::ModalScope::default(),
             saving: false,
             show_assistant: false,
             assistant,
@@ -630,14 +641,9 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.library_batch_prompt.is_some()
-            || self.mcp.show
-            || self.show_batch
-            || self.show_workflow
-            || self.vault_settings.is_some()
-            || self.ai_settings.is_some()
-            || self.snippet_modal_open()
-            || self.openssh_review.is_some()
+        if self
+            .active_modal()
+            .is_some_and(|kind| kind != modal_scope::ModalKind::Manager)
         {
             self.focus_current_surface(window, cx);
             return;
@@ -647,54 +653,15 @@ impl Workspace {
         cx.notify();
     }
     fn close_tab(&mut self, _: &CloseTab, window: &mut Window, cx: &mut Context<Self>) {
-        // Modal close takes precedence so a keyboard shortcut cannot close its underlying SSH tab.
-        if self.mcp.show {
-            self.mcp.show = false;
-        } else if self.show_workflow {
-            self.show_workflow = false;
-        } else if self.show_batch {
-            self.show_batch = false;
-        } else if self.openssh_review.is_some() {
-            self.cancel_openssh_import(window, cx);
-        } else if self.discard_archive.take().is_some() {
-            cx.notify();
-        } else if self.snippet_modal_open() {
-            self.close_snippet_modal(window, cx);
-        } else if let Some(panel) = self.vault_settings.clone() {
-            panel.update(cx, |panel, cx| panel.close(window, cx));
-        } else if self.ai_settings.is_some() {
-            if !self.saving {
-                self.ai_settings = None;
-                self.ai_settings_subscription = None;
-            }
-        } else if self.update_panel.is_some() {
-            self.update_panel = None;
-            self.update_panel_subscription = None;
-        } else if self.login.is_some() {
-            self.cancel_login(window, cx);
-        } else if self.host_approval.is_some() {
+        // Every close action resolves against the same scope used for rendering.
+        if self.close_active_modal(window, cx) {
+            return;
+        }
+        if self.connecting {
             self.cancel_connect_route(window, cx);
-        } else if self.library_batch_prompt.is_some() {
-            if !self.saving {
-                self.close_library_batch(window, cx);
-            }
-        } else if self.destination_prompt.is_some() {
-            if !self.saving {
-                self.close_destination(window, cx);
-            }
-        } else if self.folder_form.is_some() {
-            if !self.saving {
-                self.close_folder_form(window, cx);
-            }
-        } else if self.form.is_some() {
-            if !self.saving {
-                self.form = None;
-            }
-        } else if self.connecting {
-            self.cancel_connect_route(window, cx);
-        } else if self.show_connections {
-            self.show_connections = false;
-        } else if !self.tabs.is_empty() {
+            return;
+        }
+        if !self.tabs.is_empty() {
             self.cancel_remote_completion(cx);
             let terminal = self.tabs.remove(self.active);
             self.forget_reconnect(terminal.entity_id(), window, cx);
@@ -1167,7 +1134,7 @@ impl Workspace {
         cx.notify();
     }
     fn toggle_assistant(&mut self, _: &ToggleAssistant, _: &mut Window, cx: &mut Context<Self>) {
-        if self.mcp.show || self.show_batch || self.show_workflow || self.snippet_modal_open() {
+        if self.active_modal().is_some() {
             return;
         }
         self.show_assistant = !self.show_assistant;

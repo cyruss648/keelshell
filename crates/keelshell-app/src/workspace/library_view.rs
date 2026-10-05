@@ -151,7 +151,8 @@ impl Workspace {
                 connection,
             ))
             .disabled(self.saving)
-            .on_click(cx.listener(move |view, _, _, cx| view.toggle_library_selection(id, cx)));
+            .on_click(cx.listener(move |view, _, _, cx| view.toggle_library_selection(id, cx)))
+            .map(|button| self.retain_modal_button(("library-select", index), button, cx));
         let favorite = Button::new(("favorite", index))
             .ghost()
             .compact()
@@ -166,7 +167,8 @@ impl Workspace {
             ))
             .localized_tooltip("切换收藏", "Toggle favorite")
             .disabled(self.saving || trash)
-            .on_click(cx.listener(move |view, _, window, cx| view.toggle_favorite(id, window, cx)));
+            .on_click(cx.listener(move |view, _, window, cx| view.toggle_favorite(id, window, cx)))
+            .map(|button| self.retain_modal_button(("favorite", index), button, cx));
         let mut row = div()
             .id(("connection-row", index))
             .test_support()
@@ -273,7 +275,8 @@ impl Workspace {
                         .disabled(self.saving)
                         .on_click(cx.listener(move |view, _, window, cx| {
                             view.restore_connection(id, window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button(("restore", index), button, cx)),
                 )
                 .child(
                     Button::new(("library-purge", index))
@@ -293,7 +296,10 @@ impl Workspace {
                                 window,
                                 cx,
                             )
-                        })),
+                        }))
+                        .map(|button| {
+                            self.retain_modal_button(("library-purge", index), button, cx)
+                        }),
                 );
         } else {
             actions = actions
@@ -306,7 +312,8 @@ impl Workspace {
                         .disabled(self.connecting || self.saving)
                         .on_click(cx.listener(move |view, _, window, cx| {
                             view.request_connect(profile.clone(), window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button(("connect", index), button, cx)),
                 )
                 .child(
                     Button::new(("edit", index))
@@ -317,7 +324,8 @@ impl Workspace {
                         .disabled(self.saving)
                         .on_click(cx.listener(move |view, _, window, cx| {
                             view.edit_connection(edit.clone(), window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button(("edit", index), button, cx)),
                 )
                 .child(
                     Button::new(("move", index))
@@ -328,7 +336,8 @@ impl Workspace {
                         .disabled(self.saving)
                         .on_click(cx.listener(move |view, _, window, cx| {
                             view.open_destination(DestinationTarget::Connection(id), window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button(("move", index), button, cx)),
                 )
                 .child(
                     Button::new(("duplicate", index))
@@ -346,7 +355,8 @@ impl Workspace {
                                 }
                             }
                             cx.notify();
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button(("duplicate", index), button, cx)),
                 )
                 .child(
                     Button::new(("delete", index))
@@ -357,7 +367,8 @@ impl Workspace {
                         .disabled(self.saving)
                         .on_click(cx.listener(move |view, _, window, cx| {
                             view.delete_connection(id, window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button(("delete", index), button, cx)),
                 );
         }
         row.child(actions).into_any_element()
@@ -428,7 +439,8 @@ impl Workspace {
                     .label(format!("{label}  {total}"))
                     .on_click(cx.listener(move |view, _, _, cx| {
                         view.set_library_filter(filter, cx);
-                    })),
+                    }))
+                    .map(|button| self.retain_modal_button(id, button, cx)),
             );
         }
         tree = tree.child(
@@ -454,7 +466,8 @@ impl Workspace {
                         .disabled(self.saving)
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.open_folder_form(None, window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button("new-folder", button, cx)),
                 ),
         );
         for (index, folder) in self.state.folder_rows().into_iter().enumerate() {
@@ -476,7 +489,8 @@ impl Workspace {
                             .tooltip(self.folder_label(Some(id), cx))
                             .on_click(cx.listener(move |view, _, _, cx| {
                                 view.set_library_filter(LibraryFilter::Folder(Some(id)), cx);
-                            })),
+                            }))
+                            .map(|button| self.retain_modal_button(("folder", index), button, cx)),
                     )
                     .child(
                         Button::new(("manage-folder", index))
@@ -492,7 +506,10 @@ impl Workspace {
                             .disabled(self.saving)
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.open_folder_form(Some(id), window, cx)
-                            })),
+                            }))
+                            .map(|button| {
+                                self.retain_modal_button(("manage-folder", index), button, cx)
+                            }),
                     ),
             );
         }
@@ -558,7 +575,8 @@ impl Workspace {
                     .icon(IconName::Plus)
                     .label(t(cx, "新建连接", "New connection"))
                     .disabled(self.saving)
-                    .on_click(cx.listener(|view, _, window, cx| view.open_form(window, cx))),
+                    .on_click(cx.listener(|view, _, window, cx| view.open_form(window, cx)))
+                    .map(|button| self.retain_modal_button("new-connection", button, cx)),
             )
             .child(
                 Button::new("import-connections")
@@ -568,7 +586,8 @@ impl Workspace {
                     .disabled(self.saving)
                     .on_click(
                         cx.listener(|view, _, window, cx| view.import_connections(window, cx)),
-                    ),
+                    )
+                    .map(|button| self.retain_modal_button("import-connections", button, cx)),
             )
             .child(
                 Button::new("import-openssh")
@@ -586,14 +605,16 @@ impl Workspace {
                     .disabled(self.saving)
                     .on_click(cx.listener(|view, _, window, cx| {
                         view.import_openssh_connections(window, cx)
-                    })),
+                    }))
+                    .map(|button| self.retain_modal_button("import-openssh", button, cx)),
             )
             .child(
                 Button::new("export-connections")
                     .compact()
                     .icon(IconName::Upload)
                     .label(t(cx, "导出 JSON", "Export JSON"))
-                    .on_click(cx.listener(|view, _, _, cx| view.export_connections(cx))),
+                    .on_click(cx.listener(|view, _, _, cx| view.export_connections(cx)))
+                    .map(|button| self.retain_modal_button("export-connections", button, cx)),
             )
             .child(
                 div()
@@ -658,7 +679,8 @@ impl Workspace {
                                 prompt.folder_id = None;
                             }
                             cx.notify();
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button("destination-root", button, cx)),
                 );
             for (index, folder) in self.state.folder_rows().into_iter().enumerate() {
                 let id = folder.id;
@@ -673,7 +695,10 @@ impl Workspace {
                                 prompt.folder_id = Some(id);
                             }
                             cx.notify();
-                        })),
+                        }))
+                        .map(|button| {
+                            self.retain_modal_button(("destination-folder", index), button, cx)
+                        }),
                 );
             }
             body = body
@@ -693,7 +718,10 @@ impl Workspace {
                                 .label(t(cx, "取消", "Cancel"))
                                 .on_click(cx.listener(|view, _, window, cx| {
                                     view.close_destination(window, cx)
-                                })),
+                                }))
+                                .map(|button| {
+                                    self.retain_modal_button("cancel-destination", button, cx)
+                                }),
                         )
                         .child(
                             Button::new("save-destination")
@@ -702,7 +730,10 @@ impl Workspace {
                                 .label(t(cx, "确定", "Choose"))
                                 .on_click(cx.listener(|view, _, window, cx| {
                                     view.save_destination(window, cx)
-                                })),
+                                }))
+                                .map(|button| {
+                                    self.retain_modal_button("save-destination", button, cx)
+                                }),
                         ),
                 );
         } else if let Some(form) = &self.folder_form {
@@ -738,7 +769,8 @@ impl Workspace {
                                 form.parent_id = None;
                             }
                             cx.notify();
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button("folder-parent-root", button, cx)),
                 );
             for (index, folder) in self.state.folder_rows().into_iter().enumerate() {
                 let id = folder.id;
@@ -753,19 +785,22 @@ impl Workspace {
                                 form.parent_id = Some(id);
                             }
                             cx.notify();
-                        })),
+                        }))
+                        .map(|button| {
+                            self.retain_modal_button(("folder-parent", index), button, cx)
+                        }),
                 );
             }
             body=body.child(choices).when_some(form.message.clone(),|el,message|el.child(div().text_sm().text_color(rgb(visual.danger)).child(message.render(cx))))
                 .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx,"删除空文件夹前，需移走子文件夹、连接与回收站中的关联连接。","An empty folder can be removed after moving out its children and active or trashed profiles.")))
                 .child(div().flex().justify_between().gap_2()
                     .child(div().when(form.id.is_some(),|el|el.child(Button::new("remove-empty-folder").ghost().disabled(self.saving)
-                        .label(t(cx,"删除空文件夹","Remove empty folder")).on_click(cx.listener(|view,_,window,cx|view.remove_empty_folder(window,cx))))))
+                        .label(t(cx,"删除空文件夹","Remove empty folder")).on_click(cx.listener(|view,_,window,cx|view.remove_empty_folder(window,cx))).map(|button| self.retain_modal_button("remove-empty-folder", button, cx)))))
                     .child(div().flex().gap_2()
                         .child(Button::new("cancel-folder").ghost().disabled(self.saving).label(t(cx,"取消","Cancel"))
-                            .on_click(cx.listener(|view,_,window,cx|view.close_folder_form(window,cx))))
+                            .on_click(cx.listener(|view,_,window,cx|view.close_folder_form(window,cx))).map(|button| self.retain_modal_button("cancel-folder", button, cx)))
                         .child(Button::new("save-folder").primary().disabled(self.saving).label(t(cx,"保存","Save"))
-                            .on_click(cx.listener(|view,_,window,cx|view.save_folder(window,cx))))));
+                            .on_click(cx.listener(|view,_,window,cx|view.save_folder(window,cx))).map(|button| self.retain_modal_button("save-folder", button, cx)))));
         } else {
             return div().into_any_element();
         }

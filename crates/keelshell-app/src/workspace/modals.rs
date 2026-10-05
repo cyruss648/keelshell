@@ -276,7 +276,10 @@ impl Workspace {
                         .label(t(cx, "取消连接", "Cancel connection"))
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.cancel_keyboard_interactive(window, cx)
-                        })),
+                        }))
+                        .map(|button| {
+                            self.retain_modal_button("cancel-keyboard-interactive", button, cx)
+                        }),
                 )
                 .child(
                     Button::new("submit-keyboard-interactive")
@@ -284,7 +287,10 @@ impl Workspace {
                         .label(t(cx, "提交并继续", "Submit and continue"))
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.submit_keyboard_interactive(window, cx)
-                        })),
+                        }))
+                        .map(|button| {
+                            self.retain_modal_button("submit-keyboard-interactive", button, cx)
+                        }),
                 );
             (
                 px(560.),
@@ -348,7 +354,8 @@ impl Workspace {
                         .label(t(cx, "仅本次使用", "Use one-time secret"))
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.login_mode(LoginMode::Once, window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button("one-time-credential", button, cx)),
                 );
             } else if !agent && !ephemeral {
                 modes = modes.child(
@@ -358,7 +365,8 @@ impl Workspace {
                         .label(t(cx, "保存到凭据库…", "Save in vault…"))
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.login_mode(LoginMode::Save, window, cx)
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button("save-credential-mode", button, cx)),
                 );
             }
             if !agent && !save && !locked {
@@ -373,7 +381,10 @@ impl Workspace {
                         })
                         .on_click(cx.listener(|view, _, window, cx| {
                             view.toggle_keyboard_interactive(window, cx)
-                        })),
+                        }))
+                        .map(|button| {
+                            self.retain_modal_button("keyboard-interactive-mode", button, cx)
+                        }),
                 );
             }
             if login.connection.credential_ref.is_some() && !ephemeral {
@@ -385,7 +396,10 @@ impl Workspace {
                             .label(t(cx, "使用已存凭据", "Use saved credential"))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.login_mode(LoginMode::Unlock, window, cx)
-                            })),
+                            }))
+                            .map(|button| {
+                                self.retain_modal_button("unlock-credential-mode", button, cx)
+                            }),
                     );
                 }
                 modes = modes.child(
@@ -395,7 +409,8 @@ impl Workspace {
                         .label(t(cx, "解除凭据关联", "Unlink credential"))
                         .on_click(
                             cx.listener(|view, _, window, cx| view.forget_credential(window, cx)),
-                        ),
+                        )
+                        .map(|button| self.retain_modal_button("forget-credential", button, cx)),
                 );
             }
             let ssh_auth = div()
@@ -459,14 +474,16 @@ impl Workspace {
                         } else {
                             t(cx, "取消", "Cancel")
                         })
-                        .on_click(cx.listener(|view, _, window, cx| view.cancel_login(window, cx))),
+                        .on_click(cx.listener(|view, _, window, cx| view.cancel_login(window, cx)))
+                        .map(|button| self.retain_modal_button("cancel-login", button, cx)),
                 )
                 .child(
                     Button::new("submit-login")
                         .primary()
                         .disabled(login.busy || self.saving)
                         .label(submit_label)
-                        .on_click(cx.listener(|view, _, window, cx| view.submit_login(window, cx))),
+                        .on_click(cx.listener(|view, _, window, cx| view.submit_login(window, cx)))
+                        .map(|button| self.retain_modal_button("submit-login", button, cx)),
                 );
             (
                 px(if save || proxy_auth { 560. } else { 480. }),
@@ -523,7 +540,8 @@ impl Workspace {
                         .label(t(cx, "取消", "Cancel"))
                         .on_click(
                             cx.listener(|view, _, window, cx| view.reject_host_key(window, cx)),
-                        ),
+                        )
+                        .map(|button| self.retain_modal_button("reject-host-key", button, cx)),
                 )
                 .child(
                     Button::new("accept-host-key")
@@ -536,7 +554,8 @@ impl Workspace {
                         .disabled(self.saving)
                         .on_click(
                             cx.listener(|view, _, window, cx| view.accept_host_key(window, cx)),
-                        ),
+                        )
+                        .map(|button| self.retain_modal_button("accept-host-key", button, cx)),
                 );
             (
                 px(480.),
@@ -613,14 +632,25 @@ impl Workspace {
                             .label(t(cx, "取消连接", "Cancel connection"))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.cancel_connect_route(window, cx)
-                            })),
+                            }))
+                            .map(|button| {
+                                self.retain_modal_button("cancel-connect-route", button, cx)
+                            }),
                     ),
                 )
                 .into_any_element();
         } else {
             return div().into_any_element();
         };
+        let authentication_id = self
+            .keyboard_interactive
+            .as_ref()
+            .map(|prompt| format!("keyboard-interactive-instance-{}", prompt.identity))
+            .unwrap_or_else(|| "ssh-authentication-instance".to_owned());
         div()
+            // The outer trap stays stable; new challenge content gets fresh
+            // Kit pointer/key pending state while business inputs remain owned.
+            .id(authentication_id)
             .track_focus(&self.overlay_focus)
             .absolute()
             .inset_0()
@@ -718,7 +748,10 @@ impl Workspace {
                             .label(self.folder_label(form.folder_id, cx))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_destination(DestinationTarget::Draft, window, cx)
-                            })),
+                            }))
+                            .map(|button| {
+                                self.retain_modal_button("choose-connection-folder", button, cx)
+                            }),
                     ),
             )
             .child(field(t(cx, "标签", "TAGS"), &form.tags))
@@ -743,7 +776,8 @@ impl Workspace {
                             form.password = !form.password;
                         }
                         cx.notify();
-                    })),
+                    }))
+                    .map(|button| self.retain_modal_button("auth-mode", button, cx)),
             )
             .when(!form.password, |body| {
                 body.child(field(t(cx, "私钥文件", "PRIVATE KEY"), &form.key))
@@ -775,7 +809,10 @@ impl Workspace {
                                 view.form = None;
                                 view.focus_current_surface(window, cx);
                                 cx.notify();
-                            })),
+                            }))
+                            .map(|button| {
+                                self.retain_modal_button("cancel-connection", button, cx)
+                            }),
                     )
                     .child(
                         Button::new("save-connection")
@@ -784,7 +821,8 @@ impl Workspace {
                             .label(t(cx, "保存", "Save connection"))
                             .on_click(
                                 cx.listener(|view, _, window, cx| view.save_connection(window, cx)),
-                            ),
+                            )
+                            .map(|button| self.retain_modal_button("save-connection", button, cx)),
                     ),
             );
         let title = div()

@@ -125,7 +125,7 @@ impl Workspace {
                                     .on_click(cx.listener(|view, _, _, cx| {
                                         view.quick_password = !view.quick_password;
                                         cx.notify();
-                                    })),
+                                    })).map(|button| self.retain_modal_button("quick-auth-mode", button, cx)),
                             )
                             .when(!self.quick_password, |row| {
                                 row.child(div().flex_1().min_w_0().child(field(
@@ -151,7 +151,7 @@ impl Workspace {
                                     .label(t(cx, "打开连接管理器", "Open connection manager"))
                                     .on_click(cx.listener(|view, _, window, cx| {
                                         view.open_connections(&OpenConnections, window, cx)
-                                    })),
+                                    })).map(|button| self.retain_modal_button("quick-open-manager", button, cx)),
                             )
                             .child(
                                 Button::new("save-quick-profile")
@@ -160,7 +160,7 @@ impl Workspace {
                                     .disabled(self.saving)
                                     .on_click(cx.listener(|view, _, window, cx| {
                                         view.save_quick_as_profile(window, cx)
-                                    })),
+                                    })).map(|button| self.retain_modal_button("save-quick-profile", button, cx)),
                             )
                             .child(
                                 Button::new("quick-connect")
@@ -169,14 +169,14 @@ impl Workspace {
                                     .disabled(self.connecting || self.saving)
                                     .on_click(cx.listener(|view, _, window, cx| {
                                         view.connect_quick(window, cx)
-                                    })),
+                                    })).map(|button| self.retain_modal_button("quick-connect", button, cx)),
                             ),
                     ),
             )
             .into_any_element()
     }
 
-    fn connection_manager(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
+    pub(super) fn connection_manager(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         if !self.show_connections {
             return div().into_any_element();
@@ -229,7 +229,10 @@ impl Workspace {
                                         view.show_connections = false;
                                         view.focus_current_surface(window, cx);
                                         cx.notify();
-                                    })),
+                                    }))
+                                    .map(|button| {
+                                        self.retain_modal_button("close-manager", button, cx)
+                                    }),
                             ),
                     )
                     .child(
@@ -281,6 +284,10 @@ impl Render for Workspace {
         self.maintain_remote_completion(window, cx);
         self.maintain_command_workflows(cx);
         self.refresh_command_suggestions(window, cx);
+        self.synchronize_modal_focus(window, cx);
+        if let Some(kind) = self.active_modal() {
+            return self.isolated_modal_surface(kind, window, cx);
+        }
         let viewport = window.viewport_size();
         let assistant_width = px(380.).min(viewport.width * 0.42);
         // At compact widths keep the terminal usable while the assistant is open.
@@ -357,7 +364,10 @@ impl Render for Workspace {
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 view.active = index;
                                 view.close_tab(&CloseTab, window, cx);
-                            })),
+                            }))
+                            .map(|button| {
+                                self.retain_modal_button(("close-tab", index), button, cx)
+                            }),
                     ),
             );
         }
@@ -444,7 +454,8 @@ impl Render for Workspace {
                     .disabled(active_id.is_none() && kind != ToolPanel::Commands)
                     .on_click(
                         cx.listener(move |view, _, window, cx| view.toggle_panel(kind, window, cx)),
-                    ),
+                    )
+                    .map(|button| self.retain_modal_button(id, button, cx)),
             );
         }
         if let Some(id) = active_id.filter(|id| self.archived_panels.contains_key(id)) {
@@ -459,7 +470,8 @@ impl Render for Workspace {
                         .on_click(cx.listener(move |view, _, _, cx| {
                             view.show_archived.remove(&id);
                             cx.notify();
-                        })),
+                        }))
+                        .map(|button| self.retain_modal_button("show-current-session", button, cx)),
                 )
                 .child(
                     Button::new("show-previous-session")
@@ -470,7 +482,10 @@ impl Render for Workspace {
                         .on_click(cx.listener(move |view, _, _, cx| {
                             view.show_archived.insert(id);
                             cx.notify();
-                        })),
+                        }))
+                        .map(|button| {
+                            self.retain_modal_button("show-previous-session", button, cx)
+                        }),
                 );
         }
         let panels = active_id.and_then(|id| self.selected_panels(id));
@@ -491,8 +506,10 @@ impl Render for Workspace {
         } else {
             bottom
         };
-        div()
+        let surface = div()
             .id("workspace")
+            .track_focus(&self.surface_focus)
+            .on_mouse_down(MouseButton::Left, |_, window, _| window.prevent_default())
             .relative()
             .size_full()
             .flex()
@@ -522,7 +539,7 @@ impl Render for Workspace {
                             .label(t(cx, "连接", "Connections"))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_connections(&OpenConnections, window, cx)
-                            })),
+                            })).map(|button| self.retain_modal_button("connection-manager", button, cx)),
                     )
                     .child(tabs)
                     .child(
@@ -534,7 +551,7 @@ impl Render for Workspace {
                             .localized_tooltip("新建 SSH 会话", "New SSH session")
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_connections(&OpenConnections, window, cx)
-                            })),
+                            })).map(|button| self.retain_modal_button("new-session", button, cx)),
                     )
                     .child(
                         Button::new("split-session")
@@ -545,7 +562,7 @@ impl Render for Workspace {
                             .disabled(active_id.is_none())
                             .on_click(
                                 cx.listener(|view, _, window, cx| view.split_remote(window, cx)),
-                            ),
+                            ).map(|button| self.retain_modal_button("split-session", button, cx)),
                     )
                     .child(
                         Button::new("toggle-assistant")
@@ -555,7 +572,7 @@ impl Render for Workspace {
                             .label(t(cx, "AI 助手", "AI assistant"))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.toggle_assistant(&ToggleAssistant, window, cx)
-                            })),
+                            })).map(|button| self.retain_modal_button("toggle-assistant", button, cx)),
                     )
                     .child(
                         Button::new("vault-settings")
@@ -565,7 +582,7 @@ impl Render for Workspace {
                             .disabled(!self.can_open_vault())
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_vault_settings(window, cx)
-                            })),
+                            })).map(|button| self.retain_modal_button("vault-settings", button, cx)),
                     )
                     .child(
                         Button::new("about-updates")
@@ -575,7 +592,7 @@ impl Render for Workspace {
                             .label(t(cx, "关于/更新", "About / updates"))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_updates(window, cx)
-                            })),
+                            })).map(|button| self.retain_modal_button("about-updates", button, cx)),
                     )
                     .child(
                         div().id("appearance-selector").test_support().flex().gap_1()
@@ -588,7 +605,7 @@ impl Render for Workspace {
                                     .selected(self.state.settings.theme == theme)
                                     .disabled(self.saving || self.vault_settings.is_some() || self.snippet_modal_open())
                                     .localized_tooltip("设置应用外观；跟随系统会自动响应系统变化", "Select appearance; System follows platform changes")
-                                    .on_click(cx.listener(move |view, _, window, cx| view.select_theme(theme, window, cx)))
+                                    .on_click(cx.listener(move |view, _, window, cx| view.select_theme(theme, window, cx))).map(|button| self.retain_modal_button(id, button, cx))
                             }))
                     )
                     .child(
@@ -599,7 +616,7 @@ impl Render for Workspace {
                             .disabled(self.saving)
                             .on_click(
                                 cx.listener(|view, _, window, cx| view.switch_language(window, cx)),
-                            ),
+                            ).map(|button| self.retain_modal_button("language", button, cx)),
                     ),
             )
             .child(
@@ -741,7 +758,7 @@ impl Render for Workspace {
                                                         |view, _, window, cx| {
                                                             view.review_stale_command(window, cx)
                                                         },
-                                                    )),
+                                                    )).map(|button| self.retain_modal_button("review-reconnected-command", button, cx)),
                                             )
                                         })
                                         .child(
@@ -756,7 +773,7 @@ impl Render for Workspace {
                                                 )
                                                 .on_click(cx.listener(|view, _, window, cx| {
                                                     view.run_command(window, cx)
-                                                })),
+                                                })).map(|button| self.retain_modal_button("run-command", button, cx)),
                                         ),
                                 )
                                 .child(self.remote_completion_controls(compact_command_tools, cx))
@@ -795,7 +812,7 @@ impl Render for Workspace {
                                                     view.command_record_history =
                                                         !view.command_record_history;
                                                     cx.notify();
-                                                })),
+                                                })).map(|button| self.retain_modal_button("command-history-policy", button, cx)),
                                         )
                                         .child(
                                             Button::new("new-command-draft")
@@ -808,7 +825,7 @@ impl Render for Workspace {
                                                     view.set_reviewed_command(String::new(), None, window, cx);
                                                     view.command.read(cx).focus_handle(cx).focus(window, cx);
                                                     cx.notify();
-                                                })),
+                                                })).map(|button| self.retain_modal_button("new-command-draft", button, cx)),
                                         )
                                         .child(
                                             Button::new("command-batch")
@@ -832,14 +849,14 @@ impl Render for Workspace {
                                                 .disabled(self.command_surface_blocked())
                                                 .on_click(cx.listener(|view, _, window, cx| {
                                                     view.open_batch_commands(false, window, cx)
-                                                })),
+                                                })).map(|button| self.retain_modal_button("command-batch", button, cx)),
                                         )
                                         .child(Button::new("command-workflow").ghost().compact()
                                             .label(if self.workflow_panel.as_ref().is_some_and(|panel|panel.read(cx).is_running()) {
                                                 t(cx,"工作流 · 运行中","Workflow · running")
                                             } else {t(cx,"依赖工作流","Dependency workflow")})
                                             .disabled(self.command_surface_blocked())
-                                            .on_click(cx.listener(|view,_,window,cx|view.open_workflow(false,window,cx)))),
+                                            .on_click(cx.listener(|view,_,window,cx|view.open_workflow(false,window,cx))).map(|button| self.retain_modal_button("command-workflow", button, cx))),
                                 )
                                 .child(self.remote_completion_list(cx))
                                 .child(self.suggestion_list(window, cx))
@@ -883,91 +900,12 @@ impl Render for Workspace {
                     .child(
                         Button::new("mcp-settings").ghost().compact().label(self.mcp_toolbar_label())
                             .localized_tooltip("对外 MCP 授权与命令审阅", "External MCP grants and command review")
-                            .on_click(cx.listener(|view, _, window, cx| view.open_mcp(window, cx))),
+                            .on_click(cx.listener(|view, _, window, cx| view.open_mcp(window, cx))).map(|button| self.retain_modal_button("mcp-settings", button, cx)),
                     ),
             )
-            .child(self.connection_manager(viewport.width, cx))
-            .child(self.connection_form(cx))
-            .child(self.library_modal(cx))
-            .child(self.library_batch_modal(cx))
-            .child(self.openssh_import_modal(cx))
-            .child(self.authentication_modal(cx))
-            .child(self.snippet_modal(cx))
-            .child(self.archive_confirmation(cx))
-            .child(self.batch_modal(cx))
-            .child(self.workflow_modal(cx))
-            .child(self.mcp_modal(cx))
-            .when_some(self.ai_settings.clone(), |el, panel| {
-                el.child(
-                    div()
-                        .absolute()
-                        .inset_0()
-                        .occlude()
-                        .bg(rgba(0x17243a66))
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .child(
-                            div()
-                                .w(px(1080.))
-                                .max_w_full()
-                                .h(px(700.))
-                                .max_h_full()
-                                .bg(rgb(visual.surface))
-                                .rounded_lg()
-                                .shadow_lg()
-                                .overflow_hidden()
-                                .child(panel),
-                        ),
-                )
-            })
-            .when_some(self.vault_settings.clone(), |el, panel| {
-                el.child(
-                    div()
-                        .absolute()
-                        .inset_0()
-                        .occlude()
-                        .bg(rgba(0x17243a66))
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .child(
-                            div()
-                                .w(px(900.))
-                                .max_w_full()
-                                .h(px(650.))
-                                .max_h_full()
-                                .bg(rgb(visual.surface))
-                                .rounded_lg()
-                                .shadow_lg()
-                                .overflow_hidden()
-                                .child(panel),
-                        ),
-                )
-            })
-            .when_some(self.update_panel.clone(), |el, panel| {
-                el.child(
-                    div()
-                        .absolute()
-                        .inset_0()
-                        .occlude()
-                        .bg(rgba(0x17243a66))
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .child(
-                            div()
-                                .w(px(760.))
-                                .max_w_full()
-                                .h(px(600.))
-                                .max_h_full()
-                                .bg(rgb(visual.surface))
-                                .rounded_lg()
-                                .shadow_lg()
-                                .overflow_hidden()
-                                .child(panel),
-                        ),
-                )
-            })
+            .when(self.connecting, |surface| surface.child(self.authentication_modal(cx)))
+            .capture_key_down(cx.listener(|view, _, window, cx| view.capture_surface_input(window, cx)))
+            .into_any_element();
+        self.protect_surface_input(surface, cx)
     }
 }

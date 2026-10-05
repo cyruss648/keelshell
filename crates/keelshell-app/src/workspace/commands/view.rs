@@ -105,8 +105,8 @@ impl Workspace {
                 .child(t(cx,"删除本机保存的片段，不会修改命令栏中已填入的内容。", "Deletes the saved snippet; text already inserted in the command bar stays unchanged."))
                 .child(div().text_color(rgb(visual.muted)).child(self.status.render(cx)))
                 .child(div().flex().justify_end().gap_2()
-                    .child(Button::new("cancel-delete-snippet").ghost().disabled(self.saving).label(t(cx,"取消","Cancel")).on_click(cx.listener(|view,_,window,cx|view.close_snippet_modal(window,cx))))
-                    .child(Button::new("confirm-delete-snippet").primary().disabled(self.saving).label(t(cx,"确认删除","Delete")).on_click(cx.listener(|view,_,window,cx|view.delete_snippet(window,cx)))))
+                    .child(Button::new("cancel-delete-snippet").ghost().disabled(self.saving).label(t(cx,"取消","Cancel")).on_click(cx.listener(|view,_,window,cx|view.close_snippet_modal(window,cx))).map(|button| self.retain_modal_button("cancel-delete-snippet", button, cx)))
+                    .child(Button::new("confirm-delete-snippet").primary().disabled(self.saving).label(t(cx,"确认删除","Delete")).on_click(cx.listener(|view,_,window,cx|view.delete_snippet(window,cx))).map(|button| self.retain_modal_button("confirm-delete-snippet", button, cx))))
                 .into_any_element()
         } else {
             return div().into_any_element();
@@ -161,7 +161,10 @@ impl Workspace {
                             .disabled(self.command_surface_blocked())
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_batch_commands(false, window, cx)
-                            })),
+                            }))
+                            .map(|button| {
+                                self.retain_modal_button("open-batch-commands", button, cx)
+                            }),
                     )
                     .child(
                         Button::new("new-snippet")
@@ -171,7 +174,8 @@ impl Workspace {
                             .disabled(!self.can_manage_snippets())
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_snippet_editor(None, window, cx)
-                            })),
+                            }))
+                            .map(|button| self.retain_modal_button("new-snippet", button, cx)),
                     ),
             );
         let mut rows = div()
@@ -205,7 +209,10 @@ impl Workspace {
                         .disabled(
                             history.is_none_or(|history| history.newest_first().next().is_none()),
                         )
-                        .on_click(cx.listener(|view, _, _, cx| view.clear_command_history(cx))),
+                        .on_click(cx.listener(|view, _, _, cx| view.clear_command_history(cx)))
+                        .map(|button| {
+                            self.retain_modal_button("clear-command-history", button, cx)
+                        }),
                 ),
         );
         if let Some(history) = history {
@@ -246,7 +253,10 @@ impl Workspace {
                                     if let Some(ticket) = ticket.clone() {
                                         view.insert_candidate(ticket, window, cx)
                                     }
-                                })),
+                                }))
+                                .map(|button| {
+                                    self.retain_modal_button(("use-history", index), button, cx)
+                                }),
                         ),
                 );
             }
@@ -343,7 +353,14 @@ impl Workspace {
                                         if let Some(ticket) = ticket.clone() {
                                             view.insert_candidate(ticket, window, cx)
                                         }
-                                    })),
+                                    }))
+                                    .map(|button| {
+                                        self.retain_modal_button(
+                                            SharedString::from(format!("insert-snippet-{id}")),
+                                            button,
+                                            cx,
+                                        )
+                                    }),
                             )
                             .child(
                                 Button::new(SharedString::from(format!("edit-snippet-{id}")))
@@ -353,7 +370,14 @@ impl Workspace {
                                     .disabled(!self.can_manage_snippets())
                                     .on_click(cx.listener(move |view, _, window, cx| {
                                         view.open_snippet_editor(Some(editing.clone()), window, cx)
-                                    })),
+                                    }))
+                                    .map(|button| {
+                                        self.retain_modal_button(
+                                            SharedString::from(format!("edit-snippet-{id}")),
+                                            button,
+                                            cx,
+                                        )
+                                    }),
                             )
                             .child(
                                 Button::new(SharedString::from(format!("delete-snippet-{id}")))
@@ -368,7 +392,14 @@ impl Workspace {
                                             view.focus_current_surface(window, cx);
                                             cx.notify();
                                         }
-                                    })),
+                                    }))
+                                    .map(|button| {
+                                        self.retain_modal_button(
+                                            SharedString::from(format!("delete-snippet-{id}")),
+                                            button,
+                                            cx,
+                                        )
+                                    }),
                             ),
                     ),
             );

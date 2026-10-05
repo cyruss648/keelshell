@@ -1327,6 +1327,7 @@ fn keyboard_interactive_prompt_is_ephemeral_and_cancelable(cx: &mut TestAppConte
                 });
                 answer.update(cx, |input, cx| input.set_value("123456", window, cx));
                 workspace.keyboard_interactive = Some(KeyboardInteractivePrompt {
+                    identity: uuid::Uuid::new_v4(),
                     route_id,
                     index: 0,
                     name: "Duo MFA".into(),
@@ -1378,6 +1379,7 @@ fn keyboard_interactive_prompt_is_ephemeral_and_cancelable(cx: &mut TestAppConte
                 let (sender, receiver) = tokio::sync::oneshot::channel();
                 let answer = cx.new(|cx| InputState::new(window, cx).masked(true));
                 workspace.keyboard_interactive = Some(KeyboardInteractivePrompt {
+                    identity: uuid::Uuid::new_v4(),
                     route_id,
                     index: 0,
                     name: "Duo MFA".into(),
