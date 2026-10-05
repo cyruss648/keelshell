@@ -1,10 +1,8 @@
 # 界面设计与智能体能力计划
 
-2026-10-06 当前工程状态：3f26诊断CI的macOS/Linux完整检查成功、Windows隔离child失败并实际捕获OS10106；原因对照仍待执行。新的单测试SystemRoot候选已通过1155普通+8doc+6脚本完整本机门禁和新非作者限定复核，30/31复核材料经根完整读回，先追加诊断分支获取真实Windows对照，不先整合main。另一个独立工作区正在实施本地Ask真实过程显示与固定取消交互，专项测试通过但完整门禁、独立复审和新版原生尚未完成。见[诊断CI](../testing/records/2026-10-06-ai-proxy-fixture-readiness-ci.md)与[系统环境候选](../testing/records/2026-10-06-windows-proxy-system-root.md)。下方较早的工程进度保留为历史；MCP仍仅向外部智能体提供能力。
+2026-10-06 当前工程状态：精确e821的[Quality37346734818](https://github.com/cyruss648/keelshell/actions/runs/37346734818)三平台全部success，Windows清空/显式SystemRoot实际对照完成，173/174独立材料根完整读回；原c7/3f26失败保持。主树快进e821并恢复最新文档，258工程输入相等；根整合门禁370.567841秒通过1155普通+8doc+6脚本和严格检查/两控制器，尚未push main，此增量仅两份测试、生产字节不变。见[新CI记录](../testing/records/2026-10-06-windows-proxy-system-root-ci.md)。
 
-2026-10-06 工程状态：代理测试就绪与有界child诊断候选已冻结，作者1155普通+8doc+6脚本完整门禁/57打包通过；新的非作者限定专项及私有负例复核PASS，258输入恢复相等，未整合main。原c7三平台失败不改写，Windows原因仍未知，本增量先提交诊断分支获取实际stderr，新CI另行核验；见[记录](../testing/records/2026-10-06-ai-proxy-fixture-readiness.md)。对外MCP方向及UI/Agent产品目标保持。
-
-当前源码CI边界：F提交c7b6b1a的Quality37332920375三平台均失败，原日志保留。新的测试夹具时序/child诊断候选在独立树准备，未整合；本机门禁和限定macOS原生事实不代替新源码CI通过，见[失败记录](../testing/records/2026-10-05-ai-request-options-ci.md)。对外MCP方向不变。
+本地Ask真实过程显示的16候选/260工程输入已冻结，作者1162普通+8doc+6脚本/严格检查/两控制器/57打包通过，77/78材料根读回，新的非作者已开始独立复审；尚未生产整合或新版原生/供应商验收。MCP始终仅供外部智能体调用KeelShell，不增加第三方MCP客户端。下方F既有原生和历史源码事实保留各自范围。
 
 当前增量：API 请求选项 F 已通过非作者差量复核并精确整合，固定认证头兼容性和秘密元数据保护分别验证；主树完整门禁1146普通+8doc+6脚本、严格检查、57打包与新MAC15标准包通过。新原生API临时/环境引用、重启与手动Ask已验证限定事实；中英文三主题长文件完整审阅/人工拒绝及实际SFTP读回通过，独立限定证据复核与根143/144读回通过；900×580最小窗口和其他平台原生未关闭，原失败/预期未满足保留。详见[整合记录](../testing/records/2026-10-05-ai-request-options-main-integration.md)、[API原生记录](../testing/records/2026-10-05-ai-request-options-native.md)与[六组合记录](../testing/records/2026-10-05-mcp-file-review-native-matrix.md)。df8测试同步三平台CI全部通过，新F提交CI另核验，原a909失败保持。下方历史候选状态由本段覆盖；对外MCP方向不变。
 

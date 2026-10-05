@@ -15,3 +15,7 @@
 新的非作者限定复核 PASS，没有新已证 P1/P2：独立本机 HTTP18 实际通过、15.201433 秒，258 工程输入前后相等，未使用临时 overlay；确认环境增量仅 Windows 的已有 SystemRoot，原限时、容量、路由/认证/脱敏/origin 和收尾代码保持。原完整门禁日志及四次 wrapper 回执已独立核验。Windows 专属测试未在本机执行；官方机制仍为待对照证实的解释。下一步提交诊断分支取得新 Windows 实际回执，再决定修复是否成立，尚未整合 main。
 
 非作者复核材料已冻结为30 payload /31归档成员，manifest SHA-256为 `c6b87b15a9d8bd43def2514b120d6c54cfd3dc4f7567ae456495d05dfcff6863`；归档227128字节，SHA-256为 `88d088aa5f99ab44ee31dab5b35438b127a5d59b4d432465f9f37ea17941859c`。根已逐文件和归档成员核对全部原字节，并确认诊断工作区源码仍与冻结候选一致。此封包核验不增加Windows执行或产品验收范围。
+
+诊断分支已追加提交 `e821d5ed350379fbd08426d99b2658611a8c0d6f` 并推送。根实际核对远端一致、ahead/behind为0/0、该工作区干净，以及258份工程提交字节与门禁输入相等；[Quality37346734818](https://github.com/cyruss648/keelshell/actions/runs/37346734818) 正在运行，新非作者接续核验真实Windows对照及三平台结果。main仍未整合，不能根据CI启动关闭失败或产品验收。
+
+后续实际结果：e821三平台CI全部success，Windows清空路径实际10106、显式SystemRoot后真实HTTP完成和两child回收/双EOF均已独立核验；173/174完整复核材料经根读回。主树已精确快进e821，根整合完整门禁1155普通+8doc+6脚本/严格检查/两控制器通过，尚未push main。旧c7原因仍未知，详见[新CI记录](2026-10-06-windows-proxy-system-root-ci.md)；上段CI进行中状态为此前历史。

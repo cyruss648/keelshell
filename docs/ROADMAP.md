@@ -1,14 +1,8 @@
 # 开发路线
 
-最小Windows系统环境候选已通过303秒完整本机门禁与新非作者18HTTP/限定差量复核，258工程输入相等。下一步追加诊断分支采集Windows实际paired回执；未整合main、不关闭原失败。并行本地Ask进度继续独立开发。
+2026-10-06 当前源码：e821的[Quality37346734818](https://github.com/cyruss648/keelshell/actions/runs/37346734818)三平台全部success，Windows实际清空/显式SystemRoot对照完成，根已读回实际Windows原日志和全部job API；旧c7/3f26失败保持。主树已精确快进e821并恢复最新文档，258工程输入相等，173/174完整独立CI封包已根读回，根整合门禁370.567841秒通过1155普通+8doc+6脚本、严格检查与两控制器/258输入相等、尚未push main，不以本次源码CI验收桌面或安装更新。
 
-2026-10-06 后续：3f26诊断CI为Unix成功/Windows失败，实际10106已捕获；最小SystemRoot测试候选本机18HTTP通过、完整门禁进行中，未复审/未Windows验收。另一个独立工作树实施本地Ask真实进度，未整合。最新范围见[诊断CI](testing/records/2026-10-06-ai-proxy-fixture-readiness-ci.md)与[候选](testing/records/2026-10-06-windows-proxy-system-root.md)，原c7失败保持。
-
-当前诊断提交为 `3f26ffe`，已推送独立分支并核对远端、0/0和该分支干净状态；[新Quality37341962489](https://github.com/cyruss648/keelshell/actions/runs/37341962489) 尚无最终结果。main仍c7，后续根据实际Windows日志处理，不先合入或关闭原CI失败。
-
-2026-10-06：新的代理就绪/隔离child诊断候选仅改两份测试，作者完整门禁1155普通+8doc+6脚本、严格检查与57打包通过，根48/49证据读回完成；新非作者限定专项/私有负例复核PASS，258工程输入恢复相等，未整合main。c7原三平台失败保留，Windows具体原因未知，此增量先提交诊断分支采集真实错误，新CI另行核验；见[候选记录](testing/records/2026-10-06-ai-proxy-fixture-readiness.md)。
-
-2026-10-05 最新CI：F功能提交c7b6b1a已推送；[Quality37332920375](https://github.com/cyruss648/keelshell/actions/runs/37332920375) 三平台Rust gate均失败。macOS/Linux新代理界面夹具超时、Windows隔离child失败原因未知，全部原日志保留；新的测试生命周期/有界诊断候选在独立树准备，未整合。前一本机门禁与原生六组合不关闭本次CI，见[失败记录](testing/records/2026-10-05-ai-request-options-ci.md)。
+独立本地Ask过程显示候选作者1162普通+8doc+6脚本/严格检查/两控制器/57打包通过，16源码与260输入冻结，77/78材料根完整保存核验；新的非作者正式复审开始，尚未生产整合/新版原生。MCP仅向外部智能体提供服务，当前工具与客户端验收范围见[指南](product/EXTERNAL_MCP.md)。当前工程状态以[交接顶部](HANDOFF.md)为准，下方为原产品与验证历史。
 
 2026-10-05 当前状态：API 请求选项 F 经非作者差量复核通过，48 份冻结源码已精确整合；E 固定认证头大小写 P2 及此前失败保留。主树 F 完整门禁1146普通+8doc+6脚本/严格检查及57打包、新MAC15构建检查与标准双程序打包通过；新原生API临时/环境引用、重启及手动Ask已验证限定事实，中英文三主题长文件人工拒绝与实际SFTP读回通过。首提案到期、原Discover零请求预期未满足/内容未知origin与外层PTY失败保留，最小窗口未验证；新矩阵冻结独立限定复核及根143/144逐字节读回通过，无新已证P1/P2。见[整合记录](testing/records/2026-10-05-ai-request-options-main-integration.md)、[API原生记录](testing/records/2026-10-05-ai-request-options-native.md)与[文件六组合](testing/records/2026-10-05-mcp-file-review-native-matrix.md)。前一df8源码三平台CI通过，新F提交CI另核验；Windows/Linux原生、供应商第八工具、Agent及发行/安装更新仍开放。MCP仅向外部智能体提供KeelShell能力。下方历史阶段记录不覆盖本段当前状态。
 
@@ -74,7 +68,7 @@ OpenSSH 配置导入已接入安全子集：精确 Host、HostName、Port、User
 | D1 | UI-01/02/06：System/Light/Dark、语义token、设计资料库 | 主题基础已实现：System默认/旧配置迁移、窗口通知、语义palette、显式切换/后台保存；866普通+6文档、47打包和新独立审查通过；macOS两会话/草稿/明暗重启证实。新包900×580中英/明暗/AI八组合原生通过；真实OS变化、完整全屏矩阵与Windows/Linux原生未关闭，见[主题记录](testing/records/2026-10-04-system-themes.md) |
 | D2 | UI-03/04/05：丰富但克制的控件、专业工作区、模态/日志/滚动 | 部分实现并继续实施；主题token基础见D1。连接批量审核、文件操作换行/真实首行/有界工具滚动/固定确认和依赖流程入口换行已合入，分别通过独立GPUI复审；已转换tooltip的语言即时重绘回归通过，余下静态调用点由根整合补齐。旧包小窗口实际发现终端37px后，短窗口补全收为单行并保留输入/文件实体；32完整Files与16完整候选列表GPUI场景、根1031普通+8文档+6脚本/57打包通过。fresh紧凑独立复审和新macOS包八组合/真实补全/Files恢复通过，896提交三平台Quality通过；实际原生终端高度为人工读像素约89/121px，GPUI为精确测量，176文件场景不关闭全屏视觉矩阵；新增弹窗最终输入修复通过独立11原/8私有回归、76完成帧场景与根1053普通门禁，新macOS包已证实当前背景AX节点移除、草稿/偏好保留与原键盘触发焦点返回，旧原生AX对象激活、屏幕阅读器/IME与其他平台仍待验收，见[整合记录](testing/records/2026-10-05-ai-modal-mcp-integration.md) |
 | A1 | 共享API/LocalAgent配置、上下文与授权契约 | 已实现显式backend、旧配置API默认、路径/地址独立校验、准确stdin预览、版本/能力探针、取消/revision与vault v2精确backend/path绑定；详见[ADR0040](adr/0040-named-local-agent-settings-and-reviewed-asks.md) |
-| A2 | MCP-01至04：KeelShell对外MCP | 部分验收：默认关闭的stdio伴随程序、双向认证/方向AEAD桌面IPC、精确活动SSH句柄、七项固定工具和桌面审阅已接通，源码与受控原生基线已有独立复审。实际Claude Code 2.1.285在标准macOS包完成授权读取、越权/路线拒绝、桌面批准/拒绝及同客户端结果回传；撤权后客户端报告连接错误，未记录新的tools/call RPC，不扩张为新的服务端拒绝。新独立复核已通过该限定范围，无剩余 P1/P2，e16689b三平台Quality通过。Codex文本前置已通过，实际MCP只协商目录后停止，0业务RPC且读取未通过；文件修改提案、最终六目标Release与其他平台原生仍开放，见[授权客户端记录](testing/records/2026-10-05-claude-authorized-mcp.md)、[标准包记录](testing/records/2026-10-04-mcp-response-cancellation.md)及[指南](product/EXTERNAL_MCP.md) |
+| A2 | MCP-01至04：KeelShell对外MCP | 已接通默认关闭的stdio伴随程序、受认证桌面IPC、精确活动SSH句柄和八项固定工具。此前实际Claude Code七工具的授权读取、越权/路线拒绝与桌面批准/拒绝在限定范围通过独立复核；Codex完整业务调用仍未通过。第八项文件修改提案已完成新非作者工程复核和macOS自有八工具客户端的批准/拒绝/已观察并发修改拦截，当前F包中英文三主题长文件审阅及人工拒绝也已独立核验；供应商第八工具、最小原生窗口、其他平台原生和最终六目标Release/安装更新仍开放。见[文件提案记录](testing/records/2026-10-05-mcp-file-proposals.md)、[六组合记录](testing/records/2026-10-05-mcp-file-review-native-matrix.md)及[接入指南](product/EXTERNAL_MCP.md) |
 | A3 | AI-LOCAL-01至03、AI-AGENT-01：本地CLI Ask/Agent | Codex0.160.0/Claude2.1.285固定Ask后端与应用接通；独立空目录/受控环境、完整JSONL终态与owned进程清理；929普通+8文档、47打包、新独立审查与macOS实际安装版→自有SSE窗口问答/取消/重启密钥失效通过。首轮新源码Windows CI出现控制器主线程栈溢出；两处读流缓冲已堆分配，尺寸与显式2MiB完整控制器回归通过，修复be9590f2的Windows原生CI已通过两种完整控制器，914普通+8文档；同次Linux另有MCP错误响应超时，整次CI仍失败；SDK取消窗口已修复，后续34cff1b三平台Quality通过，三平台默认与2 MiB完整控制器均成功，原失败记录保留，见[取消修复记录](testing/records/2026-10-04-mcp-response-cancellation.md)与[小栈记录](testing/records/2026-10-04-local-agent-windows-stack.md)。仅显式API密钥，不复用订阅登录；本地Ask时限/回答/累计输出预算已实现并通过新独立复核、根整合门禁与新macOS原生设置保存/重开读回，无效草稿跨配置/偏好保留；新预算供应商问答与其他平台原生仍待验收，见[预算记录](testing/records/2026-10-05-local-agent-limits.md)；自定义工作目录/环境引用、可见步骤流、Agent与Windows/Linux原生继续开发/验证，见[记录](testing/records/2026-10-04-local-agent-ui.md) |
 
 D1先于后续新界面，原有后端与任务目标继续保留。全部新增条目的细节、参考与验收见正式计划；“本地智能体”不是本地terminal管理，也不等于模型离线。
