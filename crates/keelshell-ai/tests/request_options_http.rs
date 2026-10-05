@@ -12,38 +12,197 @@ use tokio::{
 };
 use zeroize::Zeroizing;
 
-type TestResult = Result<(), Box<dyn Error>>;
+type TestResult<T = ()> = Result<T, Box<dyn Error>>;
 const LIMIT: Duration = Duration::from_secs(3);
 const VALUE: &str = "synthetic-header-secret";
 
+const CHILD_RECEIPT: &str = "KEELSHELL_ISOLATED_PROXY_REAL_HTTP_COMPLETED";
+const CHILD_OUTPUT_LIMIT: usize = 32 * 1024;
+
+#[derive(Debug)]
+struct IsolatedChildReceipt {
+    pid: Option<u32>,
+    io_error: Option<String>,
+    status: Option<std::process::ExitStatus>,
+    failure: Option<&'static str>,
+    stdout: Vec<u8>,
+    stderr: Vec<u8>,
+    reaped: bool,
+    stdout_closed: bool,
+    stderr_closed: bool,
+}
+
+impl IsolatedChildReceipt {
+    fn success(&self) -> bool {
+        self.failure.is_none()
+            && self.status.is_some_and(|status| status.success())
+            && self.reaped
+            && self.stdout_closed
+            && self.stderr_closed
+            && String::from_utf8_lossy(&self.stdout).contains(CHILD_RECEIPT)
+    }
+
+    fn diagnostic(&self) -> String {
+        format!(
+            "pid={:?}; status={:?}; failure={:?}; io_error={:?}; reaped={}; pipes_closed={}/{}; stdout_bytes={}; stderr_bytes={}\nstdout: {}\nstderr: {}",
+            self.pid,
+            self.status,
+            self.failure,
+            self.io_error,
+            self.reaped,
+            self.stdout_closed,
+            self.stderr_closed,
+            self.stdout.len(),
+            self.stderr.len(),
+            String::from_utf8_lossy(&self.stdout),
+            String::from_utf8_lossy(&self.stderr)
+        )
+    }
+}
+
+fn isolated_child(mode: Option<&str>, limit: Duration) -> TestResult<IsolatedChildReceipt> {
+    tokio::runtime::Builder::new_current_thread().enable_all().build()?.block_on(async {
+        use process_wrap::tokio::{CommandWrap, KillOnDrop};
+        use std::process::Stdio;
+        let deadline = tokio::time::Instant::now() + limit;
+        // Keep the original eight-second outer limit, including stop, reap and EOF.
+        let execution_deadline = deadline - (limit / 4).min(Duration::from_secs(1));
+        let mut command = tokio::process::Command::new(std::env::current_exe()?);
+        command.args(["--exact", "explicit_proxy_environment_child", "--nocapture"])
+            .env_clear()
+            .env("KEELSHELL_REQUEST_OPTIONS_CHILD", "1")
+            .env("NO_PROXY", "*")
+            .env("no_proxy", "*")
+            .env("HTTP_PROXY", "http://127.0.0.1:9")
+            .env("HTTPS_PROXY", "http://127.0.0.1:9")
+            .env("ALL_PROXY", "http://127.0.0.1:9")
+            .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
+        if let Some(mode) = mode {
+            command.env("KEELSHELL_REQUEST_OPTIONS_DIAGNOSTIC_MODE", mode);
+        }
+        let mut command = CommandWrap::from(command);
+        command.wrap(KillOnDrop);
+        #[cfg(unix)]
+        command.wrap(process_wrap::tokio::ProcessGroup::leader());
+        #[cfg(windows)]
+        command.wrap(process_wrap::tokio::JobObject);
+        let mut child = command.spawn()?;
+        let streams = (child.stdout().take(), child.stderr().take());
+        let (Some(mut stdout), Some(mut stderr)) = streams else {
+            let _ = child.start_kill();
+            let status = tokio::time::timeout_at(deadline, child.wait()).await;
+            return Err(format!("owned child pipes missing; reap={status:?}").into());
+        };
+        let mut receipt = IsolatedChildReceipt {
+            pid: child.inner_mut().id(), io_error: None,
+            status: None, failure: None, stdout: Vec::new(), stderr: Vec::new(),
+            reaped: false, stdout_closed: false, stderr_closed: false,
+        };
+        let mut out = [0; 4096];
+        let mut err = [0; 4096];
+        loop {
+            if receipt.status.is_none() {
+                match child.inner_mut().try_wait() {
+                    Ok(status) => { receipt.status = status; receipt.reaped = status.is_some(); },
+                    Err(error) => {
+                        receipt.failure = Some("child status observation failed");
+                        receipt.io_error = Some(error.to_string()); break;
+                    },
+                }
+            }
+            if receipt.reaped && receipt.stdout_closed && receipt.stderr_closed { break; }
+            tokio::select! {
+                _ = tokio::time::sleep_until(execution_deadline) => {
+                    receipt.failure = Some(if receipt.reaped { "pipe EOF deadline" } else { "child execution deadline" });
+                    break;
+                },
+                count = stdout.read(&mut out), if !receipt.stdout_closed => {
+                    let count = match count {
+                        Ok(count) => count,
+                        Err(error) => { receipt.failure = Some("stdout read failed"); receipt.io_error = Some(error.to_string()); break; },
+                    };
+                    receipt.stdout_closed = count == 0;
+                    if receipt.stdout.len().saturating_add(count) > CHILD_OUTPUT_LIMIT {
+                        receipt.failure = Some("stdout quota"); break;
+                    }
+                    receipt.stdout.extend_from_slice(&out[..count]);
+                },
+                count = stderr.read(&mut err), if !receipt.stderr_closed => {
+                    let count = match count {
+                        Ok(count) => count,
+                        Err(error) => { receipt.failure = Some("stderr read failed"); receipt.io_error = Some(error.to_string()); break; },
+                    };
+                    receipt.stderr_closed = count == 0;
+                    if receipt.stderr.len().saturating_add(count) > CHILD_OUTPUT_LIMIT {
+                        receipt.failure = Some("stderr quota"); break;
+                    }
+                    receipt.stderr.extend_from_slice(&err[..count]);
+                },
+                _ = tokio::time::sleep(Duration::from_millis(10)) => {},
+            }
+        }
+        // Reap before signalling: a macOS zombie-only process group can return EPERM.
+        if receipt.status.is_none() {
+            match child.inner_mut().try_wait() {
+                Ok(status) => { receipt.status = status; receipt.reaped = status.is_some(); },
+                Err(error) => { receipt.failure = Some("child status observation failed"); receipt.io_error = Some(error.to_string()); },
+            }
+        }
+        if let Err(error) = child.start_kill() {
+            #[cfg(unix)]
+            let absent = error.raw_os_error() == Some(nix::errno::Errno::ESRCH as i32);
+            #[cfg(not(unix))]
+            let absent = error.kind() == std::io::ErrorKind::NotFound;
+            if !absent { receipt.failure = Some("owned child stop failed"); receipt.io_error = Some(error.to_string()); }
+        }
+        match tokio::time::timeout_at(deadline, child.wait()).await {
+            Ok(Ok(status)) => { receipt.status = Some(status); receipt.reaped = true; },
+            Ok(Err(error)) => { receipt.failure = Some("owned child reap failed"); receipt.io_error = Some(error.to_string()); },
+            Err(_) => receipt.failure = Some("owned child reap deadline"),
+        }
+        // No detached reader threads. Held inherited pipes stay under this same deadline.
+        while !(receipt.stdout_closed && receipt.stderr_closed) {
+            tokio::select! {
+                _ = tokio::time::sleep_until(deadline) => {
+                    receipt.failure = Some("owned pipe cleanup deadline"); break;
+                },
+                count = stdout.read(&mut out), if !receipt.stdout_closed => {
+                    let count = match count {
+                        Ok(count) => count,
+                        Err(error) => { receipt.failure = Some("stdout cleanup read failed"); receipt.io_error = Some(error.to_string()); break; },
+                    }; receipt.stdout_closed = count == 0;
+                    let room = CHILD_OUTPUT_LIMIT - receipt.stdout.len();
+                    receipt.stdout.extend_from_slice(&out[..count.min(room)]);
+                },
+                count = stderr.read(&mut err), if !receipt.stderr_closed => {
+                    let count = match count {
+                        Ok(count) => count,
+                        Err(error) => { receipt.failure = Some("stderr cleanup read failed"); receipt.io_error = Some(error.to_string()); break; },
+                    }; receipt.stderr_closed = count == 0;
+                    let room = CHILD_OUTPUT_LIMIT - receipt.stderr.len();
+                    receipt.stderr.extend_from_slice(&err[..count.min(room)]);
+                },
+            }
+        }
+        if receipt.failure.is_none() && !receipt.status.is_some_and(|status| status.success()) {
+            receipt.failure = Some("child nonzero exit");
+        }
+        if receipt.failure.is_none() && !String::from_utf8_lossy(&receipt.stdout).contains(CHILD_RECEIPT) {
+            receipt.failure = Some("real HTTP completion receipt missing");
+        }
+        Ok(receipt)
+    })
+}
+
 #[test]
 fn explicit_proxy_ignores_environment_exclusions_in_isolated_process() -> TestResult {
-    use std::process::{Command, Stdio};
-    let mut child = Command::new(std::env::current_exe()?)
-        .args(["--exact", "explicit_proxy_environment_child"])
-        .env_clear()
-        .env("KEELSHELL_REQUEST_OPTIONS_CHILD", "1")
-        .env("NO_PROXY", "*")
-        .env("no_proxy", "*")
-        .env("HTTP_PROXY", "http://127.0.0.1:9")
-        .env("HTTPS_PROXY", "http://127.0.0.1:9")
-        .env("ALL_PROXY", "http://127.0.0.1:9")
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()?;
-    let start = std::time::Instant::now();
-    loop {
-        if let Some(status) = child.try_wait()? {
-            assert!(status.success(), "isolated proxy fixture failed");
-            return Ok(());
-        }
-        if start.elapsed() > Duration::from_secs(8) {
-            child.kill()?;
-            child.wait()?;
-            return Err("isolated proxy fixture deadline".into());
-        }
-        std::thread::sleep(Duration::from_millis(10));
-    }
+    let receipt = isolated_child(None, Duration::from_secs(8))?;
+    assert!(
+        receipt.success(),
+        "isolated proxy fixture failed: {}",
+        receipt.diagnostic()
+    );
+    Ok(())
 }
 
 #[test]
@@ -51,7 +210,108 @@ fn explicit_proxy_environment_child() -> TestResult {
     if std::env::var_os("KEELSHELL_REQUEST_OPTIONS_CHILD").is_none() {
         return Ok(());
     }
-    explicit_http_proxy_receives_authentication_and_origin_is_never_contacted()
+    if let Ok(mode) = std::env::var("KEELSHELL_REQUEST_OPTIONS_DIAGNOSTIC_MODE") {
+        match mode.as_str() {
+            "stub" => return Ok(()),
+            "failure" => {
+                eprintln!("synthetic owned child failure detail");
+                return Err("controlled child failure".into());
+            }
+            "park" | "pipe-holder" => {
+                println!("synthetic owned child holding");
+                loop {
+                    std::thread::park_timeout(Duration::from_secs(1));
+                }
+            }
+            "flood" => {
+                use std::io::Write;
+                let bytes = [b'x'; 4096];
+                loop {
+                    std::io::stdout().write_all(&bytes)?;
+                    std::io::stderr().write_all(&bytes)?;
+                }
+            }
+            "held-pipes" => {
+                std::process::Command::new(std::env::current_exe()?)
+                    .args(["--exact", "explicit_proxy_environment_child", "--nocapture"])
+                    .env_clear()
+                    .env("KEELSHELL_REQUEST_OPTIONS_CHILD", "1")
+                    .env("KEELSHELL_REQUEST_OPTIONS_DIAGNOSTIC_MODE", "pipe-holder")
+                    .stdin(std::process::Stdio::null())
+                    .stdout(std::process::Stdio::inherit())
+                    .stderr(std::process::Stdio::inherit())
+                    .spawn()?;
+                return Ok(());
+            }
+            _ => return Err("unknown controlled child mode".into()),
+        }
+    }
+    assert_eq!(std::env::var("KEELSHELL_REQUEST_OPTIONS_CHILD")?, "1");
+    for name in ["NO_PROXY", "no_proxy"] {
+        assert_eq!(std::env::var(name)?, "*");
+    }
+    for name in ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY"] {
+        assert_eq!(std::env::var(name)?, "http://127.0.0.1:9");
+    }
+    explicit_http_proxy_receives_authentication_and_origin_is_never_contacted()?;
+    println!("{CHILD_RECEIPT}");
+    Ok(())
+}
+
+#[test]
+fn isolated_proxy_failure_diagnostics_preserve_child_status_and_reap() -> TestResult {
+    let receipt = isolated_child(Some("failure"), Duration::from_secs(8))?;
+    assert!(!receipt.success());
+    assert!(receipt.status.is_some_and(|status| !status.success()));
+    assert_eq!(receipt.failure, Some("child nonzero exit"));
+    assert!(
+        String::from_utf8_lossy(&receipt.stderr).contains("synthetic owned child failure detail")
+    );
+    assert!(receipt.reaped && receipt.stdout_closed && receipt.stderr_closed);
+    Ok(())
+}
+
+#[test]
+fn isolated_proxy_timeout_stops_reaps_and_closes_owned_pipes() -> TestResult {
+    let receipt = isolated_child(Some("park"), Duration::from_secs(8))?;
+    assert_eq!(receipt.failure, Some("child execution deadline"));
+    assert!(receipt.reaped && receipt.stdout_closed && receipt.stderr_closed);
+    Ok(())
+}
+
+#[test]
+fn isolated_proxy_output_quota_is_bounded_and_child_is_reaped() -> TestResult {
+    let receipt = isolated_child(Some("flood"), Duration::from_secs(8))?;
+    assert!(matches!(
+        receipt.failure,
+        Some("stdout quota" | "stderr quota")
+    ));
+    assert!(
+        receipt.stdout.len() <= CHILD_OUTPUT_LIMIT && receipt.stderr.len() <= CHILD_OUTPUT_LIMIT
+    );
+    assert!(receipt.reaped && receipt.stdout_closed && receipt.stderr_closed);
+    Ok(())
+}
+
+#[test]
+fn isolated_proxy_inherited_pipes_are_closed_by_owned_cleanup() -> TestResult {
+    let receipt = isolated_child(Some("held-pipes"), Duration::from_secs(8))?;
+    assert_eq!(receipt.failure, Some("pipe EOF deadline"));
+    assert!(receipt.status.is_some_and(|status| status.success()));
+    assert!(receipt.reaped && receipt.stdout_closed && receipt.stderr_closed);
+    Ok(())
+}
+
+#[test]
+fn isolated_proxy_stub_success_does_not_count_as_real_fixture_completion() -> TestResult {
+    let receipt = isolated_child(Some("stub"), Duration::from_secs(8))?;
+    assert!(receipt.status.is_some_and(|status| status.success()));
+    assert_eq!(
+        receipt.failure,
+        Some("real HTTP completion receipt missing")
+    );
+    assert!(!receipt.success());
+    Ok(())
 }
 
 fn options(route: ProxyRoute) -> Result<RequestOptions, AiError> {

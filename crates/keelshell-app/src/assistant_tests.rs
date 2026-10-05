@@ -26,6 +26,414 @@ fn profile(name: &str) -> NamedAiProfile {
     profile
 }
 
+// Start each owned exchange only after the corresponding control is revealed.
+// UI preparation cannot consume its six-second request-arrival budget.
+struct ProxyFixture {
+    listener: TcpListener,
+    origin: std::net::SocketAddr,
+}
+
+impl ProxyFixture {
+    fn start(&self, step: usize) -> ProxyExchange {
+        ProxyExchange::start(
+            self.listener
+                .try_clone()
+                .unwrap_or_else(|error| panic!("proxy clone: {error}")),
+            self.origin,
+            step,
+            Duration::from_secs(6),
+        )
+    }
+}
+
+struct ProxyExchange {
+    accepted: Arc<std::sync::atomic::AtomicBool>,
+    arrived: Arc<std::sync::atomic::AtomicBool>,
+    stopped: Arc<std::sync::atomic::AtomicBool>,
+    release: Option<std::sync::mpsc::Sender<()>>,
+    thread: Option<std::thread::JoinHandle<()>>,
+}
+
+impl ProxyExchange {
+    fn start(
+        listener: TcpListener,
+        origin_address: std::net::SocketAddr,
+        step: usize,
+        limit: Duration,
+    ) -> Self {
+        use std::sync::atomic::{AtomicBool, Ordering};
+        let accepted = Arc::new(AtomicBool::new(false));
+        let connection_observed = accepted.clone();
+        let arrived = Arc::new(AtomicBool::new(false));
+        let stopped = Arc::new(AtomicBool::new(false));
+        let (release, gated) = std::sync::mpsc::channel();
+        let observed = arrived.clone();
+        let cancelled = stopped.clone();
+        let thread = std::thread::spawn(move || {
+            let deadline = Instant::now() + limit;
+            let mut stream = loop {
+                assert!(
+                    !cancelled.load(Ordering::Acquire),
+                    "proxy exchange cancelled"
+                );
+                match listener.accept() {
+                    Ok((stream, _)) => break stream,
+                    Err(error)
+                        if error.kind() == std::io::ErrorKind::WouldBlock
+                            && Instant::now() < deadline =>
+                    {
+                        std::thread::sleep(Duration::from_millis(5))
+                    }
+                    Err(error) => panic!("proxy accept step {step}: {error}"),
+                }
+            };
+            connection_observed.store(true, Ordering::Release);
+            proxy_exchange(
+                &mut stream,
+                origin_address,
+                step,
+                &observed,
+                &cancelled,
+                gated,
+            );
+        });
+        Self {
+            accepted,
+            arrived,
+            stopped,
+            release: Some(release),
+            thread: Some(thread),
+        }
+    }
+
+    fn arrived(&self) -> bool {
+        self.arrived.load(std::sync::atomic::Ordering::Acquire)
+    }
+
+    fn finished(&self) -> bool {
+        self.thread
+            .as_ref()
+            .is_none_or(std::thread::JoinHandle::is_finished)
+    }
+
+    fn release_reply(&mut self) {
+        self.release
+            .take()
+            .unwrap_or_else(|| panic!("one reply gate"))
+            .send(())
+            .unwrap_or_else(|error| panic!("proxy reply: {error}"));
+    }
+
+    fn join(&mut self) -> Result<(), String> {
+        let deadline = Instant::now() + Duration::from_secs(4);
+        while !self.finished() && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        if !self.finished() {
+            return Err("owned proxy thread exceeded cleanup budget".into());
+        }
+        self.thread
+            .take()
+            .ok_or("owned proxy thread already joined")?
+            .join()
+            .map_err(|_| "owned proxy fixture panicked".into())
+    }
+
+    fn finish(mut self) {
+        self.join()
+            .unwrap_or_else(|error| panic!("proxy fixture: {error}"));
+    }
+}
+
+impl Drop for ProxyExchange {
+    fn drop(&mut self) {
+        self.stopped
+            .store(true, std::sync::atomic::Ordering::Release);
+        self.release.take();
+        if self.thread.is_some() {
+            let result = self.join();
+            // A failing test must still close its listener and join its worker.
+            if let Err(error) = result {
+                eprintln!("owned proxy fixture cleanup: {error}");
+            }
+        }
+    }
+}
+
+fn proxy_read_exact(
+    stream: &mut std::net::TcpStream,
+    mut bytes: &mut [u8],
+    deadline: Instant,
+    stopped: &std::sync::atomic::AtomicBool,
+) -> std::io::Result<()> {
+    while !bytes.is_empty() {
+        if stopped.load(std::sync::atomic::Ordering::Acquire) {
+            return Err(std::io::ErrorKind::Interrupted.into());
+        }
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            return Err(std::io::ErrorKind::TimedOut.into());
+        }
+        stream.set_read_timeout(Some(remaining.min(Duration::from_millis(20))))?;
+        match stream.read(bytes) {
+            Ok(0) => return Err(std::io::ErrorKind::UnexpectedEof.into()),
+            Ok(count) => bytes = &mut bytes[count..],
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    std::io::ErrorKind::TimedOut
+                        | std::io::ErrorKind::WouldBlock
+                        | std::io::ErrorKind::Interrupted
+                ) => {}
+            Err(error) => return Err(error),
+        }
+    }
+    Ok(())
+}
+
+fn proxy_exchange(
+    stream: &mut std::net::TcpStream,
+    origin_address: std::net::SocketAddr,
+    step: usize,
+    arrived: &std::sync::atomic::AtomicBool,
+    stopped: &std::sync::atomic::AtomicBool,
+    gated: std::sync::mpsc::Receiver<()>,
+) {
+    stream
+        .set_nonblocking(false)
+        .unwrap_or_else(|error| panic!("stream mode: {error}"));
+    stream
+        .set_write_timeout(Some(Duration::from_secs(3)))
+        .unwrap_or_else(|error| panic!("write limit: {error}"));
+    let read_deadline = Instant::now() + Duration::from_secs(3);
+    let mut headers = Vec::new();
+    while !headers.ends_with(b"\r\n\r\n") {
+        let mut byte = [0];
+        proxy_read_exact(stream, &mut byte, read_deadline, stopped)
+            .unwrap_or_else(|error| panic!("proxy header: {error}"));
+        headers.push(byte[0]);
+        assert!(headers.len() <= 8192);
+    }
+    let headers = String::from_utf8(headers).unwrap_or_else(|error| panic!("header utf8: {error}"));
+    let lower = headers.to_ascii_lowercase();
+    assert!(lower.contains("x-project: synthetic-route-header\r\n"));
+    assert!(lower.contains("proxy-authorization: basic "));
+    assert!(headers.starts_with(&format!(
+        "{} http://{origin_address}/v1/{} HTTP/1.1",
+        if step == 0 { "GET" } else { "POST" },
+        if step == 0 {
+            "models"
+        } else {
+            "chat/completions"
+        }
+    )));
+    let length = lower
+        .lines()
+        .find_map(|line| {
+            line.strip_prefix("content-length: ")
+                .and_then(|value| value.trim().parse::<usize>().ok())
+        })
+        .unwrap_or(0);
+    assert!(length <= 32768);
+    let mut body = vec![0; length];
+    proxy_read_exact(stream, &mut body, read_deadline, stopped)
+        .unwrap_or_else(|error| panic!("proxy body: {error}"));
+    let body = String::from_utf8(body).unwrap_or_else(|error| panic!("body utf8: {error}"));
+    for secret in [
+        "synthetic-route-header",
+        "synthetic-route-user",
+        "synthetic-route-password",
+    ] {
+        assert!(
+            !body.contains(secret),
+            "credentials never enter request context"
+        );
+    }
+    if step == 1 {
+        assert!(body.contains(keelshell_ai::CONNECTIVITY_PROMPT));
+        assert!(!body.contains("synthetic-question"));
+    } else if step == 2 {
+        assert!(body.contains("synthetic-question"));
+    }
+    // Arrival means the complete real request and all route/body assertions passed.
+    arrived.store(true, std::sync::atomic::Ordering::Release);
+    gated
+        .recv_timeout(Duration::from_secs(6))
+        .unwrap_or_else(|error| panic!("reply gate: {error}"));
+    assert!(!stopped.load(std::sync::atomic::Ordering::Acquire));
+    let response = if step == 0 {
+        r#"{"data":[{"id":"fixture-model"}]}"#
+    } else if step == 1 {
+        r#"{"model":"fixture-model","choices":[{"message":{"content":"OK"}}]}"#
+    } else {
+        r#"{"choices":[{"message":{"content":"synthetic-answer synthetic-route-header synthetic-route-user synthetic-route-password"}}]}"#
+    };
+    write!(stream, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{response}", response.len()).unwrap_or_else(|error| panic!("proxy response: {error}"));
+}
+
+fn assert_proxy_peer_closed(peer: &mut std::net::TcpStream) {
+    match peer.read(&mut [0]) {
+        Ok(0) => {}
+        Err(error)
+            if matches!(
+                error.kind(),
+                std::io::ErrorKind::ConnectionReset
+                    | std::io::ErrorKind::ConnectionAborted
+                    | std::io::ErrorKind::BrokenPipe
+            ) => {}
+        result => panic!("owned peer was not closed: {result:?}"),
+    }
+}
+
+fn wait_for_proxy_arrival(exchange: &ProxyExchange) {
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !exchange.arrived() && !exchange.finished() && Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    assert!(exchange.arrived(), "complete validated request must arrive");
+}
+
+fn proxy_fixture_request(address: std::net::SocketAddr) -> std::net::TcpStream {
+    let mut stream = std::net::TcpStream::connect(address)
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    stream
+        .set_read_timeout(Some(Duration::from_secs(1)))
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    stream
+        .set_write_timeout(Some(Duration::from_secs(1)))
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    stream.write_all(b"GET http://127.0.0.1:1/v1/models HTTP/1.1\r\nx-project: synthetic-route-header\r\nproxy-authorization: basic fixture\r\n\r\n").unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    stream
+}
+
+#[test]
+fn proxy_fixture_late_preparation_does_not_consume_exchange_deadline() {
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    listener
+        .set_nonblocking(true)
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let address = listener
+        .local_addr()
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    // Deliberately finish preparation after the original six-second arrival budget.
+    // The request still has six seconds once started; no worker exists during setup.
+    let setup = Instant::now();
+    std::thread::sleep(Duration::from_millis(6050));
+    assert!(setup.elapsed() > Duration::from_secs(6));
+    let mut exchange = ProxyExchange::start(
+        listener,
+        "127.0.0.1:1"
+            .parse()
+            .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}")),
+        0,
+        Duration::from_secs(6),
+    );
+    let mut peer = proxy_fixture_request(address);
+    wait_for_proxy_arrival(&exchange);
+    assert!(
+        !exchange.finished(),
+        "reply gate holds the actual exchange pending"
+    );
+    exchange.release_reply();
+    let mut response = String::new();
+    peer.read_to_string(&mut response)
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    assert!(response.contains("fixture-model"));
+    exchange.finish();
+}
+
+#[test]
+fn proxy_fixture_missing_peer_expires_and_joins_without_arrival() {
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    listener
+        .set_nonblocking(true)
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let address = listener
+        .local_addr()
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let mut exchange = ProxyExchange::start(
+        listener,
+        "127.0.0.1:1"
+            .parse()
+            .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}")),
+        0,
+        Duration::from_millis(30),
+    );
+    assert!(exchange.join().is_err());
+    assert!(!exchange.arrived());
+    assert!(exchange.thread.is_none());
+    assert!(std::net::TcpStream::connect(address).is_err());
+}
+
+#[test]
+fn proxy_fixture_partial_peer_drop_cancels_and_joins_worker() {
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    listener
+        .set_nonblocking(true)
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let address = listener
+        .local_addr()
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let exchange = ProxyExchange::start(
+        listener,
+        "127.0.0.1:1"
+            .parse()
+            .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}")),
+        0,
+        Duration::from_secs(6),
+    );
+    let mut peer = std::net::TcpStream::connect(address)
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    peer.set_read_timeout(Some(Duration::from_secs(1)))
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    peer.write_all(b"G")
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let accepted_deadline = Instant::now() + Duration::from_secs(3);
+    while !exchange.accepted.load(std::sync::atomic::Ordering::Acquire)
+        && !exchange.finished()
+        && Instant::now() < accepted_deadline
+    {
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    assert!(exchange.accepted.load(std::sync::atomic::Ordering::Acquire));
+    assert!(!exchange.arrived());
+    let start = Instant::now();
+    drop(exchange);
+    assert!(start.elapsed() < Duration::from_secs(4));
+    assert_proxy_peer_closed(&mut peer);
+    assert!(std::net::TcpStream::connect(address).is_err());
+}
+
+#[test]
+fn proxy_fixture_pending_reply_drop_closes_gate_and_joins_worker() {
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    listener
+        .set_nonblocking(true)
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let address = listener
+        .local_addr()
+        .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}"));
+    let exchange = ProxyExchange::start(
+        listener,
+        "127.0.0.1:1"
+            .parse()
+            .unwrap_or_else(|error| panic!("owned proxy fixture operation: {error}")),
+        0,
+        Duration::from_secs(6),
+    );
+    let mut peer = proxy_fixture_request(address);
+    wait_for_proxy_arrival(&exchange);
+    let start = Instant::now();
+    drop(exchange);
+    assert!(start.elapsed() < Duration::from_secs(4));
+    assert_proxy_peer_closed(&mut peer);
+    assert!(std::net::TcpStream::connect(address).is_err());
+}
+
 #[gpui_kit::test]
 async fn request_options_real_settings_apply_uses_same_proxy_for_discovery_test_and_ask(
     cx: &mut TestAppContext,
@@ -49,96 +457,10 @@ async fn request_options_real_settings_apply_uses_same_proxy_for_discovery_test_
     let proxy_address = proxy
         .local_addr()
         .unwrap_or_else(|error| panic!("proxy address: {error}"));
-    let (release, gated) = std::sync::mpsc::channel();
-    let server = std::thread::spawn(move || {
-        for step in 0..3 {
-            let deadline = Instant::now() + Duration::from_secs(6);
-            let mut stream = loop {
-                match proxy.accept() {
-                    Ok((stream, _)) => break stream,
-                    Err(error)
-                        if error.kind() == std::io::ErrorKind::WouldBlock
-                            && Instant::now() < deadline =>
-                    {
-                        std::thread::sleep(Duration::from_millis(5))
-                    }
-                    Err(error) => panic!("proxy accept: {error}"),
-                }
-            };
-            stream
-                .set_nonblocking(false)
-                .unwrap_or_else(|error| panic!("stream mode: {error}"));
-            stream
-                .set_read_timeout(Some(Duration::from_secs(3)))
-                .unwrap_or_else(|error| panic!("read limit: {error}"));
-            stream
-                .set_write_timeout(Some(Duration::from_secs(3)))
-                .unwrap_or_else(|error| panic!("write limit: {error}"));
-            let mut headers = Vec::new();
-            while !headers.ends_with(b"\r\n\r\n") {
-                let mut byte = [0];
-                stream
-                    .read_exact(&mut byte)
-                    .unwrap_or_else(|error| panic!("proxy header: {error}"));
-                headers.push(byte[0]);
-                assert!(headers.len() <= 8192);
-            }
-            let headers =
-                String::from_utf8(headers).unwrap_or_else(|error| panic!("header utf8: {error}"));
-            let lower = headers.to_ascii_lowercase();
-            assert!(lower.contains("x-project: synthetic-route-header\r\n"));
-            assert!(lower.contains("proxy-authorization: basic "));
-            assert!(headers.starts_with(&format!(
-                "{} http://{origin_address}/v1/{} HTTP/1.1",
-                if step == 0 { "GET" } else { "POST" },
-                if step == 0 {
-                    "models"
-                } else {
-                    "chat/completions"
-                }
-            )));
-            let length = lower
-                .lines()
-                .find_map(|line| {
-                    line.strip_prefix("content-length: ")
-                        .and_then(|value| value.trim().parse::<usize>().ok())
-                })
-                .unwrap_or(0);
-            assert!(length <= 32768);
-            let mut body = vec![0; length];
-            stream
-                .read_exact(&mut body)
-                .unwrap_or_else(|error| panic!("proxy body: {error}"));
-            let body = String::from_utf8(body).unwrap_or_else(|error| panic!("body utf8: {error}"));
-            for secret in [
-                "synthetic-route-header",
-                "synthetic-route-user",
-                "synthetic-route-password",
-            ] {
-                assert!(
-                    !body.contains(secret),
-                    "credentials never enter request context"
-                );
-            }
-            if step == 1 {
-                assert!(body.contains(keelshell_ai::CONNECTIVITY_PROMPT));
-                assert!(!body.contains("synthetic-question"));
-            } else if step == 2 {
-                assert!(body.contains("synthetic-question"));
-            }
-            gated
-                .recv_timeout(Duration::from_secs(6))
-                .unwrap_or_else(|error| panic!("reply gate: {error}"));
-            let response = if step == 0 {
-                r#"{"data":[{"id":"fixture-model"}]}"#
-            } else if step == 1 {
-                r#"{"model":"fixture-model","choices":[{"message":{"content":"OK"}}]}"#
-            } else {
-                r#"{"choices":[{"message":{"content":"synthetic-answer synthetic-route-header synthetic-route-user synthetic-route-password"}}]}"#
-            };
-            write!(stream, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{response}", response.len()).unwrap_or_else(|error| panic!("proxy response: {error}"));
-        }
-    });
+    let fixture = ProxyFixture {
+        listener: proxy,
+        origin: origin_address,
+    };
     let mut configuration = profile("Proxy fixture");
     configuration.endpoint = format!("http://{origin_address}/v1/chat/completions");
     let (settings_handle, settings) = mount_sized(cx, configuration, 900., 580.);
@@ -193,21 +515,34 @@ async fn request_options_real_settings_apply_uses_same_proxy_for_discovery_test_
         "synthetic-route-password",
         cx,
     );
-    for id in ["ai-models-discover", "ai-profile-test"] {
+    for (step, id) in ["ai-models-discover", "ai-profile-test"]
+        .into_iter()
+        .enumerate()
+    {
+        let mut exchange = None;
         cx.update_window(settings_handle, |_, window, cx| {
             reveal_request_option(window, id.into(), cx);
+            exchange = Some(fixture.start(step));
             window.click(id, cx);
         })
         .unwrap_or_else(|error| panic!("explicit settings request: {error}"));
+        let mut exchange = exchange.unwrap_or_else(|| panic!("settings request gate"));
         cx.run_until_parked();
+        cx.wait_for(settings_handle, Duration::from_secs(5), |_, _| {
+            exchange.arrived() || exchange.finished()
+        })
+        .await;
+        assert!(
+            exchange.arrived(),
+            "validated settings request arrived before release"
+        );
         assert!(!cx.update(|cx| request_has_finished(&settings, cx)));
-        release
-            .send(())
-            .unwrap_or_else(|error| panic!("settings reply: {error}"));
+        exchange.release_reply();
         cx.wait_for(settings_handle, Duration::from_secs(5), |_, cx| {
             request_has_finished(&settings, cx)
         })
         .await;
+        exchange.finish();
     }
     let (assistant_handle, assistant) = mount(cx);
     let applied = Arc::new(AtomicBool::new(false));
@@ -270,6 +605,7 @@ async fn request_options_real_settings_apply_uses_same_proxy_for_discovery_test_
             assert!(!prepared.preview_json().contains(secret));
         }
     });
+    let mut exchange = None;
     cx.update_window(assistant_handle, |_, window, cx| {
         window.render_frame(cx);
         window.scroll(
@@ -277,14 +613,22 @@ async fn request_options_real_settings_apply_uses_same_proxy_for_discovery_test_
             gpui_kit::ScrollDelta::Lines(point(0., -1000.)),
             cx,
         );
+        exchange = Some(fixture.start(2));
         window.click("send-approved-request", cx);
     })
     .unwrap_or_else(|error| panic!("send reviewed UI options: {error}"));
+    let mut exchange = exchange.unwrap_or_else(|| panic!("Ask request gate"));
     cx.run_until_parked();
+    cx.wait_for(assistant_handle, Duration::from_secs(5), |_, _| {
+        exchange.arrived() || exchange.finished()
+    })
+    .await;
+    assert!(
+        exchange.arrived(),
+        "validated Ask request arrived before release"
+    );
     assert!(assistant.read_with(cx, |panel, _| panel.busy));
-    release
-        .send(())
-        .unwrap_or_else(|error| panic!("ask reply: {error}"));
+    exchange.release_reply();
     cx.wait_for(assistant_handle, Duration::from_secs(5), |_, cx| {
         !assistant.read(cx).busy
     })
@@ -299,7 +643,7 @@ async fn request_options_real_settings_apply_uses_same_proxy_for_discovery_test_
             assert!(!panel.response.contains(secret));
         }
     });
-    server.join().unwrap_or_else(|_| panic!("proxy fixture"));
+    exchange.finish();
     assert!(
         matches!(origin.accept(), Err(error) if error.kind() == std::io::ErrorKind::WouldBlock)
     );

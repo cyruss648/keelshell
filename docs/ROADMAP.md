@@ -1,5 +1,9 @@
 # 开发路线
 
+2026-10-06：新的代理就绪/隔离child诊断候选仅改两份测试，作者完整门禁1155普通+8doc+6脚本、严格检查与57打包通过，根48/49证据读回完成；新非作者限定专项/私有负例复核PASS，258工程输入恢复相等，未整合main。c7原三平台失败保留，Windows具体原因未知，此增量先提交诊断分支采集真实错误，新CI另行核验；见[候选记录](testing/records/2026-10-06-ai-proxy-fixture-readiness.md)。
+
+2026-10-05 最新CI：F功能提交c7b6b1a已推送；[Quality37332920375](https://github.com/cyruss648/keelshell/actions/runs/37332920375) 三平台Rust gate均失败。macOS/Linux新代理界面夹具超时、Windows隔离child失败原因未知，全部原日志保留；新的测试生命周期/有界诊断候选在独立树准备，未整合。前一本机门禁与原生六组合不关闭本次CI，见[失败记录](testing/records/2026-10-05-ai-request-options-ci.md)。
+
 2026-10-05 当前状态：API 请求选项 F 经非作者差量复核通过，48 份冻结源码已精确整合；E 固定认证头大小写 P2 及此前失败保留。主树 F 完整门禁1146普通+8doc+6脚本/严格检查及57打包、新MAC15构建检查与标准双程序打包通过；新原生API临时/环境引用、重启及手动Ask已验证限定事实，中英文三主题长文件人工拒绝与实际SFTP读回通过。首提案到期、原Discover零请求预期未满足/内容未知origin与外层PTY失败保留，最小窗口未验证；新矩阵冻结独立限定复核及根143/144逐字节读回通过，无新已证P1/P2。见[整合记录](testing/records/2026-10-05-ai-request-options-main-integration.md)、[API原生记录](testing/records/2026-10-05-ai-request-options-native.md)与[文件六组合](testing/records/2026-10-05-mcp-file-review-native-matrix.md)。前一df8源码三平台CI通过，新F提交CI另核验；Windows/Linux原生、供应商第八工具、Agent及发行/安装更新仍开放。MCP仅向外部智能体提供KeelShell能力。下方历史阶段记录不覆盖本段当前状态。
 
 2026-10-05 最新更新：对外MCP方向保持；文件提案a909的Linux/Windows CI成功、macOS重新授权测试失败，整体failure保留；新的同步修正已通过全新非作者复核与主树完整门禁，新提交CI另核验。API D虽通过独立完整门禁，新的HTTP请求头名称秘密P1阻止整合，E修复进行中。

@@ -1,4 +1,8 @@
-# 开发交接 — 2026-10-05
+# 开发交接 — 2026-10-06
+
+2026-10-06 测试候选：c7 的三平台失败保持；独立 `feature/ai-proxy-fixture-readiness` 仅修改两份测试，原请求与限时保持，生产/依赖/锁/工具链不变。作者完整门禁1155普通+8doc+6脚本、严格检查/两控制器及57打包通过，48/49冻结证据经根读回；新的非作者18HTTP/4夹具/1真实GPUI与有价值的私有负例复核PASS，临时源恢复及258输入相等。此增量先提交诊断分支，新CI结果尚未确认、未整合main。Windows原child原因未知，先获取实际stderr，不以本机通过关闭失败。见[就绪时序与诊断记录](testing/records/2026-10-06-ai-proxy-fixture-readiness.md)。MCP仍仅向外部智能体提供能力。
+
+最新源码CI已明确失败：F功能提交 `c7b6b1a76161c757a08cef3de2c21f740986e4fe` 已推送并核对远端、0/0与干净状态；[Quality37332920375](https://github.com/cyruss648/keelshell/actions/runs/37332920375) 三个平台均Rust gate失败。macOS/Linux新代理界面夹具accept超时，Windows新隔离代理child失败但原stderr丢弃、原因未知。原ZIP及独立277proof/278归档经根逐字节读回保全；新独立候选只诊断/修复测试生命周期与有界child可观测性，不改生产或放宽限时，尚未整合或验收。下方本机1146通过与macOS限定原生事实保持原范围，不能关闭本次CI。见[首次F源码CI](testing/records/2026-10-05-ai-request-options-ci.md)。
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
