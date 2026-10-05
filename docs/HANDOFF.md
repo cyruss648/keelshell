@@ -2,9 +2,19 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
+## 2026-10-05 MCP 方向与新目录观察：授权业务仍开放
+
+最新作者候选状态：API请求头/代理A的31文件冻结，完整作者门禁通过；新非作者以五条实际GPUI prepare路径证实非活动配置的代理Basic派生值进入其它配置已审核payload，0send/0CLI/job，P1阻止整合。新B仅修全配置派生秘密边界，A源码/78证明已由根核验保存。文件修改提案26文件已冻结，作者1075普通/8doc/6脚本、严格门禁、57打包和host arm64双程序开发编译通过；38证明/26源码根核验保存，新非作者与根整合/原生未完成。两项均未提交或推送，旧七工具材料不迁移成第八工具验收。新的原生夹具仅完成源准备，尚未启动GUI、监听或供应商。
+
+MCP 仅供外部智能体调用 KeelShell，内置 API/CLI Ask 独立，不做通用第三方 MCP 客户端。实际 Codex 0.160.0 的新默认拒绝入口完成 initialize/tools-list，首 POST 已出现七项 KeelShell 名称，1POST/0SSE/0业务；但六项 schema 约束被转换且缺记录器 owned_exit，完整探针仍 PROBE_ABORTED，不关闭授权桌面/SSH读取。A schema P2、B features兼容错误、C假IPC认证deadline以及原授权失败均保持。独立A/B/C与根非作者D离线复核分别记录，不把根D复核叫fresh子agent。E限定schema映射经新非作者核验，但调用方进程扫描被两项mock反例证实复用PID误认领P1，预审FAIL/E不执行；71份proof根核验复制，新F修复进行中，旧实际证据不改写。见[目录诊断](testing/records/2026-10-05-codex-catalog-direction.md)。API请求头/代理31文件作者候选已冻结并进入新独立复核；第8文件修改提案仍在独立树完成门禁，未整合，不以旧七项实验验收新功能。
+
+## 2026-10-05 文件同步新提交：三平台源码 CI 已核验通过
+
+精确 `23310ee13286adb488a451277addf49b05cd476b` 的 [Quality37257829818](https://github.com/cyruss648/keelshell/actions/runs/37257829818) 已 completed/success；API head、三个实际 checkout、原日志和 Unix artifact 均独立核验。macOS/Linux各1060普通+8文档+6脚本+57打包，Windows1040普通+8文档、脚本5通过/1跳过、打包53通过/4跳过；Linux12ignored含既有手工/proc，其余平台11，均不计通过。原文件目标和EOF具名回归三平台实际ok，Unix各9项OpenSSH与观测身份清理通过，Windows相关步骤跳过。CI没有逐场景成功JSON，不冒充原生像素或新客户端通过。160份独立材料经根核验复制，79作者/160文件证明保留；文件工作树可恢复归档、分支与自有cache已实际清理，原失败保持。见[三平台验证](testing/records/2026-10-05-files-scene-ci.md)。
+
 ## 2026-10-05 文件场景同步修复：本机与新独立复审通过
 
-只有两个测试文件改动，生产/依赖/锁/工具链及原5秒传输/12秒界面等待不变。精确基线探针观察远端完整数据与旧Running快照，点击后Completed再等Paused失败；旧Linux CI具体时序仍只作候选归因。目标绑定的真实WRITE屏障保持全176场景，并要求Running/Paused/Completed阶段及控件、部分内容稳定和继续后完整字节。作者/根门禁均1060普通+8文档+6脚本、严格工程检查及默认/2MiB控制器通过，作者57打包另记；新非作者44文件/208session+1doc/4私有Handler及严格检查复审PASS，无剩余限定P1/P2。79作者/160复核证明根逐项核验复制，原失败保持；目录句柄计数和subsystem仅观测清理，新提交CI尚待确认，旧原生包不迁移。见[同步记录](testing/records/2026-10-05-files-scene-readiness.md)。
+只有两个测试文件改动，生产/依赖/锁/工具链及原5秒传输/12秒界面等待不变。精确基线探针观察远端完整数据与旧Running快照，点击后Completed再等Paused失败；旧Linux CI具体时序仍只作候选归因。目标绑定的真实WRITE屏障保持全176场景，并要求Running/Paused/Completed阶段及控件、部分内容稳定和继续后完整字节。作者/根门禁均1060普通+8文档+6脚本、严格工程检查及默认/2MiB控制器通过，作者57打包另记；新非作者44文件/208session+1doc/4私有Handler及严格检查复审PASS，无剩余限定P1/P2。79作者/160复核证明根逐项核验复制，原失败保持；目录句柄计数和subsystem仅观测清理，新233提交CI已按上方范围通过，旧原生包不迁移。见[同步记录](testing/records/2026-10-05-files-scene-readiness.md)。
 
 ## 2026-10-05 前次整合 CI：Linux 文件场景失败
 

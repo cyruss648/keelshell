@@ -1,8 +1,12 @@
 # 开发路线
 
-2026-10-05 最新更新：文件场景同步本机/独立复审通过，新CI待确认
+2026-10-05 最新更新：对外 MCP 七名称已在实际 Codex 请求观察，完整目录与授权业务仍开放；精确233文件修复三平台源码CI通过
 
-两个test文件已修复确定性后台数据完整/前台Running积压的测试生命周期竞态；旧CI具体触发仍候选。真实WRITE屏障保持176场景并验证准确阶段/控件、Paused部分稳定及Continue完整字节，原5s/12s与生产代码不变。作者和根门禁1060普通+8doc+6脚本、严格Clippy/fmt/x.y及默认/2MiB控制器通过，作者57打包另记；新非作者44文件/208session+1doc/4私有Handler与严格检查复审PASS，无剩余限定P1/P2，79作者/160复核证明根核验复制。目录计数/subsystem只观测清理，新CI与原生/发行仍另行确认，见[同步记录](testing/records/2026-10-05-files-scene-readiness.md)。
+API请求头/代理A作者31文件已冻结，但新非作者五条GPUI prepare反例证实非活动代理Basic派生值进入其它配置已审核payload（0send/0CLI/job），P1阻止整合，新B仅修该秘密边界。文件修改提案作者26文件已冻结，1075普通/8doc/6脚本、严格工程门禁、57打包和host arm64开发编译通过，仍待新独立审查与根整合/原生。A的78证明、文件提案38证明和全部冻结源码由根核验保存；两项未提交/推送。该段覆盖下方作者候选进行中状态，不能把旧七工具材料扩为第八工具验收。
+
+新的默认拒绝服务入口完成真实initialize/tools-list，首40352字节POST出现七项KeelShell函数及五项只观察的客户端定义；1POST/0SSE/0业务，没有GUI/SSH/grant。完整探针仍PROBE_ABORTED：六项原schema约束被转换、记录器最终owned_exit缺失。E根据版本源码准备限定转换，新非作者schema检查通过但进程扫描存在复用PID误认领P1，E预审FAIL/未实际执行；新F只修出生身份关系。A/P2、B/features、C/假IPC认证失败和D实际结果保留，不追溯认定误杀。MCP仍仅向外部智能体提供能力，API请求头/代理作者31文件已冻结并进入新独立复核；受审文件修改提案仍完成作者门禁，两者未整合。见[方向与目录记录](testing/records/2026-10-05-codex-catalog-direction.md)。
+
+两个test文件已修复确定性后台数据完整/前台Running积压的测试生命周期竞态；旧CI具体触发仍候选。真实WRITE屏障保持176场景并验证准确阶段/控件、Paused部分稳定及Continue完整字节，原5s/12s与生产代码不变。作者和根门禁1060普通+8doc+6脚本、严格Clippy/fmt/x.y及默认/2MiB控制器通过，作者57打包另记；新非作者44文件/208session+1doc/4私有Handler与严格检查复审PASS，无剩余限定P1/P2，79作者/160复核证明根核验复制。目录计数/subsystem只观测清理；精确233提交的新CI独立确认全success，macOS/Linux各1060普通/8doc/6脚本/57打包及9OpenSSH，Windows1040普通/8doc、脚本5通过1跳过、打包53通过4跳过且OpenSSH步骤跳过；三平台实际文件/EOF目标ok，不提供逐场景CIJSON或新原生/发行证据。160新CI材料根核验复制，文件工作树/分支/cache已清理，见[同步记录](testing/records/2026-10-05-files-scene-readiness.md)和[三平台验证](testing/records/2026-10-05-files-scene-ci.md)。
 
 精确 `a19d0c1` 的 [Quality37253864420](https://github.com/cyruss648/keelshell/actions/runs/37253864420) 已结束 failure：macOS/Windows成功，Linux文件布局GPUI等待12秒超时，app375通过/1失败、MCP/OpenSSH未执行。macOS/Windows新EOF回归通过，macOS9项系统OpenSSH通过；Windows脚本5通过/1跳过、打包53通过/4跳过。失败证据独立核对保留，候选在新工作区诊断，原因尚未由该次CI证明；见[三平台记录](testing/records/2026-10-05-integration-ci.md)。此前三个功能worktree可恢复归档、旧分支与两个审查cache已实际清理，241份证明保持。
 

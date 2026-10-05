@@ -6,6 +6,8 @@ KeelShell 提供 MCP **服务端**。Codex、Claude Code 等外部客户端启�
 
 撤权后，同一 Claude 客户端收到 `is_error=true` 的连接已断开结果，未记录第 14 次 tools/call RPC；这证明本次客户端后续访问不可用，不是新请求到达服务端后再次授权拒绝的证据。原默认拒绝及运行中撤权/重启证据继续保留在[前置记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)与[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。Codex 0.160.0 的新文本前置在仅为子进程补充回环 `NO_PROXY` / `no_proxy` 后通过；原失败保持；新的实际 MCP 尝试协商七项生产工具后，首笔模型请求缺少 KeelShell 目录并包含额外工具，停止于业务调用之前，两次失败均保留。实际读取和完整审阅场景仍未通过，见[Codex 尝试记录](../testing/records/2026-10-05-codex-authorized-mcp-failure.md)。其他平台原生窗口、文件修改提案及完整发布包仍须单独验收。
 
+最新目录诊断在默认拒绝入口中，实际 Codex 请求已出现七项 KeelShell 名称；没有有效桌面能力或业务调用。原 schema 的若干约束被转换，且记录器缺最终退出回执，完整目录准入仍未通过；这不关闭授权 SSH/SFTP 或桌面审阅。原授权失败保留，见[新目录记录](../testing/records/2026-10-05-codex-catalog-direction.md)。
+
 ## 在应用中授权
 
 1. 在 KeelShell 连接 SSH，核对主机指纹并完成认证。
