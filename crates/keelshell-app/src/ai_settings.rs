@@ -9,12 +9,12 @@ use gpui_kit::{
 };
 use keelshell_ai::{
     AiError, AiErrorCategory, ConnectivityReport, LocalAgentClient, LocalAgentConfig,
-    LocalAgentError, LocalAgentKind, LocalAgentProbe, ModelCatalog, ProviderClient, ProviderConfig,
-    ProviderEndpoint, ProviderProtocol, RequestCancellation,
+    LocalAgentError, LocalAgentKind, LocalAgentLimits, LocalAgentProbe, ModelCatalog,
+    ProviderClient, ProviderConfig, ProviderEndpoint, ProviderProtocol, RequestCancellation,
 };
 use keelshell_core::{
-    AiApiStyle, AiAuthentication, AiBackend, AiLocalAgent, AiPreset, AiProfileCatalog,
-    NamedAiProfile,
+    AiApiStyle, AiAuthentication, AiBackend, AiLocalAgent, AiLocalAgentLimits, AiPreset,
+    AiProfileCatalog, NamedAiProfile,
 };
 use tokio::runtime::Runtime;
 use uuid::Uuid;
@@ -56,6 +56,43 @@ pub enum AiSettingsEvent {
 }
 
 #[derive(Clone, PartialEq, Eq)]
+struct LocalLimitDraft {
+    timeout_seconds: String,
+    answer_kib: String,
+    output_kib: String,
+}
+
+impl LocalLimitDraft {
+    fn for_profile(profile: Option<&NamedAiProfile>) -> Self {
+        let limits = match profile.map(|profile| &profile.backend) {
+            Some(AiBackend::LocalAgent { limits, .. }) => *limits,
+            _ => AiLocalAgentLimits::default(),
+        };
+        Self {
+            timeout_seconds: limits.timeout_seconds().to_string(),
+            answer_kib: limits.answer_kib().to_string(),
+            output_kib: limits.output_kib().to_string(),
+        }
+    }
+
+    fn parse(&self) -> Result<AiLocalAgentLimits, ()> {
+        fn whole(value: &str) -> Result<u16, ()> {
+            let value = value.trim();
+            if value.is_empty() || !value.bytes().all(|byte| byte.is_ascii_digit()) {
+                return Err(());
+            }
+            value.parse().map_err(|_| ())
+        }
+        AiLocalAgentLimits::new(
+            whole(&self.timeout_seconds)?,
+            whole(&self.answer_kib)?,
+            whole(&self.output_kib)?,
+        )
+        .map_err(|_| ())
+    }
+}
+
+#[derive(Clone, PartialEq, Eq)]
 struct EditorValues {
     name: String,
     executable: String,
@@ -64,6 +101,7 @@ struct EditorValues {
     key: Zeroizing<String>,
     context_tokens: String,
     output_tokens: String,
+    local_limits: LocalLimitDraft,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -93,6 +131,10 @@ pub struct AiSettingsPanel {
     context_tokens: Entity<InputState>,
     output_tokens: Entity<InputState>,
     token_drafts: BTreeMap<Uuid, (String, String)>,
+    local_timeout: Entity<InputState>,
+    local_answer: Entity<InputState>,
+    local_output: Entity<InputState>,
+    local_limit_drafts: BTreeMap<Uuid, LocalLimitDraft>,
     editor_values: EditorValues,
     clear_key_pending: bool,
     vault_path: PathBuf,
@@ -132,6 +174,7 @@ impl AiSettingsPanel {
             .or_else(|| catalog.profiles.first().map(|p| p.id));
         let profile = selected.and_then(|id| catalog.profiles.iter().find(|p| p.id == id));
         let values = EditorValues {
+            local_limits: LocalLimitDraft::for_profile(profile),
             name: profile.map_or_else(String::new, |p| p.name.clone()),
             executable: profile.map_or_else(String::new, executable_value),
             endpoint: profile.map_or_else(String::new, |p| p.endpoint.clone()),
@@ -214,6 +257,28 @@ impl AiSettingsPanel {
             window,
             cx,
         );
+        let local_timeout = field(
+            &values.local_limits.timeout_seconds,
+            t(cx, "必填；1–300 秒", "Required; 1–300 seconds"),
+            window,
+            cx,
+        );
+        let local_answer = field(
+            &values.local_limits.answer_kib,
+            t(cx, "必填；1–1024 KiB", "Required; 1–1024 KiB"),
+            window,
+            cx,
+        );
+        let local_output = field(
+            &values.local_limits.output_kib,
+            t(
+                cx,
+                "必填；1–8192 KiB，至少覆盖回答",
+                "Required; 1–8192 KiB, at least the answer budget",
+            ),
+            window,
+            cx,
+        );
         // A modal must take keyboard focus as well as occlude pointer input.
         // An empty catalog has no rendered input, so focus the panel itself.
         let focus = cx.focus_handle();
@@ -230,6 +295,9 @@ impl AiSettingsPanel {
             &key,
             &context_tokens,
             &output_tokens,
+            &local_timeout,
+            &local_answer,
+            &local_output,
         ]
         .into_iter()
         .map(|field| {
@@ -254,6 +322,10 @@ impl AiSettingsPanel {
             context_tokens,
             output_tokens,
             token_drafts: BTreeMap::new(),
+            local_timeout,
+            local_answer,
+            local_output,
+            local_limit_drafts: BTreeMap::new(),
             editor_values: values,
             clear_key_pending: false,
             vault_path,
@@ -277,6 +349,21 @@ impl AiSettingsPanel {
     /// Translate hints without modifying draft values or operation identity.
     pub fn refresh_locale(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         for (field, zh, en) in [
+            (
+                &self.local_timeout,
+                "必填；1–300 秒",
+                "Required; 1–300 seconds",
+            ),
+            (
+                &self.local_answer,
+                "必填；1–1024 KiB",
+                "Required; 1–1024 KiB",
+            ),
+            (
+                &self.local_output,
+                "必填；1–8192 KiB，至少覆盖回答",
+                "Required; 1–8192 KiB, at least the answer budget",
+            ),
             (
                 &self.executable,
                 "本地 CLI 可执行文件的绝对路径",
@@ -355,6 +442,11 @@ impl AiSettingsPanel {
 
     fn read_values(&self, cx: &App) -> EditorValues {
         EditorValues {
+            local_limits: LocalLimitDraft {
+                timeout_seconds: self.local_timeout.read(cx).value().to_string(),
+                answer_kib: self.local_answer.read(cx).value().to_string(),
+                output_kib: self.local_output.read(cx).value().to_string(),
+            },
             name: self.name.read(cx).value().to_string(),
             executable: self.executable.read(cx).value().to_string(),
             endpoint: self.endpoint.read(cx).value().to_string(),
@@ -389,8 +481,18 @@ impl AiSettingsPanel {
             profile.name.clone_from(&values.name);
             profile.endpoint.clone_from(&values.endpoint);
             profile.model.clone_from(&values.model);
-            if let AiBackend::LocalAgent { executable, .. } = &mut profile.backend {
+            if let AiBackend::LocalAgent {
+                executable, limits, ..
+            } = &mut profile.backend
+            {
                 executable.clone_from(&values.executable);
+                self.local_limit_drafts
+                    .insert(profile.id, values.local_limits.clone());
+                // Invalid text remains an editor draft; every launch/save checks
+                // that draft before it can consume the last valid typed value.
+                if let Ok(valid) = values.local_limits.parse() {
+                    *limits = valid;
+                }
             }
             self.token_drafts.insert(
                 profile.id,
@@ -444,6 +546,11 @@ impl AiSettingsPanel {
     fn load_editor(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let token_draft = self.selected.and_then(|id| self.token_drafts.get(&id));
         let values = EditorValues {
+            local_limits: self
+                .selected
+                .and_then(|id| self.local_limit_drafts.get(&id))
+                .cloned()
+                .unwrap_or_else(|| LocalLimitDraft::for_profile(self.profile())),
             name: self.profile().map_or_else(String::new, |p| p.name.clone()),
             executable: self.profile().map_or_else(String::new, executable_value),
             endpoint: self
@@ -476,6 +583,9 @@ impl AiSettingsPanel {
             (&self.key, &values.key),
             (&self.context_tokens, &values.context_tokens),
             (&self.output_tokens, &values.output_tokens),
+            (&self.local_timeout, &values.local_limits.timeout_seconds),
+            (&self.local_answer, &values.local_limits.answer_kib),
+            (&self.local_output, &values.local_limits.output_kib),
         ] {
             field.update(cx, |field, cx| {
                 field.set_value(value.to_owned(), window, cx)
@@ -520,6 +630,8 @@ impl AiSettingsPanel {
         if let Some(id) = self.selected {
             self.catalog.remove(id);
             self.credentials.remove(&id);
+            self.local_limit_drafts.remove(&id);
+            self.token_drafts.remove(&id);
             self.selected = self.catalog.profiles.first().map(|p| p.id);
             self.changed(true, cx);
             self.load_editor(window, cx);
@@ -699,6 +811,7 @@ impl AiSettingsPanel {
         // Switching adapters cannot carry keys or unsupported HTTP controls.
         self.credentials.remove(&profile.id);
         self.token_drafts.remove(&profile.id);
+        self.local_limit_drafts.remove(&profile.id);
         profile.max_output_tokens = None;
         profile.context_window_tokens = None;
         profile.custom_headers.clear();
@@ -709,6 +822,7 @@ impl AiSettingsPanel {
             profile.backend = AiBackend::LocalAgent {
                 agent,
                 executable: String::new(),
+                limits: AiLocalAgentLimits::default(),
             };
             profile.preset = AiPreset::Custom;
             match agent {
@@ -745,6 +859,11 @@ impl AiSettingsPanel {
         let Some(profile) = self.profile() else {
             return;
         };
+        if !self.local_limit_draft_valid(profile.id) {
+            self.status = local_limit_draft_error();
+            cx.notify();
+            return;
+        }
         let config = match local_agent_config(profile, true) {
             Ok(config) => config,
             Err(error) => {
@@ -805,6 +924,20 @@ impl AiSettingsPanel {
         cx.notify();
     }
 
+    fn local_limit_draft_valid(&self, id: Uuid) -> bool {
+        self.catalog
+            .profiles
+            .iter()
+            .find(|profile| profile.id == id)
+            .is_some_and(|profile| {
+                profile.backend == AiBackend::Api
+                    || self
+                        .local_limit_drafts
+                        .get(&id)
+                        .is_none_or(|draft| draft.parse().is_ok())
+            })
+    }
+
     fn token_draft_valid(&self, id: Uuid) -> bool {
         if let Some((context, output)) = self.token_drafts.get(&id) {
             return parse_token_input(context, 16 * 1024 * 1024).is_ok()
@@ -839,6 +972,16 @@ impl AiSettingsPanel {
                 "Token 限制必须为空或范围内的正整数，请检查各配置。",
                 "Token limits must be empty or positive integers within range. Check each profile.",
             );
+            cx.notify();
+            return;
+        }
+        if self
+            .catalog
+            .profiles
+            .iter()
+            .any(|profile| !self.local_limit_draft_valid(profile.id))
+        {
+            self.status = local_limit_draft_error();
             cx.notify();
             return;
         }
@@ -1082,7 +1225,12 @@ pub(crate) fn local_agent_config(
     metadata
         .validate_local_agent_transport()
         .map_err(|_| LocalAgentError::InvalidConfiguration)?;
-    let AiBackend::LocalAgent { agent, executable } = &metadata.backend else {
+    let AiBackend::LocalAgent {
+        agent,
+        executable,
+        limits,
+    } = &metadata.backend
+    else {
         return Err(LocalAgentError::InvalidConfiguration);
     };
     let kind = match agent {
@@ -1096,6 +1244,21 @@ pub(crate) fn local_agent_config(
         metadata.model,
     )?
     .with_inference_endpoint(&metadata.endpoint)
+    .and_then(|config| {
+        LocalAgentLimits::for_ask(
+            Duration::from_secs(u64::from(limits.timeout_seconds())),
+            usize::from(limits.answer_kib()) * 1024,
+            usize::from(limits.output_kib()) * 1024,
+        )
+        .map(|limits| config.with_limits(limits))
+    })
+}
+
+fn local_limit_draft_error() -> Message {
+    Message::new(
+        "本地限制需为整数：时限 1–300 秒、回答 1–1024 KiB、累计输出 1–8192 KiB，且输出至少覆盖回答。请检查各配置。",
+        "Local limits require whole numbers: 1–300 seconds, 1–1024 KiB answer, 1–8192 KiB combined output, with output at least the answer budget. Check each profile.",
+    )
 }
 
 /// Translate typed local failures without displaying paths, stderr or context.

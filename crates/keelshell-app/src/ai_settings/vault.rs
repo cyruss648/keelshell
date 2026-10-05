@@ -58,6 +58,11 @@ impl AiSettingsPanel {
         let Some(profile) = self.profile() else {
             return;
         };
+        if !self.local_limit_draft_valid(profile.id) {
+            self.status = super::local_limit_draft_error();
+            cx.notify();
+            return;
+        }
         if !uses_api_key_authentication(&profile.authentication) {
             return;
         }
@@ -161,6 +166,11 @@ impl AiSettingsPanel {
         let Some(profile) = self.profile().cloned() else {
             return;
         };
+        if !self.local_limit_draft_valid(profile.id) {
+            self.status = super::local_limit_draft_error();
+            cx.notify();
+            return;
+        }
         let Some(prompt) = &mut self.vault_prompt else {
             return;
         };

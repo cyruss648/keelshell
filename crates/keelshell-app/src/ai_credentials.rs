@@ -102,10 +102,14 @@ fn decode(
     let mut payload: BoundKey = serde_json::from_str(&payload).map_err(|_| Error::VaultCorrupt)?;
     // Existing v1 ciphertext remains usable only by its original HTTP adapter.
     // V2 additionally binds the exact CLI type/path; metadata edits cannot make
-    // the vault silently deliver an old API key to another executable.
+    // the vault silently deliver an old API key to another executable. Limits
+    // cannot redirect a key and are excluded from this identity comparison.
     let backend_matches = match payload.version {
         1 => payload.backend.is_none() && profile.backend == AiBackend::Api,
-        2 => payload.backend.as_ref() == Some(&profile.backend),
+        2 => payload
+            .backend
+            .as_ref()
+            .is_some_and(|backend| backend.same_credential_destination(&profile.backend)),
         _ => false,
     };
     if !backend_matches

@@ -110,6 +110,25 @@ impl LocalAgentLimits {
         })
     }
 
+    /// Build user-facing Ask budgets while retaining fixed protocol safeguards.
+    ///
+    /// The JSONL line ceiling remains 256 KiB, reduced when total output is
+    /// smaller; the 512-frame ceiling is unchanged. Answer bytes are UTF-8 bytes,
+    /// and combined output also includes JSON framing and discarded stderr.
+    pub fn for_ask(
+        timeout: Duration,
+        answer_bytes: usize,
+        output_bytes: usize,
+    ) -> Result<Self, LocalAgentError> {
+        Self::new(
+            timeout,
+            output_bytes,
+            output_bytes.min(256 * 1024),
+            answer_bytes,
+            512,
+        )
+    }
+
     /// Total deadline, including version/capability admission and inference.
     pub fn timeout(self) -> Duration {
         self.timeout
@@ -252,6 +271,56 @@ impl std::fmt::Debug for LocalAgentConfig {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn user_ask_limits_keep_defaults_and_fixed_protocol_guards() {
+        assert_eq!(
+            LocalAgentLimits::for_ask(Duration::from_secs(120), 1024 * 1024, 2048 * 1024).unwrap(),
+            LocalAgentLimits::default()
+        );
+        let low = LocalAgentLimits::for_ask(Duration::from_secs(1), 1024, 1024).unwrap();
+        assert_eq!(
+            (
+                low.timeout(),
+                low.answer_bytes(),
+                low.output_bytes(),
+                low.line_bytes(),
+                low.frames()
+            ),
+            (Duration::from_secs(1), 1024, 1024, 1024, 512)
+        );
+        let high =
+            LocalAgentLimits::for_ask(Duration::from_secs(300), 1024 * 1024, 8192 * 1024).unwrap();
+        assert_eq!((high.line_bytes(), high.frames()), (256 * 1024, 512));
+        assert_eq!(
+            LocalAgentLimits::for_ask(Duration::from_secs(1), 2048, 1024),
+            Err(LocalAgentError::InvalidLimits)
+        );
+    }
+
+    #[test]
+    fn prepared_limits_are_immutable_even_when_a_new_config_changes() {
+        let root = std::env::temp_dir();
+        let original = LocalAgentConfig::new(
+            LocalAgentKind::Codex,
+            root.join("fixture-cli"),
+            root,
+            "model",
+        )
+        .unwrap();
+        let review = original
+            .prepare(crate::ContextDraft::new("explicit"), &[], 8192)
+            .unwrap();
+        let changed = original.with_limits(
+            LocalAgentLimits::for_ask(Duration::from_secs(27), 3 * 1024, 19 * 1024).unwrap(),
+        );
+        assert_eq!(review.config().limits(), LocalAgentLimits::default());
+        assert_eq!(changed.limits().timeout(), Duration::from_secs(27));
+        let preview: serde_json::Value = serde_json::from_str(review.preview_json()).unwrap();
+        assert_eq!(preview["timeout_ms"], 120000);
+        assert_eq!(preview["answer_bytes"], 1024 * 1024);
+        assert_eq!(preview["combined_output_bytes"], 2 * 1024 * 1024);
+    }
 
     #[test]
     fn configuration_rejects_shell_launchers_and_unbounded_limits() {

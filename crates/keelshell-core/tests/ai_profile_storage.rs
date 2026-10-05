@@ -51,6 +51,7 @@ fn local_agent_metadata_roundtrips_and_never_falls_back_to_http() -> TestResult 
             .join("codex")
             .to_string_lossy()
             .into_owned(),
+        limits: Default::default(),
     };
     profile.api_style = AiApiStyle::Responses;
     profile.endpoint = "https://example.test/v1".to_owned();
@@ -72,11 +73,76 @@ fn local_agent_metadata_roundtrips_and_never_falls_back_to_http() -> TestResult 
 }
 
 #[test]
+fn saved_local_budgets_and_old_metadata_keep_exact_intent_without_load_rewrite() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    for agent in [AiLocalAgent::Codex, AiLocalAgent::ClaudeCode] {
+        let path = directory.path().join(format!("state-{agent:?}.json"));
+        let mut state = AppState::default();
+        let mut selected = profile("Budgeted Ask");
+        selected.backend = AiBackend::LocalAgent {
+            agent,
+            executable: "/opt/fixture-cli".into(),
+            limits: keelshell_core::AiLocalAgentLimits::new(27, 3, 19)?,
+        };
+        match agent {
+            AiLocalAgent::Codex => selected.api_style = AiApiStyle::Responses,
+            AiLocalAgent::ClaudeCode => {
+                selected.api_style = AiApiStyle::AnthropicMessages;
+                selected.authentication = AiAuthentication::Header {
+                    name: "x-api-key".into(),
+                    credential: None,
+                };
+            }
+        }
+        selected.validate_local_agent_transport()?;
+        let id = selected.id;
+        state.settings.ai_profiles.upsert(selected.clone())?;
+        state.settings.ai_profiles.activate(id)?;
+        StateStore::new(&path).save(&state)?;
+        assert_eq!(
+            StateStore::new(&path).load()?.settings.ai_profiles.active(),
+            Some(&selected)
+        );
+        let mut old = serde_json::to_value(state)?;
+        old["settings"]["ai_profiles"]["profiles"][0]["backend"]
+            .as_object_mut()
+            .ok_or("backend missing")?
+            .remove("limits");
+        write_private(&path, &old)?;
+        let before = fs::read(&path)?;
+        let loaded = StateStore::new(&path).load()?;
+        let AiBackend::LocalAgent { limits, .. } = &loaded
+            .settings
+            .ai_profiles
+            .active()
+            .ok_or("active missing")?
+            .backend
+        else {
+            return Err("local backend lost".into());
+        };
+        assert_eq!(*limits, keelshell_core::AiLocalAgentLimits::default());
+        assert_eq!(fs::read(&path)?, before);
+        old["settings"]["ai_profiles"]["profiles"][0]["backend"]["limits"] =
+            json!({"answer_kib":2,"output_kib":1});
+        write_private(&path, &old)?;
+        let invalid = fs::read(&path)?;
+        assert!(StateStore::new(&path).load().is_err());
+        assert_eq!(
+            fs::read(&path)?,
+            invalid,
+            "invalid metadata is not rewritten"
+        );
+    }
+    Ok(())
+}
+
+#[test]
 fn local_agent_request_rejects_api_options_or_wrong_authentication() -> TestResult {
     let mut profile = profile("Claude Ask");
     profile.backend = AiBackend::LocalAgent {
         agent: AiLocalAgent::ClaudeCode,
         executable: "/opt/keelshell-fixture/claude".to_owned(),
+        limits: Default::default(),
     };
     profile.api_style = AiApiStyle::AnthropicMessages;
     profile.authentication = AiAuthentication::Header {

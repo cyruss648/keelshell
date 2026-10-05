@@ -614,6 +614,7 @@ fn local_profile(agent: keelshell_core::AiLocalAgent) -> NamedAiProfile {
     let mut profile = profile("Local CLI");
     profile.backend = AiBackend::LocalAgent {
         agent,
+        limits: Default::default(),
         executable: std::env::temp_dir()
             .join(format!("keelshell-nonexistent-{}", uuid::Uuid::new_v4()))
             .to_string_lossy()
@@ -887,5 +888,81 @@ fn long_cli_review_scrolls_to_visible_send_in_both_languages(cx: &mut TestAppCon
         assert!(!panel.busy, "scroll and locale refresh do not send");
         assert!(panel.prepared.is_some());
         assert!(panel._job.is_none());
+    });
+}
+
+#[gpui_kit::test]
+fn local_budget_change_revokes_exact_review_and_old_result_without_changing_key(
+    cx: &mut TestAppContext,
+) {
+    let (_, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        for agent in [
+            keelshell_core::AiLocalAgent::Codex,
+            keelshell_core::AiLocalAgent::ClaudeCode,
+        ] {
+            let mut profile = local_profile(agent);
+            let key = Some(Zeroizing::new("fixture-key".into()));
+            panel.set_profile(Some(profile.clone()), key.clone(), cx);
+            panel.prepare(cx);
+            let Some(PreparedAssistantRequest::Local(request)) = panel.prepared.as_ref() else {
+                panic!("local review");
+            };
+            let original = request.config().clone();
+            let old_revision = panel.request_revision;
+            let cancellation = RequestCancellation::new();
+            panel.cancellation = Some(cancellation.clone());
+            panel.busy = true;
+            if let keelshell_core::AiBackend::LocalAgent { limits, .. } = &mut profile.backend {
+                *limits = keelshell_core::AiLocalAgentLimits::new(27, 3, 19)
+                    .unwrap_or_else(|_| panic!("valid budgets"));
+            }
+            panel.set_profile(Some(profile), key.clone(), cx);
+            assert!(cancellation.is_cancelled());
+            assert!(panel.prepared.is_none());
+            assert!(panel.request_revision > old_revision);
+            assert_eq!(panel.key, key);
+            assert_eq!(
+                original.limits(),
+                keelshell_ai::LocalAgentLimits::default(),
+                "captured review remains immutable"
+            );
+            panel.finish_reply(
+                old_revision,
+                ("old-host".into(), "old-session".into()),
+                Ok("untrusted late answer".into()),
+                cx,
+            );
+            assert!(panel.response.is_empty());
+            assert!(panel.response_target.is_none());
+            panel.prepare(cx);
+            let Some(PreparedAssistantRequest::Local(request)) = panel.prepared.as_ref() else {
+                panic!("updated review");
+            };
+            assert_eq!(request.config().limits().timeout(), Duration::from_secs(27));
+            let preview: serde_json::Value = serde_json::from_str(request.preview_json())
+                .unwrap_or_else(|_| panic!("valid review"));
+            assert_eq!(preview["timeout_ms"], 27000);
+            assert_eq!(preview["answer_bytes"], 3 * 1024);
+            assert_eq!(preview["combined_output_bytes"], 19 * 1024);
+        }
+        panel.set_profile(Some(profile("API remains independent")), None, cx);
+        panel.prepare(cx);
+        let Some(PreparedAssistantRequest::Api(request)) = panel.prepared.as_ref() else {
+            panic!("API request");
+        };
+        let preview: serde_json::Value =
+            serde_json::from_str(request.preview_json()).unwrap_or_else(|_| panic!("API JSON"));
+        for field in [
+            "timeout_ms",
+            "answer_bytes",
+            "combined_output_bytes",
+            "limits",
+        ] {
+            assert!(
+                preview.get(field).is_none(),
+                "local budget must not alter API payload"
+            );
+        }
     });
 }

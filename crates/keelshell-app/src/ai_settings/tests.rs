@@ -593,6 +593,7 @@ fn local_profile() -> NamedAiProfile {
             .join(format!("keelshell-nonexistent-{}", uuid::Uuid::new_v4()))
             .to_string_lossy()
             .into_owned(),
+        limits: Default::default(),
     };
     profile.api_style = AiApiStyle::Responses;
     profile.endpoint = "https://api.openai.com/v1".into();
@@ -736,4 +737,182 @@ fn local_config_keeps_bilingual_controls_in_minimum_scroll_view(cx: &mut TestApp
         set_language(Language::ZhCn, cx);
     })
     .unwrap_or_else(|_| panic!("minimum local form"));
+}
+
+#[gpui_kit::test]
+fn local_budget_editor_preserves_invalid_drafts_identity_and_save_revision(
+    cx: &mut TestAppContext,
+) {
+    let (handle, panel) = mount(cx, local_profile());
+    cx.update_window(handle, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            let original = panel.selected.unwrap_or_else(|| panic!("selected"));
+            panel
+                .key
+                .update(cx, |input, cx| input.set_value("fixture-key", window, cx));
+            panel.sync_editor(cx);
+            let reference = AiSecretRef::SecretStore {
+                id: uuid::Uuid::new_v4(),
+            };
+            panel.catalog.profiles[0].authentication = AiAuthentication::Bearer {
+                credential: Some(reference.clone()),
+            };
+            let cancellation = RequestCancellation::new();
+            panel.cancellation = Some(cancellation.clone());
+            panel.operation = Some(OperationKind::LocalProbe);
+            for (field, value) in [
+                (&panel.local_timeout, "27"),
+                (&panel.local_answer, "3"),
+                (&panel.local_output, "19"),
+            ] {
+                field.update(cx, |input, cx| input.set_value(value, window, cx));
+            }
+            panel.sync_editor(cx);
+            assert!(cancellation.is_cancelled());
+            assert_eq!(
+                panel.profile().map(|p| p.authentication.clone()),
+                Some(AiAuthentication::Bearer {
+                    credential: Some(reference.clone())
+                })
+            );
+            assert_eq!(
+                panel.credentials.get(&original).map(|v| v.as_str()),
+                Some("fixture-key")
+            );
+            let config = super::local_agent_config(
+                panel.profile().unwrap_or_else(|| panic!("profile")),
+                false,
+            )
+            .unwrap_or_else(|_| panic!("limits config"));
+            assert_eq!(
+                (
+                    config.limits().timeout(),
+                    config.limits().answer_bytes(),
+                    config.limits().output_bytes(),
+                    config.limits().line_bytes(),
+                    config.limits().frames()
+                ),
+                (Duration::from_secs(27), 3 * 1024, 19 * 1024, 19 * 1024, 512)
+            );
+            panel.apply(cx);
+            assert!(panel.saving, "{}", panel.status.render(cx));
+            let saved = panel.revision;
+            panel
+                .local_timeout
+                .update(cx, |input, cx| input.set_value("invalid", window, cx));
+            panel.sync_editor(cx);
+            panel.mark_saved(saved, cx);
+            assert!(!panel.saving);
+            assert!(panel.revision > saved);
+            let mut second = fixture_profile();
+            second.name = "Independent API profile".into();
+            let second_id = second.id;
+            panel.catalog.profiles.push(second);
+            panel.select(second_id, window, cx);
+            panel.apply(cx);
+            assert!(
+                !panel.saving,
+                "a hidden invalid local draft still blocks saving"
+            );
+            panel.select(original, window, cx);
+            panel.load_editor(window, cx);
+            assert_eq!(panel.local_timeout.read(cx).value(), "invalid");
+            set_language(Language::En, cx);
+            panel.refresh_locale(window, cx);
+            assert_eq!(panel.local_timeout.read(cx).value(), "invalid");
+            panel.start_local_probe(cx);
+            assert!(panel.operation.is_none());
+            panel.begin_vault(crate::ai_credentials::VaultAction::Unlock, window, cx);
+            assert!(panel.vault_prompt.is_none());
+            for value in ["", "0", "301", "1.5", "+1", "999999"] {
+                panel
+                    .local_timeout
+                    .update(cx, |input, cx| input.set_value(value, window, cx));
+                panel.sync_editor(cx);
+                panel.apply(cx);
+                assert!(!panel.saving, "invalid timeout {value}");
+            }
+            panel
+                .local_timeout
+                .update(cx, |input, cx| input.set_value("27", window, cx));
+            panel
+                .local_output
+                .update(cx, |input, cx| input.set_value("2", window, cx));
+            panel.sync_editor(cx);
+            panel.apply(cx);
+            assert!(!panel.saving, "answer must fit total output");
+            panel
+                .local_output
+                .update(cx, |input, cx| input.set_value("19", window, cx));
+            panel.sync_editor(cx);
+            panel.apply(cx);
+            assert!(panel.saving, "{}", panel.status.render(cx));
+            assert_eq!(
+                panel.profile().map(|p| p.authentication.clone()),
+                Some(AiAuthentication::Bearer {
+                    credential: Some(reference)
+                })
+            );
+            set_language(Language::ZhCn, cx);
+        });
+    })
+    .unwrap_or_else(|_| panic!("budget editor"));
+}
+
+#[gpui_kit::test]
+fn real_input_events_sync_local_limit_and_controls_are_local_only(cx: &mut TestAppContext) {
+    let (handle, panel) = mount_sized(cx, local_profile(), 900., 580.);
+    cx.update_window(handle, |_, window, cx| {
+        window.render_frame(cx);
+        panel.update(cx, |panel, cx| {
+            panel
+                .local_timeout
+                .update(cx, |input, cx| input.set_value("", window, cx))
+        });
+        panel
+            .read(cx)
+            .local_timeout
+            .read(cx)
+            .focus_handle(cx)
+            .focus(window, cx);
+        window.input("27", cx);
+    })
+    .unwrap_or_else(|_| panic!("input event"));
+    cx.run_until_parked();
+    panel.read_with(cx, |panel, cx| {
+        let AiBackend::LocalAgent { limits, .. } =
+            &panel.profile().unwrap_or_else(|| panic!("local")).backend
+        else {
+            panic!("local");
+        };
+        assert_eq!(limits.timeout_seconds(), 27);
+        assert_eq!(panel.local_timeout.read(cx).value(), "27");
+    });
+    cx.update_window(handle, |_, window, cx| {
+        for language in [Language::ZhCn, Language::En] {
+            set_language(language, cx);
+            panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
+            window.render_frame(cx);
+            for id in ["ai-local-timeout", "ai-local-answer", "ai-local-output"] {
+                let element = window.find(id);
+                assert!(element.bounds().size.width > px(0.));
+                assert!(element.bounds().right() <= window.bounds().right());
+            }
+            window.scroll(
+                "ai-profile-form-scroll",
+                gpui_kit::ScrollDelta::Lines(point(0., -1000.)),
+                cx,
+            );
+            assert!(window.find("ai-local-output").visible());
+            assert!(window.find("ai-local-probe").visible());
+            assert!(window.find("ai-settings-apply").visible());
+        }
+        panel.update(cx, |panel, cx| panel.set_backend(None, window, cx));
+        window.render_frame(cx);
+        for id in ["ai-local-timeout", "ai-local-answer", "ai-local-output"] {
+            assert!(window.try_find(id).is_none(), "API hides {id}");
+        }
+        set_language(Language::ZhCn, cx);
+    })
+    .unwrap_or_else(|_| panic!("local form"));
 }

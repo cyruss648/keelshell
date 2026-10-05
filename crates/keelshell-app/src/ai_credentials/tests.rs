@@ -237,6 +237,7 @@ fn legacy_binding_unlocks_only_api_and_v2_requires_exact_executable() -> Result<
             .join("codex-fixture")
             .to_string_lossy()
             .into_owned(),
+        limits: Default::default(),
     };
     assert!(matches!(
         decode(&local, legacy),
@@ -247,6 +248,31 @@ fn legacy_binding_unlocks_only_api_and_v2_requires_exact_executable() -> Result<
         decode(&local, payload.clone())?.as_str(),
         "fixture-private-key"
     );
+    // Ciphertext emitted before budgets existed still authorizes only its
+    // original CLI identity; a budget-only edit does not redirect the key.
+    let mut old: serde_json::Value =
+        serde_json::from_str(&payload).map_err(|_| Error::VaultCorrupt)?;
+    old["backend"]
+        .as_object_mut()
+        .unwrap_or_else(|| panic!("backend"))
+        .remove("limits");
+    let old = Zeroizing::new(serde_json::to_string(&old).map_err(|_| Error::VaultCorrupt)?);
+    if let AiBackend::LocalAgent { limits, .. } = &mut local.backend {
+        *limits = keelshell_core::AiLocalAgentLimits::new(27, 3, 19).map_err(Error::from)?;
+    }
+    assert_eq!(
+        decode(&local, payload.clone())?.as_str(),
+        "fixture-private-key"
+    );
+    assert_eq!(decode(&local, old.clone())?.as_str(), "fixture-private-key");
+    let mut wrong_agent = local.clone();
+    if let AiBackend::LocalAgent { agent, .. } = &mut wrong_agent.backend {
+        *agent = keelshell_core::AiLocalAgent::ClaudeCode;
+    }
+    assert!(matches!(
+        decode(&wrong_agent, old),
+        Err(Error::VaultEntryMismatch)
+    ));
     if let AiBackend::LocalAgent { executable, .. } = &mut local.backend {
         *executable = std::env::temp_dir()
             .join("different-cli")
@@ -270,6 +296,7 @@ fn local_encrypted_key_roundtrip_preserves_process_only_unlock() -> Result<(), E
             .join("not-executed-codex-fixture")
             .to_string_lossy()
             .into_owned(),
+        limits: Default::default(),
     };
     profile.api_style = AiApiStyle::Responses;
     profile.endpoint = "https://api.openai.com/v1".into();

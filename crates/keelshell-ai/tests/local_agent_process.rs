@@ -195,6 +195,7 @@ async fn integration_cases() {
             "完整中文回答; selected-only"
         );
         fixture.assert_clean();
+        Box::pin(configured_budget_cases(&fixture)).await;
 
         for (question, expected) in [
             ("truncate", LocalAgentError::InvalidProtocol),
@@ -391,6 +392,95 @@ async fn integration_cases() {
     );
 }
 
+// Exercise the same user-facing factory used by the GPUI metadata adapter;
+// these are owned native fixture processes, not supplier or model acceptance.
+async fn configured_budget_cases(fixture: &Fixture) {
+    async fn ask(
+        fixture: &Fixture,
+        question: &str,
+        limits: LocalAgentLimits,
+    ) -> Result<String, LocalAgentError> {
+        let review = fixture
+            .config(Duration::from_secs(5))
+            .with_limits(limits)
+            .prepare(ContextDraft::new(question), &[], 8192)
+            .unwrap();
+        LocalAgentClient
+            .ask(review.approve(), credential(), &RequestCancellation::new())
+            .await
+            .map(|reply| reply.text().to_owned())
+    }
+    let limits = LocalAgentLimits::for_ask(Duration::from_secs(5), 1024, 8 * 1024).unwrap();
+    assert_eq!(
+        ask(fixture, "answer-exact-budget", limits)
+            .await
+            .unwrap()
+            .len(),
+        1024
+    );
+    fixture.assert_clean();
+    assert_eq!(
+        ask(fixture, "answer-excess-budget", limits).await.err(),
+        Some(LocalAgentError::OutputTooLarge)
+    );
+    fixture.assert_clean();
+    let combined = LocalAgentLimits::for_ask(Duration::from_secs(5), 1024, 1024).unwrap();
+    assert_eq!(
+        ask(fixture, "combined-budget", combined).await.err(),
+        Some(LocalAgentError::OutputTooLarge)
+    );
+    fixture.assert_clean();
+    let output_large =
+        LocalAgentLimits::for_ask(Duration::from_secs(5), 1024, 1024 * 1024).unwrap();
+    assert_eq!(
+        ask(fixture, "fixed-line-flood", output_large).await.err(),
+        Some(LocalAgentError::OutputTooLarge)
+    );
+    fixture.assert_clean();
+    for cancel in [false, true] {
+        let limits = LocalAgentLimits::for_ask(
+            Duration::from_secs(if cancel { 30 } else { 2 }),
+            1024,
+            8 * 1024,
+        )
+        .unwrap();
+        let review = fixture
+            .config(Duration::from_secs(5))
+            .with_limits(limits)
+            .prepare(ContextDraft::new("wait-descendant"), &[], 8192)
+            .unwrap();
+        let cancellation = RequestCancellation::new();
+        let child_signal = cancellation.clone();
+        let task = tokio::spawn(async move {
+            LocalAgentClient
+                .ask(review.approve(), credential(), &child_signal)
+                .await
+        });
+        let port = fixture.descendant_port().await;
+        assert!(TcpStream::connect(("127.0.0.1", port)).is_ok());
+        if cancel {
+            cancellation.cancel();
+        }
+        let result = tokio::time::timeout(Duration::from_secs(5), task)
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            result.err(),
+            Some(if cancel {
+                LocalAgentError::Cancelled
+            } else {
+                LocalAgentError::Timeout
+            })
+        );
+        assert!(
+            TcpStream::connect(("127.0.0.1", port)).is_err(),
+            "configured budget request cleaned its contained descendant"
+        );
+        fixture.assert_clean();
+    }
+}
+
 fn fixture(arguments: &[String]) {
     let executable = std::env::current_exe().unwrap();
     let filename = executable.file_stem().unwrap().to_string_lossy();
@@ -472,6 +562,17 @@ fn fixture(arguments: &[String]) {
         std::thread::sleep(Duration::from_secs(5));
         return;
     }
+    if question == "combined-budget" {
+        std::io::stderr().write_all(&vec![b'e'; 1024]).unwrap();
+        std::io::stderr().flush().unwrap();
+    }
+    if question == "fixed-line-flood" {
+        std::io::stdout()
+            .write_all(&vec![b'o'; 300 * 1024])
+            .unwrap();
+        std::thread::sleep(Duration::from_secs(5));
+        return;
+    }
     if question == "line-flood" {
         std::io::stdout()
             .write_all(&vec![b'o'; 160 * 1024])
@@ -488,6 +589,12 @@ fn fixture(arguments: &[String]) {
     } else {
         "完整中文回答; selected-only".to_owned()
     };
+    if question == "answer-exact-budget" {
+        answer = "中".repeat(341) + "a";
+    }
+    if question == "answer-excess-budget" {
+        answer = "中".repeat(342);
+    }
     if question.contains("descendant") {
         spawn_contained_descendant(executable, question.contains("inherits-pipes"));
         let deadline = Instant::now() + Duration::from_secs(2);

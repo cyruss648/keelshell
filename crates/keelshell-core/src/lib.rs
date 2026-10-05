@@ -29,7 +29,7 @@ mod snippets;
 mod store;
 mod vault;
 
-pub use ai_backends::{AiBackend, AiLocalAgent};
+pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits};
 pub use ai_profiles::{
     AiApiStyle, AiAuthentication, AiCustomHeader, AiModelReasoning, AiPreset, AiProfileCatalog,
     AiProxy, AiReasoningCapability, AiReasoningSelection, AiSecretRef, NamedAiProfile,
