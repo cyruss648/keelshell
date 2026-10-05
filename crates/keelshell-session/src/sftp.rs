@@ -46,6 +46,15 @@ pub struct RemoteEntry {
     pub modified: Option<u32>,
 }
 
+/// Complete checked regular-file observation, retained only by its caller.
+#[derive(Debug, Clone)]
+pub struct RegularFileSnapshot {
+    /// Exact complete file bytes; no truncation or text normalization.
+    pub content: Vec<u8>,
+    /// Path, size, explicit mode/type and timestamp observed during the read.
+    pub entry: RemoteEntry,
+}
+
 /// Maximum directory depth accepted by [`SftpSession::snapshot_tree_limited`].
 pub const MAX_SNAPSHOT_DEPTH: usize = 32;
 
@@ -482,6 +491,43 @@ impl SftpSession {
         path: &str,
         source: &mut R,
     ) -> Result<u64> {
+        self.replace_from_reader_checked(path, source, None).await
+    }
+
+    /// Replace an existing reviewed regular file of at most 64 KiB.
+    /// Complete content, size, mode, timestamp and canonical path are rechecked
+    /// before staging and immediately before POSIX rename. Existing temporary
+    /// ownership and no-fallback guarantees are identical to `write_atomic`.
+    /// SFTP v3 cannot atomically compare the target with the review: a malicious
+    /// concurrent server-side rename after the final check remains possible.
+    pub async fn write_regular_reviewed(
+        &self,
+        reviewed: &RegularFileSnapshot,
+        data: &[u8],
+    ) -> Result<()> {
+        inspection::inspection_path(&reviewed.entry.path)?;
+        if reviewed.content.len() > 64 * 1024 || data.len() > 64 * 1024 {
+            return Err(SessionError::OutputLimit(64 * 1024));
+        }
+        deadline(self.timeout, "SFTP reviewed replacement", async {
+            self.replace_from_reader_checked(&reviewed.entry.path, &mut &data[..], Some(reviewed))
+                .await?;
+            Ok(())
+        })
+        .await
+    }
+
+    async fn replace_from_reader_checked<R: AsyncRead + Unpin>(
+        &self,
+        path: &str,
+        source: &mut R,
+        reviewed: Option<&RegularFileSnapshot>,
+    ) -> Result<u64> {
+        if let Some(reviewed) = reviewed {
+            // The checked read owns a nested protocol future. Keep it out of
+            // the shared writer frame, including ordinary non-review uploads.
+            Box::pin(self.verify_regular_snapshot(reviewed)).await?;
+        }
         let (raw, version) = self._connection.sftp_raw_with_version().await?;
         if version
             .extensions
@@ -559,6 +605,9 @@ impl SftpSession {
         }
         guard.raw.close(&handle).await.map_err(sftp_error)?;
         guard.handle = None;
+        if let Some(reviewed) = reviewed {
+            Box::pin(self.verify_regular_snapshot(reviewed)).await?;
+        }
         let mut payload = Vec::new();
         for value in [
             guard.temporary.as_deref().ok_or(SessionError::Worker)?,

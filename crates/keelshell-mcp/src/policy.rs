@@ -38,6 +38,8 @@ pub enum ToolKind {
     MonitorSnapshot,
     /// Enqueue a suggestion for desktop human review, with no execution.
     ProposeCommand,
+    /// Enqueue replacement of one existing UTF-8 file for desktop human review.
+    ProposeFileChange,
     /// Inspect a proposal's desktop-owned status.
     GetActionStatus,
 }
@@ -52,6 +54,7 @@ impl ToolKind {
             Self::SftpRead => "keelshell_sftp_read",
             Self::MonitorSnapshot => "keelshell_monitor_snapshot",
             Self::ProposeCommand => "keelshell_propose_command",
+            Self::ProposeFileChange => "keelshell_propose_file_change",
             Self::GetActionStatus => "keelshell_get_action_status",
         }
     }
@@ -98,7 +101,7 @@ impl SessionGrant {
         self.identity
     }
 
-    /// Canonical remote roots allowed for file reads.
+    /// Canonical remote roots allowed for file reads and replacement proposals.
     pub fn paths(&self) -> &[String] {
         &self.paths
     }
@@ -270,7 +273,8 @@ impl AuthorizationLease {
                     && selections.iter().all(|id| grant.selections.contains(id))
                     && (paths.is_empty()
                         || grant.tools.contains(&ToolKind::SftpList)
-                        || grant.tools.contains(&ToolKind::SftpRead))
+                        || grant.tools.contains(&ToolKind::SftpRead)
+                        || grant.tools.contains(&ToolKind::ProposeFileChange))
                     && paths.iter().all(|path| grant.paths.contains(path))
             })
     }

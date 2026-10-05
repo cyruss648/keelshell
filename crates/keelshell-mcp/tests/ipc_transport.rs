@@ -344,7 +344,7 @@ async fn transparent_stdio_binary_serves_the_desktop_owned_protocol_and_exits_on
             .as_array()
             .unwrap()
             .len(),
-        7
+        8
     );
     send(&mut stdin, list_sessions(3)).await;
     assert_eq!(

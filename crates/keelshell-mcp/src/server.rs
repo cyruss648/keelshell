@@ -17,7 +17,8 @@ use uuid::Uuid;
 
 use crate::{
     AuthorizationLease, AuthorizedRequest, BackendReply, CommandProposal, DesktopBackend,
-    DisconnectedBackend, McpFailure, Operation, PolicyController, SessionIdentity, ToolKind,
+    DisconnectedBackend, FileChangeProposal, McpFailure, Operation, PolicyController,
+    SessionIdentity, ToolKind,
 };
 
 const MAX_REPLY_BYTES: usize = 256 * 1024;
@@ -110,7 +111,22 @@ impl KeelShellMcpServer {
             operation: operation.clone(),
             authorization: authorization.clone(),
             proposal: proposal.clone(),
+            file_proposal: match &operation {
+                Operation::ProposeFileChange {
+                    target,
+                    path,
+                    expected_sha256,
+                    replacement,
+                } => Some(FileChangeProposal::new(
+                    *target,
+                    path.clone(),
+                    expected_sha256.clone(),
+                    replacement.clone(),
+                )),
+                _ => None,
+            },
         };
+        let file_proposal = request.file_proposal.clone();
         let result = tokio::select! {
             biased;
             _ = cancellation.cancelled() => Err(McpFailure::Cancelled),
@@ -125,7 +141,13 @@ impl KeelShellMcpServer {
         if self.connection_closed.is_cancelled() {
             return Err(McpFailure::NotConnected);
         }
-        validate_reply(&operation, &authorization, proposal.as_ref(), &result)?;
+        validate_reply(
+            &operation,
+            &authorization,
+            proposal.as_ref(),
+            file_proposal.as_ref(),
+            &result,
+        )?;
         let value = serde_json::to_value(result).map_err(|_| McpFailure::BackendFailure)?;
         let result = CallToolResult::structured(value);
         if serde_json::to_vec(&result)
@@ -157,7 +179,7 @@ impl ServerHandler for KeelShellMcpServer {
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new("keelshell-mcp", env!("CARGO_PKG_VERSION")))
-            .with_instructions("External-agent server only. Access is disabled until the desktop user grants exact live sessions/tools/paths. Commands create pending desktop review proposals only. There is no client approval, SSH login, credential unlock, arbitrary command execution or generic MCP client. Explicit temporary launch configuration connects the stdio adapter to the authenticated desktop authority.")
+            .with_instructions("External-agent server only. Access is disabled until the desktop user grants exact live sessions/tools/paths. Commands and existing-file replacements create pending desktop human review proposals only. There is no client approval, SSH login, credential unlock, arbitrary command execution, direct file write or generic MCP client. Explicit temporary launch configuration connects the stdio adapter to the authenticated desktop authority.")
     }
 
     fn supported_protocol_versions(&self) -> Cow<'static, [ProtocolVersion]> {
@@ -238,6 +260,14 @@ struct StatusArgs {
     target: SessionIdentity,
     action_id: Uuid,
 }
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct FileChangeArgs {
+    target: SessionIdentity,
+    path: String,
+    expected_sha256: String,
+    replacement: String,
+}
 
 fn parse<T: serde::de::DeserializeOwned>(value: Value) -> Result<T, McpFailure> {
     serde_json::from_value(value).map_err(|_| McpFailure::InvalidArgument)
@@ -295,6 +325,24 @@ fn parse_operation(name: &str, value: Value) -> Result<Operation, McpFailure> {
                 command: args.command,
             }
         }
+        "keelshell_propose_file_change" => {
+            let args: FileChangeArgs = parse(value)?;
+            if args.expected_sha256.len() != 64
+                || !args
+                    .expected_sha256
+                    .bytes()
+                    .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+                || args.replacement.len() > 64 * 1024
+            {
+                return Err(McpFailure::InvalidArgument);
+            }
+            Operation::ProposeFileChange {
+                target: args.target,
+                path: args.path,
+                expected_sha256: args.expected_sha256,
+                replacement: args.replacement,
+            }
+        }
         "keelshell_get_action_status" => {
             let args: StatusArgs = parse(value)?;
             Operation::GetActionStatus {
@@ -311,6 +359,7 @@ fn validate_reply(
     operation: &Operation,
     lease: &AuthorizationLease,
     proposal: Option<&CommandProposal>,
+    file_proposal: Option<&FileChangeProposal>,
     reply: &BackendReply,
 ) -> Result<(), McpFailure> {
     match (operation, reply) {
@@ -388,10 +437,14 @@ fn validate_reply(
                 target: actual,
                 path: read,
                 text,
+                sha256,
             },
         ) if target == actual && path == read => {
             if text.len() > *max_bytes {
                 return Err(McpFailure::OutputLimit);
+            }
+            if *sha256 != crate::content_sha256(text) {
+                return Err(McpFailure::BackendFailure);
             }
         }
         (
@@ -417,6 +470,20 @@ fn validate_reply(
             },
         ) if target == actual => {
             if !proposal.is_some_and(|p| p.id == *action_id && p.digest == *digest) {
+                return Err(McpFailure::BackendFailure);
+            }
+        }
+        (
+            Operation::ProposeFileChange { target, .. },
+            BackendReply::PendingFileChange {
+                target: actual,
+                action_id,
+                digest,
+            },
+        ) if target == actual => {
+            if !file_proposal
+                .is_some_and(|proposal| proposal.id == *action_id && proposal.digest == *digest)
+            {
                 return Err(McpFailure::BackendFailure);
             }
         }
@@ -473,6 +540,12 @@ fn tool_definitions() -> Vec<Tool> {
             vec!["target", "command"],
         ),
         (
+            ToolKind::ProposeFileChange,
+            "Propose complete replacement of one existing allowed UTF-8 regular file, at most 64 KiB. The expected complete SHA-256 must match; desktop human review alone may write. No create/delete/move or approval capability.",
+            json!({"target":target,"path":{"type":"string","maxLength":4096},"expected_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},"replacement":{"type":"string","maxLength":65536}}),
+            vec!["target", "path", "expected_sha256", "replacement"],
+        ),
+        (
             ToolKind::GetActionStatus,
             "Read the desktop-owned state of a proposal for this exact target. No approval capability.",
             json!({"target":target,"action_id":{"type":"string","format":"uuid"}}),
@@ -482,6 +555,6 @@ fn tool_definitions() -> Vec<Tool> {
     specs.into_iter().map(|(kind, description, properties, required)| {
         let schema = json!({"type":"object","additionalProperties":false,"properties":properties,"required":required});
         Tool::new(kind.name(), description, schema.as_object().cloned().unwrap_or_default())
-            .with_annotations(ToolAnnotations::new().read_only(kind != ToolKind::ProposeCommand).destructive(false).idempotent(kind != ToolKind::ProposeCommand).open_world(false))
+            .with_annotations(ToolAnnotations::new().read_only(!matches!(kind, ToolKind::ProposeCommand | ToolKind::ProposeFileChange)).destructive(false).idempotent(!matches!(kind, ToolKind::ProposeCommand | ToolKind::ProposeFileChange)).open_world(false))
     }).collect()
 }

@@ -61,6 +61,7 @@ impl Workspace {
         }
         let roots = if self.mcp.draft_tools.contains(&ToolKind::SftpList)
             || self.mcp.draft_tools.contains(&ToolKind::SftpRead)
+            || self.mcp.draft_tools.contains(&ToolKind::ProposeFileChange)
         {
             vec![self.mcp.root.read(cx).value().to_string()]
         } else {
@@ -108,6 +109,9 @@ impl Workspace {
             .find(|tab| tab.entity_id() == entity)
             .map(|tab| tab.read(cx).title.clone())
             .unwrap_or_default();
+        let Some(session) = self.remote_sessions.get(&entity).cloned() else {
+            return;
+        };
         let target = Target {
             entity,
             identity,
@@ -115,9 +119,7 @@ impl Workspace {
             roots,
             tools: self.mcp.draft_tools.clone(),
             selection,
-        };
-        let Some(session) = self.remote_sessions.get(&entity).cloned() else {
-            return;
+            session: session.clone(),
         };
         self.mcp.busy = true;
         self.mcp.revision = uuid::Uuid::new_v4();
@@ -149,6 +151,7 @@ impl Workspace {
         // Synchronously cancel the old transport before installing replacement
         // authority. Its capability must never admit a request to the new scope.
         self.mcp.host = None;
+        self.mcp.clear_file_preparations();
         let grants = self
             .mcp
             .targets
@@ -172,8 +175,13 @@ impl Workspace {
         // Replacing any grant invalidates all previous review leases. A new
         // listener/secret also prevents an old client from using replacement scope.
         for action in &mut self.mcp.actions {
-            if matches!(action.state, ActionState::PendingReview) {
-                action.state = ActionState::Cancelled;
+            action.state = match action.state {
+                ActionState::PendingReview => ActionState::Cancelled,
+                ActionState::Running => ActionState::OutcomeUnknown,
+                state => state,
+            };
+            if action.lease.check().is_err() {
+                action.output.clear();
             }
         }
         match KeelShellMcpServer::new(

@@ -2,9 +2,9 @@
 use super::*;
 use crate::mcp_bridge::{QueueBackend, QueuedRequest};
 use keelshell_mcp::{
-    AccessPolicy, ActionState, AuthorizationLease, BackendReply, CommandProposal,
-    KeelShellMcpServer, McpFailure, Operation, PolicyController, SessionGrant, SessionIdentity,
-    SessionMetadata, ToolKind,
+    AccessPolicy, ActionKind, ActionState, AuthorizationLease, BackendReply, CommandProposal,
+    FileChangeProposal, KeelShellMcpServer, McpFailure, Operation, PolicyController, SessionGrant,
+    SessionIdentity, SessionMetadata, ToolKind,
 };
 use std::{collections::BTreeSet, time::Instant};
 
@@ -15,10 +15,11 @@ pub(super) struct Target {
     roots: Vec<String>,
     tools: BTreeSet<ToolKind>,
     selection: Option<(uuid::Uuid, String)>,
+    session: keelshell_session::SshSession,
 }
 
 struct Action {
-    proposal: CommandProposal,
+    proposal: ReviewedProposal,
     lease: AuthorizationLease,
     entity: EntityId,
     route: String,
@@ -26,9 +27,57 @@ struct Action {
     deadline: Instant,
     state: ActionState,
     output: String,
+    session: keelshell_session::SshSession,
+}
+
+enum ReviewedProposal {
+    Command(CommandProposal),
+    File {
+        proposal: Box<FileChangeProposal>,
+        baseline: keelshell_session::sftp::RegularFileSnapshot,
+        diff: String,
+    },
+}
+impl ReviewedProposal {
+    fn id(&self) -> uuid::Uuid {
+        match self {
+            Self::Command(p) => p.id,
+            Self::File { proposal, .. } => proposal.id,
+        }
+    }
+    fn target(&self) -> SessionIdentity {
+        match self {
+            Self::Command(p) => p.target,
+            Self::File { proposal, .. } => proposal.target,
+        }
+    }
+    fn digest(&self) -> &str {
+        match self {
+            Self::Command(p) => &p.digest,
+            Self::File { proposal, .. } => &proposal.digest,
+        }
+    }
+    fn kind(&self) -> ActionKind {
+        match self {
+            Self::Command(_) => ActionKind::Command,
+            Self::File { .. } => ActionKind::FileChange,
+        }
+    }
 }
 
 enum Completion {
+    FilePrepared {
+        revision: uuid::Uuid,
+        preparation_id: uuid::Uuid,
+        entity: EntityId,
+        label: String,
+        route: String,
+        proposal: Box<FileChangeProposal>,
+        lease: AuthorizationLease,
+        session: keelshell_session::SshSession,
+        reply: tokio::sync::oneshot::Sender<Result<BackendReply, McpFailure>>,
+        result: Result<(keelshell_session::sftp::RegularFileSnapshot, String), McpFailure>,
+    },
     Granted {
         revision: uuid::Uuid,
         target: Target,
@@ -46,6 +95,9 @@ enum Completion {
     },
 }
 
+#[cfg(test)]
+pub(in crate::workspace) struct HeldFilePreparation(Completion);
+
 pub(super) struct McpState {
     pub(super) show: bool,
     pub(super) root: Entity<InputState>,
@@ -54,6 +106,15 @@ pub(super) struct McpState {
     draft_selection: Option<(uuid::Uuid, String)>,
     targets: Vec<Target>,
     actions: Vec<Action>,
+    pub(super) reviewing: Option<uuid::Uuid>,
+    preparing_files: usize,
+    // Each completion releases only its own reservation, including after a
+    // failed regrant changes the UI revision without replacing authority.
+    preparing_file_ids: BTreeSet<(uuid::Uuid, uuid::Uuid)>,
+    #[cfg(test)]
+    defer_file_completions: bool,
+    #[cfg(test)]
+    held_file_completions: Vec<Completion>,
     authority: PolicyController,
     backend: Arc<QueueBackend>,
     requests: mpsc::Receiver<QueuedRequest>,
@@ -81,6 +142,13 @@ impl McpState {
             draft_selection: None,
             targets: Vec::new(),
             actions: Vec::new(),
+            reviewing: None,
+            preparing_files: 0,
+            preparing_file_ids: BTreeSet::new(),
+            #[cfg(test)]
+            defer_file_completions: false,
+            #[cfg(test)]
+            held_file_completions: Vec::new(),
             authority: PolicyController::default(),
             backend,
             requests,
@@ -104,6 +172,13 @@ impl McpState {
         self.executable = None;
         self.targets.clear();
         self.busy = false;
+        self.reviewing = None;
+        self.clear_file_preparations();
+        #[cfg(test)]
+        {
+            self.defer_file_completions = false;
+            self.held_file_completions.clear();
+        }
         for worker in self.workers.drain(..) {
             worker.abort();
         }
@@ -119,6 +194,21 @@ impl McpState {
             let _ = request.reply.send(Err(McpFailure::Disabled));
         }
     }
+    fn reserve_file_preparation(&mut self) -> uuid::Uuid {
+        let id = uuid::Uuid::new_v4();
+        self.preparing_file_ids.insert((self.revision, id));
+        self.preparing_files = self.preparing_file_ids.len();
+        id
+    }
+    fn release_file_preparation(&mut self, revision: uuid::Uuid, id: uuid::Uuid) -> bool {
+        let owned = self.preparing_file_ids.remove(&(revision, id));
+        self.preparing_files = self.preparing_file_ids.len();
+        owned
+    }
+    fn clear_file_preparations(&mut self) {
+        self.preparing_file_ids.clear();
+        self.preparing_files = 0;
+    }
 }
 impl Drop for McpState {
     fn drop(&mut self) {
@@ -127,6 +217,59 @@ impl Drop for McpState {
 }
 
 impl Workspace {
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_preparing_count(&self) -> usize {
+        assert_eq!(self.mcp.preparing_files, self.mcp.preparing_file_ids.len());
+        self.mcp.preparing_files
+    }
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_defer_file_prepared(&mut self) {
+        self.mcp.defer_file_completions = true;
+    }
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_hold_file_prepared(
+        &mut self,
+    ) -> Option<HeldFilePreparation> {
+        self.mcp
+            .held_file_completions
+            .pop()
+            .map(HeldFilePreparation)
+    }
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_return_file_prepared(
+        &mut self,
+        held: HeldFilePreparation,
+    ) {
+        self.mcp.defer_file_completions = false;
+        self.mcp
+            .result_sender
+            .try_send(held.0)
+            .unwrap_or_else(|error| panic!("return owned file completion: {error}"));
+    }
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_disable(&mut self) {
+        self.mcp.stop();
+    }
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_draft_contains(&self, tool: ToolKind) -> bool {
+        self.mcp.draft_tools.contains(&tool)
+    }
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_file_review(
+        &self,
+        id: uuid::Uuid,
+    ) -> Option<(&str, &str)> {
+        self.mcp
+            .actions
+            .iter()
+            .find(|action| action.proposal.id() == id)
+            .and_then(|action| match &action.proposal {
+                ReviewedProposal::File { proposal, diff, .. } => {
+                    Some((proposal.path.as_str(), diff.as_str()))
+                }
+                ReviewedProposal::Command(_) => None,
+            })
+    }
     pub(super) fn mcp_toolbar_label(&self) -> String {
         let pending = self
             .mcp
@@ -175,10 +318,15 @@ impl Workspace {
             .iter()
             .find(|tab| tab.entity_id() == entity)
             .is_some_and(|tab| tab.read(cx).is_open())
-            && self
-                .remote_sessions
-                .get(&entity)
-                .is_some_and(|session| !session.is_closed())
+            && self.remote_sessions.get(&entity).is_some_and(|session| {
+                !session.is_closed()
+                    && self
+                        .mcp
+                        .targets
+                        .iter()
+                        .find(|target| target.entity == entity)
+                        .is_none_or(|target| target.session.same_connection(session))
+            })
             && self
                 .reconnect_bindings
                 .get(&entity)
@@ -212,7 +360,71 @@ impl Workspace {
             let Ok(result) = self.mcp.results.try_recv() else {
                 break;
             };
+            // Test support owns completed packets before admission so a real
+            // background UI tick cannot race the deliberate generation change.
+            #[cfg(test)]
+            if self.mcp.defer_file_completions && matches!(result, Completion::FilePrepared { .. })
+            {
+                self.mcp.held_file_completions.push(result);
+                continue;
+            }
             match result {
+                Completion::FilePrepared {
+                    revision,
+                    preparation_id,
+                    entity,
+                    label,
+                    route,
+                    proposal,
+                    lease,
+                    session,
+                    reply,
+                    result,
+                } => {
+                    // Release the precise reservation before rejecting a stale
+                    // completion. Old callbacks cannot release a new grant's slot.
+                    if !self.mcp.release_file_preparation(revision, preparation_id) {
+                        continue;
+                    }
+                    if revision != self.mcp.revision {
+                        continue;
+                    }
+                    if reply.is_closed() {
+                        continue;
+                    }
+                    let result = result.and_then(|(baseline, diff)| {
+                        lease.check()?;
+                        if !self.mcp_target_current(entity, cx) {
+                            return Err(McpFailure::StaleSession);
+                        }
+                        if self.mcp.actions.len() >= 32 {
+                            return Err(McpFailure::Busy);
+                        }
+                        let response = BackendReply::PendingFileChange {
+                            target: proposal.target,
+                            action_id: proposal.id,
+                            digest: proposal.digest.clone(),
+                        };
+                        self.mcp.actions.push(Action {
+                            proposal: ReviewedProposal::File {
+                                proposal,
+                                baseline,
+                                diff,
+                            },
+                            lease,
+                            entity,
+                            route,
+                            label,
+                            deadline: Instant::now() + Duration::from_secs(300),
+                            state: ActionState::PendingReview,
+                            output: String::new(),
+                            session,
+                        });
+                        Ok(response)
+                    });
+                    let _ = reply.send(result);
+                    cx.notify();
+                }
                 Completion::Granted {
                     revision,
                     target,
@@ -277,7 +489,7 @@ impl Workspace {
                 }
                 Completion::Executed { id, state, output } => {
                     if let Some(action) = self.mcp.actions.iter_mut().find(|action| {
-                        action.proposal.id == id && matches!(action.state, ActionState::Running)
+                        action.proposal.id() == id && matches!(action.state, ActionState::Running)
                     }) {
                         if action.lease.check().is_ok() {
                             action.state = state;
@@ -347,7 +559,7 @@ impl Workspace {
         self.mcp
             .actions
             .iter()
-            .find(|action| action.proposal.id == id)
+            .find(|action| action.proposal.id() == id)
             .map(|action| action.state)
     }
     pub(in crate::workspace) fn mcp_test_expire(&mut self, id: uuid::Uuid) {
@@ -355,7 +567,7 @@ impl Workspace {
             .mcp
             .actions
             .iter_mut()
-            .find(|action| action.proposal.id == id)
+            .find(|action| action.proposal.id() == id)
         {
             action.deadline = Instant::now() - Duration::from_secs(1);
         }
@@ -369,7 +581,7 @@ impl Workspace {
             .mcp
             .actions
             .iter_mut()
-            .find(|action| action.proposal.id == id)
+            .find(|action| action.proposal.id() == id)
         {
             action.state = ActionState::Running;
             self.mcp
@@ -387,7 +599,7 @@ impl Workspace {
         self.mcp
             .actions
             .iter()
-            .find(|action| action.proposal.id == id)
+            .find(|action| action.proposal.id() == id)
             .map(|action| action.output.as_str())
     }
 }

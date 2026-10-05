@@ -91,7 +91,7 @@ async fn legacy_stdio_discovers_fixed_schemas_and_disabled_access_without_pollut
         .await;
     let tools = client.read().await;
     let tools = tools["result"]["tools"].as_array().unwrap();
-    assert_eq!(tools.len(), 7);
+    assert_eq!(tools.len(), 8);
     assert!(
         tools
             .iter()
@@ -131,7 +131,7 @@ async fn discover_lifecycle_requires_metadata_and_rejects_unsupported_versions()
             .as_array()
             .unwrap()
             .len(),
-        7
+        8
     );
     client
         .send(json!({"jsonrpc":"2.0","id":3,"method":"tools/list","params":{}}))
@@ -201,7 +201,7 @@ async fn concurrent_malformed_frames_and_requests_return_every_reply_without_pol
                     assert!(reply["id"].is_null());
                     invalid += 1;
                 } else {
-                    assert_eq!(reply["result"]["tools"].as_array().unwrap().len(), 7);
+                    assert_eq!(reply["result"]["tools"].as_array().unwrap().len(), 8);
                     assert!(valid.insert(reply["id"].as_u64().unwrap()), "duplicate reply");
                 }
             }

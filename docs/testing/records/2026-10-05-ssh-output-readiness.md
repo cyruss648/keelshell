@@ -88,3 +88,25 @@ The next exact-head CI still needs verification. Review and author worktree
 snapshots may be recoverably archived after their ignored receipts are saved;
 cleanup is checked independently. This source-only change neither requires
 nor establishes native GUI acceptance.
+
+## Exact new source CI
+
+Commit `773a11388bd4cbf2aa7e8cb3eb41e607f7db9428` was pushed and
+verified against the remote ref with zero ahead/behind and a clean tree.
+[Quality 37274762365](https://github.com/cyruss648/keelshell/actions/runs/37274762365)
+completed successfully on all three hosts. Independent root API metadata and
+all actual checkout logs agree on that commit; the named output readiness
+regression is explicitly ok on every platform. macOS/Linux each passed1060
+ordinary and8 rustdoc tests; Windows1040 ordinary and8 rustdoc. Respective
+ignored counts are11/12/11.
+
+Complete ZIP309164 bytes SHA256:
+`b86edf82523ee037d9bc1ff8b63b5ae23d8a7bf2a93c8f89627bb3f306cd37ac`.
+Original metadata/logs remain in ignored root evidence. Earlier raw job-log
+downloads were refused by the CLI ANSI guard; empty stdout and errors remain.
+Explicit raw capture to private files succeeded; it was not a product failure.
+
+Author/review worktrees were recoverably archived after receipts were copied.
+Both source and own target paths are absent; the root shared cache remains.
+Old Windows failures/timeouts remain failed. Source CI does not establish
+Windows/Linux desktop or new unmerged feature acceptance.

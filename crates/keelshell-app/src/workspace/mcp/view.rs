@@ -9,12 +9,61 @@ fn action_label(state: ActionState, cx: &App) -> &'static str {
         ActionState::Cancelled => t(cx, "授权已撤销", "Grant revoked"),
         ActionState::Running => t(cx, "执行中", "Running"),
         ActionState::Succeeded => t(cx, "已成功", "Succeeded"),
-        ActionState::Failed => t(cx, "退出失败", "Failed exit"),
+        ActionState::Failed => t(cx, "失败", "Failed"),
         ActionState::OutcomeUnknown => t(cx, "远端结果未知", "Remote outcome unknown"),
     }
 }
 
 impl Workspace {
+    pub(in crate::workspace) fn mcp_file_review_modal(&self, cx: &mut Context<Self>) -> AnyElement {
+        let Some(action) = self.mcp.reviewing.and_then(|id| {
+            self.mcp
+                .actions
+                .iter()
+                .find(|action| action.proposal.id() == id)
+        }) else {
+            return div().into_any_element();
+        };
+        let ReviewedProposal::File { proposal, diff, .. } = &action.proposal else {
+            return div().into_any_element();
+        };
+        let id = proposal.id;
+        let visual = crate::design::palette(cx);
+        let can_approve = matches!(action.state, ActionState::PendingReview)
+            && !self.mcp.busy
+            && Instant::now() < action.deadline
+            && action.lease.check().is_ok()
+            && self.mcp_target_current(action.entity, cx)
+            && !self
+                .mcp
+                .actions
+                .iter()
+                .any(|action| matches!(action.state, ActionState::Running));
+        div().absolute().inset_0().occlude().bg(rgba(0x00000088)).flex().items_center().justify_center()
+            .child(div().id("mcp-file-review-dialog").test_support().track_focus(&self.overlay_focus)
+                .w(px(850.)).h(px(660.)).max_w(relative(0.96)).max_h(relative(0.94)).min_w_0().min_h_0()
+                .bg(rgb(visual.surface)).text_color(rgb(visual.text)).border_1().border_color(rgb(visual.border)).rounded_lg().shadow_lg().flex().flex_col().overflow_hidden()
+                .child(div().p_3().flex_shrink_0().font_weight(FontWeight::SEMIBOLD).child(t(cx, "审阅远程文件完整替换", "Review complete remote file replacement")))
+                .child(div().id("mcp-file-review-scroll").test_support().flex_1().min_h_0().overflow_y_scroll().p_3().flex().flex_col().gap_2()
+                    .child(div().child(format!("{} · {}", action.label, action_label(action.state, cx))))
+                    .child(div().id("mcp-file-review-path").test_support().role(accesskit::Role::Label).aria_label(review::visible_command(&proposal.path)).font_family("monospace").overflow_x_scroll().child(review::visible_command(&proposal.path)))
+                    .child(div().text_xs().child(review::visible_command(&action.route)))
+                    .child(div().text_xs().child(format!("connection: {}\nsession: {}\nroute: {}\naction: {}\ndigest: {}", proposal.target.connection_id, proposal.target.session_id, proposal.target.route_revision, id, proposal.digest)))
+                    .child(div().text_xs().child(format!("SHA-256: {}\n→ {}", proposal.expected_sha256, proposal.replacement_sha256)))
+                    .child(div().text_sm().text_color(rgb(visual.muted)).child(t(cx,
+                        "下面显示原文全部删除、替换正文全部加入。写入前再次核对内容、大小、权限及时间；并发远端修改仍无法获得 SFTP 原子比较锁。关闭审阅保留待审提案；拒绝、到期或撤权不会写入。",
+                        "The diff shows every original line removed and every replacement line added. Content, size, permissions and time are checked again before writing; SFTP cannot atomically lock out concurrent remote changes. Closing keeps the pending proposal. Rejection, expiry or revocation does not write.")))
+                    .child(div().id("mcp-file-review-diff").test_support().flex_shrink_0().overflow_x_scroll().font_family("monospace").text_sm().whitespace_normal().bg(rgb(visual.canvas)).p_2().child(diff.clone())))
+                .child(div().id("mcp-file-review-footer").test_support().flex_shrink_0().p_3().border_t_1().border_color(rgb(visual.border)).flex().flex_wrap().justify_end().gap_2()
+                    .child(Button::new("mcp-file-review-close").ghost().label(t(cx, "暂不处理", "Keep pending"))
+                        .on_click(cx.listener(|view, _, _, cx| { view.mcp.reviewing = None; cx.notify(); })))
+                    .child(Button::new("mcp-file-review-reject").ghost().label(t(cx, "拒绝修改", "Reject change"))
+                        .on_click(cx.listener(move |view, _, _, cx| { view.review_mcp_action(id, false, cx); view.mcp.reviewing = None; cx.notify(); })))
+                    .child(Button::new("mcp-file-review-approve").primary().label(t(cx, "确认完整目标并替换文件", "Confirm exact target and replace file")).disabled(!can_approve)
+                        .on_click(cx.listener(move |view, _, _, cx| view.review_mcp_action(id, true, cx)))))
+            ).into_any_element()
+    }
+
     pub(in crate::workspace) fn mcp_modal(&self, cx: &mut Context<Self>) -> AnyElement {
         if !self.mcp.show {
             return div().into_any_element();
@@ -62,6 +111,11 @@ impl Workspace {
                 "Read monitor cache",
             ),
             (ToolKind::ProposeCommand, "提交待审命令", "Propose commands"),
+            (
+                ToolKind::ProposeFileChange,
+                "提交待审文件修改",
+                "Propose file changes",
+            ),
             (
                 ToolKind::GetActionStatus,
                 "查询提案状态",
@@ -117,7 +171,7 @@ impl Workspace {
         }
         let mut actions = div().flex().flex_col().gap_3();
         for action in &self.mcp.actions {
-            let id = action.proposal.id;
+            let id = action.proposal.id();
             let pending = matches!(action.state, ActionState::PendingReview);
             let can_approve = pending
                 && !self.mcp.busy
@@ -151,7 +205,8 @@ impl Workspace {
                     )
                     .child(div().text_xs().text_color(rgb(visual.muted)).child(format!(
                         "{} · {}",
-                        action.proposal.target.session_id, action.proposal.digest
+                        action.proposal.target().session_id,
+                        action.proposal.digest()
                     )))
                     .child(
                         div()
@@ -163,7 +218,17 @@ impl Workspace {
                             .p_2()
                             .font_family("monospace")
                             .whitespace_normal()
-                            .child(review::visible_command(&action.proposal.command)),
+                            .child(match &action.proposal {
+                                ReviewedProposal::Command(proposal) => {
+                                    review::visible_command(&proposal.command)
+                                }
+                                ReviewedProposal::File { proposal, .. } => format!(
+                                    "{}\n{} → {}",
+                                    review::visible_command(&proposal.path),
+                                    proposal.expected_sha256,
+                                    proposal.replacement_sha256
+                                ),
+                            }),
                     )
                     .when(!action.output.is_empty(), |card| {
                         card.child(
@@ -196,12 +261,29 @@ impl Workspace {
                                         .primary()
                                         .label(t(
                                             cx,
-                                            "确认目标并执行此命令",
-                                            "Confirm target and run this command",
+                                            if action.proposal.kind() == ActionKind::FileChange {
+                                                "打开完整文件审阅"
+                                            } else {
+                                                "确认目标并执行此命令"
+                                            },
+                                            if action.proposal.kind() == ActionKind::FileChange {
+                                                "Open full file review"
+                                            } else {
+                                                "Confirm target and run this command"
+                                            },
                                         ))
                                         .disabled(!can_approve)
                                         .on_click(cx.listener(move |view, _, _, cx| {
-                                            view.review_mcp_action(id, true, cx)
+                                            if view.mcp.actions.iter().any(|action| {
+                                                action.proposal.id() == id
+                                                    && action.proposal.kind()
+                                                        == ActionKind::FileChange
+                                            }) {
+                                                view.mcp.reviewing = Some(id);
+                                                cx.notify();
+                                            } else {
+                                                view.review_mcp_action(id, true, cx);
+                                            }
                                         })),
                                 ),
                         )
@@ -236,7 +318,7 @@ impl Workspace {
                     .child(div().font_weight(FontWeight::SEMIBOLD).child(t(cx, "已授权会话", "Granted sessions")))
                     .child(grants)
                     .child(div().flex().items_center().justify_between()
-                        .child(div().font_weight(FontWeight::SEMIBOLD).child(format!("{} ({pending})", t(cx, "命令提案", "Command proposals"))))
+                        .child(div().font_weight(FontWeight::SEMIBOLD).child(format!("{} ({pending})", t(cx, "操作提案", "Action proposals"))))
                         .child(Button::new("mcp-clear-actions").ghost().compact().label(t(cx, "清除已处理记录", "Clear finished records"))
                             .on_click(cx.listener(|view, _, _, cx| { view.mcp.actions.retain(|action| matches!(action.state, ActionState::PendingReview | ActionState::Running)); cx.notify(); }))))
                     .child(actions))

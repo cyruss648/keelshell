@@ -63,14 +63,15 @@ impl Workspace {
                 .actions
                 .iter()
                 .find(|action| {
-                    action.proposal.id == *action_id
-                        && action.proposal.target == *target
+                    action.proposal.id() == *action_id
+                        && action.proposal.target() == *target
                         && action.lease.check().is_ok()
                 })
                 .map(|action| BackendReply::ActionStatus {
                     target: *target,
                     action_id: *action_id,
                     state: action.state,
+                    action_kind: action.proposal.kind(),
                 })
                 .ok_or(McpFailure::Forbidden),
             Operation::ProposeCommand { .. } => {
@@ -92,16 +93,52 @@ impl Workspace {
                             + Duration::from_secs(u64::from(
                                 proposal.expires_after_seconds.min(300),
                             )),
-                        proposal,
+                        proposal: ReviewedProposal::Command(proposal),
                         lease: request.authorization,
                         entity: target.entity,
                         label: target.label.clone(),
                         route,
                         state: ActionState::PendingReview,
                         output: String::new(),
+                        session: target.session.clone(),
                     });
                     cx.notify();
                     Ok(response)
+                } else {
+                    Err(McpFailure::BackendFailure)
+                }
+            }
+            Operation::ProposeFileChange { .. } => {
+                if self.mcp.actions.len() + self.mcp.preparing_files >= 32 {
+                    Err(McpFailure::Busy)
+                } else if let (Some(proposal), Some(target)) = (request.file_proposal, target) {
+                    let Some(session) = self.remote_sessions.get(&target.entity).cloned() else {
+                        let _ = reply.send(Err(McpFailure::StaleSession));
+                        return;
+                    };
+                    let entity = target.entity;
+                    let label = target.label.clone();
+                    let route = self
+                        .batch_route_description(entity)
+                        .map(|(_, route)| route)
+                        .or_else(|| self.remote_hosts.get(&entity).cloned())
+                        .unwrap_or_default();
+                    let revision = self.mcp.revision;
+                    let captured_session = session.clone();
+                    let lease = request.authorization;
+                    let sender = self.mcp.result_sender.clone();
+                    let preparation_id = self.mcp.reserve_file_preparation();
+                    self.mcp.workers.push(self.runtime.spawn(async move {
+                        let mut reply = reply;
+                        let result = tokio::select! {
+                            biased;
+                            _ = reply.closed() => Err(McpFailure::Cancelled),
+                            _ = lease.revoked() => Err(McpFailure::Revoked),
+                            result = crate::mcp_bridge::prepare_file_change(session, &proposal, &lease) => result,
+                        };
+                        let _ = sender.send(Completion::FilePrepared { revision, preparation_id, entity, label, route, proposal: Box::new(proposal), lease, session: captured_session, reply, result }).await;
+                    }));
+                    return;
                 } else {
                     Err(McpFailure::BackendFailure)
                 }

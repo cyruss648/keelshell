@@ -42,6 +42,16 @@ impl SftpSession {
     /// error. The result is never a truncated success. SFTP v3 cannot exclude
     /// every concurrent writer; this supplies a review observation, not a lock.
     pub async fn read_regular(&self, path: &str, max_bytes: usize) -> Result<Vec<u8>> {
+        Ok(self.read_regular_snapshot(path, max_bytes).await?.content)
+    }
+
+    /// Capture complete checked content and portable metadata for later review.
+    /// This is an observation, not a lock or remote compare-and-swap authority.
+    pub async fn read_regular_snapshot(
+        &self,
+        path: &str,
+        max_bytes: usize,
+    ) -> Result<RegularFileSnapshot> {
         inspection_path(path)?;
         deadline(self.timeout, "SFTP checked regular-file read", async {
             let raw = DirectoryChannel(self._connection.sftp_raw().await?);
@@ -95,13 +105,40 @@ impl SftpSession {
             let closed = raw.0.close(&handle).await.map_err(sftp_error);
             let bytes = result?;
             closed?;
-            Ok(bytes)
+            Ok(RegularFileSnapshot {
+                content: bytes,
+                entry: entry(path, before),
+            })
         })
         .await
     }
+
+    pub(super) async fn verify_regular_snapshot(
+        &self,
+        snapshot: &RegularFileSnapshot,
+    ) -> Result<()> {
+        if self.canonicalize(&snapshot.entry.path).await? != snapshot.entry.path {
+            return Err(SessionError::Invalid(
+                "reviewed file canonical path changed",
+            ));
+        }
+        let current = self
+            .read_regular_snapshot(&snapshot.entry.path, 64 * 1024)
+            .await?;
+        if current.content != snapshot.content
+            || current.entry.size != snapshot.entry.size
+            || current.entry.permissions != snapshot.entry.permissions
+            || current.entry.modified != snapshot.entry.modified
+        {
+            return Err(SessionError::Invalid(
+                "reviewed file content or metadata changed",
+            ));
+        }
+        Ok(())
+    }
 }
 
-fn inspection_path(path: &str) -> Result<()> {
+pub(super) fn inspection_path(path: &str) -> Result<()> {
     valid_path(path)?;
     if path != "/"
         && (!path.starts_with('/')

@@ -20,7 +20,7 @@ impl Workspace {
             .mcp
             .actions
             .iter()
-            .position(|action| action.proposal.id == id)
+            .position(|action| action.proposal.id() == id)
         else {
             return;
         };
@@ -44,7 +44,12 @@ impl Workspace {
             cx.notify();
             return;
         }
-        let Some(session) = self.remote_sessions.get(&action.entity).cloned() else {
+        let Some(session) = self
+            .remote_sessions
+            .get(&action.entity)
+            .filter(|session| action.session.same_connection(session))
+            .cloned()
+        else {
             action.state = ActionState::Cancelled;
             cx.notify();
             return;
@@ -52,10 +57,29 @@ impl Workspace {
         // Consume exactly once on the UI thread before any network execution.
         // External MCP methods can neither approve this path nor modify bytes.
         action.state = ActionState::Running;
-        let command = action.proposal.command.clone();
+        self.mcp.reviewing = None;
+        let proposal = match &action.proposal {
+            ReviewedProposal::Command(proposal) => Execution::Command(proposal.command.clone()),
+            ReviewedProposal::File {
+                proposal, baseline, ..
+            } => Execution::File {
+                baseline: baseline.clone(),
+                replacement: proposal.replacement.clone(),
+            },
+        };
         let lease = action.lease.clone();
         let sender = self.mcp.result_sender.clone();
         self.mcp.workers.push(self.runtime.spawn(async move {
+            if let Execution::File { baseline, replacement } = proposal {
+                let result = tokio::select! {
+                    biased;
+                    _ = lease.revoked() => (ActionState::OutcomeUnknown, String::new()),
+                    result = tokio::time::timeout(Duration::from_secs(30), execute_file(session, baseline, replacement, &lease)) => result.unwrap_or((ActionState::OutcomeUnknown, String::new())),
+                };
+                let _ = sender.send(Completion::Executed { id, state: result.0, output: result.1 }).await;
+                return;
+            }
+            let Execution::Command(command) = proposal else { return; };
             let result = tokio::select! {
                 biased;
                 _ = lease.revoked() => Err(McpFailure::Revoked),
@@ -73,6 +97,67 @@ impl Workspace {
             let _ = sender.send(Completion::Executed { id, state, output }).await;
         }));
         cx.notify();
+    }
+}
+
+enum Execution {
+    Command(String),
+    File {
+        baseline: keelshell_session::sftp::RegularFileSnapshot,
+        replacement: String,
+    },
+}
+
+async fn execute_file(
+    session: keelshell_session::SshSession,
+    baseline: keelshell_session::sftp::RegularFileSnapshot,
+    replacement: String,
+    lease: &AuthorizationLease,
+) -> (ActionState, String) {
+    if lease.check().is_err() || session.is_closed() {
+        return (ActionState::OutcomeUnknown, String::new());
+    }
+    let Ok(sftp) = session.sftp().await else {
+        return (ActionState::Failed, String::new());
+    };
+    let result = async {
+        let current = sftp
+            .read_regular_snapshot(&baseline.entry.path, 64 * 1024)
+            .await;
+        if !current.is_ok_and(|current| {
+            current.content == baseline.content
+                && current.entry.size == baseline.entry.size
+                && current.entry.permissions == baseline.entry.permissions
+                && current.entry.modified == baseline.entry.modified
+        }) {
+            return (ActionState::Failed, String::new());
+        }
+        if lease.check().is_err() {
+            return (ActionState::OutcomeUnknown, String::new());
+        }
+        // Failure after mutation begins is conservatively unknown. The writer
+        // never falls back from POSIX rename, truncates, or retries a proposal.
+        if sftp
+            .write_regular_reviewed(&baseline, replacement.as_bytes())
+            .await
+            .is_err()
+        {
+            return (ActionState::OutcomeUnknown, String::new());
+        }
+        if lease.check().is_err() {
+            return (ActionState::OutcomeUnknown, String::new());
+        }
+        match sftp.read_regular(&baseline.entry.path, 64 * 1024).await {
+            Ok(bytes) if bytes == replacement.as_bytes() => (ActionState::Succeeded, String::new()),
+            _ => (ActionState::OutcomeUnknown, String::new()),
+        }
+    }
+    .await;
+    let closed = sftp.close().await;
+    if lease.check().is_err() || closed.is_err() {
+        (ActionState::OutcomeUnknown, String::new())
+    } else {
+        result
     }
 }
 

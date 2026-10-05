@@ -242,7 +242,7 @@ async fn protocol_cancel_notification_drops_owned_pending_backend_work() {
         .await;
     let response = client.read().await;
     assert_eq!(response["id"], 3);
-    assert_eq!(response["result"]["tools"].as_array().unwrap().len(), 7);
+    assert_eq!(response["result"]["tools"].as_array().unwrap().len(), 8);
     assert!(backend.dropped.load(Ordering::SeqCst));
     client.finish().await;
 }

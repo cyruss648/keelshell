@@ -32,6 +32,7 @@ pub(super) enum ModalKind {
     Vault,
     AiSettings,
     Mcp,
+    McpFileReview,
     Workflow,
     Batch,
     Archive,
@@ -56,6 +57,7 @@ impl ModalKind {
             Self::Vault => t(cx, "凭据库", "Credential vault"),
             Self::AiSettings => t(cx, "AI 配置", "AI configurations"),
             Self::Mcp => t(cx, "对外 MCP 授权与审阅", "External MCP grants and review"),
+            Self::McpFileReview => t(cx, "远程文件修改审阅", "Remote file change review"),
             Self::Workflow => t(cx, "依赖工作流", "Dependency workflow"),
             Self::Batch => t(cx, "批量任务", "Batch tasks"),
             Self::Archive => t(cx, "上次会话草稿", "Previous session drafts"),
@@ -100,11 +102,7 @@ impl SurfaceInputBoundary {
                 let current = view.active_modal() == kind
                     && view.modal_scope.current == kind
                     && view.modal_scope.generation == generation
-                    && view
-                        .keyboard_interactive
-                        .as_ref()
-                        .map(|prompt| prompt.identity)
-                        == challenge;
+                    && view.surface_challenge() == challenge;
                 if current {
                     view.remember_surface_focus(window, cx);
                 }
@@ -186,6 +184,12 @@ pub(super) struct ModalScope {
 }
 
 impl Workspace {
+    fn surface_challenge(&self) -> Option<uuid::Uuid> {
+        self.keyboard_interactive
+            .as_ref()
+            .map(|prompt| prompt.identity)
+            .or_else(|| (self.mcp.show).then_some(self.mcp.reviewing).flatten())
+    }
     pub(super) fn protect_surface_input(
         &self,
         child: AnyElement,
@@ -196,10 +200,7 @@ impl Workspace {
             workspace: cx.entity().downgrade(),
             painted_kind: self.modal_scope.current,
             painted_generation: self.modal_scope.generation,
-            painted_challenge: self
-                .keyboard_interactive
-                .as_ref()
-                .map(|prompt| prompt.identity),
+            painted_challenge: self.surface_challenge(),
         }
         .into_any_element()
     }
@@ -233,6 +234,10 @@ impl Workspace {
             (self.update_panel.is_some(), ModalKind::Updates),
             (self.vault_settings.is_some(), ModalKind::Vault),
             (self.ai_settings.is_some(), ModalKind::AiSettings),
+            (
+                self.mcp.show && self.mcp.reviewing.is_some(),
+                ModalKind::McpFileReview,
+            ),
             (self.mcp.show, ModalKind::Mcp),
             (self.show_workflow, ModalKind::Workflow),
             (self.show_batch, ModalKind::Batch),
@@ -275,10 +280,7 @@ impl Workspace {
             .borrow_mut()
             .retain(|_, focus| focus.upgrade().is_some());
         let next = self.active_modal();
-        let next_challenge = self
-            .keyboard_interactive
-            .as_ref()
-            .map(|prompt| prompt.identity);
+        let next_challenge = self.surface_challenge();
         if self.modal_scope.current == next && self.modal_scope.current_challenge != next_challenge
         {
             self.modal_scope.current_challenge = next_challenge;
@@ -389,6 +391,7 @@ impl Workspace {
                 self.ai_settings = None;
                 self.ai_settings_subscription = None;
             }
+            ModalKind::McpFileReview => self.mcp.reviewing = None,
             ModalKind::Mcp => self.mcp.show = false,
             ModalKind::Workflow => self.show_workflow = false,
             ModalKind::Batch => self.show_batch = false,
@@ -429,6 +432,7 @@ impl Workspace {
                 self.panel_modal(self.ai_settings.clone(), px(1080.), px(700.), cx)
             }
             ModalKind::Mcp => self.mcp_modal(cx),
+            ModalKind::McpFileReview => self.mcp_file_review_modal(cx),
             ModalKind::Workflow => self.workflow_modal(cx),
             ModalKind::Batch => self.batch_modal(cx),
             ModalKind::Archive => self.archive_confirmation(cx),

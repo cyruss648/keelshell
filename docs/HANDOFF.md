@@ -2,6 +2,20 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
+## 2026-10-05 文件提案主树与新 macOS 八工具闭环
+
+MCP文件提案B的新非作者限定复核通过后，21份Rust源码与冻结逐SHA相等导入主树；根完整门禁382.385秒通过1077普通+8doc+6脚本、fmt/严格workspace all-targets Clippy/x.y与默认/2MiB控制器，原11ignored保持。显式MAC15新GUI/MCP+fixture构建、标准双程序打包及原生检查通过，输入前后/与门禁相等。新原生应用连接自有TCP SSH/SFTP；自有外部客户端协商八工具并实际读取，人工完整审阅批准后精确字节/摘要读回，拒绝后不变，提案后独立修改再批准被拒并保留外部内容。首轮屏幕外AX操作未进入审阅、授权变更及EOF失败保留，具体原因未确立；第二轮先滚动到可见按钮的闭环exit0，不改产品源码。最终撤权；两次companion、GUI、fixture出生身份消失，SSH与控制监听/线程关闭、私有目录清理，HTTP0/0不计API验收。见[文件提案记录](testing/records/2026-10-05-mcp-file-proposals.md)。新提交CI另核验；第八工具供应商、最小原生六组合、Windows/Linux原生、Release/安装更新仍开放，不转移旧七工具证据。
+
+API C重复请求头草稿秘密P1仍阻止整合，133proof与134成员归档完整保存；新的D正常隐私修复只在独立树保留全配置无效草稿原值用于脱敏和请求拒绝，不赋予交付权限。D作者完整门禁338.138秒通过1109普通+8doc+6脚本和严格工程检查，11ignored保持；独立复审、主树整合和原生尚未完成。D不属于本MCP增量；下方旧“D仅基础准备”“B根门禁正在执行”保留为历史，由本节覆盖。MCP方向始终为KeelShell向外部智能体提供服务。
+
+## 2026-10-05 SSH 三平台 CI 与候选复核更新
+
+主线 `773a11388bd4cbf2aa7e8cb3eb41e607f7db9428` 已推送，远端相等、0/0及干净状态核验；[Quality37274762365](https://github.com/cyruss648/keelshell/actions/runs/37274762365) completed/success，三个实际checkout一致，SSH输出队列具名回归三平台实际ok。macOS/Linux各1060普通+8doc、Windows1040普通+8doc；11/12/11 ignored明确保留。完整原ZIP与日志经根保存核验；旧78 Windows失败不追溯改写，也不作为三平台GUI验收。
+
+API C作者38文件/49proof与原两反例通过仅属作者范围；新非作者实际证实P1：非活动配置的重复请求头草稿仍保留遮罩值，用途重建使该值遗漏于已知秘密集合，另一有效配置经Models→InputState→Test两次实际GET1/POST1。C禁止整合。133proof/134成员归档根逐bytes/hash保存；新审查被系统风险检测中断，最终fmt/diff/x.y/严格Clippy未执行，不计通过，38候选/258工程输入已恢复、10个原进程退出，0timeout。D独立树只完成精确C基础与原探针复制，尚未修复/测试；作者恢复遇模型容量错误，根接手继续推进。
+
+MCP文件提案B新非作者完成限定PASS：原MCP71普通+1doc、GPUI19、TCP-SFTP4、补充生命周期/身份/容量/路径/审批检查、恢复后fmt/严格workspace all-target Clippy/x.y/6脚本通过，26源恢复，无新已证P1/P2。最终报告已写，但proof封装遇模型容量错误中断；根保存核验已有145文件并生成根保存manifest，不称reviewer已生成未存在的manifest。实际6代×8阻塞读取在新授权后本地worker为0，远端48 READ/48 handler、峰值56 handler仍可等待READ返回；释放自有gate后全部0/零write。不把本地取消或close入队当远端停止，也不称远端跨代全局32上限。精确生产/测试代码已导入主树工作副本（继承较新文档历史），根整合门禁正在执行；新八工具原生未完成，MCP仅向外部智能体提供能力。
+
 ## 2026-10-05 新 CI 失败与修复复审状态
 
 文档提交 `78eae7cddf3d8540d5d060bc620233af966fd1b5` 已推送并核验远端、0/0与干净主树。它只改八份文档，不含新产品代码；[Quality37266941663](https://github.com/cyruss648/keelshell/actions/runs/37266941663) 已 completed/failure：macOS/Linux成功，Windows app374通过/1失败，SSH输出队列取消测试在未记录输出到达时间时断言队列非空。新的测试候选先观察真实SSH数据并明确证明队列Full，再取消，原6秒截止与最终断言保持；根专项3项和完整门禁1060普通/8doc/6脚本、格式/严格Clippy/x.y/默认及2MiB控制器通过，20份作者证明经根核验保存，全新非作者原3/私有5 TCP-SSH及严格整仓Clippy复审PASS，无限定P1/P2，64份材料经根核验保存，精确测试代码已导入主树，主树完整门禁316.964秒通过1060普通/8doc/6脚本与严格检查，两控制器/工程输入前后及与作者相等；提交后新精确CI待核验。首次外层540秒编译加测试wrapper超时保持，不计完整通过。原Windows失败保持，具体CI调度原因未证实。

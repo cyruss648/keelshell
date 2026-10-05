@@ -61,7 +61,13 @@ impl TransferWriteGate {
     async fn hold(&self, handle: &str, offset: u64, deadline: Duration) -> Result<(), ()> {
         let mut state = self.state.subscribe();
         let owned = match state.borrow_and_update().as_ref() {
-            Some(owned) if offset > 0 && owned.target == handle => owned.clone(),
+            Some(owned)
+                if offset > 0
+                    && (owned.target == handle
+                        || (owned.target.is_empty() && handle.contains(".keelshell-"))) =>
+            {
+                owned.clone()
+            }
             _ => return Ok(()),
         };
         owned.entered.fetch_add(1, Ordering::AcqRel);
@@ -205,6 +211,30 @@ impl Filesystem {
     pub fn set_invalid_transfer_read(&self, mode: usize) {
         self.invalid_transfer_read.store(mode, Ordering::Release);
     }
+    /// Own a WRITE hold for a generated atomic temporary after its first chunk.
+    pub fn hold_atomic_writes_after_first(&self) -> Result<TransferWriteHold, &'static str> {
+        let owned = Arc::new(TransferWriteState {
+            target: String::new(),
+            entered: AtomicUsize::new(0),
+            expired: AtomicBool::new(false),
+        });
+        let mut armed = false;
+        self.transfer_write_gate.state.send_if_modified(|state| {
+            if state.is_some() {
+                return false;
+            }
+            *state = Some(owned.clone());
+            armed = true;
+            true
+        });
+        if !armed {
+            return Err("fixture already has an owned WRITE hold");
+        }
+        Ok(TransferWriteHold {
+            gate: self.transfer_write_gate.clone(),
+            owned,
+        })
+    }
     pub fn transfer_writes_started(&self) -> usize {
         self.transfer_writes.load(Ordering::Acquire)
     }
@@ -234,6 +264,14 @@ impl Filesystem {
     pub fn active_directory_handles(&self) -> usize {
         self.open_handles.load(std::sync::atomic::Ordering::Acquire)
     }
+    pub fn set_file_mtime(&self, path: &str, value: u32) -> Result<(), &'static str> {
+        let mut state = self.state.lock().map_err(|_| "fixture state poisoned")?;
+        if !state.files.contains_key(path) {
+            return Err("fixture file missing");
+        }
+        state.mtimes.insert(path.to_owned(), value);
+        Ok(())
+    }
     pub fn set_atomic_unsupported(&self, value: bool) {
         self.unsupported_atomic.store(value, Ordering::Release);
     }
@@ -260,6 +298,7 @@ struct FileState {
     directories: HashSet<String>,
     read_directories: HashSet<String>,
     modes: HashMap<String, u32>,
+    mtimes: HashMap<String, u32>,
 }
 
 fn ok(id: u32) -> Status {
@@ -296,6 +335,8 @@ impl russh_sftp::server::Handler for Filesystem {
         let mut attrs = FileAttributes::empty();
         attrs.size = Some(file.len() as u64);
         attrs.permissions = Some(0o100000 | state.modes.get(&path).copied().unwrap_or(0o644));
+        attrs.mtime = state.mtimes.get(&path).copied();
+        attrs.atime = attrs.mtime;
         Ok(Attrs { id, attrs })
     }
     async fn fstat(&mut self, id: u32, handle: String) -> Result<Attrs, StatusCode> {

@@ -88,6 +88,17 @@ pub enum Operation {
         /// Exact command to show in desktop review, bounded to 32 KiB.
         command: String,
     },
+    /// Propose replacement of an existing file; this never performs a write.
+    ProposeFileChange {
+        /// Exact captured target.
+        target: SessionIdentity,
+        /// Canonical absolute remote POSIX file path.
+        path: String,
+        /// Lowercase SHA-256 of the complete content the client reviewed.
+        expected_sha256: String,
+        /// Exact complete UTF-8 replacement, at most 64 KiB.
+        replacement: String,
+    },
     /// Inspect one proposal belonging to this exact session and authority.
     GetActionStatus {
         /// Exact captured target.
@@ -107,6 +118,7 @@ impl Operation {
             Self::SftpRead { .. } => ToolKind::SftpRead,
             Self::MonitorSnapshot { .. } => ToolKind::MonitorSnapshot,
             Self::ProposeCommand { .. } => ToolKind::ProposeCommand,
+            Self::ProposeFileChange { .. } => ToolKind::ProposeFileChange,
             Self::GetActionStatus { .. } => ToolKind::GetActionStatus,
         }
     }
@@ -120,13 +132,16 @@ impl Operation {
             | Self::SftpRead { target, .. }
             | Self::MonitorSnapshot { target }
             | Self::ProposeCommand { target, .. }
+            | Self::ProposeFileChange { target, .. }
             | Self::GetActionStatus { target, .. } => Some(*target),
         }
     }
 
     pub(crate) fn path(&self) -> Option<&str> {
         match self {
-            Self::SftpList { path, .. } | Self::SftpRead { path, .. } => Some(path),
+            Self::SftpList { path, .. }
+            | Self::SftpRead { path, .. }
+            | Self::ProposeFileChange { path, .. } => Some(path),
             _ => None,
         }
     }
@@ -191,6 +206,89 @@ pub struct AuthorizedRequest {
     pub authorization: AuthorizationLease,
     /// Immutable suggestion for `ProposeCommand`, otherwise absent.
     pub proposal: Option<CommandProposal>,
+    /// Immutable replacement suggestion, present only for `ProposeFileChange`.
+    pub file_proposal: Option<FileChangeProposal>,
+}
+
+/// Server-created existing-file replacement proposal. Old content and observed
+/// metadata stay desktop-private; this object alone conveys no write authority.
+#[derive(Debug, Clone, Serialize)]
+pub struct FileChangeProposal {
+    /// Server-generated, non-reusable review identity.
+    pub id: Uuid,
+    /// Captured session and route.
+    pub target: SessionIdentity,
+    /// Exact canonical remote path.
+    pub path: String,
+    /// Client-reviewed complete baseline SHA-256.
+    pub expected_sha256: String,
+    /// Exact complete replacement, at most 64 KiB.
+    pub replacement: String,
+    /// SHA-256 of the exact replacement, computed before UI review rendering.
+    pub replacement_sha256: String,
+    /// SHA-256 binding ID, target, path, baseline and replacement bytes.
+    pub digest: String,
+    /// Maximum human review lifetime from desktop enqueue, in seconds.
+    pub expires_after_seconds: u32,
+}
+
+impl FileChangeProposal {
+    pub(crate) fn new(
+        target: SessionIdentity,
+        path: String,
+        expected_sha256: String,
+        replacement: String,
+    ) -> Self {
+        let id = Uuid::new_v4();
+        let mut hash = Sha256::new();
+        hash.update(b"keelshell-mcp-file-change-v1\0");
+        for part in [
+            id,
+            target.connection_id,
+            target.session_id,
+            target.route_revision,
+        ] {
+            hash.update(part.as_bytes());
+        }
+        for part in [&path, &expected_sha256, &replacement] {
+            hash.update((part.len() as u64).to_be_bytes());
+            hash.update(part.as_bytes());
+        }
+        let replacement_sha256 = content_sha256(&replacement);
+        Self {
+            id,
+            target,
+            path,
+            expected_sha256,
+            replacement,
+            replacement_sha256,
+            digest: hex_digest(hash.finalize()),
+            expires_after_seconds: 300,
+        }
+    }
+}
+
+/// Lowercase SHA-256 of the exact complete UTF-8 content, with no normalization.
+pub fn content_sha256(text: &str) -> String {
+    hex_digest(Sha256::digest(text.as_bytes()))
+}
+
+fn hex_digest(bytes: impl AsRef<[u8]>) -> String {
+    bytes
+        .as_ref()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+/// Desktop-reviewed proposal classification, independent of its lifecycle state.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ActionKind {
+    /// Human-reviewed SSH exec suggestion.
+    Command,
+    /// Human-reviewed existing-file replacement.
+    FileChange,
 }
 
 /// Cancellation-safe future owned by one request.
@@ -210,7 +308,7 @@ pub type BackendFuture<'a> =
 /// or credential access.
 pub trait DesktopBackend: Send + Sync + 'static {
     /// Perform only the typed read or proposal admission represented by the
-    /// request. `ProposeCommand` must only enqueue review, never approve/execute.
+    /// request. `ProposeCommand` and `ProposeFileChange` only enqueue review, never approve, execute or write.
     fn dispatch(&self, request: AuthorizedRequest) -> BackendFuture<'_>;
 }
 
@@ -335,6 +433,8 @@ pub enum BackendReply {
         path: String,
         /// Complete content within the requested bound.
         text: String,
+        /// SHA-256 of the complete exact returned UTF-8 content.
+        sha256: String,
     },
     /// Fixed monitor sample.
     Monitor {
@@ -352,6 +452,15 @@ pub enum BackendReply {
         /// Digest binding the desktop review contents.
         digest: String,
     },
+    /// Replacement was enqueued only; no baseline content or current hash leaks.
+    PendingFileChange {
+        /// Exact captured target.
+        target: SessionIdentity,
+        /// Server-created proposal ID.
+        action_id: Uuid,
+        /// Immutable review contents binding.
+        digest: String,
+    },
     /// Status for a proposal authorized by the same target/grant.
     ActionStatus {
         /// Exact captured target.
@@ -360,5 +469,7 @@ pub enum BackendReply {
         action_id: Uuid,
         /// Desktop-owned state.
         state: ActionState,
+        /// Distinguishes command and file review without exposing their content.
+        action_kind: ActionKind,
     },
 }

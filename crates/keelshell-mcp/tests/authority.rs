@@ -24,7 +24,7 @@ fn target() -> SessionIdentity {
 fn selection() -> Uuid {
     Uuid::from_u128(4)
 }
-fn tools() -> [ToolKind; 7] {
+fn tools() -> [ToolKind; 8] {
     [
         ToolKind::ListSessions,
         ToolKind::ReadSelection,
@@ -32,6 +32,7 @@ fn tools() -> [ToolKind; 7] {
         ToolKind::SftpRead,
         ToolKind::MonitorSnapshot,
         ToolKind::ProposeCommand,
+        ToolKind::ProposeFileChange,
         ToolKind::GetActionStatus,
     ]
 }
@@ -94,6 +95,7 @@ impl DesktopBackend for Backend {
                     target,
                     path,
                     text: "读".into(),
+                    sha256: content_sha256("读"),
                 },
                 Operation::MonitorSnapshot { target } => BackendReply::Monitor {
                     target,
@@ -115,10 +117,19 @@ impl DesktopBackend for Backend {
                     self.proposals.lock().unwrap().push(proposal);
                     reply
                 }
+                Operation::ProposeFileChange { target, .. } => {
+                    let proposal = request.file_proposal.unwrap();
+                    BackendReply::PendingFileChange {
+                        target,
+                        action_id: proposal.id,
+                        digest: proposal.digest,
+                    }
+                }
                 Operation::GetActionStatus { target, action_id } => BackendReply::ActionStatus {
                     target,
                     action_id,
                     state: ActionState::PendingReview,
+                    action_kind: ActionKind::Command,
                 },
             };
             request.authorization.check()?;
@@ -421,6 +432,7 @@ async fn backend_mismatched_identity_selection_and_proposal_are_rejected() {
         target: stale,
         path: "/approved/file".into(),
         text: "x".into(),
+        sha256: content_sha256("x"),
     });
     assert_eq!(
         invoke(
@@ -509,6 +521,7 @@ async fn complete_byte_bounds_and_escaped_json_size_are_enforced() {
         target: target(),
         path: "/approved/file".into(),
         text: "读".into(),
+        sha256: content_sha256("读"),
     });
     assert_eq!(
         invoke(
@@ -524,6 +537,7 @@ async fn complete_byte_bounds_and_escaped_json_size_are_enforced() {
         target: target(),
         path: "/approved/file".into(),
         text: "\0".repeat(65536),
+        sha256: content_sha256(&"\0".repeat(65536)),
     });
     assert_eq!(
         invoke(
@@ -718,4 +732,110 @@ async fn session_metadata_cannot_disclose_ungranted_selection_ids_or_roots() {
             .unwrap_err(),
         McpFailure::Forbidden
     );
+}
+
+#[tokio::test]
+async fn file_proposal_has_separate_permission_scoped_path_and_never_returns_preimage() {
+    let backend = Arc::new(Backend::default());
+    let args = json!({"target":target(),"path":"/approved/file","expected_sha256":content_sha256("old"),"replacement":"new中文\n"});
+    let denied = make_server(
+        backend.clone(),
+        enabled(&[ToolKind::SftpRead, ToolKind::ProposeCommand]),
+    );
+    assert_eq!(
+        invoke(&denied, ToolKind::ProposeFileChange, args.clone())
+            .await
+            .unwrap_err(),
+        McpFailure::Forbidden
+    );
+    assert_eq!(backend.calls.load(Ordering::SeqCst), 0);
+    let server = make_server(backend.clone(), enabled(&[ToolKind::ProposeFileChange]));
+    let first = invoke(&server, ToolKind::ProposeFileChange, args.clone())
+        .await
+        .unwrap();
+    let second = invoke(&server, ToolKind::ProposeFileChange, args.clone())
+        .await
+        .unwrap();
+    assert_eq!(first["kind"], "pending_file_change");
+    assert_ne!(first["action_id"], second["action_id"]);
+    assert_ne!(first["digest"], second["digest"]);
+    assert!(first.get("text").is_none() && first.get("sha256").is_none());
+    let mut outside = args;
+    outside["path"] = json!("/approved-other/file");
+    assert_eq!(
+        invoke(&server, ToolKind::ProposeFileChange, outside)
+            .await
+            .unwrap_err(),
+        McpFailure::Forbidden
+    );
+}
+
+#[tokio::test]
+async fn file_proposal_rejects_unknown_fields_bad_hashes_and_utf8_byte_overflow() {
+    let backend = Arc::new(Backend::default());
+    let server = make_server(backend.clone(), enabled(&[ToolKind::ProposeFileChange]));
+    let base = json!({"target":target(),"path":"/approved/file","expected_sha256":content_sha256("old"),"replacement":""});
+    for hash in ["a".repeat(63), "A".repeat(64), "g".repeat(64)] {
+        let mut bad = base.clone();
+        bad["expected_sha256"] = json!(hash);
+        assert_eq!(
+            invoke(&server, ToolKind::ProposeFileChange, bad)
+                .await
+                .unwrap_err(),
+            McpFailure::InvalidArgument
+        );
+    }
+    for (key, value) in [("approve", json!(true)), ("old_text", json!("private"))] {
+        let mut bad = base.clone();
+        bad[key] = value;
+        assert_eq!(
+            invoke(&server, ToolKind::ProposeFileChange, bad)
+                .await
+                .unwrap_err(),
+            McpFailure::InvalidArgument
+        );
+    }
+    let mut bad = base.clone();
+    bad["replacement"] = json!("中".repeat(21846));
+    assert_eq!(
+        invoke(&server, ToolKind::ProposeFileChange, bad)
+            .await
+            .unwrap_err(),
+        McpFailure::InvalidArgument
+    );
+    assert_eq!(backend.calls.load(Ordering::SeqCst), 0);
+    assert!(
+        invoke(&server, ToolKind::ProposeFileChange, base)
+            .await
+            .is_ok(),
+        "empty replacement is allowed for an existing file"
+    );
+}
+
+#[tokio::test]
+async fn sftp_content_hash_and_file_proposal_reply_binding_are_verified() {
+    let backend = Arc::new(Backend::default());
+    let server = make_server(backend.clone(), enabled(&tools()));
+    *backend.replacement.lock().unwrap() = Some(BackendReply::File {
+        target: target(),
+        path: "/approved/file".into(),
+        text: "old".into(),
+        sha256: content_sha256("different"),
+    });
+    assert_eq!(
+        invoke(
+            &server,
+            ToolKind::SftpRead,
+            json!({"target":target(),"path":"/approved/file","max_bytes":128})
+        )
+        .await
+        .unwrap_err(),
+        McpFailure::BackendFailure
+    );
+    *backend.replacement.lock().unwrap() = Some(BackendReply::PendingFileChange {
+        target: target(),
+        action_id: Uuid::new_v4(),
+        digest: "fake".into(),
+    });
+    assert_eq!(invoke(&server, ToolKind::ProposeFileChange, json!({"target":target(),"path":"/approved/file","expected_sha256":content_sha256("old"),"replacement":"new"})).await.unwrap_err(), McpFailure::BackendFailure);
 }

@@ -1,4 +1,6 @@
 //! Real GPUI consent/review actions over pinned loopback SSH handles.
+#[path = "mcp_file_changes.rs"]
+mod file_changes;
 #[path = "mcp_first_proposal.rs"]
 mod first_proposal;
 
@@ -177,8 +179,25 @@ impl Harness {
                     .update(cx, |input, cx| input.set_value(root, window, cx));
             });
             window.render_frame(cx);
-            for tool in tools {
-                window.click(tool.name(), cx);
+            for tool in [
+                ToolKind::ListSessions,
+                ToolKind::ReadSelection,
+                ToolKind::SftpList,
+                ToolKind::SftpRead,
+                ToolKind::MonitorSnapshot,
+                ToolKind::ProposeCommand,
+                ToolKind::ProposeFileChange,
+                ToolKind::GetActionStatus,
+            ] {
+                if self
+                    .fixture
+                    .workspace
+                    .read(cx)
+                    .mcp_test_draft_contains(tool)
+                    != tools.contains(&tool)
+                {
+                    window.click(tool.name(), cx);
+                }
             }
             if tools.contains(&ToolKind::ReadSelection) {
                 window.click("mcp-capture-selection", cx);

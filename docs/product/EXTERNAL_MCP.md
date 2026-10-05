@@ -2,7 +2,7 @@
 
 KeelShell 提供 MCP **服务端**。Codex、Claude Code 等外部客户端启动伴随程序 `keelshell-mcp`，它通过受认证的本机 IPC 请求正在运行的 KeelShell；SSH 会话、授权及人工审阅留在桌面应用中。应用内的 API / 本地 CLI Ask 是独立入口，本功能不接入第三方 MCP 服务。
 
-当前已实现七项工具、桌面授权及 SSH/SFTP 桥接，完成独立代码复审、真实 stdio 进程测试与 macOS 隔离 SSH 服务上的原生操作。实际安装的 Claude Code 2.1.285 已通过标准 macOS 双程序开发包完成七项 schema 协商、13 次真实工具调用与 15 次模型请求的授权流程：明确片段、目录和 UTF-8 文件读取；越界路径与未授权监控返回 `FORBIDDEN`，错误路线返回 `STALE_SESSION`；桌面批准后提案从等待变为成功，另一提案在桌面拒绝后变为拒绝。桌面操作由受控 UI 自动化执行，独立复核已通过该限定范围，无剩余 P1/P2；模型模拟服务与 SSH/SFTP 夹具均自有隔离，不代表云模型质量、任意 OS shell 或客户服务器验收。见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。
+当前实现八项固定工具，第八项为受人工审阅的现有文件替换提案，见[文件提案指南](MCP_FILE_CHANGES.md)。新增工具已通过独立工程复核、主树完整门禁及新macOS自有八工具客户端的实际文件批准/拒绝/已观察并发变化拒绝；原生最小窗口与三主题双语矩阵、供应商第八工具和其他平台原生仍未完成，见[新增工具记录](../testing/records/2026-10-05-mcp-file-proposals.md)。下列供应商实验仅覆盖此前七项工具。此前七项工具、桌面授权及 SSH/SFTP 桥接完成独立代码复审、真实 stdio 进程测试与 macOS 隔离 SSH 服务上的原生操作。实际安装的 Claude Code 2.1.285 已通过标准 macOS 双程序开发包完成七项 schema 协商、13 次真实工具调用与 15 次模型请求的授权流程：明确片段、目录和 UTF-8 文件读取；越界路径与未授权监控返回 `FORBIDDEN`，错误路线返回 `STALE_SESSION`；桌面批准后提案从等待变为成功，另一提案在桌面拒绝后变为拒绝。桌面操作由受控 UI 自动化执行，独立复核已通过该限定范围，无剩余 P1/P2；模型模拟服务与 SSH/SFTP 夹具均自有隔离，不代表云模型质量、任意 OS shell 或客户服务器验收。见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。
 
 撤权后，同一 Claude 客户端收到 `is_error=true` 的连接已断开结果，未记录第 14 次 tools/call RPC；这证明本次客户端后续访问不可用，不是新请求到达服务端后再次授权拒绝的证据。原默认拒绝及运行中撤权/重启证据继续保留在[前置记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)与[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。Codex 0.160.0 的新文本前置在仅为子进程补充回环 `NO_PROXY` / `no_proxy` 后通过；原失败保持；新的实际 MCP 尝试协商七项生产工具后，首笔模型请求缺少 KeelShell 目录并包含额外工具，停止于业务调用之前，两次失败均保留。实际读取和完整审阅场景仍未通过，见[Codex 尝试记录](../testing/records/2026-10-05-codex-authorized-mcp-failure.md)。其他平台原生窗口、文件修改提案及完整发布包仍须单独验收。
 
@@ -35,10 +35,11 @@ cargo run -p keelshell-app --locked
 | `keelshell_list_sessions` | 只列出授权活动会话的显示名、精确连接/会话/路线 ID、片段 ID 和允许目录；不提供 SSH 凭据 |
 | `keelshell_read_selection` | 读取用户明确捕获并授权的有界片段；重新授权替换片段或撤销授权后旧 ID 不可用。仅捕获新草稿尚未改变已有分享 |
 | `keelshell_sftp_list` | 在授权目录范围内读取目录，最多 256 项；路径、类型及链接检查在实际 SFTP 边界复核 |
-| `keelshell_sftp_read` | 读取授权范围内常规 UTF-8 文件，最多 64 KiB；拒绝链接、特殊对象及不完整 UTF-8 |
+| `keelshell_sftp_read` | 读取授权范围内常规 UTF-8 文件及对应完整 SHA-256，最多 64 KiB；拒绝链接、特殊对象及不完整 UTF-8 |
 | `keelshell_monitor_snapshot` | 读取当前会话已有的固定监控缓存；工具不会自行运行远程采集命令 |
 | `keelshell_propose_command` | 创建最多 32 KiB、有效期 300 秒的精确命令提案，等待应用用户逐项审阅 |
-| `keelshell_get_action_status` | 查询同一授权下提案的等待、拒绝、运行、成功、失败或结果未知状态 |
+| `keelshell_propose_file_change` | 提议最多 64 KiB 的既存常规 UTF-8 文件完整替换，旧内容 SHA-256 必须匹配；单独授权目录和能力，等待桌面完整 diff/目标人工审阅，无创建/删除/移动 |
+| `keelshell_get_action_status` | 查询同一授权下命令/文件提案的 action_kind 及等待、拒绝、到期、取消、运行、成功、失败或结果未知状态 |
 
 每次操作复核精确会话和路线。客户端没有批准、执行、SSH 登录或解锁凭据库的工具。撤权会关闭 bridge；已发出的远程命令无法据此证明停止，应用显示“远端结果未知”，撤权后的输出不继续发布。
 

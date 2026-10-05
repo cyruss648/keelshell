@@ -145,6 +145,7 @@ pub(crate) async fn read_remote(
                 Ok(BackendReply::File {
                     target,
                     path: path.clone(),
+                    sha256: keelshell_mcp::content_sha256(&text),
                     text,
                 })
             }
@@ -196,4 +197,65 @@ pub(crate) async fn validate_root(
     let closed = sftp.close().await;
     result?;
     closed.map_err(|_| McpFailure::BackendFailure)
+}
+
+/// Observe a proposal's complete baseline privately. The caller returns only a
+/// pending identity/digest: errors reveal neither old content nor current hash.
+pub(crate) async fn prepare_file_change(
+    session: keelshell_session::SshSession,
+    proposal: &keelshell_mcp::FileChangeProposal,
+    lease: &keelshell_mcp::AuthorizationLease,
+) -> Result<(keelshell_session::sftp::RegularFileSnapshot, String), McpFailure> {
+    lease.check()?;
+    if session.is_closed() {
+        return Err(McpFailure::StaleSession);
+    }
+    let sftp = session
+        .sftp()
+        .await
+        .map_err(|_| McpFailure::BackendFailure)?;
+    let result = async {
+        if sftp
+            .canonicalize(&proposal.path)
+            .await
+            .map_err(|_| McpFailure::BackendFailure)?
+            != proposal.path
+        {
+            return Err(McpFailure::Forbidden);
+        }
+        lease.check()?;
+        let baseline = sftp
+            .read_regular_snapshot(&proposal.path, 64 * 1024)
+            .await
+            .map_err(|error| match error {
+                keelshell_session::SessionError::OutputLimit(_) => McpFailure::OutputLimit,
+                _ => McpFailure::BackendFailure,
+            })?;
+        lease.check()?;
+        let old =
+            std::str::from_utf8(&baseline.content).map_err(|_| McpFailure::InvalidArgument)?;
+        if keelshell_mcp::content_sha256(old) != proposal.expected_sha256 {
+            return Err(McpFailure::BackendFailure);
+        }
+        // Whole-file replacement diff is linear in the two bounded byte inputs;
+        // no quadratic line alignment or diff recomputation runs on the UI.
+        let mut diff = String::with_capacity(old.len() + proposal.replacement.len() + 32);
+        diff.push_str("--- original\n+++ replacement\n");
+        for (prefix, text) in [("- ", old), ("+ ", proposal.replacement.as_str())] {
+            for line in text.split_inclusive('\n') {
+                diff.push_str(prefix);
+                diff.push_str(&crate::command_text::visible_command(line));
+                if !line.ends_with('\n') {
+                    diff.push_str(" [no final newline]\n");
+                }
+            }
+        }
+        Ok((baseline, diff))
+    }
+    .await;
+    let closed = sftp.close().await;
+    lease.check()?;
+    let result = result?;
+    closed.map_err(|_| McpFailure::BackendFailure)?;
+    Ok(result)
 }

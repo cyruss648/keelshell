@@ -32,6 +32,8 @@ mod directory_resume;
 mod directory_transfers;
 #[path = "fixtures/file_resume.rs"]
 mod file_resume;
+#[path = "fixtures/reviewed_file.rs"]
+mod reviewed_file;
 
 #[path = "fixtures/session_lifecycle.rs"]
 mod session_lifecycle;
