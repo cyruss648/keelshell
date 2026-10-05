@@ -1,6 +1,12 @@
 # 开发交接 — 2026-10-06
 
-最新源码CI：[Quality37346734818](https://github.com/cyruss648/keelshell/actions/runs/37346734818) 对精确 `e821d5ed350379fbd08426d99b2658611a8c0d6f` 三平台全部success。macOS/Linux各1155普通+8doc；Windows1136普通+8doc，原ignored分别11/12/11保持。Windows实际短回执明确清空SystemRoot得到10106、显式传递后完成真实三HTTP请求，两child回收及双EOF；根已独立读回run/3jobs API、实际checkout与Windows原日志。c7原被抑制错误的原因仍未知，不追溯改写；旧c7和3f26失败材料保持，见[首次失败](testing/records/2026-10-05-ai-request-options-ci.md)与[诊断失败](testing/records/2026-10-06-ai-proxy-fixture-readiness-ci.md)。
+模型目录夹具的两份测试修正已精确导入主线：header/body共享3秒总期限、接受连接恢复阻塞模式、异常退出取消/shutdown/join及真实GET1/noPOST断言；原5秒界面/观测限制保持。作者完整门禁431.334秒通过1158普通+8doc+6脚本/严格检查/两控制器，新的非作者24项及私有异常清理反例/严格检查通过；28/29和67/68封包已根全读回，主线258工程输入与最终门禁相等。生产/依赖/锁/工具链不变；新Windows CI尚待，原8d failure保留。见[修正记录](testing/records/2026-10-06-catalog-probe-owned-lifecycle.md)。
+
+最新主线 `8d074b014a9ef863944eadca02cbf190125443c7` 的 [Quality37351046635](https://github.com/cyruss648/keelshell/actions/runs/37351046635) 已结束整体 failure：macOS/Linux 各1155普通+8doc完整通过；Windows app428通过/1失败，当前已完成539普通/1失败/2ignored，doc和额外2MiB控制器未到达。失败是已有模型目录隐私测试夹具读取HTTP请求头返回10035，再因观测通道断开失败；本次没有测量请求头字节或到达时序，不认定产品泄露。SystemRoot双路径对照仍实际通过。原日志、149/150独立封包已保留；根正在另一个工作区修正测试I/O，不改变生产代码，原e821成功不关闭这次失败。见[本次CI](testing/records/2026-10-06-windows-catalog-probe-ci.md)。
+
+主线已提交并推送 `8d074b014a9ef863944eadca02cbf190125443c7`（parent e821，仅7份验证文档差量）；remote exact、0/0、推送时干净及258工程提交字节与完整门禁相等均已根实际核验。新[Quality37351046635](https://github.com/cyruss648/keelshell/actions/runs/37351046635)已结束failure，独立原始材料核验完成；下方“尚未推送”属于提交准备时点，不作为当前ref状态。已整合的诊断工作区可恢复归档，checkout/target及已合入本地/远端分支实际消失，原失败/作者/复核证明保存在主工作区并保持摘要；两个Ask作者/复审工作区仍需要，保留。
+
+此前e821源码CI：[Quality37346734818](https://github.com/cyruss648/keelshell/actions/runs/37346734818) 对精确 `e821d5ed350379fbd08426d99b2658611a8c0d6f` 三平台全部success。macOS/Linux各1155普通+8doc；Windows1136普通+8doc，原ignored分别11/12/11保持。Windows实际短回执明确清空SystemRoot得到10106、显式传递后完成真实三HTTP请求，两child回收及双EOF；根已独立读回run/3jobs API、实际checkout与Windows原日志。c7原被抑制错误的原因仍未知，不追溯改写；旧c7和3f26失败材料保持，见[首次失败](testing/records/2026-10-05-ai-request-options-ci.md)与[诊断失败](testing/records/2026-10-06-ai-proxy-fixture-readiness-ci.md)。
 
 主工作树已从c7快进到e821，严格保存并恢复根最新8份文档，258工程输入与候选完整门禁相等。根整合完整门禁370.567841秒通过1155普通+8doc+6脚本/严格检查/两控制器，258输入前后相等；173/174完整独立CI封包已根全量读回。尚未推送main，生产字节不变，本增量仅两份测试。已有作者303秒完整门禁及新的限定非作者30/31复核材料均经根读回，不冒充新原生验收。见[主树整合](testing/records/2026-10-06-ai-proxy-fixture-main-integration.md)、[新CI记录](testing/records/2026-10-06-windows-proxy-system-root-ci.md)和[SystemRoot候选](testing/records/2026-10-06-windows-proxy-system-root.md)。
 

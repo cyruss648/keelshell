@@ -934,7 +934,7 @@ pub(crate) fn request_draft_credentials(
     )
 }
 
-// Preserve the independent catalog counterexample and its assertions verbatim.
+// Preserve the independent privacy counterexample with portable fixture I/O.
 include!("tests/private_catalog_probe.rs");
 
 mod catalog_secrets;
