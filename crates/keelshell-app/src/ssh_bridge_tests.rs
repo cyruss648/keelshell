@@ -283,6 +283,7 @@ async fn full_ui_output_queue_does_not_block_cancel_or_owned_cleanup() -> Result
         let session = connect(&fixture).await?;
         let (_commands, receiver) = mpsc::sync_channel(1);
         let (output, incoming) = mpsc::sync_channel(1);
+        let readiness_output = output.clone();
         let cancelled = Arc::new(AtomicBool::new(false));
         let (lifecycle, mut state) = watch::channel(TransportState::Starting);
         let (worker, driver) = tokio::join!(
@@ -295,7 +296,34 @@ async fn full_ui_output_queue_does_not_block_cancel_or_owned_cleanup() -> Result
             ),
             async {
                 ready(&mut state).await?;
-                tokio::time::sleep(Duration::from_millis(30)).await;
+                // Ready precedes output. Observe actual SSH data, then keep the
+                // single UI slot occupied until cancellation finishes.
+                loop {
+                    match incoming.try_recv() {
+                        Ok(event @ SessionEvent::Data(_)) => {
+                            match readiness_output.try_send(event) {
+                                Ok(()) | Err(mpsc::TrySendError::Full(_)) => break,
+                                Err(mpsc::TrySendError::Disconnected(_)) => {
+                                    return Err("UI output disconnected before cancellation".into());
+                                }
+                            }
+                        }
+                        Ok(SessionEvent::Error(error)) => return Err(error.into()),
+                        Ok(SessionEvent::Exited { .. }) => {
+                            return Err("SSH ended before output backpressure".into());
+                        }
+                        Err(mpsc::TryRecvError::Disconnected) => {
+                            return Err("SSH output disconnected before backpressure".into());
+                        }
+                        Err(mpsc::TryRecvError::Empty) => {
+                            tokio::time::sleep(Duration::from_millis(2)).await;
+                        }
+                    }
+                }
+                assert!(matches!(
+                    readiness_output.try_send(SessionEvent::Data(Vec::new())),
+                    Err(mpsc::TrySendError::Full(_))
+                ));
                 cancelled.store(true, Ordering::Release);
                 Ok::<_, Box<dyn Error>>(())
             }

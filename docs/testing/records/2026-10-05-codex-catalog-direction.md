@@ -53,3 +53,15 @@ E 仅完成离线准备，尚未执行真实客户端。版本对应的官方源
 原诊断 29 项文件已核验复制。实际 B 的 31 项和 C 的 45 项输入/结果清单保持；原 A schema 失败、B features 错误、C 认证 deadline 和 D 原记录均不覆盖、不重跑同一 scope。材料在 ignored `work/codex-mcp-*20261005*`，目录 0700、文件 0600，记录不包含有效能力、API key、模型 Authorization header 或用户配置。自有监听及临时数据已清理，未改变系统代理、用户 CLI 配置、现有应用或容器。
 
 新的实际七名称观察不能关闭完整目录准入、Codex 授权 SSH/SFTP、桌面批准/拒绝、运行中撤权、新文件修改提案或其他平台原生验收。原 Claude 的有限授权通过仍按其[独立记录](2026-10-05-claude-authorized-mcp.md)报告，旧 Codex 的失败仍见[原记录](2026-10-05-codex-authorized-mcp-failure.md)。
+
+## F 生命周期预审与一次实际结果
+
+F只修复首次出生身份与父子关系的所有权追踪；新非作者独立112离线和1个自有Python到cat进程测试通过，剩余限定P1/P2为0。原E两项复用PID反例的源码/断言未改，新的helper预审不执行模型或GUI。
+
+根核验156项准备材料与361项独立材料后，仅执行一次实际F：Codex0.160.0二进制/签名和三代30mandatory加3UDP控制通过，1.913秒退出。固定HTTP400入口实际1POST、40352字节、SHA256 `7932298bfbe9f570911c76563676aca77d712c015e31dec7dbdfb27f6ca7564c`，0SSE/0业务，三个假sentinel未进入保存请求。七项名称、direct非deferred、namespace均出现；六项原始schema的五种已证实约束转换仍分别保存raw/adaptedSHA，观察状态为SCHEMA_ADAPTED_CATALOG_OBSERVED，不能称原schema精确相同。
+
+完整探针仍PROBE_ABORTED：wire包含1个owned_start与5个协议帧，没有owned_exit。客户端exit1为计划HTTP400后终止；helper实际TERM0/KILL0，自然EOF只轮询一次即观察known出生身份全部不在，receipt errors为空。根另以启动帧内三项出生身份逐项libproc核验均不在，三端口已关闭、两个privateTMP已移除、线程已停。这个清理事实不补写缺少的记录器退出帧，也不证明记录器被谁/什么信号终止。
+
+155项冻结材料保持；唯一按controller设计改写的是154字节owned-two-port-policy，将两项允许目标替换为实际自有模型/假IPC端口。根首次后置复制曾错误断言动态policy也应不变，exit1原记录保留；核验实际policy精确匹配自有两端口后完成21项runtime复制，没有重跑F。原policy在准备副本中保持。F实际失败与A至E旧失败均不可覆盖或就地重跑。
+
+此实验使用旧a19七工具companion，无GUI/有效桌面能力/SSH，不验收新文件提案、生产供应商、授权工具调用或Windows/Linux原生。缺owned_exit的直接原因及完整授权Codex业务仍开放。
