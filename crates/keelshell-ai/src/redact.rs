@@ -33,6 +33,8 @@ impl RedactionReport {
 ///
 /// A matching credential line is removed in full, so even quoted passwords with
 /// spaces are covered. Encoded, obfuscated and unknown secret formats may remain.
+/// Token-prefix heuristics ignore a prefix inside an ASCII alphanumeric word;
+/// explicit secret values are still replaced at every position.
 /// This type borrows the caller's secret list and never reads the environment.
 pub struct Redactor<'a> {
     secrets: Vec<&'a str>,
@@ -124,6 +126,16 @@ fn credential_line(line: &str) -> bool {
     .iter()
     .any(|prefix| {
         line.match_indices(prefix).any(|(start, _)| {
+            // "ask-progress" contains "sk-", but is not a standalone token.
+            // Punctuation and non-ASCII labels remain conservative matches;
+            // the explicit-value pass below does not depend on this boundary.
+            if line[..start]
+                .chars()
+                .next_back()
+                .is_some_and(|previous| previous.is_ascii_alphanumeric())
+            {
+                return false;
+            }
             line[start + prefix.len()..]
                 .bytes()
                 .take_while(|b| b.is_ascii_alphanumeric() || *b == b'_' || *b == b'-')
@@ -225,5 +237,104 @@ mod tests {
             Redactor::new(&[]).redact("client --password 'two words'").0,
             MASK
         );
+    }
+
+    #[test]
+    fn ordinary_ask_command_preserves_its_complete_review_text() {
+        let input = "```sh\nprintf 'ask-progress-review-canary'\n```";
+        assert_eq!(
+            Redactor::new(&[]).redact(input),
+            (input.into(), RedactionReport::default())
+        );
+    }
+
+    #[test]
+    fn token_prefix_inside_an_ascii_word_is_not_a_standalone_token() {
+        for input in [
+            "task-event-review",
+            "mask-documentation-summary",
+            "BASIAabcdefghijklmnop",
+            "xghp_abcdefghijklmnop",
+            "0sk-abcdefghijklmnop",
+        ] {
+            assert_eq!(
+                Redactor::new(&[]).redact(input),
+                (input.into(), RedactionReport::default())
+            );
+        }
+    }
+
+    #[test]
+    fn separated_token_prefixes_still_remove_the_entire_line() {
+        for prefix in [
+            "sk-",
+            "ghp_",
+            "github_pat_",
+            "xoxb-",
+            "xoxp-",
+            "AKIA",
+            "ASIA",
+        ] {
+            for separator in ["", " ", "'", "\"", "=", ":", "/", "_", "-", "密钥", "🔐"] {
+                let input = format!("{separator}{prefix}fixture_123-456");
+                assert_eq!(
+                    Redactor::new(&[]).redact(&input),
+                    (
+                        MASK.into(),
+                        RedactionReport {
+                            credential_lines: 1,
+                            ..Default::default()
+                        }
+                    ),
+                    "fixed prefix {prefix} after separator {separator:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn explicit_embedded_values_are_removed_without_a_token_boundary() {
+        for secret in ["sk-fixture-only-value", "ordinary-review-canary"] {
+            let input = format!("prefix{secret}suffix");
+            assert_eq!(
+                Redactor::new(&[secret]).redact(&input),
+                (
+                    format!("prefix{MASK}suffix"),
+                    RedactionReport {
+                        explicit_matches: 1,
+                        ..Default::default()
+                    }
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn credential_assignment_with_an_embedded_prefix_still_removes_the_line() {
+        assert_eq!(
+            Redactor::new(&[])
+                .redact("password=prefixsk-fixture-only-value")
+                .0,
+            MASK
+        );
+    }
+
+    #[test]
+    fn short_token_prefix_fragments_do_not_remove_diagnostics() {
+        for prefix in [
+            "sk-",
+            "ghp_",
+            "github_pat_",
+            "xoxb-",
+            "xoxp-",
+            "AKIA",
+            "ASIA",
+        ] {
+            let input = format!("received {prefix}1234567");
+            assert_eq!(
+                Redactor::new(&[]).redact(&input),
+                (input, RedactionReport::default())
+            );
+        }
     }
 }

@@ -1,64 +1,10 @@
 # 开发路线
 
-功能源码已提交并推送 `cfac02eab96d1791660bfafeb9bda9552c7f4cfe`：本地Ask真实进度、两项已独立复核的test-only补充及配套文档。根实际核对remote main、0/0、推送时干净及260工程提交字节与完整门禁相等。本机第二门禁1171普通+8doc+6脚本/严格检查/两控制器通过，MAC15新构建、57打包及标准包检查通过。精确[Quality37367209582](https://github.com/cyruss648/keelshell/actions/runs/37367209582) attempt1整体failure：Linux完整通过；Windows1152普通+8doc通过，但额外2MiB控制器45秒总期限超时，具体pending场景UNKNOWN；macOS因托管arm64容量未获运行器、未执行。原失败保持，见[本次CI](testing/records/2026-10-06-local-ask-progress-ci.md)。
+完整远程SSH产品目标仍未完成。本轮整合普通AI命令脱敏误报修复与test-only控制器阶段观测，已通过新的非作者代码/行为复核、主树完整门禁1179普通+8doc+6脚本及严格检查。默认/2MiB控制器各626条阶段记录、38次原TCP调用和5080字节future通过；原Windows45秒失败根因仍未知，不由本机通过关闭。详见[脱敏记录](testing/records/2026-10-06-ai-redaction-boundaries.md)、[控制器记录](testing/records/2026-10-06-ask-controller-stages.md)。
 
-新版真实macOS GPUI/Codex0.160.0→自有SSE完成中文浅色的等待、取消、新请求及旧尾释放隔离、最终回复与人工送入命令栏/清空；建议实际为[REDACTED]，未执行。GUI/SSH明确wait/reap、HTTP0、private删除，根三个已记录出生fresh absent及双端口errno61；不声称完整供应商后代普查。900×580逻辑窗口、全部8事实行、其余七个计划组合与其他平台原生保持开放，见[部分原生记录](testing/records/2026-10-06-local-ask-progress-native.md)。MCP仅向外部智能体提供KeelShell能力，内置Ask独立。已合入的五个受管工作树可恢复归档并核验checkout/target消失，根保留全部失败及复核材料；没有新Release或安装更新。下方为历史时点，不能覆盖此状态。
+新macOS开发包确认普通建议可读、明确捕获SSH上下文后人工送入精确命令并清空、8条事实最后一行可达；新非作者原生证据复核通过限定范围。首次无会话交付未确认，原失败保留；没有执行shell命令、900×580测量、完整语言/主题矩阵或其它平台原生。CI与发布边界见[交接](HANDOFF.md)、[CI终态记录](testing/records/2026-10-06-local-ask-progress-ci.md)。以前的进展保存在[历史路线](history/2026-10-06-roadmap-before-redaction.md)，不作为当前状态。
 
-最终Ask与两项test-only补充已在主副本整合，新非作者限定复核及根第二完整门禁通过1171普通+8doc+6脚本/严格检查/两控制器，260输入前后相等；源码未提交/推送，新MAC15双程序构建、57打包回归及标准包结构检查通过；新版原生窗口与新CI另行验收。第一次MCP超时和已推送bd9预算CI失败的原因分别未知，原记录不改，见[整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。以下旧整合“失败/待复核”属历史时点，由本段覆盖。
-
-历史bd9提交；其[Quality37356943845](https://github.com/cyruss648/keelshell/actions/runs/37356943845)整体failure：macOS自托管CLI控制器在预算清理后断言失败，普通已完成80通过/0失败/2ignored，具体分支与原因未知；Windows1139普通+8doc、Linux1158普通+8doc完整通过，目录新回归实际ok。136/137封包与258提交输入经根读回，见[新CI记录](testing/records/2026-10-06-catalog-probe-lifecycle-ci.md)。自有进程生命周期诊断在独立树进行，原本机通过与原CI失败分别保留。
-
-Ask候选已通过作者与限定独立复审并导入主工作副本，但根完整门禁314.920秒exit1：MCP无效环境子进程2秒output超时，普通已完成930通过/1失败/2ignored，doc及额外2MiB未到达。格式/x.y/6脚本/严格Clippy通过，260工程输入前后相等。Ask未提交或推送；独立启动诊断、新源码CI及新版原生仍待完成，见[整合记录](testing/records/2026-10-06-local-ask-main-integration.md)。
-
-MCP只向外部智能体提供KeelShell能力，内置Ask独立。两项test-only作者候选已冻结并经根读回：预算诊断最终1158普通+8doc、MCP子进程守卫1164普通+8doc完整门禁通过；新的非作者正在分别复核，主树尚未导入，不替代原失败原因。Codex观察器G1原Unknown反例及A准入失败cleanup反例均保留；B的62离线测试和新非作者62复核通过，仅关闭离线缺口，不给native READY。G2仅设计未实现，原F缺退出回执原因未知。顶部覆盖下方历史时点，不把辅助脚本或源码检查当作完整外部客户端/跨平台原生验收。
-
-模型目录夹具的两份测试修正已精确导入主线：header/body共享3秒总期限、接受连接恢复阻塞模式、异常退出取消/shutdown/join及真实GET1/noPOST断言；原5秒界面/观测限制保持。作者完整门禁431.334秒通过1158普通+8doc+6脚本/严格检查/两控制器，新的非作者24项及私有异常清理反例/严格检查通过；28/29和67/68封包已根全读回，主线258工程输入与最终门禁相等。生产/依赖/锁/工具链不变；新Windows CI尚待，原8d failure保留。见[修正记录](testing/records/2026-10-06-catalog-probe-owned-lifecycle.md)。
-
-最新主线 `8d074b014a9ef863944eadca02cbf190125443c7` 的 [Quality37351046635](https://github.com/cyruss648/keelshell/actions/runs/37351046635) 已结束整体 failure：macOS/Linux 各1155普通+8doc完整通过；Windows app428通过/1失败，当前已完成539普通/1失败/2ignored，doc和额外2MiB控制器未到达。失败是已有模型目录隐私测试夹具读取HTTP请求头返回10035，再因观测通道断开失败；本次没有测量请求头字节或到达时序，不认定产品泄露。SystemRoot双路径对照仍实际通过。原日志、149/150独立封包已保留；根正在另一个工作区修正测试I/O，不改变生产代码，原e821成功不关闭这次失败。见[本次CI](testing/records/2026-10-06-windows-catalog-probe-ci.md)。
-
-主线最新为已推送8d074b0，远端/0/0/推送时干净及258提交输入相等已核验；[新Quality37351046635](https://github.com/cyruss648/keelshell/actions/runs/37351046635)尚未结束，e821的三平台已通过保持原范围。已合入诊断工作区和分支清理完成，原证明保留；Ask候选继续独立复审。Codex目录记录器的新G仅离线准备，旧F缺终态保持失败，真实八工具/授权业务不先验收。
-
-2026-10-06 当前源码：e821的[Quality37346734818](https://github.com/cyruss648/keelshell/actions/runs/37346734818)三平台全部success，Windows实际清空/显式SystemRoot对照完成，根已读回实际Windows原日志和全部job API；旧c7/3f26失败保持。主树已精确快进e821并恢复最新文档，258工程输入相等，173/174完整独立CI封包已根读回，根整合门禁370.567841秒通过1155普通+8doc+6脚本、严格检查与两控制器/258输入相等、尚未push main，不以本次源码CI验收桌面或安装更新。
-
-独立本地Ask过程显示候选作者1162普通+8doc+6脚本/严格检查/两控制器/57打包通过，16源码与260输入冻结，77/78材料根完整保存核验；新的非作者正式复审开始，尚未生产整合/新版原生。MCP仅向外部智能体提供服务，当前工具与客户端验收范围见[指南](product/EXTERNAL_MCP.md)。当前工程状态以[交接顶部](HANDOFF.md)为准，下方为原产品与验证历史。
-
-2026-10-05 当前状态：API 请求选项 F 经非作者差量复核通过，48 份冻结源码已精确整合；E 固定认证头大小写 P2 及此前失败保留。主树 F 完整门禁1146普通+8doc+6脚本/严格检查及57打包、新MAC15构建检查与标准双程序打包通过；新原生API临时/环境引用、重启及手动Ask已验证限定事实，中英文三主题长文件人工拒绝与实际SFTP读回通过。首提案到期、原Discover零请求预期未满足/内容未知origin与外层PTY失败保留，最小窗口未验证；新矩阵冻结独立限定复核及根143/144逐字节读回通过，无新已证P1/P2。见[整合记录](testing/records/2026-10-05-ai-request-options-main-integration.md)、[API原生记录](testing/records/2026-10-05-ai-request-options-native.md)与[文件六组合](testing/records/2026-10-05-mcp-file-review-native-matrix.md)。前一df8源码三平台CI通过，新F提交CI另核验；Windows/Linux原生、供应商第八工具、Agent及发行/安装更新仍开放。MCP仅向外部智能体提供KeelShell能力。下方历史阶段记录不覆盖本段当前状态。
-
-2026-10-05 最新更新：对外MCP方向保持；文件提案a909的Linux/Windows CI成功、macOS重新授权测试失败，整体failure保留；新的同步修正已通过全新非作者复核与主树完整门禁，新提交CI另核验。API D虽通过独立完整门禁，新的HTTP请求头名称秘密P1阻止整合，E修复进行中。
-
-精确首次文件提案CI及跳过边界见[CI记录](testing/records/2026-10-05-mcp-file-proposals-ci.md)。新P1的9个自有HTTP请求和真实GPUI来源反例已保存，不用D原门禁关闭新缺口。下方“D尚未独立审查”“新提交CI开放”均为历史，由本段与[交接顶部](HANDOFF.md)覆盖；八工具macOS批准/拒绝/并发变化原生切片保留原范围，最小原生矩阵仍未通过。
-
-新的测试同步已通过作者1083普通+8doc+6脚本及全新非作者19MCP/105TCP/严格工程复核，原限时与关键断言保持。根导入两份测试源码，主树439.533秒完整门禁1083普通+8doc+6脚本、严格检查与默认/2MiB控制器通过；原a909 CI失败保持，新提交CI另核验。见[同步记录](testing/records/2026-10-05-mcp-grant-readiness.md)。API E追加Apply/持久化前秘密metadata保护，作者最终1121普通+8doc+6脚本通过，构建/冻结与新独立复审尚未完成。
-
-最新结果以[交接顶部](HANDOFF.md)为准：C133proof失败材料完整保存；D1109普通+8doc+6脚本作者检查通过，未合主树。MCP B145文件由根保存，主树1077普通+8doc+6脚本与严格检查通过；新源码绑定macOS自有八工具客户端实际批准/拒绝/已观察并发内容保护通过，首次AX操作失败保持。审查PASS与远端阻塞余留限制分别记录；供应商第八工具、最小原生矩阵、Windows/Linux原生和新提交CI仍开放。见[文件提案记录](testing/records/2026-10-05-mcp-file-proposals.md)。下方均为历史范围。
-
-历史限定状态：API B34文件及原五路径脱敏反例已通过作者门禁，根保存35proof，新非作者实际Models→Test入网反例证实第二P1，B禁止整合、C38文件/49proof根核验保存，作者1098普通/8doc/6脚本及严格门禁与原两反例精确通过，全新非作者已开始独立复核；文件提案A被32次实际失败重新授权计数泄漏P2否定，新B请求所有权修复完整门禁1077普通/8doc/6脚本及57打包通过，26源/53proof根核验保存、全新非作者独立复审已开始；原单次反例/独立fixed32通过，120份原复核材料保持。根F实际目录探针虽出现七名称/限定schema映射，仍因缺owned_exit失败；0业务/0GUI。文档78的Quality37266941663为macOS/Linux成功、Windows app374通过/1失败，SSH输出队列测试候选保持6秒截止并改为真实数据/Full条件，3专项和根完整工程门禁1060普通/8doc/6脚本通过，新非作者原3/私有5真实TCP-SSH与严格整仓复审PASS，64proof根核验保存、精确代码已导入；主树完整门禁1060普通/8doc/6脚本及严格检查通过，新精确CI待核验。首次外层编译加测试wrapper超时保持。上述候选均未产品提交，授权Codex、新第八工具与跨平台原生仍未关闭。见[交接](HANDOFF.md)。
-
-API请求头/代理A作者31文件已冻结，但新非作者五条GPUI prepare反例证实非活动代理Basic派生值进入其它配置已审核payload（0send/0CLI/job），P1阻止整合，新B仅修该秘密边界。文件修改提案作者26文件已冻结，1075普通/8doc/6脚本、严格工程门禁、57打包和host arm64开发编译通过，仍待新独立审查与根整合/原生。A的78证明、文件提案38证明和全部冻结源码由根核验保存；两项未提交/推送。该段覆盖下方作者候选进行中状态，不能把旧七工具材料扩为第八工具验收。
-
-新的默认拒绝服务入口完成真实initialize/tools-list，首40352字节POST出现七项KeelShell函数及五项只观察的客户端定义；1POST/0SSE/0业务，没有GUI/SSH/grant。完整探针仍PROBE_ABORTED：六项原schema约束被转换、记录器最终owned_exit缺失。E根据版本源码准备限定转换，新非作者schema检查通过但进程扫描存在复用PID误认领P1，E预审FAIL/未实际执行；新F只修出生身份关系。A/P2、B/features、C/假IPC认证失败和D实际结果保留，不追溯认定误杀。MCP仍仅向外部智能体提供能力，API请求头/代理作者31文件已冻结并进入新独立复核；受审文件修改提案仍完成作者门禁，两者未整合。见[方向与目录记录](testing/records/2026-10-05-codex-catalog-direction.md)。
-
-两个test文件已修复确定性后台数据完整/前台Running积压的测试生命周期竞态；旧CI具体触发仍候选。真实WRITE屏障保持176场景并验证准确阶段/控件、Paused部分稳定及Continue完整字节，原5s/12s与生产代码不变。作者和根门禁1060普通+8doc+6脚本、严格Clippy/fmt/x.y及默认/2MiB控制器通过，作者57打包另记；新非作者44文件/208session+1doc/4私有Handler与严格检查复审PASS，无剩余限定P1/P2，79作者/160复核证明根核验复制。目录计数/subsystem只观测清理；精确233提交的新CI独立确认全success，macOS/Linux各1060普通/8doc/6脚本/57打包及9OpenSSH，Windows1040普通/8doc、脚本5通过1跳过、打包53通过4跳过且OpenSSH步骤跳过；三平台实际文件/EOF目标ok，不提供逐场景CIJSON或新原生/发行证据。160新CI材料根核验复制，文件工作树/分支/cache已清理，见[同步记录](testing/records/2026-10-05-files-scene-readiness.md)和[三平台验证](testing/records/2026-10-05-files-scene-ci.md)。
-
-精确 `a19d0c1` 的 [Quality37253864420](https://github.com/cyruss648/keelshell/actions/runs/37253864420) 已结束 failure：macOS/Windows成功，Linux文件布局GPUI等待12秒超时，app375通过/1失败、MCP/OpenSSH未执行。macOS/Windows新EOF回归通过，macOS9项系统OpenSSH通过；Windows脚本5通过/1跳过、打包53通过/4跳过。失败证据独立核对保留，候选在新工作区诊断，原因尚未由该次CI证明；见[三平台记录](testing/records/2026-10-05-integration-ci.md)。此前三个功能worktree可恢复归档、旧分支与两个审查cache已实际清理，241份证明保持。
-
-MCP 仍仅由 KeelShell 向外部智能体提供服务。新的 Codex 0.160.0 授权只读尝试没有通过：首轮执行前脚本误解析功能表，0 POST/未 MCP exec；新范围只协商七项目录，首笔模型请求缺少 KeelShell 工具且含额外工具，安全门停止，实际 1 POST/0 业务 RPC。额外工具来源未知，原字节及两次失败保留；自有客户端与原生 GUI/SSH 已清理，根已明确撤销全部授权。新的非作者只读复核确认失败证据一致、无剩余限定范围P1/P2，15份证明由根核验复制；失败仍未关闭，详见[Codex 尝试记录](testing/records/2026-10-05-codex-authorized-mcp-failure.md)。该限定失败覆盖下方历史“Codex MCP 未执行”，不替代原 Claude 授权通过。
-
-此前精确 `40d092c` 的 [Quality37244888512](https://github.com/cyruss648/keelshell/actions/runs/37244888512) 已结束 failure（macOS/Windows success、Linux MCP EOF 退出断言失败），Linux OpenSSH 未执行；旧 e166 三平台通过保持为旧范围。完整失败日志保留；新的 EOF 分类修复、Ask 预算和弹窗输入修复均通过各自独立复核及根整合门禁 1053 普通/8文档/6脚本，限定 macOS 原生设置/当前 AX 隔离/焦点与 SSH 回显通过，见[整合记录](testing/records/2026-10-05-ai-modal-mcp-integration.md)。最新CI范围见上方，不用本机检查关闭原 Linux 失败。
-
-2026-10-05 最新对外 MCP 进展：实际安装的 Claude Code 2.1.285 已通过源码 `e16689b` 的标准 macOS 双程序开发包完成七项工具 schema 协商、13 次真实工具调用与 15 次模型请求。授权片段、目录及 UTF-8 文件读取、越界/未授权监控拒绝与失效路线拒绝均经过同一客户端的真实结果回传；受控桌面 UI 明确批准首条提案后返回成功，拒绝另一条后返回拒绝。撤销全部授权后客户端报告连接断开，未记录第 14 次 tools/call RPC，因此不声称新的服务端授权拒绝。独立复核已通过该限定范围，无剩余 P1/P2，见[授权客户端记录](testing/records/2026-10-05-claude-authorized-mcp.md)。Codex 的新受限文本前置已通过；新的实际 MCP 尝试在目录协商后被模型请求检查拒绝，0 业务 RPC，读取闭环未通过。源码基线 `e16689b` 的[Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183)三平台成功；这不关闭其他平台原生、文件修改提案、最终六目标 Release 或已安装更新。
-
-2026-10-05 工作区整合：连接库批量组织/永久清理、手工依赖工作流与文件响应布局已合入并通过独立整合审查；依赖工作流支持1–128个任务、32个已认证SSH目标及逐任务回执，文件区保留至少64px真实条目空间和固定审核操作。旧macOS开发包完成受控标签与双任务退出0/7，但实际小窗口发现终端约37px；新单行补全布局及32完整Files/16完整候选GPUI场景已修复该渲染预算，根门禁1031普通+8文档+6脚本、两种完整CLI控制器和57打包通过。fresh紧凑独立复审和新macOS包900×580八组合/显式补全闭环通过，生产提交40824f0已推送main并核对精确SHA，新Quality37232614315已结束：Linux/Windows成功，macOS的SSH测试在认证阶段超时，整次失败，旧包及GPUI场景不作为新原生通过，见[整合记录](testing/records/2026-10-05-workspace-workflows-integration.md)。
-
-SSH夹具增量：原408 CI失败仍保留；最终两文件测试修复已通过作者95项/12专项及根整仓工程门禁、9项系统OpenSSH和GUI/MCP构建。新独立复审无剩余P1/P2，95项及6项私有补充探针通过；修复f09651b已推送，Quality37235821726已结束failure（macOS/Linux成功、Windows后置TCP观察超时），下一观察修正单独核验，不沿用存在TCP探针副作用的旧候选通过结果，也不改变产品连接限时或将旧UI包改作新提交原生验收。见[夹具记录](testing/records/2026-10-05-ssh-timeout-fixture-stability.md)。
-
-Windows的后置观察已改为同截止内精确端点复绑，作者95/12/工程门禁、根整仓及fresh独立95/7探针复审通过，无剩余P1/P2；修正896073a已推送main并核对源码/远端SHA，Quality37238796819三平台实际success：macOS/Linux各1031普通+8文档、Windows1011普通+8文档、两个目标case及默认/显式2 MiB控制器均通过，macOS/Linux各9项OpenSSH及清理回执通过。159份新CI证据经根核验，本测试修正的源码CI已关闭；桌面/供应商MCP/Release保持独立，见[观察记录](testing/records/2026-10-05-windows-forward-observer.md)。
-
-此前 MCP 源码基线：MCP stdio 错误响应的接收取消窗口已用真实 SDK 与 ID4 进程超时证实；连接拥有的 I/O task 和有界 queue 已修复。最终根门禁989普通+8doc+6脚本、默认/2 MiB完整控制器、格式/严格Clippy/x.y通过；transport与新增首条短提案滚轮回归均经fresh独立审查，无P1/P2。生产修复34cff1b与新增回归958903c的三平台Quality及macOS/Linux OpenSSH均成功，新增回归三平台实际通过，见[Quality37220102376](https://github.com/cyruss648/keelshell/actions/runs/37220102376)。标准macOS双程序开发包完成隔离SSH/SFTP读取、人工批准/拒绝、撤权与重启原生闭环；供应商MCP、Windows/Linux原生、六目标Release与实际安装更新未关闭，见[记录](testing/records/2026-10-04-mcp-response-cancellation.md)。
-
-更新：2026-10-05。目标是完整的远程 SSH 管理与运维工作流，并增加参考 DBX 的 AI 配置与辅助能力。最新进展、代码接续与未验证模块见 [交接记录](HANDOFF.md)。
-
-新增正式范围见[界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：默认跟随系统的明暗主题、统一专业视觉体系、本地Claude Code/Codex接入，以及**仅向外部智能体提供能力的MCP服务端**；不开发通用第三方MCP客户端。主题基础已接通并完成领域/GPUI及macOS部分原生验证；本地CLI命名配置/能力检查/凭据引用/审核式Ask已接通并完成macOS安装版CLI→回环服务原生问答/取消。MCP已接通受认证桌面桥接和标准macOS双程序开发包受控读取/桌面审阅/撤权闭环，实际Claude授权客户端流程已完成，新的独立复核已通过该限定范围，无剩余 P1/P2。其余视觉矩阵、Agent/订阅登录、Codex MCP、文件修改提案和其他平台原生继续实施。
+MCP始终是KeelShell向外部智能体提供能力的服务端，应用内API/CLI Ask独立，不接入通用第三方MCP服务。API非默认推理参数与远程传输并行队列分别在独立工作树开发，尚未合入或验收；完成后均需新非作者复核、主树门禁及各自原生验证。完整目标与退出标准继续按下表追踪。
 
 | 阶段 | 范围 | 状态 |
 |---|---|---|

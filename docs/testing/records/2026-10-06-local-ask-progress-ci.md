@@ -21,3 +21,9 @@ macOS check-run 的一条failure明确托管运行器多次领取失败，另三
 本机第二完整门禁1171普通+8doc通过保持其本机范围；新版macOS中文浅色Ask的[部分原生验证](2026-10-06-local-ask-progress-native.md)另记。Windows新超时、macOS未执行及完整桌面/供应商/Release验收继续开放。任何后续重跑使用独立attempt与新收据，保留本attempt failure。
 
 原attempt1冻结及根完整读回后，仅对未取得运行器的macOS job提交重跑请求，API实际接受。新attempt2的原API显示exact cfac和新macOS job queued；Windows/Linux虽有新job ID，完成时间和结果沿用attempt1，不能当作重跑执行。API接受与排队不等于通过，也不关闭Windows超时或原attempt1整体failure。
+
+## 后续终态快照
+
+2026-10-05 20:57 UTC 的新只读API快照确认：旧cfac的attempt2已completed/cancelled；Mac check-run明确说明同main并发组有更高优先级等待请求而取消，并附arm64容量notice。Windows/Linux的attempt2步骤、时间及结论与attempt1相等，不作为新执行。取消操作者仍未知。
+
+后续文档检查点ad0912c的Quality37370415166 attempt1为completed/failure，但三个job均completed/cancelled、runner_id=0、steps为空，没有checkout或测试执行。该run的取消原因未读取，保持UNKNOWN，不能将顶层failure称为产品断言失败，也不代表任何平台通过。18份新原始API/收据材料已由根核对，独立读取仅4个GET，未改变旧失败。后续源码提交CI须按自己的精确head单独检查。

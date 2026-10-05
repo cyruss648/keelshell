@@ -11,6 +11,10 @@ use std::{
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Command, Stdio},
+    sync::{
+        OnceLock,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+    },
     time::{Duration, Instant},
 };
 
@@ -21,6 +25,158 @@ use keelshell_ai::{
 };
 use serde_json::{Value, json};
 use tempfile::TempDir;
+
+#[derive(Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+enum Stage {
+    Controller,
+    Adapter,
+    FixtureSetup,
+    Probe,
+    Ask,
+    ConfiguredBudget,
+    ConfiguredAsk,
+    ConfiguredDescendant,
+    Progress,
+    ProgressAsk,
+    ProgressGate,
+    ProgressAdmission,
+    ProtocolErrors,
+    Redaction,
+    PreCancelled,
+    Descendant,
+    DescendantPort,
+    LeaderExit,
+    InheritedPipes,
+    Abort,
+    SensitiveContext,
+    CredentialReject,
+    ScratchCheck,
+    Capacity,
+}
+
+#[derive(Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+enum Phase {
+    Begin,
+    Returned,
+    End,
+    GateObserved,
+    CancelRequested,
+    ReleaseRequested,
+    AbortRequested,
+    DeadlineExceeded,
+    LimitReached,
+    ConnectBegin,
+    ConnectReturned,
+    AwaitBegin,
+    AwaitReturned,
+}
+
+#[derive(Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+enum SocketOutcome {
+    Connected,
+    Refused,
+    TimedOut,
+    WouldBlock,
+    OtherError,
+}
+
+static STARTED: OnceLock<Instant> = OnceLock::new();
+static SMALL_STACK: AtomicBool = AtomicBool::new(false);
+static RECORDS: AtomicUsize = AtomicUsize::new(0);
+const RECORD_LIMIT: usize = 1024;
+
+#[derive(serde::Serialize)]
+struct StageRecord {
+    mode: &'static str,
+    sequence: usize,
+    elapsed_us: u128,
+    kind: Option<&'static str>,
+    stage: Stage,
+    phase: Phase,
+    case_index: Option<usize>,
+    socket: Option<SocketOutcome>,
+    os_error: Option<i32>,
+}
+
+fn record(
+    kind: Option<LocalAgentKind>,
+    stage: Stage,
+    phase: Phase,
+    case_index: Option<usize>,
+    socket: Option<SocketOutcome>,
+    os_error: Option<i32>,
+) {
+    let Some(started) = STARTED.get() else {
+        // Owned executable copies implement only the fixture protocol.
+        return;
+    };
+    let stderr = std::io::stderr();
+    let mut sink = stderr.lock();
+    let sequence = RECORDS.fetch_add(1, Ordering::Relaxed);
+    if sequence > RECORD_LIMIT {
+        return;
+    }
+    let (stage, phase) = if sequence == RECORD_LIMIT {
+        (Stage::Capacity, Phase::LimitReached)
+    } else {
+        (stage, phase)
+    };
+    let observation = StageRecord {
+        mode: if SMALL_STACK.load(Ordering::Relaxed) {
+            "small_stack"
+        } else {
+            "default"
+        },
+        sequence,
+        elapsed_us: started.elapsed().as_micros(),
+        kind: kind.map(|kind| match kind {
+            LocalAgentKind::Codex => "codex",
+            LocalAgentKind::ClaudeCode => "claude_code",
+        }),
+        stage,
+        phase,
+        case_index,
+        socket,
+        os_error,
+    };
+    // Observation failure cannot panic before an owned Ask is cancelled/joined.
+    // This fixed metadata never accepts input, output, environment or secrets.
+    if sink.write_all(b"controller-stage ").is_ok() {
+        let _ = serde_json::to_writer(&mut sink, &observation);
+        let _ = sink.write_all(b"\n");
+    }
+}
+
+fn mark(kind: Option<LocalAgentKind>, stage: Stage, phase: Phase, case_index: Option<usize>) {
+    record(kind, stage, phase, case_index, None, None);
+}
+
+fn connect_once(kind: LocalAgentKind, stage: Stage, port: u16) -> std::io::Result<TcpStream> {
+    mark(Some(kind), stage, Phase::ConnectBegin, None);
+    // Preserve the original synchronous call, once, and its immediate verdict.
+    let result = TcpStream::connect(("127.0.0.1", port));
+    let outcome = match &result {
+        Ok(_) => SocketOutcome::Connected,
+        Err(error) => match error.kind() {
+            std::io::ErrorKind::ConnectionRefused => SocketOutcome::Refused,
+            std::io::ErrorKind::TimedOut => SocketOutcome::TimedOut,
+            std::io::ErrorKind::WouldBlock => SocketOutcome::WouldBlock,
+            _ => SocketOutcome::OtherError,
+        },
+    };
+    record(
+        Some(kind),
+        stage,
+        Phase::ConnectReturned,
+        None,
+        Some(outcome),
+        result.as_ref().err().and_then(std::io::Error::raw_os_error),
+    );
+    result
+}
 
 fn main() {
     let arguments: Vec<_> = std::env::args().skip(1).collect();
@@ -56,6 +212,7 @@ fn main() {
             .first()
             .is_some_and(|arg| arg == "--controller-small-stack")
         {
+            SMALL_STACK.store(true, Ordering::Relaxed);
             // Exercise the identical controller without relying on the native
             // process main stack. The normal CI entry point remains unchanged.
             std::thread::Builder::new()
@@ -70,6 +227,9 @@ fn main() {
                         .block_on(async {
                             tokio::time::timeout(Duration::from_secs(45), integration_cases())
                                 .await
+                                .inspect_err(|_| {
+                                    mark(None, Stage::Controller, Phase::DeadlineExceeded, None);
+                                })
                                 .expect("small-stack controller exceeded its overall deadline");
                         });
                 })
@@ -96,6 +256,7 @@ struct Fixture {
 
 impl Fixture {
     fn new(kind: LocalAgentKind, suffix: &str) -> Self {
+        mark(Some(kind), Stage::FixtureSetup, Phase::Begin, None);
         let root = tempfile::tempdir().unwrap();
         let name = match kind {
             LocalAgentKind::Codex => "codex-agent-fixture",
@@ -107,12 +268,14 @@ impl Fixture {
         std::fs::copy(std::env::current_exe().unwrap(), &executable).unwrap();
         let scratch = root.path().join("scratch");
         std::fs::create_dir(&scratch).unwrap();
-        Self {
+        let fixture = Self {
             root,
             executable,
             scratch,
             kind,
-        }
+        };
+        mark(Some(kind), Stage::FixtureSetup, Phase::End, None);
+        fixture
     }
 
     fn config(&self, timeout: Duration) -> LocalAgentConfig {
@@ -129,6 +292,7 @@ impl Fixture {
     }
 
     async fn ask(&self, question: &str) -> Result<String, LocalAgentError> {
+        mark(Some(self.kind), Stage::Ask, Phase::Begin, None);
         let review = self
             .config(Duration::from_secs(5))
             .prepare(
@@ -137,13 +301,16 @@ impl Fixture {
                 8192,
             )
             .unwrap();
-        LocalAgentClient
+        let result = LocalAgentClient
             .ask(review.approve(), credential(), &RequestCancellation::new())
             .await
-            .map(|reply| reply.text().to_owned())
+            .map(|reply| reply.text().to_owned());
+        mark(Some(self.kind), Stage::Ask, Phase::Returned, None);
+        result
     }
 
     fn assert_clean(&self) {
+        mark(Some(self.kind), Stage::ScratchCheck, Phase::Begin, None);
         assert_eq!(
             std::fs::read_dir(&self.scratch).unwrap().count(),
             0,
@@ -154,9 +321,11 @@ impl Fixture {
             2,
             "only controller executable/scratch remain"
         );
+        mark(Some(self.kind), Stage::ScratchCheck, Phase::End, None);
     }
 
     async fn descendant_port(&self) -> u16 {
+        mark(Some(self.kind), Stage::DescendantPort, Phase::Begin, None);
         let deadline = Instant::now() + Duration::from_secs(3);
         loop {
             for entry in std::fs::read_dir(&self.scratch).unwrap() {
@@ -165,6 +334,12 @@ impl Fixture {
                     // The child may have created/truncated the file before its
                     // port write finishes. Keep the original readiness bound.
                     if let Ok(port) = text.parse() {
+                        mark(
+                            Some(self.kind),
+                            Stage::DescendantPort,
+                            Phase::Returned,
+                            None,
+                        );
                         return port;
                     }
                 }
@@ -197,8 +372,12 @@ fn credential() -> LocalAgentCredential {
 }
 
 async fn integration_cases() {
+    let _ = STARTED.set(Instant::now());
+    mark(None, Stage::Controller, Phase::Begin, None);
     for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
+        mark(Some(kind), Stage::Adapter, Phase::Begin, None);
         let fixture = Fixture::new(kind, "");
+        mark(Some(kind), Stage::Probe, Phase::Begin, None);
         let probe = LocalAgentClient
             .probe(
                 &fixture.config(Duration::from_secs(5)),
@@ -207,6 +386,7 @@ async fn integration_cases() {
             .await
             .unwrap();
         assert_eq!(probe.kind(), kind);
+        mark(Some(kind), Stage::Probe, Phase::End, None);
         assert_eq!(
             fixture
                 .ask("complete 中文 ' ; $(never-execute)")
@@ -215,10 +395,14 @@ async fn integration_cases() {
             "完整中文回答; selected-only"
         );
         fixture.assert_clean();
+        mark(Some(kind), Stage::ConfiguredBudget, Phase::Begin, None);
         Box::pin(configured_budget_cases(&fixture)).await;
+        mark(Some(kind), Stage::ConfiguredBudget, Phase::End, None);
+        mark(Some(kind), Stage::Progress, Phase::Begin, None);
         Box::pin(progress_cases(&fixture)).await;
+        mark(Some(kind), Stage::Progress, Phase::End, None);
 
-        for (question, expected) in [
+        for (case_index, (question, expected)) in [
             ("truncate", LocalAgentError::InvalidProtocol),
             ("late", LocalAgentError::InvalidProtocol),
             ("tool", LocalAgentError::UnexpectedOperation),
@@ -227,14 +411,32 @@ async fn integration_cases() {
             ("stderr-secret", LocalAgentError::ProcessFailed),
             ("stderr-flood", LocalAgentError::OutputTooLarge),
             ("line-flood", LocalAgentError::OutputTooLarge),
-        ] {
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            mark(
+                Some(kind),
+                Stage::ProtocolErrors,
+                Phase::Begin,
+                Some(case_index),
+            );
             let error = fixture.ask(question).await.unwrap_err();
             assert_eq!(error, expected, "{kind:?} {question}");
             assert!(!format!("{error:?} {error}").contains("private-fixture-secret"));
             fixture.assert_clean();
+            mark(
+                Some(kind),
+                Stage::ProtocolErrors,
+                Phase::End,
+                Some(case_index),
+            );
         }
+        mark(Some(kind), Stage::Redaction, Phase::Begin, None);
         assert_eq!(fixture.ask("echo-credential").await.unwrap(), "[REDACTED]");
+        mark(Some(kind), Stage::Redaction, Phase::End, None);
 
+        mark(Some(kind), Stage::PreCancelled, Phase::Begin, None);
         let signal = RequestCancellation::new();
         signal.cancel();
         let review = fixture
@@ -249,8 +451,15 @@ async fn integration_cases() {
             Some(LocalAgentError::Cancelled)
         );
         fixture.assert_clean();
+        mark(Some(kind), Stage::PreCancelled, Phase::End, None);
 
-        for cancel in [true, false] {
+        for (case_index, cancel) in [true, false].into_iter().enumerate() {
+            mark(
+                Some(kind),
+                Stage::Descendant,
+                Phase::Begin,
+                Some(case_index),
+            );
             let timeout = if cancel {
                 Duration::from_secs(5)
             } else {
@@ -268,14 +477,32 @@ async fn integration_cases() {
                     .await
             });
             let port = fixture.descendant_port().await;
-            assert!(TcpStream::connect(("127.0.0.1", port)).is_ok());
+            assert!(connect_once(kind, Stage::Descendant, port).is_ok());
             if cancel {
                 signal.cancel();
+                mark(
+                    Some(kind),
+                    Stage::Descendant,
+                    Phase::CancelRequested,
+                    Some(case_index),
+                );
             }
+            mark(
+                Some(kind),
+                Stage::Descendant,
+                Phase::AwaitBegin,
+                Some(case_index),
+            );
             let outcome = tokio::time::timeout(Duration::from_secs(5), task)
                 .await
                 .unwrap()
                 .unwrap();
+            mark(
+                Some(kind),
+                Stage::Descendant,
+                Phase::AwaitReturned,
+                Some(case_index),
+            );
             assert_eq!(
                 outcome.err(),
                 Some(if cancel {
@@ -285,20 +512,24 @@ async fn integration_cases() {
                 })
             );
             assert!(
-                TcpStream::connect(("127.0.0.1", port)).is_err(),
+                connect_once(kind, Stage::Descendant, port).is_err(),
                 "contained descendant listener released"
             );
             fixture.assert_clean();
+            mark(Some(kind), Stage::Descendant, Phase::End, Some(case_index));
         }
 
+        mark(Some(kind), Stage::LeaderExit, Phase::Begin, None);
         let answer = fixture.ask("leader-exits-descendant").await.unwrap();
         let port: u16 = answer.parse().unwrap();
         assert!(
-            TcpStream::connect(("127.0.0.1", port)).is_err(),
+            connect_once(kind, Stage::LeaderExit, port).is_err(),
             "successful leader exit also kills contained descendants"
         );
         fixture.assert_clean();
+        mark(Some(kind), Stage::LeaderExit, Phase::End, None);
 
+        mark(Some(kind), Stage::InheritedPipes, Phase::Begin, None);
         let started = Instant::now();
         let answer = fixture
             .ask("leader-exits-descendant-inherits-pipes")
@@ -308,9 +539,11 @@ async fn integration_cases() {
             started.elapsed() < Duration::from_secs(4),
             "inherited pipes must not delay a completed leader to timeout"
         );
-        assert!(TcpStream::connect(("127.0.0.1", answer.parse::<u16>().unwrap())).is_err());
+        assert!(connect_once(kind, Stage::InheritedPipes, answer.parse::<u16>().unwrap()).is_err());
         fixture.assert_clean();
+        mark(Some(kind), Stage::InheritedPipes, Phase::End, None);
 
+        mark(Some(kind), Stage::Abort, Phase::Begin, None);
         let review = fixture
             .config(Duration::from_secs(5))
             .prepare(ContextDraft::new("wait-descendant"), &[], 8192)
@@ -322,9 +555,11 @@ async fn integration_cases() {
         });
         let port = fixture.descendant_port().await;
         task.abort();
+        mark(Some(kind), Stage::Abort, Phase::AbortRequested, None);
         assert!(task.await.unwrap_err().is_cancelled());
+        mark(Some(kind), Stage::Abort, Phase::AwaitReturned, None);
         let deadline = Instant::now() + Duration::from_secs(2);
-        while TcpStream::connect(("127.0.0.1", port)).is_ok() {
+        while connect_once(kind, Stage::Abort, port).is_ok() {
             assert!(
                 Instant::now() < deadline,
                 "dropping future left contained process alive"
@@ -332,7 +567,9 @@ async fn integration_cases() {
             tokio::time::sleep(Duration::from_millis(10)).await;
         }
         fixture.assert_clean();
+        mark(Some(kind), Stage::Abort, Phase::End, None);
 
+        mark(Some(kind), Stage::CredentialReject, Phase::Begin, None);
         let unreviewed = fixture
             .config(Duration::from_secs(5))
             .prepare(ContextDraft::new("fixture_ephemeral_token"), &[], 8192)
@@ -349,9 +586,12 @@ async fn integration_cases() {
             Some(LocalAgentError::CredentialInContext)
         );
         fixture.assert_clean();
+        mark(Some(kind), Stage::CredentialReject, Phase::End, None);
+        mark(Some(kind), Stage::Adapter, Phase::End, None);
     }
     // Known credentials must be rejected before any version/help/model spawn,
     // including the escaped nested JSON representation of selected_context.
+    mark(None, Stage::SensitiveContext, Phase::Begin, None);
     for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
         let fixture = Fixture::new(kind, "-sensitive");
         for secret in ["fixture\"value", "fixture\\value", "fixture\"value\\mixed"] {
@@ -376,6 +616,12 @@ async fn integration_cases() {
                         .err(),
                     Some(LocalAgentError::CredentialInContext)
                 );
+                mark(
+                    Some(kind),
+                    Stage::SensitiveContext,
+                    Phase::AwaitReturned,
+                    Some(location),
+                );
                 assert!(
                     !fixture.root.path().join("spawned-fixture").exists(),
                     "credential rejection precedes every subprocess"
@@ -384,7 +630,16 @@ async fn integration_cases() {
             }
         }
     }
+    mark(None, Stage::SensitiveContext, Phase::End, None);
+    mark(None, Stage::ProgressAdmission, Phase::Begin, None);
     Box::pin(progress_admission_cases()).await;
+    mark(None, Stage::ProgressAdmission, Phase::End, None);
+    mark(
+        Some(LocalAgentKind::Codex),
+        Stage::Probe,
+        Phase::Begin,
+        Some(1),
+    );
     let future = Fixture::new(LocalAgentKind::Codex, "-future");
     assert_eq!(
         LocalAgentClient
@@ -397,6 +652,18 @@ async fn integration_cases() {
         Some(LocalAgentError::UnsupportedVersion)
     );
     future.assert_clean();
+    mark(
+        Some(LocalAgentKind::Codex),
+        Stage::Probe,
+        Phase::End,
+        Some(1),
+    );
+    mark(
+        Some(LocalAgentKind::Codex),
+        Stage::Probe,
+        Phase::Begin,
+        Some(2),
+    );
     let unsafe_flags = Fixture::new(LocalAgentKind::Codex, "-unsafe");
     assert_eq!(
         LocalAgentClient
@@ -409,6 +676,13 @@ async fn integration_cases() {
         Some(LocalAgentError::IsolationUnsupported)
     );
     unsafe_flags.assert_clean();
+    mark(
+        Some(LocalAgentKind::Codex),
+        Stage::Probe,
+        Phase::End,
+        Some(2),
+    );
+    mark(None, Stage::Controller, Phase::End, None);
     println!(
         "local agent process integration: all assertions/scenario groups passed; no supplier CLI or model calls"
     );
@@ -472,11 +746,29 @@ fn start_progress_ask(
         .prepare(ContextDraft::new(question), &[], 8192)
         .unwrap();
     let signal = signal.clone();
+    let kind = fixture.kind;
+    // Numeric cases are fixed controller positions, never the question text.
+    let case_index = match question {
+        "progress-final-gate" => Some(0),
+        "progress-nonzero-gate" => Some(1),
+        "progress-cancel-descendant-gate" => Some(2),
+        "malformed" => Some(3),
+        "out-of-order" => Some(4),
+        "tool" => Some(5),
+        "late" => Some(6),
+        "complete" => Some(7),
+        "leader-exits-descendant-inherits-pipes" => Some(8),
+        "wait-descendant" => Some(9),
+        _ => None,
+    };
     tokio::spawn(async move {
-        LocalAgentClient
+        mark(Some(kind), Stage::ProgressAsk, Phase::Begin, case_index);
+        let result = LocalAgentClient
             .ask_with_progress(review.approve(), credential(), &signal, progress)
             .await
-            .map(|reply| reply.text().to_owned())
+            .map(|reply| reply.text().to_owned());
+        mark(Some(kind), Stage::ProgressAsk, Phase::Returned, case_index);
+        result
     })
 }
 
@@ -494,12 +786,19 @@ async fn wait_progress_gate(
     facts: &mut Vec<LocalAskStage>,
     required: LocalAskStage,
 ) -> PathBuf {
+    mark(Some(fixture.kind), Stage::ProgressGate, Phase::Begin, None);
     let deadline = Instant::now() + Duration::from_secs(3);
     loop {
         drain_facts(receiver, facts);
         for tree in std::fs::read_dir(&fixture.scratch).unwrap() {
             let workspace = tree.unwrap().path().join("workspace");
             if workspace.join("progress-ready").is_file() && facts.contains(&required) {
+                mark(
+                    Some(fixture.kind),
+                    Stage::ProgressGate,
+                    Phase::GateObserved,
+                    None,
+                );
                 return workspace;
             }
         }
@@ -539,11 +838,29 @@ async fn progress_cases(fixture: &Fixture) {
         "candidate text must not complete Ask before final receipt"
     );
     std::fs::write(workspace.join("progress-release"), b"release").unwrap();
+    mark(
+        Some(fixture.kind),
+        Stage::ProgressAsk,
+        Phase::ReleaseRequested,
+        Some(0),
+    );
+    mark(
+        Some(fixture.kind),
+        Stage::ProgressAsk,
+        Phase::AwaitBegin,
+        Some(0),
+    );
     let reply = tokio::time::timeout(Duration::from_secs(5), task)
         .await
         .unwrap()
         .unwrap()
         .unwrap();
+    mark(
+        Some(fixture.kind),
+        Stage::ProgressAsk,
+        Phase::AwaitReturned,
+        Some(0),
+    );
     assert!(reply.contains("完整中文回答"));
     drain_facts(&receiver, &mut facts);
     assert_eq!(facts.len(), 8);
@@ -571,16 +888,34 @@ async fn progress_cases(fixture: &Fixture) {
             None
         };
         if let Some(port) = port {
-            assert!(TcpStream::connect(("127.0.0.1", port)).is_ok());
+            assert!(connect_once(fixture.kind, Stage::ProgressAsk, port).is_ok());
             signal.cancel();
+            mark(
+                Some(fixture.kind),
+                Stage::ProgressAsk,
+                Phase::CancelRequested,
+                Some(2),
+            );
         } else {
             std::fs::write(workspace.join("progress-release"), b"release").unwrap();
+            mark(
+                Some(fixture.kind),
+                Stage::ProgressAsk,
+                Phase::ReleaseRequested,
+                Some(1),
+            );
         }
         let error = tokio::time::timeout(Duration::from_secs(5), task)
             .await
             .unwrap()
             .unwrap()
             .unwrap_err();
+        mark(
+            Some(fixture.kind),
+            Stage::ProgressAsk,
+            Phase::AwaitReturned,
+            None,
+        );
         assert_eq!(
             error,
             if port.is_some() {
@@ -590,7 +925,7 @@ async fn progress_cases(fixture: &Fixture) {
             }
         );
         if let Some(port) = port {
-            assert!(TcpStream::connect(("127.0.0.1", port)).is_err());
+            assert!(connect_once(fixture.kind, Stage::ProgressAsk, port).is_err());
         }
         drain_facts(&receiver, &mut facts);
         assert!(facts.contains(&LocalAskStage::Finalizing));
@@ -614,6 +949,12 @@ async fn progress_cases(fixture: &Fixture) {
             .await
             .unwrap()
             .unwrap();
+        mark(
+            Some(fixture.kind),
+            Stage::ProgressAsk,
+            Phase::AwaitReturned,
+            None,
+        );
         assert_eq!(result, Err(expected));
         let mut facts = Vec::new();
         drain_facts(&receiver, &mut facts);
@@ -661,7 +1002,12 @@ async fn progress_cases(fixture: &Fixture) {
             .unwrap()
             .unwrap();
         assert!(
-            TcpStream::connect(("127.0.0.1", answer.parse::<u16>().unwrap())).is_err(),
+            connect_once(
+                fixture.kind,
+                Stage::ProgressAsk,
+                answer.parse::<u16>().unwrap()
+            )
+            .is_err(),
             "end receipt with inherited pipes still requires descendant cleanup"
         );
         drop(receiver);
@@ -684,7 +1030,7 @@ async fn progress_cases(fixture: &Fixture) {
                 .unwrap(),
             Err(LocalAgentError::Cancelled)
         );
-        assert!(TcpStream::connect(("127.0.0.1", port)).is_err());
+        assert!(connect_once(fixture.kind, Stage::ProgressAsk, port).is_err());
         drop(receiver);
         fixture.assert_clean();
     }
@@ -698,15 +1044,23 @@ async fn configured_budget_cases(fixture: &Fixture) {
         question: &str,
         limits: LocalAgentLimits,
     ) -> Result<String, LocalAgentError> {
+        mark(Some(fixture.kind), Stage::ConfiguredAsk, Phase::Begin, None);
         let review = fixture
             .config(Duration::from_secs(5))
             .with_limits(limits)
             .prepare(ContextDraft::new(question), &[], 8192)
             .unwrap();
-        LocalAgentClient
+        let result = LocalAgentClient
             .ask(review.approve(), credential(), &RequestCancellation::new())
             .await
-            .map(|reply| reply.text().to_owned())
+            .map(|reply| reply.text().to_owned());
+        mark(
+            Some(fixture.kind),
+            Stage::ConfiguredAsk,
+            Phase::Returned,
+            None,
+        );
+        result
     }
     let limits = LocalAgentLimits::for_ask(Duration::from_secs(5), 1024, 8 * 1024).unwrap();
     assert_eq!(
@@ -735,7 +1089,16 @@ async fn configured_budget_cases(fixture: &Fixture) {
         Some(LocalAgentError::OutputTooLarge)
     );
     fixture.assert_clean();
-    for (cancel, expected_ack) in [(false, true), (true, true), (false, false)] {
+    for (case_index, (cancel, expected_ack)) in [(false, true), (true, true), (false, false)]
+        .into_iter()
+        .enumerate()
+    {
+        mark(
+            Some(fixture.kind),
+            Stage::ConfiguredDescendant,
+            Phase::Begin,
+            Some(case_index),
+        );
         let diagnostic_began = Instant::now();
         let limits = LocalAgentLimits::for_ask(
             Duration::from_secs(if cancel { 30 } else { 2 }),
@@ -768,7 +1131,7 @@ async fn configured_budget_cases(fixture: &Fixture) {
         let ready_deadline = diagnostic_began + Duration::from_secs(if cancel { 30 } else { 2 });
         // Diagnostic reads consume the existing operation budget. Capture the
         // original connect verdict once; errors must not detach the Ask task.
-        let ready_connected = TcpStream::connect(("127.0.0.1", port)).is_ok();
+        let ready_connected = connect_once(fixture.kind, Stage::ConfiguredDescendant, port).is_ok();
         let ready_accepted = descendant_ack(port, ready_deadline);
         let ready_elapsed = diagnostic_began.elapsed().as_micros();
         eprintln!(
@@ -784,16 +1147,34 @@ async fn configured_budget_cases(fixture: &Fixture) {
                 .is_ok_and(|pid| Some(*pid) == expected_pid);
         if cancel || !ready_ok {
             cancellation.cancel();
+            mark(
+                Some(fixture.kind),
+                Stage::ConfiguredDescendant,
+                Phase::CancelRequested,
+                Some(case_index),
+            );
         }
         // Retain the original five-second join bound; any post-return ACK also
         // uses this same absolute deadline, never a new relative wait budget.
         let join_deadline = Instant::now() + Duration::from_secs(5);
+        mark(
+            Some(fixture.kind),
+            Stage::ConfiguredDescendant,
+            Phase::AwaitBegin,
+            Some(case_index),
+        );
         let result = tokio::time::timeout_at(tokio::time::Instant::from_std(join_deadline), task)
             .await
             .unwrap()
             .unwrap();
+        mark(
+            Some(fixture.kind),
+            Stage::ConfiguredDescendant,
+            Phase::AwaitReturned,
+            Some(case_index),
+        );
         let result_elapsed = diagnostic_began.elapsed().as_micros();
-        let after = TcpStream::connect(("127.0.0.1", port));
+        let after = connect_once(fixture.kind, Stage::ConfiguredDescendant, port);
         let connected_elapsed = diagnostic_began.elapsed().as_micros();
         let accepted = after.as_ref().ok().map(|stream| {
             stream
@@ -833,6 +1214,12 @@ async fn configured_budget_cases(fixture: &Fixture) {
             identity["pid"]
         );
         fixture.assert_clean();
+        mark(
+            Some(fixture.kind),
+            Stage::ConfiguredDescendant,
+            Phase::End,
+            Some(case_index),
+        );
     }
 }
 
