@@ -319,7 +319,6 @@ async fn unread_stdout_then_eof_still_exits_within_shutdown_deadline() {
         .await
         .unwrap()
         .unwrap();
-    assert!(status.success());
     let mut stderr = String::new();
     client
         .child
@@ -329,7 +328,11 @@ async fn unread_stdout_then_eof_still_exits_within_shutdown_deadline() {
         .read_to_string(&mut stderr)
         .await
         .unwrap();
-    assert!(stderr.is_empty());
+    assert!(
+        status.success(),
+        "stdio exit {status}; diagnostic {stderr:?}"
+    );
+    assert!(stderr.is_empty(), "unexpected diagnostic: {stderr:?}");
 }
 
 #[tokio::test]

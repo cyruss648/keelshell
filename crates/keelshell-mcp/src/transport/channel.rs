@@ -9,7 +9,7 @@ use std::{
 
 use rmcp::{
     RoleServer,
-    model::{ClientJsonRpcMessage, ErrorData, ServerJsonRpcMessage},
+    model::{ClientJsonRpcMessage, ErrorData, ServerJsonRpcMessage, ServerResult},
     transport::{
         Transport,
         async_rw::{JsonRpcMessageCodec, JsonRpcMessageCodecError},
@@ -47,6 +47,7 @@ pub(super) struct IoTasks {
     closed: CancellationToken,
     input_ended: Arc<AtomicBool>,
     failed: Arc<AtomicBool>,
+    initialization_flushed: Arc<AtomicBool>,
 }
 
 impl MessageTransport {
@@ -59,6 +60,7 @@ impl MessageTransport {
         let (outgoing, outgoing_rx) = mpsc::channel(MAX_PENDING_FRAMES);
         let input_ended = Arc::new(AtomicBool::new(false));
         let failed = Arc::new(AtomicBool::new(false));
+        let initialization_flushed = Arc::new(AtomicBool::new(false));
         let reading = tokio::spawn(read_messages(
             reader,
             incoming_tx,
@@ -72,6 +74,7 @@ impl MessageTransport {
             outgoing_rx,
             closed.clone(),
             failed.clone(),
+            initialization_flushed.clone(),
         ));
         (
             Self {
@@ -85,6 +88,7 @@ impl MessageTransport {
                 closed,
                 input_ended,
                 failed,
+                initialization_flushed,
             },
         )
     }
@@ -141,6 +145,10 @@ impl IoTasks {
 
     pub(super) fn failed(&self) -> bool {
         self.failed.load(Ordering::Acquire)
+    }
+
+    pub(super) fn initialization_flushed(&self) -> bool {
+        self.initialization_flushed.load(Ordering::Acquire)
     }
 
     pub(super) fn stop(&self) {
@@ -241,6 +249,7 @@ async fn write_messages<W: AsyncWrite + Send + Unpin>(
     mut outgoing: mpsc::Receiver<OutputJob>,
     closed: CancellationToken,
     failed: Arc<AtomicBool>,
+    initialization_flushed: Arc<AtomicBool>,
 ) {
     let mut codec = JsonRpcMessageCodec::<ServerJsonRpcMessage>::default();
     while let Some(job) = tokio::select! {
@@ -248,6 +257,11 @@ async fn write_messages<W: AsyncWrite + Send + Unpin>(
         _ = closed.cancelled() => None,
         result = outgoing.recv() => result,
     } {
+        let initialization = matches!(
+            &job.message,
+            ServerJsonRpcMessage::Response(response)
+                if matches!(&response.result, ServerResult::InitializeResult(_))
+        );
         let mut bytes = BytesMut::new();
         let result = tokio::select! {
             biased;
@@ -258,6 +272,11 @@ async fn write_messages<W: AsyncWrite + Send + Unpin>(
                 writer.flush().await
             } => result,
         };
+        // The client observes startup at the successful response flush. The SDK
+        // may still be asleep on its acknowledgement when input EOF arrives.
+        if result.is_ok() && initialization {
+            initialization_flushed.store(true, Ordering::Release);
+        }
         if let Some(flushed) = job.flushed {
             let _ = flushed.send(result.as_ref().map(|_| ()).map_err(|_| closed_error()));
         }

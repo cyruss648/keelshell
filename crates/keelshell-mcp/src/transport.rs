@@ -111,16 +111,22 @@ where
     let service = match startup {
         Some(Ok(Ok(service))) => service,
         _ => {
-            let result = if startup.is_none() && !io_tasks.input_ended() && !io_tasks.failed() {
-                Ok(())
-            } else {
-                Err(StdioFailure::Startup)
-            };
             io_tasks.stop();
             tokio::time::timeout(Duration::from_secs(2), io_tasks.join())
                 .await
                 .map_err(|_| StdioFailure::Shutdown)??;
-            return result;
+            let externally_cancelled = startup.is_none() && !io_tasks.input_ended();
+            // Join first: a writer already inside poll_flush must publish its
+            // real completion before we classify simultaneous input closure.
+            let initialized_eof = io_tasks.input_ended() && io_tasks.initialization_flushed();
+            return if (externally_cancelled || initialized_eof)
+                && !io_tasks.failed()
+                && !budget.exhausted.load(Ordering::Acquire)
+            {
+                Ok(())
+            } else {
+                Err(StdioFailure::Startup)
+            };
         }
     };
     let sdk_cancel = service.cancellation_token();
