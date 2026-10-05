@@ -1517,6 +1517,29 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        // Apply is an event boundary too. Recheck the immutable catalog and its
+        // complete credential snapshot before any background store write; a
+        // delayed or directly emitted event must not bypass the panel's guard.
+        if let AfterSave::Ai {
+            panel, credentials, ..
+        } = &after
+            && crate::ai_request_options::validate_catalog_metadata(
+                &candidate.settings.ai_profiles,
+                credentials,
+            )
+            .is_err()
+        {
+            let message = Message::new(
+                "配置文字包含已知秘密或秘密集合超限，未写入配置。",
+                "Configuration text contains a known secret or the secret set exceeds its limit. Configuration was not written.",
+            );
+            if let Some(panel) = panel.upgrade() {
+                panel.update(cx, |panel, cx| panel.report_failure(message.clone(), cx));
+            }
+            self.status = message;
+            cx.notify();
+            return;
+        }
         if self.vault_settings.is_some()
             || (self.snippet_modal_open()
                 && !matches!(

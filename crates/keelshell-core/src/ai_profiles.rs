@@ -121,6 +121,11 @@ pub enum AiSecretRef {
         /// Variable identifier, restricted to ASCII letters, digits and `_`.
         name: String,
     },
+    /// Resolve a value held only in this process. Persisting the ID never persists its value.
+    Ephemeral {
+        /// Non-nil identity of this temporary secret slot.
+        id: Uuid,
+    },
     /// Resolve an opaque item in the authenticated local credential vault.
     SecretStore {
         /// Non-nil identifier. This module does not implement the secret store.
@@ -146,13 +151,13 @@ impl AiSecretRef {
                     ));
                 }
             }
-            Self::SecretStore { id } if id.is_nil() => {
+            Self::SecretStore { id } | Self::Ephemeral { id } if id.is_nil() => {
                 return Err(invalid(
                     "ai.secret_ref",
                     "credential store ID cannot be nil",
                 ));
             }
-            Self::SecretStore { .. } => {}
+            Self::SecretStore { .. } | Self::Ephemeral { .. } => {}
         }
         Ok(())
     }
@@ -446,6 +451,15 @@ impl NamedAiProfile {
         }
         for header in &self.custom_headers {
             header_name(&header.name)?;
+            if matches!(
+                header.name.to_ascii_lowercase().as_str(),
+                "x-api-key" | "anthropic-version"
+            ) {
+                return Err(invalid(
+                    "ai.profile.headers",
+                    "protocol-managed headers cannot be overridden",
+                ));
+            }
             if !names.insert(header.name.to_ascii_lowercase()) {
                 return Err(invalid(
                     "ai.profile.headers",
@@ -528,30 +542,23 @@ impl NamedAiProfile {
         let authentication_supported = match self.api_style {
             AiApiStyle::ChatCompletions | AiApiStyle::Responses => matches!(
                 &self.authentication,
-                AiAuthentication::None
-                    | AiAuthentication::Bearer {
-                        credential: None | Some(AiSecretRef::SecretStore { .. })
-                    }
+                AiAuthentication::None | AiAuthentication::Bearer { .. }
             ),
             // Anthropic's native API uses x-api-key. Keep the accepted header
             // exact so a later adapter cannot accidentally send a bearer token
             // or arbitrary user-selected header as provider authentication.
             AiApiStyle::AnthropicMessages => match &self.authentication {
                 AiAuthentication::None => true,
-                AiAuthentication::Header { name, credential }
-                    if name.eq_ignore_ascii_case("x-api-key") =>
-                {
-                    matches!(credential, None | Some(AiSecretRef::SecretStore { .. }))
+                AiAuthentication::Header { name, .. } if name.eq_ignore_ascii_case("x-api-key") => {
+                    true
                 }
                 _ => false,
             },
         };
-        if !self.custom_headers.is_empty()
-            || self.proxy != AiProxy::Direct
-            || self
-                .reasoning_by_model
-                .get(&self.model)
-                .is_some_and(|setting| setting.selection != AiReasoningSelection::ProviderDefault)
+        if self
+            .reasoning_by_model
+            .get(&self.model)
+            .is_some_and(|setting| setting.selection != AiReasoningSelection::ProviderDefault)
             || !authentication_supported
         {
             return Err(invalid(
@@ -640,7 +647,25 @@ impl NamedAiProfile {
             ));
         }
         self.validate_current_transport()?;
-        if self.context_window_tokens.is_some() || self.max_output_tokens.is_some() {
+        if matches!(
+            &self.authentication,
+            AiAuthentication::Bearer {
+                credential: Some(AiSecretRef::Environment { .. } | AiSecretRef::Ephemeral { .. })
+            } | AiAuthentication::Header {
+                credential: Some(AiSecretRef::Environment { .. } | AiSecretRef::Ephemeral { .. }),
+                ..
+            }
+        ) {
+            return Err(invalid(
+                "ai.profile",
+                "legacy settings cannot preserve this credential reference",
+            ));
+        }
+        if self.context_window_tokens.is_some()
+            || self.max_output_tokens.is_some()
+            || !self.custom_headers.is_empty()
+            || self.proxy != AiProxy::Direct
+        {
             return Err(invalid(
                 "ai.profile",
                 "legacy settings cannot preserve token limits",
@@ -870,7 +895,11 @@ fn model_id(value: &str) -> Result<(), ValidationError> {
 fn clean_url(field: &'static str, value: &str) -> Result<Url, ValidationError> {
     bounded(field, value, 2048, false)?;
     let parsed = Url::parse(value).map_err(|_| invalid(field, "must be an absolute URL"))?;
-    if parsed.host().is_none()
+    if value.split_once("://").is_some_and(|(_, rest)| {
+        rest.split(['/', '?', '#'])
+            .next()
+            .is_some_and(|authority| authority.contains('@'))
+    }) || parsed.host().is_none()
         || !parsed.username().is_empty()
         || parsed.password().is_some()
         || parsed.query().is_some()
@@ -919,24 +948,45 @@ fn header_name(value: &str) -> Result<(), ValidationError> {
             "header name must be an HTTP token without controls",
         ));
     }
-    if matches!(
-        value.to_ascii_lowercase().as_str(),
-        "host"
-            | "authorization"
-            | "proxy-authorization"
-            | "proxy-authenticate"
-            | "content-type"
-            | "content-length"
-            | "connection"
-            | "transfer-encoding"
-            | "upgrade"
-            | "te"
-            | "trailer"
-            | "cookie"
-            | "set-cookie"
-            | "user-agent"
-            | "accept"
-    ) {
+    if ["proxy-", "x-forwarded-", "sec-"]
+        .iter()
+        .any(|prefix| value.to_ascii_lowercase().starts_with(prefix))
+        || matches!(
+            value.to_ascii_lowercase().as_str(),
+            "host"
+                | "authorization"
+                | "proxy-authorization"
+                | "proxy-authenticate"
+                | "content-type"
+                | "content-length"
+                | "connection"
+                | "transfer-encoding"
+                | "upgrade"
+                | "te"
+                | "trailer"
+                | "cookie"
+                | "set-cookie"
+                | "user-agent"
+                | "accept"
+                | "proxy-connection"
+                | "keep-alive"
+                | "accept-encoding"
+                | "content-encoding"
+                | "expect"
+                | "forwarded"
+                | "via"
+                | "x-forwarded-for"
+                | "x-forwarded-host"
+                | "x-forwarded-proto"
+                | "x-original-url"
+                | "x-rewrite-url"
+                | "origin"
+                | "referer"
+                | "range"
+                | "proxy"
+                | "x-real-ip"
+        )
+    {
         return Err(invalid(
             "ai.profile.headers",
             "transport-managed headers cannot be overridden",
@@ -957,6 +1007,69 @@ mod tests {
     }
     fn environment(name: &str) -> AiSecretRef {
         AiSecretRef::Environment { name: name.into() }
+    }
+
+    #[test]
+    fn ephemeral_references_are_value_free_and_reserved_headers_rejected_without_authentication()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let reference = AiSecretRef::Ephemeral { id: Uuid::new_v4() };
+        reference.validate()?;
+        let wire = serde_json::to_string(&reference)?;
+        assert_eq!(serde_json::from_str::<AiSecretRef>(&wire)?, reference);
+        assert!(
+            serde_json::from_str::<AiSecretRef>(&format!(
+                r#"{{"source":"ephemeral","id":"{}","value":"plaintext"}}"#,
+                Uuid::new_v4()
+            ))
+            .is_err()
+        );
+        assert!(
+            AiSecretRef::Ephemeral { id: Uuid::nil() }
+                .validate()
+                .is_err()
+        );
+        for name in [
+            "Authorization",
+            "x-api-key",
+            "anthropic-version",
+            "HOST",
+            "Content-Type",
+            "Proxy-Connection",
+            "X-Forwarded-Port",
+            "Sec-Fetch-Mode",
+            "X-Real-IP",
+        ] {
+            let mut p = profile("Fixture");
+            p.authentication = AiAuthentication::None;
+            p.custom_headers = vec![AiCustomHeader {
+                name: name.into(),
+                value_ref: reference.clone(),
+            }];
+            assert!(p.validate().is_err());
+        }
+        let mut p = profile("Fixture");
+        p.custom_headers = vec![AiCustomHeader {
+            name: "x-project".into(),
+            value_ref: reference,
+        }];
+        p.proxy = AiProxy::Explicit {
+            url: "socks5h://localhost:1080".into(),
+            credentials: None,
+        };
+        p.validate_current_transport()?;
+        assert!(p.legacy_projection(true).is_err());
+        for url in [
+            "http://@localhost:8888",
+            "http://user:password@localhost:8888",
+            "http://localhost:8888/path",
+        ] {
+            p.proxy = AiProxy::Explicit {
+                url: url.into(),
+                credentials: None,
+            };
+            assert!(p.validate().is_err());
+        }
+        Ok(())
     }
 
     #[test]
@@ -1228,12 +1341,6 @@ mod tests {
                 name: "authorization".into(),
                 credential: Some(AiSecretRef::SecretStore { id: Uuid::new_v4() }),
             },
-            AiAuthentication::Header {
-                name: "x-api-key".into(),
-                credential: Some(AiSecretRef::Environment {
-                    name: "ANTHROPIC_API_KEY".into(),
-                }),
-            },
         ] {
             profile.authentication = authentication;
             assert!(profile.validate_current_transport().is_err());
@@ -1250,7 +1357,12 @@ mod tests {
             name: "x-tenant".into(),
             value_ref: AiSecretRef::SecretStore { id: Uuid::new_v4() },
         });
-        assert!(profile.validate_current_transport().is_err());
+        profile.validate_current_transport()?;
+        profile.authentication = AiAuthentication::Header {
+            name: "x-api-key".into(),
+            credential: Some(environment("ANTHROPIC_API_KEY")),
+        };
+        profile.validate_current_transport()?;
         Ok(())
     }
 

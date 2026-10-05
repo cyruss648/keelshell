@@ -26,6 +26,386 @@ fn profile(name: &str) -> NamedAiProfile {
     profile
 }
 
+#[gpui_kit::test]
+async fn request_options_real_settings_apply_uses_same_proxy_for_discovery_test_and_ask(
+    cx: &mut TestAppContext,
+) {
+    use crate::ai_settings::{
+        AiSettingsEvent,
+        tests::{mount_sized, request_has_finished},
+    };
+    use std::sync::atomic::{AtomicBool, Ordering};
+    let origin = TcpListener::bind("127.0.0.1:0").unwrap_or_else(|error| panic!("origin: {error}"));
+    origin
+        .set_nonblocking(true)
+        .unwrap_or_else(|error| panic!("origin mode: {error}"));
+    let origin_address = origin
+        .local_addr()
+        .unwrap_or_else(|error| panic!("origin address: {error}"));
+    let proxy = TcpListener::bind("127.0.0.1:0").unwrap_or_else(|error| panic!("proxy: {error}"));
+    proxy
+        .set_nonblocking(true)
+        .unwrap_or_else(|error| panic!("proxy mode: {error}"));
+    let proxy_address = proxy
+        .local_addr()
+        .unwrap_or_else(|error| panic!("proxy address: {error}"));
+    let (release, gated) = std::sync::mpsc::channel();
+    let server = std::thread::spawn(move || {
+        for step in 0..3 {
+            let deadline = Instant::now() + Duration::from_secs(6);
+            let mut stream = loop {
+                match proxy.accept() {
+                    Ok((stream, _)) => break stream,
+                    Err(error)
+                        if error.kind() == std::io::ErrorKind::WouldBlock
+                            && Instant::now() < deadline =>
+                    {
+                        std::thread::sleep(Duration::from_millis(5))
+                    }
+                    Err(error) => panic!("proxy accept: {error}"),
+                }
+            };
+            stream
+                .set_nonblocking(false)
+                .unwrap_or_else(|error| panic!("stream mode: {error}"));
+            stream
+                .set_read_timeout(Some(Duration::from_secs(3)))
+                .unwrap_or_else(|error| panic!("read limit: {error}"));
+            stream
+                .set_write_timeout(Some(Duration::from_secs(3)))
+                .unwrap_or_else(|error| panic!("write limit: {error}"));
+            let mut headers = Vec::new();
+            while !headers.ends_with(b"\r\n\r\n") {
+                let mut byte = [0];
+                stream
+                    .read_exact(&mut byte)
+                    .unwrap_or_else(|error| panic!("proxy header: {error}"));
+                headers.push(byte[0]);
+                assert!(headers.len() <= 8192);
+            }
+            let headers =
+                String::from_utf8(headers).unwrap_or_else(|error| panic!("header utf8: {error}"));
+            let lower = headers.to_ascii_lowercase();
+            assert!(lower.contains("x-project: synthetic-route-header\r\n"));
+            assert!(lower.contains("proxy-authorization: basic "));
+            assert!(headers.starts_with(&format!(
+                "{} http://{origin_address}/v1/{} HTTP/1.1",
+                if step == 0 { "GET" } else { "POST" },
+                if step == 0 {
+                    "models"
+                } else {
+                    "chat/completions"
+                }
+            )));
+            let length = lower
+                .lines()
+                .find_map(|line| {
+                    line.strip_prefix("content-length: ")
+                        .and_then(|value| value.trim().parse::<usize>().ok())
+                })
+                .unwrap_or(0);
+            assert!(length <= 32768);
+            let mut body = vec![0; length];
+            stream
+                .read_exact(&mut body)
+                .unwrap_or_else(|error| panic!("proxy body: {error}"));
+            let body = String::from_utf8(body).unwrap_or_else(|error| panic!("body utf8: {error}"));
+            for secret in [
+                "synthetic-route-header",
+                "synthetic-route-user",
+                "synthetic-route-password",
+            ] {
+                assert!(
+                    !body.contains(secret),
+                    "credentials never enter request context"
+                );
+            }
+            if step == 1 {
+                assert!(body.contains(keelshell_ai::CONNECTIVITY_PROMPT));
+                assert!(!body.contains("synthetic-question"));
+            } else if step == 2 {
+                assert!(body.contains("synthetic-question"));
+            }
+            gated
+                .recv_timeout(Duration::from_secs(6))
+                .unwrap_or_else(|error| panic!("reply gate: {error}"));
+            let response = if step == 0 {
+                r#"{"data":[{"id":"fixture-model"}]}"#
+            } else if step == 1 {
+                r#"{"model":"fixture-model","choices":[{"message":{"content":"OK"}}]}"#
+            } else {
+                r#"{"choices":[{"message":{"content":"synthetic-answer synthetic-route-header synthetic-route-user synthetic-route-password"}}]}"#
+            };
+            write!(stream, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{response}", response.len()).unwrap_or_else(|error| panic!("proxy response: {error}"));
+        }
+    });
+    let mut configuration = profile("Proxy fixture");
+    configuration.endpoint = format!("http://{origin_address}/v1/chat/completions");
+    let (settings_handle, settings) = mount_sized(cx, configuration, 900., 580.);
+    // Real controls generate the metadata and ephemeral slots; no fixture inserts them directly.
+    cx.update_window(settings_handle, |_, window, cx| {
+        window.render_frame(cx);
+        window.scroll(
+            "ai-profile-form-scroll",
+            gpui_kit::ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.click("ai-header-add", cx);
+    })
+    .unwrap_or_else(|error| panic!("add UI header: {error}"));
+    for (id, value) in [
+        (
+            gpui_kit::ElementId::from(("ai-header-name", 0_usize)),
+            "x-project".to_owned(),
+        ),
+        (
+            gpui_kit::ElementId::from(("ai-header-value", 0_usize)),
+            "synthetic-route-header".to_owned(),
+        ),
+    ] {
+        input_request_option(settings_handle, id, &value, cx);
+    }
+    cx.update_window(settings_handle, |_, window, cx| {
+        reveal_request_option(window, "ai-proxy-explicit".into(), cx);
+        window.click("ai-proxy-explicit", cx);
+    })
+    .unwrap_or_else(|error| panic!("explicit UI route: {error}"));
+    input_request_option(
+        settings_handle,
+        "ai-proxy-url".into(),
+        &format!("http://{proxy_address}"),
+        cx,
+    );
+    cx.update_window(settings_handle, |_, window, cx| {
+        reveal_request_option(window, "ai-proxy-auth-toggle".into(), cx);
+        window.click("ai-proxy-auth-toggle", cx);
+    })
+    .unwrap_or_else(|error| panic!("proxy UI auth: {error}"));
+    input_request_option(
+        settings_handle,
+        "ai-proxy-username".into(),
+        "synthetic-route-user",
+        cx,
+    );
+    input_request_option(
+        settings_handle,
+        "ai-proxy-password".into(),
+        "synthetic-route-password",
+        cx,
+    );
+    for id in ["ai-models-discover", "ai-profile-test"] {
+        cx.update_window(settings_handle, |_, window, cx| {
+            reveal_request_option(window, id.into(), cx);
+            window.click(id, cx);
+        })
+        .unwrap_or_else(|error| panic!("explicit settings request: {error}"));
+        cx.run_until_parked();
+        assert!(!cx.update(|cx| request_has_finished(&settings, cx)));
+        release
+            .send(())
+            .unwrap_or_else(|error| panic!("settings reply: {error}"));
+        cx.wait_for(settings_handle, Duration::from_secs(5), |_, cx| {
+            request_has_finished(&settings, cx)
+        })
+        .await;
+    }
+    let (assistant_handle, assistant) = mount(cx);
+    let applied = Arc::new(AtomicBool::new(false));
+    assistant.update(cx, |panel, cx| {
+        let applied = applied.clone();
+        panel
+            ._subscriptions
+            .push(cx.subscribe(&settings, move |panel, settings, event, cx| {
+                if let AiSettingsEvent::Apply {
+                    catalog,
+                    credentials,
+                    revision,
+                } = event
+                {
+                    panel.set_profiles(catalog, credentials, cx);
+                    panel.select_profile(
+                        catalog
+                            .active_id
+                            .unwrap_or_else(|| panic!("applied profile")),
+                        cx,
+                    );
+                    settings.update(cx, |settings, cx| settings.mark_saved(*revision, cx));
+                    applied.store(true, Ordering::Release);
+                }
+            }));
+    });
+    cx.update_window(settings_handle, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("ai-settings-apply", cx);
+    })
+    .unwrap_or_else(|error| panic!("apply UI options: {error}"));
+    cx.run_until_parked();
+    assert!(applied.load(Ordering::Acquire));
+    cx.update_window(assistant_handle, |_, window, cx| {
+        assistant.update(cx, |panel, cx| {
+            panel.prompt.update(cx, |input, cx| input.set_value("synthetic-question synthetic-route-header synthetic-route-user synthetic-route-password", window, cx));
+        });
+    }).unwrap_or_else(|error| panic!("question: {error}"));
+    cx.run_until_parked();
+    cx.update_window(assistant_handle, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("prepare-request", cx);
+    })
+    .unwrap_or_else(|error| panic!("review UI options: {error}"));
+    assistant.read_with(cx, |panel, cx| {
+        let prepared = panel
+            .prepared
+            .as_ref()
+            .unwrap_or_else(|| panic!("prepared routed request"));
+        let summary = prepared.request_options_summary(panel.profile.as_ref(), cx);
+        assert!(summary.contains(&proxy_address.to_string()));
+        assert!(summary.contains("x-project"));
+        assert!(summary.contains("临时值"));
+        for secret in [
+            "synthetic-route-header",
+            "synthetic-route-user",
+            "synthetic-route-password",
+        ] {
+            assert!(!summary.contains(secret));
+            assert!(!prepared.preview_json().contains(secret));
+        }
+    });
+    cx.update_window(assistant_handle, |_, window, cx| {
+        window.render_frame(cx);
+        window.scroll(
+            "assistant-scroll",
+            gpui_kit::ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.click("send-approved-request", cx);
+    })
+    .unwrap_or_else(|error| panic!("send reviewed UI options: {error}"));
+    cx.run_until_parked();
+    assert!(assistant.read_with(cx, |panel, _| panel.busy));
+    release
+        .send(())
+        .unwrap_or_else(|error| panic!("ask reply: {error}"));
+    cx.wait_for(assistant_handle, Duration::from_secs(5), |_, cx| {
+        !assistant.read(cx).busy
+    })
+    .await;
+    assistant.read_with(cx, |panel, _| {
+        assert!(panel.response.contains("synthetic-answer"));
+        for secret in [
+            "synthetic-route-header",
+            "synthetic-route-user",
+            "synthetic-route-password",
+        ] {
+            assert!(!panel.response.contains(secret));
+        }
+    });
+    server.join().unwrap_or_else(|_| panic!("proxy fixture"));
+    assert!(
+        matches!(origin.accept(), Err(error) if error.kind() == std::io::ErrorKind::WouldBlock)
+    );
+}
+
+fn reveal_request_option(
+    window: &mut gpui_kit::Window,
+    id: gpui_kit::ElementId,
+    cx: &mut gpui_kit::App,
+) {
+    window.render_frame(cx);
+    let viewport = window.find("ai-profile-form-scroll").bounds();
+    let bounds = window.find(id.clone()).bounds();
+    window.scroll(
+        "ai-profile-form-scroll",
+        gpui_kit::ScrollDelta::Pixels(point(px(0.), viewport.top() + px(30.) - bounds.top())),
+        cx,
+    );
+    assert!(window.find(id).visible());
+}
+
+fn input_request_option(
+    handle: AnyWindowHandle,
+    id: gpui_kit::ElementId,
+    value: &str,
+    cx: &mut TestAppContext,
+) {
+    cx.update_window(handle, |_, window, cx| {
+        reveal_request_option(window, id.clone(), cx);
+        window.click(id, cx);
+        window.input(value, cx);
+    })
+    .unwrap_or_else(|error| panic!("UI request option: {error}"));
+    cx.run_until_parked();
+}
+
+#[gpui_kit::test]
+fn request_options_credential_change_on_inactive_profile_revokes_review(cx: &mut TestAppContext) {
+    use crate::ai_request_options::{RequestSecret, SecretPurpose};
+    use keelshell_core::{AiCustomHeader, AiSecretRef};
+    let (_, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        panel.prepare(cx);
+        assert!(panel.prepared.is_some());
+        let revision = panel.request_revision;
+        let mut profiles = panel.profiles.clone();
+        let inactive = &mut profiles.profiles[1];
+        let reference = AiSecretRef::Ephemeral {
+            id: uuid::Uuid::new_v4(),
+        };
+        inactive.custom_headers.push(AiCustomHeader {
+            name: "x-project".into(),
+            value_ref: reference.clone(),
+        });
+        let mut credentials = panel.credentials.clone();
+        credentials.insert_request(
+            inactive,
+            SecretPurpose::Header("x-project".into()),
+            reference,
+            RequestSecret::Header(Zeroizing::new("synthetic-inactive-secret".into())),
+        );
+        panel.set_profiles(&profiles, &credentials, cx);
+        assert!(panel.prepared.is_none());
+        assert!(panel.request_revision > revision);
+        panel.set_context(
+            "synthetic-inactive-secret".into(),
+            "host".into(),
+            "session-A".into(),
+            cx,
+        );
+        panel.prepare(cx);
+        assert!(
+            !panel
+                .prepared
+                .as_ref()
+                .unwrap_or_else(|| panic!("redacted review"))
+                .preview_json()
+                .contains("synthetic-inactive-secret")
+        );
+        let selected = &mut profiles.profiles[0];
+        let reference = AiSecretRef::Ephemeral {
+            id: uuid::Uuid::new_v4(),
+        };
+        selected.custom_headers.push(AiCustomHeader {
+            name: "x-selected".into(),
+            value_ref: reference.clone(),
+        });
+        credentials.insert_request(
+            selected,
+            SecretPurpose::Header("x-selected".into()),
+            reference,
+            RequestSecret::Header(Zeroizing::new("synthetic-selected-secret".into())),
+        );
+        panel.set_profiles(&profiles, &credentials, cx);
+        panel.prepare(cx);
+        let request = panel
+            .prepared
+            .as_ref()
+            .unwrap_or_else(|| panic!("options review"));
+        let summary = request.request_options_summary(panel.profile.as_ref(), cx);
+        assert!(summary.contains("x-selected"));
+        assert!(!summary.contains("synthetic-selected-secret"));
+        assert!(panel.prepared_key.is_none());
+    });
+}
+
 fn mount(cx: &mut TestAppContext) -> (AnyWindowHandle, Entity<AssistantPanel>) {
     cx.update(gpui_kit::init);
     let one = profile("Profile A");
@@ -329,7 +709,7 @@ fn unsupported_configuration_and_missing_bearer_key_never_prepare(cx: &mut TestA
         panel.prepare(cx);
         assert!(panel.prepared.is_none());
         needs_key.proxy = keelshell_core::AiProxy::Explicit {
-            url: "http://127.0.0.1:9080".into(),
+            url: "http://127.0.0.1:9080/invalid-path".into(),
             credentials: None,
         };
         panel.set_profile(
@@ -964,5 +1344,85 @@ fn local_budget_change_revokes_exact_review_and_old_result_without_changing_key(
                 "local budget must not alter API payload"
             );
         }
+    });
+}
+
+// Keep the independent five-path counterexample byte-for-byte for regression replay.
+include!("assistant_tests/inactive_basic_probe.rs");
+
+#[path = "assistant_tests/retained_drafts.rs"]
+mod retained_drafts;
+
+#[gpui_kit::test]
+fn inactive_proxy_basic_reply_is_redacted_and_late_reply_after_clear_is_discarded(
+    cx: &mut TestAppContext,
+) {
+    use crate::ai_request_options::{RequestSecret, SecretPurpose};
+    use keelshell_core::{AiProxy, AiSecretRef};
+    let (_, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        let active = profile("Active");
+        let mut inactive = profile("Inactive");
+        let reference = AiSecretRef::Ephemeral {
+            id: uuid::Uuid::new_v4(),
+        };
+        inactive.proxy = AiProxy::Explicit {
+            url: "http://127.0.0.1:9".into(),
+            credentials: Some(reference.clone()),
+        };
+        let mut credentials = EphemeralCredentials::new();
+        credentials.insert_request(
+            &inactive,
+            SecretPurpose::Proxy,
+            reference,
+            RequestSecret::Proxy {
+                username: Zeroizing::new("synthetic-user".into()),
+                password: Zeroizing::new("synthetic-pass".into()),
+            },
+        );
+        let catalog = AiProfileCatalog {
+            active_id: Some(active.id),
+            profiles: vec![active, inactive.clone()],
+        };
+        panel.set_profiles(&catalog, &credentials, cx);
+        let basic = "c3ludGhldGljLXVzZXI6c3ludGhldGljLXBhc3M=";
+        panel.prepare(cx);
+        assert!(panel.prepared.is_some());
+        let revision = panel.request_revision;
+        panel.finish_reply(
+            revision,
+            ("host".into(), "session-A".into()),
+            Ok(format!(
+                "ordinary reply {basic}; Basic {basic}\n```shell\nprintf '{basic}'\n```"
+            )),
+            cx,
+        );
+        assert!(panel.response.contains("ordinary reply"));
+        assert!(!panel.response.contains(basic));
+        assert!(
+            panel
+                .suggestions
+                .iter()
+                .all(|command| !command.contains(basic))
+        );
+        let cancellation = RequestCancellation::new();
+        panel.cancellation = Some(cancellation.clone());
+        panel.busy = true;
+        credentials.clear_requests(inactive.id);
+        panel.set_profiles(&catalog, &credentials, cx);
+        assert!(cancellation.is_cancelled());
+        assert!(panel.prepared.is_none());
+        assert!(panel.response.is_empty());
+        assert!(panel.credentials.all_secrets().is_empty());
+        panel.finish_reply(
+            revision,
+            ("host".into(), "session-A".into()),
+            Ok(format!("late {basic}")),
+            cx,
+        );
+        assert!(panel.response.is_empty());
+        assert!(panel.response_target.is_none());
+        assert!(!panel.busy);
+        assert!(panel._job.is_none());
     });
 }

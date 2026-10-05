@@ -25,7 +25,7 @@ tempfile = "3.27"
 chrono = "0.4"
 alacritty_terminal = "0.26"
 tokio = { version = "1.53", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util", "fs"] }
-reqwest = { version = "0.13", default-features = false, features = ["json", "rustls", "blocking"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls", "blocking", "socks"] }
 russh = "0.63"
 russh-sftp = "3.0"
 url = "2.5"

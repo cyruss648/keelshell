@@ -31,6 +31,7 @@ mod error_category;
 mod local_agent;
 mod provider;
 mod redact;
+mod request_options;
 mod review;
 
 pub use context::{ApprovedRequest, ContextDraft, PreparedRequest};
@@ -47,6 +48,7 @@ pub use local_agent::{
 };
 pub use provider::{AiClient, AssistantReply, ProviderConfig, ProviderProtocol};
 pub use redact::{RedactionReport, Redactor};
+pub use request_options::{ProxyCredentials, ProxyRoute, RequestOptions, valid_custom_header_name};
 pub use review::{CommandProposal, ReviewTicket};
 
 /// Errors intentionally omit raw provider bodies, URLs and credentials.
@@ -95,6 +97,12 @@ pub enum AiError {
     /// The caller supplied an invalid authentication header value.
     #[error("AI API key is empty or contains invalid header characters")]
     InvalidApiKey,
+    /// Header or proxy configuration failed bounded local validation.
+    #[error("AI custom headers or explicit proxy configuration are invalid")]
+    InvalidRequestOptions,
+    /// Client options differ from the reviewed immutable provider snapshot.
+    #[error("AI request route or headers changed after review")]
+    RequestOptionsMismatch,
     /// The transport key was also found in the prepared context.
     #[error("AI API key is present in the preview; add it to the secret list and prepare again")]
     CredentialInContext,

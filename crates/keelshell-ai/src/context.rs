@@ -105,7 +105,20 @@ impl ContextDraft {
             max_output_tokens,
             context_window_tokens,
         )?;
-        self.validate(secrets, byte_budget)?;
+        let option_secrets = provider.request_options().secrets();
+        let mut secrets: Vec<_> = secrets.iter().copied().chain(option_secrets).collect();
+        secrets.sort_unstable();
+        secrets.dedup();
+        self.validate(&secrets, byte_budget)?;
+        provider
+            .request_options()
+            .reject_header_name_secrets(&secrets)?;
+        if secrets.iter().filter(|s| !s.is_empty()).any(|s| {
+            crate::request_options::contains_context_secret(provider.endpoint(), s)
+                || crate::request_options::contains_context_secret(provider.model(), s)
+        }) {
+            return Err(AiError::CredentialInContext);
+        }
         let byte_budget = match context_window_tokens {
             Some(context) => {
                 let input_capacity = context
@@ -123,7 +136,7 @@ impl ContextDraft {
             }
             None => byte_budget,
         };
-        let redactor = Redactor::new(secrets);
+        let redactor = Redactor::new(&secrets);
         let (prompt, mut report) = redactor.redact(&self.prompt);
         if prompt.len() > byte_budget {
             return Err(AiError::InvalidBudget);
@@ -225,8 +238,12 @@ impl ContextDraft {
         );
         if input_bytes > MAX_INPUT_BYTES
             || self.selections.len() > MAX_SELECTIONS
-            || secrets.len() > 128
+            || secrets.len() > 4096
             || secrets.iter().any(|s| s.len() > MAX_INPUT_BYTES)
+            || secrets
+                .iter()
+                .fold(0usize, |n, s| n.saturating_add(s.len()))
+                > 8 * MAX_INPUT_BYTES
         {
             return Err(AiError::ContextTooLarge);
         }

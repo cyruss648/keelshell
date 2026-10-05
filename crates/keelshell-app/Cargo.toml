@@ -6,6 +6,7 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+base64.workspace = true
 gpui-kit.workspace = true
 alacritty_terminal.workspace = true
 zeroize.workspace = true

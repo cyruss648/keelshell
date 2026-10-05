@@ -26,7 +26,7 @@ fn preset_label(preset: AiPreset, cx: &App) -> &'static str {
     }
 }
 
-fn label(cx: &App, zh: &'static str, en: &'static str) -> Div {
+pub(super) fn label(cx: &App, zh: &'static str, en: &'static str) -> Div {
     let visual = crate::design::palette(cx);
     div()
         .text_xs()
@@ -299,8 +299,7 @@ impl Render for AiSettingsPanel {
                 .child(Input::new(&self.output_tokens).id("ai-profile-output-tokens").aria_label(t(cx, "输出上限（Token）", "Output token limit")))
                 .child(label(cx, "上下文窗口按保守字节预算限制输入，并预留输出；不是实际 Token 计数。填写窗口但不填写输出时使用 4096。", "The context window limits input using a conservative byte budget and reserves output; it is not a measured token count. A window with no output limit uses 4096."))
                 .child(label(cx, "输出字段：Chat Completions 使用 max_completion_tokens，Responses 使用 max_output_tokens，Messages 使用 max_tokens；兼容服务需支持对应字段。", "Output field: max_completion_tokens for Chat Completions, max_output_tokens for Responses, max_tokens for Messages. Compatible servers must support the selected field."))
-                .child(div().mt_2().p_2().bg(rgb(visual.canvas)).rounded(px(6.))
-                    .child(label(cx,"高级选项暂不可用：自定义请求头、代理与推理参数。","Advanced options unavailable: custom headers, proxy and reasoning controls.")))
+                .child(self.request_options_view(cx))
                 ;
             } else {
                 form = form

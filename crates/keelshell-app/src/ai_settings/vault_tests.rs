@@ -7,6 +7,80 @@ use gpui_kit::{AppContext, Focusable, TestAppContext, test::TestAppContextExt};
 use std::time::Duration;
 
 #[gpui_kit::test]
+fn request_options_late_vault_results_do_not_associate_with_changed_profile(
+    cx: &mut TestAppContext,
+) {
+    use crate::ai_request_options::{RequestSecret, SecretPurpose};
+    let mut profile = fixture_profile();
+    profile.custom_headers.push(keelshell_core::AiCustomHeader {
+        name: "x-project".into(),
+        value_ref: AiSecretRef::SecretStore { id: Uuid::new_v4() },
+    });
+    let (handle, panel) = mount(cx, profile);
+    cx.update_window(handle, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            let purpose = SecretPurpose::Header("x-project".into());
+            panel.begin_request_vault(purpose.clone(), VaultAction::Unlock, window, cx);
+            let prompt = panel
+                .vault_prompt
+                .as_ref()
+                .unwrap_or_else(|| panic!("request vault prompt"));
+            let id = prompt.id;
+            let cancelled = prompt.cancelled.clone();
+            let revision = panel.revision;
+            let profile = panel.profile().unwrap_or_else(|| panic!("profile")).clone();
+            panel.endpoint.update(cx, |f, cx| {
+                f.set_value("https://other.invalid/v1/chat/completions", window, cx)
+            });
+            panel.sync_editor(cx);
+            assert!(cancelled.load(Ordering::Acquire));
+            panel.finish_vault(
+                id,
+                revision,
+                &profile,
+                Ok(Completion::RequestUnlocked(RequestSecret::Header(
+                    Zeroizing::new("late-synthetic-header".into()),
+                ))),
+                window,
+                cx,
+            );
+            assert!(panel.credentials.all_secrets().is_empty());
+            assert!(matches!(
+                panel
+                    .profile()
+                    .unwrap_or_else(|| panic!("profile"))
+                    .custom_headers[0]
+                    .value_ref,
+                AiSecretRef::Ephemeral { .. }
+            ));
+            panel.clear_pending_request_fields(window, cx);
+            let reference = Uuid::new_v4();
+            panel.apply_request_vault_result(&purpose, Some(reference), None, window, cx);
+            panel.begin_request_vault(purpose, VaultAction::Unlock, window, cx);
+            let id = panel
+                .vault_prompt
+                .as_ref()
+                .unwrap_or_else(|| panic!("prompt"))
+                .id;
+            let revision = panel.revision;
+            let profile = panel.profile().unwrap_or_else(|| panic!("profile")).clone();
+            panel.close(cx);
+            panel.finish_vault(
+                id,
+                revision,
+                &profile,
+                Ok(Completion::Saved(Uuid::new_v4())),
+                window,
+                cx,
+            );
+            assert_eq!(panel.profile(), Some(&profile));
+            assert!(panel.credentials.all_secrets().is_empty());
+        })
+    })
+    .unwrap_or_else(|error| panic!("late request vault results: {error}"));
+}
+
+#[gpui_kit::test]
 fn endpoint_edits_clear_bound_key_and_queued_events_cannot_reinsert_it(cx: &mut TestAppContext) {
     let (window, panel) = mount(cx, fixture_profile());
     cx.update_window(window, |_, window, cx| {

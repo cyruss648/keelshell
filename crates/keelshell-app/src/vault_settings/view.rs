@@ -19,6 +19,9 @@ fn kind_label(kind: CredentialKind, cx: &App) -> &'static str {
     match kind {
         CredentialKind::Password => t(cx, "SSH 密码", "SSH password"),
         CredentialKind::PrivateKeyPassphrase => t(cx, "私钥口令", "Private key passphrase"),
+        CredentialKind::AiRequestSecret => {
+            t(cx, "AI 请求头 / 代理凭据", "AI header / proxy credential")
+        }
         CredentialKind::AiApiKey => t(cx, "AI API 密钥", "AI API key"),
     }
 }

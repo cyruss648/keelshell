@@ -53,6 +53,51 @@ impl PreparedAssistantRequest {
         }
     }
 
+    fn request_options_summary(&self, profile: Option<&NamedAiProfile>, cx: &App) -> String {
+        let Self::Api(request) = self else {
+            return String::new();
+        };
+        let options = request.provider().request_options();
+        let route = options.proxy_url().unwrap_or(t(
+            cx,
+            "直连（忽略环境代理）",
+            "Direct (ignore environment proxies)",
+        ));
+        let names = profile
+            .map(|p| {
+                p.custom_headers
+                    .iter()
+                    .map(|h| {
+                        let source = match &h.value_ref {
+                            keelshell_core::AiSecretRef::Ephemeral { .. } => {
+                                t(cx, "临时值", "Temporary")
+                            }
+                            keelshell_core::AiSecretRef::Environment { .. } => {
+                                t(cx, "环境引用", "Environment")
+                            }
+                            keelshell_core::AiSecretRef::SecretStore { .. } => {
+                                t(cx, "凭据库引用", "Vault reference")
+                            }
+                        };
+                        format!("{} [{source}]", h.name)
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            })
+            .unwrap_or_default();
+        options.redact_for_review(&format!(
+            "{}: {route} · {}: {} · {}: {names}",
+            t(cx, "路由", "Route"),
+            t(cx, "代理认证", "Proxy authentication"),
+            if options.proxy_authenticated() {
+                t(cx, "已配置", "Configured")
+            } else {
+                t(cx, "无", "None")
+            },
+            t(cx, "自定义请求头", "Custom headers")
+        ))
+    }
+
     fn redaction_report(&self) -> RedactionReport {
         match self {
             Self::Api(request) => request.redaction_report(),
@@ -75,6 +120,7 @@ pub struct AssistantPanel {
     host: String,
     session_id: String,
     prepared: Option<PreparedAssistantRequest>,
+    prepared_key: Option<Zeroizing<String>>,
     response: String,
     status: Message,
     busy: bool,
@@ -126,6 +172,7 @@ impl AssistantPanel {
             host: String::new(),
             session_id: String::new(),
             prepared: None,
+            prepared_key: None,
             response: String::new(),
             status: Message::new(
                 "请主动选择上下文，应用不会自动发送任何内容。",
@@ -159,6 +206,9 @@ impl AssistantPanel {
             .as_ref()
             .and_then(|p| credentials.get(&p.id))
             .cloned();
+        if self.credentials != *credentials {
+            self.invalidate_request(cx);
+        }
         self.profiles = profiles.clone();
         self.credentials = credentials.clone();
         self.set_profile(selected, key, cx);
@@ -220,6 +270,7 @@ impl AssistantPanel {
         self.host = host;
         self.session_id = session_id;
         self.prepared = None;
+        self.prepared_key = None;
         self.preview = false;
         self.status = Message::new(
             format!("已从 {} 选择 {} 字节", self.host, self.context.len()),
@@ -256,6 +307,7 @@ impl AssistantPanel {
         self._job = None;
         self.busy = false;
         self.prepared = None;
+        self.prepared_key = None;
         self.preview = false;
         self.response.clear();
         self.suggestions.clear();
@@ -293,8 +345,26 @@ impl AssistantPanel {
             cx.notify();
             return;
         }
+        let resolved_key = match profile.backend {
+            AiBackend::Api => {
+                let mut credentials = self.credentials.clone();
+                if let Some(key) = &self.key {
+                    credentials.insert(profile.id, key.clone());
+                }
+                crate::ai_request_options::resolve_authentication(profile, &credentials)
+            }
+            _ => Ok(self.key.clone()),
+        };
+        let resolved_key = match resolved_key {
+            Ok(key) => key,
+            Err(error) => {
+                self.status = ai_error(&error);
+                cx.notify();
+                return;
+            }
+        };
         if uses_api_key(&profile.authentication)
-            && self.key.as_ref().is_none_or(|key| key.is_empty())
+            && resolved_key.as_ref().is_none_or(|key| key.is_empty())
         {
             self.status = Message::new(
                 "此配置需要 API 密钥，请在 AI 设置中填写或解锁，然后应用。",
@@ -312,9 +382,9 @@ impl AssistantPanel {
         // when it belongs to a different profile or invocation adapter.
         let secrets: Vec<&str> = self
             .credentials
-            .values()
-            .map(|key| key.as_str())
-            .chain(self.key.as_ref().map(|key| key.as_str()))
+            .all_secrets()
+            .into_iter()
+            .chain(resolved_key.as_ref().map(|key| key.as_str()))
             .collect();
         let context = ContextDraft::new(self.prompt.read(cx).value().to_string())
             .with_host_label(self.host.clone())
@@ -328,7 +398,15 @@ impl AssistantPanel {
             );
         let result = match profile.backend {
             AiBackend::Api => {
-                ProviderConfig::new_with_protocol(&profile.endpoint, &profile.model, protocol)
+                crate::ai_request_options::resolve_options(profile, &self.credentials)
+                    .and_then(|options| {
+                        ProviderConfig::new_with_protocol(
+                            &profile.endpoint,
+                            &profile.model,
+                            protocol,
+                        )
+                        .map(|provider| provider.with_request_options(options))
+                    })
                     .and_then(|provider| {
                         context.prepare_with_limits(
                             &provider,
@@ -362,6 +440,7 @@ impl AssistantPanel {
                     ),
                 );
                 self.prepared = Some(request);
+                self.prepared_key = resolved_key;
                 self.preview = true;
             }
             Err(error) => self.status = error,
@@ -376,15 +455,7 @@ impl AssistantPanel {
         let Some(request) = self.prepared.take() else {
             return;
         };
-        let key = if self
-            .profile
-            .as_ref()
-            .is_some_and(|p| uses_api_key(&p.authentication))
-        {
-            self.key.clone()
-        } else {
-            None
-        };
+        let key = self.prepared_key.take();
         let revision = self.request_revision;
         let response_target = (self.host.clone(), self.session_id.clone());
         let cancellation = RequestCancellation::new();
@@ -401,8 +472,12 @@ impl AssistantPanel {
             async move {
                 match request {
                     PreparedAssistantRequest::Api(request) => {
-                        let client = ProviderClient::new(Duration::from_secs(60), 1024 * 1024)
-                            .map_err(|error| ai_error(&error))?;
+                        let client = ProviderClient::new_with_options(
+                            Duration::from_secs(60),
+                            1024 * 1024,
+                            request.provider().request_options().clone(),
+                        )
+                        .map_err(|error| ai_error(&error))?;
                         client
                             .send_approved(
                                 request.approve(),
@@ -477,7 +552,12 @@ impl AssistantPanel {
         match result {
             Ok(text) => {
                 self.response_target = Some(target);
-                self.response = text;
+                // A response may reflect a credential from another configuration.
+                // Revision admission precedes redaction, so obsolete results never
+                // reach the UI after their owning slots have been replaced/cleared.
+                self.response = keelshell_ai::Redactor::new(&self.credentials.all_secrets())
+                    .redact(&text)
+                    .0;
                 self.suggestions = shell_blocks(&self.response);
                 self.diagnostic_plan = None;
                 self.status = Message::new(
@@ -760,6 +840,11 @@ impl Render for AssistantPanel {
                 .child(div().text_xs().child(
                     Message::detail("发送至", "Destination", request.destination()).render(cx),
                 ))
+                .child(
+                    div()
+                        .text_xs()
+                        .child(request.request_options_summary(self.profile.as_ref(), cx)),
+                )
                 .child(
                     div()
                         .p_2()

@@ -2,6 +2,12 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
+## 2026-10-05 API 请求选项 F 精确整合与最新源码 CI
+
+API 请求选项 F 已在全新非作者差量复核通过后导入主工作树，48 份候选文件逐字节与冻结源码相等。E 原有完整门禁通过仍保留，但独立真实 GPUI 测试发现固定认证头大小写导致合法配置不能保存的 P2；F 仅修正该协议名比较并增加两条正式回归。原始 2957 字节反例原样通过，真实配置写入/回读、秘密拒绝及 HTTP 用途交付回归通过；656 proof/657 归档成员经根逐字节读回核验。C/D/E 原失败不改写。主树 F 完整门禁422.111秒通过1146普通+8doc+6脚本、严格检查与默认/2MiB控制器，57打包通过；显式MAC15新app/MCP/fixture构建与arm64/最低版本检查通过，258份Rust/Cargo输入与门禁相等。新标准包原生 API 临时/环境引用、重启及手动 Ask 已验证限定事实；原 Discover 零请求预期未满足、origin内容未知及外层PTY退出120保持，新记录器真实PTY独立回归通过。中英文三种主题均以独立新提案完成长文件首尾/固定操作栏与人工拒绝，SFTP40499字节及摘要不变；首cn-light到期失败保持，最小900×580未验证。原生API独立59/60证据包根核验，文件矩阵128/129已冻结，新独立限定复核143/144及根完整读回通过，未见新已证P1/P2。见[整合记录](testing/records/2026-10-05-ai-request-options-main-integration.md)、[API原生记录](testing/records/2026-10-05-ai-request-options-native.md)与[文件六组合](testing/records/2026-10-05-mcp-file-review-native-matrix.md)。MCP仅向外部智能体提供KeelShell能力；不开发通用第三方MCP客户端。
+
+前一测试同步提交 `df8cf8be4ea66f1186d511ef84c202709bd4fd4e` 的 [Quality37314626129](https://github.com/cyruss648/keelshell/actions/runs/37314626129) 三平台全部 success，API head、实际 checkout、原日志及 Unix 产物经非作者和根分别核验。macOS/Linux 各1083普通+8文档，Windows1063普通+8文档；原失败重授权及新屏障具名回归实际通过。168 proof/169 归档成员根保存核验；这是该提交源码 CI，不验收 F 或新原生应用，见[CI记录](testing/records/2026-10-05-mcp-grant-readiness-ci.md)。原生辅助脚本v2经26离线测试与独立追加生命周期复核通过，85proof/86归档经根核验，随后才启动本轮新GUI；原NOT_READY及首次Python版本失败保留，不改变产品源码。F新提交CI、供应商第八工具、最小窗口和Windows/Linux原生仍待完成。
+
 ## 2026-10-05 文件提案 CI 失败与 API D 新隐私缺口
 
 重授权测试同步修正已通过作者1083普通+8doc+6脚本完整门禁和全新非作者限定复核（3app/3session门控、19MCP、105真实TCP、6脚本及严格检查）；disabled点击补充反例证明无效入口不会伪造操作开始。根逐bytes/hash保存28/29作者与99/100复核材料，精确两份测试Rust已导入，生产/依赖/锁/工具链不变，主树完整门禁439.533秒通过1083普通+8doc+6脚本、严格检查和两控制器，工程输入前后相等。作者/复核工作区已可恢复归档，实际目录/cache消失，证明保留。原7s界面/5s产品限时保持，不认定原CI具体原因，见[同步记录](testing/records/2026-10-05-mcp-grant-readiness.md)。API E同时补齐网络与Apply/持久化前的秘密metadata拒绝，作者最终门禁1121普通+8doc+6脚本通过；正在完成构建和冻结，新独立复审尚未执行，D不可整合。
@@ -178,7 +184,7 @@ Windows观察更新：唯一后置TCP探针已改为相同1秒期限内单次复
 
 `ai_settings.rs` / `ai_settings/view.rs` 独立配置页支持多配置 CRUD、默认项、预设、端点、模型、临时遮罩密钥、发现、测试和取消。保存采用 revision 快照，不覆盖保存期间的新编辑。助手选择临时配置不改变已保存默认项。
 
-当前请求后端支持 Chat Completions、Responses 与 Anthropic Messages 三种显式协议；Anthropic 使用 `system`、`messages`、有界 `max_tokens`、`x-api-key` 和固定版本头，回复只读取 assistant `text` blocks。切换协议会安全替换已知 URL 后缀并清除旧密钥。自定义请求头、代理、非默认推理参数和 Agent 工作流尚未接通，请求验证明确拒绝，不能静默丢弃这些设置。AI 密钥默认驻留内存，现支持显式加密保存、每次启动后主密码解锁、清除临时密钥及解除关联。
+当前请求后端支持 Chat Completions、Responses 与 Anthropic Messages 三种显式协议；Anthropic 使用 `system`、`messages`、有界 `max_tokens`、`x-api-key` 和固定版本头，回复只读取 assistant `text` blocks。切换协议会安全替换已知 URL 后缀并清除旧密钥。自定义请求头与显式 HTTP(S)/SOCKS5 代理已接通发现、测试和审核式 Ask，具备临时/环境/加密凭据引用与秘密元数据拒绝；当前 F 整合门禁和原生验证见顶部及[请求选项指南](product/AI_REQUEST_OPTIONS.md)。非默认推理参数和 Agent 工作流尚未接通，不支持的设置明确拒绝。AI 密钥默认驻留内存，现支持显式加密保存、每次启动后主密码解锁、清除临时密钥及解除关联。
 
 SSH 密码与私钥口令已接入显式保存、每次主密码解锁和解除关联流程。凭据库 schema 2 认证完整 manifest，保存时检查经过认证的文件快照；加密 payload 绑定连接目的地，配置中只保存不透明引用。解除关联不会删除加密条目；vault 与 state 两次写入不是一个事务，失败可能留下孤立密文。后台已开始的保存可在关闭弹窗后完成，但不会自动连接。设计及边界见 `adr/0006-authenticated-credential-vault.md`，验收见 `testing/records/2026-10-03-vault-search-integration.md`。
 

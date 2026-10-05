@@ -390,7 +390,7 @@ fn unit_metadata_variants_refuse_inline_secret_fields() -> TestResult {
 }
 
 #[test]
-fn bearer_vault_reference_is_supported_but_environment_resolution_is_not() -> TestResult {
+fn bearer_references_admit_supported_sources_but_reject_invalid_reference_identity() -> TestResult {
     let mut named = profile("Vault provider");
     named.authentication = AiAuthentication::Bearer {
         credential: Some(AiSecretRef::SecretStore { id: Uuid::new_v4() }),
@@ -401,6 +401,23 @@ fn bearer_vault_reference_is_supported_but_environment_resolution_is_not() -> Te
             name: "UNRESOLVED_KEY".into(),
         }),
     };
-    assert!(named.validate_current_transport().is_err());
+    named.validate_current_transport()?;
+    named.authentication = AiAuthentication::Bearer {
+        credential: Some(AiSecretRef::Ephemeral { id: Uuid::new_v4() }),
+    };
+    named.validate_current_transport()?;
+    for reference in [
+        AiSecretRef::Ephemeral { id: Uuid::nil() },
+        AiSecretRef::SecretStore { id: Uuid::nil() },
+        AiSecretRef::Environment {
+            name: "INVALID=NAME".into(),
+        },
+    ] {
+        named.authentication = AiAuthentication::Bearer {
+            credential: Some(reference),
+        };
+        assert!(named.validate_current_transport().is_err());
+    }
+    // Metadata admission never supplies a value: explicit resolution belongs to the API caller.
     Ok(())
 }

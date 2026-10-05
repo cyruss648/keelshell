@@ -18,7 +18,7 @@ use zeroize::Zeroizing;
 use crate::provider::{
     ProviderProtocol, parse_assistant_response, payload_contains_secret, valid_model,
 };
-use crate::{AiError, ApprovedRequest, AssistantReply, ProviderConfig, Redactor};
+use crate::{AiError, ApprovedRequest, AssistantReply, ProviderConfig, Redactor, RequestOptions};
 
 /// Exact prompt used only after the user explicitly requests a connection test.
 /// No terminal content, host, files, user question or environment is included.
@@ -66,7 +66,11 @@ impl ProviderEndpoint {
             Some(Host::Domain(name)) => name.eq_ignore_ascii_case("localhost"),
             None => false,
         };
-        if url.host().is_none()
+        if endpoint.split_once("://").is_some_and(|(_, rest)| {
+            rest.split(['/', '?', '#'])
+                .next()
+                .is_some_and(|authority| authority.contains('@'))
+        }) || url.host().is_none()
             || url.port() == Some(0)
             || !url.username().is_empty()
             || url.password().is_some()
@@ -230,11 +234,21 @@ pub struct ProviderClient {
     client: Client,
     timeout: Duration,
     max_response_bytes: usize,
+    options: RequestOptions,
 }
 
 impl ProviderClient {
     /// Configure one deadline covering headers and the complete response body.
     pub fn new(timeout: Duration, max_response_bytes: usize) -> Result<Self, AiError> {
+        Self::new_with_options(timeout, max_response_bytes, RequestOptions::default())
+    }
+
+    /// Create a cancellable client for one immutable explicit route and headers.
+    pub fn new_with_options(
+        timeout: Duration,
+        max_response_bytes: usize,
+        options: RequestOptions,
+    ) -> Result<Self, AiError> {
         if timeout.is_zero()
             || timeout > Duration::from_secs(300)
             || max_response_bytes == 0
@@ -242,19 +256,22 @@ impl ProviderClient {
         {
             return Err(AiError::InvalidLimits);
         }
-        let client = Client::builder()
+        let mut builder = Client::builder()
             .timeout(timeout)
             .connect_timeout(timeout.min(Duration::from_secs(15)))
             .redirect(reqwest::redirect::Policy::none())
             .retry(reqwest::retry::never())
             .no_proxy()
-            .user_agent("KeelShell/0.1")
-            .build()
-            .map_err(|_| AiError::ClientInitialization)?;
+            .user_agent("KeelShell/0.1");
+        if let Some(proxy) = options.proxy()? {
+            builder = builder.proxy(proxy);
+        }
+        let client = builder.build().map_err(|_| AiError::ClientInitialization)?;
         Ok(Self {
             client,
             timeout,
             max_response_bytes,
+            options,
         })
     }
 
@@ -267,10 +284,14 @@ impl ProviderClient {
         cancellation: &RequestCancellation,
     ) -> Result<ModelCatalog, AiError> {
         let url = endpoint.models_endpoint()?;
+        if self.contains_secret(&url, api_key) {
+            return Err(AiError::CredentialInContext);
+        }
         self.bounded(cancellation, async {
             let mut models = Vec::new();
             let mut after_id: Option<String> = None;
             let mut pages = 0usize;
+            let mut remaining = self.max_response_bytes;
             loop {
                 pages += 1;
                 if pages > 64 {
@@ -287,12 +308,20 @@ impl ProviderClient {
                     url.clone()
                 };
                 let body = self
-                    .request(Method::GET, &page_url, None, api_key, endpoint.protocol)
+                    .request(
+                        Method::GET,
+                        &page_url,
+                        None,
+                        api_key,
+                        endpoint.protocol,
+                        remaining,
+                    )
                     .await?;
+                remaining = remaining.saturating_sub(body.len());
                 let raw: RawCatalog =
                     serde_json::from_slice(&body).map_err(|_| AiError::InvalidModelCatalog)?;
                 if raw.data.iter().any(|model| {
-                    !valid_model(&model.id) || api_key.is_some_and(|key| model.id.contains(key))
+                    !valid_model(&model.id) || self.contains_secret(&model.id, api_key)
                 }) {
                     return Err(AiError::InvalidModelCatalog);
                 }
@@ -301,6 +330,12 @@ impl ProviderClient {
                 }
                 let has_more = raw.has_more;
                 let last_id = raw.last_id;
+                if last_id
+                    .as_deref()
+                    .is_some_and(|id| !valid_model(id) || self.contains_secret(id, api_key))
+                {
+                    return Err(AiError::InvalidModelCatalog);
+                }
                 models.extend(raw.data.into_iter().map(|model| model.id));
                 if endpoint.protocol != ProviderProtocol::AnthropicMessages || !has_more {
                     break;
@@ -310,6 +345,9 @@ impl ProviderClient {
                 };
                 if after_id.as_deref() == Some(next.as_str()) {
                     return Err(AiError::InvalidModelCatalog);
+                }
+                if remaining == 0 {
+                    return Err(AiError::ResponseTooLarge);
                 }
                 after_id = Some(next);
             }
@@ -349,6 +387,14 @@ impl ProviderClient {
         max_output_tokens: Option<u32>,
         context_window_tokens: Option<u32>,
     ) -> Result<ConnectivityReport, AiError> {
+        if provider.request_options() != &self.options {
+            return Err(AiError::RequestOptionsMismatch);
+        }
+        if self.contains_secret(provider.endpoint(), api_key)
+            || self.contains_secret(provider.model(), api_key)
+        {
+            return Err(AiError::CredentialInContext);
+        }
         let output = crate::context::output_token_limit(
             provider.protocol(),
             max_output_tokens,
@@ -385,7 +431,7 @@ impl ProviderClient {
         if let Some(context) = context_window_tokens {
             crate::context::validate_token_capacity(body.len(), output.unwrap_or(4096), context)?;
         }
-        reject_context_credential(&body, api_key)?;
+        self.reject_context_secrets(&body, api_key)?;
         let started = Instant::now();
         self.bounded(cancellation, async {
             let body = self
@@ -395,9 +441,17 @@ impl ProviderClient {
                     Some(body),
                     api_key,
                     provider.protocol(),
+                    self.max_response_bytes,
                 )
                 .await?;
-            let response = parse_assistant_response(&body, provider.protocol(), api_key)?;
+            let mut response = parse_assistant_response(&body, provider.protocol(), api_key)?;
+            if response
+                .model
+                .as_deref()
+                .is_some_and(|model| self.contains_secret(model, api_key))
+            {
+                response.model = None;
+            }
             Ok(ConnectivityReport {
                 elapsed: started.elapsed(),
                 actual_model: response.model,
@@ -415,20 +469,58 @@ impl ProviderClient {
         cancellation: &RequestCancellation,
     ) -> Result<AssistantReply, AiError> {
         let request = request.0;
+        if request.provider.request_options() != &self.options {
+            return Err(AiError::RequestOptionsMismatch);
+        }
         let protocol = request.provider.protocol();
         let endpoint = request.provider.endpoint().to_owned();
         let json = request.json;
-        reject_context_credential(&json, api_key)?;
+        self.reject_context_secrets(&json, api_key)?;
         self.bounded(cancellation, async {
             let body = self
-                .request(Method::POST, &endpoint, Some(json), api_key, protocol)
+                .request(
+                    Method::POST,
+                    &endpoint,
+                    Some(json),
+                    api_key,
+                    protocol,
+                    self.max_response_bytes,
+                )
                 .await?;
             let response = parse_assistant_response(&body, protocol, api_key)?;
-            let (text, _) =
-                Redactor::new(&api_key.into_iter().collect::<Vec<_>>()).redact(&response.text);
+            let (text, _) = Redactor::new(
+                &self
+                    .options
+                    .secrets()
+                    .into_iter()
+                    .chain(api_key)
+                    .collect::<Vec<_>>(),
+            )
+            .redact(&response.text);
             Ok(AssistantReply { text })
         })
         .await
+    }
+
+    fn contains_secret(&self, value: &str, api_key: Option<&str>) -> bool {
+        self.options
+            .secrets()
+            .into_iter()
+            .chain(api_key)
+            .any(|secret| crate::request_options::contains_context_secret(value, secret))
+    }
+
+    fn reject_context_secrets(&self, body: &str, api_key: Option<&str>) -> Result<(), AiError> {
+        reject_context_credential(body, api_key)?;
+        if self
+            .options
+            .secrets()
+            .iter()
+            .any(|secret| payload_contains_secret(body, secret))
+        {
+            return Err(AiError::CredentialInContext);
+        }
+        Ok(())
     }
 
     async fn bounded<T>(
@@ -450,8 +542,27 @@ impl ProviderClient {
         body: Option<String>,
         api_key: Option<&str>,
         protocol: ProviderProtocol,
+        response_limit: usize,
     ) -> Result<Zeroizing<Vec<u8>>, AiError> {
-        let mut builder = self.client.request(method, url);
+        self.options
+            .reject_header_name_secrets(api_key.as_slice())?;
+        // Recheck every outgoing URL, including generated pagination URLs, before
+        // request construction; explicit auth/header values are delivered separately.
+        if self.contains_secret(url, api_key)
+            || self
+                .options
+                .proxy_url()
+                .is_some_and(|url| self.contains_secret(url, api_key))
+        {
+            return Err(AiError::CredentialInContext);
+        }
+        if let Some(body) = body.as_deref() {
+            self.reject_context_secrets(body, api_key)?;
+        }
+        let mut builder = self
+            .client
+            .request(method, url)
+            .headers(self.options.header_map()?);
         if let Some(key) = api_key {
             if key.is_empty() || key.chars().any(char::is_control) {
                 return Err(AiError::InvalidApiKey);
@@ -483,13 +594,13 @@ impl ProviderClient {
         }
         if response
             .content_length()
-            .is_some_and(|length| length > self.max_response_bytes as u64)
+            .is_some_and(|length| length > response_limit as u64)
         {
             return Err(AiError::ResponseTooLarge);
         }
         let mut bytes = Zeroizing::new(Vec::new());
         while let Some(chunk) = response.chunk().await.map_err(transport_error)? {
-            if chunk.len() > self.max_response_bytes.saturating_sub(bytes.len()) {
+            if chunk.len() > response_limit.saturating_sub(bytes.len()) {
                 return Err(AiError::ResponseTooLarge);
             }
             bytes.extend_from_slice(&chunk);

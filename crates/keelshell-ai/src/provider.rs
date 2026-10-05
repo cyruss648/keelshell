@@ -8,7 +8,7 @@ use serde::Deserialize;
 use url::Url;
 use zeroize::Zeroizing;
 
-use crate::{AiError, ApprovedRequest, Redactor, discovery::ProviderEndpoint};
+use crate::{AiError, ApprovedRequest, Redactor, RequestOptions, discovery::ProviderEndpoint};
 
 /// Request/response wire formats implemented by the provider transport.
 ///
@@ -34,6 +34,7 @@ pub struct ProviderConfig {
     endpoint: Url,
     model: String,
     protocol: ProviderProtocol,
+    options: RequestOptions,
 }
 
 impl fmt::Debug for ProviderConfig {
@@ -62,7 +63,19 @@ impl ProviderConfig {
             endpoint,
             model: model.to_owned(),
             protocol,
+            options: RequestOptions::default(),
         })
+    }
+
+    /// Bind validated resolved headers and routing to this immutable target.
+    pub fn with_request_options(mut self, options: RequestOptions) -> Self {
+        self.options = options;
+        self
+    }
+
+    /// Resolved options frozen into request preparation and human review.
+    pub fn request_options(&self) -> &RequestOptions {
+        &self.options
     }
 
     /// Full destination to display alongside the payload preview.
@@ -89,11 +102,21 @@ impl ProviderConfig {
 pub struct AiClient {
     client: Client,
     max_response_bytes: usize,
+    options: RequestOptions,
 }
 
 impl AiClient {
     /// Create a client with an overall deadline and a bounded response body.
     pub fn new(timeout: Duration, max_response_bytes: usize) -> Result<Self, AiError> {
+        Self::new_with_options(timeout, max_response_bytes, RequestOptions::default())
+    }
+
+    /// Create a blocking client for one validated routing/header snapshot.
+    pub fn new_with_options(
+        timeout: Duration,
+        max_response_bytes: usize,
+        options: RequestOptions,
+    ) -> Result<Self, AiError> {
         if timeout.is_zero()
             || timeout > Duration::from_secs(300)
             || max_response_bytes == 0
@@ -101,18 +124,21 @@ impl AiClient {
         {
             return Err(AiError::InvalidLimits);
         }
-        let client = Client::builder()
+        let mut builder = Client::builder()
             .timeout(timeout)
             .connect_timeout(timeout.min(Duration::from_secs(15)))
             .redirect(reqwest::redirect::Policy::none())
             .retry(reqwest::retry::never())
             .no_proxy()
-            .user_agent("KeelShell/0.1")
-            .build()
-            .map_err(|_| AiError::ClientInitialization)?;
+            .user_agent("KeelShell/0.1");
+        if let Some(proxy) = options.proxy()? {
+            builder = builder.proxy(proxy);
+        }
+        let client = builder.build().map_err(|_| AiError::ClientInitialization)?;
         Ok(Self {
             client,
             max_response_bytes,
+            options,
         })
     }
 
@@ -128,11 +154,33 @@ impl AiClient {
         api_key: Option<&str>,
     ) -> Result<AssistantReply, AiError> {
         let request = request.0;
+        if request.provider.options != self.options {
+            return Err(AiError::RequestOptionsMismatch);
+        }
+        self.options
+            .reject_header_name_secrets(api_key.as_slice())?;
+        let secrets = self.options.secrets();
+        if secrets.iter().copied().chain(api_key).any(|secret| {
+            crate::request_options::contains_context_secret(request.provider.endpoint(), secret)
+                || self
+                    .options
+                    .proxy_url()
+                    .is_some_and(|url| crate::request_options::contains_context_secret(url, secret))
+        }) {
+            return Err(AiError::CredentialInContext);
+        }
+        if secrets
+            .iter()
+            .any(|secret| payload_contains_secret(&request.json, secret))
+        {
+            return Err(AiError::CredentialInContext);
+        }
         let protocol = request.provider.protocol;
         let mut builder = self
             .client
             .post(request.provider.endpoint.clone())
-            .header(CONTENT_TYPE, "application/json");
+            .header(CONTENT_TYPE, "application/json")
+            .headers(self.options.header_map()?);
         if let Some(key) = api_key {
             if key.is_empty() || key.chars().any(char::is_control) {
                 return Err(AiError::InvalidApiKey);
@@ -196,8 +244,8 @@ impl AiClient {
         }
         let parsed = parse_assistant_response(&body, protocol, api_key)?;
         // A provider may echo the authorization key. Never reflect that key into UI.
-        let (text, _) =
-            Redactor::new(&api_key.into_iter().collect::<Vec<_>>()).redact(&parsed.text);
+        let (text, _) = Redactor::new(&secrets.into_iter().chain(api_key).collect::<Vec<_>>())
+            .redact(&parsed.text);
         Ok(AssistantReply { text })
     }
 }

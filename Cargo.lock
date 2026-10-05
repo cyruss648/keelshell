@@ -4151,6 +4151,7 @@ dependencies = [
 name = "keelshell-ai"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "nix",
  "process-wrap",
  "reqwest",
@@ -4171,6 +4172,7 @@ name = "keelshell-app"
 version = "0.1.0"
 dependencies = [
  "alacritty_terminal",
+ "base64 0.22.1",
  "chrono",
  "flate2",
  "gpui-kit",

@@ -46,6 +46,8 @@ pub enum CredentialKind {
     PrivateKeyPassphrase,
     /// An API key owned by a named AI profile.
     AiApiKey,
+    /// Header or proxy secret with a purpose-bound encrypted payload.
+    AiRequestSecret,
 }
 
 impl CredentialKind {
@@ -54,6 +56,7 @@ impl CredentialKind {
             Self::Password => 1,
             Self::PrivateKeyPassphrase => 2,
             Self::AiApiKey => 3,
+            Self::AiRequestSecret => 4,
         }
     }
 }
@@ -835,6 +838,7 @@ mod tests {
         assert_eq!(CredentialKind::Password.code(), 1);
         assert_eq!(CredentialKind::PrivateKeyPassphrase.code(), 2);
         assert_eq!(CredentialKind::AiApiKey.code(), 3);
+        assert_eq!(CredentialKind::AiRequestSecret.code(), 4);
     }
 
     #[test]

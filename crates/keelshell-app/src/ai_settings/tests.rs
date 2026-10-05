@@ -123,7 +123,7 @@ pub(super) fn mount(
     mount_sized(cx, profile, 1000., 900.)
 }
 
-fn mount_sized(
+pub(crate) fn mount_sized(
     cx: &mut TestAppContext,
     profile: NamedAiProfile,
     width: f32,
@@ -916,3 +916,25 @@ fn real_input_events_sync_local_limit_and_controls_are_local_only(cx: &mut TestA
     })
     .unwrap_or_else(|_| panic!("local form"));
 }
+
+/// Test-only observation across the settings/assistant event boundary.
+pub(crate) fn request_has_finished(panel: &Entity<AiSettingsPanel>, cx: &gpui_kit::App) -> bool {
+    panel.read(cx).operation.is_none()
+}
+
+/// Snapshot the process-only disclosure boundary produced by actual settings inputs.
+pub(crate) fn request_draft_credentials(
+    panel: &Entity<AiSettingsPanel>,
+    cx: &gpui_kit::App,
+) -> (uuid::Uuid, EphemeralCredentials) {
+    let panel = panel.read(cx);
+    (
+        panel.selected.unwrap_or_else(|| panic!("draft owner")),
+        panel.credentials.clone(),
+    )
+}
+
+// Preserve the independent catalog counterexample and its assertions verbatim.
+include!("tests/private_catalog_probe.rs");
+
+mod catalog_secrets;

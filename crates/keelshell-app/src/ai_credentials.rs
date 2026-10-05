@@ -22,6 +22,7 @@ pub(crate) enum VaultAction {
 pub(crate) enum Completion {
     Saved(Uuid),
     Unlocked(Zeroizing<String>),
+    RequestUnlocked(crate::ai_request_options::RequestSecret),
     Cancelled,
 }
 
@@ -177,6 +178,9 @@ pub(crate) fn operate(
         }
     }
 }
+
+mod request_secret;
+pub(crate) use request_secret::operate_request;
 
 #[cfg(test)]
 mod tests;

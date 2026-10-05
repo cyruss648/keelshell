@@ -22,14 +22,15 @@ use zeroize::Zeroizing;
 
 use crate::i18n::{Message, t};
 
+mod request_options;
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;
 mod vault;
 mod view;
 use vault::VaultPrompt;
 
 /// Temporary keys indexed by profile identity. Never serialize or debug this map.
-pub type EphemeralCredentials = BTreeMap<Uuid, Zeroizing<String>>;
+pub use crate::ai_request_options::EphemeralCredentials;
 
 /// Whether the selected profile uses one transient API-key value.
 ///
@@ -131,6 +132,7 @@ pub struct AiSettingsPanel {
     context_tokens: Entity<InputState>,
     output_tokens: Entity<InputState>,
     token_drafts: BTreeMap<Uuid, (String, String)>,
+    request_editors: BTreeMap<Uuid, request_options::RequestEditor>,
     local_timeout: Entity<InputState>,
     local_answer: Entity<InputState>,
     local_output: Entity<InputState>,
@@ -305,11 +307,12 @@ impl AiSettingsPanel {
                 if matches!(event, InputEvent::Change) {
                     panel.sync_editor(cx);
                     panel.clear_pending_key(window, cx);
+                    panel.clear_pending_request_fields(window, cx);
                 }
             })
         })
         .collect();
-        Self {
+        let mut panel = Self {
             catalog: catalog.clone(),
             credentials: credentials.clone(),
             selected,
@@ -322,6 +325,7 @@ impl AiSettingsPanel {
             context_tokens,
             output_tokens,
             token_drafts: BTreeMap::new(),
+            request_editors: BTreeMap::new(),
             local_timeout,
             local_answer,
             local_output,
@@ -343,7 +347,9 @@ impl AiSettingsPanel {
             runtime,
             _job: None,
             _subscriptions: subscriptions,
-        }
+        };
+        panel.load_request_editor(window, cx);
+        panel
     }
 
     /// Translate hints without modifying draft values or operation identity.
@@ -462,11 +468,12 @@ impl AiSettingsPanel {
         if self.clear_key_pending {
             values.key.clear();
         }
-        if values == self.editor_values {
-            return;
-        }
         let endpoint_changed = values.endpoint != self.editor_values.endpoint
             || values.executable != self.editor_values.executable;
+        let request_changed = self.sync_request_editor(endpoint_changed, cx);
+        if values == self.editor_values && !request_changed {
+            return;
+        }
         let key_changed = values.key != self.editor_values.key;
         if endpoint_changed {
             // Reject the old field value even before its queued UI clear runs.
@@ -538,6 +545,15 @@ impl AiSettingsPanel {
         self.cancel_operation(false, cx);
         if clear_models {
             self.models.clear();
+        } else {
+            // A credential may become known after the previous catalog arrived.
+            // Invalidate literal secret IDs as well as the in-flight operation.
+            let known = self.credentials.all_secrets();
+            self.models.retain(|model| {
+                !known
+                    .iter()
+                    .any(|secret| !secret.is_empty() && model.contains(secret))
+            });
         }
         self.status = Message::new("配置有未保存的修改。", "Configuration has unsaved changes.");
         cx.notify();
@@ -595,6 +611,8 @@ impl AiSettingsPanel {
         // turn a locale refresh/selection into edits to another profile.
         self.editor_values = values;
         self.clear_key_pending = false;
+        self.load_request_editor(window, cx);
+        self.clear_pending_request_fields(window, cx);
     }
 
     fn select(&mut self, id: Uuid, window: &mut Window, cx: &mut Context<Self>) {
@@ -629,6 +647,8 @@ impl AiSettingsPanel {
     fn remove(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if let Some(id) = self.selected {
             self.catalog.remove(id);
+            self.credentials.clear_requests(id);
+            self.request_editors.remove(&id);
             self.credentials.remove(&id);
             self.local_limit_drafts.remove(&id);
             self.token_drafts.remove(&id);
@@ -664,6 +684,19 @@ impl AiSettingsPanel {
                 _ if preset == AiPreset::Ollama => AiAuthentication::None,
                 _ => AiAuthentication::Bearer { credential: None },
             };
+            let id = profile.id;
+            for header in &mut profile.custom_headers {
+                header.value_ref = keelshell_core::AiSecretRef::Ephemeral { id: Uuid::new_v4() };
+            }
+            if let keelshell_core::AiProxy::Explicit {
+                credentials: Some(reference),
+                ..
+            } = &mut profile.proxy
+            {
+                *reference = keelshell_core::AiSecretRef::Ephemeral { id: Uuid::new_v4() };
+            }
+            self.credentials.clear_requests(id);
+            self.request_editors.remove(&id);
             // A credential for one destination is never carried to another preset.
             self.credentials.remove(&profile.id);
             self.changed(true, cx);
@@ -715,6 +748,7 @@ impl AiSettingsPanel {
             _ => AiAuthentication::Bearer { credential: None },
         };
         self.credentials.remove(&profile.id);
+        self.sync_request_editor(true, cx);
         self.changed(true, cx);
         self.load_editor(window, cx);
     }
@@ -816,7 +850,8 @@ impl AiSettingsPanel {
         profile.context_window_tokens = None;
         profile.custom_headers.clear();
         profile.proxy = keelshell_core::AiProxy::Direct;
-        profile.reasoning_by_model.clear();
+        self.credentials.clear_requests(profile.id);
+        self.request_editors.remove(&profile.id);
         profile.model.clear();
         if let Some(agent) = agent {
             profile.backend = AiBackend::LocalAgent {
@@ -985,11 +1020,34 @@ impl AiSettingsPanel {
             cx.notify();
             return;
         }
+        if self
+            .catalog
+            .profiles
+            .iter()
+            .any(|p| !self.request_draft_valid(p.id))
+        {
+            self.status = Message::new(
+                "请先修正请求头或代理引用。",
+                "Correct custom headers or proxy references first.",
+            );
+            cx.notify();
+            return;
+        }
         if let Err(error) = self.catalog.validate() {
             self.status = Message::detail(
                 "配置尚不完整或名称重复",
                 "Invalid or duplicate profile",
                 error,
+            );
+            cx.notify();
+            return;
+        }
+        if crate::ai_request_options::validate_catalog_metadata(&self.catalog, &self.credentials)
+            .is_err()
+        {
+            self.status = Message::new(
+                "配置文字包含已知秘密或秘密集合超限，请修正后再保存。",
+                "Configuration text contains a known secret or the secret set exceeds its limit. Correct it before saving.",
             );
             cx.notify();
             return;
@@ -1043,6 +1101,14 @@ impl AiSettingsPanel {
         let Some(profile) = self.profile().cloned() else {
             return;
         };
+        if !self.request_draft_valid(profile.id) {
+            self.status = Message::new(
+                "请先修正请求头或代理引用。",
+                "Correct custom headers or proxy references first.",
+            );
+            cx.notify();
+            return;
+        }
         if !self.token_draft_valid(profile.id) {
             self.status = Message::new(
                 "请先修正 Token 限制。",
@@ -1069,13 +1135,23 @@ impl AiSettingsPanel {
             cx.notify();
             return;
         }
-        let key = match &profile.authentication {
-            AiAuthentication::None => None,
-            AiAuthentication::Bearer { .. } | AiAuthentication::Header { .. } => self
-                .credentials
-                .get(&profile.id)
-                .filter(|key| !key.is_empty())
-                .cloned(),
+        let key =
+            match crate::ai_request_options::resolve_authentication(&profile, &self.credentials) {
+                Ok(key) => key,
+                Err(error) => {
+                    self.status = provider_error(&error);
+                    cx.notify();
+                    return;
+                }
+            };
+        let options = match crate::ai_request_options::resolve_options(&profile, &self.credentials)
+        {
+            Ok(options) => options,
+            Err(error) => {
+                self.status = provider_error(&error);
+                cx.notify();
+                return;
+            }
         };
         if uses_api_key(&profile.authentication) && key.is_none() {
             self.status = Message::new(
@@ -1101,7 +1177,11 @@ impl AiSettingsPanel {
             &self.runtime,
             cx.background_executor().clone(),
             async move {
-                let client = ProviderClient::new(Duration::from_secs(30), 1024 * 1024)?;
+                let client = ProviderClient::new_with_options(
+                    Duration::from_secs(30),
+                    1024 * 1024,
+                    options.clone(),
+                )?;
                 let api_key = key.as_ref().map(|key| key.as_str());
                 let protocol = match profile.api_style {
                     AiApiStyle::ChatCompletions => ProviderProtocol::ChatCompletions,
@@ -1123,7 +1203,8 @@ impl AiSettingsPanel {
                                 &profile.endpoint,
                                 &profile.model,
                                 protocol,
-                            )?,
+                            )?
+                            .with_request_options(options),
                             api_key,
                             &cancellation,
                             profile.max_output_tokens,

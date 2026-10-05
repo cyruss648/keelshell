@@ -56,14 +56,16 @@ impl AiError {
             Self::InvalidResponse | Self::EmptyReply | Self::InvalidModelCatalog => {
                 AiErrorCategory::InvalidResponse
             }
-            Self::InvalidProposal
+            Self::RequestOptionsMismatch
+            | Self::InvalidProposal
             | Self::ReviewMismatch
             | Self::ReviewExpired
             | Self::InvalidDiagnosticPlan
             | Self::DiagnosticPlanTooLarge
             | Self::NoDiagnosticSteps
             | Self::DiagnosticPlanMismatch => AiErrorCategory::Review,
-            Self::InvalidEndpoint
+            Self::InvalidRequestOptions
+            | Self::InvalidEndpoint
             | Self::InvalidModel
             | Self::ContextTooLarge
             | Self::EmptyPrompt

@@ -4,6 +4,7 @@
 )]
 
 mod ai_credentials;
+mod ai_request_options;
 mod ai_settings;
 mod assistant;
 mod batch_commands;
