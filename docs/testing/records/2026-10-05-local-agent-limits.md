@@ -1,6 +1,6 @@
 # 2026-10-05 本地 Ask 可配置时限与输出预算
 
-状态：作者隔离工程门禁、新非作者独立复核、根整合门禁及限定 macOS 原生设置验收均已通过。基线 `40d092ca61c4c229acb4a004d2852dd858e86aed`；三个整数预算只用于命名 Codex / Claude Code 单次 Ask。整合源码、新包和验收边界见[整合记录](2026-10-05-ai-modal-mcp-integration.md)，新提交 CI 另行确认。
+状态：作者隔离工程门禁、新非作者独立复核、根整合门禁及限定 macOS 原生设置验收均已通过。基线 `40d092ca61c4c229acb4a004d2852dd858e86aed`；三个整数预算只用于命名 Codex / Claude Code 单次 Ask。整合源码、新包和验收边界见[整合记录](2026-10-05-ai-modal-mcp-integration.md)。新 `a19d0c1` CI 的 macOS/Windows 成功，Linux 因文件布局测试先失败，详见[三平台记录](2026-10-05-integration-ci.md)，没有三平台整体通过结论。
 
 ## 实现范围
 

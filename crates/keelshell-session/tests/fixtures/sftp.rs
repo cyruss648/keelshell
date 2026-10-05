@@ -40,6 +40,91 @@ impl ResponseGate {
     }
 }
 
+/// Holds nonzero-offset writes for one target of a fresh reviewed upload.
+/// Watch state preserves release-before-poll and separates successive holds.
+struct TransferWriteGate {
+    state: tokio::sync::watch::Sender<Option<Arc<TransferWriteState>>>,
+}
+struct TransferWriteState {
+    target: String,
+    entered: AtomicUsize,
+    expired: AtomicBool,
+}
+impl Default for TransferWriteGate {
+    fn default() -> Self {
+        Self {
+            state: tokio::sync::watch::channel(None).0,
+        }
+    }
+}
+impl TransferWriteGate {
+    async fn hold(&self, handle: &str, offset: u64, deadline: Duration) -> Result<(), ()> {
+        let mut state = self.state.subscribe();
+        let owned = match state.borrow_and_update().as_ref() {
+            Some(owned) if offset > 0 && owned.target == handle => owned.clone(),
+            _ => return Ok(()),
+        };
+        owned.entered.fetch_add(1, Ordering::AcqRel);
+        // Each hold owns its counters and identity. An old handler cannot
+        // attribute a delayed entry/expiry to a newly armed hold for this path.
+        // No filesystem mutex is held across this wait.
+        let result = tokio::time::timeout(deadline, async {
+            loop {
+                if !state
+                    .borrow_and_update()
+                    .as_ref()
+                    .is_some_and(|current| Arc::ptr_eq(current, &owned))
+                {
+                    return Ok(());
+                }
+                state.changed().await.map_err(|_| ())?;
+            }
+        })
+        .await
+        .map_err(|_| ());
+        match result {
+            Ok(result) => result,
+            Err(()) => {
+                owned.expired.store(true, Ordering::Release);
+                Err(())
+            }
+        }
+    }
+}
+
+/// Releases a fixture WRITE even when its test fails or unwinds.
+/// Dropping a cloned Filesystem does not release another owner's active hold.
+pub struct TransferWriteHold {
+    gate: Arc<TransferWriteGate>,
+    owned: Arc<TransferWriteState>,
+}
+impl TransferWriteHold {
+    pub fn entered(&self) -> usize {
+        self.owned.entered.load(Ordering::Acquire)
+    }
+    pub fn expired(&self) -> bool {
+        self.owned.expired.load(Ordering::Acquire)
+    }
+    pub fn release(self) {
+        // The consuming operation has the same cleanup behavior as Drop.
+    }
+}
+impl Drop for TransferWriteHold {
+    fn drop(&mut self) {
+        self.gate.state.send_if_modified(|state| {
+            if state
+                .as_ref()
+                .is_some_and(|current| Arc::ptr_eq(current, &self.owned))
+            {
+                *state = None;
+                true
+            } else {
+                false
+            }
+        });
+    }
+}
+
 #[derive(Default)]
 pub struct Filesystem {
     state: std::sync::Arc<std::sync::Mutex<FileState>>,
@@ -50,6 +135,7 @@ pub struct Filesystem {
     stall_atomic_write: Arc<AtomicBool>,
     atomic_writes: Arc<AtomicUsize>,
     transfer_write_delay: Arc<AtomicUsize>,
+    transfer_write_gate: Arc<TransferWriteGate>,
     transfer_read_limit: Arc<AtomicUsize>,
     transfer_writes: Arc<AtomicUsize>,
     invalid_transfer_read: Arc<AtomicUsize>,
@@ -68,6 +154,7 @@ impl Clone for Filesystem {
             stall_atomic_write: self.stall_atomic_write.clone(),
             atomic_writes: self.atomic_writes.clone(),
             transfer_write_delay: self.transfer_write_delay.clone(),
+            transfer_write_gate: self.transfer_write_gate.clone(),
             transfer_read_limit: self.transfer_read_limit.clone(),
             transfer_writes: self.transfer_writes.clone(),
             invalid_transfer_read: self.invalid_transfer_read.clone(),
@@ -85,6 +172,35 @@ impl Filesystem {
     }
     pub fn release_directory_reads(&self) {
         self.directory_read_gate.release();
+    }
+    /// Use only for a fresh upload whose first WRITE starts at offset zero.
+    /// Nonzero-offset WRITE requests for this exact handle wait before mutation
+    /// and ACK; this is not a resume-transfer acknowledgement observer.
+    pub fn hold_transfer_writes_after_first(
+        &self,
+        target: &str,
+    ) -> Result<TransferWriteHold, &'static str> {
+        let owned = Arc::new(TransferWriteState {
+            target: target.to_owned(),
+            entered: AtomicUsize::new(0),
+            expired: AtomicBool::new(false),
+        });
+        let mut armed = false;
+        self.transfer_write_gate.state.send_if_modified(|state| {
+            if state.is_some() {
+                return false;
+            }
+            *state = Some(owned.clone());
+            armed = true;
+            true
+        });
+        if !armed {
+            return Err("fixture already has an owned WRITE hold");
+        }
+        Ok(TransferWriteHold {
+            gate: self.transfer_write_gate.clone(),
+            owned,
+        })
     }
     pub fn set_invalid_transfer_read(&self, mode: usize) {
         self.invalid_transfer_read.store(mode, Ordering::Release);
@@ -262,6 +378,10 @@ impl russh_sftp::server::Handler for Filesystem {
         bytes: Vec<u8>,
     ) -> Result<Status, StatusCode> {
         self.transfer_writes.fetch_add(1, Ordering::AcqRel);
+        self.transfer_write_gate
+            .hold(&handle, offset, Duration::from_secs(10))
+            .await
+            .map_err(|_| StatusCode::Failure)?;
         let delay = self.transfer_write_delay.load(Ordering::Acquire);
         if delay > 0 {
             tokio::time::sleep(std::time::Duration::from_millis(delay as u64)).await;
@@ -435,5 +555,110 @@ impl russh_sftp::server::Handler for Filesystem {
             id,
             files: vec![File::dummy(if path == "." { "/".into() } else { path })],
         })
+    }
+}
+
+#[cfg(test)]
+mod transfer_write_gate_tests {
+    use super::*;
+    use std::{future::Future, task::Poll};
+
+    async fn poll_held_once(future: &mut std::pin::Pin<Box<impl Future<Output = Result<(), ()>>>>) {
+        std::future::poll_fn(|cx| {
+            assert!(future.as_mut().poll(cx).is_pending());
+            Poll::Ready(())
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn first_write_unrelated_targets_and_release_before_poll_are_never_held()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let filesystem = Filesystem::default();
+        let hold = filesystem.hold_transfer_writes_after_first("/selected.bin")?;
+        assert!(
+            filesystem
+                .hold_transfer_writes_after_first("/other.bin")
+                .is_err()
+        );
+        let gate = filesystem.transfer_write_gate.clone();
+        assert_eq!(
+            gate.hold("/selected.bin", 0, Duration::from_millis(50))
+                .await,
+            Ok(())
+        );
+        assert_eq!(
+            gate.hold("/unrelated.bin", 65536, Duration::from_millis(50))
+                .await,
+            Ok(())
+        );
+        assert_eq!(hold.entered(), 0);
+        drop(filesystem.clone());
+        assert!(
+            gate.state.borrow().is_some(),
+            "a subsystem clone cannot release the owned hold"
+        );
+        let pending = gate.hold("/selected.bin", 65536, Duration::from_millis(50));
+        hold.release();
+        assert_eq!(
+            pending.await,
+            Ok(()),
+            "release before the handler's first poll is retained"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn guard_unwind_releases_an_entered_write_and_rearming_does_not_retrap_it()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let filesystem = Filesystem::default();
+        let hold = filesystem.hold_transfer_writes_after_first("/selected.bin")?;
+        let gate = filesystem.transfer_write_gate.clone();
+        let mut pending = Box::pin(gate.hold("/selected.bin", 65536, Duration::from_secs(1)));
+        poll_held_once(&mut pending).await;
+        assert_eq!(hold.entered(), 1);
+        let unwind = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _owned_hold = hold;
+            panic!("controlled fixture failure exercises owned release");
+        }));
+        assert!(unwind.is_err());
+        let next = filesystem.hold_transfer_writes_after_first("/selected.bin")?;
+        assert_eq!(
+            tokio::time::timeout(Duration::from_millis(250), pending).await,
+            Ok(Ok(()))
+        );
+        assert!(
+            gate.state.borrow().is_some(),
+            "the new generation remains owned"
+        );
+        let mut next_pending = Box::pin(gate.hold("/selected.bin", 65536, Duration::from_secs(1)));
+        poll_held_once(&mut next_pending).await;
+        assert_eq!(next.entered(), 1);
+        drop(next);
+        assert_eq!(
+            tokio::time::timeout(Duration::from_millis(250), next_pending).await,
+            Ok(Ok(()))
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn a_missing_release_expires_as_failure_instead_of_admitting_a_write()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let filesystem = Filesystem::default();
+        let hold = filesystem.hold_transfer_writes_after_first("/selected.bin")?;
+        assert_eq!(
+            filesystem
+                .transfer_write_gate
+                .hold("/selected.bin", 65536, Duration::from_millis(20))
+                .await,
+            Err(())
+        );
+        assert_eq!(hold.entered(), 1);
+        assert!(hold.expired());
+        assert!(filesystem.transfer_write_gate.state.borrow().is_some());
+        drop(hold);
+        assert!(filesystem.transfer_write_gate.state.borrow().is_none());
+        Ok(())
     }
 }

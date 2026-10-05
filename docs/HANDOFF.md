@@ -2,7 +2,15 @@
 
 本仓库已整体迁移到用户指定的项目目录。迁移保留 `.git`、所有已跟踪/未跟踪文件、ignored 构建目录和未提交改动。用户已于 2026-10-03 授权公开 GitHub 仓库、推送和标签发布；当前 remote 为 `https://github.com/cyruss648/keelshell.git`。发布与验证状态见 [发布记录](testing/records/2026-10-03-release.md)。
 
-## 2026-10-05 Ask 预算、弹窗与 MCP EOF 整合通过
+## 2026-10-05 文件场景同步修复：本机与新独立复审通过
+
+只有两个测试文件改动，生产/依赖/锁/工具链及原5秒传输/12秒界面等待不变。精确基线探针观察远端完整数据与旧Running快照，点击后Completed再等Paused失败；旧Linux CI具体时序仍只作候选归因。目标绑定的真实WRITE屏障保持全176场景，并要求Running/Paused/Completed阶段及控件、部分内容稳定和继续后完整字节。作者/根门禁均1060普通+8文档+6脚本、严格工程检查及默认/2MiB控制器通过，作者57打包另记；新非作者44文件/208session+1doc/4私有Handler及严格检查复审PASS，无剩余限定P1/P2。79作者/160复核证明根逐项核验复制，原失败保持；目录句柄计数和subsystem仅观测清理，新提交CI尚待确认，旧原生包不迁移。见[同步记录](testing/records/2026-10-05-files-scene-readiness.md)。
+
+## 2026-10-05 前次整合 CI：Linux 文件场景失败
+
+精确 `a19d0c1` 的 [Quality37253864420](https://github.com/cyruss648/keelshell/actions/runs/37253864420) 已结束 failure：macOS/Windows 成功，Linux app 为375通过/1失败，文件布局GPUI等待12秒超时，未执行到MCP/OpenSSH。新macOS/Windows的EOF回归通过，macOS另有9项OpenSSH及观察身份清理通过；Windows脚本5通过/1跳过、打包53通过/4跳过，不能把Ran计为执行通过。原始失败与独立读取证据保留，新文件布局候选在独立工作区诊断，尚不认定原CI根因；见[三平台记录](testing/records/2026-10-05-integration-ci.md)。此前三个已合增量worktree已可恢复归档，旧分支和两个审查cache实际清理，241份证明保持。
+
+## 2026-10-05 Ask 预算、弹窗与 MCP EOF 本机整合通过
 
 三个增量均已整合并通过非作者独立复核。根最终门禁通过 1053 普通、8 文档、6 脚本测试、格式/严格 Clippy/x.y 与默认/2 MiB 控制器；原弹窗 A/B 失败保持，最终 C 的 11 原/8 私有模态回归通过。显式 macOS 15.0 新双程序开发包完成隔离原生预算保存/无效草稿/中英明暗、当前 AX 背景节点移除、键盘触发焦点返回及同一 SSH 前后回显；没有新供应商或云调用，不关闭旧 AX 对象、屏幕阅读器或其它平台原生。自有进程、端口和私有数据已清理。原 Linux CI 失败保留，新提交 CI 待单独确认，见[整合记录](testing/records/2026-10-05-ai-modal-mcp-integration.md)、[预算记录](testing/records/2026-10-05-local-agent-limits.md)、[EOF记录](testing/records/2026-10-05-mcp-startup-eof.md)。
 
@@ -10,7 +18,7 @@
 
 MCP 仍仅由 KeelShell 向外部智能体提供服务。新的 Codex 0.160.0 授权只读尝试没有通过：首轮执行前脚本误解析功能表，0 POST/未 MCP exec；新范围只协商七项目录，首笔模型请求缺少 KeelShell 工具且含额外工具，安全门停止，实际 1 POST/0 业务 RPC。额外工具来源未知，原字节及两次失败保留；自有客户端与原生 GUI/SSH 已清理，根已明确撤销全部授权。新的非作者只读复核确认失败证据一致、无剩余限定范围P1/P2，15份证明由根核验复制；失败仍未关闭，详见[Codex 尝试记录](testing/records/2026-10-05-codex-authorized-mcp-failure.md)。该限定失败覆盖下方历史“Codex MCP 未执行”，不替代原 Claude 授权通过。
 
-最新精确 `40d092c` 的 [Quality37244888512](https://github.com/cyruss648/keelshell/actions/runs/37244888512) 已结束 failure（macOS/Windows success、Linux MCP EOF 退出断言失败），Linux OpenSSH 未执行；旧 e166 三平台通过保持为旧范围。完整失败日志保留；新的 EOF 分类修复已通过作者工程门禁及新非作者独立复审并整合至主工作区，根整合门禁与新提交 CI 尚待完成。
+此前精确 `40d092c` 的 [Quality37244888512](https://github.com/cyruss648/keelshell/actions/runs/37244888512) 已结束 failure（macOS/Windows success、Linux MCP EOF 退出断言失败），Linux OpenSSH 未执行；旧 e166 三平台通过保持为旧范围。完整失败日志保留；新的 EOF 分类修复已通过作者、新非作者独立复审及根整合门禁，最新新提交CI失败范围见上方，不能将本机通过追溯为原Linux通过。
 
 ## 2026-10-05 外部 MCP 授权客户端更新
 

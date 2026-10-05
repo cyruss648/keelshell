@@ -1,6 +1,6 @@
 # MCP 初始化回复与输入 EOF — 2026-10-05
 
-状态：最终作者工程门禁、新非作者独立复审及根整合门禁均已通过，见[整合记录](2026-10-05-ai-modal-mcp-integration.md)。新提交的跨平台 CI 尚待确认；本机通过不关闭原 Linux 失败。
+状态：最终作者工程门禁、新非作者独立复审及根整合门禁均已通过，见[整合记录](2026-10-05-ai-modal-mcp-integration.md)。新 `a19d0c1` CI 的 macOS/Windows EOF 回归实际通过；Linux 在 app 文件布局目标先失败，未执行 MCP，见[三平台记录](2026-10-05-integration-ci.md)，因此原 Linux 失败尚不能关闭。
 
 ## 触发证据
 

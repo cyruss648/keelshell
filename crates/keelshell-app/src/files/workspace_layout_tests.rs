@@ -46,6 +46,18 @@ fn measure_state(
                             "compare-directories"]);
                     }
                     if panel.transfer.is_some() { ids.push("file-transfer-details"); }
+                    if state == "running-transfer" {
+                        assert!(panel.busy);
+                        assert_eq!(panel.transfer.as_ref().map(|s| s.phase), Some(TransferPhase::Running));
+                        ids.extend(["pause-file-transfer", "cancel-active-file-operation"]);
+                    } else if state == "paused-transfer" {
+                        assert!(panel.busy);
+                        assert_eq!(panel.transfer.as_ref().map(|s| s.phase), Some(TransferPhase::Paused));
+                        ids.extend(["resume-file-transfer", "cancel-active-file-operation"]);
+                    } else if state == "completed-transfer" {
+                        assert!(!panel.busy);
+                        assert_eq!(panel.transfer.as_ref().map(|s| s.phase), Some(TransferPhase::Completed));
+                    }
                     if panel.comparison.is_some() { ids.extend(["plan-sync-to-remote", "plan-sync-to-local",
                         "review-directory-sync", "close-directory-comparison"]); }
                     if panel.editing.is_some() { ids.extend(["toggle-remote-diff", "save-remote-file"]); }
@@ -164,19 +176,53 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
                 );
             });
             measure_state(&h, cx, "pending-long-upload", width, height, assistant);
-            h.server.filesystem.set_transfer_write_delay(200);
+            let hold = h
+                .server
+                .filesystem
+                .hold_transfer_writes_after_first(&remote)
+                .checked("hold this reviewed upload after its first real WRITE ACK");
             h.click(cx, "confirm-file-operation");
             cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
                 h.panel.read(cx).transfer.as_ref().is_some_and(|state| {
-                    state.phase == TransferPhase::Running && state.transferred > 0
+                    state.phase == TransferPhase::Running
+                        && state.transferred > 0
+                        && hold.entered() > 0
                 })
             })
             .await;
+            let held_entries = hold.entered();
+            let measured_at = Instant::now();
             measure_state(&h, cx, "running-transfer", width, height, assistant);
+            let running_measure_seconds = measured_at.elapsed().as_secs_f64();
+            assert_eq!(
+                hold.entered(),
+                held_entries,
+                "no later WRITE may enter while the real handler is held"
+            );
+            assert!(
+                !hold.expired(),
+                "running layout must finish before the fixture fallback"
+            );
             h.click(cx, "pause-file-transfer");
+            h.panel.read_with(cx, |panel, _| {
+                assert_eq!(
+                    panel.transfer.as_ref().map(|s| s.phase),
+                    Some(TransferPhase::Pausing)
+                );
+            });
+            // Pausing proves the UI published its request, not worker ACK.
+            // Release the pending real WRITE so the worker can acknowledge a
+            // complete chunk, then demand the actual Paused event below.
+            hold.release();
             h.phase(cx, TransferPhase::Paused).await;
+            let paused_bytes = h.read(&remote);
+            assert!(!paused_bytes.is_empty() && paused_bytes.len() < bytes.len());
             measure_state(&h, cx, "paused-transfer", width, height, assistant);
-            h.server.filesystem.set_transfer_write_delay(0);
+            assert_eq!(
+                h.read(&remote),
+                paused_bytes,
+                "paused layout must admit no later WRITE"
+            );
             h.click(cx, "resume-file-transfer");
             h.idle(cx).await;
             assert_eq!(
@@ -270,6 +316,108 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
                     "unsent reviewed draft"
                 );
             });
+            cx.wait_for(h.window, Duration::from_secs(5), |_, _| {
+                h.server.active.load(Ordering::Acquire) == 0
+                    && h.server.filesystem.active_directory_handles() == 0
+            })
+            .await;
+            println!(
+                "FILES_LAYOUT_TRANSFER_JSON {}",
+                serde_json::json!({"width":width,
+                "height":height,"assistant":assistant,"held_entries":held_entries,
+                "running_measure_seconds":running_measure_seconds,"paused_bytes":paused_bytes.len(),
+                "completed_bytes":bytes.len(),"active_subsystems":0,"active_handles":0,
+                "fixture_transport_timeout_seconds":5,"write_gate_fallback_seconds":10})
+            );
         }
+    }
+}
+
+#[gpui_kit::test]
+async fn owned_write_hold_releases_real_uploads_on_early_exit_and_cancel(cx: &mut TestAppContext) {
+    for cancel in [false, true] {
+        let h = Harness::new(cx);
+        h.idle(cx).await;
+        let bytes = vec![0x4b; 384 * 1024];
+        let remote = if cancel {
+            "/cancel-held.bin"
+        } else {
+            "/released-before-entry.bin"
+        };
+        let source = h.source(remote.trim_start_matches('/'), &bytes);
+        let mut hold = Some(
+            h.server
+                .filesystem
+                .hold_transfer_writes_after_first(remote)
+                .checked("own the exact reviewed target's write hold"),
+        );
+        h.local_input(cx, &source);
+        h.click(cx, "upload-file");
+        h.panel.read_with(cx, |panel, _| {
+            assert!(
+                matches!(&panel.pending.as_ref().checked_option("owned hold exact upload review").1,
+                Operation::Upload(local, target) if local == &source && target == remote)
+            );
+        });
+        if !cancel {
+            hold.take()
+                .checked_option("early release remains owned")
+                .release();
+        }
+        h.click(cx, "confirm-file-operation");
+        if cancel {
+            let hold = hold.take().checked_option("cancelled hold remains owned");
+            cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+                h.panel
+                    .read(cx)
+                    .transfer
+                    .as_ref()
+                    .is_some_and(|s| s.phase == TransferPhase::Running && s.transferred > 0)
+                    && hold.entered() > 0
+            })
+            .await;
+            assert!(!hold.expired());
+            h.click(cx, "cancel-active-file-operation");
+            h.panel.read_with(cx, |panel, _| {
+                assert_eq!(
+                    panel.transfer.as_ref().map(|s| s.phase),
+                    Some(TransferPhase::Cancelling)
+                );
+            });
+            drop(hold);
+        }
+        h.idle(cx).await;
+        h.phase(
+            cx,
+            if cancel {
+                TransferPhase::Cancelled
+            } else {
+                TransferPhase::Completed
+            },
+        )
+        .await;
+        cx.wait_for(h.window, Duration::from_secs(5), |_, _| {
+            h.server.active.load(Ordering::Acquire) == 0
+                && h.server.filesystem.active_directory_handles() == 0
+        })
+        .await;
+        let actual = h.read(remote);
+        if cancel {
+            assert!(!actual.is_empty() && actual.len() < bytes.len());
+            assert_eq!(actual, bytes[..actual.len()]);
+        } else {
+            assert_eq!(actual, bytes);
+        }
+        cx.wait_for(h.window, Duration::from_secs(5), |_, _| {
+            h.server.active.load(Ordering::Acquire) == 0
+                && h.server.filesystem.active_directory_handles() == 0
+        })
+        .await;
+        println!(
+            "FILES_HOLD_CLEANUP cancel={cancel} bytes={} subsystems={} handles={}",
+            actual.len(),
+            h.server.active.load(Ordering::Acquire),
+            h.server.filesystem.active_directory_handles()
+        );
     }
 }

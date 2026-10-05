@@ -1,10 +1,14 @@
 # 开发路线
 
-2026-10-05 最新更新：Codex 尝试与 CI 更正
+2026-10-05 最新更新：文件场景同步本机/独立复审通过，新CI待确认
+
+两个test文件已修复确定性后台数据完整/前台Running积压的测试生命周期竞态；旧CI具体触发仍候选。真实WRITE屏障保持176场景并验证准确阶段/控件、Paused部分稳定及Continue完整字节，原5s/12s与生产代码不变。作者和根门禁1060普通+8doc+6脚本、严格Clippy/fmt/x.y及默认/2MiB控制器通过，作者57打包另记；新非作者44文件/208session+1doc/4私有Handler与严格检查复审PASS，无剩余限定P1/P2，79作者/160复核证明根核验复制。目录计数/subsystem只观测清理，新CI与原生/发行仍另行确认，见[同步记录](testing/records/2026-10-05-files-scene-readiness.md)。
+
+精确 `a19d0c1` 的 [Quality37253864420](https://github.com/cyruss648/keelshell/actions/runs/37253864420) 已结束 failure：macOS/Windows成功，Linux文件布局GPUI等待12秒超时，app375通过/1失败、MCP/OpenSSH未执行。macOS/Windows新EOF回归通过，macOS9项系统OpenSSH通过；Windows脚本5通过/1跳过、打包53通过/4跳过。失败证据独立核对保留，候选在新工作区诊断，原因尚未由该次CI证明；见[三平台记录](testing/records/2026-10-05-integration-ci.md)。此前三个功能worktree可恢复归档、旧分支与两个审查cache已实际清理，241份证明保持。
 
 MCP 仍仅由 KeelShell 向外部智能体提供服务。新的 Codex 0.160.0 授权只读尝试没有通过：首轮执行前脚本误解析功能表，0 POST/未 MCP exec；新范围只协商七项目录，首笔模型请求缺少 KeelShell 工具且含额外工具，安全门停止，实际 1 POST/0 业务 RPC。额外工具来源未知，原字节及两次失败保留；自有客户端与原生 GUI/SSH 已清理，根已明确撤销全部授权。新的非作者只读复核确认失败证据一致、无剩余限定范围P1/P2，15份证明由根核验复制；失败仍未关闭，详见[Codex 尝试记录](testing/records/2026-10-05-codex-authorized-mcp-failure.md)。该限定失败覆盖下方历史“Codex MCP 未执行”，不替代原 Claude 授权通过。
 
-最新精确 `40d092c` 的 [Quality37244888512](https://github.com/cyruss648/keelshell/actions/runs/37244888512) 已结束 failure（macOS/Windows success、Linux MCP EOF 退出断言失败），Linux OpenSSH 未执行；旧 e166 三平台通过保持为旧范围。完整失败日志保留；新的 EOF 分类修复、Ask 预算和弹窗输入修复均通过各自独立复核及根整合门禁 1053 普通/8文档/6脚本，限定 macOS 原生设置/当前 AX 隔离/焦点与 SSH 回显通过，见[整合记录](testing/records/2026-10-05-ai-modal-mcp-integration.md)。新提交 CI 尚待确认，不用本机检查关闭原 Linux 失败。
+此前精确 `40d092c` 的 [Quality37244888512](https://github.com/cyruss648/keelshell/actions/runs/37244888512) 已结束 failure（macOS/Windows success、Linux MCP EOF 退出断言失败），Linux OpenSSH 未执行；旧 e166 三平台通过保持为旧范围。完整失败日志保留；新的 EOF 分类修复、Ask 预算和弹窗输入修复均通过各自独立复核及根整合门禁 1053 普通/8文档/6脚本，限定 macOS 原生设置/当前 AX 隔离/焦点与 SSH 回显通过，见[整合记录](testing/records/2026-10-05-ai-modal-mcp-integration.md)。最新CI范围见上方，不用本机检查关闭原 Linux 失败。
 
 2026-10-05 最新对外 MCP 进展：实际安装的 Claude Code 2.1.285 已通过源码 `e16689b` 的标准 macOS 双程序开发包完成七项工具 schema 协商、13 次真实工具调用与 15 次模型请求。授权片段、目录及 UTF-8 文件读取、越界/未授权监控拒绝与失效路线拒绝均经过同一客户端的真实结果回传；受控桌面 UI 明确批准首条提案后返回成功，拒绝另一条后返回拒绝。撤销全部授权后客户端报告连接断开，未记录第 14 次 tools/call RPC，因此不声称新的服务端授权拒绝。独立复核已通过该限定范围，无剩余 P1/P2，见[授权客户端记录](testing/records/2026-10-05-claude-authorized-mcp.md)。Codex 的新受限文本前置已通过；新的实际 MCP 尝试在目录协商后被模型请求检查拒绝，0 业务 RPC，读取闭环未通过。源码基线 `e16689b` 的[Quality37240943183](https://github.com/cyruss648/keelshell/actions/runs/37240943183)三平台成功；这不关闭其他平台原生、文件修改提案、最终六目标 Release 或已安装更新。
 

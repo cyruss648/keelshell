@@ -29,6 +29,8 @@ pass2 的原始 Responses 请求为 46,780 字节，已在私有证据保存 bas
 
 ## 最新 CI
 
+新精确 `a19d0c17f2e0e298b97805991f01e2329d494d4f` 的 [Quality 37253864420](https://github.com/cyruss648/keelshell/actions/runs/37253864420) 已结束 failure：macOS/Windows 成功，Linux app 文件布局场景等待 12 秒失败，尚未执行 MCP/OpenSSH。新 macOS/Windows 的 EOF 回归通过，但本次 Linux 结果不能关闭下方旧 EOF 失败；详见[三平台记录](2026-10-05-integration-ci.md)。这也不改变本文的 Codex 业务失败。
+
 精确 `40d092ca61c4c229acb4a004d2852dd858e86aed` 的 [Quality 37244888512](https://github.com/cyruss648/keelshell/actions/runs/37244888512) 最终为 **failure**：macOS、Windows 成功，Linux 在 MCP 未读 stdout 后 EOF 的成功退出断言失败。完整日志已保留；没有该子进程 stderr，具体原因不能追溯断言。本次 Linux OpenSSH 步骤未执行，旧 `e16689b` 三平台 success 不改变新运行的 failure。
 
-后续继续查清客户端工具来源，验证实际 Codex 读取及审阅闭环。新的 EOF 修复已通过独立代码审查及根整合门禁，见[整合记录](2026-10-05-ai-modal-mcp-integration.md)，新提交 CI 仍需确认。Windows/Linux GUI、完整授权组合、文件修改提案、六目标签名发行与已安装更新仍独立开放。
+后续继续查清客户端工具来源，验证实际 Codex 读取及审阅闭环。新的 EOF 修复已通过独立代码审查及根整合门禁，见[整合记录](2026-10-05-ai-modal-mcp-integration.md)；Linux 新文件布局失败及后续 CI 分别确认。Windows/Linux GUI、完整授权组合、文件修改提案、六目标签名发行与已安装更新仍独立开放。

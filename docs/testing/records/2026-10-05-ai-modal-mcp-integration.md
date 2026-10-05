@@ -1,6 +1,6 @@
 # Ask 预算、弹窗隔离与 MCP EOF 整合 — 2026-10-05
 
-状态：整合工程门禁、三个增量的非作者独立复核以及限定 macOS 原生界面检查通过。新提交 CI、其他平台原生窗口与完整发布仍须分别确认。MCP 方向仅为 KeelShell 向外部智能体提供服务端；应用内 API / CLI Ask 是独立入口。
+状态：整合工程门禁、三个增量的非作者独立复核以及限定 macOS 原生界面检查通过。精确 `a19d0c1` 的新 CI 已结束 failure：macOS/Windows 成功，Linux 文件布局 GPUI 条件等待超时，未执行到 MCP/OpenSSH，见[三平台记录](2026-10-05-integration-ci.md)。其他平台原生窗口与完整发布仍须分别确认。MCP 方向仅为 KeelShell 向外部智能体提供服务端；应用内 API / CLI Ask 是独立入口。
 
 ## 冻结源码与工程门禁
 
@@ -38,4 +38,4 @@
 
 自有 GUI、SSH 和控制器均已结束，按进程出生身份核验不存在，唯一测试监听端口关闭，私有数据和夹具根删除；控制器无失败。成功/失败日志、输入清单、原生观察及 readback 投影保存在 ignored `work/ai-modal-mcp-integration-20261005/`，不作为用户数据发布。
 
-Windows/Linux 原生 GUI、VoiceOver/Narrator/AT-SPI、滞留旧原生 AX 对象激活、IME、硬件持续按键、真实 OS 主题通知、新预算下供应商问答、其他授权组合、最终六目标发布签名与实际安装更新尚未证明。Codex 授权 MCP 的既有两轮失败仍见[独立记录](2026-10-05-codex-authorized-mcp-failure.md)，不会因本次工程检查而变为成功。新跨平台 CI 必须绑定新提交，再单独读回结果。
+Windows/Linux 原生 GUI、VoiceOver/Narrator/AT-SPI、滞留旧原生 AX 对象激活、IME、硬件持续按键、真实 OS 主题通知、新预算下供应商问答、其他授权组合、最终六目标发布签名与实际安装更新尚未证明。Codex 授权 MCP 的既有两轮失败仍见[独立记录](2026-10-05-codex-authorized-mcp-failure.md)，不会因本次工程检查而变为成功。本次新 CI 的 Linux 文件场景失败保留，后续候选及新流水线必须单独绑定，不能将旧成功或单次重跑作为修复验收。
