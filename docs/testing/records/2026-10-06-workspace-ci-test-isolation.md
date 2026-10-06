@@ -73,3 +73,45 @@ runner 实际退出、原进程组无遗留；这些是本机工程与受控协�
 这些文字更新与已验证 Rust/Cargo/scripts 正文分开绑定。
 
 后继三平台 CI、原 Windows 历史失败定位、完整原生平台矩阵与发布验收继续开放。
+
+## 精确 6b4 的后继结果与下一轮诊断
+
+窄测试隔离与诊断提交 `6b4e5fcc7a3b8576f54f91e820d80f637f5efb1c` 已推送。
+[Quality 37442335391](https://github.com/cyruss648/keelshell/actions/runs/37442335391)
+attempt 1 实际 completed/failure，不能沿用本机完整门禁作为三平台成功：
+
+| 平台 | Job | 实际结果 |
+| --- | --- | --- |
+| macOS 26 | 112198843126 | success |
+| Ubuntu 24.04 | 112198842825 | failure，目录取消场景 `transfer stopped without a terminal event`；同进程 136 通过、1 失败 |
+| Windows 2025 | 112198843189 | failure，跨所有者 WRITE/CLOSE 场景 `Timeout("SFTP read")`；同进程 7 通过、1 失败，只读 CLOSE 场景通过 |
+
+完整原始日志已下载并保留，Linux 393,396 字节 SHA-256
+`caef35c6dd0f3a04b73dfe8da70229f8aa244f482112e9f9f8f990a66051826d`；
+macOS 518,289 字节
+`12e7c62be2a454a1d3e276c8dd5b9262a85046b31add405337285ef3bc44afd6`；
+Windows 365,187 字节
+`fb78932e2dd4218866f38b8622a42cda93d257847767b3593dc9965b123292dd`。
+原 c158 的裸 `Elapsed(())` 与这次有明确类型的失败分别保存，不追溯混用原因。
+
+新的隔离树执行了两个真实 TCP 反例，随后恢复精确 6b4：
+
+- 实际挂起第二笔 WRITE 后取消，生产返回 `Uncertain { bytes: 65536 }`；旧终态
+  helper 消费后忽略，返回相同的“没有终态”错误。此反例确定性证明 helper 遗漏
+  和取消竞态机制，不能声称原 Linux 日志中的精确事件已被证明。
+  后续已确认暂停安全点的取消须保留 `Cancelled` 断言，未回复 WRITE 的取消
+  必须另外验证未知写隔离、冲突拒绝及安全队列推进，不能把未知结果算作已知取消。
+- WRITE owner 实际约 1.044 秒返回 `Uncertain { bytes: 32768 }`，14 个独立下载和
+  14 次 EOF 完成，晚回复前后隔离 ID 不变。仅在测量后把辅助内容读回 READ
+  延迟设为 750 ms，实际精确失败于最终 `sftp.read` 固定总期限。
+  原 Windows 用例的直接 `sftp.read` 调用也在此辅助读回阶段；原 50 ms 延迟为何
+  超过固定期限仍未证明，不能声称 CI 使用过 750 ms。下一轮仅可在 owner 测量和
+  时间线保存之后、最终内容读回之前复位夹具延迟，保持 1 秒 owner 及全部原断言。
+
+两项反例实际 exit 101；故意失败后未执行的后续断言不算通过。
+其 1,271 份封存正文、30,568,326 字节已由根逐字读取并保留，封存 SHA-256
+`8d1aa1360d9030dba8353d798b8f8178f3553b1561c86c9aa153edb0250277f6`。
+初次 CoW copy 与 Cargo 错误重叠导致的 `StableCrateId` 编译失败也保留，属于准备
+错误，0 个业务测试；重新顺序复制后才运行反例，不把缓存失败当成产品缺陷。
+
+新窄测试候选已完成作者完整检查、新非作者目录/EOF/hold 专项复核，并整合主工作副本；根完整检查实际退出 0，1395 普通、8 doc、6 Python、格式、x.y 和严格 Clippy 均通过。新精确提交的 Linux/Windows CI 仍需验证，生产预留、未知写隔离及传输期限保持不变，见[新取消与 EOF 记录](2026-10-06-ci-transfer-cancellation.md)。

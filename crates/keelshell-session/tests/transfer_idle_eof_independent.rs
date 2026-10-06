@@ -140,10 +140,22 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
         let server = serve().await?;
         let mut configured = options(&server);
         configured.timeout = Duration::from_secs(1);
-        let session = SshSession::connect(configured).await?;
-        let sftp = Arc::new(session.sftp().await?);
-        sftp.write("/independent-pending", b"original").await?;
-        sftp.write("/independent-other-empty", b"").await?;
+        let session = SshSession::connect(configured).await.map_err(|error| {
+            format!("cross-owner fixture SSH connect close={close_phase}: {error:?}")
+        })?;
+        let sftp = Arc::new(session.sftp().await.map_err(|error| {
+            format!("cross-owner fixture SFTP channel close={close_phase}: {error:?}")
+        })?);
+        sftp.write("/independent-pending", b"original")
+            .await
+            .map_err(|error| {
+                format!("cross-owner fixture original-file setup close={close_phase}: {error:?}")
+            })?;
+        sftp.write("/independent-other-empty", b"")
+            .await
+            .map_err(|error| {
+                format!("cross-owner fixture empty-file setup close={close_phase}: {error:?}")
+            })?;
         let temporary = tempfile::tempdir()?;
         let source = temporary.path().join("upload");
         let content = if close_phase {
@@ -173,12 +185,18 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
         let queue = sftp.clone().transfer_queue();
         let mut job = queue
             .enqueue_atomic_upload(TransferSpec::upload(&source, "/independent-pending"))
-            .await?;
+            .await
+            .map_err(|error| {
+                format!("cross-owner measured upload enqueue close={close_phase}: {error:?}")
+            })?;
         reached(|| {
             writes.as_ref().is_some_and(|h| h.entered() == 1)
                 || closes.as_ref().is_some_and(|h| h.entered() == 1)
         })
-        .await?;
+        .await
+        .map_err(|error| {
+            format!("cross-owner actual pending mutation close={close_phase}: {error}")
+        })?;
         server.filesystem.start_review_metadata_cadence(0)?;
         server.filesystem.set_transfer_read_delay(50);
         let side_queue = sftp.clone().transfer_queue();
@@ -199,8 +217,13 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
                         "/independent-other-empty",
                         &destination,
                     ))
-                    .await?;
-                let outcome = completed(&mut other).await?;
+                    .await
+                    .map_err(|error| {
+                        format!("cross-owner side download enqueue close={close_phase}: {error:?}")
+                    })?;
+                let outcome = completed(&mut other).await.map_err(|error| {
+                    format!("cross-owner side download terminal close={close_phase}: {error}")
+                })?;
                 assert!(matches!(outcome, TransferEvent::Completed { bytes: 0, .. }));
                 assert!(tokio::fs::read(&destination).await?.is_empty());
                 completed_downloads += 1;
@@ -214,11 +237,16 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
                 .await
                 .map_err(|error| format!("cross-owner EOF owner/side completion: {error}"))?;
         let elapsed = began.elapsed();
-        let outcome = outcome?;
+        let outcome = outcome.map_err(|error| {
+            format!("cross-owner measured upload terminal close={close_phase}: {error}")
+        })?;
         let side_count = side_count?;
         let before = sftp
             .inspect_remote_mutation_quarantine("/independent-pending")
-            .await?;
+            .await
+            .map_err(|error| {
+                format!("cross-owner quarantine before late reply close={close_phase}: {error:?}")
+            })?;
         let before_ids: Vec<_> = before.entries().iter().map(|e| e.reservation_id).collect();
         let denied = sftp.upload_atomic(&source, "/independent-pending").await;
         if let Some(hold) = writes {
@@ -228,7 +256,9 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
         if let Some(hold) = &closes {
             assert!(!hold.expired());
             hold.release();
-            reached(|| hold.pending() == 0).await?;
+            reached(|| hold.pending() == 0).await.map_err(|error| {
+                format!("cross-owner released CLOSE response close={close_phase}: {error}")
+            })?;
         }
         let label = if close_phase {
             "writable-close:returned-valid-status"
@@ -241,26 +271,44 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
                 .review_metadata_timeline()
                 .is_ok_and(|t| t.iter().any(|(n, _)| n == label))
         })
-        .await?;
+        .await
+        .map_err(|error| {
+            format!("cross-owner actual late mutation STATUS close={close_phase}: {error}")
+        })?;
         let after = sftp
             .inspect_remote_mutation_quarantine("/independent-pending")
-            .await?;
+            .await
+            .map_err(|error| {
+                format!("cross-owner quarantine after late reply close={close_phase}: {error:?}")
+            })?;
         let after_ids: Vec<_> = after.entries().iter().map(|e| e.reservation_id).collect();
         let timeline = server.filesystem.review_metadata_timeline()?;
         let eof_count = timeline
             .iter()
             .filter(|(name, _)| name == "read:returned-valid-eof-status")
             .count();
-        let final_bytes = sftp.read("/independent-pending", 1024).await?;
-        server.filesystem.stop_review_metadata_delay();
-        server.filesystem.set_transfer_read_delay(0);
-        side_queue.close().await?;
-        queue.close().await?;
-        sftp.close().await?;
-        session.close().await?;
         eprintln!(
             "fresh cross-owner EOF close={close_phase} elapsed={elapsed:?} side_completed={side_count} valid_eof={eof_count} outcome={outcome:?} before_ids={before_ids:?} after_ids={after_ids:?} server_timeline={timeline:?}"
         );
+        // The owner/side idle scenario and timeline are complete. Content
+        // readback has its own fixed total deadline; it is not an idle probe.
+        server.filesystem.stop_review_metadata_delay();
+        server.filesystem.set_transfer_read_delay(0);
+        let final_bytes = sftp.read("/independent-pending", 1024).await
+            .map_err(|error| format!("cross-owner fixture final original-content readback close={close_phase}: {error:?}"))?;
+        side_queue.close().await.map_err(|error| {
+            format!("cross-owner side queue close close={close_phase}: {error:?}")
+        })?;
+        queue.close().await.map_err(|error| {
+            format!("cross-owner owner queue close close={close_phase}: {error:?}")
+        })?;
+        sftp.close()
+            .await
+            .map_err(|error| format!("cross-owner SFTP close close={close_phase}: {error:?}"))?;
+        session
+            .close()
+            .await
+            .map_err(|error| format!("cross-owner SSH close close={close_phase}: {error:?}"))?;
         server.stop().await?;
         assert!(side_count >= 5 && eof_count >= side_count);
         assert!(elapsed >= Duration::from_millis(700) && elapsed < Duration::from_millis(1500));

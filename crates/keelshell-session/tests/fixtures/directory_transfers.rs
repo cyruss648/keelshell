@@ -11,13 +11,15 @@ async fn terminal(handle: &mut TransferHandle) -> Result<TransferEvent, Box<dyn 
                 TransferEvent::Completed { .. }
                     | TransferEvent::Cancelled { .. }
                     | TransferEvent::Failed { .. }
+                    | TransferEvent::Uncertain { .. }
             ) {
                 return Ok(event);
             }
         }
         Err("transfer stopped without a terminal event".into())
     })
-    .await?
+    .await
+    .map_err(|error| format!("directory transfer terminal receipt: {error}"))?
 }
 
 fn temporary() -> Result<(tempfile::TempDir, PathBuf), Box<dyn Error>> {
@@ -168,7 +170,9 @@ async fn cancellation_and_next_fifo_job() -> Result<(), Box<dyn Error>> {
     let next = sftp
         .plan_directory_transfer(TransferSpec::upload(&source, "/next"))
         .await?;
-    server.filesystem.set_transfer_write_delay(100);
+    let hold = server
+        .filesystem
+        .hold_transfer_writes_after_first("/partial/nested/payload.bin")?;
     let queue = sftp.clone().transfer_queue();
     let mut transfer = queue.enqueue_directory(plan).await?;
     let mut next = queue.enqueue_directory(next).await?;
@@ -181,11 +185,44 @@ async fn cancellation_and_next_fifo_job() -> Result<(), Box<dyn Error>> {
         panic!("missing directory progress");
     })
     .await?;
+    tokio::time::timeout(Duration::from_secs(5), async {
+        while hold.entered() != 1 {
+            tokio::time::sleep(Duration::from_millis(5)).await;
+        }
+    })
+    .await
+    .map_err(|error| format!("directory cancellation pause at held second WRITE: {error}"))?;
+    assert!(!hold.expired());
+    // Keep the second WRITE unanswered until pause is requested. This prevents
+    // completion before a delayed event consumer can request the checkpoint.
+    // Releasing it lets the worker acknowledge the WRITE before emitting Paused.
+    transfer.pause();
+    hold.release();
+    let paused = tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            match transfer.recv().await {
+                Some(TransferEvent::Paused { transferred, .. }) => return Ok(transferred),
+                Some(TransferEvent::Progress { .. }) => {}
+                receipt => {
+                    return Err::<_, Box<dyn Error>>(
+                        format!(
+                            "directory cancellation ended before acknowledged pause: {receipt:?}"
+                        )
+                        .into(),
+                    );
+                }
+            }
+        }
+    })
+    .await
+    .map_err(|error| format!("directory cancellation acknowledged pause: {error}"))??;
+    assert!(paused > 0 && paused < 196_613);
     transfer.cancel();
+    let cancelled = terminal(&mut transfer).await?;
     assert!(
-        matches!(terminal(&mut transfer).await?, TransferEvent::Cancelled { bytes, .. } if bytes > 0 && bytes < 196_613)
+        matches!(cancelled, TransferEvent::Cancelled { bytes, .. } if bytes == paused),
+        "{cancelled:?}"
     );
-    server.filesystem.set_transfer_write_delay(0);
     assert!(matches!(
         terminal(&mut next).await?,
         TransferEvent::Completed { bytes: 196_613, .. }
@@ -200,7 +237,196 @@ async fn cancellation_and_next_fifo_job() -> Result<(), Box<dyn Error>> {
         sftp.read("/next/nested/payload.bin", 256_000).await?.len(),
         196_613
     );
+    let partial = sftp.read("/partial/nested/payload.bin", 256_000).await?;
+    assert_eq!(partial, vec![0x9d; paused as usize]);
+    eprintln!("known directory cancellation acknowledged_pause={paused} outcome={cancelled:?}");
+    queue.close().await?;
+    sftp.close().await?;
     session.close().await?;
+    Ok(())
+}
+
+#[test]
+fn directory_cancellation_with_unanswered_write_quarantines_conflicts_and_runs_safe_fifo()
+-> Result<(), Box<dyn Error>> {
+    let thread = std::thread::Builder::new()
+        .name("directory-unknown-write-2mib".into())
+        .stack_size(2 * 1024 * 1024)
+        .spawn(|| -> Result<(), String> {
+            let runtime = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|error| error.to_string())?;
+            runtime.block_on(async {
+                tokio::time::timeout(
+                    Duration::from_secs(30),
+                    Box::pin(unknown_cancellation_and_next_fifo_job()),
+                )
+                .await
+                .map_err(|error| error.to_string())?
+                .map_err(|error| error.to_string())
+            })
+        })?;
+    thread
+        .join()
+        .map_err(|_| "directory unknown-write thread panicked")?
+        .map_err(Into::into)
+}
+
+async fn unknown_cancellation_and_next_fifo_job() -> Result<(), Box<dyn Error>> {
+    let mut server = serve().await?;
+    let session = SshSession::connect(options(&server)).await?;
+    let sftp = Arc::new(session.sftp().await?);
+    let (_temporary, local) = temporary()?;
+    let source = local.join("source");
+    let plan = uploaded(&sftp, &source, "/uncertain-directory").await?;
+    let next = sftp
+        .plan_directory_transfer(TransferSpec::upload(&source, "/safe-directory"))
+        .await?;
+    let hold = server
+        .filesystem
+        .hold_transfer_writes_after_first("/uncertain-directory/nested/payload.bin")?;
+    let queue = sftp.clone().transfer_queue();
+    let mut transfer = queue.enqueue_directory(plan).await?;
+    tokio::time::timeout(Duration::from_secs(5), async {
+        while hold.entered() != 1 {
+            tokio::time::sleep(Duration::from_millis(5)).await;
+        }
+    })
+    .await
+    .map_err(|error| format!("directory cancellation actual unanswered WRITE: {error}"))?;
+    assert!(!hold.expired());
+    let acknowledged = tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            match transfer.recv().await {
+                Some(TransferEvent::Progress { transferred, .. }) if transferred > 0 => {
+                    return Ok(transferred);
+                }
+                Some(
+                    TransferEvent::Queued { .. }
+                    | TransferEvent::Started { .. }
+                    | TransferEvent::Progress { .. },
+                ) => {}
+                receipt => return Err::<_, Box<dyn Error>>(
+                    format!(
+                        "unanswered directory WRITE ended before acknowledged progress: {receipt:?}"
+                    )
+                    .into(),
+                ),
+            }
+        }
+    })
+    .await
+    .map_err(|error| format!("unanswered directory WRITE acknowledged progress: {error}"))??;
+    assert!(acknowledged > 0 && acknowledged < 196_613);
+    assert_eq!(server.filesystem.prepared_successful_write_statuses(), 1);
+    assert_eq!(
+        sftp.read("/uncertain-directory/nested/payload.bin", 256_000)
+            .await?,
+        vec![0x9d; acknowledged as usize]
+    );
+    let mut conflict = queue
+        .enqueue(TransferSpec::upload(
+            source.join("nested/payload.bin"),
+            "/uncertain-directory/conflict.bin",
+        ))
+        .await?;
+    let mut next = queue.enqueue_directory(next).await?;
+    transfer.cancel();
+    let uncertain = terminal(&mut transfer).await?;
+    assert!(
+        matches!(uncertain, TransferEvent::Uncertain { bytes, .. } if bytes == acknowledged),
+        "{uncertain:?}"
+    );
+    let conflict = terminal(&mut conflict).await?;
+    assert!(
+        matches!(conflict, TransferEvent::Failed { ref error, .. } if error.contains("unknown transfer result")),
+        "{conflict:?}"
+    );
+    let safe = terminal(&mut next).await?;
+    assert!(
+        matches!(safe, TransferEvent::Completed { bytes: 196_613, .. }),
+        "{safe:?}"
+    );
+    assert_eq!(
+        sftp.read("/safe-directory/nested/payload.bin", 256_000)
+            .await?,
+        vec![0x9d; 196_613]
+    );
+    assert!(
+        sftp.list("/uncertain-directory")
+            .await?
+            .iter()
+            .all(|entry| entry.name != "conflict.bin")
+    );
+    let before = sftp
+        .inspect_remote_mutation_quarantine("/uncertain-directory")
+        .await?;
+    let before_ids: Vec<_> = before
+        .entries()
+        .iter()
+        .map(|entry| entry.reservation_id)
+        .collect();
+    assert!(!before_ids.is_empty());
+    assert!(matches!(
+        sftp.write("/uncertain-directory/denied.bin", b"must not be sent")
+            .await,
+        Err(SessionError::MutationQuarantined)
+    ));
+    let writes_before_release = server.filesystem.prepared_successful_write_statuses();
+    assert!(!hold.expired());
+    hold.release();
+    tokio::time::timeout(Duration::from_secs(5), async {
+        while server.filesystem.prepared_successful_write_statuses() != writes_before_release + 1 {
+            tokio::time::sleep(Duration::from_millis(5)).await;
+        }
+        Ok::<(), Box<dyn Error>>(())
+    })
+    .await
+    .map_err(|error| {
+        format!("directory cancellation late handler-prepared success WRITE STATUS: {error}")
+    })??;
+    let after = sftp
+        .inspect_remote_mutation_quarantine("/uncertain-directory")
+        .await?;
+    let after_ids: Vec<_> = after
+        .entries()
+        .iter()
+        .map(|entry| entry.reservation_id)
+        .collect();
+    assert_eq!(
+        after_ids, before_ids,
+        "preparing a late success STATUS cannot retire unknown writes"
+    );
+    assert!(matches!(
+        sftp.write("/uncertain-directory/denied.bin", b"still forbidden")
+            .await,
+        Err(SessionError::MutationQuarantined)
+    ));
+    eprintln!(
+        "unknown directory cancellation acknowledged={acknowledged} outcome={uncertain:?} conflict={conflict:?} safe={safe:?} before_ids={before_ids:?} after_ids={after_ids:?} writes_before_release={writes_before_release} writes_after_release={}",
+        server.filesystem.prepared_successful_write_statuses()
+    );
+    // The fixture owns this scope and explicitly acknowledges its late-I/O
+    // risk after observing the late server mutation and retained quarantine.
+    // The fixture counter does not establish transport delivery of its STATUS.
+    sftp.acknowledge_transfer_quarantine(&after, &std::sync::atomic::AtomicBool::new(false))
+        .await?;
+    queue.close().await?;
+    sftp.close().await?;
+    session.close().await?;
+    server.disconnect.send_replace(true);
+    // The shared fixture's disconnect signal stops clients. Its listener task
+    // is separately owned and keeps accepting until its handle is aborted.
+    server.task.abort();
+    let stopped = tokio::time::timeout(Duration::from_secs(3), &mut server.task)
+        .await
+        .map_err(|error| format!("directory cancellation owned listener shutdown: {error}"))?;
+    assert!(matches!(stopped, Err(error) if error.is_cancelled()));
+    let refused = tokio::time::timeout(Duration::from_secs(3), TcpStream::connect(server.address))
+        .await
+        .map_err(|error| format!("directory cancellation owned listener refusal: {error}"))?;
+    assert!(refused.is_err(), "owned directory listener must be closed");
     Ok(())
 }
 

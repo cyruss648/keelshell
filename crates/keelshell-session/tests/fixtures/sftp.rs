@@ -323,6 +323,7 @@ pub struct Filesystem {
     transfer_read_gate: Arc<TransferWriteGate>,
     transfer_read_limit: Arc<AtomicUsize>,
     transfer_writes: Arc<AtomicUsize>,
+    prepared_successful_write_statuses: Arc<AtomicUsize>,
     invalid_transfer_read: Arc<AtomicUsize>,
     injected_name: Arc<std::sync::Mutex<Option<String>>>,
     directory_read_gate: Arc<ResponseGate>,
@@ -354,6 +355,7 @@ impl Clone for Filesystem {
             transfer_read_gate: self.transfer_read_gate.clone(),
             transfer_read_limit: self.transfer_read_limit.clone(),
             transfer_writes: self.transfer_writes.clone(),
+            prepared_successful_write_statuses: self.prepared_successful_write_statuses.clone(),
             invalid_transfer_read: self.invalid_transfer_read.clone(),
             injected_name: self.injected_name.clone(),
             directory_read_gate: self.directory_read_gate.clone(),
@@ -547,6 +549,12 @@ impl Filesystem {
     }
     pub fn transfer_writes_started(&self) -> usize {
         self.transfer_writes.load(Ordering::Acquire)
+    }
+    /// Successful WRITE statuses prepared by the handler, before transport delivery.
+    /// This counter is separate from metadata idle observations and proves no ACK receipt.
+    pub fn prepared_successful_write_statuses(&self) -> usize {
+        self.prepared_successful_write_statuses
+            .load(Ordering::Acquire)
     }
     pub fn set_transfer_read_limit(&self, bytes: usize) {
         self.transfer_read_limit.store(bytes, Ordering::Release);
@@ -824,6 +832,8 @@ impl russh_sftp::server::Handler for Filesystem {
         }
         file.resize(file.len().max(end), 0);
         file[offset..end].copy_from_slice(&bytes);
+        self.prepared_successful_write_statuses
+            .fetch_add(1, Ordering::Release);
         Ok(ok(id))
     }
     async fn read(
