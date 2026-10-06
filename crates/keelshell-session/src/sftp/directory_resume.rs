@@ -175,7 +175,13 @@ impl SftpSession {
         loop {
             context.checkpoint().await?;
             let generation = context.resume_generation();
-            let (source, target, _, _) = self.resume_tree_entries(&plan.spec).await?;
+            let (source, target, _, _) = context
+                .validation(
+                    SCAN_TIMEOUT,
+                    "directory resume tree revalidation",
+                    self.resume_tree_entries(&plan.spec),
+                )
+                .await?;
             if source != plan.source || target != plan.target {
                 return Err(SessionError::Invalid(
                     "directory changed after review; scan and review again",
@@ -184,7 +190,13 @@ impl SftpSession {
             }
             for file in &plan.files {
                 context.checkpoint().await?;
-                self.validate_file_resume(file).await?;
+                context
+                    .validation(
+                        SCAN_TIMEOUT,
+                        "directory resume file revalidation",
+                        self.validate_file_resume(file),
+                    )
+                    .await?;
                 context.checkpoint().await?;
             }
             if context.resume_generation() == generation {
@@ -231,7 +243,7 @@ impl SftpSession {
                         let mut attrs = FileAttributes::empty();
                         attrs.permissions = Some(0o700);
                         writes_started = true;
-                        raw.0.mkdir(remote, attrs).await.map_err(sftp_error)?;
+                        context.remote_mutation(raw.0.mkdir(remote, attrs)).await?;
                     }
                 }
                 TransferDirection::Download => {
@@ -246,9 +258,7 @@ impl SftpSession {
                         )
                         .await?;
                         writes_started = true;
-                        tokio::fs::create_dir(local)
-                            .await
-                            .map_err(SessionError::from)?;
+                        context.local_mutation(tokio::fs::create_dir(local)).await?;
                     }
                 }
             }
@@ -266,7 +276,13 @@ impl SftpSession {
         loop {
             context.checkpoint().await?;
             let generation = context.resume_generation();
-            let (source, target, _, _) = self.resume_tree_entries(&plan.spec).await?;
+            let (source, target, _, _) = context
+                .validation(
+                    SCAN_TIMEOUT,
+                    "completed resume tree validation",
+                    self.resume_tree_entries(&plan.spec),
+                )
+                .await?;
             if source != plan.source
                 || target.len() != plan.source.len()
                 || target.iter().zip(&plan.source).any(|(target, source)| {
@@ -283,7 +299,13 @@ impl SftpSession {
             // A pause during this final verification invalidates the pass too.
             for file in &plan.files {
                 context.checkpoint().await?;
-                self.validate_completed_file_resume(file).await?;
+                context
+                    .validation(
+                        SCAN_TIMEOUT,
+                        "completed directory resume file validation",
+                        self.validate_completed_file_resume(file),
+                    )
+                    .await?;
                 context.checkpoint().await?;
             }
             if context.resume_generation() == generation {

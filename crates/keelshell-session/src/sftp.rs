@@ -14,7 +14,6 @@ use russh_sftp::client::RawSftpSession;
 use russh_sftp::protocol::{FileAttributes, OpenFlags, Packet, StatusCode};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::sync::{mpsc, oneshot};
-use tokio::task::JoinHandle;
 
 use crate::ssh::{ChannelStreamOwner, OwnedRawSftpSession, SshSession, deadline};
 use crate::{Result, SessionError};
@@ -23,9 +22,23 @@ mod control;
 mod directory;
 mod file_resume;
 mod inspection;
-use control::{TransferContext, TransferControl};
+mod mutation;
+pub use mutation::FileMutationScope;
+mod queue;
+use control::{TransferContext, TransferControl, local_io, remote_io};
+
+/// Observe a completed SFTP setup reply if an owning transfer is being polled.
+/// Setup/admission deadlines remain separate and this does not resolve writes.
+pub(crate) fn observed_transfer_io() {
+    control::observed_io();
+}
 pub use directory::{DirectoryResumePlan, DirectoryTransferPlan};
 pub use file_resume::FileResumePlan;
+pub(crate) use queue::TransferReservations;
+pub use queue::{
+    MAX_PARALLEL_TRANSFERS, MAX_QUEUED_TRANSFERS, TransferQuarantineEntry,
+    TransferQuarantineReview, TransferQueue,
+};
 
 /// A remote directory entry with portable metadata.
 #[derive(Debug, Clone)]
@@ -126,7 +139,7 @@ pub enum TransferEvent {
         total: Option<u64>,
     },
     /// The worker reached a safe point with no pending write. Paused time does
-    /// not consume the active transfer deadline; the job keeps its FIFO slot.
+    /// not consume the active transfer deadline; the job keeps its slot and locks.
     Paused {
         /// Stable queue identifier.
         id: u64,
@@ -158,6 +171,19 @@ pub enum TransferEvent {
         id: u64,
         /// Bytes transferred before cancellation was observed.
         bytes: u64,
+    },
+    /// A mutating request was still awaiting acknowledgement when the local
+    /// operation ended. Its destination is quarantined in this application;
+    /// inspect it and explicitly review its unresolved risk before release.
+    /// Reconnecting does not prove that an earlier mutation has stopped.
+    Uncertain {
+        /// Stable queue identifier.
+        id: u64,
+        /// Only previously acknowledged bytes, never the pending write. A full
+        /// byte count does not prove writable CLOSE or publication completed.
+        bytes: u64,
+        /// Sanitized reason and the required next step.
+        error: String,
     },
     /// The transfer failed. The string is safe for UI display and excludes
     /// authentication material.
@@ -196,7 +222,7 @@ impl TransferHandle {
         self.control.pause(true);
     }
 
-    /// Request continuation. A queued job keeps its FIFO position while paused.
+    /// Request continuation. A paused job keeps its slot and path reservations.
     pub fn resume(&self) {
         self.control.pause(false);
     }
@@ -217,34 +243,6 @@ impl Drop for TransferHandle {
     }
 }
 
-/// A single-worker FIFO queue for bounded-memory SFTP uploads and downloads.
-///
-/// The queue owns no UI state and can be polled from a GPUI task or another
-/// async consumer. Each queued transfer receives progress and exactly one
-/// terminal event (`Completed`, `Cancelled` or `Failed`) while the queue lives.
-/// Create it inside an active Tokio runtime and keep the queue alive until its
-/// handles have reached a terminal event.
-pub struct TransferQueue {
-    commands: mpsc::Sender<TransferCommand>,
-    next_id: AtomicU64,
-    worker: Option<JoinHandle<()>>,
-}
-
-enum TransferJob {
-    File(TransferSpec),
-    Directory(DirectoryTransferPlan),
-    Resume(FileResumePlan),
-    DirectoryResume(DirectoryResumePlan),
-}
-
-struct TransferCommand {
-    id: u64,
-    spec: TransferJob,
-    events: mpsc::Sender<TransferEvent>,
-    terminal: oneshot::Sender<TransferEvent>,
-    control: Arc<TransferControl>,
-}
-
 /// One SFTP subsystem. Dropping a pending operation cancels the local future;
 /// a timed-out remote mutation has an unknown outcome and must be checked before retry.
 pub struct SftpSession {
@@ -253,6 +251,7 @@ pub struct SftpSession {
     _connection: SshSession,
     channel_owner: ChannelStreamOwner,
     cleanups: Arc<Mutex<Vec<tokio::task::JoinHandle<()>>>>,
+    stopped: tokio::sync::watch::Sender<bool>,
 }
 
 impl SftpSession {
@@ -272,6 +271,7 @@ impl SftpSession {
             _connection: connection,
             channel_owner,
             cleanups: Arc::default(),
+            stopped: tokio::sync::watch::channel(false).0,
         })
     }
 
@@ -288,10 +288,13 @@ impl SftpSession {
         deadline(self.timeout, "SFTP list", async {
             let raw = self._connection.sftp_raw().await?;
             let guard = DirectoryChannel(raw);
-            let handle = guard.0.opendir(path).await.map_err(sftp_error)?.handle;
+            let handle = remote_io(guard.0.opendir(path))
+                .await
+                .map_err(sftp_error)?
+                .handle;
             let mut entries = Vec::new();
             let result = loop {
-                match guard.0.readdir(&handle).await {
+                match remote_io(guard.0.readdir(&handle)).await {
                     Ok(packet) => {
                         if entries.len().saturating_add(packet.files.len()) > max_entries {
                             break Err(SessionError::EntryLimit(max_entries));
@@ -320,7 +323,7 @@ impl SftpSession {
                     Err(error) => break Err(sftp_error(error)),
                 }
             };
-            let closed = guard.0.close(handle).await.map_err(sftp_error);
+            let closed = remote_io(guard.0.close(handle)).await.map_err(sftp_error);
             let entries = result?;
             closed?;
             Ok(entries)
@@ -400,7 +403,9 @@ impl SftpSession {
     pub async fn canonicalize(&self, path: &str) -> Result<String> {
         valid_path(path)?;
         deadline(self.timeout, "SFTP canonicalize", async {
-            self.inner.canonicalize(path).await.map_err(sftp_error)
+            remote_io(self.inner.canonicalize(path))
+                .await
+                .map_err(sftp_error)
         })
         .await
     }
@@ -410,7 +415,7 @@ impl SftpSession {
     pub async fn read(&self, path: &str, max_bytes: usize) -> Result<Vec<u8>> {
         valid_path(path)?;
         deadline(self.timeout, "SFTP read", async {
-            let mut file = self.inner.open(path).await.map_err(sftp_error)?;
+            let mut file = remote_io(self.inner.open(path)).await.map_err(sftp_error)?;
             let mut content = Vec::new();
             let result = (&mut file)
                 .take((max_bytes as u64).saturating_add(1))
@@ -431,31 +436,91 @@ impl SftpSession {
     /// partial destination; interactive editors should use `write_atomic`.
     pub async fn write(&self, path: &str, data: &[u8]) -> Result<()> {
         valid_path(path)?;
-        deadline(self.timeout, "SFTP write", async {
-            let mut file = self.inner.create(path).await.map_err(sftp_error)?;
-            let result = file.write_all(data).await;
-            let close = file.close().await;
-            result?;
-            close?;
+        let scope = self.reserve_remote(&[path], false, &|| true).await?;
+        let result = deadline(self.timeout, "SFTP write", async {
+            let raw = DirectoryChannel(self._connection.sftp_raw().await?);
+            let handle = scope
+                .remote(raw.0.open(
+                    path,
+                    OpenFlags::CREATE | OpenFlags::TRUNCATE | OpenFlags::WRITE,
+                    FileAttributes::empty(),
+                ))
+                .await?
+                .handle;
+            let mut chunks = data.chunks(32 * 1024).enumerate();
+            while let Some((index, first)) = chunks.next() {
+                let second = chunks.next();
+                scope
+                    .remote(async {
+                        // Observe both bounded requests before classifying a
+                        // rejection: one STATUS cannot hide a missing peer reply.
+                        let (first, second) = tokio::join!(
+                            raw.0
+                                .write(&handle, (index * 32 * 1024) as u64, first.to_vec()),
+                            async {
+                                match second {
+                                    Some((index, bytes)) => raw
+                                        .0
+                                        .write(&handle, (index * 32 * 1024) as u64, bytes.to_vec())
+                                        .await
+                                        .map(|_| ()),
+                                    None => Ok(()),
+                                }
+                            }
+                        );
+                        match (first.map(|_| ()), second) {
+                            (Err(error), _)
+                                if !matches!(
+                                    &error,
+                                    russh_sftp::client::error::Error::Status(_)
+                                ) =>
+                            {
+                                Err(error)
+                            }
+                            (_, Err(error))
+                                if !matches!(
+                                    &error,
+                                    russh_sftp::client::error::Error::Status(_)
+                                ) =>
+                            {
+                                Err(error)
+                            }
+                            (Err(error), _) | (_, Err(error)) => Err(error),
+                            _ => Ok(()),
+                        }
+                    })
+                    .await?;
+            }
+            scope.remote(raw.0.close(handle)).await?;
             Ok(())
         })
-        .await
+        .await;
+        scope.complete(result).await
     }
 
-    /// Stream an upload with bounded memory. The remote destination is replaced;
-    /// an interrupted upload may leave a partial file for an explicit retry.
+    /// Stream an in-place upload with bounded memory and shared exclusion.
+    /// Failure may leave partial output; pending mutation replies retain quarantine.
+    /// Confirmed I/O renews the connection's idle timeout, so a progressing
+    /// transfer may take longer than one timeout interval in total.
     pub async fn upload(&self, local: &Path, remote: &str) -> Result<u64> {
         valid_path(remote)?;
-        deadline(self.timeout, "SFTP upload", async {
-            let mut source = tokio::fs::File::open(local).await?;
-            let mut target = self.inner.create(remote).await.map_err(sftp_error)?;
-            let result = tokio::io::copy(&mut source, &mut target).await;
-            let close = target.close().await;
-            let count = result?;
-            close?;
-            Ok(count)
-        })
-        .await
+        let scope = self
+            .reserve_transfer(&TransferSpec::upload(local, remote), false)
+            .await?;
+        let context = scope.context()?;
+        let result = context
+            .run(self.timeout, "SFTP upload idle wait", async {
+                scope.revalidate().await?;
+                tokio::select! {
+                    biased;
+                    _=self.cancelled()=>Err(TransferExecutionError::from(SessionError::Closed)),
+                    result=self.queued_upload(local,remote,&context)=>result,
+                }?;
+                Ok(context.bytes())
+            })
+            .await
+            .map_err(transfer_session_error);
+        scope.complete(result).await
     }
 
     /// Replace a regular file atomically using negotiated OpenSSH POSIX rename.
@@ -467,31 +532,37 @@ impl SftpSession {
     /// mode 0600. This guarantees atomic visibility, not crash durability.
     pub async fn write_atomic(&self, path: &str, data: &[u8]) -> Result<()> {
         valid_atomic_path(path)?;
-        deadline(self.timeout, "SFTP atomic write", async {
-            self.replace_from_reader(path, &mut &data[..]).await?;
-            Ok(())
-        })
-        .await
+        let scope = self.reserve_remote(&[path], true, &|| true).await?;
+        let result = deadline(
+            self.timeout,
+            "SFTP atomic write",
+            scope.write_remote_atomic(path, data),
+        )
+        .await;
+        scope.complete(result).await
     }
 
-    /// Stream a local file through a same-directory temporary file, then
-    /// atomically replace the remote regular file. Uses the same capability,
-    /// metadata and uncertain-acknowledgement policy as `write_atomic`.
+    /// Stream a local file through an exclusive temporary, then atomically publish.
+    /// Shared source/destination exclusion also applies to direct API callers.
+    /// Each confirmed I/O completion renews the idle timeout; publication still
+    /// requires acknowledged writable CLOSE and POSIX rename.
     pub async fn upload_atomic(&self, local: &Path, remote: &str) -> Result<u64> {
         valid_atomic_path(remote)?;
-        deadline(self.timeout, "SFTP atomic upload", async {
-            let mut source = tokio::fs::File::open(local).await?;
-            self.replace_from_reader(remote, &mut source).await
+        let scope = self
+            .reserve_transfer(&TransferSpec::upload(local, remote), true)
+            .await?;
+        let context = scope.context()?;
+        let result = context.run(self.timeout, "SFTP atomic upload idle wait", async {
+            scope.revalidate().await?;
+            let mut source = local_io(tokio::fs::File::open(local)).await?;
+            tokio::select! {
+                biased;
+                _=self.cancelled()=>Err(TransferExecutionError::from(SessionError::Closed)),
+                result=self.replace_from_reader_checked(remote, &mut source, None, Some(&context), Some(&scope))=>result.map_err(Into::into),
+            }
         })
-        .await
-    }
-
-    async fn replace_from_reader<R: AsyncRead + Unpin>(
-        &self,
-        path: &str,
-        source: &mut R,
-    ) -> Result<u64> {
-        self.replace_from_reader_checked(path, source, None).await
+        .await.map_err(transfer_session_error);
+        scope.complete(result).await
     }
 
     /// Replace an existing reviewed regular file of at most 64 KiB.
@@ -505,16 +576,39 @@ impl SftpSession {
         reviewed: &RegularFileSnapshot,
         data: &[u8],
     ) -> Result<()> {
+        self.write_regular_reviewed_authorized(reviewed, data, &|| true)
+            .await
+    }
+
+    /// Replace a reviewed file while checking current authority before each write.
+    /// Ordinary proposal approval cannot release a conflicting unknown result.
+    /// Dropping this future during a request retains shared target quarantine.
+    pub async fn write_regular_reviewed_authorized(
+        &self,
+        reviewed: &RegularFileSnapshot,
+        data: &[u8],
+        authorized: &(dyn Fn() -> bool + Sync),
+    ) -> Result<()> {
         inspection::inspection_path(&reviewed.entry.path)?;
         if reviewed.content.len() > 64 * 1024 || data.len() > 64 * 1024 {
             return Err(SessionError::OutputLimit(64 * 1024));
         }
-        deadline(self.timeout, "SFTP reviewed replacement", async {
-            self.replace_from_reader_checked(&reviewed.entry.path, &mut &data[..], Some(reviewed))
-                .await?;
+        let scope = self
+            .reserve_remote(&[&reviewed.entry.path], true, authorized)
+            .await?;
+        let result = deadline(self.timeout, "SFTP reviewed replacement", async {
+            self.replace_from_reader_checked(
+                &reviewed.entry.path,
+                &mut &data[..],
+                Some(reviewed),
+                None,
+                Some(&scope),
+            )
+            .await?;
             Ok(())
         })
-        .await
+        .await;
+        scope.complete(result).await
     }
 
     async fn replace_from_reader_checked<R: AsyncRead + Unpin>(
@@ -522,6 +616,8 @@ impl SftpSession {
         path: &str,
         source: &mut R,
         reviewed: Option<&RegularFileSnapshot>,
+        transfer: Option<&TransferContext>,
+        mutation: Option<&FileMutationScope<'_>>,
     ) -> Result<u64> {
         if let Some(reviewed) = reviewed {
             // The checked read owns a nested protocol future. Keep it out of
@@ -541,7 +637,7 @@ impl SftpSession {
         }
         let mut attrs = FileAttributes::empty();
         attrs.permissions = Some(0o600);
-        match raw.lstat(path).await {
+        match remote_io(raw.lstat(path)).await {
             Ok(existing) => {
                 if !existing.attrs.file_type().is_file() {
                     return Err(SessionError::Invalid(
@@ -558,7 +654,15 @@ impl SftpSession {
         }
         let (parent, name) = path.rsplit_once('/').unwrap_or((".", path));
         let temporary = format!("{parent}/.{name}.keelshell-{}.tmp", uuid::Uuid::new_v4());
+        let ticket = match (transfer, mutation) {
+            (Some(context), _) => context.reservation.clone().ok_or(SessionError::Worker)?,
+            (_, Some(scope)) => scope.ticket()?,
+            _ => return Err(SessionError::Worker),
+        };
+        let temporary_owner =
+            ticket.add_temporary(queue::remote_claim(self, &temporary, true, true).await?)?;
         let mut guard = AtomicTemporary {
+            reservation: Some(temporary_owner),
             raw: Arc::new(raw),
             temporary: Some(temporary.clone()),
             handle: None,
@@ -566,23 +670,28 @@ impl SftpSession {
             connection: self._connection.clone(),
             runtime: tokio::runtime::Handle::current(),
         };
-        let opened = guard
-            .raw
-            .open(
-                temporary,
-                OpenFlags::CREATE | OpenFlags::WRITE | OpenFlags::EXCLUDE,
-                attrs,
-            )
-            .await;
+        let opening = guard.raw.open(
+            temporary,
+            OpenFlags::CREATE | OpenFlags::WRITE | OpenFlags::EXCLUDE,
+            attrs,
+        );
+        let opened = tracked_remote(transfer, mutation, opening).await;
+        let definitely_rejected = match (transfer, mutation) {
+            (Some(context), _) => !context.mutation_pending(),
+            (_, Some(scope)) => !scope.pending.load(Ordering::Acquire),
+            _ => false,
+        };
         let handle = match opened {
             Ok(opened) => opened.handle,
             Err(error) => {
                 // A definite failure did not create our file. In particular,
                 // O_EXCL collisions must never remove somebody else's entry.
-                if matches!(&error, russh_sftp::client::error::Error::Status(_)) {
+                if definitely_rejected
+                    || transfer.is_some_and(|transfer| !transfer.mutation_pending())
+                {
                     guard.temporary = None;
                 }
-                return Err(sftp_error(error));
+                return Err(error);
             }
         };
         guard.handle = Some(handle.clone());
@@ -590,23 +699,48 @@ impl SftpSession {
         let mut buffer = vec![0_u8; 32 * 1024];
         let mut offset = 0_u64;
         loop {
+            if let Some(transfer) = transfer {
+                transfer
+                    .checkpoint()
+                    .await
+                    .map_err(transfer_session_error)?;
+            }
             let count = source.read(&mut buffer).await?;
+            if let Some(transfer) = transfer {
+                transfer.confirmed_io();
+            }
             if count == 0 {
                 break;
             }
-            guard
-                .raw
-                .write(&handle, offset, buffer[..count].to_vec())
-                .await
-                .map_err(sftp_error)?;
+            let writing = guard.raw.write(&handle, offset, buffer[..count].to_vec());
+            tracked_remote(transfer, mutation, writing).await?;
             offset = offset
                 .checked_add(count as u64)
                 .ok_or(SessionError::Invalid("upload exceeds u64 size"))?;
+            if let Some(transfer) = transfer {
+                transfer
+                    .progress(count as u64)
+                    .await
+                    .map_err(transfer_session_error)?;
+            }
         }
-        guard.raw.close(&handle).await.map_err(sftp_error)?;
-        guard.handle = None;
+        // A sent CLOSE invalidates the descriptor even before its reply. Do
+        // not let cleanup retry it if cancellation drops the pending reply.
+        tracked_remote(transfer, mutation, async {
+            // Clear only when the operation is polled after authority checks.
+            // Pre-I/O cancellation still lets owned cleanup close this handle.
+            guard.handle = None;
+            guard.raw.close(&handle).await
+        })
+        .await?;
         if let Some(reviewed) = reviewed {
             Box::pin(self.verify_regular_snapshot(reviewed)).await?;
+        }
+        if let Some(transfer) = transfer {
+            transfer
+                .checkpoint()
+                .await
+                .map_err(transfer_session_error)?;
         }
         let mut payload = Vec::new();
         for value in [
@@ -618,20 +752,27 @@ impl SftpSession {
             payload.extend_from_slice(&len.to_be_bytes());
             payload.extend_from_slice(value.as_bytes());
         }
-        match guard
-            .raw
-            .extended("posix-rename@openssh.com", payload)
-            .await
-            .map_err(sftp_error)?
-        {
-            Packet::Status(status) if status.status_code == StatusCode::Ok => {}
-            Packet::Status(status) => {
+        let publication = async {
+            match guard
+                .raw
+                .extended("posix-rename@openssh.com", payload)
+                .await?
+            {
+                Packet::Status(status) => Ok(status),
+                _ => Err(russh_sftp::client::error::Error::UnexpectedBehavior(
+                    "atomic rename returned no STATUS acknowledgement".into(),
+                )),
+            }
+        };
+        let published = tracked_remote(transfer, mutation, publication).await?;
+        match published.status_code {
+            StatusCode::Ok => {}
+            _ => {
                 return Err(sftp_error(format!(
                     "atomic rename: {:?}: {}",
-                    status.status_code, status.error_message
+                    published.status_code, published.error_message
                 )));
             }
-            _ => return Err(sftp_error("unexpected atomic rename response")),
         }
         guard.temporary = None;
         Ok(offset)
@@ -639,57 +780,73 @@ impl SftpSession {
 
     /// Stream into a new local file, refusing to overwrite an existing path.
     /// An interrupted operation leaves the partial file visibly present.
+    /// Completed reads and local writes renew the idle timeout; an unanswered
+    /// request or incomplete local mutation remains bounded by that timeout.
     pub async fn download(&self, remote: &str, local: &Path) -> Result<u64> {
         valid_path(remote)?;
-        deadline(self.timeout, "SFTP download", async {
-            let mut source = self.inner.open(remote).await.map_err(sftp_error)?;
-            let mut target = tokio::fs::OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .open(local)
-                .await?;
-            let result = tokio::io::copy(&mut source, &mut target).await;
-            let close = source.close().await;
-            let count = result?;
-            close?;
-            target.flush().await?;
-            Ok(count)
-        })
-        .await
+        let scope = self
+            .reserve_transfer(&TransferSpec::download(remote, local), false)
+            .await?;
+        let context = scope.context()?;
+        let result = context
+            .run(self.timeout, "SFTP download idle wait", async {
+                scope.revalidate().await?;
+                tokio::select! {
+                    biased;
+                    _=self.cancelled()=>Err(TransferExecutionError::from(SessionError::Closed)),
+                    result=self.queued_download(remote,local,&context)=>result,
+                }?;
+                Ok(context.bytes())
+            })
+            .await
+            .map_err(transfer_session_error);
+        scope.complete(result).await
     }
 
-    /// Create an empty remote directory.
+    /// Create an empty remote directory under shared application exclusion.
     pub async fn mkdir(&self, path: &str) -> Result<()> {
         valid_path(path)?;
-        deadline(self.timeout, "SFTP mkdir", async {
-            self.inner.create_dir(path).await.map_err(sftp_error)
-        })
-        .await
+        let scope = self.reserve_remote(&[path], true, &|| true).await?;
+        let result = deadline(self.timeout, "SFTP mkdir", scope.mkdir_remote(path)).await;
+        scope.complete(result).await
     }
-    /// Rename a remote entry according to the server's SFTP semantics.
+    /// Rename an entry, reserving both canonical pathname endpoints and subtrees.
     pub async fn rename(&self, from: &str, to: &str) -> Result<()> {
         valid_path(from)?;
         valid_path(to)?;
-        deadline(self.timeout, "SFTP rename", async {
-            self.inner.rename(from, to).await.map_err(sftp_error)
+        let scope = self.reserve_remote(&[from, to], true, &|| true).await?;
+        let result = deadline(self.timeout, "SFTP rename", async {
+            let raw = DirectoryChannel(self._connection.sftp_raw().await?);
+            scope.remote(raw.0.rename(from, to)).await?;
+            Ok(())
         })
-        .await
+        .await;
+        scope.complete(result).await
     }
-    /// Remove one file or symbolic link; this never recursively removes a tree.
+    /// Remove one file/link; never recursively remove a tree. Shared quarantine
+    /// and active target admission apply even after separate action approval.
     pub async fn remove(&self, path: &str) -> Result<()> {
         valid_path(path)?;
-        deadline(self.timeout, "SFTP remove", async {
-            self.inner.remove_file(path).await.map_err(sftp_error)
+        let scope = self.reserve_remote(&[path], true, &|| true).await?;
+        let result = deadline(self.timeout, "SFTP remove", async {
+            let raw = DirectoryChannel(self._connection.sftp_raw().await?);
+            scope.remote(raw.0.remove(path)).await?;
+            Ok(())
         })
-        .await
+        .await;
+        scope.complete(result).await
     }
-    /// Remove an empty remote directory.
+    /// Remove an empty directory while reserving its entire subtree.
     pub async fn rmdir(&self, path: &str) -> Result<()> {
         valid_path(path)?;
-        deadline(self.timeout, "SFTP rmdir", async {
-            self.inner.remove_dir(path).await.map_err(sftp_error)
+        let scope = self.reserve_remote(&[path], true, &|| true).await?;
+        let result = deadline(self.timeout, "SFTP rmdir", async {
+            let raw = DirectoryChannel(self._connection.sftp_raw().await?);
+            scope.remote(raw.0.rmdir(path)).await?;
+            Ok(())
         })
-        .await
+        .await;
+        scope.complete(result).await
     }
 
     /// Change only POSIX mode bits for one reviewed remote entry.
@@ -712,11 +869,12 @@ impl SftpSession {
                 "POSIX mode must be between 0000 and 7777",
             ));
         }
-        deadline(self.timeout, "SFTP set permissions", async {
+        let scope = self
+            .reserve_remote(&[&reviewed.path], false, &|| true)
+            .await?;
+        let result = deadline(self.timeout, "SFTP set permissions", async {
             for parent in reviewed_parent_paths(&reviewed.path)? {
-                let attrs = self
-                    .inner
-                    .symlink_metadata(&parent)
+                let attrs = remote_io(self.inner.symlink_metadata(&parent))
                     .await
                     .map_err(sftp_error)?;
                 if attrs.file_type().is_symlink() || !attrs.file_type().is_dir() {
@@ -725,9 +883,7 @@ impl SftpSession {
                     ));
                 }
             }
-            let before = self
-                .inner
-                .symlink_metadata(&reviewed.path)
+            let before = remote_io(self.inner.symlink_metadata(&reviewed.path))
                 .await
                 .map_err(sftp_error)?;
             if before.file_type().is_symlink()
@@ -742,13 +898,11 @@ impl SftpSession {
             }
             let mut attributes = FileAttributes::empty();
             attributes.permissions = Some(mode);
-            self.inner
-                .set_metadata(&reviewed.path, attributes)
-                .await
-                .map_err(sftp_error)?;
-            let after = self
-                .inner
-                .symlink_metadata(&reviewed.path)
+            let raw = DirectoryChannel(self._connection.sftp_raw().await?);
+            scope
+                .remote(raw.0.setstat(&reviewed.path, attributes))
+                .await?;
+            let after = remote_io(self.inner.symlink_metadata(&reviewed.path))
                 .await
                 .map_err(|_| SessionError::UnverifiedMutation("remote mode readback failed"))?;
             if after.file_type().is_symlink()
@@ -762,13 +916,15 @@ impl SftpSession {
             }
             Ok(remote_entry_from_attributes(reviewed, after))
         })
-        .await
+        .await;
+        scope.complete(result).await
     }
 
     /// Stop this subsystem's relay and request its channel close. Ordinary
     /// cleanup preserves SSH; a stalled protocol close can force shared shutdown.
     /// Completion is not a remote acknowledgement or a rollback of file writes.
     pub async fn close(&self) -> Result<()> {
+        self.stopped.send_replace(true);
         // Queue the sentinel while the relay is still alive. Cancelling the
         // relay first races the upstream writer's receiver and can turn an
         // otherwise successful cleanup into `SendError: channel closed`.
@@ -864,13 +1020,41 @@ fn remote_entry_from_attributes(reviewed: &RemoteEntry, attrs: FileAttributes) -
 }
 
 impl SftpSession {
-    /// Start a FIFO transfer queue using this authenticated SFTP subsystem.
+    fn is_closed(&self) -> bool {
+        *self.stopped.borrow() || self._connection.is_closed()
+    }
+    async fn cancelled(&self) {
+        let mut stopped = self.stopped.subscribe();
+        while !*stopped.borrow_and_update() {
+            if stopped.changed().await.is_err() {
+                break;
+            }
+        }
+    }
+
+    /// Start a transfer queue on this exact authenticated connection.
     ///
-    /// The queue keeps the session alive through an [`Arc`]. Its worker is
-    /// single threaded by design so progress ordering is deterministic and a
-    /// server with a small request window is not flooded by UI actions.
+    /// The default is one worker for compatibility. Use
+    /// [`TransferQueue::set_parallelism`] to admit up to four independent jobs;
+    /// overlapping source/destination paths remain serialized.
     pub fn transfer_queue(self: Arc<Self>) -> TransferQueue {
         TransferQueue::new(self)
+    }
+
+    async fn queued_atomic_upload(
+        &self,
+        local: &Path,
+        remote: &str,
+        context: &TransferContext,
+    ) -> TransferExecutionResult<()> {
+        context.checkpoint().await?;
+        let mut source = local_io(tokio::fs::File::open(local)).await?;
+        if !local_io(source.metadata()).await?.is_file() {
+            return Err(SessionError::Invalid("file upload requires a regular file").into());
+        }
+        self.replace_from_reader_checked(remote, &mut source, None, Some(context), None)
+            .await?;
+        Ok(())
     }
 
     async fn queued_upload(
@@ -880,11 +1064,10 @@ impl SftpSession {
         context: &TransferContext,
     ) -> TransferExecutionResult<()> {
         context.checkpoint().await?;
-        let mut source = tokio::fs::File::open(local)
+        let mut source = local_io(tokio::fs::File::open(local))
             .await
             .map_err(SessionError::from)?;
-        if !source
-            .metadata()
+        if !local_io(source.metadata())
             .await
             .map_err(SessionError::from)?
             .is_file()
@@ -895,32 +1078,30 @@ impl SftpSession {
             .into());
         }
         let raw = DirectoryChannel(self._connection.sftp_raw().await?);
-        let handle = raw
-            .0
-            .open(
+        let handle = context
+            .remote_mutation(raw.0.open(
                 remote,
                 OpenFlags::CREATE | OpenFlags::TRUNCATE | OpenFlags::WRITE,
                 FileAttributes::empty(),
-            )
-            .await
-            .map_err(sftp_error)?
+            ))
+            .await?
             .handle;
         let mut buffer = vec![0; TRANSFER_CHUNK_SIZE];
         let mut offset = 0;
         loop {
             context.checkpoint().await?;
             let count = source.read(&mut buffer).await.map_err(SessionError::from)?;
+            context.confirmed_io();
             if count == 0 {
                 break;
             }
-            raw.0
-                .write(&handle, offset, buffer[..count].to_vec())
-                .await
-                .map_err(sftp_error)?;
+            context
+                .remote_mutation(raw.0.write(&handle, offset, buffer[..count].to_vec()))
+                .await?;
             offset += count as u64;
             context.progress(count as u64).await?;
         }
-        raw.0.close(handle).await.map_err(sftp_error)?;
+        context.remote_mutation(raw.0.close(handle)).await?;
         Ok(())
     }
 
@@ -932,18 +1113,18 @@ impl SftpSession {
     ) -> TransferExecutionResult<()> {
         context.checkpoint().await?;
         let raw = DirectoryChannel(self._connection.sftp_raw().await?);
-        let handle = raw
-            .0
-            .open(remote, OpenFlags::READ, FileAttributes::empty())
+        let handle = remote_io(raw.0.open(remote, OpenFlags::READ, FileAttributes::empty()))
             .await
             .map_err(sftp_error)?
             .handle;
-        let mut target = tokio::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(local)
-            .await
-            .map_err(SessionError::from)?;
+        let mut target = context
+            .local_mutation(
+                tokio::fs::OpenOptions::new()
+                    .write(true)
+                    .create_new(true)
+                    .open(local),
+            )
+            .await?;
         let mut offset = 0;
         loop {
             context.checkpoint().await?;
@@ -959,16 +1140,23 @@ impl SftpSession {
                 Err(russh_sftp::client::error::Error::Status(status))
                     if status.status_code == StatusCode::Eof =>
                 {
+                    // EOF confirms this owner's read even though it adds no bytes.
+                    context.confirmed_io();
                     break;
                 }
                 Err(error) => return Err(sftp_error(error).into()),
             };
-            target.write_all(&data).await.map_err(SessionError::from)?;
-            target.flush().await.map_err(SessionError::from)?;
+            context.confirmed_io();
+            context
+                .local_mutation(async {
+                    target.write_all(&data).await?;
+                    target.flush().await
+                })
+                .await?;
             offset += data.len() as u64;
             context.progress(data.len() as u64).await?;
         }
-        raw.0.close(handle).await.map_err(sftp_error)?;
+        remote_io(raw.0.close(handle)).await.map_err(sftp_error)?;
         Ok(())
     }
 }
@@ -979,6 +1167,12 @@ type TransferExecutionResult<T = u64> = std::result::Result<T, TransferExecution
 enum TransferExecutionError {
     Cancelled(u64),
     Error(SessionError),
+}
+fn transfer_session_error(error: TransferExecutionError) -> SessionError {
+    match error {
+        TransferExecutionError::Cancelled(_) => SessionError::Closed,
+        TransferExecutionError::Error(error) => error,
+    }
 }
 impl From<SessionError> for TransferExecutionError {
     fn from(error: SessionError) -> Self {
@@ -991,162 +1185,27 @@ impl From<std::io::Error> for TransferExecutionError {
     }
 }
 
-impl TransferQueue {
-    /// Create a FIFO worker inside the active Tokio runtime. Paused entries
-    /// retain their place; progress is coalesced when consumers are slow.
-    pub fn new(sftp: Arc<SftpSession>) -> Self {
-        let (commands, mut receiver) = mpsc::channel::<TransferCommand>(32);
-        let worker = tokio::spawn(async move {
-            while let Some(TransferCommand {
-                id,
-                spec,
-                events,
-                terminal,
-                control,
-            }) = receiver.recv().await
-            {
-                if *control.cancelled.borrow() {
-                    let _ = terminal.send(TransferEvent::Cancelled { id, bytes: 0 });
-                    continue;
-                }
-                let prepare = async {
-                    match &spec {
-                        TransferJob::Directory(plan) => Some(plan.bytes()),
-                        TransferJob::DirectoryResume(plan) => Some(plan.bytes()),
-                        TransferJob::Resume(plan) => Some(plan.bytes()),
-                        TransferJob::File(spec) => match spec.direction {
-                            TransferDirection::Upload => {
-                                tokio::fs::metadata(&spec.local).await.ok().map(|m| m.len())
-                            }
-                            TransferDirection::Download => sftp
-                                .inner
-                                .metadata(&spec.remote)
-                                .await
-                                .ok()
-                                .and_then(|m| m.size),
-                        },
-                    }
-                };
-                let total = tokio::select! {
-                    biased;
-                    _ = control.cancelled() => {
-                        let _ = terminal.send(TransferEvent::Cancelled {id, bytes:0});
-                        continue;
-                    }
-                    result = tokio::time::timeout(sftp.timeout, prepare) => match result {
-                        Ok(total) => total,
-                        Err(_) => { let _ = terminal.send(TransferEvent::Failed {id,error:SessionError::Timeout("SFTP transfer preparation").to_string()}); continue; }
-                    }
-                };
-                let context = TransferContext::new(id, total, events.clone(), control);
-                let budget = match spec {
-                    TransferJob::Directory(_)
-                    | TransferJob::DirectoryResume(_)
-                    | TransferJob::Resume(_) => Duration::from_secs(15 * 60),
-                    _ => sftp.timeout,
-                };
-                let result = context
-                    .run(budget, "SFTP transfer", async {
-                        context.event(TransferEvent::Started { id, total }).await?;
-                        context.checkpoint().await?;
-                        match spec {
-                            TransferJob::Directory(plan) => {
-                                sftp.queued_directory(plan, &context).await
-                            }
-                            TransferJob::DirectoryResume(plan) => {
-                                sftp.queued_directory_resume(&plan, &context).await
-                            }
-                            TransferJob::Resume(plan) => {
-                                sftp.execute_file_resume(&plan, &context).await
-                            }
-                            TransferJob::File(spec) => match spec.direction {
-                                TransferDirection::Upload => {
-                                    sftp.queued_upload(&spec.local, &spec.remote, &context)
-                                        .await
-                                }
-                                TransferDirection::Download => {
-                                    sftp.queued_download(&spec.remote, &spec.local, &context)
-                                        .await
-                                }
-                            },
-                        }
-                    })
-                    .await;
-                let outcome = match result {
-                    Ok(()) => TransferEvent::Completed {
-                        id,
-                        bytes: context.bytes(),
-                    },
-                    Err(TransferExecutionError::Cancelled(bytes)) => {
-                        TransferEvent::Cancelled { id, bytes }
-                    }
-                    Err(TransferExecutionError::Error(error)) => TransferEvent::Failed {
-                        id,
-                        error: error.to_string(),
-                    },
-                };
-                let _ = terminal.send(outcome);
+async fn tracked_remote<T>(
+    transfer: Option<&TransferContext>,
+    mutation: Option<&FileMutationScope<'_>>,
+    operation: impl std::future::Future<
+        Output = std::result::Result<T, russh_sftp::client::error::Error>,
+    >,
+) -> Result<T> {
+    match (transfer, mutation) {
+        (Some(context), Some(scope)) => {
+            let result = scope.remote(operation).await;
+            if result.is_ok() {
+                context.confirmed_io();
             }
-        });
-        Self {
-            commands,
-            next_id: AtomicU64::new(1),
-            worker: Some(worker),
+            result
         }
-    }
-    /// Enqueue an exclusive new-directory transfer after review.
-    pub async fn enqueue_directory(&self, plan: DirectoryTransferPlan) -> Result<TransferHandle> {
-        self.enqueue_job(TransferJob::Directory(plan)).await
-    }
-    /// Enqueue a reviewed continuation. Source and destination are fully
-    /// revalidated before writing; interrupted output remains visible.
-    pub async fn enqueue_resume(&self, plan: FileResumePlan) -> Result<TransferHandle> {
-        self.enqueue_job(TransferJob::Resume(plan)).await
-    }
-    /// Enqueue a reviewed partial directory after full validation.
-    pub async fn enqueue_directory_resume(
-        &self,
-        plan: DirectoryResumePlan,
-    ) -> Result<TransferHandle> {
-        self.enqueue_job(TransferJob::DirectoryResume(plan)).await
-    }
-    /// Enqueue a regular upload or exclusive local download.
-    pub async fn enqueue(&self, spec: TransferSpec) -> Result<TransferHandle> {
-        valid_path(&spec.remote)?;
-        if spec.local.as_os_str().is_empty() {
-            return Err(SessionError::Invalid("local transfer path is empty"));
-        }
-        self.enqueue_job(TransferJob::File(spec)).await
-    }
-    async fn enqueue_job(&self, spec: TransferJob) -> Result<TransferHandle> {
-        let id = self.next_id.fetch_add(1, Ordering::Relaxed);
-        let control = Arc::new(TransferControl::new());
-        let (events, receiver) = mpsc::channel(32);
-        let (terminal, terminal_receiver) = oneshot::channel();
-        let _ = events.try_send(TransferEvent::Queued { id });
-        self.commands
-            .send(TransferCommand {
-                id,
-                spec,
-                events,
-                terminal,
-                control: control.clone(),
-            })
+        (Some(context), None) => context
+            .remote_mutation(operation)
             .await
-            .map_err(|_| SessionError::Worker)?;
-        Ok(TransferHandle {
-            id,
-            events: receiver,
-            terminal: Some(terminal_receiver),
-            control,
-        })
-    }
-}
-impl Drop for TransferQueue {
-    fn drop(&mut self) {
-        if let Some(worker) = self.worker.take() {
-            worker.abort();
-        }
+            .map_err(transfer_session_error),
+        (_, Some(scope)) => scope.remote(operation).await,
+        _ => Err(SessionError::Worker),
     }
 }
 
@@ -1163,6 +1222,7 @@ fn valid_atomic_path(path: &str) -> Result<()> {
 /// Owns the known temporary pathname before OPEN is sent, including the case
 /// where cancellation occurs before an OPEN acknowledgement returns its handle.
 struct AtomicTemporary {
+    reservation: Option<queue::TemporaryReservation>,
     raw: Arc<OwnedRawSftpSession>,
     temporary: Option<String>,
     handle: Option<String>,
@@ -1172,8 +1232,12 @@ struct AtomicTemporary {
 }
 impl Drop for AtomicTemporary {
     fn drop(&mut self) {
+        let ticket = self.reservation.take();
         let Some(path) = self.temporary.take() else {
             let _ = self.raw.close_session();
+            if let Some(ticket) = ticket {
+                ticket.finish(true);
+            }
             return;
         };
         let raw = self.raw.clone();
@@ -1181,13 +1245,20 @@ impl Drop for AtomicTemporary {
         let connection = self.connection.clone();
         let task = self.runtime.spawn(async move {
             let _connection = connection;
-            let _ = tokio::time::timeout(Duration::from_secs(2), async {
+            let cleaned = tokio::time::timeout(Duration::from_secs(2), async {
                 if let Some(handle) = handle {
-                    let _ = raw.close(handle).await;
+                    raw.close(handle).await?;
                 }
-                let _ = raw.remove(path).await;
+                raw.remove(path).await
             })
             .await;
+            let known = matches!(
+                &cleaned,
+                Ok(Ok(_)) | Ok(Err(russh_sftp::client::error::Error::Status(_)))
+            );
+            if let Some(ticket) = ticket {
+                ticket.finish(known);
+            }
             let _ = raw.close_session();
         });
         if let Ok(mut tasks) = self.cleanups.lock() {

@@ -21,7 +21,7 @@ impl SftpSession {
                 },
             )
             .await?;
-            match raw.0.lstat(path).await {
+            match remote_io(raw.0.lstat(path)).await {
                 Ok(packet) => Ok(Some(entry(path, packet.attrs))),
                 Err(russh_sftp::client::error::Error::Status(status))
                     if status.status_code == StatusCode::NoSuchFile =>
@@ -56,16 +56,20 @@ impl SftpSession {
         deadline(self.timeout, "SFTP checked regular-file read", async {
             let raw = DirectoryChannel(self._connection.sftp_raw().await?);
             directory::remote_directory_chain(&raw.0, directory::remote_parent(path)?).await?;
-            let before = raw.0.lstat(path).await.map_err(sftp_error)?.attrs;
+            let before = remote_io(raw.0.lstat(path))
+                .await
+                .map_err(sftp_error)?
+                .attrs;
             regular(&before, max_bytes)?;
-            let handle = raw
-                .0
-                .open(path, OpenFlags::READ, FileAttributes::empty())
+            let handle = remote_io(raw.0.open(path, OpenFlags::READ, FileAttributes::empty()))
                 .await
                 .map_err(sftp_error)?
                 .handle;
             let result = async {
-                let opened = raw.0.fstat(&handle).await.map_err(sftp_error)?.attrs;
+                let opened = remote_io(raw.0.fstat(&handle))
+                    .await
+                    .map_err(sftp_error)?
+                    .attrs;
                 same_file(&before, &opened)?;
                 let mut bytes = Vec::new();
                 loop {
@@ -93,16 +97,25 @@ impl SftpSession {
                 }
                 same_file(
                     &before,
-                    &raw.0.fstat(&handle).await.map_err(sftp_error)?.attrs,
+                    &remote_io(raw.0.fstat(&handle))
+                        .await
+                        .map_err(sftp_error)?
+                        .attrs,
                 )?;
-                same_file(&before, &raw.0.lstat(path).await.map_err(sftp_error)?.attrs)?;
+                same_file(
+                    &before,
+                    &remote_io(raw.0.lstat(path))
+                        .await
+                        .map_err(sftp_error)?
+                        .attrs,
+                )?;
                 if before.size != Some(bytes.len() as u64) {
                     return Err(SessionError::Invalid("checked SFTP file size changed"));
                 }
                 Ok(bytes)
             }
             .await;
-            let closed = raw.0.close(&handle).await.map_err(sftp_error);
+            let closed = remote_io(raw.0.close(&handle)).await.map_err(sftp_error);
             let bytes = result?;
             closed?;
             Ok(RegularFileSnapshot {

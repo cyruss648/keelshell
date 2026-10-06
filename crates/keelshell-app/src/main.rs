@@ -24,6 +24,7 @@ mod runtime_bridge;
 mod snippet_editor;
 mod snippet_parameters;
 mod ssh_bridge;
+mod target_parameters;
 mod terminal;
 mod tunnels;
 mod updater;

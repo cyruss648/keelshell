@@ -113,7 +113,7 @@ async fn queued_transfer(
     observe_transfer(&mut transfer, direction, None, stop, pause, progress).await
 }
 
-async fn observe_transfer(
+pub(super) async fn observe_transfer(
     transfer: &mut keelshell_session::sftp::TransferHandle,
     direction: TransferDirection,
     existing: Option<(u64, bool)>,
@@ -130,15 +130,19 @@ async fn observe_transfer(
             _ = cancellation(&stop) => {
                 transfer.cancel();
                 return tokio::time::timeout(Duration::from_secs(6), finish_cancelled_transfer(transfer,progress))
-                    .await.unwrap_or(Err(FileFailure::Cancelled));
+                    .await.unwrap_or(Err(FileFailure::CancellationUnconfirmed));
             }
             changed = pause.changed() => {
-                if changed.is_err() { transfer.cancel(); return Err(FileFailure::Cancelled); }
+                if changed.is_err() {
+                    transfer.cancel();
+                    return tokio::time::timeout(Duration::from_secs(6), finish_cancelled_transfer(transfer, progress))
+                        .await.unwrap_or(Err(FileFailure::CancellationUnconfirmed));
+                }
                 if *pause.borrow_and_update() { transfer.pause(); } else { transfer.resume(); }
             }
             event = transfer.recv() => {
                 match event {
-                    Some(TransferEvent::Queued { .. }) => {}
+                    Some(TransferEvent::Queued { .. }) => { let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Queued)); }
                     Some(TransferEvent::Started { total, .. }) => {
                         let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Started(total)));
                         if existing.is_none() { send_worker_progress(progress, transfer_progress_message(direction, 0, total)); }
@@ -178,6 +182,7 @@ async fn observe_transfer(
                         let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
                         return Err(FileFailure::Cancelled);
                     }
+                    Some(TransferEvent::Uncertain { bytes, error, .. }) => { let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes))); return Err(FileFailure::OutcomeUncertain(error)); }
                     Some(TransferEvent::Failed { error, .. }) => return Err(FileFailure::Transport(error)),
                     None => return Err(FileFailure::WorkerStopped),
                 }
@@ -202,6 +207,10 @@ async fn finish_cancelled_transfer(
             TransferEvent::Cancelled { bytes, .. } => {
                 let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
                 return Err(FileFailure::Cancelled);
+            }
+            TransferEvent::Uncertain { bytes, error, .. } => {
+                let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
+                return Err(FileFailure::OutcomeUncertain(error));
             }
             TransferEvent::Failed { error, .. } => return Err(FileFailure::Transport(error)),
             TransferEvent::Queued { .. }
@@ -236,6 +245,26 @@ pub(super) async fn operate(
     );
     let action = async {
         match operation {
+            Operation::InspectFileQuarantine(target) => {
+                Ok(Outcome::QuarantineInspected(match target {
+                    IsolationTarget::Remote(path) => {
+                        sftp.inspect_remote_mutation_quarantine(&path).await?
+                    }
+                    IsolationTarget::Local(path) => {
+                        sftp.inspect_local_mutation_quarantine(&path).await?
+                    }
+                }))
+            }
+            Operation::InspectQuarantine(spec) => Ok(Outcome::QuarantineInspected(
+                sftp.inspect_transfer_quarantine(&spec).await?,
+            )),
+            Operation::AcknowledgeQuarantine(review) => {
+                sftp.acknowledge_transfer_quarantine(&review, &stop).await?;
+                Ok(Outcome::Done(Message::new(
+                    "已解除审核目标的应用隔离；原任务仍为结果未知。新的传输必须单独审核。",
+                    "Released application isolation for the reviewed targets; previous jobs remain unknown. Review any new transfer separately.",
+                )))
+            }
             Operation::List(path) => {
                 let canonical = sftp.canonicalize(&path).await?;
                 let mut entries = sftp.list(&canonical).await?;

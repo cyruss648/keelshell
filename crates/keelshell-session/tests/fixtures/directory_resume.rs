@@ -444,7 +444,13 @@ async fn changing_the_current_prefix_while_paused_is_rejected_before_more_bytes_
     assert!(paused_at < content.len() as u64);
     let mut changed = sftp.read("/partial/data", 256_000).await?;
     changed[0] ^= 0xff;
-    sftp.write("/partial/data", &changed).await?;
+    assert!(matches!(
+        sftp.write("/partial/data", &changed).await,
+        Err(SessionError::MutationBusy)
+    ));
+    server
+        .filesystem
+        .replace_external_file("/partial/data", &changed)?;
     transfer.resume();
     assert!(matches!(
         terminal(&mut transfer).await?,
@@ -480,7 +486,13 @@ async fn final_tree_verification_detects_mutation_of_an_earlier_completed_file()
     assert_eq!(sftp.read("/partial/aa-complete", 64).await?, b"first");
     // Remote fixture metadata has no mtime; the length also remains identical.
     // Only the final complete-tree content recheck can detect this mutation.
-    sftp.write("/partial/aa-complete", b"other").await?;
+    assert!(matches!(
+        sftp.write("/partial/aa-complete", b"other").await,
+        Err(SessionError::MutationBusy)
+    ));
+    server
+        .filesystem
+        .replace_external_file("/partial/aa-complete", b"other")?;
     server.filesystem.set_transfer_write_delay(0);
     transfer.resume();
     assert!(matches!(

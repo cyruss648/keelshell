@@ -108,6 +108,8 @@ pub struct SshOptions {
     /// Explicit upstream proxy for this hop. No system proxy is read.
     pub proxy: Option<SshProxy>,
     /// Deadline for connection/authentication and individual protocol requests.
+    /// Streaming transfers use it as an active idle wait renewed by confirmed
+    /// I/O; read-only full-content/tree validation keeps its separate fixed limit.
     pub timeout: Duration,
 }
 
@@ -289,6 +291,7 @@ pub struct SshSession {
     _lifecycle: Arc<ConnectionLifecycle>,
     transport: Arc<TransportControl>,
     state: ConnectionMonitor,
+    pub(crate) transfer_reservations: Arc<crate::sftp::TransferReservations>,
 }
 
 struct ConnectionLifecycle {
@@ -562,6 +565,7 @@ impl SshSession {
             _lifecycle: lifecycle,
             transport,
             state,
+            transfer_reservations: Arc::new(crate::sftp::TransferReservations::new(options)),
         })
     }
 
@@ -758,15 +762,18 @@ impl SshSession {
     ) -> Result<(OwnedRawSftpSession, russh_sftp::protocol::Version)> {
         deadline(self.timeout, "SFTP initialization", async {
             let mut pending = open_session(self).await?;
+            crate::sftp::observed_transfer_io();
             let channel = pending.channel.as_mut().ok_or(SessionError::Closed)?;
             channel.request_subsystem(true, "sftp").await?;
             acknowledge(channel, "SFTP subsystem").await?;
+            crate::sftp::observed_transfer_io();
             let (stream, initialization) = pending.into_stream();
             let raw = russh_sftp::client::RawSftpSession::new(stream);
             let version = raw
                 .init()
                 .await
                 .map_err(|error| SessionError::Sftp(error.to_string()))?;
+            crate::sftp::observed_transfer_io();
             Ok((OwnedRawSftpSession::new(raw, initialization), version))
         })
         .await

@@ -5,6 +5,7 @@ use gpui_kit::component::popover::Popover;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum TransferPhase {
     Preparing,
+    Queued,
     Running,
     Pausing,
     Paused,
@@ -13,12 +14,14 @@ pub(super) enum TransferPhase {
     Completed,
     Cancelled,
     Failed,
+    Uncertain,
 }
 
 impl TransferPhase {
-    fn label(self, cx: &App) -> &'static str {
+    pub(super) fn label(self, cx: &App) -> &'static str {
         match self {
             Self::Preparing => t(cx, "准备传输", "Preparing"),
+            Self::Queued => t(cx, "等待槽位或路径锁", "Waiting for a slot or path lock"),
             Self::Running => t(cx, "传输中", "Transferring"),
             Self::Pausing => t(cx, "暂停中…", "Pausing…"),
             Self::Paused => t(cx, "已暂停", "Paused"),
@@ -27,12 +30,18 @@ impl TransferPhase {
             Self::Completed => t(cx, "已完成", "Completed"),
             Self::Cancelled => t(cx, "已取消", "Cancelled"),
             Self::Failed => t(cx, "未完成", "Incomplete"),
+            Self::Uncertain => t(
+                cx,
+                "结果未知 · 目标隔离",
+                "Unknown outcome · Destination isolated",
+            ),
         }
     }
 }
 
 #[derive(Clone, Copy)]
 pub(super) enum TransferUpdate {
+    Queued,
     Started(Option<u64>),
     Progress(u64, Option<u64>),
     Paused(u64, Option<u64>),
@@ -40,12 +49,13 @@ pub(super) enum TransferUpdate {
     Finished(u64),
 }
 
+#[derive(Clone)]
 pub(super) struct TransferStatus {
     pub(super) phase: TransferPhase,
     pub(super) transferred: u64,
     pub(super) total: Option<u64>,
     source: String,
-    destination: String,
+    pub(super) destination: String,
     direction: TransferDirection,
     directory: bool,
     continuation: bool,
@@ -73,9 +83,14 @@ impl TransferStatus {
 
     pub(super) fn update(&mut self, event: TransferUpdate) {
         match event {
+            TransferUpdate::Queued => {
+                if self.phase == TransferPhase::Preparing {
+                    self.phase = TransferPhase::Queued;
+                }
+            }
             TransferUpdate::Started(total) => {
                 self.total = total;
-                if self.phase == TransferPhase::Preparing {
+                if matches!(self.phase, TransferPhase::Preparing | TransferPhase::Queued) {
                     self.phase = TransferPhase::Running;
                 }
             }
@@ -138,6 +153,10 @@ impl TransferStatus {
 
 impl FilesPanel {
     pub(super) fn request_pause(&mut self, paused: bool, cx: &mut Context<Self>) {
+        if let Some(id) = self.selected_transfer {
+            self.request_job_pause(id, paused, cx);
+            return;
+        }
         if self.suspended {
             return;
         }
@@ -165,13 +184,29 @@ impl FilesPanel {
     }
 
     pub(super) fn cancel_active(&mut self, cx: &mut Context<Self>) {
+        if self.operation_id.is_none()
+            && let Some(id) = self.selected_transfer
+        {
+            self.cancel_job(id, cx);
+            return;
+        }
         if !self.busy {
             return;
         }
         if let Some(stop) = &self.operation_stop {
             stop.store(true, Ordering::Release);
         }
-        if let Some(transfer) = &mut self.transfer {
+        if let Some(transfer) = &mut self.transfer
+            && matches!(
+                transfer.phase,
+                TransferPhase::Preparing
+                    | TransferPhase::Queued
+                    | TransferPhase::Running
+                    | TransferPhase::Pausing
+                    | TransferPhase::Paused
+                    | TransferPhase::Resuming
+            )
+        {
             transfer.phase = TransferPhase::Cancelling;
         }
         self.status = Message::new(
@@ -271,58 +306,70 @@ impl FilesPanel {
                                 })),
                         )
                     })
-                    .when(self.busy, |row| {
-                        row.when(
-                            matches!(
-                                transfer.phase,
-                                TransferPhase::Running | TransferPhase::Pausing
-                            ),
-                            |row| {
-                                row.child(
-                                    Button::new("pause-file-transfer")
-                                        .ghost()
-                                        .compact()
-                                        .disabled(
-                                            self.suspended
-                                                || transfer.phase != TransferPhase::Running,
-                                        )
-                                        .label(t(cx, "暂停", "Pause"))
-                                        .on_click(cx.listener(|view, _, _, cx| {
-                                            view.request_pause(true, cx)
-                                        })),
-                                )
-                            },
-                        )
-                        .when(
-                            matches!(
-                                transfer.phase,
-                                TransferPhase::Paused | TransferPhase::Resuming
-                            ),
-                            |row| {
-                                row.child(
-                                    Button::new("resume-file-transfer")
-                                        .primary()
-                                        .compact()
-                                        .disabled(
-                                            self.suspended
-                                                || transfer.phase != TransferPhase::Paused,
-                                        )
-                                        .label(t(cx, "继续", "Continue"))
-                                        .on_click(cx.listener(|view, _, _, cx| {
-                                            view.request_pause(false, cx)
-                                        })),
-                                )
-                            },
-                        )
-                        .child(
-                            Button::new("cancel-active-file-operation")
-                                .ghost()
-                                .compact()
-                                .disabled(transfer.phase == TransferPhase::Cancelling)
-                                .label(t(cx, "取消", "Cancel"))
-                                .on_click(cx.listener(|view, _, _, cx| view.cancel_active(cx))),
-                        )
-                    }),
+                    .when(
+                        matches!(
+                            transfer.phase,
+                            TransferPhase::Preparing
+                                | TransferPhase::Queued
+                                | TransferPhase::Running
+                                | TransferPhase::Pausing
+                                | TransferPhase::Paused
+                                | TransferPhase::Resuming
+                                | TransferPhase::Cancelling
+                        ),
+                        |row| {
+                            row.when(
+                                matches!(
+                                    transfer.phase,
+                                    TransferPhase::Running | TransferPhase::Pausing
+                                ),
+                                |row| {
+                                    row.child(
+                                        Button::new("pause-file-transfer")
+                                            .ghost()
+                                            .compact()
+                                            .disabled(
+                                                self.suspended
+                                                    || transfer.phase != TransferPhase::Running,
+                                            )
+                                            .label(t(cx, "暂停", "Pause"))
+                                            .on_click(cx.listener(|view, _, _, cx| {
+                                                view.request_pause(true, cx)
+                                            })),
+                                    )
+                                },
+                            )
+                            .when(
+                                matches!(
+                                    transfer.phase,
+                                    TransferPhase::Paused | TransferPhase::Resuming
+                                ),
+                                |row| {
+                                    row.child(
+                                        Button::new("resume-file-transfer")
+                                            .primary()
+                                            .compact()
+                                            .disabled(
+                                                self.suspended
+                                                    || transfer.phase != TransferPhase::Paused,
+                                            )
+                                            .label(t(cx, "继续", "Continue"))
+                                            .on_click(cx.listener(|view, _, _, cx| {
+                                                view.request_pause(false, cx)
+                                            })),
+                                    )
+                                },
+                            )
+                            .child(
+                                Button::new("cancel-active-file-operation")
+                                    .ghost()
+                                    .compact()
+                                    .disabled(transfer.phase == TransferPhase::Cancelling)
+                                    .label(t(cx, "取消", "Cancel"))
+                                    .on_click(cx.listener(|view, _, _, cx| view.cancel_active(cx))),
+                            )
+                        },
+                    ),
             )
             .child(
                 div()

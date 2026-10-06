@@ -17,7 +17,7 @@ use keelshell_session::{
     SessionError, SshSession,
     sftp::{
         DirectoryResumePlan, DirectoryTransferPlan, FileResumePlan, RemoteEntry, SftpSession,
-        TransferDirection, TransferEvent, TransferSpec,
+        TransferDirection, TransferEvent, TransferQuarantineReview, TransferSpec,
     },
 };
 use std::{
@@ -30,6 +30,7 @@ use std::{
     time::Duration,
 };
 
+mod parallel;
 mod sync;
 mod transfer;
 mod view;
@@ -39,7 +40,15 @@ use worker::operate;
 
 use gpui_kit::assets::IconName;
 #[derive(Clone)]
+enum IsolationTarget {
+    Remote(String),
+    Local(PathBuf),
+}
+#[derive(Clone)]
 enum Operation {
+    InspectFileQuarantine(IsolationTarget),
+    InspectQuarantine(TransferSpec),
+    AcknowledgeQuarantine(TransferQuarantineReview),
     List(String),
     Read(RemoteEntry),
     Mkdir(String),
@@ -68,6 +77,7 @@ enum Operation {
     },
 }
 enum Outcome {
+    QuarantineInspected(TransferQuarantineReview),
     Listed(String, Vec<RemoteEntry>),
     Read(String, Vec<u8>),
     Saved(String, Vec<u8>),
@@ -102,6 +112,7 @@ pub struct FilesPanel {
     local: Entity<InputState>,
     editor: Entity<TextareaState>,
     tools_scroll: ScrollHandle,
+    transfer_list_scroll: ScrollHandle,
     entries: Vec<RemoteEntry>,
     selected: Option<RemoteEntry>,
     editing: Option<(String, Vec<u8>)>,
@@ -114,8 +125,13 @@ pub struct FilesPanel {
     transfer_pause: Option<tokio::sync::watch::Sender<bool>>,
     transfer: Option<TransferStatus>,
     recovery: Option<RecoveryCandidate>,
+    isolation_target: Option<IsolationTarget>,
     resume_mode: bool,
     comparison: Option<DirectoryComparison>,
+    transfer_jobs: Vec<parallel::QueuedTransfer>,
+    selected_transfer: Option<uuid::Uuid>,
+    transfer_queue: Arc<tokio::sync::OnceCell<Arc<keelshell_session::sftp::TransferQueue>>>,
+    queue_parallelism: Arc<std::sync::atomic::AtomicUsize>,
 }
 
 struct DirectoryComparison {
@@ -174,6 +190,7 @@ fn recovery_request_is_allowed(
 }
 impl Drop for FilesPanel {
     fn drop(&mut self) {
+        self.cancel_transfers();
         if let Some(stop) = &self.operation_stop {
             stop.store(true, Ordering::Release);
         }
@@ -236,8 +253,12 @@ fn parse_permissions_mode(value: &str) -> Result<u32, &'static str> {
 #[derive(Debug)]
 enum FileFailure {
     Transport(String),
+    IsolationBusy,
+    IsolationUnknown,
     Cancelled,
     CancelledBeforeStart,
+    CancellationUnconfirmed,
+    OutcomeUncertain(String),
     InvalidEditor,
     Conflict,
     Symlink,
@@ -261,6 +282,11 @@ fn terminal_transfer_phase(
     }
     Some(match result {
         Ok(_) => TransferPhase::Completed,
+        Err(
+            FileFailure::CancellationUnconfirmed
+            | FileFailure::OutcomeUncertain(_)
+            | FileFailure::WorkerStopped,
+        ) => TransferPhase::Uncertain,
         Err(error) if error.is_cancelled() => TransferPhase::Cancelled,
         Err(_) => TransferPhase::Failed,
     })
@@ -268,15 +294,26 @@ fn terminal_transfer_phase(
 
 impl From<SessionError> for FileFailure {
     fn from(error: SessionError) -> Self {
-        Self::Transport(error.to_string())
+        match error {
+            SessionError::MutationBusy => Self::IsolationBusy,
+            SessionError::MutationQuarantined => Self::IsolationUnknown,
+            SessionError::MutationUncertain => Self::OutcomeUncertain(error.to_string()),
+            _ => Self::Transport(error.to_string()),
+        }
     }
 }
 impl std::fmt::Display for FileFailure {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::IsolationBusy=>f.write_str("file target is owned by an active application mutation"),
+            Self::IsolationUnknown=>f.write_str("file target is isolated by an unknown mutation; exact risk acknowledgement required"),
             Self::Transport(detail) => f.write_str(detail),
             Self::Cancelled => {
                 f.write_str("File operation cancelled; remote outcome may be unknown")
+            }
+            Self::OutcomeUncertain(detail) => write!(f, "Transfer outcome unknown: {detail}"),
+            Self::CancellationUnconfirmed => {
+                f.write_str("Cancellation requested, but no terminal transfer result was received")
             }
             Self::CancelledBeforeStart => {
                 f.write_str("File operation cancelled before SFTP initialization")
@@ -304,6 +341,14 @@ impl FileFailure {
 
     fn message(&self) -> Message {
         match self {
+            Self::IsolationBusy => Message::new(
+                "目标正由其它文件操作占用；请等待完成后重新审核。",
+                "Another file operation owns this target; review again after it finishes.",
+            ),
+            Self::IsolationUnknown => Message::new(
+                "目标存在未知写入结果，已隔离。普通保存或 MCP 提案确认不会解除隔离；请只读检查并显式审核风险。",
+                "This target is isolated by an unknown mutation. Ordinary save or MCP approval cannot release it; inspect read-only and explicitly review its risk.",
+            ),
             Self::Transport(detail) => Message::new(
                 format!("文件操作失败：{detail}。远端结果可能未知，请检查后再重试。"),
                 format!(
@@ -313,6 +358,15 @@ impl FileFailure {
             Self::Cancelled => Message::new(
                 "操作已取消；请先检查远端结果。临时文件或未完成的本地下载可能仍存在。",
                 "Operation cancelled; inspect the remote result. A staged file or partial local download may remain.",
+            ),
+            Self::OutcomeUncertain(detail) => Message::detail(
+                "传输结果未知，目标已隔离；重连不会解除隔离。请只读检查，再显式审核未知风险",
+                "Transfer outcome unknown; destination isolated across reconnects. Inspect read-only, then explicitly review the unresolved risk",
+                detail,
+            ),
+            Self::CancellationUnconfirmed => Message::new(
+                "已请求取消，但尚未收到最终传输回执；结果未知，请检查目标后再操作。",
+                "Cancellation requested, but the final transfer result is unknown; inspect the destination before another operation.",
             ),
             Self::CancelledBeforeStart => Message::new(
                 "已在打开 SFTP 前取消操作",
@@ -450,6 +504,7 @@ impl FilesPanel {
             local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
             editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
             tools_scroll: ScrollHandle::new(),
+            transfer_list_scroll: ScrollHandle::new(),
             entries: Vec::new(),
             selected: None,
             editing: None,
@@ -462,8 +517,13 @@ impl FilesPanel {
             transfer_pause: None,
             transfer: None,
             recovery: None,
+            isolation_target: None,
             resume_mode: false,
             comparison: None,
+            transfer_jobs: Vec::new(),
+            selected_transfer: None,
+            transfer_queue: Arc::new(tokio::sync::OnceCell::new()),
+            queue_parallelism: Arc::new(std::sync::atomic::AtomicUsize::new(2)),
         };
         panel.run(Operation::List(".".into()), window, cx);
         panel
@@ -478,6 +538,7 @@ impl FilesPanel {
         self.session_token = uuid::Uuid::new_v4();
         self.recovery = None;
         self.pending = None;
+        self.cancel_transfers();
         self.cancel_active(cx);
         cx.notify();
     }
@@ -538,13 +599,20 @@ impl FilesPanel {
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
             return;
         };
-        if self.busy {
+        if self.operation_id.is_some() || (self.busy && !operation.can_run_beside_transfers()) {
             self.status = Message::new(
                 "请等待或取消当前文件操作",
                 "Wait for or cancel the active file operation",
             );
             cx.notify();
             return;
+        }
+        if operation.transfer_status().is_some() {
+            self.run_queued_transfer(operation, window, cx);
+            return;
+        }
+        if let Some(target) = operation.isolation_target() {
+            self.isolation_target = Some(target);
         }
         let recovery_spec = operation.recovery_spec();
         let is_transfer = recovery_spec.is_some();
@@ -554,7 +622,13 @@ impl FilesPanel {
                 spec,
                 directory,
             });
-        } else if !matches!(&operation, Operation::PlanResume(..)) {
+        } else if !matches!(
+            &operation,
+            Operation::PlanResume(..)
+                | Operation::InspectFileQuarantine(_)
+                | Operation::InspectQuarantine(_)
+                | Operation::AcknowledgeQuarantine(_)
+        ) {
             // A browse/edit/mutation action is a new workflow; do not retain
             // a hidden recovery proposal after the user leaves its card.
             self.recovery = None;
@@ -581,7 +655,13 @@ impl FilesPanel {
         self.operation_id = Some(operation_id);
         if let Some(status) = operation.transfer_status() {
             self.transfer = Some(status);
-        } else if !matches!(&operation, Operation::PlanResume(..)) {
+        } else if !matches!(
+            &operation,
+            Operation::PlanResume(..)
+                | Operation::InspectFileQuarantine(_)
+                | Operation::InspectQuarantine(_)
+                | Operation::AcknowledgeQuarantine(_)
+        ) {
             // Keep a failed transfer card visible while a recovery plan is
             // being checked; browsing or unrelated operations retire it.
             self.transfer = None;
@@ -620,7 +700,9 @@ impl FilesPanel {
         let editor_before = self.editor.read(cx).value().to_string();
         let review_only = matches!(
             &operation,
-            Operation::PlanResume(..)
+            Operation::InspectFileQuarantine(_)
+                | Operation::InspectQuarantine(_)
+                | Operation::PlanResume(..)
                 | Operation::PlanDirectory(_)
                 | Operation::PlanDirectorySync(..)
         );
@@ -646,7 +728,8 @@ impl FilesPanel {
                 completion
             })
         {
-            self.busy = false;
+            // A failed foreground start cannot release running queue jobs' guard.
+            self.busy = self.has_active_transfers();
             self.operation_stop = None;
             self.operation_id = None;
             self.transfer_pause = None;
@@ -706,7 +789,7 @@ impl FilesPanel {
             };
             let _ = this.update_in(cx,|view,window,cx| {
                 if view.operation_id != Some(operation_id) { return; }
-                view.busy = false;
+                view.busy = view.has_active_transfers();
                 view.operation_stop = None;
                 view.operation_id = None;
                 view.transfer_pause = None;
@@ -755,6 +838,10 @@ impl FilesPanel {
                         }
                     }
                     Ok(Outcome::Done(message)) => view.status = message,
+                    Ok(Outcome::QuarantineInspected(review)) => {
+                        view.status = Message::new("只读检查完成；请审核解除隔离的未知风险", "Read-only inspection complete; review the risk before releasing isolation");
+                        view.pending = Some((parallel::quarantine_review_message(&review), Operation::AcknowledgeQuarantine(review)));
+                    }
                     Ok(Outcome::PlannedDirectory(plan)) => {
                         view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
                         view.pending = Some((directory_review_message(&plan), Operation::TransferDirectory(plan)));
@@ -847,7 +934,7 @@ impl FilesPanel {
         if self.suspended {
             return;
         }
-        if self.busy {
+        if self.operation_id.is_some() || (self.busy && !operation.can_run_beside_transfers()) {
             self.status = Message::new(
                 "请等待或取消当前文件操作",
                 "Wait for or cancel the active file operation",
@@ -861,7 +948,13 @@ impl FilesPanel {
         if self.suspended {
             return;
         }
-        if self.busy {
+        if self.operation_id.is_some()
+            || (self.busy
+                && self
+                    .pending
+                    .as_ref()
+                    .is_none_or(|(_, operation)| !operation.can_run_beside_transfers()))
+        {
             return;
         }
         if let Some((_, Operation::Save { content, .. })) = &self.pending
@@ -1085,6 +1178,40 @@ fn resume_review_message(
 }
 
 impl Operation {
+    fn isolation_target(&self) -> Option<IsolationTarget> {
+        match self {
+            Self::Mkdir(path) | Self::Save { path, .. } => {
+                Some(IsolationTarget::Remote(path.clone()))
+            }
+            Self::Rename(from, _) => Some(IsolationTarget::Remote(from.clone())),
+            Self::Delete(entry) | Self::SetPermissions(entry, _) => {
+                Some(IsolationTarget::Remote(entry.path.clone()))
+            }
+            Self::ApplyDirectorySync(review) => Some(
+                if review.plan.direction() == DirectorySyncDirection::LeftToRight {
+                    IsolationTarget::Remote(review.remote.clone())
+                } else {
+                    IsolationTarget::Local(review.local.clone())
+                },
+            ),
+            _ => None,
+        }
+    }
+    fn can_run_beside_transfers(&self) -> bool {
+        self.recovery_spec().is_some()
+            || matches!(
+                self,
+                Self::InspectFileQuarantine(_)
+                    | Self::InspectQuarantine(_)
+                    | Self::AcknowledgeQuarantine(_)
+                    | Self::List(_)
+                    | Self::Read(_)
+                    | Self::PlanDirectory(_)
+                    | Self::PlanResume(..)
+                    | Self::Compare(..)
+                    | Self::PlanDirectorySync(..)
+            )
+    }
     /// Derive a fresh continuation request only from an operation that already
     /// performed transfer I/O. Review-only plans intentionally return `None`.
     fn recovery_spec(&self) -> Option<(TransferSpec, bool)> {
@@ -1115,7 +1242,10 @@ impl Operation {
                 },
                 true,
             )),
-            Self::List(_)
+            Self::InspectFileQuarantine(_)
+            | Self::InspectQuarantine(_)
+            | Self::AcknowledgeQuarantine(_)
+            | Self::List(_)
             | Self::Read(_)
             | Self::Mkdir(_)
             | Self::Rename(_, _)
@@ -1446,6 +1576,12 @@ mod tests {
         );
         assert_eq!(
             terminal_transfer_phase(true, &failed),
+            Some(TransferPhase::Uncertain)
+        );
+        let rejected = Err(FileFailure::Transport("server rejected the request".into()));
+        assert_eq!(terminal_transfer_phase(false, &rejected), None);
+        assert_eq!(
+            terminal_transfer_phase(true, &rejected),
             Some(TransferPhase::Failed)
         );
         assert_eq!(

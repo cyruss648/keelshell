@@ -21,7 +21,8 @@ const SCAN_TIMEOUT: Duration = Duration::from_secs(30);
 ///
 /// Plans include empty directories and regular files only. Limits are 32 child
 /// levels, 10,000 entries including the root, 4,096 path bytes and 16 GiB. Scans
-/// have a 30-second deadline; execution has a 15-minute total deadline. Symlinks,
+/// have a fixed 30-second deadline. Execution renews the connection's idle wait
+/// after confirmed I/O; read-only revalidation retains the scan limit. Symlinks,
 /// special files and names unsafe on Windows are rejected on every platform.
 /// The target root must be absent. Cancellation/failure can leave a partial tree;
 /// no existing destination is intentionally replaced or automatically deleted.
@@ -143,7 +144,13 @@ impl SftpSession {
             .into());
         }
 
-        let current = self.plan_directory_transfer(plan.spec.clone()).await?;
+        let current = context
+            .validation(
+                SCAN_TIMEOUT,
+                "directory transfer revalidation",
+                self.scan_directory(plan.spec.clone()),
+            )
+            .await?;
         if current.entries != plan.entries {
             return Err(SessionError::Invalid(
                 "directory changed after review; scan and review again",
@@ -164,7 +171,7 @@ impl SftpSession {
                         remote_absent(&raw.0, &remote).await?;
                         let mut attrs = FileAttributes::empty();
                         attrs.permissions = Some(0o700);
-                        raw.0.mkdir(&remote, attrs).await.map_err(sftp_error)?;
+                        context.remote_mutation(raw.0.mkdir(&remote, attrs)).await?;
                     } else {
                         self.upload_tree_file(&raw.0, &local, &remote, entry, context)
                             .await?;
@@ -179,9 +186,9 @@ impl SftpSession {
                     )
                     .await?;
                     if entry.directory {
-                        tokio::fs::create_dir(&local)
-                            .await
-                            .map_err(SessionError::from)?;
+                        context
+                            .local_mutation(tokio::fs::create_dir(&local))
+                            .await?;
                     } else {
                         self.download_tree_file(&raw.0, &remote, &local, entry, context)
                             .await?;
@@ -200,8 +207,8 @@ impl SftpSession {
         entry: &Entry,
         context: &TransferContext,
     ) -> TransferExecutionResult<()> {
-        let mut source = tokio::fs::File::open(local).await?;
-        let metadata = source.metadata().await?;
+        let mut source = local_io(tokio::fs::File::open(local)).await?;
+        let metadata = local_io(source.metadata()).await?;
         if !metadata.is_file() || local_entry(&metadata, &entry.relative)? != *entry {
             return Err(SessionError::Invalid("local source changed after review").into());
         }
@@ -209,14 +216,13 @@ impl SftpSession {
         // overwrite a target introduced by another client after our scan.
         let mut attrs = FileAttributes::empty();
         attrs.permissions = Some(0o600);
-        let handle = raw
-            .open(
+        let handle = context
+            .remote_mutation(raw.open(
                 remote,
                 OpenFlags::CREATE | OpenFlags::WRITE | OpenFlags::EXCLUDE,
                 attrs,
-            )
-            .await
-            .map_err(sftp_error)?
+            ))
+            .await?
             .handle;
         // Allocate directly on the heap: an inline array becomes part of this
         // future and its enclosing cancellation/deadline/queue futures.
@@ -225,19 +231,20 @@ impl SftpSession {
         loop {
             context.checkpoint().await?;
             let count = source.read(&mut buffer).await?;
+            context.confirmed_io();
             if count == 0 {
                 break;
             }
             if offset.saturating_add(count as u64) > entry.size {
                 return Err(SessionError::Invalid("local source grew after review").into());
             }
-            raw.write(&handle, offset, buffer[..count].to_vec())
-                .await
-                .map_err(sftp_error)?;
+            context
+                .remote_mutation(raw.write(&handle, offset, buffer[..count].to_vec()))
+                .await?;
             offset += count as u64;
             context.progress(count as u64).await?;
         }
-        raw.close(handle).await.map_err(sftp_error)?;
+        context.remote_mutation(raw.close(handle)).await?;
         if offset != entry.size {
             return Err(SessionError::Invalid("local source shrank after review").into());
         }
@@ -253,37 +260,49 @@ impl SftpSession {
         entry: &Entry,
         context: &TransferContext,
     ) -> TransferExecutionResult<()> {
-        let handle = raw
-            .open(remote, OpenFlags::READ, FileAttributes::empty())
+        let handle = remote_io(raw.open(remote, OpenFlags::READ, FileAttributes::empty()))
             .await
             .map_err(sftp_error)?
             .handle;
-        let actual = raw.fstat(&handle).await.map_err(sftp_error)?.attrs;
+        let actual = remote_io(raw.fstat(&handle))
+            .await
+            .map_err(sftp_error)?
+            .attrs;
         if remote_entry(&actual, &entry.relative)? != *entry {
             return Err(SessionError::Invalid("remote source changed while opening").into());
         }
-        let mut target = tokio::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(local)
+        let mut target = context
+            .local_mutation(
+                tokio::fs::OpenOptions::new()
+                    .write(true)
+                    .create_new(true)
+                    .open(local),
+            )
             .await?;
         let mut offset = 0_u64;
         loop {
             context.checkpoint().await?;
             match raw.read(&handle, offset, TRANSFER_CHUNK_SIZE as u32).await {
                 Ok(data) if !data.data.is_empty() => {
+                    context.confirmed_io();
                     let count = data.data.len() as u64;
                     if offset.saturating_add(count) > entry.size {
                         return Err(SessionError::Invalid("remote source grew after review").into());
                     }
-                    target.write_all(&data.data).await?;
+                    context
+                        .local_mutation(async {
+                            target.write_all(&data.data).await?;
+                            target.flush().await
+                        })
+                        .await?;
                     offset += count;
-                    target.flush().await?;
                     context.progress(count).await?;
                 }
                 Err(russh_sftp::client::error::Error::Status(status))
                     if status.status_code == StatusCode::Eof =>
                 {
+                    // EOF confirms this owner's read even though it adds no bytes.
+                    context.confirmed_io();
                     break;
                 }
                 Ok(_) => {
@@ -294,7 +313,7 @@ impl SftpSession {
                 Err(error) => return Err(sftp_error(error).into()),
             }
         }
-        raw.close(handle).await.map_err(sftp_error)?;
+        remote_io(raw.close(handle)).await.map_err(sftp_error)?;
         target.flush().await?;
         if offset != entry.size {
             return Err(SessionError::Invalid("remote source shrank after review").into());
@@ -400,7 +419,7 @@ pub(super) fn remote_parent(path: &str) -> Result<&str> {
 
 pub(super) async fn local_directory_chain(path: &Path) -> Result<()> {
     for ancestor in path.ancestors() {
-        let metadata = tokio::fs::symlink_metadata(ancestor).await?;
+        let metadata = local_io(tokio::fs::symlink_metadata(ancestor)).await?;
         if !metadata.is_dir() || metadata.file_type().is_symlink() {
             return Err(SessionError::Invalid(
                 "local directory ancestor is a symlink or is not a directory",
@@ -415,7 +434,7 @@ async fn local_absent_destination(path: &Path) -> Result<()> {
             .ok_or(SessionError::Invalid("local target has no parent"))?,
     )
     .await?;
-    match tokio::fs::symlink_metadata(path).await {
+    match local_io(tokio::fs::symlink_metadata(path)).await {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
         Err(error) => Err(error.into()),
         Ok(_) => Err(SessionError::Invalid(
@@ -426,7 +445,10 @@ async fn local_absent_destination(path: &Path) -> Result<()> {
 pub(super) async fn remote_directory_chain(raw: &RawSftpSession, path: &str) -> Result<()> {
     let mut current = path;
     loop {
-        let attrs = raw.lstat(current).await.map_err(sftp_error)?.attrs;
+        let attrs = remote_io(raw.lstat(current))
+            .await
+            .map_err(sftp_error)?
+            .attrs;
         if !attrs.file_type().is_dir() {
             return Err(SessionError::Invalid(
                 "remote directory ancestor is a symlink or is not a directory",
@@ -440,7 +462,7 @@ pub(super) async fn remote_directory_chain(raw: &RawSftpSession, path: &str) -> 
     Ok(())
 }
 async fn remote_absent(raw: &RawSftpSession, path: &str) -> Result<()> {
-    match raw.lstat(path).await {
+    match remote_io(raw.lstat(path)).await {
         Err(russh_sftp::client::error::Error::Status(status))
             if status.status_code == StatusCode::NoSuchFile =>
         {
@@ -535,7 +557,7 @@ async fn scan_local(root: &Path) -> Result<(Vec<Entry>, u64)> {
                 .ok_or(SessionError::Invalid("local source has no parent"))?,
         )
         .await?;
-        let metadata = tokio::fs::symlink_metadata(&path).await?;
+        let metadata = local_io(tokio::fs::symlink_metadata(&path)).await?;
         let entry = local_entry(&metadata, &relative)?;
         let directory = entry.directory;
         push_entry(&mut entries, &mut bytes, entry)?;
@@ -574,16 +596,19 @@ async fn scan_remote(raw: &RawSftpSession, root: &str) -> Result<(Vec<Entry>, u6
         let path = remote_child(root, &relative);
         validate_lengths(Path::new(&relative), &path)?;
         remote_directory_chain(raw, remote_parent(&path)?).await?;
-        let attrs = raw.lstat(&path).await.map_err(sftp_error)?.attrs;
+        let attrs = remote_io(raw.lstat(&path)).await.map_err(sftp_error)?.attrs;
         let entry = remote_entry(&attrs, &relative)?;
         let directory = entry.directory;
         push_entry(&mut entries, &mut bytes, entry)?;
         if directory {
-            let handle = raw.opendir(&path).await.map_err(sftp_error)?.handle;
+            let handle = remote_io(raw.opendir(&path))
+                .await
+                .map_err(sftp_error)?
+                .handle;
             let mut names = HashSet::new();
             let mut empty_packets = 0;
             loop {
-                match raw.readdir(&handle).await {
+                match remote_io(raw.readdir(&handle)).await {
                     Ok(packet) => {
                         if packet
                             .files
@@ -628,7 +653,7 @@ async fn scan_remote(raw: &RawSftpSession, root: &str) -> Result<(Vec<Entry>, u6
                     Err(error) => return Err(sftp_error(error)),
                 }
             }
-            raw.close(handle).await.map_err(sftp_error)?;
+            remote_io(raw.close(handle)).await.map_err(sftp_error)?;
         }
     }
     entries.sort_by(|a, b| a.relative.cmp(&b.relative));
@@ -640,7 +665,7 @@ async fn verify_local_entry(path: &Path, expected: &Entry) -> Result<()> {
             .ok_or(SessionError::Invalid("local source has no parent"))?,
     )
     .await?;
-    let metadata = tokio::fs::symlink_metadata(path).await?;
+    let metadata = local_io(tokio::fs::symlink_metadata(path)).await?;
     if local_entry(&metadata, &expected.relative)? != *expected {
         return Err(SessionError::Invalid("local source changed after review"));
     }
@@ -648,7 +673,7 @@ async fn verify_local_entry(path: &Path, expected: &Entry) -> Result<()> {
 }
 async fn verify_remote_entry(raw: &RawSftpSession, path: &str, expected: &Entry) -> Result<()> {
     remote_directory_chain(raw, remote_parent(path)?).await?;
-    let attrs = raw.lstat(path).await.map_err(sftp_error)?.attrs;
+    let attrs = remote_io(raw.lstat(path)).await.map_err(sftp_error)?.attrs;
     if remote_entry(&attrs, &expected.relative)? != *expected {
         return Err(SessionError::Invalid("remote source changed after review"));
     }

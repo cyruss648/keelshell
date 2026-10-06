@@ -182,6 +182,16 @@ impl BatchPanel {
             } else if !row.available {
                 item = item.child(hint(cx, status));
             }
+            if editable && row.selected {
+                item = item.child(crate::target_parameters::view(
+                    &row.parameters,
+                    &row.destination.endpoint,
+                    &format!("batch-parameters-{index}"),
+                    row.destination.id,
+                    cx,
+                    Self::toggle_parameter_empty,
+                ));
+            }
             list = list.child(item);
         }
         if self.rows.is_empty() {
@@ -216,6 +226,9 @@ impl Render for BatchPanel {
                 .child(hint(cx, t(cx,"独立 SSH 命令环境 · 不继承终端 cwd、别名或临时环境变量。","Independent SSH exec environment · terminal cwd, aliases and temporary variables are not inherited."))))
             .child(div().id("batch-body").test_support().flex_1().min_w_0().min_h_0().overflow_y_scroll().p_3().flex().flex_col().gap_3()
                 .child(hint(cx, format!("{} {selected} / 32",t(cx,"目标会话","Target sessions"))))
+                .when(editable, |el| el.child(crate::target_parameters::hint(cx))
+                    .child(Button::new("batch-sync-parameters").ghost().small().label(t(cx,"同步目标参数字段","Sync target parameter fields"))
+                         .on_click(cx.listener(|panel,_,window,cx| panel.sync_parameters(window,cx)))))
                 .child(self.destination_list(cx))
                 .when(editable,|el|el.child(div().flex_shrink_0().flex().flex_col().gap_2()
                     .child(hint(cx, t(cx,"命令正文 · 不自动保存历史","Command · never added to terminal history")))
@@ -227,13 +240,13 @@ impl Render for BatchPanel {
                     .child(Button::new("batch-failure-policy").ghost().small().label(if self.stop_after_failure {t(cx,"失败后停止后续任务","Stop pending work after failure")} else {t(cx,"失败后继续其他任务","Continue other work after failure")}).on_click(cx.listener(|panel,_,_,cx|{if panel.editable(){panel.stop_after_failure = !panel.stop_after_failure;cx.notify();}})))))
                 .when_some(self.review.as_ref(),|el,review| el.child(div().id("batch-review").test_support().flex_shrink_0().min_w_0().p_3().rounded_md().bg(rgb(visual.canvas)).flex().flex_col().gap_2()
                     .child(hint(cx, format!("{} {} · {} {}s · {}",t(cx,"并发","Concurrency"),review.concurrency,t(cx,"单主机超时","Per-host timeout"),review.timeout_seconds,if review.stop_after_failure {t(cx,"失败后停止等待项","Stop pending on failure")} else {t(cx,"失败后继续","Continue on failure")})))
-                    .child(hint(cx, t(cx,"模板源（仅支持 {{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；以下为每个目标的最终命令）","Template source (supports only {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; final command per target follows)")))
-                    .child(div().id("batch-reviewed-command").test_support().min_w_0().whitespace_normal().font_family("monospace").child(review.command.clone()))
+                    .child(hint(cx, t(cx,"模板源（元数据与用户参数；以下为每个目标的最终命令）","Template source (metadata and user parameters; final command per target follows)")))
+                    .child(div().id("batch-reviewed-command").test_support().min_w_0().whitespace_normal().font_family("monospace").child(crate::command_text::visible_command(&review.command)))
                     .child({
                         let mut rendered = div().id("batch-reviewed-target-commands").test_support().min_h_0().flex().flex_col().gap_2().max_h(px(320.)).overflow_y_scroll();
                         for (index, (id, command)) in review.commands.iter().enumerate() {
                             let label = self.rows.iter().find(|row| row.destination.id == *id).map(|row| row.destination.endpoint.clone()).unwrap_or_else(|| id.to_string());
-                            rendered = rendered.child(div().id(("batch-reviewed-target-command", index)).test_support().min_w_0().p_2().rounded_md().bg(rgb(visual.surface)).child(hint(cx, label)).child(div().min_w_0().whitespace_normal().font_family("monospace").child(command.clone())));
+                            rendered = rendered.child(div().id(("batch-reviewed-target-command", index)).test_support().min_w_0().p_2().rounded_md().bg(rgb(visual.surface)).child(hint(cx, label)).child(div().min_w_0().whitespace_normal().font_family("monospace").child(crate::command_text::visible_command(command))));
                         }
                         rendered
                     })))

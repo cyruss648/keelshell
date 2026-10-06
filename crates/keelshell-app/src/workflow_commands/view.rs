@@ -353,11 +353,16 @@ impl WorkflowPanel {
             .child(hint(cx,self.label(task_id,cx)))
             .child(hint(cx,t(cx,"任务名称（可选）","Task name (optional)")))
             .child(Input::new(&task.name).id("workflow-task-name").aria_label(t(cx,"任务名称","Task name")))
-            .child(hint(cx,t(cx,"命令原文。可使用 {{name}}、{{host}}、{{port}}、{{user}}、{{endpoint}}；审核显示完整展开。",
-                "Exact command. Supports {{name}}, {{host}}, {{port}}, {{user}}, {{endpoint}}; review shows the complete expansion.")))
+            .child(hint(cx,t(cx,"命令原文。五个元数据名称保持原义，其他 {{名称}} 使用本目标参数；审核显示完整展开。",
+                "Exact command. Five metadata names keep their meaning; other {{names}} use this target’s parameters. Review shows the complete expansion.")))
             .child(div().id("workflow-command-container").test_support().h(px(145.)).flex_shrink_0().child(Textarea::new(&task.command).aria_label(t(cx,"此任务的完整命令草稿","Complete command draft for this task")).h_full()))
             .child(hint(cx,t(cx,"此任务的已认证 SSH 目标","Authenticated SSH target for this task")))
             .child(targets)
+            .child(crate::target_parameters::hint(cx))
+            .child(Button::new("workflow-sync-parameters").ghost().small().label(t(cx,"同步全部目标参数字段","Sync all target parameter fields"))
+                .on_click(cx.listener(|panel,_,window,cx| panel.sync_parameters(window,cx))))
+            .when_some(task.target.and_then(|id| self.targets.iter().find(|row| row.connected.destination.id == id)), |el,row|
+                el.child(crate::target_parameters::view(&row.parameters, &row.connected.destination.endpoint, &format!("workflow-parameters-{}", row.connected.destination.id), row.connected.destination.id, cx, Self::toggle_parameter_empty)))
             .child(Button::new("workflow-refresh-targets").ghost().small().label(t(cx,"刷新已连接会话","Refresh connected sessions"))
                 .on_click(cx.listener(|panel,_,_,cx| {if panel.editable(){cx.emit(WorkflowPanelEvent::RefreshTargets);}})))
             .child(hint(cx,t(cx,"前置任务：每项必须明确成功才放行，最多 32 项","Prerequisites: every task must explicitly succeed; up to 32")))

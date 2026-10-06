@@ -16,6 +16,10 @@ use std::{
 
 use super::test_server::{Checked, Server};
 
+#[path = "mutation_isolation_tests.rs"]
+mod mutation_isolation_tests;
+#[path = "parallel_tests.rs"]
+mod parallel_tests;
 #[path = "workspace_layout_tests.rs"]
 mod workspace_layout_tests;
 
@@ -88,6 +92,46 @@ impl Harness {
             bytes
         })
     }
+    fn staged(&self, remote: &str) -> Vec<u8> {
+        self.runtime.block_on(async {
+            let sftp = self.session.sftp().await.checked("inspect staged upload");
+            let prefix = format!(".{}.keelshell-", remote.trim_start_matches('/'));
+            let entries = sftp.list("/").await.checked("list staging paths");
+            let staged = entries
+                .iter()
+                .find(|entry| entry.name.starts_with(&prefix))
+                .checked_option("owned staging file");
+            let bytes = sftp
+                .read(&staged.path, 1024 * 1024)
+                .await
+                .checked("read staged bytes");
+            assert!(
+                sftp.read(remote, 1024 * 1024).await.is_err(),
+                "new destination remains absent before atomic publication"
+            );
+            sftp.close().await.checked("close staging inspection");
+            bytes
+        })
+    }
+    fn missing(&self, remote: &str) {
+        self.runtime.block_on(async {
+            let sftp = self
+                .session
+                .sftp()
+                .await
+                .checked("inspect missing atomic target");
+            assert!(
+                sftp.list("/")
+                    .await
+                    .checked("list final paths")
+                    .iter()
+                    .all(|entry| entry.path != remote)
+            );
+            sftp.close()
+                .await
+                .checked("close missing target inspection");
+        });
+    }
     fn source(&self, name: &str, bytes: &[u8]) -> PathBuf {
         let path = self.local.0.join(name);
         std::fs::write(&path, bytes).checked("write local source");
@@ -129,28 +173,55 @@ impl Harness {
 }
 
 fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id: &str) {
-    if matches!(
-        id,
-        "parent-files" | "refresh-files" | "confirm-file-operation" | "cancel-file-operation"
-    ) || (id == "cancel-active-file-operation"
-        && window.try_find("file-transfer-card").is_none())
+    // Foreground inspection has a fixed footer cancel; a transfer's individual
+    // cancel remains inside the action card and must be scrolled into view.
+    let footer_cancel = id == "cancel-active-file-operation"
+        && window
+            .try_find(gpui_kit::SharedString::from(id.to_owned()))
+            .is_some_and(|button| matches!(button.label(), Some("取消操作" | "Cancel operation")));
+    if footer_cancel
+        || matches!(
+            id,
+            "parent-files" | "refresh-files" | "confirm-file-operation" | "cancel-file-operation"
+        )
+        || (id == "cancel-active-file-operation" && window.try_find("file-transfer-card").is_none())
     {
         return;
     }
-    for _ in 0..3 {
-        let viewport = window.find("file-tools-scroll").bounds();
+    for _ in 0..6 {
+        let outer = window.find("file-tools-scroll").bounds();
+        let queue_control = ["select-transfer-", "cancel-transfer-", "pause-transfer-"]
+            .iter()
+            .any(|prefix| id.starts_with(prefix));
+        let queue = queue_control.then(|| window.find("transfer-queue-list").bounds());
+        let viewport = queue
+            .filter(|queue| queue.origin.y >= outer.origin.y && queue.bottom() <= outer.bottom())
+            .unwrap_or(outer);
         let target = window.find(gpui_kit::SharedString::from(id.to_owned()));
-        let bounds = target.bounds();
+        let target_bounds = target.bounds();
+        let bounds = if queue_control && viewport == outer {
+            queue.unwrap_or(target_bounds)
+        } else {
+            target_bounds
+        };
         if target.visible()
-            && bounds.origin.y >= viewport.origin.y
-            && bounds.bottom() <= viewport.bottom()
+            && target_bounds.origin.y >= viewport.origin.y
+            && target_bounds.bottom() <= viewport.bottom()
+            && (!queue_control
+                || queue.is_some_and(|q| {
+                    target_bounds.origin.y >= q.origin.y && target_bounds.bottom() <= q.bottom()
+                }))
         {
             return;
         }
         // Real platform wheel input at the outer gutter avoids targeting a
         // child directly or accidentally scrolling a nested comparison/editor.
         let position = point(
-            viewport.origin.x + px(2.),
+            if queue_control && viewport != outer {
+                viewport.origin.x + viewport.size.width / 2.
+            } else {
+                viewport.origin.x + px(2.)
+            },
             viewport.origin.y + viewport.size.height / 2.,
         );
         window.dispatch_event(
@@ -756,7 +827,7 @@ async fn upload_pause_acknowledges_a_stable_boundary_and_continue_preserves_dest
         )
     });
     h.phase(cx, TransferPhase::Paused).await;
-    let paused = h.read("/upload.bin");
+    let paused = h.staged("/upload.bin");
     assert!(!paused.is_empty() && paused.len() < bytes.len());
     let start = Instant::now();
     cx.wait_for(h.window, Duration::from_secs(2), |_, _| {
@@ -764,7 +835,7 @@ async fn upload_pause_acknowledges_a_stable_boundary_and_continue_preserves_dest
     })
     .await;
     assert_eq!(
-        h.read("/upload.bin"),
+        h.staged("/upload.bin"),
         paused,
         "acknowledged pause must not admit later writes"
     );
@@ -923,9 +994,7 @@ async fn cancel_while_paused_is_bounded_and_does_not_cancel_another_panel(cx: &m
     })
     .await;
     assert_eq!(h.read("/sibling.bin"), b"independent panel bytes");
-    let partial = h.read("/cancel.bin");
-    assert!(!partial.is_empty() && partial.len() < bytes.len());
-    assert_eq!(&bytes[..partial.len()], partial);
+    h.missing("/cancel.bin");
     assert!(!h.session.is_closed());
     h.panel.read_with(cx, |panel, _| {
         assert_eq!(
@@ -1208,16 +1277,14 @@ async fn closing_the_paused_file_panel_releases_its_subsystem_without_closing_ss
     })
     .await;
     assert!(!session.is_closed());
-    let partial = runtime.block_on(async {
+    runtime.block_on(async {
         let sftp = session.sftp().await.checked("inspect after panel close");
-        let bytes = sftp
-            .read("/close.bin", 1024 * 1024)
-            .await
-            .checked("partial close output");
+        assert!(
+            sftp.read("/close.bin", 1024 * 1024).await.is_err(),
+            "cancelled staging must not publish partial output"
+        );
         sftp.close().await.checked("inspection cleanup");
-        bytes
     });
-    assert!(!partial.is_empty() && partial.len() < bytes.len());
     drop(local);
 }
 
@@ -1296,7 +1363,8 @@ async fn suspended_paused_transfer_waits_for_cancel_ack_and_keeps_unsaved_draft(
     .await;
     h.click(cx, "pause-file-transfer");
     h.phase(cx, TransferPhase::Paused).await;
-    let partial = h.read("/suspend.bin");
+    let staged = h.staged("/suspend.bin");
+    assert!(!staged.is_empty());
     cx.update_window(h.window, |_, window, cx| {
         h.panel.update(cx, |panel, cx| {
             panel.suspend(cx);
@@ -1354,7 +1422,7 @@ async fn suspended_paused_transfer_waits_for_cancel_ack_and_keeps_unsaved_draft(
         });
     })
     .checked("archived draft and original baseline survive; transfer cannot be replayed");
-    assert_eq!(h.read("/suspend.bin"), partial);
+    h.missing("/suspend.bin");
     assert_eq!(h.server.filesystem.transfer_writes_started(), writes);
     assert_eq!(h.read("/config.txt"), b"original\n");
     assert!(!h.session.is_closed());

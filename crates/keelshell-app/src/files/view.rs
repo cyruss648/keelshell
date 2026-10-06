@@ -586,7 +586,7 @@ impl Render for FilesPanel {
                     cx.notify();
                 }))))
             .child(div().id("file-transfer-tools").min_h(px(38.)).px_3().py_1().flex_shrink_0().flex().flex_wrap().items_center().gap_2().border_t_1().border_color(rgb(visual.border))
-                .child(Button::new("file-resume-mode").flex_shrink_0().ghost().compact().disabled(self.suspended || self.busy || self.pending.is_some())
+                .child(Button::new("file-resume-mode").flex_shrink_0().ghost().compact().disabled(self.suspended || self.operation_id.is_some() || self.pending.is_some())
                     .when(self.resume_mode, |button| button.primary()).label(t(cx,"续传模式","Resume mode"))
                     .on_click(cx.listener(|view,_,_,cx| {
                         view.resume_mode = !view.resume_mode;
@@ -594,7 +594,7 @@ impl Render for FilesPanel {
                         cx.notify();
                     })))
                 .child(div().flex_1().min_w(px(150.)).child(Input::new(&self.local).small().rounded(px(6.))))
-                .child(Button::new("upload-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("upload-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().to_string());
                     if view.resume_mode {
                         if let Some(entry) = &view.selected && !entry.is_directory && !entry.is_symlink {
@@ -607,7 +607,7 @@ impl Render for FilesPanel {
                         view.confirm(Message::new(format!("通过传输队列上传到 {remote}？同名远端文件可能被替换，取消时可能保留部分文件。"),format!("Upload to {remote} through the transfer queue? An existing remote file may be replaced, and cancellation may leave a partial file.")),Operation::Upload(local,remote),cx);
                     } else { view.status=Message::new("请输入有效的本地文件路径", "Enter a valid local file path");cx.notify(); }
                 })))
-                .child(Button::new("upload-directory").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("upload-directory").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().to_string());
                     if view.resume_mode {
                         if let Some(entry) = &view.selected && entry.is_directory && !entry.is_symlink {
@@ -620,7 +620,7 @@ impl Render for FilesPanel {
                         view.run(Operation::PlanDirectory(TransferSpec::upload(local, remote)), window, cx);
                     } else { view.status=Message::new("请输入本地目录的绝对路径", "Enter the absolute local directory path");cx.notify(); }
                 })))
-                .child(Button::new("download-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Download).label(if self.resume_mode {t(cx,"续传选中项","Resume selected")} else {t(cx,"下载选中项","Download selected")}).disabled(self.suspended || !downloadable || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("download-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Download).label(if self.resume_mode {t(cx,"续传选中项","Resume selected")} else {t(cx,"下载选中项","Download selected")}).disabled(self.suspended || !downloadable || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     if let Some(entry) = &view.selected && !entry.is_symlink {
                         let local = PathBuf::from(view.local.read(cx).value().to_string());
                         if view.resume_mode {
@@ -634,7 +634,7 @@ impl Render for FilesPanel {
                         view.confirm(Message::new(format!("将 {} 下载到 {}？不覆盖已有文件；中断时可能保留未完成的下载。",entry.path,local.display()),format!("Download {} to {}? Existing files are preserved; an interruption may leave a partial download.",entry.path,local.display())),Operation::Download(entry.path.clone(),local),cx);
                     }
                 })))
-                .child(Button::new("compare-directories").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.busy).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("compare-directories").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().trim());
                     // The path input is a navigation draft. Use the last
                     // successfully loaded canonical directory so a typed but
@@ -748,6 +748,7 @@ impl Render for FilesPanel {
         if self.transfer.is_some() {
             tools = tools.child(self.transfer_card(cx));
         }
+        tools = tools.child(self.parallel_queue_card(cx));
         panel = panel.child(tools);
         if let Some((message, _)) = &self.pending {
             panel = panel.child(confirmation_bar(
@@ -806,7 +807,7 @@ impl Render for FilesPanel {
                         .text_color(rgb(visual.muted))
                         .child(self.status.render(cx)),
                 )
-                .when(self.busy && self.transfer.is_none(), |view| {
+                .when(self.operation_id.is_some(), |view| {
                     view.child(
                         Button::new("cancel-active-file-operation")
                             .ghost()

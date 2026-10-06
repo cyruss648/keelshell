@@ -40,6 +40,42 @@ struct Delayed {
     tasks: Vec<JoinHandle<()>>,
     unconfirmed: Vec<server::ChannelOpenHandle>,
     stalled_channels: HashMap<ChannelId, JoinHandle<()>>,
+    stalled_packets: HashMap<ChannelId, PacketMonitor>,
+}
+#[derive(Default)]
+struct PacketMonitor {
+    header: Vec<u8>,
+    remaining: usize,
+}
+impl PacketMonitor {
+    fn observe(&mut self, mut bytes: &[u8], observed: &Observed) {
+        // Observe real WRITE framing even when SSH's exhausted window prevents
+        // the second bounded request from reaching the decoder in full.
+        while !bytes.is_empty() {
+            if self.remaining != 0 {
+                let consumed = self.remaining.min(bytes.len());
+                self.remaining -= consumed;
+                bytes = &bytes[consumed..];
+            } else {
+                let consumed = (5 - self.header.len()).min(bytes.len());
+                self.header.extend_from_slice(&bytes[..consumed]);
+                bytes = &bytes[consumed..];
+                if self.header.len() == 5 {
+                    let length = u32::from_be_bytes([
+                        self.header[0],
+                        self.header[1],
+                        self.header[2],
+                        self.header[3],
+                    ]) as usize;
+                    if self.header[4] == 6 {
+                        observed.stalled_write.store(true, Ordering::Release);
+                    }
+                    self.remaining = length.saturating_sub(1);
+                    self.header.clear();
+                }
+            }
+        }
+    }
 }
 impl Drop for Delayed {
     fn drop(&mut self) {
@@ -114,6 +150,10 @@ impl server::Handler for Delayed {
             self.observed
                 .stalled_bytes
                 .fetch_add(data.len(), Ordering::Release);
+            self.stalled_packets
+                .entry(id)
+                .or_default()
+                .observe(data, &self.observed);
         }
         Ok(())
     }
@@ -317,6 +357,7 @@ async fn serve() -> Result<Server, Box<dyn Error>> {
             tasks: Vec::new(),
             unconfirmed: Vec::new(),
             stalled_channels: HashMap::new(),
+            stalled_packets: HashMap::new(),
         };
         if let Ok(mut running) = server::run_stream(config, socket, handler).await {
             let handle = running.handle();
@@ -486,12 +527,14 @@ async fn high_level_close_or_drop_cancels_a_zero_window_sftp_writer() -> Result<
     for explicit_close in [true, false] {
         let server = serve().await?;
         let session = SshSession::connect(server.options(Duration::from_secs(10))).await?;
+        let sftp = Arc::new(session.sftp().await?);
+        // Admission uses the normal subsystem for canonical metadata. The
+        // direct writer's independent subsystem stalls actual bounded pipelined
+        // WRITEs until its 64 KiB SSH window is exhausted.
         server
             .observed
             .stall_next_sftp
             .store(true, Ordering::Release);
-        let sftp = Arc::new(session.sftp().await?);
-        let channel = server.opened()[0];
         let writer = sftp.clone();
         let writing =
             tokio::spawn(
@@ -499,9 +542,11 @@ async fn high_level_close_or_drop_cancels_a_zero_window_sftp_writer() -> Result<
             );
         wait_until(|| {
             server.observed.stalled_write.load(Ordering::Acquire)
-                && server.observed.stalled_bytes.load(Ordering::Acquire) > 64 * 1024
+                && server.observed.stalled_bytes.load(Ordering::Acquire) >= 64 * 1024
         })
-        .await?;
+        .await.inspect_err(|_| {
+            eprintln!("zero-window entry close={explicit_close} write_header={} bytes={} opened={:?} finished={}", server.observed.stalled_write.load(Ordering::Acquire), server.observed.stalled_bytes.load(Ordering::Acquire), server.opened(), writing.is_finished());
+        })?;
         let mut previous = 0;
         tokio::time::timeout(Duration::from_secs(2), async {
             loop {
@@ -514,9 +559,13 @@ async fn high_level_close_or_drop_cancels_a_zero_window_sftp_writer() -> Result<
             }
         })
         .await?;
+        let channel = *server
+            .opened()
+            .last()
+            .ok_or("missing raw writer subsystem")?;
         assert!(
             !writing.is_finished(),
-            "large raw writer must remain blocked"
+            "bounded pipelined raw writer must remain blocked"
         );
         assert!(!server.was_closed(channel));
         if explicit_close {

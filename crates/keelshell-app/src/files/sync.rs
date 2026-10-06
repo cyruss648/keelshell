@@ -417,6 +417,13 @@ pub(super) async fn apply(
     stop: &AtomicBool,
     progress: &mpsc::SyncSender<WorkerMessage>,
 ) -> Result<Outcome, FileFailure> {
+    let authorized = || !stop.load(Ordering::Acquire);
+    let spec = if review.plan.direction() == DirectorySyncDirection::LeftToRight {
+        TransferSpec::upload(&review.local, &review.remote)
+    } else {
+        TransferSpec::download(&review.remote, &review.local)
+    };
+    let ownership = sftp.reserve_directory_sync(&spec, &authorized).await?;
     let fresh = plan(
         sftp,
         review.local.clone(),
@@ -481,12 +488,12 @@ pub(super) async fn apply(
         match (review.plan.direction(), source_kind) {
             (DirectorySyncDirection::LeftToRight, DirectoryEntryKind::Directory) => {
                 if target.is_none() {
-                    sftp.mkdir(&remote).await?;
+                    ownership.mkdir_remote(&remote).await?;
                 }
             }
             (DirectorySyncDirection::RightToLeft, DirectoryEntryKind::Directory) => {
                 if target.is_none() {
-                    fs::create_dir(&local).map_err(|e| problem(e.to_string()))?;
+                    ownership.local_operation(|| fs::create_dir(&local))?;
                 }
             }
             (DirectorySyncDirection::LeftToRight, DirectoryEntryKind::File) => {
@@ -499,7 +506,7 @@ pub(super) async fn apply(
                     *expected_destination_hash,
                 )?;
                 check_stop(stop)?;
-                sftp.write_atomic(&remote, &bytes).await?;
+                ownership.write_remote_atomic(&remote, &bytes).await?;
                 verify_bytes(
                     &sftp.read_regular(&remote, MAX_DIRECTORY_HASH_BYTES).await?,
                     *expected_source_size,
@@ -509,16 +516,15 @@ pub(super) async fn apply(
             (DirectorySyncDirection::RightToLeft, DirectoryEntryKind::File) => {
                 let bytes = sftp.read_regular(&remote, MAX_DIRECTORY_HASH_BYTES).await?;
                 verify_bytes(&bytes, *expected_source_size, *expected_source_hash)?;
-                let mut temporary = tempfile::NamedTempFile::new_in(
-                    local
-                        .parent()
-                        .ok_or_else(|| problem("local sync target has no parent"))?,
-                )
-                .map_err(|e| problem(e.to_string()))?;
-                temporary
-                    .write_all(&bytes)
-                    .map_err(|e| problem(e.to_string()))?;
-                temporary.flush().map_err(|e| problem(e.to_string()))?;
+                let parent = local
+                    .parent()
+                    .ok_or_else(|| problem("local sync target has no parent"))?;
+                let temporary = ownership.local_operation(|| {
+                    let mut file = tempfile::NamedTempFile::new_in(parent)?;
+                    file.write_all(&bytes)?;
+                    file.flush()?;
+                    Ok(file)
+                })?;
                 expected(
                     current_local(&local, stop)?.as_ref(),
                     *expected_destination_kind,
@@ -526,22 +532,17 @@ pub(super) async fn apply(
                     *expected_destination_hash,
                 )?;
                 check_stop(stop)?;
-                if target.is_some() {
-                    let permissions = fs::metadata(&local)
-                        .map_err(|e| problem(e.to_string()))?
-                        .permissions();
-                    temporary
-                        .as_file()
-                        .set_permissions(permissions)
-                        .map_err(|e| problem(e.to_string()))?;
-                    temporary
-                        .persist(&local)
-                        .map_err(|e| problem(e.to_string()))?;
-                } else {
-                    temporary
-                        .persist_noclobber(&local)
-                        .map_err(|e| problem(e.to_string()))?;
-                }
+                ownership.local_operation(|| {
+                    if target.is_some() {
+                        temporary
+                            .as_file()
+                            .set_permissions(fs::metadata(&local)?.permissions())?;
+                        temporary.persist(&local).map_err(|e| e.error)?;
+                    } else {
+                        temporary.persist_noclobber(&local).map_err(|e| e.error)?;
+                    }
+                    Ok(())
+                })?;
                 verify_bytes(
                     &local_bytes(&local, stop)?,
                     *expected_source_size,

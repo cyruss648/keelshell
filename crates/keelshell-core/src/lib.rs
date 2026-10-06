@@ -12,6 +12,7 @@ mod ai_messages;
 mod ai_profiles;
 mod ai_sampling;
 mod batch_audit;
+mod batch_parameters;
 mod batch_template;
 mod batch_workflow;
 mod completion;
@@ -41,6 +42,7 @@ pub use ai_sampling::{AiModelSampling, AiSamplingValue};
 pub use batch_audit::{
     BatchAuditRecord, BatchAuditSummary, MAX_BATCH_AUDIT_TARGETS, MAX_BATCH_AUDITS, command_sha256,
 };
+pub use batch_parameters::{BatchParameterError, BatchParameterValues, BatchParameterizedTemplate};
 pub use batch_template::{
     BATCH_TEMPLATE_VARIABLES, BatchCommandTemplate, BatchTargetContext, BatchTemplateError,
 };

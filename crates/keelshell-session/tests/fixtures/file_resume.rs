@@ -320,7 +320,13 @@ async fn resumed_file_revalidates_source_and_target_after_acknowledged_pause()
             altered[400_000] ^= 1;
             tokio::fs::write(&source, altered).await?;
         } else {
-            sftp.write("/resume", b"other process content").await?;
+            assert!(matches!(
+                sftp.write("/resume", b"other process content").await,
+                Err(SessionError::MutationBusy)
+            ));
+            server
+                .filesystem
+                .replace_external_file("/resume", b"other process content")?;
         }
         let unchanged = sftp.read("/resume", 1_000_000).await?;
         handle.resume();

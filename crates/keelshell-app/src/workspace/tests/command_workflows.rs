@@ -243,18 +243,24 @@ impl Harness {
             window.click(("batch-select", 1_usize), cx);
             window.click("batch-concurrency", cx);
             replace(window, concurrency, cx);
+        })
+        .checked("select two live SSH sessions and set execution options");
+        cx.run_until_parked();
+        cx.update_window(self.fixture.window, |_, window, cx| {
             window.render_frame(cx);
             window.click("batch-review-button", cx);
         })
-        .checked("select two live SSH sessions and prepare exact review");
+        .checked("prepare exact review after input change events settle");
         cx.run_until_parked();
     }
     fn confirm(&self, cx: &mut TestAppContext) {
         cx.update_window(self.fixture.window, |_, window, cx| {
             window.render_frame(cx);
-            window.click("batch-confirm", cx);
+            if window.try_find("batch-confirm").is_some() {
+                window.click("batch-confirm", cx);
+            }
         })
-        .checked("explicit batch confirmation");
+        .checked("explicit batch confirmation when the review is still valid");
         cx.run_until_parked();
     }
     async fn complete(&self, cx: &mut TestAppContext) {
@@ -440,6 +446,117 @@ fn batch_review_rejects_a_closed_or_replaced_terminal(cx: &mut TestAppContext) {
     });
     h.confirm(cx);
     assert!(h.servers.iter().all(|s| s.requests().is_empty()));
+}
+
+#[gpui_kit::test]
+async fn batch_same_endpoint_replacement_connection_cannot_inherit_review(cx: &mut TestAppContext) {
+    let h = Harness::new(cx, [0, 0]);
+    h.prepare("reviewed replacement control", "1", cx);
+    assert!(h.servers.iter().all(|server| server.requests().is_empty()));
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(
+            window.find("batch-confirm").visible(),
+            "original review must be confirmable before replacement"
+        );
+    })
+    .checked("original exact review is present before changing connection identity");
+    h.fixture.workspace.update(cx, |view, _| {
+        // Keep the terminal entity, endpoint and route untouched, but substitute
+        // a second separately authenticated SSH connection under that entity.
+        view.remote_sessions.insert(
+            h.panes[0].terminal.entity_id(),
+            h.servers[1].session.clone(),
+        );
+    });
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        if window.try_find("batch-confirm").is_some() {
+            window.click("batch-confirm", cx);
+        }
+    })
+    .checked("confirm only if the review is still available after replacement");
+    cx.run_until_parked();
+    h.complete(cx).await;
+    let counts = h
+        .servers
+        .iter()
+        .map(|server| server.requests().len())
+        .collect::<Vec<_>>();
+    eprintln!("separately authenticated replacement control request counts: {counts:?}");
+    assert!(
+        h.servers.iter().all(|server| server.requests().is_empty()),
+        "a replacement authenticated connection received the old review"
+    );
+}
+
+#[gpui_kit::test]
+async fn batch_custom_parameters_use_actual_target_fields_and_never_persist_value_derivatives(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx, [0, 0]);
+    let before = h.fixture.store.load().checked("original persisted state");
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        h.fixture.workspace.update(cx, |view, cx| {
+            view.set_reviewed_command(
+                "printf '%s' {{path}}".into(),
+                Some(h.panes[0].terminal.entity_id()),
+                window,
+                cx,
+            );
+            view.open_batch_commands(false, window, cx);
+        });
+        window.render_frame(cx);
+        window.click(("batch-select", 0_usize), cx);
+        window.click(("batch-select", 1_usize), cx);
+        window.click("batch-sync-parameters", cx);
+        window.render_frame(cx);
+        window.click("batch-parameters-0-path", cx);
+        replace(window, "first'$(no)", cx);
+        let last = window.find("batch-parameters-1-path").bounds();
+        let body = window.find("batch-body").bounds();
+        window.scroll(
+            "batch-body",
+            ScrollDelta::Pixels(point(px(0.), body.origin.y + px(8.) - last.bottom())),
+            cx,
+        );
+        window.render_frame(cx);
+        window.click("batch-parameters-1-path", cx);
+        replace(window, "second 中文", cx);
+    })
+    .checked("actual sync button and independent per-target value inputs");
+    cx.run_until_parked();
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("batch-review-button", cx);
+    })
+    .checked("review after real input change events settle");
+    cx.run_until_parked();
+    assert!(h.servers.iter().all(|server| server.requests().is_empty()));
+    h.confirm(cx);
+    h.complete(cx).await;
+    cx.run_until_parked();
+    assert_eq!(
+        h.servers[0].requests(),
+        vec![b"printf '%s' 'first'\\''$(no)'".to_vec()]
+    );
+    assert_eq!(
+        h.servers[1].requests(),
+        vec!["printf '%s' 'second 中文'".as_bytes().to_vec()]
+    );
+    h.fixture.workspace.read_with(cx, |view, _| {
+        assert!(view.pending_batch_audits.is_empty());
+        assert!(view.command_histories.is_empty());
+    });
+    let after = h
+        .fixture
+        .store
+        .load()
+        .checked("persisted parameter-free state");
+    assert_eq!(after.batch_audits, before.batch_audits);
+    let encoded = serde_json::to_string(&after).checked("persisted metadata contents");
+    assert!(!encoded.contains("first") && !encoded.contains("second 中文"));
+    assert!(h.panes.iter().all(|pane| writes(pane).is_empty()));
 }
 
 #[gpui_kit::test]

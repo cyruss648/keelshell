@@ -22,12 +22,156 @@ impl<T, E: std::fmt::Debug> Checked<T> for Result<T, E> {
         self.unwrap_or_else(|error| panic!("{operation}: {error:?}"))
     }
 }
+impl<T> Checked<T> for Option<T> {
+    fn checked(self, operation: &str) -> T {
+        self.unwrap_or_else(|| panic!("{operation}: missing value"))
+    }
+}
 struct Harness {
     window: AnyWindowHandle,
     panel: Entity<WorkflowPanel>,
     runtime: Arc<tokio::runtime::Runtime>,
     servers: Vec<peer::Server>,
     _entities: Vec<Entity<usize>>,
+}
+
+impl Harness {
+    fn parameters(&self, cx: &mut TestAppContext, values: &[&[(&str, &str)]]) {
+        cx.update_window(self.window, |_, window, cx| {
+            self.panel.update(cx, |panel, cx| {
+                panel.sync_parameters(window, cx);
+                for (row, values) in panel.targets.iter_mut().zip(values) {
+                    for (name, value) in *values {
+                        let field = row
+                            .parameters
+                            .iter_mut()
+                            .find(|field| field.name == *name)
+                            .checked("required target parameter field");
+                        field
+                            .value
+                            .update(cx, |input, cx| input.set_value(*value, window, cx));
+                        field.allow_empty = value.is_empty();
+                    }
+                }
+                panel.changed(cx);
+            });
+        })
+        .checked("explicit transient target parameter mapping");
+        cx.run_until_parked();
+    }
+}
+
+#[gpui_kit::test]
+async fn workflow_target_parameters_bind_distinct_literals_and_shared_target_task_union(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx, &[0, 0], 960., 720.);
+    h.graph(
+        cx,
+        &[
+            ("printf '%s' {{path}}", 0, &[]),
+            ("echo {{release}} {{host}}", 0, &[0]),
+            ("printf '%s' {{path}}", 1, &[]),
+        ],
+        false,
+    );
+    h.parameters(
+        cx,
+        &[
+            &[("path", "中文'$(no)"), ("release", "v1; no")],
+            &[("path", "other\n\tpath")],
+        ],
+    );
+    let review = h.review(cx);
+    assert!(h.servers.iter().all(|server| server.requests().is_empty()));
+    let expected = [
+        "printf '%s' '中文'\\''$(no)'",
+        "echo 'v1; no' 'example.invalid'",
+        "printf '%s' 'other\n\tpath'",
+    ];
+    h.panel.read_with(cx, |panel, _| {
+        for (task, expected) in panel.tasks.iter().zip(expected) {
+            assert_eq!(
+                review
+                    .plan
+                    .tasks()
+                    .iter()
+                    .find(|spec| spec.id == task.id)
+                    .checked("review task")
+                    .command,
+                expected
+            );
+        }
+    });
+    h.start(&review, cx);
+    h.complete(cx).await;
+    assert_eq!(
+        h.servers[0].requests(),
+        vec![
+            expected[0].as_bytes().to_vec(),
+            expected[1].as_bytes().to_vec()
+        ]
+    );
+    assert_eq!(
+        h.servers[1].requests(),
+        vec![expected[2].as_bytes().to_vec()]
+    );
+}
+
+#[gpui_kit::test]
+fn workflow_missing_empty_unused_and_edited_parameter_values_require_new_review(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx, &[0], 960., 720.);
+    h.graph(cx, &[("echo {{path}}", 0, &[])], false);
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.prepare(cx);
+            assert!(panel.review.is_none());
+            panel.sync_parameters(window, cx);
+            panel.prepare(cx);
+            assert!(panel.review.is_none());
+            let target = panel.targets[0].connected.destination.id;
+            panel.toggle_parameter_empty(target, 0, cx);
+            panel.prepare(cx);
+            assert_eq!(
+                panel
+                    .review
+                    .as_ref()
+                    .checked("explicit empty review")
+                    .plan
+                    .tasks()[0]
+                    .command,
+                "echo ''"
+            );
+            let old = panel.review.clone().checked("old review");
+            panel.targets[0].parameters[0]
+                .value
+                .update(cx, |field, cx| field.set_value("changed", window, cx));
+            assert!(!panel.review_current(&old, cx));
+            panel.confirm(cx);
+            assert!(!panel.is_running());
+            panel.back(cx);
+            panel.tasks[0]
+                .command
+                .update(cx, |field, cx| field.set_value("echo {{new}}", window, cx));
+            panel.prepare(cx);
+            assert!(panel.review.is_none());
+            panel.sync_parameters(window, cx);
+            assert_eq!(panel.targets[0].parameters[0].name, "new");
+            assert!(
+                panel.targets[0].parameters[0]
+                    .value
+                    .read(cx)
+                    .value()
+                    .is_empty()
+            );
+            panel.prepare(cx);
+            assert!(panel.review.is_none());
+        })
+    })
+    .checked("missing / explicit empty / old mapping cannot be reused");
+    assert!(h.servers[0].requests().is_empty());
 }
 impl Harness {
     fn new(cx: &mut TestAppContext, codes: &[u32], width: f32, height: f32) -> Self {
@@ -583,4 +727,107 @@ fn workflow_execution_options_edges_and_target_metadata_are_bound_to_the_complet
         });
         assert!(h.servers[0].requests().is_empty());
     }
+}
+
+#[gpui_kit::test]
+fn workflow_parameter_fields_scroll_at_small_windows_and_preserve_draft_across_locale_theme(
+    cx: &mut TestAppContext,
+) {
+    use gpui_kit::{ScrollDelta, point};
+    let h = Harness::new(cx, &[0], 900., 580.);
+    let source = format!(
+        "printf '%s' {}",
+        (0..12)
+            .map(|i| format!("{{{{p{i}}}}}"))
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
+    h.graph(cx, &[(&source, 0, &[])], false);
+    h.parameters(cx, &[&[("p0", "first"), ("p11", "中文'\u{202e}last")]]);
+    let target = h
+        .panel
+        .read_with(cx, |panel, _| panel.targets[0].connected.destination.id);
+    let last = format!("workflow-parameters-{target}-p11");
+    for theme in [
+        keelshell_core::Theme::System,
+        keelshell_core::Theme::Light,
+        keelshell_core::Theme::Dark,
+    ] {
+        for language in [Language::ZhCn, Language::En] {
+            cx.update_window(h.window, |_, window, cx| {
+                crate::i18n::set_language(language, cx);
+                crate::design::apply(theme, Some(window), cx);
+                window.render_frame(cx);
+                let body = window.find("workflow-body").bounds();
+                let end = window.find(last.clone()).bounds();
+                window.scroll(
+                    "workflow-body",
+                    ScrollDelta::Pixels(point(px(0.), body.origin.y + px(12.) - end.bottom())),
+                    cx,
+                );
+                window.render_frame(cx);
+                assert!(window.find(last.clone()).visible());
+                for id in ["workflow-footer", "workflow-review-button", "workflow-hide"] {
+                    let bounds = window.find(id).bounds();
+                    assert!(
+                        bounds.origin.x >= px(0.)
+                            && bounds.origin.y >= px(0.)
+                            && bounds.right() <= px(900.)
+                            && bounds.bottom() <= px(580.)
+                    );
+                }
+                h.panel.read_with(cx, |panel, cx| {
+                    assert_eq!(
+                        panel.targets[0].parameters[11].value.read(cx).value(),
+                        "中文'\u{202e}last"
+                    );
+                    assert_eq!(panel.tasks[0].command.read(cx).value(), source);
+                });
+            })
+            .checked("actual last field reachability and fixed footer / bilingual themes");
+        }
+    }
+    assert!(h.servers[0].requests().is_empty());
+}
+
+#[gpui_kit::test]
+fn workflow_parameter_count_value_and_render_limits_fail_before_ssh(cx: &mut TestAppContext) {
+    let h = Harness::new(cx, &[0], 960., 720.);
+    let names = (0..33).map(|i| format!("{{{{p{i}}}}}")).collect::<Vec<_>>();
+    let first = format!("echo {}", names[..16].join(" "));
+    let second = format!("echo {}", names[16..].join(" "));
+    h.graph(cx, &[(&first, 0, &[]), (&second, 0, &[])], false);
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.sync_parameters(window, cx);
+            assert!(panel.message.is_some());
+            assert!(panel.targets[0].parameters.is_empty());
+            panel.prepare(cx);
+            assert!(panel.review.is_none());
+            panel.remove_task(panel.tasks[1].id, cx);
+            panel.tasks[0]
+                .command
+                .update(cx, |input, cx| input.set_value("echo {{p}}", window, cx));
+            panel.sync_parameters(window, cx);
+            for value in ["x".repeat(4097), "bad\0control".into()] {
+                panel.targets[0].parameters[0]
+                    .value
+                    .update(cx, |input, cx| input.set_value(value, window, cx));
+                panel.prepare(cx);
+                assert!(panel.review.is_none());
+            }
+            panel.tasks[0].command.update(cx, |input, cx| {
+                input.set_value(format!("echo {}", "{{p}} ".repeat(17)), window, cx)
+            });
+            panel.targets[0].parameters[0]
+                .value
+                .update(cx, |input, cx| {
+                    input.set_value("x".repeat(4096), window, cx)
+                });
+            panel.prepare(cx);
+            assert!(panel.review.is_none());
+        })
+    })
+    .checked("count / per-value / rendered-byte limits at actual panel admission");
+    assert!(h.servers[0].requests().is_empty());
 }

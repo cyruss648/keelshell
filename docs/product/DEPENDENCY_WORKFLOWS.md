@@ -45,3 +45,8 @@ Task drafts, commands and output remain in memory and do not enter stored metada
 See [ADR 0044](../adr/0044-reviewed-dependency-workflow-ui.md) and the
 [verification record](../testing/records/2026-10-05-dependency-workflow-ui.md) for
 limits and the distinction between renderer/SSH fixtures and native acceptance.
+
+逐目标用户参数的语法、字段同步、显式空值和审核绑定见[参数指南](TARGET_PARAMETERS.md)。
+
+See [per-target parameters](TARGET_PARAMETERS.md) for named literals, explicit field
+synchronization, empty values and immutable review/session bindings.

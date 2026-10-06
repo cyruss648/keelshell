@@ -142,7 +142,7 @@ impl Workspace {
     pub(super) fn maintain_command_workflows(&mut self, cx: &mut Context<Self>) {
         self.maintain_workflow(cx);
         if let Some(panel) = self.batch_panel.clone() {
-            let live = self.live_batch_entities(cx);
+            let live = self.connected_batch_destinations(cx);
             panel.update(cx, |panel, cx| panel.update_available(&live, cx));
         }
     }
@@ -180,6 +180,21 @@ impl Workspace {
             .collect()
     }
 
+    fn connected_batch_destinations(
+        &self,
+        cx: &App,
+    ) -> Vec<(Destination, keelshell_session::SshSession)> {
+        self.batch_destinations(cx)
+            .into_iter()
+            .filter_map(|destination| {
+                self.remote_sessions
+                    .get(&destination.entity)
+                    .filter(|session| !session.is_closed())
+                    .map(|session| (destination, session.clone()))
+            })
+            .collect()
+    }
+
     pub(super) fn open_batch_commands(
         &mut self,
         fresh: bool,
@@ -199,7 +214,7 @@ impl Workspace {
         }
         self.cancel_remote_completion(cx);
         if fresh || self.batch_panel.is_none() {
-            let destinations = self.batch_destinations(cx);
+            let destinations = self.connected_batch_destinations(cx);
             let text = self.command.read(cx).value().to_string();
             let panel = cx.new(|cx| BatchPanel::new(destinations, text, window, cx));
             self.batch_subscription =
@@ -244,7 +259,7 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) {
         self.maintain_command_workflows(cx);
-        let live = self.live_batch_entities(cx);
+        let live = self.connected_batch_destinations(cx);
         let valid = self.show_batch && panel.read(cx).review_current(review, cx);
         let destinations: Vec<_> = panel
             .read(cx)
@@ -255,8 +270,19 @@ impl Workspace {
         if !valid
             || destinations.len() != review.targets.len()
             || destinations.iter().any(|destination| {
-                !live.contains(&destination.entity)
-                    || self.remote_hosts.get(&destination.entity) != Some(&destination.endpoint)
+                !live.iter().any(|(current, session)| {
+                    current.entity == destination.entity
+                        && current.profile_id == destination.profile_id
+                        && current.name == destination.name
+                        && current.endpoint == destination.endpoint
+                        && current.route == destination.route
+                        && current.template_context == destination.template_context
+                        && panel
+                            .read(cx)
+                            .captured_session(destination.id)
+                            .is_some_and(|captured| session.same_connection(captured))
+                        && !session.is_closed()
+                })
             })
         {
             panel.update(cx,|panel,cx|panel.fail_start(Message::new("审核已失效：命令或 SSH 会话发生变化。请返回修改后重新审核。","Review expired: command or SSH session changed. Edit and review the plan again."),cx));
@@ -270,8 +296,9 @@ impl Workspace {
                     .iter()
                     .find(|(id, _)| *id == destination.id)
                     .map(|(_, command)| command.clone())?;
-                self.remote_sessions
-                    .get(&destination.entity)
+                panel
+                    .read(cx)
+                    .captured_session(destination.id)
                     .map(|session| keelshell_session::BatchTarget {
                         id: destination.id,
                         session: session.clone(),

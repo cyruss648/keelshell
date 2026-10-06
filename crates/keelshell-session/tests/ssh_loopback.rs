@@ -32,8 +32,17 @@ mod directory_resume;
 mod directory_transfers;
 #[path = "fixtures/file_resume.rs"]
 mod file_resume;
+#[path = "fixtures/mutation_isolation.rs"]
+mod mutation_isolation;
+#[path = "fixtures/parallel_transfers.rs"]
+mod parallel_transfers;
 #[path = "fixtures/reviewed_file.rs"]
 mod reviewed_file;
+#[path = "fixtures/writable_close.rs"]
+mod writable_close;
+
+#[path = "fixtures/reviewer_close_v3.rs"]
+mod reviewer_close_v3;
 
 #[path = "fixtures/session_lifecycle.rs"]
 mod session_lifecycle;

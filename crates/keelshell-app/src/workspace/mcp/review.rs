@@ -137,12 +137,21 @@ async fn execute_file(
         }
         // Failure after mutation begins is conservatively unknown. The writer
         // never falls back from POSIX rename, truncates, or retries a proposal.
-        if sftp
-            .write_regular_reviewed(&baseline, replacement.as_bytes())
+        let authorized = || lease.check().is_ok();
+        match sftp
+            .write_regular_reviewed_authorized(&baseline, replacement.as_bytes(), &authorized)
             .await
-            .is_err()
         {
-            return (ActionState::OutcomeUnknown, String::new());
+            Ok(()) => {}
+            Err(
+                error @ (keelshell_session::SessionError::MutationBusy
+                | keelshell_session::SessionError::MutationQuarantined),
+            ) => {
+                // Human proposal approval cannot release another mutation's
+                // active ownership or unresolved-risk quarantine.
+                return (ActionState::Failed, error.to_string());
+            }
+            Err(_) => return (ActionState::OutcomeUnknown, String::new()),
         }
         if lease.check().is_err() {
             return (ActionState::OutcomeUnknown, String::new());

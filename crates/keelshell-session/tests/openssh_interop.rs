@@ -15,6 +15,64 @@ use russh::keys::{HashAlg, PublicKey};
 
 type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
+#[tokio::test]
+#[ignore = "requires the disposable pinned OpenSSH loopback runner"]
+async fn openssh_target_parameter_values_are_exact_literals_on_separate_reviewed_connections()
+-> TestResult {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        use keelshell_core::{
+            BatchParameterValues, BatchParameterizedTemplate, BatchTargetContext,
+        };
+        use keelshell_session::{BatchOptions, BatchTarget, start_batch};
+        let fixture = Fixture::connect().await?;
+        let other = SshSession::connect(Fixture::options()?).await?;
+        assert!(!fixture.ssh.same_connection(&other));
+        let marker = fixture.path("must-not-exist");
+        let first = format!("中文'$(touch '{marker}');&|\n\t");
+        let second = String::new();
+        let template = BatchParameterizedTemplate::compile("printf '%s' {{value}}")?
+            .ok_or("missing template")?;
+        let context = BatchTargetContext::default();
+        let commands = [&first, &second]
+            .into_iter()
+            .map(|value| {
+                template.render(
+                    &context,
+                    &BatchParameterValues::new(vec![("value".into(), value.to_owned())])?,
+                )
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        // These exact command bytes are the same values presented to review;
+        // only explicit plan confirmation at the caller permits transport.
+        let targets = [&fixture.ssh, &other]
+            .into_iter()
+            .zip(commands)
+            .map(|(session, command)| BatchTarget {
+                id: uuid::Uuid::new_v4(),
+                session: session.clone(),
+                command,
+            })
+            .collect();
+        let receipt = start_batch(
+            targets,
+            BatchOptions {
+                timeout: Duration::from_secs(5),
+                ..Default::default()
+            },
+        )?
+        .finish()
+        .await?;
+        assert_eq!(receipt.rows[0].outcome, BatchOutcome::Exited { code: 0 });
+        assert_eq!(receipt.rows[0].stdout, first.as_bytes());
+        assert_eq!(receipt.rows[1].outcome, BatchOutcome::Exited { code: 0 });
+        assert_eq!(receipt.rows[1].stdout, second.as_bytes());
+        assert!(fixture.sftp.inspect_entry(&marker).await?.is_none());
+        other.close().await?;
+        fixture.close(&[], &[]).await
+    })
+    .await?
+}
+
 struct Fixture {
     ssh: SshSession,
     sftp: Arc<SftpSession>,
@@ -99,11 +157,172 @@ async fn completed(handle: &mut TransferHandle) -> TestResult<u64> {
         match tokio::time::timeout(Duration::from_secs(90), handle.recv()).await? {
             Some(TransferEvent::Completed { bytes, .. }) => return Ok(bytes),
             Some(TransferEvent::Failed { error, .. }) => return Err(error.into()),
+            Some(TransferEvent::Uncertain { error, .. }) => return Err(error.into()),
             Some(TransferEvent::Cancelled { .. }) => return Err("unexpected cancellation".into()),
             Some(_) => {}
             None => return Err("transfer ended without a terminal event".into()),
         }
     }
+}
+
+async fn await_initial_pause(handle: &mut TransferHandle) -> TestResult {
+    loop {
+        match tokio::time::timeout(Duration::from_secs(10), handle.recv()).await? {
+            Some(TransferEvent::Paused { .. }) => return Ok(()),
+            Some(
+                TransferEvent::Completed { .. }
+                | TransferEvent::Cancelled { .. }
+                | TransferEvent::Uncertain { .. }
+                | TransferEvent::Failed { .. },
+            )
+            | None => return Err("transfer ended before initial pause".into()),
+            _ => {}
+        }
+    }
+}
+
+#[tokio::test]
+#[ignore = "requires a disposable local OpenSSH server and KEELSHELL_OPENSSH_* settings"]
+async fn openssh_parallel_atomic_replacement_handles_hardlinks_and_canonical_aliases() -> TestResult
+{
+    tokio::time::timeout(Duration::from_secs(60), async {
+        let fixture = Fixture::connect().await?;
+        let local = tempfile::tempdir()?;
+        let source_one = local.path().join("one");
+        let source_two = local.path().join("two");
+        let one = vec![0x31; 256 * 1024];
+        let two = vec![0x52; 256 * 1024];
+        tokio::fs::write(&source_one, &one).await?;
+        tokio::fs::write(&source_two, &two).await?;
+        fixture
+            .sftp
+            .write(&fixture.path("one"), b"shared old inode")
+            .await?;
+        // This opt-in case is specifically the locally managed sshd fixture:
+        // hard links are created only inside its disposable caller-owned root.
+        tokio::fs::hard_link(fixture.path("one"), fixture.path("two")).await?;
+        let queue = fixture.sftp.clone().transfer_queue();
+        queue.set_parallelism(2)?;
+        let mut first = queue
+            .enqueue_atomic_upload(TransferSpec::upload(&source_one, fixture.path("one")))
+            .await?;
+        first.pause();
+        await_initial_pause(&mut first).await?;
+        let mut second = queue
+            .enqueue_atomic_upload(TransferSpec::upload(&source_two, fixture.path("two")))
+            .await?;
+        second.pause();
+        await_initial_pause(&mut second).await?;
+        queue.set_parallelism(4)?; // Spare slots make exclusion independent of capacity.
+        let reviewed = fixture
+            .sftp
+            .read_regular_snapshot(&fixture.path("one"), 64 * 1024)
+            .await?;
+        assert!(matches!(
+            fixture
+                .sftp
+                .write_regular_reviewed(&reviewed, b"blocked reviewed writer")
+                .await,
+            Err(keelshell_session::SessionError::MutationBusy)
+        ));
+        assert!(matches!(
+            fixture
+                .sftp
+                .write_atomic(
+                    &format!("{}/./one", fixture.directory),
+                    b"blocked ordinary writer"
+                )
+                .await,
+            Err(keelshell_session::SessionError::MutationBusy)
+        ));
+        assert!(matches!(
+            fixture
+                .sftp
+                .rename(&fixture.path("one"), &fixture.path("moved"))
+                .await,
+            Err(keelshell_session::SessionError::MutationBusy)
+        ));
+        fixture
+            .sftp
+            .write_atomic(
+                &fixture.path("spare"),
+                b"independent writer with spare capacity",
+            )
+            .await?;
+        assert_eq!(
+            fixture.sftp.read(&fixture.path("spare"), 100).await?,
+            b"independent writer with spare capacity"
+        );
+        let mut alias = queue
+            .enqueue_atomic_upload(TransferSpec::upload(
+                &source_two,
+                format!("{}/./one", fixture.directory),
+            ))
+            .await?;
+        assert!(matches!(
+            alias.recv().await,
+            Some(TransferEvent::Queued { .. })
+        ));
+        assert!(
+            tokio::time::timeout(Duration::from_millis(150), alias.recv())
+                .await
+                .is_err()
+        );
+        alias.cancel();
+        assert!(matches!(
+            alias.recv().await,
+            Some(TransferEvent::Cancelled { bytes: 0, .. })
+        ));
+        #[cfg(unix)]
+        {
+            let parent_alias = fixture.path("parent-alias");
+            tokio::fs::symlink(&fixture.directory, &parent_alias).await?;
+            let mut through_link = queue
+                .enqueue_atomic_upload(TransferSpec::upload(
+                    &source_two,
+                    format!("{parent_alias}/one"),
+                ))
+                .await?;
+            assert!(matches!(
+                through_link.recv().await,
+                Some(TransferEvent::Queued { .. })
+            ));
+            assert!(
+                tokio::time::timeout(Duration::from_millis(150), through_link.recv())
+                    .await
+                    .is_err()
+            );
+            through_link.cancel();
+            assert!(matches!(
+                through_link.recv().await,
+                Some(TransferEvent::Cancelled { bytes: 0, .. })
+            ));
+            tokio::fs::remove_file(parent_alias).await?;
+        }
+        assert_eq!(
+            fixture.sftp.read(&fixture.path("one"), 100).await?,
+            b"shared old inode"
+        );
+        assert_eq!(
+            fixture.sftp.read(&fixture.path("two"), 100).await?,
+            b"shared old inode"
+        );
+        first.resume();
+        second.resume();
+        assert_eq!(completed(&mut first).await?, one.len() as u64);
+        assert_eq!(completed(&mut second).await?, two.len() as u64);
+        assert_eq!(
+            fixture.sftp.read(&fixture.path("one"), one.len()).await?,
+            one
+        );
+        assert_eq!(
+            fixture.sftp.read(&fixture.path("two"), two.len()).await?,
+            two
+        );
+        queue.close().await?;
+        fixture.close(&["one", "two", "spare"], &[]).await
+    })
+    .await?
 }
 
 async fn failed(handle: &mut TransferHandle) -> TestResult {
@@ -135,7 +354,8 @@ async fn pause_after_progress(handle: &mut TransferHandle, existing: u64) -> Tes
             Some(
                 TransferEvent::Completed { .. }
                 | TransferEvent::Failed { .. }
-                | TransferEvent::Cancelled { .. },
+                | TransferEvent::Cancelled { .. }
+                | TransferEvent::Uncertain { .. },
             )
             | None => {
                 return Err("transfer finished before acknowledged pause".into());

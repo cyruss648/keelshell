@@ -20,12 +20,12 @@ pub(super) async fn inspect_paths(
     let missing_remote = allow_missing && spec.direction == TransferDirection::Upload;
     local_parent_chain(&spec.local, missing_local).await?;
     remote_parent_chain(raw, &spec.remote, missing_remote).await?;
-    let local = match tokio::fs::symlink_metadata(&spec.local).await {
+    let local = match local_io(tokio::fs::symlink_metadata(&spec.local)).await {
         Ok(metadata) => Some(local_snapshot(&metadata)?),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound && missing_local => None,
         Err(error) => return Err(error.into()),
     };
-    let remote = match raw.lstat(&spec.remote).await {
+    let remote = match remote_io(raw.lstat(&spec.remote)).await {
         Ok(attrs) => Some(remote_snapshot(attrs.attrs)?),
         Err(russh_sftp::client::error::Error::Status(status))
             if status.status_code == StatusCode::NoSuchFile && missing_remote =>
@@ -58,7 +58,7 @@ async fn local_parent_chain(path: &Path, allow_missing: bool) -> Result<()> {
     // querying that prefix before its root separator addresses a device path.
     // Root-first checks also reject links before inspecting their descendants.
     for ancestor in parent.ancestors().collect::<Vec<_>>().into_iter().rev() {
-        match tokio::fs::symlink_metadata(ancestor).await {
+        match local_io(tokio::fs::symlink_metadata(ancestor)).await {
             Ok(m) if m.is_dir() && !m.file_type().is_symlink() => {}
             Ok(_) => {
                 return Err(SessionError::Invalid(
@@ -81,7 +81,7 @@ async fn remote_parent_chain(raw: &RawSftpSession, path: &str, allow_missing: bo
     for part in parent.split('/').filter(|s| !s.is_empty()) {
         current.push('/');
         current.push_str(part);
-        match raw.lstat(&current).await {
+        match remote_io(raw.lstat(&current)).await {
             Ok(attrs)
                 if attrs
                     .attrs
@@ -104,15 +104,19 @@ pub(super) enum OpenFile<'a> {
     Remote {
         raw: &'a RawSftpSession,
         handle: String,
+        writable: bool,
     },
 }
 impl OpenFile<'_> {
     pub(super) async fn snapshot(&self) -> Result<Snapshot> {
         match self {
-            Self::Local(file) => local_snapshot(&file.metadata().await?),
-            Self::Remote { raw, handle } => {
-                remote_snapshot(raw.fstat(handle).await.map_err(sftp_error)?.attrs)
-            }
+            Self::Local(file) => local_snapshot(&local_io(file.metadata()).await?),
+            Self::Remote { raw, handle, .. } => remote_snapshot(
+                remote_io(raw.fstat(handle))
+                    .await
+                    .map_err(sftp_error)?
+                    .attrs,
+            ),
         }
     }
     pub(super) async fn read_at(&mut self, offset: u64, buffer: &mut [u8]) -> Result<usize> {
@@ -121,7 +125,7 @@ impl OpenFile<'_> {
                 file.seek(SeekFrom::Start(offset)).await?;
                 Ok(file.read(buffer).await?)
             }
-            Self::Remote { raw, handle } => {
+            Self::Remote { raw, handle, .. } => {
                 match raw.read(handle.as_str(), offset, buffer.len() as u32).await {
                     Ok(data) if !data.data.is_empty() && data.data.len() <= buffer.len() => {
                         buffer[..data.data.len()].copy_from_slice(&data.data);
@@ -138,25 +142,49 @@ impl OpenFile<'_> {
             }
         }
     }
-    pub(super) async fn write_at(&mut self, offset: u64, bytes: &[u8]) -> Result<()> {
+    pub(super) async fn write_at(
+        &mut self,
+        offset: u64,
+        bytes: &[u8],
+        context: &TransferContext,
+    ) -> TransferExecutionResult<()> {
         match self {
             Self::Local(file) => {
                 file.seek(SeekFrom::Start(offset)).await?;
-                file.write_all(bytes).await?;
-                file.flush().await?;
+                context
+                    .local_mutation(async {
+                        file.write_all(bytes).await?;
+                        file.flush().await
+                    })
+                    .await?;
                 Ok(())
             }
-            Self::Remote { raw, handle } => {
-                raw.write(handle.as_str(), offset, bytes.to_vec())
-                    .await
-                    .map_err(sftp_error)?;
+            Self::Remote { raw, handle, .. } => {
+                context
+                    .remote_mutation(raw.write(handle.as_str(), offset, bytes.to_vec()))
+                    .await?;
                 Ok(())
             }
         }
     }
-    pub(super) async fn close(self) -> Result<()> {
-        if let Self::Remote { raw, handle } = self {
-            raw.close(handle).await.map_err(sftp_error)?;
+    /// Read-only scan/source descriptors need no destination mutation marker.
+    /// Writable targets must retain their owner through the raw CLOSE STATUS.
+    pub(super) async fn close(self, context: Option<&TransferContext>) -> Result<()> {
+        if let Self::Remote {
+            raw,
+            handle,
+            writable,
+        } = self
+        {
+            if writable {
+                context
+                    .ok_or(SessionError::Worker)?
+                    .remote_mutation(raw.close(handle))
+                    .await
+                    .map_err(transfer_session_error)?;
+            } else {
+                remote_io(raw.close(handle)).await.map_err(sftp_error)?;
+            }
         }
         Ok(())
     }
@@ -166,7 +194,9 @@ pub(super) async fn open_source<'a>(
     spec: &TransferSpec,
 ) -> Result<OpenFile<'a>> {
     match spec.direction {
-        TransferDirection::Upload => Ok(OpenFile::Local(tokio::fs::File::open(&spec.local).await?)),
+        TransferDirection::Upload => Ok(OpenFile::Local(
+            local_io(tokio::fs::File::open(&spec.local)).await?,
+        )),
         TransferDirection::Download => open_remote(raw, &spec.remote, OpenFlags::READ).await,
     }
 }
@@ -178,12 +208,14 @@ pub(super) async fn open_target<'a>(
 ) -> Result<OpenFile<'a>> {
     match spec.direction {
         TransferDirection::Download => Ok(OpenFile::Local(
-            tokio::fs::OpenOptions::new()
-                .read(true)
-                .write(write)
-                .create_new(missing)
-                .open(&spec.local)
-                .await?,
+            local_io(
+                tokio::fs::OpenOptions::new()
+                    .read(true)
+                    .write(write)
+                    .create_new(missing)
+                    .open(&spec.local),
+            )
+            .await?,
         )),
         TransferDirection::Upload => {
             let flags = OpenFlags::READ
@@ -201,6 +233,44 @@ pub(super) async fn open_target<'a>(
         }
     }
 }
+/// Preserve raw STATUS and local completion at the creation boundary; mapping
+/// them to the common error type first would lose proof of a rejected mutation.
+pub(super) async fn create_transfer_target<'a>(
+    raw: &'a RawSftpSession,
+    spec: &TransferSpec,
+    context: &TransferContext,
+) -> TransferExecutionResult<OpenFile<'a>> {
+    match spec.direction {
+        TransferDirection::Download => Ok(OpenFile::Local(
+            context
+                .local_mutation(
+                    tokio::fs::OpenOptions::new()
+                        .read(true)
+                        .write(true)
+                        .create_new(true)
+                        .open(&spec.local),
+                )
+                .await?,
+        )),
+        TransferDirection::Upload => {
+            let mut attrs = FileAttributes::empty();
+            attrs.permissions = Some(0o600);
+            let handle = context
+                .remote_mutation(raw.open(
+                    &spec.remote,
+                    OpenFlags::READ | OpenFlags::WRITE | OpenFlags::CREATE | OpenFlags::EXCLUDE,
+                    attrs,
+                ))
+                .await?
+                .handle;
+            Ok(OpenFile::Remote {
+                raw,
+                handle,
+                writable: true,
+            })
+        }
+    }
+}
 async fn open_remote<'a>(
     raw: &'a RawSftpSession,
     path: &str,
@@ -212,8 +282,8 @@ async fn open_remote<'a>(
     }
     Ok(OpenFile::Remote {
         raw,
-        handle: raw
-            .open(path, flags, attrs)
+        writable: flags.contains(OpenFlags::WRITE),
+        handle: remote_io(raw.open(path, flags, attrs))
             .await
             .map_err(sftp_error)?
             .handle,

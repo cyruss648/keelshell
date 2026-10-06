@@ -139,7 +139,7 @@ async fn reviewed_file_requires_existing_regular_complete_bounded_snapshot_and_a
 }
 
 #[tokio::test]
-async fn reviewed_file_checks_content_again_after_staging_and_preserves_concurrent_writer()
+async fn reviewed_file_rechecks_external_change_and_refuses_conflicting_application_writer()
 -> Result<(), Box<dyn Error>> {
     let server = serve().await?;
     let session = SshSession::connect(options(&server)).await?;
@@ -162,7 +162,13 @@ async fn reviewed_file_checks_content_again_after_staging_and_preserves_concurre
         })
         .await?;
         let other = session.sftp().await?;
-        other.write("/reviewed.txt", b"concurrent").await?;
+        assert!(matches!(
+            other.write("/reviewed.txt", b"application bypass").await,
+            Err(SessionError::MutationBusy)
+        ));
+        server
+            .filesystem
+            .replace_external_file("/reviewed.txt", b"concurrent")?;
         other.close().await?;
         gate.release();
         Ok::<(), Box<dyn Error>>(())

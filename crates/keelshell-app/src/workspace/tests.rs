@@ -12,8 +12,8 @@ use std::{
 
 use gpui_kit::component::input::InputState;
 use gpui_kit::{
-    AnyWindowHandle, AppContext, Bounds, ClipboardItem, Entity, Focusable, TestAppContext,
-    WindowBounds, WindowOptions, point, px, size,
+    AnyWindowHandle, AppContext, Bounds, ClipboardItem, Entity, Focusable, InputEvent,
+    TestAppContext, WindowBounds, WindowOptions, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
 };
 use keelshell_core::{AppState, Connection, Language, StateStore};
@@ -25,6 +25,7 @@ use crate::terminal::{TerminalCommand, TerminalView};
 
 mod ai_command_review_target;
 mod ai_metadata;
+pub(crate) mod independent_disk_monitor;
 
 trait Checked<T> {
     fn checked(self, operation: &str) -> T;
@@ -108,6 +109,127 @@ fn mount_sized(
         store,
         _state_directory: guard,
     }
+}
+
+/// Mount an already sampled monitor beside production workspace/terminal controls.
+/// This asserts GPUI layout and local interactions, not desktop native acceptance.
+pub(crate) fn verify_disk_monitor_minimum_workspace(
+    monitor: Entity<crate::monitor::MonitorPanel>,
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_connections = false;
+            workspace.panels.insert(
+                panes[0].terminal.entity_id(),
+                super::RemotePanels {
+                    monitor: Some(monitor),
+                    ..Default::default()
+                },
+            );
+            cx.notify();
+        });
+        for language in [Language::ZhCn, Language::En] {
+            for theme in [
+                keelshell_core::Theme::System,
+                keelshell_core::Theme::Light,
+                keelshell_core::Theme::Dark,
+            ] {
+                i18n::set_language(language, cx);
+                crate::design::apply(theme, Some(window), cx);
+                window.render_frame(cx);
+                let terminal = window
+                    .find(("terminal-pane", panes[0].terminal.entity_id()))
+                    .bounds();
+                assert!(terminal.size.width >= px(200.) && terminal.size.height >= px(80.));
+                for id in [
+                    "new-session",
+                    "split-session",
+                    "toggle-assistant",
+                    "theme-system",
+                    "theme-light",
+                    "theme-dark",
+                    "language",
+                    "refresh-monitor",
+                    "pause-monitor",
+                ] {
+                    let button = window.find(id);
+                    let bounds = button.bounds();
+                    assert!(button.visible(), "{language:?}/{theme:?}/{id}");
+                    assert!(
+                        bounds.right() <= window.bounds().right()
+                            && bounds.bottom() <= window.bounds().bottom()
+                    );
+                }
+                for _ in 0..40 {
+                    let choices = window.find("monitor-disk-devices").bounds();
+                    let viewport = window.find("monitor-scroll").bounds();
+                    if choices.origin.y >= viewport.origin.y
+                        && choices.bottom() <= viewport.bottom()
+                    {
+                        break;
+                    }
+                    let direction = if choices.origin.y < viewport.origin.y {
+                        1.
+                    } else {
+                        -1.
+                    };
+                    // The column padding is outside the nested chooser. Dispatch
+                    // an actual wheel there rather than scrolling the inner list.
+                    window.dispatch_event(
+                        gpui_kit::ScrollWheelEvent {
+                            position: point(viewport.origin.x + px(2.), viewport.center().y),
+                            delta: gpui_kit::ScrollDelta::Lines(point(0., direction)),
+                            ..Default::default()
+                        }
+                        .to_platform_input(),
+                        cx,
+                    );
+                    window.render_frame(cx);
+                }
+                for _ in 0..30 {
+                    let row = window.find(("monitor-disk-device", 11_usize));
+                    let choices = window.find("monitor-disk-devices").bounds();
+                    if row.visible()
+                        && row.bounds().origin.y >= choices.origin.y
+                        && row.bounds().bottom() <= choices.bottom()
+                    {
+                        break;
+                    }
+                    window.scroll(
+                        "monitor-disk-devices",
+                        gpui_kit::ScrollDelta::Lines(point(0., -1.)),
+                        cx,
+                    );
+                    window.render_frame(cx);
+                }
+                assert!(
+                    window.find(("monitor-disk-device", 11_usize)).visible(),
+                    "{language:?}/{theme:?}: chooser {:?}, row {:?}, viewport {:?}",
+                    window.find("monitor-disk-devices").bounds(),
+                    window.find(("monitor-disk-device", 11_usize)).bounds(),
+                    window.find("monitor-scroll").bounds()
+                );
+                assert_eq!(
+                    window.find(("monitor-disk-device", 11_usize)).label(),
+                    Some("fixture11 · 8:11")
+                );
+                window.click(("monitor-disk-device", 11_usize), cx);
+                window.render_frame(cx);
+                let metrics = window.find("monitor-disk-metrics").bounds();
+                let column = window.find("monitor-column").bounds();
+                assert!(metrics.origin.x >= column.origin.x && metrics.right() <= column.right());
+                assert!(
+                    window.find("monitor-operation-status").bounds().bottom()
+                        <= window.bounds().bottom()
+                );
+            }
+        }
+    })
+    .checked("six minimum workspace disk layouts and actual nested device scroll/click");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
 
 #[gpui_kit::test]
@@ -1421,3 +1543,5 @@ mod themes;
 mod remote_completion;
 
 mod mcp;
+
+mod independent_target_parameters;

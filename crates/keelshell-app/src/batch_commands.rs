@@ -1,11 +1,11 @@
 //! Explicit multi-host review and an owned, in-memory batch receipt.
-use std::{collections::HashSet, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use gpui_kit::{
-    component::input::{InputState, TextareaState},
+    component::input::{InputEvent, InputState, TextareaState},
     *,
 };
-use keelshell_core::{BatchCommandTemplate, BatchTargetContext};
+use keelshell_core::{BatchParameterizedTemplate, BatchTargetContext};
 use keelshell_session::{
     BatchEvent, BatchHandle, BatchOptions, BatchPolicy, BatchRowReceipt, BatchTarget,
 };
@@ -50,7 +50,7 @@ pub(crate) struct Destination {
     pub template_context: BatchTargetContext,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub(crate) struct Review {
     pub token: Uuid,
     pub targets: Vec<Uuid>,
@@ -61,6 +61,7 @@ pub(crate) struct Review {
     pub concurrency: usize,
     pub timeout_seconds: u64,
     pub stop_after_failure: bool,
+    pub parameterized: bool,
 }
 
 pub(crate) enum BatchPanelEvent {
@@ -72,10 +73,12 @@ pub(crate) enum BatchPanelEvent {
 
 struct Row {
     destination: Destination,
+    session: keelshell_session::SshSession,
     selected: bool,
     available: bool,
     started: bool,
     receipt: Option<Arc<BatchRowReceipt>>,
+    parameters: Vec<crate::target_parameters::ParameterField>,
 }
 
 pub(crate) struct BatchPanel {
@@ -95,6 +98,7 @@ pub(crate) struct BatchPanel {
     message: Option<Message>,
     focus: FocusHandle,
     _poll: Option<Task<()>>,
+    _subscriptions: Vec<Subscription>,
 }
 
 fn input(value: &str, window: &mut Window, cx: &mut App) -> Entity<InputState> {
@@ -107,20 +111,22 @@ fn input(value: &str, window: &mut Window, cx: &mut App) -> Entity<InputState> {
 
 impl BatchPanel {
     pub(crate) fn new(
-        destinations: Vec<Destination>,
+        destinations: Vec<(Destination, keelshell_session::SshSession)>,
         text: String,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
-        Self {
+        let mut panel = Self {
             rows: destinations
                 .into_iter()
-                .map(|destination| Row {
+                .map(|(destination, session)| Row {
                     destination,
+                    session,
                     selected: false,
                     available: true,
                     started: false,
                     receipt: None,
+                    parameters: Vec::new(),
                 })
                 .collect(),
             command: cx.new(|cx| {
@@ -142,11 +148,40 @@ impl BatchPanel {
             message: None,
             focus: cx.focus_handle(),
             _poll: None,
+            _subscriptions: Vec::new(),
+        };
+        for field in [&panel.concurrency, &panel.timeout] {
+            panel
+                ._subscriptions
+                .push(cx.subscribe(field, |panel, _, event: &InputEvent, cx| {
+                    if matches!(event, InputEvent::Change) {
+                        panel.changed(cx);
+                    }
+                }));
         }
+        panel._subscriptions.push(cx.subscribe(
+            &panel.command,
+            |panel, _, event: &InputEvent, cx| {
+                if matches!(event, InputEvent::Change) {
+                    panel.changed(cx);
+                }
+            },
+        ));
+        panel
     }
 
     pub(crate) fn destinations(&self) -> impl Iterator<Item = &Destination> {
         self.rows.iter().map(|row| &row.destination)
+    }
+
+    pub(crate) fn captured_session(
+        &self,
+        destination: Uuid,
+    ) -> Option<&keelshell_session::SshSession> {
+        self.rows
+            .iter()
+            .find(|row| row.destination.id == destination)
+            .map(|row| &row.session)
     }
 
     pub(crate) fn is_running(&self) -> bool {
@@ -159,6 +194,73 @@ impl BatchPanel {
 
     fn editable(&self) -> bool {
         self.review.is_none() && !self.is_running() && !self.complete
+    }
+
+    fn changed(&mut self, cx: &mut Context<Self>) {
+        for row in &mut self.rows {
+            for field in &mut row.parameters {
+                if !field.value.read(cx).value().is_empty() {
+                    field.allow_empty = false;
+                }
+            }
+        }
+        if !self.is_running() && !self.complete {
+            let expired = self.review.take().is_some();
+            self.set_disabled(false, cx);
+            self.message = expired.then(|| {
+                Message::new("内容已变化，请重新审核。", "Content changed; review again.")
+            });
+        }
+        cx.notify();
+    }
+
+    fn toggle_parameter_empty(&mut self, target: Uuid, index: usize, cx: &mut Context<Self>) {
+        if !self.editable() {
+            return;
+        }
+        if let Some(row) = self
+            .rows
+            .iter_mut()
+            .find(|row| row.destination.id == target)
+            && let Some(field) = row.parameters.get_mut(index)
+            && field.value.read(cx).value().is_empty()
+        {
+            field.allow_empty = !field.allow_empty;
+            self.changed(cx);
+        }
+    }
+
+    fn sync_parameters(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if !self.editable() {
+            return;
+        }
+        let names = match crate::target_parameters::names(self.command.read(cx).value().as_str()) {
+            Ok(names) => names,
+            Err(error) => {
+                self.message = Some(error);
+                cx.notify();
+                return;
+            }
+        };
+        for row in &mut self.rows {
+            if !row.selected || !row.available {
+                continue;
+            }
+            crate::target_parameters::synchronize(&mut row.parameters, &names, window, cx);
+            for field in &mut row.parameters {
+                if field.subscription.is_none() {
+                    field.subscription = Some(cx.subscribe(
+                        &field.value,
+                        |panel, _, event: &InputEvent, cx| {
+                            if matches!(event, InputEvent::Change) {
+                                panel.changed(cx);
+                            }
+                        },
+                    ));
+                }
+            }
+        }
+        self.changed(cx);
     }
 
     fn snapshot(&self, token: Uuid, cx: &App) -> Result<Review, Message> {
@@ -209,7 +311,8 @@ impl BatchPanel {
                 "Concurrency must be 1–8; per-host timeout must be 1–300 seconds.",
             ));
         };
-        let commands = render_target_commands(&command, &self.rows)?;
+        let commands = render_target_commands(&command, &self.rows, cx)?;
+        let parameterized = !crate::target_parameters::names(&command)?.is_empty();
         Ok(Review {
             token,
             targets,
@@ -218,6 +321,7 @@ impl BatchPanel {
             concurrency,
             timeout_seconds,
             stop_after_failure: self.stop_after_failure,
+            parameterized,
         })
     }
 
@@ -356,7 +460,14 @@ impl BatchPanel {
             }
             if !self.audit_emitted {
                 self.audit_emitted = true;
-                cx.emit(BatchPanelEvent::Completed(self.audit_draft()));
+                // Values and their command-derived digest never enter persisted audits.
+                if self
+                    .review
+                    .as_ref()
+                    .is_some_and(|review| !review.parameterized)
+                {
+                    cx.emit(BatchPanelEvent::Completed(self.audit_draft()));
+                }
             }
             changed = true;
         }
@@ -374,11 +485,27 @@ impl BatchPanel {
         self.handle.is_some()
     }
 
-    pub(crate) fn update_available(&mut self, live: &HashSet<EntityId>, cx: &mut Context<Self>) {
+    pub(crate) fn update_available(
+        &mut self,
+        live: &[(Destination, keelshell_session::SshSession)],
+        cx: &mut Context<Self>,
+    ) {
         let mut lost = false;
         for row in &mut self.rows {
-            if row.available && !live.contains(&row.destination.entity) {
+            if row.available
+                && !live.iter().any(|(destination, session)| {
+                    destination.entity == row.destination.entity
+                        && destination.profile_id == row.destination.profile_id
+                        && destination.name == row.destination.name
+                        && destination.endpoint == row.destination.endpoint
+                        && destination.route == row.destination.route
+                        && destination.template_context == row.destination.template_context
+                        && session.same_connection(&row.session)
+                        && !session.is_closed()
+                })
+            {
                 row.available = false;
+                row.parameters.clear();
                 lost |= row.selected;
             }
         }
@@ -386,6 +513,10 @@ impl BatchPanel {
             if let Some(handle) = &self.handle {
                 handle.cancel();
                 self.cancelling = true;
+            } else if !self.complete {
+                self.starting = false;
+                self.review = None;
+                self.set_disabled(false, cx);
             }
             self.message = Some(Message::new(
                 "所选会话已结束；尚未开始的任务停止，已开始的任务按回执判断结果。",
@@ -406,6 +537,13 @@ impl BatchPanel {
     fn set_disabled(&mut self, disabled: bool, cx: &mut Context<Self>) {
         self.command
             .update(cx, |input, cx| input.set_disabled(disabled, cx));
+        for row in &self.rows {
+            for field in &row.parameters {
+                field
+                    .value
+                    .update(cx, |input, cx| input.set_disabled(disabled, cx));
+            }
+        }
         for field in [&self.concurrency, &self.timeout] {
             field.update(cx, |input, cx| input.set_disabled(disabled, cx));
         }
@@ -503,30 +641,35 @@ impl EventEmitter<BatchPanelEvent> for BatchPanel {}
 
 /// Render one immutable command for each selected target during the review step.
 /// No session, network, retry, or execution operation occurs here.
-fn render_target_commands(command: &str, rows: &[Row]) -> Result<Vec<(Uuid, String)>, Message> {
-    let template = BatchCommandTemplate::compile(command).map_err(|error| {
-        Message::new(
-            format!("批量模板无效：{error}"),
-            format!("Invalid batch template: {error}"),
-        )
-    })?;
+fn render_target_commands(
+    command: &str,
+    rows: &[Row],
+    cx: &App,
+) -> Result<Vec<(Uuid, String)>, Message> {
+    let template = BatchParameterizedTemplate::compile(command)
+        .map_err(|error| crate::target_parameters::error_message(&error))?;
+    let mut bytes = 0_usize;
     rows.iter()
         .filter(|row| row.selected)
         .map(|row| {
-            let rendered = template
-                .as_ref()
-                .map(|template| template.render(&row.destination.template_context))
-                .transpose()
-                .map_err(|error| {
-                    Message::new(
-                        format!("目标 {} 的模板无法展开：{error}", row.destination.name),
-                        format!(
-                            "Could not render the template for {}: {error}",
-                            row.destination.name
-                        ),
-                    )
-                })?
-                .unwrap_or_else(|| command.to_owned());
+            let values = crate::target_parameters::values(&row.parameters, cx)?;
+            bytes = bytes.saturating_add(values.byte_len());
+            if bytes > 1024 * 1024 {
+                return Err(Message::new(
+                    "目标参数总量超过 1 MiB。",
+                    "Target parameter values exceed 1 MiB.",
+                ));
+            }
+            let rendered = if let Some(template) = &template {
+                template
+                    .render(&row.destination.template_context, &values)
+                    .map_err(|error| crate::target_parameters::error_message(&error))?
+            } else {
+                values
+                    .validate_names(&[])
+                    .map_err(|error| crate::target_parameters::error_message(&error))?;
+                command.to_owned()
+            };
             Ok((row.destination.id, rendered))
         })
         .collect()

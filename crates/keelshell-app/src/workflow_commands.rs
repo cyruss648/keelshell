@@ -5,7 +5,7 @@ use gpui_kit::{
     component::input::{InputEvent, InputState, TextareaState},
     *,
 };
-use keelshell_core::{BatchCommandTemplate, BatchTaskSpec, BatchWorkflowPlan};
+use keelshell_core::{BatchParameterizedTemplate, BatchTaskSpec, BatchWorkflowPlan};
 use keelshell_session::{
     BatchPolicy, SshSession, WorkflowBinding, WorkflowEvent, WorkflowHandle, WorkflowOptions,
     WorkflowReceipt, WorkflowTaskReceipt, WorkflowTaskResult,
@@ -48,6 +48,7 @@ pub(crate) enum WorkflowPanelEvent {
 struct TargetRow {
     connected: ConnectedDestination,
     available: bool,
+    parameters: Vec<crate::target_parameters::ParameterField>,
 }
 struct TaskDraft {
     id: Uuid,
@@ -121,6 +122,7 @@ impl WorkflowPanel {
                 .map(|connected| TargetRow {
                     connected,
                     available: true,
+                    parameters: Vec::new(),
                 })
                 .collect(),
             tasks: Vec::new(),
@@ -159,6 +161,13 @@ impl WorkflowPanel {
     }
 
     fn changed(&mut self, cx: &mut Context<Self>) {
+        for row in &mut self.targets {
+            for field in &mut row.parameters {
+                if !field.value.read(cx).value().is_empty() {
+                    field.allow_empty = false;
+                }
+            }
+        }
         self.revision = self.revision.wrapping_add(1);
         if !self.is_running() && !self.complete {
             let expired = self.review.take().is_some();
@@ -254,6 +263,79 @@ impl WorkflowPanel {
             .unwrap_or_else(|| id.to_string())
     }
 
+    fn toggle_parameter_empty(&mut self, target: Uuid, index: usize, cx: &mut Context<Self>) {
+        if !self.editable() {
+            return;
+        }
+        if let Some(row) = self
+            .targets
+            .iter_mut()
+            .find(|row| row.connected.destination.id == target)
+            && let Some(field) = row.parameters.get_mut(index)
+            && field.value.read(cx).value().is_empty()
+        {
+            field.allow_empty = !field.allow_empty;
+            self.changed(cx);
+        }
+    }
+
+    fn sync_parameters(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if !self.editable() {
+            return;
+        }
+        let mut required = std::collections::BTreeMap::<Uuid, Vec<String>>::new();
+        for task in &self.tasks {
+            let Some(target) = task.target else {
+                continue;
+            };
+            let names =
+                match crate::target_parameters::names(task.command.read(cx).value().as_str()) {
+                    Ok(names) => names,
+                    Err(error) => {
+                        self.message = Some(error);
+                        cx.notify();
+                        return;
+                    }
+                };
+            let all = required.entry(target).or_default();
+            for name in names {
+                if !all.contains(&name) {
+                    all.push(name);
+                }
+            }
+            if all.len() > 32 {
+                self.message = Some(Message::new(
+                    "每个目标最多 32 个用户参数。",
+                    "At most 32 user parameters per target.",
+                ));
+                cx.notify();
+                return;
+            }
+        }
+        for row in &mut self.targets {
+            if !row.available {
+                continue;
+            }
+            let names = required
+                .get(&row.connected.destination.id)
+                .map_or(&[][..], Vec::as_slice);
+            crate::target_parameters::synchronize(&mut row.parameters, names, window, cx);
+            for field in &mut row.parameters {
+                if field.subscription.is_none() {
+                    field.subscription = Some(cx.subscribe(
+                        &field.value,
+                        |panel, _, event: &InputEvent, cx| {
+                            if matches!(event, InputEvent::Change) {
+                                panel.changed(cx);
+                            }
+                        },
+                    ));
+                }
+            }
+        }
+        self.changed(cx);
+    }
+
     fn snapshot(&self, token: Uuid, cx: &App) -> Result<WorkflowReview, Message> {
         let concurrency = self
             .concurrency
@@ -279,6 +361,47 @@ impl WorkflowPanel {
         let mut labels = Vec::new();
         let mut specs = Vec::new();
         let mut source_bytes = 0_usize;
+        let mut target_names = std::collections::BTreeMap::<Uuid, Vec<String>>::new();
+        for task in &self.tasks {
+            if let Some(target) = task.target {
+                let names =
+                    crate::target_parameters::names(task.command.read(cx).value().as_str())?;
+                let all = target_names.entry(target).or_default();
+                for name in names {
+                    if !all.contains(&name) {
+                        all.push(name);
+                    }
+                }
+            }
+        }
+        let mut mappings = std::collections::BTreeMap::new();
+        let mut value_bytes = 0_usize;
+        for (id, names) in &target_names {
+            if names.len() > 32 {
+                return Err(Message::new(
+                    "每个目标最多 32 个用户参数。",
+                    "At most 32 user parameters per target.",
+                ));
+            }
+            if let Some(row) = self
+                .targets
+                .iter()
+                .find(|row| row.connected.destination.id == *id)
+            {
+                let values = crate::target_parameters::values(&row.parameters, cx)?;
+                values
+                    .validate_names(names)
+                    .map_err(|error| crate::target_parameters::error_message(&error))?;
+                value_bytes = value_bytes.saturating_add(values.byte_len());
+                if value_bytes > 1024 * 1024 {
+                    return Err(Message::new(
+                        "目标参数总量超过 1 MiB。",
+                        "Target parameter values exceed 1 MiB.",
+                    ));
+                }
+                mappings.insert(*id, values);
+            }
+        }
         for task in &self.tasks {
             let name = task.name.read(cx).value().to_string();
             if name.len() > 256 || name.chars().any(char::is_control) {
@@ -311,16 +434,23 @@ impl WorkflowPanel {
                     "Total command drafts cannot exceed 1 MiB.",
                 ));
             }
-            let template = BatchCommandTemplate::compile(&source)
-                .map_err(|error| Message::detail("任务模板无效", "Invalid task template", error))?;
-            let command = template
-                .as_ref()
-                .map(|template| template.render(&target.connected.destination.template_context))
-                .transpose()
-                .map_err(|error| {
-                    Message::detail("任务模板展开失败", "Could not render task template", error)
-                })?
-                .unwrap_or_else(|| source.clone());
+            let template = BatchParameterizedTemplate::compile(&source)
+                .map_err(|error| crate::target_parameters::error_message(&error))?;
+            let command = if let Some(template) = template {
+                let values = mappings
+                    .get(&target.connected.destination.id)
+                    .ok_or_else(|| {
+                        Message::new("缺少目标参数映射。", "Target parameter mapping is missing.")
+                    })?;
+                let task_values = values
+                    .for_task(template.parameters())
+                    .map_err(|error| crate::target_parameters::error_message(&error))?;
+                template
+                    .render(&target.connected.destination.template_context, &task_values)
+                    .map_err(|error| crate::target_parameters::error_message(&error))?
+            } else {
+                source.clone()
+            };
             specs.push(BatchTaskSpec {
                 id: task.id,
                 target_id: target.connected.destination.id,
@@ -582,6 +712,7 @@ impl WorkflowPanel {
                 })
             {
                 row.available = false;
+                row.parameters.clear();
                 changed = true;
                 lost |= used.contains(&row.connected.destination.id);
             }
@@ -623,6 +754,7 @@ impl WorkflowPanel {
                 self.targets.push(TargetRow {
                     connected,
                     available: true,
+                    parameters: Vec::new(),
                 });
             }
         }
@@ -641,6 +773,13 @@ impl WorkflowPanel {
         }
     }
     fn set_disabled(&mut self, disabled: bool, cx: &mut Context<Self>) {
+        for row in &self.targets {
+            for field in &row.parameters {
+                field
+                    .value
+                    .update(cx, |input, cx| input.set_disabled(disabled, cx));
+            }
+        }
         for task in &self.tasks {
             task.name
                 .update(cx, |field, cx| field.set_disabled(disabled, cx));

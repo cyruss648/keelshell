@@ -1,4 +1,6 @@
 //! Real SSH process responses arriving after the panel has retired its authority.
+#[path = "monitor_tests/independent_disk_monitor.rs"]
+mod independent_disk_monitor;
 use super::{Job, MonitorPanel};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
@@ -14,7 +16,7 @@ use russh::{
 use std::{
     sync::{
         Arc,
-        atomic::{AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
     },
     time::Duration,
 };
@@ -36,6 +38,8 @@ struct Control {
     terminating: AtomicUsize,
     inspect: Semaphore,
     terminate: Semaphore,
+    disk_samples: AtomicUsize,
+    hide_first_disk: AtomicBool,
 }
 impl Default for Control {
     fn default() -> Self {
@@ -47,6 +51,8 @@ impl Default for Control {
             terminating: AtomicUsize::new(0),
             inspect: Semaphore::new(0),
             terminate: Semaphore::new(0),
+            disk_samples: AtomicUsize::new(0),
+            hide_first_disk: AtomicBool::new(false),
         }
     }
 }
@@ -119,7 +125,24 @@ impl server::Handler for Peer {
             permit.forget();
             (String::new(), 0)
         } else if command.contains("cat /proc/stat") {
-            ("@@KS:platform@@\nLinux\n@@KS:stat@@\ncpu 100 20 30 400 50 0 0 0\nbtime 1700000000\n@@KS:meminfo@@\nMemTotal: 1024 kB\nMemAvailable: 256 kB\n@@KS:loadavg@@\n1.25 0.50 0.25 1/100 45\n@@KS:uptime@@\n100.00 75.00\n@@KS:net@@\nInter-| Receive | Transmit\n face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed\n lo: 100 1 0 0 0 0 0 0 200 1 0 0 0 0 0 0\n@@KS:df@@\nFilesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\n@@KS:end@@\n".into(), 0)
+            let sample = self.0.disk_samples.fetch_add(1, Ordering::AcqRel);
+            let mut disks = String::from(
+                "@@KS:bootid@@\n11ac8d57-72c6-4ee6-93bf-68724d27e715\n@@KS:diskstats@@\n",
+            );
+            for index in 0..12 {
+                if index == 0 && self.0.hide_first_disk.load(Ordering::Acquire) {
+                    continue;
+                }
+                let ticks = 100 + sample * 10;
+                let sectors = 200 + sample * 20;
+                disks.push_str(&format!("8 {index} fixture{index} {ticks} 0 {sectors} {ticks} {ticks} 0 {sectors} {ticks} 0 {ticks} {ticks}\n"));
+            }
+            let body = "@@KS:platform@@\nLinux\n@@KS:stat@@\ncpu 100 20 30 400 50 0 0 0\nbtime 1700000000\n@@KS:meminfo@@\nMemTotal: 1024 kB\nMemAvailable: 256 kB\n@@KS:loadavg@@\n1.25 0.50 0.25 1/100 45\n@@KS:uptime@@\n100.00 75.00\n@@KS:net@@\nInter-| Receive | Transmit\n face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed\n lo: 100 1 0 0 0 0 0 0 200 1 0 0 0 0 0 0\n@@KS:df@@\nFilesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\n@@KS:end@@\n";
+            (
+                body.replace("100.00 75.00", &format!("{}.00 75.00", 100 + sample * 5))
+                    .replace("@@KS:end@@", &(disks + "@@KS:end@@")),
+                0,
+            )
         } else if command.contains("ps -ww -eo") {
             ("42 tester 2.5 1.0 fixture-worker\n".into(), 0)
         } else {
@@ -256,6 +279,19 @@ async fn tcp_socket_probe_is_explicit_and_keeps_the_result_reviewable(cx: &mut T
     cx.update_window(h.window, |_, window, cx| {
         window.render_frame(cx);
         assert!(window.try_find(("probe-socket", 0_usize)).is_some());
+        for _ in 0..40 {
+            let button = window.find(("probe-socket", 0_usize)).bounds();
+            let viewport = window.find("monitor-scroll").bounds();
+            if button.origin.y >= viewport.origin.y && button.bottom() <= viewport.bottom() {
+                break;
+            }
+            window.scroll(
+                "monitor-scroll",
+                gpui_kit::ScrollDelta::Lines(point(0., -1.)),
+                cx,
+            );
+            window.render_frame(cx);
+        }
         window.click(("probe-socket", 0_usize), cx);
     })
     .checked("start TCP probe through explicit row action");
@@ -380,4 +416,93 @@ async fn mcp_monitor_reads_existing_fixed_cache_without_collecting_and_suspensio
             .is_none()
     );
     assert_eq!(h.control.commands.load(Ordering::Acquire), commands);
+}
+
+#[gpui_kit::test]
+async fn disk_device_selection_is_local_and_disappearance_cannot_display_old_rate(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("pause-monitor", cx);
+        window.scroll(
+            "monitor-scroll",
+            gpui_kit::ScrollDelta::Lines(point(0., -4.)),
+            cx,
+        );
+        window.render_frame(cx);
+        window.click(("monitor-disk-device", 0_usize), cx);
+        assert!(h.panel.read(cx).paused);
+        assert!(window.try_find("monitor-disk-unavailable").is_some());
+    })
+    .checked("select a real first sampled disk without a command");
+    let commands = h.control.commands.load(Ordering::Acquire);
+    assert_eq!(h.control.disk_samples.load(Ordering::Acquire), 1);
+    cx.update_window(h.window, |_, window, cx| {
+        window.click("refresh-monitor", cx)
+    })
+    .checked("explicit second sample");
+    h.idle(cx).await;
+    h.panel.read_with(cx, |panel, _| {
+        assert_eq!(
+            panel.selected_disk.as_ref().map(|id| id.name.as_str()),
+            Some("fixture0")
+        );
+        let rate = &panel.rates.disks[0].observation;
+        assert_eq!(
+            rate.as_ref().map(|rate| rate.read_bytes_per_second),
+            Ok(2048.)
+        );
+    });
+    assert_eq!(h.control.commands.load(Ordering::Acquire), commands + 2);
+    h.control.hide_first_disk.store(true, Ordering::Release);
+    cx.update_window(h.window, |_, window, cx| {
+        window.click("refresh-monitor", cx)
+    })
+    .checked("explicit disappearance sample");
+    h.idle(cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.try_find("monitor-disk-unavailable").is_some());
+        assert!(window.try_find("monitor-disk-metrics").is_none());
+        assert_eq!(
+            h.panel
+                .read(cx)
+                .selected_disk
+                .as_ref()
+                .map(|id| id.name.as_str()),
+            Some("fixture0")
+        );
+    })
+    .checked("disappeared device keeps its identity but no old numeric rates");
+    assert_eq!(h.control.terminating.load(Ordering::Acquire), 0);
+    assert_eq!(h.control.probes.load(Ordering::Acquire), 0);
+}
+
+#[gpui_kit::test]
+async fn disk_monitor_minimum_workspace_languages_themes_scroll_and_selection_are_stable(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    h.panel.update(cx, |panel, _| panel.paused = true);
+    cx.update_window(h.window, |_, window, cx| {
+        window.click("refresh-monitor", cx)
+    })
+    .checked("second real disk sample");
+    h.idle(cx).await;
+    let commands = h.control.commands.load(Ordering::Acquire);
+    crate::workspace::tests::verify_disk_monitor_minimum_workspace(h.panel.clone(), cx);
+    h.panel.read_with(cx, |panel, _| {
+        assert_eq!(
+            panel.selected_disk.as_ref().map(|id| id.name.as_str()),
+            Some("fixture11")
+        );
+        assert_eq!(panel.rates.disks.len(), 12);
+        assert!(panel.paused);
+    });
+    assert_eq!(h.control.commands.load(Ordering::Acquire), commands);
+    assert_eq!(h.control.terminating.load(Ordering::Acquire), 0);
 }

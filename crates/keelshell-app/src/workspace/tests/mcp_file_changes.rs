@@ -1,6 +1,8 @@
 //! Explicit desktop file review over real isolated SSH/SFTP and authenticated IPC.
 use super::*;
 use keelshell_mcp::content_sha256;
+#[path = "mcp_transfer_isolation.rs"]
+mod transfer_isolation;
 
 async fn grant_files(h: &Harness, read: bool, cx: &mut TestAppContext) -> SessionIdentity {
     let mut tools = vec![

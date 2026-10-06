@@ -159,9 +159,9 @@ impl SftpSession {
         if current != (source_snapshot.clone(), target_snapshot.clone()) {
             return Err(SessionError::Invalid("resume path changed during review"));
         }
-        source.close().await?;
+        source.close(None).await?;
         if let Some(target) = target {
-            target.close().await?;
+            target.close(None).await?;
         }
         Ok(FileResumePlan {
             connection: self._connection.clone(),
@@ -212,7 +212,13 @@ impl SftpSession {
         context: &TransferContext,
     ) -> TransferExecutionResult<()> {
         context.checkpoint().await?;
-        self.validate_file_resume(plan).await?;
+        context
+            .validation(
+                REVIEW_TIMEOUT,
+                "resume transfer revalidation",
+                self.validate_file_resume(plan),
+            )
+            .await?;
         context.checkpoint().await?;
         let raw = DirectoryChannel(self._connection.sftp_raw().await?);
         let mut source = open_source(&raw.0, &plan.spec).await?;
@@ -227,13 +233,18 @@ impl SftpSession {
         if let (Some(file), Some(snapshot)) = (&mut target, &plan.target) {
             ensure_snapshot(&file.snapshot().await?, snapshot)?;
         }
-        let digest = verify_content(
-            &mut source,
-            target.as_mut(),
-            plan.bytes(),
-            plan.existing_bytes(),
-        )
-        .await?;
+        let digest = context
+            .validation(
+                REVIEW_TIMEOUT,
+                "resume descriptor validation",
+                verify_content(
+                    &mut source,
+                    target.as_mut(),
+                    plan.bytes(),
+                    plan.existing_bytes(),
+                ),
+            )
+            .await?;
         if digest != plan.digest {
             return Err(SessionError::Invalid("resume source changed before writing").into());
         }
@@ -242,7 +253,7 @@ impl SftpSession {
             return Err(SessionError::Invalid("resume destination changed before writing").into());
         }
         if target.is_none() {
-            target = Some(open_target(&raw.0, &plan.spec, true, true).await?);
+            target = Some(io::create_transfer_target(&raw.0, &plan.spec, context).await?);
         }
         let mut target = target.ok_or(SessionError::Invalid("resume target is unavailable"))?;
         let mut generation = context.resume_generation();
@@ -252,7 +263,13 @@ impl SftpSession {
         while offset < plan.bytes() {
             context.checkpoint().await?;
             if generation != context.resume_generation() {
-                let named = self.scan_file_resume(plan.spec.clone(), false).await?;
+                let named = context
+                    .validation(
+                        REVIEW_TIMEOUT,
+                        "paused resume revalidation",
+                        self.scan_file_resume(plan.spec.clone(), false),
+                    )
+                    .await?;
                 ensure_snapshot(&named.source, &plan.source)?;
                 if named.digest != plan.digest
                     || named.existing_bytes() != offset
@@ -262,8 +279,8 @@ impl SftpSession {
                 }
                 // Rebind descriptors to the verified names. A remote rename can
                 // leave an old handle valid without exposing an inode identifier.
-                source.close().await?;
-                target.close().await?;
+                source.close(None).await?;
+                target.close(Some(context)).await?;
                 source = open_source(&raw.0, &plan.spec).await?;
                 target = open_target(&raw.0, &plan.spec, true, false).await?;
                 ensure_snapshot(&source.snapshot().await?, &plan.source)?;
@@ -273,8 +290,13 @@ impl SftpSession {
                     )
                     .into());
                 }
-                let digest =
-                    verify_content(&mut source, Some(&mut target), plan.bytes(), offset).await?;
+                let digest = context
+                    .validation(
+                        REVIEW_TIMEOUT,
+                        "reopened resume validation",
+                        verify_content(&mut source, Some(&mut target), plan.bytes(), offset),
+                    )
+                    .await?;
                 if digest != plan.digest {
                     return Err(SessionError::Invalid("resume source changed while paused").into());
                 }
@@ -289,15 +311,21 @@ impl SftpSession {
             if count == 0 {
                 return Err(SessionError::Invalid("resume source shrank while copying").into());
             }
-            target.write_at(offset, &buffer[..count]).await?;
+            context.confirmed_io();
+            target.write_at(offset, &buffer[..count], context).await?;
             offset += count as u64;
             context.progress(count as u64).await?;
         }
         context.checkpoint().await?;
         ensure_snapshot(&source.snapshot().await?, &plan.source)?;
         // Detect concurrent same-size content changes before claiming completion.
-        let final_digest =
-            verify_content(&mut source, Some(&mut target), plan.bytes(), plan.bytes()).await?;
+        let final_digest = context
+            .validation(
+                REVIEW_TIMEOUT,
+                "completed resume validation",
+                verify_content(&mut source, Some(&mut target), plan.bytes(), plan.bytes()),
+            )
+            .await?;
         if final_digest != plan.digest {
             return Err(SessionError::Invalid("resume source changed during transfer").into());
         }
@@ -311,12 +339,18 @@ impl SftpSession {
         {
             return Err(SessionError::Invalid("resume destination changed during transfer").into());
         }
-        source.close().await?;
-        target.close().await?;
+        source.close(None).await?;
+        target.close(Some(context)).await?;
         // Reopen the named destination too: a rename while paused can replace
         // the path while the old SFTP handle still addresses the original file.
         context.checkpoint().await?;
-        self.validate_completed_file_resume(plan).await?;
+        context
+            .validation(
+                REVIEW_TIMEOUT,
+                "completed resume named-file validation",
+                self.validate_completed_file_resume(plan),
+            )
+            .await?;
         Ok(())
     }
 }

@@ -12,6 +12,12 @@ use std::{
 
 use crate::{ExecOutput, SessionError, SshSession};
 
+mod disk;
+pub use disk::{
+    DiskCounters, DiskDevice, DiskIoError, DiskIoRates, DiskIoSnapshot, DiskRate,
+    DiskRateUnavailable,
+};
+
 const MAX_OUTPUT: usize = 2 * 1024 * 1024;
 const MAX_PROCESSES: usize = 20_000;
 const SNAPSHOT_SCRIPT: &str = r#"LC_ALL=C; export LC_ALL
@@ -28,6 +34,14 @@ printf '\n@@KS:net@@\n'
 cat /proc/net/dev || exit 65
 printf '\n@@KS:df@@\n'
 df -Pk || exit 65
+printf '\n@@KS:bootid@@\n'
+if [ -r /proc/sys/kernel/random/boot_id ]; then
+  cat /proc/sys/kernel/random/boot_id 2>/dev/null || printf '\n!unavailable\n'
+fi
+printf '\n@@KS:diskstats@@\n'
+if [ -r /proc/diskstats ]; then
+  cat /proc/diskstats 2>/dev/null || printf '\n!unavailable\n'
+fi
 printf '\n@@KS:end@@\n'
 "#;
 const PROCESSES_SCRIPT: &str = r#"LC_ALL=C; export LC_ALL
@@ -149,6 +163,9 @@ pub struct Snapshot {
     pub networks: Vec<NetworkCounters>,
     /// Mounted-filesystem capacities.
     pub filesystems: Vec<FilesystemSnapshot>,
+    /// Optional block-device counters. Unsupported or invalid optional data
+    /// does not discard otherwise valid CPU, memory, network or capacity data.
+    pub disk_io: Result<DiskIoSnapshot, DiskIoError>,
 }
 
 /// Per-second network rates for one interface after two valid samples.
@@ -171,6 +188,8 @@ pub struct SampleRates {
     pub cpu_iowait_percent: Option<f64>,
     /// Per-interface transfer rates.
     pub networks: Vec<NetworkRate>,
+    /// Individual block-device rates, without summing parent disks/partitions.
+    pub disks: Vec<DiskRate>,
 }
 
 impl Snapshot {
@@ -224,6 +243,10 @@ impl Snapshot {
             memory: parse_memory(required(&sections, "meminfo")?)?,
             networks: parse_networks(required(&sections, "net")?)?,
             filesystems: parse_filesystems(required(&sections, "df")?)?,
+            disk_io: match (sections.get("bootid"), sections.get("diskstats")) {
+                (Some(boot), Some(counters)) => DiskIoSnapshot::parse(boot, counters),
+                _ => Err(DiskIoError::MissingData),
+            },
         })
     }
 
@@ -231,8 +254,21 @@ impl Snapshot {
     /// counters invalidate affected rates instead of producing negative spikes.
     pub fn rates_since(&self, previous: &Self) -> SampleRates {
         let elapsed = self.uptime_seconds - previous.uptime_seconds;
+        let mut result = SampleRates {
+            disks: self.disk_io.as_ref().map_or_else(
+                |_| Vec::new(),
+                |current| {
+                    current.rates_since(
+                        previous.disk_io.as_ref().ok(),
+                        elapsed,
+                        self.boot_time == previous.boot_time,
+                    )
+                },
+            ),
+            ..SampleRates::default()
+        };
         if self.boot_time != previous.boot_time || !elapsed.is_finite() || elapsed <= 0.0 {
-            return SampleRates::default();
+            return result;
         }
         let deltas: Option<Vec<u64>> = self
             .cpu
@@ -241,7 +277,6 @@ impl Snapshot {
             .zip(previous.cpu.ticks)
             .map(|(now, before)| now.checked_sub(before))
             .collect();
-        let mut result = SampleRates::default();
         if let Some(deltas) = deltas {
             let total: Option<u64> = deltas
                 .iter()
@@ -634,7 +669,16 @@ fn sections(input: &str) -> MonitorResult<BTreeMap<String, String>> {
             .and_then(|line| line.strip_suffix("@@"))
         {
             if ![
-                "platform", "stat", "meminfo", "loadavg", "uptime", "net", "df", "end",
+                "platform",
+                "stat",
+                "meminfo",
+                "loadavg",
+                "uptime",
+                "net",
+                "df",
+                "bootid",
+                "diskstats",
+                "end",
             ]
             .contains(&marker)
                 || sections.contains_key(marker)
@@ -912,6 +956,26 @@ mod tests {
             Snapshot::parse(&SAMPLE.replace("\nLinux\n", "\nDarwin\n")),
             Err(MonitorError::Unsupported(_))
         ));
+    }
+
+    #[test]
+    fn optional_disk_absence_and_invalid_data_preserve_original_resources() -> MonitorResult<()> {
+        let original = Snapshot::parse(SAMPLE)?;
+        assert_eq!(original.disk_io, Err(DiskIoError::MissingData));
+        for extra in [
+            "@@KS:bootid@@\n\n@@KS:diskstats@@\n",
+            "@@KS:bootid@@\n11ac8d57-72c6-4ee6-93bf-68724d27e715\n@@KS:diskstats@@\n8 0 sda 1 2 3 4\n",
+            "@@KS:bootid@@\n11ac8d57-72c6-4ee6-93bf-68724d27e715\n@@KS:diskstats@@\n!unavailable\n",
+        ] {
+            let parsed =
+                Snapshot::parse(&SAMPLE.replace("@@KS:end@@", &format!("{extra}@@KS:end@@")))?;
+            assert!(parsed.disk_io.is_err());
+            assert_eq!(parsed.cpu, original.cpu);
+            assert_eq!(parsed.memory, original.memory);
+            assert_eq!(parsed.networks, original.networks);
+            assert_eq!(parsed.filesystems, original.filesystems);
+        }
+        Ok(())
     }
 
     #[test]

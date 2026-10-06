@@ -179,7 +179,7 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
             let hold = h
                 .server
                 .filesystem
-                .hold_transfer_writes_after_first(&remote)
+                .hold_atomic_upload_after_first(&remote)
                 .checked("hold this reviewed upload after its first real WRITE ACK");
             h.click(cx, "confirm-file-operation");
             cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
@@ -215,11 +215,11 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
             // complete chunk, then demand the actual Paused event below.
             hold.release();
             h.phase(cx, TransferPhase::Paused).await;
-            let paused_bytes = h.read(&remote);
+            let paused_bytes = h.staged(&remote);
             assert!(!paused_bytes.is_empty() && paused_bytes.len() < bytes.len());
             measure_state(&h, cx, "paused-transfer", width, height, assistant);
             assert_eq!(
-                h.read(&remote),
+                h.staged(&remote),
                 paused_bytes,
                 "paused layout must admit no later WRITE"
             );
@@ -348,7 +348,7 @@ async fn owned_write_hold_releases_real_uploads_on_early_exit_and_cancel(cx: &mu
         let mut hold = Some(
             h.server
                 .filesystem
-                .hold_transfer_writes_after_first(remote)
+                .hold_atomic_upload_after_first(remote)
                 .checked("own the exact reviewed target's write hold"),
         );
         h.local_input(cx, &source);
@@ -384,13 +384,14 @@ async fn owned_write_hold_releases_real_uploads_on_early_exit_and_cancel(cx: &mu
                     Some(TransferPhase::Cancelling)
                 );
             });
+            h.phase(cx, TransferPhase::Uncertain).await;
             drop(hold);
         }
         h.idle(cx).await;
         h.phase(
             cx,
             if cancel {
-                TransferPhase::Cancelled
+                TransferPhase::Uncertain
             } else {
                 TransferPhase::Completed
             },
@@ -401,11 +402,13 @@ async fn owned_write_hold_releases_real_uploads_on_early_exit_and_cancel(cx: &mu
                 && h.server.filesystem.active_directory_handles() == 0
         })
         .await;
-        let actual = h.read(remote);
-        if cancel {
-            assert!(!actual.is_empty() && actual.len() < bytes.len());
-            assert_eq!(actual, bytes[..actual.len()]);
+        let actual = if cancel {
+            h.missing(remote);
+            Vec::new()
         } else {
+            h.read(remote)
+        };
+        if !cancel {
             assert_eq!(actual, bytes);
         }
         cx.wait_for(h.window, Duration::from_secs(5), |_, _| {

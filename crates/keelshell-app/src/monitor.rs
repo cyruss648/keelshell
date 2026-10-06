@@ -1,5 +1,7 @@
 //! Live Linux monitoring, with a separately confirmed SIGTERM workflow.
 
+#[path = "monitor_disk.rs"]
+mod disk;
 #[cfg(test)]
 #[path = "monitor_tests.rs"]
 mod tests;
@@ -24,8 +26,8 @@ use gpui_kit::{
 use keelshell_session::{
     SshSession,
     monitor::{
-        LinuxMonitor, MonitorError, MonitorResult, ProcessIdentity, ProcessInfo, SampleRates,
-        Snapshot, SocketInfo, TcpProbeResult,
+        DiskDevice, LinuxMonitor, MonitorError, MonitorResult, ProcessIdentity, ProcessInfo,
+        SampleRates, Snapshot, SocketInfo, TcpProbeResult,
     },
 };
 
@@ -71,6 +73,7 @@ pub struct MonitorPanel {
     snapshot: Option<Snapshot>,
     mcp_sample_id: Option<uuid::Uuid>,
     rates: SampleRates,
+    selected_disk: Option<DiskDevice>,
     processes: Vec<ProcessInfo>,
     sockets: Vec<SocketInfo>,
     probes: BTreeMap<String, TcpProbeResult>,
@@ -123,6 +126,7 @@ impl MonitorPanel {
             snapshot: None,
             mcp_sample_id: None,
             rates: SampleRates::default(),
+            selected_disk: None,
             processes: Vec::new(),
             sockets: Vec::new(),
             probes: BTreeMap::new(),
@@ -1066,12 +1070,14 @@ impl Render for MonitorPanel {
         }
         let content = div()
             .id("monitor-scroll")
+            .test_support()
             .flex_1()
             .min_h_0()
             .overflow_y_scroll()
             .px_3()
             .child(resources)
             .child(processes)
+            .child(self.disk_view(cx))
             .child(networks)
             .child(sockets)
             .child(disks);
@@ -1104,6 +1110,7 @@ impl Render for MonitorPanel {
             .child(
                 div()
                     .id("monitor-operation-status")
+                    .test_support()
                     .max_h(px(110.))
                     .overflow_y_scroll()
                     .px_3()

@@ -1,6 +1,6 @@
 # 外部智能体提议远程文件修改
 
-外部 MCP 服务新增 `keelshell_propose_file_change`。它只把精确现有文件的完整替换提交给 KeelShell 人工审阅；外部智能体不能批准或自行写入。应用内 API / CLI Ask 保持独立。
+KeelShell 对外 MCP 服务提供 `keelshell_propose_file_change`。它只把精确现有文件的完整替换提交给 KeelShell 人工审阅；外部智能体不能批准或自行写入。应用内 API / CLI Ask 保持独立。
 
 1. 在真实已认证 SSH 会话打开 MCP，勾选“提交待审文件修改”，填写要授权的 canonical 远程目录，再明确授权。默认没有勾选任何能力。文件提案与读取文件分别授权；模型文本不能扩大目录或读取权限。
 2. 客户端使用确切 `target` 三个 UUID、`path`、`expected_sha256` 和 `replacement` 提案。旧 hash 必须来自完整原文；已授予 `keelshell_sftp_read` 时，读取结果包含完整 UTF-8 `text` 与对应 `sha256`。

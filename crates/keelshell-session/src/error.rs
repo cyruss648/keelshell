@@ -57,6 +57,18 @@ pub enum SessionError {
     /// A directory response exceeds the caller's entry limit.
     #[error("directory exceeds {0} entries")]
     EntryLimit(usize),
+    /// Another admitted application mutation owns this path or worker budget.
+    #[error("file target is busy; review again after the active mutation finishes")]
+    MutationBusy,
+    /// A conflicting mutation has no confirmed outcome; ordinary approval is
+    /// insufficient. Explicit inspection and exact risk acknowledgement are required.
+    #[error(
+        "file target is isolated by an unknown mutation; inspect and explicitly acknowledge its risk"
+    )]
+    MutationQuarantined,
+    /// A mutating request lost its reply; process-wide destination isolation remains.
+    #[error("file mutation outcome is unknown; destination remains isolated")]
+    MutationUncertain,
     /// A remote mutation was acknowledged but its requested result could not
     /// be verified. The caller must refresh the entry before retrying.
     #[error("remote mutation acknowledged but verification failed: {0}")]
@@ -89,7 +101,10 @@ impl SessionError {
             | Self::Unsupported(_)
             | Self::OutputLimit(_)
             | Self::EntryLimit(_)
-            | Self::UnverifiedMutation(_) => false,
+            | Self::UnverifiedMutation(_)
+            | Self::MutationBusy
+            | Self::MutationQuarantined
+            | Self::MutationUncertain => false,
         }
     }
 }
