@@ -25,8 +25,18 @@ use sftp_fixture::MetadataKind;
 // Serialize them within this binary without weakening production exclusion.
 static SCENARIOS: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 
+#[path = "fixtures/directory_mirror.rs"]
+mod directory_mirror;
+#[path = "fixtures/directory_mirror_independent.rs"]
+mod directory_mirror_independent;
+#[path = "fixtures/directory_mirror_revocation_review.rs"]
+mod directory_mirror_revocation_review;
 #[path = "fixtures/directory_sync_isolation.rs"]
 mod directory_sync_isolation;
+#[path = "fixtures/recursive_directory_mirror.rs"]
+mod recursive_directory_mirror;
+#[path = "fixtures/recursive_mirror_final_review.rs"]
+mod recursive_mirror_final_review;
 const IDLE: Duration = Duration::from_millis(500);
 const CADENCE_MS: usize = 150;
 

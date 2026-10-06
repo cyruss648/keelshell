@@ -132,3 +132,18 @@ Fresh independent review and the combined-main gate passed. The controlled
 macOS two-upload/pause/continue scene is recorded in the
 [native record](../testing/records/2026-10-06-parallel-transfers-native-v5.md); other
 transfer modes, minimum-window and other-platform acceptance remain open.
+
+## 审核式目录镜像 / Reviewed directory mirror
+
+普通合并默认保留目标独有项。额外的两个镜像方向入口只生成只读计划，完整审核后
+可精确删除常规文件和目录树；全部子节点逐项审核、子先父后删除，链接和冲突阻止整份计划。逐项结果保留
+已完成、已知拒绝、取消及未知边界，既有树所有权和隔离继续适用。详见
+[镜像指南](DIRECTORY_MIRROR.md)，递归子树候选已实现，新的非作者复核、主树整合及原生桌面验收仍开放。
+
+Merge keeps destination-only entries by default. The two explicit mirror
+directions prepare read-only plans before full confirmation can remove exact
+regular files and fully expanded directory subtrees. Children are removed before
+empty parents; links and conflicts block the whole plan. Per-item results preserve completed, rejected,
+cancelled and unknown boundaries under existing tree ownership and quarantine.
+See the [mirror guide](DIRECTORY_MIRROR.md); new independent review, main integration and desktop
+acceptance of the recursive extension remain open.

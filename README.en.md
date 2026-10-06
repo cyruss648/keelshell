@@ -6,10 +6,12 @@
 
 <p align="center">
   <strong>Connect to your servers. Stay focused on your work.</strong><br>
-  A native SSH workspace built with Rust and GPUI Kit, bringing terminals, remote files, host status, and AI assistance together.
+  A native SSH workspace built with Rust and GPUI Kit, bringing remote terminals, files, host status and AI assistance together.
 </p>
 
-<p align="center"><a href="README.md">简体中文</a> · English</p>
+<p align="center">
+  <a href="README.md">简体中文</a> · English
+</p>
 
 <p align="center">
   <a href="https://github.com/cyruss648/keelshell/actions/workflows/ci.yml"><img src="https://github.com/cyruss648/keelshell/actions/workflows/ci.yml/badge.svg" alt="Quality"></a>
@@ -19,113 +21,58 @@
 <p align="center">
   <a href="#getting-started">Getting started</a> ·
   <a href="#features">Features</a> ·
-  <a href="#ai-that-keeps-you-in-control">AI assistance</a> ·
+  <a href="#ai-assistance-and-external-mcp">AI and MCP</a> ·
   <a href="docs/README.md">Documentation</a> ·
-  <a href="docs/ROADMAP.md">Roadmap</a> ·
-  <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="docs/ROADMAP.md">Roadmap</a>
 </p>
 
-> **Development preview:** [Building from source](#build-from-source) is recommended today. Basic SSH, SFTP, session management, and reviewed AI requests are implemented, including transfer pause, continue, and content-verified resumption; manual reconnection in the original tab and optional bounded automatic reconnection are available. See the [capability ledger](docs/product/CAPABILITIES.md) for implementation and verification status.
+> **Development preview:** building from source is recommended. Cross-platform desktop flows, complete external-client workflows and installed updates remain under verification. See the [capability ledger](docs/product/CAPABILITIES.md) for scope.
 
-![KeelShell remote terminal, host status, and SFTP workspace](assets/screenshots/workspace-macos.jpg)
+![KeelShell remote terminal, host status and SFTP workspace](assets/screenshots/workspace-macos.jpg)
 
-<p align="center"><sub>A native macOS development build connected to an isolated loopback SSH/SFTP fixture. The interface is evolving.</sub></p>
+<p align="center"><sub>A native macOS development build connected to an owned, isolated SSH/SFTP service. The interface evolves with development.</sub></p>
 
-KeelShell is for developers and operators who work with servers, logs, and remote files every day. Terminals, files, and host status follow the current SSH session as you switch tabs. The command bar keeps the destination visible, and AI suggestions are yours to review and execute.
+KeelShell is for developers and operators who connect to servers, inspect logs and work with remote files. Terminals, files and host status follow the active SSH session, while commands and AI suggestions show their intended destination.
 
-The interface defaults to Simplified Chinese and supports English. Appearance follows the system by default, with Light and Dark choices. The project targets macOS, Windows, and Linux, with a focus on remote SSH workflows. AI assistance is optional: server connections and SFTP file operations work independently.
+Simplified Chinese is the default, with English available. Appearance follows the system by default, or can be set to Light or Dark. The application focuses on remote SSH workflows; AI is optional.
 
 ## Features
 
-| Workflow | Available functionality |
+| Workflow | Capabilities |
 | --- | --- |
-| **Connections** | When no remote session is active, start a one-time SSH session from the Quick connect form without writing a profile, or explicitly save it as a connection; nested folders, tags, favorites, recent connections, and trash; explicit selection and review for bulk folder moves, tags, favorites, trash, restoration, and permanent cleanup; profile editing/copying, search, JSON import/export, and clipboard OpenSSH config import with exact-host parsing, source locations, and confirmation review; password, private key, and SSH Agent authentication; explicitly switch a login attempt to keyboard-interactive/MFA prompts with one-time answers; up to four jump hosts with per-hop identity review and authentication; an optional SOCKS5 or HTTP CONNECT upstream proxy for each hop |
-| **Remote terminals** | Session tabs and a two-pane split, ANSI/VT emulation, scrollback search, selection, paste, and CJK input |
-| **Command workflow** | Per-session command history; multiline snippets with explicit parameters and full command previews; local history/snippet suggestions and explicitly requested remote command and path completion |
-| **Batch commands** | Select connected SSH sessions, enter named values for each target or use connection metadata markers, then review each complete command, concurrency and timeout before independent execution; inspect per-target exit status and output, stop pending jobs on failure and cancel; runs with user parameters remain in memory, while ordinary runs retain a summary audit without command text, output or addresses |
-| **Dependency workflows** | Manually edit 1–128 tasks and explicitly select up to 32 authenticated SSH targets and prerequisites; tasks on the same target share named values, with complete source/rendered commands, targets, dependencies and execution options reviewed before running; inspect per-task states and bounded output, release dependents only on confirmed success, continue independent branches, hide/reopen and cancel; read-only task history saves fixed results and UUIDs, including each finite scheduled occurrence, without restoring or replaying work on restart (see [task history](docs/product/WORKFLOW_HISTORY.md)) |
-| **Remote files** | SFTP browsing, file and recursive directory uploads/downloads, transfer review, progress, pause/continue and cancellation, content-verified file and directory resumption, an explicit read-only recovery check for failed transfers in the same SSH session, directory creation, rename and delete, text viewing, local diff preview against the read baseline, reviewed saves, and metadata comparison, SHA-256 content verification and explicitly confirmed bidirectional directory merges preserving destination-only entries |
-| **Host status** | Linux CPU, memory, load, uptime, disk capacity, per-device throughput/request timing/in-flight I/O, network counters, processes, and listening socket diagnostics; missing or invalid samples are marked unavailable |
-| **Port forwarding** | Local/remote TCP forwarding and a loopback SOCKS5 proxy, with actual listener addresses, status, and stop controls |
-| **AI assistance** | Named model API / Codex CLI / Claude Code profiles, Chat Completions/Responses/Anthropic Messages model discovery and connection testing, context selection, exact protocol request previews, output-token limits and conservative context-window admission, answers, and command suggestions; replies can become session-bound diagnostic plans with step-by-step review |
-| **External MCP** | Disabled by default; explicitly granted active sessions, terminal fragments, SFTP directories/files and monitor caches are available to external agents; commands and complete replacements of existing UTF-8 files become proposals for exact-target human review, and grants can be revoked immediately |
-| **About and updates** | In-app project link, version and changelog; platform-aware GitHub Release checks, downloads and SHA-256 verification with opt-in install and restart |
+| **Connections** | One-time quick connections, folders, tags, favorites, recent connections and trash; reviewed bulk organization, import/export and encrypted profile sync; password, private key, SSH Agent and keyboard-interactive authentication; jump hosts and SOCKS5 / HTTP CONNECT upstream proxies |
+| **Remote terminals** | Session tabs, a two-pane split, ANSI/VT terminal, scrollback search, selection, paste and CJK input; manual reconnection in the original tab and optional bounded automatic reconnection |
+| **Remote files** | SFTP browsing, file and recursive directory transfers, pause and content-verified resumption; permissions, text editing and diff review; folder comparison, content verification, bidirectional merging and individually reviewed directory mirrors |
+| **Commands and tasks** | Session history, snippets, explicit parameters, remote command/path completion; per-target batch commands, dependency workflows, finite schedules and read-only task history |
+| **Monitoring and networking** | Linux host status and per-device disk I/O; listening sockets and remote DNS / TLS / HTTP(S) HEAD diagnostics; local/remote TCP forwarding and loopback SOCKS5 tunnels |
+| **AI assistance** | Named model API / Codex CLI / Claude Code profiles; model discovery and connection testing, explicit context, complete request previews, answers and reviewed diagnostic suggestions |
+| **External MCP** | External agents read explicitly granted session information, terminal fragments, SFTP and monitoring; commands and file changes are proposed for review and execution in the desktop app |
+| **About and updates** | Project link, version and bundled changelog; platform-aware release checks, SHA-256 verified downloads and opt-in installation/restart |
 
-Pausing waits for in-flight operations to be acknowledged before showing “Paused.” To resume a partial file or directory, explicitly select the source and destination, review the content verification, and confirm; after reconnecting or restarting, create a new resumption plan. See the [transfer verification record](docs/testing/records/2026-10-03-sftp-resume.md).
+Canceling a transfer or mirror retains completed operations; disconnection does not replay commands, transfers or tasks. Directory comparison/sync has explicit size, type and path limits. Protocol diagnostics require remote POSIX / Python 3.8+. See the [file workspace](docs/product/FILES_WORKSPACE.md), [directory mirrors](docs/product/DIRECTORY_MIRROR.md), [remote protocol diagnostics](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md) and [capability ledger](docs/product/CAPABILITIES.md) for workflows and boundaries.
 
-Select profiles in the connection library to review bulk folder moves, tags, favorites, trash, or restoration. Review includes selected profiles hidden by search and checks jump-host dependencies. Permanent cleanup requires separate confirmation of the exact profiles. Organization changes local metadata while established SSH sessions stay open. See the [connection library guide](docs/product/CONNECTION_LIBRARY.md) for the workflow and credential-retention rules.
+## AI assistance and external MCP
 
-Connection profiles can synchronize through a user-selected shared directory with end-to-end encryption, reviewed differences, offline conflicts and deletion tombstones. See [profile sync](docs/product/PROFILE_SYNC.md); native and network-mount acceptance remains recorded separately.
+**Use AI inside KeelShell:** create a named model API or local CLI profile, select context explicitly, inspect the actual request and send your question. API profiles support Chat Completions, Responses and Anthropic Messages, with request headers, proxies, reasoning and sampling options. Suggested commands remain bound to the captured SSH target and require your review before execution.
 
-After comparing folders, choose a content-verification direction and review synchronization. Each merge rechecks both sides, replaces files through same-directory temporary files and verifies the resulting hash. Limits are 64 MiB/file and 256 MiB/both sides; destination-only files are preserved, and links or type conflicts are refused. Cancellation or failure may leave completed operations; see the [directory merge record](docs/testing/records/2026-10-04-directory-sync-execution.md).
+Local Claude Code / Codex CLI currently provide single-turn Ask using explicit API credentials, an isolated directory and a controlled environment. Subscription login, custom working directories and restricted Agent workflows remain in development. See [local agents](docs/product/LOCAL_AGENTS.md), [API request options](docs/product/AI_REQUEST_OPTIONS.md) and [inference settings](docs/product/AI_INFERENCE.md).
 
-After disconnection, output and drafts are retained. Reconnection rechecks the complete route and server identities; click Continue when authentication is required. Review old commands again before running them. Transfers and tunnels are not restarted automatically. See the [reconnection verification record](docs/testing/records/2026-10-03-reconnection.md).
+**Let external agents use KeelShell:** KeelShell provides an MCP server. Its stdio companion connects to the running desktop application. You select the SSH sessions, tools, terminal fragments and directories an agent may access. Agents can read granted information or propose commands and complete replacements of existing UTF-8 files. KeelShell presents the complete target and content for review; clients cannot approve their own actions. Configuration and the eight tools are documented in the [external MCP guide](docs/product/EXTERNAL_MCP.md).
 
-Click **Complete remotely** in the command bar, or press `Ctrl+Space`, to look up the command name or literal path at the caret. Relative paths use the displayed completion directory, which can be taken from the file panel or SFTP base; insertion uses the full path. A candidate replaces only the current word, preserving multiline and Unicode input for review before execution. The independent PATH query does not include interactive shell aliases, functions, or temporary environment changes; the terminal's own Tab completion remains available. See the [completion design and verification record](docs/testing/records/2026-10-03-remote-completion.md).
-
-Enable parameters in the snippet editor to use `{{name}}` for literal values supplied this time. Review the preview before inserting it into the command bar; expanded commands skip session history by default. Batch tasks require explicit selection of connected sessions and can render a restricted metadata marker set per target; the review panel shows each final command before confirmation. Jobs run through independent SSH exec channels after review, without inheriting the interactive terminal's current directory. Cancellation cannot confirm that a remote process has stopped. See the [batch and diff verification record](docs/testing/records/2026-10-04-batch-audit-diff.md) and the [per-target template record](docs/testing/records/2026-10-04-reviewed-batch-templates.md) for this increment's validation status.
-
-For operations with prerequisites, click **Dependency workflow** in the command area, edit tasks, and select their targets and prerequisites. Complete review shows each command as it will be sent and its route; execution starts only after human confirmation. Failed, unknown or skipped tasks block their dependents. A run can be hidden and reopened; tasks, commands and output stay in the current workspace without automatic retry or restoration. See the [dependency workflow guide](docs/product/DEPENDENCY_WORKFLOWS.md).
-
-A reviewed dependency workflow can be scheduled for a finite sequence of 1–32 occurrences. Each retains the authenticated connection and complete commands; application shutdown, invalidated review or disconnection does not trigger automatic reconnection or replay. See the [scheduled workflow guide](docs/product/SCHEDULED_WORKFLOWS.md) for configuration and limits.
-
-File actions wrap to the available width; editor, comparison and transfer details scroll while the browser retains room for real entries and Confirm/Cancel remain separately reachable. Short windows place the completion directory and its actions on one row to leave room for the remote terminal; opening candidates temporarily folds the file area, and closing them restores the same panel. Connection-library changes, dependency workflows and file layouts passed independent code/GPUI re-review, and the new compact layout passed the full local workspace checks, fresh independent review and controlled minimum-window macOS acceptance. Native desktop acceptance on Windows/Linux remains open. Source and CI verification are tracked in the [integration record](docs/testing/records/2026-10-05-workspace-workflows-integration.md) and the [SSH fixture record](docs/testing/records/2026-10-05-ssh-timeout-fixture-stability.md).
-
-## AI that keeps you in control
-
-1. **Configure a provider.** Create a named model API, Codex CLI or Claude Code profile. API profiles support Chat Completions, Responses and Anthropic Messages, including self-hosted services, with optional discovery and connection testing. Local CLI profiles require a native executable path, service base URL, explicit API key and model; checking the CLI only verifies version and capabilities. See the [local agent guide](docs/product/LOCAL_AGENTS.md).
-2. **Choose the context.** Select terminal content, inspect the redacted request, and send it when ready.
-3. **Review the suggestions.** Read the response and its captured SSH host and session, place any suggested command in the command bar, and confirm its content and destination before executing it. An unbound or invalid target explains the reason beside the control; select terminal context explicitly and generate a new reply.
-
-Local CLI profiles support API-key environment references: users explicitly load a temporary key, metadata saves only the variable name, and sending freezes the reviewed value. Fresh independent review, main checks and three-platform source CI passed. Native acceptance of the new entry, arbitrary working directories and other environment forwarding remain open. See the [local agent guide](docs/product/LOCAL_AGENTS.md).
-
-API keys stay in memory by default and can be explicitly saved encrypted. Saving and unlocking a configuration make no network requests. Additional protocols and assistant workflows are tracked in the [roadmap](docs/ROADMAP.md).
-
-Local Ask displays bounded request progress for CLI admission, actual process launch, reviewed stdin delivery, protocol receipts and finalizing. Cancel remains fixed and the observed facts can be expanded and scrolled. End receipts and finalizing do not establish success; replies appear only after the final protocol, exit and cleanup checks pass. This does not display tool steps or partial answers. Independent review, the full main check and a bounded macOS Chinese Light native flow are complete; minimum size, the full language/theme matrix and other native platforms remain open. See the [progress record](docs/testing/records/2026-10-06-local-ask-stages.md) and [native partial record](docs/testing/records/2026-10-06-local-ask-progress-native.md).
-
-API profiles also support custom request headers and an explicit HTTP(S)/SOCKS5 proxy for model discovery, connection tests and reviewed questions. Values can come from the current process, environment references or the encrypted vault. The preview shows the actual destination and route, and secret values are excluded from configuration metadata. See [API request options](docs/product/AI_REQUEST_OPTIONS.md) for setup and use. Each API model can keep its own reasoning effort, thinking mode and optional temperature or Top P. Defaults omit these fields, and the actual request is reviewable before sending. Check the exact model’s support; see [inference and sampling](docs/product/AI_INFERENCE.md).
-
-In-app AI and external MCP are separate entry points. Local CLI Ask uses explicit API credentials, an isolated directory and a controlled environment; it currently does not reuse subscription login. Restricted Agent workflows continue under the [development plan](docs/product/DESIGN_AND_AGENT_PLAN.md).
-
-External MCP connects a separate stdio companion to the running KeelShell app. You choose the SSH sessions, terminal fragments, directories and tools an external agent may access. Agents can read granted information or propose commands and replacements of existing UTF-8 files. The app presents the exact destination and complete content or diff for human approval; rejection, revocation or invalidation does not trigger an automatic retry. See the [external MCP guide](docs/product/EXTERNAL_MCP.md) and [file proposal guide](docs/product/MCP_FILE_CHANGES.md) for configuration and the eight tools. KeelShell does not provide a general client for arbitrary third-party MCP services.
-
-Bounded macOS native flows and authorized Claude Code calls have been verified. Complete Codex MCP workflows, the full theme/language/minimum-window matrix, Windows/Linux desktop acceptance and installed updates remain open. The [capability ledger](docs/product/CAPABILITIES.md), [theme record](docs/testing/records/2026-10-04-system-themes.md) and [test records](docs/testing/records/) preserve actual coverage and failures.
+The two entry points have separate configuration. SSH and AI credentials are temporary by default; explicit persistence uses a vault encrypted with a master password. Profile exports exclude local credentials and host-trust records. See [AI design plan](docs/product/DESIGN_AND_AGENT_PLAN.md) and the [connection library](docs/product/CONNECTION_LIBRARY.md).
 
 <details>
 <summary>View AI settings</summary>
 
-![KeelShell provider settings, model discovery, and connection testing](assets/screenshots/ai-settings-macos.jpg)
+![KeelShell provider settings, model discovery and connection testing](assets/screenshots/ai-settings-macos.jpg)
 
 The screenshot uses a local mock service and contains no real provider credentials.
 
 </details>
 
-<details>
-<summary>How credentials are stored</summary>
-
-SSH passwords and private-key passphrases are used for one connection by default. A proxy username can be stored in the profile; its password is used only for the current connection. Explicitly saved SSH credentials go into a local vault encrypted with a master password, which is required again for every connection. Unlinking removes the profile reference while retaining the encrypted entry. Vault management supports inspection and removal of unlinked entries, along with master-password rotation.
-
-After a restart, explicitly saved AI keys must be unlocked with the master password and applied to the assistant. Changing the service endpoint clears the old key reference. Connection JSON exports exclude local credential references and host-trust records.
-
-</details>
-
 ## Getting started
 
-Building from source is recommended during development. Versioned packages will be available from [GitHub Releases](https://github.com/cyruss648/keelshell/releases), with SHA-256 checksums.
-
-Open **About / updates** from the toolbar to read the bundled changelog, check for a new version and download the matching release package. Downloads stay in a private temporary directory and are verified against the checksum published with the release. **Install and restart** starts a separate helper that revalidates the package manifest, replaces only listed files, and rolls back on failure. Development builds or non-standard installations remain reviewable for manual installation; signing, permissions and native installation acceptance still need to be completed in each release environment.
-
-| Platform | Build targets | Package |
-| --- | --- | --- |
-| macOS 15+ | Apple Silicon / Intel | ZIP containing the `.app` bundle |
-| Windows | ARM64 / x64 | ZIP containing the GUI / MCP executables and icon |
-| Linux | ARM64 / x64; Ubuntu 24.04 baseline | `.tar.gz` with the executable and desktop resources |
-
-See the [release verification record](docs/testing/records/2026-10-03-release.md) for actual build and desktop acceptance status. Distribution does not yet include macOS Developer ID signing, notarization, or Windows code signing. Packaging and tag-triggered publication are documented in [Releasing](docs/RELEASING.md).
-
-### Build from source
-
-Prepare the [platform build dependencies](.github/actions/setup-build/action.yml), install Rustup and Python 3.11+, and clone the repository. `rust-toolchain.toml` selects the pinned Rust toolchain.
+Install Rustup, Python 3.11+ and the [platform build dependencies](.github/actions/setup-build/action.yml). `rust-toolchain.toml` selects the exact Rust toolchain. Build both the application and its MCP companion.
 
 ```sh
 git clone https://github.com/cyruss648/keelshell.git
@@ -136,28 +83,33 @@ cargo run -p keelshell-app --locked
 
 If you use [mise](https://mise.jdx.dev/), run `mise install` in the repository.
 
-### Your first connection
+1. Fill in **Quick connect** on the home screen with a host, port and username to start a one-time SSH session. Choose **Save as connection…** when you want to reuse it.
+2. Verify the server fingerprint against a trusted source and authenticate. A changed saved fingerprint blocks the connection until reviewed.
+3. Use the remote terminal and file panel. Linux hosts also provide monitoring; configure an AI provider/model when needed.
 
-1. When no remote session is active, fill in **Quick connect** with the server address, port, and username to start a one-time SSH session; to reuse it later, choose **Save as connection…** and then explicitly save the profile in the editor. Existing profiles remain available in the library and through **New connection**.
-2. Connect, verify the server fingerprint against a trusted source, and approve it. A changed saved fingerprint blocks the connection until you review it again.
-3. Use the remote terminal and file panel in the session tab. Host status is available for Linux servers. Configure a provider and model whenever you want AI assistance.
+Copy an existing OpenSSH configuration and use **Import SSH config** to review supported exact Host and jump-host entries. Import does not execute commands from the configuration.
 
-If you already maintain an OpenSSH config, copy its text and select **Import SSH config**. The importer accepts only exact Host, HostName, Port, User, IdentityFile, ProxyJump, and explicitly supplied Include content; wildcard, conditional, and ProxyCommand entries are reported for review and are never executed.
+## Platforms and releases
 
-## Documentation
+| Platform | Targets | Package layout |
+| --- | --- | --- |
+| macOS 15+ | Apple Silicon / Intel | ZIP containing the `.app` |
+| Windows | ARM64 / x64 | ZIP containing GUI / MCP EXEs and resources |
+| Linux | ARM64 / x64; Ubuntu 24.04 baseline | `.tar.gz` containing binaries and desktop resources |
 
-| Looking for | Start here |
+The tag-triggered release workflow defines six build targets. Successful tagged builds publish packages and checksums to [GitHub Releases](https://github.com/cyruss648/keelshell/releases). Actual builds, desktop workflows and installed updates are recorded separately; a configured workflow does not establish acceptance.
+
+**About / updates** reads the changelog, checks versions and verifies downloads. Installation and restart require explicit confirmation. Platform signing, notarization and native update installation remain open; see [Releasing](docs/RELEASING.md).
+
+## Documentation and contributing
+
+| Content | Start here |
 | --- | --- |
-| Available features and current limitations | [Capability ledger](docs/product/CAPABILITIES.md) |
-| Product workflows, interaction rules, and plans | [Product design](docs/product/PRODUCT.md) · [Roadmap](docs/ROADMAP.md) |
-| Repository structure, local development, and check commands | [Contributing](CONTRIBUTING.md) |
-| Test coverage and platform verification | [Testing strategy](docs/testing/STRATEGY.md) · [Test records](docs/testing/records/) |
-| Platform packages, checksums, and tag-triggered releases | [Releasing](docs/RELEASING.md) |
+| Implemented capabilities, limits and plans | [Capability ledger](docs/product/CAPABILITIES.md) · [Roadmap](docs/ROADMAP.md) |
+| Workflows and design decisions | [Documentation](docs/README.md) · [Product design](docs/product/PRODUCT.md) · [ADRs](docs/adr/) |
+| Repository structure, local development and checks | [Contributing](CONTRIBUTING.md) |
+| Behavior tests and platform evidence | [Testing strategy](docs/testing/STRATEGY.md) · [Test records](docs/testing/records/) |
 
-## Contributing
+Use [Issues](https://github.com/cyruss648/keelshell/issues) to report bugs, share feedback and propose improvements. Reproduction steps, anonymized profiles and platform details help diagnosis. Start with the contributing guide for code and documentation changes.
 
-Report bugs, share feedback, and propose improvements through [Issues](https://github.com/cyruss648/keelshell/issues). Reproduction steps, anonymized profiles, and platform verification results are all useful. Start with [Contributing](CONTRIBUTING.md) for code and documentation changes.
-
-## Acknowledgements
-
-Built with [Rust](https://www.rust-lang.org/), [GPUI Kit](https://gpui-kit.com/), [Alacritty](https://github.com/alacritty/alacritty), [russh](https://github.com/Eugeny/russh), and their communities. Thank you to everyone maintaining these projects.
+KeelShell is built on [Rust](https://www.rust-lang.org/), [GPUI Kit](https://gpui-kit.com/), [Alacritty](https://github.com/alacritty/alacritty), [russh](https://github.com/Eugeny/russh) and other open-source projects. Thanks to their contributors.

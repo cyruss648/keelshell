@@ -69,7 +69,7 @@ enum Operation {
         DirectorySyncDirection,
         DirectorySyncDeletePolicy,
     ),
-    ApplyDirectorySync(Box<DirectorySyncComparison>),
+    ApplyDirectorySync(Box<DirectorySyncComparison>, sync::journal::SharedJournal),
     Save {
         path: String,
         original: Vec<u8>,
@@ -111,6 +111,7 @@ pub struct FilesPanel {
     mode: Entity<InputState>,
     local: Entity<InputState>,
     editor: Entity<TextareaState>,
+    confirmation_scroll: ScrollHandle,
     tools_scroll: ScrollHandle,
     transfer_list_scroll: ScrollHandle,
     entries: Vec<RemoteEntry>,
@@ -128,6 +129,8 @@ pub struct FilesPanel {
     isolation_target: Option<IsolationTarget>,
     resume_mode: bool,
     comparison: Option<DirectoryComparison>,
+    sync_journal: Option<sync::journal::SharedJournal>,
+    mirror_conflicts: Vec<keelshell_core::DirectoryMirrorConflict>,
     transfer_jobs: Vec<parallel::QueuedTransfer>,
     selected_transfer: Option<uuid::Uuid>,
     transfer_queue: Arc<tokio::sync::OnceCell<Arc<keelshell_session::sftp::TransferQueue>>>,
@@ -269,6 +272,7 @@ enum FileFailure {
         error: Box<FileFailure>,
     },
     Comparison(String),
+    MirrorConflicts(Vec<keelshell_core::DirectoryMirrorConflict>),
 }
 
 /// Return a terminal phase only for an operation that actually transferred
@@ -326,6 +330,7 @@ impl std::fmt::Display for FileFailure {
             Self::DirectoryTransfer { destination, error } => {
                 write!(f, "{error}; inspect partial directory {destination}")
             }
+            Self::MirrorConflicts(conflicts) => write!(f,"bounded mirror refused {} conflicts", conflicts.len()),
             Self::Comparison(detail) => write!(f, "Directory comparison failed: {detail}"),
         }
     }
@@ -348,6 +353,16 @@ impl FileFailure {
             Self::IsolationUnknown => Message::new(
                 "目标存在未知写入结果，已隔离。普通保存或 MCP 提案确认不会解除隔离；请只读检查并显式审核风险。",
                 "This target is isolated by an unknown mutation. Ordinary save or MCP approval cannot release it; inspect read-only and explicitly review its risk.",
+            ),
+            Self::MirrorConflicts(conflicts) => Message::new(
+                format!(
+                    "镜像计划已拒绝：{} 项冲突；请查看完整只读列表。没有写入或删除。",
+                    conflicts.len()
+                ),
+                format!(
+                    "Mirror refused: {} conflicts; inspect the complete read-only list. Nothing was written or deleted.",
+                    conflicts.len()
+                ),
             ),
             Self::Transport(detail) => Message::new(
                 format!("文件操作失败：{detail}。远端结果可能未知，请检查后再重试。"),
@@ -503,6 +518,7 @@ impl FilesPanel {
             ),
             local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
             editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
+            confirmation_scroll: ScrollHandle::new(),
             tools_scroll: ScrollHandle::new(),
             transfer_list_scroll: ScrollHandle::new(),
             entries: Vec::new(),
@@ -520,6 +536,8 @@ impl FilesPanel {
             isolation_target: None,
             resume_mode: false,
             comparison: None,
+            sync_journal: None,
+            mirror_conflicts: Vec::new(),
             transfer_jobs: Vec::new(),
             selected_transfer: None,
             transfer_queue: Arc::new(tokio::sync::OnceCell::new()),
@@ -648,6 +666,15 @@ impl FilesPanel {
             );
             cx.notify();
             return;
+        }
+        if matches!(
+            &operation,
+            Operation::Compare(..) | Operation::PlanDirectorySync(..)
+        ) {
+            self.mirror_conflicts.clear();
+        }
+        if let Operation::ApplyDirectorySync(_, journal) = &operation {
+            self.sync_journal = Some(journal.clone());
         }
         self.busy = true;
         self.pending = None;
@@ -808,6 +835,7 @@ impl FilesPanel {
                     cx.notify();
                     return;
                 }
+                if let Err(FileFailure::MirrorConflicts(conflicts)) = &result { view.mirror_conflicts = conflicts.clone(); }
                 let succeeded = result.is_ok();
                 match result {
                     Ok(Outcome::Listed(path,entries)) => {
@@ -840,18 +868,22 @@ impl FilesPanel {
                     Ok(Outcome::Done(message)) => view.status = message,
                     Ok(Outcome::QuarantineInspected(review)) => {
                         view.status = Message::new("只读检查完成；请审核解除隔离的未知风险", "Read-only inspection complete; review the risk before releasing isolation");
+                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
                         view.pending = Some((parallel::quarantine_review_message(&review), Operation::AcknowledgeQuarantine(review)));
                     }
                     Ok(Outcome::PlannedDirectory(plan)) => {
                         view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
+                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
                         view.pending = Some((directory_review_message(&plan), Operation::TransferDirectory(plan)));
                     }
                     Ok(Outcome::PlannedFileResume(plan)) => {
                         view.status = Message::new("部分内容校验通过，请审核续传", "Existing content verified; review continuation");
+                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
                         view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), None), Operation::ResumeFile(plan)));
                     }
                     Ok(Outcome::PlannedDirectoryResume(plan)) => {
                         view.status = Message::new("部分目录校验通过，请审核续传", "Existing tree verified; review continuation");
+                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
                         view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan)));
                     }
                     Ok(Outcome::Compared(comparison)) => {
@@ -940,6 +972,7 @@ impl FilesPanel {
                 "Wait for or cancel the active file operation",
             );
         } else {
+            self.confirmation_scroll.set_offset(point(px(0.), px(0.)));
             self.pending = Some((message, operation));
         }
         cx.notify();
@@ -991,7 +1024,14 @@ impl FilesPanel {
         };
         match sync::review_message(&review) {
             Ok(message) => {
-                self.confirm(message, Operation::ApplyDirectorySync(Box::new(review)), cx)
+                let journal = Arc::new(std::sync::Mutex::new(sync::journal::Journal::new(
+                    &review.plan,
+                )));
+                self.confirm(
+                    message,
+                    Operation::ApplyDirectorySync(Box::new(review), journal),
+                    cx,
+                )
             }
             Err(error) => {
                 self.status = error.message();
@@ -1187,7 +1227,7 @@ impl Operation {
             Self::Delete(entry) | Self::SetPermissions(entry, _) => {
                 Some(IsolationTarget::Remote(entry.path.clone()))
             }
-            Self::ApplyDirectorySync(review) => Some(
+            Self::ApplyDirectorySync(review, _) => Some(
                 if review.plan.direction() == DirectorySyncDirection::LeftToRight {
                     IsolationTarget::Remote(review.remote.clone())
                 } else {
@@ -1383,10 +1423,28 @@ fn table_cell(text: impl Into<SharedString>, width: f32) -> impl IntoElement {
 fn confirmation_bar(
     cx: &App,
     message: String,
+    scroll: &ScrollHandle,
     confirm: Button,
     cancel: Button,
 ) -> impl IntoElement {
+    use gpui_kit::component::scroll::{ScrollableElement, ScrollbarAxis};
     let visual = crate::design::palette(cx);
+    // Each original line keeps its intrinsic width and height. A single wrapped
+    // text child has no horizontal extent for long paths, even when overflow is
+    // enabled; nonshrinking rows make both axes inspectable without truncation.
+    let lines = message.split('\n').enumerate().map(|(index, line)| {
+        let line = SharedString::from(line.to_owned());
+        div()
+            .id(("file-confirmation-line", index))
+            .flex_shrink_0()
+            .min_h(px(18.))
+            .line_height(px(18.))
+            .whitespace_nowrap()
+            .role(accesskit::Role::Label)
+            .aria_label(line.clone())
+            .child(line)
+            .test_support()
+    });
     div()
         .id("file-confirmation-bar")
         .w_full()
@@ -1405,17 +1463,22 @@ fn confirmation_bar(
                 .id("file-confirmation-message")
                 .flex_1()
                 .min_w_0()
-                // Keep review actions visible beside a scrollable full message
-                // even inside the minimum-height Files workspace.
-                .max_h(px(48.))
+                .max_h(px(72.))
                 .overflow_y_scroll()
                 .overflow_x_scroll()
-                .whitespace_normal()
-                .child(message)
+                .track_scroll(scroll)
+                .relative()
+                .flex()
+                .flex_col()
+                .items_start()
+                .font_family("monospace")
+                .text_xs()
+                .pb_2()
+                .children(lines)
+                .scrollbar(scroll, ScrollbarAxis::Both)
                 .test_support(),
         )
-        // Actions cannot participate in the path text's min-content width.
-        // Long unbroken names remain inspectable inside the scrollable body.
+        // Review actions remain outside the two-axis scrolling region.
         .child(
             div()
                 .flex()

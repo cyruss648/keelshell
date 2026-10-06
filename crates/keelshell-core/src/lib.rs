@@ -23,6 +23,7 @@ mod directory_compare;
 mod directory_sync;
 mod error;
 mod model;
+mod network_diagnostic;
 mod openssh;
 mod profile_sync;
 mod proxy;
@@ -76,14 +77,20 @@ pub use directory_compare::{
     MAX_DIRECTORY_HASH_BYTES, compare_directories, hash_directory_content,
 };
 pub use directory_sync::{
-    ConfirmedDirectorySync, DirectorySyncConfirmError, DirectorySyncDeletePolicy,
-    DirectorySyncDirection, DirectorySyncOperation, DirectorySyncPlan, DirectorySyncPlanError,
-    DirectorySyncReviewToken, plan_directory_sync,
+    ConfirmedDirectorySync, DirectoryMirrorConflict, DirectoryMirrorConflictReason,
+    DirectorySyncConfirmError, DirectorySyncDeletePolicy, DirectorySyncDirection,
+    DirectorySyncOperation, DirectorySyncPlan, DirectorySyncPlanError, DirectorySyncReviewToken,
+    MAX_DIRECTORY_MIRROR_CONTENT_BYTES, MAX_DIRECTORY_MIRROR_DEPTH, directory_mirror_conflicts,
+    plan_directory_mirror, plan_directory_sync,
 };
 pub use error::{Error, ValidationError};
 pub use model::{
     AiSettings, AppState, AuthMethod, Connection, ImportReport, Language, SCHEMA_VERSION, Settings,
     SnapshotRevision, Snippet, Theme,
+};
+pub use network_diagnostic::{
+    DIAGNOSTIC_REMOTE_SECONDS, MAX_DIAGNOSTIC_INPUT_BYTES, MAX_DIAGNOSTIC_OUTPUT_BYTES,
+    NetworkDiagnosticInputError, NetworkDiagnosticKind, NetworkDiagnosticRequest,
 };
 pub use openssh::{
     MAX_OPENSSH_CONFIG_BYTES, MAX_OPENSSH_ENTRIES, MAX_OPENSSH_INCLUDE_DEPTH,

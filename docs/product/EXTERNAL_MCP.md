@@ -2,6 +2,25 @@
 
 KeelShell 提供 MCP **服务端**。Codex、Claude Code 等外部客户端启动伴随程序 `keelshell-mcp`，它通过受认证的本机 IPC 请求正在运行的 KeelShell；SSH 会话、授权及人工审阅留在桌面应用中。应用内的 API / 本地 CLI Ask 是独立入口，本功能不接入第三方 MCP 服务。
 
+## 调用方向
+
+```mermaid
+flowchart LR
+    Agent["外部智能体<br/>Codex / Claude Code"] -->|MCP 工具调用| Companion["keelshell-mcp<br/>stdio 伴随程序"]
+    Companion -->|受认证本机 IPC| Desktop["KeelShell 桌面<br/>会话与授权"]
+    Desktop -->|授予的读取能力| Remote[已连接的远程 SSH / SFTP]
+    Desktop --> Review["命令 / 文件提案<br/>完整目标与内容审阅"]
+    Review -->|用户批准后| Remote
+```
+
+例如，外部智能体可以解释用户明确捕获的错误日志，或读取授权目录中的配置文件并提出修改。读取遵守桌面授予的会话、工具和目录范围；修改现有文件或执行命令需要在 KeelShell 中批准提案。MCP 配置由外部客户端使用，KeelShell 的 MCP 面板负责提供启动配置、管理授权和审阅动作。
+
+应用内 **AI 配置** 选择 API 或本地 Claude Code / Codex CLI 推理后端，供用户在 KeelShell 中提问。这不改变上述服务端方向，两个入口独立配置。详见[本地智能体](LOCAL_AGENTS.md)和[AI 设计计划](DESIGN_AND_AGENT_PLAN.md)。
+
+## 验证状态
+
+2026-10-07 最新 Codex V12 的有限原生结果包括 20 项配对工具调用：准确选区、SFTP、范围／路线拒绝、命令批准／拒绝以及文件批准后的完整内容读回。另一文件的桌面拒绝已观察，但测试确认标记迟到使本轮超时，拒绝状态再读、原文件再读和撤权未到达，完整 Codex 业务仍未通过。新非作者已复核实际原始证据与失败边界，见[V12 记录](../testing/records/2026-10-07-codex-mcp-v12-native.md)。下方旧尝试保留各自输入与范围，不用本轮部分进展覆盖原失败。
+
 当前实现八项固定工具，第八项为受人工审阅的现有文件替换提案，见[文件提案指南](MCP_FILE_CHANGES.md)。新增工具已通过独立工程复核、主树完整门禁及新macOS自有八工具客户端的实际文件批准/拒绝/已观察并发变化拒绝，见[新增工具记录](../testing/records/2026-10-05-mcp-file-proposals.md)。最新标准包在中英文三种主题的六个独立提案中验证了长正文首尾、固定操作栏、人工拒绝和实际SFTP原字节不变；本轮只协商八项并实际调用五种工具，最小窗口、当前F批准回归、供应商第八工具与其他平台原生仍开放，见[六组合记录](../testing/records/2026-10-05-mcp-file-review-native-matrix.md)。下列供应商实验仅覆盖此前七项工具。此前七项工具、桌面授权及 SSH/SFTP 桥接完成独立代码复审、真实 stdio 进程测试与 macOS 隔离 SSH 服务上的原生操作。实际安装的 Claude Code 2.1.285 已通过标准 macOS 双程序开发包完成七项 schema 协商、13 次真实工具调用与 15 次模型请求的授权流程：明确片段、目录和 UTF-8 文件读取；越界路径与未授权监控返回 `FORBIDDEN`，错误路线返回 `STALE_SESSION`；桌面批准后提案从等待变为成功，另一提案在桌面拒绝后变为拒绝。桌面操作由受控 UI 自动化执行，独立复核已通过该限定范围，无剩余 P1/P2；模型模拟服务与 SSH/SFTP 夹具均自有隔离，不代表云模型质量、任意 OS shell 或客户服务器验收。见[授权客户端记录](../testing/records/2026-10-05-claude-authorized-mcp.md)。
 
 撤权后，同一 Claude 客户端收到 `is_error=true` 的连接已断开结果，未记录第 14 次 tools/call RPC；这证明本次客户端后续访问不可用，不是新请求到达服务端后再次授权拒绝的证据。原默认拒绝及运行中撤权/重启证据继续保留在[前置记录](../testing/records/2026-10-05-external-client-mcp-preflight.md)与[桌面桥接记录](../testing/records/2026-10-04-mcp-desktop-bridge.md)。Codex 0.160.0 的新文本前置在仅为子进程补充回环 `NO_PROXY` / `no_proxy` 后通过；原失败保持；新的实际 MCP 尝试协商七项生产工具后，首笔模型请求缺少 KeelShell 目录并包含额外工具，停止于业务调用之前，两次失败均保留。实际读取和完整审阅场景仍未通过，见[Codex 尝试记录](../testing/records/2026-10-05-codex-authorized-mcp-failure.md)。供应商文件修改提案、其他平台原生窗口及完整发布包仍须单独验收。

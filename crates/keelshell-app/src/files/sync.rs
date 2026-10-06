@@ -7,7 +7,9 @@ use std::{
     path::Path,
 };
 
-const MAX_HASH_TOTAL: u64 = 256 * 1024 * 1024;
+pub(in crate::files) mod journal;
+
+const MAX_HASH_TOTAL: u64 = keelshell_core::MAX_DIRECTORY_MIRROR_CONTENT_BYTES;
 const REVIEW_BYTES: usize = 128 * 1024;
 
 fn check_stop(stop: &AtomicBool) -> Result<(), FileFailure> {
@@ -27,13 +29,20 @@ fn problem(detail: impl Into<String>) -> FileFailure {
 fn local_child(root: &Path, relative: &str) -> Result<PathBuf, FileFailure> {
     let mut path = root.to_path_buf();
     for name in relative.split('/') {
-        let stem = name.split('.').next().unwrap_or(name).to_ascii_uppercase();
-        let device = matches!(stem.as_str(), "CON" | "PRN" | "AUX" | "NUL")
-            || ((stem.starts_with("COM") || stem.starts_with("LPT"))
-                && matches!(
-                    stem.get(3..),
-                    Some("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "¹" | "²" | "³")
-                ));
+        let stem = name
+            .split('.')
+            .next()
+            .unwrap_or(name)
+            .trim_end_matches(' ')
+            .to_ascii_uppercase();
+        let device = matches!(
+            stem.as_str(),
+            "CON" | "PRN" | "AUX" | "NUL" | "CONIN$" | "CONOUT$" | "CLOCK$"
+        ) || ((stem.starts_with("COM") || stem.starts_with("LPT"))
+            && matches!(
+                stem.get(3..),
+                Some("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "¹" | "²" | "³")
+            ));
         if name.is_empty()
             || matches!(name, "." | "..")
             || device
@@ -132,11 +141,6 @@ pub(super) async fn plan(
     policy: DirectorySyncDeletePolicy,
     stop: &AtomicBool,
 ) -> Result<DirectorySyncComparison, FileFailure> {
-    if policy != DirectorySyncDeletePolicy::PreserveDestination {
-        return Err(problem(
-            "this directory merge preserves destination-only entries",
-        ));
-    }
     let metadata = fs::symlink_metadata(&local).map_err(|e| problem(e.to_string()))?;
     if !metadata.is_dir() || metadata.file_type().is_symlink() {
         return Err(problem("local sync root must be a real directory"));
@@ -144,6 +148,17 @@ pub(super) async fn plan(
     let local = local.canonicalize().map_err(|e| problem(e.to_string()))?;
     // Resolve the explicitly selected root once; all descendants are checked
     // from this canonical root and never followed as symbolic links.
+    if policy == DirectorySyncDeletePolicy::IncludeDeletes {
+        let selected = sftp
+            .inspect_entry(&remote)
+            .await?
+            .ok_or_else(|| problem("mirror root is missing"))?;
+        if selected.permissions.map(|m| m & 0o170000) != Some(0o040000) {
+            return Err(problem(
+                "mirror root must be a real explicitly typed directory",
+            ));
+        }
+    }
     let remote = sftp.canonicalize(&remote).await?;
     let root = sftp
         .inspect_entry(&remote)
@@ -156,6 +171,49 @@ pub(super) async fn plan(
     let remote_entries = sftp
         .snapshot_tree_limited(&remote, keelshell_core::MAX_DIRECTORY_COMPARE_ENTRIES, 32)
         .await?;
+    if policy == DirectorySyncDeletePolicy::IncludeDeletes {
+        let metadata_right: Vec<_> = remote_entries
+            .iter()
+            .map(|entry| {
+                let relative = super::worker::remote_relative_path(&remote, &entry.path)
+                    .ok_or_else(|| problem("mirror entry escaped the selected root"))?;
+                let kind = match entry.permissions.map(|m| m & 0o170000) {
+                    Some(0o100000) => DirectoryEntryKind::File,
+                    Some(0o040000) => DirectoryEntryKind::Directory,
+                    Some(0o120000) => DirectoryEntryKind::Symlink,
+                    _ => DirectoryEntryKind::Other,
+                };
+                Ok(DirectoryEntrySnapshot::new(
+                    relative,
+                    kind,
+                    if kind == DirectoryEntryKind::File {
+                        entry.size
+                    } else {
+                        None
+                    },
+                    Some(0),
+                ))
+            })
+            .collect::<Result<_, FileFailure>>()?;
+        let metadata_report = keelshell_core::compare_directories(&left, &metadata_right)
+            .map_err(|e| problem(e.to_string()))?;
+        let conflicts: Vec<_> =
+            keelshell_core::directory_mirror_conflicts(&metadata_report, direction)
+                .into_iter()
+                .filter(|conflict| {
+                    conflict.reason
+                        != keelshell_core::DirectoryMirrorConflictReason::IncompleteContent
+                })
+                .collect();
+        if !conflicts.is_empty() {
+            if conflicts.iter().map(|c| c.path.len() + 64).sum::<usize>() > REVIEW_BYTES {
+                return Err(problem(
+                    "mirror conflicts exceed the complete review budget; choose a smaller folder",
+                ));
+            }
+            return Err(FileFailure::MirrorConflicts(conflicts));
+        }
+    }
     let mut right = Vec::with_capacity(remote_entries.len());
     let mut total = 0;
     for snapshot in &mut left {
@@ -253,8 +311,15 @@ pub(super) async fn plan(
             ));
         }
     }
-    let plan = keelshell_core::plan_directory_sync(&report, direction, policy)
-        .map_err(|e| problem(e.to_string()))?;
+    let plan = match policy {
+        DirectorySyncDeletePolicy::PreserveDestination => {
+            keelshell_core::plan_directory_sync(&report, direction, policy)
+        }
+        DirectorySyncDeletePolicy::IncludeDeletes => {
+            keelshell_core::plan_directory_mirror(&report, direction)
+        }
+    }
+    .map_err(|e| problem(e.to_string()))?;
     let comparison = DirectorySyncComparison {
         local,
         remote,
@@ -271,52 +336,130 @@ pub(super) fn review_message(review: &DirectorySyncComparison) -> Result<Message
     } else {
         ("远端 → 本地", "Remote → local")
     };
+    let hash_text = |hash: Option<keelshell_core::DirectoryContentHash>| {
+        hash.map(|bytes| bytes.iter().map(|b| format!("{b:02x}")).collect::<String>())
+            .unwrap_or_else(|| "—".into())
+    };
     let paths = |chinese| {
         review
             .plan
             .operations()
             .iter()
-            .map(|op| {
-                let (path, zh, en) = match op {
-                    DirectorySyncOperation::Copy {
-                        path,
-                        source_kind: DirectoryEntryKind::Directory,
-                        ..
-                    } => (path, "新建目录", "Create directory"),
-                    DirectorySyncOperation::Copy {
-                        path,
-                        expected_destination_kind: Some(_),
-                        ..
-                    } => (path, "替换文件", "Replace file"),
-                    DirectorySyncOperation::Copy { path, .. } => (path, "新增文件", "Create file"),
-                    DirectorySyncOperation::Delete { path, .. } => (path, "删除", "Delete"),
-                };
-                format!("{}: {path}", if chinese { zh } else { en })
+            .map(|op| match op {
+                DirectorySyncOperation::Copy {
+                    path,
+                    source_kind,
+                    expected_source_hash,
+                    expected_source_size,
+                    expected_destination_kind,
+                    expected_destination_size,
+                    expected_destination_hash,
+                } => {
+                    let label = if *source_kind == DirectoryEntryKind::Directory {
+                        if chinese {
+                            "新建目录"
+                        } else {
+                            "Create directory"
+                        }
+                    } else if expected_destination_kind.is_some() {
+                        if chinese {
+                            "替换常规文件"
+                        } else {
+                            "Replace regular file"
+                        }
+                    } else if chinese {
+                        "新增常规文件"
+                    } else {
+                        "Create regular file"
+                    };
+                    format!(
+                        "{label}: {path}\n  {}: {:?} / {} · {}: {:?} / {}",
+                        if chinese {
+                            "源字节/SHA-256"
+                        } else {
+                            "Source bytes/SHA-256"
+                        },
+                        expected_source_size,
+                        hash_text(*expected_source_hash),
+                        if chinese {
+                            "目标字节/SHA-256"
+                        } else {
+                            "Destination bytes/SHA-256"
+                        },
+                        expected_destination_size,
+                        hash_text(*expected_destination_hash)
+                    )
+                }
+                DirectorySyncOperation::Delete {
+                    path,
+                    expected_destination_kind,
+                    expected_destination_size,
+                    expected_destination_hash,
+                } => {
+                    let label = match (chinese, expected_destination_kind) {
+                        (true, DirectoryEntryKind::File) => "删除目标独有常规文件",
+                        (false, DirectoryEntryKind::File) => "Delete destination-only regular file",
+                        (true, _) => "删除目标独有目录（全部子节点完成后）",
+                        (false, _) => "Delete destination-only directory (after all children)",
+                    };
+                    format!(
+                        "{label}: {path}\n  {}: {:?} / {}",
+                        if chinese {
+                            "目标字节/SHA-256"
+                        } else {
+                            "Destination bytes/SHA-256"
+                        },
+                        expected_destination_size,
+                        hash_text(*expected_destination_hash)
+                    )
+                }
             })
             .collect::<Vec<_>>()
             .join("\n")
     };
-    let zh_paths = paths(true);
-    let en_paths = paths(false);
-    if zh_paths.len().max(en_paths.len()) > REVIEW_BYTES {
+    let deletes = review
+        .plan
+        .operations()
+        .iter()
+        .filter(|op| matches!(op, DirectorySyncOperation::Delete { .. }))
+        .count();
+    let (zh_policy, en_policy) = if review.plan.is_bounded_mirror() {
+        (
+            format!(
+                "镜像：明确删除 {deletes} 项，删除不可撤销；子树已逐项完整展开；先删除子节点，最后删除空父目录。新增、变化或重新出现的节点会停止后续删除。"
+            ),
+            format!(
+                "Mirror: {deletes} explicit irreversible deletions; subtrees expanded into complete reviewed rows; children first, empty parents last. Added, changed or reappearing nodes stop further deletion."
+            ),
+        )
+    } else {
+        (
+            "合并：保留目标独有项。".into(),
+            "Merge: destination-only entries preserved.".into(),
+        )
+    };
+    let zh_text = format!(
+        "{zh}\n本地：{}\n远端：{}\n{zh_policy}\n{} 项；64 MiB/文件，256 MiB/两侧。逐项重新复核；取消或失败保留已完成和未知结果。无远端原子比较锁，不自动重试。\n审核指纹：{}\n{}\n确认此完整范围？",
+        review.local.display(),
+        review.remote,
+        review.plan.operation_count(),
+        review.plan.review_fingerprint(),
+        paths(true)
+    );
+    let en_text = format!(
+        "{en}\nLocal: {}\nRemote: {}\n{en_policy}\n{} operations; 64 MiB/file, 256 MiB/both sides. Every item rechecked; cancellation/failure retains completed and unknown results. No remote compare-and-swap; no automatic retry.\nReview fingerprint: {}\n{}\nConfirm this complete scope?",
+        review.local.display(),
+        review.remote,
+        review.plan.operation_count(),
+        review.plan.review_fingerprint(),
+        paths(false)
+    );
+    if zh_text.len().max(en_text.len()) > REVIEW_BYTES {
         return Err(problem(
-            "sync plan exceeds the 128 KiB review text bound; choose a smaller folder",
+            "sync plan exceeds the 128 KiB full review text bound; choose a smaller folder",
         ));
     }
-    Ok(Message::new(
-        format!(
-            "{zh}\n本地：{}\n远端：{}\n{} 项复制/建目录，保留目标独有项。64 MiB/文件，256 MiB/两侧。执行前重新校验；取消或失败可能保留部分结果。\n{zh_paths}\n确认同步？",
-            review.local.display(),
-            review.remote,
-            review.plan.operation_count()
-        ),
-        format!(
-            "{en}\nLocal: {}\nRemote: {}\n{} copy/directory operations; preserve destination-only entries. 64 MiB/file, 256 MiB/both sides. Revalidated before writes; cancellation or failure may leave partial results.\n{en_paths}\nConfirm synchronization?",
-            review.local.display(),
-            review.remote,
-            review.plan.operation_count()
-        ),
-    ))
+    Ok(Message::new(zh_text, en_text))
 }
 
 async fn current_remote(
@@ -416,6 +559,7 @@ pub(super) async fn apply(
     review: DirectorySyncComparison,
     stop: &AtomicBool,
     progress: &mpsc::SyncSender<WorkerMessage>,
+    journal: &journal::SharedJournal,
 ) -> Result<Outcome, FileFailure> {
     let authorized = || !stop.load(Ordering::Acquire);
     let spec = if review.plan.direction() == DirectorySyncDirection::LeftToRight {
@@ -448,8 +592,36 @@ pub(super) async fn apply(
         .confirm(review.plan.review_token())
         .map_err(|e| problem(e.to_string()))?;
     let mut completed = 0;
-    for operation in confirmed.plan().operations() {
+    for (index, operation) in confirmed.plan().operations().iter().enumerate() {
         check_stop(stop)?;
+        journal::mark(journal, index, journal::StepState::Verifying);
+        if let DirectorySyncOperation::Delete { path, .. } = operation {
+            journal::mark(journal, index, journal::StepState::Unknown);
+            let result = match review.plan.direction() {
+                DirectorySyncDirection::LeftToRight => {
+                    ownership.remove_remote_reviewed(&confirmed, path).await
+                }
+                DirectorySyncDirection::RightToLeft => {
+                    ownership.remove_local_reviewed(&confirmed, path).await
+                }
+            };
+            if let Err(error) = result {
+                if !matches!(error, SessionError::MutationUncertain) {
+                    journal::mark(journal, index, journal::StepState::Rejected);
+                }
+                return Err(error.into());
+            }
+            journal::mark(journal, index, journal::StepState::Completed);
+            completed += 1;
+            super::send_worker_progress(
+                progress,
+                Message::new(
+                    format!("镜像删除已确认：{path}"),
+                    format!("Mirror deletion confirmed: {path}"),
+                ),
+            );
+            continue;
+        }
         let DirectorySyncOperation::Copy {
             path,
             source_kind,
@@ -488,12 +660,46 @@ pub(super) async fn apply(
         match (review.plan.direction(), source_kind) {
             (DirectorySyncDirection::LeftToRight, DirectoryEntryKind::Directory) => {
                 if target.is_none() {
-                    ownership.mkdir_remote(&remote).await?;
+                    journal::mark(journal, index, journal::StepState::Unknown);
+                    mutation_result(ownership.mkdir_remote(&remote).await, journal, index)?;
+                    ownership
+                        .verify_mutation(async {
+                            let entry = sftp.inspect_entry(&remote).await?;
+                            if !entry.is_some_and(|e| {
+                                e.permissions.map(|m| m & 0o170000) == Some(0o040000)
+                            }) {
+                                return Err(SessionError::UnverifiedMutation(
+                                    "created directory type mismatch",
+                                ));
+                            }
+                            Ok(())
+                        })
+                        .await?;
                 }
             }
             (DirectorySyncDirection::RightToLeft, DirectoryEntryKind::Directory) => {
                 if target.is_none() {
-                    ownership.local_operation(|| fs::create_dir(&local))?;
+                    journal::mark(journal, index, journal::StepState::Unknown);
+                    mutation_result(
+                        ownership.local_operation(|| fs::create_dir(&local)),
+                        journal,
+                        index,
+                    )?;
+                    ownership
+                        .verify_mutation(async {
+                            let entry = current_local(&local, stop).map_err(|_| {
+                                SessionError::UnverifiedMutation(
+                                    "created local directory readback failed",
+                                )
+                            })?;
+                            if !entry.is_some_and(|e| e.kind == DirectoryEntryKind::Directory) {
+                                return Err(SessionError::UnverifiedMutation(
+                                    "created local directory type mismatch",
+                                ));
+                            }
+                            Ok(())
+                        })
+                        .await?;
                 }
             }
             (DirectorySyncDirection::LeftToRight, DirectoryEntryKind::File) => {
@@ -506,12 +712,22 @@ pub(super) async fn apply(
                     *expected_destination_hash,
                 )?;
                 check_stop(stop)?;
-                ownership.write_remote_atomic(&remote, &bytes).await?;
-                verify_bytes(
-                    &sftp.read_regular(&remote, MAX_DIRECTORY_HASH_BYTES).await?,
-                    *expected_source_size,
-                    *expected_source_hash,
+                journal::mark(journal, index, journal::StepState::Unknown);
+                mutation_result(
+                    ownership.write_remote_atomic(&remote, &bytes).await,
+                    journal,
+                    index,
                 )?;
+                ownership
+                    .verify_mutation(async {
+                        let bytes = sftp.read_regular(&remote, MAX_DIRECTORY_HASH_BYTES).await?;
+                        verify_bytes(&bytes, *expected_source_size, *expected_source_hash).map_err(
+                            |_| {
+                                SessionError::UnverifiedMutation("directory file readback mismatch")
+                            },
+                        )
+                    })
+                    .await?;
             }
             (DirectorySyncDirection::RightToLeft, DirectoryEntryKind::File) => {
                 let bytes = sftp.read_regular(&remote, MAX_DIRECTORY_HASH_BYTES).await?;
@@ -519,12 +735,17 @@ pub(super) async fn apply(
                 let parent = local
                     .parent()
                     .ok_or_else(|| problem("local sync target has no parent"))?;
-                let temporary = ownership.local_operation(|| {
-                    let mut file = tempfile::NamedTempFile::new_in(parent)?;
-                    file.write_all(&bytes)?;
-                    file.flush()?;
-                    Ok(file)
-                })?;
+                journal::mark(journal, index, journal::StepState::Unknown);
+                let temporary = mutation_result(
+                    ownership.local_operation(|| {
+                        let mut file = tempfile::NamedTempFile::new_in(parent)?;
+                        file.write_all(&bytes)?;
+                        file.flush()?;
+                        Ok(file)
+                    }),
+                    journal,
+                    index,
+                )?;
                 expected(
                     current_local(&local, stop)?.as_ref(),
                     *expected_destination_kind,
@@ -543,14 +764,24 @@ pub(super) async fn apply(
                     }
                     Ok(())
                 })?;
-                verify_bytes(
-                    &local_bytes(&local, stop)?,
-                    *expected_source_size,
-                    *expected_source_hash,
-                )?;
+                ownership
+                    .verify_mutation(async {
+                        let bytes = local_bytes(&local, stop).map_err(|_| {
+                            SessionError::UnverifiedMutation("local directory file readback failed")
+                        })?;
+                        verify_bytes(&bytes, *expected_source_size, *expected_source_hash).map_err(
+                            |_| {
+                                SessionError::UnverifiedMutation(
+                                    "local directory file readback mismatch",
+                                )
+                            },
+                        )
+                    })
+                    .await?;
             }
             _ => return Err(problem("unsupported synchronization object type")),
         }
+        journal::mark(journal, index, journal::StepState::Completed);
         completed += 1;
         super::send_worker_progress(
             progress,
@@ -567,11 +798,24 @@ pub(super) async fn apply(
         );
     }
     Ok(Outcome::Done(Message::new(
-        format!("目录同步完成：{completed} 项；已保留目标独有内容，请刷新列表"),
+        format!("目录同步完成：{completed} 项；请查看逐项结果并刷新列表"),
         format!(
-            "Directory synchronization complete: {completed} operations; destination-only content preserved, refresh the listing"
+            "Directory synchronization complete: {completed} operations; inspect item results and refresh the listing"
         ),
     )))
+}
+
+fn mutation_result<T>(
+    result: Result<T, SessionError>,
+    journal: &journal::SharedJournal,
+    index: usize,
+) -> Result<T, FileFailure> {
+    result.map_err(|error| {
+        if !matches!(&error, SessionError::MutationUncertain) {
+            journal::mark(journal, index, journal::StepState::Rejected);
+        }
+        error.into()
+    })
 }
 
 fn verify_bytes(
@@ -605,6 +849,10 @@ mod tests {
             "a\\b",
             "a//b",
             "CON.txt",
+            "NUL .txt",
+            "CONIN$",
+            "CONOUT$.log",
+            "CLOCK$",
             "LPT1",
             "COM¹",
             "COM².txt",

@@ -737,6 +737,52 @@ impl SshSession {
         Ok(output)
     }
 
+    pub(crate) async fn diagnostic_exec_until(
+        &self,
+        command: &str,
+        until: Instant,
+        cancel: &std::sync::atomic::AtomicBool,
+    ) -> Result<ExecOutput> {
+        let mut pending = open_session_until(self, until).await?;
+        // An open reply can arrive after UI retirement; it cannot grant exec.
+        if cancel.load(std::sync::atomic::Ordering::Acquire) {
+            return Err(SessionError::Closed);
+        }
+        let channel = pending.channel.as_mut().ok_or(SessionError::Closed)?;
+        channel.exec(true, command).await?;
+        let mut output = ExecOutput {
+            stdout: Vec::new(),
+            stderr: Vec::new(),
+            exit_status: None,
+        };
+        while let Some(message) = channel.wait().await {
+            match message {
+                ChannelMsg::Data { data } | ChannelMsg::ExtendedData { data, ext: 0 } => {
+                    check_output(
+                        &output,
+                        data.len(),
+                        keelshell_core::MAX_DIAGNOSTIC_OUTPUT_BYTES,
+                    )?;
+                    output.stdout.extend_from_slice(&data);
+                }
+                ChannelMsg::ExtendedData { data, .. } => {
+                    check_output(
+                        &output,
+                        data.len(),
+                        keelshell_core::MAX_DIAGNOSTIC_OUTPUT_BYTES,
+                    )?;
+                    output.stderr.extend_from_slice(&data);
+                }
+                ChannelMsg::ExitStatus { exit_status } => output.exit_status = Some(exit_status),
+                ChannelMsg::Failure => return Err(SessionError::Rejected("protocol diagnostic")),
+                ChannelMsg::Close => break,
+                _ => {}
+            }
+        }
+        pending.close().await;
+        Ok(output)
+    }
+
     pub(crate) async fn completion_sftp_until(
         &self,
         until: Instant,

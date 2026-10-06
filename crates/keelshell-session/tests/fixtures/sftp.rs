@@ -884,8 +884,23 @@ impl russh_sftp::server::Handler for Filesystem {
         Ok(ok(id))
     }
     async fn rmdir(&mut self, id: u32, path: String) -> Result<Status, StatusCode> {
+        self.remove_path_gate
+            .hold(&path, Duration::from_secs(10))
+            .await
+            .map_err(|_| StatusCode::Failure)?;
         let mut state = self.state.lock().map_err(|_| StatusCode::Failure)?;
-        state.directories.remove(&path);
+        let prefix = format!("{}/", path.trim_end_matches('/'));
+        if state.files.keys().any(|child| child.starts_with(&prefix))
+            || state
+                .directories
+                .iter()
+                .any(|child| child.starts_with(&prefix))
+        {
+            return Err(StatusCode::Failure);
+        }
+        if !state.directories.remove(&path) {
+            return Err(StatusCode::NoSuchFile);
+        }
         Ok(ok(id))
     }
     async fn remove(&mut self, id: u32, path: String) -> Result<Status, StatusCode> {

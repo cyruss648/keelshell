@@ -86,10 +86,28 @@ fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl In
         } else {
             t(cx, "远端 → 本地", "Remote → local")
         };
-        card = card.child(div().text_color(rgb(visual.accent)).child(match crate::i18n::language(cx) {
-            keelshell_core::Language::ZhCn => format!("内容已校验 · {direction} · {} 项 · 保留目标独有项", plan.operation_count()),
-            keelshell_core::Language::En => format!("Content verified · {direction} · {} operations · preserve destination-only entries", plan.operation_count()),
-        }));
+        card = card.child(div().text_color(rgb(visual.accent)).child(
+            match crate::i18n::language(cx) {
+                keelshell_core::Language::ZhCn => format!(
+                    "内容已校验 · {direction} · {} 项 · {}",
+                    plan.operation_count(),
+                    if plan.is_bounded_mirror() {
+                        "包含明确删除；仍需完整审核"
+                    } else {
+                        "保留目标独有项"
+                    }
+                ),
+                keelshell_core::Language::En => format!(
+                    "Content verified · {direction} · {} operations · {}",
+                    plan.operation_count(),
+                    if plan.is_bounded_mirror() {
+                        "explicit deletions included; review required"
+                    } else {
+                        "preserve destination-only entries"
+                    }
+                ),
+            },
+        ));
     }
     card
 }
@@ -714,6 +732,54 @@ impl Render for FilesPanel {
                             })),
                     )
                     .child(
+                        Button::new("plan-mirror-to-remote")
+                            .ghost()
+                            .compact()
+                            .label(t(cx, "镜像本地 → 远端…", "Mirror local → remote…"))
+                            .disabled(disabled)
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                if view.busy || view.pending.is_some() {
+                                    return;
+                                }
+                                if let Some(c) = &view.comparison {
+                                    view.run(
+                                        Operation::PlanDirectorySync(
+                                            c.local.clone(),
+                                            c.remote.clone(),
+                                            DirectorySyncDirection::LeftToRight,
+                                            DirectorySyncDeletePolicy::IncludeDeletes,
+                                        ),
+                                        window,
+                                        cx,
+                                    );
+                                }
+                            })),
+                    )
+                    .child(
+                        Button::new("plan-mirror-to-local")
+                            .ghost()
+                            .compact()
+                            .label(t(cx, "镜像远端 → 本地…", "Mirror remote → local…"))
+                            .disabled(disabled)
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                if view.busy || view.pending.is_some() {
+                                    return;
+                                }
+                                if let Some(c) = &view.comparison {
+                                    view.run(
+                                        Operation::PlanDirectorySync(
+                                            c.local.clone(),
+                                            c.remote.clone(),
+                                            DirectorySyncDirection::RightToLeft,
+                                            DirectorySyncDeletePolicy::IncludeDeletes,
+                                        ),
+                                        window,
+                                        cx,
+                                    );
+                                }
+                            })),
+                    )
+                    .child(
                         Button::new("review-directory-sync")
                             .primary()
                             .compact()
@@ -734,7 +800,7 @@ impl Render for FilesPanel {
                                 }
                                 if matches!(
                                     &view.pending,
-                                    Some((_, Operation::ApplyDirectorySync(_)))
+                                    Some((_, Operation::ApplyDirectorySync(..)))
                                 ) {
                                     view.pending = None;
                                 }
@@ -745,20 +811,117 @@ impl Render for FilesPanel {
             );
             tools = tools.child(directory_compare_card(comparison, cx));
         }
+        if !self.mirror_conflicts.is_empty() {
+            let mut conflicts = div()
+                .id("directory-mirror-conflicts")
+                .mx_2()
+                .p_2()
+                .flex_shrink_0()
+                .max_h(px(160.))
+                .overflow_y_scroll()
+                .border_1()
+                .border_color(rgb(visual.danger_border))
+                .child(t(
+                    cx,
+                    "镜像计划已拒绝：全部冲突（只读）",
+                    "Mirror refused: all conflicts (read-only)",
+                ));
+            for conflict in &self.mirror_conflicts {
+                use keelshell_core::DirectoryMirrorConflictReason as Reason;
+                let reason = match conflict.reason {
+                    Reason::UnsupportedObject => t(
+                        cx,
+                        "链接、特殊对象或类型不明",
+                        "Link, special or ambiguous object",
+                    ),
+                    Reason::NonPortablePath => t(cx, "非安全跨平台路径", "Unsafe portable path"),
+                    Reason::TypeConflict => t(cx, "文件/目录类型冲突", "Object type conflict"),
+                    Reason::CaseConflict => t(cx, "大小写路径冲突", "Case collision"),
+                    Reason::IncompleteHierarchy => {
+                        t(cx, "父目录证据不完整", "Incomplete ancestor evidence")
+                    }
+                    Reason::IncompleteContent => t(cx, "内容证据不完整", "Incomplete content"),
+                    Reason::BudgetExceeded => t(
+                        cx,
+                        "深度或内容超出完整镜像预算",
+                        "Complete mirror depth/content budget exceeded",
+                    ),
+                };
+                conflicts = conflicts.child(
+                    div()
+                        .min_w_0()
+                        .whitespace_normal()
+                        .child(format!("{} · {reason}", conflict.path)),
+                );
+            }
+            tools = tools.child(conflicts.test_support());
+        }
+        if let Some(journal) = &self.sync_journal
+            && let Ok(journal) = journal.lock()
+        {
+            let mut rows = div()
+                .id("directory-sync-results")
+                .mx_2()
+                .p_2()
+                .flex_shrink_0()
+                .max_h(px(160.))
+                .overflow_y_scroll()
+                .border_1()
+                .border_color(rgb(visual.border))
+                .child(t(
+                    cx,
+                    "目录同步逐项结果（不自动重试）",
+                    "Directory item results (no automatic retry)",
+                ));
+            for step in &journal.steps {
+                use super::sync::journal::StepState;
+                let label = match step.state {
+                    StepState::NotStarted => t(cx, "尚未开始", "Not started"),
+                    StepState::Verifying => t(cx, "正在复核", "Verifying"),
+                    StepState::Unknown => t(cx, "结果未知", "Outcome unknown"),
+                    StepState::Completed => t(cx, "已确认完成", "Confirmed complete"),
+                    StepState::Rejected => t(cx, "拒绝或失败", "Rejected or failed"),
+                    StepState::CancelledBeforeWrite => {
+                        t(cx, "取消前未写入", "Cancelled before write")
+                    }
+                    StepState::SkippedAfterFailure => {
+                        t(cx, "失败后未开始", "Not started after failure")
+                    }
+                };
+                rows = rows.child(div().min_w_0().whitespace_normal().child(format!(
+                    "{} · {label} · {}",
+                    if step.delete {
+                        t(cx, "删除", "Delete")
+                    } else {
+                        t(cx, "复制/建目录", "Copy/mkdir")
+                    },
+                    step.path
+                )));
+            }
+            if journal.cleanup_failed {
+                rows = rows.child(t(
+                    cx,
+                    "操作结果保留；SFTP收尾未确认",
+                    "Item results retained; SFTP cleanup unconfirmed",
+                ));
+            }
+            tools = tools.child(rows.test_support());
+        }
         if self.transfer.is_some() {
             tools = tools.child(self.transfer_card(cx));
         }
         tools = tools.child(self.parallel_queue_card(cx));
         panel = panel.child(tools);
-        if let Some((message, _)) = &self.pending {
+        if let Some((message, operation)) = &self.pending {
             panel = panel.child(confirmation_bar(
                 cx,
                 format!("{} · {}", self.host, message.render(cx)),
+                &self.confirmation_scroll,
                 Button::new("confirm-file-operation")
                     .primary()
                     .compact()
                     .rounded(px(6.))
-                    .label(t(cx, "确认", "Confirm"))
+                    .label(if matches!(operation, Operation::ApplyDirectorySync(review, _) if review.plan.is_bounded_mirror()) { t(cx,"确认镜像及删除","Confirm mirror/deletions") } else { t(cx,"确认","Confirm") })
                     .on_click(cx.listener(|view, _, window, cx| view.execute_pending(window, cx))),
                 Button::new("cancel-file-operation")
                     .ghost()

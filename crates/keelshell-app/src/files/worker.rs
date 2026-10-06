@@ -230,6 +230,39 @@ pub(super) async fn operate(
     pause: tokio::sync::watch::Receiver<bool>,
     progress: &mpsc::SyncSender<WorkerMessage>,
 ) -> Result<Outcome, FileFailure> {
+    let journal = if let Operation::ApplyDirectorySync(_, journal) = &operation {
+        Some(journal.clone())
+    } else {
+        None
+    };
+    let result = operate_inner(
+        session,
+        operation,
+        stop.clone(),
+        pause,
+        progress,
+        journal.as_ref(),
+    )
+    .await;
+    if let Some(journal) = journal
+        && let Ok(mut journal) = journal.lock()
+    {
+        journal.finish(
+            stop.load(Ordering::Acquire),
+            matches!(&result, Err(FileFailure::Cleanup)),
+        );
+    }
+    result
+}
+
+async fn operate_inner(
+    session: SshSession,
+    operation: Operation,
+    stop: Arc<AtomicBool>,
+    pause: tokio::sync::watch::Receiver<bool>,
+    progress: &mpsc::SyncSender<WorkerMessage>,
+    journal: Option<&super::sync::journal::SharedJournal>,
+) -> Result<Outcome, FileFailure> {
     let sftp = tokio::select! {
         biased;
         _ = cancellation(&stop) => return Err(FileFailure::CancelledBeforeStart),
@@ -358,7 +391,7 @@ pub(super) async fn operate(
                 })??;
                 Ok(Outcome::DirectorySyncPlanned(comparison))
             }
-            Operation::ApplyDirectorySync(review) => {
+            Operation::ApplyDirectorySync(review, journal) => {
                 let destination = if review.plan.direction() == DirectorySyncDirection::LeftToRight
                 {
                     review.remote.clone()
@@ -367,7 +400,7 @@ pub(super) async fn operate(
                 };
                 tokio::time::timeout(
                     Duration::from_secs(15 * 60),
-                    super::sync::apply(&sftp, *review, &stop, progress),
+                    super::sync::apply(&sftp, *review, &stop, progress, &journal),
                 )
                 .await
                 .unwrap_or_else(|_| {
@@ -491,6 +524,12 @@ pub(super) async fn operate(
     };
     // SFTP close drains staged-file cleanup (2 s), then protocol close (2 s).
     let closed = tokio::time::timeout(Duration::from_secs(5), sftp.close()).await;
+    if !matches!(&closed, Ok(Ok(())))
+        && let Some(journal) = journal
+        && let Ok(mut journal) = journal.lock()
+    {
+        journal.cleanup_failed = true;
+    }
     match outcome {
         Ok(value) => match closed {
             Ok(Ok(())) => Ok(value),
@@ -547,5 +586,27 @@ mod tests {
             None
         );
         assert_eq!(remote_relative_path("/srv/app", "/srv/app"), None);
+    }
+}
+
+#[cfg(test)]
+mod future_size_tests {
+    use super::{Arc, AtomicBool, Operation, SshSession, WorkerMessage, mpsc, operate};
+    #[test]
+    fn file_worker_keeps_directory_mirror_state_within_its_stack_budget() {
+        fn size<F>(
+            _: impl FnOnce(
+                SshSession,
+                Operation,
+                Arc<AtomicBool>,
+                tokio::sync::watch::Receiver<bool>,
+                &'static mpsc::SyncSender<WorkerMessage>,
+            ) -> F,
+        ) -> usize {
+            std::mem::size_of::<F>()
+        }
+        let bytes = size(operate);
+        eprintln!("production file worker future bytes: {bytes}");
+        assert!(bytes < 64 * 1024, "file worker embeds {bytes} state bytes");
     }
 }

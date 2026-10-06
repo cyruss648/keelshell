@@ -824,6 +824,10 @@ impl Workspace {
         let runtime = self.runtime.clone();
         let monitor =
             cx.new(|cx| crate::monitor::MonitorPanel::new(session, host, runtime, window, cx));
+        let protocol_workspace = cx.weak_entity();
+        monitor.update(cx, |panel, panel_cx| {
+            panel.bind_protocol_authority(protocol_workspace, id, panel_cx)
+        });
         self.panels.insert(
             id,
             RemotePanels {
@@ -1595,6 +1599,7 @@ impl Workspace {
                             view.accept_reconnect_trust(*attempt, *index);
                         }
                         view.invalidate_reconnect_profiles(window, cx);
+                        view.revoke_stale_protocol_diagnostics(cx);
                         view.maintain_mcp(cx);
                         let route_changed=view.invalidate_changed_route(window,cx);
                         // Appearance does not change suggestion sources or invalidate reviews.

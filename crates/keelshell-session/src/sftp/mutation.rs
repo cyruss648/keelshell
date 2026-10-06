@@ -3,6 +3,8 @@ use super::*;
 use queue::{Admission, Reservation, ResourceClaims};
 use std::sync::atomic::AtomicBool;
 
+mod mirror;
+
 #[derive(Clone)]
 enum RequestedTarget {
     Local(PathBuf, bool, bool),
@@ -57,6 +59,7 @@ pub struct FileMutationScope<'a> {
     reservation: Option<Reservation>,
     pub(super) pending: Arc<AtomicBool>,
     child_active: AtomicBool,
+    mirror_progress: std::sync::Mutex<mirror::tree::Progress>,
 }
 struct ChildOperation<'a>(&'a AtomicBool);
 impl Drop for ChildOperation<'_> {
@@ -204,6 +207,31 @@ impl FileMutationScope<'_> {
         self.pending.store(false, Ordering::Release);
         result.map_err(Into::into)
     }
+    /// Keep an acknowledged mutation reserved until its required readback is
+    /// observed. This cannot resolve an already pending/quarantined action.
+    /// The observation must verify the exact result, not issue another write.
+    /// Failed or dropped verification conservatively retains destination isolation.
+    pub async fn verify_mutation<T>(
+        &self,
+        observation: impl std::future::Future<Output = Result<T>>,
+    ) -> Result<T> {
+        let _child = self.begin_child()?;
+        if self.pending.load(Ordering::Acquire) || !self.ticket()?.is_active() {
+            return Err(SessionError::MutationUncertain);
+        }
+        self.pending.store(true, Ordering::Release);
+        let result = deadline(
+            self.sftp.timeout,
+            "mutation result verification",
+            observation,
+        )
+        .await;
+        if result.is_ok() {
+            self.pending.store(false, Ordering::Release);
+        }
+        self.complete(result).await
+    }
+
     pub(super) fn context(&self) -> Result<TransferContext> {
         let (events, _receiver) = mpsc::channel(1);
         let mut context = TransferContext::new(0, None, events, Arc::new(TransferControl::new()));
@@ -242,6 +270,7 @@ impl SftpSession {
                 reservation: Some(reservation),
                 pending: Arc::new(AtomicBool::new(false)),
                 child_active: AtomicBool::new(false),
+                mirror_progress: std::sync::Mutex::default(),
             };
             scope.revalidate().await?;
             Ok(scope)
