@@ -40,3 +40,6 @@ OpenSSH 配置导入已接入安全子集：精确 Host、HostName、Port、User
 D1先于后续新界面，原有后端与任务目标继续保留。全部新增条目的细节、参考与验收见正式计划；“本地智能体”不是本地terminal管理，也不等于模型离线。
 
 2026-10-05早期客户端范围保留：首次Claude2.1.285只执行未授权list_sessions→DISABLED→同客户端模型请求的结果循环，没有GUI/SSH；当时Codex文本前置失败且0 POST，原证据及独立复审更正均保留在[前置记录](testing/records/2026-10-05-external-client-mcp-preflight.md)。后续新范围证实Codex尝试连接受限策略禁止的代理端口，仅为子进程加入回环NO_PROXY后直连自有模型服务并文本成功；不把新errno追溯到未采集errno的旧失败。Claude授权流程的新通过范围见本页顶部与A2，不整体关闭MCP-01至04。
+
+
+2026-10-06 本地配置增量：隔离候选复用 `AiSecretRef::Environment`，增加用户显式读取 API 密钥的环境引用编辑、接收方绑定、请求冻结与保留秘密保护。初版独立 argv 反例确认探针秘密准入 P2，未合入；v2 已补齐全目录/保留秘密的调度前检查，新的非作者1238普通/8doc/6Python完整门禁及双CLI零调度反例、合法有/无模型fixture通过；27 个候选路径已主副本整合，根22项专项及1281普通/8doc/6Python完整组合门禁通过；本次提交包含本地CLI路径，后继CI与新桌面验收仍待完成，见[修复记录](testing/records/2026-10-06-local-agent-probe-admission.md)。任意 cwd/环境转交、订阅登录及受限 Agent 仍 OPEN，不使用 help 或 mock-child 关闭原生验收。

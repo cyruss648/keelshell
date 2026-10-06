@@ -169,6 +169,7 @@ pub struct LocalAgentConfig {
     pub(super) model: String,
     pub(super) endpoint: String,
     pub(super) limits: LocalAgentLimits,
+    pub(super) credential_environment_reference: Option<String>,
 }
 
 impl LocalAgentConfig {
@@ -205,6 +206,7 @@ impl LocalAgentConfig {
             }
             .to_owned(),
             limits: LocalAgentLimits::default(),
+            credential_environment_reference: None,
         })
     }
 
@@ -225,6 +227,53 @@ impl LocalAgentConfig {
     pub fn with_limits(mut self, limits: LocalAgentLimits) -> Self {
         self.limits = limits;
         self
+    }
+
+    /// Add an audit-only credential source name to the immutable review.
+    ///
+    /// This never reads the environment and never forwards that variable name
+    /// to the CLI. The application must explicitly load and freeze its value.
+    /// Names use the existing secret-reference ASCII identifier grammar.
+    pub fn with_credential_environment_reference(
+        mut self,
+        name: Option<&str>,
+    ) -> Result<Self, LocalAgentError> {
+        if name.is_some_and(|name| {
+            name.is_empty()
+                || name.len() > 128
+                || !name
+                    .bytes()
+                    .next()
+                    .is_some_and(|b| b.is_ascii_alphabetic() || b == b'_')
+                || !name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+        }) {
+            return Err(LocalAgentError::InvalidConfiguration);
+        }
+        self.credential_environment_reference = name.map(str::to_owned);
+        Ok(self)
+    }
+
+    pub(super) fn validate_context_metadata(
+        &self,
+        secrets: &[&str],
+    ) -> Result<(), LocalAgentError> {
+        let guard = crate::RequestOptions::default()
+            .with_context_secrets(secrets)
+            .map_err(LocalAgentError::Context)?;
+        for text in [
+            self.executable.to_string_lossy().as_ref(),
+            self.scratch_parent.to_string_lossy().as_ref(),
+            &self.model,
+            &self.endpoint,
+            self.credential_environment_reference
+                .as_deref()
+                .unwrap_or(""),
+        ] {
+            guard
+                .validate_metadata_text(text)
+                .map_err(LocalAgentError::Context)?;
+        }
+        Ok(())
     }
 
     /// Selected CLI protocol adapter.
@@ -271,6 +320,77 @@ impl std::fmt::Debug for LocalAgentConfig {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn environment_reference_is_audit_only_validated_and_hidden_from_debug() {
+        let root = std::env::temp_dir();
+        let config = LocalAgentConfig::new(
+            LocalAgentKind::Codex,
+            root.join("unused-cli"),
+            &root,
+            "model",
+        )
+        .unwrap();
+        for invalid in ["", "KEY=value", "9KEY", "KEY\n", "éKEY"] {
+            assert!(
+                config
+                    .clone()
+                    .with_credential_environment_reference(Some(invalid))
+                    .is_err()
+            );
+        }
+        let reviewed = config
+            .with_credential_environment_reference(Some("KEELSHELL_IMPORT_ONLY_KEY"))
+            .unwrap();
+        let preview = reviewed
+            .prepare(
+                crate::ContextDraft::new("Explain selected output"),
+                &[],
+                8192,
+            )
+            .unwrap();
+        assert!(preview.preview_json().contains("KEELSHELL_IMPORT_ONLY_KEY"));
+        assert!(
+            !preview
+                .preview_stdin()
+                .contains("KEELSHELL_IMPORT_ONLY_KEY")
+        );
+        assert!(!format!("{reviewed:?}").contains("KEELSHELL_IMPORT_ONLY_KEY"));
+        assert!(
+            reviewed
+                .prepare(
+                    crate::ContextDraft::new("Explain output"),
+                    &["KEELSHELL_IMPORT_ONLY_KEY"],
+                    8192
+                )
+                .is_err()
+        );
+    }
+
+    #[tokio::test]
+    async fn actual_send_credential_cannot_be_hidden_in_audit_metadata_before_any_spawn() {
+        let root = std::env::temp_dir();
+        let config = LocalAgentConfig::new(
+            LocalAgentKind::Codex,
+            root.join("nonexistent-native-cli"),
+            &root,
+            "model",
+        )
+        .unwrap()
+        .with_credential_environment_reference(Some("AUDIT_KEY_NAME"))
+        .unwrap();
+        let request = config
+            .prepare(crate::ContextDraft::new("Explain output"), &[], 8192)
+            .unwrap();
+        let result = super::super::LocalAgentClient
+            .ask(
+                request.approve(),
+                super::super::LocalAgentCredential::new("AUDIT_KEY_NAME").unwrap(),
+                &crate::RequestCancellation::new(),
+            )
+            .await;
+        assert_eq!(result.err(), Some(LocalAgentError::CredentialInContext));
+    }
 
     #[test]
     fn user_ask_limits_keep_defaults_and_fixed_protocol_guards() {

@@ -56,6 +56,15 @@ impl BoundSecret {
     }
 }
 
+#[derive(Clone, PartialEq, Eq)]
+struct BoundLocalEnvironment {
+    reference: AiSecretRef,
+    endpoint: String,
+    backend: AiBackend,
+    protocol: AiApiStyle,
+    value: Zeroizing<String>,
+}
+
 /// Process-only credentials. No serialization or Debug implementation exists.
 /// API authentication remains indexed by profile; additional secrets are bound
 /// to profile, reference, protocol, endpoint and their exact header/proxy purpose.
@@ -66,6 +75,10 @@ pub struct EphemeralCredentials {
     // Retained editor values are known secrets even when their draft cannot be
     // bound to a valid delivery purpose. They never authorize header delivery.
     request_drafts: BTreeMap<Uuid, Vec<Zeroizing<String>>>,
+    // Every explicitly loaded local environment value remains a disclosure guard
+    // until its profile is deleted; clearing delivery does not forget the value.
+    local_environment_values: BTreeMap<Uuid, Vec<Zeroizing<String>>>,
+    local_environment_keys: BTreeMap<Uuid, BoundLocalEnvironment>,
 }
 
 impl EphemeralCredentials {
@@ -76,9 +89,11 @@ impl EphemeralCredentials {
         self.authentication.get(id)
     }
     pub fn insert(&mut self, id: Uuid, key: Zeroizing<String>) -> Option<Zeroizing<String>> {
+        self.local_environment_keys.remove(&id);
         self.authentication.insert(id, key)
     }
     pub fn remove(&mut self, id: &Uuid) -> Option<Zeroizing<String>> {
+        self.local_environment_keys.remove(id);
         self.authentication.remove(id)
     }
     #[cfg(test)]
@@ -91,7 +106,10 @@ impl EphemeralCredentials {
     }
     #[cfg(test)]
     pub fn is_empty(&self) -> bool {
-        self.authentication.is_empty() && self.requests.is_empty() && self.request_drafts.is_empty()
+        self.authentication.is_empty()
+            && self.requests.is_empty()
+            && self.request_drafts.is_empty()
+            && self.local_environment_values.is_empty()
     }
     pub(crate) fn all_secrets(&self) -> Vec<&str> {
         self.authentication
@@ -99,9 +117,81 @@ impl EphemeralCredentials {
             .map(|v| v.as_str())
             .chain(self.requests.values().flat_map(BoundSecret::secrets))
             .chain(self.request_drafts.values().flatten().map(|v| v.as_str()))
+            .chain(
+                self.local_environment_values
+                    .values()
+                    .flatten()
+                    .map(|v| v.as_str()),
+            )
             .collect::<BTreeSet<_>>()
             .into_iter()
             .collect()
+    }
+
+    pub(crate) fn bind_local_environment(
+        &mut self,
+        profile: &NamedAiProfile,
+        value: Zeroizing<String>,
+    ) {
+        let reference = match &profile.authentication {
+            AiAuthentication::Bearer {
+                credential: Some(reference @ AiSecretRef::Environment { .. }),
+            }
+            | AiAuthentication::Header {
+                credential: Some(reference @ AiSecretRef::Environment { .. }),
+                ..
+            } => reference.clone(),
+            _ => return,
+        };
+        if profile.backend == AiBackend::Api {
+            return;
+        }
+        self.authentication.insert(profile.id, value.clone());
+        self.local_environment_keys.insert(
+            profile.id,
+            BoundLocalEnvironment {
+                reference,
+                endpoint: profile.endpoint.clone(),
+                backend: profile.backend.clone(),
+                protocol: profile.api_style,
+                value,
+            },
+        );
+    }
+
+    pub(crate) fn local_environment_key(
+        &self,
+        profile: &NamedAiProfile,
+    ) -> Option<&Zeroizing<String>> {
+        let bound = self.local_environment_keys.get(&profile.id)?;
+        let reference = match &profile.authentication {
+            AiAuthentication::Bearer { credential }
+            | AiAuthentication::Header { credential, .. } => credential.as_ref()?,
+            AiAuthentication::None => return None,
+        };
+        (profile.backend != AiBackend::Api
+            && bound.reference == *reference
+            && bound.endpoint == profile.endpoint
+            && bound.protocol == profile.api_style
+            && bound.backend.same_credential_destination(&profile.backend))
+        .then_some(&bound.value)
+    }
+
+    pub(crate) fn retain_local_environment(&mut self, profile: Uuid, value: Zeroizing<String>) {
+        let values = self.local_environment_values.entry(profile).or_default();
+        if !values.contains(&value) {
+            values.push(value);
+        }
+    }
+
+    pub(crate) fn local_environment_capacity(&self, profile: Uuid) -> bool {
+        self.local_environment_values
+            .get(&profile)
+            .is_none_or(|values| values.len() < 16)
+    }
+
+    pub(crate) fn clear_local_environment(&mut self, profile: Uuid) {
+        self.local_environment_values.remove(&profile);
     }
 
     pub(crate) fn clear_requests(&mut self, profile: Uuid) {
@@ -197,6 +287,16 @@ pub(crate) fn validate_catalog_metadata(
     catalog
         .validate()
         .map_err(|_| AiError::InvalidRequestOptions)?;
+    validate_catalog_secrets(catalog, credentials)
+}
+
+/// Check every metadata value against all known and retained draft secrets.
+/// Incomplete drafts are included; callers separately admit their structure and
+/// transport. Capability probes may run before a model has been selected.
+pub(crate) fn validate_catalog_secrets(
+    catalog: &AiProfileCatalog,
+    credentials: &EphemeralCredentials,
+) -> Result<(), AiError> {
     let guard = RequestOptions::default().with_context_secrets(&credentials.all_secrets())?;
     let reference = |reference: &AiSecretRef| match reference {
         AiSecretRef::Environment { name } => guard.validate_metadata_text(name),
@@ -307,7 +407,7 @@ pub(crate) fn reference_for<'a>(
     }
 }
 
-fn environment(name: &str) -> Result<Zeroizing<String>, AiError> {
+pub(crate) fn environment(name: &str) -> Result<Zeroizing<String>, AiError> {
     // Only an explicitly selected reference is read at the user's request action.
     // Missing/non-Unicode/oversize values fail closed; diagnostics omit its name/value.
     let value = std::env::var(name).map_err(|_| AiError::InvalidRequestOptions)?;

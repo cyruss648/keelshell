@@ -64,6 +64,9 @@ impl AiSettingsPanel {
             cx.notify();
             return;
         }
+        if super::local_environment::reference_name(Some(profile)).is_some() {
+            return;
+        }
         if !uses_api_key_authentication(&profile.authentication) {
             return;
         }

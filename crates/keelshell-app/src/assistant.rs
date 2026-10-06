@@ -16,7 +16,7 @@ use keelshell_ai::{
     PreparedRequest, ProviderClient, ProviderConfig, ProviderProtocol, RedactionReport,
     RequestCancellation,
 };
-use keelshell_core::{AiApiStyle, AiBackend, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{AiApiStyle, AiAuthentication, AiBackend, AiProfileCatalog, NamedAiProfile};
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
@@ -434,7 +434,25 @@ impl AssistantPanel {
                 }
                 crate::ai_request_options::resolve_authentication(profile, &credentials)
             }
-            _ => Ok(self.key.clone()),
+            AiBackend::LocalAgent { .. } => {
+                if matches!(
+                    &profile.authentication,
+                    AiAuthentication::Bearer {
+                        credential: Some(keelshell_core::AiSecretRef::Environment { .. })
+                    } | AiAuthentication::Header {
+                        credential: Some(keelshell_core::AiSecretRef::Environment { .. }),
+                        ..
+                    }
+                ) {
+                    self.credentials
+                        .local_environment_key(profile)
+                        .cloned()
+                        .map(Some)
+                        .ok_or(keelshell_ai::AiError::InvalidApiKey)
+                } else {
+                    Ok(self.key.clone())
+                }
+            }
         };
         let resolved_key = match resolved_key {
             Ok(key) => key,

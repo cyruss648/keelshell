@@ -298,6 +298,8 @@ impl Fixture {
         .with_limits(
             LocalAgentLimits::new(timeout, 1024 * 1024, 128 * 1024, 128 * 1024, 128).unwrap(),
         )
+        .with_credential_environment_reference(Some("KEELSHELL_IMPORT_ONLY_KEY"))
+        .unwrap()
     }
 
     async fn ask(&self, question: &str) -> Result<String, LocalAgentError> {
@@ -1235,6 +1237,25 @@ async fn configured_budget_cases(fixture: &Fixture) {
 fn fixture(arguments: &[String]) {
     let executable = std::env::current_exe().unwrap();
     let filename = executable.file_stem().unwrap().to_string_lossy();
+    if filename.contains("review-probe") {
+        use std::fs::OpenOptions;
+        let mut receipt = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(
+                executable
+                    .parent()
+                    .unwrap()
+                    .join("review-probe-invocations.jsonl"),
+            )
+            .unwrap();
+        serde_json::to_writer(
+            &mut receipt,
+            &json!({"pid":std::process::id(), "argv":std::env::args().collect::<Vec<_>>()}),
+        )
+        .unwrap();
+        receipt.write_all(b"\n").unwrap();
+    }
     if filename.contains("sensitive") {
         std::fs::write(executable.parent().unwrap().join("spawned-fixture"), []).unwrap();
     }
@@ -1461,6 +1482,12 @@ fn assert_policy(arguments: &[String], claude: bool) {
     } else {
         "/usr/bin"
     }));
+    assert!(std::env::var_os("KEELSHELL_IMPORT_ONLY_KEY").is_none());
+    assert!(
+        !arguments
+            .iter()
+            .any(|argument| argument.contains("KEELSHELL_IMPORT_ONLY_KEY"))
+    );
     assert!(std::env::var_os("SSH_AUTH_SOCK").is_none());
     assert!(std::env::var_os("NODE_OPTIONS").is_none());
     assert!(std::env::var_os("CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD").is_none());

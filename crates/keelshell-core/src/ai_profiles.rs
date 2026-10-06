@@ -116,7 +116,9 @@ impl AiPreset {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "source", rename_all = "snake_case", deny_unknown_fields)]
 pub enum AiSecretRef {
-    /// Read an explicitly selected environment variable at request time.
+    /// Resolve an explicitly selected environment variable at a user action.
+    /// API adapters resolve at request preparation; local Ask requires an explicit
+    /// import and then uses a process-only frozen value.
     Environment {
         /// Variable identifier, restricted to ASCII letters, digits and `_`.
         name: String,
@@ -723,7 +725,11 @@ impl NamedAiProfile {
                     && matches!(
                         self.authentication,
                         AiAuthentication::Bearer {
-                            credential: None | Some(AiSecretRef::SecretStore { .. })
+                            credential: None
+                                | Some(
+                                    AiSecretRef::SecretStore { .. }
+                                        | AiSecretRef::Environment { .. }
+                                )
                         }
                     )
             }
@@ -731,7 +737,7 @@ impl NamedAiProfile {
                 self.api_style == AiApiStyle::AnthropicMessages
                     && matches!(
                         &self.authentication,
-                        AiAuthentication::Header { name, credential: None | Some(AiSecretRef::SecretStore { .. }) }
+                        AiAuthentication::Header { name, credential: None | Some(AiSecretRef::SecretStore { .. } | AiSecretRef::Environment { .. }) }
                             if name.eq_ignore_ascii_case("x-api-key")
                     )
             }

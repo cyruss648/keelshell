@@ -421,3 +421,65 @@ fn bearer_references_admit_supported_sources_but_reject_invalid_reference_identi
     // Metadata admission never supplies a value: explicit resolution belongs to the API caller.
     Ok(())
 }
+
+#[test]
+fn local_key_environment_references_roundtrip_without_resolution_or_load_rewrite() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    for agent in [AiLocalAgent::Codex, AiLocalAgent::ClaudeCode] {
+        let path = directory
+            .path()
+            .join(format!("local-reference-{agent:?}.json"));
+        let mut named = profile("Referenced local key");
+        named.backend = AiBackend::LocalAgent {
+            agent,
+            executable: directory
+                .path()
+                .join("unused-native-cli")
+                .to_string_lossy()
+                .into(),
+            limits: Default::default(),
+        };
+        let reference = AiSecretRef::Environment {
+            name: "KEELSHELL_IMPORT_ONLY_KEY".into(),
+        };
+        match agent {
+            AiLocalAgent::Codex => {
+                named.api_style = AiApiStyle::Responses;
+                named.authentication = AiAuthentication::Bearer {
+                    credential: Some(reference.clone()),
+                };
+            }
+            AiLocalAgent::ClaudeCode => {
+                named.api_style = AiApiStyle::AnthropicMessages;
+                named.authentication = AiAuthentication::Header {
+                    name: "x-api-key".into(),
+                    credential: Some(reference.clone()),
+                };
+            }
+        }
+        named.validate_local_agent_transport()?;
+        let mut state = AppState::default();
+        state.settings.ai_profiles.upsert(named.clone())?;
+        StateStore::new(&path).save(&state)?;
+        let before = fs::read(&path)?;
+        let loaded = StateStore::new(&path).load()?;
+        assert_eq!(loaded.settings.ai_profiles.profiles[0], named);
+        assert_eq!(fs::read(&path)?, before);
+        assert!(String::from_utf8(before)?.contains("KEELSHELL_IMPORT_ONLY_KEY"));
+        assert!(directory.path().read_dir()?.all(|entry| {
+            !entry
+                .map(|entry| entry.file_name())
+                .unwrap_or_default()
+                .to_string_lossy()
+                .contains("unused-native-cli")
+        }));
+        let mut wire = serde_json::to_value(state)?;
+        wire["settings"]["ai_profiles"]["profiles"][0]["authentication"]["credential"] =
+            json!({"source":"environment","name":"KEY=value"});
+        write_private(&path, &wire)?;
+        let invalid = fs::read(&path)?;
+        assert!(StateStore::new(&path).load().is_err());
+        assert_eq!(fs::read(&path)?, invalid);
+    }
+    Ok(())
+}

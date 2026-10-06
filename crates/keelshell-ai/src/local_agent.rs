@@ -234,6 +234,7 @@ impl LocalAgentConfig {
         secrets: &[&str],
         byte_budget: usize,
     ) -> Result<PreparedLocalAsk, LocalAgentError> {
+        self.validate_context_metadata(secrets)?;
         // Reuse the existing admission/redaction implementation. This formatter
         // never sends HTTP; its endpoint is not part of the CLI request or review.
         let formatter = ProviderConfig::new_with_protocol(
@@ -261,6 +262,7 @@ impl LocalAgentConfig {
             "model": self.model,
             "mode": "Ask only; no CLI tools, installed hooks/plugins, skills or MCP; fixed Claude built-in metadata admitted",
             "credential": "explicit ephemeral API credential; subscription login not reused",
+            "credential_environment_reference": self.credential_environment_reference,
             "codex_permissions": "root deny; minimal runtime paths read; isolated workspace read; command network disabled",
             "timeout_ms": self.limits.timeout.as_millis(),
             "combined_output_bytes": self.limits.output_bytes,

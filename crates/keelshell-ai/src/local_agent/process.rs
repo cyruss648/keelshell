@@ -160,6 +160,11 @@ impl LocalAgentClient {
         if payload_contains_secret(&approved.prepared.stdin, credential.0.as_str()) {
             return Err(LocalAgentError::CredentialInContext);
         }
+        approved
+            .prepared
+            .config
+            .validate_context_metadata(&[credential.0.as_str()])
+            .map_err(|_| LocalAgentError::CredentialInContext)?;
         let prepared = approved.prepared;
         let deadline = Instant::now() + prepared.config.limits.timeout;
         let scratch = Scratch::create(&prepared.config).await?;

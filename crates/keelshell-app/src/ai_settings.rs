@@ -23,6 +23,7 @@ use zeroize::Zeroizing;
 use crate::i18n::{Message, t};
 
 mod inference;
+mod local_environment;
 mod request_options;
 #[cfg(test)]
 mod scrollbar_tests;
@@ -145,6 +146,8 @@ pub struct AiSettingsPanel {
     local_answer: Entity<InputState>,
     local_output: Entity<InputState>,
     local_limit_drafts: BTreeMap<Uuid, LocalLimitDraft>,
+    local_environment: Entity<InputState>,
+    local_environment_drafts: BTreeMap<Uuid, String>,
     editor_values: EditorValues,
     clear_key_pending: bool,
     vault_path: PathBuf,
@@ -290,6 +293,12 @@ impl AiSettingsPanel {
             window,
             cx,
         );
+        let local_environment = field(
+            local_environment::reference_name(profile).unwrap_or_default(),
+            "KEELSHELL_AI_KEY",
+            window,
+            cx,
+        );
         // A modal must take keyboard focus as well as occlude pointer input.
         // An empty catalog has no rendered input, so focus the panel itself.
         let focus = cx.focus_handle();
@@ -312,6 +321,7 @@ impl AiSettingsPanel {
             &local_timeout,
             &local_answer,
             &local_output,
+            &local_environment,
         ]
         .into_iter()
         .map(|field| {
@@ -347,6 +357,8 @@ impl AiSettingsPanel {
             local_answer,
             local_output,
             local_limit_drafts: BTreeMap::new(),
+            local_environment,
+            local_environment_drafts: BTreeMap::new(),
             editor_values: values,
             clear_key_pending: false,
             vault_path,
@@ -482,6 +494,7 @@ impl AiSettingsPanel {
     }
 
     fn sync_editor(&mut self, cx: &mut Context<Self>) {
+        self.sync_local_environment(cx);
         let mut values = self.read_values(cx);
         if self.clear_key_pending {
             values.key.clear();
@@ -537,19 +550,31 @@ impl AiSettingsPanel {
                 profile.context_window_tokens = context;
                 profile.max_output_tokens = output;
             }
-            if endpoint_changed || key_changed {
+            if endpoint_changed
+                || (key_changed && local_environment::reference_name(Some(profile)).is_none())
+            {
+                let keep_environment = profile.backend != AiBackend::Api;
                 match &mut profile.authentication {
                     AiAuthentication::Bearer { credential }
                     | AiAuthentication::Header {
                         name: _,
                         credential,
-                    } => *credential = None,
+                    } => {
+                        if !keep_environment
+                            || !matches!(
+                                credential,
+                                Some(keelshell_core::AiSecretRef::Environment { .. })
+                            )
+                        {
+                            *credential = None;
+                        }
+                    }
                     AiAuthentication::None => {}
                 }
             }
             if values.key.is_empty() {
                 self.credentials.remove(&profile.id);
-            } else {
+            } else if local_environment::reference_name(Some(profile)).is_none() {
                 self.credentials.insert(profile.id, values.key.clone());
             }
         }
@@ -636,6 +661,7 @@ impl AiSettingsPanel {
         // turn a locale refresh/selection into edits to another profile.
         self.editor_values = values;
         self.clear_key_pending = false;
+        self.load_local_environment(window, cx);
         self.load_inference_editor(window, cx);
         self.load_request_editor(window, cx);
         self.clear_pending_request_fields(window, cx);
@@ -677,6 +703,8 @@ impl AiSettingsPanel {
             self.request_editors.remove(&id);
             self.credentials.remove(&id);
             self.local_limit_drafts.remove(&id);
+            self.local_environment_drafts.remove(&id);
+            self.credentials.clear_local_environment(id);
             self.token_drafts.remove(&id);
             self.inference_drafts.retain(|(owner, _), _| *owner != id);
             self.selected = self.catalog.profiles.first().map(|p| p.id);
@@ -883,6 +911,7 @@ impl AiSettingsPanel {
         self.credentials.remove(&profile.id);
         self.token_drafts.remove(&profile.id);
         self.local_limit_drafts.remove(&profile.id);
+        self.local_environment_drafts.remove(&profile.id);
         profile.max_output_tokens = None;
         profile.context_window_tokens = None;
         profile.reasoning_by_model.clear();
@@ -933,6 +962,18 @@ impl AiSettingsPanel {
             return;
         }
         self.sync_editor(cx);
+        // Probes serialize endpoint/path metadata before Ask admission. Revoked
+        // delivery values still guard every profile, including hidden drafts.
+        if crate::ai_request_options::validate_catalog_secrets(&self.catalog, &self.credentials)
+            .is_err()
+        {
+            self.status = Message::new(
+                "无法检查 CLI：配置包含已知秘密或秘密集合超限，请先修正配置。",
+                "Cannot check CLI: configuration contains a known secret or the secret set exceeds its limit. Correct it first.",
+            );
+            cx.notify();
+            return;
+        }
         let Some(profile) = self.profile() else {
             return;
         };
@@ -1382,7 +1423,7 @@ pub(crate) fn local_agent_config(
         kind,
         PathBuf::from(executable),
         std::env::temp_dir(),
-        metadata.model,
+        &metadata.model,
     )?
     .with_inference_endpoint(&metadata.endpoint)
     .and_then(|config| {
@@ -1391,7 +1432,13 @@ pub(crate) fn local_agent_config(
             usize::from(limits.answer_kib()) * 1024,
             usize::from(limits.output_kib()) * 1024,
         )
-        .map(|limits| config.with_limits(limits))
+        .and_then(|limits| {
+            config
+                .with_limits(limits)
+                .with_credential_environment_reference(local_environment::reference_name(Some(
+                    &metadata,
+                )))
+        })
     })
 }
 

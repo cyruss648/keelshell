@@ -1781,3 +1781,81 @@ fn inactive_proxy_basic_reply_is_redacted_and_late_reply_after_clear_is_discarde
         assert!(panel._job.is_none());
     });
 }
+
+#[gpui_kit::test]
+#[allow(clippy::expect_used)]
+fn local_environment_key_requires_explicit_binding_and_freezes_review_snapshot(
+    cx: &mut TestAppContext,
+) {
+    let (_, panel) = mount(cx);
+    for agent in [
+        keelshell_core::AiLocalAgent::Codex,
+        keelshell_core::AiLocalAgent::ClaudeCode,
+    ] {
+        panel.update(cx, |panel, cx| {
+            let mut profile = local_profile(agent);
+            let source = keelshell_core::AiSecretRef::Environment {
+                name: "KEELSHELL_IMPORT_ONLY_KEY".into(),
+            };
+            match &mut profile.authentication {
+                AiAuthentication::Bearer { credential }
+                | AiAuthentication::Header { credential, .. } => *credential = Some(source),
+                AiAuthentication::None => panic!("fixed key auth"),
+            }
+            let catalog = AiProfileCatalog {
+                active_id: Some(profile.id),
+                profiles: vec![profile.clone()],
+            };
+            let mut credentials = EphemeralCredentials::new();
+            // A generic manually assigned key cannot impersonate a successful
+            // environment import. No environment lookup is attempted here.
+            credentials.insert(profile.id, Zeroizing::new("unbound-manual-key".into()));
+            panel.set_profiles(&catalog, &credentials, cx);
+            panel.prepare(cx);
+            assert!(panel.prepared.is_none());
+            credentials
+                .retain_local_environment(profile.id, Zeroizing::new("frozen-import-key".into()));
+            credentials
+                .bind_local_environment(&profile, Zeroizing::new("frozen-import-key".into()));
+            panel.set_profiles(&catalog, &credentials, cx);
+            panel.prepare(cx);
+            let request = panel
+                .prepared
+                .as_ref()
+                .expect("prepared with explicit import");
+            assert!(request.preview_json().contains("KEELSHELL_IMPORT_ONLY_KEY"));
+            assert!(!request.preview_json().contains("frozen-import-key"));
+            assert_eq!(
+                panel.prepared_key.as_ref().expect("snapshot").as_str(),
+                "frozen-import-key"
+            );
+            // The caller's later cache edit cannot mutate an already reviewed
+            // request. Applying that edit revokes the old review and operation.
+            credentials
+                .bind_local_environment(&profile, Zeroizing::new("rotated-import-key".into()));
+            assert_eq!(
+                panel.prepared_key.as_ref().expect("still frozen").as_str(),
+                "frozen-import-key"
+            );
+            let cancellation = RequestCancellation::new();
+            panel.cancellation = Some(cancellation.clone());
+            panel.set_profiles(&catalog, &credentials, cx);
+            assert!(cancellation.is_cancelled());
+            assert!(panel.prepared.is_none());
+            let mut changed = profile.clone();
+            changed.endpoint = "https://changed.example/v1".into();
+            let changed_catalog = AiProfileCatalog {
+                active_id: Some(changed.id),
+                profiles: vec![changed],
+            };
+            panel.set_profiles(&changed_catalog, &credentials, cx);
+            panel.prepare(cx);
+            assert!(
+                panel.prepared.is_none(),
+                "old import is not admitted for new receiver"
+            );
+            assert!(!panel.busy);
+            assert!(panel._job.is_none());
+        });
+    }
+}
