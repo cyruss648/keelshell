@@ -125,6 +125,7 @@ impl Workspace {
             || self.folder_form.is_some()
             || self.destination_prompt.is_some()
             || self.vault_settings.is_some()
+            || self.profile_sync.is_some()
             || self.snippet_modal_open()
             || self.show_batch
             || self.show_workflow

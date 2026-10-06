@@ -56,3 +56,8 @@ per-device selection and explicit refresh while paused were observed. Result
 state survived Chinese/English and System/Light/Dark changes in a limited small
 window. This is separate from full native platform, minimum-window, accessibility
 and timed pause acceptance. See the [limited native record](../testing/records/2026-10-06-target-parameters-disk-native.md).
+
+
+### 加密配置同步候选
+
+SYNC-02：显式选择共享/挂载目录，双客户端读取并逐项审核后发布认证密文。离线冲突、删除墓碑、版本回放拒绝、待发布恢复和二次确认解除关联已实现；不含云账户、认证/vault/私钥路径/主机信任/AI/历史。目录需提供全局文件锁与原子替换，最终一致缓存不能等价验收。作者源码门禁、最终双语 UI 验证、保存队列反例/修复与 macOS 标准包结构检查已通过；新的非作者源码复核修复路线认证引用、文件夹映射与删除时间，独立完整1,276普通/8doc/6Python、严格检查及新macOS结构检查通过，见[独立记录](../testing/records/2026-10-06-profile-sync-independent-review.md)。根整合及真实跨机器/三平台原生仍待完成。详见[产品设计](PROFILE_SYNC.md)和[候选测试状态](../testing/records/2026-10-06-profile-sync.md)。

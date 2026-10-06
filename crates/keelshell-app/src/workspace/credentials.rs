@@ -62,6 +62,7 @@ impl Workspace {
             && self.connect_route.is_none()
             && self.pending_recents.is_empty()
             && self.vault_settings.is_none()
+            && self.profile_sync.is_none()
             && self.ai_settings.is_none()
             && self.login.is_none()
             && self.host_approval.is_none()

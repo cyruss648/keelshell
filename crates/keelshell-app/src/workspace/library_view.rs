@@ -609,6 +609,14 @@ impl Workspace {
                     .map(|button| self.retain_modal_button("import-openssh", button, cx)),
             )
             .child(
+                Button::new("profile-sync-open")
+                    .compact()
+                    .label(t(cx, "加密同步", "Encrypted sync"))
+                    .disabled(!self.can_open_vault())
+                    .on_click(cx.listener(|view, _, window, cx| view.open_profile_sync(window, cx)))
+                    .map(|button| self.retain_modal_button("profile-sync-open", button, cx)),
+            )
+            .child(
                 Button::new("export-connections")
                     .compact()
                     .icon(IconName::Upload)

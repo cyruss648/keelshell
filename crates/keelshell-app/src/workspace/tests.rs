@@ -26,6 +26,7 @@ use crate::terminal::{TerminalCommand, TerminalView};
 mod ai_command_review_target;
 mod ai_metadata;
 pub(crate) mod independent_disk_monitor;
+mod profile_sync;
 
 trait Checked<T> {
     fn checked(self, operation: &str) -> T;

@@ -100,6 +100,11 @@ impl Workspace {
                 | modal_scope::ModalKind::SnippetDelete
                 | modal_scope::ModalKind::Archive
                 | modal_scope::ModalKind::HostApproval => self.overlay_focus.focus(window, cx),
+                modal_scope::ModalKind::ProfileSync => {
+                    if let Some(panel) = &self.profile_sync {
+                        panel.update(cx, |panel, cx| panel.focus(window, cx));
+                    }
+                }
                 modal_scope::ModalKind::Vault => {
                     if let Some(panel) = &self.vault_settings {
                         panel.update(cx, |panel, cx| panel.focus(window, cx));
@@ -367,6 +372,7 @@ impl Workspace {
     pub(super) fn flush_recent_connections(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.saving
             || self.vault_settings.is_some()
+            || self.profile_sync.is_some()
             || self.snippet_modal_open()
             || self.pending_recents.is_empty()
         {

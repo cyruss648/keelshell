@@ -66,3 +66,19 @@ EOF 独立专项全部 8 项通过，actual 0 / 12.771272 秒：WRITE 1.05799175
 检查前后 621 个完整工程输入、13,791,215 字节逐份相等，输入清单 SHA-256 `0d96fa0f6c6c7a98255a84aba769f1b5771af613af52b3ecab18134a4b1200a9`。完整日志 381,293 字节，SHA-256 `10c9a852fae355abf42c1e0ab2e4accaaed135053c9fc5dc05b80dfba8234405`。持有的 runner 已实际 wait/reap，退出 0、无超时，所属进程组没有遗留。检查后仅补充本节及状态文档，文档增补不属于原检查输入正文。
 
 本次检查不提供新的桌面、OpenSSH、Windows/Linux 原生或发布验收；后继 GitHub Quality 必须绑定实际新提交，不能沿用旧提交或本机结果。
+
+## 精确提交的三平台后继 CI
+
+后继提交为 `b26c4c88fa54dbc9788899f86136fb14ef8cb37a`，[Quality 37455024526](https://github.com/cyruss648/keelshell/actions/runs/37455024526) attempt 1 已实际 completed/success，三个 job 均成功。新的独立子 agent 读取完整 API、三个原始 job 日志、完整 attempt ZIP 和两份 OpenSSH artifact；根另逐份复制并读回362份封存正文、11,618,004字节，封存SHA-256 `aee3b6a9f67f133279408b4fb85628ec16da6a9a7b06fb324a6eeb2c81a7e23d`。620个已提交 blob 的路径、mode和ID与该精确提交相等。
+
+| 平台 / job | 普通测试 / doc / ignored | Python | 实际控制器 |
+| --- | --- | --- | --- |
+| Windows / 112240410393 | 1376 / 8 / 16 | 6脚本、57打包 | 默认与额外2MiB各626阶段、38 TCP；future5536字节 |
+| Linux / 112240410701 | 1395 / 8 / 17 | 6脚本、57打包 | 默认626/38；额外2MiB为628/39；future5176字节 |
+| macOS / 112240410807 | 1395 / 8 / 16 | 6脚本、57打包 | 默认与额外2MiB各626阶段、38 TCP；future5176字节 |
+
+三平台格式、x.y依赖策略及严格工作区全目标Clippy通过。Linux默认TCP实际为12 connected、25 refused及一次OS104 abort；小栈为13 connected、26 refused。其余四次为12 connected、26 refused，阶段连续且到达结束；保留实际差异，不归一化为固定计数。两个目录取消场景及两项EOF独立回归在三平台均实际通过。
+
+Windows原始日志517,969字节，SHA-256 `3e0529dd7b0c6f4064e0ae7ba16805673b603ff94955e1f67abd191240005d18`；Linux548,263字节，`2c6b8804c26aeb43b219515a4e8d910d98441810d89d401e0eabc933e484d529`；macOS517,368字节，`84d55ec0ac1a3c1ae2cbae0c66912c50ae00e3c294e775b1c832153d852f2ecf`。完整attempt ZIP530,754字节、35成员，SHA-256 `13e47c1a027ef0ea62ada565663fb6875dd4610f5f84d16566b9e4faa0026fcd`；CRC与逐成员绑定通过，三个原日志与对应聚合成员正文相等。首次CLI返回空原始body和准备错误继续保留；之后原始ANSI日志仅写入private PIPE与文件，阅读副本不替换原件。
+
+Linux和macOS各11项隔离OpenSSH互通实际通过，用时16.119和22.088秒；两份ZIP摘要与artifact API digest相等，实际收据记录owned/observed进程退出及临时目录移除，保留原有祖先观测边界。Windows按精确workflow未执行OpenSSH。该结果证明此提交的目标平台工程检查和有限localhost互通，不提供三平台桌面、新同步/定时组合、发布或安装更新验收，也不回溯确定旧失败的精确触发原因。

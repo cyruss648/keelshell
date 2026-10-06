@@ -30,6 +30,7 @@ pub(super) enum ModalKind {
     Login,
     Updates,
     Vault,
+    ProfileSync,
     AiSettings,
     Mcp,
     McpFileReview,
@@ -54,6 +55,7 @@ impl ModalKind {
                 t(cx, "SSH 连接与认证", "SSH connection and authentication")
             }
             Self::Updates => t(cx, "关于与更新", "About and updates"),
+            Self::ProfileSync => t(cx, "加密连接同步", "Encrypted profile sync"),
             Self::Vault => t(cx, "凭据库", "Credential vault"),
             Self::AiSettings => t(cx, "AI 配置", "AI configurations"),
             Self::Mcp => t(cx, "对外 MCP 授权与审阅", "External MCP grants and review"),
@@ -233,6 +235,7 @@ impl Workspace {
             (self.host_approval.is_some(), ModalKind::HostApproval),
             (self.update_panel.is_some(), ModalKind::Updates),
             (self.vault_settings.is_some(), ModalKind::Vault),
+            (self.profile_sync.is_some(), ModalKind::ProfileSync),
             (self.ai_settings.is_some(), ModalKind::AiSettings),
             (
                 self.mcp.show && self.mcp.reviewing.is_some(),
@@ -382,6 +385,11 @@ impl Workspace {
                 self.update_panel = None;
                 self.update_panel_subscription = None;
             }
+            ModalKind::ProfileSync => {
+                if let Some(panel) = self.profile_sync.clone() {
+                    panel.update(cx, |panel, cx| panel.close(window, cx));
+                }
+            }
             ModalKind::Vault => {
                 if let Some(panel) = self.vault_settings.clone() {
                     panel.update(cx, |panel, cx| panel.close(window, cx));
@@ -424,6 +432,9 @@ impl Workspace {
             }
             ModalKind::Updates => {
                 self.panel_modal(self.update_panel.clone(), px(760.), px(600.), cx)
+            }
+            ModalKind::ProfileSync => {
+                self.panel_modal(self.profile_sync.clone(), px(1000.), px(680.), cx)
             }
             ModalKind::Vault => {
                 self.panel_modal(self.vault_settings.clone(), px(900.), px(650.), cx)
@@ -531,7 +542,7 @@ impl Workspace {
 
     fn modal_chrome(&self, kind: ModalKind, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
-        let disabled = self.saving || kind == ModalKind::Vault;
+        let disabled = self.saving || matches!(kind, ModalKind::Vault | ModalKind::ProfileSync);
         let mut themes = div().flex().items_center().gap_1().flex_shrink_0();
         for (id, theme, zh, en) in [
             (

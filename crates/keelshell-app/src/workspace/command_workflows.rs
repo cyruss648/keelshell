@@ -51,6 +51,7 @@ impl Workspace {
     pub(super) fn flush_batch_audits(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.saving
             || self.vault_settings.is_some()
+            || self.profile_sync.is_some()
             || self.snippet_modal_open()
             || self.pending_batch_audits.is_empty()
         {

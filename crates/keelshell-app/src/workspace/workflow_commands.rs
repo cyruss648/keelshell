@@ -90,7 +90,7 @@ impl Workspace {
     ) {
         self.maintain_workflow(cx);
         let current = self.workflow_destinations(cx);
-        let valid = self.show_workflow
+        let valid = (self.show_workflow || panel.read(cx).scheduled_due(review))
             && self
                 .workflow_panel
                 .as_ref()

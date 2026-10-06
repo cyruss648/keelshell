@@ -37,6 +37,7 @@ impl Workspace {
             || self.show_workflow
             || self.discard_archive.is_some()
             || self.vault_settings.is_some()
+            || self.profile_sync.is_some()
             || self.ai_settings.is_some()
             || self.show_connections
             || self.openssh_review.is_some()

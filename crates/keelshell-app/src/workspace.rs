@@ -27,6 +27,7 @@ mod mcp;
 mod modal_scope;
 mod modals;
 mod openssh_review;
+mod profile_sync;
 mod reconnect;
 mod reconnect_editor;
 mod remote_completion;
@@ -277,6 +278,8 @@ pub struct Workspace {
     ai_credentials: EphemeralCredentials,
     ai_settings: Option<Entity<AiSettingsPanel>>,
     ai_settings_subscription: Option<Subscription>,
+    profile_sync: Option<Entity<crate::profile_sync::ProfileSyncPanel>>,
+    profile_sync_subscription: Option<Subscription>,
     vault_settings: Option<Entity<VaultSettings>>,
     vault_settings_subscription: Option<Subscription>,
     update_panel: Option<Entity<UpdatePanel>>,
@@ -575,6 +578,8 @@ impl Workspace {
             ai_credentials,
             ai_settings: None,
             ai_settings_subscription: None,
+            profile_sync: None,
+            profile_sync_subscription: None,
             vault_settings: None,
             vault_settings_subscription: None,
             update_panel: None,
@@ -853,7 +858,7 @@ impl Workspace {
     }
 
     fn switch_language(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.saving || self.vault_settings.is_some() {
+        if self.saving || (self.vault_settings.is_some() || self.profile_sync.is_some()) {
             return;
         }
         let language = match i18n::language(cx) {
@@ -1036,7 +1041,7 @@ impl Workspace {
             || self.show_batch
             || self.show_workflow
             || self.ai_settings.is_some()
-            || self.vault_settings.is_some()
+            || (self.vault_settings.is_some() || self.profile_sync.is_some())
             || self.snippet_modal_open()
             || self.connect_route.is_some()
         {
@@ -1105,7 +1110,7 @@ impl Workspace {
             || self.show_batch
             || self.show_workflow
             || self.ai_settings.is_some()
-            || self.vault_settings.is_some()
+            || (self.vault_settings.is_some() || self.profile_sync.is_some())
             || self.update_panel.is_some()
             || self.snippet_modal_open()
             || self.connect_route.is_some()
@@ -1540,7 +1545,7 @@ impl Workspace {
             cx.notify();
             return;
         }
-        if self.vault_settings.is_some()
+        if (self.vault_settings.is_some() || self.profile_sync.is_some())
             || (self.snippet_modal_open()
                 && !matches!(
                     &after,
@@ -1550,8 +1555,8 @@ impl Workspace {
                 ))
         {
             self.status = Message::new(
-                "请先关闭凭据库管理，再修改配置。",
-                "Close vault management before changing configuration.",
+                "请先关闭配置管理面板，再修改配置。",
+                "Close the configuration management panel before changing configuration.",
             );
             cx.notify();
             return;

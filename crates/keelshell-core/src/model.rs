@@ -487,6 +487,9 @@ pub struct AppState {
     /// Bounded non-secret history of reviewed SSH batch executions.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub batch_audits: Vec<BatchAuditRecord>,
+    /// Explicit encrypted cross-device synchronization ledger; never contains keys or credentials.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile_sync: Option<crate::ProfileSyncLocal>,
     /// Non-secret preferences.
     pub settings: Settings,
     /// Explicitly trusted host identities, keyed by normalized `[host]:port`.
@@ -513,6 +516,7 @@ impl PartialEq for AppState {
             && self.recent_connections == other.recent_connections
             && self.snippets == other.snippets
             && self.batch_audits == other.batch_audits
+            && self.profile_sync == other.profile_sync
             && self.settings == other.settings
             && self.known_hosts == other.known_hosts
             && self.route_known_hosts == other.route_known_hosts
@@ -551,6 +555,7 @@ impl Default for AppState {
             recent_connections: Vec::new(),
             snippets,
             batch_audits: Vec::new(),
+            profile_sync: None,
             settings: Settings::default(),
             known_hosts: BTreeMap::new(),
             route_known_hosts: BTreeMap::new(),
@@ -586,6 +591,9 @@ impl AppState {
             }
         }
         crate::batch_audit::validate_batch_audits(&self.batch_audits)?;
+        if let Some(sync) = &self.profile_sync {
+            sync.validate()?;
+        }
         self.settings.validate()?;
         Ok(())
     }

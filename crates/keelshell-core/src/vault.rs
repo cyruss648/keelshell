@@ -875,3 +875,66 @@ mod tests {
         Ok(())
     }
 }
+
+// The sync envelope deliberately reuses the vault's bounded, fixed-cost KDF and
+// zeroizing AEAD implementation, with a separate domain and fresh salt/nonce.
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SyncEnvelope {
+    schema: u32,
+    kdf: KdfDocument,
+    nonce: String,
+    ciphertext: String,
+}
+
+pub(crate) fn seal_sync_payload(plaintext: &[u8], passphrase: &str) -> Result<Vec<u8>, Error> {
+    validate_passphrase(passphrase)?;
+    if plaintext.len() > MAX_DOCUMENT_BYTES / 2 {
+        return Err(Error::TooLarge);
+    }
+    let mut salt = [0_u8; SALT_BYTES];
+    fill_random(&mut salt)?;
+    let kdf = KdfDocument {
+        algorithm: "argon2id".into(),
+        memory_kib: ARGON_MEMORY_KIB,
+        iterations: ARGON_ITERATIONS,
+        lanes: ARGON_LANES,
+        salt: BASE64.encode(salt),
+    };
+    let key = derive_key(passphrase, &salt, &kdf)?;
+    let nonce = random_nonce()?;
+    let ciphertext = encrypt(&key, &nonce, b"keelshell-profile-sync-v1\0", plaintext)?;
+    let bytes = serde_json::to_vec(&SyncEnvelope {
+        schema: 1,
+        kdf,
+        nonce: BASE64.encode(nonce),
+        ciphertext: BASE64.encode(&*ciphertext),
+    })?;
+    if bytes.len() > MAX_DOCUMENT_BYTES {
+        return Err(Error::TooLarge);
+    }
+    Ok(bytes)
+}
+
+pub(crate) fn open_sync_payload(
+    bytes: &[u8],
+    passphrase: &str,
+) -> Result<Zeroizing<Vec<u8>>, Error> {
+    validate_passphrase(passphrase)?;
+    if bytes.len() > MAX_DOCUMENT_BYTES {
+        return Err(Error::TooLarge);
+    }
+    let envelope: SyncEnvelope = serde_json::from_slice(bytes).map_err(|_| Error::VaultCorrupt)?;
+    if envelope.schema != 1 {
+        return Err(Error::VaultCorrupt);
+    }
+    let salt = decode_fixed::<SALT_BYTES>(&envelope.kdf.salt)?;
+    let nonce = decode_fixed::<NONCE_BYTES>(&envelope.nonce)?;
+    let ciphertext = decode_bytes(&envelope.ciphertext)?;
+    let key = derive_key(passphrase, &salt, &envelope.kdf)?;
+    let plaintext = decrypt(&key, &nonce, b"keelshell-profile-sync-v1\0", &ciphertext)?;
+    if plaintext.len() > MAX_DOCUMENT_BYTES / 2 {
+        return Err(Error::TooLarge);
+    }
+    Ok(plaintext)
+}

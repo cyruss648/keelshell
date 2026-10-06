@@ -17,6 +17,7 @@ use crate::{
     i18n::{Message, t},
 };
 
+mod schedule;
 #[cfg(test)]
 mod tests;
 mod view;
@@ -36,6 +37,8 @@ pub(crate) struct WorkflowReview {
     pub sources: Vec<(Uuid, String)>,
     pub labels: Vec<(Uuid, String)>,
     pub options: WorkflowOptions,
+    pub schedule: Option<keelshell_core::WorkflowScheduleSpec>,
+    schedule_inputs: schedule::ScheduleReviewInputs,
 }
 
 pub(crate) enum WorkflowPanelEvent {
@@ -87,6 +90,9 @@ pub(crate) struct WorkflowPanel {
     focus: FocusHandle,
     _subscriptions: Vec<Subscription>,
     _poll: Option<Task<()>>,
+    schedule_draft: schedule::ScheduleDraft,
+    scheduled: Option<schedule::ScheduledRun>,
+    _schedule_poll: Option<Task<()>>,
 }
 
 fn input(value: &str, window: &mut Window, cx: &mut App) -> Entity<InputState> {
@@ -116,6 +122,7 @@ impl WorkflowPanel {
                 })
             })
             .collect();
+        let schedule_draft = schedule::ScheduleDraft::new(window, cx);
         let mut panel = Self {
             targets: destinations
                 .into_iter()
@@ -145,13 +152,16 @@ impl WorkflowPanel {
             focus: cx.focus_handle(),
             _subscriptions: subscriptions,
             _poll: None,
+            schedule_draft,
+            scheduled: None,
+            _schedule_poll: None,
         };
         panel.add_task(text, window, cx);
         panel
     }
 
     pub(crate) fn is_running(&self) -> bool {
-        self.starting || self.handle.is_some()
+        self.starting || self.handle.is_some() || self.schedule_active()
     }
     pub(crate) fn focus(&self, window: &mut Window, cx: &mut App) {
         self.focus.focus(window, cx);
@@ -477,10 +487,12 @@ impl WorkflowPanel {
         Ok(WorkflowReview {
             token,
             revision: self.revision,
-            plan,
+            plan: plan.clone(),
             destinations,
             sources,
             labels,
+            schedule: self.schedule_snapshot(token, &plan, cx)?,
+            schedule_inputs: self.schedule_draft.review_inputs(cx),
             options: WorkflowOptions {
                 concurrency,
                 timeout: Duration::from_secs(timeout),
@@ -508,6 +520,26 @@ impl WorkflowPanel {
         }
         cx.notify();
     }
+    #[cfg(test)]
+    pub(crate) fn reviewed_for_test(&self) -> Option<WorkflowReview> {
+        self.review.clone()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn parameter_for_test(
+        &self,
+        target: Uuid,
+        name: &str,
+    ) -> Option<Entity<TextareaState>> {
+        self.targets
+            .iter()
+            .find(|row| row.connected.destination.id == target)?
+            .parameters
+            .iter()
+            .find(|field| field.name == name)
+            .map(|field| field.value.clone())
+    }
+
     pub(crate) fn review_current(&self, review: &WorkflowReview, cx: &App) -> bool {
         self.review.as_ref() == Some(review)
             && self
@@ -528,12 +560,16 @@ impl WorkflowPanel {
         cx.notify();
     }
     pub(crate) fn fail_start(&mut self, cx: &mut Context<Self>) {
+        self.stop_schedule(
+            keelshell_core::WorkflowScheduleInvalidationReason::SessionBindingChanged,
+            cx,
+        );
         self.starting = false;
         self.review = None;
         self.set_disabled(false, cx);
         self.message = Some(Message::new(
-            "审核已失效：任务、执行选项或 SSH 会话变化。请重新选择并审核。",
-            "Review expired: task, execution options or SSH session changed. Select and review again.",
+            "审核已失效：任务、参数、定时配置、执行选项或 SSH 会话变化。请重新选择并审核。",
+            "Review expired: task, parameter, schedule, execution options or SSH session changed. Select and review again.",
         ));
         cx.notify();
     }
@@ -549,6 +585,9 @@ impl WorkflowPanel {
     ) {
         if !self.starting || !self.review_current(review, cx) {
             self.fail_start(cx);
+            return;
+        }
+        if review.schedule.is_some() && !self.admit_schedule(review, window, cx) {
             return;
         }
         let result = review.plan.clone().confirm(review.plan.review_token());
@@ -606,6 +645,12 @@ impl WorkflowPanel {
                 }));
             }
             Err(error) => {
+                self.complete =
+                    self.finish_schedule(keelshell_core::WorkflowScheduleOutcome::Failed);
+                self.stop_schedule(
+                    keelshell_core::WorkflowScheduleInvalidationReason::SessionBindingChanged,
+                    cx,
+                );
                 self.review = None;
                 self.set_disabled(false, cx);
                 self.message = Some(error);
@@ -638,6 +683,27 @@ impl WorkflowPanel {
             changed = true;
         }
         if let Some(result) = handle.try_finish() {
+            // Only a matching complete receipt can distinguish known failure from
+            // uncertain execution. Either stops repetition; neither is retried.
+            let scheduled_outcome = match result.as_ref() {
+                Ok(receipt) if self.receipt_matches(receipt) => {
+                    if receipt.cancelled || self.cancelling {
+                        keelshell_core::WorkflowScheduleOutcome::Cancelled
+                    } else if receipt.tasks.iter().any(|task| matches!(
+                        &task.result, WorkflowTaskResult::Transport { row }
+                            if matches!(row.outcome, keelshell_session::BatchOutcome::Unknown { .. })
+                    )) {
+                        keelshell_core::WorkflowScheduleOutcome::Unknown
+                    } else if receipt.tasks.iter().all(|task| matches!(
+                        &task.result, WorkflowTaskResult::Transport { row } if row.outcome.is_success()
+                    )) {
+                        keelshell_core::WorkflowScheduleOutcome::Succeeded
+                    } else {
+                        keelshell_core::WorkflowScheduleOutcome::Failed
+                    }
+                }
+                _ => keelshell_core::WorkflowScheduleOutcome::Unknown,
+            };
             match result {
                 Ok(receipt) if self.receipt_matches(&receipt) => {
                     self.cancelling |= receipt.cancelled;
@@ -656,8 +722,8 @@ impl WorkflowPanel {
                     ))
                 }
             }
-            self.complete = true;
             self.handle = None;
+            self.complete = self.finish_schedule(scheduled_outcome);
             changed = true;
         }
         if changed {
@@ -718,10 +784,18 @@ impl WorkflowPanel {
             }
         }
         if lost {
+            // Invalidation marks a waiting schedule complete. Capture whether
+            // this was still an unclaimed review before changing that state,
+            // so a lost target cannot leave an actionable-looking old review.
+            let waiting_review = self.handle.is_none() && !self.complete;
+            self.stop_schedule(
+                keelshell_core::WorkflowScheduleInvalidationReason::SessionBindingChanged,
+                cx,
+            );
             if let Some(handle) = &self.handle {
                 handle.cancel();
                 self.cancelling = true;
-            } else if !self.complete {
+            } else if waiting_review {
                 self.starting = false;
                 self.review = None;
                 self.set_disabled(false, cx);
@@ -766,6 +840,7 @@ impl WorkflowPanel {
         self.changed(cx);
     }
     fn cancel(&mut self, cx: &mut Context<Self>) {
+        self.cancel_schedule(cx);
         if let Some(handle) = &self.handle {
             handle.cancel();
             self.cancelling = true;
@@ -786,6 +861,7 @@ impl WorkflowPanel {
             task.command
                 .update(cx, |field, cx| field.set_disabled(disabled, cx));
         }
+        self.schedule_draft.set_disabled(disabled, cx);
         for field in [&self.concurrency, &self.timeout] {
             field.update(cx, |field, cx| field.set_disabled(disabled, cx));
         }

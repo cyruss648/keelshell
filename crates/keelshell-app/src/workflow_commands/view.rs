@@ -377,6 +377,7 @@ impl WorkflowPanel {
                 if review.options.policy==BatchPolicy::StopAfterFailure {t(cx,"失败后停止等待任务","Stop pending tasks after failure")}else{t(cx,"继续独立分支","Continue independent branches")},
                 t(cx,"每任务合计输出上限 256 KiB","Combined output limit: 256 KiB per task"))))
             .child(hint(cx,format!("{} {}",t(cx,"计划指纹","Plan fingerprint"),review.plan.review_token().hex())))
+            .when_some(review.schedule.as_ref(), |el, spec| el.child(self.schedule_review_view(spec, cx)))
             .child(hint(cx,t(cx,"确认会执行以下所有精确命令。正文完整显示，隐形字符以转义显示；命令不会进入历史或配置。",
                 "Confirmation executes every exact command below. Text is complete; invisible characters are escaped. Commands do not enter history or configuration.")));
         for (index, task) in review.plan.tasks().iter().enumerate() {
@@ -467,7 +468,9 @@ impl Render for WorkflowPanel {
             .iter()
             .filter(|row| row.receipt.is_some())
             .count();
-        let title = if self.complete {
+        let title = if self.schedule_active() && self.handle.is_none() {
+            t(cx, "定时工作流等待中", "Scheduled workflow waiting")
+        } else if self.complete {
             t(cx, "依赖工作流结果", "Dependency workflow results")
         } else if self.is_running() {
             t(cx, "依赖工作流运行中", "Dependency workflow running")
@@ -483,6 +486,7 @@ impl Render for WorkflowPanel {
                 .child(hint(cx,format!("{} {} / 128 · {} {done}/{}",t(cx,"任务","Tasks"),self.tasks.len(),t(cx,"终态回执","Terminal receipts"),self.tasks.len()))))
             .child(div().id("workflow-body").test_support().flex_1().min_h_0().min_w_0().overflow_y_scroll().p_3().flex().flex_col().gap_3()
                 .child(self.task_list(cx))
+                .when(self.scheduled.is_some(), |el| el.child(self.schedule_status_view(cx)))
                 .when(editable,|el|el.child(Button::new("workflow-add-task").ghost().small().label(t(cx,"添加任务","Add task"))
                     .disabled(self.tasks.len()>=128).on_click(cx.listener(|panel,_,window,cx|panel.add_task(String::new(),window,cx))))
                     .child(div().flex_shrink_0().flex().flex_wrap().gap_3()
@@ -490,9 +494,10 @@ impl Render for WorkflowPanel {
                         .child(div().w(px(160.)).child(hint(cx,t(cx,"单任务超时（秒）","Per-task timeout (s)"))).child(Input::new(&self.timeout).id("workflow-timeout").aria_label(t(cx,"每任务超时秒数 1 至 300","Per-task timeout in seconds from 1 to 300")))))
                     .child(Button::new("workflow-failure-policy").ghost().small().label(if self.stop_after_failure {t(cx,"失败后停止等待任务","Stop pending tasks after failure")}else{t(cx,"失败后继续独立分支","Continue independent branches")})
                         .on_click(cx.listener(|panel,_,_,cx|{if panel.editable(){panel.stop_after_failure = !panel.stop_after_failure;panel.changed(cx);}})))
+                    .child(self.schedule_editor(cx))
                     .child(self.editor(cx)))
                 .when_some(self.review.as_ref(),|el,review|el.child(self.review_view(review,cx)))
-                .when(self.handle.is_some()||self.complete,|el|el.child(hint(cx,t(cx,"逐任务输出保留本次捕获的完整 256 KiB 范围，控制字符以转义显示；可选择上方任务查看。",
+                .when(self.handle.is_some()||self.complete||self.progress.iter().any(|row| row.receipt.is_some()),|el|el.child(hint(cx,t(cx,"逐任务输出保留本次捕获的完整 256 KiB 范围，控制字符以转义显示；可选择上方任务查看。",
                     "Task output retains the complete captured 256 KiB bound, with escaped controls. Select a task above to inspect it.")))
                     .child(div().id("workflow-output").test_support().min_h(px(100.)).flex_shrink_0().p_3().bg(rgb(visual.canvas)).font_family("monospace").whitespace_normal().child(self.detail_text.clone())))
                 .child(hint(cx,t(cx,"工作流和输出仅在内存。只执行当前已审核会话，不重连、重试或回放。取消停止等待任务并取消本地等待，不能证明远端进程停止。",
@@ -500,11 +505,11 @@ impl Render for WorkflowPanel {
                 .when_some(self.message.as_ref(),|el,message|el.child(div().id("workflow-message").test_support().text_color(rgb(visual.warning)).child(message.render(cx)))))
             .child(div().id("workflow-footer").test_support().flex_shrink_0().p_3().border_t_1().border_color(rgb(visual.border)).flex().flex_wrap().justify_end().gap_2()
                 .child(Button::new("workflow-hide").ghost().label(t(cx,"返回工作区","Back to workspace")).on_click(cx.listener(|_,_,_,cx|cx.emit(WorkflowPanelEvent::Hide))))
-                .when(self.handle.is_some(),|el|el.child(Button::new("workflow-cancel").label(if self.cancelling{t(cx,"正在取消本地等待…","Cancelling local waits…")}else{t(cx,"取消工作流","Cancel workflow")})
+                .when(self.handle.is_some() || self.schedule_active(),|el|el.child(Button::new("workflow-cancel").label(if self.cancelling{t(cx,"正在取消本地等待…","Cancelling local waits…")}else{t(cx,"取消工作流","Cancel workflow")})
                     .disabled(self.cancelling).on_click(cx.listener(|panel,_,_,cx|panel.cancel(cx)))))
                 .when(self.review.is_some()&&!self.is_running()&&!self.complete,|el|el.child(Button::new("workflow-back").ghost().label(t(cx,"返回修改","Edit plan"))
                     .on_click(cx.listener(|panel,_,_,cx|panel.back(cx))))
-                    .child(Button::new("workflow-confirm").primary().label(t(cx,"确认全部任务并执行","Confirm all tasks and execute"))
+                    .child(Button::new("workflow-confirm").primary().label(if self.review.as_ref().is_some_and(|review| review.schedule.is_some()) { t(cx,"确认并启用定时计划","Confirm and arm schedule") } else { t(cx,"确认全部任务并执行","Confirm all tasks and execute") })
                         .disabled(!self.review.as_ref().is_some_and(|review|self.review_current(review,cx)))
                         .on_click(cx.listener(|panel,_,_,cx|panel.confirm(cx)))))
                 .when(editable,|el|el.child(Button::new("workflow-review-button").primary().label(t(cx,"下一步：完整审核","Next: complete review"))

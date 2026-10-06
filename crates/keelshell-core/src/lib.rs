@@ -24,9 +24,11 @@ mod directory_sync;
 mod error;
 mod model;
 mod openssh;
+mod profile_sync;
 mod proxy;
 mod reconnect;
 mod routes;
+mod scheduled_workflow;
 mod snippet_template;
 mod snippets;
 mod store;
@@ -90,9 +92,23 @@ pub use openssh::{
 pub use proxy::{ConnectionProxy, ProxyAuthentication, ProxyKind};
 pub use reconnect::ReconnectPolicy;
 pub use routes::{ConnectionRoute, HostKeyScope, MAX_JUMP_HOSTS, RouteEndpoint, RouteIdentity};
+pub use scheduled_workflow::{
+    MAX_WORKFLOW_SCHEDULE_COUNT, MAX_WORKFLOW_SCHEDULE_GRACE_SECONDS,
+    MAX_WORKFLOW_SCHEDULE_SPAN_SECONDS, MIN_WORKFLOW_SCHEDULE_INTERVAL_SECONDS,
+    ScheduleClockSample, WORKFLOW_SCHEDULE_CLOCK_DRIFT_MILLIS, WorkflowScheduleBinding,
+    WorkflowScheduleDueToken, WorkflowScheduleError, WorkflowScheduleInvalidationReason,
+    WorkflowScheduleLedger, WorkflowScheduleOutcome, WorkflowScheduleSlot,
+    WorkflowScheduleSlotStatus, WorkflowScheduleSpec, WorkflowScheduleStatus, format_fixed_offset,
+    format_fixed_offset_datetime, parse_fixed_offset, parse_fixed_offset_datetime,
+};
 pub use snippet_template::{
     MAX_SNIPPET_TEMPLATE_BYTES, MAX_SNIPPET_VALUE_BYTES, MAX_SNIPPET_VARIABLES, SnippetTemplate,
     SnippetTemplateContext, SnippetTemplateError, compile_snippet_template,
 };
 pub use store::StateStore;
 pub use vault::{CredentialKind, CredentialMetadata, CredentialVault, VaultStore};
+
+pub use profile_sync::{
+    ProfileSyncChoice, ProfileSyncError, ProfileSyncLocal, ProfileSyncOutcome, ProfileSyncPreview,
+    ProfileSyncReview, ProfileSyncRouteChange, ProfileSyncRow, ProfileSyncService, SyncProfile,
+};

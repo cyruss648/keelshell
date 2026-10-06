@@ -115,3 +115,8 @@ Windows 365,187 字节
 错误，0 个业务测试；重新顺序复制后才运行反例，不把缓存失败当成产品缺陷。
 
 新窄测试候选已完成作者完整检查、新非作者目录/EOF/hold 专项复核，并整合主工作副本；根完整检查实际退出 0，1395 普通、8 doc、6 Python、格式、x.y 和严格 Clippy 均通过。新精确提交的 Linux/Windows CI 仍需验证，生产预留、未知写隔离及传输期限保持不变，见[新取消与 EOF 记录](2026-10-06-ci-transfer-cancellation.md)。
+
+
+## 精确 b26 的三平台验证
+
+后继 `b26c4c88fa54dbc9788899f86136fb14ef8cb37a` 的 [Quality 37455024526](https://github.com/cyruss648/keelshell/actions/runs/37455024526) attempt 1 已实际 completed/success，三个 job 的完整原日志、attempt ZIP、两份 digest 匹配的 OpenSSH artifact 已由新非作者和根读回。Windows1376普通、macOS/Linux各1395普通，均8doc、6脚本Python、57打包Python及格式/x.y/严格Clippy通过；默认和额外2MiB控制器结束，Linux/Mac各11项OpenSSH通过。完整计数、原始摘要与边界见[后继记录](2026-10-06-ci-transfer-cancellation.md)。旧c158/6b4失败保留，具体历史触发原因与桌面/发布验收不因新CI通过而关闭。
