@@ -8,6 +8,8 @@ KeelShell 提供 MCP **服务端**。Codex、Claude Code 等外部客户端启�
 
 最新目录诊断在默认拒绝入口中，实际 Codex 请求已出现七项 KeelShell 名称；没有有效桌面能力或业务调用。原 schema 的若干约束被转换，且记录器缺最终退出回执，完整目录准入仍未通过；这不关闭授权 SSH/SFTP 或桌面审阅。原授权失败保留，见[新目录记录](../testing/records/2026-10-05-codex-catalog-direction.md)。
 
+后续生产八工具目录预检及诊断修复已通过新的非作者限定复审：完整目录定义、32个精确schema投影、实际请求的generated ID/header绑定与recorder错误收尾均已检查。实际新首笔POST仍固定400、0 SSE、0业务；Codex完整授权调用仍开放，不能沿用目录预检作为批准、拒绝、撤权或SSH/SFTP结果。见[八工具预检记录](../testing/records/2026-10-06-codex-mcp-catalog-preflight.md)。
+
 ## 在应用中授权
 
 1. 在 KeelShell 连接 SSH，核对主机指纹并完成认证。

@@ -1594,15 +1594,17 @@ fn long_cli_review_scrolls_to_visible_send_in_both_languages(cx: &mut TestAppCon
                 cx,
             );
             let send = window.find("send-approved-request");
+            let footer = window.find("assistant-confirmation-footer").bounds();
             assert!(
                 send.visible(),
                 "send visible after scrolling with {language:?}"
             );
             assert!(
-                send.bounds().bottom() <= viewport.bottom(),
-                "send stays inside scroll viewport"
+                send.bounds().bottom() <= footer.bottom(),
+                "send stays inside the fixed confirmation footer"
             );
-            assert!(send.bounds().origin.y >= viewport.origin.y);
+            assert!(send.bounds().origin.y >= footer.origin.y);
+            assert!(footer.top() >= viewport.bottom());
             assert!(send.bounds().size.height >= px(28.));
         }
         set_language(Language::ZhCn, cx);

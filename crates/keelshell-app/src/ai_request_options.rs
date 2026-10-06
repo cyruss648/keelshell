@@ -187,8 +187,9 @@ impl EphemeralCredentials {
 }
 
 /// Validate the exact metadata snapshot before Apply and before disk dispatch.
-/// Only editable/provider-supplied text is checked; generated UUIDs, enum tags
-/// and numeric limits cannot become credential disclosure candidates.
+/// Editable text and selected inference numbers are checked in their persisted
+/// and wire forms. Generated UUIDs, fixed schema tags and existing numeric limits
+/// remain outside this admission boundary.
 pub(crate) fn validate_catalog_metadata(
     catalog: &AiProfileCatalog,
     credentials: &EphemeralCredentials,
@@ -236,12 +237,48 @@ pub(crate) fn validate_catalog_metadata(
                 reference(value)?;
             }
         }
+        for (model, sampling) in &profile.sampling_by_model {
+            guard.validate_metadata_text(model)?;
+            for value in [sampling.temperature, sampling.top_p].into_iter().flatten() {
+                guard.validate_metadata_text(&value.millis().to_string())?;
+                // The AI adapter emits JSON f64 numbers: explicit zero is 0.0,
+                // whereas metadata stores integer thousandths. Check both exact
+                // representations before either Apply or disk dispatch.
+                let wire = serde_json::to_string(&(f64::from(value.millis()) / 1000.))
+                    .map_err(|_| AiError::Serialization)?;
+                guard.validate_metadata_text(&wire)?;
+            }
+        }
         for (model, settings) in &profile.reasoning_by_model {
             guard.validate_metadata_text(model)?;
             if let AiReasoningCapability::Effort { values } = &settings.capability {
                 for value in values {
                     guard.validate_metadata_text(value)?;
                 }
+            }
+            if let AiReasoningCapability::Messages { efforts, .. } = &settings.capability {
+                for effort in efforts {
+                    guard.validate_metadata_text(effort.as_str())?;
+                }
+            }
+            if let AiReasoningSelection::Messages(options) = &settings.selection {
+                if let Some(effort) = options.effort {
+                    guard.validate_metadata_text(effort.as_str())?;
+                }
+                // This selected mode is a persisted value, not merely a fixed schema key.
+                guard.validate_metadata_text(match options.thinking {
+                    keelshell_core::AiMessagesThinking::ProviderDefault => "provider_default",
+                    keelshell_core::AiMessagesThinking::Adaptive => "adaptive",
+                    keelshell_core::AiMessagesThinking::Disabled => "disabled",
+                    keelshell_core::AiMessagesThinking::LegacyBudget(_) => "legacy_budget",
+                })?;
+                if let keelshell_core::AiMessagesThinking::LegacyBudget(tokens) = options.thinking {
+                    guard.validate_metadata_text(&tokens.to_string())?;
+                }
+            }
+            if let AiReasoningSelection::Budget(tokens) = &settings.selection {
+                // Legacy stored Messages choices use this same integer on wire.
+                guard.validate_metadata_text(&tokens.to_string())?;
             }
             if let AiReasoningSelection::Effort(value) | AiReasoningSelection::Text(value) =
                 &settings.selection
@@ -309,6 +346,60 @@ fn resolve_authentication_with_environment(
         return Err(AiError::InvalidApiKey);
     }
     Ok(Some(key))
+}
+
+/// Convert the selected model's admitted metadata into fixed protocol fields.
+pub(crate) fn inference_options(
+    profile: &NamedAiProfile,
+) -> Result<keelshell_ai::InferenceOptions, AiError> {
+    use keelshell_ai::{InferenceOptions, ReasoningEffort, ReasoningOption, SamplingOption};
+    profile
+        .validate_inference_transport()
+        .map_err(|_| AiError::InvalidInferenceOptions)?;
+    let reasoning = match profile
+        .reasoning_by_model
+        .get(&profile.model)
+        .map(|r| &r.selection)
+    {
+        None | Some(AiReasoningSelection::ProviderDefault) => ReasoningOption::ProviderDefault,
+        Some(AiReasoningSelection::Effort(v)) => {
+            ReasoningOption::Effort(ReasoningEffort::parse(v)?)
+        }
+        Some(AiReasoningSelection::Thinking(v)) => ReasoningOption::Thinking(*v),
+        Some(AiReasoningSelection::Budget(v)) => ReasoningOption::TokenBudget(*v),
+        Some(AiReasoningSelection::Messages(options)) => ReasoningOption::Messages {
+            effort: options
+                .effort
+                .map(|v| ReasoningEffort::parse(v.as_str()))
+                .transpose()?,
+            thinking: match options.thinking {
+                keelshell_core::AiMessagesThinking::ProviderDefault => {
+                    keelshell_ai::MessagesThinking::ProviderDefault
+                }
+                keelshell_core::AiMessagesThinking::Adaptive => {
+                    keelshell_ai::MessagesThinking::Adaptive
+                }
+                keelshell_core::AiMessagesThinking::Disabled => {
+                    keelshell_ai::MessagesThinking::Disabled
+                }
+                keelshell_core::AiMessagesThinking::LegacyBudget(n) => {
+                    keelshell_ai::MessagesThinking::LegacyBudget(n)
+                }
+            },
+        },
+        Some(AiReasoningSelection::Text(_)) => return Err(AiError::InvalidInferenceOptions),
+    };
+    let sampling = match profile.sampling_by_model.get(&profile.model) {
+        Some(s) if s.temperature.is_some() => {
+            SamplingOption::Temperature(s.temperature.map_or(0, |v| v.millis()))
+        }
+        Some(s) if s.top_p.is_some() => SamplingOption::TopP(s.top_p.map_or(0, |v| v.millis())),
+        _ => SamplingOption::ProviderDefault,
+    };
+    Ok(InferenceOptions {
+        reasoning,
+        sampling,
+    })
 }
 
 pub(crate) fn resolve_options(
@@ -509,6 +600,110 @@ mod tests {
             profiles: vec![released],
         };
         assert!(validate_catalog_metadata(&catalog, &credentials).is_ok());
+    }
+
+    #[test]
+    fn inference_numeric_metadata_guards_stored_and_exact_wire_values_on_inactive_models() {
+        use keelshell_core::{AiModelSampling, AiSamplingValue};
+        for (millis, secret) in [(125, "125"), (125, "0.125"), (0, "0.0"), (1000, "1.0")] {
+            for temperature in [true, false] {
+                let mut inactive = profile();
+                inactive.name = "Inactive profile".into();
+                inactive.sampling_by_model.insert(
+                    "inactive-model".into(),
+                    AiModelSampling {
+                        declared_supported: true,
+                        temperature: temperature.then(|| {
+                            AiSamplingValue::from_millis(millis)
+                                .unwrap_or_else(|error| panic!("sampling fixture: {error}"))
+                        }),
+                        top_p: (!temperature).then(|| {
+                            AiSamplingValue::from_millis(millis)
+                                .unwrap_or_else(|error| panic!("sampling fixture: {error}"))
+                        }),
+                    },
+                );
+                let active = profile();
+                let mut credentials = EphemeralCredentials::new();
+                credentials.insert(inactive.id, Zeroizing::new(secret.into()));
+                let catalog = AiProfileCatalog {
+                    active_id: Some(active.id),
+                    profiles: vec![active, inactive],
+                };
+                assert!(catalog.validate().is_ok());
+                assert!(
+                    matches!(
+                        validate_catalog_metadata(&catalog, &credentials),
+                        Err(AiError::CredentialInContext)
+                    ),
+                    "selected sampling {millis}, wire/storage secret {secret}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn inference_numeric_metadata_guards_selected_budgets_but_preserves_limit_exemptions() {
+        use keelshell_core::{AiMessagesInference, AiMessagesThinking, AiModelReasoning};
+        for legacy in [false, true] {
+            let mut messages = NamedAiProfile::draft(AiPreset::Claude);
+            messages.name = "Messages fixture".into();
+            messages.model = "model".into();
+            messages.max_output_tokens = Some(8192);
+            messages.reasoning_by_model.insert(
+                "model".into(),
+                AiModelReasoning {
+                    capability: if legacy {
+                        AiReasoningCapability::TokenBudget {
+                            min: 1024,
+                            max: 999999,
+                        }
+                    } else {
+                        AiReasoningCapability::Messages {
+                            efforts: vec![],
+                            adaptive: false,
+                            disabled: false,
+                            manual_budget: true,
+                        }
+                    },
+                    selection: if legacy {
+                        AiReasoningSelection::Budget(2048)
+                    } else {
+                        AiReasoningSelection::Messages(AiMessagesInference {
+                            effort: None,
+                            thinking: AiMessagesThinking::LegacyBudget(2048),
+                        })
+                    },
+                },
+            );
+            let mut credentials = EphemeralCredentials::new();
+            credentials.retain_request_drafts(Uuid::new_v4(), vec![Zeroizing::new("2048".into())]);
+            let mut catalog = AiProfileCatalog {
+                active_id: Some(messages.id),
+                profiles: vec![messages],
+            };
+            assert!(catalog.validate().is_ok(), "legal selected manual budget");
+            assert!(matches!(
+                validate_catalog_metadata(&catalog, &credentials),
+                Err(AiError::CredentialInContext)
+            ));
+            catalog.profiles[0]
+                .reasoning_by_model
+                .get_mut("model")
+                .unwrap_or_else(|| panic!("reasoning fixture"))
+                .selection = AiReasoningSelection::ProviderDefault;
+            for fixed_limit in ["1024", "8192", "999999"] {
+                credentials = EphemeralCredentials::new();
+                credentials.retain_request_drafts(
+                    Uuid::new_v4(),
+                    vec![Zeroizing::new(fixed_limit.into())],
+                );
+                assert!(
+                    validate_catalog_metadata(&catalog, &credentials).is_ok(),
+                    "existing numeric limit {fixed_limit}"
+                );
+            }
+        }
     }
 
     #[test]

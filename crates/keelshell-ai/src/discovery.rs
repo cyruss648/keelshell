@@ -427,6 +427,9 @@ impl ProviderClient {
             };
             body[field] = serde_json::json!(output);
         }
+        provider
+            .inference_options()
+            .apply(&mut body, provider.protocol(), output)?;
         let body = body.to_string();
         if let Some(context) = context_window_tokens {
             crate::context::validate_token_capacity(body.len(), output.unwrap_or(4096), context)?;

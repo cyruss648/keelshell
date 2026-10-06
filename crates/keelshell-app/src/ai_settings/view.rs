@@ -3,6 +3,7 @@ use gpui_kit::{
         Disableable, IconName, Selectable,
         button::{Button, ButtonVariants},
         input::Input,
+        scroll::{Scrollbar, ScrollbarMode},
     },
     *,
 };
@@ -38,6 +39,7 @@ impl Render for AiSettingsPanel {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
         self.clear_pending_key(window, cx);
+        self.load_inference_editor(window, cx);
         let mut list = div()
             .id("ai-profile-list")
             .w(px(215.))
@@ -299,6 +301,7 @@ impl Render for AiSettingsPanel {
                 .child(Input::new(&self.output_tokens).id("ai-profile-output-tokens").aria_label(t(cx, "输出上限（Token）", "Output token limit")))
                 .child(label(cx, "上下文窗口按保守字节预算限制输入，并预留输出；不是实际 Token 计数。填写窗口但不填写输出时使用 4096。", "The context window limits input using a conservative byte budget and reserves output; it is not a measured token count. A window with no output limit uses 4096."))
                 .child(label(cx, "输出字段：Chat Completions 使用 max_completion_tokens，Responses 使用 max_output_tokens，Messages 使用 max_tokens；兼容服务需支持对应字段。", "Output field: max_completion_tokens for Chat Completions, max_output_tokens for Responses, max_tokens for Messages. Compatible servers must support the selected field."))
+                .child(self.inference_view(&profile, cx))
                 .child(self.request_options_view(cx))
                 ;
             } else {
@@ -374,13 +377,53 @@ impl Render for AiSettingsPanel {
             .child(
                 div().flex_1().min_h_0().flex().child(list).child(
                     div()
-                        .id("ai-profile-form-scroll")
-                        .test_support()
                         .flex_1()
                         .min_w_0()
                         .min_h_0()
-                        .overflow_y_scroll()
-                        .child(form),
+                        .flex()
+                        .flex_col()
+                        .relative()
+                        .child(
+                            div()
+                                .id("ai-profile-form-scroll")
+                                .test_support()
+                                .flex_1()
+                                .min_w_0()
+                                .min_h_0()
+                                .overflow_y_scroll()
+                                .track_scroll(&self.form_scroll)
+                                .child(form),
+                        )
+                        // Keep the bar outside translated content. The same
+                        // persistent handle drives wheel and pointer scrolling.
+                        .child(
+                            div()
+                                .id("ai-profile-form-scrollbar")
+                                .test_support()
+                                .aria_label(t(
+                                    cx,
+                                    "AI 配置正文滚动条",
+                                    "AI configuration form scrollbar",
+                                ))
+                                .absolute()
+                                .inset_0()
+                                .child(
+                                    Scrollbar::vertical(&self.form_scroll)
+                                        .id("ai-profile-form-scrollbar-control")
+                                        .mode(ScrollbarMode::Always)
+                                        .styles(|styles| {
+                                            styles
+                                                .track(|style| {
+                                                    style
+                                                        .width(px(12.))
+                                                        .bg(rgb(visual.canvas).into())
+                                                })
+                                                .thumb(|style| {
+                                                    style.width(px(7.)).bg(rgb(visual.muted))
+                                                })
+                                        }),
+                                ),
+                        ),
                 ),
             )
             .child(
@@ -394,28 +437,39 @@ impl Render for AiSettingsPanel {
                     .child(
                         div()
                             .flex_1()
+                            .min_w_0()
                             .text_xs()
+                            .whitespace_normal()
                             .text_color(rgb(visual.accent))
                             .child(self.status.render(cx)),
                     )
                     .child(
-                        Button::new("ai-settings-cancel")
-                            .ghost()
-                            .label(t(cx, "取消", "Cancel"))
-                            .disabled(self.saving)
-                            .on_click(cx.listener(|panel, _, _, cx| panel.close(cx))),
-                    )
-                    .child(
-                        Button::new("ai-settings-apply")
-                            .icon(IconName::Check)
-                            .primary()
-                            .label(if self.saving {
-                                t(cx, "正在保存…", "Saving…")
-                            } else {
-                                t(cx, "应用", "Apply")
-                            })
-                            .disabled(self.saving || self.vault_busy())
-                            .on_click(cx.listener(|panel, _, _, cx| panel.apply(cx))),
+                        // Validation feedback wraps within the remaining space;
+                        // fixed actions must stay reachable in narrow windows.
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap_3()
+                            .flex_shrink_0()
+                            .child(
+                                Button::new("ai-settings-cancel")
+                                    .ghost()
+                                    .label(t(cx, "取消", "Cancel"))
+                                    .disabled(self.saving)
+                                    .on_click(cx.listener(|panel, _, _, cx| panel.close(cx))),
+                            )
+                            .child(
+                                Button::new("ai-settings-apply")
+                                    .icon(IconName::Check)
+                                    .primary()
+                                    .label(if self.saving {
+                                        t(cx, "正在保存…", "Saving…")
+                                    } else {
+                                        t(cx, "应用", "Apply")
+                                    })
+                                    .disabled(self.saving || self.vault_busy())
+                                    .on_click(cx.listener(|panel, _, _, cx| panel.apply(cx))),
+                            ),
                     ),
             )
     }

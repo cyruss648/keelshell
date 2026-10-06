@@ -105,6 +105,9 @@ impl ContextDraft {
             max_output_tokens,
             context_window_tokens,
         )?;
+        provider
+            .inference_options()
+            .validate(provider.protocol(), output_limit)?;
         let option_secrets = provider.request_options().secrets();
         let mut secrets: Vec<_> = secrets.iter().copied().chain(option_secrets).collect();
         secrets.sort_unstable();
@@ -167,7 +170,7 @@ impl ContextDraft {
                 context,
             )?;
         }
-        let json = match provider.protocol() {
+        let mut json = match provider.protocol() {
             ProviderProtocol::ChatCompletions => {
                 let payload = ChatRequest {
                     model: provider.model(),
@@ -210,6 +213,21 @@ impl ContextDraft {
                 serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?
             }
         };
+        if !provider.inference_options().is_omitted() {
+            let mut payload: serde_json::Value =
+                serde_json::from_str(&json).map_err(|_| AiError::Serialization)?;
+            provider
+                .inference_options()
+                .apply(&mut payload, provider.protocol(), output_limit)?;
+            json = serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?;
+            // Inference metadata is not redacted into another semantic value.
+            // Reject it when a configured secret would enter the approved body.
+            if secrets.iter().any(|secret| {
+                !secret.is_empty() && crate::provider::payload_contains_secret(&json, secret)
+            }) {
+                return Err(AiError::CredentialInContext);
+            }
+        }
         if json.len() > MAX_INPUT_BYTES {
             return Err(AiError::ContextTooLarge);
         }

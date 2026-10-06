@@ -55,3 +55,10 @@ controller终态0；app -15、SSH夹具0明确wait/reap。根另核对三个已�
 
 
 作者与复核两个受管理工作树的恢复快照已归档；根已另外核对实际checkout及Git注册均不存在，并在确认各分支HEAD为主线祖先且未被工作树占用后删除两个本地分支。原作者861份、旧复核630份、新原生复核23份payload及tar在主树ignored证据目录继续保留；此次清理未删除失败证据。隔离原生应用和夹具早已关闭，没有安装覆盖现有应用。
+
+
+## 精确提交的三平台CI终态
+
+GitHub [Quality 37389530190](https://github.com/cyruss648/keelshell/actions/runs/37389530190)，attempt1，精确HEAD `1e07a28350680d3aee353e78dc5e3563ad7afa11`，现已completed/success。macos-26、windows-2025、ubuntu-24.04三个job的包装回归及Rust quality gate均success；macOS/Linux的OpenSSH互操作步骤success，Windows该步骤skipped。此处结论来自实际run/jobs API终态，不提供未经本轮原始日志统计的数量或时序。
+
+该CI只验收已提交的命令目标提示及其精确源码，不验收后来工作副本中的API推理/采样或滚动条，也不证明Windows/Linux桌面原生、云模型、六目标发布、签名、公证或安装更新。

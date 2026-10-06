@@ -64,7 +64,8 @@ impl AiError {
             | Self::DiagnosticPlanTooLarge
             | Self::NoDiagnosticSteps
             | Self::DiagnosticPlanMismatch => AiErrorCategory::Review,
-            Self::InvalidRequestOptions
+            Self::InvalidInferenceOptions
+            | Self::InvalidRequestOptions
             | Self::InvalidEndpoint
             | Self::InvalidModel
             | Self::ContextTooLarge

@@ -6,6 +6,7 @@ use gpui_kit::{
         Disableable, IconName,
         button::{Button, ButtonVariants},
         input::{InputEvent, Textarea, TextareaState},
+        scroll::{Scrollbar, ScrollbarMode},
     },
     *,
 };
@@ -191,6 +192,7 @@ pub struct AssistantPanel {
     cancellation: Option<RequestCancellation>,
     _job: Option<Task<()>>,
     prompt: Entity<TextareaState>,
+    content_scroll: ScrollHandle,
     context: String,
     host: String,
     session_id: String,
@@ -244,6 +246,7 @@ impl AssistantPanel {
             cancellation: None,
             _job: None,
             prompt,
+            content_scroll: ScrollHandle::new(),
             context: String::new(),
             host: String::new(),
             session_id: String::new(),
@@ -483,7 +486,13 @@ impl AssistantPanel {
                             &profile.model,
                             protocol,
                         )
-                        .map(|provider| provider.with_request_options(options))
+                        .and_then(|provider| {
+                            provider
+                                .with_request_options(options)
+                                .with_inference_options(
+                                    crate::ai_request_options::inference_options(profile)?,
+                                )
+                        })
                     })
                     .and_then(|provider| {
                         context.prepare_with_limits(
@@ -1034,12 +1043,6 @@ impl Render for AssistantPanel {
                         .text_xs()
                         .font_family("monospace")
                         .child(request.preview_json().to_owned()),
-                )
-                .child(
-                    Button::new("send-approved-request")
-                        .primary()
-                        .label(t(cx, "确认发送此请求", "Send this exact request"))
-                        .on_click(cx.listener(|view, _, _, cx| view.send(cx))),
                 );
         }
         if !self.response.is_empty() {
@@ -1260,6 +1263,24 @@ impl Render for AssistantPanel {
         } else {
             None
         };
+        // Confirmation remains outside the scrollable review. A long payload
+        // must never move the explicit send action beyond the viewport.
+        let confirmation = (self.preview && self.prepared.is_some()).then(|| {
+            div()
+                .id("assistant-confirmation-footer")
+                .test_support()
+                .flex_shrink_0()
+                .p_3()
+                .border_t_1()
+                .border_color(rgb(visual.border))
+                .child(
+                    Button::new("send-approved-request")
+                        .primary()
+                        .disabled(self.busy)
+                        .label(t(cx, "确认发送此请求", "Send this exact request"))
+                        .on_click(cx.listener(|view, _, _, cx| view.send(cx))),
+                )
+        });
         div()
             .h_full()
             .min_h_0()
@@ -1271,13 +1292,51 @@ impl Render for AssistantPanel {
             .children(request_bar)
             .child(
                 div()
-                    .id("assistant-scroll")
-                    .test_support()
                     .flex_1()
                     .min_h_0()
-                    .overflow_y_scroll()
-                    .child(content),
+                    .min_w_0()
+                    .relative()
+                    .flex()
+                    .flex_col()
+                    .child(
+                        div()
+                            .id("assistant-scroll")
+                            .test_support()
+                            .flex_1()
+                            .min_h_0()
+                            .min_w_0()
+                            .overflow_y_scroll()
+                            .track_scroll(&self.content_scroll)
+                            .child(content.pr(px(18.))),
+                    )
+                    .child(
+                        div()
+                            .id("assistant-scrollbar")
+                            .test_support()
+                            .aria_label(t(
+                                cx,
+                                "AI 助手正文滚动条",
+                                "AI assistant content scrollbar",
+                            ))
+                            .absolute()
+                            .inset_0()
+                            .child(
+                                Scrollbar::vertical(&self.content_scroll)
+                                    .id("assistant-scrollbar-control")
+                                    .mode(ScrollbarMode::Always)
+                                    .styles(|styles| {
+                                        styles
+                                            .track(|style| {
+                                                style.width(px(12.)).bg(rgb(visual.canvas).into())
+                                            })
+                                            .thumb(|style| {
+                                                style.width(px(7.)).bg(rgb(visual.muted))
+                                            })
+                                    }),
+                            ),
+                    ),
             )
+            .children(confirmation)
     }
 }
 
@@ -1356,3 +1415,7 @@ fn shell_blocks(text: &str) -> Vec<String> {
 #[cfg(test)]
 #[path = "assistant_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "assistant_inference_tests.rs"]
+mod inference_tests;

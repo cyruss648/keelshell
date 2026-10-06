@@ -35,6 +35,7 @@ pub struct ProviderConfig {
     model: String,
     protocol: ProviderProtocol,
     options: RequestOptions,
+    inference: crate::InferenceOptions,
 }
 
 impl fmt::Debug for ProviderConfig {
@@ -64,6 +65,7 @@ impl ProviderConfig {
             model: model.to_owned(),
             protocol,
             options: RequestOptions::default(),
+            inference: crate::InferenceOptions::default(),
         })
     }
 
@@ -71,6 +73,22 @@ impl ProviderConfig {
     pub fn with_request_options(mut self, options: RequestOptions) -> Self {
         self.options = options;
         self
+    }
+
+    /// Bind typed inference settings. Output-relative budget admission is
+    /// repeated during preparation, when the effective output limit is known.
+    pub fn with_inference_options(
+        mut self,
+        options: crate::InferenceOptions,
+    ) -> Result<Self, AiError> {
+        options.validate(self.protocol, Some(1_000_000))?;
+        self.inference = options;
+        Ok(self)
+    }
+
+    /// Inference fields frozen into this target and its exact payload preview.
+    pub fn inference_options(&self) -> crate::InferenceOptions {
+        self.inference
     }
 
     /// Resolved options frozen into request preparation and human review.

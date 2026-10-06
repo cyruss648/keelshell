@@ -28,6 +28,7 @@ mod context;
 mod diagnostics;
 mod discovery;
 mod error_category;
+mod inference;
 mod local_agent;
 mod provider;
 mod redact;
@@ -41,6 +42,9 @@ pub use discovery::{
     RequestCancellation,
 };
 pub use error_category::AiErrorCategory;
+pub use inference::{
+    InferenceOptions, MessagesThinking, ReasoningEffort, ReasoningOption, SamplingOption,
+};
 pub use local_agent::{
     ApprovedLocalAsk, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
     LocalAgentKind, LocalAgentLimits, LocalAgentProbe, LocalAgentReply, LocalAgentVersion,
@@ -75,6 +79,9 @@ pub enum AiError {
     /// The requested UTF-8 byte budget is invalid or cannot hold the question.
     #[error("AI context budget must be between 1 and 65536 bytes and hold the complete question")]
     InvalidBudget,
+    /// Inference fields are outside the selected protocol, bounds or combination.
+    #[error("AI inference options do not match the protocol, bounds or output budget")]
+    InvalidInferenceOptions,
     /// JSON serialization failed without echoing user content.
     #[error("AI request could not be serialized")]
     Serialization,

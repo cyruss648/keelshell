@@ -241,7 +241,7 @@ impl AiSettingsPanel {
                 }
             }
         }
-        view.child(super::super::view::label(cx, "缺失引用或无效值会阻止请求；代理失败不会改为直连。推理参数尚不支持。", "Missing references or invalid values prevent requests; proxy failure never falls back to direct. Reasoning controls remain unsupported."))
+        view.child(super::super::view::label(cx, "缺失引用或无效值会阻止请求；代理失败不会改为直连。推理与采样选项按当前模型单独配置。", "Missing references or invalid values prevent requests; proxy failure never falls back to direct. Inference and sampling options are configured separately for the current model."))
     }
 
     fn request_vault_controls(&self, purpose: SecretPurpose, cx: &mut Context<Self>) -> Div {

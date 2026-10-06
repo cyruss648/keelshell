@@ -22,7 +22,10 @@ use zeroize::Zeroizing;
 
 use crate::i18n::{Message, t};
 
+mod inference;
 mod request_options;
+#[cfg(test)]
+mod scrollbar_tests;
 #[cfg(test)]
 pub(crate) mod tests;
 mod vault;
@@ -124,6 +127,7 @@ pub struct AiSettingsPanel {
     credentials: EphemeralCredentials,
     selected: Option<Uuid>,
     focus: FocusHandle,
+    form_scroll: ScrollHandle,
     name: Entity<InputState>,
     executable: Entity<InputState>,
     endpoint: Entity<InputState>,
@@ -132,6 +136,10 @@ pub struct AiSettingsPanel {
     context_tokens: Entity<InputState>,
     output_tokens: Entity<InputState>,
     token_drafts: BTreeMap<Uuid, (String, String)>,
+    inference_inputs: [Entity<InputState>; 3],
+    inference_drafts: BTreeMap<(Uuid, String), inference::InferenceDraft>,
+    inference_active: Option<(Uuid, String)>,
+    inference_values: inference::InferenceDraft,
     request_editors: BTreeMap<Uuid, request_options::RequestEditor>,
     local_timeout: Entity<InputState>,
     local_answer: Entity<InputState>,
@@ -259,6 +267,7 @@ impl AiSettingsPanel {
             window,
             cx,
         );
+        let inference_inputs = inference::inputs(window, cx);
         let local_timeout = field(
             &values.local_limits.timeout_seconds,
             t(cx, "必填；1–300 秒", "Required; 1–300 seconds"),
@@ -297,6 +306,9 @@ impl AiSettingsPanel {
             &key,
             &context_tokens,
             &output_tokens,
+            &inference_inputs[0],
+            &inference_inputs[1],
+            &inference_inputs[2],
             &local_timeout,
             &local_answer,
             &local_output,
@@ -317,6 +329,7 @@ impl AiSettingsPanel {
             credentials: credentials.clone(),
             selected,
             focus,
+            form_scroll: ScrollHandle::new(),
             name,
             executable,
             endpoint,
@@ -325,6 +338,10 @@ impl AiSettingsPanel {
             context_tokens,
             output_tokens,
             token_drafts: BTreeMap::new(),
+            inference_inputs,
+            inference_drafts: BTreeMap::new(),
+            inference_active: None,
+            inference_values: inference::InferenceDraft(Default::default()),
             request_editors: BTreeMap::new(),
             local_timeout,
             local_answer,
@@ -348,6 +365,7 @@ impl AiSettingsPanel {
             _job: None,
             _subscriptions: subscriptions,
         };
+        panel.load_inference_editor(window, cx);
         panel.load_request_editor(window, cx);
         panel
     }
@@ -470,7 +488,8 @@ impl AiSettingsPanel {
         }
         let endpoint_changed = values.endpoint != self.editor_values.endpoint
             || values.executable != self.editor_values.executable;
-        let request_changed = self.sync_request_editor(endpoint_changed, cx);
+        let inference_changed = self.sync_inference_editor(cx);
+        let request_changed = self.sync_request_editor(endpoint_changed, cx) || inference_changed;
         if values == self.editor_values && !request_changed {
             return;
         }
@@ -485,6 +504,12 @@ impl AiSettingsPanel {
             .selected
             .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
         {
+            if endpoint_changed {
+                profile.reasoning_by_model.clear();
+                profile.sampling_by_model.clear();
+                self.inference_drafts.retain(|(id, _), _| *id != profile.id);
+                self.inference_active = None;
+            }
             profile.name.clone_from(&values.name);
             profile.endpoint.clone_from(&values.endpoint);
             profile.model.clone_from(&values.model);
@@ -611,6 +636,7 @@ impl AiSettingsPanel {
         // turn a locale refresh/selection into edits to another profile.
         self.editor_values = values;
         self.clear_key_pending = false;
+        self.load_inference_editor(window, cx);
         self.load_request_editor(window, cx);
         self.clear_pending_request_fields(window, cx);
     }
@@ -652,6 +678,7 @@ impl AiSettingsPanel {
             self.credentials.remove(&id);
             self.local_limit_drafts.remove(&id);
             self.token_drafts.remove(&id);
+            self.inference_drafts.retain(|(owner, _), _| *owner != id);
             self.selected = self.catalog.profiles.first().map(|p| p.id);
             self.changed(true, cx);
             self.load_editor(window, cx);
@@ -673,6 +700,11 @@ impl AiSettingsPanel {
             .selected
             .and_then(|id| self.catalog.profiles.iter_mut().find(|p| p.id == id))
         {
+            profile.reasoning_by_model.clear();
+            profile.sampling_by_model.clear();
+            self.inference_drafts
+                .retain(|(owner, _), _| *owner != profile.id);
+            self.inference_active = None;
             profile.preset = preset;
             profile.api_style = preset.api_style();
             profile.endpoint = preset.endpoint().into();
@@ -719,6 +751,11 @@ impl AiSettingsPanel {
             return;
         }
         let old_endpoint = profile.endpoint.clone();
+        profile.reasoning_by_model.clear();
+        profile.sampling_by_model.clear();
+        self.inference_drafts
+            .retain(|(owner, _), _| *owner != profile.id);
+        self.inference_active = None;
         profile.api_style = style;
         profile.endpoint = match style {
             AiApiStyle::ChatCompletions => replace_protocol_suffixes(
@@ -848,6 +885,11 @@ impl AiSettingsPanel {
         self.local_limit_drafts.remove(&profile.id);
         profile.max_output_tokens = None;
         profile.context_window_tokens = None;
+        profile.reasoning_by_model.clear();
+        profile.sampling_by_model.clear();
+        self.inference_drafts
+            .retain(|(owner, _), _| *owner != profile.id);
+        self.inference_active = None;
         profile.custom_headers.clear();
         profile.proxy = keelshell_core::AiProxy::Direct;
         self.credentials.clear_requests(profile.id);
@@ -1014,6 +1056,16 @@ impl AiSettingsPanel {
             .catalog
             .profiles
             .iter()
+            .any(|profile| !self.inference_draft_valid(profile.id))
+        {
+            self.status = Self::inference_error();
+            cx.notify();
+            return;
+        }
+        if self
+            .catalog
+            .profiles
+            .iter()
             .any(|profile| !self.local_limit_draft_valid(profile.id))
         {
             self.status = local_limit_draft_error();
@@ -1106,6 +1158,11 @@ impl AiSettingsPanel {
                 "请先修正请求头或代理引用。",
                 "Correct custom headers or proxy references first.",
             );
+            cx.notify();
+            return;
+        }
+        if !self.inference_draft_valid(profile.id) {
+            self.status = Self::inference_error();
             cx.notify();
             return;
         }
@@ -1204,7 +1261,10 @@ impl AiSettingsPanel {
                                 &profile.model,
                                 protocol,
                             )?
-                            .with_request_options(options),
+                            .with_request_options(options)
+                            .with_inference_options(
+                                crate::ai_request_options::inference_options(&profile)?,
+                            )?,
                             api_key,
                             &cancellation,
                             profile.max_output_tokens,

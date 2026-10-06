@@ -270,6 +270,17 @@ pub enum AiReasoningCapability {
         /// Supported values, without inventing one universal cross-vendor scale.
         values: Vec<String>,
     },
+    /// Independently declared Messages effort and thinking capabilities.
+    Messages {
+        /// Exact effort values checked for this model; an empty list permits omission.
+        efforts: Vec<crate::AiMessagesEffort>,
+        /// Model supports explicitly adaptive thinking.
+        adaptive: bool,
+        /// Model supports explicitly disabled thinking.
+        disabled: bool,
+        /// Model supports the legacy manual budget mode.
+        manual_budget: bool,
+    },
     /// A Boolean thinking switch.
     ThinkingToggle,
     /// A provider-specific integer reasoning-token budget.
@@ -293,16 +304,40 @@ impl<'de> Deserialize<'de> for AiReasoningCapability {
         enum Wire {
             Unknown {},
             Unsupported {},
-            Effort { values: Vec<String> },
+            Effort {
+                values: Vec<String>,
+            },
             ThinkingToggle {},
-            TokenBudget { min: u32, max: u32 },
-            Text { max_chars: u16 },
+            Messages {
+                efforts: Vec<crate::AiMessagesEffort>,
+                adaptive: bool,
+                disabled: bool,
+                manual_budget: bool,
+            },
+            TokenBudget {
+                min: u32,
+                max: u32,
+            },
+            Text {
+                max_chars: u16,
+            },
         }
         Ok(match Wire::deserialize(deserializer)? {
             Wire::Unknown {} => Self::Unknown,
             Wire::Unsupported {} => Self::Unsupported,
             Wire::Effort { values } => Self::Effort { values },
             Wire::ThinkingToggle {} => Self::ThinkingToggle,
+            Wire::Messages {
+                efforts,
+                adaptive,
+                disabled,
+                manual_budget,
+            } => Self::Messages {
+                efforts,
+                adaptive,
+                disabled,
+                manual_budget,
+            },
             Wire::TokenBudget { min, max } => Self::TokenBudget { min, max },
             Wire::Text { max_chars } => Self::Text { max_chars },
         })
@@ -327,6 +362,8 @@ pub enum AiReasoningSelection {
     Thinking(bool),
     /// Reasoning token budget, interpreted by the eventual API adapter.
     Budget(u32),
+    /// Independent Messages effort and thinking, including explicit combinations.
+    Messages(crate::AiMessagesInference),
     /// Provider-specific reasoning text; never a secret or arbitrary JSON body.
     Text(String),
 }
@@ -377,6 +414,9 @@ pub struct NamedAiProfile {
     /// Model-keyed controls; changing models does not reuse another model's value.
     #[serde(default)]
     pub reasoning_by_model: BTreeMap<String, AiModelReasoning>,
+    /// Sampling declarations and exact values bound to each model ID.
+    #[serde(default)]
+    pub sampling_by_model: BTreeMap<String, crate::AiModelSampling>,
 }
 impl fmt::Debug for NamedAiProfile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -414,6 +454,7 @@ impl NamedAiProfile {
             context_window_tokens: None,
             max_output_tokens: None,
             reasoning_by_model: BTreeMap::new(),
+            sampling_by_model: BTreeMap::new(),
         }
     }
 
@@ -497,6 +538,16 @@ impl NamedAiProfile {
                 "must leave context capacity for input tokens",
             ));
         }
+        if self.sampling_by_model.len() > 64 {
+            return Err(invalid(
+                "ai.profile.sampling",
+                "at most 64 model settings are allowed",
+            ));
+        }
+        for (model, sampling) in &self.sampling_by_model {
+            model_id(model)?;
+            sampling.validate()?;
+        }
         if self.reasoning_by_model.len() > 64 {
             return Err(invalid(
                 "ai.profile.reasoning",
@@ -506,9 +557,15 @@ impl NamedAiProfile {
         for (model, reasoning) in &self.reasoning_by_model {
             model_id(model)?;
             reasoning.validate()?;
+            let budget = match &reasoning.selection {
+                AiReasoningSelection::Budget(n) => Some(*n),
+                AiReasoningSelection::Messages(options) => options.budget_tokens(),
+                _ => None,
+            };
             if model == &self.model
-                && let AiReasoningSelection::Budget(tokens) = reasoning.selection
-                && self.max_output_tokens.is_some_and(|output| tokens > output)
+                && budget.is_some_and(|tokens| {
+                    self.max_output_tokens.is_some_and(|output| tokens > output)
+                })
             {
                 return Err(invalid(
                     "ai.profile.reasoning",
@@ -555,17 +612,13 @@ impl NamedAiProfile {
                 _ => false,
             },
         };
-        if self
-            .reasoning_by_model
-            .get(&self.model)
-            .is_some_and(|setting| setting.selection != AiReasoningSelection::ProviderDefault)
-            || !authentication_supported
-        {
+        if !authentication_supported {
             return Err(invalid(
-                "ai.profile",
-                "current transport does not implement these options or credential references",
+                "ai.profile.authentication",
+                "authentication does not match the selected protocol",
             ));
         }
+        self.validate_inference_transport()?;
         if self
             .max_output_tokens
             .is_some_and(|value| value > 1_000_000)
@@ -583,6 +636,72 @@ impl NamedAiProfile {
                 "ai.profile.context_window",
                 "must leave input capacity after the output reserve (4096 by default)",
             ));
+        }
+        Ok(())
+    }
+
+    /// Validate the selected model's protocol-specific inference fields.
+    /// Capability declarations are user metadata, not proof of remote support.
+    /// No transport infers support from the endpoint, preset or model spelling.
+    pub fn validate_inference_transport(&self) -> Result<(), ValidationError> {
+        self.validate()?;
+        let selection = self
+            .reasoning_by_model
+            .get(&self.model)
+            .map(|r| &r.selection);
+        let supported = match (self.api_style, selection) {
+            (_, None | Some(AiReasoningSelection::ProviderDefault)) => true,
+            (
+                AiApiStyle::ChatCompletions | AiApiStyle::Responses,
+                Some(AiReasoningSelection::Effort(v)),
+            ) => ["none", "minimal", "low", "medium", "high", "xhigh", "max"].contains(&v.as_str()),
+            (AiApiStyle::AnthropicMessages, Some(AiReasoningSelection::Effort(v))) => {
+                ["low", "medium", "high", "xhigh", "max"].contains(&v.as_str())
+            }
+            (AiApiStyle::AnthropicMessages, Some(AiReasoningSelection::Messages(options))) => {
+                options.validate()?;
+                options
+                    .budget_tokens()
+                    .is_none_or(|n| n < self.max_output_tokens.unwrap_or(4096))
+            }
+            (AiApiStyle::AnthropicMessages, Some(AiReasoningSelection::Thinking(_))) => true,
+            (AiApiStyle::AnthropicMessages, Some(AiReasoningSelection::Budget(n))) => {
+                *n >= 1024 && *n < self.max_output_tokens.unwrap_or(4096)
+            }
+            _ => false,
+        };
+        if !supported {
+            return Err(invalid(
+                "ai.profile.reasoning",
+                "the selected reasoning setting is unsupported by this protocol or output limit",
+            ));
+        }
+        if let Some(sampling) = self.sampling_by_model.get(&self.model) {
+            sampling.validate()?;
+            if self.api_style == AiApiStyle::AnthropicMessages
+                && sampling.temperature.is_some_and(|v| v.millis() > 1000)
+            {
+                return Err(invalid(
+                    "ai.profile.sampling",
+                    "Messages temperature must be 0–1",
+                ));
+            }
+            // Sampling with active reasoning is model-specific and commonly
+            // rejected. This editor only supports omission or explicit none.
+            if sampling.is_explicit()
+                && !matches!(
+                    selection,
+                    None | Some(AiReasoningSelection::ProviderDefault)
+                        | Some(AiReasoningSelection::Thinking(false))
+                )
+                && !matches!(selection, Some(AiReasoningSelection::Effort(v)) if v == "none")
+                && !matches!(selection, Some(AiReasoningSelection::Messages(v)) if v.allows_sampling())
+            {
+                return Err(invalid(
+                    "ai.profile.sampling",
+                    "sampling cannot be combined with active reasoning in this adapter",
+                ));
+            }
         }
         Ok(())
     }
@@ -622,6 +741,10 @@ impl NamedAiProfile {
             || self.proxy != AiProxy::Direct
             || self.max_output_tokens.is_some()
             || self.context_window_tokens.is_some()
+            || self
+                .sampling_by_model
+                .get(&self.model)
+                .is_some_and(crate::AiModelSampling::is_explicit)
             || self
                 .reasoning_by_model
                 .get(&self.model)
@@ -665,6 +788,14 @@ impl NamedAiProfile {
             || self.max_output_tokens.is_some()
             || !self.custom_headers.is_empty()
             || self.proxy != AiProxy::Direct
+            || self
+                .sampling_by_model
+                .get(&self.model)
+                .is_some_and(crate::AiModelSampling::is_explicit)
+            || self
+                .reasoning_by_model
+                .get(&self.model)
+                .is_some_and(|r| r.selection != AiReasoningSelection::ProviderDefault)
         {
             return Err(invalid(
                 "ai.profile",
@@ -701,6 +832,16 @@ impl AiModelReasoning {
                     }
                 }
             }
+            AiReasoningCapability::Messages { efforts, .. } => {
+                if efforts.len() > 5
+                    || efforts.iter().collect::<HashSet<_>>().len() != efforts.len()
+                {
+                    return Err(invalid(
+                        "ai.reasoning.capability",
+                        "Messages efforts must be unique",
+                    ));
+                }
+            }
             AiReasoningCapability::TokenBudget { min, max }
                 if *min == 0 || min > max || *max > MAX_TOKENS =>
             {
@@ -721,6 +862,26 @@ impl AiModelReasoning {
             (_, AiReasoningSelection::ProviderDefault) => true,
             (AiReasoningCapability::Effort { values }, AiReasoningSelection::Effort(value)) => {
                 values.contains(value)
+            }
+            (
+                AiReasoningCapability::Messages {
+                    efforts,
+                    adaptive,
+                    disabled,
+                    manual_budget,
+                },
+                AiReasoningSelection::Messages(options),
+            ) => {
+                options.validate()?;
+                options
+                    .effort
+                    .is_none_or(|effort| efforts.contains(&effort))
+                    && match options.thinking {
+                        crate::AiMessagesThinking::ProviderDefault => true,
+                        crate::AiMessagesThinking::Adaptive => *adaptive,
+                        crate::AiMessagesThinking::Disabled => *disabled,
+                        crate::AiMessagesThinking::LegacyBudget(_) => *manual_budget,
+                    }
             }
             (AiReasoningCapability::ThinkingToggle, AiReasoningSelection::Thinking(_)) => true,
             (

@@ -524,3 +524,366 @@ fn provider_cannot_reflect_authentication_key_into_reply() -> TestResult {
     server.finish()?;
     Ok(())
 }
+
+#[test]
+fn inference_exact_reviewed_body_is_sent_for_all_protocol_fields() -> TestResult {
+    use keelshell_ai::{InferenceOptions, ReasoningEffort, ReasoningOption, SamplingOption};
+    use serde_json::json;
+    for protocol in [
+        ProviderProtocol::ChatCompletions,
+        ProviderProtocol::Responses,
+        ProviderProtocol::AnthropicMessages,
+    ] {
+        let (path, answer) = match protocol {
+            ProviderProtocol::ChatCompletions => ("/v1/chat/completions", answer("OK")),
+            ProviderProtocol::Responses => ("/v1/responses", responses_answer("OK")),
+            ProviderProtocol::AnthropicMessages => ("/v1/messages", anthropic_answer("OK")),
+        };
+        let mut cases = vec![
+            (InferenceOptions::default(), None, serde_json::Value::Null),
+            (
+                InferenceOptions {
+                    reasoning: ReasoningOption::Effort(ReasoningEffort::Low),
+                    sampling: SamplingOption::ProviderDefault,
+                },
+                Some(match protocol {
+                    ProviderProtocol::ChatCompletions => "reasoning_effort",
+                    ProviderProtocol::Responses => "reasoning",
+                    ProviderProtocol::AnthropicMessages => "output_config",
+                }),
+                if protocol == ProviderProtocol::ChatCompletions {
+                    json!("low")
+                } else {
+                    json!({"effort":"low"})
+                },
+            ),
+            (
+                InferenceOptions {
+                    reasoning: ReasoningOption::ProviderDefault,
+                    sampling: SamplingOption::Temperature(0),
+                },
+                Some("temperature"),
+                json!(0.0),
+            ),
+            (
+                InferenceOptions {
+                    reasoning: ReasoningOption::ProviderDefault,
+                    sampling: SamplingOption::TopP(999),
+                },
+                Some("top_p"),
+                json!(0.999),
+            ),
+        ];
+        if protocol == ProviderProtocol::AnthropicMessages {
+            for (mode, expected) in [
+                (ReasoningOption::Thinking(true), json!({"type":"adaptive"})),
+                (ReasoningOption::Thinking(false), json!({"type":"disabled"})),
+                (
+                    ReasoningOption::TokenBudget(8192),
+                    json!({"type":"enabled","budget_tokens":8192}),
+                ),
+            ] {
+                cases.push((
+                    InferenceOptions {
+                        reasoning: mode,
+                        sampling: SamplingOption::ProviderDefault,
+                    },
+                    Some("thinking"),
+                    expected,
+                ));
+            }
+        }
+        for (options, field, expected) in cases {
+            let server =
+                Server::start_at_protocol(path, protocol, 200, &answer, true, Duration::ZERO)?;
+            let provider = server.provider.clone().with_inference_options(options)?;
+            let request = ContextDraft::new("Explicit inference fixture").prepare_with_max_tokens(
+                &provider,
+                &[],
+                8192,
+                16000,
+            )?;
+            let preview = request.preview_json().to_owned();
+            let response = client(4096)?.send(request.approve(), None);
+            let recorded = server.finish()?;
+            assert_eq!(response?.text(), "OK");
+            assert_eq!(recorded.body, preview);
+            let body: serde_json::Value = serde_json::from_str(&recorded.body)?;
+            if let Some(field) = field {
+                assert_eq!(body[field], expected);
+            } else {
+                for name in [
+                    "reasoning_effort",
+                    "reasoning",
+                    "output_config",
+                    "thinking",
+                    "temperature",
+                    "top_p",
+                ] {
+                    assert!(body.get(name).is_none(), "{name}");
+                }
+            }
+            assert!(body.get("tools").is_none());
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn inference_invalid_protocol_budget_and_secret_metadata_fail_before_network() -> TestResult {
+    use keelshell_ai::{InferenceOptions, ReasoningEffort, ReasoningOption, SamplingOption};
+    for protocol in [
+        ProviderProtocol::ChatCompletions,
+        ProviderProtocol::Responses,
+        ProviderProtocol::AnthropicMessages,
+    ] {
+        let provider =
+            ProviderConfig::new_with_protocol("http://127.0.0.1:9/unused", "fixture", protocol)?;
+        for options in [
+            InferenceOptions {
+                reasoning: ReasoningOption::ProviderDefault,
+                sampling: SamplingOption::Temperature(2001),
+            },
+            InferenceOptions {
+                reasoning: ReasoningOption::ProviderDefault,
+                sampling: SamplingOption::TopP(1001),
+            },
+            InferenceOptions {
+                reasoning: ReasoningOption::Effort(ReasoningEffort::High),
+                sampling: SamplingOption::Temperature(1000),
+            },
+        ] {
+            assert_eq!(
+                provider.clone().with_inference_options(options),
+                Err(AiError::InvalidInferenceOptions)
+            );
+        }
+        let options = InferenceOptions {
+            reasoning: ReasoningOption::Effort(ReasoningEffort::High),
+            sampling: SamplingOption::ProviderDefault,
+        };
+        let provider = provider.with_inference_options(options)?;
+        assert!(matches!(
+            ContextDraft::new("ordinary").prepare(&provider, &["high"], 8192),
+            Err(AiError::CredentialInContext)
+        ));
+    }
+    let provider = ProviderConfig::new_with_protocol(
+        "http://127.0.0.1:9/unused",
+        "fixture",
+        ProviderProtocol::AnthropicMessages,
+    )?
+    .with_inference_options(InferenceOptions {
+        reasoning: ReasoningOption::TokenBudget(4096),
+        sampling: SamplingOption::ProviderDefault,
+    })?;
+    for output in [1024, 4096] {
+        assert!(matches!(
+            ContextDraft::new("ordinary").prepare_with_max_tokens(&provider, &[], 8192, output),
+            Err(AiError::InvalidInferenceOptions)
+        ));
+    }
+    assert!(
+        ContextDraft::new("ordinary")
+            .prepare_with_max_tokens(&provider, &[], 8192, 4097)
+            .is_ok()
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn inference_connectivity_test_uses_same_protocol_options() -> TestResult {
+    use keelshell_ai::{
+        InferenceOptions, ProviderClient, ReasoningEffort, ReasoningOption, RequestCancellation,
+        SamplingOption,
+    };
+    for protocol in [
+        ProviderProtocol::ChatCompletions,
+        ProviderProtocol::Responses,
+        ProviderProtocol::AnthropicMessages,
+    ] {
+        let (path, answer, field) = match protocol {
+            ProviderProtocol::ChatCompletions => {
+                ("/v1/chat/completions", answer("OK"), "reasoning_effort")
+            }
+            ProviderProtocol::Responses => ("/v1/responses", responses_answer("OK"), "reasoning"),
+            ProviderProtocol::AnthropicMessages => {
+                ("/v1/messages", anthropic_answer("OK"), "output_config")
+            }
+        };
+        let server = Server::start_at_protocol(path, protocol, 200, &answer, true, Duration::ZERO)?;
+        let provider = server
+            .provider
+            .clone()
+            .with_inference_options(InferenceOptions {
+                reasoning: ReasoningOption::Effort(ReasoningEffort::Medium),
+                sampling: SamplingOption::ProviderDefault,
+            })?;
+        let result = ProviderClient::new(Duration::from_secs(2), 4096)?
+            .test_connection_with_limits(
+                &provider,
+                None,
+                &RequestCancellation::new(),
+                Some(16000),
+                None,
+            )
+            .await;
+        let recorded = server.finish()?;
+        result?;
+        let body: serde_json::Value = serde_json::from_str(&recorded.body)?;
+        assert_eq!(
+            body[field],
+            if protocol == ProviderProtocol::ChatCompletions {
+                serde_json::json!("medium")
+            } else {
+                serde_json::json!({"effort":"medium"})
+            }
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn inference_remote_rejection_keeps_the_original_reviewed_payload() -> TestResult {
+    use keelshell_ai::{
+        InferenceOptions, MessagesThinking, ReasoningEffort, ReasoningOption, SamplingOption,
+    };
+    let server = Server::start_at_protocol(
+        "/v1/messages",
+        ProviderProtocol::AnthropicMessages,
+        400,
+        r#"{"error":{"message":"unsupported effort"}}"#,
+        true,
+        Duration::ZERO,
+    )?;
+    let provider = server
+        .provider
+        .clone()
+        .with_inference_options(InferenceOptions {
+            reasoning: ReasoningOption::Messages {
+                effort: Some(ReasoningEffort::High),
+                thinking: MessagesThinking::Adaptive,
+            },
+            sampling: SamplingOption::ProviderDefault,
+        })?;
+    let request = ContextDraft::new("fixture rejection").prepare(&provider, &[], 8192)?;
+    let preview = request.preview_json().to_owned();
+    let result = client(4096)?.send(request.approve(), None);
+    let recorded = server.finish()?;
+    assert!(matches!(result, Err(AiError::HttpStatus(400))));
+    assert_eq!(recorded.body, preview);
+    assert!(recorded.body.contains("high"));
+    assert!(recorded.body.contains("adaptive"));
+    Ok(())
+}
+
+#[test]
+fn inference_messages_composes_effort_and_thinking_for_ask_and_connectivity() -> TestResult {
+    use keelshell_ai::{
+        InferenceOptions, MessagesThinking, ProviderClient, ReasoningEffort, ReasoningOption,
+        SamplingOption,
+    };
+    use serde_json::json;
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()?;
+    let protocol = ProviderProtocol::AnthropicMessages;
+    for (thinking, expected) in [
+        (MessagesThinking::ProviderDefault, serde_json::Value::Null),
+        (MessagesThinking::Adaptive, json!({"type":"adaptive"})),
+        (MessagesThinking::Disabled, json!({"type":"disabled"})),
+        (
+            MessagesThinking::LegacyBudget(8192),
+            json!({"type":"enabled","budget_tokens":8192}),
+        ),
+    ] {
+        let options = InferenceOptions {
+            reasoning: ReasoningOption::Messages {
+                effort: Some(ReasoningEffort::Medium),
+                thinking,
+            },
+            sampling: SamplingOption::ProviderDefault,
+        };
+        for connection_test in [false, true] {
+            let server = Server::start_at_protocol(
+                "/v1/messages",
+                protocol,
+                200,
+                &anthropic_answer("OK"),
+                true,
+                Duration::ZERO,
+            )?;
+            let provider = server.provider.clone().with_inference_options(options)?;
+            let preview = if connection_test {
+                runtime.block_on(
+                    ProviderClient::new(Duration::from_secs(2), 4096)?.test_connection_with_limits(
+                        &provider,
+                        None,
+                        &keelshell_ai::RequestCancellation::new(),
+                        Some(16000),
+                        None,
+                    ),
+                )?;
+                None
+            } else {
+                let request = ContextDraft::new("composed fixture").prepare_with_max_tokens(
+                    &provider,
+                    &[],
+                    8192,
+                    16000,
+                )?;
+                let preview = request.preview_json().to_owned();
+                assert_eq!(client(4096)?.send(request.approve(), None)?.text(), "OK");
+                Some(preview)
+            };
+            let recorded = server.finish()?;
+            if let Some(preview) = preview {
+                assert_eq!(recorded.body, preview);
+            }
+            let body: serde_json::Value = serde_json::from_str(&recorded.body)?;
+            assert_eq!(body["output_config"], json!({"effort":"medium"}));
+            assert_eq!(body.get("thinking").cloned().unwrap_or_default(), expected);
+            assert!(body.get("tools").is_none());
+        }
+    }
+    let provider =
+        ProviderConfig::new_with_protocol("http://127.0.0.1:9/unused", "fixture", protocol)?;
+    let empty = provider.clone().with_inference_options(InferenceOptions {
+        reasoning: ReasoningOption::Messages {
+            effort: None,
+            thinking: MessagesThinking::ProviderDefault,
+        },
+        sampling: SamplingOption::ProviderDefault,
+    })?;
+    assert_eq!(
+        ContextDraft::new("omitted")
+            .prepare(&provider, &[], 8192)?
+            .preview_json(),
+        ContextDraft::new("omitted")
+            .prepare(&empty, &[], 8192)?
+            .preview_json()
+    );
+    let budget = provider.clone().with_inference_options(InferenceOptions {
+        reasoning: ReasoningOption::Messages {
+            effort: Some(ReasoningEffort::Medium),
+            thinking: MessagesThinking::LegacyBudget(4096),
+        },
+        sampling: SamplingOption::ProviderDefault,
+    })?;
+    assert!(matches!(
+        ContextDraft::new("boundary").prepare(&budget, &[], 8192),
+        Err(AiError::InvalidInferenceOptions)
+    ));
+    assert!(
+        provider
+            .with_inference_options(InferenceOptions {
+                reasoning: ReasoningOption::Messages {
+                    effort: Some(ReasoningEffort::High),
+                    thinking: MessagesThinking::Adaptive
+                },
+                sampling: SamplingOption::Temperature(0),
+            })
+            .is_err()
+    );
+    Ok(())
+}

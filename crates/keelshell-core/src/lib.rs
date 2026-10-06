@@ -8,7 +8,9 @@
 #![deny(missing_docs)]
 
 mod ai_backends;
+mod ai_messages;
 mod ai_profiles;
+mod ai_sampling;
 mod batch_audit;
 mod batch_template;
 mod batch_workflow;
@@ -30,10 +32,12 @@ mod store;
 mod vault;
 
 pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits};
+pub use ai_messages::{AiMessagesEffort, AiMessagesInference, AiMessagesThinking};
 pub use ai_profiles::{
     AiApiStyle, AiAuthentication, AiCustomHeader, AiModelReasoning, AiPreset, AiProfileCatalog,
     AiProxy, AiReasoningCapability, AiReasoningSelection, AiSecretRef, NamedAiProfile,
 };
+pub use ai_sampling::{AiModelSampling, AiSamplingValue};
 pub use batch_audit::{
     BatchAuditRecord, BatchAuditSummary, MAX_BATCH_AUDIT_TARGETS, MAX_BATCH_AUDITS, command_sha256,
 };
