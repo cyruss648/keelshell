@@ -24,6 +24,9 @@ use sftp_fixture::MetadataKind;
 // These scenarios deliberately exercise conservative whole-filesystem claims.
 // Serialize them within this binary without weakening production exclusion.
 static SCENARIOS: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
+#[path = "fixtures/directory_sync_isolation.rs"]
+mod directory_sync_isolation;
 const IDLE: Duration = Duration::from_millis(500);
 const CADENCE_MS: usize = 150;
 

@@ -54,9 +54,22 @@ async fn valid_eof_cannot_hide_a_genuinely_unanswered_readonly_close() -> Result
         };
         job.pause();
         tokio::time::timeout(Duration::from_secs(4), async {
-            while !matches!(job.recv().await, Some(TransferEvent::Paused { .. })) {}
+            loop {
+                match job.recv().await {
+                    Some(TransferEvent::Paused { .. }) => break,
+                    Some(TransferEvent::Queued { .. } | TransferEvent::Started { .. }) => {}
+                    receipt => {
+                        return Err::<(), Box<dyn Error>>(
+                            format!("readonly-close scenario ended before pause: {receipt:?}")
+                                .into(),
+                        );
+                    }
+                }
+            }
+            Ok::<(), Box<dyn Error>>(())
         })
-        .await?;
+        .await
+        .map_err(|error| format!("readonly-close pre-I/O pause: {error}"))??;
         let hold = server
             .filesystem
             .hold_close("/independent-close/file", false, false)?;
@@ -64,7 +77,9 @@ async fn valid_eof_cannot_hide_a_genuinely_unanswered_readonly_close() -> Result
         server.filesystem.set_transfer_read_delay(750);
         job.resume();
         let began = tokio::time::Instant::now();
-        let outcome = tokio::time::timeout(Duration::from_secs(20), completed(&mut job)).await??;
+        let outcome = tokio::time::timeout(Duration::from_secs(20), completed(&mut job))
+            .await
+            .map_err(|error| format!("readonly-close terminal receipt: {error}"))??;
         let elapsed = began.elapsed();
         let timeline = server.filesystem.review_metadata_timeline()?;
         let last_eof = timeline
@@ -89,10 +104,10 @@ async fn valid_eof_cannot_hide_a_genuinely_unanswered_readonly_close() -> Result
         queue.close().await?;
         sftp.close().await?;
         session.close().await?;
-        server.stop().await?;
         eprintln!(
             "fresh EOF true stall directory={directory} elapsed={elapsed:?} since_eof_ms={interval_after_eof} outcome={outcome:?} held={held} pending={pending} server_timeline={final_timeline:?}"
         );
+        server.stop().await?;
         assert!(
             matches!(outcome, TransferEvent::Failed { .. }),
             "readonly close is not an unknown write"
@@ -196,7 +211,8 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
         let began = tokio::time::Instant::now();
         let (outcome, side_count) =
             tokio::time::timeout(Duration::from_secs(3), async { tokio::join!(owner, side) })
-                .await?;
+                .await
+                .map_err(|error| format!("cross-owner EOF owner/side completion: {error}"))?;
         let elapsed = began.elapsed();
         let outcome = outcome?;
         let side_count = side_count?;
@@ -242,10 +258,10 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
         queue.close().await?;
         sftp.close().await?;
         session.close().await?;
-        server.stop().await?;
         eprintln!(
             "fresh cross-owner EOF close={close_phase} elapsed={elapsed:?} side_completed={side_count} valid_eof={eof_count} outcome={outcome:?} before_ids={before_ids:?} after_ids={after_ids:?} server_timeline={timeline:?}"
         );
+        server.stop().await?;
         assert!(side_count >= 5 && eof_count >= side_count);
         assert!(elapsed >= Duration::from_millis(700) && elapsed < Duration::from_millis(1500));
         assert!(
@@ -276,7 +292,8 @@ async fn completed(
         }
         Err::<_, Box<dyn Error>>("transfer stream ended".into())
     })
-    .await?
+    .await
+    .map_err(|error| format!("EOF transfer terminal receipt: {error}"))?
 }
 
 #[derive(Default)]
@@ -415,12 +432,17 @@ fn options(server: &Server) -> SshOptions {
 impl Server {
     async fn stop(mut self) -> Result<(), Box<dyn Error>> {
         self.disconnect.send_replace(true);
-        tokio::time::timeout(Duration::from_secs(3), &mut self.task).await??;
+        tokio::time::timeout(Duration::from_secs(3), &mut self.task)
+            .await
+            .map_err(|error| format!("owned EOF listener task did not stop: {error}"))??;
         let connection = tokio::time::timeout(
-            Duration::from_millis(250),
+            // Refusing a closed loopback port can require a TCP retry on some
+            // platforms. This bounds only cleanup, never the 1s idle assertion.
+            Duration::from_secs(3),
             tokio::net::TcpStream::connect(self.address),
         )
-        .await?;
+        .await
+        .map_err(|error| format!("owned EOF listener refusal probe: {error}"))?;
         assert!(connection.is_err(), "owned listener must be closed");
         Ok(())
     }
@@ -432,6 +454,9 @@ async fn reached(condition: impl Fn() -> bool) -> Result<(), Box<dyn Error>> {
             tokio::time::sleep(Duration::from_millis(5)).await;
         }
     })
-    .await?;
+    .await
+    .map_err(|error| {
+        format!("EOF fixture response gate did not reach its observed state: {error}")
+    })?;
     Ok(())
 }
