@@ -1,7 +1,11 @@
 //! Reviewable encrypted profile synchronization; blocking work never runs in GPUI.
 
 #[cfg(test)]
+mod independent_stage_tests;
+#[cfg(test)]
 mod layout_tests;
+#[cfg(test)]
+mod observation;
 #[cfg(test)]
 mod review_tests;
 #[cfg(test)]
@@ -51,6 +55,8 @@ pub struct ProfileSyncPanel {
     close_after_work: bool,
     status: Message,
     _job: Option<Task<()>>,
+    #[cfg(test)]
+    observation: Option<Arc<observation::OperationObservation>>,
 }
 impl EventEmitter<ProfileSyncEvent> for ProfileSyncPanel {}
 enum Action {
@@ -117,6 +123,8 @@ impl ProfileSyncPanel {
                 "Disabled by default. Choose a directory both devices can access and use the same sync password. Pull differences, then approve explicitly.",
             ),
             _job: None,
+            #[cfg(test)]
+            observation: None,
         }
     }
     pub fn focus(&self, window: &mut Window, cx: &mut App) {
@@ -134,7 +142,7 @@ impl ProfileSyncPanel {
     #[cfg(test)]
     pub(crate) fn diagnostics_for_test(&self, cx: &App) -> String {
         format!(
-            "busy={} review_rows={:?} choices={} preview={} effects_acknowledged={} password_bytes={} review_snapshot={:?} configured={} enabled={} pending={} status={:?}",
+            "busy={} review_rows={:?} choices={} preview={} effects_acknowledged={} password_bytes={} review_snapshot={:?} configured={} enabled={} pending={} status={:?} phases={:?}",
             self.busy(),
             self.review.as_ref().map(|review| review.rows().len()),
             self.choices.len(),
@@ -148,6 +156,9 @@ impl ProfileSyncPanel {
             self.enabled,
             self.pending,
             self.status.render(cx),
+            self.observation
+                .as_ref()
+                .map(|operation| operation.snapshot()),
         )
     }
     fn clear_password(&self, window: &mut Window, cx: &mut App) {
@@ -286,11 +297,21 @@ impl ProfileSyncPanel {
             "正在后台验证并处理加密同步…",
             "Authenticating and processing encrypted sync in the background…",
         );
+        #[cfg(test)]
+        let observation = observation::OperationObservation::new();
+        #[cfg(test)]
+        {
+            self.observation = Some(Arc::clone(&observation));
+        }
+        #[cfg(test)]
+        let foreground_observation = Arc::clone(&observation);
         let task = crate::runtime_bridge::spawn(
             &self.runtime,
             cx.background_executor().clone(),
             async move {
                 tokio::task::spawn_blocking(move || {
+                    #[cfg(test)]
+                    observation.blocking_started();
                     let service = ProfileSyncService::new(store.clone());
                     let result = match action {
                         Action::Inspect => service
@@ -315,6 +336,10 @@ impl ProfileSyncPanel {
                             .discard_pending(&cancellation)
                             .map(|s| Report::State(s, false)),
                     };
+                    // Observe the service return before the existing Pending
+                    // recovery load; that load may still delay UI delivery.
+                    #[cfg(test)]
+                    observation.service_returned(observation::ResultCategory::from_result(&result));
                     match result {
                         Err(ProfileSyncError::Pending) => match store.load() {
                             Ok(state)
@@ -338,7 +363,14 @@ impl ProfileSyncPanel {
                 Ok(Ok(r)) => r,
                 _ => Err(ProfileSyncError::Invalid),
             };
-            let _ = this.update_in(cx, |panel, window, cx| panel.complete(result, window, cx));
+            let _ = this.update_in(cx, |panel, window, cx| {
+                #[cfg(test)]
+                foreground_observation.foreground_completed(
+                    panel.observation.as_ref(),
+                    observation::ResultCategory::from_result(&result),
+                );
+                panel.complete(result, window, cx)
+            });
         }));
         cx.notify();
     }
