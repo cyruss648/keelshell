@@ -2,6 +2,7 @@
 
 在命令区点击“依赖工作流”，可把当前命令作为第一个任务草稿。任务和输出
 只保留在本次应用工作区，关闭应用后不恢复，也不写入普通批量审计或命令历史。
+固定状态和任务/目标 UUID 会另行保存到只读[任务记录](WORKFLOW_HISTORY.md)，不保存命令、输出或参数。
 最小窗口打开 AI 助手时，命令区的历史策略、新命令、批量任务和依赖工作流按钮
 会按可用宽度换行，保留完整文字；正在运行的任务可通过同一入口重新打开。
 
@@ -50,3 +51,7 @@ limits and the distinction between renderer/SSH fixtures and native acceptance.
 
 See [per-target parameters](TARGET_PARAMETERS.md) for named literals, explicit field
 synchronization, empty values and immutable review/session bindings.
+
+任务结果的本机保留预算、未保存状态和仅重试元数据写入的入口见[任务记录指南](WORKFLOW_HISTORY.md)。
+
+See [task history](WORKFLOW_HISTORY.md) for local retention, unsaved state and metadata-only saving retries.

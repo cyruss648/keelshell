@@ -32,6 +32,7 @@ mod reconnect;
 mod reconnect_editor;
 mod remote_completion;
 mod routing;
+mod workflow_audit;
 mod workflow_commands;
 use library::{DestinationPrompt, DestinationTarget, FolderForm, LibraryFilter};
 use reconnect_editor::ReconnectEditor;
@@ -232,6 +233,9 @@ enum AfterSave {
     BatchAudit {
         records: Vec<keelshell_core::BatchAuditRecord>,
     },
+    WorkflowAudit {
+        records: Vec<keelshell_core::WorkflowAuditRecord>,
+    },
     SnippetSaved {
         panel: EntityId,
     },
@@ -267,6 +271,7 @@ pub struct Workspace {
     library_trash_undo: Vec<uuid::Uuid>,
     pending_recents: Vec<(Connection, keelshell_core::ConnectionRoute, u64)>,
     pending_batch_audits: Vec<keelshell_core::BatchAuditRecord>,
+    pending_workflow_audits: Vec<keelshell_core::WorkflowAuditRecord>,
     overlay_focus: FocusHandle,
     modal_focus: FocusHandle,
     surface_focus: FocusHandle,
@@ -567,6 +572,7 @@ impl Workspace {
             library_trash_undo: Vec::new(),
             pending_recents: Vec::new(),
             pending_batch_audits: Vec::new(),
+            pending_workflow_audits: Vec::new(),
             overlay_focus: cx.focus_handle(),
             modal_focus: cx.focus_handle(),
             surface_focus: cx.focus_handle(),
@@ -1700,6 +1706,11 @@ impl Workspace {
                             AfterSave::LibraryBatch { token, action, ids } => {
                                 view.finish_library_batch(token, action, ids, window, cx);
                             }
+                            AfterSave::WorkflowAudit { records } => {
+                                view.pending_workflow_audits.retain(|pending| !records.iter().any(|saved| saved.id == pending.id));
+                                view.status = Message::new("任务记录已保存（不含命令、输出、地址或参数）", "Task history saved (without commands, output, addresses or parameters)");
+                                view.refresh_workflow_audit_history(cx);
+                            }
                             AfterSave::BatchAudit { .. } => {
                                 view.status = Message::new(
                                     "批量审计摘要已保存（不含命令正文、输出或主机地址）",
@@ -1781,9 +1792,11 @@ impl Workspace {
                 if saved_successfully {
                     view.flush_recent_connections(window, cx);
                     view.flush_batch_audits(window, cx);
+                    view.flush_workflow_audits(window, cx);
                 } else {
                     view.pending_recents.clear();
                 }
+                view.refresh_workflow_audit_history(cx);
                 cx.notify();
             });
         })

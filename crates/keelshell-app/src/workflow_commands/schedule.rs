@@ -111,10 +111,12 @@ impl ScheduleDraft {
 }
 
 pub(super) struct ScheduledRun {
-    ledger: WorkflowScheduleLedger,
-    anchor: Instant,
-    pending: Option<WorkflowScheduleDueToken>,
-    running: Option<WorkflowScheduleDueToken>,
+    pub(super) ledger: WorkflowScheduleLedger,
+    pub(super) anchor: Instant,
+    pub(super) pending: Option<WorkflowScheduleDueToken>,
+    pub(super) running: Option<WorkflowScheduleDueToken>,
+    pub(super) audit_tasks: Vec<(Uuid, Uuid)>,
+    pub(super) audited: std::collections::HashSet<u32>,
 }
 
 fn sample(anchor: Instant) -> ScheduleClockSample {
@@ -304,6 +306,13 @@ impl WorkflowPanel {
                         anchor,
                         pending: None,
                         running: None,
+                        audit_tasks: review
+                            .plan
+                            .tasks()
+                            .iter()
+                            .map(|task| (task.id, task.target_id))
+                            .collect(),
+                        audited: std::collections::HashSet::new(),
                     });
                     self.starting = false;
                     self.message = Some(Message::new(
@@ -384,6 +393,7 @@ impl WorkflowPanel {
         };
         if run.ledger.is_terminal() {
             self.complete = self.handle.is_none();
+            self.record_terminal_schedule_audits(cx);
             return false;
         }
         match run.ledger.tick(sample(run.anchor)) {
@@ -411,6 +421,7 @@ impl WorkflowPanel {
         if !self.schedule_active() && self.handle.is_none() {
             self.complete = true;
         }
+        self.record_terminal_schedule_audits(cx);
         cx.notify();
         self.schedule_active()
     }
@@ -444,6 +455,7 @@ impl WorkflowPanel {
                 "已取消未来触发；在途任务只取消本地等待，不保证远端终止。",
                 "Future triggers cancelled. For in-flight work, only local waits are cancelled; remote termination is not guaranteed.",
             ));
+            self.record_terminal_schedule_audits(cx);
             cx.notify();
         }
     }
@@ -459,6 +471,7 @@ impl WorkflowPanel {
             self._schedule_poll = None;
             self.starting = false;
             self.complete = self.handle.is_none();
+            self.record_terminal_schedule_audits(cx);
             cx.notify();
         }
     }

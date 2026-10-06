@@ -33,6 +33,7 @@ mod snippet_template;
 mod snippets;
 mod store;
 mod vault;
+mod workflow_audit;
 
 pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits};
 pub use ai_messages::{AiMessagesEffort, AiMessagesInference, AiMessagesThinking};
@@ -111,4 +112,10 @@ pub use vault::{CredentialKind, CredentialMetadata, CredentialVault, VaultStore}
 pub use profile_sync::{
     ProfileSyncChoice, ProfileSyncError, ProfileSyncLocal, ProfileSyncOutcome, ProfileSyncPreview,
     ProfileSyncReview, ProfileSyncRouteChange, ProfileSyncRow, ProfileSyncService, SyncProfile,
+};
+
+pub use workflow_audit::{
+    MAX_WORKFLOW_AUDIT_TASKS, MAX_WORKFLOW_AUDIT_TOTAL_TASKS, MAX_WORKFLOW_AUDITS,
+    WorkflowAuditNotStarted, WorkflowAuditOutcome, WorkflowAuditRecord, WorkflowAuditTrigger,
+    WorkflowTaskAudit,
 };

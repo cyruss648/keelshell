@@ -1,0 +1,25 @@
+# 任务审计与同步／定时主树整合
+
+## 范围与已取得证据
+
+基于精确7f50主线增量合入有界任务结果审计与三路径测试诊断。代码保留审核式profile-sync、逐目标参数和有限定时，AppState/WireState中两个独立默认字段分别校验。结果只保存固定状态、UUID及时间；重启不恢复执行，连接配置同步不导出本机审计。新两StateStore行为测试同时覆盖Local/Remote选择、各自历史、同步账本重启、旧JSON缺审计字段兼容以及嵌套额外上下文拒绝。
+
+原作者与首次非作者门禁为1435普通、8doc、6Python；原Serde内部标记unit变体接受额外字段的P2保留，修复由另一个新非作者独立验证。原60控制实际36错误接收；修复60控制及额外510未知键/类型控制全部拒绝，15结果/2触发往返、15真实StateStore记录、3TCP SSH和2生产headless GPUI专项通过；严格workspace Clippy、fmt、x.y通过。该窄审只批准五路径解析增量，不批准未整合的当前主线组合或全部原生范围。
+
+根已完整读回第一次900份/23,576,374B、第二次1680份/40,786,999B证据；各自SEAL为b8b44760cf6eee9a39ab671e028ae19faca5870252fe1c1d4cc2d8cac39e53a7和e0b7f1d44f5e1341a5b96f99ef2ad28339e7eebfdc5be84c534cccc43b936d08。freeze和post-freeze的实际终结收据在FINAL外另行读回，没有倒填未终结收据。
+
+新的CI诊断非作者证据15207份/378,501,002B已由根逐正文核验，SEAL8d47c5e30440a34fa2fe06a10ae31e7198e37895a167acbf8638bb4bc4f7311d。两次正常45秒计划通过；合法第二存储引发Stale时实际故意exit101，批准后1.185秒明确busyfalse/Stale/0wire。注入已撤回，生产文件去掉两个cfg(test)函数后与基线相等，18秒/45秒及批准后断言保持。原Linux CI具体原因和新提交CI仍开放。
+
+## 当前组合验证状态
+
+新的非作者已实际复现同步管理模态关闭遗漏：原case exit101，SSH成功后pending1，真实Close后磁盘仍未保存。根两生产文件三行修复增加同步期间保存guard、Close后的审计flush以及Changed历史刷新。完全同一原case在新非作者复跑exit0，records1/pending0/wire1/replay0；另两真实GPUI组合验证Disable后的隐藏历史刷新、未批准解密审核期间不写盘、合法另一StateStore写入后Close/UI retry冲突保留原磁盘和pending且SSH0/PTY0，合计3项实际通过。原失败及完整源码保留；根精确导入3项回归测试和28B模块声明。
+
+根双StateStore字段组合实际exit0/24.616秒，严格schema4项（含510控制）实际通过；另将原14项仅打印观察转换为固定接收/规范投影断言，实际exit0/14.529秒。
+
+新的非作者当前组合限定PASS已由根逐正文读回：4754份/101,602,360B，SEAL SHA-256 `72256a05e483201719d1dae47080666b6744795ed9b0aa63525f316137bca24d`，报告SHA-256 `f41ffa8f87b4904856f0f16b292bceae53d1a68ec828505d951e525fc1c3ee55`。原Close反例exit101、修后相同case、三项GPUI、双存储、wire golden和严格检查均保留；两组包外封存/回读终结start、receipt、raw及回读脚本另行完整摄入。该审查没有编写根的生产修复，也没有替根批准完整工程或原生验收。
+
+根当前完整门禁已实际exit0，内层966.431秒、外层966.738秒，正常结束且所属进程组无残留。1508项普通Rust测试、8项doc、6项Python通过，16项ignored未执行，零失败；fmt、直接registry依赖x.y、locked workspace/all-targets Clippy `-D warnings`通过。默认与显式2MiB栈控制器分别完成序号0至625的626阶段，这些阶段不再计为普通测试。门禁前后671份输入/14,355,452B完全相同，输入map SHA-256 `98b56ec3cffbd77385ffc08a6268eae290ab7c22b006d25091134d1f421aedfa`；完整原始输出396,775B，SHA-256 `e6688b4f3752b71f92a42ef4995f7690d4bb244db070f1d2d0a9628a06ed3c4b`。
+
+同一671输入的新macOS开发双程序构建实际exit0/47.811秒；标准包暂存exit0/0.311秒，arm64/macOS15原生结构检查exit0/0.196秒，57项打包契约测试exit0/1.431秒。六项包文件已哈希绑定，源码仍与完整门禁逐正文相等。没有启动新桌面、覆盖安装、签名或发布标签；此后仅更新本次结果文档，生产代码和测试输入保持冻结。新提交级CI及原生范围仍开放，旧1478门禁、b26 CI或旧包验收不替代当前组合。
+
+跨平台原生历史入口、完整主题/语言/最小窗口/辅助技术、外部Codex完整业务以及安装更新仍开放。controlled TCP fixture只回复协议，不等于OS shell执行或客户服务器验收。

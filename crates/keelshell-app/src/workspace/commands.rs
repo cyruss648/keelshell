@@ -430,6 +430,7 @@ impl Workspace {
         self.focus_current_surface(window, cx);
         self.flush_recent_connections(window, cx);
         self.flush_batch_audits(window, cx);
+        self.flush_workflow_audits(window, cx);
         cx.notify();
     }
 

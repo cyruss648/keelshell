@@ -1,10 +1,90 @@
 //! Independent same-profile sync review with actual modal approval and authenticated fixture SSH.
 use super::*;
 
+fn trace(h: &Harness, stage: &str, began: std::time::Instant, cx: &impl AppContext) -> String {
+    let stored = h.fixture.store.load();
+    let detail = h.fixture.workspace.read_with(cx, |view, cx| {
+        format!(
+            "workspace_snapshot={:?} store_snapshot={:?} store_error={:?} store_data_equal={} saving={} pending_audits={} pending_recent={} updated_in_view={} updated_on_disk={} sync={}",
+            view.state.snapshot,
+            stored.as_ref().map(|state| state.snapshot),
+            stored.as_ref().err(),
+            stored.as_ref().is_ok_and(|state| view.state == *state),
+            view.saving,
+            view.pending_batch_audits.len(),
+            view.pending_recents.len(),
+            view.state.connections.iter().any(|c| c.host == "changed.fixture.invalid"),
+            stored.as_ref().is_ok_and(|state| state.connections.iter().any(|c| c.host == "changed.fixture.invalid")),
+            view.profile_sync.as_ref().map_or_else(|| "missing".to_owned(), |panel| panel.read(cx).diagnostics_for_test(cx)),
+        )
+    });
+    let result = format!(
+        "stage={stage} elapsed={:?} utc_ms={} wire_counts={:?} {detail}",
+        began.elapsed(),
+        chrono::Utc::now().timestamp_millis(),
+        h.servers
+            .iter()
+            .map(|server| server.requests().len())
+            .collect::<Vec<_>>(),
+    );
+    eprintln!("[saved-profile-sync] {result}");
+    result
+}
+
+async fn wait_for_approval(
+    h: &Harness,
+    incoming_id: uuid::Uuid,
+    began: std::time::Instant,
+    cx: &mut TestAppContext,
+) {
+    let timeout = Duration::from_secs(18);
+    let deadline = std::time::Instant::now() + timeout;
+    let runtime = h
+        .fixture
+        .workspace
+        .read_with(cx, |view, _| view.runtime.clone());
+    loop {
+        // Deliver both completion and its workspace subscriber before classifying
+        // an idle panel. A completed error cannot become a generic 18s timeout.
+        cx.run_until_parked();
+        let (applied, busy) = cx
+            .update_window(h.fixture.window, |_, window, cx| {
+                window.render_frame(cx);
+                h.fixture.workspace.read_with(cx, |view, cx| {
+                    (
+                        view.state
+                            .connections
+                            .iter()
+                            .any(|c| c.id == incoming_id && c.host == "changed.fixture.invalid"),
+                        view.profile_sync
+                            .as_ref()
+                            .is_some_and(|panel| panel.read(cx).background_work_pending_for_test()),
+                    )
+                })
+            })
+            .checked("observe actual encrypted sync approval completion");
+        if applied {
+            return;
+        }
+        assert!(
+            busy,
+            "sync approval ended without the approved metadata: {}",
+            trace(h, "approval-ended", began, cx)
+        );
+        assert!(
+            std::time::Instant::now() < deadline,
+            "actual sync approval deadline {timeout:?}: {}",
+            trace(h, "approval-deadline", began, cx)
+        );
+        real_pause(&runtime, Duration::from_millis(40), cx).await;
+    }
+}
+
 #[gpui_kit::test]
 async fn approved_saved_profile_retarget_does_not_replace_captured_schedule_or_authenticated_session(
     cx: &mut TestAppContext,
 ) {
+    let began = std::time::Instant::now();
     let h = Harness::new(cx);
     let entity = h.panes[0].terminal.entity_id();
     let original_session = h.servers[0].session.clone();
@@ -44,9 +124,11 @@ async fn approved_saved_profile_retarget_does_not_replace_captured_schedule_or_a
     state.connections.push(incoming);
     peer.save(&state).checked("peer local metadata");
     sync(&peer, &directory);
+    trace(&h, "peer-published", began, cx);
     let p = prepare_parameters_after(&h, 1, 45, cx);
     h.confirm(cx);
     hide_and_open_sync(&h, cx);
+    trace(&h, "sync-modal-open", began, cx);
     cx.update_window(h.fixture.window, |_, window, cx| {
         input_sync(
             window,
@@ -60,9 +142,17 @@ async fn approved_saved_profile_retarget_does_not_replace_captured_schedule_or_a
     cx.run_until_parked();
     cx.update_window(h.fixture.window, |_, window, cx| {
         window.render_frame(cx);
+        let button = window.find("profile-sync-inspect");
+        eprintln!(
+            "[saved-profile-sync] inspect visible={} disabled={:?} bounds={:?}",
+            button.visible(),
+            button.disabled(),
+            button.bounds()
+        );
         window.click("profile-sync-inspect", cx);
     })
     .checked("actual inspect action");
+    trace(&h, "inspect-clicked", began, cx);
     let deadline = std::time::Instant::now() + Duration::from_secs(18);
     loop {
         let ready = cx
@@ -72,6 +162,7 @@ async fn approved_saved_profile_retarget_does_not_replace_captured_schedule_or_a
             })
             .checked("read actual decrypted choice control");
         if ready {
+            trace(&h, "review-control-ready", began, cx);
             break;
         }
         assert!(
@@ -87,28 +178,32 @@ async fn approved_saved_profile_retarget_does_not_replace_captured_schedule_or_a
     }
     cx.update_window(h.fixture.window, |_, window, cx| {
         window.click(("profile-sync-remote", 0_usize), cx);
+        trace(&h, "remote-choice-clicked", began, cx);
         window.render_frame(cx);
         assert!(window.find("profile-sync-acknowledge-effects").visible());
         window.click("profile-sync-acknowledge-effects", cx);
+        trace(&h, "effects-ack-clicked", began, cx);
         input_sync(window, "profile-sync-password-field", PASSWORD, cx);
+        trace(&h, "second-password-input", began, cx);
     })
     .checked("human remote choice and second password");
     cx.run_until_parked();
+    trace(&h, "approval-inputs-flushed", began, cx);
     cx.update_window(h.fixture.window, |_, window, cx| {
         window.render_frame(cx);
+        let button = window.find("profile-sync-approve");
+        eprintln!(
+            "[saved-profile-sync] approve visible={} disabled={:?} bounds={:?}",
+            button.visible(),
+            button.disabled(),
+            button.bounds()
+        );
         window.click("profile-sync-approve", cx);
     })
     .checked("human explicit encrypted sync approval");
-    wait_real(&h, Duration::from_secs(18), cx, |cx| {
-        h.fixture
-            .workspace
-            .read(cx)
-            .state
-            .connections
-            .iter()
-            .any(|c| c.id == incoming_id && c.host == "changed.fixture.invalid")
-    })
-    .await;
+    trace(&h, "approve-clicked", began, cx);
+    wait_for_approval(&h, incoming_id, began, cx).await;
+    trace(&h, "approval-applied", began, cx);
     assert!(
         h.servers.iter().all(|server| server.requests().is_empty()),
         "sync approval itself sends no remote command"

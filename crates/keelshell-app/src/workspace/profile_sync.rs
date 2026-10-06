@@ -23,6 +23,7 @@ impl Workspace {
                         // changed or deleted saved endpoint cannot replace a live session.
                         view.state = (**state).clone();
                         view.status = message.clone();
+                        view.refresh_workflow_audit_history(cx);
                         cx.notify();
                     }
                     ProfileSyncEvent::Close => {
@@ -30,6 +31,7 @@ impl Workspace {
                         view.profile_sync_subscription = None;
                         view.flush_recent_connections(window, cx);
                         view.flush_batch_audits(window, cx);
+                        view.flush_workflow_audits(window, cx);
                         view.focus_current_surface(window, cx);
                         cx.notify();
                     }

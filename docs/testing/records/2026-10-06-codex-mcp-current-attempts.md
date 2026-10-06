@@ -1,0 +1,11 @@
+# 当前外部Codex MCP原生尝试
+
+本记录补充此前[原尝试](2026-10-06-codex-mcp-native-partial.md)，不改写原失败。MCP方向始终为KeelShell服务端供外部智能体调用。
+
+精确7f50标准macOS开发包绑定652源输入及661源/产物，GUI、MCP、SSH fixture和真实已安装Codex同字节私有副本分别哈希确认；完整输入a38cfa4279cb5d59c4554eeafb0fa8514307fb37e4f95fce5b31352ac423e2cc。新V11r2控制计划979份，映射61da83102c311eb35b7335d79a8602b49b99fee4c564b67af723e030fbda00a2，经不同作者的限定纯协议及清理检查。它们属于运行准备，不能算业务通过。
+
+本次实际应用连接自有隔离SSH、核对指纹、选取含中文的52字节片段，设置七项工具与/bin目录，但没有在300秒内完成并提交临时配置捕获标记。原controller直接实际wait exit1，300.899505875秒，错误为actual UI marker deadline: capture_capability；没有启动CLI、模型HTTP准入、SSE、companion或授权业务RPC。外层原log1506B、SHA c763d58bc6b992946350c6b08131cc0ebc22d77bb23e8dd606f673826d1a9c8d。该失败不得计为目录或工具调用通过。
+
+原GUI实际wait -15，fixture实际wait0，原清理记录errors为空、private/fixture目录移除，原端口拒绝。新的运行后非作者只读复核已封存，根完整读回2327份/61,341,726B（SEAL3dae686c57292af79ed9643fde829bc4a3c5cd66ed64d6c2cc87abe7dc3df18e），确认两原出生身份/进程组与当前controller PID/PG不存在、私有及fixture目录移除，限定已知资源清理通过。原outer没有typed original birth，当前不宣称完整进程枚举、内部recorder OSwait或任何客户清理证据。保留原收据、所有原始失败、源码/产物及控制器修复材料，未覆盖既有应用或用户CLI权限。
+
+此前V8实际首个会话RPC取得配对成功，选择读取的后续RPC被记录器拒绝新增workspaces元数据，未完成业务场景；已保留实际失败和有限清理独立复核。窄metadata推进与无符号/硬链接权限变更的控制器修复经纯控制验证，不追溯解释无法证明的历史权限来源。完整Codex授权读取、命令/文件批准拒绝和撤权仍需要新原生运行。

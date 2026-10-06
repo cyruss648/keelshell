@@ -125,6 +125,31 @@ impl ProfileSyncPanel {
     fn busy(&self) -> bool {
         self.cancellation.is_some()
     }
+    /// Test-only observation of actual background admission and completion.
+    #[cfg(test)]
+    pub(crate) fn background_work_pending_for_test(&self) -> bool {
+        self.busy()
+    }
+    /// Test-only state summary: never include a password or perform storage I/O.
+    #[cfg(test)]
+    pub(crate) fn diagnostics_for_test(&self, cx: &App) -> String {
+        format!(
+            "busy={} review_rows={:?} choices={} preview={} effects_acknowledged={} password_bytes={} review_snapshot={:?} configured={} enabled={} pending={} status={:?}",
+            self.busy(),
+            self.review.as_ref().map(|review| review.rows().len()),
+            self.choices.len(),
+            self.preview.is_some(),
+            self.effects_acknowledged,
+            self.password.read(cx).value().len(),
+            self.review
+                .as_ref()
+                .map(|review| review.local_state().snapshot),
+            self.configured,
+            self.enabled,
+            self.pending,
+            self.status.render(cx),
+        )
+    }
     fn clear_password(&self, window: &mut Window, cx: &mut App) {
         self.password
             .update(cx, |p, cx| p.set_value("", window, cx));

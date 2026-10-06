@@ -17,6 +17,7 @@ use crate::{
     i18n::{Message, t},
 };
 
+mod audit;
 mod schedule;
 #[cfg(test)]
 mod tests;
@@ -46,6 +47,8 @@ pub(crate) enum WorkflowPanelEvent {
     Hide,
     New,
     RefreshTargets,
+    Completed(keelshell_core::WorkflowAuditRecord),
+    RetryAuditSave,
 }
 
 struct TargetRow {
@@ -69,6 +72,10 @@ struct TaskProgress {
 }
 
 pub(crate) struct WorkflowPanel {
+    audit_history: Vec<(keelshell_core::WorkflowAuditRecord, bool)>,
+    show_audit_history: bool,
+    audit_selected: Option<Uuid>,
+    audit_backpressure: bool,
     targets: Vec<TargetRow>,
     tasks: Vec<TaskDraft>,
     next_number: usize,
@@ -124,6 +131,10 @@ impl WorkflowPanel {
             .collect();
         let schedule_draft = schedule::ScheduleDraft::new(window, cx);
         let mut panel = Self {
+            audit_history: Vec::new(),
+            show_audit_history: false,
+            audit_selected: None,
+            audit_backpressure: false,
             targets: destinations
                 .into_iter()
                 .map(|connected| TargetRow {
@@ -552,7 +563,7 @@ impl WorkflowPanel {
         let Some(review) = self.review.clone() else {
             return;
         };
-        if self.starting || !self.review_current(&review, cx) {
+        if self.audit_backpressure || self.starting || !self.review_current(&review, cx) {
             return;
         }
         self.starting = true;
@@ -560,6 +571,9 @@ impl WorkflowPanel {
         cx.notify();
     }
     pub(crate) fn fail_start(&mut self, cx: &mut Context<Self>) {
+        if self.scheduled.is_none() && self.starting {
+            self.record_start_rejected_audit(cx);
+        }
         self.stop_schedule(
             keelshell_core::WorkflowScheduleInvalidationReason::SessionBindingChanged,
             cx,
@@ -645,6 +659,7 @@ impl WorkflowPanel {
                 }));
             }
             Err(error) => {
+                self.record_start_rejected_audit(cx);
                 self.complete =
                     self.finish_schedule(keelshell_core::WorkflowScheduleOutcome::Failed);
                 self.stop_schedule(
@@ -685,6 +700,7 @@ impl WorkflowPanel {
         if let Some(result) = handle.try_finish() {
             // Only a matching complete receipt can distinguish known failure from
             // uncertain execution. Either stops repetition; neither is retried.
+            self.record_completed_audit(run_id, result.as_ref().ok(), cx);
             let scheduled_outcome = match result.as_ref() {
                 Ok(receipt) if self.receipt_matches(receipt) => {
                     if receipt.cancelled || self.cancelling {
@@ -724,6 +740,7 @@ impl WorkflowPanel {
             }
             self.handle = None;
             self.complete = self.finish_schedule(scheduled_outcome);
+            self.record_terminal_schedule_audits(cx);
             changed = true;
         }
         if changed {

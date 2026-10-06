@@ -1,4 +1,7 @@
 //! Workspace dispatch uses the production editor and human approval on real SSH.
+mod audit_sync_combination;
+mod independent_audit;
+
 use super::batch_peer as peer;
 use super::*;
 use gpui_kit::{

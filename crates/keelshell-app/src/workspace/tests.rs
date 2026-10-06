@@ -1540,6 +1540,7 @@ mod dependency_workflow;
 mod library;
 mod routes;
 mod themes;
+mod workflow_audit;
 
 mod remote_completion;
 

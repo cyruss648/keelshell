@@ -58,6 +58,12 @@ impl Workspace {
                             return;
                         }
                         match event {
+                            WorkflowPanelEvent::Completed(record) => {
+                                view.record_workflow_audit(record.clone(), window, cx);
+                            }
+                            WorkflowPanelEvent::RetryAuditSave => {
+                                view.flush_workflow_audits(window, cx);
+                            }
                             WorkflowPanelEvent::Start(review) => {
                                 view.start_reviewed_workflow(panel.clone(), review, window, cx)
                             }
@@ -76,6 +82,7 @@ impl Workspace {
                 );
             self.workflow_panel = Some(panel);
         }
+        self.refresh_workflow_audit_history(cx);
         self.show_workflow = true;
         self.maintain_workflow(cx);
         self.focus_current_surface(window, cx);

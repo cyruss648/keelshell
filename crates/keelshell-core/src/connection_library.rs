@@ -91,6 +91,8 @@ impl<'de> Deserialize<'de> for AppState {
             batch_audits: Vec<crate::BatchAuditRecord>,
             #[serde(default)]
             profile_sync: Option<crate::ProfileSyncLocal>,
+            #[serde(default)]
+            workflow_audits: Vec<crate::WorkflowAuditRecord>,
             settings: Settings,
             #[serde(default)]
             known_hosts: BTreeMap<String, String>,
@@ -109,6 +111,7 @@ impl<'de> Deserialize<'de> for AppState {
             snippets: wire.snippets,
             batch_audits: wire.batch_audits,
             profile_sync: wire.profile_sync,
+            workflow_audits: wire.workflow_audits,
             settings: wire.settings,
             known_hosts: wire.known_hosts,
             route_known_hosts: wire.route_known_hosts,

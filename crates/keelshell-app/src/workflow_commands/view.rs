@@ -461,6 +461,9 @@ impl WorkflowPanel {
 
 impl Render for WorkflowPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if self.show_audit_history {
+            return self.audit_history_view(cx);
+        }
         let visual = crate::design::palette(cx);
         let editable = self.editable();
         let done = self
@@ -482,8 +485,10 @@ impl Render for WorkflowPanel {
         div().id("workflow-panel").role(Role::Dialog).aria_label(title).test_support().size_full().flex().flex_col().min_w_0().track_focus(&self.focus)
             .text_color(rgb(visual.text))
             .child(div().id("workflow-header").test_support().p_3().flex_shrink_0().border_b_1().border_color(rgb(visual.border))
+                .child(Button::new("workflow-audit-history").ghost().small().label(t(cx,"任务记录","Task history")).on_click(cx.listener(|panel,_,_,cx| {panel.show_audit_history=true;cx.notify();})))
                 .child(div().text_lg().font_weight(FontWeight::SEMIBOLD).child(title))
                 .child(hint(cx,format!("{} {} / 128 · {} {done}/{}",t(cx,"任务","Tasks"),self.tasks.len(),t(cx,"终态回执","Terminal receipts"),self.tasks.len()))))
+            .when(self.audit_backpressure,|el|el.child(hint(cx,t(cx,"未保存任务记录较多，请先重试保存记录再启用新的工作流。","Many task results remain unsaved. Retry saving history before starting another workflow."))))
             .child(div().id("workflow-body").test_support().flex_1().min_h_0().min_w_0().overflow_y_scroll().p_3().flex().flex_col().gap_3()
                 .child(self.task_list(cx))
                 .when(self.scheduled.is_some(), |el| el.child(self.schedule_status_view(cx)))
@@ -510,7 +515,7 @@ impl Render for WorkflowPanel {
                 .when(self.review.is_some()&&!self.is_running()&&!self.complete,|el|el.child(Button::new("workflow-back").ghost().label(t(cx,"返回修改","Edit plan"))
                     .on_click(cx.listener(|panel,_,_,cx|panel.back(cx))))
                     .child(Button::new("workflow-confirm").primary().label(if self.review.as_ref().is_some_and(|review| review.schedule.is_some()) { t(cx,"确认并启用定时计划","Confirm and arm schedule") } else { t(cx,"确认全部任务并执行","Confirm all tasks and execute") })
-                        .disabled(!self.review.as_ref().is_some_and(|review|self.review_current(review,cx)))
+                        .disabled(self.audit_backpressure || !self.review.as_ref().is_some_and(|review|self.review_current(review,cx)))
                         .on_click(cx.listener(|panel,_,_,cx|panel.confirm(cx)))))
                 .when(editable,|el|el.child(Button::new("workflow-review-button").primary().label(t(cx,"下一步：完整审核","Next: complete review"))
                     .on_click(cx.listener(|panel,_,_,cx|panel.prepare(cx)))))
@@ -518,5 +523,6 @@ impl Render for WorkflowPanel {
                     .on_click(cx.listener(|_,_,_,cx|cx.emit(WorkflowPanelEvent::New)))))
                 .when(self.detail.is_some()&&!self.detail_text.is_empty(),|el|el.child(Button::new("workflow-copy-output").ghost().label(t(cx,"复制此任务输出","Copy task output"))
                     .on_click(cx.listener(|panel,_,_,cx|cx.write_to_clipboard(ClipboardItem::new_string(panel.detail_text.to_string())))))))
+            .into_any_element()
     }
 }

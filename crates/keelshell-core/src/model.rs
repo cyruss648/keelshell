@@ -490,6 +490,9 @@ pub struct AppState {
     /// Explicit encrypted cross-device synchronization ledger; never contains keys or credentials.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub profile_sync: Option<crate::ProfileSyncLocal>,
+    /// Read-only completed task results without commands, parameters or recovery authority.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub workflow_audits: Vec<crate::WorkflowAuditRecord>,
     /// Non-secret preferences.
     pub settings: Settings,
     /// Explicitly trusted host identities, keyed by normalized `[host]:port`.
@@ -517,6 +520,7 @@ impl PartialEq for AppState {
             && self.snippets == other.snippets
             && self.batch_audits == other.batch_audits
             && self.profile_sync == other.profile_sync
+            && self.workflow_audits == other.workflow_audits
             && self.settings == other.settings
             && self.known_hosts == other.known_hosts
             && self.route_known_hosts == other.route_known_hosts
@@ -556,6 +560,7 @@ impl Default for AppState {
             snippets,
             batch_audits: Vec::new(),
             profile_sync: None,
+            workflow_audits: Vec::new(),
             settings: Settings::default(),
             known_hosts: BTreeMap::new(),
             route_known_hosts: BTreeMap::new(),
@@ -594,6 +599,7 @@ impl AppState {
         if let Some(sync) = &self.profile_sync {
             sync.validate()?;
         }
+        crate::workflow_audit::validate_workflow_audits(&self.workflow_audits)?;
         self.settings.validate()?;
         Ok(())
     }

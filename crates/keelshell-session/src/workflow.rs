@@ -10,8 +10,8 @@ mod scheduler;
 use std::{collections::BTreeMap, sync::Arc, time::Duration};
 
 use keelshell_core::{
-    BatchTaskSkipReason, BatchWorkflowError, BatchWorkflowReviewToken, ConfirmedBatchWorkflow,
-    MAX_BATCH_WORKFLOW_TARGETS,
+    BatchTaskSkipReason, BatchWorkflowError, BatchWorkflowPlan, BatchWorkflowReviewToken,
+    ConfirmedBatchWorkflow, MAX_BATCH_WORKFLOW_TARGETS,
 };
 use tokio::{
     sync::{mpsc, oneshot, watch},
@@ -20,7 +20,8 @@ use tokio::{
 use uuid::Uuid;
 
 use crate::{
-    BatchOptions, BatchPolicy, BatchRowReceipt, SshSession, batch::MAX_BATCH_OUTPUT_BYTES,
+    BatchOptions, BatchOutcome, BatchPolicy, BatchRowReceipt, SshSession,
+    batch::MAX_BATCH_OUTPUT_BYTES,
 };
 
 /// One caller-reviewed identity bound to the already authenticated connection.
@@ -134,6 +135,99 @@ pub struct WorkflowReceipt {
     /// Immutable execution limits and policy actually used. The core content
     /// fingerprint does not cover these options; callers must review them too.
     pub options: WorkflowOptions,
+}
+
+impl WorkflowReceipt {
+    /// Project an exact, complete receipt into non-secret read-only history.
+    /// Commands, names, options, review digests and stdout/stderr never enter
+    /// the returned value. Mismatched or incomplete aggregates are rejected.
+    pub fn audit_record(
+        &self,
+        plan: &BatchWorkflowPlan,
+        options: WorkflowOptions,
+        id: Uuid,
+        recorded_at: u64,
+        trigger: keelshell_core::WorkflowAuditTrigger,
+    ) -> Result<keelshell_core::WorkflowAuditRecord, keelshell_core::ValidationError> {
+        use crate::BatchNotStartedReason;
+        use keelshell_core::{WorkflowAuditNotStarted as Never, WorkflowAuditOutcome as Outcome};
+        if self.fingerprint != plan.review_token()
+            || self.options != options
+            || self.tasks.len() != plan.tasks().len()
+            || !self.tasks.iter().zip(plan.tasks()).all(|(receipt, task)| {
+                receipt.id == task.id
+                    && receipt.target_id == task.target_id
+                    && match &receipt.result {
+                        WorkflowTaskResult::Transport { row } => row.id == task.id,
+                        WorkflowTaskResult::Skipped {
+                            reason: BatchTaskSkipReason::DependencyNotSucceeded { dependency },
+                        } => task.dependencies.contains(dependency),
+                        _ => true,
+                    }
+            })
+        {
+            return Err(keelshell_core::ValidationError {
+                field: "workflow_receipt",
+                reason: "aggregate does not match the reviewed plan and options",
+            });
+        }
+        let tasks: Vec<_> = self
+            .tasks
+            .iter()
+            .map(|task| {
+                let outcome = match &task.result {
+                    WorkflowTaskResult::Transport { row } => match row.outcome {
+                        BatchOutcome::Exited { code: 0 } => Outcome::Succeeded,
+                        BatchOutcome::Exited { code } => Outcome::Failed { exit_code: code },
+                        BatchOutcome::Rejected => Outcome::Rejected,
+                        BatchOutcome::Unknown { .. } => Outcome::Unknown,
+                        BatchOutcome::NotStarted { reason } => match reason {
+                            BatchNotStartedReason::Cancelled => Outcome::Cancelled,
+                            BatchNotStartedReason::StoppedAfterFailure => {
+                                Outcome::StoppedAfterFailure
+                            }
+                            BatchNotStartedReason::Timeout => Outcome::NotStarted {
+                                reason: Never::Deadline,
+                            },
+                            BatchNotStartedReason::ChannelRejected => Outcome::NotStarted {
+                                reason: Never::AdmissionRejected,
+                            },
+                            BatchNotStartedReason::ConnectionLost => Outcome::NotStarted {
+                                reason: Never::SessionUnavailable,
+                            },
+                            BatchNotStartedReason::WorkerFailed => Outcome::NotStarted {
+                                reason: Never::WorkerFailed,
+                            },
+                        },
+                    },
+                    WorkflowTaskResult::Skipped { reason } => match reason {
+                        BatchTaskSkipReason::Cancelled => Outcome::Cancelled,
+                        BatchTaskSkipReason::StoppedAfterFailure => Outcome::StoppedAfterFailure,
+                        BatchTaskSkipReason::DependencyNotSucceeded { dependency } => {
+                            Outcome::DependencyBlocked {
+                                dependency: *dependency,
+                            }
+                        }
+                    },
+                };
+                keelshell_core::WorkflowTaskAudit {
+                    id: task.id,
+                    target_id: task.target_id,
+                    outcome,
+                }
+            })
+            .collect();
+        let record = keelshell_core::WorkflowAuditRecord {
+            id,
+            recorded_at,
+            trigger,
+            cancelled: self.cancelled,
+            stopped_after_failure: self.stopped_after_failure,
+            tasks,
+        };
+        record.validate()?;
+        Ok(record)
+    }
 }
 
 /// Fixed validation/ownership failures; no commands or peer diagnostics included.
