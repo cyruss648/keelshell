@@ -614,8 +614,28 @@ async fn directory_sync_reviews_exact_content_and_uploads_only_after_confirmatio
     h.idle(cx).await;
     h.click(cx, "review-directory-sync");
     h.click(cx, "confirm-file-operation");
+    let admission = h.panel.read_with(cx, |panel, _| {
+        (
+            panel.busy,
+            panel.operation_id.is_some(),
+            panel.pending.is_some(),
+        )
+    });
     h.idle(cx).await;
-    assert_eq!(h.read("/changed.txt"), b"new!");
+    // Idle also follows a rejected or failed operation. Preserve the observed
+    // terminal state without extending the deadline or retrying confirmation.
+    let completion = h.panel.read_with(cx, |panel, _| {
+        format!(
+            "admission(busy, worker, pending)={admission:?}; terminal status={:?}, busy={}, worker={}, pending={}, suspended={}; atomic writes={}",
+            panel.status,
+            panel.busy,
+            panel.operation_id.is_some(),
+            panel.pending.is_some(),
+            panel.suspended,
+            h.server.filesystem.atomic_writes_started()
+        )
+    });
+    assert_eq!(h.read("/changed.txt"), b"new!", "{completion}");
     assert_eq!(h.read("/local-only.txt"), b"local");
     assert_eq!(h.read("/remote-only.txt"), b"keep");
     assert_eq!(h.server.filesystem.atomic_writes_started(), 2);
