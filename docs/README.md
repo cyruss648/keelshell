@@ -1,5 +1,9 @@
 # 文档索引
 
+- [展开文件审核与输入焦点](product/FILE_REVIEW_AND_FOCUS.md)：完整两轴正文、固定确认区和显式草稿／差异入口。
+- [精确 a4 三平台 CI](testing/records/2026-10-07-agent-mcp-platform-ci.md)：macOS／Windows 成功；Linux 目录夹具冲突及其证据边界。
+- [开发 KDF 构建优化](adr/0075-development-kdf-build-optimization.md)：开发构建效率、加密参数保持和限定回归。
+
 - [审核式 Agent](product/REVIEWED_AGENT.md)：逐轮请求、单项SSH操作、固定审批、停止与原会话绑定。
 - [MCP会话授权生命周期](product/MCP_SESSION_LIFETIME.md)：向外部智能体提供能力，原始结束、关闭及重连撤权。
 - [Agent与MCP主树组合](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)：独立审查、精确导入与组合验收边界。
@@ -73,3 +77,7 @@
 - [诊断分支保存资料同步 CI 定位](testing/records/2026-10-07-saved-profile-sync-ci-diagnosis.md)
 - [本地智能体工作目录候选](testing/records/2026-10-07-local-agent-working-directory.md)：显式目录隔离、发送审核、版本绑定和剩余验收边界
 - [Linux 定时同步失败观察](testing/records/2026-10-07-linux-sync-schedule-observation.md)：18 秒批准后等待的有界失败诊断、v2 复核和未确定根因
+
+- [本地 CLI 登录身份研究](research/local-cli-owned-authentication.md)：实际 parser／配置探针、执行前策略缺口和仍开放的验收。
+
+- [File review and runtime integration](testing/records/2026-10-07-ui-runtime-main-integration.md)

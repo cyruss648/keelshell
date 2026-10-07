@@ -56,6 +56,7 @@ impl FilesPanel {
         // Display exactly the base used by this worker's plan. A mutable editor
         // baseline must never substitute a different version into that review.
         let base = String::from_utf8_lossy(&base).into_owned();
+        self.editor_surface = None;
         self.merge_review = Some(MergeReview {
             snapshot,
             base,
@@ -643,9 +644,8 @@ impl FilesPanel {
             .compact()
             .rounded(px(6.))
             .label(t(cx, "应用差异到草稿", "Patch draft"))
-            .on_click(cx.listener(|view, _, _, cx| {
-                view.patch_visible = !view.patch_visible;
-                cx.notify();
+            .on_click(cx.listener(|view, _, window, cx| {
+                view.focus_editor(review::EditorSurface::Patch, window, cx);
             }));
         div()
             .flex()

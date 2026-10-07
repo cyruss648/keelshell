@@ -33,6 +33,11 @@ impl Render for ConfirmationFixture {
                     cx,
                     self.message.clone(),
                     &self.scroll,
+                    Button::new("expand-file-review").ghost().compact().label(t(
+                        cx,
+                        "展开审核",
+                        "Expand review",
+                    )),
                     Button::new("confirm-file-operation")
                         .primary()
                         .compact()

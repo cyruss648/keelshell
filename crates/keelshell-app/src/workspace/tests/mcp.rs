@@ -21,6 +21,7 @@ struct Harness {
     files: file_peer::Server,
     runtime: Arc<tokio::runtime::Runtime>,
     initial_writes: usize,
+    file_mutation_group: Option<Arc<crate::files::fixture_group::FixtureGroup>>,
 }
 
 struct StdioClient {
@@ -138,7 +139,15 @@ impl Harness {
             files,
             runtime,
             initial_writes,
+            file_mutation_group: None,
         }
+    }
+    fn new_with_file_mutations(cx: &mut TestAppContext) -> Self {
+        let mut harness = Self::new(cx);
+        harness.file_mutation_group = Some(
+            crate::files::fixture_group::FixtureGroup::acquire_for_context(cx, &harness.runtime),
+        );
+        harness
     }
     fn server(&self, cx: &mut TestAppContext) -> KeelShellMcpServer {
         self.fixture

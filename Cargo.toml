@@ -47,6 +47,10 @@ expect_used = "deny"
 [profile.dev]
 debug = 1
 
+# Keep the fixed KDF practical in development and inherited test builds (ADR 0075).
+[profile.dev.package.argon2]
+opt-level = 3
+
 [profile.release]
 lto = "thin"
 codegen-units = 1

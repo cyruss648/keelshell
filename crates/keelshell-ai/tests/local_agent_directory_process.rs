@@ -3,14 +3,18 @@
 
 use keelshell_ai::{
     ContextDraft, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
-    LocalAgentKind, LocalAgentLimits, LocalAgentWorkingDirectory, RequestCancellation,
-    run_local_agent_directory_launcher,
+    LocalAgentKind, LocalAgentLimits, LocalAgentWorkingDirectory, LocalAskProgress,
+    RequestCancellation, run_local_agent_directory_launcher,
 };
 use serde_json::{Value, json};
 use std::{
     io::{Read, Write},
     path::PathBuf,
     process::{Command, Stdio},
+    sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    },
     time::{Duration, Instant},
 };
 
@@ -73,6 +77,19 @@ fn main() {
             stem.contains("claude"),
             stem.contains("future"),
         );
+        return;
+    }
+    if args == ["--observer-io-error-tests"] {
+        tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(2)
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(async {
+                tokio::time::timeout(Duration::from_secs(40), observer_io_error_controller())
+                    .await
+                    .expect("bounded observer IO-error controller");
+            });
         return;
     }
     tokio::runtime::Builder::new_multi_thread()
@@ -291,15 +308,188 @@ fn assert_child_cwd(actual: &Value, expected: &std::path::Path) {
     assert_eq!(actual, expected.to_string_lossy().as_ref());
 }
 
+// Test-only receipt times observe bounded public facts. They are not backend
+// phase durations, authorization, or a renewed request deadline.
+async fn observed_first_ask(
+    fixture: &Fixture,
+    approved: keelshell_ai::ApprovedLocalAsk,
+) -> Result<keelshell_ai::LocalAgentReply, LocalAgentError> {
+    observed_first_ask_with_writer(fixture, approved, &mut std::io::stdout()).await
+}
+
+async fn observed_first_ask_with_writer(
+    fixture: &Fixture,
+    approved: keelshell_ai::ApprovedLocalAsk,
+    writer: &mut impl Write,
+) -> Result<keelshell_ai::LocalAgentReply, LocalAgentError> {
+    let (progress, receiver) = LocalAskProgress::channel();
+    let cancellation = RequestCancellation::new();
+    let started = Instant::now();
+    let ask = LocalAgentClient.ask_with_progress(approved, credential(), &cancellation, progress);
+    tokio::pin!(ask);
+    let mut observed = Vec::new();
+    let outcome = loop {
+        while let Ok(stage) = receiver.try_recv() {
+            if observed.len() < 8 {
+                let fact = json!({"stage":format!("{stage:?}"),"observed_elapsed_us":started.elapsed().as_micros()});
+                observed.push(fact);
+            }
+        }
+        tokio::select! {
+            result = &mut ask => break result,
+            _ = tokio::time::sleep(Duration::from_millis(10)) => {}
+        }
+    };
+    while let Ok(stage) = receiver.try_recv() {
+        if observed.len() < 8 {
+            let fact = json!({"stage":format!("{stage:?}"),"observed_elapsed_us":started.elapsed().as_micros()});
+            observed.push(fact);
+        }
+    }
+    // Only owned fixture phase/pid facts survive. Never print cwd, argv,
+    // control frames, stdin, output, endpoints or credential values.
+    let events = observed_owned_child_phases(fixture);
+    // Output is deferred until Ask has completed. Diagnostic IO failure cannot
+    // unwind an active request or replace its original success/error result.
+    for fact in &observed {
+        let _ = writeln!(writer, "directory-ci-stage {fact}");
+    }
+    let _ = writeln!(
+        writer,
+        "directory-ci-outcome {}",
+        json!({
+            "case":"selected_actual_child_cwd",
+            "kind":format!("{:?}", fixture.kind),
+            "original_ask_timeout_ms":8000,
+            "elapsed_us":started.elapsed().as_micros(),
+            "ok":outcome.is_ok(),
+            "error":outcome.as_ref().err().map(|error| format!("{error:?}")),
+            "observations":observed,
+            "owned_child_phases":events,
+            "owned_fixture_executable_bytes":std::fs::metadata(&fixture.executable).ok().map(|metadata| metadata.len()),
+            "scratch_entry_count":std::fs::read_dir(&fixture.scratch).ok().map(|entries| entries.count())
+        })
+    );
+    outcome
+}
+
+struct BrokenPipeWriter {
+    attempts: Arc<AtomicUsize>,
+}
+
+impl Write for BrokenPipeWriter {
+    fn write(&mut self, _bytes: &[u8]) -> std::io::Result<usize> {
+        self.attempts.fetch_add(1, Ordering::SeqCst);
+        Err(std::io::ErrorKind::BrokenPipe.into())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Err(std::io::ErrorKind::BrokenPipe.into())
+    }
+}
+
+async fn observer_io_error_controller() {
+    let fixture = Arc::new(Fixture::new(LocalAgentKind::Codex, false));
+    let approved = fixture.review("held-cwd", None).await;
+    let attempts = Arc::new(AtomicUsize::new(0));
+    let task_attempts = Arc::clone(&attempts);
+    let task_fixture = Arc::clone(&fixture);
+    let mut task = tokio::spawn(async move {
+        observed_first_ask_with_writer(
+            &task_fixture,
+            approved,
+            &mut BrokenPipeWriter {
+                attempts: task_attempts,
+            },
+        )
+        .await
+    });
+    await_file(&fixture.root.path().join("ask-ready"), &mut task).await;
+    assert!(!task.is_finished(), "held Ask is actually pending");
+    assert_eq!(
+        attempts.load(Ordering::SeqCst),
+        0,
+        "the observer must not write before Ask produces an outcome"
+    );
+    std::fs::write(fixture.root.path().join("ask-release"), b"").unwrap();
+    let reply = task.await.unwrap().unwrap();
+    let answer: Value = serde_json::from_str(reply.text()).unwrap();
+    assert_child_cwd(&answer["cwd"], &fixture.selected);
+    assert_eq!(answer["reviewed_marker"], true);
+    assert!(attempts.load(Ordering::SeqCst) > 0);
+    fixture.clean();
+    let _ = writeln!(
+        std::io::stdout(),
+        "observer IO-error held-cwd: pending writes 0; original success/cwd/scratch preserved"
+    );
+
+    let fixture = Fixture::new(LocalAgentKind::Codex, false);
+    let approved = fixture.review("wait", None).await;
+    let attempts = Arc::new(AtomicUsize::new(0));
+    let started = Instant::now();
+    let outcome = observed_first_ask_with_writer(
+        &fixture,
+        approved,
+        &mut BrokenPipeWriter {
+            attempts: Arc::clone(&attempts),
+        },
+    )
+    .await;
+    assert_eq!(outcome.unwrap_err(), LocalAgentError::Timeout);
+    assert!(attempts.load(Ordering::SeqCst) > 0);
+    fixture.clean();
+    let record = fixture
+        .records()
+        .into_iter()
+        .find(|record| record["phase"] == "ask")
+        .unwrap();
+    assert_child_cwd(&record["cwd"], &fixture.selected);
+    #[cfg(unix)]
+    assert_eq!(
+        nix::sys::signal::kill(
+            nix::unistd::Pid::from_raw(record["pid"].as_i64().unwrap() as i32),
+            None
+        ),
+        Err(nix::errno::Errno::ESRCH)
+    );
+    let _ = writeln!(
+        std::io::stdout(),
+        "observer IO-error wait: original 8000ms Timeout preserved; elapsed_us={}; child reaped; scratch cleaned",
+        started.elapsed().as_micros()
+    );
+}
+
+fn observed_owned_child_phases(fixture: &Fixture) -> Value {
+    // Diagnostic read failures do not replace the original Ask result. The
+    // reader has fixed byte/row limits and emits only known phase and pid fields.
+    let Ok(file) = std::fs::File::open(fixture.root.path().join("events.jsonl")) else {
+        return json!({"read_ok":false,"phases":[]});
+    };
+    let mut text = String::new();
+    if file.take(16 * 1024).read_to_string(&mut text).is_err() {
+        return json!({"read_ok":false,"phases":[]});
+    }
+    let rows: Vec<_> = text
+        .lines()
+        .take(16)
+        .filter_map(|line| {
+            let row: Value = serde_json::from_str(line).ok()?;
+            let phase = row["phase"].as_str()?;
+            if !["version", "help", "features", "ask"].contains(&phase) {
+                return None;
+            }
+            Some(json!({"phase":phase,"pid":row["pid"].as_u64()?}))
+        })
+        .collect();
+    json!({"read_ok":true,"complete":text.len()<16*1024 && text.lines().count()<=16 && rows.len()==text.lines().count(),"phases":rows})
+}
+
 async fn controller() {
     for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
         let fixture = Fixture::new(kind, false);
         let approved = fixture.review("cwd", None).await;
         assert!(fixture.records().is_empty(), "preview does not start CLI");
-        let reply = LocalAgentClient
-            .ask(approved, credential(), &RequestCancellation::new())
-            .await
-            .unwrap();
+        let reply = observed_first_ask(&fixture, approved).await.unwrap();
         let answer: Value = serde_json::from_str(reply.text()).unwrap();
         assert_child_cwd(&answer["cwd"], &fixture.selected);
         assert_eq!(answer["reviewed_marker"], true);

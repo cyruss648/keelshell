@@ -33,7 +33,8 @@
 “审核并保存”展示目标、审核基线元数据、完整最终全文、字节数和末尾 LF 状态；
 文字可按两轴滚动，确认/取消按钮固定在滚动区外。确认后编辑内容改变会废除旧审核。
 内层文本滚动不同时推动外层；文本区侧边留有真实间距，最小工作区中仍可从外围滚动
-到其它工具。固定确认文本保留 48 px 高度预算，所有原始行仍可按两轴查看。
+到其它工具。紧凑确认文本保留 48 px 高度预算，所有原始行仍可按两轴查看；
+“展开审核”提供更大的正文与固定动作，详见 [完整审核指南](FILE_REVIEW_AND_FOCUS.md)。
 保存前完整读取并比较基线，远端变化只生成新的合并审核，不覆盖或自动重试。
 写入使用既有共享目标占用/未知结果隔离，以独占同目录临时文件 staging，原子发布前
 再次核对路径、完整内容及元数据、检查当前授权，然后完整读回发布内容。只有读回
@@ -75,6 +76,8 @@ two-axis text inspection and fixed Confirm/Cancel. Changed drafts invalidate con
 Inner gestures do not simultaneously move the outer list; a real side gutter keeps
 other tools reachable in a small workspace. Confirmation keeps its compact 48 px
 height budget while every original row remains inspectable along both axes.
+“Expand review” offers a larger body with fixed actions; see the
+[complete review guide](FILE_REVIEW_AND_FOCUS.md).
 Current remote content and metadata are read before staging and again before POSIX
 atomic publication under the existing mutation exclusion/quarantine and authorization
 checks. A changed remote observation creates a fresh merge review. Successful full

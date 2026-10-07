@@ -185,6 +185,8 @@ impl FilesPanel {
         let runtime = self.runtime.clone();
         let worker_stop = stop.clone();
         let (sender, receiver) = mpsc::sync_channel(16);
+        #[cfg(test)]
+        let fixture_group = self.fixture_group.clone();
         if let Err(error) = crate::terminal::spawn_transport_worker(
             "keelshell-queued-sftp",
             stop,
@@ -201,12 +203,23 @@ impl FilesPanel {
                         Ok::<_, SessionError>(queue)
                     }) => result.map_err(FileFailure::from)?.clone(),
                 };
+                #[cfg(test)]
+                if let Some(group) = &fixture_group {
+                    group.retain_queue(&runtime, &queue);
+                }
                 queue.set_parallelism(parallelism.load(Ordering::Acquire))?;
                 if worker_stop.load(Ordering::Acquire) { return Err(FileFailure::CancelledBeforeStart); }
                 queued_operation(&queue, operation, worker_stop, pause_receiver, &sender).await
             });
                 let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
                 let _ = sender.send(WorkerMessage::Result(Box::new(result)));
+                #[cfg(test)]
+                {
+                    // Release the captured cell before the final group owner;
+                    // cleanup then unwraps and joins the actual queue scheduler.
+                    drop(queue_cell);
+                    drop(fixture_group);
+                }
                 completion
             },
         ) {

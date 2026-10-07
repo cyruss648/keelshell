@@ -51,7 +51,7 @@ Simplified Chinese is the default, with English available. Appearance follows th
 
 Canceling a transfer or mirror retains completed operations; disconnection does not replay commands, transfers or tasks. Directory comparison/sync has explicit size, type and path limits. Protocol diagnostics require remote POSIX / Python 3.8+. See the [file workspace](docs/product/FILES_WORKSPACE.md), [directory mirrors](docs/product/DIRECTORY_MIRROR.md), [remote protocol diagnostics](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md) and [capability ledger](docs/product/CAPABILITIES.md) for workflows and boundaries.
 
-Text merging and patches first produce a local draft. Saving remotely requires complete review and a fresh baseline check. See the [text merge guide](docs/product/TEXT_CONFLICT_MERGE.md) for limits. Two macOS draft/save sequences against an owned SSH/SFTP fixture completed with full-content readback; complete UI and cross-platform acceptance remain open in the [limited native record](docs/testing/records/2026-10-07-text-merge-patch-native.md).
+Text merging and patches first produce a local draft. Saving remotely requires complete review and a fresh baseline check. File reviews can expand while keeping confirmation and cancellation visible; drafts and patch inputs have explicit editing controls. See [review and editing](docs/product/FILE_REVIEW_AND_FOCUS.md) and the [text merge guide](docs/product/TEXT_CONFLICT_MERGE.md). Two macOS draft/save sequences against an owned SSH/SFTP fixture completed with full-content readback; complete UI and cross-platform acceptance remain open in the [limited native record](docs/testing/records/2026-10-07-text-merge-patch-native.md).
 
 ## AI assistance and external MCP
 

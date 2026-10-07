@@ -124,6 +124,17 @@ fn compare_status_label(status: DirectoryEntryStatus, cx: &App) -> SharedString 
 
 impl Render for FilesPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if self.confirmation_expanded
+            && let Some((message, _)) = &self.pending
+        {
+            return self
+                .expanded_confirmation(format!("{} · {}", self.host, message.render(cx)), cx);
+        }
+        if self.pending.is_none()
+            && let Some(surface) = self.editor_surface
+        {
+            return self.editor_surface(surface, cx);
+        }
         let visual = crate::design::palette(cx);
         let mut navigation = div()
             .id("remote-directory-tree")
@@ -554,6 +565,9 @@ impl Render for FilesPanel {
                         )),
                 )
             })
+            .when(self.editing.is_some() && self.pending.is_none(), |panel| {
+                panel.child(self.editor_entry_bar(cx))
+            })
             .child(body.test_support());
         tools = tools.when(self.pending.is_none(), |panel| panel
             .child(div().id("file-mutation-tools").min_h(px(38.)).px_3().py_1().flex_shrink_0().flex().flex_wrap().items_center().gap_2().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border))
@@ -894,76 +908,73 @@ impl Render for FilesPanel {
         }
         tools = tools.child(self.parallel_queue_card(cx));
         panel = panel.child(tools);
-        if let Some((message, operation)) = &self.pending {
+        if let Some((message, _)) = &self.pending {
             panel = panel.child(confirmation_bar(
                 cx,
                 format!("{} · {}", self.host, message.render(cx)),
                 &self.confirmation_scroll,
-                Button::new("confirm-file-operation")
-                    .primary()
-                    .compact()
-                    .rounded(px(6.))
-                    .label(if matches!(operation, Operation::ApplyDirectorySync(review, _) if review.plan.is_bounded_mirror()) { t(cx,"确认镜像及删除","Confirm mirror/deletions") } else { t(cx,"确认","Confirm") })
-                    .on_click(cx.listener(|view, _, window, cx| view.execute_pending(window, cx))),
-                Button::new("cancel-file-operation")
+                Button::new("expand-file-review")
                     .ghost()
                     .compact()
                     .rounded(px(6.))
-                    .label(t(cx, "取消", "Cancel"))
-                    .on_click(cx.listener(|view, _, _, cx| {
-                        view.pending = None;
-                        cx.notify();
-                    })),
+                    .label(t(cx, "展开审核", "Expand review"))
+                    .on_click(
+                        cx.listener(|view, _, window, cx| view.expand_confirmation(window, cx)),
+                    ),
+                self.confirm_button(cx),
+                self.cancel_review_button(cx),
             ));
         }
-        panel.child(
-            div()
-                .min_h(px(24.))
-                .px_2()
-                .flex_shrink_0()
-                .flex()
-                .items_center()
-                .gap_2()
-                .border_t_1()
-                .border_color(rgb(visual.border))
-                .bg(rgb(visual.canvas))
-                .child(div().text_color(rgb(visual.muted)).child(if self.busy {
-                    IconName::RefreshCw
-                } else {
-                    IconName::Info
-                }))
-                .child(
-                    div()
-                        .max_w(px(220.))
-                        .min_w_0()
-                        .text_ellipsis()
-                        .text_color(rgb(visual.muted))
-                        .child(format!(
-                            "{} {}",
-                            t(cx, "当前位置：", "Location:"),
-                            self.directory.as_deref().unwrap_or("—")
-                        )),
-                )
-                .child(
-                    div()
-                        .flex_1()
-                        .min_w_0()
-                        .text_ellipsis()
-                        .text_color(rgb(visual.muted))
-                        .child(self.status.render(cx)),
-                )
-                .when(self.operation_id.is_some(), |view| {
-                    view.child(
-                        Button::new("cancel-active-file-operation")
-                            .ghost()
-                            .compact()
-                            .rounded(px(6.))
-                            .label(t(cx, "取消操作", "Cancel operation"))
-                            .on_click(cx.listener(|view, _, _, cx| {
-                                view.cancel_active(cx);
-                            })),
+        panel
+            .child(
+                div()
+                    .min_h(px(24.))
+                    .px_2()
+                    .flex_shrink_0()
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .border_t_1()
+                    .border_color(rgb(visual.border))
+                    .bg(rgb(visual.canvas))
+                    .child(div().text_color(rgb(visual.muted)).child(if self.busy {
+                        IconName::RefreshCw
+                    } else {
+                        IconName::Info
+                    }))
+                    .child(
+                        div()
+                            .max_w(px(220.))
+                            .min_w_0()
+                            .text_ellipsis()
+                            .text_color(rgb(visual.muted))
+                            .child(format!(
+                                "{} {}",
+                                t(cx, "当前位置：", "Location:"),
+                                self.directory.as_deref().unwrap_or("—")
+                            )),
                     )
-                }),
-        )
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .text_ellipsis()
+                            .text_color(rgb(visual.muted))
+                            .child(self.status.render(cx)),
+                    )
+                    .when(self.operation_id.is_some(), |view| {
+                        view.child(
+                            Button::new("cancel-active-file-operation")
+                                .ghost()
+                                .compact()
+                                .rounded(px(6.))
+                                .label(t(cx, "取消操作", "Cancel operation"))
+                                .on_click(cx.listener(|view, _, _, cx| {
+                                    view.cancel_active(cx);
+                                })),
+                        )
+                    }),
+            )
+            .into_any_element()
     }
 }

@@ -7,6 +7,10 @@ mod review_tests;
 #[cfg(test)]
 mod tests;
 mod view;
+#[cfg(test)]
+mod work_trace;
+#[cfg(test)]
+mod work_trace_tests;
 use crate::i18n::{Message, t};
 use gpui_kit::{component::input::InputState, *};
 use keelshell_core::{
@@ -51,6 +55,8 @@ pub struct ProfileSyncPanel {
     close_after_work: bool,
     status: Message,
     _job: Option<Task<()>>,
+    #[cfg(test)]
+    work_trace: Option<Arc<work_trace::WorkTrace>>,
 }
 impl EventEmitter<ProfileSyncEvent> for ProfileSyncPanel {}
 enum Action {
@@ -117,6 +123,8 @@ impl ProfileSyncPanel {
                 "Disabled by default. Choose a directory both devices can access and use the same sync password. Pull differences, then approve explicitly.",
             ),
             _job: None,
+            #[cfg(test)]
+            work_trace: None,
         }
     }
     pub fn focus(&self, window: &mut Window, cx: &mut App) {
@@ -134,7 +142,7 @@ impl ProfileSyncPanel {
     #[cfg(test)]
     pub(crate) fn diagnostics_for_test(&self, cx: &App) -> String {
         format!(
-            "busy={} review_rows={:?} choices={} preview={} effects_acknowledged={} password_bytes={} review_snapshot={:?} configured={} enabled={} pending={} status={:?}",
+            "busy={} review_rows={:?} choices={} preview={} effects_acknowledged={} password_bytes={} review_snapshot={:?} configured={} enabled={} pending={} status={:?} worker={:?}",
             self.busy(),
             self.review.as_ref().map(|review| review.rows().len()),
             self.choices.len(),
@@ -148,6 +156,7 @@ impl ProfileSyncPanel {
             self.enabled,
             self.pending,
             self.status.render(cx),
+            self.work_trace.as_ref().map(|trace| trace.snapshot()),
         )
     }
     fn clear_password(&self, window: &mut Window, cx: &mut App) {
@@ -286,11 +295,33 @@ impl ProfileSyncPanel {
             "正在后台验证并处理加密同步…",
             "Authenticating and processing encrypted sync in the background…",
         );
+        #[cfg(test)]
+        let trace = {
+            let operation = match action {
+                Action::Inspect => "inspect",
+                Action::Apply => "apply",
+                Action::Resume => "resume",
+                Action::DiscardPending => "discard_pending",
+                Action::Disable => "disable",
+                Action::Forget => "forget",
+            };
+            let trace = Arc::new(work_trace::WorkTrace::new(operation));
+            self.work_trace = Some(trace.clone());
+            trace
+        };
+        #[cfg(test)]
+        let background_trace = trace.clone();
         let task = crate::runtime_bridge::spawn(
             &self.runtime,
             cx.background_executor().clone(),
             async move {
-                tokio::task::spawn_blocking(move || {
+                #[cfg(test)]
+                background_trace.mark(work_trace::Phase::AsyncEntered);
+                #[cfg(test)]
+                let blocking_trace = background_trace.clone();
+                let result = tokio::task::spawn_blocking(move || {
+                    #[cfg(test)]
+                    blocking_trace.mark(work_trace::Phase::BlockingEntered);
                     let service = ProfileSyncService::new(store.clone());
                     let result = match action {
                         Action::Inspect => service
@@ -315,7 +346,9 @@ impl ProfileSyncPanel {
                             .discard_pending(&cancellation)
                             .map(|s| Report::State(s, false)),
                     };
-                    match result {
+                    #[cfg(test)]
+                    blocking_trace.mark(work_trace::Phase::CoreReturned);
+                    let result = match result {
                         Err(ProfileSyncError::Pending) => match store.load() {
                             Ok(state)
                                 if state
@@ -328,17 +361,30 @@ impl ProfileSyncPanel {
                             _ => Err(ProfileSyncError::Pending),
                         },
                         result => result,
-                    }
+                    };
+                    #[cfg(test)]
+                    blocking_trace.mark(work_trace::Phase::BlockingReturned);
+                    result
                 })
-                .await
+                .await;
+                #[cfg(test)]
+                background_trace.mark(work_trace::Phase::BlockingJoined);
+                result
             },
         );
         self._job = Some(cx.spawn_in(window, async move |this, cx| {
-            let result = match task.await {
+            let completion = task.await;
+            #[cfg(test)]
+            trace.mark(work_trace::Phase::ForegroundReceived);
+            let result = match completion {
                 Ok(Ok(r)) => r,
                 _ => Err(ProfileSyncError::Invalid),
             };
-            let _ = this.update_in(cx, |panel, window, cx| panel.complete(result, window, cx));
+            let _ = this.update_in(cx, |panel, window, cx| {
+                #[cfg(test)]
+                trace.mark(work_trace::Phase::CallbackEntered);
+                panel.complete(result, window, cx);
+            });
         }));
         cx.notify();
     }

@@ -10,6 +10,7 @@ AI 侧栏打开后可以纵向滚动访问全部完整标签。文件列表保�
 暂时替换操作工具栏；完整审核文字可滚动检查，两个按钮保持在操作滚动区之外，取消
 会恢复原有草稿。提示文字在已展开的状态下也按当前语言重新绘制。
 默认中文/跟随系统外观规则继续沿用应用设置。
+完整审核与显式草稿/差异定位入口见 [使用指南](FILE_REVIEW_AND_FOCUS.md)。
 
 Files use the active authenticated SSH session's SFTP channel. The remote path
 is separate from the terminal working directory. Upload/download, creation,
@@ -26,6 +27,8 @@ complete scrollable text; Confirm/Cancel stay outside the action scroll area.
 Cancellation restores the drafts. Visible
 application hints read the live language when redrawn. Chinese and System
 appearance remain the defaults.
+See the [complete review and editor guide](FILE_REVIEW_AND_FOCUS.md) for explicit
+expansion and focused draft/patch entry.
 
 实现与验证边界见 [ADR 0043](../adr/0043-responsive-files-and-live-tooltip-translations.md)
 和 [测试记录](../testing/records/2026-10-05-files-responsive-tooltips.md)。布局/协议测试
@@ -147,3 +150,5 @@ empty parents; links and conflicts block the whole plan. Per-item results preser
 cancelled and unknown boundaries under existing tree ownership and quarantine.
 See the [mirror guide](DIRECTORY_MIRROR.md); new independent review, main integration and desktop
 acceptance of the recursive extension remain open.
+
+测试准入不改变产品所有权：已有本地写入仍保守排斥整个进程本地侧的竞争访问；有界 setup 分组仅用于共享该真实资源的受控夹具；同实际测试 App 的窗口/运行时继承弱组，真实工作线程及队列 join 结束后才放行下一组。Historical CI ownership is not identified by a local fixture pass. 详见[ADR0078](../adr/0078-process-local-file-fixture-admission.md)。

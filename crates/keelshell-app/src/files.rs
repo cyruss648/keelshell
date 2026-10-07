@@ -33,6 +33,7 @@ use std::{
 
 mod merge;
 mod parallel;
+mod review;
 mod sync;
 mod transfer;
 mod view;
@@ -131,6 +132,9 @@ pub struct FilesPanel {
     local: Entity<InputState>,
     editor: Entity<TextareaState>,
     confirmation_scroll: ScrollHandle,
+    confirmation_expanded: bool,
+    review_focus: FocusHandle,
+    editor_surface: Option<review::EditorSurface>,
     tools_scroll: ScrollHandle,
     transfer_list_scroll: ScrollHandle,
     entries: Vec<RemoteEntry>,
@@ -160,6 +164,9 @@ pub struct FilesPanel {
     selected_transfer: Option<uuid::Uuid>,
     transfer_queue: Arc<tokio::sync::OnceCell<Arc<keelshell_session::sftp::TransferQueue>>>,
     queue_parallelism: Arc<std::sync::atomic::AtomicUsize>,
+    // Tests retain setup admission in the actual entity, after queue ownership.
+    #[cfg(test)]
+    fixture_group: Option<Arc<fixture_group::FixtureGroup>>,
 }
 
 struct DirectoryComparison {
@@ -529,6 +536,8 @@ impl FilesPanel {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
+        #[cfg(test)]
+        let fixture_group = fixture_group::for_app(cx);
         let mut panel = Self {
             session: Some(session),
             session_token: uuid::Uuid::new_v4(),
@@ -552,6 +561,9 @@ impl FilesPanel {
             local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
             editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
             confirmation_scroll: ScrollHandle::new(),
+            confirmation_expanded: false,
+            review_focus: cx.focus_handle(),
+            editor_surface: None,
             tools_scroll: ScrollHandle::new(),
             transfer_list_scroll: ScrollHandle::new(),
             entries: Vec::new(),
@@ -581,6 +593,8 @@ impl FilesPanel {
             selected_transfer: None,
             transfer_queue: Arc::new(tokio::sync::OnceCell::new()),
             queue_parallelism: Arc::new(std::sync::atomic::AtomicUsize::new(2)),
+            #[cfg(test)]
+            fixture_group,
         };
         panel.run(Operation::List(".".into()), window, cx);
         panel
@@ -595,6 +609,7 @@ impl FilesPanel {
         self.session_token = uuid::Uuid::new_v4();
         self.recovery = None;
         self.pending = None;
+        self.confirmation_expanded = false;
         self.cancel_transfers();
         self.cancel_active(cx);
         cx.notify();
@@ -717,6 +732,7 @@ impl FilesPanel {
         }
         self.busy = true;
         self.pending = None;
+        self.confirmation_expanded = false;
         let operation_id = uuid::Uuid::new_v4();
         self.operation_id = Some(operation_id);
         if let Some(status) = operation.transfer_status() {
@@ -780,8 +796,12 @@ impl FilesPanel {
         let (pause, pause_receiver) = tokio::sync::watch::channel(false);
         self.transfer_pause = self.transfer.as_ref().map(|_| pause);
         let (sender, receiver) = mpsc::sync_channel(16);
+        #[cfg(test)]
+        let fixture_group = self.fixture_group.clone();
         if let Err(error) =
             crate::terminal::spawn_transport_worker("keelshell-sftp", stop, move || {
+                #[cfg(test)]
+                let _fixture_group = fixture_group;
                 let result = runtime.block_on(operate(
                     session,
                     operation,
@@ -928,21 +948,29 @@ impl FilesPanel {
                     Ok(Outcome::QuarantineInspected(review)) => {
                         view.status = Message::new("只读检查完成；请审核解除隔离的未知风险", "Read-only inspection complete; review the risk before releasing isolation");
                         view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
+                        view.confirmation_expanded = false;
+                        view.editor_surface = None;
                         view.pending = Some((parallel::quarantine_review_message(&review), Operation::AcknowledgeQuarantine(review)));
                     }
                     Ok(Outcome::PlannedDirectory(plan)) => {
                         view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
                         view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
+                        view.confirmation_expanded = false;
+                        view.editor_surface = None;
                         view.pending = Some((directory_review_message(&plan), Operation::TransferDirectory(plan)));
                     }
                     Ok(Outcome::PlannedFileResume(plan)) => {
                         view.status = Message::new("部分内容校验通过，请审核续传", "Existing content verified; review continuation");
                         view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
+                        view.confirmation_expanded = false;
+                        view.editor_surface = None;
                         view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), None), Operation::ResumeFile(plan)));
                     }
                     Ok(Outcome::PlannedDirectoryResume(plan)) => {
                         view.status = Message::new("部分目录校验通过，请审核续传", "Existing tree verified; review continuation");
                         view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
+                        view.confirmation_expanded = false;
+                        view.editor_surface = None;
                         view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan)));
                     }
                     Ok(Outcome::Compared(comparison)) => {
@@ -1032,6 +1060,8 @@ impl FilesPanel {
             );
         } else {
             self.confirmation_scroll.set_offset(point(px(0.), px(0.)));
+            self.confirmation_expanded = false;
+            self.editor_surface = None;
             self.pending = Some((message, operation));
         }
         cx.notify();
@@ -1053,6 +1083,7 @@ impl FilesPanel {
             && self.editor.read(cx).value().as_bytes() != content
         {
             self.pending = None;
+            self.confirmation_expanded = false;
             self.status = Message::new(
                 "审核后内容已修改，请重新审核再保存。",
                 "Editor changed after review. Review the new contents before saving.",
@@ -1495,27 +1526,11 @@ fn confirmation_bar(
     cx: &App,
     message: String,
     scroll: &ScrollHandle,
+    expand: Button,
     confirm: Button,
     cancel: Button,
 ) -> impl IntoElement {
-    use gpui_kit::component::scroll::{ScrollableElement, ScrollbarAxis};
     let visual = crate::design::palette(cx);
-    // Each original line keeps its intrinsic width and height. A single wrapped
-    // text child has no horizontal extent for long paths, even when overflow is
-    // enabled; nonshrinking rows make both axes inspectable without truncation.
-    let lines = message.split('\n').enumerate().map(|(index, line)| {
-        let line = SharedString::from(line.to_owned());
-        div()
-            .id(("file-confirmation-line", index))
-            .flex_shrink_0()
-            .min_h(px(18.))
-            .line_height(px(18.))
-            .whitespace_nowrap()
-            .role(accesskit::Role::Label)
-            .aria_label(line.clone())
-            .child(line)
-            .test_support()
-    });
     div()
         .id("file-confirmation-bar")
         .w_full()
@@ -1529,33 +1544,16 @@ fn confirmation_bar(
         .bg(rgb(visual.danger_surface))
         .border_t_1()
         .border_color(rgb(visual.danger_border))
-        .child(
-            div()
-                .id("file-confirmation-message")
-                .flex_1()
-                .min_w_0()
-                .max_h(px(48.))
-                .overflow_y_scroll()
-                .overflow_x_scroll()
-                .track_scroll(scroll)
-                .relative()
-                .flex()
-                .flex_col()
-                .items_start()
-                .font_family("monospace")
-                .text_xs()
-                .pb_2()
-                .children(lines)
-                .scrollbar(scroll, ScrollbarAxis::Both)
-                .test_support(),
-        )
-        // Review actions remain outside the two-axis scrolling region.
+        .child(review::confirmation_text(cx, &message, scroll, false))
+        // Expansion is presentation only. The pending reviewed operation is
+        // unchanged, and its original fixed actions remain reachable here.
         .child(
             div()
                 .flex()
                 .flex_shrink_0()
                 .items_center()
                 .gap_2()
+                .child(expand)
                 .child(confirm)
                 .child(cancel),
         )
@@ -1847,6 +1845,8 @@ mod tests {
     }
 }
 
+#[cfg(test)]
+pub(crate) mod fixture_group;
 #[cfg(test)]
 #[path = "files/layout_tests.rs"]
 mod layout_tests;

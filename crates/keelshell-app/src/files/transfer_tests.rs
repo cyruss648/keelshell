@@ -14,10 +14,15 @@ use std::{
     time::{Duration, Instant},
 };
 
-use super::test_server::{Checked, Server};
+use super::{
+    fixture_group,
+    test_server::{Checked, Server},
+};
 
 #[path = "conflict_merge_tests.rs"]
 mod conflict_merge_tests;
+#[path = "fixture_isolation_tests.rs"]
+mod fixture_isolation_tests;
 #[path = "mirror_independent_tests.rs"]
 mod mirror_independent_tests;
 #[path = "mirror_revocation_review_tests.rs"]
@@ -36,6 +41,8 @@ mod recursive_mirror_combination_review_tests;
 mod recursive_mirror_tests;
 #[path = "review_independent_tests.rs"]
 mod review_independent_tests;
+#[path = "review_viewport_tests.rs"]
+mod review_viewport_tests;
 #[path = "review_visibility_tests.rs"]
 mod review_visibility_tests;
 #[path = "workspace_layout_tests.rs"]
@@ -54,6 +61,8 @@ struct Harness {
     server: Server,
     runtime: Arc<tokio::runtime::Runtime>,
     local: LocalDirectory,
+    // Drop last: sibling fixtures retain the same application mutation domain.
+    mutation_group: Arc<fixture_group::FixtureGroup>,
 }
 impl Harness {
     fn new(cx: &mut TestAppContext) -> Self {
@@ -67,13 +76,34 @@ impl Harness {
             Arc<tokio::runtime::Runtime>,
         ) -> (AnyWindowHandle, Entity<FilesPanel>),
     ) -> Self {
-        let runtime = Arc::new(
+        let runtime = Self::runtime();
+        let mutation_group = fixture_group::FixtureGroup::acquire_for_context(cx, &runtime);
+        Self::in_group(cx, mount, runtime, mutation_group)
+    }
+    // An intentional multi-peer test owns one group, avoiding nested admission.
+    fn new_in(cx: &mut TestAppContext, parent: &Self) -> Self {
+        Self::in_group(cx, mount, Self::runtime(), parent.mutation_group.clone())
+    }
+    fn runtime() -> Arc<tokio::runtime::Runtime> {
+        Arc::new(
             tokio::runtime::Builder::new_multi_thread()
                 .worker_threads(2)
                 .enable_all()
                 .build()
                 .checked("file UI runtime"),
-        );
+        )
+    }
+    fn in_group(
+        cx: &mut TestAppContext,
+        mount: impl FnOnce(
+            &mut TestAppContext,
+            SshSession,
+            Arc<tokio::runtime::Runtime>,
+        ) -> (AnyWindowHandle, Entity<FilesPanel>),
+        runtime: Arc<tokio::runtime::Runtime>,
+        mutation_group: Arc<fixture_group::FixtureGroup>,
+    ) -> Self {
+        mutation_group.bind_context(cx);
         let server = Server::new(&runtime);
         let session = server.connect(&runtime);
         let directory =
@@ -90,6 +120,7 @@ impl Harness {
             server,
             runtime,
             local: LocalDirectory(directory),
+            mutation_group,
         }
     }
     fn seed(&self, remote: &str, bytes: &[u8]) {
@@ -191,6 +222,24 @@ impl Harness {
 }
 
 fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id: &str) {
+    // The explicit review/editor replaces this pane instead of adding another
+    // offscreen tools card. Its fixed controls need no old tools scroll owner.
+    if ["file-editor-expanded", "file-review-expanded"]
+        .iter()
+        .any(|surface| {
+            window.try_find(*surface).is_some_and(|pane| {
+                window
+                    .try_find(gpui_kit::SharedString::from(id.to_owned()))
+                    .is_some_and(|control| {
+                        control.visible()
+                            && control.bounds().origin.y >= pane.bounds().origin.y
+                            && control.bounds().bottom() <= pane.bounds().bottom()
+                    })
+            })
+        })
+    {
+        return;
+    }
     // Foreground inspection has a fixed footer cancel; a transfer's individual
     // cancel remains inside the action card and must be scrolled into view.
     let footer_cancel = id == "cancel-active-file-operation"
@@ -200,7 +249,13 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
     if footer_cancel
         || matches!(
             id,
-            "parent-files" | "refresh-files" | "confirm-file-operation" | "cancel-file-operation"
+            "parent-files"
+                | "refresh-files"
+                | "confirm-file-operation"
+                | "cancel-file-operation"
+                | "expand-file-review"
+                | "focus-file-draft"
+                | "focus-file-patch"
         )
         || (id == "cancel-active-file-operation" && window.try_find("file-transfer-card").is_none())
     {
@@ -1300,6 +1355,7 @@ async fn closing_the_paused_file_panel_releases_its_subsystem_without_closing_ss
         server,
         runtime,
         local,
+        mutation_group: _mutation_group,
     } = h;
     let (other_window, other) = mount(cx, session.clone(), runtime.clone());
     cx.wait_for(other_window, Duration::from_secs(8), |_, cx| {
