@@ -16,6 +16,8 @@ use std::{
 
 use super::test_server::{Checked, Server};
 
+#[path = "conflict_merge_tests.rs"]
+mod conflict_merge_tests;
 #[path = "mirror_independent_tests.rs"]
 mod mirror_independent_tests;
 #[path = "mirror_revocation_review_tests.rs"]

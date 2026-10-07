@@ -30,6 +30,8 @@ mod socks_tests;
 mod directory_resume;
 #[path = "fixtures/directory_transfers.rs"]
 mod directory_transfers;
+#[path = "fixtures/editor_reviewed.rs"]
+mod editor_reviewed;
 #[path = "fixtures/file_resume.rs"]
 mod file_resume;
 #[path = "fixtures/mutation_isolation.rs"]

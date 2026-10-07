@@ -16,8 +16,9 @@ use keelshell_core::{
 use keelshell_session::{
     SessionError, SshSession,
     sftp::{
-        DirectoryResumePlan, DirectoryTransferPlan, FileResumePlan, RemoteEntry, SftpSession,
-        TransferDirection, TransferEvent, TransferQuarantineReview, TransferSpec,
+        DirectoryResumePlan, DirectoryTransferPlan, FileResumePlan, RegularFileSnapshot,
+        RemoteEntry, SftpSession, TransferDirection, TransferEvent, TransferQuarantineReview,
+        TransferSpec,
     },
 };
 use std::{
@@ -30,6 +31,7 @@ use std::{
     time::Duration,
 };
 
+mod merge;
 mod parallel;
 mod sync;
 mod transfer;
@@ -51,6 +53,16 @@ enum Operation {
     AcknowledgeQuarantine(TransferQuarantineReview),
     List(String),
     Read(RemoteEntry),
+    ReadMerge {
+        path: String,
+        base: Vec<u8>,
+        draft: String,
+    },
+    ApplyPatchToDraft {
+        path: String,
+        draft: String,
+        patch: String,
+    },
     Mkdir(String),
     Rename(String, String),
     Delete(RemoteEntry),
@@ -72,15 +84,22 @@ enum Operation {
     ApplyDirectorySync(Box<DirectorySyncComparison>, sync::journal::SharedJournal),
     Save {
         path: String,
-        original: Vec<u8>,
+        reviewed: RegularFileSnapshot,
         content: Vec<u8>,
     },
 }
 enum Outcome {
     QuarantineInspected(TransferQuarantineReview),
     Listed(String, Vec<RemoteEntry>),
-    Read(String, Vec<u8>),
-    Saved(String, Vec<u8>),
+    Read(RegularFileSnapshot),
+    Saved(RegularFileSnapshot),
+    MergeLoaded {
+        snapshot: RegularFileSnapshot,
+        plan: keelshell_core::TextMergePlan,
+        base: Vec<u8>,
+        draft: String,
+    },
+    PatchApplied(String, String, String),
     Done(Message),
     PlannedDirectory(DirectoryTransferPlan),
     PlannedFileResume(FileResumePlan),
@@ -117,6 +136,12 @@ pub struct FilesPanel {
     entries: Vec<RemoteEntry>,
     selected: Option<RemoteEntry>,
     editing: Option<(String, Vec<u8>)>,
+    editor_snapshot: Option<RegularFileSnapshot>,
+    merge_review: Option<merge::MergeReview>,
+    patch: Entity<TextareaState>,
+    patch_visible: bool,
+    text_review_scroll: ScrollHandle,
+    diff_preview_scroll: ScrollHandle,
     diff_preview: Option<SharedString>,
     status: Message,
     busy: bool,
@@ -263,7 +288,8 @@ enum FileFailure {
     CancellationUnconfirmed,
     OutcomeUncertain(String),
     InvalidEditor,
-    Conflict,
+    TextEdit(keelshell_core::TextEditError),
+    SavedReadback(String),
     Symlink,
     Cleanup,
     WorkerStopped,
@@ -323,7 +349,8 @@ impl std::fmt::Display for FileFailure {
                 f.write_str("File operation cancelled before SFTP initialization")
             }
             Self::InvalidEditor => f.write_str("Editor accepts UTF-8 files up to 1 MiB"),
-            Self::Conflict => f.write_str("Remote file changed since opening"),
+            Self::TextEdit(error) => write!(f,"{error}"),
+            Self::SavedReadback(error) => write!(f,"publication acknowledged but content readback failed: {error}"),
             Self::Symlink => f.write_str("Permission changes on symbolic links are disabled"),
             Self::Cleanup => f.write_str("Operation completed but SFTP cleanup failed"),
             Self::WorkerStopped => f.write_str("File worker stopped without a result"),
@@ -391,9 +418,15 @@ impl FileFailure {
                 "编辑器仅支持不超过 1 MiB 的 UTF-8 文件",
                 "The editor accepts UTF-8 files up to 1 MiB",
             ),
-            Self::Conflict => Message::new(
-                "远程文件已被修改，请重新打开后再保存",
-                "The remote file changed since opening; reload before saving",
+            Self::TextEdit(error) => Message::detail(
+                "文本审核未完成，草稿已保留",
+                "Text review incomplete; draft retained",
+                error,
+            ),
+            Self::SavedReadback(error) => Message::detail(
+                "已收到原子发布确认，但完整读回未通过；保留旧基线和草稿，请读取远端确认，不自动重试",
+                "Atomic publication acknowledged, but full readback failed; old baseline and draft retained. Inspect the remote file; no automatic retry",
+                error,
             ),
             Self::Symlink => Message::new(
                 "为避免跟随链接误改目标，符号链接不支持修改权限",
@@ -524,6 +557,12 @@ impl FilesPanel {
             entries: Vec::new(),
             selected: None,
             editing: None,
+            editor_snapshot: None,
+            merge_review: None,
+            patch: cx.new(|cx| TextareaState::new(window, cx)),
+            patch_visible: false,
+            text_review_scroll: ScrollHandle::new(),
+            diff_preview_scroll: ScrollHandle::new(),
             diff_preview: None,
             status: Message::new("正在打开 SFTP…", "Opening SFTP…"),
             busy: false,
@@ -847,23 +886,43 @@ impl FilesPanel {
                         view.entries = entries;
                         view.selected = None;
                     }
-                    Ok(Outcome::Read(path,content)) => {
+                    Ok(Outcome::Read(snapshot)) => {
+                        let path = snapshot.entry.path.clone();
+                        let content = snapshot.content.clone();
                         if view.editor.read(cx).value().as_ref() == editor_before.as_str() {
                             view.editor.update(cx,|input,cx|input.set_value(String::from_utf8_lossy(&content).into_owned(),window,cx));
                             view.status = Message::new(format!("正在编辑 {path} · {} 字节",content.len()),format!("Editing {path} · {} bytes",content.len()));
                             view.editing = Some((path,content));
+                            view.editor_snapshot = Some(snapshot);
+                            view.merge_review = None;
                             view.diff_preview = None;
                         } else {
                             view.status = Message::new("加载期间检测到新编辑，已保留当前内容；请在准备好后重新打开文件。", "Your edits changed while loading; preserved the editor. Open the file again when ready.");
                         }
                     }
-                    Ok(Outcome::Saved(path,content)) => {
+                    Ok(Outcome::Saved(snapshot)) => {
+                        let path = snapshot.entry.path.clone();
+                        let content = snapshot.content.clone();
                         if view.editing.as_ref().is_some_and(|(current,_)| current == &path) {
                             let dirty = view.editor.read(cx).value().as_bytes() != content;
                             view.editing = Some((path,content));
+                            view.editor_snapshot = Some(snapshot);
+                            view.merge_review = None;
                             view.diff_preview = None;
-                            view.status = if dirty { Message::new("已保存审核版本；后续编辑尚未保存", "Saved the reviewed version; newer edits remain unsaved") } else { Message::new("远程文件已原子保存", "Remote file saved atomically") };
+                            view.status = if dirty { Message::new("已保存审核版本；后续编辑尚未保存", "Saved the reviewed version; newer edits remain unsaved") } else { Message::new("远程文件已原子保存并完整读回", "Remote file atomically saved and fully read back") };
                         }
+                    }
+                    Ok(Outcome::MergeLoaded {snapshot, plan, base, draft}) => {
+                        view.receive_merge(snapshot, plan, base, draft, window, cx);
+                    }
+                    Ok(Outcome::PatchApplied(path, original, result)) => {
+                        if view.editing.as_ref().is_some_and(|(current,_)| current == &path)
+                            && view.editor.read(cx).value().as_ref() == original.as_str() {
+                            view.editor.update(cx, |input,cx|input.set_value(result,window,cx));
+                            view.merge_review = None;
+                            view.diff_preview = None;
+                            view.status = Message::new("差异已精确应用到草稿；远端未写入，请审核最终全文。", "Patch applied exactly to the draft; remote unchanged. Review the complete result.");
+                        } else { view.status = Message::new("解析期间草稿已变化，保留当前草稿；请重新预览差异。", "Draft changed during patch parsing; preserved it. Preview the patch again."); }
                     }
                     Ok(Outcome::Done(message)) => view.status = message,
                     Ok(Outcome::QuarantineInspected(review)) => {
@@ -1056,18 +1115,26 @@ impl FilesPanel {
             return;
         };
         let draft = self.editor.read(cx).value();
+        self.diff_preview_scroll.set_offset(point(px(0.), px(0.)));
         match diff_utf8(original, draft.as_bytes()) {
             Ok(diff) => {
                 match diff.render(&format!("{path} (remote)"), &format!("{path} (draft)")) {
-                    Ok(rendered) if rendered.is_empty() => {
-                        self.diff_preview = Some("（当前草稿与远端内容相同）\n(No changes between the draft and the remote file.)".into());
+                    Ok(rendered) if rendered.is_empty() && original == draft.as_bytes() => {
+                        self.diff_preview = Some("（当前草稿与读取的基线字节相同）\n(The draft is byte-identical to the captured baseline.)".into());
                         self.status = Message::new(
-                            "当前草稿与远端内容相同",
-                            "The draft matches the remote file",
+                            "当前草稿与读取的基线字节相同",
+                            "The draft is byte-identical to the captured baseline",
+                        );
+                    }
+                    Ok(rendered) if rendered.is_empty() => {
+                        self.diff_preview = Some("（逻辑行相同，字节仍不同；此预览将 CRLF/LF 视为相同。请在保存审核中核对最终全文。）\n(Logical lines match, but bytes still differ; this preview treats CRLF/LF equally. Review the complete final text before saving.)".into());
+                        self.status = Message::new(
+                            "逻辑行相同，字节仍不同；请核对最终全文",
+                            "Logical lines match, but bytes still differ; review the complete final text",
                         );
                     }
                     Ok(rendered) if rendered.len() <= 128 * 1024 => {
-                        self.diff_preview = Some(rendered.into());
+                        self.diff_preview = Some(format!("逻辑行预览（CRLF/LF 视为相同）；不是可直接应用的精确字节补丁。\nLogical-line preview (CRLF/LF treated equally); not an exact byte patch.\n{rendered}").into());
                         self.status = Message::new(
                             "差异已生成，请核对后再保存",
                             "Diff generated; review it before saving",
@@ -1246,6 +1313,8 @@ impl Operation {
                     | Self::AcknowledgeQuarantine(_)
                     | Self::List(_)
                     | Self::Read(_)
+                    | Self::ReadMerge { .. }
+                    | Self::ApplyPatchToDraft { .. }
                     | Self::PlanDirectory(_)
                     | Self::PlanResume(..)
                     | Self::Compare(..)
@@ -1287,6 +1356,8 @@ impl Operation {
             | Self::AcknowledgeQuarantine(_)
             | Self::List(_)
             | Self::Read(_)
+            | Self::ReadMerge { .. }
+            | Self::ApplyPatchToDraft { .. }
             | Self::Mkdir(_)
             | Self::Rename(_, _)
             | Self::Delete(_)
@@ -1463,7 +1534,7 @@ fn confirmation_bar(
                 .id("file-confirmation-message")
                 .flex_1()
                 .min_w_0()
-                .max_h(px(72.))
+                .max_h(px(48.))
                 .overflow_y_scroll()
                 .overflow_x_scroll()
                 .track_scroll(scroll)

@@ -2,7 +2,7 @@
 
 2026-10-07 精确 `319cb2a` 三平台CI已结束，macOS/Linux成功、Windows两项应用工作目录夹具失败。新的test-only路径/JSON值修正保持生产限制与原期限，完整本机门禁1612普通/8doc/6Python及严格检查实际0，736输入相同、资源回收；非作者源码/两项GPUI/全证据复核无阻断，新提交Windows执行与原生仍待完成。旧Linux同步原因不追溯关闭。见[应用夹具记录](testing/records/2026-10-07-selected-directory-app-platform-followup.md)。同一734输入MCP新尝试停在首个120秒窗口确认，操作端记录未成功，0CLI/模型/业务；隔离资源已回收，单独截图探针不是业务成功。见[启动记录](testing/records/2026-10-07-external-mcp-current-main-startup.md)。对外MCP方向和完整产品目标保持。
 
-17路径的三方冲突合并/审核patch候选已完成独立复核、作者门禁及根全量证据消费，主树组合尚未完成。Agent候选因关闭捕获页签后仍可后台写入的真实独立P1被阻止整合；正在修正同步撤权、自然终端结束及重连边界，新冻结复核/组合/原生仍须完成。两项候选不作为主线已交付或完整产品验收。
+17路径的三方冲突合并/审核patch已完成独立复核、作者门禁及根全量证据消费，按精确preimage/postimage导入主副本并保留其余基线输入；主树745输入完整门禁实际0/994.033秒，1641普通/10doc/6Python及新macOS开发包/57打包通过，新原生与精确新CI仍待完成，见[整合记录](testing/records/2026-10-07-reviewed-text-main-integration.md)。Agent旧候选因关闭捕获页签后仍可后台写入的真实独立P1被阻止整合；修正epoch2已冻结742输入，完整门禁实际0/506.581秒、新macOS开发包/结构检查/57打包通过，仍需新的独立撤权与raw终端结束复核。候选检查不作为主树已交付或完整产品验收。
 
 2026-10-07 后续 test-only 修复已通过本机正式门禁和新非作者源码/证据复核：Windows单元夹具路径修正、命名空间拒绝反例、按既有单次预算推导总目录控制器304/224秒。734输入前后相等，142普通AI/2doc、Unix目录20及默认/2MiB各626阶段实际0；4 ignored未执行。原3873 Windows/Linux两项失败继续保留；新提交级CI、未进入的Linux app同步根因、完整原生和产品目标仍开放。见[后续记录](testing/records/2026-10-07-directory-controller-platform-followup.md)。用户再次确认MCP只由KeelShell对外提供服务，应用内API/CLI推理独立，不新增第三方MCP客户端。
 

@@ -136,7 +136,7 @@ impl SftpSession {
             ));
         }
         let current = self
-            .read_regular_snapshot(&snapshot.entry.path, 64 * 1024)
+            .read_regular_snapshot(&snapshot.entry.path, snapshot.content.len())
             .await?;
         if current.content != snapshot.content
             || current.entry.size != snapshot.entry.size

@@ -309,11 +309,21 @@ async fn operate_inner(
                 Ok(Outcome::Listed(canonical, entries))
             }
             Operation::Read(entry) => {
-                let content = sftp.read(&entry.path, 1024 * 1024).await?;
-                if std::str::from_utf8(&content).is_err() {
+                let snapshot = sftp.read_regular_snapshot(&entry.path, 1024 * 1024).await?;
+                if std::str::from_utf8(&snapshot.content).is_err() || snapshot.content.contains(&0)
+                {
                     return Err(FileFailure::InvalidEditor);
                 }
-                Ok(Outcome::Read(entry.path, content))
+                Ok(Outcome::Read(snapshot))
+            }
+            Operation::ReadMerge { path, base, draft } => {
+                let snapshot = sftp.read_regular_snapshot(&path, 1024 * 1024).await?;
+                merge_outcome(snapshot, base, draft)
+            }
+            Operation::ApplyPatchToDraft { path, draft, patch } => {
+                let result = keelshell_core::apply_text_patch(&path, &draft, &patch)
+                    .map_err(FileFailure::TextEdit)?;
+                Ok(Outcome::PatchApplied(path, draft, result))
             }
             Operation::Mkdir(path) => {
                 sftp.mkdir(&path).await?;
@@ -496,15 +506,36 @@ async fn operate_inner(
             }
             Operation::Save {
                 path,
-                original,
+                reviewed,
                 content,
             } => {
-                let current = sftp.read(&path, 1024 * 1024).await?;
-                if current != original {
-                    return Err(FileFailure::Conflict);
+                if path != reviewed.entry.path {
+                    return Err(FileFailure::InvalidEditor);
                 }
-                sftp.write_atomic(&path, &content).await?;
-                Ok(Outcome::Saved(path, content))
+                let current = sftp.read_regular_snapshot(&path, 1024 * 1024).await?;
+                if current.content != reviewed.content
+                    || current.entry.size != reviewed.entry.size
+                    || current.entry.permissions != reviewed.entry.permissions
+                    || current.entry.modified != reviewed.entry.modified
+                {
+                    return merge_outcome(
+                        current,
+                        reviewed.content,
+                        String::from_utf8(content).map_err(|_| FileFailure::InvalidEditor)?,
+                    );
+                }
+                sftp.write_editor_reviewed_authorized(&reviewed, &content, &|| {
+                    !stop.load(Ordering::Acquire)
+                })
+                .await?;
+                let saved = sftp
+                    .read_regular_snapshot(&path, 1024 * 1024)
+                    .await
+                    .map_err(|error| FileFailure::SavedReadback(error.to_string()))?;
+                if saved.content != content {
+                    return Err(FileFailure::SavedReadback("saved contents differ from the acknowledged review; inspect the remote file".into()));
+                }
+                Ok(Outcome::Saved(saved))
             }
         }
     };
@@ -609,4 +640,21 @@ mod future_size_tests {
         eprintln!("production file worker future bytes: {bytes}");
         assert!(bytes < 64 * 1024, "file worker embeds {bytes} state bytes");
     }
+}
+
+fn merge_outcome(
+    snapshot: RegularFileSnapshot,
+    base: Vec<u8>,
+    draft: String,
+) -> Result<Outcome, FileFailure> {
+    let original = std::str::from_utf8(&base).map_err(|_| FileFailure::InvalidEditor)?;
+    let remote = std::str::from_utf8(&snapshot.content).map_err(|_| FileFailure::InvalidEditor)?;
+    let plan =
+        keelshell_core::merge_text(original, &draft, remote).map_err(FileFailure::TextEdit)?;
+    Ok(Outcome::MergeLoaded {
+        snapshot,
+        plan,
+        base,
+        draft,
+    })
 }

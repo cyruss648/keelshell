@@ -1,6 +1,6 @@
 # Selected-directory desktop test fixtures — 2026-10-07
 
-Status: local full gate and non-author source/behavior/evidence review passed. New commit CI, corrected Windows execution and native acceptance remain pending. Production directory admission is unchanged.
+Status: local full gate and non-author source/behavior/evidence review passed. Corrected Windows execution passed in exact e695 CI; Linux has a separate recurring sync failure. Native acceptance remains pending. Production directory admission is unchanged.
 
 ## Exact CI observation
 
@@ -26,4 +26,25 @@ The canonical `scripts/check.py` actually exited 0 in 757.508 seconds: dependenc
 
 A non-author read the six-path frozen candidate, all 736 inputs and full gate log, all three exact CI logs, and separate native-startup/probe evidence. Two selected-directory GPUI cases independently exited 0 in 1.082 and 0.168 seconds against the exact full-gate test binary, with unchanged inputs/binary, owned groups absent and private temporary data removed. The scoped frozen review returned `NO_BLOCKER_ROOT6PATH_FROZEN`, SHA-256 `740309bfa73cb5a093b29cd2d93bed7290c6c23fe379c3401ea7673a6e8e9de4`. Root read and hashed all 57 peer payloads, 2492492 bytes, and directly rechecked the peer groups absent. Final result-only updates affect this record, HANDOFF and ROADMAP; code and tests retain the validated bytes.
 
-Full receipts and failed evidence remain in ignored `work/selected-directory-app-platform-followup-20261007-v1/` and `work/selected-directory-non-author-review-20261007/`. Corrected Windows CI is still required; neither the review nor macOS checks establish Windows execution.
+Full receipts and failed evidence remain in ignored `work/selected-directory-app-platform-followup-20261007-v1/` and `work/selected-directory-non-author-review-20261007/`.
+
+## Exact corrected commit CI
+
+[Quality 37609350208](https://github.com/cyruss648/keelshell/actions/runs/37609350208)
+for `e69575bc19afe03e80708e03d4993768c8f5dfb0` completed: Windows and macOS
+success, Linux failure. The two selected-directory application cases both
+report `ok` in the full Windows log. All three complete logs were read:
+
+| Job | Conclusion | Raw bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| Windows `112752532246` | success | 557869 | `cee5f8aa2f28c4943c6844182870989f84ae2bb41d759a0c1167e829b7187286` |
+| macOS `112752532274` | success | 556367 | `2f5484867bc3c3d03dd931d30c14fd4405dd3f1d1a795d5e088e290bc092a40e` |
+| Linux `112752531958` | failure | 323844 | `55fad07e14dc2f58dd34a0827dec42dd2140a7d1c986e91957632b095a57b209` |
+
+Linux's only failing application case was the saved-profile retarget test's
+original 18-second approval wait (582 passed, one failed, two ignored).
+The recorder showed busy=true, no terminal callback and no changed stored
+or displayed profile; the cause remains unproven. This does not undo the
+Windows fixture result or establish a production synchronization defect.
+Raw material and exact API receipts remain in ignored
+`work/ci-e695-20261007/`. Native desktop/model/customer acceptance remains open.

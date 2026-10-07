@@ -363,7 +363,11 @@ impl Render for FilesPanel {
                 .id("remote-file-editor")
                 .w_full()
                 .flex_shrink_0()
-                .h(px(if self.diff_preview.is_some() { 268. } else { 180. }))
+                .h(px(if self.diff_preview.is_some() {
+                    268.
+                } else {
+                    180.
+                }))
                 .min_h_0()
                 .flex()
                 .flex_col()
@@ -381,11 +385,11 @@ impl Render for FilesPanel {
                         .child(format!("{} · {path}", t(cx, "编辑", "Edit"))),
                 )
                 .child(
-                    div()
-                        .flex_1()
-                        .min_h_0()
-                        .p_1()
-                        .child(Textarea::new(&self.editor).h(relative(1.)).font_family("monospace")),
+                    div().flex_1().min_h_0().p_1().child(
+                        Textarea::new(&self.editor)
+                            .h(relative(1.))
+                            .font_family("monospace"),
+                    ),
                 )
                 .child(
                     div()
@@ -408,10 +412,11 @@ impl Render for FilesPanel {
                                 } else {
                                     t(cx, "查看差异", "View diff")
                                 })
-                                .on_click(cx.listener(|view, _, _, cx| {
-                                    view.toggle_diff_preview(cx)
-                                })),
+                                .on_click(
+                                    cx.listener(|view, _, _, cx| view.toggle_diff_preview(cx)),
+                                ),
                         )
+                        .child(self.text_actions(cx))
                         .child(
                             Button::new("save-remote-file")
                                 .disabled(self.suspended)
@@ -421,49 +426,26 @@ impl Render for FilesPanel {
                                 .rounded(px(6.))
                                 .label(t(cx, "审核并保存", "Review save"))
                                 .on_click(cx.listener(|view, _, _, cx| {
-                                    if let Some((path, original)) = &view.editing {
-                                        let content = view.editor.read(cx).value().as_bytes().to_vec();
-                                        if content.len() > 1024 * 1024 {
-                                            view.status = Message::new(
-                                                "编辑内容超过 1 MiB，请使用外部编辑器后上传",
-                                                "Content exceeds 1 MiB; use an external editor and upload instead",
-                                            );
-                                            cx.notify();
-                                            return;
-                                        }
-                                        view.confirm(
-                                            Message::new(
-                                                format!("将 {} 替换为审核后的 {} 字节内容？", path, content.len()),
-                                                format!("Replace {} with the reviewed {} bytes?", path, content.len()),
-                                            ),
-                                            Operation::Save {
-                                                path: path.clone(),
-                                                original: original.clone(),
-                                                content,
-                                            },
-                                            cx,
-                                        );
-                                    }
+                                    view.request_save(cx);
                                 })),
                         ),
                 );
             if let Some(diff) = &self.diff_preview {
-                editor_panel = editor_panel.child(
-                    div()
-                        .h(px(88.))
-                        .flex_shrink_0()
-                        .min_h_0()
-                        .border_t_1()
-                        .border_color(rgb(visual.border))
-                        .bg(rgb(visual.canvas))
-                        .overflow_y_scrollbar()
-                        .p_2()
-                        .text_color(rgb(visual.text))
-                        .font_family("monospace")
-                        .child(diff.clone()),
-                );
+                editor_panel = editor_panel.child(merge::text_scroll(
+                    "remote-file-diff-preview",
+                    diff,
+                    &self.diff_preview_scroll,
+                    88.,
+                    cx,
+                ));
             }
             editor_card = Some(editor_panel.test_support());
+        }
+        if let Some(card) = self.patch_card(cx) {
+            tools = tools.child(card);
+        }
+        if let Some(card) = self.merge_card(cx) {
+            tools = tools.child(card);
         }
         let selection = self
             .selected

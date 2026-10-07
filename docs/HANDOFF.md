@@ -1,8 +1,10 @@
 # KeelShell 开发交接 — 2026-10-07
 
-精确 `319cb2a` 的 [Quality 37600399634](https://github.com/cyruss648/keelshell/actions/runs/37600399634) 已终结：macOS/Linux成功，Windows应用工作目录两项夹具失败；三份完整日志已读回。新test-only修正保留普通Windows盘符路径，JSON路径按解析值核对，生产准入与期限不变。完整本机门禁实际0/757.508秒，1612普通/8doc/6Python、严格检查及两626阶段控制器通过，736输入前后相同、自有进程组和TMP回收；非作者源码、两项GPUI和全证据复核无阻断，新提交Windows CI及原生仍开放。见[应用夹具后续记录](testing/records/2026-10-07-selected-directory-app-platform-followup.md)。旧Linux同步失败原因仍未知。
+当前文件三方合并/严格patch的17路径已按精确preimage/postimage导入主副本，所有无关基线字节保持；根745输入组合完整门禁实际0/994.033秒，1641普通/10doc/6Python、格式/x.y/严格Clippy及默认/2MiB各626阶段通过，22ignored未执行。新macOS app/MCP/fixture开发包、标准结构检查和57打包实际0/82.228秒，同745输入相等，自有PGID/TMP回收；尚未启动GUI。仅结果文档随后更新，新原生与精确新提交CI待完成，见[整合记录](testing/records/2026-10-07-reviewed-text-main-integration.md)。
 
-三方合并/严格patch的17路径独立候选已完成新非作者最终复核和作者完整门禁；根已复制全部224证据、核对741输入、原始退出和实际产物，尚未导入主树。应用内Agent的独立反例确认关闭捕获页签后后台仍可能写入；候选不整合，作者正在修正即时撤权及终端结束/重连边界并重新验证。上述功能不表示产品完成，主树组合、新原生与精确CI仍须各自完成。
+精确 `e69575b` 的 [Quality 37609350208](https://github.com/cyruss648/keelshell/actions/runs/37609350208) 已终结：macOS/Windows成功，两项Windows应用目录夹具实际通过；Linux唯一失败为保存资料同步批准后原18秒等待，busy状态不足以确定根因，期限和断言不放宽。三份完整日志及实际API已读回，单独诊断代理正在区分队列/阻塞工作/前台回调，见[夹具CI记录](testing/records/2026-10-07-selected-directory-app-platform-followup.md)。
+
+当前主线MCP已由新非作者实际确认closeTab/raw typed End/finishReconnect后后台旧写租约未即时撤权的P1；三项真实暂停点、前台阻塞与独立完整SFTP读回失败证据已全部消费。隔离作者修正同三反例通过，但完整门禁、新非作者和主树整合仍待完成，见[退休审查](testing/records/2026-10-07-mcp-session-retirement-review.md)。Agent epoch2的关闭/断连修复已独立通过，但Stop按钮排队撤权又有实际P1，旧候选不合；epoch3正在修正精确共享后台取消令牌和明确停止/编辑入口。两个调用链不互相代验收。
 
 当前734源输入的新MCP原生尝试在首个120秒窗口确认因操作端记录未成功而退出1；外部CLI/模型/业务均未启动，758项绑定完整读回相同，自有GUI/夹具已reap、已知进程组/端口关闭、私有数据移除。单独截图API与时钟映射探针只证明操作流程，不关闭业务或产品验收；见[当前启动记录](testing/records/2026-10-07-external-mcp-current-main-startup.md)。MCP仅由KeelShell对外提供服务。
 

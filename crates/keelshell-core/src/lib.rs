@@ -33,6 +33,8 @@ mod scheduled_workflow;
 mod snippet_template;
 mod snippets;
 mod store;
+mod text_merge;
+mod text_patch;
 mod vault;
 mod workflow_audit;
 
@@ -126,3 +128,9 @@ pub use workflow_audit::{
     WorkflowAuditNotStarted, WorkflowAuditOutcome, WorkflowAuditRecord, WorkflowAuditTrigger,
     WorkflowTaskAudit,
 };
+
+pub use text_merge::{
+    MAX_TEXT_EDIT_BYTES, MAX_TEXT_EDIT_LINES, TextEditError, TextMergeChoice, TextMergeConflict,
+    TextMergePlan, merge_text,
+};
+pub use text_patch::apply_text_patch;

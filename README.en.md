@@ -42,7 +42,7 @@ Simplified Chinese is the default, with English available. Appearance follows th
 | --- | --- |
 | **Connections** | One-time quick connections, folders, tags, favorites, recent connections and trash; reviewed bulk organization, import/export and encrypted profile sync; password, private key, SSH Agent and keyboard-interactive authentication; jump hosts and SOCKS5 / HTTP CONNECT upstream proxies |
 | **Remote terminals** | Session tabs, a two-pane split, ANSI/VT terminal, scrollback search, selection, paste and CJK input; manual reconnection in the original tab and optional bounded automatic reconnection |
-| **Remote files** | SFTP browsing, file and recursive directory transfers, pause and content-verified resumption; permissions, text editing and diff review; folder comparison, content verification, bidirectional merging and individually reviewed directory mirrors |
+| **Remote files** | SFTP browsing, file and recursive directory transfers, pause and content-verified resumption; permissions, text editing, three-way merging with individual conflict choices and strict patch drafts; folder comparison, content verification, bidirectional merging and individually reviewed directory mirrors |
 | **Commands and tasks** | Session history, snippets, explicit parameters, remote command/path completion; per-target batch commands, dependency workflows, finite schedules and read-only task history |
 | **Monitoring and networking** | Linux host status and per-device disk I/O; listening sockets and remote DNS / TLS / HTTP(S) HEAD diagnostics; local/remote TCP forwarding and loopback SOCKS5 tunnels |
 | **AI assistance** | Named model API / Codex CLI / Claude Code profiles; model discovery and connection testing, explicit context, complete request previews, answers and reviewed diagnostic suggestions |
@@ -50,6 +50,8 @@ Simplified Chinese is the default, with English available. Appearance follows th
 | **About and updates** | Project link, version and bundled changelog; platform-aware release checks, SHA-256 verified downloads and opt-in installation/restart |
 
 Canceling a transfer or mirror retains completed operations; disconnection does not replay commands, transfers or tasks. Directory comparison/sync has explicit size, type and path limits. Protocol diagnostics require remote POSIX / Python 3.8+. See the [file workspace](docs/product/FILES_WORKSPACE.md), [directory mirrors](docs/product/DIRECTORY_MIRROR.md), [remote protocol diagnostics](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md) and [capability ledger](docs/product/CAPABILITIES.md) for workflows and boundaries.
+
+Text merging and patches first produce a local draft. Saving remotely requires complete review and a fresh baseline check. See the [text merge guide](docs/product/TEXT_CONFLICT_MERGE.md) for limits; combined engineering and macOS package structure checks have passed; fresh desktop acceptance is still in progress.
 
 ## AI assistance and external MCP
 

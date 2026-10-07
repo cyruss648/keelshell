@@ -589,9 +589,44 @@ impl SftpSession {
         data: &[u8],
         authorized: &(dyn Fn() -> bool + Sync),
     ) -> Result<()> {
+        self.write_regular_reviewed_bounded(reviewed, data, 64 * 1024, authorized)
+            .await
+    }
+
+    /// Replace an explicitly reviewed desktop text file of at most 1 MiB.
+    /// Exact content and metadata are rechecked before staging and publication.
+    /// Authorization is checked before each mutation; unknown results retain the
+    /// existing shared target quarantine. This does not expand MCP's 64 KiB limit.
+    /// SFTP supplies observations rather than an atomic compare-and-swap lock.
+    pub async fn write_editor_reviewed_authorized(
+        &self,
+        reviewed: &RegularFileSnapshot,
+        data: &[u8],
+        authorized: &(dyn Fn() -> bool + Sync),
+    ) -> Result<()> {
+        if std::str::from_utf8(data).is_err()
+            || data.contains(&0)
+            || std::str::from_utf8(&reviewed.content).is_err()
+            || reviewed.content.contains(&0)
+        {
+            return Err(SessionError::Invalid(
+                "editor replacement requires UTF-8 text without NUL",
+            ));
+        }
+        self.write_regular_reviewed_bounded(reviewed, data, 1024 * 1024, authorized)
+            .await
+    }
+
+    async fn write_regular_reviewed_bounded(
+        &self,
+        reviewed: &RegularFileSnapshot,
+        data: &[u8],
+        limit: usize,
+        authorized: &(dyn Fn() -> bool + Sync),
+    ) -> Result<()> {
         inspection::inspection_path(&reviewed.entry.path)?;
-        if reviewed.content.len() > 64 * 1024 || data.len() > 64 * 1024 {
-            return Err(SessionError::OutputLimit(64 * 1024));
+        if reviewed.content.len() > limit || data.len() > limit {
+            return Err(SessionError::OutputLimit(limit));
         }
         let scope = self
             .reserve_remote(&[&reviewed.entry.path], true, authorized)

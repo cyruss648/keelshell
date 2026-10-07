@@ -60,7 +60,8 @@ fn measure_state(
                     }
                     if panel.comparison.is_some() { ids.extend(["plan-sync-to-remote", "plan-sync-to-local",
                         "review-directory-sync", "close-directory-comparison"]); }
-                    if panel.editing.is_some() { ids.extend(["toggle-remote-diff", "save-remote-file"]); }
+                    if panel.editing.is_some() { ids.extend(["toggle-remote-diff", "save-remote-file",
+                        "read-remote-merge", "toggle-text-patch"]); }
                     ids
                 });
                 for id in required {
@@ -72,7 +73,8 @@ fn measure_state(
                     "cancel-file-operation", "file-transfer-details", "pause-file-transfer",
                     "resume-file-transfer", "cancel-active-file-operation", "plan-sync-to-remote",
                     "plan-sync-to-local", "review-directory-sync", "close-directory-comparison",
-                    "toggle-remote-diff", "save-remote-file"] {
+                    "toggle-remote-diff", "save-remote-file", "read-remote-merge",
+                    "toggle-text-patch"] {
                     if window.try_find(id).is_none() { continue; }
                     reveal_file_control(window, cx, id);
                     let target = window.find(id);
