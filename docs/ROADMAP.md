@@ -1,5 +1,7 @@
 # 开发路线
 
+本轮平台修复在已推送 `0d64f09` 基础上通过正式本机门禁：1,612普通/8doc/6Python、格式/x.y/严格Clippy，57打包及macOS双程序构建实际0；三份733输入相同，新的非作者源码/证据复核无新增阻断。旧0d64 CI仍为macOS成功、Windows条件编译和Linux目录readiness失败；修复需要自己的新提交三平台CI，完整Windows/Linux桌面及Linux同步根因继续开放。详见[平台记录](testing/records/2026-10-07-local-agent-directory-platform-fix.md)。MCP始终由KeelShell向外部智能体提供服务，应用内API/CLI Ask独立。
+
 2026-10-07 当前组合的新macOS标准双程序开发包已实际构建并通过57项打包、Info.plist和动态库检查；719输入前后相等，非文档生产输入保持完整工程检查的717范围。后续同一程序已完成限定双向镜像原生验证，没有安装或发布；完整桌面／外部客户端／Windows/Linux原生与精确提交CI仍开放，见[组合记录](testing/records/2026-10-07-recursive-mirror-main-combination.md)。
 
 2026-10-07 文件审核呈现：新非作者限定复核通过，原文逐行Label、真实两轴滚动、固定动作与新审核重置已导入主副本；受控GPUI/TCP及取消后文件读回通过，后续717输入最终组合门禁实际0；新原生仍开放，见[整合记录](testing/records/2026-10-07-file-review-main-integration.md)。递归非空子树镜像已通过新的非作者两阶段限定复核并精确整合；1,587普通／8doc／6Python及严格工程检查通过，20ignored未执行，详见[组合记录](testing/records/2026-10-07-recursive-mirror-main-combination.md)。
@@ -72,6 +74,6 @@ D1先于后续新界面，原有后端与任务目标继续保留。全部新增
 
 2026-10-07 当前组合的 macOS 原生递归镜像已实际完成双向各12项，取消及上传后的独立文件核对、下载后的根字节核对及新非作者只读复核通过。两个隔离GUI与所属Linux资源结束，首轮1800秒超时和管理进程wait未知边界保留。中英文纵向审核证据不替代横向长行、最小窗口、辅助技术或其它平台原生，见[原生记录](testing/records/2026-10-07-recursive-mirror-native.md)。
 
-2026-10-07 本地智能体工作目录候选已完成作者完整门禁、精确 Codex 0.160.0/0.160.1 与 Claude Code 2.1.285 的受控适配器验证；默认空隔离、显式绝对目录、目录身份校验、固定 bootstrap、项目 hooks/MCP/tools 禁用、发送前审核和 UI 两轴滚动均有源码及受控证据。1,257 项封包 payload 全部读回，独立复核为 `NO_BLOCKER`；当前仍未整合主线，外部账户/模型、真实桌面窗口、Windows/Linux 原生和 Agent 工作流继续开放。对外 MCP 仍只由 KeelShell 提供服务，不添加通用第三方 MCP 客户端。详见[工作目录记录](testing/records/2026-10-07-local-agent-working-directory.md)和[ADR0069](adr/0069-reviewed-local-agent-working-directories.md)。
+2026-10-07 本地智能体工作目录候选已完成作者完整门禁、精确 Codex 0.160.0/0.160.1 与 Claude Code 2.1.285 的受控适配器验证；默认空隔离、显式绝对目录、目录身份校验、固定 bootstrap、项目 hooks/MCP/tools 禁用、发送前审核和 UI 两轴滚动均有源码及受控证据。1,257 项封包 payload 全部读回，独立复核为 `NO_BLOCKER`；已在主线 `0d64f09` 整合，外部账户/模型、真实桌面窗口、Windows/Linux 原生和 Agent 工作流继续开放。对外 MCP 仍只由 KeelShell 提供服务，不添加通用第三方 MCP 客户端。详见[工作目录记录](testing/records/2026-10-07-local-agent-working-directory.md)和[ADR0069](adr/0069-reviewed-local-agent-working-directories.md)。
 
-2026-10-07 当前主线 `4c9b14c` 已包含 Windows 导入修复和 MCP 文档方向修正并推送。Quality 37585913129 的 macOS／Windows job 成功，Linux 因保存资料批准后的 18 秒工作区等待失败；日志已保存，busy 状态仍不足以确定根因。Linux 失败专用观察 v2 已经独立复核为 `NO_BLOCKER` 并整合到主副本：它仅在失败时读取有界内存状态，避免复制请求正文，保持既有期限、断言和生产路径。需要新的提交级 Linux CI 来验证诊断信息，不能把本机通过或观察器本身视为根因修复。详见[Linux 观察记录](testing/records/2026-10-07-linux-sync-schedule-observation.md)。
+2026-10-07 父提交 `4c9b14c` 已包含 Windows 导入修复和 MCP 文档方向修正并推送。Quality 37585913129 的 macOS／Windows job 成功，Linux 因保存资料批准后的 18 秒工作区等待失败；日志已保存，busy 状态仍不足以确定根因。Linux 失败专用观察 v2 已经独立复核为 `NO_BLOCKER` 并整合到主副本：它仅在失败时读取有界内存状态，避免复制请求正文，保持既有期限、断言和生产路径。需要新的提交级 Linux CI 来验证诊断信息，不能把本机通过或观察器本身视为根因修复。详见[Linux 观察记录](testing/records/2026-10-07-linux-sync-schedule-observation.md)。

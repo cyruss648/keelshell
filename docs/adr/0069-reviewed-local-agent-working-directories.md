@@ -25,4 +25,4 @@ Claude Code 继续使用 bare 模式、空工具和显式空 MCP/设置来源；
 
 有意义的测试覆盖老资料缺省、领域存储、秘密绑定、迟到选择器与后台检查、目录/元数据换位、保留已授权 inode、固定 bootstrap 帧篡改、未知版本、取消与清理。真实 installed CLI 的生产适配器使用自有 loopback SSE 服务，核对明确问题/SSH 片段、六种未授权项目内容、工具列表和项目 hooks/MCP canary；这不等于付费模型、订阅登录或三平台桌面验收。
 
-测试与失败记录见[工作目录记录](../testing/records/2026-10-07-local-agent-working-directory.md)。新非作者复核、最终组合原生 UI、Windows / Linux native CLI、订阅登录、任意环境及受限 Agent 工作流仍须分别验证。
+测试与失败记录见[工作目录记录](../testing/records/2026-10-07-local-agent-working-directory.md)。非作者代码复核已经通过；最终组合原生 UI、Windows / Linux native CLI、订阅登录、任意环境及受限 Agent 工作流仍须分别验证。

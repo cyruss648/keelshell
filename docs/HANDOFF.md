@@ -1,6 +1,6 @@
 # KeelShell 开发交接 — 2026-10-07
 
-公开仓库为 [cyruss648/keelshell](https://github.com/cyruss648/keelshell)。目录镜像、文件审核呈现、远程协议诊断及 test-only 失败观察已在主线 `9865f1f121170c9eed81c19f4ca50f522c001f45` 提交推送，完整门禁及下述限定原生验证通过；该提交的 [Quality 37525054745](https://github.com/cyruss648/keelshell/actions/runs/37525054745) 已结束：macOS 成功，Windows 测试导入严格 Clippy 失败，Linux 定时任务与配置同步组合批准后的 18 秒状态等待失败。Windows 窄修复经新非作者复核并已导入；根整合门禁及新提交级 CI 待完成，见[修复记录](testing/records/2026-10-07-windows-diagnostic-import.md)。Linux 根因仍未确定。父检查点 `0cca8ac` 的 Windows／macOS 成功、Linux 目录同步字节断言失败继续保留，不追溯新观察为旧失败原因。
+本轮平台修复基于已推送的 `0d64f09acfb7e671217a8bb1d3cb1397b421558a`，保留审核式本地智能体工作目录和 Linux 失败观察 v2。正式本机门禁实际退出 0：格式/x.y/严格 Clippy、1,612 ordinary / 8 doc / 6 scripts Python、目录控制器20、默认与2MiB各626阶段；22 ignored未执行。57项打包和macOS app/MCP构建实际0，三份733输入前后相等，进程组和临时目录完整回收；新非作者源码和证据复核无新增阻断。详见[平台修复记录](testing/records/2026-10-07-local-agent-directory-platform-fix.md)。精确新提交三平台 CI 和 Windows/Linux 桌面仍开放。基线 [Quality 37591946965](https://github.com/cyruss648/keelshell/actions/runs/37591946965) 已结束：macOS 成功，Windows 条件编译遗漏、Linux目录控制器readiness失败；Linux未进入app同步测试。父 `4c9b14c` 的 Linux两项同步审批等待失败仍保留，根因未确定。公开仓库为 [cyruss648/keelshell](https://github.com/cyruss648/keelshell)。
 
 独立诊断分支 `feature/directory-sync-ci-diagnostics` 已在 `0f1a57756a78771dc0d4e2ca14703d55925841bf` 提交推送，远端逐 ref 一致、工作树干净；四路径 test-only 增量保持生产行为和原 18 秒／45 秒断言，六个限定测试（3 个面板、2 个 recorder、1 个原审批）与严格 Clippy 通过，完整封包已由根全文读回。[Quality 37523395932](https://github.com/cyruss648/keelshell/actions/runs/37523395932) 的三平台 job 已全部成功；该增量尚未合入主树，成功不替代主线或新修复提交 CI，也不证明历史失败原因。其父 `dd32392` 的 [Quality](https://github.com/cyruss648/keelshell/actions/runs/37506388205) 已结束：macOS／Windows成功，Linux保存资料审批等待超时；原目录同步字节用例该次通过，原失败原因仍未确定。见[CI定位](testing/records/2026-10-07-saved-profile-sync-ci-diagnosis.md)，历史证据继续保存在[测试记录](testing/records/)和Git历史。
 
@@ -47,12 +47,12 @@
 
 ## 本地智能体工作目录候选 — 2026-10-07
 
-AI 工作目录候选已经完成作者门禁、封包和独立只读复核，尚未整合提交。它为本地 CLI Ask 提供默认空隔离或用户明确选择的绝对目录，后台校验目录身份并在发送前重新确认；目录副本、固定 bootstrap 帧和临时环境保持在用户审核范围内。项目 hooks、MCP 和工具默认关闭，KeelShell 的对外 MCP 服务端方向不变。精确 Codex `0.160.0`、`0.160.1` 与 Claude Code `2.1.285` 的受控 loopback 适配器验证通过，不能替代供应商账户、模型、桌面窗口或 Windows/Linux 原生验收。
+AI 工作目录已经完成作者门禁、封包和独立只读复核，并在主线 `0d64f09` 整合提交。它为本地 CLI Ask 提供默认空隔离或用户明确选择的绝对目录，后台校验目录身份并在发送前重新确认；目录副本、固定 bootstrap 帧和临时环境保持在用户审核范围内。项目 hooks、MCP 和工具默认关闭，KeelShell 的对外 MCP 服务端方向不变。精确 Codex `0.160.0`、`0.160.1` 与 Claude Code `2.1.285` 的受控 loopback 适配器验证通过，不能替代供应商账户、模型、桌面窗口或 Windows/Linux 原生验收。
 
-作者封包包含 1,257 个逐项读回 payload，manifest SHA-256 为 `0cfa26d8391331769783bd09b885c8b0929746630d9d838f7d9b439c089c93da`；独立复核为 `NO_BLOCKER`，唯一记录的边界是显式 launcher setter 不绑定 launcher 自身 inode/hash，默认入口仍以当前可执行文件校验为准。主树整合、组合门禁和跨平台桌面验收仍需单独完成。详见 [ADR 0069](adr/0069-reviewed-local-agent-working-directories.md)、[工作目录指南](product/LOCAL_AGENT_WORKING_DIRECTORY.md) 和 [测试记录](testing/records/2026-10-07-local-agent-working-directory.md)。
+作者封包包含 1,257 个逐项读回 payload，manifest SHA-256 为 `0cfa26d8391331769783bd09b885c8b0929746630d9d838f7d9b439c089c93da`；独立复核为 `NO_BLOCKER`，唯一记录的边界是显式 launcher setter 不绑定 launcher 自身 inode/hash，默认入口仍以当前可执行文件校验为准。主树整合已完成，最新平台修复门禁、提交级 CI 和跨平台桌面验收分别记录。详见 [ADR 0069](adr/0069-reviewed-local-agent-working-directories.md)、[工作目录指南](product/LOCAL_AGENT_WORKING_DIRECTORY.md) 和 [测试记录](testing/records/2026-10-07-local-agent-working-directory.md)。
 
 ## 当前提交与 Linux 失败观察 — 2026-10-07
 
-主线 `4c9b14c5886cb98b7f8cfedd1331f902885e25d3` 已推送到 `origin/main`。Windows 的 Unix-only `Command` 导入修复、MCP README 方向修正及相应文档已通过本地完整 session 门禁；Quality 37585913129 的 macOS 和 Windows job 成功，Linux 仍在保存资料批准后的 18 秒工作区等待处失败（575 passed、2 failed、2 ignored）。Linux 完整日志保存在 `work/main-combination-ci-4c9b14c-linux-failure.log`，SHA-256 为 `f39061431b473d644b47c11d33417fe70d8d294b976d40a59501229d316fdda`。失败诊断显示同步仍处于 busy 状态，但没有足够证据判定具体根因。
+父提交 `4c9b14c5886cb98b7f8cfedd1331f902885e25d3` 已推送，以下为该时点的历史结果；当前主线见本文顶部。Windows 的 Unix-only `Command` 导入修复、MCP README 方向修正及相应文档已通过本地完整 session 门禁；Quality 37585913129 的 macOS 和 Windows job 成功，Linux 仍在保存资料批准后的 18 秒工作区等待处失败（575 passed、2 failed、2 ignored）。Linux 完整日志保存在 `work/main-combination-ci-4c9b14c-linux-failure.log`，SHA-256 为 `f39061431b473d644b47c11d33417fe70d8d294b976d40a59501229d316fdda2`。失败诊断显示同步仍处于 busy 状态，但没有足够证据判定具体根因。
 
 Linux 失败观察 v2 已经通过独立非作者复核，结论 `NO_BLOCKER`，复核结果 SHA-256 为 `00e621ce836b7fec015f2b8d1a5241b18ebae1043a3cae413e2c35bc79c3cb61`。它只在原有断言失败时读取有界内存状态；`request_count` 与审核签名均避免复制 SSH payload、命令或参数，18/30/40 秒期限和生产路径没有变化。v2 的限定测试、格式和完整 Clippy 均实际退出 0；该观察尚未凭新的 Linux CI 运行证明根因已经解决。详见 [Linux 观察记录](testing/records/2026-10-07-linux-sync-schedule-observation.md)。

@@ -209,13 +209,17 @@ impl LocalAgentClient {
             } else {
                 None
             };
-            let mut probe_config = prepared.config.clone();
+            let probe_config = prepared.config.clone();
             #[cfg(unix)]
-            if let Some(binary) = &owned_binary {
-                // Capabilities are observed on the immutable owned bytes that
-                // will execute Ask, rather than a replaceable supplier pathname.
-                probe_config.executable = binary.path().to_owned();
-            }
+            let probe_config = {
+                let mut probe_config = probe_config;
+                if let Some(binary) = &owned_binary {
+                    // Capabilities are observed on the immutable owned bytes that
+                    // will execute Ask, rather than a replaceable supplier pathname.
+                    probe_config.executable = binary.path().to_owned();
+                }
+                probe_config
+            };
             observe(progress.as_ref(), LocalAskStage::CheckingCli);
             let probe = probe_in(
                 &probe_config,

@@ -55,7 +55,7 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 
 **在 KeelShell 内使用 AI**：创建命名配置，选择模型 API 或本地 CLI；明确选择上下文，检查实际请求，再发送问题。API 支持 Chat Completions、Responses 和 Anthropic Messages，可配置请求头、代理、推理及采样选项。回复中的命令绑定捕获的 SSH 目标，经你审阅后再执行。
 
-本地 Claude Code / Codex CLI 当前提供单轮 Ask，使用显式 API 凭据、隔离目录与受控环境；订阅登录、自定义工作目录和受限 Agent 工作流仍在开发。配置和限制见[本地智能体](docs/product/LOCAL_AGENTS.md)；API 选项见[请求配置](docs/product/AI_REQUEST_OPTIONS.md)与[推理设置](docs/product/AI_INFERENCE.md)。
+本地 Claude Code / Codex CLI 当前提供单轮 Ask，使用显式 API 凭据与受控环境；工作目录默认空隔离，也可明确选择绝对路径并审核。订阅登录和受限 Agent 工作流仍在开发，所选目录的完整桌面与跨平台原生验收尚未完成。配置和限制见[本地智能体](docs/product/LOCAL_AGENTS.md)；API 选项见[请求配置](docs/product/AI_REQUEST_OPTIONS.md)与[推理设置](docs/product/AI_INFERENCE.md)。
 
 **让外部智能体使用 KeelShell**：KeelShell 提供 MCP 服务端，stdio 伴随程序连接正在运行的桌面应用。你选择可访问的 SSH 会话、工具、终端片段和目录。外部智能体可以读取授权信息，或提交命令、现有 UTF-8 文件替换提案；完整目标与内容在 KeelShell 中审阅，客户端不能自行批准。配置与八项工具见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)。
 

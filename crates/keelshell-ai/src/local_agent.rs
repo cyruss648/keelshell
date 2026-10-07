@@ -304,17 +304,21 @@ impl LocalAgentConfig {
                 .validate_metadata_text(directory.canonical_path().to_string_lossy().as_ref())
                 .map_err(LocalAgentError::Context)?;
         }
-        let mut config = self.clone();
+        let config = self.clone();
         #[cfg(unix)]
-        if directory.is_some() && config.directory_launcher.is_none() {
-            // Resolve the current trusted application on a worker, never the UI.
-            config.directory_launcher = Some(
-                tokio::task::spawn_blocking(std::env::current_exe)
-                    .await
-                    .map_err(|_| LocalAgentError::DirectoryUnsupported)?
-                    .map_err(|_| LocalAgentError::DirectoryUnsupported)?,
-            );
-        }
+        let config = {
+            let mut config = config;
+            if directory.is_some() && config.directory_launcher.is_none() {
+                // Resolve the current trusted application on a worker, never the UI.
+                config.directory_launcher = Some(
+                    tokio::task::spawn_blocking(std::env::current_exe)
+                        .await
+                        .map_err(|_| LocalAgentError::DirectoryUnsupported)?
+                        .map_err(|_| LocalAgentError::DirectoryUnsupported)?,
+                );
+            }
+            config
+        };
         config.prepare_inner(context, secrets, byte_budget, directory)
     }
 

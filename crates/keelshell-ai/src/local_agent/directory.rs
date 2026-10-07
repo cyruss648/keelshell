@@ -89,7 +89,9 @@ impl LocalAgentWorkingDirectory {
 
 struct DirectoryNode {
     path: PathBuf,
-    file: File,
+    // Retained on Windows to deny directory replacement; Unix also uses it for
+    // the child-only fchdir path.
+    _file: File,
     metadata: Metadata,
 }
 
@@ -172,6 +174,7 @@ impl ValidatedLocalAgentDirectory {
         bounded_check(cancellation.clone(), move || guard.recheck(&worker_cancel)).await
     }
 
+    #[cfg(unix)]
     pub(super) fn snapshot(&self) -> DirectorySnapshot {
         self.0.snapshot()
     }
@@ -193,7 +196,7 @@ impl ValidatedLocalAgentDirectory {
             .ok_or(LocalAgentError::DirectoryUnavailable)?;
         // Called only by the single-thread internal launcher after exec, before
         // any runtime/GPUI initialization. Never changes the desktop parent's cwd.
-        nix::unistd::fchdir(&leaf.file).map_err(|_| LocalAgentError::DirectoryUnavailable)
+        nix::unistd::fchdir(&leaf._file).map_err(|_| LocalAgentError::DirectoryUnavailable)
     }
 
     #[cfg(windows)]
@@ -217,6 +220,7 @@ impl ValidatedLocalAgentDirectory {
     }
 }
 
+#[cfg(unix)]
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone)]
 #[serde(deny_unknown_fields)]
 pub(super) struct DirectorySnapshot {
@@ -227,6 +231,7 @@ pub(super) struct DirectorySnapshot {
 }
 
 impl DirectoryGuard {
+    #[cfg(unix)]
     fn snapshot(&self) -> DirectorySnapshot {
         DirectorySnapshot {
             selected: self.selected.clone(),
@@ -301,7 +306,7 @@ impl DirectoryGuard {
             }
             nodes.push(DirectoryNode {
                 path: prefix.clone(),
-                file,
+                _file: file,
                 metadata,
             });
         }
@@ -428,7 +433,7 @@ fn open_directory(
     };
     let flags = OFlag::O_RDONLY | OFlag::O_DIRECTORY | OFlag::O_NOFOLLOW | OFlag::O_CLOEXEC;
     let result = if let (Some(parent), Component::Normal(name)) = (parent, part) {
-        openat(&parent.file, Path::new(name), flags, Mode::empty())
+        openat(&parent._file, Path::new(name), flags, Mode::empty())
     } else {
         open(path, flags, Mode::empty())
     };

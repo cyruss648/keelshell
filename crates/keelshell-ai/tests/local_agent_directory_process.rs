@@ -15,6 +15,9 @@ use std::{
 };
 
 const BOOTSTRAP: &str = "--keelshell-internal-local-ask-v1";
+// Readiness observes a child-owned marker with the same eight-second budget
+// as Ask; it does not renew the request deadline or the controller's limit.
+const ASK_READINESS_DEADLINE: Duration = Duration::from_secs(8);
 
 fn main() {
     let args: Vec<_> = std::env::args().skip(1).collect();
@@ -140,7 +143,13 @@ struct Fixture {
 impl Fixture {
     fn new(kind: LocalAgentKind, future: bool) -> Self {
         let root = tempfile::tempdir().unwrap();
+        // Unix temp roots can contain symlink aliases (for example /var).
+        // Windows canonicalize returns a verbatim namespace, which production
+        // deliberately rejects as a user-selected path; retain its disk path.
+        #[cfg(unix)]
         let base = root.path().canonicalize().unwrap();
+        #[cfg(not(unix))]
+        let base = root.path().to_path_buf();
         let selected = base.join("selected 运维 folder");
         let scratch = base.join("scratch");
         std::fs::create_dir(&selected).unwrap();
@@ -172,7 +181,7 @@ impl Fixture {
             &self.scratch,
             format!(
                 "directory-fixture:{}",
-                self.root.path().canonicalize().unwrap().display()
+                self.selected.parent().unwrap().display()
             ),
         )
         .unwrap()
@@ -180,7 +189,7 @@ impl Fixture {
         .with_working_directory(LocalAgentWorkingDirectory::Selected(self.selected.clone()))
         .unwrap();
         if let Some(name) = launcher {
-            let path = self.root.path().canonicalize().unwrap().join(name);
+            let path = self.selected.parent().unwrap().join(name);
             std::fs::copy(std::env::current_exe().unwrap(), &path).unwrap();
             config = config.with_directory_launcher(path).unwrap();
         }
@@ -201,14 +210,17 @@ impl Fixture {
             )
             .await
             .unwrap();
-        assert!(
-            review
-                .preview_json()
-                .contains(self.selected.to_str().unwrap())
+        let preview: Value = serde_json::from_str(review.preview_json()).unwrap();
+        assert_eq!(preview["workspace"]["selected_path"], json!(self.selected));
+        assert_eq!(
+            preview["workspace"]["canonical_path"],
+            json!(self.selected.canonicalize().unwrap())
         );
+        let stdin: Value = serde_json::from_str(review.preview_stdin()).unwrap();
         assert!(
-            !review
-                .preview_stdin()
+            !stdin["selected_context"]
+                .as_str()
+                .unwrap()
                 .contains(self.selected.to_str().unwrap())
         );
         review.approve()
@@ -239,7 +251,7 @@ async fn await_file(
     path: &std::path::Path,
     task: &mut tokio::task::JoinHandle<Result<keelshell_ai::LocalAgentReply, LocalAgentError>>,
 ) {
-    let deadline = Instant::now() + Duration::from_secs(3);
+    let deadline = Instant::now() + ASK_READINESS_DEADLINE;
     while !path.exists() {
         if task.is_finished() {
             let outcome = task.await.unwrap().map(|reply| reply.frame_count());
@@ -253,6 +265,20 @@ async fn await_file(
     }
 }
 
+fn assert_child_cwd(actual: &Value, expected: &std::path::Path) {
+    // Windows child cwd may use canonical extended-length syntax. Compare the
+    // real directory without relaxing production selected-path admission.
+    #[cfg(windows)]
+    assert_eq!(
+        PathBuf::from(actual.as_str().unwrap())
+            .canonicalize()
+            .unwrap(),
+        expected.canonicalize().unwrap()
+    );
+    #[cfg(not(windows))]
+    assert_eq!(actual, expected.to_string_lossy().as_ref());
+}
+
 async fn controller() {
     for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
         let fixture = Fixture::new(kind, false);
@@ -263,7 +289,7 @@ async fn controller() {
             .await
             .unwrap();
         let answer: Value = serde_json::from_str(reply.text()).unwrap();
-        assert_eq!(answer["cwd"], fixture.selected.to_string_lossy().as_ref());
+        assert_child_cwd(&answer["cwd"], &fixture.selected);
         assert_eq!(answer["reviewed_marker"], true);
         let records = fixture.records();
         assert_eq!(
@@ -278,7 +304,7 @@ async fn controller() {
             .iter()
             .find(|record| record["phase"] == "ask")
             .unwrap();
-        assert_eq!(ask["cwd"], fixture.selected.to_string_lossy().as_ref());
+        assert_child_cwd(&ask["cwd"], &fixture.selected);
         assert_eq!(ask["fixed_policy"], true);
         assert_eq!(ask["private_home"], true);
         assert!(
@@ -301,38 +327,91 @@ async fn controller() {
                 .await
         });
         await_file(&fixture.root.path().join("ask-ready"), &mut task).await;
-        let moved = fixture.selected.with_file_name("moved-after-fchdir");
-        std::fs::rename(&fixture.selected, &moved).unwrap();
-        std::fs::create_dir(&fixture.selected).unwrap();
-        std::fs::write(fixture.selected.join("reviewed-marker"), b"replacement").unwrap();
-        std::fs::write(fixture.root.path().join("ask-release"), b"").unwrap();
-        assert_eq!(
-            task.await.unwrap().unwrap_err(),
-            LocalAgentError::DirectoryChanged
+        #[cfg(unix)]
+        let moved = {
+            let moved = fixture.selected.with_file_name("moved-after-fchdir");
+            std::fs::rename(&fixture.selected, &moved).unwrap();
+            std::fs::create_dir(&fixture.selected).unwrap();
+            std::fs::write(fixture.selected.join("reviewed-marker"), b"replacement").unwrap();
+            moved
+        };
+        #[cfg(windows)]
+        assert!(
+            std::fs::rename(
+                &fixture.selected,
+                fixture.selected.with_file_name("moved-held")
+            )
+            .is_err(),
+            "reviewed no-delete handles prevent replacement while the child runs"
         );
+        std::fs::write(fixture.root.path().join("ask-release"), b"").unwrap();
+        let outcome = task.await.unwrap();
+        #[cfg(unix)]
+        assert_eq!(outcome.unwrap_err(), LocalAgentError::DirectoryChanged);
+        #[cfg(windows)]
+        {
+            let answer: Value = serde_json::from_str(outcome.unwrap().text()).unwrap();
+            assert_child_cwd(&answer["cwd"], &fixture.selected);
+            assert_eq!(answer["reviewed_marker"], true);
+        }
         let proof: Value = serde_json::from_slice(
             &std::fs::read(fixture.root.path().join("held-cwd-proof.json")).unwrap(),
         )
         .unwrap();
-        assert_eq!(proof["cwd"], moved.to_string_lossy().as_ref());
+        #[cfg(unix)]
+        assert_child_cwd(&proof["cwd"], &moved);
+        #[cfg(windows)]
+        assert_child_cwd(&proof["cwd"], &fixture.selected);
         assert_eq!(
             proof["reviewed_marker"], true,
-            "relative child access retained authorized inode, never replacement"
+            "relative child access retained the reviewed directory"
         );
         fixture.clean();
+        #[cfg(windows)]
+        std::fs::rename(
+            &fixture.selected,
+            fixture.selected.with_file_name("moved-after-ask"),
+        )
+        .expect("completed Ask releases its directory handles");
 
         let fixture = Fixture::new(kind, false);
         let approved = fixture.review("cwd", None).await;
-        std::fs::rename(&fixture.selected, fixture.selected.with_file_name("moved")).unwrap();
-        std::fs::create_dir(&fixture.selected).unwrap();
-        assert_eq!(
-            LocalAgentClient
+        #[cfg(unix)]
+        {
+            std::fs::rename(&fixture.selected, fixture.selected.with_file_name("moved")).unwrap();
+            std::fs::create_dir(&fixture.selected).unwrap();
+            assert_eq!(
+                LocalAgentClient
+                    .ask(approved, credential(), &RequestCancellation::new())
+                    .await
+                    .unwrap_err(),
+                LocalAgentError::DirectoryChanged
+            );
+            assert!(fixture.records().is_empty());
+        }
+        #[cfg(windows)]
+        {
+            assert!(
+                std::fs::rename(
+                    &fixture.selected,
+                    fixture.selected.with_file_name("moved-review")
+                )
+                .is_err(),
+                "the pending review retains no-delete directory handles"
+            );
+            let reply = LocalAgentClient
                 .ask(approved, credential(), &RequestCancellation::new())
                 .await
-                .unwrap_err(),
-            LocalAgentError::DirectoryChanged
-        );
-        assert!(fixture.records().is_empty());
+                .unwrap();
+            let answer: Value = serde_json::from_str(reply.text()).unwrap();
+            assert_child_cwd(&answer["cwd"], &fixture.selected);
+            assert_eq!(answer["reviewed_marker"], true);
+            std::fs::rename(
+                &fixture.selected,
+                fixture.selected.with_file_name("moved-after-review"),
+            )
+            .expect("consumed review releases its directory handles");
+        }
         fixture.clean();
 
         let fixture = Fixture::new(kind, true);
@@ -361,6 +440,7 @@ async fn controller() {
             .into_iter()
             .find(|record| record["phase"] == "ask")
             .unwrap();
+        assert_child_cwd(&record["cwd"], &fixture.selected);
         #[cfg(unix)]
         assert_eq!(
             nix::sys::signal::kill(
@@ -482,7 +562,8 @@ async fn controller() {
             tokio::time::sleep(Duration::from_millis(5)).await;
         }
     }
-    println!("directory native process controller: 20 cases passed");
+    let cases = if cfg!(unix) { 20 } else { 15 };
+    println!("directory owned process controller: {cases} cases passed");
 }
 
 fn fixture(args: &[String], _exe: &std::path::Path, claude: bool, future: bool) {

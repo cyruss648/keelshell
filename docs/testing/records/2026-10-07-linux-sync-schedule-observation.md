@@ -10,7 +10,7 @@ v1 候选只修改两个现有测试文件。原 `wait_real` 入口委托到相�
 
 当前基线的面板 summary 不提供 worker 开始、服务返回和前台完成阶段；`busy` 不能据此证明原因。以后整合独立的 test-only 面板阶段观察时，同一 summary 可带有更多阶段事实，需要依照相应新证据解释，不能回溯补足原日志。
 
-格式准备已经完成，限定原测试和全工作区严格 Clippy 尚待执行。新非作者复核及精确提交级 Linux CI 尚未完成。本记录不把本机运行、增加观察或后续 CI 成功称为原始原因已解决。
+初稿时限定原测试、Clippy 和非作者复核尚待执行；后续完成情况见下文，精确提交级 Linux CI 另行回读。本记录不把本机运行、增加观察或后续 CI 成功称为原始原因已解决。
 
 ## 本机候选验证（2026-10-07）
 
@@ -27,3 +27,11 @@ v1 候选只修改两个现有测试文件。原 `wait_real` 入口委托到相�
 v2 仅增加 test-only 标量访问：SSH fixture server 的 `request_count()` 只读取锁内长度；工作流审核新增由审核 UUID、revision 和计划 fingerprint 组成的 `review_signature_for_test()`，不复制命令、目标或参数正文。失败观察改用这两个标量接口；生产执行、18/30/40 秒等待、原有断言和批准路径均未改变。观察器仍只在原断言失败时执行。v2 的四个源码文件为：`crates/keelshell-app/src/workflow_commands.rs`（`cfg(test)` 审核签名）、`crates/keelshell-app/src/workspace/tests/batch_peer.rs`（fixture 请求计数）、`crates/keelshell-app/src/workspace/tests/dependency_workflow/scheduled.rs`（失败专用等待器）和 `crates/keelshell-app/src/workspace/tests/dependency_workflow/scheduled/target_parameters/sync_combination.rs`（组合观察器）。
 
 v2 本地验证实际通过：精确 scheduled case 为 1 passed、0 failed、0 ignored（测试耗时 31.45 秒）；`cargo fmt --all --check` 实际退出 0；`cargo clippy --workspace --all-targets --locked -- -D warnings` 实际退出 0（23.52 秒）。输入映射均为 721 项且前后相同，进程组结束，临时目录移除。对应收据为 `limited-case-v2/RECEIPT.json`、`fmt-check-v2/RECEIPT.json` 和 `clippy-full-v2/RECEIPT.json`。本机通过仍不等同于 Linux CI 原失败已解决。
+
+## 主线整合与 CI
+
+v2 已经非作者复核为 `NO_BLOCKER`，复核结果 SHA-256 `00e621ce836b7fec015f2b8d1a5241b18ebae1043a3cae413e2c35bc79c3cb61`，并整合到主线 `0d64f09`。主副本应用测试输出为 583 passed、0 failed、2 ignored，两项同步组合均通过；该次根调用未持久保存最终退出码收据，不能当作完整正式门禁收据。
+
+父提交 `4c9b14c` 的 Quality 37585913129 已结束：macOS／Windows 成功，Linux 应用测试 575 passed、2 failed、2 ignored。两个失败均在同步批准后的工作区等待，已有诊断报告 busy 状态；仍不足以判定根因。完整 Linux job 日志 470,958 字节，SHA-256 `f39061431b473d644b47c11d33417fe70d8d294b976d40a59501229d316fdda2`，保留在 ignored work 中。新提交 CI 终态另行回读。
+
+2026-10-07 后续平台门禁：0d64 Linux 因 AI 目录控制器 readiness 失败，未进入 app 同步测试；macOS job成功。根平台修复的新正式本机733输入质量门禁退出0，app583（2ignored）通过；该运行不是Linux根因证据。新提交CI需再检查，不能把本机正常结果或观察器本身当作生产修复，见[平台记录](2026-10-07-local-agent-directory-platform-fix.md)。

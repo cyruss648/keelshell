@@ -34,6 +34,7 @@ impl LocalAgentKind {
         self.checked_versions().contains(&version)
     }
 
+    #[cfg(any(unix, test))]
     pub(super) fn supports_version_text(self, version: &str) -> bool {
         self.checked_versions()
             .iter()
