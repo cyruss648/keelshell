@@ -1,5 +1,6 @@
 //! Remote browser layout and explicit file-operation controls.
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::component::scroll::ScrollableElement;
 
 fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl IntoElement {
@@ -122,98 +123,12 @@ fn compare_status_label(status: DirectoryEntryStatus, cx: &App) -> SharedString 
     }
 }
 
-impl Render for FilesPanel {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        if self.confirmation_expanded
-            && let Some((message, _)) = &self.pending
-        {
-            return self
-                .expanded_confirmation(format!("{} · {}", self.host, message.render(cx)), cx);
-        }
-        if self.pending.is_none()
-            && let Some(surface) = self.editor_surface
-        {
-            return self.editor_surface(surface, cx);
-        }
+impl FilesPanel {
+    // Keep remote list construction in a separate frame. The debug GPUI
+    // builders otherwise accumulate over a megabyte of temporary stack state
+    // before calling either local browser surface on a normal test thread.
+    fn remote_browser_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
-        let mut navigation = div()
-            .id("remote-directory-tree")
-            .w(px(152.))
-            .flex_shrink_0()
-            .h_full()
-            .overflow_y_scroll()
-            .border_r_1()
-            .border_color(rgb(visual.border))
-            .bg(rgb(visual.surface))
-            .child(
-                div()
-                    .h(px(28.))
-                    .px_2()
-                    .flex()
-                    .items_center()
-                    .bg(rgb(visual.canvas))
-                    .border_b_1()
-                    .border_color(rgb(visual.border))
-                    .child(t(cx, "目录", "Directories")),
-            );
-        let current = self.directory.as_deref().unwrap_or("/");
-        let mut ancestors = vec![("/".to_owned(), "/".to_owned())];
-        let mut path = String::new();
-        for component in current.split('/').filter(|part| !part.is_empty()) {
-            path.push('/');
-            path.push_str(component);
-            ancestors.push((component.to_owned(), path.clone()));
-        }
-        for (index, (name, path)) in ancestors.into_iter().enumerate() {
-            let active = self.directory.as_ref() == Some(&path);
-            navigation = navigation.child(
-                div()
-                    .id(("directory-ancestor", index))
-                    .h(px(28.))
-                    .pl(px(7. + index.min(5) as f32 * 9.))
-                    .pr_2()
-                    .flex()
-                    .items_center()
-                    .cursor_pointer()
-                    .overflow_hidden()
-                    .bg(rgb(if active {
-                        visual.selected
-                    } else {
-                        visual.surface
-                    }))
-                    .gap_2()
-                    .child(IconName::FolderOpen)
-                    .child(name)
-                    .on_click(cx.listener(move |view, _, window, cx| {
-                        view.run(Operation::List(path.clone()), window, cx)
-                    })),
-            );
-        }
-        for (index, entry) in self
-            .entries
-            .iter()
-            .filter(|entry| entry.is_directory)
-            .enumerate()
-        {
-            let path = entry.path.clone();
-            navigation = navigation.child(
-                div()
-                    .id(("directory-child", index))
-                    .h(px(28.))
-                    .pl_5()
-                    .pr_2()
-                    .flex()
-                    .items_center()
-                    .cursor_pointer()
-                    .overflow_hidden()
-                    .gap_2()
-                    .child(IconName::Folder)
-                    .child(entry.name.clone())
-                    .on_click(cx.listener(move |view, _, window, cx| {
-                        view.run(Operation::List(path.clone()), window, cx)
-                    })),
-            );
-        }
         let mut list = div()
             .id("remote-files")
             .flex_1()
@@ -222,7 +137,14 @@ impl Render for FilesPanel {
             .flex()
             .flex_col()
             .test_support();
-        for (index, entry) in self.entries.iter().enumerate() {
+        for (index, source_index) in
+            browser::remote_indices(&self.entries, self.remote_show_hidden, self.remote_sort)
+                .into_iter()
+                .enumerate()
+        {
+            // Rendering IDs identify visible row positions; every action and
+            // selection captures the unchanged native entry/path instead.
+            let entry = &self.entries[source_index];
             let selected = self
                 .selected
                 .as_ref()
@@ -245,6 +167,7 @@ impl Render for FilesPanel {
                     }))
                     .cursor_pointer()
                     .on_click(cx.listener(move |view, _, window, cx| {
+                        view.withdraw_browser_review();
                         view.selected = Some(item.clone());
                         if let Some(mode) = item.permissions {
                             view.mode.update(cx, |input, cx| {
@@ -296,6 +219,9 @@ impl Render for FilesPanel {
                                     t(cx, "编辑", "Edit")
                                 })
                                 .on_click(cx.listener(move |view, _, window, cx| {
+                                    // A row selection withdraws unexecuted proposals;
+                                    // it must not clear this action's dirty-editor review.
+                                    cx.stop_propagation();
                                     if open.is_directory {
                                         view.run(Operation::List(open.path.clone()), window, cx);
                                     } else {
@@ -307,7 +233,10 @@ impl Render for FilesPanel {
                     .test_support(),
             );
         }
-        if self.entries.is_empty() && !self.busy {
+        if browser::remote_indices(&self.entries, self.remote_show_hidden, self.remote_sort)
+            .is_empty()
+            && !self.busy
+        {
             list = list.child(div().p_3().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "当前目录没有文件",
@@ -336,19 +265,78 @@ impl Render for FilesPanel {
                             .bg(rgb(visual.canvas))
                             .border_b_1()
                             .border_color(rgb(visual.border))
-                            .child(div().flex_1().min_w(px(150.)).px_2().child(t(
-                                cx,
-                                "文件名",
-                                "Name",
-                            )))
-                            .child(table_cell(t(cx, "大小", "Size"), 88.))
+                            .child(
+                                Button::new("sort-remote-name")
+                                    .ghost()
+                                    .compact()
+                                    .flex_1()
+                                    .min_w(px(150.))
+                                    .label(format!(
+                                        "{}{}",
+                                        t(cx, "远程名称", "Remote name"),
+                                        self.remote_sort.indicator(browser::SortColumn::Name)
+                                    ))
+                                    .on_click(cx.listener(|view, _, _, cx| {
+                                        view.remote_sort.select(browser::SortColumn::Name);
+                                        cx.notify();
+                                    })),
+                            )
+                            .child(
+                                Button::new("sort-remote-size")
+                                    .ghost()
+                                    .compact()
+                                    .w(px(88.))
+                                    .label(format!(
+                                        "{}{}",
+                                        t(cx, "大小", "Size"),
+                                        self.remote_sort.indicator(browser::SortColumn::Size)
+                                    ))
+                                    .on_click(cx.listener(|view, _, _, cx| {
+                                        view.remote_sort.select(browser::SortColumn::Size);
+                                        cx.notify();
+                                    })),
+                            )
                             .child(table_cell(t(cx, "类型", "Type"), 76.))
-                            .child(table_cell(t(cx, "修改时间 (UTC)", "Modified (UTC)"), 143.))
+                            .child(
+                                Button::new("sort-remote-modified")
+                                    .ghost()
+                                    .compact()
+                                    .w(px(143.))
+                                    .label(format!(
+                                        "{}{}",
+                                        t(cx, "修改时间 (UTC)", "Modified (UTC)"),
+                                        self.remote_sort.indicator(browser::SortColumn::Modified)
+                                    ))
+                                    .on_click(cx.listener(|view, _, _, cx| {
+                                        view.remote_sort.select(browser::SortColumn::Modified);
+                                        cx.notify();
+                                    })),
+                            )
                             .child(table_cell(t(cx, "权限", "Permissions"), 100.))
                             .child(table_cell(t(cx, "操作", "Action"), 60.)),
                     )
                     .child(list),
             );
+        table.into_any_element()
+    }
+}
+
+impl Render for FilesPanel {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if self.confirmation_expanded
+            && let Some((message, _)) = &self.pending
+        {
+            return self
+                .expanded_confirmation(format!("{} · {}", self.host, message.render(cx)), cx);
+        }
+        if self.pending.is_none()
+            && let Some(surface) = self.editor_surface
+        {
+            return self.editor_surface(surface, cx);
+        }
+        let visual = crate::design::palette(cx);
+        let navigation = self.local_browser_view(cx);
+        let table = self.remote_browser_view(cx);
         let body = div()
             .id("file-browsing-area")
             .flex_1()
@@ -481,73 +469,102 @@ impl Render for FilesPanel {
             .child(
                 div()
                     .h(px(38.))
-                    .px_3()
                     .flex_shrink_0()
                     .flex()
                     .items_center()
-                    .gap_2()
                     .border_b_1()
                     .border_color(rgb(visual.border))
-                    .child(
-                        div()
-                            .text_color(rgb(visual.accent))
-                            .child(IconName::FolderOpen),
-                    )
-                    .child(div().text_color(rgb(visual.muted)).child(t(
-                        cx,
-                        "远程目录",
-                        "Remote path",
-                    )))
+                    .child(self.local_navigation(cx))
                     .child(
                         div()
                             .flex_1()
                             .min_w_0()
-                            .child(Input::new(&self.path).small().rounded(px(6.))),
-                    )
-                    .child(
-                        Button::new("parent-files")
-                            .disabled(self.suspended)
-                            .ghost()
-                            .compact()
-                            .rounded(px(6.))
-                            .icon(IconName::ArrowUp)
-                            .label(t(cx, "上级", "Up"))
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                if let Some(directory) = &view.directory {
-                                    view.run(
-                                        Operation::List(format!(
-                                            "{}/..",
-                                            directory.trim_end_matches('/')
-                                        )),
-                                        window,
+                            .flex()
+                            .items_center()
+                            .gap_1()
+                            .px_1()
+                            .child(
+                                div()
+                                    .text_color(rgb(visual.accent))
+                                    .child(IconName::FolderOpen),
+                            )
+                            .child(
+                                div()
+                                    .flex_1()
+                                    .min_w_0()
+                                    .child(Input::new(&self.path).small().rounded(px(6.))),
+                            )
+                            .child(
+                                Button::new("parent-files")
+                                    .disabled(self.suspended)
+                                    .ghost()
+                                    .compact()
+                                    .icon(IconName::ArrowUp)
+                                    .accessibility_label(t(
                                         cx,
-                                    );
-                                }
-                            })),
-                    )
-                    .child(
-                        Button::new("refresh-files")
-                            .disabled(self.suspended)
-                            .ghost()
-                            .compact()
-                            .rounded(px(6.))
-                            .icon(IconName::RefreshCw)
-                            .label(t(cx, "刷新", "Refresh"))
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.run(
-                                    Operation::List(view.path.read(cx).value().to_string()),
-                                    window,
-                                    cx,
-                                )
-                            })),
-                    )
-                    .child(
-                        div()
-                            .max_w(px(160.))
-                            .min_w_0()
-                            .text_ellipsis()
-                            .text_color(rgb(visual.muted))
-                            .child(self.host.clone()),
+                                        "远程上级目录",
+                                        "Remote parent folder",
+                                    ))
+                                    .localized_tooltip("远程上级目录", "Remote parent folder")
+                                    .on_click(cx.listener(|view, _, window, cx| {
+                                        if let Some(directory) = &view.directory {
+                                            view.run(
+                                                Operation::List(format!(
+                                                    "{}/..",
+                                                    directory.trim_end_matches('/')
+                                                )),
+                                                window,
+                                                cx,
+                                            );
+                                        }
+                                    })),
+                            )
+                            .child(
+                                Button::new("refresh-files")
+                                    .disabled(self.suspended)
+                                    .ghost()
+                                    .compact()
+                                    .icon(IconName::RefreshCw)
+                                    .accessibility_label(t(
+                                        cx,
+                                        "刷新远程目录草稿",
+                                        "Browse the remote folder draft",
+                                    ))
+                                    .localized_tooltip(
+                                        "刷新远程目录草稿",
+                                        "Browse the remote folder draft",
+                                    )
+                                    .on_click(cx.listener(|view, _, window, cx| {
+                                        view.run(
+                                            Operation::List(view.path.read(cx).value().to_string()),
+                                            window,
+                                            cx,
+                                        );
+                                    })),
+                            )
+                            .child(
+                                Button::new("toggle-remote-hidden")
+                                    .disabled(self.suspended)
+                                    .ghost()
+                                    .compact()
+                                    .icon(if self.remote_show_hidden {
+                                        IconName::Eye
+                                    } else {
+                                        IconName::EyeOff
+                                    })
+                                    .accessibility_label(t(
+                                        cx,
+                                        "切换远程隐藏文件",
+                                        "Toggle remote hidden files",
+                                    ))
+                                    .localized_tooltip(
+                                        "切换远程隐藏文件",
+                                        "Toggle remote hidden files",
+                                    )
+                                    .on_click(
+                                        cx.listener(|view, _, _, cx| view.toggle_remote_hidden(cx)),
+                                    ),
+                            ),
                     ),
             )
             .when(self.suspended, |panel| {
@@ -608,6 +625,15 @@ impl Render for FilesPanel {
                         cx.notify();
                     })))
                 .child(div().flex_1().min_w(px(150.)).child(Input::new(&self.local).small().rounded(px(6.))))
+                .child(Button::new("use-local-selection").ghost().compact().label(t(cx,"使用本地所选","Use local selection"))
+                    .disabled(self.suspended || self.local_browser.selected_entry().is_none_or(|entry| !matches!(entry.kind, local_catalog::LocalEntryKind::Directory | local_catalog::LocalEntryKind::File) || entry.path.to_str().is_none()))
+                    .on_click(cx.listener(|view,_,window,cx| view.use_local_selection(window,cx))))
+                .child(Button::new("use-local-folder").ghost().compact().label(t(cx,"使用本地目录","Use local folder"))
+                    .disabled(self.suspended || self.local_browser.listing.as_ref().is_none_or(|listing| listing.directory.to_str().is_none()))
+                    .on_click(cx.listener(|view,_,window,cx| view.use_local_folder(window,cx))))
+                .child(Button::new("download-into-local-folder").ghost().compact().label(t(cx,"选作下载目录","Use as download folder"))
+                    .disabled(self.suspended || self.selected.is_none() || self.local_browser.listing.as_ref().is_none_or(|listing| listing.directory.to_str().is_none()))
+                    .on_click(cx.listener(|view,_,window,cx| view.prepare_local_destination(window,cx))))
                 .child(Button::new("upload-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().to_string());
                     if view.resume_mode {
@@ -618,7 +644,7 @@ impl Render for FilesPanel {
                     }
                     if let Some(name) = local.file_name().and_then(|name|name.to_str()) {
                         let Some(remote) = view.remote_child(name) else {cx.notify(); return;};
-                        view.confirm(Message::new(format!("通过传输队列上传到 {remote}？同名远端文件可能被替换，取消时可能保留部分文件。"),format!("Upload to {remote} through the transfer queue? An existing remote file may be replaced, and cancellation may leave a partial file.")),Operation::Upload(local,remote),cx);
+                        view.confirm(Message::new(format!("通过传输队列将 {} 上传到 {remote}？同名远端文件可能被替换，取消时可能保留部分文件。", local.display()),format!("Upload {} to {remote} through the transfer queue? An existing remote file may be replaced, and cancellation may leave a partial file.", local.display())),Operation::Upload(local,remote),cx);
                     } else { view.status=Message::new("请输入有效的本地文件路径", "Enter a valid local file path");cx.notify(); }
                 })))
                 .child(Button::new("upload-directory").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {

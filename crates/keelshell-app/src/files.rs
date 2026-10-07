@@ -5,7 +5,7 @@ use gpui_kit::{
     component::{
         Disableable, Sizable,
         button::{Button, ButtonVariants},
-        input::{Input, InputState, Textarea, TextareaState},
+        input::{Input, InputEvent, InputState, Textarea, TextareaState},
     },
     *,
 };
@@ -31,6 +31,10 @@ use std::{
     time::Duration,
 };
 
+mod browser;
+mod local_browser;
+mod local_catalog;
+mod local_view;
 mod merge;
 mod parallel;
 mod review;
@@ -130,6 +134,11 @@ pub struct FilesPanel {
     name: Entity<InputState>,
     mode: Entity<InputState>,
     local: Entity<InputState>,
+    local_browser: local_browser::LocalBrowser,
+    remote_sort: browser::BrowserSort,
+    remote_show_hidden: bool,
+    _browser_subscriptions: Vec<Subscription>,
+    browser_review_revision: uuid::Uuid,
     editor: Entity<TextareaState>,
     confirmation_scroll: ScrollHandle,
     confirmation_expanded: bool,
@@ -225,6 +234,7 @@ fn recovery_request_is_allowed(
 }
 impl Drop for FilesPanel {
     fn drop(&mut self) {
+        self.local_browser.cancel_read();
         self.cancel_transfers();
         if let Some(stop) = &self.operation_stop {
             stop.store(true, Ordering::Release);
@@ -559,6 +569,11 @@ impl FilesPanel {
                 cx,
             ),
             local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
+            local_browser: local_browser::LocalBrowser::new(window, cx),
+            remote_sort: browser::BrowserSort::default(),
+            remote_show_hidden: false,
+            _browser_subscriptions: Vec::new(),
+            browser_review_revision: uuid::Uuid::new_v4(),
             editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
             confirmation_scroll: ScrollHandle::new(),
             confirmation_expanded: false,
@@ -596,6 +611,7 @@ impl FilesPanel {
             #[cfg(test)]
             fixture_group,
         };
+        panel.install_browser_subscriptions(window, cx);
         panel.run(Operation::List(".".into()), window, cx);
         panel
     }
@@ -610,6 +626,7 @@ impl FilesPanel {
         self.recovery = None;
         self.pending = None;
         self.confirmation_expanded = false;
+        self.local_browser.retire_navigation();
         self.cancel_transfers();
         self.cancel_active(cx);
         cx.notify();
@@ -659,6 +676,11 @@ impl FilesPanel {
             (&self.name, "文件名 / 新建目录", "New name / folder"),
             (&self.mode, "权限（八进制）", "Permissions (octal)"),
             (&self.local, "本地传输路径", "Local transfer path"),
+            (
+                &self.local_browser.path,
+                "本地绝对目录",
+                "Absolute local folder",
+            ),
         ] {
             let placeholder = t(cx, zh, en);
             input.update(cx, |input, cx| {
@@ -789,6 +811,7 @@ impl FilesPanel {
                 | Operation::PlanDirectorySync(..)
         );
         let navigation_before = self.path.read(cx).value().to_string();
+        let browser_review_revision = self.browser_review_revision;
         let runtime = self.runtime.clone();
         let stop = Arc::new(AtomicBool::new(false));
         self.operation_stop = Some(stop.clone());
@@ -895,6 +918,15 @@ impl FilesPanel {
                     return;
                 }
                 if let Err(FileFailure::MirrorConflicts(conflicts)) = &result { view.mirror_conflicts = conflicts.clone(); }
+                if review_only && result.is_ok() && view.browser_review_revision != browser_review_revision {
+                    // A read-only plan may finish after a local or remote draft
+                    // changes. Retire its original result owner above, but do
+                    // not recreate a proposal that navigation withdrew. Writes
+                    // never enter this branch and retain their actual outcome.
+                    view.status = Message::new("只读审核准备已完成，但路径或选择已变化；未采用旧计划，请重新准备。", "Read-only review preparation completed, but the path or selection changed; the old plan was not adopted. Prepare it again.");
+                    cx.notify();
+                    return;
+                }
                 let succeeded = result.is_ok();
                 match result {
                     Ok(Outcome::Listed(path,entries)) => {

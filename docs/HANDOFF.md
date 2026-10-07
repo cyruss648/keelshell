@@ -1,10 +1,12 @@
-# KeelShell 开发交接 — 2026-10-07
+# KeelShell 开发交接 — 2026-10-08
 
-最新已推送检查点为 `9669243`（自动更新策略与会话栏）。2026-10-08 后续准备期收尾改动只涉及本地智能体测试控制器及检查入口：新增十项控制、原默认／2MiB各626阶段、85项AI库及严格全target Clippy已在根实际通过；最终独立复核、提交与精确CI另记[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。下文旧219等检查点保留其历史范围，不作为最新主线。
+最新已推送检查点为 `a94038d`（本地智能体准备失败的测试控制器收尾）；父提交 `9669243` 包含自动更新策略与会话栏，其三平台 Quality 已实际全部成功。2026-10-08 后续准备期收尾改动只涉及本地智能体测试控制器及检查入口：新增十项控制、原默认／2MiB各626阶段、85项AI库及严格全target Clippy已在根实际通过；新非作者最终复核和精确远端读回通过；a940 的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37676683014)已全部成功，三个 job 原日志完整读回；这不替代浏览增量的精确新 CI，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。下文旧219等检查点保留其历史范围，不作为最新主线。
 
-## 当前主线和整合状态
+本地／远程文件浏览已精确整合到根 `feature/local-remote-file-browser`：810 输入完整门禁通过 1,769 普通 Rust／10 rustdoc／6 Python、格式／x.y／严格 Clippy，22 ignored 未执行；同输入新 macOS 标准包与 57 打包用例通过。新宽窗口系统目录选择器、隐藏项、子目录／上级导航、大小排序及人工审核上传／下载已实际完成，三份完整30字节来源／远端／下载内容相等；12 原始 JPEG／AX、实际 wait 和所属资源清理保留。新组合源码／工程／宽窗口原生证据的独立复核无 P1/P2；功能提交后的精确 CI、最小原生窗口、辅助技术和其它平台桌面仍独立开放，见[整合记录](testing/records/2026-10-08-local-file-browser-main-integration.md)。MCP 由 KeelShell 向外部智能体提供服务；本轮未授予 MCP 权能或调用外部客户端。
 
-当前已推送主线为 `219093c95b491692abea1a7d005b2e6eea985967`，根已核对远端main同SHA、ahead/behind为0/0。该提交的[三平台Quality](https://github.com/cyruss648/keelshell/actions/runs/37657109077)已结束：macOS/Linux成功，Windows在本地智能体受控后代端口3秒准备期失败，该case Ask/清理终态未记录，原因UNKNOWN。三个job原日志已读回，不宣称三平台整体通过。此前 `a4c15c04772b11a70a592ae7c95132b4bea4d818` 审核式 Agent 和原 SSH 生命周期绑定的 MCP 授权已整合；本机完整工程检查及 macOS 开发包通过，详见[组合记录](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。这些结果不等于完整产品或新原生流程完成。
+## 2026-10-07 历史主线和整合状态
+
+该历史时点已推送主线为 `219093c95b491692abea1a7d005b2e6eea985967`，根已核对远端main同SHA、ahead/behind为0/0。该提交的[三平台Quality](https://github.com/cyruss648/keelshell/actions/runs/37657109077)已结束：macOS/Linux成功，Windows在本地智能体受控后代端口3秒准备期失败，该case Ask/清理终态未记录，原因UNKNOWN。三个job原日志已读回，不宣称三平台整体通过。此前 `a4c15c04772b11a70a592ae7c95132b4bea4d818` 审核式 Agent 和原 SSH 生命周期绑定的 MCP 授权已整合；本机完整工程检查及 macOS 开发包通过，详见[组合记录](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。这些结果不等于完整产品或新原生流程完成。
 
 此前精确`a4c15c0`的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37624355451)已结束：macOS、Windows 成功，Linux 唯一应用失败为目录同步被实际 `MutationBusy` 拒绝，零写入，原字节保持。独立双夹具受控流程已证明不同测试目录也可能争用进程级本地写保护；历史 CI 的准确占用者未识别。旧 b54 的 8 秒 Ask 和 e695 的 18 秒同步失败仍是分别保留的未知原因，见[精确 CI 记录](testing/records/2026-10-07-agent-mcp-platform-ci.md)。
 
@@ -39,8 +41,8 @@ UI、core、session、AI 分层；阻塞 I/O 不进入 UI 线程。直接 regist
 
 ## 下一步和证据维护
 
-1. 本次完整门禁、macOS标准包及限定原生文件流程已完成；完成功能提交和精确新CI（独立证据复核已通过）。
-2. 修复英文小窗口会话关闭入口；继续独立候选自动更新策略、本地目录浏览，分别完成工程检查、新非作者复核与相应原生。
+1. 本地／远程浏览的完整门禁、macOS 标准包、宽窗口审核式双向 SFTP 及新的非作者复核已完成；提交推送后单独核对精确新 CI。
+2. 自动更新策略、会话栏和本地目录浏览已完成各自限定整合；继续英文最小原生窗口、更新安装及其它平台桌面的独立验收。
 3. 继续完整外部客户端流程、原生 Agent、语言／主题／最小窗口／辅助技术以及 Windows/Linux 桌面验收；不以编译或受控 GPUI 代替。
 4. 完成精确提交三平台 CI，继续六目标 Release、签名／公证、安装更新验收。GitHub 链接、变更日志和更新实现已有源码，但发布和安装需要自己的证据。
 
@@ -57,3 +59,19 @@ core typed policy 和 workspace长期更新服务已接通每日默认／关闭�
 工具栏已增加紧凑图标、可滚动标签、标题省略、实体绑定的关闭入口及前后导航；动态更新文字也绑定布局reveal。完整静态图标嵌入用于开发／正式包。四项GPUI和资产回归、新非作者源码复核以及宽窗口双SSH／关闭／草稿保持已有证据；英文原生small P2保持OPEN，不能沿用GPUI900px。
 
 新组合审查发现旧绘制更新动作身份P1/P2，六项原指针反例实际失败、同测试修后通过，最后九项通过；按钮绑定完整Release／暂存包／请求身份，安装测试在current_exe/helper之前安全停止。修正后800输入最终门禁实际0：1,731普通Rust／10rustdoc／6Python、格式／x.y／严格全target Clippy及默认／2MiB各626控制器通过，22ignored未执行。同输入标准macOS双程序包／匹配夹具与57打包用例实际0。新隔离原生完成更新默认、保存／关闭重开、后台无稳定版本提示、双SSH中保存设置、英中／明暗／AI导航及关闭后保留草稿；13原图／AX、三个9,444字节完整文件读回和actualwait／所属组／端口／TMP回收均根读回。新的非作者最终源码／工程／宽窗口证据复核无阻断，收尾后仅九份状态Markdown变更，791其它输入相同。缩小尝试没有达到原生小窗口；精确提交CI、真实更新包下载／签名公证／安装回滚、整个原生退出时阻塞解包有界性、其它平台及完整产品目标继续开放，见[组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)。MCP保持KeelShell向外部智能体提供服务的方向，应用内API／CLI推理独立。
+
+## 2026-10-08 本地／远程浏览候选整合
+
+
+候选封包时，`feature/local-file-browser` 以 a4 加根已审核 43 路径／785 输入为基线，只在专用树
+实现 files 领域单目录 picker、显式本地单层 metadata、路径填框、remote sorting/hidden。
+默认不读本地目录；本地浏览仅供 SFTP。保持人工审核、写入准入、未知结果、原展开审核
+及 Textarea/patch；后到旧只读准备版本不会重建已撤回审核，已发出 writes 仍保留真实结果。
+v3 静态独立审查的下载类型与 Edit 冒泡 P2 已在 v5 候选修正；实际 v4 默认栈
+溢出后，v5 拆分远程列表构建帧，保持全部行为和四十个条件定义。相同 v5 测试旧冒泡
+两项断言 actual101、修后两项 actual0；最后 macOS 适用三十八项和原文件流程共
+一百三十六项四线程通过，全 workspace 严格 Clippy／格式／x.y 通过。编码夹具实际
+创建 EILSEQ92、未创建路径 metadata ENOENT2，最终明确拒绝分支通过；未继承 Linux
+非法字节真实创建与读回。新非作者已完成精确候选与专项证据复核，无阻断；root 完整整合／CI 和原生仍独立开放。
+原失败日志／scratch 保留，不声称已交付；见 [候选记录](testing/records/2026-10-08-local-remote-file-browser.md)。
+勿将 43 继承的 root 输入当作本功能 delta；主树及其它作者范围不可覆盖。

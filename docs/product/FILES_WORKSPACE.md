@@ -1,5 +1,20 @@
 # 文件工作区 / Files workspace
 
+2026-10-08 [本地／远程文件浏览](LOCAL_REMOTE_FILE_BROWSER.md)已整合到主副本：系统单目录
+picker、双栏单层元数据、排序／隐藏项和显式填入传输路径。v5 新非作者限定复核、根完整门禁和
+新 macOS 标准包通过；宽窗口已完成系统 picker、导航、排序和经审核的双向 SFTP，
+完整三文件字节相等。新的非作者组合源码／工程／宽窗口原生证据复核无 P1/P2；精确 CI 和未验证范围另记[整合记录](../testing/records/2026-10-08-local-file-browser-main-integration.md)。
+多选／拖放、最小原生窗口、辅助技术和其它平台桌面继续开放。
+
+The [local/remote browser](LOCAL_REMOTE_FILE_BROWSER.md) is integrated into the
+main working copy. Fresh independent candidate review, the full main gate and a
+new macOS package pass. A fresh native wide window exercised the folder picker,
+navigation, ordering and reviewed bidirectional SFTP with complete three-file
+byte equality. Fresh independent review of the combined source, engineering
+results and wide-window native evidence found no scoped P1/P2; exact-commit CI
+is tracked separately. Multi-selection, drag-and-drop, the minimum native window,
+assistive technology and other target desktops remain open.
+
 文件操作使用当前已认证 SSH 会话的 SFTP 通道，远端路径与终端工作目录独立。
 上传、下载、目录创建、重命名、删除、权限修改和内容保存均保留已有审核流程；
 目录比较只读取当前成功加载的 canonical 远端目录与显式填写的本地目录。

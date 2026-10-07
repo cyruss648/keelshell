@@ -88,3 +88,5 @@
 - [File review and runtime integration](testing/records/2026-10-07-ui-runtime-main-integration.md)
 
 - [自动更新策略](product/AUTOMATIC_UPDATES.md)及[主副本组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)：源码整合与专项结果，完整门禁／原生各自记录。
+
+- [本地／远程文件浏览](product/LOCAL_REMOTE_FILE_BROWSER.md)：显式目录选择、双栏元数据、排序／隐藏项和原有审核；v5 新独立限定审查、根完整门禁、新 macOS 标准包和宽窗口审核式双向 SFTP 通过，最终组合源码／工程／宽窗口原生独立复核无 P1/P2；精确 CI／其它原生范围见[整合记录](testing/records/2026-10-08-local-file-browser-main-integration.md)。

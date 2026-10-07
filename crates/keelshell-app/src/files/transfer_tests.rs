@@ -19,6 +19,8 @@ use super::{
     test_server::{Checked, Server},
 };
 
+#[path = "browser_tests.rs"]
+mod browser_tests;
 #[path = "conflict_merge_tests.rs"]
 mod conflict_merge_tests;
 #[path = "fixture_isolation_tests.rs"]
