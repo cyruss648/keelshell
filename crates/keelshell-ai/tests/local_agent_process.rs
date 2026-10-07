@@ -83,6 +83,83 @@ enum SocketOutcome {
     OtherError,
 }
 
+#[derive(Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+enum ReadinessFailure {
+    DeadlineExceeded,
+    ScratchReadFailed,
+}
+
+#[derive(Clone, Copy, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+enum AskTerminal {
+    ReturnedOk,
+    ReturnedCancelled,
+    ReturnedTimeout,
+    ReturnedCleanupFailed,
+    ReturnedSpawnFailed,
+    ReturnedScratchFailed,
+    ReturnedOtherError,
+    JoinCancelled,
+    JoinPanicked,
+    JoinFailed,
+    Unknown,
+}
+
+fn ask_terminal<T>(
+    result: &Result<Result<T, LocalAgentError>, tokio::task::JoinError>,
+) -> AskTerminal {
+    match result {
+        Ok(Ok(_)) => AskTerminal::ReturnedOk,
+        Ok(Err(LocalAgentError::Cancelled)) => AskTerminal::ReturnedCancelled,
+        Ok(Err(LocalAgentError::Timeout)) => AskTerminal::ReturnedTimeout,
+        Ok(Err(LocalAgentError::CleanupFailed)) => AskTerminal::ReturnedCleanupFailed,
+        Ok(Err(LocalAgentError::SpawnFailed)) => AskTerminal::ReturnedSpawnFailed,
+        Ok(Err(LocalAgentError::ScratchFailed)) => AskTerminal::ReturnedScratchFailed,
+        Ok(Err(_)) => AskTerminal::ReturnedOtherError,
+        Err(error) if error.is_cancelled() => AskTerminal::JoinCancelled,
+        Err(error) if error.is_panic() => AskTerminal::JoinPanicked,
+        Err(_) => AskTerminal::JoinFailed,
+    }
+}
+
+fn directory_observation(path: &Path) -> Value {
+    match std::fs::read_dir(path) {
+        Ok(entries) => {
+            let mut entry_count = 0;
+            let mut error_count = 0;
+            for entry in entries.take(129) {
+                if entry.is_ok() {
+                    entry_count += 1;
+                } else {
+                    error_count += 1;
+                }
+            }
+            json!({
+                "entries": entry_count,
+                "entry_errors": error_count,
+                "bounded": entry_count + error_count > 128,
+            })
+        }
+        Err(error) => json!({"read_failed": true, "os_error": error.raw_os_error()}),
+    }
+}
+
+fn readiness_diagnostic(observation: Value) {
+    let stderr = std::io::stderr();
+    let mut sink = stderr.lock();
+    write_readiness_diagnostic(&mut sink, &observation);
+}
+
+fn write_readiness_diagnostic(sink: &mut impl Write, observation: &Value) {
+    // Diagnostics contain only fixed categories and counts; failure to write
+    // them cannot bypass cancellation or the owned task's bounded Join.
+    if sink.write_all(b"readiness-cleanup-diagnostic ").is_ok() {
+        let _ = serde_json::to_writer(&mut *sink, observation);
+        let _ = sink.write_all(b"\n");
+    }
+}
+
 static STARTED: OnceLock<Instant> = OnceLock::new();
 static SMALL_STACK: AtomicBool = AtomicBool::new(false);
 static RECORDS: AtomicUsize = AtomicUsize::new(0);
@@ -196,6 +273,11 @@ fn main() {
         .is_some_and(|arg| arg == "--fixture-descendant-no-ack")
     {
         descendant(false);
+    } else if arguments
+        .first()
+        .is_some_and(|arg| arg == "--readiness-error-tests")
+    {
+        readiness_error_controls::run();
     } else if std::env::current_exe()
         .unwrap()
         .file_stem()
@@ -335,12 +417,42 @@ impl Fixture {
         mark(Some(self.kind), Stage::ScratchCheck, Phase::End, None);
     }
 
-    async fn descendant_port(&self) -> u16 {
+    async fn descendant_port<T>(
+        &self,
+        task: &mut tokio::task::JoinHandle<Result<T, LocalAgentError>>,
+        cancellation: &RequestCancellation,
+        stage: Stage,
+        case_index: Option<usize>,
+    ) -> u16 {
+        self.descendant_port_observed(
+            task,
+            cancellation,
+            stage,
+            case_index,
+            &mut readiness_diagnostic,
+        )
+        .await
+    }
+
+    async fn descendant_port_observed<T>(
+        &self,
+        task: &mut tokio::task::JoinHandle<Result<T, LocalAgentError>>,
+        cancellation: &RequestCancellation,
+        stage: Stage,
+        case_index: Option<usize>,
+        diagnostic: &mut impl FnMut(Value),
+    ) -> u16 {
         mark(Some(self.kind), Stage::DescendantPort, Phase::Begin, None);
         let deadline = Instant::now() + Duration::from_secs(3);
-        loop {
-            for entry in std::fs::read_dir(&self.scratch).unwrap() {
-                let path = entry.unwrap().path().join("workspace/descendant-port");
+        let failure = 'readiness: loop {
+            let Ok(entries) = std::fs::read_dir(&self.scratch) else {
+                break ReadinessFailure::ScratchReadFailed;
+            };
+            for entry in entries {
+                let Ok(entry) = entry else {
+                    break 'readiness ReadinessFailure::ScratchReadFailed;
+                };
+                let path = entry.path().join("workspace/descendant-port");
                 if let Ok(text) = std::fs::read_to_string(path) {
                     // The child may have created/truncated the file before its
                     // port write finishes. Keep the original readiness bound.
@@ -355,12 +467,85 @@ impl Fixture {
                     }
                 }
             }
-            assert!(
-                Instant::now() < deadline,
-                "fixture descendant did not start within bound"
-            );
+            if Instant::now() >= deadline {
+                break ReadinessFailure::DeadlineExceeded;
+            }
             tokio::time::sleep(Duration::from_millis(10)).await;
-        }
+        };
+        self.reject_missing_descendant(task, cancellation, stage, case_index, failure, diagnostic)
+            .await
+    }
+
+    async fn reject_missing_descendant<T>(
+        &self,
+        task: &mut tokio::task::JoinHandle<Result<T, LocalAgentError>>,
+        cancellation: &RequestCancellation,
+        stage: Stage,
+        case_index: Option<usize>,
+        failure: ReadinessFailure,
+        diagnostic: &mut impl FnMut(Value),
+    ) -> ! {
+        mark(
+            Some(self.kind),
+            Stage::DescendantPort,
+            match failure {
+                ReadinessFailure::DeadlineExceeded => Phase::DeadlineExceeded,
+                ReadinessFailure::ScratchReadFailed => Phase::Returned,
+            },
+            case_index,
+        );
+        let task_finished_before_cancel = task.is_finished();
+        cancellation.cancel();
+        let join_deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+        mark(Some(self.kind), stage, Phase::CancelRequested, case_index);
+        diagnostic(json!({
+            "phase": "cancel_requested",
+            "kind": self.kind.label(),
+            "stage": stage,
+            "case_index": case_index,
+            "failure": failure,
+            "task_finished_before_cancel": task_finished_before_cancel,
+            "scratch": directory_observation(&self.scratch),
+            "root": directory_observation(self.root.path()),
+        }));
+        mark(Some(self.kind), stage, Phase::AwaitBegin, case_index);
+        // Only the already failing readiness path reserves one second for an
+        // abort Join. Borrowing the handle keeps timeout from detaching the Ask.
+        let result =
+            match tokio::time::timeout_at(join_deadline - Duration::from_secs(1), &mut *task).await
+            {
+                Ok(result) => Some(result),
+                Err(_) => {
+                    task.abort();
+                    mark(Some(self.kind), stage, Phase::AbortRequested, case_index);
+                    tokio::time::timeout_at(join_deadline, &mut *task)
+                        .await
+                        .ok()
+                }
+            };
+        let terminal = result.as_ref().map_or(AskTerminal::Unknown, ask_terminal);
+        mark(
+            Some(self.kind),
+            stage,
+            if result.is_some() {
+                Phase::AwaitReturned
+            } else {
+                Phase::DeadlineExceeded
+            },
+            case_index,
+        );
+        diagnostic(json!({
+            "phase": "after_await",
+            "kind": self.kind.label(),
+            "stage": stage,
+            "case_index": case_index,
+            "failure": failure,
+            "actual_join": result.is_some(),
+            "terminal": terminal,
+            "scratch": directory_observation(&self.scratch),
+            "root": directory_observation(self.root.path()),
+        }));
+        panic!("fixture descendant did not start within bound");
     }
 
     fn descendant_identity(&self) -> Value {
@@ -375,6 +560,432 @@ impl Fixture {
         }
         // Missing diagnostics must not panic before the owned Ask finishes.
         json!({"error":"missing_identity"})
+    }
+}
+
+mod readiness_error_controls {
+    use std::{
+        any::Any,
+        future::Future,
+        pin::Pin,
+        sync::Arc,
+        task::{Context, Poll},
+    };
+
+    use super::*;
+
+    const ORIGINAL_READINESS_PANIC: &str = "fixture descendant did not start within bound";
+    const SECRET_SENTINEL: &str = "OWNED_READINESS_REDACTION_SENTINEL";
+    const CONTROL_DEADLINE: Duration = Duration::from_secs(10);
+
+    #[derive(Clone, Copy)]
+    enum Reply {
+        Timeout,
+        CooperativeCancel,
+        IgnoreCancellation,
+        Success,
+        Panic,
+        ContextError,
+    }
+
+    struct DropReceipt {
+        scratch: PathBuf,
+        dropped: Arc<AtomicUsize>,
+        cleaned: Arc<AtomicBool>,
+    }
+
+    impl Drop for DropReceipt {
+        fn drop(&mut self) {
+            let clean = match std::fs::remove_dir_all(&self.scratch) {
+                Ok(()) => true,
+                Err(error) => error.kind() == std::io::ErrorKind::NotFound,
+            };
+            self.cleaned.store(clean, Ordering::Release);
+            self.dropped.fetch_add(1, Ordering::Release);
+        }
+    }
+
+    struct OwnedAsk {
+        task: tokio::task::JoinHandle<Result<String, LocalAgentError>>,
+    }
+
+    impl Drop for OwnedAsk {
+        fn drop(&mut self) {
+            // The control normally joins before rejection. On a control bug,
+            // retaining an abort owner avoids silently detaching a pending task.
+            self.task.abort();
+        }
+    }
+
+    // Catch only the test helper's retained panic. Pinning the future in a Box
+    // permits catching each poll without unsafe code or another spawned owner.
+    struct CatchTestPanic<F> {
+        future: Pin<Box<F>>,
+    }
+
+    impl<F: Future> Future for CatchTestPanic<F> {
+        type Output = Result<F::Output, Box<dyn Any + Send>>;
+
+        fn poll(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Self::Output> {
+            match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                self.future.as_mut().poll(context)
+            })) {
+                Ok(Poll::Pending) => Poll::Pending,
+                Ok(Poll::Ready(value)) => Poll::Ready(Ok(value)),
+                Err(payload) => Poll::Ready(Err(payload)),
+            }
+        }
+    }
+
+    struct FailedWriter {
+        attempts: usize,
+    }
+
+    impl Write for FailedWriter {
+        fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+            self.attempts += 1;
+            Err(std::io::ErrorKind::PermissionDenied.into())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    struct Capture {
+        observations: Vec<Value>,
+        bytes: Vec<u8>,
+        elapsed: Duration,
+        failed_writes: usize,
+    }
+
+    fn control_fixture() -> Fixture {
+        let root = tempfile::tempdir().unwrap();
+        let scratch = root.path().join("scratch");
+        std::fs::create_dir(&scratch).unwrap();
+        let executable = root.path().join("never-launched-control");
+        std::fs::write(&executable, b"not an executable").unwrap();
+        Fixture {
+            root,
+            executable,
+            scratch,
+            kind: LocalAgentKind::Codex,
+        }
+    }
+
+    async fn start_ask(
+        fixture: &Fixture,
+        signal: &RequestCancellation,
+        reply: Reply,
+        dropped: &Arc<AtomicUsize>,
+        cleaned: &Arc<AtomicBool>,
+    ) -> OwnedAsk {
+        let scratch = fixture.scratch.join(SECRET_SENTINEL);
+        std::fs::create_dir(&scratch).unwrap();
+        std::fs::write(scratch.join(SECRET_SENTINEL), SECRET_SENTINEL).unwrap();
+        let receipt = DropReceipt {
+            scratch,
+            dropped: Arc::clone(dropped),
+            cleaned: Arc::clone(cleaned),
+        };
+        let cancellation = signal.clone();
+        let (ready, started) = tokio::sync::oneshot::channel();
+        let task = tokio::spawn(async move {
+            let _receipt = receipt;
+            let _ = ready.send(());
+            match reply {
+                Reply::Timeout => Err(LocalAgentError::Timeout),
+                Reply::CooperativeCancel => {
+                    cancellation.wait_cancelled().await;
+                    Err(LocalAgentError::Cancelled)
+                }
+                Reply::IgnoreCancellation => std::future::pending().await,
+                Reply::Success => Ok(SECRET_SENTINEL.to_owned()),
+                Reply::Panic => std::panic::panic_any(SECRET_SENTINEL.to_owned()),
+                Reply::ContextError => Err(LocalAgentError::Context(
+                    keelshell_ai::AiError::CredentialInContext,
+                )),
+            }
+        });
+        let mut ask = OwnedAsk { task };
+        if !matches!(
+            tokio::time::timeout(Duration::from_secs(1), started).await,
+            Ok(Ok(()))
+        ) {
+            ask.task.abort();
+            assert!(
+                tokio::time::timeout(Duration::from_secs(1), &mut ask.task)
+                    .await
+                    .is_ok(),
+                "control startup failure did not join its owned task"
+            );
+            panic!("control task did not start within its own bound");
+        }
+        ask
+    }
+
+    async fn run_failure(
+        reply: Reply,
+        case_index: usize,
+        remove_scratch: bool,
+        fail_writer: bool,
+    ) -> Capture {
+        let fixture = control_fixture();
+        let signal = RequestCancellation::new();
+        let dropped = Arc::new(AtomicUsize::new(0));
+        let cleaned = Arc::new(AtomicBool::new(false));
+        let mut ask = start_ask(&fixture, &signal, reply, &dropped, &cleaned).await;
+        if remove_scratch {
+            std::fs::remove_dir_all(&fixture.scratch).unwrap();
+        }
+        let mut observations = Vec::new();
+        let mut bytes = Vec::new();
+        let mut failed_writer = FailedWriter { attempts: 0 };
+        let started = Instant::now();
+        let mut diagnostic = |observation: Value| {
+            assert!(signal.is_cancelled(), "diagnostics preceded cancellation");
+            if observation["phase"] == "after_await" {
+                assert_eq!(dropped.load(Ordering::Acquire), 1, "Ask future still owned");
+                assert!(
+                    cleaned.load(Ordering::Acquire),
+                    "owned scratch cleanup failed"
+                );
+            }
+            if fail_writer {
+                write_readiness_diagnostic(&mut failed_writer, &observation);
+            } else {
+                write_readiness_diagnostic(&mut bytes, &observation);
+            }
+            readiness_diagnostic(observation.clone());
+            observations.push(observation);
+        };
+        let caught = CatchTestPanic {
+            future: Box::pin(fixture.descendant_port_observed(
+                &mut ask.task,
+                &signal,
+                Stage::ConfiguredDescendant,
+                Some(case_index),
+                &mut diagnostic,
+            )),
+        };
+        let result = tokio::time::timeout(CONTROL_DEADLINE, caught).await;
+        let payload = match result {
+            Ok(Err(payload)) => payload,
+            Ok(Ok(_)) => panic!("missing port unexpectedly passed readiness"),
+            Err(_) => {
+                signal.cancel();
+                ask.task.abort();
+                assert!(
+                    tokio::time::timeout(Duration::from_secs(1), &mut ask.task)
+                        .await
+                        .is_ok(),
+                    "control deadline failure did not join its owned task"
+                );
+                panic!("readiness error control exceeded its own deadline");
+            }
+        };
+        let panic_text = payload
+            .downcast_ref::<String>()
+            .map(String::as_str)
+            .or_else(|| payload.downcast_ref::<&str>().copied());
+        assert!(
+            panic_text == Some(ORIGINAL_READINESS_PANIC),
+            "control did not retain the original readiness failure"
+        );
+        assert_eq!(observations.len(), 2, "missing failure observations");
+        assert_eq!(observations[0]["phase"], "cancel_requested");
+        assert_eq!(observations[1]["phase"], "after_await");
+        assert_eq!(observations[1]["actual_join"], true);
+        assert_eq!(dropped.load(Ordering::Acquire), 1);
+        assert!(cleaned.load(Ordering::Acquire));
+        if remove_scratch {
+            std::fs::create_dir(&fixture.scratch).unwrap();
+        } else {
+            assert!(started.elapsed() >= Duration::from_secs(3));
+        }
+        fixture.assert_clean();
+        Capture {
+            observations,
+            bytes,
+            elapsed: started.elapsed(),
+            failed_writes: failed_writer.attempts,
+        }
+    }
+
+    fn assert_redacted(capture: &Capture) {
+        let text = std::str::from_utf8(&capture.bytes).unwrap();
+        assert!(!text.contains(SECRET_SENTINEL));
+        assert!(!text.contains("CredentialInContext"));
+        assert!(!text.contains("AI API key is present in the preview"));
+        assert!(!text.contains("never-launched-control"));
+        assert!(!text.contains("Context("));
+        assert!(text.contains("\"actual_join\":true"));
+    }
+
+    async fn missing_port_joins_completed_timeout() {
+        let capture = run_failure(Reply::Timeout, 0, false, false).await;
+        assert_eq!(capture.observations[1]["terminal"], "returned_timeout");
+        assert_redacted(&capture);
+    }
+
+    async fn missing_port_cooperatively_cancels_and_joins() {
+        let capture = run_failure(Reply::CooperativeCancel, 1, false, false).await;
+        assert_eq!(capture.observations[1]["terminal"], "returned_cancelled");
+        assert_redacted(&capture);
+    }
+
+    async fn missing_port_aborts_yielding_ignored_cancellation() {
+        let capture = run_failure(Reply::IgnoreCancellation, 2, false, false).await;
+        assert_eq!(capture.observations[1]["terminal"], "join_cancelled");
+        assert!(capture.elapsed >= Duration::from_secs(7));
+        assert_redacted(&capture);
+    }
+
+    async fn missing_port_redacts_success_text() {
+        let capture = run_failure(Reply::Success, 3, false, false).await;
+        assert_eq!(capture.observations[1]["terminal"], "returned_ok");
+        assert_redacted(&capture);
+    }
+
+    async fn missing_port_redacts_panic_payload() {
+        let capture = run_failure(Reply::Panic, 4, false, false).await;
+        assert_eq!(capture.observations[1]["terminal"], "join_panicked");
+        assert_redacted(&capture);
+    }
+
+    async fn missing_port_redacts_context_error() {
+        let capture = run_failure(Reply::ContextError, 5, false, false).await;
+        assert_eq!(capture.observations[1]["terminal"], "returned_other_error");
+        assert_redacted(&capture);
+    }
+
+    async fn scratch_read_failure_still_cancels_and_joins() {
+        let capture = run_failure(Reply::CooperativeCancel, 6, true, false).await;
+        assert_eq!(capture.observations[0]["failure"], "scratch_read_failed");
+        assert_eq!(capture.observations[0]["scratch"]["read_failed"], true);
+        assert_eq!(capture.observations[1]["terminal"], "returned_cancelled");
+        assert_redacted(&capture);
+    }
+
+    async fn diagnostic_write_failure_still_cancels_and_joins() {
+        let capture = run_failure(Reply::CooperativeCancel, 7, false, true).await;
+        assert_eq!(capture.observations[1]["terminal"], "returned_cancelled");
+        assert_eq!(capture.failed_writes, 2);
+        assert!(capture.bytes.is_empty());
+    }
+
+    async fn ready_port_does_not_cancel_join_or_diagnose() {
+        let fixture = control_fixture();
+        let signal = RequestCancellation::new();
+        let dropped = Arc::new(AtomicUsize::new(0));
+        let cleaned = Arc::new(AtomicBool::new(false));
+        let mut ask = start_ask(
+            &fixture,
+            &signal,
+            Reply::CooperativeCancel,
+            &dropped,
+            &cleaned,
+        )
+        .await;
+        let workspace = fixture.scratch.join(SECRET_SENTINEL).join("workspace");
+        std::fs::create_dir(&workspace).unwrap();
+        std::fs::write(workspace.join("descendant-port"), b"32123").unwrap();
+        let mut observations = Vec::new();
+        let ready = tokio::time::timeout(
+            Duration::from_secs(1),
+            fixture.descendant_port_observed(
+                &mut ask.task,
+                &signal,
+                Stage::ConfiguredDescendant,
+                Some(8),
+                &mut |value| observations.push(value),
+            ),
+        )
+        .await;
+        // Cleanup precedes assertions so a regression cannot orphan the task.
+        let cancelled_during_readiness = signal.is_cancelled();
+        let dropped_during_readiness = dropped.load(Ordering::Acquire);
+        signal.cancel();
+        let joined = tokio::time::timeout(Duration::from_secs(1), &mut ask.task)
+            .await
+            .expect("normal-path control did not join after explicit cancellation");
+        assert!(matches!(joined, Ok(Err(LocalAgentError::Cancelled))));
+        assert_eq!(ready.unwrap(), 32123);
+        assert!(!cancelled_during_readiness);
+        assert_eq!(dropped_during_readiness, 0);
+        assert!(observations.is_empty());
+        assert_eq!(dropped.load(Ordering::Acquire), 1);
+        assert!(cleaned.load(Ordering::Acquire));
+        fixture.assert_clean();
+    }
+
+    async fn directory_counts_are_bounded_and_redacted() {
+        let root = tempfile::tempdir().unwrap();
+        for index in 0..140 {
+            std::fs::write(
+                root.path().join(format!("{SECRET_SENTINEL}-{index}")),
+                b"owned",
+            )
+            .unwrap();
+        }
+        let observation = directory_observation(root.path());
+        assert_eq!(observation["entries"], 129);
+        assert_eq!(observation["entry_errors"], 0);
+        assert_eq!(observation["bounded"], true);
+        assert!(!observation.to_string().contains(SECRET_SENTINEL));
+    }
+
+    fn case_record(name: &'static str, phase: &'static str) {
+        eprintln!(
+            "readiness-error-test {}",
+            json!({"name": name, "phase": phase})
+        );
+    }
+
+    async fn cases() {
+        macro_rules! control {
+            ($case:ident) => {{
+                case_record(stringify!($case), "begin");
+                Box::pin($case()).await;
+                case_record(stringify!($case), "passed");
+            }};
+        }
+        control!(missing_port_joins_completed_timeout);
+        control!(missing_port_cooperatively_cancels_and_joins);
+        control!(missing_port_aborts_yielding_ignored_cancellation);
+        control!(missing_port_redacts_success_text);
+        control!(missing_port_redacts_panic_payload);
+        control!(missing_port_redacts_context_error);
+        control!(scratch_read_failure_still_cancels_and_joins);
+        control!(diagnostic_write_failure_still_cancels_and_joins);
+        control!(ready_port_does_not_cancel_join_or_diagnose);
+        control!(directory_counts_are_bounded_and_redacted);
+    }
+
+    pub(super) fn run() {
+        let _ = STARTED.set(Instant::now());
+        // This dedicated entry runs only owned controls. The default hook would
+        // echo the intentionally hostile panic payload before Join classification.
+        // Restore the hook after runtime shutdown, including an unexpected failure.
+        let previous_hook = std::panic::take_hook();
+        std::panic::set_hook(Box::new(|_| {}));
+        let result = std::panic::catch_unwind(|| {
+            tokio::runtime::Builder::new_multi_thread()
+                .worker_threads(2)
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    tokio::time::timeout(Duration::from_secs(90), cases())
+                        .await
+                        .expect("readiness error controls exceeded their own overall deadline");
+                });
+        });
+        std::panic::set_hook(previous_hook);
+        if let Err(payload) = result {
+            eprintln!("readiness-error-test controller_failed");
+            std::panic::resume_unwind(payload);
+        }
     }
 }
 
@@ -482,12 +1093,14 @@ async fn integration_cases() {
                 .unwrap();
             let signal = RequestCancellation::new();
             let observing = signal.clone();
-            let task = tokio::spawn(async move {
+            let mut task = tokio::spawn(async move {
                 LocalAgentClient
                     .ask(review.approve(), credential(), &observing)
                     .await
             });
-            let port = fixture.descendant_port().await;
+            let port = fixture
+                .descendant_port(&mut task, &signal, Stage::Descendant, Some(case_index))
+                .await;
             assert!(connect_once(kind, Stage::Descendant, port).is_ok());
             if cancel {
                 signal.cancel();
@@ -559,12 +1172,16 @@ async fn integration_cases() {
             .config(Duration::from_secs(5))
             .prepare(ContextDraft::new("wait-descendant"), &[], 8192)
             .unwrap();
-        let task = tokio::spawn(async move {
+        let signal = RequestCancellation::new();
+        let observing = signal.clone();
+        let mut task = tokio::spawn(async move {
             LocalAgentClient
-                .ask(review.approve(), credential(), &RequestCancellation::new())
+                .ask(review.approve(), credential(), &observing)
                 .await
         });
-        let port = fixture.descendant_port().await;
+        let port = fixture
+            .descendant_port(&mut task, &signal, Stage::Abort, None)
+            .await;
         task.abort();
         mark(Some(kind), Stage::Abort, Phase::AbortRequested, None);
         assert!(task.await.unwrap_err().is_cancelled());
@@ -880,7 +1497,7 @@ async fn progress_cases(fixture: &Fixture) {
     for question in ["progress-nonzero-gate", "progress-cancel-descendant-gate"] {
         let signal = RequestCancellation::new();
         let (progress, receiver) = LocalAskProgress::channel();
-        let task = start_progress_ask(fixture, question, progress, &signal);
+        let mut task = start_progress_ask(fixture, question, progress, &signal);
         let mut facts = Vec::new();
         let workspace = wait_progress_gate(
             fixture,
@@ -894,7 +1511,11 @@ async fn progress_cases(fixture: &Fixture) {
             "validated end receipt cannot bypass process/cleanup"
         );
         let port = if question.contains("descendant") {
-            Some(fixture.descendant_port().await)
+            Some(
+                fixture
+                    .descendant_port(&mut task, &signal, Stage::ProgressAsk, Some(2))
+                    .await,
+            )
         } else {
             None
         };
@@ -1031,8 +1652,10 @@ async fn progress_cases(fixture: &Fixture) {
         } else {
             Some(receiver)
         };
-        let task = start_progress_ask(fixture, "wait-descendant", progress, &signal);
-        let port = fixture.descendant_port().await;
+        let mut task = start_progress_ask(fixture, "wait-descendant", progress, &signal);
+        let port = fixture
+            .descendant_port(&mut task, &signal, Stage::ProgressAsk, Some(9))
+            .await;
         signal.cancel();
         assert_eq!(
             tokio::time::timeout(Duration::from_secs(5), task)
@@ -1132,12 +1755,19 @@ async fn configured_budget_cases(fixture: &Fixture) {
             .unwrap();
         let cancellation = RequestCancellation::new();
         let child_signal = cancellation.clone();
-        let task = tokio::spawn(async move {
+        let mut task = tokio::spawn(async move {
             LocalAgentClient
                 .ask(review.approve(), credential(), &child_signal)
                 .await
         });
-        let port = fixture.descendant_port().await;
+        let port = fixture
+            .descendant_port(
+                &mut task,
+                &cancellation,
+                Stage::ConfiguredDescendant,
+                Some(case_index),
+            )
+            .await;
         let identity = fixture.descendant_identity();
         let ready_deadline = diagnostic_began + Duration::from_secs(if cancel { 30 } else { 2 });
         // Diagnostic reads consume the existing operation budget. Capture the

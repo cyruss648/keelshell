@@ -1,5 +1,7 @@
 # 文档索引
 
+- [本地智能体准备期失败收尾](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)：取消与实际 Join、诊断脱敏、独立控制及未验证边界。
+
 - [小窗口会话标签设计](adr/0080-scrollable-session-tabs.md)：固定关闭入口、可发现的导航、布局后reveal与离线图标。
 - [小窗口会话标签修复记录](testing/records/2026-10-08-compact-session-tabs.md)：真实缺陷与新功能各自的检查状态。
 
