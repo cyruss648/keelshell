@@ -1,5 +1,11 @@
 # KeelShell 开发交接 — 2026-10-07
 
+精确 `319cb2a` 的 [Quality 37600399634](https://github.com/cyruss648/keelshell/actions/runs/37600399634) 已终结：macOS/Linux成功，Windows应用工作目录两项夹具失败；三份完整日志已读回。新test-only修正保留普通Windows盘符路径，JSON路径按解析值核对，生产准入与期限不变。完整本机门禁实际0/757.508秒，1612普通/8doc/6Python、严格检查及两626阶段控制器通过，736输入前后相同、自有进程组和TMP回收；非作者源码、两项GPUI和全证据复核无阻断，新提交Windows CI及原生仍开放。见[应用夹具后续记录](testing/records/2026-10-07-selected-directory-app-platform-followup.md)。旧Linux同步失败原因仍未知。
+
+三方合并/严格patch的17路径独立候选已完成新非作者最终复核和作者完整门禁；根已复制全部224证据、核对741输入、原始退出和实际产物，尚未导入主树。应用内Agent的独立反例确认关闭捕获页签后后台仍可能写入；候选不整合，作者正在修正即时撤权及终端结束/重连边界并重新验证。上述功能不表示产品完成，主树组合、新原生与精确CI仍须各自完成。
+
+当前734源输入的新MCP原生尝试在首个120秒窗口确认因操作端记录未成功而退出1；外部CLI/模型/业务均未启动，758项绑定完整读回相同，自有GUI/夹具已reap、已知进程组/端口关闭、私有数据移除。单独截图API与时钟映射探针只证明操作流程，不关闭业务或产品验收；见[当前启动记录](testing/records/2026-10-07-external-mcp-current-main-startup.md)。MCP仅由KeelShell对外提供服务。
+
 最新 test-only 平台后续修复基于 `3873dacb9fe6608a9aec40136bb1d82200da9a51`：Windows directory 单元夹具保留普通盘符路径，新增设备/网络命名空间拒绝反例；串行目录控制器按已有单次预算推导 Unix304秒/Windows224秒总watchdog，所有单次期限与断言保持。正式格式/x.y/workspace all-targets严格Clippy、142普通AI/2doc、Unix目录20、默认与2MiB各626阶段实际0；4供应商测试ignored。734输入前后相等，所属进程组与私有TMP完整回收，新非作者源码和完整证据复核 `NO_BLOCKER`。精确3873的Windows单元夹具失败和Linux总40秒超时原log保留；Linux未进入app同步测试，根因与新提交级三平台CI/原生仍开放。详见[后续记录](testing/records/2026-10-07-directory-controller-platform-followup.md)。MCP方向继续为KeelShell向外部智能体提供服务，不添加第三方MCP客户端。
 
 本轮平台修复基于已推送的 `0d64f09acfb7e671217a8bb1d3cb1397b421558a`，保留审核式本地智能体工作目录和 Linux 失败观察 v2。正式本机门禁实际退出 0：格式/x.y/严格 Clippy、1,612 ordinary / 8 doc / 6 scripts Python、目录控制器20、默认与2MiB各626阶段；22 ignored未执行。57项打包和macOS app/MCP构建实际0，三份733输入前后相等，进程组和临时目录完整回收；新非作者源码和证据复核无新增阻断。详见[平台修复记录](testing/records/2026-10-07-local-agent-directory-platform-fix.md)。精确新提交三平台 CI 和 Windows/Linux 桌面仍开放。基线 [Quality 37591946965](https://github.com/cyruss648/keelshell/actions/runs/37591946965) 已结束：macOS 成功，Windows 条件编译遗漏、Linux目录控制器readiness失败；Linux未进入app同步测试。父 `4c9b14c` 的 Linux两项同步审批等待失败仍保留，根因未确定。公开仓库为 [cyruss648/keelshell](https://github.com/cyruss648/keelshell)。

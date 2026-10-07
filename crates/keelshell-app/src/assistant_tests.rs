@@ -1365,6 +1365,16 @@ fn local_profile(agent: keelshell_core::AiLocalAgent) -> NamedAiProfile {
     profile
 }
 
+fn owned_selected_directory_path(root: &std::path::Path) -> std::path::PathBuf {
+    // Unix resolves aliases such as /var; Windows admission expects an ordinary
+    // drive path and intentionally rejects canonicalize's verbatim namespace.
+    #[cfg(unix)]
+    let path = root.canonicalize().expect("canonical owned root");
+    #[cfg(not(unix))]
+    let path = root.to_path_buf();
+    path
+}
+
 #[gpui_kit::test]
 fn local_review_requires_explicit_key_redacts_context_and_survives_language(
     cx: &mut TestAppContext,
@@ -1450,11 +1460,7 @@ async fn selected_directory_review_runs_in_background_and_preserves_scrollable_p
 ) {
     use keelshell_core::{AiBackend, AiLocalAgent, AiLocalAgentWorkingDirectory};
     let root = tempfile::tempdir().expect("owned selected directory");
-    let path = root
-        .path()
-        .canonicalize()
-        .expect("owned canonical root")
-        .join("完整-directory-".repeat(12));
+    let path = owned_selected_directory_path(root.path()).join("完整-directory-".repeat(12));
     std::fs::create_dir(&path).expect("owned selected directory");
     let (handle, panel) = mount(cx);
     panel.update(cx, |panel, cx| {
@@ -1494,10 +1500,19 @@ async fn selected_directory_review_runs_in_background_and_preserves_scrollable_p
         let Some(PreparedAssistantRequest::Local(request)) = &panel.prepared else {
             panic!("selected review");
         };
-        assert!(
-            request
-                .preview_json()
-                .contains(path.to_str().expect("Unicode path"))
+        let preview: serde_json::Value =
+            serde_json::from_str(request.preview_json()).expect("complete review JSON");
+        assert_eq!(
+            preview["workspace"]["selected_path"].as_str(),
+            path.to_str(),
+            "JSON escaping does not change the selected native path"
+        );
+        assert_eq!(
+            preview["workspace"]["canonical_path"].as_str(),
+            path.canonicalize()
+                .expect("canonical selected directory")
+                .to_str(),
+            "the independently resolved identity is included in the review"
         );
         assert!(
             !request.preview_json().contains("owned-session"),
@@ -1587,10 +1602,7 @@ async fn changing_selected_directory_cancels_pending_prepare_without_replacing_n
         } = &mut profile.backend
         {
             *working_directory = AiLocalAgentWorkingDirectory::Selected {
-                path: root
-                    .path()
-                    .canonicalize()
-                    .expect("canonical")
+                path: owned_selected_directory_path(root.path())
                     .to_string_lossy()
                     .into_owned(),
             };
