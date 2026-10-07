@@ -19,10 +19,19 @@ use std::{
 
 use keelshell_ai::{
     ContextDraft, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentKind,
-    LocalAgentLimits, RequestCancellation,
+    LocalAgentLimits, LocalAgentWorkingDirectory, LocalAskProgress, RequestCancellation,
 };
 use serde_json::{Value, json};
 
+const DIRECTORY_CANARIES: [&str; 6] = [
+    "keelshell-unreviewed-project-config-canary",
+    "keelshell-unreviewed-selected-instructions-canary",
+    "keelshell-unreviewed-ancestor-instructions-canary",
+    "keelshell-unreviewed-selected-skill-canary",
+    "keelshell-unreviewed-model-instructions-canary",
+    "keelshell-unreviewed-project-environment-canary",
+];
+const SSH_SELECTION: &str = "explicit-owned-ssh-selection";
 const ANSWER: &str = "controlled fixture answer";
 const QUESTION: &str = "explicit-loopback-question";
 const UNREVIEWED_CANARY: &str = "keelshell-unreviewed-ancestor-rule-canary";
@@ -77,7 +86,7 @@ impl Server {
                     continue;
                 }
                 // No headers or credentials are recorded, even dummy ones.
-                recorded.lock().unwrap().push(json!({"path":path,"tools":request.get("tools"),"model":request.get("model"),"explicit_context_present":request.to_string().contains(QUESTION),"inference":true,"unreviewed_file_canary_present":request.to_string().contains(UNREVIEWED_CANARY)}));
+                recorded.lock().unwrap().push(json!({"path":path,"tools":request.get("tools"),"model":request.get("model"),"explicit_context_present":request.to_string().contains(QUESTION),"inference":true,"unreviewed_file_canary_present":request.to_string().contains(UNREVIEWED_CANARY),"directory_canaries":DIRECTORY_CANARIES.map(|canary|request.to_string().contains(canary)),"explicit_ssh_selection_present":request.to_string().contains(SSH_SELECTION)}));
                 let body = sse(kind);
                 write!(
                     stream,
@@ -198,7 +207,7 @@ fn sse(kind: LocalAgentKind) -> String {
         .collect()
 }
 
-async fn native_cli(kind: LocalAgentKind, variable: &str) {
+async fn native_cli(kind: LocalAgentKind, variable: &str, selected_directory: bool) {
     let executable = PathBuf::from(
         std::env::var_os(variable)
             .expect("opt-in requires an explicitly supplied absolute native executable"),
@@ -207,13 +216,90 @@ async fn native_cli(kind: LocalAgentKind, variable: &str) {
     for name in ["AGENTS.md", "CLAUDE.md"] {
         std::fs::write(scratch.path().join(name), UNREVIEWED_CANARY).unwrap();
     }
+    let selected = scratch
+        .path()
+        .canonicalize()
+        .unwrap()
+        .join("selected 运维 project");
+    if selected_directory {
+        std::fs::create_dir(&selected).unwrap();
+        for name in ["AGENTS.md", "CLAUDE.md"] {
+            std::fs::write(scratch.path().join(name), DIRECTORY_CANARIES[2]).unwrap();
+            std::fs::write(selected.join(name), DIRECTORY_CANARIES[1]).unwrap();
+        }
+        std::fs::create_dir_all(selected.join(".agents/skills/prohibited")).unwrap();
+        std::fs::write(
+            selected.join(".agents/skills/prohibited/SKILL.md"),
+            format!(
+                "---\nname: prohibited\ndescription: {}\n---\n{}",
+                DIRECTORY_CANARIES[3], DIRECTORY_CANARIES[3]
+            ),
+        )
+        .unwrap();
+        std::fs::write(
+            selected.join("model-instructions.txt"),
+            DIRECTORY_CANARIES[4],
+        )
+        .unwrap();
+        std::fs::write(
+            selected.join(".env"),
+            format!("PRIVATE_FIXTURE_VALUE={}\n", DIRECTORY_CANARIES[5]),
+        )
+        .unwrap();
+        let launcher = PathBuf::from(
+            std::env::var_os("KEELSHELL_DIRECTORY_LAUNCHER")
+                .expect("selected native case requires trusted built launcher"),
+        );
+        assert!(launcher.is_absolute());
+        let marker = selected.join("forbidden-project-start");
+        let canary_program = PathBuf::from(
+            std::env::var_os("KEELSHELL_PROJECT_CANARY_EXECUTABLE")
+                .expect("selected native case requires owned compiled canary program"),
+        );
+        assert!(canary_program.is_absolute());
+        let mut child = std::process::Command::new(&canary_program)
+            .args(["--forbidden-project-start", marker.to_str().unwrap()])
+            .env_clear()
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(3);
+        let status = loop {
+            if let Some(status) = child.try_wait().unwrap() {
+                break status;
+            }
+            if Instant::now() >= deadline {
+                child.kill().unwrap();
+                child.wait().unwrap();
+                panic!("owned canary viability program exceeded bounded deadline");
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        };
+        assert!(status.success());
+        assert!(marker.exists());
+        std::fs::remove_file(&marker).unwrap();
+        let command = canary_program.to_string_lossy();
+        std::fs::create_dir(selected.join(".codex")).unwrap();
+        std::fs::write(selected.join(".codex/config.toml"),format!("instructions={}\nmodel_instructions_file={}\n[features]\nhooks=true\nshell_tool=true\nplugins=true\n[mcp_servers.prohibited]\ncommand={}\nargs=[\"--forbidden-project-start\",{}]\n",serde_json::json!(DIRECTORY_CANARIES[0]),serde_json::json!(selected.join("model-instructions.txt")),serde_json::json!(command),serde_json::json!(marker))).unwrap();
+        std::fs::create_dir(selected.join(".claude")).unwrap();
+        let forbidden_command = format!(
+            "{} --forbidden-project-start {}",
+            serde_json::json!(command),
+            serde_json::json!(marker)
+        );
+        std::fs::write(selected.join(".claude/settings.json"),serde_json::to_vec(&json!({"env":{"PRIVATE_FIXTURE_VALUE":DIRECTORY_CANARIES[5]},"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":forbidden_command}]}]}})).unwrap()).unwrap();
+        std::fs::write(selected.join(".mcp.json"),serde_json::to_vec(&json!({"mcpServers":{"prohibited":{"command":command,"args":["--forbidden-project-start",marker]}}})).unwrap()).unwrap();
+    }
+    let scratch_entries_before = std::fs::read_dir(scratch.path()).unwrap().count();
     let mut server = Server::start(kind);
     let model = if kind == LocalAgentKind::Codex {
         "gpt-6-sol"
     } else {
         "claude-sonnet-4-6"
     };
-    let config = LocalAgentConfig::new(kind, executable, scratch.path(), model)
+    let mut config = LocalAgentConfig::new(kind, executable, scratch.path(), model)
         .unwrap()
         .with_inference_endpoint(&server.endpoint)
         .unwrap()
@@ -227,20 +313,62 @@ async fn native_cli(kind: LocalAgentKind, variable: &str) {
             )
             .unwrap(),
         );
+    let cancellation = RequestCancellation::new();
+    if selected_directory {
+        config = config
+            .with_working_directory(LocalAgentWorkingDirectory::Selected(selected.clone()))
+            .unwrap()
+            .with_directory_launcher(PathBuf::from(
+                std::env::var_os("KEELSHELL_DIRECTORY_LAUNCHER").unwrap(),
+            ))
+            .unwrap();
+    }
+    let context = if selected_directory {
+        ContextDraft::new(QUESTION).add_selection("SSH", SSH_SELECTION)
+    } else {
+        ContextDraft::new(QUESTION)
+    };
+    let review = if selected_directory {
+        config
+            .prepare_checked(context, &[], 8192, &cancellation)
+            .await
+            .unwrap()
+    } else {
+        config.prepare(context, &[], 8192).unwrap()
+    };
+    if selected_directory {
+        assert!(review.preview_json().contains(selected.to_str().unwrap()));
+        for canary in DIRECTORY_CANARIES {
+            assert!(!review.preview_stdin().contains(canary));
+        }
+    }
+    let (progress, observations) = LocalAskProgress::channel();
     let result = LocalAgentClient
-        .ask(
-            config
-                .prepare(ContextDraft::new(QUESTION), &[], 8192)
-                .unwrap()
-                .approve(),
+        .ask_with_progress(
+            review.approve(),
             LocalAgentCredential::new("fixture-only-not-a-credential").unwrap(),
-            &RequestCancellation::new(),
+            &cancellation,
+            progress,
         )
         .await;
     server.close();
+    let observed: Vec<_> = std::iter::from_fn(|| observations.try_recv().ok())
+        .map(|stage| format!("{stage:?}"))
+        .collect();
+    if let Err(error) = &result {
+        let receipt = json!({"kind":format!("{kind:?}"),"error":format!("{error:?}"),"observed_stages":observed,"requests":server.requests.lock().unwrap().clone(),"complete_answer":false,"scratch_removed":std::fs::read_dir(scratch.path()).unwrap().count()==scratch_entries_before,"inference_transport":"owned loopback SSE fixture","supplier_model_or_account_used":false,"selected_directory":selected_directory,"project_hook_or_mcp_program_started":selected.join("forbidden-project-start").exists()});
+        save_receipt(kind, selected_directory, &receipt);
+    }
     let reply = result.unwrap();
     assert_eq!(reply.text(), ANSWER);
-    assert_eq!(std::fs::read_dir(scratch.path()).unwrap().count(), 2);
+    assert_eq!(
+        std::fs::read_dir(scratch.path()).unwrap().count(),
+        scratch_entries_before
+    );
+    assert!(
+        !selected.join("forbidden-project-start").exists(),
+        "project hook or MCP program was not started"
+    );
     let requests = server.requests.lock().unwrap().clone();
     let inference: Vec<_> = requests
         .iter()
@@ -252,6 +380,16 @@ async fn native_cli(kind: LocalAgentKind, variable: &str) {
     }
     assert_eq!(inference[0]["explicit_context_present"], true);
     assert_eq!(inference[0]["unreviewed_file_canary_present"], false);
+    if selected_directory {
+        assert_eq!(inference[0]["explicit_ssh_selection_present"], true);
+        assert!(
+            inference[0]["directory_canaries"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|value| value == false)
+        );
+    }
     assert!(
         inference[0]["tools"].is_null()
             || inference[0]["tools"].as_array().is_some_and(Vec::is_empty),
@@ -263,13 +401,24 @@ async fn native_cli(kind: LocalAgentKind, variable: &str) {
         "/v1/messages?beta=true"
     };
     assert_eq!(inference[0]["path"], expected_path);
-    let receipt = json!({"kind":format!("{kind:?}"),"version":reply.version().to_string(),"frames":reply.frame_count(),"requests":requests,"complete_answer":true,"scratch_removed":true,"ancestor_rules_excluded":true,"inference_transport":"owned loopback SSE fixture","supplier_model_or_account_used":false});
+    let receipt = json!({"kind":format!("{kind:?}"),"version":reply.version().to_string(),"frames":reply.frame_count(),"observed_stages":observed,"requests":requests,"complete_answer":true,"scratch_removed":true,"ancestor_rules_excluded":true,"inference_transport":"owned loopback SSE fixture","supplier_model_or_account_used":false,"selected_directory":selected_directory,"project_hook_or_mcp_program_started":false});
+    save_receipt(kind, selected_directory, &receipt);
+}
+
+fn save_receipt(kind: LocalAgentKind, selected_directory: bool, receipt: &Value) {
     if let Some(directory) = std::env::var_os("KEELSHELL_CLI_FIXTURE_RECEIPT_DIR") {
         let path = PathBuf::from(directory);
         assert!(path.is_absolute());
         std::fs::create_dir_all(&path).unwrap();
         std::fs::write(
-            path.join(format!("{kind:?}.json")),
+            path.join(format!(
+                "{kind:?}{}.json",
+                if selected_directory {
+                    "-selected"
+                } else {
+                    "-isolated"
+                }
+            )),
             serde_json::to_vec_pretty(&receipt).unwrap(),
         )
         .unwrap();
@@ -280,11 +429,33 @@ async fn native_cli(kind: LocalAgentKind, variable: &str) {
 #[tokio::test]
 #[ignore = "opt-in: set KEELSHELL_CODEX_EXECUTABLE to installed native Codex; loopback service only"]
 async fn installed_codex_ask_uses_no_tools_and_cleans_isolation() {
-    native_cli(LocalAgentKind::Codex, "KEELSHELL_CODEX_EXECUTABLE").await;
+    native_cli(LocalAgentKind::Codex, "KEELSHELL_CODEX_EXECUTABLE", false).await;
 }
 
 #[tokio::test]
 #[ignore = "opt-in: set KEELSHELL_CLAUDE_EXECUTABLE to installed native Claude; loopback service only"]
 async fn installed_claude_ask_uses_no_tools_and_cleans_isolation() {
-    native_cli(LocalAgentKind::ClaudeCode, "KEELSHELL_CLAUDE_EXECUTABLE").await;
+    native_cli(
+        LocalAgentKind::ClaudeCode,
+        "KEELSHELL_CLAUDE_EXECUTABLE",
+        false,
+    )
+    .await;
+}
+
+#[tokio::test]
+#[ignore = "opt-in native Codex and trusted launcher; owned malicious project and loopback service"]
+async fn installed_codex_selected_directory_excludes_project_context_hooks_mcp_and_tools() {
+    native_cli(LocalAgentKind::Codex, "KEELSHELL_CODEX_EXECUTABLE", true).await;
+}
+
+#[tokio::test]
+#[ignore = "opt-in native Claude and trusted launcher; owned malicious project and loopback service"]
+async fn installed_claude_selected_directory_excludes_project_context_hooks_mcp_and_tools() {
+    native_cli(
+        LocalAgentKind::ClaudeCode,
+        "KEELSHELL_CLAUDE_EXECUTABLE",
+        true,
+    )
+    .await;
 }

@@ -65,3 +65,5 @@
 - [当前主副本递归镜像／文件呈现／协议组合检查](testing/records/2026-10-07-recursive-mirror-main-combination.md)
 - [递归镜像 macOS 原生与实际 Linux 文件核对](testing/records/2026-10-07-recursive-mirror-native.md)
 - [诊断分支保存资料同步 CI 定位](testing/records/2026-10-07-saved-profile-sync-ci-diagnosis.md)
+- [本地智能体工作目录候选](testing/records/2026-10-07-local-agent-working-directory.md)：显式目录隔离、发送审核、版本绑定和剩余验收边界
+- [Linux 定时同步失败观察](testing/records/2026-10-07-linux-sync-schedule-observation.md)：18 秒批准后等待的有界失败诊断、v2 复核和未确定根因

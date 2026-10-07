@@ -19,6 +19,7 @@ fn profile(agent: AiLocalAgent) -> NamedAiProfile {
     profile.model = "fixture-model".into();
     profile.endpoint = "https://provider.example/v1".into();
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent,
         executable: std::env::temp_dir()
             .join("unused-probe-admission-fixture")

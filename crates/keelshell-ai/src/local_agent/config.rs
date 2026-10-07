@@ -2,7 +2,7 @@ use std::{path::PathBuf, time::Duration};
 
 use url::Url;
 
-use super::LocalAgentError;
+use super::{LocalAgentError, LocalAgentWorkingDirectory, ValidatedLocalAgentDirectory};
 use crate::ProviderConfig;
 
 /// The installed official CLI adapter selected by the user.
@@ -23,11 +23,21 @@ impl LocalAgentKind {
         }
     }
 
-    pub(super) fn checked_version(self) -> LocalAgentVersion {
+    pub(super) fn checked_versions(self) -> &'static [LocalAgentVersion] {
         match self {
-            Self::Codex => LocalAgentVersion(0, 160, 0),
-            Self::ClaudeCode => LocalAgentVersion(2, 1, 285),
+            Self::Codex => &[LocalAgentVersion(0, 160, 0), LocalAgentVersion(0, 160, 1)],
+            Self::ClaudeCode => &[LocalAgentVersion(2, 1, 285)],
         }
+    }
+
+    pub(super) fn supports_version(self, version: LocalAgentVersion) -> bool {
+        self.checked_versions().contains(&version)
+    }
+
+    pub(super) fn supports_version_text(self, version: &str) -> bool {
+        self.checked_versions()
+            .iter()
+            .any(|checked| checked.to_string() == version)
     }
 }
 
@@ -170,6 +180,8 @@ pub struct LocalAgentConfig {
     pub(super) endpoint: String,
     pub(super) limits: LocalAgentLimits,
     pub(super) credential_environment_reference: Option<String>,
+    pub(super) working_directory: LocalAgentWorkingDirectory,
+    pub(super) directory_launcher: Option<PathBuf>,
 }
 
 impl LocalAgentConfig {
@@ -207,7 +219,31 @@ impl LocalAgentConfig {
             .to_owned(),
             limits: LocalAgentLimits::default(),
             credential_environment_reference: None,
+            working_directory: LocalAgentWorkingDirectory::Isolated,
+            directory_launcher: None,
         })
+    }
+
+    /// Bind the trusted same-application launcher for selected Unix directories.
+    ///
+    /// The executable must call `run_local_agent_directory_launcher` before any
+    /// runtime or UI initialization. This is an application integration setting,
+    /// never a user-selected CLI, shell command or arbitrary argument template.
+    /// Defaults and Windows do not use a launcher.
+    pub fn with_directory_launcher(
+        mut self,
+        executable: impl Into<PathBuf>,
+    ) -> Result<Self, LocalAgentError> {
+        let executable = executable.into();
+        if !executable.is_absolute()
+            || executable
+                .to_str()
+                .is_none_or(|path| path.len() > 4096 || path.chars().any(char::is_control))
+        {
+            return Err(LocalAgentError::DirectoryUnsupported);
+        }
+        self.directory_launcher = Some(executable);
+        Ok(self)
     }
 
     /// Select an explicit compatible inference base URL; it is included in review.
@@ -227,6 +263,41 @@ impl LocalAgentConfig {
     pub fn with_limits(mut self, limits: LocalAgentLimits) -> Self {
         self.limits = limits;
         self
+    }
+
+    /// Select a directory mode without performing filesystem I/O.
+    ///
+    /// A selected directory is not an environment/configuration/tool grant. It
+    /// requires `prepare_checked` and complete human review before an Ask can
+    /// run. The isolated default continues to use a fresh owned empty directory.
+    pub fn with_working_directory(
+        mut self,
+        directory: LocalAgentWorkingDirectory,
+    ) -> Result<Self, LocalAgentError> {
+        directory.validate_metadata()?;
+        self.working_directory = directory;
+        Ok(self)
+    }
+
+    /// The exact directory mode captured by this immutable configuration.
+    pub fn working_directory(&self) -> &LocalAgentWorkingDirectory {
+        &self.working_directory
+    }
+
+    /// Validate an explicitly selected directory on a bounded background worker.
+    ///
+    /// This reads directory identity and, for Codex, at most 64 KiB of regular
+    /// project configuration solely for syntax/identity checks. It does not
+    /// start a CLI or send context. Cancellation revokes the returned authority;
+    /// late filesystem completions are dropped. OS filesystem calls themselves
+    /// cannot be interrupted, so callers must also reject stale UI revisions.
+    pub async fn validate_working_directory(
+        &self,
+        cancellation: &crate::RequestCancellation,
+    ) -> Result<Option<ValidatedLocalAgentDirectory>, LocalAgentError> {
+        self.working_directory
+            .validate_directory(self.kind, cancellation)
+            .await
     }
 
     /// Add an audit-only credential source name to the immutable review.
@@ -271,6 +342,11 @@ impl LocalAgentConfig {
         ] {
             guard
                 .validate_metadata_text(text)
+                .map_err(LocalAgentError::Context)?;
+        }
+        if let LocalAgentWorkingDirectory::Selected(path) = &self.working_directory {
+            guard
+                .validate_metadata_text(path.to_string_lossy().as_ref())
                 .map_err(LocalAgentError::Context)?;
         }
         Ok(())

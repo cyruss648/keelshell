@@ -44,3 +44,15 @@
 任务审计0cca的新三平台CI已全文读回：Windows／macOS成功，Linux唯一目录同步失败，原同ID资料审批测试本次通过；见[同步诊断](testing/records/2026-10-06-directory-sync-ci-diagnostics.md)。镜像686输入历史主树门禁保留；后续两个非作者组合回归、test-only失败观察、远程协议、文件呈现和递归镜像已在717输入完成完整工程检查。新 macOS 产物及限定双向镜像原生已完成，完整原生流程与精确提交 CI 仍需完成，不把工程检查代作桌面验收。继续Linux失败定位、完整远程功能、外部Codex业务、UI/语言主题/辅助技术、三平台桌面及六目标发布安装矩阵。所有新源码/产物需要自己的证据。已结束树在根消费证据及组合消费者退出后可恢复归档，活跃树与未消费失败材料保留。
 
 递归子树镜像独立候选已实现全部目标独有节点审核展开、子先父后删除、固定审核/完成记录、剩余子树名空间与内容复核、观察到变化废除旧确认。当前6核心、8新TCP（含17自有listener场景）及4 GPUI测试实际通过，38项相关组合通过；后台栈溢出、源出现和本地整树消失后旧审批复活均已实际复现并集中修复，子项准入后返回的非Closed镜像拒绝都会撤销旧owner审核，保持已知读失败、Closed/只读drop与未知写隔离边界。最终694输入语义修复epoch完整门禁实际0，1558普通/8doc/6Python、格式/x.y/严格Clippy通过，前后输入相等且进程组完整回收；仅结果文档随后更新。此694作者候选的历史时点见[递归记录](testing/records/2026-10-07-recursive-directory-mirror.md)。后续新的非作者限定复核、当前主副本717输入组合导入及完整门禁已完成，新原生和精确CI仍开放；不继承root689的原生或CI验收。
+
+## 本地智能体工作目录候选 — 2026-10-07
+
+AI 工作目录候选已经完成作者门禁、封包和独立只读复核，尚未整合提交。它为本地 CLI Ask 提供默认空隔离或用户明确选择的绝对目录，后台校验目录身份并在发送前重新确认；目录副本、固定 bootstrap 帧和临时环境保持在用户审核范围内。项目 hooks、MCP 和工具默认关闭，KeelShell 的对外 MCP 服务端方向不变。精确 Codex `0.160.0`、`0.160.1` 与 Claude Code `2.1.285` 的受控 loopback 适配器验证通过，不能替代供应商账户、模型、桌面窗口或 Windows/Linux 原生验收。
+
+作者封包包含 1,257 个逐项读回 payload，manifest SHA-256 为 `0cfa26d8391331769783bd09b885c8b0929746630d9d838f7d9b439c089c93da`；独立复核为 `NO_BLOCKER`，唯一记录的边界是显式 launcher setter 不绑定 launcher 自身 inode/hash，默认入口仍以当前可执行文件校验为准。主树整合、组合门禁和跨平台桌面验收仍需单独完成。详见 [ADR 0069](adr/0069-reviewed-local-agent-working-directories.md)、[工作目录指南](product/LOCAL_AGENT_WORKING_DIRECTORY.md) 和 [测试记录](testing/records/2026-10-07-local-agent-working-directory.md)。
+
+## 当前提交与 Linux 失败观察 — 2026-10-07
+
+主线 `4c9b14c5886cb98b7f8cfedd1331f902885e25d3` 已推送到 `origin/main`。Windows 的 Unix-only `Command` 导入修复、MCP README 方向修正及相应文档已通过本地完整 session 门禁；Quality 37585913129 的 macOS 和 Windows job 成功，Linux 仍在保存资料批准后的 18 秒工作区等待处失败（575 passed、2 failed、2 ignored）。Linux 完整日志保存在 `work/main-combination-ci-4c9b14c-linux-failure.log`，SHA-256 为 `f39061431b473d644b47c11d33417fe70d8d294b976d40a59501229d316fdda`。失败诊断显示同步仍处于 busy 状态，但没有足够证据判定具体根因。
+
+Linux 失败观察 v2 已经通过独立非作者复核，结论 `NO_BLOCKER`，复核结果 SHA-256 为 `00e621ce836b7fec015f2b8d1a5241b18ebae1043a3cae413e2c35bc79c3cb61`。它只在原有断言失败时读取有界内存状态；`request_count` 与审核签名均避免复制 SSH payload、命令或参数，18/30/40 秒期限和生产路径没有变化。v2 的限定测试、格式和完整 Clippy 均实际退出 0；该观察尚未凭新的 Linux CI 运行证明根因已经解决。详见 [Linux 观察记录](testing/records/2026-10-07-linux-sync-schedule-observation.md)。

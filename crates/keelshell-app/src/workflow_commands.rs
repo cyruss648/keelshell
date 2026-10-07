@@ -42,6 +42,15 @@ pub(crate) struct WorkflowReview {
     schedule_inputs: schedule::ScheduleReviewInputs,
 }
 
+#[cfg(test)]
+impl WorkflowReview {
+    pub(crate) fn signature_for_test(
+        &self,
+    ) -> (Uuid, u64, keelshell_core::BatchWorkflowReviewToken) {
+        (self.token, self.revision, self.plan.review_token())
+    }
+}
+
 pub(crate) enum WorkflowPanelEvent {
     Start(Box<WorkflowReview>),
     Hide,
@@ -534,6 +543,13 @@ impl WorkflowPanel {
     #[cfg(test)]
     pub(crate) fn reviewed_for_test(&self) -> Option<WorkflowReview> {
         self.review.clone()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn review_signature_for_test(
+        &self,
+    ) -> Option<(Uuid, u64, keelshell_core::BatchWorkflowReviewToken)> {
+        self.review.as_ref().map(WorkflowReview::signature_for_test)
     }
 
     #[cfg(test)]

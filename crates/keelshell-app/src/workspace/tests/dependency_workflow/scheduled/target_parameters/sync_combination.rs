@@ -83,6 +83,42 @@ fn input_sync(window: &mut Window, id: &'static str, value: &str, cx: &mut App) 
     });
 }
 
+fn sync_failure_observation(
+    stage: &'static str,
+    h: &Harness,
+    p: &Prepared,
+    incoming_id: uuid::Uuid,
+    cx: &App,
+) -> String {
+    let view = h.fixture.workspace.read(cx);
+    let sync = view
+        .profile_sync
+        .as_ref()
+        .map(|panel| panel.read(cx).diagnostics_for_test(cx));
+    let workflow_panel = panel_app(h, cx);
+    let workflow = workflow_panel.read(cx);
+    let expected_review_signature = p.review.signature_for_test();
+    // Only bounded in-memory facts. No credentials, command/output bodies,
+    // endpoint names, or synchronous storage inspection enter CI diagnostics.
+    format!(
+        "stage={stage}; sync={sync:?}; workspace_incoming={}; original_session={}; workflow_running={}; review_retained={}; slots={:?}; peer_exec_counts={:?}",
+        view.state
+            .connections
+            .iter()
+            .any(|connection| connection.id == incoming_id),
+        view.remote_sessions
+            .get(&h.panes[0].terminal.entity_id())
+            .is_some_and(|session| session.same_connection(&h.servers[0].session)),
+        workflow.is_running(),
+        workflow.review_signature_for_test() == Some(expected_review_signature),
+        workflow.schedule_status_for_test(),
+        h.servers
+            .iter()
+            .map(|server| server.request_count())
+            .collect::<Vec<_>>(),
+    )
+}
+
 #[gpui_kit::test]
 async fn scheduled_parameter_authority_survives_real_sync_approval_without_redirect_or_persistence(
     cx: &mut TestAppContext,
@@ -134,7 +170,8 @@ async fn scheduled_parameter_authority_survives_real_sync_approval_without_redir
         }
         assert!(
             std::time::Instant::now() < deadline,
-            "background sync review deadline"
+            "background sync review deadline; {}",
+            cx.update(|cx| sync_failure_observation("inspect", &h, &p, incoming_id, cx)),
         );
         let runtime = h
             .fixture
@@ -154,15 +191,21 @@ async fn scheduled_parameter_authority_survives_real_sync_approval_without_redir
         window.click("profile-sync-approve", cx);
     })
     .checked("human explicit encrypted sync approval");
-    wait_real(&h, Duration::from_secs(18), cx, |cx| {
-        h.fixture
-            .workspace
-            .read(cx)
-            .state
-            .connections
-            .iter()
-            .any(|c| c.id == incoming_id)
-    })
+    wait_real_observed(
+        &h,
+        Duration::from_secs(18),
+        cx,
+        |cx| {
+            h.fixture
+                .workspace
+                .read(cx)
+                .state
+                .connections
+                .iter()
+                .any(|c| c.id == incoming_id)
+        },
+        |cx| sync_failure_observation("apply-workspace", &h, &p, incoming_id, cx),
+    )
     .await;
     assert!(
         h.servers.iter().all(|server| server.requests().is_empty()),

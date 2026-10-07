@@ -17,6 +17,7 @@ fn fixture_profile_for_agent(agent: AiLocalAgent) -> keelshell_core::NamedAiProf
     profile.name = "Independent local fixture".into();
     profile.model = "fixture-model".into();
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent,
         executable: std::env::temp_dir()
             .join("unused-review-native-cli")

@@ -36,7 +36,7 @@ mod store;
 mod vault;
 mod workflow_audit;
 
-pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits};
+pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits, AiLocalAgentWorkingDirectory};
 pub use ai_messages::{AiMessagesEffort, AiMessagesInference, AiMessagesThinking};
 pub use ai_profiles::{
     AiApiStyle, AiAuthentication, AiCustomHeader, AiModelReasoning, AiPreset, AiProfileCatalog,

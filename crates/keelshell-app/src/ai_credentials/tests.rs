@@ -232,6 +232,7 @@ fn legacy_binding_unlocks_only_api_and_v2_requires_exact_executable() -> Result<
     );
     let mut local = profile.clone();
     local.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent: keelshell_core::AiLocalAgent::Codex,
         executable: std::env::temp_dir()
             .join("codex-fixture")
@@ -291,6 +292,7 @@ fn local_encrypted_key_roundtrip_preserves_process_only_unlock() -> Result<(), E
     let fixture = Fixture::new();
     let mut profile = profile();
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent: keelshell_core::AiLocalAgent::Codex,
         executable: std::env::temp_dir()
             .join("not-executed-codex-fixture")
