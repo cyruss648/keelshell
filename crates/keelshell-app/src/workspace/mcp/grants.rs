@@ -120,6 +120,11 @@ impl Workspace {
             tools: self.mcp.draft_tools.clone(),
             selection,
             session: session.clone(),
+            lifecycle: self
+                .tabs
+                .iter()
+                .find(|tab| tab.entity_id() == entity)
+                .and_then(|tab| tab.read(cx).subscribe_lifecycle()),
         };
         self.mcp.busy = true;
         self.mcp.revision = uuid::Uuid::new_v4();
@@ -129,7 +134,13 @@ impl Workspace {
             let result = if let Some(path) = target.roots.first() {
                 tokio::time::timeout(
                     Duration::from_secs(5),
-                    crate::mcp_bridge::validate_root(session, path),
+                    async {
+                        tokio::select! {
+                            biased;
+                            _ = crate::mcp_bridge::lifecycle_lost(target.lifecycle.clone()) => Err(McpFailure::StaleSession),
+                            result = crate::mcp_bridge::validate_root(session, path, &target.lifecycle) => result,
+                        }
+                    },
                 )
                 .await
                 .unwrap_or(Err(McpFailure::Timeout))

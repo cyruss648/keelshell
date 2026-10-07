@@ -4,6 +4,11 @@ use std::sync::Arc;
 use keelshell_mcp::{AuthorizedRequest, BackendFuture, BackendReply, DesktopBackend, McpFailure};
 use tokio::sync::{mpsc, oneshot};
 
+mod authorization;
+pub(crate) use authorization::{
+    LifecycleSource, SessionAuthorization, lifecycle_current, lifecycle_lost,
+};
+
 /// A request whose caller may have disconnected before the UI admits it.
 pub(crate) struct QueuedRequest {
     pub(crate) request: AuthorizedRequest,
@@ -53,7 +58,7 @@ impl DesktopBackend for QueueBackend {
 pub(crate) async fn read_remote(
     session: keelshell_session::SshSession,
     operation: keelshell_mcp::Operation,
-    lease: &keelshell_mcp::AuthorizationLease,
+    lease: &SessionAuthorization,
 ) -> Result<BackendReply, McpFailure> {
     use keelshell_mcp::{DirectoryEntry, EntryKind, Operation};
     lease.check()?;
@@ -165,7 +170,11 @@ pub(crate) async fn read_remote(
 pub(crate) async fn validate_root(
     session: keelshell_session::SshSession,
     path: &str,
+    lifecycle: &LifecycleSource,
 ) -> Result<(), McpFailure> {
+    if session.is_closed() || !lifecycle_current(lifecycle.as_ref()) {
+        return Err(McpFailure::StaleSession);
+    }
     let sftp = session
         .sftp()
         .await
@@ -195,6 +204,9 @@ pub(crate) async fn validate_root(
     }
     .await;
     let closed = sftp.close().await;
+    if !lifecycle_current(lifecycle.as_ref()) {
+        return Err(McpFailure::StaleSession);
+    }
     result?;
     closed.map_err(|_| McpFailure::BackendFailure)
 }
@@ -204,7 +216,7 @@ pub(crate) async fn validate_root(
 pub(crate) async fn prepare_file_change(
     session: keelshell_session::SshSession,
     proposal: &keelshell_mcp::FileChangeProposal,
-    lease: &keelshell_mcp::AuthorizationLease,
+    lease: &SessionAuthorization,
 ) -> Result<(keelshell_session::sftp::RegularFileSnapshot, String), McpFailure> {
     lease.check()?;
     if session.is_closed() {

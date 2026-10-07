@@ -24,6 +24,7 @@
 
 #![deny(missing_docs)]
 
+mod agent;
 mod context;
 mod diagnostics;
 mod discovery;
@@ -35,6 +36,10 @@ mod redact;
 mod request_options;
 mod review;
 
+pub use agent::{
+    AgentAction, AgentDecision, AgentError, AgentLimits, AgentOutcome, AgentPhase, AgentRun,
+    AgentStep, AgentTarget,
+};
 pub use context::{ApprovedRequest, ContextDraft, PreparedRequest};
 pub use diagnostics::{DiagnosticPlan, DiagnosticReview, DiagnosticRisk, DiagnosticStep};
 pub use discovery::{

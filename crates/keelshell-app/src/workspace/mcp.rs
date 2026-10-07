@@ -1,10 +1,12 @@
 //! Explicit desktop grants and single-use native review for external agents.
 use super::*;
-use crate::mcp_bridge::{QueueBackend, QueuedRequest};
+use crate::mcp_bridge::{
+    LifecycleSource, QueueBackend, QueuedRequest, SessionAuthorization, lifecycle_current,
+};
 use keelshell_mcp::{
-    AccessPolicy, ActionKind, ActionState, AuthorizationLease, BackendReply, CommandProposal,
-    FileChangeProposal, KeelShellMcpServer, McpFailure, Operation, PolicyController, SessionGrant,
-    SessionIdentity, SessionMetadata, ToolKind,
+    AccessPolicy, ActionKind, ActionState, BackendReply, CommandProposal, FileChangeProposal,
+    KeelShellMcpServer, McpFailure, Operation, PolicyController, SessionGrant, SessionIdentity,
+    SessionMetadata, ToolKind,
 };
 use std::{collections::BTreeSet, time::Instant};
 
@@ -16,11 +18,12 @@ pub(super) struct Target {
     tools: BTreeSet<ToolKind>,
     selection: Option<(uuid::Uuid, String)>,
     session: keelshell_session::SshSession,
+    lifecycle: LifecycleSource,
 }
 
 struct Action {
     proposal: ReviewedProposal,
-    lease: AuthorizationLease,
+    lease: SessionAuthorization,
     entity: EntityId,
     route: String,
     label: String,
@@ -73,7 +76,7 @@ enum Completion {
         label: String,
         route: String,
         proposal: Box<FileChangeProposal>,
-        lease: AuthorizationLease,
+        lease: SessionAuthorization,
         session: keelshell_session::SshSession,
         reply: tokio::sync::oneshot::Sender<Result<BackendReply, McpFailure>>,
         result: Result<(keelshell_session::sftp::RegularFileSnapshot, String), McpFailure>,
@@ -317,7 +320,10 @@ impl Workspace {
         self.tabs
             .iter()
             .find(|tab| tab.entity_id() == entity)
-            .is_some_and(|tab| tab.read(cx).is_open())
+            .is_some_and(|tab| {
+                tab.read(cx).is_open()
+                    && lifecycle_current(tab.read(cx).subscribe_lifecycle().as_ref())
+            })
             && self.remote_sessions.get(&entity).is_some_and(|session| {
                 !session.is_closed()
                     && self
@@ -325,7 +331,10 @@ impl Workspace {
                         .targets
                         .iter()
                         .find(|target| target.entity == entity)
-                        .is_none_or(|target| target.session.same_connection(session))
+                        .is_none_or(|target| {
+                            target.session.same_connection(session)
+                                && lifecycle_current(target.lifecycle.as_ref())
+                        })
             })
             && self
                 .reconnect_bindings
@@ -521,6 +530,23 @@ mod view;
 
 #[cfg(test)]
 impl Workspace {
+    pub(in crate::workspace) fn mcp_test_assert_actual_success_packet_and_return(
+        &mut self,
+        id: uuid::Uuid,
+    ) {
+        let packet = self
+            .mcp
+            .results
+            .try_recv()
+            .unwrap_or_else(|error| panic!("actual completed exec packet: {error}"));
+        assert!(
+            matches!(&packet, Completion::Executed { id: actual, state: ActionState::Succeeded, output } if *actual == id && !output.is_empty())
+        );
+        self.mcp
+            .result_sender
+            .try_send(packet)
+            .unwrap_or_else(|_| panic!("return owned exec packet"));
+    }
     pub(in crate::workspace) fn mcp_test_server(&self) -> KeelShellMcpServer {
         KeelShellMcpServer::new(
             self.mcp.backend.clone(),
@@ -561,6 +587,16 @@ impl Workspace {
             .iter()
             .find(|action| action.proposal.id() == id)
             .map(|action| action.state)
+    }
+    pub(in crate::workspace) fn mcp_test_action_authorized(&self, id: uuid::Uuid) -> bool {
+        self.mcp
+            .actions
+            .iter()
+            .find(|action| action.proposal.id() == id)
+            .is_some_and(|action| action.lease.check().is_ok())
+    }
+    pub(in crate::workspace) fn mcp_test_workers_finished(&self) -> bool {
+        self.mcp.workers.iter().all(|worker| worker.is_finished())
     }
     pub(in crate::workspace) fn mcp_test_expire(&mut self, id: uuid::Uuid) {
         if let Some(action) = self

@@ -2,6 +2,8 @@
 
 KeelShell 提供 MCP **服务端**。Codex、Claude Code 等外部客户端启动伴随程序 `keelshell-mcp`，它通过受认证的本机 IPC 请求正在运行的 KeelShell；SSH 会话、授权及人工审阅留在桌面应用中。应用内的 API / 本地 CLI Ask 是独立入口，本功能不接入第三方 MCP 服务。
 
+后台授权绑定原 SSH 会话的 typed lifecycle 源。关闭标签或重连替换会在当前交互回合撤销旧授权；原始结束或来源关闭也会取消后台等待，不依赖界面轮询及时运行。新连接不继承旧 grant，撤权后的迟到成功不再发布内容。已发往远端的操作可能有未知影响，不能承诺自动回滚。实现与验收边界见[会话授权生命周期](MCP_SESSION_LIFETIME.md)和[当前整合记录](../testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。
+
 ## 调用方向
 
 ```mermaid

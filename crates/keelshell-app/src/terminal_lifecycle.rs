@@ -15,6 +15,13 @@ pub(crate) struct Lifecycle {
     ended: Option<ShellEnd>,
 }
 impl TerminalView {
+    /// Capture this bridge's read-only lifecycle for backend authorization.
+    ///
+    /// A typed end or closed producer must fail closed even while the foreground
+    /// poll is delayed. Production SSH bridges always attach this source.
+    pub(crate) fn subscribe_lifecycle(&self) -> Option<watch::Receiver<TransportState>> {
+        self.lifecycle.source.clone()
+    }
     pub(crate) fn attach_lifecycle(&mut self, mut source: watch::Receiver<TransportState>) {
         source.mark_changed();
         self.lifecycle.source = Some(source);

@@ -1,6 +1,10 @@
 //! Explicit desktop file review over real isolated SSH/SFTP and authenticated IPC.
 use super::*;
 use keelshell_mcp::content_sha256;
+#[path = "mcp_independent_final_retirement.rs"]
+mod independent_final_retirement;
+#[path = "mcp_lifecycle_retirement.rs"]
+mod lifecycle_retirement;
 #[path = "mcp_transfer_isolation.rs"]
 mod transfer_isolation;
 
@@ -831,4 +835,280 @@ async fn mcp_file_authenticated_stdio_returns_eight_schemas_and_exact_reviewed_s
     assert_eq!(status["action_kind"], "file_change");
     assert_eq!(status["state"], "succeeded");
     assert_eq!(bytes(&h, "/approved/中文.txt", cx), b"stdio replacement\n");
+}
+
+#[gpui_kit::test]
+async fn independent_mcp_closed_tab_revokes_before_paused_file_writer_resumes(
+    cx: &mut TestAppContext,
+) {
+    use crate::workspace::CloseTab;
+    let h = Harness::new(cx);
+    let target = grant_files(&h, true, cx).await;
+    let replacement = "changed after MCP target tab closed\n";
+    let id = propose_file(
+        &h,
+        target,
+        "/approved/中文.txt",
+        "受控中文\n",
+        replacement,
+        cx,
+    )
+    .await;
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("mcp-close", cx);
+    })
+    .checked("dismiss settings through production control");
+    let independent = h.files.connect(&h.runtime);
+    let held = h
+        .files
+        .filesystem
+        .hold_canonical_path("/approved/中文.txt")
+        .checked("own exact prewrite canonical hold");
+    h.fixture
+        .workspace
+        .update(cx, |view, cx| view.review_mcp_action(id, true, cx));
+    cx.wait_for(h.fixture.window, Duration::from_secs(7), |_, _| {
+        held.entered() > 0
+    })
+    .await;
+    assert!(!held.expired(), "prewrite hold must not expire");
+    let readback = cx
+        .update_window(h.fixture.window, |_, window, cx| {
+            h.fixture
+                .workspace
+                .update(cx, |view, cx| view.close_tab(&CloseTab, window, cx));
+            let removed = h.panes[1].terminal.entity_id();
+            let view = h.fixture.workspace.read(cx);
+            assert!(!view.tabs.iter().any(|tab| tab.entity_id() == removed));
+            assert!(!view.remote_sessions.contains_key(&removed));
+            eprintln!(
+                "independent-mcp-closed-tab before_resume enabled={} state={:?}",
+                view.mcp_test_enabled(),
+                view.mcp_test_state(id)
+            );
+            held.release();
+            // Keep foreground maintenance paused while an already approved real
+            // background SFTP writer resumes, then read all bytes on a separate SSH.
+            h.runtime.block_on(async {
+                let sftp = independent
+                    .sftp()
+                    .await
+                    .checked("independent readback channel");
+                let deadline = std::time::Instant::now() + Duration::from_secs(2);
+                let bytes = loop {
+                    let bytes = sftp
+                        .read_regular("/approved/中文.txt", 65536)
+                        .await
+                        .checked("complete independent SFTP bytes");
+                    if bytes != "受控中文\n".as_bytes() || std::time::Instant::now() >= deadline
+                    {
+                        break bytes;
+                    }
+                    tokio::time::sleep(Duration::from_millis(5)).await;
+                };
+                sftp.close().await.checked("close independent readback");
+                bytes
+            })
+        })
+        .checked("close captured target before releasing held writer");
+    eprintln!(
+        "independent-mcp-closed-tab readback={:?}",
+        String::from_utf8_lossy(&readback)
+    );
+    assert_eq!(
+        readback,
+        "受控中文\n".as_bytes(),
+        "closing the exact granted tab must revoke the worker lease before background resumes"
+    );
+}
+
+#[gpui_kit::test]
+async fn independent_mcp_raw_terminal_end_revokes_before_paused_file_writer_resumes(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    let (producer, source) = tokio::sync::watch::channel(crate::terminal::TransportState::Ready);
+    h.panes[1]
+        .terminal
+        .update(cx, |view, _| view.attach_lifecycle(source));
+    let target = grant_files(&h, true, cx).await;
+    let id = propose_file(
+        &h,
+        target,
+        "/approved/中文.txt",
+        "受控中文\n",
+        "changed after raw terminal end\n",
+        cx,
+    )
+    .await;
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("mcp-close", cx);
+    })
+    .checked("dismiss MCP settings");
+    let independent = h.files.connect(&h.runtime);
+    let held = h
+        .files
+        .filesystem
+        .hold_canonical_path("/approved/中文.txt")
+        .checked("own typed-end exact canonical hold");
+    h.fixture
+        .workspace
+        .update(cx, |view, cx| view.review_mcp_action(id, true, cx));
+    cx.wait_for(h.fixture.window, Duration::from_secs(7), |_, _| {
+        held.entered() > 0
+    })
+    .await;
+    assert!(!held.expired());
+    let readback = cx
+        .update_window(h.fixture.window, |_, _, cx| {
+            producer.send_replace(crate::terminal::TransportState::Ended(
+                keelshell_session::ShellEnd::ChannelClosed,
+            ));
+            assert!(
+                !h.panes[1].terminal.read(cx).is_open(),
+                "raw typed End is already observable without UI polling"
+            );
+            eprintln!(
+                "independent-mcp-raw-end before_resume enabled={} state={:?}",
+                h.fixture.workspace.read(cx).mcp_test_enabled(),
+                h.fixture.workspace.read(cx).mcp_test_state(id)
+            );
+            held.release();
+            h.runtime.block_on(async {
+                let sftp = independent
+                    .sftp()
+                    .await
+                    .checked("raw-end independent readback");
+                let deadline = std::time::Instant::now() + Duration::from_secs(2);
+                let bytes = loop {
+                    let bytes = sftp
+                        .read_regular("/approved/中文.txt", 65536)
+                        .await
+                        .checked("raw-end complete SFTP bytes");
+                    if bytes != "受控中文\n".as_bytes() || std::time::Instant::now() >= deadline
+                    {
+                        break bytes;
+                    }
+                    tokio::time::sleep(Duration::from_millis(5)).await;
+                };
+                sftp.close().await.checked("raw-end close readback");
+                bytes
+            })
+        })
+        .checked("publish actual raw typed End before held writer resumes");
+    eprintln!(
+        "independent-mcp-raw-end readback={:?}",
+        String::from_utf8_lossy(&readback)
+    );
+    assert_eq!(
+        readback,
+        "受控中文\n".as_bytes(),
+        "a raw typed terminal End must revoke admission without relying on foreground scheduling"
+    );
+}
+
+#[gpui_kit::test]
+async fn independent_mcp_finish_reconnect_revokes_before_old_file_writer_resumes(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    let old = h.panes[1].terminal.entity_id();
+    let profile =
+        keelshell_core::Connection::new("controlled route binding", "127.0.0.1", "fixture");
+    let profile_id = profile.id;
+    h.fixture.workspace.update(cx, |view, _| {
+        // This profile is only the controlled route/trust binding. Both SSH
+        // handles below are independently authenticated to the owned TCP peer.
+        view.state.connections.push(profile);
+        let route = view
+            .state
+            .connection_route(profile_id)
+            .checked("controlled saved route");
+        view.bind_remote_tab(old, route);
+    });
+    let target = grant_files(&h, true, cx).await;
+    let id = propose_file(
+        &h,
+        target,
+        "/approved/中文.txt",
+        "受控中文\n",
+        "changed after replacement reconnect\n",
+        cx,
+    )
+    .await;
+    cx.update_window(h.fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("mcp-close", cx);
+    })
+    .checked("dismiss settings for reconnect boundary");
+    let replacement = h.files.connect(&h.runtime);
+    let independent = h.files.connect(&h.runtime);
+    let held = h
+        .files
+        .filesystem
+        .hold_canonical_path("/approved/中文.txt")
+        .checked("own reconnect exact prewrite hold");
+    h.fixture
+        .workspace
+        .update(cx, |view, cx| view.review_mcp_action(id, true, cx));
+    cx.wait_for(h.fixture.window, Duration::from_secs(7), |_, _| {
+        held.entered() > 0
+    })
+    .await;
+    assert!(!held.expired());
+    let readback = cx
+        .update_window(h.fixture.window, |_, window, cx| {
+            h.fixture.workspace.update(cx, |view, cx| {
+                let route = view
+                    .state
+                    .connection_route(profile_id)
+                    .checked("same completed reconnect route");
+                let ticket =
+                    crate::workspace::reconnect::budget_tests::owned_fixture_ticket(view, old);
+                assert!(
+                    view.finish_reconnect(ticket, replacement, route, window, cx),
+                    "actual production reconnect installation must succeed"
+                );
+                assert!(!view.tabs.iter().any(|tab| tab.entity_id() == old));
+                assert!(!view.remote_sessions.contains_key(&old));
+                eprintln!(
+                    "independent-mcp-reconnect before_resume enabled={} state={:?}",
+                    view.mcp_test_enabled(),
+                    view.mcp_test_state(id)
+                );
+            });
+            held.release();
+            h.runtime.block_on(async {
+                let sftp = independent
+                    .sftp()
+                    .await
+                    .checked("reconnect independent readback");
+                let deadline = std::time::Instant::now() + Duration::from_secs(2);
+                let bytes = loop {
+                    let bytes = sftp
+                        .read_regular("/approved/中文.txt", 65536)
+                        .await
+                        .checked("reconnect full SFTP bytes");
+                    if bytes != "受控中文\n".as_bytes() || std::time::Instant::now() >= deadline
+                    {
+                        break bytes;
+                    }
+                    tokio::time::sleep(Duration::from_millis(5)).await;
+                };
+                sftp.close().await.checked("close reconnect readback");
+                bytes
+            })
+        })
+        .checked("install replacement before old held writer resumes");
+    eprintln!(
+        "independent-mcp-reconnect readback={:?}",
+        String::from_utf8_lossy(&readback)
+    );
+    assert_eq!(
+        readback,
+        "受控中文\n".as_bytes(),
+        "a real completed reconnect must revoke the old worker lease before its paused write resumes"
+    );
 }

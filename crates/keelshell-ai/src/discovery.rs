@@ -158,6 +158,12 @@ impl RequestCancellation {
         *self.state.borrow()
     }
 
+    /// Wait until cancellation is requested, including an already-cancelled signal.
+    /// This exposes no approval or execution authority.
+    pub async fn wait_cancelled(&self) {
+        self.cancelled().await;
+    }
+
     async fn cancelled(&self) {
         let mut receiver = self.state.subscribe();
         let _ = receiver.wait_for(|cancelled| *cancelled).await;

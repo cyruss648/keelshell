@@ -94,7 +94,10 @@ impl Workspace {
                                 proposal.expires_after_seconds.min(300),
                             )),
                         proposal: ReviewedProposal::Command(proposal),
-                        lease: request.authorization,
+                        lease: SessionAuthorization::new(
+                            request.authorization,
+                            target.lifecycle.clone(),
+                        ),
                         entity: target.entity,
                         label: target.label.clone(),
                         route,
@@ -125,7 +128,8 @@ impl Workspace {
                         .unwrap_or_default();
                     let revision = self.mcp.revision;
                     let captured_session = session.clone();
-                    let lease = request.authorization;
+                    let lease =
+                        SessionAuthorization::new(request.authorization, target.lifecycle.clone());
                     let sender = self.mcp.result_sender.clone();
                     let preparation_id = self.mcp.reserve_file_preparation();
                     self.mcp.workers.push(self.runtime.spawn(async move {
@@ -152,7 +156,10 @@ impl Workspace {
                     return;
                 };
                 let operation = request.operation;
-                let lease = request.authorization;
+                let lease = SessionAuthorization::new(
+                    request.authorization,
+                    target.and_then(|target| target.lifecycle.clone()),
+                );
                 self.mcp.workers.push(self.runtime.spawn(async move {
                     let mut reply = reply;
                     let result = tokio::select! {

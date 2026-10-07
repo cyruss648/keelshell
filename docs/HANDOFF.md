@@ -1,5 +1,9 @@
 # KeelShell 开发交接 — 2026-10-07
 
+当前主工作副本基于已推送 b54，精确导入29路径的审核式 Agent epoch3 + MCP会话退休修复。两候选各自已通过新的非作者限定源码／行为复核，全部作者与审查材料、源码和实际产物由根完整读回；共享accessor完全相同，workspace/reconnect按精确原base三方合并，两种维护保留，无关基线字节保持。新的组合源码审查无阻断；根完整门禁实际0/850.425秒，1677普通/10doc/6Python、格式/x.y/严格Clippy与默认/2MiB各626通过，22ignored未执行；同765输入新macOS包和57打包实际0/36.350秒，自有进程组与TMP回收，随后仅Markdown状态更新。精确提交CI待读回，见[整合记录](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。原生Agent、同时活跃的两owner撤权场景及完整外部客户端业务仍开放。MCP只由KeelShell对外提供服务。
+
+b54文件合并／patch的新macOS实际自有SSH/SFTP已完成两次草稿不写入、分别批准保存及完整远端内容读回。新的非作者逐一读16 AX/看16原像素、核对source/artifact/raw/cleanup，根已消费63封包；短保存视口和offscreen AX输入不关闭完整UI/键盘/VoiceOver，见[限定原生记录](testing/records/2026-10-07-text-merge-patch-native.md)。精确b54 [Quality37614596888](https://github.com/cyruss648/keelshell/actions/runs/37614596888)已终结：macOS/Windows成功，Linux唯一失败为首个本地目录Codex Ask原8秒超时，未进入app同步，根因未知；三份完整raw/API已读回，见[CI记录](testing/records/2026-10-07-text-main-platform-ci.md)。原18秒同步原因未知保持。test-only同步8阶段recorder和仅debug Argon2 opt3另有作者限定77项通过，新的非作者/整合待完成，KDF参数不改；不能据此宣称上述CI失败已解决。以下保留历史时点，不覆盖本段当前状态。
+
 当前文件三方合并/严格patch的17路径已按精确preimage/postimage导入主副本，所有无关基线字节保持；根745输入组合完整门禁实际0/994.033秒，1641普通/10doc/6Python、格式/x.y/严格Clippy及默认/2MiB各626阶段通过，22ignored未执行。新macOS app/MCP/fixture开发包、标准结构检查和57打包实际0/82.228秒，同745输入相等，自有PGID/TMP回收；尚未启动GUI。仅结果文档随后更新，新原生与精确新提交CI待完成，见[整合记录](testing/records/2026-10-07-reviewed-text-main-integration.md)。
 
 精确 `e69575b` 的 [Quality 37609350208](https://github.com/cyruss648/keelshell/actions/runs/37609350208) 已终结：macOS/Windows成功，两项Windows应用目录夹具实际通过；Linux唯一失败为保存资料同步批准后原18秒等待，busy状态不足以确定根因，期限和断言不放宽。三份完整日志及实际API已读回，单独诊断代理正在区分队列/阻塞工作/前台回调，见[夹具CI记录](testing/records/2026-10-07-selected-directory-app-platform-followup.md)。

@@ -1,5 +1,15 @@
 # Reviewed remote text: main integration — 2026-10-07
 
+Later evidence for exact b54: two limited macOS native draft/save sequences
+have complete owned-fixture SFTP readback and independent evidence review;
+the short save viewport and offscreen AX input retain their proof limits in
+the [native record](2026-10-07-text-merge-patch-native.md). Exact b54 Quality
+finished with macOS/Windows success and Linux first-directory-Ask eight-second
+timeout, root cause unknown, in the [platform record](2026-10-07-text-main-platform-ci.md).
+The subsequent Agent/MCP source combination has its own
+[integration record](2026-10-07-reviewed-ai-mcp-main-integration.md).
+The sections below retain this earlier engineering checkpoint.
+
 The root imported the 17 reviewed text merge/patch feature paths onto
 `e69575bc19afe03e80708e03d4993768c8f5dfb0`. Every current preimage matched
 the delivery preimage and every imported byte matched the final reviewed

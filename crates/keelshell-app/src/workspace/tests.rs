@@ -29,6 +29,7 @@ pub(crate) mod independent_disk_monitor;
 pub(crate) mod mirror_sync_combination;
 mod profile_sync;
 pub(crate) mod protocol_diagnostics;
+mod reviewed_agent;
 
 trait Checked<T> {
     fn checked(self, operation: &str) -> T;

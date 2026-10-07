@@ -764,6 +764,9 @@ impl Workspace {
         let id = terminal.entity_id();
         self.suspend_panels(ticket.tab, cx);
         self.remote_sessions.remove(&ticket.tab);
+        // Cancellation cannot wait for an emitted panel event or a timer after
+        // the captured connection is retired. The replacement gets no grant.
+        self.maintain_agent(cx);
         self.remote_hosts.remove(&ticket.tab);
         self.terminal_observers.remove(&ticket.tab);
         self.terminal_focus.remove(&ticket.tab);
@@ -790,6 +793,9 @@ impl Workspace {
             self.reconnect_bindings.insert(id, binding);
         }
         self.tabs[index] = terminal.clone();
+        // Old MCP operations belong to the retired entity, including when the
+        // replacement uses the same endpoint and authenticated SSH peer.
+        self.maintain_mcp(cx);
         if let Some((first, second)) = &mut self.split_pair {
             if *first == ticket.tab {
                 *first = id;

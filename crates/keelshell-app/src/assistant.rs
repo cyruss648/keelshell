@@ -22,6 +22,7 @@ use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
 
+mod agent;
 #[path = "assistant/command_review_target.rs"]
 mod command_review_target;
 
@@ -33,10 +34,42 @@ use crate::{
 };
 
 pub enum AssistantEvent {
-    Capture { selection_only: bool },
+    Capture {
+        selection_only: bool,
+        previous_run: Option<Uuid>,
+    },
     OpenSettings,
+    AgentStart {
+        run_id: Uuid,
+        session_id: String,
+    },
+    AgentPrepareFile {
+        run_id: Uuid,
+        action_id: Uuid,
+        action: keelshell_ai::AgentAction,
+    },
+    AgentExecute {
+        run_id: Uuid,
+        action_id: Uuid,
+        action: keelshell_ai::AgentAction,
+    },
+    AgentStop {
+        run_id: Uuid,
+    },
+    AgentProposed {
+        run_id: Uuid,
+        action_id: Uuid,
+        action: keelshell_ai::AgentAction,
+    },
+    AgentActionRejected {
+        run_id: Uuid,
+        action_id: Uuid,
+    },
     SelectProfile(Uuid),
-    Suggestion { command: String, session_id: String },
+    Suggestion {
+        command: String,
+        session_id: String,
+    },
 }
 
 enum PreparedAssistantRequest {
@@ -194,6 +227,7 @@ pub struct AssistantPanel {
     _job: Option<Task<()>>,
     prompt: Entity<TextareaState>,
     content_scroll: ScrollHandle,
+    question_anchor: ScrollAnchor,
     preview_scroll: ScrollHandle,
     context: String,
     host: String,
@@ -209,6 +243,7 @@ pub struct AssistantPanel {
     request_revision: u64,
     response_target: Option<(String, String)>,
     local_progress: Option<LocalRequestProgress>,
+    agent: agent::AgentPanelState,
     _subscriptions: Vec<Subscription>,
 }
 
@@ -233,8 +268,10 @@ impl AssistantPanel {
                 "What would you like to understand?",
             ))
         });
+        let content_scroll = ScrollHandle::new();
+        let question_anchor = ScrollAnchor::for_handle(content_scroll.clone());
         let subscriptions = vec![cx.subscribe(&prompt, |view, _, event: &InputEvent, cx| {
-            if matches!(event, InputEvent::Change) {
+            if matches!(event, InputEvent::Change) && !view.obsolete_agent_question_change(cx) {
                 view.invalidate_request(cx);
             }
         })];
@@ -248,7 +285,8 @@ impl AssistantPanel {
             cancellation: None,
             _job: None,
             prompt,
-            content_scroll: ScrollHandle::new(),
+            content_scroll,
+            question_anchor,
             preview_scroll: ScrollHandle::new(),
             context: String::new(),
             host: String::new(),
@@ -267,6 +305,7 @@ impl AssistantPanel {
             request_revision: 0,
             response_target: None,
             local_progress: None,
+            agent: agent::AgentPanelState::default(),
             _subscriptions: subscriptions,
         }
     }
@@ -371,6 +410,7 @@ impl AssistantPanel {
         {
             return;
         }
+        self.lose_agent_target(cx);
         self.invalidate_request(cx);
         self.context.clear();
         self.host.clear();
@@ -383,6 +423,7 @@ impl AssistantPanel {
     }
 
     fn invalidate_request(&mut self, cx: &mut Context<Self>) {
+        self.stop_agent(cx);
         self.request_revision = self.request_revision.wrapping_add(1);
         if let Some(cancellation) = self.cancellation.take() {
             cancellation.cancel();
@@ -409,7 +450,7 @@ impl AssistantPanel {
         if self.busy {
             return;
         }
-        let Some(profile) = self.profile.as_ref() else {
+        let Some(profile) = self.profile.clone() else {
             self.status = Message::new(
                 "请先在 AI 设置中添加并选择配置。",
                 "Add and select a profile in AI settings first.",
@@ -436,7 +477,7 @@ impl AssistantPanel {
                 if let Some(key) = &self.key {
                     credentials.insert(profile.id, key.clone());
                 }
-                crate::ai_request_options::resolve_authentication(profile, &credentials)
+                crate::ai_request_options::resolve_authentication(&profile, &credentials)
             }
             AiBackend::LocalAgent { .. } => {
                 if matches!(
@@ -449,7 +490,7 @@ impl AssistantPanel {
                     }
                 ) {
                     self.credentials
-                        .local_environment_key(profile)
+                        .local_environment_key(&profile)
                         .cloned()
                         .map(Some)
                         .ok_or(keelshell_ai::AiError::InvalidApiKey)
@@ -481,6 +522,9 @@ impl AssistantPanel {
             AiApiStyle::Responses => ProviderProtocol::Responses,
             AiApiStyle::AnthropicMessages => ProviderProtocol::AnthropicMessages,
         };
+        let Some(question) = self.prepare_agent_question(cx) else {
+            return;
+        };
         // Every configured transient credential participates in redaction, even
         // when it belongs to a different profile or invocation adapter.
         let secrets: Vec<&str> = self
@@ -489,7 +533,7 @@ impl AssistantPanel {
             .into_iter()
             .chain(resolved_key.as_ref().map(|key| key.as_str()))
             .collect();
-        let context = ContextDraft::new(self.prompt.read(cx).value().to_string())
+        let context = ContextDraft::new(question)
             .with_host_label(self.host.clone())
             .add_selection(
                 t(
@@ -497,11 +541,15 @@ impl AssistantPanel {
                     "用户选择的远端终端文本",
                     "Explicitly selected remote terminal text",
                 ),
-                self.context.clone(),
+                if self.agent.mode {
+                    String::new()
+                } else {
+                    self.context.clone()
+                },
             );
         let result = match profile.backend {
             AiBackend::Api => {
-                crate::ai_request_options::resolve_options(profile, &self.credentials)
+                crate::ai_request_options::resolve_options(&profile, &self.credentials)
                     .and_then(|options| {
                         ProviderConfig::new_with_protocol(
                             &profile.endpoint,
@@ -512,7 +560,7 @@ impl AssistantPanel {
                             provider
                                 .with_request_options(options)
                                 .with_inference_options(
-                                    crate::ai_request_options::inference_options(profile)?,
+                                    crate::ai_request_options::inference_options(&profile)?,
                                 )
                         })
                     })
@@ -520,7 +568,11 @@ impl AssistantPanel {
                         context.prepare_with_limits(
                             &provider,
                             &secrets,
-                            16 * 1024,
+                            if self.agent.mode {
+                                64 * 1024
+                            } else {
+                                16 * 1024
+                            },
                             profile.max_output_tokens,
                             profile.context_window_tokens,
                         )
@@ -529,7 +581,7 @@ impl AssistantPanel {
                     .map_err(|error| ai_error(&error))
             }
             AiBackend::LocalAgent { .. } => {
-                let config = match local_agent_config(profile, false) {
+                let config = match local_agent_config(&profile, false) {
                     Ok(config) => config,
                     Err(error) => {
                         self.status = local_agent_error(error);
@@ -541,6 +593,11 @@ impl AssistantPanel {
                     config.working_directory(),
                     keelshell_ai::LocalAgentWorkingDirectory::Selected(_)
                 ) {
+                    let byte_budget = if self.agent.mode {
+                        64 * 1024
+                    } else {
+                        16 * 1024
+                    };
                     let owned_secrets: Vec<Zeroizing<String>> = secrets
                         .iter()
                         .map(|value| Zeroizing::new((*value).to_owned()))
@@ -565,7 +622,7 @@ impl AssistantPanel {
                             let secrets: Vec<&str> =
                                 owned_secrets.iter().map(|value| value.as_str()).collect();
                             config
-                                .prepare_checked(context, &secrets, 16 * 1024, &cancellation)
+                                .prepare_checked(context, &secrets, byte_budget, &cancellation)
                                 .await
                                 .map(PreparedAssistantRequest::Local)
                                 .map_err(local_agent_error)
@@ -591,7 +648,15 @@ impl AssistantPanel {
                     return;
                 }
                 config
-                    .prepare(context, &secrets, 16 * 1024)
+                    .prepare(
+                        context,
+                        &secrets,
+                        if self.agent.mode {
+                            64 * 1024
+                        } else {
+                            16 * 1024
+                        },
+                    )
                     .map(PreparedAssistantRequest::Local)
                     .map_err(local_agent_error)
             }
@@ -636,6 +701,10 @@ impl AssistantPanel {
         let Some(request) = self.prepared.take() else {
             return;
         };
+        if !self.begin_agent_round(cx) {
+            self.prepared = Some(request);
+            return;
+        }
         let key = self.prepared_key.take();
         let revision = self.request_revision;
         let response_target = (self.host.clone(), self.session_id.clone());
@@ -827,14 +896,28 @@ impl AssistantPanel {
                 self.response = keelshell_ai::Redactor::new(&self.credentials.all_secrets())
                     .redact(&text)
                     .0;
-                self.suggestions = shell_blocks(&self.response);
+                if self.agent.mode {
+                    self.accept_agent_reply(cx);
+                } else {
+                    self.suggestions = shell_blocks(&self.response);
+                }
                 self.diagnostic_plan = None;
-                self.status = Message::new(
-                    "已收到回复。命令建议需先审阅，再送入输入框。",
-                    "Response received. Suggestions require review before use.",
-                );
+                if !self.agent.mode {
+                    self.status = Message::new(
+                        "已收到回复。命令建议需先审阅，再送入输入框。",
+                        "Response received. Suggestions require review before use.",
+                    );
+                }
             }
-            Err(error) => self.status = error,
+            Err(error) => {
+                if let Some(run) = &mut self.agent.run {
+                    run.fail();
+                    let run_id = run.id();
+                    self.revoke_agent_backend(run_id, cx);
+                    cx.emit(AssistantEvent::AgentStop { run_id });
+                }
+                self.status = error;
+            }
         }
         cx.notify();
     }
@@ -954,6 +1037,9 @@ impl AssistantPanel {
 }
 impl Drop for AssistantPanel {
     fn drop(&mut self) {
+        if let Some((_, cancellation)) = &self.agent.backend {
+            cancellation.cancel();
+        }
         if let Some(cancellation) = &self.cancellation {
             cancellation.cancel();
         }
@@ -961,7 +1047,7 @@ impl Drop for AssistantPanel {
 }
 impl EventEmitter<AssistantEvent> for AssistantPanel {}
 impl Render for AssistantPanel {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
         let profile_choices = if self.selecting_profile {
             let mut choices = div().p_2().bg(rgb(visual.canvas)).flex().flex_col().gap_1();
@@ -1064,9 +1150,15 @@ impl Render for AssistantPanel {
                         Button::new("context-selection")
                             .ghost()
                             .label(t(cx, "所选文本", "Selection"))
-                            .on_click(cx.listener(|_, _, _, cx| {
+                            .on_click(cx.listener(|panel, _, _, cx| {
+                                panel.invalidate_request(cx);
                                 cx.emit(AssistantEvent::Capture {
                                     selection_only: true,
+                                    previous_run: panel
+                                        .agent
+                                        .run
+                                        .as_ref()
+                                        .map(keelshell_ai::AgentRun::id),
                                 })
                             })),
                     )
@@ -1074,9 +1166,15 @@ impl Render for AssistantPanel {
                         Button::new("context-screen")
                             .ghost()
                             .label(t(cx, "当前屏幕", "Visible screen"))
-                            .on_click(cx.listener(|_, _, _, cx| {
+                            .on_click(cx.listener(|panel, _, _, cx| {
+                                panel.invalidate_request(cx);
                                 cx.emit(AssistantEvent::Capture {
                                     selection_only: false,
+                                    previous_run: panel
+                                        .agent
+                                        .run
+                                        .as_ref()
+                                        .map(keelshell_ai::AgentRun::id),
                                 })
                             })),
                     ),
@@ -1097,11 +1195,18 @@ impl Render for AssistantPanel {
                     .render(cx)
                 },
             ))
-            .child(Textarea::new(&self.prompt))
+            .child(self.agent_controls(cx))
+            .child(
+                div()
+                    .id("assistant-question")
+                    .test_support()
+                    .anchor_scroll(Some(self.question_anchor.clone()))
+                    .child(Textarea::new(&self.prompt).readonly(self.agent_active())),
+            )
             .child(
                 Button::new("prepare-request")
                     .primary()
-                    .disabled(self.busy || self.profile.is_none())
+                    .disabled(self.busy || self.profile.is_none() || self.agent_prepare_disabled())
                     .label(if self.busy {
                         t(cx, "正在请求…", "Request in progress…")
                     } else {
@@ -1176,7 +1281,10 @@ impl Render for AssistantPanel {
                         ),
                 );
         }
-        if !self.response.is_empty() {
+        if self.agent.mode {
+            content = content.child(self.agent_view(window, cx));
+        }
+        if !self.response.is_empty() && !self.agent.mode {
             // Provider output stays plain text and never triggers implicit requests.
             content = content
                 .child(self.review_target_view("assistant-response-target".into(), cx))
@@ -1297,7 +1405,7 @@ impl Render for AssistantPanel {
                 );
             }
         }
-        let request_bar = if self.busy || self.local_progress.is_some() {
+        let request_bar = if self.busy || self.local_progress.is_some() || self.agent_active() {
             let mut bar = div()
                 .id("assistant-request-bar")
                 .test_support()
@@ -1318,8 +1426,16 @@ impl Render for AssistantPanel {
                 bar = bar
                     .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                         cx,
-                        "本地 Ask · 请求进度",
-                        "Local Ask · Request progress",
+                        if self.agent.mode {
+                            "本地推理 · 本回合请求进度"
+                        } else {
+                            "本地 Ask · 请求进度"
+                        },
+                        if self.agent.mode {
+                            "Local inference · Current round progress"
+                        } else {
+                            "Local Ask · Request progress"
+                        },
                     )))
                     .child(
                         div()
@@ -1376,13 +1492,20 @@ impl Render for AssistantPanel {
                         )));
                 }
             } else {
-                bar = bar.child(div().text_xs().text_color(rgb(visual.accent)).child(t(
-                    cx,
-                    "正在等待模型服务回复…",
-                    "Waiting for provider…",
-                )));
+                bar = bar.child(div().text_xs().text_color(rgb(visual.accent)).child(
+                    if self.agent.mode {
+                        self.agent_status_headline(cx)
+                    } else {
+                        t(cx, "正在等待模型服务回复…", "Waiting for provider…").to_owned()
+                    },
+                ));
             }
-            if self.busy {
+            if self.agent_active() {
+                bar = bar
+                    .child(self.agent_stop_button(cx))
+                    .child(self.agent_question_controls(cx));
+            }
+            if self.busy && !self.agent.mode {
                 bar = bar.child(
                     Button::new("assistant-cancel-request")
                         .ghost()
@@ -1468,6 +1591,7 @@ impl Render for AssistantPanel {
                     ),
             )
             .children(confirmation)
+            .children(self.agent_action_footer(cx))
     }
 }
 

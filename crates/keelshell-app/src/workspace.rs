@@ -17,6 +17,7 @@ use gpui_kit::{
     *,
 };
 use keelshell_core::{AppState, AuthMethod, Connection, Language, StateStore};
+mod agent;
 mod command_workflows;
 mod commands;
 mod credentials;
@@ -280,6 +281,7 @@ pub struct Workspace {
     saving: bool,
     show_assistant: bool,
     assistant: Entity<AssistantPanel>,
+    agent: Option<agent::AgentState>,
     ai_credentials: EphemeralCredentials,
     ai_settings: Option<Entity<AiSettingsPanel>>,
     ai_settings_subscription: Option<Subscription>,
@@ -460,7 +462,13 @@ impl Workspace {
             &assistant,
             window,
             |view, panel, event, window, cx| match event {
-                AssistantEvent::Capture { selection_only } => {
+                AssistantEvent::Capture {
+                    selection_only,
+                    previous_run,
+                } => {
+                    if !panel.read(cx).agent_capture_current(*previous_run) {
+                        return;
+                    }
                     if let Some(terminal) = view.tabs.get(view.active) {
                         let source = terminal.read(cx);
                         let text = if *selection_only {
@@ -479,6 +487,28 @@ impl Workspace {
                         });
                     }
                 }
+                AssistantEvent::AgentStart { run_id, session_id } => {
+                    view.start_agent(*run_id, session_id, cx)
+                }
+                AssistantEvent::AgentProposed {
+                    run_id,
+                    action_id,
+                    action,
+                } => view.register_agent_proposal(*run_id, *action_id, action, cx),
+                AssistantEvent::AgentPrepareFile {
+                    run_id,
+                    action_id,
+                    action,
+                } => view.prepare_agent_file(*run_id, *action_id, action, cx),
+                AssistantEvent::AgentExecute {
+                    run_id,
+                    action_id,
+                    action,
+                } => view.execute_agent_action(*run_id, *action_id, action, cx),
+                AssistantEvent::AgentActionRejected { run_id, action_id } => {
+                    view.reject_agent_action(*run_id, *action_id)
+                }
+                AssistantEvent::AgentStop { run_id } => view.stop_agent(*run_id),
                 AssistantEvent::OpenSettings => view.open_ai_settings(window, cx),
                 AssistantEvent::SelectProfile(id) => {
                     if let Some(profile) = view
@@ -527,6 +557,7 @@ impl Workspace {
                     .update_in(cx, |view, window, cx| {
                         view.poll_reconnect(window, cx);
                         view.maintain_mcp(cx);
+                        view.maintain_agent(cx);
                     })
                     .is_err()
                 {
@@ -581,6 +612,7 @@ impl Workspace {
             saving: false,
             show_assistant: false,
             assistant,
+            agent: None,
             ai_credentials,
             ai_settings: None,
             ai_settings_subscription: None,
@@ -677,11 +709,17 @@ impl Workspace {
             let terminal = self.tabs.remove(self.active);
             self.forget_reconnect(terminal.entity_id(), window, cx);
             self.remote_sessions.remove(&terminal.entity_id());
+            // Retiring the authoritative mapping must revoke the backend token
+            // in this foreground turn, before a paused write can resume.
+            self.maintain_agent(cx);
             self.command_histories.remove(&terminal.entity_id());
             self.remote_hosts.remove(&terminal.entity_id());
             self.panels.remove(&terminal.entity_id());
             self.terminal_observers.remove(&terminal.entity_id());
             self.terminal_focus.remove(&terminal.entity_id());
+            // Retirement revokes background MCP leases in this same UI turn.
+            // Closing a shell channel does not close its shared SFTP connection.
+            self.maintain_mcp(cx);
             self.maintain_command_workflows(cx);
             self.active = self.active.min(self.tabs.len().saturating_sub(1));
             if self.tabs.len() < 2
@@ -771,6 +809,7 @@ impl Workspace {
                 {
                     view.poll_reconnect(window, cx);
                     view.maintain_mcp(cx);
+                    view.maintain_agent(cx);
                 };
                 cx.notify();
             }),
@@ -1601,6 +1640,7 @@ impl Workspace {
                         view.invalidate_reconnect_profiles(window, cx);
                         view.revoke_stale_protocol_diagnostics(cx);
                         view.maintain_mcp(cx);
+                        view.maintain_agent(cx);
                         let route_changed=view.invalidate_changed_route(window,cx);
                         // Appearance does not change suggestion sources or invalidate reviews.
                         if !matches!(&after, AfterSave::Theme) {

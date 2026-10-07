@@ -1,5 +1,9 @@
 # 开发路线
 
+2026-10-07 当前增量：已将新的非作者限定复核通过的审核式 Agent epoch3 和 MCP原SSH生命周期撤权精确导入主工作副本，29路径、共享代码三方合并且无关基线保持。新的组合源码审查无阻断，根765输入完整门禁实际0/850.425秒，1677普通/10doc/6Python及严格检查、两种626控制器通过；同输入新macOS包与57打包实际0/36.350秒、资源回收。结果Markdown更新后非文档相同，新精确提交CI另记[整合记录](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。后续继续新组合原生Agent/外部客户端、同时活跃两owner撤权、UI最小窗口/键盘/辅助技术和Windows/Linux桌面。旧候选P1与原始失败保留，源码实现不等于完整产品完成。
+
+b54文件合并及严格patch的两次有限macOS草稿/保存已完整远端读回并独立证据复核，见[原生记录](testing/records/2026-10-07-text-merge-patch-native.md)；短审核视口与offscreen AX输入仍需改进并验证键盘操作。精确b54 Quality为macOS/Windows成功、Linux首次目录Ask原8秒Timeout，原因未知且未进入app同步，见[平台CI](testing/records/2026-10-07-text-main-platform-ci.md)。test-only同步阶段recorder与debug KDF优化候选需新的非作者及主树整合，不以本机或LinuxARM64成本样本宣称历史CI根因修复。以下历史条目保留各自时间与范围。
+
 2026-10-07 精确 `319cb2a` 三平台CI已结束，macOS/Linux成功、Windows两项应用工作目录夹具失败。新的test-only路径/JSON值修正保持生产限制与原期限，完整本机门禁1612普通/8doc/6Python及严格检查实际0，736输入相同、资源回收；非作者源码/两项GPUI/全证据复核无阻断，新提交Windows执行与原生仍待完成。旧Linux同步原因不追溯关闭。见[应用夹具记录](testing/records/2026-10-07-selected-directory-app-platform-followup.md)。同一734输入MCP新尝试停在首个120秒窗口确认，操作端记录未成功，0CLI/模型/业务；隔离资源已回收，单独截图探针不是业务成功。见[启动记录](testing/records/2026-10-07-external-mcp-current-main-startup.md)。对外MCP方向和完整产品目标保持。
 
 17路径的三方冲突合并/审核patch已完成独立复核、作者门禁及根全量证据消费，按精确preimage/postimage导入主副本并保留其余基线输入；主树745输入完整门禁实际0/994.033秒，1641普通/10doc/6Python及新macOS开发包/57打包通过，新原生与精确新CI仍待完成，见[整合记录](testing/records/2026-10-07-reviewed-text-main-integration.md)。Agent旧候选因关闭捕获页签后仍可后台写入的真实独立P1被阻止整合；修正epoch2已冻结742输入，完整门禁实际0/506.581秒、新macOS开发包/结构检查/57打包通过，仍需新的独立撤权与raw终端结束复核。候选检查不作为主树已交付或完整产品验收。

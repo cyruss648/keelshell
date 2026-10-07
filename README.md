@@ -45,19 +45,19 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 | **远程文件** | SFTP 浏览、文件和递归目录传输、暂停与内容校验续传；权限修改、文本编辑、逐项冲突选择的三方合并与严格 patch 草稿；目录比较、内容校验、双向合并及逐项审核的目录镜像 |
 | **命令与任务** | 会话历史、命令片段、显式参数、远端命令与路径补全；逐目标批量命令、依赖工作流、有限定时与只读任务记录 |
 | **监控与网络** | Linux 主机和逐设备磁盘 I/O 状态；监听端口、远程 DNS / TLS / HTTP(S) HEAD 诊断；本地及远端 TCP 转发、回环 SOCKS5 隧道 |
-| **AI 助手** | 命名模型 API / Codex CLI / Claude Code 配置；模型发现与连接测试、明确上下文、完整请求预览、回答及审核式诊断建议 |
+| **AI 助手** | 命名模型 API / Codex CLI / Claude Code 配置；模型发现与连接测试、明确上下文、完整请求预览、回答、诊断建议及逐轮审核的有限 Agent 工作流 |
 | **对外 MCP** | 外部智能体读取明确授权的会话信息、终端片段、SFTP 与监控；命令和文件修改先提交提案，在桌面应用中审阅后执行 |
 | **关于与更新** | 项目主页、版本和内置变更日志；按平台检查发布、SHA-256 校验下载，以及可选的安装和重启 |
 
 传输与镜像取消会保留已完成项；断线后不会自动重放命令、传输或任务。目录内容比较和同步具有明确的大小、类型及路径限制，协议诊断需要远端 POSIX / Python 3.8+。具体操作与边界见[文件工作区](docs/product/FILES_WORKSPACE.md)、[目录镜像](docs/product/DIRECTORY_MIRROR.md)、[远程协议诊断](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md)和[能力清单](docs/product/CAPABILITIES.md)。
 
-文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。操作限制见[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；组合工程检查和 macOS 包结构检查已完成；新的桌面验收仍在进行。
+文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。操作限制见[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；macOS 自有 SSH/SFTP 的两次草稿与保存流程已完成完整内容读回，完整界面与跨平台验收继续进行，见[限定原生记录](docs/testing/records/2026-10-07-text-merge-patch-native.md)。
 
 ## AI 助手与对外 MCP
 
 **在 KeelShell 内使用 AI**：创建命名配置，选择模型 API 或本地 CLI；明确选择上下文，检查实际请求，再发送问题。API 支持 Chat Completions、Responses 和 Anthropic Messages，可配置请求头、代理、推理及采样选项。回复中的命令绑定捕获的 SSH 目标，经你审阅后再执行。
 
-本地 Claude Code / Codex CLI 当前提供单轮 Ask，使用显式 API 凭据与受控环境；工作目录默认空隔离，也可明确选择绝对路径并审核。订阅登录和受限 Agent 工作流仍在开发，所选目录的完整桌面与跨平台原生验收尚未完成。配置和限制见[本地智能体](docs/product/LOCAL_AGENTS.md)；API 选项见[请求配置](docs/product/AI_REQUEST_OPTIONS.md)与[推理设置](docs/product/AI_INFERENCE.md)。
+本地 Claude Code / Codex CLI 使用显式 API 凭据与受控环境；工作目录默认空隔离，也可明确选择绝对路径并审核。应用内 [Agent 工作流](docs/product/REVIEWED_AGENT.md)由 KeelShell 编排：每轮请求由你发送，每项远程命令、文件读取或已有文件替换分别审阅，结果经你确认后才准备下一轮。停止或原 SSH 会话结束会撤销旧任务；已发出的操作可能留下未知结果。供应商 CLI 自身的工具保持关闭。订阅登录、新工作流及所选目录的完整桌面与跨平台原生验收尚未完成。配置和限制见[本地智能体](docs/product/LOCAL_AGENTS.md)；API 选项见[请求配置](docs/product/AI_REQUEST_OPTIONS.md)与[推理设置](docs/product/AI_INFERENCE.md)。
 
 **让外部智能体使用 KeelShell**：KeelShell 提供 MCP 服务端，stdio 伴随程序连接正在运行的桌面应用。你选择可访问的 SSH 会话、工具、终端片段和目录。外部智能体可以读取授权信息，或提交命令、现有 UTF-8 文件替换提案；完整目标与内容在 KeelShell 中审阅，客户端不能自行批准。配置与八项工具见[对外 MCP 指南](docs/product/EXTERNAL_MCP.md)。
 

@@ -80,6 +80,10 @@ impl Workspace {
                 return;
             }
             let Execution::Command(command) = proposal else { return; };
+            if lease.check().is_err() || session.is_closed() {
+                let _ = sender.send(Completion::Executed { id, state: ActionState::OutcomeUnknown, output: String::new() }).await;
+                return;
+            }
             let result = tokio::select! {
                 biased;
                 _ = lease.revoked() => Err(McpFailure::Revoked),
@@ -112,7 +116,7 @@ async fn execute_file(
     session: keelshell_session::SshSession,
     baseline: keelshell_session::sftp::RegularFileSnapshot,
     replacement: String,
-    lease: &AuthorizationLease,
+    lease: &SessionAuthorization,
 ) -> (ActionState, String) {
     if lease.check().is_err() || session.is_closed() {
         return (ActionState::OutcomeUnknown, String::new());

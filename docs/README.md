@@ -1,5 +1,11 @@
 # 文档索引
 
+- [审核式 Agent](product/REVIEWED_AGENT.md)：逐轮请求、单项SSH操作、固定审批、停止与原会话绑定。
+- [MCP会话授权生命周期](product/MCP_SESSION_LIFETIME.md)：向外部智能体提供能力，原始结束、关闭及重连撤权。
+- [Agent与MCP主树组合](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)：独立审查、精确导入与组合验收边界。
+- [文件合并／patch限定macOS原生](testing/records/2026-10-07-text-merge-patch-native.md)：两次完整远端读回与UI证据限制。
+- [精确b54三平台Quality](testing/records/2026-10-07-text-main-platform-ci.md)：macOS/Windows成功，Linux首次目录Ask超时原因未知。
+
 - [产品与交互](product/PRODUCT.md)：用户任务、界面规则、AI 边界
 - [远程 SSH 能力要求](research/remote-ssh-requirements.md)：产品目标与逐项验收标准
 - [工作区观察摘记](research/remote-workspace-reference.md)：历史匿名研究与证据限制
