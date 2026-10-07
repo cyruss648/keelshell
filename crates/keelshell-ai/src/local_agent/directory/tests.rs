@@ -8,7 +8,12 @@ use std::{
 
 fn directory() -> (tempfile::TempDir, PathBuf) {
     let temp = tempfile::tempdir().expect("owned temporary directory");
+    // Keep ordinary disk paths on Windows; canonicalize uses a verbatim
+    // namespace there, which selected-directory admission intentionally rejects.
+    #[cfg(unix)]
     let root = temp.path().canonicalize().expect("canonical owned root");
+    #[cfg(not(unix))]
+    let root = temp.path().to_path_buf();
     let selected = root.join("selected 运维 workspace");
     std::fs::create_dir(&selected).expect("selected directory");
     (temp, selected)
@@ -31,9 +36,31 @@ async fn native_absolute_unicode_directory_is_reviewed_without_creation_or_cli()
         .await
         .expect("review");
     assert_eq!(guard.selected_path(), path);
-    assert_eq!(guard.canonical_path(), path);
+    assert_eq!(
+        guard.canonical_path(),
+        path.canonicalize().expect("canonical selected path")
+    );
     assert_eq!(std::fs::read_dir(path).expect("directory").count(), 0);
     assert!(!format!("{guard:?}").contains("运维"));
+}
+
+#[cfg(windows)]
+#[tokio::test]
+async fn device_and_network_namespaces_remain_rejected_before_filesystem_access() {
+    let (_temp, path) = directory();
+    for rejected in [
+        path.canonicalize().expect("owned verbatim path"),
+        PathBuf::from(r"\\server\share\selected"),
+        PathBuf::from(r"\\.\C:\selected"),
+        PathBuf::from(r"C:relative"),
+    ] {
+        assert_eq!(
+            selected(rejected, LocalAgentKind::ClaudeCode)
+                .await
+                .unwrap_err(),
+            LocalAgentError::DirectoryInvalid
+        );
+    }
 }
 
 #[tokio::test]

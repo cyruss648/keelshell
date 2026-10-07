@@ -18,6 +18,13 @@ const BOOTSTRAP: &str = "--keelshell-internal-local-ask-v1";
 // Readiness observes a child-owned marker with the same eight-second budget
 // as Ask; it does not renew the request deadline or the controller's limit.
 const ASK_READINESS_DEADLINE: Duration = Duration::from_secs(8);
+// This controller runs all cases serially. Its aggregate watchdog covers each
+// reviewed request's directory check (5s), Ask (8s), and exceptional cleanup
+// (3s), four malformed launchers (2s each), plus one total 40s fixture reserve.
+// This is a test watchdog, not a new per-request or OS-I/O deadline.
+const REVIEWED_REQUEST_CASES: u64 = if cfg!(unix) { 16 } else { 11 };
+const CONTROLLER_DEADLINE: Duration =
+    Duration::from_secs(REVIEWED_REQUEST_CASES * (5 + 8 + 3) + 4 * 2 + 40);
 
 fn main() {
     let args: Vec<_> = std::env::args().skip(1).collect();
@@ -74,7 +81,12 @@ fn main() {
         .build()
         .unwrap()
         .block_on(async {
-            tokio::time::timeout(Duration::from_secs(40), controller())
+            println!(
+                "directory controller: {}s aggregate; 8s Ask; {} reviewed requests",
+                CONTROLLER_DEADLINE.as_secs(),
+                REVIEWED_REQUEST_CASES
+            );
+            tokio::time::timeout(CONTROLLER_DEADLINE, controller())
                 .await
                 .expect("bounded directory process controller");
         });

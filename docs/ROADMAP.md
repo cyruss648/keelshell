@@ -1,5 +1,7 @@
 # 开发路线
 
+2026-10-07 后续 test-only 修复已通过本机正式门禁和新非作者源码/证据复核：Windows单元夹具路径修正、命名空间拒绝反例、按既有单次预算推导总目录控制器304/224秒。734输入前后相等，142普通AI/2doc、Unix目录20及默认/2MiB各626阶段实际0；4 ignored未执行。原3873 Windows/Linux两项失败继续保留；新提交级CI、未进入的Linux app同步根因、完整原生和产品目标仍开放。见[后续记录](testing/records/2026-10-07-directory-controller-platform-followup.md)。用户再次确认MCP只由KeelShell对外提供服务，应用内API/CLI推理独立，不新增第三方MCP客户端。
+
 本轮平台修复在已推送 `0d64f09` 基础上通过正式本机门禁：1,612普通/8doc/6Python、格式/x.y/严格Clippy，57打包及macOS双程序构建实际0；三份733输入相同，新的非作者源码/证据复核无新增阻断。旧0d64 CI仍为macOS成功、Windows条件编译和Linux目录readiness失败；修复需要自己的新提交三平台CI，完整Windows/Linux桌面及Linux同步根因继续开放。详见[平台记录](testing/records/2026-10-07-local-agent-directory-platform-fix.md)。MCP始终由KeelShell向外部智能体提供服务，应用内API/CLI Ask独立。
 
 2026-10-07 当前组合的新macOS标准双程序开发包已实际构建并通过57项打包、Info.plist和动态库检查；719输入前后相等，非文档生产输入保持完整工程检查的717范围。后续同一程序已完成限定双向镜像原生验证，没有安装或发布；完整桌面／外部客户端／Windows/Linux原生与精确提交CI仍开放，见[组合记录](testing/records/2026-10-07-recursive-mirror-main-combination.md)。
