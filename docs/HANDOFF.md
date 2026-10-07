@@ -1,5 +1,14 @@
 # KeelShell 开发交接 — 2026-10-08
 
+## 当前状态 — 2026-10-08
+
+本轮测试修复基于已推送主线 `7c11954`，已包含本地／远程 SFTP 浏览。精确 [Quality 37683724603](https://github.com/cyruss648/keelshell/actions/runs/37683724603) 已结束：macOS 成功，Windows 和 Linux 失败，三份完整 job 原日志均保留。Windows 失败测试的 `PathBuf::join("..")` 在 verbatim 路径上会先归一化；新的测试输入保留原生字面 ParentDir，使原拒绝断言获得正确输入。Linux 失败发生在 120 秒夹具组准入，准确 owner／原因仍未知；新增有界测试观察记录实际持有和清理阶段，原期限、FIFO 与四线程保持。当前 `feature/browser-platform-controls` 已实际通过 1,776 普通 Rust／10 rustdoc／6 Python、格式／x.y／全 targets 严格 Clippy，以及 57 项打包测试；新的非作者最终源码／工程证据复核无 P1/P2 阻断；本轮测试修复提交后的精确 CI 另行验收，见[平台记录](testing/records/2026-10-08-file-browser-platform-ci.md)。下文 a940 及浏览整合阶段保留其历史范围。
+
+配置恢复在隔离候选中实际通过 34 项专项、依赖策略、最终格式及全 workspace／all targets 严格 Clippy，新非作者已核对 v8 同一输入与原始记录；四份状态文档是独立 v9。该功能尚未进入主线，完整 workspace／新标准包／原生恢复继续开放。对外 MCP 新验收控制器的账本／进程最终检查修正已通过新的非作者离线复核；当前程序绑定与完整外部 Codex 业务仍未通过。MCP 始终是 KeelShell 向外部智能体提供能力的服务端。
+
+## 历史浏览整合检查点
+
+
 最新已推送检查点为 `a94038d`（本地智能体准备失败的测试控制器收尾）；父提交 `9669243` 包含自动更新策略与会话栏，其三平台 Quality 已实际全部成功。2026-10-08 后续准备期收尾改动只涉及本地智能体测试控制器及检查入口：新增十项控制、原默认／2MiB各626阶段、85项AI库及严格全target Clippy已在根实际通过；新非作者最终复核和精确远端读回通过；a940 的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37676683014)已全部成功，三个 job 原日志完整读回；这不替代浏览增量的精确新 CI，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。下文旧219等检查点保留其历史范围，不作为最新主线。
 
 本地／远程文件浏览已精确整合到根 `feature/local-remote-file-browser`：810 输入完整门禁通过 1,769 普通 Rust／10 rustdoc／6 Python、格式／x.y／严格 Clippy，22 ignored 未执行；同输入新 macOS 标准包与 57 打包用例通过。新宽窗口系统目录选择器、隐藏项、子目录／上级导航、大小排序及人工审核上传／下载已实际完成，三份完整30字节来源／远端／下载内容相等；12 原始 JPEG／AX、实际 wait 和所属资源清理保留。新组合源码／工程／宽窗口原生证据的独立复核无 P1/P2；功能提交后的精确 CI、最小原生窗口、辅助技术和其它平台桌面仍独立开放，见[整合记录](testing/records/2026-10-08-local-file-browser-main-integration.md)。MCP 由 KeelShell 向外部智能体提供服务；本轮未授予 MCP 权能或调用外部客户端。

@@ -358,7 +358,19 @@ async fn late_local_navigation_cannot_replace_the_last_explicit_directory(cx: &m
         assert_eq!(listing.entries[0].name, "last.txt");
         assert_eq!(listing.entries[0].kind, LocalEntryKind::File);
     });
-    browse(&h, second.join(".."), cx);
+    // PathBuf::join collapses parent components on Windows verbatim paths.
+    // Preserve the literal native spelling so this input reaches rejection.
+    let mut invalid = second.as_os_str().to_os_string();
+    invalid.push(std::path::MAIN_SEPARATOR_STR);
+    invalid.push("..");
+    let invalid = PathBuf::from(invalid);
+    assert!(
+        invalid
+            .components()
+            .any(|component| component == std::path::Component::ParentDir),
+        "the failed-navigation fixture must contain a literal parent component"
+    );
+    browse(&h, invalid, cx);
     local_idle(&h, cx).await;
     h.panel.read_with(cx, |panel, cx| {
         assert!(
@@ -622,4 +634,33 @@ async fn loaded_local_and_remote_rows_fit_original_minimum_budgets_in_both_langu
             }
         }
     }
+}
+
+#[cfg(windows)]
+#[test]
+fn verbatim_parent_join_normalizes_before_local_browser_validation() {
+    let second = PathBuf::from(r"\\?\C:\keelshell-owned-fixture\second");
+    let joined = second.join("..");
+    assert_eq!(joined, PathBuf::from(r"\\?\C:\keelshell-owned-fixture"));
+    assert!(
+        !joined
+            .components()
+            .any(|component| component == std::path::Component::ParentDir)
+    );
+    let mut literal = second.as_os_str().to_os_string();
+    literal.push(std::path::MAIN_SEPARATOR_STR);
+    literal.push("..");
+    let literal = PathBuf::from(literal);
+    assert!(
+        literal
+            .components()
+            .any(|component| component == std::path::Component::ParentDir)
+    );
+    assert_eq!(
+        crate::files::local_catalog::list_directory(
+            &literal,
+            &std::sync::atomic::AtomicBool::new(false),
+        ),
+        Err(crate::files::local_catalog::LocalBrowseError::UnsupportedPath)
+    );
 }

@@ -5,9 +5,14 @@ use std::{
     time::{Duration, Instant},
 };
 
+#[path = "fixture_observation.rs"]
+mod observation;
+use observation::Kind;
+
 pub(crate) struct FixtureGroup {
     permit: Option<tokio::sync::OwnedSemaphorePermit>,
     queues: Mutex<Vec<RegisteredQueue>>,
+    observation: observation::GroupId,
 }
 
 struct RegisteredQueue {
@@ -65,6 +70,7 @@ fn reap_finished_cleanup() {
 struct Cleanup {
     permit: Option<tokio::sync::OwnedSemaphorePermit>,
     queues: Vec<RegisteredQueue>,
+    observation: observation::GroupId,
 }
 
 impl Drop for Cleanup {
@@ -74,6 +80,7 @@ impl Drop for Cleanup {
         // start a different test over that owner's local mutation domain.
         if let Some(permit) = self.permit.take() {
             permit.forget();
+            observation::group_event(self.observation, Kind::AdmissionFailedClosed, None, 0);
         }
     }
 }
@@ -81,30 +88,69 @@ impl Drop for Cleanup {
 impl Cleanup {
     fn finish(mut self) -> Result<(), String> {
         let deadline = Instant::now() + Duration::from_secs(120);
+        observation::group_event(
+            self.observation,
+            Kind::CleanupStarted,
+            None,
+            self.queues.len(),
+        );
         while let Some(RegisteredQueue { runtime, mut queue }) = self.queues.pop() {
+            let queue_index = self.queues.len() + 1;
+            let mut pending_observed = false;
             let queue = loop {
                 queue = match Arc::try_unwrap(queue) {
                     Ok(queue) => break queue,
                     Err(queue) => queue,
                 };
+                if !pending_observed {
+                    observation::group_event(
+                        self.observation,
+                        Kind::QueueReferencesPending,
+                        Some(queue_index),
+                        Arc::strong_count(&queue),
+                    );
+                    pending_observed = true;
+                }
                 if Instant::now() >= deadline {
                     return Err("fixture queue still has a live owner after 120 seconds".into());
                 }
                 std::thread::sleep(Duration::from_millis(1));
             };
             let remaining = deadline.saturating_duration_since(Instant::now());
-            runtime.block_on(async {
+            observation::group_event(
+                self.observation,
+                Kind::QueueCloseStarted,
+                Some(queue_index),
+                0,
+            );
+            let close_result = runtime.block_on(async {
                 tokio::time::timeout(remaining, queue.close())
                     .await
                     .map_err(|_| {
                         "fixture queue scheduler did not terminate in 120 seconds".to_owned()
                     })?
                     .map_err(|error| format!("fixture queue scheduler join failed: {error}"))
-            })?;
+            });
+            if close_result.is_err() {
+                observation::group_event(
+                    self.observation,
+                    Kind::QueueCloseFailed,
+                    Some(queue_index),
+                    0,
+                );
+            }
+            close_result?;
+            observation::group_event(
+                self.observation,
+                Kind::QueueSchedulerJoined,
+                Some(queue_index),
+                self.queues.len(),
+            );
         }
         // close() awaited each real scheduler, including its in-flight tasks.
         // Runtime/queue retention is one-way: no scheduler holds FixtureGroup.
         drop(self.permit.take());
+        observation::group_event(self.observation, Kind::PermitReleased, None, 0);
         Ok(())
     }
 }
@@ -118,11 +164,19 @@ impl Drop for FixtureGroup {
             Ok(queues) => std::mem::take(queues),
             Err(_) => {
                 permit.forget();
+                observation::group_event(self.observation, Kind::AdmissionFailedClosed, None, 0);
                 panic!("fixture queue registry poisoned; admission remains closed");
             }
         };
+        observation::group_event(
+            self.observation,
+            Kind::GroupLastOwnerDropped,
+            None,
+            queues.len(),
+        );
         if queues.is_empty() {
             drop(permit);
+            observation::group_event(self.observation, Kind::PermitReleased, None, 0);
             return;
         }
         // The last entity or transport worker may drop on GPUI. Move the real
@@ -131,6 +185,7 @@ impl Drop for FixtureGroup {
         let cleanup = Cleanup {
             permit: Some(permit),
             queues,
+            observation: self.observation,
         };
         let thread = std::thread::Builder::new()
             .name("keelshell-fixture-cleanup".into())
@@ -161,10 +216,12 @@ impl FixtureGroup {
         cx: &mut gpui_kit::TestAppContext,
         runtime: &tokio::runtime::Runtime,
     ) -> Arc<Self> {
+        let label = cx.test_function_name().unwrap_or("fixture_group_context");
         if let Some(group) = cx.update(|cx| for_app(cx)) {
+            observation::group_event(group.observation, Kind::SameAppReused, None, 0);
             return group;
         }
-        let group = Self::acquire(runtime);
+        let group = runtime.block_on(Self::wait_labeled(label));
         group.bind_context(cx);
         group
     }
@@ -177,22 +234,43 @@ impl FixtureGroup {
     }
 
     pub(crate) async fn wait() -> Arc<Self> {
+        Self::wait_labeled("fixture_group_internal").await
+    }
+
+    async fn wait_labeled(label: &'static str) -> Arc<Self> {
         reap_finished_cleanup();
+        let mut request = observation::request(label);
         static ADMISSION: OnceLock<Arc<tokio::sync::Semaphore>> = OnceLock::new();
         let admission = ADMISSION
             .get_or_init(|| Arc::new(tokio::sync::Semaphore::new(1)))
             .clone();
         // Existing local writers own the whole local side against possible aliases;
         // a fresh UUID directory does not isolate independent tests in one process.
-        let permit = tokio::time::timeout(Duration::from_secs(120), admission.acquire_owned())
-            .await
+        let permit_result =
+            tokio::time::timeout(Duration::from_secs(120), admission.acquire_owned()).await;
+        match &permit_result {
+            Err(_) => {
+                request.failed(Kind::AdmissionTimeout);
+                observation::report();
+            }
+            Ok(Err(_)) => {
+                request.failed(Kind::AdmissionClosed);
+                observation::report();
+            }
+            Ok(Ok(_)) => {}
+        }
+        let permit = permit_result
             .checked("file fixture group admission exceeded 120 seconds")
             .checked("file fixture admission remains open");
+        let observation = request.acquired();
         reap_finished_cleanup();
-        Arc::new(Self {
+        let group = Arc::new(Self {
             permit: Some(permit),
             queues: Mutex::new(Vec::new()),
-        })
+            observation,
+        });
+        observation::bound(observation, &group);
+        group
     }
 
     pub(crate) fn retain_queue(
@@ -209,6 +287,7 @@ impl FixtureGroup {
                 runtime: runtime.clone(),
                 queue: queue.clone(),
             });
+            observation::group_event(self.observation, Kind::QueueRegistered, None, queues.len());
         }
     }
 }
@@ -236,6 +315,7 @@ mod tests {
         let cleanup = Cleanup {
             permit: Some(permit),
             queues: Vec::new(),
+            observation: observation::GroupId::UNOBSERVED,
         };
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             // The standard library rejects this name before starting a thread;

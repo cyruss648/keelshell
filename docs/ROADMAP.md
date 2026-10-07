@@ -2,7 +2,7 @@
 
 ## 当前产品缺口与实施顺序 — 2026-10-08
 
-最新已推送检查点为 `a94038d`。Windows 准备失败收尾的 test-only 候选已在根通过十项新控制、原默认／2MiB控制器、AI库和严格Clippy；它没有改变产品范围，也未确定历史Windows失败原因，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。
+本轮测试修复基于已推送检查点 `7c11954`（本地／远程 SFTP 浏览）。精确三平台 Quality 的 macOS 成功、Windows 与 Linux 失败；Windows 字面上级路径测试修正及 Linux 夹具准入诊断已通过本机完整门禁（1,776 普通 Rust／10 rustdoc／6 Python、严格 Clippy）和 57 项打包测试，新的非作者最终复核无 P1/P2 阻断，新提交的精确 CI 尚待完成；准确 Linux 历史原因仍未知，见[平台记录](testing/records/2026-10-08-file-browser-platform-ci.md)。以下 a940 为历史检查点。Windows 准备失败收尾的 test-only 候选已在根通过十项新控制、原默认／2MiB控制器、AI库和严格Clippy；它没有改变产品范围，也未确定历史Windows失败原因，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。
 
 已推送基线 `219093c` 包含审核式 Agent、推理/采样参数、显式本地 CLI 工作目录、有界任务结果审计、加密连接配置同步、远程 DNS/TLS/HTTP 诊断及文件审核视口／生命周期v5；其工程与限定原生证据各自保留。精确219三平台CI已结束：macOS/Linux成功，Windows后代端口3秒准备期失败，Ask/清理终态未记录，原因UNKNOWN。当前新增自动更新策略和会话工具栏组合已完成最终800输入完整门禁、同源码标准macOS包、限定宽窗口更新设置／双SSH交互及新非作者最终源码／证据复核；提交CI与英文原生small P2另行追踪，见[组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)。以下十项依据当前源码与[原始远程要求](research/remote-ssh-requirements.md)列出，保留真实余项；下一步优先日常SFTP浏览／编辑和工作区布局。
 
