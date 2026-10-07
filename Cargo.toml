@@ -10,6 +10,8 @@ publish = false
 
 [workspace.dependencies]
 gpui-kit = "0.7"
+# Embed the Kit catalog in development packages as well as release binaries.
+rust-embed = { version = "8.12", features = ["debug-embed"] }
 image = { version = "0.25", default-features = false, features = ["png"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

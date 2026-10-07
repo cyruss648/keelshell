@@ -47,7 +47,7 @@ Simplified Chinese is the default, with English available. Appearance follows th
 | **Monitoring and networking** | Linux host status and per-device disk I/O; listening sockets and remote DNS / TLS / HTTP(S) HEAD diagnostics; local/remote TCP forwarding and loopback SOCKS5 tunnels |
 | **AI assistance** | Named model API / Codex CLI / Claude Code profiles; model discovery and connection testing, explicit context, complete request previews, answers, diagnostic suggestions and a finite Agent workflow reviewed each round |
 | **External MCP** | External agents read explicitly granted session information, terminal fragments, SFTP and monitoring; commands and file changes are proposed for review and execution in the desktop app |
-| **About and updates** | Project link, version and bundled changelog; platform-aware release checks, SHA-256 verified downloads and opt-in installation/restart |
+| **About and updates** | Project link, version and bundled changelog; daily background checks with off/weekly settings, optional SHA-256 verified downloads and confirmed installation/restart |
 
 Canceling a transfer or mirror retains completed operations; disconnection does not replay commands, transfers or tasks. Directory comparison/sync has explicit size, type and path limits. Protocol diagnostics require remote POSIX / Python 3.8+. See the [file workspace](docs/product/FILES_WORKSPACE.md), [directory mirrors](docs/product/DIRECTORY_MIRROR.md), [remote protocol diagnostics](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md) and [capability ledger](docs/product/CAPABILITIES.md) for workflows and boundaries.
 
@@ -101,7 +101,7 @@ Copy an existing OpenSSH configuration and use **Import SSH config** to review s
 
 The tag-triggered release workflow defines six build targets. Successful tagged builds publish packages and checksums to [GitHub Releases](https://github.com/cyruss648/keelshell/releases). Actual builds, desktop workflows and installed updates are recorded separately; a configured workflow does not establish acceptance.
 
-**About / updates** reads the changelog, checks versions and verifies downloads. Installation and restart require explicit confirmation. Platform signing, notarization and native update installation remain open; see [Releasing](docs/RELEASING.md).
+**About / updates** reads the changelog, checks versions and verifies downloads. Background policy defaults to daily checks with downloads off; off/weekly cadence and optional downloads are saved explicitly. Installation and restart require confirmation; see [Update policy](docs/product/AUTOMATIC_UPDATES.md). Platform signing, notarization and native update installation remain open; see [Releasing](docs/RELEASING.md).
 
 ## Documentation and contributing
 

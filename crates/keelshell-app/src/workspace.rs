@@ -39,6 +39,7 @@ use library::{DestinationPrompt, DestinationTarget, FolderForm, LibraryFilter};
 use reconnect_editor::ReconnectEditor;
 #[cfg(test)]
 pub(crate) mod tests;
+mod updates;
 mod vault;
 mod view;
 
@@ -186,6 +187,10 @@ impl ConnectionForm {
 enum AfterSave {
     None,
     Theme,
+    Updates {
+        revision: u64,
+    },
+    UpdateHistory,
     Ai {
         panel: WeakEntity<AiSettingsPanel>,
         credentials: EphemeralCredentials,
@@ -280,6 +285,14 @@ pub struct Workspace {
     modal_scope: modal_scope::ModalScope,
     saving: bool,
     show_assistant: bool,
+    session_tab_scroll: ScrollHandle,
+    session_tab_reveal: Option<(
+        EntityId,
+        Pixels,
+        usize,
+        keelshell_core::Language,
+        &'static str,
+    )>,
     assistant: Entity<AssistantPanel>,
     agent: Option<agent::AgentState>,
     ai_credentials: EphemeralCredentials,
@@ -290,7 +303,9 @@ pub struct Workspace {
     vault_settings: Option<Entity<VaultSettings>>,
     vault_settings_subscription: Option<Subscription>,
     update_panel: Option<Entity<UpdatePanel>>,
-    update_panel_subscription: Option<Subscription>,
+    update_service: Entity<UpdatePanel>,
+    pending_update_check: Option<u64>,
+    update_history_retry_after: Option<std::time::Instant>,
     command_target: Option<EntityId>,
     command_revision: u64,
     command_record_history: bool,
@@ -558,6 +573,7 @@ impl Workspace {
                         view.poll_reconnect(window, cx);
                         view.maintain_mcp(cx);
                         view.maintain_agent(cx);
+                        view.flush_update_check(window, cx);
                     })
                     .is_err()
                 {
@@ -576,6 +592,36 @@ impl Workspace {
             cx,
         ));
         let snippet_sources = Arc::new(state.snippets.clone());
+        let update_service =
+            cx.new(|cx| UpdatePanel::new(runtime.clone(), state.settings.updates, cx));
+        if load_error.is_some() {
+            update_service.update(cx, |panel, cx| panel.suspend_background(cx));
+        }
+        let update_subscription =
+            cx.subscribe_in(&update_service, window, |view, _, event, window, cx| {
+                match event {
+                    UpdatePanelEvent::Close => {
+                        view.update_panel = None;
+                        view.focus_current_surface(window, cx);
+                    }
+                    UpdatePanelEvent::Restart => crate::terminal::shutdown_and_quit(cx),
+                    UpdatePanelEvent::Preferences {
+                        preferences,
+                        revision,
+                    } => {
+                        view.save_update_preferences(*preferences, *revision, window, cx);
+                    }
+                    UpdatePanelEvent::Checked(seconds) => {
+                        view.pending_update_check = Some(
+                            view.pending_update_check
+                                .map_or(*seconds, |pending| pending.max(*seconds)),
+                        );
+                        view.flush_update_check(window, cx);
+                    }
+                }
+                cx.notify();
+            });
+        let update_observer = cx.observe(&update_service, |_, _, cx| cx.notify());
         Self {
             store,
             state,
@@ -611,6 +657,8 @@ impl Workspace {
             modal_scope: modal_scope::ModalScope::default(),
             saving: false,
             show_assistant: false,
+            session_tab_scroll: ScrollHandle::new(),
+            session_tab_reveal: None,
             assistant,
             agent: None,
             ai_credentials,
@@ -621,7 +669,9 @@ impl Workspace {
             vault_settings: None,
             vault_settings_subscription: None,
             update_panel: None,
-            update_panel_subscription: None,
+            update_service,
+            pending_update_check: None,
+            update_history_retry_after: None,
             command_target: None,
             command_revision: 0,
             command_record_history: true,
@@ -668,6 +718,8 @@ impl Workspace {
             terminal_observers: HashMap::new(),
             terminal_focus: HashMap::new(),
             _subscriptions: vec![
+                update_subscription,
+                update_observer,
                 appearance_subscription,
                 subscription,
                 assistant_subscription,
@@ -704,7 +756,7 @@ impl Workspace {
             self.cancel_connect_route(window, cx);
             return;
         }
-        if !self.tabs.is_empty() {
+        if self.active < self.tabs.len() {
             self.cancel_remote_completion(cx);
             let terminal = self.tabs.remove(self.active);
             self.forget_reconnect(terminal.entity_id(), window, cx);
@@ -1166,24 +1218,8 @@ impl Workspace {
         {
             return;
         }
-        let panel = cx.new(|cx| UpdatePanel::new(self.runtime.clone(), window, cx));
-        self.update_panel_subscription = Some(cx.subscribe_in(
-            &panel,
-            window,
-            |view, _panel, event, window, cx| match event {
-                UpdatePanelEvent::Close => {
-                    view.update_panel = None;
-                    view.update_panel_subscription = None;
-                    view.focus_current_surface(window, cx);
-                    cx.notify();
-                }
-                UpdatePanelEvent::Restart => {
-                    view.update_panel = None;
-                    view.update_panel_subscription = None;
-                    crate::terminal::shutdown_and_quit(cx);
-                }
-            },
-        ));
+        let panel = self.update_service.clone();
+        panel.update(cx, |panel, cx| panel.show(window, cx));
         self.update_panel = Some(panel);
         cx.notify();
     }
@@ -1566,11 +1602,20 @@ impl Workspace {
     }
     fn persist(
         &mut self,
-        candidate: AppState,
+        mut candidate: AppState,
         after: AfterSave,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if let Some(seconds) = self.pending_update_check {
+            candidate.settings.updates.last_successful_check = Some(
+                candidate
+                    .settings
+                    .updates
+                    .last_successful_check
+                    .map_or(seconds, |last| last.max(seconds)),
+            );
+        }
         // Apply is an event boundary too. Recheck the immutable catalog and its
         // complete credential snapshot before any background store write; a
         // delayed or directly emitted event must not bypass the panel's guard.
@@ -1618,8 +1663,11 @@ impl Workspace {
             cx.notify();
             return;
         }
+        let update_history = matches!(&after, AfterSave::UpdateHistory);
         self.saving = true;
-        self.status = Message::new("正在保存…", "Saving…");
+        if !update_history {
+            self.status = Message::new("正在保存…", "Saving…");
+        }
         let store = self.store.clone();
         let state = candidate.clone();
         let task = cx
@@ -1633,6 +1681,11 @@ impl Workspace {
                 match result {
                     Ok(saved) => {
                         view.state = saved;
+                        view.update_service.update(cx, |panel, cx| panel.set_preferences(view.state.settings.updates, cx));
+                        if view.pending_update_check.is_some_and(|pending| view.state.settings.updates.last_successful_check.is_some_and(|saved| saved >= pending)) {
+                            view.pending_update_check = None;
+                            view.update_history_retry_after = None;
+                        }
                         view.maintain_library_selection();
                         if let AfterSave::Trust { attempt, index } = &after {
                             view.accept_reconnect_trust(*attempt, *index);
@@ -1642,14 +1695,20 @@ impl Workspace {
                         view.maintain_mcp(cx);
                         view.maintain_agent(cx);
                         let route_changed=view.invalidate_changed_route(window,cx);
-                        // Appearance does not change suggestion sources or invalidate reviews.
-                        if !matches!(&after, AfterSave::Theme) {
+                        // Appearance and update preferences/history do not change suggestion sources.
+                        if !matches!(&after, AfterSave::Theme | AfterSave::Updates { .. } | AfterSave::UpdateHistory) {
                             view.snippet_sources = Arc::new(view.state.snippets.clone());
                             view.command_sources_revision = view.command_sources_revision.wrapping_add(1);
                         }
-                        view.status = Message::new("已保存到本机", "Saved locally");
+                        if !matches!(&after, AfterSave::UpdateHistory) {
+                            view.status = Message::new("已保存到本机", "Saved locally");
+                        }
                         match after {
-                            AfterSave::None => {}
+                            AfterSave::None | AfterSave::UpdateHistory => {}
+                            AfterSave::Updates { revision } => {
+                                view.update_service.update(cx, |panel, cx| panel.preferences_saved(revision, view.state.settings.updates, cx));
+                                view.status = Message::new("更新设置已保存", "Update settings saved");
+                            }
                             AfterSave::Theme => {
                                 crate::design::apply(view.state.settings.theme, Some(window), cx);
                                 view.status = Message::new("外观偏好已保存", "Appearance preference saved");
@@ -1812,6 +1871,12 @@ impl Workspace {
                         } else {
                             None
                         };
+                        if matches!(&after, AfterSave::Updates { .. }) {
+                            view.update_service.update(cx, |panel, cx| panel.preferences_failed(cx));
+                        }
+                        if view.pending_update_check.is_some() {
+                            view.update_history_retry_after = Some(std::time::Instant::now() + Duration::from_secs(30));
+                        }
                         if let AfterSave::Ai { panel, .. } = after
                             && let Some(panel) = panel.upgrade()
                         {
@@ -1838,10 +1903,10 @@ impl Workspace {
                     view.flush_recent_connections(window, cx);
                     view.flush_batch_audits(window, cx);
                     view.flush_workflow_audits(window, cx);
-                } else {
+                } else if !update_history {
                     view.pending_recents.clear();
                 }
-                view.refresh_workflow_audit_history(cx);
+                if !update_history { view.refresh_workflow_audit_history(cx); }
                 cx.notify();
             });
         })

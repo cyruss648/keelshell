@@ -80,7 +80,7 @@ fn main() {
         ),
     };
     gpui_kit::application()
-        .with_assets(gpui_kit::assets::Assets)
+        .with_assets(application_assets())
         .run(move |cx| {
             cx.set_app_identity("app.keelshell.desktop", "KeelShell");
             gpui_kit::init(cx);
@@ -133,6 +133,34 @@ fn linux_window_icon() -> Option<Arc<image::RgbaImage>> {
         Err(error) => {
             eprintln!("Unable to decode the embedded KeelShell window icon: {error}");
             None
+        }
+    }
+}
+
+// The component-default bundle omits application icons such as split, AI and
+// package. Native apps need the full embedded catalog; no network icon fetches.
+fn application_assets() -> impl gpui_kit::AssetSource + rust_embed::RustEmbed {
+    gpui_kit::assets::AllAssets
+}
+
+#[cfg(test)]
+mod assets_tests {
+    use gpui_kit::{AssetSource, assets::IconName};
+
+    #[test]
+    fn application_source_resolves_every_declared_icon_offline() {
+        let source = super::application_assets();
+        for icon in IconName::ALL {
+            let path = icon.path();
+            let bytes = source
+                .load(&path)
+                .unwrap_or_else(|error| panic!("{path}: {error}"))
+                .unwrap_or_else(|| panic!("missing embedded icon: {path}"));
+            assert!(!bytes.is_empty(), "empty embedded icon: {path}");
+            assert!(
+                matches!(bytes, std::borrow::Cow::Borrowed(_)),
+                "icon must be compiled static bytes, never a registry filesystem read: {path}"
+            );
         }
     }
 }

@@ -1,5 +1,8 @@
 # 文档索引
 
+- [小窗口会话标签设计](adr/0080-scrollable-session-tabs.md)：固定关闭入口、可发现的导航、布局后reveal与离线图标。
+- [小窗口会话标签修复记录](testing/records/2026-10-08-compact-session-tabs.md)：真实缺陷与新功能各自的检查状态。
+
 - [展开文件审核与输入焦点](product/FILE_REVIEW_AND_FOCUS.md)：完整两轴正文、固定确认区和显式草稿／差异入口。
 - [精确 a4 三平台 CI](testing/records/2026-10-07-agent-mcp-platform-ci.md)：macOS／Windows 成功；Linux 目录夹具冲突及其证据边界。
 - [开发 KDF 构建优化](adr/0075-development-kdf-build-optimization.md)：开发构建效率、加密参数保持和限定回归。
@@ -81,3 +84,5 @@
 - [本地 CLI 登录身份研究](research/local-cli-owned-authentication.md)：实际 parser／配置探针、执行前策略缺口和仍开放的验收。
 
 - [File review and runtime integration](testing/records/2026-10-07-ui-runtime-main-integration.md)
+
+- [自动更新策略](product/AUTOMATIC_UPDATES.md)及[主副本组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)：源码整合与专项结果，完整门禁／原生各自记录。

@@ -383,7 +383,6 @@ impl Workspace {
             ModalKind::Login => self.cancel_login(window, cx),
             ModalKind::Updates => {
                 self.update_panel = None;
-                self.update_panel_subscription = None;
             }
             ModalKind::ProfileSync => {
                 if let Some(panel) = self.profile_sync.clone() {

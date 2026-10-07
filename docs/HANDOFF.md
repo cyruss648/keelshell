@@ -2,11 +2,11 @@
 
 ## 当前主线和整合状态
 
-当前已推送主线为 `a4c15c04772b11a70a592ae7c95132b4bea4d818`。审核式 Agent 和原 SSH 生命周期绑定的 MCP 授权已整合；本机完整工程检查及 macOS 开发包通过，详见[组合记录](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。这些结果不等于完整产品或新原生流程完成。
+当前已推送主线为 `219093c95b491692abea1a7d005b2e6eea985967`，根已核对远端main同SHA、ahead/behind为0/0。该提交的[三平台Quality](https://github.com/cyruss648/keelshell/actions/runs/37657109077)已结束：macOS/Linux成功，Windows在本地智能体受控后代端口3秒准备期失败，该case Ask/清理终态未记录，原因UNKNOWN。三个job原日志已读回，不宣称三平台整体通过。此前 `a4c15c04772b11a70a592ae7c95132b4bea4d818` 审核式 Agent 和原 SSH 生命周期绑定的 MCP 授权已整合；本机完整工程检查及 macOS 开发包通过，详见[组合记录](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。这些结果不等于完整产品或新原生流程完成。
 
-该精确提交的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37624355451)已结束：macOS、Windows 成功，Linux 唯一应用失败为目录同步被实际 `MutationBusy` 拒绝，零写入，原字节保持。独立双夹具受控流程已证明不同测试目录也可能争用进程级本地写保护；历史 CI 的准确占用者未识别。旧 b54 的 8 秒 Ask 和 e695 的 18 秒同步失败仍是分别保留的未知原因，见[精确 CI 记录](testing/records/2026-10-07-agent-mcp-platform-ci.md)。
+此前精确`a4c15c0`的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37624355451)已结束：macOS、Windows 成功，Linux 唯一应用失败为目录同步被实际 `MutationBusy` 拒绝，零写入，原字节保持。独立双夹具受控流程已证明不同测试目录也可能争用进程级本地写保护；历史 CI 的准确占用者未识别。旧 b54 的 8 秒 Ask 和 e695 的 18 秒同步失败仍是分别保留的未知原因，见[精确 CI 记录](testing/records/2026-10-07-agent-mcp-platform-ci.md)。
 
-本轮43个声明路径已按精确preimage和审核后的三方结果导入主工作副本，完整785输入与准备副本相等，所有未声明基线字节保持。主树完整门禁和新macOS标准包实际通过；对应受控原生文件审核取消/保存流程已完成，新的非作者最终证据复核通过，精确新提交CI另记：
+本轮43个声明路径已按精确preimage和审核后的三方结果导入、提交并推送主线，完整785输入与准备副本相等，所有未声明基线字节保持。主树完整门禁和新macOS标准包实际通过；对应受控原生文件审核取消/保存流程已完成，新的非作者最终证据复核通过，精确新提交CI另记：
 
 - 文件审核展开视图、固定动作和显式草稿／差异编辑入口，作者及新非作者限定源码与 GPUI 回归通过，见[文件指南](product/FILE_REVIEW_AND_FOCUS.md)。
 - 测试专用同步阶段观察和 Argon2 依赖的开发构建优化，作者及新非作者限定复核通过；生产 KDF 参数和原期限保持，见[ADR 0075](adr/0075-development-kdf-build-optimization.md)。
@@ -14,6 +14,8 @@
 - 本地文件测试 v5 以真实App弱组引用和实际panel／worker所有权保持许可，队列close／Join完成后才释放；作者六控制及95项四线程通过，根已完整消费。新的非作者真实App身份、资源终态与组合UI四项限定复核通过；根已完整消费原始材料，旧v3／v4拒绝记录保持，见[生命周期复核](testing/records/2026-10-07-local-mutation-fixture-lifetime-review.md)。生产文件隔离机制不改。
 
 本次785输入正式检查实际0（1691普通Rust/10doc/6Python及严格工程检查），对应macOS标准包/57打包实际0。真实macOS受控SSH/SFTP审核、取消字节保持和明确保存42字节完整读回通过；12原始JPEG/AX、操作顺序、actualwait与清理保留。英文小窗口会话关闭按钮截断P2已确认，下一切片修复；未取得OS逻辑几何、IME/VoiceOver或其它平台桌面证据。整合结果和精确输入见本次记录，不发布完成产品标签。
+
+小窗口会话标签和离线全图标源正在下一独立切片实现：已完成固定格式/x.y/全workspace严格Clippy，四项GPUI及完整内嵌资产回归实际通过。新的非作者静态促成语言/resize旧bounds和开发包资源修正；额外旧绘制close索引实际反例已复现并按EntityId修正，新完整门禁/标准包/原生及最终复核待完成。自动更新策略与本地目录浏览在独立作者树推进，尚未整合，不继承219的通过结论。见[小窗口记录](testing/records/2026-10-08-compact-session-tabs.md)。
 
 ## 产品与工程契约
 
@@ -45,3 +47,11 @@ UI、core、session、AI 分层；阻塞 I/O 不进入 UI 线程。直接 regist
 此前详细交接及各次历史范围保存在[历史快照](history/2026-10-07-handoff-before-ui-runtime-integration.md)，不将旧时点的“当前”状态当作本次结论。研究 Reef／模板、AI 配置和界面资料见[文档索引](README.md)。
 
 本次组合状态与后续实际结果统一记录在[界面与生命周期整合](testing/records/2026-10-07-ui-runtime-main-integration.md)。原生runner中断清理与编译输入绑定的14项自有子进程控制通过，只作为准备验证；实际新GUI/SSH/SFTP审核流程已完成，限定结果和未验证边界见整合记录。
+
+## 自动更新策略与会话栏 — 2026-10-08
+
+core typed policy 和 workspace长期更新服务已接通每日默认／关闭／每周、可选后台下载、启动延迟与有限退避；人工检查可撤销旧后台owner，迟到结果不能接管。已校验旧包只在新包校验成功后替换，取消当前请求恢复旧包，空闲时明确弃包；安装只经用户确认。历史metadata与偏好保存保留SSH实体和命令草稿，state reload即时同步策略。候选26项新增行为、原取消反例与修后专项各自保留；作者1703普通的旧full不继承为最终组合结论。见[策略历史](testing/records/2026-10-08-automatic-update-policy.md)。
+
+工具栏已增加紧凑图标、可滚动标签、标题省略、实体绑定的关闭入口及前后导航；动态更新文字也绑定布局reveal。完整静态图标嵌入用于开发／正式包。四项GPUI和资产回归、新非作者源码复核以及宽窗口双SSH／关闭／草稿保持已有证据；英文原生small P2保持OPEN，不能沿用GPUI900px。
+
+新组合审查发现旧绘制更新动作身份P1/P2，六项原指针反例实际失败、同测试修后通过，最后九项通过；按钮绑定完整Release／暂存包／请求身份，安装测试在current_exe/helper之前安全停止。修正后800输入最终门禁实际0：1,731普通Rust／10rustdoc／6Python、格式／x.y／严格全target Clippy及默认／2MiB各626控制器通过，22ignored未执行。同输入标准macOS双程序包／匹配夹具与57打包用例实际0。新隔离原生完成更新默认、保存／关闭重开、后台无稳定版本提示、双SSH中保存设置、英中／明暗／AI导航及关闭后保留草稿；13原图／AX、三个9,444字节完整文件读回和actualwait／所属组／端口／TMP回收均根读回。新的非作者最终源码／工程／宽窗口证据复核无阻断，收尾后仅九份状态Markdown变更，791其它输入相同。缩小尝试没有达到原生小窗口；精确提交CI、真实更新包下载／签名公证／安装回滚、整个原生退出时阻塞解包有界性、其它平台及完整产品目标继续开放，见[组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)。MCP保持KeelShell向外部智能体提供服务的方向，应用内API／CLI推理独立。

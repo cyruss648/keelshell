@@ -6,6 +6,9 @@
 //! only manifest-listed files, rolls back partial changes, and leaves unsigned
 //! or unsupported installations reviewable instead of replacing them blindly.
 
+mod schedule;
+mod worker;
+
 use std::{
     collections::{BTreeMap, HashSet},
     env,
@@ -14,27 +17,26 @@ use std::{
     path::{Component, Path, PathBuf},
     process::Command,
     sync::Arc,
-    time::{Duration, Instant},
+    sync::atomic::{AtomicBool, Ordering},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use gpui_kit::{
     assets::IconName,
     component::{
-        Disableable,
+        Disableable, Selectable,
         button::{Button, ButtonVariants},
     },
     prelude::FluentBuilder,
     *,
 };
+use keelshell_core::{UpdateCheckFrequency, UpdatePreferences};
 use reqwest::StatusCode;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use tokio::runtime::Runtime;
 
-use crate::{
-    i18n::{LocalizedTooltipExt, Message, t},
-    runtime_bridge,
-};
+use crate::i18n::{LocalizedTooltipExt, Message, t};
 
 /// The public repository shown by the About panel and used for release APIs.
 pub const PROJECT_URL: &str = "https://github.com/cyruss648/keelshell";
@@ -65,7 +67,7 @@ struct GithubRelease {
     assets: Vec<GithubAsset>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct ReleaseInfo {
     tag: String,
     name: String,
@@ -87,13 +89,37 @@ struct StagedUpdate {
     cleanup: Option<StageCleanup>,
 }
 
+#[derive(Clone, PartialEq, Eq)]
+struct StagedIdentity {
+    release: ReleaseInfo,
+    digest: String,
+    archive: PathBuf,
+    payload: PathBuf,
+}
+
+impl StagedIdentity {
+    fn matches(&self, staged: &StagedUpdate) -> bool {
+        self.release == staged.release
+            && self.digest == staged.digest
+            && self.archive == staged.archive
+            && self.payload == staged.payload
+    }
+}
+
+#[derive(Clone)]
+enum CancelIntent {
+    Request(Box<RequestIdentity>),
+    Downloaded(Arc<StagedIdentity>),
+}
+
 /// Owns a downloaded staging root until the update is either abandoned or
 /// handed to the detached helper. Keeping this guard with the ready state
-/// prevents failed downloads and closed panels from leaking release archives.
+/// keeps abandoned stages eligible for off-thread cleanup when the service ends.
 #[derive(Debug)]
 struct StageCleanup {
     root: PathBuf,
     armed: bool,
+    executor: tokio::runtime::Handle,
 }
 
 impl StageCleanup {
@@ -105,12 +131,24 @@ impl StageCleanup {
 impl Drop for StageCleanup {
     fn drop(&mut self) {
         if self.armed {
-            let _ = fs::remove_dir_all(&self.root);
+            let root = self.root.clone();
+            drop(self.executor.spawn_blocking(move || {
+                let _ = fs::remove_dir_all(root);
+            }));
         }
     }
 }
 
 impl StagedUpdate {
+    fn identity(&self) -> StagedIdentity {
+        StagedIdentity {
+            release: self.release.clone(),
+            digest: self.digest.clone(),
+            archive: self.archive.clone(),
+            payload: self.payload.clone(),
+        }
+    }
+
     fn disarm_cleanup(&mut self) {
         if let Some(cleanup) = self.cleanup.take() {
             cleanup.disarm();
@@ -167,49 +205,264 @@ enum PanelState {
     Failed,
 }
 
+/// Workspace-owned persistence and explicit restart requests from the service.
 pub enum UpdatePanelEvent {
+    /// Hide the panel while the background service keeps its ownership.
     Close,
+    /// The user explicitly authorized installation and the helper took ownership.
     Restart,
+    /// Save the current policy draft through the workspace transaction.
+    Preferences {
+        /// Policy; the workspace supplies authoritative check metadata.
+        preferences: UpdatePreferences,
+        /// Draft revision, used to preserve edits made during a save.
+        revision: u64,
+    },
+    /// A release check completed successfully at the supplied Unix time.
+    Checked(u64),
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum RequestOrigin {
+    Manual,
+    Automatic,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+struct RequestIdentity {
+    id: uuid::Uuid,
+    target: String,
+    source: &'static str,
+    version: &'static str,
+    generation: u64,
+    release: Option<ReleaseInfo>,
+}
+
+struct InFlight {
+    identity: RequestIdentity,
+    origin: RequestOrigin,
+    _worker: worker::Worker,
+}
+
+/// Long-lived update service. Visibility of the About panel does not own work.
 pub struct UpdatePanel {
-    runtime: Arc<Runtime>,
     state: PanelState,
+    retained_stage: Option<StagedUpdate>,
     current_target: Option<String>,
     status: Message,
     _job: Option<Task<()>>,
     focus: FocusHandle,
+    preferences: UpdatePreferences,
+    draft: UpdatePreferences,
+    draft_revision: u64,
+    preferences_saving: bool,
+    preferences_status: Message,
+    generation: u64,
+    request: Option<InFlight>,
+    schedule: schedule::Schedule,
+    background_suspended: bool,
+    _poll: Task<()>,
+    #[cfg(test)]
+    release_endpoint: Option<String>,
+    #[cfg(test)]
+    download_endpoints: Option<(String, String)>,
+    // Staging guards dispatch cleanup before the last runtime owner is dropped.
+    runtime: Arc<Runtime>,
 }
 
 impl EventEmitter<UpdatePanelEvent> for UpdatePanel {}
 
 impl UpdatePanel {
-    pub fn new(runtime: Arc<Runtime>, window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let focus = cx.focus_handle();
-        focus.focus(window, cx);
+    /// Start delayed scheduling without moving focus or performing immediate I/O.
+    pub fn new(
+        runtime: Arc<Runtime>,
+        preferences: UpdatePreferences,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        let executor = cx.background_executor().clone();
+        let poll = cx.spawn(async move |this, cx| {
+            loop {
+                executor.timer(Duration::from_secs(1)).await;
+                if this.update(cx, |panel, cx| panel.poll(cx)).is_err() {
+                    break;
+                }
+            }
+        });
         Self {
             runtime,
             state: PanelState::Idle,
+            retained_stage: None,
             current_target: target_triple(),
             status: Message::new(
-                format!("当前版本 {CURRENT_VERSION}，可查看项目主页或检查最新版本。"),
+                format!("当前版本 {CURRENT_VERSION}；后台检查不会安装更新。"),
                 format!(
-                    "Current version {CURRENT_VERSION}. Open the project or check for updates."
+                    "Current version {CURRENT_VERSION}; background checks never install updates."
                 ),
             ),
             _job: None,
-            focus,
+            focus: cx.focus_handle(),
+            preferences,
+            draft: preferences,
+            draft_revision: 0,
+            preferences_saving: false,
+            preferences_status: Message::new("设置已保存", "Settings saved"),
+            generation: 0,
+            request: None,
+            schedule: schedule::Schedule::new(
+                preferences,
+                Instant::now(),
+                unix_seconds().unwrap_or(0),
+            ),
+            background_suspended: false,
+            _poll: poll,
+            #[cfg(test)]
+            release_endpoint: None,
+            #[cfg(test)]
+            download_endpoints: None,
         }
     }
 
-    fn check(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if matches!(
-            self.state,
-            PanelState::Checking | PanelState::Downloading(_) | PanelState::Installing
-        ) {
+    pub(super) fn show(&self, window: &mut Window, cx: &mut Context<Self>) {
+        self.focus.focus(window, cx);
+    }
+
+    pub(super) fn action_label(&self, cx: &App) -> &'static str {
+        match &self.state {
+            PanelState::Ready(_) => t(cx, "更新已就绪", "Update ready"),
+            PanelState::Available(_) => t(cx, "发现更新", "Update available"),
+            _ => t(cx, "关于/更新", "About / updates"),
+        }
+    }
+
+    fn poll(&mut self, cx: &mut Context<Self>) {
+        self.poll_at(Instant::now(), cx);
+    }
+
+    fn poll_at(&mut self, now: Instant, cx: &mut Context<Self>) {
+        #[cfg(test)]
+        if self.release_endpoint.is_none() {
+            return;
+        }
+        if !self.background_suspended
+            && self.schedule.due(now)
+            && self.request.is_none()
+            && matches!(
+                self.state,
+                PanelState::Idle
+                    | PanelState::Available(_)
+                    | PanelState::UpToDate(_)
+                    | PanelState::Ready(_)
+                    | PanelState::Failed
+            )
+        {
+            self.begin_check(RequestOrigin::Automatic, cx);
+        }
+    }
+
+    fn cancel_inflight(&mut self) {
+        // Abort the owned Tokio future before dropping its foreground receiver.
+        self.request = None;
+        self._job = None;
+    }
+
+    fn discard_staged(&self, staged: StagedUpdate) {
+        // The guard dispatches filesystem cleanup to its original Tokio worker.
+        drop(staged);
+    }
+
+    fn clear_state(&mut self) {
+        if let PanelState::Ready(staged) = std::mem::replace(&mut self.state, PanelState::Idle) {
+            self.discard_staged(staged);
+        }
+        if let Some(staged) = self.retained_stage.take() {
+            self.discard_staged(staged);
+        }
+    }
+
+    fn retain_ready(&mut self) {
+        if let PanelState::Ready(staged) = std::mem::replace(&mut self.state, PanelState::Idle) {
+            // A periodic check must not consume a verified package or authorize
+            // installation. Keep it until a replacement is verified or discarded.
+            self.retained_stage = Some(staged);
+        }
+    }
+
+    fn restore_ready(&mut self) {
+        if let Some(staged) = self.retained_stage.take() {
+            self.state = PanelState::Ready(staged);
+        }
+    }
+
+    fn ready_matches(&self, reviewed: &StagedIdentity) -> bool {
+        self.request.is_none()
+            && matches!(&self.state, PanelState::Ready(staged) if reviewed.matches(staged))
+    }
+
+    fn return_to_downloaded(&mut self, reviewed: &StagedIdentity, cx: &mut Context<Self>) {
+        if self.request.is_none()
+            && !matches!(self.state, PanelState::Installing)
+            && self
+                .retained_stage
+                .as_ref()
+                .is_some_and(|staged| reviewed.matches(staged))
+        {
+            self.restore_ready();
+            cx.notify();
+        }
+    }
+
+    fn cancel_reviewed(&mut self, intent: &CancelIntent, cx: &mut Context<Self>) {
+        // A painted Cancel can outlive its request. It must never become
+        // Discard, or act on a replacement owner without a fresh review.
+        let current = match intent {
+            CancelIntent::Request(identity) => self.accepts(identity),
+            CancelIntent::Downloaded(reviewed) => self.ready_matches(reviewed),
+        };
+        if current {
+            self.cancel(cx);
+        }
+    }
+
+    fn accepts(&self, identity: &RequestIdentity) -> bool {
+        identity.generation == self.generation
+            && identity.source == RELEASES_API
+            && identity.version == CURRENT_VERSION
+            && self.current_target.as_deref() == Some(identity.target.as_str())
+            && self
+                .request
+                .as_ref()
+                .is_some_and(|request| request.identity == *identity)
+    }
+
+    fn identity(&self, target: String, release: Option<ReleaseInfo>) -> RequestIdentity {
+        RequestIdentity {
+            id: uuid::Uuid::new_v4(),
+            target,
+            source: RELEASES_API,
+            version: CURRENT_VERSION,
+            generation: self.generation,
+            release,
+        }
+    }
+
+    fn check(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
+        self.begin_check(RequestOrigin::Manual, cx);
+    }
+
+    fn begin_check(&mut self, origin: RequestOrigin, cx: &mut Context<Self>) {
+        if matches!(self.state, PanelState::Installing)
+            || self
+                .request
+                .as_ref()
+                .is_some_and(|request| request.origin == RequestOrigin::Manual)
+        {
+            return;
+        }
+        if origin == RequestOrigin::Automatic && self.request.is_some() {
             return;
         }
         let Some(target) = self.current_target.clone() else {
+            self.schedule.failed(self.preferences, Instant::now());
             self.fail(
                 "当前平台没有匹配的发布产物，请从项目主页手动下载。",
                 "No release asset matches this platform. Download it from the project page.",
@@ -217,80 +470,407 @@ impl UpdatePanel {
             );
             return;
         };
-        self.state = PanelState::Checking;
-        self.status = Message::new("正在检查 GitHub Releases…", "Checking GitHub Releases…");
-        let task = runtime_bridge::spawn(
+        self.cancel_inflight();
+        self.retain_ready();
+        let identity = self.identity(target.clone(), None);
+        #[cfg(not(test))]
+        let endpoint = Some(RELEASES_API.to_owned());
+        #[cfg(test)]
+        let endpoint = self.release_endpoint.clone();
+        let (worker, completion) = worker::spawn(
             &self.runtime,
             cx.background_executor().clone(),
-            async move { fetch_latest_release(&target).await },
+            Arc::new(AtomicBool::new(false)),
+            async move {
+                match endpoint {
+                    Some(endpoint) => fetch_latest_release_at(&target, &endpoint).await,
+                    None => Err(UpdateError::Network),
+                }
+            },
         );
-        self._job = Some(cx.spawn_in(window, async move |this, cx| {
-            let result = task.await.unwrap_or(Err(UpdateError::Network));
-            let _ = this.update_in(cx, |panel, _window, cx| match result {
-                Ok(release) if is_newer(&release.tag, CURRENT_VERSION) => {
-                    panel.state = PanelState::Available(release);
-                    panel.status = Message::new(
-                        "发现新版本，可查看变更并下载校验。",
-                        "A newer version is available. Review the changelog, then download it.",
-                    );
-                    cx.notify();
-                }
-                Ok(release) => {
-                    panel.state = PanelState::UpToDate(release);
-                    panel.status =
-                        Message::new("当前已是最新版本。", "This installation is up to date.");
-                    cx.notify();
-                }
-                Err(error) => {
-                    panel.status = error.message();
-                    panel.state = PanelState::Failed;
-                    cx.notify();
-                }
+        self.request = Some(InFlight {
+            identity: identity.clone(),
+            origin,
+            _worker: worker,
+        });
+        self.state = PanelState::Checking;
+        self.status = Message::new("正在检查 GitHub Releases…", "Checking GitHub Releases…");
+        self._job = Some(cx.spawn(async move |this, cx| {
+            let result = completion.await.unwrap_or(Err(UpdateError::Network));
+            let _ = this.update(cx, |panel, cx| {
+                panel.finish_check(&identity, origin, result, cx)
             });
         }));
         cx.notify();
     }
 
-    fn download(&mut self, release: ReleaseInfo, window: &mut Window, cx: &mut Context<Self>) {
-        if !matches!(
-            self.state,
-            PanelState::Available(_) | PanelState::UpToDate(_)
-        ) {
+    fn checked(&mut self, cx: &mut Context<Self>) {
+        self.schedule.succeeded(self.preferences, Instant::now());
+        if let Some(seconds) = unix_seconds() {
+            self.preferences.last_successful_check = Some(seconds);
+            self.draft.last_successful_check = Some(seconds);
+            cx.emit(UpdatePanelEvent::Checked(seconds));
+        }
+    }
+
+    fn finish_check(
+        &mut self,
+        identity: &RequestIdentity,
+        origin: RequestOrigin,
+        result: Result<ReleaseInfo, UpdateError>,
+        cx: &mut Context<Self>,
+    ) {
+        if !self.accepts(identity) {
             return;
         }
-        self.state = PanelState::Downloading(release.clone());
-        self.status = Message::new(
-            "正在下载并校验发布产物…",
-            "Downloading and verifying the release asset…",
-        );
-        let runtime = self.runtime.clone();
-        let task = runtime_bridge::spawn(&runtime, cx.background_executor().clone(), async move {
-            download_and_stage(release).await
-        });
-        self._job = Some(cx.spawn_in(window, async move |this, cx| {
-            let result = task.await.unwrap_or(Err(UpdateError::Network));
-            let _ = this.update_in(cx, |panel, _window, cx| match result {
-                Ok(staged) => {
-                    panel.status = Message::new(
-                        format!(
-                            "{} 已下载且 SHA-256 校验通过，可自动安装并重启。",
-                            staged.release.tag
-                        ),
-                        format!(
-                            "Downloaded and verified {}. It is ready to install and restart.",
-                            staged.release.tag
-                        ),
+        self.request = None;
+        match result {
+            Ok(release) if is_newer(&release.tag, CURRENT_VERSION) => {
+                self.checked(cx);
+                if self
+                    .retained_stage
+                    .as_ref()
+                    .is_some_and(|stage| stage.release == release)
+                {
+                    self.restore_ready();
+                    self.status = Message::new(
+                        "已校验的更新仍是最新发布版本；安装需要确认。",
+                        "The verified update is still the latest release; installation needs confirmation.",
                     );
-                    panel.state = PanelState::Ready(staged);
                     cx.notify();
+                    return;
                 }
-                Err(error) => {
-                    panel.status = error.message();
-                    panel.state = PanelState::Failed;
-                    cx.notify();
+                self.state = PanelState::Available(release.clone());
+                self.status = Message::new(
+                    "发现新版本，可查看变更并下载校验。",
+                    "A newer version is available. Review its changes and download it.",
+                );
+                if origin == RequestOrigin::Automatic && self.preferences.auto_download {
+                    self.begin_download(release, RequestOrigin::Automatic, cx);
                 }
-            });
+            }
+            Ok(release) => {
+                self.checked(cx);
+                self.state = PanelState::UpToDate(release);
+                self.restore_ready();
+                self.status =
+                    Message::new("当前已是最新版本。", "This installation is up to date.");
+            }
+            Err(UpdateError::Http(404)) => {
+                self.checked(cx);
+                self.state = PanelState::Idle;
+                self.restore_ready();
+                self.status = Message::new(
+                    "项目尚无可用的稳定发布版本。",
+                    "No stable release is available yet.",
+                );
+            }
+            Err(error) => {
+                self.schedule.failed(self.preferences, Instant::now());
+                self.status = error.message();
+                self.state = PanelState::Failed;
+                self.restore_ready();
+            }
+        }
+        cx.notify();
+    }
+
+    fn download(&mut self, release: ReleaseInfo, _window: &mut Window, cx: &mut Context<Self>) {
+        self.begin_download(release, RequestOrigin::Manual, cx);
+    }
+
+    fn begin_download(
+        &mut self,
+        release: ReleaseInfo,
+        origin: RequestOrigin,
+        cx: &mut Context<Self>,
+    ) {
+        let current = match &self.state {
+            PanelState::Available(current) | PanelState::UpToDate(current) => current,
+            _ => return,
+        };
+        if current != &release || self.request.is_some() {
+            return;
+        }
+        let Some(target) = self.current_target.clone() else {
+            return;
+        };
+        let identity = self.identity(target, Some(release.clone()));
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let cancellation = cancelled.clone();
+        let download = release.clone();
+        #[cfg(not(test))]
+        let endpoints = Some((release.checksum_url.clone(), release.archive_url.clone()));
+        #[cfg(test)]
+        let endpoints = self.download_endpoints.clone();
+        let (worker, completion) = worker::spawn(
+            &self.runtime,
+            cx.background_executor().clone(),
+            cancelled,
+            async move {
+                match endpoints {
+                    Some((checksum, archive)) => {
+                        download_and_stage_from(download, cancellation, &checksum, &archive).await
+                    }
+                    None => Err(UpdateError::Network),
+                }
+            },
+        );
+        self.request = Some(InFlight {
+            identity: identity.clone(),
+            origin,
+            _worker: worker,
+        });
+        self.state = PanelState::Downloading(release);
+        self.status = Message::new(
+            "正在下载并校验发布产物；不会自动安装。",
+            "Downloading and verifying the release asset; installation remains manual.",
+        );
+        self._job = Some(cx.spawn(async move |this, cx| {
+            let result = completion.await.unwrap_or(Err(UpdateError::Network));
+            // A disposed panel cannot receive a staging guard on the UI thread.
+            let _ = this.update(cx, |panel, cx| panel.finish_download(&identity, result, cx));
         }));
+        cx.notify();
+    }
+
+    fn finish_download(
+        &mut self,
+        identity: &RequestIdentity,
+        result: Result<StagedUpdate, UpdateError>,
+        cx: &mut Context<Self>,
+    ) {
+        if !self.accepts(identity) {
+            if let Ok(staged) = result {
+                self.discard_staged(staged);
+            }
+            return;
+        }
+        self.request = None;
+        match result {
+            Ok(staged) if identity.release.as_ref() == Some(&staged.release) => {
+                self.status = Message::new(
+                    format!(
+                        "{} 已下载且 SHA-256 校验通过；请确认后安装并重启。",
+                        staged.release.tag
+                    ),
+                    format!(
+                        "Downloaded and verified {}; confirm installation and restart when ready.",
+                        staged.release.tag
+                    ),
+                );
+                if let Some(previous) = self.retained_stage.take() {
+                    self.discard_staged(previous);
+                }
+                self.state = PanelState::Ready(staged);
+            }
+            Ok(staged) => {
+                self.discard_staged(staged);
+                self.schedule.failed(self.preferences, Instant::now());
+                self.state = PanelState::Failed;
+                self.status = UpdateError::Invalid.message();
+                self.restore_ready();
+            }
+            Err(error) => {
+                self.schedule.failed(self.preferences, Instant::now());
+                self.state = PanelState::Failed;
+                self.status = error.message();
+                self.restore_ready();
+            }
+        }
+        cx.notify();
+    }
+
+    pub(super) fn suspend_background(&mut self, cx: &mut Context<Self>) {
+        self.background_suspended = true;
+        self.cancel_inflight();
+        self.restore_ready();
+        self.preferences_status = Message::new(
+            "配置读取失败，后台检查已暂停；修复并保存或重新载入设置后恢复。",
+            "Configuration could not be loaded; background checks are paused until settings are repaired and saved or reloaded.",
+        );
+        cx.notify();
+    }
+
+    pub(super) fn set_preferences(
+        &mut self,
+        preferences: UpdatePreferences,
+        cx: &mut Context<Self>,
+    ) {
+        let draft_was_clean = self.draft.frequency == self.preferences.frequency
+            && self.draft.auto_download == self.preferences.auto_download;
+        let policy_changed = self.preferences.frequency != preferences.frequency
+            || self.preferences.auto_download != preferences.auto_download;
+        let was_suspended = self.background_suspended;
+        self.background_suspended = false;
+        if policy_changed {
+            self.generation = self.generation.wrapping_add(1);
+            self.cancel_inflight();
+            if matches!(
+                self.state,
+                PanelState::Checking | PanelState::Downloading(_) | PanelState::Failed
+            ) {
+                self.restore_ready();
+            }
+            if !matches!(
+                self.state,
+                PanelState::Ready(_) | PanelState::Available(_) | PanelState::Installing
+            ) {
+                self.clear_state();
+                self.status = if preferences.frequency == UpdateCheckFrequency::Disabled {
+                    Message::new(
+                        "后台更新检查已关闭；仍可手动检查。",
+                        "Background update checks are off; manual checks remain available.",
+                    )
+                } else {
+                    Message::new(
+                        "更新策略已更改；后续检查使用新设置。",
+                        "Update policy changed; subsequent checks use the saved settings.",
+                    )
+                };
+            }
+        }
+        if policy_changed || was_suspended {
+            self.schedule
+                .reset(preferences, Instant::now(), unix_seconds().unwrap_or(0));
+        }
+        self.preferences = preferences;
+        self.draft.last_successful_check = preferences.last_successful_check;
+        if draft_was_clean {
+            self.draft = preferences;
+        }
+        cx.notify();
+    }
+
+    #[cfg(test)]
+    pub(super) fn preferences_snapshot(&self) -> UpdatePreferences {
+        self.preferences
+    }
+
+    #[cfg(test)]
+    pub(super) fn set_test_release_endpoint(&mut self, endpoint: String) {
+        self.release_endpoint = Some(endpoint);
+    }
+
+    pub(super) fn preferences_saved(
+        &mut self,
+        revision: u64,
+        preferences: UpdatePreferences,
+        cx: &mut Context<Self>,
+    ) {
+        self.set_preferences(preferences, cx);
+        self.preferences_saving = false;
+        if self.draft_revision == revision {
+            self.draft = preferences;
+        }
+        self.preferences_status = if self.draft.frequency != preferences.frequency
+            || self.draft.auto_download != preferences.auto_download
+        {
+            Message::new(
+                "先前设置已保存；当前编辑尚未保存。",
+                "Earlier settings were saved; current edits are not saved yet.",
+            )
+        } else {
+            Message::new(
+                "更新设置已保存；安装仍需确认。",
+                "Update settings saved; installation still requires confirmation.",
+            )
+        };
+        cx.notify();
+    }
+
+    pub(super) fn preferences_failed(&mut self, cx: &mut Context<Self>) {
+        self.preferences_saving = false;
+        self.preferences_status = Message::new(
+            "设置未保存，草稿已保留；请重试。",
+            "Settings were not saved; the draft is retained. Retry when ready.",
+        );
+        cx.notify();
+    }
+
+    fn preferences_card(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let dirty = self.draft.frequency != self.preferences.frequency
+            || self.draft.auto_download != self.preferences.auto_download;
+        div().id("update-preferences").flex_shrink_0().min_w_0().p_2().rounded(px(6.))
+            .bg(rgb(visual.canvas)).border_1().border_color(rgb(visual.border)).flex().flex_col().gap_1()
+            .child(div().flex().flex_wrap().items_center().gap_1()
+                .child(t(cx, "后台检查", "Background checks"))
+                .children([
+                    (UpdateCheckFrequency::Disabled, "updates-off", "关闭", "Off"),
+                    (UpdateCheckFrequency::Daily, "updates-daily", "每天", "Daily"),
+                    (UpdateCheckFrequency::Weekly, "updates-weekly", "每周", "Weekly"),
+                ].into_iter().map(|(frequency, id, zh, en)| Button::new(id).ghost().compact().label(t(cx, zh, en))
+                    .selected(self.draft.frequency == frequency).disabled(self.preferences_saving || matches!(self.state, PanelState::Installing))
+                    .on_click(cx.listener(move |panel, _, _, cx| {
+                        panel.draft.frequency = frequency;
+                        panel.draft_revision = panel.draft_revision.wrapping_add(1);
+                        panel.preferences_status = Message::new("设置尚未保存", "Settings not saved yet");
+                        cx.notify();
+                    }))))
+                .child(Button::new("updates-auto-download").ghost().compact().icon(IconName::Download)
+                    .label(t(cx, "自动下载并校验", "Download and verify automatically"))
+                    .selected(self.draft.auto_download)
+                    .disabled(self.preferences_saving || self.draft.frequency == UpdateCheckFrequency::Disabled || matches!(self.state, PanelState::Installing))
+                    .on_click(cx.listener(|panel, _, _, cx| {
+                        panel.draft.auto_download = !panel.draft.auto_download;
+                        panel.draft_revision = panel.draft_revision.wrapping_add(1);
+                        panel.preferences_status = Message::new("设置尚未保存", "Settings not saved yet");
+                        cx.notify();
+                    })))
+                .child(Button::new("save-update-preferences").primary().compact().label(t(cx, "保存设置", "Save settings"))
+                    .disabled(!dirty || self.preferences_saving || matches!(self.state, PanelState::Installing))
+                    .on_click(cx.listener(|panel, _, _, cx| {
+                        panel.preferences_saving = true;
+                        panel.preferences_status = Message::new("正在保存…", "Saving…");
+                        cx.emit(UpdatePanelEvent::Preferences { preferences: panel.draft, revision: panel.draft_revision });
+                        cx.notify();
+                    }))))
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(cx,
+                "启动后延迟检查，失败会退避；仅后台发现更新时自动下载。安装始终需要确认。",
+                "Checks start after a delay and back off on failure. Background discoveries may download; installation always needs confirmation.")))
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(self.preferences_status.render(cx)))
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(
+                self.preferences.last_successful_check
+                    .and_then(|seconds| i64::try_from(seconds).ok())
+                    .and_then(|seconds| chrono::DateTime::from_timestamp(seconds, 0))
+                    .map(|date| format!("{} {}", t(cx, "上次检查：", "Last checked:"), date.with_timezone(&chrono::Local).format("%Y-%m-%d %H:%M")))
+                    .unwrap_or_else(|| t(cx, "尚未完成更新检查", "No completed update check yet").to_owned())
+            ))
+            .into_any_element()
+    }
+
+    fn cancel(&mut self, cx: &mut Context<Self>) {
+        if matches!(self.state, PanelState::Installing) {
+            return;
+        }
+        let active_request = self.request.is_some();
+        self.cancel_inflight();
+        if active_request {
+            // Cancelling replacement work revokes that request, not the already
+            // verified package retained independently from it.
+            self.state = PanelState::Idle;
+            self.restore_ready();
+        } else {
+            self.clear_state();
+        }
+        self.schedule.succeeded(self.preferences, Instant::now());
+        self.status = if active_request && matches!(self.state, PanelState::Ready(_)) {
+            Message::new(
+                "本次更新请求已取消；已校验的下载仍保留。",
+                "Update request cancelled; the verified download was kept.",
+            )
+        } else if active_request {
+            Message::new(
+                "更新请求已取消；没有安装。",
+                "Update request cancelled; nothing was installed.",
+            )
+        } else {
+            Message::new(
+                "已丢弃下载的更新；没有安装。",
+                "Downloaded update discarded; nothing was installed.",
+            )
+        };
         cx.notify();
     }
 
@@ -385,20 +965,51 @@ impl UpdatePanel {
     }
 }
 
+impl Drop for UpdatePanel {
+    fn drop(&mut self) {
+        self.request = None;
+        self._job = None;
+    }
+}
+
+fn unix_seconds() -> Option<u64> {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .ok()
+        .map(|duration| duration.as_secs())
+}
+
 impl Render for UpdatePanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
-        let (release, can_download, can_reveal, can_install) = match &self.state {
+        let (release, can_download) = match &self.state {
             PanelState::Available(release) | PanelState::UpToDate(release) => (
                 Some(release),
                 !matches!(self.state, PanelState::UpToDate(_)),
-                false,
-                false,
             ),
-            PanelState::Downloading(release) => (Some(release), false, false, false),
-            PanelState::Ready(staged) => (Some(&staged.release), false, true, true),
-            _ => (None, false, false, false),
+            PanelState::Downloading(release) => (Some(release), false),
+            PanelState::Ready(staged) => (Some(&staged.release), false),
+            _ => (None, false),
         };
+        // Capture the displayed release and exact stage once. Sharing the
+        // snapshot avoids cloning bounded release notes for each action.
+        let download_review = release.filter(|_| can_download).cloned();
+        let ready_review = match &self.state {
+            PanelState::Ready(staged) if self.request.is_none() => {
+                Some(Arc::new(staged.identity()))
+            }
+            _ => None,
+        };
+        let retained_review = self
+            .retained_stage
+            .as_ref()
+            .filter(|_| self.request.is_none())
+            .map(|staged| Arc::new(staged.identity()));
+        let cancel_intent = self
+            .request
+            .as_ref()
+            .map(|request| CancelIntent::Request(Box::new(request.identity.clone())))
+            .or_else(|| ready_review.clone().map(CancelIntent::Downloaded));
         let body = release.map(|release| {
             let published = release
                 .published_at
@@ -489,6 +1100,7 @@ impl Render for UpdatePanel {
                     .child(
                         div()
                             .flex()
+                            .flex_wrap()
                             .gap_2()
                             .child(
                                 Button::new("open-project")
@@ -504,15 +1116,18 @@ impl Render for UpdatePanel {
                                     .primary()
                                     .compact()
                                     .label(t(cx, "检查更新", "Check for updates"))
-                                    .disabled(matches!(
-                                        self.state,
-                                        PanelState::Checking | PanelState::Downloading(_)
-                                    ))
+                                    .disabled(
+                                        matches!(self.state, PanelState::Installing)
+                                            || self.request.as_ref().is_some_and(|request| {
+                                                request.origin == RequestOrigin::Manual
+                                            }),
+                                    )
                                     .on_click(
                                         cx.listener(|panel, _, window, cx| panel.check(window, cx)),
                                     ),
                             ),
                     )
+                    .child(self.preferences_card(cx))
                     .child(body.unwrap_or_else(|| {
                         div()
                             .flex_1()
@@ -562,44 +1177,67 @@ impl Render for UpdatePanel {
                     .border_t_1()
                     .border_color(rgb(visual.border))
                     .flex()
+                    .flex_wrap()
                     .justify_end()
                     .gap_2()
-                    .when(can_download, |row| {
+                    .when_some(retained_review, |row, reviewed| {
+                        row.child(
+                            Button::new("keep-ready-update")
+                                .ghost()
+                                .label(t(cx, "返回已下载版本", "Return to downloaded version"))
+                                .on_click(cx.listener(move |panel, _, _, cx| {
+                                    panel.return_to_downloaded(&reviewed, cx);
+                                })),
+                        )
+                    })
+                    .when_some(download_review, |row, reviewed| {
                         row.child(
                             Button::new("download-update")
                                 .icon(IconName::Download)
                                 .primary()
                                 .label(t(cx, "下载并校验", "Download and verify"))
-                                .on_click(cx.listener(|panel, _, window, cx| {
-                                    if let PanelState::Available(release) = &panel.state {
-                                        panel.download(release.clone(), window, cx)
-                                    }
+                                .on_click(cx.listener(move |panel, _, window, cx| {
+                                    panel.download(reviewed.clone(), window, cx)
                                 })),
                         )
                     })
-                    .when(can_reveal, |row| {
+                    .when_some(ready_review.clone(), |row, reviewed| {
                         row.child(
                             Button::new("reveal-update")
                                 .icon(IconName::Check)
                                 .primary()
                                 .label(t(cx, "查看已校验的安装包", "Show verified package"))
-                                .on_click(cx.listener(|panel, _, _, cx| {
-                                    if let PanelState::Ready(staged) = &panel.state {
-                                        cx.reveal_path(&staged.archive)
+                                .on_click(cx.listener(move |panel, _, _, cx| {
+                                    if panel.ready_matches(&reviewed) {
+                                        cx.reveal_path(&reviewed.archive)
                                     }
                                 })),
                         )
                     })
-                    .when(can_install, |row| {
+                    .when_some(ready_review, |row, reviewed| {
                         row.child(
                             Button::new("install-update")
                                 .icon(IconName::Check)
                                 .primary()
-                                .label(t(cx, "自动安装并重启", "Install and restart"))
-                                .on_click(cx.listener(|panel, _, window, cx| {
-                                    if matches!(panel.state, PanelState::Ready(_)) {
+                                .label(t(cx, "确认安装并重启", "Install and restart"))
+                                .on_click(cx.listener(move |panel, _, window, cx| {
+                                    if panel.ready_matches(&reviewed) {
                                         panel.install(window, cx)
                                     }
+                                })),
+                        )
+                    })
+                    .when_some(cancel_intent, |row, intent| {
+                        row.child(
+                            Button::new("cancel-update-request")
+                                .ghost()
+                                .label(if matches!(intent, CancelIntent::Request(_)) {
+                                    t(cx, "取消更新请求", "Cancel update request")
+                                } else {
+                                    t(cx, "丢弃已下载更新", "Discard downloaded update")
+                                })
+                                .on_click(cx.listener(move |panel, _, _, cx| {
+                                    panel.cancel_reviewed(&intent, cx)
                                 })),
                         )
                     })
@@ -613,10 +1251,10 @@ impl Render for UpdatePanel {
     }
 }
 
-async fn fetch_latest_release(target: &str) -> Result<ReleaseInfo, UpdateError> {
+async fn fetch_latest_release_at(target: &str, endpoint: &str) -> Result<ReleaseInfo, UpdateError> {
     let client = http_client(false)?;
     let response = client
-        .get(RELEASES_API)
+        .get(endpoint)
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .send()
@@ -625,16 +1263,7 @@ async fn fetch_latest_release(target: &str) -> Result<ReleaseInfo, UpdateError> 
     if response.status() != StatusCode::OK {
         return Err(UpdateError::Http(response.status().as_u16()));
     }
-    if response
-        .content_length()
-        .is_some_and(|size| size > MAX_RELEASE_BYTES)
-    {
-        return Err(UpdateError::TooLarge);
-    }
-    let bytes = response.bytes().await.map_err(|_| UpdateError::Network)?;
-    if bytes.len() as u64 > MAX_RELEASE_BYTES {
-        return Err(UpdateError::TooLarge);
-    }
+    let bytes = read_bounded(response, MAX_RELEASE_BYTES).await?;
     let release: GithubRelease =
         serde_json::from_slice(&bytes).map_err(|_| UpdateError::Invalid)?;
     release_info(release, target)
@@ -670,10 +1299,18 @@ fn release_info(release: GithubRelease, target: &str) -> Result<ReleaseInfo, Upd
     })
 }
 
-async fn download_and_stage(release: ReleaseInfo) -> Result<StagedUpdate, UpdateError> {
+async fn download_and_stage_from(
+    release: ReleaseInfo,
+    cancelled: Arc<AtomicBool>,
+    checksum_url: &str,
+    archive_url: &str,
+) -> Result<StagedUpdate, UpdateError> {
+    if cancelled.load(Ordering::Acquire) {
+        return Err(UpdateError::Cancelled);
+    }
     let client = http_client(true)?;
     let checksum_response = client
-        .get(&release.checksum_url)
+        .get(checksum_url)
         .send()
         .await
         .map_err(|_| UpdateError::Network)?;
@@ -681,7 +1318,7 @@ async fn download_and_stage(release: ReleaseInfo) -> Result<StagedUpdate, Update
     let checksum = std::str::from_utf8(&checksum_bytes).map_err(|_| UpdateError::Invalid)?;
     let expected = parse_checksum(checksum, &release.archive_name).ok_or(UpdateError::Invalid)?;
     let response = client
-        .get(&release.archive_url)
+        .get(archive_url)
         .send()
         .await
         .map_err(|_| UpdateError::Network)?;
@@ -693,6 +1330,11 @@ async fn download_and_stage(release: ReleaseInfo) -> Result<StagedUpdate, Update
     if expected != actual {
         return Err(UpdateError::Checksum);
     }
+    if cancelled.load(Ordering::Acquire) {
+        return Err(UpdateError::Cancelled);
+    }
+    let cleanup_executor =
+        tokio::runtime::Handle::try_current().map_err(|_| UpdateError::Storage)?;
     // A private unique directory prevents other users or concurrent downloads
     // from replacing a predictable temporary path. Extracting before the
     // helper starts means the helper only copies files after the old process
@@ -704,7 +1346,15 @@ async fn download_and_stage(release: ReleaseInfo) -> Result<StagedUpdate, Update
             uuid::Uuid::new_v4()
         ));
         let result = (|| {
+            if cancelled.load(Ordering::Acquire) {
+                return Err(UpdateError::Cancelled);
+            }
             fs::create_dir(&directory).map_err(|_| UpdateError::Storage)?;
+            let cleanup = StageCleanup {
+                root: directory.clone(),
+                armed: true,
+                executor: cleanup_executor,
+            };
             let archive = directory.join(&release.archive_name);
             fs::write(&archive, &bytes).map_err(|_| UpdateError::Storage)?;
             let payload = directory.join("payload");
@@ -714,15 +1364,15 @@ async fn download_and_stage(release: ReleaseInfo) -> Result<StagedUpdate, Update
             if plan.files.is_empty() {
                 return Err(UpdateError::Invalid);
             }
+            if cancelled.load(Ordering::Acquire) {
+                return Err(UpdateError::Cancelled);
+            }
             Ok(StagedUpdate {
                 release,
                 archive,
                 payload,
                 digest: actual,
-                cleanup: Some(StageCleanup {
-                    root: directory.clone(),
-                    armed: true,
-                }),
+                cleanup: Some(cleanup),
             })
         })();
         if result.is_err() {
@@ -1534,7 +2184,10 @@ fn http_client(download: bool) -> Result<reqwest::Client, UpdateError> {
     } else {
         reqwest::redirect::Policy::none()
     };
-    reqwest::Client::builder()
+    let builder = reqwest::Client::builder();
+    #[cfg(test)]
+    let builder = builder.no_proxy();
+    builder
         .timeout(Duration::from_secs(if download { 300 } else { 20 }))
         .connect_timeout(Duration::from_secs(8))
         .redirect(redirects)
@@ -1663,11 +2316,16 @@ enum UpdateError {
     Busy,
     Install,
     RecoveryRequired,
+    Cancelled,
 }
 
 impl UpdateError {
     fn message(self) -> Message {
         match self {
+            Self::Cancelled => Message::new(
+                "更新请求已取消，未安装。",
+                "Update request cancelled; nothing was installed.",
+            ),
             Self::Network => Message::new(
                 "网络请求失败或超时，请稍后重试。",
                 "The network request failed or timed out. Try again later.",
@@ -1721,6 +2379,8 @@ impl UpdateError {
 #[allow(clippy::expect_used)]
 mod tests {
     use super::*;
+
+    mod automatic;
 
     fn set_test_executable(path: &Path) {
         #[cfg(unix)]
@@ -2457,6 +3117,11 @@ mod tests {
 
     #[::core::prelude::v1::test]
     fn staging_cleanup_is_owned_until_helper_handoff() {
+        let runtime = tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(1)
+            .enable_all()
+            .build()
+            .expect("cleanup runtime");
         let directory = tempfile::tempdir().expect("temporary staging parent");
         let root = directory.path().join("staging");
         std::fs::create_dir(&root).expect("staging root");
@@ -2464,15 +3129,24 @@ mod tests {
             let _cleanup = StageCleanup {
                 root: root.clone(),
                 armed: true,
+                executor: runtime.handle().clone(),
             };
         }
-        assert!(!root.exists());
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while root.exists() && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        assert!(
+            !root.exists(),
+            "owned background cleanup completes within its bound"
+        );
 
         let root = directory.path().join("handed-off");
         std::fs::create_dir(&root).expect("handed-off root");
         let cleanup = StageCleanup {
             root: root.clone(),
             armed: true,
+            executor: runtime.handle().clone(),
         };
         cleanup.disarm();
         assert!(root.exists());

@@ -367,6 +367,8 @@ pub struct Settings {
     pub scrollback_lines: usize,
     /// Preferred appearance.
     pub theme: Theme,
+    /// Background release policy; absent legacy fields migrate to daily checks.
+    pub updates: crate::UpdatePreferences,
     /// Legacy compatibility preferences, never authoritative for named profiles.
     /// Retained so earlier state can be migrated and old UI drafts can be read.
     pub ai: AiSettings,
@@ -395,6 +397,8 @@ impl<'de> Deserialize<'de> for Settings {
             #[serde(default)]
             theme: Theme,
             #[serde(default)]
+            updates: crate::UpdatePreferences,
+            #[serde(default)]
             ai: AiSettings,
             #[serde(default, deserialize_with = "present_catalog")]
             ai_profiles: Option<AiProfileCatalog>,
@@ -409,6 +413,7 @@ impl<'de> Deserialize<'de> for Settings {
             font_size: wire.font_size,
             scrollback_lines: wire.scrollback_lines,
             theme: wire.theme,
+            updates: wire.updates,
             ai: wire.ai,
             ai_profiles,
         })
@@ -422,6 +427,7 @@ impl Default for Settings {
             font_size: 14.0,
             scrollback_lines: 10_000,
             theme: Theme::default(),
+            updates: crate::UpdatePreferences::default(),
             ai: AiSettings::default(),
             ai_profiles: AiProfileCatalog::default(),
         }
@@ -444,6 +450,7 @@ impl Settings {
             ));
         }
         self.ai.validate()?;
+        self.updates.validate()?;
         self.ai_profiles.validate()
     }
 }

@@ -30,6 +30,7 @@ pub(crate) mod mirror_sync_combination;
 mod profile_sync;
 pub(crate) mod protocol_diagnostics;
 mod reviewed_agent;
+mod session_tabs;
 
 trait Checked<T> {
     fn checked(self, operation: &str) -> T;
@@ -1543,6 +1544,7 @@ mod dependency_workflow;
 mod library;
 mod routes;
 mod themes;
+mod updates;
 mod workflow_audit;
 
 mod remote_completion;

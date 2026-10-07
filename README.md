@@ -47,7 +47,7 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 | **监控与网络** | Linux 主机和逐设备磁盘 I/O 状态；监听端口、远程 DNS / TLS / HTTP(S) HEAD 诊断；本地及远端 TCP 转发、回环 SOCKS5 隧道 |
 | **AI 助手** | 命名模型 API / Codex CLI / Claude Code 配置；模型发现与连接测试、明确上下文、完整请求预览、回答、诊断建议及逐轮审核的有限 Agent 工作流 |
 | **对外 MCP** | 外部智能体读取明确授权的会话信息、终端片段、SFTP 与监控；命令和文件修改先提交提案，在桌面应用中审阅后执行 |
-| **关于与更新** | 项目主页、版本和内置变更日志；按平台检查发布、SHA-256 校验下载，以及可选的安装和重启 |
+| **关于与更新** | 项目主页、版本和内置变更日志；默认每日后台检查、可关闭／每周与可选 SHA-256 校验下载，确认后安装和重启 |
 
 传输与镜像取消会保留已完成项；断线后不会自动重放命令、传输或任务。目录内容比较和同步具有明确的大小、类型及路径限制，协议诊断需要远端 POSIX / Python 3.8+。具体操作与边界见[文件工作区](docs/product/FILES_WORKSPACE.md)、[目录镜像](docs/product/DIRECTORY_MIRROR.md)、[远程协议诊断](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md)和[能力清单](docs/product/CAPABILITIES.md)。
 
@@ -101,7 +101,7 @@ cargo run -p keelshell-app --locked
 
 标签发布流水线配置了六个构建目标。成功的标签构建会将发布包与校验值发布到 [GitHub Releases](https://github.com/cyruss648/keelshell/releases)；实际构建、桌面和安装验收分别记录，不能由流水线配置推导为完成。
 
-应用内 **关于/更新** 可读取变更日志、检查版本并校验下载，安装与重启需明确确认。平台签名、公证和安装更新验收仍开放，详见[发布说明](docs/RELEASING.md)。
+应用内 **关于/更新** 可读取变更日志、检查版本并校验下载。后台策略默认每日且下载关闭，可保存关闭／每周和可选自动下载；安装与重启需明确确认，见[更新策略](docs/product/AUTOMATIC_UPDATES.md)。平台签名、公证和安装更新验收仍开放，详见[发布说明](docs/RELEASING.md)。
 
 ## 文档与参与贡献
 

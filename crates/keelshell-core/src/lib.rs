@@ -35,6 +35,7 @@ mod snippets;
 mod store;
 mod text_merge;
 mod text_patch;
+mod updates;
 mod vault;
 mod workflow_audit;
 
@@ -116,6 +117,7 @@ pub use snippet_template::{
     SnippetTemplateContext, SnippetTemplateError, compile_snippet_template,
 };
 pub use store::StateStore;
+pub use updates::{UpdateCheckFrequency, UpdatePreferences};
 pub use vault::{CredentialKind, CredentialMetadata, CredentialVault, VaultStore};
 
 pub use profile_sync::{

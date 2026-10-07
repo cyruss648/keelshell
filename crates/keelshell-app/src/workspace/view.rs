@@ -5,6 +5,27 @@ use gpui_kit::assets::IconName;
 use gpui_kit::component::Selectable;
 
 impl Workspace {
+    fn select_session_tab(&mut self, index: usize, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(tab) = self.tabs.get(index).cloned() else {
+            return;
+        };
+        self.cancel_remote_completion(cx);
+        self.active = index;
+        self.session_tab_scroll.scroll_to_item(index);
+        tab.read(cx).focus_handle(cx).focus(window, cx);
+        cx.notify();
+    }
+
+    fn close_session_tab(&mut self, id: EntityId, window: &mut Window, cx: &mut Context<Self>) {
+        // A painted control can survive a foreground list change. Resolve its
+        // original entity, so an old index cannot close a replacement session.
+        let Some(index) = self.tabs.iter().position(|tab| tab.entity_id() == id) else {
+            return;
+        };
+        self.active = index;
+        self.close_tab(&CloseTab, window, cx);
+    }
+
     fn empty_workspace_body(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
         div()
             .size_full()
@@ -299,12 +320,48 @@ impl Render for Workspace {
         // row in short windows so Files and command review cannot crush the terminal.
         let compact_command_tools = viewport.height < px(700.);
         let active_id = self.tabs.get(self.active).map(Entity::entity_id);
+        let compact_toolbar = viewport.width < px(1280.);
+        // Only reveal after selection or a layout change: continuous renders must
+        // not undo a user's manual horizontal scroll through other sessions.
+        let update_action = self.update_service.read(cx).action_label(cx);
+        let reveal = active_id.map(|id| {
+            (
+                id,
+                viewport.width,
+                self.tabs.len(),
+                i18n::language(cx),
+                update_action,
+            )
+        });
+        if self.session_tab_reveal != reveal {
+            self.session_tab_reveal = reveal;
+            if let Some(expected) = reveal {
+                self.session_tab_scroll.scroll_to_item(self.active);
+                // Div applies a scroll request before updating its measured
+                // viewport. Reapply once after layout, against the new bounds.
+                cx.on_next_frame(window, move |view, window, cx| {
+                    if view.session_tab_reveal == Some(expected)
+                        && view.tabs.get(view.active).map(Entity::entity_id) == Some(expected.0)
+                        && window.viewport_size().width == expected.1
+                        && view.tabs.len() == expected.2
+                        && i18n::language(cx) == expected.3
+                        && view.update_service.read(cx).action_label(cx) == expected.4
+                    {
+                        view.session_tab_scroll.scroll_to_item(view.active);
+                        cx.notify();
+                    }
+                });
+            }
+        }
         let mut tabs = div()
+            .id("session-tabs")
+            .test_support()
             .flex_1()
             .min_w_0()
             .flex()
             .items_center()
-            .overflow_hidden();
+            .overflow_x_scroll()
+            .track_scroll(&self.session_tab_scroll);
         if self.tabs.is_empty() {
             tabs = tabs.child(
                 div()
@@ -317,16 +374,19 @@ impl Render for Workspace {
             );
         }
         for (index, terminal) in self.tabs.iter().enumerate() {
+            let terminal_id = terminal.entity_id();
             tabs = tabs.child(
                 div()
                     .id(("session-tab", index))
                     .test_support()
                     .h(px(34.))
+                    .w(px(184.))
+                    .flex_shrink_0()
                     .rounded_md()
-                    .px_3()
+                    .px_2()
                     .flex()
                     .items_center()
-                    .gap_3()
+                    .gap_1()
                     .cursor_pointer()
                     .bg(rgb(if self.active == index {
                         visual.selected
@@ -336,25 +396,37 @@ impl Render for Workspace {
                     .border_r_1()
                     .border_color(rgb(visual.border))
                     .on_click(cx.listener(move |view, _, window, cx| {
-                        view.cancel_remote_completion(cx);
-                        view.active = index;
-                        if let Some(tab) = view.tabs.get(index) {
-                            tab.read(cx).focus_handle(cx).focus(window, cx);
+                        if let Some(index) = view
+                            .tabs
+                            .iter()
+                            .position(|tab| tab.entity_id() == terminal_id)
+                        {
+                            view.select_session_tab(index, window, cx);
                         }
-                        cx.notify();
                     }))
-                    .child(terminal.read(cx).title.clone())
+                    .child(
+                        div()
+                            .id(("session-tab-title", index))
+                            .test_support()
+                            .flex_1()
+                            .min_w_0()
+                            .text_ellipsis()
+                            .child(terminal.read(cx).title.clone()),
+                    )
                     .when(terminal.read(cx).end_reason().is_some(), |tab| {
-                        tab.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
-                            cx,
-                            "已断开",
-                            "Offline",
-                        )))
+                        tab.child(
+                            div()
+                                .flex_shrink_0()
+                                .text_xs()
+                                .text_color(rgb(visual.muted))
+                                .child(t(cx, "已断开", "Offline")),
+                        )
                     })
                     .child(
                         Button::new(("close-tab", index))
                             .ghost()
                             .compact()
+                            .flex_shrink_0()
                             .label("×")
                             .accessibility_label(format!(
                                 "{}: {}",
@@ -362,8 +434,8 @@ impl Render for Workspace {
                                 terminal.read(cx).title,
                             ))
                             .on_click(cx.listener(move |view, _, window, cx| {
-                                view.active = index;
-                                view.close_tab(&CloseTab, window, cx);
+                                cx.stop_propagation();
+                                view.close_session_tab(terminal_id, window, cx);
                             }))
                             .map(|button| {
                                 self.retain_modal_button(("close-tab", index), button, cx)
@@ -536,12 +608,40 @@ impl Render for Workspace {
                             .ghost()
                             .compact()
                             .icon(IconName::FolderOpen)
-                            .label(t(cx, "连接", "Connections"))
+                            .accessibility_label(t(cx, "连接", "Connections"))
+                            .localized_tooltip("连接", "Connections")
+                            .when(!compact_toolbar, |button| button.label(t(cx, "连接", "Connections")))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_connections(&OpenConnections, window, cx)
                             })).map(|button| self.retain_modal_button("connection-manager", button, cx)),
                     )
                     .child(tabs)
+                    .when(self.tabs.len() > 1, |toolbar| {
+                        toolbar.children([
+                            Button::new("previous-session")
+                                .ghost()
+                                .compact()
+                                .icon(IconName::ChevronLeft)
+                                .accessibility_label(t(cx, "上一个 SSH 会话", "Previous SSH session"))
+                                .localized_tooltip("上一个 SSH 会话", "Previous SSH session")
+                                .disabled(self.active == 0)
+                                .on_click(cx.listener(|view, _, window, cx| {
+                                    view.select_session_tab(view.active.saturating_sub(1), window, cx);
+                                }))
+                                .map(|button| self.retain_modal_button("previous-session", button, cx)),
+                            Button::new("next-session")
+                                .ghost()
+                                .compact()
+                                .icon(IconName::ChevronRight)
+                                .accessibility_label(t(cx, "下一个 SSH 会话", "Next SSH session"))
+                                .localized_tooltip("下一个 SSH 会话", "Next SSH session")
+                                .disabled(self.active + 1 >= self.tabs.len())
+                                .on_click(cx.listener(|view, _, window, cx| {
+                                    view.select_session_tab(view.active + 1, window, cx);
+                                }))
+                                .map(|button| self.retain_modal_button("next-session", button, cx)),
+                        ])
+                    })
                     .child(
                         Button::new("new-session")
                             .icon(IconName::Plus)
@@ -558,7 +658,9 @@ impl Render for Workspace {
                             .icon(IconName::Columns2)
                             .ghost()
                             .compact()
-                            .label(t(cx, "分屏", "Split"))
+                            .accessibility_label(t(cx, "分屏", "Split"))
+                            .localized_tooltip("分屏", "Split")
+                            .when(!compact_toolbar, |button| button.label(t(cx, "分屏", "Split")))
                             .disabled(active_id.is_none())
                             .on_click(
                                 cx.listener(|view, _, window, cx| view.split_remote(window, cx)),
@@ -569,7 +671,9 @@ impl Render for Workspace {
                             .icon(IconName::Sparkles)
                             .ghost()
                             .compact()
-                            .label(t(cx, "AI 助手", "AI assistant"))
+                            .accessibility_label(t(cx, "AI 助手", "AI assistant"))
+                            .localized_tooltip("AI 助手", "AI assistant")
+                            .when(!compact_toolbar, |button| button.label(t(cx, "AI 助手", "AI assistant")))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.toggle_assistant(&ToggleAssistant, window, cx)
                             })).map(|button| self.retain_modal_button("toggle-assistant", button, cx)),
@@ -589,7 +693,9 @@ impl Render for Workspace {
                             .icon(IconName::Package)
                             .ghost()
                             .compact()
-                            .label(t(cx, "关于/更新", "About / updates"))
+                            .accessibility_label(t(cx, "关于/更新", "About / updates"))
+                            .localized_tooltip("关于/更新", "About / updates")
+                            .when(!compact_toolbar, |button| button.label(self.update_service.read(cx).action_label(cx)))
                             .on_click(cx.listener(|view, _, window, cx| {
                                 view.open_updates(window, cx)
                             })).map(|button| self.retain_modal_button("about-updates", button, cx)),
