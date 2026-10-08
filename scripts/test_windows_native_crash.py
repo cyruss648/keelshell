@@ -36,6 +36,160 @@ KEEL_{NONCE}_NATIVE_END_SECOND
 SUMMARY = "test result: ok. 704 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 1.00s"
 
 
+def staged_native(content=NATIVE):
+    """Owned schema fixture; command markers never stand in for real CDB output."""
+    points = [("LAST_EVENT", "Last event:"), ("EXCEPTION_RECORD", "ExceptionAddress:"),
+              ("EXCEPTION_CONTEXT", "start             end"),
+              ("FAULT_MODULE", "start             end"),
+              ("CURRENT_STACK", " # Child-SP"),
+              ("ALL_STACKS", f"KEEL_{NONCE}_NATIVE_END_"),
+              ("RESTORE_EVENT_THREAD", f"KEEL_{NONCE}_NATIVE_END_")]
+    for stage, boundary in points:
+        content = content.replace(boundary, f"KEEL_{NONCE}_NATIVE_STAGE_{stage}\n" + boundary, 1)
+    return content
+
+
+class NativeParserTraceTests(unittest.TestCase):
+    def parse(self, content):
+        evidence = probe.TextEvidence(NONCE, set())
+        evidence.feed((f"KEEL_{NONCE}_PID:1234\n" + content).encode())
+        evidence.finish()
+        return evidence
+
+    def assert_fixed_projection(self, trace):
+        self.assertEqual(set(trace), {"version", "counts", "faults", "dropped_faults", "saturated"})
+        self.assertEqual(trace["version"], 1)
+        self.assertIs(type(trace["saturated"]), bool)
+        self.assertEqual(set(trace["counts"]), set(probe.TRACE_STAGES))
+        for counts in trace["counts"].values():
+            self.assertEqual(set(counts), set(probe.TRACE_SHAPES))
+            for count in counts.values():
+                self.assertIs(type(count), int)
+                self.assertLessEqual(count, probe.TRACE_COUNT_LIMIT)
+                self.assertGreaterEqual(count, 0)
+        self.assertLessEqual(len(trace["faults"]), probe.TRACE_FAULT_LIMIT)
+        for fault in trace["faults"]:
+            self.assertEqual(set(fault), {"stage", "shape", "error"})
+            self.assertIn(fault["stage"], probe.TRACE_STAGES)
+            self.assertIn(fault["shape"], probe.TRACE_SHAPES)
+            self.assertIn(fault["error"], probe.TRACE_ERRORS)
+        self.assertIs(type(trace["dropped_faults"]), int)
+        self.assertLessEqual(trace["dropped_faults"], probe.TRACE_COUNT_LIMIT)
+
+    def test_markers_preserve_original_event_projection_and_all_commands(self):
+        old = self.parse(NATIVE)
+        new = self.parse(staged_native())
+        self.assertFalse(new.errors)
+        self.assertEqual(old.upload_events(), new.upload_events())
+        trace = new.trace.projection()
+        self.assert_fixed_projection(trace)
+        for stage in probe.NATIVE_STAGES:
+            self.assertEqual(trace["counts"][stage]["STAGE_MARKER"], 1)
+        self.assertEqual(trace["counts"]["FAULT_MODULE"]["MODULE_ROW"], 1)
+        self.assertEqual(trace["counts"]["CURRENT_STACK"]["STACK_FRAME"], 2)
+        self.assertEqual(trace["faults"], [])
+        command = next(line for line in probe.debugger_script(NONCE).splitlines() if line.endswith("0xc0000409"))
+        for chance in ("FIRST", "SECOND"):
+            body = command.split(f"NATIVE_BEGIN_{chance}; ", 1)[1].split(f"NATIVE_END_{chance}", 1)[0]
+            stages = [body.index(f"NATIVE_STAGE_{stage};") for stage in probe.NATIVE_STAGES]
+            self.assertEqual(stages, sorted(stages))
+            for original in (".lastevent", ".exr -1", ".ecxr", "lm a @$ip", "kn 0x40", "~* kn 0x40", "~#s"):
+                self.assertIn(original, body)
+        self.assertEqual(command.count("; gn"), 2)
+        self.assertLessEqual(max(map(len, probe.debugger_script(NONCE).splitlines())), 4096)
+
+    def test_command_failure_shape_locates_missing_module_without_admitting_it(self):
+        content = staged_native().replace("start             end                 module name\n"
+            "00007fff`00000000 00007fff`00100000   ucrtbase", "Syntax error at owned-sensitive-operand")
+        evidence = self.parse(content)
+        self.assertIn("native_module_range_invalid", evidence.errors)
+        self.assertIn("native_required_fields_or_chance_missing", evidence.errors)
+        self.assertIn("native_stack_order", evidence.errors)
+        self.assertEqual(evidence.upload_events(), [])
+        trace = evidence.trace.projection()
+        self.assert_fixed_projection(trace)
+        self.assertIn({"stage": "FAULT_MODULE", "shape": "COMMAND_ERROR_TEXT",
+                       "error": "unexpected_native_text"}, trace["faults"])
+        self.assertNotIn("owned-sensitive-operand", json.dumps(trace))
+
+    def test_context_rejection_stays_rejected_and_is_separate_from_module(self):
+        content = staged_native().replace(f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE",
+            "Unable to get exception context owned-sensitive-detail\n" + f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE")
+        evidence = self.parse(content)
+        self.assertEqual(evidence.upload_events(), [])
+        trace = evidence.trace.projection()
+        self.assertIn({"stage": "EXCEPTION_CONTEXT", "shape": "CONTEXT_UNAVAILABLE_TEXT",
+                       "error": "unexpected_native_text"}, trace["faults"])
+        self.assertEqual(trace["counts"]["FAULT_MODULE"]["MODULE_ROW"], 1)
+        self.assertNotIn("owned-sensitive-detail", json.dumps(trace))
+
+    def test_private_text_and_numeric_payloads_have_no_trace_projection(self):
+        content = staged_native().replace("ucrtbase!abort+0x45", "ucrtbase!OWNED_PRIVATE_SYMBOL+0x45")
+        content = content.replace("00007fff`00012345", "01234567`89abcdef")
+        content = content.replace("0000000000000007", "fedcba9876543210")
+        content = content.replace(f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE",
+            "Authorization: Bearer OWNED_PRIVATE_TOKEN 987654321\n"
+            "C:\\owned\\private\\file.log OWNED_PRIVATE_PATH 123456789\n"
+            + f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE")
+        evidence = self.parse(content)
+        trace = evidence.trace.projection()
+        self.assert_fixed_projection(trace)
+        self.assertEqual(evidence.upload_events(), [])
+        serialized = json.dumps(trace)
+        for private in ("OWNED_PRIVATE", "987654321", "123456789", "01234567", "89abcdef",
+                        "fedcba9876543210", NONCE, "Security check failure", "private\\file.log"):
+            self.assertNotIn(private, serialized)
+        self.assertEqual(trace["counts"]["EXCEPTION_CONTEXT"]["REJECTED_SECRET_TEXT"], 1)
+
+    def test_marker_wrong_nonce_unknown_order_duplicate_and_incomplete_are_rejected(self):
+        content = staged_native()
+        variants = [content.replace(f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE", "KEEL_wrong_NATIVE_STAGE_FAULT_MODULE"),
+                    content.replace("NATIVE_STAGE_FAULT_MODULE", "NATIVE_STAGE_UNKNOWN_PRIVATE"),
+                    content.replace("NATIVE_STAGE_LAST_EVENT", "NATIVE_STAGE_ALL_STACKS", 1),
+                    content.replace(f"KEEL_{NONCE}_NATIVE_STAGE_LAST_EVENT", f"KEEL_{NONCE}_NATIVE_STAGE_LAST_EVENT\n" * 2),
+                    content.replace(f"KEEL_{NONCE}_NATIVE_STAGE_RESTORE_EVENT_THREAD\n", "")]
+        for index, variant in enumerate(variants):
+            with self.subTest(index=index):
+                evidence = self.parse(variant)
+                self.assertTrue(evidence.errors)
+                self.assertEqual(evidence.upload_events(), [])
+                self.assert_fixed_projection(evidence.trace.projection())
+
+    def test_fixed_counts_fault_limits_and_detached_snapshot(self):
+        content = staged_native().replace(f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE",
+            ("OWNED_UNKNOWN_PRIVATE 987654321\n" * 1000) + f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE")
+        evidence = self.parse(content)
+        trace = evidence.trace.projection()
+        self.assert_fixed_projection(trace)
+        self.assertEqual(trace["counts"]["EXCEPTION_CONTEXT"]["UNKNOWN_TEXT"], probe.TRACE_COUNT_LIMIT)
+        self.assertEqual(len(trace["faults"]), probe.TRACE_FAULT_LIMIT)
+        self.assertEqual(trace["dropped_faults"], probe.TRACE_COUNT_LIMIT)
+        self.assertTrue(trace["saturated"])
+        self.assertLess(len(json.dumps(trace)), 16000)
+        trace["counts"]["EXCEPTION_CONTEXT"]["UNKNOWN_TEXT"] = 0
+        trace["faults"][0]["error"] = "OWNED_MUTATION"
+        self.assertEqual(evidence.trace.projection()["counts"]["EXCEPTION_CONTEXT"]["UNKNOWN_TEXT"], probe.TRACE_COUNT_LIMIT)
+        self.assertNotIn("OWNED_MUTATION", json.dumps(evidence.trace.projection()))
+
+    def test_incomplete_stream_and_budget_faults_are_fixed(self):
+        evidence = self.parse(staged_native().rsplit(f"KEEL_{NONCE}_NATIVE_END_SECOND", 1)[0])
+        trace = evidence.trace.projection()
+        self.assertIn({"stage": "FINISH", "shape": "FINISH", "error": "incomplete_native_block"}, trace["faults"])
+        evidence = probe.TextEvidence(NONCE, set())
+        evidence.feed(b"X" * (probe.MAX_LINE + 1))
+        evidence.feed(b"X" * probe.MAX_TEXT)
+        self.assert_fixed_projection(evidence.trace.projection())
+        self.assertEqual({fault["error"] for fault in evidence.trace.projection()["faults"]},
+                         {"line_budget_exceeded", "text_budget_exceeded"})
+
+    def test_unknown_internal_labels_cannot_export_new_vocabulary(self):
+        trace = probe.NativeParserTrace()
+        trace.observe("OWNED_PRIVATE_SHAPE", "OWNED_PRIVATE_STAGE")
+        trace.fault("OWNED_PRIVATE_ERROR")
+        self.assert_fixed_projection(trace.projection())
+        self.assertEqual(trace.projection()["faults"], [{"stage": "OUTSIDE", "shape": "UNKNOWN_TEXT", "error": "UNRECOGNIZED_ERROR"}])
+
+
 class FakeOwner:
     """Real child lifetime, controlled target DWORD; no Win32 emulation claim."""
 
@@ -1238,6 +1392,32 @@ class ProcessTests(unittest.TestCase):
             self.assertIsNotNone(owner.process.returncode)
             self.assertTrue(receipt["owned_cleanup_complete"])
             return receipt, evidence
+
+    def test_actual_owned_successful_target_keeps_parser_failure_and_fixed_trace(self):
+        content = staged_native().replace("SECOND", "FIRST").replace("second chance", "first chance")
+        content = content.replace("start             end                 module name\n"
+            "00007fff`00000000 00007fff`00100000   ucrtbase", "Syntax error at OWNED_PRIVATE_OPERAND")
+        receipt, evidence = self.run_owned(content + SUMMARY + "\n")
+        self.assertEqual(receipt["original_test_exit"], 0)
+        self.assertEqual(receipt["debugger_exit"], 0)
+        self.assertEqual(receipt["controller_exit"], 125)
+        self.assertTrue(receipt["test_started"])
+        self.assertTrue(receipt["owned_cleanup_complete"])
+        self.assertEqual(evidence.upload_events(), [])
+        NativeParserTraceTests().assert_fixed_projection(receipt["native_parser_trace"])
+        self.assertIn({"stage": "FAULT_MODULE", "shape": "COMMAND_ERROR_TEXT",
+                       "error": "unexpected_native_text"}, receipt["native_parser_trace"]["faults"])
+        self.assertNotIn("OWNED_PRIVATE_OPERAND", json.dumps(receipt))
+
+    def test_actual_owned_failure_still_dominates_trace_rejection(self):
+        content = staged_native().replace(f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE",
+            "Authorization: Bearer OWNED_PRIVATE_TOKEN\n" + f"KEEL_{NONCE}_NATIVE_STAGE_FAULT_MODULE")
+        receipt, evidence = self.run_owned(content, target_exit=0xC0000409)
+        self.assertEqual(receipt["controller_exit"], 0xC0000409)
+        self.assertTrue(receipt["owned_cleanup_complete"])
+        self.assertEqual(evidence.upload_events(), [])
+        self.assertNotIn("OWNED_PRIVATE_TOKEN", json.dumps(receipt))
+        NativeParserTraceTests().assert_fixed_projection(receipt["native_parser_trace"])
 
     def test_real_subprocess_handshake_and_success_summary(self):
         receipt, _ = self.run_owned("running 706 tests\ntest tests::case ... ok\n" + SUMMARY + "\n")

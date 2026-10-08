@@ -764,8 +764,16 @@ def application_artifact(text):
 def debugger_script(nonce):
     """Observe both chances for c0000409; all continuations remain unhandled."""
     def diagnostic(chance):
-        return (f".echo KEEL_{nonce}_NATIVE_BEGIN_{chance}; .lastevent; .exr -1; "
-                ".ecxr; lm a @$ip; kn 0x40; ~* kn 0x40; ~#s; "
+        # Echoes identify command boundaries without changing exception handling,
+        # context commands or their original order. They do not authenticate the
+        # shared stream; the trusted-owned-target limitation still applies.
+        commands = [("LAST_EVENT", ".lastevent"), ("EXCEPTION_RECORD", ".exr -1"),
+                    ("EXCEPTION_CONTEXT", ".ecxr"), ("FAULT_MODULE", "lm a @$ip"),
+                    ("CURRENT_STACK", "kn 0x40"), ("ALL_STACKS", "~* kn 0x40"),
+                    ("RESTORE_EVENT_THREAD", "~#s")]
+        body = "; ".join(f".echo KEEL_{nonce}_NATIVE_STAGE_{stage}; {command}"
+                         for stage, command in commands)
+        return (f".echo KEEL_{nonce}_NATIVE_BEGIN_{chance}; {body}; "
                 f".echo KEEL_{nonce}_NATIVE_END_{chance}; gn")
     second = diagnostic("SECOND")
     events = "* asrt av dm dz c000008e eh gp ii iov ip isc lsq sbo sov wkd aph 3c ch clr".split()
@@ -787,6 +795,69 @@ HEX32 = r"[0-9a-fA-F]{1,8}"
 LIMITATIONS = ["SHARED_STREAM_NOT_SOURCE_AUTHENTICATED", "TRUSTED_OWNED_TEST_TARGET_REQUIRED",
                "NUMERIC_STACK_FRAMES_WITHOUT_SYMBOL_TEXT", "FIXED_MODULE_ENUM_ONLY",
                "RAW_TARGET_DEBUGGER_TEXT_PRIVATE_NOT_UPLOADED"]
+
+NATIVE_STAGES = ("LAST_EVENT", "EXCEPTION_RECORD", "EXCEPTION_CONTEXT", "FAULT_MODULE",
+                 "CURRENT_STACK", "ALL_STACKS", "RESTORE_EVENT_THREAD")
+TRACE_STAGES = ("OUTSIDE", "BLOCK_OPEN", *NATIVE_STAGES, "BLOCK_END", "FINISH")
+TRACE_SHAPES = ("BEGIN_MARKER", "END_MARKER", "STAGE_MARKER", "EMPTY", "LAST_EVENT",
+                "EXCEPTION_ADDRESS", "EXCEPTION_CODE", "EXCEPTION_FLAGS", "PARAMETER_COUNT",
+                "PARAMETER", "MODULE_HEADER", "MODULE_ROW", "THREAD_HEADER", "STACK_HEADER",
+                "STACK_FRAME", "REGISTERS", "CPU_FLAGS", "IOPL_FLAGS", "DEBUGGER_TIME",
+                "SYMBOL_LABEL", "DISASSEMBLY", "SUBCODE", "REJECTED_SECRET_TEXT",
+                "UNKNOWN_TEXT", "COMMAND_ERROR_TEXT", "CONTEXT_UNAVAILABLE_TEXT",
+                "BUDGET", "FINISH")
+TRACE_ERRORS = ("text_budget_exceeded", "line_budget_exceeded", "native_field_order",
+                "native_parameter_indices_missing", "duplicate_native_field",
+                "nested_native_block", "unmatched_native_end", "invalid_or_duplicate_pid",
+                "unexpected_native_text", "native_integer_width", "native_parameter_count",
+                "invalid_or_duplicate_parameter", "module_not_in_fixed_enum",
+                "native_thread_budget", "native_thread_order_or_pid", "native_stack_order",
+                "native_frame_without_thread", "native_frame_order_or_budget",
+                "native_required_fields_or_chance_missing", "native_pid_does_not_match_target",
+                "native_module_range_invalid", "native_stack_missing", "incomplete_native_block",
+                "native_stage_order", "native_stage_sequence_incomplete", "UNRECOGNIZED_ERROR")
+TRACE_COUNT_LIMIT = 255
+TRACE_FAULT_LIMIT = 64
+
+
+class NativeParserTrace:
+    """Bounded fixed vocabulary only: no input text, symbols or numeric fields.
+
+    Counts describe parser observations and saturate at a fixed limit. The first
+    bounded faults preserve their order but only contain compiled-in enums. A
+    shape is an observation, never proof that a line originated in CDB.
+    """
+
+    def __init__(self):
+        self.stage = "OUTSIDE"
+        self.shape = "UNKNOWN_TEXT"
+        self.counts = {stage: {shape: 0 for shape in TRACE_SHAPES} for stage in TRACE_STAGES}
+        self.faults = []
+        self.dropped_faults = 0
+        self.saturated = False
+
+    def observe(self, shape, stage=None):
+        if stage is not None:
+            self.stage = stage if stage in TRACE_STAGES else "OUTSIDE"
+        self.shape = shape if shape in TRACE_SHAPES else "UNKNOWN_TEXT"
+        value = self.counts[self.stage][self.shape]
+        if value < TRACE_COUNT_LIMIT:
+            self.counts[self.stage][self.shape] = value + 1
+        else:
+            self.saturated = True
+
+    def fault(self, kind):
+        error = kind if kind in TRACE_ERRORS else "UNRECOGNIZED_ERROR"
+        if len(self.faults) < TRACE_FAULT_LIMIT:
+            self.faults.append({"stage": self.stage, "shape": self.shape, "error": error})
+        else:
+            self.dropped_faults = min(TRACE_COUNT_LIMIT, self.dropped_faults + 1)
+            self.saturated = True
+
+    def projection(self):
+        return {"version": 1, "counts": {stage: dict(counts) for stage, counts in self.counts.items()},
+                "faults": [dict(fault) for fault in self.faults],
+                "dropped_faults": self.dropped_faults, "saturated": self.saturated}
 
 
 class TextEvidence:
@@ -814,6 +885,8 @@ class TextEvidence:
         self.total = 0
         self.pending = b""
         self.raw = None
+        self.trace = NativeParserTrace()
+        self.native_stage_position = 0
         if raw_path is not None:
             self.raw = os.fdopen(os.open(raw_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb")
 
@@ -828,6 +901,8 @@ class TextEvidence:
         self.total += len(data)
         if self.total > MAX_TEXT:
             self.errors.add("text_budget_exceeded")
+            self.trace.observe("BUDGET")
+            self.trace.fault("text_budget_exceeded")
             return
         self.pending += data
         while b"\n" in self.pending:
@@ -835,10 +910,13 @@ class TextEvidence:
             self.line(line.decode("utf-8", errors="replace").rstrip("\r"))
         if len(self.pending) > MAX_LINE:
             self.errors.add("line_budget_exceeded")
+            self.trace.observe("BUDGET")
+            self.trace.fault("line_budget_exceeded")
             self.pending = b""
 
     def invalid(self, kind):
         self.errors.add(kind)
+        self.trace.fault(kind)
         if self.current is not None:
             self.current["valid"] = False
 
@@ -861,27 +939,45 @@ class TextEvidence:
 
     def line(self, line):
         if len(line.encode("utf-8")) > MAX_LINE:
+            self.trace.observe("BUDGET")
             self.invalid("line_budget_exceeded")
             return
         marker = re.fullmatch(f"KEEL_{self.nonce}_NATIVE_(BEGIN|END)_(FIRST|SECOND)", line)
         if marker and marker[1] == "BEGIN":
+            self.trace.observe("BEGIN_MARKER", "BLOCK_OPEN")
             if self.current is not None:
                 self.invalid("nested_native_block")
             self.current = {"chance": marker[2], "valid": True, "parameters": {}, "stacks": []}
             self.stack = None
+            self.native_stage_position = 0
             return
         if marker and marker[1] == "END":
+            self.trace.observe("END_MARKER", "BLOCK_END")
             if self.current is None or self.current["chance"] != marker[2]:
                 self.invalid("unmatched_native_end")
             else:
+                if self.native_stage_position not in (0, len(NATIVE_STAGES)):
+                    self.invalid("native_stage_sequence_incomplete")
                 self.blocks += 1
                 self.commit_event()
             self.current = None
             self.stack = None
+            self.trace.stage = "OUTSIDE"
             return
         if self.current is not None:
+            stage = re.fullmatch(f"KEEL_{self.nonce}_NATIVE_STAGE_({'|'.join(NATIVE_STAGES)})", line)
+            if stage:
+                self.trace.observe("STAGE_MARKER", stage[1])
+                if (self.native_stage_position >= len(NATIVE_STAGES)
+                        or NATIVE_STAGES[self.native_stage_position] != stage[1]):
+                    self.invalid("native_stage_order")
+                else:
+                    self.native_stage_position += 1
+                return
             self.native_line(line)
             return
+        self.trace.stage = "OUTSIDE"
+        self.trace.shape = "UNKNOWN_TEXT"
         if match := re.fullmatch(f"KEEL_{self.nonce}_PID:([0-9]{{1,10}})", line):
             value = int(match[1])
             if self.pid is not None or not 0 < value <= 0xffffffff:
@@ -897,32 +993,39 @@ class TextEvidence:
             self.harness.append(line)
 
     def native_line(self, line):
+        self.trace.shape = "UNKNOWN_TEXT"
         if not line.strip():
+            self.trace.observe("EMPTY")
             return
         # The fixed output schema never exports these strings. They additionally
         # invalidate an event even if embedded in otherwise plausible CDB text.
         if re.search(r"authorization|bearer|token\s*=|password\s*=", line, re.I):
+            self.trace.observe("REJECTED_SECRET_TEXT")
             self.invalid("unexpected_native_text")
             return
         if match := re.fullmatch(r"Last event:\s*([0-9a-fA-F]{1,8})\.([0-9a-fA-F]{1,8}):.*\((first|second) chance\)", line):
+            self.trace.observe("LAST_EVENT")
             self.unique("event_pid", int(match[1], 16))
             self.unique("event_tid", int(match[2], 16))
             self.unique("observed_chance", match[3].upper())
             return
         if match := re.fullmatch(rf"\s*(ExceptionAddress|ExceptionCode|ExceptionFlags):\s*({HEX64})(?:\s+\([^\r\n]*\))?", line):
             key = {"ExceptionAddress": "exception_address", "ExceptionCode": "exception_code", "ExceptionFlags": "exception_flags"}[match[1]]
+            self.trace.observe(key.upper())
             value = int(match[2].replace('`', ''), 16)
             if value > (0xffffffffffffffff if key == "exception_address" else 0xffffffff):
                 self.invalid("native_integer_width")
             self.unique(key, value)
             return
         if match := re.fullmatch(r"\s*NumberParameters:\s*([0-9]{1,2})", line):
+            self.trace.observe("PARAMETER_COUNT")
             count = int(match[1])
             if count > 15:
                 self.invalid("native_parameter_count")
             self.unique("parameter_count", count)
             return
         if match := re.fullmatch(rf"\s*Parameter\[([0-9]{{1,2}})\]:\s*({HEX64})", line):
+            self.trace.observe("PARAMETER")
             index, value = int(match[1]), int(match[2].replace('`', ''), 16)
             if (index >= 15 or index != len(self.current["parameters"])
                     or "parameter_count" not in self.current or "module_header" in self.current):
@@ -931,10 +1034,12 @@ class TextEvidence:
                 self.current["parameters"][index] = value
             return
         if re.fullmatch(r"\s*start\s+end\s+module name", line, re.I):
+            self.trace.observe("MODULE_HEADER")
             self.unique("module_header", True)
             return
         if self.current.get("module_header") and "fault_module" not in self.current:
             if match := re.fullmatch(rf"\s*({HEX64})\s+({HEX64})\s+([A-Za-z0-9_-]+)(?:\s+\([^\r\n]*\))?", line):
+                self.trace.observe("MODULE_ROW")
                 enum = self.allowed_modules.get(match[3].lower())
                 if enum is None:
                     self.invalid("module_not_in_fixed_enum")
@@ -944,6 +1049,7 @@ class TextEvidence:
                     self.unique("module_end", int(match[2].replace('`', ''), 16))
                 return
         if match := re.fullmatch(rf"\s*[.#]?\s*([0-9]{{1,3}})\s+Id:\s*({HEX32})\.({HEX32})\s+Suspend:\s*[0-9]+\s+Teb:?\s*({HEX64})\s+(?:Unfrozen|Frozen)", line, re.I):
+            self.trace.observe("THREAD_HEADER")
             if len(self.current["stacks"]) >= 512:
                 self.invalid("native_thread_budget")
                 return
@@ -954,6 +1060,7 @@ class TextEvidence:
             self.current["stacks"].append(self.stack)
             return
         if re.fullmatch(r"\s*#?\s*Child-SP\s+RetAddr\s+Call Site", line):
+            self.trace.observe("STACK_HEADER")
             if "module_end" not in self.current:
                 self.invalid("native_stack_order")
             if self.stack is None or self.stack["frames"]:
@@ -961,6 +1068,7 @@ class TextEvidence:
                 self.current["stacks"].append(self.stack)
             return
         if match := re.fullmatch(rf"\s*([0-9a-fA-F]{{1,2}})\s+({HEX64})\s+({HEX64})\s+[^\r\n]+", line):
+            self.trace.observe("STACK_FRAME")
             if self.stack is None:
                 self.invalid("native_frame_without_thread")
                 return
@@ -975,19 +1083,34 @@ class TextEvidence:
         # Known private-only CDB context output: numeric registers, CPU flags,
         # module!symbol labels and disassembly. No part is stored in upload data.
         if re.fullmatch(r"\s*(?:(?:[a-z][a-z0-9]{1,7})=[0-9a-fA-F`]+\s*)+", line):
+            self.trace.observe("REGISTERS")
             return
         if re.fullmatch(r"\s*(?:[a-zA-Z]{2,3}\s+){2,}[a-zA-Z]{2,3}\s*", line):
+            self.trace.observe("CPU_FLAGS")
             return
         if re.fullmatch(r"\s*iopl=[0-3](?:\s+(?:nv|ov|up|dn|ei|di|pl|ng|zr|nz|ac|na|pe|po|cy|nc))+\s*", line):
+            self.trace.observe("IOPL_FLAGS")
             return
         if re.fullmatch(r"\s*Debugger time:\s*(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+[0-9:. ()+-]+(?:UTC[0-9:. ()+-]*)?", line, re.I):
+            self.trace.observe("DEBUGGER_TIME")
             return
         if re.fullmatch(r"[A-Za-z0-9_-]+![A-Za-z0-9_:<>$,.+-]+:", line):
+            self.trace.observe("SYMBOL_LABEL")
             return
         if re.fullmatch(rf"\s*{HEX64}\s+[0-9a-fA-F]+\s+[^\r\n]+", line):
+            self.trace.observe("DISASSEMBLY")
             return
         if re.fullmatch(r"\s*Subcode:\s*0x[0-9a-fA-F]{1,8}\s+[A-Z0-9_]+", line):
+            self.trace.observe("SUBCODE")
             return
+        # Diagnostic-only categories never admit a previously rejected line.
+        # Their fixed labels are intentionally coarse and not source claims.
+        if re.search(r"syntax error|could not resolve", line, re.I):
+            self.trace.observe("COMMAND_ERROR_TEXT")
+        elif re.search(r"(?:unable|cannot|could not).*(?:context|exception record)", line, re.I):
+            self.trace.observe("CONTEXT_UNAVAILABLE_TEXT")
+        else:
+            self.trace.observe("UNKNOWN_TEXT")
         self.invalid("unexpected_native_text")
 
     def commit_event(self):
@@ -1014,6 +1137,7 @@ class TextEvidence:
         if self.pending:
             self.line(self.pending.decode("utf-8", errors="replace").rstrip("\r"))
         if self.current is not None:
+            self.trace.observe("FINISH", "FINISH")
             self.invalid("incomplete_native_block")
         if self.raw:
             self.raw.close()
@@ -1149,7 +1273,8 @@ def run_debugger(command, cwd, env, deadline, evidence, owner, require_suite_sum
             "owned_cleanup_complete": terminal is not None and not terminal["errors"],
             "owned_terminal": terminal,
             "timed_out": timed_out, "interrupted": interrupted,
-            "diagnostic_errors": sorted(errors), "controller_exit": code}
+            "diagnostic_errors": sorted(errors), "controller_exit": code,
+            "native_parser_trace": evidence.trace.projection()}
 
 
 def bounded(command, source, env, deadline):
