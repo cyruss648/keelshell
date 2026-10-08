@@ -2,6 +2,10 @@
 
 ## 当前产品缺口与实施顺序 — 2026-10-08
 
+最新已推送基线 `f3c8820` 的[Quality 37721737467](https://github.com/cyruss648/keelshell/actions/runs/37721737467)已结束：Linux成功，Windows／macOS失败。新的[Windows诊断 37721774239](https://github.com/cyruss648/keelshell/actions/runs/37721774239)42项1failure，ACK前确实同Job的原child HANDLE在返回后仍LIVE，证明控制器成功终态条件不足；五项CDB／原706仍UNRUN、原应用原因UNKNOWN。macOS为small-stack Codex ProgressAsk取消后连接断言，具体监听者仍UNKNOWN；Linux在未加入SHA2优化的同生产源码上通过，不能归因优化或倒填旧Timeout原因。原完整日志与唯一SDK产物均保留，见[诊断与平台后续](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。
+
+本切片仅导入SHA2 0.11.*开发优化及文档，830输入实际通过1,812普通Rust／10doc／48Python、格式／x.y／严格Clippy和原默认／2MiB各626阶段；两个owner实际wait0/reap/group absent，私有TMP为空并删除，原Rust与期限保持。实际0.11编译opt3/debugassertions-on，0.10.9在macOS图未编译、Linuxflags待验；最终非作者根证据复核已通过，无确认P1/P2；精确新提交CI待完成。Unix cleanup v1因取消／重入／Drop数字PGID重发P2被拒绝，未导入；新的Unix和Windows控制器在独立目录准备，不混入本次源码。详见[优化记录](testing/records/2026-10-08-development-sha2-build-optimization.md)。完整外部MCP、CLI登录复用、最小原生几何／辅助技术、其它平台桌面及发布安装仍OPEN。下文按各自时点保留历史状态。
+
 最新 `437f896` 的[精确三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37717370699)已全部结束且失败；首次[真实 Windows 诊断](https://github.com/cyruss648/keelshell/actions/runs/37717377052)只通过 SDK inventory，随后控制器回归失败，五项 CDB 控制与原706项应用测试未运行。Windows READY／原后代句柄身份夹具修正已通过本机48项及新非作者限定复核，准确新Windows仍待运行；Linux原8秒目录超时和macOS ProgressAsk取消后的连接身份继续OPEN；本机工程及限定原生结果保留其范围，不关闭这些失败，见[实际诊断与平台后续](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。
 
 本次配置恢复提交收录 v9 功能与数量归属修正。最终同 824 输入／16,151,246 字节完整检查实际通过 1,812 普通 Rust／10 rustdoc／6 Python及严格工程检查，新标准 macOS 包／57 打包通过；17 份修后原生观察完成有效／损坏恢复、取消、重启和完整字节读回，另四份中文浅色原图补齐当前 2／恢复后 1。两个新 owner 实际 wait=0及应用／所属资源收尾已消费；旧失败、中断、旧 P2 和 owner UNKNOWN 保留。新的非作者最终组合复核无 P1/P2，数量归属 P2 已关闭；收尾仅四份状态文档、其余 820 输入不变，精确提交 CI 另行验证；最小原生几何、辅助技术、其它平台及断电耐久性独立开放，见[整合记录](testing/records/2026-10-08-configuration-recovery-main-integration.md)。

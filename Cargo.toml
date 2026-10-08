@@ -53,6 +53,10 @@ debug = 1
 [profile.dev.package.argon2]
 opt-level = 3
 
+# Preserve complete executable integrity checks in development (ADR 0084).
+[profile.dev.package."sha2@0.11"]
+opt-level = 3
+
 [profile.release]
 lto = "thin"
 codegen-units = 1
