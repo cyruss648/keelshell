@@ -4,7 +4,7 @@ These controlled Python children are not CDB/Windows/application acceptance.
 """
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import sys
 import tempfile
 import signal
@@ -170,6 +170,77 @@ class ParsingTests(unittest.TestCase):
         self.assertNotIn(".dump", script)
         self.assertNotIn(".shell", script)
         self.assertNotIn("\ng\n", script)
+
+
+class CdbLaunchContractTests(unittest.TestCase):
+    def documented_launch(self, command):
+        """Check the documented launch subset; this does not emulate CDB.
+
+        Debugger options precede the first executable. Everything after that
+        boundary belongs to the target, including tokens resembling options.
+        """
+        flags, operands = [], {}
+        index = 1
+        while index < len(command):
+            token = command[index]
+            if token in {"-G", "-hd", "-nosqm", "-noshell", "-sins"}:
+                flags.append(token)
+                index += 1
+            elif token.startswith("-netsyms:"):
+                if token != "-netsyms:no":
+                    raise ValueError("network symbol loading must be disabled")
+                flags.append(token)
+                index += 1
+            elif token in {"-y", "-cf"}:
+                if token in operands or index + 1 >= len(command):
+                    raise ValueError("missing or duplicate debugger path operand")
+                operands[token] = command[index + 1]
+                index += 2
+            elif token.startswith("-"):
+                raise ValueError("unsupported debugger option spelling")
+            else:
+                return flags, operands, token, command[index + 1:]
+        raise ValueError("missing debuggee")
+
+    def test_launch_contract_reaches_only_the_intended_debuggee(self):
+        binary = PureWindowsPath("C:/owned fixtures/application tests.exe")
+        init = PureWindowsPath("C:/owned fixtures/initial commands.txt")
+        arguments = ["--test-threads=4", "--no-capture"]
+        command = probe.cdb_command(PureWindowsPath("C:/owned SDK/cdb.exe"), binary, init, arguments)
+        flags, operands, target, target_arguments = self.documented_launch(command)
+        self.assertCountEqual(flags, ["-G", "-hd", "-nosqm", "-noshell", "-sins", "-netsyms:no"])
+        self.assertEqual(operands, {"-y": str(binary.parent), "-cf": str(init)})
+        self.assertEqual(target, str(binary))
+        self.assertEqual(target_arguments, arguments)
+        self.assertNotIn("no", command[:command.index(str(binary))])
+
+    def test_spaces_unicode_and_option_like_target_arguments_keep_their_boundary(self):
+        paths = [PureWindowsPath("C:/owned fixtures/应用 tests.exe"),
+                 PureWindowsPath("//owned-host/owned share/application tests.exe")]
+        arguments = ["no", "-netsyms:yes", "-cf", "owned init with spaces.txt", 'owned"quote', "owned\\"]
+        for binary in paths:
+            with self.subTest(path=str(binary)):
+                init = binary.parent / "owned 初始化 commands.txt"
+                command = probe.cdb_command(binary.parent / "cdb.exe", binary, init, arguments)
+                flags, operands, target, target_arguments = self.documented_launch(command)
+                self.assertEqual(flags.count("-netsyms:no"), 1)
+                self.assertEqual(operands["-cf"], str(init))
+                self.assertEqual(operands["-y"], str(binary.parent))
+                self.assertEqual(target, str(binary))
+                self.assertEqual(target_arguments, arguments)
+                self.assertNotIn('"', target)
+
+    def test_split_network_option_and_premature_debuggee_fail_the_contract(self):
+        binary = PureWindowsPath("C:/owned/application.exe")
+        command = ["cdb.exe", "-G", "-hd", "-nosqm", "-noshell", "-sins",
+                   "-netsyms", "no", "-y", str(binary.parent), "-cf", "owned init.txt", str(binary)]
+        with self.assertRaises(ValueError):
+            self.documented_launch(command)
+        command[6:8] = ["-netsyms:no", "no"]
+        _, _, target, arguments = self.documented_launch(command)
+        self.assertEqual(target, "no")
+        self.assertNotEqual(target, str(binary))
+        self.assertIn(str(binary), arguments)
 
 
 class ProjectionTests(unittest.TestCase):

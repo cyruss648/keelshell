@@ -1166,7 +1166,7 @@ def bounded(command, source, env, deadline):
 
 def cdb_command(cdb, binary, init, arguments):
     """Keep debugger heap, telemetry, shell and network symbol behavior explicit."""
-    return [str(cdb), "-G", "-hd", "-nosqm", "-noshell", "-sins", "-netsyms", "no",
+    return [str(cdb), "-G", "-hd", "-nosqm", "-noshell", "-sins", "-netsyms:no",
             "-y", str(binary.parent), "-cf", str(init), str(binary), *arguments]
 
 
