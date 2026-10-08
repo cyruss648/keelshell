@@ -12,6 +12,7 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) {
         if self.saving
+            || self.configuration_recovery.is_some()
             || self.vault_settings.is_some()
             || self.profile_sync.is_some()
             || self.snippet_modal_open()
@@ -34,6 +35,7 @@ impl Workspace {
             return;
         };
         if self.saving
+            || self.configuration_recovery.is_some()
             || self.vault_settings.is_some()
             || self.profile_sync.is_some()
             || self.snippet_modal_open()

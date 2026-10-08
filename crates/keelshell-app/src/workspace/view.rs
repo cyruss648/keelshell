@@ -701,6 +701,17 @@ impl Render for Workspace {
                             })).map(|button| self.retain_modal_button("about-updates", button, cx)),
                     )
                     .child(
+                        Button::new("configuration-recovery")
+                            .ghost()
+                            .compact()
+                            .accessibility_label(t(cx, "配置备份与恢复", "Configuration backup and recovery"))
+                            .label(t(cx, "配置恢复", "Recovery"))
+                            .localized_tooltip("备份和恢复本机配置；恢复前先关闭 SSH 标签并停止 AI、批量、定时与 MCP 操作", "Back up and restore local metadata; close SSH tabs and stop AI, batch, scheduled and MCP work before recovery")
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                view.open_configuration_recovery(window, cx)
+                            })).map(|button| self.retain_modal_button("configuration-recovery", button, cx)),
+                    )
+                    .child(
                         div().id("appearance-selector").test_support().flex().gap_1()
                             .children([
                                 (keelshell_core::Theme::System, "theme-system", t(cx, "跟随系统", "System")),

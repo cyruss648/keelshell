@@ -9,6 +9,12 @@ use directories::ProjectDirs;
 
 use crate::{AppState, Error, SnapshotRevision, model::MAX_DOCUMENT_BYTES};
 
+mod recovery;
+pub use recovery::{
+    ConfigBackup, ConfigBackupId, ConfigBackupStatus, ConfigRecoveryPreview, ConfigRecoverySummary,
+    ConfigSourceStatus, MAX_CONFIG_BACKUPS, MAX_CONFIG_ORIGINALS,
+};
+
 #[derive(Default)]
 enum Observed {
     #[default]
@@ -35,6 +41,7 @@ enum Observed {
 /// All methods perform blocking filesystem I/O; invoke them on a worker thread.
 pub struct StateStore {
     path: PathBuf,
+    identity: uuid::Uuid,
     observed: Mutex<Observed>,
 }
 
@@ -43,6 +50,7 @@ impl StateStore {
     pub fn new(path: impl Into<PathBuf>) -> Self {
         Self {
             path: path.into(),
+            identity: uuid::Uuid::new_v4(),
             observed: Mutex::new(Observed::Unloaded),
         }
     }
@@ -135,6 +143,9 @@ impl StateStore {
             }
             _ => {}
         }
+        if let Some(current) = &current {
+            self.rotate_backup(current)?;
+        }
         let mut temporary = tempfile::Builder::new()
             .prefix(".keelshell-state-")
             .tempfile_in(parent)?;
@@ -211,18 +222,21 @@ fn decode(bytes: &[u8]) -> Result<AppState, Error> {
 }
 
 fn read_document(path: &Path) -> Result<Option<Vec<u8>>, Error> {
+    read_bounded(path, MAX_DOCUMENT_BYTES)
+}
+
+fn read_bounded(path: &Path, limit: usize) -> Result<Option<Vec<u8>>, Error> {
     let Some(metadata) = regular_metadata(path)? else {
         return Ok(None);
     };
     check_owner_permissions(&metadata)?;
-    if metadata.len() > MAX_DOCUMENT_BYTES as u64 {
+    if metadata.len() > limit as u64 {
         return Err(Error::TooLarge);
     }
     let file = File::open(path)?;
     let mut bytes = Vec::new();
-    file.take(MAX_DOCUMENT_BYTES as u64 + 1)
-        .read_to_end(&mut bytes)?;
-    if bytes.len() > MAX_DOCUMENT_BYTES {
+    file.take(limit as u64 + 1).read_to_end(&mut bytes)?;
+    if bytes.len() > limit {
         return Err(Error::TooLarge);
     }
     Ok(Some(bytes))

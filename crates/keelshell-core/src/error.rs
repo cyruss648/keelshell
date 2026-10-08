@@ -66,6 +66,33 @@ pub enum Error {
     /// Atomic replacement succeeded but syncing its directory failed.
     #[error("state was replaced, but directory durability could not be confirmed: {0}")]
     Durability(std::io::Error),
+    /// The chosen configuration backup disappeared or is not owned by this store.
+    #[error("configuration backup was not found")]
+    ConfigBackupNotFound,
+    /// The local backup wrapper version or sequence is invalid.
+    #[error("configuration backup format is unsupported or invalid")]
+    ConfigBackupFormat,
+    /// A backup changed after review or the current state/revision changed.
+    #[error("configuration recovery review is stale; inspect again")]
+    ConfigRecoveryConflict,
+    /// The bounded backup directory contains too many or unrecognized entries.
+    #[error(
+        "configuration backup directory exceeds its bounded limit or contains unexpected entries"
+    )]
+    ConfigBackupLimit,
+    /// Preserved originals are never automatically pruned; archive them explicitly first.
+    #[error(
+        "preserved configuration originals reached the eight-file limit; archive them before recovery"
+    )]
+    ConfigOriginalLimit,
+    /// Replacement failed after commit, but the prior state (including absence) was restored.
+    #[error("configuration recovery failed; the original state was restored: {0}")]
+    ConfigRecoveryRolledBack(std::io::Error),
+    /// A post-commit failure could not confirm rollback; any existing original remains preserved.
+    #[error(
+        "configuration recovery needs manual repair; an original copy was retained if the reviewed file existed"
+    )]
+    ConfigRecoveryRequired,
     /// The vault passphrase is empty or exceeds the bounded input limit.
     #[error("vault passphrase is invalid")]
     VaultInvalidPassphrase,

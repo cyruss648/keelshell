@@ -11,6 +11,7 @@ mod batch_commands;
 mod command_history;
 mod command_suggestions;
 mod command_text;
+mod configuration_recovery;
 mod design;
 mod directory_compare;
 mod emulator;

@@ -20,6 +20,7 @@ use keelshell_core::{AppState, AuthMethod, Connection, Language, StateStore};
 mod agent;
 mod command_workflows;
 mod commands;
+mod configuration_recovery;
 mod credentials;
 mod library;
 mod library_bulk;
@@ -300,6 +301,8 @@ pub struct Workspace {
     ai_settings_subscription: Option<Subscription>,
     profile_sync: Option<Entity<crate::profile_sync::ProfileSyncPanel>>,
     profile_sync_subscription: Option<Subscription>,
+    configuration_recovery: Option<Entity<crate::configuration_recovery::ConfigRecoveryPanel>>,
+    configuration_recovery_subscription: Option<Subscription>,
     vault_settings: Option<Entity<VaultSettings>>,
     vault_settings_subscription: Option<Subscription>,
     update_panel: Option<Entity<UpdatePanel>>,
@@ -666,6 +669,8 @@ impl Workspace {
             ai_settings_subscription: None,
             profile_sync: None,
             profile_sync_subscription: None,
+            configuration_recovery: None,
+            configuration_recovery_subscription: None,
             vault_settings: None,
             vault_settings_subscription: None,
             update_panel: None,
@@ -959,13 +964,22 @@ impl Workspace {
     }
 
     fn switch_language(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.saving || (self.vault_settings.is_some() || self.profile_sync.is_some()) {
+        if self.saving
+            || self.configuration_recovery.is_some()
+            || (self.vault_settings.is_some() || self.profile_sync.is_some())
+        {
             return;
         }
         let language = match i18n::language(cx) {
             Language::ZhCn => Language::En,
             Language::En => Language::ZhCn,
         };
+        self.apply_language(language, window, cx);
+        let mut candidate = self.state.clone();
+        candidate.settings.language = language;
+        self.persist(candidate, AfterSave::None, window, cx);
+    }
+    fn apply_language(&mut self, language: Language, window: &mut Window, cx: &mut Context<Self>) {
         i18n::set_language(language, cx);
         self.refresh_library_batch_locale(window, cx);
         if let Some(panel) = &self.snippet_parameters {
@@ -1132,12 +1146,10 @@ impl Workspace {
                 panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
             }
         }
-        let mut candidate = self.state.clone();
-        candidate.settings.language = language;
-        self.persist(candidate, AfterSave::None, window, cx);
     }
     fn open_ai_settings(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.library_batch_prompt.is_some()
+            || self.configuration_recovery.is_some()
             || self.mcp.show
             || self.show_batch
             || self.show_workflow
@@ -1207,7 +1219,8 @@ impl Workspace {
         cx.notify();
     }
     fn open_updates(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.mcp.show
+        if self.configuration_recovery.is_some()
+            || self.mcp.show
             || self.show_batch
             || self.show_workflow
             || self.ai_settings.is_some()
@@ -1639,7 +1652,8 @@ impl Workspace {
             cx.notify();
             return;
         }
-        if (self.vault_settings.is_some() || self.profile_sync.is_some())
+        if self.configuration_recovery.is_some()
+            || (self.vault_settings.is_some() || self.profile_sync.is_some())
             || (self.snippet_modal_open()
                 && !matches!(
                     &after,

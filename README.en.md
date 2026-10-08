@@ -47,11 +47,14 @@ Simplified Chinese is the default, with English available. Appearance follows th
 | **Monitoring and networking** | Linux host status and per-device disk I/O; listening sockets and remote DNS / TLS / HTTP(S) HEAD diagnostics; local/remote TCP forwarding and loopback SOCKS5 tunnels |
 | **AI assistance** | Named model API / Codex CLI / Claude Code profiles; model discovery and connection testing, explicit context, complete request previews, answers, diagnostic suggestions and a finite Agent workflow reviewed each round |
 | **External MCP** | External agents read explicitly granted session information, terminal fragments, SFTP and monitoring; commands and file changes are proposed for review and execution in the desktop app |
+| **Configuration recovery** | Up to eight local metadata snapshots rotated before saves; replacement previews, explicit confirmation, preserved originals and rejection of concurrent changes; credential stores stay independent |
 | **About and updates** | Project link, version and bundled changelog; daily background checks with off/weekly settings, optional SHA-256 verified downloads and confirmed installation/restart |
 
 Canceling a transfer or mirror retains completed operations; disconnection does not replay commands, transfers or tasks. Directory comparison/sync has explicit size, type and path limits. Protocol diagnostics require remote POSIX / Python 3.8+. See the [file workspace](docs/product/FILES_WORKSPACE.md), [directory mirrors](docs/product/DIRECTORY_MIRROR.md), [remote protocol diagnostics](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md) and [capability ledger](docs/product/CAPABILITIES.md) for workflows and boundaries.
 
 Text merging and patches first produce a local draft. Saving remotely requires complete review and a fresh baseline check. File reviews can expand while keeping confirmation and cancellation visible; drafts and patch inputs have explicit editing controls. See [review and editing](docs/product/FILE_REVIEW_AND_FOCUS.md) and the [text merge guide](docs/product/TEXT_CONFLICT_MERGE.md). Two macOS draft/save sequences against an owned SSH/SFTP fixture completed with full-content readback; complete UI and cross-platform acceptance remain open in the [limited native record](docs/testing/records/2026-10-07-text-merge-patch-native.md).
+
+Use [configuration backup and recovery](docs/product/CONFIGURATION_RECOVERY.md) when metadata is damaged or a rollback is needed. Recovery replaces metadata without replaying sessions, commands, transfers or external grants. Engineering and native acceptance of the current combination are tracked in the [integration record](docs/testing/records/2026-10-08-configuration-recovery-main-integration.md).
 
 ## AI assistance and external MCP
 

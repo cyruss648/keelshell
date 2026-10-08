@@ -134,6 +134,20 @@ pub(super) struct McpState {
 }
 
 impl McpState {
+    pub(super) fn config_recovery_idle(&self) -> bool {
+        self.host.is_none()
+            && !self.busy
+            && self.preparing_files == 0
+            && self
+                .workers
+                .iter()
+                .all(tokio::task::JoinHandle::is_finished)
+            && self
+                .actions
+                .iter()
+                .all(|action| !matches!(&action.state, ActionState::Running))
+    }
+
     pub(super) fn new(root: Entity<InputState>) -> Self {
         let (backend, requests) = QueueBackend::channel();
         let (result_sender, results) = mpsc::channel(8);

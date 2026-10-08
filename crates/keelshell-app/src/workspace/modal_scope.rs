@@ -31,6 +31,7 @@ pub(super) enum ModalKind {
     Updates,
     Vault,
     ProfileSync,
+    ConfigurationRecovery,
     AiSettings,
     Mcp,
     McpFileReview,
@@ -56,6 +57,9 @@ impl ModalKind {
             }
             Self::Updates => t(cx, "关于与更新", "About and updates"),
             Self::ProfileSync => t(cx, "加密连接同步", "Encrypted profile sync"),
+            Self::ConfigurationRecovery => {
+                t(cx, "配置备份与恢复", "Configuration backup and recovery")
+            }
             Self::Vault => t(cx, "凭据库", "Credential vault"),
             Self::AiSettings => t(cx, "AI 配置", "AI configurations"),
             Self::Mcp => t(cx, "对外 MCP 授权与审阅", "External MCP grants and review"),
@@ -236,6 +240,10 @@ impl Workspace {
             (self.update_panel.is_some(), ModalKind::Updates),
             (self.vault_settings.is_some(), ModalKind::Vault),
             (self.profile_sync.is_some(), ModalKind::ProfileSync),
+            (
+                self.configuration_recovery.is_some(),
+                ModalKind::ConfigurationRecovery,
+            ),
             (self.ai_settings.is_some(), ModalKind::AiSettings),
             (
                 self.mcp.show && self.mcp.reviewing.is_some(),
@@ -389,6 +397,11 @@ impl Workspace {
                     panel.update(cx, |panel, cx| panel.close(window, cx));
                 }
             }
+            ModalKind::ConfigurationRecovery => {
+                if let Some(panel) = self.configuration_recovery.clone() {
+                    panel.update(cx, |panel, cx| panel.close(cx));
+                }
+            }
             ModalKind::Vault => {
                 if let Some(panel) = self.vault_settings.clone() {
                     panel.update(cx, |panel, cx| panel.close(window, cx));
@@ -434,6 +447,9 @@ impl Workspace {
             }
             ModalKind::ProfileSync => {
                 self.panel_modal(self.profile_sync.clone(), px(1000.), px(680.), cx)
+            }
+            ModalKind::ConfigurationRecovery => {
+                self.panel_modal(self.configuration_recovery.clone(), px(900.), px(640.), cx)
             }
             ModalKind::Vault => {
                 self.panel_modal(self.vault_settings.clone(), px(900.), px(650.), cx)
@@ -541,7 +557,11 @@ impl Workspace {
 
     fn modal_chrome(&self, kind: ModalKind, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
-        let disabled = self.saving || matches!(kind, ModalKind::Vault | ModalKind::ProfileSync);
+        let disabled = self.saving
+            || matches!(
+                kind,
+                ModalKind::Vault | ModalKind::ProfileSync | ModalKind::ConfigurationRecovery
+            );
         let mut themes = div().flex().items_center().gap_1().flex_shrink_0();
         for (id, theme, zh, en) in [
             (

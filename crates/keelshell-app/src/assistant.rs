@@ -422,6 +422,11 @@ impl AssistantPanel {
         cx.notify();
     }
 
+    /// Whether configuration replacement can proceed without cancelling active inference.
+    pub(crate) fn config_recovery_idle(&self) -> bool {
+        !self.busy && !self.agent_active()
+    }
+
     fn invalidate_request(&mut self, cx: &mut Context<Self>) {
         self.stop_agent(cx);
         self.request_revision = self.request_revision.wrapping_add(1);

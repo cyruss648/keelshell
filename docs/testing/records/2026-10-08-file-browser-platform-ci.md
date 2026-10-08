@@ -29,3 +29,15 @@ Linux 的 `wrapped_file_actions_still_review_the_exact_selected_remote_target` �
 新 Windows 条件控制仍未在本机执行，Linux 历史超时原因仍 UNKNOWN；必须分别读取精确新提交的三平台 CI 结果，不把本机成功表述为三平台通过。
 
 新的非作者已独立读取完整 7 路径改动、两份原日志、两套 813 冻结输入和最终四份状态文档，当前 809 非状态输入保持；独立解析检查数量与上述一致，并检查实际进程组／scratch 均不存在。源码与限定工程证据无 P1/P2 阻断。没有运行新的 GUI 或替代 Windows/Linux CI；小审查记录保留在忽略的 `work/browser-controls-final-review-20261008-v1`。
+
+## 精确修复提交 CI 结果
+
+`a717400bf791bad43a293db50a02a64fb58bcfc7` 的 [Quality 37696576523](https://github.com/cyruss648/keelshell/actions/runs/37696576523) 已结束，macOS 和 Linux 成功，Windows 失败；三平台整体仍未通过。三份完整 job 原日志已实际下载，首次因工具拒绝终端转义的失败记录保留，成功的 v2 原文没有覆盖它。
+
+| 平台 | 结果 | 完整原日志 SHA-256 |
+| --- | --- | --- |
+| macOS | success | `a470475e74c6b71d8ec5ef22ab9a23b8c587faaec979d5ca9831d8f8d5544214` |
+| Linux | success | `7565e399b8cfe094e8e70a1894c02e704912c5919d6bcec458c34798fc0425b2` |
+| Windows | failure：应用测试进程异常退出 | `3ec1d3eb878e32457931744f883ce2dde015dae82ee0db1c012ad497955d9399` |
+
+Windows 的四线程应用测试进程以 `0xc0000409 / STATUS_STACK_BUFFER_OVERRUN` 异常退出，原日志没有单项 Rust `FAILED` 或准确触发者，不将该状态码直接归因为栈溢出。包装检查通过，后续完整 workspace 未完成；新的只读独立审查与有界诊断正在核对，保持原测试断言和期限。Linux 新成功不追溯为旧 120 秒超时准确原因已查明。本轮日志和下载回执保留在忽略的 `work/ci-a717400-20261008-v1`；没有新的 Windows/Linux 桌面 GUI 验收。

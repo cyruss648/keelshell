@@ -2,7 +2,9 @@
 
 ## 当前产品缺口与实施顺序 — 2026-10-08
 
-本轮测试修复基于已推送检查点 `7c11954`（本地／远程 SFTP 浏览）。精确三平台 Quality 的 macOS 成功、Windows 与 Linux 失败；Windows 字面上级路径测试修正及 Linux 夹具准入诊断已通过本机完整门禁（1,776 普通 Rust／10 rustdoc／6 Python、严格 Clippy）和 57 项打包测试，新的非作者最终复核无 P1/P2 阻断，新提交的精确 CI 尚待完成；准确 Linux 历史原因仍未知，见[平台记录](testing/records/2026-10-08-file-browser-platform-ci.md)。以下 a940 为历史检查点。Windows 准备失败收尾的 test-only 候选已在根通过十项新控制、原默认／2MiB控制器、AI库和严格Clippy；它没有改变产品范围，也未确定历史Windows失败原因，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。
+本次配置恢复提交收录 v9 功能与数量归属修正。最终同 824 输入／16,151,246 字节完整检查实际通过 1,812 普通 Rust／10 rustdoc／6 Python及严格工程检查，新标准 macOS 包／57 打包通过；17 份修后原生观察完成有效／损坏恢复、取消、重启和完整字节读回，另四份中文浅色原图补齐当前 2／恢复后 1。两个新 owner 实际 wait=0及应用／所属资源收尾已消费；旧失败、中断、旧 P2 和 owner UNKNOWN 保留。新的非作者最终组合复核无 P1/P2，数量归属 P2 已关闭；收尾仅四份状态文档、其余 820 输入不变，精确提交 CI 另行验证；最小原生几何、辅助技术、其它平台及断电耐久性独立开放，见[整合记录](testing/records/2026-10-08-configuration-recovery-main-integration.md)。
+
+本轮测试修复基于已推送检查点 `7c11954`（本地／远程 SFTP 浏览）。精确三平台 Quality 的 macOS 成功、Windows 与 Linux 失败；Windows 字面上级路径测试修正及 Linux 夹具准入诊断已通过本机完整门禁（1,776 普通 Rust／10 rustdoc／6 Python、严格 Clippy）和 57 项打包测试，新的非作者最终复核无 P1/P2 阻断；修复提交 a717400 的精确 CI 已结束，macOS／Linux 成功，Windows 应用测试进程异常退出，触发者仍未知；准确 Linux 历史原因仍未知，见[平台记录](testing/records/2026-10-08-file-browser-platform-ci.md)。以下 a940 为历史检查点。Windows 准备失败收尾的 test-only 候选已在根通过十项新控制、原默认／2MiB控制器、AI库和严格Clippy；它没有改变产品范围，也未确定历史Windows失败原因，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。
 
 已推送基线 `219093c` 包含审核式 Agent、推理/采样参数、显式本地 CLI 工作目录、有界任务结果审计、加密连接配置同步、远程 DNS/TLS/HTTP 诊断及文件审核视口／生命周期v5；其工程与限定原生证据各自保留。精确219三平台CI已结束：macOS/Linux成功，Windows后代端口3秒准备期失败，Ask/清理终态未记录，原因UNKNOWN。当前新增自动更新策略和会话工具栏组合已完成最终800输入完整门禁、同源码标准macOS包、限定宽窗口更新设置／双SSH交互及新非作者最终源码／证据复核；提交CI与英文原生small P2另行追踪，见[组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)。以下十项依据当前源码与[原始远程要求](research/remote-ssh-requirements.md)列出，保留真实余项；下一步优先日常SFTP浏览／编辑和工作区布局。
 
@@ -13,7 +15,7 @@
 | 3 / P1 | 日常远程文本编辑（FILE-04） | 现有有界 UTF-8 编辑、差异、冲突合并/patch 草稿和审核保存保留；先改进真实可用视口、查找/替换与语法高亮，再设计编码/换行保持和保存前可恢复备份。当前候选视口修复只关闭其限定问题；长行、键盘/IME、取消与恢复、完整字节读回和其它平台仍需分别验证。 |
 | 4 / P1 | 专业 pane 工作区与布局恢复（TERM-02/UI-04） | 现有标签与成对分屏保留；设计类型化横/纵嵌套 pane、拖动比例、活动 pane 作用域、多窗口及布局持久化。恢复布局和连接意图时不重放命令/传输。用最小窗口、焦点切换、关闭/重连及重启的真实原生场景验收。 |
 | 5 / P1 | 用户显式选择 CLI 自身登录身份及版本兼容（AI-LOCAL） | 现有 API 身份调用本地 Codex/Claude Code 已实现，默认继续 API；订阅/登录复用尚未实现。先证明请求前可禁用 hooks、MCP、skills、plugins 和工具，并处理组织策略强制启用；不能只凭 help/标志或事后事件拒绝。供应商 CLI 自己处理认证，KeelShell 不读/复制 token、不自动登录，未知版本拒绝。若当前版本无法证明准入边界则保持 OPEN，不提供占位开关；真实账号/模型和原生验收独立记录。 |
-| 6 / P2 | 配置备份轮转、损坏恢复与升级回退（CON-04/SYNC-01） | 原子配置写入、软删除和独立认证 vault 保留；新增有界备份、恢复预览与 schema 升级/回退策略。秘密只进入认证加密备份，不写明文 metadata。用隔离文件测试截断、损坏、旧版本、错误密码及并发保存；现有加密跨设备配置同步不能代替本机恢复。 |
+| 6 / P2 | 配置备份轮转、损坏恢复与升级回退（CON-04/SYNC-01） | 隔离候选已编写八槽单调metadata历史、显式预览／确认恢复、完整原件不自动删除、revision与资料字节绑定和失败回滚；独立vault／OS凭据不复制，既有schema缺省迁移保持，未来schema不推断。v1静态P2已修正为deferred-close失败后保留owner和typed原因；冻结v8实际通过23项core集成／3项失败控制／6项Workspace GPUI／2项typed UI控制、依赖策略／最终格式／全workspace all-targets严格Clippy，新非作者已复核同一输入和原始结果；主树及数量修正已整合；最终824输入1,812普通Rust／10doc／6Python严格门禁、新标准macOS包／57打包和17+4修后原生／完整字节核对通过，两个新owner实际wait0；新非作者最终组合复核无P1/P2、数量归属P2已关闭，提交CI待验证，最小OS几何、辅助技术、其它平台与断电耐久性开放；见[指南](product/CONFIGURATION_RECOVERY.md)与[候选记录](testing/records/2026-10-08-configuration-recovery.md)。现有加密跨设备同步不能代替本机恢复。 |
 | 7 / P2 | 远端能力识别、资源趋势与网络诊断（MON/NET-02） | 已有 Linux 监控及 DNS/TLS/HTTP HEAD/TCP 诊断保留；补能力识别、短期趋势、ping/丢包/traceroute 的明确降级，再设计远端 macOS/Windows 适配。缺少命令/权限时展示不可用，不能用桌面平台兼容性声称远端 OS 支持。以自有远端固定有界命令与实际样本验收。 |
 | 8 / P2 | 持久化隧道规则与真实流量统计（NET-01） | 已有 local/remote TCP 与 SOCKS5 转发保留；补命名规则、审核后启停和真实字节计数。保存规则不保存密码，不在重启时自动监听；重连使旧运行绑定失效。验证端口占用、半关闭、显式停止、断线释放与实际流量往返。 |
 | 9 / P3 | 高级传输和用户中继（FILE-05/NET-03） | 保留归档批量传输、PTY Zmodem 和用户管理中继/测速目标。先做审核式归档与路径穿越拒绝，再单独完成 rz/sz 实机协议；中继必须有可重复的延迟/丢包 A/B 数据，无收益不称加速，跳板功能不能代替此项。 |

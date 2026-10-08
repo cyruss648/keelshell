@@ -116,7 +116,10 @@ pub use snippet_template::{
     MAX_SNIPPET_TEMPLATE_BYTES, MAX_SNIPPET_VALUE_BYTES, MAX_SNIPPET_VARIABLES, SnippetTemplate,
     SnippetTemplateContext, SnippetTemplateError, compile_snippet_template,
 };
-pub use store::StateStore;
+pub use store::{
+    ConfigBackup, ConfigBackupId, ConfigBackupStatus, ConfigRecoveryPreview, ConfigRecoverySummary,
+    ConfigSourceStatus, MAX_CONFIG_BACKUPS, MAX_CONFIG_ORIGINALS, StateStore,
+};
 pub use updates::{UpdateCheckFrequency, UpdatePreferences};
 pub use vault::{CredentialKind, CredentialMetadata, CredentialVault, VaultStore};
 
