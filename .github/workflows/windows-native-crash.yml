@@ -1,0 +1,94 @@
+name: Windows application crash diagnosis
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  CARGO_BUILD_JOBS: '2'
+  CARGO_TERM_COLOR: always
+jobs:
+  application:
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - name: Start original job budget
+        shell: pwsh
+        run: |
+          $deadline = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() + 90 * 60
+          "KEELSHELL_DIAGNOSTIC_DEADLINE=$deadline" >> $env:GITHUB_ENV
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          path: diagnostic
+      - name: Exact previously failed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: a717400bf791bad43a293db50a02a64fb58bcfc7
+          persist-credentials: false
+          path: source
+      # Retain the original setup's Python, shader and cache preparation. Rustup
+      # and rustc now run privately through the controller's owned launcher.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - name: Windows shader compiler
+        shell: pwsh
+        run: |
+          $sdkRoot = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
+          $fxc = Get-ChildItem "$sdkRoot\*\x64\fxc.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $fxc) { throw 'Windows SDK fxc.exe is required for GPUI Release shaders' }
+          "GPUI_FXC_PATH=$($fxc.FullName)" >> $env:GITHUB_ENV
+          $source = Join-Path $env:RUNNER_TEMP 'keelshell-shader-check.hlsl'
+          $compiled = Join-Path $env:RUNNER_TEMP 'keelshell-shader-check.cso'
+          'float4 main() : SV_Target { return float4(1, 1, 1, 1); }' | Set-Content -Encoding utf8NoBOM $source
+          & $fxc.FullName /T ps_5_0 /E main /Fo $compiled $source
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path $compiled)) { throw 'Windows SDK shader compilation failed' }
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-on-failure: 'true'
+          key: ${{ runner.os }}-${{ runner.arch }}
+      - name: Verify existing Microsoft SDK debugger
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sdk = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\Debuggers\x64'
+          $inventory = @()
+          foreach ($name in @('cdb.exe', 'dbgeng.dll', 'dbghelp.dll')) {
+            $path = Join-Path $sdk $name
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "Official runner Windows SDK debugger component missing: $name"
+            }
+            $signature = Get-AuthenticodeSignature -LiteralPath $path
+            if ($signature.Status -ne 'Valid' -or
+                $signature.SignerCertificate.Subject -notmatch '(?:^|,\s*)O=Microsoft Corporation(?:,|$)') {
+              throw "Microsoft signature validation failed: $name"
+            }
+            $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            $inventory += @{ name = $name; sha256 = $hash; signature = 'Valid'; publisher = 'Microsoft Corporation'; version = (Get-Item -LiteralPath $path).VersionInfo.FileVersion }
+            if ($name -eq 'cdb.exe') {
+              "KEELSHELL_CDB_PATH=$path" >> $env:GITHUB_ENV
+              "KEELSHELL_CDB_SHA256=$hash" >> $env:GITHUB_ENV
+            }
+          }
+          $inventory | ConvertTo-Json -Depth 3 | Set-Content -Encoding utf8NoBOM "$env:RUNNER_TEMP\keelshell-cdb-inventory.json"
+      - name: Diagnostic controller regression tests
+        run: python -m unittest discover -s diagnostic/scripts -p test_windows_native_crash.py -v
+      - name: All 706 application tests, original four threads
+        shell: pwsh
+        run: |
+          python diagnostic/scripts/windows_native_crash.py --source source --cdb "$env:KEELSHELL_CDB_PATH" --cdb-sha256 "$env:KEELSHELL_CDB_SHA256" --deadline-unix "$env:KEELSHELL_DIAGNOSTIC_DEADLINE" --output "$env:RUNNER_TEMP\keelshell-windows-native"
+          # Preserve the DWORD bits even for 0xc0000409; upload runs via always().
+          exit $LASTEXITCODE
+      - name: Preserve only bounded diagnostic text
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-native-a717400-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/keelshell-cdb-inventory.json
+            ${{ runner.temp }}/keelshell-windows-native/native-controls.json
+            ${{ runner.temp }}/keelshell-windows-native/receipt.json
+            ${{ runner.temp }}/keelshell-windows-native/harness.txt
+            ${{ runner.temp }}/keelshell-windows-native/native.json
+          if-no-files-found: warn
+          retention-days: 7
