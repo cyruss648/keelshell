@@ -1,6 +1,6 @@
 # Windows 应用异常退出诊断 — 2026-10-08
 
-状态：本次提交只导入已通过新非作者静态／离线复核的 v2 三文件诊断工具和本记录、HANDOFF、ROADMAP；应用、Rust 测试、生产路径及既有 Quality 流水线保持。实际 Windows 诊断由单独手动流水线执行，当前仍未取得原生结果；历史异常原因为 UNKNOWN。
+状态：`437f896` 只导入已通过新非作者静态／离线复核的 v2 三文件诊断工具和本记录、HANDOFF、ROADMAP；应用、Rust 测试、生产路径及既有 Quality 流水线保持。首次真实 Windows 诊断已执行，但控制器回归阶段失败，未到达五项 CDB 控制或原应用测试；历史异常原因为 UNKNOWN。准确结果见下方“首次真实 Windows 诊断”。
 
 ## 原问题与准确输入
 
@@ -39,3 +39,38 @@ Git、rustup、rustc、Cargo、测试列表和 CDB 均使用有界进程 owner�
 ## 新提交 Quality 的独立失败边界
 
 配置恢复精确 `561eb9fb918a3d60955877461a68706d1791a787` 的 [Quality 37716374658](https://github.com/cyruss648/keelshell/actions/runs/37716374658) 已报告 Linux job 失败，macOS／Windows 在记录时仍运行。根取得并全文读取 Linux job 的 92,524 字节原日志，SHA-256 `71e948a4d77d50923faf53ff2b9bdc53b93884259d8ac02db61433a8bbdb54c6`：AI 库81项及HTTP20／4／5组通过，随后目录控制器 selected_actual_child_cwd 的 Codex case 到原8秒 Ask期限而返回 Timeout。实际观察为 WorkspaceReady 11,492µs、CheckingCli 5,419,654µs、CliAdmitted 5,419,658µs、Finalizing 8,001,939µs；只有 version／help／features 三个实际子进程阶段，完整 scratch 为空。应用／core恢复测试尚未到达，不将其表述为恢复功能在Linux通过或失败。超时的具体触发机制仍需源码和准确新诊断；不增期限、删测试或用本机PASS覆盖。该失败与旧 a717 Windows异常独立记录。
+
+## 首次真实 Windows 诊断
+
+[Windows Native Crash Diagnostics 37717377052](https://github.com/cyruss648/keelshell/actions/runs/37717377052) 运行准确 driver `437f89609f05e18f4ce3d695b0df53ee0bc763d5`，应用 source 固定为原 `a717400bf791bad43a293db50a02a64fb58bcfc7`。job `113116865613` 的完整原日志为 62,834 字节，SHA-256 `a9cb2c565dae537d6988cd493d4f37ecae4138c04a7dde399c8ca8720be285c6`，根下载 actual wait0、已 reap／所属组消失，未经过终端解释。
+
+现有 Microsoft SDK 的三组件 inventory 验证通过，版本均为 `10.0.26100.8249`，Authenticode 为 Valid／Microsoft Corporation；这只证明本次 SDK 检查，不证明 CDB 异常控制。随后 36 项 Python 控制器回归在 2.500 秒内报告 1 failure、1 error：
+
+- SIGINT 树控制读取空 PID 文件而触发 JSONDecodeError。源码中 `Path.write_text` 先创建文件，观察端仅凭 `exists()` 发中断；存在文件不能作为完整内容已发布的 READY。
+- parent-success／detached 控制事后按 PID 查询到 child `5068` 为 LIVE，但 owner 回执已报告 direct reaped、Job active0、pipes drained。旧夹具未保留该后代的原始进程句柄，无法区分 PID 重用、终止时序或真正所有权缺陷；准确原因仍 UNKNOWN。不得用回执或 PID 单方结果覆盖另一方。
+
+五项 CDB 前置控制、原 706 项应用测试及应用异常上下文全部未运行。只取得允许产物 `keelshell-cdb-inventory.json`，747 字节，SHA-256 `963966dc98493f54b625314821a577cb13757e49480553bb9def4f3430513541`；原 zip 460 字节，SHA-256 `0709f93a1796f9f9d2578e9a96a8705c1d817cea2affd0103493cfd5d0b5d2fe`。没有原始 CDB 输出、内存或应用上下文上传。本次 FAIL 保留在忽略的 `work/windows-native-crash-root-import-20261008-v2/native-attempt-01`。
+
+## 精确 437 Quality 结果
+
+[Quality 37717370699](https://github.com/cyruss648/keelshell/actions/runs/37717370699) 的三个 job 已全部结束且失败。三份完整原日志均实际下载、全文读回并保持；结果不能被此前本机 PASS 覆盖。
+
+| 平台 / job | 原日志字节 / SHA-256 | 实际失败阶段 |
+| --- | --- | --- |
+| Windows / `113117074000` | 48,117 / `47d4432b1e3f9bc23a7abc12e40c4f9207d11561cc85ef39649b6b575cf7995a` | Python 42 项、1 failure／1 skip；同 parent-success 控制查询 child `1524` 为 LIVE。未运行 Rust 应用测试。 |
+| macOS / `113117074053` | 157,118 / `33ba938780fc3c13c62c3bdfa1155dd5ec8943e809f81cbd617778094512a8f7` | AI 库85项及 HTTP20／4／5组通过；`local_agent_process.rs:1667` 的 Claude ProgressAsk 取消后连接拒绝断言失败。旧端口再次 connected 的准确进程身份与原因未确认。 |
+| Linux / `113117074221` | 95,057 / `e851e46eb78f275d696c4df20fea5804c67241a25655bd85eaf2a4a3fff4534b` | AI 库81项及 HTTP20／4／5组通过；Codex selected_actual_child_cwd 再次在原8秒 Ask期限 Timeout。 |
+
+Linux 第二次记录为 WorkspaceReady 10,545µs、CheckingCli 5,403,477µs、CliAdmitted 5,403,481µs、Finalizing 8,001,531µs；只记录 version／help／features PID `6054`／`6055`／`6056`，fixture executable 51,262,112 字节、scratch entry0。阶段接收时间不能直接当作发送端实际执行时长。macOS／Linux 均未到达配置恢复的 app／core 测试；完整日志与读回回执在忽略的 `work/exact-quality-437f896-20261008-v1`。保持原期限、并发、测试集合和失败证据，逐项修复后再取得新准确提交结果。
+
+## READY 与原进程身份修正的限定本机验证
+
+本切片只修改 `scripts/test_windows_native_crash.py` 及三份状态文档。夹具关闭完整 PID staging 文件再原子替换，父进程等待明确 ACK 后才能执行原退出／挂起路径。Windows 观察端在 ACK 前保留父子原 HANDLE、检查实际 Job membership 及 LIVE；控制器返回后先以 timeout0 观察原 HANDLE，再单独记录事后 PID 查询。原 HANDLE 的 LIVE／QUERY_FAILED 仍失败，未增加清理宽限、更新期限或假定历史 PID 重用。POSIX 仍确认真实子进程组和终态。
+
+六项新增控制涵盖旧 exists 条件对实际空文件触发中断、新夹具拒绝真实空／部分发布、非法身份拒绝、保留句柄与重开 PID 的模型反例、非 Job 成员拒绝，以及原句柄 LIVE／查询失败拒绝。36 项原测试正文 AST 完全保持；原 5.4／8 秒绝对期限、elapsed＜3、退出0／7、超时124／中断130、Job active0、实际 wait／reap、完整 pipe drain 和无 cleanup errors 均保留。生产控制器、workflow、Rust 源码／依赖／锁文件及原706应用测试条件不变。
+
+根完整读取作者101文件／535,454字节后按精确 preimage 导入唯一代码文件；新文件40,584字节，SHA-256 `caaa101a8183da08aee8cd401ca2afdc63653172d672ad044680e5527eca3ba2`。根全部脚本48项实际通过，0 skip、4.575秒；完整raw12,240字节，SHA-256 `1a9eec88e3b76f7c48edc2d7ae37cd48489e01128cb0797ea7adb4167fe8bcfd`。owner `4831` 实际 wait0、已 reap／group absent，私有TMP零遗留并删除，外层工具实际结束0；完整828输入在执行前后保持。
+
+作者的macOS 42项及根48项是本机Python回归，原Windows两个FAIL均完整保留。新的非作者已完成限定源码及作者／根完整原始证据复核，独立42项实际通过；补充两个真实POSIX控制确认LIVE／QUERY_FAILED仍被终态断言拒绝，五个明确模型覆盖ACK前失败与句柄关闭。首个补充脚本因自有receipt键错误实际1，完整失败保留，纠正后实际0。新复核无P1/P2阻断，只允许本切片提交及准确Windows诊断；原HANDLE／Job原生控制、五项CDB前置控制及原706项应用测试仍未验证，不以本机PASS关闭。Linux／macOS的独立失败继续OPEN；SHA2开发成本优化和Unix后代清理终态另设切片，当前尚未导入。生产发布信任候选也尚未导入，Python signer／OpenSSL的限定验证不关闭Rust、实际签名、平台发行及安装验收。
+
+提交前重新执行格式、x.y和diff检查，均实际0；严格 `cargo clippy --workspace --all-targets --locked -- -D warnings` 最终实际0，81.952秒，owner `91259` 已wait／reap／group absent，外层工具实际结束0。完整raw918字节，SHA-256 `bc2c713bf8cc0a59efac6c25583e5d5f0a8fdf9d1e46ad8b43e58b9cd0445aca`。第一轮Clippy收集器在54秒自身编译边界触发后，group信号返回EPERM，外层实际1且未取得Cargo实际wait；原Cargo退出保持UNKNOWN，原1,059字节日志和收尾失败保留。只调整编译收集器的绝对边界并提前保存owner身份，再取得上述完整结果，没有修改产品或测试期限。当前Rust源码及原完整工程／标准包证据保持原范围；本次未重新宣称Rust全量测试或原生界面通过。

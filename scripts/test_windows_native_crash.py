@@ -308,6 +308,63 @@ def process_state(pid):
         api.CloseHandle(handle)
 
 
+def ready_pids(record, parent_pid):
+    """Existence is not readiness: only a complete, expected publication qualifies."""
+    try:
+        pids = json.loads(record.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+    if (not isinstance(pids, dict) or set(pids) != {"parent", "child"}
+            or any(type(pid) is not int or not 0 < pid <= 0xffffffff for pid in pids.values())
+            or pids["parent"] != parent_pid or pids["child"] == parent_pid):
+        raise AssertionError("unexpected owned PID publication")
+    return pids
+
+
+class NativeTreeHandles:
+    """Bind fixture identities before cleanup; reopened PIDs are only extra evidence.
+
+    The injected API in unit controls is a counterexample model, not Win32
+    acceptance. Actual Windows controls use the owner's configured kernel32 API.
+    """
+
+    def __init__(self, api, job):
+        self.api, self.job = api, job
+        self.handles = {}
+        self.membership = {}
+
+    def bind(self, pids):
+        from ctypes import byref
+        from ctypes import wintypes
+        try:
+            for name, pid in pids.items():
+                handle = self.api.OpenProcess(0x00100000 | 0x0400, False, pid)
+                if not handle:
+                    raise AssertionError("owned process handle unavailable before ACK")
+                self.handles[name] = handle
+                present = wintypes.BOOL()
+                if not self.api.IsProcessInJob(handle, self.job, byref(present)) or not present.value:
+                    raise AssertionError("fixture process is not in its retained Job")
+                self.membership[name] = True
+                if self.api.WaitForSingleObject(handle, 0) != 258:
+                    raise AssertionError("fixture process was not live before ACK")
+        except BaseException:
+            self.close()
+            raise
+
+    def states(self):
+        states = {}
+        for name, handle in self.handles.items():
+            status = self.api.WaitForSingleObject(handle, 0)
+            states[name] = "TERMINAL" if status == 0 else "LIVE" if status == 258 else "QUERY_FAILED"
+        return states
+
+    def close(self):
+        for handle in self.handles.values():
+            self.api.CloseHandle(handle)
+        self.handles.clear()
+
+
 class PreparationTreeTests(unittest.TestCase):
     controls = []
 
@@ -315,51 +372,111 @@ class PreparationTreeTests(unittest.TestCase):
     def tearDownClass(cls):
         print(json.dumps({"actual_preparation_controls": cls.controls, "host": os.name}, sort_keys=True))
 
-    def tree(self, stdio="inherited", direct_exit=None, interrupt=False):
+    def tree(self, stdio="inherited", direct_exit=None, interrupt=False, staged=False):
         with tempfile.TemporaryDirectory(prefix="owned-preparation-tree-") as temp:
             directory = Path(temp)
             helper = directory / "parent.py"
             record = directory / "pids.json"
+            pending = directory / "pids.pending"
+            ack = directory / "identity-bound"
+            empty_seen = directory / "empty-observed"
+            partial_seen = directory / "partial-observed"
+            published = directory / "published"
             child_source = ("import os,signal,sys,time\n"
                             "if os.name != 'nt': signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
                             "print('OWNED_DESCENDANT_PIPE',flush=True)\n"
                             "time.sleep(30)\n")
+            # The parent cannot exit until the observer owns the original child
+            # identity. Publication is closed before rename and never partial.
             helper.write_text("import json,os,signal,subprocess,sys,time\n"
                               "from pathlib import Path\n"
+                              "def await_marker(path):\n"
+                              "    while not path.exists(): time.sleep(0.001)\n"
                               "if os.name != 'nt': signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
                               f"child=subprocess.Popen([sys.executable,'-c',{child_source!r}],stdin=subprocess.DEVNULL,"
                               + ("stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL" if stdio == "detached" else "")
                               + ")\n"
-                              f"Path({str(record)!r}).write_text(json.dumps({{'parent':os.getpid(),'child':child.pid}}))\n"
+                              + (f"Path({str(record)!r}).touch()\n"
+                                 f"await_marker(Path({str(empty_seen)!r}))\n"
+                                 f"Path({str(record)!r}).write_text('{{')\n"
+                                 f"await_marker(Path({str(partial_seen)!r}))\n" if staged else "")
+                              + f"Path({str(pending)!r}).write_text(json.dumps({{'parent':os.getpid(),'child':child.pid}}))\n"
+                              f"os.replace({str(pending)!r},{str(record)!r})\n"
+                              f"Path({str(published)!r}).touch()\n"
+                              f"await_marker(Path({str(ack)!r}))\n"
                               "print('OWNED_PARENT_READY',flush=True)\n"
                               + ("time.sleep(30)\n" if direct_exit is None else f"sys.exit({direct_exit})\n"))
             deadline = probe.Deadline(time.time() + (8 if interrupt else 5.4))
+            owner = probe.owner_for_host()
+            identities = NativeTreeHandles(owner.api, owner.job) if os.name == "nt" else None
             signalled = False
+            bound_pids = None
+            partial_observations = []
             def tick(process):
-                nonlocal signalled
-                if record.exists() and not signalled:
+                nonlocal signalled, bound_pids
+                if bound_pids is not None:
+                    return
+                # The staged counterexample deliberately exposes incomplete
+                # contents. Once its partial phase is acknowledged, avoid a
+                # competing Windows read handle while the producer renames.
+                if staged and partial_seen.exists() and not published.exists():
+                    return
+                pids = ready_pids(record, process.pid)
+                if pids is None:
+                    if staged and record.exists():
+                        content = record.read_text()
+                        if content == "" and not empty_seen.exists():
+                            partial_observations.append("empty")
+                            empty_seen.touch()
+                        elif content == "{" and not partial_seen.exists():
+                            partial_observations.append("partial")
+                            partial_seen.touch()
+                    return
+                if identities is not None:
+                    identities.bind(pids)
+                elif os.getpgid(pids["child"]) != process.pid:
+                    raise AssertionError("fixture descendant is outside its owned group")
+                bound_pids = pids
+                ack.touch()
+                if interrupt:
                     signalled = True
                     signal.raise_signal(signal.SIGINT)
             start = time.monotonic()
-            result, receipt = probe.run_owned([sys.executable, str(helper)], directory, dict(os.environ),
-                                              deadline, tick=tick if interrupt else None)
-            elapsed = time.monotonic() - start
-            self.assertTrue(record.exists(), "helper must actually create a descendant")
-            pids = json.loads(record.read_text())
-            states = {key: process_state(pid) for key, pid in pids.items()}
-            self.controls.append({"stdio": stdio, "requested_parent_exit": direct_exit, "signal": "SIGINT" if interrupt else None,
-                                  "elapsed_seconds": round(elapsed, 6), "receipt": receipt, "pids": pids, "post_states": states})
-            retain_control(f"tree-{stdio}-exit{direct_exit}-sigint{interrupt}", self.controls[-1],
-                           raw=(result.stdout + result.stderr).encode(), source=helper.read_text())
-            # Terminal zombies can await host-parent reap; they cannot execute or
-            # hold inherited pipes. Native Windows receipt must have Job active0.
-            self.assertTrue(all(state in ("ABSENT", "TERMINAL") or state.startswith("Z") for state in states.values()), states)
-            self.assertLess(elapsed, 3)
-            self.assertTrue(receipt["terminal"]["direct_reaped"])
-            self.assertEqual(receipt["terminal"]["active_processes"], 0)
-            self.assertTrue(receipt["terminal"]["pipes_drained"])
-            self.assertFalse(receipt["errors"])
-            return result, receipt
+            try:
+                result, receipt = probe.run_owned([sys.executable, str(helper)], directory, dict(os.environ),
+                                                  deadline, owner=owner, tick=tick)
+                elapsed = time.monotonic() - start
+                self.assertIsNotNone(bound_pids, "actual identities must be bound before ACK")
+                pids = ready_pids(record, owner.process.pid)
+                self.assertEqual(pids, bound_pids)
+                native_states = identities.states() if identities is not None else None
+                pid_states = {key: process_state(pid) for key, pid in pids.items()}
+                states = native_states if native_states is not None else pid_states
+                self.controls.append({"stdio": stdio, "requested_parent_exit": direct_exit,
+                                      "signal": "SIGINT" if interrupt else None,
+                                      "signal_sent": signalled, "identity_bound_before_ack": True,
+                                      "state_identity": "retained_native_handles" if identities is not None else "owned_group_pids",
+                                      "job_membership": dict(identities.membership) if identities is not None else None,
+                                      "partial_publications_rejected": partial_observations,
+                                      "elapsed_seconds": round(elapsed, 6), "receipt": receipt,
+                                      "pids": pids, "post_states": states, "post_pid_query_states": pid_states})
+                retain_control(f"tree-{stdio}-exit{direct_exit}-sigint{interrupt}-staged{staged}", self.controls[-1],
+                               raw=(result.stdout + result.stderr).encode(), source=helper.read_text())
+                # No wait or grace is added to these post-return observations.
+                # Original Windows handles must already be signalled; another
+                # process reusing a PID cannot supply or defeat this assertion.
+                self.assertTrue(all(state in ("ABSENT", "TERMINAL") or state.startswith("Z") for state in states.values()), states)
+                self.assertLess(elapsed, 3)
+                self.assertTrue(receipt["terminal"]["direct_reaped"])
+                self.assertEqual(receipt["terminal"]["active_processes"], 0)
+                self.assertTrue(receipt["terminal"]["pipes_drained"])
+                self.assertFalse(receipt["errors"])
+                if staged:
+                    self.assertEqual(partial_observations, ["empty", "partial"])
+                return result, receipt
+            finally:
+                if identities is not None:
+                    identities.close()
 
     def test_real_timeout_owns_descendant_with_detached_stdout_and_stderr(self):
         result, receipt = self.tree(stdio="detached")
@@ -375,6 +492,42 @@ class PreparationTreeTests(unittest.TestCase):
         result, receipt = self.tree(interrupt=True)
         self.assertEqual(result.returncode, 130)
         self.assertTrue(receipt["interrupted"])
+
+    def test_real_sigint_rejects_empty_and_partial_publication_before_identity_ack(self):
+        result, receipt = self.tree(interrupt=True, staged=True)
+        self.assertEqual(result.returncode, 130)
+        self.assertTrue(receipt["interrupted"])
+
+    def test_old_exists_readiness_can_interrupt_an_actual_empty_publication(self):
+        with tempfile.TemporaryDirectory(prefix="owned-old-publication-race-") as temp:
+            directory = Path(temp)
+            record = directory / "pids.json"
+            helper = directory / "old-publisher.py"
+            helper.write_text("import time\nfrom pathlib import Path\n"
+                              f"with Path({str(record)!r}).open('w') as output:\n"
+                              "    time.sleep(30)\n"
+                              "    output.write('{\"parent\":1,\"child\":2}')\n")
+            def old_tick(process):
+                if record.exists():
+                    signal.raise_signal(signal.SIGINT)
+            start = time.monotonic()
+            result, receipt = probe.run_owned([sys.executable, str(helper)], directory, dict(os.environ),
+                                              probe.Deadline(time.time() + 8), tick=old_tick)
+            elapsed = time.monotonic() - start
+            self.assertEqual(result.returncode, 130)
+            self.assertEqual(record.read_bytes(), b"")
+            with self.assertRaises(json.JSONDecodeError):
+                json.loads(record.read_text())
+            self.assertTrue(receipt["interrupted"])
+            self.assertTrue(receipt["terminal"]["direct_reaped"])
+            self.assertEqual(receipt["terminal"]["active_processes"], 0)
+            self.assertTrue(receipt["terminal"]["pipes_drained"])
+            self.assertFalse(receipt["errors"])
+            self.assertLess(elapsed, 3)
+            retain_control("old-empty-publication-counterexample", {
+                "actual_old_readiness_interrupt": True, "actual_record_bytes": 0,
+                "actual_json_decode_error": True, "elapsed_seconds": elapsed, "receipt": receipt},
+                raw=(result.stdout + result.stderr).encode(), source=helper.read_text())
 
     def test_real_parent_failure_keeps_exit7_even_with_descendant_pipe_timeout(self):
         result, receipt = self.tree(direct_exit=7)
@@ -406,6 +559,72 @@ class PreparationTreeTests(unittest.TestCase):
             self.assertEqual(caught.exception.returncode, 19)
             self.assertEqual(caught.exception.owned_receipt["observed_exit"], 19)
             self.assertTrue(caught.exception.owned_receipt["terminal"]["direct_reaped"])
+
+
+class FixtureIdentityTests(unittest.TestCase):
+    def test_missing_empty_and_partial_records_do_not_authorize_ack(self):
+        with tempfile.TemporaryDirectory(prefix="owned-publication-states-") as temp:
+            record = Path(temp) / "pids.json"
+            self.assertIsNone(ready_pids(record, 100))
+            for content in ["", "{", '{"parent":100,']:
+                record.write_text(content)
+                self.assertIsNone(ready_pids(record, 100))
+            record.write_text('{"parent":100,"child":200}')
+            self.assertEqual(ready_pids(record, 100), {"parent": 100, "child": 200})
+            for bad in [{"parent": 101, "child": 200}, {"parent": 100, "child": 100},
+                        {"parent": 100, "child": True}, {"parent": 100, "child": 0},
+                        {"parent": 100, "child": 0x100000000}, {"parent": 100}]:
+                record.write_text(json.dumps(bad))
+                with self.assertRaises(AssertionError):
+                    ready_pids(record, 100)
+
+    def api(self, child_member=True):
+        class ModelApi:
+            def __init__(self):
+                self.open_by_pid = {100: 1001, 200: 2001}
+                self.state_by_handle = {1001: 258, 2001: 258, 2002: 258}
+                self.closed = []
+            def OpenProcess(self, access, inheritable, pid):
+                return self.open_by_pid[pid]
+            def IsProcessInJob(self, handle, job, present):
+                present._obj.value = handle == 1001 or child_member
+                return 1
+            def WaitForSingleObject(self, handle, milliseconds):
+                return self.state_by_handle[handle]
+            def CloseHandle(self, handle):
+                self.closed.append(handle)
+                return 1
+        return ModelApi()
+
+    def test_reused_pid_query_cannot_replace_retained_original_identity(self):
+        api = self.api()
+        identities = NativeTreeHandles(api, 55)
+        identities.bind({"parent": 100, "child": 200})
+        api.state_by_handle[1001] = api.state_by_handle[2001] = 0
+        api.open_by_pid[200] = 2002  # a new unrelated process now has PID 200
+        reopened = api.OpenProcess(0x00100000, False, 200)
+        self.assertEqual(api.WaitForSingleObject(reopened, 0), 258)
+        self.assertEqual(identities.states(), {"parent": "TERMINAL", "child": "TERMINAL"})
+        identities.close()
+        self.assertEqual(api.closed, [1001, 2001])
+
+    def test_nonmember_child_is_rejected_and_original_handles_closed(self):
+        api = self.api(child_member=False)
+        identities = NativeTreeHandles(api, 55)
+        with self.assertRaisesRegex(AssertionError, "not in its retained Job"):
+            identities.bind({"parent": 100, "child": 200})
+        self.assertEqual(api.closed, [1001, 2001])
+        self.assertEqual(identities.handles, {})
+
+    def test_original_handle_live_or_query_failure_remains_a_failed_terminal(self):
+        api = self.api()
+        identities = NativeTreeHandles(api, 55)
+        identities.bind({"parent": 100, "child": 200})
+        for native_status, expected in [(258, "LIVE"), (0xffffffff, "QUERY_FAILED")]:
+            api.state_by_handle[2001] = native_status
+            self.assertEqual(identities.states()["child"], expected)
+            self.assertNotIn(expected, ("ABSENT", "TERMINAL"))
+        identities.close()
 
 
 class ProcessTests(unittest.TestCase):

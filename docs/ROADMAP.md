@@ -2,6 +2,8 @@
 
 ## 当前产品缺口与实施顺序 — 2026-10-08
 
+最新 `437f896` 的[精确三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37717370699)已全部结束且失败；首次[真实 Windows 诊断](https://github.com/cyruss648/keelshell/actions/runs/37717377052)只通过 SDK inventory，随后控制器回归失败，五项 CDB 控制与原706项应用测试未运行。Windows READY／原后代句柄身份夹具修正已通过本机48项及新非作者限定复核，准确新Windows仍待运行；Linux原8秒目录超时和macOS ProgressAsk取消后的连接身份继续OPEN；本机工程及限定原生结果保留其范围，不关闭这些失败，见[实际诊断与平台后续](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。
+
 本次配置恢复提交收录 v9 功能与数量归属修正。最终同 824 输入／16,151,246 字节完整检查实际通过 1,812 普通 Rust／10 rustdoc／6 Python及严格工程检查，新标准 macOS 包／57 打包通过；17 份修后原生观察完成有效／损坏恢复、取消、重启和完整字节读回，另四份中文浅色原图补齐当前 2／恢复后 1。两个新 owner 实际 wait=0及应用／所属资源收尾已消费；旧失败、中断、旧 P2 和 owner UNKNOWN 保留。新的非作者最终组合复核无 P1/P2，数量归属 P2 已关闭；收尾仅四份状态文档、其余 820 输入不变，精确提交 CI 另行验证；最小原生几何、辅助技术、其它平台及断电耐久性独立开放，见[整合记录](testing/records/2026-10-08-configuration-recovery-main-integration.md)。
 
 本轮测试修复基于已推送检查点 `7c11954`（本地／远程 SFTP 浏览）。精确三平台 Quality 的 macOS 成功、Windows 与 Linux 失败；Windows 字面上级路径测试修正及 Linux 夹具准入诊断已通过本机完整门禁（1,776 普通 Rust／10 rustdoc／6 Python、严格 Clippy）和 57 项打包测试，新的非作者最终复核无 P1/P2 阻断；修复提交 a717400 的精确 CI 已结束，macOS／Linux 成功，Windows 应用测试进程异常退出，触发者仍未知；诊断 v2 三文件经独立限定审查导入，根 42 项 Python 回归通过，实际 Windows 原源码／四线程诊断待运行，见[诊断记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。准确 Linux 历史原因仍未知，见[平台记录](testing/records/2026-10-08-file-browser-platform-ci.md)。以下 a940 为历史检查点。Windows 准备失败收尾的 test-only 候选已在根通过十项新控制、原默认／2MiB控制器、AI库和严格Clippy；它没有改变产品范围，也未确定历史Windows失败原因，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。
