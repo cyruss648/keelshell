@@ -1,5 +1,19 @@
 # Windows 应用异常退出诊断 — 2026-10-08
 
+## 当前终态修复切片 — 2026-10-08
+
+精确 `ecab60459de5671eea0f0cbfb59359c9478b6e38` 的 [Quality 37726023963](https://github.com/cyruss648/keelshell/actions/runs/37726023963) 已结束：macOS、Linux 成功，Windows 失败。三份完整原日志已实际读回；macOS 1,812 普通 Rust／10 rustdoc／48 脚本、Linux 1,808 普通 Rust／10 rustdoc／48 脚本及各自 OpenSSH 互通通过。Windows 57 打包用例为 53 PASS／4 平台 skip，48 脚本为 46 PASS／1 failure／1 平台 skip，Rust 未到达。原 child5980 HANDLE 在 ACK 前确认属于该 Job，返回后仍 LIVE，parent5508 TERMINAL；控制器却返回 0／active0／reap／drain／errors[]。这证明旧成功判据不足，不能由新通过追溯关闭历史目录超时或 macOS 监听身份 UNKNOWN。
+
+本切片精确导入已通过新非作者限定复核的 Windows Job v3：终止前完整绑定成员原 HANDLE，保留原直接／已验证 debuggee 对象；完整保留 ExtendedLimits 后设置活动准入上限；任意成员打开失败（包括87）保持失败。成功需要原对象结束、实际 reap 和 pipe/thread drain，以及等待前后两次 Accounting 的稳定累计关联数；活动状态保守取两个样本与 pending 原对象的最大值。所有操作共用原 Deadline，不增加宽限、不改变原结果 DWORD 或原测试断言。具体决策见 [ADR 0086](../../adr/0086-windows-job-original-process-terminal-proof.md)。本次仅 Python 验证控制器，不修改应用 Rust 清理路径。
+
+作者封包完整未过滤 59 用例在 macOS 为 58 PASS／1 新 Windows native control UNRUN；exact sealed-v2／frozen-v3 相同末 Wait 累计数7→8模型分别返回假成功0／明确失败125。模型排序在实际 Windows 的可达性 UNKNOWN，历史原句柄失败的具体时序原因 UNPROVEN；这不是原应用 `0xc0000409` 的诊断结果。作者／根已完整读回263输入、两执行 full raw 和实际 owner wait0／reap／group absent／私有TMP删除；新非作者独立完整59用例58PASS／1Windows原生UNRUN、七项额外模型通过，无确认P1/P2；完整326证据输入及两次实际owner终态已根读回。根正式完整工程检查已实际通过，详见下段；新准确Windows仍待执行。
+
+根 `python3 scripts/check.py` 在同831输入／16,341,107字节／相同mode上 actual0：1,812普通Rust／10rustdoc／22ignored未运行，65Python为64PASS／1新Windows原生UNRUN，格式／x.y／严格全target Clippy通过。原默认与2MiB控制器各626阶段（0至625）、10准备期及2观察IO控制通过；六对自有POSIX原父子均ABSENT、保留原退出／超时／中断及elapsed断言、reap与drain成立。owner51700实际wait0／reap／group absent，731.358秒，私有TMP为空且物理删除。完整原日志457,423字节／SHA256 `9430a4fdb615c6c5ae8eeeecb9cb6ddbbe4002c2ded894a74e146e96f7c259e1`，完整命令与终态收据在忽略的 `work/windows-job-terminal-root-import-20261008-v3`；最终非作者根复核保存在 `work/windows-job-terminal-root-independent-20261008-v3`。门禁后仅四份状态文档更新，其余827输入字节与mode保持；这次没有新UI包或Windows原生运行。
+
+新 Windows 控制须在已有至少两个嵌套成员时验证降低上限 setter 和真实迟到 CreateProcess 拒绝；原五项 CDB 前置控制与原 a717400 的706应用测试仍 UNRUN。先在 feature 分支取得实际 Windows 证据，再决定主线整合。旧 v1／v2 拒绝、原应用异常、控制器失败与完整材料均保留。生产发布信任和 Unix 清理候选未混入本切片；MCP 始终由 KeelShell 对外提供服务。完整产品、其它平台桌面、六目标发行与安装验收继续 OPEN。
+
+完整材料保存在忽略的 `work/windows-job-terminal-author-20261008-v3`、`work/windows-job-terminal-root-readback-20261008-v3` 与 `work/ecab604-platform-ci-root-readback-20261008-v1`。ecab 新 Mac 原日志617,170 B／SHA256 `20d2609eae84a200edb3df7dffff911387acba6c82886999e33eb8cdd6d69984`，Linux644,770 B／`6541bb6cd5292aa27dc8fc54967b00e5d48e845139fb1a6c02f58c7f70c3dd40`，Windows49,974 B／`2663c18c7da9543cef477be2510055e185194383f2679032241e22dd4ace690a`。三份日志下载 owner 的实际 wait／reap／group absent 保留，不能把早期 ANSI 拒绝的下载 actual1 改成成功。
+
 状态：`437f896` 只导入已通过新非作者静态／离线复核的 v2 三文件诊断工具和本记录、HANDOFF、ROADMAP；应用、Rust 测试、生产路径及既有 Quality 流水线保持。首次真实 Windows 诊断已执行，但控制器回归阶段失败，未到达五项 CDB 控制或原应用测试；历史异常原因为 UNKNOWN。准确结果见下方“首次真实 Windows 诊断”。
 
 ## 原问题与准确输入

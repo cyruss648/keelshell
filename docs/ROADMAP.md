@@ -1,5 +1,9 @@
 # 开发路线
 
+## Windows 终态验证增量 — 2026-10-08
+
+精确 ecab 的三平台 [Quality 37726023963](https://github.com/cyruss648/keelshell/actions/runs/37726023963) 已结束：macOS／Linux 成功，Windows 仍在原后代 HANDLE LIVE 断言失败、Rust 未到达；三份完整原日志已读回。新的 Windows Job v3 只改 Python 验证控制器：原进程对象结束、完整回收和管道收尾、原期限内等待前后 Accounting 稳定共同作为成功条件。作者及新非作者各自完整59用例58PASS／1Windows原生UNRUN；独立七模型通过，新非作者无确认P1/P2，仅准入根工程与功能分支实际Windows验证。根正式完整检查已实际通过：1,812普通Rust／10rustdoc／65Python（64PASS／1Windows原生UNRUN），格式／x.y／严格Clippy、原默认及2MiB各626阶段、10准备期与2观察IO控制通过；同831输入及mode前后不变，owner实际wait0／reap／group absent，私有TMP空且删除。四份状态文档随后更新；提交前最终非作者复核与功能分支准确Windows分别验收。本切片未关闭原应用异常原因，也不混入 Unix 和生产发布信任候选，详见[Windows记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。完整对外 MCP、CLI登录复用、UI原生辅助技术、其它平台桌面与发行安装目标继续 OPEN。下文保持各自历史时点。
+
 ## 当前产品缺口与实施顺序 — 2026-10-08
 
 最新已推送基线 `f3c8820` 的[Quality 37721737467](https://github.com/cyruss648/keelshell/actions/runs/37721737467)已结束：Linux成功，Windows／macOS失败。新的[Windows诊断 37721774239](https://github.com/cyruss648/keelshell/actions/runs/37721774239)42项1failure，ACK前确实同Job的原child HANDLE在返回后仍LIVE，证明控制器成功终态条件不足；五项CDB／原706仍UNRUN、原应用原因UNKNOWN。macOS为small-stack Codex ProgressAsk取消后连接断言，具体监听者仍UNKNOWN；Linux在未加入SHA2优化的同生产源码上通过，不能归因优化或倒填旧Timeout原因。原完整日志与唯一SDK产物均保留，见[诊断与平台后续](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。

@@ -40,6 +40,29 @@ import time
 
 CAPTURE_LIMIT = 8 * 1024 * 1024
 CLEANUP_RESERVE = 5
+MAX_JOB_PROCESSES = 4096
+
+
+class JobBasicLimits(ctypes.Structure):
+    """Native Windows widths; DWORD stays 32-bit on offline LP64 hosts too."""
+
+    _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64), ("PerJobUserTimeLimit", ctypes.c_int64),
+                ("LimitFlags", ctypes.c_uint32), ("MinimumWorkingSetSize", ctypes.c_size_t),
+                ("MaximumWorkingSetSize", ctypes.c_size_t), ("ActiveProcessLimit", ctypes.c_uint32),
+                ("Affinity", ctypes.c_size_t), ("PriorityClass", ctypes.c_uint32),
+                ("SchedulingClass", ctypes.c_uint32)]
+
+
+class JobExtendedLimits(ctypes.Structure):
+    _fields_ = [("BasicLimitInformation", JobBasicLimits), ("IoInfo", ctypes.c_uint64 * 6),
+                ("ProcessMemoryLimit", ctypes.c_size_t), ("JobMemoryLimit", ctypes.c_size_t),
+                ("PeakProcessMemoryUsed", ctypes.c_size_t), ("PeakJobMemoryUsed", ctypes.c_size_t)]
+
+
+class JobAccounting(ctypes.Structure):
+    _fields_ = [("Times", ctypes.c_int64 * 4), ("TotalPageFaultCount", ctypes.c_uint32),
+                ("TotalProcesses", ctypes.c_uint32), ("ActiveProcesses", ctypes.c_uint32),
+                ("TotalTerminatedProcesses", ctypes.c_uint32)]
 
 
 class OwnershipError(Exception):
@@ -189,6 +212,7 @@ class WindowsJob:
 
     def __init__(self):
         self.api = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.last_error = ctypes.get_last_error
         api = self.api
         for name, args, result in [
             ("CreateJobObjectW", [ctypes.c_void_p, wintypes.LPCWSTR], wintypes.HANDLE),
@@ -210,22 +234,19 @@ class WindowsJob:
         ]:
             function = getattr(api, name)
             function.argtypes, function.restype = args, result
-        class BasicLimits(ctypes.Structure):
-            _fields_ = [("PerProcessUserTimeLimit", ctypes.c_longlong), ("PerJobUserTimeLimit", ctypes.c_longlong),
-                        ("LimitFlags", wintypes.DWORD), ("MinimumWorkingSetSize", ctypes.c_size_t),
-                        ("MaximumWorkingSetSize", ctypes.c_size_t), ("ActiveProcessLimit", wintypes.DWORD),
-                        ("Affinity", ctypes.c_size_t), ("PriorityClass", wintypes.DWORD), ("SchedulingClass", wintypes.DWORD)]
-        class ExtendedLimits(ctypes.Structure):
-            _fields_ = [("BasicLimitInformation", BasicLimits), ("IoInfo", ctypes.c_ulonglong * 6),
-                        ("ProcessMemoryLimit", ctypes.c_size_t), ("JobMemoryLimit", ctypes.c_size_t),
-                        ("PeakProcessMemoryUsed", ctypes.c_size_t), ("PeakJobMemoryUsed", ctypes.c_size_t)]
         self.job = api.CreateJobObjectW(None, None)
         self.processes = []
         self.process = None
         self.extra_handles = []
+        self.verified_extra_handles = []
+        self.terminal_handles = {}
+        self.terminal_prepared = False
+        self.admission_closed = False
+        self.terminal_pending = None
+        self.terminal_total = None
         if not self.job:
             raise OwnershipError("CreateJobObject failed")
-        limits = ExtendedLimits()
+        limits = JobExtendedLimits()
         limits.BasicLimitInformation.LimitFlags = 0x2000  # KILL_ON_JOB_CLOSE, no breakaway
         if not api.SetInformationJobObject(self.job, 9, ctypes.byref(limits), ctypes.sizeof(limits)):
             self.close()
@@ -353,12 +374,144 @@ class WindowsJob:
 
     force = terminate
 
-    def active(self, deadline):
+    def process_ids(self, deadline):
+        """Complete bounded Job/nested-Job membership list; truncation never passes."""
+        capacity = 16
+        while True:
+            deadline.remaining()
+            class IdList(ctypes.Structure):
+                _fields_ = [("assigned", ctypes.c_uint32), ("listed", ctypes.c_uint32),
+                            ("pids", ctypes.c_size_t * capacity)]
+            values = IdList()
+            ok = self.api.QueryInformationJobObject(self.job, 3, ctypes.byref(values), ctypes.sizeof(values), None)
+            if not ok and self.last_error() != 234:  # ERROR_MORE_DATA alone permits a bounded retry.
+                raise OwnershipError("Job process-list query failed")
+            if values.listed > capacity or values.listed > values.assigned:
+                raise OwnershipError("Job process-list length invalid")
+            if values.assigned > MAX_JOB_PROCESSES:
+                raise OwnershipError("Job process-list budget exceeded")
+            if not ok or values.listed < values.assigned:
+                if values.assigned <= capacity:
+                    raise OwnershipError("Job process-list incomplete without required growth")
+                capacity = min(MAX_JOB_PROCESSES, max(capacity * 2, values.assigned))
+                continue
+            pids = list(values.pids[:values.listed])
+            if len(set(pids)) != len(pids) or any(not 0 < pid <= 0xffffffff for pid in pids):
+                raise OwnershipError("Job process identifiers invalid")
+            return pids
+
+    def prepare_terminal(self, deadline):
+        """Close future descendant admission and bind current identities before kill.
+
+        Every running parent already occupies at least one active slot, so a
+        limit of one rejects new CreateProcess descendants during cleanup. Two
+        complete member captures surround that limit change. Cumulative process
+        accounting must stay unchanged across capture and every terminal poll:
+        even an admission/exit hidden between snapshots fails closed. Existing
+        handles are retained before changing limits, regardless of setter timing.
+        This applies only at cleanup, after the original result sample.
+        It is process lifecycle ownership, not a sandbox against external brokers.
+        """
+        if self.terminal_prepared:
+            return
         deadline.remaining()
-        values = (ctypes.c_ulonglong * 6)()
+        total_before = self.accounting(deadline).TotalProcesses
+        self.retain_current_members(deadline)
+        limits = JobExtendedLimits()
+        if not self.api.QueryInformationJobObject(self.job, 9, ctypes.byref(limits), ctypes.sizeof(limits), None):
+            raise OwnershipError("Job cleanup limit query failed")
+        basic = limits.BasicLimitInformation
+        if not basic.LimitFlags & 0x2000 or basic.LimitFlags & (0x0800 | 0x1000):
+            raise OwnershipError("Job cleanup ownership flags invalid")
+        basic.LimitFlags |= 0x0008  # ACTIVE_PROCESS; preserve KILL_ON_JOB_CLOSE and all other limits.
+        basic.ActiveProcessLimit = 1
+        if not self.api.SetInformationJobObject(self.job, 9, ctypes.byref(limits), ctypes.sizeof(limits)):
+            raise OwnershipError("Job cleanup admission barrier failed")
+        self.admission_closed = True
+        self.retain_current_members(deadline)
+        total_after = self.accounting(deadline).TotalProcesses
+        if total_before != total_after:
+            raise OwnershipError("Job process admission changed during terminal binding")
+        self.terminal_total = total_after
+        self.terminal_prepared = True
+
+    def retain_current_members(self, deadline):
+        """Retain before any termination or limit change can hide live objects."""
+        for pid in self.process_ids(deadline):
+            if pid in self.terminal_handles:
+                continue
+            deadline.remaining()
+            handle = self.api.OpenProcess(0x00100000 | 0x1000, False, pid)
+            if not handle:
+                # No error code supplies the original object's signal state.
+                # Even ERROR_INVALID_PARAMETER cannot omit a listed identity
+                # from a success proof. Preserve failure and kill the owned Job.
+                raise OwnershipError("Job terminal process open failed")
+            # Register for closure before another API call, but do not treat an
+            # unverified/reused identity as owned work that may be waited on.
+            self.extra_handles.append(handle)
+            present = wintypes.BOOL()
+            if not self.api.IsProcessInJob(handle, self.job, ctypes.byref(present)) or not present.value:
+                # Never wait on or terminate an unrelated process that reused
+                # the listed PID. Membership/query ambiguity fails closed.
+                raise OwnershipError("Job terminal process membership changed")
+            self.terminal_handles[pid] = handle
+            self.extra_handles.remove(handle)
+    def accounting(self, deadline):
+        deadline.remaining()
+        values = JobAccounting()
         if not self.api.QueryInformationJobObject(self.job, 1, ctypes.byref(values), ctypes.sizeof(values), None):
             raise OwnershipError("Job accounting query failed")
-        return ctypes.cast(values, ctypes.POINTER(wintypes.DWORD))[10]
+        return values
+
+    def active(self, deadline):
+        values = self.accounting(deadline)
+        if self.terminal_prepared and values.TotalProcesses != self.terminal_total:
+            raise OwnershipError("Job process admission changed after terminal binding")
+        pending = 0
+        for handle in self.original_wait_handles():
+            deadline.remaining()
+            status = self.api.WaitForSingleObject(handle, 0)
+            if status == 258:
+                pending += 1
+            elif status != 0:
+                raise OwnershipError("Job terminal process wait failed")
+        self.terminal_pending = pending
+        # The final original-object wait may follow an accounting change. Check
+        # again inside this same budget before publishing a zero-active proof.
+        after = self.accounting(deadline)
+        if self.terminal_prepared and after.TotalProcesses != self.terminal_total:
+            raise OwnershipError("Job process admission changed during terminal waits")
+        # Accounting may become zero before asynchronous termination signals the
+        # process objects. Both must reach terminal inside the original budget.
+        return max(values.ActiveProcesses, after.ActiveProcesses, pending)
+
+    def original_wait_handles(self):
+        """Wait both membership snapshots and already-held, verified identities.
+
+        A direct CreateProcess object and an admitted debuggee remain owned even
+        if absent from the first current-PID list. Unverified extra handles are
+        closure-only and must never enter this set. Deduplication uses handles,
+        never PIDs, which could refer to a different later process object.
+        """
+        handles = list(self.terminal_handles.values())
+        handles.extend(process._handle for process in self.processes if process._handle)
+        handles.extend(self.verified_extra_handles)
+        return list(dict.fromkeys(handles))
+
+    def wait_retained(self, deadline):
+        """Best-effort failure cleanup still waits known original objects boundedly.
+
+        This cannot convert incomplete membership evidence into a success; the
+        caller preserves its cleanup error and absent success terminal.
+        """
+        for handle in self.original_wait_handles():
+            allowance = deadline.remaining()
+            status = self.api.WaitForSingleObject(handle, max(0, int(allowance * 1000)))
+            if status == 258:
+                raise subprocess.TimeoutExpired("owned-Job-process", allowance)
+            if status != 0:
+                raise OwnershipError("Job retained failure-cleanup wait failed")
 
     def close(self):
         if self.job:
@@ -369,6 +522,20 @@ class WindowsJob:
         for handle in self.extra_handles:
             self.api.CloseHandle(handle)
         self.extra_handles.clear()
+        self.verified_extra_handles.clear()
+        for handle in self.terminal_handles.values():
+            self.api.CloseHandle(handle)
+        self.terminal_handles.clear()
+
+    def terminal_evidence(self):
+        """Bounded lifecycle counts only; no target paths, streams or credentials."""
+        return {"admission_closed": self.admission_closed,
+                "identities_bound": self.terminal_prepared,
+                "retained_processes": len(self.terminal_handles),
+                "pending_process_objects": self.terminal_pending,
+                "original_handles_checked": len(self.original_wait_handles()),
+                "known_direct_handles": sum(bool(process._handle) for process in self.processes),
+                "verified_extra_handles": len(self.verified_extra_handles)}
 
 
 def owner_for_host():
@@ -391,6 +558,8 @@ def deferred_interrupts():
 def cleanup(owner, process, pumps, deadline, capture):
     """All grace, force, draining and reap remain inside the original deadline."""
     errors = set()
+    if prepare_terminal := getattr(owner, "prepare_terminal", None):
+        prepare_terminal(deadline)
     owner.terminate()
     grace_end = min(time.monotonic() + 0.4, deadline.end)
     while process.poll() is None and time.monotonic() < grace_end:
@@ -413,8 +582,11 @@ def cleanup(owner, process, pumps, deadline, capture):
         pump.thread.join(timeout=deadline.remaining())
         if pump.thread.is_alive() or pump.failed.is_set() or pump.overflow.is_set():
             errors.add("owned_pipe_terminal_failed")
-    return {"direct_reaped": process.returncode is not None, "active_processes": active,
-            "pipes_drained": all(pump.complete() for pump in pumps), "errors": sorted(errors)}
+    terminal = {"direct_reaped": process.returncode is not None, "active_processes": active,
+                "pipes_drained": all(pump.complete() for pump in pumps), "errors": sorted(errors)}
+    if terminal_evidence := getattr(owner, "terminal_evidence", None):
+        terminal["native_process_objects"] = terminal_evidence()
+    return terminal
 
 
 def finish_owned(owner, process, pumps, deadline, capture):
@@ -435,8 +607,18 @@ def finish_owned(owner, process, pumps, deadline, capture):
                 if process.poll() is None:
                     process.kill()
                 process.wait(timeout=deadline.remaining())
+                if wait_retained := getattr(owner, "wait_retained", None):
+                    wait_retained(deadline)
             except (OSError, OwnershipError, TimeoutError, subprocess.SubprocessError):
                 errors.add("owned_fallback_reap_failed")
+            try:
+                for pump in pumps:
+                    pump.thread.join(timeout=deadline.remaining())
+                    pump.drain(capture[pump], deadline)
+                    if pump.thread.is_alive() or not pump.complete() or pump.failed.is_set() or pump.overflow.is_set():
+                        errors.add("owned_fallback_pipe_terminal_failed")
+            except (OSError, OwnershipError, TimeoutError, subprocess.SubprocessError):
+                errors.add("owned_fallback_pipe_terminal_failed")
         finally:
             owner.close()  # Windows final-handle close kills ordinary descendants.
             for stream in [process.stdin, process.stdout, process.stderr]:
@@ -869,6 +1051,9 @@ class WindowsOwner(WindowsJob):
             raise ProbeError("OpenProcess target failed before g")
         self.extra_handles.append(self.target)
         self.assign(self.target)
+        # Assignment/query succeeded before initial g. Preserve this original
+        # debuggee identity independently of later current-member enumeration.
+        self.verified_extra_handles.append(self.target)
 
     def exit_code(self):
         if not self.target:

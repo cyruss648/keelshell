@@ -627,6 +627,526 @@ class FixtureIdentityTests(unittest.TestCase):
         identities.close()
 
 
+class JobTerminalModelTests(unittest.TestCase):
+    """Deterministic API counterexamples; these are never native Windows results."""
+
+    def model(self, pids=(100, 200), pending=(258, 258, 0), fail=None):
+        import ctypes
+        class ApiModel:
+            def __init__(self):
+                self.error = 0
+                self.closed = []
+                self.calls = []
+                self.pids = list(pids)
+                self.total = 5 + len(pids)  # include prior already-terminated members
+                self.wait_sequence = list(pending)
+                self.last_wait = None
+                self.terminated = False
+                self.barrier = False
+                self.limits = probe.JobExtendedLimits()
+                self.limits.BasicLimitInformation.LimitFlags = 0x2000
+                self.limits.BasicLimitInformation.PriorityClass = 0x20
+                self.limits.ProcessMemoryLimit = 123456
+            def QueryInformationJobObject(self, job, kind, info, size, returned):
+                self.calls.append(("query", kind))
+                if fail == f"query{kind}":
+                    self.error = 5
+                    return 0
+                if kind == 9:
+                    ctypes.memmove(info, ctypes.byref(self.limits), ctypes.sizeof(self.limits))
+                elif kind == 3:
+                    values = info._obj
+                    if fail == "excessive_count":
+                        values.assigned = probe.MAX_JOB_PROCESSES + 1
+                        self.error = 234
+                        return 0
+                    values.assigned = len(self.pids)
+                    values.listed = min(len(values.pids), len(self.pids))
+                    for index, pid in enumerate(self.pids[:values.listed]):
+                        values.pids[index] = pid
+                    if fail == "bad_list_length":
+                        values.listed = len(values.pids) + 1
+                    if values.listed < values.assigned:
+                        self.error = 234
+                        return 0
+                elif kind == 1:
+                    info._obj.ActiveProcesses = 0 if self.terminated else len(self.pids)
+                    info._obj.TotalProcesses = self.total
+                return 1
+            def SetInformationJobObject(self, job, kind, info, size):
+                self.calls.append(("set", kind))
+                if fail == "barrier":
+                    return 0
+                ctypes.memmove(ctypes.byref(self.limits), info, ctypes.sizeof(self.limits))
+                self.barrier = bool(self.limits.BasicLimitInformation.LimitFlags & 8)
+                if fail == "late_before_barrier":
+                    self.pids.append(300)
+                    self.total += 1
+                if fail == "setter_removes_member":
+                    self.pids.remove(200)
+                return 1
+            def OpenProcess(self, access, inherit, pid):
+                self.calls.append(("open", pid))
+                if pid == 200 and fail in ("gone", "access_denied"):
+                    self.error = 87 if fail == "gone" else 5
+                    return 0
+                return pid + 1000
+            def IsProcessInJob(self, handle, job, present):
+                self.calls.append(("member", handle))
+                present._obj.value = not (handle == 1200 and fail == "membership_changed")
+                return 0 if fail == "membership_query" else 1
+            def TerminateJobObject(self, job, code):
+                self.calls.append(("terminate", job))
+                self.terminated = True
+                return 0 if fail == "terminate" else 1
+            def WaitForSingleObject(self, handle, milliseconds):
+                self.calls.append(("wait", handle, milliseconds))
+                if handle == 1200:
+                    self.last_wait = self.wait_sequence.pop(0) if self.wait_sequence else 0
+                    return self.last_wait
+                return 0
+            def CloseHandle(self, handle):
+                self.closed.append(handle)
+                return 1
+        api = ApiModel()
+        owner = probe.WindowsJob.__new__(probe.WindowsJob)
+        owner.api, owner.last_error, owner.job = api, lambda: api.error, 55
+        owner.processes, owner.extra_handles, owner.terminal_handles = [], [], {}
+        owner.verified_extra_handles = []
+        owner.process = None
+        owner.terminal_prepared = owner.admission_closed = False
+        owner.terminal_pending = None
+        owner.terminal_total = None
+        return owner, api
+
+    def root(self):
+        class Root:
+            returncode = 0
+            stdin = stdout = stderr = None
+            def poll(self):
+                return 0
+            def wait(self, timeout):
+                if timeout <= 0:
+                    raise subprocess.TimeoutExpired("model-root", timeout)
+                return 0
+        return Root()
+
+    def test_old_accounting_only_cleanup_can_publish_false_terminal_with_original_handle_live(self):
+        owner, api = self.model(pending=(258,))
+        # Reproduce the original active() semantics, not a Windows emulator.
+        def accounting_only(deadline):
+            import ctypes
+            values = probe.JobAccounting()
+            api.QueryInformationJobObject(owner.job, 1, ctypes.byref(values), ctypes.sizeof(values), None)
+            return values.ActiveProcesses
+        owner.active = accounting_only
+        terminal = probe.cleanup(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertEqual(terminal["active_processes"], 0)
+        self.assertEqual(api.WaitForSingleObject(owner.terminal_handles[200], 0), 258)
+        retain_control("accounting-zero-live-object-model-counterexample", {
+            "evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "old_accounting_terminal": terminal,
+            "original_child_handle_status": "LIVE"})
+        owner.close()
+
+    def test_cleanup_waits_for_all_original_objects_after_accounting_zero(self):
+        owner, api = self.model()
+        terminal = probe.cleanup(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertEqual(api.last_wait, 0)
+        self.assertEqual(terminal["active_processes"], 0)
+        self.assertEqual(terminal["native_process_objects"], {
+            "admission_closed": True, "identities_bound": True,
+            "retained_processes": 2, "pending_process_objects": 0,
+            "original_handles_checked": 2, "known_direct_handles": 0,
+            "verified_extra_handles": 0})
+        self.assertTrue(all(call[-1] == 0 for call in api.calls if call[0] == "wait"))
+        self.assertLess(api.calls.index(("open", 200)), api.calls.index(("set", 9)))
+        self.assertLess(api.calls.index(("member", 1200)), api.calls.index(("terminate", 55)))
+        retain_control("accounting-zero-original-object-terminal-model", {
+            "evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "terminal": terminal, "api_calls": api.calls})
+        owner.close()
+        self.assertEqual(api.closed, [55, 1100, 1200])
+
+    def test_all_members_including_nested_list_are_bound_and_other_limits_preserved(self):
+        owner, api = self.model(pids=tuple(range(100, 132)), pending=(0,))
+        owner.prepare_terminal(probe.Deadline(time.time() + 1))
+        self.assertEqual(set(owner.terminal_handles), set(range(100, 132)))
+        self.assertEqual(sum(call == ("query", 3) for call in api.calls), 4)
+        self.assertTrue(api.barrier)
+        self.assertEqual(api.limits.BasicLimitInformation.ActiveProcessLimit, 1)
+        self.assertEqual(api.limits.BasicLimitInformation.PriorityClass, 0x20)
+        self.assertEqual(api.limits.ProcessMemoryLimit, 123456)
+        owner.close()
+        self.assertEqual(len(api.closed), 33)
+
+    def test_admission_during_or_after_binding_fails_closed_even_when_second_snapshot_captures_it(self):
+        owner, api = self.model(fail="late_before_barrier")
+        terminal, errors = probe.finish_owned(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertIsNone(terminal)
+        self.assertIn("owned_cleanup_failed", errors)
+        self.assertTrue(api.terminated)
+        self.assertIn(1300, api.closed)
+        owner, api = self.model(pending=(0,))
+        owner.prepare_terminal(probe.Deadline(time.time() + 1))
+        api.pids.append(300)
+        api.total += 1
+        terminal, errors = probe.finish_owned(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertIsNone(terminal)
+        self.assertIn("owned_cleanup_failed", errors)
+        self.assertTrue(api.terminated)
+        self.assertEqual(api.closed, [55, 1100, 1200])
+
+    def test_members_removed_by_limit_setting_keep_original_handles_until_signalled(self):
+        owner, api = self.model(fail="setter_removes_member")
+        terminal = probe.cleanup(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertNotIn(200, api.pids)
+        self.assertEqual(api.last_wait, 0)
+        self.assertEqual(terminal["native_process_objects"]["retained_processes"], 2)
+        self.assertEqual(terminal["active_processes"], 0)
+        owner.close()
+        self.assertEqual(api.closed, [55, 1100, 1200])
+
+    def test_every_listed_member_open_failure_including_87_fails_closed(self):
+        for failure, native_error in (("gone", 87), ("access_denied", 5)):
+            with self.subTest(failure=failure):
+                owner, api = self.model(fail=failure)
+                terminal, errors = probe.finish_owned(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+                self.assertIsNone(terminal)
+                self.assertIn("owned_cleanup_failed", errors)
+                self.assertFalse(owner.terminal_prepared)
+                self.assertTrue(api.terminated)
+                self.assertEqual(api.error, native_error)
+                self.assertEqual(api.closed, [55, 1100])
+                self.assertNotIn(("set", 9), api.calls)
+                self.assertEqual(sum(call == ("open", 200) for call in api.calls), 1)
+                # The old model's externally-held object may still be LIVE.
+                # ERROR87 must not turn that unknown identity into a pass.
+                self.assertEqual(api.WaitForSingleObject(1200, 0), 258)
+                retain_control(f"listed-open-{native_error}-fail-closed-model", {
+                    "evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS",
+                    "real_Windows_sequence_reachable": "UNKNOWN", "terminal": terminal,
+                    "errors": sorted(errors), "unbound_original_observer_status": 258,
+                    "closed_handles": api.closed, "api_calls": api.calls})
+
+    def test_known_direct_and_verified_debuggee_handles_are_checked_when_current_list_is_empty(self):
+        owner, api = self.model(pids=(), pending=(258, 258, 0))
+        direct = probe.WindowsProcess(api, 100, 1100, None, None, None, None)
+        owner.processes = [direct]
+        owner.extra_handles = [1200]
+        owner.verified_extra_handles = [1200]
+        terminal = probe.cleanup(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertEqual(terminal["active_processes"], 0)
+        self.assertEqual(api.last_wait, 0)
+        evidence = terminal["native_process_objects"]
+        self.assertEqual(evidence["retained_processes"], 0)
+        self.assertEqual(evidence["original_handles_checked"], 2)
+        self.assertEqual(evidence["known_direct_handles"], 1)
+        self.assertEqual(evidence["verified_extra_handles"], 1)
+        self.assertTrue(any(call[0] == "wait" and call[1] == 1100 for call in api.calls))
+        self.assertEqual(sum(call[0] == "wait" and call[1] == 1200 for call in api.calls), 3)
+        retain_control("held-originals-absent-from-current-list-model", {
+            "evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "real_Windows_sequence_reachable": "UNKNOWN",
+            "terminal": terminal, "api_calls": api.calls})
+        owner.close()
+        self.assertEqual(api.closed, [55, 1100, 1200])
+
+    def test_unverified_extra_is_closure_only_and_original_handles_use_handle_identity(self):
+        owner, api = self.model(pids=(), pending=(258,))
+        direct = probe.WindowsProcess(api, 200, 1100, None, None, None, None)
+        owner.processes = [direct]
+        owner.extra_handles = [1200, 1300]
+        owner.verified_extra_handles = [1300]
+        owner.terminal_handles = {200: 1400}  # a separately held identity, even with the same PID label
+        self.assertEqual(owner.original_wait_handles(), [1400, 1100, 1300])
+        owner.wait_retained(probe.Deadline(time.time() + 1))
+        self.assertFalse(any(call[0] == "wait" and call[1] == 1200 for call in api.calls))
+        owner.close()
+        self.assertEqual(api.closed, [55, 1100, 1200, 1300, 1400])
+
+    def test_debuggee_is_registered_for_terminal_wait_only_after_job_verification(self):
+        for failure in (None, "membership_query"):
+            with self.subTest(failure=failure):
+                owner, api = self.model(pids=(), pending=(258,), fail=failure)
+                debug_owner = probe.WindowsOwner.__new__(probe.WindowsOwner)
+                debug_owner.__dict__.update(owner.__dict__)
+                debug_owner.target = None
+                if failure is None:
+                    debug_owner.open_target(200)
+                    self.assertEqual(debug_owner.original_wait_handles(), [1200])
+                    self.assertEqual(debug_owner.verified_extra_handles, [1200])
+                    self.assertIsNone(debug_owner.exit_code())
+                    # Top-level success already required a signalled target;
+                    # this does not excuse an incomplete terminal structure.
+                    self.assertEqual(probe.result_code(None, True), 125)
+                else:
+                    with self.assertRaises(probe.OwnershipError):
+                        debug_owner.open_target(200)
+                    self.assertEqual(debug_owner.original_wait_handles(), [])
+                    self.assertEqual(debug_owner.verified_extra_handles, [])
+                    self.assertFalse(any(call[0] == "wait" and call[1] == 1200 for call in api.calls))
+                self.assertEqual(debug_owner.extra_handles, [1200])
+                debug_owner.close()
+                self.assertEqual(api.closed, [55, 1200])
+
+    def test_reused_nonmember_or_membership_error_fails_closed_and_closes_handles(self):
+        for failure in ("membership_changed", "membership_query"):
+            with self.subTest(failure=failure):
+                owner, api = self.model(fail=failure)
+                with self.assertRaisesRegex(probe.OwnershipError, "membership changed"):
+                    owner.prepare_terminal(probe.Deadline(time.time() + 1))
+                self.assertFalse(owner.terminal_prepared)
+                owner.force()
+                owner.wait_retained(probe.Deadline(time.time() + 1))
+                unverified = 1200 if failure == "membership_changed" else 1100
+                self.assertFalse(any(call[0] == "wait" and call[1] == unverified for call in api.calls))
+                owner.close()
+                self.assertTrue(api.terminated)
+                self.assertEqual(api.closed[0], 55)
+                self.assertTrue(all(handle in api.closed for handle in (1100, 1200) if ("open", handle - 1000) in api.calls))
+
+    def test_barrier_list_length_and_query_failures_never_create_a_success_terminal(self):
+        for failure in ("query1", "query9", "barrier", "query3", "bad_list_length", "excessive_count"):
+            with self.subTest(failure=failure):
+                owner, api = self.model(fail=failure)
+                terminal, errors = probe.finish_owned(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+                self.assertIsNone(terminal)
+                self.assertIn("owned_cleanup_failed", errors)
+                self.assertTrue(api.terminated)
+                self.assertEqual(api.closed, [55] + [call[1] + 1000 for call in api.calls if call[0] == "open"])
+
+    def test_expired_original_budget_and_original_wait_failure_cannot_publish_terminal(self):
+        owner, api = self.model(pending=(258,) * 100)
+        start = time.monotonic()
+        terminal, errors = probe.finish_owned(owner, self.root(), [], probe.Deadline(time.time() + 0.04), {})
+        self.assertIsNone(terminal)
+        self.assertIn("owned_cleanup_failed", errors)
+        self.assertLess(time.monotonic() - start, 0.2)
+        self.assertEqual(api.closed, [55, 1100, 1200])
+        owner, api = self.model(pending=(0xffffffff,))
+        terminal, errors = probe.finish_owned(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertIsNone(terminal)
+        self.assertIn("owned_cleanup_failed", errors)
+        self.assertEqual(api.closed, [55, 1100, 1200])
+
+    def test_total_change_during_final_original_wait_prevents_success_terminal(self):
+        owner, api = self.model(pending=(0,))
+        original_wait = api.WaitForSingleObject
+        original_query = api.QueryInformationJobObject
+        child_waits = 0
+        def wait_changes_total(handle, milliseconds):
+            nonlocal child_waits
+            status = original_wait(handle, milliseconds)
+            if handle == 1200 and milliseconds == 0:
+                child_waits += 1
+                if child_waits == 2:
+                    before = api.total
+                    api.total += 1
+                    api.calls.append(("total_change_in_final_wait", before, api.total))
+            return status
+        def accounting_trace(job, kind, info, size, returned):
+            status = original_query(job, kind, info, size, returned)
+            if kind == 1:
+                api.calls.append(("accounting_return", info._obj.TotalProcesses, info._obj.ActiveProcesses))
+            return status
+        api.WaitForSingleObject = wait_changes_total
+        api.QueryInformationJobObject = accounting_trace
+        terminal, errors = probe.finish_owned(owner, self.root(), [], probe.Deadline(time.time() + 1), {})
+        self.assertIsNone(terminal)
+        self.assertEqual(errors, {"owned_cleanup_failed"})
+        self.assertEqual(probe.result_code(0, not errors), 125)
+        self.assertEqual(owner.terminal_total, 7)
+        self.assertEqual(api.total, 8)
+        self.assertIn(("accounting_return", 8, 0), api.calls)
+        self.assertEqual(api.closed, [55, 1100, 1200])
+        retain_control("post-wait-total-drift-fail-closed-model", {
+            "evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "real_Windows_sequence_reachable": "UNKNOWN",
+            "historical_native_cause": "UNPROVEN", "terminal": terminal, "errors": sorted(errors),
+            "controller_if_original_zero": 125, "api_calls": api.calls, "closed_handles": api.closed})
+
+    def test_active_changes_during_waits_preserve_both_accounting_samples(self):
+        for before, after in ((0, 1), (1, 0)):
+            with self.subTest(before=before, after=after):
+                owner, api = self.model(pending=(0,))
+                deadline = probe.Deadline(time.time() + 1)
+                owner.prepare_terminal(deadline)
+                api.terminated = True
+                active = before
+                original_wait = api.WaitForSingleObject
+                original_query = api.QueryInformationJobObject
+                def wait_changes_active(handle, milliseconds):
+                    nonlocal active
+                    status = original_wait(handle, milliseconds)
+                    if handle == 1200:
+                        active = after
+                        api.calls.append(("active_change_in_original_wait", before, after))
+                    return status
+                def accounting_active(job, kind, info, size, returned):
+                    status = original_query(job, kind, info, size, returned)
+                    if kind == 1:
+                        info._obj.ActiveProcesses = active
+                        api.calls.append(("accounting_return", info._obj.TotalProcesses, active))
+                    return status
+                api.WaitForSingleObject = wait_changes_active
+                api.QueryInformationJobObject = accounting_active
+                self.assertEqual(owner.active(deadline), 1)
+                samples = [call for call in api.calls if call[0] == "accounting_return"]
+                self.assertEqual(samples, [("accounting_return", 7, before), ("accounting_return", 7, after)])
+                owner.close()
+                self.assertEqual(api.closed, [55, 1100, 1200])
+                retain_control(f"post-wait-active-{before}-to-{after}-conservative-model", {
+                    "evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "real_Windows_sequence_reachable": "UNKNOWN",
+                    "active_result": 1, "samples": samples, "api_calls": api.calls, "closed_handles": api.closed})
+
+    def test_trailing_accounting_query_failure_or_expiry_preserves_failed_terminal(self):
+        for failure in ("query", "deadline"):
+            with self.subTest(failure=failure):
+                owner, api = self.model(pending=(0,))
+                deadline = probe.Deadline(time.time() + 1)
+                child_waits = 0
+                armed = False
+                original_wait = api.WaitForSingleObject
+                original_query = api.QueryInformationJobObject
+                def wait_arms_failure(handle, milliseconds):
+                    nonlocal child_waits, armed
+                    status = original_wait(handle, milliseconds)
+                    if handle == 1200 and milliseconds == 0:
+                        child_waits += 1
+                        if child_waits == 2:
+                            armed = True
+                            if failure == "deadline":
+                                deadline.end = time.monotonic() - 0.001
+                            api.calls.append(("failure_armed_in_final_wait", failure))
+                    return status
+                def query_may_fail(job, kind, info, size, returned):
+                    if kind == 1 and armed and failure == "query":
+                        api.error = 5
+                        api.calls.append(("trailing_accounting_query_failed", 5))
+                        return 0
+                    return original_query(job, kind, info, size, returned)
+                api.WaitForSingleObject = wait_arms_failure
+                api.QueryInformationJobObject = query_may_fail
+                terminal, errors = probe.finish_owned(owner, self.root(), [], deadline, {})
+                self.assertIsNone(terminal)
+                self.assertIn("owned_cleanup_failed", errors)
+                self.assertEqual(probe.result_code(0, not errors), 125)
+                self.assertTrue(armed)
+                self.assertTrue(api.terminated)
+                self.assertEqual(api.closed, [55, 1100, 1200])
+                if failure == "query":
+                    self.assertIn(("trailing_accounting_query_failed", 5), api.calls)
+                    self.assertEqual(errors, {"owned_cleanup_failed"})
+                else:
+                    self.assertIn("owned_fallback_reap_failed", errors)
+                retain_control(f"post-wait-{failure}-fail-closed-model", {
+                    "evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "real_Windows_sequence_reachable": "UNKNOWN",
+                    "terminal": terminal, "errors": sorted(errors), "controller_if_original_zero": 125,
+                    "api_calls": api.calls, "closed_handles": api.closed})
+
+    def test_native_structures_keep_dword_width_and_actual_accounting_offset(self):
+        import ctypes
+        self.assertEqual(probe.JobAccounting.ActiveProcesses.offset, 40)
+        self.assertEqual(ctypes.sizeof(probe.JobAccounting), 48)
+        self.assertEqual(probe.JobBasicLimits.ActiveProcessLimit.offset, 40 if ctypes.sizeof(ctypes.c_size_t) == 8 else 28)
+        if ctypes.sizeof(ctypes.c_size_t) == 8:
+            self.assertEqual(ctypes.sizeof(probe.JobExtendedLimits), 144)
+
+
+class NativeJobBarrierTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "new native Windows barrier control is UNRUN on this host")
+    def test_actual_two_existing_nested_members_survive_barrier_and_late_createprocess_is_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="owned-native-Job-barrier-") as temp:
+            directory = Path(temp)
+            helper = directory / "parent.py"
+            record, ack, late_record = (directory / name for name in ("pids.json", "ack", "late.json"))
+            marker = directory / "late-process-must-not-execute"
+            child_source = "import time;time.sleep(30)"
+            late_source = f"from pathlib import Path;Path({str(marker)!r}).touch()"
+            helper.write_text("import ctypes,json,os,subprocess,sys,time\n"
+                              "from ctypes import wintypes\nfrom pathlib import Path\n"
+                              "api=ctypes.WinDLL('kernel32',use_last_error=True)\n"
+                              "api.CreateJobObjectW.argtypes=[ctypes.c_void_p,wintypes.LPCWSTR]\n"
+                              "api.CreateJobObjectW.restype=wintypes.HANDLE\n"
+                              "api.GetCurrentProcess.argtypes=[]\napi.GetCurrentProcess.restype=wintypes.HANDLE\n"
+                              "api.AssignProcessToJobObject.argtypes=[wintypes.HANDLE,wintypes.HANDLE]\n"
+                              "api.AssignProcessToJobObject.restype=wintypes.BOOL\n"
+                              "api.IsProcessInJob.argtypes=[wintypes.HANDLE,wintypes.HANDLE,ctypes.POINTER(wintypes.BOOL)]\n"
+                              "api.IsProcessInJob.restype=wintypes.BOOL\n"
+                              "nested=api.CreateJobObjectW(None,None)\n"
+                              "assert nested and api.AssignProcessToJobObject(nested,api.GetCurrentProcess())\n"
+                              f"child=subprocess.Popen([sys.executable,'-c',{child_source!r}],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n"
+                              "present=wintypes.BOOL()\n"
+                              "assert api.IsProcessInJob(int(child._handle),nested,ctypes.byref(present)) and present.value\n"
+                              f"pending=Path({str(record)!r}+'.pending')\n"
+                              "pending.write_text(json.dumps({'parent':os.getpid(),'child':child.pid}))\n"
+                              f"os.replace(pending,{str(record)!r})\n"
+                              f"while not Path({str(ack)!r}).exists():time.sleep(0.001)\n"
+                              "late={'nested_child_membership':True,'creation_rejected':False}\n"
+                              "try:\n"
+                              f"    attempt=subprocess.Popen([sys.executable,'-c',{late_source!r}],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n"
+                              "except OSError as error:\n"
+                              "    late['creation_rejected']=True;late['winerror']=error.winerror\n"
+                              "else:\n"
+                              "    late['unexpected_child_pid']=attempt.pid\n"
+                              f"pending=Path({str(late_record)!r}+'.pending')\n"
+                              "pending.write_text(json.dumps(late))\n"
+                              f"os.replace(pending,{str(late_record)!r})\n")
+            owner = probe.WindowsJob()
+            identities = NativeTreeHandles(owner.api, owner.job)
+            deadline = probe.Deadline(time.time() + 8)
+            bound = None
+            barrier = None
+            def tick(process):
+                nonlocal bound, barrier
+                if bound is not None:
+                    return
+                pids = ready_pids(record, process.pid)
+                if pids is None:
+                    return
+                identities.bind(pids)
+                before = identities.states()
+                owner.prepare_terminal(deadline)
+                after = identities.states()
+                # Observe setter effects before ACK allows any original exit or
+                # attempted late child creation. Nested descendants must appear.
+                self.assertEqual(before, {"parent": "LIVE", "child": "LIVE"})
+                self.assertEqual(after, before)
+                self.assertTrue(set(pids.values()) <= set(owner.terminal_handles))
+                barrier = {"before_original_handle_states": before, "after_original_handle_states": after,
+                           "nested_member_ids_captured": sorted(owner.terminal_handles),
+                           "total_processes_at_binding": owner.terminal_total}
+                bound = pids
+                ack.touch()
+            try:
+                result, receipt = probe.run_owned([sys.executable, str(helper)], directory, dict(os.environ),
+                                                  deadline, owner=owner, tick=tick)
+                self.assertIsNotNone(bound)
+                late = json.loads(late_record.read_text())
+                original_states = identities.states()
+                evidence = {"evidence_kind": "ACTUAL_NATIVE_WINDOWS", "barrier": barrier,
+                            "late_createprocess": late, "late_marker_exists": marker.exists(),
+                            "post_original_handle_states": original_states, "receipt": receipt}
+                retain_control("native-nested-members-admission-barrier", evidence, source=helper.read_text())
+                print(json.dumps({"actual_native_job_barrier": evidence}, sort_keys=True))
+                self.assertTrue(late["nested_child_membership"])
+                self.assertTrue(late["creation_rejected"])
+                self.assertFalse(marker.exists())
+                self.assertEqual(original_states, {"parent": "TERMINAL", "child": "TERMINAL"})
+                # A rejected association may itself increment cumulative Job
+                # accounting. Changed accounting must fail closed; unchanged
+                # accounting may pass only with the full original-object proof.
+                if "owned_cleanup_failed" in receipt["errors"]:
+                    self.assertEqual(result.returncode, 125)
+                    self.assertIsNone(receipt["terminal"])
+                    self.assertNotIn("owned_fallback_reap_failed", receipt["errors"])
+                    self.assertNotIn("owned_fallback_pipe_terminal_failed", receipt["errors"])
+                else:
+                    self.assertEqual(result.returncode, 0)
+                    self.assertEqual(receipt["terminal"]["native_process_objects"]["pending_process_objects"], 0)
+                    self.assertTrue(receipt["terminal"]["direct_reaped"])
+                    self.assertTrue(receipt["terminal"]["pipes_drained"])
+            finally:
+                identities.close()
+
+
 class ProcessTests(unittest.TestCase):
     def run_owned(self, output, target_exit=0, cdb_exit=0, fault=None, hang=False, seconds=10):
         with tempfile.TemporaryDirectory(prefix="owned-crash-controller-") as temp:
