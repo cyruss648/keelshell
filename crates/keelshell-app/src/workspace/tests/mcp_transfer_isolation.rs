@@ -14,7 +14,7 @@ fn approve(h: &Harness, id: uuid::Uuid, cx: &mut TestAppContext) {
 async fn mcp_native_file_approval_obeys_active_and_unknown_transfer_isolation(
     cx: &mut TestAppContext,
 ) {
-    let h = Harness::new(cx);
+    let h = Harness::new_with_file_mutations(cx);
     let target = grant_files(&h, true, cx).await;
     let session = h
         .fixture

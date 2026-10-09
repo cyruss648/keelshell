@@ -147,3 +147,5 @@ empty parents; links and conflicts block the whole plan. Per-item results preser
 cancelled and unknown boundaries under existing tree ownership and quarantine.
 See the [mirror guide](DIRECTORY_MIRROR.md); new independent review, main integration and desktop
 acceptance of the recursive extension remain open.
+
+测试准入不改变产品所有权：已有本地写入仍保守排斥整个进程本地侧的竞争访问；有界 setup 分组仅用于共享该真实资源的受控夹具；同实际测试 App 的窗口/运行时继承弱组，真实工作线程及队列 join 结束后才放行下一组。Historical CI ownership is not identified by a local fixture pass. 详见[ADR0078](../adr/0078-process-local-file-fixture-admission.md)。

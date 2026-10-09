@@ -47,6 +47,13 @@ pub fn spawn_transport_worker(
     workers::registry().spawn(name, cancelled, worker)
 }
 
+#[cfg(test)]
+pub(crate) fn transport_completion_for_test(
+    cancelled: &Arc<AtomicBool>,
+) -> Option<workers::Completion> {
+    workers::registry().completion(cancelled)
+}
+
 /// Install explicit quit actions and the platform's bounded last-resort quit hook.
 pub fn install_shutdown(cx: &mut App) {
     cx.bind_keys([

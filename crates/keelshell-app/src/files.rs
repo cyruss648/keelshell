@@ -160,6 +160,9 @@ pub struct FilesPanel {
     selected_transfer: Option<uuid::Uuid>,
     transfer_queue: Arc<tokio::sync::OnceCell<Arc<keelshell_session::sftp::TransferQueue>>>,
     queue_parallelism: Arc<std::sync::atomic::AtomicUsize>,
+    // Tests retain setup admission in the actual entity, after queue ownership.
+    #[cfg(test)]
+    fixture_group: Option<Arc<fixture_group::FixtureGroup>>,
 }
 
 struct DirectoryComparison {
@@ -529,6 +532,8 @@ impl FilesPanel {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
+        #[cfg(test)]
+        let fixture_group = fixture_group::for_app(cx);
         let mut panel = Self {
             session: Some(session),
             session_token: uuid::Uuid::new_v4(),
@@ -581,6 +586,8 @@ impl FilesPanel {
             selected_transfer: None,
             transfer_queue: Arc::new(tokio::sync::OnceCell::new()),
             queue_parallelism: Arc::new(std::sync::atomic::AtomicUsize::new(2)),
+            #[cfg(test)]
+            fixture_group,
         };
         panel.run(Operation::List(".".into()), window, cx);
         panel
@@ -780,8 +787,12 @@ impl FilesPanel {
         let (pause, pause_receiver) = tokio::sync::watch::channel(false);
         self.transfer_pause = self.transfer.as_ref().map(|_| pause);
         let (sender, receiver) = mpsc::sync_channel(16);
+        #[cfg(test)]
+        let fixture_group = self.fixture_group.clone();
         if let Err(error) =
             crate::terminal::spawn_transport_worker("keelshell-sftp", stop, move || {
+                #[cfg(test)]
+                let _fixture_group = fixture_group;
                 let result = runtime.block_on(operate(
                     session,
                     operation,
@@ -1847,6 +1858,8 @@ mod tests {
     }
 }
 
+#[cfg(test)]
+pub(crate) mod fixture_group;
 #[cfg(test)]
 #[path = "files/layout_tests.rs"]
 mod layout_tests;
