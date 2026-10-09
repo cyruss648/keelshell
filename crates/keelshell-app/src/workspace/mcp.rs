@@ -490,7 +490,7 @@ impl Workspace {
                             self.mcp.executable = executable;
                             self.mcp.status = if self.mcp.executable.is_some() {
                                 Message::new(
-                                    "授权已启用；复制一次性配置后可连接外部智能体。",
+                                    "授权已启用；复制临时启动配置后可连接外部智能体。",
                                     "Grant enabled; copy temporary launch settings to connect an external agent.",
                                 )
                             } else {
