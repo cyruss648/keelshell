@@ -52,6 +52,8 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 
 传输与镜像取消会保留已完成项；断线后不会自动重放命令、传输或任务。目录内容比较和同步具有明确的大小、类型及路径限制，协议诊断需要远端 POSIX / Python 3.8+。具体操作与边界见[文件工作区](docs/product/FILES_WORKSPACE.md)、[目录镜像](docs/product/DIRECTORY_MIRROR.md)、[远程协议诊断](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md)和[能力清单](docs/product/CAPABILITIES.md)。
 
+文件工作区的[多选与审核式批量传输候选](docs/product/FILE_BROWSER_BATCH_TRANSFERS.md)增加checkbox、范围选择、逐目标完整预览与原传输队列。限定作者编译、行为回归与严格工程检查已运行；完整根组合、最终独立复核与原生验收仍开放，具体进度见[候选记录](docs/testing/records/2026-10-08-file-browser-batch-transfers.md)；拖放仍在开发计划中。
+
 文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。文件审核可以展开，确认与取消保持可见；草稿和差异输入提供明确的编辑入口。操作说明见[审核与编辑](docs/product/FILE_REVIEW_AND_FOCUS.md)和[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；macOS 自有 SSH/SFTP 的两次草稿与保存流程已完成完整内容读回，完整界面与跨平台验收继续进行，见[限定原生记录](docs/testing/records/2026-10-07-text-merge-patch-native.md)。
 
 配置损坏或需要回退时，可使用[配置备份与恢复](docs/product/CONFIGURATION_RECOVERY.md)。恢复只替换配置；会话、命令、传输和外部授权不会重放。当前组合的工程与原生验收进度见[整合记录](docs/testing/records/2026-10-08-configuration-recovery-main-integration.md)。

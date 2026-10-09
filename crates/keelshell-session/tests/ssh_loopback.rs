@@ -34,6 +34,8 @@ mod directory_transfers;
 mod editor_reviewed;
 #[path = "fixtures/file_resume.rs"]
 mod file_resume;
+#[path = "fixtures/file_transfer_review.rs"]
+mod file_transfer_review;
 #[path = "fixtures/mutation_isolation.rs"]
 mod mutation_isolation;
 #[path = "fixtures/parallel_transfers.rs"]

@@ -35,6 +35,7 @@ pub struct TransferQueue {
 enum TransferJob {
     File(TransferSpec),
     AtomicUpload(TransferSpec),
+    ReviewedFile(FileTransferPlan),
     Directory(DirectoryTransferPlan),
     Resume(FileResumePlan),
     DirectoryResume(DirectoryResumePlan),
@@ -43,6 +44,11 @@ impl TransferJob {
     fn spec(&self) -> TransferSpec {
         match self {
             Self::File(spec) | Self::AtomicUpload(spec) => spec.clone(),
+            Self::ReviewedFile(plan) => TransferSpec {
+                direction: plan.direction(),
+                local: plan.local_path().to_owned(),
+                remote: plan.remote_path().to_owned(),
+            },
             Self::Directory(plan) => TransferSpec {
                 direction: plan.direction(),
                 local: plan.local_path().to_owned(),
@@ -245,6 +251,7 @@ async fn claims(sftp: &SftpSession, job: &TransferJob) -> Result<Claims> {
             &spec.remote,
             spec.direction == TransferDirection::Upload,
             matches!(job, TransferJob::AtomicUpload(_))
+                || matches!(job, TransferJob::ReviewedFile(plan) if plan.direction() == TransferDirection::Upload)
         ),
     )?;
     Ok(Claims { local, remote })
@@ -325,6 +332,12 @@ impl TransferQueue {
             ));
         }
         self.enqueue_job(TransferJob::AtomicUpload(spec)).await
+    }
+    /// Enqueue an immutable reviewed file transfer on its captured SSH connection.
+    /// Source and destination observations are checked again after queue wait and
+    /// before mutation; changed objects fail without a replacement operation.
+    pub async fn enqueue_reviewed_file(&self, plan: FileTransferPlan) -> Result<TransferHandle> {
+        self.enqueue_job(TransferJob::ReviewedFile(plan)).await
     }
     async fn enqueue_job(&self, spec: TransferJob) -> Result<TransferHandle> {
         if self.sftp.is_closed() {
@@ -492,6 +505,10 @@ async fn execute(
             ));
         }
         Ok(match &spec {
+            TransferJob::ReviewedFile(plan) => {
+                sftp.validate_file_transfer(plan).await?;
+                Some(plan.bytes())
+            }
             TransferJob::Directory(plan) => Some(plan.bytes()),
             TransferJob::DirectoryResume(plan) => Some(plan.bytes()),
             TransferJob::Resume(plan) => Some(plan.bytes()),
@@ -537,6 +554,7 @@ async fn execute(
                     sftp.queued_atomic_upload(&spec.local, &spec.remote, &context)
                         .await
                 }
+                TransferJob::ReviewedFile(plan) => sftp.queued_reviewed_file(plan, &context).await,
                 TransferJob::Directory(plan) => sftp.queued_directory(plan, &context).await,
                 TransferJob::DirectoryResume(plan) => {
                     sftp.queued_directory_resume(&plan, &context).await
@@ -560,22 +578,30 @@ async fn execute(
             Some(ticket) => ticket.cleanup_known().await,
             None => false,
         };
-    let outcome = if !known {
-        TransferEvent::Uncertain { id, bytes: context.bytes(), error: "a destination mutation has no confirmed reply; the destination remains isolated across reconnects; inspect and explicitly acknowledge the unresolved risk before reviewing a conflicting transfer".into() }
+    let outcome = terminal_transfer_event(id, context.bytes(), known, result);
+    (known, terminal, outcome)
+}
+
+// Preserve the operation's own category. A later cancellation request must
+// not relabel an acknowledged I/O/connection failure; unknown I/O stays unknown.
+pub(super) fn terminal_transfer_event(
+    id: u64,
+    bytes: u64,
+    known: bool,
+    result: TransferExecutionResult<()>,
+) -> TransferEvent {
+    if !known {
+        TransferEvent::Uncertain { id, bytes, error: "a destination mutation has no confirmed reply; the destination remains isolated across reconnects; inspect and explicitly acknowledge the unresolved risk before reviewing a conflicting transfer".into() }
     } else {
         match result {
-            Ok(()) => TransferEvent::Completed {
-                id,
-                bytes: context.bytes(),
-            },
+            Ok(()) => TransferEvent::Completed { id, bytes },
             Err(TransferExecutionError::Cancelled(bytes)) => TransferEvent::Cancelled { id, bytes },
             Err(TransferExecutionError::Error(error)) => TransferEvent::Failed {
                 id,
                 error: error.to_string(),
             },
         }
-    };
-    (known, terminal, outcome)
+    }
 }
 
 #[cfg(test)]

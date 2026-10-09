@@ -16,9 +16,9 @@ use keelshell_core::{
 use keelshell_session::{
     SessionError, SshSession,
     sftp::{
-        DirectoryResumePlan, DirectoryTransferPlan, FileResumePlan, RegularFileSnapshot,
-        RemoteEntry, SftpSession, TransferDirection, TransferEvent, TransferQuarantineReview,
-        TransferSpec,
+        DirectoryResumePlan, DirectoryTransferPlan, FileResumePlan, FileTransferPlan,
+        RegularFileSnapshot, RemoteEntry, SftpSession, TransferDirection, TransferEvent,
+        TransferQuarantineReview, TransferSpec,
     },
 };
 use std::{
@@ -31,6 +31,7 @@ use std::{
     time::Duration,
 };
 
+mod batch;
 mod browser;
 mod local_browser;
 mod local_catalog;
@@ -38,6 +39,7 @@ mod local_view;
 mod merge;
 mod parallel;
 mod review;
+mod selection;
 mod sync;
 mod transfer;
 mod view;
@@ -75,6 +77,9 @@ enum Operation {
     Upload(PathBuf, String),
     Download(String, PathBuf),
     PlanDirectory(TransferSpec),
+    PlanBatch(batch::BatchRequest),
+    TransferBatch(Box<batch::BatchPlan>),
+    TransferFile(FileTransferPlan),
     TransferDirectory(DirectoryTransferPlan),
     PlanResume(TransferSpec, bool),
     ResumeFile(FileResumePlan),
@@ -107,6 +112,7 @@ enum Outcome {
     PatchApplied(String, String, String),
     Done(Message),
     PlannedDirectory(DirectoryTransferPlan),
+    PlannedBatch(Box<batch::BatchPlan>),
     PlannedFileResume(FileResumePlan),
     PlannedDirectoryResume(DirectoryResumePlan),
     Compared(DirectoryComparison),
@@ -136,6 +142,7 @@ pub struct FilesPanel {
     local: Entity<InputState>,
     local_browser: local_browser::LocalBrowser,
     remote_sort: browser::BrowserSort,
+    remote_selection: selection::Selection<String>,
     remote_show_hidden: bool,
     _browser_subscriptions: Vec<Subscription>,
     browser_review_revision: uuid::Uuid,
@@ -146,6 +153,8 @@ pub struct FilesPanel {
     editor_surface: Option<review::EditorSurface>,
     tools_scroll: ScrollHandle,
     transfer_list_scroll: ScrollHandle,
+    queue_details_scroll: ScrollHandle,
+    queue_details_visible: bool,
     entries: Vec<RemoteEntry>,
     selected: Option<RemoteEntry>,
     editing: Option<(String, Vec<u8>)>,
@@ -571,6 +580,7 @@ impl FilesPanel {
             local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
             local_browser: local_browser::LocalBrowser::new(window, cx),
             remote_sort: browser::BrowserSort::default(),
+            remote_selection: selection::Selection::default(),
             remote_show_hidden: false,
             _browser_subscriptions: Vec::new(),
             browser_review_revision: uuid::Uuid::new_v4(),
@@ -581,6 +591,8 @@ impl FilesPanel {
             editor_surface: None,
             tools_scroll: ScrollHandle::new(),
             transfer_list_scroll: ScrollHandle::new(),
+            queue_details_scroll: ScrollHandle::new(),
+            queue_details_visible: false,
             entries: Vec::new(),
             selected: None,
             editing: None,
@@ -627,6 +639,8 @@ impl FilesPanel {
         self.pending = None;
         self.confirmation_expanded = false;
         self.local_browser.retire_navigation();
+        self.remote_selection.clear();
+        self.selected = None;
         self.cancel_transfers();
         self.cancel_active(cx);
         cx.notify();
@@ -701,6 +715,10 @@ impl FilesPanel {
             cx.notify();
             return;
         }
+        if let Operation::TransferBatch(plan) = operation {
+            self.run_batch(*plan, window, cx);
+            return;
+        }
         if operation.transfer_status().is_some() {
             self.run_queued_transfer(operation, window, cx);
             return;
@@ -751,6 +769,14 @@ impl FilesPanel {
         }
         if let Operation::ApplyDirectorySync(_, journal) = &operation {
             self.sync_journal = Some(journal.clone());
+        }
+        if matches!(&operation, Operation::List(_)) {
+            // Admission retires the old selection even when the new directory
+            // later fails or is cancelled. Rejected busy/invalid requests above
+            // do not change the current browser selection.
+            self.remote_selection.clear();
+            self.selected = None;
+            self.withdraw_browser_review();
         }
         self.busy = true;
         self.pending = None;
@@ -808,6 +834,7 @@ impl FilesPanel {
                 | Operation::InspectQuarantine(_)
                 | Operation::PlanResume(..)
                 | Operation::PlanDirectory(_)
+                | Operation::PlanBatch(_)
                 | Operation::PlanDirectorySync(..)
         );
         let navigation_before = self.path.read(cx).value().to_string();
@@ -937,6 +964,7 @@ impl FilesPanel {
                         view.status = Message::new(format!("共 {} 项",entries.len()),format!("{} entries",entries.len()));
                         view.entries = entries;
                         view.selected = None;
+                        view.remote_selection.clear();
                     }
                     Ok(Outcome::Read(snapshot)) => {
                         let path = snapshot.entry.path.clone();
@@ -983,6 +1011,10 @@ impl FilesPanel {
                         view.confirmation_expanded = false;
                         view.editor_surface = None;
                         view.pending = Some((parallel::quarantine_review_message(&review), Operation::AcknowledgeQuarantine(review)));
+                    }
+                    Ok(Outcome::PlannedBatch(plan)) => {
+                        view.status = Message::new("批量只读准备完成，请审核每个目标。", "Read-only batch preparation completed; review every target.");
+                        view.confirm(plan.review_message(), Operation::TransferBatch(plan), cx);
                     }
                     Ok(Outcome::PlannedDirectory(plan)) => {
                         view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
@@ -1379,6 +1411,8 @@ impl Operation {
                     | Self::ReadMerge { .. }
                     | Self::ApplyPatchToDraft { .. }
                     | Self::PlanDirectory(_)
+                    | Self::PlanBatch(_)
+                    | Self::TransferBatch(_)
                     | Self::PlanResume(..)
                     | Self::Compare(..)
                     | Self::PlanDirectorySync(..)
@@ -1388,6 +1422,14 @@ impl Operation {
     /// performed transfer I/O. Review-only plans intentionally return `None`.
     fn recovery_spec(&self) -> Option<(TransferSpec, bool)> {
         match self {
+            Self::TransferFile(plan) => Some((
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                false,
+            )),
             Self::Upload(local, remote) => Some((TransferSpec::upload(local, remote), false)),
             Self::Download(remote, local) => Some((TransferSpec::download(remote, local), false)),
             Self::TransferDirectory(plan) => Some((
@@ -1426,6 +1468,8 @@ impl Operation {
             | Self::Delete(_)
             | Self::SetPermissions(_, _)
             | Self::PlanDirectory(_)
+            | Self::PlanBatch(_)
+            | Self::TransferBatch(_)
             | Self::PlanResume(..)
             | Self::Compare(..)
             | Self::ApplyDirectorySync(..)
@@ -1436,6 +1480,15 @@ impl Operation {
 
     fn transfer_status(&self) -> Option<TransferStatus> {
         let (spec, directory, continuation) = match self {
+            Self::TransferFile(plan) => (
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                false,
+                false,
+            ),
             Self::Upload(local, remote) => (TransferSpec::upload(local, remote), false, false),
             Self::Download(remote, local) => (TransferSpec::download(remote, local), false, false),
             Self::TransferDirectory(plan) => (

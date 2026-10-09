@@ -1,6 +1,7 @@
 //! Remote browser layout and explicit file-operation controls.
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
+use gpui_kit::component::checkbox::Checkbox;
 use gpui_kit::component::scroll::ScrollableElement;
 
 fn directory_compare_card(comparison: &DirectoryComparison, cx: &App) -> impl IntoElement {
@@ -145,11 +146,11 @@ impl FilesPanel {
             // Rendering IDs identify visible row positions; every action and
             // selection captures the unchanged native entry/path instead.
             let entry = &self.entries[source_index];
-            let selected = self
-                .selected
-                .as_ref()
-                .is_some_and(|item| item.path == entry.path);
+            let selected = self.remote_selection.contains(&entry.path);
             let item = entry.clone();
+            let directory = self.directory.clone();
+            let check_directory = self.directory.clone();
+            let check_path = entry.path.clone();
             let open = entry.clone();
             list = list.child(
                 div()
@@ -166,16 +167,38 @@ impl FilesPanel {
                         visual.canvas
                     }))
                     .cursor_pointer()
-                    .on_click(cx.listener(move |view, _, window, cx| {
-                        view.withdraw_browser_review();
-                        view.selected = Some(item.clone());
-                        if let Some(mode) = item.permissions {
-                            view.mode.update(cx, |input, cx| {
-                                input.set_value(format!("{:04o}", mode & 0o7777), window, cx);
-                            });
-                        }
-                        cx.notify();
+                    .on_click(cx.listener(move |view, event: &ClickEvent, window, cx| {
+                        view.select_remote_entry(
+                            &item.path,
+                            &directory,
+                            event.modifiers(),
+                            false,
+                            window,
+                            cx,
+                        );
                     }))
+                    .child(
+                        Checkbox::new(("select-remote-entry", index))
+                            .small()
+                            .checked(selected)
+                            .disabled(self.suspended)
+                            .accessibility_label(format!(
+                                "{} {}",
+                                t(cx, "选择远程项", "Select remote entry"),
+                                entry.name
+                            ))
+                            .on_click(cx.listener(move |view, _, window, cx| {
+                                cx.stop_propagation();
+                                view.select_remote_entry(
+                                    &check_path,
+                                    &check_directory,
+                                    Modifiers::default(),
+                                    true,
+                                    window,
+                                    cx,
+                                );
+                            })),
+                    )
                     .child(
                         div()
                             .flex_1()
@@ -209,7 +232,10 @@ impl FilesPanel {
                     .child(
                         div().w(px(60.)).flex_shrink_0().child(
                             Button::new(("open-remote", index))
-                                .disabled(self.suspended)
+                                .disabled(
+                                    self.suspended
+                                        || (!entry.is_directory && self.remote_selection.len() > 1),
+                                )
                                 .ghost()
                                 .compact()
                                 .rounded(px(6.))
@@ -224,7 +250,7 @@ impl FilesPanel {
                                     cx.stop_propagation();
                                     if open.is_directory {
                                         view.run(Operation::List(open.path.clone()), window, cx);
-                                    } else {
+                                    } else if view.remote_selection.len() <= 1 {
                                         view.request_read(open.clone(), window, cx);
                                     }
                                 })),
@@ -355,6 +381,7 @@ impl Render for FilesPanel {
             .vertical_scrollbar(&self.tools_scroll)
             .flex()
             .flex_col()
+            .child(self.batch_controls(cx))
             .test_support();
         let mut editor_card = None;
         if let Some((path, _)) = &self.editing {
@@ -585,7 +612,10 @@ impl Render for FilesPanel {
             .when(self.editing.is_some() && self.pending.is_none(), |panel| {
                 panel.child(self.editor_entry_bar(cx))
             })
-            .child(body.test_support());
+            .child(self.queue_entry_bar(cx))
+            .when(!self.queue_details_visible, |panel| {
+                panel.child(body.test_support())
+            });
         tools = tools.when(self.pending.is_none(), |panel| panel
             .child(div().id("file-mutation-tools").min_h(px(38.)).px_3().py_1().flex_shrink_0().flex().flex_wrap().items_center().gap_2().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border))
                 .child(div().w(px(150.)).flex_shrink_0().text_ellipsis().text_color(rgb(if has_selection {visual.text} else {visual.muted})).child(selection.to_owned()))
@@ -933,7 +963,11 @@ impl Render for FilesPanel {
             tools = tools.child(self.transfer_card(cx));
         }
         tools = tools.child(self.parallel_queue_card(cx));
-        panel = panel.child(tools);
+        panel = if self.queue_details_visible {
+            panel.child(self.queue_details_view(cx))
+        } else {
+            panel.child(tools)
+        };
         if let Some((message, _)) = &self.pending {
             panel = panel.child(confirmation_bar(
                 cx,

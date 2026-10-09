@@ -21,6 +21,8 @@ use crate::{Result, SessionError};
 mod control;
 mod directory;
 mod file_resume;
+mod file_transfer;
+pub use file_transfer::{FileTransferPlan, MAX_REVIEWED_FILE_BYTES};
 mod inspection;
 mod mutation;
 pub use mutation::FileMutationScope;
@@ -558,7 +560,7 @@ impl SftpSession {
             tokio::select! {
                 biased;
                 _=self.cancelled()=>Err(TransferExecutionError::from(SessionError::Closed)),
-                result=self.replace_from_reader_checked(remote, &mut source, None, Some(&context), Some(&scope))=>result.map_err(Into::into),
+                result=self.replace_from_reader_checked(remote, &mut source, None, Some(&context), Some(&scope), None)=>result,
             }
         })
         .await.map_err(transfer_session_error);
@@ -638,8 +640,10 @@ impl SftpSession {
                 Some(reviewed),
                 None,
                 Some(&scope),
+                None,
             )
-            .await?;
+            .await
+            .map_err(transfer_session_error)?;
             Ok(())
         })
         .await;
@@ -653,7 +657,8 @@ impl SftpSession {
         reviewed: Option<&RegularFileSnapshot>,
         transfer: Option<&TransferContext>,
         mutation: Option<&FileMutationScope<'_>>,
-    ) -> Result<u64> {
+        file_review: Option<&FileTransferPlan>,
+    ) -> TransferExecutionResult<u64> {
         if let Some(reviewed) = reviewed {
             // The checked read owns a nested protocol future. Keep it out of
             // the shared writer frame, including ordinary non-review uploads.
@@ -668,7 +673,8 @@ impl SftpSession {
         {
             return Err(SessionError::Unsupported(
                 "server must advertise posix-rename@openssh.com version 1",
-            ));
+            )
+            .into());
         }
         let mut attrs = FileAttributes::empty();
         attrs.permissions = Some(0o600);
@@ -677,7 +683,8 @@ impl SftpSession {
                 if !existing.attrs.file_type().is_file() {
                     return Err(SessionError::Invalid(
                         "atomic replacement requires a confirmed regular file",
-                    ));
+                    )
+                    .into());
                 }
                 if let Some(mode) = existing.attrs.permissions {
                     attrs.permissions = Some(mode & 0o777);
@@ -685,14 +692,14 @@ impl SftpSession {
             }
             Err(russh_sftp::client::error::Error::Status(status))
                 if status.status_code == StatusCode::NoSuchFile => {}
-            Err(error) => return Err(sftp_error(error)),
+            Err(error) => return Err(sftp_error(error).into()),
         }
         let (parent, name) = path.rsplit_once('/').unwrap_or((".", path));
         let temporary = format!("{parent}/.{name}.keelshell-{}.tmp", uuid::Uuid::new_v4());
         let ticket = match (transfer, mutation) {
             (Some(context), _) => context.reservation.clone().ok_or(SessionError::Worker)?,
             (_, Some(scope)) => scope.ticket()?,
-            _ => return Err(SessionError::Worker),
+            _ => return Err(SessionError::Worker.into()),
         };
         let temporary_owner =
             ticket.add_temporary(queue::remote_claim(self, &temporary, true, true).await?)?;
@@ -726,7 +733,7 @@ impl SftpSession {
                 {
                     guard.temporary = None;
                 }
-                return Err(error);
+                return Err(error.into());
             }
         };
         guard.handle = Some(handle.clone());
@@ -734,12 +741,7 @@ impl SftpSession {
         let mut buffer = vec![0_u8; 32 * 1024];
         let mut offset = 0_u64;
         loop {
-            if let Some(transfer) = transfer {
-                transfer
-                    .checkpoint()
-                    .await
-                    .map_err(transfer_session_error)?;
-            }
+            writer_checkpoint(transfer).await?;
             let count = source.read(&mut buffer).await?;
             if let Some(transfer) = transfer {
                 transfer.confirmed_io();
@@ -752,12 +754,7 @@ impl SftpSession {
             offset = offset
                 .checked_add(count as u64)
                 .ok_or(SessionError::Invalid("upload exceeds u64 size"))?;
-            if let Some(transfer) = transfer {
-                transfer
-                    .progress(count as u64)
-                    .await
-                    .map_err(transfer_session_error)?;
-            }
+            writer_progress(transfer, count as u64).await?;
         }
         // A sent CLOSE invalidates the descriptor even before its reply. Do
         // not let cleanup retry it if cancellation drops the pending reply.
@@ -771,11 +768,11 @@ impl SftpSession {
         if let Some(reviewed) = reviewed {
             Box::pin(self.verify_regular_snapshot(reviewed)).await?;
         }
-        if let Some(transfer) = transfer {
-            transfer
-                .checkpoint()
-                .await
-                .map_err(transfer_session_error)?;
+        writer_checkpoint(transfer).await?;
+        if let Some(plan) = file_review {
+            // The nested metadata checks own protocol futures. Keep that state
+            // off the shared writer frame, even when this call has no review.
+            Box::pin(self.validate_file_transfer(plan)).await?;
         }
         let mut payload = Vec::new();
         for value in [
@@ -806,7 +803,8 @@ impl SftpSession {
                 return Err(sftp_error(format!(
                     "atomic rename: {:?}: {}",
                     published.status_code, published.error_message
-                )));
+                ))
+                .into());
             }
         }
         guard.temporary = None;
@@ -1087,7 +1085,7 @@ impl SftpSession {
         if !local_io(source.metadata()).await?.is_file() {
             return Err(SessionError::Invalid("file upload requires a regular file").into());
         }
-        self.replace_from_reader_checked(remote, &mut source, None, Some(context), None)
+        self.replace_from_reader_checked(remote, &mut source, None, Some(context), None, None)
             .await?;
         Ok(())
     }
@@ -1197,6 +1195,26 @@ impl SftpSession {
 }
 
 const TRANSFER_CHUNK_SIZE: usize = 64 * 1024;
+// Queue jobs retain typed cancellation through the shared atomic writer.
+// Mapping it to SessionError::Closed belongs only at public Result boundaries:
+// cancellation can arrive after an outer select polled its first branch.
+async fn writer_checkpoint(transfer: Option<&TransferContext>) -> TransferExecutionResult<()> {
+    match transfer {
+        Some(transfer) => transfer.checkpoint().await,
+        None => Ok(()),
+    }
+}
+
+async fn writer_progress(
+    transfer: Option<&TransferContext>,
+    count: u64,
+) -> TransferExecutionResult<()> {
+    match transfer {
+        Some(transfer) => transfer.progress(count).await,
+        None => Ok(()),
+    }
+}
+
 type TransferExecutionResult<T = u64> = std::result::Result<T, TransferExecutionError>;
 #[derive(Debug)]
 enum TransferExecutionError {

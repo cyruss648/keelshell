@@ -92,3 +92,6 @@
 - [自动更新策略](product/AUTOMATIC_UPDATES.md)及[主副本组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)：源码整合与专项结果，完整门禁／原生各自记录。
 
 - [本地／远程文件浏览](product/LOCAL_REMOTE_FILE_BROWSER.md)：显式目录选择、双栏元数据、排序／隐藏项和原有审核；v5 新独立限定审查、根完整门禁、新 macOS 标准包和宽窗口审核式双向 SFTP 通过，最终组合源码／工程／宽窗口原生独立复核无 P1/P2；精确 CI／其它原生范围见[整合记录](testing/records/2026-10-08-local-file-browser-main-integration.md)。
+
+- [文件多选与审核式批量传输](product/FILE_BROWSER_BATCH_TRANSFERS.md)、[ADR0087](adr/0087-reviewed-file-browser-batch-transfers.md)和[实际记录](testing/records/2026-10-08-file-browser-batch-transfers.md)：最终842完整工程、同源macOS开发包／57打包及三上传／三下载每方向106字节受控原生通过，原失败保留；拖放／其它原生平台／完整产品独立OPEN。
+- [传输队列固定入口](product/TRANSFER_QUEUE_ACCESS.md)与[入口记录](testing/records/2026-10-09-transfer-queue-entry.md)：当前会话分类摘要、详情结果优先、返回保留目录／选区／草稿、原SSH身份绑定；新非作者现场复核关闭英文深色该流程的可发现性P2，最小OS逻辑几何／辅助技术等未关闭。

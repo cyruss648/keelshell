@@ -449,3 +449,337 @@ async fn lost_pause_control_waits_for_unknown_terminal_instead_of_claiming_cance
     });
     h.missing("/lost-control.bin");
 }
+
+fn queue_entry_contains(inner: Bounds<gpui_kit::Pixels>, outer: Bounds<gpui_kit::Pixels>) -> bool {
+    inner.origin.x >= outer.origin.x
+        && inner.right() <= outer.right()
+        && inner.origin.y >= outer.origin.y
+        && inner.bottom() <= outer.bottom()
+}
+
+fn queue_entry_click(h: &Harness, cx: &mut TestAppContext) {
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        let button = window.find("toggle-file-transfer-queue");
+        assert!(
+            button.visible(),
+            "the queue entry must be painted without tool scrolling"
+        );
+        window.click("toggle-file-transfer-queue", cx);
+    })
+    .checked("click the fixed production queue entry");
+}
+
+#[gpui_kit::test]
+async fn queue_entry_completed_results_are_visible_and_return_preserves_browser_selection_and_drafts(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new_with(cx, |cx, session, runtime| {
+        mount_layout_scene(cx, session, runtime, 900., 580., true)
+    });
+    h.idle(cx).await;
+    for index in 0..6 {
+        let bytes = format!("complete owned transfer {index}");
+        let name = format!("queue-entry-{index}.txt");
+        let source = h.source(&name, bytes.as_bytes());
+        h.local_input(cx, &source);
+        h.click(cx, "upload-file");
+        h.click(cx, "confirm-file-operation");
+        h.idle(cx).await;
+        assert_eq!(h.read(&format!("/{name}")), bytes.as_bytes());
+    }
+    h.seed("/a-selected.txt", b"selection only");
+    let selected_local = h.source("a-selected.txt", b"local selection only");
+    h.click(cx, "refresh-files");
+    h.idle(cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.browse_local(h.local.0.clone(), window, cx)
+        });
+    })
+    .checked("explicitly load local browser for selection preservation");
+    cx.wait_for(h.window, Duration::from_secs(12), |_, cx| {
+        !h.panel.read(cx).local_browser.reading()
+    })
+    .await;
+    cx.update_window(h.window, |_, window, cx| {
+        let local_index = h.panel.read_with(cx, |panel, _| {
+            let listing = panel
+                .local_browser
+                .listing
+                .as_ref()
+                .checked_option("complete explicit local listing");
+            // Local row IDs retain the unsorted native index. The first painted
+            // row must be resolved from its original path, not assumed index 0.
+            let index = listing
+                .entries
+                .iter()
+                .position(|entry| entry.path == selected_local)
+                .checked_option("the original local selection target");
+            assert_eq!(
+                crate::files::browser::local_indices(
+                    &listing.entries,
+                    panel.local_browser.show_hidden,
+                    panel.local_browser.sort,
+                )
+                .first()
+                .copied(),
+                Some(index),
+                "the intended target must be the first painted local entry"
+            );
+            index
+        });
+        window.render_frame(cx);
+        let local_row = window.find(("local-entry", local_index));
+        assert!(
+            local_row.visible()
+                && queue_entry_contains(local_row.bounds(), window.find("local-files").bounds()),
+            "the actual first local data row must fit before the queue is opened"
+        );
+        window.click(("select-local-entry", local_index), cx);
+        window.click(("select-remote-entry", 0_usize), cx);
+        h.panel.update(cx, |panel, cx| {
+            assert!(panel.local_browser.selection.contains(&selected_local));
+            assert!(
+                panel
+                    .remote_selection
+                    .contains(&"/a-selected.txt".to_owned())
+            );
+            panel.path.update(cx, |input, cx| {
+                input.set_value("/unsubmitted remote draft", window, cx)
+            });
+            panel.local.update(cx, |input, cx| {
+                input.set_value("unsubmitted local draft", window, cx)
+            });
+            panel
+                .name
+                .update(cx, |input, cx| input.set_value("未执行.txt", window, cx));
+            panel
+                .mode
+                .update(cx, |input, cx| input.set_value("0600", window, cx));
+        });
+    })
+    .checked("select real entries and retain unsubmitted drafts");
+    let before = h.panel.read_with(cx, |panel, cx| {
+        (
+            panel
+                .local_browser
+                .selection
+                .paths()
+                .cloned()
+                .collect::<Vec<_>>(),
+            panel.remote_selection.paths().cloned().collect::<Vec<_>>(),
+            panel.path.read(cx).value().to_string(),
+            panel.local.read(cx).value().to_string(),
+            panel.name.read(cx).value().to_string(),
+            panel.mode.read(cx).value().to_string(),
+        )
+    });
+    let first_id = h.panel.read_with(cx, |panel, _| {
+        assert_eq!(panel.transfer_jobs.len(), 6);
+        assert!(
+            panel
+                .transfer_jobs
+                .iter()
+                .all(|job| job.status.phase == TransferPhase::Completed)
+        );
+        panel.transfer_jobs[0].id
+    });
+    for (width, height) in [(900., 580.), (1440., 900.)] {
+        for language in [Language::ZhCn, Language::En] {
+            for theme in [
+                keelshell_core::Theme::System,
+                keelshell_core::Theme::Light,
+                keelshell_core::Theme::Dark,
+            ] {
+                cx.update_window(h.window, |_, window, cx| {
+                    window.resize(size(px(width), px(height)));
+                    window.bounds_changed(cx);
+                    i18n::set_language(language, cx);
+                    crate::design::apply(theme, Some(window), cx);
+                    window.render_frame(cx);
+                    let area = window.find("files-layout-scene").bounds();
+                    let summary = window.find("file-transfer-summary");
+                    assert!(summary.visible() && queue_entry_contains(summary.bounds(), area));
+                    assert!(queue_entry_contains(
+                        window.find("toggle-file-transfer-queue").bounds(),
+                        summary.bounds()
+                    ));
+                    let completed = window.find("file-transfer-summary-completed");
+                    assert_eq!(
+                        completed.label(),
+                        Some(if language == Language::ZhCn {
+                            "完成 6"
+                        } else {
+                            "Done 6"
+                        })
+                    );
+                    for id in ["active", "completed", "failed", "cancelled", "uncertain"] {
+                        let count = window.find(gpui_kit::SharedString::from(format!(
+                            "file-transfer-summary-{id}"
+                        )));
+                        assert!(
+                            count.visible()
+                                && queue_entry_contains(count.bounds(), summary.bounds())
+                        );
+                    }
+                    assert_true_file_row(window);
+                })
+                .checked("default summary stays painted in both languages and all themes");
+                queue_entry_click(&h, cx);
+                cx.update_window(h.window, |_, window, cx| {
+                    window.render_frame(cx);
+                    assert!(h.panel.read(cx).queue_details_visible);
+                    assert!(window.try_find("file-browsing-area").is_none());
+                    let details = window.find("file-transfer-queue-details");
+                    let row = window.find(gpui_kit::SharedString::from(format!("transfer-job-{first_id}")));
+                    assert!(row.visible() && queue_entry_contains(row.bounds(), details.bounds()),
+                        "queue entry must reveal an actual retained outcome without outer tool scrolling");
+                    assert!(window.try_find("inspect-transfer-isolation").is_some());
+                    assert!(window.try_find("transfer-parallelism-2").is_some());
+                }).checked("entry opens actual queue results and retains existing controls");
+                queue_entry_click(&h, cx);
+                cx.update_window(h.window, |_, window, cx| {
+                    window.render_frame(cx);
+                    assert_true_file_row(window);
+                })
+                .checked("return restores the real browser view");
+                assert_eq!(
+                    h.panel.read_with(cx, |panel, cx| (
+                        panel
+                            .local_browser
+                            .selection
+                            .paths()
+                            .cloned()
+                            .collect::<Vec<_>>(),
+                        panel.remote_selection.paths().cloned().collect::<Vec<_>>(),
+                        panel.path.read(cx).value().to_string(),
+                        panel.local.read(cx).value().to_string(),
+                        panel.name.read(cx).value().to_string(),
+                        panel.mode.read(cx).value().to_string(),
+                    )),
+                    before
+                );
+                assert_eq!(h.server.filesystem.atomic_writes_started(), 6);
+            }
+        }
+    }
+}
+
+#[gpui_kit::test]
+async fn queue_entry_keeps_pending_review_and_fixed_actions_without_dispatch_or_approval(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new_with(cx, |cx, session, runtime| {
+        mount_layout_scene(cx, session, runtime, 900., 580., true)
+    });
+    h.idle(cx).await;
+    let bytes = b"only explicit confirmation can publish";
+    let source = h.source("queue-review.txt", bytes);
+    h.local_input(cx, &source);
+    h.click(cx, "upload-file");
+    for language in [Language::ZhCn, Language::En] {
+        for theme in [
+            keelshell_core::Theme::System,
+            keelshell_core::Theme::Light,
+            keelshell_core::Theme::Dark,
+        ] {
+            cx.update_window(h.window, |_, window, cx| {
+                i18n::set_language(language, cx);
+                crate::design::apply(theme, Some(window), cx);
+                window.render_frame(cx);
+            })
+            .checked("paint original unexecuted review");
+            queue_entry_click(&h, cx);
+            cx.update_window(h.window, |_, window, cx| {
+                window.render_frame(cx);
+                let area = window.find("files-layout-scene").bounds();
+                let review = window.find("file-confirmation-message");
+                assert!(review.visible() && queue_entry_contains(review.bounds(), area));
+                for id in [
+                    "expand-file-review",
+                    "confirm-file-operation",
+                    "cancel-file-operation",
+                ] {
+                    let button = window.find(id);
+                    assert!(button.visible() && queue_entry_contains(button.bounds(), area));
+                }
+                h.panel.read_with(cx, |panel, _| {
+                    assert!(
+                        matches!(&panel.pending, Some((_, Operation::Upload(local, target)))
+                        if local == &source && target == "/queue-review.txt")
+                    );
+                    assert!(panel.transfer_jobs.is_empty());
+                });
+            })
+            .checked("queue surface retains the exact pending review and all fixed actions");
+            assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+            queue_entry_click(&h, cx);
+        }
+    }
+    queue_entry_click(&h, cx);
+    h.click(cx, "expand-file-review");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.try_find("file-review-expanded").is_some());
+        assert!(window.try_find("file-transfer-queue-details").is_none());
+        assert!(window.find("confirm-file-operation").visible());
+        assert!(window.find("cancel-file-operation").visible());
+    })
+    .checked("full review takes precedence over queue presentation");
+    h.click(cx, "cancel-file-operation");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+    h.missing("/queue-review.txt");
+    queue_entry_click(&h, cx);
+    h.click(cx, "upload-file");
+    queue_entry_click(&h, cx);
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read("/queue-review.txt"), bytes);
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 1);
+}
+
+#[gpui_kit::test]
+async fn queue_entry_old_painted_owner_cannot_switch_a_replacement_session_surface(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        let position = window.find("toggle-file-transfer-queue").bounds().center();
+        h.panel
+            .update(cx, |panel, _| panel.session_token = uuid::Uuid::new_v4());
+        for input in [
+            gpui_kit::MouseDownEvent {
+                button: gpui_kit::MouseButton::Left,
+                position,
+                click_count: 1,
+                ..Default::default()
+            }
+            .to_platform_input(),
+            gpui_kit::MouseUpEvent {
+                button: gpui_kit::MouseButton::Left,
+                position,
+                click_count: 1,
+                ..Default::default()
+            }
+            .to_platform_input(),
+        ] {
+            window.dispatch_event(input, cx);
+        }
+        assert!(
+            !h.panel.read(cx).queue_details_visible,
+            "an old frame cannot operate the new owner"
+        );
+        assert!(h.panel.read(cx).transfer_jobs.is_empty());
+    })
+    .checked("dispatch the old painted queue entry after its owner changed");
+    queue_entry_click(&h, cx);
+    assert!(
+        h.panel
+            .read_with(cx, |panel, _| panel.queue_details_visible)
+    );
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}

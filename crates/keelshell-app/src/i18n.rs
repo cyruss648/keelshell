@@ -86,6 +86,11 @@ impl Message {
         )
     }
 
+    /// Borrow both translations for composing a complete bilingual review.
+    pub(crate) fn translations(&self) -> (&str, &str) {
+        (&self.zh, &self.en)
+    }
+
     /// Render according to the current application language, without mutation.
     pub fn render(&self, cx: &App) -> String {
         match language(cx) {

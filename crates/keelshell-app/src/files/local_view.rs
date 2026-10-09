@@ -4,6 +4,7 @@ use super::browser::SortColumn;
 use super::local_catalog::LocalEntryKind;
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
+use gpui_kit::component::checkbox::Checkbox;
 
 impl FilesPanel {
     pub(super) fn local_navigation(&self, cx: &mut Context<Self>) -> AnyElement {
@@ -98,7 +99,10 @@ impl FilesPanel {
                 self.local_browser.sort,
             ) {
                 let entry = &listing.entries[index];
-                let selected = self.local_browser.selected.as_ref() == Some(&entry.path);
+                let selected = self.local_browser.selection.contains(&entry.path);
+                let directory = listing.directory.clone();
+                let check_directory = listing.directory.clone();
+                let check_path = entry.path.clone();
                 let path = entry.path.clone();
                 let action_path = entry.path.clone();
                 let kind = entry.kind;
@@ -130,11 +134,36 @@ impl FilesPanel {
                             visual.canvas
                         }))
                         .cursor_pointer()
-                        .on_click(cx.listener(move |panel, _, _, cx| {
-                            panel.local_browser.selected = Some(path.clone());
-                            panel.withdraw_browser_review();
-                            cx.notify();
+                        .on_click(cx.listener(move |panel, event: &ClickEvent, _, cx| {
+                            panel.select_local_entry(
+                                &path,
+                                &directory,
+                                event.modifiers(),
+                                false,
+                                cx,
+                            );
                         }))
+                        .child(
+                            Checkbox::new(("select-local-entry", index))
+                                .small()
+                                .checked(selected)
+                                .disabled(self.suspended)
+                                .accessibility_label(format!(
+                                    "{} {}",
+                                    t(cx, "选择本地项", "Select local entry"),
+                                    name
+                                ))
+                                .on_click(cx.listener(move |panel, _, _, cx| {
+                                    cx.stop_propagation();
+                                    panel.select_local_entry(
+                                        &check_path,
+                                        &check_directory,
+                                        Modifiers::default(),
+                                        true,
+                                        cx,
+                                    );
+                                })),
+                        )
                         .child(match kind {
                             LocalEntryKind::Directory => IconName::Folder,
                             LocalEntryKind::File => IconName::FileText,
@@ -154,6 +183,8 @@ impl FilesPanel {
                                 .compact()
                                 .disabled(
                                     self.suspended
+                                        || (kind == LocalEntryKind::File
+                                            && self.local_browser.selection.len() > 1)
                                         || !matches!(
                                             kind,
                                             LocalEntryKind::Directory | LocalEntryKind::File
@@ -172,7 +203,9 @@ impl FilesPanel {
                                     cx.stop_propagation();
                                     if kind == LocalEntryKind::Directory {
                                         panel.browse_local(action_path.clone(), window, cx);
-                                    } else if kind == LocalEntryKind::File {
+                                    } else if kind == LocalEntryKind::File
+                                        && panel.local_browser.selection.len() <= 1
+                                    {
                                         panel.use_local_path(action_path.clone(), window, cx);
                                     }
                                 })),

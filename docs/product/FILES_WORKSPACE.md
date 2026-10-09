@@ -1,5 +1,15 @@
 # 文件工作区 / Files workspace
 
+## 当前批量与队列范围 — 2026-10-09
+
+多选、逐目标审核式批量上传／下载、取消类型保持及固定队列入口已实现并完成限定验证：最终842完整工程、同源macOS开发包和受控原生三上传／三下载（每方向三文件106字节）通过。新的非作者现场复核英文深色默认入口／五类计数／详情／返回保持，关闭该限定流程可发现性P2；中文浅色默认入口与计数由根实际观察。次级工具卡片在操作区真实滚动访问，不承诺默认可见，原首轮完整失败及同源复现保留。
+
+Multi-selection, per-target reviewed batch transfers, typed cancellation and the fixed queue entry are implemented and scoped validation is complete. The final 842-input snapshot passed complete engineering checks, a matching macOS development package and a controlled native flow of three uploads and three downloads totaling 106 file bytes in each direction. A fresh independent live review closed the English/Dark default-entry/counts/details/return discoverability issue; Chinese/Light observations come from the root run. Secondary cards use tools scrolling, without promising default visibility; prior failures are retained.
+
+详见[批量指南](FILE_BROWSER_BATCH_TRANSFERS.md)、[队列交互](TRANSFER_QUEUE_ACCESS.md)与[实际记录](../testing/records/2026-10-08-file-browser-batch-transfers.md)。拖放、最小OS逻辑几何／IME／VoiceOver、System原生主题、其它平台桌面、OpenSSH桌面GUI及发行安装独立OPEN；下方单项段落是历史范围，其多选开放状态不覆盖本段。Drag-and-drop, minimum OS geometry/accessibility, native System-theme switching, other desktops, OpenSSH desktop GUI and release installation remain independently open.
+
+## 历史单项浏览范围 — 2026-10-08
+
 2026-10-08 [本地／远程文件浏览](LOCAL_REMOTE_FILE_BROWSER.md)已整合到主副本：系统单目录
 picker、双栏单层元数据、排序／隐藏项和显式填入传输路径。v5 新非作者限定复核、根完整门禁和
 新 macOS 标准包通过；宽窗口已完成系统 picker、导航、排序和经审核的双向 SFTP，

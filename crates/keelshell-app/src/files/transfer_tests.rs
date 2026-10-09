@@ -19,6 +19,8 @@ use super::{
     test_server::{Checked, Server},
 };
 
+#[path = "batch_tests.rs"]
+mod batch_tests;
 #[path = "browser_tests.rs"]
 mod browser_tests;
 #[path = "conflict_merge_tests.rs"]
@@ -1289,6 +1291,18 @@ async fn directory_continuation_uses_reviewed_tree_and_finishes_missing_content(
         for language in [Language::ZhCn, Language::En] {
             i18n::set_language(language, cx);
             window.render_frame(cx);
+            // Progress is a secondary tools card; inspect it through the same
+            // actual platform-wheel reveal used by the other transfer tests.
+            reveal_file_control(window, cx, "file-transfer-card");
+            let card = window.find("file-transfer-card").bounds();
+            let viewport = window.find("file-tools-scroll").bounds();
+            assert!(
+                card.origin.x >= viewport.origin.x
+                    && card.right() <= viewport.right()
+                    && card.origin.y >= viewport.origin.y
+                    && card.bottom() <= viewport.bottom(),
+                "directory continuation card must fit the actual tools viewport: {card:?} in {viewport:?}"
+            );
             let state = h
                 .panel
                 .read(cx)

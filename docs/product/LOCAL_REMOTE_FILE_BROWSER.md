@@ -64,3 +64,9 @@ Local reads are limited to 4096 entries and 1 MiB of encoded names, with
 cooperative five-second checkpoints. A blocked filesystem call cannot be
 forcibly cancelled. This milestone is single-selection; drag-and-drop,
 multi-selection and target-native layout/picker acceptance remain open.
+
+## 后续批量候选 / Batch candidate
+
+上面的单项浏览是已整合历史范围。当前[多选／审核式批量传输](FILE_BROWSER_BATCH_TRANSFERS.md)已实现checkbox、Ctrl/Cmd／Shift选区和逐目标审核；最终842完整工程、同源macOS开发包及受控原生三上传／三下载（每方向106字节）通过，首轮完整失败及同源目录续传复现保留。[固定队列入口](TRANSFER_QUEUE_ACCESS.md)默认摘要、详情、返回保持的英文深色可发现性P2由新非作者现场复核关闭，次级工具卡片仍按真实滚动访问。拖放、最小OS逻辑几何／IME／VoiceOver、System原生主题、其它平台桌面、OpenSSH桌面GUI和发行安装独立OPEN，不能以本功能验收扩大成全产品通过。详见[实际记录](../testing/records/2026-10-08-file-browser-batch-transfers.md)。
+
+The single-item browser above is historical scope. Current [reviewed batch transfers](FILE_BROWSER_BATCH_TRANSFERS.md) implement checkboxes, Ctrl/Cmd/Shift selections and per-target approval. The final 842-input snapshot passed complete engineering checks, a matching macOS development package and a controlled native three-upload/three-download flow totaling 106 file bytes in each direction; first complete and same-source directory-continuation failures are retained. A fresh independent live review closed the English/Dark [fixed queue entry](TRANSFER_QUEUE_ACCESS.md)/counts/details/return discoverability issue; secondary cards still use actual tools scrolling. Drag-and-drop, minimum OS geometry/IME/VoiceOver, native System-theme switching, other desktops, OpenSSH desktop GUI and release installation remain independently open. This feature is not whole-product acceptance. See the [actual record](../testing/records/2026-10-08-file-browser-batch-transfers.md).

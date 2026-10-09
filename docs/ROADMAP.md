@@ -1,5 +1,15 @@
 # 开发路线
 
+## 当前功能收尾与暂停边界 — 2026-10-09
+
+当前收尾目标是 `feature/file-browser-batch-transfer`（HEAD基线 `af9465c`）的842组合，只完成功能提交推送后暂停；main整合、其它功能分支整合、标签与Release继续列为后续。另一分支 `991473f` 的Unix生产修复未导入本组合，其CI与这里的输入／原生证据分别验收。
+
+本次多选审核式批量上传／下载、取消类型保持及固定队列入口已经完成限定工程和macOS受控原生验收。最终842输入／16,489,347字节完整工程检查实际wait0，1,841普通Rust、10rustdoc（9运行／1个no_run仅编译）、65Python（64通过／1Windows原生跳过），22ignored未运行；原七命令和默认／2MiB各626控制完成，同源新macOS双程序包／fixture及57打包用例通过。固定入口／详情／返回和本次三文件往返的限定可发现性P2已由新非作者原生复核关闭；原失败及旧840自有OpenSSH十一项仍保留各自来源，不能扩大为OpenSSH桌面验收。
+
+本记录为提交前验收快照；功能提交与推送结果以 Git 历史及远端读回为准。本轮按用户要求在完成提交推送后暂停，完整目标仍未完成。最终八份状态文档复核、功能提交推送及准确远端读回分别验收；精确新提交CI结果单独待验，不虚造提交SHA或平台通过。
+
+本次全项目目标未完成。拖放、远程编辑器及资源／网络能力余项、完整对外MCP、本地CLI自身登录、最小OS逻辑窗口／IME／VoiceOver／System原生主题、Windows／Linux桌面和六目标Release签名公证／更新安装回滚仍OPEN。详见[批量记录](testing/records/2026-10-08-file-browser-batch-transfers.md)、[队列记录](testing/records/2026-10-09-transfer-queue-entry.md)与[交互指南](product/TRANSFER_QUEUE_ACCESS.md)。旧历史结果不替代当前输入绑定或完整产品验收。
+
 ## Windows 终态验证增量 — 2026-10-08
 
 精确 ecab 的三平台 [Quality 37726023963](https://github.com/cyruss648/keelshell/actions/runs/37726023963) 已结束：macOS／Linux 成功，Windows 仍在原后代 HANDLE LIVE 断言失败、Rust 未到达；三份完整原日志已读回。新的 Windows Job v3 只改 Python 验证控制器：原进程对象结束、完整回收和管道收尾、原期限内等待前后 Accounting 稳定共同作为成功条件。作者及新非作者各自完整59用例58PASS／1Windows原生UNRUN；独立七模型通过，新非作者无确认P1/P2，仅准入根工程与功能分支实际Windows验证。根正式完整检查已实际通过：1,812普通Rust／10rustdoc／65Python（64PASS／1Windows原生UNRUN），格式／x.y／严格Clippy、原默认及2MiB各626阶段、10准备期与2观察IO控制通过；同831输入及mode前后不变，owner实际wait0／reap／group absent，私有TMP空且删除。四份状态文档随后更新；提交前最终非作者复核与功能分支准确Windows分别验收。本切片未关闭原应用异常原因，也不混入 Unix 和生产发布信任候选，详见[Windows记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。完整对外 MCP、CLI登录复用、UI原生辅助技术、其它平台桌面与发行安装目标继续 OPEN。下文保持各自历史时点。
@@ -142,3 +152,12 @@ D1先于后续新界面，原有后端与任务目标继续保留。全部新增
 
 
 2026-10-08 本地／远程文件浏览已精确整合到根开发副本；810输入完整门禁实际0（1,769普通Rust／10rustdoc／6Python与严格工程检查，22ignored未执行），同输入新标准macOS包及57打包实际0。新宽窗口系统picker、隐藏项、目录导航、大小排序及人工审核双向SFTP完成，3×完整30字节内容相等，12原图／AX与实际资源清理保留。新的非作者已完成组合源码／工程／宽窗口原生证据复核，无 P1/P2；精确提交CI、最小原生窗口、辅助技术、其它平台及完整产品继续开放，见[整合记录](testing/records/2026-10-08-local-file-browser-main-integration.md)。
+
+## FILE-01/02/03 批量传输独立候选 — 2026-10-08
+
+已编写本地／远程多选、逐目标来源／目的／字节／覆盖／拒绝完整预览、review身份及原session／目录／选区绑定、人工批准后精确有界queue与逐目标结果。新增源descriptor与实际IO复核；原single／续传／编辑和隔离机制保持。当前编译／门禁／非作者复核／原生未运行，不关闭本表的对应验收目标；FILE-02拖放继续OPEN。见[批量指南](product/FILE_BROWSER_BATCH_TRANSFERS.md)与[当前记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。
+
+
+2026-10-08 文件批量作者限定检查补记：独立target下locked编译、选择／重复准备4项、自有TCP6项、新GPUI9项、原文件工作区85项四线程及全workspace严格Clippyactual0；原失败、旧绘制ID guard反例与修后结果保留。新只读审查的List准入选区及目录非原子审核两项P2已补实现／真实回归。完整根组合门禁、最终新非作者和标准包／三平台原生仍独立开放；FILE-02拖放OPEN，不用作者通过关闭本表验收。见[批量记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。
+
+根完整门禁在原子上传future大小测试实际失败（18,112B／原16KiB阈值）；仅将发布前metadata复核future放到堆上后测得10,272B，32项SFTP库、6项审核TCP、4项原子TCP与严格Clippyactual0。原测试、线程和安全语义不变；修后完整门禁、新的非作者复核、原生与拖放继续OPEN，不以限定修复覆盖完整失败。

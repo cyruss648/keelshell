@@ -284,6 +284,10 @@ mod metadata_tests;
 mod independent_metadata_tests;
 
 #[cfg(test)]
+#[path = "control/cancellation_type_tests.rs"]
+mod cancellation_type_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 

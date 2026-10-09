@@ -11,6 +11,7 @@ pub(super) struct LocalBrowser {
     native_draft: Option<PathBuf>,
     pub(super) listing: Option<LocalListing>,
     pub(super) selected: Option<PathBuf>,
+    pub(super) selection: selection::Selection<PathBuf>,
     pub(super) sort: BrowserSort,
     pub(super) show_hidden: bool,
     pub(super) status: Message,
@@ -38,6 +39,7 @@ impl LocalBrowser {
             native_draft: None,
             listing: None,
             selected: None,
+            selection: selection::Selection::default(),
             sort: BrowserSort::default(),
             show_hidden: false,
             status: Message::new(
@@ -65,6 +67,7 @@ impl LocalBrowser {
         self.revision = uuid::Uuid::new_v4();
         self.queued = None;
         self.selected = None;
+        self.selection.clear();
         self.cancel_read();
     }
 
@@ -319,6 +322,7 @@ impl FilesPanel {
                             let count = listing.entries.len();
                             panel.local_browser.listing = Some(listing);
                             panel.local_browser.selected = None;
+                            panel.local_browser.selection.clear();
                             panel.local_browser.status = Message::new(
                                 format!("已读取 {count} 项（仅元数据）"),
                                 format!("Loaded {count} entries (metadata only)"),
@@ -415,26 +419,128 @@ impl FilesPanel {
         self.use_local_path(destination, window, cx);
     }
 
-    pub(super) fn toggle_remote_hidden(&mut self, cx: &mut Context<Self>) {
-        self.remote_show_hidden = !self.remote_show_hidden;
-        if !self.remote_show_hidden && self.selected.as_ref().is_some_and(browser::remote_hidden) {
-            self.selected = None;
+    pub(super) fn select_local_entry(
+        &mut self,
+        path: &PathBuf,
+        directory: &PathBuf,
+        modifiers: Modifiers,
+        checkbox: bool,
+        cx: &mut Context<Self>,
+    ) {
+        if self.suspended {
+            return;
+        }
+        let Some(listing) = &self.local_browser.listing else {
+            return;
+        };
+        if &listing.directory != directory {
+            return;
+        }
+        let visible: Vec<_> = browser::local_indices(
+            &listing.entries,
+            self.local_browser.show_hidden,
+            self.local_browser.sort,
+        )
+        .into_iter()
+        .map(|index| listing.entries[index].path.clone())
+        .collect();
+        if !self.local_browser.selection.click(
+            path,
+            &visible,
+            checkbox || modifiers.control || modifiers.platform,
+            modifiers.shift,
+        ) {
+            self.local_browser.status = Message::new(
+                "最多选择32项；隐藏或过期项目不能加入选择。",
+                "Select at most 32 entries; hidden or stale rows cannot join the selection.",
+            );
+        } else {
+            self.local_browser.selected = self.local_browser.selection.single().cloned();
             self.withdraw_browser_review();
         }
         cx.notify();
     }
 
+    pub(super) fn select_remote_entry(
+        &mut self,
+        path: &str,
+        directory: &Option<String>,
+        modifiers: Modifiers,
+        checkbox: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.suspended || &self.directory != directory {
+            return;
+        }
+        let visible: Vec<_> =
+            browser::remote_indices(&self.entries, self.remote_show_hidden, self.remote_sort)
+                .into_iter()
+                .map(|index| self.entries[index].path.clone())
+                .collect();
+        if !self.remote_selection.click(
+            &path.to_owned(),
+            &visible,
+            checkbox || modifiers.control || modifiers.platform,
+            modifiers.shift,
+        ) {
+            self.status = Message::new(
+                "最多选择32项；隐藏或过期项目不能加入选择。",
+                "Select at most 32 entries; hidden or stale rows cannot join the selection.",
+            );
+        } else {
+            self.selected = self
+                .remote_selection
+                .single()
+                .and_then(|path| self.entries.iter().find(|entry| &entry.path == path))
+                .cloned();
+            self.withdraw_browser_review();
+            if let Some(mode) = self.selected.as_ref().and_then(|entry| entry.permissions) {
+                self.mode.update(cx, |input, cx| {
+                    input.set_value(format!("{:04o}", mode & 0o7777), window, cx)
+                });
+            }
+        }
+        cx.notify();
+    }
+
+    pub(super) fn toggle_remote_hidden(&mut self, cx: &mut Context<Self>) {
+        self.remote_show_hidden = !self.remote_show_hidden;
+        let visible: Vec<_> =
+            browser::remote_indices(&self.entries, self.remote_show_hidden, self.remote_sort)
+                .into_iter()
+                .map(|index| self.entries[index].path.clone())
+                .collect();
+        self.remote_selection.retain_visible(&visible);
+        self.selected = self
+            .remote_selection
+            .single()
+            .and_then(|path| self.entries.iter().find(|entry| &entry.path == path))
+            .cloned();
+        self.withdraw_browser_review();
+        cx.notify();
+    }
+
     pub(super) fn toggle_local_hidden(&mut self, cx: &mut Context<Self>) {
         self.local_browser.show_hidden = !self.local_browser.show_hidden;
-        if !self.local_browser.show_hidden
-            && self
-                .local_browser
-                .selected_entry()
-                .is_some_and(|entry| entry.hidden)
-        {
-            self.local_browser.selected = None;
-            self.withdraw_browser_review();
-        }
+        let visible: Vec<_> = self
+            .local_browser
+            .listing
+            .as_ref()
+            .map(|listing| {
+                browser::local_indices(
+                    &listing.entries,
+                    self.local_browser.show_hidden,
+                    self.local_browser.sort,
+                )
+                .into_iter()
+                .map(|index| listing.entries[index].path.clone())
+                .collect()
+            })
+            .unwrap_or_default();
+        self.local_browser.selection.retain_visible(&visible);
+        self.local_browser.selected = self.local_browser.selection.single().cloned();
+        self.withdraw_browser_review();
         cx.notify();
     }
 }

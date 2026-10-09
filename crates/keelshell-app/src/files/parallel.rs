@@ -1,5 +1,6 @@
 //! Multiple reviewed jobs share one queue and the original authenticated session.
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::component::scroll::ScrollableElement;
 use keelshell_session::sftp::{MAX_QUEUED_TRANSFERS, TransferQueue};
 
@@ -23,7 +24,177 @@ fn active(phase: TransferPhase) -> bool {
     )
 }
 
+#[derive(Default, Debug, PartialEq, Eq)]
+struct QueueSummary {
+    active: usize,
+    completed: usize,
+    failed: usize,
+    cancelled: usize,
+    uncertain: usize,
+}
+
+impl QueueSummary {
+    fn for_session(jobs: &[QueuedTransfer], session_token: uuid::Uuid) -> Self {
+        let mut summary = Self::default();
+        for job in jobs.iter().filter(|job| job.session_token == session_token) {
+            match job.status.phase {
+                TransferPhase::Completed => summary.completed += 1,
+                TransferPhase::Failed => summary.failed += 1,
+                TransferPhase::Cancelled => summary.cancelled += 1,
+                TransferPhase::Uncertain => summary.uncertain += 1,
+                _ => summary.active += 1,
+            }
+        }
+        summary
+    }
+}
+
 impl FilesPanel {
+    fn set_queue_details_visible(
+        &mut self,
+        expected_session: uuid::Uuid,
+        visible: bool,
+        cx: &mut Context<Self>,
+    ) {
+        // A painted entry belongs to this panel's original SSH owner. Switching
+        // surfaces changes neither browser drafts nor the pending approval.
+        if self.session_token != expected_session {
+            return;
+        }
+        self.queue_details_visible = visible;
+        cx.notify();
+    }
+
+    pub(super) fn queue_entry_bar(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let summary = QueueSummary::for_session(&self.transfer_jobs, self.session_token);
+        let mut counts = div()
+            .id("file-transfer-summary-counts")
+            .flex_1()
+            .min_w_0()
+            .h_full()
+            .overflow_x_scroll()
+            .flex()
+            .items_center()
+            .gap_2()
+            .child(
+                div()
+                    .flex_shrink_0()
+                    .text_color(rgb(visual.muted))
+                    .child(t(cx, "当前", "Current")),
+            );
+        for (id, label, count, color) in [
+            (
+                "active",
+                t(cx, "活动", "Active"),
+                summary.active,
+                visual.accent,
+            ),
+            (
+                "completed",
+                t(cx, "完成", "Done"),
+                summary.completed,
+                visual.success,
+            ),
+            (
+                "failed",
+                t(cx, "失败", "Failed"),
+                summary.failed,
+                visual.danger,
+            ),
+            (
+                "cancelled",
+                t(cx, "取消", "Cancelled"),
+                summary.cancelled,
+                visual.muted,
+            ),
+            (
+                "uncertain",
+                t(cx, "未知", "Unknown"),
+                summary.uncertain,
+                visual.warning,
+            ),
+        ] {
+            let text = SharedString::from(format!("{label} {count}"));
+            counts = counts.child(
+                div()
+                    .id(SharedString::from(format!("file-transfer-summary-{id}")))
+                    .flex_shrink_0()
+                    .whitespace_nowrap()
+                    .text_color(rgb(color))
+                    .role(accesskit::Role::Label)
+                    .aria_label(text.clone())
+                    .child(text)
+                    .test_support(),
+            );
+        }
+        let expected_session = self.session_token;
+        let show_details = !self.queue_details_visible;
+        div()
+            .id("file-transfer-summary")
+            .h(px(22.))
+            .flex_shrink_0()
+            .min_w_0()
+            .px_1()
+            .flex()
+            .items_center()
+            .gap_2()
+            .border_t_1()
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.canvas))
+            .child(
+                Button::new("toggle-file-transfer-queue")
+                    .flex_shrink_0()
+                    .xsmall()
+                    .compact()
+                    .ghost()
+                    .when(self.queue_details_visible, |button| button.primary())
+                    .label(if self.queue_details_visible {
+                        t(cx, "返回文件", "Back to files")
+                    } else {
+                        t(cx, "传输队列", "Transfer queue")
+                    })
+                    .accessibility_label(t(
+                        cx,
+                        "切换传输队列详情；数量为当前 SSH 会话",
+                        "Toggle transfer queue details; counts belong to the current SSH session",
+                    ))
+                    .localized_tooltip(
+                        "数量仅属于当前 SSH 会话；详情保留本面板历史记录",
+                        "Counts belong to the current SSH session; details retain this panel's history",
+                    )
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        view.set_queue_details_visible(expected_session, show_details, cx);
+                    })),
+            )
+            .child(counts)
+            .test_support()
+            .into_any_element()
+    }
+
+    pub(super) fn queue_details_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        div()
+            .id("file-transfer-queue-details")
+            .flex_1()
+            .min_h_0()
+            .overflow_y_scroll()
+            .track_scroll(&self.queue_details_scroll)
+            .vertical_scrollbar(&self.queue_details_scroll)
+            .child(self.parallel_queue_card(cx))
+            .test_support()
+            .into_any_element()
+    }
+
+    pub(super) fn batch_queue_has_capacity(&self, count: usize) -> bool {
+        count <= MAX_QUEUED_TRANSFERS
+            && self
+                .transfer_jobs
+                .iter()
+                .filter(|job| active(job.status.phase))
+                .count()
+                + count
+                <= MAX_QUEUED_TRANSFERS
+    }
     pub(super) fn has_active_transfers(&self) -> bool {
         self.transfer_jobs
             .iter()
@@ -540,7 +711,33 @@ impl FilesPanel {
             }
             list = list.child(row);
         }
-        div().id("parallel-transfer-queue").test_support().flex().flex_col().flex_shrink_0().gap_1().p_2().border_t_1().border_color(rgb(visual.border)).child(header).child(div().text_color(rgb(visual.muted)).child(t(cx, "暂停保留槽位和路径锁；调低并发只影响后续任务。未知写入结果隔离目标，重连不会解除；可检查目标，再显式审核解除隔离的风险。不会重放。", "Paused jobs keep slots and path locks; lower concurrency applies to later jobs. Unknown writes isolate destinations across reconnects; inspect the target and explicitly review the risk of releasing isolation. Jobs never replay."))).when(!self.transfer_jobs.is_empty(), |view| view.child(list)).into_any_element()
+        let explanation = div().text_color(rgb(visual.muted)).child(t(
+            cx,
+            "暂停保留槽位和路径锁；调低并发只影响后续任务。未知写入结果隔离目标，重连不会解除；可检查目标，再显式审核解除隔离的风险。不会重放。",
+            "Paused jobs keep slots and path locks; lower concurrency applies to later jobs. Unknown writes isolate destinations across reconnects; inspect the target and explicitly review the risk of releasing isolation. Jobs never replay.",
+        ));
+        let card = div()
+            .id("parallel-transfer-queue")
+            .test_support()
+            .flex()
+            .flex_col()
+            .flex_shrink_0()
+            .gap_1()
+            .p_2()
+            .border_t_1()
+            .border_color(rgb(visual.border));
+        // The dedicated queue starts with actual outcomes. The full concurrency
+        // controls and isolation explanation remain reachable below the rows.
+        let card = if self.queue_details_visible {
+            card.when(!self.transfer_jobs.is_empty(), |view| view.child(list))
+                .child(header)
+                .child(explanation)
+        } else {
+            card.child(header)
+                .child(explanation)
+                .when(!self.transfer_jobs.is_empty(), |view| view.child(list))
+        };
+        card.into_any_element()
     }
 }
 
@@ -552,6 +749,7 @@ async fn queued_operation(
     progress: &mpsc::SyncSender<WorkerMessage>,
 ) -> Result<Outcome, FileFailure> {
     let (direction, existing) = match &operation {
+        Operation::TransferFile(plan) => (plan.direction(), None),
         Operation::Upload(..) => (TransferDirection::Upload, None),
         Operation::Download(..) => (TransferDirection::Download, None),
         Operation::TransferDirectory(plan) => (plan.direction(), None),
@@ -563,6 +761,7 @@ async fn queued_operation(
         biased;
         _ = cancellation(&stop) => return Err(FileFailure::CancelledBeforeStart),
         result = async { match operation {
+            Operation::TransferFile(plan) => queue.enqueue_reviewed_file(plan).await,
             Operation::Upload(local, remote) => queue.enqueue_atomic_upload(TransferSpec::upload(local, remote)).await,
             Operation::Download(remote, local) => queue.enqueue(TransferSpec::download(remote, local)).await,
             Operation::TransferDirectory(plan) => queue.enqueue_directory(plan).await,
@@ -615,4 +814,71 @@ pub(super) fn quarantine_review_message(
         en.push_str(&format!("\nIsolation record #{} · {side_en}: {}\nRead-only observation: {kind_en}; {bytes} bytes; modification time (Unix seconds) {modified}\n", entry.reservation_id, entry.destination));
     }
     Message::new(zh, en)
+}
+
+#[cfg(test)]
+mod queue_summary_tests {
+    use super::*;
+
+    fn job(session_token: uuid::Uuid, phase: TransferPhase) -> QueuedTransfer {
+        let spec = TransferSpec::upload(PathBuf::from("not-opened-by-summary"), "/not-written");
+        let mut status = TransferStatus::new(spec.clone(), false, false);
+        status.phase = phase;
+        let (pause, _) = tokio::sync::watch::channel(false);
+        QueuedTransfer {
+            id: uuid::Uuid::new_v4(),
+            session_token,
+            status,
+            result: None,
+            stop: Arc::new(AtomicBool::new(false)),
+            pause,
+            recovery: RecoveryCandidate {
+                session_token,
+                spec,
+                directory: false,
+            },
+        }
+    }
+
+    #[core::prelude::v1::test]
+    fn queue_entry_counts_all_current_owner_phases_without_merging_terminal_outcomes() {
+        let owner = uuid::Uuid::new_v4();
+        let old_owner = uuid::Uuid::new_v4();
+        let phases = [
+            TransferPhase::Preparing,
+            TransferPhase::Queued,
+            TransferPhase::Running,
+            TransferPhase::Pausing,
+            TransferPhase::Paused,
+            TransferPhase::Resuming,
+            TransferPhase::Cancelling,
+            TransferPhase::Completed,
+            TransferPhase::Failed,
+            TransferPhase::Cancelled,
+            TransferPhase::Uncertain,
+        ];
+        let jobs: Vec<_> = phases
+            .iter()
+            .copied()
+            .flat_map(|phase| [job(owner, phase), job(old_owner, phase)])
+            .collect();
+        assert_eq!(
+            QueueSummary::for_session(&jobs, owner),
+            QueueSummary {
+                active: 7,
+                completed: 1,
+                failed: 1,
+                cancelled: 1,
+                uncertain: 1,
+            }
+        );
+        assert_eq!(
+            QueueSummary::for_session(&jobs, uuid::Uuid::new_v4()),
+            QueueSummary::default()
+        );
+        assert!(
+            jobs.iter().all(|job| !job.stop.load(Ordering::Acquire)),
+            "summarizing a queue cannot cancel or operate it"
+        );
+    }
 }

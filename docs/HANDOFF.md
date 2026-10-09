@@ -1,5 +1,19 @@
 # KeelShell 开发交接 — 2026-10-08
 
+## 批量传输与队列入口限定验收 — 2026-10-09
+
+本功能证据与功能分支／提交目标为 `feature/file-browser-batch-transfer`，HEAD 基线 `af9465c`，完整842组合；尚未合入main。本次只提交推送该功能并按用户要求暂停，主线整合、标签和Release单独保留后续。根另一功能分支的Unix生产修复 `991473f` 与维护 `02f2e59` 及其[三平台CI](https://github.com/cyruss648/keelshell/actions/runs/37868547352)是独立范围，当前批量分支不包含该Unix修复。
+
+本次多选审核式批量上传／下载、取消类型保持及固定队列入口已经完成限定工程和macOS受控原生验收。最终842输入／16,489,347字节完整工程检查实际wait0，1,841普通Rust、10rustdoc（9运行／1个no_run仅编译）、65Python（64通过／1Windows原生跳过），22ignored未运行；原七命令和默认／2MiB各626控制完成，同源新macOS双程序包／fixture及57打包用例通过。
+
+新原生完成三上传／三下载，三文件34／39／33字节，每方向106字节，来源／远端／下载完整相等且无额外文件；待审时进队列仍零任务、展开末项后取消保持零写。中文浅色默认入口／计数由根实际观察；新的非作者现场复核英文深色默认入口、五类计数（完成6，其余0）、详情结果及返回后的目录／选区／四份ASCII草稿保持，队列可发现性P2在该限定范围关闭。应用正常退出与夹具actual0／回收／组不存在、严格端口拒绝连接和所属scratch删除均有真实收据。
+
+首轮842／16,488,619字节完整检查actual1、app737PASS／1FAIL／2ignored及同源原目录续传单例actual101保留。修正仅让原布局测试按既有工具区契约真实滚动后检查次级卡片，保留visible、双轴包含和原窗口／四线程／8秒／75毫秒要求，不承诺次级卡片默认可见；新完整通过不覆盖原失败。
+
+本记录为提交前验收快照；功能提交与推送结果以 Git 历史及远端读回为准。本轮按用户要求在完成提交推送后暂停，完整目标仍未完成。最终八份状态文档复核、功能提交推送及准确远端读回分别验收；精确新提交CI结果单独待验，不虚造提交SHA或平台通过。
+
+最小OS逻辑几何、IME／VoiceOver、System主题原生切换、Windows／Linux桌面、OpenSSH桌面GUI、完整外部MCP业务、本地CLI自身登录复用及签名公证／发行安装继续OPEN；本次受控SFTP原生不代表这些范围或全项目完成。详见[批量记录](testing/records/2026-10-08-file-browser-batch-transfers.md)和[队列记录](testing/records/2026-10-09-transfer-queue-entry.md)。下文各历史时点不覆盖本段最新状态。
+
 ## Windows 终态验证增量 — 2026-10-08
 
 精确 ecab 的三平台 [Quality 37726023963](https://github.com/cyruss648/keelshell/actions/runs/37726023963) 已结束：macOS／Linux 成功，Windows 仍在原后代 HANDLE LIVE 断言失败、Rust 未到达；三份完整原日志已读回。新的 Windows Job v3 只改 Python 验证控制器：原进程对象结束、完整回收和管道收尾、原期限内等待前后 Accounting 稳定共同作为成功条件。作者及新非作者各自完整59用例58PASS／1Windows原生UNRUN；独立七模型通过，新非作者无确认P1/P2，仅准入根工程与功能分支实际Windows验证。根正式完整检查已实际通过：1,812普通Rust／10rustdoc／65Python（64PASS／1Windows原生UNRUN），格式／x.y／严格Clippy、原默认及2MiB各626阶段、10准备期与2观察IO控制通过；同831输入及mode前后不变，owner实际wait0／reap／group absent，私有TMP空且删除。四份状态文档随后更新；提交前最终非作者复核与功能分支准确Windows分别验收。本切片未关闭原应用异常原因，也不混入 Unix 和生产发布信任候选，详见[Windows记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。完整对外 MCP、CLI登录复用、UI原生辅助技术、其它平台桌面与发行安装目标继续 OPEN。下文保持各自历史时点。
@@ -94,3 +108,14 @@ v3 静态独立审查的下载类型与 Edit 冒泡 P2 已在 v5 候选修正；
 非法字节真实创建与读回。新非作者已完成精确候选与专项证据复核，无阻断；root 完整整合／CI 和原生仍独立开放。
 原失败日志／scratch 保留，不声称已交付；见 [候选记录](testing/records/2026-10-08-local-remote-file-browser.md)。
 勿将 43 继承的 root 输入当作本功能 delta；主树及其它作者范围不可覆盖。
+
+## 文件多选与批量传输作者候选 — 2026-10-08
+
+基于af9465c的独立作者树实现本地／远程checkbox、Ctrl/Cmd切换及Shift范围、32项有界选择、逐目标完整双语预览和人工批准的批量queue。新增session FileTransferPlan保留原本地source descriptor、执行／原子发布前metadata复核及原SSH绑定；目录复用原扫描计划。混合无效项完整拒绝报告，暂停／取消／逐目标真实结果沿用原队列。当前源码／测试已编写，Cargo／门禁／新非作者／原生UNRUN；拖放保持OPEN，不改变本交接中根平台失败事实。见[操作指南](product/FILE_BROWSER_BATCH_TRANSFERS.md)和[候选记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。
+
+
+## 文件批量候选作者限定检查补记 — 2026-10-08
+
+上述初始UNRUN之后，独立target／jobs2租约下locked编译、选择3＋重复目的1＋session TCP6、新GPUI9、原文件工作区85项四线程与全workspace严格Clippy均actual0；保留三轮编译失败、首轮GPUI6/8、ID guard负控制actual101和Clippy无效Default失败。新只读审查两项P2已补真实准入失败／取消选区清空，以及普通文件原子发布／目录非原子逐项的双语审核说明与回归。独立MCP一行中文wording单独准备；批量feature不包含它。完整root组合、最终新非作者／标准包／原生、跨平台与拖放继续OPEN，不改变根Unix失败事实。详见[限定作者记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。
+
+根完整组合随后实际失败：839输入前后相同，session库101PASS／1FAIL／4ignored，原子上传future18,112B超过既有16KiB阈值；owner实际wait1／reap／group absent，后续门禁未到达。接管只将发布前文件metadata复核的嵌套future放到堆上，原测试／阈值／四线程／安全校验不改；修后原子上传10,272B，SFTP库32、审核TCP6、原子TCP4及严格全target Clippy均actual0。新的完整门禁、非作者复核和原生仍OPEN，原失败及限定成功分别保留，见[批量记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。

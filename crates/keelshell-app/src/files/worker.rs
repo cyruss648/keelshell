@@ -273,6 +273,7 @@ async fn operate_inner(
         Operation::Upload(..)
             | Operation::Download(..)
             | Operation::TransferDirectory(..)
+            | Operation::TransferFile(..)
             | Operation::ResumeFile(..)
             | Operation::ResumeDirectory(..)
     );
@@ -377,6 +378,24 @@ async fn operate_inner(
                 queued_transfer(
                     sftp.clone(),
                     TransferSpec::download(remote, local),
+                    stop.clone(),
+                    pause,
+                    progress,
+                )
+                .await
+            }
+            Operation::PlanBatch(request) => Ok(Outcome::PlannedBatch(Box::new(
+                batch::prepare(&sftp, request, &stop).await?,
+            ))),
+            Operation::TransferBatch(_) => Err(FileFailure::WorkerStopped),
+            Operation::TransferFile(plan) => {
+                let direction = plan.direction();
+                let queue = sftp.clone().transfer_queue();
+                let mut transfer = queue.enqueue_reviewed_file(plan).await?;
+                observe_transfer(
+                    &mut transfer,
+                    direction,
+                    None,
                     stop.clone(),
                     pause,
                     progress,

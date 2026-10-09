@@ -66,16 +66,23 @@ impl FilesPanel {
     }
 
     pub(super) fn confirm_button(&self, cx: &Context<Self>) -> Button {
+        let expected_batch = self.pending_batch_id();
+        let empty_batch = matches!(&self.pending, Some((_, Operation::TransferBatch(plan))) if plan.ready_count() == 0);
         Button::new("confirm-file-operation")
             .primary()
             .compact()
             .rounded(px(6.))
+            .disabled(empty_batch)
             .label(if matches!(&self.pending, Some((_, Operation::ApplyDirectorySync(review, _))) if review.plan.is_bounded_mirror()) {
                 t(cx, "确认镜像及删除", "Confirm mirror/deletions")
+            } else if expected_batch.is_some() {
+                t(cx, "确认可传输目标", "Confirm admissible targets")
             } else {
                 t(cx, "确认", "Confirm")
             })
-            .on_click(cx.listener(|view, _, window, cx| view.execute_pending(window, cx)))
+            .on_click(cx.listener(move |view, _, window, cx| {
+                if view.pending_batch_id() == expected_batch { view.execute_pending(window, cx); }
+            }))
     }
 
     pub(super) fn cancel_review_button(&self, cx: &Context<Self>) -> Button {

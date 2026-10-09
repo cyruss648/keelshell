@@ -183,8 +183,9 @@ impl FileMutationScope<'_> {
         let _child = self.begin_child()?;
         self.remote_child(path).await?;
         self.sftp
-            .replace_from_reader_checked(path, &mut &data[..], None, None, Some(self))
-            .await?;
+            .replace_from_reader_checked(path, &mut &data[..], None, None, Some(self), None)
+            .await
+            .map_err(transfer_session_error)?;
         Ok(())
     }
     /// Perform one synchronous local mutation and observe its actual completion.
