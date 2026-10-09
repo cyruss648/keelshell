@@ -48,7 +48,17 @@ async fn wait_real(
     h: &Harness,
     timeout: Duration,
     cx: &mut TestAppContext,
+    ready: impl FnMut(&mut App) -> bool,
+) {
+    wait_real_observed(h, timeout, cx, ready, |_| String::new()).await;
+}
+
+async fn wait_real_observed(
+    h: &Harness,
+    timeout: Duration,
+    cx: &mut TestAppContext,
     mut ready: impl FnMut(&mut App) -> bool,
+    mut failure_observation: impl FnMut(&mut App) -> String,
 ) {
     let deadline = std::time::Instant::now() + timeout;
     let runtime = h
@@ -67,7 +77,10 @@ async fn wait_real(
         }
         assert!(
             std::time::Instant::now() < deadline,
-            "actual wall-clock schedule deadline {timeout:?}"
+            "actual wall-clock schedule deadline {timeout:?}; {}",
+            // Assertions evaluate this only on failure. The observer cannot
+            // complete work, perform I/O, or renew the original deadline.
+            cx.update(|cx| failure_observation(cx)),
         );
         // GPUI's wait_for is measured in deterministic test time. Use an owned
         // Tokio timer as well so a real 60-second occurrence cannot be mistaken

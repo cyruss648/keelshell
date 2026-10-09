@@ -124,6 +124,10 @@ impl Server {
     pub fn requests(&self) -> Vec<Vec<u8>> {
         self.requests.lock().checked("batch observations").clone()
     }
+    /// Return only the number of captured requests for bounded diagnostics.
+    pub fn request_count(&self) -> usize {
+        self.requests.lock().checked("batch observations").len()
+    }
 }
 impl Drop for Server {
     fn drop(&mut self) {
