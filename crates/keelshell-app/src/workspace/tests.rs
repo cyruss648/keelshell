@@ -27,6 +27,7 @@ mod ai_command_review_target;
 mod ai_metadata;
 pub(crate) mod independent_disk_monitor;
 mod profile_sync;
+pub(crate) mod protocol_diagnostics;
 
 trait Checked<T> {
     fn checked(self, operation: &str) -> T;

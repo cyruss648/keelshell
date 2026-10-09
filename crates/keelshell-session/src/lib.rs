@@ -10,6 +10,7 @@ mod error;
 mod events;
 pub mod forwarding;
 pub mod monitor;
+pub mod network_diagnostic;
 pub mod sftp;
 pub mod ssh;
 pub mod workflow;

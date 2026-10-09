@@ -215,6 +215,36 @@ impl Workspace {
         })
     }
 
+    pub(crate) fn protocol_session_current(&self, tab: EntityId, session: &SshSession) -> bool {
+        self.remote_sessions
+            .get(&tab)
+            .is_some_and(|current| current.same_connection(session))
+            && self.tabs.iter().any(|terminal| terminal.entity_id() == tab)
+            && self
+                .reconnect_bindings
+                .get(&tab)
+                .is_none_or(|binding| self.binding_current(binding) && !binding.ended)
+    }
+
+    pub(super) fn revoke_stale_protocol_diagnostics(&mut self, cx: &mut Context<Self>) {
+        let retired: Vec<_> = self
+            .panels
+            .iter()
+            .filter_map(|(id, panels)| {
+                let current = self.remote_sessions.get(id).is_some_and(|session| {
+                    self.protocol_session_current(*id, session)
+                        && panels.monitor.as_ref().is_some_and(|monitor| {
+                            monitor.read(cx).protocol_connection_matches(session, cx)
+                        })
+                });
+                (!current).then(|| panels.monitor.clone()).flatten()
+            })
+            .collect();
+        for panel in retired {
+            panel.update(cx, |panel, cx| panel.revoke_protocol_authority(cx));
+        }
+    }
+
     pub(super) fn reconnect_ticket_current(&self, ticket: Ticket) -> bool {
         self.tabs.iter().any(|tab| tab.entity_id() == ticket.tab)
             && self
@@ -275,6 +305,7 @@ impl Workspace {
     }
 
     pub(super) fn poll_reconnect(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        self.revoke_stale_protocol_diagnostics(cx);
         let now = Instant::now();
         let terminals = self.tabs.clone();
         for terminal in terminals {
@@ -778,6 +809,10 @@ impl Workspace {
                 cx,
             )
         });
+        let protocol_workspace = cx.weak_entity();
+        monitor.update(cx, |panel, panel_cx| {
+            panel.bind_protocol_authority(protocol_workspace, id, panel_cx)
+        });
         let files = cx.new(|cx| crate::files::FilesPanel::new(session, host, runtime, window, cx));
         self.panels.insert(
             id,
@@ -914,12 +949,36 @@ impl Workspace {
 }
 
 #[cfg(test)]
-mod budget_tests {
+pub(super) mod budget_tests {
     use super::{Series, TabBinding};
     use crate::i18n::Message;
     use keelshell_core::{AppState, Connection, ReconnectPolicy};
     use keelshell_session::{ConnectionEnd, ShellEnd};
     use std::time::{Duration, Instant};
+
+    /// Arrange a completed fixture attempt without starting a real connector.
+    /// The regression then calls the actual finish_reconnect installation path.
+    pub(crate) fn owned_fixture_ticket(
+        view: &mut super::Workspace,
+        tab: gpui_kit::EntityId,
+    ) -> super::Ticket {
+        let ticket = super::Ticket {
+            tab,
+            series: uuid::Uuid::new_v4(),
+        };
+        let binding = view
+            .reconnect_bindings
+            .get_mut(&tab)
+            .unwrap_or_else(|| panic!("owned fixture requires captured route"));
+        binding.ended = true;
+        binding.series = Some(Series {
+            id: ticket.series,
+            due: None,
+            background: false,
+            discard_archive: None,
+        });
+        ticket
+    }
 
     fn binding() -> TabBinding {
         let connection = Connection::new("budget", "example.invalid", "test");

@@ -23,6 +23,7 @@ mod directory_compare;
 mod directory_sync;
 mod error;
 mod model;
+mod network_diagnostic;
 mod openssh;
 mod profile_sync;
 mod proxy;
@@ -83,6 +84,10 @@ pub use error::{Error, ValidationError};
 pub use model::{
     AiSettings, AppState, AuthMethod, Connection, ImportReport, Language, SCHEMA_VERSION, Settings,
     SnapshotRevision, Snippet, Theme,
+};
+pub use network_diagnostic::{
+    DIAGNOSTIC_REMOTE_SECONDS, MAX_DIAGNOSTIC_INPUT_BYTES, MAX_DIAGNOSTIC_OUTPUT_BYTES,
+    NetworkDiagnosticInputError, NetworkDiagnosticKind, NetworkDiagnosticRequest,
 };
 pub use openssh::{
     MAX_OPENSSH_CONFIG_BYTES, MAX_OPENSSH_ENTRIES, MAX_OPENSSH_INCLUDE_DEPTH,
