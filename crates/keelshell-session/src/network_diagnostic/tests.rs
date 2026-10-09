@@ -1,10 +1,9 @@
 use super::*;
 use crate::{SshAuth, SshOptions};
 use russh::server;
-use std::{
-    process::Command,
-    sync::{Arc, Mutex, atomic::AtomicUsize},
-};
+#[cfg(unix)]
+use std::process;
+use std::sync::{Arc, Mutex, atomic::AtomicUsize};
 use tokio::{net::TcpListener, sync::Semaphore, task::JoinHandle};
 mod actual_services;
 #[cfg(unix)]
@@ -133,11 +132,11 @@ impl server::Handler for Peer {
                     .to_owned();
                 tokio::task::spawn_blocking(move || {
                     let mut child = if let Some(container) = container {
-                        let mut child = Command::new("podman");
+                        let mut child = process::Command::new("podman");
                         child.args(["exec", &container, "/bin/sh", "-c", &command]);
                         child
                     } else {
-                        let mut child = Command::new("/bin/sh");
+                        let mut child = process::Command::new("/bin/sh");
                         child.arg("-c").arg(command);
                         child
                     };

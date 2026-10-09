@@ -68,4 +68,6 @@ D1先于后续新界面，原有后端与任务目标继续保留。全部新增
 
 2026-10-07 诊断分支 dd32392 的 Quality 已实际结束：macOS／Windows成功，Linux同ID保存资料审批18秒等待失败；原目录字节用例该次通过但旧失败原因保持未知。新增四阶段test-only观察在独立工作树验证，不改变生产加密、18秒批准或45秒计划，见[CI定位](testing/records/2026-10-07-saved-profile-sync-ci-diagnosis.md)。
 
+主线 9865f1f 的 Windows job 已实际失败于测试 `Command` 导入缺少 Unix 条件；独立工作树仅补齐该条件及两个既有夹具调用的模块限定，未改生产、断言或门禁。最终表示的本机格式／x.y／全工作区严格 Clippy、389 项 session 普通测试和 1 项文档测试通过，16 ignored 未执行；新的非作者复核与新提交级 Windows CI 待完成，原失败日志保留，见[Windows 记录](testing/records/2026-10-07-windows-diagnostic-import.md)。
+
 2026-10-07 当前组合的 macOS 原生递归镜像已实际完成双向各12项，取消及上传后的独立文件核对、下载后的根字节核对及新非作者只读复核通过。两个隔离GUI与所属Linux资源结束，首轮1800秒超时和管理进程wait未知边界保留。中英文纵向审核证据不替代横向长行、最小窗口、辅助技术或其它平台原生，见[原生记录](testing/records/2026-10-07-recursive-mirror-native.md)。
