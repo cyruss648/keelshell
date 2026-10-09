@@ -4,7 +4,9 @@
 //! model or a local terminal. Only specifically checked versions are admitted;
 //! a new version requires a fresh capability and controlled-wire review.
 
+mod bootstrap;
 mod config;
+mod directory;
 mod process;
 mod progress;
 mod protocol;
@@ -16,7 +18,9 @@ use zeroize::Zeroizing;
 
 use crate::{AiError, ContextDraft, ProviderConfig, ProviderProtocol, RedactionReport};
 
+pub use bootstrap::run_local_agent_directory_launcher;
 pub use config::{LocalAgentConfig, LocalAgentKind, LocalAgentLimits, LocalAgentVersion};
+pub use directory::{LocalAgentWorkingDirectory, ValidatedLocalAgentDirectory};
 pub use process::{LocalAgentClient, LocalAgentProbe};
 pub use progress::{LocalAskProgress, LocalAskProgressReceiver, LocalAskStage};
 
@@ -42,6 +46,42 @@ pub enum LocalAgentError {
     /// Scratch data could not be created or removed.
     #[error("Local agent isolated scratch data could not be created or removed")]
     ScratchFailed,
+    /// Selected directory metadata is not a bounded absolute native path.
+    #[error("Local agent working directory must be a bounded absolute native path")]
+    DirectoryInvalid,
+    /// The explicitly selected directory no longer exists.
+    #[error("Local agent working directory does not exist")]
+    DirectoryMissing,
+    /// A selected path component is a file or another non-directory object.
+    #[error("Local agent working directory path contains a non-directory object")]
+    DirectoryNotDirectory,
+    /// A selected path or project-metadata entry is a symbolic link/reparse point.
+    #[error("Local agent working directory or project metadata contains a symbolic link")]
+    DirectorySymlink,
+    /// Directory access was refused or filesystem identity could not be read.
+    #[error("Local agent working directory cannot be accessed")]
+    DirectoryUnavailable,
+    /// A reviewed directory was moved, replaced or otherwise ceased to match.
+    #[error("Local agent reviewed working directory changed; review again")]
+    DirectoryChanged,
+    /// Codex project metadata is malformed, special or outside its size bound.
+    #[error("Local agent project metadata is invalid or outside its supported bound")]
+    DirectoryMetadataInvalid,
+    /// Codex project metadata appeared, disappeared or changed after review.
+    #[error("Local agent reviewed project metadata changed; review again")]
+    DirectoryMetadataChanged,
+    /// A selected directory requires background validation and an exact preview.
+    #[error("Local agent selected directory requires background validation and review")]
+    DirectoryReviewRequired,
+    /// Native directory anchoring cannot be enforced on this platform.
+    #[error("Local agent working directory cannot be safely anchored on this platform")]
+    DirectoryUnsupported,
+    /// Background directory validation exceeded its separate bounded deadline.
+    #[error("Local agent working directory validation timed out; authority is revoked")]
+    DirectoryValidationTimedOut,
+    /// The reviewed native CLI was moved, replaced or changed during admission.
+    #[error("Local agent executable changed during admission; review again")]
+    ExecutableChanged,
     /// The CLI version is not within the specifically checked compatibility set.
     #[error("Local agent version is outside the checked compatibility set")]
     UnsupportedVersion,
@@ -123,6 +163,7 @@ pub struct PreparedLocalAsk {
     stdin: Zeroizing<String>,
     preview: Zeroizing<String>,
     report: RedactionReport,
+    directory: Option<ValidatedLocalAgentDirectory>,
 }
 
 impl PreparedLocalAsk {
@@ -234,6 +275,56 @@ impl LocalAgentConfig {
         secrets: &[&str],
         byte_budget: usize,
     ) -> Result<PreparedLocalAsk, LocalAgentError> {
+        if self.working_directory != LocalAgentWorkingDirectory::Isolated {
+            return Err(LocalAgentError::DirectoryReviewRequired);
+        }
+        self.prepare_inner(context, secrets, byte_budget, None)
+    }
+
+    /// Prepare an exact Ask preview after background directory validation.
+    ///
+    /// A selected path authorizes inspecting its project metadata, not sending
+    /// its contents or activating tools/hooks/MCP. The preview displays selected
+    /// and canonical paths and warns that directory metadata can reach the
+    /// inference service. Only explicit stdin context is included; the runtime
+    /// rechecks the retained directory authority after every admission wait.
+    pub async fn prepare_checked(
+        &self,
+        context: ContextDraft,
+        secrets: &[&str],
+        byte_budget: usize,
+        cancellation: &crate::RequestCancellation,
+    ) -> Result<PreparedLocalAsk, LocalAgentError> {
+        self.validate_context_metadata(secrets)?;
+        let directory = self.validate_working_directory(cancellation).await?;
+        if let Some(directory) = &directory {
+            crate::RequestOptions::default()
+                .with_context_secrets(secrets)
+                .map_err(LocalAgentError::Context)?
+                .validate_metadata_text(directory.canonical_path().to_string_lossy().as_ref())
+                .map_err(LocalAgentError::Context)?;
+        }
+        let mut config = self.clone();
+        #[cfg(unix)]
+        if directory.is_some() && config.directory_launcher.is_none() {
+            // Resolve the current trusted application on a worker, never the UI.
+            config.directory_launcher = Some(
+                tokio::task::spawn_blocking(std::env::current_exe)
+                    .await
+                    .map_err(|_| LocalAgentError::DirectoryUnsupported)?
+                    .map_err(|_| LocalAgentError::DirectoryUnsupported)?,
+            );
+        }
+        config.prepare_inner(context, secrets, byte_budget, directory)
+    }
+
+    fn prepare_inner(
+        &self,
+        context: ContextDraft,
+        secrets: &[&str],
+        byte_budget: usize,
+        directory: Option<ValidatedLocalAgentDirectory>,
+    ) -> Result<PreparedLocalAsk, LocalAgentError> {
         self.validate_context_metadata(secrets)?;
         // Reuse the existing admission/redaction implementation. This formatter
         // never sends HTTP; its endpoint is not part of the CLI request or review.
@@ -253,17 +344,33 @@ impl LocalAgentConfig {
             "selected_context": fields["input"],
         }))
         .map_err(|_| LocalAgentError::InvalidProtocol)?;
+        let workspace = match &directory {
+            None => serde_json::json!({
+                "mode":"isolated",
+                "description":"fresh empty temporary directory; no existing project is exposed",
+            }),
+            Some(directory) => serde_json::json!({
+                "mode":"selected",
+                "selected_path":directory.selected_path(),
+                "canonical_path":directory.canonical_path(),
+                "directory_authority":"CLI may inspect project metadata in this explicitly selected directory; metadata contents are not approved model context",
+                "inference_metadata":"the selected directory path and CLI-generated directory metadata may be sent to the inference service",
+                "context":"no automatic AGENTS.md, CLAUDE.md, skills or project-file context; only the selected stdin below is approved",
+                "configuration":"project configuration cannot enable hooks, MCP, tools or inherited credentials; home, environment and temporary data remain isolated",
+            }),
+        };
         let preview = serde_json::to_string_pretty(&serde_json::json!({
             "kind": self.kind.label(),
             "executable": self.executable,
             "scratch_parent": self.scratch_parent,
-            "workspace": "fresh empty temporary directory; no existing project is exposed",
+            "workspace": workspace,
             "inference_endpoint": self.endpoint,
             "model": self.model,
             "mode": "Ask only; no CLI tools, installed hooks/plugins, skills or MCP; fixed Claude built-in metadata admitted",
             "credential": "explicit ephemeral API credential; subscription login not reused",
             "credential_environment_reference": self.credential_environment_reference,
-            "codex_permissions": "root deny; minimal runtime paths read; isolated workspace read; command network disabled",
+            "codex_permissions": if directory.is_some() {"root deny; minimal runtime paths and reviewed directory read; command network disabled"}
+                else {"root deny; minimal runtime paths read; isolated workspace read; command network disabled"},
             "timeout_ms": self.limits.timeout.as_millis(),
             "combined_output_bytes": self.limits.output_bytes,
             "jsonl_line_bytes": self.limits.line_bytes,
@@ -277,6 +384,7 @@ impl LocalAgentConfig {
             stdin: Zeroizing::new(stdin),
             preview: Zeroizing::new(preview),
             report: sanitized.redaction_report(),
+            directory,
         })
     }
 }

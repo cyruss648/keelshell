@@ -12,6 +12,7 @@ fn profile(agent: AiLocalAgent) -> NamedAiProfile {
     profile.name = "Isolated local".into();
     profile.model = "fixture-model".into();
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent,
         executable: std::env::temp_dir()
             .join("unused-cli")

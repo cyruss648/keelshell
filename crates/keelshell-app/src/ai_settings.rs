@@ -13,8 +13,8 @@ use keelshell_ai::{
     ProviderClient, ProviderConfig, ProviderEndpoint, ProviderProtocol, RequestCancellation,
 };
 use keelshell_core::{
-    AiApiStyle, AiAuthentication, AiBackend, AiLocalAgent, AiLocalAgentLimits, AiPreset,
-    AiProfileCatalog, NamedAiProfile,
+    AiApiStyle, AiAuthentication, AiBackend, AiLocalAgent, AiLocalAgentLimits,
+    AiLocalAgentWorkingDirectory, AiPreset, AiProfileCatalog, NamedAiProfile,
 };
 use tokio::runtime::Runtime;
 use uuid::Uuid;
@@ -31,6 +31,7 @@ mod scrollbar_tests;
 pub(crate) mod tests;
 mod vault;
 mod view;
+mod working_directory;
 use vault::VaultPrompt;
 
 /// Temporary keys indexed by profile identity. Never serialize or debug this map.
@@ -101,6 +102,7 @@ impl LocalLimitDraft {
 struct EditorValues {
     name: String,
     executable: String,
+    local_directory: String,
     endpoint: String,
     model: String,
     key: Zeroizing<String>,
@@ -114,6 +116,7 @@ enum OperationKind {
     Models,
     Test,
     LocalProbe,
+    DirectoryCheck,
 }
 
 enum OperationResult {
@@ -131,6 +134,10 @@ pub struct AiSettingsPanel {
     form_scroll: ScrollHandle,
     name: Entity<InputState>,
     executable: Entity<InputState>,
+    local_directory: Entity<InputState>,
+    local_directory_drafts: BTreeMap<Uuid, String>,
+    local_directory_scroll: ScrollHandle,
+    local_directory_checked: Option<(Uuid, u64, String)>,
     endpoint: Entity<InputState>,
     model: Entity<InputState>,
     key: Entity<InputState>,
@@ -190,6 +197,7 @@ impl AiSettingsPanel {
             local_limits: LocalLimitDraft::for_profile(profile),
             name: profile.map_or_else(String::new, |p| p.name.clone()),
             executable: profile.map_or_else(String::new, executable_value),
+            local_directory: profile.map_or_else(String::new, working_directory::path_value),
             endpoint: profile.map_or_else(String::new, |p| p.endpoint.clone()),
             model: profile.map_or_else(String::new, |p| p.model.clone()),
             key: selected
@@ -231,6 +239,16 @@ impl AiSettingsPanel {
                 cx,
                 "本地 CLI 可执行文件的绝对路径",
                 "Absolute path to the native CLI executable",
+            ),
+            window,
+            cx,
+        );
+        let local_directory = field(
+            &values.local_directory,
+            t(
+                cx,
+                "选择已有目录，或填写完整绝对路径",
+                "Select an existing folder or enter its full absolute path",
             ),
             window,
             cx,
@@ -310,6 +328,7 @@ impl AiSettingsPanel {
         let subscriptions = [
             &name,
             &executable,
+            &local_directory,
             &endpoint,
             &model,
             &key,
@@ -342,6 +361,10 @@ impl AiSettingsPanel {
             form_scroll: ScrollHandle::new(),
             name,
             executable,
+            local_directory,
+            local_directory_drafts: BTreeMap::new(),
+            local_directory_scroll: ScrollHandle::new(),
+            local_directory_checked: None,
             endpoint,
             model,
             key,
@@ -404,6 +427,11 @@ impl AiSettingsPanel {
                 &self.executable,
                 "本地 CLI 可执行文件的绝对路径",
                 "Absolute path to the native CLI executable",
+            ),
+            (
+                &self.local_directory,
+                "选择已有目录，或填写完整绝对路径",
+                "Select an existing folder or enter its full absolute path",
             ),
             (
                 &self.name,
@@ -485,6 +513,7 @@ impl AiSettingsPanel {
             },
             name: self.name.read(cx).value().to_string(),
             executable: self.executable.read(cx).value().to_string(),
+            local_directory: self.local_directory.read(cx).value().to_string(),
             endpoint: self.endpoint.read(cx).value().to_string(),
             model: self.model.read(cx).value().to_string(),
             key: Zeroizing::new(self.key.read(cx).value().to_string()),
@@ -527,10 +556,18 @@ impl AiSettingsPanel {
             profile.endpoint.clone_from(&values.endpoint);
             profile.model.clone_from(&values.model);
             if let AiBackend::LocalAgent {
-                executable, limits, ..
+                executable,
+                limits,
+                working_directory,
+                ..
             } = &mut profile.backend
             {
                 executable.clone_from(&values.executable);
+                self.local_directory_drafts
+                    .insert(profile.id, values.local_directory.clone());
+                if let AiLocalAgentWorkingDirectory::Selected { path } = working_directory {
+                    path.clone_from(&values.local_directory);
+                }
                 self.local_limit_drafts
                     .insert(profile.id, values.local_limits.clone());
                 // Invalid text remains an editor draft; every launch/save checks
@@ -590,6 +627,9 @@ impl AiSettingsPanel {
     }
 
     fn changed(&mut self, clear_models: bool, cx: &mut Context<Self>) {
+        self.local_directory_checked = None;
+        self.local_directory_scroll
+            .set_offset(point(px(0.), px(0.)));
         self.cancel_vault();
         self.revision = self.revision.wrapping_add(1);
         self.cancel_operation(false, cx);
@@ -610,6 +650,9 @@ impl AiSettingsPanel {
     }
 
     fn load_editor(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        self.local_directory_checked = None;
+        self.local_directory_scroll
+            .set_offset(point(px(0.), px(0.)));
         let token_draft = self.selected.and_then(|id| self.token_drafts.get(&id));
         let values = EditorValues {
             local_limits: self
@@ -619,6 +662,14 @@ impl AiSettingsPanel {
                 .unwrap_or_else(|| LocalLimitDraft::for_profile(self.profile())),
             name: self.profile().map_or_else(String::new, |p| p.name.clone()),
             executable: self.profile().map_or_else(String::new, executable_value),
+            local_directory: self
+                .selected
+                .and_then(|id| self.local_directory_drafts.get(&id))
+                .cloned()
+                .unwrap_or_else(|| {
+                    self.profile()
+                        .map_or_else(String::new, working_directory::path_value)
+                }),
             endpoint: self
                 .profile()
                 .map_or_else(String::new, |p| p.endpoint.clone()),
@@ -644,6 +695,7 @@ impl AiSettingsPanel {
         for (field, value) in [
             (&self.name, values.name.as_str()),
             (&self.executable, &values.executable),
+            (&self.local_directory, &values.local_directory),
             (&self.endpoint, &values.endpoint),
             (&self.model, &values.model),
             (&self.key, &values.key),
@@ -703,6 +755,7 @@ impl AiSettingsPanel {
             self.request_editors.remove(&id);
             self.credentials.remove(&id);
             self.local_limit_drafts.remove(&id);
+            self.local_directory_drafts.remove(&id);
             self.local_environment_drafts.remove(&id);
             self.credentials.clear_local_environment(id);
             self.token_drafts.remove(&id);
@@ -926,6 +979,7 @@ impl AiSettingsPanel {
         profile.model.clear();
         if let Some(agent) = agent {
             profile.backend = AiBackend::LocalAgent {
+                working_directory: Default::default(),
                 agent,
                 executable: String::new(),
                 limits: AiLocalAgentLimits::default(),
@@ -1183,6 +1237,10 @@ impl AiSettingsPanel {
     }
 
     fn start_operation(&mut self, kind: OperationKind, cx: &mut Context<Self>) {
+        if kind == OperationKind::DirectoryCheck {
+            self.start_directory_check(cx);
+            return;
+        }
         if kind == OperationKind::LocalProbe {
             self.start_local_probe(cx);
             return;
@@ -1269,7 +1327,7 @@ impl AiSettingsPanel {
             OperationKind::Test => {
                 Message::new("正在发送固定连接测试…", "Sending a fixed connection test…")
             }
-            OperationKind::LocalProbe => Message::empty(),
+            OperationKind::LocalProbe | OperationKind::DirectoryCheck => Message::empty(),
         };
         let job = crate::runtime_bridge::spawn(
             &self.runtime,
@@ -1313,7 +1371,9 @@ impl AiSettingsPanel {
                         )
                         .await
                         .map(OperationResult::Test),
-                    OperationKind::LocalProbe => Err(AiError::InvalidEndpoint),
+                    OperationKind::LocalProbe | OperationKind::DirectoryCheck => {
+                        Err(AiError::InvalidEndpoint)
+                    }
                 }
             },
         );
@@ -1404,13 +1464,18 @@ pub(crate) fn local_agent_config(
             metadata.model = "capability-probe-only".into();
         }
     }
-    metadata
-        .validate_local_agent_transport()
-        .map_err(|_| LocalAgentError::InvalidConfiguration)?;
+    metadata.validate_local_agent_transport().map_err(|error| {
+        if error.field == "ai.profile.backend.working_directory" {
+            LocalAgentError::DirectoryInvalid
+        } else {
+            LocalAgentError::InvalidConfiguration
+        }
+    })?;
     let AiBackend::LocalAgent {
         agent,
         executable,
         limits,
+        working_directory,
     } = &metadata.backend
     else {
         return Err(LocalAgentError::InvalidConfiguration);
@@ -1425,6 +1490,14 @@ pub(crate) fn local_agent_config(
         std::env::temp_dir(),
         &metadata.model,
     )?
+    .with_working_directory(match working_directory {
+        AiLocalAgentWorkingDirectory::Isolated => {
+            keelshell_ai::LocalAgentWorkingDirectory::Isolated
+        }
+        AiLocalAgentWorkingDirectory::Selected { path } => {
+            keelshell_ai::LocalAgentWorkingDirectory::Selected(PathBuf::from(path))
+        }
+    })?
     .with_inference_endpoint(&metadata.endpoint)
     .and_then(|config| {
         LocalAgentLimits::for_ask(
@@ -1455,6 +1528,50 @@ pub(crate) fn local_agent_error(error: LocalAgentError) -> Message {
         return provider_error(error);
     }
     let (zh, en) = match error {
+        LocalAgentError::ExecutableChanged => (
+            "本地 CLI 文件在能力检查期间发生变化；请重新检查并审阅。",
+            "The local CLI changed during capability checks; check and review again.",
+        ),
+        LocalAgentError::DirectoryInvalid => (
+            "工作目录需为当前平台的完整绝对路径；不能包含控制字符或上级目录跳转。",
+            "Use a full native absolute working directory path without control characters or parent traversal.",
+        ),
+        LocalAgentError::DirectoryMissing => (
+            "所选工作目录不存在；请重新选择已有目录。",
+            "The selected working directory does not exist; select an existing folder.",
+        ),
+        LocalAgentError::DirectoryNotDirectory => (
+            "工作目录路径中包含文件或非目录对象。",
+            "The working directory path contains a file or non-directory object.",
+        ),
+        LocalAgentError::DirectorySymlink => (
+            "工作目录或项目元数据包含符号链接或重解析点；请选择真实目录。",
+            "The working directory or project metadata contains a symbolic link or reparse point; select the real directory.",
+        ),
+        LocalAgentError::DirectoryChanged | LocalAgentError::DirectoryMetadataChanged => (
+            "审核过的目录或项目元数据已变化，本次授权作废；请重新预览。",
+            "The reviewed directory or project metadata changed. This approval is revoked; prepare a fresh preview.",
+        ),
+        LocalAgentError::DirectoryMetadataInvalid => (
+            "项目元数据需为不超过 64 KiB 的正规、无链接、有效 TOML 文件；本次审核作废。",
+            "Project metadata must be a regular, non-link, valid TOML file of at most 64 KiB; this review is revoked.",
+        ),
+        LocalAgentError::DirectoryUnavailable => (
+            "无法访问所选目录或读取其身份；请检查目录权限。",
+            "The selected directory or its identity cannot be accessed; check directory permissions.",
+        ),
+        LocalAgentError::DirectoryUnsupported => (
+            "当前平台无法确认目录锚定安全，本次调用已拒绝。",
+            "Safe directory anchoring could not be confirmed on this platform; the invocation was refused.",
+        ),
+        LocalAgentError::DirectoryReviewRequired => (
+            "所选工作目录需先后台校验，再审阅完整请求。",
+            "The selected working directory needs background validation and a full request review.",
+        ),
+        LocalAgentError::DirectoryValidationTimedOut => (
+            "工作目录后台校验超时；本次授权作废。",
+            "Background working directory validation timed out; this authority is revoked.",
+        ),
         LocalAgentError::InvalidConfiguration | LocalAgentError::InvalidLimits => (
             "CLI 配置无效；请检查绝对路径、模型和受支持的选项。",
             "Invalid CLI configuration; check the absolute path, model and supported options.",

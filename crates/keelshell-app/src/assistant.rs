@@ -6,6 +6,7 @@ use gpui_kit::{
         Disableable, IconName,
         button::{Button, ButtonVariants},
         input::{InputEvent, Textarea, TextareaState},
+        label::Label,
         scroll::{Scrollbar, ScrollbarMode},
     },
     *,
@@ -88,7 +89,7 @@ impl LocalRequestProgress {
 fn stage_message(stage: LocalAskStage) -> Message {
     match stage {
         LocalAskStage::WorkspaceReady => {
-            Message::new("隔离工作区已创建", "Isolated workspace created")
+            Message::new("运行工作目录已就绪", "Execution working directory ready")
         }
         LocalAskStage::CheckingCli => {
             Message::new("正在检查版本与能力", "Checking version and capabilities")
@@ -193,6 +194,7 @@ pub struct AssistantPanel {
     _job: Option<Task<()>>,
     prompt: Entity<TextareaState>,
     content_scroll: ScrollHandle,
+    preview_scroll: ScrollHandle,
     context: String,
     host: String,
     session_id: String,
@@ -247,6 +249,7 @@ impl AssistantPanel {
             _job: None,
             prompt,
             content_scroll: ScrollHandle::new(),
+            preview_scroll: ScrollHandle::new(),
             context: String::new(),
             host: String::new(),
             session_id: String::new(),
@@ -389,6 +392,7 @@ impl AssistantPanel {
         self.prepared = None;
         self.prepared_key = None;
         self.preview = false;
+        self.preview_scroll.set_offset(point(px(0.), px(0.)));
         self.response.clear();
         self.suggestions.clear();
         self.diagnostic_plan = None;
@@ -524,11 +528,83 @@ impl AssistantPanel {
                     .map(PreparedAssistantRequest::Api)
                     .map_err(|error| ai_error(&error))
             }
-            AiBackend::LocalAgent { .. } => local_agent_config(profile, false)
-                .and_then(|config| config.prepare(context, &secrets, 16 * 1024))
-                .map(PreparedAssistantRequest::Local)
-                .map_err(local_agent_error),
+            AiBackend::LocalAgent { .. } => {
+                let config = match local_agent_config(profile, false) {
+                    Ok(config) => config,
+                    Err(error) => {
+                        self.status = local_agent_error(error);
+                        cx.notify();
+                        return;
+                    }
+                };
+                if matches!(
+                    config.working_directory(),
+                    keelshell_ai::LocalAgentWorkingDirectory::Selected(_)
+                ) {
+                    let owned_secrets: Vec<Zeroizing<String>> = secrets
+                        .iter()
+                        .map(|value| Zeroizing::new((*value).to_owned()))
+                        .collect();
+                    let expected_profile = profile.clone();
+                    let revision = self.request_revision;
+                    let target = (self.host.clone(), self.session_id.clone());
+                    let cancellation = RequestCancellation::new();
+                    self.cancellation = Some(cancellation.clone());
+                    self.prepared = None;
+                    self.prepared_key = None;
+                    self.preview = false;
+                    self.busy = true;
+                    self.status = Message::new(
+                        "后台校验所选工作目录；完成后请审核完整目录与 SSH 片段。",
+                        "Validating the selected working directory in the background; then review the full directory and SSH selection.",
+                    );
+                    let job = crate::runtime_bridge::spawn(
+                        &self.runtime,
+                        cx.background_executor().clone(),
+                        async move {
+                            let secrets: Vec<&str> =
+                                owned_secrets.iter().map(|value| value.as_str()).collect();
+                            config
+                                .prepare_checked(context, &secrets, 16 * 1024, &cancellation)
+                                .await
+                                .map(PreparedAssistantRequest::Local)
+                                .map_err(local_agent_error)
+                        },
+                    );
+                    self._job = Some(cx.spawn(async move |this, cx| {
+                        let result = job.await.unwrap_or_else(|_| {
+                            Err(local_agent_error(LocalAgentError::DirectoryUnavailable))
+                        });
+                        let _ = this.update(cx, |panel, cx| {
+                            if panel.request_revision != revision
+                                || panel.profile.as_ref() != Some(&expected_profile)
+                                || (panel.host.clone(), panel.session_id.clone()) != target
+                            {
+                                return;
+                            }
+                            panel.busy = false;
+                            panel.cancellation = None;
+                            panel.accept_prepared(result, resolved_key, cx);
+                        });
+                    }));
+                    cx.notify();
+                    return;
+                }
+                config
+                    .prepare(context, &secrets, 16 * 1024)
+                    .map(PreparedAssistantRequest::Local)
+                    .map_err(local_agent_error)
+            }
         };
+        self.accept_prepared(result, resolved_key, cx);
+    }
+
+    fn accept_prepared(
+        &mut self,
+        result: Result<PreparedAssistantRequest, Message>,
+        resolved_key: Option<Zeroizing<String>>,
+        cx: &mut Context<Self>,
+    ) {
         match result {
             Ok(request) => {
                 let report = request.redaction_report();
@@ -1053,14 +1129,51 @@ impl Render for AssistantPanel {
                 )
                 .child(
                     div()
-                        .p_2()
+                        .relative()
+                        .w_full()
+                        .h(px(224.))
                         .rounded(px(6.))
                         .bg(rgb(visual.canvas))
                         .border_1()
                         .border_color(rgb(visual.border))
-                        .text_xs()
-                        .font_family("monospace")
-                        .child(request.preview_json().to_owned()),
+                        .child(
+                            div()
+                                .id("assistant-request-full-preview")
+                                .test_support()
+                                .size_full()
+                                .flex()
+                                .flex_col()
+                                .items_start()
+                                .overflow_scroll()
+                                .track_scroll(&self.preview_scroll)
+                                .p_2()
+                                .pr_5()
+                                .pb_5()
+                                .font_family("monospace")
+                                .child(
+                                    Label::new(request.preview_json().to_owned())
+                                        .text_xs()
+                                        .whitespace_nowrap()
+                                        .flex_shrink_0(),
+                                ),
+                        )
+                        .child(
+                            div()
+                                .id("assistant-request-preview-scrollbar")
+                                .test_support()
+                                .aria_label(t(
+                                    cx,
+                                    "完整请求预览滚动条",
+                                    "Complete request preview scrollbars",
+                                ))
+                                .absolute()
+                                .inset_0()
+                                .child(
+                                    Scrollbar::new(&self.preview_scroll)
+                                        .id("assistant-request-preview-scrollbar-control")
+                                        .mode(ScrollbarMode::Always),
+                                ),
+                        ),
                 );
         }
         if !self.response.is_empty() {

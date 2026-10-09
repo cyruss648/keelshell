@@ -1,8 +1,10 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use super::{AssistantEvent, AssistantPanel, PreparedAssistantRequest, shell_blocks};
 use crate::{ai_settings::EphemeralCredentials, i18n::set_language};
 use gpui_kit::{
-    AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
-    point, px, size,
+    AnyWindowHandle, AppContext, Bounds, Entity, InputEvent as _, TestAppContext, WindowBounds,
+    WindowOptions, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
 };
 use keelshell_ai::RequestCancellation;
@@ -1337,6 +1339,7 @@ fn local_profile(agent: keelshell_core::AiLocalAgent) -> NamedAiProfile {
     use keelshell_core::{AiBackend, AiLocalAgent};
     let mut profile = profile("Local CLI");
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent,
         limits: Default::default(),
         executable: std::env::temp_dir()
@@ -1439,6 +1442,218 @@ fn local_review_requires_explicit_key_redacts_context_and_survives_language(
         }
     })
     .unwrap_or_else(|_| panic!("CLI review languages"));
+}
+
+#[gpui_kit::test]
+async fn selected_directory_review_runs_in_background_and_preserves_scrollable_payload(
+    cx: &mut TestAppContext,
+) {
+    use keelshell_core::{AiBackend, AiLocalAgent, AiLocalAgentWorkingDirectory};
+    let root = tempfile::tempdir().expect("owned selected directory");
+    let path = root
+        .path()
+        .canonicalize()
+        .expect("owned canonical root")
+        .join("完整-directory-".repeat(12));
+    std::fs::create_dir(&path).expect("owned selected directory");
+    let (handle, panel) = mount(cx);
+    panel.update(cx, |panel, cx| {
+        let mut profile = local_profile(AiLocalAgent::Codex);
+        if let AiBackend::LocalAgent {
+            working_directory, ..
+        } = &mut profile.backend
+        {
+            *working_directory = AiLocalAgentWorkingDirectory::Selected {
+                path: path.to_string_lossy().into_owned(),
+            };
+        }
+        panel.set_profile(
+            Some(profile),
+            Some(Zeroizing::new("owned-ephemeral-key".into())),
+            cx,
+        );
+        panel.set_context(
+            "unbroken-explicit-selected-output-".repeat(140),
+            "owned-host".into(),
+            "owned-session".into(),
+            cx,
+        );
+        panel.prepare(cx);
+        assert!(panel.busy);
+        assert!(
+            panel.prepared.is_none(),
+            "no approval before background validation"
+        );
+        assert!(panel._job.is_some());
+    });
+    cx.update_window(handle, |_, window, cx| window.render_frame(cx))
+        .expect("responsive frame while validating");
+    cx.wait_for(handle, Duration::from_secs(5), |_, cx| !panel.read(cx).busy)
+        .await;
+    let exact = panel.read_with(cx, |panel, _| {
+        let Some(PreparedAssistantRequest::Local(request)) = &panel.prepared else {
+            panic!("selected review");
+        };
+        assert!(
+            request
+                .preview_json()
+                .contains(path.to_str().expect("Unicode path"))
+        );
+        assert!(
+            !request.preview_json().contains("owned-session"),
+            "request identity remains local"
+        );
+        assert!(
+            !request
+                .preview_stdin()
+                .contains(path.to_str().expect("path"))
+        );
+        request.preview_json().to_owned()
+    });
+    cx.update_window(handle, |_, window, cx| {
+        window.render_frame(cx);
+        let viewport = window.find("assistant-request-full-preview").bounds();
+        let scroll = panel.read(cx).preview_scroll.clone();
+        assert!(
+            scroll.max_offset().x > px(0.),
+            "long original JSON line has a horizontal range"
+        );
+        assert!(
+            scroll.max_offset().y > px(0.),
+            "complete policy JSON has a vertical range"
+        );
+        let position = viewport.center();
+        window.dispatch_event(
+            gpui_kit::MouseMoveEvent {
+                position,
+                ..Default::default()
+            }
+            .to_platform_input(),
+            cx,
+        );
+        for delta in [point(px(-10000.), px(0.)), point(px(0.), px(-10000.))] {
+            window.dispatch_event(
+                gpui_kit::ScrollWheelEvent {
+                    position,
+                    delta: gpui_kit::ScrollDelta::Pixels(delta),
+                    ..Default::default()
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.render_frame(cx);
+        }
+        assert!(scroll.offset().x < px(0.));
+        assert!(scroll.offset().y < px(0.));
+        assert!(window.find("assistant-request-preview-scrollbar").visible());
+        for language in [Language::En, Language::ZhCn] {
+            set_language(language, cx);
+            panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
+            assert_eq!(
+                panel
+                    .read(cx)
+                    .prepared
+                    .as_ref()
+                    .expect("immutable review")
+                    .preview_json(),
+                exact
+            );
+        }
+        panel.update(cx, |panel, cx| {
+            panel.set_context(
+                "changed".into(),
+                "new-host".into(),
+                "new-session".into(),
+                cx,
+            )
+        });
+        assert_eq!(scroll.offset(), point(px(0.), px(0.)));
+        assert!(panel.read(cx).prepared.is_none());
+    })
+    .expect("two-axis original preview");
+}
+
+#[gpui_kit::test]
+async fn changing_selected_directory_cancels_pending_prepare_without_replacing_new_review(
+    cx: &mut TestAppContext,
+) {
+    use keelshell_core::{AiBackend, AiLocalAgent, AiLocalAgentWorkingDirectory};
+    let root = tempfile::tempdir().expect("owned selected directory");
+    let (handle, panel) = mount(cx);
+    let cancellation = panel.update(cx, |panel, cx| {
+        let mut profile = local_profile(AiLocalAgent::ClaudeCode);
+        if let AiBackend::LocalAgent {
+            working_directory, ..
+        } = &mut profile.backend
+        {
+            *working_directory = AiLocalAgentWorkingDirectory::Selected {
+                path: root
+                    .path()
+                    .canonicalize()
+                    .expect("canonical")
+                    .to_string_lossy()
+                    .into_owned(),
+            };
+        }
+        panel.set_profile(
+            Some(profile.clone()),
+            Some(Zeroizing::new("owned-key".into())),
+            cx,
+        );
+        panel.prepare(cx);
+        let cancellation = panel
+            .cancellation
+            .as_ref()
+            .expect("background owner")
+            .clone();
+        if let AiBackend::LocalAgent {
+            working_directory, ..
+        } = &mut profile.backend
+        {
+            *working_directory = AiLocalAgentWorkingDirectory::Isolated;
+        }
+        panel.set_profile(Some(profile), Some(Zeroizing::new("owned-key".into())), cx);
+        assert!(cancellation.is_cancelled());
+        panel.set_context(
+            "new SSH selection".into(),
+            "new host".into(),
+            "new session".into(),
+            cx,
+        );
+        panel.prepare(cx);
+        assert!(
+            !panel.busy,
+            "default empty mode keeps historical synchronous preview"
+        );
+        cancellation
+    });
+    let exact = panel.read_with(cx, |panel, _| {
+        panel
+            .prepared
+            .as_ref()
+            .expect("new default review")
+            .preview_json()
+            .to_owned()
+    });
+    let deadline = Instant::now() + Duration::from_millis(60);
+    cx.wait_for(handle, Duration::from_secs(2), |_, _| {
+        Instant::now() >= deadline
+    })
+    .await;
+    panel.read_with(cx, |panel, _| {
+        assert!(cancellation.is_cancelled());
+        assert_eq!(
+            panel
+                .prepared
+                .as_ref()
+                .expect("new review retained")
+                .preview_json(),
+            exact
+        );
+        assert!(panel.prepared_key.is_some());
+        assert!(!panel.busy);
+        assert!(panel.cancellation.is_none());
+    });
 }
 
 #[gpui_kit::test]
@@ -1583,16 +1798,54 @@ fn long_cli_review_scrolls_to_visible_send_in_both_languages(cx: &mut TestAppCon
             panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
             window.render_frame(cx);
             let viewport = window.find("assistant-scroll").bounds();
-            let natural = window.find("assistant-content").bounds();
+            let preview = window.find("assistant-request-full-preview").bounds();
+            let scroll = panel.read(cx).preview_scroll.clone();
             assert!(
-                natural.size.height > viewport.size.height,
-                "review retains its natural content height"
+                scroll.max_offset().x > px(0.),
+                "original long JSON line is readable horizontally"
             );
+            assert!(
+                scroll.max_offset().y > px(0.),
+                "complete policy remains readable vertically"
+            );
+            assert!(preview.size.width <= viewport.size.width);
             window.scroll(
                 "assistant-scroll",
                 gpui_kit::ScrollDelta::Lines(point(0., -1000.)),
                 cx,
             );
+            window.render_frame(cx);
+            let position = window
+                .find("assistant-request-full-preview")
+                .bounds()
+                .center();
+            window.dispatch_event(
+                gpui_kit::MouseMoveEvent {
+                    position,
+                    ..Default::default()
+                }
+                .to_platform_input(),
+                cx,
+            );
+            for delta in [point(px(-10000.), px(0.)), point(px(0.), px(-10000.))] {
+                window.dispatch_event(
+                    gpui_kit::ScrollWheelEvent {
+                        position,
+                        delta: gpui_kit::ScrollDelta::Pixels(delta),
+                        ..Default::default()
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+                window.render_frame(cx);
+            }
+            assert!(
+                scroll.offset().x < px(0.),
+                "horizontal event at {position:?}: max {:?}, offset {:?}",
+                scroll.max_offset(),
+                scroll.offset()
+            );
+            assert!(scroll.offset().y < px(0.));
             let send = window.find("send-approved-request");
             let footer = window.find("assistant-confirmation-footer").bounds();
             assert!(

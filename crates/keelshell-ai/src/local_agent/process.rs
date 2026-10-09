@@ -72,7 +72,8 @@ impl LocalAgentProbe {
     }
 }
 
-/// A stateless, Ask-only CLI worker. No shell, PTY or existing project is opened.
+/// A stateless, Ask-only CLI worker. No shell or PTY is opened.
+/// Selected directories require explicit review and fresh identity checks.
 ///
 /// Run these async methods on a background Tokio executor, never directly on
 /// the GPUI thread. There is no automatic retry, resume, CLI install or login.
@@ -106,6 +107,7 @@ impl LocalAgentClient {
             &scratch,
             Instant::now() + PROBE_DEADLINE,
             cancellation,
+            None,
         )
         .await;
         scratch.close().await?;
@@ -157,7 +159,9 @@ impl LocalAgentClient {
             return Err(LocalAgentError::ReviewExpired);
         }
         check_cancelled(cancellation)?;
-        if payload_contains_secret(&approved.prepared.stdin, credential.0.as_str()) {
+        if payload_contains_secret(&approved.prepared.stdin, credential.0.as_str())
+            || payload_contains_secret(&approved.prepared.preview, credential.0.as_str())
+        {
             return Err(LocalAgentError::CredentialInContext);
         }
         approved
@@ -167,75 +171,139 @@ impl LocalAgentClient {
             .map_err(|_| LocalAgentError::CredentialInContext)?;
         let prepared = approved.prepared;
         let deadline = Instant::now() + prepared.config.limits.timeout;
+        recheck_directory(prepared.directory.as_ref(), deadline, cancellation).await?;
         let scratch = Scratch::create(&prepared.config).await?;
         observe(progress.as_ref(), LocalAskStage::WorkspaceReady);
         let result = async {
+            recheck_directory(prepared.directory.as_ref(), deadline, cancellation).await?;
+            #[cfg(unix)]
+            let executable_review = if prepared.directory.is_some() {
+                Some(
+                    tokio::time::timeout_at(
+                        deadline,
+                        super::bootstrap::ExecutableReview::acquire(
+                            prepared.config.executable.clone(),
+                            cancellation,
+                        ),
+                    )
+                    .await
+                    .map_err(|_| LocalAgentError::Timeout)??,
+                )
+            } else {
+                None
+            };
+            #[cfg(unix)]
+            let owned_binary = if let Some(binary) = &executable_review {
+                #[cfg(target_os = "macos")]
+                verify_signed_bundle(binary, &scratch, deadline, cancellation).await?;
+                let owned = tokio::time::timeout_at(
+                    deadline,
+                    binary.owned_copy(&scratch.temporary, cancellation),
+                )
+                .await
+                .map_err(|_| LocalAgentError::Timeout)??;
+                #[cfg(target_os = "macos")]
+                verify_signed_bundle(&owned, &scratch, deadline, cancellation).await?;
+                recheck_directory(prepared.directory.as_ref(), deadline, cancellation).await?;
+                Some(owned)
+            } else {
+                None
+            };
+            let mut probe_config = prepared.config.clone();
+            #[cfg(unix)]
+            if let Some(binary) = &owned_binary {
+                // Capabilities are observed on the immutable owned bytes that
+                // will execute Ask, rather than a replaceable supplier pathname.
+                probe_config.executable = binary.path().to_owned();
+            }
             observe(progress.as_ref(), LocalAskStage::CheckingCli);
-            let probe = probe_in(&prepared.config, &scratch, deadline, cancellation).await?;
+            let probe = probe_in(
+                &probe_config,
+                &scratch,
+                deadline,
+                cancellation,
+                prepared.directory.as_ref(),
+            )
+            .await?;
             observe(progress.as_ref(), LocalAskStage::CliAdmitted);
             check_cancelled(cancellation)?;
-            let mut command = base_command(&prepared.config, &scratch);
-            match prepared.config.kind {
-                LocalAgentKind::Codex => {
-                    codex_policy(&mut command, &prepared.config);
-                    command.args([
-                        "exec",
-                        "--json",
-                        "--ephemeral",
-                        "--ignore-user-config",
-                        "--ignore-rules",
-                        "--skip-git-repo-check",
-                        "--color",
-                        "never",
-                        "--model",
-                        &prepared.config.model,
-                        "-",
-                    ]);
-                    command.env("KEELSHELL_LOCAL_AGENT_TOKEN", credential.0.as_str());
+            let (command, input, mode) = if prepared.directory.is_some() && cfg!(unix) {
+                #[cfg(unix)]
+                {
+                    let directory = prepared
+                        .directory
+                        .as_ref()
+                        .ok_or(LocalAgentError::DirectoryReviewRequired)?;
+                    let binary = executable_review
+                        .as_ref()
+                        .ok_or(LocalAgentError::ExecutableChanged)?;
+                    tokio::time::timeout_at(deadline, binary.recheck(cancellation))
+                        .await
+                        .map_err(|_| LocalAgentError::Timeout)??;
+                    let owned_binary = owned_binary
+                        .as_ref()
+                        .ok_or(LocalAgentError::ExecutableChanged)?;
+                    tokio::time::timeout_at(deadline, owned_binary.recheck(cancellation))
+                        .await
+                        .map_err(|_| LocalAgentError::Timeout)??;
+                    recheck_directory(Some(directory), deadline, cancellation).await?;
+                    let mut command = base_command(&prepared.config, &scratch);
+                    configure_ask_command(
+                        &mut command,
+                        &prepared.config,
+                        Some(directory),
+                        credential.0.as_str(),
+                    );
+                    super::bootstrap::wrap(
+                        command,
+                        &prepared.config,
+                        directory,
+                        owned_binary,
+                        (&scratch.home, &scratch.temporary),
+                        &prepared.stdin,
+                        probe.version,
+                    )?
                 }
-                LocalAgentKind::ClaudeCode => {
-                    command.args([
-                        "--print",
-                        "--bare",
-                        "--output-format",
-                        "stream-json",
-                        "--verbose",
-                        "--tools",
-                        "",
-                        "--disallowedTools",
-                        "*",
-                        "--strict-mcp-config",
-                        "--mcp-config",
-                        "{\"mcpServers\":{}}",
-                        "--disable-slash-commands",
-                        "--setting-sources",
-                        "",
-                        "--settings",
-                        "{\"disableAllHooks\":true}",
-                        "--permission-mode",
-                        "default",
-                        "--permission-prompts",
-                        "none",
-                        "--no-session-persistence",
-                        "--max-turns",
-                        "1",
-                        "--model",
-                        &prepared.config.model,
-                    ]);
-                    command.env("ANTHROPIC_API_KEY", credential.0.as_str());
-                    command.env("ANTHROPIC_BASE_URL", &prepared.config.endpoint);
+                #[cfg(not(unix))]
+                {
+                    return Err(LocalAgentError::DirectoryUnsupported);
                 }
-            }
+            } else {
+                let mut command = base_command(&prepared.config, &scratch);
+                #[cfg(windows)]
+                if let Some(directory) = &prepared.directory {
+                    command.current_dir(directory.child_path());
+                }
+                configure_ask_command(
+                    &mut command,
+                    &prepared.config,
+                    prepared.directory.as_ref(),
+                    credential.0.as_str(),
+                );
+                (
+                    command,
+                    Zeroizing::new(prepared.stdin.to_string()),
+                    if prepared.directory.is_some() {
+                        OutputMode::GuardedProtocol(prepared.config.kind)
+                    } else {
+                        OutputMode::Protocol(prepared.config.kind)
+                    },
+                )
+            };
+            recheck_directory(prepared.directory.as_ref(), deadline, cancellation).await?;
             let output = run_command(
                 command,
-                prepared.stdin.as_bytes(),
-                OutputMode::Protocol(prepared.config.kind),
+                input.as_bytes(),
+                mode,
                 prepared.config.limits,
                 deadline,
                 cancellation,
                 progress.as_ref(),
             )
             .await?;
+            // Directory handles survive until the owned group/job is cleaned.
+            // A changed review discards even a successfully completed candidate.
+            recheck_directory(prepared.directory.as_ref(), deadline, cancellation).await?;
             match output {
                 RunOutput::Answer(text, frames) => {
                     let (text, _) = Redactor::new(&[credential.0.as_str()]).redact(&text);
@@ -273,8 +341,16 @@ impl Scratch {
         }
         let parent = config.scratch_parent.clone();
         tokio::task::spawn_blocking(move || {
-            let tree = tempfile::Builder::new()
-                .prefix("keelshell-agent-")
+            let mut builder = tempfile::Builder::new();
+            builder.prefix("keelshell-agent-");
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                // The CLI may write its own logs/config to this disposable home.
+                // Explicit 0700 avoids relying on the user's inherited umask.
+                builder.permissions(std::fs::Permissions::from_mode(0o700));
+            }
+            let tree = builder
                 .tempdir_in(parent)
                 .map_err(|_| LocalAgentError::ScratchFailed)?;
             let home = tree.path().join("home");
@@ -316,21 +392,35 @@ impl Scratch {
 }
 
 fn base_command(config: &LocalAgentConfig, scratch: &Scratch) -> Command {
+    owned_command(
+        config,
+        &scratch.home,
+        &scratch.workspace,
+        &scratch.temporary,
+    )
+}
+
+pub(super) fn owned_command(
+    config: &LocalAgentConfig,
+    home: &std::path::Path,
+    workspace: &std::path::Path,
+    temporary: &std::path::Path,
+) -> Command {
     let mut command = Command::new(&config.executable);
     command
         .env_clear()
-        .current_dir(&scratch.workspace)
-        .env("HOME", &scratch.home)
-        .env("USERPROFILE", &scratch.home)
-        .env("CODEX_HOME", scratch.home.join("codex"))
-        .env("CLAUDE_CONFIG_DIR", scratch.home.join("claude"))
-        .env("XDG_CONFIG_HOME", scratch.home.join("config"))
-        .env("XDG_CACHE_HOME", scratch.home.join("cache"))
-        .env("APPDATA", scratch.home.join("appdata"))
-        .env("LOCALAPPDATA", scratch.home.join("localappdata"))
-        .env("TMPDIR", &scratch.temporary)
-        .env("TEMP", &scratch.temporary)
-        .env("TMP", &scratch.temporary)
+        .current_dir(workspace)
+        .env("HOME", home)
+        .env("USERPROFILE", home)
+        .env("CODEX_HOME", home.join("codex"))
+        .env("CLAUDE_CONFIG_DIR", home.join("claude"))
+        .env("XDG_CONFIG_HOME", home.join("config"))
+        .env("XDG_CACHE_HOME", home.join("cache"))
+        .env("APPDATA", home.join("appdata"))
+        .env("LOCALAPPDATA", home.join("localappdata"))
+        .env("TMPDIR", temporary)
+        .env("TEMP", temporary)
+        .env("TMP", temporary)
         .env("LANG", "en_US.UTF-8")
         .env("LC_ALL", "en_US.UTF-8")
         .env("TERM", "dumb")
@@ -358,11 +448,101 @@ fn base_command(config: &LocalAgentConfig, scratch: &Scratch) -> Command {
     command
 }
 
+pub(super) fn configure_ask_command(
+    command: &mut Command,
+    config: &LocalAgentConfig,
+    directory: Option<&super::ValidatedLocalAgentDirectory>,
+    credential: &str,
+) {
+    match config.kind {
+        LocalAgentKind::Codex => {
+            codex_policy(command, config, directory);
+            command.args([
+                "exec",
+                "--json",
+                "--ephemeral",
+                "--ignore-user-config",
+                "--ignore-rules",
+                "--skip-git-repo-check",
+                "--color",
+                "never",
+                "--model",
+                &config.model,
+                "-",
+            ]);
+            command.env("KEELSHELL_LOCAL_AGENT_TOKEN", credential);
+        }
+        LocalAgentKind::ClaudeCode => {
+            command.args([
+                "--print",
+                "--bare",
+                "--output-format",
+                "stream-json",
+                "--verbose",
+                "--tools",
+                "",
+                "--disallowedTools",
+                "*",
+                "--strict-mcp-config",
+                "--mcp-config",
+                "{\"mcpServers\":{}}",
+                "--disable-slash-commands",
+                "--setting-sources",
+                "",
+                "--settings",
+                "{\"disableAllHooks\":true}",
+                "--permission-mode",
+                "default",
+                "--permission-prompts",
+                "none",
+                "--no-session-persistence",
+                "--max-turns",
+                "1",
+                "--model",
+                &config.model,
+            ]);
+            command.env("ANTHROPIC_API_KEY", credential);
+            command.env("ANTHROPIC_BASE_URL", &config.endpoint);
+        }
+    }
+}
+
 fn config_arg(command: &mut Command, value: &str) {
     command.args(["-c", value]);
 }
 
-fn codex_policy(command: &mut Command, config: &LocalAgentConfig) {
+#[cfg(target_os = "macos")]
+async fn verify_signed_bundle(
+    binary: &super::bootstrap::ExecutableReview,
+    scratch: &Scratch,
+    deadline: Instant,
+    cancellation: &RequestCancellation,
+) -> Result<(), LocalAgentError> {
+    let Some(path) = binary.signed_bundle_path() else {
+        return Ok(());
+    };
+    let mut command = Command::new("/usr/bin/codesign");
+    command
+        .env_clear()
+        .current_dir(&scratch.workspace)
+        .args(["--verify", "--strict"])
+        .arg(path)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    let verification_deadline = deadline.min(Instant::now() + std::time::Duration::from_secs(5));
+    match capture(command, verification_deadline, cancellation).await {
+        Ok(_) => Ok(()),
+        Err(error @ (LocalAgentError::Cancelled | LocalAgentError::Timeout)) => Err(error),
+        Err(_) => Err(LocalAgentError::UnsupportedExecutable),
+    }
+}
+
+fn codex_policy(
+    command: &mut Command,
+    config: &LocalAgentConfig,
+    directory: Option<&super::ValidatedLocalAgentDirectory>,
+) {
     for feature in DISABLED_CODEX_FEATURES {
         command.args(["--disable", feature]);
     }
@@ -379,10 +559,40 @@ fn codex_policy(command: &mut Command, config: &LocalAgentConfig) {
         "feedback.enabled=false",
         "history.persistence=\"none\"",
         "project_doc_max_bytes=0",
-        "project_root_markers=[\".keelshell-isolated-workspace\"]",
         "model_provider=\"keelshell_ask\"",
     ] {
         config_arg(command, value);
+    }
+    match &config.working_directory {
+        super::LocalAgentWorkingDirectory::Isolated => {
+            config_arg(
+                command,
+                "project_root_markers=[\".keelshell-isolated-workspace\"]",
+            );
+        }
+        super::LocalAgentWorkingDirectory::Selected(path) => {
+            // Disabled project layers are parsed but excluded from effective_config.
+            // No marker/config is written into the explicitly selected directory.
+            config_arg(command, "project_root_markers=[]");
+            let path = directory.map_or(path.as_path(), |directory| directory.canonical_path());
+            let quoted_path = serde_json::json!(path).to_string();
+            config_arg(
+                command,
+                &format!("projects={{{quoted_path}={{trust_level=\"untrusted\"}}}}"),
+            );
+            for value in [
+                "skills.include_instructions=false",
+                "skills.bundled.enabled=false",
+                "cloud.skills.enabled=false",
+                "suppress_unstable_features_warning=true",
+            ] {
+                config_arg(command, value);
+            }
+            command.args(["--enable", "skip_host_skill_discovery"]);
+            // The checked supplier otherwise attempts a sibling native host
+            // even with code_mode disabled. This adapter never copies helpers.
+            command.args(["--disable", "code_mode_host"]);
+        }
     }
     // Url::as_str() has already removed controls and encoded quotes. JSON string
     // escapes are valid TOML string escapes here, and this is one argv element.
@@ -400,12 +610,14 @@ async fn probe_in(
     scratch: &Scratch,
     deadline: Instant,
     cancellation: &RequestCancellation,
+    directory: Option<&super::ValidatedLocalAgentDirectory>,
 ) -> Result<LocalAgentProbe, LocalAgentError> {
     let mut version_command = base_command(config, scratch);
     version_command.arg("--version");
     let version_bytes = capture(version_command, deadline, cancellation).await?;
+    recheck_directory(directory, deadline, cancellation).await?;
     let version = parse_version(config.kind, &version_bytes)?;
-    if version != config.kind.checked_version() {
+    if !config.kind.supports_version(version) {
         return Err(LocalAgentError::UnsupportedVersion);
     }
     let mut help_command = base_command(config, scratch);
@@ -414,6 +626,7 @@ async fn probe_in(
     }
     help_command.arg("--help");
     let help = capture(help_command, deadline, cancellation).await?;
+    recheck_directory(directory, deadline, cancellation).await?;
     let help = std::str::from_utf8(&help).map_err(|_| LocalAgentError::InvalidProtocol)?;
     let required: &[&str] = match config.kind {
         LocalAgentKind::Codex => &[
@@ -443,15 +656,55 @@ async fn probe_in(
     }
     if config.kind == LocalAgentKind::Codex {
         let mut features_command = base_command(config, scratch);
-        codex_policy(&mut features_command, config);
+        codex_policy(&mut features_command, config, directory);
         features_command.args(["features", "list"]);
         let features = capture(features_command, deadline, cancellation).await?;
+        recheck_directory(directory, deadline, cancellation).await?;
         check_codex_features(&features)?;
+        if matches!(
+            config.working_directory,
+            super::LocalAgentWorkingDirectory::Selected(_)
+        ) {
+            check_selected_codex_features(&features)?;
+        }
     }
     Ok(LocalAgentProbe {
         kind: config.kind,
         version,
     })
+}
+
+async fn recheck_directory(
+    directory: Option<&super::ValidatedLocalAgentDirectory>,
+    deadline: Instant,
+    cancellation: &RequestCancellation,
+) -> Result<(), LocalAgentError> {
+    check_cancelled(cancellation)?;
+    if let Some(directory) = directory {
+        tokio::time::timeout_at(deadline, directory.recheck(cancellation))
+            .await
+            .map_err(|_| LocalAgentError::Timeout)??;
+    }
+    check_cancelled(cancellation)
+}
+
+fn check_selected_codex_features(bytes: &[u8]) -> Result<(), LocalAgentError> {
+    let text = std::str::from_utf8(bytes).map_err(|_| LocalAgentError::IsolationUnsupported)?;
+    let mut matches = text.lines().filter_map(|line| {
+        let fields: Vec<_> = line.split_whitespace().collect();
+        (fields.first() == Some(&"skip_host_skill_discovery")).then(|| fields.last().copied())
+    });
+    if matches.next() != Some(Some("true")) || matches.next().is_some() {
+        return Err(LocalAgentError::IsolationUnsupported);
+    }
+    let mut host = text.lines().filter_map(|line| {
+        let fields: Vec<_> = line.split_whitespace().collect();
+        (fields.first() == Some(&"code_mode_host")).then(|| fields.last().copied())
+    });
+    if host.next() != Some(Some("false")) || host.next().is_some() {
+        return Err(LocalAgentError::IsolationUnsupported);
+    }
+    Ok(())
 }
 
 fn parse_version(kind: LocalAgentKind, bytes: &[u8]) -> Result<LocalAgentVersion, LocalAgentError> {
@@ -464,9 +717,11 @@ fn parse_version(kind: LocalAgentKind, bytes: &[u8]) -> Result<LocalAgentVersion
     let mut fields = version.split('.');
     let mut next = || {
         fields.next().and_then(|field| {
-            (!field.is_empty() && field.bytes().all(|byte| byte.is_ascii_digit()))
-                .then(|| field.parse::<u32>().ok())
-                .flatten()
+            (!field.is_empty()
+                && (field.len() == 1 || !field.starts_with('0'))
+                && field.bytes().all(|byte| byte.is_ascii_digit()))
+            .then(|| field.parse::<u32>().ok())
+            .flatten()
         })
     };
     let parsed = LocalAgentVersion(
@@ -523,9 +778,11 @@ async fn capture(
     }
 }
 
-enum OutputMode {
+#[derive(Clone, Copy)]
+pub(super) enum OutputMode {
     Text,
     Protocol(LocalAgentKind),
+    GuardedProtocol(LocalAgentKind),
 }
 
 enum RunOutput {
@@ -746,7 +1003,19 @@ async fn run_command(
                     biased;
                     status = &mut leader => (status.map_err(|_| LocalAgentError::ProcessFailed)?, None),
                     output = &mut pipes => {
-                        let output = output?;
+                        let output=match output {
+                            Ok(output)=>output,
+                            Err(error)=> {
+                                #[cfg(unix)] if matches!(mode,OutputMode::GuardedProtocol(_)) && error==LocalAgentError::PipeFailed {
+                                    // A rejecting launcher may close stdin before a large
+                                    // reviewed payload is delivered. Preserve its typed
+                                    // refusal; the outer deadline/cancel still owns cleanup.
+                                    let status=leader.await.map_err(|_|LocalAgentError::ProcessFailed)?;
+                                    if let Some(refusal)=super::bootstrap::exit_error(status.code()) {return Err(refusal);}
+                                }
+                                return Err(error);
+                            }
+                        };
                         (leader.await.map_err(|_| LocalAgentError::ProcessFailed)?, Some(output))
                     },
                 }
@@ -760,6 +1029,12 @@ async fn run_command(
                     .map_err(|_| LocalAgentError::CleanupFailed)??,
             };
             if !status.success() {
+                #[cfg(unix)]
+                if matches!(mode, OutputMode::GuardedProtocol(_))
+                    && let Some(error) = super::bootstrap::exit_error(status.code())
+                {
+                    return Err(error);
+                }
                 return Err(LocalAgentError::ProcessFailed);
             }
             match stdout {
@@ -812,6 +1087,7 @@ async fn read_stdout(
     let mut protocol = match mode {
         OutputMode::Text => None,
         OutputMode::Protocol(kind) => Some(AnswerStream::new(kind, limits)),
+        OutputMode::GuardedProtocol(kind) => Some(AnswerStream::selected(kind, limits)),
     };
     loop {
         let count = reader
@@ -977,7 +1253,7 @@ mod tests {
     }
 
     #[test]
-    fn version_parser_does_not_accept_prefix_guesses_or_future_versions() {
+    fn version_parser_requires_canonical_three_component_supplier_output() {
         assert_eq!(
             parse_version(LocalAgentKind::Codex, b"codex-cli 0.160.0\n").unwrap(),
             LocalAgentVersion(0, 160, 0)
@@ -990,12 +1266,36 @@ mod tests {
             b"codex-cli 0.160.0-private-data".as_slice(),
             b"0.160.0",
             b"codex-cli 0.160.0.1",
+            b"codex-cli 0.160.01",
+            b"codex-cli 00.160.1",
         ] {
             assert_eq!(
                 parse_version(LocalAgentKind::Codex, bytes),
                 Err(LocalAgentError::UnsupportedVersion)
             );
         }
+    }
+
+    #[test]
+    fn admitted_versions_are_exact_patches_not_a_minor_range() {
+        for version in [LocalAgentVersion(0, 160, 0), LocalAgentVersion(0, 160, 1)] {
+            assert!(LocalAgentKind::Codex.supports_version(version));
+            assert!(LocalAgentKind::Codex.supports_version_text(&version.to_string()));
+        }
+        for version in [
+            LocalAgentVersion(0, 159, 0),
+            LocalAgentVersion(0, 160, 2),
+            LocalAgentVersion(0, 161, 0),
+            LocalAgentVersion(1, 160, 0),
+        ] {
+            assert!(!LocalAgentKind::Codex.supports_version(version));
+            assert!(!LocalAgentKind::Codex.supports_version_text(&version.to_string()));
+        }
+        for version in ["0.160", "0.160.1-private", "0.160.01", "0.160.1\n"] {
+            assert!(!LocalAgentKind::Codex.supports_version_text(version));
+        }
+        assert!(LocalAgentKind::ClaudeCode.supports_version(LocalAgentVersion(2, 1, 285)));
+        assert!(!LocalAgentKind::ClaudeCode.supports_version(LocalAgentVersion(2, 1, 286)));
     }
 
     #[test]
@@ -1017,6 +1317,31 @@ mod tests {
             check_codex_features(format!("{features}hooks stable false\n").as_bytes()),
             Err(LocalAgentError::IsolationUnsupported)
         );
+    }
+
+    #[test]
+    fn selected_codex_requires_one_disabled_host_and_one_skip_discovery() {
+        let features = "skip_host_skill_discovery under_development true\ncode_mode_host under_development false\n";
+        assert!(check_selected_codex_features(features.as_bytes()).is_ok());
+        for invalid in [
+            features.replace(
+                "host under_development false",
+                "host under_development true",
+            ),
+            features.replace(
+                "discovery under_development true",
+                "discovery under_development false",
+            ),
+            "skip_host_skill_discovery under_development true\n".to_owned(),
+            "code_mode_host under_development false\n".to_owned(),
+            format!("{features}code_mode_host under_development false\n"),
+            format!("{features}skip_host_skill_discovery under_development true\n"),
+        ] {
+            assert_eq!(
+                check_selected_codex_features(invalid.as_bytes()),
+                Err(LocalAgentError::IsolationUnsupported)
+            );
+        }
     }
 
     #[tokio::test]

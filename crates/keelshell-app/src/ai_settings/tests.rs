@@ -588,6 +588,7 @@ fn backend_switch_clears_destination_credentials_and_api_options(cx: &mut TestAp
 fn local_profile() -> NamedAiProfile {
     let mut profile = fixture_profile();
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent: AiLocalAgent::Codex,
         executable: std::env::temp_dir()
             .join(format!("keelshell-nonexistent-{}", uuid::Uuid::new_v4()))

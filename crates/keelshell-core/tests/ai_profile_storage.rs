@@ -45,6 +45,7 @@ fn local_agent_metadata_roundtrips_and_never_falls_back_to_http() -> TestResult 
     let mut state = store.load()?;
     let mut profile = profile("Local Ask");
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent: AiLocalAgent::Codex,
         executable: directory
             .path()
@@ -73,6 +74,55 @@ fn local_agent_metadata_roundtrips_and_never_falls_back_to_http() -> TestResult 
 }
 
 #[test]
+fn selected_directory_roundtrips_and_missing_field_migrates_without_filesystem_access() -> TestResult
+{
+    let directory = tempfile::tempdir()?;
+    let store = StateStore::new(directory.path().join("state.json"));
+    let mut state = AppState::default();
+    let mut selected = profile("Selected local Ask");
+    selected.api_style = AiApiStyle::Responses;
+    selected.endpoint = "https://example.test/v1".into();
+    selected.backend = AiBackend::LocalAgent {
+        agent: AiLocalAgent::Codex,
+        executable: "/opt/fixture-cli".into(),
+        limits: Default::default(),
+        working_directory: keelshell_core::AiLocalAgentWorkingDirectory::Selected {
+            path: "/opt/explicit 运维 directory".into(),
+        },
+    };
+    state.settings.ai_profiles.upsert(selected.clone())?;
+    state.settings.ai_profiles.activate(selected.id)?;
+    store.save(&state)?;
+    assert_eq!(store.load()?.settings.ai_profiles.active(), Some(&selected));
+    let mut wire = serde_json::to_value(state)?;
+    wire["settings"]["ai_profiles"]["profiles"][0]["backend"]
+        .as_object_mut()
+        .ok_or("backend missing")?
+        .remove("working_directory");
+    write_private(store.path(), &wire)?;
+    let before = fs::read(store.path())?;
+    let loaded = store.load()?;
+    let profile = loaded
+        .settings
+        .ai_profiles
+        .active()
+        .ok_or("active profile missing")?;
+    assert!(matches!(
+        profile.backend,
+        AiBackend::LocalAgent {
+            working_directory: keelshell_core::AiLocalAgentWorkingDirectory::Isolated,
+            ..
+        }
+    ));
+    assert_eq!(
+        fs::read(store.path())?,
+        before,
+        "reading old metadata never rewrites it"
+    );
+    Ok(())
+}
+
+#[test]
 fn saved_local_budgets_and_old_metadata_keep_exact_intent_without_load_rewrite() -> TestResult {
     let directory = tempfile::tempdir()?;
     for agent in [AiLocalAgent::Codex, AiLocalAgent::ClaudeCode] {
@@ -80,6 +130,7 @@ fn saved_local_budgets_and_old_metadata_keep_exact_intent_without_load_rewrite()
         let mut state = AppState::default();
         let mut selected = profile("Budgeted Ask");
         selected.backend = AiBackend::LocalAgent {
+            working_directory: Default::default(),
             agent,
             executable: "/opt/fixture-cli".into(),
             limits: keelshell_core::AiLocalAgentLimits::new(27, 3, 19)?,
@@ -140,6 +191,7 @@ fn saved_local_budgets_and_old_metadata_keep_exact_intent_without_load_rewrite()
 fn local_agent_request_rejects_api_options_or_wrong_authentication() -> TestResult {
     let mut profile = profile("Claude Ask");
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent: AiLocalAgent::ClaudeCode,
         executable: "/opt/keelshell-fixture/claude".to_owned(),
         limits: Default::default(),
@@ -431,6 +483,7 @@ fn local_key_environment_references_roundtrip_without_resolution_or_load_rewrite
             .join(format!("local-reference-{agent:?}.json"));
         let mut named = profile("Referenced local key");
         named.backend = AiBackend::LocalAgent {
+            working_directory: Default::default(),
             agent,
             executable: directory
                 .path()

@@ -78,3 +78,6 @@ DBX官方文档明确描述了本地Claude Code/Codex配置、Ask/Agent与受限
 已只读检测本机Codex CLI `0.160.0` 与Claude Code `2.1.285`的版本/帮助。Codex官方提供JSONL非交互输出与app-server结构化协议；Claude Code官方提供程序化运行与流输出。适配器需按支持版本测试，不能把帮助命令当作登录、付费账户或真实工具互通验收。见[Codex非交互模式](https://learn.chatgpt.com/docs/non-interactive-mode)、[Codex App Server](https://learn.chatgpt.com/docs/app-server)和[Claude Code程序化调用](https://code.claude.com/docs/en/headless)。Codex长期交互优先评估app-server，单次exec仅用于最小Ask闭环；Claude Code需验证官方程序化审批路径，不从终端提示文本猜审批状态。
 
 [MCP官方传输规范](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports)已检查。它与旧协议的消息/取消模型存在差异，SDK兼容范围由锁定依赖与协商测试约束，升级时须重新核对，不硬编码历史版本行为；本计划不新增第三方MCP客户端。
+
+
+本地 CLI 的显式工作目录候选支持默认空隔离、完整绝对路径/目录选择、后台验证与发送审核；不继承项目工具、hooks/MCP 或登录。新非作者复核和完整工程/原生范围分别记录，见[工作目录指南](LOCAL_AGENT_WORKING_DIRECTORY.md)、[ADR 0069](../adr/0069-reviewed-local-agent-working-directories.md)和[作者记录](../testing/records/2026-10-07-local-agent-working-directory.md)。

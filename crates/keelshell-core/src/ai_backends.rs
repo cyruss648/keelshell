@@ -16,7 +16,78 @@ pub enum AiLocalAgent {
     ClaudeCode,
 }
 
-/// User-facing, non-secret budgets for a single isolated local Ask invocation.
+/// The explicitly selected working-directory mode for a named local Ask profile.
+///
+/// Choosing a directory does not authorize importing its files, environment,
+/// project configuration, hooks, tools or credentials. Runtime adapters must
+/// separately prove their isolation policy before running in a selected path.
+#[derive(Clone, PartialEq, Eq, Serialize, Default)]
+#[serde(tag = "mode", rename_all = "snake_case", deny_unknown_fields)]
+pub enum AiLocalAgentWorkingDirectory {
+    /// Create a fresh owned empty directory for every invocation.
+    #[default]
+    Isolated,
+    /// Use this absolute directory only after background runtime validation.
+    Selected {
+        /// Non-secret metadata; the complete path must appear in request review.
+        path: String,
+    },
+}
+
+impl<'de> Deserialize<'de> for AiLocalAgentWorkingDirectory {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(tag = "mode", rename_all = "snake_case", deny_unknown_fields)]
+        enum Wire {
+            Isolated {},
+            Selected { path: String },
+        }
+        Ok(match Wire::deserialize(deserializer)? {
+            Wire::Isolated {} => Self::Isolated,
+            Wire::Selected { path } => Self::Selected { path },
+        })
+    }
+}
+
+impl fmt::Debug for AiLocalAgentWorkingDirectory {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // A path is explicitly previewed in the UI, but is never diagnostic data.
+        match self {
+            Self::Isolated => f.write_str("Isolated"),
+            Self::Selected { .. } => f.write_str("Selected(<private path>)"),
+        }
+    }
+}
+
+impl AiLocalAgentWorkingDirectory {
+    /// Validate portable absolute metadata without reading the filesystem.
+    ///
+    /// Unix and Windows drive paths survive cross-platform profile storage.
+    /// Runtime admission still requires a real directory on the current host.
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        let Self::Selected { path } = self else {
+            return Ok(());
+        };
+        let bytes = path.as_bytes();
+        let windows_drive = bytes.len() >= 3
+            && bytes[0].is_ascii_alphabetic()
+            && bytes[1] == b':'
+            && matches!(bytes[2], b'/' | b'\\');
+        if path.is_empty()
+            || path.len() > 4096
+            || path.chars().any(char::is_control)
+            || !(path.starts_with('/') || windows_drive)
+        {
+            return Err(ValidationError::new(
+                "ai.profile.backend.working_directory",
+                "must be a bounded absolute directory path without control characters",
+            ));
+        }
+        Ok(())
+    }
+}
+
+/// User-facing, non-secret budgets for a single reviewed local Ask invocation.
 ///
 /// Values are whole seconds and KiB (1024 bytes), independent of model tokens.
 /// Missing metadata keeps the original 120 s / 1024 KiB / 2048 KiB behavior.
@@ -126,6 +197,8 @@ pub enum AiBackend {
         executable: String,
         /// Total local deadline and bounded answer/protocol output budgets.
         limits: AiLocalAgentLimits,
+        /// Defaults to a fresh empty directory when absent in older profiles.
+        working_directory: AiLocalAgentWorkingDirectory,
     },
 }
 
@@ -141,6 +214,8 @@ impl<'de> Deserialize<'de> for AiBackend {
                 executable: String,
                 #[serde(default)]
                 limits: AiLocalAgentLimits,
+                #[serde(default)]
+                working_directory: AiLocalAgentWorkingDirectory,
             },
         }
         Ok(match Wire::deserialize(deserializer)? {
@@ -149,10 +224,12 @@ impl<'de> Deserialize<'de> for AiBackend {
                 agent,
                 executable,
                 limits,
+                working_directory,
             } => Self::LocalAgent {
                 agent,
                 executable,
                 limits,
+                working_directory,
             },
         })
     }
@@ -199,9 +276,15 @@ impl AiBackend {
     /// admission still requires a usable native executable on the current host.
     /// Relative paths, shell launchers and control characters are rejected.
     pub fn validate(&self) -> Result<(), ValidationError> {
-        let Self::LocalAgent { executable, .. } = self else {
+        let Self::LocalAgent {
+            executable,
+            working_directory,
+            ..
+        } = self
+        else {
             return Ok(());
         };
+        working_directory.validate()?;
         let bytes = executable.as_bytes();
         let unix_absolute = executable.starts_with('/');
         let windows_absolute = bytes.len() >= 3
@@ -229,6 +312,87 @@ impl AiBackend {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn directory_defaults_migrate_and_are_never_api_fields()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let old = serde_json::json!({
+            "kind":"local_agent", "agent":"claude_code", "executable":"/opt/claude"
+        });
+        let AiBackend::LocalAgent {
+            working_directory, ..
+        } = serde_json::from_value::<AiBackend>(old.clone())?
+        else {
+            return Err("local backend missing".into());
+        };
+        assert_eq!(working_directory, AiLocalAgentWorkingDirectory::Isolated);
+        for path in ["/owned/project with spaces", "C:\\Projects\\运维"] {
+            let directory = AiLocalAgentWorkingDirectory::Selected { path: path.into() };
+            directory.validate()?;
+            let mut wire = old.clone();
+            wire["working_directory"] = serde_json::to_value(&directory)?;
+            let backend: AiBackend = serde_json::from_value(wire)?;
+            backend.validate()?;
+            assert_eq!(
+                serde_json::from_value::<AiBackend>(serde_json::to_value(&backend)?)?,
+                backend
+            );
+            assert!(!format!("{directory:?}").contains(path));
+        }
+        for directory in [
+            serde_json::json!({"mode":"isolated", "path":"/owned"}),
+            serde_json::json!({"mode":"selected", "path":"/owned", "environment":{}}),
+            serde_json::json!({"mode":"selected"}),
+            serde_json::json!({"mode":"arbitrary"}),
+            serde_json::json!(null),
+        ] {
+            let mut wire = old.clone();
+            wire["working_directory"] = directory;
+            assert!(serde_json::from_value::<AiBackend>(wire).is_err());
+        }
+        assert!(
+            serde_json::from_value::<AiBackend>(serde_json::json!({
+                "kind":"api", "working_directory":{"mode":"isolated"}
+            }))
+            .is_err()
+        );
+        for path in [
+            "",
+            "relative",
+            "~/project",
+            "C:relative",
+            "/owned/\n",
+            "/owned/\0",
+        ] {
+            assert!(
+                AiLocalAgentWorkingDirectory::Selected { path: path.into() }
+                    .validate()
+                    .is_err()
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn directory_change_revokes_request_equality_without_redirecting_credentials() {
+        let original = AiBackend::LocalAgent {
+            agent: AiLocalAgent::ClaudeCode,
+            executable: "/opt/claude".into(),
+            limits: Default::default(),
+            working_directory: Default::default(),
+        };
+        let mut changed = original.clone();
+        if let AiBackend::LocalAgent {
+            working_directory, ..
+        } = &mut changed
+        {
+            *working_directory = AiLocalAgentWorkingDirectory::Selected {
+                path: "/owned/project".into(),
+            };
+        }
+        assert_ne!(original, changed);
+        assert!(original.same_credential_destination(&changed));
+    }
 
     #[test]
     fn missing_local_limits_preserve_defaults_and_strict_numbers()
@@ -284,11 +448,13 @@ mod tests {
     fn credential_identity_excludes_budgets_but_request_equality_includes_them()
     -> Result<(), Box<dyn std::error::Error>> {
         let original = AiBackend::LocalAgent {
+            working_directory: Default::default(),
             agent: AiLocalAgent::Codex,
             executable: "/opt/codex".into(),
             limits: AiLocalAgentLimits::default(),
         };
         let changed = AiBackend::LocalAgent {
+            working_directory: Default::default(),
             agent: AiLocalAgent::Codex,
             executable: "/opt/codex".into(),
             limits: AiLocalAgentLimits::new(30, 1, 2)?,
@@ -298,11 +464,13 @@ mod tests {
         for other in [
             AiBackend::Api,
             AiBackend::LocalAgent {
+                working_directory: Default::default(),
                 agent: AiLocalAgent::ClaudeCode,
                 executable: "/opt/codex".into(),
                 limits: AiLocalAgentLimits::default(),
             },
             AiBackend::LocalAgent {
+                working_directory: Default::default(),
                 agent: AiLocalAgent::Codex,
                 executable: "/opt/replacement".into(),
                 limits: AiLocalAgentLimits::default(),
@@ -331,6 +499,7 @@ mod tests {
     -> Result<(), Box<dyn std::error::Error>> {
         for executable in ["/opt/tools/codex", "C:\\Program Files\\Tools\\codex.exe"] {
             let backend = AiBackend::LocalAgent {
+                working_directory: Default::default(),
                 agent: AiLocalAgent::Codex,
                 executable: executable.to_owned(),
                 limits: Default::default(),
@@ -358,6 +527,7 @@ mod tests {
         ] {
             assert!(
                 AiBackend::LocalAgent {
+                    working_directory: Default::default(),
                     agent: AiLocalAgent::Codex,
                     executable: executable.to_owned(),
                     limits: Default::default(),

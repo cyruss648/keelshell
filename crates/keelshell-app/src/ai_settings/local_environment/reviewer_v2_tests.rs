@@ -13,6 +13,7 @@ fn probe_profile(agent: AiLocalAgent, executable: String) -> NamedAiProfile {
     profile.model.clear();
     profile.endpoint = "https://provider.example/v1".into();
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent,
         executable,
         limits: Default::default(),

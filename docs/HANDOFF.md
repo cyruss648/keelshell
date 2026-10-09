@@ -30,3 +30,9 @@
 白底图标、GitHub链接、内置变更日志、检查更新、SHA-256校验下载、人工确认安装与回滚helper和六目标标签发布流水线已有实现。完整Release产物、签名/公证、Windows/Linux桌面及安装更新仍开放；本阶段没有发布标签或覆盖安装。
 
 保存并推送已完成组合复核、主树门禁和macOS开发包检查的任务审计／诊断检查点，单独核验新提交CI；完成目录镜像P1的新非作者修复复核再整合；继续完整远程功能、外部Codex业务、UI/语言主题/辅助技术、三平台桌面及六目标发布安装矩阵。所有新源码/产物需要自己的证据。已结束树在根消费证据及组合消费者退出后可恢复归档，活跃树与未消费失败材料保留。
+
+## 独立工作目录候选 — 2026-10-07
+
+`feature/local-agent-working-directory` 在 `0cca8ac59d12afdc68512b45db8830810835c634` 上提供默认空隔离、显式绝对目录、后台校验及完整可滚动发送审核；这属于本地 CLI Ask，不是本地终端或第三方 MCP 客户端。审核绑定持有目录身份、固定 bootstrap、native 副本与有界公共签名元数据；不启用项目 hooks/MCP/tools。精确 Codex `0.160.0` / `0.160.1` 及 Claude Code `2.1.285` 已由实际生产适配器与自有 loopback SSE 验证，不能代替供应商账户、模型或图形界面验收。
+
+作者 681 输入完整门禁前后相等：1533 ordinary Rust、8 doc、6 scripts Python、格式/x.y/严格 Clippy、20 真实目录控制器、默认及 2 MiB 小栈、57 打包、app 构建及两项所选目录 native CLI 全通过。最初版本拒绝、readiness 失败、Clippy 与完整预览失败均保留。候选冻结后仍需新的非作者复核、主树整合及组合门禁；本树未提交或推送。详见[ADR 0069](adr/0069-reviewed-local-agent-working-directories.md)、[使用指南](product/LOCAL_AGENT_WORKING_DIRECTORY.md)与[测试记录](testing/records/2026-10-07-local-agent-working-directory.md)。

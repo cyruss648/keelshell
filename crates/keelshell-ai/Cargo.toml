@@ -18,16 +18,21 @@ tokio.workspace = true
 sha2.workspace = true
 base64.workspace = true
 tempfile.workspace = true
+toml = "1.1"
 process-wrap = { version = "10.0", default-features = false, features = ["tokio1", "kill-on-drop", "process-group", "job-object"] }
 
 [target.'cfg(unix)'.dependencies]
-nix = { version = "0.31", default-features = false }
+nix = { version = "0.31", default-features = false, features = ["fs", "poll", "user"] }
 
 [target.'cfg(windows)'.dependencies]
 win32job = "2.0"
 
 [[test]]
 name = "local_agent_process"
+harness = false
+
+[[test]]
+name = "local_agent_directory_process"
 harness = false
 
 [lints]

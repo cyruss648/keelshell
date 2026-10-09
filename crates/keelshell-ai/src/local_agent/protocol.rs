@@ -5,6 +5,28 @@ use zeroize::Zeroizing;
 
 use super::{LocalAgentError, LocalAgentKind, LocalAgentLimits};
 
+// The two exact checked Codex patches emit this frame with all tools disabled.
+// The disabled provider cannot spawn the host. Only the selected-directory
+// admission path recognizes it; supplier errors remain refusals everywhere else.
+const DISABLED_HOST_WARNING: &str = "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`.";
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct StartupWarning {
+    #[serde(rename = "type")]
+    kind: String,
+    item: StartupWarningItem,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct StartupWarningItem {
+    id: String,
+    #[serde(rename = "type")]
+    kind: String,
+    message: String,
+}
+
 pub(super) struct AnswerStream {
     kind: LocalAgentKind,
     limits: LocalAgentLimits,
@@ -14,6 +36,8 @@ pub(super) struct AnswerStream {
     completed: bool,
     item_ids: HashSet<String>,
     answer: Zeroizing<String>,
+    selected_codex_warning: bool,
+    warning_observed: bool,
 }
 
 impl AnswerStream {
@@ -27,7 +51,16 @@ impl AnswerStream {
             completed: false,
             item_ids: HashSet::new(),
             answer: Zeroizing::new(String::new()),
+            selected_codex_warning: false,
+            warning_observed: false,
         }
+    }
+
+    /// Internal admission has already verified the exact CLI and disabled host.
+    pub(super) fn selected(kind: LocalAgentKind, limits: LocalAgentLimits) -> Self {
+        let mut stream = Self::new(kind, limits);
+        stream.selected_codex_warning = kind == LocalAgentKind::Codex;
+        stream
     }
 
     pub(super) fn frame(&mut self, bytes: &[u8]) -> Result<(), LocalAgentError> {
@@ -41,7 +74,7 @@ impl AnswerStream {
             serde_json::from_slice(bytes).map_err(|_| LocalAgentError::InvalidProtocol)?;
         self.frames += 1;
         match self.kind {
-            LocalAgentKind::Codex => self.codex(&value),
+            LocalAgentKind::Codex => self.codex(&value, bytes),
             LocalAgentKind::ClaudeCode => self.claude(&value),
         }
     }
@@ -72,11 +105,31 @@ impl AnswerStream {
         Ok(())
     }
 
-    fn codex(&mut self, value: &Value) -> Result<(), LocalAgentError> {
+    fn codex(&mut self, value: &Value, bytes: &[u8]) -> Result<(), LocalAgentError> {
         match string(value, "type")? {
             "thread.started" if !self.initialized => {
                 nonempty_string(value, "thread_id")?;
                 self.initialized = true;
+            }
+            "item.completed"
+                if self.selected_codex_warning
+                    && self.initialized
+                    && !self.started
+                    && !self.warning_observed =>
+            {
+                // Decode the original bytes again with a strict shape. Value
+                // alone would lose duplicate keys before this narrow admission.
+                let warning: StartupWarning =
+                    serde_json::from_slice(bytes).map_err(|_| LocalAgentError::InvalidProtocol)?;
+                if warning.kind != "item.completed"
+                    || warning.item.id != "item_0"
+                    || warning.item.kind != "error"
+                    || warning.item.message != DISABLED_HOST_WARNING
+                    || !self.item_ids.insert(warning.item.id)
+                {
+                    return Err(LocalAgentError::InvalidProtocol);
+                }
+                self.warning_observed = true;
             }
             "turn.started" if self.initialized && !self.started => self.started = true,
             "item.started" | "item.updated" | "item.completed" if self.started => {
@@ -313,6 +366,93 @@ mod tests {
             .frame(br#"{"type":"turn.completed","usage":{}}"#)
             .unwrap();
         assert_eq!(stream.finish().unwrap().0.as_str(), "完整中文回答");
+    }
+
+    fn disabled_host_warning() -> Value {
+        serde_json::json!({"type":"item.completed","item":{"id":"item_0","type":"error","message":DISABLED_HOST_WARNING}})
+    }
+
+    fn selected_initialized() -> AnswerStream {
+        let mut stream = AnswerStream::selected(LocalAgentKind::Codex, LocalAgentLimits::default());
+        stream
+            .frame(br#"{"type":"thread.started","thread_id":"owned"}"#)
+            .unwrap();
+        stream
+    }
+
+    #[test]
+    fn selected_exact_disabled_host_warning_is_neither_an_answer_nor_success() {
+        let warning = disabled_host_warning().to_string();
+        let mut stream = selected_initialized();
+        stream.frame(warning.as_bytes()).unwrap();
+        assert!(!stream.started());
+        assert!(!stream.completed());
+        assert_eq!(
+            stream.finish().unwrap_err(),
+            LocalAgentError::InvalidProtocol
+        );
+        let mut stream = selected_initialized();
+        stream.frame(warning.as_bytes()).unwrap();
+        stream.frame(br#"{"type":"turn.started"}"#).unwrap();
+        stream.frame(br#"{"type":"item.completed","item":{"id":"answer","type":"agent_message","text":"reviewable answer"}}"#).unwrap();
+        stream
+            .frame(br#"{"type":"turn.completed","usage":{}}"#)
+            .unwrap();
+        assert_eq!(stream.finish().unwrap().0.as_str(), "reviewable answer");
+    }
+
+    #[test]
+    fn selected_warning_rejects_fields_duplicates_order_and_general_errors() {
+        let exact = disabled_host_warning().to_string();
+        let mut variations = Vec::new();
+        for field in ["tool_calls", "unknown"] {
+            let mut value = disabled_host_warning();
+            value["item"][field] = serde_json::json!([]);
+            variations.push(value.to_string());
+        }
+        let mut value = disabled_host_warning();
+        value["extra"] = serde_json::json!(true);
+        variations.push(value.to_string());
+        let mut value = disabled_host_warning();
+        value["item"]["message"] = serde_json::json!("Unexpected configuration or inference error");
+        variations.push(value.to_string());
+        for id in ["", " ", "item_1", "other-warning"] {
+            let mut value = disabled_host_warning();
+            value["item"]["id"] = serde_json::json!(id);
+            variations.push(value.to_string());
+        }
+        variations.push(exact.replacen(
+            "\"message\":",
+            "\"message\":\"ignored duplicate\",\"message\":",
+            1,
+        ));
+        variations.push(exact.replacen("\"item\":", "\"type\":\"item.completed\",\"item\":", 1));
+        for frame in variations {
+            assert!(
+                selected_initialized().frame(frame.as_bytes()).is_err(),
+                "malformed warning shape must refuse"
+            );
+        }
+        let mut before = AnswerStream::selected(LocalAgentKind::Codex, LocalAgentLimits::default());
+        assert!(before.frame(exact.as_bytes()).is_err());
+        let mut duplicate = selected_initialized();
+        duplicate.frame(exact.as_bytes()).unwrap();
+        assert!(duplicate.frame(exact.as_bytes()).is_err());
+        let mut late = selected_initialized();
+        late.frame(br#"{"type":"turn.started"}"#).unwrap();
+        assert!(late.frame(exact.as_bytes()).is_err());
+        let mut isolated = AnswerStream::new(LocalAgentKind::Codex, LocalAgentLimits::default());
+        isolated
+            .frame(br#"{"type":"thread.started","thread_id":"owned"}"#)
+            .unwrap();
+        assert!(isolated.frame(exact.as_bytes()).is_err());
+        let mut selected = selected_initialized();
+        selected.frame(exact.as_bytes()).unwrap();
+        selected.frame(br#"{"type":"turn.started"}"#).unwrap();
+        assert_eq!(
+            selected.frame(br#"{"type":"error","message":"inference failure"}"#),
+            Err(LocalAgentError::InferenceFailed)
+        );
     }
 
     #[test]

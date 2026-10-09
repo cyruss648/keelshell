@@ -201,6 +201,7 @@ fn settings_scrollbar_pointer_reaches_api_parameters_and_footer_keeps_drafts(
 fn settings_scrollbar_pointer_and_wheel_share_cli_form_and_fixed_apply(cx: &mut TestAppContext) {
     let mut profile = fixture_profile();
     profile.backend = AiBackend::LocalAgent {
+        working_directory: Default::default(),
         agent: AiLocalAgent::Codex,
         executable: std::env::temp_dir()
             .join("keelshell-owned-unlaunched-agent")

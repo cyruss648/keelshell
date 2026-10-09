@@ -306,8 +306,18 @@ pub(crate) fn validate_catalog_secrets(
         for text in [&profile.name, &profile.endpoint, &profile.model] {
             guard.validate_metadata_text(text)?;
         }
-        if let AiBackend::LocalAgent { executable, .. } = &profile.backend {
+        if let AiBackend::LocalAgent {
+            executable,
+            working_directory,
+            ..
+        } = &profile.backend
+        {
             guard.validate_metadata_text(executable)?;
+            if let keelshell_core::AiLocalAgentWorkingDirectory::Selected { path } =
+                working_directory
+            {
+                guard.validate_metadata_text(path)?;
+            }
         }
         match &profile.authentication {
             AiAuthentication::None => {}
@@ -668,6 +678,7 @@ mod tests {
                 }
                 7 => {
                     profile.backend = AiBackend::LocalAgent {
+                        working_directory: Default::default(),
                         agent: keelshell_core::AiLocalAgent::Codex,
                         executable: format!("/owned/{SECRET}/codex"),
                         limits: Default::default(),
@@ -1120,6 +1131,7 @@ mod tests {
                 }
                 _ => {
                     next.backend = AiBackend::LocalAgent {
+                        working_directory: Default::default(),
                         agent: keelshell_core::AiLocalAgent::Codex,
                         executable: "/synthetic/codex".into(),
                         limits: Default::default(),

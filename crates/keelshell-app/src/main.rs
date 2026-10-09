@@ -41,6 +41,9 @@ use keelshell_core::{AppState, StateStore};
 use std::sync::Arc;
 
 fn main() {
+    if keelshell_ai::run_local_agent_directory_launcher() {
+        return;
+    }
     if updater::run_update_helper() {
         return;
     }

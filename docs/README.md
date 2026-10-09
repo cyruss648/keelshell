@@ -57,3 +57,5 @@
 - [界面设计与智能体计划](product/DESIGN_AND_AGENT_PLAN.md)：系统明暗主题、专业视觉、本地Claude Code/Codex和对外MCP服务端，明确尚未实现的范围。
 - [设计资料库](design/README.md)：参考选型、语义token/组件规范的维护方式和可用技能。
 - [对外 MCP 使用指南](product/EXTERNAL_MCP.md)：桌面授权、七项工具、临时启动配置、Codex/Claude Code 示例与撤权边界。
+
+- [本地智能体工作目录指南](product/LOCAL_AGENT_WORKING_DIRECTORY.md)、[ADR 0069](adr/0069-reviewed-local-agent-working-directories.md)、[工作目录作者记录](testing/records/2026-10-07-local-agent-working-directory.md)。
