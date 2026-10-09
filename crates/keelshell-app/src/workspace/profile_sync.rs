@@ -22,6 +22,7 @@ impl Workspace {
                         // Tabs retain their captured authenticated transports. A renamed,
                         // changed or deleted saved endpoint cannot replace a live session.
                         view.state = (**state).clone();
+                        view.revoke_stale_protocol_diagnostics(cx);
                         view.status = message.clone();
                         cx.notify();
                     }

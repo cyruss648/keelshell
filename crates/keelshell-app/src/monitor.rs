@@ -2,6 +2,8 @@
 
 #[path = "monitor_disk.rs"]
 mod disk;
+#[path = "monitor_protocol.rs"]
+mod protocol;
 #[cfg(test)]
 #[path = "monitor_tests.rs"]
 mod tests;
@@ -66,6 +68,7 @@ enum Outcome {
 /// be paused; process inspection and the final SIGTERM confirmation are separate
 /// actions. No process is stopped merely by selecting it.
 pub struct MonitorPanel {
+    protocol: Entity<protocol::ProtocolPanel>,
     monitor: Option<LinuxMonitor>,
     suspended: bool,
     host: String,
@@ -99,7 +102,7 @@ impl MonitorPanel {
         session: SshSession,
         host: String,
         runtime: Arc<tokio::runtime::Runtime>,
-        _window: &mut Window,
+        window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
         let executor = cx.background_executor().clone();
@@ -118,7 +121,11 @@ impl MonitorPanel {
                 }
             }
         });
+        let protocol = cx.new(|cx| {
+            protocol::ProtocolPanel::new(session.clone(), host.clone(), runtime.clone(), window, cx)
+        });
         let mut panel = Self {
+            protocol,
             monitor: Some(LinuxMonitor::new(session)),
             suspended: false,
             host,
@@ -176,6 +183,7 @@ impl MonitorPanel {
         self.paused = true;
         self.pending = None;
         self.monitor = None;
+        self.protocol.update(cx, |panel, cx| panel.suspend(cx));
         if let Some(cancel) = &self.worker_cancel {
             cancel.store(true, Ordering::Release);
         }
@@ -184,6 +192,7 @@ impl MonitorPanel {
 
     /// Redraw labels without restarting collection or changing the selected process.
     pub fn refresh_locale(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
+        self.protocol.update(cx, |_, cx| cx.notify());
         cx.notify();
     }
 
@@ -1079,6 +1088,7 @@ impl Render for MonitorPanel {
             .child(processes)
             .child(self.disk_view(cx))
             .child(networks)
+            .child(self.protocol.clone())
             .child(sockets)
             .child(disks);
         let mut confirmation = None;
