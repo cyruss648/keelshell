@@ -22,7 +22,7 @@ toml = "1.1"
 process-wrap = { version = "10.0", default-features = false, features = ["tokio1", "kill-on-drop", "process-group", "job-object"] }
 
 [target.'cfg(unix)'.dependencies]
-nix = { version = "0.31", default-features = false, features = ["fs", "poll", "user"] }
+nix = { version = "0.31", default-features = false, features = ["fs", "poll", "process", "signal", "socket", "user"] }
 
 [target.'cfg(windows)'.dependencies]
 win32job = "2.0"

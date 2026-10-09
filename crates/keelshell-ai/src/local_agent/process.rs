@@ -83,9 +83,14 @@ impl LocalAgentProbe {
 ///
 /// Containment is not a sandbox around a malicious executable, and POSIX
 /// descendants which deliberately detach from the process group can escape it.
-/// Ordinary contained descendants are covered by the real-process tests. Drop
-/// of an in-flight future issues a best-effort group/job kill; callers should
-/// cancel with the supplied signal and await the result for a cleanup receipt.
+/// Ordinary contained descendants are covered by the real-process tests. Unix
+/// cleanup permits one termination attempt, then requires the original leader
+/// wait and a zero-signal observation of group absence within one three-second
+/// deadline. A permission-denied observation remains unknown until that same
+/// deadline; it cannot establish success or authorize another termination.
+/// Drop may initiate best-effort cleanup only before that Unix attempt begins.
+/// Callers should cancel with the supplied signal and await the result for a
+/// cleanup receipt rather than dropping the in-flight future.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct LocalAgentClient;
 
@@ -797,9 +802,104 @@ enum RunOutput {
 
 struct OwnedChild {
     child: Box<dyn ChildWrapper>,
+    #[cfg(any(not(unix), test))]
     cleaned: bool,
+    #[cfg(unix)]
+    observed_group: Option<UnixProcessGroup>,
+    #[cfg(unix)]
+    unix_cleanup: UnixCleanupState,
+    #[cfg(all(unix, test))]
+    cleanup_signal_attempts: std::sync::Arc<AtomicUsize>,
     #[cfg(windows)]
     observed_job: std::sync::Arc<win32job::Job>,
+}
+
+// Signal ownership is consumed before any fallible/suspending cleanup work.
+// Re-entry resumes observation under the original deadline; failure never
+// re-arms a numeric group ID or masquerades as completed cleanup.
+#[cfg(unix)]
+#[derive(Clone, Copy, Debug)]
+enum UnixCleanupState {
+    Ready,
+    Waiting { deadline: Instant },
+    Observing { deadline: Instant },
+    Failed,
+    Complete,
+}
+
+#[cfg(unix)]
+#[derive(Clone, Copy)]
+struct UnixProcessGroup(nix::unistd::Pid);
+
+#[cfg(unix)]
+impl UnixProcessGroup {
+    fn capture(child: &dyn ChildWrapper) -> Result<Self, LocalAgentError> {
+        // The installed ProcessGroupChild retains the PGID established at
+        // spawn. A native child's id() becomes None after leader wait/reap.
+        let group = (child as &dyn std::any::Any)
+            .downcast_ref::<process_wrap::tokio::ProcessGroupChild>()
+            .ok_or(LocalAgentError::SpawnFailed)?
+            .pgid();
+        let group = i32::try_from(group).map_err(|_| LocalAgentError::SpawnFailed)?;
+        if group <= 1 {
+            return Err(LocalAgentError::SpawnFailed);
+        }
+        Ok(Self(nix::unistd::Pid::from_raw(group)))
+    }
+
+    #[cfg(test)]
+    async fn wait_until_absent(self, deadline: Instant) -> Result<(), LocalAgentError> {
+        self.wait_until_absent_observed(deadline, |group| nix::sys::signal::killpg(group, None))
+            .await
+    }
+
+    async fn wait_until_absent_observed(
+        self,
+        deadline: Instant,
+        mut observe: impl FnMut(nix::unistd::Pid) -> Result<(), nix::errno::Errno>,
+    ) -> Result<(), LocalAgentError> {
+        loop {
+            if Instant::now() >= deadline {
+                #[cfg(test)]
+                eprintln!(
+                    "unix-cleanup-failure {}",
+                    serde_json::json!({"stage":"before_group_observation","saved_group":self.0.as_raw(),"deadline_expired":true})
+                );
+                return Err(LocalAgentError::CleanupFailed);
+            }
+            // Signal zero only observes. EPERM leaves membership unknown and
+            // may reflect an exiting group, so keep observing under this same
+            // deadline without another termination. ECHILD from wrapper wait
+            // cannot establish non-child absence; only timely ESRCH does.
+            let absent = match observe(self.0) {
+                Ok(()) | Err(nix::errno::Errno::EPERM) => false,
+                Err(nix::errno::Errno::ESRCH) => true,
+                Err(error) => {
+                    #[cfg(test)]
+                    eprintln!(
+                        "unix-cleanup-failure {}",
+                        serde_json::json!({"stage":"group_observation_errno","saved_group":self.0.as_raw(),"errno":error as i32,"deadline_expired":Instant::now() >= deadline})
+                    );
+                    #[cfg(not(test))]
+                    let _ = error;
+                    return Err(LocalAgentError::CleanupFailed);
+                }
+            };
+            if Instant::now() >= deadline {
+                #[cfg(test)]
+                eprintln!(
+                    "unix-cleanup-failure {}",
+                    serde_json::json!({"stage":"after_group_observation","saved_group":self.0.as_raw(),"deadline_expired":true})
+                );
+                return Err(LocalAgentError::CleanupFailed);
+            }
+            if absent {
+                return Ok(());
+            }
+            tokio::time::sleep_until((Instant::now() + Duration::from_millis(10)).min(deadline))
+                .await;
+        }
+    }
 }
 
 impl OwnedChild {
@@ -824,17 +924,119 @@ impl OwnedChild {
             command.wrap(process_wrap::tokio::JobObject);
             job
         };
-        command
-            .spawn()
-            .map(|child| Self {
-                child,
-                cleaned: false,
-                #[cfg(windows)]
-                observed_job,
-            })
-            .map_err(|_| LocalAgentError::SpawnFailed)
+        let child = command.spawn().map_err(|_| LocalAgentError::SpawnFailed)?;
+        let owned = Self {
+            child,
+            #[cfg(any(not(unix), test))]
+            cleaned: false,
+            #[cfg(unix)]
+            observed_group: None,
+            #[cfg(unix)]
+            unix_cleanup: UnixCleanupState::Ready,
+            #[cfg(all(unix, test))]
+            cleanup_signal_attempts: std::sync::Arc::new(AtomicUsize::new(0)),
+            #[cfg(windows)]
+            observed_job,
+        };
+        #[cfg(unix)]
+        let owned = {
+            let mut owned = owned;
+            // Construct the Drop owner before a fallible identity capture so
+            // refusal retains the original best-effort group cleanup.
+            owned.observed_group = Some(UnixProcessGroup::capture(owned.child.as_ref())?);
+            owned
+        };
+        Ok(owned)
     }
 
+    #[cfg(unix)]
+    async fn cleanup(&mut self) -> Result<(), LocalAgentError> {
+        self.cleanup_unix_with(
+            |child| child.start_kill(),
+            |group| nix::sys::signal::killpg(group, None),
+        )
+        .await
+    }
+
+    #[cfg(unix)]
+    async fn cleanup_unix_with(
+        &mut self,
+        mut signal: impl FnMut(&mut dyn ChildWrapper) -> std::io::Result<()>,
+        observe: impl FnMut(nix::unistd::Pid) -> Result<(), nix::errno::Errno>,
+    ) -> Result<(), LocalAgentError> {
+        match self.unix_cleanup {
+            UnixCleanupState::Complete => return Ok(()),
+            UnixCleanupState::Failed => return Err(LocalAgentError::CleanupFailed),
+            UnixCleanupState::Ready => {
+                let deadline = Instant::now() + CLEANUP_DEADLINE;
+                // This transition must precede try_wait and the signal call.
+                // Cancelling a later wait cannot grant another action to the
+                // outer cleanup or Drop, even if the group number is reused.
+                self.unix_cleanup = UnixCleanupState::Waiting { deadline };
+                if self.child.inner_mut().try_wait().is_err() || Instant::now() >= deadline {
+                    self.unix_cleanup = UnixCleanupState::Failed;
+                    return Err(LocalAgentError::CleanupFailed);
+                }
+                #[cfg(test)]
+                self.cleanup_signal_attempts.fetch_add(1, Ordering::Relaxed);
+                if let Err(error) = signal(self.child.as_mut()) {
+                    // EPERM can describe a zombie-only group on macOS. Reap
+                    // and observe under the same deadline, never re-signal a
+                    // numeric identity after an await. ESRCH remains absence.
+                    if !already_exited(&error)
+                        && error.raw_os_error() != Some(nix::errno::Errno::EPERM as i32)
+                    {
+                        self.unix_cleanup = UnixCleanupState::Failed;
+                        return Err(LocalAgentError::CleanupFailed);
+                    }
+                }
+            }
+            UnixCleanupState::Waiting { .. } | UnixCleanupState::Observing { .. } => {}
+        }
+        if let UnixCleanupState::Waiting { deadline } = self.unix_cleanup {
+            if Instant::now() >= deadline {
+                self.unix_cleanup = UnixCleanupState::Failed;
+                return Err(LocalAgentError::CleanupFailed);
+            }
+            let reaped = tokio::time::timeout_at(deadline, self.child.wait()).await;
+            if !matches!(reaped, Ok(Ok(_))) {
+                // Unit-only failure metadata is emitted after the original
+                // result is decided; it cannot replace a wait or observation.
+                #[cfg(test)]
+                eprintln!(
+                    "unix-cleanup-failure {}",
+                    serde_json::json!({"stage":"wrapper_wait","timeout":reaped.is_err(),"wait_errno":reaped.as_ref().ok().and_then(|result|result.as_ref().err()).and_then(std::io::Error::raw_os_error),"native_id":self.child.id(),"saved_group":self.observed_group.map(|group|group.0.as_raw()),"deadline_expired":Instant::now() >= deadline})
+                );
+                self.unix_cleanup = UnixCleanupState::Failed;
+                return Err(LocalAgentError::CleanupFailed);
+            }
+            self.unix_cleanup = UnixCleanupState::Observing { deadline };
+        }
+        let UnixCleanupState::Observing { deadline } = self.unix_cleanup else {
+            self.unix_cleanup = UnixCleanupState::Failed;
+            return Err(LocalAgentError::CleanupFailed);
+        };
+        let Some(group) = self.observed_group else {
+            self.unix_cleanup = UnixCleanupState::Failed;
+            return Err(LocalAgentError::CleanupFailed);
+        };
+        if group
+            .wait_until_absent_observed(deadline, observe)
+            .await
+            .is_err()
+        {
+            self.unix_cleanup = UnixCleanupState::Failed;
+            return Err(LocalAgentError::CleanupFailed);
+        }
+        self.unix_cleanup = UnixCleanupState::Complete;
+        #[cfg(test)]
+        {
+            self.cleaned = true;
+        }
+        Ok(())
+    }
+
+    #[cfg(not(unix))]
     async fn cleanup(&mut self) -> Result<(), LocalAgentError> {
         if self.cleaned {
             return Ok(());
@@ -929,6 +1131,14 @@ fn already_exited(error: &std::io::Error) -> bool {
 
 impl Drop for OwnedChild {
     fn drop(&mut self) {
+        #[cfg(unix)]
+        if matches!(self.unix_cleanup, UnixCleanupState::Ready) {
+            self.unix_cleanup = UnixCleanupState::Failed;
+            #[cfg(test)]
+            self.cleanup_signal_attempts.fetch_add(1, Ordering::Relaxed);
+            let _ = self.child.start_kill();
+        }
+        #[cfg(not(unix))]
         if !self.cleaned {
             let _ = self.child.start_kill();
         }
@@ -1184,6 +1394,9 @@ async fn observe_cancellation(cancellation: &RequestCancellation) {
         tokio::time::sleep(Duration::from_millis(10)).await;
     }
 }
+
+#[cfg(all(test, unix))]
+mod unix_cleanup_tests;
 
 #[cfg(test)]
 #[allow(clippy::unwrap_used, clippy::expect_used)]

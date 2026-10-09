@@ -1,5 +1,27 @@
 # 开发路线
 
+## 当前实现验证 — 2026-10-09
+
+有界Unix未知观察的新契约经非作者源码审查后，锁定编译、16项控制及原完整工程门禁实际通过；原三秒／一次终止许可／取消重入限制保持，持续EPERM或迟到ESRCH不建立成功。原EPERM立即失败测试域明确修改，原失败原因仍未知。执行835输入保持，专项和完整各21个夹具根删除；最终证据复核、功能提交及准确平台CI待完成，详见[Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。
+
+批量传输布局修后839输入的原完整门禁、同源macOS开发包及57打包用例通过并保留独立复核。新840取消类型组合六同poll控制、原future大小和真实TCP专项通过，旧mapper的两个同断言负控实际失败、精确恢复后六控制通过；新完整工程、标准包和GUI业务继续验收。原Windows取消终态失败的根因仍未知，已确认的类型擦除缺陷通过保留原Cancelled类别修复，不能把所有Closed或后来取消的真实错误改成取消。
+
+Windows追踪功能提交72e9c8e的真实诊断失败于首机会严格解析，异常核心字段已产生、context不可用和module缺失；第五控制及固定原应用诊断未到达，后续窄诊断继续。完整远程功能、外部MCP业务、CLI自身身份、桌面辅助技术、其它目标平台和发行安装仍按下表追踪。七个旧受管worktree归档完成状态待实际确认，当前必要工作副本和失败材料保留。
+
+## 最新验证与清理边界 — 2026-10-08
+
+Unix v9原完整检查实际失败于长TMP夹具组观察EPERM，原626和后续门禁未到达；临时诊断源码已恢复，locked no-run通过，原v7默认controller根因仍未知。批量传输候选原完整检查通过734项应用测试后，在session的既有16KiB future约束失败，正在调整发布前再次校验的内存布局；完整门禁、原生批量业务与整合未完成。Windows参数功能提交e8c2fdc的真实三个CDB控制通过，首机会输出解析拒绝；精确Quality的macOS／Linux成功，Windows暂停取消状态断言失败，诊断及平台验收继续开放。上述各次原失败材料保持，不以新的专项通过改写历史结果。
+
+本地七处旧编译缓存和两处增量缓存已清理，两个干净闲置checkout及十二个已合并分支已删除；实际可用空间增加约63.4GiB。七个旧受管worktree的可恢复归档仍排队，两个当前开发副本、失败材料和必要程序保留。每个阶段结束后继续确认无活跃消费者再清理，见[清理记录](testing/records/2026-10-08-local-development-cleanup.md)。
+
+## Unix 当前状态：完整检查失败 — 2026-10-08
+
+当前 Unix 清理增量仍在未提交的功能分支。v6 专项编译与十二控制实际通过，v7 等价单字节写法已通过严格 Clippy；但 v7 原完整检查在默认本地智能体 controller 的 Claude Code 自有继承管道后代场景返回 CleanupFailed，实际 check wait1／Rust command101。原626阶段只到408，完整后续 workspace／doc、readiness／IO／small-stack 未到达，不能以专项通过准入功能提交。准确 wait／观察／errno 分支仍 UNKNOWN；测试版诊断不在普通 integration 库构建中。17个本轮私有 Unix 短根严格终态与实际删除已成立，不能代替该原 controller 的成功或未记录身份的终态。v4／v5 失败与 v6 Clippy 失败全部保留，详见[Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。v8 临时 test/debug 观察实验已通过新的非作者源码复核并实际完成原默认626阶段，没有失败hook，旧原因仍UNKNOWN；精确恢复原源码后 locked no-run 也实际通过。原v7完整失败和提交阻断保持；新运行证据复核单独进行，未放宽三秒或任何原断言。
+
+父提交 af9465c 的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37731989533)已结束：macOS 成功，Windows 应用异常、Linux 文件夹具准入失败；新的实际 Windows 控制器两 runner 通过，首项 CDB 未启动目标，其余控制及固定原应用诊断未到达。两个窄候选（Windows参数、Linux测试App范围）完成新非作者静态复核，仍未导入或实际平台通过。发布签名信任正在重基准备；完整对外 MCP、CLI 登录复用、原生界面／辅助技术及发行安装保持 OPEN。MCP 始终由 KeelShell 向外部智能体提供服务。
+
+下文保留父提交及其它历史范围；Unix 各次准备／失败／通过以本段和专门记录为准。
+
 ## Windows 终态验证增量 — 2026-10-08
 
 精确 ecab 的三平台 [Quality 37726023963](https://github.com/cyruss648/keelshell/actions/runs/37726023963) 已结束：macOS／Linux 成功，Windows 仍在原后代 HANDLE LIVE 断言失败、Rust 未到达；三份完整原日志已读回。新的 Windows Job v3 只改 Python 验证控制器：原进程对象结束、完整回收和管道收尾、原期限内等待前后 Accounting 稳定共同作为成功条件。作者及新非作者各自完整59用例58PASS／1Windows原生UNRUN；独立七模型通过，新非作者无确认P1/P2，仅准入根工程与功能分支实际Windows验证。根正式完整检查已实际通过：1,812普通Rust／10rustdoc／65Python（64PASS／1Windows原生UNRUN），格式／x.y／严格Clippy、原默认及2MiB各626阶段、10准备期与2观察IO控制通过；同831输入及mode前后不变，owner实际wait0／reap／group absent，私有TMP空且删除。四份状态文档随后更新；提交前最终非作者复核与功能分支准确Windows分别验收。本切片未关闭原应用异常原因，也不混入 Unix 和生产发布信任候选，详见[Windows记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。完整对外 MCP、CLI登录复用、UI原生辅助技术、其它平台桌面与发行安装目标继续 OPEN。下文保持各自历史时点。

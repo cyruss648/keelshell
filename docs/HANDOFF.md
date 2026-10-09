@@ -1,5 +1,33 @@
 # KeelShell 开发交接 — 2026-10-08
 
+## 最新实现与实际门禁 — 2026-10-09
+
+Unix清理已采用有界未知观察契约：EPERM不表示成功，在原三秒内只继续零信号观察，仍要求原leader回收与期限内实际ESRCH；持续未知／迟到缺席失败，取消／重入／Drop不能重获终止许可。原EPERM立即失败测试域的变化已明确披露，旧失败及完整前像保留。本机自有未回收zombie探针实际EPERM、原wait0后ESRCH只证明机制，不证明旧v7／v9原因。新非作者源码复核通过后，根锁定编译、16控制和原完整工程检查均实际wait0；835输入／16,438,546字节在各阶段前后相同，专项及完整各21个独立夹具根确认终态并删除。准确结果见[Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。提交前最终证据／文档后像复核、精确新平台CI仍开放。
+
+批量传输future布局修复后的839输入已实际通过原完整工程门禁，新非作者已复核1,831普通Rust／10rustdoc（其中1个no_run仅编译）、65Python与原各626控制；同源macOS双程序开发包及57打包用例通过。新增取消类型修复经新非作者精确三方组合审查导入840输入；六同poll控制、原future16KiB及真实TCP专项通过，旧mapper负控的两个原断言实际失败，精确恢复后六控制通过。新840完整门禁、同源包、GUI批量审核／自有OpenSSH和其它平台原生继续独立验收，旧839通过不能继承。
+
+Windows受限parser追踪已在独立功能提交72e9c8e推送，其[真实诊断37767535214](https://github.com/cyruss648/keelshell/actions/runs/37767535214)实际失败：三个exit控制通过，首机会target／debugger实际exit0且原句柄终态已确认，但严格解析拒绝并返回125。追踪显示异常记录核心字段已产生，同时context不可用、额外未知行和module范围缺失；第五控制和固定原706应用诊断未到达。私有CDB原文／dump未获取，下一窄诊断保持拒绝，不猜测旧应用异常原因。完整MCP、CLI自身登录、原生UI及发布安装保持OPEN。下方各段是历史时点，不能覆盖本段最新状态。
+
+## 本地文件与工作副本清理 — 2026-10-08
+
+七处旧 Cargo 缓存、两处当前树增量缓存、两个干净闲置 checkout 和十二个已合并本地分支已实际删除；逻辑缓存约715.4GiB，磁盘可用空间实际增加约63.4GiB。删除结束后的根834及批量传输839个完整工程输入保持原字节、权限与路径集合，必要程序和失败材料已保留。七个旧受管 worktree 的可恢复归档请求仍为 queued，物理 checkout 未验收删除，后续需核对后再清理已合并且未占用的分支。当前两个开发工作副本保留。以后每个阶段结束即清理无活跃消费者的可再生缓存和闲置副本，归档前保留所需忽略材料，详见[清理记录](testing/records/2026-10-08-local-development-cleanup.md)。
+
+## 最新并行门禁 — 2026-10-08
+
+Unix v9 临时诊断的原完整检查实际 wait1，AI 库96PASS／1FAIL／1ignored；失败是长TMP夹具的组观察返回EPERM并锁定CleanupFailed，不是原v7默认controller失败的根因证明。原默认626及后续门禁未到达，源码已精确恢复，恢复后的locked no-run实际wait0。只有15个严格complete根已删除，另1个fallback失败根保留；不能沿用v7的17根数量，详见[最新Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。
+
+批量文件传输候选原完整检查实际 wait1，734个应用测试通过，但session原future大小测试失败：atomic upload为18,112字节，超过既有16KiB限制。原完整门禁及后续原生验收仍未通过，正在修复布局并保留来源／目标发布前再次校验；没有导入根或提交候选。限定作者回归不能代替新的完整检查，记录保存在批量传输工作副本及根忽略的 `work/file-browser-batch-root-20261008-v1/`。
+
+Windows CDB参数修正已在独立公开功能提交e8c2fdc推送，其[真实诊断37744413563](https://github.com/cyruss648/keelshell/actions/runs/37744413563)的三个exit控制通过；首机会控制已启动目标，但严格输出解析拒绝，后两阶段未到达。[精确Quality37744320601](https://github.com/cyruss648/keelshell/actions/runs/37744320601)的macOS／Linux成功，Windows的暂停取消测试实际为Failed而非预期Cancelled，原应用异常原因继续未知。本段优先于下方历史“候选未运行”状态，独立诊断准备继续，不以部分控制替代Windows或完整产品验收。
+
+## Unix 原完整检查失败记录 — 2026-10-08
+
+当前 Unix 清理增量仍在未提交的功能分支。v6 专项编译与十二控制实际通过，v7 等价单字节写法已通过严格 Clippy；但 v7 原完整检查在默认本地智能体 controller 的 Claude Code 自有继承管道后代场景返回 CleanupFailed，实际 check wait1／Rust command101。原626阶段只到408，完整后续 workspace／doc、readiness／IO／small-stack 未到达，不能以专项通过准入功能提交。准确 wait／观察／errno 分支仍 UNKNOWN；测试版诊断不在普通 integration 库构建中。17个本轮私有 Unix 短根严格终态与实际删除已成立，不能代替该原 controller 的成功或未记录身份的终态。v4／v5 失败与 v6 Clippy 失败全部保留，详见[Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。v8 临时 test/debug 观察实验已通过新的非作者源码复核并实际完成原默认626阶段，没有失败hook，旧原因仍UNKNOWN；精确恢复原源码后 locked no-run 也实际通过。原v7完整失败和提交阻断保持；新运行证据复核单独进行，未放宽三秒或任何原断言。
+
+父提交 af9465c 的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37731989533)已结束：macOS 成功，Windows 应用异常、Linux 文件夹具准入失败；新的实际 Windows 控制器两 runner 通过，首项 CDB 未启动目标，其余控制及固定原应用诊断未到达。两个窄候选（Windows参数、Linux测试App范围）完成新非作者静态复核，仍未导入或实际平台通过。发布签名信任正在重基准备；完整对外 MCP、CLI 登录复用、原生界面／辅助技术及发行安装保持 OPEN。MCP 始终由 KeelShell 向外部智能体提供服务。
+
+下文保留父提交及其它历史范围；Unix 各次准备／失败／通过以本段和专门记录为准。
+
 ## Windows 终态验证增量 — 2026-10-08
 
 精确 ecab 的三平台 [Quality 37726023963](https://github.com/cyruss648/keelshell/actions/runs/37726023963) 已结束：macOS／Linux 成功，Windows 仍在原后代 HANDLE LIVE 断言失败、Rust 未到达；三份完整原日志已读回。新的 Windows Job v3 只改 Python 验证控制器：原进程对象结束、完整回收和管道收尾、原期限内等待前后 Accounting 稳定共同作为成功条件。作者及新非作者各自完整59用例58PASS／1Windows原生UNRUN；独立七模型通过，新非作者无确认P1/P2，仅准入根工程与功能分支实际Windows验证。根正式完整检查已实际通过：1,812普通Rust／10rustdoc／65Python（64PASS／1Windows原生UNRUN），格式／x.y／严格Clippy、原默认及2MiB各626阶段、10准备期与2观察IO控制通过；同831输入及mode前后不变，owner实际wait0／reap／group absent，私有TMP空且删除。四份状态文档随后更新；提交前最终非作者复核与功能分支准确Windows分别验收。本切片未关闭原应用异常原因，也不混入 Unix 和生产发布信任候选，详见[Windows记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。完整对外 MCP、CLI登录复用、UI原生辅助技术、其它平台桌面与发行安装目标继续 OPEN。下文保持各自历史时点。
