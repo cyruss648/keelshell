@@ -9,6 +9,9 @@ Page Up/Down、Home、End 用于浏览。正文中的 Enter 不批准操作。
 取消撤销本次待确认操作，保留草稿。每份新审核从紧凑模式和正文开头开始。
 文件很长时仍需滚动逐段检查；展开不意味着所有内容同时适配一屏。
 
+确认与取消只作用于按钮显示时的那一份审核。若文件列表操作或后台只读准备
+产生了新的审核，旧按钮事件不能批准或撤销新审核；新操作仍需重新查看并确认。
+
 打开远程文件后，文件列表上方的固定路径行提供“编辑草稿”和“输入差异”。选择
 入口会展开对应输入区，并把键盘焦点置于同一个草稿或差异编辑器。“返回文件”
 保留输入；底部可切换草稿与差异、解析差异或发起保存审核，并显示操作状态。
@@ -27,6 +30,11 @@ presentation without changing the reviewed operation or bytes. Cancel removes
 that pending proposal and retains drafts. Each new review starts compact and at
 the top. Long files still require scrolling; expansion does not promise that all
 contents fit on one screen.
+
+Confirm and Cancel apply only to the proposal displayed with those buttons.
+If browsing or read-only preparation replaces it, a button event from the old
+frame cannot approve or dismiss the new proposal. The replacement still needs
+its own review and confirmation.
 
 After opening a remote file, the pinned path row offers “Edit draft” and “Enter
 patch”. Each reveals the corresponding input and focuses the same existing

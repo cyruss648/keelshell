@@ -65,8 +65,14 @@ impl FilesPanel {
         cx.notify();
     }
 
+    fn pending_review_identity(&self) -> Option<(uuid::Uuid, Option<uuid::Uuid>)> {
+        self.pending
+            .as_ref()
+            .map(|_| (self.pending_review_id, self.pending_batch_id()))
+    }
+
     pub(super) fn confirm_button(&self, cx: &Context<Self>) -> Button {
-        let expected_batch = self.pending_batch_id();
+        let expected_review = self.pending_review_identity();
         let empty_batch = matches!(&self.pending, Some((_, Operation::TransferBatch(plan))) if plan.ready_count() == 0);
         Button::new("confirm-file-operation")
             .primary()
@@ -75,23 +81,32 @@ impl FilesPanel {
             .disabled(empty_batch)
             .label(if matches!(&self.pending, Some((_, Operation::ApplyDirectorySync(review, _))) if review.plan.is_bounded_mirror()) {
                 t(cx, "确认镜像及删除", "Confirm mirror/deletions")
-            } else if expected_batch.is_some() {
+            } else if self.pending_batch_id().is_some() {
                 t(cx, "确认可传输目标", "Confirm admissible targets")
             } else {
                 t(cx, "确认", "Confirm")
             })
             .on_click(cx.listener(move |view, _, window, cx| {
-                if view.pending_batch_id() == expected_batch { view.execute_pending(window, cx); }
+                // Rejected stale actions must not reach retained row listeners.
+                cx.stop_propagation();
+                if expected_review.is_some() && view.pending_review_identity() == expected_review {
+                    view.execute_pending(window, cx);
+                }
             }))
     }
 
     pub(super) fn cancel_review_button(&self, cx: &Context<Self>) -> Button {
+        let expected_review = self.pending_review_identity();
         Button::new("cancel-file-operation")
             .ghost()
             .compact()
             .rounded(px(6.))
             .label(t(cx, "取消", "Cancel"))
-            .on_click(cx.listener(|view, _, _, cx| {
+            .on_click(cx.listener(move |view, _, _, cx| {
+                cx.stop_propagation();
+                if expected_review.is_none() || view.pending_review_identity() != expected_review {
+                    return;
+                }
                 view.pending = None;
                 view.confirmation_expanded = false;
                 cx.notify();

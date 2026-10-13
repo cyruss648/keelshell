@@ -2,6 +2,74 @@
 use super::*;
 use gpui_kit::{ElementId, Modifiers};
 
+fn create_hidden_source(path: &std::path::Path) {
+    use std::io::Write as _;
+
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt as _;
+        // A leading dot alone does not make a file hidden on Windows.
+        options.attributes(0x0000_0002); // FILE_ATTRIBUTE_HIDDEN
+    }
+    let mut file = options
+        .open(path)
+        .checked("create the native hidden fixture");
+    file.write_all(b".hidden")
+        .checked("write the hidden fixture bytes");
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt as _;
+        assert_ne!(
+            file.metadata()
+                .checked("read native hidden attributes")
+                .file_attributes()
+                & 0x0000_0002,
+            0,
+            "the Windows fixture must have FILE_ATTRIBUTE_HIDDEN"
+        );
+    }
+}
+
+#[cfg(windows)]
+#[test]
+fn hidden_fixture_sets_native_attribute_while_dot_name_alone_remains_visible() {
+    use std::os::windows::fs::MetadataExt as _;
+
+    let folder = tempfile::tempdir().checked("create isolated native hidden fixture");
+    let ordinary_dot = folder.path().join(".ordinary");
+    std::fs::write(&ordinary_dot, b"visible despite dot prefix")
+        .checked("create ordinary Windows dot name");
+    assert_eq!(
+        std::fs::metadata(&ordinary_dot)
+            .checked("read ordinary native attributes")
+            .file_attributes()
+            & 0x0000_0002,
+        0
+    );
+    let hidden = folder.path().join(".hidden");
+    create_hidden_source(&hidden);
+    let listing = crate::files::local_catalog::list_directory(
+        folder.path(),
+        &std::sync::atomic::AtomicBool::new(false),
+    )
+    .checked("read actual Windows file metadata through the browser");
+    assert_eq!(listing.entries.len(), 2);
+    assert!(
+        listing
+            .entries
+            .iter()
+            .any(|entry| entry.path == hidden && entry.hidden)
+    );
+    assert!(
+        listing
+            .entries
+            .iter()
+            .any(|entry| entry.path == ordinary_dot && !entry.hidden)
+    );
+}
+
 async fn browse(h: &Harness, folder: PathBuf, cx: &mut TestAppContext) {
     cx.update_window(h.window, |_, window, cx| {
         h.panel
@@ -442,10 +510,29 @@ async fn browser_modifier_ranges_hidden_filters_and_single_actions_use_current_p
 ) {
     let h = Harness::new(cx);
     h.idle(cx).await;
-    for name in ["a.txt", "b.txt", "c.txt", ".hidden"] {
+    for name in ["a.txt", "b.txt", "c.txt"] {
         h.source(name, name.as_bytes());
     }
+    create_hidden_source(&h.local.0.join(".hidden"));
     browse(&h, h.local.0.clone(), cx).await;
+    h.panel.read_with(cx, |panel, _| {
+        let listing = panel
+            .local_browser
+            .listing
+            .as_ref()
+            .checked_option("hidden fixture listing");
+        assert!(
+            listing
+                .entries
+                .iter()
+                .any(|entry| { entry.name.to_str() == Some(".hidden") && entry.hidden })
+        );
+        assert_eq!(crate::files::browser::local_indices(
+            &listing.entries,
+            false,
+            panel.local_browser.sort,
+        ).len(), 3);
+    });
     select_local(&h, "a.txt", cx);
     cx.update_window(h.window, |_, window, cx| {
         window.render_frame(cx);

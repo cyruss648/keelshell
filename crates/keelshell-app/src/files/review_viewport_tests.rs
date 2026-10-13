@@ -32,6 +32,162 @@ fn review_bytes(h: &Harness, cx: &TestAppContext) -> (String, Vec<u8>, Vec<u8>) 
     })
 }
 
+fn dispatch_review_pointer(
+    window: &mut gpui_kit::Window,
+    position: gpui_kit::Point<gpui_kit::Pixels>,
+    cx: &mut gpui_kit::App,
+) {
+    for input in [
+        gpui_kit::MouseMoveEvent {
+            position,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        gpui_kit::MouseDownEvent {
+            button: gpui_kit::MouseButton::Left,
+            position,
+            click_count: 1,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        gpui_kit::MouseUpEvent {
+            button: gpui_kit::MouseButton::Left,
+            position,
+            click_count: 1,
+            ..Default::default()
+        }
+        .to_platform_input(),
+    ] {
+        window.dispatch_event(input, cx);
+    }
+}
+
+async fn old_painted_save_action_keeps_replacement_read_review(
+    action: &'static str,
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    open_file(&h, "/z-editing.txt", b"original remote bytes\n", cx).await;
+    h.seed("/a-replacement.txt", b"replacement remote bytes\n");
+    h.click(cx, "refresh-files");
+    h.idle(cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.read(cx).editor.clone().update(cx, |input, cx| {
+            input.set_value("unsaved original draft\n", window, cx)
+        });
+    })
+    .checked("prepare the dirty editor for the original save review");
+    h.click(cx, "save-remote-file");
+    assert_eq!(
+        review_bytes(&h, cx),
+        (
+            "/z-editing.txt".into(),
+            b"original remote bytes\n".to_vec(),
+            b"unsaved original draft\n".to_vec(),
+        )
+    );
+
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        let old_action = window.find(action);
+        assert!(old_action.visible(), "the original save action is painted");
+        let old_position = old_action.bounds().center();
+        let replacement_index = h.panel.read_with(cx, |panel, _| {
+            crate::files::browser::remote_indices(
+                &panel.entries,
+                panel.remote_show_hidden,
+                panel.remote_sort,
+            )
+            .iter()
+            .position(|index| panel.entries[*index].path == "/a-replacement.txt")
+            .checked_option("visible replacement file row")
+        });
+        let edit = window.find(("open-remote", replacement_index));
+        assert!(edit.visible(), "the replacement Edit action is painted");
+        let edit_position = edit.bounds().center();
+
+        // The production Edit callback replaces Save with a dirty-editor Read
+        // review. Both pointer pairs use this same frame: repainting after Edit
+        // would bind a fresh button and hide the stale authorization defect.
+        dispatch_review_pointer(window, edit_position, cx);
+        h.panel.read_with(cx, |panel, cx| {
+            assert!(matches!(
+                &panel.pending,
+                Some((_, Operation::Read(entry))) if entry.path == "/a-replacement.txt"
+            ));
+            assert_eq!(
+                panel.editor.read(cx).value().as_str(),
+                "unsaved original draft\n"
+            );
+            assert!(!panel.busy && panel.operation_id.is_none());
+        });
+        dispatch_review_pointer(window, old_position, cx);
+        h.panel.read_with(cx, |panel, cx| {
+            assert!(
+                matches!(
+                    &panel.pending,
+                    Some((_, Operation::Read(entry))) if entry.path == "/a-replacement.txt"
+                ),
+                "an old save-review action cannot approve or cancel the replacement read review"
+            );
+            assert_eq!(
+                panel
+                    .editing
+                    .as_ref()
+                    .checked_option("original file remains open")
+                    .0,
+                "/z-editing.txt"
+            );
+            assert_eq!(
+                panel.editor.read(cx).value().as_str(),
+                "unsaved original draft\n"
+            );
+            assert!(!panel.busy && panel.operation_id.is_none());
+        });
+    })
+    .checked("dispatch the original save action after real Edit replaces its review");
+    h.idle(cx).await;
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(matches!(
+            &panel.pending,
+            Some((_, Operation::Read(entry))) if entry.path == "/a-replacement.txt"
+        ));
+        assert_eq!(
+            panel.editor.read(cx).value().as_str(),
+            "unsaved original draft\n"
+        );
+        assert!(panel.operation_id.is_none() && panel.transfer_jobs.is_empty());
+    });
+    assert_eq!(h.read("/z-editing.txt"), b"original remote bytes\n");
+    assert_eq!(h.read("/a-replacement.txt"), b"replacement remote bytes\n");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+
+    // A newly painted action still owns the current review and can dismiss it.
+    h.click(cx, "cancel-file-operation");
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(panel.pending.is_none());
+        assert_eq!(
+            panel.editor.read(cx).value().as_str(),
+            "unsaved original draft\n"
+        );
+    });
+}
+
+#[gpui_kit::test]
+async fn old_painted_save_confirmation_cannot_approve_replacement_read_review(
+    cx: &mut TestAppContext,
+) {
+    old_painted_save_action_keeps_replacement_read_review("confirm-file-operation", cx).await;
+}
+
+#[gpui_kit::test]
+async fn old_painted_save_cancellation_cannot_cancel_replacement_read_review(
+    cx: &mut TestAppContext,
+) {
+    old_painted_save_action_keeps_replacement_read_review("cancel-file-operation", cx).await;
+}
+
 #[gpui_kit::test]
 async fn expanded_save_review_retains_complete_rows_and_keyboard_scroll_in_minimum_pane(
     cx: &mut TestAppContext,

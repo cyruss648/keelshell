@@ -168,6 +168,7 @@ pub struct FilesPanel {
     status: Message,
     busy: bool,
     pending: Option<(Message, Operation)>,
+    pending_review_id: uuid::Uuid,
     operation_stop: Option<Arc<AtomicBool>>,
     operation_id: Option<uuid::Uuid>,
     transfer_pause: Option<tokio::sync::watch::Sender<bool>>,
@@ -606,6 +607,7 @@ impl FilesPanel {
             status: Message::new("正在打开 SFTP…", "Opening SFTP…"),
             busy: false,
             pending: None,
+            pending_review_id: uuid::Uuid::new_v4(),
             operation_stop: None,
             operation_id: None,
             transfer_pause: None,
@@ -1007,10 +1009,7 @@ impl FilesPanel {
                     Ok(Outcome::Done(message)) => view.status = message,
                     Ok(Outcome::QuarantineInspected(review)) => {
                         view.status = Message::new("只读检查完成；请审核解除隔离的未知风险", "Read-only inspection complete; review the risk before releasing isolation");
-                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
-                        view.confirmation_expanded = false;
-                        view.editor_surface = None;
-                        view.pending = Some((parallel::quarantine_review_message(&review), Operation::AcknowledgeQuarantine(review)));
+                        view.replace_pending_review(parallel::quarantine_review_message(&review), Operation::AcknowledgeQuarantine(review));
                     }
                     Ok(Outcome::PlannedBatch(plan)) => {
                         view.status = Message::new("批量只读准备完成，请审核每个目标。", "Read-only batch preparation completed; review every target.");
@@ -1018,24 +1017,15 @@ impl FilesPanel {
                     }
                     Ok(Outcome::PlannedDirectory(plan)) => {
                         view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
-                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
-                        view.confirmation_expanded = false;
-                        view.editor_surface = None;
-                        view.pending = Some((directory_review_message(&plan), Operation::TransferDirectory(plan)));
+                        view.replace_pending_review(directory_review_message(&plan), Operation::TransferDirectory(plan));
                     }
                     Ok(Outcome::PlannedFileResume(plan)) => {
                         view.status = Message::new("部分内容校验通过，请审核续传", "Existing content verified; review continuation");
-                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
-                        view.confirmation_expanded = false;
-                        view.editor_surface = None;
-                        view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), None), Operation::ResumeFile(plan)));
+                        view.replace_pending_review(resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), None), Operation::ResumeFile(plan));
                     }
                     Ok(Outcome::PlannedDirectoryResume(plan)) => {
                         view.status = Message::new("部分目录校验通过，请审核续传", "Existing tree verified; review continuation");
-                        view.confirmation_scroll.set_offset(point(px(0.), px(0.)));
-                        view.confirmation_expanded = false;
-                        view.editor_surface = None;
-                        view.pending = Some((resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan)));
+                        view.replace_pending_review(resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan));
                     }
                     Ok(Outcome::Compared(comparison)) => {
                         let review_count = comparison.report.review_count();
@@ -1123,12 +1113,18 @@ impl FilesPanel {
                 "Wait for or cancel the active file operation",
             );
         } else {
-            self.confirmation_scroll.set_offset(point(px(0.), px(0.)));
-            self.confirmation_expanded = false;
-            self.editor_surface = None;
-            self.pending = Some((message, operation));
+            self.replace_pending_review(message, operation);
         }
         cx.notify();
+    }
+    fn replace_pending_review(&mut self, message: Message, operation: Operation) {
+        // Each proposal needs fresh approval, even when two non-batch actions
+        // have identical text or replace one another before the next frame.
+        self.pending_review_id = uuid::Uuid::new_v4();
+        self.confirmation_scroll.set_offset(point(px(0.), px(0.)));
+        self.confirmation_expanded = false;
+        self.editor_surface = None;
+        self.pending = Some((message, operation));
     }
     fn execute_pending(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.suspended {
