@@ -2,7 +2,7 @@
 
 ## 继续开发 — 2026-10-14
 
-当前组合继续位于 `feature/platform-batch-integration`。精确 `78c7720` 的 Ubuntu 准入泄漏与 Windows 退出码 0 身份等待已有本机修复和回归，详见[CI记录](testing/records/2026-10-14-ci-admission-and-windows-identity.md)。审核式拖放上传完成受控 GPUI 验证；原生文件管理器拖放、三平台桌面、新精确 CI 和 Windows `0xc0000409` 仍分别验收。
+当前组合继续位于 `feature/platform-batch-integration`。精确 `78c7720` 的 Ubuntu 准入泄漏与 Windows 退出码 0 身份等待已有本机修复和回归，详见[CI记录](testing/records/2026-10-14-ci-admission-and-windows-identity.md)。审核式拖放上传完成受控 GPUI 验证。精确 `99425de` 的 Ubuntu 与 macOS CI 已通过；Windows 越过原进程树失败，但更新器 5 秒 Ready 等待失败。原生文件管理器拖放、三平台桌面和 Windows `0xc0000409` 仍分别验收。
 
 提交按 Unix 夹具、更新器夹具、拖放上传三个阶段进行；不因功能分支推送而合入 main 或创建发行标签。
 

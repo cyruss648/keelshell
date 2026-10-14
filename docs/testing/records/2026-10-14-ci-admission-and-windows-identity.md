@@ -32,6 +32,16 @@
 非零退出、未退出、超时和中断仍保留原清理预留。总期限、退出码、回收和管道排空断言不变。
 本机新增两个时钟反例，并重新通过 9 项真实 POSIX 进程树控制。该结果不能代替 Windows 原生验收。
 
+## 精确 99425de CI
+
+[Quality 38519397381](https://github.com/cyruss648/keelshell/actions/runs/38519397381)
+的 Ubuntu 24.04 与 macOS 26 成功。Windows 2025 的 Python 准备控制已通过，应用测试为
+739 通过、1 失败、2 ignored。失败测试是
+`automatic_download_verifies_real_archive_and_ready_continues_periodic_checks`，
+5 秒内没有进入 Ready；超时界面仍显示检查和取消按钮。本机单独运行该测试 0.20 秒通过。
+Windows 日志同时记录布局测试运行超过 60 秒，因此当前没有把该失败归因于下载逻辑或放宽期限。
+历史应用异常 `0xc0000409` 仍未由这次结果关闭。
+
 ## 拖放边界
 
 受控 GPUI 拖放上传此前已验证。原生文件管理器拖放、三平台桌面、签名安装及 Windows 应用异常仍未关闭。

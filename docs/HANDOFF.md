@@ -4,7 +4,7 @@
 
 用户继续要求先处理当前 CI 与测试失败，完成文件拖放上传的独立审查和验证，通过后分阶段提交推送，并清理无用临时文件。
 
-精确 `78c7720` 的 run `38500698507` 中，Ubuntu 的布局场景持有唯一文件夹具许可直到测试函数结束，导致后续文件与 MCP 测试失败；Windows 的退出码 0 进程树控制则在身份发布前耗尽 5 秒清理预留。两项均已有本机回归，详见[CI记录](testing/records/2026-10-14-ci-admission-and-windows-identity.md)。原生文件管理器拖放和 Windows `0xc0000409` 仍未关闭。
+精确 `78c7720` 的 run `38500698507` 中，Ubuntu 的布局场景持有唯一文件夹具许可直到测试函数结束，导致后续文件与 MCP 测试失败；Windows 的退出码 0 进程树控制则在身份发布前耗尽 5 秒清理预留。两项均已有本机回归，详见[CI记录](testing/records/2026-10-14-ci-admission-and-windows-identity.md)。原生文件管理器拖放和 Windows `0xc0000409` 仍未关闭。精确 `99425de` 的 Ubuntu 与 macOS CI 已通过；Windows 原进程树失败已越过，但更新器 Ready 的 5 秒等待在负载下失败，本机单独通过，期限未改。
 
 当前仍在 `feature/platform-batch-integration`，远端基线为 `cddec26`。Unix 清理夹具的直接故障已定位为自有 socket 超时 setter 返回 `EINVAL`；现已改为单次绝对期限内的非阻塞读写，生产清理期限和安全契约未变。本机完整 `python3 scripts/check.py` 已实际通过。macOS 更新器夹具的 `WouldBlock` 也已按同一边界修复，应用更新器 53 项及文件模块 162 项通过。
 
