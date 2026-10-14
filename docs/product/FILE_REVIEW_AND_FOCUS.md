@@ -18,6 +18,11 @@ Page Up/Down、Home、End 用于浏览。正文中的 Enter 不批准操作。
 差异解析只改变草稿，不写远端。保存仍须完整审核并显式确认；审核后草稿变化、
 会话断连、撤权或暂停继续阻止旧确认，未知写入隔离规则不变。
 
+展开草稿编辑器提供有界的字面查找、替换当前和全部替换。查找不跨越匹配重叠，
+也不把点视为通配符。替换只改变本机草稿；取消保存审核不会写入远端。审核保存在发布
+新内容前，先把已复核的原内容写入同目录隐藏备份。备份失败时不发布新内容；若新内容
+发布结果未知，已完成的备份保留，原文件仍按原隔离规则处理。目标被其它操作占用时，备份可能已经写入，但目标不会被替换。
+
 A pending file operation starts with compact review, leaving the browser available.
 “Expand review” gives its complete text the file pane's available space while the
 terminal and assistant retain their allocations. Every original path, hash,
@@ -43,6 +48,14 @@ editors, parse a patch or request save review, with the operation status visible
 Patch parsing changes only the draft. Remote saving still requires complete
 review and explicit confirmation. Changed drafts, suspension, disconnection and
 revocation keep the original guards; unknown mutation isolation is unchanged.
+
+The expanded draft editor provides bounded literal find, replace-current and
+replace-all actions. Search does not overlap matches or treat a dot as a
+wildcard. Replacement changes only the local draft, and cancelling save review
+writes nothing remotely. Reviewed save writes the rechecked original into a
+hidden backup in the same directory before publishing the replacement. Backup
+failure prevents publication. If publication has an unknown result, the completed
+backup remains and the original file keeps its existing isolation rules. If another operation owns the target, the backup may already exist while replacement is still refused.
 
 候选源码与回归准备不代表原生验收；目前新布局的 macOS 像素、最小窗口操作、
 完整键盘导航、VoiceOver 和 Windows/Linux 桌面仍待复验。详见
