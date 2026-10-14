@@ -258,7 +258,7 @@ fn add_name_bytes(current: usize, name: &OsStr) -> Result<usize, LocalBrowseErro
     Ok(total)
 }
 
-fn entry_kind(metadata: &Metadata) -> LocalEntryKind {
+pub(super) fn entry_kind(metadata: &Metadata) -> LocalEntryKind {
     if metadata.file_type().is_symlink() {
         LocalEntryKind::Symlink
     } else if is_reparse_point(metadata) {

@@ -12,7 +12,7 @@ pub(super) struct BatchBinding {
     pub(super) session: uuid::Uuid,
     revision: uuid::Uuid,
     remote: String,
-    local: PathBuf,
+    local: Option<PathBuf>,
     local_selection: Vec<PathBuf>,
     remote_selection: Vec<String>,
 }
@@ -21,6 +21,7 @@ pub(super) struct BatchBinding {
 pub(super) struct BatchRequest {
     binding: BatchBinding,
     direction: TransferDirection,
+    dropped: bool,
     sources: Vec<BatchSource>,
 }
 
@@ -29,7 +30,7 @@ struct BatchSource {
     name: String,
     local: PathBuf,
     remote: String,
-    directory: bool,
+    directory: Option<bool>,
     supported: bool,
 }
 
@@ -65,6 +66,7 @@ pub(super) struct BatchPlan {
     pub(super) id: uuid::Uuid,
     binding: BatchBinding,
     direction: TransferDirection,
+    dropped: bool,
     rows: Vec<BatchRow>,
 }
 
@@ -81,16 +83,29 @@ impl BatchPlan {
             .filter_map(|row| row.prepared.as_ref().ok())
             .map(PreparedTarget::bytes)
             .sum();
+        let local = if self.dropped {
+            Message::new(
+                "拖入的本地路径（逐项列出）",
+                "Dropped local paths (listed individually)",
+            )
+        } else {
+            let path = self
+                .binding
+                .local
+                .as_ref()
+                .map_or_else(String::new, |path| path.display().to_string());
+            Message::new(path.clone(), path)
+        };
         let mut zh = format!(
             "批量传输审核：{ready} 个可传输目标／{rejected} 个拒绝项，共 {bytes} 字节。确认仅加入以下明确可传输目标；拒绝项不会执行。\n原SSH连接：{}\n本地目录：{}\n远程目录：{}\n普通文件上传仅原子发布；目录按项传输，失败或取消可能留下部分目录和文件。下载不覆盖本地文件；未知写入保留隔离，不自动重试。\n",
             self.binding.session,
-            self.binding.local.display(),
+            local.translations().0,
             self.binding.remote
         );
         let mut en = format!(
             "Batch transfer review: {ready} admissible targets / {rejected} rejected entries, {bytes} bytes. Confirm adds only the exact admissible targets below; rejected entries do not run.\nOriginal SSH connection: {}\nLocal folder: {}\nRemote folder: {}\nRegular-file uploads publish atomically. Folders transfer item by item; failure or cancellation can leave partial folders and files. Downloads never overwrite local files. Unknown writes retain isolation; no automatic retry.\n",
             self.binding.session,
-            self.binding.local.display(),
+            local.translations().1,
             self.binding.remote
         );
         for (index, row) in self.rows.iter().enumerate() {
@@ -191,7 +206,26 @@ pub(super) async fn prepare(
                 remote: source.remote.clone(),
             };
             let result = tokio::time::timeout_at(deadline, async {
-                if source.directory {
+                let directory = match source.directory {
+                    Some(directory) => directory,
+                    None => {
+                        // A platform drop carries paths, not trusted file metadata.
+                        // This runs on the existing SFTP worker, never the UI thread.
+                        let metadata = tokio::fs::symlink_metadata(&source.local)
+                            .await
+                            .map_err(SessionError::from)?;
+                        match local_catalog::entry_kind(&metadata) {
+                            local_catalog::LocalEntryKind::File => false,
+                            local_catalog::LocalEntryKind::Directory => true,
+                            _ => {
+                                return Err(SessionError::Invalid(
+                                    "dropped source must be an ordinary file or directory",
+                                ));
+                            }
+                        }
+                    }
+                };
+                if directory {
                     sftp.plan_directory_transfer(spec)
                         .await
                         .map(PreparedTarget::Directory)
@@ -232,6 +266,7 @@ pub(super) async fn prepare(
         id: uuid::Uuid::new_v4(),
         binding: request.binding,
         direction: request.direction,
+        dropped: request.dropped,
         rows,
     })
 }
@@ -243,16 +278,105 @@ impl FilesPanel {
             _ => None,
         }
     }
-    fn batch_binding(&self) -> Option<BatchBinding> {
+    pub(super) fn batch_binding(&self) -> Option<BatchBinding> {
         Some(BatchBinding {
             session: self.session_token,
             revision: self.browser_review_revision,
             remote: self.directory.clone()?,
-            local: self.local_browser.listing.as_ref()?.directory.clone(),
+            local: self
+                .local_browser
+                .listing
+                .as_ref()
+                .map(|listing| listing.directory.clone()),
             local_selection: self.local_browser.selection.paths().cloned().collect(),
             remote_selection: self.remote_selection.paths().cloned().collect(),
         })
     }
+    pub(super) fn drop_upload_available(&self) -> bool {
+        !self.suspended
+            && !self.busy
+            && self.session.is_some()
+            && self.directory.is_some()
+            && self.operation_id.is_none()
+            && self.pending.is_none()
+    }
+
+    pub(super) fn request_dropped_upload(
+        &mut self,
+        paths: &ExternalPaths,
+        painted_binding: Option<&BatchBinding>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if !self.drop_upload_available() {
+            self.status = Message::new(
+                "暂时无法准备拖放上传；请连接远程目录，并先完成当前操作或审核。",
+                "Cannot prepare dropped files yet. Connect to a remote folder and finish the current operation or review.",
+            );
+            cx.notify();
+            return;
+        }
+        let Some(binding) = self
+            .batch_binding()
+            .filter(|current| Some(current) == painted_binding)
+        else {
+            self.status = Message::new(
+                "远程目录或选择已变化；请在当前目录重新拖放。",
+                "The folder or selection changed. Drop the files again in the current folder.",
+            );
+            cx.notify();
+            return;
+        };
+        if paths.paths().is_empty() || paths.paths().len() > MAX_QUEUED_TRANSFERS {
+            self.status = Message::new(
+                "每次可拖入 1–32 个文件或文件夹；本次未准备任何传输。",
+                "Drop 1–32 files or folders at a time. No transfer was prepared.",
+            );
+            cx.notify();
+            return;
+        }
+        let sources = paths
+            .paths()
+            .iter()
+            .map(|path| {
+                let name = path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or_default();
+                let supported = path.is_absolute()
+                    && !path
+                        .components()
+                        .any(|part| matches!(part, std::path::Component::ParentDir))
+                    && path
+                        .parent()
+                        .and_then(|parent| browser::local_destination(parent, name))
+                        .as_ref()
+                        == Some(path);
+                BatchSource {
+                    name: path
+                        .file_name()
+                        .unwrap_or(path.as_os_str())
+                        .to_string_lossy()
+                        .into_owned(),
+                    local: path.clone(),
+                    remote: format!("{}/{}", binding.remote.trim_end_matches('/'), name),
+                    directory: None,
+                    supported,
+                }
+            })
+            .collect();
+        self.run(
+            Operation::PlanBatch(BatchRequest {
+                binding,
+                direction: TransferDirection::Upload,
+                dropped: true,
+                sources,
+            }),
+            window,
+            cx,
+        );
+    }
+
     pub(super) fn request_batch(
         &mut self,
         direction: TransferDirection,
@@ -283,7 +407,7 @@ impl FilesPanel {
                         name: entry.name.to_string_lossy().into_owned(),
                         local: entry.path.clone(),
                         remote,
-                        directory: entry.kind == local_catalog::LocalEntryKind::Directory,
+                        directory: Some(entry.kind == local_catalog::LocalEntryKind::Directory),
                         supported: portable
                             && entry.path == listing.directory.join(&entry.name)
                             && matches!(
@@ -295,16 +419,19 @@ impl FilesPanel {
                 }
             }
             TransferDirection::Download => {
+                let Some(local) = &binding.local else {
+                    return;
+                };
                 for path in self.remote_selection.paths() {
                     let Some(entry) = self.entries.iter().find(|entry| &entry.path == path) else {
                         return;
                     };
-                    let destination = browser::local_destination(&binding.local, &entry.name);
+                    let destination = browser::local_destination(local, &entry.name);
                     sources.push(BatchSource {
                         name: entry.name.clone(),
-                        local: destination.clone().unwrap_or_else(|| binding.local.clone()),
+                        local: destination.clone().unwrap_or_else(|| local.clone()),
                         remote: entry.path.clone(),
-                        directory: entry.is_directory,
+                        directory: Some(entry.is_directory),
                         supported: destination.is_some()
                             && entry.path
                                 == format!(
@@ -327,6 +454,7 @@ impl FilesPanel {
             Operation::PlanBatch(BatchRequest {
                 binding,
                 direction,
+                dropped: false,
                 sources,
             }),
             window,
@@ -379,6 +507,7 @@ impl FilesPanel {
         let visual = crate::design::palette(cx);
         let local = self.local_browser.selection.len();
         let remote = self.remote_selection.len();
+        let drop_available = self.drop_upload_available();
         div()
             .id("batch-transfer-controls")
             .test_support()
@@ -393,6 +522,35 @@ impl FilesPanel {
             .border_b_1()
             .border_color(rgb(visual.border))
             .bg(rgb(visual.canvas))
+            .child(
+                div()
+                    .id("remote-drop-hint")
+                    .test_support()
+                    .h(px(28.))
+                    .px_1()
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .text_color(rgb(if drop_available {
+                        visual.accent
+                    } else {
+                        visual.muted
+                    }))
+                    .child(IconName::Upload)
+                    .child(if drop_available {
+                        t(
+                            cx,
+                            "拖入本地文件或文件夹，审核后上传",
+                            "Drop local files or folders here, then review to upload",
+                        )
+                    } else {
+                        t(
+                            cx,
+                            "连接远程目录并完成当前操作后，可拖放上传",
+                            "Connect and finish the current operation to drop files",
+                        )
+                    }),
+            )
             .child(
                 div()
                     .text_color(rgb(visual.muted))
@@ -490,24 +648,25 @@ mod tests {
                 session: uuid::Uuid::new_v4(),
                 revision: uuid::Uuid::new_v4(),
                 remote: "/".into(),
-                local: root,
+                local: Some(root),
                 local_selection: vec![source.clone()],
                 remote_selection: vec![],
             },
             direction: TransferDirection::Upload,
+            dropped: false,
             sources: vec![
                 BatchSource {
                     name: "first".into(),
                     local: source.clone(),
                     remote: "/target.txt".into(),
-                    directory: false,
+                    directory: Some(false),
                     supported: true,
                 },
                 BatchSource {
                     name: "alias".into(),
                     local: source,
                     remote: "/TARGET.txt".into(),
-                    directory: false,
+                    directory: Some(false),
                     supported: true,
                 },
             ],

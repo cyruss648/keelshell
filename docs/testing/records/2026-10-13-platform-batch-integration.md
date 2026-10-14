@@ -89,3 +89,30 @@ main、不创建发行标签，也不将当前组合记为已完成的功能验�
 入口证据继续保留原范围。本轮不继承其程序哈希，也不以合并或编译证明
 新的原生行为。Windows 应用异常、三平台桌面、最小窗口和辅助技术、
 完整外部 MCP、本地 CLI 自身登录，以及签名公证/安装更新仍需各自验收。
+
+
+## 用户恢复开发后的夹具故障定位
+
+用户随后明确恢复目标。原失败根的 member stderr 在第 223 行记录
+`set_read_timeout(Some(100 ms))` 返回 `EINVAL`，其 PID/group 与同轮
+保存的身份及主检查日志一致；member 随后退出，父端第 383 行写请求
+收到 `BrokenPipe`。这定位到本次测试夹具的直接故障，不证明操作系统
+为何拒绝 setter，也不能据此关闭其它历史 CleanupFailed。
+
+候选仅将自有 Unix fixture 通信改为安全非阻塞读写。操作字节与完整
+nonce 共用单次 100 ms 绝对期限，受 member/leader 原 10 秒生命期上限
+约束；部分读写、Interrupted 或 WouldBlock 不重置期限。完整 nonce
+仍是退出条件；Q 的回复保持尽力发送，以兼容 Drop 的既有单向退出请求。
+父端 8 秒期限、生产 3 秒清理、一次信号许可及原身份/终态断言不变。
+
+新增真实 socket 控制覆盖完整身份响应、分段 nonce、错误/残缺 nonce、
+无数据/部分数据的父期限、已过期请求及对端关闭。专项、完整工程和新
+非作者复核结果随后分别记录；此候选当前不声明已通过。
+
+## 2026-10-14 夹具修复与拖放验证
+
+完整本机 `python3 scripts/check.py` 实际退出 0，耗时 1078.53 秒，848 个当时工程输入在检查前后保持不变。收据为忽略目录中的 `work/2026-10-13-resume/full-check-result.json`。该结果覆盖格式、严格 Clippy、workspace 测试、readiness、observer IO 和 small-stack；应用套件为 740 通过、2 ignored。它不能解释随后修复的 macOS 更新器失败，也不能解释 Windows `0xc0000409`。
+
+精确 `cddec26` 的 [Quality 38333873552](https://github.com/cyruss648/keelshell/actions/runs/38333873552) 已完成且整体失败：Ubuntu 成功，macOS 与 Windows 失败。macOS 的直接故障是更新器夹具继承非阻塞套接字后 `read_exact` 返回 errno 35；现用单次 2 秒请求期限和 8 秒夹具寿命做非阻塞安全读写，Drop 不再二次 panic。新增分段、超时和提前关闭回归。更新器测试现为 53 通过。
+
+拖放上传复用批量审核。六项 GPUI 回归及完整文件模块 162 项通过，四线程执行。拖放提示放在现有批量工具栏中，文件区最小高度保持 64。此证据不是 macOS、Windows 或 Linux 原生文件管理器拖放，也未证明远端字节在真实桌面流程中的往返。

@@ -269,11 +269,24 @@ impl FilesPanel {
                 "This directory is empty",
             )));
         }
+        let drop_binding = self.batch_binding();
+        let drop_available = self.drop_upload_available();
         let table = div()
             .id("remote-files-table")
             .flex_1()
             .min_w_0()
             .h_full()
+            .when(drop_available, |table| {
+                table.drag_over::<ExternalPaths>(move |style, _, _, _| {
+                    style.border_color(rgb(visual.accent))
+                })
+            })
+            .on_drop(
+                cx.listener(move |panel, paths: &ExternalPaths, window, cx| {
+                    cx.stop_propagation();
+                    panel.request_dropped_upload(paths, drop_binding.as_ref(), window, cx);
+                }),
+            )
             .overflow_x_scroll()
             .test_support()
             .child(
