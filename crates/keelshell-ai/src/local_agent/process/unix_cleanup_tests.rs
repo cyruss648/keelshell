@@ -33,6 +33,8 @@ use uuid::Uuid;
 
 use super::*;
 
+mod socket_tests;
+
 const ENTRYPOINT: &str = "local_agent::process::unix_cleanup_tests::owned_group_fixture_entrypoint";
 const FIXTURE_ARGUMENTS: [&str; 6] = [
     "--exact",
@@ -62,44 +64,22 @@ fn private_fixture_log(root: &Path, name: &str) -> std::fs::File {
         .unwrap()
 }
 
-// An observed held-leader fixture failed while setting SO_RCVTIMEO.
-// Avoid that optional setting and read the complete nonce under one 100ms
-// deadline capped by the leader's existing hard lifetime. Partial reads and
-// transient errors cannot restart either budget or authorize a partial nonce.
-fn read_held_leader_request(
-    stream: &mut std::os::unix::net::UnixStream,
-    leader_deadline: StdInstant,
-) -> std::io::Result<[u8; 17]> {
-    let deadline = (StdInstant::now() + Duration::from_millis(100)).min(leader_deadline);
-    stream.set_nonblocking(true)?;
-    let mut request = [0; 17];
-    let mut offset = 0;
+// Keep every partial read/write under the original request deadline. Socket
+// timeout setters have failed in both owned fixture roles on macOS.
+fn poll_fixture_io<T>(
+    deadline: StdInstant,
+    mut operation: impl FnMut() -> std::io::Result<T>,
+) -> std::io::Result<T> {
     loop {
         if StdInstant::now() >= deadline {
             return Err(std::io::Error::new(
                 ErrorKind::TimedOut,
-                "held fixture request deadline expired",
+                "owned fixture request deadline expired",
             ));
         }
-        match stream.read(&mut request[offset..]) {
-            Ok(0) => {
-                return Err(std::io::Error::new(
-                    ErrorKind::UnexpectedEof,
-                    "held fixture request ended before its complete nonce",
-                ));
-            }
-            Ok(bytes) => {
-                offset += bytes;
-                if offset == request.len() {
-                    if StdInstant::now() >= deadline {
-                        return Err(std::io::Error::new(
-                            ErrorKind::TimedOut,
-                            "held fixture request arrived after its deadline",
-                        ));
-                    }
-                    return Ok(request);
-                }
-            }
+        match operation() {
+            Ok(value) if StdInstant::now() < deadline => return Ok(value),
+            Ok(_) => return Err(std::io::Error::from(ErrorKind::TimedOut)),
             Err(error)
                 if matches!(error.kind(), ErrorKind::Interrupted | ErrorKind::WouldBlock) =>
             {
@@ -109,6 +89,78 @@ fn read_held_leader_request(
             Err(error) => return Err(error),
         }
     }
+}
+
+fn read_fixture_exact(
+    stream: &mut std::os::unix::net::UnixStream,
+    mut bytes: &mut [u8],
+    deadline: StdInstant,
+) -> std::io::Result<()> {
+    while !bytes.is_empty() {
+        let read = poll_fixture_io(deadline, || stream.read(bytes))?;
+        if read == 0 {
+            return Err(std::io::Error::from(ErrorKind::UnexpectedEof));
+        }
+        bytes = &mut bytes[read..];
+    }
+    Ok(())
+}
+
+fn write_fixture_all(
+    stream: &mut std::os::unix::net::UnixStream,
+    mut bytes: &[u8],
+    deadline: StdInstant,
+) -> std::io::Result<()> {
+    while !bytes.is_empty() {
+        let written = poll_fixture_io(deadline, || stream.write(bytes))?;
+        if written == 0 {
+            return Err(std::io::Error::from(ErrorKind::WriteZero));
+        }
+        bytes = &bytes[written..];
+    }
+    Ok(())
+}
+
+fn read_held_leader_request(
+    stream: &mut std::os::unix::net::UnixStream,
+    leader_deadline: StdInstant,
+) -> std::io::Result<[u8; 17]> {
+    let deadline = (StdInstant::now() + Duration::from_millis(100)).min(leader_deadline);
+    stream.set_nonblocking(true)?;
+    let mut request = [0; 17];
+    read_fixture_exact(stream, &mut request, deadline)?;
+    Ok(request)
+}
+
+fn answer_member_request(
+    stream: &mut std::os::unix::net::UnixStream,
+    identity: &MemberIdentity,
+    member_deadline: StdInstant,
+) -> std::io::Result<bool> {
+    let deadline = (StdInstant::now() + Duration::from_millis(100)).min(member_deadline);
+    stream.set_nonblocking(true)?;
+    let mut request = [0];
+    read_fixture_exact(stream, &mut request, deadline)?;
+    let stop = match request[0] {
+        b'I' => false,
+        b'Q' => {
+            let mut nonce = [0; 16];
+            read_fixture_exact(stream, &mut nonce, deadline)?;
+            if nonce != *identity.nonce.as_bytes() {
+                return Ok(false);
+            }
+            true
+        }
+        _ => return Err(std::io::Error::from(ErrorKind::InvalidData)),
+    };
+    let response = serde_json::to_vec(identity)?;
+    let result = write_fixture_all(stream, &response, deadline);
+    if !stop {
+        result?;
+    }
+    // The authenticated stop also serves Drop's one-way fallback. Receipt of
+    // the complete nonce authorizes exit even when that caller closes early.
+    Ok(stop)
 }
 
 // This ignored entry is invoked only by the actual owned test executable with
@@ -218,29 +270,9 @@ fn owned_group_fixture_entrypoint() {
             while StdInstant::now() < deadline {
                 match listener.accept() {
                     Ok((mut stream, _)) => {
-                        stream
-                            .set_read_timeout(Some(Duration::from_millis(100)))
-                            .unwrap();
-                        stream
-                            .set_write_timeout(Some(Duration::from_millis(100)))
-                            .unwrap();
-                        let mut request = [0];
-                        if stream.read_exact(&mut request).is_ok() {
-                            match request[0] {
-                                b'I' => {
-                                    let _ = serde_json::to_writer(&mut stream, &identity);
-                                }
-                                b'Q' => {
-                                    let mut supplied_nonce = [0; 16];
-                                    if stream.read_exact(&mut supplied_nonce).is_ok()
-                                        && supplied_nonce == *nonce.as_bytes()
-                                    {
-                                        let _ = serde_json::to_writer(&mut stream, &identity);
-                                        return;
-                                    }
-                                }
-                                _ => panic!("unexpected owned fixture request"),
-                            }
+                        if answer_member_request(&mut stream, &identity, deadline).unwrap_or(false)
+                        {
+                            return;
                         }
                     }
                     Err(error) if error.kind() == ErrorKind::WouldBlock => {
