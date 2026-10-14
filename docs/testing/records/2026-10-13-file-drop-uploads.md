@@ -20,3 +20,7 @@
 仅完成候选源码编写和指定文件rustfmt。按根的编译互斥要求没有执行Cargo；六项测试、严格Clippy、完整工程、既有布局回归和任何原生桌面验证均UNRUN。此记录不能替代实际通过结果，导入后由根补充准确收据。
 
 建议命令：`cargo test -p keelshell-app --bin keelshell-app --locked drop_upload_ -- --test-threads=4`，随后既有batch／browser／workspace-layout回归及标准完整工程检查。还需新非作者审查，及从原生文件管理器对同源应用包实际拖放、取消、明确批准、完整字节核对和清理。
+
+## 2026-10-14 根验证
+
+候选已导入根工作区。六项拖放回归及完整文件模块162项测试实际通过，应用严格 Clippy 通过。文件区最小高度保持64，拖放提示位于现有批量工具栏。完整三平台 CI 与 macOS、Windows、Linux 原生文件管理器拖放仍独立验收。

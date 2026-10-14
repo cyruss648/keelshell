@@ -2,7 +2,7 @@
 
 状态：作者候选，2026-10-13。实际编译、回归、独立复核和原生桌面拖放待验证；不作为已验收功能。
 
-Status: author candidate, 2026-10-13. Compilation, regression tests, independent review and native desktop drag-and-drop remain unverified.
+Status: controlled GPUI behavior verified on 2026-10-14. Six drop regressions and 162 file-module tests passed. Native file-manager drag-and-drop remains unverified.
 
 ## 操作方式 / Interaction
 

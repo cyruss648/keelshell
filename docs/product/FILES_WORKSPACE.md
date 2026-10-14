@@ -6,7 +6,7 @@
 
 Multi-selection, per-target reviewed batch transfers, typed cancellation and the fixed queue entry are implemented and scoped validation is complete. The final 842-input snapshot passed complete engineering checks, a matching macOS development package and a controlled native flow of three uploads and three downloads totaling 106 file bytes in each direction. A fresh independent live review closed the English/Dark default-entry/counts/details/return discoverability issue; Chinese/Light observations come from the root run. Secondary cards use tools scrolling, without promising default visibility; prior failures are retained.
 
-详见[批量指南](FILE_BROWSER_BATCH_TRANSFERS.md)、[队列交互](TRANSFER_QUEUE_ACCESS.md)与[实际记录](../testing/records/2026-10-08-file-browser-batch-transfers.md)。拖放、最小OS逻辑几何／IME／VoiceOver、System原生主题、其它平台桌面、OpenSSH桌面GUI及发行安装独立OPEN；下方单项段落是历史范围，其多选开放状态不覆盖本段。Drag-and-drop, minimum OS geometry/accessibility, native System-theme switching, other desktops, OpenSSH desktop GUI and release installation remain independently open.
+详见[批量指南](FILE_BROWSER_BATCH_TRANSFERS.md)、[队列交互](TRANSFER_QUEUE_ACCESS.md)与[实际记录](../testing/records/2026-10-08-file-browser-batch-transfers.md)。受控 GPUI 拖放已验证；原生文件管理器拖放、最小OS逻辑几何／IME／VoiceOver、System原生主题、其它平台桌面、OpenSSH桌面GUI及发行安装独立OPEN；下方单项段落是历史范围，其多选开放状态不覆盖本段。Controlled GPUI drag-and-drop is verified; native file-manager drag-and-drop, minimum OS geometry/accessibility, native System-theme switching, other desktops, OpenSSH desktop GUI and release installation remain independently open.
 
 ## 历史单项浏览范围 — 2026-10-08
 
