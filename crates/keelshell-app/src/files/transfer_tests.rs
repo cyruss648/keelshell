@@ -1663,7 +1663,7 @@ async fn late_save_acknowledges_remote_commit_without_rewriting_the_archived_bas
         assert!(panel.pending.is_none() && panel.session.is_none());
     });
     assert_eq!(h.read("/saved.txt"), b"reviewed version");
-    assert_eq!(h.server.filesystem.atomic_writes_started(), 1);
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 2);
 }
 
 #[gpui_kit::test]

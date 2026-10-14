@@ -17,15 +17,17 @@ async fn editor_reviewed_supports_one_mib_without_expanding_mcp_budget()
         sftp.write_regular_reviewed(&review, &new).await,
         Err(SessionError::OutputLimit(65536))
     ));
-    sftp.write_editor_reviewed_authorized(&review, &new, &|| true)
+    let backup = sftp
+        .write_editor_reviewed_authorized(&review, &new, &|| true)
         .await?;
+    assert_eq!(sftp.read_regular(&backup, 1024 * 1024).await?, old);
     assert_eq!(
         sftp.read_regular_snapshot("/editor.txt", 1024 * 1024)
             .await?
             .content,
         new
     );
-    assert_eq!(sftp.list("/").await?.len(), 1);
+    assert_eq!(sftp.list("/").await?.len(), 2);
     let current = sftp
         .read_regular_snapshot("/editor.txt", 1024 * 1024)
         .await?;
@@ -173,9 +175,10 @@ async fn editor_reviewed_dropped_unacknowledged_writable_close_keeps_target_quar
     let review = sftp
         .read_regular_snapshot("/editor.txt", 1024 * 1024)
         .await?;
-    let hold = server
-        .filesystem
-        .hold_close("/.editor.txt.keelshell-", true, true)?;
+    let hold =
+        server
+            .filesystem
+            .hold_close_excluding("/.editor.txt.keelshell-", true, true, "backup")?;
     {
         let writer = sftp.write_editor_reviewed_authorized(&review, b"new draft", &|| true);
         tokio::pin!(writer);
@@ -200,6 +203,55 @@ async fn editor_reviewed_dropped_unacknowledged_writable_close_keeps_target_quar
         Err(SessionError::MutationQuarantined)
     ));
     hold.release();
+    sftp.close().await?;
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn editor_backup_survives_unknown_target_publication() -> Result<(), Box<dyn Error>> {
+    let server = serve().await?;
+    let session = SshSession::connect(options(&server)).await?;
+    let sftp = session.sftp().await?;
+    sftp.write("/editor.txt", b"original").await?;
+    let review = sftp
+        .read_regular_snapshot("/editor.txt", 1024 * 1024)
+        .await?;
+    let hold =
+        server
+            .filesystem
+            .hold_close_excluding("/.editor.txt.keelshell-", true, true, "backup")?;
+    let writer = sftp.write_editor_reviewed_authorized(&review, b"replacement", &|| true);
+    tokio::pin!(writer);
+    tokio::select! {
+        result = &mut writer => return Err(std::io::Error::other(format!("target publication was not held: {result:?}")).into()),
+        observed = tokio::time::timeout(Duration::from_secs(5), async {
+            while hold.entered() == 0 {
+                tokio::task::yield_now().await;
+            }
+        }) => observed?,
+    }
+    let entries = sftp.list("/").await?;
+    let backup = entries
+        .iter()
+        .find(|entry| {
+            entry.name.starts_with(".editor.txt.keelshell-backup-") && !entry.name.contains(".tmp")
+        })
+        .ok_or("reviewed original was not backed up before publication")?;
+    assert_eq!(sftp.read_regular(&backup.path, 1024).await?, b"original");
+    assert_eq!(sftp.read_regular("/editor.txt", 1024).await?, b"original");
+    assert!(
+        tokio::time::timeout(Duration::from_millis(50), &mut writer)
+            .await
+            .is_err(),
+        "target publication remained blocked"
+    );
+    hold.release();
+    writer.await?;
+    assert_eq!(
+        sftp.read_regular("/editor.txt", 1024).await?,
+        b"replacement"
+    );
     sftp.close().await?;
     session.close().await?;
     Ok(())

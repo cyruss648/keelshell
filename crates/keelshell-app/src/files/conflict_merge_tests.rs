@@ -557,3 +557,76 @@ async fn changed_baseline_rejects_a_late_merge_plan_even_when_path_and_draft_mat
     assert_eq!(h.read("/late-base.txt"), b"remote C\n");
     assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
 }
+
+#[gpui_kit::test]
+async fn editor_search_replaces_draft_and_reviewed_save_keeps_original_backup(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new_with(cx, |cx, session, runtime| {
+        mount_layout_scene(cx, session, runtime, 900., 580., false)
+    });
+    h.idle(cx).await;
+    open(
+        &h,
+        "/editor.txt",
+        b"alpha beta alpha",
+        "alpha beta alpha",
+        cx,
+    )
+    .await;
+    h.click(cx, "focus-file-draft");
+    cx.update_window(h.window, |_, window, cx| {
+        let (find, replace) = h.panel.read_with(cx, |panel, _| {
+            (panel.editor_find.clone(), panel.editor_replace.clone())
+        });
+        find.update(cx, |input, cx| input.set_value("alpha", window, cx));
+        replace.update(cx, |input, cx| input.set_value("omega", window, cx));
+    })
+    .checked("set literal editor query");
+
+    h.click(cx, "find-editor-text");
+    h.panel.read_with(cx, |panel, _| {
+        assert_eq!(panel.editor_match, Some(0));
+        assert!(panel.pending.is_none());
+    });
+    assert_eq!(h.read("/editor.txt"), b"alpha beta alpha");
+
+    h.click(cx, "replace-editor-match");
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), "omega beta alpha");
+        assert!(panel.has_unsaved_draft(cx));
+    });
+    assert_eq!(h.read("/editor.txt"), b"alpha beta alpha");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+
+    h.click(cx, "replace-editor-matches");
+    h.click(cx, "save-remote-file");
+    h.click(cx, "cancel-file-operation");
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), "omega beta omega");
+        assert!(panel.pending.is_none());
+    });
+    assert_eq!(h.read("/editor.txt"), b"alpha beta alpha");
+
+    h.click(cx, "save-remote-file");
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read("/editor.txt"), b"omega beta omega");
+    let backup = h.runtime.block_on(async {
+        let sftp = h.session.sftp().await.checked("inspect editor backup");
+        let entries = sftp.list("/").await.checked("list editor backups");
+        let backup = entries
+            .iter()
+            .find(|entry| entry.name.starts_with(".editor.txt.keelshell-backup-"))
+            .checked_option("saved original backup")
+            .path
+            .clone();
+        let bytes = sftp
+            .read(&backup, 1024)
+            .await
+            .checked("read original backup");
+        sftp.close().await.checked("close backup inspection");
+        bytes
+    });
+    assert_eq!(backup, b"alpha beta alpha");
+}

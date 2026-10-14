@@ -84,7 +84,7 @@ async fn separate_files_save_cannot_bypass_active_or_unknown_target_and_requires
             Some(("/shared.txt".into(), b"original shared target".to_vec()))
         );
     });
-    assert_eq!(h.server.filesystem.transfer_writes_started(), before);
+    assert_eq!(h.server.filesystem.transfer_writes_started(), before + 1);
     assert_eq!(h.read("/shared.txt"), b"original shared target");
     let (third_window, third) = mount(cx, h.session.clone(), h.runtime.clone());
     idle_other(third_window, &third, cx).await;
@@ -110,7 +110,7 @@ async fn separate_files_save_cannot_bypass_active_or_unknown_target_and_requires
         assert!(matches!(panel.isolation_target,Some(IsolationTarget::Remote(ref path)) if path=="/shared.txt"));
         assert!(panel.has_unsaved_draft(cx));
     });
-    assert_eq!(h.server.filesystem.transfer_writes_started(), before);
+    assert_eq!(h.server.filesystem.transfer_writes_started(), before + 1);
     assert_eq!(h.read("/shared.txt"), b"original shared target");
     click_other(second_window, cx, "inspect-file-isolation");
     idle_other(second_window, &second, cx).await;

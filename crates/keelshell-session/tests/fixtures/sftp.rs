@@ -221,6 +221,7 @@ struct CloseGate {
 struct CloseState {
     path: String,
     prefix: bool,
+    exclude: &'static str,
     writable: bool,
     entered: AtomicUsize,
     expired: AtomicBool,
@@ -238,6 +239,7 @@ impl CloseGate {
         let owned = match state.borrow_and_update().as_ref() {
             Some(owned)
                 if owned.writable == writable
+                    && (owned.exclude.is_empty() || !path.contains(owned.exclude))
                     && (owned.path == path || (owned.prefix && path.starts_with(&owned.path))) =>
             {
                 owned.clone()
@@ -428,9 +430,19 @@ impl Filesystem {
         prefix: bool,
         writable: bool,
     ) -> Result<CloseHold, &'static str> {
+        self.hold_close_excluding(path, prefix, writable, "")
+    }
+    pub fn hold_close_excluding(
+        &self,
+        path: &str,
+        prefix: bool,
+        writable: bool,
+        exclude: &'static str,
+    ) -> Result<CloseHold, &'static str> {
         let owned = Arc::new(CloseState {
             path: path.to_owned(),
             prefix,
+            exclude,
             writable,
             entered: AtomicUsize::new(0),
             expired: AtomicBool::new(false),

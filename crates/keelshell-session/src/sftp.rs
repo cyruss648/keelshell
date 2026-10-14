@@ -605,7 +605,7 @@ impl SftpSession {
         reviewed: &RegularFileSnapshot,
         data: &[u8],
         authorized: &(dyn Fn() -> bool + Sync),
-    ) -> Result<()> {
+    ) -> Result<String> {
         if std::str::from_utf8(data).is_err()
             || data.contains(&0)
             || std::str::from_utf8(&reviewed.content).is_err()
@@ -615,8 +615,50 @@ impl SftpSession {
                 "editor replacement requires UTF-8 text without NUL",
             ));
         }
+        inspection::inspection_path(&reviewed.entry.path)?;
+        if reviewed.content.len() > 1024 * 1024 || data.len() > 1024 * 1024 {
+            return Err(SessionError::OutputLimit(1024 * 1024));
+        }
+        let (parent, name) = reviewed
+            .entry
+            .path
+            .rsplit_once('/')
+            .unwrap_or((".", &reviewed.entry.path));
+        let backup = format!(
+            "{parent}/.{name}.keelshell-backup-{}.txt",
+            uuid::Uuid::new_v4()
+        );
+        let backup = self
+            .backup_reviewed_editor_file(&backup, reviewed, authorized)
+            .await?;
         self.write_regular_reviewed_bounded(reviewed, data, 1024 * 1024, authorized)
+            .await?;
+        Ok(backup)
+    }
+
+    async fn backup_reviewed_editor_file(
+        &self,
+        backup: &str,
+        reviewed: &RegularFileSnapshot,
+        authorized: &(dyn Fn() -> bool + Sync),
+    ) -> Result<String> {
+        let scope = self.reserve_remote(&[backup], true, authorized).await?;
+        let result = deadline(self.timeout, "SFTP editor backup", async {
+            self.verify_regular_snapshot(reviewed).await?;
+            self.replace_from_reader_checked(
+                backup,
+                &mut &reviewed.content[..],
+                None,
+                None,
+                Some(&scope),
+                None,
+            )
             .await
+            .map_err(transfer_session_error)?;
+            Ok(backup.to_owned())
+        })
+        .await;
+        scope.complete(result).await
     }
 
     async fn write_regular_reviewed_bounded(

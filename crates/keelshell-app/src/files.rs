@@ -33,6 +33,9 @@ use std::{
 
 mod batch;
 mod browser;
+mod editor_search;
+#[cfg(test)]
+mod editor_search_tests;
 mod local_browser;
 mod local_catalog;
 mod local_view;
@@ -102,7 +105,10 @@ enum Outcome {
     QuarantineInspected(TransferQuarantineReview),
     Listed(String, Vec<RemoteEntry>),
     Read(RegularFileSnapshot),
-    Saved(RegularFileSnapshot),
+    Saved {
+        snapshot: RegularFileSnapshot,
+        backup: String,
+    },
     MergeLoaded {
         snapshot: RegularFileSnapshot,
         plan: keelshell_core::TextMergePlan,
@@ -147,6 +153,9 @@ pub struct FilesPanel {
     _browser_subscriptions: Vec<Subscription>,
     browser_review_revision: uuid::Uuid,
     editor: Entity<TextareaState>,
+    editor_find: Entity<InputState>,
+    editor_replace: Entity<InputState>,
+    editor_match: Option<usize>,
     confirmation_scroll: ScrollHandle,
     confirmation_expanded: bool,
     review_focus: FocusHandle,
@@ -586,6 +595,9 @@ impl FilesPanel {
             _browser_subscriptions: Vec::new(),
             browser_review_revision: uuid::Uuid::new_v4(),
             editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
+            editor_find: field(t(cx, "查找", "Find"), "", window, cx),
+            editor_replace: field(t(cx, "替换为", "Replace with"), "", window, cx),
+            editor_match: None,
             confirmation_scroll: ScrollHandle::new(),
             confirmation_expanded: false,
             review_focus: cx.focus_handle(),
@@ -982,7 +994,7 @@ impl FilesPanel {
                             view.status = Message::new("加载期间检测到新编辑，已保留当前内容；请在准备好后重新打开文件。", "Your edits changed while loading; preserved the editor. Open the file again when ready.");
                         }
                     }
-                    Ok(Outcome::Saved(snapshot)) => {
+                    Ok(Outcome::Saved { snapshot, backup }) => {
                         let path = snapshot.entry.path.clone();
                         let content = snapshot.content.clone();
                         if view.editing.as_ref().is_some_and(|(current,_)| current == &path) {
@@ -991,7 +1003,17 @@ impl FilesPanel {
                             view.editor_snapshot = Some(snapshot);
                             view.merge_review = None;
                             view.diff_preview = None;
-                            view.status = if dirty { Message::new("已保存审核版本；后续编辑尚未保存", "Saved the reviewed version; newer edits remain unsaved") } else { Message::new("远程文件已原子保存并完整读回", "Remote file atomically saved and fully read back") };
+                            view.status = if dirty {
+                                Message::new(
+                                    format!("已保存审核版本；后续编辑尚未保存。原内容备份：{backup}"),
+                                    format!("Saved the reviewed version; newer edits remain unsaved. Original backup: {backup}"),
+                                )
+                            } else {
+                                Message::new(
+                                    format!("远程文件已原子保存并完整读回。原内容备份：{backup}"),
+                                    format!("Remote file atomically saved and fully read back. Original backup: {backup}"),
+                                )
+                            };
                         }
                     }
                     Ok(Outcome::MergeLoaded {snapshot, plan, base, draft}) => {

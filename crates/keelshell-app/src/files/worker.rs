@@ -543,10 +543,11 @@ async fn operate_inner(
                         String::from_utf8(content).map_err(|_| FileFailure::InvalidEditor)?,
                     );
                 }
-                sftp.write_editor_reviewed_authorized(&reviewed, &content, &|| {
-                    !stop.load(Ordering::Acquire)
-                })
-                .await?;
+                let backup = sftp
+                    .write_editor_reviewed_authorized(&reviewed, &content, &|| {
+                        !stop.load(Ordering::Acquire)
+                    })
+                    .await?;
                 let saved = sftp
                     .read_regular_snapshot(&path, 1024 * 1024)
                     .await
@@ -554,7 +555,10 @@ async fn operate_inner(
                 if saved.content != content {
                     return Err(FileFailure::SavedReadback("saved contents differ from the acknowledged review; inspect the remote file".into()));
                 }
-                Ok(Outcome::Saved(saved))
+                Ok(Outcome::Saved {
+                    snapshot: saved,
+                    backup,
+                })
             }
         }
     };

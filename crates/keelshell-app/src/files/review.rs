@@ -316,6 +316,9 @@ impl FilesPanel {
                                 view.focus_editor(other, window, cx)
                             })),
                     )
+                    .when(surface == EditorSurface::Draft, |el| {
+                        el.child(self.editor_search_controls(cx))
+                    })
                     .when(surface == EditorSurface::Patch, |el| {
                         el.child(
                             Button::new("apply-text-patch")
@@ -359,7 +362,6 @@ impl FilesPanel {
             .test_support()
             .into_any_element()
     }
-
     pub(super) fn editor_entry_bar(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         div()
@@ -412,7 +414,6 @@ impl FilesPanel {
             .into_any_element()
     }
 }
-
 pub(super) fn confirmation_text(
     cx: &App,
     message: &str,
