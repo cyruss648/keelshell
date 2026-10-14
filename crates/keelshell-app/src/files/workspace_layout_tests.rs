@@ -331,6 +331,29 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
                 "completed_bytes":bytes.len(),"active_subsystems":0,"active_handles":0,
                 "fixture_transport_timeout_seconds":5,"write_gate_fallback_seconds":10})
             );
+            // Each scene uses one process-wide admission permit. Close its
+            // window before the next iteration; the test App otherwise retains
+            // every previous scene until the whole function returns.
+            let Harness {
+                window,
+                panel,
+                server: _server,
+                runtime: _runtime,
+                session: _session,
+                local: _local,
+                mutation_group,
+            } = h;
+            let weak_group = std::sync::Arc::downgrade(&mutation_group);
+            cx.update_window(window, |_, window, _| window.remove_window())
+                .checked("close completed layout scene");
+            drop(panel);
+            drop(mutation_group);
+            cx.update(|_| {});
+            assert_eq!(
+                weak_group.strong_count(),
+                0,
+                "completed layout scene must release fixture admission"
+            );
         }
     }
 }

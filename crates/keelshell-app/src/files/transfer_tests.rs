@@ -25,6 +25,8 @@ mod batch_tests;
 mod browser_tests;
 #[path = "conflict_merge_tests.rs"]
 mod conflict_merge_tests;
+#[path = "drop_tests.rs"]
+mod drop_tests;
 #[path = "fixture_isolation_tests.rs"]
 mod fixture_isolation_tests;
 #[path = "mirror_independent_tests.rs"]
