@@ -657,14 +657,17 @@ def run_owned(command, cwd, env, deadline, owner=None, tick=None):
         while True:
             if (code := process.poll()) is not None:
                 observed = code
-            deadline.remaining(reserve=CLEANUP_RESERVE)
+            # Exit zero may use its remaining fixture allowance to bind identity.
+            # Every other state keeps the cleanup reserve inside the same deadline.
+            identity_pending = observed == 0 and tick is not None
+            deadline.remaining(reserve=0 if identity_pending else CLEANUP_RESERVE)
             if tick:
                 tick(process)
             for pump in pumps:
                 pump.drain(capture[pump], deadline)
             if observed is not None and all(pump.complete() for pump in pumps):
                 break
-            time.sleep(min(0.01, deadline.remaining(reserve=CLEANUP_RESERVE)))
+            time.sleep(min(0.01, deadline.remaining(reserve=0 if identity_pending else CLEANUP_RESERVE)))
     except TimeoutError:
         timed_out = True
     except KeyboardInterrupt:

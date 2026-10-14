@@ -2,6 +2,7 @@
 
 These controlled Python children are not CDB/Windows/application acceptance.
 """
+import io
 import json
 import os
 from pathlib import Path
@@ -12,6 +13,7 @@ import subprocess
 import threading
 import time
 import unittest
+from unittest import mock
 from unittest.mock import patch
 
 import windows_native_crash as probe
@@ -86,6 +88,24 @@ class FakeOwner:
         self.closed = True
 
 
+class HeldPump:
+    """Keep one owned stream pending until the counterexample releases it."""
+
+    def __init__(self):
+        self.released = False
+        self.stream = object()
+        self.failed = threading.Event()
+        self.overflow = threading.Event()
+        self.thread = threading.Thread(target=lambda: None)
+        self.thread.start()
+
+    def drain(self, _capture, _deadline):
+        return None
+
+    def complete(self):
+        return self.released
+
+
 class ParsingTests(unittest.TestCase):
     def test_distinct_whole_application_list_and_no_filter(self):
         text = "\n".join(f"tests::case_{index}: test" for index in range(706))
@@ -151,6 +171,145 @@ class ParsingTests(unittest.TestCase):
         for epoch in [1000, 999, 6400.1]:
             with self.assertRaises(probe.ProbeError):
                 probe.Deadline(epoch, clock=lambda: 100, wall=lambda: 1000)
+
+    def test_completed_parent_waits_for_late_identity_within_original_allowance(self):
+        """Exit zero must not consume the cleanup reserve before identity binding."""
+        clock = [0.0]
+
+        class ExitedParent:
+            pid = 41
+            returncode = None
+            owned_started = True
+            stdin = stdout = stderr = io.BytesIO(b"")
+
+            def poll(self):
+                self.returncode = 0
+                return 0
+
+            def kill(self):
+                raise AssertionError("completed parent must not be killed while identity is pending")
+
+            def wait(self, timeout):
+                return 0
+
+        class Owner:
+            process = None
+            closed = False
+
+            def spawn(self, command, cwd, env, deadline, merge_error=False):
+                self.process = ExitedParent()
+                return self.process
+
+            def prepare_terminal(self, deadline):
+                pass
+
+            def terminate(self):
+                pass
+
+            force = terminate
+
+            def active(self, deadline):
+                return 0
+
+            def close(self):
+                self.closed = True
+
+        published = False
+        pumps = [HeldPump(), HeldPump()]
+
+        def tick(process):
+            nonlocal published
+            if clock[0] >= probe.CLEANUP_RESERVE + 0.05:
+                published = True
+                for pump in pumps:
+                    pump.released = True
+
+        def monotonic():
+            return clock[0]
+
+        def now():
+            return clock[0]
+
+        def sleep(delay):
+            clock[0] += delay
+
+        with mock.patch.multiple(probe.time, monotonic=monotonic, time=now, sleep=sleep), mock.patch.object(probe, "Pump", side_effect=pumps):
+            result, receipt = probe.run_owned(
+                [sys.executable, "-c", "pass"], Path("."), {},
+                probe.Deadline(5.4, clock=monotonic, wall=now),
+                owner=Owner(), tick=tick)
+        self.assertTrue(published)
+        self.assertEqual(result.returncode, 0)
+        self.assertFalse(receipt["timed_out"])
+        self.assertLess(clock[0], 5.4)
+
+    def test_nonzero_exit_keeps_cleanup_reserve_before_late_identity(self):
+        """A failing command cannot spend its cleanup reserve waiting for identity."""
+        clock = [0.0]
+
+        class FailedParent:
+            pid = 43
+            returncode = None
+            owned_started = True
+            stdin = stdout = stderr = io.BytesIO(b"")
+
+            def poll(self):
+                self.returncode = 7
+                return 7
+
+            def kill(self):
+                return None
+
+            def wait(self, timeout):
+                return 7
+
+        class Owner:
+            process = None
+
+            def spawn(self, command, cwd, env, deadline, merge_error=False):
+                self.process = FailedParent()
+                return self.process
+
+            def prepare_terminal(self, deadline):
+                pass
+
+            def terminate(self):
+                pass
+
+            force = terminate
+
+            def active(self, deadline):
+                return 0
+
+            def close(self):
+                pass
+
+        calls = []
+        pumps = [HeldPump(), HeldPump()]
+        for pump in pumps:
+            pump.released = True
+
+        def tick(process):
+            calls.append(clock[0])
+
+        def monotonic():
+            return clock[0]
+
+        def now():
+            return clock[0]
+
+        def sleep(delay):
+            clock[0] += delay
+
+        with mock.patch.multiple(probe.time, monotonic=monotonic, time=now, sleep=sleep), mock.patch.object(probe, "Pump", side_effect=pumps):
+            result, receipt = probe.run_owned(
+                [sys.executable, "-c", "raise SystemExit(7)"], Path("."), {},
+                probe.Deadline(5.4, clock=monotonic, wall=now),
+                owner=Owner(), tick=tick)
+        self.assertEqual(calls, [0.0])
+        self.assertEqual(result.returncode, 7)
+        self.assertFalse(receipt["timed_out"])
+        self.assertLess(clock[0], 0.01)
 
     def test_failure_dword_dominates_diagnostics_and_timeout(self):
         for diagnostic_ok in [True, False]:
@@ -411,9 +570,10 @@ class PreparationTreeTests(unittest.TestCase):
             identities = NativeTreeHandles(owner.api, owner.job) if os.name == "nt" else None
             signalled = False
             bound_pids = None
+            ack_created = False
             partial_observations = []
             def tick(process):
-                nonlocal signalled, bound_pids
+                nonlocal signalled, bound_pids, ack_created
                 if bound_pids is not None:
                     return
                 # The staged counterexample deliberately exposes incomplete
@@ -438,6 +598,7 @@ class PreparationTreeTests(unittest.TestCase):
                     raise AssertionError("fixture descendant is outside its owned group")
                 bound_pids = pids
                 ack.touch()
+                ack_created = True
                 if interrupt:
                     signalled = True
                     signal.raise_signal(signal.SIGINT)
@@ -446,7 +607,18 @@ class PreparationTreeTests(unittest.TestCase):
                 result, receipt = probe.run_owned([sys.executable, str(helper)], directory, dict(os.environ),
                                                   deadline, owner=owner, tick=tick)
                 elapsed = time.monotonic() - start
-                self.assertIsNotNone(bound_pids, "actual identities must be bound before ACK")
+                self.assertIsNotNone(
+                    bound_pids,
+                    {
+                        "phase": "identity publication",
+                        "ack_created": ack_created,
+                        "record_exists": record.exists(),
+                        "published": published.exists(),
+                        "receipt": receipt,
+                        "stdout": result.stdout,
+                        "stderr": result.stderr,
+                    },
+                )
                 pids = ready_pids(record, owner.process.pid)
                 self.assertEqual(pids, bound_pids)
                 native_states = identities.states() if identities is not None else None
