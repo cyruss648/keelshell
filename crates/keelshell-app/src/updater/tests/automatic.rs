@@ -1,5 +1,6 @@
 //! Owned loopback transport and controlled GPUI service behavior; no installation.
 mod painted_actions;
+mod socket_tests;
 use super::super::{
     CURRENT_VERSION, InFlight, PROJECT_URL, PanelState, RequestOrigin, StageCleanup, StagedUpdate,
     UpdateError, UpdatePanel, hex_digest, hex_file_digest, package_name, packaged_binary_path,
@@ -25,21 +26,104 @@ use std::{
     time::{Duration, Instant},
 };
 
-struct Reply {
+pub(super) struct Reply {
     path: &'static str,
     status: u16,
     body: Vec<u8>,
     held: bool,
 }
-struct HttpFixture {
+pub(super) struct HttpFixture {
     address: std::net::SocketAddr,
     observed: mpsc::Receiver<String>,
     release: mpsc::SyncSender<()>,
     stopped: Arc<AtomicBool>,
     owner: Option<std::thread::JoinHandle<()>>,
 }
+const FIXTURE_LIFE: Duration = Duration::from_secs(8);
+const REQUEST_BOUND: Duration = Duration::from_secs(2);
+
+fn fixture_deadline(limit: Duration, stopped: &AtomicBool) -> io::Result<Instant> {
+    if stopped.load(Ordering::Acquire) {
+        return Err(io::Error::from(io::ErrorKind::Interrupted));
+    }
+    let deadline = Instant::now() + limit;
+    if deadline.saturating_duration_since(Instant::now()).is_zero() {
+        return Err(io::Error::from(io::ErrorKind::TimedOut));
+    }
+    Ok(deadline)
+}
+
+fn poll_bounded<T>(
+    deadline: Instant,
+    stopped: &AtomicBool,
+    mut operation: impl FnMut() -> io::Result<T>,
+) -> io::Result<T> {
+    loop {
+        if stopped.load(Ordering::Acquire) {
+            return Err(io::Error::from(io::ErrorKind::Interrupted));
+        }
+        if Instant::now() >= deadline {
+            return Err(io::Error::new(
+                io::ErrorKind::TimedOut,
+                "owned updater fixture deadline expired",
+            ));
+        }
+        match operation() {
+            Ok(value) if Instant::now() < deadline => return Ok(value),
+            Ok(_) => {
+                return Err(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    "owned updater fixture completed after its deadline",
+                ));
+            }
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    io::ErrorKind::Interrupted | io::ErrorKind::WouldBlock
+                ) =>
+            {
+                let remaining = deadline.saturating_duration_since(Instant::now());
+                std::thread::sleep(Duration::from_millis(2).min(remaining));
+            }
+            Err(error) => return Err(error),
+        }
+    }
+}
+
+fn read_bounded(
+    stream: &mut std::net::TcpStream,
+    mut bytes: &mut [u8],
+    deadline: Instant,
+    stopped: &AtomicBool,
+) -> io::Result<()> {
+    while !bytes.is_empty() {
+        let read = poll_bounded(deadline, stopped, || stream.read(bytes))?;
+        if read == 0 {
+            return Err(io::Error::from(io::ErrorKind::UnexpectedEof));
+        }
+        bytes = &mut bytes[read..];
+    }
+    Ok(())
+}
+
+fn write_bounded(
+    stream: &mut std::net::TcpStream,
+    mut bytes: &[u8],
+    deadline: Instant,
+    stopped: &AtomicBool,
+) -> io::Result<()> {
+    while !bytes.is_empty() {
+        let written = poll_bounded(deadline, stopped, || stream.write(bytes))?;
+        if written == 0 {
+            return Err(io::Error::from(io::ErrorKind::WriteZero));
+        }
+        bytes = &bytes[written..];
+    }
+    Ok(())
+}
+
 impl HttpFixture {
-    fn new(replies: Vec<Reply>) -> Self {
+    pub(super) fn new(replies: Vec<Reply>) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").expect("owned loopback listener");
         listener
             .set_nonblocking(true)
@@ -50,7 +134,7 @@ impl HttpFixture {
         let stopped = Arc::new(AtomicBool::new(false));
         let stopping = stopped.clone();
         let owner = std::thread::spawn(move || {
-            let deadline = Instant::now() + Duration::from_secs(8);
+            let deadline = Instant::now() + FIXTURE_LIFE;
             for reply in replies {
                 let mut stream = loop {
                     if stopping.load(Ordering::Acquire) {
@@ -67,16 +151,21 @@ impl HttpFixture {
                         Err(error) => panic!("bounded fixture accept: {error}"),
                     }
                 };
+                // Accepted sockets can inherit the listener's nonblocking mode.
+                // Keep that mode and bound every partial read or write explicitly.
                 stream
-                    .set_read_timeout(Some(Duration::from_secs(2)))
-                    .expect("read bound");
-                stream
-                    .set_write_timeout(Some(Duration::from_secs(2)))
-                    .expect("write bound");
+                    .set_nonblocking(true)
+                    .expect("owned request stream stays nonblocking");
+                let request_deadline = match fixture_deadline(REQUEST_BOUND, &stopping) {
+                    Ok(deadline) => deadline,
+                    Err(_) => return,
+                };
                 let mut headers = Vec::new();
                 while !headers.ends_with(b"\r\n\r\n") {
                     let mut byte = [0];
-                    stream.read_exact(&mut byte).expect("owned request header");
+                    if read_bounded(&mut stream, &mut byte, request_deadline, &stopping).is_err() {
+                        return;
+                    }
                     headers.push(byte[0]);
                     assert!(headers.len() <= 8192, "request header bound");
                 }
@@ -84,18 +173,31 @@ impl HttpFixture {
                 assert!(headers.starts_with(&format!("GET {} HTTP/1.1\r\n", reply.path)));
                 assert!(!headers.to_ascii_lowercase().contains("authorization:"));
                 let _ = observations.send(reply.path.to_owned());
-                if reply.held {
-                    gate.recv_timeout(Duration::from_secs(5))
-                        .expect("bounded reply gate");
+                if reply.held && gate.recv_timeout(Duration::from_secs(5)).is_err() {
+                    return;
                 }
                 // A cancelled request may close the stream before a held reply.
-                let _ = write!(
-                    stream,
+                let response = format!(
                     "HTTP/1.1 {} fixture\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
                     reply.status,
                     reply.body.len()
                 );
-                let _ = stream.write_all(&reply.body);
+                let response_deadline = match fixture_deadline(REQUEST_BOUND, &stopping) {
+                    Ok(deadline) => deadline,
+                    Err(_) => return,
+                };
+                if write_bounded(
+                    &mut stream,
+                    response.as_bytes(),
+                    response_deadline,
+                    &stopping,
+                )
+                .is_err()
+                    || write_bounded(&mut stream, &reply.body, response_deadline, &stopping)
+                        .is_err()
+                {
+                    return;
+                }
             }
         });
         Self {
@@ -106,7 +208,7 @@ impl HttpFixture {
             owner: Some(owner),
         }
     }
-    fn endpoint(&self, path: &str) -> String {
+    pub(super) fn endpoint(&self, path: &str) -> String {
         format!("http://{}{path}", self.address)
     }
     fn release(&self) {
@@ -116,7 +218,10 @@ impl HttpFixture {
         self.release();
         self.stopped.store(true, Ordering::Release);
         if let Some(owner) = self.owner.take() {
-            owner.join().expect("fixture thread reaped");
+            // Test assertions panic before Drop. Cleanup must not panic again.
+            if let Err(error) = owner.join() {
+                eprintln!("owned updater fixture cleanup: {error:?}");
+            }
         }
     }
 }

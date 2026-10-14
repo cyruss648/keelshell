@@ -43,18 +43,35 @@ impl HeldUpdateReply {
                     Err(error) => panic!("bounded update accept: {error}"),
                 }
             };
+            // Keep the inherited nonblocking mode and use one absolute deadline.
             stream
-                .set_read_timeout(Some(Duration::from_secs(2)))
-                .checked("update read bound");
-            stream
-                .set_write_timeout(Some(Duration::from_secs(2)))
-                .checked("update write bound");
+                .set_nonblocking(true)
+                .checked("held update stream stays nonblocking");
+            let request_deadline = std::time::Instant::now() + Duration::from_secs(2);
             let mut headers = Vec::new();
             while !headers.ends_with(b"\r\n\r\n") {
                 let mut byte = [0];
-                stream
-                    .read_exact(&mut byte)
-                    .checked("held update request header");
+                loop {
+                    if stopping.load(Ordering::Acquire)
+                        || std::time::Instant::now() >= request_deadline
+                    {
+                        return;
+                    }
+                    match stream.read(&mut byte) {
+                        Ok(1) => break,
+                        Ok(0) => return,
+                        Ok(_) => panic!("single-byte update read exceeded its buffer"),
+                        Err(error)
+                            if matches!(
+                                error.kind(),
+                                std::io::ErrorKind::WouldBlock | std::io::ErrorKind::Interrupted
+                            ) =>
+                        {
+                            std::thread::sleep(Duration::from_millis(2));
+                        }
+                        Err(_) => return,
+                    }
+                }
                 headers.push(byte[0]);
                 assert!(headers.len() <= 8192, "bounded update headers");
             }
@@ -66,11 +83,30 @@ impl HeldUpdateReply {
                 .checked("observe held HTTP request");
             gate.recv_timeout(Duration::from_secs(5))
                 .checked("bounded held update release");
-            stream
-                .write_all(
-                    b"HTTP/1.1 404 fixture\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
-                )
-                .checked("hidden service still owns request");
+            let response =
+                b"HTTP/1.1 404 fixture\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+            let mut pending = &response[..];
+            let response_deadline = std::time::Instant::now() + Duration::from_secs(2);
+            while !pending.is_empty() {
+                if stopping.load(Ordering::Acquire)
+                    || std::time::Instant::now() >= response_deadline
+                {
+                    return;
+                }
+                match stream.write(pending) {
+                    Ok(0) => return,
+                    Ok(written) => pending = &pending[written..],
+                    Err(error)
+                        if matches!(
+                            error.kind(),
+                            std::io::ErrorKind::WouldBlock | std::io::ErrorKind::Interrupted
+                        ) =>
+                    {
+                        std::thread::sleep(Duration::from_millis(2));
+                    }
+                    Err(_) => return,
+                }
+            }
         });
         Self {
             endpoint,
