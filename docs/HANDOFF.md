@@ -1,8 +1,8 @@
 # KeelShell 开发交接 — 2026-10-08
 
-## 当前继续开发 — 2026-10-23
+## 当前继续开发 — 2026-10-24
 
-NET-01 已完成运行时流量统计切片：local/remote TCP 与 loopback SOCKS5 的 payload 发送／接收计数通过 session forwarding 暴露，并在 app 隧道行显示；remote forwarding 现在以远端监听侧定义发送／接收，并在停止时等待已建立 relay 完成，停止后的行保留最终快照。AI-04 已完成 `keelshell-core` 纯领域切片：用户显式选择的来源绑定事实可生成有界脱敏摘要、时间线、说明性 Markdown/runbook 和本地字符串搜索；未知／未完成结果及敏感标记只留下不可保存的安全状态。来源元数据在构造阶段直接拒绝；领域产物仅支持受控序列化预览，不提供绕过不变量的通用反序列化。两项均未接入新的持久化规则、AI UI 或真实模型发送，详细记录见[NET-01 记录](testing/records/2026-10-23-net-01-traffic-accounting.md)和[AI-04 记录](testing/records/2026-10-23-ai-04-local-knowledge-core.md)。本轮独立复核及修复记录见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
+NET-01 已完成运行时流量统计和命名规则领域切片：local/remote TCP 与 loopback SOCKS5 的 payload 发送／接收计数通过 session forwarding 暴露，并在 app 隧道行显示；remote forwarding 以远端监听侧定义方向，停止时等待已建立 relay 完成，停止后的行保留最终快照。命名规则已支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除引用保护和绑定 rule/connection/state revision 的审核计划；规则编辑 UI、真实 executor、listener 启停、运行状态持久化、重启恢复、重连失效和原生验收仍未完成。AI-04 已完成 `keelshell-core` 领域模型和 `keelshell-app` GPUI 本地知识预览审核：用户显式捕获的来源绑定文本带不可变 session/source identity、revision、时间与捕获类型；预览默认是 `Unknown`／`DoNotPersist`，只有真实完成/失败确认按钮才产生可审核事实；敏感内容只留下安全状态，Markdown 不含敏感正文。保存按钮仍禁用，尚未接入 StateStore 持久化、条目编辑/删除、模型发送或完整 workspace capture 集成测试。详细记录见[NET-01 记录](testing/records/2026-10-23-net-01-traffic-accounting.md)、[命名规则记录](testing/records/2026-10-23-net-01-named-tunnel-rules.md)和[AI-04 UI 记录](testing/records/2026-10-23-ai-04-knowledge-review-ui.md)。本轮独立复核及修复记录见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
 
 主远程草稿编辑器已完成 FILE-04 第一阶段：使用 GPUI Kit `EditorState`，按远端文件名启用 Rust、Python、JSON、TOML、YAML 和 Bash 高亮，未知或不支持的名称使用纯文本。KeelShell 自有字面查找／替换仍是唯一搜索入口，内置搜索、折叠、自动闭合和智能缩进关闭；patch 与冲突合并输入保持 `TextareaState`。UTF-8、NUL、1 MiB、审核保存、同目录备份和完整读回边界未改变。SQL grammar 为控制首阶段范围暂未启用，SQL 文件回退纯文本；当前 grammar 集合已使用旧兼容的 `cc` 锁定线，扩展语言需单独评估。代码与专项验证见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。
 

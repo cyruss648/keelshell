@@ -1,8 +1,8 @@
-# NET-01 / AI-04 独立代码与功能复核记录 — 2026-10-23
+# NET-01 / AI-04 独立代码与功能复核记录 — 2026-10-24
 
 ## 复核范围
 
-本记录覆盖本轮未提交的 NET-01 隧道运行时流量统计和 AI-04 本地知识领域核心，以及它们对应的 ADR、能力矩阵、路线图和交接文档。三名独立只读 agent 分别检查了 forwarding 生命周期与方向、AI-04 安全边界和文档证据；agent 没有修改、暂存、提交或推送文件。
+本记录覆盖已合入主线的 NET-01 隧道运行时流量统计／命名规则和 AI-04 本地知识预览审核，以及它们对应的 ADR、能力矩阵、路线图和交接文档。隧道切片经过两轮独立只读复核；AI-04 UI 与敏感信息修复经过独立只读复核。所有 reviewer 均未修改、暂存、提交或推送文件。
 
 ## 首轮发现与修复
 
@@ -14,6 +14,13 @@
 - AI-04 领域产物移除通用 `Deserialize`，保留受控 `Serialize` 预览，避免后续调用方直接反序列化出绕过来源绑定或 `DoNotPersist` 的不变量。
 - `DoNotPersist` 原因聚合对 `SensitiveContent` 采用更高优先级，避免未知结果掩盖敏感内容阻断原因。
 - 文档明确区分来源标签构造阶段直接拒绝与标题／摘要构建阶段生成不可保存时间线，同时把 FILE-04 的前一轮完整门禁和本轮 NET/AI 门禁分开记录。
+
+## 合入前新增修复与复核
+
+- 普通 AI 请求的 `Redactor` 增加带空格的 `api key` marker，并加入整行阻断、后续普通行保留和计数回归；这使普通请求与 AI-04 知识敏感内容闸门在该 marker 上保持一致。
+- AI-04 测试记录收窄为真实 `AssistantPanel` GPUI 控制和确认按钮证据，明确当前专项测试直接驱动 `set_context`，没有把 `context-selection`／`context-screen` 到 workspace capture event 的完整路径写成已验证。
+- 命名规则测试记录修正过时的 494 项全量测试表述；新增集成测试后的 497 是测试目标枚举，不被写成通过数。
+- 最新 AI reviewer 对 `fb6226a` 给出 `NO_BLOCKER`：marker 逻辑、回归测试和文档边界均无 P0/P1/P2 阻断。隧道 reviewer 对 stale rule、批量删除保护和文档修正无新增 P0/P1。
 
 ## 修复后专项验证
 
@@ -31,7 +38,7 @@ cargo test -p keelshell-app --locked --offline dynamic_panel_starts_real_proxy -
 
 ## 提交级完整门禁
 
-修复后在当前工作树运行：
+前一轮 NET/AI 修复工作树运行：
 
 ```text
 python3 scripts/check.py
@@ -47,6 +54,24 @@ python3 scripts/check.py
 
 门禁输出仍有两类已有环境或传递依赖警告：传递依赖 `block 0.1.6` 的 future-incompatibility 提示，以及 macOS linker 的 `__eh_frame section too large` 警告；本轮没有把它们当作失败吞掉。该门禁证明当前源码和受控测试范围通过，不代表三平台原生桌面、真实客户 SSH、安装签名或发布验收。
 
-## 边界
+## 合入后主线门禁
 
-本轮修复和专项验证不代表 Windows/Linux/macOS 原生窗口、IME、VoiceOver、语法颜色像素、Finder 拖放、安装签名、公证、Release 或真实客户 SSH 主机验收。AI-04 仍未接入 `keelshell-app` UI 审核、StateStore 持久化或真实模型发送；NET-01 仍未实现命名隧道规则、规则持久化、审核后启停、重启恢复或重连绑定。
+在主线合并文档更新后运行：
+
+```text
+cargo fmt --all -- --check
+git diff --check
+cargo clippy -p keelshell-core --all-targets --all-features --locked --offline -- -D warnings
+cargo clippy -p keelshell-app --all-targets --all-features --locked --offline -- -D warnings
+cargo clippy -p keelshell-ai --all-targets --all-features --locked --offline -- -D warnings
+cargo test -p keelshell-core --locked --offline
+cargo test -p keelshell-ai --locked --offline
+cargo test -p keelshell-app --locked --offline explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_source_binding -- --nocapture
+python3 scripts/check.py
+```
+
+结果：格式、差异、三个包的严格 Clippy、core 497 项测试、AI 176 项测试、AI GPUI 专项 1 项测试和完整 `scripts/check.py` 均通过。完整脚本报告 67 项 Python 检查通过、1 项跳过；workspace app 测试 756 项通过、2 项 ignored，core 152 项通过；其余 session、MCP、集成测试与 10 项 doctest 在同一脚本中通过。受控网络/原生夹具仍按各测试的 ignored 条件保持未运行。
+
+## 当前合入状态与边界
+
+本轮修复和专项验证不代表 Windows/Linux/macOS 原生窗口、IME、VoiceOver、语法颜色像素、Finder 拖放、安装签名、公证、Release 或真实客户 SSH 主机验收。NET-01 已有命名规则持久化和审核计划，但仍未实现规则编辑 UI、真实 forwarding executor、listener 启停、运行状态持久化、重启恢复或重连绑定失效。AI-04 已接入 `keelshell-app` 的 GPUI 本地知识预览和明确完成/失败审核按钮；StateStore 持久化、条目编辑/删除、模型发送和完整 workspace capture 集成测试仍未完成，保存按钮保持禁用。受控 GPUI 与源码门禁不能替代原生跨平台验收。
