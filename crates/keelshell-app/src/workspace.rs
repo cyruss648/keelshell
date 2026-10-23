@@ -3,7 +3,11 @@ use gpui_kit::prelude::FluentBuilder;
 use keelshell_session::{
     KeyboardInteractiveChallenge, RetryPolicy, SessionError, SshAuth, SshOptions, SshSession,
 };
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 use tokio::sync::{mpsc, oneshot};
 use zeroize::Zeroizing;
 
@@ -45,7 +49,9 @@ mod vault;
 mod view;
 
 use crate::ai_settings::{AiSettingsEvent, AiSettingsPanel, EphemeralCredentials};
-use crate::assistant::{AssistantEvent, AssistantPanel};
+use crate::assistant::{
+    AssistantEvent, AssistantPanel, KnowledgeCaptureKind, KnowledgeCaptureSnapshot,
+};
 use crate::command_history::CommandHistory;
 use crate::jump_host_picker::JumpHostPicker;
 use crate::proxy_editor::ProxyEditor;
@@ -337,6 +343,8 @@ pub struct Workspace {
     show_workflow: bool,
     runtime: Arc<tokio::runtime::Runtime>,
     remote_sessions: HashMap<EntityId, SshSession>,
+    knowledge_source_ids: HashMap<EntityId, uuid::Uuid>,
+    knowledge_source_revisions: HashMap<EntityId, u64>,
     command_histories: HashMap<EntityId, CommandHistory>,
     login: Option<LoginPrompt>,
     keyboard_interactive: Option<KeyboardInteractivePrompt>,
@@ -363,6 +371,12 @@ fn input(placeholder: &str, value: &str, window: &mut Window, cx: &mut App) -> E
         state.set_value(value.to_owned(), window, cx);
         state
     })
+}
+
+fn current_unix_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_secs())
 }
 
 impl Workspace {
@@ -488,6 +502,7 @@ impl Workspace {
                         return;
                     }
                     if let Some(terminal) = view.tabs.get(view.active) {
+                        let terminal_id = terminal.entity_id();
                         let source = terminal.read(cx);
                         let text = if *selection_only {
                             source.selected_text()
@@ -496,12 +511,36 @@ impl Workspace {
                         };
                         let host = view
                             .remote_hosts
-                            .get(&terminal.entity_id())
+                            .get(&terminal_id)
                             .cloned()
                             .unwrap_or_default();
-                        let session_id = format!("{:?}", terminal.entity_id());
+                        let session_id = format!("{:?}", terminal_id);
+                        let source_id = *view
+                            .knowledge_source_ids
+                            .entry(terminal_id)
+                            .or_insert_with(uuid::Uuid::new_v4);
+                        let revision = view
+                            .knowledge_source_revisions
+                            .entry(terminal_id)
+                            .or_insert(0);
+                        *revision = revision.saturating_add(1);
                         panel.update(cx, |panel, cx| {
-                            panel.set_context(text, host, session_id, cx)
+                            panel.set_context_snapshot(
+                                KnowledgeCaptureSnapshot {
+                                    text,
+                                    host,
+                                    session_id,
+                                    source_id,
+                                    revision: *revision,
+                                    captured_at: current_unix_timestamp(),
+                                    kind: if *selection_only {
+                                        KnowledgeCaptureKind::Selection
+                                    } else {
+                                        KnowledgeCaptureKind::VisibleScreen
+                                    },
+                                },
+                                cx,
+                            )
                         });
                     }
                 }
@@ -705,6 +744,8 @@ impl Workspace {
             show_workflow: false,
             runtime,
             remote_sessions: HashMap::new(),
+            knowledge_source_ids: HashMap::new(),
+            knowledge_source_revisions: HashMap::new(),
             command_histories: HashMap::new(),
             login: None,
             keyboard_interactive: None,
@@ -766,6 +807,9 @@ impl Workspace {
             let terminal = self.tabs.remove(self.active);
             self.forget_reconnect(terminal.entity_id(), window, cx);
             self.remote_sessions.remove(&terminal.entity_id());
+            self.knowledge_source_ids.remove(&terminal.entity_id());
+            self.knowledge_source_revisions
+                .remove(&terminal.entity_id());
             // Retiring the authoritative mapping must revoke the backend token
             // in this foreground turn, before a paused write can resume.
             self.maintain_agent(cx);

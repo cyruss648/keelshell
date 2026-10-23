@@ -7,11 +7,12 @@
 ## 已验证行为
 
 - 没有当前 session、host 或上下文时，预览入口不可用。
-- 用户显式捕获终端内容后，可以生成来源绑定的知识文档和 Markdown 预览。
-- 预览显示来源标签、来源 revision、来源类别、条目和排除项。
-- `Persistable` 结果显示本地内容闸门通过，但保存按钮仍为禁用，因为 StateStore 接入尚未实现。
+- 用户显式捕获终端内容后，可以生成来源绑定的 `Unknown` 知识文档和 Markdown 预览；真实 GPUI 按钮确认完成后才生成条目。
+- 预览显示来源标签、捕获类型、session identity、来源 revision、捕获时间、条目和排除项。
+- 未确认的未知结果显示 `DoNotPersist`；只有用户明确确认完成或失败且通过敏感内容闸门后才显示 `Persistable`。保存按钮仍为禁用，因为 StateStore 接入尚未实现。
 - 敏感内容通过领域层变成 `DoNotPersist`，Markdown 不包含敏感正文，保存按钮保持禁用。
-- 同一个 session 的重复选择保持 source identity；切换 session 时由 UI 生成新的 source identity。
+- 同一个 session 的重复选择保持 source identity，且 source revision 随捕获递增；切换 session 时由 workspace 绑定新的 source identity。
+- 真实 `knowledge-confirm-completed` 按钮交互会把未知预览转换为可审核的完成事实；敏感内容仍由领域层阻止，Markdown 不包含敏感正文。
 - 预览不会自动发送到模型，也不会执行任何 action。
 
 ## 命令与结果
@@ -19,10 +20,11 @@
 ```text
 cargo fmt --all -- --check
 cargo check -p keelshell-app --locked --offline
+cargo clippy -p keelshell-app --all-targets --all-features --locked --offline -- -D warnings
 cargo test -p keelshell-app --locked --offline explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_source_binding -- --nocapture
 ```
 
-结果：格式检查通过；应用编译通过；新增 GPUI 测试 1 项通过。编译输出保留已有传递依赖 `block 0.1.6` 的 future-incompatibility 提示。
+结果：格式检查通过；应用编译通过；严格 Clippy 退出 0；新增 GPUI 测试 1 项通过。编译输出保留已有传递依赖 `block 0.1.6` 的 future-incompatibility 提示。
 
 ## 未完成边界
 

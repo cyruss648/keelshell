@@ -81,6 +81,59 @@ pub enum AssistantEvent {
     },
 }
 
+/// The scope of the terminal snapshot captured by an explicit user action.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum KnowledgeCaptureKind {
+    /// Text selected in the terminal emulator.
+    Selection,
+    /// The currently visible terminal screen.
+    VisibleScreen,
+}
+
+/// Immutable metadata captured at the same explicit action as the terminal text.
+pub(crate) struct KnowledgeCaptureSnapshot {
+    pub(crate) text: String,
+    pub(crate) host: String,
+    pub(crate) session_id: String,
+    pub(crate) source_id: Uuid,
+    pub(crate) revision: u64,
+    pub(crate) captured_at: u64,
+    pub(crate) kind: KnowledgeCaptureKind,
+}
+
+impl KnowledgeCaptureKind {
+    fn title(self) -> &'static str {
+        match self {
+            Self::Selection => "Explicit terminal selection",
+            Self::VisibleScreen => "Visible terminal snapshot",
+        }
+    }
+
+    fn label(self, cx: &App) -> &'static str {
+        match self {
+            Self::Selection => t(cx, "明确选择文本", "Explicit selection"),
+            Self::VisibleScreen => t(cx, "可见终端快照", "Visible terminal snapshot"),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct KnowledgeCapture {
+    source_id: Uuid,
+    session_id: String,
+    source_label: String,
+    revision: u64,
+    captured_at: u64,
+    kind: KnowledgeCaptureKind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum KnowledgeReviewOutcome {
+    Unknown,
+    Completed,
+    Failed,
+}
+
 enum PreparedAssistantRequest {
     Api(PreparedRequest),
     Local(PreparedLocalAsk),
@@ -97,6 +150,7 @@ struct LocalRequestProgress {
 struct KnowledgePreview {
     document: KnowledgeDocument,
     markdown: MarkdownArtifact,
+    review_outcome: KnowledgeReviewOutcome,
 }
 
 impl LocalRequestProgress {
@@ -246,7 +300,7 @@ pub struct AssistantPanel {
     context: String,
     host: String,
     session_id: String,
-    knowledge_source_id: Uuid,
+    knowledge_capture: Option<KnowledgeCapture>,
     prepared: Option<PreparedAssistantRequest>,
     prepared_key: Option<Zeroizing<String>>,
     response: String,
@@ -307,7 +361,7 @@ impl AssistantPanel {
             context: String::new(),
             host: String::new(),
             session_id: String::new(),
-            knowledge_source_id: Uuid::new_v4(),
+            knowledge_capture: None,
             prepared: None,
             prepared_key: None,
             response: String::new(),
@@ -405,16 +459,48 @@ impl AssistantPanel {
         session_id: String,
         cx: &mut Context<Self>,
     ) {
-        if self.session_id != session_id {
-            // A session identity remains stable across repeated selections, so
-            // a preview can be rebuilt against the same source while a session
-            // switch receives a new binding identity.
-            self.knowledge_source_id = Uuid::new_v4();
-        }
+        let same_session = self
+            .knowledge_capture
+            .as_ref()
+            .is_some_and(|capture| capture.session_id == session_id);
+        let (source_id, revision) = self
+            .knowledge_capture
+            .as_ref()
+            .filter(|_| same_session)
+            .map_or((Uuid::new_v4(), 1), |capture| {
+                (capture.source_id, capture.revision.saturating_add(1))
+            });
+        self.set_context_snapshot(
+            KnowledgeCaptureSnapshot {
+                text,
+                host,
+                session_id,
+                source_id,
+                revision,
+                captured_at: current_unix_timestamp(),
+                kind: KnowledgeCaptureKind::Selection,
+            },
+            cx,
+        );
+    }
+
+    pub(crate) fn set_context_snapshot(
+        &mut self,
+        snapshot: KnowledgeCaptureSnapshot,
+        cx: &mut Context<Self>,
+    ) {
         self.invalidate_request(cx);
-        self.context = text;
-        self.host = host;
-        self.session_id = session_id;
+        self.context = snapshot.text;
+        self.host = snapshot.host;
+        self.session_id = snapshot.session_id.clone();
+        self.knowledge_capture = Some(KnowledgeCapture {
+            source_id: snapshot.source_id,
+            session_id: snapshot.session_id,
+            source_label: format!("{} · {}", self.host, self.session_id),
+            revision: snapshot.revision,
+            captured_at: snapshot.captured_at,
+            kind: snapshot.kind,
+        });
         self.knowledge_preview = None;
         self.prepared = None;
         self.prepared_key = None;
@@ -440,6 +526,7 @@ impl AssistantPanel {
         self.context.clear();
         self.host.clear();
         self.session_id.clear();
+        self.knowledge_capture = None;
         self.knowledge_preview = None;
         self.status = Message::new(
             "原 SSH 会话已结束；问题草稿已保留，请重新选择上下文并审核。",
@@ -449,14 +536,50 @@ impl AssistantPanel {
     }
 
     fn build_knowledge_preview(&mut self, cx: &mut Context<Self>) {
+        self.build_knowledge_preview_for(KnowledgeReviewOutcome::Unknown, cx);
+    }
+
+    fn set_knowledge_review_outcome(
+        &mut self,
+        outcome: KnowledgeReviewOutcome,
+        cx: &mut Context<Self>,
+    ) {
+        self.build_knowledge_preview_for(outcome, cx);
+    }
+
+    fn build_knowledge_preview_for(
+        &mut self,
+        review_outcome: KnowledgeReviewOutcome,
+        cx: &mut Context<Self>,
+    ) {
         if self.context.trim().is_empty()
             || self.host.trim().is_empty()
             || self.session_id.trim().is_empty()
+            || self.knowledge_capture.is_none()
         {
             self.knowledge_preview = None;
             self.status = Message::new(
                 "请先从当前终端明确选择文本，再生成本地知识预览。",
                 "Select text from the current terminal explicitly before building a local knowledge preview.",
+            );
+            cx.notify();
+            return;
+        }
+
+        let Some(capture) = self.knowledge_capture.as_ref() else {
+            self.knowledge_preview = None;
+            self.status = Message::new(
+                "缺少终端快照元数据，知识预览已阻止。",
+                "Terminal snapshot metadata is missing; the knowledge preview is blocked.",
+            );
+            cx.notify();
+            return;
+        };
+        if capture.revision == 0 || capture.captured_at == 0 {
+            self.knowledge_preview = None;
+            self.status = Message::new(
+                "终端快照缺少有效的捕获时间或 revision，知识预览已阻止。",
+                "The terminal snapshot has no valid capture time or revision; the knowledge preview is blocked.",
             );
             cx.notify();
             return;
@@ -472,9 +595,9 @@ impl AssistantPanel {
             .join(" ");
         let source = match SourceBinding::new(
             KnowledgeSourceKind::Session,
-            self.knowledge_source_id,
-            self.request_revision.max(1),
-            &self.host,
+            capture.source_id,
+            capture.revision,
+            &capture.source_label,
         ) {
             Ok(source) => source,
             Err(error) => {
@@ -484,15 +607,18 @@ impl AssistantPanel {
                 return;
             }
         };
-        let occurred_at = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_or(1, |duration| duration.as_secs().max(1));
-        let fact = match SelectedFact::completed(
-            source,
-            occurred_at,
-            "Explicitly selected terminal text",
-            &summary,
-        ) {
+        let fact_result = match review_outcome {
+            KnowledgeReviewOutcome::Unknown => {
+                SelectedFact::unknown(source, capture.captured_at, capture.kind.title())
+            }
+            KnowledgeReviewOutcome::Completed => {
+                SelectedFact::completed(source, capture.captured_at, capture.kind.title(), &summary)
+            }
+            KnowledgeReviewOutcome::Failed => {
+                SelectedFact::failed(source, capture.captured_at, capture.kind.title(), &summary)
+            }
+        };
+        let fact = match fact_result {
             Ok(fact) => fact,
             Err(error) => {
                 self.knowledge_preview = None;
@@ -534,11 +660,15 @@ impl AssistantPanel {
                 "Local knowledge preview generated; saving and sending are not connected.",
             ),
             SaveDisposition::DoNotPersist { .. } => Message::new(
-                "预览包含不可保存内容；保存和发送已阻止。",
-                "The preview contains content that cannot be saved; saving and sending are blocked.",
+                "结果尚未被明确标记为已完成或已失败；知识条目保存/发送已阻止。",
+                "The outcome is not explicitly marked completed or failed; saving/sending this knowledge artifact is blocked.",
             ),
         };
-        self.knowledge_preview = Some(KnowledgePreview { document, markdown });
+        self.knowledge_preview = Some(KnowledgePreview {
+            document,
+            markdown,
+            review_outcome,
+        });
         cx.notify();
     }
 
@@ -1193,6 +1323,23 @@ impl AssistantPanel {
         } else {
             visual.danger
         };
+        let capture_kind_label = self.knowledge_capture.as_ref().map_or_else(
+            || t(cx, "终端快照", "Terminal snapshot"),
+            |capture| capture.kind.label(cx),
+        );
+        let review_label = match preview.review_outcome {
+            KnowledgeReviewOutcome::Unknown => t(
+                cx,
+                "结果状态：未知（仅审核）",
+                "Outcome: unknown (review only)",
+            ),
+            KnowledgeReviewOutcome::Completed => {
+                t(cx, "结果状态：已确认完成", "Outcome: confirmed completed")
+            }
+            KnowledgeReviewOutcome::Failed => {
+                t(cx, "结果状态：已确认失败", "Outcome: confirmed failed")
+            }
+        };
         let mut sources = div()
             .id("knowledge-preview-sources")
             .test_support()
@@ -1206,11 +1353,12 @@ impl AssistantPanel {
                     .test_support()
                     .text_xs()
                     .child(format!(
-                        "{} · {} · rev {} · {}",
+                        "{} · {} · rev {} · captured {} · {}",
                         entry.title(),
                         entry.source().label(),
                         entry.source().revision(),
-                        knowledge_source_kind_label(entry.source().kind(), cx),
+                        entry.occurred_at(),
+                        capture_kind_label,
                     )),
             );
         }
@@ -1222,11 +1370,12 @@ impl AssistantPanel {
                     .text_xs()
                     .text_color(rgb(visual.danger))
                     .child(format!(
-                        "{} · {} · rev {} · {}",
+                        "{} · {} · rev {} · captured {} · {}",
                         knowledge_exclusion_label(exclusion.reason(), cx),
                         exclusion.source().label(),
                         exclusion.source().revision(),
-                        knowledge_source_kind_label(exclusion.source().kind(), cx),
+                        exclusion.occurred_at(),
+                        capture_kind_label,
                     )),
             );
         }
@@ -1258,8 +1407,24 @@ impl AssistantPanel {
                     .text_color(rgb(visual.muted))
                     .child(t(
                         cx,
-                        "来源仅来自当前用户明确选择的终端会话文本；不会从 WorkflowAuditRecord 自动导入。",
-                        "The source is only the text explicitly selected from the current terminal session; WorkflowAuditRecord is never imported automatically.",
+                        "来源来自一次明确捕获的终端快照；选择类型、session identity、捕获时间和 revision 均绑定在预览中。不会从 WorkflowAuditRecord 自动导入。",
+                        "The source is one explicitly captured terminal snapshot; its capture kind, session identity, capture time and revision stay bound to this preview. WorkflowAuditRecord is never imported automatically.",
+                    )),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(review_label),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "知识条目只有在你明确确认结果状态后才可通过本地内容闸门。",
+                        "A knowledge entry passes the local content gate only after you explicitly confirm its outcome.",
                     )),
             )
             .child(
@@ -1277,6 +1442,33 @@ impl AssistantPanel {
                     .child(t(cx, "来源、条目与排除项", "Sources, entries and exclusions")),
             )
             .child(sources)
+            .child(
+                div()
+                    .flex()
+                    .gap_2()
+                    .child(
+                        Button::new("knowledge-confirm-completed")
+                            .ghost()
+                            .label(t(cx, "确认已完成", "Confirm completed"))
+                            .on_click(cx.listener(|panel, _, _, cx| {
+                                panel.set_knowledge_review_outcome(
+                                    KnowledgeReviewOutcome::Completed,
+                                    cx,
+                                )
+                            })),
+                    )
+                    .child(
+                        Button::new("knowledge-confirm-failed")
+                            .ghost()
+                            .label(t(cx, "确认已失败", "Confirm failed"))
+                            .on_click(cx.listener(|panel, _, _, cx| {
+                                panel.set_knowledge_review_outcome(
+                                    KnowledgeReviewOutcome::Failed,
+                                    cx,
+                                )
+                            })),
+                    ),
+            )
             .child(
                 div()
                     .text_xs()
@@ -1895,16 +2087,6 @@ fn knowledge_error_message(error: KnowledgeError) -> Message {
     )
 }
 
-fn knowledge_source_kind_label(kind: KnowledgeSourceKind, cx: &App) -> &'static str {
-    match kind {
-        KnowledgeSourceKind::Session => t(cx, "终端会话", "Terminal session"),
-        KnowledgeSourceKind::Workflow => t(cx, "工作流", "Workflow"),
-        KnowledgeSourceKind::File => t(cx, "文件", "File"),
-        KnowledgeSourceKind::Monitor => t(cx, "监控观察", "Monitor observation"),
-        KnowledgeSourceKind::Manual => t(cx, "手工事实", "Manual fact"),
-    }
-}
-
 fn knowledge_exclusion_label(reason: KnowledgeExclusionReason, cx: &App) -> &'static str {
     match reason {
         KnowledgeExclusionReason::UnknownOutcome => {
@@ -1932,6 +2114,12 @@ fn knowledge_save_block_label(reason: KnowledgeSaveBlock, cx: &App) -> &'static 
             "Unknown or incomplete outcome; save/send blocked",
         ),
     }
+}
+
+fn current_unix_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_secs())
 }
 
 fn ai_error(error: &AiError) -> Message {

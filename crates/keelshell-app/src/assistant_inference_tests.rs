@@ -309,22 +309,43 @@ fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_sourc
         })
         .unwrap_or_else(|error| panic!("open knowledge preview window: {error}"))
     });
+    let source_id = cx
+        .update_window(window, |_, _, cx| {
+            panel.update(cx, |panel, cx| {
+                panel.set_context(
+                    "systemctl status keelshell\nservice is healthy".into(),
+                    "fixture-host".into(),
+                    "session-a".into(),
+                    cx,
+                );
+                panel.build_knowledge_preview(cx);
+                let (document, markdown) = panel
+                    .knowledge_preview_for_test()
+                    .unwrap_or_else(|| panic!("explicit selection should produce a preview"));
+                assert!(!document.disposition().is_persistable());
+                assert!(document.entries().is_empty());
+                assert!(markdown.text().contains("unknown"));
+                assert_eq!(document.exclusions().len(), 1);
+                document.exclusions()[0].source().id()
+            })
+        })
+        .unwrap_or_else(|error| panic!("build unknown knowledge preview: {error}"));
+
     cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("knowledge-confirm-completed", cx);
+        window.render_frame(cx);
+    })
+    .unwrap_or_else(|error| panic!("confirm knowledge outcome: {error}"));
+
+    cx.update_window(window, |_, _, cx| {
         panel.update(cx, |panel, cx| {
-            panel.set_context(
-                "systemctl status keelshell\nservice is healthy".into(),
-                "fixture-host".into(),
-                "session-a".into(),
-                cx,
-            );
-            panel.build_knowledge_preview(cx);
             let (document, markdown) = panel
                 .knowledge_preview_for_test()
-                .unwrap_or_else(|| panic!("explicit selection should produce a preview"));
+                .unwrap_or_else(|| panic!("explicit outcome review should rebuild the preview"));
             assert!(document.disposition().is_persistable());
             assert_eq!(document.entries().len(), 1);
             assert!(markdown.text().contains("service is healthy"));
-            let source_id = document.entries()[0].source().id();
 
             panel.set_context(
                 "service is healthy again".into(),
@@ -336,8 +357,13 @@ fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_sourc
             let (document, _) = panel
                 .knowledge_preview_for_test()
                 .unwrap_or_else(|| panic!("same session should remain reviewable"));
-            assert_eq!(document.entries()[0].source().id(), source_id);
+            assert_eq!(document.exclusions()[0].source().id(), source_id);
+        });
+    })
+    .unwrap_or_else(|error| panic!("inspect confirmed knowledge preview: {error}"));
 
+    cx.update_window(window, |_, _, cx| {
+        panel.update(cx, |panel, cx| {
             panel.set_context(
                 "api key=fixture-secret".into(),
                 "fixture-host".into(),
@@ -345,6 +371,19 @@ fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_sourc
                 cx,
             );
             panel.build_knowledge_preview(cx);
+        });
+    })
+    .unwrap_or_else(|error| panic!("build sensitive knowledge preview: {error}"));
+
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("knowledge-confirm-completed", cx);
+        window.render_frame(cx);
+    })
+    .unwrap_or_else(|error| panic!("confirm sensitive knowledge outcome: {error}"));
+
+    cx.update_window(window, |_, _, cx| {
+        panel.update(cx, |panel, _| {
             let (document, markdown) = panel.knowledge_preview_for_test().unwrap_or_else(|| {
                 panic!("sensitive content should still yield a blocked preview")
             });
@@ -352,6 +391,10 @@ fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_sourc
             assert!(markdown.text().contains("sensitive_content"));
             assert!(!markdown.text().contains("fixture-secret"));
         });
+    })
+    .unwrap_or_else(|error| panic!("inspect sensitive knowledge preview: {error}"));
+
+    cx.update_window(window, |_, window, cx| {
         window.render_frame(cx);
         assert!(window.find("knowledge-preview-action").visible());
         assert!(window.find("knowledge-save-disabled").visible());
