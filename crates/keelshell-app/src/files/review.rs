@@ -33,13 +33,12 @@ impl FilesPanel {
         if surface == EditorSurface::Patch {
             self.patch_visible = true;
         }
-        let input = match surface {
-            EditorSurface::Draft => &self.editor,
-            EditorSurface::Patch => &self.patch,
-        };
         // Focus the same state used by the inline editor, after choosing the
         // visible surface. A directory input is never a fallback focus target.
-        input.read(cx).focus_handle(cx).focus(window, cx);
+        match surface {
+            EditorSurface::Draft => self.editor.read(cx).focus_handle(cx).focus(window, cx),
+            EditorSurface::Patch => self.patch.read(cx).focus_handle(cx).focus(window, cx),
+        }
         cx.notify();
     }
 
@@ -222,19 +221,21 @@ impl FilesPanel {
             .as_ref()
             .map(|(path, _)| path.as_str())
             .unwrap_or("");
-        let (input, label, other, other_label) = match surface {
+        let (label, other, other_label) = match surface {
             EditorSurface::Draft => (
-                &self.editor,
                 t(cx, "编辑草稿", "Edit draft"),
                 EditorSurface::Patch,
                 t(cx, "输入差异", "Enter patch"),
             ),
             EditorSurface::Patch => (
-                &self.patch,
                 t(cx, "输入单文件差异", "Enter single-file patch"),
                 EditorSurface::Draft,
                 t(cx, "查看草稿", "View draft"),
             ),
+        };
+        let focus_handle = match surface {
+            EditorSurface::Draft => self.editor.read(cx).focus_handle(cx).clone(),
+            EditorSurface::Patch => self.patch.read(cx).focus_handle(cx).clone(),
         };
         div()
             .id("file-editor-expanded")
@@ -285,13 +286,23 @@ impl FilesPanel {
                     .min_h_0()
                     .min_w_0()
                     .p_2()
-                    .track_focus(&input.read(cx).focus_handle(cx))
-                    .child(
-                        Textarea::new(input)
-                            .h(relative(1.))
-                            .font_family("monospace")
-                            .aria_label(format!("{label} · {path}")),
-                    )
+                    .track_focus(&focus_handle)
+                    .when(surface == EditorSurface::Draft, |el| {
+                        el.child(
+                            gpui_kit::component::input::Editor::new(&self.editor)
+                                .h(relative(1.))
+                                .font_family("monospace")
+                                .aria_label(format!("{label} · {path}")),
+                        )
+                    })
+                    .when(surface == EditorSurface::Patch, |el| {
+                        el.child(
+                            Textarea::new(&self.patch)
+                                .h(relative(1.))
+                                .font_family("monospace")
+                                .aria_label(format!("{label} · {path}")),
+                        )
+                    })
                     .test_support(),
             )
             .child(

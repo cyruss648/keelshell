@@ -425,7 +425,7 @@ impl Render for FilesPanel {
                 )
                 .child(
                     div().flex_1().min_h_0().p_1().child(
-                        Textarea::new(&self.editor)
+                        gpui_kit::component::input::Editor::new(&self.editor)
                             .h(relative(1.))
                             .font_family("monospace"),
                     ),

@@ -5,7 +5,7 @@ use gpui_kit::{
     component::{
         Disableable, Sizable,
         button::{Button, ButtonVariants},
-        input::{Input, InputEvent, InputState, Textarea, TextareaState},
+        input::{EditorState, Input, InputEvent, InputState, Textarea, TextareaState},
     },
     *,
 };
@@ -33,6 +33,7 @@ use std::{
 
 mod batch;
 mod browser;
+mod editor_language;
 mod editor_search;
 #[cfg(test)]
 mod editor_search_tests;
@@ -152,7 +153,7 @@ pub struct FilesPanel {
     remote_show_hidden: bool,
     _browser_subscriptions: Vec<Subscription>,
     browser_review_revision: uuid::Uuid,
-    editor: Entity<TextareaState>,
+    editor: Entity<EditorState>,
     editor_find: Entity<InputState>,
     editor_replace: Entity<InputState>,
     editor_match: Option<usize>,
@@ -594,7 +595,17 @@ impl FilesPanel {
             remote_show_hidden: false,
             _browser_subscriptions: Vec::new(),
             browser_review_revision: uuid::Uuid::new_v4(),
-            editor: cx.new(|cx| TextareaState::new(window, cx).rows(8)),
+            editor: cx.new(|cx| {
+                EditorState::new(window, cx)
+                    .language("text")
+                    // KeelShell owns the literal search/replace controls and
+                    // keeps review edits explicit, so editor conveniences that
+                    // alter input or add a second search surface stay disabled.
+                    .searchable(false)
+                    .folding(false)
+                    .auto_close(false)
+                    .smart_indent(false)
+            }),
             editor_find: field(t(cx, "查找", "Find"), "", window, cx),
             editor_replace: field(t(cx, "替换为", "Replace with"), "", window, cx),
             editor_match: None,
@@ -693,6 +704,7 @@ impl FilesPanel {
     ) {
         self.editing = Some((path.to_owned(), original.as_bytes().to_vec()));
         self.editor.update(cx, |editor, cx| {
+            editor.set_highlighter(editor_language::language_for_path(path), cx);
             editor.set_value(draft.to_owned(), window, cx)
         });
     }
@@ -984,7 +996,17 @@ impl FilesPanel {
                         let path = snapshot.entry.path.clone();
                         let content = snapshot.content.clone();
                         if view.editor.read(cx).value().as_ref() == editor_before.as_str() {
-                            view.editor.update(cx,|input,cx|input.set_value(String::from_utf8_lossy(&content).into_owned(),window,cx));
+                            view.editor.update(cx, |input, cx| {
+                                input.set_highlighter(
+                                    editor_language::language_for_path(&path),
+                                    cx,
+                                );
+                                input.set_value(
+                                    String::from_utf8_lossy(&content).into_owned(),
+                                    window,
+                                    cx,
+                                )
+                            });
                             view.status = Message::new(format!("正在编辑 {path} · {} 字节",content.len()),format!("Editing {path} · {} bytes",content.len()));
                             view.editing = Some((path,content));
                             view.editor_snapshot = Some(snapshot);

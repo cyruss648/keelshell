@@ -9,7 +9,14 @@ rust-version = "1.98"
 publish = false
 
 [workspace.dependencies]
-gpui-kit = "0.7"
+gpui-kit = { version = "0.7", features = [
+    "tree-sitter",
+    "tree-sitter-bash",
+    "tree-sitter-python",
+    "tree-sitter-rust",
+    "tree-sitter-toml",
+    "tree-sitter-yaml",
+] }
 # Embed the Kit catalog in development packages as well as release binaries.
 rust-embed = { version = "8.12", features = ["debug-embed"] }
 image = { version = "0.25", default-features = false, features = ["png"] }

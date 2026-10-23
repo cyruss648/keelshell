@@ -3,7 +3,10 @@ use crate::{SshAuth, SshOptions};
 use russh::server;
 #[cfg(unix)]
 use std::process;
-use std::sync::{Arc, Mutex, atomic::AtomicUsize};
+use std::sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, AtomicUsize},
+};
 use tokio::{net::TcpListener, sync::Semaphore, task::JoinHandle};
 mod actual_services;
 #[cfg(unix)]
@@ -58,6 +61,15 @@ struct Control {
     closed: AtomicUsize,
     gate: Semaphore,
     seen: Mutex<Vec<Vec<u8>>>,
+}
+struct ListenerGuard {
+    listener: TcpListener,
+    dropped: Arc<AtomicBool>,
+}
+impl Drop for ListenerGuard {
+    fn drop(&mut self) {
+        self.dropped.store(true, Ordering::Release);
+    }
 }
 struct Peer {
     mode: Mode,
@@ -182,7 +194,7 @@ struct Fixture {
     task: JoinHandle<()>,
     session: SshSession,
     control: Arc<Control>,
-    port: u16,
+    listener_dropped: Arc<AtomicBool>,
 }
 impl Drop for Fixture {
     fn drop(&mut self) {
@@ -200,6 +212,11 @@ impl Fixture {
         });
         let listener = TcpListener::bind("127.0.0.1:0").await?;
         let address = listener.local_addr()?;
+        let listener_dropped = Arc::new(AtomicBool::new(false));
+        let listener_owner = ListenerGuard {
+            listener,
+            dropped: listener_dropped.clone(),
+        };
         let control = Arc::new(Control {
             commands: AtomicUsize::new(0),
             opened: AtomicUsize::new(0),
@@ -212,7 +229,7 @@ impl Fixture {
             control: control.clone(),
         };
         let task = tokio::spawn(async move {
-            if let Ok((socket, _)) = listener.accept().await
+            if let Ok((socket, _)) = listener_owner.listener.accept().await
                 && let Ok(running) = server::run_stream(config, socket, peer).await
             {
                 let _ = running.await;
@@ -228,7 +245,7 @@ impl Fixture {
             task,
             session,
             control,
-            port: address.port(),
+            listener_dropped,
         })
     }
     async fn finish(mut self) -> Result<(), Box<dyn std::error::Error>> {
@@ -237,9 +254,7 @@ impl Fixture {
         self.task.abort();
         let joined = tokio::time::timeout(Duration::from_secs(2), &mut self.task).await?;
         assert!(joined.is_ok() || joined.as_ref().is_err_and(|e| e.is_cancelled()));
-        assert!(
-            matches!(tokio::net::TcpStream::connect(("127.0.0.1",self.port)).await,Err(e) if e.kind()==std::io::ErrorKind::ConnectionRefused)
-        );
+        assert!(self.listener_dropped.load(Ordering::Acquire));
         Ok(())
     }
 }

@@ -1,5 +1,15 @@
 # KeelShell 开发交接 — 2026-10-08
 
+## 当前继续开发 — 2026-10-23
+
+主远程草稿编辑器已完成 FILE-04 第一阶段：使用 GPUI Kit `EditorState`，按远端文件名启用 Rust、Python、JSON、TOML、YAML 和 Bash 高亮，未知或不支持的名称使用纯文本。KeelShell 自有字面查找／替换仍是唯一搜索入口，内置搜索、折叠、自动闭合和智能缩进关闭；patch 与冲突合并输入保持 `TextareaState`。UTF-8、NUL、1 MiB、审核保存、同目录备份和完整读回边界未改变。SQL grammar 为控制首阶段范围暂未启用，SQL 文件回退纯文本；当前 grammar 集合已使用旧兼容的 `cc` 锁定线，扩展语言需单独评估。代码与专项验证见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。
+
+本轮 Finder 原生拖放尝试只完成隔离构建；原生 UI 工具报告 Mac 处于锁屏状态，拖放、审核、零写入取消、确认读回、截图和 AX 均为 `UNRUN`，见[原生记录](testing/records/2026-10-23-file-drop-native-macos.md)。解锁后需继续复用 `work/native-file-drop-20261023/package`，完成 FILE-02 的 Finder 验收。
+
+完整 `python3 scripts/check.py` 已在当前工作树实际退出 0，覆盖脚本、格式、严格 Clippy、全 workspace 测试、文档测试和三个本地 agent 控制场景；证据见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。独立代码／功能复核已完成，`.fish` 错误映射和应用级回归覆盖不足已修复。该门禁不关闭提交级 CI、语法颜色像素、IME、VoiceOver、最小窗口、Windows/Linux 原生桌面或发布安装边界；原生 Finder `UNRUN` 证据必须保留。
+
+复核完成后将当前切片分阶段提交并核对本地提交状态；本轮按既有授权推送到 `origin/main`，不创建发行标签。解锁后继续复用 `work/native-file-drop-20261023/package` 完成 FILE-02 的 Finder 验收。
+
 ## 继续开发 — 2026-10-14
 
 当前增量为远程编辑器的字面查找、替换和保存前备份。查找替换只改本机草稿；审核保存先写同目录隐藏备份，备份失败不发布新内容。目标发布结果未知时已完成备份保留，原文件仍按原隔离规则处理。专项回归和本轮 `python3 scripts/check.py` 实际退出 0，见[编辑器记录](testing/records/2026-10-14-editor-search-backup.md)。这不是原生文件管理器拖放、三平台桌面或 Windows `0xc0000409` 验收。

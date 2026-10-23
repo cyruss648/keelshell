@@ -1,5 +1,19 @@
 # 开发路线
 
+## 当前继续开发 — 2026-10-23
+
+远程草稿编辑器已完成 FILE-04 的第一阶段：主草稿输入使用 GPUI Kit `EditorState`，按远程文件名选择 Rust、Python、JSON、TOML、YAML 或 Bash 语法高亮；未知或不支持的名称回退为纯文本。项目保留自有字面查找／替换控件，并关闭编辑器内置搜索、折叠、自动闭合和智能缩进，避免改变审核式编辑的输入语义。补丁输入和冲突合并手工输入仍使用普通多行文本框。
+
+该阶段保留 UTF-8、NUL、1 MiB、审核保存、同目录备份和字节读回边界。SQL 暂不启用 Tree-sitter grammar，以控制首阶段解析器范围；当前启用的 grammar 集合已经把 `cc` 解析到旧兼容锁定线，后续需单独评估扩展语言和原生构建影响。SQL 文件因此继续按纯文本编辑。语言识别单元测试、应用编译和完整 `python3 scripts/check.py` 已通过；提交级 CI、编辑器原生像素／IME／VoiceOver 以及其它平台桌面仍待验收。
+
+本轮 Finder 原生拖放验收已完成隔离 macOS 构建，但原生 UI 工具确认系统处于锁屏状态，Finder 事件、审核、取消零写入、确认读回和截图均为 `UNRUN`，记录见[原生尝试记录](testing/records/2026-10-23-file-drop-native-macos.md)。Mac 解锁后继续复用该隔离包完成 FILE-02 验收。
+
+The first FILE-04 editor slice is now in the working tree: the main remote draft uses GPUI Kit `EditorState` and selects Rust, Python, JSON, TOML, YAML or Bash highlighting from the remote filename. Unknown and unsupported names fall back to plain text. KeelShell's literal find/replace controls remain the only search surface, and built-in search, folding, auto-closing and smart indentation stay disabled so reviewed editing keeps its input semantics. Patch and conflict merge text areas remain ordinary multiline inputs.
+
+The UTF-8, NUL, 1 MiB, reviewed save, same-directory backup and byte-readback boundaries remain unchanged. SQL Tree-sitter is intentionally deferred to keep the first grammar set bounded; the enabled grammars already resolve `cc` to an older compatible lock line, so adding languages and native build impact need a separate review. SQL files remain plain text until then. Unit tests, application compilation and the full `python3 scripts/check.py` gate pass; commit CI and native editor/IME/accessibility checks remain open.
+
+The Finder native drag-and-drop attempt produced an isolated macOS build, but the native UI tool reported that the system was locked. Finder events, review, cancel-with-zero-writes, confirmed readback and screenshots are therefore `UNRUN`; see the [native attempt record](testing/records/2026-10-23-file-drop-native-macos.md). Reuse the isolated package after unlocking the Mac.
+
 ## 继续开发 — 2026-10-14
 
 当前组合继续位于 `feature/platform-batch-integration`。远程编辑器现支持有界字面查找和替换，审核保存前写入同目录原内容备份。专项会话、真实 GPUI 回归和本轮完整 `python3 scripts/check.py` 已通过，见[编辑器记录](testing/records/2026-10-14-editor-search-backup.md)。精确 `78c7720` 的 Ubuntu 准入泄漏与 Windows 退出码 0 身份等待已有本机修复和回归，详见[CI记录](testing/records/2026-10-14-ci-admission-and-windows-identity.md)。审核式拖放上传完成受控 GPUI 验证。精确 `99425de` 的 Ubuntu 与 macOS CI 已通过；Windows 越过原进程树失败，但更新器 5 秒 Ready 等待失败。原生文件管理器拖放、三平台桌面和 Windows `0xc0000409` 仍分别验收。

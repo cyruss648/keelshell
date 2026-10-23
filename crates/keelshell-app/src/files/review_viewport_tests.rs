@@ -14,6 +14,30 @@ async fn open_file(h: &Harness, path: &str, bytes: &[u8], cx: &mut TestAppContex
     h.idle(cx).await;
 }
 
+#[gpui_kit::test]
+async fn remote_editor_selects_filename_language_without_changing_draft(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+
+    for (path, expected) in [
+        ("/config.rs", "rust"),
+        ("/script.py", "python"),
+        ("/config.jsonc", "json"),
+        ("/settings.toml", "toml"),
+        ("/deploy.yml", "yaml"),
+        ("/deploy.sh", "bash"),
+        ("/deploy.fish", "text"),
+        ("/notes.txt", "text"),
+    ] {
+        let content = format!("content for {path}\n");
+        open_file(&h, path, content.as_bytes(), cx).await;
+        h.panel.read_with(cx, |panel, cx| {
+            assert_eq!(panel.editor.read(cx).language_name().as_str(), expected);
+            assert_eq!(panel.editor.read(cx).value().as_str(), content);
+        });
+    }
+}
+
 fn review_bytes(h: &Harness, cx: &TestAppContext) -> (String, Vec<u8>, Vec<u8>) {
     h.panel.read_with(cx, |panel, _| {
         match &panel

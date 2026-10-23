@@ -18,6 +18,14 @@ Page Up/Down、Home、End 用于浏览。正文中的 Enter 不批准操作。
 差异解析只改变草稿，不写远端。保存仍须完整审核并显式确认；审核后草稿变化、
 会话断连、撤权或暂停继续阻止旧确认，未知写入隔离规则不变。
 
+主远程草稿编辑器按远端文件名启用有限语法高亮：Rust、Python、JSON、TOML、YAML
+和 Bash 使用 GPUI Kit 的对应 grammar；未知、不支持或无扩展名的文件使用纯文本。
+识别只读取路径最后的文件名，不嗅探内容，也不把路径交给命令执行。KeelShell 自有
+字面查找／替换保持唯一查找入口；编辑器内置搜索、折叠、自动闭合和智能缩进关闭，
+避免在用户输入时自动改变草稿。SQL grammar 为控制首阶段语言范围暂不启用；当前
+grammar 集合已使用旧兼容的 `cc` 锁定线，后续扩展需单独评估。SQL 文件继续以纯文本
+打开。补丁和冲突合并输入保持普通多行文本框。
+
 展开草稿编辑器提供有界的字面查找、替换当前和全部替换。查找不跨越匹配重叠，
 也不把点视为通配符。替换只改变本机草稿；取消保存审核不会写入远端。审核保存在发布
 新内容前，先把已复核的原内容写入同目录隐藏备份。备份失败时不发布新内容；若新内容
@@ -48,6 +56,16 @@ editors, parse a patch or request save review, with the operation status visible
 Patch parsing changes only the draft. Remote saving still requires complete
 review and explicit confirmation. Changed drafts, suspension, disconnection and
 revocation keep the original guards; unknown mutation isolation is unchanged.
+
+The main remote draft editor enables a bounded set of syntax highlighters from the remote
+filename: Rust, Python, JSON, TOML, YAML and Bash use GPUI Kit grammars; unknown,
+unsupported and extensionless files use plain text. Detection reads only the final filename
+component. It does not sniff contents or send the path to command execution. KeelShell's
+literal find/replace controls remain the sole search surface; built-in search, folding,
+auto-closing and smart indentation stay disabled so typing cannot silently change a draft.
+SQL grammar is deferred to keep the first grammar set bounded; the enabled grammars already
+use an older compatible `cc` lock line, so expanding the set needs a separate review. SQL
+opens as plain text. Patch and conflict-merge inputs remain ordinary multiline text areas.
 
 The expanded draft editor provides bounded literal find, replace-current and
 replace-all actions. Search does not overlap matches or treat a dot as a
