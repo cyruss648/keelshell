@@ -26,7 +26,7 @@ cargo test -p keelshell-core --test tunnel_rules --locked --offline -- --nocaptu
 cargo test -p keelshell-core --locked --offline
 ```
 
-结果：格式检查和严格 Clippy 通过；core 全量测试 494 项通过；`tunnel_rules` 集成测试 10 项通过。测试记录中的删除引用、批量 Trash、规则变更、规则删除和 state revision 失效场景均通过。
+结果：格式检查和严格 Clippy 通过；当前功能提交后尚未重新运行 core 全量测试；新增 3 个集成测试使当前测试目标总数为 497，不能将该枚举数字写成通过数；`tunnel_rules` 集成测试 10 项通过。测试记录中的删除引用、批量 Trash、规则变更、规则删除和 state revision 失效场景均通过。
 
 ## 未完成边界
 
