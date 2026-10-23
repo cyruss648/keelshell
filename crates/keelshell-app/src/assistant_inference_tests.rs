@@ -1,6 +1,6 @@
 use super::AssistantPanel;
 use crate::ai_settings::EphemeralCredentials;
-use gpui_kit::{AppContext, TestAppContext, WindowOptions};
+use gpui_kit::{AppContext, TestAppContext, WindowOptions, test::TestWindowExt};
 use keelshell_ai::RequestCancellation;
 use keelshell_core::{AiApiStyle, AiProfileCatalog, NamedAiProfile};
 use keelshell_core::{
@@ -286,4 +286,75 @@ fn inactive_configured_secret_in_effort_metadata_refuses_preview(cx: &mut TestAp
         });
     })
     .unwrap_or_else(|error| panic!("update inference window: {error}"));
+}
+
+#[gpui_kit::test]
+fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_source_binding(
+    cx: &mut TestAppContext,
+) {
+    cx.update(gpui_kit::init);
+    let runtime = Arc::new(
+        tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(1)
+            .enable_all()
+            .build()
+            .unwrap_or_else(|error| panic!("test runtime: {error}")),
+    );
+    let catalog = AiProfileCatalog::default();
+    let (window, panel) = cx.update(|cx| {
+        gpui_kit::open_window(WindowOptions::default(), cx, |window, cx| {
+            cx.new(|cx| {
+                AssistantPanel::new(&catalog, &EphemeralCredentials::new(), runtime, window, cx)
+            })
+        })
+        .unwrap_or_else(|error| panic!("open knowledge preview window: {error}"))
+    });
+    cx.update_window(window, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            panel.set_context(
+                "systemctl status keelshell\nservice is healthy".into(),
+                "fixture-host".into(),
+                "session-a".into(),
+                cx,
+            );
+            panel.build_knowledge_preview(cx);
+            let (document, markdown) = panel
+                .knowledge_preview_for_test()
+                .unwrap_or_else(|| panic!("explicit selection should produce a preview"));
+            assert!(document.disposition().is_persistable());
+            assert_eq!(document.entries().len(), 1);
+            assert!(markdown.text().contains("service is healthy"));
+            let source_id = document.entries()[0].source().id();
+
+            panel.set_context(
+                "service is healthy again".into(),
+                "fixture-host".into(),
+                "session-a".into(),
+                cx,
+            );
+            panel.build_knowledge_preview(cx);
+            let (document, _) = panel
+                .knowledge_preview_for_test()
+                .unwrap_or_else(|| panic!("same session should remain reviewable"));
+            assert_eq!(document.entries()[0].source().id(), source_id);
+
+            panel.set_context(
+                "api key=fixture-secret".into(),
+                "fixture-host".into(),
+                "session-a".into(),
+                cx,
+            );
+            panel.build_knowledge_preview(cx);
+            let (document, markdown) = panel.knowledge_preview_for_test().unwrap_or_else(|| {
+                panic!("sensitive content should still yield a blocked preview")
+            });
+            assert!(!document.disposition().is_persistable());
+            assert!(markdown.text().contains("sensitive_content"));
+            assert!(!markdown.text().contains("fixture-secret"));
+        });
+        window.render_frame(cx);
+        assert!(window.find("knowledge-preview-action").visible());
+        assert!(window.find("knowledge-save-disabled").visible());
+    })
+    .unwrap_or_else(|error| panic!("knowledge preview interaction: {error}"));
 }

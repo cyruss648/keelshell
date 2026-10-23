@@ -1,6 +1,10 @@
 //! Explicit-context AI panel. It can propose text, never run a terminal command.
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::Arc,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
+use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::{
     component::{
         Disableable, IconName,
@@ -17,7 +21,12 @@ use keelshell_ai::{
     PreparedRequest, ProviderClient, ProviderConfig, ProviderProtocol, RedactionReport,
     RequestCancellation,
 };
-use keelshell_core::{AiApiStyle, AiAuthentication, AiBackend, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{
+    AiApiStyle, AiAuthentication, AiBackend, AiProfileCatalog, KnowledgeDocument, KnowledgeError,
+    KnowledgeExclusionReason, KnowledgeSaveBlock, KnowledgeSelection, KnowledgeService,
+    KnowledgeSourceKind, MarkdownArtifact, NamedAiProfile, SaveDisposition, SelectedFact,
+    SourceBinding,
+};
 use tokio::runtime::Runtime;
 use uuid::Uuid;
 use zeroize::Zeroizing;
@@ -83,6 +92,11 @@ struct LocalRequestProgress {
     facts: Vec<LocalAskStage>,
     outcome: Option<bool>,
     expanded: bool,
+}
+
+struct KnowledgePreview {
+    document: KnowledgeDocument,
+    markdown: MarkdownArtifact,
 }
 
 impl LocalRequestProgress {
@@ -232,6 +246,7 @@ pub struct AssistantPanel {
     context: String,
     host: String,
     session_id: String,
+    knowledge_source_id: Uuid,
     prepared: Option<PreparedAssistantRequest>,
     prepared_key: Option<Zeroizing<String>>,
     response: String,
@@ -243,6 +258,7 @@ pub struct AssistantPanel {
     request_revision: u64,
     response_target: Option<(String, String)>,
     local_progress: Option<LocalRequestProgress>,
+    knowledge_preview: Option<KnowledgePreview>,
     agent: agent::AgentPanelState,
     _subscriptions: Vec<Subscription>,
 }
@@ -291,6 +307,7 @@ impl AssistantPanel {
             context: String::new(),
             host: String::new(),
             session_id: String::new(),
+            knowledge_source_id: Uuid::new_v4(),
             prepared: None,
             prepared_key: None,
             response: String::new(),
@@ -305,6 +322,7 @@ impl AssistantPanel {
             request_revision: 0,
             response_target: None,
             local_progress: None,
+            knowledge_preview: None,
             agent: agent::AgentPanelState::default(),
             _subscriptions: subscriptions,
         }
@@ -387,10 +405,17 @@ impl AssistantPanel {
         session_id: String,
         cx: &mut Context<Self>,
     ) {
+        if self.session_id != session_id {
+            // A session identity remains stable across repeated selections, so
+            // a preview can be rebuilt against the same source while a session
+            // switch receives a new binding identity.
+            self.knowledge_source_id = Uuid::new_v4();
+        }
         self.invalidate_request(cx);
         self.context = text;
         self.host = host;
         self.session_id = session_id;
+        self.knowledge_preview = None;
         self.prepared = None;
         self.prepared_key = None;
         self.preview = false;
@@ -415,11 +440,113 @@ impl AssistantPanel {
         self.context.clear();
         self.host.clear();
         self.session_id.clear();
+        self.knowledge_preview = None;
         self.status = Message::new(
             "原 SSH 会话已结束；问题草稿已保留，请重新选择上下文并审核。",
             "The SSH session ended. Your question is preserved; select fresh context and review again.",
         );
         cx.notify();
+    }
+
+    fn build_knowledge_preview(&mut self, cx: &mut Context<Self>) {
+        if self.context.trim().is_empty()
+            || self.host.trim().is_empty()
+            || self.session_id.trim().is_empty()
+        {
+            self.knowledge_preview = None;
+            self.status = Message::new(
+                "请先从当前终端明确选择文本，再生成本地知识预览。",
+                "Select text from the current terminal explicitly before building a local knowledge preview.",
+            );
+            cx.notify();
+            return;
+        }
+
+        // Terminal snapshots are multiline UI text. The domain boundary accepts
+        // a single reviewed fact summary, so normalize whitespace before calling
+        // it; this keeps the source explicit while retaining the domain limits.
+        let summary = self
+            .context
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join(" ");
+        let source = match SourceBinding::new(
+            KnowledgeSourceKind::Session,
+            self.knowledge_source_id,
+            self.request_revision.max(1),
+            &self.host,
+        ) {
+            Ok(source) => source,
+            Err(error) => {
+                self.knowledge_preview = None;
+                self.status = knowledge_error_message(error);
+                cx.notify();
+                return;
+            }
+        };
+        let occurred_at = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_or(1, |duration| duration.as_secs().max(1));
+        let fact = match SelectedFact::completed(
+            source,
+            occurred_at,
+            "Explicitly selected terminal text",
+            &summary,
+        ) {
+            Ok(fact) => fact,
+            Err(error) => {
+                self.knowledge_preview = None;
+                self.status = knowledge_error_message(error);
+                cx.notify();
+                return;
+            }
+        };
+        let selection = match KnowledgeSelection::new(vec![fact]) {
+            Ok(selection) => selection,
+            Err(error) => {
+                self.knowledge_preview = None;
+                self.status = knowledge_error_message(error);
+                cx.notify();
+                return;
+            }
+        };
+        let document = match KnowledgeService::build(&selection) {
+            Ok(document) => document,
+            Err(error) => {
+                self.knowledge_preview = None;
+                self.status = knowledge_error_message(error);
+                cx.notify();
+                return;
+            }
+        };
+        let markdown = match KnowledgeService::render_markdown(&document) {
+            Ok(markdown) => markdown,
+            Err(error) => {
+                self.knowledge_preview = None;
+                self.status = knowledge_error_message(error);
+                cx.notify();
+                return;
+            }
+        };
+        self.status = match document.disposition() {
+            SaveDisposition::Persistable => Message::new(
+                "本地知识预览已生成；保存和发送仍未接入。",
+                "Local knowledge preview generated; saving and sending are not connected.",
+            ),
+            SaveDisposition::DoNotPersist { .. } => Message::new(
+                "预览包含不可保存内容；保存和发送已阻止。",
+                "The preview contains content that cannot be saved; saving and sending are blocked.",
+            ),
+        };
+        self.knowledge_preview = Some(KnowledgePreview { document, markdown });
+        cx.notify();
+    }
+
+    #[cfg(test)]
+    fn knowledge_preview_for_test(&self) -> Option<(&KnowledgeDocument, &MarkdownArtifact)> {
+        self.knowledge_preview
+            .as_ref()
+            .map(|preview| (&preview.document, &preview.markdown))
     }
 
     /// Whether configuration replacement can proceed without cancelling active inference.
@@ -1039,6 +1166,152 @@ impl AssistantPanel {
         }
         cx.notify();
     }
+
+    fn knowledge_preview_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let Some(preview) = self.knowledge_preview.as_ref() else {
+            return div().into_any_element();
+        };
+        let disposition = match preview.document.disposition() {
+            SaveDisposition::Persistable => Message::new(
+                "SaveDisposition：Persistable（仅代表通过本地内容闸门）",
+                "SaveDisposition: Persistable (only the local content gate passed)",
+            ),
+            SaveDisposition::DoNotPersist { reason } => Message::new(
+                format!(
+                    "SaveDisposition：DoNotPersist · {}",
+                    knowledge_save_block_label(reason, cx)
+                ),
+                format!(
+                    "SaveDisposition: DoNotPersist · {}",
+                    knowledge_save_block_label(reason, cx)
+                ),
+            ),
+        };
+        let disposition_color = if preview.document.disposition().is_persistable() {
+            visual.success
+        } else {
+            visual.danger
+        };
+        let mut sources = div()
+            .id("knowledge-preview-sources")
+            .test_support()
+            .flex()
+            .flex_col()
+            .gap_1();
+        for (index, entry) in preview.document.entries().iter().enumerate() {
+            sources = sources.child(
+                div()
+                    .id(("knowledge-entry", index))
+                    .test_support()
+                    .text_xs()
+                    .child(format!(
+                        "{} · {} · rev {} · {}",
+                        entry.title(),
+                        entry.source().label(),
+                        entry.source().revision(),
+                        knowledge_source_kind_label(entry.source().kind(), cx),
+                    )),
+            );
+        }
+        for (index, exclusion) in preview.document.exclusions().iter().enumerate() {
+            sources = sources.child(
+                div()
+                    .id(("knowledge-exclusion", index))
+                    .test_support()
+                    .text_xs()
+                    .text_color(rgb(visual.danger))
+                    .child(format!(
+                        "{} · {} · rev {} · {}",
+                        knowledge_exclusion_label(exclusion.reason(), cx),
+                        exclusion.source().label(),
+                        exclusion.source().revision(),
+                        knowledge_source_kind_label(exclusion.source().kind(), cx),
+                    )),
+            );
+        }
+        let save_label = if preview.document.disposition().is_persistable() {
+            Message::new("保存（未接入，OPEN）", "Save (not connected, OPEN)")
+        } else {
+            Message::new("保存已阻止", "Saving blocked")
+        };
+        div()
+            .id("knowledge-preview")
+            .test_support()
+            .p_2()
+            .rounded(px(6.))
+            .bg(rgb(visual.canvas))
+            .border_1()
+            .border_color(rgb(visual.border))
+            .flex()
+            .flex_col()
+            .gap_2()
+            .child(
+                div()
+                    .text_xs()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(t(cx, "本地知识预览 / 审核", "Local knowledge preview / review")),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "来源仅来自当前用户明确选择的终端会话文本；不会从 WorkflowAuditRecord 自动导入。",
+                        "The source is only the text explicitly selected from the current terminal session; WorkflowAuditRecord is never imported automatically.",
+                    )),
+            )
+            .child(
+                div()
+                    .id("knowledge-preview-disposition")
+                    .test_support()
+                    .text_xs()
+                    .text_color(rgb(disposition_color))
+                    .child(disposition.render(cx)),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(t(cx, "来源、条目与排除项", "Sources, entries and exclusions")),
+            )
+            .child(sources)
+            .child(
+                div()
+                    .text_xs()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(t(cx, "Markdown 预览", "Markdown preview")),
+            )
+            .child(
+                div()
+                    .id("knowledge-preview-markdown")
+                    .test_support()
+                    .max_h(px(180.))
+                    .overflow_y_scroll()
+                    .p_2()
+                    .bg(rgb(visual.surface))
+                    .font_family("monospace")
+                    .child(Label::new(preview.markdown.text().to_owned()).text_xs()),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "模型发送：未接入；本预览不会自动发送。",
+                        "Model sending: not connected; this preview is never sent automatically.",
+                    )),
+            )
+            .child(
+                Button::new("knowledge-save-disabled")
+                    .ghost()
+                    .disabled(true)
+                    .label(save_label.render(cx)),
+            )
+            .into_any_element()
+    }
 }
 impl Drop for AssistantPanel {
     fn drop(&mut self) {
@@ -1200,6 +1473,20 @@ impl Render for AssistantPanel {
                     .render(cx)
                 },
             ))
+            .child(
+                Button::new("knowledge-preview-action")
+                    .ghost()
+                    .disabled(
+                        self.context.trim().is_empty()
+                            || self.host.trim().is_empty()
+                            || self.session_id.trim().is_empty(),
+                    )
+                    .label(t(cx, "生成本地知识预览", "Build local knowledge preview"))
+                    .on_click(cx.listener(|panel, _, _, cx| panel.build_knowledge_preview(cx))),
+            )
+            .when(self.knowledge_preview.is_some(), |content| {
+                content.child(self.knowledge_preview_view(cx))
+            })
             .child(self.agent_controls(cx))
             .child(
                 div()
@@ -1597,6 +1884,53 @@ impl Render for AssistantPanel {
             )
             .children(confirmation)
             .children(self.agent_action_footer(cx))
+    }
+}
+
+fn knowledge_error_message(error: KnowledgeError) -> Message {
+    Message::detail(
+        "本地知识预览失败，未生成产物",
+        "Local knowledge preview failed; no artifact was generated",
+        error,
+    )
+}
+
+fn knowledge_source_kind_label(kind: KnowledgeSourceKind, cx: &App) -> &'static str {
+    match kind {
+        KnowledgeSourceKind::Session => t(cx, "终端会话", "Terminal session"),
+        KnowledgeSourceKind::Workflow => t(cx, "工作流", "Workflow"),
+        KnowledgeSourceKind::File => t(cx, "文件", "File"),
+        KnowledgeSourceKind::Monitor => t(cx, "监控观察", "Monitor observation"),
+        KnowledgeSourceKind::Manual => t(cx, "手工事实", "Manual fact"),
+    }
+}
+
+fn knowledge_exclusion_label(reason: KnowledgeExclusionReason, cx: &App) -> &'static str {
+    match reason {
+        KnowledgeExclusionReason::UnknownOutcome => {
+            t(cx, "未知结果，已排除", "Unknown outcome, excluded")
+        }
+        KnowledgeExclusionReason::NotCompleted => {
+            t(cx, "未完成结果，已排除", "Incomplete outcome, excluded")
+        }
+        KnowledgeExclusionReason::SensitiveContent => {
+            t(cx, "敏感内容，已排除", "Sensitive content, excluded")
+        }
+    }
+}
+
+fn knowledge_save_block_label(reason: KnowledgeSaveBlock, cx: &App) -> &'static str {
+    match reason {
+        KnowledgeSaveBlock::SensitiveContent => t(
+            cx,
+            "敏感内容；保存/发送已阻止",
+            "Sensitive content; save/send blocked",
+        ),
+        KnowledgeSaveBlock::UnknownOrIncompleteOutcome => t(
+            cx,
+            "未知或未完成结果；保存/发送已阻止",
+            "Unknown or incomplete outcome; save/send blocked",
+        ),
     }
 }
 

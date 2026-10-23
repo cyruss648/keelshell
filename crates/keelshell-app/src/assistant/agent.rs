@@ -1,6 +1,5 @@
 //! Explicit model requests and desktop-reviewed actions for one captured SSH target.
 use super::*;
-use gpui_kit::prelude::FluentBuilder as _;
 use keelshell_ai::{AgentAction, AgentLimits, AgentOutcome, AgentPhase, AgentRun, AgentTarget};
 
 #[derive(Default)]
