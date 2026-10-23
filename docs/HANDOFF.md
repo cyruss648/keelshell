@@ -2,11 +2,13 @@
 
 ## 当前继续开发 — 2026-10-23
 
+NET-01 已完成运行时流量统计切片：local/remote TCP 与 loopback SOCKS5 的 payload 发送／接收计数通过 session forwarding 暴露，并在 app 隧道行显示；remote forwarding 现在以远端监听侧定义发送／接收，并在停止时等待已建立 relay 完成，停止后的行保留最终快照。AI-04 已完成 `keelshell-core` 纯领域切片：用户显式选择的来源绑定事实可生成有界脱敏摘要、时间线、说明性 Markdown/runbook 和本地字符串搜索；未知／未完成结果及敏感标记只留下不可保存的安全状态。来源元数据在构造阶段直接拒绝；领域产物仅支持受控序列化预览，不提供绕过不变量的通用反序列化。两项均未接入新的持久化规则、AI UI 或真实模型发送，详细记录见[NET-01 记录](testing/records/2026-10-23-net-01-traffic-accounting.md)和[AI-04 记录](testing/records/2026-10-23-ai-04-local-knowledge-core.md)。本轮独立复核及修复记录见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
+
 主远程草稿编辑器已完成 FILE-04 第一阶段：使用 GPUI Kit `EditorState`，按远端文件名启用 Rust、Python、JSON、TOML、YAML 和 Bash 高亮，未知或不支持的名称使用纯文本。KeelShell 自有字面查找／替换仍是唯一搜索入口，内置搜索、折叠、自动闭合和智能缩进关闭；patch 与冲突合并输入保持 `TextareaState`。UTF-8、NUL、1 MiB、审核保存、同目录备份和完整读回边界未改变。SQL grammar 为控制首阶段范围暂未启用，SQL 文件回退纯文本；当前 grammar 集合已使用旧兼容的 `cc` 锁定线，扩展语言需单独评估。代码与专项验证见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。
 
 本轮 Finder 原生拖放尝试只完成隔离构建；原生 UI 工具报告 Mac 处于锁屏状态，拖放、审核、零写入取消、确认读回、截图和 AX 均为 `UNRUN`，见[原生记录](testing/records/2026-10-23-file-drop-native-macos.md)。解锁后需继续复用 `work/native-file-drop-20261023/package`，完成 FILE-02 的 Finder 验收。
 
-完整 `python3 scripts/check.py` 已在当前工作树实际退出 0，覆盖脚本、格式、严格 Clippy、全 workspace 测试、文档测试和三个本地 agent 控制场景；证据见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。独立代码／功能复核已完成，`.fish` 错误映射和应用级回归覆盖不足已修复。该门禁不关闭提交级 CI、语法颜色像素、IME、VoiceOver、最小窗口、Windows/Linux 原生桌面或发布安装边界；原生 Finder `UNRUN` 证据必须保留。
+FILE-04 前一轮的 `python3 scripts/check.py` 结果见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。本轮 NET-01／AI-04 修复后重新运行的完整门禁、专项命令和独立复核结果见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。该门禁不关闭提交级 CI、语法颜色像素、IME、VoiceOver、最小窗口、Windows/Linux 原生桌面或发布安装边界；原生 Finder `UNRUN` 证据必须保留。
 
 复核完成后将当前切片分阶段提交并核对本地提交状态；本轮按既有授权推送到 `origin/main`，不创建发行标签。解锁后继续复用 `work/native-file-drop-20261023/package` 完成 FILE-02 的 Finder 验收。
 

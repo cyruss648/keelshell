@@ -1,6 +1,6 @@
 //! Real panel handlers with an isolated SSH server and SOCKS TCP byte exchange.
 
-use super::{Direction, TunnelsPanel, dynamic_bind};
+use super::{Direction, TunnelsPanel, dynamic_bind, traffic_message};
 use gpui_kit::{
     AppContext, Bounds, Focusable, TestAppContext, WindowBounds, WindowOptions, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
@@ -268,6 +268,30 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
         .checked("SOCKS UI byte deadline")
         .checked("real SOCKS exchange")
     });
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).rows[0].last_traffic
+            == keelshell_session::forwarding::TrafficSnapshot {
+                sent: 8,
+                received: 8,
+            }
+    })
+    .await;
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        assert_eq!(
+            panel.read(cx).rows[0].last_traffic,
+            keelshell_session::forwarding::TrafficSnapshot {
+                sent: 8,
+                received: 8,
+            }
+        );
+        assert!(
+            traffic_message(panel.read(cx).rows[0].last_traffic)
+                .render(cx)
+                .contains("Sent 8 B")
+        );
+    })
+    .checked("render traffic row");
     cx.update_window(window, |_, window, cx| {
         window.render_frame(cx);
         window.click("start-tunnel", cx);
@@ -306,6 +330,13 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
     .await;
     cx.update(|cx| {
         assert!(!panel.read(cx).rows[0].failed);
+        assert_eq!(
+            panel.read(cx).rows[0].last_traffic,
+            keelshell_session::forwarding::TrafficSnapshot {
+                sent: 8,
+                received: 8,
+            }
+        );
         assert_eq!(
             panel.read(cx).status.render(cx).as_str(),
             "Active listeners: 1"

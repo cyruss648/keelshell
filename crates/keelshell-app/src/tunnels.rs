@@ -13,7 +13,9 @@ use gpui_kit::component::{Disableable, Selectable, Sizable};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use keelshell_session::SshSession;
-use keelshell_session::forwarding::{DynamicForward, LocalForward, RemoteForward};
+use keelshell_session::forwarding::{
+    DynamicForward, LocalForward, RemoteForward, TrafficSnapshot, TrafficStats,
+};
 use tokio::runtime::Runtime;
 
 use crate::i18n::{LocalizedTooltipExt, Message, t};
@@ -46,6 +48,14 @@ impl Forward {
         matches!(self, Self::Dynamic(owner) if owner.is_closed())
     }
 
+    fn traffic(&self) -> TrafficStats {
+        match self {
+            Self::Local(owner) => owner.traffic(),
+            Self::Remote(owner) => owner.traffic(),
+            Self::Dynamic(owner) => owner.traffic(),
+        }
+    }
+
     async fn close(self) -> Result<(), String> {
         match self {
             Self::Local(owner) => {
@@ -59,7 +69,10 @@ impl Forward {
 }
 
 enum TunnelEvent {
-    Listening(String),
+    Listening {
+        address: String,
+        traffic: TrafficStats,
+    },
     Finished(Result<(), String>),
 }
 
@@ -73,6 +86,8 @@ struct TunnelRow {
     listening: bool,
     failed: bool,
     proxy_address: Option<String>,
+    traffic: TrafficStats,
+    last_traffic: TrafficSnapshot,
 }
 
 impl Drop for TunnelRow {
@@ -280,7 +295,14 @@ impl TunnelsPanel {
                         return Err(error);
                     },
                 };
-                let disconnected = if events.try_send(TunnelEvent::Listening(bound)).is_ok() {
+                let traffic = owner.traffic();
+                let disconnected = if events
+                    .try_send(TunnelEvent::Listening {
+                        address: bound,
+                        traffic: traffic.clone(),
+                    })
+                    .is_ok()
+                {
                     tokio::select! {
                         _ = cancellation(&worker_cancel) => false,
                         disconnected = connection_closed(&session, &owner) => disconnected,
@@ -307,6 +329,8 @@ impl TunnelsPanel {
                     listening: false,
                     failed: false,
                     proxy_address: None,
+                    traffic: TrafficStats::default(),
+                    last_traffic: TrafficSnapshot::default(),
                 });
                 self.next_id += 1;
                 self.status = tunnel_summary(&self.rows);
@@ -328,8 +352,9 @@ impl TunnelsPanel {
             while let Ok(event) = row.incoming.try_recv() {
                 changed = true;
                 match event {
-                    TunnelEvent::Listening(address) => {
+                    TunnelEvent::Listening { address, traffic } => {
                         row.listening = true;
+                        row.traffic = traffic;
                         if address.starts_with("socks5h://") {
                             row.proxy_address = Some(address.clone());
                         }
@@ -357,6 +382,11 @@ impl TunnelsPanel {
                         };
                     }
                 }
+            }
+            let snapshot = row.traffic.snapshot();
+            if snapshot != row.last_traffic {
+                row.last_traffic = snapshot;
+                changed = true;
             }
         }
         if changed {
@@ -446,6 +476,36 @@ fn tunnel_error(error: &str) -> Message {
     }
 }
 
+fn traffic_message(snapshot: TrafficSnapshot) -> Message {
+    Message::new(
+        format!(
+            "↑ 发送 {} · ↓ 接收 {}",
+            byte_size(snapshot.sent),
+            byte_size(snapshot.received)
+        ),
+        format!(
+            "↑ Sent {} · ↓ Received {}",
+            byte_size(snapshot.sent),
+            byte_size(snapshot.received)
+        ),
+    )
+}
+
+fn byte_size(bytes: u64) -> String {
+    const UNITS: [&str; 5] = ["B", "KiB", "MiB", "GiB", "TiB"];
+    let mut value = bytes as f64;
+    let mut unit = 0;
+    while value >= 1024.0 && unit + 1 < UNITS.len() {
+        value /= 1024.0;
+        unit += 1;
+    }
+    if unit == 0 {
+        format!("{bytes} B")
+    } else {
+        format!("{value:.1} {}", UNITS[unit])
+    }
+}
+
 impl Render for TunnelsPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
@@ -480,7 +540,7 @@ impl Render for TunnelsPanel {
                 .child(div().flex_1().min_w_0().child(row.description.render(cx)))
                 .child(
                     div()
-                        .w(px(280.))
+                        .w(px(250.))
                         .flex_shrink_0()
                         .text_color(rgb(if row.failed {
                             visual.danger
@@ -488,6 +548,13 @@ impl Render for TunnelsPanel {
                             visual.muted
                         }))
                         .child(row.status.render(cx)),
+                )
+                .child(
+                    div()
+                        .w(px(170.))
+                        .flex_shrink_0()
+                        .text_color(rgb(visual.muted))
+                        .child(traffic_message(row.last_traffic).render(cx)),
                 );
             if !row.finished {
                 if let Some(address) = row.proxy_address.clone() {
@@ -597,7 +664,8 @@ impl Render for TunnelsPanel {
             .child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(if self.direction == Direction::Dynamic { t(cx,"仅本机回环，无代理认证；支持 TCP CONNECT，不支持 UDP/BIND。", "Loopback only, no proxy authentication; TCP CONNECT supported, UDP/BIND unsupported.") } else { t(cx,"默认仅监听回环地址；非回环地址可能允许其他设备访问。", "Loopback is the default. A non-loopback address may allow access from other devices.") }))
             .child(div().h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(visual.canvas)).border_y_1().border_color(rgb(visual.border))
                 .child(div().flex_1().child(t(cx,"转发方向 / 端点","Direction / endpoints")))
-                .child(div().w(px(280.)).child(t(cx,"状态","Status")))
+                .child(div().w(px(250.)).child(t(cx,"状态","Status")))
+                .child(div().w(px(170.)).child(t(cx,"流量","Traffic")))
                 .child(div().w(px(45.)).child(t(cx,"操作","Action"))))
             .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(t(cx, "上一会话隧道记录 · 不会自动重建", "Previous session tunnels · Never restarted automatically"))))
             .child(rows)

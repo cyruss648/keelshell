@@ -123,6 +123,14 @@ async fn roundtrip(target: &str, ipv6: bool) -> Result<(), Box<dyn Error>> {
         *server.direct_requests.lock().map_err(|_| "request lock")?,
         vec![(target.to_owned(), u32::from(port))]
     );
+    let traffic = forward.traffic();
+    assert_eq!(
+        traffic.snapshot(),
+        keelshell_session::forwarding::TrafficSnapshot {
+            sent: payload.len() as u64,
+            received: (payload.len() + b"server-first".len()) as u64,
+        }
+    );
     forward.close().await?;
     released(address).await?;
     assert!(!session.is_closed());

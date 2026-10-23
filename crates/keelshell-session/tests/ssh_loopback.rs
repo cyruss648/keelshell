@@ -528,10 +528,18 @@ async fn local_forward_transports_bytes_and_closes_listener() -> Result<(), Box<
     let mut bytes = [0; 4];
     tokio::time::timeout(Duration::from_secs(3), stream.read_exact(&mut bytes)).await??;
     assert_eq!(&bytes, b"PING");
+    let traffic = forward.traffic();
     forward.close().await;
     tokio::task::yield_now().await;
     assert!(TcpStream::connect(address).await.is_err());
     tokio::time::timeout(Duration::from_secs(3), echo_task).await???;
+    assert_eq!(
+        traffic.snapshot(),
+        keelshell_session::forwarding::TrafficSnapshot {
+            sent: 4,
+            received: 4,
+        }
+    );
     session.close().await?;
     Ok(())
 }
@@ -888,9 +896,9 @@ async fn remote_forward_transports_bytes_and_is_cancelled() -> Result<(), Box<dy
     let echo_address = echo.local_addr()?;
     let echo_task = tokio::spawn(async move {
         let (mut stream, _) = echo.accept().await?;
-        let mut bytes = [0; 4];
+        let mut bytes = [0; 3];
         stream.read_exact(&mut bytes).await?;
-        stream.write_all(&bytes).await?;
+        stream.write_all(b"REMOTE-RESP").await?;
         Ok::<_, std::io::Error>(())
     });
     let forward = session
@@ -898,13 +906,29 @@ async fn remote_forward_transports_bytes_and_is_cancelled() -> Result<(), Box<dy
         .await?;
     let address = format!("127.0.0.1:{}", forward.remote_port());
     let mut stream = TcpStream::connect(&address).await?;
-    stream.write_all(b"PONG").await?;
-    let mut bytes = [0; 4];
+    stream.write_all(b"REQ").await?;
+    let mut bytes = [0; 11];
     tokio::time::timeout(Duration::from_secs(3), stream.read_exact(&mut bytes)).await??;
-    assert_eq!(&bytes, b"PONG");
+    assert_eq!(&bytes, b"REMOTE-RESP");
+    let traffic = forward.traffic();
     forward.close().await?;
     assert!(TcpStream::connect(&address).await.is_err());
     tokio::time::timeout(Duration::from_secs(3), echo_task).await???;
+    assert_eq!(
+        traffic.snapshot(),
+        keelshell_session::forwarding::TrafficSnapshot {
+            sent: 3,
+            received: 11,
+        }
+    );
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    assert_eq!(
+        traffic.snapshot(),
+        keelshell_session::forwarding::TrafficSnapshot {
+            sent: 3,
+            received: 11,
+        }
+    );
     session.close().await?;
     Ok(())
 }

@@ -15,6 +15,7 @@ use tokio::sync::watch;
 use tokio::task::{JoinHandle, JoinSet};
 use tokio::time::{Instant, timeout_at};
 
+use super::{TrafficStats, copy_counted};
 use crate::{Result, SessionError, SshSession};
 
 /// Resource limits for a local SOCKS5 proxy. These bounds apply independently
@@ -50,6 +51,7 @@ impl Default for DynamicForwardOptions {
 /// returned explicitly; remote cleanup is never assumed.
 pub struct DynamicForward {
     address: SocketAddr,
+    traffic: TrafficStats,
     cancel: watch::Sender<bool>,
     task: JoinHandle<Result<()>>,
 }
@@ -58,6 +60,11 @@ impl DynamicForward {
     /// Actual loopback address, including an allocated port for a port-0 bind.
     pub fn local_addr(&self) -> SocketAddr {
         self.address
+    }
+
+    /// Cumulative payload traffic observed by this listener.
+    pub fn traffic(&self) -> TrafficStats {
+        self.traffic.clone()
     }
 
     /// Whether the listener owner has completed cleanup. Use [`Self::close`]
@@ -108,6 +115,8 @@ impl SshSession {
         }
         let listener = TcpListener::bind(bind).await?;
         let address = listener.local_addr()?;
+        let traffic = TrafficStats::default();
+        let worker_traffic = traffic.clone();
         let (cancel, mut cancelled) = watch::channel(false);
         let worker_cancel = cancel.clone();
         let session = self.clone();
@@ -124,7 +133,7 @@ impl SshSession {
                     accepted = listener.accept() => {
                         let (socket, peer) = match accepted { Ok(accepted) => accepted, Err(error) => break Some(error) };
                         if streams.len() >= options.max_connections { continue; }
-                        streams.spawn(serve_client(socket, peer, session.clone(), cancelled.clone(), options, unconfirmed.clone()));
+                        streams.spawn(serve_client(socket, peer, session.clone(), cancelled.clone(), options, unconfirmed.clone(), worker_traffic.clone()));
                     },
                 }
             };
@@ -147,6 +156,7 @@ impl SshSession {
         });
         Ok(DynamicForward {
             address,
+            traffic,
             cancel,
             task,
         })
@@ -168,6 +178,7 @@ async fn serve_client(
     mut cancelled: watch::Receiver<bool>,
     options: DynamicForwardOptions,
     unconfirmed: Arc<AtomicBool>,
+    traffic: TrafficStats,
 ) {
     let until = Instant::now() + options.handshake_timeout.min(session.timeout);
     let target = tokio::select! {
@@ -230,6 +241,7 @@ async fn serve_client(
         &mut cancelled,
         &session,
         &unconfirmed,
+        traffic,
     )
     .await;
 }
@@ -262,23 +274,24 @@ async fn relay(
     cancelled: &mut watch::Receiver<bool>,
     session: &SshSession,
     unconfirmed: &AtomicBool,
+    traffic: TrafficStats,
 ) {
     tokio::select! {
         biased;
         _ = cancellation(cancelled) => {},
         _ = async {
             if matches!(timeout_at(until, reply(&mut socket, 0)).await, Ok(Ok(()))) {
-                let (mut local_read, mut local_write) = socket.split();
-                let mut remote_write = channel.make_writer();
-                let mut remote_read = channel.make_reader();
+                let (local_read, local_write) = socket.split();
+                let remote_write = channel.make_writer();
+                let remote_read = channel.make_reader();
                 let _ = tokio::try_join!(
                     async {
-                        tokio::io::copy(&mut local_read, &mut remote_write).await?;
-                        remote_write.shutdown().await
+                        copy_counted(local_read, remote_write, traffic.clone(), true).await?;
+                        Ok::<_, io::Error>(())
                     },
                     async {
-                        tokio::io::copy(&mut remote_read, &mut local_write).await?;
-                        local_write.shutdown().await
+                        copy_counted(remote_read, local_write, traffic.clone(), false).await?;
+                        Ok::<_, io::Error>(())
                     }
                 );
             }

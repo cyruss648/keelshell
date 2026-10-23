@@ -2,6 +2,8 @@
 
 ## 当前继续开发 — 2026-10-23
 
+NET-01 运行时流量统计已完成并在本轮复核后修正：local/remote TCP 与 loopback SOCKS5 的 payload 计数接入 session forwarding；remote forwarding 以远端监听侧定义发送／接收，关闭时等待已建立 relay 完成，app 行显示活动和停止后的快照。AI-04 纯领域切片已完成并在本轮复核后收紧：未知／未开始／取消不保留标题或正文，Unicode 搜索保持原文列号，敏感标记覆盖带空格的 API key，领域产物只支持受控序列化预览。两项仍未接入持久化规则、UI 审核、StateStore 或模型发送；本轮复核和修复证据见[NET/AI 独立复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
+
 远程草稿编辑器已完成 FILE-04 的第一阶段：主草稿输入使用 GPUI Kit `EditorState`，按远程文件名选择 Rust、Python、JSON、TOML、YAML 或 Bash 语法高亮；未知或不支持的名称回退为纯文本。项目保留自有字面查找／替换控件，并关闭编辑器内置搜索、折叠、自动闭合和智能缩进，避免改变审核式编辑的输入语义。补丁输入和冲突合并手工输入仍使用普通多行文本框。
 
 该阶段保留 UTF-8、NUL、1 MiB、审核保存、同目录备份和字节读回边界。SQL 暂不启用 Tree-sitter grammar，以控制首阶段解析器范围；当前启用的 grammar 集合已经把 `cc` 解析到旧兼容锁定线，后续需单独评估扩展语言和原生构建影响。SQL 文件因此继续按纯文本编辑。语言识别单元测试、应用编译和完整 `python3 scripts/check.py` 已通过；提交级 CI、编辑器原生像素／IME／VoiceOver 以及其它平台桌面仍待验收。
@@ -102,9 +104,9 @@ Unix v9原完整检查实际失败于长TMP夹具组观察EPERM，原626和后�
 | 5 / P1 | 用户显式选择 CLI 自身登录身份及版本兼容（AI-LOCAL） | 现有 API 身份调用本地 Codex/Claude Code 已实现，默认继续 API；订阅/登录复用尚未实现。先证明请求前可禁用 hooks、MCP、skills、plugins 和工具，并处理组织策略强制启用；不能只凭 help/标志或事后事件拒绝。供应商 CLI 自己处理认证，KeelShell 不读/复制 token、不自动登录，未知版本拒绝。若当前版本无法证明准入边界则保持 OPEN，不提供占位开关；真实账号/模型和原生验收独立记录。 |
 | 6 / P2 | 配置备份轮转、损坏恢复与升级回退（CON-04/SYNC-01） | 隔离候选已编写八槽单调metadata历史、显式预览／确认恢复、完整原件不自动删除、revision与资料字节绑定和失败回滚；独立vault／OS凭据不复制，既有schema缺省迁移保持，未来schema不推断。v1静态P2已修正为deferred-close失败后保留owner和typed原因；冻结v8实际通过23项core集成／3项失败控制／6项Workspace GPUI／2项typed UI控制、依赖策略／最终格式／全workspace all-targets严格Clippy，新非作者已复核同一输入和原始结果；主树及数量修正已整合；最终824输入1,812普通Rust／10doc／6Python严格门禁、新标准macOS包／57打包和17+4修后原生／完整字节核对通过，两个新owner实际wait0；新非作者最终组合复核无P1/P2、数量归属P2已关闭，提交CI待验证，最小OS几何、辅助技术、其它平台与断电耐久性开放；见[指南](product/CONFIGURATION_RECOVERY.md)与[候选记录](testing/records/2026-10-08-configuration-recovery.md)。现有加密跨设备同步不能代替本机恢复。 |
 | 7 / P2 | 远端能力识别、资源趋势与网络诊断（MON/NET-02） | 已有 Linux 监控及 DNS/TLS/HTTP HEAD/TCP 诊断保留；补能力识别、短期趋势、ping/丢包/traceroute 的明确降级，再设计远端 macOS/Windows 适配。缺少命令/权限时展示不可用，不能用桌面平台兼容性声称远端 OS 支持。以自有远端固定有界命令与实际样本验收。 |
-| 8 / P2 | 持久化隧道规则与真实流量统计（NET-01） | 已有 local/remote TCP 与 SOCKS5 转发保留；补命名规则、审核后启停和真实字节计数。保存规则不保存密码，不在重启时自动监听；重连使旧运行绑定失效。验证端口占用、半关闭、显式停止、断线释放与实际流量往返。 |
+| 8 / P2 | 持久化隧道规则与真实流量统计（NET-01） | NET-01 运行时切片已完成：local/remote TCP 与 loopback SOCKS5 的每条活动/已停止隧道累计发送/接收 payload 计数接入 session，并在 app 行级展示；remote forwarding 的方向以远端监听侧为准，关闭时等待已建立 relay 完成；真实 local、remote、SOCKS5 回环和 GPUI SOCKS 流量通过。保存规则、命名规则、审核后启停、重启不自动监听和重连绑定失效仍待设计与实现；当前统计只存在于进程内，跨平台原生桌面视觉与完整发布验收仍开放。 |
 | 9 / P3 | 高级传输和用户中继（FILE-05/NET-03） | 保留归档批量传输、PTY Zmodem 和用户管理中继/测速目标。先做审核式归档与路径穿越拒绝，再单独完成 rz/sz 实机协议；中继必须有可重复的延迟/丢包 A/B 数据，无收益不称加速，跳板功能不能代替此项。 |
-| 10 / P3 | AI 知识与复用（AI-04） | 基于用户选择的已完成事实，提供来源绑定的脱敏摘要、时间线、Markdown/runbook 保存与本地搜索。先预览再明确保存/发送，不上传真实日志或把任务结果审计当知识库；未知结果和秘密排除分别有验证。 |
+| 10 / P3 | AI 知识与复用（AI-04） | `keelshell-core` 纯领域切片已完成：基于用户显式选择的已知完成/失败事实，提供来源绑定的脱敏摘要、时间线、说明性 Markdown/runbook 和有界本地搜索；未知结果、未完成结果和敏感内容只生成不可保存标记，领域产物只支持受控序列化预览。UI 选择／预览／明确保存或发送、StateStore 接入及模型发送仍待实现，不能把任务审计自动当知识库。 |
 
 上述开发与已有实现的验收并行推进：完整外部 Codex MCP 批准/拒绝/撤权、新 Agent 原生回合、语言/主题/最小窗口/两轴滚动/键盘与辅助技术、Windows/Linux 桌面、六目标发布安装更新都保持各自未完成边界。MCP 始终由 KeelShell 提供给外部智能体，应用内 API/CLI 推理是另一入口；不新增通用第三方 MCP 客户端。双语 README 的现有能力表述继续保留。
 
