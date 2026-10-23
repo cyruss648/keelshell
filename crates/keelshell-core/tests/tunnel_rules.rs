@@ -3,8 +3,8 @@
 use std::fs;
 
 use keelshell_core::{
-    AppState, Connection, Error, StateStore, TunnelRule, TunnelRuleAction, TunnelRuleKind,
-    TunnelRuleReviewError,
+    AppState, Connection, ConnectionLibraryAction, ConnectionLibraryBatchError, Error, StateStore,
+    TunnelRule, TunnelRuleAction, TunnelRuleKind, TunnelRuleReviewError,
 };
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
@@ -151,6 +151,85 @@ fn stale_review_plan_is_rejected_after_connection_update() -> TestResult {
     let mut changed = connection;
     changed.host = "changed.test".into();
     state.update_connection(changed)?;
+
+    assert_eq!(
+        plan.confirm(&state, token),
+        Err(TunnelRuleReviewError::StateChanged)
+    );
+    Ok(())
+}
+
+#[test]
+fn batch_trash_rejects_any_referenced_connection_without_partial_deletion() -> TestResult {
+    let referenced = Connection::new("Referenced", "referenced.test", "operator");
+    let unrelated = Connection::new("Unrelated", "unrelated.test", "operator");
+    let referenced_id = referenced.id;
+    let unrelated_id = unrelated.id;
+    let mut state = AppState::default();
+    state.connections.extend([referenced, unrelated]);
+    state.add_tunnel_rule(enabled_rule(referenced_id)?)?;
+    let before = state.clone();
+
+    let error = state
+        .apply_connection_library_batch(
+            &[referenced_id, unrelated_id],
+            &ConnectionLibraryAction::Trash(1),
+        )
+        .expect_err("a referenced profile must block the complete batch");
+    assert!(matches!(
+        error,
+        ConnectionLibraryBatchError::InvalidState(Error::ConnectionReferencedByTunnelRule)
+    ));
+    assert_eq!(state, before);
+    assert!(state.validate().is_ok());
+    Ok(())
+}
+
+#[test]
+fn changing_or_removing_a_rule_invalidates_its_old_review_plan() -> TestResult {
+    let connection = Connection::new("Host", "host.test", "operator");
+    let connection_id = connection.id;
+    let mut state = AppState::default();
+    state.connections.push(connection);
+    let rule = enabled_rule(connection_id)?;
+    let rule_id = state.add_tunnel_rule(rule.clone())?;
+
+    let changed_plan = state.plan_tunnel_rule_action(rule_id, TunnelRuleAction::Start)?;
+    let changed_token = changed_plan.review_token();
+    let mut changed_rule = rule;
+    changed_rule.target_host = Some("other.test".into());
+    state.update_tunnel_rule(changed_rule)?;
+    assert_eq!(
+        changed_plan.confirm(&state, changed_token),
+        Err(TunnelRuleReviewError::StateChanged)
+    );
+
+    let removed_plan = state.plan_tunnel_rule_action(rule_id, TunnelRuleAction::Start)?;
+    let removed_token = removed_plan.review_token();
+    state.remove_tunnel_rule(rule_id)?;
+    assert_eq!(
+        removed_plan.confirm(&state, removed_token),
+        Err(TunnelRuleReviewError::StateChanged)
+    );
+    Ok(())
+}
+
+#[test]
+fn saving_again_rotates_state_revision_and_invalidates_old_review_plan() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let store = StateStore::new(directory.path().join("state.json"));
+    let mut state = store.load()?;
+    let connection = Connection::new("Host", "host.test", "operator");
+    let connection_id = connection.id;
+    state.connections.push(connection);
+    let mut rule = enabled_rule(connection_id)?;
+    rule.enabled = true;
+    state.add_tunnel_rule(rule.clone())?;
+    state = store.save(&state)?;
+
+    let plan = state.plan_tunnel_rule_action(rule.id, TunnelRuleAction::Start)?;
+    let token = plan.review_token();
+    state = store.save(&state)?;
 
     assert_eq!(
         plan.confirm(&state, token),
