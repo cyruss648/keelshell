@@ -500,6 +500,9 @@ pub struct AppState {
     /// Read-only completed task results without commands, parameters or recovery authority.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub workflow_audits: Vec<crate::WorkflowAuditRecord>,
+    /// Named, non-secret forwarding intents. Loading these rules never starts a listener.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tunnel_rules: Vec<crate::TunnelRule>,
     /// Non-secret preferences.
     pub settings: Settings,
     /// Explicitly trusted host identities, keyed by normalized `[host]:port`.
@@ -528,6 +531,7 @@ impl PartialEq for AppState {
             && self.batch_audits == other.batch_audits
             && self.profile_sync == other.profile_sync
             && self.workflow_audits == other.workflow_audits
+            && self.tunnel_rules == other.tunnel_rules
             && self.settings == other.settings
             && self.known_hosts == other.known_hosts
             && self.route_known_hosts == other.route_known_hosts
@@ -568,6 +572,7 @@ impl Default for AppState {
             batch_audits: Vec::new(),
             profile_sync: None,
             workflow_audits: Vec::new(),
+            tunnel_rules: Vec::new(),
             settings: Settings::default(),
             known_hosts: BTreeMap::new(),
             route_known_hosts: BTreeMap::new(),
@@ -607,6 +612,7 @@ impl AppState {
             sync.validate()?;
         }
         crate::workflow_audit::validate_workflow_audits(&self.workflow_audits)?;
+        self.validate_tunnel_rules()?;
         self.settings.validate()?;
         Ok(())
     }

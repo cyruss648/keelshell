@@ -36,6 +36,7 @@ mod snippets;
 mod store;
 mod text_merge;
 mod text_patch;
+mod tunnel_rules;
 mod updates;
 mod vault;
 mod workflow_audit;
@@ -130,6 +131,11 @@ pub use snippet_template::{
 pub use store::{
     ConfigBackup, ConfigBackupId, ConfigBackupStatus, ConfigRecoveryPreview, ConfigRecoverySummary,
     ConfigSourceStatus, MAX_CONFIG_BACKUPS, MAX_CONFIG_ORIGINALS, StateStore,
+};
+pub use tunnel_rules::{
+    ConfirmedTunnelRuleAction, MAX_TUNNEL_RULES, TUNNEL_RULE_VERSION, TunnelRule, TunnelRuleAction,
+    TunnelRuleKind, TunnelRuleReviewError, TunnelRuleReviewToken, TunnelRuleType,
+    ValidatedTunnelRulePlan,
 };
 pub use updates::{UpdateCheckFrequency, UpdatePreferences};
 pub use vault::{CredentialKind, CredentialMetadata, CredentialVault, VaultStore};

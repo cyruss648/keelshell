@@ -63,6 +63,9 @@ pub enum Error {
     /// The requested identifier does not exist.
     #[error("connection was not found")]
     ConnectionNotFound,
+    /// The requested named tunnel rule does not exist.
+    #[error("tunnel rule was not found")]
+    TunnelRuleNotFound,
     /// Atomic replacement succeeded but syncing its directory failed.
     #[error("state was replaced, but directory durability could not be confirmed: {0}")]
     Durability(std::io::Error),
