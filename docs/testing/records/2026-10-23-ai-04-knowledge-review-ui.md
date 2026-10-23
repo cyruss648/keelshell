@@ -11,7 +11,7 @@
 - 预览显示来源标签、捕获类型、session identity、来源 revision、捕获时间、条目和排除项。
 - 未确认的未知结果显示 `DoNotPersist`；只有用户明确确认完成或失败且通过敏感内容闸门后才显示 `Persistable`。保存按钮仍为禁用，因为 StateStore 接入尚未实现。
 - 敏感内容通过领域层变成 `DoNotPersist`，Markdown 不包含敏感正文，保存按钮保持禁用。
-- 同一个 session 的重复选择保持 source identity，且 source revision 随捕获递增；切换 session 时由 workspace 绑定新的 source identity。
+- 生产代码路径会为同一个 session 的重复捕获保持 source identity，并让 source revision 随捕获递增；切换 session 时由 workspace 绑定新的 source identity。当前专项 GPUI 测试直接驱动 `AssistantPanel::set_context`，没有真实点击 `context-selection` 或 `context-screen`，也没有覆盖完整的 workspace capture event 订阅路径。
 - 真实 `knowledge-confirm-completed` 按钮交互会把未知预览转换为可审核的完成事实；敏感内容仍由领域层阻止，Markdown 不包含敏感正文。
 - 预览不会自动发送到模型，也不会执行任何 action。
 
@@ -22,10 +22,11 @@ cargo fmt --all -- --check
 cargo check -p keelshell-app --locked --offline
 cargo clippy -p keelshell-app --all-targets --all-features --locked --offline -- -D warnings
 cargo test -p keelshell-app --locked --offline explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_source_binding -- --nocapture
+cargo test -p keelshell-ai --locked --offline spaced_api_key_marker_is_redacted -- --nocapture
 ```
 
-结果：格式检查通过；应用编译通过；严格 Clippy 退出 0；新增 GPUI 测试 1 项通过。编译输出保留已有传递依赖 `block 0.1.6` 的 future-incompatibility 提示。
+结果：格式检查通过；应用编译通过；严格 Clippy 退出 0；新增 GPUI 测试 1 项通过；普通 AI Redactor 的带空格 `api key` 回归测试 1 项通过。编译输出保留已有传递依赖 `block 0.1.6` 的 future-incompatibility 提示。
 
 ## 未完成边界
 
-本记录不证明知识持久化、条目编辑/删除、模型发送、真实供应商、跨平台原生窗口、IME、VoiceOver 或 Finder 拖放验收。AI-04 后续必须继续保留“预览 → 明确保存/发送”的人工审核边界，并在 StateStore 接入时绑定 snapshot/revision 和未知写入结果。
+本记录不证明完整 workspace capture 集成测试、知识持久化、条目编辑/删除、模型发送、真实供应商、跨平台原生窗口、IME、VoiceOver 或 Finder 拖放验收。普通 AI Redactor 与知识预览共用带空格 `api key` 的敏感标记回归，但本记录仍不宣称覆盖所有秘密格式。AI-04 后续必须继续保留“预览 → 明确保存/发送”的人工审核边界，并在 StateStore 接入时绑定 snapshot/revision 和未知写入结果。

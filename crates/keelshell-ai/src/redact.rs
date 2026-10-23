@@ -152,6 +152,7 @@ fn credential_line(line: &str) -> bool {
         "token",
         "api_key",
         "api-key",
+        "api key",
         "apikey",
         "secret",
         "access_key",
@@ -237,6 +238,14 @@ mod tests {
             Redactor::new(&[]).redact("client --password 'two words'").0,
             MASK
         );
+    }
+
+    #[test]
+    fn spaced_api_key_marker_is_redacted() {
+        let (output, report) = Redactor::new(&[]).redact("api key=fixture-secret\nkeep this");
+
+        assert_eq!(output, "[REDACTED]\nkeep this");
+        assert_eq!(report.credential_lines, 1);
     }
 
     #[test]
