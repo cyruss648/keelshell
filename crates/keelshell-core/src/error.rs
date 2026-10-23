@@ -63,6 +63,9 @@ pub enum Error {
     /// The requested identifier does not exist.
     #[error("connection was not found")]
     ConnectionNotFound,
+    /// A saved tunnel rule still references this connection.
+    #[error("connection is referenced by a named tunnel rule")]
+    ConnectionReferencedByTunnelRule,
     /// The requested named tunnel rule does not exist.
     #[error("tunnel rule was not found")]
     TunnelRuleNotFound,

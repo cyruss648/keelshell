@@ -699,6 +699,7 @@ impl AppState {
     pub fn remove_connection(&mut self, id: Uuid) -> Result<Connection, Error> {
         self.validate_connection_library()?;
         self.ensure_no_jump_dependents(id, true)?;
+        self.ensure_no_tunnel_rule_dependents(id)?;
         let index = self
             .connections
             .iter()

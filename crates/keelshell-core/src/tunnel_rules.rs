@@ -9,7 +9,7 @@ use std::net::IpAddr;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{AppState, Error, ValidationError, model::text};
+use crate::{AppState, Connection, Error, SnapshotRevision, ValidationError, model::text};
 
 /// The current version of the persisted rule shape.
 pub const TUNNEL_RULE_VERSION: u32 = 1;
@@ -210,6 +210,8 @@ pub struct ValidatedTunnelRulePlan {
     rule: TunnelRule,
     action: TunnelRuleAction,
     review_token: TunnelRuleReviewToken,
+    state_revision: SnapshotRevision,
+    connection_snapshot: Connection,
 }
 
 impl ValidatedTunnelRulePlan {
@@ -235,10 +237,26 @@ impl ValidatedTunnelRulePlan {
     /// revalidate it, and report the observed start/stop result.
     pub fn confirm(
         self,
+        state: &AppState,
         token: TunnelRuleReviewToken,
     ) -> Result<ConfirmedTunnelRuleAction, TunnelRuleReviewError> {
         if token != self.review_token {
             return Err(TunnelRuleReviewError::TokenMismatch);
+        }
+        let current_connection = state
+            .connections
+            .iter()
+            .find(|connection| connection.id == self.rule.connection_id);
+        let current_rule = state
+            .tunnel_rules
+            .iter()
+            .find(|rule| rule.id == self.rule.id);
+        if state.snapshot != self.state_revision
+            || state.validate().is_err()
+            || current_connection != Some(&self.connection_snapshot)
+            || current_rule != Some(&self.rule)
+        {
+            return Err(TunnelRuleReviewError::StateChanged);
         }
         Ok(ConfirmedTunnelRuleAction { plan: self })
     }
@@ -279,6 +297,9 @@ pub enum TunnelRuleReviewError {
     /// The supplied token was not produced for this exact plan.
     #[error("tunnel rule review token does not match the plan")]
     TokenMismatch,
+    /// The reviewed state, connection route or rule changed before confirmation.
+    #[error("tunnel rule review is stale because its state changed")]
+    StateChanged,
 }
 
 impl AppState {
@@ -346,11 +367,30 @@ impl AppState {
             )
             .into());
         }
+        let connection_snapshot = self
+            .connections
+            .iter()
+            .find(|connection| connection.id == rule.connection_id)
+            .cloned()
+            .ok_or(Error::ConnectionNotFound)?;
         Ok(ValidatedTunnelRulePlan {
             rule,
             action,
             review_token: TunnelRuleReviewToken(Uuid::new_v4()),
+            state_revision: self.snapshot,
+            connection_snapshot,
         })
+    }
+
+    pub(crate) fn ensure_no_tunnel_rule_dependents(&self, id: Uuid) -> Result<(), Error> {
+        if self
+            .tunnel_rules
+            .iter()
+            .any(|rule| rule.connection_id == id)
+        {
+            return Err(Error::ConnectionReferencedByTunnelRule);
+        }
+        Ok(())
     }
 
     pub(crate) fn validate_tunnel_rules(&self) -> Result<(), ValidationError> {
@@ -443,12 +483,38 @@ mod tests {
             .plan_tunnel_rule_action(rule.id, TunnelRuleAction::Start)
             .expect("start plan");
         let token = plan.review_token();
-        assert!(plan.clone().confirm(token).is_ok());
+        assert!(plan.clone().confirm(&state, token).is_ok());
         assert_eq!(
-            plan.clone().confirm(TunnelRuleReviewToken(Uuid::new_v4())),
+            plan.clone()
+                .confirm(&state, TunnelRuleReviewToken(Uuid::new_v4())),
             Err(TunnelRuleReviewError::TokenMismatch)
         );
         assert_eq!(state.tunnel_rules.len(), 1);
+    }
+
+    #[test]
+    fn changing_the_bound_connection_invalidates_an_old_review_plan() {
+        let connection = Connection::new("host", "host.test", "user");
+        let mut state = AppState::default();
+        state.connections.push(connection.clone());
+        let mut rule = local_rule(connection.id);
+        rule.enabled = true;
+        state.add_tunnel_rule(rule.clone()).expect("rule added");
+        let plan = state
+            .plan_tunnel_rule_action(rule.id, TunnelRuleAction::Start)
+            .expect("start plan");
+        let token = plan.review_token();
+
+        let mut changed = connection;
+        changed.host = "other.test".into();
+        state
+            .update_connection(changed)
+            .expect("connection route remains valid");
+
+        assert_eq!(
+            plan.confirm(&state, token),
+            Err(TunnelRuleReviewError::StateChanged)
+        );
     }
 
     #[test]

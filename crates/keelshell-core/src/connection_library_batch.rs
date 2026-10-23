@@ -108,6 +108,10 @@ impl AppState {
             action,
             ConnectionLibraryAction::Trash(_) | ConnectionLibraryAction::Purge
         ) {
+            for id in ids {
+                self.ensure_no_tunnel_rule_dependents(*id)
+                    .map_err(ConnectionLibraryBatchError::InvalidState)?;
+            }
             for profile in self.connections.iter().chain(
                 self.deleted_connections
                     .iter()

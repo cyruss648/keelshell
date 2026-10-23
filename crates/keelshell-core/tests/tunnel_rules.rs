@@ -76,14 +76,85 @@ fn rule_binding_and_review_are_explicit_and_do_not_start_a_listener() -> TestRes
 
     let plan = state.plan_tunnel_rule_action(id, TunnelRuleAction::Start)?;
     let token = plan.review_token();
-    assert_eq!(plan.clone().confirm(token)?.plan().rule().id, id);
+    assert_eq!(plan.clone().confirm(&state, token)?.plan().rule().id, id);
     let other_token = state
         .plan_tunnel_rule_action(id, TunnelRuleAction::Stop)?
         .review_token();
     assert_eq!(
-        plan.confirm(other_token)
+        plan.confirm(&state, other_token)
             .expect_err("a different token must fail"),
         TunnelRuleReviewError::TokenMismatch
+    );
+    Ok(())
+}
+
+#[test]
+fn deleting_a_connection_with_a_named_rule_is_rejected_atomically() -> TestResult {
+    let connection = Connection::new("Host", "host.test", "operator");
+    let connection_id = connection.id;
+    let mut state = AppState::default();
+    state.connections.push(connection.clone());
+    state.add_tunnel_rule(enabled_rule(connection_id)?)?;
+
+    let error = state
+        .soft_delete_connection(connection_id, 1)
+        .expect_err("a referenced connection must remain active");
+    assert!(matches!(error, Error::ConnectionReferencedByTunnelRule));
+    assert!(
+        state
+            .connections
+            .iter()
+            .any(|item| item.id == connection_id)
+    );
+    assert!(state.deleted_connections.is_empty());
+
+    let error = state
+        .remove_connection(connection_id)
+        .expect_err("hard deletion must use the same reference guard");
+    assert!(matches!(error, Error::ConnectionReferencedByTunnelRule));
+    assert!(state.validate().is_ok());
+    Ok(())
+}
+
+#[test]
+fn purging_a_deleted_connection_with_a_named_rule_is_rejected() -> TestResult {
+    let connection = Connection::new("Host", "host.test", "operator");
+    let connection_id = connection.id;
+    let mut state = AppState::default();
+    state
+        .deleted_connections
+        .push(keelshell_core::DeletedConnection {
+            connection,
+            deleted_at: 1,
+        });
+    state.tunnel_rules.push(enabled_rule(connection_id)?);
+
+    let error = state
+        .purge_deleted_connection(connection_id)
+        .expect_err("purge must preserve referenced metadata");
+    assert!(matches!(error, Error::ConnectionReferencedByTunnelRule));
+    assert_eq!(state.deleted_connections.len(), 1);
+    Ok(())
+}
+
+#[test]
+fn stale_review_plan_is_rejected_after_connection_update() -> TestResult {
+    let connection = Connection::new("Host", "host.test", "operator");
+    let connection_id = connection.id;
+    let mut state = AppState::default();
+    state.connections.push(connection.clone());
+    let rule = enabled_rule(connection_id)?;
+    let rule_id = state.add_tunnel_rule(rule)?;
+    let plan = state.plan_tunnel_rule_action(rule_id, TunnelRuleAction::Start)?;
+    let token = plan.review_token();
+
+    let mut changed = connection;
+    changed.host = "changed.test".into();
+    state.update_connection(changed)?;
+
+    assert_eq!(
+        plan.confirm(&state, token),
+        Err(TunnelRuleReviewError::StateChanged)
     );
     Ok(())
 }

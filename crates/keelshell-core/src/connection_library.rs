@@ -347,6 +347,7 @@ impl AppState {
     ) -> Result<Connection, Error> {
         self.validate_connection_library()?;
         self.ensure_no_jump_dependents(id, false)?;
+        self.ensure_no_tunnel_rule_dependents(id)?;
         let index = self
             .connections
             .iter()
@@ -404,6 +405,7 @@ impl AppState {
     pub fn purge_deleted_connection(&mut self, id: Uuid) -> Result<Connection, Error> {
         self.validate_connection_library()?;
         self.ensure_no_jump_dependents(id, true)?;
+        self.ensure_no_tunnel_rule_dependents(id)?;
         let index = self
             .deleted_connections
             .iter()

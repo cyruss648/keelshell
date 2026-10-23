@@ -12,17 +12,21 @@
 - `TunnelRule` 的未知字段被拒绝，测试确认伪造 password 字段不会进入反序列化路径。
 - 旧 `state.json` 缺少 `tunnel_rules` 时加载为空列表，加载不重写原始字节。
 - 保存后通过新 `StateStore` 重新打开，规则字段和 `enabled` 意图完整读回。
-- start/stop 计划携带独立 review token；错误 token 不能生成确认收据。
+- start/stop 计划携带独立 review token，并绑定 state revision、规则 snapshot 和 connection snapshot；错误 token、连接更新或规则状态变化都不能生成确认收据。
+- soft delete、hard remove、purge 和批量 Trash/Purge 在存在规则引用时都 fail closed，原 state 保持可验证。
 - 领域操作只改内存快照或产生无副作用计划，没有 listener、SSH channel 或后台 task。
 
 ## 命令与结果
 
 ```text
+cargo fmt --all -- --check
+cargo clippy -p keelshell-core --all-targets --all-features --locked --offline -- -D warnings
 cargo test -p keelshell-core --locked --offline tunnel_rules -- --nocapture
 cargo test -p keelshell-core --test tunnel_rules --locked --offline -- --nocapture
+cargo test -p keelshell-core --locked --offline
 ```
 
-结果：core 单元测试 4 项通过；StateStore 集成测试 4 项通过。
+结果：格式检查和严格 Clippy 通过；core 全量测试 494 项通过；`tunnel_rules` 集成测试 7 项通过。测试记录中的删除引用和旧审核失效场景均通过。
 
 ## 未完成边界
 
