@@ -524,12 +524,15 @@ fn stale_knowledge_save_completion_does_not_mark_current_preview_saved(cx: &mut 
         })
         .unwrap_or_else(|error| panic!("build stale knowledge preview: {error}"));
 
-    cx.update_window(window, |_, _, cx| {
+    cx.update_window(window, |_, window, cx| {
         panel.update(cx, |panel, cx| {
             panel.mark_knowledge_save_pending(review_id, cx);
             assert!(!panel.mark_knowledge_saved(Uuid::new_v4(), cx));
             assert!(!panel.knowledge_save_ready_for_test());
         });
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save-pending").visible());
+        assert!(window.try_find("knowledge-save-saved").is_none());
     })
     .unwrap_or_else(|error| panic!("inspect stale knowledge completion: {error}"));
 }

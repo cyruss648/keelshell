@@ -26,11 +26,12 @@ cargo test -p keelshell-app --locked --offline workspace_capture_review_and_save
 cargo test -p keelshell-app --locked --offline workspace_selection_capture_uses_the_focused_terminal_source -- --nocapture
 cargo test -p keelshell-app --locked --offline explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_source_binding -- --nocapture
 cargo test -p keelshell-app --locked --offline unknown_knowledge_write_result_disables_automatic_replay -- --nocapture
+cargo test -p keelshell-app --locked --offline stale_knowledge_save_completion_does_not_mark_current_preview_saved -- --nocapture
 ```
 
-结果为 core 持久化 6 项通过、AI-04 相关 app 6 项通过；测试使用临时目录和受控 GPUI/内存 SSH 夹具，不启动真实模型或客户主机。保留已有 `block 0.1.6` future-incompatibility 和 macOS linker 警告，它们不改变退出码。
+结果为 core 持久化 6 项通过、AI-04 相关 app 7 项通过；测试使用临时目录和受控 GPUI/内存 SSH 夹具，不启动真实模型或客户主机。保留已有 `block 0.1.6` future-incompatibility 和 macOS linker 警告，它们不改变退出码。
 
-本轮完整门禁的实际结果为：`cargo fmt --all -- --check`、`git diff --check`、三个 crate 的目标 Clippy 均通过；`cargo test -p keelshell-core --locked --offline` 为 505 项通过，`cargo test -p keelshell-ai --locked --offline` 为 176 项通过、5 项忽略。`cargo test -p keelshell-app --locked --offline` 首次为 758 项通过、1 项失败、2 项忽略，失败是 `files::transfer_tests::fixture_isolation_tests::removed_window_keeps_admission_until_real_worker_cleanup_finishes` 的有界 fixture setup 超时；立即单独重跑该测试为 1 项通过、760 项过滤。之后 `python3 scripts/check.py` 退出码为 0：Python 检查 67 项通过、1 项跳过，脚本内 workspace app 为 759 项通过、2 项忽略，core、session、MCP、集成测试和 doctest 均通过。
+本轮完整门禁的实际结果为：`cargo fmt --all -- --check`、`git diff --check`、三个 crate 的目标 Clippy 均通过；`cargo test -p keelshell-core --locked --offline` 为 505 项通过，`cargo test -p keelshell-ai --locked --offline` 为 176 项通过、5 项忽略。`cargo test -p keelshell-app --locked --offline` 首次为 759 项通过、1 项失败、2 项忽略，失败是 `files::transfer_tests::fixture_isolation_tests::removed_window_keeps_admission_until_real_worker_cleanup_finishes` 的有界 fixture setup 超时；立即单独重跑该测试为 1 项通过、760 项过滤。之后 `python3 scripts/check.py` 退出码为 0：Python 检查 67 项通过、1 项跳过，脚本内 workspace app 为 759 项通过、2 项忽略，core、session、MCP、集成测试和 doctest 均通过。
 
 完整 workspace 门禁、独立 reviewer 和主线合入后的最终结果在本记录后续补记；在这些步骤完成前，不把该 worktree 结果写成发布或三平台原生验收。
 
