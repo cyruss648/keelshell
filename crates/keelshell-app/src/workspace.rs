@@ -2020,11 +2020,15 @@ impl Workspace {
                             && let Some(panel) = panel.upgrade()
                         {
                             panel.update(cx, |panel, cx| {
-                                panel.mark_knowledge_save_failed(
-                                    *review_id,
-                                    matches!(&error, keelshell_core::Error::Durability(_)),
-                                    cx,
-                                )
+                                if matches!(&error, keelshell_core::Error::Conflict) {
+                                    panel.mark_knowledge_save_conflict(*review_id, cx);
+                                } else {
+                                    panel.mark_knowledge_save_failed(
+                                        *review_id,
+                                        matches!(&error, keelshell_core::Error::Durability(_)),
+                                        cx,
+                                    );
+                                }
                             });
                         }
                         view.status = credential_failure.unwrap_or_else(|| Message::detail(

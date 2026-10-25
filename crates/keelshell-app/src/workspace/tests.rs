@@ -883,6 +883,76 @@ async fn workspace_capture_review_and_save_round_trips_confirmed_knowledge(
 }
 
 #[gpui_kit::test]
+async fn workspace_knowledge_conflict_invalidates_review_without_replay(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    let panes = attach_remote_panes(&fixture, cx);
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_assistant = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+        window.click("context-screen", cx);
+    })
+    .checked("capture terminal context for the conflict review");
+    cx.run_until_parked();
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.click("knowledge-preview-action", cx);
+        window.render_frame(cx);
+        window.click("knowledge-confirm-completed", cx);
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save").visible());
+    })
+    .checked("prepare a confirmed knowledge save before the competing write");
+
+    let mut competing = fixture
+        .store
+        .load()
+        .checked("load competing state snapshot");
+    competing.settings.language = Language::En;
+    fixture
+        .store
+        .save(&competing)
+        .checked("persist competing state change");
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.render_frame(cx);
+        window.click("knowledge-save", cx);
+        window.render_frame(cx);
+    })
+    .checked("submit the stale knowledge save candidate");
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).saving
+    })
+    .await;
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save-conflict").visible());
+        assert!(window.try_find("knowledge-save").is_none());
+    })
+    .checked("show a non-retryable conflict state after the stale write");
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        assert!(!workspace.assistant.read(cx).knowledge_save_ready_for_test());
+    });
+
+    let persisted = fixture
+        .store
+        .load()
+        .checked("reload competing state after conflict");
+    assert_eq!(persisted.settings.language, Language::En);
+    assert!(persisted.knowledge_entries.is_empty());
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
 fn workspace_selection_capture_uses_the_focused_terminal_source(cx: &mut TestAppContext) {
     let fixture = mount(cx, Vec::new());
     let panes = attach_remote_panes(&fixture, cx);

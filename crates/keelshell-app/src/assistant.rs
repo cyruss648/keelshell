@@ -150,6 +150,12 @@ enum KnowledgeSaveState {
     Saving,
     Saved,
     Unknown,
+    /// The StateStore revision changed while this review was being saved.
+    ///
+    /// A conflicted review must be reloaded and reviewed again. It must never
+    /// return to `Ready`, because the candidate still carries the stale
+    /// snapshot that caused the conflict.
+    Conflict,
 }
 
 enum PreparedAssistantRequest {
@@ -800,6 +806,21 @@ impl AssistantPanel {
                     "Local knowledge save failed; the reviewed content was retained.",
                 )
             };
+            cx.notify();
+        }
+    }
+
+    pub(crate) fn mark_knowledge_save_conflict(&mut self, review_id: Uuid, cx: &mut Context<Self>) {
+        if let Some(preview) = self
+            .knowledge_preview
+            .as_mut()
+            .filter(|preview| preview.review_id == review_id)
+        {
+            preview.save_state = KnowledgeSaveState::Conflict;
+            self.status = Message::new(
+                "本地知识保存冲突；配置已变化，请重新加载后再审核。",
+                "Local knowledge save conflicted because the configuration changed; reload before reviewing it again.",
+            );
             cx.notify();
         }
     }
@@ -1547,6 +1568,17 @@ impl AssistantPanel {
                         cx,
                         "结果未知，请重新加载",
                         "Unknown; reload before retry",
+                    ))
+                    .into_any_element()
+            }
+            (SaveDisposition::Persistable, KnowledgeSaveState::Conflict) => {
+                Button::new("knowledge-save-conflict")
+                    .ghost()
+                    .disabled(true)
+                    .label(t(
+                        cx,
+                        "配置已变化，请重新加载",
+                        "Configuration changed; reload before retry",
                     ))
                     .into_any_element()
             }
