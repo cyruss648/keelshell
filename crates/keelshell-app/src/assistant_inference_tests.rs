@@ -7,6 +7,7 @@ use keelshell_core::{
     AiAuthentication, AiModelReasoning, AiPreset, AiReasoningCapability, AiReasoningSelection,
 };
 use std::sync::Arc;
+use uuid::Uuid;
 use zeroize::Zeroizing;
 
 #[gpui_kit::test]
@@ -484,4 +485,51 @@ fn unknown_knowledge_write_result_disables_automatic_replay(cx: &mut TestAppCont
         assert!(window.try_find("knowledge-save").is_none());
     })
     .unwrap_or_else(|error| panic!("retain unknown save result without replay: {error}"));
+}
+
+#[gpui_kit::test]
+fn stale_knowledge_save_completion_does_not_mark_current_preview_saved(cx: &mut TestAppContext) {
+    cx.update(gpui_kit::init);
+    let runtime = Arc::new(
+        tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(1)
+            .enable_all()
+            .build()
+            .unwrap_or_else(|error| panic!("test runtime: {error}")),
+    );
+    let catalog = AiProfileCatalog::default();
+    let (window, panel) = cx.update(|cx| {
+        gpui_kit::open_window(WindowOptions::default(), cx, |window, cx| {
+            cx.new(|cx| {
+                AssistantPanel::new(&catalog, &EphemeralCredentials::new(), runtime, window, cx)
+            })
+        })
+        .unwrap_or_else(|error| panic!("open stale knowledge window: {error}"))
+    });
+    let review_id = cx
+        .update_window(window, |_, _, cx| {
+            panel.update(cx, |panel, cx| {
+                panel.set_context(
+                    "systemctl status keelshell\nservice is healthy".into(),
+                    "fixture-host".into(),
+                    "session-a".into(),
+                    cx,
+                );
+                panel.build_knowledge_preview(cx);
+                panel.set_knowledge_review_outcome(KnowledgeReviewOutcome::Completed, cx);
+                panel
+                    .knowledge_review_id_for_test()
+                    .unwrap_or_else(|| panic!("knowledge review id"))
+            })
+        })
+        .unwrap_or_else(|error| panic!("build stale knowledge preview: {error}"));
+
+    cx.update_window(window, |_, _, cx| {
+        panel.update(cx, |panel, cx| {
+            panel.mark_knowledge_save_pending(review_id, cx);
+            assert!(!panel.mark_knowledge_saved(Uuid::new_v4(), cx));
+            assert!(!panel.knowledge_save_ready_for_test());
+        });
+    })
+    .unwrap_or_else(|error| panic!("inspect stale knowledge completion: {error}"));
 }

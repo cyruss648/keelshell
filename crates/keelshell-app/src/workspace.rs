@@ -1804,7 +1804,7 @@ impl Workspace {
                             view.snippet_sources = Arc::new(view.state.snippets.clone());
                             view.command_sources_revision = view.command_sources_revision.wrapping_add(1);
                         }
-                        if !matches!(&after, AfterSave::UpdateHistory) {
+                        if !matches!(&after, AfterSave::UpdateHistory | AfterSave::Knowledge { .. }) {
                             view.status = Message::new("已保存到本机", "Saved locally");
                         }
                         match after {
@@ -1920,15 +1920,25 @@ impl Workspace {
                                 view.refresh_workflow_audit_history(cx);
                             }
                             AfterSave::Knowledge { panel, review_id } => {
-                                if let Some(panel) = panel.upgrade() {
-                                    panel.update(cx, |panel, cx| {
-                                        panel.mark_knowledge_saved(review_id, cx)
-                                    });
-                                }
-                                view.status = Message::new(
-                                    "本地知识已保存到 StateStore",
-                                    "Local knowledge saved to StateStore",
-                                );
+                                let accepted_by_panel = panel
+                                    .upgrade()
+                                    .map(|panel| {
+                                        panel.update(cx, |panel, cx| {
+                                            panel.mark_knowledge_saved(review_id, cx)
+                                        })
+                                    })
+                                    .unwrap_or(false);
+                                view.status = if accepted_by_panel {
+                                    Message::new(
+                                        "本地知识已保存到 StateStore",
+                                        "Local knowledge saved to StateStore",
+                                    )
+                                } else {
+                                    Message::new(
+                                        "本地知识写入已完成，但当前审核预览已过期；请重新加载配置后查看。",
+                                        "Local knowledge write completed, but the current review is stale; reload the configuration before reviewing it again.",
+                                    )
+                                };
                             }
                             AfterSave::BatchAudit { .. } => {
                                 view.status = Message::new(

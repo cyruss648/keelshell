@@ -758,7 +758,7 @@ impl AssistantPanel {
         }
     }
 
-    pub(crate) fn mark_knowledge_saved(&mut self, review_id: Uuid, cx: &mut Context<Self>) {
+    pub(crate) fn mark_knowledge_saved(&mut self, review_id: Uuid, cx: &mut Context<Self>) -> bool {
         if let Some(preview) = self
             .knowledge_preview
             .as_mut()
@@ -767,6 +767,9 @@ impl AssistantPanel {
             preview.save_state = KnowledgeSaveState::Saved;
             self.status = Message::new("本地知识已保存", "Local knowledge saved");
             cx.notify();
+            true
+        } else {
+            false
         }
     }
 
