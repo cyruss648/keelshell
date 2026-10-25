@@ -18,6 +18,7 @@
 - [精确b54三平台Quality](testing/records/2026-10-07-text-main-platform-ci.md)：macOS/Windows成功，Linux首次目录Ask超时原因未知。
 
 - [产品与交互](product/PRODUCT.md)：用户任务、界面规则、AI 边界
+- [本地知识与 AI 复用](product/AI_LOCAL_KNOWLEDGE.md)：显式捕获、审核、StateStore 保存和后续边界
 - [远程 SSH 能力要求](research/remote-ssh-requirements.md)：产品目标与逐项验收标准
 - [工作区观察摘记](research/remote-workspace-reference.md)：历史匿名研究与证据限制
 - [路线与状态](ROADMAP.md)：每阶段范围及验收状态
@@ -33,6 +34,8 @@
 
 - [远程工作区、AI 与图标验收](testing/records/2026-10-03-remote-ai-icons.md)：181项门禁及本机受控交互证据。
 - [命名 AI 配置与视觉系统](adr/0005-named-ai-profiles-and-visual-system.md)：当前协议、凭据、取消、视觉与平台边界。
+- [AI-04 本地知识领域边界](adr/0091-ai-04-local-knowledge-domain-boundary.md)、[预览审核](adr/0092-ai-04-knowledge-review-ui.md)与[单条持久化](adr/0093-ai-04-knowledge-persistence.md)：内容闸门、人工审核、来源绑定与未知写入结果。
+- [AI-04 持久化记录](testing/records/2026-10-25-ai-04-knowledge-persistence.md)：StateStore 与 Workspace 集成证据和未完成范围。
 
 - [GitHub 与发布流程](RELEASING.md)：六平台标签构建、资产完整性校验和无发布演练。
 - [凭据库认证设计](adr/0006-authenticated-credential-vault.md)：整库认证、身份绑定、保存冲突与安全边界。

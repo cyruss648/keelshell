@@ -14,12 +14,13 @@ AI-04 的 `keelshell-core` 领域模型已经能够把用户明确选择的事�
 - 捕获后的初始结果始终是 `Unknown` 的 review-only 文档。用户在预览卡片中明确确认“已完成”或“已失败”后，UI 才构造 `SelectedFact::completed` 或 `SelectedFact::failed`；未确认的中间状态不能成为知识条目。
 - 入口只使用当前助手绑定的 session、host 和文本；不从 `WorkflowAuditRecord` 自动导入，不在后台扫描终端或审计记录。
 - UI 通过 `SourceBinding`、`SelectedFact`、`KnowledgeSelection` 和 `KnowledgeService` 生成领域文档，展示来源、捕获类型、revision、条目、排除项、`SaveDisposition` 和 Markdown。
-- `DoNotPersist` 内容显示阻止原因，保存按钮保持禁用；`Persistable` 只代表本地内容闸门通过，不代表已经保存或允许自动发送。
-- 当前切片不写 StateStore、不调用模型、不执行命令。保存和发送必须在后续切片中分别设计显式审核、上下文绑定和失败/未知结果语义。
+- `DoNotPersist` 内容显示阻止原因，保存按钮保持禁用；`Persistable` 只代表本地内容闸门通过，不代表已经保存或允许自动发送。通过后，保存按钮还要绑定当前 `review_id` 和 immutable capture。
+- 已接入单条显式保存：Workspace 再次验证 source/session identity、source revision、capture time 和当前 capture 后，将受控 `SavedKnowledgeEntry` 交给后台 StateStore。冲突保留审核内容，durability 未确认进入 UNKNOWN 并禁止自动重试。
+- 当前切片仍不调用模型、不执行命令。条目编辑/删除、搜索/分类、批量管理和模型发送必须继续使用独立的显式审核、上下文绑定和失败/未知结果语义。
 - 同一个 SSH session 的重复捕获复用稳定 source identity，session 切换生成新的 source identity；捕获 revision 和时间戳随每次显式捕获重新生成。
 
 ## Consequences
 
 用户现在可以在 AI 侧栏中看到可审查的本地知识草稿，同时能看到敏感或未知结果被排除的原因。领域层继续拥有最终内容闸门，UI 不复制敏感检测规则。
 
-该入口是预览能力，不是持久化知识库或模型发送能力。StateStore、知识条目编辑/删除、明确保存、模型上下文复用和跨平台原生视觉验收仍然开放。
+该入口现在包含单条本地 StateStore 保存能力，但还不是完整知识库或模型发送能力。知识条目编辑/删除、批量管理、模型上下文复用和跨平台原生视觉验收仍然开放。持久化结构和 UNKNOWN 语义详见 [ADR 0093](0093-ai-04-knowledge-persistence.md)。

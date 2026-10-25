@@ -1,8 +1,8 @@
-use super::AssistantPanel;
+use super::{AssistantPanel, KnowledgeReviewOutcome};
 use crate::ai_settings::EphemeralCredentials;
 use gpui_kit::{AppContext, TestAppContext, WindowOptions, test::TestWindowExt};
 use keelshell_ai::RequestCancellation;
-use keelshell_core::{AiApiStyle, AiProfileCatalog, NamedAiProfile};
+use keelshell_core::{AiApiStyle, AiProfileCatalog, KnowledgeOutcome, NamedAiProfile};
 use keelshell_core::{
     AiAuthentication, AiModelReasoning, AiPreset, AiReasoningCapability, AiReasoningSelection,
 };
@@ -338,15 +338,24 @@ fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_sourc
     })
     .unwrap_or_else(|error| panic!("confirm knowledge outcome: {error}"));
 
-    cx.update_window(window, |_, _, cx| {
-        panel.update(cx, |panel, cx| {
+    cx.update_window(window, |_, window, cx| {
+        let review_id = panel.update(cx, |panel, _| {
             let (document, markdown) = panel
                 .knowledge_preview_for_test()
                 .unwrap_or_else(|| panic!("explicit outcome review should rebuild the preview"));
             assert!(document.disposition().is_persistable());
             assert_eq!(document.entries().len(), 1);
             assert!(markdown.text().contains("service is healthy"));
+            let review_id = panel
+                .knowledge_review_id_for_test()
+                .unwrap_or_else(|| panic!("review token should be present"));
+            assert!(panel.knowledge_save_candidate(review_id).is_some());
+            review_id
+        });
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save").visible());
 
+        panel.update(cx, |panel, cx| {
             panel.set_context(
                 "service is healthy again".into(),
                 "fixture-host".into(),
@@ -358,9 +367,31 @@ fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_sourc
                 .knowledge_preview_for_test()
                 .unwrap_or_else(|| panic!("same session should remain reviewable"));
             assert_eq!(document.exclusions()[0].source().id(), source_id);
+            assert!(panel.knowledge_save_candidate(review_id).is_none());
         });
     })
     .unwrap_or_else(|error| panic!("inspect confirmed knowledge preview: {error}"));
+
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("knowledge-confirm-failed", cx);
+        window.render_frame(cx);
+    })
+    .unwrap_or_else(|error| panic!("confirm failed knowledge outcome: {error}"));
+
+    cx.update_window(window, |_, _, cx| {
+        panel.update(cx, |panel, _| {
+            let (document, _) = panel
+                .knowledge_preview_for_test()
+                .unwrap_or_else(|| panic!("failed outcome should rebuild the preview"));
+            assert_eq!(document.entries()[0].outcome(), KnowledgeOutcome::Failed);
+            let review_id = panel
+                .knowledge_review_id_for_test()
+                .unwrap_or_else(|| panic!("failed review token should be present"));
+            assert!(panel.knowledge_save_candidate(review_id).is_some());
+        });
+    })
+    .unwrap_or_else(|error| panic!("inspect failed knowledge preview: {error}"));
 
     cx.update_window(window, |_, _, cx| {
         panel.update(cx, |panel, cx| {
@@ -400,4 +431,57 @@ fn explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_sourc
         assert!(window.find("knowledge-save-disabled").visible());
     })
     .unwrap_or_else(|error| panic!("knowledge preview interaction: {error}"));
+}
+
+#[gpui_kit::test]
+fn unknown_knowledge_write_result_disables_automatic_replay(cx: &mut TestAppContext) {
+    cx.update(gpui_kit::init);
+    let runtime = Arc::new(
+        tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(1)
+            .enable_all()
+            .build()
+            .unwrap_or_else(|error| panic!("test runtime: {error}")),
+    );
+    let catalog = AiProfileCatalog::default();
+    let (window, panel) = cx.update(|cx| {
+        gpui_kit::open_window(WindowOptions::default(), cx, |window, cx| {
+            cx.new(|cx| {
+                AssistantPanel::new(&catalog, &EphemeralCredentials::new(), runtime, window, cx)
+            })
+        })
+        .unwrap_or_else(|error| panic!("open knowledge save window: {error}"))
+    });
+
+    let review_id = cx
+        .update_window(window, |_, _, cx| {
+            panel.update(cx, |panel, cx| {
+                panel.set_context(
+                    "service is healthy".into(),
+                    "fixture-host".into(),
+                    "session-a".into(),
+                    cx,
+                );
+                panel.build_knowledge_preview(cx);
+                panel.set_knowledge_review_outcome(KnowledgeReviewOutcome::Completed, cx);
+                panel
+                    .knowledge_review_id_for_test()
+                    .unwrap_or_else(|| panic!("review token should be present"))
+            })
+        })
+        .unwrap_or_else(|error| panic!("build reviewable knowledge preview: {error}"));
+
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save").visible());
+        panel.update(cx, |panel, cx| {
+            panel.mark_knowledge_save_pending(review_id, cx);
+            panel.mark_knowledge_save_failed(review_id, true, cx);
+            assert!(!panel.knowledge_save_ready_for_test());
+        });
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save-unknown").visible());
+        assert!(window.try_find("knowledge-save").is_none());
+    })
+    .unwrap_or_else(|error| panic!("retain unknown save result without replay: {error}"));
 }

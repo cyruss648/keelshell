@@ -22,10 +22,10 @@ use keelshell_ai::{
     RequestCancellation,
 };
 use keelshell_core::{
-    AiApiStyle, AiAuthentication, AiBackend, AiProfileCatalog, KnowledgeDocument, KnowledgeError,
-    KnowledgeExclusionReason, KnowledgeSaveBlock, KnowledgeSelection, KnowledgeService,
-    KnowledgeSourceKind, MarkdownArtifact, NamedAiProfile, SaveDisposition, SelectedFact,
-    SourceBinding,
+    AiApiStyle, AiAuthentication, AiBackend, AiProfileCatalog, KnowledgeCaptureType,
+    KnowledgeDocument, KnowledgeError, KnowledgeExclusionReason, KnowledgeSaveBlock,
+    KnowledgeSelection, KnowledgeService, KnowledgeSourceKind, MarkdownArtifact, NamedAiProfile,
+    SaveDisposition, SavedKnowledgeEntry, SelectedFact, SourceBinding,
 };
 use tokio::runtime::Runtime;
 use uuid::Uuid;
@@ -79,6 +79,9 @@ pub enum AssistantEvent {
         command: String,
         session_id: String,
     },
+    SaveKnowledge {
+        review_id: Uuid,
+    },
 }
 
 /// The scope of the terminal snapshot captured by an explicit user action.
@@ -115,9 +118,16 @@ impl KnowledgeCaptureKind {
             Self::VisibleScreen => t(cx, "可见终端快照", "Visible terminal snapshot"),
         }
     }
+
+    fn persistence_type(self) -> KnowledgeCaptureType {
+        match self {
+            Self::Selection => KnowledgeCaptureType::Selection,
+            Self::VisibleScreen => KnowledgeCaptureType::VisibleScreen,
+        }
+    }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct KnowledgeCapture {
     source_id: Uuid,
     session_id: String,
@@ -134,6 +144,14 @@ enum KnowledgeReviewOutcome {
     Failed,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum KnowledgeSaveState {
+    Ready,
+    Saving,
+    Saved,
+    Unknown,
+}
+
 enum PreparedAssistantRequest {
     Api(PreparedRequest),
     Local(PreparedLocalAsk),
@@ -148,9 +166,12 @@ struct LocalRequestProgress {
 }
 
 struct KnowledgePreview {
+    review_id: Uuid,
+    capture: KnowledgeCapture,
     document: KnowledgeDocument,
     markdown: MarkdownArtifact,
     review_outcome: KnowledgeReviewOutcome,
+    save_state: KnowledgeSaveState,
 }
 
 impl LocalRequestProgress {
@@ -566,7 +587,7 @@ impl AssistantPanel {
             return;
         }
 
-        let Some(capture) = self.knowledge_capture.as_ref() else {
+        let Some(capture) = self.knowledge_capture.as_ref().cloned() else {
             self.knowledge_preview = None;
             self.status = Message::new(
                 "缺少终端快照元数据，知识预览已阻止。",
@@ -656,8 +677,8 @@ impl AssistantPanel {
         };
         self.status = match document.disposition() {
             SaveDisposition::Persistable => Message::new(
-                "本地知识预览已生成；保存和发送仍未接入。",
-                "Local knowledge preview generated; saving and sending are not connected.",
+                "本地知识预览已生成；保存需要你明确确认，发送仍未接入。",
+                "Local knowledge preview generated; saving requires explicit confirmation, and sending is not connected.",
             ),
             SaveDisposition::DoNotPersist { .. } => Message::new(
                 "结果尚未被明确标记为已完成或已失败；知识条目保存/发送已阻止。",
@@ -665,9 +686,12 @@ impl AssistantPanel {
             ),
         };
         self.knowledge_preview = Some(KnowledgePreview {
+            review_id: Uuid::new_v4(),
+            capture,
             document,
             markdown,
             review_outcome,
+            save_state: KnowledgeSaveState::Ready,
         });
         cx.notify();
     }
@@ -677,6 +701,112 @@ impl AssistantPanel {
         self.knowledge_preview
             .as_ref()
             .map(|preview| (&preview.document, &preview.markdown))
+    }
+
+    #[cfg(test)]
+    fn knowledge_review_id_for_test(&self) -> Option<Uuid> {
+        self.knowledge_preview
+            .as_ref()
+            .map(|preview| preview.review_id)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn knowledge_save_ready_for_test(&self) -> bool {
+        self.knowledge_preview
+            .as_ref()
+            .and_then(|preview| self.knowledge_save_candidate(preview.review_id))
+            .is_some()
+    }
+
+    pub(crate) fn knowledge_save_candidate(&self, review_id: Uuid) -> Option<SavedKnowledgeEntry> {
+        let preview = self
+            .knowledge_preview
+            .as_ref()
+            .filter(|preview| preview.review_id == review_id)
+            .filter(|preview| preview.save_state == KnowledgeSaveState::Ready)
+            .filter(|preview| preview.document.disposition().is_persistable())?;
+        let capture = &preview.capture;
+        let entry = preview.document.entries().first()?;
+        if preview.document.entries().len() != 1
+            || capture.source_id != entry.source().id()
+            || capture.revision != entry.source().revision()
+            || capture.session_id != self.session_id
+            || capture.revision == 0
+            || capture.captured_at != entry.occurred_at()
+            || self.knowledge_capture.as_ref() != Some(capture)
+        {
+            return None;
+        }
+        SavedKnowledgeEntry::from_document(
+            review_id,
+            &preview.document,
+            &capture.session_id,
+            capture.kind.persistence_type(),
+        )
+        .ok()
+    }
+
+    pub(crate) fn mark_knowledge_save_pending(&mut self, review_id: Uuid, cx: &mut Context<Self>) {
+        if let Some(preview) = self
+            .knowledge_preview
+            .as_mut()
+            .filter(|preview| preview.review_id == review_id)
+        {
+            preview.save_state = KnowledgeSaveState::Saving;
+            self.status = Message::new("正在保存本地知识…", "Saving local knowledge…");
+            cx.notify();
+        }
+    }
+
+    pub(crate) fn mark_knowledge_saved(&mut self, review_id: Uuid, cx: &mut Context<Self>) {
+        if let Some(preview) = self
+            .knowledge_preview
+            .as_mut()
+            .filter(|preview| preview.review_id == review_id)
+        {
+            preview.save_state = KnowledgeSaveState::Saved;
+            self.status = Message::new("本地知识已保存", "Local knowledge saved");
+            cx.notify();
+        }
+    }
+
+    pub(crate) fn mark_knowledge_save_failed(
+        &mut self,
+        review_id: Uuid,
+        unknown: bool,
+        cx: &mut Context<Self>,
+    ) {
+        if let Some(preview) = self
+            .knowledge_preview
+            .as_mut()
+            .filter(|preview| preview.review_id == review_id)
+        {
+            preview.save_state = if unknown {
+                KnowledgeSaveState::Unknown
+            } else {
+                KnowledgeSaveState::Ready
+            };
+            self.status = if unknown {
+                Message::new(
+                    "本地知识写入结果未知；不会自动重放，请重新加载配置后再审核。",
+                    "Local knowledge write result is unknown; it will not be replayed automatically. Reload configuration before reviewing again.",
+                )
+            } else {
+                Message::new(
+                    "本地知识保存失败，审核内容已保留。",
+                    "Local knowledge save failed; the reviewed content was retained.",
+                )
+            };
+            cx.notify();
+        }
+    }
+
+    pub(crate) fn reject_knowledge_save(&mut self, cx: &mut Context<Self>) {
+        self.status = Message::new(
+            "本地知识审核已过期或不满足保存条件，请重新生成预览。",
+            "The local knowledge review is stale or not eligible for saving. Build a fresh preview.",
+        );
+        cx.notify();
     }
 
     /// Whether configuration replacement can proceed without cancelling active inference.
@@ -1323,10 +1453,7 @@ impl AssistantPanel {
         } else {
             visual.danger
         };
-        let capture_kind_label = self.knowledge_capture.as_ref().map_or_else(
-            || t(cx, "终端快照", "Terminal snapshot"),
-            |capture| capture.kind.label(cx),
-        );
+        let capture_kind_label = preview.capture.kind.label(cx);
         let review_label = match preview.review_outcome {
             KnowledgeReviewOutcome::Unknown => t(
                 cx,
@@ -1379,10 +1506,52 @@ impl AssistantPanel {
                     )),
             );
         }
-        let save_label = if preview.document.disposition().is_persistable() {
-            Message::new("保存（未接入，OPEN）", "Save (not connected, OPEN)")
-        } else {
-            Message::new("保存已阻止", "Saving blocked")
+        let save_button = match (preview.document.disposition(), preview.save_state) {
+            (SaveDisposition::Persistable, KnowledgeSaveState::Ready) => {
+                Button::new("knowledge-save")
+                    .ghost()
+                    .label(t(cx, "保存到本机知识库", "Save to local knowledge"))
+                    .on_click(cx.listener(|panel, _, _, cx| {
+                        if let Some(review_id) = panel
+                            .knowledge_preview
+                            .as_ref()
+                            .map(|preview| preview.review_id)
+                        {
+                            cx.emit(AssistantEvent::SaveKnowledge { review_id });
+                        }
+                    }))
+                    .into_any_element()
+            }
+            (SaveDisposition::Persistable, KnowledgeSaveState::Saving) => {
+                Button::new("knowledge-save-pending")
+                    .ghost()
+                    .disabled(true)
+                    .label(t(cx, "正在保存…", "Saving…"))
+                    .into_any_element()
+            }
+            (SaveDisposition::Persistable, KnowledgeSaveState::Saved) => {
+                Button::new("knowledge-save-saved")
+                    .ghost()
+                    .disabled(true)
+                    .label(t(cx, "已保存", "Saved"))
+                    .into_any_element()
+            }
+            (SaveDisposition::Persistable, KnowledgeSaveState::Unknown) => {
+                Button::new("knowledge-save-unknown")
+                    .ghost()
+                    .disabled(true)
+                    .label(t(
+                        cx,
+                        "结果未知，请重新加载",
+                        "Unknown; reload before retry",
+                    ))
+                    .into_any_element()
+            }
+            (SaveDisposition::DoNotPersist { .. }, _) => Button::new("knowledge-save-disabled")
+                .ghost()
+                .disabled(true)
+                .label(t(cx, "保存已阻止", "Saving blocked"))
+                .into_any_element(),
         };
         div()
             .id("knowledge-preview")
@@ -1492,16 +1661,11 @@ impl AssistantPanel {
                     .text_color(rgb(visual.muted))
                     .child(t(
                         cx,
-                        "模型发送：未接入；本预览不会自动发送。",
-                        "Model sending: not connected; this preview is never sent automatically.",
+                        "模型发送：未接入；本预览不会自动发送。保存只在明确确认后发生。",
+                        "Model sending: not connected; this preview is never sent automatically. Saving requires explicit confirmation.",
                     )),
             )
-            .child(
-                Button::new("knowledge-save-disabled")
-                    .ghost()
-                    .disabled(true)
-                    .label(save_label.render(cx)),
-            )
+            .child(save_button)
             .into_any_element()
     }
 }

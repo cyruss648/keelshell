@@ -43,14 +43,15 @@ mod workflow_audit;
 
 pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits, AiLocalAgentWorkingDirectory};
 pub use ai_knowledge::{
-    KnowledgeDocument, KnowledgeEntry, KnowledgeError, KnowledgeExclusion,
+    KnowledgeCaptureType, KnowledgeDocument, KnowledgeEntry, KnowledgeError, KnowledgeExclusion,
     KnowledgeExclusionReason, KnowledgeOutcome, KnowledgeSaveBlock, KnowledgeSelection,
-    KnowledgeService, KnowledgeSourceKind, MAX_KNOWLEDGE_FACTS, MAX_KNOWLEDGE_MARKDOWN_BYTES,
-    MAX_KNOWLEDGE_SEARCH_MATCHES, MAX_KNOWLEDGE_SEARCH_QUERY_BYTES,
-    MAX_KNOWLEDGE_SEARCH_SNIPPET_BYTES, MAX_KNOWLEDGE_SOURCE_LABEL_BYTES, MAX_KNOWLEDGE_TEXT_BYTES,
-    MAX_KNOWLEDGE_TOTAL_BYTES, MAX_RUNBOOK_STEPS, MarkdownArtifact, Runbook, RunbookStep,
-    SaveDisposition, SearchMatch, SelectedFact, SelectedFactOutcome, SourceBinding, TimelineEvent,
-    TimelineStatus,
+    KnowledgeService, KnowledgeSourceKind, MAX_KNOWLEDGE_ENTRIES, MAX_KNOWLEDGE_FACTS,
+    MAX_KNOWLEDGE_MARKDOWN_BYTES, MAX_KNOWLEDGE_SEARCH_MATCHES, MAX_KNOWLEDGE_SEARCH_QUERY_BYTES,
+    MAX_KNOWLEDGE_SEARCH_SNIPPET_BYTES, MAX_KNOWLEDGE_SESSION_ID_BYTES,
+    MAX_KNOWLEDGE_SOURCE_LABEL_BYTES, MAX_KNOWLEDGE_TEXT_BYTES, MAX_KNOWLEDGE_TOTAL_BYTES,
+    MAX_RUNBOOK_STEPS, MarkdownArtifact, Runbook, RunbookStep, SaveDisposition,
+    SavedKnowledgeEntry, SearchMatch, SelectedFact, SelectedFactOutcome, SourceBinding,
+    TimelineEvent, TimelineStatus,
 };
 pub use ai_messages::{AiMessagesEffort, AiMessagesInference, AiMessagesThinking};
 pub use ai_profiles::{

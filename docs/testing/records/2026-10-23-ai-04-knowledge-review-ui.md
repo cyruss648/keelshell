@@ -1,5 +1,7 @@
 # AI-04 本地知识预览审核 UI 测试记录 — 2026-10-23
 
+> 本记录是 2026-10-23 的 UI 预览快照；其中“保存按钮禁用”和“未覆盖 Workspace capture”只描述该日期的范围。2026-10-25 的单条持久化和完整 capture/save 集成证据见[后续记录](2026-10-25-ai-04-knowledge-persistence.md)。
+
 ## 范围
 
 本记录覆盖 `keelshell-app` AI 助手中的显式本地知识预览入口，以及它与 `keelshell-core::ai_knowledge` 的边界。测试使用 GPUI Kit 受控窗口和内存领域对象，不启动模型、网络或命令执行。

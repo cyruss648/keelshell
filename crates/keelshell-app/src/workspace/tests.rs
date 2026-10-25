@@ -12,11 +12,11 @@ use std::{
 
 use gpui_kit::component::input::InputState;
 use gpui_kit::{
-    AnyWindowHandle, AppContext, Bounds, ClipboardItem, Entity, Focusable, InputEvent,
+    AnyWindowHandle, AppContext, Bounds, ClipboardItem, Entity, Focusable, InputEvent, ScrollDelta,
     TestAppContext, WindowBounds, WindowOptions, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
 };
-use keelshell_core::{AppState, Connection, Language, StateStore};
+use keelshell_core::{AppState, Connection, KnowledgeOutcome, Language, StateStore};
 use keelshell_session::SessionEvent;
 
 use super::{KeyboardInteractiveField, KeyboardInteractivePrompt, Workspace};
@@ -800,6 +800,122 @@ fn split_peer_pointer_focus_routes_capture_and_commands_without_reordering_panes
     fixture.workspace.read_with(cx, |workspace, cx| {
         assert_eq!(workspace.command.read(cx).value(), "printf focused-right");
         assert_eq!(workspace.command_target, Some(right));
+    });
+}
+
+#[gpui_kit::test]
+async fn workspace_capture_review_and_save_round_trips_confirmed_knowledge(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount(cx, Vec::new());
+    let panes = attach_remote_panes(&fixture, cx);
+    let active_id = panes[0].terminal.entity_id();
+    let expected_session_id = format!("{active_id:?}");
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_assistant = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+        window.click("context-screen", cx);
+    })
+    .checked("capture visible terminal context through the Workspace subscription");
+    cx.run_until_parked();
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        let (context, host, session_id) = workspace.assistant.read(cx).captured_context_for_test();
+        assert!(context.contains("left-pane-output"));
+        assert_eq!(host, "fixture-0@example.invalid:22");
+        assert_eq!(session_id, expected_session_id);
+    });
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.click("knowledge-preview-action", cx);
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save-disabled").visible());
+        window.click("knowledge-confirm-completed", cx);
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save").visible());
+    })
+    .checked("review the captured knowledge before saving");
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        assert!(workspace.assistant.read(cx).knowledge_save_ready_for_test());
+    });
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.render_frame(cx);
+        window.click("knowledge-save", cx);
+        window.render_frame(cx);
+    })
+    .checked("emit the reviewed knowledge save event");
+    cx.run_until_parked();
+
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).saving
+    })
+    .await;
+
+    let saved = fixture.store.load().checked("reload saved knowledge state");
+    assert_eq!(saved.knowledge_entries.len(), 1);
+    let entry = &saved.knowledge_entries[0];
+    let expected_source_id = fixture.workspace.read_with(cx, |workspace, _| {
+        workspace
+            .knowledge_source_ids
+            .get(&active_id)
+            .copied()
+            .unwrap_or_else(|| panic!("captured source identity"))
+    });
+    assert_eq!(entry.session_id(), expected_session_id);
+    assert_eq!(entry.entry().source().id(), expected_source_id);
+    assert_eq!(entry.entry().outcome(), KnowledgeOutcome::Completed);
+    assert!(entry.entry().summary().contains("left-pane-output"));
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("knowledge-save-saved").visible());
+    })
+    .checked("show the saved state after the background write completes");
+}
+
+#[gpui_kit::test]
+fn workspace_selection_capture_uses_the_focused_terminal_source(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    let panes = attach_remote_panes(&fixture, cx);
+    let active_id = panes[0].terminal.entity_id();
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_assistant = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+    })
+    .checked("show the assistant beside the terminal before selecting text");
+    panes[0].terminal.update(cx, |terminal, _| {
+        terminal.emulator.start_selection(0, 0);
+        terminal
+            .emulator
+            .update_selection(0, "left-pane-output".len().saturating_sub(1));
+        assert_eq!(terminal.selected_text(), "left-pane-output");
+    });
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.click("context-selection", cx);
+    })
+    .checked("capture selected terminal context through the Workspace subscription");
+    cx.run_until_parked();
+
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        let assistant = workspace.assistant.read(cx);
+        let (context, host, session_id) = assistant.captured_context_for_test();
+        assert!(context.contains("left-pane-output"));
+        assert_eq!(host, "fixture-0@example.invalid:22");
+        assert_eq!(session_id, format!("{active_id:?}"));
     });
 }
 

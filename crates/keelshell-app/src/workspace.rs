@@ -249,6 +249,10 @@ enum AfterSave {
     WorkflowAudit {
         records: Vec<keelshell_core::WorkflowAuditRecord>,
     },
+    Knowledge {
+        panel: WeakEntity<AssistantPanel>,
+        review_id: uuid::Uuid,
+    },
     SnippetSaved {
         panel: EntityId,
     },
@@ -565,6 +569,37 @@ impl Workspace {
                 AssistantEvent::AgentActionRejected { run_id, action_id } => {
                     view.reject_agent_action(*run_id, *action_id)
                 }
+                AssistantEvent::SaveKnowledge { review_id } => {
+                    let Some(entry) = panel.read(cx).knowledge_save_candidate(*review_id) else {
+                        panel.update(cx, |panel, cx| panel.reject_knowledge_save(cx));
+                        view.status = Message::new(
+                            "本地知识审核已过期或未通过保存闸门。",
+                            "The local knowledge review is stale or did not pass the save gate.",
+                        );
+                        cx.notify();
+                        return;
+                    };
+                    let mut candidate = view.state.clone();
+                    if let Err(error) = candidate.record_knowledge_entry(entry) {
+                        panel.update(cx, |panel, cx| panel.reject_knowledge_save(cx));
+                        view.status = Message::detail(
+                            "本地知识未保存",
+                            "Local knowledge was not saved",
+                            error,
+                        );
+                        cx.notify();
+                        return;
+                    }
+                    view.persist(
+                        candidate,
+                        AfterSave::Knowledge {
+                            panel: panel.downgrade(),
+                            review_id: *review_id,
+                        },
+                        window,
+                        cx,
+                    );
+                }
                 AssistantEvent::AgentStop { run_id } => view.stop_agent(*run_id),
                 AssistantEvent::OpenSettings => view.open_ai_settings(window, cx),
                 AssistantEvent::SelectProfile(id) => {
@@ -805,6 +840,10 @@ impl Workspace {
         if self.active < self.tabs.len() {
             self.cancel_remote_completion(cx);
             let terminal = self.tabs.remove(self.active);
+            let retired_session_id = format!("{:?}", terminal.entity_id());
+            self.assistant.update(cx, |panel, cx| {
+                panel.invalidate_session(&retired_session_id, cx)
+            });
             self.forget_reconnect(terminal.entity_id(), window, cx);
             self.remote_sessions.remove(&terminal.entity_id());
             self.knowledge_source_ids.remove(&terminal.entity_id());
@@ -1723,6 +1762,13 @@ impl Workspace {
         }
         let update_history = matches!(&after, AfterSave::UpdateHistory);
         self.saving = true;
+        if let AfterSave::Knowledge { panel, review_id } = &after
+            && let Some(panel) = panel.upgrade()
+        {
+            panel.update(cx, |panel, cx| {
+                panel.mark_knowledge_save_pending(*review_id, cx)
+            });
+        }
         if !update_history {
             self.status = Message::new("正在保存…", "Saving…");
         }
@@ -1873,6 +1919,17 @@ impl Workspace {
                                 view.status = Message::new("任务记录已保存（不含命令、输出、地址或参数）", "Task history saved (without commands, output, addresses or parameters)");
                                 view.refresh_workflow_audit_history(cx);
                             }
+                            AfterSave::Knowledge { panel, review_id } => {
+                                if let Some(panel) = panel.upgrade() {
+                                    panel.update(cx, |panel, cx| {
+                                        panel.mark_knowledge_saved(review_id, cx)
+                                    });
+                                }
+                                view.status = Message::new(
+                                    "本地知识已保存到 StateStore",
+                                    "Local knowledge saved to StateStore",
+                                );
+                            }
                             AfterSave::BatchAudit { .. } => {
                                 view.status = Message::new(
                                     "批量审计摘要已保存（不含命令正文、输出或主机地址）",
@@ -1935,7 +1992,7 @@ impl Workspace {
                         if view.pending_update_check.is_some() {
                             view.update_history_retry_after = Some(std::time::Instant::now() + Duration::from_secs(30));
                         }
-                        if let AfterSave::Ai { panel, .. } = after
+                        if let AfterSave::Ai { panel, .. } = &after
                             && let Some(panel) = panel.upgrade()
                         {
                             panel.update(cx, |panel, cx| {
@@ -1945,6 +2002,17 @@ impl Workspace {
                                         "Save failed; draft preserved",
                                         &error,
                                     ),
+                                    cx,
+                                )
+                            });
+                        }
+                        if let AfterSave::Knowledge { panel, review_id } = &after
+                            && let Some(panel) = panel.upgrade()
+                        {
+                            panel.update(cx, |panel, cx| {
+                                panel.mark_knowledge_save_failed(
+                                    *review_id,
+                                    matches!(&error, keelshell_core::Error::Durability(_)),
                                     cx,
                                 )
                             });

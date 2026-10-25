@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     AiProfileCatalog, BatchAuditRecord, ConnectionFolder, ConnectionProxy, DeletedConnection,
-    Error, RecentConnection, ReconnectPolicy, ValidationError,
+    Error, RecentConnection, ReconnectPolicy, SavedKnowledgeEntry, ValidationError,
 };
 
 /// Current persisted state and connection-export schema. Unknown versions fail closed.
@@ -503,6 +503,10 @@ pub struct AppState {
     /// Named, non-secret forwarding intents. Loading these rules never starts a listener.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tunnel_rules: Vec<crate::TunnelRule>,
+    /// Explicitly reviewed local knowledge entries; only known completed or failed
+    /// session captures are stored, and each entry retains its source/session binding.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub knowledge_entries: Vec<SavedKnowledgeEntry>,
     /// Non-secret preferences.
     pub settings: Settings,
     /// Explicitly trusted host identities, keyed by normalized `[host]:port`.
@@ -532,6 +536,7 @@ impl PartialEq for AppState {
             && self.profile_sync == other.profile_sync
             && self.workflow_audits == other.workflow_audits
             && self.tunnel_rules == other.tunnel_rules
+            && self.knowledge_entries == other.knowledge_entries
             && self.settings == other.settings
             && self.known_hosts == other.known_hosts
             && self.route_known_hosts == other.route_known_hosts
@@ -573,6 +578,7 @@ impl Default for AppState {
             profile_sync: None,
             workflow_audits: Vec::new(),
             tunnel_rules: Vec::new(),
+            knowledge_entries: Vec::new(),
             settings: Settings::default(),
             known_hosts: BTreeMap::new(),
             route_known_hosts: BTreeMap::new(),
@@ -613,7 +619,43 @@ impl AppState {
         }
         crate::workflow_audit::validate_workflow_audits(&self.workflow_audits)?;
         self.validate_tunnel_rules()?;
+        crate::ai_knowledge::validate_saved_knowledge_entries(&self.knowledge_entries)?;
         self.settings.validate()?;
+        Ok(())
+    }
+
+    /// Append one explicitly reviewed, content-gated local knowledge entry.
+    ///
+    /// Re-submitting the same immutable receipt is an idempotent no-op. A
+    /// different entry with the same ID is rejected so a stale or ambiguous
+    /// review cannot overwrite a saved fact.
+    pub fn record_knowledge_entry(&mut self, entry: SavedKnowledgeEntry) -> Result<(), Error> {
+        crate::ai_knowledge::validate_saved_knowledge_entries(std::slice::from_ref(&entry))?;
+        if let Some(existing) = self
+            .knowledge_entries
+            .iter()
+            .find(|existing| existing.id() == entry.id())
+        {
+            if existing == &entry {
+                return Ok(());
+            }
+            return Err(ValidationError::new(
+                "knowledge_entries.id",
+                "a saved entry ID already has different content",
+            )
+            .into());
+        }
+        if self.knowledge_entries.len() >= crate::MAX_KNOWLEDGE_ENTRIES {
+            return Err(ValidationError::new(
+                "knowledge_entries",
+                "at most 256 saved entries are supported",
+            )
+            .into());
+        }
+        let mut entries = self.knowledge_entries.clone();
+        entries.push(entry);
+        crate::ai_knowledge::validate_saved_knowledge_entries(&entries)?;
+        self.knowledge_entries = entries;
         Ok(())
     }
 

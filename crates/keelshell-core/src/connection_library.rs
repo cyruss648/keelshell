@@ -95,6 +95,8 @@ impl<'de> Deserialize<'de> for AppState {
             workflow_audits: Vec<crate::WorkflowAuditRecord>,
             #[serde(default)]
             tunnel_rules: Vec<crate::TunnelRule>,
+            #[serde(default)]
+            knowledge_entries: Vec<crate::SavedKnowledgeEntry>,
             settings: Settings,
             #[serde(default)]
             known_hosts: BTreeMap<String, String>,
@@ -115,6 +117,7 @@ impl<'de> Deserialize<'de> for AppState {
             profile_sync: wire.profile_sync,
             workflow_audits: wire.workflow_audits,
             tunnel_rules: wire.tunnel_rules,
+            knowledge_entries: wire.knowledge_entries,
             settings: wire.settings,
             known_hosts: wire.known_hosts,
             route_known_hosts: wire.route_known_hosts,

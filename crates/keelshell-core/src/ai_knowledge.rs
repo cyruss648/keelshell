@@ -7,10 +7,12 @@
 //! a file. Unknown outcomes and sensitive content remain visible only as
 //! bounded, non-content exclusion markers and make the result non-persistable.
 
-use std::{fmt, num::NonZeroU64};
+use std::{collections::HashSet, fmt, num::NonZeroU64};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::ValidationError;
 
 /// Maximum number of explicitly selected facts in one knowledge build.
 pub const MAX_KNOWLEDGE_FACTS: usize = 64;
@@ -18,8 +20,12 @@ pub const MAX_KNOWLEDGE_FACTS: usize = 64;
 pub const MAX_KNOWLEDGE_TEXT_BYTES: usize = 16 * 1024;
 /// Maximum UTF-8 bytes in source metadata.
 pub const MAX_KNOWLEDGE_SOURCE_LABEL_BYTES: usize = 256;
+/// Maximum UTF-8 bytes in the opaque session identity attached to a saved entry.
+pub const MAX_KNOWLEDGE_SESSION_ID_BYTES: usize = 256;
 /// Maximum combined input bytes in one selected knowledge set.
 pub const MAX_KNOWLEDGE_TOTAL_BYTES: usize = 128 * 1024;
+/// Maximum number of explicitly saved knowledge entries in local state.
+pub const MAX_KNOWLEDGE_ENTRIES: usize = 256;
 /// Maximum runbook steps produced from one knowledge document.
 pub const MAX_RUNBOOK_STEPS: usize = 64;
 /// Maximum Markdown bytes accepted by rendering and local search.
@@ -32,7 +38,7 @@ pub const MAX_KNOWLEDGE_SEARCH_MATCHES: usize = 256;
 pub const MAX_KNOWLEDGE_SEARCH_SNIPPET_BYTES: usize = 256;
 
 /// Safe, opaque source categories that can bind a knowledge entry.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum KnowledgeSourceKind {
     /// A user-selected terminal or SSH session snapshot.
@@ -47,6 +53,16 @@ pub enum KnowledgeSourceKind {
     Manual,
 }
 
+/// The explicit user action that captured the source text for a knowledge entry.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum KnowledgeCaptureType {
+    /// Text selected inside the terminal emulator.
+    Selection,
+    /// The currently visible terminal screen.
+    VisibleScreen,
+}
+
 /// Stable identity and revision for the source of a knowledge fact.
 ///
 /// The revision prevents a later source change from silently making an old
@@ -59,6 +75,23 @@ pub struct SourceBinding {
     id: Uuid,
     revision: NonZeroU64,
     label: String,
+}
+
+impl<'de> Deserialize<'de> for SourceBinding {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(deny_unknown_fields)]
+        struct WireSourceBinding {
+            kind: KnowledgeSourceKind,
+            id: Uuid,
+            revision: u64,
+            label: String,
+        }
+
+        let wire = WireSourceBinding::deserialize(deserializer)?;
+        Self::new(wire.kind, wire.id, wire.revision, &wire.label)
+            .map_err(|_| serde::de::Error::custom("invalid knowledge source binding"))
+    }
 }
 
 impl fmt::Debug for SourceBinding {
@@ -118,7 +151,7 @@ impl SourceBinding {
 }
 
 /// Outcome selected by the user for one source fact.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub enum SelectedFactOutcome {
     /// The fact completed successfully and has a user-selected summary.
     Completed(String),
@@ -308,7 +341,7 @@ impl KnowledgeSelection {
 }
 
 /// Why a selected fact is excluded from saved knowledge.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum KnowledgeExclusionReason {
     /// The source reports no known result.
@@ -320,7 +353,7 @@ pub enum KnowledgeExclusionReason {
 }
 
 /// Reason a generated artifact cannot be persisted without a later review.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum KnowledgeSaveBlock {
     /// A selected item contained a credential or other sensitive marker.
@@ -350,7 +383,7 @@ impl SaveDisposition {
 }
 
 /// Outcome represented by a persistable knowledge summary.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum KnowledgeOutcome {
     /// The selected fact completed successfully.
@@ -395,6 +428,197 @@ impl KnowledgeEntry {
     pub const fn outcome(&self) -> KnowledgeOutcome {
         self.outcome
     }
+}
+
+/// A reviewed knowledge entry that is safe to store in the local application state.
+///
+/// This is a separate persistence boundary from [`KnowledgeEntry`]. It records
+/// the immutable session and capture metadata that made the review eligible for
+/// saving, and it has a validating deserializer so a hand-edited state file
+/// cannot bypass the local content gate.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(try_from = "SavedKnowledgeEntryWire")]
+pub struct SavedKnowledgeEntry {
+    id: Uuid,
+    entry: KnowledgeEntry,
+    session_id: String,
+    capture_type: KnowledgeCaptureType,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SavedKnowledgeEntryWire {
+    id: Uuid,
+    source: SourceBinding,
+    session_id: String,
+    capture_type: KnowledgeCaptureType,
+    occurred_at: u64,
+    title: String,
+    summary: String,
+    outcome: KnowledgeOutcome,
+}
+
+impl Serialize for SavedKnowledgeEntry {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        SavedKnowledgeEntryWire {
+            id: self.id,
+            source: self.entry.source.clone(),
+            session_id: self.session_id.clone(),
+            capture_type: self.capture_type,
+            occurred_at: self.entry.occurred_at,
+            title: self.entry.title.clone(),
+            summary: self.entry.summary.clone(),
+            outcome: self.entry.outcome,
+        }
+        .serialize(serializer)
+    }
+}
+
+impl TryFrom<SavedKnowledgeEntryWire> for SavedKnowledgeEntry {
+    type Error = &'static str;
+
+    fn try_from(wire: SavedKnowledgeEntryWire) -> Result<Self, Self::Error> {
+        if wire.id.is_nil()
+            || wire.occurred_at == 0
+            || wire.session_id.trim().is_empty()
+            || wire.session_id.len() > MAX_KNOWLEDGE_SESSION_ID_BYTES
+            || wire.session_id.contains('\0')
+            || wire.session_id.chars().any(char::is_control)
+            || contains_sensitive_marker(&wire.session_id)
+        {
+            return Err("invalid saved knowledge identity");
+        }
+        if wire.source.kind() != KnowledgeSourceKind::Session {
+            return Err("saved knowledge source is not a session capture");
+        }
+        let title = checked_single_line(&wire.title, MAX_KNOWLEDGE_TEXT_BYTES)
+            .map_err(|_| "invalid saved knowledge title")?;
+        checked_text(&wire.summary, MAX_KNOWLEDGE_TEXT_BYTES)
+            .map_err(|_| "invalid saved knowledge summary")?;
+        if contains_sensitive_marker(&title) || contains_sensitive_marker(&wire.summary) {
+            return Err("saved knowledge contains sensitive content");
+        }
+        let entry = KnowledgeEntry {
+            source: wire.source,
+            occurred_at: wire.occurred_at,
+            title,
+            summary: normalize_text(&wire.summary),
+            outcome: wire.outcome,
+        };
+        Ok(Self {
+            id: wire.id,
+            entry,
+            session_id: wire.session_id,
+            capture_type: wire.capture_type,
+        })
+    }
+}
+
+impl SavedKnowledgeEntry {
+    /// Build one persisted record from a complete, content-gated document.
+    ///
+    /// The current application slice intentionally accepts exactly one entry;
+    /// a document containing any exclusion is rejected as a whole so a safe
+    /// subset cannot be saved while the review still contains unknown or
+    /// sensitive facts.
+    pub fn from_document(
+        id: Uuid,
+        document: &KnowledgeDocument,
+        session_id: &str,
+        capture_type: KnowledgeCaptureType,
+    ) -> Result<Self, KnowledgeError> {
+        if !document.disposition().is_persistable()
+            || !document.exclusions().is_empty()
+            || document.entries().len() != 1
+            || document.entries()[0].source().kind() != KnowledgeSourceKind::Session
+        {
+            return Err(KnowledgeError::NotPersistable);
+        }
+        Self::new(id, document.entries()[0].clone(), session_id, capture_type)
+    }
+
+    fn new(
+        id: Uuid,
+        entry: KnowledgeEntry,
+        session_id: &str,
+        capture_type: KnowledgeCaptureType,
+    ) -> Result<Self, KnowledgeError> {
+        let session_id = checked_single_line(session_id, MAX_KNOWLEDGE_SESSION_ID_BYTES)?;
+        if contains_sensitive_marker(&session_id) {
+            return Err(KnowledgeError::SensitiveSourceMetadata);
+        }
+        if id.is_nil()
+            || entry.occurred_at == 0
+            || entry.source.kind() != KnowledgeSourceKind::Session
+            || contains_sensitive_marker(&entry.title)
+            || contains_sensitive_marker(&entry.summary)
+        {
+            return Err(KnowledgeError::SensitiveGeneratedContent);
+        }
+        Ok(Self {
+            id,
+            entry,
+            session_id,
+            capture_type,
+        })
+    }
+
+    /// Return the stable identity assigned to this reviewed save operation.
+    pub const fn id(&self) -> Uuid {
+        self.id
+    }
+
+    /// Return the source-bound content that passed the local content gate.
+    pub fn entry(&self) -> &KnowledgeEntry {
+        &self.entry
+    }
+
+    /// Return the immutable session identity captured during review.
+    pub fn session_id(&self) -> &str {
+        &self.session_id
+    }
+
+    /// Return whether the source came from a selection or a visible screen.
+    pub const fn capture_type(&self) -> KnowledgeCaptureType {
+        self.capture_type
+    }
+}
+
+pub(crate) fn validate_saved_knowledge_entries(
+    entries: &[SavedKnowledgeEntry],
+) -> Result<(), ValidationError> {
+    if entries.len() > MAX_KNOWLEDGE_ENTRIES {
+        return Err(ValidationError::new(
+            "knowledge_entries",
+            "at most 256 saved entries are supported",
+        ));
+    }
+    let mut ids = HashSet::with_capacity(entries.len());
+    for entry in entries {
+        if !ids.insert(entry.id()) {
+            return Err(ValidationError::new(
+                "knowledge_entries.id",
+                "saved entry IDs must be unique",
+            ));
+        }
+        if entry.entry().source().kind() != KnowledgeSourceKind::Session {
+            return Err(ValidationError::new(
+                "knowledge_entries.source",
+                "the current persistence slice only accepts session captures",
+            ));
+        }
+        if entry.session_id().is_empty()
+            || contains_sensitive_marker(entry.session_id())
+            || contains_sensitive_marker(entry.entry().title())
+            || contains_sensitive_marker(entry.entry().summary())
+        {
+            return Err(ValidationError::new(
+                "knowledge_entries",
+                "saved knowledge contains sensitive content",
+            ));
+        }
+    }
+    Ok(())
 }
 
 /// A timeline marker for an included fact or a deliberately excluded fact.
@@ -671,6 +895,9 @@ pub enum KnowledgeError {
     /// The search source exceeds the bounded local string budget.
     #[error("knowledge search input exceeds its bounded byte limit")]
     SearchInputTooLarge,
+    /// The complete reviewed document is not eligible for persistence.
+    #[error("knowledge document is not eligible for persistence")]
+    NotPersistable,
 }
 
 /// Pure in-memory operations for explicit local knowledge and runbooks.
@@ -1236,6 +1463,50 @@ mod tests {
                 Err(KnowledgeError::SensitiveSourceMetadata)
             );
         }
+    }
+
+    #[test]
+    fn saved_entry_round_trips_as_flat_source_bound_state() {
+        let source = source(KnowledgeSourceKind::Session, "ops host · session-a");
+        let fact = SelectedFact::completed(source, 42, "Health check", "Service reports ready")
+            .expect("completed fact");
+        let document = KnowledgeService::build(&selection(vec![fact])).expect("document");
+        let entry = SavedKnowledgeEntry::new(
+            Uuid::new_v4(),
+            document.entries()[0].clone(),
+            "session-a",
+            KnowledgeCaptureType::Selection,
+        )
+        .expect("saved entry");
+
+        let value = serde_json::to_value(&entry).expect("serialize saved entry");
+        assert!(value.get("entry").is_none());
+        assert_eq!(value["capture_type"], "selection");
+        let loaded: SavedKnowledgeEntry = serde_json::from_value(value).expect("load entry");
+        assert_eq!(loaded, entry);
+        assert_eq!(loaded.entry().summary(), "Service reports ready");
+    }
+
+    #[test]
+    fn saved_entry_wire_rejects_sensitive_content_and_unknown_fields() {
+        let source = source(KnowledgeSourceKind::Session, "ops host");
+        let fact = SelectedFact::completed(source, 42, "Health check", "Service reports ready")
+            .expect("completed fact");
+        let document = KnowledgeService::build(&selection(vec![fact])).expect("document");
+        let entry = SavedKnowledgeEntry::new(
+            Uuid::new_v4(),
+            document.entries()[0].clone(),
+            "session-a",
+            KnowledgeCaptureType::VisibleScreen,
+        )
+        .expect("saved entry");
+        let mut value = serde_json::to_value(&entry).expect("serialize saved entry");
+        value["summary"] = serde_json::Value::String("api key = should never persist".into());
+        assert!(serde_json::from_value::<SavedKnowledgeEntry>(value).is_err());
+
+        let mut value = serde_json::to_value(&entry).expect("serialize saved entry");
+        value["unexpected"] = serde_json::Value::Bool(true);
+        assert!(serde_json::from_value::<SavedKnowledgeEntry>(value).is_err());
     }
 
     #[test]
