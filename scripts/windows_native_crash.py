@@ -699,7 +699,6 @@ def run_owned(command, cwd, env, deadline, owner=None, tick=None):
 
 
 SOURCE_SHA = "a717400bf791bad43a293db50a02a64fb58bcfc7"
-TOOLCHAIN = "1.98.1"
 TEST_COUNT = 706
 JOB_SECONDS = 90 * 60
 DIAGNOSTIC_ERROR = 125
@@ -1252,8 +1251,10 @@ def main():
         raise ProbeError("diagnostic source has tracked changes")
     bounded(["rustup", "show"], source, env, deadline)
     rust = bounded(["rustc", "-Vv"], source, env, deadline).stdout
-    if f"release: {TOOLCHAIN}\n" not in rust or "host: x86_64-pc-windows-msvc\n" not in rust:
-        raise ProbeError("exact Rust1.98.1 x64-msvc is required")
+    rust_release = next((line.split(":", 1)[1].strip() for line in rust.splitlines()
+                         if line.startswith("release: ")), None)
+    if not rust_release or "host: x86_64-pc-windows-msvc\n" not in rust:
+        raise ProbeError("a Windows x64-msvc Rust toolchain is required")
     controls = native_controls(cdb, output, env, deadline)
     build = bounded(["cargo", "test", "-p", "keelshell-app", "--bin", "keelshell-app", "--no-run", "--locked", "--message-format=json"], source, env, deadline)
     binary = application_artifact(build.stdout)
@@ -1264,7 +1265,7 @@ def main():
     evidence = TextEvidence(nonce, names, app_module=binary.stem, raw_path=scratch / "app-shared-raw.bin")
     command = cdb_command(cdb, binary, init, ["--test-threads=4", "--no-capture"])
     receipt = run_debugger(command, source, env, deadline, evidence, WindowsOwner())
-    receipt.update({"source_sha": SOURCE_SHA, "rust_release": TOOLCHAIN, "test_count": len(names),
+    receipt.update({"source_sha": SOURCE_SHA, "rust_release": rust_release, "test_count": len(names),
                     "test_threads": 4, "no_capture": True, "cdb_sha256": options.cdb_sha256.lower(),
                     "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
                     "native_blocks": evidence.blocks, "native_controls_passed": len(controls),

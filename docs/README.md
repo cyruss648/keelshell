@@ -36,6 +36,7 @@
 - [命名 AI 配置与视觉系统](adr/0005-named-ai-profiles-and-visual-system.md)：当前协议、凭据、取消、视觉与平台边界。
 - [AI-04 本地知识领域边界](adr/0091-ai-04-local-knowledge-domain-boundary.md)、[预览审核](adr/0092-ai-04-knowledge-review-ui.md)与[单条持久化](adr/0093-ai-04-knowledge-persistence.md)：内容闸门、人工审核、来源绑定与未知写入结果。
 - [AI-04 持久化记录](testing/records/2026-10-25-ai-04-knowledge-persistence.md)：StateStore 与 Workspace 集成证据和未完成范围。
+- [Rust 1.99.1 工具链记录](testing/records/2026-10-26-rust-1-99-1-toolchain.md)：本机工具链切换、项目取消版本限制与工程门禁。
 
 - [GitHub 与发布流程](RELEASING.md)：六平台标签构建、资产完整性校验和无发布演练。
 - [凭据库认证设计](adr/0006-authenticated-credential-vault.md)：整库认证、身份绑定、保存冲突与安全边界。

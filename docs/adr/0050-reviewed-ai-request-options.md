@@ -32,7 +32,7 @@ LocalAgent 对 API 请求头和代理仍拒绝，不继承环境代理或秘密�
 
 ## 依据与验证边界
 
-实现核对锁定 reqwest 0.13.5 的[官方 ClientBuilder 文档](https://docs.rs/reqwest/0.13.5/reqwest/struct.ClientBuilder.html)及[官方 Proxy 文档](https://docs.rs/reqwest/0.13.5/reqwest/struct.Proxy.html)，只开启现有 `0.13` 的 socks feature，保留精确 toolchain 1.98.1 与锁定 patch。
+实现核对锁定 reqwest 0.13.5 的[官方 ClientBuilder 文档](https://docs.rs/reqwest/0.13.5/reqwest/struct.ClientBuilder.html)及[官方 Proxy 文档](https://docs.rs/reqwest/0.13.5/reqwest/struct.Proxy.html)，只开启现有 `0.13` 的 socks feature。该记录当时使用 Rust 1.98.1；当前项目不固定 toolchain，Cargo.lock 继续保留依赖的解析 patch。
 
 隔离回环与 GPUI 测试是传输/受控界面证据。HTTPS 代理回环先证明 TLS 握手和 TLS 失败关闭，不伪称已有真实代理证书验收。未读取用户凭据、启动已安装应用或请求云模型；macOS、Windows、Linux 原生窗口和真实供应商兼容性由整合后验收记录另行说明。详见[产品指南](../product/AI_REQUEST_OPTIONS.md)与[测试记录](../testing/records/2026-10-05-ai-request-options.md)。
 

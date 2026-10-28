@@ -167,7 +167,7 @@ impl FrameBudget {
     fn admit(&self) -> bool {
         if self
             .pending
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |pending| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |pending| {
                 (pending < MAX_PENDING_FRAMES).then_some(pending + 1)
             })
             .is_err()
@@ -182,7 +182,7 @@ impl FrameBudget {
     fn flushed(&self, frames: usize) {
         let _ = self
             .pending
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |pending| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |pending| {
                 Some(pending.saturating_sub(frames))
             });
     }

@@ -4,7 +4,7 @@ Read `docs/HANDOFF.md` before continuing this in-progress implementation; the la
 
 - Maintain a real native GPUI Kit application for macOS, Windows and Linux. Never represent mock data, planned functionality, compilation or emulation as native acceptance.
 - Keep UI (`keelshell-app`), domain/storage (`keelshell-core`), transports (`keelshell-session`) and AI (`keelshell-ai`) separate. Blocking I/O belongs off the UI thread.
-- All direct registry dependency requirements must be `x.y`. Keep the application Cargo.lock with resolved patch versions. Pin toolchains exactly to avoid known compiler defects; toolchain pins are not library dependency requirements.
+- All direct registry dependency requirements must be `x.y`. Keep the application Cargo.lock with resolved patch versions. The project does not pin a Rust toolchain; use the current supported toolchain provided by the development environment or CI runner.
 - Do not introduce private Git dependencies, developer-specific absolute paths, embedded credentials or production logs. Credentials stay ephemeral by default. Explicit persistence uses an OS credential store or the authenticated, master-password-encrypted vault; never write a master password or a plaintext credential to profile metadata.
 - AI suggestions must be reviewable. Sending context is explicit; model output cannot bypass command review or issue actions autonomously. Host key changes must fail closed.
 - Public library APIs need rustdoc. Comments explain invariants and non-obvious decisions. Use typed errors and avoid panics outside tests.

@@ -223,7 +223,7 @@ impl Server {
                     _ = stopped.changed() => break,
                     accepted = listener.accept() => {
                         let Ok((socket, _)) = accepted else { break; };
-                        if shared.drop_connections.fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| count.checked_sub(1)).is_ok() {
+                        if shared.drop_connections.try_update(Ordering::AcqRel, Ordering::Acquire, |count| count.checked_sub(1)).is_ok() {
                             drop(socket);
                             continue;
                         }

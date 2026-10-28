@@ -79,7 +79,7 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 
 ## 开始使用
 
-安装 Rustup、Python 3.11+ 和[平台构建依赖](.github/actions/setup-build/action.yml)。仓库的 `rust-toolchain.toml` 选择精确 Rust 工具链；应用和 MCP 伴随程序需一起构建。
+安装 Rustup、Python 3.11+ 和[平台构建依赖](.github/actions/setup-build/action.yml)。项目不固定 Rust 工具链版本，请使用开发环境提供的当前支持版本；应用和 MCP 伴随程序需一起构建。
 
 ```sh
 git clone https://github.com/cyruss648/keelshell.git
@@ -88,7 +88,7 @@ cargo build -p keelshell-app -p keelshell-mcp --locked
 cargo run -p keelshell-app --locked
 ```
 
-使用 [mise](https://mise.jdx.dev/) 时，可在仓库内执行 `mise install`。
+使用 [mise](https://mise.jdx.dev/) 时，可直接运行仓库中的任务，例如 `mise run check`。
 
 1. 在首页 **快速连接** 中填写地址、端口和用户名，开始一次性 SSH 会话；需要复用时选择 **保存为连接…**。
 2. 与可信来源核对服务器指纹，完成认证后进入工作区。已保存指纹变化时，应用会阻止连接并要求重新核对。

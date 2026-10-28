@@ -4,7 +4,7 @@
 
 ## 开发环境
 
-安装 Rustup 和 Python 3.11+，按 [构建环境配置](.github/actions/setup-build/action.yml) 准备系统依赖。仓库固定 Rust 工具链，直接 registry 依赖采用 `x.y` 要求，Cargo.lock 保存解析后的完整版本。
+安装 Rustup 和 Python 3.11+，按 [构建环境配置](.github/actions/setup-build/action.yml) 准备系统依赖。项目不固定 Rust 工具链版本；直接 registry 依赖采用 `x.y` 要求，Cargo.lock 保存解析后的完整版本。
 
 ```sh
 cargo run -p keelshell-app --locked

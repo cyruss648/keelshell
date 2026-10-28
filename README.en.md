@@ -79,7 +79,7 @@ The screenshot uses a local mock service and contains no real provider credentia
 
 ## Getting started
 
-Install Rustup, Python 3.11+ and the [platform build dependencies](.github/actions/setup-build/action.yml). `rust-toolchain.toml` selects the exact Rust toolchain. Build both the application and its MCP companion.
+Install Rustup, Python 3.11+ and the [platform build dependencies](.github/actions/setup-build/action.yml). The project does not pin a Rust toolchain; use a currently supported version supplied by your development environment. Build both the application and its MCP companion.
 
 ```sh
 git clone https://github.com/cyruss648/keelshell.git
@@ -88,7 +88,7 @@ cargo build -p keelshell-app -p keelshell-mcp --locked
 cargo run -p keelshell-app --locked
 ```
 
-If you use [mise](https://mise.jdx.dev/), run `mise install` in the repository.
+If you use [mise](https://mise.jdx.dev/), run a repository task such as `mise run check`.
 
 1. Fill in **Quick connect** on the home screen with a host, port and username to start a one-time SSH session. Choose **Save as connection…** when you want to reuse it.
 2. Verify the server fingerprint against a trusted source and authenticate. A changed saved fingerprint blocks the connection until reviewed.

@@ -60,7 +60,7 @@ pub struct TrafficSnapshot {
 }
 
 fn saturating_add(counter: &AtomicU64, bytes: u64) {
-    let _ = counter.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+    let _ = counter.try_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
         Some(current.saturating_add(bytes))
     });
 }

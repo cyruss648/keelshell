@@ -1,4 +1,8 @@
-# KeelShell 开发交接 — 2026-10-08
+# KeelShell 开发交接 — 2026-10-26
+
+## 当前工具链策略 — 2026-10-26
+
+项目配置不再固定 Rust 工具链：已删除 `rust-toolchain.toml`、workspace 与 crate 的 `rust-version`、`mise.toml` 的 Rust 版本项，以及 Windows 诊断脚本对 1.98.1 的硬编码。直接 registry 依赖仍使用 `x.y` 要求，`Cargo.lock` 仍保留解析后的完整版本。当前开发机使用 Rust 1.99.1；这只记录本机验证环境，不构成项目版本限制。历史测试记录中的 1.98.1 保留为当时的实际执行事实。
 
 ## 当前继续开发 — 2026-10-25
 
@@ -135,7 +139,7 @@ Windows CDB参数修正已在独立公开功能提交e8c2fdc推送，其[真实�
 
 原生 Rust GPUI Kit，macOS、Windows、Linux；只管理远程 SSH。默认简体中文并维护英文，System／Light／Dark 主题和白底跨平台图标。专业界面、完整远程功能、最小窗口和辅助技术目标保持，范围及余项以[能力清单](product/CAPABILITIES.md)、[路线图](ROADMAP.md)和[远程要求](research/remote-ssh-requirements.md)为准。
 
-UI、core、session、AI 分层；阻塞 I/O 不进入 UI 线程。直接 registry 依赖使用 x.y，保留应用 Cargo.lock 与精确工具链。公开 API 有 rustdoc，错误类型明确，行为测试隔离且有界。提交前完成格式、Clippy、测试、依赖策略、相关原生检查和新的非作者审查。
+UI、core、session、AI 分层；阻塞 I/O 不进入 UI 线程。直接 registry 依赖使用 x.y，保留应用 Cargo.lock，不固定 Rust 工具链。公开 API 有 rustdoc，错误类型明确，行为测试隔离且有界。提交前完成格式、Clippy、测试、依赖策略、相关原生检查和新的非作者审查。
 
 凭据默认临时；明确保存使用 OS 存储或经认证的加密 vault。主密码、明文凭据及客户日志不进入源码、profile metadata 或记录。主机指纹变化拒绝连接。用户已授权公开 GitHub、提交推送和标签触发多平台 Releases，没有授权遥测或覆盖安装。
 

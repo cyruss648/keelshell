@@ -1,5 +1,5 @@
 name: Prepare native build
-description: Install the locked Rust toolchain and native GPUI dependencies
+description: Prepare native GPUI dependencies and report the runner Rust toolchain
 runs:
   using: composite
   steps:
