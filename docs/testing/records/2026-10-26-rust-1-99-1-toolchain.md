@@ -32,3 +32,11 @@
 AI 全量测试第一次运行时有一个隔离代理用例在子进程已退出且输出已完整写出后出现 `pipe EOF deadline`；该用例单独重跑通过，随后 AI 全量测试重新运行得到 `176 passed，5 ignored`。这次收尾抖动不改变代码断言结果，但保留在记录中以区分测试观察问题与产品失败。
 
 本记录不宣称 Windows、Linux 或 macOS 发行包的原生桌面验收，也不宣称发布签名、公证、安装覆盖和完整产品目标已经完成。
+
+## 独立复核与远端读回
+
+独立 reviewer 会话 `01a180b2-e860-71a1-8f04-b3481c439384` 在隔离 worktree `/Users/hdh/.codex/worktrees/9884/keelshell` 只读审查了 `80aa7207c1b67963cbd8b54c0ba2f990ec71aad6`。结论为 `MERGE`，P0/P1 均无。复核确认 `try_update` 是 Rust 1.99.0 对 `fetch_update` 的更名，调用参数、闭包重试、`Result` 判定和 memory ordering 未改变；toolchain 配置、CI、Windows 收据解析和 Cargo.lock 边界一致。
+
+复核提出两个 P2 跟进项：源码使用 `try_update` 形成 Rust 1.99.0+ 的实际编译下限，但项目不再提供机器可读的 `rust-version`，后续可在文档中明确该事实；Windows `rustc -Vv` release/host 解析可抽成纯函数并增加缺失字段与错误 host 的直接反例测试。两项均不阻止本次合并。
+
+提交已推送并读回：`HEAD=80aa7207c1b67963cbd8b54c0ba2f990ec71aad6`，`origin/main=80aa7207c1b67963cbd8b54c0ba2f990ec71aad6`，`HEAD...origin/main=0 0`。reviewer 的 session crate 并行全量运行另观察到两个未改动的临时目录路径夹具失败；MCP 的并行 fixture 超时单独重跑通过。主工作区完整 `scripts/check.py` 已以 Rust 1.99.1 退出 0，具体数字见上表。

@@ -4,6 +4,8 @@
 
 项目不再通过仓库配置限制 Rust 工具链版本。`rust-toolchain.toml`、workspace/crate 的 `rust-version` 和 `mise.toml` 的 Rust 版本项已移除；CI 使用 runner 提供的工具链。当前本机以 Rust 1.99.1 完成验证，直接 registry 依赖仍遵守 `x.y`，Cargo.lock 继续提交解析后的完整版本。版本切换记录见[Rust 1.99.1 工具链记录](testing/records/2026-10-26-rust-1-99-1-toolchain.md)。
 
+该工程变更已推送到 `origin/main` 的 `80aa7207c1b67963cbd8b54c0ba2f990ec71aad6`，独立复核 P0/P1 均无。后续补充项是文档明确 Rust 1.99.0+ 的实际源码下限，以及为 Windows release/host 解析增加直接纯函数测试；它们不代表恢复项目级 toolchain pin。
+
 ## 当前继续开发 — 2026-10-25
 
 NET-01 运行时流量统计和命名规则领域切片已完成并在本轮复核后收紧：local/remote TCP 与 loopback SOCKS5 的 payload 计数接入 session forwarding；remote forwarding 以远端监听侧定义方向，关闭时等待已建立 relay 完成；命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除引用保护和 state/rule/connection 绑定的 stale review rejection。规则编辑 UI、真实 forwarding executor、listener 启停、运行状态持久化、重启恢复、重连绑定失效仍待实现。AI-04 领域与 GPUI 本地知识预览审核切片已完成并在本轮复核后收紧：捕获元数据不可变绑定 source/session identity、revision、时间与捕获类型；未知／未开始／取消不保留标题或正文，敏感标记覆盖带空格的 API key，默认结果为 `DoNotPersist`，只有用户明确完成/失败确认后才产生可审核事实，领域产物只支持受控序列化预览。已实现单条完整 session capture 的显式 StateStore 持久化、受控加载、乐观冲突和 workspace capture 集成链；条目编辑/删除、模型发送和批量知识管理仍待实现。本轮复核和修复证据见[NET/AI 独立复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
