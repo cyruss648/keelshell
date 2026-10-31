@@ -6,11 +6,11 @@
 
 该工程变更已推送到 `origin/main` 的 `80aa7207c1b67963cbd8b54c0ba2f990ec71aad6`，独立复核 P0/P1 均无。后续补充项是文档明确 Rust 1.99.0+ 的实际源码下限，以及为 Windows release/host 解析增加直接纯函数测试；它们不代表恢复项目级 toolchain pin。
 
-## 当前继续开发 — 2026-10-25
+## 当前继续开发 — 2026-10-31
 
-NET-01 executor 的本轮生命周期修复已让 local listener task 的意外终止进入 app `Finished` 状态；focused session/app tests 已通过，完整门禁和最新独立 reviewer 仍待补记。
+NET-01 executor 的命名规则执行链已完成并通过独立复核：规则按 saved connection 过滤，经过 state/rule/connection revision 重新审核后才接入 local、remote 或 dynamic forwarding worker；local listener task 意外终止时也会进入 app `Finished` 状态。`69f7f40` 与 `8268b0a` 已合入主线为 `b218a4a`、`3c00ff3`，P0/P1/P2 均无。
 
-NET-01 运行时流量统计、命名规则持久化和审核启动适配已完成：local/remote TCP 与 loopback SOCKS5 的 payload 计数接入 session forwarding；remote forwarding 以远端监听侧定义方向，关闭时等待已建立 relay 完成；命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除引用保护、state/rule/connection 绑定的 stale review rejection，以及当前 Tunnels 面板到真实 forwarding executor 的显式“审核并启动”链。规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效和三平台原生验收仍待实现。AI-04 领域与 GPUI 本地知识预览审核切片已完成并在本轮复核后收紧：捕获元数据不可变绑定 source/session identity、revision、时间与捕获类型；未知／未开始／取消不保留标题或正文，敏感标记覆盖带空格的 API key，默认结果为 `DoNotPersist`，只有用户明确完成/失败确认后才产生可审核事实，领域产物只支持受控序列化预览。已实现单条完整 session capture 的显式 StateStore 持久化、受控加载、乐观冲突和 workspace capture 集成链；条目编辑/删除、模型发送和批量知识管理仍待实现。本轮复核和修复证据见[NET/AI 独立复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
+NET-01 运行时流量统计、命名规则持久化和审核启动适配已完成：local/remote TCP 与 loopback SOCKS5 的 payload 计数接入 session forwarding；remote forwarding 以远端监听侧定义方向，关闭时等待已建立 relay 完成；命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除引用保护、state/rule/connection 绑定的 stale review rejection，以及当前 Tunnels 面板到真实 forwarding executor 的显式“审核并启动”链。规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效和三平台原生验收仍待实现。AI-04 领域与 GPUI 本地知识预览审核切片已完成并在本轮复核后收紧：捕获元数据不可变绑定 source/session identity、revision、时间与捕获类型；未知／未开始／取消不保留标题或正文，敏感标记覆盖带空格的 API key，默认结果为 `DoNotPersist`，只有用户明确完成/失败确认后才产生可审核事实，领域产物只支持受控序列化预览。已实现单条完整 session capture 的显式 StateStore 持久化、受控加载、乐观冲突和 workspace capture 集成链；条目编辑/删除、模型发送和批量知识管理仍待实现。本轮复核和修复证据见[NET-01 命名规则记录](testing/records/2026-10-23-net-01-named-tunnel-rules.md)与[NET/AI 独立复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
 
 远程草稿编辑器已完成 FILE-04 的第一阶段：主草稿输入使用 GPUI Kit `EditorState`，按远程文件名选择 Rust、Python、JSON、TOML、YAML 或 Bash 语法高亮；未知或不支持的名称回退为纯文本。项目保留自有字面查找／替换控件，并关闭编辑器内置搜索、折叠、自动闭合和智能缩进，避免改变审核式编辑的输入语义。补丁输入和冲突合并手工输入仍使用普通多行文本框。
 

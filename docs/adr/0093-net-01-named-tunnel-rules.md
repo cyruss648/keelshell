@@ -24,3 +24,7 @@ NET-01 的运行时转发统计已经完成，但监听规则仍然只存在于�
 规则可以安全地进入版本化 StateStore，并能在 UI 中展示为明确的待审核启动/停止意图。存在引用规则时连接删除会失败并保留原 state；旧配置继续可读，规则保存不会改变已有连接和运行时会话。
 
 当前仍需实现规则编辑、删除和持久化管理 UI；stop action 仍沿用当前运行行的 listener owner 停止语义，尚未提供按 rule ID 的独立 stop review。运行状态持久化、重启恢复、重连后旧 owner 失效的完整规则级验收、未知远程结果处理和跨平台原生 UI 仍未完成。规则与本地 fixture 验证不代表真实客户 SSH、三平台原生桌面或发布安装验收。
+
+## Verification note — 2026-10-31
+
+The reviewed named-rule executor was merged as `b218a4a`, followed by the listener lifecycle fix as `3c00ff3`. Independent review of `8268b0a` returned `MERGE` with P0/P1/P2 all zero. The post-merge macOS gate passed core (505), AI (176 passed, 5 ignored), app (766 passed, 2 ignored), workspace checks and the repository validation script. The evidence remains bounded to controlled local fixtures and does not close native macOS, Windows or Linux acceptance.

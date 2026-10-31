@@ -24,10 +24,11 @@
 - StateStore snapshot 或绑定刷新会清除 selection/review plan，旧规则不会自动重放；运行时 owner 仍由当前 live session 管理，配置加载不会启动 listener。
 - GPUI/SSH fixture 测试通过真实 dynamic SOCKS5 listener 读取实际 `socks5h://` 地址，并验证 named rule 运行行带有 rule ID；原有 free-form dynamic/local/remote 生命周期测试继续覆盖。
 
-## 2026-10-31 listener 生命周期修复
+## 2026-10-31 executor 与 listener 生命周期最终验证
 
 - 独立复核发现 LocalForward listener task 因 accept 错误自行结束时，app 只检查 DynamicForward 的 owner 状态，导致 worker 可能一直等待而不发送 `Finished`。`LocalForward::is_closed` 现在反映 listener task 的终止状态，统一 `Forward::is_closed` 检查 local、remote 和 dynamic owner；新增 session 回归测试覆盖已结束的 listener task。
-- 本轮修复后的格式检查、diff 检查、session forwarding focused tests（5 passed）、app tunnel focused tests（5 passed）、session/app 严格 Clippy 均通过。完整 workspace 门禁和最新独立 reviewer 仍待补记。
+- 本轮修复后的格式检查、diff 检查、session forwarding focused tests（5 passed）、app tunnel focused tests（5 passed）、session/app 严格 Clippy 均通过。`69f7f40` 的命名规则 executor 与 `8268b0a` 的 listener 生命周期修复均已由独立 reviewer 复核。
+- 最新 reviewer thread `01a191db-ed24-7d63-93c8-52b5afd56448` 对 `8268b0a` 给出 `MERGE`，P0=0、P1=0、P2=0；reviewer worktree 未修改目标代码。复核范围是本机 macOS、受控 GPUI/内存 SSH fixture 与离线测试，不构成三平台原生验收。
 
 ## 命令与结果
 
@@ -39,10 +40,16 @@ cargo test -p keelshell-core --test tunnel_rules --locked --offline -- --nocaptu
 cargo test -p keelshell-core --locked --offline
 cargo test -p keelshell-app --locked --offline dynamic_panel_starts_real_proxy_copies_address_switches_language_and_stops -- --nocapture
 cargo clippy -p keelshell-app --all-targets --all-features --locked --offline -- -D warnings
+cargo fmt --all -- --check
+git diff --check
+cargo clippy --workspace --all-targets --all-features --locked --offline -- -D warnings
+cargo test -p keelshell-ai --locked --offline
+cargo test -p keelshell-app --locked --offline -- --test-threads=4
+python3 scripts/check.py
 ```
 
-结果：领域测试记录中的 core persistence 场景和本轮 executor 的格式检查、严格 Clippy、GPUI/SSH 聚焦测试通过；修复后的 app tunnel 聚焦测试为 5 passed、763 filtered out，session forwarding 聚焦测试为 5 passed、421 filtered out。完整门禁和最新独立 reviewer 仍需在修复提交上重新执行。`tunnel_rules` 集成测试继续覆盖规则持久化、删除引用、批量 Trash、规则变更、规则删除和 state revision 失效。
+结果：`keelshell-core` 全量 505 passed，`keelshell-ai` 全量 176 passed、5 ignored，`keelshell-app` 全量 766 passed、2 ignored；`scripts/check.py` 退出码为 0，其中 Python 检查 67 passed、1 skipped，workspace Clippy、workspace Rust 测试、doctest 和额外 local-agent readiness/stack 检查均通过。新 executor focused tests 为 app 5 passed、763 filtered out，session forwarding 5 passed、421 filtered out；core `tunnel_rules` 集成测试为 10 passed。保留已有 `block v0.1.6` future-incompatibility 和 macOS linker `__eh_frame section too large` 环境提示，不构成本提交失败。
 
 ## 未完成边界
 
-本记录仍不证明规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效、远程未知结果处理、跨平台原生窗口或发布安装。当前已证明的启动链只覆盖本机 macOS 上的受控 GPUI 和内存 SSH fixture，不能替代真实客户 SSH 或 macOS/Windows/Linux 原生验收。
+本记录仍不证明规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效、远程未知结果处理、跨平台原生窗口或发布安装。当前已证明的启动链只覆盖本机 macOS 上的受控 GPUI 和内存 SSH fixture，不能替代真实客户 SSH 或 macOS/Windows/Linux 原生验收。命名规则 executor 已合入主线为 `b218a4a`，listener 生命周期修复已合入主线为 `3c00ff3`；文档提交完成后以远端 readback 记录最终主线状态。

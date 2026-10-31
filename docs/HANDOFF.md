@@ -6,13 +6,23 @@
 
 本变更已提交并推送为 `80aa7207c1b67963cbd8b54c0ba2f990ec71aad6`，`HEAD` 与 `origin/main` 已读回一致。Rust 1.99.1 本机门禁为 core 505、AI 176、app 761，完整 `scripts/check.py` 为 Python 67 passed/1 skipped、workspace Rust 1930 passed/23 ignored；独立 reviewer 结论为 P0/P1 无、可合入。reviewer 提出的 Rust 1.99 隐含编译下限文档说明和 Windows release 解析直接单测列入后续 P2，不改变当前未完成的三平台原生桌面、发布安装和产品功能边界。
 
+## 当前继续开发 — NET-01 named tunnel executor — 2026-10-31
+
+NET-01 命名规则已经从审核计划接入真实 forwarding executor。Workspace 为远程 tab 维护 saved connection binding，split/reconnect 保留该绑定，ephemeral quick connect 不能执行 named rule；Tunnels 面板按当前 saved connection 过滤规则，显示端点预览，重新校验 rule/connection/state revision 后才启动 local、remote 或 dynamic worker。运行行保留 rule ID，listener owner、relay task 和流量统计仍属于当前 live session，不写入 StateStore。
+
+独立复核发现并修复了 LocalForward listener task 意外结束后 worker 永不收敛的问题：`Forward::is_closed` 统一观察 local、remote、dynamic owner，UI 会收到 `Finished`。命名规则 executor 提交 `69f7f40` 和生命周期修复 `8268b0a` 已由独立 reviewer `01a191db-ed24-7d63-93c8-52b5afd56448` 复核通过，P0/P1/P2 均为 0；两项已合入主线为 `b218a4a`、`3c00ff3`。
+
+合入后的门禁通过：core 505 passed，AI 176 passed/5 ignored，app 766 passed/2 ignored；`scripts/check.py` 退出码 0（Python 67 passed/1 skipped，workspace Clippy、workspace Rust、doctest 及额外 AI readiness/stack 检查通过）。这些结果仅覆盖本机 macOS、受控 GPUI/内存 SSH fixture 和离线测试，三平台原生桌面、真实客户 SSH、发布签名安装仍未验收。
+
+规则编辑/删除 UI、按 rule ID 的独立 stop review、runtime 状态持久化、重启恢复、规则级 reconnect owner invalidation、远程未知 forwarding 结果处理和三平台原生验收仍是后续工作。
+
 ## 当前继续开发 — AI-04 reload/reconcile
 
 在 StateStore Conflict 或写入结果 Unknown 后，AI-04 现在提供显式“重新加载并重新审核”动作。Workspace 通过后台 executor 读取最新 StateStore，成功后更新内存配置快照并清除旧知识 preview/review ID；用户必须重新生成预览、重新确认，旧保存 candidate 不会被重放。读取失败保持保存阻断，只允许再次读取。reload 期间 AI Settings、Updates、Vault、Profile Sync 和 Configuration Recovery 的配置入口与迟到回调均受串行化保护，并同步 locale、theme、active AI profile 及 Workspace 消费者。最终功能提交为 `2e4dad0`，独立 reviewer Hypatia 结论为 P0/P1=0、建议合入；剩余 P2 是测试记录同步和 Configuration Recovery 迟到 `Restored` 回调时序覆盖。应用内条目合并、编辑/删除/搜索、模型发送，以及三平台原生验收仍未完成。
 
-## 当前继续开发 — 2026-10-25
+## 历史快照 — 2026-10-25
 
-本次 NET-01 生命周期修复补充了 local listener task 的终止状态检查；listener 因 accept 错误自行结束时，app worker 会收敛到 `Finished`，不会只等待共享 SSH session 关闭。修复后的 focused tests 已通过，完整门禁和最新独立 reviewer 仍待补记。
+本节保留 2026-10-25 的中间状态；最终的 NET-01 executor、listener 生命周期修复、完整门禁和独立复核结果见上方 2026-10-31 记录。
 
 NET-01 已完成运行时流量统计、命名规则持久化和当前面板的审核启动适配：local/remote TCP 与 loopback SOCKS5 的 payload 发送／接收计数通过 session forwarding 暴露，并在 app 隧道行显示；remote forwarding 以远端监听侧定义方向，停止时等待已建立 relay 完成，停止后的行保留最终快照。命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除引用保护和绑定 rule/connection/state revision 的审核计划；Tunnels 面板会按 saved connection 过滤规则，先展示预览，用户显式确认后调用真实 forwarding executor，split/reconnect 保留连接绑定，运行行保留 rule ID。规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效和跨平台原生验收仍未完成。AI-04 已完成 `keelshell-core` 领域模型和 `keelshell-app` GPUI 本地知识预览审核：用户显式捕获的来源绑定文本带不可变 session/source identity、revision、时间与捕获类型；预览默认是 `Unknown`／`DoNotPersist`，只有真实完成/失败确认按钮才产生可审核事实；敏感内容只留下安全状态，Markdown 不含敏感正文。已接入单条完整 session capture 的显式 StateStore 持久化、受控加载、乐观冲突、敏感/unknown 阻断和 context-selection/context-screen 到 Workspace 的完整 capture/save 集成测试；条目编辑/删除、模型发送和跨平台原生验收仍未完成。详细记录见[NET-01 记录](testing/records/2026-10-23-net-01-traffic-accounting.md)、[命名规则记录](testing/records/2026-10-23-net-01-named-tunnel-rules.md)和[AI-04 UI 记录](testing/records/2026-10-23-ai-04-knowledge-review-ui.md)。本轮独立复核及修复记录见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
 
