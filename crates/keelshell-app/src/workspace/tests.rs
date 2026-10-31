@@ -16,7 +16,10 @@ use gpui_kit::{
     TestAppContext, WindowBounds, WindowOptions, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
 };
-use keelshell_core::{AppState, Connection, KnowledgeOutcome, Language, StateStore};
+use keelshell_core::{
+    AiApiStyle, AiAuthentication, AiPreset, AiProfileCatalog, AppState, Connection,
+    KnowledgeOutcome, Language, StateStore, Theme,
+};
 use keelshell_session::SessionEvent;
 
 use super::{KeyboardInteractiveField, KeyboardInteractivePrompt, Workspace};
@@ -970,6 +973,135 @@ async fn workspace_knowledge_conflict_invalidates_review_without_replay(cx: &mut
     assert_eq!(persisted.settings.language, Language::En);
     assert!(persisted.knowledge_entries.is_empty());
     assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
+async fn workspace_knowledge_reload_rebinds_authoritative_ui_configuration(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount(cx, Vec::new());
+    let panes = attach_remote_panes(&fixture, cx);
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_assistant = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+        window.click("context-screen", cx);
+    })
+    .checked("capture terminal context before the authoritative reload");
+    cx.run_until_parked();
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.click("knowledge-preview-action", cx);
+        window.render_frame(cx);
+        window.click("knowledge-confirm-completed", cx);
+        window.render_frame(cx);
+    })
+    .checked("prepare a review that can enter the reload boundary");
+
+    let external_profile = {
+        let mut profile = keelshell_core::NamedAiProfile::draft(AiPreset::Custom);
+        profile.name = "Externally selected assistant".into();
+        profile.api_style = AiApiStyle::ChatCompletions;
+        profile.endpoint = "https://external.example/v1/chat".into();
+        profile.model = "external-model".into();
+        profile.authentication = AiAuthentication::None;
+        profile
+    };
+    let external_profile_id = external_profile.id;
+    let mut competing = fixture.store.load().checked("load reload competitor state");
+    competing.settings.language = Language::En;
+    competing.settings.theme = Theme::Dark;
+    competing.settings.ai_profiles = AiProfileCatalog {
+        active_id: Some(external_profile_id),
+        profiles: vec![external_profile],
+    };
+    fixture
+        .store
+        .save(&competing)
+        .checked("persist external assistant and appearance state");
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.render_frame(cx);
+        window.click("knowledge-save", cx);
+        window.render_frame(cx);
+    })
+    .checked("create the stale save that requires reload");
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).saving
+    })
+    .await;
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("knowledge-reload").visible());
+        window.click("knowledge-reload", cx);
+        window.render_frame(cx);
+    })
+    .checked("start the explicit reload");
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).state_reloading
+    })
+    .await;
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert_eq!(i18n::language(cx), Language::En);
+        assert_eq!(
+            cx.global::<gpui_kit::component::Theme>().mode,
+            gpui_kit::component::ThemeMode::Dark
+        );
+    })
+    .checked("apply authoritative locale and theme after reload");
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        assert_eq!(workspace.state.settings.theme, Theme::Dark);
+        assert_eq!(
+            workspace.assistant.read(cx).active_profile_id_for_test(),
+            Some(external_profile_id)
+        );
+        assert!(workspace.ai_credentials.get(&external_profile_id).is_none());
+    });
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
+fn workspace_blocks_ai_settings_apply_while_state_reloads(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_assistant = true;
+            workspace.open_ai_settings(window, cx);
+            cx.notify();
+        });
+        window.render_frame(cx);
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.state_reloading = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+        assert!(window.find("ai-settings-apply").visible());
+        window.click("ai-settings-apply", cx);
+        window.render_frame(cx);
+    })
+    .checked("reject settings apply while reload is active");
+
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        assert!(workspace.state_reloading);
+        assert!(!workspace.saving);
+        let panel = workspace
+            .ai_settings
+            .as_ref()
+            .unwrap_or_else(|| panic!("settings panel remains open"));
+        assert!(!panel.read(cx).is_saving_for_test());
+    });
 }
 
 #[gpui_kit::test]

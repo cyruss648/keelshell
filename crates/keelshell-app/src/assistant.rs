@@ -442,6 +442,26 @@ impl AssistantPanel {
         self.set_profile(selected, key, cx);
     }
 
+    /// Replace the in-memory profile snapshot with the authoritative state
+    /// loaded from disk. A reload must honor the persisted active profile even
+    /// when the currently selected profile still exists; `set_profiles` keeps
+    /// that selection intentionally for the normal settings-save path.
+    pub fn replace_profiles(
+        &mut self,
+        profiles: &AiProfileCatalog,
+        credentials: &EphemeralCredentials,
+        cx: &mut Context<Self>,
+    ) {
+        self.profiles = profiles.clone();
+        self.credentials = credentials.clone();
+        let selected = profiles.active().cloned();
+        let key = selected
+            .as_ref()
+            .and_then(|profile| credentials.get(&profile.id))
+            .cloned();
+        self.set_profile(selected, key, cx);
+    }
+
     /// Select exact metadata plus a temporary credential. Changed metadata or
     /// credentials revoke prepared requests and cancel any old HTTP operation;
     /// the selected host, terminal context and question are never retargeted.
@@ -721,6 +741,11 @@ impl AssistantPanel {
         self.knowledge_preview
             .as_ref()
             .map(|preview| preview.review_id)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn active_profile_id_for_test(&self) -> Option<Uuid> {
+        self.profile.as_ref().map(|profile| profile.id)
     }
 
     #[cfg(test)]

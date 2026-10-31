@@ -1053,6 +1053,7 @@ impl Workspace {
 
     fn switch_language(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.saving
+            || self.state_reloading
             || self.configuration_recovery.is_some()
             || (self.vault_settings.is_some() || self.profile_sync.is_some())
         {
@@ -1236,7 +1237,8 @@ impl Workspace {
         }
     }
     fn open_ai_settings(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.library_batch_prompt.is_some()
+        if self.state_reloading
+            || self.library_batch_prompt.is_some()
             || self.configuration_recovery.is_some()
             || self.mcp.show
             || self.show_batch
@@ -1275,12 +1277,20 @@ impl Workspace {
                     credentials,
                     revision,
                 } => {
-                    if view.saving {
+                    if view.saving || view.state_reloading {
                         panel.update(cx, |panel, cx| {
                             panel.report_failure(
                                 Message::new(
-                                    "请等待当前保存完成",
-                                    "Wait for the current save to finish",
+                                    if view.state_reloading {
+                                        "正在重新加载配置，请完成后再应用 AI 设置"
+                                    } else {
+                                        "请等待当前保存完成"
+                                    },
+                                    if view.state_reloading {
+                                        "Configuration reload is in progress; apply AI settings after it finishes"
+                                    } else {
+                                        "Wait for the current save to finish"
+                                    },
                                 ),
                                 cx,
                             )
@@ -1708,10 +1718,10 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.saving || self.state_reloading {
+        if self.saving || self.state_reloading || self.ai_settings.is_some() {
             self.status = Message::new(
-                "正在保存或重新加载，请完成后再重新加载配置。",
-                "A save or reload is in progress. Wait before reloading configuration.",
+                "正在保存、重新加载或编辑 AI 配置，请完成后再重新加载。",
+                "A save, reload, or AI configuration edit is in progress. Finish it before reloading.",
             );
             cx.notify();
             return;
@@ -1750,6 +1760,20 @@ impl Workspace {
                             .unwrap_or(false);
                         if accepted {
                             view.state = state;
+                            // StateStore does not persist transient AI keys.
+                            // An explicit reload is therefore also a security
+                            // boundary: discard keys bound to the pre-reload
+                            // profile snapshot before rebinding the assistant.
+                            view.ai_credentials = EphemeralCredentials::new();
+                            view.apply_language(view.state.settings.language, window, cx);
+                            crate::design::apply(view.state.settings.theme, Some(window), cx);
+                            view.assistant.update(cx, |assistant, cx| {
+                                assistant.replace_profiles(
+                                    &view.state.settings.ai_profiles,
+                                    &view.ai_credentials,
+                                    cx,
+                                )
+                            });
                             view.update_service.update(cx, |panel, cx| {
                                 panel.set_preferences(view.state.settings.updates, cx)
                             });
@@ -1773,16 +1797,21 @@ impl Workspace {
                         }
                     }
                     Err(error) => {
-                        if let Some(panel) = panel.upgrade() {
-                            panel.update(cx, |panel, cx| {
-                                panel.mark_knowledge_reload_failed(review_id, &error, cx)
-                            });
+                        let accepted = panel
+                            .upgrade()
+                            .map(|panel| {
+                                panel.update(cx, |panel, cx| {
+                                    panel.mark_knowledge_reload_failed(review_id, &error, cx)
+                                })
+                            })
+                            .unwrap_or(false);
+                        if accepted {
+                            view.status = Message::detail(
+                                "配置重新加载失败，知识保存仍被阻止",
+                                "Configuration reload failed; knowledge saving remains blocked",
+                                error,
+                            );
                         }
-                        view.status = Message::detail(
-                            "配置重新加载失败，知识保存仍被阻止",
-                            "Configuration reload failed; knowledge saving remains blocked",
-                            error,
-                        );
                     }
                 }
                 cx.notify();

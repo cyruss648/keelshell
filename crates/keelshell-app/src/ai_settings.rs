@@ -476,6 +476,11 @@ impl AiSettingsPanel {
         cx.notify();
     }
 
+    #[cfg(test)]
+    pub(crate) fn is_saving_for_test(&self) -> bool {
+        self.saving
+    }
+
     /// Acknowledge exactly the revision emitted in Apply. Edits made while the
     /// disk write was pending remain visible and are never silently overwritten.
     pub fn mark_saved(&mut self, revision: u64, cx: &mut Context<Self>) {
