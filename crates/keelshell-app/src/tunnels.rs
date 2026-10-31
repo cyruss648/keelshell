@@ -12,6 +12,9 @@ use gpui_kit::component::input::{Input, InputState};
 use gpui_kit::component::{Disableable, Selectable, Sizable};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
+use keelshell_core::{
+    AppState, TunnelRule, TunnelRuleAction, TunnelRuleKind, ValidatedTunnelRulePlan,
+};
 use keelshell_session::SshSession;
 use keelshell_session::forwarding::{
     DynamicForward, LocalForward, RemoteForward, TrafficSnapshot, TrafficStats,
@@ -21,7 +24,7 @@ use tokio::runtime::Runtime;
 use crate::i18n::{LocalizedTooltipExt, Message, t};
 use crate::terminal::spawn_transport_worker;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum Direction {
     Local,
     Remote,
@@ -78,6 +81,7 @@ enum TunnelEvent {
 
 struct TunnelRow {
     id: usize,
+    rule_id: Option<uuid::Uuid>,
     description: Message,
     status: Message,
     cancel: Arc<AtomicBool>,
@@ -101,6 +105,11 @@ pub struct TunnelsPanel {
     suspended: bool,
     host: String,
     runtime: Arc<Runtime>,
+    rule_state: Option<AppState>,
+    connection_id: Option<uuid::Uuid>,
+    selected_rule: Option<uuid::Uuid>,
+    rule_plan: Option<ValidatedTunnelRulePlan>,
+    rule_status: Message,
     direction: Direction,
     bind_host: Entity<InputState>,
     bind_port: Entity<InputState>,
@@ -121,10 +130,16 @@ fn field(value: &str, window: &mut Window, cx: &mut App) -> Entity<InputState> {
 }
 
 impl TunnelsPanel {
-    pub fn new(
+    /// Construct the tunnel panel with the immutable application snapshot used
+    /// for named-rule review. A panel without a saved connection binding keeps
+    /// the existing free-form endpoint controls, while a bound panel can also
+    /// execute reviewed rules for that exact connection.
+    pub fn new_with_state(
         session: SshSession,
         host: String,
         runtime: Arc<Runtime>,
+        rule_state: Option<AppState>,
+        connection_id: Option<uuid::Uuid>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
@@ -142,6 +157,14 @@ impl TunnelsPanel {
             suspended: false,
             host,
             runtime,
+            rule_state,
+            connection_id,
+            selected_rule: None,
+            rule_plan: None,
+            rule_status: Message::new(
+                "没有可用于此连接的命名隧道规则；也可以使用下方临时端点。",
+                "No named tunnel rules are available for this connection; use the temporary endpoints below.",
+            ),
             direction: Direction::Local,
             bind_host: field("127.0.0.1", window, cx),
             bind_port: field("0", window, cx),
@@ -155,8 +178,160 @@ impl TunnelsPanel {
             ),
             _poll: poll,
         };
+        panel.rule_status = panel.rule_availability_message();
         panel.refresh_locale(window, cx);
         panel
+    }
+
+    /// Replace the snapshot used for named-rule review.
+    ///
+    /// StateStore saves rotate the snapshot revision. Rebinding a panel to a
+    /// newer state therefore also retires any old selection and review plan;
+    /// the user must select and review the rule again before starting it.
+    pub fn refresh_rule_state(
+        &mut self,
+        state: Option<AppState>,
+        connection_id: Option<uuid::Uuid>,
+        cx: &mut Context<Self>,
+    ) {
+        let changed = self.connection_id != connection_id
+            || self.rule_state.as_ref().map(|current| current.snapshot)
+                != state.as_ref().map(|current| current.snapshot)
+            || self.rule_state.as_ref() != state.as_ref();
+        if !changed {
+            return;
+        }
+        self.rule_state = state;
+        self.connection_id = connection_id;
+        self.selected_rule = None;
+        self.rule_plan = None;
+        self.rule_status = self.rule_availability_message();
+        cx.notify();
+    }
+
+    fn matching_rules(&self) -> Vec<TunnelRule> {
+        let Some(state) = &self.rule_state else {
+            return Vec::new();
+        };
+        let Some(connection_id) = self.connection_id else {
+            return Vec::new();
+        };
+        state
+            .tunnel_rules
+            .iter()
+            .filter(|rule| rule.connection_id == connection_id)
+            .cloned()
+            .collect()
+    }
+
+    fn rule_availability_message(&self) -> Message {
+        if self.rule_state.is_none() || self.connection_id.is_none() {
+            return Message::new(
+                "此会话没有已保存连接绑定；可使用下方临时端点。",
+                "This session has no saved-connection binding; use the temporary endpoints below.",
+            );
+        }
+        if self.matching_rules().is_empty() {
+            Message::new(
+                "此连接没有已保存的命名隧道规则；可使用下方临时端点。",
+                "This connection has no saved named tunnel rules; use the temporary endpoints below.",
+            )
+        } else {
+            Message::new(
+                "请选择规则并检查端点预览，然后审核并启动。",
+                "Select a rule, inspect its endpoint preview, then review and start it.",
+            )
+        }
+    }
+
+    fn select_named_rule(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
+        self.selected_rule = Some(id);
+        self.rule_plan = None;
+        let Some(state) = self.rule_state.as_ref() else {
+            self.rule_status = self.rule_availability_message();
+            cx.notify();
+            return;
+        };
+        let Some(connection_id) = self.connection_id else {
+            self.rule_status = self.rule_availability_message();
+            cx.notify();
+            return;
+        };
+        if !state
+            .tunnel_rules
+            .iter()
+            .any(|rule| rule.id == id && rule.connection_id == connection_id)
+        {
+            self.rule_status = Message::new(
+                "规则不属于当前 SSH 连接，已拒绝审核。",
+                "This rule is not owned by the current SSH connection; review was rejected.",
+            );
+            cx.notify();
+            return;
+        }
+        match state.plan_tunnel_rule_action(id, TunnelRuleAction::Start) {
+            Ok(plan) => {
+                self.rule_status = rule_preview_message(plan.rule());
+                self.rule_plan = Some(plan);
+            }
+            Err(error) => {
+                self.rule_status =
+                    Message::detail("命名规则不能启动", "Named rule cannot start", error);
+            }
+        }
+        cx.notify();
+    }
+
+    fn start_named_rule(&mut self, cx: &mut Context<Self>) {
+        if self.rows.iter().filter(|row| !row.finished).count() >= 32 {
+            self.rule_status = Message::new(
+                "最多同时运行 32 条隧道，请先停止现有隧道。",
+                "Stop an existing tunnel before opening more than 32.",
+            );
+            cx.notify();
+            return;
+        }
+        let Some(plan) = self.rule_plan.take() else {
+            self.rule_status = Message::new(
+                "请先选择并审核一条命名规则。",
+                "Select and review a named rule first.",
+            );
+            cx.notify();
+            return;
+        };
+        let Some(state) = self.rule_state.clone() else {
+            self.rule_status = Message::new(
+                "命名规则状态已失效，请重新加载配置后重试。",
+                "Named-rule state is unavailable; reload configuration and try again.",
+            );
+            cx.notify();
+            return;
+        };
+        let token = plan.review_token();
+        let confirmed = match plan.confirm(&state, token) {
+            Ok(receipt) => receipt,
+            Err(error) => {
+                self.selected_rule = None;
+                self.rule_status =
+                    Message::detail("命名规则审核已过期", "Named-rule review expired", error);
+                cx.notify();
+                return;
+            }
+        };
+        let rule = confirmed.plan().rule().clone();
+        let specification = match specification_from_rule(&rule) {
+            Ok(specification) => specification,
+            Err(error) => {
+                self.rule_status = error;
+                cx.notify();
+                return;
+            }
+        };
+        self.rule_status = Message::new(
+            format!("已审核规则“{}”，正在启动…", rule.name),
+            format!("Reviewed rule “{}”; starting…", rule.name),
+        );
+        self.start_specification(specification, Some(rule.name), Some(rule.id), cx);
     }
 
     /// Retire listeners without transferring their remote authority to a new session.
@@ -241,9 +416,6 @@ impl TunnelsPanel {
     }
 
     fn start(&mut self, cx: &mut Context<Self>) {
-        let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
-            return;
-        };
         let spec = match self.specification(cx) {
             Ok(spec) => spec,
             Err(error) => {
@@ -252,11 +424,29 @@ impl TunnelsPanel {
                 return;
             }
         };
+        self.start_specification(spec, None, None, cx);
+    }
+
+    fn start_specification(
+        &mut self,
+        spec: Specification,
+        rule_name: Option<String>,
+        rule_id: Option<uuid::Uuid>,
+        cx: &mut Context<Self>,
+    ) {
+        let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
+            return;
+        };
         let endpoints = format!(
             "{}:{} → {}:{}",
             spec.bind_host, spec.bind_port, spec.target_host, spec.target_port
         );
-        let description = if spec.direction == Direction::Dynamic {
+        let description = if let Some(name) = rule_name {
+            Message::new(
+                format!("规则 {name} · {endpoints}"),
+                format!("Rule {name} · {endpoints}"),
+            )
+        } else if spec.direction == Direction::Dynamic {
             Message::new(
                 "动态 SOCKS5 · 目标与域名由 SSH 主机连接",
                 "Dynamic SOCKS5 · destinations and DNS via SSH host",
@@ -321,6 +511,7 @@ impl TunnelsPanel {
             Ok(()) => {
                 self.rows.push(TunnelRow {
                     id: self.next_id,
+                    rule_id,
                     description,
                     status: Message::new("正在启动…", "Starting…"),
                     cancel,
@@ -444,6 +635,55 @@ fn tunnel_summary(rows: &[TunnelRow]) -> Message {
     Message::new(zh.join(" · "), en.join(" · "))
 }
 
+fn rule_preview_message(rule: &TunnelRule) -> Message {
+    let kind = match rule.kind {
+        TunnelRuleKind::Local => ("本地转发", "Local forwarding"),
+        TunnelRuleKind::Remote => ("远程转发", "Remote forwarding"),
+        TunnelRuleKind::Dynamic => ("动态 SOCKS5", "Dynamic SOCKS5"),
+    };
+    let endpoint = match (rule.target_host.as_deref(), rule.target_port) {
+        (Some(host), Some(port)) => {
+            format!("{}:{} → {}:{}", rule.bind_host, rule.bind_port, host, port)
+        }
+        _ => format!("{}:{}", rule.bind_host, rule.bind_port),
+    };
+    Message::new(
+        format!("规则“{}” · {} · 预览：{endpoint}", rule.name, kind.0),
+        format!("Rule “{}” · {} · Preview: {endpoint}", rule.name, kind.1),
+    )
+}
+
+fn specification_from_rule(rule: &TunnelRule) -> Result<Specification, Message> {
+    let (direction, target_host, target_port) = match rule.kind {
+        TunnelRuleKind::Local => (
+            Direction::Local,
+            rule.target_host.clone().unwrap_or_default(),
+            rule.target_port.unwrap_or_default(),
+        ),
+        TunnelRuleKind::Remote => (
+            Direction::Remote,
+            rule.target_host.clone().unwrap_or_default(),
+            rule.target_port.unwrap_or_default(),
+        ),
+        TunnelRuleKind::Dynamic => (Direction::Dynamic, String::new(), 0),
+    };
+    if direction == Direction::Dynamic {
+        dynamic_bind(&rule.bind_host, rule.bind_port)?;
+    } else if target_host.is_empty() || target_port == 0 {
+        return Err(Message::new(
+            "命名规则目标端点无效，已阻止启动。",
+            "The named rule has an invalid destination endpoint; start was blocked.",
+        ));
+    }
+    Ok(Specification {
+        direction,
+        bind_host: rule.bind_host.clone(),
+        bind_port: rule.bind_port,
+        target_host,
+        target_port,
+    })
+}
+
 async fn connection_closed(session: &SshSession, owner: &Forward) -> bool {
     while !session.is_closed() && !owner.is_closed() {
         tokio::time::sleep(Duration::from_millis(100)).await;
@@ -509,6 +749,69 @@ fn byte_size(bytes: u64) -> String {
 impl Render for TunnelsPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
+        let matching_rules = self.matching_rules();
+        let selected_rule = self.selected_rule;
+        let mut named_rules = div().flex().flex_wrap().gap_1();
+        for rule in matching_rules {
+            let rule_id = rule.id;
+            let label = if rule.enabled {
+                rule.name.clone()
+            } else {
+                format!("{} · {}", rule.name, t(cx, "未启用", "Disabled"))
+            };
+            named_rules = named_rules.child(
+                Button::new(format!("named-tunnel-rule-{rule_id}"))
+                    .ghost()
+                    .compact()
+                    .rounded(px(6.))
+                    .selected(selected_rule == Some(rule_id))
+                    .disabled(self.suspended)
+                    .label(label)
+                    .on_click(
+                        cx.listener(move |view, _, _, cx| view.select_named_rule(rule_id, cx)),
+                    ),
+            );
+        }
+        let mut named_rule_section = div()
+            .px_3()
+            .py_2()
+            .flex_shrink_0()
+            .flex()
+            .items_center()
+            .gap_2()
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            .child(
+                div()
+                    .text_color(rgb(visual.muted))
+                    .child(IconName::Bookmark),
+            )
+            .child(
+                div()
+                    .w(px(120.))
+                    .flex_shrink_0()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(t(cx, "命名规则", "Named rules")),
+            )
+            .child(named_rules)
+            .child(div().flex_1());
+        if self.rule_plan.is_some() {
+            named_rule_section = named_rule_section.child(
+                Button::new("review-start-named-tunnel")
+                    .primary()
+                    .compact()
+                    .rounded(px(6.))
+                    .disabled(self.suspended)
+                    .label(t(cx, "审核并启动", "Review and start"))
+                    .on_click(cx.listener(|view, _, _, cx| view.start_named_rule(cx))),
+            );
+        }
+        named_rule_section = named_rule_section.child(
+            div()
+                .max_w(px(460.))
+                .text_color(rgb(visual.muted))
+                .child(self.rule_status.render(cx)),
+        );
         let mut rows = div()
             .id("tunnels-list")
             .flex_1()
@@ -518,6 +821,11 @@ impl Render for TunnelsPanel {
             .flex_col();
         for (index, row) in self.rows.iter().enumerate() {
             let id = row.id;
+            let row_icon = if row.rule_id.is_some() {
+                IconName::Bookmark
+            } else {
+                IconName::ArrowLeftRight
+            };
             let mut item = div()
                 .min_h(px(38.))
                 .px_2()
@@ -532,11 +840,7 @@ impl Render for TunnelsPanel {
                 }))
                 .border_b_1()
                 .border_color(rgb(visual.border))
-                .child(
-                    div()
-                        .text_color(rgb(visual.muted))
-                        .child(IconName::ArrowLeftRight),
-                )
+                .child(div().text_color(rgb(visual.muted)).child(row_icon))
                 .child(div().flex_1().min_w_0().child(row.description.render(cx)))
                 .child(
                     div()
@@ -651,6 +955,7 @@ impl Render for TunnelsPanel {
                 .child(Button::new("tunnel-local").ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).selected(self.direction==Direction::Local).label(t(cx,"本地转发","Local forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Local;cx.notify();})))
                 .child(Button::new("tunnel-remote").ghost().compact().rounded(px(6.)).icon(IconName::ArrowDown).selected(self.direction==Direction::Remote).label(t(cx,"远程转发","Remote forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Remote;cx.notify();})))
                 .child(Button::new("tunnel-dynamic").ghost().compact().rounded(px(6.)).icon(IconName::Network).selected(self.direction==Direction::Dynamic).label(t(cx,"动态 SOCKS5","Dynamic SOCKS5")).on_click(cx.listener(|view,_,window,cx| {view.direction=Direction::Dynamic;view.bind_host.read(cx).focus_handle(cx).focus(window,cx);cx.notify();}))))
+            .child(named_rule_section)
             .child(div().px_3().py_3().flex_shrink_0().flex().items_end().gap_2().border_b_1().border_color(rgb(visual.border))
                 .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"监听地址","Bind host")).child(Input::new(&self.bind_host).small().rounded(px(6.))))
                 .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"监听端口","Bind port")).child(Input::new(&self.bind_port).small().rounded(px(6.))))
@@ -739,7 +1044,49 @@ async fn cancellation(cancelled: &AtomicBool) {
 
 #[cfg(test)]
 mod tests {
-    use super::tunnel_error;
+    use super::{Direction, specification_from_rule, tunnel_error};
+    use keelshell_core::{TunnelRule, TunnelRuleKind};
+
+    #[test]
+    fn named_rule_adapter_preserves_forwarding_mode_and_blocks_missing_targets() {
+        let connection_id = uuid::Uuid::new_v4();
+        let local = TunnelRule::new(
+            "Local database",
+            connection_id,
+            TunnelRuleKind::Local,
+            "127.0.0.1",
+            15432,
+            Some("db.internal".into()),
+            Some(5432),
+        )
+        .unwrap_or_else(|error| panic!("valid local rule: {error}"));
+        let specification = specification_from_rule(&local)
+            .unwrap_or_else(|_| panic!("local specification should be valid"));
+        assert_eq!(specification.direction, Direction::Local);
+        assert_eq!(specification.target_host, "db.internal");
+        assert_eq!(specification.target_port, 5432);
+
+        let dynamic = TunnelRule::new(
+            "Local proxy",
+            connection_id,
+            TunnelRuleKind::Dynamic,
+            "127.0.0.1",
+            0,
+            None,
+            None,
+        )
+        .unwrap_or_else(|error| panic!("valid dynamic rule: {error}"));
+        assert_eq!(
+            specification_from_rule(&dynamic)
+                .unwrap_or_else(|_| panic!("dynamic specification should be valid"))
+                .direction,
+            Direction::Dynamic
+        );
+
+        let mut invalid = local;
+        invalid.target_host = None;
+        assert!(specification_from_rule(&invalid).is_err());
+    }
 
     #[gpui_kit::test]
     fn stopped_and_failed_tunnel_messages_follow_current_language(

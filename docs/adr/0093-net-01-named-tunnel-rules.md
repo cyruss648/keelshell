@@ -15,10 +15,11 @@ NET-01 的运行时转发统计已经完成，但监听规则仍然只存在于�
 - 缺失的 `tunnel_rules` 字段从旧 `state.json` 迁移为空列表；加载、校验和保存规则都不会绑定端口、打开 SSH、启动 listener 或自动恢复运行时隧道。
 - 删除或移入回收站的连接如果仍被命名规则引用会被 typed error 原子拒绝；批量 Trash/Purge 也使用相同的引用闸门，避免留下不可保存的悬空规则。
 - `AppState::plan_tunnel_rule_action` 生成无副作用的精确计划，计划绑定创建时的 state revision、完整非敏感 connection snapshot 和规则 snapshot；`TunnelRuleReviewToken` 还必须与当前 `AppState` 一起确认。连接路由、认证、规则内容或 state revision 变化都会使旧计划失效。
-- 当前切片只建立持久化领域和审核闸门，尚未把收据交给 forwarding executor，也不把 `enabled` 解释成启动时自动执行。
+- Tunnels 面板只为当前已保存连接展示匹配规则；选择规则后先生成端点预览，用户点击“审核并启动”才会确认计划并交给现有 forwarding executor。确认后的运行行保留 rule ID，但 listener owner、relay task 和流量统计只存在于当前 live session，不写入 `AppState`。
+- session 到 saved connection 的绑定由 Workspace 持有，split 和 reconnect 会复制或迁移该绑定；无 saved connection 的临时会话不能执行 named rule。面板收到新的 StateStore snapshot 或连接绑定变化时清除旧选择和 review plan，避免旧 revision 重放。
 
 ## Consequences
 
 规则可以安全地进入版本化 StateStore，并能在 UI 中展示为明确的待审核启动/停止意图。存在引用规则时连接删除会失败并保留原 state；旧配置继续可读，规则保存不会改变已有连接和运行时会话。
 
-后续 UI 仍需实现规则编辑、逐条审核、运行状态绑定、启动/停止结果、重启不自动监听、重连后旧 owner 失效和未知远程结果处理。规则领域本身不代表跨平台原生 UI 或真实客户 SSH 验收。
+当前仍需实现规则编辑、删除和持久化管理 UI；stop action 仍沿用当前运行行的 listener owner 停止语义，尚未提供按 rule ID 的独立 stop review。运行状态持久化、重启恢复、重连后旧 owner 失效的完整规则级验收、未知远程结果处理和跨平台原生 UI 仍未完成。规则与本地 fixture 验证不代表真实客户 SSH、三平台原生桌面或发布安装验收。

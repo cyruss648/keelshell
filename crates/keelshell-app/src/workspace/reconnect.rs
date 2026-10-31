@@ -764,6 +764,7 @@ impl Workspace {
         let id = terminal.entity_id();
         self.suspend_panels(ticket.tab, cx);
         self.remote_sessions.remove(&ticket.tab);
+        let connection_id = self.remote_connection_ids.remove(&ticket.tab);
         // Cancellation cannot wait for an emitted panel event or a timer after
         // the captured connection is retired. The replacement gets no grant.
         self.maintain_agent(cx);
@@ -777,6 +778,9 @@ impl Workspace {
         self.show_archived.remove(&ticket.tab);
         self.remote_sessions.insert(id, session.clone());
         self.remote_hosts.insert(id, host.clone());
+        if let Some(connection_id) = connection_id {
+            self.remote_connection_ids.insert(id, connection_id);
+        }
         if let Some(history) = self.command_histories.remove(&ticket.tab) {
             self.command_histories.insert(id, history);
         }

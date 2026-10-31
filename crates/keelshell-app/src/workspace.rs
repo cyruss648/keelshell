@@ -357,6 +357,7 @@ pub struct Workspace {
     connecting: bool,
     connect_route: Option<routing::ConnectRoute>,
     remote_hosts: HashMap<EntityId, String>,
+    remote_connection_ids: HashMap<EntityId, uuid::Uuid>,
     panels: HashMap<EntityId, RemotePanels>,
     reconnect_bindings: HashMap<EntityId, reconnect::TabBinding>,
     archived_panels: HashMap<EntityId, RemotePanels>,
@@ -793,6 +794,7 @@ impl Workspace {
             connecting: false,
             connect_route: None,
             remote_hosts: HashMap::new(),
+            remote_connection_ids: HashMap::new(),
             panels: HashMap::new(),
             reconnect_bindings: HashMap::new(),
             archived_panels: HashMap::new(),
@@ -859,6 +861,7 @@ impl Workspace {
             self.maintain_agent(cx);
             self.command_histories.remove(&terminal.entity_id());
             self.remote_hosts.remove(&terminal.entity_id());
+            self.remote_connection_ids.remove(&terminal.entity_id());
             self.panels.remove(&terminal.entity_id());
             self.terminal_observers.remove(&terminal.entity_id());
             self.terminal_focus.remove(&terminal.entity_id());
@@ -903,8 +906,9 @@ impl Workspace {
         let binding = self.reconnect_bindings.get(&id).cloned();
         let title = tab.read(cx).title.clone();
         let host = self.remote_hosts.get(&id).cloned().unwrap_or_default();
+        let connection_id = self.remote_connection_ids.get(&id).copied();
         let original = self.active;
-        self.add_remote_tab(session, title, host, window, cx);
+        self.add_remote_tab(session, title, host, connection_id, window, cx);
         if let (Some(binding), Some(peer)) = (binding, self.tabs.get(self.active)) {
             self.reconnect_bindings
                 .insert(peer.entity_id(), binding.for_split());
@@ -989,6 +993,7 @@ impl Workspace {
         session: SshSession,
         title: String,
         host: String,
+        connection_id: Option<uuid::Uuid>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -1002,6 +1007,9 @@ impl Workspace {
         );
         let id = terminal.entity_id();
         self.remote_hosts.insert(id, host.clone());
+        if let Some(connection_id) = connection_id {
+            self.remote_connection_ids.insert(id, connection_id);
+        }
         self.watch_terminal(&terminal, window, cx);
         self.remote_sessions.insert(id, session.clone());
         self.command_histories.insert(id, CommandHistory::default());
@@ -1790,6 +1798,7 @@ impl Workspace {
                             view.revoke_stale_protocol_diagnostics(cx);
                             view.maintain_mcp(cx);
                             view.maintain_agent(cx);
+                            view.refresh_tunnel_panels(cx);
                             view.snippet_sources = Arc::new(view.state.snippets.clone());
                             view.command_sources_revision =
                                 view.command_sources_revision.wrapping_add(1);
@@ -1917,6 +1926,7 @@ impl Workspace {
                 match result {
                     Ok(saved) => {
                         view.state = saved;
+                        view.refresh_tunnel_panels(cx);
                         view.update_service.update(cx, |panel, cx| panel.set_preferences(view.state.settings.updates, cx));
                         if view.pending_update_check.is_some_and(|pending| view.state.settings.updates.last_successful_check.is_some_and(|saved| saved >= pending)) {
                             view.pending_update_check = None;
@@ -2312,6 +2322,21 @@ impl Workspace {
         };
         cx.notify();
     }
+    fn refresh_tunnel_panels(&mut self, cx: &mut Context<Self>) {
+        let state = self.state.clone();
+        let mut panels = Vec::new();
+        for (id, remote_panels) in self.panels.iter().chain(self.archived_panels.iter()) {
+            if let Some(panel) = &remote_panels.tunnels {
+                panels.push((panel.clone(), self.remote_connection_ids.get(id).copied()));
+            }
+        }
+        for (panel, connection_id) in panels {
+            panel.update(cx, |panel, cx| {
+                panel.refresh_rule_state(Some(state.clone()), connection_id, cx)
+            });
+        }
+    }
+
     fn toggle_panel(&mut self, kind: ToolPanel, window: &mut Window, cx: &mut Context<Self>) {
         if self.remote_completion.visible() {
             self.cancel_remote_completion(cx);
@@ -2352,6 +2377,8 @@ impl Workspace {
         };
         let host = self.remote_hosts.get(&id).cloned().unwrap_or_default();
         let runtime = self.runtime.clone();
+        let rule_state = self.state.clone();
+        let rule_connection_id = self.remote_connection_ids.get(&id).copied();
         let panels = self.panels.entry(id).or_default();
         match kind {
             ToolPanel::Files if panels.files.is_none() => {
@@ -2362,8 +2389,23 @@ impl Workspace {
             }
             ToolPanel::Tunnels if panels.tunnels.is_none() => {
                 panels.tunnels = Some(cx.new(|cx| {
-                    crate::tunnels::TunnelsPanel::new(session, host, runtime, window, cx)
+                    crate::tunnels::TunnelsPanel::new_with_state(
+                        session,
+                        host,
+                        runtime,
+                        Some(rule_state),
+                        rule_connection_id,
+                        window,
+                        cx,
+                    )
                 }));
+            }
+            ToolPanel::Tunnels => {
+                if let Some(panel) = &panels.tunnels {
+                    panel.update(cx, |panel, cx| {
+                        panel.refresh_rule_state(Some(rule_state), rule_connection_id, cx)
+                    });
+                }
             }
             _ => {}
         }

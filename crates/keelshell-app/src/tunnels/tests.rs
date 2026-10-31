@@ -5,7 +5,7 @@ use gpui_kit::{
     AppContext, Bounds, Focusable, TestAppContext, WindowBounds, WindowOptions, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
 };
-use keelshell_core::Language;
+use keelshell_core::{AppState, Connection, Language, TunnelRule, TunnelRuleKind};
 use keelshell_session::{SshAuth, SshOptions, SshSession};
 use russh::keys::{HashAlg, PrivateKey, ssh_key::private::Ed25519Keypair};
 use std::{sync::Arc, time::Duration};
@@ -112,6 +112,23 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
             timeout: Duration::from_secs(3),
         }))
         .checked("real SSH connection");
+    let mut named_state = AppState::default();
+    let connection = Connection::new("SSH fixture", ssh_address.ip().to_string(), "fixture");
+    let connection_id = connection.id;
+    named_state.connections.push(connection);
+    let mut named_rule = TunnelRule::new(
+        "Fixture SOCKS",
+        connection_id,
+        TunnelRuleKind::Dynamic,
+        "127.0.0.1",
+        0,
+        None,
+        None,
+    )
+    .checked("named dynamic rule");
+    named_rule.enabled = true;
+    named_state.tunnel_rules.push(named_rule.clone());
+    named_state.validate().checked("named rule state");
     let panel_session = session.clone();
     let panel_runtime = runtime.clone();
     let (window, panel) = cx.update(|cx| {
@@ -128,10 +145,12 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
             cx,
             |window, cx| {
                 cx.new(|cx| {
-                    TunnelsPanel::new(
+                    TunnelsPanel::new_with_state(
                         panel_session,
                         "SSH fixture".into(),
                         panel_runtime,
+                        Some(named_state),
+                        Some(connection_id),
                         window,
                         cx,
                     )
@@ -180,7 +199,31 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
                 .update(cx, |input, cx| input.set_value("127.0.0.1", window, cx))
         });
         window.render_frame(cx);
-        window.click("start-tunnel", cx);
+        let rule_button = format!("named-tunnel-rule-{}", named_rule.id);
+        window.click(rule_button, cx);
+        assert!(panel.read(cx).rule_plan.is_some());
+        assert!(panel.read(cx).rule_status.render(cx).contains("预览"));
+        let mut refreshed_state = panel
+            .read(cx)
+            .rule_state
+            .clone()
+            .unwrap_or_else(|| panic!("named rule snapshot"));
+        refreshed_state.tunnel_rules[0].name = "Fixture SOCKS refreshed".into();
+        panel.update(cx, |panel, cx| {
+            panel.refresh_rule_state(Some(refreshed_state), Some(connection_id), cx)
+        });
+        assert!(panel.read(cx).rule_plan.is_none());
+        assert!(panel.read(cx).rule_status.render(cx).contains("请选择规则"));
+        window.render_frame(cx);
+        let rule_button = format!("named-tunnel-rule-{}", named_rule.id);
+        window.click(rule_button, cx);
+        assert!(panel.read(cx).rule_plan.is_some());
+        window.render_frame(cx);
+        window.click("review-start-named-tunnel", cx);
+        assert_eq!(panel.read(cx).rows.len(), 1);
+        assert_eq!(panel.read(cx).rows[0].rule_id, Some(named_rule.id));
+        assert!(panel.read(cx).rule_plan.is_none());
+        assert!(panel.read(cx).rule_status.render(cx).contains("正在启动"));
     })
     .checked("select dynamic mode and start using real handlers");
     cx.wait_for(window, Duration::from_secs(5), |_, cx| {
@@ -487,10 +530,12 @@ async fn suspended_tunnels_wait_for_cleanup_close_owned_streams_and_never_restar
             cx,
             |window, cx| {
                 cx.new(|cx| {
-                    TunnelsPanel::new(
+                    TunnelsPanel::new_with_state(
                         session.clone(),
                         "suspend fixture".into(),
                         runtime.clone(),
+                        None,
+                        None,
                         window,
                         cx,
                     )

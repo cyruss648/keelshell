@@ -2,7 +2,7 @@
 
 ## 范围
 
-本记录覆盖 `keelshell-core` 中命名 forwarding rule 的持久化结构、旧状态迁移、连接绑定和显式审核计划。没有启动 SSH、监听 socket、远程转发或真实客户主机。
+本记录首先覆盖 `keelshell-core` 中命名 forwarding rule 的持久化结构、旧状态迁移、连接绑定和显式审核计划；2026-10-31 增量补充当前 GPUI Tunnels 面板到真实 forwarding executor 的审核启动链。所有联调仍使用内存 SSH server 和临时 StateStore，没有真实客户主机。
 
 ## 已验证行为
 
@@ -16,6 +16,14 @@
 - soft delete、hard remove、purge 和批量 Trash/Purge 的生产路径都 fail closed；专项测试直接覆盖 soft delete、hard remove、purge 和包含一个被引用连接的多选批量 Trash，原 state 保持可验证。有效 state 不允许 deleted connection 被规则引用，因此批量 Purge 的引用分支是防御性检查。
 - 领域操作只改内存快照或产生无副作用计划，没有 listener、SSH channel 或后台 task。
 
+## 2026-10-31 executor 增量
+
+- Workspace 为每个远程 tab 维护 saved connection ID；split tab 继承该绑定，reconnect replacement 迁移该绑定，ephemeral quick connect 没有规则执行权限。
+- Tunnels 面板只显示当前连接匹配的规则；规则选择生成端点预览，禁用规则不能生成 start plan。
+- “审核并启动”重新用当前面板快照确认 `TunnelRuleReviewToken`，确认失败会清除旧计划；确认成功后才调用已有 local、remote 或 dynamic forwarding worker，运行行保留 `rule_id`。
+- StateStore snapshot 或绑定刷新会清除 selection/review plan，旧规则不会自动重放；运行时 owner 仍由当前 live session 管理，配置加载不会启动 listener。
+- GPUI/SSH fixture 测试通过真实 dynamic SOCKS5 listener 读取实际 `socks5h://` 地址，并验证 named rule 运行行带有 rule ID；原有 free-form dynamic/local/remote 生命周期测试继续覆盖。
+
 ## 命令与结果
 
 ```text
@@ -24,10 +32,12 @@ cargo clippy -p keelshell-core --all-targets --all-features --locked --offline -
 cargo test -p keelshell-core --locked --offline tunnel_rules -- --nocapture
 cargo test -p keelshell-core --test tunnel_rules --locked --offline -- --nocapture
 cargo test -p keelshell-core --locked --offline
+cargo test -p keelshell-app --locked --offline dynamic_panel_starts_real_proxy_copies_address_switches_language_and_stops -- --nocapture
+cargo clippy -p keelshell-app --all-targets --all-features --locked --offline -- -D warnings
 ```
 
-结果：格式检查和严格 Clippy 通过；当前功能提交后尚未重新运行 core 全量测试；新增 3 个集成测试使当前测试目标总数为 497，不能将该枚举数字写成通过数；`tunnel_rules` 集成测试 10 项通过。测试记录中的删除引用、批量 Trash、规则变更、规则删除和 state revision 失效场景均通过。
+结果：领域测试记录中的 core persistence 场景和本轮 executor 的格式检查、严格 Clippy、GPUI/SSH 聚焦测试通过；该聚焦测试为 1 passed，766 filtered out。全量门禁在提交和独立复核阶段补记。`tunnel_rules` 集成测试继续覆盖规则持久化、删除引用、批量 Trash、规则变更、规则删除和 state revision 失效。
 
 ## 未完成边界
 
-本记录不证明规则编辑 UI、审核后真实启动/停止、运行状态持久化、重启恢复、重连绑定失效、跨平台原生窗口或发布安装。后续 executor 必须继续绑定当前 connection/route、复核规则 revision，并将未知远程取消结果保持为 UNKNOWN。
+本记录仍不证明规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效、远程未知结果处理、跨平台原生窗口或发布安装。当前已证明的启动链只覆盖本机 macOS 上的受控 GPUI 和内存 SSH fixture，不能替代真实客户 SSH 或 macOS/Windows/Linux 原生验收。

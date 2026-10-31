@@ -718,6 +718,7 @@ impl Workspace {
                                         "{}@{}:{}",
                                         connection.username, connection.host, connection.port
                                     ),
+                                    (!ephemeral).then_some(connection.id),
                                     window,
                                     cx,
                                 );
