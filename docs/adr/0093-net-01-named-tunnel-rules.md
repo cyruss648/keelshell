@@ -16,6 +16,7 @@ NET-01 的运行时转发统计已经完成，但监听规则仍然只存在于�
 - 删除或移入回收站的连接如果仍被命名规则引用会被 typed error 原子拒绝；批量 Trash/Purge 也使用相同的引用闸门，避免留下不可保存的悬空规则。
 - `AppState::plan_tunnel_rule_action` 生成无副作用的精确计划，计划绑定创建时的 state revision、完整非敏感 connection snapshot 和规则 snapshot；`TunnelRuleReviewToken` 还必须与当前 `AppState` 一起确认。连接路由、认证、规则内容或 state revision 变化都会使旧计划失效。
 - Tunnels 面板只为当前已保存连接展示匹配规则；选择规则后先生成端点预览，用户点击“审核并启动”才会确认计划并交给现有 forwarding executor。确认后的运行行保留 rule ID，但 listener owner、relay task 和流量统计只存在于当前 live session，不写入 `AppState`。
+- executor worker 同时观察 local listener task、remote owner 和 dynamic owner 的终止状态；local listener 因 accept 错误自行结束时也必须收敛到 UI `Finished`，不能只等待共享 SSH session 关闭。
 - session 到 saved connection 的绑定由 Workspace 持有，split 和 reconnect 会复制或迁移该绑定；无 saved connection 的临时会话不能执行 named rule。面板收到新的 StateStore snapshot 或连接绑定变化时清除旧选择和 review plan，避免旧 revision 重放。
 
 ## Consequences

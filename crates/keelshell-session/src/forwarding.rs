@@ -214,6 +214,15 @@ impl LocalForward {
     pub fn local_addr(&self) -> SocketAddr {
         self.address
     }
+    /// Whether the listener task has reached a terminal state.
+    ///
+    /// The application uses this to surface an unexpected listener failure and
+    /// release the worker that owns the forwarding row. A task can finish on
+    /// its own when accepting a new local connection fails, so checking only
+    /// the shared SSH session is insufficient.
+    pub fn is_closed(&self) -> bool {
+        self.task.is_finished()
+    }
     /// Cumulative payload traffic observed by this listener.
     pub fn traffic(&self) -> TrafficStats {
         self.traffic.clone()
@@ -245,6 +254,10 @@ impl RemoteForward {
     /// Port selected by the remote server.
     pub fn remote_port(&self) -> u32 {
         self.port
+    }
+    /// Whether this remote listener has completed its explicit close path.
+    pub fn is_closed(&self) -> bool {
+        self.closed
     }
     /// Cumulative payload traffic observed by this listener.
     pub fn traffic(&self) -> TrafficStats {
@@ -501,5 +514,27 @@ mod tests {
         };
         stats.add_sent(4);
         assert_eq!(stats.snapshot().sent, u64::MAX);
+    }
+
+    #[tokio::test]
+    async fn local_forward_reports_a_finished_listener_task() {
+        let listener = TcpListener::bind(("127.0.0.1", 0))
+            .await
+            .unwrap_or_else(|error| panic!("bind listener fixture: {error}"));
+        let address = listener
+            .local_addr()
+            .unwrap_or_else(|error| panic!("read listener fixture address: {error}"));
+        let task = tokio::spawn(async move {
+            let _ = listener.accept().await;
+        });
+        task.abort();
+        let owner = LocalForward {
+            address,
+            traffic: TrafficStats::default(),
+            task,
+        };
+
+        tokio::task::yield_now().await;
+        assert!(owner.is_closed());
     }
 }

@@ -12,6 +12,8 @@
 
 ## 当前继续开发 — 2026-10-25
 
+本次 NET-01 生命周期修复补充了 local listener task 的终止状态检查；listener 因 accept 错误自行结束时，app worker 会收敛到 `Finished`，不会只等待共享 SSH session 关闭。修复后的 focused tests 已通过，完整门禁和最新独立 reviewer 仍待补记。
+
 NET-01 已完成运行时流量统计、命名规则持久化和当前面板的审核启动适配：local/remote TCP 与 loopback SOCKS5 的 payload 发送／接收计数通过 session forwarding 暴露，并在 app 隧道行显示；remote forwarding 以远端监听侧定义方向，停止时等待已建立 relay 完成，停止后的行保留最终快照。命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除引用保护和绑定 rule/connection/state revision 的审核计划；Tunnels 面板会按 saved connection 过滤规则，先展示预览，用户显式确认后调用真实 forwarding executor，split/reconnect 保留连接绑定，运行行保留 rule ID。规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效和跨平台原生验收仍未完成。AI-04 已完成 `keelshell-core` 领域模型和 `keelshell-app` GPUI 本地知识预览审核：用户显式捕获的来源绑定文本带不可变 session/source identity、revision、时间与捕获类型；预览默认是 `Unknown`／`DoNotPersist`，只有真实完成/失败确认按钮才产生可审核事实；敏感内容只留下安全状态，Markdown 不含敏感正文。已接入单条完整 session capture 的显式 StateStore 持久化、受控加载、乐观冲突、敏感/unknown 阻断和 context-selection/context-screen 到 Workspace 的完整 capture/save 集成测试；条目编辑/删除、模型发送和跨平台原生验收仍未完成。详细记录见[NET-01 记录](testing/records/2026-10-23-net-01-traffic-accounting.md)、[命名规则记录](testing/records/2026-10-23-net-01-named-tunnel-rules.md)和[AI-04 UI 记录](testing/records/2026-10-23-ai-04-knowledge-review-ui.md)。本轮独立复核及修复记录见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
 
 主远程草稿编辑器已完成 FILE-04 第一阶段：使用 GPUI Kit `EditorState`，按远端文件名启用 Rust、Python、JSON、TOML、YAML 和 Bash 高亮，未知或不支持的名称使用纯文本。KeelShell 自有字面查找／替换仍是唯一搜索入口，内置搜索、折叠、自动闭合和智能缩进关闭；patch 与冲突合并输入保持 `TextareaState`。UTF-8、NUL、1 MiB、审核保存、同目录备份和完整读回边界未改变。SQL grammar 为控制首阶段范围暂未启用，SQL 文件回退纯文本；当前 grammar 集合已使用旧兼容的 `cc` 锁定线，扩展语言需单独评估。代码与专项验证见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。

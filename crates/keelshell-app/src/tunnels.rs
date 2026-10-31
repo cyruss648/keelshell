@@ -48,7 +48,11 @@ enum Forward {
 
 impl Forward {
     fn is_closed(&self) -> bool {
-        matches!(self, Self::Dynamic(owner) if owner.is_closed())
+        match self {
+            Self::Local(owner) => owner.is_closed(),
+            Self::Remote(owner) => owner.is_closed(),
+            Self::Dynamic(owner) => owner.is_closed(),
+        }
     }
 
     fn traffic(&self) -> TrafficStats {

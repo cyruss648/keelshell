@@ -24,6 +24,11 @@
 - StateStore snapshot 或绑定刷新会清除 selection/review plan，旧规则不会自动重放；运行时 owner 仍由当前 live session 管理，配置加载不会启动 listener。
 - GPUI/SSH fixture 测试通过真实 dynamic SOCKS5 listener 读取实际 `socks5h://` 地址，并验证 named rule 运行行带有 rule ID；原有 free-form dynamic/local/remote 生命周期测试继续覆盖。
 
+## 2026-10-31 listener 生命周期修复
+
+- 独立复核发现 LocalForward listener task 因 accept 错误自行结束时，app 只检查 DynamicForward 的 owner 状态，导致 worker 可能一直等待而不发送 `Finished`。`LocalForward::is_closed` 现在反映 listener task 的终止状态，统一 `Forward::is_closed` 检查 local、remote 和 dynamic owner；新增 session 回归测试覆盖已结束的 listener task。
+- 本轮修复后的格式检查、diff 检查、session forwarding focused tests（5 passed）、app tunnel focused tests（5 passed）、session/app 严格 Clippy 均通过。完整 workspace 门禁和最新独立 reviewer 仍待补记。
+
 ## 命令与结果
 
 ```text
@@ -36,7 +41,7 @@ cargo test -p keelshell-app --locked --offline dynamic_panel_starts_real_proxy_c
 cargo clippy -p keelshell-app --all-targets --all-features --locked --offline -- -D warnings
 ```
 
-结果：领域测试记录中的 core persistence 场景和本轮 executor 的格式检查、严格 Clippy、GPUI/SSH 聚焦测试通过；该聚焦测试为 1 passed，766 filtered out。全量门禁在提交和独立复核阶段补记。`tunnel_rules` 集成测试继续覆盖规则持久化、删除引用、批量 Trash、规则变更、规则删除和 state revision 失效。
+结果：领域测试记录中的 core persistence 场景和本轮 executor 的格式检查、严格 Clippy、GPUI/SSH 聚焦测试通过；修复后的 app tunnel 聚焦测试为 5 passed、763 filtered out，session forwarding 聚焦测试为 5 passed、421 filtered out。完整门禁和最新独立 reviewer 仍需在修复提交上重新执行。`tunnel_rules` 集成测试继续覆盖规则持久化、删除引用、批量 Trash、规则变更、规则删除和 state revision 失效。
 
 ## 未完成边界
 
