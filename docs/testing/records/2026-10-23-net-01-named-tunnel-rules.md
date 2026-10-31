@@ -52,4 +52,4 @@ python3 scripts/check.py
 
 ## 未完成边界
 
-本记录仍不证明规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效、远程未知结果处理、跨平台原生窗口或发布安装。当前已证明的启动链只覆盖本机 macOS 上的受控 GPUI 和内存 SSH fixture，不能替代真实客户 SSH 或 macOS/Windows/Linux 原生验收。命名规则 executor 已合入主线为 `b218a4a`，listener 生命周期修复已合入主线为 `3c00ff3`；文档提交完成后以远端 readback 记录最终主线状态。
+本记录仍不证明规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效、远程未知结果处理、跨平台原生窗口或发布安装。当前已证明的启动链只覆盖本机 macOS 上的受控 GPUI 和内存 SSH fixture，不能替代真实客户 SSH 或 macOS/Windows/Linux 原生验收。命名规则 executor 已合入主线为 `b218a4a`，listener 生命周期修复已合入主线为 `3c00ff3`；本次交付最终要求 `HEAD == origin/main`、ahead/behind 为 `0/0`，并由推送后的命令回读确认。
