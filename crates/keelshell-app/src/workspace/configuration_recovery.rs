@@ -5,6 +5,7 @@ use crate::configuration_recovery::{ConfigRecoveryEvent, ConfigRecoveryPanel};
 impl Workspace {
     fn config_recovery_idle(&self, cx: &App) -> bool {
         !self.saving
+            && !self.state_reloading
             && self.tabs.is_empty()
             && self.remote_sessions.is_empty()
             && !self.connecting
@@ -63,6 +64,14 @@ impl Workspace {
                         }
                     }
                     ConfigRecoveryEvent::Restored(state) => {
+                        if view.state_reloading {
+                            view.status = Message::new(
+                                "配置正在重新加载，已忽略过期的恢复结果。",
+                                "Configuration is reloading; the stale recovery result was ignored.",
+                            );
+                            cx.notify();
+                            return;
+                        }
                         view.state = (**state).clone();
                         // Recovery never transports a previous runtime capability.
                         // The modal precondition already required no active work.

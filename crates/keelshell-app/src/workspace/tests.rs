@@ -1144,12 +1144,14 @@ fn workspace_blocks_update_and_secure_state_panels_while_state_reloads(cx: &mut 
         fixture.workspace.update(cx, |workspace, cx| {
             workspace.open_profile_sync(window, cx);
             workspace.open_vault_settings(window, cx);
+            workspace.open_configuration_recovery(window, cx);
         });
     })
     .checked("reject secure configuration panels during reload");
     fixture.workspace.read_with(cx, |workspace, _| {
         assert!(workspace.profile_sync.is_none());
         assert!(workspace.vault_settings.is_none());
+        assert!(workspace.configuration_recovery.is_none());
     });
 }
 
