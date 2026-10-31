@@ -82,6 +82,9 @@ pub enum AssistantEvent {
     SaveKnowledge {
         review_id: Uuid,
     },
+    ReloadKnowledge {
+        review_id: Uuid,
+    },
 }
 
 /// The scope of the terminal snapshot captured by an explicit user action.
@@ -156,6 +159,10 @@ enum KnowledgeSaveState {
     /// return to `Ready`, because the candidate still carries the stale
     /// snapshot that caused the conflict.
     Conflict,
+    /// A user-requested StateStore reload is in progress.
+    Reloading,
+    /// The last user-requested reload failed; saving remains blocked.
+    ReloadFailed,
 }
 
 enum PreparedAssistantRequest {
@@ -823,6 +830,81 @@ impl AssistantPanel {
             );
             cx.notify();
         }
+    }
+
+    pub(crate) fn mark_knowledge_reload_pending(
+        &mut self,
+        review_id: Uuid,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let Some(preview) = self
+            .knowledge_preview
+            .as_mut()
+            .filter(|preview| preview.review_id == review_id)
+        else {
+            return false;
+        };
+        if !matches!(
+            preview.save_state,
+            KnowledgeSaveState::Unknown
+                | KnowledgeSaveState::Conflict
+                | KnowledgeSaveState::ReloadFailed
+        ) {
+            return false;
+        }
+        preview.save_state = KnowledgeSaveState::Reloading;
+        self.status = Message::new(
+            "正在重新加载配置；旧知识审核不会重放。",
+            "Reloading configuration; the old knowledge review will not be replayed.",
+        );
+        cx.notify();
+        true
+    }
+
+    pub(crate) fn mark_knowledge_reload_succeeded(
+        &mut self,
+        review_id: Uuid,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let is_reloading = self.knowledge_preview.as_ref().is_some_and(|preview| {
+            preview.review_id == review_id && preview.save_state == KnowledgeSaveState::Reloading
+        });
+        if !is_reloading {
+            return false;
+        }
+        self.knowledge_preview = None;
+        self.status = Message::new(
+            "配置已重新加载；旧知识审核已清除，请重新生成预览并审核。",
+            "Configuration reloaded; the old knowledge review was cleared. Build and review a fresh preview.",
+        );
+        cx.notify();
+        true
+    }
+
+    pub(crate) fn mark_knowledge_reload_failed(
+        &mut self,
+        review_id: Uuid,
+        error: &keelshell_core::Error,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let Some(preview) = self
+            .knowledge_preview
+            .as_mut()
+            .filter(|preview| preview.review_id == review_id)
+        else {
+            return false;
+        };
+        if preview.save_state != KnowledgeSaveState::Reloading {
+            return false;
+        }
+        preview.save_state = KnowledgeSaveState::ReloadFailed;
+        self.status = Message::detail(
+            "配置重新加载失败，知识保存仍被阻止",
+            "Configuration reload failed; knowledge saving remains blocked",
+            error,
+        );
+        cx.notify();
+        true
     }
 
     pub(crate) fn reject_knowledge_save(&mut self, cx: &mut Context<Self>) {
@@ -1560,26 +1642,74 @@ impl AssistantPanel {
                     .label(t(cx, "已保存", "Saved"))
                     .into_any_element()
             }
-            (SaveDisposition::Persistable, KnowledgeSaveState::Unknown) => {
-                Button::new("knowledge-save-unknown")
+            (SaveDisposition::Persistable, KnowledgeSaveState::Unknown) => div()
+                .flex()
+                .gap_2()
+                .child(
+                    Button::new("knowledge-save-unknown")
+                        .ghost()
+                        .disabled(true)
+                        .label(t(cx, "结果未知", "Unknown")),
+                )
+                .child(
+                    Button::new("knowledge-reload")
+                        .ghost()
+                        .label(t(cx, "重新加载并重新审核", "Reload and review again"))
+                        .on_click(cx.listener(|panel, _, _, cx| {
+                            if let Some(review_id) = panel
+                                .knowledge_preview
+                                .as_ref()
+                                .map(|preview| preview.review_id)
+                            {
+                                cx.emit(AssistantEvent::ReloadKnowledge { review_id });
+                            }
+                        })),
+                )
+                .into_any_element(),
+            (SaveDisposition::Persistable, KnowledgeSaveState::Conflict) => div()
+                .flex()
+                .gap_2()
+                .child(
+                    Button::new("knowledge-save-conflict")
+                        .ghost()
+                        .disabled(true)
+                        .label(t(cx, "配置已变化", "Configuration changed")),
+                )
+                .child(
+                    Button::new("knowledge-reload")
+                        .ghost()
+                        .label(t(cx, "重新加载并重新审核", "Reload and review again"))
+                        .on_click(cx.listener(|panel, _, _, cx| {
+                            if let Some(review_id) = panel
+                                .knowledge_preview
+                                .as_ref()
+                                .map(|preview| preview.review_id)
+                            {
+                                cx.emit(AssistantEvent::ReloadKnowledge { review_id });
+                            }
+                        })),
+                )
+                .into_any_element(),
+            (SaveDisposition::Persistable, KnowledgeSaveState::Reloading) => {
+                Button::new("knowledge-reload-pending")
                     .ghost()
                     .disabled(true)
-                    .label(t(
-                        cx,
-                        "结果未知，请重新加载",
-                        "Unknown; reload before retry",
-                    ))
+                    .label(t(cx, "正在重新加载…", "Reloading…"))
                     .into_any_element()
             }
-            (SaveDisposition::Persistable, KnowledgeSaveState::Conflict) => {
-                Button::new("knowledge-save-conflict")
+            (SaveDisposition::Persistable, KnowledgeSaveState::ReloadFailed) => {
+                Button::new("knowledge-reload")
                     .ghost()
-                    .disabled(true)
-                    .label(t(
-                        cx,
-                        "配置已变化，请重新加载",
-                        "Configuration changed; reload before retry",
-                    ))
+                    .label(t(cx, "重试重新加载", "Retry reload"))
+                    .on_click(cx.listener(|panel, _, _, cx| {
+                        if let Some(review_id) = panel
+                            .knowledge_preview
+                            .as_ref()
+                            .map(|preview| preview.review_id)
+                        {
+                            cx.emit(AssistantEvent::ReloadKnowledge { review_id });
+                        }
+                    }))
                     .into_any_element()
             }
             (SaveDisposition::DoNotPersist { .. }, _) => Button::new("knowledge-save-disabled")

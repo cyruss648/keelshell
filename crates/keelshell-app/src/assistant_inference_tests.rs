@@ -482,6 +482,18 @@ fn unknown_knowledge_write_result_disables_automatic_replay(cx: &mut TestAppCont
         });
         window.render_frame(cx);
         assert!(window.find("knowledge-save-unknown").visible());
+        assert!(window.find("knowledge-reload").visible());
+        assert!(window.try_find("knowledge-save").is_none());
+        panel.update(cx, |panel, cx| {
+            assert!(panel.mark_knowledge_reload_pending(review_id, cx));
+            assert!(panel.mark_knowledge_reload_failed(
+                review_id,
+                &keelshell_core::Error::TooLarge,
+                cx,
+            ));
+        });
+        window.render_frame(cx);
+        assert!(window.find("knowledge-reload").visible());
         assert!(window.try_find("knowledge-save").is_none());
     })
     .unwrap_or_else(|error| panic!("retain unknown save result without replay: {error}"));

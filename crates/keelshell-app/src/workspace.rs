@@ -295,6 +295,7 @@ pub struct Workspace {
     modal_button_focus: std::cell::RefCell<HashMap<ElementId, WeakFocusHandle>>,
     modal_scope: modal_scope::ModalScope,
     saving: bool,
+    state_reloading: bool,
     show_assistant: bool,
     session_tab_scroll: ScrollHandle,
     session_tab_reveal: Option<(
@@ -600,6 +601,9 @@ impl Workspace {
                         cx,
                     );
                 }
+                AssistantEvent::ReloadKnowledge { review_id } => {
+                    view.reload_knowledge_state(panel.downgrade(), *review_id, window, cx);
+                }
                 AssistantEvent::AgentStop { run_id } => view.stop_agent(*run_id),
                 AssistantEvent::OpenSettings => view.open_ai_settings(window, cx),
                 AssistantEvent::SelectProfile(id) => {
@@ -733,6 +737,7 @@ impl Workspace {
             modal_button_focus: std::cell::RefCell::new(HashMap::new()),
             modal_scope: modal_scope::ModalScope::default(),
             saving: false,
+            state_reloading: false,
             show_assistant: false,
             session_tab_scroll: ScrollHandle::new(),
             session_tab_reveal: None,
@@ -1696,6 +1701,96 @@ impl Workspace {
             cx,
         );
     }
+    fn reload_knowledge_state(
+        &mut self,
+        panel: WeakEntity<AssistantPanel>,
+        review_id: uuid::Uuid,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.saving || self.state_reloading {
+            self.status = Message::new(
+                "正在保存或重新加载，请完成后再重新加载配置。",
+                "A save or reload is in progress. Wait before reloading configuration.",
+            );
+            cx.notify();
+            return;
+        }
+        let Some(panel_entity) = panel.upgrade() else {
+            return;
+        };
+        let accepted = panel_entity.update(cx, |panel, cx| {
+            panel.mark_knowledge_reload_pending(review_id, cx)
+        });
+        if !accepted {
+            self.status = Message::new(
+                "本地知识重新加载请求已过期，请重新生成预览。",
+                "The local knowledge reload request is stale; build a fresh preview.",
+            );
+            cx.notify();
+            return;
+        }
+        self.state_reloading = true;
+        self.status = Message::new("正在重新加载本机配置…", "Reloading local configuration…");
+        let store = self.store.clone();
+        let task = cx.background_executor().spawn(async move { store.load() });
+        cx.spawn_in(window, async move |this, cx| {
+            let result = task.await;
+            let _ = this.update_in(cx, |view, window, cx| {
+                view.state_reloading = false;
+                match result {
+                    Ok(state) => {
+                        let accepted = panel
+                            .upgrade()
+                            .map(|panel| {
+                                panel.update(cx, |panel, cx| {
+                                    panel.mark_knowledge_reload_succeeded(review_id, cx)
+                                })
+                            })
+                            .unwrap_or(false);
+                        if accepted {
+                            view.state = state;
+                            view.update_service.update(cx, |panel, cx| {
+                                panel.set_preferences(view.state.settings.updates, cx)
+                            });
+                            view.maintain_library_selection();
+                            view.invalidate_reconnect_profiles(window, cx);
+                            view.revoke_stale_protocol_diagnostics(cx);
+                            view.maintain_mcp(cx);
+                            view.maintain_agent(cx);
+                            view.snippet_sources = Arc::new(view.state.snippets.clone());
+                            view.command_sources_revision =
+                                view.command_sources_revision.wrapping_add(1);
+                            view.status = Message::new(
+                                "配置已重新加载；旧知识审核已清除，请重新生成预览。",
+                                "Configuration reloaded; the old knowledge review was cleared. Build a fresh preview.",
+                            );
+                        } else {
+                            view.status = Message::new(
+                                "配置已读取，但当前知识审核已经过期。",
+                                "Configuration was read, but the current knowledge review is stale.",
+                            );
+                        }
+                    }
+                    Err(error) => {
+                        if let Some(panel) = panel.upgrade() {
+                            panel.update(cx, |panel, cx| {
+                                panel.mark_knowledge_reload_failed(review_id, &error, cx)
+                            });
+                        }
+                        view.status = Message::detail(
+                            "配置重新加载失败，知识保存仍被阻止",
+                            "Configuration reload failed; knowledge saving remains blocked",
+                            error,
+                        );
+                    }
+                }
+                cx.notify();
+            });
+        })
+        .detach();
+    }
+
     fn persist(
         &mut self,
         mut candidate: AppState,
@@ -1752,10 +1847,10 @@ impl Workspace {
             cx.notify();
             return;
         }
-        if self.saving {
+        if self.saving || self.state_reloading {
             self.status = Message::new(
-                "正在保存，请完成后重试本次修改。",
-                "A save is in progress. Wait for it to finish, then retry this change.",
+                "正在保存或重新加载，请完成后重试本次修改。",
+                "A save or reload is in progress. Wait for it to finish, then retry this change.",
             );
             cx.notify();
             return;

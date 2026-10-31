@@ -943,6 +943,26 @@ async fn workspace_knowledge_conflict_invalidates_review_without_replay(cx: &mut
         assert!(!workspace.assistant.read(cx).knowledge_save_ready_for_test());
     });
 
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.click("knowledge-reload", cx);
+        window.render_frame(cx);
+    })
+    .checked("explicitly reload the latest StateStore after the conflict");
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).state_reloading
+    })
+    .await;
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("knowledge-preview-action").visible());
+        assert!(window.try_find("knowledge-preview").is_none());
+        assert!(window.try_find("knowledge-save-conflict").is_none());
+    })
+    .checked("require a fresh review after the explicit reload");
+    fixture.workspace.read_with(cx, |workspace, _| {
+        assert_eq!(workspace.state.settings.language, Language::En);
+    });
+
     let persisted = fixture
         .store
         .load()

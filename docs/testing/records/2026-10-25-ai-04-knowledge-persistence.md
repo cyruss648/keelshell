@@ -12,6 +12,7 @@
 - 受控 wire 加载拒绝敏感标题/摘要和未知字段；旧 AppState 缺少 `knowledge_entries` 时按空列表加载。
 - 真实 Workspace GPUI 测试通过 `context-screen` 和 `context-selection` 进入 Assistant，完成/失败确认后由保存按钮发出事件，后台 StateStore 写入并重新加载确认结果。
 - 保存中的按钮不可用，成功后显示已保存；保存结果未知的 UI 状态保留 UNKNOWN 并禁用自动重试。
+- StateStore Conflict 后，真实 Workspace GPUI 测试通过用户点击 `knowledge-reload` 读取竞争写入后的最新配置；旧 preview/review ID 被清除，保存按钮不再出现，必须重新生成预览，且外部状态和知识条目保持不变。
 
 ## 命令与当前结果
 
@@ -27,13 +28,14 @@ cargo test -p keelshell-app --locked --offline workspace_selection_capture_uses_
 cargo test -p keelshell-app --locked --offline explicit_terminal_context_builds_reviewable_knowledge_preview_and_keeps_source_binding -- --nocapture
 cargo test -p keelshell-app --locked --offline unknown_knowledge_write_result_disables_automatic_replay -- --nocapture
 cargo test -p keelshell-app --locked --offline stale_knowledge_save_completion_does_not_mark_current_preview_saved -- --nocapture
+cargo test -p keelshell-app --locked --offline workspace_knowledge_conflict_invalidates_review_without_replay -- --nocapture
 ```
 
-结果为 core 持久化 6 项通过、AI-04 相关 app 7 项通过；测试使用临时目录和受控 GPUI/内存 SSH 夹具，不启动真实模型或客户主机。保留已有 `block 0.1.6` future-incompatibility 和 macOS linker 警告，它们不改变退出码。
+结果为 core 持久化 6 项通过、AI-04 相关 app 8 项通过；新增冲突后的显式 reload 回归 1 项通过。测试使用临时目录和受控 GPUI/内存 SSH 夹具，不启动真实模型或客户主机。保留已有 `block 0.1.6` future-incompatibility 和 macOS linker 警告，它们不改变退出码。
 
-本轮完整门禁的实际结果为：`cargo fmt --all -- --check`、`git diff --check`、三个 crate 的目标 Clippy 均通过；`cargo test -p keelshell-core --locked --offline` 为 505 项通过，`cargo test -p keelshell-ai --locked --offline` 为 176 项通过、5 项忽略。`cargo test -p keelshell-app --locked --offline` 首次为 759 项通过、1 项失败、2 项忽略，失败是 `files::transfer_tests::fixture_isolation_tests::removed_window_keeps_admission_until_real_worker_cleanup_finishes` 的有界 fixture setup 超时；立即单独重跑该测试为 1 项通过、760 项过滤。之后 `python3 scripts/check.py` 退出码为 0：Python 检查 67 项通过、1 项跳过，脚本内 workspace app 为 759 项通过、2 项忽略，core、session、MCP、集成测试和 doctest 均通过。
+本轮基线完整门禁的实际结果为：`cargo fmt --all -- --check`、三个 crate 的目标 Clippy 均通过；`cargo test -p keelshell-core --locked --offline` 为 505 项通过，`cargo test -p keelshell-ai --locked --offline` 为 176 项通过、5 项忽略，`cargo test -p keelshell-app --locked --offline -- --test-threads=4` 为 761 项通过、2 项忽略。`python3 scripts/check.py` 退出码为 0：Python 检查 67 项通过、1 项跳过，脚本内 workspace Rust 为 1930 项通过、23 项忽略。之后的 reload 切片完整门禁和独立复核结果待在本记录中追加，不能把聚焦测试写成三平台原生验收。
 
-完整 workspace 门禁、独立 reviewer 和主线合入后的最终结果在本记录后续补记；在这些步骤完成前，不把该 worktree 结果写成发布或三平台原生验收。
+本记录中的所有 GPUI 结果均使用临时目录和受控 fixture；它们不代表 macOS/Windows/Linux 原生桌面验收、真实客户 SSH、模型服务或发布安装验收。reload 只读取最新 StateStore 并清除旧审核，不提供应用内知识条目合并、编辑或自动重放。
 
 ## 未完成边界
 
