@@ -8,7 +8,7 @@
 
 ## 当前继续开发 — AI-04 reload/reconcile
 
-在 StateStore Conflict 或写入结果 Unknown 后，AI-04 现在提供显式“重新加载并重新审核”动作。Workspace 通过后台 executor 读取最新 StateStore，成功后更新内存配置快照并清除旧知识 preview/review ID；用户必须重新生成预览、重新确认，旧保存 candidate 不会被重放。读取失败保持保存阻断，只允许再次读取。该切片的 GPUI 冲突回归覆盖外部竞争写入、Conflict 状态、显式 reload、最新配置读回和旧 preview 清除；应用内条目合并、编辑/删除/搜索、模型发送，以及三平台原生验收仍未完成。
+在 StateStore Conflict 或写入结果 Unknown 后，AI-04 现在提供显式“重新加载并重新审核”动作。Workspace 通过后台 executor 读取最新 StateStore，成功后更新内存配置快照并清除旧知识 preview/review ID；用户必须重新生成预览、重新确认，旧保存 candidate 不会被重放。读取失败保持保存阻断，只允许再次读取。reload 期间 AI Settings、Updates、Vault、Profile Sync 和 Configuration Recovery 的配置入口与迟到回调均受串行化保护，并同步 locale、theme、active AI profile 及 Workspace 消费者。最终功能提交为 `2e4dad0`，独立 reviewer Hypatia 结论为 P0/P1=0、建议合入；剩余 P2 是测试记录同步和 Configuration Recovery 迟到 `Restored` 回调时序覆盖。应用内条目合并、编辑/删除/搜索、模型发送，以及三平台原生验收仍未完成。
 
 ## 当前继续开发 — 2026-10-25
 
