@@ -558,6 +558,7 @@ impl Workspace {
     fn modal_chrome(&self, kind: ModalKind, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let disabled = self.saving
+            || self.state_reloading
             || matches!(
                 kind,
                 ModalKind::Vault | ModalKind::ProfileSync | ModalKind::ConfigurationRecovery

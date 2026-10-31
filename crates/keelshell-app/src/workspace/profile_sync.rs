@@ -19,6 +19,14 @@ impl Workspace {
             Some(
                 cx.subscribe_in(&panel, window, |view, _, event, window, cx| match event {
                     ProfileSyncEvent::Changed { state, message } => {
+                        if view.state_reloading {
+                            view.status = Message::new(
+                                "配置正在重新加载，已忽略过期的同步状态；请重新打开同步面板。",
+                                "Configuration is reloading; the stale sync result was ignored. Reopen sync after reload.",
+                            );
+                            cx.notify();
+                            return;
+                        }
                         // Tabs retain their captured authenticated transports. A renamed,
                         // changed or deleted saved endpoint cannot replace a live session.
                         view.state = (**state).clone();

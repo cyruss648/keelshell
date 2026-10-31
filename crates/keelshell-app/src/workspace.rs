@@ -1317,7 +1317,8 @@ impl Workspace {
         cx.notify();
     }
     fn open_updates(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.configuration_recovery.is_some()
+        if self.state_reloading
+            || self.configuration_recovery.is_some()
             || self.mcp.show
             || self.show_batch
             || self.show_workflow
@@ -1718,7 +1719,13 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.saving || self.state_reloading || self.ai_settings.is_some() {
+        if self.saving
+            || self.state_reloading
+            || self.ai_settings.is_some()
+            || self.vault_settings.is_some()
+            || self.profile_sync.is_some()
+            || self.update_panel.is_some()
+        {
             self.status = Message::new(
                 "正在保存、重新加载或编辑 AI 配置，请完成后再重新加载。",
                 "A save, reload, or AI configuration edit is in progress. Finish it before reloading.",

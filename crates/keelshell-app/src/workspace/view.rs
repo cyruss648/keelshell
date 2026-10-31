@@ -720,7 +720,7 @@ impl Render for Workspace {
                             ].into_iter().map(|(theme, id, label)| {
                                 Button::new(id).ghost().compact().label(label)
                                     .selected(self.state.settings.theme == theme)
-                                    .disabled(self.saving || self.vault_settings.is_some() || self.snippet_modal_open())
+                                    .disabled(self.saving || self.state_reloading || self.vault_settings.is_some() || self.snippet_modal_open())
                                     .localized_tooltip("设置应用外观；跟随系统会自动响应系统变化", "Select appearance; System follows platform changes")
                                     .on_click(cx.listener(move |view, _, window, cx| view.select_theme(theme, window, cx))).map(|button| self.retain_modal_button(id, button, cx))
                             }))
@@ -730,7 +730,7 @@ impl Render for Workspace {
                             .ghost()
                             .compact()
                             .label(t(cx, "中文 / EN", "EN / 中文"))
-                            .disabled(self.saving)
+                            .disabled(self.saving || self.state_reloading)
                             .on_click(
                                 cx.listener(|view, _, window, cx| view.switch_language(window, cx)),
                             ).map(|button| self.retain_modal_button("language", button, cx)),

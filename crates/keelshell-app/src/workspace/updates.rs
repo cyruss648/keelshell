@@ -12,6 +12,7 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) {
         if self.saving
+            || self.state_reloading
             || self.configuration_recovery.is_some()
             || self.vault_settings.is_some()
             || self.profile_sync.is_some()
@@ -35,6 +36,7 @@ impl Workspace {
             return;
         };
         if self.saving
+            || self.state_reloading
             || self.configuration_recovery.is_some()
             || self.vault_settings.is_some()
             || self.profile_sync.is_some()

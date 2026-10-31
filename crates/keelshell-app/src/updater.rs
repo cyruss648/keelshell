@@ -788,6 +788,11 @@ impl UpdatePanel {
         cx.notify();
     }
 
+    #[cfg(test)]
+    pub(crate) fn preferences_saving_for_test(&self) -> bool {
+        self.preferences_saving
+    }
+
     fn preferences_card(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let dirty = self.draft.frequency != self.preferences.frequency

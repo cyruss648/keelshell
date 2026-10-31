@@ -1040,6 +1040,11 @@ async fn workspace_knowledge_reload_rebinds_authoritative_ui_configuration(
     .await;
 
     cx.update_window(fixture.window, |_, window, cx| {
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
         window.render_frame(cx);
         assert!(window.find("knowledge-reload").visible());
         window.click("knowledge-reload", cx);
@@ -1102,6 +1107,120 @@ fn workspace_blocks_ai_settings_apply_while_state_reloads(cx: &mut TestAppContex
             .unwrap_or_else(|| panic!("settings panel remains open"));
         assert!(!panel.read(cx).is_saving_for_test());
     });
+}
+
+#[gpui_kit::test]
+fn workspace_blocks_update_and_secure_state_panels_while_state_reloads(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.open_updates(window, cx);
+            workspace.state_reloading = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+        assert!(window.try_find("vault-settings-panel").is_none());
+        window.click("updates-weekly", cx);
+        window.render_frame(cx);
+        window.click("save-update-preferences", cx);
+        window.render_frame(cx);
+    })
+    .checked("keep update controls closed while reload is active");
+
+    fixture.workspace.read_with(cx, |workspace, cx| {
+        assert!(workspace.state_reloading);
+        assert!(workspace.profile_sync.is_none());
+        assert!(workspace.vault_settings.is_none());
+        assert!(
+            !workspace
+                .update_service
+                .read(cx)
+                .preferences_saving_for_test()
+        );
+    });
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.open_profile_sync(window, cx);
+            workspace.open_vault_settings(window, cx);
+        });
+    })
+    .checked("reject secure configuration panels during reload");
+    fixture.workspace.read_with(cx, |workspace, _| {
+        assert!(workspace.profile_sync.is_none());
+        assert!(workspace.vault_settings.is_none());
+    });
+}
+
+#[gpui_kit::test]
+async fn workspace_reload_failure_keeps_knowledge_save_blocked(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    let _panes = attach_remote_panes(&fixture, cx);
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_assistant = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+        window.click("context-screen", cx);
+    })
+    .checked("capture context before corrupting the reload source");
+    cx.run_until_parked();
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.click("knowledge-preview-action", cx);
+        window.render_frame(cx);
+        window.click("knowledge-confirm-completed", cx);
+        window.render_frame(cx);
+    })
+    .checked("create a review before corrupting the reload source");
+    let review_id = fixture.workspace.read_with(cx, |workspace, cx| {
+        workspace
+            .assistant
+            .read(cx)
+            .knowledge_review_id_for_test()
+            .unwrap_or_else(|| panic!("knowledge review should exist"))
+    });
+    fixture.workspace.update(cx, |workspace, cx| {
+        workspace.assistant.update(cx, |assistant, cx| {
+            assistant.mark_knowledge_save_pending(review_id, cx);
+            assistant.mark_knowledge_save_failed(review_id, true, cx);
+        });
+    });
+    std::fs::write(fixture.store.path(), b"{corrupt").checked("corrupt reload fixture");
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.render_frame(cx);
+        assert!(window.find("knowledge-reload").visible());
+        window.click("knowledge-reload", cx);
+        window.render_frame(cx);
+    })
+    .checked("start reload against corrupt state");
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).state_reloading
+    })
+    .await;
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("knowledge-reload").visible());
+        assert!(window.try_find("knowledge-save").is_none());
+        fixture.workspace.read_with(cx, |workspace, cx| {
+            assert!(
+                workspace
+                    .assistant
+                    .read(cx)
+                    .knowledge_reload_failed_for_test()
+            );
+            assert!(!workspace.assistant.read(cx).knowledge_save_ready_for_test());
+        });
+    })
+    .checked("keep the failed reload fail closed");
 }
 
 #[gpui_kit::test]

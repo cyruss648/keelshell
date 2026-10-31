@@ -737,7 +737,7 @@ impl AssistantPanel {
     }
 
     #[cfg(test)]
-    fn knowledge_review_id_for_test(&self) -> Option<Uuid> {
+    pub(crate) fn knowledge_review_id_for_test(&self) -> Option<Uuid> {
         self.knowledge_preview
             .as_ref()
             .map(|preview| preview.review_id)
@@ -746,6 +746,13 @@ impl AssistantPanel {
     #[cfg(test)]
     pub(crate) fn active_profile_id_for_test(&self) -> Option<Uuid> {
         self.profile.as_ref().map(|profile| profile.id)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn knowledge_reload_failed_for_test(&self) -> bool {
+        self.knowledge_preview
+            .as_ref()
+            .is_some_and(|preview| preview.save_state == KnowledgeSaveState::ReloadFailed)
     }
 
     #[cfg(test)]
