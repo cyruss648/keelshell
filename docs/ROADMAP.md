@@ -2,6 +2,7 @@
 
 ## 当前主题与组合验证 — 2026-11-04
 
+- 最新推送 `9ab663e` 修复更新器测试夹具，完整门禁及非作者提交绑定通过；其 Windows CI 在更早的 Python 原生 Job 准备断言失败，未进入更新器。当前只补固定阶段与断言前回执，原始原因 UNKNOWN；独立审查提出的可选记录 I/O 掩盖原失败 P2 已修正并复核关闭。修后 Python 128 项/1 skipped、格式/严格 Clippy/依赖策略及独立复核通过，Rust 输入与前序完整 gate 相同。真实 Windows 结果待完成，见[诊断记录](testing/records/2026-11-04-native-barrier-diagnostics.md)。
 - 组合 `c366871` 后的 Windows 预算修复 `9d4517e`、Unix 分片修复 `7b43af2` 均已通过本机完整门禁和非作者复核并推送。`7b43af2` 的 macOS/Linux CI 成功，Windows 更新器 3 秒等待失败；现已复现取消响应中止后续脚本及测试时钟快进两个夹具问题。修后更新器 54 项、完整门禁（普通 Rust 2,011 passed/23 ignored、544 个非 Markdown 输入保持）和非作者复核均通过；精确新提交 CI 待完成。见[前序回读](testing/records/2026-11-04-theme-delivery-ci.md)、[Unix 分片记录](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)与[更新器记录](testing/records/2026-11-04-updater-transport-fixture.md)。
 - 三套原生主题已实现：霜白、曜石、雾紫，目录驱动选择器，独立明暗模式、兼容持久化、统一组件 token 和终端默认色。组合工程门禁、非作者复核和限定 macOS 原生切换/重启已通过；详见[主题指南](product/THEME_PREFERENCES.md)。
 - 主题/布局分开推进：本轮统一视觉与主题入口；连接导航、文件工具区和更多原生工作区布局优化继续，不把 HTML 样例算作原生完成。

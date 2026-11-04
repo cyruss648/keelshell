@@ -2,7 +2,20 @@
 
 ## 本轮提交与 CI 后续 — 2026-11-04
 
-最新已推送提交是 `7b43af20e62c228972b461a412e063aac6ad9304`。
+更新器测试修复已推送为 `9ab663ea1aaafdcff69a3203d38910bea681f84a`，
+远端 SHA 与最终非作者提交绑定均已核对。它的 Quality `41843572205`
+在 Windows 的 Python 原生嵌套 Job 夹具中出现 `bound is None`，
+尚未进入 Cargo 或更新器测试；该 run 的 macOS/Linux 均成功。
+原日志在断言前没有保存准备回执，因此原因保持 UNKNOWN。
+当前候选只给该测试增加固定阶段、数值错误码和断言前回执，保留原 8 秒期限及全部断言；
+不称为已修复原生问题。独立审查发现可选记录 I/O 可能掩盖原失败的 P2，现已修正并补反例。
+修后 Python 128 项/1 skipped、格式、严格 Clippy 和依赖策略通过，
+其余 543 个非 Markdown 输入与 `9ab663e` 完整门禁相同；没有重复运行未改动的
+Rust suite。Fermat 修后复核 P0/P1/P2 为 0，13 项作者/独立专项控制通过；
+原 P2 和失败证据保留，真实 Windows 结果仍待完成，
+见[原生夹具诊断记录](testing/records/2026-11-04-native-barrier-diagnostics.md)。
+
+前序提交是 `7b43af20e62c228972b461a412e063aac6ad9304`。
 其 Quality `41834475286` 的 macOS/Linux 均成功，Windows 在更新器
 `automatic_download_verifies_real_archive_and_ready_continues_periodic_checks`
 的一个 3 秒 UI 等待失败；旧日志不能识别准确阶段。
@@ -13,8 +26,8 @@
 修后更新器 54 项通过，完整门禁实际退出 0（普通 Rust 2,011 passed/23 ignored、
 app 823 passed/2 ignored、rustdoc 10 passed、Python 122 项/1 skipped），
 544 个非 Markdown 输入前后不变。新的非作者 Bacon 已复核源码、反例和完整门禁，
-P0/P1/P2 均为 0；
-精确新提交 CI 尚未运行。见[更新器测试记录](testing/records/2026-11-04-updater-transport-fixture.md)。
+P0/P1/P2 均为 0。其精确提交 `9ab663e` 的 Windows job 未到达更新器检查，
+后续结果不能由本机通过替代。见[更新器测试记录](testing/records/2026-11-04-updater-transport-fixture.md)。
 
 Windows 测试夹具修复已推送为 `9d4517e`，本机完整门禁和最终提交绑定的非作者复核通过。
 它的新 Quality `41828929466` 的 macOS job 在旧 Unix 分片 nonce 测试超时：

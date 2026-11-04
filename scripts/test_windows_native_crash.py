@@ -1276,6 +1276,170 @@ class JobTerminalModelTests(unittest.TestCase):
             self.assertEqual(ctypes.sizeof(probe.JobExtendedLimits), 144)
 
 
+NATIVE_BARRIER_TRACE = "KEELSHELL_OWNED_JOB_BARRIER:"
+NATIVE_BARRIER_PHASES = frozenset((
+    "create_nested_job", "assign_nested_job", "create_nested_child",
+    "verify_nested_child", "publish_identity", "await_ack",
+    "attempt_late_child", "publish_late_result", "finished",
+))
+
+
+def native_barrier_error(error):
+    """Keep exception categories and numeric OS codes, never exception messages."""
+    kind = ("OSError" if isinstance(error, OSError) else
+            "OwnershipError" if isinstance(error, probe.OwnershipError) else
+            "SubprocessError" if isinstance(error, subprocess.SubprocessError) else "Other")
+    projected = {"kind": kind}
+    for name in ("errno", "winerror"):
+        value = getattr(error, name, None)
+        projected[name] = value if type(value) is int and 0 <= value <= 0xffffffff else None
+    return projected
+
+
+def native_barrier_preparation(result, receipt, observer_phase, *, bound,
+                               identity_published, late_published):
+    """Project only fixed fixture phases and Win32 numbers, never private streams."""
+    helper_phase = None
+    win32_error = None
+    for line in result.stdout.splitlines():
+        if not line.startswith(NATIVE_BARRIER_TRACE):
+            continue
+        value = line[len(NATIVE_BARRIER_TRACE):]
+        if value in NATIVE_BARRIER_PHASES:
+            helper_phase = value
+        elif value.startswith("win32_error="):
+            number = value.removeprefix("win32_error=")
+            if (0 < len(number) <= 10 and number.isascii() and number.isdecimal()
+                    and int(number) <= 0xffffffff):
+                win32_error = int(number)
+    return {
+        "evidence_kind": "ACTUAL_NATIVE_WINDOWS",
+        "observer_phase": observer_phase,
+        "helper_phase": helper_phase,
+        "helper_win32_error": win32_error,
+        "identity_bound": bound,
+        "identity_published": identity_published,
+        "late_result_published": late_published,
+        "receipt": receipt,
+    }
+
+
+def report_native_barrier_preparation(preparation):
+    """Optional evidence I/O must not replace the fixture's original assertions."""
+    records = [{"actual_native_job_barrier_preparation": preparation}]
+    try:
+        retain_control("native-job-barrier-preparation", preparation)
+    except OSError as error:
+        records.append({"native_job_barrier_retention_error": native_barrier_error(error)})
+    for record in records:
+        try:
+            print(json.dumps(record, sort_keys=True))
+        except OSError:
+            # A closed output pipe is not permission to skip a native assertion.
+            # The optional local receipt above may still be available.
+            pass
+
+
+class NativeBarrierProjectionTests(unittest.TestCase):
+    def test_unwritable_optional_evidence_preserves_receipt_and_original_binding_failure(self):
+        preparation = {"evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "identity_bound": False}
+        with tempfile.TemporaryDirectory(prefix="owned-barrier-retention-") as temp:
+            destination = Path(temp) / "not-a-directory"
+            destination.write_text("owned blocker")
+            output = io.StringIO()
+            with patch.dict(os.environ, {"KEEL_CONTROL_EVIDENCE_DIR": str(destination)}):
+                with patch("sys.stdout", output):
+                    with self.assertRaisesRegex(AssertionError, "original missing binding"):
+                        report_native_barrier_preparation(preparation)
+                        self.assertIsNotNone(None, "original missing binding")
+            records = [json.loads(line) for line in output.getvalue().splitlines()]
+            self.assertEqual(records[0], {"actual_native_job_barrier_preparation": preparation})
+            self.assertEqual(records[1]["native_job_barrier_retention_error"]["kind"], "OSError")
+            self.assertNotIn(str(destination), output.getvalue())
+
+    def test_closed_output_preserves_local_receipt_and_original_binding_failure(self):
+        class ClosedOutput:
+            def write(self, _text):
+                raise BrokenPipeError("owned private output failure")
+
+        preparation = {"evidence_kind": "API_MODEL_NOT_NATIVE_WINDOWS", "identity_bound": False}
+        with tempfile.TemporaryDirectory(prefix="owned-barrier-output-") as temp:
+            with patch.dict(os.environ, {"KEEL_CONTROL_EVIDENCE_DIR": temp}):
+                with patch("sys.stdout", ClosedOutput()):
+                    with self.assertRaisesRegex(AssertionError, "original missing binding"):
+                        report_native_barrier_preparation(preparation)
+                        self.assertIsNotNone(None, "original missing binding")
+            receipt = json.loads((Path(temp) / "native-job-barrier-preparation.json").read_text())
+            self.assertEqual(receipt, preparation)
+
+    def test_observer_error_keeps_only_numeric_codes_and_known_category(self):
+        error = OSError(13, "owned-private-exception-sentinel")
+        error.winerror = 5
+        self.assertEqual(native_barrier_error(error), {"kind": "OSError", "errno": 13, "winerror": 5})
+        for value in ("owned-private-code-sentinel", True, -1, 0x100000000):
+            error.winerror = value
+            self.assertIsNone(native_barrier_error(error)["winerror"])
+        projected = native_barrier_error(probe.OwnershipError("owned-private-owner-sentinel"))
+        self.assertEqual(projected, {"kind": "OwnershipError", "errno": None, "winerror": None})
+
+    def test_owned_helper_source_compiles_without_running_windows_apis(self):
+        class StopBeforeNativeOwner(Exception):
+            pass
+
+        generated = []
+        original_write = Path.write_text
+        def capture(path, source, *args, **kwargs):
+            if path.name == "parent.py":
+                generated.append(source)
+            return original_write(path, source, *args, **kwargs)
+
+        # Exercise the actual generator, stopping before its first native owner.
+        # This bypasses only unittest's host skip to compile, never to run Win32.
+        method = NativeJobBarrierTests.test_actual_two_existing_nested_members_survive_barrier_and_late_createprocess_is_rejected
+        method = getattr(method, "__wrapped__", method)
+        with patch.object(Path, "write_text", autospec=True, side_effect=capture):
+            with patch.object(probe, "WindowsJob", side_effect=StopBeforeNativeOwner):
+                with self.assertRaises(StopBeforeNativeOwner):
+                    method(NativeJobBarrierTests())
+        self.assertEqual(len(generated), 1)
+        compile(generated[0], "<owned-native-Job-barrier-helper>", "exec")
+
+    def test_failure_projection_keeps_receipt_and_last_fixed_phase_without_private_text(self):
+        private = "owned-private-stream-sentinel"
+        result = subprocess.CompletedProcess(
+            [private], 1,
+            f"{private}\n{NATIVE_BARRIER_TRACE}create_nested_job\n"
+            f"{NATIVE_BARRIER_TRACE}assign_nested_job\n"
+            f"{NATIVE_BARRIER_TRACE}win32_error=5\n"
+            f"{NATIVE_BARRIER_TRACE}{private}\n",
+            private,
+        )
+        receipt = {"observed_exit": 1, "controller_exit": 1, "timed_out": False,
+                   "terminal": None, "errors": ["owned_cleanup_failed"]}
+        evidence = native_barrier_preparation(
+            result, receipt, "waiting_identity", bound=False,
+            identity_published=False, late_published=False,
+        )
+        self.assertEqual(evidence["helper_phase"], "assign_nested_job")
+        self.assertEqual(evidence["helper_win32_error"], 5)
+        self.assertEqual(evidence["receipt"], receipt)
+        self.assertFalse(evidence["identity_bound"])
+        self.assertNotIn(private, json.dumps(evidence))
+
+    def test_unrecognised_or_malformed_trace_cannot_invent_a_phase_or_error(self):
+        for value in ("", "not-a-phase", "win32_error=-1", "win32_error=4294967296",
+                      "win32_error=²", "win32_error=５", "win32_error=1private",
+                      "win32_error=" + "1" * 100):
+            with self.subTest(value=value):
+                result = subprocess.CompletedProcess([], 1, NATIVE_BARRIER_TRACE + value, "")
+                evidence = native_barrier_preparation(
+                    result, {}, "waiting_identity", bound=False,
+                    identity_published=False, late_published=False,
+                )
+                self.assertIsNone(evidence["helper_phase"])
+                self.assertIsNone(evidence["helper_win32_error"])
+
+
 class NativeJobBarrierTests(unittest.TestCase):
     @unittest.skipUnless(os.name == "nt", "new native Windows barrier control is UNRUN on this host")
     def test_actual_two_existing_nested_members_survive_barrier_and_late_createprocess_is_rejected(self):
@@ -1288,6 +1452,12 @@ class NativeJobBarrierTests(unittest.TestCase):
             late_source = f"from pathlib import Path;Path({str(marker)!r}).touch()"
             helper.write_text("import ctypes,json,os,subprocess,sys,time\n"
                               "from ctypes import wintypes\nfrom pathlib import Path\n"
+                              "def phase(value):\n"
+                              f"    print({NATIVE_BARRIER_TRACE!r}+value,flush=True)\n"
+                              "def checked(ok):\n"
+                              "    if not ok:\n"
+                              "        phase('win32_error='+str(ctypes.get_last_error()))\n"
+                              "    assert ok\n"
                               "api=ctypes.WinDLL('kernel32',use_last_error=True)\n"
                               "api.CreateJobObjectW.argtypes=[ctypes.c_void_p,wintypes.LPCWSTR]\n"
                               "api.CreateJobObjectW.restype=wintypes.HANDLE\n"
@@ -1296,40 +1466,56 @@ class NativeJobBarrierTests(unittest.TestCase):
                               "api.AssignProcessToJobObject.restype=wintypes.BOOL\n"
                               "api.IsProcessInJob.argtypes=[wintypes.HANDLE,wintypes.HANDLE,ctypes.POINTER(wintypes.BOOL)]\n"
                               "api.IsProcessInJob.restype=wintypes.BOOL\n"
-                              "nested=api.CreateJobObjectW(None,None)\n"
-                              "assert nested and api.AssignProcessToJobObject(nested,api.GetCurrentProcess())\n"
+                              "phase('create_nested_job')\n"
+                              "nested=api.CreateJobObjectW(None,None)\nchecked(nested)\n"
+                              "phase('assign_nested_job')\n"
+                              "checked(api.AssignProcessToJobObject(nested,api.GetCurrentProcess()))\n"
+                              "phase('create_nested_child')\n"
                               f"child=subprocess.Popen([sys.executable,'-c',{child_source!r}],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n"
+                              "phase('verify_nested_child')\n"
                               "present=wintypes.BOOL()\n"
-                              "assert api.IsProcessInJob(int(child._handle),nested,ctypes.byref(present)) and present.value\n"
+                              "checked(api.IsProcessInJob(int(child._handle),nested,ctypes.byref(present)))\n"
+                              "assert present.value\n"
+                              "phase('publish_identity')\n"
                               f"pending=Path({str(record)!r}+'.pending')\n"
                               "pending.write_text(json.dumps({'parent':os.getpid(),'child':child.pid}))\n"
                               f"os.replace(pending,{str(record)!r})\n"
+                              "phase('await_ack')\n"
                               f"while not Path({str(ack)!r}).exists():time.sleep(0.001)\n"
                               "late={'nested_child_membership':True,'creation_rejected':False}\n"
+                              "phase('attempt_late_child')\n"
                               "try:\n"
                               f"    attempt=subprocess.Popen([sys.executable,'-c',{late_source!r}],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n"
                               "except OSError as error:\n"
                               "    late['creation_rejected']=True;late['winerror']=error.winerror\n"
                               "else:\n"
                               "    late['unexpected_child_pid']=attempt.pid\n"
+                              "phase('publish_late_result')\n"
                               f"pending=Path({str(late_record)!r}+'.pending')\n"
                               "pending.write_text(json.dumps(late))\n"
-                              f"os.replace(pending,{str(late_record)!r})\n")
+                              f"os.replace(pending,{str(late_record)!r})\n"
+                              "phase('finished')\n")
             owner = probe.WindowsJob()
             identities = NativeTreeHandles(owner.api, owner.job)
             deadline = probe.Deadline(time.time() + 8)
             bound = None
             barrier = None
-            def tick(process):
-                nonlocal bound, barrier
+            observer_phase = "waiting_identity"
+            observer_error = None
+            def observe(process):
+                nonlocal bound, barrier, observer_phase
                 if bound is not None:
                     return
                 pids = ready_pids(record, process.pid)
                 if pids is None:
                     return
+                observer_phase = "binding_original_handles"
                 identities.bind(pids)
+                observer_phase = "sampling_before_barrier"
                 before = identities.states()
+                observer_phase = "applying_admission_barrier"
                 owner.prepare_terminal(deadline)
+                observer_phase = "sampling_after_barrier"
                 after = identities.states()
                 # Observe setter effects before ACK allows any original exit or
                 # attempted late child creation. Nested descendants must appear.
@@ -1340,10 +1526,27 @@ class NativeJobBarrierTests(unittest.TestCase):
                            "nested_member_ids_captured": sorted(owner.terminal_handles),
                            "total_processes_at_binding": owner.terminal_total}
                 bound = pids
+                observer_phase = "acknowledging_identity"
                 ack.touch()
+                observer_phase = "identity_bound"
+            def tick(process):
+                nonlocal observer_error
+                try:
+                    observe(process)
+                except (OSError, probe.OwnershipError, subprocess.SubprocessError) as error:
+                    observer_error = native_barrier_error(error)
+                    raise
             try:
                 result, receipt = probe.run_owned([sys.executable, str(helper)], directory, dict(os.environ),
                                                   deadline, owner=owner, tick=tick)
+                # Publish bounded preparation facts before any assertion can
+                # hide an early helper exit or a failed observer/API operation.
+                preparation = native_barrier_preparation(
+                    result, receipt, observer_phase, bound=bound is not None,
+                    identity_published=record.is_file(), late_published=late_record.is_file(),
+                )
+                preparation["observer_error"] = observer_error
+                report_native_barrier_preparation(preparation)
                 self.assertIsNotNone(bound)
                 late = json.loads(late_record.read_text())
                 original_states = identities.states()

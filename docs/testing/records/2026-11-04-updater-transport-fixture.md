@@ -65,7 +65,16 @@ GPUI Kit 报告 `UI condition timed out after 3s`；app 汇总
   observer I/O 和 2 MiB 控制器均通过。
 - 新的非作者 Bacon 已复核三个测试文件、17 个原等待数值及顺序、原始反例、
   完整门禁和文档，P0/P1/P2 为 0。其独立摘要将 544 个输入绑定到 gate 前后和
-  最终源码；未重复执行 Cargo，不扩大原生验收范围。新提交及其三平台 CI 待执行。
+  最终源码；未重复执行 Cargo，不扩大原生验收范围。
+
+修复已推送为 `9ab663ea1aaafdcff69a3203d38910bea681f84a`，远端 main 读回一致。
+Bacon 已额外核对精确提交的 544 个非 Markdown blob 和最终文档状态句，
+没有 P0/P1/P2；工作树干净。Quality `41843572205` 的 Windows
+`126621167159` 在 Python 原生 Job 准备测试失败，未进入 Cargo，不能判断
+本次更新器修复的 Windows 结果。该独立失败及诊断增量见
+[原生夹具记录](2026-11-04-native-barrier-diagnostics.md)。
+macOS `126621167756`、Linux `126621167873` 最终均成功（含 OpenSSH 互操作步骤）；
+三份完整 job 日志和摘要已保存在 `updater-cancel/ci-*`，整个 run 因 Windows 失败而未通过。
 
 证据目录：`work/theme-integration-20261104/ci/updater-cancel/`。
 `author/` 保存非父任务作者 Peirce 的 TCP 反例及旧代码摘要；
