@@ -1,5 +1,49 @@
 # 2026-11-04 — SFTP 测试服务器身份隔离
 
+## 已提交源码与平台回读 — 2026-11-05
+
+修复已提交并推送为 `dc94e0e03782ba3d115e784c72823ee0f082b1b2`；
+`2026-11-04T16:00:43Z` 读回本地与远端 main 一致。
+Hypatia 的最终提交复核将 545 个非 Markdown 输入及九个声明变更文件
+逐一绑定到已通过的修后门禁和文档，结论为 APPROVE，P0/P1/P2 均为 0。
+提交复核位于
+`work/theme-integration-20261104/ci/sftp-fixture-identity/independent-review/p2-closure/final-binding/committed-review.json`。
+
+精确 Quality `41863354940` 第一次尝试的最新分项回读如下：
+
+| 平台与 job | 已保存结果 |
+| --- | --- |
+| macOS `126691000390` | cancelled；未获得 runner，未执行任何步骤。GitHub annotation 明确记录多次未能分配托管 runner，并提示 macOS ARM 容量紧张；没有测试日志。 |
+| Linux `126691001067` | success；app 826 passed / 2 ignored。三个新增身份/展开回归、原 MCP 失败项和原更新器失败项实际通过，OpenSSH 互操作通过。 |
+| Windows `126691000868` | success；app 817 passed / 2 ignored。三个新增身份/展开回归、原 MCP 和更新器失败项实际通过；原生 Job 准备、身份绑定、回收及空清理错误回执通过。 |
+
+第一次尝试整体为 **failure**，原因是 macOS 未启动；不得把两个成功平台
+合称该次完整 CI 通过。两份完整日志与逐项测试回读保存在
+`work/theme-integration-20261104/ci/sftp-fixture-identity/attempt-1-test-readback.json`。
+Windows 原日志摘要为
+`35c28b0e7e4c95cf3f5651a428a01107ba4ace182011b1ca28004036a6337e46`。
+
+初期 `2026-11-04T16:17:54Z` 的 API 返回 run/jobs queued、runner 为空；
+后续完整日志证明 Linux 当时已经执行，因此这只保留为当时 API 观测，
+不能据此认定三个平台都未运行。Linux 原日志摘要为
+`8bfe0345335ab31c02a392ce395941f0c88c502e5b067999818d4666de31edce`。
+同期 GitHub 官方状态接口报告 Actions 服务异常；macOS 未获 runner 有独立 annotation
+证据，但该服务事件与本次所有状态延迟的因果关系没有单独证明。
+API、annotation 和服务快照保存在
+`work/theme-integration-20261104/ci/sftp-fixture-identity/queue-observation/`。
+`2026-11-04T16:38:18Z` 已成功请求仅重跑未启动的 macOS job；
+同一提交、同一 run 的第二次尝试创建 macOS job `126711796757`。
+该 job 于 `2026-11-04T16:53:22Z` 再次 **cancelled**，
+runner ID 为 0、步骤为空，annotation 再次明确未能分配托管 runner 及 ARM 容量紧张。
+第二次尝试整体也为 **failure**；macOS 远端 CI 为 **未执行**，不是代码测试失败，
+也不能以本机 macOS 完整门禁替代该 CI 结果。
+Windows/Linux 在新尝试中的成功条目分别为 `126711800213` / `126711919205`，
+继承第一次执行：完整日志摘要相同，不宣称它们又执行了一次。
+第二次尝试证据另存 `work/theme-integration-20261104/ci/sftp-fixture-identity/attempt-2/`，
+第一次失败与注释保持。两次回读均已结束并回收观察进程；
+托管 runner 可用后再补 macOS CI，本轮不重复触发相同的未启动任务。
+没有修改测试断言、期限、runner 或 workflow。
+
 ## 原始平台失败
 
 提交 `7782979351291abfc95966b286f824fca683deb6` 的 Quality `41848787327`，
@@ -119,4 +163,4 @@ Hypatia 最终复核为 **APPROVE，P0/P1/P2 均为 0**，P2-1 与句柄措辞�
 各次突变运行没有独立的源码快照/摘要，不将其写成 reviewer 亲自重跑的证据。
 清理保证限于仍可安全检查的自有连接；不能检查时保留隔离和错误，
 不承诺任意失败都能无条件回收进程级状态。
-新候选的 Linux/Windows 执行尚未取得；普通测试不构成原生桌面或真实客户 SSH 验收。
+上方平台回读继续记录后续 Linux/Windows 执行；普通测试不构成原生桌面或真实客户 SSH 验收。

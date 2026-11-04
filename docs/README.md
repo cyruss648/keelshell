@@ -1,5 +1,9 @@
 # 文档索引
 
+继续开发先读[开发交接](HANDOFF.md)，再按[路线与状态](ROADMAP.md)选择切片。
+较早的交接全文保存在[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)；
+其中的“当前”与暂停指令只代表对应历史时点。
+
 - [主题与外观](product/THEME_PREFERENCES.md)：三套内置主题、明暗模式及扩展方式。
 - [原生主题设计](design/NATIVE_THEMES.md)与[ADR 0095](adr/0095-extensible-native-theme-families.md)：目录、语义 token、组件适配与旧配置兼容。
 - [本轮主题测试](testing/records/2026-11-04-native-themes.md)：实际结果、失败历史与平台验收边界。
@@ -42,8 +46,6 @@
 文档随功能提交更新。设计状态不等于实现状态，测试计划不等于测试通过。正式发布前需满足逐项验收矩阵。
 
 - [Capability ledger](product/CAPABILITIES.md): what runs, what is tested, and what remains.
-
-- [开发交接](HANDOFF.md)：迁移后的当前状态、未验证模块与接续顺序。
 
 - [远程工作区、AI 与图标验收](testing/records/2026-10-03-remote-ai-icons.md)：181项门禁及本机受控交互证据。
 - [命名 AI 配置与视觉系统](adr/0005-named-ai-profiles-and-visual-system.md)：当前协议、凭据、取消、视觉与平台边界。

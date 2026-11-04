@@ -9,8 +9,21 @@
 
 ## 最新源码与验收范围
 
-后续限定测试修复和诊断已推送至 `7782979351291abfc95966b286f824fca683deb6`。
-精确 Quality `41848787327` 的 macOS/Windows 已成功，Linux 在 MCP SFTP 夹具准备失败；
+后续限定测试修复和诊断已推送至 `dc94e0e03782ba3d115e784c72823ee0f082b1b2`。
+最新 SFTP 夹具身份及准备期清理回归已通过本机完整门禁：
+普通 Rust 2,014 passed / 23 ignored、app 826 passed / 2 ignored、
+rustdoc 10 passed、Python 128 项 / 1 skipped，545 个非 Markdown 输入前后相同。
+独立最终提交复核 APPROVE，P0/P1/P2 均为 0，原 HOLD 和失败保留。
+精确 Quality `41863354940` 第一次尝试中，Linux/Windows 成功，Linux OpenSSH 通过；
+macOS 因未分配到托管 runner 而取消，未执行测试，整个尝试为 failure。
+第二次尝试仅重跑 macOS，也因同一 runner 分配限制而取消、未执行测试；
+两次尝试整体均为 failure。Windows/Linux 在第二次尝试中继承原成功，没有重新执行。
+macOS 远端 CI 仍须待托管 runner 可用后补验，不能用本机完整门禁代替。
+初期 API queued 与后来实际执行日志的差异、原回执及后续限定重跑分别保存，见
+[SFTP 夹具记录](2026-11-04-sftp-fixture-identity.md)。
+
+前一基线 `7782979351291abfc95966b286f824fca683deb6` 的
+精确 Quality `41848787327` 中，macOS/Windows 已成功，Linux 在 MCP SFTP 夹具准备失败；
 整个 run 失败，三个完整原日志均已回读。各项结果见
 [原生 Job 记录](2026-11-04-native-barrier-diagnostics.md)；此前失败继续逐次保留。
 不能把本机通过或 CI 步骤名称代替实际平台测试结果。
@@ -104,6 +117,15 @@ Windows Server 2025 runner 使用 Python 3.15.2、Rust 1.99.1。
 具体后续见[更新器记录](2026-11-04-updater-transport-fixture.md)。
 
 ## 资源清理与后续边界
+
+2026-11-05 的文档整理把当前交接缩为 115 行，将原始 317 行全文归档到
+`docs/history/2026-11-05-handoff-before-theme-ci-readback.md`。
+归档来自 `dc94e0e` 的 Git blob `a844bebfd3167763cd21f4a84d8ee97223ec29a6`，
+仅新增历史说明并重定位 63 处相对链接；逆向还原与原 blob 字节完全一致。
+新非作者 Bohr 的限定文档审查 P0/P1/P2 均为 0；
+归档、链接和当前事实的回执保存在
+`work/theme-integration-20261104/handoff-refresh/`。
+这轮变更只有 Markdown，后续文档提交的 CI 结果独立读回。
 
 本轮原生 app、SSH/SFTP fixture、两个 HTML 服务均已正常收尾，所属端口拒绝连接。
 NET 临时 worktree、分支和约 6.5 GiB 的独立缓存已清理；测试、原失败和最终开发包

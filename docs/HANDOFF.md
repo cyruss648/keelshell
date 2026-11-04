@@ -1,317 +1,115 @@
-# KeelShell 开发交接 — 2026-11-04
-
-## 本轮提交与 CI 后续 — 2026-11-04
-
-本次修复的已推送基线为 `7782979351291abfc95966b286f824fca683deb6`，
-推送时本地与远端 main 已核对一致。该提交只给 Windows 原生 Job 测试增加有限诊断，
-不修改生产控制器或应用代码。精确 Quality `41848787327` 的 macOS 已成功，
-Linux 在 MCP 文件测试的 UTF-8 种子写入被 `MutationQuarantined` 拒绝
-（822 passed/1 failed/2 ignored），Windows 已成功（app 814 passed/2 ignored）。
-Windows 原生 Job 回执确认 helper 完成、原父子句柄终态和零清理错误，
-原更新器失败项及新的传输回归也实际通过；整个 run 因 Linux 失败而未通过。
-Linux 已实际通过原更新器失败项，但没有到达 OpenSSH 步骤。
-准确隔离 owner/原因未知。已用相同绑定端点的真实 SSH/SFTP 反例证明
-测试服务器固定主机密钥导致独立文件系统继承隔离的机制；
-候选改为每个独立夹具生成密钥，同服务器重连仍保留隔离。
-首候选 32 项专项和 545 输入的完整门禁实际通过：普通 Rust 2,012 passed/23 ignored、
-app 824 passed/2 ignored、rustdoc 10 passed、Python 128 项/1 skipped，
-格式、workspace 严格 Clippy 和策略检查均通过，输入前后相同。
-非作者初审发现准备写入发生在清理 guard 之外的 P2，暂缓提交；
-已补准备阶段所有权及实际 WRITE 取消/展开控制。
-两项禁用 Drop 的反向控制及最终源码上的旧密钥反例均按预期失败，
-精确恢复候选后 3 项专项、严格 app Clippy 和格式通过；新完整门禁实际退出 0，
-普通 Rust 2,014 passed/23 ignored、app 826 passed/2 ignored、rustdoc 10、
-Python 128 项/1 skipped，545 个非 Markdown 输入前后相同。
-Hypatia 最终源码/新门禁/文档复核 P0/P1/P2 均为 0，P2 已关闭；
-原 HOLD 与失败记录保留，新修复的精确提交 CI 另行验收。
-“句柄为零”的证据范围已修正为目录句柄，不涵盖普通文件句柄。
-没有修改生产隔离规则，不据此认定历史 CI 的唯一原因。
-原失败与后续验证见[SFTP 夹具记录](testing/records/2026-11-04-sftp-fixture-identity.md)。
-完整原日志和最终摘要保存在
-`work/theme-integration-20261104/ci/native-barrier/`。
-
-更新器测试修复已推送为 `9ab663ea1aaafdcff69a3203d38910bea681f84a`，
-远端 SHA 与最终非作者提交绑定均已核对。它的 Quality `41843572205`
-在 Windows 的 Python 原生嵌套 Job 夹具中出现 `bound is None`，
-尚未进入 Cargo 或更新器测试；该 run 的 macOS/Linux 均成功。
-原日志在断言前没有保存准备回执，因此原因保持 UNKNOWN。
-后续 `7782979` 只给该测试增加固定阶段、数值错误码和断言前回执，保留原 8 秒期限及全部断言；
-不称为已修复原生问题。独立审查发现可选记录 I/O 可能掩盖原失败的 P2，现已修正并补反例。
-修后 Python 128 项/1 skipped、格式、严格 Clippy 和依赖策略通过，
-其余 543 个非 Markdown 输入与 `9ab663e` 完整门禁相同；没有重复运行未改动的
-Rust suite。Fermat 修后复核 P0/P1/P2 为 0，13 项作者/独立专项控制通过；
-原 P2 和失败证据保留，后续 `7782979` 的真实 Windows 控制已成功，旧失败根因仍未知，
-见[原生夹具诊断记录](testing/records/2026-11-04-native-barrier-diagnostics.md)。
+# KeelShell 当前交接 — 2026-11-05
 
-前序提交是 `7b43af20e62c228972b461a412e063aac6ad9304`。
-其 Quality `41834475286` 的 macOS/Linux 均成功，Windows 在更新器
-`automatic_download_verifies_real_archive_and_ready_continues_periodic_checks`
-的一个 3 秒 UI 等待失败；旧日志不能识别准确阶段。
-当前只改更新器测试：取消响应写入失败后继续下一条脚本回复；
-真实 Tokio/TCP 测试改用实际经过时间的一次性截止点，并输出阶段。
-旧服务器的真实 TCP 反例连续失败 10 次；旧 100ms GPUI timer
-仅经过约 0.16ms，两个缺陷分别得到证实，但不据此断言 Windows 的唯一原因。
-修后更新器 54 项通过，完整门禁实际退出 0（普通 Rust 2,011 passed/23 ignored、
-app 823 passed/2 ignored、rustdoc 10 passed、Python 122 项/1 skipped），
-544 个非 Markdown 输入前后不变。新的非作者 Bacon 已复核源码、反例和完整门禁，
-P0/P1/P2 均为 0。其精确提交 `9ab663e` 的 Windows job 未到达更新器检查；
-后续同 Rust 输入的 `7782979` Windows 已实际通过更新器检查，
-原未具名超时原因仍未知。见[更新器测试记录](testing/records/2026-11-04-updater-transport-fixture.md)。
-
-Windows 测试夹具修复已推送为 `9d4517e`，本机完整门禁和最终提交绑定的非作者复核通过。
-它的新 Quality `41828929466` 的 macOS job 在旧 Unix 分片 nonce 测试超时：
-测试通过线程定时等待安排分片，而实际请求上限为 100ms。受控发送延迟已复现；
-当前候选改为真实 socket `WouldBlock` 驱动第二片发送，原 100ms 期限和认证断言保留。
-仅两份 `cfg(test, unix)` 文件变化，23 项专项通过，两项隔离突变被断言拒绝；
-新非作者源码/证据复核 P0/P1/P2 为 0；修后完整门禁实际退出 0
-（普通 Rust 2,007 passed/23 ignored、rustdoc 10 passed、Python 122 项/1 skipped，
-543 个非 Markdown 输入前后相同）。该修复已推送为上述 `7b43af2`，
-见[Unix 分片记录](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)。
-下面 `c366871` 的 macOS/Linux 精确 CI 后来均成功，Windows 原失败仍保留。
+本入口供后续 AI 会话接续；日期按 Asia/Shanghai。先读 [AGENTS.md](../AGENTS.md)，再按下列链接读取负责该范围的文档和证据。
+最新用户要求优先于历史范围；源码、工程测试、受控原生、平台 CI、公开发布和安装分别验收。
+完整旧稿见[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)，其中“当前”、暂停及删除指令只属于当时，不构成新的操作授权。
 
-下方主题/知识库/NET/依赖组合已提交并推送 `origin/main` 为
-`c36687126312191191236f1e9c8840abb7b4d808`，远端 SHA 已读回；没有发布标签或覆盖安装。
-精确 Quality `41824639165` 的 Windows job 在 Python 进程树夹具身份发布前超时；
-原 5.4 秒总期限中 5 秒用于清理，实际准备余量不足 0.4 秒。当前只修测试夹具：
-独立有界准备，绑定原句柄后缩短同一期限，仍核验小于 3 秒的执行/回收和全部终态断言。
-修后完整 `scripts/check.py` 退出 0（普通 Rust 2,007 passed/23 ignored、
-app 819 passed/2 ignored、rustdoc 10 passed、Python 122 项/1 skipped），
-543 个非 Markdown 输入在运行前后不变；新的非作者源码复核 P0/P1/P2 为 0。
-其提交、原始 CI 与资源回读见[提交回读记录](testing/records/2026-11-04-theme-delivery-ci.md)；
-`9d4517e` 的 Windows/Linux 最终成功，macOS 后续失败见 Unix 记录。
+## 已接受的产品与主题方向
 
-原始失败、各分项证据和最终 macOS 开发包已经保存到主 checkout 的忽略 `work/`。
-NET 临时 worktree/分支、独立缓存、旧包和所属运行进程已清理。
-依赖与知识库两棵受管理 worktree 因其它活跃任务仍在使用而被归档管理器拒绝，
-因此保留；不要以 shell 删除绕过该保护。本轮主题决定不需要再次确认。
+- 真实 Rust / GPUI Kit 原生应用，目标 macOS、Windows、Linux；只管理远程 SSH。本地文件浏览仅服务于 SFTP，本地 AI 进程是推理入口；本地终端、远程桌面和串口不属于产品目标。
+- 默认简体中文并维护英文、白底跨平台图标和专业工作区。真实会话、数据、操作与验收必须可追溯；演示、编译、受控 GPUI 或模拟均不代表原生通过。
+- 用户已决定 **霜白 Frost、曜石 Graphite、雾紫 Lavender 三套全部内置并可继续扩展**，无需再要求选一套。主题家族 `theme_family` 与 System / Light / Dark 独立，工作区密度和面板布局另行设计。
+- 原生主题注册目录集中稳定 ID、双语元数据、推荐外观、浅深 Palette、组件 token 和终端默认色；新增主题走 `ThemeDefinition` / `registry()`，业务视图不按主题 ID 分支。自定义文件导入、下载或插件机制尚未提供。
+- 主题通过后台持久化成功后才应用，保留会话和草稿；旧配置默认 Frost，有效但未知的 ID 原样保留并回退显示。终端显式 ANSI/truecolor/OSC 颜色保持；切换主题不发送 AI 上下文。
+- HTML 方向已用于设计探索，连接导航和工具区布局尚未全部迁入原生。增加主题数量后需另验选择器布局，不能外推当前三项结果。
 
-## 本轮组合与用户设计决定 — 2026-11-04
+主题细节见[使用与扩展](product/THEME_PREFERENCES.md)、[原生设计](design/NATIVE_THEMES.md)、[ADR 0095](adr/0095-extensible-native-theme-families.md)。
+完整目标和差距由[能力清单](product/CAPABILITIES.md)、[远程要求](research/remote-ssh-requirements.md)、[路线图](ROADMAP.md)维护；归档/Zmodem、可验证的中继加速、跨设备同步等长期目标仍在，不因当前切片而删除。
 
-用户已接受霜白、曜石、雾紫三套方向，要求全部作为内置主题，并方便继续增加主题。原生实现采用 `theme_family` + 既有 System/Light/Dark；目录集中元数据、浅深 Palette、组件形状和终端默认色，业务视图不分支识别主题 ID。旧配置默认霜白，有效未知 ID 保留并回退显示。工具栏“主题”打开原生选择器，主题变更通过后台保存成功后应用，保留会话与草稿。主题与工作区密度/面板布局分离，HTML 布局实验尚不等于已完整迁入原生。见[主题指南](product/THEME_PREFERENCES.md)、[设计](design/NATIVE_THEMES.md)、[ADR 0095](adr/0095-extensible-native-theme-families.md)。
+## 当前已集成的源码
 
-本轮组合基于 `4cd1809`，包含主题、知识库列表/搜索/审核编辑删除、隧道规则管理和依赖升级。完整 `scripts/check.py` 实际退出 0，929 个输入在运行前后不变：普通 Rust 2,007 passed/23 ignored、rustdoc 10 passed（1 项仅编译）、app 819 passed/2 ignored、Python 116 项/1 skipped；格式、严格 Clippy 与额外控制器均通过。最后仅修复 Python 依赖检查器的非成员 dev 依赖判定，受影响的完整 Python suite 已重跑 120 项/1 skipped、官方 freshness 104 项通过，Rust 输入未变。
+功能组合已提交推送为 `c36687126312191191236f1e9c8840abb7b4d808`，包括三主题、知识库管理、NET 命名规则管理及依赖升级。
+当前已提交并推送的源码基线为 **`dc94e0e03782ba3d115e784c72823ee0f082b1b2`**；父任务保存了远端 main 同 SHA 的读回回执。
+本次增量只改 SFTP 测试夹具、回归及文档：独立服务器使用独立主机密钥，同服务器重连保留身份；真实同一绑定端点反例验证碰撞机制，准备写入前建立清理 guard，并覆盖取消与展开。
+生产隔离规则未改；功能提交之后的生产交付输入保持相同，Rust 测试文件确实变化，不能称整个 Rust 源树不变。
 
-主题/助手、知识库、NET、HTML 和修后的依赖工具均完成非作者分项复核，最终没有确认的 P0/P1/P2。解锁后原生 macOS 已观察三主题切换保留 SSH fixture、远端列表、未发送草稿及重启恢复主题/语言；最终同 Rust 输入包补充确认三主题入口与知识输入框中英文 AX 名称，正常退出 0。真实取消拒绝已纳入 NET 回归，真实远端取消超时只做源码复核；不要把这两个范围混写。实际结果与历史失败见[主题记录](testing/records/2026-11-04-native-themes.md)、[AI 记录](testing/records/2026-11-04-ai-knowledge-library.md)、[NET 记录](testing/records/2026-11-04-net-01-rule-management.md)及[依赖记录](testing/records/2026-11-04-dependencies.md)。
+| 已集成范围 | 当前边界与负责文档 |
+| --- | --- |
+| AI-04 本地知识库：列表、字面搜索、单条审核编辑/删除、后台 StateStore 保存 | 来源身份保持；Conflict/Unknown 后显式 reload 并重新审核，不重放旧 candidate。知识上下文模型发送尚未完成。见[知识库指南](product/AI_KNOWLEDGE_LIBRARY.md)、[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)。 |
+| NET-01：saved connection 绑定的 local/remote/dynamic executor，命名规则新增/编辑/删除及独立停止审核 | 运行 owner/流量属于原 live session；ephemeral quick connect 不能运行 named rule。真实 cancel 拒绝已有回归，真实远端超时只有源码复核；运行状态持久化、重启恢复、重连 owner 全矩阵及原生仍开放。见[NET 记录](testing/records/2026-11-04-net-01-rule-management.md)。 |
 
-后续重点仍是连接导航/工具区原生布局迁移、完整知识上下文发送、NET 原生与真实超时、三平台桌面/最小窗口/IME/VoiceOver 和精确提交 CI。三套主题已由用户决定全部保留，不要再次要求选一个；也不要把本轮当作整个产品目标完成。提交、推送和工作树清理以本节后续读回与 Git 历史为准。
+## 最新工程门禁、审查与 CI
 
-依赖每轮开发须检查官方最新稳定、非撤回版本。本轮最后检查时间为 `2026-11-04T11:45:03Z`，104 项通过。运行 `python3 scripts/check_dependencies.py --json-report <新报告.json>` 保存证据，或 `python3 scripts/check.py --fresh-dependencies` 在标准门禁前检查；离线标准检查继续可用。registry 要求保持 x.y，Cargo.lock 保留 patch，仍不 pin Rust 工具链。三平台原生、完整实际 SSH/AI/MCP、签名安装及全部产品能力均独立验收。
+`dc94e0e` 对应修后完整 `scripts/check.py` 实际退出 0，545 个非 Markdown 输入在门禁前后相同。
 
-## 当前工具链策略 — 2026-10-26
+| 检查 | 已保存的实际结果 |
+| --- | --- |
+| 普通 Rust | 2,014 passed / 23 ignored；其中 app 826 passed / 2 ignored，不能重复累加 |
+| rustdoc | 10 passed，其中 1 项仅编译 |
+| Python | 128 项 / 1 skipped；整体退出 0 |
+| 工程策略 | 格式、workspace/all-targets 严格 Clippy、x.y 策略及额外 readiness / observer I/O / small-stack 控制器通过 |
+| 独立审查 | Hypatia 最终源码/门禁复核 APPROVE，P0/P1/P2=0；随后精确提交绑定核对全部 545 个非 Markdown blob 与门禁输入一致 |
 
-项目配置不再固定 Rust 工具链：已删除 `rust-toolchain.toml`、workspace 与 crate 的 `rust-version`、`mise.toml` 的 Rust 版本项，以及 Windows 诊断脚本对 1.98.1 的硬编码。直接 registry 依赖仍使用 `x.y` 要求，`Cargo.lock` 仍保留解析后的完整版本。当前开发机使用 Rust 1.99.1；这只记录本机验证环境，不构成项目版本限制。历史测试记录中的 1.98.1 保留为当时的实际执行事实。
+首候选虽有 2,012 passed / 23 ignored（app 824 / 2 ignored），初审仍为 **HOLD / P2**：准备写入早于清理 guard。
+修后门禁与最终审查关闭该 P2；原 HOLD、首候选门禁、旧密钥及禁用 Drop 反例原样保留。目录句柄为零不代表普通文件句柄计数。
+reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时突变过程及缺少逐次突变源码摘要的边界见[SFTP 记录](testing/records/2026-11-04-sftp-fixture-identity.md)。
+清理仅在仍能安全检查自有连接时成立，不能检查时保留隔离和错误，不承诺任意失败都回收全局状态。
 
-本变更已提交并推送为 `80aa7207c1b67963cbd8b54c0ba2f990ec71aad6`，`HEAD` 与 `origin/main` 已读回一致。Rust 1.99.1 本机门禁为 core 505、AI 176、app 761，完整 `scripts/check.py` 为 Python 67 passed/1 skipped、workspace Rust 1930 passed/23 ignored；独立 reviewer 结论为 P0/P1 无、可合入。reviewer 提出的 Rust 1.99 隐含编译下限文档说明和 Windows release 解析直接单测列入后续 P2，不改变当前未完成的三平台原生桌面、发布安装和产品功能边界。
+- 精确 Quality **41863354940**：Linux/Windows **success**，app 分别 826/817 passed（各 2 ignored），三个新增回归、原 MCP/更新器失败项实际通过，Linux OpenSSH 通过。macOS 首次 job `126691000390` 及限定重跑 `126711796757` 均 **cancelled**，runner ID 为 0、步骤为空，annotation 明确说明未分配到托管 runner 及 ARM 容量紧张。两次尝试整体均为 failure；macOS 远端 CI **未执行**，需待 runner 可用后补验。第二次尝试的 Windows/Linux 继承第一次成功，没有重新执行。
+- 初期 API 报 queued，但后读 Linux 日志显示已执行；API 观测不能当作没有执行的证明。同期 Actions 服务事件与精确 job 的结果分开记录，见[SFTP 记录](testing/records/2026-11-04-sftp-fixture-identity.md)。
+- 上一提交 `7782979351291abfc95966b286f824fca683deb6` 的 Quality **41848787327**：macOS/Windows 成功；Linux 在 UTF-8 种子写入收到 `MutationQuarantined`，未到 OpenSSH 步骤，整个 run 失败。准确隔离 owner/原因 **UNKNOWN**，32 组容量假设仍未排除；身份碰撞反例不能证明历史 CI 的唯一原因。
+- 更早 Windows 原生 Job 准备失败与更新器超时的原始原因仍 **UNKNOWN**；后续控制通过不倒填旧原因。原失败和后续成功分别见[Job 记录](testing/records/2026-11-04-native-barrier-diagnostics.md)、[更新器记录](testing/records/2026-11-04-updater-transport-fixture.md)、[Unix 分片记录](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)及[提交回读](testing/records/2026-11-04-theme-delivery-ci.md)。
 
-## 当前继续开发 — NET-01 named tunnel executor — 2026-10-31
+上述源码 CI 已取得终态，并保留 macOS 外部容量限制。本次交接重写另经 Bohr 独立文档审查，P0/P1/P2=0；历史原稿逆向还原字节一致，相对链接检查通过。文档差异与提交绑定保存在 `work/theme-integration-20261104/handoff-refresh/independent-review/`；文档提交后的精确 CI 另行回读，不从源码或本机结果推断。
 
-NET-01 命名规则已经从审核计划接入真实 forwarding executor。Workspace 为远程 tab 维护 saved connection binding，split/reconnect 保留该绑定，ephemeral quick connect 不能执行 named rule；Tunnels 面板按当前 saved connection 过滤规则，显示端点预览，重新校验 rule/connection/state revision 后才启动 local、remote 或 dynamic worker。运行行保留 rule ID，listener owner、relay task 和流量统计仍属于当前 live session，不写入 StateStore。
+## 原生证据与 OPEN 边界
 
-独立复核发现并修复了 LocalForward listener task 意外结束后 worker 永不收敛的问题：`Forward::is_closed` 统一观察 local、remote、dynamic owner，UI 会收到 `Finished`。命名规则 executor 提交 `69f7f40` 和生命周期修复 `8268b0a` 已由独立 reviewer `01a191db-ed24-7d63-93c8-52b5afd56448` 复核通过，P0/P1/P2 均为 0；两项已合入主线为 `b218a4a`、`3c00ff3`。
+两份 macOS 包的证据必须分别引用，包内程序 SHA-256 如下：
 
-合入后的门禁通过：core 505 passed，AI 176 passed/5 ignored，app 766 passed/2 ignored；`scripts/check.py` 退出码 0（Python 67 passed/1 skipped，workspace Clippy、workspace Rust、doctest 及额外 AI readiness/stack 检查通过）。这些结果仅覆盖本机 macOS、受控 GPUI/内存 SSH fixture 和离线测试，三平台原生桌面、真实客户 SSH、发布签名安装仍未验收。
+| 程序身份 | 实际观察与保留状态 |
+| --- | --- |
+| 早期 `6d29c6ae68901147f3686da59624e5537f70e4ed214d1ea1ee3b1ceae2da4624` | 受控 loopback SSH/SFTP 中三主题切换、会话/远端列表/未发送草稿保持及重启恢复主题/语言。二进制已清理，原 manifest、AX、截图和退出回执保留；当前不能重算该二进制摘要。 |
+| 最终 `6d92ada1ddeff800bac062599611949ab70899b77fc39aba407da277272898e3` | 包保留且重新核对摘要；只补验主题选择入口、中英文知识字段 AX 及内容保留。未重跑 SSH fixture，未验 NET 或知识库原生增删改。 |
 
-规则编辑/删除 UI、按 rule ID 的独立 stop review、runtime 状态持久化、重启恢复、规则级 reconnect owner invalidation、远程未知 forwarding 结果处理和三平台原生验收仍是后续工作。
+最终包构建早于功能提交，manifest 无 commit/workflow 身份；**源码连续性不等于当前 HEAD 的原生执行**。
+具体范围见[主题原生记录](testing/records/2026-11-04-native-themes.md)及[包身份与交付复核](testing/records/2026-11-04-theme-delivery-ci.md)。
 
-## 当前继续开发 — AI-04 reload/reconcile
+以下仍为 **OPEN**，不能由本机门禁或上述限定观察关闭：
 
-在 StateStore Conflict 或写入结果 Unknown 后，AI-04 现在提供显式“重新加载并重新审核”动作。Workspace 通过后台 executor 读取最新 StateStore，成功后更新内存配置快照并清除旧知识 preview/review ID；用户必须重新生成预览、重新确认，旧保存 candidate 不会被重放。读取失败保持保存阻断，只允许再次读取。reload 期间 AI Settings、Updates、Vault、Profile Sync 和 Configuration Recovery 的配置入口与迟到回调均受串行化保护，并同步 locale、theme、active AI profile 及 Workspace 消费者。最终功能提交为 `2e4dad0`，独立 reviewer Hypatia 结论为 P0/P1=0、建议合入；剩余 P2 是测试记录同步和 Configuration Recovery 迟到 `Restored` 回调时序覆盖。应用内条目合并、编辑/删除/搜索、模型发送，以及三平台原生验收仍未完成。
+- Windows/Linux 桌面、完整三主题×明暗视觉矩阵、OS 外观通知、最小 OS 窗口几何、IME、VoiceOver；原生文件管理器拖放和其它既有原生缺口继续按[能力清单](product/CAPABILITIES.md)验收。
+- NET 原生操作、真实远端取消超时；知识库原生修改及完整知识上下文发送；更广泛的远程环境兼容性和完整 AI/MCP 流程。当前受控 OpenSSH CI 不代表全部部署环境。
+- 六目标 Release、签名/公证、真实下载、安装/更新/回滚及完整产品目标；本轮没有创建发行标签或覆盖安装。
 
-## 历史快照 — 2026-10-25
+## AI 与对外 MCP 的固定方向
 
-本节保留 2026-10-25 的中间状态；最终的 NET-01 executor、listener 生命周期修复、完整门禁和独立复核结果见上方 2026-10-31 记录。
+**MCP 是 KeelShell 向外部智能体提供能力的服务端**；应用内 API / 本地 Claude Code、Codex CLI 是独立推理入口，不增加通用第三方 MCP 客户端。
+外部 stdio 伴随程序通过认证桌面 IPC 使用用户授权的会话与工具；八项工具只提供限定读取、待审命令/现有文件替换提案或状态查询，客户端不能自行批准。
+关闭、结束或重连原 SSH 会话使旧授权失效；已发出的远端操作仍可能结果未知，不自动重发写操作。AI 输出不能绕过人工审核或自主执行。
+上下文捕获、保存和发送均须显式选择；敏感正文不进入模型或知识记录，远端输出是不能提升权限的不可信数据。知识来源是历史事实记录，不保证外部事实仍成立。
 
-NET-01 已完成运行时流量统计、命名规则持久化和当前面板的审核启动适配：local/remote TCP 与 loopback SOCKS5 的 payload 发送／接收计数通过 session forwarding 暴露，并在 app 隧道行显示；remote forwarding 以远端监听侧定义方向，停止时等待已建立 relay 完成，停止后的行保留最终快照。命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除引用保护和绑定 rule/connection/state revision 的审核计划；Tunnels 面板会按 saved connection 过滤规则，先展示预览，用户显式确认后调用真实 forwarding executor，split/reconnect 保留连接绑定，运行行保留 rule ID。规则编辑/删除 UI、按规则 stop review、运行状态持久化、重启恢复、规则级重连 owner 失效和跨平台原生验收仍未完成。AI-04 已完成 `keelshell-core` 领域模型和 `keelshell-app` GPUI 本地知识预览审核：用户显式捕获的来源绑定文本带不可变 session/source identity、revision、时间与捕获类型；预览默认是 `Unknown`／`DoNotPersist`，只有真实完成/失败确认按钮才产生可审核事实；敏感内容只留下安全状态，Markdown 不含敏感正文。已接入单条完整 session capture 的显式 StateStore 持久化、受控加载、乐观冲突、敏感/unknown 阻断和 context-selection/context-screen 到 Workspace 的完整 capture/save 集成测试；条目编辑/删除、模型发送和跨平台原生验收仍未完成。详细记录见[NET-01 记录](testing/records/2026-10-23-net-01-traffic-accounting.md)、[命名规则记录](testing/records/2026-10-23-net-01-named-tunnel-rules.md)和[AI-04 UI 记录](testing/records/2026-10-23-ai-04-knowledge-review-ui.md)。本轮独立复核及修复记录见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。
+完整外部 Codex 业务尚未通过；历史配对调用没有覆盖后续拒绝、原文件再读和撤权，历史七工具证据也不关闭供应商第八工具。
+同时活跃的应用内 Agent/MCP 撤权、三平台桌面和真实 provider 分别验收；CLI 当前使用明确 API 身份，订阅登录复用未实现。
+见[MCP 接入](product/EXTERNAL_MCP.md)、[授权生命周期](product/MCP_SESSION_LIFETIME.md)、[审核式 Agent](product/REVIEWED_AGENT.md)、[方向复核](testing/records/2026-10-07-mcp-direction-review.md)及[CLI 登录研究](research/local-cli-owned-authentication.md)。
 
-主远程草稿编辑器已完成 FILE-04 第一阶段：使用 GPUI Kit `EditorState`，按远端文件名启用 Rust、Python、JSON、TOML、YAML 和 Bash 高亮，未知或不支持的名称使用纯文本。KeelShell 自有字面查找／替换仍是唯一搜索入口，内置搜索、折叠、自动闭合和智能缩进关闭；patch 与冲突合并输入保持 `TextareaState`。UTF-8、NUL、1 MiB、审核保存、同目录备份和完整读回边界未改变。SQL grammar 为控制首阶段范围暂未启用，SQL 文件回退纯文本；当前 grammar 集合已使用旧兼容的 `cc` 锁定线，扩展语言需单独评估。代码与专项验证见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。
+## 工程、依赖与授权规则
 
-本轮 Finder 原生拖放尝试只完成隔离构建；原生 UI 工具报告 Mac 处于锁屏状态，拖放、审核、零写入取消、确认读回、截图和 AX 均为 `UNRUN`，见[原生记录](testing/records/2026-10-23-file-drop-native-macos.md)。解锁后需继续复用 `work/native-file-drop-20261023/package`，完成 FILE-02 的 Finder 验收。
+- `keelshell-app` 为 UI，`keelshell-core` 为领域/存储，`keelshell-session` 为传输，`keelshell-ai` 为 AI；阻塞 I/O 离开 UI 线程。公共 API 写 rustdoc，使用 typed errors，测试外避免 panic，行为测试使用隔离临时数据与有界等待。
+- 直接 registry 要求统一 `x.y`，应用 `Cargo.lock` 保留 patch；**不 pin Rust 工具链**，使用开发环境或 CI 支持的版本。历史 Rust 1.99.1 是执行环境记录，不是项目限制。
+- 每轮开发检查官方最新稳定、非撤回直接依赖并保存新证据：`python3 scripts/check_dependencies.py --json-report <新报告.json>`，或标准门禁前执行 `python3 scripts/check.py --fresh-dependencies`；离线标准检查继续可用。
+- 最后官方 freshness 为 **2026-11-04T11:45:03Z–11:45:19Z**：104 条声明/使用、34 个包、5 个成员通过。后续测试修复未新增依赖；这不是 11 月 5 日的新检查。见[依赖记录](testing/records/2026-11-04-dependencies.md)及[工程来源复核](research/2026-11-04-engineering-refresh.md)。
+- 不引入私有 Git 依赖、开发者绝对路径、凭据或生产日志。凭据默认临时；显式保存使用 OS 凭据库或经认证、主密码加密的 vault；主密码及明文凭据不写 profile metadata。主机密钥变化必须拒绝连接。
+- 功能提交前完成格式、严格 Clippy、测试、依赖策略、相关原生检查和新的非作者审查；失败证据与未验证范围必须保留。需求/设计/验收分别更新 `docs/product`、`docs/adr`、`docs/testing` 和 `docs/ROADMAP.md`，中英文 README 同步。
+- 用 KeelShell 自身能力描述产品，仓库文本、文件名、注释及发行说明不得引入具名专有 SSH 产品比较。既有授权涵盖公开 GitHub、提交推送及标签触发多平台 Releases；不涵盖遥测上传或覆盖安装。
 
-FILE-04 前一轮的 `python3 scripts/check.py` 结果见[语言高亮记录](testing/records/2026-10-23-editor-language-highlighting.md)。本轮 NET-01／AI-04 修复后重新运行的完整门禁、专项命令和独立复核结果见[复核记录](testing/records/2026-10-23-net-ai-independent-review.md)。该门禁不关闭提交级 CI、语法颜色像素、IME、VoiceOver、最小窗口、Windows/Linux 原生桌面或发布安装边界；原生 Finder `UNRUN` 证据必须保留。
+## 优先接续顺序
 
-复核完成后将当前切片分阶段提交并核对本地提交状态；本轮按既有授权推送到 `origin/main`，不创建发行标签。解锁后继续复用 `work/native-file-drop-20261023/package` 完成 FILE-02 的 Finder 验收。
+1. 核对最终交付读回及文档提交的精确 CI；托管 runner 恢复后补 macOS CI，保留两次未启动记录。区分本机通过、Windows/Linux 成功与 macOS CI 未执行，不以反复重跑或修改平台配置掩盖容量限制；其它功能可按下面顺序继续。
+2. 按已接受的三主题设计继续连接导航/工具区原生布局迁移，保留会话、草稿、审核和焦点行为，并补完整主题视觉与最小窗口证据。
+3. 推进知识上下文显式选择与模型发送、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
+4. 补 NET 原生与真实取消超时、重连 owner 全矩阵；运行状态持久化/恢复单独设计，不从已完成的命名规则元数据管理推断。
+5. 逐项补三平台桌面、IME/VoiceOver、原生拖放、真实互操作与发布安装验证；按[路线图](ROADMAP.md)继续完整能力目标。
 
-## 继续开发 — 2026-10-14
+## 资源与证据接续
 
-当前增量为远程编辑器的字面查找、替换和保存前备份。查找替换只改本机草稿；审核保存先写同目录隐藏备份，备份失败不发布新内容。目标发布结果未知时已完成备份保留，原文件仍按原隔离规则处理。专项回归和本轮 `python3 scripts/check.py` 实际退出 0，见[编辑器记录](testing/records/2026-10-14-editor-search-backup.md)。这不是原生文件管理器拖放、三平台桌面或 Windows `0xc0000409` 验收。
+本轮所属原生 app、SSH/SFTP 夹具、HTML 服务及临时控制均已收尾；不用的 NET worktree/分支、独立缓存和旧包已清理。源码 CI 观察进程已退出并回收；后续文档 CI 与审查资源的最终状态见 `work/theme-integration-20261104/delivery-readback.json`，结束后及时关闭。
+`dependencies-20261104` 和 `ai-04-knowledge-library` 受管理 worktree 的归档均被拒绝：**“Another active task still uses this worktree”**。
+保留这两棵树、对应分支和现有修改，**不得用 shell 删除绕过保护**。后续清理先确认消费者与资源所有权，保留必要忽略材料，再用可恢复归档；不删除共享缓存或其它任务资源。
 
-用户继续要求先处理当前 CI 与测试失败，完成文件拖放上传的独立审查和验证，通过后分阶段提交推送，并清理无用临时文件。
+以下路径均相对仓库根目录，属于本地忽略证据，不是公开发行产物：
 
-精确 `78c7720` 的 run `38500698507` 中，Ubuntu 的布局场景持有唯一文件夹具许可直到测试函数结束，导致后续文件与 MCP 测试失败；Windows 的退出码 0 进程树控制则在身份发布前耗尽 5 秒清理预留。两项均已有本机回归，详见[CI记录](testing/records/2026-10-14-ci-admission-and-windows-identity.md)。原生文件管理器拖放和 Windows `0xc0000409` 仍未关闭。精确 `99425de` 的 Ubuntu 与 macOS CI 已通过；Windows 原进程树失败已越过，但更新器 Ready 的 5 秒等待在负载下失败，本机单独通过，期限未改。
+- `work/theme-integration-20261104/ci/sftp-fixture-identity/p2-closure/`：修后完整门禁、反例、输入清单和退出回执。
+- `work/theme-integration-20261104/ci/sftp-fixture-identity/independent-review/`：原 HOLD；其 `p2-closure/final-binding/` 保存最终 APPROVE 与 `committed-review.json` 的精确提交绑定。
+- `work/theme-integration-20261104/ci/`：原平台失败与后续 run/job 回读；`final-delivery-review/` 和 `worktree-cleanup.json` 位于 `work/theme-integration-20261104/`，保存包身份和资源清理复核。
+- `work/theme-integration-20261104/handoff-refresh/`：本次旧稿原始 blob 字节、哈希、相对链接重定位与文档验证回执。
 
-当前仍在 `feature/platform-batch-integration`，远端基线为 `cddec26`。Unix 清理夹具的直接故障已定位为自有 socket 超时 setter 返回 `EINVAL`；现已改为单次绝对期限内的非阻塞读写，生产清理期限和安全契约未变。本机完整 `python3 scripts/check.py` 已实际通过。macOS 更新器夹具的 `WouldBlock` 也已按同一边界修复，应用更新器 53 项及文件模块 162 项通过。
-
-审核式拖放上传已导入当前工作区。一次 1–32 个本地文件或目录进入现有只读准备和人工审核；取消、超限、链接、重复及冲突目标不写入。GPUI 受控事件通过不等于原生文件管理器验收。Windows 应用进程 `0xc0000409` 的触发者仍未知，不由本机结果关闭。
-
-## 保存进度、重建本地仓库与暂停 — 2026-10-13
-
-用户最新要求提交全部本地代码后删除当前项目目录，再从 GitHub 重新克隆。
-当前 `feature/platform-batch-integration` 保存为进度检查点，不合入 main，
-不创建发行标签。两项旧文件审核按钮的真实 GPUI 指针回归已通过，依赖
-策略、格式、严格 Clippy、65 项脚本测试（1 项 Windows 跳过）及此前
-57 项打包脚本测试通过；本轮完整工程检查仍失败：AI 库 100 通过、1 失败、
-1 ignored，Unix 清理夹具写入返回 BrokenPipe。后续门禁未运行，
-当前组合的新原生桌面与精确提交 CI 未验收。完整失败、前像和独立审查
-保留在私有迁移备份中，详见[本轮记录](testing/records/2026-10-13-platform-batch-integration.md)。
-
-提交推送并核对远端后，仓库外保留小型内部 Git 恢复备份和必要测试证据，
-删除旧目录、构建缓存和 Python 缓存，在原路径重新克隆并检出该功能分支。
-现有用户配置不在仓库内。重克隆完成后暂停目标，后续开发需用户恢复；
-首先排查上述失败并完成当前组合验证。下文“恢复开发”及较早“当前”
-描述属于历史时点，不覆盖这一暂停与未通过边界。
-
-## 恢复开发与功能整合 — 2026-10-13
-
-本轮从远端重新核对的主线 `ecab604` 恢复开发。在 `feature/platform-batch-integration` 组合已提交的批量传输 `0220f2f`（含 Windows 测试控制器 `af9465c`）与 Unix 本地 AI 清理修复 `991473f`。这两项原为独立分支，下面 10 月 9 日的暂停和“未包含”描述只反映各自历史时点。本次组合需要新的格式、依赖策略、Clippy、完整测试、相关原生检查及独立复核；当前尚不声明这些检查通过。
-
-本轮独立复核另外发现普通文件审核的旧绘制动作身份缺口：Save 审核被 Read 审核替换后，旧批准或取消可能作用于新提案。现将全部新提案统一分配独立 UUID，并绑定两个按钮；真实指针回归与完整验证正在执行。Windows 批量选择测试的隐藏文件夹具同时修正为真实原生属性，进程 `0xc0000409` 的原因仍未知。见[本轮记录](testing/records/2026-10-13-platform-batch-integration.md)。
-
-批量功能的已审核多选、目录非原子语义和 typed 取消保持；Unix 仍只在原三秒期限内进行一次终止与后续缺席观察，不放宽原测试期限。其余保存快照不自动并入。最新平台结果及本次实际验证另记，完整产品、外部 MCP、CLI 自身登录、跨平台桌面和签名安装验收仍未完成。
-
-## 批量传输与队列入口限定验收 — 2026-10-09
-
-本功能证据与功能分支／提交目标为 `feature/file-browser-batch-transfer`，HEAD 基线 `af9465c`，完整842组合；尚未合入main。本次只提交推送该功能并按用户要求暂停，主线整合、标签和Release单独保留后续。根另一功能分支的Unix生产修复 `991473f` 与维护 `02f2e59` 及其[三平台CI](https://github.com/cyruss648/keelshell/actions/runs/37868547352)是独立范围，当前批量分支不包含该Unix修复。
-
-本次多选审核式批量上传／下载、取消类型保持及固定队列入口已经完成限定工程和macOS受控原生验收。最终842输入／16,489,347字节完整工程检查实际wait0，1,841普通Rust、10rustdoc（9运行／1个no_run仅编译）、65Python（64通过／1Windows原生跳过），22ignored未运行；原七命令和默认／2MiB各626控制完成，同源新macOS双程序包／fixture及57打包用例通过。
-
-新原生完成三上传／三下载，三文件34／39／33字节，每方向106字节，来源／远端／下载完整相等且无额外文件；待审时进队列仍零任务、展开末项后取消保持零写。中文浅色默认入口／计数由根实际观察；新的非作者现场复核英文深色默认入口、五类计数（完成6，其余0）、详情结果及返回后的目录／选区／四份ASCII草稿保持，队列可发现性P2在该限定范围关闭。应用正常退出与夹具actual0／回收／组不存在、严格端口拒绝连接和所属scratch删除均有真实收据。
-
-首轮842／16,488,619字节完整检查actual1、app737PASS／1FAIL／2ignored及同源原目录续传单例actual101保留。修正仅让原布局测试按既有工具区契约真实滚动后检查次级卡片，保留visible、双轴包含和原窗口／四线程／8秒／75毫秒要求，不承诺次级卡片默认可见；新完整通过不覆盖原失败。
-
-本记录为提交前验收快照；功能提交与推送结果以 Git 历史及远端读回为准。本轮按用户要求在完成提交推送后暂停，完整目标仍未完成。最终八份状态文档复核、功能提交推送及准确远端读回分别验收；精确新提交CI结果单独待验，不虚造提交SHA或平台通过。
-
-最小OS逻辑几何、IME／VoiceOver、System主题原生切换、Windows／Linux桌面、OpenSSH桌面GUI、完整外部MCP业务、本地CLI自身登录复用及签名公证／发行安装继续OPEN；本次受控SFTP原生不代表这些范围或全项目完成。详见[批量记录](testing/records/2026-10-08-file-browser-batch-transfers.md)和[队列记录](testing/records/2026-10-09-transfer-queue-entry.md)。下文各历史时点不覆盖本段最新状态。
-
-## 最新实现与实际门禁 — 2026-10-09
-
-Unix清理已采用有界未知观察契约：EPERM不表示成功，在原三秒内只继续零信号观察，仍要求原leader回收与期限内实际ESRCH；持续未知／迟到缺席失败，取消／重入／Drop不能重获终止许可。原EPERM立即失败测试域的变化已明确披露，旧失败及完整前像保留。本机自有未回收zombie探针实际EPERM、原wait0后ESRCH只证明机制，不证明旧v7／v9原因。新非作者源码复核通过后，根锁定编译、16控制和原完整工程检查均实际wait0；835输入／16,438,546字节在各阶段前后相同，专项及完整各21个独立夹具根确认终态并删除。准确结果见[Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。提交前最终证据／文档后像复核、精确新平台CI仍开放。
-
-批量传输future布局修复后的839输入已实际通过原完整工程门禁，新非作者已复核1,831普通Rust／10rustdoc（其中1个no_run仅编译）、65Python与原各626控制；同源macOS双程序开发包及57打包用例通过。新增取消类型修复经新非作者精确三方组合审查导入840输入；六同poll控制、原future16KiB及真实TCP专项通过，旧mapper负控的两个原断言实际失败，精确恢复后六控制通过。新840完整门禁、同源包、GUI批量审核／自有OpenSSH和其它平台原生继续独立验收，旧839通过不能继承。
-
-Windows受限parser追踪已在独立功能提交72e9c8e推送，其[真实诊断37767535214](https://github.com/cyruss648/keelshell/actions/runs/37767535214)实际失败：三个exit控制通过，首机会target／debugger实际exit0且原句柄终态已确认，但严格解析拒绝并返回125。追踪显示异常记录核心字段已产生，同时context不可用、额外未知行和module范围缺失；第五控制和固定原706应用诊断未到达。私有CDB原文／dump未获取，下一窄诊断保持拒绝，不猜测旧应用异常原因。完整MCP、CLI自身登录、原生UI及发布安装保持OPEN。下方各段是历史时点，不能覆盖本段最新状态。
-
-## 本地文件与工作副本清理 — 2026-10-08
-
-七处旧 Cargo 缓存、两处当前树增量缓存、两个干净闲置 checkout 和十二个已合并本地分支已实际删除；逻辑缓存约715.4GiB，磁盘可用空间实际增加约63.4GiB。删除结束后的根834及批量传输839个完整工程输入保持原字节、权限与路径集合，必要程序和失败材料已保留。七个旧受管 worktree 的可恢复归档请求仍为 queued，物理 checkout 未验收删除，后续需核对后再清理已合并且未占用的分支。当前两个开发工作副本保留。以后每个阶段结束即清理无活跃消费者的可再生缓存和闲置副本，归档前保留所需忽略材料，详见[清理记录](testing/records/2026-10-08-local-development-cleanup.md)。
-
-## 最新并行门禁 — 2026-10-08
-
-Unix v9 临时诊断的原完整检查实际 wait1，AI 库96PASS／1FAIL／1ignored；失败是长TMP夹具的组观察返回EPERM并锁定CleanupFailed，不是原v7默认controller失败的根因证明。原默认626及后续门禁未到达，源码已精确恢复，恢复后的locked no-run实际wait0。只有15个严格complete根已删除，另1个fallback失败根保留；不能沿用v7的17根数量，详见[最新Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。
-
-批量文件传输候选原完整检查实际 wait1，734个应用测试通过，但session原future大小测试失败：atomic upload为18,112字节，超过既有16KiB限制。原完整门禁及后续原生验收仍未通过，正在修复布局并保留来源／目标发布前再次校验；没有导入根或提交候选。限定作者回归不能代替新的完整检查，记录保存在批量传输工作副本及根忽略的 `work/file-browser-batch-root-20261008-v1/`。
-
-Windows CDB参数修正已在独立公开功能提交e8c2fdc推送，其[真实诊断37744413563](https://github.com/cyruss648/keelshell/actions/runs/37744413563)的三个exit控制通过；首机会控制已启动目标，但严格输出解析拒绝，后两阶段未到达。[精确Quality37744320601](https://github.com/cyruss648/keelshell/actions/runs/37744320601)的macOS／Linux成功，Windows的暂停取消测试实际为Failed而非预期Cancelled，原应用异常原因继续未知。本段优先于下方历史“候选未运行”状态，独立诊断准备继续，不以部分控制替代Windows或完整产品验收。
-
-## Unix 原完整检查失败记录 — 2026-10-08
-
-当前 Unix 清理增量仍在未提交的功能分支。v6 专项编译与十二控制实际通过，v7 等价单字节写法已通过严格 Clippy；但 v7 原完整检查在默认本地智能体 controller 的 Claude Code 自有继承管道后代场景返回 CleanupFailed，实际 check wait1／Rust command101。原626阶段只到408，完整后续 workspace／doc、readiness／IO／small-stack 未到达，不能以专项通过准入功能提交。准确 wait／观察／errno 分支仍 UNKNOWN；测试版诊断不在普通 integration 库构建中。17个本轮私有 Unix 短根严格终态与实际删除已成立，不能代替该原 controller 的成功或未记录身份的终态。v4／v5 失败与 v6 Clippy 失败全部保留，详见[Unix记录](testing/records/2026-10-08-unix-local-agent-cleanup-terminal-state.md)。v8 临时 test/debug 观察实验已通过新的非作者源码复核并实际完成原默认626阶段，没有失败hook，旧原因仍UNKNOWN；精确恢复原源码后 locked no-run 也实际通过。原v7完整失败和提交阻断保持；新运行证据复核单独进行，未放宽三秒或任何原断言。
-
-父提交 af9465c 的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37731989533)已结束：macOS 成功，Windows 应用异常、Linux 文件夹具准入失败；新的实际 Windows 控制器两 runner 通过，首项 CDB 未启动目标，其余控制及固定原应用诊断未到达。两个窄候选（Windows参数、Linux测试App范围）完成新非作者静态复核，仍未导入或实际平台通过。发布签名信任正在重基准备；完整对外 MCP、CLI 登录复用、原生界面／辅助技术及发行安装保持 OPEN。MCP 始终由 KeelShell 向外部智能体提供服务。
-
-下文保留父提交及其它历史范围；Unix 各次准备／失败／通过以本段和专门记录为准。
-
-## Windows 终态验证增量 — 2026-10-08
-
-精确 ecab 的三平台 [Quality 37726023963](https://github.com/cyruss648/keelshell/actions/runs/37726023963) 已结束：macOS／Linux 成功，Windows 仍在原后代 HANDLE LIVE 断言失败、Rust 未到达；三份完整原日志已读回。新的 Windows Job v3 只改 Python 验证控制器：原进程对象结束、完整回收和管道收尾、原期限内等待前后 Accounting 稳定共同作为成功条件。作者及新非作者各自完整59用例58PASS／1Windows原生UNRUN；独立七模型通过，新非作者无确认P1/P2，仅准入根工程与功能分支实际Windows验证。根正式完整检查已实际通过：1,812普通Rust／10rustdoc／65Python（64PASS／1Windows原生UNRUN），格式／x.y／严格Clippy、原默认及2MiB各626阶段、10准备期与2观察IO控制通过；同831输入及mode前后不变，owner实际wait0／reap／group absent，私有TMP空且删除。四份状态文档随后更新；提交前最终非作者复核与功能分支准确Windows分别验收。本切片未关闭原应用异常原因，也不混入 Unix 和生产发布信任候选，详见[Windows记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。完整对外 MCP、CLI登录复用、UI原生辅助技术、其它平台桌面与发行安装目标继续 OPEN。下文保持各自历史时点。
-
-## 当前状态 — 2026-10-08
-
-最新已推送基线 `f3c8820` 的[Quality 37721737467](https://github.com/cyruss648/keelshell/actions/runs/37721737467)已结束：Linux成功，Windows／macOS失败。新的[Windows诊断 37721774239](https://github.com/cyruss648/keelshell/actions/runs/37721774239)42项1failure，ACK前确实同Job的原child HANDLE在返回后仍LIVE，证明控制器成功终态条件不足；五项CDB／原706仍UNRUN、原应用原因UNKNOWN。macOS为small-stack Codex ProgressAsk取消后连接断言，具体监听者仍UNKNOWN；Linux在未加入SHA2优化的同生产源码上通过，不能归因优化或倒填旧Timeout原因。原完整日志与唯一SDK产物均保留，见[诊断与平台后续](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。
-
-本切片仅导入SHA2 0.11.*开发优化及文档，830输入实际通过1,812普通Rust／10doc／48Python、格式／x.y／严格Clippy和原默认／2MiB各626阶段；两个owner实际wait0/reap/group absent，私有TMP为空并删除，原Rust与期限保持。实际0.11编译opt3/debugassertions-on，0.10.9在macOS图未编译、Linuxflags待验；最终非作者根证据复核已通过，无确认P1/P2；精确新提交CI待完成。Unix cleanup v1因取消／重入／Drop数字PGID重发P2被拒绝，未导入；新的Unix和Windows控制器在独立目录准备，不混入本次源码。详见[优化记录](testing/records/2026-10-08-development-sha2-build-optimization.md)。完整外部MCP、CLI登录复用、最小原生几何／辅助技术、其它平台桌面及发布安装仍OPEN。下文按各自时点保留历史状态。
-
-最新精确 `437f896` 的三平台 [Quality 37717370699](https://github.com/cyruss648/keelshell/actions/runs/37717370699) 已全部失败：Windows 控制器的后代终态测试、Linux 原8秒 CLI目录测试、macOS ProgressAsk取消后连接断言。首次真实 [Windows诊断 37717377052](https://github.com/cyruss648/keelshell/actions/runs/37717377052) 通过SDK inventory，但Python36项回归1failure／1error，未到达五项CDB控制或原706项应用测试；原异常原因仍UNKNOWN。三平台及诊断完整原日志和唯一允许的inventory产物已读回并保留；READY／原句柄身份夹具修正已通过本机48项脚本回归和新非作者限定复核；准确新Windows仍待运行，Linux耗时及macOS连接身份分别保持OPEN。此最新结果优先于下文历史“待运行”状态，不以本机通过覆盖，见[诊断与平台后续](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。
-
-本轮测试修复基于已推送主线 `7c11954`，已包含本地／远程 SFTP 浏览。精确 [Quality 37683724603](https://github.com/cyruss648/keelshell/actions/runs/37683724603) 已结束：macOS 成功，Windows 和 Linux 失败，三份完整 job 原日志均保留。Windows 失败测试的 `PathBuf::join("..")` 在 verbatim 路径上会先归一化；新的测试输入保留原生字面 ParentDir，使原拒绝断言获得正确输入。Linux 失败发生在 120 秒夹具组准入，准确 owner／原因仍未知；新增有界测试观察记录实际持有和清理阶段，原期限、FIFO 与四线程保持。测试修复 `a717400` 已提交推送；其精确 [Quality 37696576523](https://github.com/cyruss648/keelshell/actions/runs/37696576523) 已结束，macOS／Linux 成功；Windows 应用测试以 `0xc0000409` 异常退出，准确触发者未知。新的诊断 v2 已通过独立静态／离线复核并在本次提交精确导入三文件；根 42 项 Python 回归通过，实际 Windows 原源码四线程诊断待运行，见[诊断记录](testing/records/2026-10-08-windows-native-crash-diagnostics.md)。本机此前已实际通过 1,776 普通 Rust／10 rustdoc／6 Python、格式／x.y／全 targets 严格 Clippy，以及 57 项打包测试；新的非作者最终源码／工程证据复核无 P1/P2 阻断；本轮测试修复提交后的精确 CI 另行验收，见[平台记录](testing/records/2026-10-08-file-browser-platform-ci.md)。下文 a940 及浏览整合阶段保留其历史范围。
-
-本次配置恢复提交收录 v9 功能与数量归属修正。首次工程检查的既有 AI 目标测试失败、中断和旧原生数量 P2 均保留；测试改用实际会话导航，领域预览和界面分别标注当前／恢复后数量，不可读当前数量不虚构为零。最终同 824 输入／16,151,246 字节实际通过 1,812 普通 Rust／10 rustdoc／6 Python、格式／x.y／严格全 targets Clippy，以及新 macOS 标准包和 57 打包用例。修后 17 原生观察完成有效／损坏恢复、取消、重启及完整文件比较；另四份中文浅色原图确认当前 2／恢复后 1 并取消保持原字节。两个新 owner 均实际 wait=0、已 reap／group absent，十次 app 均实际收尾，旧 v3 owner exit 仍 UNKNOWN。新的非作者最终源码／工程／包／限定原生复核无 P1/P2 阻断，当前／恢复后数量归属 P2 已关闭；收尾仅更新四份状态文档，其余 820 输入不变。精确提交 CI、最小 OS 几何／VoiceOver／IME、其它平台桌面及断电耐久性仍开放，见[整合记录](testing/records/2026-10-08-configuration-recovery-main-integration.md)。对外 MCP 新验收控制器的账本／进程最终检查修正已通过新的非作者离线复核；当前程序绑定与完整外部 Codex 业务仍未通过。MCP 始终是 KeelShell 向外部智能体提供能力的服务端。
-
-## 历史浏览整合检查点
-
-
-最新已推送检查点为 `a94038d`（本地智能体准备失败的测试控制器收尾）；父提交 `9669243` 包含自动更新策略与会话栏，其三平台 Quality 已实际全部成功。2026-10-08 后续准备期收尾改动只涉及本地智能体测试控制器及检查入口：新增十项控制、原默认／2MiB各626阶段、85项AI库及严格全target Clippy已在根实际通过；新非作者最终复核和精确远端读回通过；a940 的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37676683014)已全部成功，三个 job 原日志完整读回；这不替代浏览增量的精确新 CI，见[准备期记录](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)。下文旧219等检查点保留其历史范围，不作为最新主线。
-
-本地／远程文件浏览已精确整合到根 `feature/local-remote-file-browser`：810 输入完整门禁通过 1,769 普通 Rust／10 rustdoc／6 Python、格式／x.y／严格 Clippy，22 ignored 未执行；同输入新 macOS 标准包与 57 打包用例通过。新宽窗口系统目录选择器、隐藏项、子目录／上级导航、大小排序及人工审核上传／下载已实际完成，三份完整30字节来源／远端／下载内容相等；12 原始 JPEG／AX、实际 wait 和所属资源清理保留。新组合源码／工程／宽窗口原生证据的独立复核无 P1/P2；功能提交后的精确 CI、最小原生窗口、辅助技术和其它平台桌面仍独立开放，见[整合记录](testing/records/2026-10-08-local-file-browser-main-integration.md)。MCP 由 KeelShell 向外部智能体提供服务；本轮未授予 MCP 权能或调用外部客户端。
-
-## 2026-10-07 历史主线和整合状态
-
-该历史时点已推送主线为 `219093c95b491692abea1a7d005b2e6eea985967`，根已核对远端main同SHA、ahead/behind为0/0。该提交的[三平台Quality](https://github.com/cyruss648/keelshell/actions/runs/37657109077)已结束：macOS/Linux成功，Windows在本地智能体受控后代端口3秒准备期失败，该case Ask/清理终态未记录，原因UNKNOWN。三个job原日志已读回，不宣称三平台整体通过。此前 `a4c15c04772b11a70a592ae7c95132b4bea4d818` 审核式 Agent 和原 SSH 生命周期绑定的 MCP 授权已整合；本机完整工程检查及 macOS 开发包通过，详见[组合记录](testing/records/2026-10-07-reviewed-ai-mcp-main-integration.md)。这些结果不等于完整产品或新原生流程完成。
-
-此前精确`a4c15c0`的[三平台 Quality](https://github.com/cyruss648/keelshell/actions/runs/37624355451)已结束：macOS、Windows 成功，Linux 唯一应用失败为目录同步被实际 `MutationBusy` 拒绝，零写入，原字节保持。独立双夹具受控流程已证明不同测试目录也可能争用进程级本地写保护；历史 CI 的准确占用者未识别。旧 b54 的 8 秒 Ask 和 e695 的 18 秒同步失败仍是分别保留的未知原因，见[精确 CI 记录](testing/records/2026-10-07-agent-mcp-platform-ci.md)。
-
-本轮43个声明路径已按精确preimage和审核后的三方结果导入、提交并推送主线，完整785输入与准备副本相等，所有未声明基线字节保持。主树完整门禁和新macOS标准包实际通过；对应受控原生文件审核取消/保存流程已完成，新的非作者最终证据复核通过，精确新提交CI另记：
-
-- 文件审核展开视图、固定动作和显式草稿／差异编辑入口，作者及新非作者限定源码与 GPUI 回归通过，见[文件指南](product/FILE_REVIEW_AND_FOCUS.md)。
-- 测试专用同步阶段观察和 Argon2 依赖的开发构建优化，作者及新非作者限定复核通过；生产 KDF 参数和原期限保持，见[ADR 0075](adr/0075-development-kdf-build-optimization.md)。
-- 本地智能体目录诊断仅在 Ask 返回后尽力输出，新独立 IO 错误反例保持原成功或超时结果；原测试正文和 8 秒 Ask 不变，标准检查将自动执行新增 IO 回归。
-- 本地文件测试 v5 以真实App弱组引用和实际panel／worker所有权保持许可，队列close／Join完成后才释放；作者六控制及95项四线程通过，根已完整消费。新的非作者真实App身份、资源终态与组合UI四项限定复核通过；根已完整消费原始材料，旧v3／v4拒绝记录保持，见[生命周期复核](testing/records/2026-10-07-local-mutation-fixture-lifetime-review.md)。生产文件隔离机制不改。
-
-本次785输入正式检查实际0（1691普通Rust/10doc/6Python及严格工程检查），对应macOS标准包/57打包实际0。真实macOS受控SSH/SFTP审核、取消字节保持和明确保存42字节完整读回通过；12原始JPEG/AX、操作顺序、actualwait与清理保留。英文小窗口会话关闭按钮截断P2已确认，下一切片修复；未取得OS逻辑几何、IME/VoiceOver或其它平台桌面证据。整合结果和精确输入见本次记录，不发布完成产品标签。
-
-小窗口会话标签和离线全图标源正在下一独立切片实现：已完成固定格式/x.y/全workspace严格Clippy，四项GPUI及完整内嵌资产回归实际通过。新的非作者静态促成语言/resize旧bounds和开发包资源修正；额外旧绘制close索引实际反例已复现并按EntityId修正，新完整门禁/标准包/原生及最终复核待完成。自动更新策略与本地目录浏览在独立作者树推进，尚未整合，不继承219的通过结论。见[小窗口记录](testing/records/2026-10-08-compact-session-tabs.md)。
-
-## 产品与工程契约
-
-原生 Rust GPUI Kit，macOS、Windows、Linux；只管理远程 SSH。默认简体中文并维护英文，System／Light／Dark 主题和白底跨平台图标。专业界面、完整远程功能、最小窗口和辅助技术目标保持，范围及余项以[能力清单](product/CAPABILITIES.md)、[路线图](ROADMAP.md)和[远程要求](research/remote-ssh-requirements.md)为准。
-
-UI、core、session、AI 分层；阻塞 I/O 不进入 UI 线程。直接 registry 依赖使用 x.y，保留应用 Cargo.lock，不固定 Rust 工具链。公开 API 有 rustdoc，错误类型明确，行为测试隔离且有界。提交前完成格式、Clippy、测试、依赖策略、相关原生检查和新的非作者审查。
-
-凭据默认临时；明确保存使用 OS 存储或经认证的加密 vault。主密码、明文凭据及客户日志不进入源码、profile metadata 或记录。主机指纹变化拒绝连接。用户已授权公开 GitHub、提交推送和标签触发多平台 Releases，没有授权遥测或覆盖安装。
-
-## AI 和对外 MCP
-
-**MCP 由 KeelShell 向外部智能体提供服务。** 应用内调用 API／本地 Claude Code、Codex CLI 是独立的推理入口。独立代码与文案核对确认了服务端方向，见[方向复核](testing/records/2026-10-07-mcp-direction-review.md)。
-
-对外 stdio 伴随程序经受认证的桌面 IPC 访问用户授权的会话、工具、片段和目录。八项工具读取限定信息、创建待审命令／现有文件替换或查询提案状态；客户端不能自行批准。关闭、结束或重连原 SSH 会话使旧授权失效，已经发出的远程操作仍可能结果未知。见[接入指南](product/EXTERNAL_MCP.md)、[授权生命周期](product/MCP_SESSION_LIFETIME.md)和[审核式 Agent](product/REVIEWED_AGENT.md)。
-
-当前完整外部 Codex 业务尚未通过。旧 V12 完成 20 次配对调用，但后续拒绝状态、原文件再读和撤权未到达；之后启动尝试没有进入 CLI／模型／业务，不能补齐。历史 Claude 七工具限定证据不关闭供应商第八工具；同时活跃的应用内 Agent／MCP 撤权及三平台桌面仍须分别验证。
-
-应用内 CLI 目前使用明确 API 身份，订阅登录复用仍未实现。新的只读研究和六项自有无账号探针确认了有效策略准入缺口；未增加占位功能、未读取用户 token，见[登录研究](research/local-cli-owned-authentication.md)。
-
-## 下一步和证据维护
-
-1. 本地／远程浏览的完整门禁、macOS 标准包、宽窗口审核式双向 SFTP 及新的非作者复核已完成；提交推送后单独核对精确新 CI。
-2. 自动更新策略、会话栏和本地目录浏览已完成各自限定整合；继续英文最小原生窗口、更新安装及其它平台桌面的独立验收。
-3. 继续完整外部客户端流程、原生 Agent、语言／主题／最小窗口／辅助技术以及 Windows/Linux 桌面验收；不以编译或受控 GPUI 代替。
-4. 完成精确提交三平台 CI，继续六目标 Release、签名／公证、安装更新验收。GitHub 链接、变更日志和更新实现已有源码，但发布和安装需要自己的证据。
-
-设计在 `docs/design` 和 `docs/adr`，需求在 `docs/product`，实际成功、失败及未验证范围在 `docs/testing`。完整原始材料留在忽略的 `work/`；归档前保留所需忽略材料，确认没有活跃消费者，再使用可恢复 worktree 归档。旧 UI 和 KDF 候选树已在保留源码、失败材料与实际程序后归档；新的测试组作者树保留。
-
-此前详细交接及各次历史范围保存在[历史快照](history/2026-10-07-handoff-before-ui-runtime-integration.md)，不将旧时点的“当前”状态当作本次结论。研究 Reef／模板、AI 配置和界面资料见[文档索引](README.md)。
-
-本次组合状态与后续实际结果统一记录在[界面与生命周期整合](testing/records/2026-10-07-ui-runtime-main-integration.md)。原生runner中断清理与编译输入绑定的14项自有子进程控制通过，只作为准备验证；实际新GUI/SSH/SFTP审核流程已完成，限定结果和未验证边界见整合记录。
-
-## 自动更新策略与会话栏 — 2026-10-08
-
-core typed policy 和 workspace长期更新服务已接通每日默认／关闭／每周、可选后台下载、启动延迟与有限退避；人工检查可撤销旧后台owner，迟到结果不能接管。已校验旧包只在新包校验成功后替换，取消当前请求恢复旧包，空闲时明确弃包；安装只经用户确认。历史metadata与偏好保存保留SSH实体和命令草稿，state reload即时同步策略。候选26项新增行为、原取消反例与修后专项各自保留；作者1703普通的旧full不继承为最终组合结论。见[策略历史](testing/records/2026-10-08-automatic-update-policy.md)。
-
-工具栏已增加紧凑图标、可滚动标签、标题省略、实体绑定的关闭入口及前后导航；动态更新文字也绑定布局reveal。完整静态图标嵌入用于开发／正式包。四项GPUI和资产回归、新非作者源码复核以及宽窗口双SSH／关闭／草稿保持已有证据；英文原生small P2保持OPEN，不能沿用GPUI900px。
-
-新组合审查发现旧绘制更新动作身份P1/P2，六项原指针反例实际失败、同测试修后通过，最后九项通过；按钮绑定完整Release／暂存包／请求身份，安装测试在current_exe/helper之前安全停止。修正后800输入最终门禁实际0：1,731普通Rust／10rustdoc／6Python、格式／x.y／严格全target Clippy及默认／2MiB各626控制器通过，22ignored未执行。同输入标准macOS双程序包／匹配夹具与57打包用例实际0。新隔离原生完成更新默认、保存／关闭重开、后台无稳定版本提示、双SSH中保存设置、英中／明暗／AI导航及关闭后保留草稿；13原图／AX、三个9,444字节完整文件读回和actualwait／所属组／端口／TMP回收均根读回。新的非作者最终源码／工程／宽窗口证据复核无阻断，收尾后仅九份状态Markdown变更，791其它输入相同。缩小尝试没有达到原生小窗口；精确提交CI、真实更新包下载／签名公证／安装回滚、整个原生退出时阻塞解包有界性、其它平台及完整产品目标继续开放，见[组合记录](testing/records/2026-10-08-update-toolbar-main-combination.md)。MCP保持KeelShell向外部智能体提供服务的方向，应用内API／CLI推理独立。
-
-## 2026-10-08 本地／远程浏览候选整合
-
-
-候选封包时，`feature/local-file-browser` 以 a4 加根已审核 43 路径／785 输入为基线，只在专用树
-实现 files 领域单目录 picker、显式本地单层 metadata、路径填框、remote sorting/hidden。
-默认不读本地目录；本地浏览仅供 SFTP。保持人工审核、写入准入、未知结果、原展开审核
-及 Textarea/patch；后到旧只读准备版本不会重建已撤回审核，已发出 writes 仍保留真实结果。
-v3 静态独立审查的下载类型与 Edit 冒泡 P2 已在 v5 候选修正；实际 v4 默认栈
-溢出后，v5 拆分远程列表构建帧，保持全部行为和四十个条件定义。相同 v5 测试旧冒泡
-两项断言 actual101、修后两项 actual0；最后 macOS 适用三十八项和原文件流程共
-一百三十六项四线程通过，全 workspace 严格 Clippy／格式／x.y 通过。编码夹具实际
-创建 EILSEQ92、未创建路径 metadata ENOENT2，最终明确拒绝分支通过；未继承 Linux
-非法字节真实创建与读回。新非作者已完成精确候选与专项证据复核，无阻断；root 完整整合／CI 和原生仍独立开放。
-原失败日志／scratch 保留，不声称已交付；见 [候选记录](testing/records/2026-10-08-local-remote-file-browser.md)。
-勿将 43 继承的 root 输入当作本功能 delta；主树及其它作者范围不可覆盖。
-
-## 文件多选与批量传输作者候选 — 2026-10-08
-
-基于af9465c的独立作者树实现本地／远程checkbox、Ctrl/Cmd切换及Shift范围、32项有界选择、逐目标完整双语预览和人工批准的批量queue。新增session FileTransferPlan保留原本地source descriptor、执行／原子发布前metadata复核及原SSH绑定；目录复用原扫描计划。混合无效项完整拒绝报告，暂停／取消／逐目标真实结果沿用原队列。当前源码／测试已编写，Cargo／门禁／新非作者／原生UNRUN；拖放保持OPEN，不改变本交接中根平台失败事实。见[操作指南](product/FILE_BROWSER_BATCH_TRANSFERS.md)和[候选记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。
-
-
-## 文件批量候选作者限定检查补记 — 2026-10-08
-
-上述初始UNRUN之后，独立target／jobs2租约下locked编译、选择3＋重复目的1＋session TCP6、新GPUI9、原文件工作区85项四线程与全workspace严格Clippy均actual0；保留三轮编译失败、首轮GPUI6/8、ID guard负控制actual101和Clippy无效Default失败。新只读审查两项P2已补真实准入失败／取消选区清空，以及普通文件原子发布／目录非原子逐项的双语审核说明与回归。独立MCP一行中文wording单独准备；批量feature不包含它。完整root组合、最终新非作者／标准包／原生、跨平台与拖放继续OPEN，不改变根Unix失败事实。详见[限定作者记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。
-
-根完整组合随后实际失败：839输入前后相同，session库101PASS／1FAIL／4ignored，原子上传future18,112B超过既有16KiB阈值；owner实际wait1／reap／group absent，后续门禁未到达。接管只将发布前文件metadata复核的嵌套future放到堆上，原测试／阈值／四线程／安全校验不改；修后原子上传10,272B，SFTP库32、审核TCP6、原子TCP4及严格全target Clippy均actual0。新的完整门禁、非作者复核和原生仍OPEN，原失败及限定成功分别保留，见[批量记录](testing/records/2026-10-08-file-browser-batch-transfers.md)。
+更多资料从[文档索引](README.md)进入；引用具体记录时核对其提交、包身份、时间及验证范围，历史“当前”段落不能覆盖本入口和后续真实读回。
