@@ -36,6 +36,8 @@ KeelShell is for developers and operators who connect to servers, inspect logs a
 
 Simplified Chinese is the default, with English available. Appearance follows the system by default, or can be set to Light or Dark. The application focuses on remote SSH workflows; AI is optional.
 
+The [native workspace](docs/product/NATIVE_WORKBENCH.md) includes a connections and host-information sidebar, a separate session strip, and Files, Commands and Tunnels controls that show the current selection. Hiding the sidebar or switching the AI assistant preserves sessions and drafts.
+
 ## Features
 
 | Workflow | Capabilities |

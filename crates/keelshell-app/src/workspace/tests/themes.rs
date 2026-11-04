@@ -21,7 +21,6 @@ fn minimum_window_keeps_bilingual_appearance_and_workspace_actions_visible(
                 window.render_frame(cx);
                 let mut previous_right = window.bounds().origin.x;
                 for id in [
-                    "new-session",
                     "split-session",
                     "toggle-assistant",
                     "vault-settings",
@@ -50,6 +49,17 @@ fn minimum_window_keeps_bilingual_appearance_and_workspace_actions_visible(
                     );
                     previous_right = bounds.right();
                 }
+                let new_session = window.find("new-session");
+                let session_strip = window.find("session-strip").bounds();
+                let bounds = new_session.bounds();
+                assert!(new_session.visible());
+                assert!(bounds.size.width > px(0.) && bounds.size.height > px(0.));
+                assert!(bounds.left() >= session_strip.left());
+                assert!(bounds.right() <= session_strip.right());
+                assert!(bounds.top() >= session_strip.top());
+                assert!(bounds.bottom() <= session_strip.bottom());
+                assert!(session_strip.top() >= window.bounds().top() + px(42.));
+                assert!(session_strip.right() <= window.bounds().right());
                 let mcp = window.find("mcp-settings");
                 let bounds = mcp.bounds();
                 assert!(mcp.visible());

@@ -1,5 +1,30 @@
 [
   {
+    "date": "2026-11-05",
+    "scope": "app",
+    "shape": "app screen",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "SSH workspace",
+    "signature": "saved destinations beside a dedicated session strip and visible reviewed command",
+    "nav": "Connections and Host info; responsive sidebar and AI panel",
+    "footer": "retained Files, Commands and Tunnels selection plus connection status",
+    "imagery": "candidate-bound native captures only",
+    "sections": [
+      "global toolbar",
+      "saved destinations",
+      "session strip",
+      "terminal",
+      "explicit command and completion",
+      "session tools"
+    ],
+    "waived": [],
+    "sweep": "Native-only: sloplint cannot render Rust. Final full gate2026 ordinary/10doc/Python128 with1skip passes. Initial HOLD P2=2 closed by unchanged-test negative/passing controls. Final independent candidate review APPROVE P0/P1/P2=0; Hallmark ship for supplied captures. First and fixed packages remain separate; wrong-target18-21 excluded; complete native/platform matrix open."
+  },
+  {
     "date": "2026-11-04",
     "scope": "app",
     "shape": "app screen",

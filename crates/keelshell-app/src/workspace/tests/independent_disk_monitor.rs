@@ -88,6 +88,8 @@ pub(crate) async fn exercise(
             window.click("close-manager", cx);
             window.render_frame(cx);
         }
+        window.click("navigation-monitor", cx);
+        window.render_frame(cx);
         window.click("command-input-container", cx);
         match window
             .focused_input(cx)

@@ -34,6 +34,8 @@ mod library_view;
 mod mcp;
 mod modal_scope;
 mod modals;
+mod navigation;
+use navigation::NavigationPanel;
 mod openssh_review;
 mod profile_sync;
 mod reconnect;
@@ -306,11 +308,14 @@ pub struct Workspace {
     overlay_focus: FocusHandle,
     modal_focus: FocusHandle,
     surface_focus: FocusHandle,
+    navigation_focus: FocusHandle,
     modal_button_focus: std::cell::RefCell<HashMap<ElementId, WeakFocusHandle>>,
     modal_scope: modal_scope::ModalScope,
     saving: bool,
     state_reloading: bool,
     show_assistant: bool,
+    show_navigation: bool,
+    navigation_panel: NavigationPanel,
     session_tab_scroll: ScrollHandle,
     session_tab_reveal: Option<(
         EntityId,
@@ -318,6 +323,8 @@ pub struct Workspace {
         usize,
         keelshell_core::Language,
         &'static str,
+        bool,
+        bool,
     )>,
     assistant: Entity<AssistantPanel>,
     agent: Option<agent::AgentState>,
@@ -766,11 +773,14 @@ impl Workspace {
             overlay_focus: cx.focus_handle(),
             modal_focus: cx.focus_handle(),
             surface_focus: cx.focus_handle(),
+            navigation_focus: cx.focus_handle(),
             modal_button_focus: std::cell::RefCell::new(HashMap::new()),
             modal_scope: modal_scope::ModalScope::default(),
             saving: false,
             state_reloading: false,
             show_assistant: false,
+            show_navigation: true,
+            navigation_panel: NavigationPanel::default(),
             session_tab_scroll: ScrollHandle::new(),
             session_tab_reveal: None,
             assistant,

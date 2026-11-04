@@ -19,6 +19,12 @@ pub(crate) fn exercise_layout(
             .monitor = Some(monitor);
         cx.notify();
     });
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("navigation-monitor", cx);
+        window.render_frame(cx);
+    })
+    .checked("open the host information page through its actual navigation control");
     for language in [Language::ZhCn, Language::En] {
         cx.update(|cx| i18n::set_language(language, cx));
         for theme in [Theme::System, Theme::Light, Theme::Dark] {

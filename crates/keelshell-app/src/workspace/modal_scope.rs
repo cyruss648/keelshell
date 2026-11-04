@@ -83,7 +83,15 @@ impl ModalKind {
 
 struct ModalFrame {
     kind: ModalKind,
-    return_focus: Option<FocusHandle>,
+    return_focus: Option<ReturnFocus>,
+}
+
+#[derive(Clone)]
+struct ReturnFocus {
+    handle: FocusHandle,
+    // The rail is absent from the modal's rendered focus tree. Retain its
+    // origin before unmounting so a later resize cannot redirect typing to SSH.
+    navigation: Option<NavigationPanel>,
 }
 
 /// Registers capture before the child paints its pointer handlers. Div capture
@@ -187,7 +195,7 @@ pub(super) struct ModalScope {
     pub(super) current: Option<ModalKind>,
     current_challenge: Option<uuid::Uuid>,
     frames: Vec<ModalFrame>,
-    last_focus: Option<FocusHandle>,
+    last_focus: Option<ReturnFocus>,
     generation: u64,
 }
 
@@ -274,7 +282,13 @@ impl Workspace {
     }
 
     pub(super) fn remember_surface_focus(&mut self, window: &Window, cx: &App) {
-        self.modal_scope.last_focus = window.focused(cx);
+        self.modal_scope.last_focus = window.focused(cx).map(|handle| ReturnFocus {
+            handle,
+            navigation: self
+                .navigation_focus
+                .contains_focused(window, cx)
+                .then_some(self.navigation_panel),
+        });
     }
 
     pub(super) fn capture_surface_input(&mut self, window: &Window, cx: &mut Context<Self>) {
@@ -366,8 +380,16 @@ impl Workspace {
             if view.modal_scope.generation != generation || view.active_modal() != next {
                 return;
             }
-            if let Some(focus) = restore {
-                focus.focus(window, cx);
+            if let Some(target) = restore {
+                if next.is_none()
+                    && target.navigation.is_some_and(|panel| {
+                        !view.navigation_visible(window) || view.navigation_panel != panel
+                    })
+                {
+                    view.surface_focus.focus(window, cx);
+                } else {
+                    target.handle.focus(window, cx);
+                }
             }
             if next.is_some() && !view.modal_focus.contains_focused(window, cx) {
                 view.modal_focus.focus(window, cx);

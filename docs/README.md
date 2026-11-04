@@ -5,6 +5,7 @@
 其中的“当前”与暂停指令只代表对应历史时点。
 
 - [主题与外观](product/THEME_PREFERENCES.md)：三套内置主题、明暗模式及扩展方式。
+- [原生工作区](product/NATIVE_WORKBENCH.md)、[ADR 0096](adr/0096-native-workbench-navigation.md)与[本轮记录](testing/records/2026-11-05-native-workbench.md)：连接/主机信息侧栏、独立会话栏、紧凑命令区及其实际验收边界。
 - [原生主题设计](design/NATIVE_THEMES.md)与[ADR 0095](adr/0095-extensible-native-theme-families.md)：目录、语义 token、组件适配与旧配置兼容。
 - [本轮主题测试](testing/records/2026-11-04-native-themes.md)：实际结果、失败历史与平台验收边界。
 - [主题组合提交与 CI 回读](testing/records/2026-11-04-theme-delivery-ci.md)：精确提交、Windows 夹具失败与修复、资源清理和后续验收。

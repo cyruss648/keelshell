@@ -1,10 +1,72 @@
 //! Remote workspace composition: compact tabs, host monitor, terminal, command bar, files.
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
-use gpui_kit::assets::IconName;
+use gpui_kit::{assets::IconName, component::Selectable};
 
 impl Workspace {
-    fn select_session_tab(&mut self, index: usize, window: &mut Window, cx: &mut Context<Self>) {
+    fn session_strip(&self, tabs: AnyElement, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        div()
+            .id("session-strip")
+            .test_support()
+            .h(px(38.))
+            .flex_shrink_0()
+            .min_w_0()
+            .flex()
+            .items_center()
+            .gap_1()
+            .px_1()
+            .bg(rgb(visual.surface))
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            .child(tabs)
+            .when(self.tabs.len() > 1, |toolbar| {
+                toolbar.children([
+                    Button::new("previous-session")
+                        .ghost()
+                        .compact()
+                        .icon(IconName::ChevronLeft)
+                        .accessibility_label(t(cx, "上一个 SSH 会话", "Previous SSH session"))
+                        .localized_tooltip("上一个 SSH 会话", "Previous SSH session")
+                        .disabled(self.active == 0)
+                        .on_click(cx.listener(|view, _, window, cx| {
+                            view.select_session_tab(view.active.saturating_sub(1), window, cx);
+                        }))
+                        .map(|button| self.retain_modal_button("previous-session", button, cx)),
+                    Button::new("next-session")
+                        .ghost()
+                        .compact()
+                        .icon(IconName::ChevronRight)
+                        .accessibility_label(t(cx, "下一个 SSH 会话", "Next SSH session"))
+                        .localized_tooltip("下一个 SSH 会话", "Next SSH session")
+                        .disabled(self.active + 1 >= self.tabs.len())
+                        .on_click(cx.listener(|view, _, window, cx| {
+                            view.select_session_tab(view.active + 1, window, cx);
+                        }))
+                        .map(|button| self.retain_modal_button("next-session", button, cx)),
+                ])
+            })
+            .child(
+                Button::new("new-session")
+                    .icon(IconName::Plus)
+                    .ghost()
+                    .compact()
+                    .accessibility_label(t(cx, "新建 SSH 会话", "New SSH session"))
+                    .localized_tooltip("新建 SSH 会话", "New SSH session")
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        view.open_connections(&OpenConnections, window, cx)
+                    }))
+                    .map(|button| self.retain_modal_button("new-session", button, cx)),
+            )
+            .into_any_element()
+    }
+
+    pub(super) fn select_session_tab(
+        &mut self,
+        index: usize,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let Some(tab) = self.tabs.get(index).cloned() else {
             return;
         };
@@ -265,7 +327,7 @@ impl Workspace {
             )
             .into_any_element()
     }
-    fn monitor_column(&self, cx: &mut Context<Self>) -> AnyElement {
+    pub(super) fn monitor_column(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         if let Some(monitor) = self
             .tabs
@@ -320,13 +382,21 @@ impl Workspace {
         let viewport = window.viewport_size();
         let assistant_width = px(380.).min(viewport.width * 0.42);
         // At compact widths keep the terminal usable while the assistant is open.
-        let show_monitor = !self.tabs.is_empty()
-            && viewport.width >= px(900.)
-            && (!self.show_assistant || viewport.width >= px(1280.));
-        let tool_height = px(340.).min(viewport.height * 0.40);
-        // Keep the existing tool budget: secondary completion controls use one
-        // row in short windows so Files and command review cannot crush the terminal.
+        let show_navigation = self.navigation_visible(window);
+        if !show_navigation && self.navigation_focus.contains_focused(window, cx) {
+            // A resize can unmount the rail while its retained search is focused.
+            // Use the inert workspace, never a terminal that would receive typing.
+            self.surface_focus.focus(window, cx);
+        }
         let compact_command_tools = viewport.height < px(700.);
+        // At short heights share the new session-strip budget with the
+        // scrollable tool area, retaining usable file controls and multiline input.
+        let tool_height = px(340.).min(viewport.height * 0.40)
+            - if compact_command_tools {
+                px(32.)
+            } else {
+                px(0.)
+            };
         let active_id = self.tabs.get(self.active).map(Entity::entity_id);
         let compact_toolbar = viewport.width < px(1280.);
         // Only reveal after selection or a layout change: continuous renders must
@@ -339,6 +409,8 @@ impl Workspace {
                 self.tabs.len(),
                 i18n::language(cx),
                 update_action,
+                show_navigation,
+                self.show_assistant,
             )
         });
         if self.session_tab_reveal != reveal {
@@ -354,6 +426,8 @@ impl Workspace {
                         && view.tabs.len() == expected.2
                         && i18n::language(cx) == expected.3
                         && view.update_service.read(cx).action_label(cx) == expected.4
+                        && view.show_assistant == expected.6
+                        && view.navigation_visible(window) == expected.5
                     {
                         view.session_tab_scroll.scroll_to_item(view.active);
                         cx.notify();
@@ -451,6 +525,7 @@ impl Workspace {
                     ),
             );
         }
+        let session_strip = self.session_strip(tabs.into_any_element(), cx);
         let body = if self.tabs.is_empty() {
             self.empty_workspace_body(
                 viewport.width
@@ -480,7 +555,7 @@ impl Workspace {
                         .border_color(rgb(if Some(id) == active_id {
                             visual.accent
                         } else {
-                            0x0c121b
+                            crate::design::terminal_palette(cx).background
                         }))
                         .child(self.reconnect_banner(id, cx))
                         .child(div().flex_1().min_h_0().child(pane)),
@@ -513,7 +588,9 @@ impl Workspace {
             .map(|tab| tab.read(cx).status.render(cx))
             .unwrap_or_else(|| t(cx, "无活动 SSH 会话", "No active SSH session").into());
         let mut bottom_tabs = div()
-            .h(px(30.))
+            .id("workspace-tool-tabs")
+            .test_support()
+            .h(px(32.))
             .flex_shrink_0()
             .flex()
             .items_center()
@@ -531,6 +608,8 @@ impl Workspace {
                     .ghost()
                     .compact()
                     .label(t(cx, zh, en))
+                    .selected(self.visible_panel == Some(kind))
+                    .toggled(self.visible_panel == Some(kind))
                     .disabled(active_id.is_none() && kind != ToolPanel::Commands)
                     .on_click(
                         cx.listener(move |view, _, window, cx| view.toggle_panel(kind, window, cx)),
@@ -597,12 +676,13 @@ impl Workspace {
             .bg(rgb(visual.canvas))
             .text_color(rgb(visual.text))
             .text_sm()
-            .font_family(".SystemUIFont")
             .on_action(cx.listener(Self::open_connections))
             .on_action(cx.listener(Self::close_tab))
             .on_action(cx.listener(Self::toggle_assistant))
             .child(
                 div()
+                    .id("workspace-toolbar")
+                    .test_support()
                     .h(px(42.))
                     .bg(rgb(visual.chrome))
                     .px_2()
@@ -612,6 +692,25 @@ impl Workspace {
                     .items_center()
                     .border_b_1()
                     .border_color(rgb(visual.border))
+                    .child(
+                        Button::new("toggle-navigation")
+                            .ghost().compact().icon(IconName::Columns2)
+                            .selected(show_navigation)
+                            .toggled(show_navigation)
+                            .disabled(self.tabs.is_empty())
+                            .accessibility_label(t(cx, "连接与主机侧栏", "Connections and host sidebar"))
+                            .localized_tooltip("显示或收起连接与主机信息", "Show or hide connections and host information")
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                if view.tabs.is_empty() { return; }
+                                let visible = view.navigation_visible(window);
+                                view.show_navigation = !visible;
+                                if view.show_navigation && window.viewport_size().width < px(1280.) {
+                                    view.show_assistant = false;
+                                }
+                                cx.notify();
+                            }))
+                            .map(|button| self.retain_modal_button("toggle-navigation", button, cx)),
+                    )
                     .child(
                         Button::new("connection-manager")
                             .ghost()
@@ -624,43 +723,10 @@ impl Workspace {
                                 view.open_connections(&OpenConnections, window, cx)
                             })).map(|button| self.retain_modal_button("connection-manager", button, cx)),
                     )
-                    .child(tabs)
-                    .when(self.tabs.len() > 1, |toolbar| {
-                        toolbar.children([
-                            Button::new("previous-session")
-                                .ghost()
-                                .compact()
-                                .icon(IconName::ChevronLeft)
-                                .accessibility_label(t(cx, "上一个 SSH 会话", "Previous SSH session"))
-                                .localized_tooltip("上一个 SSH 会话", "Previous SSH session")
-                                .disabled(self.active == 0)
-                                .on_click(cx.listener(|view, _, window, cx| {
-                                    view.select_session_tab(view.active.saturating_sub(1), window, cx);
-                                }))
-                                .map(|button| self.retain_modal_button("previous-session", button, cx)),
-                            Button::new("next-session")
-                                .ghost()
-                                .compact()
-                                .icon(IconName::ChevronRight)
-                                .accessibility_label(t(cx, "下一个 SSH 会话", "Next SSH session"))
-                                .localized_tooltip("下一个 SSH 会话", "Next SSH session")
-                                .disabled(self.active + 1 >= self.tabs.len())
-                                .on_click(cx.listener(|view, _, window, cx| {
-                                    view.select_session_tab(view.active + 1, window, cx);
-                                }))
-                                .map(|button| self.retain_modal_button("next-session", button, cx)),
-                        ])
-                    })
                     .child(
-                        Button::new("new-session")
-                            .icon(IconName::Plus)
-                            .ghost()
-                            .compact()
-                            .accessibility_label(t(cx, "新建 SSH 会话", "New SSH session"))
-                            .localized_tooltip("新建 SSH 会话", "New SSH session")
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.open_connections(&OpenConnections, window, cx)
-                            })).map(|button| self.retain_modal_button("new-session", button, cx)),
+                        div().flex_1().min_w_0().px_2().text_ellipsis()
+                            .text_color(rgb(visual.muted))
+                            .child(t(cx, "远程工作区", "Remote workspace")),
                     )
                     .child(
                         Button::new("split-session")
@@ -749,17 +815,18 @@ impl Workspace {
                     .flex_1()
                     .min_h_0()
                     .flex()
-                    .when(show_monitor, |el| {
+                    .when(show_navigation, |el| {
                         el.child(
                             div()
                                 .id("monitor-column")
                                 .test_support()
+                                .track_focus(&self.navigation_focus)
                                 .w(px(260.))
                                 .h_full()
                                 .flex_shrink_0()
                                 .border_r_1()
                                 .border_color(rgb(visual.border))
-                                .child(self.monitor_column(cx)),
+                                .child(self.navigation_column(cx)),
                         )
                     })
                     .child(
@@ -770,6 +837,7 @@ impl Workspace {
                             .min_w_0()
                             .flex()
                             .flex_col()
+                            .child(session_strip)
                             .child(div().flex_1().min_h_0().child(body))
                             .when(active_id.is_some(), |el| {
                                 el.child(
@@ -901,7 +969,7 @@ impl Workspace {
                                                 })).map(|button| self.retain_modal_button("run-command", button, cx)),
                                         ),
                                 )
-                                .child(self.remote_completion_controls(compact_command_tools, cx))
+                                .child(self.remote_completion_controls(true, cx))
                                 .child(
                                     div()
                                         .id("command-actions")
@@ -919,7 +987,14 @@ impl Workspace {
                                             Button::new("command-history-policy")
                                                 .ghost()
                                                 .compact()
+                                                .selected(self.command_record_history)
+                                                .toggled(self.command_record_history)
                                                 .label(if self.command_record_history {
+                                                    t(cx, "记录历史", "History on")
+                                                } else {
+                                                    t(cx, "不记历史", "History off")
+                                                })
+                                                .accessibility_label(if self.command_record_history {
                                                     t(
                                                         cx,
                                                         "本次命令：记录历史",
@@ -932,6 +1007,10 @@ impl Workspace {
                                                         "This command: skip history",
                                                     )
                                                 })
+                                                .localized_tooltip(
+                                                    "仅控制当前命令执行后的历史记录",
+                                                    "Controls history recording for the current command only",
+                                                )
                                                 .disabled(self.command_surface_blocked())
                                                 .on_click(cx.listener(|view, _, _, cx| {
                                                     view.command_record_history =

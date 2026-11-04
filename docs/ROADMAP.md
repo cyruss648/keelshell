@@ -1,8 +1,26 @@
 # 开发路线
 
+## 当前原生工作区 — 2026-11-05
+
+- 连接/主机导航、独立会话栏、紧凑补全、明确工具页选择和窄窗口 AI 协作已实现，
+  继续使用三套已接受的注册目录主题。连接行重新查找 UUID，当前目标/跳板/信任绑定
+  变化时不复用旧 SSH；隐藏导航和弹窗返回均不能把按键落入终端。
+- 新增 7 项导航、5 项工作区回归；修后完整本机门禁通过
+  （2,026 ordinary / 23 ignored、10 rustdoc、Python 128 / 1 skipped、严格 Clippy 和策略）。
+  非作者初审两项 P2 已由相同测试的反例/修后对照关闭；最终证据见[本轮记录](testing/records/2026-11-05-native-workbench.md)。
+- 首包 macOS 已捕获三主题浅深、双语言和 900×580 的限定路径；
+  最终修后包另有 900×900 隐藏焦点与 AX 回归、1440×900 画面。
+  无效旧目标捕获及未成功缩放的尝试保留并排除；不能把不同包的范围拼成完整最终验收。
+- 基线 `4f937281850464c7d52611e7d4df8bbc46f7d5c8` 的 Quality `41873553476`
+  最终 failure：Linux/Windows 成功，macOS 没有获分配 runner、未执行。
+  本次功能提交的 CI 单独读回，本机通过不代表新提交三平台 CI 已通过。
+- 下一步继续完整文件工具区改版、知识上下文显式选择/发送、NET 原生和真实取消超时，
+  并逐项补最终候选主题×语言×窗口矩阵、OS 外观通知、IME、VoiceOver 和 Windows/Linux 桌面。
+  完整产品目标及发布安装验收仍未完成。
+
 ## 当前主题与组合验证 — 2026-11-05
 
-- 最新已推送源码为 `dc94e0e`。每夹具独立密钥及准备阶段清理保护已通过反向控制、3 项专项、新完整门禁（普通 Rust 2,014 passed/23 ignored、545 输入保持）和 Hypatia 最终提交复核，P0/P1/P2 均为 0，初审 P2 已关闭。精确 Quality `41863354940` 的 Linux/Windows 成功，Linux OpenSSH 通过；macOS 首次及限定重跑均因未获托管 runner 而取消、没有执行测试，两次尝试整体均为 failure。第二次尝试的其余两平台继承原成功，macOS CI 待 runner 可用后补验。前一基线 `7782979` 的 Quality `41848787327` 为 macOS/Windows 成功、Linux MCP SFTP 夹具准备失败；整个 run 未通过，历史 Linux 准确 owner/原因仍 UNKNOWN。原失败及 HOLD 保留。见[Job 诊断](testing/records/2026-11-04-native-barrier-diagnostics.md)和[SFTP 夹具记录](testing/records/2026-11-04-sftp-fixture-identity.md)。
+- 该阶段已推送源码为 `dc94e0e`。每夹具独立密钥及准备阶段清理保护已通过反向控制、3 项专项、新完整门禁（普通 Rust 2,014 passed/23 ignored、545 输入保持）和 Hypatia 最终提交复核，P0/P1/P2 均为 0，初审 P2 已关闭。精确 Quality `41863354940` 的 Linux/Windows 成功，Linux OpenSSH 通过；macOS 首次及限定重跑均因未获托管 runner 而取消、没有执行测试，两次尝试整体均为 failure。第二次尝试的其余两平台继承原成功，macOS CI 待 runner 可用后补验。前一基线 `7782979` 的 Quality `41848787327` 为 macOS/Windows 成功、Linux MCP SFTP 夹具准备失败；整个 run 未通过，历史 Linux 准确 owner/原因仍 UNKNOWN。原失败及 HOLD 保留。见[Job 诊断](testing/records/2026-11-04-native-barrier-diagnostics.md)和[SFTP 夹具记录](testing/records/2026-11-04-sftp-fixture-identity.md)。
 - 组合 `c366871` 后的 Windows 预算修复 `9d4517e`、Unix 分片修复 `7b43af2` 均已通过本机完整门禁和非作者复核并推送。`7b43af2` 的 macOS/Linux CI 成功，Windows 更新器 3 秒等待失败；现已复现取消响应中止后续脚本及测试时钟快进两个夹具问题。修后更新器 54 项、完整门禁（普通 Rust 2,011 passed/23 ignored、544 个非 Markdown 输入保持）和非作者复核均通过；后续 `7782979` 的三平台日志均实际记录更新器原失败项通过，但整体 CI 因独立 Linux 失败未通过。见[前序回读](testing/records/2026-11-04-theme-delivery-ci.md)、[Unix 分片记录](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)与[更新器记录](testing/records/2026-11-04-updater-transport-fixture.md)。
 - 三套原生主题已实现：霜白、曜石、雾紫，目录驱动选择器，独立明暗模式、兼容持久化、统一组件 token 和终端默认色。组合工程门禁、非作者复核和限定 macOS 原生切换/重启已通过；详见[主题指南](product/THEME_PREFERENCES.md)。
 - 主题/布局分开推进：本轮统一视觉与主题入口；连接导航、文件工具区和更多原生工作区布局优化继续，不把 HTML 样例算作原生完成。

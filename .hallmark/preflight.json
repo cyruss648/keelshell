@@ -1,18 +1,19 @@
 {
   "version": "2.0.0",
-  "date": "2026-11-04",
+  "date": "2026-11-05",
   "scope": "app",
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "review accurate local changes before explicitly applying them",
+  "job": "find a saved SSH destination, keep the current terminal readable, and review explicit actions",
   "tone": "utilitarian",
-  "theme": "existing KeelShell semantic theme",
+  "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
-    "crates/keelshell-app/src/design.rs:1",
-    "docs/design/THEMES.md:1",
-    "docs/design/MODALS.md:1",
-    "crates/keelshell-app/src/assistant/knowledge_library.rs:1"
+    "crates/keelshell-app/src/design/registry.rs:1",
+    "crates/keelshell-app/src/workspace/view.rs:1",
+    "crates/keelshell-app/src/workspace/navigation.rs:1",
+    "docs/design/HALLMARK_NATIVE.md:1",
+    "docs/adr/0096-native-workbench-navigation.md:1"
   ],
   "preserve": [
     "native application",
@@ -22,14 +23,17 @@
     "test hooks"
   ],
   "introduce": [
-    "knowledge list and editor",
-    "source disclosure",
-    "fixed review footer"
+    "saved connection and host-information rail",
+    "separate session strip",
+    "compact completion and history labels",
+    "inert focus return when navigation is hidden"
   ],
   "material": {
     "real": [
-      "saved source-bound knowledge",
-      "named forwarding rules"
+      "saved connection folders and profiles",
+      "live owned SSH sessions",
+      "actual owned SFTP fixture listing",
+      "retained command and assistant drafts"
     ],
     "pictures": "native captures after building the candidate",
     "absent": [
@@ -39,7 +43,7 @@
     ]
   },
   "inferred_from_authorized_design_scope": true,
-  "web_render_verified": true,
-  "native_verification": "macOS isolated theme switches and restart verified; full platform/native matrix remains open",
-  "web_render_scope": "CUA browser inspection; Hallmark own render tier unavailable"
+  "web_render_verified": false,
+  "native_verification": "First package: six palettes at1440x900 and limited Lavender900x580. Fixed final package: direct900x900 focus/AX and1440x900 capture. Wrong-target18-21 excluded; full platform matrix open.",
+  "web_render_scope": "not_applicable: Rust/GPUI; sloplint reports no supported source files"
 }

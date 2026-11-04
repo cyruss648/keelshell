@@ -32,10 +32,12 @@ mod configuration_recovery;
 pub(crate) mod independent_disk_monitor;
 mod knowledge_library;
 pub(crate) mod mirror_sync_combination;
+mod navigation;
 mod profile_sync;
 pub(crate) mod protocol_diagnostics;
 mod reviewed_agent;
 mod session_tabs;
+mod workbench_layout;
 
 trait Checked<T> {
     fn checked(self, operation: &str) -> T;
@@ -141,6 +143,8 @@ pub(crate) fn verify_disk_monitor_minimum_workspace(
             );
             cx.notify();
         });
+        window.render_frame(cx);
+        window.click("navigation-monitor", cx);
         for language in [Language::ZhCn, Language::En] {
             for theme in [
                 keelshell_core::Theme::System,

@@ -204,7 +204,10 @@ fn same_active_tab_survives_language_resize_and_manual_scroll(cx: &mut TestAppCo
     cx.update_window(fixture.window, |_, window, cx| {
         fixture.workspace.update(cx, |workspace, cx| {
             workspace.tabs = panes.iter().map(|pane| pane.terminal.clone()).collect();
-            workspace.active = 2;
+            // The dedicated strip is wider than the old global-toolbar slot.
+            // Choose a tab beyond its first viewport so a legal manual scroll
+            // can still clip the active close control without a positive offset.
+            workspace.active = 4;
             cx.notify();
         });
         for width in [1440., 900., 1440., 900.] {
@@ -213,13 +216,13 @@ fn same_active_tab_survives_language_resize_and_manual_scroll(cx: &mut TestAppCo
             for language in [Language::ZhCn, Language::En] {
                 i18n::set_language(language, cx);
                 render_and_reveal(window, cx);
-                assert_eq!(fixture.workspace.read(cx).active, 2);
+                assert_eq!(fixture.workspace.read(cx).active, 4);
                 assert_active_close_visible(&fixture, window, cx);
             }
         }
         let initial = fixture.workspace.read(cx).session_tab_scroll.offset();
         let move_right = window.find("session-tabs").bounds().right()
-            - window.find(("close-tab", 2_usize)).bounds().right()
+            - window.find(("close-tab", 4_usize)).bounds().right()
             + px(20.);
         fixture
             .workspace
@@ -232,7 +235,7 @@ fn same_active_tab_survives_language_resize_and_manual_scroll(cx: &mut TestAppCo
         let manual = fixture.workspace.read(cx).session_tab_scroll.offset();
         assert_eq!(manual.x, initial.x + move_right);
         assert!(
-            window.find(("close-tab", 2_usize)).bounds().right()
+            window.find(("close-tab", 4_usize)).bounds().right()
                 > window.find("session-tabs").bounds().right()
         );
         render_and_reveal(window, cx);
@@ -240,10 +243,10 @@ fn same_active_tab_survives_language_resize_and_manual_scroll(cx: &mut TestAppCo
             fixture.workspace.read(cx).session_tab_scroll.offset(),
             manual
         );
-        window.click(("session-tab", 2_usize), cx);
+        window.click(("session-tab", 4_usize), cx);
         render_and_reveal(window, cx);
         assert_active_close_visible(&fixture, window, cx);
-        assert_eq!(fixture.workspace.read(cx).active, 2);
+        assert_eq!(fixture.workspace.read(cx).active, 4);
     })
     .checked("keep the same active tab visible after language, layout and explicit reselection");
     assert!(panes.iter().all(|pane| writes(pane).is_empty()));

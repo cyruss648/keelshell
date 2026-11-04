@@ -408,17 +408,10 @@ fn dependency_workflow_entry_actions_fit_and_operate_with_themes_languages_and_a
                             );
                             let first = window.find("command-history-policy").bounds();
                             let last = window.find("command-workflow").bounds();
-                            if width == 900. && assistant && language == Language::En {
-                                assert!(
-                                    last.origin.y > first.origin.y,
-                                    "compact English entry must wrap"
-                                );
-                            } else if width == 1440. {
-                                assert_eq!(
-                                    last.origin.y, first.origin.y,
-                                    "wide actions remain on one line"
-                                );
-                            }
+                            assert_eq!(
+                                last.origin.y, first.origin.y,
+                                "concise history labels keep idle actions on one line"
+                            );
                             window.click("command-history-policy", cx);
                             assert_eq!(
                                 h.fixture.workspace.read(cx).command_record_history,
