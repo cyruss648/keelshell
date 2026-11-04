@@ -24,7 +24,7 @@ impl<T, E: std::fmt::Debug> Checked<T> for Result<T, E> {
     }
 }
 
-struct Server;
+pub(super) struct Server;
 impl russh::server::Handler for Server {
     type Error = russh::Error;
 
@@ -340,7 +340,7 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
         window.click("start-tunnel", cx);
         assert_eq!(
             panel.read(cx).status.render(cx).as_str(),
-            "Active listeners: 1 · Starting: 1"
+            "Active listeners: 1, Starting: 1"
         );
     })
     .checked("start a second listener without losing the active count");
@@ -355,9 +355,17 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
         );
         window.render_frame(cx);
         window.click(("stop-tunnel", 0_usize), cx);
+        assert!(panel.read(cx).rule_stop_review.is_some());
+        assert!(
+            !panel.read(cx).rows[0]
+                .cancel
+                .load(std::sync::atomic::Ordering::Acquire)
+        );
+        window.render_frame(cx);
+        window.click("confirm-tunnel-rule-stop", cx);
         assert_eq!(
             panel.read(cx).status.render(cx).as_str(),
-            "Active listeners: 1 · Stopping: 1"
+            "Active listeners: 1, Stopping: 1"
         );
         assert!(
             panel.read(cx).rows[0]

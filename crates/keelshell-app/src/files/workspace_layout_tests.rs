@@ -142,7 +142,7 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
                     table.origin.y + px(8.),
                 );
                 window.dispatch_event(
-                    gpui_kit::ScrollWheelEvent {
+                    gpui_kit::ScrollEvent {
                         position,
                         delta: gpui_kit::ScrollDelta::Pixels(point(px(-10000.), px(0.))),
                         ..Default::default()

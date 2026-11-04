@@ -34,6 +34,7 @@ use zeroize::Zeroizing;
 mod agent;
 #[path = "assistant/command_review_target.rs"]
 mod command_review_target;
+pub(crate) mod knowledge_library;
 
 use crate::{
     ai_settings::{
@@ -84,6 +85,12 @@ pub enum AssistantEvent {
     },
     ReloadKnowledge {
         review_id: Uuid,
+    },
+    ManageKnowledge {
+        review_id: Uuid,
+    },
+    ReloadKnowledgeLibrary {
+        token: Uuid,
     },
 }
 
@@ -347,6 +354,8 @@ pub struct AssistantPanel {
     response_target: Option<(String, String)>,
     local_progress: Option<LocalRequestProgress>,
     knowledge_preview: Option<KnowledgePreview>,
+    pub(crate) knowledge_library: Entity<knowledge_library::KnowledgeLibrary>,
+    show_knowledge_library: bool,
     agent: agent::AgentPanelState,
     _subscriptions: Vec<Subscription>,
 }
@@ -374,11 +383,26 @@ impl AssistantPanel {
         });
         let content_scroll = ScrollHandle::new();
         let question_anchor = ScrollAnchor::for_handle(content_scroll.clone());
-        let subscriptions = vec![cx.subscribe(&prompt, |view, _, event: &InputEvent, cx| {
+        let mut subscriptions = vec![cx.subscribe(&prompt, |view, _, event: &InputEvent, cx| {
             if matches!(event, InputEvent::Change) && !view.obsolete_agent_question_change(cx) {
                 view.invalidate_request(cx);
             }
         })];
+        let knowledge_library = cx.new(|cx| knowledge_library::KnowledgeLibrary::new(window, cx));
+        subscriptions.push(cx.subscribe(&knowledge_library, |view, _, event, cx| {
+            match event {
+                knowledge_library::LibraryEvent::Apply(review_id) => {
+                    cx.emit(AssistantEvent::ManageKnowledge {
+                        review_id: *review_id,
+                    });
+                }
+                knowledge_library::LibraryEvent::Reload(token) => {
+                    cx.emit(AssistantEvent::ReloadKnowledgeLibrary { token: *token });
+                }
+                knowledge_library::LibraryEvent::Close => view.show_knowledge_library = false,
+            }
+            cx.notify();
+        }));
         Self {
             profiles: profiles.clone(),
             credentials: credentials.clone(),
@@ -411,6 +435,8 @@ impl AssistantPanel {
             response_target: None,
             local_progress: None,
             knowledge_preview: None,
+            knowledge_library,
+            show_knowledge_library: false,
             agent: agent::AgentPanelState::default(),
             _subscriptions: subscriptions,
         }
@@ -944,6 +970,11 @@ impl AssistantPanel {
             "本地知识审核已过期或不满足保存条件，请重新生成预览。",
             "The local knowledge review is stale or not eligible for saving. Build a fresh preview.",
         );
+        cx.notify();
+    }
+
+    pub(crate) fn invalidate_knowledge_review(&mut self, cx: &mut Context<Self>) {
+        self.knowledge_preview = None;
         cx.notify();
     }
 
@@ -1754,7 +1785,7 @@ impl AssistantPanel {
             .id("knowledge-preview")
             .test_support()
             .p_2()
-            .rounded(px(6.))
+            .rounded(px(crate::design::components(cx).control_radius))
             .bg(rgb(visual.canvas))
             .border_1()
             .border_color(rgb(visual.border))
@@ -1879,6 +1910,9 @@ impl Drop for AssistantPanel {
 impl EventEmitter<AssistantEvent> for AssistantPanel {}
 impl Render for AssistantPanel {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if self.show_knowledge_library {
+            return self.knowledge_library.clone().into_any_element();
+        }
         let visual = crate::design::palette(cx);
         let profile_choices = if self.selecting_profile {
             let mut choices = div().p_2().bg(rgb(visual.canvas)).flex().flex_col().gap_1();
@@ -1910,11 +1944,28 @@ impl Render for AssistantPanel {
             .flex_col()
             .gap_3()
             .p_3()
-            .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child(t(
-                cx,
-                "AI 助手",
-                "AI assistant",
-            )))
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap_2()
+                    .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child(t(
+                        cx,
+                        "AI 助手",
+                        "AI assistant",
+                    )))
+                    .child(
+                        Button::new("open-knowledge-library")
+                            .ghost()
+                            .compact()
+                            .label(t(cx, "本地知识库", "Local knowledge library"))
+                            .on_click(cx.listener(|view, _, _, cx| {
+                                view.show_knowledge_library = true;
+                                cx.notify();
+                            })),
+                    ),
+            )
             .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "解释远端输出、排查问题、准备命令。",
@@ -2082,7 +2133,7 @@ impl Render for AssistantPanel {
                         .relative()
                         .w_full()
                         .h(px(224.))
-                        .rounded(px(6.))
+                        .rounded(px(crate::design::components(cx).control_radius))
                         .bg(rgb(visual.canvas))
                         .border_1()
                         .border_color(rgb(visual.border))
@@ -2161,7 +2212,7 @@ impl Render for AssistantPanel {
             if let Some(plan) = self.diagnostic_plan.as_ref() {
                 let mut plan_view = div()
                     .p_2()
-                    .rounded(px(6.))
+                    .rounded(px(crate::design::components(cx).control_radius))
                     .bg(rgb(visual.canvas))
                     .border_1()
                     .border_color(rgb(visual.border))
@@ -2222,7 +2273,7 @@ impl Render for AssistantPanel {
                 content = content.child(
                     div()
                         .p_2()
-                        .rounded(px(6.))
+                        .rounded(px(crate::design::components(cx).control_radius))
                         .bg(rgb(visual.canvas))
                         .border_1()
                         .border_color(rgb(visual.border))
@@ -2437,6 +2488,7 @@ impl Render for AssistantPanel {
             )
             .children(confirmation)
             .children(self.agent_action_footer(cx))
+            .into_any_element()
     }
 }
 

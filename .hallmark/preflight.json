@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "date": "2026-11-04",
+  "scope": "app",
+  "framework": "native GPUI Kit",
+  "genre": "modern-minimal",
+  "audience": "developers and operators managing remote SSH hosts",
+  "job": "review accurate local changes before explicitly applying them",
+  "tone": "utilitarian",
+  "theme": "existing KeelShell semantic theme",
+  "sources": [
+    "crates/keelshell-app/src/design.rs:1",
+    "docs/design/THEMES.md:1",
+    "docs/design/MODALS.md:1",
+    "crates/keelshell-app/src/assistant/knowledge_library.rs:1"
+  ],
+  "preserve": [
+    "native application",
+    "theme tokens",
+    "bilingual UI",
+    "review identities",
+    "test hooks"
+  ],
+  "introduce": [
+    "knowledge list and editor",
+    "source disclosure",
+    "fixed review footer"
+  ],
+  "material": {
+    "real": [
+      "saved source-bound knowledge",
+      "named forwarding rules"
+    ],
+    "pictures": "native captures after building the candidate",
+    "absent": [
+      "invented metrics",
+      "testimonials",
+      "decorative product mockups"
+    ]
+  },
+  "inferred_from_authorized_design_scope": true,
+  "web_render_verified": true,
+  "native_verification": "macOS isolated theme switches and restart verified; full platform/native matrix remains open",
+  "web_render_scope": "CUA browser inspection; Hallmark own render tier unavailable"
+}

@@ -85,7 +85,7 @@ fn main() {
         .run(move |cx| {
             cx.set_app_identity("app.keelshell.desktop", "KeelShell");
             gpui_kit::init(cx);
-            design::apply(state.settings.theme, None, cx);
+            design::apply_settings(&state.settings, None, cx);
             i18n::set_language(state.settings.language, cx);
             workspace::bind_keys(cx);
             terminal::install_shutdown(cx);

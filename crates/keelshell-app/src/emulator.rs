@@ -69,6 +69,23 @@ pub struct Cell {
     pub selected: bool,
 }
 
+#[derive(Clone, Copy)]
+struct DefaultColors {
+    foreground: u32,
+    background: u32,
+    cursor: u32,
+}
+
+impl Default for DefaultColors {
+    fn default() -> Self {
+        Self {
+            foreground: 0xd9e3ed,
+            background: 0x0c121b,
+            cursor: 0x7bdec5,
+        }
+    }
+}
+
 pub struct Emulator {
     term: Term<Listener>,
     parser: Processor,
@@ -77,6 +94,7 @@ pub struct Emulator {
     search_match: Option<(Point, Point)>,
     search_query: String,
     history_limit: usize,
+    default_colors: DefaultColors,
 }
 
 impl Emulator {
@@ -98,6 +116,7 @@ impl Emulator {
             search_match: None,
             search_query: String::new(),
             history_limit: history,
+            default_colors: DefaultColors::default(),
         }
     }
 
@@ -156,8 +175,20 @@ impl Emulator {
     pub fn mode(&self) -> TermMode {
         *self.term.mode()
     }
+    /// Set the local theme's default foreground, background and cursor as `0xRRGGBB`.
+    ///
+    /// Rendering and color-query replies use these values only when there is no
+    /// OSC override. Updating defaults preserves terminal content, selections,
+    /// parser state and queued events, and emits no terminal events or replies.
+    pub fn set_default_colors(&mut self, foreground: u32, background: u32, cursor: u32) {
+        self.default_colors = DefaultColors {
+            foreground,
+            background,
+            cursor,
+        };
+    }
     pub fn palette(&self, index: usize) -> u32 {
-        palette(index, self.term.colors())
+        palette(index, self.term.colors(), self.default_colors)
     }
     pub fn color_reply(&self, index: usize) -> alacritty_terminal::vte::ansi::Rgb {
         let value = self.palette(index);
@@ -293,8 +324,8 @@ impl Emulator {
                     return None;
                 }
                 let cell = indexed.cell;
-                let mut foreground = color(cell.fg, content.colors);
-                let mut background = color(cell.bg, content.colors);
+                let mut foreground = color(cell.fg, content.colors, self.default_colors);
+                let mut background = color(cell.bg, content.colors, self.default_colors);
                 if cell.flags.contains(Flags::INVERSE) {
                     std::mem::swap(&mut foreground, &mut background);
                 }
@@ -401,7 +432,7 @@ fn indexed_color(index: u8) -> u32 {
 fn rgb_number(rgb: alacritty_terminal::vte::ansi::Rgb) -> u32 {
     (u32::from(rgb.r) << 16) | (u32::from(rgb.g) << 8) | u32::from(rgb.b)
 }
-fn palette(index: usize, colors: &Colors) -> u32 {
+fn palette(index: usize, colors: &Colors, defaults: DefaultColors) -> u32 {
     if index < COUNT
         && let Some(rgb) = colors[index]
     {
@@ -409,8 +440,8 @@ fn palette(index: usize, colors: &Colors) -> u32 {
     }
     match index {
         0..=255 => indexed_color(index as u8),
-        257 => 0x0c121b,
-        258 => 0x7bdec5,
+        257 => defaults.background,
+        258 => defaults.cursor,
         259..=266 => {
             let rgb = PALETTE[index - 259];
             let dim = |component: u32| component * 2 / 3;
@@ -418,14 +449,14 @@ fn palette(index: usize, colors: &Colors) -> u32 {
         }
         267 => 0xf4f7fa,
         268 => 0x90979e,
-        _ => 0xd9e3ed,
+        _ => defaults.foreground,
     }
 }
-fn color(value: Color, colors: &Colors) -> u32 {
+fn color(value: Color, colors: &Colors, defaults: DefaultColors) -> u32 {
     match value {
         Color::Spec(rgb) => rgb_number(rgb),
-        Color::Indexed(index) => palette(usize::from(index), colors),
-        Color::Named(named) => palette(named as usize, colors),
+        Color::Indexed(index) => palette(usize::from(index), colors, defaults),
+        Color::Named(named) => palette(named as usize, colors, defaults),
     }
 }
 
@@ -621,6 +652,252 @@ pub fn encode_mouse(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn color_replies(emulator: &Emulator) -> Vec<(usize, String)> {
+        std::iter::from_fn(|| emulator.event())
+            .filter_map(|event| match event {
+                Event::ColorRequest(index, reply) => {
+                    Some((index, reply(emulator.color_reply(index))))
+                }
+                _ => None,
+            })
+            .collect()
+    }
+
+    fn assert_default_color_queries(emulator: &mut Emulator, expected: [&str; 3]) {
+        emulator.feed(b"\x1b]10;?\x07\x1b]11;?\x07\x1b]12;?\x07");
+        let replies = color_replies(emulator);
+        assert_eq!(replies.len(), expected.len());
+        for (offset, ((index, reply), expected)) in replies.iter().zip(expected).enumerate() {
+            assert_eq!(*index, 256 + offset);
+            assert!(
+                reply.contains(expected),
+                "unexpected color reply: {reply:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn constructor_keeps_legacy_default_colors() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.feed(b"default");
+        assert_eq!(emulator.cells()[0].foreground, 0xd9e3ed);
+        assert_eq!(emulator.cells()[0].background, 0x0c121b);
+        assert_eq!(emulator.palette(258), 0x7bdec5);
+        assert_default_color_queries(
+            &mut emulator,
+            [
+                "rgb:d9d9/e3e3/eded",
+                "rgb:0c0c/1212/1b1b",
+                "rgb:7b7b/dede/c5c5",
+            ],
+        );
+    }
+
+    #[test]
+    fn theme_defaults_recolor_existing_cells_but_preserve_explicit_colors() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.feed(
+            b"D\x1b[31;44mA\x1b[91;104mB\x1b[38;5;196;48;5;22mI\
+              \x1b[38;2;12;34;56;48;2;65;43;21mT\x1b[39;49mR\x1b[7mV\x1b[0m",
+        );
+        let before = emulator.visible_text();
+        for (foreground, background, cursor) in [
+            (0x213243, 0xfafbfc, 0x142536),
+            (0xd9e3ed, 0x0c121b, 0x7bdec5),
+        ] {
+            emulator.set_default_colors(foreground, background, cursor);
+            let colors: Vec<_> = emulator
+                .cells()
+                .iter()
+                .take(7)
+                .map(|cell| (cell.foreground, cell.background))
+                .collect();
+            assert_eq!(
+                colors,
+                [
+                    (foreground, background),
+                    (PALETTE[1], PALETTE[4]),
+                    (PALETTE[9], PALETTE[12]),
+                    (0xff0000, 0x005f00),
+                    (0x0c2238, 0x412b15),
+                    (foreground, background),
+                    (background, foreground),
+                ]
+            );
+            assert_eq!(emulator.visible_text(), before);
+            assert_eq!(rgb_number(emulator.color_reply(256)), foreground);
+            assert_eq!(rgb_number(emulator.color_reply(257)), background);
+            assert_eq!(rgb_number(emulator.color_reply(258)), cursor);
+            assert!(emulator.event().is_none());
+        }
+    }
+
+    #[test]
+    fn osc_default_overrides_survive_theme_changes_and_reset_to_current_theme() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.set_default_colors(0x213243, 0xfafbfc, 0x142536);
+        emulator.feed(b"default");
+        assert_default_color_queries(
+            &mut emulator,
+            [
+                "rgb:2121/3232/4343",
+                "rgb:fafa/fbfb/fcfc",
+                "rgb:1414/2525/3636",
+            ],
+        );
+        emulator.feed(b"\x1b]10;rgb:12/34/56\x07\x1b]11;rgb:01/02/03\x07\x1b]12;rgb:ab/cd/ef\x07");
+        emulator.set_default_colors(0xaabbcc, 0x112233, 0x445566);
+        assert_eq!(emulator.cells()[0].foreground, 0x123456);
+        assert_eq!(emulator.cells()[0].background, 0x010203);
+        assert_eq!(emulator.palette(258), 0xabcdef);
+        assert_default_color_queries(
+            &mut emulator,
+            [
+                "rgb:1212/3434/5656",
+                "rgb:0101/0202/0303",
+                "rgb:abab/cdcd/efef",
+            ],
+        );
+        emulator.feed(b"\x1b]110\x07");
+        assert_eq!(emulator.cells()[0].foreground, 0xaabbcc);
+        assert_eq!(emulator.cells()[0].background, 0x010203);
+        assert_eq!(emulator.palette(258), 0xabcdef);
+        emulator.feed(b"\x1b]111\x07");
+        assert_eq!(emulator.cells()[0].background, 0x112233);
+        assert_eq!(emulator.palette(258), 0xabcdef);
+        emulator.feed(b"\x1b]112\x07");
+        assert_eq!(emulator.palette(258), 0x445566);
+        assert_default_color_queries(
+            &mut emulator,
+            [
+                "rgb:aaaa/bbbb/cccc",
+                "rgb:1111/2222/3333",
+                "rgb:4444/5555/6666",
+            ],
+        );
+    }
+
+    #[test]
+    fn indexed_osc_overrides_and_resets_remain_independent_of_theme_defaults() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.feed(b"\x1b]4;1;rgb:12/34/56;196;rgb:65/43/21\x07\x1b[31;48;5;196mX");
+        emulator.set_default_colors(0x213243, 0xfafbfc, 0x142536);
+        assert_eq!(emulator.cells()[0].foreground, 0x123456);
+        assert_eq!(emulator.cells()[0].background, 0x654321);
+        emulator.feed(b"\x1b]4;1;?;196;?\x07");
+        let replies = color_replies(&emulator);
+        assert_eq!(replies.len(), 2);
+        assert_eq!(replies[0].0, 1);
+        assert!(replies[0].1.contains("rgb:1212/3434/5656"));
+        assert_eq!(replies[1].0, 196);
+        assert!(replies[1].1.contains("rgb:6565/4343/2121"));
+        emulator.feed(b"\x1b]104;1\x07");
+        assert_eq!(emulator.cells()[0].foreground, PALETTE[1]);
+        assert_eq!(emulator.cells()[0].background, 0x654321);
+        emulator.feed(b"\x1b]104\x07");
+        assert_eq!(emulator.cells()[0].background, 0xff0000);
+        assert_eq!(emulator.palette(256), 0x213243);
+        assert_eq!(emulator.palette(257), 0xfafbfc);
+        assert_eq!(emulator.palette(258), 0x142536);
+    }
+
+    #[test]
+    fn theme_changes_preserve_scrollback_viewport_manual_selection_and_modes() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.feed(b"first\r\nsecond\r\nthird\r\nfourth\r\nfifth\x1b[?1h\x1b[?2004h");
+        emulator.scroll(2);
+        emulator.start_selection(0, 0);
+        emulator.update_selection(0, 4);
+        assert_eq!(emulator.selected_text().as_deref(), Some("first"));
+        let snapshot = |emulator: &Emulator| {
+            emulator
+                .cells()
+                .into_iter()
+                .map(|cell| (cell.row, cell.col, cell.text, cell.selected))
+                .collect::<Vec<_>>()
+        };
+        let before = snapshot(&emulator);
+        let viewport = emulator.term.grid().display_offset();
+        let history = emulator.term.grid().history_size();
+        let cursor = emulator.term.grid().cursor.point;
+        let mode = emulator.mode();
+        while emulator.event().is_some() {}
+        for _ in 0..2 {
+            emulator.set_default_colors(0x213243, 0xfafbfc, 0x142536);
+            assert_eq!(snapshot(&emulator), before);
+            assert_eq!(emulator.selected_text().as_deref(), Some("first"));
+            assert_eq!(emulator.term.grid().display_offset(), viewport);
+            assert_eq!(emulator.term.grid().history_size(), history);
+            assert_eq!(emulator.term.grid().cursor.point, cursor);
+            assert_eq!(emulator.mode(), mode);
+            assert_eq!((emulator.size.rows, emulator.size.cols), (3, 20));
+            assert!(emulator.event().is_none());
+        }
+        emulator.bottom();
+        assert!(emulator.visible_text().contains("fifth"));
+        assert_eq!(
+            emulator.search("first", SearchDirection::Next),
+            SearchOutcome::Found
+        );
+    }
+
+    #[test]
+    fn theme_changes_preserve_search_selection_and_navigation() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.feed(b"first hit\r\nsecond\r\nthird hit\r\nfourth");
+        assert_eq!(
+            emulator.search("hit", SearchDirection::Next),
+            SearchOutcome::Found
+        );
+        let before = emulator.search_match;
+        let viewport = emulator.term.grid().display_offset();
+        emulator.set_default_colors(0x213243, 0xfafbfc, 0x142536);
+        assert_eq!(emulator.search_match, before);
+        assert_eq!(emulator.search_query, "hit");
+        assert_eq!(emulator.selected_text().as_deref(), Some("hit"));
+        assert_eq!(emulator.term.grid().display_offset(), viewport);
+        assert_eq!(
+            emulator.search("hit", SearchDirection::Next),
+            SearchOutcome::Found
+        );
+        assert_ne!(emulator.search_match, before);
+    }
+
+    #[test]
+    fn theme_changes_preserve_alternate_and_primary_screen_content() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.feed(b"primary");
+        let primary = emulator.visible_text();
+        emulator.feed(b"\x1b[?1049halternate");
+        let alternate = emulator.visible_text();
+        let cursor = emulator.cursor();
+        emulator.set_default_colors(0x213243, 0xfafbfc, 0x142536);
+        assert!(emulator.mode().contains(TermMode::ALT_SCREEN));
+        assert_eq!(emulator.visible_text(), alternate);
+        assert_eq!(emulator.cursor(), cursor);
+        assert_eq!(emulator.cells()[0].foreground, 0x213243);
+        emulator.feed(b"\x1b[?1049l");
+        assert_eq!(emulator.visible_text(), primary);
+        assert_eq!(emulator.cells()[0].foreground, 0x213243);
+        assert_eq!(emulator.cells()[0].background, 0xfafbfc);
+    }
+
+    #[test]
+    fn theme_changes_preserve_queued_queries_and_partial_escape_sequences() {
+        let mut emulator = Emulator::new(3, 20, 10);
+        emulator.feed(b"\x1b]10;?\x07\x1b[38;2;18;");
+        emulator.set_default_colors(0x213243, 0xfafbfc, 0x142536);
+        let replies = color_replies(&emulator);
+        assert_eq!(replies.len(), 1);
+        assert_eq!(replies[0].0, 256);
+        assert!(replies[0].1.contains("rgb:2121/3232/4343"));
+        emulator.feed(b"52;86mX");
+        assert_eq!(emulator.cells()[0].text, "X");
+        assert_eq!(emulator.cells()[0].foreground, 0x123456);
+        assert_eq!(emulator.cells()[0].background, 0xfafbfc);
+        assert!(emulator.event().is_none());
+    }
 
     #[test]
     fn reconnect_preserves_history_and_last_alternate_screen_without_remote_modes() {

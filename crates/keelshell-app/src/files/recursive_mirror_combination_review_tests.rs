@@ -26,7 +26,7 @@ fn wheel(window: &mut Window, cx: &mut App, body: Bounds<Pixels>, delta: Point<P
             continue;
         }
         window.dispatch_event(
-            gpui_kit::ScrollWheelEvent {
+            gpui_kit::ScrollEvent {
                 position,
                 delta: gpui_kit::ScrollDelta::Pixels(delta),
                 ..Default::default()

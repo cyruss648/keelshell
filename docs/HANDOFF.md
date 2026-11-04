@@ -1,4 +1,16 @@
-# KeelShell 开发交接 — 2026-10-26
+# KeelShell 开发交接 — 2026-11-04
+
+## 本轮组合与用户设计决定 — 2026-11-04
+
+用户已接受霜白、曜石、雾紫三套方向，要求全部作为内置主题，并方便继续增加主题。原生实现采用 `theme_family` + 既有 System/Light/Dark；目录集中元数据、浅深 Palette、组件形状和终端默认色，业务视图不分支识别主题 ID。旧配置默认霜白，有效未知 ID 保留并回退显示。工具栏“主题”打开原生选择器，主题变更通过后台保存成功后应用，保留会话与草稿。主题与工作区密度/面板布局分离，HTML 布局实验尚不等于已完整迁入原生。见[主题指南](product/THEME_PREFERENCES.md)、[设计](design/NATIVE_THEMES.md)、[ADR 0095](adr/0095-extensible-native-theme-families.md)。
+
+本轮组合基于 `4cd1809`，包含主题、知识库列表/搜索/审核编辑删除、隧道规则管理和依赖升级。完整 `scripts/check.py` 实际退出 0，929 个输入在运行前后不变：普通 Rust 2,007 passed/23 ignored、rustdoc 10 passed（1 项仅编译）、app 819 passed/2 ignored、Python 116 项/1 skipped；格式、严格 Clippy 与额外控制器均通过。最后仅修复 Python 依赖检查器的非成员 dev 依赖判定，受影响的完整 Python suite 已重跑 120 项/1 skipped、官方 freshness 104 项通过，Rust 输入未变。
+
+主题/助手、知识库、NET、HTML 和修后的依赖工具均完成非作者分项复核，最终没有确认的 P0/P1/P2。解锁后原生 macOS 已观察三主题切换保留 SSH fixture、远端列表、未发送草稿及重启恢复主题/语言；最终同 Rust 输入包补充确认三主题入口与知识输入框中英文 AX 名称，正常退出 0。真实取消拒绝已纳入 NET 回归，真实远端取消超时只做源码复核；不要把这两个范围混写。实际结果与历史失败见[主题记录](testing/records/2026-11-04-native-themes.md)、[AI 记录](testing/records/2026-11-04-ai-knowledge-library.md)、[NET 记录](testing/records/2026-11-04-net-01-rule-management.md)及[依赖记录](testing/records/2026-11-04-dependencies.md)。
+
+后续重点仍是连接导航/工具区原生布局迁移、完整知识上下文发送、NET 原生与真实超时、三平台桌面/最小窗口/IME/VoiceOver 和精确提交 CI。三套主题已由用户决定全部保留，不要再次要求选一个；也不要把本轮当作整个产品目标完成。提交、推送和工作树清理以本节后续读回与 Git 历史为准。
+
+依赖每轮开发须检查官方最新稳定、非撤回版本。本轮最后检查时间为 `2026-11-04T11:45:03Z`，104 项通过。运行 `python3 scripts/check_dependencies.py --json-report <新报告.json>` 保存证据，或 `python3 scripts/check.py --fresh-dependencies` 在标准门禁前检查；离线标准检查继续可用。registry 要求保持 x.y，Cargo.lock 保留 patch，仍不 pin Rust 工具链。三平台原生、完整实际 SSH/AI/MCP、签名安装及全部产品能力均独立验收。
 
 ## 当前工具链策略 — 2026-10-26
 

@@ -1274,6 +1274,14 @@ fn diagnostic_plan_buttons_only_emit_reviewable_text(cx: &mut TestAppContext) {
         window.render_frame(cx);
         window.click("build-diagnostic-plan", cx);
         window.render_frame(cx);
+        // The generated plan extends the scrollable response; exercise the
+        // visible control through the same scrolling path as a user.
+        window.scroll(
+            "assistant-scroll",
+            gpui_kit::ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.render_frame(cx);
         window.click(("review-diagnostic-step", 0_usize), cx);
     })
     .unwrap_or_else(|error| panic!("diagnostic plan buttons: {error}"));
@@ -1548,7 +1556,7 @@ async fn selected_directory_review_runs_in_background_and_preserves_scrollable_p
         );
         for delta in [point(px(-10000.), px(0.)), point(px(0.), px(-10000.))] {
             window.dispatch_event(
-                gpui_kit::ScrollWheelEvent {
+                gpui_kit::ScrollEvent {
                     position,
                     delta: gpui_kit::ScrollDelta::Pixels(delta),
                     ..Default::default()
@@ -1841,7 +1849,7 @@ fn long_cli_review_scrolls_to_visible_send_in_both_languages(cx: &mut TestAppCon
             );
             for delta in [point(px(-10000.), px(0.)), point(px(0.), px(-10000.))] {
                 window.dispatch_event(
-                    gpui_kit::ScrollWheelEvent {
+                    gpui_kit::ScrollEvent {
                         position,
                         delta: gpui_kit::ScrollDelta::Pixels(delta),
                         ..Default::default()

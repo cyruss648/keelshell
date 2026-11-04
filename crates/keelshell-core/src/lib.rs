@@ -23,6 +23,7 @@ mod diff;
 mod directory_compare;
 mod directory_sync;
 mod error;
+mod knowledge_library;
 mod model;
 mod network_diagnostic;
 mod openssh;
@@ -36,6 +37,7 @@ mod snippets;
 mod store;
 mod text_merge;
 mod text_patch;
+mod theme;
 mod tunnel_rules;
 mod updates;
 mod vault;
@@ -133,6 +135,7 @@ pub use store::{
     ConfigBackup, ConfigBackupId, ConfigBackupStatus, ConfigRecoveryPreview, ConfigRecoverySummary,
     ConfigSourceStatus, MAX_CONFIG_BACKUPS, MAX_CONFIG_ORIGINALS, StateStore,
 };
+pub use theme::ThemeId;
 pub use tunnel_rules::{
     ConfirmedTunnelRuleAction, MAX_TUNNEL_RULES, TUNNEL_RULE_VERSION, TunnelRule, TunnelRuleAction,
     TunnelRuleKind, TunnelRuleReviewError, TunnelRuleReviewToken, TunnelRuleType,

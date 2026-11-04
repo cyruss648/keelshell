@@ -607,7 +607,7 @@ impl Render for MonitorPanel {
                             .icon(IconName::RefreshCw)
                             .ghost()
                             .compact()
-                            .rounded(px(6.))
+                            .rounded(px(crate::design::components(cx).control_radius))
                             .label(if self.busy {
                                 t(cx, "读取中…", "Reading…")
                             } else {
@@ -629,7 +629,7 @@ impl Render for MonitorPanel {
                             })
                             .ghost()
                             .compact()
-                            .rounded(px(6.))
+                            .rounded(px(crate::design::components(cx).control_radius))
                             .label(if self.paused {
                                 t(cx, "继续", "Resume")
                             } else {
@@ -648,7 +648,7 @@ impl Render for MonitorPanel {
                             .icon(IconName::Network)
                             .ghost()
                             .compact()
-                            .rounded(px(6.))
+                            .rounded(px(crate::design::components(cx).control_radius))
                             .label(t(cx, "端口", "Sockets"))
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if panel.pending.is_none() {
@@ -887,7 +887,7 @@ impl Render for MonitorPanel {
                             .disabled(self.busy || self.suspended || self.pending.is_some())
                             .ghost()
                             .compact()
-                            .rounded(px(6.))
+                            .rounded(px(crate::design::components(cx).control_radius))
                             .label(t(cx, "探测", "Probe"))
                             .on_click(cx.listener(move |panel, _, _, cx| {
                                 if !panel.busy && panel.pending.is_none() {
@@ -1015,7 +1015,7 @@ impl Render for MonitorPanel {
                         .text_color(rgb(visual.danger))
                         .ghost()
                         .compact()
-                        .rounded(px(6.))
+                        .rounded(px(crate::design::components(cx).control_radius))
                         .label(t(cx, "终止", "Stop"))
                         .on_click(cx.listener(move |panel, _, _, cx| {
                             if panel.busy || panel.pending.is_some() {
@@ -1047,7 +1047,7 @@ impl Render for MonitorPanel {
                             .icon(IconName::ChevronLeft)
                             .ghost()
                             .compact()
-                            .rounded(px(6.))
+                            .rounded(px(crate::design::components(cx).control_radius))
                             .label(t(cx, "上一页", "Previous"))
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 panel.process_page = panel.process_page.saturating_sub(1);
@@ -1064,7 +1064,7 @@ impl Render for MonitorPanel {
                             .icon(IconName::ChevronRight)
                             .ghost()
                             .compact()
-                            .rounded(px(6.))
+                            .rounded(px(crate::design::components(cx).control_radius))
                             .label(t(cx, "下一页", "Next"))
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if (panel.process_page + 1) * PROCESS_PAGE_SIZE
@@ -1094,16 +1094,16 @@ impl Render for MonitorPanel {
         let mut confirmation = None;
         if let Some(identity) = &self.pending {
             let process = identity.process();
-            confirmation = Some(div().id("process-confirmation").max_h(px(250.)).overflow_y_scroll().m_2().p_2().bg(rgb(visual.danger_surface)).rounded(px(6.)).border_1().border_color(rgb(visual.danger_border)).flex().flex_col().gap_2()
+            confirmation = Some(div().id("process-confirmation").max_h(px(250.)).overflow_y_scroll().m_2().p_2().bg(rgb(visual.danger_surface)).rounded(px(crate::design::components(cx).control_radius)).border_1().border_color(rgb(visual.danger_border)).flex().flex_col().gap_2()
                 .child(div().text_xs().font_weight(FontWeight::SEMIBOLD).child(t(cx, "确认终止进程", "Confirm termination")))
                 .child(div().text_xs().child(self.host.clone()))
                 .child(div().text_xs().child(format!("PID {} · {}", process.pid, process.user)))
                 .child(div().text_xs().child(process.command.clone()))
                 .child(div().text_xs().child(t(cx, "将发送 SIGTERM，可能中断任务。不会强制终止或提权；启动时间复核仍有极小的 PID 重用竞争。", "SIGTERM may interrupt work. No force kill or privilege escalation; a narrow PID reuse race remains after the start-time check.")))
                 .child(div().flex().gap_1()
-                    .child(Button::new("confirm-process-term").icon(IconName::Square).primary().compact().rounded(px(6.)).label(t(cx, "发送 SIGTERM", "Send SIGTERM"))
+                    .child(Button::new("confirm-process-term").icon(IconName::Square).primary().compact().rounded(px(crate::design::components(cx).control_radius)).label(t(cx, "发送 SIGTERM", "Send SIGTERM"))
                         .on_click(cx.listener(|panel, _, _, cx| { if !panel.busy && let Some(identity) = panel.pending.take() { panel.run(Job::Terminate(identity), cx); } })))
-                    .child(Button::new("cancel-process-term").ghost().compact().rounded(px(6.)).label(t(cx, "取消", "Cancel"))
+                    .child(Button::new("cancel-process-term").ghost().compact().rounded(px(crate::design::components(cx).control_radius)).label(t(cx, "取消", "Cancel"))
                         .on_click(cx.listener(|panel, _, _, cx| { panel.pending = None; panel.status = Message::new("已取消终止，自动刷新仍暂停。", "Termination cancelled. Polling remains paused."); cx.notify(); })))));
         }
         div()

@@ -22,10 +22,12 @@ use gpui_kit::{
 };
 use keelshell_core::{AppState, AuthMethod, Connection, Language, StateStore};
 mod agent;
+mod appearance;
 mod command_workflows;
 mod commands;
 mod configuration_recovery;
 mod credentials;
+mod knowledge_library;
 mod library;
 mod library_bulk;
 mod library_view;
@@ -44,6 +46,9 @@ use library::{DestinationPrompt, DestinationTarget, FolderForm, LibraryFilter};
 use reconnect_editor::ReconnectEditor;
 #[cfg(test)]
 pub(crate) mod tests;
+#[cfg(test)]
+#[path = "tunnels/workspace_tests.rs"]
+mod tunnel_rule_tests;
 mod updates;
 mod vault;
 mod view;
@@ -253,6 +258,14 @@ enum AfterSave {
         panel: WeakEntity<AssistantPanel>,
         review_id: uuid::Uuid,
     },
+    KnowledgeLibrary {
+        panel: WeakEntity<crate::assistant::knowledge_library::KnowledgeLibrary>,
+        review_id: uuid::Uuid,
+    },
+    TunnelRule {
+        panel: WeakEntity<crate::tunnels::TunnelsPanel>,
+        operation: uuid::Uuid,
+    },
     SnippetSaved {
         panel: EntityId,
     },
@@ -280,6 +293,7 @@ pub struct Workspace {
     openssh_review: Option<OpenSshImportReview>,
     status: Message,
     show_connections: bool,
+    show_appearance: bool,
     library_filter: LibraryFilter,
     folder_form: Option<FolderForm>,
     destination_prompt: Option<DestinationPrompt>,
@@ -368,6 +382,10 @@ pub struct Workspace {
     visible_panel: Option<ToolPanel>,
     terminal_observers: HashMap<EntityId, Subscription>,
     terminal_focus: HashMap<EntityId, Subscription>,
+    tunnel_subscriptions: HashMap<EntityId, Subscription>,
+    // Keep runtime owners reachable after tab/archive removal until cleanup.
+    tunnel_owners: HashMap<EntityId, Entity<crate::tunnels::TunnelsPanel>>,
+    tunnel_rule_store_blocked: bool,
     _subscriptions: Vec<Subscription>,
 }
 
@@ -394,7 +412,7 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
-        crate::design::apply(state.settings.theme, Some(window), cx);
+        crate::design::apply_settings(&state.settings, Some(window), cx);
         let appearance_subscription = cx.observe_window_appearance(window, |view, window, cx| {
             view.on_appearance_changed(window.appearance(), window, cx);
         });
@@ -496,6 +514,11 @@ impl Workspace {
                 cx,
             )
         });
+        assistant
+            .read(cx)
+            .knowledge_library
+            .clone()
+            .update(cx, |panel, cx| panel.set_snapshot(&state, cx));
         let assistant_subscription = cx.subscribe_in(
             &assistant,
             window,
@@ -605,6 +628,12 @@ impl Workspace {
                 AssistantEvent::ReloadKnowledge { review_id } => {
                     view.reload_knowledge_state(panel.downgrade(), *review_id, window, cx);
                 }
+                AssistantEvent::ManageKnowledge { review_id } => {
+                    view.apply_knowledge_change(*review_id, window, cx);
+                }
+                AssistantEvent::ReloadKnowledgeLibrary { token } => {
+                    view.reload_knowledge_library(*token, window, cx);
+                }
                 AssistantEvent::AgentStop { run_id } => view.stop_agent(*run_id),
                 AssistantEvent::OpenSettings => view.open_ai_settings(window, cx),
                 AssistantEvent::SelectProfile(id) => {
@@ -653,6 +682,7 @@ impl Workspace {
                 if this
                     .update_in(cx, |view, window, cx| {
                         view.poll_reconnect(window, cx);
+                        view.retire_tunnel_owners(cx);
                         view.maintain_mcp(cx);
                         view.maintain_agent(cx);
                         view.flush_update_check(window, cx);
@@ -723,6 +753,7 @@ impl Workspace {
                     Message::new("就绪，请选择 SSH 连接", "Ready. Select an SSH connection")
                 }),
             show_connections: false,
+            show_appearance: false,
             library_filter: LibraryFilter::All,
             folder_form: None,
             destination_prompt: None,
@@ -805,6 +836,9 @@ impl Workspace {
             visible_panel: None,
             terminal_observers: HashMap::new(),
             terminal_focus: HashMap::new(),
+            tunnel_subscriptions: HashMap::new(),
+            tunnel_owners: HashMap::new(),
+            tunnel_rule_store_blocked: false,
             _subscriptions: vec![
                 update_subscription,
                 update_observer,
@@ -853,6 +887,7 @@ impl Workspace {
             });
             self.forget_reconnect(terminal.entity_id(), window, cx);
             self.remote_sessions.remove(&terminal.entity_id());
+            self.tunnel_subscriptions.remove(&terminal.entity_id());
             self.knowledge_source_ids.remove(&terminal.entity_id());
             self.knowledge_source_revisions
                 .remove(&terminal.entity_id());
@@ -863,6 +898,7 @@ impl Workspace {
             self.remote_hosts.remove(&terminal.entity_id());
             self.remote_connection_ids.remove(&terminal.entity_id());
             self.panels.remove(&terminal.entity_id());
+            self.retire_tunnel_owners(cx);
             self.terminal_observers.remove(&terminal.entity_id());
             self.terminal_focus.remove(&terminal.entity_id());
             // Retirement revokes background MCP leases in this same UI turn.
@@ -1757,6 +1793,7 @@ impl Workspace {
             return;
         }
         self.state_reloading = true;
+        self.set_tunnel_rule_configuration_busy(true, cx);
         self.status = Message::new("正在重新加载本机配置…", "Reloading local configuration…");
         let store = self.store.clone();
         let task = cx.background_executor().spawn(async move { store.load() });
@@ -1764,6 +1801,7 @@ impl Workspace {
             let result = task.await;
             let _ = this.update_in(cx, |view, window, cx| {
                 view.state_reloading = false;
+                view.set_tunnel_rule_configuration_busy(false, cx);
                 match result {
                     Ok(state) => {
                         let accepted = panel
@@ -1775,33 +1813,7 @@ impl Workspace {
                             })
                             .unwrap_or(false);
                         if accepted {
-                            view.state = state;
-                            // StateStore does not persist transient AI keys.
-                            // An explicit reload is therefore also a security
-                            // boundary: discard keys bound to the pre-reload
-                            // profile snapshot before rebinding the assistant.
-                            view.ai_credentials = EphemeralCredentials::new();
-                            view.apply_language(view.state.settings.language, window, cx);
-                            crate::design::apply(view.state.settings.theme, Some(window), cx);
-                            view.assistant.update(cx, |assistant, cx| {
-                                assistant.replace_profiles(
-                                    &view.state.settings.ai_profiles,
-                                    &view.ai_credentials,
-                                    cx,
-                                )
-                            });
-                            view.update_service.update(cx, |panel, cx| {
-                                panel.set_preferences(view.state.settings.updates, cx)
-                            });
-                            view.maintain_library_selection();
-                            view.invalidate_reconnect_profiles(window, cx);
-                            view.revoke_stale_protocol_diagnostics(cx);
-                            view.maintain_mcp(cx);
-                            view.maintain_agent(cx);
-                            view.refresh_tunnel_panels(cx);
-                            view.snippet_sources = Arc::new(view.state.snippets.clone());
-                            view.command_sources_revision =
-                                view.command_sources_revision.wrapping_add(1);
+                            view.accept_reloaded_knowledge_state(state, window, cx);
                             view.status = Message::new(
                                 "配置已重新加载；旧知识审核已清除，请重新生成预览。",
                                 "Configuration reloaded; the old knowledge review was cleared. Build a fresh preview.",
@@ -1814,6 +1826,7 @@ impl Workspace {
                         }
                     }
                     Err(error) => {
+                        view.mark_tunnel_rule_store_uncertain(cx);
                         let accepted = panel
                             .upgrade()
                             .map(|panel| {
@@ -1902,7 +1915,15 @@ impl Workspace {
             return;
         }
         let update_history = matches!(&after, AfterSave::UpdateHistory);
+        if let AfterSave::KnowledgeLibrary { panel, review_id } = &after
+            && !panel
+                .upgrade()
+                .is_some_and(|panel| panel.update(cx, |panel, cx| panel.begin_save(*review_id, cx)))
+        {
+            return;
+        }
         self.saving = true;
+        self.set_tunnel_rule_configuration_busy(true, cx);
         if let AfterSave::Knowledge { panel, review_id } = &after
             && let Some(panel) = panel.upgrade()
         {
@@ -1922,10 +1943,24 @@ impl Workspace {
             let result = task.await;
             let _ = this.update_in(cx, |view, window, cx| {
                 view.saving = false;
+                view.set_tunnel_rule_configuration_busy(false, cx);
                 let saved_successfully = result.is_ok();
                 match result {
                     Ok(saved) => {
                         view.state = saved;
+                        view.refresh_knowledge_library(cx);
+                        let tunnel_rule_saved = if let AfterSave::TunnelRule {
+                            panel, operation, ..
+                        } = &after
+                        {
+                            panel.upgrade().map(|panel| {
+                                panel.update(cx, |panel, cx| {
+                                    panel.mark_rule_mutation_succeeded(*operation, cx)
+                                })
+                            })
+                        } else {
+                            None
+                        };
                         view.refresh_tunnel_panels(cx);
                         view.update_service.update(cx, |panel, cx| panel.set_preferences(view.state.settings.updates, cx));
                         if view.pending_update_check.is_some_and(|pending| view.state.settings.updates.last_successful_check.is_some_and(|saved| saved >= pending)) {
@@ -1956,7 +1991,7 @@ impl Workspace {
                                 view.status = Message::new("更新设置已保存", "Update settings saved");
                             }
                             AfterSave::Theme => {
-                                crate::design::apply(view.state.settings.theme, Some(window), cx);
+                                crate::design::apply_settings(&view.state.settings, Some(window), cx);
                                 view.status = Message::new("外观偏好已保存", "Appearance preference saved");
                             }
                             AfterSave::SnippetSaved { panel } => {
@@ -2082,6 +2117,28 @@ impl Workspace {
                                     )
                                 };
                             }
+                            AfterSave::KnowledgeLibrary { panel, review_id } => {
+                                if let Some(panel) = panel.upgrade() {
+                                    panel.update(cx, |panel, cx| panel.finish_save(review_id, cx));
+                                }
+                                view.status = Message::new(
+                                    "本地知识修改已保存",
+                                    "Local knowledge changes saved",
+                                );
+                            }
+                            AfterSave::TunnelRule { .. } => {
+                                view.status = if tunnel_rule_saved == Some(true) {
+                                    Message::new(
+                                        "命名隧道规则已保存到 StateStore",
+                                        "Named tunnel rule saved to StateStore",
+                                    )
+                                } else {
+                                    Message::new(
+                                        "命名隧道规则已保存，但当前编辑面板已过期。",
+                                        "Named tunnel rule was saved, but the current editor is stale.",
+                                    )
+                                };
+                            }
                             AfterSave::BatchAudit { .. } => {
                                 view.status = Message::new(
                                     "批量审计摘要已保存（不含命令正文、输出或主机地址）",
@@ -2171,6 +2228,31 @@ impl Workspace {
                                         cx,
                                     );
                                 }
+                            });
+                        }
+                        if let AfterSave::KnowledgeLibrary { panel, review_id } = &after
+                            && let Some(panel) = panel.upgrade()
+                        {
+                            panel.update(cx, |panel, cx| panel.save_failed(*review_id, &error, cx));
+                        }
+                        if matches!(&after, AfterSave::TunnelRule { .. })
+                            || matches!(&error, keelshell_core::Error::Conflict | keelshell_core::Error::Durability(_))
+                        {
+                            view.mark_tunnel_rule_store_uncertain(cx);
+                        }
+                        if let AfterSave::TunnelRule { panel, operation } = &after
+                            && let Some(panel) = panel.upgrade()
+                        {
+                            let message = if matches!(&error, keelshell_core::Error::Conflict) {
+                                Message::new(
+                                    "配置已被其他操作修改，规则草稿已保留；请重新打开应用或重新加载配置，再编辑最新规则。",
+                                    "Configuration changed elsewhere; the draft is retained. Reopen the app or reload configuration, then edit the latest rule.",
+                                )
+                            } else {
+                                Message::detail("规则保存失败或结果未知，草稿已保留；请重新打开应用或重新加载配置后再编辑", "Rule save failed or its outcome is unknown; draft retained. Reopen the app or reload configuration before editing again", &error)
+                            };
+                            panel.update(cx, |panel, cx| {
+                                panel.mark_rule_mutation_failed(*operation, message, true, cx)
                             });
                         }
                         view.status = credential_failure.unwrap_or_else(|| Message::detail(
@@ -2323,6 +2405,15 @@ impl Workspace {
         cx.notify();
     }
     fn refresh_tunnel_panels(&mut self, cx: &mut Context<Self>) {
+        self.update_tunnel_panels(false, cx);
+    }
+
+    fn reload_tunnel_panels(&mut self, cx: &mut Context<Self>) {
+        self.tunnel_rule_store_blocked = false;
+        self.update_tunnel_panels(true, cx);
+    }
+
+    fn update_tunnel_panels(&mut self, authoritative: bool, cx: &mut Context<Self>) {
         let state = self.state.clone();
         let mut panels = Vec::new();
         for (id, remote_panels) in self.panels.iter().chain(self.archived_panels.iter()) {
@@ -2332,9 +2423,125 @@ impl Workspace {
         }
         for (panel, connection_id) in panels {
             panel.update(cx, |panel, cx| {
-                panel.refresh_rule_state(Some(state.clone()), connection_id, cx)
+                if authoritative {
+                    panel.reload_rule_state(state.clone(), connection_id, cx);
+                } else {
+                    panel.refresh_rule_state(Some(state.clone()), connection_id, cx);
+                }
+                if self.tunnel_rule_store_blocked {
+                    panel.mark_rule_store_uncertain(cx);
+                }
             });
         }
+    }
+
+    fn mark_tunnel_rule_store_uncertain(&mut self, cx: &mut Context<Self>) {
+        self.tunnel_rule_store_blocked = true;
+        for panels in self.panels.values().chain(self.archived_panels.values()) {
+            if let Some(panel) = &panels.tunnels {
+                panel.update(cx, |panel, cx| panel.mark_rule_store_uncertain(cx));
+            }
+        }
+    }
+
+    fn retire_tunnel_owners(&mut self, cx: &mut Context<Self>) {
+        let retained: std::collections::HashSet<_> = self
+            .panels
+            .values()
+            .chain(self.archived_panels.values())
+            .filter_map(|panels| panels.tunnels.as_ref())
+            .map(Entity::entity_id)
+            .collect();
+        self.tunnel_owners.retain(|id, panel| {
+            retained.contains(id) || panel.update(cx, |panel, cx| panel.retire_workers(cx))
+        });
+    }
+
+    fn set_tunnel_rule_configuration_busy(&mut self, busy: bool, cx: &mut Context<Self>) {
+        for panels in self.panels.values().chain(self.archived_panels.values()) {
+            if let Some(panel) = &panels.tunnels {
+                panel.update(cx, |panel, cx| panel.set_rule_configuration_busy(busy, cx));
+            }
+        }
+    }
+
+    fn handle_tunnel_rule_event(
+        &mut self,
+        panel: &Entity<crate::tunnels::TunnelsPanel>,
+        event: &crate::tunnels::TunnelRuleEvent,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        // A subscription is not authority: require the original live panel,
+        // saved-connection binding and exact pending review at this boundary.
+        let bound = self.panels.iter().any(|(terminal, panels)| {
+            panels.tunnels.as_ref() == Some(panel)
+                && self.remote_connection_ids.get(terminal) == Some(&event.rule.connection_id)
+        });
+        if !bound || self.tunnel_rule_store_blocked || !panel.read(cx).accepts_rule_mutation(event)
+        {
+            panel.update(cx, |panel, cx| {
+                panel.mark_rule_mutation_failed(
+                    event.operation,
+                    Message::new(
+                        "隧道面板或审核已过期，未保存规则。",
+                        "Tunnel panel or review expired; rule was not saved.",
+                    ),
+                    false,
+                    cx,
+                )
+            });
+            return;
+        }
+        let busy = self.saving
+            || self.state_reloading
+            || self.configuration_recovery.is_some()
+            || self.vault_settings.is_some()
+            || self.profile_sync.is_some()
+            || self.snippet_modal_open();
+        let active = event.deleting
+            && self
+                .panels
+                .values()
+                .chain(self.archived_panels.values())
+                .filter_map(|panels| panels.tunnels.as_ref())
+                .chain(self.tunnel_owners.values())
+                .any(|panel| panel.read(cx).has_active_rule(event.rule.id));
+        if busy || active {
+            panel.update(cx, |panel, cx| {
+                panel.mark_rule_mutation_failed(event.operation,
+                    if active { Message::new("此规则在其他标签或当前标签仍有活动隧道，请先停止。", "This rule still has active tunnels in this or another tab. Stop them first.") }
+                    else { Message::new("配置正在保存、重新加载或管理中，请完成后重试。", "Configuration is being saved, reloaded or managed. Finish that operation before retrying.") }, false, cx)
+            });
+            return;
+        }
+        let candidate = match event.candidate(&self.state) {
+            Ok(candidate) => candidate,
+            Err(error) => {
+                panel.update(cx, |panel, cx| {
+                    panel.mark_rule_mutation_failed(
+                        event.operation,
+                        Message::detail(
+                            "规则审核已过期或内容无效，未保存",
+                            "Rule review expired or is invalid; not saved",
+                            error,
+                        ),
+                        false,
+                        cx,
+                    )
+                });
+                return;
+            }
+        };
+        self.persist(
+            candidate,
+            AfterSave::TunnelRule {
+                panel: panel.downgrade(),
+                operation: event.operation,
+            },
+            window,
+            cx,
+        );
     }
 
     fn toggle_panel(&mut self, kind: ToolPanel, window: &mut Window, cx: &mut Context<Self>) {
@@ -2379,16 +2586,27 @@ impl Workspace {
         let runtime = self.runtime.clone();
         let rule_state = self.state.clone();
         let rule_connection_id = self.remote_connection_ids.get(&id).copied();
-        let panels = self.panels.entry(id).or_default();
         match kind {
-            ToolPanel::Files if panels.files.is_none() => {
-                panels.files =
+            ToolPanel::Files
+                if self
+                    .panels
+                    .get(&id)
+                    .and_then(|panels| panels.files.as_ref())
+                    .is_none() =>
+            {
+                self.panels.entry(id).or_default().files =
                     Some(cx.new(|cx| {
                         crate::files::FilesPanel::new(session, host, runtime, window, cx)
                     }));
             }
-            ToolPanel::Tunnels if panels.tunnels.is_none() => {
-                panels.tunnels = Some(cx.new(|cx| {
+            ToolPanel::Tunnels
+                if self
+                    .panels
+                    .get(&id)
+                    .and_then(|panels| panels.tunnels.as_ref())
+                    .is_none() =>
+            {
+                let panel = cx.new(|cx| {
                     crate::tunnels::TunnelsPanel::new_with_state(
                         session,
                         host,
@@ -2398,10 +2616,30 @@ impl Workspace {
                         window,
                         cx,
                     )
-                }));
+                });
+                let subscription = cx.subscribe_in(
+                    &panel,
+                    window,
+                    |view, panel, event: &crate::tunnels::TunnelRuleEvent, window, cx| {
+                        view.handle_tunnel_rule_event(panel, event, window, cx)
+                    },
+                );
+                panel.update(cx, |panel, cx| {
+                    panel.set_rule_configuration_busy(self.saving || self.state_reloading, cx);
+                    if self.tunnel_rule_store_blocked {
+                        panel.mark_rule_store_uncertain(cx);
+                    }
+                });
+                self.tunnel_owners.insert(panel.entity_id(), panel.clone());
+                self.tunnel_subscriptions.insert(id, subscription);
+                self.panels.entry(id).or_default().tunnels = Some(panel);
             }
             ToolPanel::Tunnels => {
-                if let Some(panel) = &panels.tunnels {
+                if let Some(panel) = self
+                    .panels
+                    .get(&id)
+                    .and_then(|panels| panels.tunnels.clone())
+                {
                     panel.update(cx, |panel, cx| {
                         panel.refresh_rule_state(Some(rule_state), rule_connection_id, cx)
                     });
@@ -2482,15 +2720,15 @@ impl Workspace {
 }
 
 pub fn bind_keys(cx: &mut App) {
-    let modifier = if cfg!(target_os = "macos") {
-        "cmd"
+    let (open, close, assistant) = if cfg!(target_os = "macos") {
+        ("cmd-t", "cmd-w", "cmd-j")
     } else {
-        "ctrl-shift"
+        ("ctrl-shift-t", "ctrl-shift-w", "ctrl-shift-j")
     };
     cx.bind_keys([
         KeyBinding::new("ctrl-space", CompleteRemoteCommand, Some("Input")),
-        KeyBinding::new(&format!("{modifier}-t"), OpenConnections, None),
-        KeyBinding::new(&format!("{modifier}-w"), CloseTab, None),
-        KeyBinding::new(&format!("{modifier}-j"), ToggleAssistant, None),
+        KeyBinding::new(open, OpenConnections, None),
+        KeyBinding::new(close, CloseTab, None),
+        KeyBinding::new(assistant, ToggleAssistant, None),
     ]);
 }

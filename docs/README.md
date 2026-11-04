@@ -1,5 +1,13 @@
 # 文档索引
 
+- [主题与外观](product/THEME_PREFERENCES.md)：三套内置主题、明暗模式及扩展方式。
+- [原生主题设计](design/NATIVE_THEMES.md)与[ADR 0095](adr/0095-extensible-native-theme-families.md)：目录、语义 token、组件适配与旧配置兼容。
+- [本轮主题测试](testing/records/2026-11-04-native-themes.md)：实际结果、失败历史与平台验收边界。
+
+- [本地知识库管理](product/AI_KNOWLEDGE_LIBRARY.md)、[ADR 0094](adr/0094-reviewed-knowledge-library-mutations.md)与[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)：搜索、编辑/删除审核、配置冲突和重新加载。
+- [Hallmark 原生设计约定](design/HALLMARK_NATIVE.md)：既有 GPUI 主题、app screen 布局和 Web/native 验证边界。
+- [工程与依赖复核](research/2026-11-04-engineering-refresh.md)与[升级记录](testing/records/2026-11-04-dependencies.md)：Reef/模板当前来源、官方最新依赖、解析与后续验收。
+
 - [配置备份与显式恢复](product/CONFIGURATION_RECOVERY.md)、[ADR 0081](adr/0081-bounded-explicit-configuration-recovery.md)与[候选记录](testing/records/2026-10-08-configuration-recovery.md)：八份有界metadata、损坏原件保持、用户审核、回滚与未运行验证。
 
 - [本地智能体准备期失败收尾](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)：取消与实际 Join、诊断脱敏、独立控制及未验证边界。

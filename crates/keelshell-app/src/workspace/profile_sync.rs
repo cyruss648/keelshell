@@ -30,6 +30,7 @@ impl Workspace {
                         // Tabs retain their captured authenticated transports. A renamed,
                         // changed or deleted saved endpoint cannot replace a live session.
                         view.state = (**state).clone();
+                        view.refresh_knowledge_library(cx);
                         view.update_service.update(cx, |panel, cx| {
                             panel.set_preferences(view.state.settings.updates, cx)
                         });

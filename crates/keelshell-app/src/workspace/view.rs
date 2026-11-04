@@ -2,7 +2,6 @@
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::assets::IconName;
-use gpui_kit::component::Selectable;
 
 impl Workspace {
     fn select_session_tab(&mut self, index: usize, window: &mut Window, cx: &mut Context<Self>) {
@@ -88,7 +87,7 @@ impl Workspace {
                     .bg(rgb(visual.surface))
                     .border_1()
                     .border_color(rgb(visual.border))
-                    .rounded_lg()
+                    .rounded(px(crate::design::components(cx).panel_radius))
                     .shadow_lg()
                     .p_6()
                     .flex()
@@ -223,7 +222,7 @@ impl Workspace {
                     .bg(rgb(visual.surface))
                     .border_1()
                     .border_color(rgb(visual.border))
-                    .rounded_lg()
+                    .rounded(px(crate::design::components(cx).panel_radius))
                     .overflow_hidden()
                     .shadow_lg()
                     .flex()
@@ -300,7 +299,6 @@ impl Workspace {
 }
 impl Render for Workspace {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let visual = crate::design::palette(cx);
         self.maintain_mcp(cx);
         self.maintain_remote_completion(window, cx);
         self.maintain_command_workflows(cx);
@@ -309,6 +307,16 @@ impl Render for Workspace {
         if let Some(kind) = self.active_modal() {
             return self.isolated_modal_surface(kind, window, cx);
         }
+        self.render_workspace(window, cx)
+    }
+}
+
+impl Workspace {
+    // Keep the large workspace builder off the modal rendering stack. An early
+    // return in one monolithic debug frame still reserves all its temporaries.
+    #[inline(never)]
+    fn render_workspace(&mut self, window: &mut Window, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let viewport = window.viewport_size();
         let assistant_width = px(380.).min(viewport.width * 0.42);
         // At compact widths keep the terminal usable while the assistant is open.
@@ -382,7 +390,7 @@ impl Render for Workspace {
                     .h(px(34.))
                     .w(px(184.))
                     .flex_shrink_0()
-                    .rounded_md()
+                    .rounded(px(crate::design::components(cx).control_radius))
                     .px_2()
                     .flex()
                     .items_center()
@@ -467,7 +475,7 @@ impl Render for Workspace {
                         .flex()
                         .flex_col()
                         .p_2()
-                        .bg(rgb(0x0c121b))
+                        .bg(rgb(crate::design::terminal_palette(cx).background))
                         .border_t_2()
                         .border_color(rgb(if Some(id) == active_id {
                             visual.accent
@@ -596,6 +604,7 @@ impl Render for Workspace {
             .child(
                 div()
                     .h(px(42.))
+                    .bg(rgb(visual.chrome))
                     .px_2()
                     .gap_1()
                     .flex_shrink_0()
@@ -713,18 +722,16 @@ impl Render for Workspace {
                             })).map(|button| self.retain_modal_button("configuration-recovery", button, cx)),
                     )
                     .child(
-                        div().id("appearance-selector").test_support().flex().gap_1()
-                            .children([
-                                (keelshell_core::Theme::System, "theme-system", t(cx, "跟随系统", "System")),
-                                (keelshell_core::Theme::Light, "theme-light", t(cx, "浅色", "Light")),
-                                (keelshell_core::Theme::Dark, "theme-dark", t(cx, "深色", "Dark")),
-                            ].into_iter().map(|(theme, id, label)| {
-                                Button::new(id).ghost().compact().label(label)
-                                    .selected(self.state.settings.theme == theme)
-                                    .disabled(self.saving || self.state_reloading || self.vault_settings.is_some() || self.snippet_modal_open())
-                                    .localized_tooltip("设置应用外观；跟随系统会自动响应系统变化", "Select appearance; System follows platform changes")
-                                    .on_click(cx.listener(move |view, _, window, cx| view.select_theme(theme, window, cx))).map(|button| self.retain_modal_button(id, button, cx))
-                            }))
+                        Button::new("theme-settings")
+                            .ghost()
+                            .compact()
+                            .icon(IconName::Settings)
+                            .label(t(cx, "主题", "Themes"))
+                            .accessibility_label(t(cx, "主题与外观", "Themes and appearance"))
+                            .disabled(self.saving || self.state_reloading)
+                            .localized_tooltip("选择霜白、曜石、雾紫及明暗模式", "Choose a theme family and appearance")
+                            .on_click(cx.listener(|view, _, window, cx| view.open_appearance(window, cx)))
+                            .map(|button| self.retain_modal_button("theme-settings", button, cx))
                     )
                     .child(
                         Button::new("language")

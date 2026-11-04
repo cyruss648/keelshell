@@ -238,7 +238,7 @@ impl FilesPanel {
                                 )
                                 .ghost()
                                 .compact()
-                                .rounded(px(6.))
+                                .rounded(px(crate::design::components(cx).control_radius))
                                 .label(if entry.is_directory {
                                     t(cx, "打开", "Open")
                                 } else {
@@ -445,7 +445,7 @@ impl Render for FilesPanel {
                                 .icon(IconName::FileDiff)
                                 .ghost()
                                 .compact()
-                                .rounded(px(6.))
+                                .rounded(px(crate::design::components(cx).control_radius))
                                 .label(if self.diff_preview.is_some() {
                                     t(cx, "隐藏差异", "Hide diff")
                                 } else {
@@ -462,7 +462,7 @@ impl Render for FilesPanel {
                                 .icon(IconName::Save)
                                 .primary()
                                 .compact()
-                                .rounded(px(6.))
+                                .rounded(px(crate::design::components(cx).control_radius))
                                 .label(t(cx, "审核并保存", "Review save"))
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.request_save(cx);
@@ -529,10 +529,11 @@ impl Render for FilesPanel {
                                     .child(IconName::FolderOpen),
                             )
                             .child(
-                                div()
-                                    .flex_1()
-                                    .min_w_0()
-                                    .child(Input::new(&self.path).small().rounded(px(6.))),
+                                div().flex_1().min_w_0().child(
+                                    Input::new(&self.path)
+                                        .small()
+                                        .rounded(px(crate::design::components(cx).control_radius)),
+                                ),
                             )
                             .child(
                                 Button::new("parent-files")
@@ -632,20 +633,20 @@ impl Render for FilesPanel {
         tools = tools.when(self.pending.is_none(), |panel| panel
             .child(div().id("file-mutation-tools").min_h(px(38.)).px_3().py_1().flex_shrink_0().flex().flex_wrap().items_center().gap_2().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border))
                 .child(div().w(px(150.)).flex_shrink_0().text_ellipsis().text_color(rgb(if has_selection {visual.text} else {visual.muted})).child(selection.to_owned()))
-                .child(div().id("file-name-draft").w(px(180.)).flex_shrink_0().child(Input::new(&self.name).small().rounded(px(6.))).test_support())
-                .child(Button::new("mkdir").flex_shrink_0().disabled(self.suspended).ghost().compact().rounded(px(6.)).icon(IconName::FolderPlus).label(t(cx,"新建目录","New folder")).on_click(cx.listener(|view,_,_,cx| {
+                .child(div().id("file-name-draft").w(px(180.)).flex_shrink_0().child(Input::new(&self.name).small().rounded(px(crate::design::components(cx).control_radius))).test_support())
+                .child(Button::new("mkdir").flex_shrink_0().disabled(self.suspended).ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::FolderPlus).label(t(cx,"新建目录","New folder")).on_click(cx.listener(|view,_,_,cx| {
                     if let Some(path) = view.new_remote_path(cx) { view.confirm(Message::new(format!("创建目录 {path}？"),format!("Create directory {path}?")),Operation::Mkdir(path),cx); } cx.notify();
                 })))
                 .child(div().h(px(16.)).w(px(1.)).bg(rgb(visual.border)))
-                .child(Button::new("rename").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Pencil).label(t(cx,"重命名","Rename")).disabled(self.suspended || !has_selection).on_click(cx.listener(|view,_,_,cx| {
+                .child(Button::new("rename").flex_shrink_0().ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::Pencil).label(t(cx,"重命名","Rename")).disabled(self.suspended || !has_selection).on_click(cx.listener(|view,_,_,cx| {
                     if let (Some(entry),Some(path)) = (view.selected.clone(),view.new_remote_path(cx)) { view.confirm(Message::new(format!("将 {} 重命名为 {path}？",entry.path),format!("Rename {} to {path}?",entry.path)),Operation::Rename(entry.path,path),cx); } cx.notify();
                 })))
-                .child(Button::new("delete-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Trash).label(t(cx,"删除","Delete")).disabled(self.suspended || !has_selection).text_color(rgb(if self.suspended { visual.muted } else { visual.danger })).on_click(cx.listener(|view,_,_,cx| {
+                .child(Button::new("delete-file").flex_shrink_0().ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::Trash).label(t(cx,"删除","Delete")).disabled(self.suspended || !has_selection).text_color(rgb(if self.suspended { visual.muted } else { visual.danger })).on_click(cx.listener(|view,_,_,cx| {
                     if let Some(entry) = view.selected.clone() { view.confirm(Message::new(format!("永久删除 {}？",entry.path),format!("Delete {} permanently?",entry.path)),Operation::Delete(entry),cx); }
                 })))
                 .child(div().h(px(16.)).w(px(1.)).bg(rgb(visual.border)))
-                .child(div().id("file-mode-draft").w(px(118.)).flex_shrink_0().child(Input::new(&self.mode).small().rounded(px(6.))).test_support())
-                .child(Button::new("chmod-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Lock).label(t(cx,"改权限","Permissions")).disabled(self.suspended || self.busy || !has_selection).on_click(cx.listener(|view,_,_,cx| {
+                .child(div().id("file-mode-draft").w(px(118.)).flex_shrink_0().child(Input::new(&self.mode).small().rounded(px(crate::design::components(cx).control_radius))).test_support())
+                .child(Button::new("chmod-file").flex_shrink_0().ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::Lock).label(t(cx,"改权限","Permissions")).disabled(self.suspended || self.busy || !has_selection).on_click(cx.listener(|view,_,_,cx| {
                     let Some(entry) = view.selected.clone() else { return; };
                     if entry.is_symlink {
                         view.status = Message::new("为避免跟随链接误改目标，符号链接不支持修改权限", "Permission changes on symbolic links are disabled to avoid following a link");
@@ -667,7 +668,7 @@ impl Render for FilesPanel {
                         view.status = if view.resume_mode { Message::new("续传上传：选择远端已有部分文件/目录；续传下载：填写已有本地目标。先校验，再确认追加。", "Resume upload: select the existing remote file/folder. Resume download: enter the existing local destination. Verify first, then confirm append.") } else { Message::new("普通上传可替换同名文件；普通下载仅新建本地目标。", "Normal uploads may replace files; normal downloads create new local destinations only.") };
                         cx.notify();
                     })))
-                .child(div().flex_1().min_w(px(150.)).child(Input::new(&self.local).small().rounded(px(6.))))
+                .child(div().flex_1().min_w(px(150.)).child(Input::new(&self.local).small().rounded(px(crate::design::components(cx).control_radius))))
                 .child(Button::new("use-local-selection").ghost().compact().label(t(cx,"使用本地所选","Use local selection"))
                     .disabled(self.suspended || self.local_browser.selected_entry().is_none_or(|entry| !matches!(entry.kind, local_catalog::LocalEntryKind::Directory | local_catalog::LocalEntryKind::File) || entry.path.to_str().is_none()))
                     .on_click(cx.listener(|view,_,window,cx| view.use_local_selection(window,cx))))
@@ -677,7 +678,7 @@ impl Render for FilesPanel {
                 .child(Button::new("download-into-local-folder").ghost().compact().label(t(cx,"选作下载目录","Use as download folder"))
                     .disabled(self.suspended || self.selected.is_none() || self.local_browser.listing.as_ref().is_none_or(|listing| listing.directory.to_str().is_none()))
                     .on_click(cx.listener(|view,_,window,cx| view.prepare_local_destination(window,cx))))
-                .child(Button::new("upload-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("upload-file").flex_shrink_0().ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::Upload).label(if self.resume_mode {t(cx,"续传文件","Resume file")} else {t(cx,"上传文件","Upload file")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().to_string());
                     if view.resume_mode {
                         if let Some(entry) = &view.selected && !entry.is_directory && !entry.is_symlink {
@@ -690,7 +691,7 @@ impl Render for FilesPanel {
                         view.confirm(Message::new(format!("通过传输队列将 {} 上传到 {remote}？同名远端文件可能被替换，取消时可能保留部分文件。", local.display()),format!("Upload {} to {remote} through the transfer queue? An existing remote file may be replaced, and cancellation may leave a partial file.", local.display())),Operation::Upload(local,remote),cx);
                     } else { view.status=Message::new("请输入有效的本地文件路径", "Enter a valid local file path");cx.notify(); }
                 })))
-                .child(Button::new("upload-directory").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("upload-directory").flex_shrink_0().ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::Folder).label(if self.resume_mode {t(cx,"续传目录","Resume folder")} else {t(cx,"上传目录","Upload folder")}).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().to_string());
                     if view.resume_mode {
                         if let Some(entry) = &view.selected && entry.is_directory && !entry.is_symlink {
@@ -703,7 +704,7 @@ impl Render for FilesPanel {
                         view.run(Operation::PlanDirectory(TransferSpec::upload(local, remote)), window, cx);
                     } else { view.status=Message::new("请输入本地目录的绝对路径", "Enter the absolute local directory path");cx.notify(); }
                 })))
-                .child(Button::new("download-file").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::Download).label(if self.resume_mode {t(cx,"续传选中项","Resume selected")} else {t(cx,"下载选中项","Download selected")}).disabled(self.suspended || !downloadable || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("download-file").flex_shrink_0().ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::Download).label(if self.resume_mode {t(cx,"续传选中项","Resume selected")} else {t(cx,"下载选中项","Download selected")}).disabled(self.suspended || !downloadable || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     if let Some(entry) = &view.selected && !entry.is_symlink {
                         let local = PathBuf::from(view.local.read(cx).value().to_string());
                         if view.resume_mode {
@@ -717,7 +718,7 @@ impl Render for FilesPanel {
                         view.confirm(Message::new(format!("将 {} 下载到 {}？不覆盖已有文件；中断时可能保留未完成的下载。",entry.path,local.display()),format!("Download {} to {}? Existing files are preserved; an interruption may leave a partial download.",entry.path,local.display())),Operation::Download(entry.path.clone(),local),cx);
                     }
                 })))
-                .child(Button::new("compare-directories").flex_shrink_0().ghost().compact().rounded(px(6.)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
+                .child(Button::new("compare-directories").flex_shrink_0().ghost().compact().rounded(px(crate::design::components(cx).control_radius)).icon(IconName::FileDiff).label(t(cx, "比较目录", "Compare folders")).disabled(self.suspended || self.operation_id.is_some()).on_click(cx.listener(|view,_,window,cx| {
                     let local = PathBuf::from(view.local.read(cx).value().trim());
                     // The path input is a navigation draft. Use the last
                     // successfully loaded canonical directory so a typed but
@@ -989,7 +990,7 @@ impl Render for FilesPanel {
                 Button::new("expand-file-review")
                     .ghost()
                     .compact()
-                    .rounded(px(6.))
+                    .rounded(px(crate::design::components(cx).control_radius))
                     .label(t(cx, "展开审核", "Expand review"))
                     .on_click(
                         cx.listener(|view, _, window, cx| view.expand_confirmation(window, cx)),
@@ -1040,7 +1041,7 @@ impl Render for FilesPanel {
                             Button::new("cancel-active-file-operation")
                                 .ghost()
                                 .compact()
-                                .rounded(px(6.))
+                                .rounded(px(crate::design::components(cx).control_radius))
                                 .label(t(cx, "取消操作", "Cancel operation"))
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.cancel_active(cx);

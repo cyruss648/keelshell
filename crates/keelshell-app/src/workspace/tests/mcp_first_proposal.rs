@@ -104,7 +104,7 @@ async fn first_short_proposal_with_selection_and_directory_has_reachable_review(
                                 cx,
                             );
                             window.dispatch_event(
-                                gpui_kit::ScrollWheelEvent {
+                                gpui_kit::ScrollEvent {
                                     position,
                                     delta: reset,
                                     ..Default::default()
@@ -116,7 +116,7 @@ async fn first_short_proposal_with_selection_and_directory_has_reachable_review(
                             let before = window.find(format!("mcp-execute-{action}")).bounds();
                             for _ in 0..8 {
                                 window.dispatch_event(
-                                    gpui_kit::ScrollWheelEvent {
+                                    gpui_kit::ScrollEvent {
                                         position,
                                         delta: down,
                                         ..Default::default()

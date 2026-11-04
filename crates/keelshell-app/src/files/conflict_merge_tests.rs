@@ -403,7 +403,7 @@ async fn complete_merge_versions_keep_literal_rows_and_two_axis_scroll_without_w
                 for delta in [point(px(0.),px(-10000.)),point(px(-10000.),px(0.))] {
                     window.dispatch_event(gpui_kit::MouseMoveEvent {position,..Default::default()}.to_platform_input(),cx);
                     window.dispatch_event(
-                        gpui_kit::ScrollWheelEvent {
+                        gpui_kit::ScrollEvent {
                             position,
                             delta: gpui_kit::ScrollDelta::Pixels(delta),
                             touch_phase:gpui_kit::TouchPhase::Started,

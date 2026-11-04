@@ -26,7 +26,7 @@ fn reveal_device(window: &mut Window, index: usize, cx: &mut App) {
             -1.
         };
         window.dispatch_event(
-            gpui_kit::ScrollWheelEvent {
+            gpui_kit::ScrollEvent {
                 position: point(viewport.origin.x + px(2.), viewport.center().y),
                 delta: ScrollDelta::Lines(point(0., direction)),
                 ..Default::default()
@@ -119,19 +119,23 @@ pub(crate) async fn exercise(
         ] {
             cx.update_window(fixture.window, |_, window, cx| {
                 window.render_frame(cx);
+                window.click("theme-settings", cx);
+                window.render_frame(cx);
                 window.click(id, cx);
             })
-            .checked("switch appearance with actual production toolbar button");
+            .checked("switch appearance through the production theme preferences");
             cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
                 !fixture.workspace.read(cx).saving
             })
             .await;
             cx.update_window(fixture.window, |_, window, cx| {
                 window.render_frame(cx);
+                window.click("theme-done", cx);
+                window.render_frame(cx);
                 let scene = format!("{language:?}/{theme:?}/900x580/manager-closed");
                 let terminal = window.find(("terminal-pane", panes[0].terminal.entity_id())).bounds();
                 assert!(terminal.size.width >= px(200.) && terminal.size.height >= px(80.), "{scene}: terminal {terminal:?}");
-                for id in ["new-session", "theme-dark", "theme-light", "theme-system", "language", "refresh-monitor", "pause-monitor", "command-input-container"] {
+                for id in ["new-session", "theme-settings", "language", "refresh-monitor", "pause-monitor", "command-input-container"] {
                     let control = window.find(id);
                     assert!(control.visible() && contained(control.bounds(), window.bounds()), "{scene}: {id} {:?}", control.bounds());
                 }
@@ -142,7 +146,7 @@ pub(crate) async fn exercise(
                     let metrics = window.find("monitor-disk-metrics").bounds();
                     if contained(metrics, viewport) { break; }
                     let direction = if metrics.origin.y < viewport.origin.y { 1. } else { -1. };
-                    window.dispatch_event(gpui_kit::ScrollWheelEvent {
+                    window.dispatch_event(gpui_kit::ScrollEvent {
                         position: point(viewport.origin.x + px(2.), viewport.center().y),
                         delta: ScrollDelta::Lines(point(0., direction)),
                         ..Default::default()

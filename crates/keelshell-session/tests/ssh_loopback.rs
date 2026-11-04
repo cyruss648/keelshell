@@ -117,7 +117,7 @@ impl server::Handler for Fixture {
     async fn auth_publickey(
         &mut self,
         user: &str,
-        _: &russh::keys::ssh_key::PublicKey,
+        _: server::VerifiedPublicKey<'_>,
     ) -> Result<server::Auth, Self::Error> {
         Ok(if user == "fixture" {
             server::Auth::Accept

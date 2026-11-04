@@ -8,7 +8,7 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-gpui-kit = { version = "0.7", features = [
+gpui-kit = { version = "0.9", features = [
     "tree-sitter",
     "tree-sitter-bash",
     "tree-sitter-python",
@@ -17,32 +17,32 @@ gpui-kit = { version = "0.7", features = [
     "tree-sitter-yaml",
 ] }
 # Embed the Kit catalog in development packages as well as release binaries.
-rust-embed = { version = "8.12", features = ["debug-embed"] }
+rust-embed = { version = "8.13", features = ["debug-embed"] }
 image = { version = "0.25", default-features = false, features = ["png"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "2.0"
 anyhow = "1.0"
 argon2 = { version = "0.6", features = ["zeroize"] }
-base64 = "0.22"
+base64 = "0.23"
 chacha20poly1305 = { version = "0.11", features = ["zeroize"] }
-rand = "0.9"
-uuid = { version = "1.26", features = ["v4", "serde"] }
+rand = "0.10"
+uuid = { version = "1.29", features = ["v4", "serde"] }
 directories = "6.0"
 tempfile = "3.27"
 chrono = "0.4"
 alacritty_terminal = "0.26"
-tokio = { version = "1.53", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util", "fs"] }
+tokio = { version = "1.54", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util", "fs"] }
 reqwest = { version = "0.13", default-features = false, features = ["json", "rustls", "blocking", "socks"] }
-russh = "0.63"
+russh = "0.65"
 russh-sftp = "3.0"
 url = "2.5"
 zeroize = "1.9"
 sha2 = "0.11"
 flate2 = "1.1"
 tar = { version = "0.4", default-features = false }
-zip = { version = "8.0", default-features = false, features = ["deflate-flate2"] }
-rmcp = { version = "3.5", default-features = false, features = ["server", "transport-io"] }
+zip = { version = "9.3", default-features = false, features = ["deflate-flate2"] }
+rmcp = { version = "3.8", default-features = false, features = ["server", "transport-io"] }
 tokio-util = { version = "0.7", features = ["rt"] }
 
 [workspace.lints.rust]

@@ -306,7 +306,7 @@ fn independent_large_literal_review_uses_reversible_coordinate_wheels(cx: &mut T
                     cx,
                 );
                 window.dispatch_event(
-                    gpui_kit::ScrollWheelEvent {
+                    gpui_kit::ScrollEvent {
                         position,
                         delta: gpui_kit::ScrollDelta::Pixels(delta),
                         ..Default::default()

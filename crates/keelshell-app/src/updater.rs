@@ -1525,14 +1525,14 @@ fn extract_zip(archive: &Path, destination: &Path) -> Result<(), UpdateError> {
     let mut total = 0_u64;
     for index in 0..archive.len() {
         let mut entry = archive.by_index(index).map_err(|_| UpdateError::Invalid)?;
-        let raw_name = entry.name();
+        let raw_name = entry.name().map_err(|_| UpdateError::Invalid)?;
         // ZIP writers commonly add a trailing slash to directory members;
         // normalize only that directory marker while still rejecting empty
         // path components inside a member name.
         let name = if entry.is_dir() {
             raw_name.trim_end_matches('/')
         } else {
-            raw_name
+            raw_name.as_ref()
         };
         let Some(relative) = safe_relative(name) else {
             return Err(UpdateError::Invalid);

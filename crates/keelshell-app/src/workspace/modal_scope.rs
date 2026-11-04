@@ -28,6 +28,7 @@ pub(super) enum ModalKind {
     KeyboardInteractive,
     HostApproval,
     Login,
+    Appearance,
     Updates,
     Vault,
     ProfileSync,
@@ -56,6 +57,7 @@ impl ModalKind {
                 t(cx, "SSH 连接与认证", "SSH connection and authentication")
             }
             Self::Updates => t(cx, "关于与更新", "About and updates"),
+            Self::Appearance => t(cx, "主题与外观", "Themes and appearance"),
             Self::ProfileSync => t(cx, "加密连接同步", "Encrypted profile sync"),
             Self::ConfigurationRecovery => {
                 t(cx, "配置备份与恢复", "Configuration backup and recovery")
@@ -237,6 +239,7 @@ impl Workspace {
             ),
             (self.login.is_some(), ModalKind::Login),
             (self.host_approval.is_some(), ModalKind::HostApproval),
+            (self.show_appearance, ModalKind::Appearance),
             (self.update_panel.is_some(), ModalKind::Updates),
             (self.vault_settings.is_some(), ModalKind::Vault),
             (self.profile_sync.is_some(), ModalKind::ProfileSync),
@@ -389,6 +392,7 @@ impl Workspace {
                 self.cancel_connect_route(window, cx)
             }
             ModalKind::Login => self.cancel_login(window, cx),
+            ModalKind::Appearance if !self.saving => self.show_appearance = false,
             ModalKind::Updates => {
                 self.update_panel = None;
             }
@@ -445,6 +449,7 @@ impl Workspace {
             ModalKind::Updates => {
                 self.panel_modal(self.update_panel.clone(), px(760.), px(600.), cx)
             }
+            ModalKind::Appearance => self.appearance_modal(cx),
             ModalKind::ProfileSync => {
                 self.panel_modal(self.profile_sync.clone(), px(1000.), px(680.), cx)
             }
@@ -621,6 +626,19 @@ impl Workspace {
                     .child(kind.title(cx)),
             )
             .child(themes)
+            .when(kind == ModalKind::Manager, |bar| {
+                bar.child(
+                    Button::new("modal-theme-settings")
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "主题", "Themes"))
+                        .disabled(disabled)
+                        .on_click(
+                            cx.listener(|view, _, window, cx| view.open_appearance(window, cx)),
+                        )
+                        .map(|button| self.retain_modal_button("modal-theme-settings", button, cx)),
+                )
+            })
             .child(
                 Button::new("modal-language")
                     .ghost()

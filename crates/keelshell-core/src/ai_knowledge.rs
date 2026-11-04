@@ -537,6 +537,40 @@ impl SavedKnowledgeEntry {
         Self::new(id, document.entries()[0].clone(), session_id, capture_type)
     }
 
+    /// Return a reviewed copy with a new title and summary.
+    ///
+    /// Only content changes: the saved ID, complete source binding, session,
+    /// capture type, occurrence timestamp and known outcome are preserved
+    /// exactly. The title is trimmed and summary whitespace is normalized using
+    /// the same bounded text rules as the original knowledge capture. This does
+    /// not modify the original entry or persist the returned copy.
+    ///
+    /// # Errors
+    /// Returns [`KnowledgeError::EmptyText`] for empty or unsupported control
+    /// data, [`KnowledgeError::TextTooLarge`] for a field exceeding
+    /// [`MAX_KNOWLEDGE_TEXT_BYTES`], or [`KnowledgeError::SensitiveGeneratedContent`]
+    /// for a sensitive marker in the input or normalized content.
+    pub fn with_reviewed_content(
+        &self,
+        title: &str,
+        summary: &str,
+    ) -> Result<Self, KnowledgeError> {
+        let reviewed_title = checked_single_line(title, MAX_KNOWLEDGE_TEXT_BYTES)?;
+        checked_text(summary, MAX_KNOWLEDGE_TEXT_BYTES)?;
+        let reviewed_summary = normalize_text(summary);
+        // Whitespace normalization can join a marker that was separated in the input.
+        if contains_sensitive_marker(title)
+            || contains_sensitive_marker(summary)
+            || contains_sensitive_marker(&reviewed_summary)
+        {
+            return Err(KnowledgeError::SensitiveGeneratedContent);
+        }
+        let mut reviewed = self.clone();
+        reviewed.entry.title = reviewed_title;
+        reviewed.entry.summary = reviewed_summary;
+        Ok(reviewed)
+    }
+
     fn new(
         id: Uuid,
         entry: KnowledgeEntry,
@@ -1194,7 +1228,13 @@ fn normalize_text(value: &str) -> String {
 }
 
 fn contains_sensitive_marker(value: &str) -> bool {
-    let folded = value.to_ascii_lowercase();
+    // Titles, source labels and normalized summaries must share the same
+    // whitespace-insensitive marker gate at every ingress boundary.
+    let folded = value
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_ascii_lowercase();
     [
         "authorization",
         "bearer ",

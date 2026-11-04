@@ -13,16 +13,21 @@ use gpui_kit::component::{Disableable, Selectable, Sizable};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use keelshell_core::{
-    AppState, TunnelRule, TunnelRuleAction, TunnelRuleKind, ValidatedTunnelRulePlan,
+    AppState, TunnelRule, TunnelRuleAction, TunnelRuleKind, TunnelRuleReviewToken,
+    ValidatedTunnelRulePlan,
 };
-use keelshell_session::SshSession;
 use keelshell_session::forwarding::{
     DynamicForward, LocalForward, RemoteForward, TrafficSnapshot, TrafficStats,
 };
+use keelshell_session::{ConnectionState, SshSession};
 use tokio::runtime::Runtime;
 
 use crate::i18n::{LocalizedTooltipExt, Message, t};
 use crate::terminal::spawn_transport_worker;
+
+mod rules;
+pub(crate) use rules::TunnelRuleEvent;
+use rules::{RuleChangeReview, RuleEditor, RuleStopReview};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum Direction {
@@ -80,7 +85,33 @@ enum TunnelEvent {
         address: String,
         traffic: TrafficStats,
     },
+    CleanupUnconfirmed(UnresolvedCleanup),
     Finished(Result<(), String>),
+}
+
+struct UnresolvedCleanup {
+    // This observes only the original transport. Unlike SshSession, retaining
+    // the receiver cannot keep that transport alive after its last owner drops.
+    connection_state: tokio::sync::watch::Receiver<ConnectionState>,
+    error: String,
+}
+
+impl TunnelEvent {
+    fn completion(
+        result: Result<(), String>,
+        session: &SshSession,
+        cleanup_verified: bool,
+    ) -> Self {
+        match result {
+            Err(error) if !cleanup_verified && !session.is_closed() => {
+                Self::CleanupUnconfirmed(UnresolvedCleanup {
+                    connection_state: session.subscribe_state(),
+                    error,
+                })
+            }
+            result => Self::Finished(result),
+        }
+    }
 }
 
 struct TunnelRow {
@@ -93,6 +124,7 @@ struct TunnelRow {
     finished: bool,
     listening: bool,
     failed: bool,
+    unresolved_cleanup: Option<UnresolvedCleanup>,
     proxy_address: Option<String>,
     traffic: TrafficStats,
     last_traffic: TrafficSnapshot,
@@ -106,6 +138,7 @@ impl Drop for TunnelRow {
 
 pub struct TunnelsPanel {
     session: Option<SshSession>,
+    runtime_owner: uuid::Uuid,
     suspended: bool,
     host: String,
     runtime: Arc<Runtime>,
@@ -114,6 +147,13 @@ pub struct TunnelsPanel {
     selected_rule: Option<uuid::Uuid>,
     rule_plan: Option<ValidatedTunnelRulePlan>,
     rule_status: Message,
+    rule_epoch: uuid::Uuid,
+    rule_editor: Option<RuleEditor>,
+    rule_change_review: Option<RuleChangeReview>,
+    rule_stop_review: Option<RuleStopReview>,
+    rule_mutation: Option<TunnelRuleEvent>,
+    rule_store_blocked: bool,
+    rule_configuration_busy: bool,
     direction: Direction,
     bind_host: Entity<InputState>,
     bind_port: Entity<InputState>,
@@ -158,6 +198,7 @@ impl TunnelsPanel {
         });
         let mut panel = Self {
             session: Some(session),
+            runtime_owner: uuid::Uuid::new_v4(),
             suspended: false,
             host,
             runtime,
@@ -169,6 +210,13 @@ impl TunnelsPanel {
                 "没有可用于此连接的命名隧道规则；也可以使用下方临时端点。",
                 "No named tunnel rules are available for this connection; use the temporary endpoints below.",
             ),
+            rule_editor: None,
+            rule_epoch: uuid::Uuid::new_v4(),
+            rule_change_review: None,
+            rule_stop_review: None,
+            rule_mutation: None,
+            rule_store_blocked: false,
+            rule_configuration_busy: false,
             direction: Direction::Local,
             bind_host: field("127.0.0.1", window, cx),
             bind_port: field("0", window, cx),
@@ -198,18 +246,56 @@ impl TunnelsPanel {
         connection_id: Option<uuid::Uuid>,
         cx: &mut Context<Self>,
     ) {
+        self.replace_rule_state(state, connection_id, false, cx);
+    }
+
+    /// Accept an authoritative StateStore read, including an unchanged snapshot.
+    ///
+    /// Ordinary refreshes cannot resolve an uncertain write. A successful read
+    /// also retires reviews made before the reload even if no bytes changed.
+    pub(crate) fn reload_rule_state(
+        &mut self,
+        state: AppState,
+        connection_id: Option<uuid::Uuid>,
+        cx: &mut Context<Self>,
+    ) {
+        self.replace_rule_state(Some(state), connection_id, true, cx);
+    }
+
+    fn replace_rule_state(
+        &mut self,
+        state: Option<AppState>,
+        connection_id: Option<uuid::Uuid>,
+        authoritative: bool,
+        cx: &mut Context<Self>,
+    ) {
         let changed = self.connection_id != connection_id
             || self.rule_state.as_ref().map(|current| current.snapshot)
                 != state.as_ref().map(|current| current.snapshot)
             || self.rule_state.as_ref() != state.as_ref();
-        if !changed {
+        if !changed && !authoritative {
             return;
         }
         self.rule_state = state;
         self.connection_id = connection_id;
+        self.rule_epoch = uuid::Uuid::new_v4();
         self.selected_rule = None;
         self.rule_plan = None;
-        self.rule_status = self.rule_availability_message();
+        self.rule_stop_review = None;
+        self.clear_change_review(cx);
+        if authoritative {
+            self.rule_store_blocked = false;
+        }
+        // A draft retains its original snapshot. Refresh must never silently
+        // rebase edited text onto a different rule or connection.
+        if self.rule_editor.is_some() {
+            self.rule_status = Message::new(
+                "配置已变化，草稿已保留但审核已失效；请取消草稿，再基于最新规则重新编辑。",
+                "Configuration changed; the draft is retained but its review expired. Cancel it and edit the latest rule.",
+            );
+        } else {
+            self.rule_status = self.rule_availability_message();
+        }
         cx.notify();
     }
 
@@ -237,8 +323,8 @@ impl TunnelsPanel {
         }
         if self.matching_rules().is_empty() {
             Message::new(
-                "此连接没有已保存的命名隧道规则；可使用下方临时端点。",
-                "This connection has no saved named tunnel rules; use the temporary endpoints below.",
+                "此连接还没有命名规则。选择“新建”添加规则。",
+                "This connection has no named rules yet. Choose New to add one.",
             )
         } else {
             Message::new(
@@ -248,9 +334,16 @@ impl TunnelsPanel {
         }
     }
 
-    fn select_named_rule(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
+    fn select_named_rule(&mut self, id: uuid::Uuid, epoch: uuid::Uuid, cx: &mut Context<Self>) {
+        if !self.accept_rule_action(epoch) || self.rule_editor.is_some() || self.rule_store_blocked
+        {
+            return;
+        }
         self.selected_rule = Some(id);
+        self.rule_epoch = uuid::Uuid::new_v4();
         self.rule_plan = None;
+        self.clear_change_review(cx);
+        self.rule_stop_review = None;
         let Some(state) = self.rule_state.as_ref() else {
             self.rule_status = self.rule_availability_message();
             cx.notify();
@@ -286,7 +379,19 @@ impl TunnelsPanel {
         cx.notify();
     }
 
-    fn start_named_rule(&mut self, cx: &mut Context<Self>) {
+    fn start_named_rule(&mut self, token: TunnelRuleReviewToken, cx: &mut Context<Self>) {
+        if self.suspended
+            || self.rule_configuration_busy
+            || self.rule_store_blocked
+            || self.rule_mutation.is_some()
+            || self.rule_editor.is_some()
+            || !self
+                .rule_plan
+                .as_ref()
+                .is_some_and(|plan| plan.review_token() == token)
+        {
+            return;
+        }
         if self.rows.iter().filter(|row| !row.finished).count() >= 32 {
             self.rule_status = Message::new(
                 "最多同时运行 32 条隧道，请先停止现有隧道。",
@@ -311,7 +416,6 @@ impl TunnelsPanel {
             cx.notify();
             return;
         };
-        let token = plan.review_token();
         let confirmed = match plan.confirm(&state, token) {
             Ok(receipt) => receipt,
             Err(error) => {
@@ -323,6 +427,9 @@ impl TunnelsPanel {
             }
         };
         let rule = confirmed.plan().rule().clone();
+        if self.connection_id != Some(rule.connection_id) {
+            return;
+        }
         let specification = match specification_from_rule(&rule) {
             Ok(specification) => specification,
             Err(error) => {
@@ -345,17 +452,30 @@ impl TunnelsPanel {
         }
         self.suspended = true;
         self.session = None;
+        self.rule_epoch = uuid::Uuid::new_v4();
+        self.rule_plan = None;
+        self.rule_stop_review = None;
+        self.clear_change_review(cx);
         for row in &mut self.rows {
             if !row.finished {
                 row.cancel.store(true, Ordering::Release);
-                row.status = Message::new(
-                    "正在停止，等待监听器清理…",
-                    "Stopping; waiting for listener cleanup…",
-                );
+                if row.unresolved_cleanup.is_none() {
+                    row.status = Message::new(
+                        "正在停止，等待监听器清理…",
+                        "Stopping; waiting for listener cleanup…",
+                    );
+                }
             }
         }
         self.status = tunnel_summary(&self.rows);
         cx.notify();
+    }
+
+    /// Retain this owner until cleanup is verified or its original transport closes.
+    pub(crate) fn retire_workers(&mut self, cx: &mut Context<Self>) -> bool {
+        self.suspend(cx);
+        self.poll(cx);
+        self.rows.iter().any(|row| !row.finished)
     }
 
     /// Translate hints in place without replacing input entities or active tunnels.
@@ -370,6 +490,9 @@ impl TunnelsPanel {
             input.update(cx, |input, cx| {
                 input.set_placeholder(placeholder, window, cx)
             });
+        }
+        if let Some(editor) = &mut self.rule_editor {
+            editor.refresh_locale(window, cx);
         }
         cx.notify();
     }
@@ -447,23 +570,23 @@ impl TunnelsPanel {
         );
         let description = if let Some(name) = rule_name {
             Message::new(
-                format!("规则 {name} · {endpoints}"),
-                format!("Rule {name} · {endpoints}"),
+                format!("规则 {name}\n{endpoints}"),
+                format!("Rule {name}\n{endpoints}"),
             )
         } else if spec.direction == Direction::Dynamic {
             Message::new(
-                "动态 SOCKS5 · 目标与域名由 SSH 主机连接",
-                "Dynamic SOCKS5 · destinations and DNS via SSH host",
+                "动态 SOCKS5\n目标与域名由 SSH 主机连接",
+                "Dynamic SOCKS5\ndestinations and DNS via SSH host",
             )
         } else if spec.direction == Direction::Local {
             Message::new(
-                format!("本地 → SSH 主机 · {endpoints}"),
-                format!("Local → SSH host · {endpoints}"),
+                format!("本地 → SSH 主机\n{endpoints}"),
+                format!("Local → SSH host\n{endpoints}"),
             )
         } else {
             Message::new(
-                format!("SSH 主机 → 本机 · {endpoints}"),
-                format!("SSH host → this device · {endpoints}"),
+                format!("SSH 主机 → 本机\n{endpoints}"),
+                format!("SSH host → this device\n{endpoints}"),
             )
         };
         let (events, incoming) = mpsc::sync_channel(4);
@@ -472,20 +595,26 @@ impl TunnelsPanel {
         let runtime = self.runtime.clone();
         let started = spawn_transport_worker("keelshell-tunnel", cancel.clone(), move || {
             runtime.block_on(async move {
+                let remote_requested = AtomicBool::new(false);
                 let started = tokio::select! {
-                    result = start_forward(&session, &spec) => result,
+                    result = start_forward(&session, &spec, &remote_requested) => result,
                     _ = cancellation(&worker_cancel) => {
-                        let result = Err(if spec.direction == Direction::Remote {
+                        let unconfirmed = remote_requested.load(Ordering::Acquire);
+                        let result = Err(if unconfirmed {
                             "Tunnel start cancelled before confirmation; remote allocation may require connection cleanup"
                         } else { "Tunnel start cancelled" }.to_owned());
-                        let _ = events.try_send(TunnelEvent::Finished(result.clone()));
+                        let _ = events.try_send(TunnelEvent::completion(
+                            result.clone(), &session, !unconfirmed,
+                        ));
                         return result;
                     },
                 };
                 let (owner, bound) = match started {
                     Ok(started) => started,
                     Err(error) => {
-                        let _ = events.try_send(TunnelEvent::Finished(Err(error.clone())));
+                        let _ = events.try_send(TunnelEvent::completion(
+                            Err(error.clone()), &session, !remote_requested.load(Ordering::Acquire),
+                        ));
                         return Err(error);
                     },
                 };
@@ -502,12 +631,16 @@ impl TunnelsPanel {
                         disconnected = connection_closed(&session, &owner) => disconnected,
                     }
                 } else { false };
-                // The guard lives until native cancellation acknowledgement;
-                // the registry joins this owner during application shutdown.
-                let result = owner.close().await.and_then(|()| if disconnected {
+                // Worker completion is not proof of cleanup. An unconfirmed
+                // result transfers only the original lifecycle observer to the row.
+                let cleanup = owner.close().await;
+                let cleanup_verified = cleanup.is_ok();
+                let result = cleanup.and_then(|()| if disconnected {
                     Err("SSH connection closed; tunnel listener has been released".to_owned())
                 } else { Ok(()) });
-                let _ = events.try_send(TunnelEvent::Finished(result.clone()));
+                let _ = events.try_send(TunnelEvent::completion(
+                    result.clone(), &session, cleanup_verified,
+                ));
                 result
             })
         });
@@ -523,6 +656,7 @@ impl TunnelsPanel {
                     finished: false,
                     listening: false,
                     failed: false,
+                    unresolved_cleanup: None,
                     proxy_address: None,
                     traffic: TrafficStats::default(),
                     last_traffic: TrafficSnapshot::default(),
@@ -565,9 +699,22 @@ impl TunnelsPanel {
                             )
                         }
                     }
+                    TunnelEvent::CleanupUnconfirmed(cleanup) => {
+                        row.finished = false;
+                        row.listening = false;
+                        row.failed = true;
+                        row.cancel.store(true, Ordering::Release);
+                        row.status = Message::detail(
+                            "清理未确认；原 SSH 连接关闭前仍保留规则占用",
+                            "Cleanup unconfirmed; rule ownership remains until the original SSH connection closes",
+                            &cleanup.error,
+                        );
+                        row.unresolved_cleanup = Some(cleanup);
+                    }
                     TunnelEvent::Finished(result) => {
                         row.finished = true;
                         row.failed = result.is_err();
+                        row.unresolved_cleanup = None;
                         row.status = match result {
                             Ok(()) => Message::new(
                                 "已停止；监听器和所属连接流已关闭",
@@ -577,6 +724,23 @@ impl TunnelsPanel {
                         };
                     }
                 }
+            }
+            // Neither a cancellation request (Closing) nor a replacement
+            // connection proves that this original listener has been released.
+            if row.unresolved_cleanup.as_ref().is_some_and(|cleanup| {
+                matches!(
+                    *cleanup.connection_state.borrow(),
+                    ConnectionState::Closed(_)
+                )
+            }) && let Some(cleanup) = row.unresolved_cleanup.take()
+            {
+                row.finished = true;
+                row.status = Message::detail(
+                    "原 SSH 连接已关闭，规则占用已解除；此前清理失败",
+                    "Original SSH connection closed; rule ownership released after cleanup failure",
+                    cleanup.error,
+                );
+                changed = true;
             }
             let snapshot = row.traffic.snapshot();
             if snapshot != row.last_traffic {
@@ -592,9 +756,12 @@ impl TunnelsPanel {
 }
 
 fn tunnel_summary(rows: &[TunnelRow]) -> Message {
-    let (mut listening, mut starting, mut stopping, mut stopped, mut failed) = (0, 0, 0, 0, 0);
+    let (mut listening, mut starting, mut stopping, mut stopped, mut failed, mut unconfirmed) =
+        (0, 0, 0, 0, 0, 0);
     for row in rows {
-        if row.finished {
+        if row.unresolved_cleanup.is_some() {
+            unconfirmed += 1;
+        } else if row.finished {
             if row.failed {
                 failed += 1;
             } else {
@@ -608,7 +775,7 @@ fn tunnel_summary(rows: &[TunnelRow]) -> Message {
             starting += 1;
         }
     }
-    if listening + starting + stopping == 0 {
+    if listening + starting + stopping + unconfirmed == 0 {
         return if failed == 0 {
             Message::new(
                 format!("全部 {stopped} 条隧道已停止；监听器和所属连接流已关闭"),
@@ -629,6 +796,7 @@ fn tunnel_summary(rows: &[TunnelRow]) -> Message {
         (listening, "正在监听", "Active listeners"),
         (starting, "正在启动", "Starting"),
         (stopping, "正在停止", "Stopping"),
+        (unconfirmed, "清理未确认", "Cleanup unconfirmed"),
         (failed, "失败", "Failed"),
     ] {
         if count > 0 {
@@ -636,7 +804,7 @@ fn tunnel_summary(rows: &[TunnelRow]) -> Message {
             en.push(format!("{en_label}: {count}"));
         }
     }
-    Message::new(zh.join(" · "), en.join(" · "))
+    Message::new(zh.join("，"), en.join(", "))
 }
 
 fn rule_preview_message(rule: &TunnelRule) -> Message {
@@ -652,8 +820,8 @@ fn rule_preview_message(rule: &TunnelRule) -> Message {
         _ => format!("{}:{}", rule.bind_host, rule.bind_port),
     };
     Message::new(
-        format!("规则“{}” · {} · 预览：{endpoint}", rule.name, kind.0),
-        format!("Rule “{}” · {} · Preview: {endpoint}", rule.name, kind.1),
+        format!("规则“{}”\n{}\n预览：{endpoint}", rule.name, kind.0),
+        format!("Rule “{}”\n{}\nPreview: {endpoint}", rule.name, kind.1),
     )
 }
 
@@ -723,12 +891,12 @@ fn tunnel_error(error: &str) -> Message {
 fn traffic_message(snapshot: TrafficSnapshot) -> Message {
     Message::new(
         format!(
-            "↑ 发送 {} · ↓ 接收 {}",
+            "↑ 发送 {}\n↓ 接收 {}",
             byte_size(snapshot.sent),
             byte_size(snapshot.received)
         ),
         format!(
-            "↑ Sent {} · ↓ Received {}",
+            "↑ Sent {}\n↓ Received {}",
             byte_size(snapshot.sent),
             byte_size(snapshot.received)
         ),
@@ -753,26 +921,126 @@ fn byte_size(bytes: u64) -> String {
 impl Render for TunnelsPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
+        // The workspace tool area is bounded. A draft/review takes that area
+        // temporarily and scrolls independently instead of pushing actions offscreen.
+        if let Some(content) = self
+            .rule_review_view(cx)
+            .or_else(|| self.rule_editor_view(cx))
+        {
+            return div()
+                .id("tunnels-panel")
+                .test_support()
+                .size_full()
+                .flex()
+                .flex_col()
+                .overflow_hidden()
+                .text_sm()
+                .bg(rgb(visual.surface))
+                .text_color(rgb(visual.text))
+                .child(
+                    div()
+                        .id("tunnel-management-scroll")
+                        .test_support()
+                        .flex_1()
+                        .min_h_0()
+                        .overflow_y_scroll()
+                        .child(content.body),
+                )
+                .child(
+                    div()
+                        .id("tunnel-review-footer")
+                        .test_support()
+                        .min_h(px(48.))
+                        .px_3()
+                        .py_2()
+                        .flex_shrink_0()
+                        .border_t_1()
+                        .border_color(rgb(visual.border))
+                        .bg(rgb(visual.canvas))
+                        .flex()
+                        .items_center()
+                        .justify_end()
+                        .child(content.footer),
+                )
+                .child(
+                    div()
+                        .px_3()
+                        .py_1()
+                        .flex_shrink_0()
+                        .text_color(rgb(visual.muted))
+                        .child(self.rule_feedback().render(cx)),
+                )
+                .into_any_element();
+        }
         let matching_rules = self.matching_rules();
         let selected_rule = self.selected_rule;
+        let epoch = self.rule_epoch;
         let mut named_rules = div().flex().flex_wrap().gap_1();
         for rule in matching_rules {
             let rule_id = rule.id;
             let label = if rule.enabled {
                 rule.name.clone()
             } else {
-                format!("{} · {}", rule.name, t(cx, "未启用", "Disabled"))
+                format!("{} ({})", rule.name, t(cx, "未启用", "Disabled"))
             };
+            let active = self
+                .rows
+                .iter()
+                .any(|row| !row.finished && row.rule_id == Some(rule_id));
             named_rules = named_rules.child(
-                Button::new(format!("named-tunnel-rule-{rule_id}"))
-                    .ghost()
-                    .compact()
-                    .rounded(px(6.))
-                    .selected(selected_rule == Some(rule_id))
-                    .disabled(self.suspended)
-                    .label(label)
-                    .on_click(
-                        cx.listener(move |view, _, _, cx| view.select_named_rule(rule_id, cx)),
+                div()
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .child(
+                        Button::new(format!("named-tunnel-rule-{rule_id}"))
+                            .ghost()
+                            .compact()
+                            .rounded(px(6.))
+                            .selected(selected_rule == Some(rule_id))
+                            .disabled(
+                                self.suspended
+                                    || self.rule_mutation.is_some()
+                                    || self.rule_configuration_busy
+                                    || self.rule_store_blocked,
+                            )
+                            .label(label)
+                            .on_click(cx.listener(move |view, _, _, cx| {
+                                view.select_named_rule(rule_id, epoch, cx)
+                            })),
+                    )
+                    .child(
+                        Button::new(format!("edit-tunnel-rule-{rule_id}"))
+                            .ghost()
+                            .compact()
+                            .icon(IconName::Pencil)
+                            .localized_tooltip("编辑规则", "Edit rule")
+                            .disabled(
+                                self.suspended
+                                    || self.rule_mutation.is_some()
+                                    || self.rule_configuration_busy
+                                    || self.rule_store_blocked,
+                            )
+                            .on_click(cx.listener(move |view, _, window, cx| {
+                                view.begin_edit_rule(rule_id, epoch, window, cx)
+                            })),
+                    )
+                    .child(
+                        Button::new(format!("delete-tunnel-rule-{rule_id}"))
+                            .ghost()
+                            .compact()
+                            .icon(IconName::Trash)
+                            .disabled(
+                                self.suspended
+                                    || self.rule_mutation.is_some()
+                                    || self.rule_configuration_busy
+                                    || self.rule_store_blocked
+                                    || active,
+                            )
+                            .label(t(cx, "删除", "Delete"))
+                            .on_click(cx.listener(move |view, _, _, cx| {
+                                view.request_delete_rule(rule_id, epoch, cx)
+                            })),
                     ),
             );
         }
@@ -798,23 +1066,46 @@ impl Render for TunnelsPanel {
                     .child(t(cx, "命名规则", "Named rules")),
             )
             .child(named_rules)
-            .child(div().flex_1());
-        if self.rule_plan.is_some() {
+            .child(div().flex_1())
+            .child(
+                Button::new("new-tunnel-rule")
+                    .ghost()
+                    .compact()
+                    .icon(IconName::Plus)
+                    .disabled(
+                        self.suspended
+                            || self.rule_mutation.is_some()
+                            || self.connection_id.is_none()
+                            || self.rule_state.is_none()
+                            || self.rule_configuration_busy
+                            || self.rule_store_blocked,
+                    )
+                    .label(t(cx, "新建", "New"))
+                    .on_click(cx.listener(move |view, _, window, cx| {
+                        view.begin_new_rule(epoch, window, cx)
+                    })),
+            );
+        if let Some(token) = self.rule_plan.as_ref().map(|plan| plan.review_token()) {
             named_rule_section = named_rule_section.child(
                 Button::new("review-start-named-tunnel")
                     .primary()
                     .compact()
                     .rounded(px(6.))
-                    .disabled(self.suspended)
+                    .disabled(
+                        self.suspended
+                            || self.rule_configuration_busy
+                            || self.rule_store_blocked
+                            || self.rule_mutation.is_some(),
+                    )
                     .label(t(cx, "审核并启动", "Review and start"))
-                    .on_click(cx.listener(|view, _, _, cx| view.start_named_rule(cx))),
+                    .on_click(cx.listener(move |view, _, _, cx| view.start_named_rule(token, cx))),
             );
         }
         named_rule_section = named_rule_section.child(
             div()
                 .max_w(px(460.))
                 .text_color(rgb(visual.muted))
-                .child(self.rule_status.render(cx)),
+                .child(self.rule_feedback().render(cx)),
         );
         let mut rows = div()
             .id("tunnels-list")
@@ -880,25 +1171,32 @@ impl Render for TunnelsPanel {
                     );
                 }
                 let stopping = row.cancel.load(Ordering::Acquire);
+                let cleanup_unconfirmed = row.unresolved_cleanup.is_some();
+                let rule_id = row.rule_id;
+                let workers = rule_id.map(|id| self.rule_workers(id)).unwrap_or_default();
                 item = item.child(
                     Button::new(("stop-tunnel", id))
                         .icon(IconName::Square)
                         .ghost()
                         .compact()
                         .rounded(px(6.))
-                        .disabled(stopping)
-                        .label(if stopping {
+                        .disabled(stopping || cleanup_unconfirmed)
+                        .label(if cleanup_unconfirmed {
+                            t(cx, "清理未确认", "Cleanup unconfirmed")
+                        } else if stopping {
                             t(cx, "正在停止…", "Stopping…")
                         } else {
-                            t(cx, "停止", "Stop")
+                            if rule_id.is_some() {
+                                t(cx, "审核停止", "Review stop")
+                            } else {
+                                t(cx, "停止", "Stop")
+                            }
                         })
                         .on_click(cx.listener(move |view, _, _, cx| {
-                            if let Some(row) = view.rows.iter_mut().find(|row| row.id == id) {
-                                row.cancel.store(true, Ordering::Release);
-                                row.status = Message::new(
-                                    "正在停止，等待监听器清理…",
-                                    "Stopping; waiting for listener cleanup…",
-                                );
+                            if let Some(rule_id) = rule_id {
+                                view.review_rule_stop(rule_id, epoch, &workers, cx);
+                            } else {
+                                view.stop_worker(id);
                             }
                             view.status = tunnel_summary(&view.rows);
                             cx.notify();
@@ -976,15 +1274,17 @@ impl Render for TunnelsPanel {
                 .child(div().w(px(250.)).child(t(cx,"状态","Status")))
                 .child(div().w(px(170.)).child(t(cx,"流量","Traffic")))
                 .child(div().w(px(45.)).child(t(cx,"操作","Action"))))
-            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(t(cx, "上一会话隧道记录 · 不会自动重建", "Previous session tunnels · Never restarted automatically"))))
+            .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(t(cx, "上一会话隧道记录，不会自动重建", "Previous session tunnels. Never restarted automatically"))))
             .child(rows)
             .child(div().min_h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border)).text_color(rgb(visual.muted)).child(self.status.render(cx)))
+            .into_any_element()
     }
 }
 
 async fn start_forward(
     session: &SshSession,
     spec: &Specification,
+    remote_requested: &AtomicBool,
 ) -> Result<(Forward, String), String> {
     match spec.direction {
         Direction::Dynamic => {
@@ -1008,6 +1308,9 @@ async fn start_forward(
         }
         Direction::Remote => {
             let target = resolve(&spec.target_host, spec.target_port).await?;
+            // A failure or cancellation before this request cannot allocate a
+            // remote listener and must not leave an unresolved cleanup owner.
+            remote_requested.store(true, Ordering::Release);
             let owner = session
                 .forward_remote(spec.bind_host.clone(), spec.bind_port, target)
                 .await
@@ -1045,6 +1348,8 @@ async fn cancellation(cancelled: &AtomicBool) {
         tokio::time::sleep(Duration::from_millis(10)).await;
     }
 }
+
+impl EventEmitter<TunnelRuleEvent> for TunnelsPanel {}
 
 #[cfg(test)]
 mod tests {
@@ -1123,3 +1428,6 @@ mod tests {
 #[cfg(test)]
 #[path = "tunnels/tests.rs"]
 mod integration_tests;
+
+#[cfg(test)]
+pub(crate) mod test_support;

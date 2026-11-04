@@ -73,6 +73,8 @@ impl Workspace {
                             return;
                         }
                         view.state = (**state).clone();
+                        view.reload_tunnel_panels(cx);
+                        view.refresh_knowledge_library(cx);
                         // Recovery never transports a previous runtime capability.
                         // The modal precondition already required no active work.
                         view.agent = None;
@@ -92,7 +94,7 @@ impl Workspace {
                         view.command_sources_revision = view.command_sources_revision.wrapping_add(1);
                         view.command_target = None;
                         view.cancel_remote_completion(cx);
-                        crate::design::apply(view.state.settings.theme, Some(window), cx);
+                        crate::design::apply_settings(&view.state.settings, Some(window), cx);
                         view.apply_language(view.state.settings.language, window, cx);
                         view.refresh_workflow_audit_history(cx);
                         view.status = Message::new(

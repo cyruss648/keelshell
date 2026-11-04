@@ -145,11 +145,14 @@ impl TerminalView {
             }
         });
         let completion = workers::registry().completion(&cancelled);
+        let palette = crate::design::terminal_palette(cx);
+        let mut emulator = Emulator::new(30, 100, history);
+        emulator.set_default_colors(palette.foreground, palette.background, palette.cursor);
         Self {
             lifecycle: lifecycle::Lifecycle::default(),
             title,
             status: Message::new("正在连接…", "Starting…"),
-            emulator: Emulator::new(30, 100, history),
+            emulator,
             focus: cx.focus_handle(),
             incoming,
             output: OutputQueue::default(),
@@ -179,7 +182,16 @@ impl TerminalView {
         }
     }
 
+    fn sync_default_colors(&mut self, cx: &App) -> crate::design::TerminalPalette {
+        let palette = crate::design::terminal_palette(cx);
+        self.emulator
+            .set_default_colors(palette.foreground, palette.background, palette.cursor);
+        palette
+    }
+
     fn poll(&mut self, cx: &mut Context<Self>) {
+        // Hidden terminals can receive OSC queries before their next render.
+        self.sync_default_colors(cx);
         let started = Instant::now();
         let mut changed = self.poll_lifecycle();
         changed |= !self.exited && !self.pending.is_empty();
@@ -580,6 +592,7 @@ impl TerminalView {
         }
     }
     fn paint(&mut self, bounds: Bounds<Pixels>, window: &mut Window, cx: &mut Context<Self>) {
+        let palette = self.sync_default_colors(cx);
         self.bounds = Some(bounds);
         let font = font(if cfg!(target_os = "windows") {
             "Consolas"
@@ -591,7 +604,7 @@ impl TerminalView {
         let run = TextRun {
             len: 1,
             font: font.clone(),
-            color: rgb(0xd9e3ed).into(),
+            color: rgb(self.emulator.palette(256)).into(),
             background_color: None,
             underline: None,
             strikethrough: None,
@@ -632,7 +645,7 @@ impl TerminalView {
                 window.paint_quad(fill(
                     cell_bounds,
                     rgb(if cell.selected {
-                        0x254d63
+                        palette.selection
                     } else {
                         cell.background
                     }),
@@ -690,7 +703,7 @@ impl TerminalView {
                     len: self.composition.text.len(),
                     font,
                     color: rgb(self.emulator.palette(258)).into(),
-                    background_color: Some(rgb(0x1a2838).into()),
+                    background_color: Some(rgb(background).into()),
                     underline: None,
                     strikethrough: None,
                 };
@@ -838,6 +851,7 @@ fn button_code(button: MouseButton) -> Option<u8> {
 }
 impl Render for TerminalView {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        self.sync_default_colors(cx);
         let entity = cx.entity();
         let paint_entity = entity.clone();
         let mut element = div()
@@ -923,7 +937,7 @@ impl Render for TerminalView {
                     cx.notify();
                 }
             }))
-            .on_scroll_wheel(cx.listener(|view, event: &ScrollWheelEvent, _, cx| {
+            .on_scroll(cx.listener(|view, event: &ScrollEvent, _, cx| {
                 let delta = event.delta.pixel_delta(px(view.line_height));
                 view.scroll_remainder += f32::from(delta.y) / view.line_height;
                 let lines = view.scroll_remainder.trunc() as i32;
@@ -1048,5 +1062,195 @@ impl EntityInputHandler for TerminalView {
         _: &mut Context<Self>,
     ) -> Option<usize> {
         Some(self.composition.selected.start)
+    }
+}
+
+#[cfg(test)]
+mod theme_tests {
+    use super::*;
+    use ::core::prelude::v1::test;
+    use gpui_kit::test::TestWindowExt;
+
+    fn apply_family(id: &str, window: Option<&mut Window>, cx: &mut App) {
+        let family = crate::design::definition(id);
+        let settings = keelshell_core::Settings {
+            theme_family: keelshell_core::ThemeId::new(id)
+                .unwrap_or_else(|error| panic!("registered family: {error}")),
+            theme: family.preferred_appearance,
+            ..Default::default()
+        };
+        crate::design::apply_settings(&settings, window, cx);
+    }
+
+    fn assert_theme_defaults(view: &TerminalView, cx: &App) {
+        let palette = crate::design::terminal_palette(cx);
+        assert_eq!(
+            [
+                view.emulator.palette(256),
+                view.emulator.palette(257),
+                view.emulator.palette(258),
+            ],
+            [palette.foreground, palette.background, palette.cursor]
+        );
+    }
+
+    #[gpui_kit::test]
+    fn construction_uses_current_theme_without_transport_commands(cx: &mut TestAppContext) {
+        cx.update(gpui_kit::init);
+        for family in crate::design::registry() {
+            cx.update(|cx| apply_family(family.id, None, cx));
+            let (_output, incoming) = mpsc::sync_channel(4);
+            let (outgoing, commands) = mpsc::sync_channel(4);
+            let terminal = cx.new(|cx| {
+                TerminalView::from_transport(
+                    "Theme defaults".into(),
+                    14.,
+                    100,
+                    incoming,
+                    outgoing,
+                    Arc::new(AtomicBool::new(false)),
+                    cx,
+                )
+            });
+            terminal.update(cx, |view, cx| assert_theme_defaults(view, cx));
+            assert_eq!(commands.try_recv(), Err(mpsc::TryRecvError::Empty));
+        }
+    }
+
+    #[gpui_kit::test]
+    fn hidden_terminal_queries_use_changed_theme_before_render(cx: &mut TestAppContext) {
+        cx.update(gpui_kit::init);
+        cx.update(|cx| apply_family("frost", None, cx));
+        let (_output, incoming) = mpsc::sync_channel(4);
+        let (outgoing, commands) = mpsc::sync_channel(8);
+        let terminal = cx.new(|cx| {
+            TerminalView::from_transport(
+                "Hidden terminal".into(),
+                14.,
+                100,
+                incoming,
+                outgoing,
+                Arc::new(AtomicBool::new(false)),
+                cx,
+            )
+        });
+        cx.update(|cx| apply_family("graphite", None, cx));
+        terminal.update(cx, |view, cx| {
+            view.poll(cx);
+            assert_theme_defaults(view, cx);
+        });
+        assert_eq!(commands.try_recv(), Err(mpsc::TryRecvError::Empty));
+
+        // A later query must use the latest theme even if this tab never paints.
+        terminal.update(cx, |view, _| {
+            view.emulator
+                .feed(b"\x1b]10;?\x07\x1b]11;?\x07\x1b]12;?\x07");
+        });
+        cx.update(|cx| apply_family("lavender", None, cx));
+        let expected = terminal.update(cx, |view, cx| {
+            for _ in 0..4 {
+                view.poll(cx);
+            }
+            assert_theme_defaults(view, cx);
+            let palette = crate::design::terminal_palette(cx);
+            [palette.foreground, palette.background, palette.cursor]
+        });
+        let replies: Vec<_> = commands.try_iter().collect();
+        assert_eq!(replies.len(), expected.len());
+        for (command, color) in replies.iter().zip(expected) {
+            let TerminalCommand::Write(bytes) = command else {
+                panic!("a color query must produce a terminal write");
+            };
+            let expected = format!(
+                "rgb:{:04x}/{:04x}/{:04x}",
+                ((color >> 16) & 255) * 257,
+                ((color >> 8) & 255) * 257,
+                (color & 255) * 257,
+            );
+            assert!(String::from_utf8_lossy(bytes).contains(&expected));
+        }
+    }
+
+    #[gpui_kit::test]
+    fn theme_renders_preserve_terminal_state_and_transport(cx: &mut TestAppContext) {
+        cx.update(gpui_kit::init);
+        cx.update(|cx| apply_family("frost", None, cx));
+        let (_output, incoming) = mpsc::sync_channel(4);
+        let (outgoing, commands) = mpsc::sync_channel(16);
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let stop = cancelled.clone();
+        let opened = cx.update(|cx| {
+            gpui_kit::open_window(
+                WindowOptions {
+                    window_bounds: Some(WindowBounds::Windowed(Bounds::new(
+                        point(px(0.), px(0.)),
+                        size(px(800.), px(480.)),
+                    ))),
+                    ..Default::default()
+                },
+                cx,
+                |_, cx| {
+                    cx.new(|cx| {
+                        TerminalView::from_transport(
+                            "Theme rendering".into(),
+                            14.,
+                            100,
+                            incoming,
+                            outgoing,
+                            stop,
+                            cx,
+                        )
+                    })
+                },
+            )
+        });
+        let (window, terminal) = match opened {
+            Ok(fixture) => fixture,
+            Err(error) => panic!("open terminal theme fixture: {error:?}"),
+        };
+        let entity = terminal.entity_id();
+        let result = cx.update_window(window, |_, window, cx| {
+            window.render_frame(cx);
+            assert!(
+                commands
+                    .try_iter()
+                    .all(|command| matches!(command, TerminalCommand::Resize(_, _)))
+            );
+            let before = terminal.update(cx, |view, cx| {
+                view.focus(window, cx);
+                for row in 0..view.emulator.size.rows + 3 {
+                    view.emulator.feed(format!("row {row}\r\n").as_bytes());
+                }
+                view.emulator.scroll(100);
+                view.emulator.start_selection(0, 0);
+                view.emulator.update_selection(0, 4);
+                view.composition.mark(None, "preedit", None);
+                assert_eq!(view.selected_text(), "row 0");
+                view.visible_text()
+            });
+            for family in crate::design::registry() {
+                apply_family(family.id, Some(window), cx);
+                window.render_frame(cx);
+                terminal.update(cx, |view, cx| {
+                    assert_theme_defaults(view, cx);
+                    assert_eq!(view.visible_text(), before);
+                    assert_eq!(view.selected_text(), "row 0");
+                    assert_eq!(view.composition.text, "preedit");
+                    assert!(view.focus.is_focused(window));
+                    assert!(view.is_open());
+                    assert!(Arc::ptr_eq(&view.cancelled, &cancelled));
+                    view.poll(cx);
+                });
+                assert_eq!(terminal.entity_id(), entity);
+                assert!(!cancelled.load(Ordering::Acquire));
+                assert_eq!(commands.try_recv(), Err(mpsc::TryRecvError::Empty));
+            }
+            terminal.update(cx, |view, _| view.write(b"same transport".to_vec()));
+            assert_eq!(
+                commands.try_recv(),
+                Ok(TerminalCommand::Write(b"same transport".to_vec()))
+            );
+        });
+        assert!(result.is_ok(), "render terminal theme fixture: {result:?}");
     }
 }

@@ -30,6 +30,7 @@ mod ai_command_review_target;
 mod ai_metadata;
 mod configuration_recovery;
 pub(crate) mod independent_disk_monitor;
+mod knowledge_library;
 pub(crate) mod mirror_sync_combination;
 mod profile_sync;
 pub(crate) mod protocol_diagnostics;
@@ -157,9 +158,7 @@ pub(crate) fn verify_disk_monitor_minimum_workspace(
                     "new-session",
                     "split-session",
                     "toggle-assistant",
-                    "theme-system",
-                    "theme-light",
-                    "theme-dark",
+                    "theme-settings",
                     "language",
                     "refresh-monitor",
                     "pause-monitor",
@@ -188,7 +187,7 @@ pub(crate) fn verify_disk_monitor_minimum_workspace(
                     // The column padding is outside the nested chooser. Dispatch
                     // an actual wheel there rather than scrolling the inner list.
                     window.dispatch_event(
-                        gpui_kit::ScrollWheelEvent {
+                        gpui_kit::ScrollEvent {
                             position: point(viewport.origin.x + px(2.), viewport.center().y),
                             delta: gpui_kit::ScrollDelta::Lines(point(0., direction)),
                             ..Default::default()
@@ -838,6 +837,14 @@ async fn workspace_capture_review_and_save_round_trips_confirmed_knowledge(
         assert!(window.find("knowledge-save-disabled").visible());
         window.click("knowledge-confirm-completed", cx);
         window.render_frame(cx);
+        // Outcome confirmation expands the source-bound preview. Reveal its
+        // save action without bypassing the scroll container or visibility.
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+        window.render_frame(cx);
         assert!(window.find("knowledge-save").visible());
     })
     .checked("review the captured knowledge before saving");
@@ -905,6 +912,12 @@ async fn workspace_knowledge_conflict_invalidates_review_without_replay(cx: &mut
         window.click("knowledge-preview-action", cx);
         window.render_frame(cx);
         window.click("knowledge-confirm-completed", cx);
+        window.render_frame(cx);
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
         window.render_frame(cx);
         assert!(window.find("knowledge-save").visible());
     })

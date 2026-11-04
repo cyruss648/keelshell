@@ -51,10 +51,10 @@ async fn independent_minimum_assistant_review_keeps_literals_and_async_review_re
         }
         let position = point(body.origin.x + px(8.), body.center().y);
         window.dispatch_event(gpui_kit::MouseMoveEvent { position, ..Default::default() }.to_platform_input(), cx);
-        window.dispatch_event(gpui_kit::ScrollWheelEvent { position, delta: gpui_kit::ScrollDelta::Pixels(point(px(-100_000.), px(0.))), ..Default::default() }.to_platform_input(), cx);
+        window.dispatch_event(gpui_kit::ScrollEvent { position, delta: gpui_kit::ScrollDelta::Pixels(point(px(-100_000.), px(0.))), ..Default::default() }.to_platform_input(), cx);
         window.render_frame(cx);
         window.dispatch_event(
-            gpui_kit::ScrollWheelEvent {
+            gpui_kit::ScrollEvent {
                 position,
                 delta: gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
                 ..Default::default()

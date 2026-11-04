@@ -680,7 +680,7 @@ pub(super) fn text_scroll(
         .track_scroll(scroll)
         // Inner text gestures must not also move the outer tools viewport.
         // GPUI applies the built-in scroll listener before this bubble guard.
-        .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+        .on_scroll(|_, _, cx| cx.stop_propagation())
         .relative()
         .flex()
         .flex_col()

@@ -1,0 +1,694 @@
+//! Local knowledge browsing and explicit, snapshot-bound mutation review.
+//! The workspace owns every disk operation; this panel never contacts a model.
+
+use gpui_kit::{
+    component::{
+        Disableable,
+        button::{Button, ButtonVariants},
+        input::{Input, InputEvent, InputState, Textarea, TextareaState},
+    },
+    *,
+};
+use keelshell_core::{
+    AppState, KnowledgeError, KnowledgeOutcome, MAX_KNOWLEDGE_SEARCH_QUERY_BYTES,
+    MAX_KNOWLEDGE_TEXT_BYTES, SavedKnowledgeEntry, SnapshotRevision,
+};
+use uuid::Uuid;
+
+use crate::i18n::{Message, t};
+
+#[cfg(test)]
+mod tests;
+
+pub(crate) enum LibraryEvent {
+    Apply(Uuid),
+    Reload(Uuid),
+    Close,
+}
+
+#[derive(Clone)]
+pub(crate) struct MutationReview {
+    pub(crate) id: Uuid,
+    pub(crate) snapshot: SnapshotRevision,
+    pub(crate) expected: SavedKnowledgeEntry,
+    pub(crate) replacement: Option<SavedKnowledgeEntry>,
+    draft_title: SharedString,
+    draft_summary: SharedString,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Phase {
+    Ready,
+    Saving(Uuid),
+    NeedsReload(Uuid),
+    Reloading(Uuid),
+}
+
+pub(crate) struct KnowledgeLibrary {
+    entries: Vec<SavedKnowledgeEntry>,
+    snapshot: SnapshotRevision,
+    query: Entity<InputState>,
+    title: Entity<InputState>,
+    summary: Entity<TextareaState>,
+    selected: Option<SavedKnowledgeEntry>,
+    review: Option<MutationReview>,
+    phase: Phase,
+    show_source_details: bool,
+    message: Message,
+    _subscriptions: Vec<Subscription>,
+}
+
+impl KnowledgeLibrary {
+    #[cfg(test)]
+    pub(crate) fn set_draft_for_test(
+        &mut self,
+        title: &str,
+        summary: &str,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.title
+            .update(cx, |input, cx| input.set_value(title, window, cx));
+        self.summary
+            .update(cx, |input, cx| input.set_value(summary, window, cx));
+    }
+
+    pub(crate) fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let query = cx.new(|cx| InputState::new(window, cx));
+        let title = cx.new(|cx| InputState::new(window, cx));
+        let summary = cx.new(|cx| TextareaState::new(window, cx).rows(8));
+        let subscriptions = vec![
+            cx.subscribe(&query, |_, _, _: &InputEvent, cx| cx.notify()),
+            cx.subscribe(&title, |view, _, event: &InputEvent, cx| {
+                if matches!(event, InputEvent::Change) {
+                    view.invalidate_review(cx);
+                }
+            }),
+            cx.subscribe(&summary, |view, _, event: &InputEvent, cx| {
+                if matches!(event, InputEvent::Change) {
+                    view.invalidate_review(cx);
+                }
+            }),
+        ];
+        Self {
+            entries: Vec::new(),
+            snapshot: SnapshotRevision::default(),
+            query,
+            title,
+            summary,
+            selected: None,
+            review: None,
+            phase: Phase::Ready,
+            show_source_details: false,
+            message: Message::new(
+                "查看和整理明确保存的本地知识。",
+                "Browse and organize explicitly saved local knowledge.",
+            ),
+            _subscriptions: subscriptions,
+        }
+    }
+
+    pub(crate) fn set_snapshot(&mut self, state: &AppState, cx: &mut Context<Self>) {
+        if self.snapshot == state.snapshot && self.entries == state.knowledge_entries {
+            return;
+        }
+        self.snapshot = state.snapshot;
+        self.entries.clone_from(&state.knowledge_entries);
+        if self.phase == Phase::Ready {
+            self.review = None;
+            if self
+                .selected
+                .as_ref()
+                .is_some_and(|selected| !self.entries.contains(selected))
+            {
+                self.selected = None;
+            }
+            self.message = Message::new(
+                "本地知识已刷新；修改需要重新审核。",
+                "Local knowledge refreshed. Review changes again before saving.",
+            );
+        }
+        cx.notify();
+    }
+
+    fn invalidate_review(&mut self, cx: &mut Context<Self>) {
+        if self.phase == Phase::Ready
+            && self
+                .review
+                .as_ref()
+                .is_some_and(|review| !self.draft_matches(review, cx))
+        {
+            self.review = None;
+        }
+        cx.notify();
+    }
+
+    fn select(
+        &mut self,
+        expected: &SavedKnowledgeEntry,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.phase != Phase::Ready || !self.entries.contains(expected) {
+            return;
+        }
+        self.review = None;
+        self.selected = Some(expected.clone());
+        self.show_source_details = false;
+        self.title.update(cx, |input, cx| {
+            input.set_value(expected.entry().title(), window, cx)
+        });
+        self.summary.update(cx, |input, cx| {
+            input.set_value(expected.entry().summary(), window, cx)
+        });
+        self.message = Message::new(
+            "编辑标题或正文后预览；来源和原结果保持绑定。",
+            "Edit the title or text, then review. The source and original outcome stay bound.",
+        );
+        cx.notify();
+    }
+
+    fn prepare(&mut self, expected: &SavedKnowledgeEntry, delete: bool, cx: &mut Context<Self>) {
+        if self.phase != Phase::Ready
+            || self.selected.as_ref() != Some(expected)
+            || !self.entries.contains(expected)
+        {
+            return;
+        }
+        let replacement = if delete {
+            None
+        } else {
+            match self.edited_entry(expected, cx) {
+                Ok(entry) => Some(entry),
+                Err(error) => {
+                    self.review = None;
+                    self.message = Message::detail(
+                        "修改未通过本地内容检查",
+                        "The changes did not pass the local content check",
+                        error,
+                    );
+                    cx.notify();
+                    return;
+                }
+            }
+        };
+        self.review = Some(MutationReview {
+            id: Uuid::new_v4(),
+            snapshot: self.snapshot,
+            expected: expected.clone(),
+            replacement,
+            draft_title: self.title.read(cx).value(),
+            draft_summary: self.summary.read(cx).value(),
+        });
+        self.message = Message::new(
+            "请审核完整内容，再确认本次本地修改。",
+            "Review the full content, then confirm this local change.",
+        );
+        cx.notify();
+    }
+
+    fn edited_entry(
+        &self,
+        expected: &SavedKnowledgeEntry,
+        cx: &App,
+    ) -> Result<SavedKnowledgeEntry, KnowledgeError> {
+        let raw = self.summary.read(cx).value();
+        if raw.len() > MAX_KNOWLEDGE_TEXT_BYTES {
+            return Err(KnowledgeError::TextTooLarge);
+        }
+        if raw
+            .chars()
+            .any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t'))
+        {
+            return Err(KnowledgeError::EmptyText);
+        }
+        // As with terminal captures, the editable multiline draft becomes one
+        // reviewed summary. Check the raw budget before reducing whitespace.
+        let summary = raw.split_whitespace().collect::<Vec<_>>().join(" ");
+        expected.with_reviewed_content(self.title.read(cx).value().as_ref(), &summary)
+    }
+
+    fn draft_matches(&self, review: &MutationReview, cx: &App) -> bool {
+        self.title.read(cx).value() == review.draft_title
+            && self.summary.read(cx).value() == review.draft_summary
+    }
+
+    pub(crate) fn candidate(&self, id: Uuid, cx: &App) -> Option<MutationReview> {
+        let review = self.review.as_ref()?;
+        (self.phase == Phase::Ready
+            && review.id == id
+            && review.snapshot == self.snapshot
+            && self.draft_matches(review, cx)
+            && self.entries.contains(&review.expected))
+        .then(|| review.clone())
+    }
+
+    fn confirm(&mut self, id: Uuid, cx: &mut Context<Self>) {
+        if self.candidate(id, cx).is_some() {
+            cx.emit(LibraryEvent::Apply(id));
+        }
+    }
+
+    fn cancel_review(&mut self, id: Uuid, cx: &mut Context<Self>) {
+        if self.phase == Phase::Ready && self.review.as_ref().is_some_and(|r| r.id == id) {
+            self.review = None;
+            cx.notify();
+        }
+    }
+
+    fn disable_editor(&self, disabled: bool, cx: &mut Context<Self>) {
+        self.title
+            .update(cx, |input, cx| input.set_disabled(disabled, cx));
+        self.summary
+            .update(cx, |input, cx| input.set_disabled(disabled, cx));
+    }
+
+    pub(crate) fn begin_save(&mut self, id: Uuid, cx: &mut Context<Self>) -> bool {
+        if self.candidate(id, cx).is_none() {
+            return false;
+        }
+        self.phase = Phase::Saving(id);
+        self.disable_editor(true, cx);
+        self.message = Message::new("正在保存本地修改…", "Saving local changes…");
+        cx.notify();
+        true
+    }
+
+    pub(crate) fn finish_save(&mut self, id: Uuid, cx: &mut Context<Self>) {
+        if self.phase != Phase::Saving(id) {
+            return;
+        }
+        self.phase = Phase::Ready;
+        self.review = None;
+        self.selected = None;
+        self.disable_editor(false, cx);
+        self.message = Message::new("本地知识修改已保存。", "Local knowledge changes saved.");
+        cx.notify();
+    }
+
+    pub(crate) fn save_failed(
+        &mut self,
+        id: Uuid,
+        error: &keelshell_core::Error,
+        cx: &mut Context<Self>,
+    ) {
+        if self.phase != Phase::Saving(id) {
+            return;
+        }
+        self.review = None;
+        // Even an ordinary I/O error can race an external writer. A fresh load
+        // is required before another review, never an automatic retry.
+        self.phase = Phase::NeedsReload(Uuid::new_v4());
+        self.message = Message::detail(
+            "修改未确认保存；请重新加载并重新审核",
+            "The change was not confirmed saved. Reload and review again",
+            error,
+        );
+        cx.notify();
+    }
+
+    pub(crate) fn reject_review(&mut self, cx: &mut Context<Self>) {
+        if self.phase == Phase::Ready {
+            self.review = None;
+            self.message = Message::new(
+                "审核已过期，请重新选择条目并审核。",
+                "The review is stale. Select the entry and review it again.",
+            );
+            cx.notify();
+        }
+    }
+
+    pub(crate) fn begin_reload(&mut self, token: Uuid, cx: &mut Context<Self>) -> bool {
+        if self.phase != Phase::NeedsReload(token) {
+            return false;
+        }
+        self.phase = Phase::Reloading(token);
+        self.message = Message::new("正在重新加载本机配置…", "Reloading local configuration…");
+        cx.notify();
+        true
+    }
+
+    pub(crate) fn finish_reload(
+        &mut self,
+        token: Uuid,
+        state: &AppState,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        if self.phase != Phase::Reloading(token) {
+            return false;
+        }
+        self.snapshot = state.snapshot;
+        self.entries.clone_from(&state.knowledge_entries);
+        self.phase = Phase::Ready;
+        self.selected = None;
+        self.review = None;
+        self.disable_editor(false, cx);
+        self.message = Message::new(
+            "配置已重新加载，旧审核已清除。请重新选择条目。",
+            "Configuration reloaded and the old review cleared. Select the entry again.",
+        );
+        cx.notify();
+        true
+    }
+
+    pub(crate) fn reload_failed(
+        &mut self,
+        token: Uuid,
+        error: &keelshell_core::Error,
+        cx: &mut Context<Self>,
+    ) {
+        if self.phase == Phase::Reloading(token) {
+            self.phase = Phase::NeedsReload(Uuid::new_v4());
+            self.message = Message::detail(
+                "重新加载失败，修改仍被阻止",
+                "Reload failed; changes remain blocked",
+                error,
+            );
+            cx.notify();
+        }
+    }
+
+    fn matching_entries(&self, cx: &App) -> Option<Vec<SavedKnowledgeEntry>> {
+        let query = self.query.read(cx).value();
+        if query.len() > MAX_KNOWLEDGE_SEARCH_QUERY_BYTES || query.chars().any(char::is_control) {
+            return None;
+        }
+        let query = query.trim().to_lowercase();
+        Some(
+            self.entries
+                .iter()
+                .filter(|entry| {
+                    query.is_empty()
+                        || [
+                            entry.entry().title(),
+                            entry.entry().summary(),
+                            entry.entry().source().label(),
+                        ]
+                        .iter()
+                        .any(|text| text.to_lowercase().contains(&query))
+                })
+                .cloned()
+                .collect(),
+        )
+    }
+
+    fn source_view(&self, entry: &SavedKnowledgeEntry, cx: &mut Context<Self>) -> AnyElement {
+        let fact = entry.entry();
+        let visual = crate::design::palette(cx);
+        let captured_at = i64::try_from(fact.occurred_at())
+            .ok()
+            .and_then(|seconds| chrono::DateTime::from_timestamp(seconds, 0))
+            .map(|time| time.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+            .unwrap_or_else(|| fact.occurred_at().to_string());
+        let mut source = div()
+            .text_xs()
+            .text_color(rgb(visual.muted))
+            .flex()
+            .flex_col()
+            .gap_1()
+            .child(fact.source().label().to_owned())
+            .child(match fact.outcome() {
+                KnowledgeOutcome::Completed => t(cx, "已确认完成", "Confirmed completed"),
+                KnowledgeOutcome::Failed => t(cx, "已确认失败", "Confirmed failed"),
+            })
+            .child(captured_at)
+            .child(
+                Button::new("knowledge-library-source-details")
+                    .ghost()
+                    .label(if self.show_source_details {
+                        t(cx, "收起来源详情", "Hide source details")
+                    } else {
+                        t(cx, "查看来源详情", "View source details")
+                    })
+                    .on_click(cx.listener(|view, _, _, cx| {
+                        view.show_source_details = !view.show_source_details;
+                        cx.notify();
+                    })),
+            );
+        if self.show_source_details {
+            source = source
+                .child(format!(
+                    "{}: {}",
+                    t(cx, "会话", "Session"),
+                    entry.session_id()
+                ))
+                .child(format!(
+                    "{}: {}",
+                    t(cx, "来源", "Source"),
+                    fact.source().id()
+                ))
+                .child(format!(
+                    "{}: {}",
+                    t(cx, "来源版本", "Source revision"),
+                    fact.source().revision()
+                ))
+                .child(match entry.capture_type() {
+                    keelshell_core::KnowledgeCaptureType::Selection => {
+                        t(cx, "选中文本", "Selected text")
+                    }
+                    keelshell_core::KnowledgeCaptureType::VisibleScreen => {
+                        t(cx, "可见终端", "Visible screen")
+                    }
+                });
+        }
+        source.into_any_element()
+    }
+
+    fn entry_text(entry: &SavedKnowledgeEntry) -> AnyElement {
+        div()
+            .flex()
+            .flex_col()
+            .gap_2()
+            .child(
+                div()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(entry.entry().title().to_owned()),
+            )
+            .child(div().child(entry.entry().summary().to_owned()))
+            .into_any_element()
+    }
+}
+
+impl EventEmitter<LibraryEvent> for KnowledgeLibrary {}
+
+impl Render for KnowledgeLibrary {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
+        let ready = self.phase == Phase::Ready;
+        let mut body = div().flex().flex_col().gap_3();
+        let mut footer = div().flex().flex_wrap().gap_2();
+        if let Some(review) = self.review.as_ref() {
+            let id = review.id;
+            body = body
+                .child(self.source_view(&review.expected, cx))
+                .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
+                    cx,
+                    "当前保存的内容",
+                    "Currently saved content",
+                )))
+                .child(Self::entry_text(&review.expected));
+            if let Some(replacement) = &review.replacement {
+                body = body
+                    .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
+                        cx,
+                        "确认后保存的内容",
+                        "Content after confirmation",
+                    )))
+                    .child(Self::entry_text(replacement));
+            } else {
+                body = body.child(div().text_color(rgb(visual.danger)).child(t(
+                    cx,
+                    "确认后将从当前本地知识库删除此条目。配置备份可能保留历史副本。",
+                    "Confirmation removes this entry from the current local library. Configuration backups may retain historical copies.",
+                )));
+            }
+            footer = footer
+                .child(
+                    Button::new("knowledge-library-confirm")
+                        .primary()
+                        .disabled(!ready)
+                        .label(if review.replacement.is_some() {
+                            t(cx, "确认保存修改", "Confirm changes")
+                        } else {
+                            t(cx, "确认删除条目", "Confirm deletion")
+                        })
+                        .on_click(cx.listener(move |view, _, _, cx| view.confirm(id, cx))),
+                )
+                .child(
+                    Button::new("knowledge-library-cancel")
+                        .ghost()
+                        .disabled(!ready)
+                        .label(t(cx, "返回编辑", "Back to editing"))
+                        .on_click(cx.listener(move |view, _, _, cx| view.cancel_review(id, cx))),
+                );
+        } else if let Some(selected) = self.selected.clone() {
+            let delete_target = selected.clone();
+            body = body
+                .child(self.source_view(&selected, cx))
+                .child(div().child(t(cx, "标题", "Title")))
+                .child(
+                    Input::new(&self.title)
+                        .id("knowledge-library-title")
+                        .aria_label(t(cx, "知识标题", "Knowledge title"))
+                        .disabled(!ready),
+                )
+                .child(div().child(t(
+                    cx,
+                    "摘要（换行会合并为空格）",
+                    "Summary (line breaks become spaces)",
+                )))
+                .child(
+                    div().id("knowledge-library-summary").child(
+                        Textarea::new(&self.summary)
+                            .aria_label(t(cx, "知识摘要", "Knowledge summary"))
+                            .disabled(!ready),
+                    ),
+                );
+            footer = footer
+                .child(
+                    Button::new("knowledge-library-review-edit")
+                        .primary()
+                        .disabled(!ready)
+                        .label(t(cx, "预览修改", "Review changes"))
+                        .on_click(
+                            cx.listener(move |view, _, _, cx| view.prepare(&selected, false, cx)),
+                        ),
+                )
+                .child(
+                    Button::new("knowledge-library-review-delete")
+                        .ghost()
+                        .disabled(!ready)
+                        .label(t(cx, "审核删除", "Review deletion"))
+                        .on_click(cx.listener(move |view, _, _, cx| {
+                            view.prepare(&delete_target, true, cx)
+                        })),
+                )
+                .child(
+                    Button::new("knowledge-library-back")
+                        .ghost()
+                        .disabled(!ready)
+                        .label(t(cx, "返回列表", "Back to list"))
+                        .on_click(cx.listener(|view, _, _, cx| {
+                            if view.phase == Phase::Ready {
+                                view.selected = None;
+                                cx.notify();
+                            }
+                        })),
+                );
+        } else {
+            body = body
+                .child(div().text_xs().child(t(
+                    cx,
+                    "搜索标题、正文或来源",
+                    "Search title, text or source",
+                )))
+                .child(
+                    Input::new(&self.query)
+                        .id("knowledge-library-search")
+                        .aria_label(t(cx, "搜索本地知识", "Search local knowledge")),
+                );
+            match self.matching_entries(cx) {
+                None => {
+                    body = body.child(t(
+                        cx,
+                        "搜索词最多 512 字节且不能包含控制字符。",
+                        "Search accepts at most 512 bytes and no control characters.",
+                    ));
+                }
+                Some(entries) => {
+                    body = body.child(format!("{} / {}", entries.len(), self.entries.len()));
+                    if entries.is_empty() {
+                        body = body.child(t(
+                            cx,
+                            "没有匹配的知识条目。",
+                            "No matching knowledge entries.",
+                        ));
+                    }
+                    for entry in entries {
+                        let title: String = entry.entry().title().chars().take(80).collect();
+                        body = body.child(
+                            Button::new(SharedString::from(format!(
+                                "knowledge-entry-{}",
+                                entry.id()
+                            )))
+                            .ghost()
+                            .w_full()
+                            .disabled(!ready)
+                            .label(title)
+                            .on_click(cx.listener(
+                                move |view, _, window, cx| view.select(&entry, window, cx),
+                            )),
+                        );
+                    }
+                }
+            }
+        }
+        if let Phase::NeedsReload(token) = self.phase {
+            footer = footer.child(
+                Button::new("knowledge-library-reload")
+                    .primary()
+                    .label(t(cx, "重新加载并重新审核", "Reload and review again"))
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        if view.phase == Phase::NeedsReload(token) {
+                            cx.emit(LibraryEvent::Reload(token));
+                        }
+                    })),
+            );
+        }
+        div()
+            .id("knowledge-library")
+            .test_support()
+            .h_full()
+            .min_h_0()
+            .min_w_0()
+            .flex()
+            .flex_col()
+            .text_sm()
+            .text_color(rgb(visual.text))
+            .bg(rgb(visual.surface))
+            .child(
+                div()
+                    .p_3()
+                    .flex_shrink_0()
+                    .flex()
+                    .flex_col()
+                    .gap_2()
+                    .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
+                        cx,
+                        "本地知识库",
+                        "Local knowledge library",
+                    )))
+                    .child(
+                        Button::new("knowledge-library-close")
+                            .ghost()
+                            .label(t(cx, "返回 AI 助手", "Back to AI assistant"))
+                            .on_click(cx.listener(|_, _, _, cx| cx.emit(LibraryEvent::Close))),
+                    ),
+            )
+            .child(
+                div()
+                    .id("knowledge-library-scroll")
+                    .test_support()
+                    .flex_1()
+                    .min_h_0()
+                    .min_w_0()
+                    .overflow_y_scroll()
+                    .p_3()
+                    .child(body),
+            )
+            .child(
+                div()
+                    .id("knowledge-library-footer")
+                    .test_support()
+                    .flex_shrink_0()
+                    .p_3()
+                    .border_t_1()
+                    .border_color(rgb(visual.border))
+                    .flex()
+                    .flex_col()
+                    .gap_2()
+                    .child(div().text_xs().child(self.message.render(cx)))
+                    .child(footer),
+            )
+    }
+}

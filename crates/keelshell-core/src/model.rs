@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     AiProfileCatalog, BatchAuditRecord, ConnectionFolder, ConnectionProxy, DeletedConnection,
-    Error, RecentConnection, ReconnectPolicy, SavedKnowledgeEntry, ValidationError,
+    Error, RecentConnection, ReconnectPolicy, SavedKnowledgeEntry, ThemeId, ValidationError,
 };
 
 /// Current persisted state and connection-export schema. Unknown versions fail closed.
@@ -367,6 +367,9 @@ pub struct Settings {
     pub scrollback_lines: usize,
     /// Preferred appearance.
     pub theme: Theme,
+    /// Preferred theme family, independent of appearance; absent legacy fields use Frost.
+    /// Valid unknown identifiers are retained for application-level fallback resolution.
+    pub theme_family: ThemeId,
     /// Background release policy; absent legacy fields migrate to daily checks.
     pub updates: crate::UpdatePreferences,
     /// Legacy compatibility preferences, never authoritative for named profiles.
@@ -397,6 +400,8 @@ impl<'de> Deserialize<'de> for Settings {
             #[serde(default)]
             theme: Theme,
             #[serde(default)]
+            theme_family: ThemeId,
+            #[serde(default)]
             updates: crate::UpdatePreferences,
             #[serde(default)]
             ai: AiSettings,
@@ -413,6 +418,7 @@ impl<'de> Deserialize<'de> for Settings {
             font_size: wire.font_size,
             scrollback_lines: wire.scrollback_lines,
             theme: wire.theme,
+            theme_family: wire.theme_family,
             updates: wire.updates,
             ai: wire.ai,
             ai_profiles,
@@ -427,6 +433,7 @@ impl Default for Settings {
             font_size: 14.0,
             scrollback_lines: 10_000,
             theme: Theme::default(),
+            theme_family: ThemeId::default(),
             updates: crate::UpdatePreferences::default(),
             ai: AiSettings::default(),
             ai_profiles: AiProfileCatalog::default(),

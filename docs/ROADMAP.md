@@ -1,5 +1,12 @@
 # 开发路线
 
+## 当前主题与组合验证 — 2026-11-04
+
+- 三套原生主题已实现：霜白、曜石、雾紫，目录驱动选择器，独立明暗模式、兼容持久化、统一组件 token 和终端默认色。组合工程门禁、非作者复核和限定 macOS 原生切换/重启已通过；详见[主题指南](product/THEME_PREFERENCES.md)。
+- 主题/布局分开推进：本轮统一视觉与主题入口；连接导航、文件工具区和更多原生工作区布局优化继续，不把 HTML 样例算作原生完成。
+- 知识库列表/搜索/审核编辑删除与命名隧道管理已通过组合门禁。NET 两轮独立审查的问题均已修复并复核；真实取消拒绝后保留占用，原连接关闭后解除，配置恢复会清除存储阻断。完整知识模型发送、NET 原生和真实超时场景仍待验收。
+- 完整门禁普通 Rust 2,007 passed/23 ignored、app 819 passed/2 ignored；末轮 Python 检查器修复后 120 项/1 skipped、53 项检查器测试通过，官方在线 104 条声明/使用检查通过。GPUI Kit 0.9/Pillow 13；详细证据和范围集中到[测试记录](testing/records/2026-11-04-native-themes.md)。
+
 ## 当前工程策略 — 2026-10-26
 
 项目不再通过仓库配置限制 Rust 工具链版本。`rust-toolchain.toml`、workspace/crate 的 `rust-version` 和 `mise.toml` 的 Rust 版本项已移除；CI 使用 runner 提供的工具链。当前本机以 Rust 1.99.1 完成验证，直接 registry 依赖仍遵守 `x.y`，Cargo.lock 继续提交解析后的完整版本。版本切换记录见[Rust 1.99.1 工具链记录](testing/records/2026-10-26-rust-1-99-1-toolchain.md)。

@@ -692,8 +692,8 @@ fn random_nonce() -> Result<[u8; NONCE_BYTES], Error> {
 }
 
 fn fill_random(bytes: &mut [u8]) -> Result<(), Error> {
-    use rand::{TryRngCore, rngs::OsRng};
-    OsRng
+    use rand::{TryRng, rngs::SysRng};
+    SysRng
         .try_fill_bytes(bytes)
         .map_err(|_| Error::VaultRandomness)
 }

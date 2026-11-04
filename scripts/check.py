@@ -32,8 +32,13 @@ def dependency_policy():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--policy-only", action="store_true", help="Validate manifest dependency versions only")
+    parser.add_argument("--fresh-dependencies", action="store_true",
+                        help="Check official latest stable registry versions before the deterministic gate (requires network)")
     options = parser.parse_args()
     dependency_policy()
+    if options.fresh_dependencies:
+        subprocess.run([sys.executable, str(ROOT / "scripts/check_dependencies.py")],
+                       cwd=ROOT, check=True)
     if options.policy_only:
         return
     with tempfile.TemporaryDirectory(prefix="keelshell-check-") as scratch:

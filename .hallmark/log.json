@@ -1,0 +1,49 @@
+[
+  {
+    "date": "2026-11-04",
+    "scope": "app",
+    "shape": "app screen",
+    "theme": "existing KeelShell semantic theme",
+    "entry": "AI assistant / local knowledge library",
+    "signature": "complete source-bound content review before a local mutation",
+    "nav": "list, editor, review within the existing assistant",
+    "footer": "fixed confirmation and cancellation",
+    "imagery": "native product captures only",
+    "sections": [
+      "search",
+      "selected entry",
+      "source details",
+      "review",
+      "operation state"
+    ],
+    "waived": [],
+    "sweep": "12 focused knowledge tests passed; independent source review; macOS isolated list/search/detail and bilingual native AX names verified; native mutation and full platform matrix open"
+  },
+  {
+    "date": "2026-11-04",
+    "scope": "app",
+    "shape": "app screen",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "decision": "User accepted all three themes",
+    "signature": "shared semantic colors and component tokens; theme family separate from appearance and workspace layout",
+    "native_entry": "toolbar theme preferences",
+    "persistence": "serialized StateStore save; apply after success",
+    "prototype": "docs/design/prototypes/2026-11-workbench/index.html",
+    "sweep": "Complete local Rust gate passed; 2007 ordinary tests, 10 rustdoc checks; independent theme/source review. macOS isolated family switches, retained live fixture/draft, restart persistence and final picker verified. Full native platform matrix open.",
+    "prototype_sweep": {
+      "static": "0 FAIL / 8 WARN; Hallmark render unavailable without puppeteer-core",
+      "browser": "A/B/C 1440x900 and 900x580; A 375x844; no document horizontal overflow",
+      "independent_review": "Euclid: no confirmed P0/P1/P2",
+      "warnings": {
+        "contrast": "Resolved against actual computed cascade: body 11.195–15.790; selected text 5.152–6.607",
+        "accent_slot": "Unused scaffold data-slot rule; no matching page element",
+        "F4": "Selected tabs and toggles are navigation state, not competing primary submit actions",
+        "F24": "Fine border separates dense workspace panes; restrained external shadow separates the prototype from its preview canvas"
+      }
+    }
+  }
+]

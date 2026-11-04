@@ -20,7 +20,7 @@ use chacha20poly1305::{
     aead::{Aead, KeyInit as AeadKeyInit, Payload},
 };
 use hmac::{Hmac, KeyInit, Mac};
-use rand::TryRngCore;
+use rand::TryRng;
 use sha2::{Digest, Sha256};
 use thiserror::Error;
 use tokio::{
@@ -378,7 +378,7 @@ impl DesktopIpcClient {
 
 fn random_bytes() -> Result<Zeroizing<[u8; 32]>, IpcFailure> {
     let mut bytes = Zeroizing::new([0; 32]);
-    rand::rngs::OsRng
+    rand::rngs::SysRng
         .try_fill_bytes(bytes.as_mut())
         .map_err(|_| IpcFailure::Unavailable)?;
     Ok(bytes)

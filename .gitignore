@@ -1,6 +1,7 @@
 /target/
 /work/
 /.local/
+/.hallmark/salt
 .env
 .env.*
 !.env.example
