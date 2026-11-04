@@ -9,10 +9,24 @@
   新包原生实际上传摘要匹配，雾紫深色英文 900×900 与推算 900×581
   客户区中纵向滚动不移列、可逆，较矮窗口末行可选。
   原生横向工具输入未观察到位移，继续保留 UNKNOWN；
-  最终非作者证据复核 P0/P1/P2=0，提交绑定及新提交 CI 尚待完成。
+  最终非作者证据复核 P0/P1/P2=0，`146e3c1` 已合入推送；
+  490 个提交输入一致，精确 Quality `41921359337` 三平台 success。
   见[滚动轴记录](testing/records/2026-11-05-file-scroll-axes.md)。
-- 知识上下文显式选择、实际请求预览和明确发送在独立工作副本实现，
-  当前尚未整合与验收；继续沿用原始来源身份、敏感检查和既有审核发送通道。
+- 知识上下文显式选择、实际请求预览和明确发送的修正版已整合；
+  首次非作者审查 HOLD / P1 的编码凭据问题已有同测试修前失败/修后通过，
+  作者专项 221 passed / 1 ignored，含 84 种组合及受控子进程 stdin 验证。
+  非作者再审已在 v2 源码范围关闭 P1，开放 P0/P1/P2=0；
+  完整组合门禁 2,056 ordinary / 23 ignored（含 app 863 / 2 ignored）、
+  10 rustdoc、Python 128 / 1 skipped 通过，494 个构建/门禁输入一致。
+  新包已验合成知识的真实 loopback 发送、原来源内容保持、移除使旧预览失效、
+  清空选择后迟到回复不恢复，以及三主题限定外观下草稿保持/无隐式发送。
+  原生完整预览字节提取和窄窗口未验。最终首轮复核要求纠正文档状态和预览
+  元信息串联（P2=2）；文档及三处展示字符串已修。r2 同计数完整门禁通过，
+  新包 `c48ae4c7…` 的中英文预览和一次双记录 loopback 发送通过，
+  494 个输入一致。限定再审 APPROVE_SCOPED_CHANGE、开放 P0/P1/P2=0，
+  Hallmark 对受检子集 ship；提交及精确 CI 待收尾。
+  原 HOLD 和失败历史保留。
+  见[知识上下文记录](testing/records/2026-11-05-ai-knowledge-context.md)。
 - 物理滚动设备、更多输入 phase/惯性、最终候选完整主题/语言/窗口矩阵、
   Windows/Linux 桌面及完整产品/AI/发布安装目标仍保留。
 
@@ -180,7 +194,7 @@ Unix v9原完整检查实际失败于长TMP夹具组观察EPERM，原626和后�
 | 7 / P2 | 远端能力识别、资源趋势与网络诊断（MON/NET-02） | 已有 Linux 监控及 DNS/TLS/HTTP HEAD/TCP 诊断保留；补能力识别、短期趋势、ping/丢包/traceroute 的明确降级，再设计远端 macOS/Windows 适配。缺少命令/权限时展示不可用，不能用桌面平台兼容性声称远端 OS 支持。以自有远端固定有界命令与实际样本验收。 |
 | 8 / P2 | 持久化隧道规则与真实流量统计（NET-01） | NET-01 runtime 已有 local/remote TCP 与 loopback SOCKS5 的每条活动/已停止隧道累计发送／接收 payload 计数、行级状态与 cleanup；命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除保护和绑定 state/rule/connection snapshot 的 stale review rejection。当前 Tunnels 面板已将匹配规则的显式审核收据交给真实 forwarding executor，并保留 rule ID 到运行行；规则编辑/删除 UI、按规则 stop review、listener/runtime 状态持久化、重启恢复、规则级重连 owner 失效和原生验收仍待实现。|
 | 9 / P3 | 高级传输和用户中继（FILE-05/NET-03） | 保留归档批量传输、PTY Zmodem 和用户管理中继/测速目标。先做审核式归档与路径穿越拒绝，再单独完成 rz/sz 实机协议；中继必须有可重复的延迟/丢包 A/B 数据，无收益不称加速，跳板功能不能代替此项。 |
-| 10 / P3 | AI 知识与复用（AI-04） | `keelshell-core` 领域模型和 `keelshell-app` GPUI 本地知识预览已完成：基于用户显式捕获的来源绑定文本，提供不可变 capture metadata、脱敏摘要、时间线、说明性 Markdown/runbook 和有界本地搜索；未知结果、未完成结果和敏感内容只生成不可保存标记，默认预览为 `DoNotPersist`，只有明确完成/失败按钮才生成可审核事实。已实现明确保存、StateStore 接入、单条目重启加载、敏感/unknown 阻断、完整 workspace capture 集成，以及 Conflict/Unknown 后的后台 reload/reconcile；reload 会清除旧 review 并要求重新审核，不自动重放。条目编辑/删除、搜索/分类、批量管理、模型发送和重启恢复旧 session 仍待实现，不能把任务审计自动当知识库。 |
+| 10 / P3 | AI 知识与复用（AI-04） | 已实现来源绑定捕获、完整审核保存、StateStore 加载、字面搜索及单条编辑/删除；未知、未完成及敏感内容仍受保存闸门限制，Conflict/Unknown 后重新加载并重新审核。显式知识加入 Ask、实际请求预览与发送已实现，编码凭据 P1 已由独立再审关闭，v2 完整组合门禁和受控 macOS loopback 发送通过；最终复核要求的预览文案整理已通过新包双语观察和第二轮完整门禁，限定再审通过，交付状态见本页顶部。分类、批量管理、跨设备知识同步、真实 provider/CLI 和完整原生验收仍开放；历史知识不恢复旧 SSH 授权，不能把任务审计自动当知识库。 |
 
 上述开发与已有实现的验收并行推进：完整外部 Codex MCP 批准/拒绝/撤权、新 Agent 原生回合、语言/主题/最小窗口/两轴滚动/键盘与辅助技术、Windows/Linux 桌面、六目标发布安装更新都保持各自未完成边界。MCP 始终由 KeelShell 提供给外部智能体，应用内 API/CLI 推理是另一入口；不新增通用第三方 MCP 客户端。双语 README 的现有能力表述继续保留。
 

@@ -59,7 +59,7 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 
 文件工作区的[多选与审核式批量传输](docs/product/FILE_BROWSER_BATCH_TRANSFERS.md)已接入选择、逐目标预览与传输队列。拖放上传已实现受控 GPUI 事件路径，原生文件管理器拖放仍有独立验收缺口；当前证据与下一步以[交接文档](docs/HANDOFF.md)为准。
 
-[本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；知识模型发送、批量管理及完整跨平台原生验收仍待完成。
+[本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；可将已保存条目[显式加入 Ask](docs/product/AI_KNOWLEDGE_CONTEXT.md)，核对历史来源和完整请求后再发送。移除、编辑或重新加载会撤销旧审核；批量管理及完整跨平台原生验收仍待完成。
 
 文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。文件审核可以展开，确认与取消保持可见；草稿和差异输入提供明确的编辑入口。操作说明见[审核与编辑](docs/product/FILE_REVIEW_AND_FOCUS.md)和[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；macOS 自有 SSH/SFTP 的两次草稿与保存流程已完成完整内容读回，完整界面与跨平台验收继续进行，见[限定原生记录](docs/testing/records/2026-10-07-text-merge-patch-native.md)。
 

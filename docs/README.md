@@ -16,6 +16,7 @@
 - [SFTP 夹具身份隔离](testing/records/2026-11-04-sftp-fixture-identity.md)：后续 Linux 种子写入隔离失败、身份复用假设、实际反例与验证边界。
 
 - [本地知识库管理](product/AI_KNOWLEDGE_LIBRARY.md)、[ADR 0094](adr/0094-reviewed-knowledge-library-mutations.md)与[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)：搜索、编辑/删除审核、配置冲突和重新加载。
+- [显式知识上下文](product/AI_KNOWLEDGE_CONTEXT.md)、[ADR 0098](adr/0098-explicit-saved-knowledge-context.md)与[验证记录](testing/records/2026-11-05-ai-knowledge-context.md)：选择历史条目、完整请求审核、明确发送、失效及编码后的凭据检查。
 - [Hallmark 原生设计约定](design/HALLMARK_NATIVE.md)：既有 GPUI 主题、app screen 布局和 Web/native 验证边界。
 - [工程与依赖复核](research/2026-11-04-engineering-refresh.md)与[升级记录](testing/records/2026-11-04-dependencies.md)：Reef/模板当前来源、官方最新依赖、解析与后续验收。
 

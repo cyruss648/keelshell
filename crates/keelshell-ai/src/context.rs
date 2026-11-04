@@ -92,6 +92,12 @@ impl ContextDraft {
     /// expansion; optional selections are truncated at character boundaries.
     /// A question that cannot fit is rejected intact. A declared context limit
     /// also makes the effective output limit explicit in the reviewed JSON.
+    ///
+    /// # Errors
+    /// Returns [`AiError::CredentialInContext`] if a known credential remains
+    /// recoverable from the final payload after redaction, including nested JSON
+    /// selections. This check applies with default inference options as well.
+    /// Other errors reject invalid metadata, input or request budgets.
     pub fn prepare_with_limits(
         self,
         provider: &ProviderConfig,
@@ -220,16 +226,17 @@ impl ContextDraft {
                 .inference_options()
                 .apply(&mut payload, provider.protocol(), output_limit)?;
             json = serde_json::to_string_pretty(&payload).map_err(|_| AiError::Serialization)?;
-            // Inference metadata is not redacted into another semantic value.
-            // Reject it when a configured secret would enter the approved body.
-            if secrets.iter().any(|secret| {
-                !secret.is_empty() && crate::provider::payload_contains_secret(&json, secret)
-            }) {
-                return Err(AiError::CredentialInContext);
-            }
         }
         if json.len() > MAX_INPUT_BYTES {
             return Err(AiError::ContextTooLarge);
+        }
+        // Structured selections can escape a credential before literal
+        // redaction. All callers, including both local formatters, must reject
+        // a recoverable value before displaying or approving the payload.
+        if secrets.iter().any(|secret| {
+            !secret.is_empty() && crate::provider::payload_contains_secret(&json, secret)
+        }) {
+            return Err(AiError::CredentialInContext);
         }
         Ok(PreparedRequest {
             provider: provider.clone(),
@@ -443,6 +450,58 @@ mod tests {
 
     fn provider() -> Result<ProviderConfig, AiError> {
         ProviderConfig::new("https://example.test/v1/chat/completions", "test-model")
+    }
+
+    #[test]
+    fn nested_selection_credentials_are_rejected_before_default_preview() -> Result<(), AiError> {
+        let active = "distinct-active-fixture-value";
+        for protocol in [
+            ProviderProtocol::ChatCompletions,
+            ProviderProtocol::Responses,
+            ProviderProtocol::AnthropicMessages,
+        ] {
+            let provider = ProviderConfig::new_with_protocol(
+                "https://example.test/v1/request",
+                "fixture-model",
+                protocol,
+            )?;
+            for inactive in [
+                "history-fixture-a\"bc",
+                "history-fixture-ab\\c",
+                "history-fixture-a\"b\\c",
+            ] {
+                let record = serde_json::json!({"summary":inactive, "outcome":"failed"});
+                let text = serde_json::to_string(&record).map_err(|_| AiError::Serialization)?;
+                assert!(
+                    !text.contains(inactive),
+                    "literal matching cannot find escaped data"
+                );
+                ContextDraft::new("Explain")
+                    .add_selection("Historical record", &text)
+                    .prepare(&provider, &[active], 4096)?;
+                for from_options in [false, true] {
+                    let configured = if from_options {
+                        provider.clone().with_request_options(
+                            crate::RequestOptions::default().with_context_secrets(&[inactive])?,
+                        )
+                    } else {
+                        provider.clone()
+                    };
+                    let secrets = if from_options {
+                        vec![active]
+                    } else {
+                        vec![active, inactive]
+                    };
+                    assert!(matches!(
+                        ContextDraft::new("Explain")
+                            .add_selection("Historical record", &text)
+                            .prepare(&configured, &secrets, 4096),
+                        Err(AiError::CredentialInContext)
+                    ));
+                }
+            }
+        }
+        Ok(())
     }
 
     #[test]

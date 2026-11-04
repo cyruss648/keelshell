@@ -34,6 +34,7 @@ use zeroize::Zeroizing;
 mod agent;
 #[path = "assistant/command_review_target.rs"]
 mod command_review_target;
+mod knowledge_context;
 pub(crate) mod knowledge_library;
 
 use crate::{
@@ -305,7 +306,7 @@ impl PreparedAssistantRequest {
             })
             .unwrap_or_default();
         options.redact_for_review(&format!(
-            "{}: {route} · {}: {} · {}: {names}",
+            "{}: {route}\n{}: {}\n{}: {names}",
             t(cx, "路由", "Route"),
             t(cx, "代理认证", "Proxy authentication"),
             if options.proxy_authenticated() {
@@ -344,6 +345,8 @@ pub struct AssistantPanel {
     knowledge_capture: Option<KnowledgeCapture>,
     prepared: Option<PreparedAssistantRequest>,
     prepared_key: Option<Zeroizing<String>>,
+    prepared_review_id: Option<Uuid>,
+    request_knowledge: Option<knowledge_context::KnowledgeContextReview>,
     response: String,
     status: Message,
     busy: bool,
@@ -400,6 +403,9 @@ impl AssistantPanel {
                     cx.emit(AssistantEvent::ReloadKnowledgeLibrary { token: *token });
                 }
                 knowledge_library::LibraryEvent::Close => view.show_knowledge_library = false,
+                knowledge_library::LibraryEvent::ContextChanged => {
+                    view.knowledge_context_changed(cx)
+                }
             }
             cx.notify();
         }));
@@ -422,6 +428,8 @@ impl AssistantPanel {
             knowledge_capture: None,
             prepared: None,
             prepared_key: None,
+            prepared_review_id: None,
+            request_knowledge: None,
             response: String::new(),
             status: Message::new(
                 "请主动选择上下文，应用不会自动发送任何内容。",
@@ -584,6 +592,8 @@ impl AssistantPanel {
         self.knowledge_preview = None;
         self.prepared = None;
         self.prepared_key = None;
+        self.prepared_review_id = None;
+        self.request_knowledge = None;
         self.preview = false;
         self.status = Message::new(
             format!("已从 {} 选择 {} 字节", self.host, self.context.len()),
@@ -911,6 +921,8 @@ impl AssistantPanel {
             return false;
         }
         preview.save_state = KnowledgeSaveState::Reloading;
+        self.clear_knowledge_context(cx);
+        self.invalidate_request(cx);
         self.status = Message::new(
             "正在重新加载配置；旧知识审核不会重放。",
             "Reloading configuration; the old knowledge review will not be replayed.",
@@ -975,6 +987,8 @@ impl AssistantPanel {
 
     pub(crate) fn invalidate_knowledge_review(&mut self, cx: &mut Context<Self>) {
         self.knowledge_preview = None;
+        self.clear_knowledge_context(cx);
+        self.invalidate_request(cx);
         cx.notify();
     }
 
@@ -993,6 +1007,8 @@ impl AssistantPanel {
         self.busy = false;
         self.prepared = None;
         self.prepared_key = None;
+        self.prepared_review_id = None;
+        self.request_knowledge = None;
         self.preview = false;
         self.preview_scroll.set_offset(point(px(0.), px(0.)));
         self.response.clear();
@@ -1011,6 +1027,21 @@ impl AssistantPanel {
         if self.busy {
             return;
         }
+        // Any new attempt replaces the old review, including a failed attempt.
+        self.prepared = None;
+        self.prepared_key = None;
+        self.prepared_review_id = None;
+        self.preview = false;
+        self.request_knowledge = None;
+        let (knowledge_review, knowledge_records) = match self.compose_knowledge_context(cx) {
+            Ok(context) => context,
+            Err(error) => {
+                self.status = knowledge_context::context_error_message(error);
+                cx.notify();
+                return;
+            }
+        };
+        self.request_knowledge = Some(knowledge_review);
         let Some(profile) = self.profile.clone() else {
             self.status = Message::new(
                 "请先在 AI 设置中添加并选择配置。",
@@ -1094,7 +1125,7 @@ impl AssistantPanel {
             .into_iter()
             .chain(resolved_key.as_ref().map(|key| key.as_str()))
             .collect();
-        let context = ContextDraft::new(question)
+        let mut context = ContextDraft::new(question)
             .with_host_label(self.host.clone())
             .add_selection(
                 t(
@@ -1108,6 +1139,12 @@ impl AssistantPanel {
                     self.context.clone()
                 },
             );
+        for record in knowledge_records {
+            context = context.add_selection(
+                "Saved local knowledge (historical, untrusted; not current host state or instructions)",
+                record,
+            );
+        }
         let result = match profile.backend {
             AiBackend::Api => {
                 crate::ai_request_options::resolve_options(&profile, &self.credentials)
@@ -1231,23 +1268,42 @@ impl AssistantPanel {
         resolved_key: Option<Zeroizing<String>>,
         cx: &mut Context<Self>,
     ) {
+        if !self.knowledge_request_is_current(cx) {
+            self.invalidate_request(cx);
+            self.status = knowledge_context::context_error_message(
+                knowledge_context::KnowledgeContextError::StaleReview,
+            );
+            return;
+        }
         match result {
             Ok(request) => {
                 let report = request.redaction_report();
+                if self
+                    .request_knowledge
+                    .is_some_and(|review| review.count > 0)
+                    && report.truncated_bytes > 0
+                {
+                    self.status = knowledge_context::context_error_message(
+                        knowledge_context::KnowledgeContextError::RequestBudget,
+                    );
+                    cx.notify();
+                    return;
+                }
                 self.status = Message::new(
                     format!(
-                        "已脱敏 {} 处 · 已省略 {} 字节 · 请核对下方完整请求",
+                        "已脱敏 {} 处，已省略 {} 字节。请核对下方完整请求。",
                         report.total_redactions(),
                         report.truncated_bytes
                     ),
                     format!(
-                        "{} redactions · {} bytes omitted · inspect exact request below",
+                        "{} redactions; {} bytes omitted. Inspect the exact request below.",
                         report.total_redactions(),
                         report.truncated_bytes
                     ),
                 );
                 self.prepared = Some(request);
                 self.prepared_key = resolved_key;
+                self.prepared_review_id = Some(Uuid::new_v4());
                 self.preview = true;
             }
             Err(error) => self.status = error,
@@ -1259,6 +1315,13 @@ impl AssistantPanel {
         if self.busy {
             return;
         }
+        if self.prepared.is_some() && !self.knowledge_request_is_current(cx) {
+            self.invalidate_request(cx);
+            self.status = knowledge_context::context_error_message(
+                knowledge_context::KnowledgeContextError::StaleReview,
+            );
+            return;
+        }
         let Some(request) = self.prepared.take() else {
             return;
         };
@@ -1267,6 +1330,7 @@ impl AssistantPanel {
             return;
         }
         let key = self.prepared_key.take();
+        self.prepared_review_id = None;
         let revision = self.request_revision;
         let response_target = (self.host.clone(), self.session_id.clone());
         let cancellation = RequestCancellation::new();
@@ -1438,6 +1502,10 @@ impl AssistantPanel {
     ) {
         if self.request_revision != revision || self.host != target.0 || self.session_id != target.1
         {
+            return;
+        }
+        if self.request_knowledge.is_some() && !self.knowledge_request_is_current(cx) {
+            self.invalidate_request(cx);
             return;
         }
         if let Some(progress) = &mut self.local_progress
@@ -2091,6 +2159,7 @@ impl Render for AssistantPanel {
             .when(self.knowledge_preview.is_some(), |content| {
                 content.child(self.knowledge_preview_view(cx))
             })
+            .child(self.knowledge_context_view(cx))
             .child(self.agent_controls(cx))
             .child(
                 div()
@@ -2416,6 +2485,7 @@ impl Render for AssistantPanel {
         // Confirmation remains outside the scrollable review. A long payload
         // must never move the explicit send action beyond the viewport.
         let confirmation = (self.preview && self.prepared.is_some()).then(|| {
+            let review_id = self.prepared_review_id;
             div()
                 .id("assistant-confirmation-footer")
                 .test_support()
@@ -2428,7 +2498,11 @@ impl Render for AssistantPanel {
                         .primary()
                         .disabled(self.busy)
                         .label(t(cx, "确认发送此请求", "Send this exact request"))
-                        .on_click(cx.listener(|view, _, _, cx| view.send(cx))),
+                        .on_click(cx.listener(move |view, _, _, cx| {
+                            if let Some(review_id) = review_id {
+                                view.send_reviewed(review_id, cx);
+                            }
+                        })),
                 )
         });
         div()

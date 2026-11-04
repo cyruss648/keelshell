@@ -1,48 +1,45 @@
 {
   "version": "2.0.0",
   "date": "2026-11-05",
-  "scope": "component",
+  "scope": "app",
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "browse file rows without losing the chosen remote columns",
+  "job": "choose historical knowledge and review the exact Ask request before sending",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
-    "crates/keelshell-app/src/files/view.rs:134",
-    "crates/keelshell-app/src/files/local_view.rs:139",
-    "crates/keelshell-app/src/files/remote_wheel_tests.rs:1",
-    "crates/keelshell-app/src/files/local_view_tests.rs:1",
-    "docs/testing/records/2026-11-05-file-scroll-axes.md:1"
+    "crates/keelshell-app/src/assistant/knowledge_context.rs:105",
+    "crates/keelshell-app/src/assistant/knowledge_library.rs:260",
+    "crates/keelshell-ai/src/context.rs:97",
+    "docs/product/AI_KNOWLEDGE_CONTEXT.md:1"
   ],
   "preserve": [
-    "three theme families and all semantic styling",
-    "file browser geometry",
-    "native pointer and keyboard actions",
-    "selection and review identities",
-    "owned SFTP transfer results"
+    "semantic theme tokens and existing assistant layout",
+    "historical source identity and saved originals",
+    "explicit provider/local CLI approval and action review",
+    "fixed confirmation footer and scrollable full payload"
   ],
   "introduce": [
-    "independent file row and remote column scrolling",
-    "local rows ignore horizontal input",
-    "vertical header input does not pan remote columns"
+    "explicit Add/Remove/Clear selection with source/date/outcome",
+    "selection-bound exact request preview and stale action invalidation",
+    "recoverable encoded credential rejection before preview"
   ],
   "material": {
     "real": [
-      "saved connection folders and profiles",
-      "live owned SSH sessions",
-      "actual owned SFTP fixture listing",
-      "retained command and assistant drafts"
+      "user-saved local historical knowledge",
+      "explicitly chosen records and provider",
+      "actual reviewed payload and reply"
     ],
-    "pictures": "raw native captures bound to candidate 0fd982d8",
+    "pictures": "r1: 20 native JPEG/AX pairs, binary60170e84; r2: 4 fresh pairs, binaryc48ae4c7. Synthetic records and owned no-auth loopback; all raw2880x1866.",
     "absent": [
-      "invented metrics",
-      "testimonials",
-      "decorative product mockups"
+      "invented live hosts",
+      "unreviewed command execution",
+      "background context sending"
     ]
   },
   "inferred_from_authorized_design_scope": true,
   "web_render_verified": false,
-  "native_verification": "Candidate 0fd982d8: 21 raw capture/AX pairs, owned 34-byte upload digest match, reversible vertical rows without column drift at 900x900 and inferred900x581. Native horizontal attempts produced no visible movement: UNKNOWN; exact900x580 and complete matrix open.",
-  "web_render_scope": "not_applicable: Rust/GPUI; sloplint reports no supported source files"
+  "web_render_scope": "not_applicable: Rust/GPUI source",
+  "native_verification": "r1 subset retained under60170e84. Gate63 preview correction applied as exactly three strings; r2 full gate passed with2056 ordinary/23ignored,10doc,Python128run1skip and494 equal inputs. New c48ae4c7 package bilingual Frost-light metadata and one explicit two-record loopback send verified; both processes exited0/reaped. Bounded r2 independent re-review APPROVE_SCOPED_CHANGE, openP0/P1/P2=0, bothP2resolved; Hallmark ship for inspected subset. Full native preview extraction and complete matrix remain open."
 }

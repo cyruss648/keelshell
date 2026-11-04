@@ -304,3 +304,98 @@ fn knowledge_library_review_footer_remains_visible_with_long_text(cx: &mut TestA
     })
     .unwrap();
 }
+
+#[gpui_kit::test]
+fn knowledge_library_context_edit_save_failure_and_reload_discard_old_selection(
+    cx: &mut TestAppContext,
+) {
+    let (window, panel, state) = mount(cx);
+    cx.update_window(window, |_, window, cx| {
+        panel.update(cx, |panel, cx| {
+            let entry = &state.knowledge_entries[0];
+            panel.toggle_context(entry, cx);
+            let selected_revision = panel.context_revision();
+            panel.select(entry, window, cx);
+            assert_eq!(
+                panel.context_selection().entries(),
+                std::slice::from_ref(entry)
+            );
+            panel.summary.update(cx, |input, cx| {
+                input.set_value("An unsaved edit", window, cx)
+            });
+            panel.invalidate_review(cx);
+            assert!(panel.context_selection().entries().is_empty());
+            assert_ne!(panel.context_revision(), selected_revision);
+            // An unsaved draft cannot be silently selected in place of saved text.
+            panel.toggle_context(entry, cx);
+            assert!(panel.context_selection().entries().is_empty());
+            panel.select(entry, window, cx);
+            panel.toggle_context(entry, cx);
+            panel.prepare(entry, true, cx);
+            let review = panel.review.as_ref().unwrap().id;
+            assert!(panel.begin_save(review, cx));
+            assert!(panel.context_selection().entries().is_empty());
+            panel.save_failed(review, &keelshell_core::Error::Conflict, cx);
+            panel.toggle_context(entry, cx);
+            assert!(panel.context_selection().entries().is_empty());
+            let Phase::NeedsReload(token) = panel.phase else {
+                panic!("reload required")
+            };
+            assert!(panel.begin_reload(token, cx));
+            let reloading = panel.context_revision();
+            assert!(panel.finish_reload(token, &state, cx));
+            assert_ne!(panel.context_revision(), reloading);
+            assert!(panel.context_selection().entries().is_empty());
+            panel.toggle_context(entry, cx);
+            assert_eq!(
+                panel.context_selection().entries(),
+                std::slice::from_ref(entry)
+            );
+        });
+    })
+    .unwrap();
+}
+
+#[gpui_kit::test]
+fn knowledge_library_context_old_painted_add_cannot_select_changed_record(cx: &mut TestAppContext) {
+    let (window, panel, mut state) = mount(cx);
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        let position = window
+            .find(format!(
+                "knowledge-context-toggle-{}",
+                state.knowledge_entries[0].id()
+            ))
+            .bounds()
+            .center();
+        panel.update(cx, |panel, cx| {
+            state.knowledge_entries[0] = state.knowledge_entries[0]
+                .with_reviewed_content("Replacement", "Different facts")
+                .unwrap();
+            panel.set_snapshot(&state, cx);
+        });
+        window.dispatch_event(
+            MouseDownEvent {
+                button: MouseButton::Left,
+                position,
+                modifiers: Default::default(),
+                click_count: 1,
+                first_mouse: false,
+            }
+            .to_platform_input(),
+            cx,
+        );
+        window.dispatch_event(
+            MouseUpEvent {
+                button: MouseButton::Left,
+                position,
+                modifiers: Default::default(),
+                click_count: 1,
+            }
+            .to_platform_input(),
+            cx,
+        );
+        assert!(panel.read(cx).context_selection().entries().is_empty());
+    })
+    .unwrap();
+}

@@ -1,6 +1,28 @@
 [
   {
     "date": "2026-11-05",
+    "scope": "app",
+    "shape": "existing native assistant and local knowledge list",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "explicit saved knowledge for Ask",
+    "signature": "historical sources beside a request the user explicitly reviews",
+    "sections": [
+      "knowledge search and selection",
+      "chosen source summaries",
+      "question and provider",
+      "full payload and confirmation",
+      "reply"
+    ],
+    "imagery": "r1:20 original JPEG/AX pairs bound to60170e84; r2:4 fresh pairs bound toc48ae4c7; all raw2880x1866",
+    "waived": [],
+    "sweep": "r1 full gate passed and P1 closed. First final review FIX_REQUIRED_DOCUMENTATION_AND_HALLMARK, P2=2; original reports retained. Documentation and exactly three preview display strings corrected. r2 full gate2056 ordinary/23ignored,10doc,Python128run1skip passed;494 inputs match. Fresh c48ae4c7 bilingual Frost-light preview and one explicit loopback send verified; bounded r2 independent re-review APPROVE_SCOPED_CHANGE, openP0/P1/P2=0, bothP2resolved; Hallmark ship for inspected subset. Rust HTML lint not applicable."
+  },
+  {
+    "date": "2026-11-05",
     "scope": "component",
     "shape": "existing native file lists",
     "theme": [

@@ -278,6 +278,20 @@ fn main() {
         .is_some_and(|arg| arg == "--readiness-error-tests")
     {
         readiness_error_controls::run();
+    } else if arguments == ["--saved-knowledge-context-tests"] {
+        tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(2)
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(async {
+                tokio::time::timeout(
+                    Duration::from_secs(40),
+                    saved_knowledge_context_admission_cases(),
+                )
+                .await
+                .expect("bounded saved-knowledge process checks");
+            });
     } else if std::env::current_exe()
         .unwrap()
         .file_stem()
@@ -993,6 +1007,77 @@ fn credential() -> LocalAgentCredential {
     LocalAgentCredential::new("fixture_ephemeral_token").unwrap()
 }
 
+fn owned_saved_record(summary: &str) -> Value {
+    json!({
+        "id":"11111111-1111-4111-8111-111111111111",
+        "source":{
+            "kind":"session", "id":"22222222-2222-4222-8222-222222222222",
+            "revision":7, "label":"Historical fixture"
+        },
+        "session_id":"retired-fixture-session", "capture_type":"selection",
+        "occurred_at":100, "title":"Historical observation",
+        "summary":summary, "outcome":"failed"
+    })
+}
+
+async fn saved_knowledge_context_admission_cases() {
+    for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
+        let fixture = Fixture::new(kind, "-sensitive-knowledge");
+        for inactive in [
+            "history-fixture-a\"bc",
+            "history-fixture-ab\\c",
+            "history-fixture-a\"b\\c",
+        ] {
+            let result = fixture.config(Duration::from_secs(5)).prepare(
+                ContextDraft::new("saved-knowledge-stdin").add_selection(
+                    "Historical record",
+                    serde_json::to_string(&owned_saved_record(inactive)).unwrap(),
+                ),
+                &["fixture_ephemeral_token", inactive],
+                8192,
+            );
+            assert!(matches!(
+                result,
+                Err(LocalAgentError::Context(
+                    keelshell_ai::AiError::CredentialInContext
+                ))
+            ));
+            assert!(
+                !fixture.root.path().join("spawned-fixture").exists(),
+                "inactive credential rejection must precede every child process"
+            );
+            fixture.assert_clean();
+        }
+        let record = owned_saved_record("harmless \"quote\" and \\ slash");
+        let review = fixture
+            .config(Duration::from_secs(5))
+            .prepare(
+                ContextDraft::new("saved-knowledge-stdin")
+                    .add_selection("Historical record", serde_json::to_string(&record).unwrap()),
+                &["fixture_ephemeral_token", "history-fixture-a\"b\\c"],
+                8192,
+            )
+            .unwrap();
+        let stdin: Value = serde_json::from_str(review.preview_stdin()).unwrap();
+        let context: Value =
+            serde_json::from_str(stdin["selected_context"].as_str().unwrap()).unwrap();
+        let decoded: Value =
+            serde_json::from_str(context["selections"][0]["text"].as_str().unwrap()).unwrap();
+        assert_eq!(decoded, record);
+        let reply = LocalAgentClient
+            .ask(review.approve(), credential(), &RequestCancellation::new())
+            .await
+            .unwrap();
+        assert_eq!(reply.text(), "saved knowledge stdin verified");
+        assert!(fixture.root.path().join("spawned-fixture").exists());
+        std::fs::remove_file(fixture.root.path().join("spawned-fixture")).unwrap();
+        fixture.assert_clean();
+    }
+    println!(
+        "saved knowledge process checks: 6 inactive-credential rejections, 2 owned stdin deliveries; no supplier CLI or provider"
+    );
+}
+
 async fn integration_cases() {
     let _ = STARTED.set(Instant::now());
     mark(None, Stage::Controller, Phase::Begin, None);
@@ -1310,6 +1395,7 @@ async fn integration_cases() {
         Phase::End,
         Some(2),
     );
+    Box::pin(saved_knowledge_context_admission_cases()).await;
     mark(None, Stage::Controller, Phase::End, None);
     println!(
         "local agent process integration: all assertions/scenario groups passed; no supplier CLI or model calls"
@@ -1998,6 +2084,15 @@ fn fixture(arguments: &[String]) {
     }
     let mut answer = if question == "echo-credential" {
         "fixture_ephemeral_token".to_owned()
+    } else if question == "saved-knowledge-stdin" {
+        assert_eq!(selected["selections"].as_array().unwrap().len(), 1);
+        let record: Value =
+            serde_json::from_str(selected["selections"][0]["text"].as_str().unwrap()).unwrap();
+        assert_eq!(
+            record,
+            owned_saved_record("harmless \"quote\" and \\ slash")
+        );
+        "saved knowledge stdin verified".to_owned()
     } else {
         "完整中文回答; selected-only".to_owned()
     };

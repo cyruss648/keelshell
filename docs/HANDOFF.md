@@ -6,6 +6,14 @@
 
 ## 当前接续：文件滚动轴与知识上下文
 
+文件滚动轴功能已提交、快进合入并推送 main：
+**`146e3c10f4a86d4211f7186cc621c3ebead4a5de`**。
+全部 490 个提交 blob 与最终门禁输入一致；对应 Quality
+**41921359337** 已读回三平台全部 success，原始日志和终态位于
+`current-ci/`，有界观察器已退出回收。基线文档提交 `c10d9f8` 的
+Quality **41914607956** 已读回三平台成功。
+交付回执为 `work/files-scroll-axes-20261105/delivery-readback.json`。
+
 文件列表轴限制以 `c10d9f8365c1eecfef9f8042108ec4b3f9f087ee` 为基线，
 在 `feature/files-scroll-axes-20261105` 中推进。纯纵向输入使远程列横移、
 纯横向输入使本地行纵移均已由实际 GPUI 事件复现；
@@ -18,14 +26,53 @@ Python 128 / 1 skipped，格式/严格 Clippy/依赖策略通过。
 可逆、列位置保持，较矮窗口末行可正确勾选。原始小窗图像为 1800×1228；
 不能称精确 900×580。横向工具输入未观察到位移、接收事件字段未知，
 原生横向验收仍 OPEN。最终证据复核 APPROVE_SCOPED_CHANGE，
-P0/P1/P2=0，Hallmark 对所检查子集为 ship；提交绑定与精确 CI 待收尾，
-不能沿用前轮包或三平台 CI 作为新源码验收。
+P0/P1/P2=0，Hallmark 对所检查子集为 ship；提交绑定与精确 CI 已读回，
+仍不能用三平台源码 CI 关闭原生横向或完整桌面矩阵。
 具体结果与失败证据见[滚动轴记录](testing/records/2026-11-05-file-scroll-axes.md)，
 本地材料为 `work/files-scroll-axes-20261105/`。
 
-知识上下文显式选择/预览/发送同时在独立工作副本开发，尚未导入当前源码，
-不把现有知识库管理或已存在的模型发送通道算作该新流程完成。
-当前副本只改 Files；整合前分别复核来源身份、失效规则与实际发送内容。
+知识上下文显式选择/预览/发送的 v2 修正版已导入当前源码。
+完整组合门禁退出 0并回收：**2,056 ordinary Rust / 23 ignored**
+（含 app **863 / 2 ignored**）、10 rustdoc、Python 128 / 1 skipped，
+格式/严格 Clippy/依赖策略及额外进程控制器通过。原始来源身份、失效规则
+和实际发送内容分别验收，完整模型/供应商验收仍开放。
+
+首候选非作者源码审查为 **HOLD / P1 AKC-SR-001**：已知凭据包含 JSON
+转义字符时，先编码再字面脱敏可能遗漏可恢复内容，尤其是非当前 profile
+凭据进入本地推理 stdin。v2 将已有嵌套凭据检查变为每次准备前必经的拒绝
+条件，原保存记录保持不变。同一最终测试修前失败、修后通过，覆盖 84 种组合；
+作者专项 221 passed / 1 ignored，受控进程验证六次启动前拒绝和两次安全 stdin。
+非作者再审 **APPROVE_SCOPED_P1_FIX**，开放 P0/P1/P2=0，确认最终测试相同，
+957 个输入仅生产 `context.rs` 有差异。该发现已在 v2 源码范围关闭；原 HOLD
+仍保存在 `work/ai-knowledge-context-20261105/independent-review/`。
+
+父任务当前整合分支为 `feature/knowledge-context-integration-20261105`。
+新包 `60170e84…` 的 **494 个构建/门禁/捕获后输入一致**。
+受控 macOS 原生已核对两条合成历史知识的选择、预览后零请求、显式发送后
+实际知识逐字段保持原身份和内容；移除 Beta 使旧预览/发送失效。
+第二次只发送 Alpha，清空进行中的选择后放行响应，界面没有恢复迟到回复。
+三主题限定外观及中英文切换保留选择和草稿、没有隐式发送；20 对原始捕获
+均为 2880×1866，缩放尝试失败，窄窗口未验。原生预览完整文本未提取，
+不将实际请求来源核对冒充原生预览字节相等。无真实 provider、供应商 CLI
+或实时 SSH；应用和录制端均退出 0、已回收，隔离运行目录已清理，
+包、种子、结束状态与原始证据保留。
+最终首轮证据复核为 **P2=2 / FIX_REQUIRED_DOCUMENTATION_AND_HALLMARK**：
+两处能力状态未同步、预览元信息使用多重中点串联。文档已纠正，
+`assistant.rs` 仅三处展示字符串改为分行/普通句子；r1 包与门禁仍保留。
+`full-gate-r2` 已退出 0并回收，计数仍为 2,056 ordinary / 23 ignored、
+10 rustdoc、Python 128 / 1 skipped；494 个门禁/构建/捕获后输入一致。
+新包 `c48ae4c7…` 在霜白浅色下核对中英文三行元信息和普通状态句子；
+确认前零请求，确认后仅一次实际发送，两条原记录逐字段保持。
+四对原始捕获均为 2880×1866，无 SSH 审核目标、诊断计划禁用；
+应用与录制端退出 0、已回收，隔离目录已清理。
+两包范围分别保留。r2 限定非作者复核 **APPROVE_SCOPED_CHANGE，
+开放 P0/P1/P2=0**，两项 P2 已关闭；Hallmark 对受检子集为 ship。
+提交和精确 CI 待完成。
+见[知识上下文记录](testing/records/2026-11-05-ai-knowledge-context.md)。
+v2 补丁与输入摘要位于 `work/ai-knowledge-context-20261105/author/`，
+导入读回为 `import-readback-v2.json`。新依赖 freshness 于
+2026-11-04T21:55:57Z 开始，104 条声明/使用通过，报告为
+`dependency-freshness-r2.json`；首次报告写入失败的回执单独保留。
 
 ## 本轮文件工作区与渲染栈 — 源码与三平台 CI 通过
 
@@ -113,7 +160,7 @@ SFTP 修复源码基线为 **`dc94e0e03782ba3d115e784c72823ee0f082b1b2`**；父�
 
 | 已集成范围 | 当前边界与负责文档 |
 | --- | --- |
-| AI-04 本地知识库：列表、字面搜索、单条审核编辑/删除、后台 StateStore 保存 | 来源身份保持；Conflict/Unknown 后显式 reload 并重新审核，不重放旧 candidate。知识上下文模型发送尚未完成。见[知识库指南](product/AI_KNOWLEDGE_LIBRARY.md)、[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)。 |
+| AI-04 本地知识库：列表、字面搜索、单条审核编辑/删除、后台 StateStore 保存 | 来源身份保持；Conflict/Unknown 后显式 reload 并重新审核，不重放旧 candidate。知识上下文最新整合和受控原生见本入口顶部，真实供应商验收仍开放。见[知识库指南](product/AI_KNOWLEDGE_LIBRARY.md)、[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)。 |
 | NET-01：saved connection 绑定的 local/remote/dynamic executor，命名规则新增/编辑/删除及独立停止审核 | 运行 owner/流量属于原 live session；ephemeral quick connect 不能运行 named rule。真实 cancel 拒绝已有回归，真实远端超时只有源码复核；运行状态持久化、重启恢复、重连 owner 全矩阵及原生仍开放。见[NET 记录](testing/records/2026-11-04-net-01-rule-management.md)。 |
 
 ## 前轮工程门禁、审查与 CI
@@ -181,7 +228,7 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 以下仍为 **OPEN**，不能由本机门禁或上述限定观察关闭：
 
 - Windows/Linux 桌面、最终候选完整主题×语言×窗口矩阵、OS 外观通知、最终候选最小 OS 窗口几何、IME、VoiceOver；原生文件管理器拖放和其它既有原生缺口继续按[能力清单](product/CAPABILITIES.md)验收。首包三主题浅深默认尺寸画面不能关闭这些范围。
-- NET 原生操作、真实远端取消超时；知识库原生修改及完整知识上下文发送；更广泛的远程环境兼容性和完整 AI/MCP 流程。当前受控 OpenSSH CI 不代表全部部署环境。
+- NET 原生操作、真实远端取消超时；知识库原生修改、知识上下文真实供应商/CLI 及完整矩阵；更广泛的远程环境兼容性和完整 AI/MCP 流程。当前受控 OpenSSH CI 不代表全部部署环境。
 - 六目标 Release、签名/公证、真实下载、安装/更新/回滚及完整产品目标；本轮没有创建发行标签或覆盖安装。
 
 ## AI 与对外 MCP 的固定方向
@@ -200,15 +247,15 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 - `keelshell-app` 为 UI，`keelshell-core` 为领域/存储，`keelshell-session` 为传输，`keelshell-ai` 为 AI；阻塞 I/O 离开 UI 线程。公共 API 写 rustdoc，使用 typed errors，测试外避免 panic，行为测试使用隔离临时数据与有界等待。
 - 直接 registry 要求统一 `x.y`，应用 `Cargo.lock` 保留 patch；**不 pin Rust 工具链**，使用开发环境或 CI 支持的版本。历史 Rust 1.99.1 是执行环境记录，不是项目限制。
 - 每轮开发检查官方最新稳定、非撤回直接依赖并保存新证据：`python3 scripts/check_dependencies.py --json-report <新报告.json>`，或标准门禁前执行 `python3 scripts/check.py --fresh-dependencies`；离线标准检查继续可用。
-- 最新官方 freshness 开始于 **2026-11-04T21:20:42Z**（上海 11 月 5 日）：104 条声明/使用通过，报告为 `work/files-scroll-axes-20261105/dependency-freshness.json`。本轮没有新增或升级依赖；前轮首次报告目录缺失失败亦保留。早前升级和工程来源见[依赖记录](testing/records/2026-11-04-dependencies.md)及[工程来源复核](research/2026-11-04-engineering-refresh.md)。
+- 最新官方 freshness 开始于 **2026-11-04T21:55:57Z**（上海 11 月 5 日）：104 条声明/使用通过，报告为 `work/ai-knowledge-context-20261105/dependency-freshness-r2.json`。本轮没有新增或升级依赖；前轮首次报告目录缺失失败亦保留。早前升级和工程来源见[依赖记录](testing/records/2026-11-04-dependencies.md)及[工程来源复核](research/2026-11-04-engineering-refresh.md)。
 - 不引入私有 Git 依赖、开发者绝对路径、凭据或生产日志。凭据默认临时；显式保存使用 OS 凭据库或经认证、主密码加密的 vault；主密码及明文凭据不写 profile metadata。主机密钥变化必须拒绝连接。
 - 功能提交前完成格式、严格 Clippy、测试、依赖策略、相关原生检查和新的非作者审查；失败证据与未验证范围必须保留。需求/设计/验收分别更新 `docs/product`、`docs/adr`、`docs/testing` 和 `docs/ROADMAP.md`，中英文 README 同步。
 - 用 KeelShell 自身能力描述产品，仓库文本、文件名、注释及发行说明不得引入具名专有 SSH 产品比较。既有授权涵盖公开 GitHub、提交推送及标签触发多平台 Releases；不涵盖遥测上传或覆盖安装。
 
 ## 优先接续顺序
 
-1. 完成滚动轴候选的提交与精确 CI；最终非作者复核已通过，纵向不移列已有新包证据，继续核对未生效的横向原生输入及接收事件，补最终候选主题×语言×窗口矩阵、精确最小 OS 高度、导航键盘树操作及无障碍证据。浏览优先文件区、连接/主机导航及会话栏已实现，不要重复重做；受控滚轮测试不代替 OS 验收。
-2. 推进知识上下文显式选择与模型发送、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
+1. 完成知识候选最终非作者复核、提交及精确 CI；组合门禁和限定原生证据见顶部。文件滚动轴已合入且精确 CI 成功；继续核对未生效的横向原生输入及接收事件，补最终候选主题×语言×窗口矩阵、精确最小 OS 高度、导航键盘树操作及无障碍证据。浏览优先文件区、连接/主机导航及会话栏已实现，不要重复重做；受控滚轮测试不代替 OS 验收。
+2. 推进知识上下文真实供应商/CLI 验收、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
 3. 补 NET 原生与真实取消超时、重连 owner 全矩阵；运行状态持久化/恢复单独设计，不从已完成的命名规则元数据管理推断。
 4. 逐项补三平台桌面、IME/VoiceOver、原生拖放、真实互操作与发布安装验证；按[路线图](ROADMAP.md)继续完整能力目标。文件工作区提交的三平台源码 CI 已通过，保留前次失败，不重复将已闭合源码检查列为待办。
 
@@ -231,6 +278,9 @@ KeelShell 进程。低栈诊断副本、临时目录和独立滚轮源码副本�
 
 以下路径均相对仓库根目录，属于本地忽略证据，不是公开发行产物：
 
+- `work/ai-knowledge-context-20261105/`：v1 HOLD、v2 作者与独立再审、
+  组合门禁/构建及 494 输入；`native/` 的两次实际 HTTP 请求、原始种子、
+  20 对 AX/JPEG、包身份和进程退出/清理回执；最终整合复核与交付另记。
 - `work/files-scroll-axes-20261105/`：独立滚动轴的修前反例、同测试修后通过、
   完整门禁与 490 输入绑定；`native/` 中新包、实际上传摘要、原始 AX/JPEG、
   尺寸与退出回执；`independent-review/` 中新的非作者复核。

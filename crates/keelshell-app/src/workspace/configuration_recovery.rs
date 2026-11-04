@@ -81,6 +81,7 @@ impl Workspace {
                         view.mcp = mcp::McpState::new(view.mcp.root.clone());
                         view.ai_credentials = EphemeralCredentials::new();
                         view.assistant.update(cx, |assistant, cx| {
+                            assistant.invalidate_knowledge_review(cx);
                             assistant.set_context(String::new(), String::new(), String::new(), cx);
                             assistant.set_profiles(&view.state.settings.ai_profiles, &view.ai_credentials, cx);
                         });

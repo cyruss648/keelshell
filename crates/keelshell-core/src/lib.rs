@@ -23,6 +23,7 @@ mod diff;
 mod directory_compare;
 mod directory_sync;
 mod error;
+mod knowledge_context;
 mod knowledge_library;
 mod model;
 mod network_diagnostic;
@@ -102,6 +103,9 @@ pub use directory_sync::{
     plan_directory_mirror, plan_directory_sync,
 };
 pub use error::{Error, ValidationError};
+pub use knowledge_context::{
+    MAX_SAVED_CONTEXT_BYTES, MAX_SAVED_CONTEXT_ENTRIES, SavedContextError, SavedKnowledgeContext,
+};
 pub use model::{
     AiSettings, AppState, AuthMethod, Connection, ImportReport, Language, SCHEMA_VERSION, Settings,
     SnapshotRevision, Snippet, Theme,

@@ -11,7 +11,7 @@ use gpui_kit::{
 };
 use keelshell_core::{
     AppState, KnowledgeError, KnowledgeOutcome, MAX_KNOWLEDGE_SEARCH_QUERY_BYTES,
-    MAX_KNOWLEDGE_TEXT_BYTES, SavedKnowledgeEntry, SnapshotRevision,
+    MAX_KNOWLEDGE_TEXT_BYTES, SavedKnowledgeContext, SavedKnowledgeEntry, SnapshotRevision,
 };
 use uuid::Uuid;
 
@@ -24,6 +24,7 @@ pub(crate) enum LibraryEvent {
     Apply(Uuid),
     Reload(Uuid),
     Close,
+    ContextChanged,
 }
 
 #[derive(Clone)]
@@ -55,6 +56,8 @@ pub(crate) struct KnowledgeLibrary {
     phase: Phase,
     show_source_details: bool,
     message: Message,
+    context: SavedKnowledgeContext,
+    context_revision: Uuid,
     _subscriptions: Vec<Subscription>,
 }
 
@@ -104,6 +107,8 @@ impl KnowledgeLibrary {
                 "查看和整理明确保存的本地知识。",
                 "Browse and organize explicitly saved local knowledge.",
             ),
+            context: SavedKnowledgeContext::default(),
+            context_revision: Uuid::new_v4(),
             _subscriptions: subscriptions,
         }
     }
@@ -114,6 +119,9 @@ impl KnowledgeLibrary {
         }
         self.snapshot = state.snapshot;
         self.entries.clone_from(&state.knowledge_entries);
+        if self.context.retain_current(&self.entries) {
+            self.context_changed(cx);
+        }
         if self.phase == Phase::Ready {
             self.review = None;
             if self
@@ -132,6 +140,12 @@ impl KnowledgeLibrary {
     }
 
     fn invalidate_review(&mut self, cx: &mut Context<Self>) {
+        if let Some(selected) = &self.selected
+            && !self.saved_draft_matches(selected, cx)
+            && self.context.remove(selected.id())
+        {
+            self.context_changed(cx);
+        }
         if self.phase == Phase::Ready
             && self
                 .review
@@ -141,6 +155,125 @@ impl KnowledgeLibrary {
             self.review = None;
         }
         cx.notify();
+    }
+
+    fn saved_draft_matches(&self, entry: &SavedKnowledgeEntry, cx: &App) -> bool {
+        self.title.read(cx).value().as_ref() == entry.entry().title()
+            && self.summary.read(cx).value().as_ref() == entry.entry().summary()
+    }
+
+    pub(super) fn context_revision(&self) -> Uuid {
+        self.context_revision
+    }
+
+    pub(super) fn context_selection(&self) -> &SavedKnowledgeContext {
+        &self.context
+    }
+
+    pub(super) fn compose_context(
+        &self,
+        cx: &App,
+    ) -> Result<Vec<String>, super::knowledge_context::KnowledgeContextError> {
+        self.validate_context(cx)?;
+        self.context.compose(&self.entries).map_err(Into::into)
+    }
+
+    pub(super) fn validate_context(
+        &self,
+        cx: &App,
+    ) -> Result<(), super::knowledge_context::KnowledgeContextError> {
+        use super::knowledge_context::KnowledgeContextError;
+        if !self.context.entries().is_empty()
+            && (self.phase != Phase::Ready
+                || self.selected.as_ref().is_some_and(|entry| {
+                    self.context.entries().contains(entry) && !self.saved_draft_matches(entry, cx)
+                }))
+        {
+            return Err(KnowledgeContextError::LibraryUnavailable);
+        }
+        self.context
+            .validate_current(&self.entries)
+            .map_err(Into::into)
+    }
+
+    fn context_changed(&mut self, cx: &mut Context<Self>) {
+        self.context_revision = Uuid::new_v4();
+        cx.emit(LibraryEvent::ContextChanged);
+        cx.notify();
+    }
+
+    pub(super) fn remove_context(&mut self, id: Uuid, cx: &mut Context<Self>) {
+        if self.context.remove(id) {
+            self.context_changed(cx);
+        }
+    }
+
+    pub(super) fn clear_context(&mut self, cx: &mut Context<Self>) {
+        if self.context.clear() {
+            self.context_changed(cx);
+        }
+    }
+
+    pub(super) fn toggle_context(
+        &mut self,
+        expected: &SavedKnowledgeEntry,
+        cx: &mut Context<Self>,
+    ) {
+        if self.phase != Phase::Ready || !self.entries.contains(expected) {
+            return;
+        }
+        if self.context.entries().contains(expected) {
+            self.remove_context(expected.id(), cx);
+            return;
+        }
+        // An editor draft is never substituted for the saved version behind the
+        // user's back. Save it first or return to the list to select saved text.
+        if self.selected.as_ref() == Some(expected) && !self.saved_draft_matches(expected, cx) {
+            return;
+        }
+        match self.context.select(expected, &self.entries) {
+            Ok(true) => {
+                self.context_changed(cx);
+                self.message = Message::new(
+                    "已加入 Ask 草稿。返回助手后预览完整请求，再确认发送。",
+                    "Added to the Ask draft. Return to the assistant, preview the full request, then confirm sending.",
+                );
+            }
+            Ok(false) => {}
+            Err(error) => {
+                self.message = super::knowledge_context::context_error_message(error.into());
+                cx.notify();
+            }
+        }
+    }
+
+    fn context_button(
+        &self,
+        entry: &SavedKnowledgeEntry,
+        ready: bool,
+        cx: &mut Context<Self>,
+    ) -> Button {
+        let expected = entry.clone();
+        let selected = self.context.entries().contains(entry);
+        let revision = self.context_revision;
+        Button::new(SharedString::from(format!(
+            "knowledge-context-toggle-{}",
+            entry.id()
+        )))
+        .ghost()
+        .compact()
+        .toggled(selected)
+        .disabled(!ready)
+        .label(if selected {
+            t(cx, "移出 Ask", "Remove from Ask")
+        } else {
+            t(cx, "加入 Ask", "Add to Ask")
+        })
+        .on_click(cx.listener(move |view, _, _, cx| {
+            if view.context_revision == revision {
+                view.toggle_context(&expected, cx);
+            }
+        }))
     }
 
     fn select(
@@ -268,6 +401,10 @@ impl KnowledgeLibrary {
             return false;
         }
         self.phase = Phase::Saving(id);
+        if let Some(review) = &self.review {
+            self.context.remove(review.expected.id());
+        }
+        self.context_changed(cx);
         self.disable_editor(true, cx);
         self.message = Message::new("正在保存本地修改…", "Saving local changes…");
         cx.notify();
@@ -299,6 +436,8 @@ impl KnowledgeLibrary {
         // Even an ordinary I/O error can race an external writer. A fresh load
         // is required before another review, never an automatic retry.
         self.phase = Phase::NeedsReload(Uuid::new_v4());
+        self.context.clear();
+        self.context_changed(cx);
         self.message = Message::detail(
             "修改未确认保存；请重新加载并重新审核",
             "The change was not confirmed saved. Reload and review again",
@@ -323,6 +462,8 @@ impl KnowledgeLibrary {
             return false;
         }
         self.phase = Phase::Reloading(token);
+        self.context.clear();
+        self.context_changed(cx);
         self.message = Message::new("正在重新加载本机配置…", "Reloading local configuration…");
         cx.notify();
         true
@@ -339,6 +480,8 @@ impl KnowledgeLibrary {
         }
         self.snapshot = state.snapshot;
         self.entries.clone_from(&state.knowledge_entries);
+        self.context.clear();
+        self.context_changed(cx);
         self.phase = Phase::Ready;
         self.selected = None;
         self.review = None;
@@ -545,6 +688,11 @@ impl Render for KnowledgeLibrary {
                     ),
                 );
             footer = footer
+                .child(self.context_button(
+                    &selected,
+                    ready && self.saved_draft_matches(&selected, cx),
+                    cx,
+                ))
                 .child(
                     Button::new("knowledge-library-review-edit")
                         .primary()
@@ -605,23 +753,45 @@ impl Render for KnowledgeLibrary {
                         ));
                     }
                     for entry in entries {
-                        let title: String = entry.entry().title().chars().take(80).collect();
+                        let title: String = entry.entry().title().chars().take(48).collect();
+                        let context_button = self.context_button(&entry, ready, cx);
                         body = body.child(
-                            Button::new(SharedString::from(format!(
-                                "knowledge-entry-{}",
-                                entry.id()
-                            )))
-                            .ghost()
-                            .w_full()
-                            .disabled(!ready)
-                            .label(title)
-                            .on_click(cx.listener(
-                                move |view, _, window, cx| view.select(&entry, window, cx),
-                            )),
+                            div()
+                                .min_w_0()
+                                .flex()
+                                .flex_col()
+                                .gap_1()
+                                .child(
+                                    Button::new(SharedString::from(format!(
+                                        "knowledge-entry-{}",
+                                        entry.id()
+                                    )))
+                                    .ghost()
+                                    .w_full()
+                                    .disabled(!ready)
+                                    .label(title)
+                                    .on_click(cx.listener(move |view, _, window, cx| {
+                                        view.select(&entry, window, cx)
+                                    })),
+                                )
+                                .child(context_button),
                         );
                     }
                 }
             }
+        }
+        if !self.context.entries().is_empty() {
+            let revision = self.context_revision;
+            footer = footer.child(
+                Button::new("knowledge-context-clear-library")
+                    .ghost()
+                    .label(t(cx, "清空 Ask 知识", "Clear Ask knowledge"))
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        if view.context_revision == revision {
+                            view.clear_context(cx);
+                        }
+                    })),
+            );
         }
         if let Phase::NeedsReload(token) = self.phase {
             footer = footer.child(
@@ -658,6 +828,21 @@ impl Render for KnowledgeLibrary {
                         "本地知识库",
                         "Local knowledge library",
                     )))
+                    .child(
+                        div().text_xs().text_color(rgb(visual.muted)).child(
+                            Message::new(
+                                format!(
+                                    "Ask 已选 {} / 8；历史资料不会恢复 SSH。",
+                                    self.context.entries().len()
+                                ),
+                                format!(
+                                    "Ask: {} / 8 selected. Historical records do not restore SSH.",
+                                    self.context.entries().len()
+                                ),
+                            )
+                            .render(cx),
+                        ),
+                    )
                     .child(
                         Button::new("knowledge-library-close")
                             .ghost()

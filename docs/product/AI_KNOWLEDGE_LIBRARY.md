@@ -17,6 +17,9 @@ AI 助手中的“本地知识库”展示用户明确审核并保存过的终�
 
 本切片提供本地列表、字面搜索、单条编辑和删除。知识上下文发送给模型、批量管理、分类、跨机器同步、重建原 SSH 会话和自动执行 runbook 不属于该切片。终端来源是用户确认过的事实记录，并不保证外部事实仍然成立。
 
+后续的[显式知识上下文](AI_KNOWLEDGE_CONTEXT.md)接入了逐条加入 Ask、请求预览和明确发送；
+本地浏览及选择本身不会发送资料，编辑、删除或重新加载会使相关旧审核失效。
+
 源码和测试结果见[测试记录](../testing/records/2026-11-04-ai-knowledge-library.md)。GPUI 受控测试、真实 StateStore 读写、macOS 桌面及 Windows/Linux 桌面各有独立证据边界。
 
 ## English
@@ -30,3 +33,7 @@ Deletion has a separate review and confirmation. Cancelling a review writes noth
 Each approval binds the complete original entry, configuration snapshot, draft text and one review identity. Stale controls cannot approve a newer review. Workspace serializes background StateStore writes. A failed save requires an explicit reload and fresh review; conflicts and unknown durability outcomes are never replayed automatically.
 
 Model context sending, bulk management, categories, cross-device knowledge synchronization, restoration of the original SSH session and automatic runbook execution remain outside this slice. Controlled GPUI tests and local storage tests do not establish native acceptance on all three platforms.
+
+The subsequent [explicit knowledge context flow](AI_KNOWLEDGE_CONTEXT.md) adds per-entry
+Ask selection, request preview and explicit sending. Browsing and selecting remain local;
+editing, deletion or reloading revokes the affected review.

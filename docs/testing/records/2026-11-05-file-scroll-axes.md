@@ -89,5 +89,10 @@ Hallmark 实际 lint 退出 2，原因是 Rust 不属于其 HTML/CSS 渲染范�
 记录为不适用，不是渲染检查通过。
 基线文档提交 `c10d9f8` 的精确 Quality **41914607956** 已读回
 success，macOS/Linux/Windows 三项成功；原始 run/jobs 与摘要保存在
-`previous-ci/`。提交绑定与本次精确提交的三平台 CI 尚待读回；
-基线 CI 不覆盖本次源码。
+`previous-ci/`。功能提交 **`146e3c10f4a86d4211f7186cc621c3ebead4a5de`**
+已快进合入并推送 main，490 个提交 blob 与门禁输入相同；交付绑定见
+`delivery-readback.json`。
+该提交的精确 Quality **41921359337** 于 2026-11-04T22:37:42Z 读回
+**success**：macOS、Linux、Windows 三项均成功。原始 run/jobs、
+日志归档和摘要保存在 `current-ci/`，观察器进程已退出并回收；
+没有请求重跑或取消。此结果只关闭该提交的源码 CI，不关闭上述原生边界。
