@@ -55,10 +55,32 @@
 - Fermat 修后非作者复核 P0/P1/P2 为 0，P2-1 关闭；13 项专项控制通过
   （6 项作者控制、7 项独立控制），覆盖普通文件目录、实际写入失败、关闭输出和
   两个记录通道同时失败，原绑定断言均保持。首次 HOLD 的材料逐字节保留，
-  闭环与最终输入绑定独立记录。本次增量的真实 Windows 执行仍待完成。
+  闭环与最终输入绑定独立记录；真实 Windows 后续结果见下一节。
 
 证据目录 `work/theme-integration-20261104/ci/native-barrier/` 保留
 原测试源码摘要、专项、分项检查日志、前后输入清单。
 前序 Quality 的 macOS `126621167756`、Linux `126621167873` 最终均成功，
 两者 OpenSSH 互操作步骤也成功；三份完整日志在同级 `updater-cancel/ci-*`。
 Windows 原失败保持，不宣称三平台整体成功。
+
+## 提交与精确 CI
+
+诊断增量已提交并推送为 `7782979351291abfc95966b286f824fca683deb6`，
+本地与远端 main 已核对一致。精确 Quality `41848787327`：
+macOS `126639191771` 已成功（包括 OpenSSH），Windows `126639192119` 成功；
+Linux `126639192564` 在 MCP 文件测试准备时遇到 `seed UTF8: MutationQuarantined`，
+app 822 passed/1 failed/2 ignored，没有到达 OpenSSH。
+三个 job 的完整原日志、最终 run/jobs API 结果和摘要均已保留；
+整个 run 的结论为 failure，监控进程实际退出 1 并已 reap。
+
+Windows 日志中的 `actual_native_job_barrier_preparation` 显示 helper `finished`，
+身份和迟到结果均已发布，observer 没有错误，原身份已绑定。
+其后的原 `actual_native_job_barrier` 证明 barrier 前后原父子句柄均为 LIVE，
+迟到 `CreateProcess` 被拒绝（数值 Win32 错误 1816），没有迟到 marker；
+最终原句柄均 TERMINAL、活动进程和 pending objects 均为 0、直接进程已 reap、
+管道已排空且 errors 为空。Python 128 项/1 skipped、退出 0，
+app 814 passed/2 ignored，原更新器失败项实际通过。
+
+该运行验证了诊断增量在真实 Windows 上可执行，不能据此反推旧失败原因。
+原 `9ab663e` 的准备失败原因仍为 UNKNOWN。新的 Linux 失败单独见
+[SFTP 夹具记录](2026-11-04-sftp-fixture-identity.md)。

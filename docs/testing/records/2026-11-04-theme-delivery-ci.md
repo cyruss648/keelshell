@@ -7,6 +7,32 @@
 没有创建发行标签或覆盖安装。功能、原生范围与前序完整门禁见
 [主题验证记录](2026-11-04-native-themes.md)。
 
+## 最新源码与验收范围
+
+后续限定测试修复和诊断已推送至 `7782979351291abfc95966b286f824fca683deb6`。
+精确 Quality `41848787327` 的 macOS/Windows 已成功，Linux 在 MCP SFTP 夹具准备失败；
+整个 run 失败，三个完整原日志均已回读。各项结果见
+[原生 Job 记录](2026-11-04-native-barrier-diagnostics.md)；此前失败继续逐次保留。
+不能把本机通过或 CI 步骤名称代替实际平台测试结果。
+
+macOS 原生证据分两份：较早的主题包覆盖受控 SSH/SFTP 连接下切换主题、保留草稿
+和重启恢复；最终组合包补验三个主题入口及中英文知识字段 AX 名称，未重跑 SSH fixture。
+后续提交仅修改测试输入，不把这些检查扩展为完整知识管理、NET 原生、Windows/Linux
+桌面或发布安装验收。具体包摘要与范围分别保存在 `native-theme-results.json`
+和 `native-final-results.json`；后续 Rust 测试源码确实变化，不能声称整个 Rust 源树不变。
+
+新的非作者 Huygens 已逐个检查 `c366871` 之后至 `7782979` 的四个提交：只改变五个被测试模块
+守卫隔离的 Rust 文件、一个 Python unittest 文件及文档；其它 538 个非 Markdown
+输入相同，包括生产源码、Cargo 配置/锁文件、资源、打包和 workflow。
+主题指南与 ADR 0095 的内置注册扩展边界正确，本次限定交付复核 P0/P1/P2 均为 0。
+
+早期主题包的可执行文件已清理，当前不能重算其字节摘要；原结果、manifest、启动路径、
+退出回执及保留的截图/AX 相互一致。最终包的五个文件均重新核对 manifest，
+其程序摘要为 `6d92ada1ddeff800bac062599611949ab70899b77fc39aba407da277272898e3`，
+实际退出 0 且已 reap。该包在功能提交前构建，manifest 没有 commit/workflow 身份；
+源码连续性不等于当前 HEAD 的原生执行。复核材料在
+`work/theme-integration-20261104/final-delivery-review/`。
+
 ## 原提交的 Windows 失败
 
 精确提交的 Quality run `41824639165`，Windows job `126556142575` 在

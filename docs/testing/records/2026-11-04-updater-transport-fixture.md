@@ -76,6 +76,14 @@ Bacon 已额外核对精确提交的 544 个非 Markdown blob 和最终文档状
 macOS `126621167756`、Linux `126621167873` 最终均成功（含 OpenSSH 互操作步骤）；
 三份完整 job 日志和摘要已保存在 `updater-cancel/ci-*`，整个 run 因 Windows 失败而未通过。
 
+后续诊断提交 `7782979` 只修改 Python 测试与文档，更新器和其它 Rust 输入保持。
+其 Quality `41848787327` 的 macOS 已成功；Linux 原更新器失败项实际通过，
+但整体 app suite 在独立 MCP 夹具准备处失败。Windows `126639192119` 已成功；
+其完整日志实际记录原失败用例、取消响应后的下一脚本回复及时间域控制通过，
+app 814 passed/2 ignored。三平台完整日志位于 `native-barrier/ci-*`；
+整体 run 因独立 Linux 失败而未通过。
+原未具名的 3 秒超时原因仍为 UNKNOWN。
+
 证据目录：`work/theme-integration-20261104/ci/updater-cancel/`。
 `author/` 保存非父任务作者 Peirce 的 TCP 反例及旧代码摘要；
 `clock-baseline*` 保存旧时钟源码和实际失败；

@@ -2,17 +2,45 @@
 
 ## 本轮提交与 CI 后续 — 2026-11-04
 
+本次修复的已推送基线为 `7782979351291abfc95966b286f824fca683deb6`，
+推送时本地与远端 main 已核对一致。该提交只给 Windows 原生 Job 测试增加有限诊断，
+不修改生产控制器或应用代码。精确 Quality `41848787327` 的 macOS 已成功，
+Linux 在 MCP 文件测试的 UTF-8 种子写入被 `MutationQuarantined` 拒绝
+（822 passed/1 failed/2 ignored），Windows 已成功（app 814 passed/2 ignored）。
+Windows 原生 Job 回执确认 helper 完成、原父子句柄终态和零清理错误，
+原更新器失败项及新的传输回归也实际通过；整个 run 因 Linux 失败而未通过。
+Linux 已实际通过原更新器失败项，但没有到达 OpenSSH 步骤。
+准确隔离 owner/原因未知。已用相同绑定端点的真实 SSH/SFTP 反例证明
+测试服务器固定主机密钥导致独立文件系统继承隔离的机制；
+候选改为每个独立夹具生成密钥，同服务器重连仍保留隔离。
+首候选 32 项专项和 545 输入的完整门禁实际通过：普通 Rust 2,012 passed/23 ignored、
+app 824 passed/2 ignored、rustdoc 10 passed、Python 128 项/1 skipped，
+格式、workspace 严格 Clippy 和策略检查均通过，输入前后相同。
+非作者初审发现准备写入发生在清理 guard 之外的 P2，暂缓提交；
+已补准备阶段所有权及实际 WRITE 取消/展开控制。
+两项禁用 Drop 的反向控制及最终源码上的旧密钥反例均按预期失败，
+精确恢复候选后 3 项专项、严格 app Clippy 和格式通过；新完整门禁实际退出 0，
+普通 Rust 2,014 passed/23 ignored、app 826 passed/2 ignored、rustdoc 10、
+Python 128 项/1 skipped，545 个非 Markdown 输入前后相同。
+Hypatia 最终源码/新门禁/文档复核 P0/P1/P2 均为 0，P2 已关闭；
+原 HOLD 与失败记录保留，新修复的精确提交 CI 另行验收。
+“句柄为零”的证据范围已修正为目录句柄，不涵盖普通文件句柄。
+没有修改生产隔离规则，不据此认定历史 CI 的唯一原因。
+原失败与后续验证见[SFTP 夹具记录](testing/records/2026-11-04-sftp-fixture-identity.md)。
+完整原日志和最终摘要保存在
+`work/theme-integration-20261104/ci/native-barrier/`。
+
 更新器测试修复已推送为 `9ab663ea1aaafdcff69a3203d38910bea681f84a`，
 远端 SHA 与最终非作者提交绑定均已核对。它的 Quality `41843572205`
 在 Windows 的 Python 原生嵌套 Job 夹具中出现 `bound is None`，
 尚未进入 Cargo 或更新器测试；该 run 的 macOS/Linux 均成功。
 原日志在断言前没有保存准备回执，因此原因保持 UNKNOWN。
-当前候选只给该测试增加固定阶段、数值错误码和断言前回执，保留原 8 秒期限及全部断言；
+后续 `7782979` 只给该测试增加固定阶段、数值错误码和断言前回执，保留原 8 秒期限及全部断言；
 不称为已修复原生问题。独立审查发现可选记录 I/O 可能掩盖原失败的 P2，现已修正并补反例。
 修后 Python 128 项/1 skipped、格式、严格 Clippy 和依赖策略通过，
 其余 543 个非 Markdown 输入与 `9ab663e` 完整门禁相同；没有重复运行未改动的
 Rust suite。Fermat 修后复核 P0/P1/P2 为 0，13 项作者/独立专项控制通过；
-原 P2 和失败证据保留，真实 Windows 结果仍待完成，
+原 P2 和失败证据保留，后续 `7782979` 的真实 Windows 控制已成功，旧失败根因仍未知，
 见[原生夹具诊断记录](testing/records/2026-11-04-native-barrier-diagnostics.md)。
 
 前序提交是 `7b43af20e62c228972b461a412e063aac6ad9304`。
@@ -26,8 +54,9 @@ Rust suite。Fermat 修后复核 P0/P1/P2 为 0，13 项作者/独立专项控�
 修后更新器 54 项通过，完整门禁实际退出 0（普通 Rust 2,011 passed/23 ignored、
 app 823 passed/2 ignored、rustdoc 10 passed、Python 122 项/1 skipped），
 544 个非 Markdown 输入前后不变。新的非作者 Bacon 已复核源码、反例和完整门禁，
-P0/P1/P2 均为 0。其精确提交 `9ab663e` 的 Windows job 未到达更新器检查，
-后续结果不能由本机通过替代。见[更新器测试记录](testing/records/2026-11-04-updater-transport-fixture.md)。
+P0/P1/P2 均为 0。其精确提交 `9ab663e` 的 Windows job 未到达更新器检查；
+后续同 Rust 输入的 `7782979` Windows 已实际通过更新器检查，
+原未具名超时原因仍未知。见[更新器测试记录](testing/records/2026-11-04-updater-transport-fixture.md)。
 
 Windows 测试夹具修复已推送为 `9d4517e`，本机完整门禁和最终提交绑定的非作者复核通过。
 它的新 Quality `41828929466` 的 macOS job 在旧 Unix 分片 nonce 测试超时：

@@ -7,6 +7,7 @@
 - [Unix 分片认证夹具](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)：后续真实 CI 失败、socket 事件驱动的分片检查与新的验证边界。
 - [更新器真实传输夹具](testing/records/2026-11-04-updater-transport-fixture.md)：取消响应后的脚本继续、真实时间期限、反例和精确平台结果。
 - [原生 Job 准备诊断](testing/records/2026-11-04-native-barrier-diagnostics.md)：新 Windows 准备失败、固定阶段与断言前回执；未知原因与平台验收分别记录。
+- [SFTP 夹具身份隔离](testing/records/2026-11-04-sftp-fixture-identity.md)：后续 Linux 种子写入隔离失败、身份复用假设、实际反例与验证边界。
 
 - [本地知识库管理](product/AI_KNOWLEDGE_LIBRARY.md)、[ADR 0094](adr/0094-reviewed-knowledge-library-mutations.md)与[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)：搜索、编辑/删除审核、配置冲突和重新加载。
 - [Hallmark 原生设计约定](design/HALLMARK_NATIVE.md)：既有 GPUI 主题、app screen 布局和 Web/native 验证边界。

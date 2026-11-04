@@ -15,11 +15,15 @@ use std::{
 };
 use tokio::{
     net::TcpListener,
+    sync::oneshot,
     task::{JoinHandle, JoinSet},
 };
 use zeroize::Zeroizing;
 
 use crate::files::sftp_test_filesystem as filesystem;
+
+#[path = "test_server_identity_tests.rs"]
+mod identity_tests;
 
 pub(super) trait Checked<T> {
     fn checked(self, label: &str) -> T;
@@ -98,6 +102,7 @@ pub(crate) struct Server {
     address: std::net::SocketAddr,
     fingerprint: String,
     task: JoinHandle<()>,
+    listener_handoff: Option<oneshot::Sender<oneshot::Sender<TcpListener>>>,
 }
 impl Drop for Server {
     fn drop(&mut self) {
@@ -109,8 +114,17 @@ impl Server {
         let listener = runtime
             .block_on(TcpListener::bind("127.0.0.1:0"))
             .checked("bind file test server");
+        Self::from_listener(runtime, listener)
+    }
+    fn from_listener(runtime: &tokio::runtime::Runtime, listener: TcpListener) -> Self {
         let address = listener.local_addr().checked("file server address");
-        let key = PrivateKey::from(Ed25519Keypair::from_seed(&[0x59; 32]));
+        // Independent filesystems need distinct host identities when loopback
+        // ports are reused. Reconnects to this Server keep the same config/key.
+        let mut seed = [0_u8; 32];
+        for part in seed.as_chunks_mut::<16>().0 {
+            part.copy_from_slice(uuid::Uuid::new_v4().as_bytes());
+        }
+        let key = PrivateKey::from(Ed25519Keypair::from_seed(&seed));
         let fingerprint = key.public_key().fingerprint(HashAlg::Sha256).to_string();
         let config = Arc::new(server::Config {
             keys: vec![key],
@@ -120,17 +134,41 @@ impl Server {
         let active = Arc::new(AtomicUsize::new(0));
         let shared_fs = filesystem.clone();
         let shared_active = active.clone();
-        let task=runtime.spawn(async move {
-            let mut clients=JoinSet::new();
-            loop {tokio::select! {
-                accepted=listener.accept()=>{
-                    let Ok((socket,_))=accepted else {break};
-                    let config=config.clone();
-                    let peer=Peer {channels:HashMap::new(),filesystem:shared_fs.clone(),active:shared_active.clone(),jobs:JoinSet::new()};
-                    clients.spawn(async move {if let Ok(client)=server::run_stream(config,socket,peer).await {let _=client.await;}});
+        let (listener_handoff, mut handoff_request) =
+            oneshot::channel::<oneshot::Sender<TcpListener>>();
+        let task = runtime.spawn(async move {
+            let mut clients = JoinSet::new();
+            loop {
+                tokio::select! {
+                    request = &mut handoff_request => {
+                        // Transfer the bound socket without a rebind race. Existing
+                        // SSH sessions keep their filesystem and are still joined.
+                        if let Ok(return_listener) = request {
+                            let _ = return_listener.send(listener);
+                        }
+                        break;
+                    }
+                    accepted = listener.accept() => {
+                        let Ok((socket, _)) = accepted else { break };
+                        let config = config.clone();
+                        let peer = Peer {
+                            channels: HashMap::new(),
+                            filesystem: shared_fs.clone(),
+                            active: shared_active.clone(),
+                            jobs: JoinSet::new(),
+                        };
+                        clients.spawn(async move {
+                            if let Ok(client) = server::run_stream(config, socket, peer).await {
+                                let _ = client.await;
+                            }
+                        });
+                    }
+                    _ = clients.join_next(), if !clients.is_empty() => {}
                 }
-                _=clients.join_next(),if !clients.is_empty()=>{}
-            }}
+            }
+            // Dropping a russh RunningSession detaches its protocol task, so the
+            // endpoint-reuse regression closes its clients before joining here.
+            while clients.join_next().await.is_some() {}
         });
         Self {
             filesystem,
@@ -138,6 +176,7 @@ impl Server {
             address,
             fingerprint,
             task,
+            listener_handoff: Some(listener_handoff),
         }
     }
     pub(crate) fn connect(&self, runtime: &tokio::runtime::Runtime) -> SshSession {
