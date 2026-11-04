@@ -125,8 +125,52 @@ Lorentz 在独立源码副本中，使用生产 `Workspace` 和真实 SFTP，
 
 两项测试已去掉诊断打印后纳入 `files/remote_wheel_tests.rs`。
 没有修改生产滚动实现；受控事件通过不证明 OS/CUA 原生事件通过。
-原生无滚动的原因仍 **UNKNOWN**。原测试源码、构建输入、几何和进程回执
+此前原生无滚动的原因仍 **UNKNOWN**；同包后续方向对照见下一节。
+原测试源码、构建输入、几何和进程回执
 保留在 `independent-review/remote-wheel-probe/`，一次性源码副本已清理。
+
+### 同包原生方向对照
+
+功能提交 `5d676b97683af3e5060c448fe9f5f61d81bf38b9` 推送后，使用未改动的
+最终 r3 程序再次运行。其 SHA-256 仍为
+`132881a279779de29f813ecad5c30276bfa5b3387d66b962304ebbd7ce80a668`。
+本次为新的隔离数据、临时连接和 SSH/SFTP 夹具；夹具程序摘要为
+`bd0843b566ee03a0f6fe7826a3924290909127ffd651d9d718f0016feb4e519f`，
+不同于上一轮夹具，不能把两次连接当作同一运行身份。
+窗口为 900×900 客户区、雾紫深色英文，原始截图为 1800×1866。
+
+明确审核并上传自有 34 字节文件后，队列显示 Done 1。
+源文件和夹具目标均为 34 字节，SHA-256 同为
+`5f6c526851a3015b99ab2339c101882e324b83eae68608413bf3f45da355e7ca`。
+随后使用同一截图坐标 `(1020,1392)`，只执行三次滚轮调用：
+
+| 捕获 | 操作 | 实际观察 |
+| --- | --- | --- |
+| 36–37 | 上传完成后点击可见首行 | 原始截图显示首个文件夹被选中；父工具 AX 响应报告 `bin` 选中 |
+| 38 | `down`，2 页 | 行、列均无可见位移 |
+| 39–40 | `up`，2 页，再点击同一点 | 文件夹行变为文件行；列从名称侧移到权限/操作侧。父工具 AX 响应报告选中 `report's draft.txt`，`bin` 取消选中 |
+| 41 | `down`，2 页 | 恢复 `bin` / `uploads` / `中文 文档` 三行及左侧列；队列仍 Done 1 |
+
+这些原始截图支持**上传后列表发生可逆的纵向与横向移动**，
+不再将“原生文件列表从未移动”作为当前结论。
+本次没有采集收到的 NSEvent/GPUI 位置、delta、phase 或 modifiers，
+也没有独立物理鼠标/触控板操作；不能证明工具方向对应的事件符号、
+完整滚动体验或历史单次无位移的唯一原因。生产滚动代码没有改动。
+同时发生的横向移动仍需按接收事件核对，不能仅凭源代码推断实际 delta。
+
+本次捕获辅助函数先读取 AX，随后才保存组合观察，因此六份 `.ax.txt`
+仅保存“无变化”差分，**不是完整 AX 树**。行名/选中状态来自父工具真实响应的
+明确转录 `native/r4-parent-ui-observations.json`，不能称为独立原始 AX 复核。
+后续捕获应直接保存禁用差分的组合观察，避免第二次读取仅留下“无变化”摘要。
+原始截图、摘要、动作顺序、上传读回与此限制保存在
+`native/36-r4-*` 至 `native/41-r4-*`、`native/scroll-attempts-r4.json`
+及 `native/r4-upload-content-readback.json`。应用和夹具均退出 0、已回收，
+关闭后的应用清单确认 `isRunning=false`。
+非作者 Helmholtz 独立检查六张原始截图、程序与本地上传源摘要及退出回执，
+确认限定可逆滚动结论，同时明确不能独立验证转录中的行名。
+其报告保存在 `native-wheel-followup/r4-review.md/.json`。
+复核后重新核对清单，移除了本次隔离数据和本地测试源的 7 个文件；
+最终程序、原始截图和回执保留，清理见 `native/r4-cleanup-receipt.json`。
 
 ## 上一提交的跨平台失败与本机栈诊断
 
@@ -173,6 +217,34 @@ Zeno 对拥有独立副本的 macOS arm64 测试程序进行六次有界诊断�
 
 ## 收尾与开放边界
 
+功能提交 **`5d676b97683af3e5060c448fe9f5f61d81bf38b9`** 已合入并推送 main，
+提交后 reviewer 核对了全部 490 个门禁/构建输入与提交 blob。
+20 个 Rust 候选文件与审查源码相同；33 个候选路径中 29 个完全相同，
+4 个仅为结论/交接文档收尾。精确提交复核仍为
+**APPROVE_SCOPED_CHANGE，P0/P1/P2=0**，回执在
+`independent-review/committed-review.json`。
+
+该提交的 Quality **41907439739** 已取得 **success** 终态：
+
+| 平台 / 精确 job | app 测试 | 真实 OpenSSH 步骤 |
+| --- | --- | --- |
+| macOS 26 / `126845767925` | 848 passed / 2 ignored | 通过，26.22s |
+| Ubuntu 24.04 / `126845768247` | 848 passed / 2 ignored | 通过，16.071s |
+| Windows 2025 / `126845767461` | 839 passed / 2 ignored | 工作流明确不运行 |
+
+各 job 的格式、严格 Clippy、标准门禁与打包检查步骤均成功。
+三个原始日志均实际记录以下四项通过：
+`capture_reload_propagates_busy_and_failure`、
+`profile_sync_close_and_history_cannot_restore_retired_mirror_approval`、
+`remote_wheel_after_34_byte_upload_at_900x580`、
+`remote_wheel_after_34_byte_upload_at_900x900`。
+这不是重跑旧失败 run，也不能倒填历史唯一根因。
+首次在 job 仍执行时获取日志返回 404，仅表示当时无法取得日志；
+首次有界观察到时仍未完成，第二次继续观察同一 run 后取得终态，
+没有触发重跑。原 API 回读、各 job 完整日志及 SHA-256、
+逐项行号摘要保存在 `current-ci/`，总回执为 `current-ci/final-readback.json`。
+本节 app 数量属于各自平台执行，不与下方本机总数累加。
+
 最终 `full-gate-r3` 退出 0、进程已回收：普通 Rust **2,036 passed / 23 ignored**，
 其中 app **848 passed / 2 ignored**；rustdoc **10 passed**（一项仅编译），
 Python 运行 **128 项 / 1 skipped**，格式、严格 Clippy、依赖策略和额外进程控制器通过。
@@ -192,6 +264,8 @@ Python 运行 **128 项 / 1 skipped**，格式、严格 Clippy、依赖策略和
 随后清理旧布局包和隔离测试数据/传输文件，逐文件摘要与旧包 manifest 保留在
 `native/final-native-cleanup.json` 及旁边的保存副本；最终 r3 开发包保留。
 夹具临时根目录已由退出清理。没有删除共享缓存或其它任务持有的 worktree。
-提交/推送/CI 将由精确提交回执绑定；没有创建标签或覆盖安装。
+功能提交、推送和精确 CI 已由上述回执绑定。
+后续补验仅改文档，490 个原生构建/门禁输入仍与功能提交相同，
+不将新文档提交冒充为该次 CI 的 head。没有创建标签或覆盖安装。
 完整主题×语言×尺寸矩阵、Windows/Linux 桌面、OS 外观通知、IME、VoiceOver、
 原生文件拖放和完整产品/AI/发布安装目标继续保持 OPEN。

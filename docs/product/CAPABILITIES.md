@@ -16,9 +16,19 @@ separate. Non-inlined Workspace helpers reduced the measured debug entry frame f
 1,101,856 to 62,208 bytes without increasing CI stack limits.
 
 Two production-Workspace tests pass pixel/line scrolling after a real upload at 900×900
-and 900×580. Native wheel attempts still did not move the rows; their cause is unknown.
+and 900×580. A later native run of the unchanged final package at 900×900 demonstrates
+reversible row and column movement after upload: `down` at the top did not move,
+`up` moved both axes, and another `down` returned. The received event fields,
+physical-device direction, multi-axis interaction and unique cause of earlier attempts remain unknown.
 Final native 900×580 geometry, the complete appearance/language/size matrix and native
-Windows/Linux acceptance remain open. Exact commit CI is recorded separately.
+Windows/Linux acceptance remain open.
+Feature commit `5d676b97683af3e5060c448fe9f5f61d81bf38b9` is merged and pushed.
+Its exact Quality run `41907439739` passed macOS, Linux and Windows; app counts are
+848, 848 and 839 passed respectively, with two ignored on each platform.
+All three logs contain passing results for both prior failed scenarios and both new
+post-upload wheel tests. Controlled OpenSSH interoperability passed on macOS/Linux;
+the workflow does not run that step on Windows. This closes source-CI acceptance for
+that commit, not desktop or release acceptance.
 See the [file guide](FILES_WORKSPACE.md) and [evidence record](../testing/records/2026-11-05-native-file-workbench.md).
 
 ## 2026-11-05: native workspace navigation
