@@ -6,10 +6,10 @@ use crate::files::{
     test_server::{Checked, Server},
 };
 use gpui_kit::{
-    AnyWindowHandle, AppContext, Bounds, Context, Entity, InputEvent, InteractiveElement,
+    AnyWindowHandle, App, AppContext, Bounds, Context, Entity, InputEvent, InteractiveElement,
     IntoElement, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParentElement, Pixels,
-    Render, Styled, Subscription, TestAppContext, TestSupportExt, Window, WindowBounds,
-    WindowOptions, accesskit,
+    Point, Render, ScrollDelta, ScrollEvent, Styled, Subscription, TestAppContext, TestSupportExt,
+    Window, WindowBounds, WindowOptions, accesskit,
     component::input::InputState,
     div, point, px, size,
     test::{TestAppContextExt, TestWindowExt},
@@ -477,4 +477,97 @@ async fn compact_pending_navigation_keeps_the_focused_path_and_typing_withdraws_
         }
     })
     .checked("typing withdraws review without issuing its operation or replacing the input");
+}
+
+fn scroll_at(window: &mut Window, cx: &mut App, position: Point<Pixels>, delta: ScrollDelta) {
+    window.dispatch_event(
+        ScrollEvent {
+            position,
+            delta,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        cx,
+    );
+    window.render_frame(cx);
+}
+
+#[gpui_kit::test]
+async fn local_file_rows_ignore_horizontal_wheel_and_remain_vertically_scrollable(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::tempdir().checked("isolated local wheel files");
+    let root = directory
+        .path()
+        .canonicalize()
+        .checked("canonical wheel root");
+    for index in 0..12 {
+        std::fs::write(root.join(format!("row-{index:02}.txt")), b"local wheel")
+            .checked("seed local wheel row");
+    }
+    let fixture = Fixture::new(cx);
+    fixture.idle(cx).await;
+    fixture.click("choose-local-folder", cx);
+    cx.simulate_path_prompt_response(|_| Some(vec![root.clone()]));
+    cx.run_until_parked();
+    fixture.idle(cx).await;
+    assert_eq!(fixture.directory(cx), Some(root));
+    let first_index = fixture.panel.read_with(cx, |panel, _| {
+        let listing = panel
+            .local_browser
+            .listing
+            .as_ref()
+            .unwrap_or_else(|| panic!("loaded local wheel files"));
+        assert_eq!(listing.entries.len(), 12);
+        *super::browser::local_indices(
+            &listing.entries,
+            panel.local_browser.show_hidden,
+            panel.local_browser.sort,
+        )
+        .first()
+        .unwrap_or_else(|| panic!("first rendered local entry"))
+    });
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        let list = window.find("local-files").bounds();
+        let position = point(list.origin.x + px(60.), list.origin.y + px(14.));
+        let original = window.find(("local-entry", first_index)).bounds().origin;
+        for pixels in [true, false] {
+            let horizontal = if pixels {
+                ScrollDelta::Pixels(point(px(-120.), px(0.)))
+            } else {
+                ScrollDelta::Lines(point(-3., 0.))
+            };
+            scroll_at(window, cx, position, horizontal);
+            assert_eq!(
+                window.find(("local-entry", first_index)).bounds().origin,
+                original,
+                "horizontal input must not be remapped onto local rows"
+            );
+            let vertical = if pixels {
+                ScrollDelta::Pixels(point(px(0.), px(-120.)))
+            } else {
+                ScrollDelta::Lines(point(0., -3.))
+            };
+            scroll_at(window, cx, position, vertical);
+            let moved = window.find(("local-entry", first_index)).bounds().origin;
+            assert_eq!(moved.x, original.x);
+            assert!(moved.y < original.y, "vertical input must move local rows");
+            scroll_at(
+                window,
+                cx,
+                position,
+                ScrollDelta::Pixels(point(px(0.), px(100_000.))),
+            );
+            assert_eq!(
+                window.find(("local-entry", first_index)).bounds().origin,
+                original
+            );
+        }
+        let panel = fixture.panel.read(cx);
+        assert!(panel.pending.is_none() && panel.transfer_jobs.is_empty());
+        assert_eq!(panel.local_browser.selection.len(), 0);
+    })
+    .checked("scroll actual local file rows without starting an operation");
+    assert_eq!(fixture._server.filesystem.atomic_writes_started(), 0);
 }

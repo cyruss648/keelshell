@@ -1,6 +1,26 @@
 [
   {
     "date": "2026-11-05",
+    "scope": "component",
+    "shape": "existing native file lists",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "native Files wheel axes",
+    "signature": "vertical file browsing preserves the selected columns",
+    "sections": [
+      "local file rows",
+      "remote file rows",
+      "remote columns and header"
+    ],
+    "imagery": "21 raw native screenshot/AX pairs for candidate 0fd982d8",
+    "waived": [],
+    "sweep": "Identical-test negative/passing controls; 8 wheel tests. Full gate2037 ordinary/23ignored,10doc,Python128/1skip passed; source review P0/P1/P2=0. Native34-byte upload digest and vertical independence/reversal pass in captured scope; horizontal tool input UNKNOWN, exact minimum height open. Final independent evidence review APPROVE_SCOPED_CHANGE P0/P1/P2=0; Hallmark finish ship for inspected native subset. Rust is outside HTML sloplint scope (exit2, not applicable)."
+  },
+  {
+    "date": "2026-11-05",
     "scope": "app",
     "shape": "app screen",
     "theme": [

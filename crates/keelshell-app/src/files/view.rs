@@ -129,11 +129,14 @@ impl FilesPanel {
     // before calling either local browser surface on a normal test thread.
     fn remote_browser_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
+        // Both nested scrollers must keep their own axis; GPUI otherwise
+        // remaps one wheel delta onto the rows and the columns simultaneously.
         let mut list = div()
             .id("remote-files")
             .flex_1()
             .min_h_0()
             .overflow_y_scroll()
+            .restrict_scroll_to_axis()
             .flex()
             .flex_col()
             .test_support();
@@ -287,6 +290,7 @@ impl FilesPanel {
                 }),
             )
             .overflow_x_scroll()
+            .restrict_scroll_to_axis()
             .test_support()
             .child(
                 div()

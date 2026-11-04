@@ -6,6 +6,12 @@
 本地文件夹选择、上级目录、刷新与隐藏文件入口位于路径上方。
 霜白、曜石、雾紫共用布局，不需要主题专用的业务代码。
 
+文件列表按输入轴滚动：纵向浏览文件行，横向查看远程表格后面的列。
+纵向浏览会保留当前列位置；横向查看列不会改动文件行位置。
+本地列表不把横向输入转换成纵向滚动，远程表头上的纵向输入也不会横移列。
+滚动本身不选择文件、不创建审核或开始传输。
+实际验证范围见[滚动轴记录](../testing/records/2026-11-05-file-scroll-axes.md)。
+
 操作条提供两组可展开设置：
 
 - **文件操作**：名称草稿、新建目录、重命名、删除与 POSIX 权限。
@@ -32,6 +38,12 @@ Browsing now has a dedicated path row and two mutually exclusive settings groups
 Batch actions and the real queue remain accessible. Hiding a group retains its
 entities and drafts; compact reviews retain every original line, both scroll
 axes and the explicit expansion. Tests use the production file-pane height.
+File lists keep their input axes: vertical input browses rows and horizontal
+input reveals remote columns. Vertical browsing preserves the chosen column
+position; horizontal input does not move local or remote rows. Scrolling does
+not select files, prepare reviews or start transfers. See the
+[axis validation record](../testing/records/2026-11-05-file-scroll-axes.md) for
+the tested platform and input boundaries.
 
 ## 批量与队列验收历史 — 2026-10-09
 

@@ -1,31 +1,31 @@
 {
   "version": "2.0.0",
   "date": "2026-11-05",
-  "scope": "app",
+  "scope": "component",
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "browse local and remote files, disclose settings when needed, and review exact targets",
+  "job": "browse file rows without losing the chosen remote columns",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
-    "crates/keelshell-app/src/files/view.rs:1",
-    "crates/keelshell-app/src/files/action_view.rs:1",
-    "crates/keelshell-app/src/files/navigation_view.rs:1",
-    "docs/adr/0097-file-workbench-disclosures.md:1"
+    "crates/keelshell-app/src/files/view.rs:134",
+    "crates/keelshell-app/src/files/local_view.rs:139",
+    "crates/keelshell-app/src/files/remote_wheel_tests.rs:1",
+    "crates/keelshell-app/src/files/local_view_tests.rs:1",
+    "docs/testing/records/2026-11-05-file-scroll-axes.md:1"
   ],
   "preserve": [
-    "native application",
-    "theme tokens",
-    "bilingual UI",
-    "review identities",
-    "test hooks"
+    "three theme families and all semantic styling",
+    "file browser geometry",
+    "native pointer and keyboard actions",
+    "selection and review identities",
+    "owned SFTP transfer results"
   ],
   "introduce": [
-    "browse-first file panel",
-    "two-row normal navigation and compact retained review/suspended paths",
-    "retained mutually exclusive file and transfer settings",
-    "compact batch actions and scrollable real transfer counts"
+    "independent file row and remote column scrolling",
+    "local rows ignore horizontal input",
+    "vertical header input does not pan remote columns"
   ],
   "material": {
     "real": [
@@ -34,7 +34,7 @@
       "actual owned SFTP fixture listing",
       "retained command and assistant drafts"
     ],
-    "pictures": "native captures after building the candidate",
+    "pictures": "raw native captures bound to candidate 0fd982d8",
     "absent": [
       "invented metrics",
       "testimonials",
@@ -43,6 +43,6 @@
   },
   "inferred_from_authorized_design_scope": true,
   "web_render_verified": false,
-  "native_verification": "Final132881…a668: selected appearances across three families, retained drafts, English900x900 review/cancel and content-verified SSH/SFTP upload/download. OS wheel no-scroll cause,900x580 and full matrix open.",
+  "native_verification": "Candidate 0fd982d8: 21 raw capture/AX pairs, owned 34-byte upload digest match, reversible vertical rows without column drift at 900x900 and inferred900x581. Native horizontal attempts produced no visible movement: UNKNOWN; exact900x580 and complete matrix open.",
   "web_render_scope": "not_applicable: Rust/GPUI; sloplint reports no supported source files"
 }

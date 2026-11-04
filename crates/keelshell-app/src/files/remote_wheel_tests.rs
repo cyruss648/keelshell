@@ -1,4 +1,4 @@
-//! Real wheel reachability after a completed transfer in the production workspace.
+//! Independent wheel axes and reachability after a real completed transfer.
 use super::*;
 use crate::workspace::tests::mirror_sync_combination::mount_scene;
 use gpui_kit::{
@@ -211,6 +211,7 @@ async fn exercise_after_upload(cx: &mut TestAppContext, height: f32) {
                 "the same pointer position used for wheel input must hit a real row"
             );
             let first_y = window.find(("remote-entry", 0_usize)).bounds().origin.y;
+            let first_x = window.find(("remote-entry", 0_usize)).bounds().origin.x;
             for _ in 0..16 {
                 let delta = if mode == "pixels" {
                     ScrollDelta::Pixels(point(px(0.), px(-120.)))
@@ -218,6 +219,11 @@ async fn exercise_after_upload(cx: &mut TestAppContext, height: f32) {
                     ScrollDelta::Lines(point(0., -3.))
                 };
                 wheel(window, cx, position, delta);
+                assert_eq!(
+                    window.find(("remote-entry", 0_usize)).bounds().origin.x,
+                    first_x,
+                    "vertical {mode} input must keep the remote name column in place"
+                );
                 if row_inside(window, last_index) {
                     break;
                 }
@@ -245,6 +251,57 @@ async fn exercise_after_upload(cx: &mut TestAppContext, height: f32) {
                 ScrollDelta::Pixels(point(px(0.), px(100_000.))),
             );
             assert!(row_inside(window, 0), "scrolling must remain reversible");
+
+            let top = window.find(("remote-entry", 0_usize)).bounds().origin;
+            let horizontal = if mode == "pixels" {
+                ScrollDelta::Pixels(point(px(-120.), px(0.)))
+            } else {
+                ScrollDelta::Lines(point(-3., 0.))
+            };
+            wheel(window, cx, position, horizontal);
+            let shifted = window.find(("remote-entry", 0_usize)).bounds().origin;
+            assert!(
+                shifted.x < top.x,
+                "explicit horizontal {mode} input must still expose remote columns"
+            );
+            assert_eq!(
+                shifted.y, top.y,
+                "horizontal {mode} input must not scroll remote file rows"
+            );
+            let vertical = if mode == "pixels" {
+                ScrollDelta::Pixels(point(px(0.), px(-120.)))
+            } else {
+                ScrollDelta::Lines(point(0., -3.))
+            };
+            wheel(window, cx, position, vertical);
+            let after_vertical = window.find(("remote-entry", 0_usize)).bounds().origin;
+            assert_eq!(
+                after_vertical.x, shifted.x,
+                "vertical {mode} input must preserve the chosen horizontal position"
+            );
+            assert!(after_vertical.y < shifted.y);
+            wheel(
+                window,
+                cx,
+                position,
+                ScrollDelta::Pixels(point(px(0.), px(100_000.))),
+            );
+            wheel(
+                window,
+                cx,
+                position,
+                ScrollDelta::Pixels(point(px(100_000.), px(0.))),
+            );
+            assert_eq!(window.find(("remote-entry", 0_usize)).bounds().origin, top);
+
+            let table = window.find("remote-files-table").bounds();
+            let header = point(table.center().x, table.origin.y + px(14.));
+            wheel(window, cx, header, vertical);
+            assert_eq!(
+                window.find(("remote-entry", 0_usize)).bounds().origin,
+                top,
+                "vertical input over the header must not pan the remote columns"
+            );
         }
         assert!(
             modes_passed

@@ -1,5 +1,27 @@
 # Capability ledger
 
+## 2026-11-05: independent file scrolling axes
+
+The current candidate restricts the local row list and both nested remote
+scrollers to their input axes. Identical behavioral tests fail before the fix
+and pass afterward: vertical input preserves remote columns and horizontal
+input preserves local/remote row positions. Explicit horizontal remote
+scrolling passes controlled event tests. Eight related wheel tests and a fresh independent
+source review pass. The full gate passed 2,037 ordinary Rust / 23 ignored
+(app 849 / 2 ignored), 10 rustdoc checks and 128 Python tests / one skipped.
+The new macOS package shares all 490 recorded gate/build inputs and verifies
+the actual 34-byte upload contents. Lavender dark English native captures show
+reversible vertical browsing without column drift at 900×900 and an inferred
+900×581 client area, with a clickable last row in the shorter window.
+Horizontal automation attempts showed no visible displacement; received event
+fields and native horizontal behavior remain unknown. Exact 900×580 geometry,
+physical devices and the complete native matrix remain open. Final independent
+evidence review approves this scope with P0/P1/P2=0; commit binding and the new
+commit's CI are pending.
+See the [axis record](../testing/records/2026-11-05-file-scroll-axes.md).
+Saved-knowledge context sending is being developed separately and is not yet
+integrated into this candidate.
+
 ## 2026-11-05: file workbench and renderer stack reduction
 
 The native file pane defaults to browsing, with retained, mutually exclusive file/transfer
