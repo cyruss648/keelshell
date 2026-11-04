@@ -524,6 +524,18 @@ class NativeTreeHandles:
         self.handles.clear()
 
 
+TREE_PREPARATION_SECONDS = 5
+TREE_EXECUTION_SECONDS = 0.4
+
+
+def constrain_tree_execution(deadline):
+    """Shorten the fixture's execution window after binding, never renew it."""
+    deadline.end = min(
+        deadline.end,
+        deadline.clock() + probe.CLEANUP_RESERVE + TREE_EXECUTION_SECONDS,
+    )
+
+
 class PreparationTreeTests(unittest.TestCase):
     controls = []
 
@@ -531,7 +543,8 @@ class PreparationTreeTests(unittest.TestCase):
     def tearDownClass(cls):
         print(json.dumps({"actual_preparation_controls": cls.controls, "host": os.name}, sort_keys=True))
 
-    def tree(self, stdio="inherited", direct_exit=None, interrupt=False, staged=False):
+    def tree(self, stdio="inherited", direct_exit=None, interrupt=False, staged=False,
+             publication_delay=0):
         with tempfile.TemporaryDirectory(prefix="owned-preparation-tree-") as temp:
             directory = Path(temp)
             helper = directory / "parent.py"
@@ -541,6 +554,7 @@ class PreparationTreeTests(unittest.TestCase):
             empty_seen = directory / "empty-observed"
             partial_seen = directory / "partial-observed"
             published = directory / "published"
+            publication_allowed = directory / "publication-allowed"
             child_source = ("import os,signal,sys,time\n"
                             "if os.name != 'nt': signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
                             "print('OWNED_DESCENDANT_PIPE',flush=True)\n"
@@ -555,6 +569,7 @@ class PreparationTreeTests(unittest.TestCase):
                               f"child=subprocess.Popen([sys.executable,'-c',{child_source!r}],stdin=subprocess.DEVNULL,"
                               + ("stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL" if stdio == "detached" else "")
                               + ")\n"
+                              + (f"await_marker(Path({str(publication_allowed)!r}))\n" if publication_delay else "")
                               + (f"Path({str(record)!r}).touch()\n"
                                  f"await_marker(Path({str(empty_seen)!r}))\n"
                                  f"Path({str(record)!r}).write_text('{{')\n"
@@ -565,17 +580,23 @@ class PreparationTreeTests(unittest.TestCase):
                               f"await_marker(Path({str(ack)!r}))\n"
                               "print('OWNED_PARENT_READY',flush=True)\n"
                               + ("time.sleep(30)\n" if direct_exit is None else f"sys.exit({direct_exit})\n"))
-            deadline = probe.Deadline(time.time() + (8 if interrupt else 5.4))
+            # Python startup, child creation and identity publication need their
+            # own bounded preparation allowance. The previous 5.4-second total
+            # left only 0.4 seconds after the controller's cleanup reserve.
+            deadline = probe.Deadline(time.time() + probe.CLEANUP_RESERVE + TREE_PREPARATION_SECONDS)
             owner = probe.owner_for_host()
             identities = NativeTreeHandles(owner.api, owner.job) if os.name == "nt" else None
             signalled = False
             bound_pids = None
+            bound_at = None
             ack_created = False
             partial_observations = []
             def tick(process):
-                nonlocal signalled, bound_pids, ack_created
+                nonlocal signalled, bound_pids, bound_at, ack_created
                 if bound_pids is not None:
                     return
+                if publication_delay and time.monotonic() - start >= publication_delay:
+                    publication_allowed.touch()
                 # The staged counterexample deliberately exposes incomplete
                 # contents. Once its partial phase is acknowledged, avoid a
                 # competing Windows read handle while the producer renames.
@@ -597,6 +618,10 @@ class PreparationTreeTests(unittest.TestCase):
                 elif os.getpgid(pids["child"]) != process.pid:
                     raise AssertionError("fixture descendant is outside its owned group")
                 bound_pids = pids
+                bound_at = time.monotonic()
+                # Begin the original short execution exercise only after the
+                # observer owns both identities. Keep the original outer cap.
+                constrain_tree_execution(deadline)
                 ack.touch()
                 ack_created = True
                 if interrupt:
@@ -621,6 +646,7 @@ class PreparationTreeTests(unittest.TestCase):
                 )
                 pids = ready_pids(record, owner.process.pid)
                 self.assertEqual(pids, bound_pids)
+                post_identity_elapsed = time.monotonic() - bound_at
                 native_states = identities.states() if identities is not None else None
                 pid_states = {key: process_state(pid) for key, pid in pids.items()}
                 states = native_states if native_states is not None else pid_states
@@ -630,15 +656,21 @@ class PreparationTreeTests(unittest.TestCase):
                                       "state_identity": "retained_native_handles" if identities is not None else "owned_group_pids",
                                       "job_membership": dict(identities.membership) if identities is not None else None,
                                       "partial_publications_rejected": partial_observations,
-                                      "elapsed_seconds": round(elapsed, 6), "receipt": receipt,
+                                      "elapsed_seconds": round(elapsed, 6),
+                                      "preparation_seconds": round(bound_at - start, 6),
+                                      "post_identity_seconds": round(post_identity_elapsed, 6),
+                                      "publication_delay_seconds": publication_delay, "receipt": receipt,
                                       "pids": pids, "post_states": states, "post_pid_query_states": pid_states})
-                retain_control(f"tree-{stdio}-exit{direct_exit}-sigint{interrupt}-staged{staged}", self.controls[-1],
+                retain_control(f"tree-{stdio}-exit{direct_exit}-sigint{interrupt}-staged{staged}-delay{publication_delay}", self.controls[-1],
                                raw=(result.stdout + result.stderr).encode(), source=helper.read_text())
                 # No wait or grace is added to these post-return observations.
                 # Original Windows handles must already be signalled; another
                 # process reusing a PID cannot supply or defeat this assertion.
                 self.assertTrue(all(state in ("ABSENT", "TERMINAL") or state.startswith("Z") for state in states.values()), states)
-                self.assertLess(elapsed, 3)
+                self.assertLess(elapsed, probe.CLEANUP_RESERVE + TREE_PREPARATION_SECONDS)
+                self.assertLess(post_identity_elapsed, 3)
+                if publication_delay:
+                    self.assertGreaterEqual(bound_at - start, publication_delay)
                 self.assertTrue(receipt["terminal"]["direct_reaped"])
                 self.assertEqual(receipt["terminal"]["active_processes"], 0)
                 self.assertTrue(receipt["terminal"]["pipes_drained"])
@@ -657,6 +689,12 @@ class PreparationTreeTests(unittest.TestCase):
 
     def test_real_timeout_drains_inherited_descendant_pipes_and_forces_tree(self):
         result, receipt = self.tree()
+        self.assertEqual(result.returncode, 124)
+        self.assertTrue(receipt["timed_out"])
+
+    def test_real_delayed_publication_keeps_short_owned_tree_cleanup(self):
+        result, receipt = self.tree(stdio="detached",
+                                    publication_delay=TREE_EXECUTION_SECONDS + 0.2)
         self.assertEqual(result.returncode, 124)
         self.assertTrue(receipt["timed_out"])
 
@@ -734,6 +772,22 @@ class PreparationTreeTests(unittest.TestCase):
 
 
 class FixtureIdentityTests(unittest.TestCase):
+    def test_binding_identity_cannot_extend_or_revive_outer_deadline(self):
+        for bound_at in [1.0, 4.9, 10.1]:
+            with self.subTest(bound_at=bound_at):
+                clock = [0.0]
+                deadline = probe.Deadline(10, clock=lambda: clock[0], wall=lambda: 0)
+                original_end = deadline.end
+                clock[0] = bound_at
+                constrain_tree_execution(deadline)
+                self.assertLessEqual(deadline.end, original_end)
+                if bound_at < original_end:
+                    self.assertLessEqual(deadline.remaining(),
+                                         probe.CLEANUP_RESERVE + TREE_EXECUTION_SECONDS)
+                else:
+                    with self.assertRaises(TimeoutError):
+                        deadline.remaining()
+
     def test_missing_empty_and_partial_records_do_not_authorize_ack(self):
         with tempfile.TemporaryDirectory(prefix="owned-publication-states-") as temp:
             record = Path(temp) / "pids.json"

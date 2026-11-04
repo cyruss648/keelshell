@@ -3,6 +3,7 @@
 - [主题与外观](product/THEME_PREFERENCES.md)：三套内置主题、明暗模式及扩展方式。
 - [原生主题设计](design/NATIVE_THEMES.md)与[ADR 0095](adr/0095-extensible-native-theme-families.md)：目录、语义 token、组件适配与旧配置兼容。
 - [本轮主题测试](testing/records/2026-11-04-native-themes.md)：实际结果、失败历史与平台验收边界。
+- [主题组合提交与 CI 回读](testing/records/2026-11-04-theme-delivery-ci.md)：精确提交、Windows 夹具失败与修复、资源清理和后续验收。
 
 - [本地知识库管理](product/AI_KNOWLEDGE_LIBRARY.md)、[ADR 0094](adr/0094-reviewed-knowledge-library-mutations.md)与[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)：搜索、编辑/删除审核、配置冲突和重新加载。
 - [Hallmark 原生设计约定](design/HALLMARK_NATIVE.md)：既有 GPUI 主题、app screen 布局和 Web/native 验证边界。

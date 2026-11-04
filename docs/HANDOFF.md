@@ -1,5 +1,22 @@
 # KeelShell 开发交接 — 2026-11-04
 
+## 本轮提交与 CI 后续 — 2026-11-04
+
+下方主题/知识库/NET/依赖组合已提交并推送 `origin/main` 为
+`c36687126312191191236f1e9c8840abb7b4d808`，远端 SHA 已读回；没有发布标签或覆盖安装。
+精确 Quality `41824639165` 的 Windows job 在 Python 进程树夹具身份发布前超时；
+原 5.4 秒总期限中 5 秒用于清理，实际准备余量不足 0.4 秒。当前只修测试夹具：
+独立有界准备，绑定原句柄后缩短同一期限，仍核验小于 3 秒的执行/回收和全部终态断言。
+修后完整 `scripts/check.py` 退出 0（普通 Rust 2,007 passed/23 ignored、
+app 819 passed/2 ignored、rustdoc 10 passed、Python 122 项/1 skipped），
+543 个非 Markdown 输入在运行前后不变；新的非作者源码复核 P0/P1/P2 为 0。
+新提交的精确 CI 仍待推送后读回，见[提交回读记录](testing/records/2026-11-04-theme-delivery-ci.md)。
+
+原始失败、各分项证据和最终 macOS 开发包已经保存到主 checkout 的忽略 `work/`。
+NET 临时 worktree/分支、独立缓存、旧包和所属运行进程已清理。
+依赖与知识库两棵受管理 worktree 因其它活跃任务仍在使用而被归档管理器拒绝，
+因此保留；不要以 shell 删除绕过该保护。本轮主题决定不需要再次确认。
+
 ## 本轮组合与用户设计决定 — 2026-11-04
 
 用户已接受霜白、曜石、雾紫三套方向，要求全部作为内置主题，并方便继续增加主题。原生实现采用 `theme_family` + 既有 System/Light/Dark；目录集中元数据、浅深 Palette、组件形状和终端默认色，业务视图不分支识别主题 ID。旧配置默认霜白，有效未知 ID 保留并回退显示。工具栏“主题”打开原生选择器，主题变更通过后台保存成功后应用，保留会话与草稿。主题与工作区密度/面板布局分离，HTML 布局实验尚不等于已完整迁入原生。见[主题指南](product/THEME_PREFERENCES.md)、[设计](design/NATIVE_THEMES.md)、[ADR 0095](adr/0095-extensible-native-theme-families.md)。
