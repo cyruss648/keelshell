@@ -92,7 +92,7 @@ fn poll_fixture_io<T>(
 }
 
 fn read_fixture_exact(
-    stream: &mut std::os::unix::net::UnixStream,
+    stream: &mut impl Read,
     mut bytes: &mut [u8],
     deadline: StdInstant,
 ) -> std::io::Result<()> {
@@ -107,7 +107,7 @@ fn read_fixture_exact(
 }
 
 fn write_fixture_all(
-    stream: &mut std::os::unix::net::UnixStream,
+    stream: &mut impl Write,
     mut bytes: &[u8],
     deadline: StdInstant,
 ) -> std::io::Result<()> {
@@ -139,6 +139,14 @@ fn answer_member_request(
 ) -> std::io::Result<bool> {
     let deadline = (StdInstant::now() + Duration::from_millis(100)).min(member_deadline);
     stream.set_nonblocking(true)?;
+    answer_member_request_io(stream, identity, deadline)
+}
+
+fn answer_member_request_io(
+    stream: &mut (impl Read + Write),
+    identity: &MemberIdentity,
+    deadline: StdInstant,
+) -> std::io::Result<bool> {
     let mut request = [0];
     read_fixture_exact(stream, &mut request, deadline)?;
     let stop = match request[0] {

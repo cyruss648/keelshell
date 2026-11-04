@@ -64,8 +64,15 @@ Windows Server 2025 runner 使用 Python 3.15.2、Rust 1.99.1。
 本机为 macOS/POSIX；以上不构成 Windows 原生句柄测试或 Windows 桌面验收。
 
 修后门禁原始输出、输入摘要和独立复核材料保存在
-`work/theme-integration-20261104/ci/`。新精确提交的三平台 CI 仍待独立读回；
-不能用本机通过覆盖原 Windows 失败。
+`work/theme-integration-20261104/ci/`。
+
+该修复已提交推送为 `9d4517e653e8484436c6a10a1e81229dbccb1103`，
+远端 main 已读回一致。Tesla 的最终复核将提交中的 543 个非 Markdown 输入
+及 5 份文档逐一绑定到已通过门禁/已复核内容，P0/P1/P2 为 0。
+原 `c366871` 的 macOS/Linux 两个 job 最后均成功，三份原始日志已完整保存。
+新修复的 Quality `41828929466` 中 macOS 因另一个既有 Unix 分片 nonce 测试失败，
+详见[独立后续记录](2026-11-04-unix-fixture-fragment-readiness.md)。
+新 run 的 Windows/Linux 结果仍在回读，不能用本机通过覆盖任一原失败。
 
 ## 资源清理与后续边界
 

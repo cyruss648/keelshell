@@ -1,6 +1,6 @@
 //! Real socket regressions for the bounded, authenticated fixture protocol.
 
-use std::{net::Shutdown, os::unix::net::UnixStream, sync::mpsc};
+use std::{net::Shutdown, os::unix::net::UnixStream};
 
 use super::*;
 
@@ -36,32 +36,80 @@ fn member_socket_identity_probe_returns_complete_matching_identity() {
 
 #[test]
 fn member_socket_fragmented_nonce_is_required_before_stop() {
+    // Release the second fragment only after a real socket read observes the
+    // gap. A timed wait on another thread tests scheduler latency against the
+    // fixture's 100 ms request cap instead of the authentication boundary.
+    struct FragmentedRequest<'a> {
+        server: &'a mut UnixStream,
+        client: &'a mut UnixStream,
+        suffix: &'a [u8],
+        bytes_read: usize,
+        gap_observed: bool,
+    }
+
+    impl Read for FragmentedRequest<'_> {
+        fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+            match self.server.read(bytes) {
+                Ok(read) => {
+                    self.bytes_read += read;
+                    Ok(read)
+                }
+                Err(error) if error.kind() == ErrorKind::WouldBlock && !self.gap_observed => {
+                    assert_eq!(self.bytes_read, 9, "only Q and half the nonce were sent");
+                    assert_eq!(
+                        self.client.read(&mut [0]).unwrap_err().kind(),
+                        ErrorKind::WouldBlock,
+                        "an incomplete nonce must not receive an identity response",
+                    );
+                    self.client.write_all(self.suffix)?;
+                    self.gap_observed = true;
+                    Err(error)
+                }
+                Err(error) => Err(error),
+            }
+        }
+    }
+
+    impl Write for FragmentedRequest<'_> {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            assert!(
+                self.gap_observed,
+                "the peer has not sent the complete nonce"
+            );
+            assert_eq!(self.bytes_read, 17, "the full nonce must be consumed");
+            self.server.write(bytes)
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            self.server.flush()
+        }
+    }
+
     let identity = identity();
     let (mut client, mut server) = UnixStream::pair().unwrap();
-    let (result_tx, result_rx) = mpsc::sync_channel(1);
+    client.set_nonblocking(true).unwrap();
+    server.set_nonblocking(true).unwrap();
     client.write_all(b"Q").unwrap();
     client.write_all(&identity.nonce.as_bytes()[..8]).unwrap();
-    std::thread::scope(|scope| {
-        scope.spawn(|| {
-            let result = answer_member_request(
-                &mut server,
-                &identity,
-                StdInstant::now() + Duration::from_secs(1),
-            );
-            result_tx.send(result).unwrap();
-        });
-        assert!(matches!(
-            result_rx.recv_timeout(Duration::from_millis(10)),
-            Err(mpsc::RecvTimeoutError::Timeout)
-        ));
-        client.write_all(&identity.nonce.as_bytes()[8..]).unwrap();
+    {
+        let mut fragmented = FragmentedRequest {
+            server: &mut server,
+            client: &mut client,
+            suffix: &identity.nonce.as_bytes()[8..],
+            bytes_read: 0,
+            gap_observed: false,
+        };
         assert!(
-            result_rx
-                .recv_timeout(Duration::from_secs(1))
-                .unwrap()
-                .unwrap()
+            answer_member_request_io(
+                &mut fragmented,
+                &identity,
+                StdInstant::now() + Duration::from_millis(100),
+            )
+            .unwrap()
         );
-    });
+        assert!(fragmented.gap_observed);
+        assert_eq!(fragmented.bytes_read, 17);
+    }
     drop(server);
     let mut response = Vec::new();
     client.read_to_end(&mut response).unwrap();
