@@ -57,8 +57,17 @@ Windows 准备预算修复 `9d4517e653e8484436c6a10a1e81229dbccb1103`
   observer I/O、2 MiB 控制器均通过。运行期间更新的 Markdown 不纳入输入不变声明。
 
 证据位于忽略的 `work/theme-integration-20261104/ci/unix-socket/`；
-原 CI 完整日志为同级 `fix-macos.log`。新提交与精确平台 CI 另行读回，
-前序本机或 CI 成功不代替这次新候选的验收。
+原 CI 完整日志为同级 `fix-macos.log`。前序本机或 CI 成功不代替后续提交的验收。
 
-前序 `9d4517e` 的 Linux job 已成功，macOS 失败如上，Windows job
-`126570758307` 仍在运行；本次 Unix 修复尚待提交及精确平台 CI。
+前序 `9d4517e` 的 Linux 和 Windows job `126570758307` 最终成功，
+macOS 失败如上。Windows 日志包含 7 项真实进程树控制，原句柄与
+Job membership、返回后的原父子终态及零清理错误均有回执；
+真实延迟身份约 0.620 秒后发布，绑定后执行/清理约 0.411 秒。
+
+本次 Unix 修复已提交推送为 `7b43af20e62c228972b461a412e063aac6ad9304`，
+非作者复核将提交输入绑定到上述门禁，远端 main SHA 已回读。
+Quality `41834475286` 的 macOS `126589736196` 和
+Linux `126589736295` 成功；两者 OpenSSH 互操作步骤也成功。
+Windows `126589735715` 在既有更新器测试的一个 3 秒 UI 等待失败，
+详见[更新器后续](2026-11-04-updater-transport-fixture.md)。
+三份完整日志及 jobs JSON 保留在 `ci/unix-socket/`，不把此 run 记作全平台成功。

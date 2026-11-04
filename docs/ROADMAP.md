@@ -2,7 +2,7 @@
 
 ## 当前主题与组合验证 — 2026-11-04
 
-- 组合已推送 `c366871`，其 macOS/Linux CI 成功，Windows 在测试夹具身份发布前超时。预算修复 `9d4517e` 已通过本机完整门禁和非作者复核并推送，但新 macOS CI 暴露旧 Unix 分片 nonce 时序失败；只改测试夹具的新候选已通过 23 项专项、完整门禁（Rust 2,007 passed/23 ignored）和非作者源码复核，精确新提交 CI 仍待执行。见[前序回读](testing/records/2026-11-04-theme-delivery-ci.md)与[Unix 分片记录](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)。
+- 组合 `c366871` 后的 Windows 预算修复 `9d4517e`、Unix 分片修复 `7b43af2` 均已通过本机完整门禁和非作者复核并推送。`7b43af2` 的 macOS/Linux CI 成功，Windows 更新器 3 秒等待失败；现已复现取消响应中止后续脚本及测试时钟快进两个夹具问题。修后更新器 54 项、完整门禁（普通 Rust 2,011 passed/23 ignored、544 个非 Markdown 输入保持）和非作者复核均通过；精确新提交 CI 待完成。见[前序回读](testing/records/2026-11-04-theme-delivery-ci.md)、[Unix 分片记录](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)与[更新器记录](testing/records/2026-11-04-updater-transport-fixture.md)。
 - 三套原生主题已实现：霜白、曜石、雾紫，目录驱动选择器，独立明暗模式、兼容持久化、统一组件 token 和终端默认色。组合工程门禁、非作者复核和限定 macOS 原生切换/重启已通过；详见[主题指南](product/THEME_PREFERENCES.md)。
 - 主题/布局分开推进：本轮统一视觉与主题入口；连接导航、文件工具区和更多原生工作区布局优化继续，不把 HTML 样例算作原生完成。
 - 知识库列表/搜索/审核编辑删除与命名隧道管理已通过组合门禁。NET 两轮独立审查的问题均已修复并复核；真实取消拒绝后保留占用，原连接关闭后解除，配置恢复会清除存储阻断。完整知识模型发送、NET 原生和真实超时场景仍待验收。

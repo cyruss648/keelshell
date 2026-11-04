@@ -2,6 +2,20 @@
 
 ## 本轮提交与 CI 后续 — 2026-11-04
 
+最新已推送提交是 `7b43af20e62c228972b461a412e063aac6ad9304`。
+其 Quality `41834475286` 的 macOS/Linux 均成功，Windows 在更新器
+`automatic_download_verifies_real_archive_and_ready_continues_periodic_checks`
+的一个 3 秒 UI 等待失败；旧日志不能识别准确阶段。
+当前只改更新器测试：取消响应写入失败后继续下一条脚本回复；
+真实 Tokio/TCP 测试改用实际经过时间的一次性截止点，并输出阶段。
+旧服务器的真实 TCP 反例连续失败 10 次；旧 100ms GPUI timer
+仅经过约 0.16ms，两个缺陷分别得到证实，但不据此断言 Windows 的唯一原因。
+修后更新器 54 项通过，完整门禁实际退出 0（普通 Rust 2,011 passed/23 ignored、
+app 823 passed/2 ignored、rustdoc 10 passed、Python 122 项/1 skipped），
+544 个非 Markdown 输入前后不变。新的非作者 Bacon 已复核源码、反例和完整门禁，
+P0/P1/P2 均为 0；
+精确新提交 CI 尚未运行。见[更新器测试记录](testing/records/2026-11-04-updater-transport-fixture.md)。
+
 Windows 测试夹具修复已推送为 `9d4517e`，本机完整门禁和最终提交绑定的非作者复核通过。
 它的新 Quality `41828929466` 的 macOS job 在旧 Unix 分片 nonce 测试超时：
 测试通过线程定时等待安排分片，而实际请求上限为 100ms。受控发送延迟已复现；
@@ -9,7 +23,7 @@ Windows 测试夹具修复已推送为 `9d4517e`，本机完整门禁和最终�
 仅两份 `cfg(test, unix)` 文件变化，23 项专项通过，两项隔离突变被断言拒绝；
 新非作者源码/证据复核 P0/P1/P2 为 0；修后完整门禁实际退出 0
 （普通 Rust 2,007 passed/23 ignored、rustdoc 10 passed、Python 122 项/1 skipped，
-543 个非 Markdown 输入前后相同）。新提交与精确平台 CI 仍待回读，
+543 个非 Markdown 输入前后相同）。该修复已推送为上述 `7b43af2`，
 见[Unix 分片记录](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)。
 下面 `c366871` 的 macOS/Linux 精确 CI 后来均成功，Windows 原失败仍保留。
 
@@ -22,7 +36,7 @@ Windows 测试夹具修复已推送为 `9d4517e`，本机完整门禁和最终�
 app 819 passed/2 ignored、rustdoc 10 passed、Python 122 项/1 skipped），
 543 个非 Markdown 输入在运行前后不变；新的非作者源码复核 P0/P1/P2 为 0。
 其提交、原始 CI 与资源回读见[提交回读记录](testing/records/2026-11-04-theme-delivery-ci.md)；
-最新 `9d4517e` 的后续失败以上方 Unix 记录为准。
+`9d4517e` 的 Windows/Linux 最终成功，macOS 后续失败见 Unix 记录。
 
 原始失败、各分项证据和最终 macOS 开发包已经保存到主 checkout 的忽略 `work/`。
 NET 临时 worktree/分支、独立缓存、旧包和所属运行进程已清理。

@@ -5,6 +5,7 @@
 - [本轮主题测试](testing/records/2026-11-04-native-themes.md)：实际结果、失败历史与平台验收边界。
 - [主题组合提交与 CI 回读](testing/records/2026-11-04-theme-delivery-ci.md)：精确提交、Windows 夹具失败与修复、资源清理和后续验收。
 - [Unix 分片认证夹具](testing/records/2026-11-04-unix-fixture-fragment-readiness.md)：后续真实 CI 失败、socket 事件驱动的分片检查与新的验证边界。
+- [更新器真实传输夹具](testing/records/2026-11-04-updater-transport-fixture.md)：取消响应后的脚本继续、真实时间期限、反例和精确平台结果。
 
 - [本地知识库管理](product/AI_KNOWLEDGE_LIBRARY.md)、[ADR 0094](adr/0094-reviewed-knowledge-library-mutations.md)与[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)：搜索、编辑/删除审核、配置冲突和重新加载。
 - [Hallmark 原生设计约定](design/HALLMARK_NATIVE.md)：既有 GPUI 主题、app screen 布局和 Web/native 验证边界。

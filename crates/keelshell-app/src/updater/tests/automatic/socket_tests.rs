@@ -1,9 +1,9 @@
 //! Bounded request IO for the owned nonblocking updater fixture.
-use super::{HttpFixture, Reply};
+use super::{FIXTURE_LIFE, HttpFixture, REQUEST_BOUND, Reply, poll_bounded, read_bounded};
 use std::{
     io::{Read, Write},
     net::TcpStream,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 fn connect(endpoint: &str) -> TcpStream {
@@ -102,4 +102,116 @@ fn peer_closes_before_request_completion() {
         .expect("close partial request");
     drop(stream);
     drop(fixture);
+}
+
+#[test]
+fn cancelled_held_response_does_not_abort_the_following_scripted_reply() {
+    const CANCELLED_BODY_LEN: usize = 32 * 1024 * 1024;
+    let following_body = b"following reply: complete\r\nwith distinct bytes\x00\xff";
+    let started = Instant::now();
+    let mut fixture = HttpFixture::new(vec![
+        Reply {
+            path: "/cancelled",
+            status: 200,
+            body: vec![0xa5; CANCELLED_BODY_LEN],
+            held: true,
+        },
+        Reply {
+            path: "/following",
+            status: 201,
+            body: following_body.to_vec(),
+            held: false,
+        },
+    ]);
+    let mut cancelled = connect(&fixture.endpoint("/cancelled"));
+    write_exact_bounded(
+        &mut cancelled,
+        b"GET /cancelled HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n",
+    );
+    assert_eq!(
+        fixture
+            .observed
+            .recv_timeout(REQUEST_BOUND)
+            .expect("held request reached the fixture"),
+        "/cancelled"
+    );
+
+    // Queue the next request before releasing the held response so a stopped
+    // server is detected while reading its reply, not by a later connect race.
+    let mut following = connect(&fixture.endpoint("/following"));
+    write_exact_bounded(
+        &mut following,
+        b"GET /following HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n",
+    );
+    fixture.release();
+    let cancelled_deadline = Instant::now() + REQUEST_BOUND;
+    let expected_header = format!(
+        "HTTP/1.1 200 fixture\r\nContent-Length: {CANCELLED_BODY_LEN}\r\nConnection: close\r\n\r\n"
+    );
+    let mut header = vec![0; expected_header.len()];
+    read_bounded(
+        &mut cancelled,
+        &mut header,
+        cancelled_deadline,
+        &fixture.stopped,
+    )
+    .expect("held response header");
+    let mut prefix = [0; 1024];
+    read_bounded(
+        &mut cancelled,
+        &mut prefix,
+        cancelled_deadline,
+        &fixture.stopped,
+    )
+    .expect("held response began its large body");
+    let mut unread = [0];
+    let peeked = poll_bounded(cancelled_deadline, &fixture.stopped, || {
+        cancelled.peek(&mut unread)
+    })
+    .expect("unread response bytes before cancellation");
+    // A tiny response can fit in socket buffers even after its client closes.
+    // Read only a prefix of this large body, leave actual bytes unread, and
+    // close while the server still has the rest of the body to write.
+    drop(cancelled);
+    assert_eq!(header, expected_header.as_bytes());
+    assert_eq!(prefix, [0xa5; 1024]);
+    assert_eq!(peeked, 1);
+    assert_eq!(unread, [0xa5]);
+
+    let mut expected_response = format!(
+        "HTTP/1.1 201 fixture\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        following_body.len()
+    )
+    .into_bytes();
+    expected_response.extend_from_slice(following_body);
+    let mut response = vec![0; expected_response.len()];
+    let following_deadline = Instant::now() + REQUEST_BOUND;
+    let received = read_bounded(
+        &mut following,
+        &mut response,
+        following_deadline,
+        &fixture.stopped,
+    )
+    .and_then(|()| {
+        poll_bounded(following_deadline, &fixture.stopped, || {
+            following.read(&mut [0])
+        })
+    });
+    drop(following);
+
+    // Reap the owner before asserting delivery, including on the old fixture's
+    // failure path; Drop remains the fallback for earlier assertion failures.
+    fixture.finish();
+    assert!(fixture.owner.is_none(), "fixture owner was joined");
+    assert!(started.elapsed() < FIXTURE_LIFE, "bounded fixture cleanup");
+    assert_eq!(
+        received.expect("following scripted reply must survive the cancelled response"),
+        0,
+        "following response ends exactly at its declared length"
+    );
+    assert_eq!(response, expected_response);
+    assert_eq!(
+        fixture.observed.try_iter().collect::<Vec<_>>(),
+        ["/following"]
+    );
 }

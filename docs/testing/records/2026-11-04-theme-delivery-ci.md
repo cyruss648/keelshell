@@ -72,7 +72,10 @@ Windows Server 2025 runner 使用 Python 3.15.2、Rust 1.99.1。
 原 `c366871` 的 macOS/Linux 两个 job 最后均成功，三份原始日志已完整保存。
 新修复的 Quality `41828929466` 中 macOS 因另一个既有 Unix 分片 nonce 测试失败，
 详见[独立后续记录](2026-11-04-unix-fixture-fragment-readiness.md)。
-新 run 的 Windows/Linux 结果仍在回读，不能用本机通过覆盖任一原失败。
+新 run 的 Windows/Linux 最终均成功。Windows 七项真实进程树控制已回读，
+包括延迟身份发布、原父子句柄终态和空清理错误；不扩大为 Windows 桌面验收。
+后续 Unix 修复 `7b43af2` 的 macOS/Linux 成功，Windows 更新器测试失败，
+具体后续见[更新器记录](2026-11-04-updater-transport-fixture.md)。
 
 ## 资源清理与后续边界
 

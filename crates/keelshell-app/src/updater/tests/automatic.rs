@@ -1,6 +1,7 @@
 //! Owned loopback transport and controlled GPUI service behavior; no installation.
 mod painted_actions;
 mod socket_tests;
+mod transport_wait;
 use super::super::{
     CURRENT_VERSION, InFlight, PROJECT_URL, PanelState, RequestOrigin, StageCleanup, StagedUpdate,
     UpdateError, UpdatePanel, hex_digest, hex_file_digest, package_name, packaged_binary_path,
@@ -9,8 +10,7 @@ use super::super::{
 use super::{companion_payload, test_release};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
-    point, px, size,
-    test::{TestAppContextExt, TestWindowExt},
+    point, px, size, test::TestWindowExt,
 };
 use keelshell_core::{UpdateCheckFrequency, UpdatePreferences};
 use sha2::{Digest, Sha256};
@@ -25,6 +25,7 @@ use std::{
     },
     time::{Duration, Instant},
 };
+use transport_wait::TransportTestContextExt;
 
 pub(super) struct Reply {
     path: &'static str,
@@ -196,7 +197,9 @@ impl HttpFixture {
                     || write_bounded(&mut stream, &reply.body, response_deadline, &stopping)
                         .is_err()
                 {
-                    return;
+                    // This request consumed its scripted reply even if its
+                    // cancelled client closed. Later requests still need service.
+                    continue;
                 }
             }
         });
@@ -235,6 +238,9 @@ fn mount_panel(
     cx: &mut TestAppContext,
     preferences: UpdatePreferences,
 ) -> (AnyWindowHandle, Entity<UpdatePanel>) {
+    // Tokio and TCP use wall time. Deterministic timer jumps can exhaust a UI
+    // wait before the real worker runs; transport_wait also enforces wall deadlines.
+    cx.executor().allow_parking();
     let runtime = Arc::new(
         tokio::runtime::Builder::new_multi_thread()
             .worker_threads(1)
@@ -336,7 +342,7 @@ async fn delayed_automatic_check_is_single_flight_and_persists_success_metadata(
         );
         panel.poll_at(now + schedule::STARTUP_DELAY, cx);
     });
-    cx.wait_for(window, Duration::from_secs(3), |_, _| {
+    cx.wait_for_transport(window, Duration::from_secs(3), "startup request", |_, _| {
         fixture.observed.try_recv().is_ok()
     })
     .await;
@@ -353,9 +359,12 @@ async fn delayed_automatic_check_is_single_flight_and_persists_success_metadata(
     });
     cx.run_until_parked();
     fixture.release();
-    cx.wait_for(window, Duration::from_secs(3), |_, cx| {
-        panel.read(cx).request.is_none()
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "startup completion",
+        |_, cx| panel.read(cx).request.is_none(),
+    )
     .await;
     panel.read_with(cx, |panel, _| {
         assert!(matches!(panel.state, PanelState::UpToDate(_)));
@@ -419,9 +428,12 @@ async fn automatic_download_verifies_real_archive_and_ready_continues_periodic_c
             Some((fixture.endpoint("/checksums"), fixture.endpoint("/archive")));
         panel.poll_at(Instant::now() + schedule::STARTUP_DELAY, cx);
     });
-    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
-        matches!(panel.read(cx).state, PanelState::Ready(_))
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(5),
+        "verified archive",
+        |_, cx| matches!(panel.read(cx).state, PanelState::Ready(_)),
+    )
     .await;
     let root = panel.read_with(cx, |panel, _| match &panel.state {
         PanelState::Ready(staged) => {
@@ -455,9 +467,12 @@ async fn automatic_download_verifies_real_archive_and_ready_continues_periodic_c
             "checking cannot discard the ready package"
         );
     });
-    cx.wait_for(window, Duration::from_secs(3), |_, _| {
-        fixture.observed.try_recv().is_ok()
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "held periodic request",
+        |_, _| fixture.observed.try_recv().is_ok(),
+    )
     .await;
     cx.update_window(window, |_, window, cx| {
         window.render_frame(cx);
@@ -483,25 +498,47 @@ async fn automatic_download_verifies_real_archive_and_ready_continues_periodic_c
     panel.update(cx, |panel, cx| {
         panel.poll_at(Instant::now() + Duration::from_secs(86_401), cx)
     });
-    cx.wait_for(window, Duration::from_secs(3), |_, cx| {
-        panel.read(cx).request.is_none()
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "resumed periodic check",
+        |_, cx| panel.read(cx).request.is_none(),
+    )
     .await;
-    panel.read_with(cx, |panel, _| {
+    assert_eq!(
+        fixture.observed.try_iter().collect::<Vec<_>>(),
+        ["/latest"],
+        "the resumed periodic check reached the transport"
+    );
+    panel.read_with(cx, |panel, cx| {
         let PanelState::Ready(staged) = &panel.state else {
             panic!("ready restored after same release check");
         };
         assert_eq!(staged.cleanup.as_ref().expect("same stage").root, root);
         assert!(panel.retained_stage.is_none());
         assert!(!matches!(panel.state, PanelState::Installing));
+        assert_eq!(
+            panel.status.render(cx),
+            crate::i18n::Message::new(
+                "已校验的更新仍是最新发布版本；安装需要确认。",
+                "The verified update is still the latest release; installation needs confirmation.",
+            )
+            .render(cx),
+            "restoring Ready after a network error is not a successful periodic check"
+        );
     });
     cx.update_window(window, |_, window, cx| {
         window.render_frame(cx);
         window.click("cancel-update-request", cx);
     })
     .expect("discard the ready package through the explicitly labelled button");
-    cx.wait_for(window, Duration::from_secs(3), |_, _| !root.exists())
-        .await;
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "discard verified archive",
+        |_, _| !root.exists(),
+    )
+    .await;
     fixture.finish();
 }
 
@@ -527,9 +564,12 @@ async fn manual_check_preempts_automatic_owner_and_policy_change_cancels_actual_
         panel.release_endpoint = Some(first.endpoint("/latest"));
         panel.poll_at(Instant::now() + schedule::STARTUP_DELAY, cx);
     });
-    cx.wait_for(window, Duration::from_secs(3), |_, _| {
-        first.observed.try_recv().is_ok()
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "automatic owner request",
+        |_, _| first.observed.try_recv().is_ok(),
+    )
     .await;
     let (old, cancelled) = panel.read_with(cx, |panel, _| {
         let request = panel.request.as_ref().expect("automatic owner");
@@ -540,9 +580,12 @@ async fn manual_check_preempts_automatic_owner_and_policy_change_cancels_actual_
         panel.begin_check(RequestOrigin::Manual, cx);
     });
     assert!(cancelled.load(Ordering::Acquire));
-    cx.wait_for(window, Duration::from_secs(3), |_, _| {
-        second.observed.try_recv().is_ok()
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "manual owner request",
+        |_, _| second.observed.try_recv().is_ok(),
+    )
     .await;
     panel.update(cx, |panel, cx| {
         let replacement = panel.request.as_ref().expect("manual owner").identity.id;
@@ -658,9 +701,12 @@ async fn failed_replacement_download_restores_the_previous_verified_package(
             Some((fixture.endpoint("/checksums"), fixture.endpoint("/archive")));
         panel.poll_at(Instant::now() + schedule::STARTUP_DELAY, cx);
     });
-    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
-        matches!(panel.read(cx).state, PanelState::Ready(_))
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(5),
+        "initial verified package",
+        |_, cx| matches!(panel.read(cx).state, PanelState::Ready(_)),
+    )
     .await;
     let (root, digest) = panel.read_with(cx, |panel, _| {
         let PanelState::Ready(staged) = &panel.state else {
@@ -679,10 +725,15 @@ async fn failed_replacement_download_restores_the_previous_verified_package(
     panel.update(cx, |panel, cx| {
         panel.poll_at(Instant::now() + Duration::from_secs(86_401), cx)
     });
-    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
-        let panel = panel.read(cx);
-        panel.request.is_none() && matches!(panel.state, PanelState::Ready(_))
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(5),
+        "failed replacement",
+        |_, cx| {
+            let panel = panel.read(cx);
+            panel.request.is_none() && matches!(panel.state, PanelState::Ready(_))
+        },
+    )
     .await;
     panel.read_with(cx, |panel, cx| {
         let PanelState::Ready(staged) = &panel.state else {
@@ -719,8 +770,13 @@ async fn failed_replacement_download_restores_the_previous_verified_package(
         "failed replacement cannot consume the original package"
     );
     panel.update(cx, |panel, cx| panel.cancel(cx));
-    cx.wait_for(window, Duration::from_secs(3), |_, _| !root.exists())
-        .await;
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "discard retained package",
+        |_, _| !root.exists(),
+    )
+    .await;
     fixture.finish();
 }
 
@@ -759,8 +815,13 @@ async fn stale_download_cannot_replace_state_and_cleanup_stays_off_foreground(
         );
         assert!(panel.request.is_none());
     });
-    cx.wait_for(window, Duration::from_secs(3), |_, _| !root.exists())
-        .await;
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "late stage cleanup",
+        |_, _| !root.exists(),
+    )
+    .await;
 }
 
 #[gpui_kit::test]
@@ -856,14 +917,14 @@ async fn worker_drop_aborts_actual_future_and_late_blocking_stage_is_cleaned(
             std::future::pending::<()>().await;
         },
     );
-    cx.wait_for(window, Duration::from_secs(3), |_, _| {
+    cx.wait_for_transport(window, Duration::from_secs(3), "worker entered", |_, _| {
         start.try_recv().is_ok()
     })
     .await;
     drop(owner);
     drop(completion);
     assert!(cancellation.load(Ordering::Acquire));
-    cx.wait_for(window, Duration::from_secs(3), |_, _| {
+    cx.wait_for_transport(window, Duration::from_secs(3), "worker dropped", |_, _| {
         drop_ack.try_recv().is_ok()
     })
     .await;
@@ -891,17 +952,25 @@ async fn worker_drop_aborts_actual_future_and_late_blocking_stage_is_cleaned(
         .await
         .expect("blocking stage completion")
     });
-    cx.wait_for(window, Duration::from_secs(3), |_, _| {
-        entry.try_recv().is_ok()
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "blocking stage entered",
+        |_, _| entry.try_recv().is_ok(),
+    )
     .await;
     assert!(root.exists());
     drop(owner);
     drop(completion);
     assert!(cancellation.load(Ordering::Acquire));
     release.try_send(()).expect("finish owned blocking work");
-    cx.wait_for(window, Duration::from_secs(3), |_, _| !root.exists())
-        .await;
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "blocking stage cleanup",
+        |_, _| !root.exists(),
+    )
+    .await;
 }
 
 #[gpui_kit::test]
@@ -931,9 +1000,12 @@ async fn failed_configuration_load_pauses_background_but_manual_checks_remain_av
         );
         panel.begin_check(RequestOrigin::Manual, cx);
     });
-    cx.wait_for(window, Duration::from_secs(3), |_, cx| {
-        panel.read(cx).request.is_none()
-    })
+    cx.wait_for_transport(
+        window,
+        Duration::from_secs(3),
+        "explicit manual check",
+        |_, cx| panel.read(cx).request.is_none(),
+    )
     .await;
     panel.read_with(cx, |panel, _| {
         assert!(matches!(panel.state, PanelState::Idle));
