@@ -38,6 +38,8 @@ Simplified Chinese is the default, with English available. Appearance follows th
 
 The [native workspace](docs/product/NATIVE_WORKBENCH.md) includes a connections and host-information sidebar, a separate session strip, and Files, Commands and Tunnels controls that show the current selection. Hiding the sidebar or switching the AI assistant preserves sessions and drafts.
 
+The [file workspace](docs/product/FILES_WORKSPACE.md) gives browsing priority with two file lists and a dedicated path row. File actions and transfer settings expand on demand; batch upload/download and the queue remain accessible, preserving drafts and review rules across switches.
+
 ## Features
 
 | Workflow | Capabilities |

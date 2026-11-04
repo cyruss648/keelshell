@@ -1,6 +1,7 @@
 //! Selection-bound batch preparation is read-only; approval dispatches exact plans.
 
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use keelshell_session::sftp::{FileTransferPlan, MAX_QUEUED_TRANSFERS};
 use std::collections::BTreeSet;
 
@@ -504,70 +505,24 @@ impl FilesPanel {
         cx.notify();
     }
     pub(super) fn batch_controls(&self, cx: &mut Context<Self>) -> AnyElement {
-        let visual = crate::design::palette(cx);
         let local = self.local_browser.selection.len();
         let remote = self.remote_selection.len();
-        let drop_available = self.drop_upload_available();
         div()
             .id("batch-transfer-controls")
             .test_support()
             .flex_shrink_0()
-            .min_h(px(30.))
             .flex()
-            .flex_wrap()
             .items_center()
             .gap_1()
-            .px_2()
-            .py_1()
-            .border_b_1()
-            .border_color(rgb(visual.border))
-            .bg(rgb(visual.canvas))
-            .child(
-                div()
-                    .id("remote-drop-hint")
-                    .test_support()
-                    .h(px(28.))
-                    .px_1()
-                    .flex()
-                    .items_center()
-                    .gap_1()
-                    .text_color(rgb(if drop_available {
-                        visual.accent
-                    } else {
-                        visual.muted
-                    }))
-                    .child(IconName::Upload)
-                    .child(if drop_available {
-                        t(
-                            cx,
-                            "拖入本地文件或文件夹，审核后上传",
-                            "Drop local files or folders here, then review to upload",
-                        )
-                    } else {
-                        t(
-                            cx,
-                            "连接远程目录并完成当前操作后，可拖放上传",
-                            "Connect and finish the current operation to drop files",
-                        )
-                    }),
-            )
-            .child(
-                div()
-                    .text_color(rgb(visual.muted))
-                    .child(match crate::i18n::language(cx) {
-                        keelshell_core::Language::ZhCn => {
-                            format!("所选：本地 {local} · 远程 {remote}（每侧最多32项）")
-                        }
-                        keelshell_core::Language::En => {
-                            format!("Selected: local {local} · remote {remote} (32 per side)")
-                        }
-                    }),
-            )
             .child(
                 Button::new("clear-file-selection")
                     .ghost()
+                    .small()
+                    .size(px(24.))
                     .compact()
-                    .label(t(cx, "清空选择", "Clear selection"))
+                    .icon(IconName::X)
+                    .accessibility_label(t(cx, "清空文件选择", "Clear file selection"))
+                    .localized_tooltip("清空文件选择", "Clear file selection")
                     .disabled(local + remote == 0)
                     .on_click(cx.listener(|panel, _, _, cx| {
                         panel.local_browser.selection.clear();
@@ -581,9 +536,18 @@ impl FilesPanel {
             .child(
                 Button::new("batch-upload")
                     .ghost()
+                    .small()
+                    .size(px(24.))
                     .compact()
                     .icon(IconName::Upload)
-                    .label(t(cx, "审核批量上传", "Review batch upload"))
+                    .accessibility_label(format!(
+                        "{} ({local})",
+                        t(cx, "审核上传所选本地项", "Review upload of local selection")
+                    ))
+                    .localized_tooltip(
+                        "审核上传所选本地项；也可拖入远程列表准备上传",
+                        "Review upload of local selection; or drop onto the remote list",
+                    )
                     .disabled(
                         self.suspended
                             || local == 0
@@ -599,9 +563,22 @@ impl FilesPanel {
             .child(
                 Button::new("batch-download")
                     .ghost()
+                    .small()
+                    .size(px(24.))
                     .compact()
                     .icon(IconName::Download)
-                    .label(t(cx, "审核批量下载", "Review batch download"))
+                    .accessibility_label(format!(
+                        "{} ({remote})",
+                        t(
+                            cx,
+                            "审核下载所选远程项",
+                            "Review download of remote selection"
+                        )
+                    ))
+                    .localized_tooltip(
+                        "审核下载所选远程项到当前本地目录",
+                        "Review download of remote selection into the current local folder",
+                    )
                     .disabled(
                         self.suspended
                             || remote == 0
@@ -613,11 +590,6 @@ impl FilesPanel {
                         panel.request_batch(TransferDirection::Download, window, cx)
                     })),
             )
-            .child(div().text_color(rgb(visual.muted)).child(t(
-                cx,
-                "勾选／Ctrl或⌘切换 · Shift范围 · 只准备不执行",
-                "Checkbox / Ctrl or ⌘ toggle · Shift range · Prepare only",
-            )))
             .into_any_element()
     }
 }

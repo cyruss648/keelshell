@@ -37,4 +37,6 @@
 本轮实现和实际验证状态见[工作区记录](../testing/records/2026-11-05-native-workbench.md)，
 设计约束见 [ADR 0096](../adr/0096-native-workbench-navigation.md)。
 受控 GPUI 测试、macOS 原生观察、Windows/Linux 桌面验收分别记录。
-完整文件工具区改版、导航键盘树操作、原生无障碍与完整产品目标继续验收。
+文件区的浏览与可展开设置见[文件工作区](FILES_WORKSPACE.md)及
+[ADR 0097](../adr/0097-file-workbench-disclosures.md)；导航键盘树操作、
+原生无障碍与完整产品目标继续验收。

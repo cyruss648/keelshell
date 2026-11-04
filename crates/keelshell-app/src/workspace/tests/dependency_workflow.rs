@@ -120,8 +120,14 @@ async fn dependency_workflow_workspace_with_real_files_preserves_terminal_budget
                             let first = window.find(("remote-entry", 0_usize));
                             let entry = first.bounds();
                             assert!(first.visible() && entry.size.height >= px(28.) && entry.origin.y >= browser.origin.y && entry.bottom() <= browser.bottom(), "{scene}: actual SFTP first row {entry:?} clipped by {browser:?}");
+                            assert!(window.try_find("file-tools-scroll").is_none(), "{scene}: browsing starts with settings collapsed");
+                            window.click("toggle-file-actions", cx);
+                            window.render_frame(cx);
                             let tools = window.find("file-tools-scroll").bounds();
-                            assert!(tools.size.height >= px(50.), "{scene}: file tools {tools:?}");
+                            assert!(tools.size.height >= px(28.), "{scene}: file tools {tools:?}");
+                            assert!(contained(tools, window.bounds()), "{scene}: disclosed tools remain inside window");
+                            window.click("toggle-file-actions", cx);
+                            window.render_frame(cx);
                             let column = window.find("command-column").bounds();
                             let completion = window.find("remote-completion-controls").bounds();
                             let textarea = window.find("command-input-container").bounds();

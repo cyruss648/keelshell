@@ -3,7 +3,7 @@ use crate::i18n::{Message, t};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::{
     component::{
-        Disableable, Sizable,
+        Disableable, Selectable, Sizable,
         button::{Button, ButtonVariants},
         input::{EditorState, Input, InputEvent, InputState, Textarea, TextareaState},
     },
@@ -31,6 +31,7 @@ use std::{
     time::Duration,
 };
 
+mod action_view;
 mod batch;
 mod browser;
 mod editor_language;
@@ -40,7 +41,10 @@ mod editor_search_tests;
 mod local_browser;
 mod local_catalog;
 mod local_view;
+#[cfg(test)]
+mod local_view_tests;
 mod merge;
+mod navigation_view;
 mod parallel;
 mod review;
 mod selection;
@@ -162,6 +166,8 @@ pub struct FilesPanel {
     review_focus: FocusHandle,
     editor_surface: Option<review::EditorSurface>,
     tools_scroll: ScrollHandle,
+    tool_section: Option<action_view::ToolSection>,
+    tool_section_focus: [FocusHandle; 2],
     transfer_list_scroll: ScrollHandle,
     queue_details_scroll: ScrollHandle,
     queue_details_visible: bool,
@@ -559,6 +565,16 @@ fn send_worker_progress(progress: &mpsc::SyncSender<WorkerMessage>, message: Mes
 }
 
 impl FilesPanel {
+    /// Height allocated by the workspace, also used by file-state geometry tests.
+    pub(crate) fn workbench_height(viewport_height: Pixels) -> Pixels {
+        px(340.).min(viewport_height * 0.40)
+            - if viewport_height < px(700.) {
+                px(20.)
+            } else {
+                px(0.)
+            }
+    }
+
     pub fn new(
         session: SshSession,
         host: String,
@@ -614,6 +630,8 @@ impl FilesPanel {
             review_focus: cx.focus_handle(),
             editor_surface: None,
             tools_scroll: ScrollHandle::new(),
+            tool_section: None,
+            tool_section_focus: [cx.focus_handle(), cx.focus_handle()],
             transfer_list_scroll: ScrollHandle::new(),
             queue_details_scroll: ScrollHandle::new(),
             queue_details_visible: false,
@@ -1661,7 +1679,7 @@ fn confirmation_bar(
         .w_full()
         .min_w_0()
         .px_2()
-        .py_1()
+        .py_0()
         .flex_shrink_0()
         .flex()
         .items_center()

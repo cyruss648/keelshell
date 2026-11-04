@@ -374,67 +374,11 @@ impl Render for Workspace {
 }
 
 impl Workspace {
-    // Keep the large workspace builder off the modal rendering stack. An early
-    // return in one monolithic debug frame still reserves all its temporaries.
+    // Finish each child behind a call boundary so debug builder temporaries
+    // do not accumulate in the workspace renderer's stack frame.
     #[inline(never)]
-    fn render_workspace(&mut self, window: &mut Window, cx: &mut Context<Self>) -> AnyElement {
+    fn session_tabs(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
-        let viewport = window.viewport_size();
-        let assistant_width = px(380.).min(viewport.width * 0.42);
-        // At compact widths keep the terminal usable while the assistant is open.
-        let show_navigation = self.navigation_visible(window);
-        if !show_navigation && self.navigation_focus.contains_focused(window, cx) {
-            // A resize can unmount the rail while its retained search is focused.
-            // Use the inert workspace, never a terminal that would receive typing.
-            self.surface_focus.focus(window, cx);
-        }
-        let compact_command_tools = viewport.height < px(700.);
-        // At short heights share the new session-strip budget with the
-        // scrollable tool area, retaining usable file controls and multiline input.
-        let tool_height = px(340.).min(viewport.height * 0.40)
-            - if compact_command_tools {
-                px(32.)
-            } else {
-                px(0.)
-            };
-        let active_id = self.tabs.get(self.active).map(Entity::entity_id);
-        let compact_toolbar = viewport.width < px(1280.);
-        // Only reveal after selection or a layout change: continuous renders must
-        // not undo a user's manual horizontal scroll through other sessions.
-        let update_action = self.update_service.read(cx).action_label(cx);
-        let reveal = active_id.map(|id| {
-            (
-                id,
-                viewport.width,
-                self.tabs.len(),
-                i18n::language(cx),
-                update_action,
-                show_navigation,
-                self.show_assistant,
-            )
-        });
-        if self.session_tab_reveal != reveal {
-            self.session_tab_reveal = reveal;
-            if let Some(expected) = reveal {
-                self.session_tab_scroll.scroll_to_item(self.active);
-                // Div applies a scroll request before updating its measured
-                // viewport. Reapply once after layout, against the new bounds.
-                cx.on_next_frame(window, move |view, window, cx| {
-                    if view.session_tab_reveal == Some(expected)
-                        && view.tabs.get(view.active).map(Entity::entity_id) == Some(expected.0)
-                        && window.viewport_size().width == expected.1
-                        && view.tabs.len() == expected.2
-                        && i18n::language(cx) == expected.3
-                        && view.update_service.read(cx).action_label(cx) == expected.4
-                        && view.show_assistant == expected.6
-                        && view.navigation_visible(window) == expected.5
-                    {
-                        view.session_tab_scroll.scroll_to_item(view.active);
-                        cx.notify();
-                    }
-                });
-            }
-        }
         let mut tabs = div()
             .id("session-tabs")
             .test_support()
@@ -525,68 +469,46 @@ impl Workspace {
                     ),
             );
         }
-        let session_strip = self.session_strip(tabs.into_any_element(), cx);
-        let body = if self.tabs.is_empty() {
-            self.empty_workspace_body(
-                viewport.width
-                    - if self.show_assistant {
-                        assistant_width
+        tabs.into_any_element()
+    }
+
+    #[inline(never)]
+    fn terminal_panes(&self, active_id: Option<EntityId>, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(visual.border));
+        for pane in self.displayed_terminals() {
+            let id = pane.entity_id();
+            area = area.child(
+                div()
+                    .id(("terminal-pane", id))
+                    .test_support()
+                    .flex_1()
+                    .min_w_0()
+                    .h_full()
+                    .flex()
+                    .flex_col()
+                    .p_2()
+                    .bg(rgb(crate::design::terminal_palette(cx).background))
+                    .border_t_2()
+                    .border_color(rgb(if Some(id) == active_id {
+                        visual.accent
                     } else {
-                        px(0.)
-                    },
-                cx,
-            )
-        } else {
-            let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(visual.border));
-            for pane in self.displayed_terminals() {
-                let id = pane.entity_id();
-                area = area.child(
-                    div()
-                        .id(("terminal-pane", id))
-                        .test_support()
-                        .flex_1()
-                        .min_w_0()
-                        .h_full()
-                        .flex()
-                        .flex_col()
-                        .p_2()
-                        .bg(rgb(crate::design::terminal_palette(cx).background))
-                        .border_t_2()
-                        .border_color(rgb(if Some(id) == active_id {
-                            visual.accent
-                        } else {
-                            crate::design::terminal_palette(cx).background
-                        }))
-                        .child(self.reconnect_banner(id, cx))
-                        .child(div().flex_1().min_h_0().child(pane)),
-                );
-            }
-            area.into_any_element()
-        };
-        let reviewed_id = self.command_target.or(active_id);
-        let stale_command = self
-            .command_target
-            .is_some_and(|target| !self.tabs.iter().any(|tab| tab.entity_id() == target));
-        let reviewed_target = reviewed_id
-            .and_then(|id| self.remote_hosts.get(&id))
-            .cloned()
-            .unwrap_or_else(|| {
-                if stale_command {
-                    t(
-                        cx,
-                        "上次会话 · 待审核",
-                        "Previous session · review required",
-                    )
-                    .into()
-                } else {
-                    t(cx, "未连接", "Disconnected").into()
-                }
-            });
-        let terminal_status = self
-            .tabs
-            .get(self.active)
-            .map(|tab| tab.read(cx).status.render(cx))
-            .unwrap_or_else(|| t(cx, "无活动 SSH 会话", "No active SSH session").into());
+                        crate::design::terminal_palette(cx).background
+                    }))
+                    .child(self.reconnect_banner(id, cx))
+                    .child(div().flex_1().min_h_0().child(pane)),
+            );
+        }
+        area.into_any_element()
+    }
+
+    #[inline(never)]
+    fn workspace_tool_tabs(
+        &self,
+        active_id: Option<EntityId>,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let mut bottom_tabs = div()
             .id("workspace-tool-tabs")
             .test_support()
@@ -647,6 +569,560 @@ impl Workspace {
                         }),
                 );
         }
+        bottom_tabs.into_any_element()
+    }
+
+    #[inline(never)]
+    fn workspace_session_actions(
+        &self,
+        show_navigation: bool,
+        compact_toolbar: bool,
+        active_id: Option<EntityId>,
+        cx: &mut Context<Self>,
+    ) -> [AnyElement; 5] {
+        let visual = crate::design::palette(cx);
+        [
+            Button::new("toggle-navigation")
+                .ghost()
+                .compact()
+                .icon(IconName::Columns2)
+                .selected(show_navigation)
+                .toggled(show_navigation)
+                .disabled(self.tabs.is_empty())
+                .accessibility_label(t(cx, "连接与主机侧栏", "Connections and host sidebar"))
+                .localized_tooltip(
+                    "显示或收起连接与主机信息",
+                    "Show or hide connections and host information",
+                )
+                .on_click(cx.listener(|view, _, window, cx| {
+                    if view.tabs.is_empty() {
+                        return;
+                    }
+                    let visible = view.navigation_visible(window);
+                    view.show_navigation = !visible;
+                    if view.show_navigation && window.viewport_size().width < px(1280.) {
+                        view.show_assistant = false;
+                    }
+                    cx.notify();
+                }))
+                .map(|button| self.retain_modal_button("toggle-navigation", button, cx))
+                .into_any_element(),
+            Button::new("connection-manager")
+                .ghost()
+                .compact()
+                .icon(IconName::FolderOpen)
+                .accessibility_label(t(cx, "连接", "Connections"))
+                .localized_tooltip("连接", "Connections")
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "连接", "Connections"))
+                })
+                .on_click(cx.listener(|view, _, window, cx| {
+                    view.open_connections(&OpenConnections, window, cx)
+                }))
+                .map(|button| self.retain_modal_button("connection-manager", button, cx))
+                .into_any_element(),
+            div()
+                .flex_1()
+                .min_w_0()
+                .px_2()
+                .text_ellipsis()
+                .text_color(rgb(visual.muted))
+                .child(t(cx, "远程工作区", "Remote workspace"))
+                .into_any_element(),
+            Button::new("split-session")
+                .icon(IconName::Columns2)
+                .ghost()
+                .compact()
+                .accessibility_label(t(cx, "分屏", "Split"))
+                .localized_tooltip("分屏", "Split")
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "分屏", "Split"))
+                })
+                .disabled(active_id.is_none())
+                .on_click(cx.listener(|view, _, window, cx| view.split_remote(window, cx)))
+                .map(|button| self.retain_modal_button("split-session", button, cx))
+                .into_any_element(),
+            Button::new("toggle-assistant")
+                .icon(IconName::Sparkles)
+                .ghost()
+                .compact()
+                .accessibility_label(t(cx, "AI 助手", "AI assistant"))
+                .localized_tooltip("AI 助手", "AI assistant")
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "AI 助手", "AI assistant"))
+                })
+                .on_click(cx.listener(|view, _, window, cx| {
+                    view.toggle_assistant(&ToggleAssistant, window, cx)
+                }))
+                .map(|button| self.retain_modal_button("toggle-assistant", button, cx))
+                .into_any_element(),
+        ]
+    }
+
+    #[inline(never)]
+    fn workspace_settings_actions(
+        &self,
+        compact_toolbar: bool,
+        cx: &mut Context<Self>,
+    ) -> [AnyElement; 5] {
+        [
+            Button::new("vault-settings")
+                .ghost()
+                .compact()
+                .label(t(cx, "凭据库", "Vault"))
+                .disabled(!self.can_open_vault())
+                .on_click(cx.listener(|view, _, window, cx| {
+                    view.open_vault_settings(window, cx)
+                })).map(|button| self.retain_modal_button("vault-settings", button, cx))
+            .into_any_element(),
+            Button::new("about-updates")
+                .icon(IconName::Package)
+                .ghost()
+                .compact()
+                .accessibility_label(t(cx, "关于/更新", "About / updates"))
+                .localized_tooltip("关于/更新", "About / updates")
+                .when(!compact_toolbar, |button| button.label(self.update_service.read(cx).action_label(cx)))
+                .on_click(cx.listener(|view, _, window, cx| {
+                    view.open_updates(window, cx)
+                })).map(|button| self.retain_modal_button("about-updates", button, cx))
+            .into_any_element(),
+            Button::new("configuration-recovery")
+                .ghost()
+                .compact()
+                .disabled(self.state_reloading)
+                .accessibility_label(t(cx, "配置备份与恢复", "Configuration backup and recovery"))
+                .label(t(cx, "配置恢复", "Recovery"))
+                .localized_tooltip("备份和恢复本机配置；恢复前先关闭 SSH 标签并停止 AI、批量、定时与 MCP 操作", "Back up and restore local metadata; close SSH tabs and stop AI, batch, scheduled and MCP work before recovery")
+                .on_click(cx.listener(|view, _, window, cx| {
+                    view.open_configuration_recovery(window, cx)
+                })).map(|button| self.retain_modal_button("configuration-recovery", button, cx))
+            .into_any_element(),
+            Button::new("theme-settings")
+                .ghost()
+                .compact()
+                .icon(IconName::Settings)
+                .label(t(cx, "主题", "Themes"))
+                .accessibility_label(t(cx, "主题与外观", "Themes and appearance"))
+                .disabled(self.saving || self.state_reloading)
+                .localized_tooltip("选择霜白、曜石、雾紫及明暗模式", "Choose a theme family and appearance")
+                .on_click(cx.listener(|view, _, window, cx| view.open_appearance(window, cx)))
+                .map(|button| self.retain_modal_button("theme-settings", button, cx))
+            .into_any_element(),
+            Button::new("language")
+                .ghost()
+                .compact()
+                .label(t(cx, "中文 / EN", "EN / 中文"))
+                .disabled(self.saving || self.state_reloading)
+                .on_click(
+                    cx.listener(|view, _, window, cx| view.switch_language(window, cx)),
+                ).map(|button| self.retain_modal_button("language", button, cx))
+            .into_any_element(),
+        ]
+    }
+
+    #[inline(never)]
+    fn workspace_toolbar(
+        &self,
+        show_navigation: bool,
+        compact_toolbar: bool,
+        active_id: Option<EntityId>,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        div()
+            .id("workspace-toolbar")
+            .test_support()
+            .h(px(42.))
+            .bg(rgb(visual.chrome))
+            .px_2()
+            .gap_1()
+            .flex_shrink_0()
+            .flex()
+            .items_center()
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            // Keep the existing siblings: grouping adds call boundaries, not containers.
+            .children(self.workspace_session_actions(
+                show_navigation,
+                compact_toolbar,
+                active_id,
+                cx,
+            ))
+            .children(self.workspace_settings_actions(compact_toolbar, cx))
+            .into_any_element()
+    }
+
+    #[inline(never)]
+    fn command_input_bar(
+        &self,
+        active_id: Option<EntityId>,
+        reviewed_id: Option<EntityId>,
+        reviewed_target: String,
+        stale_command: bool,
+        compact_command_tools: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        div()
+            .flex_shrink_0()
+            .px_2()
+            .py_1()
+            .when(compact_command_tools, |bar| bar.py_0())
+            .bg(rgb(visual.surface))
+            .flex()
+            .items_center()
+            .gap_2()
+            .child(
+                div()
+                    .max_w(px(220.))
+                    .text_xs()
+                    .text_ellipsis()
+                    .text_color(rgb(if reviewed_id != active_id {
+                        visual.warning
+                    } else {
+                        visual.muted
+                    }))
+                    .child(reviewed_target),
+            )
+            .capture_action(cx.listener(|view, _: &CompleteRemoteCommand, window, cx| {
+                if view.command.read(cx).focus_handle(cx).is_focused(window)
+                    && !view.command.update(cx, |input, cx| {
+                        input.marked_text_range(window, cx).is_some()
+                    })
+                {
+                    view.request_remote_completion(false, window, cx);
+                    cx.stop_propagation();
+                } else {
+                    cx.propagate();
+                }
+            }))
+            // Bound input actions run before raw key callbacks in GPUI.
+            .capture_action(cx.listener(
+                |view, _: &gpui_kit::component::input::MoveUp, window, cx| {
+                    if !view.suggestion_action("up", window, cx) {
+                        cx.propagate();
+                    }
+                },
+            ))
+            .capture_action(cx.listener(
+                |view, _: &gpui_kit::component::input::MoveDown, window, cx| {
+                    if !view.suggestion_action("down", window, cx) {
+                        cx.propagate();
+                    }
+                },
+            ))
+            .capture_action(cx.listener(
+                |view, _: &gpui_kit::component::input::Escape, window, cx| {
+                    if !view.suggestion_action("escape", window, cx) {
+                        cx.propagate();
+                    }
+                },
+            ))
+            .capture_action(cx.listener(
+                |view, action: &gpui_kit::component::input::Enter, window, cx| {
+                    if action.secondary
+                        || action.shift
+                        || !view.suggestion_action("enter", window, cx)
+                    {
+                        cx.propagate();
+                    }
+                },
+            ))
+            .child(
+                div()
+                    .id("command-input-container")
+                    .test_support()
+                    .flex_1()
+                    .min_w_0()
+                    .h(px(64.))
+                    .child(Textarea::new(&self.command).h_full()),
+            )
+            .when(stale_command, |bar| {
+                bar.child(
+                    Button::new("review-reconnected-command")
+                        .ghost()
+                        .compact()
+                        .label(t(cx, "用于当前会话", "Use in current session"))
+                        .on_click(
+                            cx.listener(|view, _, window, cx| {
+                                view.review_stale_command(window, cx)
+                            }),
+                        )
+                        .map(|button| {
+                            self.retain_modal_button("review-reconnected-command", button, cx)
+                        }),
+                )
+            })
+            .child(
+                Button::new("run-command")
+                    .compact()
+                    .label(t(cx, "执行", "Run"))
+                    .disabled(
+                        reviewed_id != active_id
+                            || self
+                                .tabs
+                                .get(self.active)
+                                .is_none_or(|tab| !tab.read(cx).is_open()),
+                    )
+                    .on_click(cx.listener(|view, _, window, cx| view.run_command(window, cx)))
+                    .map(|button| self.retain_modal_button("run-command", button, cx)),
+            )
+            .into_any_element()
+    }
+
+    #[inline(never)]
+    fn command_actions(&self, compact_command_tools: bool, cx: &mut Context<Self>) -> AnyElement {
+        div()
+            .id("command-actions")
+            .test_support()
+            .flex_shrink_0()
+            .min_w_0()
+            .px_2()
+            .py_1()
+            .flex()
+            .flex_wrap()
+            .items_center()
+            .gap_2()
+            .when(compact_command_tools, |row| row.py(px(2.)).gap_1())
+            .child(
+                Button::new("command-history-policy")
+                    .ghost()
+                    .compact()
+                    .selected(self.command_record_history)
+                    .toggled(self.command_record_history)
+                    .label(if self.command_record_history {
+                        t(cx, "记录历史", "History on")
+                    } else {
+                        t(cx, "不记历史", "History off")
+                    })
+                    .accessibility_label(if self.command_record_history {
+                        t(cx, "本次命令：记录历史", "This command: keep history")
+                    } else {
+                        t(cx, "本次命令：不记录历史", "This command: skip history")
+                    })
+                    .localized_tooltip(
+                        "仅控制当前命令执行后的历史记录",
+                        "Controls history recording for the current command only",
+                    )
+                    .disabled(self.command_surface_blocked())
+                    .on_click(cx.listener(|view, _, _, cx| {
+                        view.command_record_history = !view.command_record_history;
+                        cx.notify();
+                    }))
+                    .map(|button| self.retain_modal_button("command-history-policy", button, cx)),
+            )
+            .child(
+                Button::new("new-command-draft")
+                    .ghost()
+                    .compact()
+                    .label(t(cx, "新命令", "New command"))
+                    .localized_tooltip(
+                        "清空当前草稿，重新选择目标与历史设置",
+                        "Clear this draft and reset its target and history choice",
+                    )
+                    .disabled(self.command_surface_blocked())
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        if view.command_surface_blocked() {
+                            return;
+                        }
+                        view.set_reviewed_command(String::new(), None, window, cx);
+                        view.command.read(cx).focus_handle(cx).focus(window, cx);
+                        cx.notify();
+                    }))
+                    .map(|button| self.retain_modal_button("new-command-draft", button, cx)),
+            )
+            .child(
+                Button::new("command-batch")
+                    .ghost()
+                    .compact()
+                    .label(
+                        if self
+                            .batch_panel
+                            .as_ref()
+                            .is_some_and(|p| p.read(cx).is_running())
+                        {
+                            t(cx, "批量任务 · 运行中", "Batch · running")
+                        } else {
+                            t(cx, "批量任务", "Batch tasks")
+                        },
+                    )
+                    .disabled(self.command_surface_blocked())
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        view.open_batch_commands(false, window, cx)
+                    }))
+                    .map(|button| self.retain_modal_button("command-batch", button, cx)),
+            )
+            .child(
+                Button::new("command-workflow")
+                    .ghost()
+                    .compact()
+                    .label(
+                        if self
+                            .workflow_panel
+                            .as_ref()
+                            .is_some_and(|panel| panel.read(cx).is_running())
+                        {
+                            t(cx, "工作流 · 运行中", "Workflow · running")
+                        } else {
+                            t(cx, "依赖工作流", "Dependency workflow")
+                        },
+                    )
+                    .disabled(self.command_surface_blocked())
+                    .on_click(
+                        cx.listener(|view, _, window, cx| view.open_workflow(false, window, cx)),
+                    )
+                    .map(|button| self.retain_modal_button("command-workflow", button, cx)),
+            )
+            .into_any_element()
+    }
+
+    #[inline(never)]
+    fn workspace_status_bar(&self, terminal_status: String, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        div()
+            .h(px(30.))
+            .px_3()
+            .flex_shrink_0()
+            .flex()
+            .items_center()
+            .gap_3()
+            .border_t_1()
+            .border_color(rgb(visual.border))
+            .text_xs()
+            .text_color(rgb(visual.muted))
+            .child(
+                div()
+                    .flex_1()
+                    .min_w_0()
+                    .text_ellipsis()
+                    .child(terminal_status),
+            )
+            .child(
+                div()
+                    .min_w_0()
+                    .text_ellipsis()
+                    .child(self.status.render(cx)),
+            )
+            .child(
+                Button::new("mcp-settings")
+                    .ghost()
+                    .compact()
+                    .label(self.mcp_toolbar_label())
+                    .localized_tooltip(
+                        "对外 MCP 授权与命令审阅",
+                        "External MCP grants and command review",
+                    )
+                    .on_click(cx.listener(|view, _, window, cx| view.open_mcp(window, cx)))
+                    .map(|button| self.retain_modal_button("mcp-settings", button, cx)),
+            )
+            .into_any_element()
+    }
+
+    // Keep the large workspace builder off the modal rendering stack. An early
+    // return in one monolithic debug frame still reserves all its temporaries.
+    #[inline(never)]
+    fn render_workspace(&mut self, window: &mut Window, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let viewport = window.viewport_size();
+        let assistant_width = px(380.).min(viewport.width * 0.42);
+        // At compact widths keep the terminal usable while the assistant is open.
+        let show_navigation = self.navigation_visible(window);
+        if !show_navigation && self.navigation_focus.contains_focused(window, cx) {
+            // A resize can unmount the rail while its retained search is focused.
+            // Use the inert workspace, never a terminal that would receive typing.
+            self.surface_focus.focus(window, cx);
+        }
+        let compact_command_tools = viewport.height < px(700.);
+        // At short heights share the new session-strip budget with the
+        // scrollable tool area, retaining usable file controls and multiline input.
+        let tool_height = if self.visible_panel == Some(ToolPanel::Files) {
+            crate::files::FilesPanel::workbench_height(viewport.height)
+        } else {
+            px(340.).min(viewport.height * 0.40)
+                - if compact_command_tools {
+                    px(32.)
+                } else {
+                    px(0.)
+                }
+        };
+        let active_id = self.tabs.get(self.active).map(Entity::entity_id);
+        let compact_toolbar = viewport.width < px(1280.);
+        // Only reveal after selection or a layout change: continuous renders must
+        // not undo a user's manual horizontal scroll through other sessions.
+        let update_action = self.update_service.read(cx).action_label(cx);
+        let reveal = active_id.map(|id| {
+            (
+                id,
+                viewport.width,
+                self.tabs.len(),
+                i18n::language(cx),
+                update_action,
+                show_navigation,
+                self.show_assistant,
+            )
+        });
+        if self.session_tab_reveal != reveal {
+            self.session_tab_reveal = reveal;
+            if let Some(expected) = reveal {
+                self.session_tab_scroll.scroll_to_item(self.active);
+                // Div applies a scroll request before updating its measured
+                // viewport. Reapply once after layout, against the new bounds.
+                cx.on_next_frame(window, move |view, window, cx| {
+                    if view.session_tab_reveal == Some(expected)
+                        && view.tabs.get(view.active).map(Entity::entity_id) == Some(expected.0)
+                        && window.viewport_size().width == expected.1
+                        && view.tabs.len() == expected.2
+                        && i18n::language(cx) == expected.3
+                        && view.update_service.read(cx).action_label(cx) == expected.4
+                        && view.show_assistant == expected.6
+                        && view.navigation_visible(window) == expected.5
+                    {
+                        view.session_tab_scroll.scroll_to_item(view.active);
+                        cx.notify();
+                    }
+                });
+            }
+        }
+        let tabs = self.session_tabs(cx);
+        let session_strip = self.session_strip(tabs, cx);
+        let body = if self.tabs.is_empty() {
+            self.empty_workspace_body(
+                viewport.width
+                    - if self.show_assistant {
+                        assistant_width
+                    } else {
+                        px(0.)
+                    },
+                cx,
+            )
+        } else {
+            self.terminal_panes(active_id, cx)
+        };
+        let reviewed_id = self.command_target.or(active_id);
+        let stale_command = self
+            .command_target
+            .is_some_and(|target| !self.tabs.iter().any(|tab| tab.entity_id() == target));
+        let reviewed_target = reviewed_id
+            .and_then(|id| self.remote_hosts.get(&id))
+            .cloned()
+            .unwrap_or_else(|| {
+                if stale_command {
+                    t(
+                        cx,
+                        "上次会话 · 待审核",
+                        "Previous session · review required",
+                    )
+                    .into()
+                } else {
+                    t(cx, "未连接", "Disconnected").into()
+                }
+            });
+        let terminal_status = self
+            .tabs
+            .get(self.active)
+            .map(|tab| tab.read(cx).status.render(cx))
+            .unwrap_or_else(|| t(cx, "无活动 SSH 会话", "No active SSH session").into());
+        let bottom_tabs = self.workspace_tool_tabs(active_id, cx);
         let panels = active_id.and_then(|id| self.selected_panels(id));
         let bottom = match self.visible_panel {
             Some(ToolPanel::Files) => panels
@@ -679,137 +1155,7 @@ impl Workspace {
             .on_action(cx.listener(Self::open_connections))
             .on_action(cx.listener(Self::close_tab))
             .on_action(cx.listener(Self::toggle_assistant))
-            .child(
-                div()
-                    .id("workspace-toolbar")
-                    .test_support()
-                    .h(px(42.))
-                    .bg(rgb(visual.chrome))
-                    .px_2()
-                    .gap_1()
-                    .flex_shrink_0()
-                    .flex()
-                    .items_center()
-                    .border_b_1()
-                    .border_color(rgb(visual.border))
-                    .child(
-                        Button::new("toggle-navigation")
-                            .ghost().compact().icon(IconName::Columns2)
-                            .selected(show_navigation)
-                            .toggled(show_navigation)
-                            .disabled(self.tabs.is_empty())
-                            .accessibility_label(t(cx, "连接与主机侧栏", "Connections and host sidebar"))
-                            .localized_tooltip("显示或收起连接与主机信息", "Show or hide connections and host information")
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                if view.tabs.is_empty() { return; }
-                                let visible = view.navigation_visible(window);
-                                view.show_navigation = !visible;
-                                if view.show_navigation && window.viewport_size().width < px(1280.) {
-                                    view.show_assistant = false;
-                                }
-                                cx.notify();
-                            }))
-                            .map(|button| self.retain_modal_button("toggle-navigation", button, cx)),
-                    )
-                    .child(
-                        Button::new("connection-manager")
-                            .ghost()
-                            .compact()
-                            .icon(IconName::FolderOpen)
-                            .accessibility_label(t(cx, "连接", "Connections"))
-                            .localized_tooltip("连接", "Connections")
-                            .when(!compact_toolbar, |button| button.label(t(cx, "连接", "Connections")))
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.open_connections(&OpenConnections, window, cx)
-                            })).map(|button| self.retain_modal_button("connection-manager", button, cx)),
-                    )
-                    .child(
-                        div().flex_1().min_w_0().px_2().text_ellipsis()
-                            .text_color(rgb(visual.muted))
-                            .child(t(cx, "远程工作区", "Remote workspace")),
-                    )
-                    .child(
-                        Button::new("split-session")
-                            .icon(IconName::Columns2)
-                            .ghost()
-                            .compact()
-                            .accessibility_label(t(cx, "分屏", "Split"))
-                            .localized_tooltip("分屏", "Split")
-                            .when(!compact_toolbar, |button| button.label(t(cx, "分屏", "Split")))
-                            .disabled(active_id.is_none())
-                            .on_click(
-                                cx.listener(|view, _, window, cx| view.split_remote(window, cx)),
-                            ).map(|button| self.retain_modal_button("split-session", button, cx)),
-                    )
-                    .child(
-                        Button::new("toggle-assistant")
-                            .icon(IconName::Sparkles)
-                            .ghost()
-                            .compact()
-                            .accessibility_label(t(cx, "AI 助手", "AI assistant"))
-                            .localized_tooltip("AI 助手", "AI assistant")
-                            .when(!compact_toolbar, |button| button.label(t(cx, "AI 助手", "AI assistant")))
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.toggle_assistant(&ToggleAssistant, window, cx)
-                            })).map(|button| self.retain_modal_button("toggle-assistant", button, cx)),
-                    )
-                    .child(
-                        Button::new("vault-settings")
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "凭据库", "Vault"))
-                            .disabled(!self.can_open_vault())
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.open_vault_settings(window, cx)
-                            })).map(|button| self.retain_modal_button("vault-settings", button, cx)),
-                    )
-                    .child(
-                        Button::new("about-updates")
-                            .icon(IconName::Package)
-                            .ghost()
-                            .compact()
-                            .accessibility_label(t(cx, "关于/更新", "About / updates"))
-                            .localized_tooltip("关于/更新", "About / updates")
-                            .when(!compact_toolbar, |button| button.label(self.update_service.read(cx).action_label(cx)))
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.open_updates(window, cx)
-                            })).map(|button| self.retain_modal_button("about-updates", button, cx)),
-                    )
-                    .child(
-                        Button::new("configuration-recovery")
-                            .ghost()
-                            .compact()
-                            .disabled(self.state_reloading)
-                            .accessibility_label(t(cx, "配置备份与恢复", "Configuration backup and recovery"))
-                            .label(t(cx, "配置恢复", "Recovery"))
-                            .localized_tooltip("备份和恢复本机配置；恢复前先关闭 SSH 标签并停止 AI、批量、定时与 MCP 操作", "Back up and restore local metadata; close SSH tabs and stop AI, batch, scheduled and MCP work before recovery")
-                            .on_click(cx.listener(|view, _, window, cx| {
-                                view.open_configuration_recovery(window, cx)
-                            })).map(|button| self.retain_modal_button("configuration-recovery", button, cx)),
-                    )
-                    .child(
-                        Button::new("theme-settings")
-                            .ghost()
-                            .compact()
-                            .icon(IconName::Settings)
-                            .label(t(cx, "主题", "Themes"))
-                            .accessibility_label(t(cx, "主题与外观", "Themes and appearance"))
-                            .disabled(self.saving || self.state_reloading)
-                            .localized_tooltip("选择霜白、曜石、雾紫及明暗模式", "Choose a theme family and appearance")
-                            .on_click(cx.listener(|view, _, window, cx| view.open_appearance(window, cx)))
-                            .map(|button| self.retain_modal_button("theme-settings", button, cx))
-                    )
-                    .child(
-                        Button::new("language")
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "中文 / EN", "EN / 中文"))
-                            .disabled(self.saving || self.state_reloading)
-                            .on_click(
-                                cx.listener(|view, _, window, cx| view.switch_language(window, cx)),
-                            ).map(|button| self.retain_modal_button("language", button, cx)),
-                    ),
-            )
+            .child(self.workspace_toolbar(show_navigation, compact_toolbar, active_id, cx))
             .child(
                 div()
                     .flex_1()
@@ -840,228 +1186,16 @@ impl Workspace {
                             .child(session_strip)
                             .child(div().flex_1().min_h_0().child(body))
                             .when(active_id.is_some(), |el| {
-                                el.child(
-                                    div()
-                                        .flex_shrink_0()
-                                        .px_2()
-                                        .py_1()
-                                        .when(compact_command_tools, |bar| bar.py_0())
-                                        .bg(rgb(visual.surface))
-                                        .flex()
-                                        .items_center()
-                                        .gap_2()
-                                        .child(
-                                            div()
-                                                .max_w(px(220.))
-                                                .text_xs()
-                                                .text_ellipsis()
-                                                .text_color(rgb(if reviewed_id != active_id {
-                                                    visual.warning
-                                                } else {
-                                                    visual.muted
-                                                }))
-                                                .child(reviewed_target),
-                                        )
-                                        .capture_action(cx.listener(
-                                            |view, _: &CompleteRemoteCommand, window, cx| {
-                                                if view
-                                                    .command
-                                                    .read(cx)
-                                                    .focus_handle(cx)
-                                                    .is_focused(window)
-                                                    && !view.command.update(cx, |input, cx| {
-                                                        input
-                                                            .marked_text_range(window, cx)
-                                                            .is_some()
-                                                    })
-                                                {
-                                                    view.request_remote_completion(
-                                                        false, window, cx,
-                                                    );
-                                                    cx.stop_propagation();
-                                                } else {
-                                                    cx.propagate();
-                                                }
-                                            },
-                                        ))
-                                        // Bound input actions run before raw key callbacks in GPUI.
-                                        .capture_action(cx.listener(
-                                            |view,
-                                             _: &gpui_kit::component::input::MoveUp,
-                                             window,
-                                             cx| {
-                                                if !view.suggestion_action("up", window, cx) {
-                                                    cx.propagate();
-                                                }
-                                            },
-                                        ))
-                                        .capture_action(cx.listener(
-                                            |view,
-                                             _: &gpui_kit::component::input::MoveDown,
-                                             window,
-                                             cx| {
-                                                if !view.suggestion_action("down", window, cx) {
-                                                    cx.propagate();
-                                                }
-                                            },
-                                        ))
-                                        .capture_action(cx.listener(
-                                            |view,
-                                             _: &gpui_kit::component::input::Escape,
-                                             window,
-                                             cx| {
-                                                if !view.suggestion_action("escape", window, cx) {
-                                                    cx.propagate();
-                                                }
-                                            },
-                                        ))
-                                        .capture_action(cx.listener(
-                                            |view,
-                                             action: &gpui_kit::component::input::Enter,
-                                             window,
-                                             cx| {
-                                                if action.secondary
-                                                    || action.shift
-                                                    || !view.suggestion_action("enter", window, cx)
-                                                {
-                                                    cx.propagate();
-                                                }
-                                            },
-                                        ))
-                                        .child(
-                                            div()
-                                                .id("command-input-container")
-                                                .test_support()
-                                                .flex_1()
-                                                .min_w_0()
-                                                .h(px(64.))
-                                                .child(Textarea::new(&self.command).h_full()),
-                                        )
-                                        .when(stale_command, |bar| {
-                                            bar.child(
-                                                Button::new("review-reconnected-command")
-                                                    .ghost()
-                                                    .compact()
-                                                    .label(t(
-                                                        cx,
-                                                        "用于当前会话",
-                                                        "Use in current session",
-                                                    ))
-                                                    .on_click(cx.listener(
-                                                        |view, _, window, cx| {
-                                                            view.review_stale_command(window, cx)
-                                                        },
-                                                    )).map(|button| self.retain_modal_button("review-reconnected-command", button, cx)),
-                                            )
-                                        })
-                                        .child(
-                                            Button::new("run-command")
-                                                .compact()
-                                                .label(t(cx, "执行", "Run"))
-                                                .disabled(
-                                                    reviewed_id != active_id
-                                                        || self.tabs.get(self.active).is_none_or(
-                                                            |tab| !tab.read(cx).is_open(),
-                                                        ),
-                                                )
-                                                .on_click(cx.listener(|view, _, window, cx| {
-                                                    view.run_command(window, cx)
-                                                })).map(|button| self.retain_modal_button("run-command", button, cx)),
-                                        ),
-                                )
+                                el.child(self.command_input_bar(
+                                    active_id,
+                                    reviewed_id,
+                                    reviewed_target,
+                                    stale_command,
+                                    compact_command_tools,
+                                    cx,
+                                ))
                                 .child(self.remote_completion_controls(true, cx))
-                                .child(
-                                    div()
-                                        .id("command-actions")
-                                        .test_support()
-                                        .flex_shrink_0()
-                                        .min_w_0()
-                                        .px_2()
-                                        .py_1()
-                                        .flex()
-                                        .flex_wrap()
-                                        .items_center()
-                                        .gap_2()
-                                        .when(compact_command_tools, |row| row.py(px(2.)).gap_1())
-                                        .child(
-                                            Button::new("command-history-policy")
-                                                .ghost()
-                                                .compact()
-                                                .selected(self.command_record_history)
-                                                .toggled(self.command_record_history)
-                                                .label(if self.command_record_history {
-                                                    t(cx, "记录历史", "History on")
-                                                } else {
-                                                    t(cx, "不记历史", "History off")
-                                                })
-                                                .accessibility_label(if self.command_record_history {
-                                                    t(
-                                                        cx,
-                                                        "本次命令：记录历史",
-                                                        "This command: keep history",
-                                                    )
-                                                } else {
-                                                    t(
-                                                        cx,
-                                                        "本次命令：不记录历史",
-                                                        "This command: skip history",
-                                                    )
-                                                })
-                                                .localized_tooltip(
-                                                    "仅控制当前命令执行后的历史记录",
-                                                    "Controls history recording for the current command only",
-                                                )
-                                                .disabled(self.command_surface_blocked())
-                                                .on_click(cx.listener(|view, _, _, cx| {
-                                                    view.command_record_history =
-                                                        !view.command_record_history;
-                                                    cx.notify();
-                                                })).map(|button| self.retain_modal_button("command-history-policy", button, cx)),
-                                        )
-                                        .child(
-                                            Button::new("new-command-draft")
-                                                .ghost().compact()
-                                                .label(t(cx, "新命令", "New command"))
-                                                .localized_tooltip("清空当前草稿，重新选择目标与历史设置", "Clear this draft and reset its target and history choice")
-                                                .disabled(self.command_surface_blocked())
-                                                .on_click(cx.listener(|view, _, window, cx| {
-                                                    if view.command_surface_blocked() { return; }
-                                                    view.set_reviewed_command(String::new(), None, window, cx);
-                                                    view.command.read(cx).focus_handle(cx).focus(window, cx);
-                                                    cx.notify();
-                                                })).map(|button| self.retain_modal_button("new-command-draft", button, cx)),
-                                        )
-                                        .child(
-                                            Button::new("command-batch")
-                                                .ghost()
-                                                .compact()
-                                                .label(
-                                                    if self
-                                                        .batch_panel
-                                                        .as_ref()
-                                                        .is_some_and(|p| p.read(cx).is_running())
-                                                    {
-                                                        t(
-                                                            cx,
-                                                            "批量任务 · 运行中",
-                                                            "Batch · running",
-                                                        )
-                                                    } else {
-                                                        t(cx, "批量任务", "Batch tasks")
-                                                    },
-                                                )
-                                                .disabled(self.command_surface_blocked())
-                                                .on_click(cx.listener(|view, _, window, cx| {
-                                                    view.open_batch_commands(false, window, cx)
-                                                })).map(|button| self.retain_modal_button("command-batch", button, cx)),
-                                        )
-                                        .child(Button::new("command-workflow").ghost().compact()
-                                            .label(if self.workflow_panel.as_ref().is_some_and(|panel|panel.read(cx).is_running()) {
-                                                t(cx,"工作流 · 运行中","Workflow · running")
-                                            } else {t(cx,"依赖工作流","Dependency workflow")})
-                                            .disabled(self.command_surface_blocked())
-                                            .on_click(cx.listener(|view,_,window,cx|view.open_workflow(false,window,cx))).map(|button| self.retain_modal_button("command-workflow", button, cx))),
-                                )
+                                .child(self.command_actions(compact_command_tools, cx))
                                 .child(self.remote_completion_list(cx))
                                 .child(self.suggestion_list(window, cx))
                             })
@@ -1087,28 +1221,13 @@ impl Workspace {
                         )
                     }),
             )
-            .child(
-                div()
-                    .h(px(30.))
-                    .px_3()
-                    .flex_shrink_0()
-                    .flex()
-                    .items_center()
-                    .gap_3()
-                    .border_t_1()
-                    .border_color(rgb(visual.border))
-                    .text_xs()
-                    .text_color(rgb(visual.muted))
-                    .child(div().flex_1().min_w_0().text_ellipsis().child(terminal_status))
-                    .child(div().min_w_0().text_ellipsis().child(self.status.render(cx)))
-                    .child(
-                        Button::new("mcp-settings").ghost().compact().label(self.mcp_toolbar_label())
-                            .localized_tooltip("对外 MCP 授权与命令审阅", "External MCP grants and command review")
-                            .on_click(cx.listener(|view, _, window, cx| view.open_mcp(window, cx))).map(|button| self.retain_modal_button("mcp-settings", button, cx)),
-                    ),
+            .child(self.workspace_status_bar(terminal_status, cx))
+            .when(self.connecting, |surface| {
+                surface.child(self.authentication_modal(cx))
+            })
+            .capture_key_down(
+                cx.listener(|view, _, window, cx| view.capture_surface_input(window, cx)),
             )
-            .when(self.connecting, |surface| surface.child(self.authentication_modal(cx)))
-            .capture_key_down(cx.listener(|view, _, window, cx| view.capture_surface_input(window, cx)))
             .into_any_element();
         self.protect_surface_input(surface, cx)
     }

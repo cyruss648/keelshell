@@ -5,15 +5,14 @@
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "find a saved SSH destination, keep the current terminal readable, and review explicit actions",
+  "job": "browse local and remote files, disclose settings when needed, and review exact targets",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
-    "crates/keelshell-app/src/design/registry.rs:1",
-    "crates/keelshell-app/src/workspace/view.rs:1",
-    "crates/keelshell-app/src/workspace/navigation.rs:1",
-    "docs/design/HALLMARK_NATIVE.md:1",
-    "docs/adr/0096-native-workbench-navigation.md:1"
+    "crates/keelshell-app/src/files/view.rs:1",
+    "crates/keelshell-app/src/files/action_view.rs:1",
+    "crates/keelshell-app/src/files/navigation_view.rs:1",
+    "docs/adr/0097-file-workbench-disclosures.md:1"
   ],
   "preserve": [
     "native application",
@@ -23,10 +22,10 @@
     "test hooks"
   ],
   "introduce": [
-    "saved connection and host-information rail",
-    "separate session strip",
-    "compact completion and history labels",
-    "inert focus return when navigation is hidden"
+    "browse-first file panel",
+    "two-row normal navigation and compact retained review/suspended paths",
+    "retained mutually exclusive file and transfer settings",
+    "compact batch actions and scrollable real transfer counts"
   ],
   "material": {
     "real": [
@@ -44,6 +43,6 @@
   },
   "inferred_from_authorized_design_scope": true,
   "web_render_verified": false,
-  "native_verification": "First package: six palettes at1440x900 and limited Lavender900x580. Fixed final package: direct900x900 focus/AX and1440x900 capture. Wrong-target18-21 excluded; full platform matrix open.",
+  "native_verification": "Final132881…a668: selected appearances across three families, retained drafts, English900x900 review/cancel and content-verified SSH/SFTP upload/download. OS wheel no-scroll cause,900x580 and full matrix open.",
   "web_render_scope": "not_applicable: Rust/GPUI; sloplint reports no supported source files"
 }

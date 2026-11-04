@@ -4,6 +4,41 @@
 最新用户要求优先于历史范围；源码、工程测试、受控原生、平台 CI、公开发布和安装分别验收。
 完整旧稿见[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)，其中“当前”、暂停及删除指令只属于当时，不构成新的操作授权。
 
+## 本轮文件工作区与渲染栈 — 本机验证完成
+
+当前切片为浏览优先的文件工作区，基线 `3a1473e241263f0b531af16e4e1dd8fd46fc65b0`。
+默认收起文件操作和传输设置，保留真实列表、常驻批量入口与队列入口；
+两行导航、紧凑审核路径和隐藏输入焦点已实现。三主题仍共用现有目录与语义 token。
+需求、方案和每轮失败/通过分别见[文件指南](product/FILES_WORKSPACE.md)、
+[ADR 0097](adr/0097-file-workbench-disclosures.md)、
+[验证记录](testing/records/2026-11-05-native-file-workbench.md)。
+
+最终 `full-gate-r3` 已退出 0并回收：**2,036 ordinary Rust passed / 23 ignored**，
+含 app 848 / 2 ignored；10 rustdoc（一项仅编译），Python 运行 128 项 / 1 skipped，
+格式、严格 Clippy、依赖策略和额外进程控制器通过。**490 个输入**
+在最终门禁、原生构建和捕获后检查中相同。
+最终包程序 SHA-256 为 `132881a279779de29f813ecad5c30276bfa5b3387d66b962304ebbd7ce80a668`，
+已验霜白浅色、曜石深色、雾紫浅深中文与雾紫深色英文，
+草稿保持、900×900 英文审核/取消、双向真实 SFTP 内容摘要和完成队列 0→1→2。
+前一布局包的三主题完整浅深画面单独保留，不能补齐最终包矩阵。
+最终包最小高度缩放未成功；原生滚轮仍未移动列表，原因 UNKNOWN。
+独立生产 Workspace 的真实上传后像素/行滚轮在 900×900、900×580 均通过，
+已成为永久回归；没有修改生产滚动实现，受控事件不代表 OS 滚动验收。
+手工冲突焦点的初审 P2 已由 reviewer 撤回为 WITHDRAWN_UNPROVEN；
+测试在旧 guard 下本来就通过，不能称为复现后的修复。
+
+基线的精确 Quality **41891939556** 已读回 failure：
+Linux/Windows 测试栈溢出；macOS runner ID 0、未执行。
+渲染构造已分成保持调用边界的辅助函数，测得 `render_workspace` 入口分配
+**1,101,856 → 62,208 字节**，原两项场景在请求 2 MiB 栈时通过。
+1 MiB 的其它渲染帧故障与 512 KiB 的控件转换故障分别保留，
+没有提高 CI 栈预算；历史平台失败的确切故障指令/唯一根因仍未知。
+非作者最终组合复核为 **APPROVE_SCOPED_CHANGE，P0/P1/P2=0**，
+Hallmark 对上述捕获范围给出 ship；精确提交/CI 读回见本轮记录及
+`work/native-file-workbench-20261105/delivery-readback.json`。
+
+以下原生导航、主题与管理记录属于已经集成的前轮证据；不能覆盖上方新候选状态。
+
 ## 已接受的产品与主题方向
 
 - 真实 Rust / GPUI Kit 原生应用，目标 macOS、Windows、Linux；只管理远程 SSH。本地文件浏览仅服务于 SFTP，本地 AI 进程是推理入口；本地终端、远程桌面和串口不属于产品目标。
@@ -11,12 +46,12 @@
 - 用户已决定 **霜白 Frost、曜石 Graphite、雾紫 Lavender 三套全部内置并可继续扩展**，无需再要求选一套。主题家族 `theme_family` 与 System / Light / Dark 独立，工作区密度和面板布局另行设计。
 - 原生主题注册目录集中稳定 ID、双语元数据、推荐外观、浅深 Palette、组件 token 和终端默认色；新增主题走 `ThemeDefinition` / `registry()`，业务视图不按主题 ID 分支。自定义文件导入、下载或插件机制尚未提供。
 - 主题通过后台持久化成功后才应用，保留会话和草稿；旧配置默认 Frost，有效但未知的 ID 原样保留并回退显示。终端显式 ANSI/truecolor/OSC 颜色保持；切换主题不发送 AI 上下文。
-- HTML 方向已用于设计探索；连接/主机导航、独立会话栏及紧凑补全已迁入原生，完整文件工具区仍继续设计。增加主题数量后需另验选择器布局，不能外推当前三项结果。
+- HTML 方向已用于设计探索；连接/主机导航、独立会话栏、紧凑补全与浏览优先文件工具区已迁入原生。增加主题数量后需另验选择器布局，不能外推当前三项结果。
 
 主题细节见[使用与扩展](product/THEME_PREFERENCES.md)、[原生设计](design/NATIVE_THEMES.md)、[ADR 0095](adr/0095-extensible-native-theme-families.md)。
 完整目标和差距由[能力清单](product/CAPABILITIES.md)、[远程要求](research/remote-ssh-requirements.md)、[路线图](ROADMAP.md)维护；归档/Zmodem、可验证的中继加速、跨设备同步等长期目标仍在，不因当前切片而删除。
 
-## 当前已集成的源码
+## 前轮已集成的源码
 
 本入口随 **原生工作区导航与会话层级** 功能提交维护，基线为
 `4f937281850464c7d52611e7d4df8bbc46f7d5c8`。本次功能提交的精确 SHA、推送及 CI
@@ -45,7 +80,7 @@ SFTP 修复源码基线为 **`dc94e0e03782ba3d115e784c72823ee0f082b1b2`**；父�
 | AI-04 本地知识库：列表、字面搜索、单条审核编辑/删除、后台 StateStore 保存 | 来源身份保持；Conflict/Unknown 后显式 reload 并重新审核，不重放旧 candidate。知识上下文模型发送尚未完成。见[知识库指南](product/AI_KNOWLEDGE_LIBRARY.md)、[本轮记录](testing/records/2026-11-04-ai-knowledge-library.md)。 |
 | NET-01：saved connection 绑定的 local/remote/dynamic executor，命名规则新增/编辑/删除及独立停止审核 | 运行 owner/流量属于原 live session；ephemeral quick connect 不能运行 named rule。真实 cancel 拒绝已有回归，真实远端超时只有源码复核；运行状态持久化、重启恢复、重连 owner 全矩阵及原生仍开放。见[NET 记录](testing/records/2026-11-04-net-01-rule-management.md)。 |
 
-## 最新工程门禁、审查与 CI
+## 前轮工程门禁、审查与 CI
 
 原生工作区修后完整 `scripts/check.py`（`full-gate-r2`）退出 0、进程已回收：
 普通 Rust **2,026 passed / 23 ignored**（含 app 838 / 2 ignored）、rustdoc 10 passed
@@ -129,20 +164,25 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 - `keelshell-app` 为 UI，`keelshell-core` 为领域/存储，`keelshell-session` 为传输，`keelshell-ai` 为 AI；阻塞 I/O 离开 UI 线程。公共 API 写 rustdoc，使用 typed errors，测试外避免 panic，行为测试使用隔离临时数据与有界等待。
 - 直接 registry 要求统一 `x.y`，应用 `Cargo.lock` 保留 patch；**不 pin Rust 工具链**，使用开发环境或 CI 支持的版本。历史 Rust 1.99.1 是执行环境记录，不是项目限制。
 - 每轮开发检查官方最新稳定、非撤回直接依赖并保存新证据：`python3 scripts/check_dependencies.py --json-report <新报告.json>`，或标准门禁前执行 `python3 scripts/check.py --fresh-dependencies`；离线标准检查继续可用。
-- 最新官方 freshness 开始于 **2026-11-04T17:56:35Z**（上海 11 月 5 日）：104 条声明/使用通过，报告为 `work/native-workbench-20261105/dependency-freshness.json`。本轮没有新增或升级依赖；首次报告目录缺失失败亦保留。早前升级和工程来源见[依赖记录](testing/records/2026-11-04-dependencies.md)及[工程来源复核](research/2026-11-04-engineering-refresh.md)。
+- 最新官方 freshness 开始于 **2026-11-04T19:01:59Z**（上海 11 月 5 日）：104 条声明/使用通过，报告为 `work/native-file-workbench-20261105/dependency-freshness.json`。本轮没有新增或升级依赖；前轮首次报告目录缺失失败亦保留。早前升级和工程来源见[依赖记录](testing/records/2026-11-04-dependencies.md)及[工程来源复核](research/2026-11-04-engineering-refresh.md)。
 - 不引入私有 Git 依赖、开发者绝对路径、凭据或生产日志。凭据默认临时；显式保存使用 OS 凭据库或经认证、主密码加密的 vault；主密码及明文凭据不写 profile metadata。主机密钥变化必须拒绝连接。
 - 功能提交前完成格式、严格 Clippy、测试、依赖策略、相关原生检查和新的非作者审查；失败证据与未验证范围必须保留。需求/设计/验收分别更新 `docs/product`、`docs/adr`、`docs/testing` 和 `docs/ROADMAP.md`，中英文 README 同步。
 - 用 KeelShell 自身能力描述产品，仓库文本、文件名、注释及发行说明不得引入具名专有 SSH 产品比较。既有授权涵盖公开 GitHub、提交推送及标签触发多平台 Releases；不涵盖遥测上传或覆盖安装。
 
 ## 优先接续顺序
 
-1. 核对原生工作区功能提交的精确 CI 与交付回执；托管 runner 恢复后补 macOS CI，保留旧未启动记录。区分本机通过、Windows/Linux 成功与 macOS CI 未执行，不以反复重跑或修改平台配置掩盖容量限制。
-2. 按已接受的三主题继续完整文件工具区布局、导航键盘树操作，并补最终候选主题×语言×窗口矩阵、最小窗口及原生无障碍证据。连接/主机导航及会话栏已实现，不要重复重做。
+1. 核对文件工作区与渲染栈功能提交的精确 CI 与交付回执；基线 `3a1473e` 的 Linux/Windows 栈溢出和 macOS 未启动记录保留。新提交的执行结果独立读回，不以反复重跑或修改平台配置掩盖容量限制。
+2. 定位原生滚轮无位移的实际原因，补最终候选主题×语言×窗口矩阵、最小 OS 高度、导航键盘树操作及无障碍证据。浏览优先文件区、连接/主机导航及会话栏已实现，不要重复重做；受控滚轮测试不代替 OS 验收。
 3. 推进知识上下文显式选择与模型发送、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
 4. 补 NET 原生与真实取消超时、重连 owner 全矩阵；运行状态持久化/恢复单独设计，不从已完成的命名规则元数据管理推断。
 5. 逐项补三平台桌面、IME/VoiceOver、原生拖放、真实互操作与发布安装验证；按[路线图](ROADMAP.md)继续完整能力目标。
 
 ## 资源与证据接续
+
+文件工作区的最终应用和 SSH/SFTP 夹具退出 0、已回收；关闭后的清单确认没有
+KeelShell 进程。低栈诊断副本、临时目录和独立滚轮源码副本已按归属清理，
+输入、原日志、失败历史和必要截图保留在 `work/native-file-workbench-20261105/`。
+保留的最终开发包与旧包清理、提交和 CI 的实际状态由该目录的交付回执维护。
 
 工作区本轮的两次 SSH/SFTP 夹具均正常退出并回收；最终包先后两次运行也已退出回收，
 最后一次通过系统关闭按钮结束。一次 Cmd-Q 尝试未退出，保留 AX，不声称该快捷键验证通过。
@@ -156,6 +196,10 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 
 以下路径均相对仓库根目录，属于本地忽略证据，不是公开发行产物：
 
+- `work/native-file-workbench-20261105/`：本轮各次失败/通过检查、490 输入绑定、
+  `native/` 中按包分开的原始 JPEG/AX 和真实双向传输读回、
+  `independent-review/` 中撤回的初审风险与最终复核、
+  `previous-ci/triage/` 中精确平台失败和各栈预算的独立诊断。
 - `work/native-workbench-20261105/`：每轮失败/通过门禁、输入清单、最新依赖检查；
   `native/` 保存两包身份、原始 JPEG/AX、无效捕获说明和进程退出回执，
   `independent-review/` 保存本轮 HOLD、修后复核与最终交付绑定。

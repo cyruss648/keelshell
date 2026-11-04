@@ -4,35 +4,38 @@ use super::browser::SortColumn;
 use super::local_catalog::LocalEntryKind;
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
-use gpui_kit::component::checkbox::Checkbox;
+use gpui_kit::component::{Selectable, checkbox::Checkbox};
 
 impl FilesPanel {
     pub(super) fn local_navigation(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
-        div()
-            .id("local-folder-navigation")
-            .w(relative(0.32))
-            .min_w(px(168.))
-            .max_w(px(290.))
-            .h_full()
+        let radius = px(crate::design::components(cx).control_radius);
+        let controls = div()
+            .id("local-folder-controls")
+            .w_full()
+            .h(px(24.))
             .flex_shrink_0()
             .flex()
             .items_center()
             .gap_1()
-            .px_1()
-            .border_r_1()
-            .border_color(rgb(visual.border))
             .child(
                 div()
+                    .id("local-folder-label")
                     .flex_1()
                     .min_w_0()
-                    .child(Input::new(&self.local_browser.path).small().rounded(px(6.))),
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(cx, "本地", "Local"))
+                    .test_support(),
             )
             .child(
                 Button::new("choose-local-folder")
                     .disabled(self.suspended || self.local_browser.choosing())
                     .ghost()
+                    .small()
                     .compact()
+                    .size(px(24.))
+                    .rounded(radius)
                     .icon(IconName::FolderOpen)
                     .accessibility_label(t(cx, "选择本地文件夹", "Choose local folder"))
                     .localized_tooltip("选择本地文件夹", "Choose local folder")
@@ -44,7 +47,10 @@ impl FilesPanel {
                 Button::new("parent-local-folder")
                     .disabled(self.suspended || self.local_browser.listing.is_none())
                     .ghost()
+                    .small()
                     .compact()
+                    .size(px(24.))
+                    .rounded(radius)
                     .icon(IconName::ArrowUp)
                     .accessibility_label(t(cx, "本地上级目录", "Local parent folder"))
                     .localized_tooltip("本地上级目录", "Local parent folder")
@@ -56,7 +62,10 @@ impl FilesPanel {
                 Button::new("refresh-local-folder")
                     .disabled(self.suspended)
                     .ghost()
+                    .small()
                     .compact()
+                    .size(px(24.))
+                    .rounded(radius)
                     .icon(IconName::RefreshCw)
                     .accessibility_label(t(cx, "刷新本地目录草稿", "Browse the local folder draft"))
                     .localized_tooltip("刷新本地目录草稿", "Browse the local folder draft")
@@ -68,7 +77,12 @@ impl FilesPanel {
                 Button::new("toggle-local-hidden")
                     .disabled(self.suspended)
                     .ghost()
+                    .small()
                     .compact()
+                    .size(px(24.))
+                    .rounded(radius)
+                    .selected(self.local_browser.show_hidden)
+                    .toggled(self.local_browser.show_hidden)
                     .icon(if self.local_browser.show_hidden {
                         IconName::Eye
                     } else {
@@ -77,6 +91,46 @@ impl FilesPanel {
                     .accessibility_label(t(cx, "切换本地隐藏文件", "Toggle local hidden files"))
                     .localized_tooltip("切换本地隐藏文件", "Toggle local hidden files")
                     .on_click(cx.listener(|panel, _, _, cx| panel.toggle_local_hidden(cx))),
+            )
+            .test_support();
+        div()
+            .id("local-folder-navigation")
+            .w(relative(0.32))
+            .min_w(px(168.))
+            .max_w(px(290.))
+            .h_full()
+            .min_h_0()
+            .flex_shrink_0()
+            .flex()
+            .flex_col()
+            .gap_1()
+            .px_1()
+            .when(self.pending.is_none() && !self.suspended, |navigation| {
+                navigation.py(px(2.))
+            })
+            .border_r_1()
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.chrome))
+            .when(self.pending.is_none() && !self.suspended, |navigation| {
+                navigation.child(controls)
+            })
+            .child(
+                div()
+                    .id("local-folder-path")
+                    .w_full()
+                    .min_w_0()
+                    .flex_1()
+                    .min_h_0()
+                    .flex()
+                    .items_center()
+                    .child(
+                        Input::new(&self.local_browser.path)
+                            .id("local-folder-path-input")
+                            .w_full()
+                            .small()
+                            .rounded(radius),
+                    )
+                    .test_support(),
             )
             .test_support()
             .into_any_element()

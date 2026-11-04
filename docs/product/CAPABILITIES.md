@@ -1,5 +1,26 @@
 # Capability ledger
 
+## 2026-11-05: file workbench and renderer stack reduction
+
+The native file pane defaults to browsing, with retained, mutually exclusive file/transfer
+settings, visible batch and queue entries, and compact editable paths during review.
+Production and layout fixtures share the same height budget. The three registered theme
+families use the same semantic component styling.
+
+The final local gate passed 2,036 ordinary Rust tests / 23 ignored, 10 rustdoc checks,
+and 128 Python tests run / one skipped, with formatting, strict Clippy and dependency policy.
+All 490 recorded build/gate inputs match. The final macOS package covers selected appearances
+across all three families, retained drafts, English 900×900 review/cancellation, verified
+upload/download contents and real queue counts. Earlier six-appearance captures remain
+separate. Non-inlined Workspace helpers reduced the measured debug entry frame from
+1,101,856 to 62,208 bytes without increasing CI stack limits.
+
+Two production-Workspace tests pass pixel/line scrolling after a real upload at 900×900
+and 900×580. Native wheel attempts still did not move the rows; their cause is unknown.
+Final native 900×580 geometry, the complete appearance/language/size matrix and native
+Windows/Linux acceptance remain open. Exact commit CI is recorded separately.
+See the [file guide](FILES_WORKSPACE.md) and [evidence record](../testing/records/2026-11-05-native-file-workbench.md).
+
 ## 2026-11-05: native workspace navigation
 
 The workspace now separates global actions from the session strip, provides a saved-connection
@@ -61,7 +82,7 @@ Local Ask progress and the two independently reviewed test-only supplements are 
 
 ## Implementation and remaining acceptance
 
-Three registry-driven theme families, independent light/dark/system preferences, the navigation rail and separate session strip are implemented with the scoped native evidence above; the complete Files layout refresh remains open. The independent `keelshell-mcp` stdio companion connects authenticated desktop IPC to real SSH/SFTP handles, cached monitor samples and desktop review. Eight fixed tools remain disabled without an explicit grant; existing-file replacements require independent desktop review. Source independent review and the earlier integrated963 ordinary+8doc gate passed. Earlier native macOS checks used an owned stdio client and isolated SSH/SFTP service to verify selected text, files, forbidden requests, approval/rejection, running revocation and disabled restart; installed Claude Code's earlier seven-tool authorized workflow passed its separate independent review. Actual Codex MCP, vendor calls to the new file-change tool, final release packaging and Windows/Linux native acceptance remain open; see the [authorized client record](../testing/records/2026-10-05-claude-authorized-mcp.md), [bridge record](../testing/records/2026-10-04-mcp-desktop-bridge.md) and [guide](EXTERNAL_MCP.md).
+Three registry-driven theme families, independent light/dark/system preferences, the navigation rail, separate session strip and browse-first Files layout are implemented with the scoped native evidence above; full native geometry and scrolling acceptance remain open. The independent `keelshell-mcp` stdio companion connects authenticated desktop IPC to real SSH/SFTP handles, cached monitor samples and desktop review. Eight fixed tools remain disabled without an explicit grant; existing-file replacements require independent desktop review. Source independent review and the earlier integrated963 ordinary+8doc gate passed. Earlier native macOS checks used an owned stdio client and isolated SSH/SFTP service to verify selected text, files, forbidden requests, approval/rejection, running revocation and disabled restart; installed Claude Code's earlier seven-tool authorized workflow passed its separate independent review. Actual Codex MCP, vendor calls to the new file-change tool, final release packaging and Windows/Linux native acceptance remain open; see the [authorized client record](../testing/records/2026-10-05-claude-authorized-mcp.md), [bridge record](../testing/records/2026-10-04-mcp-desktop-bridge.md) and [guide](EXTERNAL_MCP.md).
 
 Named Codex0.160.0/0.160.1 and Claude Code2.1.285 Ask profiles, capability checks, exact stdin review, cancellation and backend/path-bound encrypted credentials are integrated. The local CLI gate passed929 ordinary+8doc and47 packaging tests; new independent core/app and process reviews passed. Native macOS windows exercised both installed CLIs against owned loopback SSE, complete answers, manual suggestion transfer, cancellation and restart key loss. See the [record](../testing/records/2026-10-04-local-agent-ui.md). These are explicit API-key Ask adapters without subscription/OAuth reuse or CLI tools; editable time/output/answer budgets are integrated with the [limits record](../testing/records/2026-10-05-local-agent-limits.md). Bounded lifecycle facts passed the main gate and the partial new macOS check described above; they contain neither supplier text nor executable steps. Explicit key environment references are integrated and passed source CI; reference metadata contains the variable name, while the value is read only after a user action and remains ephemeral. Explicit user-selected absolute working directories are integrated with directory-identity checks, fixed bootstrap and pre-send review; default execution still uses an empty isolated directory. The reviewed Agent loop is implemented in KeelShell while supplier CLI tools remain disabled. Reusing a CLI subscription/login identity is not implemented: current calls use explicitly supplied API credentials, and an effective pre-session isolation proof is still required before enabling a login mode. Arbitrary environment/config/hooks/tools forwarding is not enabled. Supplier/account acceptance and Windows/Linux native CLI/GUI remain open; see the [working-directory guide](LOCAL_AGENT_WORKING_DIRECTORY.md) and [Agent guide](REVIEWED_AGENT.md). A general client for other MCP servers is explicitly outside this scope. Requirements, ordering, proof boundaries and references are in the [design and agent plan](DESIGN_AND_AGENT_PLAN.md) and [design library](../design/README.md). Local version/help probes prove installed binaries only, not account or model access.
 

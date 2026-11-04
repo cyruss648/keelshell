@@ -213,10 +213,15 @@ fn multiline_review_has_a_real_scroll_range_and_wheel_reaches_the_end(cx: &mut T
                     let tail_bounds=tail.bounds();
                     window.scroll("file-confirmation-message",gpui_kit::ScrollDelta::Pixels(point(px(-100000.),px(0.))),cx);
                     let right=panel.read(cx).scroll.offset();
+                    // Compact previews show fewer lines; navigate vertically
+                    // to the long-path row before checking its horizontal end.
+                    let path_y=window.find(("file-confirmation-line",48_usize)).bounds().center().y;
+                    window.scroll("file-confirmation-message",gpui_kit::ScrollDelta::Pixels(point(px(0.),body.center().y-path_y)),cx);
                     let path=window.find(("file-confirmation-line",48_usize));
                     assert!(right.x<px(-500.) && path.visible() && path.bounds().right()<=body.right(),"unbroken path suffix must enter the real viewport: {:?} in {body:?}, offset={right:?}",path.bounds());
                     assert!(path.bounds().origin.x<body.origin.x,"long path really moved across the clipped horizontal region");
                     window.scroll("file-confirmation-message",gpui_kit::ScrollDelta::Pixels(point(px(100000.),px(0.))),cx);
+                    window.scroll("file-confirmation-message",gpui_kit::ScrollDelta::Pixels(point(px(0.),px(-100000.))),cx);
                     let restored=window.find(("file-confirmation-line",50_usize));
                     assert!(restored.visible() && contained(restored.bounds(),body));
                     for id in ["confirm-file-operation","cancel-file-operation"] {
@@ -325,11 +330,14 @@ fn independent_large_literal_review_uses_reversible_coordinate_wheels(cx: &mut T
             let end = panel.read(cx).scroll.offset();
             assert!(end.x < px(-500.) && end.y < px(-3000.));
             wheel(window, point(px(100_000.), px(0.)), cx);
+            let tail_y = window.find(("file-confirmation-line", lines.len() - 2)).bounds().center().y;
+            wheel(window, point(px(0.), body.center().y - tail_y), cx);
+            let inspected_y = panel.read(cx).scroll.offset().y;
             let tail = window.find(("file-confirmation-line", lines.len() - 2));
             assert!(tail.visible() && contained(tail.bounds(), body));
             panel.update(cx, |_, cx| cx.notify());
             window.render_frame(cx);
-            assert_eq!(panel.read(cx).scroll.offset().y, end.y);
+            assert_eq!(panel.read(cx).scroll.offset().y, inspected_y);
             wheel(window, point(px(0.), px(100_000.)), cx);
             assert_eq!(panel.read(cx).scroll.offset(), point(px(0.), px(0.)));
             for (index, id) in ["confirm-file-operation", "cancel-file-operation"]

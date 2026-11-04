@@ -83,6 +83,7 @@ async fn retained_window_keeps_admission_after_normal_harness_drop(cx: &mut Test
             panel.selected = Some(selected("/lifetime-source.bin", false))
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "file-resume-mode");
         window.click("file-resume-mode", cx);
         window.click("download-file", cx);
     })
@@ -275,6 +276,7 @@ async fn held_existing_local_resume_excludes_other_fixture_sync_without_mutation
             panel.selected = Some(selected("/source.bin", false));
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "file-resume-mode");
         window.click("file-resume-mode", cx);
         window.click("download-file", cx);
     })

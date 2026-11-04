@@ -437,7 +437,10 @@ pub(super) fn confirmation_text(
         .flex_1()
         .min_w_0()
         .min_h_0()
-        .when(!expanded, |el| el.max_h(px(48.)))
+        // The compact preview reserves a full row for browsing and controls at
+        // the production minimum height. All lines remain scrollable; the
+        // explicit expansion provides the larger review surface.
+        .when(!expanded, |el| el.max_h(px(32.)))
         .overflow_y_scroll()
         .overflow_x_scroll()
         .track_scroll(scroll)

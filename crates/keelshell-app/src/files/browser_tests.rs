@@ -530,6 +530,7 @@ async fn a_late_read_only_resume_plan_cannot_recreate_review_after_input_changes
     h.seed("/resume-source.bin", &bytes);
     let partial = h.source("resume-partial.bin", &bytes[..96 * 1024]);
     h.server.filesystem.set_transfer_read_delay(75);
+    h.click(cx, "toggle-file-transfer-settings");
     cx.update_window(h.window, |_, window, cx| {
         h.panel.update(cx, |panel, cx| {
             panel.run(
@@ -602,7 +603,10 @@ async fn loaded_local_and_remote_rows_fit_original_minimum_budgets_in_both_langu
                         assert_true_file_row(window);
                         let body = window.find("file-browsing-area").bounds();
                         assert!(body.size.height >= px(64.));
-                        assert!(window.find("file-tools-scroll").bounds().size.height >= px(28.));
+                        assert!(
+                            window.try_find("file-tools-scroll").is_none(),
+                            "settings are collapsed by default"
+                        );
                         let local = window.find(("local-entry", 0_usize));
                         let pane = window.find("local-files-pane").bounds();
                         assert!(

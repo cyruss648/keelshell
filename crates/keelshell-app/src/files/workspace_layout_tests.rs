@@ -30,11 +30,13 @@ fn measure_state(
                 window.render_frame(cx);
                 assert_true_file_row(window);
                 let area = window.find("files-layout-scene").bounds();
+                assert_eq!(area.size.height, px(if height == 580. { 212. } else { 340. }),
+                    "use the actual production file-pane budget");
                 let body = window.find("file-browsing-area").bounds();
-                let tools = window.find("file-tools-scroll").bounds();
-                assert!(contains(body, area) && contains(tools, area),
+                let tools = window.try_find("file-tools-scroll").map(|tools| tools.bounds());
+                assert!(contains(body, area) && tools.is_none_or(|tools| contains(tools, area)),
                     "{state}/{language:?}/{theme:?}: browsing/tools must stay in {area:?}");
-                assert!(tools.size.height >= px(28.), "one scrollable control must fit: {tools:?}");
+                if let Some(tools) = tools { assert!(tools.size.height >= px(28.), "one scrollable control must fit: {tools:?}"); }
                 let mut controls = serde_json::Map::new();
                 let required = h.panel.read_with(cx, |panel, _| {
                     let mut ids = vec!["parent-files", "refresh-files"];
@@ -65,17 +67,6 @@ fn measure_state(
                     ids
                 });
                 for id in required {
-                    assert!(window.try_find(id).is_some(), "{state} must render its {id} control");
-                }
-                for id in ["parent-files", "refresh-files", "mkdir", "rename", "delete-file",
-                    "chmod-file", "file-resume-mode", "upload-file", "upload-directory",
-                    "download-file", "compare-directories", "confirm-file-operation",
-                    "cancel-file-operation", "file-transfer-details", "pause-file-transfer",
-                    "resume-file-transfer", "cancel-active-file-operation", "plan-sync-to-remote",
-                    "plan-sync-to-local", "review-directory-sync", "close-directory-comparison",
-                    "toggle-remote-diff", "save-remote-file", "read-remote-merge",
-                    "toggle-text-patch"] {
-                    if window.try_find(id).is_none() { continue; }
                     reveal_file_control(window, cx, id);
                     let target = window.find(id);
                     assert!(target.visible() && contains(target.bounds(), area),
@@ -90,7 +81,7 @@ fn measure_state(
                 println!("FILES_LAYOUT_JSON {}", serde_json::json!({"state":state,
                     "width":width,"height":height,"assistant":assistant,
                     "language":format!("{language:?}"),"theme":format!("{theme:?}"),
-                    "area":bounds_json(area),"body":bounds_json(body),"tools":bounds_json(tools),
+                    "area":bounds_json(area),"body":bounds_json(body),"tools":tools.map(bounds_json),
                     "first_row":bounds_json(window.find(("remote-entry",0_usize)).bounds()),
                     "reachable_controls":controls}));
             }).checked("measure production themed layout after real remote state changes");

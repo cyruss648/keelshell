@@ -70,6 +70,7 @@ impl FilesPanel {
         let summary = QueueSummary::for_session(&self.transfer_jobs, self.session_token);
         let mut counts = div()
             .id("file-transfer-summary-counts")
+            .test_support()
             .flex_1()
             .min_w_0()
             .h_full()
@@ -132,7 +133,7 @@ impl FilesPanel {
         let show_details = !self.queue_details_visible;
         div()
             .id("file-transfer-summary")
-            .h(px(22.))
+            .h(px(30.))
             .flex_shrink_0()
             .min_w_0()
             .px_1()
@@ -142,13 +143,17 @@ impl FilesPanel {
             .border_t_1()
             .border_color(rgb(visual.border))
             .bg(rgb(visual.canvas))
+            .child(self.tool_section_button(action_view::ToolSection::File, cx))
+            .child(self.tool_section_button(action_view::ToolSection::Transfer, cx))
+            .child(self.batch_controls(cx))
             .child(
                 Button::new("toggle-file-transfer-queue")
                     .flex_shrink_0()
                     .xsmall()
                     .compact()
                     .ghost()
-                    .when(self.queue_details_visible, |button| button.primary())
+                    .selected(self.queue_details_visible)
+                    .toggled(self.queue_details_visible)
                     .label(if self.queue_details_visible {
                         t(cx, "返回文件", "Back to files")
                     } else {

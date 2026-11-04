@@ -19,6 +19,8 @@ use super::{
     test_server::{Checked, Server},
 };
 
+#[path = "action_view_tests.rs"]
+mod action_view_tests;
 #[path = "batch_tests.rs"]
 mod batch_tests;
 #[path = "browser_tests.rs"]
@@ -45,6 +47,8 @@ mod parallel_tests;
 mod recursive_mirror_combination_review_tests;
 #[path = "recursive_mirror_tests.rs"]
 mod recursive_mirror_tests;
+#[path = "remote_wheel_tests.rs"]
+mod remote_wheel_tests;
 #[path = "review_independent_tests.rs"]
 mod review_independent_tests;
 #[path = "review_viewport_tests.rs"]
@@ -228,6 +232,27 @@ impl Harness {
 }
 
 fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id: &str) {
+    let section = match id {
+        "file-name-draft" | "file-mode-draft" | "mkdir" | "rename" | "delete-file"
+        | "chmod-file" => Some("toggle-file-actions"),
+        "file-resume-mode"
+        | "upload-file"
+        | "upload-directory"
+        | "download-file"
+        | "compare-directories"
+        | "use-local-selection"
+        | "use-local-folder"
+        | "download-into-local-folder" => Some("toggle-file-transfer-settings"),
+        _ => None,
+    };
+    if window
+        .try_find(gpui_kit::SharedString::from(id.to_owned()))
+        .is_none()
+        && let Some(trigger) = section
+    {
+        window.click(trigger, cx);
+        window.render_frame(cx);
+    }
     // The explicit review/editor replaces this pane instead of adding another
     // offscreen tools card. Its fixed controls need no old tools scroll owner.
     if ["file-editor-expanded", "file-review-expanded"]
@@ -260,8 +285,11 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
                 | "confirm-file-operation"
                 | "cancel-file-operation"
                 | "expand-file-review"
-                | "focus-file-draft"
-                | "focus-file-patch"
+                | "batch-upload"
+                | "batch-download"
+                | "clear-file-selection"
+                | "toggle-file-actions"
+                | "toggle-file-transfer-settings"
         )
         || (id == "cancel-active-file-operation" && window.try_find("file-transfer-card").is_none())
     {
@@ -384,7 +412,7 @@ impl gpui_kit::Render for FilesLayoutScene {
                         .id("files-layout-scene")
                         .w_full()
                         .min_w_0()
-                        .h(px(340.).min(viewport.height * 0.40))
+                        .h(FilesPanel::workbench_height(viewport.height))
                         .child(self.files.clone())
                         .test_support(),
                 ),
@@ -490,6 +518,7 @@ async fn bilingual_file_actions_fit_workspace_budgets_with_real_assistant(cx: &m
                         window.render_frame(cx);
                         let area = window.find("files-layout-scene").bounds();
                         assert_true_file_row(window);
+                        reveal_file_control(window, cx, "file-name-draft");
                         assert_eq!(window.find("file-name-draft").bounds().size.width, px(180.));
                         assert_eq!(window.find("file-mode-draft").bounds().size.width, px(118.));
                         for id in [
@@ -1124,6 +1153,7 @@ async fn reconnect_review_and_confirm_resume_upload_keeps_the_reviewed_target(
             });
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "file-resume-mode");
         window.click("file-resume-mode", cx);
         window.click("upload-file", cx);
     })
@@ -1171,6 +1201,7 @@ async fn resume_mismatch_and_cancelled_review_never_write_or_fall_back_to_replac
             panel.selected = Some(selected("/different.bin", false))
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "file-resume-mode");
         window.click("file-resume-mode", cx);
         window.click("upload-file", cx);
     })
@@ -1215,6 +1246,7 @@ async fn explicit_download_continuation_preserves_partial_bytes_until_confirmati
             panel.selected = Some(selected("/source.bin", false))
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "file-resume-mode");
         window.click("file-resume-mode", cx);
         window.click("download-file", cx);
     })
@@ -1269,6 +1301,7 @@ async fn directory_continuation_uses_reviewed_tree_and_finishes_missing_content(
             panel.selected = Some(selected("/partial-tree", true))
         });
         window.render_frame(cx);
+        reveal_file_control(window, cx, "file-resume-mode");
         window.click("file-resume-mode", cx);
         window.click("upload-directory", cx);
     })

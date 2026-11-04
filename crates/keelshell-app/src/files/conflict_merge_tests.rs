@@ -30,6 +30,45 @@ fn external(h: &Harness, path: &str, text: &[u8]) {
 }
 
 #[gpui_kit::test]
+async fn queue_details_move_focus_out_of_the_manual_conflict_draft(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    open(&h, "/queue-conflict.txt", b"base\n", "local\n", cx).await;
+    external(&h, "/queue-conflict.txt", b"remote\n");
+    h.click(cx, "read-remote-merge");
+    h.idle(cx).await;
+    let manual = h.panel.read_with(cx, |panel, _| {
+        panel
+            .merge_review
+            .as_ref()
+            .checked_option("actual three-way conflict")
+            .manual
+            .clone()
+    });
+    cx.update_window(h.window, |_, window, cx| {
+        reveal_file_control(window, cx, "merge-manual-draft");
+        manual.update(cx, |input, cx| input.focus(window, cx));
+    })
+    .checked("focus the visible manual conflict field");
+    cx.simulate_input(h.window, "visible-manual-edit");
+    let draft = manual.read_with(cx, |input, _| input.value().to_string());
+    assert!(draft.contains("visible-manual-edit"));
+    cx.update_window(h.window, |_, window, cx| {
+        window.click("toggle-file-transfer-queue", cx);
+        window.render_frame(cx);
+        assert!(window.try_find("merge-manual-draft").is_none());
+        assert!(window.find("file-transfer-queue-details").visible());
+    })
+    .checked("hide the actual conflict draft behind queue details");
+    cx.simulate_input(h.window, "invisible-manual-edit");
+    manual.read_with(cx, |input, _| assert_eq!(input.value(), draft));
+    h.panel
+        .read_with(cx, |panel, _| assert!(panel.pending.is_none()));
+    assert_eq!(h.read("/queue-conflict.txt"), b"remote\n");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}
+
+#[gpui_kit::test]
 async fn independent_remote_changes_merge_to_reviewed_draft_and_full_readback(
     cx: &mut TestAppContext,
 ) {

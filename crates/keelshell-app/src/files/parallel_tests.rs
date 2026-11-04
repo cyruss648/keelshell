@@ -615,12 +615,22 @@ async fn queue_entry_completed_results_are_visible_and_return_preserves_browser_
                         })
                     );
                     for id in ["active", "completed", "failed", "cancelled", "uncertain"] {
-                        let count = window.find(gpui_kit::SharedString::from(format!(
-                            "file-transfer-summary-{id}"
-                        )));
+                        let id =
+                            gpui_kit::SharedString::from(format!("file-transfer-summary-{id}"));
+                        let viewport = window.find("file-transfer-summary-counts").bounds();
+                        let count = window.find(id.clone()).bounds();
+                        window.scroll(
+                            "file-transfer-summary-counts",
+                            gpui_kit::ScrollDelta::Pixels(point(
+                                viewport.center().x - count.center().x,
+                                px(0.),
+                            )),
+                            cx,
+                        );
+                        let count = window.find(id);
                         assert!(
-                            count.visible()
-                                && queue_entry_contains(count.bounds(), summary.bounds())
+                            count.visible() && queue_entry_contains(count.bounds(), viewport),
+                            "every real status count remains reachable in the compact strip"
                         );
                     }
                     assert_true_file_row(window);
