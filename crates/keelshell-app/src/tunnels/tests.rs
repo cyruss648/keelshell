@@ -223,7 +223,10 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
         assert_eq!(panel.read(cx).rows.len(), 1);
         assert_eq!(panel.read(cx).rows[0].rule_id, Some(named_rule.id));
         assert!(panel.read(cx).rule_plan.is_none());
-        assert!(panel.read(cx).rule_status.render(cx).contains("正在启动"));
+        let feedback = panel.read(cx).rule_status.render(cx);
+        assert!(feedback.contains("已批准"));
+        assert!(feedback.contains("运行状态"));
+        assert!(!feedback.contains("正在启动"));
     })
     .checked("select dynamic mode and start using real handlers");
     cx.wait_for(window, Duration::from_secs(5), |_, cx| {
@@ -249,6 +252,9 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
                     .starts_with("正在监听")
             );
             assert_eq!(panel.read(cx).status.render(cx).as_str(), "正在监听 1 条");
+            let approval = panel.read(cx).rule_status.render(cx);
+            assert!(approval.contains("已批准") && approval.contains("运行状态"));
+            assert!(!approval.contains("正在启动"));
             window.render_frame(cx);
             window.click(("copy-proxy", 0_usize), cx);
             assert_eq!(
@@ -268,6 +274,9 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
                     .render(cx)
                     .starts_with("Listening at")
             );
+            let approval = panel.read(cx).rule_status.render(cx);
+            assert!(approval.contains("Approved") && approval.contains("runtime status"));
+            assert!(!approval.contains("starting"));
             assert_eq!(
                 panel.read(cx).bind_host.read(cx).value().as_str(),
                 "127.0.0.1"
@@ -333,6 +342,10 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
                 .render(cx)
                 .contains("Sent 8 B")
         );
+        let traffic = window.find(("tunnel-instance-traffic", 0_usize));
+        assert_eq!(traffic.role(), Some(gpui_kit::accesskit::Role::Label));
+        let label = traffic.label().unwrap_or_else(|| panic!("traffic AX"));
+        assert!(label.contains("Sent 8 B") && label.contains("Received 8 B"));
     })
     .checked("render traffic row");
     cx.update_window(window, |_, window, cx| {
@@ -398,6 +411,9 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
                 .render(cx)
                 .starts_with("Stopped")
         );
+        let approval = panel.read(cx).rule_status.render(cx);
+        assert!(approval.contains("Approved") && approval.contains("runtime status"));
+        assert!(!approval.contains("starting"));
     });
     cx.update_window(window, |_, window, cx| {
         window.render_frame(cx);
@@ -425,6 +441,9 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
                 .render(cx)
                 .starts_with("全部 2 条隧道已停止")
         );
+        let approval = panel.read(cx).rule_status.render(cx);
+        assert!(approval.contains("已批准") && approval.contains("运行状态"));
+        assert!(!approval.contains("正在启动"));
         crate::i18n::set_language(Language::En, cx);
     });
     // A real bind failure must replace the startup footer without claiming success.
@@ -456,6 +475,53 @@ async fn dynamic_panel_starts_real_proxy_copies_address_switches_language_and_st
                 .starts_with("No active tunnels; 2 stopped, 1 failed")
         );
     });
+    cx.update_window(window, |_, window, cx| {
+        let mut state = panel
+            .read(cx)
+            .rule_state
+            .clone()
+            .unwrap_or_else(|| panic!("saved-rule snapshot"));
+        state.tunnel_rules[0].bind_port = occupied_port;
+        panel.update(cx, |panel, cx| {
+            panel.refresh_rule_state(Some(state), Some(connection_id), cx)
+        });
+        window.render_frame(cx);
+        window.click(format!("named-tunnel-rule-{}", named_rule.id), cx);
+        window.render_frame(cx);
+        window.click("review-start-named-tunnel", cx);
+    })
+    .checked("named-rule start on the same occupied endpoint");
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).rows.get(3).is_some_and(|row| row.finished)
+    })
+    .await;
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(panel.read(cx).rows[3].failed);
+        assert!(panel.read(cx).rows[3].bound_address.is_none());
+        assert!(
+            window
+                .find(("tunnel-instance-details", 3_usize))
+                .label()
+                .unwrap_or_else(|| panic!("failed-instance AX"))
+                .contains("not confirmed")
+        );
+        assert!(
+            window
+                .find(("tunnel-instance-status", 3_usize))
+                .label()
+                .unwrap_or_else(|| panic!("failure status AX"))
+                .starts_with("Tunnel failed")
+        );
+        let feedback = panel.read(cx).rule_feedback().render(cx);
+        assert!(feedback.contains("Approved") && feedback.contains("runtime status"));
+        assert!(!feedback.contains("starting"));
+        assert_eq!(
+            panel.read(cx).rows[0].bound_address.as_deref(),
+            Some(format!("socks5h://{proxy_address}").as_str())
+        );
+    })
+    .checked("failed start never claims a bound endpoint or overwrites the stopped instance");
     drop(occupied);
     assert!(!session.is_closed());
     let rebound = runtime

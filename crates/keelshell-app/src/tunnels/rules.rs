@@ -698,11 +698,16 @@ impl TunnelsPanel {
                 .child(div().font_weight(FontWeight::SEMIBOLD).child(t(cx,
                     if review.event.deleting { "确认删除命名规则" } else { "确认保存命名规则" },
                     if review.event.deleting { "Confirm rule deletion" } else { "Confirm rule save" })))
-                .child(rule_preview_message(rule).render(cx))
-                .child(format!("{}: {}", t(cx, "规则 ID", "Rule ID"), rule.id))
-                .child(if rule.enabled { t(cx, "已启用", "Enabled") } else { t(cx, "已停用", "Disabled") })
-                .child(t(cx, "只更新配置。活动隧道保持原端点，非回环监听可能允许其他设备访问。",
-                    "Updates configuration only. Active tunnels keep their endpoints. Non-loopback listeners may allow access from other devices."));
+                .child(tunnel_text("tunnel-rule-review-target", format!(
+                    "{}\n{}: {}\n{}: {}\nSSH: {}\n{}",
+                    rule_preview_message(rule).render(cx),
+                    t(cx, "规则 ID", "Rule ID"), rule.id,
+                    t(cx, "连接 ID", "Connection ID"), rule.connection_id,
+                    self.host,
+                    if rule.enabled { t(cx, "已启用", "Enabled") } else { t(cx, "已停用", "Disabled") },
+                )))
+                .child(tunnel_text("tunnel-rule-review-effect", t(cx, "只更新配置。活动隧道保持原端点，非回环监听可能允许其他设备访问。",
+                    "Updates configuration only. Active tunnels keep their endpoints. Non-loopback listeners may allow access from other devices.")));
             div()
                 .flex()
                 .gap_2()
@@ -733,10 +738,14 @@ impl TunnelsPanel {
                     "审核停止此规则的活动实例",
                     "Review stopping this rule's active instances",
                 )))
-                .child(format!(
-                    "{}: {}",
-                    t(cx, "规则 ID", "Rule ID"),
-                    review.rule_id
+                .child(tunnel_text(
+                    "tunnel-rule-review-target",
+                    format!(
+                        "{}: {}\nSSH: {}",
+                        t(cx, "规则 ID", "Rule ID"),
+                        review.rule_id,
+                        self.host,
+                    ),
                 ));
             for row in self
                 .rows
@@ -748,13 +757,24 @@ impl TunnelsPanel {
                         .py_2()
                         .border_b_1()
                         .border_color(rgb(visual.border))
-                        .child(row.description.render(cx)),
+                        .child(tunnel_text(
+                            ("tunnel-stop-review-instance", row.id),
+                            format!(
+                                "{}\n{}\n{}",
+                                row.details(cx),
+                                row.status.render(cx),
+                                traffic_message(row.last_traffic).render(cx),
+                            ),
+                        )),
                 );
             }
-            body = body.child(t(
-                cx,
-                "确认只请求停止，清理完成后才显示终态。",
-                "Confirmation requests a stop. Completion appears after cleanup.",
+            body = body.child(tunnel_text(
+                "tunnel-rule-review-effect",
+                t(
+                    cx,
+                    "确认只请求停止，清理完成后才显示终态。",
+                    "Confirmation requests a stop. Completion appears after cleanup.",
+                ),
             ));
             div()
                 .flex()
@@ -820,6 +840,7 @@ impl TunnelsPanel {
                         .child(
                             Input::new(&editor.target_host)
                                 .id("tunnel-rule-target-host")
+                                .aria_label(t(cx, "目标地址", "Destination host"))
                                 .small()
                                 .disabled(disabled),
                         ),
@@ -834,6 +855,7 @@ impl TunnelsPanel {
                         .child(
                             Input::new(&editor.target_port)
                                 .id("tunnel-rule-target-port")
+                                .aria_label(t(cx, "目标端口", "Destination port"))
                                 .small()
                                 .disabled(disabled),
                         ),
@@ -881,6 +903,7 @@ impl TunnelsPanel {
                             .child(
                                 Input::new(&editor.name)
                                     .id("tunnel-rule-name")
+                                    .aria_label(t(cx, "规则名称", "Rule name"))
                                     .small()
                                     .disabled(disabled),
                             ),
@@ -896,6 +919,7 @@ impl TunnelsPanel {
                             .child(
                                 Input::new(&editor.bind_host)
                                     .id("tunnel-rule-bind-host")
+                                    .aria_label(t(cx, "监听地址", "Bind host"))
                                     .small()
                                     .disabled(disabled),
                             ),
@@ -910,6 +934,7 @@ impl TunnelsPanel {
                             .child(
                                 Input::new(&editor.bind_port)
                                     .id("tunnel-rule-bind-port")
+                                    .aria_label(t(cx, "监听端口", "Bind port"))
                                     .small()
                                     .disabled(disabled),
                             ),
@@ -927,6 +952,7 @@ impl TunnelsPanel {
                             .ghost()
                             .compact()
                             .selected(editor.kind == TunnelRuleKind::Local)
+                            .toggled(editor.kind == TunnelRuleKind::Local)
                             .disabled(disabled)
                             .label(t(cx, "本地", "Local"))
                             .on_click(cx.listener(move |view, _, _, cx| {
@@ -938,6 +964,7 @@ impl TunnelsPanel {
                             .ghost()
                             .compact()
                             .selected(editor.kind == TunnelRuleKind::Remote)
+                            .toggled(editor.kind == TunnelRuleKind::Remote)
                             .disabled(disabled)
                             .label(t(cx, "远程", "Remote"))
                             .on_click(cx.listener(move |view, _, _, cx| {
@@ -949,6 +976,7 @@ impl TunnelsPanel {
                             .ghost()
                             .compact()
                             .selected(editor.kind == TunnelRuleKind::Dynamic)
+                            .toggled(editor.kind == TunnelRuleKind::Dynamic)
                             .disabled(disabled)
                             .label(t(cx, "动态 SOCKS5", "Dynamic SOCKS5"))
                             .on_click(cx.listener(move |view, _, _, cx| {
@@ -960,6 +988,9 @@ impl TunnelsPanel {
                         Button::new("tunnel-rule-enabled")
                             .ghost()
                             .compact()
+                            .selected(editor.enabled)
+                            .toggled(editor.enabled)
+                            .accessibility_label(t(cx, "启用规则", "Enable rule"))
                             .disabled(disabled)
                             .label(if editor.enabled {
                                 t(cx, "已启用", "Enabled")

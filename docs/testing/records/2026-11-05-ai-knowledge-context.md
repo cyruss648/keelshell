@@ -197,6 +197,34 @@ r2 限定非作者复核为 **APPROVE_SCOPED_CHANGE，开放 P0/P1/P2=0**，
 上方 r1 包和原生证据只能代表其自己的程序身份。
 精确提交绑定、推送及该提交 CI 另记交付回执，不沿用基线 CI。
 
+## 提交与精确三平台 CI 读回
+
+功能提交 **`7625ed387e4df6bd5c8e338f9a2a61479b242e37`** 已快进合入并
+推送 main；全部 494 个门禁输入与提交 blob 一致。精确 Quality
+**41933498562 / attempt 1** 于上海时间 **2026-11-05 07:57:10**
+返回 completed / success。三平台均分配到非零 runner，实际执行成功。
+
+| 平台 | 普通 Rust passed / ignored | App passed / ignored（包含在前列） | rustdoc | OpenSSH |
+| --- | --- | --- | --- | --- |
+| macOS 26 | 2,056 / 23 | 863 / 2 | 10 | 11 passed |
+| Ubuntu 24.04 | 2,052 / 24 | 863 / 2 | 10 | 11 passed |
+| Windows 2025 | 1,996 / 18 | 854 / 2 | 10 | 按工作流条件跳过 |
+
+三平台脚本 Python 均运行 128 项、跳过 1 项；打包 Python 运行 57 项，
+macOS/Linux 无跳过，Windows 跳过 4 项。rustdoc 各有一项仅编译。
+本提交 19 项新增 libtest 用例在三平台逐项通过；两次独立的受控进程日志均
+记录六次非当前凭据拒绝、两次安全 stdin 传递，不重复计入普通测试数量。
+OpenSSH 原始 artifact 与 API digest 相同，分别确认 11 项及清理回执。
+
+新的只读 agent 保存了每个平台的原始 job 日志、完整逐项统计、来源 diff、
+OpenSSH artifact、runner 信息和读取回执，位于
+`work/ai-knowledge-context-20261105/current-ci/readback-41933498562/`。
+GitHub 连接工具没有所需 Actions 日志读取能力，本次使用 `gh api` GET，
+没有重跑或取消 CI。首次两个日志下载遇到 gh ANSI 输出保护，失败回执保留，
+后续原字节下载成功；这不是 CI 测试失败。
+独立读取子进程均已回收；父任务既有有界 watcher 另有退出 0 回执。
+三平台源码 CI 不代表供应商 API/CLI 或三平台原生桌面验收。
+
 ## 未关闭
 
 三平台桌面原生、完整主题×语言×尺寸矩阵、真实 API 和实际本地 CLI 发送、可访问性/IME、发布安装与完整应用能力均未由本切片关闭。外部磁盘写入在应用接纳新状态前不可见；没有增加隐式读取或跨进程监听。已发往模型服务的资料不能通过取消保证撤回。

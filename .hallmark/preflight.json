@@ -5,41 +5,41 @@
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "choose historical knowledge and review the exact Ask request before sending",
+  "job": "review the actual listener and observe the result of each tunnel operation",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
-    "crates/keelshell-app/src/assistant/knowledge_context.rs:105",
-    "crates/keelshell-app/src/assistant/knowledge_library.rs:260",
-    "crates/keelshell-ai/src/context.rs:97",
-    "docs/product/AI_KNOWLEDGE_CONTEXT.md:1"
+    "crates/keelshell-app/src/tunnels.rs",
+    "crates/keelshell-app/src/tunnels/rules.rs",
+    "docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md",
+    "docs/testing/records/2026-11-05-net-native-acceptance.md"
   ],
   "preserve": [
-    "semantic theme tokens and existing assistant layout",
-    "historical source identity and saved originals",
-    "explicit provider/local CLI approval and action review",
-    "fixed confirmation footer and scrollable full payload"
+    "semantic theme tokens and native controls",
+    "separate saved metadata and runtime ownership",
+    "snapshot-bound save/start/stop approvals",
+    "retained counters and fixed review footer"
   ],
   "introduce": [
-    "explicit Add/Remove/Clear selection with source/date/outcome",
-    "selection-bound exact request preview and stale action invalidation",
-    "recoverable encoded credential rejection before preview"
+    "actual allocated listener endpoint and namespace in review and retained results",
+    "historical start approval feedback without stale ongoing progress",
+    "bilingual input/action names and review/runtime AX content"
   ],
   "material": {
     "real": [
-      "user-saved local historical knowledge",
-      "explicitly chosen records and provider",
-      "actual reviewed payload and reply"
+      "owned Podman OpenSSH service",
+      "native rule metadata and worker receipts",
+      "payload bytes and actual listener observations"
     ],
-    "pictures": "r1: 20 native JPEG/AX pairs, binary60170e84; r2: 4 fresh pairs, binaryc48ae4c7. Synthetic records and owned no-auth loopback; all raw2880x1866.",
+    "pictures": "Baseline c48ae4c7: 48 corrected raw captures. Repaired 66fb90fc: 29 fresh JPEG/AX pairs, all 2880x1866, Frost light, selected English/Chinese observations; clipped runtime rows explicitly recorded.",
     "absent": [
-      "invented live hosts",
-      "unreviewed command execution",
-      "background context sending"
+      "invented live servers",
+      "fabricated traffic",
+      "implicit background starts"
     ]
   },
   "inferred_from_authorized_design_scope": true,
   "web_render_verified": false,
   "web_render_scope": "not_applicable: Rust/GPUI source",
-  "native_verification": "r1 subset retained under60170e84. Gate63 preview correction applied as exactly three strings; r2 full gate passed with2056 ordinary/23ignored,10doc,Python128run1skip and494 equal inputs. New c48ae4c7 package bilingual Frost-light metadata and one explicit two-record loopback send verified; both processes exited0/reaped. Bounded r2 independent re-review APPROVE_SCOPED_CHANGE, openP0/P1/P2=0, bothP2resolved; Hallmark ship for inspected subset. Full native preview extraction and complete matrix remain open."
+  "native_verification": "Repaired source review APPROVE_SCOPED_SOURCE P0/P1/P2=0. Full gate2061 ordinary/23ignored,10doc,Python128run1skip passed;494 gate/build/post-native inputs match. Three actual forwarding paths, cancelled review, hold EOF, port refusal, retained endpoints/counters and bilingual AX observed in new package. Combined independent review APPROVE_SCOPED_COMBINED P0/P1/P2=0; original NET-01/02/03 closed within inspected source/native subset, Hallmark ship only for macOS arm64 Frost-light2880x1866 and selected English/Chinese observations. Original3P2 and failures preserved."
 }

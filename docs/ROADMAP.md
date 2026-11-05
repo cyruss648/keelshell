@@ -1,5 +1,23 @@
 # 开发路线
 
+## 当前隧道原生与显示修订 — 2026-11-05
+
+- 基线 `7625ed3` 对应开发包 `c48ae4c7…` 的 494 个门禁/构建/当前输入一致。
+  受控 macOS 与自有 Podman/OpenSSH 已取得 local/remote/dynamic 正常转发、
+  387/737 字节累计、取消停止审核、确认停止、流 EOF 和监听端口释放的证据；
+  保存不启动及所观察的独立规则继续传输亦有回执。
+- 三项显示/AX 修订已通过新非作者源码审查，P0/P1/P2=0。
+  完整门禁 2,061 ordinary / 23 ignored、10 rustdoc、Python 128 / 1 skipped
+  通过；修后包 `66fb90fc…` 的 494 个构建/门禁/捕获后输入一致。
+  新运行三方向各 387/737、取消审核后传输、hold EOF 和停止后端口拒绝通过，
+  实际端点保留、准确批准回执及双语 AX 另有原生观察。独立组合复核
+  APPROVE_SCOPED_COMBINED，开放 P0/P1/P2=0，Hallmark 对所验子集为 ship；
+  提交/推送/精确 CI 见该切片交付回执；旧包结果保持独立。
+  初始权限失败、local 超时/截止拒绝与捕获归属纠正完整保留。
+- 四次应用、容器、网络和私有目录均已回收，自有镜像已移除。受控正常路径不关闭删除/编辑/
+  多实例/重连全矩阵、真实取消超时、运行状态恢复、其它平台和完整主题/尺寸验收。
+  见[原生记录](testing/records/2026-11-05-net-native-acceptance.md)。
+
 ## 当前文件滚动与知识上下文 — 2026-11-05
 
 - 文件列表的纵向行滚动和横向列滚动分别响应输入轴；两个真实上传后
@@ -24,7 +42,8 @@
   元信息串联（P2=2）；文档及三处展示字符串已修。r2 同计数完整门禁通过，
   新包 `c48ae4c7…` 的中英文预览和一次双记录 loopback 发送通过，
   494 个输入一致。限定再审 APPROVE_SCOPED_CHANGE、开放 P0/P1/P2=0，
-  Hallmark 对受检子集 ship；提交及精确 CI 待收尾。
+  Hallmark 对受检子集 ship；`7625ed3` 已合入推送，494 个提交输入一致，
+  精确 Quality `41933498562` 已返回 success，平台细节见交付记录。
   原 HOLD 和失败历史保留。
   见[知识上下文记录](testing/records/2026-11-05-ai-knowledge-context.md)。
 - 物理滚动设备、更多输入 phase/惯性、最终候选完整主题/语言/窗口矩阵、
@@ -192,7 +211,7 @@ Unix v9原完整检查实际失败于长TMP夹具组观察EPERM，原626和后�
 | 5 / P1 | 用户显式选择 CLI 自身登录身份及版本兼容（AI-LOCAL） | 现有 API 身份调用本地 Codex/Claude Code 已实现，默认继续 API；订阅/登录复用尚未实现。先证明请求前可禁用 hooks、MCP、skills、plugins 和工具，并处理组织策略强制启用；不能只凭 help/标志或事后事件拒绝。供应商 CLI 自己处理认证，KeelShell 不读/复制 token、不自动登录，未知版本拒绝。若当前版本无法证明准入边界则保持 OPEN，不提供占位开关；真实账号/模型和原生验收独立记录。 |
 | 6 / P2 | 配置备份轮转、损坏恢复与升级回退（CON-04/SYNC-01） | 隔离候选已编写八槽单调metadata历史、显式预览／确认恢复、完整原件不自动删除、revision与资料字节绑定和失败回滚；独立vault／OS凭据不复制，既有schema缺省迁移保持，未来schema不推断。v1静态P2已修正为deferred-close失败后保留owner和typed原因；冻结v8实际通过23项core集成／3项失败控制／6项Workspace GPUI／2项typed UI控制、依赖策略／最终格式／全workspace all-targets严格Clippy，新非作者已复核同一输入和原始结果；主树及数量修正已整合；最终824输入1,812普通Rust／10doc／6Python严格门禁、新标准macOS包／57打包和17+4修后原生／完整字节核对通过，两个新owner实际wait0；新非作者最终组合复核无P1/P2、数量归属P2已关闭，提交CI待验证，最小OS几何、辅助技术、其它平台与断电耐久性开放；见[指南](product/CONFIGURATION_RECOVERY.md)与[候选记录](testing/records/2026-10-08-configuration-recovery.md)。现有加密跨设备同步不能代替本机恢复。 |
 | 7 / P2 | 远端能力识别、资源趋势与网络诊断（MON/NET-02） | 已有 Linux 监控及 DNS/TLS/HTTP HEAD/TCP 诊断保留；补能力识别、短期趋势、ping/丢包/traceroute 的明确降级，再设计远端 macOS/Windows 适配。缺少命令/权限时展示不可用，不能用桌面平台兼容性声称远端 OS 支持。以自有远端固定有界命令与实际样本验收。 |
-| 8 / P2 | 持久化隧道规则与真实流量统计（NET-01） | NET-01 runtime 已有 local/remote TCP 与 loopback SOCKS5 的每条活动/已停止隧道累计发送／接收 payload 计数、行级状态与 cleanup；命名规则支持 StateStore 持久化、旧状态迁移、active connection 绑定、删除保护和绑定 state/rule/connection snapshot 的 stale review rejection。当前 Tunnels 面板已将匹配规则的显式审核收据交给真实 forwarding executor，并保留 rule ID 到运行行；规则编辑/删除 UI、按规则 stop review、listener/runtime 状态持久化、重启恢复、规则级重连 owner 失效和原生验收仍待实现。|
+| 8 / P2 | 持久化隧道规则与真实流量统计（NET-01） | local/remote TCP 与 loopback SOCKS5 已有运行行、双向累计 payload、显式审核启动与停止、StateStore 命名规则新增/编辑/删除和 stale review rejection。未确认 cleanup 保留 owner/删除保护，权威 reload/recovery 才解除存储阻断。修后包已取得受控 macOS/Podman 三方向正常转发、活动流停止、端口释放、真实端点保留与双语 AX 原生证据；新非作者组合复核和完整本机门禁通过，原三项 P2 在限定范围关闭，提交 CI 另记。listener/runtime 状态持久化、重启恢复、规则重连 owner 及完整原生矩阵仍开放，见[本轮记录](testing/records/2026-11-05-net-native-acceptance.md)。|
 | 9 / P3 | 高级传输和用户中继（FILE-05/NET-03） | 保留归档批量传输、PTY Zmodem 和用户管理中继/测速目标。先做审核式归档与路径穿越拒绝，再单独完成 rz/sz 实机协议；中继必须有可重复的延迟/丢包 A/B 数据，无收益不称加速，跳板功能不能代替此项。 |
 | 10 / P3 | AI 知识与复用（AI-04） | 已实现来源绑定捕获、完整审核保存、StateStore 加载、字面搜索及单条编辑/删除；未知、未完成及敏感内容仍受保存闸门限制，Conflict/Unknown 后重新加载并重新审核。显式知识加入 Ask、实际请求预览与发送已实现，编码凭据 P1 已由独立再审关闭，v2 完整组合门禁和受控 macOS loopback 发送通过；最终复核要求的预览文案整理已通过新包双语观察和第二轮完整门禁，限定再审通过，交付状态见本页顶部。分类、批量管理、跨设备知识同步、真实 provider/CLI 和完整原生验收仍开放；历史知识不恢复旧 SSH 授权，不能把任务审计自动当知识库。 |
 

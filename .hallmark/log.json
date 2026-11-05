@@ -2,6 +2,27 @@
   {
     "date": "2026-11-05",
     "scope": "app",
+    "shape": "existing native named tunnel editor and runtime list",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "accurate tunnel review and accessible runtime results",
+    "signature": "actual allocated listener stays attached to its reviewed instance",
+    "sections": [
+      "saved rule list",
+      "editor and metadata review",
+      "runtime listener and counters",
+      "instance-bound stop review"
+    ],
+    "imagery": "Baseline c48ae4c7:48 raw captures; repaired66fb90fc:29 raw JPEG/AX pairs, all2880x1866; partial-row clipping recorded",
+    "waived": [],
+    "sweep": "Source repairs completed and independently APPROVE_SCOPED_SOURCE P0/P1/P2=0. Full gate2061ordinary/23ignored,10doc,Python128run1skip passed;494inputs match. Fresh repaired-package native transfer/stop/endpoint/AX evidence complete for stated subset, combined review APPROVE_SCOPED_COMBINED openP0/P1/P2=0, NET-01/02/03 closed in inspected source/native subset, Hallmark ship only for that subset. Initial3P2 and original failures retained. Rust HTML lint not applicable."
+  },
+  {
+    "date": "2026-11-05",
+    "scope": "app",
     "shape": "existing native assistant and local knowledge list",
     "theme": [
       "frost",

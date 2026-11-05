@@ -117,6 +117,9 @@ impl TunnelEvent {
 struct TunnelRow {
     id: usize,
     rule_id: Option<uuid::Uuid>,
+    direction: Direction,
+    // The Listening receipt remains a historical endpoint after cleanup.
+    bound_address: Option<String>,
     description: Message,
     status: Message,
     cancel: Arc<AtomicBool>,
@@ -128,6 +131,36 @@ struct TunnelRow {
     proxy_address: Option<String>,
     traffic: TrafficStats,
     last_traffic: TrafficSnapshot,
+}
+
+impl TunnelRow {
+    fn details(&self, cx: &App) -> String {
+        let location = match self.direction {
+            Direction::Local | Direction::Dynamic => t(cx, "本机", "this device"),
+            Direction::Remote => t(cx, "SSH 主机", "SSH host"),
+        };
+        format!(
+            "{} {}: {}\n{} ({location}): {}",
+            t(cx, "实例", "Instance"),
+            self.id + 1,
+            self.description.render(cx),
+            t(cx, "实际分配的监听端点", "Assigned listener"),
+            self.bound_address
+                .as_deref()
+                .unwrap_or_else(|| t(cx, "尚未确认", "not confirmed")),
+        )
+    }
+}
+
+fn tunnel_text(id: impl Into<ElementId>, text: impl Into<SharedString>) -> AnyElement {
+    let text = text.into();
+    div()
+        .id(id)
+        .role(accesskit::Role::Label)
+        .aria_label(text.clone())
+        .child(text)
+        .test_support()
+        .into_any_element()
 }
 
 impl Drop for TunnelRow {
@@ -439,8 +472,11 @@ impl TunnelsPanel {
             }
         };
         self.rule_status = Message::new(
-            format!("已审核规则“{}”，正在启动…", rule.name),
-            format!("Reviewed rule “{}”; starting…", rule.name),
+            format!("已批准启动规则“{}”；结果见下方运行状态。", rule.name),
+            format!(
+                "Approved start for rule “{}”; see runtime status below.",
+                rule.name
+            ),
         );
         self.start_specification(specification, Some(rule.name), Some(rule.id), cx);
     }
@@ -564,30 +600,41 @@ impl TunnelsPanel {
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
             return;
         };
-        let endpoints = format!(
-            "{}:{} → {}:{}",
-            spec.bind_host, spec.bind_port, spec.target_host, spec.target_port
-        );
+        let direction = spec.direction;
+        let bind = format!("{}:{}", spec.bind_host, spec.bind_port);
+        let endpoints = match direction {
+            Direction::Dynamic => Message::new(
+                format!("动态 SOCKS5（本机监听）\n配置：{bind}；不预设目标，由客户端请求"),
+                format!(
+                    "Dynamic SOCKS5 (listener on this device)\nConfigured: {bind}; no preset destination, requested by the client"
+                ),
+            ),
+            Direction::Local => Message::new(
+                format!(
+                    "本地转发（本机监听）\n配置：{bind} → {}:{}（SSH 主机连接目标）",
+                    spec.target_host, spec.target_port
+                ),
+                format!(
+                    "Local forwarding (listener on this device)\nConfigured: {bind} → {}:{} (destination via SSH host)",
+                    spec.target_host, spec.target_port
+                ),
+            ),
+            Direction::Remote => Message::new(
+                format!(
+                    "远程转发（SSH 主机监听）\n配置：{bind} → {}:{}（本机连接目标）",
+                    spec.target_host, spec.target_port
+                ),
+                format!(
+                    "Remote forwarding (listener on SSH host)\nConfigured: {bind} → {}:{} (destination via this device)",
+                    spec.target_host, spec.target_port
+                ),
+            ),
+        };
         let description = if let Some(name) = rule_name {
-            Message::new(
-                format!("规则 {name}\n{endpoints}"),
-                format!("Rule {name}\n{endpoints}"),
-            )
-        } else if spec.direction == Direction::Dynamic {
-            Message::new(
-                "动态 SOCKS5\n目标与域名由 SSH 主机连接",
-                "Dynamic SOCKS5\ndestinations and DNS via SSH host",
-            )
-        } else if spec.direction == Direction::Local {
-            Message::new(
-                format!("本地 → SSH 主机\n{endpoints}"),
-                format!("Local → SSH host\n{endpoints}"),
-            )
+            let (zh, en) = endpoints.translations();
+            Message::new(format!("规则 {name}：{zh}"), format!("Rule {name}: {en}"))
         } else {
-            Message::new(
-                format!("SSH 主机 → 本机\n{endpoints}"),
-                format!("SSH host → this device\n{endpoints}"),
-            )
+            endpoints
         };
         let (events, incoming) = mpsc::sync_channel(4);
         let cancel = Arc::new(AtomicBool::new(false));
@@ -649,6 +696,8 @@ impl TunnelsPanel {
                 self.rows.push(TunnelRow {
                     id: self.next_id,
                     rule_id,
+                    direction,
+                    bound_address: None,
                     description,
                     status: Message::new("正在启动…", "Starting…"),
                     cancel,
@@ -683,6 +732,7 @@ impl TunnelsPanel {
                 match event {
                     TunnelEvent::Listening { address, traffic } => {
                         row.listening = true;
+                        row.bound_address = Some(address.clone());
                         row.traffic = traffic;
                         if address.starts_with("socks5h://") {
                             row.proxy_address = Some(address.clone());
@@ -809,9 +859,18 @@ fn tunnel_summary(rows: &[TunnelRow]) -> Message {
 
 fn rule_preview_message(rule: &TunnelRule) -> Message {
     let kind = match rule.kind {
-        TunnelRuleKind::Local => ("本地转发", "Local forwarding"),
-        TunnelRuleKind::Remote => ("远程转发", "Remote forwarding"),
-        TunnelRuleKind::Dynamic => ("动态 SOCKS5", "Dynamic SOCKS5"),
+        TunnelRuleKind::Local => (
+            "本地转发（本机监听）",
+            "Local forwarding (listener on this device)",
+        ),
+        TunnelRuleKind::Remote => (
+            "远程转发（SSH 主机监听）",
+            "Remote forwarding (listener on SSH host)",
+        ),
+        TunnelRuleKind::Dynamic => (
+            "动态 SOCKS5（本机监听，不预设目标）",
+            "Dynamic SOCKS5 (listener on this device, no preset destination)",
+        ),
     };
     let endpoint = match (rule.target_host.as_deref(), rule.target_port) {
         (Some(host), Some(port)) => {
@@ -968,7 +1027,10 @@ impl Render for TunnelsPanel {
                         .py_1()
                         .flex_shrink_0()
                         .text_color(rgb(visual.muted))
-                        .child(self.rule_feedback().render(cx)),
+                        .child(tunnel_text(
+                            "tunnel-rule-feedback",
+                            self.rule_feedback().render(cx),
+                        )),
                 )
                 .into_any_element();
         }
@@ -1005,6 +1067,7 @@ impl Render for TunnelsPanel {
                                     || self.rule_store_blocked,
                             )
                             .label(label)
+                            .toggled(selected_rule == Some(rule_id))
                             .on_click(cx.listener(move |view, _, _, cx| {
                                 view.select_named_rule(rule_id, epoch, cx)
                             })),
@@ -1014,6 +1077,11 @@ impl Render for TunnelsPanel {
                             .ghost()
                             .compact()
                             .icon(IconName::Pencil)
+                            .accessibility_label(format!(
+                                "{}{}",
+                                t(cx, "编辑规则：", "Edit rule: "),
+                                rule.name,
+                            ))
                             .localized_tooltip("编辑规则", "Edit rule")
                             .disabled(
                                 self.suspended
@@ -1038,6 +1106,11 @@ impl Render for TunnelsPanel {
                                     || active,
                             )
                             .label(t(cx, "删除", "Delete"))
+                            .accessibility_label(format!(
+                                "{}{}",
+                                t(cx, "删除规则：", "Delete rule: "),
+                                rule.name,
+                            ))
                             .on_click(cx.listener(move |view, _, _, cx| {
                                 view.request_delete_rule(rule_id, epoch, cx)
                             })),
@@ -1101,12 +1174,10 @@ impl Render for TunnelsPanel {
                     .on_click(cx.listener(move |view, _, _, cx| view.start_named_rule(token, cx))),
             );
         }
-        named_rule_section = named_rule_section.child(
-            div()
-                .max_w(px(460.))
-                .text_color(rgb(visual.muted))
-                .child(self.rule_feedback().render(cx)),
-        );
+        named_rule_section =
+            named_rule_section.child(div().max_w(px(460.)).text_color(rgb(visual.muted)).child(
+                tunnel_text("tunnel-rule-feedback", self.rule_feedback().render(cx)),
+            ));
         let mut rows = div()
             .id("tunnels-list")
             .flex_1()
@@ -1136,7 +1207,10 @@ impl Render for TunnelsPanel {
                 .border_b_1()
                 .border_color(rgb(visual.border))
                 .child(div().text_color(rgb(visual.muted)).child(row_icon))
-                .child(div().flex_1().min_w_0().child(row.description.render(cx)))
+                .child(div().flex_1().min_w_0().child(tunnel_text(
+                    ("tunnel-instance-details", id),
+                    row.details(cx),
+                )))
                 .child(
                     div()
                         .w(px(250.))
@@ -1146,14 +1220,20 @@ impl Render for TunnelsPanel {
                         } else {
                             visual.muted
                         }))
-                        .child(row.status.render(cx)),
+                        .child(tunnel_text(
+                            ("tunnel-instance-status", id),
+                            row.status.render(cx),
+                        )),
                 )
                 .child(
                     div()
                         .w(px(170.))
                         .flex_shrink_0()
                         .text_color(rgb(visual.muted))
-                        .child(traffic_message(row.last_traffic).render(cx)),
+                        .child(tunnel_text(
+                            ("tunnel-instance-traffic", id),
+                            traffic_message(row.last_traffic).render(cx),
+                        )),
                 );
             if !row.finished {
                 if let Some(address) = row.proxy_address.clone() {
@@ -1164,6 +1244,11 @@ impl Render for TunnelsPanel {
                             .ghost()
                             .compact()
                             .rounded(px(6.))
+                            .accessibility_label(format!(
+                                "{}: {address}\n{}",
+                                t(cx, "复制代理地址", "Copy proxy address"),
+                                row.details(cx),
+                            ))
                             .localized_tooltip("复制代理地址", "Copy proxy address")
                             .on_click(move |_, _, cx| {
                                 cx.write_to_clipboard(ClipboardItem::new_string(address.clone()))
@@ -1181,6 +1266,19 @@ impl Render for TunnelsPanel {
                         .compact()
                         .rounded(px(6.))
                         .disabled(stopping || cleanup_unconfirmed)
+                        .accessibility_label(format!(
+                            "{}\n{}",
+                            if row.rule_id.is_some() {
+                                t(
+                                    cx,
+                                    "审核停止此规则的活动实例",
+                                    "Review stopping this rule's active instances",
+                                )
+                            } else {
+                                t(cx, "停止隧道实例", "Stop tunnel instance")
+                            },
+                            row.details(cx),
+                        ))
                         .label(if cleanup_unconfirmed {
                             t(cx, "清理未确认", "Cleanup unconfirmed")
                         } else if stopping {
@@ -1253,18 +1351,18 @@ impl Render for TunnelsPanel {
             .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_3().bg(rgb(visual.canvas)).border_b_1().border_color(rgb(visual.border))
                 .child(div().text_color(rgb(visual.accent)).child(IconName::Network))
                 .child(div().font_weight(FontWeight::SEMIBOLD).child(t(cx,"端口转发","Port forwarding")))
-                .child(div().flex_1().text_color(rgb(visual.muted)).child(self.host.clone()))
-                .child(Button::new("tunnel-local").ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).selected(self.direction==Direction::Local).label(t(cx,"本地转发","Local forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Local;cx.notify();})))
-                .child(Button::new("tunnel-remote").ghost().compact().rounded(px(6.)).icon(IconName::ArrowDown).selected(self.direction==Direction::Remote).label(t(cx,"远程转发","Remote forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Remote;cx.notify();})))
-                .child(Button::new("tunnel-dynamic").ghost().compact().rounded(px(6.)).icon(IconName::Network).selected(self.direction==Direction::Dynamic).label(t(cx,"动态 SOCKS5","Dynamic SOCKS5")).on_click(cx.listener(|view,_,window,cx| {view.direction=Direction::Dynamic;view.bind_host.read(cx).focus_handle(cx).focus(window,cx);cx.notify();}))))
+                .child(div().flex_1().text_color(rgb(visual.muted)).child(tunnel_text("tunnel-ssh-target", format!("SSH: {}", self.host))))
+                .child(Button::new("tunnel-local").ghost().compact().rounded(px(6.)).icon(IconName::ArrowUp).selected(self.direction==Direction::Local).toggled(self.direction==Direction::Local).label(t(cx,"本地转发","Local forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Local;cx.notify();})))
+                .child(Button::new("tunnel-remote").ghost().compact().rounded(px(6.)).icon(IconName::ArrowDown).selected(self.direction==Direction::Remote).toggled(self.direction==Direction::Remote).label(t(cx,"远程转发","Remote forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Remote;cx.notify();})))
+                .child(Button::new("tunnel-dynamic").ghost().compact().rounded(px(6.)).icon(IconName::Network).selected(self.direction==Direction::Dynamic).toggled(self.direction==Direction::Dynamic).label(t(cx,"动态 SOCKS5","Dynamic SOCKS5")).on_click(cx.listener(|view,_,window,cx| {view.direction=Direction::Dynamic;view.bind_host.read(cx).focus_handle(cx).focus(window,cx);cx.notify();}))))
             .child(named_rule_section)
             .child(div().px_3().py_3().flex_shrink_0().flex().items_end().gap_2().border_b_1().border_color(rgb(visual.border))
-                .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"监听地址","Bind host")).child(Input::new(&self.bind_host).small().rounded(px(6.))))
-                .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"监听端口","Bind port")).child(Input::new(&self.bind_port).small().rounded(px(6.))))
+                .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"监听地址","Bind host")).child(Input::new(&self.bind_host).aria_label(t(cx,"监听地址","Bind host")).small().rounded(px(6.))))
+                .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"监听端口","Bind port")).child(Input::new(&self.bind_port).aria_label(t(cx,"监听端口","Bind port")).small().rounded(px(6.))))
                 .when(self.direction != Direction::Dynamic, |row| row
                 .child(div().pb_2().text_color(rgb(visual.muted)).child(IconName::ArrowRight))
-                .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"目标地址","Destination host")).child(Input::new(&self.target_host).small().rounded(px(6.))))
-                .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"目标端口","Destination port")).child(Input::new(&self.target_port).small().rounded(px(6.)))))
+                .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"目标地址","Destination host")).child(Input::new(&self.target_host).aria_label(t(cx,"目标地址","Destination host")).small().rounded(px(6.))))
+                .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"目标端口","Destination port")).child(Input::new(&self.target_port).aria_label(t(cx,"目标端口","Destination port")).small().rounded(px(6.)))))
                 .when(self.direction == Direction::Dynamic, |row| row.child(div().flex_1().pb_2().text_color(rgb(visual.muted)).child(t(cx,"在客户端设置 SOCKS5 代理，并启用代理端 DNS。", "Set a SOCKS5 proxy in your client and enable proxy-side DNS."))))
                 .child(Button::new("start-tunnel").disabled(self.suspended).icon(IconName::Play).primary().compact().rounded(px(6.)).label(t(cx,"启动隧道","Start tunnel")).on_click(cx.listener(|view,_,_,cx|view.start(cx)))))
             .child(div().px_3().py_1().flex_shrink_0().flex().items_center().gap_2().text_color(rgb(visual.muted)).bg(rgb(visual.canvas)).child(IconName::Info).child(exposure.render(cx)))
@@ -1276,7 +1374,7 @@ impl Render for TunnelsPanel {
                 .child(div().w(px(45.)).child(t(cx,"操作","Action"))))
             .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(t(cx, "上一会话隧道记录，不会自动重建", "Previous session tunnels. Never restarted automatically"))))
             .child(rows)
-            .child(div().min_h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border)).text_color(rgb(visual.muted)).child(self.status.render(cx)))
+            .child(div().min_h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border)).text_color(rgb(visual.muted)).child(tunnel_text("tunnel-runtime-summary", self.status.render(cx))))
             .into_any_element()
     }
 }
