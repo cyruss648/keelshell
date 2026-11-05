@@ -1,6 +1,43 @@
 # 开发路线
 
-## 当前开发 — 2026-11-06
+## 当前整合：资源趋势与知识管理 — 2026-11-06
+
+诊断/画布代码`5b7772c`已推main并完成本地/跟踪/远端读回；
+精确Quality42088301874/1已三平台success，父exec74994已实际wait、
+exit0/reaped，91子进程回收，非作者closeout批准。
+ordinary为macOS2242、Linux2237、Windows2176，各14rustdoc/131候选；
+Linux/macOS各11项OpenSSH与附件摘要通过，只签该提交。
+已在独立工作树开始CPU/内存五分钟有界趋势，以及知识管理多选/审核式批量删除。
+设计分别见[资源趋势](product/HOST_RESOURCE_TRENDS.md)与
+[知识批量管理](product/KNOWLEDGE_BULK_MANAGEMENT.md)。
+前者复用真实采样并在暂停/错误/重启时断段，后者复用整批验证和保存队列，
+撤销受影响Ask审核。两者源码工程已通过，原生与交付按各自回执记录。
+趋势三路径已导入，作者模型6/monitor10及严格Clippy通过；
+非作者发现的暂停状态文案P3已修，新增断言窄回归1passed，限定复核关闭。
+知识作者70项不同专项/25项新增通过，严格Clippy和fmt通过；七路径已导入，
+另有元数据独立标签行的显示增量，新非作者B源码与增量批准，开放发现零。
+530输入组合完整门禁已退出0/reaped：2276ordinary/23ignored、
+14rustdoc、Python131run/1skip及全部工程检查通过；同输入新包14cb801e已构建。
+非作者combined-r1已批准组合源码/门禁/精确包归属，开放发现零。
+新包完成一次Frost Light/英文原生观察：17对AX/JPEG、16轮真实Linux资源加ps，
+暂停/面板显示零增量与恢复断段、合成知识取消零写及确认精确3→1均有实际读回。
+父exec42584实际wait exit0/reaped，应用0/reaped，684.164221秒内结束并清理
+container/network/private，530输入后置保持。原capture形状拒绝保留，
+B采用同run只读导出与审计bookends；native-r4非作者已批准限定A/B实际证据，
+没有新增阻断。sshd实际-9/reaped且原清理警告保留；完整原生finish仍OPEN。
+原capture tuple/list工具P2、失败枚举summary工具P3在后续工具候选处理，
+不重写本次冻结与原拒绝。最终文档增量另审。
+最新104条要求/34个registry包检查通过，530输入保持、无依赖变动。
+自有tools image已删除，A作者树已归档，B受primary checkout保护而保留；
+共享base/VM/target保留。详见[原生记录](testing/records/2026-11-06-resource-knowledge-native.md)。
+真实CLI回环r2因权限元数据形状误判在启动前HOLD，2.467秒内资源清理通过；
+r3只修测试工具准入，原权限与TTL保持；限定批准后的一次双栈CLI→生产Python
+回环probe已通过，11.065秒内清理，实际结果非作者限定批准且开放发现为零；
+Rust传输/解析、审核UI、真实错误及native边界仍开放。
+
+## 已交付代码：诊断与画布 — 2026-11-06
+
+以下保留代码交付时的验收轨迹；后续联调及新功能进度见本页上方。
 
 单窗惰性恢复切片`56d5440`已正常快进推送main，三处源码/原生/文档独立批准
 及520输入绑定通过；精确Quality42063264237/1三平台success，

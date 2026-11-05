@@ -2,6 +2,8 @@
 
 #[path = "monitor_disk.rs"]
 mod disk;
+#[path = "monitor_history.rs"]
+mod history;
 #[path = "monitor_protocol.rs"]
 mod protocol;
 #[cfg(test)]
@@ -51,6 +53,7 @@ enum Outcome {
     Cancelled,
     Refreshed {
         snapshot: MonitorResult<Snapshot>,
+        sampled_at: Instant,
         processes: MonitorResult<Vec<ProcessInfo>>,
     },
     Sockets(MonitorResult<Vec<SocketInfo>>),
@@ -74,6 +77,9 @@ pub struct MonitorPanel {
     host: String,
     runtime: Arc<tokio::runtime::Runtime>,
     snapshot: Option<Snapshot>,
+    history: history::ResourceHistory,
+    sample_generation: uuid::Uuid,
+    refresh_in_flight: bool,
     mcp_sample_id: Option<uuid::Uuid>,
     rates: SampleRates,
     selected_disk: Option<DiskDevice>,
@@ -111,9 +117,12 @@ impl MonitorPanel {
                 executor.timer(Duration::from_secs(5)).await;
                 if this
                     .update(cx, |panel, cx| {
+                        panel.history.prune(Instant::now());
                         if !panel.paused && panel.pending.is_none() {
                             panel.run(Job::Refresh, cx);
                         }
+                        // Age and the five-minute viewport advance while paused.
+                        cx.notify();
                     })
                     .is_err()
                 {
@@ -131,6 +140,9 @@ impl MonitorPanel {
             host,
             runtime,
             snapshot: None,
+            history: history::ResourceHistory::default(),
+            sample_generation: uuid::Uuid::new_v4(),
+            refresh_in_flight: false,
             mcp_sample_id: None,
             rates: SampleRates::default(),
             selected_disk: None,
@@ -181,6 +193,8 @@ impl MonitorPanel {
         }
         self.suspended = true;
         self.paused = true;
+        self.history.interrupt();
+        self.sample_generation = uuid::Uuid::new_v4();
         self.pending = None;
         self.monitor = None;
         self.protocol.update(cx, |panel, cx| panel.suspend(cx));
@@ -196,6 +210,50 @@ impl MonitorPanel {
         cx.notify();
     }
 
+    fn set_paused(&mut self, paused: bool, cx: &mut Context<Self>) {
+        if self.paused == paused || self.suspended {
+            return;
+        }
+        self.paused = paused;
+        self.history.interrupt();
+        // Pause/resume is an authority boundary even if no frame was drawn.
+        self.sample_generation = uuid::Uuid::new_v4();
+        if self.refresh_in_flight
+            && let Some(cancel) = &self.worker_cancel
+        {
+            cancel.store(true, Ordering::Release);
+        }
+        // A revoked refresh cannot publish a later status. Keep independent
+        // socket/process operations responsible for their own receipts.
+        if !self.busy || self.refresh_in_flight {
+            self.status = if paused {
+                Message::new("自动刷新已暂停。", "Polling paused.")
+            } else {
+                Message::new(
+                    "自动刷新已恢复，等待下一次采样。",
+                    "Polling resumed; waiting for the next sample.",
+                )
+            };
+        }
+        cx.notify();
+    }
+
+    fn adopt_outcome(
+        &mut self,
+        outcome: Outcome,
+        generation: Option<uuid::Uuid>,
+        cx: &mut Context<Self>,
+    ) {
+        self.busy = false;
+        self.worker_cancel = None;
+        self.refresh_in_flight = false;
+        if generation.is_some_and(|generation| generation != self.sample_generation) {
+            cx.notify();
+            return;
+        }
+        self.apply_outcome(outcome, cx);
+    }
+
     fn apply_outcome(&mut self, outcome: Outcome, cx: &mut Context<Self>) {
         self.busy = false;
         self.worker_cancel = None;
@@ -206,6 +264,7 @@ impl MonitorPanel {
         }
         match outcome {
             Outcome::Cancelled => {
+                self.history.interrupt();
                 self.status = Message::new(
                     "下一条命令发送前已取消监控。",
                     "Monitoring cancelled before the next command was sent.",
@@ -213,22 +272,44 @@ impl MonitorPanel {
             }
             Outcome::Refreshed {
                 snapshot,
+                sampled_at,
                 processes,
             } => {
                 let mut errors_zh = Vec::new();
                 let mut errors_en = Vec::new();
                 match snapshot {
                     Ok(snapshot) => {
-                        self.rates = self
-                            .snapshot
-                            .as_ref()
-                            .map(|old| snapshot.rates_since(old))
-                            .unwrap_or_default();
-                        self.snapshot = Some(snapshot);
-                        self.mcp_sample_id = Some(uuid::Uuid::new_v4());
-                        self.last_sample = Some(Instant::now());
+                        match self.history.record(
+                            &snapshot,
+                            self.snapshot.as_ref(),
+                            sampled_at,
+                            Instant::now(),
+                        ) {
+                            Ok(cpu) => {
+                                self.rates = self
+                                    .snapshot
+                                    .as_ref()
+                                    .map(|old| snapshot.rates_since(old))
+                                    .unwrap_or_default();
+                                self.rates.cpu_busy_percent = cpu;
+                                if cpu.is_none() {
+                                    self.rates.cpu_iowait_percent = None;
+                                }
+                                self.snapshot = Some(snapshot);
+                                self.mcp_sample_id = Some(uuid::Uuid::new_v4());
+                                self.last_sample = Some(sampled_at);
+                            }
+                            Err(_) => {
+                                self.rates = SampleRates::default();
+                                errors_zh.push("资源：迟到或时间无效的采样未采用".into());
+                                errors_en.push(
+                                    "Resources: late or invalid sample time was discarded".into(),
+                                );
+                            }
+                        }
                     }
                     Err(error) => {
+                        self.history.interrupt();
                         self.rates = SampleRates::default();
                         let (zh, en) = error_text(&error);
                         errors_zh.push(format!("资源：{zh}"));
@@ -358,6 +439,8 @@ impl MonitorPanel {
             return;
         }
         self.busy = true;
+        let generation = matches!(&job, Job::Refresh).then_some(self.sample_generation);
+        self.refresh_in_flight = generation.is_some();
         self.status = match &job {
             Job::Refresh => Message::new("正在刷新主机状态…", "Refreshing from the host…"),
             Job::Sockets => Message::new("正在读取监听端口…", "Reading listening sockets…"),
@@ -391,6 +474,10 @@ impl MonitorPanel {
         });
         if let Err(error) = started {
             self.busy = false;
+            self.refresh_in_flight = false;
+            if generation.is_some() {
+                self.history.interrupt();
+            }
             self.status = Message::detail(
                 "无法启动监控任务",
                 "Unable to start monitoring worker",
@@ -409,6 +496,11 @@ impl MonitorPanel {
                     Err(TryRecvError::Disconnected) => {
                         let _ = this.update(cx, |panel, cx| {
                             panel.busy = false;
+                            panel.worker_cancel = None;
+                            panel.refresh_in_flight = false;
+                            if generation.is_some() {
+                                panel.history.interrupt();
+                            }
                             panel.status = Message::new("监控任务未返回结果，请刷新后再操作。", "Monitoring worker ended without a result. Refresh before retrying any action.");
                             cx.notify();
                         });
@@ -417,7 +509,7 @@ impl MonitorPanel {
                 }
             };
             let _ = this.update(cx, |panel, cx| {
-                panel.apply_outcome(outcome, cx);
+                panel.adopt_outcome(outcome, generation, cx);
                 cx.notify();
             });
         }));
@@ -442,12 +534,16 @@ async fn execute_job(monitor: LinuxMonitor, job: Job, cancel: &AtomicBool) -> Ou
     match job {
         Job::Refresh => {
             let snapshot = monitor.snapshot().await;
+            // Timestamp the resource response, before the independent ps query
+            // or UI dispatch can delay adoption and make it look fresh.
+            let sampled_at = Instant::now();
             if cancel.load(Ordering::Acquire) {
                 return Outcome::Cancelled;
             }
             let processes = monitor.processes().await;
             Outcome::Refreshed {
                 snapshot,
+                sampled_at,
                 processes,
             }
         }
@@ -637,7 +733,7 @@ impl Render for MonitorPanel {
                             })
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if !panel.suspended && panel.pending.is_none() {
-                                    panel.paused = !panel.paused;
+                                    panel.set_paused(!panel.paused, cx);
                                 }
                                 cx.notify();
                             })),
@@ -674,6 +770,7 @@ impl Render for MonitorPanel {
                     .render(cx),
                 ),
             );
+        let history_now = Instant::now();
         let cpu = self.rates.cpu_busy_percent;
         let memory = self.snapshot.as_ref().map(|snapshot| &snapshot.memory);
         let memory_ratio = memory.and_then(|m| {
@@ -683,8 +780,14 @@ impl Render for MonitorPanel {
         });
         let memory_value = memory
             .and_then(|m| {
-                m.used_bytes()
-                    .map(|used| format!("{} / {}", bytes(used), bytes(m.total_bytes)))
+                m.used_bytes().filter(|_| m.total_bytes > 0).map(|used| {
+                    format!(
+                        "{:.1}% · {} / {}",
+                        used as f64 / m.total_bytes as f64 * 100.,
+                        bytes(used),
+                        bytes(m.total_bytes)
+                    )
+                })
             })
             .unwrap_or_else(|| "—".into());
         let swap = memory.and_then(|m| Some((m.swap_total_bytes?, m.swap_free_bytes?)));
@@ -706,6 +809,12 @@ impl Render for MonitorPanel {
                 cpu.map(|value| value as f32 / 100.),
                 visual.accent,
             ))
+            .child(history::view(
+                &self.history,
+                history::Series::Cpu,
+                history_now,
+                cx,
+            ))
             .child(metric(
                 cx,
                 t(cx, "内存", "Memory"),
@@ -713,6 +822,18 @@ impl Render for MonitorPanel {
                 memory_ratio,
                 visual.success,
             ))
+            .child(history::view(
+                &self.history,
+                history::Series::Memory,
+                history_now,
+                cx,
+            ))
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(self.history.time_range(history_now, cx)),
+            )
             .child(metric(
                 cx,
                 t(cx, "交换空间", "Swap"),
@@ -1021,7 +1142,7 @@ impl Render for MonitorPanel {
                             if panel.busy || panel.pending.is_some() {
                                 return;
                             }
-                            panel.paused = true;
+                            panel.set_paused(true, cx);
                             panel.run(Job::Inspect(selected.clone()), cx);
                         })),
                 );

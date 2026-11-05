@@ -2,6 +2,9 @@
 
 use super::*;
 
+#[cfg(test)]
+mod batch_tests;
+
 impl Workspace {
     pub(super) fn refresh_knowledge_library(&self, cx: &mut Context<Self>) {
         let library = self.assistant.read(cx).knowledge_library.clone();
@@ -26,15 +29,23 @@ impl Workspace {
             return;
         }
         let mut candidate = self.state.clone();
-        let result = match review.replacement {
-            Some(replacement) => candidate.replace_knowledge_entry(&review.expected, replacement),
-            None => candidate.remove_knowledge_entry(&review.expected),
+        let result = match (&review.expected[..], review.replacement) {
+            ([expected], Some(replacement)) => {
+                candidate.replace_knowledge_entry(expected, replacement)
+            }
+            (expected, None) => candidate.remove_knowledge_entries(expected),
+            _ => return,
         };
         if let Err(error) = result {
-            library.update(cx, |panel, cx| panel.reject_review(cx));
+            library.update(cx, |panel, cx| {
+                panel.candidate_failed(review_id, &error, cx)
+            });
+            self.assistant.update(cx, |assistant, cx| {
+                assistant.revoke_stale_knowledge_request(cx)
+            });
             self.status = Message::detail(
-                "本地知识未修改，请重新选择条目",
-                "Local knowledge was not changed; select the entry again",
+                "本地知识未修改，请重新加载并重新审核",
+                "Local knowledge was not changed; reload and review again",
                 error,
             );
             cx.notify();
@@ -49,6 +60,12 @@ impl Workspace {
             window,
             cx,
         );
+        // begin_save runs inside persist after the queue's admission guards.
+        // Revoke the owning Ask now, before queued ContextChanged or a late
+        // reply can run. Its send/reply guards also read the library directly.
+        self.assistant.update(cx, |assistant, cx| {
+            assistant.revoke_stale_knowledge_request(cx)
+        });
     }
 
     pub(super) fn reload_knowledge_library(

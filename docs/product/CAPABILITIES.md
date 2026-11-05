@@ -1,5 +1,32 @@
 # Capability ledger
 
+## 2026-11-06: resource history and knowledge batch management
+
+CPU and memory share a five-minute, 60-position in-memory history for the current
+authenticated Linux SSH session. Real sample times determine horizontal positions.
+Initial CPU counters have no rate; unknowns are not zeros. Pauses, errors,
+restarts and invalid counters/times break the series. A new segment establishes
+its own CPU baseline. Painting adds no sampling commands or frequency.
+See [resource trends](HOST_RESOURCE_TRENDS.md).
+
+Knowledge management has independent deletion checkboxes, a 32-entry bound and
+full reviews including filtered-out selections. A unique review, complete
+original entries, selection revision and configuration snapshot bind one atomic
+candidate and one persistence operation. Cancel writes nothing. Saving revokes
+affected Ask attachments and pending requests synchronously; queued events or
+late replies cannot restore consent. Conflict/Unknown require reload and a new
+review. See [batch management](KNOWLEDGE_BULK_MANAGEMENT.md).
+
+The source slices have separate non-author approval with no open findings,
+including the repaired pause-status P3 and independently labeled review metadata.
+The combined 530-input gate passes 2,276 ordinary Rust tests / 23 ignored,
+14 rustdocs and 130 Python tests / one skipped; 1,002 app tests are included in
+the ordinary count. Formatting, strict Clippy, dependency policy and additional
+controllers pass. Build, package and gate inputs match; the new macOS development
+package is `14cb801e…`. Native sampling, disk readback, immutable delivery and
+exact new-commit CI remain separate in the
+[integration record](../testing/records/2026-11-06-resource-knowledge-integration.md).
+
 ## 2026-11-06: reviewed ICMP and pane surfaces
 
 The current candidate adds an explicit preview/confirm ICMP operation from the
@@ -8,7 +35,11 @@ paths, uses at most four attempts, bounded remote/SSH time and output, and owns
 its version/resolver/ping children. Quiet utility counters mean reported
 attempts/replies/unanswered attempts; they establish neither successful sends
 nor exclusively network loss. See [the ICMP contract](ICMP_DIAGNOSTICS.md).
-Genuine utility, IPv4/IPv6 and native platform acceptance remain open.
+A bounded OpenSSH CLI carrying the exact production Python command has now
+passed real Linux IPv4/IPv6 loopback probes, four counted attempts and replies
+per target, with owned cleanup. This signs the Python/iputils probe layer only;
+Rust transport/parser, review UI, real error/cancellation cases, external routing
+and native platform acceptance remain open.
 
 Diagnostic consent now follows an uninterrupted active pane/tab selection.
 Switching away and back invalidates the prior review and held reply; selecting

@@ -5,7 +5,90 @@
 [组合前历史快照](history/2026-11-05-handoff-before-workspace-integration.md)，
 其中“当前”、暂停和清理指令只代表历史时点，不构成新的操作授权。
 
-## 当前开发：面板外观与远端诊断
+## 最新接续状态
+
+诊断与画布代码已提交并普通快进推送main：
+`5b7772ca45b0562af6b623792322087842758654`。
+本地main、origin/main和远端读回一致，工作副本当时干净；
+525工程输入、15份正式文档及41assets共581个提交blob匹配验收冻结。
+full-gate-r5通过2242ordinary/23ignored、14rustdoc、Python131run/1skip；
+combined-r2批准源码/门禁/包归属，final-docs-r1随后批准当时15份正式文档；
+两者开放P0/P1/P2/P3均为零，后续状态增量和新设计稿另审。
+交付回执在`work/pane-surface-polish-20261106/delivery-r1.json`及`committed-inputs-r1.json`。
+精确Quality42088301874/1已三平台success：
+ordinary为macOS2242/23ignored、Linux2237/24ignored、Windows2176/18ignored，
+各14rustdoc、131项候选通过。Linux/macOS各11项OpenSSH及附件API摘要匹配；
+Windows按工作流跳过OpenSSH，不代签Windows桌面。
+唯一观察器exec74994已由父实际wait、exit0/reaped，91个子进程全部回收；
+其中一次GET EOF退出1的原件保留。19:16:57 UTC收集结束，1395.624/5400秒，
+原期限未延长，新的非作者closeout限定批准、开放发现零。
+原件见`current-ci/exec-readback-r1.json`和`closeout-verification-r1.json`，
+只签5b7772c，不代签本轮后续源码。
+
+下一轮并行功能已开始，均从56d5440建树并要求先快进到上述新main：
+`feature/host-resource-trends-20261106`负责CPU/内存五分钟有界历史，
+`feature/knowledge-batch-delete-20261106`负责独立多选及审核式整批删除。
+整合仍复用本工作树，当前分支为`feature/resource-knowledge-integration-20261106`；
+已合入main的本地`feature/pane-surface-polish-20261106`分支已删除。
+父集中管理共同文档和最终组合。趋势作者已完成模型6/monitor10及严格Clippy，
+释放槽；三路径按摘要导入父树。非作者无P0/P1/P2，暂停状态文案P3
+已由父最小修订，真实SSH ABA窄回归1passed，限定复核已关闭P3。
+知识作者最终r2七路径已导入，70项不同专项通过、含全部25项新增测试；
+严格app/core Clippy与fmt通过，六次首次失败原件及全部实际wait回执保留。
+父另把审核元数据拆为独立标签行，不改删除或选择规则；
+新非作者Laplace已批准B来源及该增量，开放P0/P1/P2/P3=0。
+530输入组合build及打包exit0/reaped，新包14cb801e…；
+full-gate-r1/exec55268已实际wait、exit0/reaped：
+2276ordinary/23ignored、app1002/2ignored已含于ordinary、14rustdoc、
+Python131run/1skip及全部工程检查通过，530输入前后保持。
+非作者combined-r1已批准组合源码装配、完整门禁及精确包归属，
+开放P0/P1/P2/P3=0。新包一次原生运行已完成，native-r4非作者已批准限定A/B证据，见下。
+设计入口为[资源趋势](product/HOST_RESOURCE_TRENDS.md)和
+[知识批量管理](product/KNOWLEDGE_BULK_MANAGEMENT.md)，源码工程与原生状态分别标记。
+本轮专项与组合状态见[资源/知识整合记录](testing/records/2026-11-06-resource-knowledge-integration.md)。
+
+本轮原生r1在PTY属主权限准入失败；r2/r3通过PTY后在监督器的setuid ps
+身份读取处HOLD，原失败和UNKNOWN保持。单次诊断确认EPERM，撤回快速退出假设。
+r4仅将测试监督器PID枚举改为固定64KiB的libproc读取，严格Runner恢复，
+35项离线测试通过并获限定准备批准；非阻断的失败summary P3保留。
+一次run `abc8f78e408046648f4457631f680584`完成17对AX/JPEG：
+Frost Light/英文，16轮真实Linux资源加ps，暂停/显示零增量及恢复断段已观察；
+合成知识取消保持原bytes/元数据，确认精确3→1、保留条目及其他配置保持。
+原capture的tuple/list拒绝保留，B由同run只读适配和独立审计bookends读回，
+不冒称原capture成功。父exec42584已实际wait exit0/reaped，
+应用47967 UI退出0/reaped，684.164221秒内结束，清理2.743772秒，
+30工作加12清理CLI均0/reaped，container/network/private删除、sshd实际-9/reaped；
+原清理警告`kill(12): Operation not permitted`及`no more sessions`保留。
+native-r4为APPROVE_SCOPED_NATIVE_R4_A_B_WITH_PARENT_READONLY_EXPORT；
+没有新增阻断，原capture工具P2和失败枚举summary工具P3保持开放，
+后续只修新工具候选，不修改本次冻结或失败原件。
+源码530输入后置保持，未安装/签名/发布；完整native finish仍OPEN，正式文档增量另审。
+完整记录与未验收边界见[原生联调记录](testing/records/2026-11-06-resource-knowledge-native.md)。
+
+最新dependency-freshness-r2于21:10:47–21:11:03 UTC通过104条要求/34个registry包，
+父exec43998实际wait、exit0/reaped，530输入保持，无manifest/lock变化。
+专用tools image已核实无消费者后非强制删除；四个CLI实际回收，末次exists预期退出1，
+共享base、Podman VM及target保留。A作者树已由管理器归档，
+B作者树因primary checkout保护拒绝归档而保留，未绕过；两份作者证据tar摘要已重新核对。
+清理回执见本轮`native/tools-image-cleanup-r1/`及`source-evidence/author-worktree-cleanup-r1.json`。
+
+真实CLI准备r2的两项P2已获限定批准；父一次执行在容器准入停止，
+原始EffectiveCaps/BoundingCaps为要求的三项，但HostConfig归一化形状与工具假设不符。
+未复制材料/启动服务/SSH/发Echo，exec19849退出1/reaped，2.467秒内
+container/network/private精确清理通过。原件已复制到本轮`real-icmp/runtime-r2/`。
+r3只修该测试工具的权限元数据判定，精确三项能力及原300秒总TTL保持；
+新的非作者准备批准后，父一次exec92077已实际wait、exit0/reaped，
+run9c480d64ad4547e99f5c683b59d61572为PASS_REAL_SSH_LOOPBACK_PROBE_ONLY。
+127.0.0.1及::1各四次工具尝试/四回复，28CLI全部退出0/reaped；
+11.065秒内完成，cleanup3.063秒、sshd实际wait/reap、container/network/private均删除。
+103原件已复制到本轮`real-icmp/runtime-r3/`，五项生产输入保持；
+实际结果非作者限定批准、开放P0/P1/P2/P3=0；
+sshd清理的实际wait结果-9独立保留，不代签Rust传输/解析、审核UI或native。
+tools image转由下一轮原生监控夹具准备消费，不处理共享base。
+
+## 已交付代码：面板外观与远端诊断
+
+下文按提交时点保留来源、失败与验收轨迹；后续联调和并行开发以上方接续状态为准。
 
 启动恢复切片已提交并正常快进推送main：
 `56d5440e4fa260f53ee6ea404fee9223f41d2188`。本地main、origin/main及远端已读回一致，
@@ -21,7 +104,7 @@ exec93298已实际wait、exit0/reaped，84子进程全部回收。三次GET失�
 `current-ci/final-readback.json`、`exec-readback.json`及`closeout-verification.json`
 只签56d5440，不代签本轮dirty源码或新依赖。
 
-当前复用本工作树，分支`feature/pane-surface-polish-20261106`。
+该切片当时复用本工作树，分支`feature/pane-surface-polish-20261106`。
 `pane_view.rs`已作8增3删的语义画布修整，未连接面板采用主题画布并移除终端内边距，
 沿用三主题及原状态组件。首次候选只完成单文件rustfmt和diff检查；
 后续组合门禁与新包原生见下，当前提交/交付仍另记。
