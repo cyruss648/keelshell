@@ -41,8 +41,8 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 连接树候选补充目录折叠、方向键浏览、搜索恢复和单一 Tab 停靠点。
 [限定原生记录](docs/testing/records/2026-11-05-navigation-keyboard.md)保留早期成功观察、
 后期按键无响应及未成功的输入正控；完整键盘隔离仍开放。
-当前正在[组合验证](docs/testing/records/2026-11-05-workspace-integration.md)导航、分屏和 Ask 诊断，
-新组合包已有导航、主题、草稿及分屏的限定 macOS 观察，正在独立复核；
+[导航、分屏和 Ask 诊断组合](docs/testing/records/2026-11-05-workspace-integration.md)的源码提交 e331372 已通过三平台 CI，
+新组合包的导航、主题、草稿及分屏限定 macOS 观察已通过非作者证据复核；
 各来源包的验收范围分别保留，普通字符输入异常和完整平台矩阵仍待核实。
 
 [文件工作区](docs/product/FILES_WORKSPACE.md)默认优先展示双栏列表，路径独占一行；纵向浏览文件行，横向查看远程列。文件操作与传输设置按需展开，批量上传/下载和队列入口保持可见，切换时保留草稿与审核规则。

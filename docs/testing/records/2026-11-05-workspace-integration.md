@@ -53,7 +53,7 @@
   579个本地链接目标存在。两处仍写C原件复核待收回的文字构成一项非阻断P3；
   本轮已纠正，并由 `document-followup-r1` 限定复核关闭，开放P0/P1/P2/P3=0。
   报告在 `independent-review/combined-r1.md/json`，后续文档批准不扩大原审查范围。
-  本次候选提交冻结组合；精确组合CI在推送后绑定，不提前填写结果。
+  候选e331372已推送，精确Quality42025002190/1已三平台success，见下方精确CI终态。
 - 独立分支的门禁和开发包继续只签各自输入。组合macOS arm64开发包已构建并分目录打包，
   构建/打包均退出0并回收；515门禁/构建/打包/当前输入相同，41assets另核对，五个包成员摘要匹配。
   程序SHA-256为 `33be2e685a280b6bfd2094d4707a67c12b8a14ccac6e2b92d34f64a877154831`。
@@ -92,7 +92,9 @@ shell_closed事件。夹具拒绝exec不等于产品未发监控请求；整次r
 不以应用退出码代填。11:40:00 UTC的cleanup/final均verified，精确容器、网络、私有目录
 已清理、端口拒绝连接；11:40:39 UTC清理专用镜像，共享base保留。
 回执为 `native/verification-r1.json`、`native/parent-close-readback-r1.json`；
-新的非作者原件/源码复核进行中，未提前签native finish。
+新的非作者`native-r1`已批准限定原生证据，状态PARTIAL_OBSERVED；
+53对原件、28份原始审计与22个区间重算一致，无可确证源码P1/P2。
+不授予完整native或finish，也不自动签后续变化的最终文档。
 
 该包只签原515输入。原生结束后，仅文件布局测试加入诊断；原包与原件不重新归属新测试输入。
 紧凑OS窗口、完整主题×明暗×语言×尺寸、IME/VoiceOver、Windows/Linux桌面、
@@ -151,5 +153,58 @@ owned hold清理专项1passed，提前退出/取消均释放资源。两次执�
 修订后的`full-gate-r2`已退出0并回收（exec36492、child93525），修订515输入前后
 完全一致，较r1只改变该测试文件。**2,191 ordinary/23ignored、14rustdoc、
 Python131run/1skip**，app933/2ignored；格式、严格Clippy、依赖策略及附加进程控制器通过。
-回执为`full-gate-r2-readback.json`。新的非作者测试修订复核进行中；没有做负控，
+回执为`full-gate-r2-readback.json`。新的非作者`diagnostic-r1`批准限定诊断源码及两次证据，
+开放P0/P1/P2/P3=0，已绑定候选提交中的e164ea测试文件；没有做负控，
 原失败和两处时序前提缺口不会被本机门禁覆盖。原生包仍只绑定r1的515输入。
+
+## 候选提交与精确CI终态
+
+`e3313722b20b0c3f5461ea8a4f194fec51c0adea` 的两个父提交为B的9db9cbc和A的72a19ea；
+515项r2工程输入与23项文档r5均逐一匹配Git对象，提交后工作区干净。
+推送退出0，2026-11-05 12:11:12 UTC创建Quality push run42025002190。
+推送时main为77aa69c。未发布或安装；后续主线和文档提交以对应Git回执为准。
+
+观察器仅启动一次，exec79169/PID29803，12:14:56 UTC启动、13:44:56 UTC到期，
+由Aquinas保留外层执行会话。74项候选定义/来源摘要与精确提交一致，包括新增诊断后的
+文件布局目标。20:40:44 Asia/Shanghai取得终态并结束收集，原期限未延长，
+没有重跑或取消CI。原始API、三平台日志、解析结果及附件在`current-ci/`。
+
+| 平台 | Ordinary passed / ignored | app passed / ignored | Rustdoc | Packaging Python run / skipped | Scripts Python run / skipped | 74项候选 | Quality |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| macOS | 2,191 / 23 | 933 / 2 | 14 | 57 / 0 | 131 / 1 | 全部通过 | success |
+| Linux | 2,186 / 24 | 933 / 2 | 14 | 57 / 0 | 131 / 1 | 全部通过 | success |
+| Windows | 2,126 / 18 | 924 / 2 | 14 | 57 / 4 | 131 / 1 | 全部通过 | success |
+
+Linux/macOS各有11项本机OpenSSH互操作通过；两份附件分别含7个文件，ZIP摘要
+匹配GitHub API，临时目录删除和所观察进程停止均有回执。Windows按工作流条件跳过，
+三平台CI均不代表各平台桌面、发布或安装验收。
+新增诊断的文件布局目标这次三平台通过，但成功libtest不输出内部诊断：
+真实phase/timing没有被远端日志观察到，不能填写为零或解释旧失败根因。
+旧B失败和两处时序前提缺口保持OPEN。
+
+观察器在原5400秒期限内完成，75个子进程全部exit0/reaped；外层exec79169已实际
+wait/reap且exit0，后续检查原PID及75个子进程PID均不存在。
+`current-ci/exec-readback.json`单独记录外层退出，不以子进程汇总代填。
+最终结果为`current-ci/final-readback.json`、`test-readback.json`、
+`evidence-manifest.json`和`final-readback-manifest.json`。
+本节状态增量发生在候选提交之后；后续文档提交保持515项工程输入不变，
+精确CI仍只签e331372，最终文档另做限定复核。
+
+## 输入补查准备
+
+候选CI期间准备普通字符、文本提交和回车路径补查。r2开发包的构建/打包均
+exit0/reaped；515项工程输入与full-gate-r2一致，五个包成员摘要与r1逐项相同，
+程序仍为33be2e68。`native/package-readback-r2.json`记录该检查，r2包未执行或安装，
+不能将r1原生记录改归r2，也不增加输入验收范围。
+
+测试镜像构建owner为`5653c1ba75aa4c17a3ab43ba98e381e0`，12:25:49 UTC开始、
+12:28:49 UTC结束。公开Debian包下载/安装所在的Containerfile `timeout 180s`
+步骤返回124；wrapper记录`timeout=False`，并非外层240秒监督预算超时。
+exec66413最终exit1/reaped。原始`build-result.json`、`build.log`、命令回执和
+`context-cleanup.json`保留于`preparation/builds/5653c1ba75aa4c17a3ab43ba98e381e0/`；
+失败报告为`preparation/reports/failure-4d0e45eb8cb94e1e819841dc96977fa7.json`。
+
+构建context已删除，没有image receipt；按本次owner核对的容器和镜像均为空，
+外部构建容器库存中没有本次新增项。没有启动原生run、应用进程或私有凭据目录，
+没有删除其他项目容器或共享base。父回执为`native/input-followup-preparation-r2.json`。
+该补查状态为**NOT_RUN**，保留输入路径OPEN；不以重复下载或放宽超时替代失败分析。

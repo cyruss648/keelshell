@@ -42,7 +42,8 @@ Hallmark 的 HTML/CSS 规则在本项目映射到原生实现：
 两账号粘贴/方向键前后对照成功；普通字符按键失败仍保留，完整隔离未通过。
 点击分隔条后Right未改变比例且增加PTY输入，Tab显示焦点后Right为50%→55%且该段
 零增量；不把点击等同获得键盘焦点。应用与专用运行资源已回收，
-新的非作者原件审查及组合finish仍待结论。
+新的非作者原件审查已APPROVE_SCOPED_NATIVE_EVIDENCE / PARTIAL_OBSERVED，
+未发现可确证源码P1/P2；只批准实际观察的证据，不授予完整native或组合finish。
 见[组合记录](../testing/records/2026-11-05-workspace-integration.md)。
 
 原生分屏候选保留全局会话栏，在每叶用一行标签和固定比例按钮表达归属。

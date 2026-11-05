@@ -43,8 +43,8 @@
   "inferred_from_authorized_design_scope": true,
   "web_render_verified": false,
   "web_render_scope": "not_applicable: Rust/GPUI source",
-  "native_verification": "Combined package33be2e68 has53 original pairs: scoped tree/search/theme/draft/split/merge observations, A/B paste+Right controls before and after navigation; early ordinary-character/Right controls failed, recovered navigation after separately measured Escape. Clicking divider then Right left ratio unchanged and added3 PTY bytes; Tab focus then Right50→55% had zero increment. Cumulative24 PTY bytes and32 refused exec requests/13440 bytes. App and owned runtime cleaned. Full input isolation and native matrix OPEN; fresh independent review pending.",
+  "native_verification": "Combined package33be2e68 has53 original pairs: scoped tree/search/theme/draft/split/merge observations, A/B paste+Right controls before and after navigation; early ordinary-character/Right controls failed, recovered navigation after separately measured Escape. Clicking divider then Right left ratio unchanged and added3 PTY bytes; Tab focus then Right50→55% had zero increment. Cumulative24 PTY bytes and32 refused exec requests/13440 bytes. App and owned runtime cleaned. Full input isolation and native matrix OPEN; fresh non-author native-r1 approves scoped evidence as PARTIAL_OBSERVED, with no confirmed source P1/P2. Full native/finish not granted.",
   "native_evidence": "docs/testing/records/2026-11-05-workspace-integration.md",
-  "combined_review": "APPROVE_SCOPED_COMBINED_SOURCE_AND_EVIDENCE for original515 inputs; document-followup-r1 closes P3. Subsequent test-only diagnostics pass full-gate-r2; independent diagnostic review pending.",
-  "finish_review": "PENDING fresh combined native review; full native matrix OPEN"
+  "combined_review": "Original515 combined source/evidence approval; document-followup-r1 closes P3; test-only diagnostic-r1 approves the e164ea delta and two exact runs. Source e331372 Quality42025002190/1 passed all three platforms with74candidate tests each; Linux/macOS each11OpenSSH. Final documentation is tracked separately for scoped review; native evidence remains PARTIAL_OBSERVED.",
+  "finish_review": "OPEN: native-r1 approves scoped observations only, not full native or finish"
 }

@@ -41,8 +41,8 @@ The [native workspace](docs/product/NATIVE_WORKBENCH.md) includes a connections 
 The connection-tree candidate adds folder folding, arrow-key browsing, restored search state and a single Tab stop.
 Its [scoped native record](docs/testing/records/2026-11-05-navigation-keyboard.md) preserves early successful observations,
 later unresponsive keys and unsuccessful input positive controls; complete keyboard isolation remains open.
-Navigation, panes and Ask diagnostics are undergoing [combined validation](docs/testing/records/2026-11-05-workspace-integration.md),
-with scoped macOS observations of navigation, themes, drafts and panes in the new combined package under independent review.
+Source commit e331372 for [combined navigation, panes and Ask diagnostics](docs/testing/records/2026-11-05-workspace-integration.md) has passed CI on all three platforms.
+Scoped macOS observations of navigation, themes, drafts and panes in the new combined package have passed a non-author evidence review.
 Each source package retains its own acceptance scope; the ordinary character-input anomaly and full platform matrix remain open.
 
 The [file workspace](docs/product/FILES_WORKSPACE.md) gives browsing priority with two file lists and a dedicated path row. Vertical input browses file rows; horizontal input reveals remote columns. File actions and transfer settings expand on demand; batch upload/download and the queue remain accessible, preserving drafts and review rules across switches.

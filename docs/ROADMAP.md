@@ -4,7 +4,7 @@
 
 `feature/workspace-integration-20261105` 正在组合原生分屏 `9db9cbc`、
 Ask诊断 `3d84767` 与CI容量 `72a19ea`。源码自动组合无冲突，三个状态文档
-按各自来源回写；本次候选提交冻结组合，尚未合入main；完整本机门禁已退出0并回收。
+按各自来源回写；组合源码e331372已推送且精确CI三平台success；完整本机门禁已退出0并回收。
 两条feature已推送。容量修订的精确Quality `42009720436/1` 三平台success；
 分屏的 `42009970970/1` 为macOS、Windows success，Linux唯一文件布局条件等待失败，
 根因UNKNOWN；52项分屏测试三平台通过，不能把该失败归为旧ENOSPC。
@@ -14,11 +14,15 @@ Ask诊断 `3d84767` 与CI容量 `72a19ea`。源码自动组合无冲突，三个
 APPROVE_SCOPED_COMBINED_SOURCE_AND_EVIDENCE，P0/P1/P2=0。
 两处C原件状态文字P3已由限定复核关闭。新组合包取得53对原生捕获：
 导航、主题、草稿、分屏/合并和独立输入对照有局部证据；早期字符按键及点击分隔条后
-Right未达预期，完整输入隔离仍OPEN，新的非作者原件复核进行中。
+Right未达预期，完整输入隔离仍OPEN；新的非作者原件复核批准限定证据，
+PARTIAL_OBSERVED，无可确证源码P1/P2，不授予完整native/finish。
 应用与本轮专用运行资源已回收。原生结束后文件布局测试新增阶段诊断，保持原断言与预算；
 修订后的full-gate-r2通过：2,191 ordinary/23ignored、14rustdoc、Python131run/1skip，
 515输入前后一致；freshness-r2通过104条要求，无版本变动。
-候选提交的测试修订/原生独立复核与精确组合CI并行，终态仍PENDING；
+测试修订已获独立限定批准，开放P0/P1/P2/P3=0；
+精确候选Quality42025002190/1三平台success，74项候选分别通过，
+Linux/macOS各11项OpenSSH通过并收回摘要一致的附件；
+后续文档与主线交付分别核对，不将候选CI扩大到后续SHA。
 两处测试时序前提缺口不因本机绿而关闭。
 组合自己的检查和新非作者审查见[组合记录](testing/records/2026-11-05-workspace-integration.md)。
 以下切片段落保留来源时点；其中PENDING或“未提交”不覆盖本节和后续交付回执。
