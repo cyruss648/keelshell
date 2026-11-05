@@ -2,14 +2,40 @@
 """Portable developer gate. Stops on the first failure and preserves command output."""
 import argparse
 from pathlib import Path
+import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
+
+def report_storage(phase, temporary, *, output=None):
+    """Observe capacity without paths or error text; never replace a check result."""
+    facts = {}
+    for label, path in (("workspace", ROOT), ("temporary", temporary)):
+        try:
+            usage = shutil.disk_usage(path)
+            facts[label] = {
+                "available": True, "total_bytes": usage.total,
+                "used_bytes": usage.used, "free_bytes": usage.free,
+            }
+        except OSError as error:
+            facts[label] = {
+                "available": False,
+                "errno": error.errno if type(error.errno) is int else None,
+                "winerror": value if type(value := getattr(error, "winerror", None)) is int else None,
+            }
+    try:
+        print(json.dumps({"storage_observation": {"phase": phase, "locations": facts}}),
+              file=sys.stdout if output is None else output, flush=True)
+    except (OSError, ValueError):
+        # Optional reporting must not hide a failed command, including when
+        # stdout has already been closed by its caller.
+        pass
 
 def dependency_policy():
     for path in [ROOT / "Cargo.toml", *sorted((ROOT / "crates").glob("*/Cargo.toml"))]:
@@ -43,17 +69,21 @@ def main():
         return
     with tempfile.TemporaryDirectory(prefix="keelshell-check-") as scratch:
         env = dict(os.environ, TMPDIR=str(Path(scratch).resolve()))
-        for command in [
-            [sys.executable, "-m", "unittest", "discover", "-s", "scripts", "-p", "test_*.py"],
-            ["cargo", "fmt", "--all", "--check"],
-            ["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"],
-            ["cargo", "test", "--workspace", "--locked", "--", "--test-threads=4"],
-            ["cargo", "test", "-p", "keelshell-ai", "--test", "local_agent_process", "--locked", "--", "--readiness-error-tests"],
-            ["cargo", "test", "-p", "keelshell-ai", "--test", "local_agent_directory_process", "--locked", "--", "--observer-io-error-tests"],
-            ["cargo", "test", "-p", "keelshell-ai", "--test", "local_agent_process", "--locked", "--", "--controller-small-stack"],
+        for label, command in [
+            ("python-tests", [sys.executable, "-m", "unittest", "discover", "-s", "scripts", "-p", "test_*.py"]),
+            ("format", ["cargo", "fmt", "--all", "--check"]),
+            ("clippy", ["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--", "-D", "warnings"]),
+            ("workspace-tests", ["cargo", "test", "--workspace", "--locked", "--", "--test-threads=4"]),
+            ("readiness-controller", ["cargo", "test", "-p", "keelshell-ai", "--test", "local_agent_process", "--locked", "--", "--readiness-error-tests"]),
+            ("observer-controller", ["cargo", "test", "-p", "keelshell-ai", "--test", "local_agent_directory_process", "--locked", "--", "--observer-io-error-tests"]),
+            ("small-stack-controller", ["cargo", "test", "-p", "keelshell-ai", "--test", "local_agent_process", "--locked", "--", "--controller-small-stack"]),
         ]:
+            report_storage(f"before-{label}", scratch)
             print("Running: " + " ".join(command), flush=True)
-            subprocess.run(command, cwd=ROOT, env=env, check=True)
+            try:
+                subprocess.run(command, cwd=ROOT, env=env, check=True)
+            finally:
+                report_storage(f"after-{label}", scratch)
 
 if __name__ == "__main__":
     try:

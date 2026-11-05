@@ -1,19 +1,28 @@
 # 开发路线
 
-## 当前独立切片：本地 Ask scratch 诊断 — 2026-11-05
+## 当前独立切片：CI 容量修订 — 2026-11-05（Asia/Shanghai）
 
-基线 Linux `41967541069 / attempt 1` 的 ScratchFailed 根因仍 UNKNOWN。
-新增按请求隔离、数量有界的静态操作/错误观测，并给目录夹具的每个 readiness
-等待点加入 case/kind 和自身阶段，保留原结果、取消及清理规则。
-设计、测试与审查分别见[ADR 0102](adr/0102-local-ask-scratch-diagnostics.md)
-和[记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)。
-初轮单元/进程专项及同测试诊断断开反例已完成。完整门禁实际退出 0并回收：
-2,126 ordinary Rust / 23 ignored、14 rustdoc、Python 128 run / 1 skipped，
-500 项输入一致；新的非作者源码审查批准限定范围，开放 P0/P1/P2/P3=0。
-九文档/证据组合复核同样批准限定范围，开放 P0/P1/P2/P3=0；
-提交绑定、推送与精确 CI 以本轮交付读回为准。
-原生分屏与连接树在各自工作副本冻结，
-待桌面接口可用后接续；本切片不关闭其原生验收。
+诊断提交 `3d8476716ab80f0cec8b8c731a8cde0bcd7601a3` 已推送 feature，
+未合入 main；原完整门禁及非作者源码/文档/提交绑定复核通过。
+Quality `41994734898 / attempt 1` 为 macOS success、Linux ENOSPC、
+Windows preparation failure。旧 run `41967541069` 的根因仍 UNKNOWN。
+诊断证据见[原记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)，
+后续修订见[ADR 0103](adr/0103-ci-storage-capacity.md)与
+[容量记录](testing/records/2026-11-05-ci-storage-capacity.md)。
+
+- 已实现六文件容量修订：串行 fixture 显式关闭及前一 root 不存在断言、
+  非 workspace 依赖 dev `debug=0`、缓存新分代、门禁前后数值容量。
+  既有断言和期限保持；同 helper 寿命对照 exit 101 → 0，
+  新依赖检查 exit 0、Python 三项专项通过。
+- 新 profile `ci-capacity/full-gate-r1` **exit 0并回收**：2,126 ordinary
+  Rust / 23 ignored、14 rustdoc、Python 131 run / 1 skipped；506 项输入一致。
+  本机两种夹具程序分别为 10,078,320 / 9,921,664 字节，范围见记录。
+  Nash 六文件源码 **APPROVE_SCOPED_SOURCE，P0/P1/P2/P3=0**。
+- Nash `combined-r1.md` 为 **APPROVE_SCOPED_COMBINED，P0/P1/P2/P3=0**，
+  文档预审 P3 已关闭；**新提交绑定及精确 CI 仍 PENDING**，不宣称远端容量已修复。
+- 原提交 Windows 单 job 重跑 **success**；attempt 2 整体 failure，
+  Linux/macOS 起止时间、步骤及日志与首次相同，属于继承，原失败保持。
+- 原生分屏与连接树按各自冻结输入及回执独立验收，本切片不转移其原生结论。
 
 ## 当前独立切片：布局领域模型 — 2026-11-05
 

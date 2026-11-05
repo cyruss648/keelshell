@@ -11,8 +11,14 @@
 只记录静态操作和错误类别/数值，保留原错误优先级与期限。
 本轮不包含另两棵工作副本中冻结的原生分屏和连接树候选。
 实现已冻结；初轮专项、诊断失效反向控制及完整门禁已完成，新的非作者
-源码及文档/证据组合复核均已批准限定范围。精确提交、推送与三平台 CI
-按本轮 `delivery-readback.json` 和 `current-ci/` 的实际读回另行核对。
+源码及文档/证据组合复核均已批准限定范围。提交
+`3d8476716ab80f0cec8b8c731a8cde0bcd7601a3` 已推送 feature，未合入 main，
+提交绑定复核通过。Quality `41994734898 / attempt 1` 为 macOS success、
+Linux ENOSPC、Windows preparation failure；原提交的 Windows 单 job
+重跑已 success，attempt 2 整体仍 failure，Linux/macOS 继承首次结果。
+原始 `current-ci/` 读回、重跑终态及后续六文件修订见
+[容量记录](2026-11-05-ci-storage-capacity.md)。以下门禁/审查属于诊断提交，
+不覆盖新 profile；旧 run `41967541069` 的根因仍 UNKNOWN。
 
 设计见[ADR 0102](../../adr/0102-local-ask-scratch-diagnostics.md)。
 本地证据根目录为 `work/agent-scratch-diagnostics-20261105/`。
@@ -111,6 +117,9 @@ Linux 后续 OpenSSH 步骤 skipped。失败等待点返回 `Err(ScratchFailed)`
 
 ## 待完成
 
-1. 核对不可变功能提交与门禁/所审文件绑定，推送并读回精确三平台 CI。
-2. Linux 未复现时仍保留 UNKNOWN，
-   不把观测能力的实现称作历史失败已修复。
+1. 新修订完整门禁及 Nash 源码/组合复核已通过，文档 P3 已关闭；按
+   [容量记录](2026-11-05-ci-storage-capacity.md)接续新提交绑定及精确 CI，
+   两者仍 PENDING。原提交 Windows 重跑成功不替代新修订的平台验收。
+2. 保留旧 Linux run 的 UNKNOWN；新 run 的 ENOSPC 不倒填历史根因。
+   原生包按各自冻结输入及回执独立验收，范围见[交接](../../HANDOFF.md)，
+   不覆盖上方当时的 Mac locked 失败，也不向本切片转移结论。

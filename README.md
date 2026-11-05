@@ -124,8 +124,9 @@ cargo run -p keelshell-app --locked
 | 已实现能力、限制与开发计划 | [能力清单](docs/product/CAPABILITIES.md) · [路线图](docs/ROADMAP.md) |
 | 操作指南与设计决策 | [文档目录](docs/README.md) · [产品设计](docs/product/PRODUCT.md) · [ADR](docs/adr/) |
 | 工程结构、本地开发与检查 | [贡献指南](CONTRIBUTING.md) |
-| 行为测试与平台证据 | [测试策略](docs/testing/STRATEGY.md) · [测试记录](docs/testing/records/) |
+| 行为测试与平台证据 | [测试策略](docs/testing/STRATEGY.md) · [测试索引](docs/testing/README.md) |
 | 本地 Ask 失败观测与已知边界 | [有界诊断设计](docs/adr/0102-local-ask-scratch-diagnostics.md) |
+| CI 容量修订与验证进展 | [ADR 0103](docs/adr/0103-ci-storage-capacity.md) · [容量记录](docs/testing/records/2026-11-05-ci-storage-capacity.md) |
 
 欢迎通过 [Issues](https://github.com/cyruss648/keelshell/issues) 报告问题、分享体验和提出建议。提供复现步骤、匿名配置和平台信息有助于定位问题；代码与文档贡献请从贡献指南开始。
 

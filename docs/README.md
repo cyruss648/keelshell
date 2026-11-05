@@ -4,6 +4,8 @@
 较早的交接全文保存在[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)；
 其中的“当前”与暂停指令只代表对应历史时点。
 
+- [CI 容量修订 / ADR 0103](adr/0103-ci-storage-capacity.md)与[容量记录](testing/records/2026-11-05-ci-storage-capacity.md)：新 profile 门禁、506 项输入绑定及 Nash 源码复核通过；原提交 Windows 重跑成功、Linux/macOS 继承首次结果，Nash 组合复核通过、文档 P3 关闭，新提交绑定及精确 CI 仍 PENDING。
+- [测试索引](testing/README.md)：当前接续记录、验证策略与完整历史入口。
 - [主题与外观](product/THEME_PREFERENCES.md)：三套内置主题、明暗模式及扩展方式。
 - [工作区布局与恢复](product/WORKSPACE_LAYOUT.md)、[ADR 0100](adr/0100-bounded-inert-workspace-layout.md)与[验证记录](testing/records/2026-11-05-pane-layout-model.md)：有界布局领域模型和可选持久化；原生分隔条、多窗口与恢复入口仍待接入。
 - [文件工作区布局](product/FILES_WORKSPACE.md)、[ADR 0097](adr/0097-file-workbench-disclosures.md)与[验证记录](testing/records/2026-11-05-native-file-workbench.md)：浏览优先、按需展开的设置、真实传输与渲染栈诊断。

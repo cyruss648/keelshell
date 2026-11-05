@@ -1,6 +1,37 @@
 # Capability ledger
 
-## 2026-11-05: optional local Ask diagnostics — separate candidate
+## 2026-11-05 (Asia/Shanghai): CI storage capacity — uncommitted revision
+
+Diagnostic commit `3d8476716ab80f0cec8b8c731a8cde0bcd7601a3` was pushed to
+the feature branch, not merged into main. Quality `41994734898 / attempt 1`
+succeeded on macOS, failed with ENOSPC on Linux, and failed in Windows Python
+preparation before Cargo. Linux log lines 744/957 record 70 MB free and
+`OwnedExecutableWrite / StorageFull / errno 28`; the older run `41967541069`
+still has an UNKNOWN cause. The original commit's Windows-only retry succeeded;
+attempt 2 remains a failure. Linux/macOS have identical start/end times, steps and
+raw logs to attempt 1 and are inherited results despite new IDs and `run_attempt=2`.
+
+Six subsequent files add explicit closure between serial fixtures, a check that
+the preceding root is gone, zero debug info for non-workspace dependencies in
+dev/test, a new cache generation, and numeric capacity observations around gate
+commands. Existing assertions and
+deadlines remain. The same lifetime helper failed before closure and passed after
+it (exit 101 → 0); both runs preceded the profile change. Fresh dependency checks
+passed. The new-profile `ci-capacity/full-gate-r1` exited zero and was reaped:
+2,126 ordinary Rust passed / 23 ignored, 14 rustdoc checks, and 131 Python tests
+run / one skipped, including the three capacity tests. All 506 engineering inputs
+match. Local workspace/focused fixture executables measured 10,078,320 / 9,921,664
+bytes, separately; these are not whole-target or remote capacity measurements.
+Nash approved the six-file source scope, then issued **APPROVE_SCOPED_COMBINED**
+in `combined-r1.md`, with no open P0/P1/P2/P3 findings and the document P3 closed.
+Immutable commit binding and exact new-commit CI remain **PENDING**.
+
+See [ADR 0103](../adr/0103-ci-storage-capacity.md) and the
+[capacity record](../testing/records/2026-11-05-ci-storage-capacity.md).
+Native navigation/pane acceptance follows its own frozen inputs and receipts;
+this capacity slice does not inherit that acceptance or overwrite earlier failures.
+
+## 2026-11-05: optional local Ask diagnostics — pushed feature commit
 
 Each explicitly observed Ask may attach its own diagnostics producer. The queue
 and shared total budget are both bounded to sixteen facts; draining does not
@@ -16,9 +47,10 @@ was reaped: 2,126 ordinary Rust passed / 23 ignored, 14 rustdoc checks and
 128 Python tests run / one skipped. All nineteen new unit tests passed and all
 500 engineering inputs match. A new non-author source review approves the scoped
 change with no P0/P1/P2/P3 findings. The subsequent document/evidence review also
-approves its bounded scope with no open findings. Exact commit binding, delivery
-and platform CI are tracked separately in the round's delivery readback.
-The historical Linux failure's cause remains UNKNOWN.
+approves its bounded scope with no open findings. Commit binding was subsequently
+approved; delivery and the failing platform CI are recorded above. These approvals
+do not cover the later capacity revision. The historical Linux failure's cause
+remains UNKNOWN.
 See the [diagnostic record](../testing/records/2026-11-05-local-ask-scratch-diagnostics.md)
 and [ADR 0102](../adr/0102-local-ask-scratch-diagnostics.md).
 This candidate does not contain the separately frozen native panes or connection tree.

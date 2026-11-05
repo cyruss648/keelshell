@@ -1,6 +1,9 @@
 //! Owned native fixtures exercise the real selected-directory adapter/bootstrap.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
+#[path = "support/local_agent_fixture_lifetime.rs"]
+mod fixture_lifetime;
+
 use keelshell_ai::{
     ContextDraft, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
     LocalAgentKind, LocalAgentLimits, LocalAgentWorkingDirectory, LocalAskDiagnostic,
@@ -173,6 +176,7 @@ struct Fixture {
 impl Fixture {
     fn new(kind: LocalAgentKind, future: bool) -> Self {
         let root = tempfile::tempdir().unwrap();
+        fixture_lifetime::record_new_root(root.path());
         // Unix temp roots can contain symlink aliases (for example /var).
         // Windows canonicalize returns a verbatim namespace, which production
         // deliberately rejects as a user-selected path; retain its disk path.
@@ -272,6 +276,18 @@ impl Fixture {
             0,
             "owned scratch cleaned"
         );
+    }
+
+    fn close(self) {
+        // Shadowed Rust bindings otherwise retain earlier executable copies
+        // until the whole serial controller scope ends.
+        self.root.close().expect("remove completed fixture files");
+    }
+
+    fn close_shared(self: Arc<Self>) {
+        let fixture = Arc::try_unwrap(self)
+            .unwrap_or_else(|_| panic!("completed Ask still retains its fixture"));
+        fixture.close();
     }
 }
 fn credential() -> LocalAgentCredential {
@@ -505,6 +521,7 @@ async fn observer_io_error_controller() {
         std::io::stdout(),
         "observer IO-error held-cwd: pending writes 0; original success/cwd/scratch preserved"
     );
+    fixture.close_shared();
 
     let fixture = Fixture::new(LocalAgentKind::Codex, false);
     let approved = fixture.review("wait", None).await;
@@ -542,6 +559,7 @@ async fn observer_io_error_controller() {
         "observer IO-error wait: original 8000ms Timeout preserved; elapsed_us={}; child reaped; scratch cleaned",
         started.elapsed().as_micros()
     );
+    fixture.close();
     scratch_failure_receipts_are_redacted().await;
     scratch_directory_observation_is_bounded();
 }
@@ -605,6 +623,7 @@ async fn scratch_failure_receipts_are_redacted() {
                 "diagnostic leaked request material"
             );
         }
+        fixture.close();
     }
     let _ = writeln!(
         std::io::stdout(),
@@ -697,6 +716,7 @@ async fn controller() {
             "{}",
             json!({"case":"selected_actual_child_cwd","kind":format!("{kind:?}"),"probes_isolated":true,"fixed_policy":true,"scratch_cleaned":true})
         );
+        fixture.close();
 
         let fixture = Arc::new(Fixture::new(kind, false));
         let approved = fixture.review("held-cwd", None).await;
@@ -763,6 +783,7 @@ async fn controller() {
             fixture.selected.with_file_name("moved-after-ask"),
         )
         .expect("completed Ask releases its directory handles");
+        fixture.close_shared();
 
         let fixture = Fixture::new(kind, false);
         let approved = fixture.review("cwd", None).await;
@@ -803,6 +824,7 @@ async fn controller() {
             .expect("consumed review releases its directory handles");
         }
         fixture.clean();
+        fixture.close();
 
         let fixture = Fixture::new(kind, true);
         let approved = fixture.review("cwd", None).await;
@@ -814,6 +836,7 @@ async fn controller() {
             LocalAgentError::UnsupportedVersion
         );
         fixture.clean();
+        fixture.close();
 
         let fixture = Arc::new(Fixture::new(kind, false));
         let approved = fixture.review("wait", None).await;
@@ -851,6 +874,7 @@ async fn controller() {
             "{}",
             json!({"case":"selected_cancel","kind":format!("{kind:?}"),"owned_child_reaped":true,"scratch_cleaned":true})
         );
+        fixture.close_shared();
     }
     #[cfg(unix)]
     {
@@ -887,6 +911,7 @@ async fn controller() {
                     .any(|record| record["phase"] == "ask")
             );
             fixture.clean();
+            fixture.close();
         }
         let fixture = Arc::new(Fixture::new(LocalAgentKind::ClaudeCode, false));
         let approved = fixture.review("cwd", Some("gate-launcher")).await;
@@ -929,6 +954,7 @@ async fn controller() {
                 .any(|record| record["phase"] == "ask")
         );
         fixture.clean();
+        fixture.close_shared();
     }
     let fixture = Fixture::new(LocalAgentKind::Codex, false);
     let approved = fixture.review("cwd", None).await;
@@ -942,6 +968,7 @@ async fn controller() {
     );
     assert!(fixture.records().is_empty());
     fixture.clean();
+    fixture.close();
     for input in [
         "{}\n".to_owned(),
         "{\"schema\":2}\n".to_owned(),

@@ -124,8 +124,9 @@ The tag-triggered release workflow defines six build targets. Successful tagged 
 | Implemented capabilities, limits and plans | [Capability ledger](docs/product/CAPABILITIES.md) · [Roadmap](docs/ROADMAP.md) |
 | Workflows and design decisions | [Documentation](docs/README.md) · [Product design](docs/product/PRODUCT.md) · [ADRs](docs/adr/) |
 | Repository structure, local development and checks | [Contributing](CONTRIBUTING.md) |
-| Behavior tests and platform evidence | [Testing strategy](docs/testing/STRATEGY.md) · [Test records](docs/testing/records/) |
+| Behavior tests and platform evidence | [Testing strategy](docs/testing/STRATEGY.md) · [Test index](docs/testing/README.md) |
 | Local Ask failure observations and known limits | [Bounded diagnostic design](docs/adr/0102-local-ask-scratch-diagnostics.md) |
+| CI capacity revision and validation status | [ADR 0103](docs/adr/0103-ci-storage-capacity.md) · [Capacity record](docs/testing/records/2026-11-05-ci-storage-capacity.md) |
 
 Use [Issues](https://github.com/cyruss648/keelshell/issues) to report bugs, share feedback and propose improvements. Reproduction steps, anonymized profiles and platform details help diagnosis. Start with the contributing guide for code and documentation changes.
 

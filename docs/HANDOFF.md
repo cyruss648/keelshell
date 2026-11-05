@@ -4,43 +4,46 @@
 最新用户要求优先于历史范围；源码、工程测试、受控原生、平台 CI、公开发布和安装分别验收。
 完整旧稿见[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)，其中“当前”、暂停及删除指令只属于当时，不构成新的操作授权。
 
-## 当前独立切片：本地 Ask scratch 诊断
+## 当前独立切片：CI 容量修订
 
-从干净基线 `77aa69c04ad0dd625a5d827552335878de993ee7` 建立独立工作副本，
-分支 `feature/agent-scratch-diagnostics-20261105`。原生窗口接口仍不可用时，
-推进基线 Linux Quality `41967541069 / attempt 1` 的失败可观测性。
-历史根因仍 UNKNOWN；当前只读证据无法区分 held-cwd / wait 等待点，也无法
-区分 scratch 创建/复制/关闭错误，关闭失败还可能覆盖此前结果。
+HEAD **`3d8476716ab80f0cec8b8c731a8cde0bcd7601a3`** 已推送
+`feature/agent-scratch-diagnostics-20261105`，**未合入 main**。
+该诊断提交的本机门禁退出 0并回收：2,126 ordinary Rust / 23 ignored、
+14 rustdoc、Python 128 run / 1 skipped，500 个工程输入一致。
+非作者源码、文档/证据和提交绑定均已批准限定范围，开放 P0/P1/P2/P3=0；
+这些结论不覆盖后续容量修订。诊断设计与原失败见
+[ADR 0102](adr/0102-local-ask-scratch-diagnostics.md)和
+[诊断记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)。
 
-候选正在新增可选的请求级有界诊断及 case/kind 回执，不改变错误优先级、
-请求期限或审核权限；不记录路径、输出或凭据。官方依赖检查从
-`2026-11-05T07:21:53Z` 开始，于 `07:22:09Z` 完成，
-104 条声明/使用通过，无新增 registry 依赖。
-初轮专项已退出 0并回收：77 passed / 1 ignored 的本地 Agent 单元测试，
-原目录控制器和 observer I/O 控制器通过。最后将弃用的 `fetch_update`
-改为 `try_update`，初轮成功不覆盖该修订。诊断断开反例使用相同测试，
-准确因缺少真实 ScratchCreate 事实而失败，原 ScratchFailed 保持；
-源码已恢复且摘要一致。修后 `full-gate-r1` 实际退出 0并回收：
-2,126 ordinary Rust / 23 ignored（含 app 868 / 2 ignored）、14 rustdoc、
-Python 128 run / 1 skipped，严格 Clippy、格式与依赖策略及额外进程控制器通过。
-新增 19 项单元测试全部通过，500 项门禁/修后输入完全相同。
-新非作者 Parfit 的源码复核为 APPROVE_SCOPED_SOURCE，
-开放 P0/P1/P2/P3=0；随后九文档/终态证据复核为
-APPROVE_SCOPED_COMBINED，开放 P0/P1/P2/P3=0。
-reviewer 独立重算输入及日志，没有重跑 Cargo 或原生。
-功能提交、推送与精确三平台 CI 另见本轮 `delivery-readback.json`、
-`current-ci/`；本机批准不能代替这些后续读回。
-设计与状态见[ADR 0102](adr/0102-local-ask-scratch-diagnostics.md)和
-[测试记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)，
-本地证据为 `work/agent-scratch-diagnostics-20261105/`。
+精确 Quality **41994734898 / attempt 1**：macOS success，Linux ENOSPC，
+Windows Python preparation failure，整体 failure。Linux 原日志第 744 行
+报告剩余 70 MB，第 957 行为 `OwnedExecutableWrite / StorageFull / errno 28`；
+只确定本次写入失败，旧 `41967541069` 的原因仍 **UNKNOWN**。
+Windows 首次失败未进入 Cargo；原提交的单 job 重跑已 **success**，
+attempt 2 整体仍 **failure**。Linux/macOS 的起止时间、全部步骤及原始日志
+均与首次相同，属于继承结果；不因新 job ID / `run_attempt=2` 重复计数。
+原始失败保留在 `current-ci/`，重跑单列 `current-ci-windows-r2/`。
 
-原生分屏另在 `feature/native-pane-layout-20261105` 冻结：修后 r4 门禁和源码
-复审通过，新包 `5ce34862…` 的窗口读取返回 Mac locked，无新原生证据；
-应用及自有夹具已清理，包和 503 项输入保留在其工作副本。
-本次用户再次通知解锁后，清单读取及重建 CUA 后读取仍返回相同错误；
-没有启动新应用或容器，不能判断设备实际锁定。读回保存在本轮
-`desktop-retry-readback.json`。
-该候选及导航候选均未导入本分支，不用本分支构建补记旧包验收。
+六文件未提交修订：每个串行 fixture 显式关闭，下一 fixture 断言前一 root
+不存在；非 workspace 依赖 dev `debug=0`、构建缓存新分代；
+`check.py` 在各命令前后记录数值容量。原断言、期限和四线程入口保持。
+同一新断言 helper 的寿命对照 **exit 101 → 0**，两次均早于 profile 修改。
+新依赖 freshness 104 条通过、exit 0；Python 三项专项通过，
+父执行会话 `73042` 已 exit 0。
+新 profile **`ci-capacity/full-gate-r1` 已 exit 0并回收**，外层会话 `77447`：
+2,126 ordinary Rust / 23 ignored、14 rustdoc、Python **131 run / 1 skipped**，
+**506 个工程输入前后一致**。全仓及后续专项夹具程序分别测得
+**10,078,320 / 9,921,664 字节**，不代表完整 target 或远端容量收益。
+Nash 六文件源码复核 **APPROVE_SCOPED_SOURCE，开放 P0/P1/P2/P3=0**；
+Nash `combined-r1.md` 随后批准 **APPROVE_SCOPED_COMBINED**，开放
+P0/P1/P2/P3=0，原文档 P3 已关闭；新提交绑定及精确 CI 仍 **PENDING**。
+详见[ADR 0103](adr/0103-ci-storage-capacity.md)和
+[容量记录](testing/records/2026-11-05-ci-storage-capacity.md)。
+本地证据根为 `work/agent-scratch-diagnostics-20261105/`。
+
+导航与分屏按各自冻结输入及回执独立验收，未导入本分支；
+旧 Mac locked 失败及 `desktop-retry-readback.json` 保持。
+另树修后分屏包已有新的限定原生矩阵证据、尚待最终复核，不计入本容量切片。
 
 ## 已集成：布局领域模型与持久化
 
@@ -74,7 +77,7 @@ macOS/Linux 真实 OpenSSH 各 11 passed，Windows 按条件 skipped。
 受监督启动 r2a 包，但访问窗口再次返回 Mac locked。没有 AX、截图、
 交互或显式 SSH 连接；健康的空审计不能当作导航零输入通过。
 应用退出 -15、监督器退出 0并均已回收，自有容器/网络/私有目录/镜像已清理，
-后续接口清单查询仍返回同一错误。实际回执在导航副本
+该轮收尾的接口清单查询仍返回同一错误。实际回执在导航副本
 `work/navigation-keyboard-20261105/native/r2-launch-blocked-readback.json`，
 不把工具反馈当作用户未解锁的证明。
 导航包、源码和 499 输入保持冻结，未导入本核心提交。后续原生可用时回到该工作
@@ -364,10 +367,11 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 - `keelshell-app` 为 UI，`keelshell-core` 为领域/存储，`keelshell-session` 为传输，`keelshell-ai` 为 AI；阻塞 I/O 离开 UI 线程。公共 API 写 rustdoc，使用 typed errors，测试外避免 panic，行为测试使用隔离临时数据与有界等待。
 - 直接 registry 要求统一 `x.y`，应用 `Cargo.lock` 保留 patch；**不 pin Rust 工具链**，使用开发环境或 CI 支持的版本。历史 Rust 1.99.1 是执行环境记录，不是项目限制。
 - 每轮开发检查官方最新稳定、非撤回直接依赖并保存新证据：`python3 scripts/check_dependencies.py --json-report <新报告.json>`，或标准门禁前执行 `python3 scripts/check.py --fresh-dependencies`；离线标准检查继续可用。
-- 最新官方 freshness 开始于 **2026-11-05T00:01:57Z**（上海 08:01:57）：
-  104 条声明/使用通过，报告为 `work/net-native-20261105/dependency-freshness.json`，
-  检查进程退出 0并回收。本轮没有新增或升级依赖；知识轮原报告及首次目录缺失
-  失败亦保留。早前升级和工程来源见[依赖记录](testing/records/2026-11-04-dependencies.md)
+- 当前容量切片的官方 freshness 于 **2026-11-05 17:01:46–17:02:04
+  Asia/Shanghai** 执行：104 条声明/使用通过，检查进程退出 0并回收。
+  报告为 `work/agent-scratch-diagnostics-20261105/ci-capacity/dependency-freshness.json`。
+  本轮没有新增或升级依赖；此前报告及首次目录缺失失败保持。
+  早前升级和工程来源见[依赖记录](testing/records/2026-11-04-dependencies.md)
   及[工程来源复核](research/2026-11-04-engineering-refresh.md)。
 - 不引入私有 Git 依赖、开发者绝对路径、凭据或生产日志。凭据默认临时；显式保存使用 OS 凭据库或经认证、主密码加密的 vault；主密码及明文凭据不写 profile metadata。主机密钥变化必须拒绝连接。
 - 功能提交前完成格式、严格 Clippy、测试、依赖策略、相关原生检查和新的非作者审查；失败证据与未验证范围必须保留。需求/设计/验收分别更新 `docs/product`、`docs/adr`、`docs/testing` 和 `docs/ROADMAP.md`，中英文 README 同步。
@@ -375,10 +379,13 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 
 ## 优先接续顺序
 
-1. 按交付回执核对 NET 功能提交与精确 CI；修后包非作者组合复核、完整本机门禁和三方向原生已通过限定范围。知识上下文与文件滚动轴已合入且精确 CI 成功。继续核对未生效的横向原生输入及接收事件，补最终候选主题×语言×窗口矩阵、精确最小 OS 高度、导航键盘树操作及无障碍证据。浏览优先文件区、连接/主机导航及会话栏已实现，不要重复重做；受控滚轮测试不代替 OS 验收。
-2. 推进知识上下文真实供应商/CLI 验收、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
-3. 补 NET 原生删除、运行中编辑、多实例、真实取消超时和重连 owner 全矩阵；运行状态持久化/恢复单独设计，不从已完成的命名规则元数据管理或正常转发验收推断。
-4. 逐项补三平台桌面、IME/VoiceOver、原生拖放、真实互操作与发布安装验证；按[路线图](ROADMAP.md)继续完整能力目标。文件工作区提交的三平台源码 CI 已通过，保留前次失败，不重复将已闭合源码检查列为待办。
+1. 容量修订的新 profile 完整门禁、回收和 506 项输入绑定已读回，Nash 源码
+   及组合复核通过，原文档 P3 已关闭；接续新提交绑定及精确 CI，仍 PENDING。
+   原提交 Windows 重跑成功不覆盖 Linux 继承失败；导航/分屏按各自冻结输入及回执验收。
+2. 按交付回执核对 NET 功能提交与精确 CI；修后包非作者组合复核、完整本机门禁和三方向原生已通过限定范围。知识上下文与文件滚动轴已合入且精确 CI 成功。继续核对未生效的横向原生输入及接收事件，补最终候选主题×语言×窗口矩阵、精确最小 OS 高度、导航键盘树操作及无障碍证据。浏览优先文件区、连接/主机导航及会话栏已实现，不要重复重做；受控滚轮测试不代替 OS 验收。
+3. 推进知识上下文真实供应商/CLI 验收、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
+4. 补 NET 原生删除、运行中编辑、多实例、真实取消超时和重连 owner 全矩阵；运行状态持久化/恢复单独设计，不从已完成的命名规则元数据管理或正常转发验收推断。
+5. 逐项补三平台桌面、IME/VoiceOver、原生拖放、真实互操作与发布安装验证；按[路线图](ROADMAP.md)继续完整能力目标。文件工作区提交的三平台源码 CI 已通过，保留前次失败，不重复将已闭合源码检查列为待办。
 
 ## 资源与证据接续
 
