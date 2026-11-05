@@ -92,6 +92,7 @@ struct ReturnFocus {
     // The rail is absent from the modal's rendered focus tree. Retain its
     // origin before unmounting so a later resize cannot redirect typing to SSH.
     navigation: Option<NavigationPanel>,
+    pane_divider: Option<keelshell_core::PaneNodeId>,
 }
 
 /// Registers capture before the child paints its pointer handlers. Div capture
@@ -200,6 +201,11 @@ pub(super) struct ModalScope {
 }
 
 impl Workspace {
+    /// Bind retained pane gestures to the exact foreground input scope.
+    pub(super) fn pane_input_generation(&self) -> u64 {
+        self.modal_scope.generation
+    }
+
     fn surface_challenge(&self) -> Option<uuid::Uuid> {
         self.keyboard_interactive
             .as_ref()
@@ -288,6 +294,11 @@ impl Workspace {
                 .navigation_focus
                 .contains_focused(window, cx)
                 .then_some(self.navigation_panel),
+            pane_divider: self
+                .pane_divider_focus
+                .borrow()
+                .iter()
+                .find_map(|(id, focus)| focus.is_focused(window).then_some(*id)),
         });
     }
 
@@ -382,9 +393,11 @@ impl Workspace {
             }
             if let Some(target) = restore {
                 if next.is_none()
-                    && target.navigation.is_some_and(|panel| {
+                    && (target.navigation.is_some_and(|panel| {
                         !view.navigation_visible(window) || view.navigation_panel != panel
-                    })
+                    }) || target
+                        .pane_divider
+                        .is_some_and(|id| !view.pane_divider_visible(id)))
                 {
                     view.surface_focus.focus(window, cx);
                 } else {

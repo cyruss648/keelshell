@@ -1,11 +1,13 @@
 # 文档索引
 
+- [原生分屏工作区接入](testing/records/2026-11-05-native-pane-layout.md)与[ADR 0101](adr/0101-native-session-pane-ownership.md)：修后r2包的四通道、两轴拖动、三个分隔条键盘、工具选择、聚焦/合并/关闭和保存已有35对原始捕获；新的非作者组合复核通过，Hallmark finish 对所检子集为 ship。r1及窗口失败历史、紧凑OS和完整矩阵缺口保留。
+
 继续开发先读[开发交接](HANDOFF.md)，再按[路线与状态](ROADMAP.md)选择切片。
 较早的交接全文保存在[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)；
 其中的“当前”与暂停指令只代表对应历史时点。
 
 - [主题与外观](product/THEME_PREFERENCES.md)：三套内置主题、明暗模式及扩展方式。
-- [工作区布局与恢复](product/WORKSPACE_LAYOUT.md)、[ADR 0100](adr/0100-bounded-inert-workspace-layout.md)与[验证记录](testing/records/2026-11-05-pane-layout-model.md)：有界布局领域模型和可选持久化；原生分隔条、多窗口与恢复入口仍待接入。
+- [工作区布局与恢复](product/WORKSPACE_LAYOUT.md)、[ADR 0100](adr/0100-bounded-inert-workspace-layout.md)与[模型记录](testing/records/2026-11-05-pane-layout-model.md)：已合入有界领域模型和可选持久化；原生候选及限定macOS结果见上项，紧凑OS/完整矩阵仍OPEN，多窗口与恢复入口尚未实现。
 - [文件工作区布局](product/FILES_WORKSPACE.md)、[ADR 0097](adr/0097-file-workbench-disclosures.md)与[验证记录](testing/records/2026-11-05-native-file-workbench.md)：浏览优先、按需展开的设置、真实传输与渲染栈诊断。
 - [原生工作区](product/NATIVE_WORKBENCH.md)、[ADR 0096](adr/0096-native-workbench-navigation.md)与[本轮记录](testing/records/2026-11-05-native-workbench.md)：连接/主机信息侧栏、独立会话栏、紧凑命令区及其实际验收边界。
 - [原生主题设计](design/NATIVE_THEMES.md)与[ADR 0095](adr/0095-extensible-native-theme-families.md)：目录、语义 token、组件适配与旧配置兼容。

@@ -37,6 +37,8 @@ mod modals;
 mod navigation;
 use navigation::NavigationPanel;
 mod openssh_review;
+mod pane_sessions;
+mod pane_view;
 mod profile_sync;
 mod reconnect;
 mod reconnect_editor;
@@ -280,13 +282,28 @@ enum AfterSave {
     },
 }
 
+struct NewRemoteTab {
+    session: SshSession,
+    title: String,
+    host: String,
+    connection_id: Option<uuid::Uuid>,
+    split: Option<(EntityId, keelshell_core::SplitAxis)>,
+}
+
 pub struct Workspace {
     store: Arc<StateStore>,
     state: AppState,
     tabs: Vec<Entity<TerminalView>>,
     active: usize,
-    split: bool,
-    split_pair: Option<(EntityId, EntityId)>,
+    session_panes: pane_sessions::SessionPanes<EntityId>,
+    pane_bounds:
+        std::rc::Rc<std::cell::RefCell<HashMap<keelshell_core::PaneNodeId, Bounds<Pixels>>>>,
+    pane_canvas_size: std::rc::Rc<std::cell::Cell<Size<Pixels>>>,
+    pane_divider_focus: std::cell::RefCell<HashMap<keelshell_core::PaneNodeId, FocusHandle>>,
+    pane_generation: u64,
+    pane_tab_ids: HashMap<EntityId, uuid::Uuid>,
+    layout_window_id: uuid::Uuid,
+    pane_zoomed: bool,
     search: Entity<InputState>,
     command: Entity<TextareaState>,
     form: Option<ConnectionForm>,
@@ -741,13 +758,23 @@ impl Workspace {
                 cx.notify();
             });
         let update_observer = cx.observe(&update_service, |_, _, cx| cx.notify());
+        let layout_window_id = state
+            .workspace_layout
+            .as_ref()
+            .map_or_else(uuid::Uuid::new_v4, |layout| layout.active_window);
         Self {
             store,
             state,
             tabs: Vec::new(),
             active: 0,
-            split: false,
-            split_pair: None,
+            session_panes: pane_sessions::SessionPanes::new(),
+            pane_bounds: Default::default(),
+            pane_canvas_size: Default::default(),
+            pane_divider_focus: Default::default(),
+            pane_generation: 0,
+            pane_tab_ids: HashMap::new(),
+            layout_window_id,
+            pane_zoomed: false,
             search,
             command,
             form: None,
@@ -888,55 +915,78 @@ impl Workspace {
             self.cancel_connect_route(window, cx);
             return;
         }
-        if self.active < self.tabs.len() {
-            self.cancel_remote_completion(cx);
-            let terminal = self.tabs.remove(self.active);
-            let retired_session_id = format!("{:?}", terminal.entity_id());
-            self.assistant.update(cx, |panel, cx| {
-                panel.invalidate_session(&retired_session_id, cx)
-            });
-            self.forget_reconnect(terminal.entity_id(), window, cx);
-            self.remote_sessions.remove(&terminal.entity_id());
-            self.tunnel_subscriptions.remove(&terminal.entity_id());
-            self.knowledge_source_ids.remove(&terminal.entity_id());
-            self.knowledge_source_revisions
-                .remove(&terminal.entity_id());
-            // Retiring the authoritative mapping must revoke the backend token
-            // in this foreground turn, before a paused write can resume.
-            self.maintain_agent(cx);
-            self.command_histories.remove(&terminal.entity_id());
-            self.remote_hosts.remove(&terminal.entity_id());
-            self.remote_connection_ids.remove(&terminal.entity_id());
-            self.panels.remove(&terminal.entity_id());
-            self.retire_tunnel_owners(cx);
-            self.terminal_observers.remove(&terminal.entity_id());
-            self.terminal_focus.remove(&terminal.entity_id());
-            // Retirement revokes background MCP leases in this same UI turn.
-            // Closing a shell channel does not close its shared SFTP connection.
-            self.maintain_mcp(cx);
-            self.maintain_command_workflows(cx);
-            self.active = self.active.min(self.tabs.len().saturating_sub(1));
-            if self.tabs.len() < 2
-                || self.split_pair.is_some_and(|(first, second)| {
-                    first == terminal.entity_id() || second == terminal.entity_id()
-                })
-            {
-                self.split = false;
-                self.split_pair = None;
-            }
+        if let Some(tab) = self.tabs.get(self.active) {
+            self.close_session_tab(tab.entity_id(), window, cx);
+        } else {
+            self.focus_current_surface(window, cx);
         }
+    }
+
+    fn close_session_tab(&mut self, id: EntityId, window: &mut Window, cx: &mut Context<Self>) {
+        if self.active_modal().is_some() || self.connecting {
+            return;
+        }
+        // A painted close control retains its original entity. Do not select
+        // that target first: closing an inactive tab must retain the user's
+        // active pane, its command review and every other leaf's selection.
+        let Some(index) = self.tabs.iter().position(|tab| tab.entity_id() == id) else {
+            return;
+        };
+        if !self.sync_session_panes() {
+            cx.notify();
+            return;
+        }
+        let next = match self.session_panes.remove(id) {
+            Ok(next) => next,
+            Err(error) => {
+                self.status =
+                    Message::detail("无法关闭会话面板", "Cannot close session pane", error);
+                cx.notify();
+                return;
+            }
+        };
+        self.cancel_remote_completion(cx);
+        let terminal = self.tabs.remove(index);
+        self.pane_tab_ids.remove(&terminal.entity_id());
+        self.pane_generation = self.pane_generation.wrapping_add(1);
+        let retired_session_id = format!("{:?}", terminal.entity_id());
+        self.assistant.update(cx, |panel, cx| {
+            panel.invalidate_session(&retired_session_id, cx)
+        });
+        self.forget_reconnect(terminal.entity_id(), window, cx);
+        self.remote_sessions.remove(&terminal.entity_id());
+        self.tunnel_subscriptions.remove(&terminal.entity_id());
+        self.knowledge_source_ids.remove(&terminal.entity_id());
+        self.knowledge_source_revisions
+            .remove(&terminal.entity_id());
+        // Retiring the authoritative mapping must revoke the backend token
+        // in this foreground turn, before a paused write can resume.
+        self.maintain_agent(cx);
+        self.command_histories.remove(&terminal.entity_id());
+        self.remote_hosts.remove(&terminal.entity_id());
+        self.remote_connection_ids.remove(&terminal.entity_id());
+        self.panels.remove(&terminal.entity_id());
+        self.retire_tunnel_owners(cx);
+        self.terminal_observers.remove(&terminal.entity_id());
+        self.terminal_focus.remove(&terminal.entity_id());
+        // Retirement revokes background MCP leases in this same UI turn.
+        // Closing a shell channel does not close its shared SFTP connection.
+        self.maintain_mcp(cx);
+        self.maintain_command_workflows(cx);
+        self.active = next
+            .and_then(|id| self.tabs.iter().position(|tab| tab.entity_id() == id))
+            .unwrap_or_else(|| self.active.min(self.tabs.len().saturating_sub(1)));
         self.focus_current_surface(window, cx);
         cx.notify();
     }
-    fn split_remote(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.command_surface_blocked() {
+    fn split_remote(
+        &mut self,
+        axis: keelshell_core::SplitAxis,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.active_modal().is_some() || self.connecting || !self.sync_session_panes() {
             self.focus_current_surface(window, cx);
-            return;
-        }
-        if self.split_companion().is_some() {
-            self.split_pair = None;
-            self.split = false;
-            cx.notify();
             return;
         }
         let Some(tab) = self.tabs.get(self.active) else {
@@ -949,45 +999,36 @@ impl Workspace {
         if !tab.read(cx).is_open() {
             return;
         }
+        if !self.session_panes.can_split(id) || self.tabs.len() >= keelshell_core::MAX_LAYOUT_TABS {
+            self.status = Message::new("已达到分屏上限。", "The pane limit has been reached.");
+            cx.notify();
+            return;
+        }
         let binding = self.reconnect_bindings.get(&id).cloned();
         let title = tab.read(cx).title.clone();
         let host = self.remote_hosts.get(&id).cloned().unwrap_or_default();
         let connection_id = self.remote_connection_ids.get(&id).copied();
-        let original = self.active;
-        self.add_remote_tab(session, title, host, connection_id, window, cx);
-        if let (Some(binding), Some(peer)) = (binding, self.tabs.get(self.active)) {
-            self.reconnect_bindings
-                .insert(peer.entity_id(), binding.for_split());
+        let Some(peer) = self.add_remote_tab(
+            NewRemoteTab {
+                session,
+                title,
+                host,
+                connection_id,
+                split: Some((id, axis)),
+            },
+            window,
+            cx,
+        ) else {
+            return;
+        };
+        if let Some(binding) = binding {
+            self.reconnect_bindings.insert(peer, binding.for_split());
         }
-        self.split_pair = self
-            .tabs
-            .get(self.active)
-            .map(|peer| (id, peer.entity_id()));
-        self.active = original;
-        self.split = true;
         // The command bar and keyboard focus share the primary pane target.
         if let Some(primary) = self.tabs.get(self.active) {
             primary.read(cx).focus_handle(cx).focus(window, cx);
         }
         cx.notify();
-    }
-    fn split_companion(&self) -> Option<Entity<TerminalView>> {
-        if !self.split {
-            return None;
-        }
-        let active = self.tabs.get(self.active)?.entity_id();
-        let (first, second) = self.split_pair?;
-        let companion = if active == first {
-            second
-        } else if active == second {
-            first
-        } else {
-            return None;
-        };
-        self.tabs
-            .iter()
-            .find(|tab| tab.entity_id() == companion)
-            .cloned()
     }
     fn watch_terminal(
         &mut self,
@@ -1018,31 +1059,44 @@ impl Workspace {
                         view.cancel_remote_completion(cx);
                     }
                     view.active = index;
+                    view.sync_session_panes();
                     cx.notify();
                 }
             }),
         );
     }
+    #[cfg(test)]
     fn displayed_terminals(&self) -> Vec<Entity<TerminalView>> {
-        if self.split_companion().is_some()
-            && let Some((first, second)) = self.split_pair
-        {
-            return [first, second]
-                .iter()
-                .filter_map(|id| self.tabs.iter().find(|tab| tab.entity_id() == *id).cloned())
-                .collect();
-        }
-        self.tabs.get(self.active).cloned().into_iter().collect()
+        self.session_panes
+            .displayed_sessions()
+            .into_iter()
+            .filter_map(|id| self.tabs.iter().find(|tab| tab.entity_id() == id).cloned())
+            .collect()
     }
     fn add_remote_tab(
         &mut self,
-        session: SshSession,
-        title: String,
-        host: String,
-        connection_id: Option<uuid::Uuid>,
+        request: NewRemoteTab,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) {
+    ) -> Option<EntityId> {
+        let NewRemoteTab {
+            session,
+            title,
+            host,
+            connection_id,
+            split: pane_split,
+        } = request;
+        if !self.sync_session_panes()
+            || self.tabs.len() >= keelshell_core::MAX_LAYOUT_TABS
+            || pane_split.is_none() && !self.session_panes.can_add()
+        {
+            self.status = Message::new(
+                "当前面板的会话数量已达上限。",
+                "This pane has reached its session limit.",
+            );
+            cx.notify();
+            return None;
+        }
         let terminal = crate::ssh_bridge::open(
             session.clone(),
             self.runtime.clone(),
@@ -1052,6 +1106,26 @@ impl Workspace {
             cx,
         );
         let id = terminal.entity_id();
+        let mut panes = self.session_panes.clone();
+        let placement = if let Some((primary, axis)) = pane_split {
+            panes.split(primary, id, axis).map(|_| ())
+        } else {
+            let ids: Vec<_> = self
+                .tabs
+                .iter()
+                .map(Entity::entity_id)
+                .chain([id])
+                .collect();
+            panes.reconcile(&ids, Some(id))
+        };
+        if let Err(error) = placement {
+            self.status = Message::detail("无法添加会话面板", "Cannot add session pane", error);
+            cx.notify();
+            return None;
+        }
+        self.session_panes = panes;
+        self.pane_tab_ids.insert(id, uuid::Uuid::new_v4());
+        self.pane_generation = self.pane_generation.wrapping_add(1);
         self.remote_hosts.insert(id, host.clone());
         if let Some(connection_id) = connection_id {
             self.remote_connection_ids.insert(id, connection_id);
@@ -1074,11 +1148,20 @@ impl Workspace {
             },
         );
         self.tabs.push(terminal);
-        self.active = self.tabs.len() - 1;
+        self.active = self
+            .session_panes
+            .active_session()
+            .and_then(|active| self.tabs.iter().position(|tab| tab.entity_id() == active))
+            .unwrap_or(self.tabs.len() - 1);
         self.show_connections = false;
-        self.visible_panel = None;
-        self.toggle_panel(ToolPanel::Files, window, cx);
+        // Splitting retains the primary target and its chosen tool surface.
+        // Only a newly connected session starts in the default Files view.
+        if pane_split.is_none() {
+            self.visible_panel = None;
+            self.toggle_panel(ToolPanel::Files, window, cx);
+        }
         self.focus_current_surface(window, cx);
+        Some(id)
     }
     fn on_appearance_changed(
         &mut self,

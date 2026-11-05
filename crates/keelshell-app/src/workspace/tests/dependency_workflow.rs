@@ -652,7 +652,7 @@ fn dependency_workflow_workspace_rejects_same_endpoint_session_replacement_and_b
             view.open_connections(&crate::workspace::OpenConnections, window, cx);
             view.open_ai_settings(window, cx);
             view.open_vault_settings(window, cx);
-            view.split_remote(window, cx);
+            view.split_remote(keelshell_core::SplitAxis::Horizontal, window, cx);
             view.toggle_assistant(&crate::workspace::ToggleAssistant, window, cx);
             assert!(
                 view.show_workflow

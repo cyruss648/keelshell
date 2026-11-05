@@ -67,24 +67,19 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if self.active_modal().is_some() || self.connecting {
+            return;
+        }
         let Some(tab) = self.tabs.get(index).cloned() else {
             return;
         };
         self.cancel_remote_completion(cx);
         self.active = index;
+        self.sync_session_panes();
+        self.session_panes.select(tab.entity_id());
         self.session_tab_scroll.scroll_to_item(index);
         tab.read(cx).focus_handle(cx).focus(window, cx);
         cx.notify();
-    }
-
-    fn close_session_tab(&mut self, id: EntityId, window: &mut Window, cx: &mut Context<Self>) {
-        // A painted control can survive a foreground list change. Resolve its
-        // original entity, so an old index cannot close a replacement session.
-        let Some(index) = self.tabs.iter().position(|tab| tab.entity_id() == id) else {
-            return;
-        };
-        self.active = index;
-        self.close_tab(&CloseTab, window, cx);
     }
 
     fn empty_workspace_body(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
@@ -473,36 +468,6 @@ impl Workspace {
     }
 
     #[inline(never)]
-    fn terminal_panes(&self, active_id: Option<EntityId>, cx: &mut Context<Self>) -> AnyElement {
-        let visual = crate::design::palette(cx);
-        let mut area = div().size_full().flex().gap(px(1.)).bg(rgb(visual.border));
-        for pane in self.displayed_terminals() {
-            let id = pane.entity_id();
-            area = area.child(
-                div()
-                    .id(("terminal-pane", id))
-                    .test_support()
-                    .flex_1()
-                    .min_w_0()
-                    .h_full()
-                    .flex()
-                    .flex_col()
-                    .p_2()
-                    .bg(rgb(crate::design::terminal_palette(cx).background))
-                    .border_t_2()
-                    .border_color(rgb(if Some(id) == active_id {
-                        visual.accent
-                    } else {
-                        crate::design::terminal_palette(cx).background
-                    }))
-                    .child(self.reconnect_banner(id, cx))
-                    .child(div().flex_1().min_h_0().child(pane)),
-            );
-        }
-        area.into_any_element()
-    }
-
-    #[inline(never)]
     fn workspace_tool_tabs(
         &self,
         active_id: Option<EntityId>,
@@ -579,8 +544,20 @@ impl Workspace {
         compact_toolbar: bool,
         active_id: Option<EntityId>,
         cx: &mut Context<Self>,
-    ) -> [AnyElement; 5] {
+    ) -> [AnyElement; 9] {
         let visual = crate::design::palette(cx);
+        let generation = self.pane_generation;
+        let can_split = !self.connecting
+            && self.tabs.len() < keelshell_core::MAX_LAYOUT_TABS
+            && active_id.is_some_and(|id| {
+                self.session_panes.can_split(id)
+                    && self.remote_sessions.contains_key(&id)
+                    && self
+                        .tabs
+                        .iter()
+                        .any(|tab| tab.entity_id() == id && tab.read(cx).is_open())
+            });
+        let active_pane = self.session_panes.active_pane();
         [
             Button::new("toggle-navigation")
                 .ghost()
@@ -633,14 +610,112 @@ impl Workspace {
                 .icon(IconName::Columns2)
                 .ghost()
                 .compact()
-                .accessibility_label(t(cx, "分屏", "Split"))
-                .localized_tooltip("分屏", "Split")
+                .accessibility_label(t(
+                    cx,
+                    "左右分屏当前 SSH 会话",
+                    "Split current SSH session left and right",
+                ))
+                .localized_tooltip(
+                    "左右分屏当前 SSH 会话",
+                    "Split current SSH session left and right",
+                )
                 .when(!compact_toolbar, |button| {
-                    button.label(t(cx, "分屏", "Split"))
+                    button.label(t(cx, "左右分屏", "Split left/right"))
                 })
-                .disabled(active_id.is_none())
-                .on_click(cx.listener(|view, _, window, cx| view.split_remote(window, cx)))
+                .disabled(!can_split)
+                .on_click(cx.listener(move |view, _, window, cx| {
+                    if view.pane_generation == generation
+                        && view.tabs.get(view.active).map(Entity::entity_id) == active_id
+                    {
+                        view.split_remote(keelshell_core::SplitAxis::Horizontal, window, cx);
+                    }
+                }))
                 .map(|button| self.retain_modal_button("split-session", button, cx))
+                .into_any_element(),
+            Button::new("split-session-vertical")
+                .ghost()
+                .compact()
+                .icon(IconName::Rows2)
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "上下分屏", "Split top/bottom"))
+                })
+                .accessibility_label(t(
+                    cx,
+                    "上下分屏当前 SSH 会话",
+                    "Split current SSH session top and bottom",
+                ))
+                .localized_tooltip(
+                    "上下分屏当前 SSH 会话",
+                    "Split current SSH session top and bottom",
+                )
+                .disabled(!can_split)
+                .on_click(cx.listener(move |view, _, window, cx| {
+                    if view.pane_generation == generation
+                        && view.tabs.get(view.active).map(Entity::entity_id) == active_id
+                    {
+                        view.split_remote(keelshell_core::SplitAxis::Vertical, window, cx);
+                    }
+                }))
+                .map(|button| self.retain_modal_button("split-session-vertical", button, cx))
+                .into_any_element(),
+            Button::new("collapse-pane")
+                .ghost()
+                .compact()
+                .icon(IconName::PanelsTopLeft)
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "合并", "Merge"))
+                })
+                .accessibility_label(t(
+                    cx,
+                    "合并活动面板并保留会话",
+                    "Merge active pane and keep its sessions",
+                ))
+                .localized_tooltip(
+                    "合并活动面板并保留会话",
+                    "Merge active pane and keep its sessions",
+                )
+                .disabled(self.session_panes.layout().nodes.len() == 1)
+                .on_click(cx.listener(move |view, _, window, cx| {
+                    if view.pane_generation == generation
+                        && view.session_panes.active_pane() == active_pane
+                    {
+                        view.collapse_active_pane(window, cx);
+                    }
+                }))
+                .map(|button| self.retain_modal_button("collapse-pane", button, cx))
+                .into_any_element(),
+            Button::new("zoom-pane")
+                .ghost()
+                .compact()
+                .icon(IconName::Maximize2)
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "聚焦", "Focus"))
+                })
+                .accessibility_label(t(cx, "仅显示活动面板", "Show only the active pane"))
+                .localized_tooltip("切换活动面板聚焦显示", "Toggle focus on the active pane")
+                .selected(self.pane_zoomed)
+                .toggled(self.pane_zoomed)
+                .disabled(self.session_panes.layout().nodes.len() == 1)
+                .on_click(cx.listener(|view, _, _, cx| {
+                    if view.active_modal().is_none() && !view.connecting {
+                        view.pane_zoomed = !view.pane_zoomed;
+                        cx.notify();
+                    }
+                }))
+                .map(|button| self.retain_modal_button("zoom-pane", button, cx))
+                .into_any_element(),
+            Button::new("save-pane-layout")
+                .ghost()
+                .compact()
+                .icon(IconName::Save)
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "保存布局", "Save layout"))
+                })
+                .accessibility_label(t(cx, "保存当前窗口布局", "Save current window layout"))
+                .localized_tooltip("保存当前窗口布局", "Save current window layout")
+                .disabled(self.saving || self.state_reloading || self.connecting)
+                .on_click(cx.listener(|view, _, window, cx| view.save_pane_layout(window, cx)))
+                .map(|button| self.retain_modal_button("save-pane-layout", button, cx))
                 .into_any_element(),
             Button::new("toggle-assistant")
                 .icon(IconName::Sparkles)
@@ -1022,6 +1097,7 @@ impl Workspace {
     // return in one monolithic debug frame still reserves all its temporaries.
     #[inline(never)]
     fn render_workspace(&mut self, window: &mut Window, cx: &mut Context<Self>) -> AnyElement {
+        self.sync_session_panes();
         let visual = crate::design::palette(cx);
         let viewport = window.viewport_size();
         let assistant_width = px(380.).min(viewport.width * 0.42);
@@ -1096,7 +1172,7 @@ impl Workspace {
                 cx,
             )
         } else {
-            self.terminal_panes(active_id, cx)
+            self.native_pane_canvas(window, cx)
         };
         let reviewed_id = self.command_target.or(active_id);
         let stale_command = self

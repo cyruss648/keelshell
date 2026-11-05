@@ -4,6 +4,82 @@
 最新用户要求优先于历史范围；源码、工程测试、受控原生、平台 CI、公开发布和安装分别验收。
 完整旧稿见[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)，其中“当前”、暂停及删除指令只属于当时，不构成新的操作授权。
 
+## 当前候选：原生分屏工作区接入
+
+复用当前受保护工作副本，分支 `feature/native-pane-layout-20261105`，基线
+`77aa69c04ad0dd625a5d827552335878de993ee7`。候选已将领域布局接入原生嵌套分屏、
+逐叶标签、拖动/键盘比例、保留会话的合并、聚焦/紧凑窗口与显式保存。
+重连原位迁移布局身份，旧运行授权继续撤销。重启恢复、多窗口尚未接入。
+工程检查、新非作者复核和实机检查状态见[本轮记录](testing/records/2026-11-05-native-pane-layout.md)，
+设计见[ADR 0101](adr/0101-native-session-pane-ownership.md)。本节为提交前验收快照；
+后续提交、推送和精确 CI 由 `work/native-pane-layout-20261105/delivery-readback.json` 记录。
+新依赖检查 34 包/104 条通过；首轮失败均保留。`full-gate-r2` 已退出 0并回收：
+2,152 ordinary / 23 ignored、11 rustdoc、Python 128 run / 1 skipped，503 输入相同。
+非作者首审 HOLD/P2 NP-SR-001：平衡四叶根分隔条缺键盘入口；据此给每个分隔条
+补充 Tab/方向键与 AX。修订先遇到 Kit 焦点观测不支持，改读生产 FocusHandle；
+随后 r6 实际 0/3 可达，在显式句柄上启用 Tab 停靠后 r7 的 47 项专项通过，
+两者测试相同、仅生产 pane_view 不同。父后续补查确认直接及弹窗内缩窗的隐藏
+分隔条焦点回退缺失，已修订，r8 的 49 项专项通过；后两场景同测试修前失败/
+修后通过，503 输入仅三个生产文件不同。原失败/独立 HOLD 保留。
+修后 `full-gate-r3` 已退出 0并回收：2,155 ordinary/23 ignored（app916/2ignored）、
+11 rustdoc、Python128run/1skip，503输入保持。Herschel再审
+APPROVE_SCOPED_SOURCE，开放P0/P1/P2/P3=0，原P2在所审源码范围关闭。
+原生接口先仍报 Mac locked，之后重置会话后应用清单成功；不把工具反馈当作
+设备锁定状态证明，也不把清单成功当作窗口验收。随后首包 `0855f7b4…`
+已完成受控 macOS/OpenSSH 四通道分屏、三个分隔条键盘调整、主题/语言切换、
+聚焦恢复、合并/关闭和保存读回；34 对原始 AX/图像保留。所有布局操作后
+raw PTY 仍为 0，显式终端正控才增加 1 字节；监控 exec 拒绝另计。
+应用/监督器退出 0并回收，自有容器/网络/私有目录/镜像已清理。
+首包拖动和紧凑缩窗没有通过；新受控回归已确认单次目标 move 后释放不更新，
+两次 move 正常。已在拖动启动时应用首个位置，并修复分屏覆盖原工具区选择的既有 P3；
+最终测试修前51/1、修后52项通过，503输入仅pane_view生产文件不同。
+`full-gate-r4` 已退出0并回收：2,158 ordinary/23ignored（app919/2ignored）、
+11rustdoc、Python128run/1skip，503输入保持。Herschel source-r3
+APPROVE_SCOPED_SOURCE，开放P0/P1/P2/P3=0，关闭两项修订的源码/受控回归范围。
+新包`5ce34862…`构建退出0，503门禁/构建/尝试后输入和另41个assets保持。
+run `904d404d…` 于06:54:01Z受监督启动，但完整路径窗口读取及重置后的清单
+再次返回Mac locked，没有AX/截图/交互或SSH连接；不能判断设备实际锁定。
+应用退出-15、supervisor退出0并均已回收，容器/网络/私有目录/自有镜像已清理，
+新包保留。详见`native/r2-launch-blocked-readback.json`；空审计不算原生通过。
+原首包结果不回填。导航候选和原r2a包仍冻结，不能混用原生证据；
+后续独立运行新增结果如下，提交交付另按上述回执核对。
+限定交接快照复核`independent-review/handoff-r4.md`为APPROVE_SCOPED_HANDOFF，
+开放P0/P1/P2/P3=0；只认可07:06:19Z前核对的旧快照，不签新增r2原生或finish。
+
+修后同一包在独立 run **`acceb50f1da74d12bf027efec66166a4`** 于
+**09:12:02Z** 启动，35 对原始 AX/JPEG 均为 **2880×1866**。
+分屏保留收起 Files、Commands、Tunnels；根/左上下拖动分别达到 58.47%/62.18%，
+随后从导航搜索框 Tab 到三个分隔条，方向键得到 63.47%/57.18%/50%，
+错误轴按键不变。09 半尺寸坐标失败及12/13仍在草稿内的键盘尝试保留；
+13 的人工 Tab 加入两个尾空格，后期草稿相等以此为基准。
+初始霜白浅色中文、曜石深色中文、雾紫浅色中英文，聚焦/还原、合并、标签切换、
+仅关闭第四会话及两次保存均有原件。27/28 缩窗未生效，紧凑 OS 几何仍 OPEN。
+A/fixture 四个 shell 在合并后保持原身份，显式关闭后剩原三个；B 未连接。
+正控前 raw PTY 为0，35显式首终端输入 `x`（未Enter）后才增1字节；
+监控 exec 拒绝另计，正控前后为1088/456960、1132/475440次/字节。
+没有 `shell_closed` 事件；最终审计 raw PTY 1、live 0。
+保存 JSON 的键为 `layout`，四叶比例6347/5718/5000，UUID/连接引用保持；
+单叶保存的活动标签为 `original_tabs[1]`，之后才选首会话正控，未再次保存。
+应用/监督器退出0并回收，exec35928已回收；09:26:46Z自有容器/网络/私有目录
+清理，09:28:09Z自有镜像清理，共享base保留。
+父已运行 `native/verify-r2.py` 退出0，`native/verification-r2.json`
+核验于 **09:35:23.521207Z**：503门禁/构建/当前输入相同，程序仍为
+`5ce34862d2c8dffc40828291d4e6f05039888fcd4f3d672ca643b6a0e17039b8`；
+41 assets另行绑定。详见[修后原生记录](testing/records/2026-11-05-native-pane-layout.md#修后包独立-macos-原生运行r2)。
+新非作者 `independent-review/combined-r5.md` 于 **10:04:21Z** 完成最终核对：
+**APPROVE_SCOPED_COMBINED，开放 P0/P1/P2/P3=0；Hallmark finish 对所检子集为 ship**。
+独立复核覆盖35对原件、七份审计、保存/清理、503工程输入、41assets及11份冻结文档；
+亲自执行315项只读证据断言和10项冻结核对，没有重跑工程测试或原生操作。
+完整主题×明暗×语言×尺寸、IME/VoiceOver、Windows/Linux桌面、
+重启恢复、多窗口及其它未验原生目标仍OPEN，不自行签ship。
+
+原布局模型本地分支已经在复用工作树后删除，未删除受保护主工作副本。
+新证据在 `work/native-pane-layout-20261105/`，以实际终态回执为准。
+基线文档提交 `77aa69c` 的 Quality `41967541069 / attempt 1` 已读回 failure：
+macOS/Windows 成功，Linux 本地 AI 目录进程测试在就绪前报 `ScratchFailed`，
+原因 UNKNOWN；后续 OpenSSH skipped。原始日志及 GET 位于新证据目录的
+`baseline-ci/`，这不改写前一功能提交 `3e2f41f` 的成功结果。
+
 ## 已集成：布局领域模型与持久化
 
 `feature/pane-layout-model-20261105` 从 `967c588803df493d06d42cf96221bd691aba46b9`
@@ -27,7 +103,8 @@ macOS/Linux 真实 OpenSSH 各 11 passed，Windows 按条件 skipped。
 当前实现与验证状态见[本轮记录](testing/records/2026-11-05-pane-layout-model.md)；
 产品边界见[工作区布局](product/WORKSPACE_LAYOUT.md)和
 [ADR 0100](adr/0100-bounded-inert-workspace-layout.md)。
-原生分隔条、多窗口和恢复入口尚未实现，不把纯核心数据能力写成 UI 已完成。
+该已合入切片只提供核心数据能力；原生分隔条及限定 macOS 结果见顶部候选，
+多窗口和恢复入口尚未实现，不把核心提交的批准外推为原生候选批准。
 
 连接树候选仍在原工作副本 `feature/navigation-keyboard-20261105`，本分支不含其
 尚未提交的源码。该候选修订包 `1f180f13…` 已有完整门禁和非作者源码复核，
@@ -326,8 +403,8 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 - `keelshell-app` 为 UI，`keelshell-core` 为领域/存储，`keelshell-session` 为传输，`keelshell-ai` 为 AI；阻塞 I/O 离开 UI 线程。公共 API 写 rustdoc，使用 typed errors，测试外避免 panic，行为测试使用隔离临时数据与有界等待。
 - 直接 registry 要求统一 `x.y`，应用 `Cargo.lock` 保留 patch；**不 pin Rust 工具链**，使用开发环境或 CI 支持的版本。历史 Rust 1.99.1 是执行环境记录，不是项目限制。
 - 每轮开发检查官方最新稳定、非撤回直接依赖并保存新证据：`python3 scripts/check_dependencies.py --json-report <新报告.json>`，或标准门禁前执行 `python3 scripts/check.py --fresh-dependencies`；离线标准检查继续可用。
-- 最新官方 freshness 开始于 **2026-11-05T00:01:57Z**（上海 08:01:57）：
-  104 条声明/使用通过，报告为 `work/net-native-20261105/dependency-freshness.json`，
+- 最新官方 freshness 开始于 **2026-11-05T04:39:02Z**（上海 12:39:02）：
+  34 包、104 条声明/使用通过，报告为 `work/native-pane-layout-20261105/dependency-freshness.json`，
   检查进程退出 0并回收。本轮没有新增或升级依赖；知识轮原报告及首次目录缺失
   失败亦保留。早前升级和工程来源见[依赖记录](testing/records/2026-11-04-dependencies.md)
   及[工程来源复核](research/2026-11-04-engineering-refresh.md)。
@@ -337,10 +414,13 @@ reviewer 复核已有控制日志与源码，没有重新运行 Cargo；临时�
 
 ## 优先接续顺序
 
-1. 按交付回执核对 NET 功能提交与精确 CI；修后包非作者组合复核、完整本机门禁和三方向原生已通过限定范围。知识上下文与文件滚动轴已合入且精确 CI 成功。继续核对未生效的横向原生输入及接收事件，补最终候选主题×语言×窗口矩阵、精确最小 OS 高度、导航键盘树操作及无障碍证据。浏览优先文件区、连接/主机导航及会话栏已实现，不要重复重做；受控滚轮测试不代替 OS 验收。
-2. 推进知识上下文真实供应商/CLI 验收、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
-3. 补 NET 原生删除、运行中编辑、多实例、真实取消超时和重连 owner 全矩阵；运行状态持久化/恢复单独设计，不从已完成的命名规则元数据管理或正常转发验收推断。
-4. 逐项补三平台桌面、IME/VoiceOver、原生拖放、真实互操作与发布安装验证；按[路线图](ROADMAP.md)继续完整能力目标。文件工作区提交的三平台源码 CI 已通过，保留前次失败，不重复将已闭合源码检查列为待办。
+1. 原生分屏 r2 包、35 对原件、七份审计、保存和文档已获新的非作者组合批准。
+   接续精确提交绑定、推送及该提交的三平台 CI；不能沿用基线或其它分支结果。
+   保留 r1、窗口失败和缩窗失败历史，不将导航 499 输入/r2a 包混入本候选。
+2. 按交付回执核对 NET 功能提交与精确 CI；修后包非作者组合复核、完整本机门禁和三方向原生已通过限定范围。知识上下文与文件滚动轴已合入且精确 CI 成功。继续核对未生效的横向原生输入及接收事件，补最终候选主题×语言×窗口矩阵、精确最小 OS 高度、导航键盘树操作及无障碍证据。浏览优先文件区、连接/主机导航及会话栏已实现，不要重复重做；受控滚轮测试不代替 OS 验收。
+3. 推进知识上下文真实供应商/CLI 验收、完整外部客户端流程和 CLI 登录复用；沿用原始会话/来源身份、敏感内容闸门和逐次审核。
+4. 补 NET 原生删除、运行中编辑、多实例、真实取消超时和重连 owner 全矩阵；运行状态持久化/恢复单独设计，不从已完成的命名规则元数据管理或正常转发验收推断。
+5. 逐项补三平台桌面、IME/VoiceOver、原生拖放、真实互操作与发布安装验证；按[路线图](ROADMAP.md)继续完整能力目标。文件工作区提交的三平台源码 CI 已通过，保留前次失败，不重复将已闭合源码检查列为待办。
 
 ## 资源与证据接续
 
@@ -361,6 +441,12 @@ KeelShell 进程。低栈诊断副本、临时目录和独立滚轮源码副本�
 
 以下路径均相对仓库根目录，属于本地忽略证据，不是公开发行产物：
 
+- `work/native-pane-layout-20261105/`：r4 门禁/source-r3、首包 r1 与窗口失败历史；
+  `native/` 的修后包 r2、35 对原件、保存读回和09:35:23Z核验；
+  `preparation/runs/acceb50f1da74d12bf027efec66166a4/` 的审计与退出/清理。
+  `native/b-line-doc-inputs-r2.json` 记录本轮文档作者输入、hash/链接核验和冻结时间，
+  独立 `independent-review/combined-r5.md` 和 `input-hashes-r5.json` 签署该冻结子集；
+  后续审查状态回写、提交绑定与精确 CI 另留回执，不倒签原冻结字节。
 - `work/net-native-20261105/`：旧包三次运行与修后包独立运行、实际 payload、
   原始 AX/JPEG、失败与捕获归属纠正、494 输入及退出/清理回执；
   作者冻结、完整门禁与新非作者审查另存，交付读回按提交记录。

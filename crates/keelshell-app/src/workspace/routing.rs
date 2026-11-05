@@ -167,6 +167,9 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if !self.admit_new_session(cx) {
+            return;
+        }
         if self.connecting || self.saving || self.connect_route.is_some() {
             self.status = Message::new(
                 "请先完成或取消当前连接。",
@@ -212,6 +215,9 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if !self.admit_new_session(cx) {
+            return;
+        }
         if self.connecting || self.saving || self.connect_route.is_some() {
             self.status = Message::new(
                 "请先完成或取消当前连接。",
@@ -711,19 +717,24 @@ impl Workspace {
                                     return;
                                 }
                             } else {
-                                view.add_remote_tab(
-                                    session,
-                                    connection.name.clone(),
-                                    format!(
-                                        "{}@{}:{}",
-                                        connection.username, connection.host, connection.port
-                                    ),
-                                    (!ephemeral).then_some(connection.id),
+                                let Some(terminal) = view.add_remote_tab(
+                                    NewRemoteTab {
+                                        session,
+                                        title: connection.name.clone(),
+                                        host: format!(
+                                            "{}@{}:{}",
+                                            connection.username, connection.host, connection.port
+                                        ),
+                                        connection_id: (!ephemeral).then_some(connection.id),
+                                        split: None,
+                                    },
                                     window,
                                     cx,
-                                );
-                                if !ephemeral && let Some(terminal) = view.tabs.get(view.active) {
-                                    view.bind_remote_tab(terminal.entity_id(), snapshot);
+                                ) else {
+                                    return;
+                                };
+                                if !ephemeral {
+                                    view.bind_remote_tab(terminal, snapshot);
                                 }
                             }
                             view.status = Message::new(

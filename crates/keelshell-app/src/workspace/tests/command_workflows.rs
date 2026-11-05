@@ -623,7 +623,7 @@ fn batch_review_keeps_fixed_actions_visible_and_blocks_other_modal_shortcuts(
                     view.open_connections(&crate::workspace::OpenConnections, window, cx);
                     view.open_ai_settings(window, cx);
                     view.open_vault_settings(window, cx);
-                    view.split_remote(window, cx);
+                    view.split_remote(keelshell_core::SplitAxis::Horizontal, window, cx);
                     view.toggle_assistant(&crate::workspace::ToggleAssistant, window, cx);
                     assert!(view.show_batch);
                     assert!(!view.show_connections);

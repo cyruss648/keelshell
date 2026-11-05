@@ -33,6 +33,7 @@ pub(crate) mod independent_disk_monitor;
 mod knowledge_library;
 pub(crate) mod mirror_sync_combination;
 mod navigation;
+mod pane_layout;
 mod profile_sync;
 pub(crate) mod protocol_diagnostics;
 mod reviewed_agent;
@@ -322,8 +323,8 @@ fn empty_split_and_new_session_never_create_a_fallback_shell(cx: &mut TestAppCon
         window.click("split-session", cx);
         // Also exercise the command defensively, bypassing disabled UI state.
         fixture.workspace.update(cx, |workspace, cx| {
-            workspace.split_remote(window, cx);
-            workspace.split_remote(window, cx);
+            workspace.split_remote(keelshell_core::SplitAxis::Horizontal, window, cx);
+            workspace.split_remote(keelshell_core::SplitAxis::Horizontal, window, cx);
         });
         window.render_frame(cx);
         window.click("new-session", cx);
@@ -333,7 +334,15 @@ fn empty_split_and_new_session_never_create_a_fallback_shell(cx: &mut TestAppCon
         assert!(workspace.remote_sessions.is_empty());
         assert!(workspace.remote_hosts.is_empty());
         assert!(workspace.panels.is_empty());
-        assert!(!workspace.split);
+        assert_eq!(
+            workspace
+                .session_panes
+                .layout()
+                .leaf_ids()
+                .checked("empty layout"),
+            vec![workspace.session_panes.active_pane()]
+        );
+        assert_eq!(workspace.session_panes.active_session(), None);
     })
     .checked("empty split and connection-manager actions");
     cx.run_until_parked();
@@ -567,59 +576,115 @@ async fn language_switch_preserves_profiles_and_unsaved_drafts_after_persistence
 }
 
 #[gpui_kit::test]
-fn split_pair_is_stable_across_unrelated_tabs_and_closure(cx: &mut TestAppContext) {
+fn pane_tabs_preserve_other_leaf_selection_across_switching_and_closure(cx: &mut TestAppContext) {
     let fixture = mount(cx, Vec::new());
+    let panes: Vec<_> = (0..2)
+        .flat_map(|_| attach_remote_panes(&fixture, cx))
+        .collect();
+    let primary = panes[0].terminal.entity_id();
+    let unrelated = panes[1].terminal.entity_id();
+    let peer = panes[2].terminal.entity_id();
     cx.update_window(fixture.window, |_, window, cx| {
-        let tabs: Vec<_> = ["primary", "unrelated host", "peer"]
-            .into_iter()
-            .map(|title| {
-                let (_, output) = std::sync::mpsc::sync_channel(2);
-                let (input, _) = std::sync::mpsc::sync_channel(2);
-                cx.new(|cx| {
-                    crate::terminal::TerminalView::from_transport(
-                        title.into(),
-                        14.,
-                        1000,
-                        output,
-                        input,
-                        Arc::new(std::sync::atomic::AtomicBool::new(false)),
-                        cx,
-                    )
-                })
-            })
-            .collect();
-        let primary = tabs[0].entity_id();
-        let peer = tabs[2].entity_id();
-        fixture.workspace.update(cx, |workspace, cx| {
-            workspace.tabs = tabs;
-            workspace.split = true;
-            workspace.split_pair = Some((primary, peer));
+        let (original, adjacent) = fixture.workspace.update(cx, |workspace, cx| {
+            workspace.tabs = panes[..3]
+                .iter()
+                .map(|pane| pane.terminal.clone())
+                .collect();
             workspace.active = 0;
-            assert_eq!(
-                workspace.split_companion().map(|tab| tab.entity_id()),
-                Some(peer)
-            );
-            workspace.active = 1;
-            assert!(workspace.split_companion().is_none());
-            // Removing another host does not change the selected pair's identity.
-            workspace.close_tab(&super::CloseTab, window, cx);
-            workspace.active = 0;
-            assert_eq!(
-                workspace.split_companion().map(|tab| tab.entity_id()),
-                Some(peer)
-            );
-            workspace.active = 1;
-            assert_eq!(
-                workspace.split_companion().map(|tab| tab.entity_id()),
-                Some(primary)
-            );
-            workspace.close_tab(&super::CloseTab, window, cx);
-            assert!(workspace.split_companion().is_none());
-            assert!(workspace.split_pair.is_none());
-            assert!(!workspace.split);
+            assert!(workspace.sync_session_panes());
+            let original = workspace.session_panes.active_pane();
+            let adjacent = workspace
+                .session_panes
+                .split(primary, peer, keelshell_core::SplitAxis::Horizontal)
+                .checked("split registered peer into a second leaf");
+            cx.notify();
+            (original, adjacent)
         });
+        window.render_frame(cx);
+        window.simulate_next_frame(cx);
+        window.render_frame(cx);
+        assert_eq!(
+            fixture.workspace.read(cx).session_panes.tabs_in(original),
+            &[primary, unrelated]
+        );
+        window.click(("pane-tab", unrelated), cx);
+        let workspace = fixture.workspace.read(cx);
+        assert_eq!(workspace.tabs[workspace.active].entity_id(), unrelated);
+        assert_eq!(
+            workspace.session_panes.selected_in(original),
+            Some(unrelated)
+        );
+        assert_eq!(workspace.session_panes.selected_in(adjacent), Some(peer));
+        assert_eq!(
+            workspace.session_panes.displayed_sessions(),
+            vec![unrelated, peer]
+        );
+        assert!(
+            panes[1]
+                .terminal
+                .read(cx)
+                .focus_handle(cx)
+                .is_focused(window)
+        );
+        assert!(window.find(("terminal-pane", peer)).visible());
+
+        window.click(("close-tab", 1_usize), cx);
+        let workspace = fixture.workspace.read(cx);
+        assert_eq!(workspace.session_panes.tabs_in(original), &[primary]);
+        assert_eq!(workspace.session_panes.tabs_in(adjacent), &[peer]);
+        assert_eq!(
+            workspace.session_panes.displayed_sessions(),
+            vec![primary, peer]
+        );
+        assert_eq!(workspace.session_panes.active_session(), Some(primary));
+        assert!(
+            panes[0]
+                .terminal
+                .read(cx)
+                .focus_handle(cx)
+                .is_focused(window)
+        );
+
+        window.click(("session-tab", 1_usize), cx);
+        assert!(
+            panes[2]
+                .terminal
+                .read(cx)
+                .focus_handle(cx)
+                .is_focused(window)
+        );
+        assert_eq!(
+            fixture
+                .workspace
+                .read(cx)
+                .session_panes
+                .displayed_sessions(),
+            vec![primary, peer]
+        );
+        window.click(("close-tab", 1_usize), cx);
+        let workspace = fixture.workspace.read(cx);
+        assert_eq!(
+            workspace
+                .tabs
+                .iter()
+                .map(Entity::entity_id)
+                .collect::<Vec<_>>(),
+            vec![primary]
+        );
+        assert_eq!(workspace.session_panes.layout().root, original);
+        assert_eq!(workspace.session_panes.displayed_sessions(), vec![primary]);
+        assert_eq!(workspace.session_panes.active_session(), Some(primary));
+        assert!(
+            panes[0]
+                .terminal
+                .read(cx)
+                .focus_handle(cx)
+                .is_focused(window)
+        );
+        assert!(workspace.session_panes.tabs_in(adjacent).is_empty());
     })
-    .checked("keep split bound to its actual remote pane entities");
+    .checked("switch local pane tabs and close sessions without replacing the other leaf");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
 
 struct RemotePane {
@@ -700,11 +765,16 @@ fn split_peer_pointer_focus_routes_capture_and_commands_without_reordering_panes
     let original_bounds = cx
         .update_window(fixture.window, |_, window, cx| {
             fixture.workspace.update(cx, |workspace, cx| {
-                workspace.split = true;
-                workspace.split_pair = Some((left, right));
+                assert!(workspace.sync_session_panes());
+                workspace
+                    .session_panes
+                    .split(left, right, keelshell_core::SplitAxis::Horizontal)
+                    .checked("split the actual registered terminal peer");
                 workspace.show_assistant = true;
                 cx.notify();
             });
+            window.render_frame(cx);
+            window.simulate_next_frame(cx);
             window.render_frame(cx);
             let bounds = [
                 window.find(("terminal-pane", left)).bounds(),
@@ -725,10 +795,28 @@ fn split_peer_pointer_focus_routes_capture_and_commands_without_reordering_panes
         })
         .checked("click the actual right-hand terminal pane");
     cx.run_until_parked();
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
     cx.update_window(fixture.window, |_, window, cx| {
         window.render_frame(cx);
         let workspace = fixture.workspace.read(cx);
         assert_eq!(workspace.tabs[workspace.active].entity_id(), right);
+        assert_eq!(
+            workspace
+                .tabs
+                .iter()
+                .map(Entity::entity_id)
+                .collect::<Vec<_>>(),
+            vec![left, right]
+        );
+        for id in [left, right] {
+            let pane = workspace
+                .session_panes
+                .pane_for(id)
+                .ok_or("registered pane owner")
+                .checked("look up stable pane ownership");
+            assert_eq!(workspace.session_panes.tabs_in(pane), &[id]);
+            assert_eq!(workspace.session_panes.selected_in(pane), Some(id));
+        }
         assert_eq!(
             workspace
                 .displayed_terminals()
@@ -766,6 +854,7 @@ fn split_peer_pointer_focus_routes_capture_and_commands_without_reordering_panes
     fixture.workspace.read_with(cx, |workspace, _| {
         assert_eq!(workspace.command_target, Some(right));
     });
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
     cx.update_window(fixture.window, |_, window, cx| {
         window.click("run-command", cx);
     })
@@ -807,6 +896,7 @@ fn split_peer_pointer_focus_routes_capture_and_commands_without_reordering_panes
         assert_eq!(workspace.command.read(cx).value(), "printf focused-right");
         assert_eq!(workspace.command_target, Some(right));
     });
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
 
 #[gpui_kit::test]

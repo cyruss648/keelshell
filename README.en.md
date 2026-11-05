@@ -40,14 +40,14 @@ The [native workspace](docs/product/NATIVE_WORKBENCH.md) includes a connections 
 
 The [file workspace](docs/product/FILES_WORKSPACE.md) gives browsing priority with two file lists and a dedicated path row. Vertical input browses file rows; horizontal input reveals remote columns. File actions and transfer settings expand on demand; batch upload/download and the queue remain accessible, preserving drafts and review rules across switches.
 
-[Layout restoration](docs/product/WORKSPACE_LAYOUT.md) is at the bounded domain-model and configuration-persistence stage. Nested splits, draggable ratios, multiple windows and startup restoration are not yet connected to the native UI; the current interface retains tabs and paired splits.
+[Workspace layout](docs/product/WORKSPACE_LAYOUT.md) has a bounded domain model and configuration persistence. The native candidate adds nested horizontal/vertical splits, pointer and keyboard ratio controls, per-pane tabs, merging, focus and explicit saving. The repaired package has [scoped native evidence](docs/testing/records/2026-11-05-native-pane-layout.md) for four controlled macOS SSH channels, retained tool selection, pointer dragging on both axes, keyboard control of all three dividers and saved-layout readback. A fresh non-author combined review and Hallmark finish have passed for the inspected subset. Compact OS geometry and the complete platform matrix remain open, while multiple windows and startup restoration remain unimplemented. Commit, push and exact CI outcomes are recorded separately.
 
 ## Features
 
 | Workflow | Capabilities |
 | --- | --- |
 | **Connections** | One-time quick connections, folders, tags, favorites, recent connections and trash; reviewed bulk organization, import/export and encrypted profile sync; password, private key, SSH Agent and keyboard-interactive authentication; jump hosts and SOCKS5 / HTTP CONNECT upstream proxies |
-| **Remote terminals** | Session tabs, a two-pane split, ANSI/VT terminal, scrollback search, selection, paste and CJK input; manual reconnection in the original tab and optional bounded automatic reconnection |
+| **Remote terminals** | Session tabs and splits (nested layout candidate under validation), ANSI/VT terminal, scrollback search, selection, paste and CJK input; manual reconnection in the original tab and optional bounded automatic reconnection |
 | **Remote files** | SFTP browsing, file and recursive directory transfers, pause and content-verified resumption; permissions, text editing, three-way merging with individual conflict choices and strict patch drafts; folder comparison, content verification, bidirectional merging and individually reviewed directory mirrors |
 | **Commands and tasks** | Session history, snippets, explicit parameters, remote command/path completion; per-target batch commands, dependency workflows, finite schedules and read-only task history |
 | **Monitoring and networking** | Linux host status and per-device disk I/O; listening sockets and remote DNS / TLS / HTTP(S) HEAD diagnostics; local/remote TCP forwarding and loopback SOCKS5 tunnels; [reviewed named-rule creation, editing, deletion and stopping](docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md) |

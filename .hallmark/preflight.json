@@ -5,41 +5,42 @@
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "review the actual listener and observe the result of each tunnel operation",
+  "job": "keep each SSH session and reviewed target in its own stable pane",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
-    "crates/keelshell-app/src/tunnels.rs",
-    "crates/keelshell-app/src/tunnels/rules.rs",
-    "docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md",
-    "docs/testing/records/2026-11-05-net-native-acceptance.md"
+    "crates/keelshell-app/src/workspace/pane_view.rs",
+    "crates/keelshell-app/src/workspace/pane_sessions.rs",
+    "docs/adr/0101-native-session-pane-ownership.md"
   ],
   "preserve": [
-    "semantic theme tokens and native controls",
-    "separate saved metadata and runtime ownership",
-    "snapshot-bound save/start/stop approvals",
-    "retained counters and fixed review footer"
+    "semantic theme registry and tokens",
+    "global session strip and per-session remote tools",
+    "explicit review and runtime authority"
   ],
   "introduce": [
-    "actual allocated listener endpoint and namespace in review and retained results",
-    "historical start approval feedback without stale ongoing progress",
-    "bilingual input/action names and review/runtime AX content"
+    "nested horizontal/vertical splits with per-leaf tabs",
+    "bounded pointer and keyboard ratio adjustment",
+    "merge without closing sessions, focused and compact display",
+    "explicit inert layout saving"
   ],
   "material": {
     "real": [
-      "owned Podman OpenSSH service",
-      "native rule metadata and worker receipts",
-      "payload bytes and actual listener observations"
+      "existing native terminal entities",
+      "bounded layout model",
+      "controlled GPUI events and isolated StateStore"
     ],
-    "pictures": "Baseline c48ae4c7: 48 corrected raw captures. Repaired 66fb90fc: 29 fresh JPEG/AX pairs, all 2880x1866, Frost light, selected English/Chinese observations; clipped runtime rows explicitly recorded.",
+    "pictures": "r1: 34 raw macOS AX/image pairs bound to 0855f7b4; r2: 35 new pairs, all 2880x1866, bound to 5ce34862 and run acceb50f1da74d12bf027efec66166a4. Original failed attempts are retained.",
     "absent": [
-      "invented live servers",
-      "fabricated traffic",
-      "implicit background starts"
+      "invented hosts",
+      "fabricated native acceptance"
     ]
   },
   "inferred_from_authorized_design_scope": true,
   "web_render_verified": false,
   "web_render_scope": "not_applicable: Rust/GPUI source",
-  "native_verification": "Repaired source review APPROVE_SCOPED_SOURCE P0/P1/P2=0. Full gate2061 ordinary/23ignored,10doc,Python128run1skip passed;494 gate/build/post-native inputs match. Three actual forwarding paths, cancelled review, hold EOF, port refusal, retained endpoints/counters and bilingual AX observed in new package. Combined independent review APPROVE_SCOPED_COMBINED P0/P1/P2=0; original NET-01/02/03 closed within inspected source/native subset, Hallmark ship only for macOS arm64 Frost-light2880x1866 and selected English/Chinese observations. Original3P2 and failures preserved."
+  "native_verification": "r1 remains scoped to 0855f7b4. Short-drag/tool fixes pass 52 focused tests, full-gate-r4 (2158 ordinary/23 ignored, app919/2 ignored, 11 rustdoc, Python128 run/1 skip) and source-r3. Package5ce34862 first failed window access in run904d404d, retained as history. Fresh runacceb50f from09:12:02Z has35 original pairs: retained collapsed Files/Commands/Tunnels, root and left vertical pointer changes, all3 keyboard dividers with wrong-axis controls, selected themes/languages, focus/merge/tab switch/close and inert saves. Four stable shells become the original3 only after explicit fourth closure; rawPTY0 before explicit x without Enter, then1 byte. Monitor exec probes are separate; shell_closed events remain0. Later draft equality includes2 manually added trailing spaces. Saves use layout and6347/5718/5000bps; single-pane active is original_tabs[1], selected first terminal later without saving again. App/supervisor exit0/reaped; exec35928 reaped; runtime cleanup09:26:46Z, image09:28:09Z, shared base retained. Verification09:35:23Z binds503 gate/build/current inputs and35 raw pairs;41 assets separately bound. Capture09 wrong-coordinate failure,12/13 draft-focus attempts and27/28 unchanged2880x1866 geometry retained. Compact OS/full theme-appearance-language-size matrix/IME/VoiceOver/Windows-Linux desktop/restart/multiwindow OPEN. Fresh non-author combined-r5 APPROVE_SCOPED_COMBINED, open P0/P1/P2/P3=0; Hallmark finish ship for inspected subset, final freeze check10:04:21Z. Old handoff-r4 remains limited to its older snapshot; exact commit/CI and full native scope require separate evidence.",
+  "native_evidence": "work/native-pane-layout-20261105/native/verification-r2.json",
+  "combined_review": "APPROVE_SCOPED_COMBINED: work/native-pane-layout-20261105/independent-review/combined-r5.md",
+  "finish_review": "ship for inspected subset; full native matrix remains OPEN"
 }

@@ -2,6 +2,30 @@
   {
     "date": "2026-11-05",
     "scope": "app",
+    "shape": "native multi-pane SSH workspace",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "stable pane ownership and bounded nested splits",
+    "signature": "each visible pane keeps its session target through focus, merge and reconnect",
+    "sections": [
+      "global actions",
+      "session strip",
+      "per-pane tabs and dividers",
+      "existing remote tools and reviewed command bar"
+    ],
+    "imagery": "r1:34 original AX/JPEG pairs,32 at2880x1866 and2 at3840x2098, bound to0855f7b4; r2:35 original pairs,all2880x1866,bound to5ce34862/runacceb50f1da74d12bf027efec66166a4",
+    "waived": [],
+    "sweep": "r4 full gate2158ordinary/23ignored(app919/2ignored),11rustdoc,Python128run1skip passed;52 focused regressions and source-r3 APPROVE_SCOPED_SOURCE openP0/P1/P2/P3=0. r1 remains bound to0855f7b4; repaired5ce34862 window failure/run904d404d retained. Fresh runacceb50f(09:12:02Z) observes four fixture shells, retained tool choices, two-axis pointer and three-divider keyboard changes, wrong-axis controls, selected themes/languages, focus/restore/merge/tab switch/explicit fourth close/saving. Six live audits retain identities4to3; rawPTY0 until explicit x(no Enter) adds1 byte, monitor exec separately counted, no shell_closed events. Later unchanged draft includes2 manually inserted spaces; saved layout ratios6347/5718/5000 and retained UUIDs/refs, single active original_tabs[1], later first-terminal control without resave. Verification09:35:23Z binds503 gate/build/current inputs plus separately inventoried41assets. App/supervisor exit0/reaped, exec35928 reaped; owned runtime cleaned09:26:46Z, image09:28:09Z, shared base retained. Captures09/12/13 failed or draft-focus attempts and27/28 unchanged2880x1866 geometry retained. CompactOS/full theme-appearance-language-size matrix/IME/VoiceOver/Windows-Linux desktop/restart/multiwindow OPEN. Fresh non-author combined-r5 APPROVE_SCOPED_COMBINED, open P0/P1/P2/P3=0; Hallmark finish ship for inspected subset, final freeze check10:04:21Z. Old handoff-r4 remains limited to its older snapshot; exact commit/CI and full native scope require separate evidence. Rust HTML lint not applicable.",
+    "native_evidence": "work/native-pane-layout-20261105/native/verification-r2.json",
+    "combined_review": "APPROVE_SCOPED_COMBINED: work/native-pane-layout-20261105/independent-review/combined-r5.md",
+    "finish_review": "ship for inspected subset; full native matrix remains OPEN"
+  },
+  {
+    "date": "2026-11-05",
+    "scope": "app",
     "shape": "existing native named tunnel editor and runtime list",
     "theme": [
       "frost",

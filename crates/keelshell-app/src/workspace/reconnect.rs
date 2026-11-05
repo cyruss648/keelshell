@@ -739,6 +739,9 @@ impl Workspace {
             );
             return false;
         }
+        if !self.sync_session_panes() {
+            return false;
+        }
         let old = self.tabs[index].clone();
         let title = old.read(cx).title.clone();
         let focused = old.read(cx).focus_handle(cx).is_focused(window);
@@ -757,11 +760,20 @@ impl Workspace {
             self.state.settings.scrollback_lines,
             cx,
         );
+        let id = terminal.entity_id();
+        if let Err(error) = self.session_panes.replace(ticket.tab, id) {
+            self.status =
+                Message::detail("无法替换重连面板", "Cannot replace reconnected pane", error);
+            return false;
+        }
+        if let Some(stable_id) = self.pane_tab_ids.remove(&ticket.tab) {
+            self.pane_tab_ids.insert(id, stable_id);
+        }
+        self.pane_generation = self.pane_generation.wrapping_add(1);
         let history = old.update(cx, |terminal, _| terminal.take_reconnect_history());
         terminal.update(cx, |terminal, cx| {
             terminal.inherit_reconnect_history(history, cx)
         });
-        let id = terminal.entity_id();
         self.suspend_panels(ticket.tab, cx);
         self.remote_sessions.remove(&ticket.tab);
         let connection_id = self.remote_connection_ids.remove(&ticket.tab);
@@ -800,14 +812,6 @@ impl Workspace {
         // Old MCP operations belong to the retired entity, including when the
         // replacement uses the same endpoint and authenticated SSH peer.
         self.maintain_mcp(cx);
-        if let Some((first, second)) = &mut self.split_pair {
-            if *first == ticket.tab {
-                *first = id;
-            }
-            if *second == ticket.tab {
-                *second = id;
-            }
-        }
         self.watch_terminal(&terminal, window, cx);
         let runtime = self.runtime.clone();
         let monitor = cx.new(|cx| {

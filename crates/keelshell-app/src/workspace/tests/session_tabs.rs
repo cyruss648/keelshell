@@ -83,6 +83,11 @@ fn navigation_reveals_and_closes_the_selected_session_without_sending_drafts(
         fixture.workspace.update(cx, |workspace, cx| {
             workspace.tabs = panes.iter().map(|pane| pane.terminal.clone()).collect();
             workspace.active = 0;
+            // The helper mounts each pair separately. This test assembles them
+            // into one new ordered pane, rather than retaining the final
+            // helper pair's local order ahead of the other sessions.
+            workspace.session_panes = crate::workspace::pane_sessions::SessionPanes::new();
+            assert!(workspace.sync_session_panes());
             workspace.command.update(cx, |input, cx| {
                 input.set_value("printf '尚未发送'", window, cx);
             });

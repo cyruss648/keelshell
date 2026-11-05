@@ -2,6 +2,7 @@
 use super::*;
 use crate::command_suggestions::SuggestionSource;
 use crate::terminal::TransportState;
+use crate::workspace::ToolPanel;
 use keelshell_core::ReconnectPolicy;
 use keelshell_session::{ConnectionEnd, ShellEnd};
 
@@ -73,6 +74,84 @@ fn click_reconnect(fixture: &Fixture, id: gpui_kit::EntityId, cx: &mut TestAppCo
 }
 
 #[gpui_kit::test]
+async fn split_preserves_the_selected_remote_tool_and_its_existing_panel(cx: &mut TestAppContext) {
+    let (fixture, route) = mount_route(cx, false, true);
+    let original = connect_ready(&fixture, &route, cx).await;
+    let original_id = original.entity_id();
+    assert!(fixture.workspace.read_with(cx, |view, _| {
+        view.visible_panel == Some(ToolPanel::Files)
+    }));
+    for split in ["split-session", "split-session-vertical"] {
+        for choice in [None, Some("files"), Some("commands"), Some("tunnels")] {
+            cx.update_window(fixture.window, |_, window, cx| {
+                if let Some(current) = fixture.workspace.read(cx).visible_panel {
+                    let button = match current {
+                        ToolPanel::Files => "files",
+                        ToolPanel::Commands => "commands",
+                        ToolPanel::Tunnels => "tunnels",
+                    };
+                    window.render_frame(cx);
+                    window.click(button, cx);
+                }
+                if let Some(button) = choice {
+                    window.render_frame(cx);
+                    window.click(button, cx);
+                }
+                let (selected, files, tunnels) = {
+                    let view = fixture.workspace.read(cx);
+                    let panels = &view.panels[&original_id];
+                    (
+                        view.visible_panel,
+                        panels.files.as_ref().map(Entity::entity_id),
+                        panels.tunnels.as_ref().map(Entity::entity_id),
+                    )
+                };
+                window.render_frame(cx);
+                window.click(split, cx);
+                window.render_frame(cx);
+                let view = fixture.workspace.read(cx);
+                assert_eq!(
+                    view.tabs.len(),
+                    2,
+                    "the actual split control must create a peer"
+                );
+                assert_eq!(view.tabs[view.active].entity_id(), original_id);
+                assert!(
+                    view.visible_panel == selected,
+                    "{split} must retain tool choice {choice:?}"
+                );
+                let panels = &view.panels[&original_id];
+                assert_eq!(panels.files.as_ref().map(Entity::entity_id), files);
+                assert_eq!(panels.tunnels.as_ref().map(Entity::entity_id), tunnels);
+            })
+            .checked("split through production controls after choosing a remote tool");
+            cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
+                fixture.workspace.read(cx).tabs.iter().all(|terminal| {
+                    terminal.read(cx).is_open()
+                        && terminal.read(cx).visible_text().contains("TARGET READY")
+                })
+            })
+            .await;
+            cx.update_window(fixture.window, |_, window, cx| {
+                window.render_frame(cx);
+                window.click(("close-tab", 1_usize), cx);
+                window.render_frame(cx);
+                assert_eq!(fixture.workspace.read(cx).tabs.len(), 1);
+            })
+            .checked("close only the new peer before checking the next tool choice");
+        }
+    }
+    assert!(
+        route
+            .target_state
+            .received
+            .lock()
+            .checked("inspect isolated SSH input")
+            .is_empty()
+    );
+}
+
+#[gpui_kit::test]
 async fn reconnect_keeps_slot_history_and_split_but_requires_new_command_review(
     cx: &mut TestAppContext,
 ) {
@@ -89,7 +168,7 @@ async fn reconnect_keeps_slot_history_and_split_but_requires_new_command_review(
                     cx,
                 );
                 view.run_command(window, cx);
-                view.split_remote(window, cx);
+                view.split_remote(keelshell_core::SplitAxis::Horizontal, window, cx);
                 view.set_reviewed_command(
                     "before-reconnect-marker".into(),
                     Some(old_id),
@@ -130,6 +209,12 @@ async fn reconnect_keeps_slot_history_and_split_but_requires_new_command_review(
     let peer_id = fixture
         .workspace
         .read_with(cx, |view, _| view.tabs[1].entity_id());
+    let (original_pane, original_tab) = fixture.workspace.read_with(cx, |view, _| {
+        (
+            view.session_panes.pane_for(old_id),
+            view.pane_tab_ids[&old_id],
+        )
+    });
     close_transport(&fixture, &old, cx).await;
     click_reconnect(&fixture, old_id, cx);
     authenticate_route(&fixture, &route, cx).await;
@@ -139,7 +224,13 @@ async fn reconnect_keeps_slot_history_and_split_but_requires_new_command_review(
     fixture.workspace.read_with(cx, |view, cx| {
         assert_eq!(view.tabs.len(), 2);
         assert_eq!(view.tabs[1].entity_id(), peer_id);
-        assert_eq!(view.split_pair, Some((current_id, peer_id)));
+        assert_eq!(
+            view.session_panes.displayed_sessions(),
+            vec![current_id, peer_id]
+        );
+        assert_eq!(view.session_panes.pane_for(current_id), original_pane);
+        assert_eq!(view.pane_tab_ids[&current_id], original_tab);
+        assert!(!view.pane_tab_ids.contains_key(&old_id));
         assert_eq!(view.command_target, Some(old_id));
         assert!(
             view.command_histories[&current_id]
