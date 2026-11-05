@@ -1369,15 +1369,34 @@ async fn explicit_save_round_trips_only_layout_references_and_reopen_creates_no_
             workspace.state.workspace_layout.as_ref(),
             Some(&expected_saved)
         );
-        assert!(workspace.tabs.is_empty());
+        assert_eq!(workspace.tabs.len(), ids.len());
+        assert!(workspace.tabs.iter().all(|tab| !tab.read(cx).is_open()));
         assert!(workspace.remote_sessions.is_empty());
         assert!(workspace.remote_hosts.is_empty());
         assert!(workspace.remote_connection_ids.is_empty());
         assert!(workspace.panels.is_empty());
         assert!(workspace.reconnect_bindings.is_empty());
-        assert!(workspace.pane_tab_ids.is_empty());
-        assert_eq!(workspace.session_panes.active_session(), None);
-        assert!(workspace.session_panes.displayed_sessions().is_empty());
+        assert_eq!(workspace.pane_tab_ids.len(), tab_ids.len());
+        assert_eq!(workspace.restored_tabs.len(), ids.len());
+        assert_eq!(workspace.session_panes.layout(), mapping.layout());
+        for saved in &expected_saved.windows[0].panes {
+            assert_eq!(
+                workspace
+                    .session_panes
+                    .tabs_in(saved.pane)
+                    .iter()
+                    .map(|key| workspace.pane_tab_ids[key])
+                    .collect::<Vec<_>>(),
+                saved.tabs.iter().map(|tab| tab.id).collect::<Vec<_>>()
+            );
+            assert_eq!(
+                workspace
+                    .session_panes
+                    .selected_in(saved.pane)
+                    .map(|key| workspace.pane_tab_ids[&key]),
+                saved.active_tab
+            );
+        }
         assert!(!workspace.connecting);
         assert!(workspace.connect_route.is_none());
         assert!(workspace.login.is_none());

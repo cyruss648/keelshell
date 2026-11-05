@@ -30,6 +30,9 @@ mod lifecycle;
 #[path = "terminal_output.rs"]
 mod output;
 pub(crate) use lifecycle::TransportState;
+#[cfg(test)]
+#[path = "terminal_text_input_tests.rs"]
+mod text_input_tests;
 #[path = "terminal_workers.rs"]
 mod workers;
 pub use input::TerminalCommand;
@@ -122,10 +125,32 @@ pub struct TerminalView {
     search_query: String,
     search_feedback: Message,
     search_found: bool,
-    _poll: Task<()>,
+    _poll: Option<Task<()>>,
 }
 
 impl TerminalView {
+    /// Create an inert entity identity for a restored tab without a transport.
+    ///
+    /// Starts closed with blank output and no history, pending input, lifecycle
+    /// source, worker or polling task. Both channel peers are dropped immediately,
+    /// so no outgoing receiver exists. Render the workspace's inactive placeholder
+    /// for this entity; an explicit connection must create a new transport entity.
+    pub fn inactive(title: String, font_size: f32, cx: &mut Context<Self>) -> Self {
+        let (output, incoming) = mpsc::sync_channel(1);
+        drop(output);
+        let (outgoing, commands) = mpsc::sync_channel(1);
+        drop(commands);
+        Self::initialize(
+            title,
+            font_size,
+            0,
+            incoming,
+            outgoing,
+            Arc::new(AtomicBool::new(true)),
+            cx,
+        )
+    }
+
     pub fn from_transport(
         title: String,
         font_size: f32,
@@ -145,23 +170,41 @@ impl TerminalView {
             }
         });
         let completion = workers::registry().completion(&cancelled);
+        let mut view =
+            Self::initialize(title, font_size, history, incoming, outgoing, cancelled, cx);
+        view.status = Message::new("正在连接…", "Starting…");
+        view.exited = false;
+        view.completion = completion;
+        view._poll = Some(poll);
+        view
+    }
+
+    fn initialize(
+        title: String,
+        font_size: f32,
+        history: usize,
+        incoming: Receiver<SessionEvent>,
+        outgoing: SyncSender<TerminalCommand>,
+        cancelled: Arc<AtomicBool>,
+        cx: &mut Context<Self>,
+    ) -> Self {
         let palette = crate::design::terminal_palette(cx);
         let mut emulator = Emulator::new(30, 100, history);
         emulator.set_default_colors(palette.foreground, palette.background, palette.cursor);
         Self {
             lifecycle: lifecycle::Lifecycle::default(),
             title,
-            status: Message::new("正在连接…", "Starting…"),
+            status: Message::new("未连接", "Not connected"),
             emulator,
             focus: cx.focus_handle(),
             incoming,
             output: OutputQueue::default(),
             outgoing,
             cancelled,
-            completion,
+            completion: None,
             completion_seen: false,
             pending: InputQueue::default(),
-            exited: false,
+            exited: true,
             started: false,
             input_error: None,
             bounds: None,
@@ -178,7 +221,7 @@ impl TerminalView {
             search_query: String::new(),
             search_feedback: Message::empty(),
             search_found: false,
-            _poll: poll,
+            _poll: None,
         }
     }
 
@@ -1062,6 +1105,64 @@ impl EntityInputHandler for TerminalView {
         _: &mut Context<Self>,
     ) -> Option<usize> {
         Some(self.composition.selected.start)
+    }
+}
+
+#[cfg(test)]
+mod inactive_tests {
+    use super::*;
+    use ::core::prelude::v1::test;
+
+    #[gpui_kit::test]
+    fn inactive_has_no_transport_lifecycle_or_polling_task(cx: &mut TestAppContext) {
+        cx.update(gpui_kit::init);
+        let terminal = cx.new(|cx| TerminalView::inactive("Restored tab".into(), 14., cx));
+        terminal.update(cx, |view, _| {
+            assert_eq!(view.title, "Restored tab");
+            assert_eq!(view.status, Message::new("未连接", "Not connected"));
+            assert!(!view.is_open());
+            assert!(!view.started);
+            assert!(view._poll.is_none());
+            assert!(view.completion.is_none());
+            assert!(view.cancelled.load(Ordering::Acquire));
+            assert!(view.subscribe_lifecycle().is_none());
+            assert_eq!(view.end_reason(), None);
+            assert!(!view.ready_to_archive());
+            assert!(matches!(
+                view.incoming.try_recv(),
+                Err(mpsc::TryRecvError::Disconnected)
+            ));
+            assert_eq!(
+                view.outgoing.try_send(TerminalCommand::Write(vec![b'x'])),
+                Err(mpsc::TrySendError::Disconnected(TerminalCommand::Write(
+                    vec![b'x']
+                )))
+            );
+            assert!(view.pending.is_empty());
+            assert!(view.composition.text.is_empty());
+            assert!(view.visible_text().trim().is_empty());
+            assert!(view.search_input.is_none());
+            assert!(view.search_query.is_empty());
+        });
+    }
+
+    #[gpui_kit::test]
+    fn inactive_rejects_commands_writes_and_paste_without_admitting_input(cx: &mut TestAppContext) {
+        cx.update(gpui_kit::init);
+        let terminal = cx.new(|cx| TerminalView::inactive("Restored tab".into(), 14., cx));
+        terminal.update(cx, |view, cx| {
+            assert!(view.try_write(b"command\n".to_vec()).is_err());
+            view.write(b"typed text".to_vec());
+            view.paste("pasted text\n");
+            view.flush_input();
+            view.poll(cx);
+            assert!(!view.is_open());
+            assert!(view.pending.is_empty());
+            assert!(view.composition.text.is_empty());
+            assert!(view.visible_text().trim().is_empty());
+            assert!(view.subscribe_lifecycle().is_none());
+            assert!(view._poll.is_none());
+        });
     }
 }
 

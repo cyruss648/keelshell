@@ -56,6 +56,7 @@ struct TransferWriteGate {
 struct TransferWriteState {
     target: String,
     prefix: bool,
+    entered_at: std::sync::OnceLock<std::time::Instant>,
     entered: AtomicUsize,
     expired: AtomicBool,
 }
@@ -80,6 +81,7 @@ impl TransferWriteGate {
             }
             _ => return Ok(()),
         };
+        owned.entered_at.get_or_init(std::time::Instant::now);
         owned.entered.fetch_add(1, Ordering::AcqRel);
         // Each hold owns its counters and identity. An old handler cannot
         // attribute a delayed entry/expiry to a newly armed hold for this path.
@@ -115,6 +117,11 @@ pub struct TransferWriteHold {
     owned: Arc<TransferWriteState>,
 }
 impl TransferWriteHold {
+    /// Monotonic time at the handler's first matching hold, before mutation/ACK.
+    /// This is distinct from the UI's later observation of `entered()`.
+    pub fn entered_at(&self) -> Option<std::time::Instant> {
+        self.owned.entered_at.get().copied()
+    }
     pub fn entered(&self) -> usize {
         self.owned.entered.load(Ordering::Acquire)
     }
@@ -507,6 +514,7 @@ impl Filesystem {
         let owned = Arc::new(TransferWriteState {
             target,
             prefix,
+            entered_at: std::sync::OnceLock::new(),
             entered: AtomicUsize::new(0),
             expired: AtomicBool::new(false),
         });
@@ -532,6 +540,7 @@ impl Filesystem {
         let owned = Arc::new(TransferWriteState {
             target: String::new(),
             prefix: true,
+            entered_at: std::sync::OnceLock::new(),
             entered: AtomicUsize::new(0),
             expired: AtomicBool::new(false),
         });
@@ -1152,6 +1161,7 @@ mod transfer_write_gate_tests {
     -> Result<(), Box<dyn std::error::Error>> {
         let filesystem = Filesystem::default();
         let hold = filesystem.hold_transfer_writes_after_first("/selected.bin")?;
+        assert!(hold.entered_at().is_none());
         assert!(
             filesystem
                 .hold_transfer_writes_after_first("/other.bin")
@@ -1169,6 +1179,10 @@ mod transfer_write_gate_tests {
             Ok(())
         );
         assert_eq!(hold.entered(), 0);
+        assert!(
+            hold.entered_at().is_none(),
+            "unmatched writes have no entry time"
+        );
         drop(filesystem.clone());
         assert!(
             gate.state.borrow().is_some(),
@@ -1191,14 +1205,21 @@ mod transfer_write_gate_tests {
         let hold = filesystem.hold_transfer_writes_after_first("/selected.bin")?;
         let gate = filesystem.transfer_write_gate.clone();
         let mut pending = Box::pin(gate.hold("/selected.bin", 65536, Duration::from_secs(1)));
+        let before_entry = std::time::Instant::now();
         poll_held_once(&mut pending).await;
         assert_eq!(hold.entered(), 1);
+        let entered_at = hold.entered_at().ok_or("missing exact WRITE entry")?;
+        assert!(before_entry <= entered_at && entered_at <= std::time::Instant::now());
         let unwind = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             let _owned_hold = hold;
             panic!("controlled fixture failure exercises owned release");
         }));
         assert!(unwind.is_err());
         let next = filesystem.hold_transfer_writes_after_first("/selected.bin")?;
+        assert!(
+            next.entered_at().is_none(),
+            "a new owner cannot inherit the old entry time"
+        );
         assert_eq!(
             tokio::time::timeout(Duration::from_millis(250), pending).await,
             Ok(Ok(()))
@@ -1210,6 +1231,7 @@ mod transfer_write_gate_tests {
         let mut next_pending = Box::pin(gate.hold("/selected.bin", 65536, Duration::from_secs(1)));
         poll_held_once(&mut next_pending).await;
         assert_eq!(next.entered(), 1);
+        assert!(next.entered_at().is_some_and(|at| at >= entered_at));
         drop(next);
         assert_eq!(
             tokio::time::timeout(Duration::from_millis(250), next_pending).await,

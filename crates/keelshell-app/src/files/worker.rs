@@ -121,8 +121,14 @@ pub(super) async fn observe_transfer(
     mut pause: tokio::sync::watch::Receiver<bool>,
     progress: &mpsc::SyncSender<WorkerMessage>,
 ) -> Result<Outcome, FileFailure> {
+    #[cfg(test)]
+    let pause_handoff = super::test_server::pause_handoff_fixture::before_forward(&pause).await;
     if *pause.borrow_and_update() {
         transfer.pause();
+        #[cfg(test)]
+        if let Some(handoff) = pause_handoff {
+            handoff.forwarded();
+        }
     }
     loop {
         tokio::select! {
@@ -138,7 +144,15 @@ pub(super) async fn observe_transfer(
                     return tokio::time::timeout(Duration::from_secs(6), finish_cancelled_transfer(transfer, progress))
                         .await.unwrap_or(Err(FileFailure::CancellationUnconfirmed));
                 }
-                if *pause.borrow_and_update() { transfer.pause(); } else { transfer.resume(); }
+                #[cfg(test)]
+                let pause_handoff = super::test_server::pause_handoff_fixture::before_forward(&pause).await;
+                if *pause.borrow_and_update() {
+                    transfer.pause();
+                    #[cfg(test)]
+                    if let Some(handoff) = pause_handoff {
+                        handoff.forwarded();
+                    }
+                } else { transfer.resume(); }
             }
             event = transfer.recv() => {
                 match event {

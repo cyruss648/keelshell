@@ -78,7 +78,11 @@ impl Workspace {
         self.sync_session_panes();
         self.session_panes.select(tab.entity_id());
         self.session_tab_scroll.scroll_to_item(index);
-        tab.read(cx).focus_handle(cx).focus(window, cx);
+        if self.restored_tabs.contains_key(&tab.entity_id()) {
+            self.surface_focus.focus(window, cx);
+        } else {
+            tab.read(cx).focus_handle(cx).focus(window, cx);
+        }
         cx.notify();
     }
 
@@ -431,8 +435,22 @@ impl Workspace {
                             .test_support()
                             .flex_1()
                             .min_w_0()
-                            .text_ellipsis()
-                            .child(terminal.read(cx).title.clone()),
+                            .flex()
+                            .flex_col()
+                            .child(
+                                div()
+                                    .text_ellipsis()
+                                    .child(self.session_title(terminal_id, cx)),
+                            )
+                            .when_some(self.restored_status(terminal_id, cx), |title, status| {
+                                title.child(
+                                    div()
+                                        .text_ellipsis()
+                                        .text_xs()
+                                        .text_color(rgb(visual.muted))
+                                        .child(status),
+                                )
+                            }),
                     )
                     .when(terminal.read(cx).end_reason().is_some(), |tab| {
                         tab.child(
@@ -452,7 +470,7 @@ impl Workspace {
                             .accessibility_label(format!(
                                 "{}: {}",
                                 t(cx, "关闭 SSH 会话", "Close SSH session"),
-                                terminal.read(cx).title,
+                                self.session_title(terminal_id, cx),
                             ))
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 cx.stop_propagation();
@@ -497,7 +515,10 @@ impl Workspace {
                     .label(t(cx, zh, en))
                     .selected(self.visible_panel == Some(kind))
                     .toggled(self.visible_panel == Some(kind))
-                    .disabled(active_id.is_none() && kind != ToolPanel::Commands)
+                    .disabled(
+                        kind != ToolPanel::Commands
+                            && active_id.is_none_or(|id| self.restored_tabs.contains_key(&id)),
+                    )
                     .on_click(
                         cx.listener(move |view, _, window, cx| view.toggle_panel(kind, window, cx)),
                     )
@@ -1164,7 +1185,7 @@ impl Workspace {
         }
         let tabs = self.session_tabs(cx);
         let session_strip = self.session_strip(tabs, cx);
-        let body = if self.tabs.is_empty() {
+        let body = if self.tabs.is_empty() && self.state.workspace_layout.is_none() {
             self.empty_workspace_body(
                 viewport.width
                     - if self.show_assistant {
@@ -1199,7 +1220,11 @@ impl Workspace {
         let terminal_status = self
             .tabs
             .get(self.active)
-            .map(|tab| tab.read(cx).status.render(cx))
+            .map(|tab| {
+                self.restored_status(tab.entity_id(), cx)
+                    .map(str::to_owned)
+                    .unwrap_or_else(|| tab.read(cx).status.render(cx))
+            })
             .unwrap_or_else(|| t(cx, "无活动 SSH 会话", "No active SSH session").into());
         let bottom_tabs = self.workspace_tool_tabs(active_id, cx);
         let panels = active_id.and_then(|id| self.selected_panels(id));

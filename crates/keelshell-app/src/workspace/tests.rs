@@ -38,6 +38,7 @@ mod profile_sync;
 pub(crate) mod protocol_diagnostics;
 mod reviewed_agent;
 mod session_tabs;
+mod startup_restore;
 mod workbench_layout;
 
 trait Checked<T> {
@@ -79,13 +80,24 @@ fn mount_sized(
     width: f32,
     height: f32,
 ) -> Fixture {
+    mount_state_sized(
+        cx,
+        AppState {
+            connections: profiles,
+            ..AppState::default()
+        },
+        width,
+        height,
+    )
+}
+
+fn mount_state_sized(cx: &mut TestAppContext, state: AppState, width: f32, height: f32) -> Fixture {
     let directory = std::env::temp_dir().join(format!("keelshell-ui-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir(&directory).checked("create isolated state directory");
     let guard = TemporaryState(directory.clone());
     let store = Arc::new(StateStore::new(directory.join("state.json")));
-    let mut state = store.load().checked("load empty fixture state");
-    state.connections = profiles;
-    state = store.save(&state).checked("persist fixture profiles");
+    store.save(&state).checked("persist fixture state");
+    let state = store.load().checked("load persisted fixture state");
     let runtime = Arc::new(
         tokio::runtime::Builder::new_multi_thread()
             .worker_threads(1)

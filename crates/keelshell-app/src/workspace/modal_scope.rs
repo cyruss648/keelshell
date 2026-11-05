@@ -93,6 +93,7 @@ struct ReturnFocus {
     // origin before unmounting so a later resize cannot redirect typing to SSH.
     navigation: Option<NavigationPanel>,
     pane_divider: Option<keelshell_core::PaneNodeId>,
+    restored_tab: Option<EntityId>,
 }
 
 /// Registers capture before the child paints its pointer handlers. Div capture
@@ -299,6 +300,22 @@ impl Workspace {
                 .borrow()
                 .iter()
                 .find_map(|(id, focus)| focus.is_focused(window).then_some(*id)),
+            restored_tab: self.restored_tabs.keys().find_map(|id| {
+                [
+                    ElementId::from(("connect-restored-tab", *id)),
+                    ElementId::from(("manage-restored-tab", *id)),
+                    ElementId::from(("close-restored-tab", *id)),
+                ]
+                .iter()
+                .any(|key| {
+                    self.modal_button_focus
+                        .borrow()
+                        .get(key)
+                        .and_then(WeakFocusHandle::upgrade)
+                        .is_some_and(|focus| focus.is_focused(window))
+                })
+                .then_some(*id)
+            }),
         });
     }
 
@@ -400,7 +417,15 @@ impl Workspace {
                         !view.navigation_visible(window) || view.navigation_panel != panel
                     }) || target
                         .pane_divider
-                        .is_some_and(|id| !view.pane_divider_visible(id)))
+                        .is_some_and(|id| !view.pane_divider_visible(id))
+                        || target.restored_tab.is_some_and(|id| {
+                            !view.restored_tabs.contains_key(&id)
+                                || !view.session_panes.pane_for(id).is_some_and(|pane| {
+                                    view.session_panes.selected_in(pane) == Some(id)
+                                        && (!(view.pane_zoomed || view.compact_panes())
+                                            || view.session_panes.active_pane() == pane)
+                                })
+                        }))
                 {
                     view.surface_focus.focus(window, cx);
                 } else {

@@ -25,6 +25,9 @@ use crate::files::sftp_test_filesystem as filesystem;
 #[path = "test_server_identity_tests.rs"]
 mod identity_tests;
 
+#[path = "pause_handoff_fixture.rs"]
+pub(crate) mod pause_handoff_fixture;
+
 pub(super) trait Checked<T> {
     fn checked(self, label: &str) -> T;
 }

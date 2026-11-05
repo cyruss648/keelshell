@@ -132,6 +132,14 @@ impl Workspace {
                 .read(cx)
                 .focus_handle(cx)
                 .focus(window, cx);
+        } else if self
+            .tabs
+            .get(self.active)
+            .is_some_and(|tab| self.restored_tabs.contains_key(&tab.entity_id()))
+            || self.tabs.is_empty() && self.state.workspace_layout.is_some()
+            || self.active >= self.tabs.len() && !self.tabs.is_empty()
+        {
+            self.surface_focus.focus(window, cx);
         } else if self.show_connections || self.tabs.is_empty() {
             self.search.read(cx).focus_handle(cx).focus(window, cx);
         } else if let Some(terminal) = self.tabs.get(self.active) {

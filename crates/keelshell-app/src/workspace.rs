@@ -44,6 +44,7 @@ mod reconnect;
 mod reconnect_editor;
 mod remote_completion;
 mod routing;
+mod startup_restore;
 mod workflow_audit;
 mod workflow_commands;
 use library::{DestinationPrompt, DestinationTarget, FolderForm, LibraryFilter};
@@ -288,6 +289,7 @@ struct NewRemoteTab {
     host: String,
     connection_id: Option<uuid::Uuid>,
     split: Option<(EntityId, keelshell_core::SplitAxis)>,
+    restored: Option<startup_restore::RestoredTarget>,
 }
 
 pub struct Workspace {
@@ -302,6 +304,7 @@ pub struct Workspace {
     pane_divider_focus: std::cell::RefCell<HashMap<keelshell_core::PaneNodeId, FocusHandle>>,
     pane_generation: u64,
     pane_tab_ids: HashMap<EntityId, uuid::Uuid>,
+    restored_tabs: HashMap<EntityId, keelshell_core::LayoutTab>,
     layout_window_id: uuid::Uuid,
     pane_zoomed: bool,
     search: Entity<InputState>,
@@ -764,7 +767,7 @@ impl Workspace {
             .workspace_layout
             .as_ref()
             .map_or_else(uuid::Uuid::new_v4, |layout| layout.active_window);
-        Self {
+        let mut workspace = Self {
             store,
             state,
             tabs: Vec::new(),
@@ -775,6 +778,7 @@ impl Workspace {
             pane_divider_focus: Default::default(),
             pane_generation: 0,
             pane_tab_ids: HashMap::new(),
+            restored_tabs: HashMap::new(),
             layout_window_id,
             pane_zoomed: false,
             search,
@@ -891,7 +895,9 @@ impl Workspace {
                 completion_directory_subscription,
                 completion_cursor_subscription,
             ],
-        }
+        };
+        workspace.restore_startup_layout(cx);
+        workspace
     }
     fn open_connections(
         &mut self,
@@ -936,6 +942,16 @@ impl Workspace {
         let Some(index) = self.tabs.iter().position(|tab| tab.entity_id() == id) else {
             return;
         };
+        let closed_active = self.tabs.get(self.active).map(Entity::entity_id) == Some(id);
+        let closed_restored = self.restored_tabs.contains_key(&id);
+        if self
+            .connect_route
+            .as_ref()
+            .and_then(|route| route.restored)
+            .is_some_and(|target| target.entity == id)
+        {
+            self.cancel_connect_route(window, cx);
+        }
         if !self.sync_session_panes() {
             cx.notify();
             return;
@@ -952,6 +968,7 @@ impl Workspace {
         self.cancel_remote_completion(cx);
         let terminal = self.tabs.remove(index);
         self.pane_tab_ids.remove(&terminal.entity_id());
+        self.restored_tabs.remove(&terminal.entity_id());
         self.pane_generation = self.pane_generation.wrapping_add(1);
         let retired_session_id = format!("{:?}", terminal.entity_id());
         self.assistant.update(cx, |panel, cx| {
@@ -979,8 +996,10 @@ impl Workspace {
         self.maintain_command_workflows(cx);
         self.active = next
             .and_then(|id| self.tabs.iter().position(|tab| tab.entity_id() == id))
-            .unwrap_or_else(|| self.active.min(self.tabs.len().saturating_sub(1)));
-        self.focus_current_surface(window, cx);
+            .unwrap_or(self.tabs.len());
+        if closed_active || !closed_restored {
+            self.focus_current_surface(window, cx);
+        }
         cx.notify();
     }
     fn split_remote(
@@ -1019,6 +1038,7 @@ impl Workspace {
                 host,
                 connection_id,
                 split: Some((id, axis)),
+                restored: None,
             },
             window,
             cx,
@@ -1089,10 +1109,19 @@ impl Workspace {
             host,
             connection_id,
             split: pane_split,
+            restored,
         } = request;
+        if restored.is_some_and(|target| {
+            !self.restored_target_current(target)
+                || connection_id != Some(target.connection)
+                || pane_split.is_some()
+        }) {
+            return None;
+        }
         if !self.sync_session_panes()
-            || self.tabs.len() >= keelshell_core::MAX_LAYOUT_TABS
-            || pane_split.is_none() && !self.session_panes.can_add()
+            || restored.is_none()
+                && (self.tabs.len() >= keelshell_core::MAX_LAYOUT_TABS
+                    || pane_split.is_none() && !self.session_panes.can_add())
         {
             self.status = Message::new(
                 "当前面板的会话数量已达上限。",
@@ -1111,7 +1140,9 @@ impl Workspace {
         );
         let id = terminal.entity_id();
         let mut panes = self.session_panes.clone();
-        let placement = if let Some((primary, axis)) = pane_split {
+        let placement = if let Some(target) = restored {
+            panes.replace(target.entity, id)
+        } else if let Some((primary, axis)) = pane_split {
             panes.split(primary, id, axis).map(|_| ())
         } else {
             let ids: Vec<_> = self
@@ -1127,8 +1158,23 @@ impl Workspace {
             cx.notify();
             return None;
         }
+        let replacement = restored.and_then(|target| {
+            self.tabs
+                .iter()
+                .position(|tab| tab.entity_id() == target.entity)
+                .map(|index| (target, index))
+        });
+        if restored.is_some() && replacement.is_none() {
+            return None;
+        }
         self.session_panes = panes;
-        self.pane_tab_ids.insert(id, uuid::Uuid::new_v4());
+        if let Some((target, _)) = replacement {
+            self.pane_tab_ids.remove(&target.entity);
+            self.restored_tabs.remove(&target.entity);
+            self.pane_tab_ids.insert(id, target.layout_tab);
+        } else {
+            self.pane_tab_ids.insert(id, uuid::Uuid::new_v4());
+        }
         self.pane_generation = self.pane_generation.wrapping_add(1);
         self.remote_hosts.insert(id, host.clone());
         if let Some(connection_id) = connection_id {
@@ -1151,20 +1197,28 @@ impl Workspace {
                 ..Default::default()
             },
         );
-        self.tabs.push(terminal);
+        if let Some((_, index)) = replacement {
+            // Only the inert owner is retired. Runtime authorities and command
+            // reviews belonging to other entities retain their exact targets.
+            self.tabs[index] = terminal;
+        } else {
+            self.tabs.push(terminal);
+        }
         self.active = self
             .session_panes
             .active_session()
             .and_then(|active| self.tabs.iter().position(|tab| tab.entity_id() == active))
-            .unwrap_or(self.tabs.len() - 1);
+            .unwrap_or(self.tabs.len());
         self.show_connections = false;
         // Splitting retains the primary target and its chosen tool surface.
         // Only a newly connected session starts in the default Files view.
-        if pane_split.is_none() {
+        if pane_split.is_none() && restored.is_none() {
             self.visible_panel = None;
             self.toggle_panel(ToolPanel::Files, window, cx);
         }
-        self.focus_current_surface(window, cx);
+        if restored.is_none() || self.tabs.get(self.active).map(Entity::entity_id) == Some(id) {
+            self.focus_current_surface(window, cx);
+        }
         Some(id)
     }
     fn on_appearance_changed(

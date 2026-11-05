@@ -839,3 +839,4 @@ fn delayed_recent_success_does_not_survive_upstream_authentication_changes(
 mod proxies;
 
 mod reconnect;
+mod startup_restore;

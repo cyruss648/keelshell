@@ -5,9 +5,64 @@
 [组合前历史快照](history/2026-11-05-handoff-before-workspace-integration.md)，
 其中“当前”、暂停和清理指令只代表历史时点，不构成新的操作授权。
 
-## 当前工作
+## 当前开发：启动恢复与输入补查
 
-当前工作副本复用原分屏工作树，分支为 `feature/workspace-integration-20261105`。
+本轮开始前，2026-11-05的上一轮组合已通过普通快进推送到main，起点主线为
+`dcf7438a13fff737997ee5e8061044c94d4ba53a`，随后远端与主工作副本均已读回。
+该提交只跟进8份文档，515项工程输入与e331372相同；r7文档增量的非作者批准
+见组合证据中的`independent-review/final-docs-r1.md`。
+dcf7438的精确Quality `42032294580 / attempt 1`已三平台success：
+ordinary为macOS2,191/23ignored、Linux2,186/24ignored、Windows2,126/18ignored，
+各14rustdoc、74项候选通过；Linux/macOS各11项OpenSSH与附件摘要核验通过。
+唯一观察器exec16293已退出0并回收，85个子进程全部回收，
+13:39:24 UTC结束，未延长原期限。原件见组合证据的`main-ci/final-readback.json`、
+`exec-readback.json`与`closeout-verification.json`，只签dcf7438及其范围。
+
+当前复用原Ask诊断工作树，分支为`feature/input-and-layout-readiness-20261105`，
+基线dcf7438。文件布局测试将补真实WRITE阻塞和暂停转交的同步条件，保留原断言与预算；
+首次四组专项共9项通过，执行会话54030退出0并回收，517项输入保持；
+父重算176个唯一布局和16次传输回执。新非作者source-r1批准限定源码与专项，
+开放P0/P1/P2/P3为0，两处源码可证的测试时序前提缺口在此限定修订内关闭；
+旧Linux失败的确切根因仍UNKNOWN，最终组合完整门禁结果见下。
+localhost夹具取消preflight误报成功的P2经同测试修前失败/修后25项通过及r2独立复核关闭；
+真实preflight已通过。旧515输入的33be2e68包完成run ec01db306f2d43158d6d8984becf0b83：
+22对AX/JPEG，可见x到独立Return才增加1字节，新Return/Right为1/3；
+Unicode typeText无可见结果/PTY0，原因UNKNOWN。
+限定树Home/Down/End与激活均实际改变选择且PTY/exec零增量，前后Right正控成功。
+累计PTY12、拒绝exec24/9,268字节，不能代签新恢复源码或完整输入/IME。
+应用及前台exec53146均退出0并回收，私有目录删除/端口拒绝，
+548.661秒内清理，原900秒预算保持；新的非作者`input-native-r1`批准限定证据，
+P0/P1/P2=0，仍为PARTIAL_OBSERVED。
+单窗启动恢复从独立分支的18个冻结路径整合，17个逐字节相同，
+terminal仅合并本轮测试注册；61个不同专项最终通过，保留两次首次失败。
+恢复分屏拓扑/比例与未连接标签，显式连接才进入当前认证流程；
+不恢复OS外框，不创建多个OS窗口。新的非作者`startup-source-r1`批准冻结源码与专项，
+P0/P1/P2/P3=0；新的`final-combined-r1`批准21个改动Rust文件与520项输入的组合
+源码/门禁/包归属，开放P0/P1/P2/P3=0；正式文档以`final-docs-r2`限定复核为准。
+最终520输入的full-gate-r1因三项test-only Clippy失败退出1并回收；
+父最小修订后full-gate-r2于14:01:24–14:12:28 UTC通过，
+exec88486已实际wait，退出0并回收；520输入前后一致。2,221 ordinary/23ignored、
+app963/2ignored、14rustdoc、Python131run/1skip，格式、严格Clippy、依赖策略及
+附加控制器均通过。共享target、2jobs、四测试线程和原1500秒预算保持。
+build-r1于15:12:27–15:12:57 UTC退出0，exec47106已实际wait/reap；
+构建、门禁及当前520输入一致。新macOS开发包程序SHA为
+`99cd7f6955735b18686df30626d68688c8de1f2fb3b1ceba2ae6329f3b49b9ae`，
+包结构/五个成员/41assets已核对，未安装、签名或发布。
+新包run`60c040c7da1a4cadbab99a1a2d78f520`完成同一隔离目录的两次原生启动：
+六对AX/JPEG记录初始62%、选择缺失态、调整67%、切中文、显式保存与重启保持。
+按合成seed与实际操作重建的完整布局唯一匹配退出后的摘要，UUID/引用/顺序保持；
+未选窗口和窗口顺序保持，两次raw state摘要相同。原state只留摘要，已随private删除。
+两次应用与exec22504均退出0/reaped，原600秒TTL内完成清理，无本轮活进程。
+本次未点击Connect，没有网络审计，不代签真实认证、完整外观/输入或多窗口。
+新的`restore-native-r1`为APPROVE_SCOPED_RESTORE_EVIDENCE / PARTIAL_OBSERVED，
+开放P0/P1/P2/P3=0，不授予完整native/finish；
+冻结及收尾见`native/restore-verification-r1.json`。
+本轮官方依赖检查于13:09:23–13:09:39 UTC通过104条要求，无版本变动；
+证据位于`work/input-and-layout-readiness-20261105/`。
+
+## 已集成：工作区组合
+
+组合工作副本复用原分屏工作树，分支为 `feature/workspace-integration-20261105`。
 组合源码提交 `e3313722b20b0c3f5461ea8a4f194fec51c0adea` 已推送本分支。
 它组合以下已审查提交和冻结导航源码；原515输入的本机组合门禁与非作者源码/证据审查通过，
 后续测试诊断有独立批准和新的完整门禁，53对原生捕获获限定证据批准，状态仍PARTIAL_OBSERVED。
@@ -62,7 +117,8 @@ Tab聚焦后Right由50%变55%且该段为0。合并保留三shell，保存仅有
 14rustdoc、Python131run/1skip，app933/2ignored，修订515输入前后一致；
 exec36492退出0/reaped。两项exact专项各1passed，布局176/176组合。
 官方依赖freshness-r2在11:59:34–11:59:51 UTC通过104条要求，无版本变动。
-原包证据保持r1归属；Linux旧失败与两处测试时序前提缺口仍OPEN。
+原包证据保持r1归属；该来源时点的两处测试时序前提缺口尚未关闭，
+本轮已由真实WRITE/暂停交接修订及source-r1限定复核关闭。旧Linux失败确切根因仍UNKNOWN。
 测试诊断的`diagnostic-r1`已APPROVE_SCOPED_DIAGNOSTIC_SOURCE_AND_EVIDENCE，
 限定补丁/两次exact范围内开放P0/P1/P2/P3=0；已绑定e331372中的测试摘要。
 两份报告都不自动签后续更新的最终文档，状态增量另作限定复核。
@@ -142,10 +198,14 @@ Home/End等没有预期导航变化，最后两个终端正控也没有确认服
 2. A的精确CI三平台success，B精确CI因Linux文件布局条件等待失败；失败与原件保留。
    B observer已退出0并回收。文件布局已定位测试前提与诊断缺口，确切根因UNKNOWN；
    阶段诊断、限定验证、新完整门禁及诊断独立复核已通过。
-   精确组合CI已三平台success，74项候选三平台通过；这次绿灯不关闭旧失败根因或时序前提缺口。
+   精确组合CI已三平台success，74项候选三平台通过；该次绿灯本身不关闭旧失败根因。
+   两处时序前提缺口已在本轮源码修订与source-r1限定复核中关闭，确切历史根因仍UNKNOWN。
    文档增量限定复核、主线交付和后续精确SHA的CI应分别记录，不扩大源码/原生批准。
-3. 继续紧凑OS窗口、完整主题×明暗×语言×尺寸、IME/VoiceOver、Windows/Linux桌面，
-   并推进重启恢复、多窗口、真实供应商/CLI和审核目标的完整原生矩阵。
+3. 单窗启动恢复已有本机完整门禁、限定新包重启与非作者源码/原件批准，
+   正式文档、不可变提交与精确新CI分别跟进；
+   并行准备真实Finder文件/目录拖放的审核、取消与确认读回。继续紧凑OS窗口、
+   完整主题×明暗×语言×尺寸、IME/VoiceOver、Windows/Linux桌面、多窗口、
+   真实供应商/CLI和审核目标的完整原生矩阵。
    完整产品目标仍active，具体能力缺口见[路线图](ROADMAP.md)及[能力清单](product/CAPABILITIES.md)。
 4. 仅在功能证据与提交保存后归档无消费者的受管worktree，清理自有分支、进程、容器、网络、镜像。
    管理器曾拒绝仍被使用和主工作副本的归档，不能用shell绕过；不删共享target/base image。

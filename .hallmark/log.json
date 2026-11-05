@@ -2,6 +2,30 @@
   {
     "date": "2026-11-05",
     "scope": "app",
+    "shape": "saved active-window restoration within the native SSH pane workspace",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "restore stable geometry and tabs without runtime authority",
+    "signature": "each restored pane states whether its current profile is available, unsaved or missing, with an explicit Connect action",
+    "sections": [
+      "existing global actions and session strip",
+      "restored per-pane tabs and empty leaves",
+      "disconnected state and precise next action",
+      "existing current-profile authentication and host-key review"
+    ],
+    "imagery": "New520-input package99cd7f69/run60c040c7da1a4cadbab99a1a2d78f520 has6 original2880x1866 AX/JPEG pairs. Old515-input package input followup retains its independent22-pair attribution.",
+    "waived": [],
+    "sweep": "Semantic Palette and Kit controls,bilingual AX,no new colors/fonts/animations.61 distinct restoration focused checks and source review pass; final520-input gate exit0/reaped:2221ordinary/23ignored,14doc,Python131run/1skip. Web render not applicable to Rust/GPUI. Offline two-launch native save/restore retains Chinese,67percent,missing-tab selection and exact layout digest; original600s TTL cleanup verified. Full appearance/platform/input/authentication native matrix remains OPEN.",
+    "native_evidence": "docs/testing/records/2026-11-05-workspace-startup-restore.md",
+    "combined_review": "final-combined-r1 approves scoped21-file Rust combination,520-input gate/build/package binding,P0/P1/P2/P3=0; final documentation follows final-docs-r2",
+    "finish_review": "restore-native-r1 approves offline restoration evidence as PARTIAL_OBSERVED,P0/P1/P2/P3=0; full native/finish remains OPEN"
+  },
+  {
+    "date": "2026-11-05",
+    "scope": "app",
     "shape": "native SSH navigation and pane workspace",
     "theme": [
       "frost",

@@ -4,8 +4,9 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 use keelshell_core::{
-    MAX_LAYOUT_DEPTH, MAX_LAYOUT_PANES, MAX_LAYOUT_TABS, MAX_LAYOUT_TABS_PER_PANE, PaneLayout,
-    PaneNode, PaneNodeId, SplitAxis, ValidationError,
+    LayoutTab, LayoutWindow, MAX_LAYOUT_DEPTH, MAX_LAYOUT_PANES, MAX_LAYOUT_TABS,
+    MAX_LAYOUT_TABS_PER_PANE, PaneLayout, PaneNode, PaneNodeId, SplitAxis, ValidationError,
+    WORKSPACE_LAYOUT_VERSION, WorkspaceLayout,
 };
 use thiserror::Error;
 use uuid::Uuid;
@@ -16,7 +17,7 @@ mod tests;
 /// A rejected session mapping or topology change, with no partial mutation.
 #[derive(Clone, Debug, PartialEq, Eq, Error)]
 pub(super) enum PaneSessionError {
-    /// The authoritative session list contains the same key more than once.
+    /// The authoritative session list or restored tabs map to a repeated key.
     #[error("session keys must be unique")]
     DuplicateSession,
     /// The requested active key is absent from the authoritative session list.
@@ -40,7 +41,7 @@ pub(super) enum PaneSessionError {
     /// The requested pane has no leaf tab collection.
     #[error("pane must identify an existing leaf")]
     UnknownPane,
-    /// The core topology rejected the target, ratio, identity or geometry.
+    /// Core validation rejected the topology or saved window metadata.
     #[error(transparent)]
     Layout(#[from] ValidationError),
 }
@@ -69,7 +70,9 @@ impl<K: Copy + Eq> PaneTabs<K> {
 /// Bounded, ephemeral ownership and selection for session keys in a valid layout.
 ///
 /// Each key occurs in exactly one leaf. Nonempty leaves always select one of
-/// their keys; only the final leaf may be empty. No entity or transport is owned.
+/// their keys. Saved empty leaves survive until explicitly collapsed or populated;
+/// removing their last key then closes them, except for the final leaf.
+/// No entity or transport is owned.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct SessionPanes<K: Copy + Eq + Hash> {
     layout: PaneLayout,
@@ -98,6 +101,51 @@ impl<K: Copy + Eq + Hash> SessionPanes<K> {
         }
     }
 
+    /// Restore topology, tab order and selections using fresh runtime keys.
+    ///
+    /// Validates the whole window before calling `key_for` once per tab in saved
+    /// pane/tab order. Empty leaves retain their IDs and selection. The caller
+    /// must keep mapped entities inert; this constructor owns no sessions.
+    ///
+    /// Returns a core validation error for invalid metadata, or
+    /// [`PaneSessionError::DuplicateSession`] for repeated mapped keys. No partial
+    /// mapping is returned; side effects in `key_for` cannot be rolled back.
+    pub(super) fn restore(
+        window: &LayoutWindow,
+        mut key_for: impl FnMut(&LayoutTab) -> K,
+    ) -> Result<Self, PaneSessionError> {
+        // Reuse the authoritative metadata validator, including tab identities,
+        // leaf coverage and selection, rather than only validating geometry.
+        WorkspaceLayout {
+            version: WORKSPACE_LAYOUT_VERSION,
+            windows: vec![window.clone()],
+            active_window: window.id,
+        }
+        .validate()?;
+
+        let mut keys = HashSet::new();
+        let mut panes = HashMap::with_capacity(window.panes.len());
+        for pane in &window.panes {
+            let mut tabs = Vec::with_capacity(pane.tabs.len());
+            let mut selected = None;
+            for tab in &pane.tabs {
+                let key = key_for(tab);
+                if !keys.insert(key) {
+                    return Err(PaneSessionError::DuplicateSession);
+                }
+                tabs.push(key);
+                if pane.active_tab == Some(tab.id) {
+                    selected = Some(key);
+                }
+            }
+            panes.insert(pane.pane, PaneTabs { tabs, selected });
+        }
+        Ok(Self {
+            layout: window.layout.clone(),
+            panes,
+        })
+    }
+
     /// Borrow the topology without exposing mutable layout state.
     pub(super) fn layout(&self) -> &PaneLayout {
         &self.layout
@@ -108,9 +156,16 @@ impl<K: Copy + Eq + Hash> SessionPanes<K> {
         self.layout.active
     }
 
-    /// Return the active leaf's selected key, or `None` for the empty workspace.
+    /// Return the active leaf's selected key, or `None` for an empty active leaf.
     pub(super) fn active_session(&self) -> Option<K> {
         self.selected_in(self.active_pane())
+    }
+
+    /// Select a leaf without inventing a key for an empty saved pane.
+    ///
+    /// Unknown leaves fail without changing the active pane or any selection.
+    pub(super) fn select_pane(&mut self, pane: PaneNodeId) -> bool {
+        self.panes.contains_key(&pane) && self.layout.set_active(pane).is_ok()
     }
 
     /// Find the sole leaf owning a registered key.
@@ -148,9 +203,10 @@ impl<K: Copy + Eq + Hash> SessionPanes<K> {
     /// Reconcile the authoritative keys, retaining surviving owners and tab order.
     ///
     /// Removed selections use the next surviving tab, then the preceding tab.
-    /// Empty leaves close before new keys are appended to the resulting active
-    /// leaf in input order. `active`, when present, selects its owner last;
-    /// `None` preserves the surviving selection or its removal fallback.
+    /// Leaves emptied by removals close before new keys are appended to the
+    /// resulting active leaf in input order. Untouched saved empty leaves stay.
+    /// `active`, when present, selects its owner last; `None` preserves the
+    /// surviving selection or its removal fallback.
     ///
     /// Rejects duplicates, an unknown active key or exceeded limits atomically.
     pub(super) fn reconcile(
@@ -186,7 +242,10 @@ impl<K: Copy + Eq + Hash> SessionPanes<K> {
             }
         }
         for pane in candidate.layout.leaf_ids()? {
-            if candidate.panes.len() > 1 && candidate.tabs_in(pane).is_empty() {
+            if candidate.panes.len() > 1
+                && !self.tabs_in(pane).is_empty()
+                && candidate.tabs_in(pane).is_empty()
+            {
                 candidate.layout.close(pane)?;
                 candidate.panes.remove(&pane);
             }
@@ -357,7 +416,8 @@ impl<K: Copy + Eq + Hash> SessionPanes<K> {
     /// Remove a registered key and return the resulting active selection.
     ///
     /// A removed selection prefers its same-index successor, then its predecessor.
-    /// Empty leaves close except for the final leaf. Unknown keys fail atomically.
+    /// Its owner closes if emptied, except for the final leaf. Other empty leaves
+    /// stay untouched. Unknown keys fail atomically.
     pub(super) fn remove(&mut self, key: K) -> Result<Option<K>, PaneSessionError> {
         let owner = self.pane_for(key).ok_or(PaneSessionError::UnknownSession)?;
         let mut candidate = self.clone();

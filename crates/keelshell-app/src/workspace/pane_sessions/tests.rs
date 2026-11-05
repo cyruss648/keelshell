@@ -1,6 +1,329 @@
 use super::*;
+use keelshell_core::LayoutPane;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
+
+fn saved_tab(id: u32) -> LayoutTab {
+    LayoutTab {
+        id: Uuid::from_u128(u128::from(id)),
+        connection_id: Some(Uuid::from_u128(900)),
+    }
+}
+
+fn saved_window() -> Result<LayoutWindow, ValidationError> {
+    let [first, second, third, fourth] = [1, 2, 3, 4].map(|id| PaneNodeId(Uuid::from_u128(id)));
+    let mut layout = PaneLayout::single(first)?;
+    layout.split(
+        first,
+        second,
+        PaneNodeId(Uuid::from_u128(11)),
+        SplitAxis::Horizontal,
+        6400,
+    )?;
+    layout.split(
+        second,
+        third,
+        PaneNodeId(Uuid::from_u128(12)),
+        SplitAxis::Vertical,
+        3500,
+    )?;
+    layout.split(
+        third,
+        fourth,
+        PaneNodeId(Uuid::from_u128(13)),
+        SplitAxis::Horizontal,
+        7250,
+    )?;
+    layout.set_active(second)?;
+    layout.nodes.reverse();
+    Ok(LayoutWindow {
+        id: Uuid::from_u128(1000),
+        layout,
+        panes: vec![
+            LayoutPane {
+                pane: first,
+                tabs: vec![
+                    saved_tab(101),
+                    LayoutTab {
+                        id: Uuid::from_u128(102),
+                        connection_id: None,
+                    },
+                    saved_tab(103),
+                ],
+                active_tab: Some(Uuid::from_u128(102)),
+            },
+            LayoutPane {
+                pane: second,
+                tabs: vec![saved_tab(201), saved_tab(202)],
+                active_tab: Some(Uuid::from_u128(202)),
+            },
+            LayoutPane {
+                pane: third,
+                tabs: Vec::new(),
+                active_tab: None,
+            },
+            LayoutPane {
+                pane: fourth,
+                tabs: Vec::new(),
+                active_tab: None,
+            },
+        ],
+    })
+}
+
+fn saved_key(tab: &LayoutTab) -> u32 {
+    tab.id.as_u128() as u32
+}
+
+#[test]
+fn restore_preserves_topology_tab_order_and_each_selection() -> TestResult {
+    let mut window = saved_window()?;
+    let first = window.panes[0].pane;
+    let second = window.panes[1].pane;
+    window.panes.reverse();
+    let mut mapped = Vec::new();
+    let mut panes = SessionPanes::restore(&window, |tab| {
+        mapped.push(tab.clone());
+        saved_key(tab)
+    })?;
+    assert_eq!(
+        mapped,
+        window
+            .panes
+            .iter()
+            .flat_map(|pane| pane.tabs.iter().cloned())
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(panes.layout(), &window.layout);
+    assert_eq!(panes.tabs_in(first), &[101, 102, 103]);
+    assert_eq!(panes.tabs_in(second), &[201, 202]);
+    assert_eq!(panes.selected_in(first), Some(102));
+    assert_eq!(panes.active_pane(), second);
+    assert_eq!(panes.active_session(), Some(202));
+    assert_eq!(panes.displayed_sessions(), vec![102, 202]);
+    let restored = panes.clone();
+    panes.reconcile(&[202, 103, 201, 102, 101], Some(202))?;
+    assert_eq!(panes, restored);
+    assert_keys(&panes, &[101, 102, 103, 201, 202])
+}
+
+#[test]
+fn restore_keeps_selected_empty_leaf_when_other_leaves_have_tabs() -> TestResult {
+    let mut window = saved_window()?;
+    let empty = window.panes[3].pane;
+    window.layout.set_active(empty)?;
+    let mut panes = SessionPanes::restore(&window, saved_key)?;
+    assert_eq!(panes.active_pane(), empty);
+    assert_eq!(panes.active_session(), None);
+    assert_eq!(panes.displayed_sessions(), vec![102, 202]);
+    let restored = panes.clone();
+    for _ in 0..3 {
+        panes.reconcile(&[202, 103, 201, 102, 101], None)?;
+        assert_eq!(panes, restored);
+    }
+    assert_keys(&panes, &[101, 102, 103, 201, 202])
+}
+
+#[test]
+fn selecting_saved_empty_pane_has_no_active_key_and_rejects_unknown_leaf() -> TestResult {
+    let window = saved_window()?;
+    let mut panes = SessionPanes::restore(&window, saved_key)?;
+    assert!(panes.select_pane(window.panes[2].pane));
+    assert_eq!(panes.active_session(), None);
+    assert_eq!(panes.selected_in(window.panes[0].pane), Some(102));
+    let before = panes.clone();
+    assert!(!panes.select_pane(PaneNodeId(Uuid::from_u128(5000))));
+    assert_eq!(panes, before);
+    assert!(panes.select(202));
+    assert_eq!(panes.active_pane(), window.panes[1].pane);
+    Ok(())
+}
+
+#[test]
+fn restoring_multiple_empty_leaves_survives_repeated_empty_reconciliation() -> TestResult {
+    let mut window = saved_window()?;
+    for pane in &mut window.panes {
+        pane.tabs.clear();
+        pane.active_tab = None;
+    }
+    let mut mapped = 0;
+    let mut panes = SessionPanes::restore(&window, |_| {
+        mapped += 1;
+        mapped
+    })?;
+    assert_eq!(mapped, 0);
+    assert_eq!(panes.layout(), &window.layout);
+    assert_eq!(panes.active_pane(), window.panes[1].pane);
+    assert_eq!(panes.active_session(), None);
+    let restored = panes.clone();
+    for _ in 0..3 {
+        panes.reconcile(&[], None)?;
+        assert_eq!(panes, restored);
+    }
+    assert_keys(&panes, &[])
+}
+
+#[test]
+fn reconciliation_removes_emptied_populated_leaves_but_retains_saved_empty_leaves() -> TestResult {
+    let window = saved_window()?;
+    let [first, second, third, fourth] = std::array::from_fn(|index| window.panes[index].pane);
+    let mut panes = SessionPanes::restore(&window, saved_key)?;
+    let mut expected_layout = window.layout.clone();
+    expected_layout.close(second)?;
+    panes.reconcile(&[101, 102, 103], None)?;
+    assert_eq!(panes.layout(), &expected_layout);
+    assert_eq!(panes.layout().leaf_ids()?, vec![first, third, fourth]);
+    assert_eq!(panes.active_pane(), third);
+    assert_eq!(panes.active_session(), None);
+    assert_keys(&panes, &[101, 102, 103])?;
+
+    expected_layout.close(first)?;
+    panes.reconcile(&[], None)?;
+    assert_eq!(panes.layout(), &expected_layout);
+    assert_eq!(panes.layout().leaf_ids()?, vec![third, fourth]);
+    let empty = panes.clone();
+    panes.reconcile(&[], None)?;
+    assert_eq!(panes, empty);
+    assert_keys(&panes, &[])
+}
+
+#[test]
+fn restored_empty_leaf_closes_after_population_and_last_key_removal() -> TestResult {
+    let mut window = saved_window()?;
+    let populated = window.panes[2].pane;
+    window.layout.set_active(populated)?;
+    for reconcile_removal in [false, true] {
+        let mut panes = SessionPanes::restore(&window, saved_key)?;
+        panes.reconcile(&[101, 102, 103, 201, 202, 301, 302], Some(302))?;
+        assert_eq!(panes.tabs_in(populated), &[301, 302]);
+        assert_eq!(panes.layout(), &window.layout);
+        panes.reconcile(&[101, 102, 103, 201, 202, 302], None)?;
+        assert_eq!(panes.layout(), &window.layout);
+        assert_eq!(panes.selected_in(populated), Some(302));
+        if reconcile_removal {
+            panes.reconcile(&[101, 102, 103, 201, 202], None)?;
+        } else {
+            assert_eq!(panes.remove(302)?, None);
+        }
+        let mut expected_layout = window.layout.clone();
+        expected_layout.close(populated)?;
+        assert_eq!(panes.layout(), &expected_layout);
+        assert_eq!(panes.active_pane(), window.panes[3].pane);
+        let removed = panes.clone();
+        panes.reconcile(&[202, 201, 103, 102, 101], None)?;
+        assert_eq!(panes, removed);
+        assert_keys(&panes, &[101, 102, 103, 201, 202])?;
+    }
+    Ok(())
+}
+
+fn assert_restore_metadata_rejected(window: &LayoutWindow, field: &str) -> TestResult {
+    let before = window.clone();
+    let mut mapped = 0;
+    let error = SessionPanes::restore(window, |_| {
+        mapped += 1;
+        mapped
+    })
+    .err()
+    .ok_or("invalid metadata must be rejected")?;
+    assert!(
+        matches!(&error, PaneSessionError::Layout(error) if error.field == field),
+        "expected {field}, got {error:?}"
+    );
+    assert_eq!(mapped, 0);
+    assert_eq!(window, &before);
+    Ok(())
+}
+
+#[test]
+fn restore_rejects_invalid_metadata_before_mapping_runtime_keys() -> TestResult {
+    type CorruptWindow = fn(&mut LayoutWindow);
+    let cases: &[(&str, CorruptWindow)] = &[
+        ("workspace_layout.window.id", |window| {
+            window.id = Uuid::nil();
+        }),
+        ("pane_layout.active", |window| {
+            window.layout.active = window.layout.root;
+        }),
+        ("workspace_layout.panes", |window| {
+            window.panes.pop();
+        }),
+        ("workspace_layout.pane", |window| {
+            window.panes[2].pane = window.panes[0].pane;
+        }),
+        ("workspace_layout.pane", |window| {
+            window.panes[2].pane = window.layout.root;
+        }),
+        ("workspace_layout.tab.id", |window| {
+            window.panes[0].tabs[0].id = Uuid::nil();
+        }),
+        ("workspace_layout.tab.id", |window| {
+            window.panes[1].tabs[0].id = window.panes[0].tabs[0].id;
+        }),
+        ("workspace_layout.tab.connection_id", |window| {
+            window.panes[1].tabs[0].connection_id = Some(Uuid::nil());
+        }),
+        ("workspace_layout.pane.active_tab", |window| {
+            window.panes[1].active_tab = None;
+        }),
+        ("workspace_layout.pane.active_tab", |window| {
+            window.panes[1].active_tab = window.panes[0].active_tab;
+        }),
+        ("workspace_layout.pane.active_tab", |window| {
+            window.panes[2].active_tab = Some(Uuid::from_u128(101));
+        }),
+    ];
+    for (field, corrupt) in cases {
+        let mut window = saved_window()?;
+        corrupt(&mut window);
+        assert_restore_metadata_rejected(&window, field)?;
+    }
+    Ok(())
+}
+
+#[test]
+fn restore_rejects_pane_and_window_tab_overflow_before_mapping() -> TestResult {
+    let mut window = saved_window()?;
+    window.panes[0].tabs = (1..=33).map(saved_tab).collect();
+    window.panes[0].active_tab = Some(Uuid::from_u128(1));
+    assert_restore_metadata_rejected(&window, "workspace_layout.pane.tabs")?;
+
+    let mut window = saved_window()?;
+    for (index, pane) in window.panes.iter_mut().enumerate() {
+        let first = index as u32 * 32 + 1;
+        pane.tabs = (first..first + 32).map(saved_tab).collect();
+        pane.active_tab = Some(Uuid::from_u128(u128::from(first)));
+    }
+    let extra = PaneNodeId(Uuid::from_u128(5));
+    window.layout.split(
+        window.panes[3].pane,
+        extra,
+        PaneNodeId(Uuid::from_u128(14)),
+        SplitAxis::Vertical,
+        5000,
+    )?;
+    window.panes.push(LayoutPane {
+        pane: extra,
+        tabs: vec![saved_tab(129)],
+        active_tab: Some(Uuid::from_u128(129)),
+    });
+    assert_restore_metadata_rejected(&window, "workspace_layout.tabs")
+}
+
+#[test]
+fn restore_rejects_duplicate_mapped_keys_within_and_across_leaves() -> TestResult {
+    let window = saved_window()?;
+    let before = window.clone();
+    for duplicate_tab in [103, 201] {
+        let result = SessionPanes::restore(&window, |tab| {
+            let key = saved_key(tab);
+            if key == duplicate_tab { 101 } else { key }
+        });
+        assert_eq!(result, Err(PaneSessionError::DuplicateSession));
+        assert_eq!(window, before);
+    }
+    Ok(())
+}
 
 #[test]
 fn replacing_inactive_session_preserves_owner_geometry_and_other_selection() -> TestResult {
@@ -727,6 +1050,9 @@ fn unknown_keys_and_nonleaf_lookups_do_not_change_runtime_state() -> TestResult 
 fn runtime_keys_need_neither_debug_nor_default() -> TestResult {
     #[derive(Clone, Copy, PartialEq, Eq, Hash)]
     struct Key(u32);
+
+    let restored = SessionPanes::restore(&saved_window()?, |tab| Key(saved_key(tab)))?;
+    assert!(restored.active_session() == Some(Key(202)));
 
     let mut panes = SessionPanes::new();
     panes.reconcile(&[Key(1), Key(2)], Some(Key(2)))?;

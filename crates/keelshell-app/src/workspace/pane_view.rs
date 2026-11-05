@@ -63,6 +63,7 @@ impl Workspace {
             .borrow_mut()
             .retain(|id, _| nodes.contains(id));
         self.pane_tab_ids.retain(|id, _| ids.contains(id));
+        self.restored_tabs.retain(|id, _| ids.contains(id));
         for id in ids {
             self.pane_tab_ids
                 .entry(id)
@@ -92,6 +93,11 @@ impl Workspace {
             Ok(()) => {
                 self.pane_generation = self.pane_generation.wrapping_add(1);
                 self.pane_zoomed = false;
+                self.active = self
+                    .session_panes
+                    .active_session()
+                    .and_then(|id| self.tabs.iter().position(|tab| tab.entity_id() == id))
+                    .unwrap_or(self.tabs.len());
                 self.status = Message::new(
                     "已合并面板，会话继续保持。",
                     "Panes merged. Sessions remain open.",
@@ -121,7 +127,10 @@ impl Workspace {
                                 .pane_tab_ids
                                 .get(key)
                                 .ok_or(PaneSnapshotError::MissingIdentity)?,
-                            connection_id: self.remote_connection_ids.get(key).copied(),
+                            connection_id: self.restored_tabs.get(key).map_or_else(
+                                || self.remote_connection_ids.get(key).copied(),
+                                |tab| tab.connection_id,
+                            ),
                         })
                     })
                     .collect::<Result<Vec<_>, PaneSnapshotError>>()?;
@@ -288,7 +297,7 @@ impl Workspace {
         }
     }
 
-    fn compact_panes(&self) -> bool {
+    pub(super) fn compact_panes(&self) -> bool {
         let available = self.pane_canvas_size.get();
         let minimum = self.pane_minimum(self.session_panes.layout().root);
         self.session_panes.layout().nodes.len() > 1
@@ -576,13 +585,13 @@ impl Workspace {
     #[inline(never)]
     fn render_session_pane(&self, pane: PaneNodeId, cx: &mut Context<Self>) -> AnyElement {
         let Some(id) = self.session_panes.selected_in(pane) else {
-            return div().size_full().into_any_element();
+            return self.render_empty_restored_pane(pane, cx);
         };
         let Some(terminal) = self.tabs.iter().find(|tab| tab.entity_id() == id) else {
             return div().size_full().into_any_element();
         };
         let visual = crate::design::palette(cx);
-        let active = self.tabs.get(self.active).map(Entity::entity_id) == Some(id);
+        let active = self.session_panes.active_pane() == pane;
         let mut view = div()
             .id(("terminal-pane", id))
             .test_support()
@@ -597,6 +606,11 @@ impl Workspace {
             .border_color(rgb(if active { visual.accent } else { visual.border }));
         if self.session_panes.layout().nodes.len() > 1 {
             view = view.child(self.pane_header(pane, id, cx));
+        }
+        if self.restored_tabs.contains_key(&id) {
+            return view
+                .child(self.render_restored_tab(id, cx))
+                .into_any_element();
         }
         view.child(self.reconnect_banner(id, cx))
             .child(div().flex_1().min_h_0().min_w_0().child(terminal.clone()))
@@ -628,7 +642,7 @@ impl Workspace {
                     Button::new(("pane-tab", key))
                         .ghost()
                         .compact()
-                        .label(tab.read(cx).title.clone())
+                        .label(self.session_title(tab.entity_id(), cx))
                         .selected(key == selected)
                         .toggled(key == selected)
                         .on_click(cx.listener(move |view, _, window, cx| {

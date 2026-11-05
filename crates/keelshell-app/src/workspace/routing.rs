@@ -19,6 +19,7 @@ pub(super) struct ConnectRoute {
     /// Whether this attempt opted into server-driven keyboard-interactive auth.
     pub(super) keyboard_interactive: bool,
     pub(super) reconnect: Option<super::reconnect::Ticket>,
+    pub(super) restored: Option<super::startup_restore::RestoredTarget>,
     pub(super) background: bool,
     pub(super) awaiting_interaction: bool,
     pub(super) deferred_approval: Option<HostApproval>,
@@ -89,6 +90,12 @@ impl Workspace {
         let Some(route) = &self.connect_route else {
             return false;
         };
+        if route
+            .restored
+            .is_some_and(|target| !self.restored_target_current(target))
+        {
+            return false;
+        }
         if route.ephemeral {
             return route.snapshot.hops().len() == 1
                 && route.reconnect.is_none()
@@ -148,6 +155,7 @@ impl Workspace {
             keyboard_interactive_receiver: None,
             keyboard_interactive: false,
             reconnect: None,
+            restored: None,
             background: false,
             awaiting_interaction: false,
             deferred_approval: None,
@@ -202,6 +210,7 @@ impl Workspace {
             keyboard_interactive_receiver: None,
             keyboard_interactive: false,
             reconnect: None,
+            restored: None,
             background: false,
             awaiting_interaction: false,
             deferred_approval: None,
@@ -711,6 +720,7 @@ impl Workspace {
                         } else {
                             let snapshot = route.snapshot.clone();
                             let ephemeral = route.ephemeral;
+                            let restored = route.restored;
                             view.connect_route = None;
                             if let Some(ticket) = reconnect {
                                 if !view.finish_reconnect(ticket, session, snapshot, window, cx) {
@@ -727,6 +737,7 @@ impl Workspace {
                                         ),
                                         connection_id: (!ephemeral).then_some(connection.id),
                                         split: None,
+                                        restored,
                                     },
                                     window,
                                     cx,
