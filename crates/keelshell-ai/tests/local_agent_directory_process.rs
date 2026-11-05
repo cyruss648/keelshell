@@ -3,8 +3,9 @@
 
 use keelshell_ai::{
     ContextDraft, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
-    LocalAgentKind, LocalAgentLimits, LocalAgentWorkingDirectory, LocalAskProgress,
-    RequestCancellation, run_local_agent_directory_launcher,
+    LocalAgentKind, LocalAgentLimits, LocalAgentWorkingDirectory, LocalAskDiagnostic,
+    LocalAskDiagnostics, LocalAskErrorKind, LocalAskProgress, RequestCancellation,
+    run_local_agent_directory_launcher,
 };
 use serde_json::{Value, json};
 use std::{
@@ -279,16 +280,22 @@ fn credential() -> LocalAgentCredential {
 async fn await_file(
     path: &std::path::Path,
     task: &mut tokio::task::JoinHandle<Result<keelshell_ai::LocalAgentReply, LocalAgentError>>,
+    kind: LocalAgentKind,
+    case: &'static str,
 ) {
     let deadline = Instant::now() + ASK_READINESS_DEADLINE;
     while !path.exists() {
         if task.is_finished() {
-            let outcome = task.await.unwrap().map(|reply| reply.frame_count());
-            panic!("owned request ended before readiness: {outcome:?}");
+            let outcome = task
+                .await
+                .unwrap()
+                .map(|reply| reply.frame_count())
+                .map_err(|error| LocalAskErrorKind::from(&error));
+            panic!("owned request ended before readiness: case={case} kind={kind:?} {outcome:?}");
         }
         assert!(
             Instant::now() < deadline,
-            "bounded owned readiness; request still running"
+            "bounded owned readiness; request still running: case={case} kind={kind:?}"
         );
         tokio::time::sleep(Duration::from_millis(5)).await;
     }
@@ -310,22 +317,34 @@ fn assert_child_cwd(actual: &Value, expected: &std::path::Path) {
 
 // Test-only receipt times observe bounded public facts. They are not backend
 // phase durations, authorization, or a renewed request deadline.
-async fn observed_first_ask(
+async fn observed_ask(
     fixture: &Fixture,
     approved: keelshell_ai::ApprovedLocalAsk,
+    cancellation: &RequestCancellation,
+    case: &'static str,
 ) -> Result<keelshell_ai::LocalAgentReply, LocalAgentError> {
-    observed_first_ask_with_writer(fixture, approved, &mut std::io::stdout()).await
+    observed_ask_with_writer(
+        fixture,
+        approved,
+        cancellation,
+        case,
+        &mut std::io::stdout(),
+    )
+    .await
 }
 
-async fn observed_first_ask_with_writer(
+async fn observed_ask_with_writer(
     fixture: &Fixture,
     approved: keelshell_ai::ApprovedLocalAsk,
+    cancellation: &RequestCancellation,
+    case: &'static str,
     writer: &mut impl Write,
 ) -> Result<keelshell_ai::LocalAgentReply, LocalAgentError> {
     let (progress, receiver) = LocalAskProgress::channel();
-    let cancellation = RequestCancellation::new();
+    let (diagnostics, diagnostic_receiver) = LocalAskDiagnostics::channel();
+    let progress = progress.with_diagnostics(diagnostics);
     let started = Instant::now();
-    let ask = LocalAgentClient.ask_with_progress(approved, credential(), &cancellation, progress);
+    let ask = LocalAgentClient.ask_with_progress(approved, credential(), cancellation, progress);
     tokio::pin!(ask);
     let mut observed = Vec::new();
     let outcome = loop {
@@ -346,31 +365,87 @@ async fn observed_first_ask_with_writer(
             observed.push(fact);
         }
     }
+    let diagnostics: Vec<_> = std::iter::from_fn(|| diagnostic_receiver.try_recv().ok())
+        .take(16)
+        .map(diagnostic_fact)
+        .collect();
     // Only owned fixture phase/pid facts survive. Never print cwd, argv,
     // control frames, stdin, output, endpoints or credential values.
     let events = observed_owned_child_phases(fixture);
     // Output is deferred until Ask has completed. Diagnostic IO failure cannot
     // unwind an active request or replace its original success/error result.
     for fact in &observed {
-        let _ = writeln!(writer, "directory-ci-stage {fact}");
+        let _ = writeln!(
+            writer,
+            "directory-ci-stage {}",
+            json!({"case":case, "kind":format!("{:?}",fixture.kind), "observation":fact})
+        );
     }
     let _ = writeln!(
         writer,
         "directory-ci-outcome {}",
         json!({
-            "case":"selected_actual_child_cwd",
+            "case":case,
             "kind":format!("{:?}", fixture.kind),
             "original_ask_timeout_ms":8000,
             "elapsed_us":started.elapsed().as_micros(),
             "ok":outcome.is_ok(),
-            "error":outcome.as_ref().err().map(|error| format!("{error:?}")),
+            "error":outcome.as_ref().err().map(|error| format!("{:?}", LocalAskErrorKind::from(error))),
             "observations":observed,
+            "diagnostics":diagnostics,
             "owned_child_phases":events,
             "owned_fixture_executable_bytes":std::fs::metadata(&fixture.executable).ok().map(|metadata| metadata.len()),
-            "scratch_entry_count":std::fs::read_dir(&fixture.scratch).ok().map(|entries| entries.count())
+            "scratch":observed_scratch_entries(&fixture.scratch)
         })
     );
     outcome
+}
+
+fn diagnostic_fact(event: LocalAskDiagnostic) -> Value {
+    match event {
+        LocalAskDiagnostic::Io {
+            operation,
+            kind,
+            raw_os_error,
+        } => json!({
+            "event":"io",
+            "operation":format!("{operation:?}"),
+            "kind":format!("{kind:?}"),
+            "raw_os_error":raw_os_error,
+        }),
+        LocalAskDiagnostic::WorkerJoin { operation, kind } => json!({
+            "event":"worker_join",
+            "operation":format!("{operation:?}"),
+            "kind":format!("{kind:?}"),
+        }),
+        LocalAskDiagnostic::MissingCurrentDirectory => json!({"event":"missing_current_directory"}),
+        LocalAskDiagnostic::ResultBeforeClose { result } => json!({
+            "event":"result_before_close",
+            "ok":result.is_ok(),
+            "error":result.err().map(|error|format!("{error:?}")),
+        }),
+        LocalAskDiagnostic::CloseResult { result } => json!({
+            "event":"close_result",
+            "ok":result.is_ok(),
+            "error":result.err().map(|error|format!("{error:?}")),
+        }),
+        // A new event must receive an explicit field allow-list before its
+        // contents can be copied into CI output.
+        _ => json!({"event":"unrecognized"}),
+    }
+}
+
+fn observed_scratch_entries(path: &std::path::Path) -> Value {
+    let Ok(entries) = std::fs::read_dir(path) else {
+        return json!({"read_ok":false});
+    };
+    let entries: Vec<_> = entries.take(65).collect();
+    json!({
+        "read_ok":true,
+        "entry_count":entries.len().min(64),
+        "limited":entries.len()>64,
+        "entry_errors":entries.iter().take(64).filter(|entry| entry.is_err()).count()
+    })
 }
 
 struct BrokenPipeWriter {
@@ -395,16 +470,24 @@ async fn observer_io_error_controller() {
     let task_attempts = Arc::clone(&attempts);
     let task_fixture = Arc::clone(&fixture);
     let mut task = tokio::spawn(async move {
-        observed_first_ask_with_writer(
+        observed_ask_with_writer(
             &task_fixture,
             approved,
+            &RequestCancellation::new(),
+            "observer-held-cwd",
             &mut BrokenPipeWriter {
                 attempts: task_attempts,
             },
         )
         .await
     });
-    await_file(&fixture.root.path().join("ask-ready"), &mut task).await;
+    await_file(
+        &fixture.root.path().join("ask-ready"),
+        &mut task,
+        fixture.kind,
+        "observer-held-cwd",
+    )
+    .await;
     assert!(!task.is_finished(), "held Ask is actually pending");
     assert_eq!(
         attempts.load(Ordering::SeqCst),
@@ -427,9 +510,11 @@ async fn observer_io_error_controller() {
     let approved = fixture.review("wait", None).await;
     let attempts = Arc::new(AtomicUsize::new(0));
     let started = Instant::now();
-    let outcome = observed_first_ask_with_writer(
+    let outcome = observed_ask_with_writer(
         &fixture,
         approved,
+        &RequestCancellation::new(),
+        "observer-timeout",
         &mut BrokenPipeWriter {
             attempts: Arc::clone(&attempts),
         },
@@ -456,6 +541,91 @@ async fn observer_io_error_controller() {
         std::io::stdout(),
         "observer IO-error wait: original 8000ms Timeout preserved; elapsed_us={}; child reaped; scratch cleaned",
         started.elapsed().as_micros()
+    );
+    scratch_failure_receipts_are_redacted().await;
+    scratch_directory_observation_is_bounded();
+}
+
+async fn scratch_failure_receipts_are_redacted() {
+    for kind in [LocalAgentKind::Codex, LocalAgentKind::ClaudeCode] {
+        let fixture = Fixture::new(kind, false);
+        let approved = fixture
+            .review("diagnostic-context-must-not-be-logged", None)
+            .await;
+        // Remove only this empty fixture-owned parent after review. The real
+        // request must fail while creating scratch, before any CLI is launched.
+        std::fs::remove_dir(&fixture.scratch).unwrap();
+        let mut bytes = Vec::new();
+        let outcome = observed_ask_with_writer(
+            &fixture,
+            approved,
+            &RequestCancellation::new(),
+            "scratch-parent-missing",
+            &mut bytes,
+        )
+        .await;
+        assert_eq!(outcome.unwrap_err(), LocalAgentError::ScratchFailed);
+        assert!(fixture.records().is_empty());
+        assert!(!fixture.root.path().join("ask-ready").exists());
+        let text = String::from_utf8(bytes).unwrap();
+        let receipt: Value = serde_json::from_str(
+            text.lines()
+                .find_map(|line| line.strip_prefix("directory-ci-outcome "))
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(receipt["case"], "scratch-parent-missing");
+        assert_eq!(receipt["kind"], format!("{kind:?}"));
+        assert_eq!(receipt["error"], "ScratchFailed");
+        assert_eq!(receipt["ok"], false);
+        assert_eq!(receipt["observations"], json!([]));
+        assert_eq!(receipt["scratch"]["read_ok"], false);
+        assert!(
+            receipt["diagnostics"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|event| {
+                    event["event"] == "io"
+                        && event["operation"] == "ScratchCreate"
+                        && event["kind"] == "NotFound"
+                        && (event["raw_os_error"].is_null() || event["raw_os_error"].is_i64())
+                }),
+            "the real failed operation retains its IO category"
+        );
+        for excluded in [
+            "diagnostic-context-must-not-be-logged",
+            "fixture-only-ephemeral-key",
+            fixture.root.path().to_str().unwrap(),
+            fixture.scratch.to_str().unwrap(),
+            fixture.executable.to_str().unwrap(),
+        ] {
+            assert!(
+                !text.contains(excluded),
+                "diagnostic leaked request material"
+            );
+        }
+    }
+    let _ = writeln!(
+        std::io::stdout(),
+        "scratch diagnostic receipt: both kinds retain ScratchFailed/NotFound; no child or request material"
+    );
+}
+
+fn scratch_directory_observation_is_bounded() {
+    let root = tempfile::tempdir().unwrap();
+    for index in 0..65 {
+        std::fs::write(root.path().join(format!("private-entry-{index}")), []).unwrap();
+    }
+    let observation = observed_scratch_entries(root.path());
+    assert_eq!(observation["entry_count"], 64);
+    assert_eq!(observation["limited"], true);
+    assert_eq!(observation["entry_errors"], 0);
+    assert!(!observation.to_string().contains("private-entry"));
+    assert!(
+        !observation
+            .to_string()
+            .contains(root.path().to_str().unwrap())
     );
 }
 
@@ -489,7 +659,14 @@ async fn controller() {
         let fixture = Fixture::new(kind, false);
         let approved = fixture.review("cwd", None).await;
         assert!(fixture.records().is_empty(), "preview does not start CLI");
-        let reply = observed_first_ask(&fixture, approved).await.unwrap();
+        let reply = observed_ask(
+            &fixture,
+            approved,
+            &RequestCancellation::new(),
+            "selected-actual-child-cwd",
+        )
+        .await
+        .unwrap();
         let answer: Value = serde_json::from_str(reply.text()).unwrap();
         assert_child_cwd(&answer["cwd"], &fixture.selected);
         assert_eq!(answer["reviewed_marker"], true);
@@ -521,14 +698,25 @@ async fn controller() {
             json!({"case":"selected_actual_child_cwd","kind":format!("{kind:?}"),"probes_isolated":true,"fixed_policy":true,"scratch_cleaned":true})
         );
 
-        let fixture = Fixture::new(kind, false);
+        let fixture = Arc::new(Fixture::new(kind, false));
         let approved = fixture.review("held-cwd", None).await;
+        let task_fixture = Arc::clone(&fixture);
         let mut task = tokio::spawn(async move {
-            LocalAgentClient
-                .ask(approved, credential(), &RequestCancellation::new())
-                .await
+            observed_ask(
+                &task_fixture,
+                approved,
+                &RequestCancellation::new(),
+                "selected-held-cwd",
+            )
+            .await
         });
-        await_file(&fixture.root.path().join("ask-ready"), &mut task).await;
+        await_file(
+            &fixture.root.path().join("ask-ready"),
+            &mut task,
+            kind,
+            "selected-held-cwd",
+        )
+        .await;
         #[cfg(unix)]
         let moved = {
             let moved = fixture.selected.with_file_name("moved-after-fchdir");
@@ -627,13 +815,21 @@ async fn controller() {
         );
         fixture.clean();
 
-        let fixture = Fixture::new(kind, false);
+        let fixture = Arc::new(Fixture::new(kind, false));
         let approved = fixture.review("wait", None).await;
         let cancellation = RequestCancellation::new();
         let token = cancellation.clone();
-        let mut task =
-            tokio::spawn(async move { LocalAgentClient.ask(approved, credential(), &token).await });
-        await_file(&fixture.root.path().join("ask-ready"), &mut task).await;
+        let task_fixture = Arc::clone(&fixture);
+        let mut task = tokio::spawn(async move {
+            observed_ask(&task_fixture, approved, &token, "selected-cancel").await
+        });
+        await_file(
+            &fixture.root.path().join("ask-ready"),
+            &mut task,
+            kind,
+            "selected-cancel",
+        )
+        .await;
         cancellation.cancel();
         assert_eq!(task.await.unwrap().unwrap_err(), LocalAgentError::Cancelled);
         fixture.clean();
@@ -692,14 +888,25 @@ async fn controller() {
             );
             fixture.clean();
         }
-        let fixture = Fixture::new(LocalAgentKind::ClaudeCode, false);
+        let fixture = Arc::new(Fixture::new(LocalAgentKind::ClaudeCode, false));
         let approved = fixture.review("cwd", Some("gate-launcher")).await;
+        let task_fixture = Arc::clone(&fixture);
         let mut task = tokio::spawn(async move {
-            LocalAgentClient
-                .ask(approved, credential(), &RequestCancellation::new())
-                .await
+            observed_ask(
+                &task_fixture,
+                approved,
+                &RequestCancellation::new(),
+                "gate-before-child-open",
+            )
+            .await
         });
-        await_file(&fixture.root.path().join("gate-ready"), &mut task).await;
+        await_file(
+            &fixture.root.path().join("gate-ready"),
+            &mut task,
+            fixture.kind,
+            "gate-before-child-open",
+        )
+        .await;
         std::fs::rename(
             &fixture.selected,
             fixture.selected.with_file_name("moved-before-child-open"),

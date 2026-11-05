@@ -48,7 +48,7 @@ pub fn run_local_agent_directory_launcher() -> bool {
 }
 
 #[cfg(unix)]
-pub(super) use unix::{ExecutableReview, wrap};
+pub(super) use unix::{ExecutableReview, WrapRequest, wrap};
 
 #[cfg(unix)]
 pub(super) fn exit_error(code: Option<i32>) -> Option<LocalAgentError> {
@@ -71,7 +71,8 @@ mod unix {
         RequestCancellation,
         local_agent::{
             LocalAgentConfig, LocalAgentCredential, LocalAgentKind, LocalAgentVersion,
-            LocalAgentWorkingDirectory, ValidatedLocalAgentDirectory,
+            LocalAgentWorkingDirectory, LocalAskOperation, ValidatedLocalAgentDirectory,
+            diagnostics::DiagnosticSink,
             directory::DirectorySnapshot,
             process::{OutputMode, configure_ask_command, owned_command},
         },
@@ -229,6 +230,7 @@ mod unix {
             &self,
             temporary: &std::path::Path,
             cancellation: &RequestCancellation,
+            diagnostics: &DiagnosticSink,
         ) -> Result<Self, LocalAgentError> {
             let mut source = self
                 ._file
@@ -245,6 +247,7 @@ mod unix {
                 .transpose()?;
             let cancellation = cancellation.clone();
             let worker_cancel = cancellation.clone();
+            let diagnostics = diagnostics.clone();
             crate::local_agent::directory::bounded_check(cancellation, move || {
                 if requested
                     .canonicalize()
@@ -286,7 +289,7 @@ mod unix {
                     .ok_or(LocalAgentError::UnsupportedExecutable)?;
                 #[cfg(target_os = "macos")]
                 let path = if let Some(bundle) = &bundle {
-                    bundle.copy_into(&temporary, &worker_cancel)?
+                    bundle.copy_into(&temporary, &worker_cancel, &diagnostics)?
                 } else {
                     temporary.join(filename)
                 };
@@ -300,7 +303,9 @@ mod unix {
                         nix::fcntl::OFlag::O_NOFOLLOW.bits() | nix::fcntl::OFlag::O_CLOEXEC.bits(),
                     )
                     .open(&path)
-                    .map_err(|_| LocalAgentError::ScratchFailed)?;
+                    .map_err(|error| {
+                        diagnostics.scratch_io(LocalAskOperation::OwnedExecutableOpen, &error)
+                    })?;
                 let mut digest = Sha256::new();
                 let mut buffer = vec![0; 64 * 1024];
                 let mut count = 0u64;
@@ -319,8 +324,11 @@ mod unix {
                         return Err(LocalAgentError::ExecutableChanged);
                     }
                     digest.update(&buffer[..length]);
-                    std::io::Write::write_all(&mut destination, &buffer[..length])
-                        .map_err(|_| LocalAgentError::ScratchFailed)?;
+                    std::io::Write::write_all(&mut destination, &buffer[..length]).map_err(
+                        |error| {
+                            diagnostics.scratch_io(LocalAskOperation::OwnedExecutableWrite, &error)
+                        },
+                    )?;
                 }
                 let path_after = std::fs::symlink_metadata(&expected.path)
                     .map_err(|_| LocalAgentError::ExecutableChanged)?;
@@ -349,14 +357,14 @@ mod unix {
                 {
                     return Err(LocalAgentError::ExecutableChanged);
                 }
-                std::io::Write::flush(&mut destination)
-                    .map_err(|_| LocalAgentError::ScratchFailed)?;
+                std::io::Write::flush(&mut destination).map_err(|error| {
+                    diagnostics.scratch_io(LocalAskOperation::OwnedExecutableFlush, &error)
+                })?;
                 drop(destination);
                 let owned = Self::read(path, &worker_cancel)?;
-                let owned_metadata = owned
-                    ._file
-                    .metadata()
-                    .map_err(|_| LocalAgentError::ScratchFailed)?;
+                let owned_metadata = owned._file.metadata().map_err(|error| {
+                    diagnostics.scratch_io(LocalAskOperation::OwnedExecutableMetadata, &error)
+                })?;
                 if owned_metadata.nlink() != 1 || owned_metadata.mode() & 0o777 != 0o700 {
                     return Err(LocalAgentError::ExecutableChanged);
                 }
@@ -365,7 +373,10 @@ mod unix {
                     || owned
                         ._file
                         .metadata()
-                        .map_err(|_| LocalAgentError::ScratchFailed)?
+                        .map_err(|error| {
+                            diagnostics
+                                .scratch_io(LocalAskOperation::OwnedExecutableOwnerMetadata, &error)
+                        })?
                         .uid()
                         != nix::unistd::geteuid().as_raw()
                 {
@@ -405,16 +416,31 @@ mod unix {
         temporary: PathBuf,
     }
 
+    pub(in crate::local_agent) struct WrapRequest<'a> {
+        pub(in crate::local_agent) config: &'a LocalAgentConfig,
+        pub(in crate::local_agent) directory: &'a ValidatedLocalAgentDirectory,
+        pub(in crate::local_agent) binary: &'a ExecutableReview,
+        pub(in crate::local_agent) home: &'a std::path::Path,
+        pub(in crate::local_agent) temporary: &'a std::path::Path,
+        pub(in crate::local_agent) input: &'a str,
+        pub(in crate::local_agent) version: LocalAgentVersion,
+        pub(in crate::local_agent) diagnostics: &'a DiagnosticSink,
+    }
+
     pub(in crate::local_agent) fn wrap(
         command: Command,
-        config: &LocalAgentConfig,
-        directory: &ValidatedLocalAgentDirectory,
-        binary: &ExecutableReview,
-        private_directories: (&std::path::Path, &std::path::Path),
-        input: &str,
-        version: LocalAgentVersion,
+        request: WrapRequest<'_>,
     ) -> Result<(Command, Zeroizing<String>, OutputMode), LocalAgentError> {
-        let (home, temporary) = private_directories;
+        let WrapRequest {
+            config,
+            directory,
+            binary,
+            home,
+            temporary,
+            input,
+            version,
+            diagnostics,
+        } = request;
         if !config.kind.supports_version(version) {
             return Err(LocalAgentError::UnsupportedVersion);
         }
@@ -430,12 +456,12 @@ mod unix {
             directory: directory.snapshot(),
             model: config.model.clone(),
             endpoint: config.endpoint.clone(),
-            home: home
-                .canonicalize()
-                .map_err(|_| LocalAgentError::ScratchFailed)?,
-            temporary: temporary
-                .canonicalize()
-                .map_err(|_| LocalAgentError::ScratchFailed)?,
+            home: home.canonicalize().map_err(|error| {
+                diagnostics.scratch_io(LocalAskOperation::BootstrapHomeCanonicalize, &error)
+            })?,
+            temporary: temporary.canonicalize().map_err(|error| {
+                diagnostics.scratch_io(LocalAskOperation::BootstrapTemporaryCanonicalize, &error)
+            })?,
         };
         let header = Zeroizing::new(
             serde_json::to_string(&frame).map_err(|_| LocalAgentError::DirectoryUnsupported)?,
@@ -455,7 +481,7 @@ mod unix {
             .current_dir(
                 original
                     .get_current_dir()
-                    .ok_or(LocalAgentError::ScratchFailed)?,
+                    .ok_or_else(|| diagnostics.missing_current_directory())?,
             )
             .stdin(std::process::Stdio::piped())
             .stdout(std::process::Stdio::piped())
@@ -620,5 +646,186 @@ mod unix {
         // O_CLOEXEC closes all directory/config/binary handles in the supplier.
         let _error = command.into_std().exec();
         Err(LocalAgentError::SpawnFailed)
+    }
+
+    #[cfg(test)]
+    #[allow(clippy::unwrap_used, clippy::expect_used)]
+    mod tests {
+        use std::{os::unix::fs::PermissionsExt, time::Duration};
+
+        use super::*;
+        use crate::{LocalAskDiagnostic, LocalAskDiagnostics};
+
+        fn executable_fixture() -> (tempfile::TempDir, PathBuf) {
+            let root = tempfile::tempdir().unwrap();
+            let path = root.path().canonicalize().unwrap().join("synthetic-binary");
+            // Only the copy admission is exercised; these bytes are never run.
+            std::fs::write(&path, b"\x7fELFsynthetic private executable body").unwrap();
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o700)).unwrap();
+            (root, path)
+        }
+
+        #[tokio::test]
+        async fn owned_copy_reports_destination_collision_without_source_text() {
+            let (_root, path) = executable_fixture();
+            let cancellation = RequestCancellation::new();
+            let binary = ExecutableReview::read(path, &cancellation).unwrap();
+            let destination = tempfile::tempdir().unwrap();
+            let collision = destination.path().join("synthetic-binary");
+            std::fs::write(&collision, b"owned existing destination").unwrap();
+            let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+            let sink = diagnostics.into_sink();
+            let result = tokio::time::timeout(
+                Duration::from_secs(5),
+                binary.owned_copy(destination.path(), &cancellation, &sink),
+            )
+            .await
+            .unwrap();
+            assert!(matches!(result, Err(LocalAgentError::ScratchFailed)));
+            assert_eq!(
+                std::fs::read(&collision).unwrap(),
+                b"owned existing destination"
+            );
+            let event = receiver.try_recv().unwrap();
+            assert!(matches!(
+                event,
+                LocalAskDiagnostic::Io {
+                    operation: LocalAskOperation::OwnedExecutableOpen,
+                    kind: std::io::ErrorKind::AlreadyExists,
+                    raw_os_error: Some(_),
+                }
+            ));
+            assert!(!format!("{event:?}").contains("synthetic"));
+        }
+
+        #[tokio::test]
+        async fn source_replacement_remains_executable_changed_without_scratch_io() {
+            let (_root, path) = executable_fixture();
+            let cancellation = RequestCancellation::new();
+            let binary = ExecutableReview::read(path.clone(), &cancellation).unwrap();
+            std::fs::remove_file(path).unwrap();
+            let destination = tempfile::tempdir().unwrap();
+            let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+            let sink = diagnostics.into_sink();
+            let result = tokio::time::timeout(
+                Duration::from_secs(5),
+                binary.owned_copy(destination.path(), &cancellation, &sink),
+            )
+            .await
+            .unwrap();
+            assert!(matches!(result, Err(LocalAgentError::ExecutableChanged)));
+            assert_eq!(
+                receiver.try_recv(),
+                Err(std::sync::mpsc::TryRecvError::Empty)
+            );
+            assert_eq!(std::fs::read_dir(destination.path()).unwrap().count(), 0);
+        }
+
+        #[tokio::test]
+        async fn dropped_observer_keeps_owned_copy_integrity_checks() {
+            let (_root, path) = executable_fixture();
+            let cancellation = RequestCancellation::new();
+            let binary = ExecutableReview::read(path, &cancellation).unwrap();
+            let destination = tempfile::tempdir().unwrap();
+            let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+            let sink = diagnostics.into_sink();
+            drop(receiver);
+            let copied = tokio::time::timeout(
+                Duration::from_secs(5),
+                binary.owned_copy(destination.path(), &cancellation, &sink),
+            )
+            .await
+            .unwrap()
+            .unwrap();
+            assert_eq!(copied.snapshot.digest, binary.snapshot.digest);
+            assert_eq!(copied.snapshot.size, binary.snapshot.size);
+            assert_ne!(copied.snapshot.identity, binary.snapshot.identity);
+            assert_eq!(copied._file.metadata().unwrap().mode() & 0o777, 0o700);
+        }
+
+        #[tokio::test]
+        async fn parent_wrap_distinguishes_home_tmp_and_missing_cwd_failures() {
+            for failure in ["home", "tmp", "cwd"] {
+                let (root, executable) = executable_fixture();
+                let root_path = root.path().canonicalize().unwrap();
+                let home = root_path.join("home");
+                let temporary = root_path.join("tmp");
+                let selected = root_path.join("selected");
+                for path in [&home, &temporary, &selected] {
+                    std::fs::create_dir(path).unwrap();
+                }
+                let cancellation = RequestCancellation::new();
+                let binary = ExecutableReview::read(executable.clone(), &cancellation).unwrap();
+                let directory = tokio::time::timeout(
+                    Duration::from_secs(5),
+                    ValidatedLocalAgentDirectory::acquire(
+                        selected.clone(),
+                        LocalAgentKind::Codex,
+                        &cancellation,
+                    ),
+                )
+                .await
+                .unwrap()
+                .unwrap();
+                let config = LocalAgentConfig::new(
+                    LocalAgentKind::Codex,
+                    &executable,
+                    &root_path,
+                    "test-model",
+                )
+                .unwrap()
+                .with_directory_launcher(&executable)
+                .unwrap();
+                let mut command = Command::new(&executable);
+                if failure != "cwd" {
+                    command.current_dir(&selected);
+                    std::fs::remove_dir(if failure == "home" { &home } else { &temporary })
+                        .unwrap();
+                }
+                let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+                let sink = diagnostics.into_sink();
+                let result = wrap(
+                    command,
+                    WrapRequest {
+                        config: &config,
+                        directory: &directory,
+                        binary: &binary,
+                        home: &home,
+                        temporary: &temporary,
+                        input: "synthetic private input",
+                        version: LocalAgentVersion(0, 160, 1),
+                        diagnostics: &sink,
+                    },
+                );
+                assert!(matches!(result, Err(LocalAgentError::ScratchFailed)));
+                let event = receiver.try_recv().unwrap();
+                if failure == "cwd" {
+                    assert_eq!(event, LocalAskDiagnostic::MissingCurrentDirectory);
+                } else {
+                    assert!(matches!(
+                        event,
+                        LocalAskDiagnostic::Io {
+                            operation,
+                            kind: std::io::ErrorKind::NotFound,
+                            raw_os_error: Some(_),
+                        } if operation == if failure == "home" {
+                            LocalAskOperation::BootstrapHomeCanonicalize
+                        } else {
+                            LocalAskOperation::BootstrapTemporaryCanonicalize
+                        }
+                    ));
+                }
+                assert_eq!(
+                    receiver.try_recv(),
+                    Err(std::sync::mpsc::TryRecvError::Empty)
+                );
+            }
+            // Launcher exit status retains its own boundary; it is not a
+            // parent scratch failure unless later parent cleanup also fails.
+            assert_eq!(
+                super::super::exit_error(Some(77)),
+                Some(LocalAgentError::DirectoryUnsupported)
+            );
+        }
     }
 }

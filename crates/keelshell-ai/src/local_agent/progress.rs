@@ -5,6 +5,8 @@ use std::sync::{
     mpsc::{self, Receiver, SyncSender, TryRecvError},
 };
 
+use super::{LocalAskDiagnostics, diagnostics::DiagnosticSink};
+
 /// An observed fact from one local Ask invocation, without supplier text or secrets.
 ///
 /// Input delivery and protocol reads run concurrently. These facts are not a
@@ -51,10 +53,12 @@ impl LocalAskStage {
 ///
 /// It emits each static fact at most once through nonblocking `try_send`. A
 /// stopped, slow or dropped consumer cannot block pipe drainage or cleanup. No
-/// supplier frame, answer, path, context, credential or diagnostic is included.
+/// supplier frame, answer, path, context or credential is included. Optional
+/// static diagnostics use their own separately bounded channel.
 pub struct LocalAskProgress {
     sender: SyncSender<LocalAskStage>,
     observed: AtomicU8,
+    diagnostics: DiagnosticSink,
 }
 
 impl LocalAskProgress {
@@ -69,9 +73,43 @@ impl LocalAskProgress {
             Self {
                 sender,
                 observed: AtomicU8::new(0),
+                diagnostics: DiagnosticSink::default(),
             },
             LocalAskProgressReceiver { receiver },
         )
+    }
+
+    /// Attach optional diagnostics for this exact request, consuming the producer.
+    ///
+    /// No work is started. `ask_with_progress` consumes this progress producer,
+    /// preventing diagnostics from being reused by another request. Dropping
+    /// either receiver has no effect on request results or the other channel.
+    ///
+    /// ```
+    /// use keelshell_ai::{LocalAskDiagnostics, LocalAskProgress};
+    /// let (diagnostics, diagnostic_receiver) = LocalAskDiagnostics::channel();
+    /// let (progress, stage_receiver) = LocalAskProgress::channel();
+    /// let progress = progress.with_diagnostics(diagnostics);
+    /// // Pass progress to the explicitly approved ask_with_progress invocation.
+    /// assert!(diagnostic_receiver.try_recv().is_err());
+    /// assert!(stage_receiver.try_recv().is_err());
+    /// ```
+    ///
+    /// ```compile_fail
+    /// use keelshell_ai::{LocalAskDiagnostics, LocalAskProgress};
+    /// let (diagnostics, _) = LocalAskDiagnostics::channel();
+    /// let (first, _) = LocalAskProgress::channel();
+    /// let (second, _) = LocalAskProgress::channel();
+    /// let first = first.with_diagnostics(diagnostics);
+    /// let second = second.with_diagnostics(diagnostics);
+    /// ```
+    pub fn with_diagnostics(mut self, diagnostics: LocalAskDiagnostics) -> Self {
+        self.diagnostics = diagnostics.into_sink();
+        self
+    }
+
+    pub(super) fn diagnostics(&self) -> &DiagnosticSink {
+        &self.diagnostics
     }
 
     pub(super) fn observe(&self, stage: LocalAskStage) {
@@ -123,5 +161,27 @@ mod tests {
         for stage in LocalAskStage::ALL {
             progress.observe(stage);
         }
+    }
+
+    #[test]
+    fn stages_and_diagnostics_remain_independent_when_one_receiver_is_dropped() {
+        let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+        let (progress, stages) = LocalAskProgress::channel();
+        let progress = progress.with_diagnostics(diagnostics);
+        drop(stages);
+        progress.observe(LocalAskStage::Finalizing);
+        progress.diagnostics().close_result(&Ok(()));
+        assert_eq!(
+            receiver.try_recv(),
+            Ok(super::super::LocalAskDiagnostic::CloseResult { result: Ok(()) })
+        );
+
+        let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+        let (progress, stages) = LocalAskProgress::channel();
+        let progress = progress.with_diagnostics(diagnostics);
+        drop(receiver);
+        progress.diagnostics().close_result(&Ok(()));
+        progress.observe(LocalAskStage::Finalizing);
+        assert_eq!(stages.try_recv(), Ok(LocalAskStage::Finalizing));
     }
 }

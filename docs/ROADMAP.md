@@ -1,5 +1,20 @@
 # 开发路线
 
+## 当前独立切片：本地 Ask scratch 诊断 — 2026-11-05
+
+基线 Linux `41967541069 / attempt 1` 的 ScratchFailed 根因仍 UNKNOWN。
+新增按请求隔离、数量有界的静态操作/错误观测，并给目录夹具的每个 readiness
+等待点加入 case/kind 和自身阶段，保留原结果、取消及清理规则。
+设计、测试与审查分别见[ADR 0102](adr/0102-local-ask-scratch-diagnostics.md)
+和[记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)。
+初轮单元/进程专项及同测试诊断断开反例已完成。完整门禁实际退出 0并回收：
+2,126 ordinary Rust / 23 ignored、14 rustdoc、Python 128 run / 1 skipped，
+500 项输入一致；新的非作者源码审查批准限定范围，开放 P0/P1/P2/P3=0。
+九文档/证据组合复核同样批准限定范围，开放 P0/P1/P2/P3=0；
+提交绑定、推送与精确 CI 以本轮交付读回为准。
+原生分屏与连接树在各自工作副本冻结，
+待桌面接口可用后接续；本切片不关闭其原生验收。
+
 ## 当前独立切片：布局领域模型 — 2026-11-05
 
 `feature/pane-layout-model-20261105` 实现有界面板图和可选配置布局元数据，

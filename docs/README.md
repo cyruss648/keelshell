@@ -25,6 +25,7 @@
 - [配置备份与显式恢复](product/CONFIGURATION_RECOVERY.md)、[ADR 0081](adr/0081-bounded-explicit-configuration-recovery.md)与[候选记录](testing/records/2026-10-08-configuration-recovery.md)：八份有界metadata、损坏原件保持、用户审核、回滚与未运行验证。
 
 - [本地智能体准备期失败收尾](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)：取消与实际 Join、诊断脱敏、独立控制及未验证边界。
+- [本地 Ask scratch 诊断](adr/0102-local-ask-scratch-diagnostics.md)与[验证记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)：按请求隔离的有界静态观测、原错误语义和历史未知根因。
 
 - [小窗口会话标签设计](adr/0080-scrollable-session-tabs.md)：固定关闭入口、可发现的导航、布局后reveal与离线图标。
 - [小窗口会话标签修复记录](testing/records/2026-10-08-compact-session-tabs.md)：真实缺陷与新功能各自的检查状态。

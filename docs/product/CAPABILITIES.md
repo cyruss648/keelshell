@@ -1,5 +1,28 @@
 # Capability ledger
 
+## 2026-11-05: optional local Ask diagnostics — separate candidate
+
+Each explicitly observed Ask may attach its own diagnostics producer. The queue
+and shared total budget are both bounded to sixteen facts; draining does not
+replenish the budget. Facts contain static operation/error classifications and
+available numeric OS error codes, without paths, credentials or request/response
+text. The original Ask outcome, timeout, approval and cleanup precedence remain
+unchanged. No new UI, telemetry or automatic retry is introduced.
+
+Initial unit and real-process checks passed. Disconnecting the producer makes
+the same actual missing-scratch receipt test fail while preserving ScratchFailed;
+the source was restored and verified. The complete local gate exited zero and
+was reaped: 2,126 ordinary Rust passed / 23 ignored, 14 rustdoc checks and
+128 Python tests run / one skipped. All nineteen new unit tests passed and all
+500 engineering inputs match. A new non-author source review approves the scoped
+change with no P0/P1/P2/P3 findings. The subsequent document/evidence review also
+approves its bounded scope with no open findings. Exact commit binding, delivery
+and platform CI are tracked separately in the round's delivery readback.
+The historical Linux failure's cause remains UNKNOWN.
+See the [diagnostic record](../testing/records/2026-11-05-local-ask-scratch-diagnostics.md)
+and [ADR 0102](../adr/0102-local-ask-scratch-diagnostics.md).
+This candidate does not contain the separately frozen native panes or connection tree.
+
 ## 2026-11-05: pane layout metadata — separate core candidate
 
 The core candidate adds a bounded horizontal/vertical pane graph, stable identities,

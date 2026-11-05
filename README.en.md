@@ -125,6 +125,7 @@ The tag-triggered release workflow defines six build targets. Successful tagged 
 | Workflows and design decisions | [Documentation](docs/README.md) · [Product design](docs/product/PRODUCT.md) · [ADRs](docs/adr/) |
 | Repository structure, local development and checks | [Contributing](CONTRIBUTING.md) |
 | Behavior tests and platform evidence | [Testing strategy](docs/testing/STRATEGY.md) · [Test records](docs/testing/records/) |
+| Local Ask failure observations and known limits | [Bounded diagnostic design](docs/adr/0102-local-ask-scratch-diagnostics.md) |
 
 Use [Issues](https://github.com/cyruss648/keelshell/issues) to report bugs, share feedback and propose improvements. Reproduction steps, anonymized profiles and platform details help diagnosis. Start with the contributing guide for code and documentation changes.
 

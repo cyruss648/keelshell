@@ -4,6 +4,44 @@
 最新用户要求优先于历史范围；源码、工程测试、受控原生、平台 CI、公开发布和安装分别验收。
 完整旧稿见[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)，其中“当前”、暂停及删除指令只属于当时，不构成新的操作授权。
 
+## 当前独立切片：本地 Ask scratch 诊断
+
+从干净基线 `77aa69c04ad0dd625a5d827552335878de993ee7` 建立独立工作副本，
+分支 `feature/agent-scratch-diagnostics-20261105`。原生窗口接口仍不可用时，
+推进基线 Linux Quality `41967541069 / attempt 1` 的失败可观测性。
+历史根因仍 UNKNOWN；当前只读证据无法区分 held-cwd / wait 等待点，也无法
+区分 scratch 创建/复制/关闭错误，关闭失败还可能覆盖此前结果。
+
+候选正在新增可选的请求级有界诊断及 case/kind 回执，不改变错误优先级、
+请求期限或审核权限；不记录路径、输出或凭据。官方依赖检查从
+`2026-11-05T07:21:53Z` 开始，于 `07:22:09Z` 完成，
+104 条声明/使用通过，无新增 registry 依赖。
+初轮专项已退出 0并回收：77 passed / 1 ignored 的本地 Agent 单元测试，
+原目录控制器和 observer I/O 控制器通过。最后将弃用的 `fetch_update`
+改为 `try_update`，初轮成功不覆盖该修订。诊断断开反例使用相同测试，
+准确因缺少真实 ScratchCreate 事实而失败，原 ScratchFailed 保持；
+源码已恢复且摘要一致。修后 `full-gate-r1` 实际退出 0并回收：
+2,126 ordinary Rust / 23 ignored（含 app 868 / 2 ignored）、14 rustdoc、
+Python 128 run / 1 skipped，严格 Clippy、格式与依赖策略及额外进程控制器通过。
+新增 19 项单元测试全部通过，500 项门禁/修后输入完全相同。
+新非作者 Parfit 的源码复核为 APPROVE_SCOPED_SOURCE，
+开放 P0/P1/P2/P3=0；随后九文档/终态证据复核为
+APPROVE_SCOPED_COMBINED，开放 P0/P1/P2/P3=0。
+reviewer 独立重算输入及日志，没有重跑 Cargo 或原生。
+功能提交、推送与精确三平台 CI 另见本轮 `delivery-readback.json`、
+`current-ci/`；本机批准不能代替这些后续读回。
+设计与状态见[ADR 0102](adr/0102-local-ask-scratch-diagnostics.md)和
+[测试记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)，
+本地证据为 `work/agent-scratch-diagnostics-20261105/`。
+
+原生分屏另在 `feature/native-pane-layout-20261105` 冻结：修后 r4 门禁和源码
+复审通过，新包 `5ce34862…` 的窗口读取返回 Mac locked，无新原生证据；
+应用及自有夹具已清理，包和 503 项输入保留在其工作副本。
+本次用户再次通知解锁后，清单读取及重建 CUA 后读取仍返回相同错误；
+没有启动新应用或容器，不能判断设备实际锁定。读回保存在本轮
+`desktop-retry-readback.json`。
+该候选及导航候选均未导入本分支，不用本分支构建补记旧包验收。
+
 ## 已集成：布局领域模型与持久化
 
 `feature/pane-layout-model-20261105` 从 `967c588803df493d06d42cf96221bd691aba46b9`
