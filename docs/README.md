@@ -1,15 +1,20 @@
 # 文档索引
 
+- [工作区组合验证](testing/records/2026-11-05-workspace-integration.md)：组合原生分屏、Ask诊断与CI容量修订；独立分支的证据保留归属，组合门禁与审查另行记录。开发入口见[当前交接](HANDOFF.md)。
+
 - [原生分屏工作区接入](testing/records/2026-11-05-native-pane-layout.md)与[ADR 0101](adr/0101-native-session-pane-ownership.md)：修后r2包的四通道、两轴拖动、三个分隔条键盘、工具选择、聚焦/合并/关闭和保存已有35对原始捕获；新的非作者组合复核通过，Hallmark finish 对所检子集为 ship。r1及窗口失败历史、紧凑OS和完整矩阵缺口保留。
 
 继续开发先读[开发交接](HANDOFF.md)，再按[路线与状态](ROADMAP.md)选择切片。
 较早的交接全文保存在[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)；
 其中的“当前”与暂停指令只代表对应历史时点。
 
+- [CI 容量修订 / ADR 0103](adr/0103-ci-storage-capacity.md)与[容量记录](testing/records/2026-11-05-ci-storage-capacity.md)：新 profile 门禁、506 项输入绑定及 Nash 源码复核通过；原提交 Windows 重跑成功、Linux/macOS 继承首次结果，Nash 组合复核通过、文档 P3 关闭，新提交绑定已批准，精确 CI 另行观察。
+- [测试索引](testing/README.md)：当前接续记录、验证策略与完整历史入口。
 - [主题与外观](product/THEME_PREFERENCES.md)：三套内置主题、明暗模式及扩展方式。
 - [工作区布局与恢复](product/WORKSPACE_LAYOUT.md)、[ADR 0100](adr/0100-bounded-inert-workspace-layout.md)与[模型记录](testing/records/2026-11-05-pane-layout-model.md)：已合入有界领域模型和可选持久化；原生候选及限定macOS结果见上项，紧凑OS/完整矩阵仍OPEN，多窗口与恢复入口尚未实现。
 - [文件工作区布局](product/FILES_WORKSPACE.md)、[ADR 0097](adr/0097-file-workbench-disclosures.md)与[验证记录](testing/records/2026-11-05-native-file-workbench.md)：浏览优先、按需展开的设置、真实传输与渲染栈诊断。
 - [原生工作区](product/NATIVE_WORKBENCH.md)、[ADR 0096](adr/0096-native-workbench-navigation.md)与[本轮记录](testing/records/2026-11-05-native-workbench.md)：连接/主机信息侧栏、独立会话栏、紧凑命令区及其实际验收边界。
+- [连接树键盘设计](adr/0099-keyboard-connection-tree.md)与[验证记录](testing/records/2026-11-05-navigation-keyboard.md)：目录折叠、方向键浏览、搜索恢复、焦点和激活身份；修后 54 对原始捕获为 PARTIAL_OBSERVED，后期输入异常 UNKNOWN、正控未完成，完整键盘隔离 OPEN；新非作者只签可观察子集，不授予完整native或Hallmark finish。
 - [原生主题设计](design/NATIVE_THEMES.md)与[ADR 0095](adr/0095-extensible-native-theme-families.md)：目录、语义 token、组件适配与旧配置兼容。
 - [本轮主题测试](testing/records/2026-11-04-native-themes.md)：实际结果、失败历史与平台验收边界。
 - [主题组合提交与 CI 回读](testing/records/2026-11-04-theme-delivery-ci.md)：精确提交、Windows 夹具失败与修复、资源清理和后续验收。
@@ -27,6 +32,7 @@
 - [配置备份与显式恢复](product/CONFIGURATION_RECOVERY.md)、[ADR 0081](adr/0081-bounded-explicit-configuration-recovery.md)与[候选记录](testing/records/2026-10-08-configuration-recovery.md)：八份有界metadata、损坏原件保持、用户审核、回滚与未运行验证。
 
 - [本地智能体准备期失败收尾](testing/records/2026-10-08-readiness-cleanup-diagnostics.md)：取消与实际 Join、诊断脱敏、独立控制及未验证边界。
+- [本地 Ask scratch 诊断](adr/0102-local-ask-scratch-diagnostics.md)与[验证记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)：按请求隔离的有界静态观测、原错误语义和历史未知根因。
 
 - [小窗口会话标签设计](adr/0080-scrollable-session-tabs.md)：固定关闭入口、可发现的导航、布局后reveal与离线图标。
 - [小窗口会话标签修复记录](testing/records/2026-10-08-compact-session-tabs.md)：真实缺陷与新功能各自的检查状态。

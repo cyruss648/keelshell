@@ -53,8 +53,10 @@ pub use inference::{
 pub use local_agent::{
     ApprovedLocalAsk, LocalAgentClient, LocalAgentConfig, LocalAgentCredential, LocalAgentError,
     LocalAgentKind, LocalAgentLimits, LocalAgentProbe, LocalAgentReply, LocalAgentVersion,
-    LocalAgentWorkingDirectory, LocalAskProgress, LocalAskProgressReceiver, LocalAskStage,
-    PreparedLocalAsk, ValidatedLocalAgentDirectory, run_local_agent_directory_launcher,
+    LocalAgentWorkingDirectory, LocalAskDiagnostic, LocalAskDiagnostics,
+    LocalAskDiagnosticsReceiver, LocalAskErrorKind, LocalAskOperation, LocalAskProgress,
+    LocalAskProgressReceiver, LocalAskStage, LocalAskWorkerJoinKind, PreparedLocalAsk,
+    ValidatedLocalAgentDirectory, run_local_agent_directory_launcher,
 };
 pub use provider::{AiClient, AssistantReply, ProviderConfig, ProviderProtocol};
 pub use redact::{RedactionReport, Redactor};

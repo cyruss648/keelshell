@@ -313,6 +313,9 @@ impl Workspace {
     }
 
     pub(super) fn synchronize_modal_focus(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.active_modal().is_some() {
+            self.navigation_tree.armed = None;
+        }
         // Only mounted controls and actual return targets retain strong handles.
         // Repeated creation/deletion of snippets cannot grow this cache forever.
         self.modal_button_focus
@@ -567,9 +570,8 @@ impl Workspace {
             .role(accesskit::Role::Dialog)
             .accessibility_id("keelshell.active-modal")
             .aria_label(kind.title(cx))
-            .capture_key_down(
-                cx.listener(|view, _, window, cx| view.capture_surface_input(window, cx)),
-            )
+            .capture_key_down(cx.listener(Self::capture_navigation_key_down))
+            .capture_key_up(cx.listener(Self::capture_navigation_key_up))
             .on_key_down(cx.listener(|view, event: &KeyDownEvent, window, cx| {
                 if event.keystroke.key == "escape"
                     && !event.keystroke.modifiers.modified()

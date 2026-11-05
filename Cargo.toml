@@ -55,6 +55,11 @@ expect_used = "deny"
 [profile.dev]
 debug = 1
 
+# Retain workspace diagnostics without copying dependency debug data into each
+# test executable (ADR 0103). The test profile inherits this development policy.
+[profile.dev.package."*"]
+debug = 0
+
 # Keep the fixed KDF practical in development and inherited test builds (ADR 0075).
 [profile.dev.package.argon2]
 opt-level = 3

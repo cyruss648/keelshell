@@ -34,4 +34,5 @@ runs:
     - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       with:
         cache-on-failure: 'true'
-        key: ${{ runner.os }}-${{ runner.arch }}
+        # Do not restore the large target artifacts from the previous profile.
+        key: ${{ runner.os }}-${{ runner.arch }}-dependency-debug-0

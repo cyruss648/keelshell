@@ -5,13 +5,16 @@
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "keep each SSH session and reviewed target in its own stable pane",
+  "job": "navigate saved connections and control SSH panes while retaining precise review targets",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
     "crates/keelshell-app/src/workspace/pane_view.rs",
     "crates/keelshell-app/src/workspace/pane_sessions.rs",
-    "docs/adr/0101-native-session-pane-ownership.md"
+    "docs/adr/0101-native-session-pane-ownership.md",
+    "crates/keelshell-app/src/workspace/navigation.rs",
+    "crates/keelshell-app/src/workspace/navigation/keyboard.rs",
+    "docs/adr/0099-keyboard-connection-tree.md"
   ],
   "preserve": [
     "semantic theme registry and tokens",
@@ -22,7 +25,8 @@
     "nested horizontal/vertical splits with per-leaf tabs",
     "bounded pointer and keyboard ratio adjustment",
     "merge without closing sessions, focused and compact display",
-    "explicit inert layout saving"
+    "explicit inert layout saving",
+    "folding and keyboard connection-tree navigation with protected held-key lifetime"
   ],
   "material": {
     "real": [
@@ -30,7 +34,7 @@
       "bounded layout model",
       "controlled GPUI events and isolated StateStore"
     ],
-    "pictures": "r1: 34 raw macOS AX/image pairs bound to 0855f7b4; r2: 35 new pairs, all 2880x1866, bound to 5ce34862 and run acceb50f1da74d12bf027efec66166a4. Original failed attempts are retained.",
+    "pictures": "53 original combined macOS AX/JPEG pairs, bound to app33be2e68 and run3f7689e9; no mock acceptance",
     "absent": [
       "invented hosts",
       "fabricated native acceptance"
@@ -39,8 +43,8 @@
   "inferred_from_authorized_design_scope": true,
   "web_render_verified": false,
   "web_render_scope": "not_applicable: Rust/GPUI source",
-  "native_verification": "r1 remains scoped to 0855f7b4. Short-drag/tool fixes pass 52 focused tests, full-gate-r4 (2158 ordinary/23 ignored, app919/2 ignored, 11 rustdoc, Python128 run/1 skip) and source-r3. Package5ce34862 first failed window access in run904d404d, retained as history. Fresh runacceb50f from09:12:02Z has35 original pairs: retained collapsed Files/Commands/Tunnels, root and left vertical pointer changes, all3 keyboard dividers with wrong-axis controls, selected themes/languages, focus/merge/tab switch/close and inert saves. Four stable shells become the original3 only after explicit fourth closure; rawPTY0 before explicit x without Enter, then1 byte. Monitor exec probes are separate; shell_closed events remain0. Later draft equality includes2 manually added trailing spaces. Saves use layout and6347/5718/5000bps; single-pane active is original_tabs[1], selected first terminal later without saving again. App/supervisor exit0/reaped; exec35928 reaped; runtime cleanup09:26:46Z, image09:28:09Z, shared base retained. Verification09:35:23Z binds503 gate/build/current inputs and35 raw pairs;41 assets separately bound. Capture09 wrong-coordinate failure,12/13 draft-focus attempts and27/28 unchanged2880x1866 geometry retained. Compact OS/full theme-appearance-language-size matrix/IME/VoiceOver/Windows-Linux desktop/restart/multiwindow OPEN. Fresh non-author combined-r5 APPROVE_SCOPED_COMBINED, open P0/P1/P2/P3=0; Hallmark finish ship for inspected subset, final freeze check10:04:21Z. Old handoff-r4 remains limited to its older snapshot; exact commit/CI and full native scope require separate evidence.",
-  "native_evidence": "work/native-pane-layout-20261105/native/verification-r2.json",
-  "combined_review": "APPROVE_SCOPED_COMBINED: work/native-pane-layout-20261105/independent-review/combined-r5.md",
-  "finish_review": "ship for inspected subset; full native matrix remains OPEN"
+  "native_verification": "Combined package33be2e68 has53 original pairs: scoped tree/search/theme/draft/split/merge observations, A/B paste+Right controls before and after navigation; early ordinary-character/Right controls failed, recovered navigation after separately measured Escape. Clicking divider then Right left ratio unchanged and added3 PTY bytes; Tab focus then Right50→55% had zero increment. Cumulative24 PTY bytes and32 refused exec requests/13440 bytes. App and owned runtime cleaned. Full input isolation and native matrix OPEN; fresh independent review pending.",
+  "native_evidence": "docs/testing/records/2026-11-05-workspace-integration.md",
+  "combined_review": "APPROVE_SCOPED_COMBINED_SOURCE_AND_EVIDENCE for original515 inputs; document-followup-r1 closes P3. Subsequent test-only diagnostics pass full-gate-r2; independent diagnostic review pending.",
+  "finish_review": "PENDING fresh combined native review; full native matrix OPEN"
 }

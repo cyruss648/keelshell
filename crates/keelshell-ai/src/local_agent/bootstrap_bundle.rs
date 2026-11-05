@@ -14,7 +14,10 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use super::LocalAgentError;
-use crate::RequestCancellation;
+use crate::{
+    RequestCancellation,
+    local_agent::{LocalAskOperation, diagnostics::DiagnosticSink},
+};
 
 const MAX_METADATA: u64 = 64 * 1024;
 const FILES: [&str; 3] = [
@@ -247,6 +250,7 @@ impl BundleReview {
         &self,
         temporary: &Path,
         cancellation: &RequestCancellation,
+        diagnostics: &DiagnosticSink,
     ) -> Result<PathBuf, LocalAgentError> {
         let app = temporary.join("CodexCLI.app");
         let contents = app.join("Contents");
@@ -259,7 +263,9 @@ impl BundleReview {
             std::fs::DirBuilder::new()
                 .mode(0o700)
                 .create(path)
-                .map_err(|_| LocalAgentError::ScratchFailed)?;
+                .map_err(|error| {
+                    diagnostics.scratch_io(LocalAskOperation::BundleDirectoryCreate, &error)
+                })?;
         }
         for (index, relative) in FILES.iter().enumerate() {
             let source = self.files[index]
@@ -280,20 +286,22 @@ impl BundleReview {
                 .mode(0o600)
                 .custom_flags(OFlag::O_NOFOLLOW.bits() | OFlag::O_CLOEXEC.bits())
                 .open(&path)
-                .map_err(|_| LocalAgentError::ScratchFailed)?;
+                .map_err(|error| {
+                    diagnostics.scratch_io(LocalAskOperation::BundleTargetOpen, &error)
+                })?;
             // A bounded held source is copied, then read back in full. A source
             // edit during copying cannot silently become the reviewed metadata.
             std::io::copy(
                 &mut Read::by_ref(&mut source).take(MAX_METADATA + 1),
                 &mut destination,
             )
-            .map_err(|_| LocalAgentError::ScratchFailed)?;
+            .map_err(|error| diagnostics.scratch_io(LocalAskOperation::BundleTargetCopy, &error))?;
             if !stable(&source_before, &metadata(&source)?) {
                 return Err(LocalAgentError::ExecutableChanged);
             }
-            destination
-                .flush()
-                .map_err(|_| LocalAgentError::ScratchFailed)?;
+            destination.flush().map_err(|error| {
+                diagnostics.scratch_io(LocalAskOperation::BundleTargetFlush, &error)
+            })?;
             drop(destination);
             let target = File::from(
                 open(
@@ -301,7 +309,12 @@ impl BundleReview {
                     OFlag::O_RDONLY | OFlag::O_NOFOLLOW | OFlag::O_CLOEXEC,
                     nix::sys::stat::Mode::empty(),
                 )
-                .map_err(|_| LocalAgentError::ScratchFailed)?,
+                .map_err(|error| {
+                    diagnostics.scratch_io(
+                        LocalAskOperation::BundleTargetReopen,
+                        &std::io::Error::from_raw_os_error(error as i32),
+                    )
+                })?,
             );
             let (target, copied) = read_file(target, cancellation)?;
             let m = metadata(&target)?;
@@ -322,6 +335,7 @@ impl BundleReview {
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
+    use crate::{LocalAskDiagnostic, LocalAskDiagnostics};
 
     fn fixture() -> (tempfile::TempDir, PathBuf) {
         let root = tempfile::tempdir().expect("owned signature fixture");
@@ -346,7 +360,7 @@ mod tests {
             .expect("bundle");
         let destination = tempfile::tempdir().expect("owned output");
         let copied = review
-            .copy_into(destination.path(), &cancel)
+            .copy_into(destination.path(), &cancel, &DiagnosticSink::default())
             .expect("copy fixed metadata");
         let current = BundleReview::acquire(&copied, &cancel)
             .expect("readback")
@@ -361,6 +375,32 @@ mod tests {
         }
         assert!(!contents.join("CodeResources").exists());
         assert_eq!(std::fs::read_dir(contents).expect("namespace").count(), 4);
+    }
+
+    #[test]
+    fn bundle_destination_obstruction_keeps_scratch_failure_and_static_io_details() {
+        let (_root, exe) = fixture();
+        let cancel = RequestCancellation::new();
+        let review = BundleReview::acquire(&exe, &cancel).unwrap().unwrap();
+        let destination = tempfile::tempdir().unwrap();
+        std::fs::write(
+            destination.path().join("CodexCLI.app"),
+            b"owned obstruction",
+        )
+        .unwrap();
+        let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+        assert_eq!(
+            review.copy_into(destination.path(), &cancel, &diagnostics.into_sink()),
+            Err(LocalAgentError::ScratchFailed)
+        );
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(LocalAskDiagnostic::Io {
+                operation: LocalAskOperation::BundleDirectoryCreate,
+                kind: std::io::ErrorKind::AlreadyExists,
+                raw_os_error: Some(_),
+            })
+        ));
     }
 
     #[test]
@@ -431,7 +471,7 @@ mod tests {
         cancel.cancel();
         let destination = tempfile::tempdir().expect("owned output");
         assert_eq!(
-            review.copy_into(destination.path(), &cancel),
+            review.copy_into(destination.path(), &cancel, &DiagnosticSink::default()),
             Err(LocalAgentError::Cancelled)
         );
         assert!(

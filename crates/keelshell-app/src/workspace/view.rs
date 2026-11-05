@@ -1103,6 +1103,9 @@ impl Workspace {
         let assistant_width = px(380.).min(viewport.width * 0.42);
         // At compact widths keep the terminal usable while the assistant is open.
         let show_navigation = self.navigation_visible(window);
+        if !show_navigation {
+            self.navigation_tree.armed = None;
+        }
         if !show_navigation && self.navigation_focus.contains_focused(window, cx) {
             // A resize can unmount the rail while its retained search is focused.
             // Use the inert workspace, never a terminal that would receive typing.
@@ -1248,7 +1251,7 @@ impl Workspace {
                                 .flex_shrink_0()
                                 .border_r_1()
                                 .border_color(rgb(visual.border))
-                                .child(self.navigation_column(cx)),
+                                .child(self.navigation_column(window, cx)),
                         )
                     })
                     .child(
@@ -1301,9 +1304,8 @@ impl Workspace {
             .when(self.connecting, |surface| {
                 surface.child(self.authentication_modal(cx))
             })
-            .capture_key_down(
-                cx.listener(|view, _, window, cx| view.capture_surface_input(window, cx)),
-            )
+            .capture_key_down(cx.listener(Self::capture_navigation_key_down))
+            .capture_key_up(cx.listener(Self::capture_navigation_key_up))
             .into_any_element();
         self.protect_surface_input(surface, cx)
     }

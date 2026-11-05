@@ -4,6 +4,10 @@ use crate::terminal::TransportState;
 use crate::workspace::{library::LibraryFilter, navigation::NavigationPanel};
 use gpui_kit::{App, MouseButton, Pixels, Point, SharedString, Window};
 
+mod input_lifetime;
+mod keyboard;
+mod selection_recovery;
+
 fn row_id(id: uuid::Uuid) -> SharedString {
     format!("navigation-connection-{id}").into()
 }

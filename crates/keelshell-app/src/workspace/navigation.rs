@@ -3,8 +3,11 @@ use super::*;
 use crate::jump_host_picker::endpoint;
 use gpui_kit::{
     assets::IconName,
-    component::{Selectable, tooltip::Tooltip},
+    component::{Icon, Selectable, tooltip::Tooltip},
 };
+mod keyboard;
+pub(super) mod tree;
+use tree::{Entry, NodeId};
 
 /// The left rail's content; switching panels retains the existing entities.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -24,7 +27,11 @@ impl Workspace {
     }
 
     /// Render the navigation rail inside the width allocated by the workspace.
-    pub(super) fn navigation_column(&self, cx: &mut Context<Self>) -> AnyElement {
+    pub(super) fn navigation_column(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let visual = crate::design::palette(cx);
         let mut selector = div()
             .flex()
@@ -55,8 +62,12 @@ impl Workspace {
                     .accessibility_label(label)
                     .selected(self.navigation_panel == panel)
                     .toggled(self.navigation_panel == panel)
-                    .on_click(cx.listener(move |view, _, _, cx| {
+                    .on_click(cx.listener(move |view, _, window, cx| {
                         if view.active_modal().is_none() {
+                            view.navigation_tree.armed = None;
+                            if view.navigation_tree.focus.is_focused(window) {
+                                view.surface_focus.focus(window, cx);
+                            }
                             view.navigation_panel = panel;
                             cx.notify();
                         }
@@ -65,7 +76,7 @@ impl Workspace {
             );
         }
         let content = match self.navigation_panel {
-            NavigationPanel::Connections => self.navigation_connections(cx),
+            NavigationPanel::Connections => self.navigation_connections(window, cx),
             NavigationPanel::Monitor => self.monitor_column(cx),
         };
         div()
@@ -86,23 +97,24 @@ impl Workspace {
             .into_any_element()
     }
 
-    fn navigation_connections(&self, cx: &mut Context<Self>) -> AnyElement {
+    fn navigation_connections(&mut self, window: &Window, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let query = self.search.read(cx).value();
-        // The manager's Favorites/Trash/folder selection is deliberately not a
-        // navigation filter. Both surfaces reuse the input only when mounted.
-        let mut profiles: Vec<_> = self
-            .state
-            .connections
-            .iter()
-            .filter(|profile| profile.matches(&query))
-            .collect();
-        profiles.sort_unstable_by(|left, right| {
-            left.name.cmp(&right.name).then(left.id.cmp(&right.id))
-        });
+        self.navigation_tree.synchronize(&self.state, &query);
+        if !self.navigation_tree.focus.is_focused(window) {
+            self.navigation_tree.armed = None;
+        }
         let mut rows = div()
             .id("navigation-rows")
             .test_support()
+            .role(Role::Tree)
+            .aria_label(t(cx, "已保存连接", "Saved connections"))
+            .aria_description(t(cx, "方向键浏览，Enter 打开，左右键折叠或展开文件夹。", "Use arrow keys to browse, Enter to open, and Left or Right to collapse or expand folders."))
+            .track_focus(&self.navigation_tree.focus)
+            .tab_index(0)
+            .track_scroll(&self.navigation_tree.scroll)
+            .on_key_down(cx.listener(Self::navigation_key_down))
+            .on_key_up(cx.listener(Self::navigation_key_up))
             .flex_1()
             .min_h_0()
             .min_w_0()
@@ -112,48 +124,10 @@ impl Workspace {
             .flex()
             .flex_col()
             .gap_1();
-        let unfiled: Vec<_> = profiles
-            .iter()
-            .copied()
-            .filter(|profile| self.state.folder_id_of(profile.id).is_none())
-            .collect();
-        if !unfiled.is_empty() {
-            let label = t(cx, "未归档", "Unfiled").to_owned();
-            rows = rows.child(self.navigation_folder_heading(
-                "navigation-unfiled".into(),
-                label.clone(),
-                label,
-                0,
-                cx,
-            ));
-            for profile in unfiled {
-                rows = rows.child(self.navigation_connection_row(profile, 0, cx));
-            }
+        for entry in &self.navigation_tree.visible {
+            rows = rows.child(self.navigation_tree_row(entry, window, cx));
         }
-        for folder in self.state.folder_rows() {
-            if !query.trim().is_empty()
-                && !profiles
-                    .iter()
-                    .any(|profile| self.state.folder_contains(folder.id, profile.id))
-            {
-                continue;
-            }
-            rows = rows.child(self.navigation_folder_heading(
-                format!("navigation-folder-{}", folder.id).into(),
-                folder.name,
-                self.folder_label(Some(folder.id), cx),
-                folder.depth,
-                cx,
-            ));
-            for profile in profiles
-                .iter()
-                .copied()
-                .filter(|profile| self.state.folder_id_of(profile.id) == Some(folder.id))
-            {
-                rows = rows.child(self.navigation_connection_row(profile, folder.depth + 1, cx));
-            }
-        }
-        if profiles.is_empty() {
+        if self.navigation_tree.visible.is_empty() {
             let message = if self.state.connections.is_empty() {
                 t(
                     cx,
@@ -228,10 +202,39 @@ impl Workspace {
                             ),
                     )
                     .child(
-                        Input::new(&self.search)
-                            .id("navigation-search")
-                            .small()
-                            .aria_label(t(cx, "搜索已保存连接", "Search saved connections")),
+                        div()
+                            .capture_key_down(cx.listener(
+                                |view, event: &KeyDownEvent, window, cx| {
+                                    if event.keystroke.key == "down"
+                                        && event.keystroke.modifiers == Modifiers::default()
+                                        && view.active_modal().is_none()
+                                        && view.search.read(cx).focus_handle(cx).is_focused(window)
+                                    {
+                                        view.navigation_tree.synchronize(
+                                            &view.state,
+                                            &view.search.read(cx).value(),
+                                        );
+                                        if let Some(id) = view.navigation_tree.cursor {
+                                            view.navigation_tree.select(id);
+                                            view.navigation_tree.focus.focus(window, cx);
+                                            cx.notify();
+                                        }
+                                        view.navigation_tree.held.insert("down".into());
+                                        window.prevent_default();
+                                        cx.stop_propagation();
+                                    }
+                                },
+                            ))
+                            .child(
+                                Input::new(&self.search)
+                                    .id("navigation-search")
+                                    .small()
+                                    .aria_label(t(
+                                        cx,
+                                        "搜索已保存连接",
+                                        "Search saved connections",
+                                    )),
+                            ),
                     ),
             )
             .child(rows)
@@ -262,44 +265,103 @@ impl Workspace {
             .into_any_element()
     }
 
-    fn navigation_folder_heading(
+    fn navigation_tree_row(
         &self,
-        id: SharedString,
-        name: String,
-        path: String,
-        depth: usize,
-        cx: &App,
-    ) -> AnyElement {
-        let label = format!("{}: {path}", t(cx, "文件夹", "Folder"));
-        div()
-            .id(id)
-            .test_support()
-            .role(Role::Label)
-            .aria_label(label.clone())
-            .tooltip(move |window, cx| Tooltip::new(label.clone()).build(window, cx))
-            .flex_shrink_0()
-            .min_w_0()
-            .pl(px(8. + depth.min(4) as f32 * 10.))
-            .pr_2()
-            .pt_2()
-            .pb_1()
-            .text_xs()
-            .text_color(rgb(crate::design::palette(cx).muted))
-            .font_weight(FontWeight::SEMIBOLD)
-            .text_ellipsis()
-            .child(name)
-            .into_any_element()
-    }
-
-    fn navigation_connection_row(
-        &self,
-        connection: &Connection,
-        depth: usize,
+        entry: &Entry,
+        window: &Window,
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
-        let profile_id = connection.id;
-        let id: SharedString = format!("navigation-connection-{profile_id}").into();
+        let id = entry.id;
+        let cursor = self.navigation_tree.cursor == Some(id);
+        let siblings: Vec<_> = self
+            .navigation_tree
+            .visible
+            .iter()
+            .filter(|row| row.parent == entry.parent)
+            .collect();
+        let position = siblings
+            .iter()
+            .position(|row| row.id == id)
+            .unwrap_or_default();
+        let base = gpui_kit::base::Button::new(SharedString::from(id.element_id()))
+            .focusable(false)
+            .justify_start()
+            .role(Role::TreeItem)
+            .aria_level(entry.depth + 1)
+            .aria_position_in_set(position + 1)
+            .aria_size_of_set(siblings.len())
+            .aria_selected(cursor)
+            .when(cursor, |row| row.aria_active_descendant())
+            .flex_shrink_0()
+            .min_w_0()
+            .w_full()
+            .border_1()
+            .border_color(rgb(visual.sidebar))
+            .rounded(px(crate::design::components(cx).control_radius))
+            .pl(px(8. + entry.depth.min(4) as f32 * 10.))
+            .pr_2()
+            .py_1()
+            .line_height(relative(1.3))
+            .cursor_pointer()
+            .hover(|style| style.bg(rgb(visual.surface)))
+            .active(|style| style.bg(rgb(visual.selected)))
+            .when(cursor, |row| {
+                row.bg(rgb(visual.selected))
+                    .when(self.navigation_tree.focus.is_focused(window), |row| {
+                        row.border_color(rgb(visual.accent))
+                    })
+            })
+            .on_mouse_down(MouseButton::Left, |_, window, _| window.prevent_default())
+            .on_click(cx.listener(move |view, _, window, cx| {
+                view.activate_navigation_node(id, window, cx);
+            }));
+        let NodeId::Connection(profile_id) = id else {
+            let name = if id == NodeId::Unfiled {
+                t(cx, "未归档", "Unfiled").to_owned()
+            } else {
+                entry.name.clone()
+            };
+            let path = match id {
+                NodeId::Folder(folder) => self.folder_label(Some(folder), cx),
+                _ => name.clone(),
+            };
+            let label = format!("{}: {path}", t(cx, "文件夹", "Folder"));
+            return base
+                .h(px(32.))
+                .aria_label(label.clone())
+                .when(entry.has_children, |row| row.aria_expanded(entry.expanded))
+                .tooltip(move |window, cx| Tooltip::new(label.clone()).build(window, cx))
+                .flex()
+                .items_center()
+                .gap_1()
+                .child(
+                    Icon::new(if entry.expanded {
+                        IconName::ChevronDown
+                    } else {
+                        IconName::ChevronRight
+                    })
+                    .size_3()
+                    .when(!entry.has_children, |icon| icon.invisible()),
+                )
+                .child(
+                    div()
+                        .min_w_0()
+                        .text_ellipsis()
+                        .text_xs()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .child(name),
+                )
+                .into_any_element();
+        };
+        let Some(connection) = self
+            .state
+            .connections
+            .iter()
+            .find(|profile| profile.id == profile_id)
+        else {
+            return div().into_any_element();
+        };
         let live = self.navigation_live_tab(profile_id, cx);
         let selected = live == Some(self.active);
         let state = if selected {
@@ -316,62 +378,44 @@ impl Workspace {
         };
         let endpoint = endpoint(connection);
         let label = format!("{action}: {}\n{endpoint}\n{state}", connection.name);
-        div()
-            .min_w_0()
-            .flex_shrink_0()
-            .pl(px(depth.min(4) as f32 * 10.))
+        base.h(px(66.))
+            .aria_label(label.clone())
+            .tooltip(move |window, cx| Tooltip::new(label.clone()).build(window, cx))
+            .disabled(
+                live.is_none() && (self.connecting || self.saving || self.connect_route.is_some()),
+            )
             .child(
-                Button::new(id.clone())
-                    .ghost()
+                div()
                     .w_full()
                     .min_w_0()
-                    .h(px(66.))
-                    .px_2()
-                    .py_1()
-                    .selected(selected)
-                    .accessibility_label(label.clone())
-                    .tooltip(label)
-                    .disabled(
-                        live.is_none()
-                            && (self.connecting || self.saving || self.connect_route.is_some()),
+                    .flex()
+                    .flex_col()
+                    .gap(px(2.))
+                    .child(
+                        div()
+                            .text_sm()
+                            .font_weight(FontWeight::MEDIUM)
+                            .text_ellipsis()
+                            .child(connection.name.clone()),
                     )
                     .child(
                         div()
-                            .w_full()
-                            .min_w_0()
-                            .flex()
-                            .flex_col()
-                            .gap(px(2.))
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .font_weight(FontWeight::MEDIUM)
-                                    .text_ellipsis()
-                                    .child(connection.name.clone()),
-                            )
-                            .child(
-                                div()
-                                    .text_xs()
-                                    .text_color(rgb(visual.muted))
-                                    .text_ellipsis()
-                                    .child(endpoint),
-                            )
-                            .child(
-                                div()
-                                    .text_xs()
-                                    .text_color(rgb(if live.is_some() {
-                                        visual.success
-                                    } else {
-                                        visual.muted
-                                    }))
-                                    .text_ellipsis()
-                                    .child(state),
-                            ),
+                            .text_xs()
+                            .text_color(rgb(visual.muted))
+                            .text_ellipsis()
+                            .child(endpoint),
                     )
-                    .on_click(cx.listener(move |view, _, window, cx| {
-                        view.activate_navigation_connection(profile_id, window, cx);
-                    }))
-                    .map(|button| self.retain_modal_button(id, button, cx)),
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(rgb(if live.is_some() {
+                                visual.success
+                            } else {
+                                visual.muted
+                            }))
+                            .text_ellipsis()
+                            .child(state),
+                    ),
             )
             .into_any_element()
     }

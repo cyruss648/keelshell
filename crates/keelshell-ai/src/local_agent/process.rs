@@ -17,8 +17,8 @@ use zeroize::Zeroizing;
 
 use super::{
     ApprovedLocalAsk, LocalAgentConfig, LocalAgentCredential, LocalAgentError, LocalAgentKind,
-    LocalAgentLimits, LocalAgentReply, LocalAgentVersion, LocalAskProgress, LocalAskStage,
-    protocol::AnswerStream,
+    LocalAgentLimits, LocalAgentReply, LocalAgentVersion, LocalAskOperation, LocalAskProgress,
+    LocalAskStage, diagnostics::DiagnosticSink, protocol::AnswerStream,
 };
 use crate::{Redactor, RequestCancellation, provider::payload_contains_secret};
 
@@ -106,7 +106,7 @@ impl LocalAgentClient {
         cancellation: &RequestCancellation,
     ) -> Result<LocalAgentProbe, LocalAgentError> {
         check_cancelled(cancellation)?;
-        let scratch = Scratch::create(config).await?;
+        let scratch = Scratch::create(config, DiagnosticSink::default()).await?;
         let result = probe_in(
             config,
             &scratch,
@@ -115,8 +115,7 @@ impl LocalAgentClient {
             None,
         )
         .await;
-        scratch.close().await?;
-        result
+        scratch.finish(result).await
     }
 
     /// Invoke one exact, single-use human-approved request with an ephemeral key.
@@ -142,6 +141,8 @@ impl LocalAgentClient {
     /// neglecting its receiver never changes protocol validation, cancellation,
     /// or cleanup. Stages contain no supplier output or request content; only
     /// this method's final result establishes success after all cleanup gates.
+    /// Optional diagnostics attached with [`LocalAskProgress::with_diagnostics`]
+    /// follow the same request ownership and never change error precedence.
     pub async fn ask_with_progress(
         &self,
         approved: ApprovedLocalAsk,
@@ -177,7 +178,11 @@ impl LocalAgentClient {
         let prepared = approved.prepared;
         let deadline = Instant::now() + prepared.config.limits.timeout;
         recheck_directory(prepared.directory.as_ref(), deadline, cancellation).await?;
-        let scratch = Scratch::create(&prepared.config).await?;
+        let diagnostics = progress
+            .as_ref()
+            .map(|progress| progress.diagnostics().clone())
+            .unwrap_or_default();
+        let scratch = Scratch::create(&prepared.config, diagnostics).await?;
         observe(progress.as_ref(), LocalAskStage::WorkspaceReady);
         let result = async {
             recheck_directory(prepared.directory.as_ref(), deadline, cancellation).await?;
@@ -203,7 +208,7 @@ impl LocalAgentClient {
                 verify_signed_bundle(binary, &scratch, deadline, cancellation).await?;
                 let owned = tokio::time::timeout_at(
                     deadline,
-                    binary.owned_copy(&scratch.temporary, cancellation),
+                    binary.owned_copy(&scratch.temporary, cancellation, &scratch.diagnostics),
                 )
                 .await
                 .map_err(|_| LocalAgentError::Timeout)??;
@@ -265,12 +270,16 @@ impl LocalAgentClient {
                     );
                     super::bootstrap::wrap(
                         command,
-                        &prepared.config,
-                        directory,
-                        owned_binary,
-                        (&scratch.home, &scratch.temporary),
-                        &prepared.stdin,
-                        probe.version,
+                        super::bootstrap::WrapRequest {
+                            config: &prepared.config,
+                            directory,
+                            binary: owned_binary,
+                            home: &scratch.home,
+                            temporary: &scratch.temporary,
+                            input: &prepared.stdin,
+                            version: probe.version,
+                            diagnostics: &scratch.diagnostics,
+                        },
                     )?
                 }
                 #[cfg(not(unix))]
@@ -328,8 +337,7 @@ impl LocalAgentClient {
         }
         .await;
         observe(progress.as_ref(), LocalAskStage::Finalizing);
-        scratch.close().await?;
-        result
+        scratch.finish(result).await
     }
 }
 
@@ -338,10 +346,14 @@ struct Scratch {
     home: PathBuf,
     workspace: PathBuf,
     temporary: PathBuf,
+    diagnostics: DiagnosticSink,
 }
 
 impl Scratch {
-    async fn create(config: &LocalAgentConfig) -> Result<Self, LocalAgentError> {
+    async fn create(
+        config: &LocalAgentConfig,
+        diagnostics: DiagnosticSink,
+    ) -> Result<Self, LocalAgentError> {
         let metadata = tokio::fs::metadata(&config.executable)
             .await
             .map_err(|_| LocalAgentError::SpawnFailed)?;
@@ -349,54 +361,103 @@ impl Scratch {
             return Err(LocalAgentError::InvalidConfiguration);
         }
         let parent = config.scratch_parent.clone();
-        tokio::task::spawn_blocking(move || {
-            let mut builder = tempfile::Builder::new();
-            builder.prefix("keelshell-agent-");
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                // The CLI may write its own logs/config to this disposable home.
-                // Explicit 0700 avoids relying on the user's inherited umask.
-                builder.permissions(std::fs::Permissions::from_mode(0o700));
-            }
-            let tree = builder
-                .tempdir_in(parent)
-                .map_err(|_| LocalAgentError::ScratchFailed)?;
-            let home = tree.path().join("home");
-            let workspace = tree.path().join("workspace");
-            let temporary = tree.path().join("tmp");
-            for directory in [
-                home.clone(),
+        let worker_diagnostics = diagnostics.clone();
+        tokio::task::spawn_blocking(move || Self::create_in(parent, worker_diagnostics))
+            .await
+            .map_err(|error| {
+                diagnostics.scratch_join(LocalAskOperation::ScratchCreateWorker, &error)
+            })?
+    }
+
+    fn create_in(parent: PathBuf, diagnostics: DiagnosticSink) -> Result<Self, LocalAgentError> {
+        let mut builder = tempfile::Builder::new();
+        builder.prefix("keelshell-agent-");
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            // The CLI may write its own logs/config to this disposable home.
+            // Explicit 0700 avoids relying on the user's inherited umask.
+            builder.permissions(std::fs::Permissions::from_mode(0o700));
+        }
+        let tree = builder
+            .tempdir_in(parent)
+            .map_err(|error| diagnostics.scratch_io(LocalAskOperation::ScratchCreate, &error))?;
+        Self::populate(tree, diagnostics)
+    }
+
+    fn populate(tree: TempDir, diagnostics: DiagnosticSink) -> Result<Self, LocalAgentError> {
+        let home = tree.path().join("home");
+        let workspace = tree.path().join("workspace");
+        let temporary = tree.path().join("tmp");
+        for (directory, operation) in [
+            (home.clone(), LocalAskOperation::ScratchHomeCreate),
+            (
                 home.join("codex"),
+                LocalAskOperation::ScratchCodexHomeCreate,
+            ),
+            (
                 home.join("claude"),
+                LocalAskOperation::ScratchClaudeHomeCreate,
+            ),
+            (
                 home.join("appdata"),
+                LocalAskOperation::ScratchAppDataCreate,
+            ),
+            (
                 home.join("localappdata"),
-                home.join("cache"),
-                home.join("config"),
-                workspace.clone(),
-                temporary.clone(),
-            ] {
-                std::fs::create_dir(&directory).map_err(|_| LocalAgentError::ScratchFailed)?;
-            }
-            // Stop ancestor project/config discovery at this owned empty root.
-            std::fs::write(workspace.join(".keelshell-isolated-workspace"), [])
-                .map_err(|_| LocalAgentError::ScratchFailed)?;
-            Ok(Self {
-                tree,
-                home,
-                workspace,
-                temporary,
-            })
+                LocalAskOperation::ScratchLocalAppDataCreate,
+            ),
+            (home.join("cache"), LocalAskOperation::ScratchCacheCreate),
+            (home.join("config"), LocalAskOperation::ScratchConfigCreate),
+            (workspace.clone(), LocalAskOperation::ScratchWorkspaceCreate),
+            (temporary.clone(), LocalAskOperation::ScratchTemporaryCreate),
+        ] {
+            std::fs::create_dir(&directory)
+                .map_err(|error| diagnostics.scratch_io(operation, &error))?;
+        }
+        // Stop ancestor project/config discovery at this owned empty root.
+        Self::write_marker(&workspace, &diagnostics)?;
+        Ok(Self {
+            tree,
+            home,
+            workspace,
+            temporary,
+            diagnostics,
         })
-        .await
-        .map_err(|_| LocalAgentError::ScratchFailed)?
+    }
+
+    fn write_marker(
+        workspace: &std::path::Path,
+        diagnostics: &DiagnosticSink,
+    ) -> Result<(), LocalAgentError> {
+        std::fs::write(workspace.join(".keelshell-isolated-workspace"), [])
+            .map_err(|error| diagnostics.scratch_io(LocalAskOperation::ScratchMarkerWrite, &error))
+    }
+
+    async fn finish<T>(self, result: Result<T, LocalAgentError>) -> Result<T, LocalAgentError> {
+        self.diagnostics.result_before_close(&result);
+        // Preserve the original precedence: scratch close failure overrides the
+        // earlier request result, including an otherwise successful reply.
+        self.close().await?;
+        result
     }
 
     async fn close(self) -> Result<(), LocalAgentError> {
-        tokio::task::spawn_blocking(move || self.tree.close())
+        let Self {
+            tree, diagnostics, ..
+        } = self;
+        let result = tokio::task::spawn_blocking(move || tree.close())
             .await
-            .map_err(|_| LocalAgentError::ScratchFailed)?
-            .map_err(|_| LocalAgentError::ScratchFailed)
+            .map_err(|error| {
+                diagnostics.scratch_join(LocalAskOperation::ScratchCloseWorker, &error)
+            })
+            .and_then(|result| {
+                result.map_err(|error| {
+                    diagnostics.scratch_io(LocalAskOperation::ScratchClose, &error)
+                })
+            });
+        diagnostics.close_result(&result);
+        result
     }
 }
 
@@ -1402,6 +1463,225 @@ mod unix_cleanup_tests;
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
+    use crate::{ContextDraft, LocalAskDiagnostic, LocalAskDiagnostics, LocalAskErrorKind};
+
+    #[tokio::test]
+    async fn ask_reports_real_scratch_creation_failure_without_starting_a_cli() {
+        let root = tempfile::tempdir().unwrap();
+        let executable = root.path().join("private-executable");
+        std::fs::write(&executable, b"not an executable and must never be spawned").unwrap();
+        let config = LocalAgentConfig::new(
+            LocalAgentKind::Codex,
+            executable,
+            root.path().join("missing-private-parent"),
+            "test-model",
+        )
+        .unwrap();
+        let review = config
+            .prepare(ContextDraft::new("synthetic private context"), &[], 4096)
+            .unwrap();
+        let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+        let (progress, stages) = LocalAskProgress::channel();
+        let signal = RequestCancellation::new();
+        let result = tokio::time::timeout(
+            Duration::from_secs(5),
+            LocalAgentClient.ask_with_progress(
+                review.approve(),
+                LocalAgentCredential::new("synthetic-private-credential").unwrap(),
+                &signal,
+                progress.with_diagnostics(diagnostics),
+            ),
+        )
+        .await
+        .unwrap();
+        assert!(matches!(result, Err(LocalAgentError::ScratchFailed)));
+        let event = receiver.try_recv().unwrap();
+        assert!(matches!(
+            event,
+            LocalAskDiagnostic::Io {
+                operation: LocalAskOperation::ScratchCreate,
+                kind: ErrorKind::NotFound,
+                // tempfile's private path wrapper does not expose OS errno.
+                raw_os_error: None,
+            }
+        ));
+        let debug = format!("{event:?}");
+        for private in [
+            root.path().to_str().unwrap(),
+            "private-executable",
+            "missing-private-parent",
+            "synthetic private context",
+            "synthetic-private-credential",
+        ] {
+            assert!(!debug.contains(private));
+        }
+        assert_eq!(
+            stages.try_recv(),
+            Err(std::sync::mpsc::TryRecvError::Disconnected)
+        );
+        assert_eq!(
+            receiver.try_recv(),
+            Err(std::sync::mpsc::TryRecvError::Disconnected)
+        );
+    }
+
+    #[test]
+    fn existing_home_object_reports_the_subdirectory_failure() {
+        let tree = tempfile::tempdir().unwrap();
+        std::fs::write(tree.path().join("home"), b"owned obstruction").unwrap();
+        let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+        assert!(matches!(
+            Scratch::populate(tree, diagnostics.into_sink()),
+            Err(LocalAgentError::ScratchFailed)
+        ));
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(LocalAskDiagnostic::Io {
+                operation: LocalAskOperation::ScratchHomeCreate,
+                kind: ErrorKind::AlreadyExists,
+                raw_os_error: Some(_),
+            })
+        ));
+    }
+
+    #[test]
+    fn directory_at_marker_location_reports_marker_io_failure() {
+        let workspace = tempfile::tempdir().unwrap();
+        std::fs::create_dir(workspace.path().join(".keelshell-isolated-workspace")).unwrap();
+        let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+        assert_eq!(
+            Scratch::write_marker(workspace.path(), &diagnostics.into_sink()),
+            Err(LocalAgentError::ScratchFailed)
+        );
+        // Windows and Unix categorize writing over a directory differently.
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(LocalAskDiagnostic::Io {
+                operation: LocalAskOperation::ScratchMarkerWrite,
+                raw_os_error: Some(_),
+                ..
+            })
+        ));
+    }
+
+    #[tokio::test]
+    async fn successful_close_preserves_the_original_reply_or_nested_error() {
+        for original in [
+            Ok("synthetic private answer"),
+            Err(LocalAgentError::Timeout),
+            Err(LocalAgentError::CleanupFailed),
+            Err(LocalAgentError::Context(crate::AiError::HttpStatus(599))),
+        ] {
+            let parent = tempfile::tempdir().unwrap();
+            let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+            let scratch =
+                Scratch::create_in(parent.path().to_owned(), diagnostics.into_sink()).unwrap();
+            let tree_path = scratch.tree.path().to_owned();
+            let before = original
+                .as_ref()
+                .map(|_| ())
+                .map_err(LocalAskErrorKind::from);
+            let result = tokio::time::timeout(Duration::from_secs(5), scratch.finish(original))
+                .await
+                .unwrap();
+            assert_eq!(
+                result.as_ref().map(|_| ()).map_err(LocalAskErrorKind::from),
+                before
+            );
+            if before.is_ok() {
+                assert_eq!(result.unwrap(), "synthetic private answer");
+            } else if before == Err(LocalAskErrorKind::Context) {
+                assert_eq!(
+                    result,
+                    Err(LocalAgentError::Context(crate::AiError::HttpStatus(599)))
+                );
+            }
+            assert!(!tree_path.exists());
+            let events: Vec<_> = std::iter::from_fn(|| receiver.try_recv().ok()).collect();
+            assert_eq!(
+                events,
+                [
+                    LocalAskDiagnostic::ResultBeforeClose { result: before },
+                    LocalAskDiagnostic::CloseResult { result: Ok(()) },
+                ]
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn real_close_failure_keeps_the_preclose_result_and_original_override() {
+        for original in [
+            Ok("synthetic private answer"),
+            Err(LocalAgentError::Timeout),
+            Err(LocalAgentError::CleanupFailed),
+            Err(LocalAgentError::DirectoryUnsupported),
+        ] {
+            let parent = tempfile::tempdir().unwrap();
+            let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+            let scratch =
+                Scratch::create_in(parent.path().to_owned(), diagnostics.into_sink()).unwrap();
+            let tree_path = scratch.tree.path().to_owned();
+            // An actual filesystem type change makes TempDir::close fail without
+            // permissions assumptions (including privileged CI users) or races.
+            std::fs::remove_dir_all(&tree_path).unwrap();
+            std::fs::write(&tree_path, b"owned replacement, removed with parent").unwrap();
+            let before = original
+                .as_ref()
+                .map(|_| ())
+                .map_err(LocalAskErrorKind::from);
+            assert_eq!(
+                tokio::time::timeout(Duration::from_secs(5), scratch.finish(original))
+                    .await
+                    .unwrap(),
+                Err(LocalAgentError::ScratchFailed)
+            );
+            let events: Vec<_> = std::iter::from_fn(|| receiver.try_recv().ok()).collect();
+            assert!(matches!(
+                events.as_slice(),
+                [
+                    LocalAskDiagnostic::ResultBeforeClose { result },
+                    LocalAskDiagnostic::Io {
+                        operation: LocalAskOperation::ScratchClose,
+                        raw_os_error: None,
+                        ..
+                    },
+                    LocalAskDiagnostic::CloseResult {
+                        result: Err(LocalAskErrorKind::ScratchFailed),
+                    },
+                ] if *result == before
+            ));
+        }
+    }
+
+    #[tokio::test]
+    async fn dropped_diagnostics_do_not_change_scratch_cleanup_or_error_precedence() {
+        for obstruct_close in [false, true] {
+            let parent = tempfile::tempdir().unwrap();
+            let (diagnostics, receiver) = LocalAskDiagnostics::channel();
+            drop(receiver);
+            let scratch =
+                Scratch::create_in(parent.path().to_owned(), diagnostics.into_sink()).unwrap();
+            let tree_path = scratch.tree.path().to_owned();
+            if obstruct_close {
+                std::fs::remove_dir_all(&tree_path).unwrap();
+                std::fs::write(&tree_path, b"owned obstruction").unwrap();
+            }
+            assert_eq!(
+                tokio::time::timeout(
+                    Duration::from_secs(5),
+                    scratch.finish(Err::<(), _>(LocalAgentError::Cancelled)),
+                )
+                .await
+                .unwrap(),
+                Err(if obstruct_close {
+                    LocalAgentError::ScratchFailed
+                } else {
+                    LocalAgentError::Cancelled
+                })
+            );
+            assert_eq!(tree_path.exists(), obstruct_close);
+        }
+    }
 
     #[test]
     fn local_agent_futures_keep_pipe_buffers_on_the_heap() {

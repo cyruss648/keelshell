@@ -333,6 +333,7 @@ pub struct Workspace {
     show_assistant: bool,
     show_navigation: bool,
     navigation_panel: NavigationPanel,
+    navigation_tree: navigation::tree::NavigationTree,
     session_tab_scroll: ScrollHandle,
     session_tab_reveal: Option<(
         EntityId,
@@ -440,6 +441,7 @@ impl Workspace {
         let appearance_subscription = cx.observe_window_appearance(window, |view, window, cx| {
             view.on_appearance_changed(window.appearance(), window, cx);
         });
+        let navigation_keystrokes = Self::intercept_navigation_keys(window, cx);
         let search = input(
             t(cx, "搜索连接名称、主机、用户…", "Search connections…"),
             "",
@@ -808,6 +810,7 @@ impl Workspace {
             show_assistant: false,
             show_navigation: true,
             navigation_panel: NavigationPanel::default(),
+            navigation_tree: navigation::tree::NavigationTree::new(cx),
             session_tab_scroll: ScrollHandle::new(),
             session_tab_reveal: None,
             assistant,
@@ -880,6 +883,7 @@ impl Workspace {
                 update_subscription,
                 update_observer,
                 appearance_subscription,
+                navigation_keystrokes,
                 subscription,
                 assistant_subscription,
                 command_subscription,

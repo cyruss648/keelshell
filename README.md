@@ -38,6 +38,13 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 
 [原生工作区](docs/product/NATIVE_WORKBENCH.md)提供连接与主机信息侧栏、独立会话标签栏，以及标明当前选择的文件、命令和隧道入口。收起侧栏或切换 AI 助手会保留会话与草稿。
 
+连接树候选补充目录折叠、方向键浏览、搜索恢复和单一 Tab 停靠点。
+[限定原生记录](docs/testing/records/2026-11-05-navigation-keyboard.md)保留早期成功观察、
+后期按键无响应及未成功的输入正控；完整键盘隔离仍开放。
+当前正在[组合验证](docs/testing/records/2026-11-05-workspace-integration.md)导航、分屏和 Ask 诊断，
+新组合包已有导航、主题、草稿及分屏的限定 macOS 观察，正在独立复核；
+各来源包的验收范围分别保留，普通字符输入异常和完整平台矩阵仍待核实。
+
 [文件工作区](docs/product/FILES_WORKSPACE.md)默认优先展示双栏列表，路径独占一行；纵向浏览文件行，横向查看远程列。文件操作与传输设置按需展开，批量上传/下载和队列入口保持可见，切换时保留草稿与审核规则。
 
 [工作区布局](docs/product/WORKSPACE_LAYOUT.md)已具备有界领域模型与配置持久化。当前原生候选接入嵌套左右/上下分屏、拖动/键盘比例、逐叶标签、合并、聚焦与显式保存。修后包已取得受控 macOS 四通道、工具选择保留、两轴拖动、三个分隔条键盘及保存读回的[限定原生证据](docs/testing/records/2026-11-05-native-pane-layout.md)，并通过新的非作者组合复核与所检子集的 Hallmark finish。紧凑 OS 窗口及完整平台矩阵仍开放，多窗口及重启恢复入口尚未实现；提交、推送和精确 CI 分别记录。
@@ -124,7 +131,9 @@ cargo run -p keelshell-app --locked
 | 已实现能力、限制与开发计划 | [能力清单](docs/product/CAPABILITIES.md) · [路线图](docs/ROADMAP.md) |
 | 操作指南与设计决策 | [文档目录](docs/README.md) · [产品设计](docs/product/PRODUCT.md) · [ADR](docs/adr/) |
 | 工程结构、本地开发与检查 | [贡献指南](CONTRIBUTING.md) |
-| 行为测试与平台证据 | [测试策略](docs/testing/STRATEGY.md) · [测试记录](docs/testing/records/) |
+| 行为测试与平台证据 | [测试策略](docs/testing/STRATEGY.md) · [测试索引](docs/testing/README.md) |
+| 本地 Ask 失败观测与已知边界 | [有界诊断设计](docs/adr/0102-local-ask-scratch-diagnostics.md) |
+| CI 容量修订与验证进展 | [ADR 0103](docs/adr/0103-ci-storage-capacity.md) · [容量记录](docs/testing/records/2026-11-05-ci-storage-capacity.md) |
 
 欢迎通过 [Issues](https://github.com/cyruss648/keelshell/issues) 报告问题、分享体验和提出建议。提供复现步骤、匿名配置和平台信息有助于定位问题；代码与文档贡献请从贡献指南开始。
 

@@ -38,6 +38,13 @@ Simplified Chinese is the default, with English available. Appearance follows th
 
 The [native workspace](docs/product/NATIVE_WORKBENCH.md) includes a connections and host-information sidebar, a separate session strip, and Files, Commands and Tunnels controls that show the current selection. Hiding the sidebar or switching the AI assistant preserves sessions and drafts.
 
+The connection-tree candidate adds folder folding, arrow-key browsing, restored search state and a single Tab stop.
+Its [scoped native record](docs/testing/records/2026-11-05-navigation-keyboard.md) preserves early successful observations,
+later unresponsive keys and unsuccessful input positive controls; complete keyboard isolation remains open.
+Navigation, panes and Ask diagnostics are undergoing [combined validation](docs/testing/records/2026-11-05-workspace-integration.md),
+with scoped macOS observations of navigation, themes, drafts and panes in the new combined package under independent review.
+Each source package retains its own acceptance scope; the ordinary character-input anomaly and full platform matrix remain open.
+
 The [file workspace](docs/product/FILES_WORKSPACE.md) gives browsing priority with two file lists and a dedicated path row. Vertical input browses file rows; horizontal input reveals remote columns. File actions and transfer settings expand on demand; batch upload/download and the queue remain accessible, preserving drafts and review rules across switches.
 
 [Workspace layout](docs/product/WORKSPACE_LAYOUT.md) has a bounded domain model and configuration persistence. The native candidate adds nested horizontal/vertical splits, pointer and keyboard ratio controls, per-pane tabs, merging, focus and explicit saving. The repaired package has [scoped native evidence](docs/testing/records/2026-11-05-native-pane-layout.md) for four controlled macOS SSH channels, retained tool selection, pointer dragging on both axes, keyboard control of all three dividers and saved-layout readback. A fresh non-author combined review and Hallmark finish have passed for the inspected subset. Compact OS geometry and the complete platform matrix remain open, while multiple windows and startup restoration remain unimplemented. Commit, push and exact CI outcomes are recorded separately.
@@ -124,7 +131,9 @@ The tag-triggered release workflow defines six build targets. Successful tagged 
 | Implemented capabilities, limits and plans | [Capability ledger](docs/product/CAPABILITIES.md) · [Roadmap](docs/ROADMAP.md) |
 | Workflows and design decisions | [Documentation](docs/README.md) · [Product design](docs/product/PRODUCT.md) · [ADRs](docs/adr/) |
 | Repository structure, local development and checks | [Contributing](CONTRIBUTING.md) |
-| Behavior tests and platform evidence | [Testing strategy](docs/testing/STRATEGY.md) · [Test records](docs/testing/records/) |
+| Behavior tests and platform evidence | [Testing strategy](docs/testing/STRATEGY.md) · [Test index](docs/testing/README.md) |
+| Local Ask failure observations and known limits | [Bounded diagnostic design](docs/adr/0102-local-ask-scratch-diagnostics.md) |
+| CI capacity revision and validation status | [ADR 0103](docs/adr/0103-ci-storage-capacity.md) · [Capacity record](docs/testing/records/2026-11-05-ci-storage-capacity.md) |
 
 Use [Issues](https://github.com/cyruss648/keelshell/issues) to report bugs, share feedback and propose improvements. Reproduction steps, anonymized profiles and platform details help diagnosis. Start with the contributing guide for code and documentation changes.
 

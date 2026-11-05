@@ -1,5 +1,52 @@
 # 开发路线
 
+## 当前工作：工作区组合 — 2026-11-05
+
+`feature/workspace-integration-20261105` 正在组合原生分屏 `9db9cbc`、
+Ask诊断 `3d84767` 与CI容量 `72a19ea`。源码自动组合无冲突，三个状态文档
+按各自来源回写；本次候选提交冻结组合，尚未合入main；完整本机门禁已退出0并回收。
+两条feature已推送。容量修订的精确Quality `42009720436/1` 三平台success；
+分屏的 `42009970970/1` 为macOS、Windows success，Linux唯一文件布局条件等待失败，
+根因UNKNOWN；52项分屏测试三平台通过，不能把该失败归为旧ENOSPC。
+导航冻结源码随后已通过三方patch接入，原候选包和原生证据保持独立，
+新的非作者复核仅认可PARTIAL_OBSERVED，后半段输入异常仍UNKNOWN。原515工程输入一致时，A/B/C完整组合门禁为
+2,191 ordinary/23ignored、14rustdoc、Python131run/1skip；新非作者组合源码/证据审查
+APPROVE_SCOPED_COMBINED_SOURCE_AND_EVIDENCE，P0/P1/P2=0。
+两处C原件状态文字P3已由限定复核关闭。新组合包取得53对原生捕获：
+导航、主题、草稿、分屏/合并和独立输入对照有局部证据；早期字符按键及点击分隔条后
+Right未达预期，完整输入隔离仍OPEN，新的非作者原件复核进行中。
+应用与本轮专用运行资源已回收。原生结束后文件布局测试新增阶段诊断，保持原断言与预算；
+修订后的full-gate-r2通过：2,191 ordinary/23ignored、14rustdoc、Python131run/1skip，
+515输入前后一致；freshness-r2通过104条要求，无版本变动。
+候选提交的测试修订/原生独立复核与精确组合CI并行，终态仍PENDING；
+两处测试时序前提缺口不因本机绿而关闭。
+组合自己的检查和新非作者审查见[组合记录](testing/records/2026-11-05-workspace-integration.md)。
+以下切片段落保留来源时点；其中PENDING或“未提交”不覆盖本节和后续交付回执。
+
+## 当前独立切片：CI 容量修订 — 2026-11-05（Asia/Shanghai）
+
+诊断提交 `3d8476716ab80f0cec8b8c731a8cde0bcd7601a3` 已推送 feature，
+未合入 main；原完整门禁及非作者源码/文档/提交绑定复核通过。
+Quality `41994734898 / attempt 1` 为 macOS success、Linux ENOSPC、
+Windows preparation failure。旧 run `41967541069` 的根因仍 UNKNOWN。
+诊断证据见[原记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)，
+后续修订见[ADR 0103](adr/0103-ci-storage-capacity.md)与
+[容量记录](testing/records/2026-11-05-ci-storage-capacity.md)。
+
+- 已实现六文件容量修订：串行 fixture 显式关闭及前一 root 不存在断言、
+  非 workspace 依赖 dev `debug=0`、缓存新分代、门禁前后数值容量。
+  既有断言和期限保持；同 helper 寿命对照 exit 101 → 0，
+  新依赖检查 exit 0、Python 三项专项通过。
+- 新 profile `ci-capacity/full-gate-r1` **exit 0并回收**：2,126 ordinary
+  Rust / 23 ignored、14 rustdoc、Python 131 run / 1 skipped；506 项输入一致。
+  本机两种夹具程序分别为 10,078,320 / 9,921,664 字节，范围见记录。
+  Nash 六文件源码 **APPROVE_SCOPED_SOURCE，P0/P1/P2/P3=0**。
+- Nash `combined-r1.md` 为 **APPROVE_SCOPED_COMBINED，P0/P1/P2/P3=0**，
+  文档预审 P3 已关闭；**新提交绑定及精确 CI 仍 PENDING**，不宣称远端容量已修复。
+- 原提交 Windows 单 job 重跑 **success**；attempt 2 整体 failure，
+  Linux/macOS 起止时间、步骤及日志与首次相同，属于继承，原失败保持。
+- 原生分屏与连接树按各自冻结输入及回执独立验收，本切片不转移其原生结论。
+
 ## 当前候选：原生分屏工作区 — 2026-11-05
 
 `feature/native-pane-layout-20261105` 接入有界嵌套分屏、逐叶选择、比例拖动与键盘调整、
@@ -245,7 +292,7 @@ Unix v9原完整检查实际失败于长TMP夹具组观察EPERM，原626和后�
 | 1 / P1 | 更新签名信任与安装验收（PLAT-01） | 项目链接、变更日志、手动检查、启动／周期检查、失败退避、持久化策略及可选校验下载已实现，安装保留明确确认。剩余签名清单／可信发布者与平台验签兼容契约、macOS签名／公证和Windows签名；以隔离安装目录完成真实下载、失败回滚和重启原生验证。六目标构建、受控服务测试和宽窗口设置保存不代替这些验收。 |
 | 2 / P1 | 日常 SFTP 浏览与批量入口（FILE-01/02/03） | 已接通系统单目录选择、本地／远程双栏、隐藏项、排序和仅填入路径的选择动作；继续多选／拖放和完整批量目标预览。复用现有队列、内容校验和审核；路径或会话变化撤销旧计划，部分失败逐目标报告。验证真实本地文件与自有 SFTP 读回，未经审核不写入。 v5 新非作者专项及136项文件回归通过；根810输入完整门禁、新macOS标准包和宽窗口 picker／人工审核双向 SFTP 已完成。新组合源码／工程／宽窗口原生独立复核无 P1/P2，精确CI／最小原生窗口／其它平台、多选／拖放／完整批量目标继续开放。 |
 | 3 / P1 | 日常远程文本编辑（FILE-04） | 现有有界 UTF-8 编辑、差异、冲突合并/patch 草稿和审核保存保留；先改进真实可用视口、查找/替换与语法高亮，再设计编码/换行保持和保存前可恢复备份。当前候选视口修复只关闭其限定问题；长行、键盘/IME、取消与恢复、完整字节读回和其它平台仍需分别验证。 |
-| 4 / P1 | 专业 pane 工作区与布局恢复（TERM-02/UI-04） | [布局模型](product/WORKSPACE_LAYOUT.md)已提供有界横/纵布局、稳定身份和非活动布局持久化。独立原生候选接入分屏、拖动/键盘比例、逐叶标签、合并/聚焦和显式保存；修后r2包的四通道macOS原生子集与r4工程门禁分别记录，combined/finish PENDING。最小OS窗口、完整焦点/审核目标与关闭/重连矩阵仍待验；多窗口与恢复入口仍需实现，恢复不得重放命令/传输。 |
+| 4 / P1 | 专业 pane 工作区与布局恢复（TERM-02/UI-04） | [布局模型](product/WORKSPACE_LAYOUT.md)已提供有界横/纵布局、稳定身份和非活动布局持久化。独立原生候选接入分屏、拖动/键盘比例、逐叶标签、合并/聚焦和显式保存；修后r2包的四通道macOS原生子集与r4工程门禁分别记录，新的非作者组合复核已通过，Hallmark finish仅签所检原生子集。最小OS窗口、完整焦点/审核目标与关闭/重连矩阵仍待验；多窗口与恢复入口仍需实现，恢复不得重放命令/传输。 |
 | 5 / P1 | 用户显式选择 CLI 自身登录身份及版本兼容（AI-LOCAL） | 现有 API 身份调用本地 Codex/Claude Code 已实现，默认继续 API；订阅/登录复用尚未实现。先证明请求前可禁用 hooks、MCP、skills、plugins 和工具，并处理组织策略强制启用；不能只凭 help/标志或事后事件拒绝。供应商 CLI 自己处理认证，KeelShell 不读/复制 token、不自动登录，未知版本拒绝。若当前版本无法证明准入边界则保持 OPEN，不提供占位开关；真实账号/模型和原生验收独立记录。 |
 | 6 / P2 | 配置备份轮转、损坏恢复与升级回退（CON-04/SYNC-01） | 隔离候选已编写八槽单调metadata历史、显式预览／确认恢复、完整原件不自动删除、revision与资料字节绑定和失败回滚；独立vault／OS凭据不复制，既有schema缺省迁移保持，未来schema不推断。v1静态P2已修正为deferred-close失败后保留owner和typed原因；冻结v8实际通过23项core集成／3项失败控制／6项Workspace GPUI／2项typed UI控制、依赖策略／最终格式／全workspace all-targets严格Clippy，新非作者已复核同一输入和原始结果；主树及数量修正已整合；最终824输入1,812普通Rust／10doc／6Python严格门禁、新标准macOS包／57打包和17+4修后原生／完整字节核对通过，两个新owner实际wait0；新非作者最终组合复核无P1/P2、数量归属P2已关闭，提交CI待验证，最小OS几何、辅助技术、其它平台与断电耐久性开放；见[指南](product/CONFIGURATION_RECOVERY.md)与[候选记录](testing/records/2026-10-08-configuration-recovery.md)。现有加密跨设备同步不能代替本机恢复。 |
 | 7 / P2 | 远端能力识别、资源趋势与网络诊断（MON/NET-02） | 已有 Linux 监控及 DNS/TLS/HTTP HEAD/TCP 诊断保留；补能力识别、短期趋势、ping/丢包/traceroute 的明确降级，再设计远端 macOS/Windows 适配。缺少命令/权限时展示不可用，不能用桌面平台兼容性声称远端 OS 支持。以自有远端固定有界命令与实际样本验收。 |

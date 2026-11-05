@@ -1,6 +1,45 @@
 //! Vertical budgets with real listed data and completed/active remote work.
 use super::*;
 
+// Test-only snapshots: never probe the peer or change transfer state for diagnostics.
+fn layout_transfer_snapshot(h: &Harness, panel: &FilesPanel) -> serde_json::Value {
+    serde_json::json!({
+        "phase": panel.transfer.as_ref().map(|state| format!("{:?}", state.phase)),
+        "transferred": panel.transfer.as_ref().map(|state| state.transferred),
+        "total": panel.transfer.as_ref().and_then(|state| state.total),
+        "busy": panel.busy,
+        "suspended": panel.suspended,
+        "operation_active": panel.operation_id.is_some(),
+        "pending_review": panel.pending.is_some(),
+        "selected_transfer": panel.selected_transfer.map(|id| id.to_string()),
+        "jobs": panel.transfer_jobs.iter().map(|job| serde_json::json!({
+            "id": job.id.to_string(), "phase": format!("{:?}", job.status.phase),
+            "transferred": job.status.transferred,
+        })).collect::<Vec<_>>(),
+        "status_en": panel.status.translations().1,
+        "session_closed": h.session.is_closed(),
+        "active_subsystems": h.server.active.load(Ordering::Acquire),
+        "active_directory_handles": h.server.filesystem.active_directory_handles(),
+    })
+}
+
+fn trace_layout_transfer(
+    stage: &str,
+    scene: &serde_json::Value,
+    started_at: Instant,
+    snapshot: &serde_json::Value,
+    details: serde_json::Value,
+) {
+    println!(
+        "FILES_LAYOUT_DIAGNOSTIC_JSON {}",
+        serde_json::json!({
+            "stage": stage, "scene": scene,
+            "wall_seconds_since_confirm_start": started_at.elapsed().as_secs_f64(),
+            "snapshot": snapshot, "details": details,
+        })
+    );
+}
+
 fn bounds_json(bounds: Bounds<gpui_kit::Pixels>) -> serde_json::Value {
     serde_json::json!({"x": f32::from(bounds.origin.x), "y": f32::from(bounds.origin.y),
         "w": f32::from(bounds.size.width), "h": f32::from(bounds.size.height)})
@@ -174,6 +213,10 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
                 .filesystem
                 .hold_atomic_upload_after_first(&remote)
                 .checked("hold this reviewed upload after its first real WRITE ACK");
+            let diagnostic_scene = serde_json::json!({
+                "width": width, "height": height, "assistant": assistant,
+            });
+            let confirm_started_at = Instant::now();
             h.click(cx, "confirm-file-operation");
             cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
                 h.panel.read(cx).transfer.as_ref().is_some_and(|state| {
@@ -184,9 +227,37 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
             })
             .await;
             let held_entries = hold.entered();
+            // This is an observation time, not the server's exact WRITE-entry time.
+            let hold_observed_at = Instant::now();
+            h.panel.read_with(cx, |panel, _| {
+                trace_layout_transfer(
+                    "write-hold-observed",
+                    &diagnostic_scene,
+                    confirm_started_at,
+                    &layout_transfer_snapshot(&h, panel),
+                    serde_json::json!({
+                        "hold_entered": held_entries, "hold_expired": hold.expired(),
+                    }),
+                );
+            });
             let measured_at = Instant::now();
             measure_state(&h, cx, "running-transfer", width, height, assistant);
             let running_measure_seconds = measured_at.elapsed().as_secs_f64();
+            // Emit before any later assertion/await can lose this failed scene's timing.
+            h.panel.read_with(cx, |panel, _| {
+                trace_layout_transfer(
+                    "running-measured",
+                    &diagnostic_scene,
+                    confirm_started_at,
+                    &layout_transfer_snapshot(&h, panel),
+                    serde_json::json!({
+                        "running_measure_seconds": running_measure_seconds,
+                        "wall_seconds_since_hold_observed": hold_observed_at.elapsed().as_secs_f64(),
+                        "hold_entered": hold.entered(), "hold_expired": hold.expired(),
+                        "fixture_idle_budget_seconds": 5, "write_gate_fallback_seconds": 10,
+                    }),
+                );
+            });
             assert_eq!(
                 hold.entered(),
                 held_entries,
@@ -198,6 +269,16 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
             );
             h.click(cx, "pause-file-transfer");
             h.panel.read_with(cx, |panel, _| {
+                trace_layout_transfer(
+                    "pause-click-returned",
+                    &diagnostic_scene,
+                    confirm_started_at,
+                    &layout_transfer_snapshot(&h, panel),
+                    serde_json::json!({
+                        "wall_seconds_since_hold_observed": hold_observed_at.elapsed().as_secs_f64(),
+                        "hold_entered": hold.entered(), "hold_expired": hold.expired(),
+                    }),
+                );
                 assert_eq!(
                     panel.transfer.as_ref().map(|s| s.phase),
                     Some(TransferPhase::Pausing)
@@ -206,8 +287,37 @@ async fn real_file_rows_and_controls_survive_transfer_comparison_editor_and_revi
             // Pausing proves the UI published its request, not worker ACK.
             // Release the pending real WRITE so the worker can acknowledge a
             // complete chunk, then demand the actual Paused event below.
+            let released_at = Instant::now();
             hold.release();
-            h.phase(cx, TransferPhase::Paused).await;
+            let mut previous_snapshot = None;
+            let mut polls = 0_usize;
+            // Same predicate and 12-second GPUI budget as Harness::phase. The
+            // locked Kit 0.9.0 polls at 10ms; poll 1201 is its final observation.
+            cx.wait_for(h.window, Duration::from_secs(12), |_, cx| {
+                polls += 1;
+                let panel = h.panel.read(cx);
+                let ready = panel
+                    .transfer
+                    .as_ref()
+                    .is_some_and(|state| state.phase == TransferPhase::Paused);
+                let snapshot = layout_transfer_snapshot(&h, panel);
+                if previous_snapshot.as_ref() != Some(&snapshot) || ready || polls == 1_201 {
+                    trace_layout_transfer(
+                        "waiting-for-paused",
+                        &diagnostic_scene,
+                        confirm_started_at,
+                        &snapshot,
+                        serde_json::json!({
+                            "expected_phase": "Paused", "poll": polls,
+                            "gpui_test_clock_budget_seconds": 12,
+                            "wall_seconds_since_hold_release": released_at.elapsed().as_secs_f64(),
+                        }),
+                    );
+                }
+                previous_snapshot = Some(snapshot);
+                ready
+            })
+            .await;
             let paused_bytes = h.staged(&remote);
             assert!(!paused_bytes.is_empty() && paused_bytes.len() < bytes.len());
             measure_state(&h, cx, "paused-transfer", width, height, assistant);

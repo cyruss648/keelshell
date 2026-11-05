@@ -6,6 +6,7 @@
 
 mod bootstrap;
 mod config;
+mod diagnostics;
 mod directory;
 mod process;
 mod progress;
@@ -20,6 +21,10 @@ use crate::{AiError, ContextDraft, ProviderConfig, ProviderProtocol, RedactionRe
 
 pub use bootstrap::run_local_agent_directory_launcher;
 pub use config::{LocalAgentConfig, LocalAgentKind, LocalAgentLimits, LocalAgentVersion};
+pub use diagnostics::{
+    LocalAskDiagnostic, LocalAskDiagnostics, LocalAskDiagnosticsReceiver, LocalAskErrorKind,
+    LocalAskOperation, LocalAskWorkerJoinKind,
+};
 pub use directory::{LocalAgentWorkingDirectory, ValidatedLocalAgentDirectory};
 pub use process::{LocalAgentClient, LocalAgentProbe};
 pub use progress::{LocalAskProgress, LocalAskProgressReceiver, LocalAskStage};
