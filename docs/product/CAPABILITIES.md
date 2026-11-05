@@ -1,5 +1,22 @@
 # Capability ledger
 
+## 2026-11-05: pane layout metadata — separate core candidate
+
+The core candidate adds a bounded horizontal/vertical pane graph, stable identities,
+transactional split/close/selection/ratio changes, and optional StateStore layout
+metadata. Only geometry, selections and saved profile references are retained;
+missing profiles remain inactive placeholders. Native nested panes, drag handles,
+multiwindow behavior and startup restoration are not wired into the application.
+Engineering and independent-review results are tracked in the
+[layout record](../testing/records/2026-11-05-pane-layout-model.md).
+The complete local gate exited zero and was reaped: 2,107 ordinary Rust passed /
+23 ignored, 11 rustdoc checks (one compile-only), and 128 Python tests run / one
+skipped. The 46 new tests passed, and all 499 gate/post-gate inputs match.
+A new non-author source/function review and final document/evidence review approved
+the scoped core change with no P0/P1/P2/P3 findings. Exact commit binding, delivery
+and CI are tracked separately in `work/pane-layout-20261105/delivery-readback.json`.
+This branch does not include the separate uncommitted connection-tree candidate.
+
 ## 2026-11-05: explicit saved knowledge in Ask — integration candidate
 
 Saved records can be individually attached to Ask, inspected with their historical

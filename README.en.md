@@ -40,6 +40,8 @@ The [native workspace](docs/product/NATIVE_WORKBENCH.md) includes a connections 
 
 The [file workspace](docs/product/FILES_WORKSPACE.md) gives browsing priority with two file lists and a dedicated path row. Vertical input browses file rows; horizontal input reveals remote columns. File actions and transfer settings expand on demand; batch upload/download and the queue remain accessible, preserving drafts and review rules across switches.
 
+[Layout restoration](docs/product/WORKSPACE_LAYOUT.md) is at the bounded domain-model and configuration-persistence stage. Nested splits, draggable ratios, multiple windows and startup restoration are not yet connected to the native UI; the current interface retains tabs and paired splits.
+
 ## Features
 
 | Workflow | Capabilities |

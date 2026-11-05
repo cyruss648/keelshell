@@ -71,6 +71,14 @@ fn present_folders<'de, D: serde::Deserializer<'de>>(
     Vec::<ConnectionFolder>::deserialize(deserializer).map(Some)
 }
 
+// A missing field means no saved layout. An explicit null is malformed, not an
+// instruction to discard a saved workspace or substitute the current layout.
+fn present_workspace_layout<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<crate::WorkspaceLayout>, D::Error> {
+    crate::WorkspaceLayout::deserialize(deserializer).map(Some)
+}
+
 impl<'de> Deserialize<'de> for AppState {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
@@ -97,6 +105,8 @@ impl<'de> Deserialize<'de> for AppState {
             tunnel_rules: Vec<crate::TunnelRule>,
             #[serde(default)]
             knowledge_entries: Vec<crate::SavedKnowledgeEntry>,
+            #[serde(default, deserialize_with = "present_workspace_layout")]
+            workspace_layout: Option<crate::WorkspaceLayout>,
             settings: Settings,
             #[serde(default)]
             known_hosts: BTreeMap<String, String>,
@@ -118,6 +128,7 @@ impl<'de> Deserialize<'de> for AppState {
             workflow_audits: wire.workflow_audits,
             tunnel_rules: wire.tunnel_rules,
             knowledge_entries: wire.knowledge_entries,
+            workspace_layout: wire.workspace_layout,
             settings: wire.settings,
             known_hosts: wire.known_hosts,
             route_known_hosts: wire.route_known_hosts,

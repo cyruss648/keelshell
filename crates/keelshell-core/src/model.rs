@@ -514,6 +514,9 @@ pub struct AppState {
     /// session captures are stored, and each entry retains its source/session binding.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub knowledge_entries: Vec<SavedKnowledgeEntry>,
+    /// Optional inactive workspace layout. Loading never starts sessions or replays actions.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workspace_layout: Option<crate::WorkspaceLayout>,
     /// Non-secret preferences.
     pub settings: Settings,
     /// Explicitly trusted host identities, keyed by normalized `[host]:port`.
@@ -544,6 +547,7 @@ impl PartialEq for AppState {
             && self.workflow_audits == other.workflow_audits
             && self.tunnel_rules == other.tunnel_rules
             && self.knowledge_entries == other.knowledge_entries
+            && self.workspace_layout == other.workspace_layout
             && self.settings == other.settings
             && self.known_hosts == other.known_hosts
             && self.route_known_hosts == other.route_known_hosts
@@ -586,6 +590,7 @@ impl Default for AppState {
             workflow_audits: Vec::new(),
             tunnel_rules: Vec::new(),
             knowledge_entries: Vec::new(),
+            workspace_layout: None,
             settings: Settings::default(),
             known_hosts: BTreeMap::new(),
             route_known_hosts: BTreeMap::new(),
@@ -627,6 +632,9 @@ impl AppState {
         crate::workflow_audit::validate_workflow_audits(&self.workflow_audits)?;
         self.validate_tunnel_rules()?;
         crate::ai_knowledge::validate_saved_knowledge_entries(&self.knowledge_entries)?;
+        if let Some(layout) = &self.workspace_layout {
+            layout.validate()?;
+        }
         self.settings.validate()?;
         Ok(())
     }

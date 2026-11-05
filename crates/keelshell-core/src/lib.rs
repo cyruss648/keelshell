@@ -28,6 +28,7 @@ mod knowledge_library;
 mod model;
 mod network_diagnostic;
 mod openssh;
+mod pane_layout;
 mod profile_sync;
 mod proxy;
 mod reconnect;
@@ -43,6 +44,7 @@ mod tunnel_rules;
 mod updates;
 mod vault;
 mod workflow_audit;
+mod workspace_layout;
 
 pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits, AiLocalAgentWorkingDirectory};
 pub use ai_knowledge::{
@@ -119,6 +121,10 @@ pub use openssh::{
     MAX_OPENSSH_LINE_BYTES, OpenSshConfig, OpenSshEntry, OpenSshImportReport, OpenSshWarning,
     parse_openssh_config, parse_openssh_config_with_includes,
 };
+pub use pane_layout::{
+    MAX_LAYOUT_DEPTH, MAX_LAYOUT_PANES, MAX_SPLIT_RATIO_BPS, MIN_SPLIT_RATIO_BPS, PaneLayout,
+    PaneNode, PaneNodeId, SplitAxis,
+};
 pub use proxy::{ConnectionProxy, ProxyAuthentication, ProxyKind};
 pub use reconnect::ReconnectPolicy;
 pub use routes::{ConnectionRoute, HostKeyScope, MAX_JUMP_HOSTS, RouteEndpoint, RouteIdentity};
@@ -164,3 +170,7 @@ pub use text_merge::{
     TextMergePlan, merge_text,
 };
 pub use text_patch::apply_text_patch;
+pub use workspace_layout::{
+    LayoutPane, LayoutTab, LayoutTabAvailability, LayoutWindow, MAX_LAYOUT_TABS,
+    MAX_LAYOUT_TABS_PER_PANE, MAX_LAYOUT_WINDOWS, WORKSPACE_LAYOUT_VERSION, WorkspaceLayout,
+};
