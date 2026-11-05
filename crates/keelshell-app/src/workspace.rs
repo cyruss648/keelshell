@@ -40,6 +40,7 @@ mod openssh_review;
 mod pane_sessions;
 mod pane_view;
 mod profile_sync;
+mod protocol_selection;
 mod reconnect;
 mod reconnect_editor;
 mod remote_completion;
@@ -298,6 +299,7 @@ pub struct Workspace {
     tabs: Vec<Entity<TerminalView>>,
     active: usize,
     session_panes: pane_sessions::SessionPanes<EntityId>,
+    protocol_selection: protocol_selection::ProtocolSelection,
     pane_bounds:
         std::rc::Rc<std::cell::RefCell<HashMap<keelshell_core::PaneNodeId, Bounds<Pixels>>>>,
     pane_canvas_size: std::rc::Rc<std::cell::Cell<Size<Pixels>>>,
@@ -445,6 +447,7 @@ impl Workspace {
             view.on_appearance_changed(window.appearance(), window, cx);
         });
         let navigation_keystrokes = Self::intercept_navigation_keys(window, cx);
+        let terminal_keystrokes = Self::observe_terminal_selection(window, cx);
         let search = input(
             t(cx, "搜索连接名称、主机、用户…", "Search connections…"),
             "",
@@ -773,6 +776,7 @@ impl Workspace {
             tabs: Vec::new(),
             active: 0,
             session_panes: pane_sessions::SessionPanes::new(),
+            protocol_selection: Default::default(),
             pane_bounds: Default::default(),
             pane_canvas_size: Default::default(),
             pane_divider_focus: Default::default(),
@@ -888,6 +892,7 @@ impl Workspace {
                 update_observer,
                 appearance_subscription,
                 navigation_keystrokes,
+                terminal_keystrokes,
                 subscription,
                 assistant_subscription,
                 command_subscription,
@@ -897,6 +902,7 @@ impl Workspace {
             ],
         };
         workspace.restore_startup_layout(cx);
+        workspace.refresh_protocol_selection(cx);
         workspace
     }
     fn open_connections(
@@ -997,6 +1003,7 @@ impl Workspace {
         self.active = next
             .and_then(|id| self.tabs.iter().position(|tab| tab.entity_id() == id))
             .unwrap_or(self.tabs.len());
+        self.refresh_protocol_selection(cx);
         if closed_active || !closed_restored {
             self.focus_current_surface(window, cx);
         }
@@ -1061,6 +1068,12 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) {
         let id = terminal.entity_id();
+        let workspace = cx.weak_entity();
+        terminal.update(cx, |terminal, _| {
+            terminal.bind_input_selection(move |cx| {
+                let _ = workspace.update(cx, |view, cx| view.select_terminal_input(id, cx));
+            });
+        });
         self.terminal_observers.insert(
             id,
             cx.observe_in(terminal, window, |view, _, window, cx| {
@@ -1078,14 +1091,7 @@ impl Workspace {
         self.terminal_focus.insert(
             id,
             cx.on_focus_in(&focus, window, move |view, _, cx| {
-                if let Some(index) = view.tabs.iter().position(|tab| tab.entity_id() == id) {
-                    if view.active != index {
-                        view.cancel_remote_completion(cx);
-                    }
-                    view.active = index;
-                    view.sync_session_panes();
-                    cx.notify();
-                }
+                view.select_terminal_input(id, cx);
             }),
         );
     }
@@ -1209,6 +1215,7 @@ impl Workspace {
             .active_session()
             .and_then(|active| self.tabs.iter().position(|tab| tab.entity_id() == active))
             .unwrap_or(self.tabs.len());
+        self.refresh_protocol_selection(cx);
         self.show_connections = false;
         // Splitting retains the primary target and its chosen tool surface.
         // Only a newly connected session starts in the default Files view.
@@ -2504,7 +2511,9 @@ impl Workspace {
             }
             let queued = terminal.update(cx, |view, cx| {
                 let result = view.try_write(format!("{text}\r").into_bytes());
-                view.focus(window, cx);
+                // Workspace already owns selection here; avoid calling back
+                // into its leased entity through the terminal input hook.
+                view.focus_handle(cx).focus(window, cx);
                 cx.notify();
                 result
             });

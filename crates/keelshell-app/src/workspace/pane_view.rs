@@ -98,6 +98,7 @@ impl Workspace {
                     .active_session()
                     .and_then(|id| self.tabs.iter().position(|tab| tab.entity_id() == id))
                     .unwrap_or(self.tabs.len());
+                self.refresh_protocol_selection(cx);
                 self.status = Message::new(
                     "已合并面板，会话继续保持。",
                     "Panes merged. Sessions remain open.",
@@ -592,6 +593,7 @@ impl Workspace {
         };
         let visual = crate::design::palette(cx);
         let active = self.session_panes.active_pane() == pane;
+        let restored = self.restored_tabs.contains_key(&id);
         let mut view = div()
             .id(("terminal-pane", id))
             .test_support()
@@ -600,20 +602,41 @@ impl Workspace {
             .min_h_0()
             .flex()
             .flex_col()
-            .p_2()
-            .bg(rgb(crate::design::terminal_palette(cx).background))
+            .when(!restored, |pane| pane.p_2())
+            .bg(rgb(if restored {
+                visual.canvas
+            } else {
+                crate::design::terminal_palette(cx).background
+            }))
             .border_t_2()
             .border_color(rgb(if active { visual.accent } else { visual.border }));
         if self.session_panes.layout().nodes.len() > 1 {
             view = view.child(self.pane_header(pane, id, cx));
         }
-        if self.restored_tabs.contains_key(&id) {
+        if restored {
             return view
                 .child(self.render_restored_tab(id, cx))
                 .into_any_element();
         }
         view.child(self.reconnect_banner(id, cx))
-            .child(div().flex_1().min_h_0().min_w_0().child(terminal.clone()))
+            .child(
+                div()
+                    .id(("terminal-input-pane", id))
+                    .test_support()
+                    .flex_1()
+                    .min_h_0()
+                    .min_w_0()
+                    // Capture before the terminal takes its entity lease or
+                    // consumes a mouse-reporting event. GPUI focus callbacks
+                    // are frame-based and cannot preserve an intervening ABA.
+                    .capture_any_mouse_down(cx.listener(move |view, _, window, cx| {
+                        if let Some(index) = view.tabs.iter().position(|tab| tab.entity_id() == id)
+                        {
+                            view.select_session_tab(index, window, cx);
+                        }
+                    }))
+                    .child(terminal.clone()),
+            )
             .into_any_element()
     }
 

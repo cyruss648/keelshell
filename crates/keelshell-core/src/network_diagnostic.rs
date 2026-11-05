@@ -10,7 +10,7 @@ pub const MAX_DIAGNOSTIC_OUTPUT_BYTES: usize = 32 * 1024;
 /// Remote wall-clock budget; the SSH envelope additionally bounds channel work.
 pub const DIAGNOSTIC_REMOTE_SECONDS: u64 = 8;
 
-/// Explicit application protocol to inspect from the authenticated remote host.
+/// Explicit network operation to inspect from the authenticated remote host.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum NetworkDiagnosticKind {
@@ -20,6 +20,8 @@ pub enum NetworkDiagnosticKind {
     Tls,
     /// Send a credential-free HTTP(S) HEAD request without following redirects.
     Http,
+    /// Send at most four ICMP echo requests using an admitted remote ping utility.
+    Icmp,
 }
 
 /// Validated immutable diagnostic input. It never contains URL credentials,
@@ -51,6 +53,15 @@ pub enum NetworkDiagnosticInputError {
 }
 
 impl NetworkDiagnosticRequest {
+    /// Validate a host for an explicitly reviewed remote ICMP echo operation.
+    ///
+    /// Validation performs no resolution or probing. Flags, URLs, shell syntax
+    /// and IPv6 zone identifiers are rejected. Count and budgets are fixed by
+    /// the transport; callers cannot supply executable names or utility options.
+    pub fn icmp(host: &str) -> Result<Self, NetworkDiagnosticInputError> {
+        Self::endpoint(NetworkDiagnosticKind::Icmp, host, 443)
+    }
+
     /// Validate a remote system-resolver query. This does not query DNS locally.
     pub fn dns(host: &str) -> Result<Self, NetworkDiagnosticInputError> {
         Self::endpoint(NetworkDiagnosticKind::Dns, host, 443)
@@ -152,7 +163,7 @@ impl NetworkDiagnosticRequest {
     pub fn host(&self) -> &str {
         &self.host
     }
-    /// Numeric target port. DNS queries do not open this service port.
+    /// Numeric target port. DNS and ICMP do not open this service port.
     pub fn port(&self) -> u16 {
         self.port
     }
@@ -160,13 +171,16 @@ impl NetworkDiagnosticRequest {
     pub fn https(&self) -> bool {
         self.https
     }
-    /// Request path; empty for DNS/TLS.
+    /// Request path; empty for DNS/TLS/ICMP.
     pub fn path(&self) -> &str {
         &self.path
     }
     /// Credential-free endpoint for the exact operation review and result label.
     pub fn endpoint_label(&self) -> String {
-        if self.kind == NetworkDiagnosticKind::Dns {
+        if matches!(
+            self.kind,
+            NetworkDiagnosticKind::Dns | NetworkDiagnosticKind::Icmp
+        ) {
             return self.host.clone();
         }
         let host = if self.host.contains(':') {
@@ -229,6 +243,37 @@ fn checked_host(input: &str) -> Result<String, NetworkDiagnosticInputError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn icmp_admission_is_host_only_and_never_accepts_utility_options() {
+        for host in [
+            "-c4",
+            "--help",
+            "example.test;id",
+            "$(id)",
+            "`id`",
+            "example.test -c 9",
+            "example.test\n",
+            "fe80::1%eth0",
+            "[::1]",
+            "127.1",
+            "https://example.test/",
+            "https://user:secret@example.test/?token=secret",
+        ] {
+            assert!(NetworkDiagnosticRequest::icmp(host).is_err(), "{host:?}");
+        }
+        for (host, expected) in [
+            ("EXAMPLE.test.", "example.test."),
+            ("192.0.2.1", "192.0.2.1"),
+            ("2001:db8::1", "2001:db8::1"),
+        ] {
+            let request = NetworkDiagnosticRequest::icmp(host)
+                .unwrap_or_else(|error| panic!("admitted ICMP host: {error}"));
+            assert_eq!(request.kind(), NetworkDiagnosticKind::Icmp);
+            assert_eq!(request.endpoint_label(), expected);
+            assert!(request.path().is_empty());
+        }
+    }
+
     #[test]
     fn endpoint_validation_precedes_every_transport() {
         for host in [

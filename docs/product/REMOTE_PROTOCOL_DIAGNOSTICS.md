@@ -1,10 +1,16 @@
 # 远程协议诊断 / Remote protocol diagnostics
 
-Status: implemented old-base candidate with a limited nonauthor review; current-main integration gates, CI and native desktop acceptance pending. The [test record](../testing/records/2026-10-06-remote-protocol-diagnostics.md) separates actual protocol services, controlled GPUI rendering and platform acceptance.
+DNS/TLS/HTTP are integrated into the SSH workspace. Their historical candidate,
+current-main gates and native desktop boundaries are recorded separately in
+[the original record](../testing/records/2026-10-06-remote-protocol-diagnostics.md)
+and [the main integration](../testing/records/2026-10-07-remote-protocol-main-integration.md).
+The current [ICMP candidate](ICMP_DIAGNOSTICS.md) has a separate, narrower remote
+utility contract; combined checks and genuine ICMP/native acceptance are tracked
+in [the 2026-11-06 record](../testing/records/2026-11-06-reviewed-diagnostics-integration.md).
 
 ## 操作方式
 
-打开已认证 SSH 会话的主机状态面板，展开“协议诊断”，选择 DNS、TLS 或 HTTP(S)。输入主机名/IP；TLS 另有端口，HTTP(S) 使用完整 URL。点击“预览诊断”查看执行 SSH 主机、完整目标和实际操作，再点击“确认探测”。修改输入、切换模式、替换会话或修改保存的连接路线后，旧审核失效，需要重新预览。诊断不会在连接、语言或主题切换时自动运行。
+打开已认证 SSH 会话的主机状态面板，展开“协议诊断”，选择 DNS、TLS、HTTP(S) 或具有独立环境限制的 ICMP ping。输入主机名/IP；TLS 另有端口，HTTP(S) 使用完整 URL。点击“预览诊断”查看执行 SSH 主机、完整目标和实际操作，再点击“确认探测”。修改输入、切换模式、替换会话、活动面板/标签变化或修改保存的连接路线后，旧审核失效，需要重新预览。切走再切回不会恢复旧审核；关闭非活动标签保留当前审核。诊断不会在连接、语言或主题切换时自动运行。
 
 结果保持在该面板内存中，包括远程解析地址、实际连接地址、已验证证书及单调时钟分段耗时。取消只撤销本次结果的接纳；它不表示远端进程已瞬间退出。历史结果不会被当作新会话的检测结果。界面跟随中文/英文及 System/Light/Dark 设置。诊断不进入 AI 上下文、遥测、连接元数据或任务日志。
 

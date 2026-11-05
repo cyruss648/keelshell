@@ -95,12 +95,15 @@ pub fn shutdown_and_quit(cx: &mut App) {
     .detach();
 }
 
+type InputSelectionHandler = Box<dyn Fn(&mut App)>;
+
 pub struct TerminalView {
     lifecycle: lifecycle::Lifecycle,
     pub title: String,
     pub status: Message,
     pub emulator: Emulator,
     focus: FocusHandle,
+    input_selection: Option<InputSelectionHandler>,
     incoming: Receiver<SessionEvent>,
     output: OutputQueue,
     outgoing: SyncSender<TerminalCommand>,
@@ -119,6 +122,7 @@ pub struct TerminalView {
     selecting: bool,
     mouse_pressed: Option<u8>,
     scroll_remainder: f32,
+    search_focus: FocusHandle,
     search_input: Option<Entity<InputState>>,
     search_observer: Option<Subscription>,
     search_open: bool,
@@ -197,6 +201,7 @@ impl TerminalView {
             status: Message::new("未连接", "Not connected"),
             emulator,
             focus: cx.focus_handle(),
+            input_selection: None,
             incoming,
             output: OutputQueue::default(),
             outgoing,
@@ -215,6 +220,7 @@ impl TerminalView {
             selecting: false,
             mouse_pressed: None,
             scroll_remainder: 0.,
+            search_focus: cx.focus_handle().tab_stop(false),
             search_input: None,
             search_observer: None,
             search_open: false,
@@ -392,8 +398,30 @@ impl TerminalView {
         }
         self.flush_input();
     }
+    /// Publish the input owner before moving focus, without waiting for a frame.
     pub fn focus(&self, window: &mut Window, cx: &mut App) {
+        self.publish_input_selection(cx);
         self.focus.focus(window, cx);
+    }
+
+    /// Bind a foreground owner notification for terminal and search input.
+    ///
+    /// The callback must not read or update this terminal or its search input:
+    /// either entity may already be leased while an input action is handled.
+    pub(crate) fn bind_input_selection(&mut self, handler: impl Fn(&mut App) + 'static) {
+        self.input_selection = Some(Box::new(handler));
+    }
+
+    fn publish_input_selection(&self, cx: &mut App) {
+        if let Some(handler) = &self.input_selection {
+            handler(cx);
+        }
+    }
+
+    /// Inspect focus only after the originating key action has returned.
+    pub(crate) fn owns_input_focus(&self, window: &Window, cx: &App) -> bool {
+        self.focus.is_focused(window)
+            || (self.search_open && self.search_focus.contains_focused(window, cx))
     }
     pub(crate) fn is_open(&self) -> bool {
         !self.exited && self.lifecycle_ready() && self.end_reason().is_none()
@@ -484,6 +512,7 @@ impl TerminalView {
         cx.notify();
     }
     fn move_search(&mut self, direction: SearchDirection, cx: &mut Context<Self>) {
+        self.publish_input_selection(cx);
         let Some(input) = &self.search_input else {
             return;
         };
@@ -515,6 +544,7 @@ impl TerminalView {
         cx.notify();
     }
     fn open_search(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        self.publish_input_selection(cx);
         let input = self.ensure_search_input(window, cx);
         self.search_open = true;
         self.refresh_locale(window, cx);
@@ -778,7 +808,12 @@ impl TerminalView {
                 .id("terminal-search-bar")
                 .test_support()
                 .occlude()
-                .track_focus(&input.read(cx).focus_handle(cx))
+                .capture_any_mouse_down(cx.listener(|view, _, _, cx| {
+                    view.publish_input_selection(cx);
+                }))
+                // A distinct, non-tab-stop scope owns input and button focus.
+                // Reusing Input's handle here would insert duplicate tab stops.
+                .track_focus(&self.search_focus)
                 .on_action(cx.listener(Self::search_enter))
                 .on_action(cx.listener(Self::search_escape))
                 .absolute()

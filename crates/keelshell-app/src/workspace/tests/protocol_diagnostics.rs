@@ -235,3 +235,72 @@ pub(crate) fn independent_mutate_pending_authority(
         _ => unreachable!("finite independent authority mutation matrix"),
     }
 }
+
+/// Use the production selection/close handlers without an intermediate render.
+pub(crate) fn change_selection(
+    view: &mut Workspace,
+    action: &str,
+    window: &mut gpui_kit::Window,
+    cx: &mut gpui_kit::Context<Workspace>,
+) {
+    match action {
+        "aba" => {
+            view.select_session_tab(1, window, cx);
+            assert_eq!(view.active, 1);
+            view.select_session_tab(0, window, cx);
+            assert_eq!(view.active, 0);
+        }
+        "same" => view.select_session_tab(0, window, cx),
+        "close_inactive" => {
+            let inactive = view.tabs[1].entity_id();
+            view.close_session_tab(inactive, window, cx);
+            assert_eq!(view.active, 0);
+            assert_eq!(view.tabs.len(), 1);
+        }
+        _ => unreachable!("fixed diagnostic selection transition matrix"),
+    }
+}
+
+/// Keep both actual terminal surfaces visible for raw, unrendered pointer events.
+pub(crate) fn prepare_pointer_panes(
+    workspace: &Entity<Workspace>,
+    window: &mut gpui_kit::Window,
+    cx: &mut gpui_kit::App,
+) -> [gpui_kit::Point<gpui_kit::Pixels>; 2] {
+    let ids = workspace.update(cx, |view, cx| {
+        let ids = [view.tabs[0].entity_id(), view.tabs[1].entity_id()];
+        let mut mapping = super::super::pane_sessions::SessionPanes::new();
+        mapping
+            .reconcile(&ids[..1], Some(ids[0]))
+            .checked("pointer primary");
+        mapping
+            .split(ids[0], ids[1], keelshell_core::SplitAxis::Horizontal)
+            .checked("pointer peer split");
+        view.session_panes = mapping;
+        view.show_connections = false;
+        view.show_navigation = false;
+        view.show_assistant = false;
+        view.visible_panel = None;
+        view.select_session_tab(0, window, cx);
+        ids
+    });
+    for _ in 0..3 {
+        window.render_frame(cx);
+    }
+    ids.map(|id| {
+        let body = window.find(("terminal-input-pane", id)).bounds();
+        assert!(body.size.width > px(100.) && body.size.height > px(100.));
+        body.center()
+    })
+}
+
+pub(crate) fn assert_selection(view: &Workspace, expected: usize) {
+    assert_eq!(
+        view.active, expected,
+        "selection must change before the next draw"
+    );
+    assert_eq!(
+        view.session_panes.active_session(),
+        Some(view.tabs[expected].entity_id())
+    );
+}

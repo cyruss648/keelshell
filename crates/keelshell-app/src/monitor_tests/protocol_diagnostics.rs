@@ -14,11 +14,16 @@ use russh::{
 use std::sync::atomic::AtomicUsize;
 use tokio::{net::TcpListener, sync::Semaphore, task::JoinHandle};
 
+#[path = "protocol_selection.rs"]
+mod selection;
+
 struct Control {
     requests: AtomicUsize,
     gate: Semaphore,
     unknown: AtomicBool,
     shells_ready: AtomicUsize,
+    icmp_received: AtomicUsize,
+    exit_mode: AtomicUsize,
 }
 struct Peer(Arc<Control>);
 impl server::Handler for Peer {
@@ -83,6 +88,26 @@ impl server::Handler for Peer {
                 .await
                 .map_err(|_| russh::Error::Disconnect)?;
             permit.forget();
+            // Controlled SSH frames exercise missing supervisor reports, not
+            // real process termination or remote cleanup acceptance.
+            match self.0.exit_mode.load(Ordering::Acquire) {
+                1 => {
+                    session.exit_status_request(id, 137)?;
+                    session.close(id)?;
+                    return Ok(());
+                }
+                2 => {
+                    session.exit_signal_request(id, russh::Sig::KILL, false, "", "")?;
+                    session.close(id)?;
+                    return Ok(());
+                }
+                3 => {
+                    session.exit_status_request(id, 66)?;
+                    session.close(id)?;
+                    return Ok(());
+                }
+                _ => {}
+            }
             let encoded = command
                 .lines()
                 .nth(1)
@@ -106,10 +131,19 @@ impl server::Handler for Peer {
             } else {
                 serde_json::Value::Null
             };
+            let received = self.0.icmp_received.load(Ordering::Acquire);
+            let icmp = if kind == "icmp" {
+                serde_json::json!({"reason":if received==4{"completed"}else if received==0{"no_echo_reply"}else{"packet_loss"},
+                    "implementation":"iputils_20240117","address":"127.0.0.1",
+                    "counts":{"transmitted":4,"received":received,"duplicates":0,"corrupted":0,"errors":0},
+                    "rtt":if received>0{serde_json::json!({"min_us":10,"avg_us":20,"max_us":30,"mdev_us":8})}else{serde_json::Value::Null}})
+            } else {
+                serde_json::Value::Null
+            };
             let body = if self.0.unknown.load(Ordering::Acquire) {
                 serde_json::json!({"version":1,"status":"cleanup_unknown","addresses":[],"peer":null,"tls":null,"http":null,"limited":false,"timing":{"resolve_ms":null,"connect_ms":null,"tls_ms":null,"headers_ms":null,"total_ms":8000}})
             } else {
-                serde_json::json!({"version":1,"status":"success","addresses":[{"family":"IPv4","address":"127.0.0.1"}],"peer":if kind=="dns"{serde_json::Value::Null}else{serde_json::json!("127.0.0.1")},"tls":tls,"http":http,"limited":false,"timing":{"resolve_ms":1,"connect_ms":if kind=="dns"{None}else{Some(1)},"tls_ms":if encrypted{Some(1)}else{None},"headers_ms":if kind=="http"{Some(1)}else{None},"total_ms":4}})
+                serde_json::json!({"version":1,"status":if kind!="icmp"||received==4{"success"}else if received==0{"icmp_no_reply"}else{"icmp_partial"},"addresses":[{"family":"IPv4","address":"127.0.0.1"}],"peer":if kind=="dns"||kind=="icmp"{serde_json::Value::Null}else{serde_json::json!("127.0.0.1")},"tls":tls,"http":http,"icmp":icmp,"limited":false,"timing":{"resolve_ms":1,"connect_ms":if kind=="dns"||kind=="icmp"{None}else{Some(1)},"tls_ms":if encrypted{Some(1)}else{None},"headers_ms":if kind=="http"{Some(1)}else{None},"total_ms":4}})
             };
             (format!("KEELSHELL_DIAGNOSTIC_V1\n{body}"), 0)
         } else {
@@ -171,6 +205,8 @@ impl Harness {
             gate: Semaphore::new(0),
             unknown: AtomicBool::new(false),
             shells_ready: AtomicUsize::new(0),
+            icmp_received: AtomicUsize::new(4),
+            exit_mode: AtomicUsize::new(0),
         });
         let peer = control.clone();
         let server = runtime.spawn(async move {
@@ -290,7 +326,9 @@ async fn protocol_review_rechecks_input_and_theme_locale_never_dispatch(cx: &mut
     assert_eq!(h.control.requests.load(Ordering::Acquire), 0);
     assert!(h.panel.read_with(cx, |p, _| p.review.is_some()));
     h.set_endpoint("changed.test", cx);
-    h.click("protocol-confirm", cx);
+    // Input observation removes the obsolete control immediately. Calling the
+    // handler directly must also refuse a queued click from an older frame.
+    h.panel.update(cx, |panel, cx| panel.confirm(cx));
     assert_eq!(h.control.requests.load(Ordering::Acquire), 0);
     assert!(h.panel.read_with(cx, |p, _| p.review.is_none()));
     h.click("protocol-mode-tls", cx);
@@ -421,7 +459,15 @@ async fn protocol_reconnect_installed_panel_refuses_stale_route_before_preview(
 async fn independent_reconnected_pending_reply_rechecks_route_pin_and_closed_tab(
     cx: &mut TestAppContext,
 ) {
-    for mutation in ["route", "trust", "closed_tab"] {
+    use keelshell_core::NetworkDiagnosticKind::{Dns, Icmp};
+    for (mutation, kind) in [
+        ("route", Dns),
+        ("trust", Dns),
+        ("closed_tab", Dns),
+        ("route", Icmp),
+        ("trust", Icmp),
+        ("closed_tab", Icmp),
+    ] {
         let h = Harness::new(cx);
         // Each input belongs to one mounted window; retire the initial monitor
         // before exercising the actual reconnect-installed child.
@@ -440,6 +486,7 @@ async fn independent_reconnected_pending_reply_rechecks_route_pin_and_closed_tab
         .await;
         cx.update_window(window, |_, window, cx| {
             panel.update(cx, |panel, cx| {
+                panel.kind = kind;
                 panel.endpoint.update(cx, |input, cx| {
                     input.set_value("owned-review.test", window, cx)
                 });
@@ -501,6 +548,145 @@ async fn independent_reconnected_pending_reply_rechecks_route_pin_and_closed_tab
         );
         cx.update_window(window, |_, window, _| window.remove_window())
             .checked("close independent production workspace window");
+        h.finish();
+    }
+}
+
+#[gpui_kit::test]
+async fn protocol_icmp_requires_exact_review_and_bilingual_themes_do_not_dispatch(
+    cx: &mut TestAppContext,
+) {
+    use keelshell_core::{Language, Settings, Theme};
+    let h = Harness::new(cx);
+    assert_eq!(
+        h.panel.read_with(cx, |panel, _| panel.kind),
+        keelshell_core::NetworkDiagnosticKind::Dns
+    );
+    h.click("protocol-expand", cx);
+    h.click("protocol-mode-icmp", cx);
+    h.set_endpoint("fixture.test", cx);
+    h.click("protocol-preview", cx);
+    assert_eq!(h.control.requests.load(Ordering::Acquire), 0);
+    assert_eq!(
+        h.panel
+            .read_with(cx, |panel, _| panel.review.as_ref().map(|r| r.kind())),
+        Some(keelshell_core::NetworkDiagnosticKind::Icmp)
+    );
+    // Even a normalized-equivalent edit revokes review; reverting it does not
+    // resurrect the old consent or permit an old event to dispatch.
+    h.set_endpoint("FIXTURE.test", cx);
+    h.set_endpoint("fixture.test", cx);
+    h.panel.update(cx, |panel, cx| panel.confirm(cx));
+    assert!(h.panel.read_with(cx, |panel, _| panel.review.is_none()));
+    assert_eq!(h.control.requests.load(Ordering::Acquire), 0);
+    for endpoint in [
+        "--help",
+        "fe80::1%eth0",
+        "https://user:secret@fixture.test/?token=x",
+    ] {
+        h.set_endpoint(endpoint, cx);
+        h.click("protocol-preview", cx);
+        assert!(h.panel.read_with(cx, |panel, _| panel.review.is_none()));
+    }
+    h.set_endpoint("fixture.test", cx);
+    h.click("protocol-preview", cx);
+    for language in [Language::ZhCn, Language::En] {
+        cx.update(|cx| crate::i18n::set_language(language, cx));
+        for definition in crate::design::registry() {
+            for appearance in [Theme::Light, Theme::Dark] {
+                cx.update_window(h.window, |_, window, cx| {
+                    let settings = Settings {
+                        theme_family: keelshell_core::ThemeId::new(definition.id)
+                            .checked("registered ICMP theme"),
+                        theme: appearance,
+                        ..Default::default()
+                    };
+                    crate::design::apply_settings(&settings, Some(window), cx);
+                    window.render_frame(cx);
+                    assert_eq!(
+                        window.find("protocol-preview").label(),
+                        Some(if language == Language::ZhCn {
+                            "预览诊断"
+                        } else {
+                            "Preview diagnostic"
+                        })
+                    );
+                    assert_eq!(
+                        window.find("protocol-confirm").label(),
+                        Some(if language == Language::ZhCn {
+                            "确认执行"
+                        } else {
+                            "Confirm probe"
+                        })
+                    );
+                })
+                .checked("ICMP review bilingual registered-theme controls");
+            }
+        }
+    }
+    assert_eq!(h.control.requests.load(Ordering::Acquire), 0);
+    h.control.icmp_received.store(2, Ordering::Release);
+    h.control.gate.add_permits(1);
+    h.click("protocol-confirm", cx);
+    h.idle(cx).await;
+    assert!(
+        h.panel
+            .read_with(cx, |panel, _| panel.result.as_ref().is_some_and(|report| {
+                report.status
+                    == keelshell_session::network_diagnostic::NetworkDiagnosticStatus::IcmpPartial
+                    && report.icmp.as_ref().is_some_and(|icmp| icmp.rtt.is_some())
+            }))
+    );
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        for id in [
+            "protocol-icmp-reason",
+            "protocol-icmp-counts",
+            "protocol-icmp-rtt",
+        ] {
+            assert!(window.find(id).bounds().size.width > px(0.));
+        }
+    })
+    .checked("structured ICMP result rows");
+    assert_eq!(h.control.requests.load(Ordering::Acquire), 1);
+    h.finish();
+}
+
+#[gpui_kit::test]
+async fn protocol_icmp_inflight_edit_cancel_and_session_revoke_discard_late_results(
+    cx: &mut TestAppContext,
+) {
+    for mutation in ["input", "cancel", "session"] {
+        let h = Harness::new(cx);
+        h.click("protocol-expand", cx);
+        h.click("protocol-mode-icmp", cx);
+        h.set_endpoint("fixture.test", cx);
+        h.click("protocol-preview", cx);
+        h.click("protocol-confirm", cx);
+        cx.wait_for(h.window, Duration::from_secs(3), |_, _| {
+            h.control.requests.load(Ordering::Acquire) == 1
+        })
+        .await;
+        match mutation {
+            "input" => {
+                // Programmatic set_value emits no InputEvent::Change. The
+                // observer and the adoption snapshot must still revoke it.
+                h.set_endpoint("changed.test", cx);
+                h.set_endpoint("fixture.test", cx);
+            }
+            "cancel" => h.click("protocol-cancel", cx),
+            "session" => h.monitor.update(cx, |monitor, cx| monitor.suspend(cx)),
+            _ => unreachable!("fixed local mutation matrix"),
+        }
+        h.control.gate.add_permits(1);
+        h.idle(cx).await;
+        assert!(
+            h.panel.read_with(cx, |panel, _| panel.result.is_none()
+                && panel.review.is_none()),
+            "{mutation}: late ICMP result adopted"
+        );
+        h.panel.update(cx, |panel, cx| panel.confirm(cx));
+        assert_eq!(h.control.requests.load(Ordering::Acquire), 1);
         h.finish();
     }
 }

@@ -1,11 +1,11 @@
 {
   "version": "2.0.0",
-  "date": "2026-11-05",
+  "date": "2026-11-06",
   "scope": "app",
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "restore the saved active window as explicit disconnected SSH placeholders, then connect to the current profile only after review",
+  "job": "review an explicit bounded diagnostic against the continuously selected SSH pane, and display disconnected panes on semantic theme surfaces",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
   "sources": [
@@ -16,7 +16,10 @@
     "crates/keelshell-app/src/workspace/navigation/keyboard.rs",
     "docs/adr/0099-keyboard-connection-tree.md",
     "crates/keelshell-app/src/workspace/startup_restore.rs",
-    "docs/adr/0104-single-window-startup-restore.md"
+    "docs/adr/0104-single-window-startup-restore.md",
+    "crates/keelshell-app/src/monitor_protocol.rs",
+    "crates/keelshell-app/src/workspace/protocol_selection.rs",
+    "docs/adr/0106-diagnostic-selection-consent.md"
   ],
   "preserve": [
     "semantic theme registry and tokens",
@@ -30,7 +33,10 @@
     "explicit inert layout saving",
     "folding and keyboard connection-tree navigation with protected held-key lifetime",
     "single-window startup restoration with distinct available, unsaved and missing-connection states",
-    "explicit current-profile authentication replaces only the selected inactive slot"
+    "explicit current-profile authentication replaces only the selected inactive slot",
+    "semantic canvas and state spacing for disconnected restored panes",
+    "explicit ICMP preview with utility-reported attempt/reply counters and quiet-summary limitation",
+    "continuous active pane/tab consent with same-turn invalidation and fresh preview"
   ],
   "material": {
     "real": [
@@ -53,5 +59,7 @@
   "finish_review": "OPEN: native-r1 approves scoped observations only, not full native or finish",
   "current_source_verification": "520 combined engineering inputs unchanged through full-gate-r2/build/current; gate exit0/reaped:2221ordinary/23ignored,app963/2ignored,14rustdoc,Python131run/1skip. Formatting,strict Clippy,dependency policy and additional controllers passed. Initial3 test-only lint failures preserved. source-r1/startup-source-r1 scoped approvals; final-combined-r1 approves scoped combined source/gate/package binding,P0/P1/P2/P3=0; final documentation follows final-docs-r2.",
   "current_native_followup": "Old515-input package33be2e68/runec01db306f2d43158d6d8984becf0b83:22 AX/JPEG pairs; input-native-r1 scoped evidence accepted as PARTIAL_OBSERVED,P0/P1/P2=0. Visible x sends0 until separate Return1; fresh Return1/Right3; Unicode typeText0/no visible result UNKNOWN. Tree navigation has observable changes and zero PTY/exec increments bracketed by Right3 controls. Total12PTY,24refusedexec/9268bytes. App/outer exit0/reaped; private removed/port refused within548.661s of900. Full input/IME remains OPEN.",
-  "current_restoration_native": "New520-input package99cd7f69/run60c040c7da1a4cadbab99a1a2d78f520:6 AX/JPEG pairs,offline two-launch restore. Explicit save then second launch retained Chinese,67percent and selected missing tab. Exact expected layout uniquely matches both saved layout digests; other window metadata/order preserved; raw state digests equal. Raw post-exit state not retained. App1/app2/outer22504 exit0/reaped,private lexists false within original600s TTL. Connect not invoked; no network audit or full appearance/native matrix claim. restore-native-r1 approves scoped evidence as PARTIAL_OBSERVED,P0/P1/P2/P3=0; full native/finish not granted."
+  "current_restoration_native": "New520-input package99cd7f69/run60c040c7da1a4cadbab99a1a2d78f520:6 AX/JPEG pairs,offline two-launch restore. Explicit save then second launch retained Chinese,67percent and selected missing tab. Exact expected layout uniquely matches both saved layout digests; other window metadata/order preserved; raw state digests equal. Raw post-exit state not retained. App1/app2/outer22504 exit0/reaped,private lexists false within original600s TTL. Connect not invoked; no network audit or full appearance/native matrix claim. restore-native-r1 approves scoped evidence as PARTIAL_OBSERVED,P0/P1/P2/P3=0; full native/finish not granted.",
+  "current_slice_verification": "Final full-gate-r5 exit0/reaped on525 unchanged engineering inputs matching build-r2 and current source:2242ordinary/23ignored,app976/2ignored,14rustdoc,Python131run(130pass/1skip); formatting,strict Clippy,dependency policy and additional controllers passed. Selection-r5 independently approves scoped source and two Button negative controls; combined-r2 independently approves frozen product source/full gate/package attribution with no open findings; formal docs reviewed separately. Official freshness-r4 passes104requirements; zip9.4/rmcp3.9 retain x.y declarations.",
+  "current_slice_native": "New525-input packagef9b5ac99/run5a650e67ced3483c9cb71122d65756a1:one macOS launch,24workbench AX/JPEG pairs at2880x1866 for3families x2appearances x2languages and unsaved/missing states,plus12settings pairs. Available-disconnected state remains in left pane;Connect not invoked. App99109 and exec89824 exit0/reaped,STOPPED/launches1,private removed and observed PIDs absent within original600s TTL. No restart,input/IME,compact geometry,network-zero or authenticated ICMP/native-platform acceptance. Non-author evidence review tracked separately. Non-author surfaces-native-r1 APPROVE_SCOPED_MACOS_CANVAS_NATIVE_MAPPING with no open findings,Hallmark finish ship only for observed canvas mapping. Later packagea5261fab has not run natively; old captures retain f9b5ac99 attribution."
 }

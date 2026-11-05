@@ -836,6 +836,7 @@ impl Workspace {
                 tunnels: None,
             },
         );
+        self.refresh_protocol_selection(cx);
         if focused {
             terminal.read(cx).focus_handle(cx).focus(window, cx);
         }

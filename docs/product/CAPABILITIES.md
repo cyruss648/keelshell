@@ -1,5 +1,64 @@
 # Capability ledger
 
+## 2026-11-06: reviewed ICMP and pane surfaces
+
+The current candidate adds an explicit preview/confirm ICMP operation from the
+authenticated SSH host. It admits only Linux iputils 20240117 at fixed system
+paths, uses at most four attempts, bounded remote/SSH time and output, and owns
+its version/resolver/ping children. Quiet utility counters mean reported
+attempts/replies/unanswered attempts; they establish neither successful sends
+nor exclusively network loss. See [the ICMP contract](ICMP_DIAGNOSTICS.md).
+Genuine utility, IPv4/IPv6 and native platform acceptance remain open.
+
+Diagnostic consent now follows an uninterrupted active pane/tab selection.
+Switching away and back invalidates the prior review and held reply; selecting
+the same tab or closing an inactive tab retains current consent. Fresh preview
+is possible without discarding the SSH connection. Any ICMP error without a
+validated supervisor report retires diagnostic authority even for a stale
+completion. General session authority for other owners keeps its existing
+semantics. [ADR 0106](../adr/0106-diagnostic-selection-consent.md) describes the
+boundary.
+
+Disconnected restored panes use the semantic canvas and state spacing rather
+than a terminal gutter. Frost, Graphite and Lavender share this component rule.
+The protocol subset and its follow-up pointer/search checks passed on their
+respective frozen inputs. Updated zip/rmcp dependencies retain x.y requirements.
+The first full-gate attempt stopped at one test-only Clippy `expect_used`;
+the second stopped at the remote-only guard's classification of an external
+test fixture. Explicit leading inner cfg handling and its positive/negative
+checks pass. Independent review also found a pointer-focus timing gap, now
+covered by capture-phase selection and two raw-event tests without intermediate
+draws; removing the handler makes the same regression fail as expected, and
+the fixed source was restored exactly. The remaining search-occlusion and
+Tab/Shift-Tab/Escape entry gap has a synchronous owner notification, a completed
+Tab-action observer and three actual-event regressions. Same-owner search
+retains consent and search focus; old peer reviews cannot execute.
+A further review found that reverse Tab could enter search buttons directly
+and Space could activate navigation without that observer. A distinct
+non-tab-stop search focus scope and synchronous navigation-owner publication
+now cover those paths. Six search regressions pass; removing either defense
+makes its regression fail. Independent selection-r5 review approves this
+bounded fix with no open findings.
+The revised development build and fifth full gate pass on the same unchanged
+525 inputs: 2,242 ordinary Rust tests, 14 rustdocs and 130 Python tests pass;
+23 Rust tests and one Python test remain ignored/skipped. Formatting, strict
+Clippy, dependency policy and additional controllers pass. Independent
+combined-r2 review approves the frozen source, gate and package attribution
+with no open findings. Official freshness was checked again for all 104 requirements.
+
+The new macOS package f9b5ac99 has one offline native run with 24 workbench
+AX/JPEG pairs covering three families, two appearances, two languages and
+both unsaved/missing states; another 12 settings pairs establish the selections.
+The app and supervisor exited zero and the private runtime was cleaned within
+its original 600-second limit. This validates the observed disconnected canvas
+subset at one geometry; it does not establish authenticated ICMP, input/IME,
+compact windows, accessibility technology or other desktop platforms.
+Independent surfaces-native-r1 review approves only this macOS canvas mapping.
+The revised package a5261fab has not been run natively; the earlier captures
+retain their exact package attribution.
+See [the integration record](../testing/records/2026-11-06-reviewed-diagnostics-integration.md)
+and [the canvas record](../testing/records/2026-11-06-pane-surfaces.md).
+
 ## 2026-11-05: single-window startup restoration and input readiness
 
 Production startup installs the saved active window's pane topology and ratios,

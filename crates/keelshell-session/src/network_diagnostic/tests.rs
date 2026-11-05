@@ -9,6 +9,7 @@ use std::sync::{
 };
 use tokio::{net::TcpListener, sync::Semaphore, task::JoinHandle};
 mod actual_services;
+mod icmp;
 #[cfg(unix)]
 mod supervisor;
 

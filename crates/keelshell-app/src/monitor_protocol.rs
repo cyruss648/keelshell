@@ -9,11 +9,19 @@ use keelshell_core::{
     NetworkDiagnosticInputError, NetworkDiagnosticKind, NetworkDiagnosticRequest,
 };
 use keelshell_session::network_diagnostic::{
-    NetworkDiagnosticError, NetworkDiagnosticReport, NetworkDiagnosticStatus,
+    NetworkDiagnosticError, NetworkDiagnosticIcmpReason, NetworkDiagnosticReport,
+    NetworkDiagnosticStatus,
 };
 #[cfg(test)]
 #[path = "monitor_tests/protocol_diagnostics.rs"]
 mod tests;
+
+#[derive(Clone, PartialEq, Eq)]
+struct DiagnosticDraft {
+    kind: NetworkDiagnosticKind,
+    endpoint: String,
+    port: String,
+}
 
 pub(super) struct ProtocolPanel {
     authority: Option<(WeakEntity<crate::workspace::Workspace>, EntityId)>,
@@ -25,11 +33,15 @@ pub(super) struct ProtocolPanel {
     port: Entity<InputState>,
     expanded: bool,
     review: Option<NetworkDiagnosticRequest>,
+    review_draft: Option<DiagnosticDraft>,
+    review_selection: Option<uuid::Uuid>,
+    observed_draft: DiagnosticDraft,
     result: Option<NetworkDiagnosticReport>,
     status: Message,
     token: uuid::Uuid,
     cancel: Option<Arc<AtomicBool>>,
     _job: Option<Task<()>>,
+    _input_observers: Vec<Subscription>,
 }
 
 impl ProtocolPanel {
@@ -46,6 +58,10 @@ impl ProtocolPanel {
             input.set_value("443", window, cx);
             input
         });
+        let input_observers = [&endpoint, &port]
+            .into_iter()
+            .map(|input| cx.observe(input, |panel, _, cx| panel.sync_input(cx)))
+            .collect();
         Self {
             authority: None,
             session: Some(session),
@@ -56,12 +72,47 @@ impl ProtocolPanel {
             port,
             expanded: false,
             review: None,
+            review_draft: None,
+            review_selection: None,
+            observed_draft: DiagnosticDraft {
+                kind: NetworkDiagnosticKind::Dns,
+                endpoint: String::new(),
+                port: "443".into(),
+            },
             result: None,
             status: Message::empty(),
             token: uuid::Uuid::new_v4(),
             cancel: None,
             _job: None,
+            _input_observers: input_observers,
         }
+    }
+
+    fn draft(&self, cx: &App) -> DiagnosticDraft {
+        DiagnosticDraft {
+            kind: self.kind,
+            endpoint: self.endpoint.read(cx).value().to_string(),
+            port: self.port.read(cx).value().to_string(),
+        }
+    }
+
+    fn sync_input(&mut self, cx: &mut Context<Self>) {
+        let draft = self.draft(cx);
+        if self.observed_draft == draft {
+            return;
+        }
+        self.observed_draft = draft;
+        self.review = None;
+        self.review_draft = None;
+        self.review_selection = None;
+        self.result = None;
+        self.cancel(cx);
+        self.token = uuid::Uuid::new_v4();
+        self.status = Message::new(
+            "输入已变化，旧审核与结果已失效；请重新预览。",
+            "Input changed; previous review and results are invalid. Preview again.",
+        );
+        cx.notify();
     }
 
     pub(super) fn suspend(&mut self, cx: &mut Context<Self>) {
@@ -70,6 +121,8 @@ impl ProtocolPanel {
         }
         self.session = None;
         self.review = None;
+        self.review_draft = None;
+        self.review_selection = None;
         self.token = uuid::Uuid::new_v4();
         self.cancel(cx);
         self.status = Message::new(
@@ -91,6 +144,31 @@ impl ProtocolPanel {
         cx.notify();
     }
 
+    fn invalidate_selection(&mut self, cx: &mut Context<Self>) {
+        self.review = None;
+        self.review_draft = None;
+        self.review_selection = None;
+        self.result = None;
+        self.cancel(cx);
+        self.token = uuid::Uuid::new_v4();
+        self.status = Message::new(
+            "活动面板或会话已变化；请选择此会话并重新预览。",
+            "Active pane or session changed; select this session and preview again.",
+        );
+        cx.notify();
+    }
+
+    fn selection_token(&self, cx: &App) -> Option<uuid::Uuid> {
+        let session = self.session.as_ref()?;
+        match &self.authority {
+            None => Some(uuid::Uuid::nil()),
+            Some((workspace, tab)) => workspace
+                .upgrade()?
+                .read(cx)
+                .protocol_selection_token(*tab, session),
+        }
+    }
+
     fn input(&self, cx: &App) -> Result<NetworkDiagnosticRequest, NetworkDiagnosticInputError> {
         let value = self.endpoint.read(cx).value();
         match self.kind {
@@ -104,10 +182,12 @@ impl ProtocolPanel {
                     .map_err(|_| NetworkDiagnosticInputError::InvalidPort)?,
             ),
             NetworkDiagnosticKind::Http => NetworkDiagnosticRequest::http(&value),
+            NetworkDiagnosticKind::Icmp => NetworkDiagnosticRequest::icmp(&value),
         }
     }
 
     fn preview(&mut self, cx: &mut Context<Self>) {
+        self.sync_input(cx);
         if self.session.is_none() || self.cancel.is_some() {
             return;
         }
@@ -115,10 +195,18 @@ impl ProtocolPanel {
             self.suspend(cx);
             return;
         }
+        let Some(selection) = self.selection_token(cx) else {
+            self.invalidate_selection(cx);
+            return;
+        };
         self.review = None;
+        self.review_draft = None;
+        self.review_selection = None;
         self.status = match self.input(cx) {
             Ok(request) => {
                 self.review = Some(request);
+                self.review_draft = Some(self.draft(cx));
+                self.review_selection = Some(selection);
                 Message::new(
                     "核对执行主机、端点与操作后确认。",
                     "Review the execution host, endpoint and operation before confirming.",
@@ -140,11 +228,20 @@ impl ProtocolPanel {
     }
 
     fn confirm(&mut self, cx: &mut Context<Self>) {
+        self.sync_input(cx);
         if self.cancel.is_some() {
             return;
         }
         if !self.authorized(cx) {
             self.suspend(cx);
+            return;
+        }
+        let Some(selection) = self.selection_token(cx) else {
+            self.invalidate_selection(cx);
+            return;
+        };
+        if self.review_selection.take() != Some(selection) {
+            self.invalidate_selection(cx);
             return;
         }
         let Some(session) = self.session.clone() else {
@@ -153,12 +250,16 @@ impl ProtocolPanel {
         let Some(request) = self.review.take() else {
             return;
         };
-        if self.input(cx).as_ref() != Ok(&request) {
+        let draft = self.draft(cx);
+        if self.review_draft.take().as_ref() != Some(&draft)
+            || self.input(cx).as_ref() != Ok(&request)
+        {
             self.status = Message::new("输入已变化，请重新预览。", "Input changed; preview again.");
             cx.notify();
             return;
         }
         let runtime = self.runtime.clone();
+        let icmp_operation = request.kind() == NetworkDiagnosticKind::Icmp;
         let cancel = Arc::new(AtomicBool::new(false));
         let worker_cancel = cancel.clone();
         let token = uuid::Uuid::new_v4();
@@ -193,8 +294,43 @@ impl ProtocolPanel {
                 }
             };
             let _ = this.update(cx, |panel, cx| {
+                panel.sync_input(cx);
                 panel.cancel = None;
-                if !panel.authorized(cx) || panel.token != token {
+                // SSH cancellation/transport failure cannot confirm remote reap.
+                // Retire this diagnostic authority even for a stale token: a
+                // discarded result must not re-admit another uncertain process.
+                if icmp_operation && result.is_err() {
+                    panel.session = None;
+                    panel.review = None;
+                    panel.review_draft = None;
+                    panel.review_selection = None;
+                    panel.result = None;
+                    panel.status = Message::new(
+                        "ICMP 通道未取得可验证的退出结果；诊断权限已停用。远端有独立 8 秒预算，请核对进程后重连。",
+                        "ICMP channel has no verifiable exit result; diagnostic authority is disabled. The remote has an independent eight-second budget. Inspect processes before reconnecting.",
+                    );
+                    cx.notify();
+                    return;
+                }
+                if panel.token != token
+                    && result.as_ref().is_ok_and(|report| report.status == NetworkDiagnosticStatus::CleanupUnknown) {
+                    panel.session = None;
+                    panel.review = None;
+                    panel.review_draft = None;
+                    panel.review_selection = None;
+                    panel.result = None;
+                    panel.status = outcome_message(NetworkDiagnosticStatus::CleanupUnknown);
+                    cx.notify();
+                    return;
+                }
+                if !panel.authorized(cx) {
+                    panel.suspend(cx);
+                    return;
+                }
+                if panel.token != token
+                    || panel.draft(cx) != draft
+                    || panel.selection_token(cx) != Some(selection)
+                {
                     cx.notify();
                     return;
                 }
@@ -204,6 +340,8 @@ impl ProtocolPanel {
                         if report.status == NetworkDiagnosticStatus::CleanupUnknown {
                             panel.session = None;
                             panel.review = None;
+                            panel.review_draft = None;
+                            panel.review_selection = None;
                         }
                         panel.result = Some(report);
                         message
@@ -253,6 +391,12 @@ impl MonitorPanel {
     pub(crate) fn revoke_protocol_authority(&mut self, cx: &mut Context<Self>) {
         self.protocol.update(cx, |panel, cx| panel.suspend(cx));
     }
+
+    /// Retain the connection while withdrawing selection-scoped consent.
+    pub(crate) fn invalidate_protocol_selection(&mut self, cx: &mut Context<Self>) {
+        self.protocol
+            .update(cx, |panel, cx| panel.invalidate_selection(cx));
+    }
 }
 
 impl Drop for ProtocolPanel {
@@ -291,8 +435,8 @@ fn outcome_message(status: NetworkDiagnosticStatus) -> Message {
             "No valid bounded HTTP headers; check whether the service supports HEAD.",
         ),
         Timeout => Message::new(
-            "远端诊断超过 8 秒期限。未确认成功。",
-            "Remote diagnostic exceeded its eight-second deadline. Success is unconfirmed.",
+            "远端诊断达到阶段期限（总预算 8 秒）。未确认成功。",
+            "Remote diagnostic reached a stage deadline within its eight-second total budget. Success is unconfirmed.",
         ),
         UnsupportedEnvironment => Message::new(
             "目标需要 POSIX 环境及 Python 3.8+ 的 socket/ssl/http/signal 标准库；请自行配置，不会自动安装。",
@@ -305,6 +449,79 @@ fn outcome_message(status: NetworkDiagnosticStatus) -> Message {
         Interrupted => Message::new(
             "远端诊断被中断，已确认探测 worker 退出。",
             "Remote diagnostic interrupted; the probe worker exited.",
+        ),
+        IcmpPartial => Message::new(
+            "工具报告四次发送尝试，部分未获回复；请查看工具计数与 RTT。",
+            "The utility reports four attempts with some unanswered; inspect its counters and RTT.",
+        ),
+        IcmpNoReply => Message::new(
+            "工具报告四次发送尝试，未收到 Echo 回复；不能据此断定主机离线或请求已成功发出。",
+            "The utility reports four attempts without echo replies; this establishes neither an offline host nor successful sends.",
+        ),
+        UtilityUnavailable => Message::new(
+            "远端 /usr/bin/ping 或 /bin/ping 不可用；不会安装工具或改用 TCP。",
+            "Remote /usr/bin/ping or /bin/ping is unavailable; no installation or TCP fallback.",
+        ),
+        PermissionDenied => Message::new(
+            "远端 ping 的执行或 ICMP 权限被拒绝；请管理员核对权限，不会提权。",
+            "Remote ping execution or ICMP permission was denied; ask an administrator to inspect permissions. No privilege escalation.",
+        ),
+        IcmpFailure => Message::new(
+            "ICMP 诊断未通过输出、退出状态或预算校验；请查看固定原因。",
+            "ICMP diagnostic failed output, exit-status or budget checks; inspect the fixed reason.",
+        ),
+    }
+}
+
+fn icmp_reason(reason: NetworkDiagnosticIcmpReason, cx: &App) -> &'static str {
+    use NetworkDiagnosticIcmpReason::*;
+    match reason {
+        Completed => t(cx, "工具报告四次回复", "Utility reports four replies"),
+        PacketLoss => t(cx, "部分尝试未获回复", "Some attempts unanswered"),
+        NoEchoReply => t(cx, "没有 Echo 回复", "No echo reply"),
+        Deadline => t(
+            cx,
+            "监督期限到达；缺失计数未知",
+            "Supervisor deadline; missing counts are unknown",
+        ),
+        Interrupted => t(cx, "已中断并回收", "Interrupted and reaped"),
+        CleanupUnknown => t(
+            cx,
+            "进程退出未确认，须检查后重连",
+            "Process exit unconfirmed; inspect before reconnecting",
+        ),
+        UtilityMissing => t(cx, "缺少 ping 工具", "Ping utility missing"),
+        PermissionDenied => t(
+            cx,
+            "执行或 ICMP 权限不足",
+            "Execution or ICMP permission denied",
+        ),
+        UnsupportedPlatform => t(
+            cx,
+            "仅支持 Linux POSIX / Python 3.8+",
+            "Requires Linux POSIX / Python 3.8+",
+        ),
+        UnsupportedImplementation => t(
+            cx,
+            "仅支持 iputils 20240117 的固定输出契约",
+            "Requires the fixed iputils 20240117 output contract",
+        ),
+        ResolutionFailed => t(cx, "远端系统解析失败", "Remote system resolution failed"),
+        ProcessFailed => t(cx, "工具启动或退出失败", "Utility start or exit failed"),
+        InvalidOutput => t(
+            cx,
+            "未知或不一致的工具输出",
+            "Unknown or inconsistent utility output",
+        ),
+        OutputLimit => t(
+            cx,
+            "工具输出超过总计 32 KiB",
+            "Combined utility output exceeded 32 KiB",
+        ),
+        ReportedErrors => t(
+            cx,
+            "工具报告 ICMP 错误或损坏回包",
+            "Utility reported ICMP errors or corrupted replies",
         ),
     }
 }
@@ -394,6 +611,7 @@ impl Render for ProtocolPanel {
                         (NetworkDiagnosticKind::Dns, "DNS"),
                         (NetworkDiagnosticKind::Tls, "TLS"),
                         (NetworkDiagnosticKind::Http, "HTTP(S)"),
+                        (NetworkDiagnosticKind::Icmp, "ICMP ping"),
                     ]
                     .into_iter()
                     .map(|(kind, label)| {
@@ -401,6 +619,7 @@ impl Render for ProtocolPanel {
                             NetworkDiagnosticKind::Dns => "protocol-mode-dns",
                             NetworkDiagnosticKind::Tls => "protocol-mode-tls",
                             NetworkDiagnosticKind::Http => "protocol-mode-http",
+                            NetworkDiagnosticKind::Icmp => "protocol-mode-icmp",
                         })
                         .ghost()
                         .compact()
@@ -409,8 +628,7 @@ impl Render for ProtocolPanel {
                         .label(label)
                         .on_click(cx.listener(move |panel, _, _, cx| {
                             panel.kind = kind;
-                            panel.review = None;
-                            cx.notify();
+                            panel.sync_input(cx);
                         }))
                     }),
                 ),
@@ -429,6 +647,13 @@ impl Render for ProtocolPanel {
             view = view
                 .child(div().text_xs().child(t(cx, "TLS 端口", "TLS port")))
                 .child(Input::new(&self.port).small().disabled(busy || retired));
+        }
+        if self.kind == NetworkDiagnosticKind::Icmp {
+            view = view.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                cx,
+                "仅支持远端 Linux iputils 20240117 · 最多 4 个 Echo 请求 · 只探测首个解析地址 · 不自动安装或回退",
+                "Remote Linux iputils 20240117 · At most 4 echo requests · First resolved address only · No install or fallback",
+            )));
         }
         view = view.child(
             Button::new("protocol-preview")
@@ -454,6 +679,11 @@ impl Render for ProtocolPanel {
                     cx,
                     "发送一次 HEAD；不跟随重定向，不发送凭据、Cookie 或正文。",
                     "Send one HEAD; no redirects, credentials, cookies or body.",
+                ),
+                NetworkDiagnosticKind::Icmp => t(
+                    cx,
+                    "由此 SSH 主机解析目标，并向首个地址发送最多 4 个 ICMP Echo 请求。总期限 8 秒，SSH 通道 10 秒。不会提权、安装工具或回退到 TCP。",
+                    "This SSH host resolves the target and sends at most 4 ICMP echo requests to its first address. Total budget 8s, SSH envelope 10s. No privilege escalation, installation or TCP fallback.",
                 ),
             };
             view = view.child(
@@ -502,6 +732,8 @@ impl Render for ProtocolPanel {
                                     .label(t(cx, "返回", "Back"))
                                     .on_click(cx.listener(|panel, _, _, cx| {
                                         panel.review = None;
+                                        panel.review_draft = None;
+                                        panel.review_selection = None;
                                         cx.notify();
                                     })),
                             ),
@@ -599,6 +831,79 @@ impl Render for ProtocolPanel {
                     format!("{} {}", http.version, http.status),
                     cx,
                 ));
+            }
+            if let Some(icmp) = &report.icmp {
+                result = result.child(value_row(
+                    "protocol-icmp-reason",
+                    t(cx, "ICMP 结果原因", "ICMP result reason"),
+                    icmp_reason(icmp.reason, cx).into(),
+                    cx,
+                ));
+                if let Some(address) = &icmp.address {
+                    result = result.child(value_row(
+                        "protocol-icmp-address",
+                        t(cx, "本次 ICMP 地址", "This ICMP address"),
+                        address.clone(),
+                        cx,
+                    ));
+                }
+                if let Some(counts) = &icmp.counts {
+                    result = result
+                        .child(value_row(
+                            "protocol-icmp-counts",
+                            t(
+                                cx,
+                                "工具尝试 / 回复 / 未回复",
+                                "Utility attempts / Replies / Unanswered",
+                            ),
+                            format!(
+                                "{} / {} / {}",
+                                counts.transmitted,
+                                counts.received,
+                                counts.transmitted - counts.received
+                            ),
+                            cx,
+                        ))
+                        .child(value_row(
+                            "protocol-icmp-errors",
+                            t(
+                                cx,
+                                "重复 / 损坏 / ICMP 错误",
+                                "Duplicates / Corrupted / ICMP errors",
+                            ),
+                            format!(
+                                "{} / {} / {}",
+                                counts.duplicates, counts.corrupted, counts.errors
+                            ),
+                            cx,
+                        ))
+                        .child(
+                            div()
+                                .id("protocol-icmp-counts-limit")
+                                .text_xs()
+                                .text_color(rgb(visual.muted))
+                                .child(t(
+                                    cx,
+                                    "工具的静默汇总无法区分部分本地发送失败与网络丢包；未回复不证明请求已成功发出。",
+                                    "Quiet summaries cannot distinguish some local send failures from network loss; unanswered attempts do not prove successful sends.",
+                                )),
+                        );
+                }
+                if let Some(rtt) = &icmp.rtt {
+                    result = result.child(value_row(
+                        "protocol-icmp-rtt",
+                        t(
+                            cx,
+                            "RTT 最小 / 平均 / 最大 / 标准差",
+                            "RTT Min / Mean / Max / Stddev",
+                        ),
+                        format!(
+                            "{} / {} / {} / {} µs",
+                            rtt.min_us, rtt.avg_us, rtt.max_us, rtt.mdev_us
+                        ),
+                        cx,
+                    ));
+                }
             }
             for (id, label, value) in [
                 (

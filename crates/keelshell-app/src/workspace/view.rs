@@ -77,6 +77,7 @@ impl Workspace {
         self.active = index;
         self.sync_session_panes();
         self.session_panes.select(tab.entity_id());
+        self.refresh_protocol_selection(cx);
         self.session_tab_scroll.scroll_to_item(index);
         if self.restored_tabs.contains_key(&tab.entity_id()) {
             self.surface_focus.focus(window, cx);

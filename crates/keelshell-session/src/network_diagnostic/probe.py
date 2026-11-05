@@ -62,6 +62,16 @@ try:
     for number in (signal.SIGHUP, signal.SIGTERM, signal.SIGINT):
         signal.signal(number, interrupt)
     worker = base64.b64decode(sys.argv[2], validate=True).decode("utf-8")
+    request = json.loads(base64.b64decode(sys.argv[1], validate=True))
+    if request.get("kind") == "icmp":
+        payload = icmp_diagnostic(request, worker, started, lambda: interrupted)
+        output = (FRAME + json.dumps(payload, separators=(",", ":")) + "\n").encode("ascii")
+        sys.stdout.buffer.write(output)
+        sys.stdout.buffer.flush()
+        # The common finally block owns only the legacy protocol worker. ICMP
+        # has directly owned, reaped stages and must not emit a second frame.
+        output = b""
+        raise SystemExit(0)
     child = subprocess.Popen([sys.executable, "-I", "-S", "-B", "-c", worker,
                               sys.argv[1]], stdin=subprocess.DEVNULL,
                              stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,

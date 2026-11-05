@@ -8,9 +8,10 @@ mod tests {
 import base64,errno,json,os,pathlib,signal,subprocess,sys,tempfile,time
 with tempfile.TemporaryDirectory(prefix='keelshell-supervisor-') as root:
     pidfile=pathlib.Path(root)/'worker.pid'
-    worker="import os,pathlib,sys,time; pathlib.Path(sys.argv[1]).write_text(str(os.getpid())); time.sleep(30)"
+    worker="import base64,json,os,pathlib,sys,time; pathlib.Path(json.loads(base64.b64decode(sys.argv[1]))['owned_pidfile']).write_text(str(os.getpid())); time.sleep(30)"
     encoded=base64.b64encode(worker.encode()).decode('ascii')
-    child=subprocess.Popen([sys.executable,'-I','-S','-B','-',str(pidfile),encoded],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    request=base64.b64encode(json.dumps({'owned_pidfile':str(pidfile)}).encode()).decode('ascii')
+    child=subprocess.Popen([sys.executable,'-I','-S','-B','-',request,encoded],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     try:
         child.stdin.write(sys.argv[1].encode()); child.stdin.close(); child.stdin=None
         end=time.monotonic()+3

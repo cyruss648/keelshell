@@ -62,6 +62,7 @@ impl Workspace {
                 self.pane_tab_ids = stable_ids;
                 self.restored_tabs = restored;
                 self.session_panes = panes;
+                self.refresh_protocol_selection(cx);
                 self.status = Message::new(
                     "已恢复保存的活动窗口布局，所有标签均未连接。",
                     "Restored the saved active window layout. All tabs are disconnected.",
@@ -333,6 +334,7 @@ impl Workspace {
                             && view.session_panes.select_pane(pane)
                         {
                             view.active = view.tabs.len();
+                            view.refresh_protocol_selection(cx);
                             view.surface_focus.focus(window, cx);
                             cx.notify();
                         }
@@ -355,6 +357,7 @@ impl Workspace {
                             && view.session_panes.select_pane(pane)
                         {
                             view.active = view.tabs.len();
+                            view.refresh_protocol_selection(cx);
                             view.open_connections(&OpenConnections, window, cx);
                         }
                     })),

@@ -12,6 +12,11 @@ fn compact_production_source(source: &str) -> String {
     // Git can check out CRLF on Windows; line endings must not change whether
     // a trailing inline test module is distinguished from shipped code.
     let normalized = source.replace("\r\n", "\n");
+    // A leading inner cfg excludes the entire external fixture module from
+    // shipped code. Do not infer this from a path or an outer module attribute.
+    if normalized.trim_start().starts_with("#![cfg(test)]\n") {
+        return String::new();
+    }
     normalized
         .split("#[cfg(test)]\nmod tests {")
         .next()
@@ -19,6 +24,22 @@ fn compact_production_source(source: &str) -> String {
         .chars()
         .filter(|character| !character.is_whitespace())
         .collect()
+}
+
+#[test]
+fn whole_file_test_cfg_is_recognized_only_as_the_leading_inner_attribute() {
+    let fixture = "#![cfg(test)]\nuse std::process::Command;";
+    let production = "fn remote() {}\n#![cfg(test)]\nuse std::process::Command;";
+    let outer = "#[cfg(test)]\nmod fixtures;\nuse std::process::Command;";
+    for newline in ["\n", "\r\n"] {
+        assert!(compact_production_source(&fixture.replace('\n', newline)).is_empty());
+        for source in [production, outer] {
+            assert!(
+                compact_production_source(&source.replace('\n', newline))
+                    .contains("std::process::Command")
+            );
+        }
+    }
 }
 
 fn inspect_sources(path: &Path) -> Result<(), Box<dyn Error>> {
