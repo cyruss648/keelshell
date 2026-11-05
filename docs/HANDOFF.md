@@ -4,7 +4,7 @@
 最新用户要求优先于历史范围；源码、工程测试、受控原生、平台 CI、公开发布和安装分别验收。
 完整旧稿见[历史快照](history/2026-11-05-handoff-before-theme-ci-readback.md)，其中“当前”、暂停及删除指令只属于当时，不构成新的操作授权。
 
-## 当前独立切片：布局领域模型与持久化
+## 已集成：布局领域模型与持久化
 
 `feature/pane-layout-model-20261105` 从 `967c588803df493d06d42cf96221bd691aba46b9`
 建立独立工作副本。新增有界横/纵面板图、稳定身份、比例/活动叶变换，
@@ -13,8 +13,16 @@
 11 rustdoc、Python 128 run / 1 skipped；格式/严格 Clippy/依赖策略及附加控制器通过，
 499 个门禁/检查后输入一致。新非作者源码/功能复核 APPROVE_SCOPED_SOURCE，
 九份文档与证据终态复核 APPROVE_SCOPED_COMBINED，P0/P1/P2/P3=0。
-功能提交、推送、精确 CI 和资源清理由 `work/pane-layout-20261105/delivery-readback.json`
-维护，不从本机工程检查推断外部结果。
+功能提交 **`3e2f41f9d44e2ac48973a13ebcc97290b9d7ac91`** 已快进合入并推送 main，
+远端分支身份已读回。提交绑定独立复核为 APPROVE_SCOPED_COMMIT_BINDING，
+499 个门禁输入及 17 个候选文件与不可变提交 blob 相同，开放 P0/P1/P2/P3=0；
+reviewer 没有重跑测试。精确 Quality **41963286647 / attempt 1** 已读回三平台
+success：ordinary Rust macOS/Linux/Windows 分别 **2107/2103/2047 passed**，
+ignored 分别 **23/24/18**；新增 46 项测试各平台全部通过，各有 11 项 rustdoc。
+macOS/Linux 真实 OpenSSH 各 11 passed，Windows 按条件 skipped。
+原始日志、两份完整互操作 artifact 及四次 GET 连接失败保留在 `current-ci/`；
+观察器退出 0、60 个子进程及父执行会话均已回收。精确提交与后续资源清理由
+`work/pane-layout-20261105/delivery-readback.json` 维护。
 首轮轴枚举测试失败和 Clippy 测试用法失败均保留；
 当前实现与验证状态见[本轮记录](testing/records/2026-11-05-pane-layout-model.md)；
 产品边界见[工作区布局](product/WORKSPACE_LAYOUT.md)和
@@ -23,13 +31,20 @@
 
 连接树候选仍在原工作副本 `feature/navigation-keyboard-20261105`，本分支不含其
 尚未提交的源码。该候选修订包 `1f180f13…` 已有完整门禁和非作者源码复核，
-但解锁通知之后两次 CUA 查询仍返回系统锁定，未启动新的应用/容器；
-导航包、源码和 499 输入保持冻结。后续原生可用时回到该工作副本接续，
-不可用当前核心分支的构建去补记旧包验收。
+解锁通知后的前三次 CUA 查询返回系统锁定，当时未启动新应用或容器。
+之后清单查询成功，另一个导航 run `33a13f59…` 于 2026-11-05T03:49:02Z
+受监督启动 r2a 包，但访问窗口再次返回 Mac locked。没有 AX、截图、
+交互或显式 SSH 连接；健康的空审计不能当作导航零输入通过。
+应用退出 -15、监督器退出 0并均已回收，自有容器/网络/私有目录/镜像已清理，
+后续接口清单查询仍返回同一错误。实际回执在导航副本
+`work/navigation-keyboard-20261105/native/r2-launch-blocked-readback.json`，
+不把工具反馈当作用户未解锁的证明。
+导航包、源码和 499 输入保持冻结，未导入本核心提交。后续原生可用时回到该工作
+副本接续，不可用当前核心分支的构建去补记旧包验收，导航原生仍 OPEN。
 
-## 当前接续：隧道显示修订与修后原生复核
+## 已集成：隧道显示修订与修后原生复核
 
-当前分支为 `feature/net-native-acceptance-20261105`，基线 main 为
+该轮分支为 `feature/net-native-acceptance-20261105`，基线 main 为
 `7625ed387e4df6bd5c8e338f9a2a61479b242e37`。既有包 `c48ae4c7…`
 已在受控 macOS/Podman/OpenSSH 中取得 local、remote、dynamic 命名规则的
 真实传输和正常停止闭环，三轮 payload 累计各 387/737 字节。
