@@ -63,8 +63,10 @@ try:
         signal.signal(number, interrupt)
     worker = base64.b64decode(sys.argv[2], validate=True).decode("utf-8")
     request = json.loads(base64.b64decode(sys.argv[1], validate=True))
-    if request.get("kind") == "icmp":
-        payload = icmp_diagnostic(request, worker, started, lambda: interrupted)
+    if request.get("kind") in ("icmp", "traceroute"):
+        payload = (icmp_diagnostic(request, worker, started, lambda: interrupted)
+                   if request["kind"] == "icmp" else
+                   traceroute_diagnostic(request, started, lambda: interrupted))
         output = (FRAME + json.dumps(payload, separators=(",", ":")) + "\n").encode("ascii")
         sys.stdout.buffer.write(output)
         sys.stdout.buffer.flush()

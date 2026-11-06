@@ -2,6 +2,7 @@
 
 状态：源码、独立组合复核、fresh完整门禁及开发包通过；
 原生首轮HOLD保持，修后同包第二轮完成限定A/B操作与清理，新的非作者限定复核通过。
+本批已交付main `fa7c059`；精确提交CI `run42153758152` 已完成限定收口，三个平台 job 均 success；原观察器 exit2、Linux附件补取与 UNKNOWN 根因均按原件保留。
 基线为已推main的`850b77b77b576f3bd2527883ffef9d97a666afd0`。
 原生失败不覆盖已通过的工程结果，也不授予未执行路径的验收。
 
@@ -45,7 +46,7 @@
 | 同输入开发包 | fresh build/package/静态inspect-r2全部0/reaped，同536输入，app SHA8f1384e1…；未运行r1包 |
 | 原生工具候选 | r3最终54输入获准备批准；r4的62输入及必要差分获新非作者限定批准，旧失败原件保留 |
 | 同包真实SSH/存储与原生观察 | 第二轮706.365秒内完成28对AX/JPEG、A监控及B0–B5读回，app/外层0/reaped、清理核实；native-r2限定批准，新增P0–P3均0 |
-| 本片不可变提交及精确CI | 未生成 |
+| 本片不可变提交及精确CI | 已交付fa7c059，536工程输入与556提交blob匹配；Quality42153758152/1 已完成限定收口，三个平台均 success；原观察器不完整原因与附件补取证据保留 |
 
 上轮native-r4工具P2/P3在新副本修订并加入离线回归；
 旧冻结、旧运行和原拒绝不变。工具准备与实际运行分别记录。
@@ -221,6 +222,49 @@ container/network/private移除已核实。工具镜像随后按精确ID、owner
 本轮未验df/ps缺失后恢复、ss可用成功、Resume新趋势段或SFTP。
 完整三主题/尺寸/输入/IME/辅助技术、多窗口、Windows/Linux桌面、
 实际存储故障和签名安装仍开放。
+
+## 不可变交付与当前提交CI
+
+源码/门禁/包沿用combined-r1，限定原生沿用native-r2；
+正式20文档冻结经docs-r1独立批准，预查三项均关闭，当前P0–P3均0。
+父随后提交并普通快进推送main：
+`fa7c05914e0eefc0f24ab32f8af690bdc50a63ed`，父提交850b77b。
+536工程输入、38个自有改动路径及总556个提交blob逐项匹配冻结。
+本地main、origin/main与远端SHA一致，两工作副本交付时干净；
+父实际wait交付exec71025、0/reaped，未覆盖安装、签名或创建Release标签。
+
+该SHA的main/Quality/push/attempt1已绑定run42153758152。
+唯一前台exec91099/observer PID13490于2026-11-06 03:00:01.430826 UTC开始，
+原5400秒deadline为04:30:01.430826 UTC；不重启、不延长或重跑/取消工作流。
+536工程输入与204项候选从精确提交archive/show绑定；
+后续工作树的独立开发不改变该提交或其CI归属。
+run与三个job均已success。父实际wait外层91099，数值exit2/reaped：
+原观察器收集到Linux附件时GET失败，`runner-finish.evidence_complete=false`保留。
+Harvey在原deadline内只对固定附件13475026268做一次补充GET，exit0/reaped，
+外层61272也实际wait、0/reaped；不是新的观察器，没有重试CI或延长期限。
+新文件摘要与原API digest一致，旧失败文件/metadata和其他两次GET失败保持。
+
+| 平台 | ordinary passed / ignored | app（已含ordinary） | rustdoc | scripts Python | 204候选 |
+| --- | --- | --- | --- | --- | --- |
+| macOS | 2313 / 23 | 1026 / 2 | 14 passed | 131 run / 1 skipped | 每名一次pass |
+| Linux | 2308 / 24 | 1026 / 2 | 14 passed | 131 run / 1 skipped | 每名一次pass |
+| Windows | 2247 / 18 | 1017 / 2 | 14 passed | 131 run / 1 skipped | 每名一次pass |
+
+packaging Python三平台均57 run，macOS/Linux无skip、Windows4 skip。
+Linux/macOS各11个具名OpenSSH用例均通过，两份ZIP均与原API摘要匹配；
+实际清理回执确认observed/owned进程退出、临时目录移除及ancestry_unverified为空，
+仍限定于原回执的观察/出生身份边界。Windows三个OpenSSH相关step按精确workflow跳过。
+原观察器109个子进程均数值退出/reaped，1722.868/5400秒结束。
+原GET传输失败根因仍UNKNOWN；附件补取成功不解释旧原因。
+
+新的非作者`current-ci-r2`批准`APPROVE_SCOPED_EXACT_HEAD_CI_CLOSEOUT`，
+开放P0/P1/P2/P3均0；原r1预查、exit2和不完整标记未被改写。
+该批准只签fa7c059/run42153758152/attempt1，不签后续543输入组合、
+完整原生桌面、Release或安装。
+
+本地回执为`delivery-r1.json`、`committed-inputs-r1.json`、
+`delivery-exec-readback-r1.json`及`current-ci-next/`；
+本段为交付后续记，不改写已冻结报告或其原始结论。
 
 ## 基线CI并行观察
 

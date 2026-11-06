@@ -16,8 +16,17 @@ use std::{
 };
 use tokio::time::{Instant, timeout_at};
 
+mod traceroute;
+pub use traceroute::{
+    NetworkDiagnosticTraceroute, NetworkDiagnosticTracerouteHop,
+    NetworkDiagnosticTracerouteImplementation, NetworkDiagnosticTracerouteProbe,
+    NetworkDiagnosticTracerouteReason,
+};
+
 const SCRIPT: &str = concat!(
     include_str!("network_diagnostic/icmp.py"),
+    "\n",
+    include_str!("network_diagnostic/traceroute.py"),
     "\n",
     include_str!("network_diagnostic/probe.py")
 );
@@ -62,6 +71,12 @@ pub enum NetworkDiagnosticStatus {
     PermissionDenied,
     /// ICMP output, exit status, output budget or reported ICMP errors prevented success.
     IcmpFailure,
+    /// The reviewed hop limit was exhausted without an observed destination reply.
+    TracerouteHopLimit,
+    /// The utility reported an ICMP unreachable/error marker; no healthy route is claimed.
+    TracerouteUnreachable,
+    /// Traceroute start, output, exit status or capture budget failed validation.
+    TracerouteFailure,
 }
 
 /// The single upstream utility output/argument contract currently admitted.
@@ -243,6 +258,8 @@ pub struct NetworkDiagnosticReport {
     pub http: Option<NetworkDiagnosticHttp>,
     /// ICMP counters/RTT or a fixed capability/failure reason; absent for other modes.
     pub icmp: Option<NetworkDiagnosticIcmp>,
+    /// Structured Linux traceroute rows/reason, absent for other operations.
+    pub traceroute: Option<NetworkDiagnosticTraceroute>,
     /// Remote elapsed stages.
     pub timing: NetworkDiagnosticTiming,
     /// Address or certificate display fields reached a stated cap.
@@ -349,6 +366,7 @@ struct Wire {
     tls: Option<NetworkDiagnosticTls>,
     http: Option<NetworkDiagnosticHttp>,
     icmp: Option<NetworkDiagnosticIcmp>,
+    traceroute: Option<NetworkDiagnosticTraceroute>,
     timing: NetworkDiagnosticTiming,
     limited: bool,
 }
@@ -431,17 +449,30 @@ fn parse_report(
         return Err(InvalidResponse);
     }
     let kind = request.kind();
-    if kind == NetworkDiagnosticKind::Icmp {
-        validate_icmp(&wire)?;
-    } else if wire.icmp.is_some()
+    if kind == NetworkDiagnosticKind::Traceroute {
+        traceroute::validate(&request, &wire)?;
+    } else if wire.traceroute.is_some()
         || matches!(
             wire.status,
-            NetworkDiagnosticStatus::IcmpPartial
-                | NetworkDiagnosticStatus::IcmpNoReply
-                | NetworkDiagnosticStatus::UtilityUnavailable
-                | NetworkDiagnosticStatus::PermissionDenied
-                | NetworkDiagnosticStatus::IcmpFailure
+            NetworkDiagnosticStatus::TracerouteHopLimit
+                | NetworkDiagnosticStatus::TracerouteUnreachable
+                | NetworkDiagnosticStatus::TracerouteFailure
         )
+    {
+        return Err(InvalidResponse);
+    }
+    if kind == NetworkDiagnosticKind::Icmp {
+        validate_icmp(&wire)?;
+    } else if kind != NetworkDiagnosticKind::Traceroute
+        && (wire.icmp.is_some()
+            || matches!(
+                wire.status,
+                NetworkDiagnosticStatus::IcmpPartial
+                    | NetworkDiagnosticStatus::IcmpNoReply
+                    | NetworkDiagnosticStatus::UtilityUnavailable
+                    | NetworkDiagnosticStatus::PermissionDenied
+                    | NetworkDiagnosticStatus::IcmpFailure
+            ))
     {
         return Err(InvalidResponse);
     }
@@ -452,8 +483,10 @@ fn parse_report(
     {
         return Err(InvalidResponse);
     }
-    if kind != NetworkDiagnosticKind::Icmp
-        && wire.status == NetworkDiagnosticStatus::Success
+    if !matches!(
+        kind,
+        NetworkDiagnosticKind::Icmp | NetworkDiagnosticKind::Traceroute
+    ) && wire.status == NetworkDiagnosticStatus::Success
         && (wire.addresses.is_empty()
             || wire.timing.resolve_ms.is_none()
             || (kind != NetworkDiagnosticKind::Dns
@@ -476,6 +509,7 @@ fn parse_report(
         tls: wire.tls,
         http: wire.http,
         icmp: wire.icmp,
+        traceroute: wire.traceroute,
         timing: wire.timing,
         limited: wire.limited,
     })

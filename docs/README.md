@@ -2,9 +2,14 @@
 
 继续开发先读[当前交接](HANDOFF.md)和[路线图](ROADMAP.md)；精确SHA、CI执行会话及资源所有权只在交接入口维护。
 
-- [监控能力](product/MONITOR_CAPABILITIES.md)、[知识分类](product/KNOWLEDGE_CATEGORIES.md)与[本片记录](testing/records/2026-11-06-monitor-knowledge-categories.md)：源码与fresh组合门禁/包通过，首轮HOLD保持，修后同包限定A/B原件获native-r2独立批准，完整原生矩阵另验。
+- [远程文本格式](product/REMOTE_TEXT_FORMAT.md)、[ADR0111](adr/0111-utf8-editor-format-envelope.md)与[测试记录](testing/records/2026-11-06-editor-format.md)：r3三项P2关闭；父最终543输入门禁、新包和限定BOM/CRLF原生观察分别记录。
+- [文本与路由诊断组合](testing/records/2026-11-06-editor-traceroute-integration.md)：543输入/21路径，2355 ordinary/23 ignored通过，42新增具体名实际pass，combined-r3/r4限定批准源码及门禁/新包。
+- [限定原生记录](testing/records/2026-11-06-editor-traceroute-native.md)：38组macOS AX/JPEG、BOM/CRLF取消与保存、SSH UDP双栈一跳获native-r1限定批准；inline底部动作P2待修、合并采用/保存NOT_RUN，完整native HOLD。
+- [审核式traceroute](product/TRACEROUTE_DIAGNOSTICS.md)、[ADR0112](adr/0112-reviewed-bounded-traceroute.md)与[专项记录](testing/records/2026-11-06-traceroute-diagnostics.md)：r3修正真实工具版本流并获限定源码批准；真实生产Python、组合工程和原生观察按各自边界记录。
+- [监控能力](product/MONITOR_CAPABILITIES.md)、[知识分类](product/KNOWLEDGE_CATEGORIES.md)与[本片记录](testing/records/2026-11-06-monitor-knowledge-categories.md)：已交付fa7c059；源码与fresh组合门禁/包通过，首轮HOLD保持，修后同包限定A/B原件获native-r2独立批准，完整原生矩阵另验。
 - [资源趋势](product/HOST_RESOURCE_TRENDS.md)、[知识批量管理](product/KNOWLEDGE_BULK_MANAGEMENT.md)及[整合记录](testing/records/2026-11-06-resource-knowledge-integration.md)：已交付850b77b，完整本机门禁和限定原生各自留证，精确CI从交接继续。
 - [测试索引](testing/README.md)列最近切片；[历史交接](history/2026-11-06-handoff-before-capabilities-categories.md)和[历史路线](history/2026-11-06-roadmap-before-capabilities-categories.md)保留完整轨迹。
+- [文本/路由切片前交接](history/2026-11-06-handoff-before-editor-traceroute.md)和[对应路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留监控/知识交付前的冻结状态，不覆盖最新交接。
 
 ## 历史专题与功能指南
 

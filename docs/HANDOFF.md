@@ -1,122 +1,113 @@
 # KeelShell 当前交接 — 2026-11-06
 
-时间使用 Asia/Shanghai。先读 [AGENTS.md](../AGENTS.md)，再读本页与[路线图](ROADMAP.md)。
-旧的完整轨迹已保留在[历史交接](history/2026-11-06-handoff-before-capabilities-categories.md)；
-历史段落的“当前”“待审”和暂停指令不覆盖本页。
+先读[AGENTS](../AGENTS.md)、本页、[路线图](ROADMAP.md)及
+[共享 Cargo 指南](testing/SHARED_TARGET.md)。时间使用 Asia/Shanghai，
+原始回执 UTC 保持。上一阶段完整过程保存在
+[原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
-## 最新交付
+## 已交付基线
 
-资源趋势与知识批量管理已提交并普通快进推送 main：
-`850b77b77b576f3bd2527883ffef9d97a666afd0`，父提交为 `5b7772c`。
-本地 main、origin/main 与远端 SHA 读回一致，两工作副本交付当时干净。
-530 项工程输入与完整门禁、构建及开发包保持一致；546 个工程/正式文档提交 blob 已核对。
-来源代码、组合、限定原生与正式文档均有非作者批准，分别对应
-`combined-r1`、`native-r4` 和 `docs-r5`，不可相互代签。
+本批基线为已交付的 `fa7c05914e0eefc0f24ab32f8af690bdc50a63ed`，
+包括按项监控能力与审核式知识分类。536 输入 fresh 完整门禁为
+2313 ordinary / 23 ignored、14 rustdoc、Python 131 run / 1 skipped；
+限定新包原生与正式文档已有各自非作者批准。
+精确 main / Quality / push / attempt 1 的 run `42153758152` 三平台成功，
+候选各 204 名通过。原观察器外层 91099 实际 wait、exit 2 / reaped；
+原 Linux 附件 GET 失败保留，原期限内一次固定附件补取与两平台各 11 项 OpenSSH
+由 `current-ci-r2` 限定批准，不重启或重跑旧 run。
+见[该批记录](testing/records/2026-11-06-monitor-knowledge-categories.md)。
 
-- 完整本机门禁：2276 ordinary passed / 23 ignored；app1002/2 ignored 已含其中；
-  14 rustdoc；Python131 run =130 passed +1 skipped；格式、严格Clippy、依赖策略和附加控制器通过。
-- 最新依赖检查：2026-11-05 21:10:47–21:11:03 UTC，104 条要求/34 个registry包通过，
-  530 输入保持，无manifest/lock变化。所有直接registry要求仍为 `x.y`。
-- macOS开发包程序SHA-256为 `14cb801e3d5eed51bbf52534c5160ea62d4a044719fd063c4eb8b2859488ccad`。
-  单窗 Frost Light/英文17对AX/JPEG、16轮真实Linux资源/ps及合成知识取消/确认获限定批准。
-  取消保持原bytes/文件元数据，确认精确3→1；暂停/显示零增量、恢复断段有审计。
-- 原监督器capture的tuple/list失败保持；本次B使用同run父只读导出并获独立核实。
-  工具P2（NR4-P2-01）与失败枚举summary工具P3（NP-R4-P3-01）仍开放；完整native finish仍OPEN。
-- app与外层exec实际wait、0/reaped；sshd实际-9/reaped且原清理警告保留。
-  自有container/network/private/tools image已清理，共享base/VM/target保留；未安装、签名或发布。
+## 本批：文本格式与路径探测
 
-证据入口：`work/resource-knowledge-20261106/`，包括 `delivery-r1.json`、
-`delivery-exec-readback-r1.json`、`committed-inputs-r1.json`、`independent-review/`。
-正式功能与限定原生记录见[整合记录](testing/records/2026-11-06-resource-knowledge-integration.md)
-和[原生记录](testing/records/2026-11-06-resource-knowledge-native.md)。
-`work/`被Git忽略，本地原件路径不表示已公开发布。
+整合工作树分支 `feature/editor-traceroute-20261106`，基线 fa7c059。
+最终 r3 为 543 项工程输入、21 个源码路径，冻结文件 SHA256：
+`1b5c7cf42d8a4d9ede5de6fcca29caf11da5daeaef59fc8e580ea4a1172590bd`。
+原件入口 `work/next-batch-20261106/` 被 Git 忽略，不表示公开附件。
 
-## 精确提交 CI
+- UTF-8 BOM 与 LF/CRLF 保持：25 个新增用例实际通过，三项连续编辑 P2
+  已在独立 r3 差分复审中关闭。备份 ACK、目标发布 ACK 与目标完整读回分别处理。
+- 审核式有界 traceroute：17 个新增 Rust 用例实际通过；真实工具版本输出在 stderr，
+  r3 修正精确准入合同，14 项 Python 与 10 个错误流负例通过。
+  原 r2 工程通过但真实版本拒绝的失败保留。
+- 最终完整门禁 `full-gate-r3` 外层 5546 实际 wait、exit 0 / reaped，
+  575.972 秒：2355 ordinary / 23 ignored，含 app 1047 / 2 ignored；
+  14 rustdoc，Python 131 run = 130 passed + 1 skipped。
+  42 新增与基线 204 个具体名均实际通过，543 输入前后不变。
+- 采用 `full-gate-r3-summary-r2.json` 与 `full-gate-r3-exec-readback-r2.json`；
+  首次派生摘要误留旧日志信息的原件保持，修正未重跑门禁。
+- 正常程序构建、macOS 打包和静态检查均 exit 0 / reaped；新包 6 成员、41 资产读回。
+  app SHA256 为 `9e83d83af253ffe3c3aba29997450ea75f4c70a6dbe9311e61469228bd0158b9`，
+  MCP 为 `e29f58d15f0c26c6634033f2eb0efed62b5b71dc37fcbfbab6bbbc9d28ed78a6`。
+  Gauss 的 `combined-r3` 源码、`combined-r4` 门禁/新包增量复核均限定批准，
+  开放 P0–P3 为 0；不签原生或未来 CI。
+- 本批官方依赖检查 34 包 / 104 要求通过，manifest / lock 未改变；
+  直接 registry 要求保持 `x.y`，不固定 Rust toolchain。
 
-`850b77b` 的 Quality `42129830892 / attempt 1` 已三平台success。
-ordinary分别为macOS2276/23 ignored、Linux2271/24 ignored、Windows2210/18 ignored；
-各14 rustdoc、165项候选通过。Linux/macOS各11项OpenSSH及附件API摘要匹配；
-新的非作者closeout已限定批准，开放发现零；Windows按工作流跳过OpenSSH。
-唯一前台exec38847已由父实际wait、0/reaped，104子进程全部回收；
-23:54:16 UTC结束收集，耗时1429.697/5400秒，原deadline未延长。
-一次GET失败原件保留，原件及父外层回执位于本轮 `current-ci/`。
-没有仍在运行的本轮CI观察器；这不签下一轮源码或其他平台桌面/发布/安装。
+### 限定原生
 
-## 正在开发
+runtime-r3 owner 为 `01e8d214a619471b8ad93786b6083afe`。
+Curie `report-r3` 仅批准准备；父真实运行取得 38 组 AX/JPEG。
+BOM/CRLF 完整审核取消后字节/stat/目录不变；重新审核确认一次后，
+app 自己完整读回，独立观察目标 29 字节与唯一原备份 22 字节。
+真实 SSH UI 中 UDP IPv4 / IPv6 各审核确认一次，均返回目的地址一跳回复。
 
-复用现有整合工作树，分支 `feature/monitor-knowledge-categories-20261106`，基线850b77b。
-管理器两次建树请求均超时且后查无新目录/登记；未重复请求或绕过primary保护。
-两名作者按独占文件范围并行，不自行改分支/提交/推送，父负责装配、公共文档及最终门禁。
+inline 编辑器底部动作可达性待修；合并仅准备草稿和一次固定竞争写，
+`merge-adopt` / `merge-save`、late-save 和连续零换行保存保持 NOT_RUN。
+不能用源码/夹具观察替代这些原生结论。Gauss 的 `native-r1` 已批准观察子集与
+基础设施收口，建议允许当前 543 输入批次限定交付；新增 P2 `NR1-P2-01`
+保持 OPEN，完整原生继续 HOLD。报告 SHA256：
+`9ce082e4be171262753f750ae4f931f37ca8be61cdeb71b985bc3960c3e07f70`。
 
-| 切片 | 写入范围 | 当前状态 |
-| --- | --- | --- |
-| 监控能力识别与按项降级 | session/app monitor及其测试 | 最终r2已获新非作者批准组合，原P2及两项专项P3关闭；session34、app初跑18/2失败后受影响回归通过，历史保持 |
-| 知识分类与组合筛选 | core/app knowledge及Workspace知识适配 | 最终r4已获新非作者批准组合；core单元22/集成31、app专项67及严格Clippy通过；组合门禁与第二轮限定原生复核通过 |
-| 原生工具与实际运行 | ignored work下的新候选副本 | r4的62输入及必要差分获准备批准；同包第二轮706.365秒内完成A/B与清理，native-r2限定批准，旧首轮HOLD原件保持 |
+外层 28510 由父实际 wait、exit 0 / reaped，797.330164 / 900 秒，没有重启或延期。
+app exit 0 / reaped，sshd -9 / reaped，容器 exit 0；
+该 owner 的 container / network / image / private 已清理，共享 base / VM / 第三方 target
+保留。原 `cleanup.json` 的阶段性 false 与后续 `editor-cleanup.json` 的 true 分别保留。
+旧 runtime-r2 因 0700 目录先 chown 后写 seed 失败，app 未启动，外层 49450
+实际 wait、exit 1 / reaped。Curie 于 05:13:12 UTC 另编号完成旧 image/private
+补充清理，7 条命令实际 wait/reaped、0.298/30 秒，精确身份与 absent 已读回；
+旧 HOLD / false、失败和 12 项受保护原件不变，不回填成功。
 
-本批两作者已明确释放共享Cargo槽，父已完成并实际wait组合门禁；
-`CARGO_TARGET_DIR`使用主开发副本的既有target，`CARGO_BUILD_JOBS=2`，测试四线程。
-禁止同时对共享target运行Cargo；作者只格式化自有路径。
-新功能完成后必须新开非作者源码/功能复核，再执行组合完整门禁与相关原生检查。
-两片设计见[监控能力](product/MONITOR_CAPABILITIES.md)和[知识分类](product/KNOWLEDGE_CATEGORIES.md)。
-当前536工程输入/18源码已冻结，非自有工程保持850b77b。
-r1构建/打包/静态inspect退出0，但完整门禁app测试清单缺少B新增用例；
-其exit0与实际wait仍保留，不能作为完整验收。旧清单、fingerprint、dep-info及包
-已留证。父只使五个项目crate产物失效，第三方缓存保留；
-build-r2明确编译当前树全部五crate，app新清单1028项且两片具体用例齐全；
-package-r2及静态inspect通过，程序SHA为
-`8f1384e1622069d32736437b4bd1d65ef312aee9b8ea82761ed2e0b446599ce4`。
-fresh完整门禁exec60566已由父实际wait、0/reaped，在原1500秒内结束；
-2313 ordinary passed/23 ignored，app1026/2 ignored已含其中，14 rustdoc，
-Python131 run=130 passed+1 skipped。两片37个新增用例均真实执行，536输入不变。
-新的组合终审已批准source/gate/package，开放P0/P1/P2/P3均0。
-同包原生首轮在279.610秒后HOLD，父实际wait exec23708、exit1/reaped；
-八对JPEG/AX保留，真实core/ps至少各25轮和ss缺失缓存有局部证据，
-一次Recheck后的采集失败及断开保持未通过，A3及B0–B5未开始。
-夹具日志保留审计容量及清理PermissionError；app-15/reaped，
-自有container/network/private已移除，sshd实际退出/回收未证实。
-修后准备与第二轮验证使用新副本/owner，不覆盖失败或延长旧期限。
-第二轮在2026-11-06 02:19:03.529 UTC开始，owner `a45b8b77…`，
-单窗霜白浅色/英文共28对原始AX/JPEG。核心/ps各20轮成功，
-ss缺失缓存1次，显式Recheck后实际2次且仍明确缺失；
-Pause静止前后及Connections/Host info显示切换均零exec/PTY增量。
-B0–B5实际完成分类取消、设定、组合筛选、改名及清空，三条合成记录全保留；
-取消/筛选保持原bytes及stat，三次确认只改变Alpha分类，全部B步骤零SSH exec/PTY计数增量。
-纯导出比较通过；新的非作者native-r2已限定批准，新增P0/P1/P2/P3均0。
-私有raw state及app stderr随授权清理移除，磁盘结论使用捕获时来源与完整导出；
-不声称评审后重新读取私有原文件，不代签全部SSH传输流量或完整native finish。
-app正常退出0/reaped，父实际wait exec81019、exit0/reaped，
-耗时706.365298秒，原900秒预算未延长；sshd-9/reaped，容器exit0，
-自有container/network/private移除已核实。
-见[共享target归属](testing/SHARED_TARGET.md)和[本轮记录](testing/records/2026-11-06-monitor-knowledge-categories.md)。
-未安装、签名或发布。
-父已保存门禁后包与普通程序的匹配回执，正式将Cargo槽交给下一片远程文本格式作者。
-该作者只在`work/editor-format-20261106/implementation-source`无`.git`副本实施UTF-8 BOM、
-单一LF/CRLF保持及测试，使用536输入作基线，不改本树Rust或当前不可变包。
-该片r2冻结538输入/10路径，42项专项通过，其中21项新增；
-严格Clippy及格式通过，失败历史保留，原生未运行。
-新开的非作者editor-format复核发现三项P2：保存中后续草稿BOM重复、
-合并丢新增头部U+FEFF、连续保存丢CRLF插入策略；r2暂缓导入。
-作者已在隔离副本形成r3冻结，三项独立反例在旧r2真实失败，修后受影响37项通过，
-含4项r3新增用例，总新增声明25项；必要增量交原非作者复审，
-修后完整门禁等待实际结果，旧门禁不代签r3。Cargo归属由该作者独占。
-后续Cargo归属切换须先失效项目crate；源码未批准前不导入当前536输入。
-审核式有界traceroute同时在`work/reviewed-traceroute-20261106/implementation-source`
-以536输入隔离开发，不修改本树Rust/文档，不使用Cargo；实现与验收均未完成。
-当前原生准备只消费package-r2及冻结回执，不消费后续变化的活target。
-本轮自有tools image曾一次构建并查询工具：
-`sha256:cbbeac297612e1e51f10444e53634835ae3027853b15a677c30b281c84710d8d`，
-owner `b63e98b0b62e4f8fab396be8a71ffcb4`。
-第二轮退出后已按精确ID/owner及零消费者核对并移除，读回镜像不存在；
-两轮自有SSH容器、网络与private均已移除，共享base/VM/target保留。
-原件、失败记录和当前仍有消费者的隔离源码副本保留。
+完整来源与失败见[组合记录](testing/records/2026-11-06-editor-traceroute-integration.md)，
+原生范围与原件见[原生记录](testing/records/2026-11-06-editor-traceroute-native.md)。
 
-## 接续约束与开放边界
+## 并行下一片与 Cargo 归属
 
-- 仅管理远程SSH；本地终端、RDP、串口不在范围。UI/core/session/AI分层，阻塞I/O不进UI线程。
-- 霜白、曜石、雾紫全部内置，注册表和语义token扩展；遵循[原生设计合同](design/HALLMARK_NATIVE.md)。
-- AI上下文及命令各自显式审核，模型不能自主执行；主机密钥变化fail closed；凭据不进普通配置/日志。
-- Windows/Linux桌面、完整主题/尺寸/键盘/IME/辅助技术、多窗口、供应商账户/外部MCP及已签名安装验收仍开放。
-- 用户已授权自主开发、提交推送main、标签触发Release、本地Podman联调；不包含覆盖安装或遥测上传。
-- A资源趋势作者树已归档且分支已删除；B知识作者树受primary checkout保护而保留，证据tar已核对。
-  旧树保护拒绝不得用shell绕过。已合并的整合分支已正常删除；当前整合树仍在使用。
+2026-11-06 04:38:48 UTC 父已将共享 Cargo 槽释放给 **Dewey 的 multiwindow 隔离源码**；
+原件 `work/next-batch-20261106/cargo-slot-release-r1.json`。
+父只消费不可变 `package-macos-r1`，不得用当前 target 字节重新签旧包。
+其他角色不能并行 Cargo / clean。归属切换先只使五个项目包失效，保留第三方缓存。
+
+| 切片 | 当前范围与状态 |
+| --- | --- |
+| 独立工作窗口 | Dewey 在 `work/multiwindow-20261106/implementation-source` 实施空白新窗、每窗独立会话/草稿/审核、安全关闭、定向 worker 回收及共享 StateStore 协调；尚未交付或验收，不重复作者 full gate |
+| 编辑器动作可达性 | Carver 在 `work/editor-layout-20261106/implementation-source` 分析并修复原生发现的底部裁切，限定 files 范围；等待专项/独立复核，尚未导入本批 |
+
+作者隔离副本没有 `.git`，不修改父正式源码、文档或 Git。
+已合并分支及时清理；受管建树已两次超时，旧 worktree 的其他任务/primary 保护保持，
+不用 shell 绕过。失败和不可变原件保留。
+
+## 接续顺序
+
+提交与 CI 身份不能在同一提交正文中自引用。执行下列步骤前先读取实时 Git 和
+`work/next-batch-20261106/delivery-r1.json`、`delivery-exec-readback-r1.json`
+及 `current-ci-preparation/` 的实际回执；已有实际完成记录的动作不重放。
+
+1. 原生非作者报告已收取；正式文档、链接及差分由非作者作最终限定复核。
+2. 提交本批既有 543 输入，普通快进推送 main，读回本地/跟踪/远端 SHA。
+3. 用已封存 `current-ci-preparation/launch_exact.py --sha <新的精确 main SHA>`
+   启动一次新观察器；首次构造开始原 5400 秒时钟，不能重启、延时或重跑。
+   248 候选的平台预期为 macOS 248 / Linux 247 / Windows 246。
+   新 SHA / run / exec / deadline 尚未绑定，不把旧 fa7 CI 当本批结果。
+4. 下一片源码导入和新的非作者审后统一 fresh 完整门禁，构建新包及真实原生验收。
+
+## 持续约束与开放边界
+
+仅管理远程 SSH；本地终端、RDP、串口不在范围。UI / core / session / AI 分层，
+阻塞 I/O 不进 UI 线程。霜白、曜石、雾紫全部保留，通过注册表和语义 token 扩展，
+遵循[原生设计合同](design/HALLMARK_NATIVE.md)。
+AI 上下文与命令各自显式审核，模型不能自主执行；主机密钥变化 fail closed，
+凭据不进普通配置或日志。
+
+Windows/Linux 真实桌面、完整主题/尺寸/键盘/IME/辅助技术、多窗口、
+供应商账户/外部 MCP、签名安装仍开放。用户已授权自主开发、提交推送 main、
+标签触发 Release 和本地 Podman 联调；不含覆盖安装或遥测。产品总目标保持进行中。

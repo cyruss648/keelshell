@@ -1,5 +1,44 @@
 # Capability ledger
 
+## 2026-11-06: combined text format and reviewed traceroute candidate
+
+The reviewed editor r3 and traceroute r3 sources are now combined in the
+development branch: 543 engineering inputs and 21 source paths. The shared core
+exports retain both features. Freshly compiled inventories contain all 25 editor
+and 17 traceroute additions. The final combined gate passed 2355 ordinary tests /
+23 ignored, 14 rustdoc tests and 131 Python checks / one skipped. Scoped non-author
+reviews approved combined source and the new macOS package. That package has
+38 native AX/JPEG capture groups covering BOM/CRLF cancel/save and real SSH UI
+UDP IPv4/IPv6 one-hop loopback replies. Native-r1 approves those observed cases;
+one footer-action P2 remains open and full native acceptance stays on HOLD.
+Inline editor footer actions need a layout fix; native merge adoption/saving,
+late-save and consecutive no-break saving were not completed.
+See the [native record](../testing/records/2026-11-06-editor-traceroute-native.md).
+Traceroute requires an explicit UDP/ICMP
+method, IPv4/IPv6 family, bounded hops/probes/wait and a complete review. It admits
+only the fixed remote Linux traceroute 2.1.5 contract; stars and missing rows
+remain unknown. See the [combined record](../testing/records/2026-11-06-editor-traceroute-integration.md).
+
+## 2026-11-06: UTF-8 format preservation candidate
+
+The isolated editor r3 candidate separates one leading UTF-8 BOM from editable
+text and preserves a uniform LF/CRLF save policy. Dirty state, full review,
+limits and complete target readback use the same exact outbound bytes. A newer
+draft keeps its paired format; a no-break intermediate save retains the open
+document's insertion policy. Newly inserted leading U+FEFF survives merge adoption.
+
+Three independent P2 findings are closed in the reviewed delta. The 538-input
+isolated full gate passed 2338 ordinary tests / 23 ignored, 14 rustdoc tests and
+131 Python checks / one skipped; all 25 added tests actually ran. This candidate
+was imported with matching 538 input hashes and subsequently combined with
+traceroute into 543 inputs; combined validation, a new package and native
+observation remain separate.
+Backup-write ACK, publication ACK and complete target readback remain separate:
+production does not independently reread backup contents. See the
+[format guide](REMOTE_TEXT_FORMAT.md),
+[ADR 0111](../adr/0111-utf8-editor-format-envelope.md) and
+[test record](../testing/records/2026-11-06-editor-format.md).
+
 ## 2026-11-06: monitoring capabilities and local knowledge categories
 
 The current integration separates core Linux resources, filesystem capacity,

@@ -78,6 +78,10 @@ ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝
 
 [按项监控能力](docs/product/MONITOR_CAPABILITIES.md)让文件系统容量、进程或监听工具不可用时保留其他有效资源，并提供原因、实际检查年龄和显式重新检测。[知识分类](docs/product/KNOWLEDGE_CATEGORIES.md)提供全部、未分类、分类计数与文本交集筛选；更改分类先审核，标签只用于本地整理。两项新增切片的组合工程与同包原生进度见[验收记录](docs/testing/records/2026-11-06-monitor-knowledge-categories.md)。
 
+[文本格式保持](docs/product/REMOTE_TEXT_FORMAT.md)保留一个UTF-8文件头BOM与原有单一LF/CRLF策略，混合换行或仅CR草稿原样保存。审核和目标完整读回比较精确字节，不强制文件末尾换行；格式发生不兼容变化时需重新读取并审核。新包已有BOM/CRLF取消与确认保存的限定macOS观察，完整范围见[格式记录](docs/testing/records/2026-11-06-editor-format.md)。
+
+[审核式 traceroute](docs/product/TRACEROUTE_DIAGNOSTICS.md)支持显式选择 UDP/ICMP、IPv4/IPv6 和有界探测参数，确认前展示完整目标与命令。缺失跳和星号保持未知；同包真实SSH UI已取得UDP双栈回环的一跳回复。限定原生、未完成的合并验收与底部操作可达性问题见[原生记录](docs/testing/records/2026-11-06-editor-traceroute-native.md)；完整工程见[组合记录](docs/testing/records/2026-11-06-editor-traceroute-integration.md)。
+
 文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。文件审核可以展开，确认与取消保持可见；草稿和差异输入提供明确的编辑入口。操作说明见[审核与编辑](docs/product/FILE_REVIEW_AND_FOCUS.md)和[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；macOS 自有 SSH/SFTP 的两次草稿与保存流程已完成完整内容读回，完整界面与跨平台验收继续进行，见[限定原生记录](docs/testing/records/2026-10-07-text-merge-patch-native.md)。
 
 配置损坏或需要回退时，可使用[配置备份与恢复](docs/product/CONFIGURATION_RECOVERY.md)。恢复只替换配置；会话、命令、传输和外部授权不会重放。当前组合的工程与原生验收进度见[整合记录](docs/testing/records/2026-10-08-configuration-recovery-main-integration.md)。

@@ -7,30 +7,29 @@
   "audience": "developers and operators managing remote SSH hosts",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
-  "job": "inspect independently available remote Linux monitoring functions and organize explicitly saved local knowledge by reviewed categories",
+  "job": "edit remote UTF-8 text with exact format-preserving save reviews and inspect explicitly reviewed bounded remote Linux routes",
   "sources": [
-    "crates/keelshell-app/src/monitor.rs",
-    "crates/keelshell-app/src/assistant/knowledge_library.rs",
+    "crates/keelshell-app/src/files.rs",
+    "crates/keelshell-app/src/monitor_protocol.rs",
     "docs/design/HALLMARK_NATIVE.md",
-    "docs/product/MONITOR_CAPABILITIES.md",
-    "docs/product/KNOWLEDGE_CATEGORIES.md"
+    "docs/product/REMOTE_TEXT_FORMAT.md"
   ],
   "preserve": [
     "Frost/Graphite/Lavender registry and semantic tokens",
-    "existing cadence,pause,connection ownership and review authority",
-    "separate management,Ask and edit selections",
-    "background StateStore queue and conflict/reload boundaries"
+    "current pane/tab/connection review authority",
+    "complete original/candidate content review and fixed confirm/cancel",
+    "background transport work and unknown-result isolation"
   ],
   "introduce": [
-    "typed per-function capability status with an explicit recheck",
-    "local category counts and combined filtering",
-    "separate fully reviewed category mutations without added model context"
+    "one-BOM body/format separation and original uniform LF/CRLF insertion policy",
+    "explicit traceroute protocol/family/limits and complete command review",
+    "unknown stars and distinct hop-limit/unreachable/tool-permission outcomes"
   ],
-  "base_sha": "850b77b77b576f3bd2527883ffef9d97a666afd0",
-  "source_status": "combined-r1 APPROVE_FOR_SCOPED_COMBINED_GATES_AND_PACKAGE; fresh536-input full-gate-r2 with2313ordinary/23ignored,14rustdoc,Python131run/1skip and fixed package-r2 passed",
-  "native_status": "native-r2 APPROVE_SCOPED_NATIVE_A_B_R4;28 original AX/JPEG pairs;core/ps20real rounds each;ss cached then explicit recheck;paused display and B0-B5 zeroexec/PTY increment;app/outer0reaped in706.365298seconds;owned cleanup verified. R1 remains HOLD.",
-  "finish_review": "native-r2 scoped A/B independent approval with no new findings; full native/product finish OPEN; private raw state cleaned and disk conclusion uses capture-time exports",
-  "evidence": "docs/testing/records/2026-11-06-monitor-knowledge-categories.md",
+  "base_sha": "fa7c05914e0eefc0f24ab32f8af690bdc50a63ed",
+  "source_status": "editor-r3 and traceroute-r3 source approved; combined543 inputs/21 paths; full-gate-r3 actual0/reaped,2355 ordinary/23ignored,14rustdoc,Python131/1skip;42 new and204 baseline names passed; combined-r3/r4 scoped source/gate/package approvals",
+  "native_status": "PARTIAL_NATIVE_ACCEPTANCE_FULL_NATIVE_HOLD;non-author native-r1 approves limited macOS BOM/CRLF cancel+confirmed save and SSH UI UDPv4/v6 one-hop observations;NR1-P2-01 inline editor footer actions remain partly clipped;merge-adopt/save,late-save,consecutive-zero-newline NOT_RUN",
+  "finish_review": "APPROVE_LIMITED_543_INPUT_BATCH_DELIVERY_WITH_OPEN_P2_AND_EXPLICIT_NATIVE_HOLDS;full native finish remains HOLD;previous scoped approvals retain their original source/package boundaries",
+  "evidence": "docs/testing/records/2026-11-06-editor-traceroute-native.md",
   "baseline_evidence": "docs/testing/records/2026-11-06-resource-knowledge-native.md",
   "baseline_native_scope": "native-r4 approves scoped macOS resource/batch evidence for14cb801e with same-run parent read-only export; known capture-tool P2/failed-inventory-summary P3 remain open in that immutable attempt",
   "web_render": "not_applicable to native Rust/GPUI; actual GPUI and native checks recorded separately"

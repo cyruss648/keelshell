@@ -12,6 +12,7 @@ mod actual_services;
 mod icmp;
 #[cfg(unix)]
 mod supervisor;
+mod traceroute;
 
 fn dns_request() -> NetworkDiagnosticRequest {
     NetworkDiagnosticRequest::dns("localhost").unwrap_or_else(|e| panic!("{e}"))

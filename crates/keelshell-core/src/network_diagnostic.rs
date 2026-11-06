@@ -22,6 +22,71 @@ pub enum NetworkDiagnosticKind {
     Http,
     /// Send at most four ICMP echo requests using an admitted remote ping utility.
     Icmp,
+    /// Trace a single reviewed destination using the admitted Linux traceroute.
+    Traceroute,
+}
+
+/// Probe method explicitly reviewed for one traceroute, with no automatic fallback.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TracerouteProtocol {
+    /// Classic UDP probes starting at destination port 33434, increasing per probe.
+    Udp,
+    /// ICMP echo probes; unavailable permissions are reported without escalation.
+    Icmp,
+}
+
+/// Address family selected before remote resolution; another family is never tried.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TracerouteFamily {
+    /// Resolve and trace one IPv4 address.
+    Ipv4,
+    /// Resolve and trace one IPv6 address if supported by the remote environment.
+    Ipv6,
+}
+
+/// Validated traceroute limits. Sequential probes have at most six seconds of
+/// cumulative requested waiting; resolution/admission and cleanup share the
+/// existing eight-second remote budget. A deadline is never a completed route.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub struct NetworkDiagnosticTracerouteOptions {
+    protocol: TracerouteProtocol,
+    family: TracerouteFamily,
+    max_hops: u8,
+    probes_per_hop: u8,
+    wait_ms: u16,
+}
+
+impl NetworkDiagnosticTracerouteOptions {
+    /// The explicit probe method.
+    pub fn protocol(self) -> TracerouteProtocol {
+        self.protocol
+    }
+    /// The requested IP family, without fallback.
+    pub fn family(self) -> TracerouteFamily {
+        self.family
+    }
+    /// Maximum TTL/hop limit, in 1–16.
+    pub fn max_hops(self) -> u8 {
+        self.max_hops
+    }
+    /// Probe attempts per hop, in 1–3.
+    pub fn probes_per_hop(self) -> u8 {
+        self.probes_per_hop
+    }
+    /// Maximum wait for each sequential probe, in 100–1000 milliseconds.
+    pub fn wait_ms(self) -> u16 {
+        self.wait_ms
+    }
+    /// Maximum requested attempts, including probes that may remain unsent if stopped.
+    pub fn max_probes(self) -> u16 {
+        u16::from(self.max_hops) * u16::from(self.probes_per_hop)
+    }
+    /// Upper bound on cumulative requested probe waiting, excluding other stages.
+    pub fn probe_wait_budget_ms(self) -> u32 {
+        u32::from(self.max_probes()) * u32::from(self.wait_ms)
+    }
 }
 
 /// Validated immutable diagnostic input. It never contains URL credentials,
@@ -33,6 +98,8 @@ pub struct NetworkDiagnosticRequest {
     port: u16,
     path: String,
     https: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    traceroute: Option<NetworkDiagnosticTracerouteOptions>,
 }
 
 /// Fixed validation failure, deliberately excluding the supplied input.
@@ -50,9 +117,56 @@ pub enum NetworkDiagnosticInputError {
     /// A port must be in 1–65535.
     #[error("invalid diagnostic port")]
     InvalidPort,
+    /// Traceroute limits, cumulative waiting budget or literal IP family are invalid.
+    #[error(
+        "traceroute requires 1–16 hops, 1–3 probes, 100–1000 ms wait, and at most 6000 ms cumulative waiting in the selected IP family"
+    )]
+    InvalidTracerouteOptions,
 }
 
 impl NetworkDiagnosticRequest {
+    /// Validate a single remote Linux traceroute without resolving or executing.
+    ///
+    /// Only a hostname or numeric literal is accepted. The protocol and family
+    /// are explicit; at most 16 hops × 3 probes are possible, and their combined
+    /// requested waiting must be at most 6000 ms. No caller-supplied tool, flags,
+    /// port, interface, source address or command text is accepted.
+    pub fn traceroute(
+        host: &str,
+        protocol: TracerouteProtocol,
+        family: TracerouteFamily,
+        max_hops: u8,
+        probes_per_hop: u8,
+        wait_ms: u16,
+    ) -> Result<Self, NetworkDiagnosticInputError> {
+        let mut request = Self::endpoint(NetworkDiagnosticKind::Traceroute, host, 33434)?;
+        let options = NetworkDiagnosticTracerouteOptions {
+            protocol,
+            family,
+            max_hops,
+            probes_per_hop,
+            wait_ms,
+        };
+        if !(1..=16).contains(&max_hops)
+            || !(1..=3).contains(&probes_per_hop)
+            || !(100..=1000).contains(&wait_ms)
+            || options.probe_wait_budget_ms() > 6000
+            || request
+                .host
+                .parse::<IpAddr>()
+                .is_ok_and(|ip| ip.is_ipv4() != (family == TracerouteFamily::Ipv4))
+        {
+            return Err(NetworkDiagnosticInputError::InvalidTracerouteOptions);
+        }
+        request.traceroute = Some(options);
+        Ok(request)
+    }
+
+    /// Exact reviewed traceroute options; absent for other diagnostic kinds.
+    pub fn traceroute_options(&self) -> Option<NetworkDiagnosticTracerouteOptions> {
+        self.traceroute
+    }
+
     /// Validate a host for an explicitly reviewed remote ICMP echo operation.
     ///
     /// Validation performs no resolution or probing. Flags, URLs, shell syntax
@@ -87,6 +201,7 @@ impl NetworkDiagnosticRequest {
             port,
             path: String::new(),
             https: true,
+            traceroute: None,
         })
     }
 
@@ -152,6 +267,7 @@ impl NetworkDiagnosticRequest {
             port,
             path: path.to_owned(),
             https: url.scheme() == "https",
+            traceroute: None,
         })
     }
 
@@ -163,7 +279,8 @@ impl NetworkDiagnosticRequest {
     pub fn host(&self) -> &str {
         &self.host
     }
-    /// Numeric target port. DNS and ICMP do not open this service port.
+    /// Numeric target port. DNS/ICMP do not open this service port; traceroute
+    /// uses fixed UDP ports starting at 33434 only when UDP is selected.
     pub fn port(&self) -> u16 {
         self.port
     }
@@ -171,7 +288,7 @@ impl NetworkDiagnosticRequest {
     pub fn https(&self) -> bool {
         self.https
     }
-    /// Request path; empty for DNS/TLS/ICMP.
+    /// Request path; empty for DNS/TLS/ICMP/traceroute.
     pub fn path(&self) -> &str {
         &self.path
     }
@@ -179,7 +296,9 @@ impl NetworkDiagnosticRequest {
     pub fn endpoint_label(&self) -> String {
         if matches!(
             self.kind,
-            NetworkDiagnosticKind::Dns | NetworkDiagnosticKind::Icmp
+            NetworkDiagnosticKind::Dns
+                | NetworkDiagnosticKind::Icmp
+                | NetworkDiagnosticKind::Traceroute
         ) {
             return self.host.clone();
         }
@@ -243,6 +362,114 @@ fn checked_host(input: &str) -> Result<String, NetworkDiagnosticInputError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn traceroute_rejects_argument_injection_without_echoing_input() {
+        for host in [
+            "",
+            "--help",
+            "-I",
+            "a;id",
+            "$(id)",
+            "`id`",
+            "a\n",
+            "example.test -m 99",
+            "fe80::1%eth0",
+            "[::1]",
+            "127.1",
+            "https://user:secret@example.test/",
+        ] {
+            let error = NetworkDiagnosticRequest::traceroute(
+                host,
+                TracerouteProtocol::Udp,
+                TracerouteFamily::Ipv4,
+                6,
+                1,
+                500,
+            )
+            .err()
+            .unwrap_or_else(|| panic!("unsafe host must be rejected"));
+            assert!(!error.to_string().contains("secret"));
+        }
+    }
+
+    #[test]
+    fn traceroute_limits_include_cumulative_wait_and_literal_family() {
+        for (hops, probes, wait) in [
+            (0, 1, 500),
+            (17, 1, 100),
+            (1, 0, 500),
+            (1, 4, 500),
+            (1, 1, 99),
+            (1, 1, 1001),
+            (16, 3, 1000),
+            (7, 1, 1000),
+        ] {
+            assert_eq!(
+                NetworkDiagnosticRequest::traceroute(
+                    "example.test",
+                    TracerouteProtocol::Udp,
+                    TracerouteFamily::Ipv4,
+                    hops,
+                    probes,
+                    wait,
+                ),
+                Err(NetworkDiagnosticInputError::InvalidTracerouteOptions)
+            );
+        }
+        assert_eq!(
+            NetworkDiagnosticRequest::traceroute(
+                "::1",
+                TracerouteProtocol::Icmp,
+                TracerouteFamily::Ipv4,
+                1,
+                1,
+                100,
+            ),
+            Err(NetworkDiagnosticInputError::InvalidTracerouteOptions)
+        );
+        assert_eq!(
+            NetworkDiagnosticRequest::traceroute(
+                "127.0.0.1",
+                TracerouteProtocol::Icmp,
+                TracerouteFamily::Ipv6,
+                1,
+                1,
+                100,
+            ),
+            Err(NetworkDiagnosticInputError::InvalidTracerouteOptions)
+        );
+    }
+
+    #[test]
+    fn traceroute_serialization_preserves_complete_reviewed_request() {
+        for protocol in [TracerouteProtocol::Udp, TracerouteProtocol::Icmp] {
+            let request = NetworkDiagnosticRequest::traceroute(
+                "2001:db8::1",
+                protocol,
+                TracerouteFamily::Ipv6,
+                16,
+                3,
+                125,
+            )
+            .unwrap_or_else(|error| panic!("bounded IPv6 request: {error}"));
+            let options = request
+                .traceroute_options()
+                .unwrap_or_else(|| panic!("traceroute options"));
+            assert_eq!(
+                (options.max_probes(), options.probe_wait_budget_ms()),
+                (48, 6000)
+            );
+            let value = serde_json::to_value(&request)
+                .unwrap_or_else(|error| panic!("serialize approved request: {error}"));
+            assert_eq!(value["traceroute"]["family"], "ipv6");
+            assert_eq!(value["traceroute"]["max_hops"], 16);
+            assert_eq!(value["traceroute"]["probes_per_hop"], 3);
+            assert_eq!(value["traceroute"]["wait_ms"], 125);
+            assert_eq!(request.endpoint_label(), "2001:db8::1");
+            assert_eq!(request.kind(), NetworkDiagnosticKind::Traceroute);
+        }
+    }
+
     #[test]
     fn icmp_admission_is_host_only_and_never_accepts_utility_options() {
         for host in [

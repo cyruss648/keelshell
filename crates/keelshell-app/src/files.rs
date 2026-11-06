@@ -11,7 +11,8 @@ use gpui_kit::{
 };
 use keelshell_core::{
     DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
-    DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, diff_utf8,
+    DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextLineEnding,
+    Utf8TextDocument, Utf8TextFormat, diff_utf8,
 };
 use keelshell_session::{
     SessionError, SshSession,
@@ -109,10 +110,11 @@ enum Operation {
 enum Outcome {
     QuarantineInspected(TransferQuarantineReview),
     Listed(String, Vec<RemoteEntry>),
-    Read(RegularFileSnapshot),
+    Read(RegularFileSnapshot, Utf8TextDocument),
     Saved {
         snapshot: RegularFileSnapshot,
         backup: String,
+        document: Utf8TextDocument,
     },
     MergeLoaded {
         snapshot: RegularFileSnapshot,
@@ -175,6 +177,10 @@ pub struct FilesPanel {
     selected: Option<RemoteEntry>,
     editing: Option<(String, Vec<u8>)>,
     editor_snapshot: Option<RegularFileSnapshot>,
+    editor_format: Option<Utf8TextFormat>,
+    // Once an incompatible remote format was observed, only an explicit
+    // successful reopen may establish a new save/merge baseline.
+    editor_reload_required: bool,
     merge_review: Option<merge::MergeReview>,
     patch: Entity<TextareaState>,
     patch_visible: bool,
@@ -331,6 +337,8 @@ enum FileFailure {
     CancellationUnconfirmed,
     OutcomeUncertain(String),
     InvalidEditor,
+    TextDocument(keelshell_core::TextDocumentError),
+    EditorFormatChanged,
     TextEdit(keelshell_core::TextEditError),
     SavedReadback(String),
     Symlink,
@@ -392,6 +400,8 @@ impl std::fmt::Display for FileFailure {
                 f.write_str("File operation cancelled before SFTP initialization")
             }
             Self::InvalidEditor => f.write_str("Editor accepts UTF-8 files up to 1 MiB"),
+            Self::TextDocument(error) => write!(f, "{error}"),
+            Self::EditorFormatChanged => f.write_str("Remote BOM or line-ending format changed; read and review again"),
             Self::TextEdit(error) => write!(f,"{error}"),
             Self::SavedReadback(error) => write!(f,"publication acknowledged but content readback failed: {error}"),
             Self::Symlink => f.write_str("Permission changes on symbolic links are disabled"),
@@ -460,6 +470,15 @@ impl FileFailure {
             Self::InvalidEditor => Message::new(
                 "编辑器仅支持不超过 1 MiB 的 UTF-8 文件",
                 "The editor accepts UTF-8 files up to 1 MiB",
+            ),
+            Self::TextDocument(error) => Message::detail(
+                "UTF-8 格式准备未通过，保留原文件和草稿",
+                "UTF-8 format preparation failed; original and draft retained",
+                error,
+            ),
+            Self::EditorFormatChanged => Message::new(
+                "远端 BOM 或换行格式已变化；当前草稿保留。请保留所需草稿，再显式重新打开文件并审核；未写入。",
+                "Remote BOM or line-ending format changed; draft retained. Preserve the draft you need, then explicitly reopen and review the file; no write occurred.",
             ),
             Self::TextEdit(error) => Message::detail(
                 "文本审核未完成，草稿已保留",
@@ -639,6 +658,8 @@ impl FilesPanel {
             selected: None,
             editing: None,
             editor_snapshot: None,
+            editor_format: None,
+            editor_reload_required: false,
             merge_review: None,
             patch: cx.new(|cx| TextareaState::new(window, cx)),
             patch_visible: false,
@@ -702,8 +723,22 @@ impl FilesPanel {
         self.editing
             .as_ref()
             .map_or(!content.is_empty(), |(_, original)| {
-                content.as_bytes() != original
+                !self.draft_matches_bytes(&content, original)
             })
+    }
+
+    fn draft_matches_bytes(&self, draft: &str, raw: &[u8]) -> bool {
+        self.editor_format.map_or_else(
+            || draft.as_bytes() == raw,
+            |format| format.matches_bytes(draft, raw),
+        )
+    }
+
+    fn prepare_editor_bytes(&self, draft: &str) -> Result<Vec<u8>, FileFailure> {
+        self.editor_format
+            .ok_or(FileFailure::InvalidEditor)?
+            .prepare_save(draft)
+            .map_err(FileFailure::TextDocument)
     }
 
     /// Immutable in-memory version for explicit archive-discard consent.
@@ -721,6 +756,10 @@ impl FilesPanel {
         cx: &mut Context<Self>,
     ) {
         self.editing = Some((path.to_owned(), original.as_bytes().to_vec()));
+        self.editor_format = Utf8TextDocument::decode(original.as_bytes())
+            .ok()
+            .map(|document| document.format());
+        self.editor_reload_required = false;
         self.editor.update(cx, |editor, cx| {
             editor.set_highlighter(editor_language::language_for_path(path), cx);
             editor.set_value(draft.to_owned(), window, cx)
@@ -1010,7 +1049,7 @@ impl FilesPanel {
                         view.selected = None;
                         view.remote_selection.clear();
                     }
-                    Ok(Outcome::Read(snapshot)) => {
+                    Ok(Outcome::Read(snapshot, document)) => {
                         let path = snapshot.entry.path.clone();
                         let content = snapshot.content.clone();
                         if view.editor.read(cx).value().as_ref() == editor_before.as_str() {
@@ -1020,13 +1059,16 @@ impl FilesPanel {
                                     cx,
                                 );
                                 input.set_value(
-                                    String::from_utf8_lossy(&content).into_owned(),
+                                    document.body().to_owned(),
                                     window,
                                     cx,
                                 )
                             });
-                            view.status = Message::new(format!("正在编辑 {path} · {} 字节",content.len()),format!("Editing {path} · {} bytes",content.len()));
+                            let description = text_format_description(document.format());
+                            view.status = Message::new(format!("正在编辑 {path} · {} 字节 · {}",content.len(), description.0),format!("Editing {path} · {} bytes · {}",content.len(), description.1));
                             view.editing = Some((path,content));
+                            view.editor_format = Some(document.format());
+                            view.editor_reload_required = false;
                             view.editor_snapshot = Some(snapshot);
                             view.merge_review = None;
                             view.diff_preview = None;
@@ -1034,12 +1076,24 @@ impl FilesPanel {
                             view.status = Message::new("加载期间检测到新编辑，已保留当前内容；请在准备好后重新打开文件。", "Your edits changed while loading; preserved the editor. Open the file again when ready.");
                         }
                     }
-                    Ok(Outcome::Saved { snapshot, backup }) => {
+                    Ok(Outcome::Saved { snapshot, backup, document }) => {
                         let path = snapshot.entry.path.clone();
                         let content = snapshot.content.clone();
                         if view.editing.as_ref().is_some_and(|(current,_)| current == &path) {
-                            let dirty = view.editor.read(cx).value().as_bytes() != content;
+                            let current = view.editor.read(cx).value();
+                            let dirty = !view.draft_matches_bytes(&current, &content);
+                            let previous_format = view.editor_format.unwrap_or(document.format());
+                            if !dirty && current.as_ref() != document.body() {
+                                view.editor.update(cx, |input, cx| input.set_value(document.body().to_owned(), window, cx));
+                            }
                             view.editing = Some((path,content));
+                            // Retained newer text still owns its original envelope.
+                            // Only a canonical saved body can adopt the observed BOM.
+                            view.editor_format = Some(if dirty {
+                                previous_format
+                            } else {
+                                document.format().retain_insertion_policy(previous_format)
+                            });
                             view.editor_snapshot = Some(snapshot);
                             view.merge_review = None;
                             view.diff_preview = None;
@@ -1119,6 +1173,11 @@ impl FilesPanel {
                             format!("Content verification complete: {operation_count} reviewed operations; preview only, nothing was written"),
                         );
                     }
+                    Err(FileFailure::EditorFormatChanged) => {
+                        view.editor_reload_required = true;
+                        view.merge_review = None;
+                        view.status = FileFailure::EditorFormatChanged.message();
+                    }
                     Err(error) => view.status = if review_only {
                         Message::detail("审核未完成，尚未开始传输", "Review incomplete; transfer not started", error)
                     } else { error.message() },
@@ -1148,10 +1207,9 @@ impl FilesPanel {
         self.remote_child(&name)
     }
     fn request_read(&mut self, entry: RemoteEntry, window: &mut Window, cx: &mut Context<Self>) {
-        let dirty = self
-            .editing
-            .as_ref()
-            .is_some_and(|(_, original)| self.editor.read(cx).value().as_bytes() != original);
+        let dirty = self.editing.as_ref().is_some_and(|(_, original)| {
+            !self.draft_matches_bytes(&self.editor.read(cx).value(), original)
+        });
         if dirty {
             self.confirm(
                 Message::new(
@@ -1202,7 +1260,7 @@ impl FilesPanel {
             return;
         }
         if let Some((_, Operation::Save { content, .. })) = &self.pending
-            && self.editor.read(cx).value().as_bytes() != content
+            && !self.draft_matches_bytes(&self.editor.read(cx).value(), content)
         {
             self.pending = None;
             self.confirmation_expanded = false;
@@ -1268,11 +1326,19 @@ impl FilesPanel {
             return;
         };
         let draft = self.editor.read(cx).value();
+        let draft = match self.prepare_editor_bytes(&draft) {
+            Ok(bytes) => bytes,
+            Err(error) => {
+                self.status = error.message();
+                cx.notify();
+                return;
+            }
+        };
         self.diff_preview_scroll.set_offset(point(px(0.), px(0.)));
-        match diff_utf8(original, draft.as_bytes()) {
+        match diff_utf8(original, &draft) {
             Ok(diff) => {
                 match diff.render(&format!("{path} (remote)"), &format!("{path} (draft)")) {
-                    Ok(rendered) if rendered.is_empty() && original == draft.as_bytes() => {
+                    Ok(rendered) if rendered.is_empty() && original == &draft => {
                         self.diff_preview = Some("（当前草稿与读取的基线字节相同）\n(The draft is byte-identical to the captured baseline.)".into());
                         self.status = Message::new(
                             "当前草稿与读取的基线字节相同",
@@ -1586,6 +1652,26 @@ impl Operation {
         };
         Some(status)
     }
+}
+
+fn text_format_description(format: Utf8TextFormat) -> (String, String) {
+    let (zh, en) = match format.line_ending() {
+        TextLineEnding::None => ("无换行；新增使用 LF", "no line breaks; new breaks use LF"),
+        TextLineEnding::Lf => ("LF", "LF"),
+        TextLineEnding::CrLf => ("CRLF", "CRLF"),
+        TextLineEnding::Cr => ("孤立 CR（原样保持）", "standalone CR (verbatim)"),
+        TextLineEnding::Mixed => ("混合换行（原样保持）", "mixed line endings (verbatim)"),
+    };
+    (
+        format!(
+            "UTF-8；BOM：{}；换行：{zh}",
+            if format.has_bom() { "有" } else { "无" }
+        ),
+        format!(
+            "UTF-8; BOM: {}; line endings: {en}",
+            if format.has_bom() { "yes" } else { "no" }
+        ),
+    )
 }
 
 fn size_label(size: Option<u64>) -> String {

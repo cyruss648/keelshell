@@ -16,6 +16,8 @@ use tokio::{net::TcpListener, sync::Semaphore, task::JoinHandle};
 
 #[path = "protocol_selection.rs"]
 mod selection;
+#[path = "protocol_traceroute.rs"]
+mod traceroute;
 
 struct Control {
     requests: AtomicUsize,
@@ -24,6 +26,8 @@ struct Control {
     shells_ready: AtomicUsize,
     icmp_received: AtomicUsize,
     exit_mode: AtomicUsize,
+    traceroute_mode: AtomicUsize,
+    reviewed_requests: std::sync::Mutex<Vec<serde_json::Value>>,
 }
 struct Peer(Arc<Control>);
 impl server::Handler for Peer {
@@ -120,6 +124,11 @@ impl server::Handler for Peer {
                 .and_then(|bytes| serde_json::from_slice(&bytes).ok())
                 .ok_or(russh::Error::Disconnect)?;
             let kind = input["kind"].as_str().unwrap_or("");
+            self.0
+                .reviewed_requests
+                .lock()
+                .map_err(|_| russh::Error::Disconnect)?
+                .push(input.clone());
             let encrypted = kind == "tls" || (kind == "http" && input["https"] == true);
             let tls = if encrypted {
                 serde_json::json!({"protocol":"TLSv1.3","cipher":"TLS_AES_256_GCM_SHA384","subject":"commonName=fixture.test","issuer":"commonName=owned fixture CA","not_before":"Oct  6 00:00:00 2026 GMT","not_after":"Oct  7 00:00:00 2026 GMT","names":["fixture.test","127.0.0.1"],"sha256":"ab".repeat(32)})
@@ -142,6 +151,8 @@ impl server::Handler for Peer {
             };
             let body = if self.0.unknown.load(Ordering::Acquire) {
                 serde_json::json!({"version":1,"status":"cleanup_unknown","addresses":[],"peer":null,"tls":null,"http":null,"limited":false,"timing":{"resolve_ms":null,"connect_ms":null,"tls_ms":null,"headers_ms":null,"total_ms":8000}})
+            } else if kind == "traceroute" {
+                traceroute::response(&input, self.0.traceroute_mode.load(Ordering::Acquire))
             } else {
                 serde_json::json!({"version":1,"status":if kind!="icmp"||received==4{"success"}else if received==0{"icmp_no_reply"}else{"icmp_partial"},"addresses":[{"family":"IPv4","address":"127.0.0.1"}],"peer":if kind=="dns"||kind=="icmp"{serde_json::Value::Null}else{serde_json::json!("127.0.0.1")},"tls":tls,"http":http,"icmp":icmp,"limited":false,"timing":{"resolve_ms":1,"connect_ms":if kind=="dns"||kind=="icmp"{None}else{Some(1)},"tls_ms":if encrypted{Some(1)}else{None},"headers_ms":if kind=="http"{Some(1)}else{None},"total_ms":4}})
             };
@@ -207,6 +218,8 @@ impl Harness {
             shells_ready: AtomicUsize::new(0),
             icmp_received: AtomicUsize::new(4),
             exit_mode: AtomicUsize::new(0),
+            traceroute_mode: AtomicUsize::new(0),
+            reviewed_requests: std::sync::Mutex::new(Vec::new()),
         });
         let peer = control.clone();
         let server = runtime.spawn(async move {
