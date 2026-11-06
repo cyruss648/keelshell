@@ -21,6 +21,9 @@ use crate::i18n::{Message, t};
 mod batch;
 #[cfg(test)]
 mod batch_tests;
+mod categories;
+#[cfg(test)]
+mod category_tests;
 #[cfg(test)]
 mod tests;
 
@@ -38,6 +41,8 @@ pub(crate) struct MutationReview {
     pub(crate) expected: Vec<SavedKnowledgeEntry>,
     pub(crate) replacement: Option<SavedKnowledgeEntry>,
     batch_revision: Option<Uuid>,
+    category_revision: Option<Uuid>,
+    draft_category: SharedString,
     draft_title: SharedString,
     draft_summary: SharedString,
 }
@@ -58,6 +63,11 @@ pub(crate) struct KnowledgeLibrary {
     title: Entity<InputState>,
     summary: Entity<TextareaState>,
     selected: Option<SavedKnowledgeEntry>,
+    category_input: Entity<InputState>,
+    category_target: Option<SavedKnowledgeEntry>,
+    category_revision: Uuid,
+    category_filter: categories::CategoryFilter,
+    category_scroll: ScrollHandle,
     // Management selection never grants Ask attachment or edit authority.
     management: Vec<SavedKnowledgeEntry>,
     management_revision: Uuid,
@@ -89,6 +99,7 @@ impl KnowledgeLibrary {
         let query = cx.new(|cx| InputState::new(window, cx));
         let title = cx.new(|cx| InputState::new(window, cx));
         let summary = cx.new(|cx| TextareaState::new(window, cx).rows(8));
+        let category_input = cx.new(|cx| InputState::new(window, cx));
         let subscriptions = vec![
             cx.subscribe(&query, |_, _, _: &InputEvent, cx| cx.notify()),
             cx.subscribe(&title, |view, _, event: &InputEvent, cx| {
@@ -101,6 +112,11 @@ impl KnowledgeLibrary {
                     view.invalidate_review(cx);
                 }
             }),
+            cx.subscribe(&category_input, |view, _, event: &InputEvent, cx| {
+                if matches!(event, InputEvent::Change) {
+                    view.category_draft_changed(cx);
+                }
+            }),
         ];
         Self {
             entries: Vec::new(),
@@ -110,6 +126,11 @@ impl KnowledgeLibrary {
             title,
             summary,
             selected: None,
+            category_input,
+            category_target: None,
+            category_revision: Uuid::new_v4(),
+            category_filter: categories::CategoryFilter::All,
+            category_scroll: ScrollHandle::default(),
             management: Vec::new(),
             management_revision: Uuid::new_v4(),
             review: None,
@@ -131,6 +152,7 @@ impl KnowledgeLibrary {
         }
         self.snapshot = state.snapshot;
         self.entries.clone_from(&state.knowledge_entries);
+        self.retain_category_filter();
         self.retain_management();
         if self.context.retain_current(&self.entries) {
             self.context_changed(cx);
@@ -143,6 +165,14 @@ impl KnowledgeLibrary {
                 .is_some_and(|selected| !self.entries.contains(selected))
             {
                 self.selected = None;
+            }
+            if self
+                .category_target
+                .as_ref()
+                .is_some_and(|entry| !self.entries.contains(entry))
+            {
+                self.category_target = None;
+                self.category_revision = Uuid::new_v4();
             }
             self.message = Message::new(
                 "本地知识已刷新；修改需要重新审核。",
@@ -200,6 +230,10 @@ impl KnowledgeLibrary {
             && (self.phase != Phase::Ready
                 || self.selected.as_ref().is_some_and(|entry| {
                     self.context.entries().contains(entry) && !self.saved_draft_matches(entry, cx)
+                })
+                || self.category_target.as_ref().is_some_and(|entry| {
+                    self.context.entries().contains(entry)
+                        && !self.category_draft_matches(entry, cx)
                 }))
         {
             return Err(KnowledgeContextError::LibraryUnavailable);
@@ -242,6 +276,11 @@ impl KnowledgeLibrary {
         // An editor draft is never substituted for the saved version behind the
         // user's back. Save it first or return to the list to select saved text.
         if self.selected.as_ref() == Some(expected) && !self.saved_draft_matches(expected, cx) {
+            return;
+        }
+        if self.category_target.as_ref() == Some(expected)
+            && !self.category_draft_matches(expected, cx)
+        {
             return;
         }
         match self.context.select(expected, &self.entries) {
@@ -299,6 +338,8 @@ impl KnowledgeLibrary {
             return;
         }
         self.review = None;
+        self.category_target = None;
+        self.category_revision = Uuid::new_v4();
         self.scroll.set_offset(point(px(0.), px(0.)));
         self.selected = Some(expected.clone());
         self.show_source_details = false;
@@ -317,6 +358,7 @@ impl KnowledgeLibrary {
 
     fn prepare(&mut self, expected: &SavedKnowledgeEntry, delete: bool, cx: &mut Context<Self>) {
         if self.phase != Phase::Ready
+            || self.category_target.is_some()
             || self.selected.as_ref() != Some(expected)
             || !self.entries.contains(expected)
         {
@@ -345,6 +387,8 @@ impl KnowledgeLibrary {
             expected: vec![expected.clone()],
             replacement,
             batch_revision: None,
+            category_revision: None,
+            draft_category: SharedString::default(),
             draft_title: self.title.read(cx).value(),
             draft_summary: self.summary.read(cx).value(),
         });
@@ -378,6 +422,10 @@ impl KnowledgeLibrary {
     }
 
     fn draft_matches(&self, review: &MutationReview, cx: &App) -> bool {
+        if let Some(revision) = review.category_revision {
+            return self.category_revision == revision
+                && self.category_input.read(cx).value() == review.draft_category;
+        }
         review.batch_revision.is_some()
             || (self.title.read(cx).value() == review.draft_title
                 && self.summary.read(cx).value() == review.draft_summary)
@@ -416,6 +464,8 @@ impl KnowledgeLibrary {
             .update(cx, |input, cx| input.set_disabled(disabled, cx));
         self.summary
             .update(cx, |input, cx| input.set_disabled(disabled, cx));
+        self.category_input
+            .update(cx, |input, cx| input.set_disabled(disabled, cx));
     }
 
     pub(crate) fn begin_save(&mut self, id: Uuid, cx: &mut Context<Self>) -> bool {
@@ -442,6 +492,8 @@ impl KnowledgeLibrary {
         self.phase = Phase::Ready;
         self.review = None;
         self.selected = None;
+        self.category_target = None;
+        self.category_revision = Uuid::new_v4();
         self.disable_editor(false, cx);
         self.message = Message::new("本地知识修改已保存。", "Local knowledge changes saved.");
         cx.notify();
@@ -520,10 +572,13 @@ impl KnowledgeLibrary {
         }
         self.snapshot = state.snapshot;
         self.entries.clone_from(&state.knowledge_entries);
+        self.retain_category_filter();
         self.context.clear();
         self.context_changed(cx);
         self.phase = Phase::Ready;
         self.selected = None;
+        self.category_target = None;
+        self.category_revision = Uuid::new_v4();
         self.review = None;
         self.management.clear();
         self.management_revision = Uuid::new_v4();
@@ -564,14 +619,15 @@ impl KnowledgeLibrary {
             self.entries
                 .iter()
                 .filter(|entry| {
-                    query.is_empty()
-                        || [
-                            entry.entry().title(),
-                            entry.entry().summary(),
-                            entry.entry().source().label(),
-                        ]
-                        .iter()
-                        .any(|text| text.to_lowercase().contains(&query))
+                    self.category_filter.matches(entry)
+                        && (query.is_empty()
+                            || [
+                                entry.entry().title(),
+                                entry.entry().summary(),
+                                entry.entry().source().label(),
+                            ]
+                            .iter()
+                            .any(|text| text.to_lowercase().contains(&query)))
                 })
                 .cloned()
                 .collect(),
@@ -640,7 +696,7 @@ impl KnowledgeLibrary {
         source.into_any_element()
     }
 
-    fn entry_text(entry: &SavedKnowledgeEntry) -> AnyElement {
+    fn entry_text(entry: &SavedKnowledgeEntry, cx: &App) -> AnyElement {
         div()
             .flex()
             .flex_col()
@@ -651,6 +707,7 @@ impl KnowledgeLibrary {
                     .child(entry.entry().title().to_owned()),
             )
             .child(div().child(entry.entry().summary().to_owned()))
+            .child(div().text_xs().child(Self::category_label(entry, cx)))
             .into_any_element()
     }
 }
@@ -667,6 +724,14 @@ impl Render for KnowledgeLibrary {
             let (review_body, review_footer) = self.batch_review_view(review, ready, cx);
             body = review_body;
             footer = review_footer;
+        } else if let Some(review) = self
+            .review
+            .as_ref()
+            .filter(|review| review.category_revision.is_some())
+        {
+            let (review_body, review_footer) = self.category_review_view(review, ready, cx);
+            body = review_body;
+            footer = review_footer;
         } else if let Some(review) = self.review.as_ref() {
             let id = review.id;
             let Some(expected) = review.expected.first() else {
@@ -679,7 +744,7 @@ impl Render for KnowledgeLibrary {
                     "当前保存的内容",
                     "Currently saved content",
                 )))
-                .child(Self::entry_text(expected));
+                .child(Self::entry_text(expected, cx));
             if let Some(replacement) = &review.replacement {
                 body = body
                     .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
@@ -687,7 +752,7 @@ impl Render for KnowledgeLibrary {
                         "确认后保存的内容",
                         "Content after confirmation",
                     )))
-                    .child(Self::entry_text(replacement));
+                    .child(Self::entry_text(replacement, cx));
             } else {
                 body = body.child(div().text_color(rgb(visual.danger)).child(t(
                     cx,
@@ -714,10 +779,16 @@ impl Render for KnowledgeLibrary {
                         .label(t(cx, "返回编辑", "Back to editing"))
                         .on_click(cx.listener(move |view, _, _, cx| view.cancel_review(id, cx))),
                 );
+        } else if let Some(target) = self.category_target.clone() {
+            let (category_body, category_footer) = self.category_editor_view(&target, ready, cx);
+            body = category_body;
+            footer = category_footer;
         } else if let Some(selected) = self.selected.clone() {
             let delete_target = selected.clone();
+            let category_target = selected.clone();
             body = body
                 .child(self.source_view(&selected, cx))
+                .child(self.category_button(&category_target, ready, cx))
                 .child(div().child(t(cx, "标题", "Title")))
                 .child(
                     Input::new(&self.title)
@@ -806,6 +877,7 @@ impl Render for KnowledgeLibrary {
                         let title: String = entry.entry().title().chars().take(48).collect();
                         let context_button = self.context_button(&entry, ready, cx);
                         let management_checkbox = self.management_checkbox(&entry, ready, cx);
+                        let category_button = self.category_button(&entry, ready, cx);
                         body = body.child(
                             div()
                                 .min_w_0()
@@ -833,7 +905,15 @@ impl Render for KnowledgeLibrary {
                                                 view.select(&entry, window, cx)
                                             })),
                                         )
-                                        .child(context_button),
+                                        .child(
+                                            div()
+                                                .min_w_0()
+                                                .flex()
+                                                .flex_wrap()
+                                                .gap_1()
+                                                .child(category_button)
+                                                .child(context_button),
+                                        ),
                                 ),
                         );
                     }
@@ -914,6 +994,12 @@ impl Render for KnowledgeLibrary {
                 self.review
                     .is_none()
                     .then(|| self.management_selection_view(ready, cx)),
+            )
+            .children(
+                (self.review.is_none()
+                    && self.selected.is_none()
+                    && self.category_target.is_none())
+                .then(|| self.category_filter_view(cx)),
             )
             .child(
                 div()

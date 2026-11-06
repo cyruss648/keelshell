@@ -209,3 +209,134 @@ fn knowledge_batch_delete_keeps_sensitive_content_validation_at_deserialization(
     assert!(serde_json::from_value::<SavedKnowledgeEntry>(wire).is_err());
     Ok(())
 }
+
+#[test]
+fn knowledge_category_old_state_defaults_to_uncategorized_and_content_edits_preserve_category()
+-> TestResult {
+    let original = entry(0)?;
+    let mut legacy = serde_json::to_value(&original)?;
+    legacy
+        .as_object_mut()
+        .ok_or("record object")?
+        .remove("category");
+    let loaded: SavedKnowledgeEntry = serde_json::from_value(legacy)?;
+    assert_eq!(loaded, original);
+    assert_eq!(loaded.category(), None);
+    let categorized = loaded.with_reviewed_category(Some("  运维 Ops  "))?;
+    assert_eq!(categorized.category(), Some("运维 Ops"));
+    let edited = categorized.with_reviewed_content("Reviewed title", "Reviewed text")?;
+    assert_eq!(edited.category(), categorized.category());
+    let mut expected = serde_json::to_value(&original)?;
+    expected["category"] = json!("运维 Ops");
+    assert_eq!(serde_json::to_value(&categorized)?, expected);
+    assert_eq!(
+        serde_json::from_value::<SavedKnowledgeEntry>(expected)?,
+        categorized
+    );
+    assert_eq!(categorized.with_reviewed_category(None)?, original);
+    assert_eq!(
+        categorized.with_reviewed_category(Some(" \u{3000} "))?,
+        original
+    );
+    Ok(())
+}
+
+#[test]
+fn knowledge_category_bounds_use_raw_utf8_bytes_before_trimming() -> TestResult {
+    let original = entry(0)?;
+    let full = format!("{}ab", "中".repeat(42));
+    assert_eq!(full.len(), SavedKnowledgeEntry::MAX_CATEGORY_BYTES);
+    assert_eq!(
+        original.with_reviewed_category(Some(&full))?.category(),
+        Some(full.as_str())
+    );
+    for value in ["中".repeat(43), " ".repeat(129), format!(" {full}")] {
+        assert_eq!(
+            original.with_reviewed_category(Some(&value)),
+            Err(crate::KnowledgeError::CategoryTooLarge),
+        );
+        let mut wire = serde_json::to_value(&original)?;
+        wire["category"] = json!(value);
+        assert!(serde_json::from_value::<SavedKnowledgeEntry>(wire).is_err());
+    }
+    Ok(())
+}
+
+#[test]
+fn knowledge_category_controls_sensitive_markers_and_diagnostics_never_echo_labels() -> TestResult {
+    let original = entry(0)?;
+    for control in ['\0', '\n', '\r', '\t', '\u{7f}', '\u{85}'] {
+        let value = format!("Personal fixture{control}label");
+        let error = original
+            .with_reviewed_category(Some(&value))
+            .err()
+            .ok_or("category rejected")?;
+        assert_eq!(error, crate::KnowledgeError::InvalidCategory);
+        assert!(!error.to_string().contains("Personal fixture"));
+        let mut wire = serde_json::to_value(&original)?;
+        wire["category"] = json!(value);
+        let error = serde_json::from_value::<SavedKnowledgeEntry>(wire)
+            .err()
+            .ok_or("wire rejected")?;
+        assert!(!error.to_string().contains("Personal fixture"));
+    }
+    assert_eq!(
+        original.with_reviewed_category(Some("password = synthetic-private-data")),
+        Err(crate::KnowledgeError::SensitiveGeneratedContent),
+    );
+    let categorized = original.with_reviewed_category(Some("Personal fixture label"))?;
+    assert!(!format!("{categorized:?}").contains("Personal fixture label"));
+    Ok(())
+}
+
+#[test]
+fn knowledge_category_set_change_clear_persist_once_preserving_facts_and_order() -> TestResult {
+    let directory = tempfile::tempdir()?;
+    let store = StateStore::new(directory.path().join("state.json"));
+    let mut current = store.save(&state(3)?)?;
+    let original = current.clone();
+    for category in [Some("Ops"), Some("ops"), None] {
+        let before = std::fs::read(store.path())?;
+        let backups = store.config_backups()?.len();
+        let expected = current.knowledge_entries[1].clone();
+        let replacement = expected.with_reviewed_category(category)?;
+        current.replace_knowledge_entry(&expected, replacement.clone())?;
+        assert_eq!(std::fs::read(store.path())?, before);
+        current = store.save(&current)?;
+        assert_eq!(store.config_backups()?.len(), backups + 1);
+        assert_eq!(store.load()?, current);
+        assert_eq!(current.knowledge_entries[0], original.knowledge_entries[0]);
+        assert_eq!(current.knowledge_entries[2], original.knowledge_entries[2]);
+        assert_eq!(current.knowledge_entries[1].category(), category);
+        assert_eq!(
+            current.knowledge_entries[1].with_reviewed_category(None)?,
+            original.knowledge_entries[1],
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn knowledge_category_change_revokes_old_edit_single_delete_and_batch_delete_atomically()
+-> TestResult {
+    let mut current = state(3)?;
+    let old = current.knowledge_entries[1].clone();
+    current.replace_knowledge_entry(&old, old.with_reviewed_category(Some("Ops"))?)?;
+    let original = current.clone();
+    assert!(matches!(
+        current.replace_knowledge_entry(&old, old.with_reviewed_content("New", "Text")?),
+        Err(Error::Conflict),
+    ));
+    unchanged(&current, &original);
+    assert!(matches!(
+        current.remove_knowledge_entry(&old),
+        Err(Error::Conflict)
+    ));
+    unchanged(&current, &original);
+    assert!(matches!(
+        current.remove_knowledge_entries(&[current.knowledge_entries[0].clone(), old]),
+        Err(Error::Conflict),
+    ));
+    unchanged(&current, &original);
+    Ok(())
+}

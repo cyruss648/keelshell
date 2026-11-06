@@ -1,431 +1,122 @@
 # KeelShell 当前交接 — 2026-11-06
 
-本入口供新的 AI 会话接续，时间使用 Asia/Shanghai。先读 [AGENTS.md](../AGENTS.md)，
-再按下面的切片记录核实源码、门禁、原生、CI 和交付状态。旧的详细交接已移到
-[组合前历史快照](history/2026-11-05-handoff-before-workspace-integration.md)，
-其中“当前”、暂停和清理指令只代表历史时点，不构成新的操作授权。
+时间使用 Asia/Shanghai。先读 [AGENTS.md](../AGENTS.md)，再读本页与[路线图](ROADMAP.md)。
+旧的完整轨迹已保留在[历史交接](history/2026-11-06-handoff-before-capabilities-categories.md)；
+历史段落的“当前”“待审”和暂停指令不覆盖本页。
 
-## 最新接续状态
+## 最新交付
 
-诊断与画布代码已提交并普通快进推送main：
-`5b7772ca45b0562af6b623792322087842758654`。
-本地main、origin/main和远端读回一致，工作副本当时干净；
-525工程输入、15份正式文档及41assets共581个提交blob匹配验收冻结。
-full-gate-r5通过2242ordinary/23ignored、14rustdoc、Python131run/1skip；
-combined-r2批准源码/门禁/包归属，final-docs-r1随后批准当时15份正式文档；
-两者开放P0/P1/P2/P3均为零，后续状态增量和新设计稿另审。
-交付回执在`work/pane-surface-polish-20261106/delivery-r1.json`及`committed-inputs-r1.json`。
-精确Quality42088301874/1已三平台success：
-ordinary为macOS2242/23ignored、Linux2237/24ignored、Windows2176/18ignored，
-各14rustdoc、131项候选通过。Linux/macOS各11项OpenSSH及附件API摘要匹配；
-Windows按工作流跳过OpenSSH，不代签Windows桌面。
-唯一观察器exec74994已由父实际wait、exit0/reaped，91个子进程全部回收；
-其中一次GET EOF退出1的原件保留。19:16:57 UTC收集结束，1395.624/5400秒，
-原期限未延长，新的非作者closeout限定批准、开放发现零。
-原件见`current-ci/exec-readback-r1.json`和`closeout-verification-r1.json`，
-只签5b7772c，不代签本轮后续源码。
+资源趋势与知识批量管理已提交并普通快进推送 main：
+`850b77b77b576f3bd2527883ffef9d97a666afd0`，父提交为 `5b7772c`。
+本地 main、origin/main 与远端 SHA 读回一致，两工作副本交付当时干净。
+530 项工程输入与完整门禁、构建及开发包保持一致；546 个工程/正式文档提交 blob 已核对。
+来源代码、组合、限定原生与正式文档均有非作者批准，分别对应
+`combined-r1`、`native-r4` 和 `docs-r5`，不可相互代签。
 
-下一轮并行功能已开始，均从56d5440建树并要求先快进到上述新main：
-`feature/host-resource-trends-20261106`负责CPU/内存五分钟有界历史，
-`feature/knowledge-batch-delete-20261106`负责独立多选及审核式整批删除。
-整合仍复用本工作树，当前分支为`feature/resource-knowledge-integration-20261106`；
-已合入main的本地`feature/pane-surface-polish-20261106`分支已删除。
-父集中管理共同文档和最终组合。趋势作者已完成模型6/monitor10及严格Clippy，
-释放槽；三路径按摘要导入父树。非作者无P0/P1/P2，暂停状态文案P3
-已由父最小修订，真实SSH ABA窄回归1passed，限定复核已关闭P3。
-知识作者最终r2七路径已导入，70项不同专项通过、含全部25项新增测试；
-严格app/core Clippy与fmt通过，六次首次失败原件及全部实际wait回执保留。
-父另把审核元数据拆为独立标签行，不改删除或选择规则；
-新非作者Laplace已批准B来源及该增量，开放P0/P1/P2/P3=0。
-530输入组合build及打包exit0/reaped，新包14cb801e…；
-full-gate-r1/exec55268已实际wait、exit0/reaped：
-2276ordinary/23ignored、app1002/2ignored已含于ordinary、14rustdoc、
-Python131run/1skip及全部工程检查通过，530输入前后保持。
-非作者combined-r1已批准组合源码装配、完整门禁及精确包归属，
-开放P0/P1/P2/P3=0。新包一次原生运行已完成，native-r4非作者已批准限定A/B证据，见下。
-设计入口为[资源趋势](product/HOST_RESOURCE_TRENDS.md)和
-[知识批量管理](product/KNOWLEDGE_BULK_MANAGEMENT.md)，源码工程与原生状态分别标记。
-本轮专项与组合状态见[资源/知识整合记录](testing/records/2026-11-06-resource-knowledge-integration.md)。
+- 完整本机门禁：2276 ordinary passed / 23 ignored；app1002/2 ignored 已含其中；
+  14 rustdoc；Python131 run =130 passed +1 skipped；格式、严格Clippy、依赖策略和附加控制器通过。
+- 最新依赖检查：2026-11-05 21:10:47–21:11:03 UTC，104 条要求/34 个registry包通过，
+  530 输入保持，无manifest/lock变化。所有直接registry要求仍为 `x.y`。
+- macOS开发包程序SHA-256为 `14cb801e3d5eed51bbf52534c5160ea62d4a044719fd063c4eb8b2859488ccad`。
+  单窗 Frost Light/英文17对AX/JPEG、16轮真实Linux资源/ps及合成知识取消/确认获限定批准。
+  取消保持原bytes/文件元数据，确认精确3→1；暂停/显示零增量、恢复断段有审计。
+- 原监督器capture的tuple/list失败保持；本次B使用同run父只读导出并获独立核实。
+  工具P2（NR4-P2-01）与失败枚举summary工具P3（NP-R4-P3-01）仍开放；完整native finish仍OPEN。
+- app与外层exec实际wait、0/reaped；sshd实际-9/reaped且原清理警告保留。
+  自有container/network/private/tools image已清理，共享base/VM/target保留；未安装、签名或发布。
 
-本轮原生r1在PTY属主权限准入失败；r2/r3通过PTY后在监督器的setuid ps
-身份读取处HOLD，原失败和UNKNOWN保持。单次诊断确认EPERM，撤回快速退出假设。
-r4仅将测试监督器PID枚举改为固定64KiB的libproc读取，严格Runner恢复，
-35项离线测试通过并获限定准备批准；非阻断的失败summary P3保留。
-一次run `abc8f78e408046648f4457631f680584`完成17对AX/JPEG：
-Frost Light/英文，16轮真实Linux资源加ps，暂停/显示零增量及恢复断段已观察；
-合成知识取消保持原bytes/元数据，确认精确3→1、保留条目及其他配置保持。
-原capture的tuple/list拒绝保留，B由同run只读适配和独立审计bookends读回，
-不冒称原capture成功。父exec42584已实际wait exit0/reaped，
-应用47967 UI退出0/reaped，684.164221秒内结束，清理2.743772秒，
-30工作加12清理CLI均0/reaped，container/network/private删除、sshd实际-9/reaped；
-原清理警告`kill(12): Operation not permitted`及`no more sessions`保留。
-native-r4为APPROVE_SCOPED_NATIVE_R4_A_B_WITH_PARENT_READONLY_EXPORT；
-没有新增阻断，原capture工具P2和失败枚举summary工具P3保持开放，
-后续只修新工具候选，不修改本次冻结或失败原件。
-源码530输入后置保持，未安装/签名/发布；完整native finish仍OPEN，正式文档增量另审。
-完整记录与未验收边界见[原生联调记录](testing/records/2026-11-06-resource-knowledge-native.md)。
+证据入口：`work/resource-knowledge-20261106/`，包括 `delivery-r1.json`、
+`delivery-exec-readback-r1.json`、`committed-inputs-r1.json`、`independent-review/`。
+正式功能与限定原生记录见[整合记录](testing/records/2026-11-06-resource-knowledge-integration.md)
+和[原生记录](testing/records/2026-11-06-resource-knowledge-native.md)。
+`work/`被Git忽略，本地原件路径不表示已公开发布。
 
-最新dependency-freshness-r2于21:10:47–21:11:03 UTC通过104条要求/34个registry包，
-父exec43998实际wait、exit0/reaped，530输入保持，无manifest/lock变化。
-专用tools image已核实无消费者后非强制删除；四个CLI实际回收，末次exists预期退出1，
-共享base、Podman VM及target保留。A作者树已由管理器归档，
-B作者树因primary checkout保护拒绝归档而保留，未绕过；两份作者证据tar摘要已重新核对。
-清理回执见本轮`native/tools-image-cleanup-r1/`及`source-evidence/author-worktree-cleanup-r1.json`。
+## 精确提交 CI
 
-真实CLI准备r2的两项P2已获限定批准；父一次执行在容器准入停止，
-原始EffectiveCaps/BoundingCaps为要求的三项，但HostConfig归一化形状与工具假设不符。
-未复制材料/启动服务/SSH/发Echo，exec19849退出1/reaped，2.467秒内
-container/network/private精确清理通过。原件已复制到本轮`real-icmp/runtime-r2/`。
-r3只修该测试工具的权限元数据判定，精确三项能力及原300秒总TTL保持；
-新的非作者准备批准后，父一次exec92077已实际wait、exit0/reaped，
-run9c480d64ad4547e99f5c683b59d61572为PASS_REAL_SSH_LOOPBACK_PROBE_ONLY。
-127.0.0.1及::1各四次工具尝试/四回复，28CLI全部退出0/reaped；
-11.065秒内完成，cleanup3.063秒、sshd实际wait/reap、container/network/private均删除。
-103原件已复制到本轮`real-icmp/runtime-r3/`，五项生产输入保持；
-实际结果非作者限定批准、开放P0/P1/P2/P3=0；
-sshd清理的实际wait结果-9独立保留，不代签Rust传输/解析、审核UI或native。
-tools image转由下一轮原生监控夹具准备消费，不处理共享base。
+`850b77b` 的 Quality `42129830892 / attempt 1` 已三平台success。
+ordinary分别为macOS2276/23 ignored、Linux2271/24 ignored、Windows2210/18 ignored；
+各14 rustdoc、165项候选通过。Linux/macOS各11项OpenSSH及附件API摘要匹配；
+新的非作者closeout已限定批准，开放发现零；Windows按工作流跳过OpenSSH。
+唯一前台exec38847已由父实际wait、0/reaped，104子进程全部回收；
+23:54:16 UTC结束收集，耗时1429.697/5400秒，原deadline未延长。
+一次GET失败原件保留，原件及父外层回执位于本轮 `current-ci/`。
+没有仍在运行的本轮CI观察器；这不签下一轮源码或其他平台桌面/发布/安装。
 
-## 已交付代码：面板外观与远端诊断
+## 正在开发
 
-下文按提交时点保留来源、失败与验收轨迹；后续联调和并行开发以上方接续状态为准。
+复用现有整合工作树，分支 `feature/monitor-knowledge-categories-20261106`，基线850b77b。
+管理器两次建树请求均超时且后查无新目录/登记；未重复请求或绕过primary保护。
+两名作者按独占文件范围并行，不自行改分支/提交/推送，父负责装配、公共文档及最终门禁。
 
-启动恢复切片已提交并正常快进推送main：
-`56d5440e4fa260f53ee6ea404fee9223f41d2188`。本地main、origin/main及远端已读回一致，
-34路径与r6文档冻结、520工程输入及构建逐摘要匹配；533个提交blob已核对。
-本轮所有源码/原件/最终文档限定审查均无开放P0/P1/P2/P3。
-提交/推送/绑定原件见`work/input-and-layout-readiness-20261105/`下
-`commit-r1.json`、`delivery-r1.json`、`delivery-exec-readback-r1.json`及`committed-inputs-r1.json`。
-精确Quality `42063264237 / attempt 1`已三平台success，108项候选各平台通过。
-ordinary为macOS2221/23ignored、Linux2216/24ignored、Windows2156/18ignored，
-各14rustdoc；Linux/macOS各11项OpenSSH及附件API摘要通过。
-唯一观察者Parfit于16:47:34 UTC在原5400秒期限内结束；
-exec93298已实际wait、exit0/reaped，84子进程全部回收。三次GET失败原件保留。
-`current-ci/final-readback.json`、`exec-readback.json`及`closeout-verification.json`
-只签56d5440，不代签本轮dirty源码或新依赖。
-
-该切片当时复用本工作树，分支`feature/pane-surface-polish-20261106`。
-`pane_view.rs`已作8增3删的语义画布修整，未连接面板采用主题画布并移除终端内边距，
-沿用三主题及原状态组件。首次候选只完成单文件rustfmt和diff检查；
-后续组合门禁与新包原生见下，当前提交/交付仍另记。
-记录见`work/pane-surface-polish-20261106/applied-r1.json`。
-远端审核式ICMP诊断由Cicero在原组合工作树的
-`feature/reviewed-icmp-diagnostics-20261105`独立实现，基线dcf7438；
-作者已在16:22:23 UTC释放共享Cargo槽位。父按冻结patch逐摘要导入13路径，
-已补独立的Workspace活动选择UUID与同步撤权；preview/confirm/结果采用均校验，
-不改变Agent共享的session/route语义。真实生产ABA、迟到结果与非活动关闭正控已验证。
-协议专项15passed，exec29548 exit0/reaped，525工程输入一致。
-来源非作者发现两项P2后，父补ICMP任何错误先停权及六种受控SSH终态负控，
-作者另交6路径计数语义修订，已逐摘要导入；原failed审查保持。
-原两项ICMP P2已由icmp-r2限定复核批准，开放P0/P1/P2/P3为零。
-full-gate-r1因父测试expect_used停止、exec99904 exit1/reaped；
-full-gate-r2因remote_only守卫误判新增fake-process夹具停止、
-exec17319 exit1/reaped，两个回执525输入分别保持，不回写为通过。
-首部inner cfg(test)及守卫LF/CRLF正反例修订已有5项passed。
-选择增量的新非作者另指出终端指针focus到绘制后才刷新的一项P2：
-父已在正文wrapper捕获阶段同步选择/撤权，2项无中间render真实指针回归passed；
-移除handler的同测在预期active0vs1失败、cargo101，源已精确恢复，
-负控外层exec50283 exit0/reaped只签预期失败与恢复，不是测试绿灯。
-app r3与guard两路径已冻结，full-gate-r3 / exec81606已退出0/reaped：
-2236ordinary/23ignored、app970/2ignored、14rustdoc、Python131run/1skip及附加控制器通过。
-但selection-r3仍保留原P2的搜索遮挡与键盘子项，不能用旧r3门禁关闭新hook。
-父已补TerminalView同步输入所有者、搜索条自身capture和完成Tab动作观察；
-只按EntityId更新Workspace，不反读已借用的Terminal/InputState、不移动搜索焦点。
-Workspace已有选择的命令聚焦改用raw FocusHandle避免父lease重入，
-搜索Input移除祖先重复track_focus，修复真实Tab顺序自循环。
-新search-r1编译失败、r2两绿一红保持；r3三项真实搜索专项passed，
-exec48788 exit0/reaped，525输入一致。同实体搜索保留审核/焦点；
-停用通知的同测实际Cargo101/active0vs1，外层exec85227 exit0只签预期负控和精确恢复。
-11个app路径另冻结在review-selection-r4，后续按钮入口复核见下。
-新full-gate-r4于17:43:55–17:53:01UTC通过，exec35977已实际wait、exit0/reaped，
-525工程输入保持，与build-r1及当时源码逐项相同：
-2239ordinary/23ignored、app973/2ignored、14rustdoc、Python131run/1skip，
-格式/严格Clippy/依赖策略及附加控制器通过。组合源码/正式文档另作独立复核。
-最新官方依赖检查首次发现zip9.4/rmcp3.9，声明保持x.y并更新lock；
-dependency-freshness-r2于16:56:19–16:56:34 UTC通过104条，
-exec96051 exit0/reaped；后续源修订未改manifest/lock。
-最终dependency-freshness-r3于17:51:16–17:51:32UTC再次通过104条，
-exec41777已实际wait、exit0/reaped，525输入保持，无额外版本变动。
-组合结果另记。共享target由父顺序使用，jobs2、四测试线程。
-
-后续selection-r4及combined-r1保留同一SEL-P2-01：
-搜索按钮自身的Tab stop和空格导航可绕过Input-only焦点识别。
-父补独立非Tab-stop搜索父焦点范围及导航动作同步所有者发布，
-只改变terminal.rs与monitor_tests/protocol_selection.rs；
-review-selection-r5及review-combined-r2已冻结，其他20个组合工程路径不变。
-search-r4六项passed，exec52073退出0/reaped；两个独立负控各自实际
-Cargo101/active0vs1，exec32612退出0只签预期失败与逐字节恢复。
-新的非作者selection-r5限定批准关闭SEL-P2-01，开放P0/P1/P2/P3=0。
-build-r2于18:19:44–18:19:50 UTC退出0/reaped，exec78221已实际wait，
-新包a5261fab…的五成员/41assets已核对，未原生运行/安装/签名/发布。
-full-gate-r5于18:20:25–18:29:38 UTC退出0/reaped，父exec80111已实际wait，
-525输入保持并与build-r2/当前源码相同：2242ordinary/23ignored、
-app976/2ignored、14rustdoc、Python131run（130pass/1skip）及全部工程检查通过。
-新的非作者combined-r2批准冻结产品源码/完整门禁/包归属，开放P0/P1/P2/P3=0，
-不签正式文档、真实CLI准备或原生。freshness-r4于18:21:23–18:21:39 UTC重新
-通过104条要求，exec21640退出0/reaped，无额外版本变化。
-
-新build-r1/exec12666已退出0/reaped，525输入与r4门禁一致；
-macOS开发包程序f9b5ac99e109c16de69e497dfa32f3fb47056ff0ea9e1e456764900e251a51b3，
-5成员/41assets核对，未安装/签名/发布。
-一次离线native run5a650e67ced3483c9cb71122d65756a1完成36对AX/JPEG：
-24画布覆盖三家族×明暗×双语的未保存/缺失态，另12设置原件。
-合成available未连接态始终保留，不点Connect、不签网络零增量或真实ICMP。
-app99109正常UI退出0/reaped，WAITING_RESTART后stop而不restart；
-父exec89824已实际wait、exit0/reaped，STOPPED/launches1，原600秒内清理private及已观察进程。
-原生原件新非作者surfaces-native-r1限定批准，开放P0/P1/P2/P3=0；
-Hallmark只对所验macOS画布映射为ship，仍不签紧凑/输入/VoiceOver/Windows/Linux或产品full finish。
-原桌面另有旧组合开发包PID89730，本轮按新包完整路径操作且合成seed匹配，未清理该已有进程。
-
-Finder拖放的新宿主回环准备已冻结，容器路径因无离线SFTP镜像保持HOLD。
-唯一实际preflight `1b9beeac25b445039161db570e320414`前三步骤通过，
-沙箱内`sftp-requests`以-6退出，具体原因UNKNOWN；canary未执行，没有启动服务或应用。
-四子进程均已回收，私有目录删除，0.544秒内清理。没有重试失败准入或放宽沙箱；
-作者只在独立诊断目录准备有界stderr采集，新非作者仍复核原冻结准备。
-证据见`work/reviewed-file-drop-20261105/preflight-r1-verification.json`。
-父已快审并只运行一次相同sandbox/sftp查询的有界stderr诊断，
-run`db1ef92b8ca34691b8f8f7b739a1b0ef`仍-6、stderr完整EOF但零字节；
-0.146秒内唯一子进程回收/后查不存在，外层同步exit1/reaped。
-没有服务或应用启动，原因仍UNKNOWN。原准备独立复核另有响应日志识别、
-最后port检查后的TTL两项P2，已由作者在新r2修订，33项离线检查通过；
-原非作者preparation-r2限定批准、开放发现零，runtime/native仍HOLD。
-精确PID的dyld crash原件已只读匹配，没有具体deny/路径说明，根因继续UNKNOWN。
-不改写冻结失败原件。ICMP真实容器夹具另在作者树real-preparation-r2
-有界准备官方Ubuntu候选；r2在原期限内HOLD且未启动build/apt，失败保持。
-独立首次build的real-preparation-r3于01:30:10–01:30:25（Asia/Shanghai）退出0/reaped，
-原240秒预算未延长，仅一build，13.001秒。image35b28f15…的owner为a608bbee…，
-无网络查询实际完整ping输出匹配iputils20240117，Python3.12.3；
-自有查询容器/context已清理，专用image给后续真实联调准备保留，共享base保持。
-尚未启动服务/实际Echo，不允许放宽版本契约或混用本轮离线原生包验收。
-双栈CLI回环准备r1仍未执行，非作者指出fixture目录umask权限及回执失败跳过清理
-两项P2，作者正在ignored work准备最小r2；不阻断已批准的产品源码，
-不得代签真实Rust/UI路径，固定300秒含30秒清理预算保持。
-启动恢复作者树工程消费者已释放且32份证据保存，但管理器以primary checkout
-保护拒绝归档，没有用shell绕过。新整合入口见
-[诊断与外观记录](testing/records/2026-11-06-reviewed-diagnostics-integration.md)。
-旧普通输入/IME、完整主题尺寸、Windows/Linux桌面、多窗口及完整产品验收继续开放。
-
-## 已交付：启动恢复与输入补查 — 2026-11-05
-
-本轮开始前，2026-11-05的上一轮组合已通过普通快进推送到main，起点主线为
-`dcf7438a13fff737997ee5e8061044c94d4ba53a`，随后远端与主工作副本均已读回。
-该提交只跟进8份文档，515项工程输入与e331372相同；r7文档增量的非作者批准
-见组合证据中的`independent-review/final-docs-r1.md`。
-dcf7438的精确Quality `42032294580 / attempt 1`已三平台success：
-ordinary为macOS2,191/23ignored、Linux2,186/24ignored、Windows2,126/18ignored，
-各14rustdoc、74项候选通过；Linux/macOS各11项OpenSSH与附件摘要核验通过。
-唯一观察器exec16293已退出0并回收，85个子进程全部回收，
-13:39:24 UTC结束，未延长原期限。原件见组合证据的`main-ci/final-readback.json`、
-`exec-readback.json`与`closeout-verification.json`，只签dcf7438及其范围。
-
-当前复用原Ask诊断工作树，分支为`feature/input-and-layout-readiness-20261105`，
-基线dcf7438。文件布局测试将补真实WRITE阻塞和暂停转交的同步条件，保留原断言与预算；
-首次四组专项共9项通过，执行会话54030退出0并回收，517项输入保持；
-父重算176个唯一布局和16次传输回执。新非作者source-r1批准限定源码与专项，
-开放P0/P1/P2/P3为0，两处源码可证的测试时序前提缺口在此限定修订内关闭；
-旧Linux失败的确切根因仍UNKNOWN，最终组合完整门禁结果见下。
-localhost夹具取消preflight误报成功的P2经同测试修前失败/修后25项通过及r2独立复核关闭；
-真实preflight已通过。旧515输入的33be2e68包完成run ec01db306f2d43158d6d8984becf0b83：
-22对AX/JPEG，可见x到独立Return才增加1字节，新Return/Right为1/3；
-Unicode typeText无可见结果/PTY0，原因UNKNOWN。
-限定树Home/Down/End与激活均实际改变选择且PTY/exec零增量，前后Right正控成功。
-累计PTY12、拒绝exec24/9,268字节，不能代签新恢复源码或完整输入/IME。
-应用及前台exec53146均退出0并回收，私有目录删除/端口拒绝，
-548.661秒内清理，原900秒预算保持；新的非作者`input-native-r1`批准限定证据，
-P0/P1/P2=0，仍为PARTIAL_OBSERVED。
-单窗启动恢复从独立分支的18个冻结路径整合，17个逐字节相同，
-terminal仅合并本轮测试注册；61个不同专项最终通过，保留两次首次失败。
-恢复分屏拓扑/比例与未连接标签，显式连接才进入当前认证流程；
-不恢复OS外框，不创建多个OS窗口。新的非作者`startup-source-r1`批准冻结源码与专项，
-P0/P1/P2/P3=0；新的`final-combined-r1`批准21个改动Rust文件与520项输入的组合
-源码/门禁/包归属，开放P0/P1/P2/P3=0；正式文档以`final-docs-r2`限定复核为准。
-最终520输入的full-gate-r1因三项test-only Clippy失败退出1并回收；
-父最小修订后full-gate-r2于14:01:24–14:12:28 UTC通过，
-exec88486已实际wait，退出0并回收；520输入前后一致。2,221 ordinary/23ignored、
-app963/2ignored、14rustdoc、Python131run/1skip，格式、严格Clippy、依赖策略及
-附加控制器均通过。共享target、2jobs、四测试线程和原1500秒预算保持。
-build-r1于15:12:27–15:12:57 UTC退出0，exec47106已实际wait/reap；
-构建、门禁及当前520输入一致。新macOS开发包程序SHA为
-`99cd7f6955735b18686df30626d68688c8de1f2fb3b1ceba2ae6329f3b49b9ae`，
-包结构/五个成员/41assets已核对，未安装、签名或发布。
-新包run`60c040c7da1a4cadbab99a1a2d78f520`完成同一隔离目录的两次原生启动：
-六对AX/JPEG记录初始62%、选择缺失态、调整67%、切中文、显式保存与重启保持。
-按合成seed与实际操作重建的完整布局唯一匹配退出后的摘要，UUID/引用/顺序保持；
-未选窗口和窗口顺序保持，两次raw state摘要相同。原state只留摘要，已随private删除。
-两次应用与exec22504均退出0/reaped，原600秒TTL内完成清理，无本轮活进程。
-本次未点击Connect，没有网络审计，不代签真实认证、完整外观/输入或多窗口。
-新的`restore-native-r1`为APPROVE_SCOPED_RESTORE_EVIDENCE / PARTIAL_OBSERVED，
-开放P0/P1/P2/P3=0，不授予完整native/finish；
-冻结及收尾见`native/restore-verification-r1.json`。
-本轮官方依赖检查于13:09:23–13:09:39 UTC通过104条要求，无版本变动；
-证据位于`work/input-and-layout-readiness-20261105/`。
-
-## 已集成：工作区组合
-
-组合工作副本复用原分屏工作树，分支为 `feature/workspace-integration-20261105`。
-组合源码提交 `e3313722b20b0c3f5461ea8a4f194fec51c0adea` 已推送本分支。
-它组合以下已审查提交和冻结导航源码；原515输入的本机组合门禁与非作者源码/证据审查通过，
-后续测试诊断有独立批准和新的完整门禁，53对原生捕获获限定证据批准，状态仍PARTIAL_OBSERVED。
-精确Quality `42025002190 / attempt 1` 已三平台success；
-后续文档提交保持515项工程输入不变，CI结果只签e331372，不扩大到其他提交或原生验收：
-
-| 切片 | 精确输入与已验证范围 | 当前边界 |
+| 切片 | 写入范围 | 当前状态 |
 | --- | --- | --- |
-| 原生分屏 | `9db9cbc1dcfd22c05a2e8a5dfb183877c8ff9f65`，父为 `77aa69c`。完整门禁 2,158 ordinary / 23 ignored、11 rustdoc、Python 128 run / 1 skipped；503 输入相同。限定 macOS 原生及新的非作者组合复核通过。 | 已推 feature；Quality `42009970970 / attempt 1` 为 failure：macOS、Windows success，Linux唯一文件布局状态等待失败，根因UNKNOWN；52项分屏测试三平台通过。独立提交绑定批准，两处状态同步P3已在组合中纠正并限定复核；完整原生矩阵未完成。 |
-| Ask 诊断与 CI 容量 | `3d8476716ab80f0cec8b8c731a8cde0bcd7601a3`、`72a19ea5b7d47402c79d0ced73d442570c7ae9fd`。容量修订完整门禁 2,126 ordinary / 23 ignored、14 rustdoc、Python 131 run / 1 skipped；506 输入相同。新的非作者源码、组合和不可变提交绑定通过。 | 已推 feature；Quality `42009720436 / attempt 1` 已三平台success。这是新容量修订提交的通过，不回写旧失败，也不解释B的新文件布局失败。 |
+| 监控能力识别与按项降级 | session/app monitor及其测试 | 最终r2已获新非作者批准组合，原P2及两项专项P3关闭；session34、app初跑18/2失败后受影响回归通过，历史保持 |
+| 知识分类与组合筛选 | core/app knowledge及Workspace知识适配 | 最终r4已获新非作者批准组合；core单元22/集成31、app专项67及严格Clippy通过；组合门禁与第二轮限定原生复核通过 |
+| 原生工具与实际运行 | ignored work下的新候选副本 | r4的62输入及必要差分获准备批准；同包第二轮706.365秒内完成A/B与清理，native-r2限定批准，旧首轮HOLD原件保持 |
 
-源码自动组合没有冲突；冲突仅在 HANDOFF、ROADMAP、CAPABILITIES 的状态段落。
-随后以三方patch接入导航的10个冻结源码文件，也没有冲突；7个文件保持导航原字节，
-workspace、modal_scope、view三个文件组合了分屏与导航变化，必须重新审查交互。
-本分支完整门禁 `full-gate-r1` 已**退出0并回收**，父执行会话 **90038**。
-**2,191 ordinary Rust / 23 ignored、14 rustdoc、Python 131 run / 1 skipped**，
-app为933/2 ignored；**515工程输入前后一致**。格式、严格Clippy、依赖策略及
-附加进程控制器通过；共享target、2 jobs和1500秒预算未改变。
-新的官方依赖检查退出0并回收。新的非作者组合复核为
-`APPROVE_SCOPED_COMBINED_SOURCE_AND_EVIDENCE`，P0/P1/P2=0；
-一项非阻断P3涉及两处仍写C原件待审的状态文字，已由document-followup-r1限定复核关闭。
-完整门禁与新的非作者组合复核不继承来源分支结论。
-合入前核对的main为 `77aa69c04ad0dd625a5d827552335878de993ee7`；
-主线交付与后续文档提交以Git和精确推送回执为准，不以此前CI代签后续SHA。
-新的macOS arm64组合开发包已构建，程序SHA-256为
-`33be2e685a280b6bfd2094d4707a67c12b8a14ccac6e2b92d34f64a877154831`；
-515项冻结输入一致，41assets另行核对；已执行下面的原生子集、未安装，
-不能替代来源包或完整平台验收。
-组合材料放在 `work/workspace-integration-20261105/`，正式记录从
-[组合记录](testing/records/2026-11-05-workspace-integration.md)继续。
+本批两作者已明确释放共享Cargo槽，父已完成并实际wait组合门禁；
+`CARGO_TARGET_DIR`使用主开发副本的既有target，`CARGO_BUILD_JOBS=2`，测试四线程。
+禁止同时对共享target运行Cargo；作者只格式化自有路径。
+新功能完成后必须新开非作者源码/功能复核，再执行组合完整门禁与相关原生检查。
+两片设计见[监控能力](product/MONITOR_CAPABILITIES.md)和[知识分类](product/KNOWLEDGE_CATEGORIES.md)。
+当前536工程输入/18源码已冻结，非自有工程保持850b77b。
+r1构建/打包/静态inspect退出0，但完整门禁app测试清单缺少B新增用例；
+其exit0与实际wait仍保留，不能作为完整验收。旧清单、fingerprint、dep-info及包
+已留证。父只使五个项目crate产物失效，第三方缓存保留；
+build-r2明确编译当前树全部五crate，app新清单1028项且两片具体用例齐全；
+package-r2及静态inspect通过，程序SHA为
+`8f1384e1622069d32736437b4bd1d65ef312aee9b8ea82761ed2e0b446599ce4`。
+fresh完整门禁exec60566已由父实际wait、0/reaped，在原1500秒内结束；
+2313 ordinary passed/23 ignored，app1026/2 ignored已含其中，14 rustdoc，
+Python131 run=130 passed+1 skipped。两片37个新增用例均真实执行，536输入不变。
+新的组合终审已批准source/gate/package，开放P0/P1/P2/P3均0。
+同包原生首轮在279.610秒后HOLD，父实际wait exec23708、exit1/reaped；
+八对JPEG/AX保留，真实core/ps至少各25轮和ss缺失缓存有局部证据，
+一次Recheck后的采集失败及断开保持未通过，A3及B0–B5未开始。
+夹具日志保留审计容量及清理PermissionError；app-15/reaped，
+自有container/network/private已移除，sshd实际退出/回收未证实。
+修后准备与第二轮验证使用新副本/owner，不覆盖失败或延长旧期限。
+第二轮在2026-11-06 02:19:03.529 UTC开始，owner `a45b8b77…`，
+单窗霜白浅色/英文共28对原始AX/JPEG。核心/ps各20轮成功，
+ss缺失缓存1次，显式Recheck后实际2次且仍明确缺失；
+Pause静止前后及Connections/Host info显示切换均零exec/PTY增量。
+B0–B5实际完成分类取消、设定、组合筛选、改名及清空，三条合成记录全保留；
+取消/筛选保持原bytes及stat，三次确认只改变Alpha分类，全部B步骤零SSH exec/PTY计数增量。
+纯导出比较通过；新的非作者native-r2已限定批准，新增P0/P1/P2/P3均0。
+私有raw state及app stderr随授权清理移除，磁盘结论使用捕获时来源与完整导出；
+不声称评审后重新读取私有原文件，不代签全部SSH传输流量或完整native finish。
+app正常退出0/reaped，父实际wait exec81019、exit0/reaped，
+耗时706.365298秒，原900秒预算未延长；sshd-9/reaped，容器exit0，
+自有container/network/private移除已核实。
+见[共享target归属](testing/SHARED_TARGET.md)和[本轮记录](testing/records/2026-11-06-monitor-knowledge-categories.md)。
+未安装、签名或发布。
+父已保存门禁后包与普通程序的匹配回执，正式将Cargo槽交给下一片远程文本格式作者。
+该作者只在`work/editor-format-20261106/implementation-source`无`.git`副本实施UTF-8 BOM、
+单一LF/CRLF保持及测试，使用536输入作基线，不改本树Rust或当前不可变包。
+该片r2冻结538输入/10路径，42项专项通过，其中21项新增；
+严格Clippy及格式通过，失败历史保留，原生未运行。
+新开的非作者editor-format复核发现三项P2：保存中后续草稿BOM重复、
+合并丢新增头部U+FEFF、连续保存丢CRLF插入策略；r2暂缓导入。
+作者已在隔离副本形成r3冻结，三项独立反例在旧r2真实失败，修后受影响37项通过，
+含4项r3新增用例，总新增声明25项；必要增量交原非作者复审，
+修后完整门禁等待实际结果，旧门禁不代签r3。Cargo归属由该作者独占。
+后续Cargo归属切换须先失效项目crate；源码未批准前不导入当前536输入。
+审核式有界traceroute同时在`work/reviewed-traceroute-20261106/implementation-source`
+以536输入隔离开发，不修改本树Rust/文档，不使用Cargo；实现与验收均未完成。
+当前原生准备只消费package-r2及冻结回执，不消费后续变化的活target。
+本轮自有tools image曾一次构建并查询工具：
+`sha256:cbbeac297612e1e51f10444e53634835ae3027853b15a677c30b281c84710d8d`，
+owner `b63e98b0b62e4f8fab396be8a71ffcb4`。
+第二轮退出后已按精确ID/owner及零消费者核对并移除，读回镜像不存在；
+两轮自有SSH容器、网络与private均已移除，共享base/VM/target保留。
+原件、失败记录和当前仍有消费者的隔离源码副本保留。
 
-## 新组合包的原生子集与资源
+## 接续约束与开放边界
 
-run `3f7689e959484901bc4365d98819d8ad` 已结束，原始AX/JPEG共53对，均2880×1866。
-最初普通`x`按键可见但PTY0，首次Right0，Escape后Right1而非预期3；
-随后两账号粘贴与fresh Right及导航后对照均独立成功。普通字符路径与恢复根因仍UNKNOWN，
-不能以粘贴代签，也不把现象归咎IME。
-导航/隐藏q/两主题切换/语言段PTY与exec均零增量，但该段End/Down没有移动；
-单独Escape后方向、Home/End、搜索Tab导航有实际移动及独立零增量。
-分屏建立第三条shell并暂停新监控；点击分隔条+Right未改变比例且PTY增加3，
-Tab聚焦后Right由50%变55%且该段为0。合并保留三shell，保存仅有UI确认。
-最终累计PTY24字节、32exec/13,440字节，命令与Ask草稿保持、无命令执行或模型发送。
-
-应用由UI退出且exit0/reaped；父wait70792得到final，执行会话已回收、原监督器PID不存在，
-外层数值退出码未展示，不代填。11:40:00 UTC清理容器、网络、私有目录，
-11:40:39 UTC清理专用镜像，共享base保留。没有仍活的本轮测试应用/容器。
-新非作者`native-r1`已核对53对原件、28份原始审计、22个区间和相关源码，
-结论APPROVE_SCOPED_NATIVE_EVIDENCE / PARTIAL_OBSERVED，无可确证源码P1/P2，
-不授予完整native或finish。见组合记录和
-`work/workspace-integration-20261105/native/verification-r1.json`、`parent-close-readback-r1.json`。
-原生结束后新增的文件布局测试诊断通过full-gate-r2：2,191 ordinary/23ignored、
-14rustdoc、Python131run/1skip，app933/2ignored，修订515输入前后一致；
-exec36492退出0/reaped。两项exact专项各1passed，布局176/176组合。
-官方依赖freshness-r2在11:59:34–11:59:51 UTC通过104条要求，无版本变动。
-原包证据保持r1归属；该来源时点的两处测试时序前提缺口尚未关闭，
-本轮已由真实WRITE/暂停交接修订及source-r1限定复核关闭。旧Linux失败确切根因仍UNKNOWN。
-测试诊断的`diagnostic-r1`已APPROVE_SCOPED_DIAGNOSTIC_SOURCE_AND_EVIDENCE，
-限定补丁/两次exact范围内开放P0/P1/P2/P3=0；已绑定e331372中的测试摘要。
-两份报告都不自动签后续更新的最终文档，状态增量另作限定复核。
-
-普通字符输入补查只完成准备，**没有启动第二次原生run**。r2开发包构建/打包均
-exit0/reaped，修订后的515输入与full-gate-r2相同，五个包成员与r1逐字节相同；
-这不增加原生验收范围。12:25:49–12:28:49 UTC的专用镜像构建在Containerfile内部
-`timeout 180s`包下载/安装步骤退出124，外层未超时，exec66413已exit1/reaped。
-构建context已删除，本次owner下没有镜像或容器；没有创建run、应用进程或私有凭据目录，
-共享base和其他项目资源保留。见组合记录的“输入补查准备”及
-`native/input-followup-preparation-r2.json`、`native/package-readback-r2.json`。
-普通字符、文本提交和回车补查仍NOT_RUN，不直接重试同一下载或延长预算。
-
-## 导航原始候选与原生边界
-
-`feature/navigation-keyboard-20261105` 的源码与 r2a 开发包仍独立，基线为 `967c588`。
-修订完整门禁 2,075 ordinary / 23 ignored、10 rustdoc、Python 128 run / 1 skipped，
-499 输入一致；非作者源码与旧证据准确性复核通过。源码已按冻结摘要导入当前组合，
-原候选工作树未修改；新原生证据和开发包仍只属于原499输入。
-
-解锁后同一程序 `1f180f13…` 在 run `5c76b54db2de4dd89cff9793187208c6` 取得54对原件。
-早期中文树导航、折叠、搜索、已有会话切换和草稿保持有可观察结果；后半段方向键、
-Home/End等没有预期导航变化，最后两个终端正控也没有确认服务端输入，重绑定也未恢复，原因 UNKNOWN。
-搜索文本输入和鼠标/AX 点击仍可改变界面。不能据此归咎语言或直接认定产品缺陷。
-两条真实 SSH 会话在09:49:24–10:02:47 UTC审计窗口内保持身份，raw PTY为0、
-新增exec为0；初始化已有22次拒绝/9,240字节另计。正控未成功，完整键盘输入隔离仍OPEN。
-原件中29/30仍是B，31选A/32激活才切A；37/39/40没有选到文件名声称的空根；
-38缩窗未生效。文件名不是验收结论。
-
-应用和监督器均退出0并回收，10:07:08 UTC清理自有容器、网络、私有目录；
-10:07:48 UTC清理专用镜像，共享base保留。新的非作者已逐项复核54对原件、源码路径、499工程输入、包及12份冻结文档，
-未发现新增可确证源码P1/P2；只认可PARTIAL_OBSERVED，不授予完整native/finish。
-独立记录与设计合同已接入组合，原证据保持。组合源码审查和原生验收另行进行。
-接续该树的 `work/navigation-keyboard-20261105/native/r2-parent-close-readback.json`
-及 `independent-review/`；旧失败和旧包证据保持，禁止混用分屏包补记导航验收。
-
-## 已审查切片的必要边界
-
-- 分屏：修后程序 `5ce34862…` 的 run `acceb50f…` 有35对2880×1866原始AX/JPEG，
-  四个真实Shell、两轴拖动、三个分隔条键盘、工具选择保留、聚焦/合并/关闭和保存读回。
-  原四个会话合并后保持，只显式关闭第四个才剩原三个；最后独立输入正控增加1字节，
-  监控exec另计。缩窗未生效；后期草稿保持包含人工Tab加入的两个尾空格。
-  四叶保存比例6347/5718/5000，单叶保存活动标签为原遍历第二项，后续正控后未再保存。
-  新的 `combined-r5` 为 APPROVE_SCOPED_COMBINED，开放P0/P1/P2/P3=0，
-  Hallmark finish只签所检子集。详见[分屏记录](testing/records/2026-11-05-native-pane-layout.md)、
-  [布局合同](product/WORKSPACE_LAYOUT.md)及[ADR 0101](adr/0101-native-session-pane-ownership.md)。
-- CI容量：串行夹具显式关闭，下一夹具检查前一目录已删除；非workspace依赖dev debug=0，
-  缓存新分代，检查命令前后记录数值容量。原断言、期限与四线程入口保持。
-  旧诊断提交Quality `41994734898`的Linux实际ENOSPC不解释更早`41967541069`的UNKNOWN。
-  Windows限定重跑成功，attempt2的Linux/macOS为继承结果，整体仍failure。
-  本机两种夹具程序10,078,320/9,921,664字节不是远端或完整target节省量。
-  见[容量记录](testing/records/2026-11-05-ci-storage-capacity.md)、
-  [诊断记录](testing/records/2026-11-05-local-ask-scratch-diagnostics.md)及
-  [ADR 0103](adr/0103-ci-storage-capacity.md)。
-
-## 用户要求与工程约束
-
-- 只管理远程SSH；不接入本地终端、远程桌面或串口。保持真实原生GPUI Kit应用和
-  macOS、Windows、Linux目标；编译、受控GPUI与仿真不能替代各平台桌面验收。
-- 霜白、曜石、雾紫全部内置，主题通过注册表和语义token扩展；业务组件不按主题ID分支。
-  使用既有Hallmark原生映射，见[设计合同](design/HALLMARK_NATIVE.md)。
-- UI/core/session/AI分层；阻塞I/O离开UI线程。公共库API有rustdoc，解释不明显约束，
-  使用类型化错误和有意义的测试。保持中英文README同步。
-- AI上下文发送必须显式审核；生成的命令另行审核执行。主机密钥变化fail closed；
-  凭据默认临时，显式保存仅进系统凭据库或加密vault，不能写入普通配置或日志。
-- registry依赖要求仅`x.y`，保留Cargo.lock patch，不pin Rust工具链；每轮查官方稳定版本。
-  最近容量切片freshness为2026-11-05 17:01:46–17:02:04，104条通过；组合另留新回执。
-- 用户已授权公开GitHub、提交推送、标签触发多平台Release和本地Podman真实联调；
-  不涵盖遥测上传或覆盖安装。仓库中不写具名专有SSH产品比较。
-- 每个功能完成后新开非作者评审。先完成已授权工作，不反复请求确认。
-  源码门禁、开发包、原生子集、CI、公开发行与安装分别验收，失败证据不得改写。
-
-## 下一步与资源
-
-1. A/B/C原515组合门禁与非作者源码/证据复核通过，文字P3限定复核已关闭；
-   C与新组合原件均仅PARTIAL_OBSERVED，完整输入隔离仍OPEN；两份新限定复核已完成。
-2. A的精确CI三平台success，B精确CI因Linux文件布局条件等待失败；失败与原件保留。
-   B observer已退出0并回收。文件布局已定位测试前提与诊断缺口，确切根因UNKNOWN；
-   阶段诊断、限定验证、新完整门禁及诊断独立复核已通过。
-   精确组合CI已三平台success，74项候选三平台通过；该次绿灯本身不关闭旧失败根因。
-   两处时序前提缺口已在本轮源码修订与source-r1限定复核中关闭，确切历史根因仍UNKNOWN。
-   文档增量限定复核、主线交付和后续精确SHA的CI应分别记录，不扩大源码/原生批准。
-3. 单窗启动恢复已有本机完整门禁、限定新包重启与非作者源码/原件批准，
-   正式文档、不可变提交与精确新CI分别跟进；
-   并行准备真实Finder文件/目录拖放的审核、取消与确认读回。继续紧凑OS窗口、
-   完整主题×明暗×语言×尺寸、IME/VoiceOver、Windows/Linux桌面、多窗口、
-   真实供应商/CLI和审核目标的完整原生矩阵。
-   完整产品目标仍active，具体能力缺口见[路线图](ROADMAP.md)及[能力清单](product/CAPABILITIES.md)。
-4. 仅在功能证据与提交保存后归档无消费者的受管worktree，清理自有分支、进程、容器、网络、镜像。
-   管理器曾拒绝仍被使用和主工作副本的归档，不能用shell绕过；不删共享target/base image。
-
-当前没有本轮KeelShell或SSH测试容器在等待用户。A的CI observer执行会话34765已退出0并回收，
-75个子进程全部回收，macOS artifact补取会话1068也退出0并回收；精确原件188文件已逐摘要复制到组合的source-ci-a目录。
-B的observer执行会话48913已退出0并回收，全部启动子进程已回收；两者只读GitHub并有期限。B原收集器6419因错误沿用main筛选已停止并回收，
-空查询页保留；修订收集器仍绑定同一run且不延长原观察总期限。资源状态以终态回执为准。
-本地`work/`证据被Git忽略，分别位于对应切片的工作副本；公开文档中的路径不代表已发布附件。
-
-组合CI观察器exec79169 / PID29803于20:14:56（Asia/Shanghai）启动，
-20:40:44取得终态，在原21:44:56期限内结束收集；75个子进程均已回收。
-外层exec79169已实际wait/reap且exit0，后续检查原PID及75个子进程PID均不存在；
-回执为`current-ci/exec-readback.json`，未以子进程状态代填外层退出。
-它只观察e331372的Quality42025002190，没有重跑或取消CI。
-三平台ordinary分别为macOS2,191/23ignored、Linux2,186/24ignored、
-Windows2,126/18ignored；各14rustdoc、74项候选通过。
-Linux/macOS各11项OpenSSH通过，两份七文件附件匹配API摘要并有资源清理回执；
-Windows按工作流跳过OpenSSH，不代表Windows桌面验收。
-精确日志、附件与回执在`work/workspace-integration-20261105/current-ci/`。
-成功测试未公开内部phase日志，因此旧Linux失败耗时和根因仍UNKNOWN。
-依赖工作树归档被管理器以“Another active task still uses this worktree.”拒绝，
-没有绕过保护或删除该工作树/分支；当前组合工作树继续使用。
+- 仅管理远程SSH；本地终端、RDP、串口不在范围。UI/core/session/AI分层，阻塞I/O不进UI线程。
+- 霜白、曜石、雾紫全部内置，注册表和语义token扩展；遵循[原生设计合同](design/HALLMARK_NATIVE.md)。
+- AI上下文及命令各自显式审核，模型不能自主执行；主机密钥变化fail closed；凭据不进普通配置/日志。
+- Windows/Linux桌面、完整主题/尺寸/键盘/IME/辅助技术、多窗口、供应商账户/外部MCP及已签名安装验收仍开放。
+- 用户已授权自主开发、提交推送main、标签触发Release、本地Podman联调；不包含覆盖安装或遥测上传。
+- A资源趋势作者树已归档且分支已删除；B知识作者树受primary checkout保护而保留，证据tar已核对。
+  旧树保护拒绝不得用shell绕过。已合并的整合分支已正常删除；当前整合树仍在使用。

@@ -148,3 +148,22 @@ r3修订及非作者准入后的一次双栈回环已通过，11.065秒内完成
 没有改变产品权限/命令。该结果只属于原生产Python/iputils的probe层，
 不代签本轮趋势、知识保存、Rust诊断或native。
 原失败见[上一轮整合记录](2026-11-06-reviewed-diagnostics-integration.md)。
+
+## 不可变交付与精确CI
+
+本片已提交为`850b77b77b576f3bd2527883ffef9d97a666afd0`并普通快进推送main，
+本地main、origin/main及远端SHA读回一致，两副本交付当时干净。
+530工程输入及16正式文档共546个提交blob与冻结匹配；
+父交付exec2510实际wait、0/reaped，`committed-r1`非作者限定批准，
+开放发现零。正式文档以`docs-r5`单字段收尾批准为准。
+原件在本轮`delivery-r1.json`、`delivery-exec-readback-r1.json`及`committed-inputs-r1.json`。
+
+该SHA的精确Quality42129830892/1已三平台success：
+macOS2276/23 ignored、Linux2271/24 ignored、Windows2210/18 ignored，
+各14 rustdoc、165项候选通过。
+唯一前台exec38847已由父实际wait、0/reaped，104子进程全部回收；
+23:54:16 UTC结束，1429.697/5400秒，原deadline未延长。
+一次GET jobs失败原件保持。Linux/macOS各11项OpenSSH及两份附件API摘要匹配；
+新的非作者`APPROVE_SCOPED_EXACT_HEAD_CI_CLOSEOUT`限定批准，开放发现零，
+报告位于`current-ci/closeout-verification-r1`；Windows按工作流跳过OpenSSH。
+新一轮监控能力/知识分类、其他平台桌面及发行安装不在该SHA的验收内。

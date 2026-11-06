@@ -1,5 +1,36 @@
 # Capability ledger
 
+## 2026-11-06: monitoring capabilities and local knowledge categories
+
+The current integration separates core Linux resources, filesystem capacity,
+processes and listening sockets into typed capability observations with explicit
+rechecking. A failed optional tool preserves valid core measurements. Confirmed
+negative observations remain in the authenticated connection's cache and retain
+their actual check time; an expired delivery cannot leave the UI permanently
+disagreeing with that cache. Rendering, theme changes and paused polling add no
+automatic remote work.
+
+Saved knowledge has an optional local category, full-library counts and text
+intersection filtering. An independent bounded category viewport preserves the
+library and review controls. Setting, changing or clearing a category requires a
+complete review and one background save; cancellation writes nothing. Categories
+participate in current-object checks that revoke old reviews, while the model
+context projection and its byte budget omit category metadata.
+
+Both source slices have new non-author approval with no open source findings.
+After rejecting an incomplete cached test run, the fresh 536-input gate passed
+2313 ordinary tests with 23 ignored, 14 rustdoc tests and 131 Python checks with
+one skipped. The rebuilt package and macOS static inspection passed;
+the same package has completed a second scoped macOS run with real Linux SSH
+sampling and B0–B5 category readback. The first failed attempt remains HOLD;
+the second run has independent scoped approval in native-r2, with no new findings.
+Private raw state was removed by owned cleanup; disk conclusions use capture-time
+provenance and durable exports. These stages do not
+establish other desktop platforms, installation or complete native finish. See the [monitoring guide](MONITOR_CAPABILITIES.md),
+[category guide](KNOWLEDGE_CATEGORIES.md) and
+[acceptance record](../testing/records/2026-11-06-monitor-knowledge-categories.md)
+for the current boundary.
+
 ## 2026-11-06: resource history and knowledge batch management
 
 CPU and memory share a five-minute, 60-position in-memory history for the current

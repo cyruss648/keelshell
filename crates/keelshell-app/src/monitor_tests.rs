@@ -1,4 +1,6 @@
 //! Real SSH process responses arriving after the panel has retired its authority.
+#[path = "monitor_tests/capabilities.rs"]
+mod capabilities;
 #[path = "monitor_tests/independent_disk_monitor.rs"]
 mod independent_disk_monitor;
 use super::{Job, MonitorPanel};
@@ -43,6 +45,17 @@ struct Control {
     hold_processes: AtomicBool,
     process_release: Semaphore,
     fail_resources: AtomicBool,
+    df_failure: AtomicUsize,
+    df_commands: AtomicUsize,
+    process_failure: AtomicUsize,
+    process_commands: AtomicUsize,
+    timeout_process_once: AtomicBool,
+    socket_failure: AtomicUsize,
+    timeout_socket_once: AtomicBool,
+    hold_sockets: AtomicBool,
+    socket_release: Semaphore,
+    hold_resources: AtomicBool,
+    resource_release: Semaphore,
 }
 impl Default for Control {
     fn default() -> Self {
@@ -59,6 +72,17 @@ impl Default for Control {
             hold_processes: AtomicBool::new(false),
             process_release: Semaphore::new(0),
             fail_resources: AtomicBool::new(false),
+            df_failure: AtomicUsize::new(0),
+            df_commands: AtomicUsize::new(0),
+            process_failure: AtomicUsize::new(0),
+            process_commands: AtomicUsize::new(0),
+            timeout_process_once: AtomicBool::new(false),
+            socket_failure: AtomicUsize::new(0),
+            timeout_socket_once: AtomicBool::new(false),
+            hold_sockets: AtomicBool::new(false),
+            socket_release: Semaphore::new(0),
+            hold_resources: AtomicBool::new(false),
+            resource_release: Semaphore::new(0),
         }
     }
 }
@@ -96,10 +120,23 @@ impl server::Handler for Peer {
         let command = String::from_utf8_lossy(data);
         let (body, status) = if command.contains("ss -H -lntup") {
             self.0.sockets.fetch_add(1, Ordering::Release);
+            if self.0.timeout_socket_once.swap(false, Ordering::AcqRel) {
+                // Leave this accepted channel silent. The production SSH exec
+                // deadline must fail it; the next channel can still succeed.
+                return Ok(());
+            }
+            if self.0.hold_sockets.load(Ordering::Acquire) {
+                self.0
+                    .socket_release
+                    .acquire()
+                    .await
+                    .map_err(|_| russh::Error::Disconnect)?
+                    .forget();
+            }
             (
                 "tcp LISTEN 0 128 127.0.0.1:2222 0.0.0.0:* users:((\"fixture\",pid=42,fd=3))\n"
                     .into(),
-                0,
+                self.0.socket_failure.load(Ordering::Acquire) as u32,
             )
         } else if command.contains("command -v nc") {
             self.0.probes.fetch_add(1, Ordering::Release);
@@ -131,7 +168,20 @@ impl server::Handler for Peer {
             permit.forget();
             (String::new(), 0)
         } else if command.contains("cat /proc/stat") {
+            if self.0.hold_resources.load(Ordering::Acquire) {
+                self.0
+                    .resource_release
+                    .acquire()
+                    .await
+                    .map_err(|_| russh::Error::Disconnect)?
+                    .forget();
+            }
             let sample = self.0.disk_samples.fetch_add(1, Ordering::AcqRel);
+            let df_failure = self.0.df_failure.load(Ordering::Acquire);
+            let collecting_df = command.contains("df -Pk");
+            if collecting_df {
+                self.0.df_commands.fetch_add(1, Ordering::AcqRel);
+            }
             let mut disks = String::from(
                 "@@KS:bootid@@\n11ac8d57-72c6-4ee6-93bf-68724d27e715\n@@KS:diskstats@@\n",
             );
@@ -143,7 +193,18 @@ impl server::Handler for Peer {
                 let sectors = 200 + sample * 20;
                 disks.push_str(&format!("8 {index} fixture{index} {ticks} 0 {sectors} {ticks} {ticks} 0 {sectors} {ticks} 0 {ticks} {ticks}\n"));
             }
-            let body = "@@KS:platform@@\nLinux\n@@KS:stat@@\ncpu 100 20 30 400 50 0 0 0\nbtime 1700000000\n@@KS:meminfo@@\nMemTotal: 1024 kB\nMemAvailable: 256 kB\n@@KS:loadavg@@\n1.25 0.50 0.25 1/100 45\n@@KS:uptime@@\n100.00 75.00\n@@KS:net@@\nInter-| Receive | Transmit\n face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed\n lo: 100 1 0 0 0 0 0 0 200 1 0 0 0 0 0 0\n@@KS:df@@\nFilesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\n@@KS:end@@\n";
+            let mut body = "@@KS:platform@@\nLinux\n@@KS:stat@@\ncpu 100 20 30 400 50 0 0 0\nbtime 1700000000\n@@KS:meminfo@@\nMemTotal: 1024 kB\nMemAvailable: 256 kB\n@@KS:loadavg@@\n1.25 0.50 0.25 1/100 45\n@@KS:uptime@@\n100.00 75.00\n@@KS:net@@\nInter-| Receive | Transmit\n face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed\n lo: 100 1 0 0 0 0 0 0 200 1 0 0 0 0 0 0\n@@KS:df@@\nFilesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\n@@KS:end@@\n".to_owned();
+            if !collecting_df || df_failure != 0 {
+                let status = if collecting_df {
+                    df_failure.to_string()
+                } else {
+                    "cached".into()
+                };
+                body = body.replace("Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\n", &format!("@@KS:df-status@@\n{status}\n"));
+            }
+            if collecting_df && df_failure == 2 {
+                session.extended_data(id, 1, b"df: invalid option -- P\n".to_vec())?;
+            }
             (
                 body.replace("100.00 75.00", &format!("{}.00 75.00", 100 + sample * 5))
                     .replace(
@@ -162,6 +223,10 @@ impl server::Handler for Peer {
                 },
             )
         } else if command.contains("ps -ww -eo") {
+            self.0.process_commands.fetch_add(1, Ordering::Release);
+            if self.0.timeout_process_once.swap(false, Ordering::AcqRel) {
+                return Ok(());
+            }
             if self.0.hold_processes.load(Ordering::Acquire) {
                 let permit = self
                     .0
@@ -171,7 +236,11 @@ impl server::Handler for Peer {
                     .map_err(|_| russh::Error::Disconnect)?;
                 permit.forget();
             }
-            ("42 tester 2.5 1.0 fixture-worker\n".into(), 0)
+            let status = self.0.process_failure.load(Ordering::Acquire);
+            if status == 2 {
+                session.extended_data(id, 1, b"ps: unrecognized option -- e\n".to_vec())?;
+            }
+            ("42 tester 2.5 1.0 fixture-worker\n".into(), status as u32)
         } else {
             (String::new(), 64)
         };
