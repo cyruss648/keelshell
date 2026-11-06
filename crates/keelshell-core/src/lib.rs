@@ -37,6 +37,7 @@ mod scheduled_workflow;
 mod snippet_template;
 mod snippets;
 mod store;
+mod text_document;
 mod text_merge;
 mod text_patch;
 mod theme;
@@ -115,6 +116,7 @@ pub use model::{
 pub use network_diagnostic::{
     DIAGNOSTIC_REMOTE_SECONDS, MAX_DIAGNOSTIC_INPUT_BYTES, MAX_DIAGNOSTIC_OUTPUT_BYTES,
     NetworkDiagnosticInputError, NetworkDiagnosticKind, NetworkDiagnosticRequest,
+    NetworkDiagnosticTracerouteOptions, TracerouteFamily, TracerouteProtocol,
 };
 pub use openssh::{
     MAX_OPENSSH_CONFIG_BYTES, MAX_OPENSSH_ENTRIES, MAX_OPENSSH_INCLUDE_DEPTH,
@@ -165,6 +167,7 @@ pub use workflow_audit::{
     WorkflowTaskAudit,
 };
 
+pub use text_document::{TextDocumentError, TextLineEnding, Utf8TextDocument, Utf8TextFormat};
 pub use text_merge::{
     MAX_TEXT_EDIT_BYTES, MAX_TEXT_EDIT_LINES, TextEditError, TextMergeChoice, TextMergeConflict,
     TextMergePlan, merge_text,

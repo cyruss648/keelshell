@@ -155,6 +155,47 @@ exec 96051 exit 0/reaped。后续选择/guard 修订不修改 manifest 或 lock�
 即使通过，也只签CLI→原生产Python/iputils的probe层，不代签Rust传输/解析、
 审核UI或native。不得把工具版本检查记作已发送Echo。
 
+准备r2以28项离线检查和新的非作者限定复核关闭这两P2；
+父一次执行run`77cc4b8f8d5d496b817b1b5b4018404f`仍在容器准入HOLD：
+检查工具假设HostConfig保留原始CapAdd/CapDrop，但当前Podman返回归一化差集。
+原始inspect的EffectiveCaps/BoundingCaps均精确为SETGID、SETUID、SYS_CHROOT；
+这是创建态配置读回，不是已运行内核权限验收。
+没有复制材料、启动容器/sshd、建立SSH或发送Echo。
+controller12447实际exit1/reaped，父exec19849已实际wait、exit1/reaped；
+原300秒期限内共2.467205秒结束，清理1.913272秒，
+container/network/private均不存在、18个直接CLI子进程退出0/reaped，
+生产五项摘要保持。`cleanup.verified=true`不改变probe失败，也不代签未启动的sshd回收。
+本轮64份原件逐摘要复制到`real-icmp/runtime-r2/`，
+外层回执为`real-icmp/runtime-r2-readback.json`。
+r3只纠正准备工具对归一化元数据的假设，必须继续严格核验精确能力集合；
+原r2失败保持，不自动重试或放宽为真实探测成功。
+
+### r3的实际成功范围
+
+r3强制要求EffectiveCaps及BoundingCaps两个字段均存在，
+各自为无重复的规范字符串列表，精确等于三项约定能力；没有HostConfig fallback。
+31项离线检查通过，新的非作者批准单次执行，原argv/生产命令/common/execute/TTL均不变。
+父一次运行`9c480d64ad4547e99f5c683b59d61572`已结束：
+exec92077已实际wait、exit0/reaped，终态`PASS_REAL_SSH_LOOPBACK_PROBE_ONLY`。
+
+两个独立认证的OpenSSH CLI连接携带从冻结Rust模板重建的精确生产Python命令，
+分别探测127.0.0.1及::1；各为四次工具计数尝试/四个唯一回复，
+corrupted/duplicates/errors均零，iputils20240117的完整版本输出和RTT/timing已校验。
+普通权限账号实际可打开双栈datagram ICMP sockets，未增加NET_RAW/NET_ADMIN；
+版本/权限读回本身没有发送Echo。这不是Rust同一SSH连接内的channel复用验收，
+也不把quiet工具计数提升为线上发送或丢包证明。
+
+总11.065355秒，清理3.062863秒，原300秒总TTL未延长；
+28个直接CLI子进程均退出0并实际reap；sshd实际wait/reap的清理退出码为-9，
+已观察ping的精确argv/PID/birth随后消失。container/network/private均删除，
+生产五项输入前后保持。103份原件逐摘要复制到本轮`real-icmp/runtime-r3/`，
+父回执在`real-icmp/runtime-r3-readback.json`。
+新的非作者`real-loopback-runtime-r3`限定批准实际probe结果，
+开放P0/P1/P2/P3=0；核对103份作者/父副本、28CLI及sshd回收、
+实际时间和五项生产输入，不运行新的runtime，也不扩大至Rust/UI路径。
+专用tools image保留给下一轮原生监控准备，基础镜像不动。
+当前不签Rust传输/结果解析、审核UI、真实错误/取消/迟到矩阵、外部路由或native。
+
 ## 文件拖放的独立诊断
 
 原 preflight `1b9beeac25b445039161db570e320414` 保留。

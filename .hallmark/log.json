@@ -2,31 +2,65 @@
   {
     "date": "2026-11-06",
     "scope": "app",
-    "shape": "app screen",
+    "shape": "existing native remote text review and protocol diagnostics",
     "theme": [
       "frost",
       "graphite",
       "lavender"
     ],
-    "entry": "workbench chrome hierarchy",
-    "signature": "the active SSH session reads as the current target inside a quiet three-layer shell",
-    "nav": "global toolbar, connection rail, session strip, tool strip, status line",
-    "footer": "semantic status and existing reviewed actions",
-    "imagery": "not applicable: native Rust/GPUI app screen",
-    "sections": [
-      "global chrome",
-      "connection selector",
-      "session strip",
-      "remote pane",
-      "tool strip",
-      "status line"
+    "signature": "exact complete outbound text beside explicit format, target and bounded diagnostic consent",
+    "material": "user drafts and authenticated remote observations; no invented host results",
+    "preserve": "semantic registry, Kit controls, bilingual review, pane/tab authority and background I/O",
+    "introduce": [
+      "BOM and uniform line ending review",
+      "bounded explicit protocol/family/hops/probes/wait",
+      "unknown route rows with fixed result reasons"
     ],
-    "waived": [
-      "browser render lint: not applicable to Rust/GPUI source"
+    "sweep": "Combined543 inputs/21 paths;full-gate-r3 actual0/reaped,2355ordinary/23ignored,14rustdoc,Python131/1skip;42 new and204 baseline names passed. combined-r3/r4 scoped source/gate/new-package approvals. Immutable macOS app9e83d83a has38 real AX/JPEG pairs: BOM/CRLF cancel/save,SSH UI UDPv4/v6 one-hop replies. Non-author native-r1 approves this limited scope;NR1-P2-01 inline editor footer actions remain partly clipped;merge-adopt/save,late-save,consecutive-zero-newline NOT_RUN. Full native finish HOLD. Web render not_applicable to Rust/GPUI.",
+    "native_evidence": "docs/testing/records/2026-11-06-editor-traceroute-native.md",
+    "finish_review": "APPROVE_LIMITED_543_INPUT_BATCH_DELIVERY_WITH_OPEN_P2_AND_EXPLICIT_NATIVE_HOLDS;full native finish HOLD"
+  },
+  {
+    "date": "2026-11-06",
+    "scope": "app",
+    "shape": "native per-function monitoring states and category-organized local knowledge",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
     ],
-    "sweep": "Focused design 4, workbench 5, theme 7 and navigation 21 tests passed; full scripts/check.py exit 0; second independent review APPROVE; native package and cross-platform desktop matrix remain open.",
-    "native_evidence": "docs/testing/records/2026-11-06-workbench-chrome-polish.md",
-    "finish_review": "independent source review APPROVE; native capture pending"
+    "signature": "available measurements retain their own status while local knowledge categories remain separate from execution authority",
+    "material": "authenticated Linux command results and user-reviewed saved records",
+    "preserve": "semantic tokens,Kit controls,bilingual status,existing sample and persistence ownership",
+    "introduce": [
+      "per-function availability with explicit recheck",
+      "category counts and intersecting text filters",
+      "full original/candidate category review"
+    ],
+    "sweep": "536-input fresh full-gate-r2 exit0/reaped:2313ordinary/23ignored,14rustdoc,Python131run/1skip. combined-r1 non-author approves fixed package-r2. Native first attempt HOLD retained. Revised-tool second run completed28AX/JPEG pairs;core/ps20rounds,ss cached/rechecked,paused display and B0-B5 zeroexec/PTY counter increment. app/outer0/reaped in706.365seconds;owned cleanup verified and tools image removed. Independent native-r2 APPROVE_SCOPED_NATIVE_A_B_R4;newP0/P1/P2/P3=0;private raw state cleaned,capture-time durable exports reviewed. Web render not_applicable to Rust/GPUI.",
+    "native_evidence": "docs/testing/records/2026-11-06-monitor-knowledge-categories.md",
+    "finish_review": "native-r2 approves scoped macOS A/B evidence with no new findings; full themes/sizes/input/accessibility/Windows/Linux native finish remains OPEN"
+  },
+  {
+    "date": "2026-11-06",
+    "scope": "app",
+    "shape": "native host resource rows and local knowledge review list",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "signature": "real sample time and explicit gaps alongside precise full-entry deletion reviews",
+    "material": "authenticated-session sampling; actual saved local entries; no invented metrics or hosts",
+    "preserve": "semantic registry and tokens, existing monitor cadence, separate Ask/editor selection, explicit review and serialized persistence",
+    "introduce": [
+      "bounded CPU/memory trend lines with text alternatives",
+      "independent deletion checkboxes and 32-entry complete batch review",
+      "separate labeled source metadata with fixed confirm/cancel actions"
+    ],
+    "sweep": "530-input complete gate exit0/reaped:2276ordinary/23ignored,14doc,Python131run/1skip;app1002/2ignored included. A status P3 closed by narrow regression and independent closeout. B final source and labeled-row delta independently approved. Same-input build/package14cb801e verified with5 members/41 assets. Combined-r1 independently approves source/gate/package attribution with no open findings; final docs separate; subsequent same-package native:17 pairs/16 real snapshot+ps rounds and reviewed synthetic deletion observed,outer42584/app0/reaped and cleanup complete,sshd-9/reaped with original warnings retained; native-r4 independently approves scoped A/B with same-run parent read-only exports;known capture-tool P2 and failed-inventory-summary P3 remain open; original capture refusal preserved and parent read-only exports separate; full native finish OPEN; web render not_applicable to Rust/GPUI.",
+    "native_evidence": "docs/testing/records/2026-11-06-resource-knowledge-integration.md",
+    "finish_review": "native-r4 approves scoped macOS A/B evidence with parent read-only exports;capture-tool P2 and failed-inventory-summary P3 remain open;full themes/sizes/input/accessibility/Windows/Linux native finish OPEN"
   },
   {
     "date": "2026-11-06",

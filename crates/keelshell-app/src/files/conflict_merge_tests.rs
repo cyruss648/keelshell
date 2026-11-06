@@ -1,6 +1,9 @@
 //! Real GPUI review actions and exact bytes on owned loopback SSH/SFTP.
 use super::*;
 
+#[path = "editor_format_tests.rs"]
+mod editor_format_tests;
+
 async fn open(h: &Harness, path: &str, base: &[u8], draft: &str, cx: &mut TestAppContext) {
     h.seed(path, base);
     cx.update_window(h.window, |_, window, cx| {
@@ -188,10 +191,34 @@ async fn manual_merge_and_patch_remain_drafts_until_full_review(cx: &mut TestApp
         assert_eq!(panel.editor.read(cx).value().as_str(), "手工\r\npatched")
     });
     assert_eq!(h.read("/手工.txt"), b"remote\n");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
     h.click(cx, "save-remote-file");
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), "手工\r\npatched");
+        match &panel
+            .pending
+            .as_ref()
+            .checked_option("exact LF save review")
+            .1
+        {
+            Operation::Save {
+                reviewed, content, ..
+            } => {
+                assert_eq!(reviewed.content, b"remote\n");
+                assert_eq!(content, "手工\npatched".as_bytes());
+            }
+            _ => panic!("expected a reviewed save"),
+        }
+    });
+    assert_eq!(h.read("/手工.txt"), b"remote\n");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
     h.click(cx, "confirm-file-operation");
     h.idle(cx).await;
-    assert_eq!(h.read("/手工.txt"), "手工\r\npatched".as_bytes());
+    assert_eq!(h.read("/手工.txt"), "手工\npatched".as_bytes());
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), "手工\npatched");
+        assert!(!panel.has_unsaved_draft(cx));
+    });
 }
 
 #[gpui_kit::test]
@@ -477,7 +504,7 @@ async fn logical_diff_does_not_claim_byte_equality_for_line_ending_changes(
 ) {
     let h = Harness::new(cx);
     h.idle(cx).await;
-    open(&h, "/line-endings.txt", b"a\r\nb\r\n", "a\nb\n", cx).await;
+    open(&h, "/line-endings.txt", b"a\r\nb\n", "a\nb\n", cx).await;
     cx.update(|cx| {
         h.panel
             .update(cx, |panel, cx| panel.toggle_diff_preview(cx));
@@ -490,7 +517,7 @@ async fn logical_diff_does_not_claim_byte_equality_for_line_ending_changes(
         assert!(panel.has_unsaved_draft(cx));
         assert!(panel.pending.is_none());
     });
-    assert_eq!(h.read("/line-endings.txt"), b"a\r\nb\r\n");
+    assert_eq!(h.read("/line-endings.txt"), b"a\r\nb\n");
     assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
 }
 

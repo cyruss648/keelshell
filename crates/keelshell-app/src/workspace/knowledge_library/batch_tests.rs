@@ -311,3 +311,148 @@ fn workspace_knowledge_batch_flat_review_footer_is_reachable_in_compact_and_wide
         assert!(fixture.store.config_backups().unwrap().is_empty());
     }
 }
+
+fn category_draft(fixture: &Fixture, value: &str, cx: &mut TestAppContext) {
+    cx.update_window(fixture.window, |_, window, cx| {
+        let library = fixture
+            .workspace
+            .read(cx)
+            .assistant
+            .read(cx)
+            .knowledge_library
+            .clone();
+        library.update(cx, |view, cx| {
+            view.set_category_draft_for_test(value, window, cx)
+        });
+    })
+    .unwrap();
+    cx.run_until_parked();
+}
+
+#[gpui_kit::test]
+async fn workspace_knowledge_category_cancel_zero_write_then_set_change_clear_save_once(
+    cx: &mut TestAppContext,
+) {
+    let fixture = fixture(cx, 1280., 840.);
+    let original = fixture.state.clone();
+    for value in ["Ops", "ops", ""] {
+        let before = std::fs::read(fixture.store.path()).unwrap();
+        let backups = fixture.store.config_backups().unwrap().len();
+        cx.update_window(fixture.window, |_, window, cx| {
+            window.render_frame(cx);
+            window.click(
+                format!(
+                    "knowledge-category-edit-{}",
+                    original.knowledge_entries[0].id()
+                ),
+                cx,
+            );
+        })
+        .unwrap();
+        category_draft(&fixture, value, cx);
+        cx.update_window(fixture.window, |_, window, cx| {
+            window.render_frame(cx);
+            window.click("knowledge-category-review", cx);
+            window.render_frame(cx);
+            assert!(window.find("knowledge-library-confirm").visible());
+            window.click("knowledge-library-cancel", cx);
+        })
+        .unwrap();
+        cx.run_until_parked();
+        assert_eq!(std::fs::read(fixture.store.path()).unwrap(), before);
+        assert_eq!(fixture.store.config_backups().unwrap().len(), backups);
+        cx.update_window(fixture.window, |_, window, cx| {
+            window.render_frame(cx);
+            window.click("knowledge-category-review", cx);
+            window.render_frame(cx);
+            window.click("knowledge-library-confirm", cx);
+        })
+        .unwrap();
+        cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+            !fixture.workspace.read(cx).saving
+        })
+        .await;
+        let saved = fixture.store.load().unwrap();
+        let expected_category = (!value.is_empty()).then_some(value);
+        assert_eq!(saved.knowledge_entries[0].category(), expected_category);
+        assert_eq!(
+            saved.knowledge_entries[0]
+                .with_reviewed_category(None)
+                .unwrap(),
+            original.knowledge_entries[0]
+        );
+        assert_eq!(
+            saved.knowledge_entries[1..],
+            original.knowledge_entries[1..]
+        );
+        assert_eq!(fixture.store.config_backups().unwrap().len(), backups + 1);
+        fixture.workspace.read_with(cx, |workspace, _| {
+            assert_eq!(workspace.state, saved);
+        });
+    }
+}
+
+#[gpui_kit::test]
+async fn workspace_knowledge_category_external_conflict_reload_never_replays_review(
+    cx: &mut TestAppContext,
+) {
+    let fixture = fixture(cx, 1280., 840.);
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click(
+            format!(
+                "knowledge-category-edit-{}",
+                fixture.state.knowledge_entries[0].id()
+            ),
+            cx,
+        );
+    })
+    .unwrap();
+    category_draft(&fixture, "Ops", cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("knowledge-category-review", cx);
+    })
+    .unwrap();
+    let other = StateStore::new(fixture.store.path().to_owned());
+    let mut external = other.load().unwrap();
+    external.knowledge_entries[0] = external.knowledge_entries[0]
+        .with_reviewed_category(Some("External"))
+        .unwrap();
+    external.settings.language = Language::En;
+    let external = other.save(&external).unwrap();
+    let before = std::fs::read(fixture.store.path()).unwrap();
+    let backups = fixture.store.config_backups().unwrap().len();
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("knowledge-library-confirm", cx);
+    })
+    .unwrap();
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).saving
+    })
+    .await;
+    assert_eq!(std::fs::read(fixture.store.path()).unwrap(), before);
+    assert_eq!(fixture.store.config_backups().unwrap().len(), backups);
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.try_find("knowledge-library-confirm").is_none());
+        window.click("knowledge-library-reload", cx);
+    })
+    .unwrap();
+    cx.wait_for(fixture.window, Duration::from_secs(3), |_, cx| {
+        !fixture.workspace.read(cx).state_reloading
+    })
+    .await;
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.try_find("knowledge-library-confirm").is_none());
+        assert!(window.try_find("knowledge-category-review").is_none());
+        fixture.workspace.read_with(cx, |workspace, _| {
+            assert_eq!(workspace.state, external);
+        });
+    })
+    .unwrap();
+    assert_eq!(std::fs::read(fixture.store.path()).unwrap(), before);
+    assert_eq!(fixture.store.config_backups().unwrap().len(), backups);
+}

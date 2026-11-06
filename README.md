@@ -38,7 +38,7 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 
 [原生工作区](docs/product/NATIVE_WORKBENCH.md)提供连接与主机信息侧栏、独立会话标签栏，以及标明当前选择的文件、命令和隧道入口。收起侧栏或切换 AI 助手会保留会话与草稿。
 
-连接树候选补充目录折叠、方向键浏览、搜索恢复和单一 Tab 停靠点。
+连接树支持目录折叠、方向键浏览、搜索恢复和单一 Tab 停靠点。
 [限定原生记录](docs/testing/records/2026-11-05-navigation-keyboard.md)保留早期成功观察、
 后期按键无响应及未成功的输入正控；完整键盘隔离仍开放。
 [导航、分屏和 Ask 诊断组合](docs/testing/records/2026-11-05-workspace-integration.md)的源码提交 e331372 已通过三平台 CI，
@@ -56,11 +56,11 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 | 工作流 | 能力 |
 | --- | --- |
 | **连接管理** | 一次性快速连接、连接目录树、标签、收藏、最近连接与回收站；批量组织、导入导出、审核式加密配置同步；密码、私钥、SSH Agent 与键盘交互认证；跳板与 SOCKS5 / HTTP CONNECT 上游代理 |
-| **远程终端** | 多会话标签、分屏（嵌套布局候选验证中）、ANSI/VT 终端、滚动区搜索、选择、粘贴与中文输入；原标签手动重连及可选的有界自动重连 |
+| **远程终端** | 多会话与逐叶标签、嵌套分屏、显式布局保存和单窗启动恢复、ANSI/VT 终端、滚动区搜索、选择、粘贴与中文输入；原标签手动重连及可选的有界自动重连 |
 | **远程文件** | SFTP 浏览、文件和递归目录传输、暂停与内容校验续传；权限修改、文本编辑、逐项冲突选择的三方合并与严格 patch 草稿；目录比较、内容校验、双向合并及逐项审核的目录镜像 |
 | **命令与任务** | 会话历史、命令片段、显式参数、远端命令与路径补全；逐目标批量命令、依赖工作流、有限定时与只读任务记录 |
-| **监控与网络** | Linux 主机和逐设备磁盘 I/O 状态；监听端口、远程 DNS / TLS / HTTP(S) HEAD 诊断；显式审核的有界 [ICMP ping 候选](docs/product/ICMP_DIAGNOSTICS.md)；本地及远端 TCP 转发、回环 SOCKS5 隧道；[命名规则的审核式增改删和停止](docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md) |
-| **AI 助手** | 命名模型 API / Codex CLI / Claude Code 配置；模型发现与连接测试、明确上下文、完整请求预览、回答、诊断建议及逐轮审核的有限 Agent 工作流；来源绑定的本地知识保存、搜索及审核式编辑/删除 |
+| **监控与网络** | Linux 主机和逐设备磁盘 I/O 状态、按项能力说明与显式复查；监听端口、远程 DNS / TLS / HTTP(S) HEAD 诊断；显式审核的有界 [ICMP ping 候选](docs/product/ICMP_DIAGNOSTICS.md)；本地及远端 TCP 转发、回环 SOCKS5 隧道；[命名规则的审核式增改删和停止](docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md) |
+| **AI 助手** | 命名模型 API / Codex CLI / Claude Code 配置；模型发现与连接测试、明确上下文、完整请求预览、回答、诊断建议及逐轮审核的有限 Agent 工作流；来源绑定的本地知识保存、搜索与分类、审核式编辑及多选整批删除 |
 | **对外 MCP** | 外部智能体读取明确授权的会话信息、终端片段、SFTP 与监控；命令和文件修改先提交提案，在桌面应用中审阅后执行 |
 | **配置恢复** | 保存前轮转保留最多八份本机配置备份；恢复影响预览、明确确认、原件保留与并发变化拒绝；凭据库独立管理 |
 | **主题与外观** | 霜白、曜石、雾紫三套内置主题；各自支持浅色、深色和跟随系统，选择持久化，切换保留会话及草稿；[主题指南](docs/product/THEME_PREFERENCES.md) |
@@ -68,11 +68,19 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 
 传输与镜像取消会保留已完成项；断线后不会自动重放命令、传输或任务。目录内容比较和同步具有明确的大小、类型及路径限制，协议诊断需要远端 POSIX / Python 3.8+。具体操作与边界见[文件工作区](docs/product/FILES_WORKSPACE.md)、[目录镜像](docs/product/DIRECTORY_MIRROR.md)、[远程协议诊断](docs/product/REMOTE_PROTOCOL_DIAGNOSTICS.md)和[能力清单](docs/product/CAPABILITIES.md)。
 
-ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝试和未获回复不能证明成功发包或纯粹网络丢包。真实工具、双栈网络及原生验收仍独立开放，当前整合进度见[诊断记录](docs/testing/records/2026-11-06-reviewed-diagnostics-integration.md)。
+ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝试和未获回复不能证明成功发包或纯粹网络丢包。精确生产Python命令已通过自有OpenSSH CLI的真实Linux双栈回环probe；Rust传输/解析、审核UI、外部路由及原生验收仍独立开放，见[诊断记录](docs/testing/records/2026-11-06-reviewed-diagnostics-integration.md)。
 
 文件工作区的[多选与审核式批量传输](docs/product/FILE_BROWSER_BATCH_TRANSFERS.md)已接入选择、逐目标预览与传输队列。拖放上传已实现受控 GPUI 事件路径，原生文件管理器拖放仍有独立验收缺口；当前证据与下一步以[交接文档](docs/HANDOFF.md)为准。
 
-[本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；可将已保存条目[显式加入 Ask](docs/product/AI_KNOWLEDGE_CONTEXT.md)，核对历史来源和完整请求后再发送。移除、编辑或重新加载会撤销旧审核；批量管理及完整跨平台原生验收仍待完成。
+[本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；[多选整批删除](docs/product/KNOWLEDGE_BULK_MANAGEMENT.md)最多32条，审核包含筛选隐藏项，取消不写入，确认只保存一次。管理选择与[显式加入 Ask](docs/product/AI_KNOWLEDGE_CONTEXT.md)分别维护；发送前仍须核对历史来源和完整请求，保存开始就撤销受影响的旧审核。工程验证和新包原生验收见[本轮记录](docs/testing/records/2026-11-06-resource-knowledge-integration.md)。
+
+[主机资源趋势](docs/product/HOST_RESOURCE_TRENDS.md)复用当前认证会话的Linux采样，显示最近五分钟、最多60点的CPU和内存历史。缺失值不作零值，暂停、错误或计数异常会断段；显示和切换主题不增加远端命令。历史仅保存在对应会话内存中，真实采样与原生平台覆盖按本轮记录分别验收。
+
+[按项监控能力](docs/product/MONITOR_CAPABILITIES.md)让文件系统容量、进程或监听工具不可用时保留其他有效资源，并提供原因、实际检查年龄和显式重新检测。[知识分类](docs/product/KNOWLEDGE_CATEGORIES.md)提供全部、未分类、分类计数与文本交集筛选；更改分类先审核，标签只用于本地整理。两项新增切片的组合工程与同包原生进度见[验收记录](docs/testing/records/2026-11-06-monitor-knowledge-categories.md)。
+
+[文本格式保持](docs/product/REMOTE_TEXT_FORMAT.md)保留一个UTF-8文件头BOM与原有单一LF/CRLF策略，混合换行或仅CR草稿原样保存。审核和目标完整读回比较精确字节，不强制文件末尾换行；格式发生不兼容变化时需重新读取并审核。新包已有BOM/CRLF取消与确认保存的限定macOS观察，完整范围见[格式记录](docs/testing/records/2026-11-06-editor-format.md)。
+
+[审核式 traceroute](docs/product/TRACEROUTE_DIAGNOSTICS.md)支持显式选择 UDP/ICMP、IPv4/IPv6 和有界探测参数，确认前展示完整目标与命令。缺失跳和星号保持未知；同包真实SSH UI已取得UDP双栈回环的一跳回复。限定原生、未完成的合并验收与底部操作可达性问题见[原生记录](docs/testing/records/2026-11-06-editor-traceroute-native.md)；完整工程见[组合记录](docs/testing/records/2026-11-06-editor-traceroute-integration.md)。
 
 文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。文件审核可以展开，确认与取消保持可见；草稿和差异输入提供明确的编辑入口。操作说明见[审核与编辑](docs/product/FILE_REVIEW_AND_FOCUS.md)和[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；macOS 自有 SSH/SFTP 的两次草稿与保存流程已完成完整内容读回，完整界面与跨平台验收继续进行，见[限定原生记录](docs/testing/records/2026-10-07-text-merge-patch-native.md)。
 

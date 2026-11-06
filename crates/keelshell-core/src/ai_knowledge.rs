@@ -436,16 +436,30 @@ impl KnowledgeEntry {
 /// the immutable session and capture metadata that made the review eligible for
 /// saving, and it has a validating deserializer so a hand-edited state file
 /// cannot bypass the local content gate.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Deserialize)]
 #[serde(try_from = "SavedKnowledgeEntryWire")]
 pub struct SavedKnowledgeEntry {
     id: Uuid,
     entry: KnowledgeEntry,
     session_id: String,
     capture_type: KnowledgeCaptureType,
+    category: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl fmt::Debug for SavedKnowledgeEntry {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SavedKnowledgeEntry")
+            .field("id", &self.id)
+            .field("entry", &self.entry)
+            .field("session_id", &self.session_id)
+            .field("capture_type", &self.capture_type)
+            .field("has_local_category", &self.category.is_some())
+            .finish()
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SavedKnowledgeEntryWire {
     id: Uuid,
@@ -456,10 +470,18 @@ struct SavedKnowledgeEntryWire {
     title: String,
     summary: String,
     outcome: KnowledgeOutcome,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    category: Option<String>,
 }
 
 impl Serialize for SavedKnowledgeEntry {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.wire().serialize(serializer)
+    }
+}
+
+impl SavedKnowledgeEntry {
+    fn wire(&self) -> SavedKnowledgeEntryWire {
         SavedKnowledgeEntryWire {
             id: self.id,
             source: self.entry.source.clone(),
@@ -469,8 +491,8 @@ impl Serialize for SavedKnowledgeEntry {
             title: self.entry.title.clone(),
             summary: self.entry.summary.clone(),
             outcome: self.entry.outcome,
+            category: self.category.clone(),
         }
-        .serialize(serializer)
     }
 }
 
@@ -498,6 +520,8 @@ impl TryFrom<SavedKnowledgeEntryWire> for SavedKnowledgeEntry {
         if contains_sensitive_marker(&title) || contains_sensitive_marker(&wire.summary) {
             return Err("saved knowledge contains sensitive content");
         }
+        let category = checked_category(wire.category.as_deref())
+            .map_err(|_| "invalid saved knowledge category")?;
         let entry = KnowledgeEntry {
             source: wire.source,
             occurred_at: wire.occurred_at,
@@ -510,11 +534,15 @@ impl TryFrom<SavedKnowledgeEntryWire> for SavedKnowledgeEntry {
             entry,
             session_id: wire.session_id,
             capture_type: wire.capture_type,
+            category,
         })
     }
 }
 
 impl SavedKnowledgeEntry {
+    /// Maximum raw UTF-8 bytes in one optional local organization label.
+    pub const MAX_CATEGORY_BYTES: usize = 128;
+
     /// Build one persisted record from a complete, content-gated document.
     ///
     /// The current application slice intentionally accepts exactly one entry;
@@ -571,6 +599,43 @@ impl SavedKnowledgeEntry {
         Ok(reviewed)
     }
 
+    /// Return a copy with one reviewed local category, preserving all other fields.
+    ///
+    /// `None` or whitespace-only input clears the category. Names are trimmed,
+    /// compared case-sensitively, and never change the factual source kind.
+    /// This operation performs no I/O and grants no model or session authority.
+    ///
+    /// # Errors
+    /// Returns [`KnowledgeError::CategoryTooLarge`] when the raw input exceeds
+    /// [`Self::MAX_CATEGORY_BYTES`], [`KnowledgeError::InvalidCategory`] for any
+    /// control character, or [`KnowledgeError::SensitiveGeneratedContent`] for a
+    /// sensitive marker. Error messages never include the supplied label.
+    pub fn with_reviewed_category(&self, category: Option<&str>) -> Result<Self, KnowledgeError> {
+        let category = checked_category(category)?;
+        let mut reviewed = self.clone();
+        reviewed.category = category;
+        Ok(reviewed)
+    }
+
+    /// Return the optional local category without resolving the historical source.
+    pub fn category(&self) -> Option<&str> {
+        self.category.as_deref()
+    }
+
+    /// Serialize a historical record for explicit context review, omitting local categories.
+    ///
+    /// The caller must validate the exact saved selection before composing and
+    /// retain the existing redaction, request preview and send confirmation gates.
+    /// Local organization labels are never model context or execution authority.
+    ///
+    /// # Errors
+    /// Returns a serialization error if the complete historical record cannot be encoded.
+    pub fn context_record(&self) -> Result<String, serde_json::Error> {
+        let mut wire = self.wire();
+        wire.category = None;
+        serde_json::to_string(&wire)
+    }
+
     fn new(
         id: Uuid,
         entry: KnowledgeEntry,
@@ -594,6 +659,7 @@ impl SavedKnowledgeEntry {
             entry,
             session_id,
             capture_type,
+            category: None,
         })
     }
 
@@ -649,6 +715,12 @@ pub(crate) fn validate_saved_knowledge_entries(
             return Err(ValidationError::new(
                 "knowledge_entries",
                 "saved knowledge contains sensitive content",
+            ));
+        }
+        if checked_category(entry.category()).is_err() {
+            return Err(ValidationError::new(
+                "knowledge_entries.category",
+                "invalid local knowledge category",
             ));
         }
     }
@@ -932,6 +1004,12 @@ pub enum KnowledgeError {
     /// The complete reviewed document is not eligible for persistence.
     #[error("knowledge document is not eligible for persistence")]
     NotPersistable,
+    /// A local category contains unsupported control characters.
+    #[error("local knowledge category contains unsupported control data")]
+    InvalidCategory,
+    /// A local category exceeds its raw UTF-8 byte budget.
+    #[error("local knowledge category exceeds the 128-byte limit")]
+    CategoryTooLarge,
 }
 
 /// Pure in-memory operations for explicit local knowledge and runbooks.
@@ -1221,6 +1299,26 @@ fn checked_single_line(value: &str, limit: usize) -> Result<String, KnowledgeErr
     }
     checked_text(value, limit)?;
     Ok(value.trim().to_owned())
+}
+
+fn checked_category(value: Option<&str>) -> Result<Option<String>, KnowledgeError> {
+    let Some(value) = value else {
+        return Ok(None);
+    };
+    if value.len() > SavedKnowledgeEntry::MAX_CATEGORY_BYTES {
+        return Err(KnowledgeError::CategoryTooLarge);
+    }
+    if value.chars().any(char::is_control) {
+        return Err(KnowledgeError::InvalidCategory);
+    }
+    let value = value.trim();
+    if value.is_empty() {
+        return Ok(None);
+    }
+    if contains_sensitive_marker(value) {
+        return Err(KnowledgeError::SensitiveGeneratedContent);
+    }
+    Ok(Some(value.to_owned()))
 }
 
 fn normalize_text(value: &str) -> String {

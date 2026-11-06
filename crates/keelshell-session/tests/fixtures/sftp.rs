@@ -392,6 +392,25 @@ impl Filesystem {
         state.files.insert(path.to_owned(), bytes.to_vec());
         Ok(())
     }
+    /// Replace one exact target after its POSIX rename but before the success
+    /// status. This simulates a competing writer for full-readback assertions.
+    pub fn replace_after_atomic_rename(
+        &self,
+        path: &str,
+        bytes: &[u8],
+    ) -> Result<(), &'static str> {
+        let mut state = self
+            .state
+            .lock()
+            .map_err(|_| "fixture filesystem poisoned")?;
+        if !state.files.contains_key(path) || state.after_atomic_rename.contains_key(path) {
+            return Err("fixture requires an existing target without an armed replacement");
+        }
+        state
+            .after_atomic_rename
+            .insert(path.to_owned(), bytes.to_vec());
+        Ok(())
+    }
     /// Observe a production root validation on one exact path without delaying
     /// unrelated SFTP operations or releasing another test owner's hold.
     pub fn hold_canonical_path(&self, path: &str) -> Result<CanonicalPathHold, &'static str> {
@@ -650,6 +669,7 @@ struct FileState {
     read_directories: HashSet<String>,
     modes: HashMap<String, u32>,
     mtimes: HashMap<String, u32>,
+    after_atomic_rename: HashMap<String, Vec<u8>>,
 }
 
 fn ok(id: u32) -> Status {
@@ -737,7 +757,13 @@ impl russh_sftp::server::Handler for Filesystem {
         if !input.is_empty() {
             return Err(StatusCode::BadMessage);
         }
-        let status = self.rename(id, from, to).await?;
+        let status = self.rename(id, from, to.clone()).await?;
+        {
+            let mut state = self.state.lock().map_err(|_| StatusCode::Failure)?;
+            if let Some(replacement) = state.after_atomic_rename.remove(&to) {
+                state.files.insert(to, replacement);
+            }
+        }
         if self.unexpected_atomic_reply.load(Ordering::Acquire) {
             Ok(Packet::Data(russh_sftp::protocol::Data {
                 id,

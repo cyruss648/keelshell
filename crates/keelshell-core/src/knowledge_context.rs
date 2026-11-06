@@ -146,8 +146,9 @@ impl SavedKnowledgeContext {
 
     /// Compose complete historical records for a later redacted request preview.
     ///
-    /// The flat record JSON preserves the saved schema's exact metadata and
-    /// content; it is data, never a system instruction or execution grant.
+    /// The flat record JSON preserves historical metadata and content while
+    /// excluding local organization categories. The same projection determines
+    /// the byte budget. It is data, never a system instruction or execution grant.
     /// Empty selection returns no records. No truncation or partial result is
     /// permitted here. Callers must still apply current credential redaction,
     /// sensitive-content policy, and model budgets before exposing a preview.
@@ -175,7 +176,9 @@ impl SavedKnowledgeContext {
 }
 
 fn serialize(entry: &SavedKnowledgeEntry) -> Result<String, SavedContextError> {
-    serde_json::to_string(entry).map_err(|_| SavedContextError::Serialization)
+    entry
+        .context_record()
+        .map_err(|_| SavedContextError::Serialization)
 }
 
 fn validate_entry(

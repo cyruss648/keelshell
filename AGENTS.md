@@ -10,6 +10,7 @@ Read `docs/HANDOFF.md` before continuing this in-progress implementation; the la
 - Public library APIs need rustdoc. Comments explain invariants and non-obvious decisions. Use typed errors and avoid panics outside tests.
 - Add meaningful unit and integration tests for behavior. Use bounded waits and isolated temporary data, no real customer machines.
 - Run formatting, Clippy, tests, dependency policy and relevant native checks before local feature commits. Preserve failing evidence and document unverified boundaries.
+- When switching checkouts or source copies that share a Cargo target directory, invalidate this workspace's package artifacts before validation and verify the compiled test inventory. Matching source hashes and an exit-zero command alone do not prove that cached binaries contain the current changes; follow `docs/testing/SHARED_TARGET.md`.
 - Track requirements and acceptance in docs/product, design decisions in docs/adr, test runs in docs/testing, and remaining work in docs/ROADMAP.md. Update status honestly in the same feature commit.
 - Describe KeelShell through its own capabilities. Keep named proprietary SSH product comparisons out of repository text, filenames, source comments and release notes; maintain the Chinese and English README together.
 - The user authorized a public GitHub repository, pushing commits, and tag-triggered multi-platform Releases on 2026-10-03. Keep release validation and incomplete product scope explicit. This does not authorize telemetry uploads or installation over an existing application.

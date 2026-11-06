@@ -2,6 +2,111 @@
 use super::*;
 
 #[tokio::test]
+async fn editor_reviewed_utf8_bom_crlf_final_budget_and_original_backup_are_exact()
+-> Result<(), Box<dyn Error>> {
+    use keelshell_core::{MAX_TEXT_EDIT_BYTES, TextDocumentError, Utf8TextDocument};
+
+    let server = serve().await?;
+    let session = SshSession::connect(options(&server)).await?;
+    let sftp = session.sftp().await?;
+    let raw = b"\xef\xbb\xbfold\r\nlast";
+    sftp.write("/format-budget.txt", raw).await?;
+    let reviewed = sftp
+        .read_regular_snapshot("/format-budget.txt", MAX_TEXT_EDIT_BYTES)
+        .await?;
+    let document = Utf8TextDocument::decode(&reviewed.content)?;
+    assert_eq!(document.body(), "old\r\nlast");
+    let draft = format!("{}\n", "x".repeat(MAX_TEXT_EDIT_BYTES - 5));
+    let prepared = document.format().prepare_save(&draft)?;
+    assert_eq!(prepared.len(), MAX_TEXT_EDIT_BYTES);
+    assert!(prepared.starts_with(b"\xef\xbb\xbf"));
+    assert!(prepared.ends_with(b"\r\n"));
+    let backup = sftp
+        .write_editor_reviewed_authorized(&reviewed, &prepared, &|| true)
+        .await?;
+    assert_eq!(sftp.read_regular(&backup, MAX_TEXT_EDIT_BYTES).await?, raw);
+    assert_eq!(
+        sftp.read_regular_snapshot("/format-budget.txt", MAX_TEXT_EDIT_BYTES)
+            .await?
+            .content,
+        prepared
+    );
+    let writes = server.filesystem.atomic_writes_started();
+    assert_eq!(
+        document.format().prepare_save(&format!("{draft}x")),
+        Err(TextDocumentError::Limit)
+    );
+    assert_eq!(server.filesystem.atomic_writes_started(), writes);
+    sftp.close().await?;
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn editor_reviewed_format_only_raw_changes_revoke_original_authority()
+-> Result<(), Box<dyn Error>> {
+    let server = serve().await?;
+    let session = SshSession::connect(options(&server)).await?;
+    let sftp = session.sftp().await?;
+    for (raw, changed) in [
+        (b"\xef\xbb\xbfa\n".as_slice(), b"a\n".as_slice()),
+        (b"a\nb\n".as_slice(), b"a\r\nb\r\n".as_slice()),
+    ] {
+        sftp.write("/format-conflict.txt", raw).await?;
+        let reviewed = sftp
+            .read_regular_snapshot("/format-conflict.txt", 1024)
+            .await?;
+        server
+            .filesystem
+            .replace_external_file("/format-conflict.txt", changed)?;
+        assert!(
+            sftp.write_editor_reviewed_authorized(&reviewed, b"reviewed", &|| true)
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            sftp.read_regular("/format-conflict.txt", 1024).await?,
+            changed
+        );
+        assert_eq!(server.filesystem.atomic_writes_started(), 0);
+    }
+    sftp.close().await?;
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn editor_reviewed_publication_ack_does_not_replace_complete_caller_readback()
+-> Result<(), Box<dyn Error>> {
+    let server = serve().await?;
+    let session = SshSession::connect(options(&server)).await?;
+    let sftp = session.sftp().await?;
+    let original = b"\xef\xbb\xbfold\r\nTAIL";
+    let reviewed_bytes = b"\xef\xbb\xbfnew\r\nTAIL";
+    let raced_bytes = b"\xef\xbb\xbfnew\r\nTAIX";
+    sftp.write("/readback-format.txt", original).await?;
+    let review = sftp
+        .read_regular_snapshot("/readback-format.txt", 1024)
+        .await?;
+    server
+        .filesystem
+        .replace_after_atomic_rename("/readback-format.txt", raced_bytes)?;
+    let backup = sftp
+        .write_editor_reviewed_authorized(&review, reviewed_bytes, &|| true)
+        .await?;
+    let actual = sftp
+        .read_regular_snapshot("/readback-format.txt", 1024)
+        .await?;
+    assert_eq!(actual.content.len(), reviewed_bytes.len());
+    assert_ne!(actual.content, reviewed_bytes);
+    assert_eq!(actual.content, raced_bytes);
+    assert_eq!(sftp.read_regular(&backup, 1024).await?, original);
+    sftp.close().await?;
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
 async fn editor_reviewed_supports_one_mib_without_expanding_mcp_budget()
 -> Result<(), Box<dyn Error>> {
     let server = serve().await?;

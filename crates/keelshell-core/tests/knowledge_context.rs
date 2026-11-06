@@ -123,3 +123,75 @@ fn saved_context_ingress_cannot_bypass_the_existing_sensitive_content_gate() {
             .is_err()
     );
 }
+
+#[test]
+fn saved_context_category_is_local_only_but_changes_revoke_the_complete_selected_object() {
+    let original = entry("Original facts");
+    let categorized = original
+        .with_reviewed_category(Some("Private organization label"))
+        .unwrap();
+    let mut context = SavedKnowledgeContext::default();
+    context
+        .select(&categorized, std::slice::from_ref(&categorized))
+        .unwrap();
+    let records = context.compose(std::slice::from_ref(&categorized)).unwrap();
+    assert_eq!(records, vec![serde_json::to_string(&original).unwrap()]);
+    assert_eq!(context.bytes(), records[0].len());
+    assert!(!records[0].contains("Private organization label"));
+    assert!(!records[0].contains("category"));
+    assert_eq!(
+        context.compose(std::slice::from_ref(&original)),
+        Err(SavedContextError::StaleEntry),
+    );
+    assert!(context.retain_current(std::slice::from_ref(&original)));
+    assert!(context.entries().is_empty());
+    assert_eq!(context.bytes(), 0);
+}
+
+#[test]
+fn saved_context_category_does_not_consume_request_bytes_at_the_exact_budget() {
+    let first = entry("x");
+    let second = entry("x");
+    let overhead =
+        first.context_record().unwrap().len() + second.context_record().unwrap().len() - 2;
+    let first_summary_bytes = keelshell_core::MAX_KNOWLEDGE_TEXT_BYTES;
+    let second_summary_bytes =
+        keelshell_core::MAX_SAVED_CONTEXT_BYTES - overhead - first_summary_bytes;
+    let library = [
+        first
+            .with_reviewed_content(first.entry().title(), &"a".repeat(first_summary_bytes))
+            .unwrap(),
+        second
+            .with_reviewed_content(second.entry().title(), &"b".repeat(second_summary_bytes))
+            .unwrap(),
+    ];
+    let categorized: Vec<_> = library
+        .iter()
+        .map(|record| {
+            record
+                .with_reviewed_category(Some(&"c".repeat(SavedKnowledgeEntry::MAX_CATEGORY_BYTES)))
+                .unwrap()
+        })
+        .collect();
+    let mut context = SavedKnowledgeContext::default();
+    for record in &categorized {
+        context.select(record, &categorized).unwrap();
+    }
+    assert_eq!(context.bytes(), keelshell_core::MAX_SAVED_CONTEXT_BYTES);
+    assert_eq!(
+        context.compose(&categorized).unwrap(),
+        library
+            .iter()
+            .map(|record| serde_json::to_string(record).unwrap())
+            .collect::<Vec<_>>(),
+    );
+    let extra = entry("one more");
+    let mut all = categorized;
+    all.push(extra.clone());
+    let before = context.clone();
+    assert_eq!(
+        context.select(&extra, &all),
+        Err(SavedContextError::TooLarge)
+    );
+    assert_eq!(context, before);
+}

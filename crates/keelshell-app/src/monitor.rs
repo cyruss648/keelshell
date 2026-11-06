@@ -1,7 +1,11 @@
 //! Live Linux monitoring, with a separately confirmed SIGTERM workflow.
 
+#[path = "monitor_capabilities.rs"]
+mod capabilities;
 #[path = "monitor_disk.rs"]
 mod disk;
+#[path = "monitor_history.rs"]
+mod history;
 #[path = "monitor_protocol.rs"]
 mod protocol;
 #[cfg(test)]
@@ -28,13 +32,15 @@ use gpui_kit::{
 use keelshell_session::{
     SshSession,
     monitor::{
-        DiskDevice, LinuxMonitor, MonitorError, MonitorResult, ProcessIdentity, ProcessInfo,
+        Capability, CapabilityReport, CapabilityState, DiskDevice, LinuxMonitor,
+        MonitorCapabilities, MonitorError, MonitorResult, ProcessIdentity, ProcessInfo,
         SampleRates, Snapshot, SocketInfo, TcpProbeResult,
     },
 };
 
 enum Job {
     Refresh,
+    Redetect,
     Sockets,
     Probe(SocketInfo),
     Inspect(ProcessInfo),
@@ -46,17 +52,26 @@ use crate::{
 };
 
 const PROCESS_PAGE_SIZE: usize = 5;
+const MAX_RESULT_AGE: Duration = Duration::from_secs(10);
 
 enum Outcome {
     Cancelled,
     Refreshed {
-        snapshot: MonitorResult<Snapshot>,
+        snapshot: Box<MonitorResult<Snapshot>>,
+        sampled_at: Instant,
         processes: MonitorResult<Vec<ProcessInfo>>,
+        process_sampled_at: Instant,
+        sockets: Option<MonitorResult<Vec<SocketInfo>>>,
+        capabilities: CapabilityReport,
     },
-    Sockets(MonitorResult<Vec<SocketInfo>>),
+    Sockets {
+        result: MonitorResult<Vec<SocketInfo>>,
+        capabilities: CapabilityReport,
+    },
     Probed {
         socket: SocketInfo,
         result: MonitorResult<TcpProbeResult>,
+        capabilities: CapabilityReport,
     },
     Inspected(MonitorResult<ProcessIdentity>),
     Terminated(MonitorResult<()>),
@@ -70,10 +85,14 @@ enum Outcome {
 pub struct MonitorPanel {
     protocol: Entity<protocol::ProtocolPanel>,
     monitor: Option<LinuxMonitor>,
+    capabilities: MonitorCapabilities,
     suspended: bool,
     host: String,
     runtime: Arc<tokio::runtime::Runtime>,
     snapshot: Option<Snapshot>,
+    history: history::ResourceHistory,
+    sample_generation: uuid::Uuid,
+    refresh_in_flight: bool,
     mcp_sample_id: Option<uuid::Uuid>,
     rates: SampleRates,
     selected_disk: Option<DiskDevice>,
@@ -111,9 +130,12 @@ impl MonitorPanel {
                 executor.timer(Duration::from_secs(5)).await;
                 if this
                     .update(cx, |panel, cx| {
+                        panel.history.prune(Instant::now());
                         if !panel.paused && panel.pending.is_none() {
                             panel.run(Job::Refresh, cx);
                         }
+                        // Age and the five-minute viewport advance while paused.
+                        cx.notify();
                     })
                     .is_err()
                 {
@@ -127,10 +149,14 @@ impl MonitorPanel {
         let mut panel = Self {
             protocol,
             monitor: Some(LinuxMonitor::new(session)),
+            capabilities: MonitorCapabilities::default(),
             suspended: false,
             host,
             runtime,
             snapshot: None,
+            history: history::ResourceHistory::default(),
+            sample_generation: uuid::Uuid::new_v4(),
+            refresh_in_flight: false,
             mcp_sample_id: None,
             rates: SampleRates::default(),
             selected_disk: None,
@@ -181,7 +207,12 @@ impl MonitorPanel {
         }
         self.suspended = true;
         self.paused = true;
+        self.history.interrupt();
+        self.sample_generation = uuid::Uuid::new_v4();
         self.pending = None;
+        if let Some(monitor) = &self.monitor {
+            monitor.invalidate_pending_capabilities();
+        }
         self.monitor = None;
         self.protocol.update(cx, |panel, cx| panel.suspend(cx));
         if let Some(cancel) = &self.worker_cancel {
@@ -196,7 +227,75 @@ impl MonitorPanel {
         cx.notify();
     }
 
-    fn apply_outcome(&mut self, outcome: Outcome, cx: &mut Context<Self>) {
+    fn set_paused(&mut self, paused: bool, cx: &mut Context<Self>) {
+        if self.paused == paused || self.suspended {
+            return;
+        }
+        self.paused = paused;
+        self.history.interrupt();
+        // Pause/resume is an authority boundary even if no frame was drawn.
+        self.sample_generation = uuid::Uuid::new_v4();
+        if let Some(monitor) = &self.monitor {
+            monitor.invalidate_pending_capabilities();
+        }
+        if self.refresh_in_flight
+            && let Some(cancel) = &self.worker_cancel
+        {
+            cancel.store(true, Ordering::Release);
+        }
+        // A revoked refresh cannot publish a later status. Keep independent
+        // socket/process operations responsible for their own receipts.
+        if !self.busy || self.refresh_in_flight {
+            self.status = if paused {
+                Message::new("自动刷新已暂停。", "Polling paused.")
+            } else {
+                Message::new(
+                    "自动刷新已恢复，等待下一次采样。",
+                    "Polling resumed; waiting for the next sample.",
+                )
+            };
+        }
+        cx.notify();
+    }
+
+    fn adopt_outcome(
+        &mut self,
+        outcome: Outcome,
+        generation: Option<uuid::Uuid>,
+        completed_at: Instant,
+        cx: &mut Context<Self>,
+    ) {
+        self.adopt_outcome_at(outcome, generation, completed_at, Instant::now(), cx);
+    }
+
+    fn adopt_outcome_at(
+        &mut self,
+        outcome: Outcome,
+        generation: Option<uuid::Uuid>,
+        completed_at: Instant,
+        now: Instant,
+        cx: &mut Context<Self>,
+    ) {
+        self.busy = false;
+        self.worker_cancel = None;
+        self.refresh_in_flight = false;
+        if generation.is_some_and(|generation| generation != self.sample_generation) {
+            cx.notify();
+            return;
+        }
+        if generation.is_some() && !fresh(completed_at, now) {
+            self.history.interrupt();
+            self.status = Message::new(
+                "监控响应已过期，未采用；请刷新或重新检测。",
+                "Monitoring response expired and was discarded; refresh or recheck capabilities.",
+            );
+            cx.notify();
+            return;
+        }
+        self.apply_outcome(outcome, now, cx);
+    }
+
+    fn apply_outcome(&mut self, outcome: Outcome, now: Instant, cx: &mut Context<Self>) {
         self.busy = false;
         self.worker_cancel = None;
         // A sent SIGTERM still has a meaningful receipt. Other old results must
@@ -206,6 +305,7 @@ impl MonitorPanel {
         }
         match outcome {
             Outcome::Cancelled => {
+                self.history.interrupt();
                 self.status = Message::new(
                     "下一条命令发送前已取消监控。",
                     "Monitoring cancelled before the next command was sent.",
@@ -213,22 +313,56 @@ impl MonitorPanel {
             }
             Outcome::Refreshed {
                 snapshot,
+                sampled_at,
                 processes,
+                process_sampled_at,
+                sockets,
+                capabilities,
             } => {
+                if !self.adopt_capabilities(&capabilities, now, cx) {
+                    return;
+                }
                 let mut errors_zh = Vec::new();
                 let mut errors_en = Vec::new();
-                match snapshot {
+                match *snapshot {
+                    _ if !fresh(sampled_at, now) => {
+                        self.history.interrupt();
+                        self.rates = SampleRates::default();
+                        errors_zh.push("资源：过期响应未采用".into());
+                        errors_en.push("Resources: expired response was discarded".into());
+                    }
                     Ok(snapshot) => {
-                        self.rates = self
-                            .snapshot
-                            .as_ref()
-                            .map(|old| snapshot.rates_since(old))
-                            .unwrap_or_default();
-                        self.snapshot = Some(snapshot);
-                        self.mcp_sample_id = Some(uuid::Uuid::new_v4());
-                        self.last_sample = Some(Instant::now());
+                        match self.history.record(
+                            &snapshot,
+                            self.snapshot.as_ref(),
+                            sampled_at,
+                            now,
+                        ) {
+                            Ok(cpu) => {
+                                self.rates = self
+                                    .snapshot
+                                    .as_ref()
+                                    .map(|old| snapshot.rates_since(old))
+                                    .unwrap_or_default();
+                                self.rates.cpu_busy_percent = cpu;
+                                if cpu.is_none() {
+                                    self.rates.cpu_iowait_percent = None;
+                                }
+                                self.snapshot = Some(snapshot);
+                                self.mcp_sample_id = Some(uuid::Uuid::new_v4());
+                                self.last_sample = Some(sampled_at);
+                            }
+                            Err(_) => {
+                                self.rates = SampleRates::default();
+                                errors_zh.push("资源：迟到或时间无效的采样未采用".into());
+                                errors_en.push(
+                                    "Resources: late or invalid sample time was discarded".into(),
+                                );
+                            }
+                        }
                     }
                     Err(error) => {
+                        self.history.interrupt();
                         self.rates = SampleRates::default();
                         let (zh, en) = error_text(&error);
                         errors_zh.push(format!("资源：{zh}"));
@@ -236,18 +370,41 @@ impl MonitorPanel {
                     }
                 }
                 match processes {
+                    _ if !fresh(process_sampled_at, now) => {
+                        errors_zh.push("进程：过期响应未采用".into());
+                        errors_en.push("Processes: expired response was discarded".into());
+                    }
                     Ok(processes) => {
                         self.processes = processes;
                         self.process_page = self
                             .process_page
                             .min(self.processes.len().saturating_sub(1) / PROCESS_PAGE_SIZE);
-                        self.last_process_sample = Some(Instant::now());
+                        self.last_process_sample = Some(process_sampled_at);
                     }
                     Err(error) => {
                         let (zh, en) = error_text(&error);
                         errors_zh.push(format!("进程：{zh}"));
                         errors_en.push(format!("Processes: {en}"));
                     }
+                }
+                if let Some(result) = sockets {
+                    match result {
+                        Ok(sockets) => {
+                            self.sockets = sockets;
+                            self.probes.clear();
+                        }
+                        Err(error) => {
+                            let (zh, en) = error_text(&error);
+                            errors_zh.push(format!("端口：{zh}"));
+                            errors_en.push(format!("Sockets: {en}"));
+                            self.sockets.clear();
+                            self.probes.clear();
+                        }
+                    }
+                }
+                if let CapabilityState::Unavailable(reason) = self.capabilities.filesystems.state {
+                    errors_zh.push(format!("磁盘容量：{}", capabilities::reason_text(reason).0));
+                    errors_en.push(format!("Filesystem capacity: {reason}"));
                 }
                 self.status = if errors_zh.is_empty() {
                     Message::new(
@@ -256,63 +413,84 @@ impl MonitorPanel {
                     )
                 } else {
                     Message::new(
-                        format!("刷新不完整，保留的值为旧数据。{}", errors_zh.join(" · ")),
                         format!(
-                            "Refresh incomplete; retained values are old. {}",
+                            "部分项目未更新，保留条目为旧数据；可重新检测。{}",
+                            errors_zh.join(" · ")
+                        ),
+                        format!(
+                            "Some items were not updated; retained entries are old. Recheck capabilities to retry. {}",
                             errors_en.join(" · ")
                         ),
                     )
                 };
             }
-            Outcome::Sockets(result) => match result {
-                Ok(sockets) => {
-                    self.status = Message::new(
-                        format!("已读取 {} 个监听端口。", sockets.len()),
-                        format!("Loaded {} listening sockets.", sockets.len()),
-                    );
-                    self.sockets = sockets;
-                    self.probes.clear();
+            Outcome::Sockets {
+                result,
+                capabilities,
+            } => {
+                if !self.adopt_capabilities(&capabilities, now, cx) {
+                    return;
                 }
-                Err(error) => {
-                    let (zh, en) = error_text(&error);
-                    self.status = Message::new(
-                        format!("端口诊断失败：{zh}"),
-                        format!("Socket diagnostics failed: {en}"),
-                    );
-                    self.sockets.clear();
+                match result {
+                    Ok(sockets) => {
+                        self.status = Message::new(
+                            format!("已读取 {} 个监听端口。", sockets.len()),
+                            format!("Loaded {} listening sockets.", sockets.len()),
+                        );
+                        self.sockets = sockets;
+                        self.probes.clear();
+                    }
+                    Err(error) => {
+                        let (zh, en) = error_text(&error);
+                        self.status = Message::new(
+                            format!("端口诊断失败：{zh}"),
+                            format!("Socket diagnostics failed: {en}"),
+                        );
+                        self.sockets.clear();
+                        self.probes.clear();
+                    }
                 }
-            },
-            Outcome::Probed { socket, result } => match result {
-                Ok(probe) => {
-                    self.status = Message::new(
-                        if probe.reachable {
-                            format!("TCP {}:{} 可建立连接。", probe.host, probe.port)
-                        } else {
-                            format!(
-                                "TCP {}:{} 未建立连接（nc 状态 {}）。",
-                                probe.host, probe.port, probe.probe_status
-                            )
-                        },
-                        if probe.reachable {
-                            format!("TCP {}:{} accepted a connection.", probe.host, probe.port)
-                        } else {
-                            format!(
-                                "TCP {}:{} did not accept a connection (nc status {}).",
-                                probe.host, probe.port, probe.probe_status
-                            )
-                        },
-                    );
-                    self.probes.insert(socket_key(&socket), probe);
+            }
+            Outcome::Probed {
+                socket,
+                result,
+                capabilities,
+            } => {
+                if !self.adopt_capabilities(&capabilities, now, cx) {
+                    return;
                 }
-                Err(error) => {
-                    let (zh, en) = error_text(&error);
-                    self.status = Message::new(
-                        format!("TCP 探测失败：{zh}"),
-                        format!("TCP probe failed: {en}"),
-                    );
-                    self.probes.remove(&socket_key(&socket));
+                match result {
+                    Ok(probe) => {
+                        self.status = Message::new(
+                            if probe.reachable {
+                                format!("TCP {}:{} 可建立连接。", probe.host, probe.port)
+                            } else {
+                                format!(
+                                    "TCP {}:{} 未建立连接（nc 状态 {}）。",
+                                    probe.host, probe.port, probe.probe_status
+                                )
+                            },
+                            if probe.reachable {
+                                format!("TCP {}:{} accepted a connection.", probe.host, probe.port)
+                            } else {
+                                format!(
+                                    "TCP {}:{} did not accept a connection (nc status {}).",
+                                    probe.host, probe.port, probe.probe_status
+                                )
+                            },
+                        );
+                        self.probes.insert(socket_key(&socket), probe);
+                    }
+                    Err(error) => {
+                        let (zh, en) = error_text(&error);
+                        self.status = Message::new(
+                            format!("TCP 探测失败：{zh}"),
+                            format!("TCP probe failed: {en}"),
+                        );
+                        self.probes.remove(&socket_key(&socket));
+                    }
                 }
-            },
+            }
             Outcome::Inspected(result) => match result {
                 Ok(identity) => {
                     self.pending = Some(identity);
@@ -358,8 +536,14 @@ impl MonitorPanel {
             return;
         }
         self.busy = true;
+        let generation = (!matches!(&job, Job::Terminate(_))).then_some(self.sample_generation);
+        self.refresh_in_flight = matches!(&job, Job::Refresh | Job::Redetect);
         self.status = match &job {
             Job::Refresh => Message::new("正在刷新主机状态…", "Refreshing from the host…"),
+            Job::Redetect => Message::new(
+                "正在重新检测 Linux 监控能力…",
+                "Rechecking Linux monitoring capabilities…",
+            ),
             Job::Sockets => Message::new("正在读取监听端口…", "Reading listening sockets…"),
             Job::Probe(_) => Message::new(
                 "正在执行只读 TCP 连接探测…",
@@ -386,11 +570,15 @@ impl MonitorPanel {
                 Outcome::Terminated(Err(error)) => Some(error.to_string()),
                 _ => None,
             };
-            let _ = outgoing.try_send(outcome);
+            let _ = outgoing.try_send((outcome, Instant::now()));
             failure.map_or(Ok(()), Err)
         });
         if let Err(error) = started {
             self.busy = false;
+            self.refresh_in_flight = false;
+            if generation.is_some() {
+                self.history.interrupt();
+            }
             self.status = Message::detail(
                 "无法启动监控任务",
                 "Unable to start monitoring worker",
@@ -402,13 +590,24 @@ impl MonitorPanel {
         self.worker_cancel = Some(cancel);
         let executor = cx.background_executor().clone();
         self._job = Some(cx.spawn(async move |this, cx| {
-            let outcome = loop {
+            let (outcome, completed_at) = loop {
                 match incoming.try_recv() {
                     Ok(outcome) => break outcome,
                     Err(TryRecvError::Empty) => executor.timer(Duration::from_millis(30)).await,
                     Err(TryRecvError::Disconnected) => {
                         let _ = this.update(cx, |panel, cx| {
                             panel.busy = false;
+                            panel.worker_cancel = None;
+                            panel.refresh_in_flight = false;
+                            if generation.is_some_and(|generation| generation != panel.sample_generation)
+                                || panel.suspended
+                            {
+                                cx.notify();
+                                return;
+                            }
+                            if generation.is_some() {
+                                panel.history.interrupt();
+                            }
                             panel.status = Message::new("监控任务未返回结果，请刷新后再操作。", "Monitoring worker ended without a result. Refresh before retrying any action.");
                             cx.notify();
                         });
@@ -417,7 +616,7 @@ impl MonitorPanel {
                 }
             };
             let _ = this.update(cx, |panel, cx| {
-                panel.apply_outcome(outcome, cx);
+                panel.adopt_outcome(outcome, generation, completed_at, cx);
                 cx.notify();
             });
         }));
@@ -440,25 +639,60 @@ async fn execute_job(monitor: LinuxMonitor, job: Job, cancel: &AtomicBool) -> Ou
         return Outcome::Cancelled;
     }
     match job {
-        Job::Refresh => {
+        Job::Refresh | Job::Redetect => {
+            let redetect = matches!(job, Job::Redetect);
+            if redetect {
+                monitor.reset_capabilities().await;
+            }
+            if cancel.load(Ordering::Acquire) {
+                return Outcome::Cancelled;
+            }
             let snapshot = monitor.snapshot().await;
+            // Timestamp the resource response, before the independent ps query
+            // or UI dispatch can delay adoption and make it look fresh.
+            let sampled_at = Instant::now();
             if cancel.load(Ordering::Acquire) {
                 return Outcome::Cancelled;
             }
             let processes = monitor.processes().await;
+            let process_sampled_at = Instant::now();
+            if cancel.load(Ordering::Acquire) {
+                return Outcome::Cancelled;
+            }
+            let sockets = if redetect {
+                Some(monitor.listening_sockets().await)
+            } else {
+                None
+            };
             Outcome::Refreshed {
-                snapshot,
+                snapshot: Box::new(snapshot),
+                sampled_at,
                 processes,
+                process_sampled_at,
+                sockets,
+                capabilities: monitor.capability_report().await,
             }
         }
-        Job::Sockets => Outcome::Sockets(monitor.listening_sockets().await),
-        Job::Probe(socket) => Outcome::Probed {
-            result: monitor.probe_tcp(&socket).await,
-            socket,
+        Job::Sockets => Outcome::Sockets {
+            result: monitor.listening_sockets().await,
+            capabilities: monitor.capability_report().await,
         },
+        Job::Probe(socket) => {
+            let result = monitor.probe_tcp(&socket).await;
+            Outcome::Probed {
+                result,
+                socket,
+                capabilities: monitor.capability_report().await,
+            }
+        }
         Job::Inspect(process) => Outcome::Inspected(monitor.inspect_process(&process).await),
         Job::Terminate(identity) => Outcome::Terminated(monitor.terminate(identity).await),
     }
+}
+
+fn fresh(at: Instant, now: Instant) -> bool {
+    now.checked_duration_since(at)
+        .is_some_and(|age| age <= MAX_RESULT_AGE)
 }
 
 fn bytes(value: u64) -> String {
@@ -492,6 +726,9 @@ fn error_text(error: &MonitorError) -> (String, String) {
     let zh = match error {
         MonitorError::Session(error) => format!("SSH 通信失败：{error}"),
         MonitorError::Unsupported(_) => "目标不支持此功能，需要 Linux 与相应系统命令。".into(),
+        MonitorError::CapabilityUnavailable { reason, .. } => {
+            capabilities::reason_text(*reason).0.into()
+        }
         MonitorError::RemoteFailure { exit_status, .. } => match exit_status {
             Some(status) => format!("远端操作失败，退出状态 {status}"),
             None => "远端操作未返回退出状态，不能确认成功".into(),
@@ -637,7 +874,7 @@ impl Render for MonitorPanel {
                             })
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if !panel.suspended && panel.pending.is_none() {
-                                    panel.paused = !panel.paused;
+                                    panel.set_paused(!panel.paused, cx);
                                 }
                                 cx.notify();
                             })),
@@ -658,22 +895,36 @@ impl Render for MonitorPanel {
                     ),
             )
             .child(
-                div().text_xs().text_color(rgb(visual.muted)).child(
-                    Message::new(
-                        format!(
-                            "资源 {} · 进程 {}",
-                            age(self.last_sample, cx),
-                            age(self.last_process_sample, cx)
-                        ),
-                        format!(
-                            "Resources {} · Processes {}",
-                            age(self.last_sample, cx),
-                            age(self.last_process_sample, cx)
-                        ),
+                div()
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .truncate()
+                            .text_xs()
+                            .text_color(rgb(visual.muted))
+                            .child(
+                                Message::new(
+                                    format!(
+                                        "资源 {} · 进程 {}",
+                                        age(self.last_sample, cx),
+                                        age(self.last_process_sample, cx)
+                                    ),
+                                    format!(
+                                        "Resources {} · Processes {}",
+                                        age(self.last_sample, cx),
+                                        age(self.last_process_sample, cx)
+                                    ),
+                                )
+                                .render(cx),
+                            ),
                     )
-                    .render(cx),
-                ),
+                    .child(self.redetect_button(cx)),
             );
+        let history_now = Instant::now();
         let cpu = self.rates.cpu_busy_percent;
         let memory = self.snapshot.as_ref().map(|snapshot| &snapshot.memory);
         let memory_ratio = memory.and_then(|m| {
@@ -683,8 +934,14 @@ impl Render for MonitorPanel {
         });
         let memory_value = memory
             .and_then(|m| {
-                m.used_bytes()
-                    .map(|used| format!("{} / {}", bytes(used), bytes(m.total_bytes)))
+                m.used_bytes().filter(|_| m.total_bytes > 0).map(|used| {
+                    format!(
+                        "{:.1}% · {} / {}",
+                        used as f64 / m.total_bytes as f64 * 100.,
+                        bytes(used),
+                        bytes(m.total_bytes)
+                    )
+                })
             })
             .unwrap_or_else(|| "—".into());
         let swap = memory.and_then(|m| Some((m.swap_total_bytes?, m.swap_free_bytes?)));
@@ -706,6 +963,12 @@ impl Render for MonitorPanel {
                 cpu.map(|value| value as f32 / 100.),
                 visual.accent,
             ))
+            .child(history::view(
+                &self.history,
+                history::Series::Cpu,
+                history_now,
+                cx,
+            ))
             .child(metric(
                 cx,
                 t(cx, "内存", "Memory"),
@@ -713,6 +976,18 @@ impl Render for MonitorPanel {
                 memory_ratio,
                 visual.success,
             ))
+            .child(history::view(
+                &self.history,
+                history::Series::Memory,
+                history_now,
+                cx,
+            ))
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(self.history.time_range(history_now, cx)),
+            )
             .child(metric(
                 cx,
                 t(cx, "交换空间", "Swap"),
@@ -843,8 +1118,16 @@ impl Render for MonitorPanel {
         if self.sockets.is_empty() {
             sockets = sockets.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
-                "点击上方“端口”读取",
-                "Click Sockets above to load",
+                if self.capabilities.sockets.state == CapabilityState::Available {
+                    "未发现监听端口"
+                } else {
+                    "暂无可用端口采样；可点击端口或重新检测"
+                },
+                if self.capabilities.sockets.state == CapabilityState::Available {
+                    "No listening sockets found"
+                } else {
+                    "No socket sample; click Sockets or Recheck"
+                },
             )));
         } else {
             for (socket_index, socket) in self.sockets.iter().take(12).enumerate() {
@@ -951,6 +1234,31 @@ impl Render for MonitorPanel {
                         ),
                     );
             }
+            if snapshot.filesystems.is_empty() {
+                let empty = t(
+                    cx,
+                    if self.capabilities.filesystems.state == CapabilityState::Available {
+                        "未发现挂载点"
+                    } else {
+                        "容量不可用；CPU、内存和网络独立采集"
+                    },
+                    if self.capabilities.filesystems.state == CapabilityState::Available {
+                        "No mounts found"
+                    } else {
+                        "Capacity unavailable; CPU, memory and network collect independently"
+                    },
+                );
+                disks = disks.child(
+                    div()
+                        .id("monitor-filesystem-empty")
+                        .test_support()
+                        .role(accesskit::Role::Label)
+                        .aria_label(empty)
+                        .text_xs()
+                        .text_color(rgb(visual.muted))
+                        .child(empty),
+                );
+            }
         } else {
             disks = disks.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
@@ -1021,7 +1329,7 @@ impl Render for MonitorPanel {
                             if panel.busy || panel.pending.is_some() {
                                 return;
                             }
-                            panel.paused = true;
+                            panel.set_paused(true, cx);
                             panel.run(Job::Inspect(selected.clone()), cx);
                         })),
                 );
@@ -1090,7 +1398,8 @@ impl Render for MonitorPanel {
             .child(networks)
             .child(self.protocol.clone())
             .child(sockets)
-            .child(disks);
+            .child(disks)
+            .child(self.capabilities_view(cx));
         let mut confirmation = None;
         if let Some(identity) = &self.pending {
             let process = identity.process();

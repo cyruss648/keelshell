@@ -12,6 +12,12 @@ use std::{
 
 use crate::{ExecOutput, SessionError, SshSession};
 
+mod capabilities;
+pub use capabilities::{
+    Capability, CapabilityObservation, CapabilityReason, CapabilityReport, CapabilityState,
+    MonitorCapabilities,
+};
+use capabilities::{CapabilityCache, cached_reason, command_text, error_state, failure_reason};
 mod disk;
 pub use disk::{
     DiskCounters, DiskDevice, DiskIoError, DiskIoRates, DiskIoSnapshot, DiskRate,
@@ -33,7 +39,13 @@ cat /proc/uptime || exit 65
 printf '\n@@KS:net@@\n'
 cat /proc/net/dev || exit 65
 printf '\n@@KS:df@@\n'
-df -Pk || exit 65
+df_status=0
+if command -v df >/dev/null 2>&1; then
+  df -Pk || df_status=$?
+else
+  df_status=127
+fi
+printf '\n@@KS:df-status@@\n%s\n' "$df_status"
 printf '\n@@KS:bootid@@\n'
 if [ -r /proc/sys/kernel/random/boot_id ]; then
   cat /proc/sys/kernel/random/boot_id 2>/dev/null || printf '\n!unavailable\n'
@@ -46,6 +58,7 @@ printf '\n@@KS:end@@\n'
 "#;
 const PROCESSES_SCRIPT: &str = r#"LC_ALL=C; export LC_ALL
 if [ "$(uname -s)" != Linux ]; then exit 64; fi
+command -v ps >/dev/null 2>&1 || exit 66
 ps -ww -eo pid=,user=,pcpu=,pmem=,args= || exit 65
 "#;
 const SOCKETS_SCRIPT: &str = r#"LC_ALL=C; export LC_ALL
@@ -53,6 +66,13 @@ if [ "$(uname -s)" != Linux ]; then exit 64; fi
 command -v ss >/dev/null 2>&1 || exit 66
 ss -H -lntupn || exit 65
 "#;
+const DF_COLLECTION: &str = r#"df_status=0
+if command -v df >/dev/null 2>&1; then
+  df -Pk || df_status=$?
+else
+  df_status=127
+fi
+printf '\n@@KS:df-status@@\n%s\n' "$df_status""#;
 
 /// Typed monitor failure; remote output is never interpolated into an error.
 #[derive(Debug, thiserror::Error)]
@@ -63,6 +83,14 @@ pub enum MonitorError {
     /// The target OS or required command capability is not supported.
     #[error("monitoring is unsupported: {0}")]
     Unsupported(&'static str),
+    /// An independent facility failed; other monitoring can remain available.
+    #[error("{capability} is unavailable: {reason}")]
+    CapabilityUnavailable {
+        /// Facility that was checked.
+        capability: Capability,
+        /// Typed reason, without untrusted remote diagnostic text.
+        reason: CapabilityReason,
+    },
     /// A fixed command returned failure or did not provide an exit status.
     #[error("remote {operation} did not succeed (exit {exit_status:?})")]
     RemoteFailure {
@@ -161,7 +189,8 @@ pub struct Snapshot {
     pub memory: MemorySnapshot,
     /// Per-interface network counters.
     pub networks: Vec<NetworkCounters>,
-    /// Mounted-filesystem capacities.
+    /// Mounted-filesystem capacities. Empty when capacity could not be collected;
+    /// consult [`LinuxMonitor::capabilities`] to distinguish absence from failure.
     pub filesystems: Vec<FilesystemSnapshot>,
     /// Optional block-device counters. Unsupported or invalid optional data
     /// does not discard otherwise valid CPU, memory, network or capacity data.
@@ -194,7 +223,12 @@ pub struct SampleRates {
 
 impl Snapshot {
     /// Parse the collector's versioned section markers and validate numeric fields.
+    /// Optional filesystem failure does not discard valid core resources.
     pub fn parse(input: &str) -> MonitorResult<Self> {
+        Self::parse_with_capacity(input, &[]).map(|(snapshot, _)| snapshot)
+    }
+
+    fn parse_with_capacity(input: &str, stderr: &[u8]) -> MonitorResult<(Self, CapabilityState)> {
         if input.len() > MAX_OUTPUT {
             return Err(MonitorError::InvalidData("snapshot exceeds 2 MiB"));
         }
@@ -235,19 +269,23 @@ impl Snapshot {
         let load_average: [f64; 3] = values
             .try_into()
             .map_err(|_| MonitorError::InvalidData("missing load averages"))?;
-        Ok(Self {
-            boot_time,
-            uptime_seconds,
-            load_average,
-            cpu: CpuCounters { ticks },
-            memory: parse_memory(required(&sections, "meminfo")?)?,
-            networks: parse_networks(required(&sections, "net")?)?,
-            filesystems: parse_filesystems(required(&sections, "df")?)?,
-            disk_io: match (sections.get("bootid"), sections.get("diskstats")) {
-                (Some(boot), Some(counters)) => DiskIoSnapshot::parse(boot, counters),
-                _ => Err(DiskIoError::MissingData),
+        let (filesystems, capacity) = parse_capacity(&sections, stderr);
+        Ok((
+            Self {
+                boot_time,
+                uptime_seconds,
+                load_average,
+                cpu: CpuCounters { ticks },
+                memory: parse_memory(required(&sections, "meminfo")?)?,
+                networks: parse_networks(required(&sections, "net")?)?,
+                filesystems,
+                disk_io: match (sections.get("bootid"), sections.get("diskstats")) {
+                    (Some(boot), Some(counters)) => DiskIoSnapshot::parse(boot, counters),
+                    _ => Err(DiskIoError::MissingData),
+                },
             },
-        })
+            capacity,
+        ))
     }
 
     /// Compare with a previous sample. Reboots, non-forward time and decreasing
@@ -382,35 +420,129 @@ impl ProcessIdentity {
 #[derive(Clone)]
 pub struct LinuxMonitor {
     session: SshSession,
+    capabilities: Arc<CapabilityCache>,
 }
 
 impl LinuxMonitor {
     /// Bind monitoring to one authenticated SSH connection.
     pub fn new(session: SshSession) -> Self {
-        Self { session }
+        Self {
+            session,
+            capabilities: Arc::new(CapabilityCache::default()),
+        }
     }
 
-    /// Execute the fixed read-only `/proc` and `df -Pk` collector.
+    /// Read cached observations without collecting or exposing remote output.
+    pub async fn capabilities(&self) -> MonitorCapabilities {
+        self.capabilities.report().await
+    }
+
+    /// Read observations with immutable proof of this connection's cache state.
+    pub async fn capability_report(&self) -> CapabilityReport {
+        self.capabilities.authenticated_report().await
+    }
+
+    /// Check report authority using only connection identity and atomic counters.
+    ///
+    /// A cache write, reset or invalidation revokes older reports. This check
+    /// performs no I/O and does not refresh any observation time.
+    pub fn accepts_capability_report(&self, report: &CapabilityReport) -> bool {
+        report.is_current_for(&self.capabilities)
+    }
+
+    /// Forget observations before an explicit, read-only capability recheck.
+    ///
+    /// The cache belongs only to this monitor's authenticated SSH session.
+    pub async fn reset_capabilities(&self) {
+        self.capabilities.reset().await;
+    }
+
+    /// Revoke publication by already running checks without blocking the caller.
+    /// Used when a panel pauses or retires its authenticated session authority.
+    pub fn invalidate_pending_capabilities(&self) {
+        self.capabilities.invalidate_pending();
+    }
+
+    /// Execute the fixed read-only `/proc` collector and optional `df -Pk`.
+    ///
+    /// A failed capacity command is skipped until explicit redetection. Its
+    /// failure does not discard CPU, memory, network or block-device counters.
     pub async fn snapshot(&self) -> MonitorResult<Snapshot> {
-        let output = self
-            .session
-            .exec_limited(SNAPSHOT_SCRIPT, MAX_OUTPUT)
-            .await?;
-        Snapshot::parse(checked_text(output, "resource collection")?.as_str())
+        let (revision, resources) = self.capabilities.begin(Capability::Resources).await;
+        if resources == CapabilityState::Unavailable(CapabilityReason::UnsupportedPlatform) {
+            return Err(MonitorError::CapabilityUnavailable {
+                capability: Capability::Resources,
+                reason: CapabilityReason::UnsupportedPlatform,
+            });
+        }
+        let (_, capacity) = self.capabilities.begin(Capability::Filesystems).await;
+        let skip_capacity = cached_reason(capacity).is_some();
+        let script = if skip_capacity {
+            SNAPSHOT_SCRIPT.replace(DF_COLLECTION, "printf '\\n@@KS:df-status@@\\ncached\\n'")
+        } else {
+            SNAPSHOT_SCRIPT.to_owned()
+        };
+        let result = async {
+            let output = self.session.exec_limited(&script, MAX_OUTPUT).await?;
+            let ExecOutput {
+                stdout,
+                stderr,
+                exit_status,
+            } = output;
+            let text = checked_text(
+                ExecOutput {
+                    stdout,
+                    stderr: Vec::new(),
+                    exit_status,
+                },
+                "resource collection",
+            )?;
+            Snapshot::parse_with_capacity(&text, &stderr)
+        }
+        .await;
+        let state = result
+            .as_ref()
+            .map_or_else(error_state, |_| CapabilityState::Available);
+        self.capabilities
+            .record(revision, Capability::Resources, state)
+            .await;
+        match result {
+            Ok((snapshot, capacity)) => {
+                if !skip_capacity {
+                    self.capabilities
+                        .record(revision, Capability::Filesystems, capacity)
+                        .await;
+                }
+                Ok(snapshot)
+            }
+            Err(error) => Err(error),
+        }
     }
 
     /// Execute fixed ps columns and sort by descending reported CPU usage.
     pub async fn processes(&self) -> MonitorResult<Vec<ProcessInfo>> {
-        let output = self
-            .session
-            .exec_limited(PROCESSES_SCRIPT, MAX_OUTPUT)
-            .await?;
-        if output.exit_status == Some(65) {
-            return Err(MonitorError::Unsupported(
-                "Linux ps must support pid,user,pcpu,pmem,args fields",
-            ));
+        let (revision, state) = self.capabilities.begin(Capability::Processes).await;
+        if let Some(reason) = cached_reason(state) {
+            return Err(MonitorError::CapabilityUnavailable {
+                capability: Capability::Processes,
+                reason,
+            });
         }
-        parse_processes(&checked_text(output, "process collection")?)
+        let result = async {
+            let output = self
+                .session
+                .exec_limited(PROCESSES_SCRIPT, MAX_OUTPUT)
+                .await?;
+            parse_processes(&command_text(output, Capability::Processes)?)
+        }
+        .await;
+        let state = result
+            .as_ref()
+            .map_or_else(error_state, |_| CapabilityState::Available);
+        self.capabilities
+            .record(revision, Capability::Processes, state)
+            .await;
+        result
     }
 
     /// Collect listening TCP/UDP sockets using the fixed `ss` command.
@@ -418,16 +550,28 @@ impl LinuxMonitor {
     /// The result is diagnostic text only. It is never treated as an executable
     /// command and it does not imply that a service accepted a connection.
     pub async fn listening_sockets(&self) -> MonitorResult<Vec<SocketInfo>> {
-        let output = self
-            .session
-            .exec_limited(SOCKETS_SCRIPT, MAX_OUTPUT)
-            .await?;
-        match output.exit_status {
-            Some(66) => Err(MonitorError::Unsupported(
-                "Linux ss is required for socket diagnostics",
-            )),
-            _ => parse_sockets(&checked_text(output, "socket collection")?),
+        let (revision, state) = self.capabilities.begin(Capability::Sockets).await;
+        if let Some(reason) = cached_reason(state) {
+            return Err(MonitorError::CapabilityUnavailable {
+                capability: Capability::Sockets,
+                reason,
+            });
         }
+        let result = async {
+            let output = self
+                .session
+                .exec_limited(SOCKETS_SCRIPT, MAX_OUTPUT)
+                .await?;
+            parse_sockets(&command_text(output, Capability::Sockets)?)
+        }
+        .await;
+        let state = result
+            .as_ref()
+            .map_or_else(error_state, |_| CapabilityState::Available);
+        self.capabilities
+            .record(revision, Capability::Sockets, state)
+            .await;
+        result
     }
 
     /// Probe one TCP listening row through the authenticated remote host.
@@ -676,6 +820,7 @@ fn sections(input: &str) -> MonitorResult<BTreeMap<String, String>> {
                 "uptime",
                 "net",
                 "df",
+                "df-status",
                 "bootid",
                 "diskstats",
                 "end",
@@ -817,6 +962,39 @@ fn parse_filesystems(input: &str) -> MonitorResult<Vec<FilesystemSnapshot>> {
         .collect()
 }
 
+fn parse_capacity(
+    sections: &BTreeMap<String, String>,
+    stderr: &[u8],
+) -> (Vec<FilesystemSnapshot>, CapabilityState) {
+    if let Some(status) = sections.get("df-status") {
+        match status.trim().parse::<u32>() {
+            Ok(0) => {}
+            Ok(status @ 1..=255) => {
+                return (
+                    Vec::new(),
+                    CapabilityState::Unavailable(failure_reason(status, stderr)),
+                );
+            }
+            _ => {
+                return (
+                    Vec::new(),
+                    CapabilityState::Unavailable(CapabilityReason::InvalidOutput),
+                );
+            }
+        }
+    }
+    match sections
+        .get("df")
+        .and_then(|text| parse_filesystems(text).ok())
+    {
+        Some(filesystems) => (filesystems, CapabilityState::Available),
+        None => (
+            Vec::new(),
+            CapabilityState::Unavailable(CapabilityReason::InvalidOutput),
+        ),
+    }
+}
+
 fn columns(mut line: &str, count: usize) -> MonitorResult<(Vec<&str>, &str)> {
     let mut fields = Vec::with_capacity(count);
     for _ in 0..count {
@@ -863,7 +1041,7 @@ fn process_start_ticks(stat: &str, expected_pid: u32) -> MonitorResult<u64> {
 mod tests {
     use super::*;
 
-    const SAMPLE: &str = "@@KS:platform@@\nLinux\n@@KS:stat@@\ncpu 100 20 30 400 50 0 0 0 80 10\ncpu0 1 1 1 1\nbtime 1700000000\n@@KS:meminfo@@\nMemTotal: 1024 kB\nMemAvailable: 256 kB\nSwapTotal: 512 kB\nSwapFree: 128 kB\n@@KS:loadavg@@\n1.25 0.50 0.25 1/100 45\n@@KS:uptime@@\n100.00 75.00\n@@KS:net@@\nInter-| Receive | Transmit\n face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed\n lo: 100 1 0 0 0 0 0 0 200 1 0 0 0 0 0 0\neth0: 1000 10 0 0 0 0 0 0 2000 10 0 0 0 0 0 0\n@@KS:df@@\nFilesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\ntmpfs 200 1 199 1% /with spaces\n@@KS:end@@\n";
+    pub(super) const SAMPLE: &str = "@@KS:platform@@\nLinux\n@@KS:stat@@\ncpu 100 20 30 400 50 0 0 0 80 10\ncpu0 1 1 1 1\nbtime 1700000000\n@@KS:meminfo@@\nMemTotal: 1024 kB\nMemAvailable: 256 kB\nSwapTotal: 512 kB\nSwapFree: 128 kB\n@@KS:loadavg@@\n1.25 0.50 0.25 1/100 45\n@@KS:uptime@@\n100.00 75.00\n@@KS:net@@\nInter-| Receive | Transmit\n face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed\n lo: 100 1 0 0 0 0 0 0 200 1 0 0 0 0 0 0\neth0: 1000 10 0 0 0 0 0 0 2000 10 0 0 0 0 0 0\n@@KS:df@@\nFilesystem 1024-blocks Used Available Capacity Mounted on\n/dev/root 1000 600 350 64% /\ntmpfs 200 1 199 1% /with spaces\n@@KS:end@@\n";
     const PROCESS_ROWS: &str =
         "1 root 0.0 0.1 /sbin/init\n42 tester 125.0 2.5 worker --arg 'two  spaces'\n";
     const SOCKET_ROWS: &str = "tcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:* users:((\"sshd\",pid=42,fd=3))\nudp UNCONN 0 0 [::1]:5353 [::]:* users:((\"dns\",pid=7,fd=4))\n";
@@ -1267,7 +1445,7 @@ mod tests {
 
     #[tokio::test]
     async fn loopback_ssh_reports_unsupported_platform() -> Result<(), Box<dyn std::error::Error>> {
-        let (_server, monitor) = fixture(true).await?;
+        let (server, monitor) = fixture(true).await?;
         assert!(matches!(
             monitor.snapshot().await,
             Err(MonitorError::Unsupported(_))
@@ -1276,6 +1454,22 @@ mod tests {
             monitor.processes().await,
             Err(MonitorError::Unsupported(_))
         ));
+        assert!(matches!(
+            monitor.snapshot().await,
+            Err(MonitorError::CapabilityUnavailable {
+                capability: Capability::Resources,
+                reason: CapabilityReason::UnsupportedPlatform,
+            })
+        ));
+        assert_eq!(
+            server
+                .commands
+                .lock()
+                .map_err(|_| "fixture lock poisoned")?
+                .len(),
+            2,
+            "an observed unsupported platform is not repeatedly collected"
+        );
         Ok(())
     }
 

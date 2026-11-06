@@ -32,7 +32,7 @@ impl FilesPanel {
     ) {
         if self.editing.as_ref().is_none_or(|(path, current_base)| {
             path != &snapshot.entry.path || current_base != &base
-        }) || self.editor.read(cx).value().as_ref() != draft.as_str()
+        }) || !self.draft_matches_bytes(&self.editor.read(cx).value(), draft.as_bytes())
         {
             self.status = Message::new(
                 "读取期间草稿、文件或基线已变化，保留当前草稿；请重新读取并合并。",
@@ -81,11 +81,31 @@ impl FilesPanel {
         if self.suspended || self.busy || self.operation_id.is_some() || self.pending.is_some() {
             return;
         }
+        if self.editor_reload_required {
+            self.status = FileFailure::EditorFormatChanged.message();
+            cx.notify();
+            return;
+        }
         if let Some((path, base)) = &self.editing {
+            let draft = match self.prepare_editor_bytes(&self.editor.read(cx).value()) {
+                Ok(bytes) => match String::from_utf8(bytes) {
+                    Ok(text) => text,
+                    Err(_) => {
+                        self.status = FileFailure::InvalidEditor.message();
+                        cx.notify();
+                        return;
+                    }
+                },
+                Err(error) => {
+                    self.status = error.message();
+                    cx.notify();
+                    return;
+                }
+            };
             let operation = Operation::ReadMerge {
                 path: path.clone(),
                 base: base.clone(),
-                draft: self.editor.read(cx).value().to_string(),
+                draft,
             };
             // A fresh observation supersedes every choice from the old review;
             // the user's editor draft remains untouched while the worker runs.
@@ -132,7 +152,7 @@ impl FilesPanel {
         let Some(review) = &self.merge_review else {
             return;
         };
-        if self.editor.read(cx).value().as_ref() != review.draft.as_str() {
+        if !self.draft_matches_bytes(&self.editor.read(cx).value(), review.draft.as_bytes()) {
             self.status = Message::new(
                 "冲突审核后草稿已变化，请重新读取并合并；当前草稿已保留。",
                 "Draft changed after conflict review. Read and merge again; current draft retained.",
@@ -153,9 +173,36 @@ impl FilesPanel {
         match review.plan.resolve(&review.choices) {
             Ok(text) => {
                 let snapshot = review.snapshot.clone();
+                let document = match Utf8TextDocument::decode(text.as_bytes()) {
+                    Ok(document) => document,
+                    Err(error) => {
+                        self.status = FileFailure::TextDocument(error).message();
+                        cx.notify();
+                        return;
+                    }
+                };
+                let original = match Utf8TextDocument::decode(&snapshot.content) {
+                    Ok(document) => document,
+                    Err(error) => {
+                        self.status = FileFailure::TextDocument(error).message();
+                        cx.notify();
+                        return;
+                    }
+                };
+                let format = original
+                    .format()
+                    .retain_insertion_policy(self.editor_format.unwrap_or(original.format()));
+                // Remove a signature only when the owning remote envelope has one.
+                // A new leading FEFF on a no-BOM baseline remains draft data.
+                let body = if format.has_bom() {
+                    document.body().to_owned()
+                } else {
+                    text
+                };
                 self.editor
-                    .update(cx, |input, cx| input.set_value(text, window, cx));
+                    .update(cx, |input, cx| input.set_value(body, window, cx));
                 self.editing = Some((snapshot.entry.path.clone(), snapshot.content.clone()));
+                self.editor_format = Some(format);
                 self.editor_snapshot = Some(snapshot);
                 self.merge_review = None;
                 self.diff_preview = None;
@@ -172,6 +219,11 @@ impl FilesPanel {
         cx.notify();
     }
     pub(super) fn request_save(&mut self, cx: &mut Context<Self>) {
+        if self.editor_reload_required {
+            self.status = FileFailure::EditorFormatChanged.message();
+            cx.notify();
+            return;
+        }
         if self.merge_review.is_some() {
             self.status = Message::new(
                 "请先解决并采用合并草稿，或关闭合并审核保留当前草稿。",
@@ -200,25 +252,23 @@ impl FilesPanel {
             cx.notify();
             return;
         }
-        let content = self.editor.read(cx).value().as_bytes().to_vec();
-        if self
-            .editor
-            .read(cx)
-            .value()
-            .split_inclusive('\n')
-            .take(4097)
-            .count()
-            > 4096
-        {
-            self.status = FileFailure::TextEdit(keelshell_core::TextEditError::Limit).message();
-            cx.notify();
-            return;
-        }
-        if content.len() > 1024 * 1024 || content.contains(&0) {
-            self.status = FileFailure::InvalidEditor.message();
-            cx.notify();
-            return;
-        }
+        let content = match self.prepare_editor_bytes(&self.editor.read(cx).value()) {
+            Ok(bytes) => bytes,
+            Err(error) => {
+                self.status = error.message();
+                cx.notify();
+                return;
+            }
+        };
+        let document = match Utf8TextDocument::decode(&content) {
+            Ok(document) => document,
+            Err(error) => {
+                self.status = FileFailure::TextDocument(error).message();
+                cx.notify();
+                return;
+            }
+        };
+        let description = text_format_description(document.format());
         let text = String::from_utf8_lossy(&content);
         let mode = snapshot
             .entry
@@ -227,26 +277,38 @@ impl FilesPanel {
             .unwrap_or_else(|| "—".into());
         let modified = modified_label(snapshot.entry.modified);
         let details_zh = format!(
-            "{}\n{} → {} 字节\n权限：{mode}；修改时间(UTC)：{modified}；末尾 LF：{}\n",
+            "{}\n{} → {} 字节\n{}；权限：{mode}；修改时间(UTC)：{modified}；末尾 LF：{}；末尾 CR：{}\n",
             snapshot.entry.path,
             snapshot.content.len(),
             content.len(),
+            description.0,
             if content.ends_with(b"\n") {
                 "有"
             } else {
                 "无"
-            }
+            },
+            if content.ends_with(b"\r") {
+                "有"
+            } else {
+                "无"
+            },
         );
         let details_en = format!(
-            "{}\n{} → {} bytes\nMode: {mode}; modified (UTC): {modified}; final LF: {}\n",
+            "{}\n{} → {} bytes\n{}; mode: {mode}; modified (UTC): {modified}; final LF: {}; final CR: {}\n",
             snapshot.entry.path,
             snapshot.content.len(),
             content.len(),
+            description.1,
             if content.ends_with(b"\n") {
                 "yes"
             } else {
                 "no"
-            }
+            },
+            if content.ends_with(b"\r") {
+                "yes"
+            } else {
+                "no"
+            },
         );
         self.confirm(Message::new(format!("审核最终全文并保存？\n{details_zh}先复核原文件内容与元数据，发布前再复核；原子替换后完整读回。仅保留普通 rwx 权限，不保留所有者、ACL 或特殊模式。SFTP 不提供远端比较交换锁；不自动重试。\n── 最终全文 ──\n{text}"),format!("Review the complete result and save?\n{details_en}Recheck original content/metadata before staging and publication; read back all published bytes. Only ordinary rwx permissions are preserved, excluding ownership, ACLs and special modes. SFTP has no remote compare-and-swap lock; no automatic retry.\n── Complete result ──\n{text}")),Operation::Save{path:snapshot.entry.path.clone(),reviewed:snapshot,content},cx);
     }

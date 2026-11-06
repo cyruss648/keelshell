@@ -325,11 +325,9 @@ async fn operate_inner(
             }
             Operation::Read(entry) => {
                 let snapshot = sftp.read_regular_snapshot(&entry.path, 1024 * 1024).await?;
-                if std::str::from_utf8(&snapshot.content).is_err() || snapshot.content.contains(&0)
-                {
-                    return Err(FileFailure::InvalidEditor);
-                }
-                Ok(Outcome::Read(snapshot))
+                let document = Utf8TextDocument::decode(&snapshot.content)
+                    .map_err(FileFailure::TextDocument)?;
+                Ok(Outcome::Read(snapshot, document))
             }
             Operation::ReadMerge { path, base, draft } => {
                 let snapshot = sftp.read_regular_snapshot(&path, 1024 * 1024).await?;
@@ -569,9 +567,12 @@ async fn operate_inner(
                 if saved.content != content {
                     return Err(FileFailure::SavedReadback("saved contents differ from the acknowledged review; inspect the remote file".into()));
                 }
+                let document = Utf8TextDocument::decode(&saved.content)
+                    .map_err(|error| FileFailure::SavedReadback(error.to_string()))?;
                 Ok(Outcome::Saved {
                     snapshot: saved,
                     backup,
+                    document,
                 })
             }
         }
@@ -684,6 +685,15 @@ fn merge_outcome(
     base: Vec<u8>,
     draft: String,
 ) -> Result<Outcome, FileFailure> {
+    let original_document = Utf8TextDocument::decode(&base).map_err(FileFailure::TextDocument)?;
+    let remote_document =
+        Utf8TextDocument::decode(&snapshot.content).map_err(FileFailure::TextDocument)?;
+    if !original_document
+        .format()
+        .is_compatible_with(remote_document.format())
+    {
+        return Err(FileFailure::EditorFormatChanged);
+    }
     let original = std::str::from_utf8(&base).map_err(|_| FileFailure::InvalidEditor)?;
     let remote = std::str::from_utf8(&snapshot.content).map_err(|_| FileFailure::InvalidEditor)?;
     let plan =

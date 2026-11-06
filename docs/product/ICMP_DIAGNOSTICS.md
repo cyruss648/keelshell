@@ -1,8 +1,10 @@
 # MON/NET-02：显式审核式 ICMP ping / Reviewed remote ICMP
 
 切片始于 2026-11-05，基线 `dcf7438a13fff737997ee5e8061044c94d4ba53a`。
-此指南描述候选源码契约；实际门禁、未完成的集成与原生边界见
-[验证记录](../testing/records/2026-11-05-icmp-diagnostics.md)。
+此指南描述已合入代码的能力契约；来源历史见
+[作者记录](../testing/records/2026-11-05-icmp-diagnostics.md)，
+组合门禁、真实probe及仍未完成的Rust/UI/原生边界见
+[整合记录](../testing/records/2026-11-06-reviewed-diagnostics-integration.md)。
 
 ## 操作与授权 / Interaction and authority
 
@@ -46,8 +48,11 @@ has its own meaning alongside DNS/TLS/HTTP and the existing TCP connection test.
 其他 iputils 版本、发行版自定义版本串、BusyBox、BSD/macOS、远端 Windows、
 未知版本/配置输出都明确返回 Unsupported，不使用 `--help` 推测参数是否安全。
 版本串属于已认证远端的能力声明，不能证明 executable 的密码学身份；
-此适配器不是对恶意远端二进制的沙箱。IPv4/IPv6 文本契约都有离线夹具；
-真实 Linux ICMP 和双栈网络验收仍未运行。
+此适配器不是对恶意远端二进制的沙箱。IPv4/IPv6 文本契约都有离线夹具。
+2026-11-06另在自有Linux容器完成OpenSSH CLI携带精确生产Python命令的
+双栈回环probe：127.0.0.1和::1各四次工具尝试/四个回复，实际工具为iputils20240117。
+这只覆盖CLI→生产Python/iputils，不代签Rust传输/解析、审核UI、外部路由、
+真实错误/取消矩阵或各平台原生验收。
 
 主机输入只接受受限 DNS 名称或完整数值 IP。拒绝 flags、空白、控制字符、shell
 片段、IPv6 zone、URL、userinfo/query/fragment。传给工具的目标只能是解析后的数值地址。

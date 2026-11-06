@@ -14,7 +14,9 @@ impl AppState {
     /// `expected` must equal the complete current entry, including its content.
     /// The replacement must preserve its ID, complete source binding, session,
     /// capture type, occurrence timestamp and outcome. Construct edited content
-    /// with [`SavedKnowledgeEntry::with_reviewed_content`].
+    /// with [`SavedKnowledgeEntry::with_reviewed_content`] or change only its
+    /// local category with [`SavedKnowledgeEntry::with_reviewed_category`].
+    /// Both content and category participate in the complete original comparison.
     ///
     /// This only edits memory and preserves the snapshot revision. Persist the
     /// candidate through the same [`crate::StateStore`] that loaded the snapshot;

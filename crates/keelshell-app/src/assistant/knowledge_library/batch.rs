@@ -30,6 +30,12 @@ impl KnowledgeLibrary {
     }
 
     pub(super) fn review_selection_matches(&self, review: &MutationReview) -> bool {
+        if review.category_revision.is_some() {
+            return review.batch_revision.is_none()
+                && review.replacement.is_some()
+                && review.expected.len() == 1
+                && self.category_target.as_ref() == review.expected.first();
+        }
         match review.batch_revision {
             Some(revision) => {
                 review.replacement.is_none()
@@ -102,6 +108,8 @@ impl KnowledgeLibrary {
             expected: self.management.clone(),
             replacement: None,
             batch_revision: Some(revision),
+            category_revision: None,
+            draft_category: SharedString::default(),
             draft_title: SharedString::default(),
             draft_summary: SharedString::default(),
         };
@@ -149,7 +157,7 @@ impl KnowledgeLibrary {
                 || (!selected && self.management.len() >= AppState::MAX_KNOWLEDGE_DELETE_ENTRIES),
         )
         .accessibility_label(format!(
-            "{}: {} · {}",
+            "{}: {} ({})",
             t(cx, "管理选择（待删除）", "Deletion selection"),
             entry.entry().title(),
             entry.id()
@@ -232,6 +240,15 @@ impl KnowledgeLibrary {
         entry: &SavedKnowledgeEntry,
         cx: &mut Context<Self>,
     ) -> AnyElement {
+        self.complete_entry_view(entry, "knowledge-management-full", cx)
+    }
+
+    pub(super) fn complete_entry_view(
+        &self,
+        entry: &SavedKnowledgeEntry,
+        id_prefix: &str,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let fact = entry.entry();
         let outcome = match fact.outcome() {
             KnowledgeOutcome::Completed => t(cx, "原结果：完成", "Original outcome: completed"),
@@ -245,17 +262,15 @@ impl KnowledgeLibrary {
         };
         let visual = crate::design::palette(cx);
         div()
-            .id(SharedString::from(format!(
-                "knowledge-management-full-{}",
-                entry.id()
-            )))
+            .id(SharedString::from(format!("{id_prefix}-{}", entry.id())))
             .test_support()
             .role(Role::Group)
             .aria_label(format!(
-                "UUID: {} · {} · {} · {outcome}",
+                "UUID: {}, {}, {}, {outcome}, {}",
                 entry.id(),
                 fact.title(),
-                fact.source().label()
+                fact.source().label(),
+                Self::category_label(entry, cx),
             ))
             .aria_description(fact.summary().to_owned())
             .min_w_0()
@@ -268,29 +283,34 @@ impl KnowledgeLibrary {
             .border_color(rgb(visual.border))
             .whitespace_normal()
             .child(format!("UUID: {}", entry.id()))
-            .child(Self::entry_text(entry))
+            .child(Self::entry_text(entry, cx))
             .child(div().text_xs().text_color(rgb(visual.muted)).child(format!(
                 "{}: {}",
                 t(cx, "来源（会话）", "Source (session)"),
                 fact.source().label()
             )))
             .child(div().text_xs().child(format!(
-                "{}: {} · {}: {}",
+                "{}: {}",
                 t(cx, "来源 UUID", "Source UUID"),
-                fact.source().id(),
+                fact.source().id()
+            )))
+            .child(div().text_xs().child(format!(
+                "{}: {}",
                 t(cx, "版本", "Revision"),
                 fact.source().revision()
             )))
             .child(div().text_xs().child(format!(
-                "{}: {} · {capture}",
+                "{}: {}",
                 t(cx, "原会话", "Original session"),
                 entry.session_id()
             )))
+            .child(div().text_xs().child(capture))
             .child(div().text_xs().child(format!(
-                "{}: {} · {outcome}",
+                "{}: {}",
                 t(cx, "Unix 时间（秒）", "Unix time (seconds)"),
                 fact.occurred_at()
             )))
+            .child(div().text_xs().child(outcome))
             .into_any_element()
     }
 

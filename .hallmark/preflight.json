@@ -5,61 +5,32 @@
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
-  "job": "review an explicit bounded diagnostic against the continuously selected SSH pane, and display disconnected panes on semantic theme surfaces",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
+  "job": "edit remote UTF-8 text with exact format-preserving save reviews and inspect explicitly reviewed bounded remote Linux routes",
   "sources": [
-    "crates/keelshell-app/src/workspace/pane_view.rs",
-    "crates/keelshell-app/src/workspace/pane_sessions.rs",
-    "docs/adr/0101-native-session-pane-ownership.md",
-    "crates/keelshell-app/src/workspace/navigation.rs",
-    "crates/keelshell-app/src/workspace/navigation/keyboard.rs",
-    "docs/adr/0099-keyboard-connection-tree.md",
-    "crates/keelshell-app/src/workspace/startup_restore.rs",
-    "docs/adr/0104-single-window-startup-restore.md",
+    "crates/keelshell-app/src/files.rs",
     "crates/keelshell-app/src/monitor_protocol.rs",
-    "crates/keelshell-app/src/workspace/protocol_selection.rs",
-    "docs/adr/0106-diagnostic-selection-consent.md"
+    "docs/design/HALLMARK_NATIVE.md",
+    "docs/product/REMOTE_TEXT_FORMAT.md"
   ],
   "preserve": [
-    "semantic theme registry and tokens",
-    "global session strip and per-session remote tools",
-    "explicit review and runtime authority"
+    "Frost/Graphite/Lavender registry and semantic tokens",
+    "current pane/tab/connection review authority",
+    "complete original/candidate content review and fixed confirm/cancel",
+    "background transport work and unknown-result isolation"
   ],
   "introduce": [
-    "nested horizontal/vertical splits with per-leaf tabs",
-    "bounded pointer and keyboard ratio adjustment",
-    "merge without closing sessions, focused and compact display",
-    "explicit inert layout saving",
-    "folding and keyboard connection-tree navigation with protected held-key lifetime",
-    "single-window startup restoration with distinct available, unsaved and missing-connection states",
-    "explicit current-profile authentication replaces only the selected inactive slot",
-    "semantic canvas and state spacing for disconnected restored panes",
-    "explicit ICMP preview with utility-reported attempt/reply counters and quiet-summary limitation",
-    "continuous active pane/tab consent with same-turn invalidation and fresh preview"
+    "one-BOM body/format separation and original uniform LF/CRLF insertion policy",
+    "explicit traceroute protocol/family/limits and complete command review",
+    "unknown stars and distinct hop-limit/unreachable/tool-permission outcomes"
   ],
-  "material": {
-    "real": [
-      "existing native terminal entities",
-      "bounded layout model",
-      "controlled GPUI events and isolated StateStore"
-    ],
-    "pictures": "53 original combined macOS AX/JPEG pairs, bound to app33be2e68 and run3f7689e9; no mock acceptance",
-    "absent": [
-      "invented hosts",
-      "fabricated native acceptance"
-    ]
-  },
-  "inferred_from_authorized_design_scope": true,
-  "web_render_verified": false,
-  "web_render_scope": "not_applicable: Rust/GPUI source",
-  "native_verification": "Combined package33be2e68 has53 original pairs: scoped tree/search/theme/draft/split/merge observations, A/B paste+Right controls before and after navigation; early ordinary-character/Right controls failed, recovered navigation after separately measured Escape. Clicking divider then Right left ratio unchanged and added3 PTY bytes; Tab focus then Right50→55% had zero increment. Cumulative24 PTY bytes and32 refused exec requests/13440 bytes. App and owned runtime cleaned. Full input isolation and native matrix OPEN; fresh non-author native-r1 approves scoped evidence as PARTIAL_OBSERVED, with no confirmed source P1/P2. Full native/finish not granted.",
-  "native_evidence": "docs/testing/records/2026-11-05-workspace-integration.md",
-  "combined_review": "Original515 combined source/evidence approval; document-followup-r1 closes P3; test-only diagnostic-r1 approves the e164ea delta and two exact runs. Source e331372 Quality42025002190/1 passed all three platforms with74candidate tests each; Linux/macOS each11OpenSSH. Final documentation is tracked separately for scoped review; native evidence remains PARTIAL_OBSERVED.",
-  "finish_review": "OPEN: native-r1 approves scoped observations only, not full native or finish",
-  "current_source_verification": "520 combined engineering inputs unchanged through full-gate-r2/build/current; gate exit0/reaped:2221ordinary/23ignored,app963/2ignored,14rustdoc,Python131run/1skip. Formatting,strict Clippy,dependency policy and additional controllers passed. Initial3 test-only lint failures preserved. source-r1/startup-source-r1 scoped approvals; final-combined-r1 approves scoped combined source/gate/package binding,P0/P1/P2/P3=0; final documentation follows final-docs-r2.",
-  "current_native_followup": "Old515-input package33be2e68/runec01db306f2d43158d6d8984becf0b83:22 AX/JPEG pairs; input-native-r1 scoped evidence accepted as PARTIAL_OBSERVED,P0/P1/P2=0. Visible x sends0 until separate Return1; fresh Return1/Right3; Unicode typeText0/no visible result UNKNOWN. Tree navigation has observable changes and zero PTY/exec increments bracketed by Right3 controls. Total12PTY,24refusedexec/9268bytes. App/outer exit0/reaped; private removed/port refused within548.661s of900. Full input/IME remains OPEN.",
-  "current_restoration_native": "New520-input package99cd7f69/run60c040c7da1a4cadbab99a1a2d78f520:6 AX/JPEG pairs,offline two-launch restore. Explicit save then second launch retained Chinese,67percent and selected missing tab. Exact expected layout uniquely matches both saved layout digests; other window metadata/order preserved; raw state digests equal. Raw post-exit state not retained. App1/app2/outer22504 exit0/reaped,private lexists false within original600s TTL. Connect not invoked; no network audit or full appearance/native matrix claim. restore-native-r1 approves scoped evidence as PARTIAL_OBSERVED,P0/P1/P2/P3=0; full native/finish not granted.",
-  "current_slice_verification": "Final full-gate-r5 exit0/reaped on525 unchanged engineering inputs matching build-r2 and current source:2242ordinary/23ignored,app976/2ignored,14rustdoc,Python131run(130pass/1skip); formatting,strict Clippy,dependency policy and additional controllers passed. Selection-r5 independently approves scoped source and two Button negative controls; combined-r2 independently approves frozen product source/full gate/package attribution with no open findings; formal docs reviewed separately. Official freshness-r4 passes104requirements; zip9.4/rmcp3.9 retain x.y declarations.",
-  "current_slice_native": "New525-input packagef9b5ac99/run5a650e67ced3483c9cb71122d65756a1:one macOS launch,24workbench AX/JPEG pairs at2880x1866 for3families x2appearances x2languages and unsaved/missing states,plus12settings pairs. Available-disconnected state remains in left pane;Connect not invoked. App99109 and exec89824 exit0/reaped,STOPPED/launches1,private removed and observed PIDs absent within original600s TTL. No restart,input/IME,compact geometry,network-zero or authenticated ICMP/native-platform acceptance. Non-author evidence review tracked separately. Non-author surfaces-native-r1 APPROVE_SCOPED_MACOS_CANVAS_NATIVE_MAPPING with no open findings,Hallmark finish ship only for observed canvas mapping. Later packagea5261fab has not run natively; old captures retain f9b5ac99 attribution."
+  "base_sha": "fa7c05914e0eefc0f24ab32f8af690bdc50a63ed",
+  "source_status": "editor-r3 and traceroute-r3 source approved; combined543 inputs/21 paths; full-gate-r3 actual0/reaped,2355 ordinary/23ignored,14rustdoc,Python131/1skip;42 new and204 baseline names passed; combined-r3/r4 scoped source/gate/package approvals",
+  "native_status": "PARTIAL_NATIVE_ACCEPTANCE_FULL_NATIVE_HOLD;non-author native-r1 approves limited macOS BOM/CRLF cancel+confirmed save and SSH UI UDPv4/v6 one-hop observations;NR1-P2-01 inline editor footer actions remain partly clipped;merge-adopt/save,late-save,consecutive-zero-newline NOT_RUN",
+  "finish_review": "APPROVE_LIMITED_543_INPUT_BATCH_DELIVERY_WITH_OPEN_P2_AND_EXPLICIT_NATIVE_HOLDS;full native finish remains HOLD;previous scoped approvals retain their original source/package boundaries",
+  "evidence": "docs/testing/records/2026-11-06-editor-traceroute-native.md",
+  "baseline_evidence": "docs/testing/records/2026-11-06-resource-knowledge-native.md",
+  "baseline_native_scope": "native-r4 approves scoped macOS resource/batch evidence for14cb801e with same-run parent read-only export; known capture-tool P2/failed-inventory-summary P3 remain open in that immutable attempt",
+  "web_render": "not_applicable to native Rust/GPUI; actual GPUI and native checks recorded separately"
 }

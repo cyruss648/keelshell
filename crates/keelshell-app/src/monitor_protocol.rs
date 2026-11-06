@@ -5,12 +5,14 @@ use gpui_kit::component::{
     Selectable, Sizable,
     input::{Input, InputState},
 };
+use gpui_kit::prelude::FluentBuilder;
 use keelshell_core::{
-    NetworkDiagnosticInputError, NetworkDiagnosticKind, NetworkDiagnosticRequest,
+    NetworkDiagnosticInputError, NetworkDiagnosticKind, NetworkDiagnosticRequest, TracerouteFamily,
+    TracerouteProtocol,
 };
 use keelshell_session::network_diagnostic::{
     NetworkDiagnosticError, NetworkDiagnosticIcmpReason, NetworkDiagnosticReport,
-    NetworkDiagnosticStatus,
+    NetworkDiagnosticStatus, NetworkDiagnosticTracerouteReason,
 };
 #[cfg(test)]
 #[path = "monitor_tests/protocol_diagnostics.rs"]
@@ -21,6 +23,11 @@ struct DiagnosticDraft {
     kind: NetworkDiagnosticKind,
     endpoint: String,
     port: String,
+    trace_protocol: TracerouteProtocol,
+    trace_family: TracerouteFamily,
+    trace_hops: String,
+    trace_probes: String,
+    trace_wait: String,
 }
 
 pub(super) struct ProtocolPanel {
@@ -31,6 +38,11 @@ pub(super) struct ProtocolPanel {
     kind: NetworkDiagnosticKind,
     endpoint: Entity<InputState>,
     port: Entity<InputState>,
+    trace_protocol: TracerouteProtocol,
+    trace_family: TracerouteFamily,
+    trace_hops: Entity<InputState>,
+    trace_probes: Entity<InputState>,
+    trace_wait: Entity<InputState>,
     expanded: bool,
     review: Option<NetworkDiagnosticRequest>,
     review_draft: Option<DiagnosticDraft>,
@@ -58,7 +70,17 @@ impl ProtocolPanel {
             input.set_value("443", window, cx);
             input
         });
-        let input_observers = [&endpoint, &port]
+        let mut trace_input = |value: &str| {
+            cx.new(|cx| {
+                let mut input = InputState::new(window, cx);
+                input.set_value(value, window, cx);
+                input
+            })
+        };
+        let trace_hops = trace_input("6");
+        let trace_probes = trace_input("1");
+        let trace_wait = trace_input("500");
+        let input_observers = [&endpoint, &port, &trace_hops, &trace_probes, &trace_wait]
             .into_iter()
             .map(|input| cx.observe(input, |panel, _, cx| panel.sync_input(cx)))
             .collect();
@@ -70,6 +92,11 @@ impl ProtocolPanel {
             kind: NetworkDiagnosticKind::Dns,
             endpoint,
             port,
+            trace_protocol: TracerouteProtocol::Udp,
+            trace_family: TracerouteFamily::Ipv4,
+            trace_hops,
+            trace_probes,
+            trace_wait,
             expanded: false,
             review: None,
             review_draft: None,
@@ -78,6 +105,11 @@ impl ProtocolPanel {
                 kind: NetworkDiagnosticKind::Dns,
                 endpoint: String::new(),
                 port: "443".into(),
+                trace_protocol: TracerouteProtocol::Udp,
+                trace_family: TracerouteFamily::Ipv4,
+                trace_hops: "6".into(),
+                trace_probes: "1".into(),
+                trace_wait: "500".into(),
             },
             result: None,
             status: Message::empty(),
@@ -93,6 +125,11 @@ impl ProtocolPanel {
             kind: self.kind,
             endpoint: self.endpoint.read(cx).value().to_string(),
             port: self.port.read(cx).value().to_string(),
+            trace_protocol: self.trace_protocol,
+            trace_family: self.trace_family,
+            trace_hops: self.trace_hops.read(cx).value().to_string(),
+            trace_probes: self.trace_probes.read(cx).value().to_string(),
+            trace_wait: self.trace_wait.read(cx).value().to_string(),
         }
     }
 
@@ -183,6 +220,14 @@ impl ProtocolPanel {
             ),
             NetworkDiagnosticKind::Http => NetworkDiagnosticRequest::http(&value),
             NetworkDiagnosticKind::Icmp => NetworkDiagnosticRequest::icmp(&value),
+            NetworkDiagnosticKind::Traceroute => NetworkDiagnosticRequest::traceroute(
+                &value,
+                self.trace_protocol,
+                self.trace_family,
+                trace_number(&self.trace_hops, cx)?,
+                trace_number(&self.trace_probes, cx)?,
+                trace_number(&self.trace_wait, cx)?,
+            ),
         }
     }
 
@@ -219,6 +264,10 @@ impl ProtocolPanel {
             Err(NetworkDiagnosticInputError::InvalidPort) => {
                 Message::new("端口必须为 1–65535。", "Port must be 1–65535.")
             }
+            Err(NetworkDiagnosticInputError::InvalidTracerouteOptions) => Message::new(
+                "Traceroute 需要所选 IP 族、1–16 跳、每跳 1–3 次、等待 100–1000 ms；跳数 × 次数 × 等待不得超过 6000 ms。只接受十进制整数。",
+                "Traceroute requires the selected IP family, 1–16 hops, 1–3 probes per hop, 100–1000 ms wait; hops × probes × wait must not exceed 6000 ms. Decimal integers only.",
+            ),
             Err(_) => Message::new(
                 "请输入有效 DNS 名称、IP 或明确的 HTTP(S) URL；不接受空白、控制字符或区域标识。",
                 "Enter a valid DNS name, IP or explicit HTTP(S) URL; whitespace, controls and zone identifiers are not accepted.",
@@ -259,7 +308,10 @@ impl ProtocolPanel {
             return;
         }
         let runtime = self.runtime.clone();
-        let icmp_operation = request.kind() == NetworkDiagnosticKind::Icmp;
+        let utility_operation = matches!(
+            request.kind(),
+            NetworkDiagnosticKind::Icmp | NetworkDiagnosticKind::Traceroute
+        );
         let cancel = Arc::new(AtomicBool::new(false));
         let worker_cancel = cancel.clone();
         let token = uuid::Uuid::new_v4();
@@ -299,15 +351,15 @@ impl ProtocolPanel {
                 // SSH cancellation/transport failure cannot confirm remote reap.
                 // Retire this diagnostic authority even for a stale token: a
                 // discarded result must not re-admit another uncertain process.
-                if icmp_operation && result.is_err() {
+                if utility_operation && result.is_err() {
                     panel.session = None;
                     panel.review = None;
                     panel.review_draft = None;
                     panel.review_selection = None;
                     panel.result = None;
                     panel.status = Message::new(
-                        "ICMP 通道未取得可验证的退出结果；诊断权限已停用。远端有独立 8 秒预算，请核对进程后重连。",
-                        "ICMP channel has no verifiable exit result; diagnostic authority is disabled. The remote has an independent eight-second budget. Inspect processes before reconnecting.",
+                        "工具诊断通道未取得可验证的退出结果；诊断权限已停用。远端有独立 8 秒预算，请核对进程后重连。",
+                        "Utility diagnostic channel has no verifiable exit result; diagnostic authority is disabled. The remote has an independent eight-second budget. Inspect processes before reconnecting.",
                     );
                     cx.notify();
                     return;
@@ -459,18 +511,156 @@ fn outcome_message(status: NetworkDiagnosticStatus) -> Message {
             "The utility reports four attempts without echo replies; this establishes neither an offline host nor successful sends.",
         ),
         UtilityUnavailable => Message::new(
-            "远端 /usr/bin/ping 或 /bin/ping 不可用；不会安装工具或改用 TCP。",
-            "Remote /usr/bin/ping or /bin/ping is unavailable; no installation or TCP fallback.",
+            "远端固定路径中的所选诊断工具不可用；不会安装或改用其他工具。",
+            "The selected diagnostic utility is unavailable at its fixed remote paths; no installation or tool fallback.",
         ),
         PermissionDenied => Message::new(
-            "远端 ping 的执行或 ICMP 权限被拒绝；请管理员核对权限，不会提权。",
-            "Remote ping execution or ICMP permission was denied; ask an administrator to inspect permissions. No privilege escalation.",
+            "远端工具的执行或探测权限被拒绝；请管理员核对权限，不会提权。",
+            "Remote utility execution or probe permission was denied; ask an administrator to inspect permissions. No privilege escalation.",
         ),
         IcmpFailure => Message::new(
             "ICMP 诊断未通过输出、退出状态或预算校验；请查看固定原因。",
             "ICMP diagnostic failed output, exit-status or budget checks; inspect the fixed reason.",
         ),
+        TracerouteHopLimit => Message::new(
+            "已完成所选跳数，未观察到目的地址回复；星号为未知，不代表主机离线。",
+            "Reviewed hop limit completed without an observed destination reply; stars are unknown and do not establish an offline host.",
+        ),
+        TracerouteUnreachable => Message::new(
+            "工具报告 ICMP 不可达或错误标记；请核对各跳结果。",
+            "The utility reported ICMP unreachable or error markers; inspect the hop results.",
+        ),
+        TracerouteFailure => Message::new(
+            "Traceroute 未通过工具启动、输出、退出状态或预算校验；缺失结果未知。",
+            "Traceroute failed utility start, output, exit-status or budget checks; missing results are unknown.",
+        ),
     }
+}
+
+fn trace_number<T: std::str::FromStr>(
+    input: &Entity<InputState>,
+    cx: &App,
+) -> Result<T, NetworkDiagnosticInputError> {
+    let value = input.read(cx).value();
+    if value.is_empty() || value.len() > 4 || !value.bytes().all(|byte| byte.is_ascii_digit()) {
+        return Err(NetworkDiagnosticInputError::InvalidTracerouteOptions);
+    }
+    value
+        .parse()
+        .map_err(|_| NetworkDiagnosticInputError::InvalidTracerouteOptions)
+}
+
+fn traceroute_reason(reason: NetworkDiagnosticTracerouteReason, cx: &App) -> &'static str {
+    use NetworkDiagnosticTracerouteReason::*;
+    match reason {
+        DestinationResponded => t(cx, "观察到目的地址回复", "Destination address responded"),
+        HopLimit => t(
+            cx,
+            "达到所选跳数；未确认到达",
+            "Reviewed hop limit; destination unconfirmed",
+        ),
+        ReportedUnreachable => t(cx, "工具报告 ICMP 错误", "Utility reported ICMP errors"),
+        Deadline => t(
+            cx,
+            "监督期限到达；缺失跳未知",
+            "Supervisor deadline; missing hops unknown",
+        ),
+        Interrupted => t(cx, "已中断并回收", "Interrupted and reaped"),
+        CleanupUnknown => t(
+            cx,
+            "进程退出未确认，请检查后重连",
+            "Process exit unconfirmed; inspect before reconnecting",
+        ),
+        UtilityMissing => t(
+            cx,
+            "固定路径中缺少 traceroute",
+            "Traceroute missing at fixed paths",
+        ),
+        PermissionDenied => t(
+            cx,
+            "工具执行或探测权限不足",
+            "Utility execution or probe permission denied",
+        ),
+        UnsupportedPlatform => t(
+            cx,
+            "仅支持 Linux POSIX / Python 3.8+",
+            "Requires Linux POSIX / Python 3.8+",
+        ),
+        UnsupportedImplementation => t(
+            cx,
+            "仅支持 Linux traceroute 2.1.5 固定契约",
+            "Requires the fixed Linux traceroute 2.1.5 contract",
+        ),
+        UnsupportedOptions => t(
+            cx,
+            "远端工具不接受固定选项或配置",
+            "Remote utility rejected fixed options or configuration",
+        ),
+        ResolutionFailed => t(
+            cx,
+            "所选 IP 族的远端解析失败",
+            "Remote resolution failed for the selected IP family",
+        ),
+        ProcessFailed => t(cx, "工具启动或退出失败", "Utility start or exit failed"),
+        InvalidOutput => t(
+            cx,
+            "未知或不一致的工具输出",
+            "Unknown or inconsistent utility output",
+        ),
+        OutputLimit => t(
+            cx,
+            "工具输出超过总计 32 KiB",
+            "Combined utility output exceeded 32 KiB",
+        ),
+    }
+}
+
+fn traceroute_preview(request: &NetworkDiagnosticRequest, cx: &App) -> String {
+    let Some(options) = request.traceroute_options() else {
+        return String::new();
+    };
+    let family = if options.family() == TracerouteFamily::Ipv4 {
+        "-4"
+    } else {
+        "-6"
+    };
+    let method = if options.protocol() == TracerouteProtocol::Udp {
+        "default"
+    } else {
+        "icmp"
+    };
+    format!(
+        "Linux traceroute 2.1.5 (/usr/bin/traceroute | /bin/traceroute)\n{} · {} · {} × {} · {} ms · {} {} ms\ntraceroute {family} -n -M {method} -f 1 -m {} -q {} -N 1 -w {}.{:03} -z 0 -- <{}> 60\n{}",
+        if options.protocol() == TracerouteProtocol::Udp {
+            "UDP 33434+"
+        } else {
+            "ICMP Echo"
+        },
+        if options.family() == TracerouteFamily::Ipv4 {
+            "IPv4"
+        } else {
+            "IPv6"
+        },
+        options.max_hops(),
+        options.probes_per_hop(),
+        options.wait_ms(),
+        t(cx, "累计等待上限", "Cumulative wait cap"),
+        options.probe_wait_budget_ms(),
+        options.max_hops(),
+        options.probes_per_hop(),
+        options.wait_ms() / 1000,
+        options.wait_ms() % 1000,
+        t(
+            cx,
+            "所选族的首个远端解析地址",
+            "first remotely resolved address in selected family"
+        ),
+        t(
+            cx,
+            "最多 8 秒 / 32 KiB；不安装、不提权、不改变配置。切换活动面板、会话或保存路线后须重新审核。",
+            "At most 8s / 32 KiB; no install, escalation or configuration changes. Review again after active pane, session or saved route changes."
+        ),
+    )
 }
 
 fn icmp_reason(reason: NetworkDiagnosticIcmpReason, cx: &App) -> &'static str {
@@ -612,6 +802,7 @@ impl Render for ProtocolPanel {
                         (NetworkDiagnosticKind::Tls, "TLS"),
                         (NetworkDiagnosticKind::Http, "HTTP(S)"),
                         (NetworkDiagnosticKind::Icmp, "ICMP ping"),
+                        (NetworkDiagnosticKind::Traceroute, "Traceroute"),
                     ]
                     .into_iter()
                     .map(|(kind, label)| {
@@ -620,6 +811,7 @@ impl Render for ProtocolPanel {
                             NetworkDiagnosticKind::Tls => "protocol-mode-tls",
                             NetworkDiagnosticKind::Http => "protocol-mode-http",
                             NetworkDiagnosticKind::Icmp => "protocol-mode-icmp",
+                            NetworkDiagnosticKind::Traceroute => "protocol-mode-traceroute",
                         })
                         .ghost()
                         .compact()
@@ -655,6 +847,77 @@ impl Render for ProtocolPanel {
                 "Remote Linux iputils 20240117 · At most 4 echo requests · First resolved address only · No install or fallback",
             )));
         }
+        if self.kind == NetworkDiagnosticKind::Traceroute {
+            view = view.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                cx,
+                "仅远端 Linux traceroute 2.1.5 · 只探测所选 IP 族的首个地址 · 不回退 · 星号为未知",
+                "Remote Linux traceroute 2.1.5 · First address in selected IP family only · No fallback · Stars mean unknown",
+            )));
+            view = view.child(
+                div().flex().flex_wrap().gap_1().children(
+                    [
+                        (TracerouteProtocol::Udp, "trace-protocol-udp", "UDP"),
+                        (TracerouteProtocol::Icmp, "trace-protocol-icmp", "ICMP Echo"),
+                    ]
+                    .into_iter()
+                    .map(|(protocol, id, label)| {
+                        Button::new(id)
+                            .ghost()
+                            .compact()
+                            .label(label)
+                            .selected(self.trace_protocol == protocol)
+                            .disabled(busy || retired)
+                            .on_click(cx.listener(move |panel, _, _, cx| {
+                                panel.trace_protocol = protocol;
+                                panel.sync_input(cx);
+                            }))
+                    }),
+                ),
+            );
+            view = view.child(
+                div().flex().flex_wrap().gap_1().children(
+                    [
+                        (TracerouteFamily::Ipv4, "trace-family-v4", "IPv4"),
+                        (TracerouteFamily::Ipv6, "trace-family-v6", "IPv6"),
+                    ]
+                    .into_iter()
+                    .map(|(family, id, label)| {
+                        Button::new(id)
+                            .ghost()
+                            .compact()
+                            .label(label)
+                            .selected(self.trace_family == family)
+                            .disabled(busy || retired)
+                            .on_click(cx.listener(move |panel, _, _, cx| {
+                                panel.trace_family = family;
+                                panel.sync_input(cx);
+                            }))
+                    }),
+                ),
+            );
+            for (label, input) in [
+                (
+                    t(cx, "最大跳数（1–16）", "Max hops (1–16)"),
+                    &self.trace_hops,
+                ),
+                (
+                    t(cx, "每跳探测数（1–3）", "Probes per hop (1–3)"),
+                    &self.trace_probes,
+                ),
+                (
+                    t(
+                        cx,
+                        "每次等待 ms（100–1000）",
+                        "Wait per probe ms (100–1000)",
+                    ),
+                    &self.trace_wait,
+                ),
+            ] {
+                view = view
+                    .child(div().text_xs().child(label))
+                    .child(Input::new(input).small().disabled(busy || retired));
+            }
+        }
         view = view.child(
             Button::new("protocol-preview")
                 .ghost()
@@ -685,6 +948,11 @@ impl Render for ProtocolPanel {
                     "由此 SSH 主机解析目标，并向首个地址发送最多 4 个 ICMP Echo 请求。总期限 8 秒，SSH 通道 10 秒。不会提权、安装工具或回退到 TCP。",
                     "This SSH host resolves the target and sends at most 4 ICMP echo requests to its first address. Total budget 8s, SSH envelope 10s. No privilege escalation, installation or TCP fallback.",
                 ),
+                NetworkDiagnosticKind::Traceroute => t(
+                    cx,
+                    "从此 SSH 主机按明确协议和 IP 族探测单一目标。只返回有界数值结果，缺失跳不推断为丢包或离线。",
+                    "Trace one destination from this SSH host using the explicit protocol and IP family. Bounded numeric results only; missing hops establish neither loss nor an offline host.",
+                ),
             };
             view = view.child(
                 div()
@@ -712,6 +980,18 @@ impl Render for ProtocolPanel {
                         cx,
                     ))
                     .child(div().text_xs().child(operation))
+                    .when(request.traceroute_options().is_some(), |review| {
+                        review.child(value_row(
+                            "protocol-review-traceroute",
+                            t(
+                                cx,
+                                "Traceroute 请求与命令预览",
+                                "Traceroute request and command preview",
+                            ),
+                            traceroute_preview(request, cx),
+                            cx,
+                        ))
+                    })
                     .child(
                         div()
                             .flex()
@@ -904,6 +1184,55 @@ impl Render for ProtocolPanel {
                         cx,
                     ));
                 }
+            }
+            if let Some(trace) = &report.traceroute {
+                result = result.child(value_row(
+                    "protocol-traceroute-reason",
+                    t(cx, "Traceroute 结果原因", "Traceroute result reason"),
+                    traceroute_reason(trace.reason, cx).into(),
+                    cx,
+                ));
+                if let Some(address) = &trace.address {
+                    result = result.child(value_row(
+                        "protocol-traceroute-address",
+                        t(cx, "本次目的地址", "This destination address"),
+                        address.clone(),
+                        cx,
+                    ));
+                }
+                let hops = trace
+                    .hops
+                    .iter()
+                    .map(|hop| {
+                        let probes = hop
+                            .probes
+                            .iter()
+                            .map(|probe| match (&probe.address, probe.rtt_us) {
+                                (Some(address), Some(rtt)) => format!(
+                                    "{address} {rtt} µs{}",
+                                    probe
+                                        .annotation
+                                        .as_ref()
+                                        .map_or_else(String::new, |a| format!(" {a}"))
+                                ),
+                                _ => t(cx, "* 未知", "* Unknown").into(),
+                            })
+                            .collect::<Vec<_>>()
+                            .join(" · ");
+                        format!("{}: {probes}", hop.ttl)
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                result = result.child(value_row(
+                    "protocol-traceroute-hops",
+                    t(cx, "完整跳结果", "Complete hop rows"),
+                    if hops.is_empty() {
+                        t(cx, "无完整跳结果；未知", "No complete hop rows; unknown").into()
+                    } else {
+                        hops
+                    },
+                    cx,
+                ));
             }
             for (id, label, value) in [
                 (

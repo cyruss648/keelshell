@@ -1,5 +1,102 @@
 # Capability ledger
 
+## 2026-11-06: combined text format and reviewed traceroute candidate
+
+The reviewed editor r3 and traceroute r3 sources are now combined in the
+development branch: 543 engineering inputs and 21 source paths. The shared core
+exports retain both features. Freshly compiled inventories contain all 25 editor
+and 17 traceroute additions. The final combined gate passed 2355 ordinary tests /
+23 ignored, 14 rustdoc tests and 131 Python checks / one skipped. Scoped non-author
+reviews approved combined source and the new macOS package. That package has
+38 native AX/JPEG capture groups covering BOM/CRLF cancel/save and real SSH UI
+UDP IPv4/IPv6 one-hop loopback replies. Native-r1 approves those observed cases;
+one footer-action P2 remains open and full native acceptance stays on HOLD.
+Inline editor footer actions need a layout fix; native merge adoption/saving,
+late-save and consecutive no-break saving were not completed.
+See the [native record](../testing/records/2026-11-06-editor-traceroute-native.md).
+Traceroute requires an explicit UDP/ICMP
+method, IPv4/IPv6 family, bounded hops/probes/wait and a complete review. It admits
+only the fixed remote Linux traceroute 2.1.5 contract; stars and missing rows
+remain unknown. See the [combined record](../testing/records/2026-11-06-editor-traceroute-integration.md).
+
+## 2026-11-06: UTF-8 format preservation candidate
+
+The isolated editor r3 candidate separates one leading UTF-8 BOM from editable
+text and preserves a uniform LF/CRLF save policy. Dirty state, full review,
+limits and complete target readback use the same exact outbound bytes. A newer
+draft keeps its paired format; a no-break intermediate save retains the open
+document's insertion policy. Newly inserted leading U+FEFF survives merge adoption.
+
+Three independent P2 findings are closed in the reviewed delta. The 538-input
+isolated full gate passed 2338 ordinary tests / 23 ignored, 14 rustdoc tests and
+131 Python checks / one skipped; all 25 added tests actually ran. This candidate
+was imported with matching 538 input hashes and subsequently combined with
+traceroute into 543 inputs; combined validation, a new package and native
+observation remain separate.
+Backup-write ACK, publication ACK and complete target readback remain separate:
+production does not independently reread backup contents. See the
+[format guide](REMOTE_TEXT_FORMAT.md),
+[ADR 0111](../adr/0111-utf8-editor-format-envelope.md) and
+[test record](../testing/records/2026-11-06-editor-format.md).
+
+## 2026-11-06: monitoring capabilities and local knowledge categories
+
+The current integration separates core Linux resources, filesystem capacity,
+processes and listening sockets into typed capability observations with explicit
+rechecking. A failed optional tool preserves valid core measurements. Confirmed
+negative observations remain in the authenticated connection's cache and retain
+their actual check time; an expired delivery cannot leave the UI permanently
+disagreeing with that cache. Rendering, theme changes and paused polling add no
+automatic remote work.
+
+Saved knowledge has an optional local category, full-library counts and text
+intersection filtering. An independent bounded category viewport preserves the
+library and review controls. Setting, changing or clearing a category requires a
+complete review and one background save; cancellation writes nothing. Categories
+participate in current-object checks that revoke old reviews, while the model
+context projection and its byte budget omit category metadata.
+
+Both source slices have new non-author approval with no open source findings.
+After rejecting an incomplete cached test run, the fresh 536-input gate passed
+2313 ordinary tests with 23 ignored, 14 rustdoc tests and 131 Python checks with
+one skipped. The rebuilt package and macOS static inspection passed;
+the same package has completed a second scoped macOS run with real Linux SSH
+sampling and B0–B5 category readback. The first failed attempt remains HOLD;
+the second run has independent scoped approval in native-r2, with no new findings.
+Private raw state was removed by owned cleanup; disk conclusions use capture-time
+provenance and durable exports. These stages do not
+establish other desktop platforms, installation or complete native finish. See the [monitoring guide](MONITOR_CAPABILITIES.md),
+[category guide](KNOWLEDGE_CATEGORIES.md) and
+[acceptance record](../testing/records/2026-11-06-monitor-knowledge-categories.md)
+for the current boundary.
+
+## 2026-11-06: resource history and knowledge batch management
+
+CPU and memory share a five-minute, 60-position in-memory history for the current
+authenticated Linux SSH session. Real sample times determine horizontal positions.
+Initial CPU counters have no rate; unknowns are not zeros. Pauses, errors,
+restarts and invalid counters/times break the series. A new segment establishes
+its own CPU baseline. Painting adds no sampling commands or frequency.
+See [resource trends](HOST_RESOURCE_TRENDS.md).
+
+Knowledge management has independent deletion checkboxes, a 32-entry bound and
+full reviews including filtered-out selections. A unique review, complete
+original entries, selection revision and configuration snapshot bind one atomic
+candidate and one persistence operation. Cancel writes nothing. Saving revokes
+affected Ask attachments and pending requests synchronously; queued events or
+late replies cannot restore consent. Conflict/Unknown require reload and a new
+review. See [batch management](KNOWLEDGE_BULK_MANAGEMENT.md).
+
+The source slices have separate non-author approval with no open findings,
+including the repaired pause-status P3 and independently labeled review metadata.
+The combined 530-input gate passes 2,276 ordinary Rust tests / 23 ignored,
+14 rustdocs and 130 Python tests / one skipped; 1,002 app tests are included in
+the ordinary count. Formatting, strict Clippy, dependency policy and additional
+controllers pass. Build, package and gate inputs match; the new macOS development
+package is `14cb801e…`. Native sampling, disk readback, immutable delivery and
+exact new-commit CI remain separate in the
+[integration record](../testing/records/2026-11-06-resource-knowledge-integration.md).
+
 ## 2026-11-06: reviewed ICMP and pane surfaces
 
 The current candidate adds an explicit preview/confirm ICMP operation from the
@@ -8,7 +105,11 @@ paths, uses at most four attempts, bounded remote/SSH time and output, and owns
 its version/resolver/ping children. Quiet utility counters mean reported
 attempts/replies/unanswered attempts; they establish neither successful sends
 nor exclusively network loss. See [the ICMP contract](ICMP_DIAGNOSTICS.md).
-Genuine utility, IPv4/IPv6 and native platform acceptance remain open.
+A bounded OpenSSH CLI carrying the exact production Python command has now
+passed real Linux IPv4/IPv6 loopback probes, four counted attempts and replies
+per target, with owned cleanup. This signs the Python/iputils probe layer only;
+Rust transport/parser, review UI, real error/cancellation cases, external routing
+and native platform acceptance remain open.
 
 Diagnostic consent now follows an uninterrupted active pane/tab selection.
 Switching away and back invalidates the prior review and held reply; selecting

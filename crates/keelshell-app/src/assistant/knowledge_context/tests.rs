@@ -851,7 +851,16 @@ impl Drop for HttpFixture {
 async fn saved_knowledge_context_explicit_send_delivers_exact_preview_to_owned_http(
     cx: &mut TestAppContext,
 ) {
-    let (window, panel, state) = mount(cx);
+    let (window, panel, mut state) = mount(cx);
+    let original = state.knowledge_entries[0].clone();
+    state.knowledge_entries[0] = original
+        .with_reviewed_category(Some("Private local organization"))
+        .unwrap();
+    panel.update(cx, |panel, cx| {
+        panel
+            .knowledge_library
+            .update(cx, |library, cx| library.set_snapshot(&state, cx));
+    });
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     listener.set_nonblocking(true).unwrap();
     let endpoint = format!(
@@ -867,6 +876,16 @@ async fn saved_knowledge_context_explicit_send_delivers_exact_preview_to_owned_h
         assert!(panel._job.is_none());
         let exact = preview(panel).to_owned();
         assert_eq!(records(&exact)[0]["outcome"], "failed");
+        assert_eq!(
+            records(&exact),
+            vec![serde_json::to_value(&original).unwrap()]
+        );
+        assert!(!exact.contains("Private local organization"));
+        assert!(records(&exact)[0].get("category").is_none());
+        assert_eq!(
+            panel.knowledge_library.read(cx).context_selection().bytes(),
+            original.context_record().unwrap().len(),
+        );
         exact
     });
     assert!(
@@ -901,6 +920,79 @@ async fn saved_knowledge_context_explicit_send_delivers_exact_preview_to_owned_h
             "history grants no command target"
         );
         assert!(panel.prepared.is_none(), "approval is consumed once");
+    });
+}
+
+#[gpui_kit::test]
+async fn saved_knowledge_context_categories_are_absent_from_all_api_and_local_prepared_requests(
+    cx: &mut TestAppContext,
+) {
+    let (window, panel, mut state) = mount(cx);
+    let original = state.knowledge_entries[0].clone();
+    state.knowledge_entries[0] = original
+        .with_reviewed_category(Some("Private local label"))
+        .unwrap();
+    panel.update(cx, |panel, cx| {
+        panel
+            .knowledge_library
+            .update(cx, |library, cx| library.set_snapshot(&state, cx));
+    });
+    attach(&panel, &state, cx);
+    for configuration in [
+        profile(AiApiStyle::ChatCompletions),
+        profile(AiApiStyle::Responses),
+        profile(AiApiStyle::AnthropicMessages),
+        local_profile(AiLocalAgent::Codex),
+        local_profile(AiLocalAgent::ClaudeCode),
+    ] {
+        panel.update(cx, |panel, cx| {
+            panel.set_profile(
+                Some(configuration),
+                Some(Zeroizing::new("owned-category-fixture-key".into())),
+                cx,
+            );
+            panel.prepare(cx);
+        });
+        cx.wait_for(window, Duration::from_secs(5), |_, cx| !panel.read(cx).busy)
+            .await;
+        panel.read_with(cx, |panel, cx| {
+            assert!(panel.prepared.is_some(), "{}", panel.status.render(cx));
+            let request = preview(panel);
+            assert_eq!(
+                records(request),
+                vec![serde_json::to_value(&original).unwrap()]
+            );
+            assert!(!request.contains("Private local label"));
+            if let Some(PreparedAssistantRequest::Local(request)) = &panel.prepared {
+                assert!(!request.preview_stdin().contains("Private local label"));
+                assert!(!request.preview_stdin().contains("\\\"category\\\""));
+            }
+            assert!(panel.host.is_empty());
+            assert!(panel.session_id.is_empty());
+            assert!(panel._job.is_none());
+        });
+    }
+}
+
+#[gpui_kit::test]
+fn saved_knowledge_context_category_only_change_blocks_send_before_queued_notification(
+    cx: &mut TestAppContext,
+) {
+    let (_, panel, mut state) = mount(cx);
+    attach(&panel, &state, cx);
+    panel.update(cx, |panel, cx| {
+        panel.prepare(cx);
+        let old = panel.prepared_review_id.unwrap();
+        state.knowledge_entries[0] = state.knowledge_entries[0]
+            .with_reviewed_category(Some("Local"))
+            .unwrap();
+        panel
+            .knowledge_library
+            .update(cx, |library, cx| library.set_snapshot(&state, cx));
+        assert!(!panel.knowledge_request_is_current(cx));
+        panel.send_reviewed(old, cx);
+        assert!(panel._job.is_none());
+        assert!(!panel.busy);
     });
 }
 
