@@ -31,7 +31,14 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.command_surface_blocked() && !self.show_workflow {
+        // Library metadata review owns the modal and its persistence lease.
+        // A retained workflow may be reopened after a stale configuration
+        // notice, but it must not coexist with an active library review.
+        if self.library_batch_prompt.is_some() {
+            return;
+        }
+        let can_reopen_retained_workflow = self.workflow_panel.is_some();
+        if self.command_surface_blocked() && !self.show_workflow && !can_reopen_retained_workflow {
             return;
         }
         if fresh
@@ -137,7 +144,7 @@ impl Workspace {
             .absolute()
             .inset_0()
             .occlude()
-            .bg(rgba(0x17243a66))
+            .bg(rgba(visual.overlay))
             .flex()
             .items_center()
             .justify_center()

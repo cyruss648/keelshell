@@ -39,6 +39,7 @@ pub(crate) mod protocol_diagnostics;
 mod reviewed_agent;
 mod session_tabs;
 mod startup_restore;
+pub(super) mod windows;
 mod workbench_layout;
 
 trait Checked<T> {
@@ -134,6 +135,46 @@ fn mount_state_sized(cx: &mut TestAppContext, state: AppState, width: f32, heigh
         store,
         _state_directory: guard,
     }
+}
+
+/// Adopt a deliberately persisted fixture snapshot into the shared configuration
+/// authority before exercising a production action.
+///
+/// Test setup sometimes writes through a separate `StateStore` call after the
+/// real workspace has been mounted. Updating only `Workspace::state` would
+/// leave its revision and epoch behind the process-wide gate, so every guarded
+/// action would be rejected as stale. This helper models the completed reload
+/// boundary used by the production event handlers while keeping live panes and
+/// drafts owned by the test workspace.
+fn adopt_fixture_state(fixture: &Fixture, state: AppState, cx: &mut TestAppContext) {
+    cx.update_window(fixture.window, |_, _, cx| {
+        fixture.workspace.update(cx, |view, cx| {
+            view.state = state.clone();
+            let gate = view.app_windows.read(cx).gate.clone();
+            let reload =
+                crate::app_windows::ConfigurationGate::begin_reload_lease(&gate, view.window_id)
+                    .checked("begin fixture configuration adoption");
+            reload.finish(Some(&state));
+            view.configuration_epoch = gate
+                .lock()
+                .checked("lock fixture configuration gate")
+                .epoch();
+            view.configuration_invalidated = false;
+            cx.notify();
+        });
+    })
+    .checked("adopt persisted fixture configuration");
+}
+
+fn save_and_adopt_fixture_state(
+    fixture: &Fixture,
+    state: AppState,
+    operation: &str,
+    cx: &mut TestAppContext,
+) -> AppState {
+    let saved = fixture.store.save(&state).checked(operation);
+    adopt_fixture_state(fixture, saved.clone(), cx);
+    saved
 }
 
 /// Mount an already sampled monitor beside production workspace/terminal controls.

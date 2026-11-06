@@ -103,8 +103,8 @@ async fn approved_saved_profile_retarget_does_not_replace_captured_schedule_or_a
     let captured_route = local
         .connection_route(original_profile.id)
         .checked("original captured route");
+    adopt_fixture_state(&h.fixture, local.clone(), cx);
     h.fixture.workspace.update(cx, |view, cx| {
-        view.state = local;
         // Controlled metadata labels a real owned TCP SSH fixture; no DNS target is contacted.
         view.remote_hosts
             .insert(entity, "fixture@example.invalid:22".into());

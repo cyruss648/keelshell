@@ -56,7 +56,7 @@ impl FilesPanel {
         // Display exactly the base used by this worker's plan. A mutable editor
         // baseline must never substitute a different version into that review.
         let base = String::from_utf8_lossy(&base).into_owned();
-        self.editor_surface = None;
+        let expanded = self.editor_surface.take().is_some();
         self.merge_review = Some(MergeReview {
             snapshot,
             base,
@@ -72,6 +72,11 @@ impl FilesPanel {
             active: 0,
             manual,
         });
+        if expanded {
+            // The old editor has just been unmounted. Its retained input must
+            // lose focus before the merge review can receive keyboard events.
+            self.focus_editor(review::EditorSurface::Merge, window, cx);
+        }
         self.status = Message::new(
             "已读取当前远端版本；解决冲突并采用合并草稿后，仍需审核全文才能保存。",
             "Current remote version read; resolve conflicts and adopt the draft, then review all contents before saving.",
@@ -210,6 +215,9 @@ impl FilesPanel {
                     "已采用合并草稿；远端未写入。请检查全文，再审核保存。",
                     "Merged draft adopted; remote unchanged. Inspect all contents, then review save.",
                 );
+                if self.editor_surface == Some(review::EditorSurface::Merge) {
+                    self.focus_editor(review::EditorSurface::Draft, window, cx);
+                }
             }
             Err(error) => {
                 self.status =
@@ -341,6 +349,61 @@ impl FilesPanel {
     }
     fn render_merge_card(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
+        div()
+            .id("text-merge-card")
+            .flex_shrink_0()
+            .mx_2()
+            .my_1()
+            .border_1()
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.canvas))
+            .flex()
+            .flex_col()
+            .child(self.merge_review_body(review, cx))
+            .child(self.merge_apply_controls(review.choices.iter().all(Option::is_some), cx))
+            .test_support()
+            .into_any_element()
+    }
+    pub(super) fn merge_surface(&self, cx: &mut Context<Self>) -> AnyElement {
+        use gpui_kit::component::scroll::ScrollableElement;
+        let Some(review) = &self.merge_review else {
+            return self.editor_surface(review::EditorSurface::Draft, cx);
+        };
+        let visual = crate::design::palette(cx);
+        div()
+            .id("file-merge-expanded")
+            .size_full()
+            .min_w_0()
+            .min_h_0()
+            .flex()
+            .flex_col()
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
+            .text_xs()
+            .child(
+                div()
+                    .id("file-tools-scroll")
+                    .flex_1()
+                    .min_h_0()
+                    .min_w_0()
+                    .overflow_y_scroll()
+                    .track_focus(&self.review_focus)
+                    .track_scroll(&self.tools_scroll)
+                    .vertical_scrollbar(&self.tools_scroll)
+                    .on_key_down(cx.listener(|view, event, _, cx| {
+                        Self::scroll_bounded(&view.tools_scroll, event, cx);
+                    }))
+                    .child(self.merge_review_body(review, cx))
+                    .test_support(),
+            )
+            // The complete versions and conflict inputs scroll independently
+            // of these actions, even at the minimum file-pane height.
+            .child(self.merge_apply_controls(review.choices.iter().all(Option::is_some), cx))
+            .child(self.editor_status(cx))
+            .test_support()
+            .into_any_element()
+    }
+    fn merge_review_body(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
         let total = review.choices.len();
         let resolved = review
             .choices
@@ -352,17 +415,31 @@ impl FilesPanel {
             t(cx, "三方合并审核", "Three-way merge review"),
             review.snapshot.entry.path
         );
-        let mut card = div()
-            .id("text-merge-card")
-            .flex_shrink_0()
-            .mx_2()
-            .my_1()
-            .border_1()
-            .border_color(rgb(visual.border))
-            .bg(rgb(visual.canvas))
-            .flex()
-            .flex_col();
-        card = card.child(div().px_2().py_1().flex_shrink_0().child(heading));
+        let mut card = div().min_w_0().flex_shrink_0().flex().flex_col();
+        card = card.child(
+            div()
+                .px_2()
+                .py_1()
+                .flex_shrink_0()
+                .flex()
+                .items_center()
+                .gap_1()
+                .child(div().flex_1().min_w_0().text_ellipsis().child(heading))
+                .when(
+                    self.editor_surface != Some(review::EditorSurface::Merge),
+                    |el| {
+                        el.child(
+                            Button::new("expand-text-merge")
+                                .ghost()
+                                .compact()
+                                .label(t(cx, "展开合并审核", "Expand merge review"))
+                                .on_click(cx.listener(|view, _, window, cx| {
+                                    view.focus_editor(review::EditorSurface::Merge, window, cx);
+                                })),
+                        )
+                    },
+                ),
+        );
         card = card.child(self.merge_version_controls(resolved, total, cx));
         if let Some(version) = review.overview {
             let (label, text) = match version {
@@ -449,9 +526,7 @@ impl FilesPanel {
         } else {
             card=card.child(div().p_2().child(t(cx,"无重叠冲突，已组合两侧独立更改；仍需采用草稿并审核全文。","No overlapping conflicts; independent edits combined. Adopt the draft and review all contents.")));
         }
-        card.child(self.merge_apply_controls(resolved == total, cx))
-            .test_support()
-            .into_any_element()
+        card.into_any_element()
     }
     fn merge_version_controls(
         &self,
@@ -594,12 +669,25 @@ impl FilesPanel {
         card = card.child(
             div()
                 .id("merge-manual-draft")
-                .h(px(90.))
+                // Keep the conflict editor fully reachable in the smallest
+                // supported file-pane viewport. The expanded merge surface
+                // reserves space for its fixed actions and status row, so a
+                // taller field cannot be brought wholly into view in the
+                // 900×580 window's compact file workspace.
+                .h(px(72.))
                 .p_1()
                 .child(
-                    Textarea::new(&review.manual)
+                    div()
+                        .id("merge-manual-input")
                         .h(relative(1.))
-                        .font_family("monospace"),
+                        .min_h_0()
+                        .min_w_0()
+                        .child(
+                            Textarea::new(&review.manual)
+                                .h(relative(1.))
+                                .font_family("monospace"),
+                        )
+                        .test_support(),
                 )
                 .test_support(),
         );
@@ -635,12 +723,16 @@ impl FilesPanel {
             .ghost()
             .compact()
             .label(t(cx, "关闭并保留草稿", "Close; keep draft"))
-            .on_click(cx.listener(|view, _, _, cx| {
+            .on_click(cx.listener(|view, _, window, cx| {
                 view.merge_review = None;
+                if view.editor_surface == Some(review::EditorSurface::Merge) {
+                    view.focus_editor(review::EditorSurface::Draft, window, cx);
+                }
                 cx.notify();
             }));
         div()
             .id("text-merge-apply-controls")
+            .min_h(px(40.))
             .px_2()
             .py_1()
             .flex_shrink_0()
@@ -691,15 +783,17 @@ impl FilesPanel {
         .test_support()
         .into_any_element()
     }
-    pub(super) fn text_actions(&self, cx: &mut Context<Self>) -> AnyElement {
-        let read = Button::new("read-remote-merge")
+    pub(super) fn read_merge_button(&self, cx: &Context<Self>) -> Button {
+        Button::new("read-remote-merge")
             .disabled(self.suspended || self.busy || self.pending.is_some())
             .icon(IconName::FileDiff)
             .ghost()
             .compact()
             .rounded(px(6.))
             .label(t(cx, "读取远端并合并", "Read remote and merge"))
-            .on_click(cx.listener(|view, _, window, cx| view.request_merge(window, cx)));
+            .on_click(cx.listener(|view, _, window, cx| view.request_merge(window, cx)))
+    }
+    pub(super) fn text_actions(&self, cx: &mut Context<Self>) -> AnyElement {
         let patch = Button::new("toggle-text-patch")
             .disabled(self.suspended)
             .ghost()
@@ -713,7 +807,7 @@ impl FilesPanel {
             .flex()
             .flex_wrap()
             .gap_1()
-            .child(read)
+            .child(self.read_merge_button(cx))
             .child(patch)
             .into_any_element()
     }

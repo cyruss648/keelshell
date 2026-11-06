@@ -12,13 +12,13 @@ use keelshell_core::{BatchAuditRecord, BatchAuditSummary, Snippet};
 fn seed(fixture: &Fixture, cx: &mut TestAppContext) -> Snippet {
     let mut snippet = Snippet::new("参数化检查", "printf '%s\\n' {{path}}");
     snippet.parameterized = true;
+    let mut state = fixture
+        .workspace
+        .read_with(cx, |view, _| view.state.clone());
+    state.snippets = vec![snippet.clone()];
+    let saved = save_and_adopt_fixture_state(fixture, state, "persist opt-in template", cx);
     fixture.workspace.update(cx, |view, cx| {
-        view.state.snippets = vec![snippet.clone()];
-        view.state = fixture
-            .store
-            .save(&view.state)
-            .checked("persist opt-in template");
-        view.snippet_sources = Arc::new(view.state.snippets.clone());
+        view.snippet_sources = Arc::new(saved.snippets.clone());
         view.command_sources_revision = view.command_sources_revision.wrapping_add(1);
         cx.notify();
     });

@@ -75,7 +75,10 @@ impl Workspace {
     }
 
     pub(super) fn open_vault_settings(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if !self.can_open_vault() {
+        if !self.can_open_vault()
+            || !self.window_maintenance_idle(cx)
+            || !self.begin_window_maintenance(cx)
+        {
             return;
         }
         let panel = cx.new(|cx| {
@@ -91,20 +94,34 @@ impl Workspace {
         });
         self.vault_settings_subscription =
             Some(
-                cx.subscribe_in(&panel, window, |view, _, event, window, cx| match event {
-                    VaultSettingsEvent::Close { message } => {
-                        // The panel only emits Close once its worker has settled.
-                        // Pending usage metadata merges after releasing this lease.
-                        view.vault_settings = None;
-                        view.vault_settings_subscription = None;
-                        view.flush_recent_connections(window, cx);
-                        view.flush_batch_audits(window, cx);
-                        view.flush_workflow_audits(window, cx);
-                        if let Some(message) = message {
-                            view.status = message.clone();
+                cx.subscribe_in(&panel, window, |view, owner, event, window, cx| {
+                    if view
+                        .vault_settings
+                        .as_ref()
+                        .is_none_or(|panel| panel.entity_id() != owner.entity_id())
+                        || !view.window_maintenance_current(cx)
+                    {
+                        return;
+                    }
+                    match event {
+                        VaultSettingsEvent::Close { message } => {
+                            if owner.read(cx).is_busy() {
+                                return;
+                            }
+                            // The panel only emits Close once its worker has settled.
+                            // Pending usage metadata merges after releasing this lease.
+                            view.vault_settings = None;
+                            view.vault_settings_subscription = None;
+                            view.end_window_maintenance(cx);
+                            view.flush_recent_connections(window, cx);
+                            view.flush_batch_audits(window, cx);
+                            view.flush_workflow_audits(window, cx);
+                            if let Some(message) = message {
+                                view.status = message.clone();
+                            }
+                            view.focus_current_surface(window, cx);
+                            cx.notify();
                         }
-                        view.focus_current_surface(window, cx);
-                        cx.notify();
                     }
                 }),
             );

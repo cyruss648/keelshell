@@ -1,4 +1,4 @@
-# 开发路线 — 2026-11-06
+# 开发路线 — 2026-11-07
 
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
@@ -22,6 +22,15 @@ token，并以轨道对比度测试防止回退到固定颜色。修后设计 4/
 `LIMITED_PARENT_REVIEW / APPROVE_SCOPED_WITH_REVIEW_SERVICE_LIMITATION`，保留独立
 子代理复核服务未形成报告的限制，不把它写成已获得非作者批准。
 
+2026-11-07 的独立工作窗口与编辑器动作可达性候选已导入当前分支。新增实现通过
+定向窗口、配置闸门、worker ownership、loopback SSH、编辑器视口和 11 项
+临时目录根路径回归；完整 `scripts/check.py` 实际退出 0：workspace 2,397
+ordinary / 23 ignored、11 rustdoc、Python 131 / 1 skipped，三组 AI controller
+也通过。当前仍需新的严格只读独立复核和真实 macOS 多窗口/编辑器采用保存验收，
+Windows/Linux 原生桌面验收继续单独保持开放。
+两次新开的有界只读复核 agent 都未返回可审计报告，不能把当前候选标记为独立
+批准；父级静态差分检查已修正新增的 worker stderr 输出，但不代替非作者复核。
+
 ## 最新交付
 
 main已普通推送`fa7c05914e0eefc0f24ab32f8af690bdc50a63ed`，交付读回一致。
@@ -39,13 +48,13 @@ CI不代签桌面验收。见[本批记录](testing/records/2026-11-06-monitor-k
 | --- | --- | --- |
 | P1 | [远程文本格式](product/REMOTE_TEXT_FORMAT.md) | r3三项连续编辑P2关闭；父543输入门禁/包通过；native-r1限定批准macOS原生BOM/CRLF取消与确认，完整编辑器验收HOLD |
 | P2 | [审核式有界traceroute](product/TRACEROUTE_DIAGNOSTICS.md) | stderr精确版本合同与最终门禁通过；同包真实SSH UI各审核确认UDPv4/v6一次，均一跳回复；原生ICMP/取消和完整平台另验 |
-| P1 | 独立工作窗口 | 下一片已委派隔离开发：真实空白新窗、各窗独立会话/审核、安全关闭及共享配置协调；尚无实现/验收结论，Cargo归属见当前交接 |
-| P1 | 编辑器动作可达性 | 原生观察发现inline编辑器底部动作难以触达；Carver在隔离源修复，合并采用/保存原生保持NOT_RUN，不混入本批543输入 |
+| P1 | 独立工作窗口 | 源码已导入当前分支；空白新窗、各窗独立会话/审核、安全关闭、共享 StateStore 协调、worker 回收与 loopback SSH 定向测试通过；完整工程门禁通过，独立复核和真实多窗口验收待完成 |
+| P1 | 编辑器动作可达性 | inline editor 与三方合并正文独立滚动、底部动作固定、手工输入最小高度修复已导入；11 项视口专项和完整工程门禁通过，`merge-adopt` / `merge-save`、late-save、连续无换行保存的真实原生复验待完成 |
 
-父已装配543输入、21源码路径，保留两片唯一公共文件的双方导出；
-五个项目crate已失效重编，42新增具体名均在新库存中。r2工程门禁2355/23 ignored通过，
-但版本流缺陷需r3另验；r3最终完整门禁已实际0/reaped，575.972秒，
-2355 ordinary/23 ignored、14 rustdoc、Python131/1 skip；42新增及基线204名实际pass。
+当前候选已装配本轮源码和文档输入，五个项目 crate 已按共享 target 规则失效重编，
+42 个新增具体测试名均在当前库存中。修复 macOS 临时目录根路径夹具后，完整工程
+门禁实际退出 0：2,397 ordinary / 23 ignored、11 rustdoc、Python 131 / 1 skip，
+三组 AI controller 和 workspace strict Clippy 均通过。
 新包构建与macOS包检查完成，全部成员和41项资产已读回；
 Gauss的combined-r3/r4已批准限定源码及门禁/新包；
 新runtime-r3原生797.330164/900秒结束、外层28510实际wait0/reaped，

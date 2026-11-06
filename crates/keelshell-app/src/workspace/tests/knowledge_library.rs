@@ -127,9 +127,9 @@ fn mount_library_sized(
         .store
         .save(&state)
         .checked("seed isolated knowledge fixture");
+    adopt_fixture_state(&fixture, state.clone(), cx);
     cx.update_window(fixture.window, |_, window, cx| {
         fixture.workspace.update(cx, |workspace, cx| {
-            workspace.state = state;
             workspace.refresh_knowledge_library(cx);
             workspace.show_assistant = true;
             cx.notify();
@@ -169,9 +169,9 @@ fn workspace_knowledge_library_minimum_window_keeps_long_review_actions_in_bound
             .store
             .save(&state)
             .checked("save bounded 256-entry fixture");
+        adopt_fixture_state(&fixture, state, cx);
         cx.update_window(fixture.window, |_, window, cx| {
             fixture.workspace.update(cx, |workspace, cx| {
-                workspace.state = state;
                 workspace.apply_language(language, window, cx);
                 crate::design::apply(theme, Some(window), cx);
                 workspace.refresh_knowledge_library(cx);

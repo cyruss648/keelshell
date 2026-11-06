@@ -96,7 +96,20 @@ impl Workspace {
         self.state_reloading = true;
         self.set_tunnel_rule_configuration_busy(true, cx);
         let store = self.store.clone();
-        let task = cx.background_executor().spawn(async move { store.load() });
+        let gate = self.configuration_gate.clone();
+        let owner = self.window_id;
+        let reload = match crate::app_windows::ConfigurationGate::begin_reload_lease(&gate, owner) {
+            Ok(reload) => reload,
+            Err(_) => {
+                self.state_reloading = false;
+                return;
+            }
+        };
+        let task = cx.background_executor().spawn(async move {
+            let result = store.load();
+            reload.finish(result.as_ref().ok());
+            result
+        });
         cx.spawn_in(window, async move |this, cx| {
             let result = task.await;
             let _ = this.update_in(cx, |view, window, cx| {
@@ -114,6 +127,7 @@ impl Workspace {
                     }
                     Err(error) => {
                         view.mark_tunnel_rule_store_uncertain(cx);
+                        view.configuration_invalidated = true;
                         library.update(cx, |panel, cx| panel.reload_failed(token, &error, cx));
                         view.status = Message::detail(
                             "配置重新加载失败",
@@ -136,6 +150,7 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) {
         self.state = state;
+        self.shared_commit_completed(cx);
         // A fresh store snapshot cannot inherit transient keys from the old
         // profile catalog. Both knowledge reload entry points share this rule.
         self.ai_credentials = EphemeralCredentials::new();

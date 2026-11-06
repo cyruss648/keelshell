@@ -200,9 +200,9 @@ async fn reload_updates_existing_and_new_panels(
             .record_knowledge_entry(entry.clone())
             .expect("seed entry");
         let saved = fixture.store.save(&state).expect("persist fixture");
+        adopt_fixture_state(&fixture, saved.clone(), cx);
         cx.update_window(fixture.window, |_, window, cx| {
             fixture.workspace.update(cx, |workspace, cx| {
-                workspace.state = saved;
                 workspace.refresh_knowledge_library(cx);
                 workspace.refresh_tunnel_panels(cx);
             });
@@ -756,13 +756,17 @@ async fn configuration_recovery_clears_uncertainty_before_a_new_tunnel_panel(
     })
     .expect("accepted recovery clears uncertainty without replaying runtime owners");
 
+    // Closing the last production tab closes its authenticated connection.
+    // Reconnect through a fresh isolated SSH fixture before exercising a rule
+    // on the recovered configuration.
+    let reconnected = SshFixture::new();
     let new_tab = cx
         .update_window(fixture.window, |_, window, cx| {
             fixture.workspace.update(cx, |workspace, cx| {
                 assert!(workspace.configuration_recovery.is_none());
                 add_tab_with_session(
                     workspace,
-                    fixture.ssh.session.clone(),
+                    reconnected.session.clone(),
                     fixture.ssh.connection_id,
                     window,
                     cx,
@@ -797,7 +801,7 @@ async fn configuration_recovery_clears_uncertainty_before_a_new_tunnel_panel(
             .tunnel_rules,
         fixture.ssh.state.tunnel_rules
     );
-    assert!(!fixture.ssh.session.is_closed());
+    assert!(!reconnected.session.is_closed());
 }
 
 async fn wait_for_recovery(fixture: &Fixture, cx: &mut TestAppContext) {

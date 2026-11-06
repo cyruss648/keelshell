@@ -209,6 +209,8 @@ enum PanelState {
 pub enum UpdatePanelEvent {
     /// Hide the panel while the background service keeps its ownership.
     Close,
+    /// Request aggregate window review before the installer helper is started.
+    ReviewInstall,
     /// The user explicitly authorized installation and the helper took ownership.
     Restart,
     /// Save the current policy draft through the workspace transaction.
@@ -880,15 +882,36 @@ impl UpdatePanel {
     }
 
     fn install(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let _ = window;
+        if matches!(self.state, PanelState::Ready(_)) {
+            // A package can outlive the platform target used when it was
+            // downloaded. Fail closed before asking the workspace to close
+            // windows or start the installer when that target is no longer
+            // available.
+            if self.current_target.is_none() {
+                self.fail(
+                    "当前平台没有匹配的发布产物，无法自动安装。",
+                    "No release asset matches this platform, so automatic installation is unavailable.",
+                    cx,
+                );
+            } else {
+                cx.emit(UpdatePanelEvent::ReviewInstall);
+            }
+        }
+    }
+
+    /// Start the helper only after aggregate window consent. A failed start
+    /// leaves window authorities intact; its existing helper waits for exit.
+    pub(crate) fn install_reviewed(&mut self, window: &mut Window, cx: &mut Context<Self>) -> bool {
         let mut staged = match std::mem::replace(&mut self.state, PanelState::Installing) {
             PanelState::Ready(staged) => staged,
             state => {
                 self.state = state;
-                return;
+                return false;
             }
         };
         if !matches!(self.state, PanelState::Installing) {
-            return;
+            return false;
         }
         let Some(target) = self.current_target.clone() else {
             self.fail(
@@ -897,7 +920,7 @@ impl UpdatePanel {
                 cx,
             );
             drop(staged);
-            return;
+            return false;
         };
         let current_exe = match env::current_exe() {
             Ok(path) => path,
@@ -908,7 +931,7 @@ impl UpdatePanel {
                     cx,
                 );
                 drop(staged);
-                return;
+                return false;
             }
         };
         let Some(install_root) = installation_root(&current_exe, &target) else {
@@ -918,7 +941,7 @@ impl UpdatePanel {
                 cx,
             );
             drop(staged);
-            return;
+            return false;
         };
         self.status = Message::new(
             "正在启动安全安装助手；程序将关闭并在成功后重启。",
@@ -940,12 +963,14 @@ impl UpdatePanel {
                 cx.notify();
                 let _ = window;
                 cx.emit(UpdatePanelEvent::Restart);
+                true
             }
             Err(error) => {
                 self.state = PanelState::Failed;
                 self.status = error.message();
                 drop(staged);
                 cx.notify();
+                false
             }
         }
     }

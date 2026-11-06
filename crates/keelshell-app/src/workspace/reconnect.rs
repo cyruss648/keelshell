@@ -117,6 +117,12 @@ fn maximum(policy: ReconnectPolicy) -> usize {
 }
 
 impl Workspace {
+    pub(super) fn invalidate_window_reconnect(&mut self) {
+        for binding in self.reconnect_bindings.values_mut() {
+            binding.suppressed = true;
+            binding.series = None;
+        }
+    }
     pub(super) fn library_session_references(
         &self,
         profile: uuid::Uuid,
@@ -216,9 +222,11 @@ impl Workspace {
     }
 
     pub(crate) fn protocol_session_current(&self, tab: EntityId, session: &SshSession) -> bool {
-        self.remote_sessions
-            .get(&tab)
-            .is_some_and(|current| current.same_connection(session))
+        self.configuration_token_current()
+            && self
+                .remote_sessions
+                .get(&tab)
+                .is_some_and(|current| current.same_connection(session))
             && self.tabs.iter().any(|terminal| terminal.entity_id() == tab)
             && self
                 .reconnect_bindings
@@ -305,6 +313,9 @@ impl Workspace {
     }
 
     pub(super) fn poll_reconnect(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.close_review.is_some() || self.closing.is_some() {
+            return;
+        }
         self.revoke_stale_protocol_diagnostics(cx);
         let now = Instant::now();
         let terminals = self.tabs.clone();
@@ -952,7 +963,7 @@ impl Workspace {
         let Some(id) = self.discard_archive else {
             return div().into_any_element();
         };
-        div().track_focus(&self.overlay_focus).absolute().inset_0().occlude().bg(rgba(0x00000066)).flex().items_center().justify_center()
+        div().track_focus(&self.overlay_focus).absolute().inset_0().occlude().bg(rgba(visual.scrim)).flex().items_center().justify_center()
             .child(div().id("discard-session-archive").w(px(460.)).max_w_full().p_4().bg(rgb(visual.surface)).rounded_lg().flex().flex_col().gap_3()
                 .child(t(cx, "上次会话包含未保存的文件草稿。继续重连成功后会替换该快照；请先复制需要保留的内容。", "The previous session contains an unsaved file draft. A successful reconnect will replace that snapshot. Copy anything you need first."))
                 .child(div().flex().flex_wrap().gap_2()

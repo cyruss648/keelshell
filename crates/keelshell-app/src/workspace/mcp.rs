@@ -134,6 +134,13 @@ pub(super) struct McpState {
 }
 
 impl McpState {
+    pub(super) fn window_close_idle(&self) -> bool {
+        self.config_recovery_idle()
+            && self
+                .actions
+                .iter()
+                .all(|action| !matches!(action.state, ActionState::OutcomeUnknown))
+    }
     pub(super) fn config_recovery_idle(&self) -> bool {
         self.host.is_none()
             && !self.busy
@@ -331,13 +338,15 @@ impl Workspace {
     }
 
     fn mcp_target_current(&self, entity: EntityId, cx: &App) -> bool {
-        self.tabs
-            .iter()
-            .find(|tab| tab.entity_id() == entity)
-            .is_some_and(|tab| {
-                tab.read(cx).is_open()
-                    && lifecycle_current(tab.read(cx).subscribe_lifecycle().as_ref())
-            })
+        self.configuration_current(cx)
+            && self
+                .tabs
+                .iter()
+                .find(|tab| tab.entity_id() == entity)
+                .is_some_and(|tab| {
+                    tab.read(cx).is_open()
+                        && lifecycle_current(tab.read(cx).subscribe_lifecycle().as_ref())
+                })
             && self.remote_sessions.get(&entity).is_some_and(|session| {
                 !session.is_closed()
                     && self

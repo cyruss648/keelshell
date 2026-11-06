@@ -20,6 +20,18 @@ impl Workspace {
             .border_b_1()
             .border_color(rgb(visual.border))
             .child(tabs)
+            .child(
+                Button::new("new-workspace-window")
+                    .ghost()
+                    .compact()
+                    .label(t(cx, "新建窗口", "New window"))
+                    .disabled(
+                        !self.app_windows.read(cx).can_open() || !self.configuration_current(cx),
+                    )
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        view.new_workspace_window(&NewWorkspaceWindow, window, cx)
+                    })),
+            )
             .when(self.tabs.len() > 1, |toolbar| {
                 toolbar.children([
                     Button::new("previous-session")
@@ -267,7 +279,7 @@ impl Workspace {
             .absolute()
             .inset_0()
             .occlude()
-            .bg(rgba(0x00000055))
+            .bg(rgba(visual.scrim))
             .flex()
             .items_center()
             .justify_center()
@@ -361,6 +373,11 @@ impl Workspace {
 }
 impl Render for Workspace {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        self.observe_shared_configuration_if_needed(window, cx);
+        if self.close_review.is_some() || self.closing.is_some() || self.cleanup_unknown.is_some() {
+            self.synchronize_modal_focus(window, cx);
+            return self.isolated_modal_surface(modal_scope::ModalKind::WindowClose, window, cx);
+        }
         self.maintain_mcp(cx);
         self.maintain_remote_completion(window, cx);
         self.maintain_command_workflows(cx);
@@ -1083,7 +1100,7 @@ impl Workspace {
                             t(cx, "依赖工作流", "Dependency workflow")
                         },
                     )
-                    .disabled(self.command_surface_blocked())
+                    .disabled(self.command_surface_blocked() && self.workflow_panel.is_none())
                     .on_click(
                         cx.listener(|view, _, window, cx| view.open_workflow(false, window, cx)),
                     )
@@ -1278,9 +1295,35 @@ impl Workspace {
             .text_color(rgb(visual.text))
             .text_sm()
             .on_action(cx.listener(Self::open_connections))
+            .on_action(cx.listener(Self::new_workspace_window))
+            .on_action(cx.listener(Self::close_workspace_window))
             .on_action(cx.listener(Self::close_tab))
             .on_action(cx.listener(Self::toggle_assistant))
             .child(self.workspace_toolbar(show_navigation, compact_toolbar, active_id, cx))
+            .when(self.configuration_invalidated, |surface| {
+                surface.child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap_2()
+                        .px_3()
+                        .py_1()
+                        .child(t(
+                            cx,
+                            "共享配置已变化；草稿和现有 SSH 保留。",
+                            "Shared configuration changed; drafts and live SSH are retained.",
+                        ))
+                        .child(
+                            Button::new("reload-window-configuration")
+                                .small()
+                                .label(t(cx, "重新加载配置", "Reload configuration"))
+                                .disabled(self.saving || self.state_reloading)
+                                .on_click(cx.listener(|view, _, window, cx| {
+                                    view.reload_window_configuration(window, cx)
+                                })),
+                        ),
+                )
+            })
             .child(
                 div()
                     .flex_1()

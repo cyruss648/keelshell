@@ -6,6 +6,7 @@ use gpui_kit::component::scroll::{ScrollableElement, ScrollbarAxis};
 pub(super) enum EditorSurface {
     Draft,
     Patch,
+    Merge,
 }
 
 impl FilesPanel {
@@ -26,7 +27,10 @@ impl FilesPanel {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.editing.is_none() || self.pending.is_some() {
+        if self.editing.is_none()
+            || self.pending.is_some()
+            || (surface == EditorSurface::Merge && self.merge_review.is_none())
+        {
             return;
         }
         self.editor_surface = Some(surface);
@@ -38,13 +42,31 @@ impl FilesPanel {
         match surface {
             EditorSurface::Draft => self.editor.read(cx).focus_handle(cx).focus(window, cx),
             EditorSurface::Patch => self.patch.read(cx).focus_handle(cx).focus(window, cx),
+            EditorSurface::Merge => {
+                self.tools_scroll.set_offset(point(px(0.), px(0.)));
+                self.review_focus.focus(window, cx);
+            }
         }
         cx.notify();
     }
 
     fn scroll_confirmation(&mut self, event: &KeyDownEvent, cx: &mut Context<Self>) {
-        let offset = self.confirmation_scroll.offset();
-        let maximum = self.confirmation_scroll.max_offset();
+        Self::scroll_bounded(&self.confirmation_scroll, event, cx);
+    }
+
+    /// Apply the bounded review key map to any review-owned scroll surface.
+    ///
+    /// Review text owns these keys so they cannot bubble into an editor,
+    /// terminal, or parent workspace. `ScrollHandle` clamps the computed
+    /// offset again, while these explicit bounds keep the behavior identical
+    /// for confirmation and expanded merge review.
+    pub(super) fn scroll_bounded(
+        scroll: &ScrollHandle,
+        event: &KeyDownEvent,
+        cx: &mut Context<Self>,
+    ) {
+        let offset = scroll.offset();
+        let maximum = scroll.max_offset();
         let next = match event.keystroke.key.as_str() {
             "up" => point(offset.x, offset.y + px(18.)),
             "down" => point(offset.x, offset.y - px(18.)),
@@ -56,7 +78,7 @@ impl FilesPanel {
             "end" => point(offset.x, -maximum.y),
             _ => return,
         };
-        self.confirmation_scroll.set_offset(point(
+        scroll.set_offset(point(
             next.x.clamp(-maximum.x, px(0.)),
             next.y.clamp(-maximum.y, px(0.)),
         ));
@@ -221,21 +243,20 @@ impl FilesPanel {
             .as_ref()
             .map(|(path, _)| path.as_str())
             .unwrap_or("");
-        let (label, other, other_label) = match surface {
+        let (label, other, other_label, focus_handle) = match surface {
             EditorSurface::Draft => (
                 t(cx, "编辑草稿", "Edit draft"),
                 EditorSurface::Patch,
                 t(cx, "输入差异", "Enter patch"),
+                self.editor.read(cx).focus_handle(cx).clone(),
             ),
             EditorSurface::Patch => (
                 t(cx, "输入单文件差异", "Enter single-file patch"),
                 EditorSurface::Draft,
                 t(cx, "查看草稿", "View draft"),
+                self.patch.read(cx).focus_handle(cx).clone(),
             ),
-        };
-        let focus_handle = match surface {
-            EditorSurface::Draft => self.editor.read(cx).focus_handle(cx).clone(),
-            EditorSurface::Patch => self.patch.read(cx).focus_handle(cx).clone(),
+            EditorSurface::Merge => return self.merge_surface(cx),
         };
         div()
             .id("file-editor-expanded")
@@ -267,6 +288,9 @@ impl FilesPanel {
                             .text_ellipsis()
                             .child(path.to_owned()),
                     )
+                    .when(surface == EditorSurface::Draft, |el| {
+                        el.child(self.read_merge_button(cx))
+                    })
                     .child(
                         Button::new("close-file-editor")
                             .ghost()
@@ -284,25 +308,35 @@ impl FilesPanel {
                     .id("file-editor-input")
                     .flex_1()
                     .min_h_0()
+                    .min_h(px(72.))
                     .min_w_0()
                     .p_2()
                     .track_focus(&focus_handle)
-                    .when(surface == EditorSurface::Draft, |el| {
-                        el.child(
-                            gpui_kit::component::input::Editor::new(&self.editor)
-                                .h(relative(1.))
-                                .font_family("monospace")
-                                .aria_label(format!("{label} · {path}")),
-                        )
-                    })
-                    .when(surface == EditorSurface::Patch, |el| {
-                        el.child(
-                            Textarea::new(&self.patch)
-                                .h(relative(1.))
-                                .font_family("monospace")
-                                .aria_label(format!("{label} · {path}")),
-                        )
-                    })
+                    .child(
+                        div()
+                            .id("file-editor-control")
+                            .h(relative(1.))
+                            .min_h_0()
+                            .min_h(px(72.))
+                            .min_w_0()
+                            .when(surface == EditorSurface::Draft, |el| {
+                                el.child(
+                                    gpui_kit::component::input::Editor::new(&self.editor)
+                                        .h(relative(1.))
+                                        .font_family("monospace")
+                                        .aria_label(format!("{label} · {path}")),
+                                )
+                            })
+                            .when(surface == EditorSurface::Patch, |el| {
+                                el.child(
+                                    Textarea::new(&self.patch)
+                                        .h(relative(1.))
+                                        .font_family("monospace")
+                                        .aria_label(format!("{label} · {path}")),
+                                )
+                            })
+                            .test_support(),
+                    )
                     .test_support(),
             )
             .child(
@@ -312,64 +346,80 @@ impl FilesPanel {
                     .px_2()
                     .py_1()
                     .flex()
-                    .flex_wrap()
-                    .items_center()
+                    .flex_col()
                     .gap_1()
                     .border_t_1()
                     .border_color(rgb(visual.border))
                     .child(
-                        Button::new("switch-file-editor")
-                            .ghost()
-                            .compact()
-                            .rounded(px(6.))
-                            .label(other_label)
-                            .on_click(cx.listener(move |view, _, window, cx| {
-                                view.focus_editor(other, window, cx)
-                            })),
+                        div()
+                            .flex()
+                            .flex_wrap()
+                            .items_center()
+                            .gap_1()
+                            .child(
+                                Button::new("switch-file-editor")
+                                    .ghost()
+                                    .compact()
+                                    .rounded(px(6.))
+                                    .label(other_label)
+                                    .on_click(cx.listener(move |view, _, window, cx| {
+                                        view.focus_editor(other, window, cx)
+                                    })),
+                            )
+                            .when(surface == EditorSurface::Patch, |el| {
+                                el.child(
+                                    Button::new("apply-text-patch")
+                                        .ghost()
+                                        .compact()
+                                        .rounded(px(6.))
+                                        .disabled(
+                                            self.suspended || self.busy || self.pending.is_some(),
+                                        )
+                                        .label(t(
+                                            cx,
+                                            "解析并应用到草稿",
+                                            "Parse and apply to draft",
+                                        ))
+                                        .on_click(cx.listener(|view, _, window, cx| {
+                                            view.request_patch(window, cx)
+                                        })),
+                                )
+                            })
+                            .child(
+                                Button::new("save-remote-file")
+                                    .primary()
+                                    .compact()
+                                    .rounded(px(6.))
+                                    .disabled(self.suspended || self.busy || self.pending.is_some())
+                                    .icon(IconName::Save)
+                                    .label(t(cx, "审核并保存", "Review save"))
+                                    .on_click(cx.listener(|view, _, _, cx| view.request_save(cx))),
+                            ),
                     )
+                    // Keep search on one bounded row rather than interleaving
+                    // it with primary actions into three narrow-pane rows.
                     .when(surface == EditorSurface::Draft, |el| {
                         el.child(self.editor_search_controls(cx))
-                    })
-                    .when(surface == EditorSurface::Patch, |el| {
-                        el.child(
-                            Button::new("apply-text-patch")
-                                .ghost()
-                                .compact()
-                                .rounded(px(6.))
-                                .disabled(self.suspended || self.busy || self.pending.is_some())
-                                .label(t(cx, "解析并应用到草稿", "Parse and apply to draft"))
-                                .on_click(cx.listener(|view, _, window, cx| {
-                                    view.request_patch(window, cx)
-                                })),
-                        )
-                    })
-                    .child(
-                        Button::new("save-remote-file")
-                            .primary()
-                            .compact()
-                            .rounded(px(6.))
-                            .disabled(self.suspended || self.busy || self.pending.is_some())
-                            .icon(IconName::Save)
-                            .label(t(cx, "审核并保存", "Review save"))
-                            .on_click(cx.listener(|view, _, _, cx| view.request_save(cx))),
-                    ),
+                    }),
             )
-            .child(
-                div()
-                    .id("file-editor-status")
-                    .h(px(24.))
-                    .flex_shrink_0()
-                    .px_2()
-                    .flex()
-                    .items_center()
-                    .min_w_0()
-                    .text_ellipsis()
-                    .text_color(rgb(visual.muted))
-                    .role(accesskit::Role::Label)
-                    .aria_label(self.status.render(cx))
-                    .child(self.status.render(cx))
-                    .test_support(),
-            )
+            .child(self.editor_status(cx))
+            .test_support()
+            .into_any_element()
+    }
+    pub(super) fn editor_status(&self, cx: &App) -> AnyElement {
+        div()
+            .id("file-editor-status")
+            .h(px(24.))
+            .flex_shrink_0()
+            .px_2()
+            .flex()
+            .items_center()
+            .min_w_0()
+            .text_ellipsis()
+            .text_color(rgb(crate::design::palette(cx).muted))
+            .role(accesskit::Role::Label)
+            .aria_label(self.status.render(cx))
+            .child(self.status.render(cx))
             .test_support()
             .into_any_element()
     }

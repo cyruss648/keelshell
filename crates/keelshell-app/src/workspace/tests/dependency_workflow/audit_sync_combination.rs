@@ -285,7 +285,7 @@ async fn independent_audit_sync_changed_refreshes_hidden_history_after_real_disa
         .checked("initial durable result");
     publish_local(&h.fixture.store, &shared);
     let state = h.fixture.store.load().checked("configured local pairing");
-    h.fixture.workspace.update(cx, |view, _| view.state = state);
+    adopt_fixture_state(&h.fixture, state, cx);
     hide_and_open_sync(&h, cx);
     let workflow = panel(&h, cx);
     assert_eq!(

@@ -1,6 +1,15 @@
 //! Real TCP/SFTP overlap and conflict tests, using owned response barriers.
 use super::*;
 use keelshell_session::sftp::{MAX_QUEUED_TRANSFERS, TransferHandle, TransferQueue};
+use std::path::PathBuf;
+
+fn temporary() -> Result<(tempfile::TempDir, PathBuf), Box<dyn Error>> {
+    let directory = tempfile::tempdir()?;
+    // macOS commonly exposes TMPDIR through a /var symlink. Product transfer
+    // paths reject static symlink ancestors, so fixture paths use their real root.
+    let path = directory.path().canonicalize()?;
+    Ok((directory, path))
+}
 
 async fn next(handle: &mut TransferHandle) -> Result<TransferEvent, Box<dyn Error>> {
     tokio::time::timeout(Duration::from_secs(7), handle.recv())
@@ -141,8 +150,8 @@ async fn directory_root_blocks_child_destination_but_allows_independent_job()
     let sftp = Arc::new(session.sftp().await?);
     let queue = sftp.clone().transfer_queue();
     queue.set_parallelism(3)?;
-    let root = tempfile::tempdir()?;
-    let tree = root.path().join("tree");
+    let (_root_guard, root) = temporary()?;
+    let tree = root.join("tree");
     tokio::fs::create_dir(&tree).await?;
     let source = tree.join("file");
     tokio::fs::write(&source, vec![0x12; 256 * 1024]).await?;
@@ -644,8 +653,8 @@ async fn acknowledged_atomic_write_rejection_releases_destination_without_quaran
     let session = SshSession::connect(options(&server)).await?;
     let sftp = Arc::new(session.sftp().await?);
     sftp.write("/rejected", b"preserved").await?;
-    let local = tempfile::tempdir()?;
-    let source = local.path().join("source");
+    let (_local_guard, local) = temporary()?;
+    let source = local.join("source");
     let bytes = vec![0x35; 128 * 1024];
     tokio::fs::write(&source, &bytes).await?;
     let queue = sftp.clone().transfer_queue();
@@ -684,8 +693,8 @@ async fn acknowledged_missing_resume_create_rejection_is_failed_and_allows_new_r
     let server = serve().await?;
     let session = SshSession::connect(options(&server)).await?;
     let sftp = Arc::new(session.sftp().await?);
-    let local = tempfile::tempdir()?;
-    let source = local.path().join("source");
+    let (_local_guard, local) = temporary()?;
+    let source = local.join("source");
     tokio::fs::create_dir(&source).await?;
     tokio::fs::write(source.join("create-rejected"), b"reviewed bytes").await?;
     sftp.mkdir("/resume-root").await?;

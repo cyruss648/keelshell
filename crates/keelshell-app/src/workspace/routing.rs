@@ -87,6 +87,10 @@ impl Workspace {
     }
 
     fn route_is_current(&self) -> bool {
+        let configuration_current = self.configuration_token_current();
+        if !configuration_current || self.close_review.is_some() {
+            return false;
+        }
         let Some(route) = &self.connect_route else {
             return false;
         };
@@ -106,12 +110,14 @@ impl Workspace {
         let Some(target) = route.snapshot.hops().last() else {
             return false;
         };
-        self.state
+        let same_state_route = self
+            .state
             .connection_route(target.id)
-            .is_ok_and(|current| same_route(&route.snapshot, &current))
-            && route
-                .reconnect
-                .is_none_or(|ticket| self.reconnect_ticket_current(ticket))
+            .is_ok_and(|current| same_route(&route.snapshot, &current));
+        let reconnect_current = route
+            .reconnect
+            .is_none_or(|ticket| self.reconnect_ticket_current(ticket));
+        same_state_route && reconnect_current
     }
 
     pub(super) fn begin_connect_route(
@@ -119,6 +125,9 @@ impl Workspace {
         connection: &Connection,
         cx: &mut Context<Self>,
     ) -> bool {
+        if !self.configuration_token_current() || self.close_review.is_some() {
+            return false;
+        }
         let snapshot = match self.state.connection_route(connection.id) {
             Ok(snapshot)
                 if snapshot
@@ -458,6 +467,7 @@ impl Workspace {
     }
 
     pub(super) fn cancel_connect_route(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let had_route = self.connect_route.is_some();
         let background = self
             .connect_route
             .as_ref()
@@ -472,6 +482,9 @@ impl Workspace {
         self.connect_route = None;
         self.connecting = false;
         self.host_approval = None;
+        if had_route && self.remote_sessions.is_empty() {
+            self.close_orphaned_window_sessions(cx);
+        }
         if let Some(mut prompt) = self.keyboard_interactive.take() {
             prompt.clear_inputs(window, cx);
             if let Some(response) = prompt.response.take() {
@@ -687,6 +700,7 @@ impl Workspace {
                 result = connect => Some(result),
             }
         };
+        self.route_jobs += 1;
         let job = crate::runtime_bridge::spawn(
             &self.runtime,
             cx.background_executor().clone(),
@@ -696,11 +710,25 @@ impl Workspace {
         cx.spawn_in(window, async move |this, cx| {
             let result = job.await.unwrap_or(Some(Err(SessionError::Worker)));
             let _ = this.update_in(cx, |view, window, cx| {
+                view.route_jobs = view.route_jobs.saturating_sub(1);
+                if let Some(Ok(session)) = &result
+                    && !view
+                        .owned_window_sessions
+                        .iter()
+                        .any(|old| old.same_connection(session))
+                {
+                    // Even a rejected late login remains this window's owner
+                    // until its transport is explicitly closed and observed.
+                    view.owned_window_sessions.push(session.clone());
+                }
                 if !view
                     .connect_route
                     .as_ref()
                     .is_some_and(|route| route.id == id && route.current == index)
                 {
+                    if view.remote_sessions.is_empty() {
+                        view.close_orphaned_window_sessions(cx);
+                    }
                     return;
                 }
                 view.connecting = false;
@@ -710,17 +738,40 @@ impl Workspace {
                 }
                 match result {
                     Some(Ok(session)) => {
-                        let Some(route) = &mut view.connect_route else {
-                            return;
+                        let (parent, finished, snapshot, ephemeral, restored) = {
+                            let Some(route) = &mut view.connect_route else {
+                                return;
+                            };
+                            let parent = route.upstream.clone();
+                            if index + 1 < route.snapshot.hops().len() {
+                                route.upstream = Some(session.clone());
+                                route.current += 1;
+                                (parent, false, None, false, None)
+                            } else {
+                                (
+                                    parent,
+                                    true,
+                                    Some(route.snapshot.clone()),
+                                    route.ephemeral,
+                                    route.restored,
+                                )
+                            }
                         };
-                        if index + 1 < route.snapshot.hops().len() {
-                            route.upstream = Some(session);
-                            route.current += 1;
+                        if let Some(parent) = parent.as_ref() {
+                            view.remember_session_dependency(&session, parent);
+                        }
+                        if !finished {
                             view.prepare_route_hop(window, cx);
                         } else {
-                            let snapshot = route.snapshot.clone();
-                            let ephemeral = route.ephemeral;
-                            let restored = route.restored;
+                            let Some(snapshot) = snapshot else {
+                                view.status = Message::new(
+                                    "连接路线状态无效，请重新连接。",
+                                    "The connection route became invalid. Connect again.",
+                                );
+                                view.connect_route = None;
+                                cx.notify();
+                                return;
+                            };
                             view.connect_route = None;
                             if let Some(ticket) = reconnect {
                                 if !view.finish_reconnect(ticket, session, snapshot, window, cx) {

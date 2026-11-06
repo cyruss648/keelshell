@@ -430,11 +430,6 @@ impl Render for FilesPanel {
                 .id("remote-file-editor")
                 .w_full()
                 .flex_shrink_0()
-                .h(px(if self.diff_preview.is_some() {
-                    268.
-                } else {
-                    180.
-                }))
                 .min_h_0()
                 .flex()
                 .flex_col()
@@ -452,14 +447,18 @@ impl Render for FilesPanel {
                         .child(format!("{} · {path}", t(cx, "编辑", "Edit"))),
                 )
                 .child(
-                    div().flex_1().min_h_0().p_1().child(
+                    div().h(px(112.)).flex_shrink_0().min_h_0().p_1().child(
                         gpui_kit::component::input::Editor::new(&self.editor)
                             .h(relative(1.))
                             .font_family("monospace"),
                     ),
                 )
                 .child(
+                    // Measure every wrapped action row into the card's scroll
+                    // extent. A fixed card height can leave its footer outside
+                    // the last reachable position of the tools viewport.
                     div()
+                        .id("remote-file-editor-actions")
                         .p_1()
                         .flex_shrink_0()
                         .border_t_1()
@@ -495,7 +494,8 @@ impl Render for FilesPanel {
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.request_save(cx);
                                 })),
-                        ),
+                        )
+                        .test_support(),
                 );
             if let Some(diff) = &self.diff_preview {
                 editor_panel = editor_panel.child(merge::text_scroll(
@@ -542,9 +542,10 @@ impl Render for FilesPanel {
                 )
             })
             .child(self.queue_entry_bar(cx))
-            .when(!self.queue_details_visible, |panel| {
-                panel.child(body.test_support())
-            });
+            .when(
+                !self.queue_details_visible && self.merge_review.is_none(),
+                |panel| panel.child(body.test_support()),
+            );
         if self.pending.is_none() {
             tools = match self.tool_section {
                 Some(action_view::ToolSection::File) => tools.child(self.mutation_tools(cx)),

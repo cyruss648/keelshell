@@ -50,6 +50,33 @@ pub fn spawn_transport_worker(
     workers::registry().spawn(name, cancelled, worker)
 }
 
+/// Register a transport worker under the UI entity that owns its authority.
+/// Window cleanup consumes these owners without stopping sibling windows.
+pub(crate) fn spawn_owned_transport_worker(
+    owner: EntityId,
+    name: &str,
+    cancelled: Arc<AtomicBool>,
+    worker: impl FnOnce() -> Result<(), String> + Send + 'static,
+) -> std::io::Result<()> {
+    workers::registry().spawn_owned(Some(owner), name, cancelled, worker)
+}
+
+pub(crate) fn stop_window_workers(
+    owners: &[EntityId],
+    deadline: Instant,
+) -> Result<Vec<String>, String> {
+    workers::registry().stop_owned(owners, deadline)
+}
+
+pub(crate) fn request_stop_window_workers(owners: &[EntityId]) -> Result<(), String> {
+    workers::registry().request_stop_owned(owners)
+}
+
+#[cfg(test)]
+pub(crate) fn application_is_quitting_for_test() -> bool {
+    workers::registry().quitting.load(Ordering::Acquire)
+}
+
 #[cfg(test)]
 pub(crate) fn transport_completion_for_test(
     cancelled: &Arc<AtomicBool>,
@@ -63,7 +90,7 @@ pub fn install_shutdown(cx: &mut App) {
         KeyBinding::new("cmd-q", QuitTerminalApp, None),
         KeyBinding::new("ctrl-shift-q", QuitTerminalApp, None),
     ]);
-    cx.on_action(|_: &QuitTerminalApp, cx| shutdown_and_quit(cx));
+    cx.on_action(|_: &QuitTerminalApp, cx| crate::app_windows::request_quit(cx));
     cx.on_app_quit(|cx| {
         workers::registry().request_stop();
         cx.background_executor().spawn(async {
@@ -174,6 +201,7 @@ impl TerminalView {
             }
         });
         let completion = workers::registry().completion(&cancelled);
+        workers::registry().bind_owner(&cancelled, cx.entity_id());
         let mut view =
             Self::initialize(title, font_size, history, incoming, outgoing, cancelled, cx);
         view.status = Message::new("正在连接…", "Starting…");
@@ -424,7 +452,16 @@ impl TerminalView {
             || (self.search_open && self.search_focus.contains_focused(window, cx))
     }
     pub(crate) fn is_open(&self) -> bool {
-        !self.exited && self.lifecycle_ready() && self.end_reason().is_none()
+        !self.cancelled.load(Ordering::Acquire)
+            && !self.exited
+            && self.lifecycle_ready()
+            && self.end_reason().is_none()
+    }
+
+    pub(crate) fn revoke_window_input(&mut self) {
+        self.cancelled.store(true, Ordering::Release);
+        self.pending = InputQueue::default();
+        self.composition = Composition::default();
     }
 
     /// Admit a complete user command; success means queued, not remotely executed.
@@ -604,7 +641,7 @@ impl TerminalView {
             return;
         }
         if accelerator && key.key == "q" {
-            shutdown_and_quit(cx);
+            crate::app_windows::request_quit(cx);
             cx.stop_propagation();
             return;
         }

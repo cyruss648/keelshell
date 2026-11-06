@@ -17,12 +17,14 @@ fn snippet() -> Snippet {
 }
 
 fn seed(fixture: &Fixture, snippets: Vec<Snippet>, cx: &mut TestAppContext) {
+    let mut state = fixture
+        .workspace
+        .read_with(cx, |workspace, _| workspace.state.clone());
+    state.snippets = snippets;
+    let saved = save_and_adopt_fixture_state(fixture, state, "seed snippet fixture", cx);
     cx.update_window(fixture.window, |_, _, cx| {
         fixture.workspace.update(cx, |workspace, cx| {
-            let mut state = workspace.state.clone();
-            state.snippets = snippets;
-            workspace.state = fixture.store.save(&state).checked("seed snippet fixture");
-            workspace.snippet_sources = Arc::new(workspace.state.snippets.clone());
+            workspace.snippet_sources = Arc::new(saved.snippets.clone());
             workspace.command_sources_revision = workspace.command_sources_revision.wrapping_add(1);
             cx.notify();
         });

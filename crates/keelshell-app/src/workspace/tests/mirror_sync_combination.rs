@@ -72,6 +72,7 @@ pub(crate) fn mount_scene(
         )
         .checked("real encrypted channel publication");
     assert!(outcome.published);
+    adopt_fixture_state(&fixture, outcome.state, cx);
     let panes = attach_remote_panes(&fixture, cx);
     let (lifecycle, source) = tokio::sync::watch::channel(crate::terminal::TransportState::Ready);
     panes[0]
@@ -89,7 +90,6 @@ pub(crate) fn mount_scene(
                 )
             });
             fixture.workspace.update(cx, |view, cx| {
-                view.state = outcome.state;
                 view.runtime = runtime;
                 view.show_connections = false;
                 let route = view

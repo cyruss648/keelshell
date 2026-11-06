@@ -31,7 +31,9 @@ impl Workspace {
     }
 
     pub(super) fn command_surface_blocked(&self) -> bool {
-        self.snippet_modal_open()
+        !self.configuration_token_current()
+            || self.close_review.is_some()
+            || self.snippet_modal_open()
             || self.mcp.show
             || self.show_batch
             || self.show_workflow

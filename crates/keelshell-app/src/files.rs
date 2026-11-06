@@ -138,6 +138,17 @@ enum WorkerMessage {
     Result(Box<Result<Outcome, FileFailure>>),
 }
 
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct CloseDraft {
+    text: SharedString,
+    format: Option<Utf8TextFormat>,
+    original: Option<(String, Vec<u8>)>,
+    reload_required: bool,
+    session: uuid::Uuid,
+    review: uuid::Uuid,
+    patch: SharedString,
+}
+
 pub struct FilesPanel {
     session: Option<SshSession>,
     /// Changes whenever this panel is detached from its authenticated host.
@@ -586,6 +597,10 @@ fn send_worker_progress(progress: &mpsc::SyncSender<WorkerMessage>, message: Mes
 impl FilesPanel {
     /// Height allocated by the workspace, also used by file-state geometry tests.
     pub(crate) fn workbench_height(viewport_height: Pixels) -> Pixels {
+        // Keep the compact workbench bounded so the terminal retains a usable
+        // viewport. The file panel owns its own scroll surfaces, so editor,
+        // transfer and merge controls remain reachable without reserving their
+        // full content height from the shared workspace.
         px(340.).min(viewport_height * 0.40)
             - if viewport_height < px(700.) {
                 px(20.)
@@ -744,6 +759,51 @@ impl FilesPanel {
     /// Immutable in-memory version for explicit archive-discard consent.
     pub fn draft_snapshot(&self, cx: &App) -> SharedString {
         self.editor.read(cx).value()
+    }
+
+    /// Exact transient draft/format consent; never serialized or logged.
+    pub(crate) fn window_close_draft(&self, cx: &App) -> CloseDraft {
+        CloseDraft {
+            text: self.editor.read(cx).value(),
+            format: self.editor_format,
+            original: self.editing.clone(),
+            reload_required: self.editor_reload_required,
+            session: self.session_token,
+            review: self.pending_review_id,
+            patch: self.patch.read(cx).value(),
+        }
+    }
+
+    pub(crate) fn window_close_busy(&self) -> bool {
+        self.busy
+            || self.operation_id.is_some()
+            || self.has_active_transfers()
+            || self.isolation_target.is_some()
+            || self
+                .transfer
+                .as_ref()
+                .is_some_and(|job| job.phase == TransferPhase::Uncertain)
+            || self
+                .transfer_jobs
+                .iter()
+                .any(|job| job.status.phase == TransferPhase::Uncertain)
+            || self.sync_journal.as_ref().is_some_and(|journal| {
+                journal.lock().map_or(true, |journal| {
+                    !journal.finished
+                        || journal.cleanup_failed
+                        || journal
+                            .steps
+                            .iter()
+                            .any(|step| step.state == sync::journal::StepState::Unknown)
+                })
+            })
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_window_close_format_for_test(&mut self, raw: &[u8]) {
+        self.editor_format = Utf8TextDocument::decode(raw)
+            .ok()
+            .map(|document| document.format());
     }
 
     #[cfg(test)]
@@ -931,8 +991,11 @@ impl FilesPanel {
         let (sender, receiver) = mpsc::sync_channel(16);
         #[cfg(test)]
         let fixture_group = self.fixture_group.clone();
-        if let Err(error) =
-            crate::terminal::spawn_transport_worker("keelshell-sftp", stop, move || {
+        if let Err(error) = crate::terminal::spawn_owned_transport_worker(
+            cx.entity_id(),
+            "keelshell-sftp",
+            stop,
+            move || {
                 #[cfg(test)]
                 let _fixture_group = fixture_group;
                 let result = runtime.block_on(operate(
@@ -945,8 +1008,8 @@ impl FilesPanel {
                 let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
                 let _ = sender.send(WorkerMessage::Result(Box::new(result)));
                 completion
-            })
-        {
+            },
+        ) {
             // A failed foreground start cannot release running queue jobs' guard.
             self.busy = self.has_active_transfers();
             self.operation_stop = None;

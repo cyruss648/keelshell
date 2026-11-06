@@ -52,6 +52,10 @@ enum Report {
 }
 
 impl ConfigRecoveryPanel {
+    pub(crate) fn maintenance_busy(&self) -> bool {
+        self.busy
+    }
+
     #[cfg(test)]
     pub(crate) fn pending_for_test(&self) -> bool {
         self.busy

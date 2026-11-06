@@ -363,7 +363,8 @@ impl FilesPanel {
         let (sender, receiver) = mpsc::sync_channel(16);
         #[cfg(test)]
         let fixture_group = self.fixture_group.clone();
-        if let Err(error) = crate::terminal::spawn_transport_worker(
+        if let Err(error) = crate::terminal::spawn_owned_transport_worker(
+            cx.entity_id(),
             "keelshell-queued-sftp",
             stop,
             move || {

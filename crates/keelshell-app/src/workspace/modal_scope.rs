@@ -25,6 +25,7 @@ impl RenderOnce for RetainedModalButton {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum ModalKind {
+    WindowClose,
     KeyboardInteractive,
     HostApproval,
     Login,
@@ -53,6 +54,7 @@ pub(super) enum ModalKind {
 impl ModalKind {
     fn title(self, cx: &App) -> &'static str {
         match self {
+            Self::WindowClose => t(cx, "关闭窗口审核", "Review window close"),
             Self::KeyboardInteractive | Self::HostApproval | Self::Login => {
                 t(cx, "SSH 连接与认证", "SSH connection and authentication")
             }
@@ -248,6 +250,12 @@ impl Workspace {
         // Authentication can arrive asynchronously. It must interrupt a settings
         // draft rather than leave a security decision hidden behind that draft.
         [
+            (
+                self.close_review.is_some()
+                    || self.closing.is_some()
+                    || self.cleanup_unknown.is_some(),
+                ModalKind::WindowClose,
+            ),
             (
                 self.keyboard_interactive.is_some(),
                 ModalKind::KeyboardInteractive,
@@ -451,6 +459,7 @@ impl Workspace {
             return false;
         };
         match kind {
+            ModalKind::WindowClose => self.cancel_window_close(window, cx),
             ModalKind::KeyboardInteractive | ModalKind::HostApproval => {
                 self.cancel_connect_route(window, cx)
             }
@@ -458,6 +467,11 @@ impl Workspace {
             ModalKind::Appearance if !self.saving => self.show_appearance = false,
             ModalKind::Updates => {
                 self.update_panel = None;
+                self.app_windows.update(cx, |shared, _| {
+                    if shared.update_owner == Some(self.window_id) {
+                        shared.update_owner = None;
+                    }
+                });
             }
             ModalKind::ProfileSync => {
                 if let Some(panel) = self.profile_sync.clone() {
@@ -506,6 +520,7 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         match kind {
+            ModalKind::WindowClose => self.window_close_modal(cx),
             ModalKind::KeyboardInteractive | ModalKind::HostApproval | ModalKind::Login => {
                 self.authentication_modal(cx)
             }
@@ -553,7 +568,7 @@ impl Workspace {
             .absolute()
             .inset_0()
             .occlude()
-            .bg(rgba(0x17243a66))
+            .bg(rgba(visual.overlay))
             .flex()
             .items_center()
             .justify_center()

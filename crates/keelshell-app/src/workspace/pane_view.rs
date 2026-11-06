@@ -73,6 +73,9 @@ impl Workspace {
     }
 
     pub(super) fn admit_new_session(&mut self, cx: &mut Context<Self>) -> bool {
+        if !self.configuration_current(cx) || self.close_review.is_some() {
+            return false;
+        }
         if self.sync_session_panes() && self.session_panes.can_add() {
             return true;
         }

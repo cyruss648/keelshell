@@ -39,7 +39,7 @@ impl Workspace {
                 .actions
                 .iter()
                 .any(|action| matches!(action.state, ActionState::Running));
-        div().absolute().inset_0().occlude().bg(rgba(0x00000088)).flex().items_center().justify_center()
+        div().absolute().inset_0().occlude().bg(rgba(visual.overlay)).flex().items_center().justify_center()
             .child(div().id("mcp-file-review-dialog").test_support().track_focus(&self.overlay_focus)
                 .w(px(850.)).h(px(660.)).max_w(relative(0.96)).max_h(relative(0.94)).min_w_0().min_h_0()
                 .bg(rgb(visual.surface)).text_color(rgb(visual.text)).border_1().border_color(rgb(visual.border)).rounded_lg().shadow_lg().flex().flex_col().overflow_hidden()
@@ -290,7 +290,7 @@ impl Workspace {
                     }),
             );
         }
-        div().absolute().inset_0().occlude().bg(rgba(0x00000066)).flex().items_center().justify_center()
+        div().absolute().inset_0().occlude().bg(rgba(visual.overlay)).flex().items_center().justify_center()
             .child(div().id("mcp-dialog").test_support().track_focus(&self.overlay_focus)
                 .w(px(850.)).h(px(660.)).max_w(relative(0.96)).max_h(relative(0.94)).min_w_0().min_h_0()
                 .bg(rgb(visual.surface)).text_color(rgb(visual.text)).border_1().border_color(rgb(visual.border)).rounded_lg().shadow_lg().flex().flex_col().overflow_hidden()

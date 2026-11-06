@@ -130,7 +130,7 @@ impl ProfileSyncPanel {
     pub fn focus(&self, window: &mut Window, cx: &mut App) {
         self.password.read(cx).focus_handle(cx).focus(window, cx);
     }
-    fn busy(&self) -> bool {
+    pub(crate) fn busy(&self) -> bool {
         self.cancellation.is_some()
     }
     /// Test-only observation of actual background admission and completion.

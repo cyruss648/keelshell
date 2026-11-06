@@ -274,15 +274,20 @@ impl FilesPanel {
         let (sender, receiver) = mpsc::sync_channel(1);
         #[cfg(test)]
         let fixture_group = self.fixture_group.clone();
-        if crate::terminal::spawn_transport_worker("keelshell-local-browser", stop, move || {
-            #[cfg(test)]
-            let _fixture_group = fixture_group;
-            let result = local_catalog::list_directory(&path, &worker_stop);
-            // A display read's failure is delivered to its owner without logging
-            // paths; the registry still observes a normal completed worker.
-            let _ = sender.send(result);
-            Ok(())
-        })
+        if crate::terminal::spawn_owned_transport_worker(
+            cx.entity_id(),
+            "keelshell-local-browser",
+            stop,
+            move || {
+                #[cfg(test)]
+                let _fixture_group = fixture_group;
+                let result = local_catalog::list_directory(&path, &worker_stop);
+                // A display read's failure is delivered to its owner without logging
+                // paths; the registry still observes a normal completed worker.
+                let _ = sender.send(result);
+                Ok(())
+            },
+        )
         .is_err()
         {
             self.local_browser.active = None;

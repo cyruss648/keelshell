@@ -23,7 +23,6 @@ use keelshell_session::{ConnectionState, SshSession};
 use tokio::runtime::Runtime;
 
 use crate::i18n::{LocalizedTooltipExt, Message, t};
-use crate::terminal::spawn_transport_worker;
 
 mod rules;
 pub(crate) use rules::TunnelRuleEvent;
@@ -514,6 +513,12 @@ impl TunnelsPanel {
         self.rows.iter().any(|row| !row.finished)
     }
 
+    pub(crate) fn window_close_busy(&self) -> bool {
+        self.rows
+            .iter()
+            .any(|row| !row.finished || row.unresolved_cleanup.is_some())
+    }
+
     /// Translate hints in place without replacing input entities or active tunnels.
     pub fn refresh_locale(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         for (input, zh, en) in [
@@ -640,8 +645,12 @@ impl TunnelsPanel {
         let cancel = Arc::new(AtomicBool::new(false));
         let worker_cancel = cancel.clone();
         let runtime = self.runtime.clone();
-        let started = spawn_transport_worker("keelshell-tunnel", cancel.clone(), move || {
-            runtime.block_on(async move {
+        let started = crate::terminal::spawn_owned_transport_worker(
+            cx.entity_id(),
+            "keelshell-tunnel",
+            cancel.clone(),
+            move || {
+                runtime.block_on(async move {
                 let remote_requested = AtomicBool::new(false);
                 let started = tokio::select! {
                     result = start_forward(&session, &spec, &remote_requested) => result,
@@ -690,7 +699,8 @@ impl TunnelsPanel {
                 ));
                 result
             })
-        });
+            },
+        );
         match started {
             Ok(()) => {
                 self.rows.push(TunnelRow {

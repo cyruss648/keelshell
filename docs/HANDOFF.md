@@ -1,4 +1,4 @@
-# KeelShell 当前交接 — 2026-11-06
+# KeelShell 当前交接 — 2026-11-07
 
 先读[AGENTS](../AGENTS.md)、本页、[路线图](ROADMAP.md)及
 [共享 Cargo 指南](testing/SHARED_TARGET.md)。时间使用 Asia/Shanghai，
@@ -40,6 +40,36 @@ workspace tests、格式、workspace Clippy、依赖策略和三组 AI controlle
 原生包、Windows/Linux 桌面、紧凑窗口、输入法和辅助技术仍保持各自未完成边界。
 实现和视觉来源记录见 [工作区外壳 ADR](adr/0113-workbench-chrome-hierarchy.md)
 与 [视觉测试记录](testing/records/2026-11-06-workbench-chrome-polish.md)。
+
+## 接续片：独立工作窗口与编辑器动作可达性
+
+2026-11-07 已从受保护的隔离源码副本导入两项下一片实现到当前集成分支：
+
+- `AppWindows` 为同一 `StateStore` 路径提供进程内窗口注册、共享更新服务和
+  `ConfigurationGate`。新窗口通过真实 `gpui_kit::open_window` 创建，从空工作区
+  开始；每个 `Workspace` 独立持有 SSH、终端输入、草稿、AI 审核、远程面板和
+  transport owner，窗口最多八个。
+- 配置写入使用 `WriteLease` 绑定 snapshot revision、epoch 和 owner。兄弟窗口
+  收到变更后只更新主题/语言并撤销旧配置审核，保留 live SSH 与本地草稿，显式
+  reload 后才能继续配置操作。关闭窗口先审核精确会话/草稿/格式快照，再按 owner
+  有界停止和 join worker；未知清理结果保留 owner，不自动重试。
+- inline editor 与三方合并手工输入的布局修复已导入：正文和完整版本独立滚动，
+  底部审核动作固定在可见动作区，900×580 下手工输入保留可达最小高度。
+
+当前 app 测试清单为 1,075 项、2 项 ignored；配置闸门 4、窗口行为 12、真实
+loopback SSH 窗口清理 1、worker 回收 3、编辑器视口 11，以及本轮 macOS
+临时目录根路径回归 11 项均通过。第一次 workspace 重跑暴露两个并行传输夹具
+直接使用 macOS `/var` symlink 临时路径的问题，已让这两个夹具使用
+canonicalized temporary root；产品的静态 symlink ancestor fail-closed 规则保持不变。
+随后完整 `python3 scripts/check.py` 实际退出 0，包含 Python 131 run / 1 skipped、
+workspace 2,397 ordinary / 23 ignored、11 rustdoc、workspace strict Clippy、
+依赖策略和三组 AI controller 门禁。独立非作者复核、开发包、真实 macOS 多窗口/
+编辑器采用保存，以及 Windows/Linux 原生验收仍待完成。正式边界见
+[ADR 0114](adr/0114-independent-workspace-windows.md) 和
+[本轮记录](testing/records/2026-11-07-multiwindow-editor-layout.md)。
+本轮两次新开的有界只读复核 agent 均未返回可审计报告，已停止且没有改动工作树；
+因此不能把本批写成已获独立批准。父级只读差分检查发现并修正了新增的 worker
+stderr 输出，未发现新的 P0/P1；该检查不替代非作者复核报告。
 
 ## 已交付基线
 
@@ -115,8 +145,8 @@ app exit 0 / reaped，sshd -9 / reaped，容器 exit 0；
 
 | 切片 | 当前范围与状态 |
 | --- | --- |
-| 独立工作窗口 | Dewey 在 `work/multiwindow-20261106/implementation-source` 实施空白新窗、每窗独立会话/草稿/审核、安全关闭、定向 worker 回收及共享 StateStore 协调；尚未交付或验收，不重复作者 full gate |
-| 编辑器动作可达性 | Carver 在 `work/editor-layout-20261106/implementation-source` 分析并修复原生发现的底部裁切，限定 files 范围；等待专项/独立复核，尚未导入本批 |
+| 独立工作窗口 | 源码已导入当前分支并通过定向窗口、worker 和 loopback SSH 测试；workspace 全量门禁通过，独立复核和真实多窗口验收待完成 |
+| 编辑器动作可达性 | 源码布局修复已导入并通过 11 项视口专项；`merge-adopt` / `merge-save`、late-save 和连续无换行保存的真实原生复验待完成 |
 
 作者隔离副本没有 `.git`，不修改父正式源码、文档或 Git。
 已合并分支及时清理；受管建树已两次超时，旧 worktree 的其他任务/primary 保护保持，
@@ -134,7 +164,7 @@ app exit 0 / reaped，sshd -9 / reaped，容器 exit 0；
    启动一次新观察器；首次构造开始原 5400 秒时钟，不能重启、延时或重跑。
    248 候选的平台预期为 macOS 248 / Linux 247 / Windows 246。
    新 SHA / run / exec / deadline 尚未绑定，不把旧 fa7 CI 当本批结果。
-4. 下一片源码导入和新的非作者审后统一 fresh 完整门禁，构建新包及真实原生验收。
+4. 当前两项源码候选完成新的非作者审后，统一 fresh 完整门禁，构建新包及真实原生验收。
 
 ## 持续约束与开放边界
 
@@ -144,6 +174,6 @@ app exit 0 / reaped，sshd -9 / reaped，容器 exit 0；
 AI 上下文与命令各自显式审核，模型不能自主执行；主机密钥变化 fail closed，
 凭据不进普通配置或日志。
 
-Windows/Linux 真实桌面、完整主题/尺寸/键盘/IME/辅助技术、多窗口、
+Windows/Linux 真实桌面、完整主题/尺寸/键盘/IME/辅助技术、多窗口的完整原生矩阵、
 供应商账户/外部 MCP、签名安装仍开放。用户已授权自主开发、提交推送 main、
 标签触发 Release 和本地 Podman 联调；不含覆盖安装或遥测。产品总目标保持进行中。

@@ -92,14 +92,16 @@ async fn ai_key_draft_cancel_preserves_workspace_and_apply_unlinks_it(cx: &mut T
         }),
     };
     let id = profile.id;
+    let mut state = fixture
+        .workspace
+        .read_with(cx, |workspace, _| workspace.state.clone());
+    state.settings.ai_profiles = AiProfileCatalog {
+        active_id: Some(id),
+        profiles: vec![profile.clone()],
+    };
+    save_and_adopt_fixture_state(&fixture, state, "seed AI metadata", cx);
     cx.update_window(fixture.window, |_, window, cx| {
         fixture.workspace.update(cx, |workspace, cx| {
-            let mut state = workspace.state.clone();
-            state.settings.ai_profiles = AiProfileCatalog {
-                active_id: Some(id),
-                profiles: vec![profile.clone()],
-            };
-            workspace.state = fixture.store.save(&state).checked("seed AI metadata");
             workspace
                 .ai_credentials
                 .insert(id, Zeroizing::new("fixture-api-key".into()));

@@ -183,6 +183,18 @@ impl WorkflowPanel {
     pub(crate) fn is_running(&self) -> bool {
         self.starting || self.handle.is_some() || self.schedule_active()
     }
+
+    /// Whether a remote workflow execution is currently consuming its
+    /// captured sessions.
+    ///
+    /// An armed future schedule is configuration-independent and can coexist
+    /// with a single-window configuration maintenance lease. A live handle or
+    /// startup phase still blocks maintenance because it owns active execution
+    /// authority.
+    pub(crate) fn has_active_run(&self) -> bool {
+        self.starting || self.handle.is_some()
+    }
+
     pub(crate) fn focus(&self, window: &mut Window, cx: &mut App) {
         self.focus.focus(window, cx);
     }

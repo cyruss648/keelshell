@@ -6,6 +6,7 @@
 mod ai_credentials;
 mod ai_request_options;
 mod ai_settings;
+mod app_windows;
 mod assistant;
 mod batch_commands;
 mod command_history;
@@ -37,7 +38,6 @@ mod workspace;
 #[cfg(test)]
 mod ui_tests;
 
-use gpui_kit::*;
 use keelshell_core::{AppState, StateStore};
 use std::sync::Arc;
 
@@ -89,32 +89,7 @@ fn main() {
             i18n::set_language(state.settings.language, cx);
             workspace::bind_keys(cx);
             terminal::install_shutdown(cx);
-            let options = WindowOptions {
-                // Wayland desktop lookup and X11 WM_CLASS match keelshell.desktop.
-                app_id: Some("keelshell".into()),
-                #[cfg(target_os = "linux")]
-                icon: linux_window_icon(),
-                window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
-                    None,
-                    size(px(1440.), px(900.)),
-                    cx,
-                ))),
-                window_min_size: Some(size(px(900.), px(580.))),
-                titlebar: Some(TitlebarOptions {
-                    title: Some("KeelShell".into()),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            };
-            if let Err(error) = gpui_kit::open_window(options, cx, |window, cx| {
-                window.on_window_should_close(cx, |_, cx| {
-                    terminal::shutdown_and_quit(cx);
-                    false
-                });
-                cx.new(|cx| {
-                    workspace::Workspace::new(store, state, load_error, runtime, window, cx)
-                })
-            }) {
+            if let Err(error) = app_windows::open(store, state, load_error, runtime, true, cx) {
                 eprintln!("Unable to open KeelShell: {error}");
                 cx.quit();
             }

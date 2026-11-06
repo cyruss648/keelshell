@@ -326,7 +326,24 @@ impl Harness {
     }
     fn finish(mut self) {
         self.control.gate.add_permits(8);
-        self.runtime.block_on(async{self.session.close().await.checked("close own SSH");self.server.abort();let joined=tokio::time::timeout(Duration::from_secs(2),&mut self.server).await.checked("join own listener task");assert!(joined.is_ok()||joined.as_ref().is_err_and(|e|e.is_cancelled()));assert!(matches!(tokio::net::TcpStream::connect(("127.0.0.1",self.port)).await,Err(e)if e.kind()==std::io::ErrorKind::ConnectionRefused));});
+        self.runtime.block_on(async {
+            if !self.session.is_closed() {
+                let result = self.session.close().await;
+                assert!(
+                    result.is_ok() || self.session.is_closed(),
+                    "close own SSH: {result:?}"
+                );
+            }
+            self.server.abort();
+            let joined = tokio::time::timeout(Duration::from_secs(2), &mut self.server)
+                .await
+                .checked("join own listener task");
+            assert!(joined.is_ok() || joined.as_ref().is_err_and(|error| error.is_cancelled()));
+            assert!(matches!(
+                tokio::net::TcpStream::connect(("127.0.0.1", self.port)).await,
+                Err(error) if error.kind() == std::io::ErrorKind::ConnectionRefused
+            ));
+        });
     }
 }
 

@@ -58,6 +58,8 @@ mod tunnel_rule_tests;
 mod updates;
 mod vault;
 mod view;
+mod window_configuration;
+pub(crate) mod window_lifecycle;
 
 use crate::ai_settings::{AiSettingsEvent, AiSettingsPanel, EphemeralCredentials};
 use crate::assistant::{
@@ -78,7 +80,9 @@ actions!(
         OpenConnections,
         CloseTab,
         ToggleAssistant,
-        CompleteRemoteCommand
+        CompleteRemoteCommand,
+        NewWorkspaceWindow,
+        CloseWorkspaceWindow
     ]
 );
 
@@ -294,6 +298,25 @@ struct NewRemoteTab {
 }
 
 pub struct Workspace {
+    app_windows: Entity<crate::app_windows::AppWindows>,
+    configuration_gate: Arc<std::sync::Mutex<crate::app_windows::ConfigurationGate>>,
+    window_id: uuid::Uuid,
+    native_window: AnyWindowHandle,
+    configuration_epoch: u64,
+    configuration_invalidated: bool,
+    close_review: Option<window_lifecycle::CloseReview>,
+    closing: Option<Message>,
+    cleanup_unknown: Option<window_lifecycle::CleanupUnknown>,
+    closing_intent: Option<window_lifecycle::CloseIntent>,
+    worker_owners: std::collections::HashSet<EntityId>,
+    owned_window_sessions: Vec<SshSession>,
+    /// Authenticated route sessions that must outlive their dependent child.
+    ///
+    /// A target reached through a jump host owns a different SSH connection
+    /// from that host. Keeping only sessions referenced by terminal tabs would
+    /// therefore close the jump host while the target still uses its channel.
+    session_dependencies: Vec<(SshSession, SshSession)>,
+    retired_window_panels: Vec<RemotePanels>,
     store: Arc<StateStore>,
     state: AppState,
     tabs: Vec<Entity<TerminalView>>,
@@ -399,6 +422,7 @@ pub struct Workspace {
     keyboard_interactive: Option<KeyboardInteractivePrompt>,
     host_approval: Option<HostApproval>,
     connecting: bool,
+    route_jobs: usize,
     connect_route: Option<routing::ConnectRoute>,
     remote_hosts: HashMap<EntityId, String>,
     remote_connection_ids: HashMap<EntityId, uuid::Uuid>,
@@ -442,6 +466,45 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
+        Self::new_window(store, state, load_error, runtime, true, window, cx)
+    }
+
+    pub(crate) fn new_window(
+        store: Arc<StateStore>,
+        state: AppState,
+        load_error: Option<String>,
+        runtime: Arc<tokio::runtime::Runtime>,
+        restore: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        let app_windows =
+            crate::app_windows::AppWindows::for_store(&store, &state, runtime.clone(), cx);
+        let window_id = uuid::Uuid::new_v4();
+        let configuration_epoch = app_windows
+            .read(cx)
+            .gate
+            .lock()
+            .map_or(0, |gate| gate.epoch());
+        let workspace_owner = cx.weak_entity();
+        app_windows.update(cx, |shared, _| {
+            shared.register(crate::app_windows::Registration {
+                id: window_id,
+                window: window.window_handle(),
+                workspace: workspace_owner,
+            })
+        });
+        let weak = cx.weak_entity();
+        window.on_window_should_close(cx, move |window, cx| {
+            let _ = weak.update(cx, |view, cx| {
+                view.request_window_close(window_lifecycle::CloseIntent::Window, window, cx)
+            });
+            false
+        });
+        let configuration_subscription =
+            cx.subscribe_in(&app_windows, window, |view, _, _, window, cx| {
+                view.observe_shared_configuration(window, cx);
+            });
         crate::design::apply_settings(&state.settings, Some(window), cx);
         let appearance_subscription = cx.observe_window_appearance(window, |view, window, cx| {
             view.on_appearance_changed(window.appearance(), window, cx);
@@ -717,6 +780,7 @@ impl Workspace {
                         view.retire_tunnel_owners(cx);
                         view.maintain_mcp(cx);
                         view.maintain_agent(cx);
+                        view.close_orphaned_window_sessions(cx);
                         view.flush_update_check(window, cx);
                     })
                     .is_err()
@@ -736,8 +800,7 @@ impl Workspace {
             cx,
         ));
         let snippet_sources = Arc::new(state.snippets.clone());
-        let update_service =
-            cx.new(|cx| UpdatePanel::new(runtime.clone(), state.settings.updates, cx));
+        let update_service = app_windows.read(cx).updater.clone();
         if load_error.is_some() {
             update_service.update(cx, |panel, cx| panel.suspend_background(cx));
         }
@@ -745,17 +808,53 @@ impl Workspace {
             cx.subscribe_in(&update_service, window, |view, _, event, window, cx| {
                 match event {
                     UpdatePanelEvent::Close => {
-                        view.update_panel = None;
-                        view.focus_current_surface(window, cx);
+                        if view.app_windows.read(cx).update_owner == Some(view.window_id) {
+                            view.app_windows
+                                .update(cx, |shared, _| shared.update_owner = None);
+                            view.update_panel = None;
+                            view.focus_current_surface(window, cx);
+                        }
                     }
-                    UpdatePanelEvent::Restart => crate::terminal::shutdown_and_quit(cx),
+                    UpdatePanelEvent::ReviewInstall => {
+                        if view.app_windows.read(cx).update_owner == Some(view.window_id) {
+                            view.request_window_close(
+                                window_lifecycle::CloseIntent::Install,
+                                window,
+                                cx,
+                            );
+                        }
+                    }
+                    UpdatePanelEvent::Restart => {
+                        let shared = view.app_windows.read(cx);
+                        if shared.update_owner == Some(view.window_id)
+                            && shared.quitting
+                            && shared.quit_install
+                            && shared
+                                .windows
+                                .iter()
+                                .all(|entry| shared.cleaned.contains(&entry.id))
+                        {
+                            crate::terminal::shutdown_and_quit(cx);
+                        }
+                    }
                     UpdatePanelEvent::Preferences {
                         preferences,
                         revision,
                     } => {
-                        view.save_update_preferences(*preferences, *revision, window, cx);
+                        if view.app_windows.read(cx).update_owner == Some(view.window_id) {
+                            view.save_update_preferences(*preferences, *revision, window, cx);
+                        }
                     }
                     UpdatePanelEvent::Checked(seconds) => {
+                        if view
+                            .app_windows
+                            .read(cx)
+                            .windows
+                            .first()
+                            .is_none_or(|entry| entry.id != view.window_id)
+                        {
+                            return;
+                        }
                         view.pending_update_check = Some(
                             view.pending_update_check
                                 .map_or(*seconds, |pending| pending.max(*seconds)),
@@ -766,11 +865,29 @@ impl Workspace {
                 cx.notify();
             });
         let update_observer = cx.observe(&update_service, |_, _, cx| cx.notify());
-        let layout_window_id = state
-            .workspace_layout
-            .as_ref()
-            .map_or_else(uuid::Uuid::new_v4, |layout| layout.active_window);
+        let layout_window_id = if restore {
+            state
+                .workspace_layout
+                .as_ref()
+                .map_or_else(uuid::Uuid::new_v4, |layout| layout.active_window)
+        } else {
+            uuid::Uuid::new_v4()
+        };
         let mut workspace = Self {
+            configuration_gate: app_windows.read(cx).gate.clone(),
+            app_windows,
+            window_id,
+            native_window: window.window_handle(),
+            configuration_epoch,
+            configuration_invalidated: false,
+            close_review: None,
+            closing: None,
+            cleanup_unknown: None,
+            closing_intent: None,
+            worker_owners: Default::default(),
+            owned_window_sessions: Vec::new(),
+            session_dependencies: Vec::new(),
+            retired_window_panels: Vec::new(),
             store,
             state,
             tabs: Vec::new(),
@@ -871,6 +988,7 @@ impl Workspace {
             keyboard_interactive: None,
             host_approval: None,
             connecting: false,
+            route_jobs: 0,
             connect_route: None,
             remote_hosts: HashMap::new(),
             remote_connection_ids: HashMap::new(),
@@ -888,6 +1006,7 @@ impl Workspace {
             tunnel_owners: HashMap::new(),
             tunnel_rule_store_blocked: false,
             _subscriptions: vec![
+                configuration_subscription,
                 update_subscription,
                 update_observer,
                 appearance_subscription,
@@ -901,7 +1020,9 @@ impl Workspace {
                 completion_cursor_subscription,
             ],
         };
-        workspace.restore_startup_layout(cx);
+        if restore {
+            workspace.restore_startup_layout(cx);
+        }
         workspace.refresh_protocol_selection(cx);
         workspace
     }
@@ -972,6 +1093,7 @@ impl Workspace {
             }
         };
         self.cancel_remote_completion(cx);
+        self.remember_window_workers(cx);
         let terminal = self.tabs.remove(index);
         self.pane_tab_ids.remove(&terminal.entity_id());
         self.restored_tabs.remove(&terminal.entity_id());
@@ -986,14 +1108,22 @@ impl Workspace {
         self.knowledge_source_ids.remove(&terminal.entity_id());
         self.knowledge_source_revisions
             .remove(&terminal.entity_id());
-        // Retiring the authoritative mapping must revoke the backend token
-        // in this foreground turn, before a paused write can resume.
-        self.maintain_agent(cx);
         self.command_histories.remove(&terminal.entity_id());
         self.remote_hosts.remove(&terminal.entity_id());
         self.remote_connection_ids.remove(&terminal.entity_id());
-        self.panels.remove(&terminal.entity_id());
+        if let Some(panels) = self.panels.remove(&terminal.entity_id()) {
+            self.retired_window_panels.push(panels);
+        }
         self.retire_tunnel_owners(cx);
+        // Retiring a tab can leave an independent file,
+        // monitor, tunnel or agent worker using the captured
+        // SSH connection. Keep that connection until the
+        // worker has published its terminal outcome.
+        self.close_orphaned_window_sessions(cx);
+        // Retiring the authoritative mapping must revoke the
+        // backend token in this foreground turn, before a
+        // paused write can resume.
+        self.maintain_agent(cx);
         self.terminal_observers.remove(&terminal.entity_id());
         self.terminal_focus.remove(&terminal.entity_id());
         // Retirement revokes background MCP leases in this same UI turn.
@@ -1009,6 +1139,97 @@ impl Workspace {
         }
         cx.notify();
     }
+
+    /// Close route sessions that no remaining tab in this window can use.
+    ///
+    /// Route authentication may retain intermediate hop handles so a window
+    /// close can clean up a late completion. A normal tab close still has to
+    /// release those handles when the last tab using the route disappears.
+    /// Sessions shared by another tab remain owned by that tab's window.
+    fn retain_route_dependencies(&self, active: &[SshSession]) -> Vec<SshSession> {
+        let mut required = active.to_vec();
+        let mut changed = true;
+        while changed {
+            changed = false;
+            for (child, parent) in &self.session_dependencies {
+                if required
+                    .iter()
+                    .any(|session| session.same_connection(child))
+                    && !required
+                        .iter()
+                        .any(|session| session.same_connection(parent))
+                {
+                    required.push(parent.clone());
+                    changed = true;
+                }
+            }
+        }
+        required
+    }
+
+    fn remember_session_dependency(&mut self, child: &SshSession, parent: &SshSession) {
+        if !self
+            .session_dependencies
+            .iter()
+            .any(|(known_child, known_parent)| {
+                known_child.same_connection(child) && known_parent.same_connection(parent)
+            })
+        {
+            self.session_dependencies
+                .push((child.clone(), parent.clone()));
+        }
+    }
+
+    fn close_orphaned_window_sessions(&mut self, cx: &App) {
+        let active: Vec<_> = self.remote_sessions.values().cloned().collect();
+        let required = self.retain_route_dependencies(&active);
+        let background_busy = self.window_agent_busy(cx)
+            || self.retired_window_panels.iter().any(|panels| {
+                panels
+                    .files
+                    .as_ref()
+                    .is_some_and(|panel| panel.read(cx).window_close_busy())
+                    || panels
+                        .monitor
+                        .as_ref()
+                        .is_some_and(|panel| panel.read(cx).window_close_busy(cx))
+                    || panels
+                        .tunnels
+                        .as_ref()
+                        .is_some_and(|panel| panel.read(cx).window_close_busy())
+            });
+        if background_busy {
+            return;
+        }
+        let mut orphaned = Vec::new();
+        self.owned_window_sessions.retain(|session| {
+            if required
+                .iter()
+                .any(|remaining| remaining.same_connection(session))
+            {
+                true
+            } else {
+                orphaned.push(session.clone());
+                false
+            }
+        });
+        for session in orphaned {
+            let runtime = self.runtime.clone();
+            runtime.spawn(async move {
+                let _ = tokio::time::timeout(Duration::from_secs(3), session.close()).await;
+            });
+        }
+        self.session_dependencies.retain(|(child, parent)| {
+            self.owned_window_sessions
+                .iter()
+                .any(|session| session.same_connection(child))
+                && self
+                    .owned_window_sessions
+                    .iter()
+                    .any(|session| session.same_connection(parent))
+        });
+    }
+
     fn split_remote(
         &mut self,
         axis: keelshell_core::SplitAxis,
@@ -1067,6 +1288,7 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        self.worker_owners.insert(terminal.entity_id());
         let id = terminal.entity_id();
         let workspace = cx.weak_entity();
         terminal.update(cx, |terminal, _| {
@@ -1226,6 +1448,7 @@ impl Workspace {
         if restored.is_none() || self.tabs.get(self.active).map(Entity::entity_id) == Some(id) {
             self.focus_current_surface(window, cx);
         }
+        self.remember_window_workers(cx);
         Some(id)
     }
     fn on_appearance_changed(
@@ -1265,7 +1488,6 @@ impl Workspace {
             Language::ZhCn => Language::En,
             Language::En => Language::ZhCn,
         };
-        self.apply_language(language, window, cx);
         let mut candidate = self.state.clone();
         candidate.settings.language = language;
         self.persist(candidate, AfterSave::None, window, cx);
@@ -1519,6 +1741,16 @@ impl Workspace {
         cx.notify();
     }
     fn open_updates(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if !self.configuration_current(cx)
+            || self.close_review.is_some()
+            || self
+                .app_windows
+                .read(cx)
+                .update_owner
+                .is_some_and(|owner| owner != self.window_id)
+        {
+            return;
+        }
         if self.state_reloading
             || self.configuration_recovery.is_some()
             || self.mcp.show
@@ -1533,6 +1765,8 @@ impl Workspace {
             return;
         }
         let panel = self.update_service.clone();
+        self.app_windows
+            .update(cx, |shared, _| shared.update_owner = Some(self.window_id));
         panel.update(cx, |panel, cx| panel.show(window, cx));
         self.update_panel = Some(panel);
         cx.notify();
@@ -1954,7 +2188,20 @@ impl Workspace {
         self.set_tunnel_rule_configuration_busy(true, cx);
         self.status = Message::new("正在重新加载本机配置…", "Reloading local configuration…");
         let store = self.store.clone();
-        let task = cx.background_executor().spawn(async move { store.load() });
+        let gate = self.configuration_gate.clone();
+        let owner = self.window_id;
+        let reload = match crate::app_windows::ConfigurationGate::begin_reload_lease(&gate, owner) {
+            Ok(reload) => reload,
+            Err(_) => {
+                self.state_reloading = false;
+                return;
+            }
+        };
+        let task = cx.background_executor().spawn(async move {
+            let result = store.load();
+            reload.finish(result.as_ref().ok());
+            result
+        });
         cx.spawn_in(window, async move |this, cx| {
             let result = task.await;
             let _ = this.update_in(cx, |view, window, cx| {
@@ -1985,6 +2232,7 @@ impl Workspace {
                     }
                     Err(error) => {
                         view.mark_tunnel_rule_store_uncertain(cx);
+                        view.configuration_invalidated = true;
                         let accepted = panel
                             .upgrade()
                             .map(|panel| {
@@ -2073,11 +2321,15 @@ impl Workspace {
             return;
         }
         let update_history = matches!(&after, AfterSave::UpdateHistory);
+        let Some(write_lease) = self.acquire_configuration_write(cx) else {
+            return;
+        };
         if let AfterSave::KnowledgeLibrary { panel, review_id } = &after
             && !panel
                 .upgrade()
                 .is_some_and(|panel| panel.update(cx, |panel, cx| panel.begin_save(*review_id, cx)))
         {
+            write_lease.cancel_before_dispatch();
             return;
         }
         self.saving = true;
@@ -2094,9 +2346,11 @@ impl Workspace {
         }
         let store = self.store.clone();
         let state = candidate.clone();
-        let task = cx
-            .background_executor()
-            .spawn(async move { store.save(&state) });
+        let task = cx.background_executor().spawn(async move {
+            let result = store.save(&state);
+            write_lease.finish(&result);
+            result
+        });
         cx.spawn_in(window, async move |this, cx| {
             let result = task.await;
             let _ = this.update_in(cx, |view, window, cx| {
@@ -2106,6 +2360,8 @@ impl Workspace {
                 match result {
                     Ok(saved) => {
                         view.state = saved;
+                        view.shared_commit_completed(cx);
+                        view.apply_language(view.state.settings.language, window, cx);
                         view.refresh_knowledge_library(cx);
                         let tunnel_rule_saved = if let AfterSave::TunnelRule {
                             panel, operation, ..
@@ -2398,13 +2654,40 @@ impl Workspace {
                         {
                             view.mark_tunnel_rule_store_uncertain(cx);
                         }
+                        if matches!(
+                            &error,
+                            keelshell_core::Error::Conflict | keelshell_core::Error::Durability(_)
+                        ) {
+                            // Run the shared invalidation side effects so
+                            // command sources, reviews and transports cannot
+                            // use an uncertain configuration. A credential
+                            // failure retains its modal and a knowledge
+                            // failure retains its non-retryable conflict
+                            // review; both are updated below after shared
+                            // authority has been invalidated.
+                            if !view.configuration_invalidated {
+                                match &after {
+                                    AfterSave::CredentialLinked { .. } => {
+                                        view.observe_shared_configuration_preserving_login(
+                                            window, cx,
+                                        );
+                                    }
+                                    AfterSave::Knowledge { .. } => {
+                                        view.observe_shared_configuration_preserving_knowledge_review(
+                                            window, cx,
+                                        );
+                                    }
+                                    _ => view.observe_shared_configuration(window, cx),
+                                }
+                            }
+                        }
                         if let AfterSave::TunnelRule { panel, operation } = &after
                             && let Some(panel) = panel.upgrade()
                         {
                             let message = if matches!(&error, keelshell_core::Error::Conflict) {
                                 Message::new(
-                                    "配置已被其他操作修改，规则草稿已保留；请重新打开应用或重新加载配置，再编辑最新规则。",
-                                    "Configuration changed elsewhere; the draft is retained. Reopen the app or reload configuration, then edit the latest rule.",
+                                    "规则保存失败：配置已被其他操作修改，规则草稿已保留；请重新打开应用或重新加载配置，再编辑最新规则。",
+                                    "Rule save failed because configuration changed elsewhere; the draft is retained. Reopen the app or reload configuration, then edit the latest rule.",
                                 )
                             } else {
                                 Message::detail("规则保存失败或结果未知，草稿已保留；请重新打开应用或重新加载配置后再编辑", "Rule save failed or its outcome is unknown; draft retained. Reopen the app or reload configuration before editing again", &error)
@@ -2413,6 +2696,12 @@ impl Workspace {
                                 panel.mark_rule_mutation_failed(*operation, message, true, cx)
                             });
                         }
+                        // observe_shared_configuration marks the shared
+                        // tunnel controls busy while it revokes stale
+                        // authority. The failed save has already completed,
+                        // so restore the normal idle presentation before
+                        // reporting the durable error.
+                        view.set_tunnel_rule_configuration_busy(false, cx);
                         view.status = credential_failure.unwrap_or_else(|| Message::detail(
                             "保存失败，输入内容已保留",
                             "Save failed; input preserved",
@@ -2420,6 +2709,7 @@ impl Workspace {
                         ))
                     }
                 };
+                view.observe_shared_configuration_if_needed(window, cx);
                 view.resume_connect_route(window, cx);
                 if saved_successfully {
                     view.flush_recent_connections(window, cx);
@@ -2614,6 +2904,20 @@ impl Workspace {
             .collect();
         self.tunnel_owners.retain(|id, panel| {
             retained.contains(id) || panel.update(cx, |panel, cx| panel.retire_workers(cx))
+        });
+        self.retired_window_panels.retain(|panels| {
+            panels
+                .files
+                .as_ref()
+                .is_some_and(|panel| panel.read(cx).window_close_busy())
+                || panels
+                    .monitor
+                    .as_ref()
+                    .is_some_and(|panel| panel.read(cx).window_close_busy(cx))
+                || panels
+                    .tunnels
+                    .as_ref()
+                    .is_some_and(|panel| panel.read(cx).window_close_busy())
         });
     }
 
@@ -2890,5 +3194,23 @@ pub fn bind_keys(cx: &mut App) {
         KeyBinding::new(open, OpenConnections, None),
         KeyBinding::new(close, CloseTab, None),
         KeyBinding::new(assistant, ToggleAssistant, None),
+        KeyBinding::new(
+            if cfg!(target_os = "macos") {
+                "cmd-shift-n"
+            } else {
+                "ctrl-shift-n"
+            },
+            NewWorkspaceWindow,
+            None,
+        ),
+        KeyBinding::new(
+            if cfg!(target_os = "macos") {
+                "cmd-shift-w"
+            } else {
+                "ctrl-alt-w"
+            },
+            CloseWorkspaceWindow,
+            None,
+        ),
     ]);
 }

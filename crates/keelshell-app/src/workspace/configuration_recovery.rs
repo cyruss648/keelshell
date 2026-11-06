@@ -4,26 +4,13 @@ use crate::configuration_recovery::{ConfigRecoveryEvent, ConfigRecoveryPanel};
 
 impl Workspace {
     fn config_recovery_idle(&self, cx: &App) -> bool {
-        !self.saving
-            && !self.state_reloading
+        self.window_maintenance_idle(cx)
             && self.tabs.is_empty()
             && self.remote_sessions.is_empty()
-            && !self.connecting
-            && self.connect_route.is_none()
             && self.agent.is_none()
-            && self.assistant.read(cx).config_recovery_idle()
-            && self.mcp.config_recovery_idle()
             && self.pending_recents.is_empty()
             && self.pending_batch_audits.is_empty()
             && self.pending_workflow_audits.is_empty()
-            && self
-                .batch_panel
-                .as_ref()
-                .is_none_or(|panel| !panel.read(cx).is_running())
-            && self
-                .workflow_panel
-                .as_ref()
-                .is_none_or(|panel| !panel.read(cx).is_running())
     }
 
     pub(super) fn open_configuration_recovery(
@@ -39,7 +26,7 @@ impl Workspace {
             self.focus_current_surface(window, cx);
             return;
         }
-        if !self.config_recovery_idle(cx) {
+        if !self.config_recovery_idle(cx) || !self.begin_window_maintenance(cx) {
             self.status = Message::new(
                 "恢复前请关闭全部 SSH 标签，停止 AI、批量、定时和外部 MCP 操作，并等待配置保存完成。",
                 "Before recovery, close all SSH tabs, stop AI, batch, scheduled and external MCP work, and wait for configuration saves.",
@@ -57,14 +44,14 @@ impl Workspace {
                 }
                 match event {
                     ConfigRecoveryEvent::RequestRestore { generation } => {
-                        if view.config_recovery_idle(cx) {
+                        if view.window_maintenance_current(cx) && view.config_recovery_idle(cx) {
                             owner.update(cx, |panel, cx| panel.restore_approved(*generation, cx));
                         } else {
                             owner.update(cx, |panel, cx| panel.refuse_restore(cx));
                         }
                     }
                     ConfigRecoveryEvent::Restored(state) => {
-                        if view.state_reloading {
+                        if view.state_reloading || !view.accept_maintenance_commit(state, cx) {
                             view.status = Message::new(
                                 "配置正在重新加载，已忽略过期的恢复结果。",
                                 "Configuration is reloading; the stale recovery result was ignored.",
@@ -73,6 +60,7 @@ impl Workspace {
                             return;
                         }
                         view.state = (**state).clone();
+                        view.shared_commit_completed(cx);
                         view.reload_tunnel_panels(cx);
                         view.refresh_knowledge_library(cx);
                         // Recovery never transports a previous runtime capability.
@@ -104,8 +92,10 @@ impl Workspace {
                         );
                     }
                     ConfigRecoveryEvent::Close => {
+                        if owner.read(cx).maintenance_busy() || !view.window_maintenance_current(cx) { return; }
                         view.configuration_recovery = None;
                         view.configuration_recovery_subscription = None;
+                        view.end_window_maintenance(cx);
                         view.focus_current_surface(window, cx);
                     }
                 }

@@ -1,7 +1,7 @@
 //! Real file-pane expansion, keyboard targeting and unchanged approval guards.
 use super::*;
 use gpui_kit::{Focusable, ScrollDelta};
-use keelshell_core::{Language, Theme};
+use keelshell_core::{Language, Settings, Theme, ThemeId};
 
 async fn open_file(h: &Harness, path: &str, bytes: &[u8], cx: &mut TestAppContext) {
     h.seed(path, bytes);
@@ -54,6 +54,20 @@ fn review_bytes(h: &Harness, cx: &TestAppContext) -> (String, Vec<u8>, Vec<u8>) 
             _ => panic!("expected exact reviewed save"),
         }
     })
+}
+
+fn apply_editor_view_theme(
+    family: &'static crate::design::ThemeDefinition,
+    appearance: Theme,
+    window: &mut gpui_kit::Window,
+    cx: &mut gpui_kit::App,
+) {
+    let settings = Settings {
+        theme_family: ThemeId::new(family.id).checked("registered editor viewport theme"),
+        theme: appearance,
+        ..Settings::default()
+    };
+    crate::design::apply_settings(&settings, Some(window), cx);
 }
 
 fn dispatch_review_pointer(
@@ -229,23 +243,24 @@ async fn expanded_save_review_retains_complete_rows_and_keyboard_scroll_in_minim
             })
         })
         .checked("set explicit reviewed draft");
-        for language in [Language::ZhCn, Language::En] {
-            for theme in [Theme::System, Theme::Light, Theme::Dark] {
-                cx.update_window(h.window, |_, window, cx| {
-                    crate::i18n::set_language(language, cx);
-                    crate::design::apply(theme, Some(window), cx);
-                })
-                .checked("set real review language and theme");
-                h.click(cx, "save-remote-file");
-                let before = review_bytes(&h, cx);
-                let original = h.panel.read_with(cx, |panel, cx| {
-                    format!(
-                        "{} · {}",
-                        panel.host,
-                        panel.pending.as_ref().checked_option("review").0.render(cx)
-                    )
-                });
-                cx.update_window(h.window, |_, window, cx| {
+        for family in crate::design::registry() {
+            for appearance in [Theme::System, Theme::Light, Theme::Dark] {
+                for language in [Language::ZhCn, Language::En] {
+                    cx.update_window(h.window, |_, window, cx| {
+                        crate::i18n::set_language(language, cx);
+                        apply_editor_view_theme(family, appearance, window, cx);
+                    })
+                    .checked("set registered review family, language and appearance");
+                    h.click(cx, "save-remote-file");
+                    let before = review_bytes(&h, cx);
+                    let original = h.panel.read_with(cx, |panel, cx| {
+                        format!(
+                            "{} · {}",
+                            panel.host,
+                            panel.pending.as_ref().checked_option("review").0.render(cx)
+                        )
+                    });
+                    cx.update_window(h.window, |_, window, cx| {
                     window.render_frame(cx);
                     let compact = window.find("file-confirmation-message").bounds();
                     assert!(
@@ -304,7 +319,8 @@ async fn expanded_save_review_retains_complete_rows_and_keyboard_scroll_in_minim
                     }
                     println!("FILE_REVIEW_VIEWPORT_JSON {}", serde_json::json!({
                         "width": width, "height": height, "assistant": true,
-                        "language": format!("{language:?}"), "theme": format!("{theme:?}"),
+                        "family": family.id, "language": format!("{language:?}"),
+                        "appearance": format!("{appearance:?}"),
                         "compact_height": f32::from(compact.size.height),
                         "expanded_height": f32::from(body.size.height),
                         "offset_x": f32::from(h.panel.read(cx).confirmation_scroll.offset().x),
@@ -320,14 +336,15 @@ async fn expanded_save_review_retains_complete_rows_and_keyboard_scroll_in_minim
                     );
                 })
                 .checked("actual compact/expanded layout, keys and wheel");
-                assert_eq!(
-                    review_bytes(&h, cx),
-                    before,
-                    "presentation cannot replace reviewed target or bytes"
-                );
-                h.click(cx, "cancel-file-operation");
-                assert_eq!(h.read(&path), b"alpha\nbase-middle\nbase-tail\n");
-                assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+                    assert_eq!(
+                        review_bytes(&h, cx),
+                        before,
+                        "presentation cannot replace reviewed target or bytes"
+                    );
+                    h.click(cx, "cancel-file-operation");
+                    assert_eq!(h.read(&path), b"alpha\nbase-middle\nbase-tail\n");
+                    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+                }
             }
         }
     }
@@ -539,4 +556,510 @@ async fn expanded_mirror_review_keeps_complete_hash_rows_and_cancel_never_mutate
             panel.pending.is_none() && panel.operation_id.is_none() && panel.sync_journal.is_none()
         );
     });
+}
+
+fn layout_contains(inner: Bounds<gpui_kit::Pixels>, outer: Bounds<gpui_kit::Pixels>) -> bool {
+    inner.origin.x >= outer.origin.x
+        && inner.right() <= outer.right()
+        && inner.origin.y >= outer.origin.y
+        && inner.bottom() <= outer.bottom()
+}
+
+fn scroll_tools_to_end(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App) {
+    let tools = window.find("file-tools-scroll").bounds();
+    // The outer gutter avoids delivering this wheel to the editor or a nested
+    // complete-version viewport. No test mutates the production scroll offset.
+    let position = point(
+        tools.origin.x + px(2.),
+        tools.origin.y + tools.size.height / 2.,
+    );
+    window.dispatch_event(
+        gpui_kit::MouseMoveEvent {
+            position,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        cx,
+    );
+    window.dispatch_event(
+        gpui_kit::ScrollEvent {
+            position,
+            delta: ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
+            ..Default::default()
+        }
+        .to_platform_input(),
+        cx,
+    );
+    window.render_frame(cx);
+}
+
+fn scroll_visible_merge_text_to_end(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App) {
+    let text = window.find("text-merge-complete-version").bounds();
+    let tools = window.find("file-tools-scroll").bounds();
+    let top = text.origin.y.max(tools.origin.y);
+    let bottom = text.bottom().min(tools.bottom());
+    assert!(
+        bottom > top,
+        "wheel targets the actually visible part of the text viewport"
+    );
+    let position = point(
+        text.origin.x + text.size.width / 2.,
+        top + (bottom - top) / 2.,
+    );
+    for event in [
+        gpui_kit::MouseMoveEvent {
+            position,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        gpui_kit::ScrollEvent {
+            position,
+            delta: ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
+            ..Default::default()
+        }
+        .to_platform_input(),
+    ] {
+        window.dispatch_event(event, cx);
+    }
+    window.render_frame(cx);
+}
+
+fn fixed_merge_actions(window: &mut gpui_kit::Window) -> Bounds<gpui_kit::Pixels> {
+    let pane = window.find("files-layout-scene").bounds();
+    let body = window.find("file-tools-scroll").bounds();
+    let footer = window.find("text-merge-apply-controls").bounds();
+    assert!(layout_contains(body, pane) && layout_contains(footer, pane));
+    assert!(
+        body.bottom() <= footer.origin.y,
+        "review body cannot cover its actions"
+    );
+    for id in ["adopt-text-merge", "close-text-merge"] {
+        let action = window.find(id);
+        assert!(action.visible() && layout_contains(action.bounds(), footer));
+        assert!(
+            action.bounds().size.height >= px(20.),
+            "{id} must be a complete hit target"
+        );
+    }
+    footer
+}
+
+#[gpui_kit::test]
+async fn inline_editor_scroll_extent_includes_wrapped_actions_and_diff(cx: &mut TestAppContext) {
+    for (width, height) in [(900., 580.), (1440., 900.)] {
+        let h = Harness::new_with(cx, |cx, session, runtime| {
+            mount_layout_scene(cx, session, runtime, width, height, true)
+        });
+        h.idle(cx).await;
+        open_file(
+            &h,
+            "/布局-完整编辑器.txt",
+            b"\xef\xbb\xbfalpha\r\nbeta\r\n",
+            cx,
+        )
+        .await;
+        for family in crate::design::registry() {
+            for appearance in [Theme::Light, Theme::Dark] {
+                for language in [Language::En, Language::ZhCn] {
+                    cx.update_window(h.window, |_, window, cx| {
+                        crate::i18n::set_language(language, cx);
+                        apply_editor_view_theme(family, appearance, window, cx);
+                    })
+                    .checked("select layout family, appearance and language");
+                    for with_diff in [false, true] {
+                        if with_diff {
+                            h.click(cx, "toggle-remote-diff");
+                        }
+                        cx.update_window(h.window, |_, window, cx| {
+                            window.render_frame(cx);
+                            let editor = window.find("remote-file-editor").bounds();
+                            let actions = window.find("remote-file-editor-actions").bounds();
+                            assert!(layout_contains(actions, editor),
+                                "wrapped footer must contribute to the editor's scroll extent: {actions:?} in {editor:?}");
+                            scroll_tools_to_end(window, cx);
+                            for id in ["read-remote-merge", "save-remote-file"] {
+                                reveal_file_control(window, cx, id);
+                                let target = window.find(id);
+                                assert!(target.visible());
+                                assert!(layout_contains(target.bounds(), window.find("file-tools-scroll").bounds()));
+                                assert!(layout_contains(target.bounds(), window.find("files-layout-scene").bounds()));
+                            }
+                        })
+                        .checked("actual footer bounds and platform wheel reachability");
+                        if with_diff {
+                            h.click(cx, "toggle-remote-diff");
+                        }
+                    }
+                }
+            }
+        }
+        assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+        assert_eq!(
+            h.read("/布局-完整编辑器.txt"),
+            b"\xef\xbb\xbfalpha\r\nbeta\r\n"
+        );
+    }
+}
+
+#[gpui_kit::test]
+async fn expanded_merge_versions_and_review_actions_fit_minimum_file_pane(cx: &mut TestAppContext) {
+    for (width, height) in [(900., 580.), (1440., 900.)] {
+        let h = Harness::new_with(cx, |cx, session, runtime| {
+            mount_layout_scene(cx, session, runtime, width, height, true)
+        });
+        h.idle(cx).await;
+        for language in [Language::En, Language::ZhCn] {
+            let path = format!("/{}-合并.txt", "完整路径".repeat(24));
+            let tail = (0..40)
+                .map(|n| format!("未更改行 {n}\r\n"))
+                .collect::<String>();
+            let base = format!("a\r\nb\r\n{tail}");
+            let draft = format!("\u{feff}A\r\nb\r\n{tail}");
+            let remote = format!("a\r\nB\r\n{tail}");
+            let result = format!("\u{feff}A\r\nB\r\n{tail}");
+            open_file(&h, &path, base.as_bytes(), cx).await;
+            cx.update_window(h.window, |_, window, cx| {
+                crate::i18n::set_language(language, cx);
+                h.panel
+                    .read(cx)
+                    .editor
+                    .clone()
+                    .update(cx, |input, cx| input.set_value(draft.clone(), window, cx));
+            })
+            .checked("prepare exact CRLF and leading FEFF draft");
+            h.server
+                .filesystem
+                .replace_external_file(&path, remote.as_bytes())
+                .checked("independent remote edit in the controlled test peer");
+            h.click(cx, "focus-file-draft");
+            cx.update_window(h.window, |_, window, cx| {
+                window.render_frame(cx);
+                let pane = window.find("files-layout-scene").bounds();
+                let read = window.find("read-remote-merge");
+                assert!(read.visible() && layout_contains(read.bounds(), pane));
+                assert!(
+                    window.find("file-editor-control").bounds().size.height >= px(72.),
+                    "the actual editor control container must retain a usable minimum height"
+                );
+                window.click("read-remote-merge", cx);
+            })
+            .checked("expanded editor's fully visible merge entry");
+            h.idle(cx).await;
+            for (id, text) in [
+                ("merge-show-base", &base),
+                ("merge-show-draft", &draft),
+                ("merge-show-remote", &remote),
+                ("merge-show-result", &result),
+            ] {
+                h.click(cx, id);
+                cx.update_window(h.window, |_, window, cx| {
+                    window.render_frame(cx);
+                    assert!(window.find("file-merge-expanded").visible());
+                    let footer = fixed_merge_actions(window);
+                    for (index, line) in text.split('\n').enumerate() {
+                        assert_eq!(
+                            window
+                                .find(("text-merge-complete-version", index + 1))
+                                .label(),
+                            Some(line),
+                            "complete version rows retain every byte of display text"
+                        );
+                    }
+                    scroll_visible_merge_text_to_end(window, cx);
+                    scroll_tools_to_end(window, cx);
+                    let last_index = text
+                        .split('\n')
+                        .enumerate()
+                        .filter(|(_, line)| !line.is_empty())
+                        .map(|(index, _)| index + 1)
+                        .last()
+                        .checked_option("last complete nonempty version row");
+                    let last = window.find(("text-merge-complete-version", last_index));
+                    assert!(
+                        last.visible()
+                            && layout_contains(
+                                last.bounds(),
+                                window.find("file-tools-scroll").bounds()
+                            ),
+                        "last complete version row must be reachable"
+                    );
+                    assert_eq!(
+                        fixed_merge_actions(window),
+                        footer,
+                        "scrolling a complete version cannot displace adopt/close"
+                    );
+                })
+                .checked("all real version rows, final row and fixed merge actions");
+            }
+            let writes = h.server.filesystem.atomic_writes_started();
+            h.click(cx, "adopt-text-merge");
+            assert_eq!(h.server.filesystem.atomic_writes_started(), writes);
+            assert_eq!(
+                h.read(&path),
+                remote.as_bytes(),
+                "adoption only changes the draft"
+            );
+            cx.update_window(h.window, |_, window, cx| {
+                window.render_frame(cx);
+                assert!(window.find("file-editor-expanded").visible());
+                assert!(
+                    h.panel
+                        .read(cx)
+                        .editor
+                        .read(cx)
+                        .focus_handle(cx)
+                        .is_focused(window)
+                );
+                window.click("save-remote-file", cx);
+                window.click("expand-file-review", cx);
+                let pane = window.find("files-layout-scene").bounds();
+                for id in ["confirm-file-operation", "cancel-file-operation"] {
+                    let action = window.find(id);
+                    assert!(action.visible() && layout_contains(action.bounds(), pane));
+                }
+                window.press("end", cx);
+            })
+            .checked("adoption returns to the visible draft, then complete save review");
+            assert_eq!(
+                review_bytes(&h, cx),
+                (
+                    path.clone(),
+                    remote.as_bytes().to_vec(),
+                    result.as_bytes().to_vec()
+                )
+            );
+            h.click(cx, "cancel-file-operation");
+            assert_eq!(h.server.filesystem.atomic_writes_started(), writes);
+            assert_eq!(h.read(&path), remote.as_bytes());
+            h.click(cx, "save-remote-file");
+            h.click(cx, "expand-file-review");
+            h.click(cx, "confirm-file-operation");
+            h.idle(cx).await;
+            assert_eq!(
+                h.read(&path),
+                result.as_bytes(),
+                "only explicit confirmation writes the full result"
+            );
+        }
+    }
+}
+
+#[gpui_kit::test]
+async fn expanded_merge_focus_keeps_hidden_editor_and_manual_inputs_isolated(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new_with(cx, |cx, session, runtime| {
+        mount_layout_scene(cx, session, runtime, 900., 580., true)
+    });
+    h.idle(cx).await;
+    open_file(&h, "/focus-merge.txt", b"base\n", cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel
+            .read(cx)
+            .editor
+            .clone()
+            .update(cx, |input, cx| input.set_value("local\n", window, cx));
+    })
+    .checked("prepare conflicting draft");
+    h.server
+        .filesystem
+        .replace_external_file("/focus-merge.txt", b"remote\n")
+        .checked("controlled conflict");
+    h.click(cx, "read-remote-merge");
+    h.idle(cx).await;
+    let manual = h.panel.read_with(cx, |panel, _| {
+        panel
+            .merge_review
+            .as_ref()
+            .checked_option("real conflict")
+            .manual
+            .clone()
+    });
+    cx.update_window(h.window, |_, window, cx| {
+        reveal_file_control(window, cx, "merge-manual-draft");
+        manual.update(cx, |input, cx| input.focus(window, cx));
+    })
+    .checked("focus inline manual draft before expanding");
+    h.click(cx, "expand-text-merge");
+    let original = manual.read_with(cx, |input, _| input.value().to_string());
+    let directory = h
+        .panel
+        .read_with(cx, |panel, cx| panel.path.read(cx).value().to_string());
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        fixed_merge_actions(window);
+        assert!(h.panel.read(cx).review_focus.is_focused(window));
+        assert!(!manual.read(cx).focus_handle(cx).is_focused(window));
+        assert!(
+            !h.panel
+                .read(cx)
+                .editor
+                .read(cx)
+                .focus_handle(cx)
+                .is_focused(window)
+        );
+    })
+    .checked("expansion explicitly retires the previous input focus");
+    cx.simulate_input(h.window, "unfocused-input");
+    assert_eq!(
+        manual.read_with(cx, |input, _| input.value().to_string()),
+        original
+    );
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), "local\n");
+        assert_eq!(panel.path.read(cx).value().as_str(), directory);
+    });
+    h.click(cx, "close-text-merge");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("file-editor-expanded").visible());
+        assert!(
+            h.panel
+                .read(cx)
+                .editor
+                .read(cx)
+                .focus_handle(cx)
+                .is_focused(window)
+        );
+    })
+    .checked("close keeps the draft and restores its visible focus");
+    assert_eq!(h.read("/focus-merge.txt"), b"remote\n");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+    h.click(cx, "read-remote-merge");
+    h.idle(cx).await;
+    let manual = h.panel.read_with(cx, |panel, _| {
+        panel
+            .merge_review
+            .as_ref()
+            .checked_option("fresh conflict from the expanded editor")
+            .manual
+            .clone()
+    });
+    cx.update_window(h.window, |_, window, cx| {
+        reveal_file_control(window, cx, "merge-manual-draft");
+        manual.update(cx, |input, cx| input.focus(window, cx));
+        window.press(
+            if cfg!(target_os = "macos") {
+                "cmd-a"
+            } else {
+                "ctrl-a"
+            },
+            cx,
+        );
+    })
+    .checked("explicitly focus the visible manual replacement");
+    cx.simulate_input(h.window, "resolved\n");
+    h.click(cx, "merge-use-manual");
+    h.click(cx, "adopt-text-merge");
+    let chosen = manual.read_with(cx, |input, _| input.value().to_string());
+    cx.simulate_input(h.window, "visible-draft-input");
+    assert_eq!(
+        manual.read_with(cx, |input, _| input.value().to_string()),
+        chosen,
+        "the removed manual field cannot consume draft input"
+    );
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(
+            panel
+                .editor
+                .read(cx)
+                .value()
+                .contains("visible-draft-input")
+        );
+        assert_eq!(panel.path.read(cx).value().as_str(), directory);
+        assert!(panel.pending.is_none() && panel.merge_review.is_none());
+    });
+    assert_eq!(h.read("/focus-merge.txt"), b"remote\n");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}
+
+#[gpui_kit::test]
+async fn expanded_merge_keyboard_scroll_reaches_body_end_behind_fixed_actions(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new_with(cx, |cx, session, runtime| {
+        mount_layout_scene(cx, session, runtime, 900., 580., true)
+    });
+    h.idle(cx).await;
+    open_file(&h, "/keyboard-merge.txt", b"base\n", cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel
+            .read(cx)
+            .editor
+            .clone()
+            .update(cx, |input, cx| input.set_value("draft\n", window, cx));
+    })
+    .checked("prepare the bounded merge draft");
+    h.server
+        .filesystem
+        .replace_external_file("/keyboard-merge.txt", b"remote\n")
+        .checked("prepare the controlled remote conflict");
+    h.click(cx, "read-remote-merge");
+    h.idle(cx).await;
+    h.click(cx, "expand-text-merge");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        let body = window.find("file-tools-scroll").bounds();
+        let footer = fixed_merge_actions(window);
+        assert!(footer.origin.y >= body.bottom());
+        assert!(h.panel.read(cx).review_focus.is_focused(window));
+        assert_eq!(
+            h.panel.read(cx).tools_scroll.offset(),
+            point(px(0.), px(0.)),
+            "expanded merge starts at the complete review root"
+        );
+
+        window.press("end", cx);
+        window.render_frame(cx);
+        let maximum = h.panel.read(cx).tools_scroll.max_offset();
+        let offset = h.panel.read(cx).tools_scroll.offset();
+        assert!(
+            maximum.y > px(0.),
+            "fixture must have an outer merge scroll range"
+        );
+        assert_eq!(
+            offset.y, -maximum.y,
+            "End reaches the bounded outer merge tail"
+        );
+        let tail = window.find("merge-use-manual");
+        assert!(
+            tail.visible()
+                && layout_contains(tail.bounds(), body)
+                && tail.bounds().bottom() <= body.bottom(),
+            "the final body action is visible after keyboard End"
+        );
+        let manual = window.find("merge-manual-draft");
+        assert!(
+            manual.visible() && layout_contains(manual.bounds(), body),
+            "the manual conflict editor is fully visible after keyboard End"
+        );
+        let manual_input = window.find("merge-manual-input");
+        assert!(
+            manual_input.visible() && layout_contains(manual_input.bounds(), body),
+            "the manual textarea container is fully visible after keyboard End"
+        );
+        let footer_after = fixed_merge_actions(window);
+        assert_eq!(
+            footer_after, footer,
+            "outer merge scrolling leaves Adopt and Close outside the body"
+        );
+
+        window.press("home", cx);
+        assert_eq!(
+            h.panel.read(cx).tools_scroll.offset().y,
+            px(0.),
+            "Home returns to the complete review root"
+        );
+        window.press("pagedown", cx);
+        assert!(h.panel.read(cx).tools_scroll.offset().y < px(0.));
+        window.press("pageup", cx);
+        assert_eq!(
+            h.panel.read(cx).tools_scroll.offset().y,
+            px(0.),
+            "PageUp follows the same bounded review semantics"
+        );
+    })
+    .checked("keyboard keys scroll the focused outer merge body only");
+    assert_eq!(h.read("/keyboard-merge.txt"), b"remote\n");
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
 }

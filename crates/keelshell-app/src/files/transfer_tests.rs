@@ -255,20 +255,23 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
     }
     // The explicit review/editor replaces this pane instead of adding another
     // offscreen tools card. Its fixed controls need no old tools scroll owner.
-    if ["file-editor-expanded", "file-review-expanded"]
-        .iter()
-        .any(|surface| {
-            window.try_find(*surface).is_some_and(|pane| {
-                window
-                    .try_find(gpui_kit::SharedString::from(id.to_owned()))
-                    .is_some_and(|control| {
-                        control.visible()
-                            && control.bounds().origin.y >= pane.bounds().origin.y
-                            && control.bounds().bottom() <= pane.bounds().bottom()
-                    })
-            })
+    if [
+        "file-editor-expanded",
+        "file-review-expanded",
+        "file-merge-expanded",
+    ]
+    .iter()
+    .any(|surface| {
+        window.try_find(*surface).is_some_and(|pane| {
+            window
+                .try_find(gpui_kit::SharedString::from(id.to_owned()))
+                .is_some_and(|control| {
+                    control.visible()
+                        && control.bounds().origin.y >= pane.bounds().origin.y
+                        && control.bounds().bottom() <= pane.bounds().bottom()
+                })
         })
-    {
+    }) {
         return;
     }
     // Foreground inspection has a fixed footer cancel; a transfer's individual

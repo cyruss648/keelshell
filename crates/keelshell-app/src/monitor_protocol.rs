@@ -52,6 +52,7 @@ pub(super) struct ProtocolPanel {
     status: Message,
     token: uuid::Uuid,
     cancel: Option<Arc<AtomicBool>>,
+    cleanup_unknown: bool,
     _job: Option<Task<()>>,
     _input_observers: Vec<Subscription>,
 }
@@ -115,6 +116,7 @@ impl ProtocolPanel {
             status: Message::empty(),
             token: uuid::Uuid::new_v4(),
             cancel: None,
+            cleanup_unknown: false,
             _job: None,
             _input_observers: input_observers,
         }
@@ -318,12 +320,16 @@ impl ProtocolPanel {
         self.token = token;
         self.result = None;
         let (sender, receiver) = mpsc::sync_channel(1);
-        let started =
-            spawn_transport_worker("keelshell-protocol-diagnostic", cancel.clone(), move || {
+        let started = crate::terminal::spawn_owned_transport_worker(
+            cx.entity_id(),
+            "keelshell-protocol-diagnostic",
+            cancel.clone(),
+            move || {
                 let result = runtime.block_on(session.diagnose_remote(request, &worker_cancel));
                 let _ = sender.try_send(result);
                 Ok(())
-            });
+            },
+        );
         if started.is_err() {
             self.status = Message::new("无法启动诊断任务。", "Unable to start diagnostic worker.");
             cx.notify();
@@ -352,6 +358,7 @@ impl ProtocolPanel {
                 // Retire this diagnostic authority even for a stale token: a
                 // discarded result must not re-admit another uncertain process.
                 if utility_operation && result.is_err() {
+                    panel.cleanup_unknown = true;
                     panel.session = None;
                     panel.review = None;
                     panel.review_draft = None;
@@ -366,6 +373,7 @@ impl ProtocolPanel {
                 }
                 if panel.token != token
                     && result.as_ref().is_ok_and(|report| report.status == NetworkDiagnosticStatus::CleanupUnknown) {
+                    panel.cleanup_unknown = true;
                     panel.session = None;
                     panel.review = None;
                     panel.review_draft = None;
@@ -390,6 +398,7 @@ impl ProtocolPanel {
                     Ok(report) => {
                         let message = outcome_message(report.status);
                         if report.status == NetworkDiagnosticStatus::CleanupUnknown {
+                            panel.cleanup_unknown = true;
                             panel.session = None;
                             panel.review = None;
                             panel.review_draft = None;
@@ -419,6 +428,18 @@ impl ProtocolPanel {
 }
 
 impl MonitorPanel {
+    pub(crate) fn window_worker_owners(&self, _cx: &App) -> [EntityId; 1] {
+        [self.protocol.entity_id()]
+    }
+
+    pub(crate) fn window_close_busy(&self, cx: &App) -> bool {
+        let protocol = self.protocol.read(cx);
+        self.pending.is_some()
+            || (self.busy && !self.refresh_in_flight)
+            || protocol.cancel.is_some()
+            || protocol.cleanup_unknown
+    }
+
     /// Match the child's captured connection, rather than comparing the current
     /// workspace map entry to itself during retirement polling.
     pub(crate) fn protocol_connection_matches(&self, session: &SshSession, cx: &App) -> bool {

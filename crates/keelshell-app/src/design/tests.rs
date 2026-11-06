@@ -27,6 +27,10 @@ fn alpha_blend(foreground: u32, background: u32, alpha: f64) -> u32 {
     (channel(16) << 16) | (channel(8) << 8) | channel(0)
 }
 
+fn alpha(color: u32) -> u8 {
+    (color & 0xff) as u8
+}
+
 #[test]
 fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
     for theme in registry() {
@@ -98,6 +102,24 @@ fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
                 p.resource,
                 p.border,
                 contrast(p.resource, p.border)
+            );
+            assert!(
+                alpha(p.scrim) > 0 && alpha(p.scrim) < u8::MAX,
+                "{}/{mode:?} scrim must be translucent: {:#010x}",
+                theme.id,
+                p.scrim
+            );
+            assert!(
+                alpha(p.overlay) > alpha(p.scrim) && alpha(p.overlay) < u8::MAX,
+                "{}/{mode:?} overlay must be stronger than scrim: {:#010x} vs {:#010x}",
+                theme.id,
+                p.scrim,
+                p.overlay
+            );
+            assert_ne!(
+                p.scrim, p.overlay,
+                "{}/{mode:?} scrim and overlay need separate semantic tokens",
+                theme.id
             );
             assert_ne!(
                 p.surface_hover, p.surface_active,

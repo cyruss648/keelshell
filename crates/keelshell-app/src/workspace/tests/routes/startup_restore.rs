@@ -103,12 +103,15 @@ fn reopen_from_disk(fixture: &mut Fixture, snapshot: &WorkspaceLayout, cx: &mut 
                 ..Default::default()
             },
             cx,
-            |window, cx| cx.new(|cx| Workspace::new(store, loaded, None, runtime, window, cx)),
+            |window, cx| {
+                cx.new(|cx| Workspace::new(store, loaded.clone(), None, runtime, window, cx))
+            },
         )
         .checked("mount fresh production Workspace from the saved file")
     });
     fixture.window = window;
     fixture.workspace = workspace;
+    adopt_fixture_state(fixture, loaded.clone(), cx);
     cx.update_window(window, |_, window, cx| {
         window.activate_window();
         window.render_frame(cx);
@@ -116,6 +119,12 @@ fn reopen_from_disk(fixture: &mut Fixture, snapshot: &WorkspaceLayout, cx: &mut 
         window.render_frame(cx);
     })
     .checked("display the fresh Workspace as the real GPUI root");
+    fixture.workspace.read_with(cx, |view, _| {
+        assert!(
+            view.configuration_token_current(),
+            "restored fixture must adopt the loaded configuration token"
+        );
+    });
     assert_eq!(
         std::fs::read(fixture.store.path()).checked("read metadata after Workspace construction"),
         before
@@ -192,6 +201,13 @@ fn click_connect(fixture: &Fixture, id: EntityId, cx: &mut TestAppContext) {
         window.click(("connect-restored-tab", id), cx);
     })
     .checked("explicitly connect the displayed restored placeholder");
+    fixture.workspace.read_with(cx, |view, cx| {
+        assert!(
+            view.connect_route.is_some(),
+            "restored connect must create a route: {}",
+            view.status.render(cx)
+        );
+    });
 }
 
 async fn authenticate_pinned(fixture: &Fixture, route: &RouteFixture, cx: &mut TestAppContext) {
@@ -514,34 +530,38 @@ async fn restored_connect_resolves_the_profile_saved_after_startup_at_action_tim
     let mut current = route_fixture(&runtime, false);
     current.target.id = previous_route.target.id;
     current.target.name = "changed current route".into();
-    cx.update_window(fixture.window, |_, _, cx| {
-        fixture.workspace.update(cx, |view, cx| {
-            let mut state = view.state.clone();
-            state.connections.push(current.gateway.clone());
-            state
-                .update_connection(current.target.clone())
-                .checked("change saved target route");
-            let resolved = state
-                .connection_route(current.target.id)
-                .checked("resolve current route");
-            for (index, pin) in current.pins.iter().enumerate() {
-                state
-                    .trust_host_key_for_scope(
-                        &resolved
-                            .host_key_scope(index)
-                            .checked_option("current scope"),
-                        pin,
-                    )
-                    .checked("pin the current fixture route");
-            }
-            view.state = fixture
-                .store
-                .save(&state)
-                .checked("persist current profile before Connect");
-            cx.notify();
-        });
-    })
-    .checked("change the profile without replacing the restored placeholder");
+    let mut state = fixture
+        .workspace
+        .read_with(cx, |view, _| view.state.clone());
+    state.connections.push(current.gateway.clone());
+    state
+        .update_connection(current.target.clone())
+        .checked("change saved target route");
+    let resolved = state
+        .connection_route(current.target.id)
+        .checked("resolve current route");
+    for (index, pin) in current.pins.iter().enumerate() {
+        state
+            .trust_host_key_for_scope(
+                &resolved
+                    .host_key_scope(index)
+                    .checked_option("current scope"),
+                pin,
+            )
+            .checked("pin the current fixture route");
+    }
+    save_and_adopt_fixture_state(
+        &fixture,
+        state,
+        "persist current profile before Connect",
+        cx,
+    );
+    fixture.workspace.read_with(cx, |view, _| {
+        assert!(
+            view.configuration_token_current(),
+            "profile fixture write must update the shared configuration token"
+        );
+    });
     assert_eq!(
         fixture
             .store
@@ -601,29 +621,29 @@ async fn reject_changed_profile_during_authentication(trash: bool, cx: &mut Test
         route.target_state.authenticated.load(Ordering::Acquire) == 1
     })
     .await;
-    cx.update_window(fixture.window, |_, _, cx| {
-        fixture.workspace.update(cx, |view, cx| {
-            assert!(view.connecting);
-            let mut state = view.state.clone();
-            if trash {
-                state
-                    .soft_delete_connection(route.target.id, 1)
-                    .checked("trash authenticating profile");
-            } else {
-                let mut gateway = route.gateway.clone();
-                gateway.username = "changed-during-authentication".into();
-                state
-                    .update_connection(gateway)
-                    .checked("change authenticating route");
-            }
-            view.state = fixture
-                .store
-                .save(&state)
-                .checked("save changed profile while reply is gated");
-            cx.notify();
-        });
-    })
-    .checked("invalidate the route while the real server holds its authentication reply");
+    fixture.workspace.read_with(cx, |view, _| {
+        assert!(view.connecting);
+    });
+    let mut state = fixture
+        .workspace
+        .read_with(cx, |view, _| view.state.clone());
+    if trash {
+        state
+            .soft_delete_connection(route.target.id, 1)
+            .checked("trash authenticating profile");
+    } else {
+        let mut gateway = route.gateway.clone();
+        gateway.username = "changed-during-authentication".into();
+        state
+            .update_connection(gateway)
+            .checked("change authenticating route");
+    }
+    save_and_adopt_fixture_state(
+        &fixture,
+        state,
+        "save changed profile while reply is gated",
+        cx,
+    );
     route
         .target_state
         .gate

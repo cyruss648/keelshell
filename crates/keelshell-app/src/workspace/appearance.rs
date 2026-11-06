@@ -3,7 +3,37 @@
 use super::*;
 use crate::design::{self, ThemeDefinition};
 use gpui_kit::base::Selectable;
+use keelshell_core::Theme;
 use modal_scope::ModalKind;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct ThemeCardState {
+    current_family: bool,
+    recommended_preset_applied: bool,
+}
+
+impl ThemeCardState {
+    fn for_theme(
+        current_family_id: &str,
+        current_appearance: Theme,
+        theme: &ThemeDefinition,
+    ) -> Self {
+        let current_family = current_family_id == theme.id;
+        Self {
+            current_family,
+            recommended_preset_applied: current_family
+                && current_appearance == theme.preferred_appearance,
+        }
+    }
+}
+
+fn appearance_label(cx: &App, appearance: Theme) -> &'static str {
+    match appearance {
+        Theme::System => t(cx, "跟随系统", "System"),
+        Theme::Light => t(cx, "浅色", "Light"),
+        Theme::Dark => t(cx, "深色", "Dark"),
+    }
+}
 
 impl Workspace {
     pub(super) fn open_appearance(&mut self, window: &mut Window, cx: &mut Context<Self>) {
@@ -196,8 +226,35 @@ impl Workspace {
             theme.preferred_appearance,
             WindowAppearance::Light,
         ));
-        let active = self.state.settings.theme_family.as_str() == theme.id;
+        let state = ThemeCardState::for_theme(
+            self.state.settings.theme_family.as_str(),
+            self.state.settings.theme,
+            theme,
+        );
         let visual = design::palette(cx);
+        let recommended = appearance_label(cx, theme.preferred_appearance);
+        let current = appearance_label(cx, self.state.settings.theme);
+        let action_label = if state.recommended_preset_applied {
+            format!("{} · {recommended}", t(cx, "已应用", "Applied"))
+        } else if state.current_family {
+            format!("{} · {recommended}", t(cx, "应用推荐", "Use recommended"))
+        } else {
+            format!("{} · {recommended}", t(cx, "应用", "Apply"))
+        };
+        let accessibility_label = if state.current_family {
+            format!(
+                "{} · {}：{current} · {}：{recommended} · {action_label}",
+                t(cx, theme.name_zh, theme.name_en),
+                t(cx, "当前明暗", "Current appearance"),
+                t(cx, "推荐外观", "Recommended appearance"),
+            )
+        } else {
+            format!(
+                "{} · {}：{recommended} · {action_label}",
+                t(cx, theme.name_zh, theme.name_en),
+                t(cx, "推荐外观", "Recommended appearance"),
+            )
+        };
         div()
             .flex_1()
             .min_w(px(220.))
@@ -212,7 +269,11 @@ impl Workspace {
                     .overflow_hidden()
                     .rounded(px(theme.components.panel_radius))
                     .border_2()
-                    .border_color(rgb(if active { visual.accent } else { visual.border }))
+                    .border_color(rgb(if state.current_family {
+                        visual.accent
+                    } else {
+                        visual.border
+                    }))
                     .bg(rgb(p.canvas))
                     .child(
                         div()
@@ -257,39 +318,88 @@ impl Workspace {
                             ),
                     ),
             )
-            .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
-                cx,
-                theme.name_zh,
-                theme.name_en,
-            )))
             .child(
                 div()
-                    .h(px(36.))
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
+                        cx,
+                        theme.name_zh,
+                        theme.name_en,
+                    )))
+                    .when(state.current_family, |row| {
+                        row.child(
+                            div()
+                                .px_2()
+                                .py_1()
+                                .rounded(px(theme.components.control_radius))
+                                .bg(rgb(visual.selected))
+                                .text_color(rgb(visual.accent))
+                                .text_xs()
+                                .child(t(cx, "当前族", "Current family")),
+                        )
+                    }),
+            )
+            .child(
+                div()
+                    .min_h(px(36.))
+                    .flex()
+                    .flex_col()
+                    .gap_1()
                     .text_xs()
                     .text_color(rgb(visual.muted))
-                    .child(t(cx, theme.description_zh, theme.description_en)),
+                    .child(t(cx, theme.description_zh, theme.description_en))
+                    .child(format!(
+                        "{}：{recommended}",
+                        t(cx, "推荐外观", "Recommended appearance")
+                    ))
+                    .when(state.current_family, |body| {
+                        body.child(format!(
+                            "{}：{current}",
+                            t(cx, "当前明暗", "Current appearance")
+                        ))
+                    }),
             )
             .child(
                 Button::new(SharedString::from(format!("theme-family-{}", theme.id)))
                     .w_full()
-                    .label(
-                        if theme.preferred_appearance == keelshell_core::Theme::Dark {
-                            t(cx, "应用 · 深色", "Apply · Dark")
-                        } else {
-                            t(cx, "应用 · 浅色", "Apply · Light")
-                        },
-                    )
-                    .accessibility_label(format!(
-                        "{} · {}",
-                        t(cx, theme.name_zh, theme.name_en),
-                        t(cx, "应用推荐外观", "Apply recommended appearance"),
-                    ))
-                    .selected(active)
+                    .label(action_label)
+                    .accessibility_label(accessibility_label)
+                    .selected(state.recommended_preset_applied)
                     .disabled(self.saving || self.state_reloading)
                     .on_click(cx.listener(move |view, _, window, cx| {
                         view.select_theme_family(theme, window, cx)
                     })),
             )
             .into_any_element()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ThemeCardState;
+    use crate::design::registry;
+    use keelshell_core::Theme;
+
+    #[test]
+    fn theme_card_state_separates_family_from_recommended_preset() {
+        let graphite = registry()
+            .iter()
+            .find(|theme| theme.id == "graphite")
+            .unwrap_or_else(|| panic!("graphite is a registered theme"));
+
+        let family_with_custom_appearance =
+            ThemeCardState::for_theme(graphite.id, Theme::Light, graphite);
+        assert!(family_with_custom_appearance.current_family);
+        assert!(!family_with_custom_appearance.recommended_preset_applied);
+
+        let applied_preset = ThemeCardState::for_theme(graphite.id, Theme::Dark, graphite);
+        assert!(applied_preset.current_family);
+        assert!(applied_preset.recommended_preset_applied);
+
+        let different_family = ThemeCardState::for_theme("frost", Theme::Dark, graphite);
+        assert!(!different_family.current_family);
+        assert!(!different_family.recommended_preset_applied);
     }
 }

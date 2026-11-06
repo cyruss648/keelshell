@@ -11,7 +11,8 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        if self.saving
+        if !self.configuration_current(cx)
+            || self.saving
             || self.state_reloading
             || self.configuration_recovery.is_some()
             || self.vault_settings.is_some()
@@ -35,7 +36,14 @@ impl Workspace {
         let Some(seconds) = self.pending_update_check else {
             return;
         };
-        if self.saving
+        if !self.configuration_current(cx)
+            || !self
+                .app_windows
+                .read(cx)
+                .gate
+                .lock()
+                .is_ok_and(|gate| gate.available())
+            || self.saving
             || self.state_reloading
             || self.configuration_recovery.is_some()
             || self.vault_settings.is_some()

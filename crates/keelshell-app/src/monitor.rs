@@ -46,10 +46,7 @@ enum Job {
     Inspect(ProcessInfo),
     Terminate(ProcessIdentity),
 }
-use crate::{
-    i18n::{Message, t},
-    terminal::spawn_transport_worker,
-};
+use crate::i18n::{Message, t};
 
 const PROCESS_PAGE_SIZE: usize = 5;
 const MAX_RESULT_AGE: Duration = Duration::from_secs(10);
@@ -562,17 +559,22 @@ impl MonitorPanel {
         let cancel = Arc::new(AtomicBool::new(false));
         let worker_cancel = cancel.clone();
         let (outgoing, incoming) = mpsc::sync_channel(1);
-        let started = spawn_transport_worker("keelshell-monitor", cancel.clone(), move || {
-            let outcome = runtime.block_on(execute_job(monitor, job, &worker_cancel));
-            // Registry owns and joins the worker even after this view disappears.
-            // In-flight writes run to a bounded outcome, never detached/retried.
-            let failure = match &outcome {
-                Outcome::Terminated(Err(error)) => Some(error.to_string()),
-                _ => None,
-            };
-            let _ = outgoing.try_send((outcome, Instant::now()));
-            failure.map_or(Ok(()), Err)
-        });
+        let started = crate::terminal::spawn_owned_transport_worker(
+            cx.entity_id(),
+            "keelshell-monitor",
+            cancel.clone(),
+            move || {
+                let outcome = runtime.block_on(execute_job(monitor, job, &worker_cancel));
+                // Registry owns and joins the worker even after this view disappears.
+                // In-flight writes run to a bounded outcome, never detached/retried.
+                let failure = match &outcome {
+                    Outcome::Terminated(Err(error)) => Some(error.to_string()),
+                    _ => None,
+                };
+                let _ = outgoing.try_send((outcome, Instant::now()));
+                failure.map_or(Ok(()), Err)
+            },
+        );
         if let Err(error) = started {
             self.busy = false;
             self.refresh_in_flight = false;

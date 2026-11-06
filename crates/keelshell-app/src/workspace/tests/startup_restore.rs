@@ -16,7 +16,7 @@ fn pane(value: u128) -> PaneNodeId {
     PaneNodeId(id(value))
 }
 
-fn scene(active_empty: bool) -> AppState {
+pub(super) fn scene(active_empty: bool) -> AppState {
     let mut profile = Connection::new("Current saved profile", "restore.invalid", "reader");
     profile.id = id(1);
     profile.auth = AuthMethod::Password;

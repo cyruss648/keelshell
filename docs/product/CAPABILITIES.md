@@ -1,5 +1,30 @@
 # Capability ledger
 
+## 2026-11-07: independent workspace windows and editor reachability candidate
+
+The app now has a real native GPUI Kit path for opening an empty second workspace.
+Each window owns its sessions, terminal input, drafts, AI reviews, remote panels and
+transport workers. A process-local `AppWindows` registry shares only the committed
+configuration service, update service and a revision/epoch gate. Configuration writes
+are serialized through an explicit lease; sibling windows retain their live SSH and
+drafts but stale configuration reviews are invalidated until an explicit reload.
+Window close uses an exact review snapshot, revokes only that window's authority, and
+joins only its owned workers with a bounded deadline. Unknown cleanup retains the owner
+and blocks automatic retry. Eight running windows are admitted.
+
+The remote inline editor keeps its review actions in a fixed action area while the
+document, complete versions and merge details retain independent scroll regions.
+Manual merge input has a bounded minimum height so it remains reachable in the 900×580
+workspace. Targeted GPUI tests cover window isolation, shared writes, loopback SSH
+cleanup, worker ownership and editor viewport reachability.
+
+This is an implementation candidate with targeted source validation and a passing
+full engineering gate: 2,397 ordinary workspace tests / 23 ignored, 11 rustdoc
+checks, Python 131 run / 1 skipped, strict workspace Clippy and all three AI
+controllers passed. Independent review, native multi-window behavior and complete
+editor adoption/save acceptance remain open. See [ADR 0114](../adr/0114-independent-workspace-windows.md)
+and the [test record](../testing/records/2026-11-07-multiwindow-editor-layout.md).
+
 ## 2026-11-06: combined text format and reviewed traceroute candidate
 
 The reviewed editor r3 and traceroute r3 sources are now combined in the

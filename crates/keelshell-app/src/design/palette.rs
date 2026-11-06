@@ -10,6 +10,14 @@ pub struct Palette {
     pub chrome: u32,
     pub toolbar: u32,
     pub sidebar: u32,
+    /// RGBA backdrop for secondary surfaces such as the connection manager.
+    ///
+    /// Values use the `0xRRGGBBAA` format accepted by `gpui_kit::rgba`.
+    pub scrim: u32,
+    /// RGBA backdrop for modal review and editing surfaces.
+    ///
+    /// Values use the `0xRRGGBBAA` format accepted by `gpui_kit::rgba`.
+    pub overlay: u32,
     pub border: u32,
     pub field_border: u32,
     pub text: u32,
@@ -41,6 +49,8 @@ impl Palette {
         chrome: 0xf8fafc,
         toolbar: 0xfafcff,
         sidebar: 0xf4f6f9,
+        scrim: 0x17243a55,
+        overlay: 0x17243a66,
         border: 0xdce3ec,
         field_border: 0x7d8999,
         text: 0x1d2939,
@@ -71,6 +81,8 @@ impl Palette {
         chrome: 0x141e2c,
         toolbar: 0x182535,
         sidebar: 0x121c29,
+        scrim: 0x00000077,
+        overlay: 0x0b111b99,
         border: 0x34465b,
         field_border: 0x718299,
         text: 0xe5edf6,

@@ -8,6 +8,53 @@ use gpui_kit::{
 };
 use keelshell_core::Theme;
 
+fn assert_theme_cards_are_visible_by_wrapped_row(window: &mut gpui_kit::Window) {
+    let viewport = window.bounds();
+    let mut row_top = None;
+    let mut previous_right = viewport.origin.x;
+    let mut rows = 0;
+    for family in crate::design::registry() {
+        let button = window.find(format!("theme-family-{}", family.id));
+        let bounds = button.bounds();
+        assert!(button.visible(), "theme card hidden: {}", family.id);
+        assert!(bounds.size.width > px(0.) && bounds.size.height > px(0.));
+        assert!(
+            bounds.origin.y >= viewport.origin.y
+                && bounds.bottom() <= viewport.bottom()
+                && bounds.right() <= viewport.right(),
+            "theme card escapes the appearance viewport: {} {bounds:?}",
+            family.id
+        );
+
+        match row_top {
+            None => {
+                row_top = Some(bounds.origin.y);
+                previous_right = viewport.origin.x;
+                rows += 1;
+            }
+            Some(top) if bounds.origin.y > top + px(1.) => {
+                row_top = Some(bounds.origin.y);
+                previous_right = viewport.origin.x;
+                rows += 1;
+            }
+            Some(top) => {
+                assert!(
+                    bounds.origin.y <= top + px(1.),
+                    "theme card drifted outside its row: {} {bounds:?}",
+                    family.id
+                );
+            }
+        }
+        assert!(
+            bounds.origin.x >= previous_right,
+            "theme cards overlap within a wrapped row: {} {bounds:?}",
+            family.id
+        );
+        previous_right = bounds.right();
+    }
+    assert!(rows > 0);
+}
+
 #[gpui_kit::test]
 fn minimum_window_keeps_bilingual_appearance_and_workspace_actions_visible(
     cx: &mut TestAppContext,
@@ -252,8 +299,14 @@ async fn conflicting_theme_save_keeps_original_visuals_and_late_input(cx: &mut T
         assert_eq!(workspace.state.settings.theme, Theme::System);
         assert_eq!(palette(cx), Palette::LIGHT);
         assert_eq!(workspace.command.read(cx).value(), "late unsent draft");
-        assert_eq!(workspace.command_sources_revision, 0);
-        assert!(workspace.status.render(cx).contains("保存失败"));
+        assert_eq!(
+            workspace.command_sources_revision, 1,
+            "a conflict invalidates configuration-bound command sources"
+        );
+        assert!(
+            workspace.status.render(cx).contains("保存失败"),
+            "the explicit save failure must remain visible until an explicit reload"
+        );
     });
     assert_eq!(
         other
@@ -297,22 +350,7 @@ async fn all_theme_presets_persist_and_keep_live_session_and_draft_identity(
                 window.render_frame(cx);
                 window.click("theme-settings", cx);
                 window.render_frame(cx);
-                let mut previous_right = window.bounds().origin.x;
-                for family in crate::design::registry() {
-                    let button = window.find(format!("theme-family-{}", family.id));
-                    let bounds = button.bounds();
-                    assert!(button.visible());
-                    assert!(
-                        bounds.origin.x >= previous_right
-                            && bounds.right() <= window.bounds().right()
-                    );
-                    assert!(
-                        bounds.origin.y >= window.bounds().origin.y
-                            && bounds.bottom() <= window.bounds().bottom()
-                    );
-                    assert!(bounds.size.width > px(0.) && bounds.size.height > px(0.));
-                    previous_right = bounds.right();
-                }
+                assert_theme_cards_are_visible_by_wrapped_row(window);
                 for id in [
                     "theme-system",
                     "theme-light",
@@ -386,8 +424,40 @@ async fn all_theme_presets_persist_and_keep_live_session_and_draft_identity(
 }
 
 #[gpui_kit::test]
+fn theme_picker_separates_current_family_from_recommended_preset(cx: &mut TestAppContext) {
+    let mut state = AppState::default();
+    state.settings.theme_family = keelshell_core::ThemeId::new("graphite")
+        .unwrap_or_else(|error| panic!("valid graphite theme ID: {error}"));
+    state.settings.theme = Theme::Light;
+    let fixture = mount_state_sized(cx, state, 1280., 840.);
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("theme-settings", cx);
+        window.render_frame(cx);
+
+        let current_family = window.find("theme-family-graphite");
+        assert_eq!(
+            current_family.label(),
+            Some("曜石 · 当前明暗：浅色 · 推荐外观：深色 · 应用推荐 · 深色")
+        );
+
+        let available_family = window.find("theme-family-frost");
+        assert_eq!(
+            available_family.label(),
+            Some("霜白 · 推荐外观：浅色 · 应用 · 浅色")
+        );
+    })
+    .checked("render current-family and recommended-appearance states independently");
+}
+
+#[gpui_kit::test]
 async fn conflicting_family_save_does_not_apply_the_failed_preset(cx: &mut TestAppContext) {
     let fixture = mount(cx, Vec::new());
+    let target = crate::design::registry()
+        .iter()
+        .find(|theme| theme.id != "frost")
+        .checked_option("a non-default registered theme family");
     let mut newer = fixture.store.load().checked("load competing writer");
     newer.settings.font_size = 18.;
     fixture
@@ -398,7 +468,7 @@ async fn conflicting_family_save_does_not_apply_the_failed_preset(cx: &mut TestA
         window.render_frame(cx);
         window.click("theme-settings", cx);
         window.render_frame(cx);
-        window.click("theme-family-graphite", cx);
+        window.click(format!("theme-family-{}", target.id), cx);
     })
     .checked("attempt conflicting preset save");
     cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
@@ -409,7 +479,10 @@ async fn conflicting_family_save_does_not_apply_the_failed_preset(cx: &mut TestA
         assert_eq!(view.state.settings.theme_family.as_str(), "frost");
         assert_eq!(view.state.settings.theme, Theme::System);
         assert_eq!(crate::design::current_definition(cx).id, "frost");
-        assert!(view.status.render(cx).contains("保存失败"));
+        assert!(
+            view.status.render(cx).contains("保存失败"),
+            "the explicit save failure must remain visible until an explicit reload"
+        );
     });
     let saved = fixture.store.load().checked("read competing data");
     assert_eq!(saved.settings.font_size, 18.);
@@ -419,13 +492,17 @@ async fn conflicting_family_save_does_not_apply_the_failed_preset(cx: &mut TestA
 #[gpui_kit::test]
 async fn system_appearance_retains_family_without_rewriting_state(cx: &mut TestAppContext) {
     let fixture = mount(cx, Vec::new());
+    let family = crate::design::registry()
+        .iter()
+        .find(|theme| theme.id != "frost")
+        .checked_option("a non-default registered theme family");
     cx.update_window(fixture.window, |_, window, cx| {
         window.render_frame(cx);
         window.click("theme-settings", cx);
         window.render_frame(cx);
-        window.click("theme-family-lavender", cx);
+        window.click(format!("theme-family-{}", family.id), cx);
     })
-    .checked("select lavender");
+    .checked("select a registered non-default family");
     cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
         !fixture.workspace.read(cx).saving
     })
@@ -448,12 +525,12 @@ async fn system_appearance_retains_family_without_rewriting_state(cx: &mut TestA
                 (WindowAppearance::Light, ThemeMode::Light),
             ] {
                 view.on_appearance_changed(appearance, window, cx);
-                assert_eq!(crate::design::current_definition(cx).id, "lavender");
+                assert_eq!(crate::design::current_definition(cx).id, family.id);
                 assert_eq!(
                     palette(cx),
-                    crate::design::definition("lavender").palette(mode)
+                    crate::design::definition(family.id).palette(mode)
                 );
-                assert_eq!(view.state.settings.theme_family.as_str(), "lavender");
+                assert_eq!(view.state.settings.theme_family.as_str(), family.id);
                 assert!(!view.saving);
             }
         });

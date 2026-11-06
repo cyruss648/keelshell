@@ -34,6 +34,12 @@ impl Drop for AgentState {
     }
 }
 impl Workspace {
+    pub(super) fn window_agent_busy(&self, _cx: &App) -> bool {
+        self.agent
+            .as_ref()
+            .is_some_and(|state| state.pending.is_some() || state.job.is_some())
+    }
+
     #[cfg(test)]
     pub(super) fn agent_cancellation_for_test(&self) -> Option<RequestCancellation> {
         self.agent.as_ref().map(|state| state.cancellation.clone())

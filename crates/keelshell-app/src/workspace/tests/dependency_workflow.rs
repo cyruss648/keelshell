@@ -738,15 +738,12 @@ async fn dependency_workflow_and_library_reviews_are_exclusive_and_retain_captur
         "fixture",
     );
     let profile_id = profile.id;
-    h.fixture.workspace.update(cx, |view, cx| {
-        view.state.connections.push(profile);
-        view.state = h
-            .fixture
-            .store
-            .save(&view.state)
-            .checked("seed unrelated local metadata");
-        cx.notify();
-    });
+    let mut state = h
+        .fixture
+        .workspace
+        .read_with(cx, |view, _| view.state.clone());
+    state.connections.push(profile);
+    save_and_adopt_fixture_state(&h.fixture, state, "seed unrelated local metadata", cx);
     let before = h
         .fixture
         .store

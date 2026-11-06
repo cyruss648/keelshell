@@ -98,6 +98,39 @@ fn mount_with_ssh(ssh: SshFixture, cx: &mut TestAppContext) -> Fixture {
     }
 }
 
+/// Adopt a fixture snapshot through the same shared gate boundary as a
+/// completed production reload.
+///
+/// Tunnel review regressions sometimes seed additional rules or knowledge
+/// entries after mounting the real workspace. Updating only `Workspace::state`
+/// would leave the process-wide configuration gate at the older revision, so
+/// every guarded action would be rejected before it reaches StateStore.
+fn adopt_fixture_state(
+    fixture: &Fixture,
+    state: keelshell_core::AppState,
+    cx: &mut TestAppContext,
+) {
+    cx.update_window(fixture.window, |_, _, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.state = state.clone();
+            let gate = workspace.app_windows.read(cx).gate.clone();
+            let reload = crate::app_windows::ConfigurationGate::begin_reload_lease(
+                &gate,
+                workspace.window_id,
+            )
+            .expect("begin fixture configuration adoption");
+            reload.finish(Some(&state));
+            workspace.configuration_epoch = gate
+                .lock()
+                .expect("lock fixture configuration gate")
+                .epoch();
+            workspace.configuration_invalidated = false;
+            cx.notify();
+        });
+    })
+    .expect("adopt persisted fixture configuration");
+}
+
 fn fill(window: &mut gpui_kit::Window, id: &str, value: &str, cx: &mut gpui_kit::App) {
     click(window, id.to_owned(), cx);
     window.press(
@@ -216,13 +249,9 @@ async fn tunnel_rule_external_conflict_retains_external_bytes_and_requires_reloa
     })
     .expect("attempt stale store save");
     cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
-        !fixture.workspace.read(cx).saving
-            && fixture
-                .workspace
-                .read(cx)
-                .status
-                .render(cx)
-                .contains("保存失败")
+        let workspace = fixture.workspace.read(cx);
+        let status = workspace.status.render(cx);
+        !workspace.saving && status.contains("保存失败")
     })
     .await;
     assert_eq!(

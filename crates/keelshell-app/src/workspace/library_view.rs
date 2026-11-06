@@ -612,7 +612,7 @@ impl Workspace {
                 Button::new("profile-sync-open")
                     .compact()
                     .label(t(cx, "加密同步", "Encrypted sync"))
-                    .disabled(!self.can_open_vault())
+                    .disabled(!self.can_open_vault() || !self.profile_sync_maintenance_idle(cx))
                     .on_click(cx.listener(|view, _, window, cx| view.open_profile_sync(window, cx)))
                     .map(|button| self.retain_modal_button("profile-sync-open", button, cx)),
             )
@@ -816,7 +816,7 @@ impl Workspace {
             .absolute()
             .inset_0()
             .occlude()
-            .bg(rgba(0x17243a66))
+            .bg(rgba(visual.overlay))
             .p_4()
             .flex()
             .items_center()

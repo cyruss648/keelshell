@@ -288,7 +288,20 @@ fn install_route(fixture: &Fixture, route: &RouteFixture, pinned: bool, cx: &mut
                         .checked("trust fixture identity");
                 }
             }
-            view.state = fixture.store.save(&state).checked("save isolated route");
+            let saved = fixture.store.save(&state).checked("save isolated route");
+            view.state = saved.clone();
+            // This helper mutates the persisted fixture after Workspace
+            // construction. Keep the test window's shared authority aligned
+            // with that deliberate setup write; production stale-snapshot
+            // admission remains unchanged.
+            let gate = view.app_windows.read(cx).gate.clone();
+            let reload =
+                crate::app_windows::ConfigurationGate::begin_reload_lease(&gate, view.window_id)
+                    .checked("begin fixture configuration reload");
+            reload.finish(Some(&saved));
+            let gate = gate.lock().checked("lock fixture configuration gate");
+            view.configuration_epoch = gate.epoch();
+            view.configuration_invalidated = false;
             cx.notify();
         });
     })
@@ -840,3 +853,4 @@ mod proxies;
 
 mod reconnect;
 mod startup_restore;
+mod windows;

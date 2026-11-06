@@ -115,7 +115,7 @@ impl Workspace {
             .absolute()
             .inset_0()
             .occlude()
-            .bg(rgba(0x17243a66))
+            .bg(rgba(visual.overlay))
             .flex()
             .items_center()
             .justify_center()

@@ -31,16 +31,16 @@ fn review_confirm(fixture: &Fixture, cx: &mut TestAppContext) {
 }
 
 fn prepare_trash(fixture: &Fixture, cx: &mut TestAppContext) {
+    let mut state = fixture
+        .workspace
+        .read_with(cx, |view, _| view.state.clone());
+    let ids: Vec<_> = state.connections.iter().map(|item| item.id).collect();
+    state
+        .apply_connection_library_batch(&ids, &Action::Trash(10))
+        .checked("prepare isolated deleted profiles");
+    save_and_adopt_fixture_state(fixture, state, "save isolated trash fixture", cx);
     cx.update_window(fixture.window, |_, _, cx| {
         fixture.workspace.update(cx, |view, cx| {
-            let ids: Vec<_> = view.state.connections.iter().map(|item| item.id).collect();
-            view.state
-                .apply_connection_library_batch(&ids, &Action::Trash(10))
-                .checked("prepare isolated deleted profiles");
-            view.state = fixture
-                .store
-                .save(&view.state)
-                .checked("save isolated trash fixture");
             view.set_library_filter(LibraryFilter::Trash, cx);
         });
     })
@@ -524,13 +524,13 @@ async fn trash_review_binds_real_ssh_session_and_keeps_it_open_without_terminal_
             let _ = tokio::time::timeout(Duration::from_secs(20), session).await;
         }
     });
+    let mut state = fixture
+        .workspace
+        .read_with(cx, |view, _| view.state.clone());
+    state.connections[0].port = port;
+    save_and_adopt_fixture_state(&fixture, state, "save owned fixture endpoint", cx);
     cx.update_window(fixture.window, |_, window, cx| {
         fixture.workspace.update(cx, |view, cx| {
-            view.state.connections[0].port = port;
-            view.state = fixture
-                .store
-                .save(&view.state)
-                .checked("save owned fixture endpoint");
             view.connect(
                 view.state.connections[0].clone(),
                 zeroize::Zeroizing::new("delayed-test-password".into()),

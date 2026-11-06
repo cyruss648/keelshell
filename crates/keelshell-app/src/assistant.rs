@@ -997,6 +997,10 @@ impl AssistantPanel {
         !self.busy && !self.agent_active()
     }
 
+    pub(crate) fn window_close_draft(&self, cx: &App) -> SharedString {
+        self.prompt.read(cx).value()
+    }
+
     fn invalidate_request(&mut self, cx: &mut Context<Self>) {
         self.stop_agent(cx);
         self.request_revision = self.request_revision.wrapping_add(1);
