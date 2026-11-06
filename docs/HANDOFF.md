@@ -7,8 +7,10 @@
 
 ## 当前集成：主题与工作区外壳视觉
 
-本分支 `feature/main-visual-integration-20261106` 将 `main` 的最新监控、知识分类、
+本分支 `feature/main-visual-integration-20261106` 已将 `main` 的最新监控、知识分类、
 远端文本格式和 traceroute 能力，与视觉分支的三主题语义 token 和工作区外壳修整合并。
+集成提交为 `26e11c5`，文档编号清理提交为 `ecdc8c1`；本地、tracking 和
+`origin/feature/main-visual-integration-20261106` 均指向 `ecdc8c1`。
 视觉增量覆盖顶部工具栏、连接导航选择器、会话栏、底部工具栏和状态栏：统一使用
 `chrome`、`surface`、`surface_hover`、`surface_active`、`toolbar`、`focus` 和
 `accent` 语义层级，活动会话以边界与底部强调线表达当前目标，不改变会话实体、焦点、
@@ -16,8 +18,11 @@
 
 霜白、曜石、雾紫仍由注册表、Palette 和组件形状扩展；业务视图不按主题 ID 分支，
 新增主题只需要扩展主题注册表、语义 Palette 和组件形状。视觉来源切片的定向门禁、
-焦点环实际 alpha 合成对比度检查和第二轮独立复核均已通过；本次与 `main` 合并后，
-完整工程门禁、独立集成复核和新包验证必须重新执行，不能沿用来源分支的最终结论。
+焦点环实际 alpha 合成对比度检查和第二轮独立复核均已通过；集成后的
+`python3 scripts/check.py` 已重新执行并退出 0，包含 Python 131 run / 1 skipped、
+workspace tests、格式、workspace Clippy、依赖策略和三组 AI controller 门禁。
+集成后的 design 4 项和 workbench layout 5 项也再次通过；独立集成复核固定在
+`26e11c5`，最新文档提交 `ecdc8c1` 仅改变文档编号和状态归属。
 原生包、Windows/Linux 桌面、紧凑窗口、输入法和辅助技术仍保持各自未完成边界。
 实现和视觉来源记录见 [工作区外壳 ADR](adr/0113-workbench-chrome-hierarchy.md)
 与 [视觉测试记录](testing/records/2026-11-06-workbench-chrome-polish.md)。
