@@ -3,8 +3,9 @@
 
 use gpui_kit::{
     component::{
-        Disableable,
+        Disableable, Sizable,
         button::{Button, ButtonVariants},
+        checkbox::Checkbox,
         input::{Input, InputEvent, InputState, Textarea, TextareaState},
     },
     *,
@@ -17,6 +18,9 @@ use uuid::Uuid;
 
 use crate::i18n::{Message, t};
 
+mod batch;
+#[cfg(test)]
+mod batch_tests;
 #[cfg(test)]
 mod tests;
 
@@ -31,8 +35,9 @@ pub(crate) enum LibraryEvent {
 pub(crate) struct MutationReview {
     pub(crate) id: Uuid,
     pub(crate) snapshot: SnapshotRevision,
-    pub(crate) expected: SavedKnowledgeEntry,
+    pub(crate) expected: Vec<SavedKnowledgeEntry>,
     pub(crate) replacement: Option<SavedKnowledgeEntry>,
+    batch_revision: Option<Uuid>,
     draft_title: SharedString,
     draft_summary: SharedString,
 }
@@ -49,9 +54,13 @@ pub(crate) struct KnowledgeLibrary {
     entries: Vec<SavedKnowledgeEntry>,
     snapshot: SnapshotRevision,
     query: Entity<InputState>,
+    scroll: ScrollHandle,
     title: Entity<InputState>,
     summary: Entity<TextareaState>,
     selected: Option<SavedKnowledgeEntry>,
+    // Management selection never grants Ask attachment or edit authority.
+    management: Vec<SavedKnowledgeEntry>,
+    management_revision: Uuid,
     review: Option<MutationReview>,
     phase: Phase,
     show_source_details: bool,
@@ -97,9 +106,12 @@ impl KnowledgeLibrary {
             entries: Vec::new(),
             snapshot: SnapshotRevision::default(),
             query,
+            scroll: ScrollHandle::default(),
             title,
             summary,
             selected: None,
+            management: Vec::new(),
+            management_revision: Uuid::new_v4(),
             review: None,
             phase: Phase::Ready,
             show_source_details: false,
@@ -119,6 +131,10 @@ impl KnowledgeLibrary {
         }
         self.snapshot = state.snapshot;
         self.entries.clone_from(&state.knowledge_entries);
+        // Any new authoritative snapshot retires painted management controls,
+        // even when the selected entries themselves are unchanged.
+        self.management_revision = Uuid::new_v4();
+        self.retain_management();
         if self.context.retain_current(&self.entries) {
             self.context_changed(cx);
         }
@@ -286,6 +302,7 @@ impl KnowledgeLibrary {
             return;
         }
         self.review = None;
+        self.scroll.set_offset(point(px(0.), px(0.)));
         self.selected = Some(expected.clone());
         self.show_source_details = false;
         self.title.update(cx, |input, cx| {
@@ -328,11 +345,13 @@ impl KnowledgeLibrary {
         self.review = Some(MutationReview {
             id: Uuid::new_v4(),
             snapshot: self.snapshot,
-            expected: expected.clone(),
+            expected: vec![expected.clone()],
             replacement,
+            batch_revision: None,
             draft_title: self.title.read(cx).value(),
             draft_summary: self.summary.read(cx).value(),
         });
+        self.scroll.set_offset(point(px(0.), px(0.)));
         self.message = Message::new(
             "请审核完整内容，再确认本次本地修改。",
             "Review the full content, then confirm this local change.",
@@ -362,8 +381,9 @@ impl KnowledgeLibrary {
     }
 
     fn draft_matches(&self, review: &MutationReview, cx: &App) -> bool {
-        self.title.read(cx).value() == review.draft_title
-            && self.summary.read(cx).value() == review.draft_summary
+        review.batch_revision.is_some()
+            || (self.title.read(cx).value() == review.draft_title
+                && self.summary.read(cx).value() == review.draft_summary)
     }
 
     pub(crate) fn candidate(&self, id: Uuid, cx: &App) -> Option<MutationReview> {
@@ -372,7 +392,11 @@ impl KnowledgeLibrary {
             && review.id == id
             && review.snapshot == self.snapshot
             && self.draft_matches(review, cx)
-            && self.entries.contains(&review.expected))
+            && self.review_selection_matches(review)
+            && review
+                .expected
+                .iter()
+                .all(|entry| self.entry_is_current(entry)))
         .then(|| review.clone())
     }
 
@@ -385,6 +409,7 @@ impl KnowledgeLibrary {
     fn cancel_review(&mut self, id: Uuid, cx: &mut Context<Self>) {
         if self.phase == Phase::Ready && self.review.as_ref().is_some_and(|r| r.id == id) {
             self.review = None;
+            self.scroll.set_offset(point(px(0.), px(0.)));
             cx.notify();
         }
     }
@@ -402,7 +427,9 @@ impl KnowledgeLibrary {
         }
         self.phase = Phase::Saving(id);
         if let Some(review) = &self.review {
-            self.context.remove(review.expected.id());
+            for entry in &review.expected {
+                self.context.remove(entry.id());
+            }
         }
         self.context_changed(cx);
         self.disable_editor(true, cx);
@@ -432,10 +459,26 @@ impl KnowledgeLibrary {
         if self.phase != Phase::Saving(id) {
             return;
         }
+        self.require_reload(error, cx);
+    }
+
+    pub(crate) fn candidate_failed(
+        &mut self,
+        id: Uuid,
+        error: &keelshell_core::Error,
+        cx: &mut Context<Self>,
+    ) {
+        if self.phase == Phase::Ready && self.review.as_ref().is_some_and(|r| r.id == id) {
+            self.require_reload(error, cx);
+        }
+    }
+
+    fn require_reload(&mut self, error: &keelshell_core::Error, cx: &mut Context<Self>) {
         self.review = None;
         // Even an ordinary I/O error can race an external writer. A fresh load
         // is required before another review, never an automatic retry.
         self.phase = Phase::NeedsReload(Uuid::new_v4());
+        self.disable_editor(true, cx);
         self.context.clear();
         self.context_changed(cx);
         self.message = Message::detail(
@@ -485,6 +528,9 @@ impl KnowledgeLibrary {
         self.phase = Phase::Ready;
         self.selected = None;
         self.review = None;
+        self.management.clear();
+        self.management_revision = Uuid::new_v4();
+        self.scroll.set_offset(point(px(0.), px(0.)));
         self.disable_editor(false, cx);
         self.message = Message::new(
             "配置已重新加载，旧审核已清除。请重新选择条目。",
@@ -620,16 +666,23 @@ impl Render for KnowledgeLibrary {
         let ready = self.phase == Phase::Ready;
         let mut body = div().flex().flex_col().gap_3();
         let mut footer = div().flex().flex_wrap().gap_2();
-        if let Some(review) = self.review.as_ref() {
+        if let Some(review) = self.review.as_ref().filter(|r| r.batch_revision.is_some()) {
+            let (review_body, review_footer) = self.batch_review_view(review, ready, cx);
+            body = review_body;
+            footer = review_footer;
+        } else if let Some(review) = self.review.as_ref() {
             let id = review.id;
+            let Some(expected) = review.expected.first() else {
+                return div().into_any_element();
+            };
             body = body
-                .child(self.source_view(&review.expected, cx))
+                .child(self.source_view(expected, cx))
                 .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
                     cx,
                     "当前保存的内容",
                     "Currently saved content",
                 )))
-                .child(Self::entry_text(&review.expected));
+                .child(Self::entry_text(expected));
             if let Some(replacement) = &review.replacement {
                 body = body
                     .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
@@ -755,26 +808,36 @@ impl Render for KnowledgeLibrary {
                     for entry in entries {
                         let title: String = entry.entry().title().chars().take(48).collect();
                         let context_button = self.context_button(&entry, ready, cx);
+                        let management_checkbox = self.management_checkbox(&entry, ready, cx);
                         body = body.child(
                             div()
                                 .min_w_0()
                                 .flex()
-                                .flex_col()
-                                .gap_1()
+                                .items_start()
+                                .gap_2()
+                                .child(management_checkbox)
                                 .child(
-                                    Button::new(SharedString::from(format!(
-                                        "knowledge-entry-{}",
-                                        entry.id()
-                                    )))
-                                    .ghost()
-                                    .w_full()
-                                    .disabled(!ready)
-                                    .label(title)
-                                    .on_click(cx.listener(move |view, _, window, cx| {
-                                        view.select(&entry, window, cx)
-                                    })),
-                                )
-                                .child(context_button),
+                                    div()
+                                        .flex_1()
+                                        .min_w_0()
+                                        .flex()
+                                        .flex_col()
+                                        .gap_1()
+                                        .child(
+                                            Button::new(SharedString::from(format!(
+                                                "knowledge-entry-{}",
+                                                entry.id()
+                                            )))
+                                            .ghost()
+                                            .w_full()
+                                            .disabled(!ready)
+                                            .label(title)
+                                            .on_click(cx.listener(move |view, _, window, cx| {
+                                                view.select(&entry, window, cx)
+                                            })),
+                                        )
+                                        .child(context_button),
+                                ),
                         );
                     }
                 }
@@ -850,6 +913,11 @@ impl Render for KnowledgeLibrary {
                             .on_click(cx.listener(|_, _, _, cx| cx.emit(LibraryEvent::Close))),
                     ),
             )
+            .children(
+                self.review
+                    .is_none()
+                    .then(|| self.management_selection_view(ready, cx)),
+            )
             .child(
                 div()
                     .id("knowledge-library-scroll")
@@ -858,6 +926,8 @@ impl Render for KnowledgeLibrary {
                     .min_h_0()
                     .min_w_0()
                     .overflow_y_scroll()
+                    .overflow_x_scroll()
+                    .track_scroll(&self.scroll)
                     .p_3()
                     .child(body),
             )
@@ -875,5 +945,6 @@ impl Render for KnowledgeLibrary {
                     .child(div().text_xs().child(self.message.render(cx)))
                     .child(footer),
             )
+            .into_any_element()
     }
 }

@@ -5,6 +5,31 @@
 [组合前历史快照](history/2026-11-05-handoff-before-workspace-integration.md)，
 其中“当前”、暂停和清理指令只代表历史时点，不构成新的操作授权。
 
+## 当前独立切片：本地知识库审核式批量删除 — 2026-11-06
+
+当前工作树为 `feature/knowledge-batch-delete-20261106`，基线为
+`5b7772c`。本切片新增最多 32 条的管理选择、完整正文/来源审核、全量原子
+内存候选和一次后台 StateStore 保存；管理选择与 Ask 附件、编辑器草稿和 SSH
+运行权限分离。批量保存失败、冲突、耐久性未知或普通 I/O 错误均要求显式
+重新加载，不自动重放旧集合。实现和范围见
+[ADR 0107](adr/0107-reviewed-knowledge-batch-delete.md)、
+[产品说明](product/AI_KNOWLEDGE_LIBRARY.md)和
+[测试记录](testing/records/2026-11-06-ai-knowledge-batch-delete.md)。
+
+当前未提交文件集中在：
+`crates/keelshell-core/src/knowledge_library.rs`及其批量测试、
+`crates/keelshell-app/src/assistant/knowledge_library.rs`、
+`assistant/knowledge_library/batch.rs`及测试、
+`workspace/knowledge_library.rs`及联调测试，以及上述三份产品/ADR/测试文档
+和本交接。定向 core 8 项、app 17 项、严格 Clippy、格式和 diff 检查已通过；
+项目完整 `python3 scripts/check.py` 已在补充 snapshot revision 修复后再次退出 0
+（Python 131/1 skip、app 993/2 ignored、core 181、14 rustdoc；workspace
+tests、doc tests、readiness controller、依赖策略、格式和 workspace Clippy
+均通过）。新的非作者子代理已完成严格只读复核，P0/P1/P2/P3 全部为 0，
+`NO_BLOCKER`，合入建议 `APPROVE`；复核没有编辑、提交或清理工作树。
+本切片现在具备功能提交条件。当前不签发行包、安装、签名、跨平台桌面、
+真实远端或安全擦除验收；提交/推送及这些边界要分别保留原始证据。
+
 ## 当前开发：面板外观与远端诊断
 
 启动恢复切片已提交并正常快进推送main：

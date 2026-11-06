@@ -2,7 +2,13 @@
 
 use crate::{AppState, Error, SavedKnowledgeEntry, ValidationError};
 
+#[cfg(test)]
+mod tests;
+
 impl AppState {
+    /// Maximum entries in one explicitly reviewed knowledge deletion.
+    pub const MAX_KNOWLEDGE_DELETE_ENTRIES: usize = 32;
+
     /// Replace one exactly reviewed knowledge entry without changing its order.
     ///
     /// `expected` must equal the complete current entry, including its content.
@@ -62,6 +68,54 @@ impl AppState {
         let index = reviewed_entry_index(&self.knowledge_entries, expected)?;
         let mut candidate = self.clone();
         candidate.knowledge_entries.remove(index);
+        candidate.validate()?;
+        *self = candidate;
+        Ok(())
+    }
+
+    /// Remove an entire reviewed set of saved entries, or change nothing.
+    ///
+    /// Supply between one and [`Self::MAX_KNOWLEDGE_DELETE_ENTRIES`] distinct
+    /// originals. Every field of every original must match its current record;
+    /// an ID alone never authorizes deletion. All originals are checked before
+    /// constructing the candidate. Remaining entries retain their complete
+    /// content, metadata and relative order.
+    ///
+    /// This edits memory once and preserves the snapshot revision. Persist the
+    /// resulting state once through the [`crate::StateStore`] that loaded it.
+    /// Deletion does not erase historical copies in configuration backups.
+    ///
+    /// # Errors
+    /// Empty, oversized or duplicate review sets return a validation error.
+    /// Missing or changed originals return [`Error::Conflict`]; ambiguous IDs or
+    /// an invalid candidate return a validation error. Every failure leaves the
+    /// entire state, including its snapshot revision, unchanged.
+    pub fn remove_knowledge_entries(
+        &mut self,
+        expected: &[SavedKnowledgeEntry],
+    ) -> Result<(), Error> {
+        if expected.is_empty() || expected.len() > Self::MAX_KNOWLEDGE_DELETE_ENTRIES {
+            return Err(ValidationError::new(
+                "knowledge_entries",
+                "review between one and 32 saved entries",
+            )
+            .into());
+        }
+        let mut ids = std::collections::HashSet::with_capacity(expected.len());
+        for entry in expected {
+            if !ids.insert(entry.id()) {
+                return Err(ValidationError::new(
+                    "knowledge_entries.id",
+                    "reviewed entry IDs must be unique",
+                )
+                .into());
+            }
+            reviewed_entry_index(&self.knowledge_entries, entry)?;
+        }
+        let mut candidate = self.clone();
+        candidate
+            .knowledge_entries
+            .retain(|entry| !ids.contains(&entry.id()));
         candidate.validate()?;
         *self = candidate;
         Ok(())

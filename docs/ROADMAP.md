@@ -2,6 +2,18 @@
 
 ## 当前开发 — 2026-11-06
 
+当前工作树另有 `feature/knowledge-batch-delete-20261106` 承担本地知识库整理：
+管理选择与 Ask 附件/编辑器分离，最多 32 条逐条完整审核后一次确认，核心候选
+在内存中全量校验并保持剩余顺序，Workspace 只通过一次后台 StateStore 保存。
+核心定向测试 8 项、应用/Workspace 批量定向测试 17 项，知识库全域 app 测试
+31 项；严格 Clippy、格式、diff 和完整 `scripts/check.py` 均通过。
+第二轮完整门禁在 snapshot revision 修复后再次退出 0；新子代理完成严格只读代码与
+功能复核，P0/P1/P2/P3 均为 0，结论 `NO_BLOCKER` / `APPROVE`。本切片已具备
+功能提交条件；提交归属、跨平台桌面和安全擦除仍未完成。设计见
+[ADR 0107](adr/0107-reviewed-knowledge-batch-delete.md)，产品和验证边界见
+[本地知识库](product/AI_KNOWLEDGE_LIBRARY.md)及
+[批量删除记录](testing/records/2026-11-06-ai-knowledge-batch-delete.md)。
+
 单窗惰性恢复切片`56d5440`已正常快进推送main，三处源码/原生/文档独立批准
 及520输入绑定通过；精确Quality42063264237/1三平台success，
 各108项候选通过，Linux/macOS各11项OpenSSH与附件摘要通过。
