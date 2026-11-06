@@ -3,6 +3,14 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-07 当前交付位置
+
+`ac397c87f3fc49e1e1f940ecd99fab20566c7a23` 已推送到
+`feature/main-visual-integration-20261106`，本地、tracking 和远端 SHA 一致；
+`main` 尚未推进。三组继续回归分别为 5/5、14/14 和 11/11 通过。独立非作者复核
+仍因 agent 无报告、供应商 API-Key 403 及本地 agent 工具循环而不可用；真实 macOS
+桌面通道仍报告锁屏，因此多窗口和编辑器原生操作保持 `NOT_RUN`。
+
 ## 当前集成
 
 `feature/main-visual-integration-20261106` 已把 `main` 的最新功能基线与工作区

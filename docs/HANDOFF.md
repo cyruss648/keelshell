@@ -5,6 +5,27 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 继续推进回执
+
+当前源码提交 `ac397c87f3fc49e1e1f940ecd99fab20566c7a23` 已于
+2026-11-06 22:07:13 UTC 推送到
+`origin/feature/main-visual-integration-20261106`，本地、tracking 和远端
+分支均已读回同一 SHA；`main` 未改变。
+
+在没有源码变更的前提下，继续执行了三组定向回归：`app_windows::tests`
+5/5、`workspace::tests::windows` 14/14、`files::transfer_tests::review_viewport_tests`
+11/11。应用使用隔离 `KEELSHELL_DATA_DIR` 完成编译并启动，随后停止并清理临时目录；
+这只证明启动路径可执行，不替代桌面交互验收。
+
+本轮再次尝试非作者严格只读复核。默认 agent 在有界等待内没有报告；备用供应商
+返回 API-Key 限制 403；本地 Codex agent 在工具调用循环中未到达审查正文。三次
+尝试均没有修改工作树、提交、推送或清理任何项目资源，当前状态保持
+`NON_AUTHOR_REVIEW_UNAVAILABLE`，不能写成独立批准。
+
+CUA 桌面通道连续返回 macOS 仍锁定，未能观察多窗口、Quit/Install 聚合审核、
+主题切换、`merge-adopt`、`merge-save`、late-save 或连续无换行保存；当前原生范围
+保持 `NOT_RUN`。下一次桌面可用后，先运行这些受控场景，再更新本页和对应测试记录。
+
 ## 当前集成：主题与工作区外壳视觉
 
 本分支 `feature/main-visual-integration-20261106` 已将 `main` 的最新监控、知识分类、

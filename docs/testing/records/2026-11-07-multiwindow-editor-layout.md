@@ -53,3 +53,25 @@
 它们已停止且没有修改工作树。父级只读差分检查修正了新增的 worker stderr 输出，
 但不替代非作者复核。固定源码提交和后续交付仍需独立复核报告、发行包构建及真实
 原生验收。
+
+## 2026-11-07 继续推进
+
+当前提交 `ac397c87f3fc49e1e1f940ecd99fab20566c7a23` 已推送到
+`feature/main-visual-integration-20261106`，并实际读回本地、tracking、远端三者
+一致；`main` 未改变。
+
+继续回归结果：
+
+| 检查 | 结果 |
+| --- | --- |
+| `cargo test -p keelshell-app --locked --offline -- app_windows::tests:: --test-threads=4` | 5 passed |
+| `cargo test -p keelshell-app --locked --offline -- workspace::tests::windows:: --test-threads=4` | 14 passed |
+| `cargo test -p keelshell-app --locked --offline -- files::transfer_tests::review_viewport_tests:: --test-threads=4` | 11 passed |
+| `cargo run -p keelshell-app --locked --offline` with isolated `KEELSHELL_DATA_DIR` | compiled and launched; manually stopped after startup |
+| temporary state cleanup | verified absent |
+| independent non-author review | unavailable; no report produced |
+| native macOS multi-window/editor interaction | NOT_RUN; CUA repeatedly reported locked desktop |
+
+三次本轮非作者复核尝试都没有修改源码或项目资源：一次在有界等待内无报告，
+一次被供应商 API-Key 限制拒绝，一次在工具调用循环中未进入审查正文。上述事实不
+改变“独立复核待完成”的交付边界。
