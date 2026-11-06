@@ -10,6 +10,8 @@
 `main` 尚未推进。三组继续回归分别为 5/5、14/14 和 11/11 通过。独立非作者复核
 仍因 agent 无报告、供应商 API-Key 403 及本地 agent 工具循环而不可用；真实 macOS
 桌面通道仍报告锁屏，因此多窗口和编辑器原生操作保持 `NOT_RUN`。
+文档提交后的首次完整门禁曾在 small-stack controller 收到 `EmptyReply` 退出 101；
+精确重跑通过，第二次完整 `python3 scripts/check.py` 退出 0，保留首次失败证据。
 
 ## 当前集成
 

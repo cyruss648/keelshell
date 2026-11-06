@@ -69,6 +69,9 @@
 | `cargo test -p keelshell-app --locked --offline -- files::transfer_tests::review_viewport_tests:: --test-threads=4` | 11 passed |
 | `cargo run -p keelshell-app --locked --offline` with isolated `KEELSHELL_DATA_DIR` | compiled and launched; manually stopped after startup |
 | temporary state cleanup | verified absent |
+| first `python3 scripts/check.py` after docs commit | exit 1; `local_agent_process --controller-small-stack` ended with `EmptyReply` |
+| exact `cargo test -p keelshell-ai --test local_agent_process --locked -- --controller-small-stack` rerun | passed; all scenario groups/assertions passed |
+| second `python3 scripts/check.py` | exit 0; Python 131 / 1 skipped, workspace 2,397 ordinary / 23 ignored, 11 rustdoc, strict Clippy and all AI controllers passed |
 | independent non-author review | unavailable; no report produced |
 | native macOS multi-window/editor interaction | NOT_RUN; CUA repeatedly reported locked desktop |
 

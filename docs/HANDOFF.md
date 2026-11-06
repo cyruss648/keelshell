@@ -17,6 +17,13 @@
 11/11。应用使用隔离 `KEELSHELL_DATA_DIR` 完成编译并启动，随后停止并清理临时目录；
 这只证明启动路径可执行，不替代桌面交互验收。
 
+文档提交后的第一次完整 `python3 scripts/check.py` 在
+`keelshell-ai --test local_agent_process -- --controller-small-stack` 处遇到
+`EmptyReply` 并退出 101；精确重跑同一控制器通过，随后第二次完整门禁退出 0。
+第二次结果保持 Python 131 run / 1 skipped、workspace 2,397 ordinary / 23 ignored、
+11 rustdoc、严格 workspace Clippy、依赖策略和三组 AI controller 全通过。第一次
+失败和精确复跑成功均保留为测试事实，不将第一次失败隐藏成从未发生。
+
 本轮再次尝试非作者严格只读复核。默认 agent 在有界等待内没有报告；备用供应商
 返回 API-Key 限制 403；本地 Codex agent 在工具调用循环中未到达审查正文。三次
 尝试均没有修改工作树、提交、推送或清理任何项目资源，当前状态保持
