@@ -1,6 +1,6 @@
 //! Rendered workspace regions and navigation transitions, not native GUI evidence.
 use super::*;
-use gpui_kit::{App, Pixels, Window};
+use gpui_kit::{App, Pixels, SharedString, Window};
 use keelshell_core::{Theme, ThemeId};
 
 fn settle(window: &mut Window, cx: &mut App) {
@@ -111,6 +111,64 @@ fn workbench_regions_fit_all_registered_themes_without_changing_drafts(cx: &mut 
         })
         .checked("measure actual bilingual regions across all theme palettes");
     }
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
+fn every_terminal_pane_keeps_a_bilingual_connection_identity_bar(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for (language, expected_protocol) in [
+            (Language::ZhCn, "SSH / UTF-8"),
+            (Language::En, "SSH / UTF-8"),
+        ] {
+            i18n::set_language(language, cx);
+            let settings = fixture.workspace.read(cx).state.settings.clone();
+            crate::design::apply_settings(&settings, Some(window), cx);
+            settle(window, cx);
+            let pane = fixture.workspace.read(cx).session_panes.active_pane();
+            let identity = window.find(SharedString::from(format!("pane-identity-{}", pane.0)));
+            let endpoint = window.find(SharedString::from(format!(
+                "pane-identity-endpoint-{}",
+                pane.0
+            )));
+            let protocol = window.find(SharedString::from(format!(
+                "pane-identity-protocol-{}",
+                pane.0
+            )));
+            let status = window.find(SharedString::from(format!(
+                "pane-identity-status-{}",
+                pane.0
+            )));
+            assert!(identity.visible(), "{language:?}: identity bar");
+            assert!(inside(
+                identity.bounds(),
+                window
+                    .find(("terminal-pane", panes[0].terminal.entity_id()))
+                    .bounds()
+            ));
+            assert_eq!(
+                endpoint.label(),
+                Some("fixture-0@example.invalid:22"),
+                "{language:?}: endpoint remains real and stable"
+            );
+            assert_eq!(
+                protocol.label(),
+                Some(expected_protocol),
+                "{language:?}: protocol and status"
+            );
+            assert_eq!(
+                status.label(),
+                Some(if language == Language::ZhCn {
+                    "已连接"
+                } else {
+                    "Connected"
+                })
+            );
+        }
+    })
+    .checked("render the real connection identity bar in both supported languages");
     assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
 

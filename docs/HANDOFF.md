@@ -5,6 +5,29 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 连接身份栏继续推进
+
+上一片视觉节奏收口已由 `e3226e7097b72f6927fbc38f05a94a365d8269d7` 提交并推送，
+本地、tracking 和远端分支已读回一致。当前候选把每个终端 pane 的顶部统一成
+会话标签、连接身份和 pane 比例动作组成的紧凑 header：
+
+- 真实端点来自 Workspace 的远端快照，恢复标签从当前连接档案生成，缺失档案明确
+  显示不可用，不生成示例主机；
+- SSH / UTF-8 与状态 badge 分开显示，状态文字与语义色同时保留；
+- 身份区具有双语 AX 标签，单 pane 与分屏都使用同一渲染路径；
+- 继续使用 Frost、Graphite、Lavender 的 Palette、组件 token 和
+  `ChromeTokens::pane_header_height`，没有主题 ID 业务分支。
+
+源码、设计决策和测试记录分别见 `crates/keelshell-app/src/workspace/pane_view.rs`、
+[ADR 0116](adr/0116-pane-connection-identity-bar.md) 和
+[测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。本轮定向
+身份栏 1/1、工作区主题/尺寸 1/1、长标题 1/1、最小窗口 1/1、分屏布局 16/16，
+格式化和差异检查通过；完整工程门禁和独立复核尚未完成。
+
+该实现继续保持 UI、core、session、AI 分层，阻塞 I/O 不进入 UI 线程，连接身份栏
+不改变 SSH 生命周期、命令审核或 AI 权限。真实 macOS/Windows/Linux 桌面、主题
+切换截图、IME、键盘和 VoiceOver 仍不能用 headless GPUI 测试代签。
+
 ## 2026-11-07 继续推进回执
 
 本次继续推进的视觉增量尚未提交时已完成定向回归和完整工程门禁。源码新增

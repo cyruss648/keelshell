@@ -219,3 +219,20 @@ KeelShell 品牌和远程工作台身份，中部显示当前 SSH 主机；命�
 
 本轮实现和验证见 [ADR 0115](../adr/0115-workbench-visual-rhythm-and-context.md)
 及 [测试记录](../testing/records/2026-11-07-workbench-visual-refinement.md)。
+
+## 2026-11-07 终端 pane 连接身份
+
+所有终端 pane 现在都保留一行紧凑 header：左侧是会话标签，右侧是来自
+Workspace 快照的真实用户、主机和端口，下面以独立文字表示 `SSH / UTF-8`，
+状态使用同时具备文字和语义色的 badge。单 pane 与分屏 pane 使用同一组件路径，
+恢复占位使用当前 profile 或明确的缺失状态。
+
+该身份栏不把连接状态写入 `TerminalView`，不改变 SSH 输入焦点、命令审核目标、
+AI 权限或传输线程。布局和 AX 标签使用 `ChromeTokens::pane_header_height`、
+Palette 状态色、边框和组件圆角 token；Frost、Graphite、Lavender 共享视图实现，
+新增主题只需要扩展 registry/token。
+
+定向验证见 [ADR 0116](../adr/0116-pane-connection-identity-bar.md) 和
+[测试记录](../testing/records/2026-11-07-pane-connection-identity-bar.md)。
+完整工程门禁、独立非作者复核、原生桌面主题/尺寸/IME/VoiceOver 和
+Windows/Linux 运行仍开放。

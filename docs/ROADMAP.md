@@ -5,19 +5,22 @@
 
 ## 2026-11-07 当前交付位置
 
-当前工作树包含一片未提交的工作区视觉增量：主题 registry 新增 chrome 几何
-token，宽窗工具栏增加品牌与当前主机上下文，命令审核目标和 primary 执行动作
-更明确，会话标签增加主题化 hover/active 状态。定向回归通过，首次 app 全量
-运行的既有 reconnect 分屏夹具失败已精确重跑通过；随后完整
-`python3 scripts/check.py` 退出 0。正式源码提交前仍需完成独立非作者源码复核，
-并把这片输入与文档一起提交。
+上一片工作区视觉节奏收口已提交并推送，提交为
+`e3226e7097b72f6927fbc38f05a94a365d8269d7`，本地、tracking 和远端 SHA 一致。
+它包含主题 registry 的 chrome 几何 token、宽窗品牌与当前主机上下文、命令审核
+目标、primary 执行动作和会话标签的主题化 hover/active 状态。
 
-下一片 UI 优先级为单 pane 连接身份栏：在终端画布上方持续显示真实连接主机、
-用户/端口、SSH/编码和连接状态，分屏时收紧为同一身份栏的紧凑变体。该栏必须
-只消费 Workspace 已有的连接/生命周期快照，不把传输状态塞进 TerminalView，
-并补齐中英文、三主题、最小窗口和焦点/AX 回归。
+当前候选继续推进 pane 连接身份栏：所有终端 pane 在画布上方持续显示真实连接
+主机、用户/端口、SSH/编码和连接状态，分屏时与会话标签和比例控制共享紧凑
+header。实现只消费 Workspace 已有的连接/生命周期快照，不把传输状态塞进
+TerminalView，并补齐中英文、三主题、最小窗口和焦点/AX 回归。设计和验证见
+[ADR 0116](adr/0116-pane-connection-identity-bar.md) 与
+[测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。
 
-`ac397c87f3fc49e1e1f940ecd99fab20566c7a23` 已推送到
+当前身份栏的定向回归已通过；本轮完整 `python3 scripts/check.py`、新提交的独立
+非作者源码复核和原生桌面验收仍待完成。
+
+`e3226e7097b72f6927fbc38f05a94a365d8269d7` 已推送到
 `feature/main-visual-integration-20261106`，本地、tracking 和远端 SHA 一致；
 `main` 尚未推进。三组继续回归分别为 5/5、14/14 和 11/11 通过。独立非作者复核
 仍因 agent 无报告、供应商 API-Key 403 及本地 agent 工具循环而不可用；真实 macOS

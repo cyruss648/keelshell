@@ -613,9 +613,7 @@ impl Workspace {
             }))
             .border_t_2()
             .border_color(rgb(if active { visual.accent } else { visual.border }));
-        if self.session_panes.layout().nodes.len() > 1 {
-            view = view.child(self.pane_header(pane, id, cx));
-        }
+        view = view.child(self.pane_header(pane, id, cx));
         if restored {
             return view
                 .child(self.render_restored_tab(id, cx))
@@ -683,6 +681,52 @@ impl Workspace {
                 );
             }
         }
+        let endpoint = self.session_endpoint(selected, cx);
+        let restored = self.restored_tabs.contains_key(&selected);
+        let (status, status_color, status_surface) = if restored {
+            (
+                self.restored_status(selected, cx)
+                    .unwrap_or_else(|| t(cx, "待连接", "Awaiting connection"))
+                    .to_owned(),
+                visual.warning,
+                visual.surface_active,
+            )
+        } else if let Some(terminal) = self.tabs.iter().find(|tab| tab.entity_id() == selected) {
+            if terminal.read(cx).is_open() {
+                (
+                    t(cx, "已连接", "Connected").to_owned(),
+                    visual.success,
+                    visual.surface_active,
+                )
+            } else if terminal.read(cx).end_reason().is_some() {
+                (
+                    terminal.read(cx).status.render(cx),
+                    visual.danger,
+                    visual.danger_surface,
+                )
+            } else {
+                (
+                    terminal.read(cx).status.render(cx),
+                    visual.warning,
+                    visual.surface_active,
+                )
+            }
+        } else {
+            (
+                t(cx, "未知状态", "Unknown state").to_owned(),
+                visual.warning,
+                visual.surface_active,
+            )
+        };
+        let endpoint_label = endpoint.clone();
+        let identity_label = format!(
+            "{}; {}: {}; {}: {}",
+            self.session_title(selected, cx),
+            t(cx, "端点", "Endpoint"),
+            endpoint,
+            t(cx, "状态", "Status"),
+            status
+        );
         div()
             .h(px(chrome.pane_header_height))
             .flex_shrink_0()
@@ -693,8 +737,114 @@ impl Workspace {
             .border_b_1()
             .border_color(rgb(visual.border))
             .child(tabs)
+            .child(
+                div()
+                    .id(SharedString::from(format!("pane-identity-{}", pane.0)))
+                    .test_support()
+                    .role(Role::Group)
+                    .aria_label(identity_label)
+                    .flex_shrink_0()
+                    .min_w_0()
+                    .w(px(330.))
+                    .max_w(relative(0.56))
+                    .h_full()
+                    .px_2()
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .border_l_1()
+                    .border_color(rgb(visual.border))
+                    .child(
+                        div()
+                            .id(SharedString::from(format!(
+                                "pane-identity-status-dot-{}",
+                                pane.0
+                            )))
+                            .test_support()
+                            .size(px(8.))
+                            .flex_shrink_0()
+                            .rounded(px(4.))
+                            .bg(rgb(status_color)),
+                    )
+                    .child(
+                        div()
+                            .id(SharedString::from(format!(
+                                "pane-identity-details-{}",
+                                pane.0
+                            )))
+                            .test_support()
+                            .flex_1()
+                            .min_w_0()
+                            .flex()
+                            .flex_col()
+                            .justify_center()
+                            .child(
+                                div()
+                                    .id(SharedString::from(format!(
+                                        "pane-identity-endpoint-{}",
+                                        pane.0
+                                    )))
+                                    .test_support()
+                                    .aria_label(endpoint_label.clone())
+                                    .min_w_0()
+                                    .text_xs()
+                                    .text_ellipsis()
+                                    .font_family("monospace")
+                                    .text_color(rgb(visual.text))
+                                    .child(endpoint_label),
+                            )
+                            .child(
+                                div()
+                                    .id(SharedString::from(format!(
+                                        "pane-identity-protocol-{}",
+                                        pane.0
+                                    )))
+                                    .test_support()
+                                    .aria_label("SSH / UTF-8")
+                                    .text_xs()
+                                    .text_color(rgb(visual.muted))
+                                    .child("SSH / UTF-8"),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .id(SharedString::from(format!(
+                                "pane-identity-status-{}",
+                                pane.0
+                            )))
+                            .test_support()
+                            .aria_label(status.clone())
+                            .flex_shrink_0()
+                            .px_2()
+                            .py_0()
+                            .rounded(px(crate::design::components(cx).control_radius))
+                            .bg(rgb(status_surface))
+                            .text_xs()
+                            .text_color(rgb(status_color))
+                            .child(status),
+                    ),
+            )
             .child(self.pane_ratio_controls(pane, selected, cx))
             .into_any_element()
+    }
+
+    fn session_endpoint(&self, id: EntityId, cx: &App) -> String {
+        if let Some(endpoint) = self.remote_hosts.get(&id) {
+            return endpoint.clone();
+        }
+        let Some(restored) = self.restored_tabs.get(&id) else {
+            return t(cx, "未连接", "Disconnected").to_owned();
+        };
+        restored
+            .connection_id
+            .and_then(|connection_id| {
+                self.state
+                    .connections
+                    .iter()
+                    .find(|connection| connection.id == connection_id)
+            })
+            .map(crate::jump_host_picker::endpoint)
+            .unwrap_or_else(|| t(cx, "配置已移除", "Profile unavailable").to_owned())
     }
 
     #[inline(never)]
