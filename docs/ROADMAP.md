@@ -2,6 +2,17 @@
 
 ## 当前开发 — 2026-11-06
 
+当前工作树 `feature/workbench-visual-polish-20261106` 正在进行工作区外壳视觉
+修整：顶部工具栏、连接导航选择器、会话栏、底部工具栏和状态栏使用更清晰的
+语义层级，活动会话强调当前目标但不改变会话/焦点/审核权限。三主题仍通过注册表
+和 Palette 扩展，用户可选择霜白、曜石和雾紫；新增主题只扩展注册表、Palette
+和组件形状，不进入工作区业务分支。定向工作区 5 项、主题 7 项、连接导航
+21 项和 design 4 项通过；第一轮独立复核发现的浅色焦点环 alpha 对比度问题已
+修复并重跑门禁，完整 `scripts/check.py` 已 exit 0；第二轮独立复核
+`P0/P1/P2/P3=0`、`NO_BLOCKER`、`APPROVE`，原生包和跨平台桌面仍待完成。设计见
+[ADR 0108](adr/0108-workbench-chrome-hierarchy.md)，验证见
+[外壳视觉记录](testing/records/2026-11-06-workbench-chrome-polish.md)。
+
 当前工作树另有 `feature/knowledge-batch-delete-20261106` 承担本地知识库整理：
 管理选择与 Ask 附件/编辑器分离，最多 32 条逐条完整审核后一次确认，核心候选
 在内存中全量校验并保持剩余顺序，Workspace 只通过一次后台 StateStore 保存。

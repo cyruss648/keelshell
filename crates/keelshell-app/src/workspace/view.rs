@@ -9,14 +9,14 @@ impl Workspace {
         div()
             .id("session-strip")
             .test_support()
-            .h(px(38.))
+            .h(px(40.))
             .flex_shrink_0()
             .min_w_0()
             .flex()
             .items_center()
-            .gap_1()
-            .px_1()
-            .bg(rgb(visual.surface))
+            .gap_2()
+            .px_2()
+            .bg(rgb(visual.chrome))
             .border_b_1()
             .border_color(rgb(visual.border))
             .child(tabs)
@@ -395,7 +395,7 @@ impl Workspace {
                     .px_4()
                     .flex()
                     .items_center()
-                    .bg(rgb(visual.surface))
+                    .text_color(rgb(visual.muted))
                     .child(t(cx, "快速连接", "Quick connect")),
             );
         }
@@ -409,18 +409,25 @@ impl Workspace {
                     .w(px(184.))
                     .flex_shrink_0()
                     .rounded(px(crate::design::components(cx).control_radius))
-                    .px_2()
+                    .px_3()
                     .flex()
                     .items_center()
                     .gap_1()
                     .cursor_pointer()
                     .bg(rgb(if self.active == index {
-                        visual.selected
+                        visual.surface
                     } else {
                         visual.canvas
                     }))
-                    .border_r_1()
-                    .border_color(rgb(visual.border))
+                    .border_1()
+                    .border_color(rgb(if self.active == index {
+                        visual.accent
+                    } else {
+                        visual.border
+                    }))
+                    .when(self.active == index, |tab| {
+                        tab.border_b_2().border_color(rgb(visual.accent))
+                    })
                     .on_click(cx.listener(move |view, _, window, cx| {
                         if let Some(index) = view
                             .tabs
@@ -441,6 +448,11 @@ impl Workspace {
                             .child(
                                 div()
                                     .text_ellipsis()
+                                    .font_weight(if self.active == index {
+                                        FontWeight::SEMIBOLD
+                                    } else {
+                                        FontWeight::NORMAL
+                                    })
                                     .child(self.session_title(terminal_id, cx)),
                             )
                             .when_some(self.restored_status(terminal_id, cx), |title, status| {
@@ -503,7 +515,7 @@ impl Workspace {
             .border_t_1()
             .border_b_1()
             .border_color(rgb(visual.border))
-            .bg(rgb(visual.canvas));
+            .bg(rgb(visual.chrome));
         for (id, kind, zh, en) in [
             ("files", ToolPanel::Files, "文件", "Files"),
             ("commands", ToolPanel::Commands, "命令", "Commands"),
@@ -845,6 +857,13 @@ impl Workspace {
                 active_id,
                 cx,
             ))
+            .child(
+                div()
+                    .h(px(20.))
+                    .w(px(1.))
+                    .flex_shrink_0()
+                    .bg(rgb(visual.border)),
+            )
             .children(self.workspace_settings_actions(compact_toolbar, cx))
             .into_any_element()
     }
@@ -1083,6 +1102,7 @@ impl Workspace {
             .flex()
             .items_center()
             .gap_3()
+            .bg(rgb(visual.chrome))
             .border_t_1()
             .border_color(rgb(visual.border))
             .text_xs()

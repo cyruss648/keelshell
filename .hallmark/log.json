@@ -2,6 +2,35 @@
   {
     "date": "2026-11-06",
     "scope": "app",
+    "shape": "app screen",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "workbench chrome hierarchy",
+    "signature": "the active SSH session reads as the current target inside a quiet three-layer shell",
+    "nav": "global toolbar, connection rail, session strip, tool strip, status line",
+    "footer": "semantic status and existing reviewed actions",
+    "imagery": "not applicable: native Rust/GPUI app screen",
+    "sections": [
+      "global chrome",
+      "connection selector",
+      "session strip",
+      "remote pane",
+      "tool strip",
+      "status line"
+    ],
+    "waived": [
+      "browser render lint: not applicable to Rust/GPUI source"
+    ],
+    "sweep": "Focused design 4, workbench 5, theme 7 and navigation 21 tests passed; full scripts/check.py exit 0; second independent review APPROVE; native package and cross-platform desktop matrix remain open.",
+    "native_evidence": "docs/testing/records/2026-11-06-workbench-chrome-polish.md",
+    "finish_review": "independent source review APPROVE; native capture pending"
+  },
+  {
+    "date": "2026-11-06",
+    "scope": "app",
     "shape": "native pane surfaces and reviewed protocol diagnostics",
     "theme": [
       "frost",

@@ -38,6 +38,7 @@ impl Workspace {
             .flex_shrink_0()
             .gap_1()
             .p_2()
+            .bg(rgb(visual.chrome))
             .border_b_1()
             .border_color(rgb(visual.border));
         for (id, panel, label) in [

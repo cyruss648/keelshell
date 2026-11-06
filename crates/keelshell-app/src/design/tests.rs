@@ -18,6 +18,15 @@ fn contrast(a: u32, b: u32) -> f64 {
     (a.max(b) + 0.05) / (a.min(b) + 0.05)
 }
 
+fn alpha_blend(foreground: u32, background: u32, alpha: f64) -> u32 {
+    let channel = |shift: u32| {
+        let foreground = f64::from((foreground >> shift) & 255u32);
+        let background = f64::from((background >> shift) & 255u32);
+        (foreground * alpha + background * (1. - alpha)).floor() as u32
+    };
+    (channel(16) << 16) | (channel(8) << 8) | channel(0)
+}
+
 #[test]
 fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
     for theme in registry() {
@@ -72,6 +81,15 @@ fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
                 "{}/{mode:?} focus ring",
                 theme.id
             );
+            for background in [p.surface, p.chrome, p.sidebar] {
+                let composited = alpha_blend(p.focus, background, 0.5);
+                assert!(
+                    contrast(composited, background) >= 3.,
+                    "{}/{mode:?} composited focus ring: {composited:x} on {background:x} = {}",
+                    theme.id,
+                    contrast(composited, background)
+                );
+            }
             assert_ne!(
                 p.surface_hover, p.surface_active,
                 "{}/{mode:?} hover and active need separate surfaces",

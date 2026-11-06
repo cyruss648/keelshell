@@ -5,6 +5,26 @@
 [组合前历史快照](history/2026-11-05-handoff-before-workspace-integration.md)，
 其中“当前”、暂停和清理指令只代表历史时点，不构成新的操作授权。
 
+## 当前工作区外壳视觉切片 — 2026-11-06
+
+当前工作树为 `feature/workbench-visual-polish-20261106`，父基线为
+`43d5e395ee9f1ff2f14e917979c99ca610be3ff4`，当前已整合主题 token 的 HEAD 为
+`a54b978`；未提交改动仅覆盖工作区外壳、设计文档和测试记录。本切片把顶部工具栏、连接导航
+选择器、会话栏、底部工具栏和状态栏统一到主题 `chrome` 层，并用 `surface`
+与 `accent` 边界强调活动会话。它不改变会话实体、焦点、审核、网络或持久化
+语义，也不按三套主题 ID 分支。用户可在设置中选择霜白、曜石或雾紫；新增
+主题只需扩展主题注册表、语义 Palette 和组件形状，不需要修改工作区业务视图。
+
+定向验证已通过：工作区 5 项、主题 7 项、连接导航 21 项，格式和 diff 检查
+通过；design 4 项也通过，覆盖 Kit 50% alpha 焦点环的实际合成对比度。完整
+`scripts/check.py` 已 exit 0：Python 131 passed/1 skipped、workspace
+Rust 2,238 passed/23 ignored、14 项 rustdoc、workspace Clippy、依赖策略、格式和
+附加 controller 均通过。实现、设计和验证见
+[ADR 0108](adr/0108-workbench-chrome-hierarchy.md)、
+[测试记录](testing/records/2026-11-06-workbench-chrome-polish.md)；第二轮新的
+独立复核已返回 `P0/P1/P2/P3=0`、`NO_BLOCKER`、`APPROVE`。标准开发包原生
+截图和 Windows/Linux 桌面仍待完成。
+
 ## 当前独立切片：本地知识库审核式批量删除 — 2026-11-06
 
 当前工作树为 `feature/knowledge-batch-delete-20261106`，基线为

@@ -56,6 +56,16 @@ Hallmark 的 HTML/CSS 规则在本项目映射到原生实现：
 开放P0/P1/P2/P3=0；正式文档以final-docs-r2限定复核为准。
 旧捕获不代签新增占位界面，当前新包完整原生finish仍OPEN。
 
+2026-11-06 当前工作区外壳视觉修整：顶部工具栏、会话栏、底部工具栏和状态栏
+统一使用主题 `chrome` 层；活动会话使用 `surface`、`accent` 边界和半粗标题，
+未活动会话保留 `canvas` 与普通边界；连接导航的选择器与树内容形成轻微层级差。
+这次调整只改语义 Palette 的使用和现有边界形状，不改变导航、会话实体、焦点、
+审核或持久化逻辑，也没有按主题 ID 分支。定向工作区 5 项、主题 7 项和连接
+导航 21 项通过，完整工程门禁和新的独立只读复核均已通过；原生截图和其它平台
+仍待单独验收，见
+[ADR 0108](../adr/0108-workbench-chrome-hierarchy.md)与
+[测试记录](../testing/records/2026-11-06-workbench-chrome-polish.md)。
+
 旧组合程序33be2e68的本机输入补查另取得22对AX/JPEG：
 可见x在单独Return后才有1字节增量，新Return/Right正控为1/3；
 Unicode typeText没有可见或PTY结果，原因UNKNOWN。限定树Home/Down/End和激活

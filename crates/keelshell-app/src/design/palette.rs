@@ -44,7 +44,9 @@ impl Palette {
         text: 0x1d2939,
         muted: 0x526175,
         accent: 0x205eb7,
-        focus: 0x1769d2,
+        // Kit renders the ordinary focus ring at 50% alpha; keep the
+        // composited ring visible against the light chrome and sidebar layers.
+        focus: 0x002a56,
         selected: 0xe8f0fc,
         primary: 0x2166c5,
         primary_hover: 0x1c58ad,

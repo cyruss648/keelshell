@@ -72,7 +72,9 @@ const GRAPHITE: ThemeDefinition = ThemeDefinition {
         text: 0x2c2822,
         muted: 0x64594b,
         accent: 0x84500d,
-        focus: 0x9a5d0b,
+        // Kit renders the ordinary focus ring at 50% alpha; keep the
+        // composited ring visible against the light chrome and sidebar layers.
+        focus: 0x3f2000,
         selected: 0xf0e5d3,
         primary: 0x89540f,
         primary_hover: 0x75470a,
@@ -143,7 +145,9 @@ const LAVENDER: ThemeDefinition = ThemeDefinition {
         text: 0x332840,
         muted: 0x665272,
         accent: 0x6939ab,
-        focus: 0x7c43c4,
+        // Kit renders the ordinary focus ring at 50% alpha; keep the
+        // composited ring visible against the light chrome and sidebar layers.
+        focus: 0x37105f,
         selected: 0xe4d8f2,
         primary: 0x7143b5,
         primary_hover: 0x60379d,
