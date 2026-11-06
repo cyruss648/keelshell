@@ -651,6 +651,7 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
         let mut tabs = div()
             .id(SharedString::from(format!("pane-tabs-{}", pane.0)))
             .test_support()
@@ -683,7 +684,7 @@ impl Workspace {
             }
         }
         div()
-            .h(px(28.))
+            .h(px(chrome.pane_header_height))
             .flex_shrink_0()
             .min_w_0()
             .flex()

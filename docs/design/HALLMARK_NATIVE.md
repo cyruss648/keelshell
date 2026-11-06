@@ -202,3 +202,20 @@ Unicode typeText没有可见或PTY结果，原因UNKNOWN。限定树Home/Down/En
 [隧道记录](../testing/records/2026-11-05-net-native-acceptance.md)。
 
 本文件定义设计方向，不声称已完成全应用或三平台原生验收。每次交付仍需按测试记录列出实际覆盖与缺口。
+
+## 2026-11-07 工作区视觉节奏收口
+
+工作区外壳继续遵循“一个主任务、一条清晰上下文”的原则：宽窗顶部显示
+KeelShell 品牌和远程工作台身份，中部显示当前 SSH 主机；命令栏左侧用
+审核目标徽章固定目标身份，主要执行按钮使用主题 primary 语义。会话标签的
+当前、悬停和按下状态分别消费 `surface_active`、`surface_hover` 和
+`surface_active`，不以装饰性状态点替代文字。
+
+三套主题仍全部进入同一注册表，新增的 `ChromeTokens` 与 Palette、组件圆角、
+终端默认色一起作为主题定义的一部分。当前主题故意保持相同 chrome 尺寸，
+避免切换主题时终端和命令输入突然跳动；后续主题可在注册表中调整这些 token，
+视图不需要知道主题 ID。900×580 下品牌区自动隐藏，确保紧凑布局优先保留
+连接、会话、终端、审核输入和工具区。
+
+本轮实现和验证见 [ADR 0115](../adr/0115-workbench-visual-rhythm-and-context.md)
+及 [测试记录](../testing/records/2026-11-07-workbench-visual-refinement.md)。

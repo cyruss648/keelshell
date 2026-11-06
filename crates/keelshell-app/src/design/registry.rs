@@ -1,6 +1,6 @@
 //! Built-in families. Adding a theme requires a definition and one registry entry.
 
-use super::{ComponentTokens, Palette, TerminalPalette};
+use super::{ChromeTokens, ComponentTokens, Palette, TerminalPalette};
 use gpui_kit::component::ThemeMode;
 use keelshell_core::Theme;
 
@@ -17,6 +17,7 @@ pub struct ThemeDefinition {
     pub light: Palette,
     pub dark: Palette,
     pub components: ComponentTokens,
+    pub chrome: ChromeTokens,
     pub terminal: TerminalPalette,
 }
 
@@ -43,6 +44,15 @@ pub(super) const FROST: ThemeDefinition = ThemeDefinition {
     components: ComponentTokens {
         control_radius: 6.,
         panel_radius: 8.,
+    },
+    chrome: ChromeTokens {
+        toolbar_height: 42.,
+        session_strip_height: 40.,
+        session_tab_height: 34.,
+        tool_tabs_height: 32.,
+        command_input_height: 64.,
+        status_bar_height: 30.,
+        pane_header_height: 28.,
     },
     terminal: TerminalPalette {
         foreground: 0xd9e3ed,
@@ -123,6 +133,15 @@ const GRAPHITE: ThemeDefinition = ThemeDefinition {
         control_radius: 4.,
         panel_radius: 6.,
     },
+    chrome: ChromeTokens {
+        toolbar_height: 42.,
+        session_strip_height: 40.,
+        session_tab_height: 34.,
+        tool_tabs_height: 32.,
+        command_input_height: 64.,
+        status_bar_height: 30.,
+        pane_header_height: 28.,
+    },
     terminal: TerminalPalette {
         foreground: 0xe5dfd5,
         background: 0x11100e,
@@ -201,6 +220,15 @@ const LAVENDER: ThemeDefinition = ThemeDefinition {
     components: ComponentTokens {
         control_radius: 12.,
         panel_radius: 14.,
+    },
+    chrome: ChromeTokens {
+        toolbar_height: 42.,
+        session_strip_height: 40.,
+        session_tab_height: 34.,
+        tool_tabs_height: 32.,
+        command_input_height: 64.,
+        status_bar_height: 30.,
+        pane_header_height: 28.,
     },
     terminal: TerminalPalette {
         foreground: 0xeee4f7,

@@ -146,6 +146,11 @@ fn registry_identifiers_are_valid_unique_and_unknown_families_fall_back() {
             theme.preferred_appearance,
             Preference::Light | Preference::Dark
         ));
+        assert!(theme.chrome.toolbar_height >= 36.);
+        assert!(theme.chrome.session_strip_height >= theme.chrome.session_tab_height);
+        assert!(theme.chrome.command_input_height >= 56.);
+        assert!(theme.chrome.status_bar_height >= 24.);
+        assert!(theme.chrome.pane_header_height >= 24.);
     }
     assert_eq!(definition("future-theme-v2").id, "frost");
 }
@@ -203,6 +208,7 @@ fn kit_controls_and_custom_views_receive_the_same_family_snapshot(cx: &mut TestA
                 assert_eq!(kit.colors.sidebar, rgb(p.sidebar).into());
                 assert_eq!(kit.radius, px(family.components.control_radius));
                 assert_eq!(kit.radius_lg, px(family.components.panel_radius));
+                assert_eq!(chrome(cx), family.chrome);
             }
         }
         let settings = Settings {

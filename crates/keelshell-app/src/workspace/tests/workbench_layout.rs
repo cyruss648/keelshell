@@ -59,6 +59,15 @@ fn workbench_regions_fit_all_registered_themes_without_changing_drafts(cx: &mut 
                         assert!(inside(toolbar, window.bounds()), "{scene}: toolbar");
                         assert!(inside(strip, column), "{scene}: session strip");
                         assert!(strip.top() >= toolbar.bottom(), "{scene}: separate chrome");
+                        match window.try_find("workspace-brand") {
+                            Some(brand) => {
+                                assert!(width >= 1280., "{scene}: brand is too wide");
+                                assert!(inside(brand.bounds(), toolbar), "{scene}: brand");
+                            }
+                            None => {
+                                assert!(width < 1280., "{scene}: wide toolbar lost brand");
+                            }
+                        }
                         let terminal = window
                             .find(("terminal-pane", panes[0].terminal.entity_id()))
                             .bounds();
@@ -71,6 +80,7 @@ fn workbench_regions_fit_all_registered_themes_without_changing_drafts(cx: &mut 
                             "navigation-monitor",
                             "new-session",
                             "command-input-container",
+                            "command-target-badge",
                             "remote-completion-controls",
                             "command-actions",
                             "workspace-tool-tabs",

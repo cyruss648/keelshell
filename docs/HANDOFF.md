@@ -7,6 +7,31 @@
 
 ## 2026-11-07 继续推进回执
 
+本次继续推进的视觉增量尚未提交时已完成定向回归和完整工程门禁。源码新增
+`ChromeTokens` 并接入主题注册表，工作区宽窗增加品牌与远程工作台上下文，
+命令栏增加审核目标徽章，执行按钮使用 primary 语义，会话标签补充
+`surface_active`/`surface_hover`/按下层级。新增设计决策见
+[ADR 0115](adr/0115-workbench-visual-rhythm-and-context.md)，测试回执见
+[2026-11-07 视觉记录](testing/records/2026-11-07-workbench-visual-refinement.md)。
+三套主题仍通过 registry、Palette、组件形状和 chrome token 扩展，业务视图不
+按主题 ID 分支；900px 以下隐藏品牌区以保留紧凑窗口操作空间。
+
+定向设计测试 4/4、工作区三主题/双明暗/双语/三尺寸布局 1/1、长标题会话
+1/1、900×580 双语工具栏 1/1 通过。首次 app crate 全量运行出现既有 reconnect
+分屏夹具 1 项失败（1074/1/2），精确重跑该用例 1/1 通过；随后完整
+`python3 scripts/check.py` 退出 0，实际完成 Python 131/1 skip、app
+1075/2 ignored、workspace 其余测试、严格 Clippy、rustdoc、依赖策略和三组
+AI controller。该 linker 警告和首次 app 全量失败均保留，不伪装成无失败历史。
+
+独立视觉/产品只读复核已返回：未发现 P0，确认当前主题注册表和本轮视觉增量
+方向可维护；下一片优先建议为所有终端 pane 增加持续的连接身份栏，并随后处理
+顶部工具栏分组、AI 面板窄窗比例和会话标签键盘/AX 语义。该报告不替代源码
+独立非作者复核，后者仍在等待。
+
+原生 CUA 通道仍需再次确认桌面解锁后才能观察当前工作树；在此之前 macOS
+多窗口、主题切换、键盘/IME/VoiceOver 和当前视觉增量的实际截图继续保持
+`NOT_RUN`，不以 GPUI headless 测试代签。
+
 当前源码提交 `ac397c87f3fc49e1e1f940ecd99fab20566c7a23` 已于
 2026-11-06 22:07:13 UTC 推送到
 `origin/feature/main-visual-integration-20261106`，本地、tracking 和远端

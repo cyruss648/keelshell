@@ -34,6 +34,23 @@ pub struct ComponentTokens {
     pub panel_radius: f32,
 }
 
+/// Geometry tokens for the persistent workbench chrome.
+///
+/// These values live with a theme definition so future families can tune the
+/// visual rhythm without adding theme-ID branches to workspace views. The
+/// current families intentionally share the same measurements to preserve
+/// cross-theme muscle memory and compact-window behavior.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ChromeTokens {
+    pub toolbar_height: f32,
+    pub session_strip_height: f32,
+    pub session_tab_height: f32,
+    pub tool_tabs_height: f32,
+    pub command_input_height: f32,
+    pub status_bar_height: f32,
+    pub pane_header_height: f32,
+}
+
 struct InstalledTheme(&'static ThemeDefinition);
 impl Global for InstalledTheme {}
 
@@ -67,6 +84,11 @@ pub fn terminal_palette(cx: &App) -> TerminalPalette {
 /// Shared shape tokens for custom application surfaces.
 pub fn components(cx: &App) -> ComponentTokens {
     current_definition(cx).components
+}
+
+/// Return a copied snapshot of the current workbench geometry.
+pub fn chrome(cx: &App) -> ChromeTokens {
+    current_definition(cx).chrome
 }
 
 pub fn resolve(preference: Preference, appearance: WindowAppearance) -> ThemeMode {

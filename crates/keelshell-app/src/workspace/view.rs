@@ -1,15 +1,19 @@
 //! Remote workspace composition: compact tabs, host monitor, terminal, command bar, files.
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
-use gpui_kit::{assets::IconName, component::Selectable};
+use gpui_kit::{
+    assets::IconName,
+    component::{Icon, Selectable},
+};
 
 impl Workspace {
     fn session_strip(&self, tabs: AnyElement, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
         div()
             .id("session-strip")
             .test_support()
-            .h(px(40.))
+            .h(px(chrome.session_strip_height))
             .flex_shrink_0()
             .min_w_0()
             .flex()
@@ -396,6 +400,7 @@ impl Workspace {
     #[inline(never)]
     fn session_tabs(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
         let mut tabs = div()
             .id("session-tabs")
             .test_support()
@@ -422,7 +427,7 @@ impl Workspace {
                 div()
                     .id(("session-tab", index))
                     .test_support()
-                    .h(px(34.))
+                    .h(px(chrome.session_tab_height))
                     .w(px(184.))
                     .flex_shrink_0()
                     .rounded(px(crate::design::components(cx).control_radius))
@@ -432,7 +437,7 @@ impl Workspace {
                     .gap_1()
                     .cursor_pointer()
                     .bg(rgb(if self.active == index {
-                        visual.surface
+                        visual.surface_active
                     } else {
                         visual.canvas
                     }))
@@ -445,6 +450,8 @@ impl Workspace {
                     .when(self.active == index, |tab| {
                         tab.border_b_2().border_color(rgb(visual.accent))
                     })
+                    .hover(|style| style.bg(rgb(visual.surface_hover)))
+                    .active(|style| style.bg(rgb(visual.surface_active)))
                     .on_click(cx.listener(move |view, _, window, cx| {
                         if let Some(index) = view
                             .tabs
@@ -522,10 +529,11 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
         let mut bottom_tabs = div()
             .id("workspace-tool-tabs")
             .test_support()
-            .h(px(32.))
+            .h(px(chrome.tool_tabs_height))
             .flex_shrink_0()
             .flex()
             .items_center()
@@ -649,14 +657,33 @@ impl Workspace {
                 }))
                 .map(|button| self.retain_modal_button("connection-manager", button, cx))
                 .into_any_element(),
-            div()
-                .flex_1()
-                .min_w_0()
-                .px_2()
-                .text_ellipsis()
-                .text_color(rgb(visual.muted))
-                .child(t(cx, "远程工作区", "Remote workspace"))
-                .into_any_element(),
+            {
+                let context = active_id
+                    .and_then(|id| self.remote_hosts.get(&id))
+                    .cloned()
+                    .unwrap_or_else(|| t(cx, "选择一个连接", "Select a connection").to_owned());
+                div()
+                    .flex_1()
+                    .min_w_0()
+                    .px_2()
+                    .flex()
+                    .flex_col()
+                    .justify_center()
+                    .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                        cx,
+                        "远程工作区",
+                        "Remote workspace",
+                    )))
+                    .child(
+                        div()
+                            .min_w_0()
+                            .text_xs()
+                            .text_ellipsis()
+                            .text_color(rgb(visual.text))
+                            .child(context),
+                    )
+                    .into_any_element()
+            },
             Button::new("split-session")
                 .icon(IconName::Columns2)
                 .ghost()
@@ -785,6 +812,50 @@ impl Workspace {
         ]
     }
 
+    fn workspace_brand(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        div()
+            .id("workspace-brand")
+            .test_support()
+            .flex_shrink_0()
+            .flex()
+            .items_center()
+            .gap_2()
+            .pr_3()
+            .border_r_1()
+            .border_color(rgb(visual.border))
+            .child(
+                div()
+                    .size(px(24.))
+                    .flex_shrink_0()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .rounded(px(crate::design::components(cx).control_radius))
+                    .bg(rgb(visual.primary))
+                    .text_color(rgb(visual.primary_text))
+                    .child(Icon::new(IconName::Server).size_3()),
+            )
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .justify_center()
+                    .child(
+                        div()
+                            .text_sm()
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .child("KeelShell"),
+                    )
+                    .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                        cx,
+                        "远程工作台",
+                        "Remote workbench",
+                    ))),
+            )
+            .into_any_element()
+    }
+
     #[inline(never)]
     fn workspace_settings_actions(
         &self,
@@ -855,10 +926,11 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
         div()
             .id("workspace-toolbar")
             .test_support()
-            .h(px(42.))
+            .h(px(chrome.toolbar_height))
             .bg(rgb(visual.chrome))
             .px_2()
             .gap_1()
@@ -867,6 +939,9 @@ impl Workspace {
             .items_center()
             .border_b_1()
             .border_color(rgb(visual.border))
+            .when(!compact_toolbar, |toolbar| {
+                toolbar.child(self.workspace_brand(cx))
+            })
             // Keep the existing siblings: grouping adds call boundaries, not containers.
             .children(self.workspace_session_actions(
                 show_navigation,
@@ -896,6 +971,12 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
+        let target_color = if reviewed_id != active_id {
+            visual.warning
+        } else {
+            visual.accent
+        };
         div()
             .flex_shrink_0()
             .px_2()
@@ -907,15 +988,43 @@ impl Workspace {
             .gap_2()
             .child(
                 div()
+                    .id("command-target-badge")
+                    .test_support()
                     .max_w(px(220.))
-                    .text_xs()
-                    .text_ellipsis()
-                    .text_color(rgb(if reviewed_id != active_id {
+                    .min_w(px(112.))
+                    .flex_shrink_0()
+                    .flex()
+                    .flex_col()
+                    .justify_center()
+                    .gap(px(1.))
+                    .px_2()
+                    .py_1()
+                    .rounded(px(crate::design::components(cx).control_radius))
+                    .bg(rgb(visual.chrome))
+                    .border_1()
+                    .border_color(rgb(if reviewed_id != active_id {
                         visual.warning
                     } else {
-                        visual.muted
+                        visual.border
                     }))
-                    .child(reviewed_target),
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap_1()
+                            .text_xs()
+                            .text_color(rgb(visual.muted))
+                            .child(Icon::new(IconName::Server).size_3())
+                            .child(t(cx, "审核目标", "Review target")),
+                    )
+                    .child(
+                        div()
+                            .min_w_0()
+                            .text_xs()
+                            .text_ellipsis()
+                            .text_color(rgb(target_color))
+                            .child(reviewed_target),
+                    ),
             )
             .capture_action(cx.listener(|view, _: &CompleteRemoteCommand, window, cx| {
                 if view.command.read(cx).focus_handle(cx).is_focused(window)
@@ -967,7 +1076,7 @@ impl Workspace {
                     .test_support()
                     .flex_1()
                     .min_w_0()
-                    .h(px(64.))
+                    .h(px(chrome.command_input_height))
                     .child(Textarea::new(&self.command).h_full()),
             )
             .when(stale_command, |bar| {
@@ -988,6 +1097,7 @@ impl Workspace {
             })
             .child(
                 Button::new("run-command")
+                    .primary()
                     .compact()
                     .label(t(cx, "执行", "Run"))
                     .disabled(
@@ -1005,6 +1115,7 @@ impl Workspace {
 
     #[inline(never)]
     fn command_actions(&self, compact_command_tools: bool, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         div()
             .id("command-actions")
             .test_support()
@@ -1012,6 +1123,9 @@ impl Workspace {
             .min_w_0()
             .px_2()
             .py_1()
+            .border_t_1()
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.canvas))
             .flex()
             .flex_wrap()
             .items_center()
@@ -1112,8 +1226,9 @@ impl Workspace {
     #[inline(never)]
     fn workspace_status_bar(&self, terminal_status: String, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
         div()
-            .h(px(30.))
+            .h(px(chrome.status_bar_height))
             .px_3()
             .flex_shrink_0()
             .flex()
