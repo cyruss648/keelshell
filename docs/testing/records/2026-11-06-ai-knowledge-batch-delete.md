@@ -60,8 +60,9 @@ revision 与 ABA 旧绘制事件、Ask/编辑器状态隔离、Workspace 单次 
 `crates/keelshell-app/src/assistant/knowledge_library/batch.rs:297-346`。
 
 当前未进行发行构建、安装、签名、远端同步、跨平台桌面或安全擦除验收；
-配置备份保留历史副本的边界仍然有效。完整工程门禁和独立复核均通过后，
-本切片已具备提交条件，提交、推送和后续原生验收仍分别记录。
+配置备份保留历史副本的边界仍然有效。来源切片的完整工程门禁和独立复核通过后，
+已通过后续 `main` 功能组合进入当前集成树；当前组合的提交、推送和原生验收
+以交接文档及本次组合记录为准。
 
 ## English
 
@@ -77,7 +78,8 @@ the full knowledge-library application run passed 31 tests. Two complete project
 gates passed with Python 131 run / 1 skipped, app 993 passed / 2 ignored, core 181
 passed and 14 rustdoc checks, including the readiness controller. A new sub-agent
 performed a strict read-only source and behavior review and reported P0/P1/P2/P3 = 0,
-`NO_BLOCKER`, and `APPROVE`. The slice is ready for a feature commit.
+`NO_BLOCKER`, and `APPROVE`. The source slice was ready for integration at that stage;
+it has since been absorbed by the later `main` knowledge-category combination.
 
 Release builds, installation, signing, remote synchronization, native desktop
 acceptance on other platforms and secure erasure remain outside this record.
