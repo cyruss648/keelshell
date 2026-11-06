@@ -15,17 +15,28 @@ Palette 提供颜色，业务代码没有主题 ID 分支。用户可以在设�
 曜石或雾紫；新增主题只需注册新的 family 元数据、浅深 Palette 和组件形状，
 不需要修改工作区业务视图。
 
+## 主题 token 补全
+
+集成后的非作者源码复核进一步指出，监控面板的文件系统容量条仍直接使用
+`0x448eaa`，因此不会随 Frost、Graphite、Lavender 的明暗变体切换。修复提交
+`ef110d2` 在 `Palette` 中增加独立的 `resource` 语义 token，为三套主题的六个
+变体提供资源色，容量条改用当前 `visual.resource`；设计测试同时检查 token
+非空以及资源色与进度轨道边界至少 3:1 的对比度。该修复不改变采样、容量计算、
+滚动、选择或监控权限行为。
+
 ## 定向验证
 
 | 命令 | 结果 |
 | --- | --- |
 | `cargo fmt --all -- --check` | exit 0 |
 | `git diff --check` | exit 0 |
-| `cargo test -p keelshell-app --locked design -- --test-threads=4` | exit 0；4 passed，991 filtered；包含实际 50% alpha 合成焦点环对比度 |
+| `cargo test -p keelshell-app design::tests -- --test-threads=4` | exit 0；4 passed，1045 filtered；包含实际 50% alpha 合成焦点环和六个资源 token 的对比度 |
+| `cargo test -p keelshell-app disk_ -- --test-threads=4` | exit 0；10 passed，1039 filtered；覆盖文件系统容量和磁盘采样相关回归 |
+| `cargo test -p keelshell-app independent_disk -- --test-threads=4` | exit 0；1 passed，1048 filtered；覆盖主题切换后的独立磁盘采样 |
 | `cargo test -p keelshell-app --locked workbench_layout -- --test-threads=4` | exit 0；5 passed，990 filtered |
 | `cargo test -p keelshell-app --locked 'themes::' -- --test-threads=4` | exit 0；7 passed，988 filtered |
 | `cargo test -p keelshell-app --locked workspace::tests::navigation -- --test-threads=4` | exit 0；21 passed，974 filtered |
-| `cargo clippy -p keelshell-app --all-targets --locked --all-features -- -D warnings` | exit 0 |
+| `cargo clippy -p keelshell-app --tests --all-targets -- -D warnings` | exit 0 |
 
 已有工作区矩阵覆盖 900×580、1280×840、1440×900，三套主题、明暗模式和
 中英文；本轮执行了工作区、主题和连接导航专项。
@@ -44,6 +55,12 @@ Palette 提供颜色，业务代码没有主题 ID 分支。用户可以在设�
 
 完整门禁覆盖了本切片之外的现有代码，因此它证明当前工作树的工程回归
 通过，不代表完整产品能力、发行包或三平台桌面验收已经完成。
+
+## 主题 token 修复的复核状态
+
+来源复核发现的容量条硬编码色已由 `ef110d2` 修复，修后作者定向测试、严格
+Clippy 和完整 `python3 scripts/check.py` 均通过。新的非作者只读复核尚未完成；
+在复核固定最终源码前，不把该 P2 写成已关闭。
 
 ## 复核修订
 
