@@ -24,7 +24,16 @@ fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
         for mode in [ThemeMode::Light, ThemeMode::Dark] {
             let p = theme.palette(mode);
             for (role, foreground) in [("text", p.text), ("muted", p.muted), ("accent", p.accent)] {
-                for background in [p.canvas, p.surface, p.selected, p.chrome, p.sidebar] {
+                for background in [
+                    p.canvas,
+                    p.surface,
+                    p.surface_hover,
+                    p.surface_active,
+                    p.selected,
+                    p.chrome,
+                    p.toolbar,
+                    p.sidebar,
+                ] {
                     assert!(
                         contrast(foreground, background) >= 4.5,
                         "{}/{mode:?}/{role}: {foreground:x} on {background:x} = {}",
@@ -56,6 +65,16 @@ fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
             assert!(
                 contrast(p.field_border, p.surface) >= 3.,
                 "{}/{mode:?} input",
+                theme.id
+            );
+            assert!(
+                contrast(p.focus, p.surface) >= 3.,
+                "{}/{mode:?} focus ring",
+                theme.id
+            );
+            assert_ne!(
+                p.surface_hover, p.surface_active,
+                "{}/{mode:?} hover and active need separate surfaces",
                 theme.id
             );
         }
@@ -120,13 +139,17 @@ fn kit_controls_and_custom_views_receive_the_same_family_snapshot(cx: &mut TestA
                 let kit = cx.global::<Theme>();
                 assert_eq!(current_definition(cx).id, family.id);
                 assert_eq!(kit.colors.background, rgb(p.surface).into());
+                assert_eq!(kit.colors.accent, rgb(p.surface_hover).into());
+                assert_eq!(kit.colors.button_active, rgb(p.surface_active).into());
+                assert_eq!(kit.colors.ring, rgb(p.focus).into());
                 assert_eq!(
                     kit.colors.button_primary_foreground,
                     rgb(p.primary_text).into()
                 );
                 assert_eq!(kit.colors.input, rgb(p.field_border).into());
-                assert_eq!(kit.colors.list_active, rgb(p.selected).into());
-                assert_eq!(kit.colors.table_head, rgb(p.chrome).into());
+                assert_eq!(kit.colors.list_active, rgb(p.surface_active).into());
+                assert_eq!(kit.colors.table_head, rgb(p.toolbar).into());
+                assert_eq!(kit.colors.tab_bar, rgb(p.toolbar).into());
                 assert_eq!(kit.colors.popover, rgb(p.surface).into());
                 assert_eq!(kit.colors.sidebar, rgb(p.sidebar).into());
                 assert_eq!(kit.radius, px(family.components.control_radius));
