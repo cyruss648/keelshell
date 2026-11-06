@@ -19,7 +19,7 @@
 焦点环实际 alpha 合成对比度检查和第二轮独立复核均已通过；本次与 `main` 合并后，
 完整工程门禁、独立集成复核和新包验证必须重新执行，不能沿用来源分支的最终结论。
 原生包、Windows/Linux 桌面、紧凑窗口、输入法和辅助技术仍保持各自未完成边界。
-实现和视觉来源记录见 [工作区外壳 ADR](adr/0108-workbench-chrome-hierarchy.md)
+实现和视觉来源记录见 [工作区外壳 ADR](adr/0113-workbench-chrome-hierarchy.md)
 与 [视觉测试记录](testing/records/2026-11-06-workbench-chrome-polish.md)。
 
 ## 已交付基线

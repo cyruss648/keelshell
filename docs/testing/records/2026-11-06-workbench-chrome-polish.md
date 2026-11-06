@@ -69,5 +69,5 @@ design 与 workbench_layout 两项短测试，均 exit 0；结论为
 ## Hallmark 记录
 
 这是原生 Rust/GPUI app-screen 视觉调整，浏览器 `sloplint --render` 不适用。
-设计依据和语义映射见 [ADR 0108](../../adr/0108-workbench-chrome-hierarchy.md)
+设计依据和语义映射见 [ADR 0113](../../adr/0113-workbench-chrome-hierarchy.md)
 及 [Hallmark 原生映射](../../design/HALLMARK_NATIVE.md)。

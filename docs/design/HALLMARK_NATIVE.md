@@ -119,7 +119,7 @@ UI成功状态与B0–B5配置及SSH审计分别读回。新的native-r2独立�
 审核或持久化逻辑，也没有按主题 ID 分支。定向工作区 5 项、主题 7 项和连接
 导航 21 项通过，完整工程门禁和新的独立只读复核均已通过；原生截图和其它平台
 仍待单独验收，见
-[ADR 0108](../adr/0108-workbench-chrome-hierarchy.md)与
+[ADR 0113](../adr/0113-workbench-chrome-hierarchy.md)与
 [测试记录](../testing/records/2026-11-06-workbench-chrome-polish.md)。
 
 旧组合程序33be2e68的本机输入补查另取得22对AX/JPEG：
