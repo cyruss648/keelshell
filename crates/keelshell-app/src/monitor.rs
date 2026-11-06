@@ -1214,7 +1214,7 @@ impl Render for MonitorPanel {
                         &filesystem.mount,
                         format!("{}%", filesystem.used_percent),
                         Some(filesystem.used_percent as f32 / 100.),
-                        0x448eaa,
+                        visual.resource,
                     ))
                     .child(
                         div().text_xs().text_color(rgb(visual.muted)).child(

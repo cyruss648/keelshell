@@ -90,6 +90,15 @@ fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
                     contrast(composited, background)
                 );
             }
+            assert_ne!(p.resource, 0, "{}/{mode:?} resource token", theme.id);
+            assert!(
+                contrast(p.resource, p.border) >= 3.,
+                "{}/{mode:?} resource meter: {} on {} = {}",
+                theme.id,
+                p.resource,
+                p.border,
+                contrast(p.resource, p.border)
+            );
             assert_ne!(
                 p.surface_hover, p.surface_active,
                 "{}/{mode:?} hover and active need separate surfaces",

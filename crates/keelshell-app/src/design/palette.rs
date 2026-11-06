@@ -15,6 +15,8 @@ pub struct Palette {
     pub text: u32,
     pub muted: u32,
     pub accent: u32,
+    /// Resource meters such as filesystem capacity bars.
+    pub resource: u32,
     pub focus: u32,
     pub selected: u32,
     pub primary: u32,
@@ -44,6 +46,7 @@ impl Palette {
         text: 0x1d2939,
         muted: 0x526175,
         accent: 0x205eb7,
+        resource: 0x167a8f,
         // Kit renders the ordinary focus ring at 50% alpha; keep the
         // composited ring visible against the light chrome and sidebar layers.
         focus: 0x002a56,
@@ -73,6 +76,7 @@ impl Palette {
         text: 0xe5edf6,
         muted: 0xaab8ca,
         accent: 0x91bdff,
+        resource: 0x67c7d9,
         focus: 0xa9ccff,
         selected: 0x223e5b,
         primary: 0x316fca,
