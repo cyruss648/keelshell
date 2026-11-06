@@ -22,7 +22,12 @@
 主题明暗变体切换。修复提交 `ef110d2` 增加 `Palette.resource`，为三套主题的六个
 变体定义资源色，容量条读取当前 `visual.resource`，并以设计测试校验资源色与进度
 轨道的至少 3:1 对比度。修后定向设计 4/4、磁盘相关 10/10、独立磁盘主题回归 1/1、
-严格 Clippy 和完整 `python3 scripts/check.py` 均退出 0；新的非作者只读复核仍待完成。
+严格 Clippy 和完整 `python3 scripts/check.py` 均退出 0。随后尝试启动新的非作者只读
+复核，但默认复核任务未在有界等待内返回报告，备用模型因 API-Key 权限返回 403；
+没有任何复核任务修改工作树。父级对固定提交 `052eebc` 的限定只读核对未发现新的
+P0/P1/P2/P3，当前状态为
+`LIMITED_PARENT_REVIEW / APPROVE_SCOPED_WITH_REVIEW_SERVICE_LIMITATION`，不把它写成
+非作者子代理已批准。
 
 霜白、曜石、雾紫仍由注册表、Palette 和组件形状扩展；业务视图不按主题 ID 分支，
 新增主题只需要扩展主题注册表、语义 Palette 和组件形状。视觉来源切片的定向门禁、

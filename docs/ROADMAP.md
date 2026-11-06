@@ -17,7 +17,10 @@
 独立的 `Palette.resource`，六个主题变体均提供资源色，监控视图按当前主题读取该
 token，并以轨道对比度测试防止回退到固定颜色。修后设计 4/4、磁盘相关 10/10、
 独立主题回归 1/1、严格 Clippy 和完整 `scripts/check.py` 均通过；新的非作者只读
-复核仍待完成，完成前保持该 P2 的待复核状态。
+复核任务在有界等待内未返回，备用模型因 API-Key 权限返回 403；父级固定提交只读
+核对未发现新的 P0/P1/P2/P3。当前采用
+`LIMITED_PARENT_REVIEW / APPROVE_SCOPED_WITH_REVIEW_SERVICE_LIMITATION`，保留独立
+子代理复核服务未形成报告的限制，不把它写成已获得非作者批准。
 
 ## 最新交付
 

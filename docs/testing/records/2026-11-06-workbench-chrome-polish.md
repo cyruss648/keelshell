@@ -59,8 +59,14 @@ Palette 提供颜色，业务代码没有主题 ID 分支。用户可以在设�
 ## 主题 token 修复的复核状态
 
 来源复核发现的容量条硬编码色已由 `ef110d2` 修复，修后作者定向测试、严格
-Clippy 和完整 `python3 scripts/check.py` 均通过。新的非作者只读复核尚未完成；
-在复核固定最终源码前，不把该 P2 写成已关闭。
+Clippy 和完整 `python3 scripts/check.py` 均通过。随后尝试启动新的非作者只读
+复核，但两个默认复核任务在有界等待内没有返回可审计报告，轻量复核因模型 API
+权限返回 403，未产生任何源码或文档写入。父级对固定提交 `052eebc` 做了最后的
+只读核对：六个 `resource` 变体均已注册，监控容量条仅引用 `visual.resource`，
+旧 `0x448eaa` 已不存在，定向测试和完整门禁证据与提交一致，未发现新的
+P0/P1/P2/P3。结论限定为
+`LIMITED_PARENT_REVIEW / APPROVE_SCOPED_WITH_REVIEW_SERVICE_LIMITATION`；
+该结论不冒充一次成功的非作者子代理批准。
 
 ## 复核修订
 
