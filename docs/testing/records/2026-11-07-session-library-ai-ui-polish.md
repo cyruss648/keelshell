@@ -56,6 +56,51 @@ AI 工作流首轮定向测试曾在回复测试中因新增内容把回复区�
 审核、Agent 操作审核、知识保存闸门和外部 AI provider 协议没有被放宽。快捷键
 只切换已有会话，不创建连接、不发送命令、不覆盖草稿。
 
+## 精确提交复核与当前 macOS 包
+
+源码片已提交并推送到 `feature/main-visual-integration-20261106`：
+
+- reviewed commit / HEAD：`dd6c88b0710bb56ca785eeeb83ee0835a1b77ede`；
+- parent：`8402a93c0304b8f0766e8f2f4deb79b985c59ff6`；
+- 本地、tracking、远端 SHA 一致，`git status --porcelain=v1` 为空。
+
+新的独立严格只读复核固定在上述 exact tip，未编辑、reset、checkout、提交、推送
+或清理工作树，结论如下：
+
+- P0：0；P1：0；P2：0；P3：0；
+- merge recommendation：`APPROVE`，同时保留本文列出的原生和外部集成边界；
+- `git diff --check dd6c88b^ dd6c88b`：通过；
+- `cargo test -p keelshell-app --locked keyboard_session_navigation_keeps_the_active_target_and_exposes_count -- --test-threads=1`：1 passed，0 failed，1085 filtered；
+- `cargo test -p keelshell-app --locked workspace_capture_review_and_save_round_trips_confirmed_knowledge -- --test-threads=1`：1 passed，0 failed，1085 filtered。
+
+上述两项测试出现既有 `ld: __eh_frame section too large` warning，但命令均退出
+0。复核 agent 没有重新执行完整 `python3 scripts/check.py`，完整门禁退出 0 的计数
+来自本片作者回执；共享 target 失效也没有在只读复核中执行。
+
+为关闭共享 target 归属风险，本片随后执行：
+
+```text
+cargo clean --locked --offline -p keelshell-app -p keelshell-core -p keelshell-session -p keelshell-ai -p keelshell-mcp
+MACOSX_DEPLOYMENT_TARGET=15.0 KEELSHELL_BUILD_COMMIT=dd6c88b0710bb56ca785eeeb83ee0835a1b77ede cargo build -p keelshell-app -p keelshell-mcp --release --locked
+KEELSHELL_BUILD_COMMIT=dd6c88b0710bb56ca785eeeb83ee0835a1b77ede python3 packaging/package.py macos --binary target/release/keelshell-app --mcp-binary target/release/keelshell-mcp --target aarch64-apple-darwin --output work/native-cua-20261107/package-r6
+python3 packaging/inspect_native.py --platform macos --target aarch64-apple-darwin --stage work/native-cua-20261107/package-r6
+```
+
+四步最终均退出 0；首次没有传入 `KEELSHELL_BUILD_COMMIT` 的 `package-r6` 临时
+目录读回 `build.commit=null`，已删除且不作为证据。最终 `package-r6` manifest
+绑定 exact `dd6c88b...`，`installed=false`，GUI SHA-256 为
+`42d546065cfd8e056b96de597cb564e650f03a8c6ab4f6117f76f1c1791786f5`，MCP SHA-256
+为 `94eaf83f8bbb23ae4db7cc190c9c06332ddbc19b4bf9246dcdf35f43b3645d8f`，目标为
+`aarch64-apple-darwin`，最低 macOS 版本为 15.0。包结构检查只证明 bundle、架构、
+依赖和 manifest 自洽，不证明签名、公证、安装或完整 GUI 验收。
+
+解锁后从 `package-r6/KeelShell.app` 启动并完成短范围 smoke：连接库空态显示当前
+范围、数量和新建连接入口；主题对话框依次将 Frost、Graphite、Lavender 标为
+当前并可应用，之后恢复 Graphite；AI 助手侧栏显示六阶段轨道、明确捕获提示、
+问题输入和预览动作，AX 树可读到相应按钮和文本。测试结束后 package-r5/r6 的
+KeelShell 进程均已关闭。该 smoke 没有运行真实 SSH、完整分屏/恢复长流程、IME、
+VoiceOver 或外部 AI provider。
+
 ## 尚未完成
 
 完整 `python3 scripts/check.py` 已退出 0，包含 Python 131 run / 1 skipped、格式、

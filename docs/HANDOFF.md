@@ -7,7 +7,9 @@
 
 ## 2026-11-07 会话、连接库与 AI 助手界面增强
 
-当前工作树继续推进工作区的视觉连续性和操作可达性，源码与文档改动尚未形成新的提交。
+本片已提交并推送到 `feature/main-visual-integration-20261106`，精确提交为
+`dd6c88b0710bb56ca785eeeb83ee0835a1b77ede`；当前工作树、tracking 和远端 SHA
+一致且工作树干净。
 本片包含连接库范围标题与空态、会话条数量与双语 AX、上一个/下一个会话快捷键，
 以及 AI 助手的六阶段工作流轨道。AI 回复到达后会自动滚动到回复审核区，避免
 长上下文把审核入口推到首屏之外；知识保存动作固定在助手底部审核栏，Agent 停止
@@ -28,9 +30,14 @@ Chrome token 和 Typography token 提供，视图不按主题 ID 分支，新增
 
 完整 `python3 scripts/check.py` 已重新执行并退出 0，包含 Python 131/1 skipped、
 格式、严格 workspace Clippy、workspace tests、doctests、依赖策略和三组 AI
-controller。下一步是提交并推送这片源码与文档，然后固定最新提交启动新的独立只读
-代码/功能复核。Windows/Linux 原生桌面、完整键盘焦点、IME、VoiceOver、当前源码
-包的长流程、Podman/SSH 真实联调和外部 AI provider 仍不能由本轮 headless 门禁代签。
+controller。当前提交已完成新的独立严格只读复核：P0/P1/P2/P3 均为 0，
+复核建议为 `APPROVE`；复核使用两个定向用例，各 1 passed，保留
+`__eh_frame section too large` linker warning 及共享 target 只读限制。当前精确
+源码已重新失效构建并生成 `package-r6`，manifest 绑定 `dd6c88b...`，结构检查
+退出 0；解锁后的 macOS 短验确认 Frost、Graphite、Lavender 三套主题均可切换，
+AI 助手侧栏和其 AX 元素可见，运行进程已关闭。Windows/Linux 原生桌面、完整键盘
+焦点、IME、VoiceOver、当前源码包的长流程、Podman/SSH 真实联调和外部 AI provider
+仍不能由本轮 headless 或短范围 smoke 代签。
 
 ## 2026-11-07 连接身份栏最终候选
 
