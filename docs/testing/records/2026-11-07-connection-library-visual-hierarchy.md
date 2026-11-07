@@ -8,7 +8,8 @@
 - `crates/keelshell-app/src/workspace/library_view.rs`
 - `crates/keelshell-app/src/workspace/tests/library.rs`
 
-实现提交：`09e05e2`。
+最终实现提交：
+`48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9`。
 
 ## 实现结果
 
@@ -31,7 +32,10 @@ right: Some("☑")
 ```
 
 失败发生在测试代码的断言层，没有产生源码行为失败。修正为验证双语完整可访问
-标签和行的 selected 语义后，精确重跑与完整定向模块均通过。
+标签、行的 selected 语义和主动作可达性后，精确重跑与完整定向模块均通过。
+随后又修复了选中行悬停覆盖 active 状态和 `Role::Group` 不属于原生
+selectable item 语义的问题，最终提交统一使用 `Role::List` / `Role::ListItem`
+以及未选中行的 `surface_hover`。
 
 | 命令 | 结果 |
 | --- | --- |
@@ -50,8 +54,9 @@ linker warning：`__eh_frame section too large`；没有导致命令失败。
 
 ## 验收边界
 
-本片只形成源码和 headless GPUI 证据。`package-r10` 等此前包不包含提交
-`09e05e2`，不能代签本片的真实桌面颜色或按钮样式。当前源码的 macOS 包、
+本片只形成源码和 headless GPUI 证据。`package-r10` 等此前包不包含最终提交
+`48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9`，不能代签本片的真实桌面颜色或
+按钮样式。当前源码的 macOS 包、
 Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、真实 SSH/Podman 长流程和
 外部 AI provider 仍需独立验收。
 

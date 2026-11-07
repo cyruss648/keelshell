@@ -52,8 +52,12 @@ Lavender 的主题 ID。未来新增主题只需补齐注册定义和 token；�
 
 ## 验证
 
-源码和测试实现提交为 `09e05e2`。连接库定向测试为 `27 passed / 0 failed`，
+最终源码和测试实现提交为
+`48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9`。连接库定向测试为
+`27 passed / 0 failed`，selected-row 精确回归为 `1 passed / 0 failed`，
 覆盖宽表格、窄卡片、双语、回收站、批量选择、动作可达性和 selected-row
 无障碍语义。完整 `python3 scripts/check.py` 退出 `0`，实际完成 Python
 `131 run / 1 skipped`、app `1089 passed / 2 ignored`、workspace 其它测试、
-严格 Clippy、doctests、依赖策略和三组 AI controller。
+严格 Clippy、doctests、依赖策略和三组 AI controller。此前测试曾把
+observation 的可访问标签误当成可见按钮文本，修正后的断言已在精确回归和完整
+门禁中通过。

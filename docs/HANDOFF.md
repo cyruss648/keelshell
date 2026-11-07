@@ -7,7 +7,8 @@
 
 ## 2026-11-07 连接库视觉层级与主动作候选
 
-本片源码已提交为 `09e05e2`，当前连接库行在宽表格和窄卡片中统一表达
+本片最终源码已提交为
+`48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9`，当前连接库行在宽表格和窄卡片中统一表达
 selected 状态：行公开 `aria-selected`，使用 `Palette.surface_active` 和
 `Palette.accent` 左边界，非选中悬停使用 `surface_hover`。活动连接库中的
 Connect 使用 GPUI Kit `primary` 变体，Edit/Move/Copy/Trash 保持次级动作；
@@ -15,16 +16,18 @@ Connect 使用 GPUI Kit `primary` 变体，Edit/Move/Copy/Trash 保持次级动�
 Graphite「曜石」、Lavender「雾紫」继续通过 registry/Palette/token 驱动，新增
 主题只扩展注册定义。
 
-验证已完成：连接库定向 `27 passed / 0 failed`，app 严格 Clippy、格式和差异
-检查通过；完整 `python3 scripts/check.py` 退出 `0`，Python `131 run / 1 skipped`、
+验证已完成：连接库定向 `27 passed / 0 failed`，selected-row 精确回归
+`1 passed / 0 failed`，app 严格 Clippy、格式和差异检查通过；完整
+`python3 scripts/check.py` 退出 `0`，Python `131 run / 1 skipped`、
 app `1089 passed / 2 ignored`，workspace 其它测试、doctests、依赖策略和三组
 AI controller 通过。首次新增测试错误地把可访问标签当成可见文本的失败已保留，
-精确重跑已通过。设计见[ADR 0119](adr/0119-connection-library-visual-hierarchy.md)，
+并已修正为验证可访问标签与语义状态；最终提交还收敛了 selectable role 和选中
+行悬停状态。设计见[ADR 0119](adr/0119-connection-library-visual-hierarchy.md)，
 回执见[连接库视觉层级记录](testing/records/2026-11-07-connection-library-visual-hierarchy.md)。
 
-下一步必须在固定当前源码（含后续文档提交）后启动新的独立严格只读复核，要求
+下一步必须在固定当前源码（含本次文档提交）后完成新的独立严格只读复核，要求
 返回 P0/P1/P2/P3、绝对路径/行号、实际测试计数、限制和 merge recommendation。
-当前包不包含 `09e05e2`，因此不能把既有 macOS 包写成本片原生通过；当前源码
+当前包不包含 `48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9`，因此不能把既有 macOS 包写成本片原生通过；当前源码
 macOS 包、Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、真实 SSH/Podman
 长流程和外部 AI provider 仍待独立验收。
 
