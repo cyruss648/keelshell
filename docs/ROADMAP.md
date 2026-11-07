@@ -5,20 +5,20 @@
 
 ## 2026-11-08 本片交付状态
 
-源码提交 `e5891d1c8101c00944979ec2761718d376ae60d5` 已推送，local/tracking/remote
-SHA 一致。完整工程门禁通过：Python `131 run / 1 skipped`，workspace Rust
-`2,435 passed / 23 ignored`，app `1,113 passed / 2 ignored`，14 项 doctest、
-严格 Clippy、依赖策略和三个 AI controller 均通过。
+本片已经补齐连续无换行保存与
+`merge-adopt → merge-save → late newer draft/readback` 组合回归；生产代码没有修改。
+完整工程门禁第二轮 `python3 scripts/check.py` 退出 `0`：Python
+`131 run / 1 skipped`，workspace Rust `2,437 passed / 23 ignored`，app
+`1,115 passed / 2 ignored`，14 项 doctest、严格 Clippy、依赖策略和三个 AI
+controller 均通过；`cargo fmt --all -- --check` 与 `git diff --check` 也退出 `0`。
 
-当前精确 macOS 包为
-`work/native-cua-20261107/package-r11/KeelShell.app`，manifest 绑定源码 SHA，
-GUI/MCP 为 arm64 Mach-O，最低版本 `15.0`；三套主题和中英文切换已在隔离数据目录
-的桌面短验中观察到。独立复核没有返回可审计正文，状态为
-`NON_AUTHOR_REVIEW_UNAVAILABLE`，不能写成非作者批准。
+第一轮完整门禁在 Python `131 run / 1 skipped` 后于格式阶段退出 `1`，原因是新增
+断言未按 `cargo fmt` 展开；格式化后重新执行并通过。该失败事实和第二轮完整回执
+已记录在[组合回归测试记录](testing/records/2026-11-08-editor-format-merge-combinations.md)。
 
-下一步是重新取得独立只读复核报告，并补齐连续无换行保存与
-`merge-adopt → merge-save → late newer draft/readback` 组合回归；跨平台原生、
-IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 继续保持未验证边界。
+下一步按交付顺序固定源码提交，针对新提交取得可审计的独立严格只读复核，再生成
+绑定新 SHA 的精确包并执行有限 macOS smoke。Windows/Linux 原生、IME、VoiceOver、
+真实 SSH/Podman 长流程和外部 AI provider 继续保持未验证边界。
 
 ## 2026-11-08 内联合并审核视口
 
@@ -40,6 +40,25 @@ IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 继续保持�
 agent 未返回可审计报告而保持 `NON_AUTHOR_REVIEW_UNAVAILABLE`。连续无换行保存、
 late newer draft/readback 组合、Windows/Linux 原生窗口、IME、VoiceOver、真实
 SSH/Podman 和外部 AI provider 继续保持未验证边界。
+
+## 2026-11-08 编辑器格式与合并迟到读回组合回归
+
+新增两个真实 GPUI/SFTP 回归，分别覆盖无换行文件连续保存的 LF 策略保持，以及
+合并采用后保存发布期间产生较新草稿时的完整读回和下一次保存基线重建：
+
+- `editor_format_tests`：`14 passed / 0 failed / 1103 filtered out`；
+- `conflict_merge_tests`：`29 passed / 0 failed / 1088 filtered out`；
+- 两个新增用例精确运行均为 `1 passed / 0 failed / 1116 filtered out`；
+- `rustfmt` 与 `git diff --check` 均退出 `0`。
+
+本片没有修改生产代码；产品合同、设计决策和失败证据分别见
+[远程文本格式](product/REMOTE_TEXT_FORMAT.md)、
+[远程文本合并](product/TEXT_CONFLICT_MERGE.md)、
+[ADR 0122](adr/0122-editor-format-and-late-readback-regressions.md) 和
+[测试记录](testing/records/2026-11-08-editor-format-merge-combinations.md)。
+首次接入时的闭包上下文编译错误和并行工作树覆盖测试文件的事实已保留，修复后
+重新确认测试清单包含两个新增用例。完整工程门禁已经通过；独立复核、精确包和
+原生验收仍待本片后续步骤。
 
 ## 2026-11-08 快速操作中心
 
@@ -286,10 +305,10 @@ CI不代签桌面验收。见[本批记录](testing/records/2026-11-06-monitor-k
 
 | 优先级 | 用户功能 | 真实状态与下一步 |
 | --- | --- | --- |
-| P1 | [远程文本格式](product/REMOTE_TEXT_FORMAT.md) | r3三项连续编辑P2关闭；父543输入门禁/包通过；native-r1限定批准macOS原生BOM/CRLF取消与确认，完整编辑器验收HOLD |
+| P1 | [远程文本格式](product/REMOTE_TEXT_FORMAT.md) | r3三项连续编辑P2关闭；新增无换行连续保存 GPUI/SFTP 回归 `14/14`；父543输入门禁/包通过；native-r1限定批准macOS原生BOM/CRLF取消与确认，完整编辑器验收HOLD |
 | P2 | [审核式有界traceroute](product/TRACEROUTE_DIAGNOSTICS.md) | stderr精确版本合同与最终门禁通过；同包真实SSH UI各审核确认UDPv4/v6一次，均一跳回复；原生ICMP/取消和完整平台另验 |
 | P1 | 独立工作窗口 | 源码已导入当前分支；空白新窗、各窗独立会话/审核、安全关闭、共享 StateStore 协调、worker 回收与 loopback SSH 定向测试通过；完整工程门禁通过，独立复核和真实多窗口验收待完成 |
-| P1 | 编辑器动作可达性 | inline editor 与三方合并正文独立滚动、底部动作固定、手工输入最小高度修复已导入；11 项视口专项和完整工程门禁通过，`merge-adopt` / `merge-save`、late-save、连续无换行保存的真实原生复验待完成 |
+| P1 | 编辑器动作可达性 | inline editor 与三方合并正文独立滚动、底部动作固定、手工输入最小高度修复已导入；视口专项和本片 `merge-adopt` / `merge-save` / late newer 回归通过；完整工程门禁、独立复核和真实原生复验待完成 |
 
 当前候选已装配本轮源码和文档输入，五个项目 crate 已按共享 target 规则失效重编，
 42 个新增具体测试名均在当前库存中。修复 macOS 临时目录根路径夹具后，完整工程

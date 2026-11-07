@@ -141,6 +141,158 @@ async fn independent_remote_changes_merge_to_reviewed_draft_and_full_readback(
 }
 
 #[gpui_kit::test]
+async fn merge_adopt_save_keeps_late_newer_draft_and_rebases_next_save(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    let path = "/merge-late-newer.txt";
+    let local_line = "local-".to_owned() + &"x".repeat(40_000);
+    let merged_line = format!("{local_line}\r\n");
+    let base = b"base\r\nunchanged\r\n";
+    let draft = format!("{local_line}\nunchanged\n");
+    let remote = b"base\r\nremote\r\n";
+    let merged = format!("{merged_line}remote\r\n");
+    let late_line = "latest-".to_owned() + &"y".repeat(40_000);
+    let late_draft = format!("{late_line}\nremote\n");
+    let next_saved = format!("{late_line}\r\nremote\r\n").into_bytes();
+
+    open(&h, path, base, &draft, cx).await;
+    external(&h, path, remote);
+    h.click(cx, "read-remote-merge");
+    h.idle(cx).await;
+    h.panel.read_with(cx, |panel, cx| {
+        let review = panel
+            .merge_review
+            .as_ref()
+            .checked_option("three-way merge review");
+        assert!(review.plan.conflicts().is_empty());
+        assert_eq!(panel.editor.read(cx).value().as_str(), draft);
+    });
+
+    h.click(cx, "adopt-text-merge");
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), merged);
+        assert_eq!(
+            panel
+                .editor_snapshot
+                .as_ref()
+                .checked_option("adopted remote baseline")
+                .content,
+            remote
+        );
+        assert!(panel.has_unsaved_draft(cx));
+    });
+    assert_eq!(h.read(path), remote);
+    h.click(cx, "save-remote-file");
+    h.panel.read_with(cx, |panel, _cx| {
+        match &panel
+            .pending
+            .as_ref()
+            .checked_option("complete save review")
+            .1
+        {
+            Operation::Save {
+                reviewed, content, ..
+            } => {
+                assert_eq!(reviewed.content.as_slice(), remote);
+                assert_eq!(content.as_slice(), merged.as_bytes());
+            }
+            _ => panic!("expected a complete reviewed save"),
+        }
+    });
+
+    // The merged result is larger than one fixture WRITE. The first hold
+    // therefore pauses the real target publication after its first chunk,
+    // after the small original backup has completed. The replacement hook
+    // exercises the exact POSIX-rename boundary while preserving the reviewed
+    // bytes, so the readback path remains successful and deterministic.
+    h.server
+        .filesystem
+        .replace_after_atomic_rename(path, merged.as_bytes())
+        .checked("arm the exact post-rename readback fixture");
+    let write_hold = h
+        .server
+        .filesystem
+        .hold_atomic_writes_after_first()
+        .checked("hold the reviewed target after its first write");
+    h.click(cx, "confirm-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, _| {
+        write_hold.entered() > 0
+    })
+    .await;
+    assert!(
+        write_hold.entered() > 0,
+        "save must be held before the late edit"
+    );
+    edit(&h, &late_draft, cx);
+    write_hold.release();
+    h.idle(cx).await;
+
+    let merged_bytes = merged.as_bytes().to_vec();
+    assert_eq!(h.read(path), merged_bytes);
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), late_draft);
+        assert!(panel.has_unsaved_draft(cx));
+        assert_eq!(
+            panel
+                .editing
+                .as_ref()
+                .checked_option("baseline after late readback")
+                .1,
+            merged_bytes
+        );
+        assert_eq!(
+            panel
+                .editor_snapshot
+                .as_ref()
+                .checked_option("snapshot after late readback")
+                .content,
+            merged_bytes
+        );
+        assert!(panel.pending.is_none() && panel.merge_review.is_none());
+    });
+
+    // The next review must use the successful merged readback as its baseline,
+    // while the retained LF editor draft is prepared with the original CRLF
+    // insertion policy.
+    h.click(cx, "save-remote-file");
+    h.panel.read_with(cx, |panel, _| {
+        match &panel
+            .pending
+            .as_ref()
+            .checked_option("rebased next save review")
+            .1
+        {
+            Operation::Save {
+                reviewed, content, ..
+            } => {
+                assert_eq!(reviewed.content.as_slice(), merged_bytes.as_slice());
+                assert_eq!(content.as_slice(), next_saved.as_slice());
+            }
+            _ => panic!("expected the rebased next save"),
+        }
+    });
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read(path), next_saved);
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(
+            panel.editor.read(cx).value().as_str(),
+            String::from_utf8_lossy(&next_saved)
+        );
+        assert!(!panel.has_unsaved_draft(cx));
+        assert_eq!(
+            panel
+                .editor_snapshot
+                .as_ref()
+                .checked_option("final next-save baseline")
+                .content,
+            next_saved
+        );
+        assert!(panel.pending.is_none() && panel.merge_review.is_none());
+    });
+}
+
+#[gpui_kit::test]
 async fn stale_save_creates_conflict_review_and_every_conflict_requires_choice(
     cx: &mut TestAppContext,
 ) {

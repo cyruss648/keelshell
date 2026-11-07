@@ -264,6 +264,119 @@ async fn independent_editor_format_r1_crlf_policy_survives_zero_break_save(
 }
 
 #[gpui_kit::test]
+async fn independent_editor_format_no_newline_keeps_lf_policy_across_empty_and_plain_saves(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    let path = "/no-newline-lf-policy.txt";
+    let initial = b"seed";
+    let first_saved = b"seed\n";
+    let later = b"later\nline";
+
+    open_raw(&h, path, initial, cx).await;
+    h.panel.read_with(cx, |panel, cx| {
+        let format = panel
+            .editor_format
+            .checked_option("initial no-break format");
+        assert!(!format.has_bom());
+        assert_eq!(format.line_ending(), TextLineEnding::None);
+        assert_eq!(panel.editor.read(cx).value().as_str(), "seed");
+        assert!(!panel.has_unsaved_draft(cx));
+    });
+
+    h.click(cx, "focus-file-draft");
+    cx.update_window(h.window, |_, window, cx| {
+        window.activate_window();
+        window.press("end", cx);
+        window.press("enter", cx);
+        assert_eq!(h.panel.read(cx).editor.read(cx).value().as_str(), "seed\n");
+    })
+    .checked("insert the first break through the real GPUI editor");
+    h.click(cx, "save-remote-file");
+    assert_eq!(
+        reviewed_bytes(&h, cx),
+        (initial.to_vec(), first_saved.to_vec())
+    );
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read(path), first_saved);
+    h.panel.read_with(cx, |panel, cx| {
+        let format = panel
+            .editor_format
+            .checked_option("LF policy after first save");
+        assert!(!format.has_bom());
+        assert_eq!(format.line_ending(), TextLineEnding::Lf);
+        assert_eq!(panel.editor.read(cx).value().as_str(), "seed\n");
+        assert!(!panel.has_unsaved_draft(cx));
+    });
+
+    edit(&h, "", cx);
+    h.click(cx, "save-remote-file");
+    assert_eq!(reviewed_bytes(&h, cx), (first_saved.to_vec(), Vec::new()));
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read(path), b"");
+    h.panel.read_with(cx, |panel, cx| {
+        let format = panel
+            .editor_format
+            .checked_option("LF policy after empty save");
+        assert!(!format.has_bom());
+        assert_eq!(format.line_ending(), TextLineEnding::Lf);
+        assert_eq!(panel.editor.read(cx).value().as_str(), "");
+        assert!(!panel.has_unsaved_draft(cx));
+    });
+
+    edit(&h, "plain", cx);
+    h.click(cx, "save-remote-file");
+    assert_eq!(reviewed_bytes(&h, cx), (Vec::new(), b"plain".to_vec()));
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read(path), b"plain");
+    h.panel.read_with(cx, |panel, cx| {
+        let format = panel
+            .editor_format
+            .checked_option("LF policy after no-break save");
+        assert!(!format.has_bom());
+        assert_eq!(format.line_ending(), TextLineEnding::Lf);
+        assert_eq!(panel.editor.read(cx).value().as_str(), "plain");
+        assert!(!panel.has_unsaved_draft(cx));
+    });
+
+    edit(&h, "later\nline", cx);
+    h.click(cx, "save-remote-file");
+    assert_eq!(reviewed_bytes(&h, cx), (b"plain".to_vec(), later.to_vec()));
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+    assert_eq!(h.read(path), later);
+    h.panel.read_with(cx, |panel, cx| {
+        let format = panel
+            .editor_format
+            .checked_option("final retained LF policy");
+        assert!(!format.has_bom());
+        assert_eq!(format.line_ending(), TextLineEnding::Lf);
+        assert_eq!(panel.editor.read(cx).value().as_str(), "later\nline");
+        assert_eq!(
+            panel
+                .prepare_editor_bytes(&panel.editor.read(cx).value())
+                .checked("prepare final LF bytes"),
+            later
+        );
+        assert!(!panel.has_unsaved_draft(cx));
+    });
+    assert_backup_versions(
+        &h,
+        path,
+        &[
+            initial.to_vec(),
+            first_saved.to_vec(),
+            Vec::new(),
+            b"plain".to_vec(),
+        ],
+    );
+}
+
+#[gpui_kit::test]
 async fn editor_format_open_separates_one_signature_without_false_dirty(cx: &mut TestAppContext) {
     let h = Harness::new(cx);
     h.idle(cx).await;

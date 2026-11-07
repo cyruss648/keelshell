@@ -5,6 +5,37 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-08 当前片：编辑器格式与合并迟到读回组合回归收口
+
+本片在源码基线
+`1d0898025bcd714550de8d702d5c8026242844bf`
+上新增两个真实 GPUI/SFTP 组合回归，生产代码没有修改：
+
+- `independent_editor_format_no_newline_keeps_lf_policy_across_empty_and_plain_saves`
+  验证无换行远端文件首次插入 LF 后，连续保存带换行、空内容、再次无换行和后续
+  带换行内容仍保留 LF 插入策略，不增加 BOM 或 CRLF；
+- `merge_adopt_save_keeps_late_newer_draft_and_rebases_next_save` 验证合并采用、完整
+  保存审核、发布期间较新草稿、成功目标读回、新编辑基线和下一次 CRLF 保存的
+  完整时序。
+
+完整工程门禁第二轮 `python3 scripts/check.py` 已退出 `0`：
+
+- Python：`131 run / 1 skipped`；
+- workspace Rust：`2,437 passed / 23 ignored`；
+- `keelshell-app`：`1,115 passed / 2 ignored`；
+- 14 项 doctest、依赖版本策略、严格 workspace Clippy 和 readiness/observer/
+  small-stack AI controller 全部通过；
+- `cargo fmt --all -- --check` 与 `git diff --check` 均退出 `0`。
+
+第一轮完整门禁已在 Python `131 run / 1 skipped` 后于格式阶段退出 `1`，原因是新增
+断言尚未按 `cargo fmt` 展开；格式化后重新启动完整门禁并通过。失败事实和最终回执
+保存在[组合回归测试记录](testing/records/2026-11-08-editor-format-merge-combinations.md)。
+
+当前仍需按交付顺序完成：固定源码提交，针对新提交取得可审计的独立严格只读复核，
+重新构建绑定新 SHA 的精确 macOS 包并做有限 smoke，最后读回 local/tracking/remote
+SHA。Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI
+provider 仍未验收；既有旧包不能代签本片新增测试。
+
 ## 2026-11-08 本片源码与 macOS 包收口
 
 本片源码提交为 `e5891d1c8101c00944979ec2761718d376ae60d5`，已推送到
@@ -60,9 +91,32 @@ readiness/observer/small-stack controller 全部通过。完整证据保存在[�
 [ADR 0121](adr/0121-inline-merge-review-viewport.md)。首次视口回归曾因外层尾部裁掉
 正文命中区域、并因 stop propagation 阻止正文默认滚动而失败，修复后精确重跑通过。
 
-后续工作：重新启动并取得可审计的独立严格只读复核；补齐连续无换行保存、
-`merge-adopt → merge-save → late newer draft/readback` 组合回归。Windows/Linux
-原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 仍未验收。
+后续工作：按共享 target 规则重新执行完整工程门禁，固定本片源码并取得可审计的
+独立严格只读复核，再生成绑定新源码的精确包。Windows/Linux 原生窗口、IME、
+VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 仍未验收。
+
+## 2026-11-08 编辑器格式与合并迟到读回组合回归
+
+当前未提交候选新增两个真实 GPUI/SFTP 回归：
+
+- `independent_editor_format_no_newline_keeps_lf_policy_across_empty_and_plain_saves`
+  从无换行远端文件开始，验证首次 Enter 使用 LF，连续保存空内容和无换行内容后仍
+  保留 LF，后续编辑不增加 BOM 或 CRLF，并核对四份原始备份；
+- `merge_adopt_save_keeps_late_newer_draft_and_rebases_next_save` 验证读取合并、
+  Adopt、完整 Save review、发布期间较新草稿、成功读回、新基线和下一次保存的
+  精确 CRLF 字节。
+
+定向结果为：编辑器格式 `14 passed / 0 failed / 1103 filtered out`，冲突合并
+`29 passed / 0 failed / 1088 filtered out`，两个新增用例精确运行均为
+`1 passed / 0 failed / 1116 filtered out`。格式、差异检查已通过。生产代码没有
+修改；产品、ADR 和失败证据见
+[组合回归测试记录](testing/records/2026-11-08-editor-format-merge-combinations.md)
+和 [ADR 0122](adr/0122-editor-format-and-late-readback-regressions.md)。
+
+首次接入的测试上下文编译错误已修复，并重新确认新增用例出现在当前测试清单中。
+并行切片曾覆盖第一个测试文件的未提交内容，已按返回差分重新应用并重跑；这一
+事实保留在测试记录中。第二轮完整工程门禁已通过；源码提交、独立复核、精确新包
+和原生验收仍按上方当前交接顺序待执行。
 
 ## 2026-11-08 快速操作中心生产布局与键盘收口
 

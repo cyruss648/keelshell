@@ -5,6 +5,10 @@
 链接、目录和缺少必要类型/大小信息的对象。编辑保存、合并与 patch 的每侧文件/结果上限为 1 MiB、
 4,096 行，patch 输入另限 4 MiB / 17,408 行；读取不会把截断内容认作完整成功。
 
+截至 2026-11-08，`merge_adopt_save_keeps_late_newer_draft_and_rebases_next_save`
+已通过定向 GPUI/SFTP 和完整工程门禁；当前源码仍需固定提交、独立复核、精确包和
+跨平台原生验收。
+
 “读取远端并合并”是只读操作。应用保留打开时基线、本地草稿和新读取的远端版本，
 组合独立修改；重叠修改、同位置插入和有歧义的插入边界成为冲突。可切换查看完整基线、草稿、当前远端及已解决的合并全文；每个冲突显示基线、
 草稿及当前远端区域文本，可选择草稿、远端或手工输入的区域替换。上一项/下一项不会
@@ -14,6 +18,20 @@
 重新读取会撤销旧版本的冲突审核和选择，保留编辑器草稿；后台操作期间不能采用旧审核。
 迟到结果必须同时匹配读取时的文件路径、完整基线字节和草稿，完整基线视图始终使用
 该次计算捕获的基线，不能由后来变化的编辑器基线替代。
+
+## Adopt、保存审核与迟到草稿
+
+组合回归
+`merge_adopt_save_keeps_late_newer_draft_and_rebases_next_save`
+使用真实 GPUI、loopback SFTP 和受控原子写入停顿覆盖完整时序：读取远端并生成合并
+审核，采用合并草稿，进入完整保存审核，在已审核内容发布过程中编辑器产生较新草稿，
+随后完成目标读回。回归同时核对远端采用已审核的合并字节、编辑器保留较新草稿、
+编辑基线切换到成功读回的合并版本，以及下一次保存使用该新基线并按原 CRLF 插入
+策略生成精确字节。
+
+迟到保存结果不会覆盖较新的编辑器内容，也不会把一次成功的发布读回误当成较新
+草稿的基线。只有下一次明确审核和确认才会写入较新草稿；如果目标读回失败，仍沿用
+既有失败/未知结果隔离合同。
 
 “应用差异到草稿”接受粘贴的单文件 unified diff。两个文件头必须精确填写当前完整
 远端路径；hunk 按序排列，行号、删除和上下文逐字节匹配当前草稿。不接受时间戳、
@@ -82,6 +100,19 @@ This layout changes review reachability while preserving the separate adopt and 
 authorization steps. The body and action area use the theme registry, semantic Palette and
 component tokens; Frost, Graphite and Lavender remain data-driven choices without
 theme-ID branches in the view.
+
+The combination regression
+`merge_adopt_save_keeps_late_newer_draft_and_rebases_next_save` uses real GPUI, loopback
+SFTP and a controlled atomic-write hold. It reads a remote change, creates a merge review,
+adopts the merged draft, opens a complete save review, edits the editor while the reviewed
+bytes are being published, and waits for full target readback. It verifies that the remote
+file receives the reviewed merge, the editor retains the newer draft, the successful
+readback becomes the editor baseline, and the next explicit save prepares bytes from that
+new baseline while retaining the original CRLF insertion policy.
+
+A late save result cannot replace newer editor content or silently rebase that newer draft.
+The newer draft is written only after a new explicit review and confirmation; a failed
+readback continues to use the existing failure and unknown-result isolation contract.
 
 The editor reads complete checked regular UTF-8 files on the captured authenticated
 SSH/SFTP session. Text operations admit at most 1 MiB and 4,096 lines, preserve exact

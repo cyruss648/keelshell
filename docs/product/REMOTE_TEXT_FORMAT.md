@@ -7,6 +7,9 @@ r2独立审请求修订的三项P2已在r3关闭，必要差分复审与新的�
 inline合并操作可达性待修，其他格式与跨平台原生仍待验，见
 [限定原生记录](../testing/records/2026-11-06-editor-traceroute-native.md)。
 
+截至 2026-11-08，连续无换行保存组合回归已通过定向 GPUI/SFTP 和完整工程门禁；
+当前源码尚未完成固定提交、独立复核、精确包和跨平台原生验收。
+
 ## 可用行为
 
 远程编辑仍使用当前已认证 SSH 的 SFTP 通道，只接受完整、检查过的常规 UTF-8
@@ -32,6 +35,19 @@ UTF-16/32 文件头不猜测或转换；错误不回显文件正文。
 
 读取保留原1 MiB字节上限。保存、合并与 patch 结果的1 MiB / 4096行上限不扩大，
 最终字节预算包含 BOM 和 CRLF 扩张。超过4096行但未变动的已读文件不被误标为脏。
+
+## 连续无换行保存回归
+
+当前 GPUI/SFTP 组合回归
+`independent_editor_format_no_newline_keeps_lf_policy_across_empty_and_plain_saves`
+从远端无换行内容开始，使用真实编辑器 Enter 插入首个换行，然后依次保存带 LF 的
+内容、空内容、再次无换行内容和后续带换行内容。每次审核都核对原始基线与精确出站
+字节，最终还核对四份远端原始备份。
+
+该回归确认：首次插入使用 LF；保存空内容或无换行内容后仍保留 LF 插入策略；后续
+编辑不会因为空内容或无换行读回而自动增加 BOM 或改成 CRLF。它只证明当前受控
+GPUI、loopback SFTP 和本地测试夹具路径，不代签 Windows/Linux 原生编辑器、IME
+或真实客户 SSH。
 
 ## 格式变化与授权
 
@@ -77,3 +93,13 @@ permits baseline adoption. Cancellation is not rollback, and SFTP is not remote 
 The existing 1 MiB / 4096-line limits remain. A new macOS package has scoped native
 BOM/CRLF cancel/save observations; inline merge accessibility and complete native
 acceptance remain open.
+
+The GPUI/SFTP regression
+`independent_editor_format_no_newline_keeps_lf_policy_across_empty_and_plain_saves`
+starts from a remote file without line breaks, inserts the first break through the real
+editor, then saves LF content, empty content, another no-break body and a later
+line-containing body. It verifies exact reviewed bytes after every step and reads back all
+four original backup versions. The regression confirms that the first inserted break uses
+LF, the known LF policy survives empty and no-break saves, and later edits do not acquire a
+BOM or CRLF. It is controlled GPUI/loopback-SFTP evidence and does not establish native
+Windows/Linux editor, IME or customer-SSH acceptance.
