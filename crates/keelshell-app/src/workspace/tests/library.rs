@@ -232,6 +232,158 @@ fn connection_actions_distinguish_same_names_by_complete_endpoint_in_both_langua
     .checked("assert production control names for active and recoverable SSH profiles");
 }
 
+#[gpui_kit::test]
+fn library_summary_exposes_filter_query_and_selection_in_both_languages(cx: &mut TestAppContext) {
+    let mut favorite = Connection::new("收藏主机", "favorite.invalid", "operator");
+    favorite.favorite = true;
+    let other = Connection::new("普通主机", "other.invalid", "operator");
+    let fixture = mount(cx, vec![favorite, other]);
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_connections = true;
+            cx.notify();
+        });
+        for language in [Language::ZhCn, Language::En] {
+            i18n::set_language(language, cx);
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.set_library_filter(LibraryFilter::All, cx);
+                workspace.library_selection.clear();
+                workspace.search.update(cx, |input, cx| {
+                    input.set_value("", window, cx);
+                });
+            });
+            window.render_frame(cx);
+            assert_eq!(
+                window.find("library-scope-title").label(),
+                Some(if language == Language::ZhCn {
+                    "全部连接"
+                } else {
+                    "All connections"
+                })
+            );
+            assert_eq!(
+                window.find("library-filter-count").label(),
+                Some(if language == Language::ZhCn {
+                    "2 / 2 个连接"
+                } else {
+                    "2 / 2 profiles"
+                })
+            );
+
+            window.click("favorite-connections", cx);
+            window.render_frame(cx);
+            assert_eq!(
+                window.find("library-scope-title").label(),
+                Some(if language == Language::ZhCn {
+                    "收藏"
+                } else {
+                    "Favorites"
+                })
+            );
+            assert_eq!(
+                window.find("library-filter-count").label(),
+                Some(if language == Language::ZhCn {
+                    "1 / 1 个连接"
+                } else {
+                    "1 / 1 profiles"
+                })
+            );
+            assert_eq!(
+                fixture.workspace.read(cx).library_filter,
+                LibraryFilter::Favorites
+            );
+
+            window.click(("library-select", 0_usize), cx);
+            window.render_frame(cx);
+            assert_eq!(
+                window.find("library-selection-count").label(),
+                Some(if language == Language::ZhCn {
+                    "1 个连接已选择"
+                } else {
+                    "1 profiles selected"
+                })
+            );
+
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.search.update(cx, |input, cx| {
+                    input.set_value("does-not-exist", window, cx);
+                });
+            });
+            window.render_frame(cx);
+            assert!(window.find("library-query-summary").visible());
+            assert!(window.find("library-clear-filter").visible());
+            assert!(window.find("library-empty-state").visible());
+            assert_eq!(
+                window.find("library-empty-title").label(),
+                Some(if language == Language::ZhCn {
+                    "没有匹配的连接"
+                } else {
+                    "No matching profiles"
+                })
+            );
+            window.click("library-empty-clear-filter", cx);
+            window.render_frame(cx);
+            assert!(
+                fixture
+                    .workspace
+                    .read(cx)
+                    .search
+                    .read(cx)
+                    .value()
+                    .is_empty()
+            );
+            assert!(window.try_find("library-empty-state").is_none());
+        }
+        i18n::set_language(Language::ZhCn, cx);
+    })
+    .checked("render library scope, query and explicit selection semantics");
+}
+
+#[gpui_kit::test]
+fn library_empty_state_is_theme_neutral_bilingual_and_actionable(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 720., 600.);
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_connections = true;
+            cx.notify();
+        });
+        for theme in crate::design::registry() {
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.state.settings.theme_family =
+                    keelshell_core::ThemeId::new(theme.id).checked("valid theme family");
+                workspace.state.settings.theme = Theme::Light;
+                let settings = workspace.state.settings.clone();
+                crate::design::apply_settings(&settings, Some(window), cx);
+                cx.notify();
+            });
+            for language in [Language::ZhCn, Language::En] {
+                i18n::set_language(language, cx);
+                window.render_frame(cx);
+                let manager = window.find("connection-manager-dialog").bounds();
+                let empty = window.find("library-empty-state");
+                assert!(empty.visible());
+                assert!(contained(empty.bounds(), manager));
+                assert!(window.find("library-empty-card").visible());
+                assert!(window.find("library-scope-icon").visible());
+                assert!(window.find("library-empty-new-connection").visible());
+                assert_eq!(
+                    window.find("library-empty-title").label(),
+                    Some(if language == Language::ZhCn {
+                        "还没有连接配置"
+                    } else {
+                        "No saved profiles"
+                    })
+                );
+            }
+        }
+        window.click("library-empty-new-connection", cx);
+        assert!(fixture.workspace.read(cx).form.is_some());
+        window.click("cancel-connection", cx);
+        i18n::set_language(Language::ZhCn, cx);
+    })
+    .checked("render actionable empty state across registered themes and languages");
+}
+
 async fn saved(fixture: &Fixture, cx: &mut TestAppContext) {
     cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
         !fixture.workspace.read(cx).saving

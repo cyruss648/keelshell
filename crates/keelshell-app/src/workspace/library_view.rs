@@ -4,7 +4,7 @@ use crate::i18n::LocalizedTooltipExt;
 use crate::jump_host_picker::endpoint;
 use gpui_kit::{
     assets::IconName,
-    component::{Selectable, tooltip::Tooltip},
+    component::{Icon, Selectable, tooltip::Tooltip},
 };
 use keelshell_core::ConnectionLibraryAction;
 
@@ -30,6 +30,423 @@ fn timestamp(seconds: u64) -> String {
 }
 
 impl Workspace {
+    fn library_scope_presentation(
+        &self,
+        cx: &mut Context<Self>,
+    ) -> (IconName, String, String, u32, u32) {
+        let visual = crate::design::palette(cx);
+        match self.library_filter {
+            LibraryFilter::All => (
+                IconName::Server,
+                t(cx, "全部连接", "All connections").to_string(),
+                t(
+                    cx,
+                    "所有已保存的 SSH 连接配置，可直接连接或继续整理。",
+                    "Every saved SSH profile, ready to connect or organize.",
+                )
+                .to_string(),
+                visual.accent,
+                visual.selected,
+            ),
+            LibraryFilter::Favorites => (
+                IconName::Bookmark,
+                t(cx, "收藏", "Favorites").to_string(),
+                t(
+                    cx,
+                    "把常用连接集中在这里，快速回到高频工作目标。",
+                    "Keep frequently used profiles close to your daily work.",
+                )
+                .to_string(),
+                visual.warning,
+                visual.selected,
+            ),
+            LibraryFilter::Recent => (
+                IconName::Activity,
+                t(cx, "最近连接", "Recent").to_string(),
+                t(
+                    cx,
+                    "按成功连接记录整理；失败尝试不会进入最近列表。",
+                    "Successful connection history only; failed attempts stay out.",
+                )
+                .to_string(),
+                visual.success,
+                visual.selected,
+            ),
+            LibraryFilter::Trash => (
+                IconName::Trash,
+                t(cx, "回收站", "Trash").to_string(),
+                t(
+                    cx,
+                    "已移除的连接配置仍可恢复；永久删除需要再次审核。",
+                    "Removed profiles remain recoverable; permanent deletion requires review.",
+                )
+                .to_string(),
+                visual.danger,
+                visual.danger_surface,
+            ),
+            LibraryFilter::Folder(folder) => (
+                IconName::FolderOpen,
+                self.folder_label(folder, cx),
+                if folder.is_some() {
+                    t(
+                        cx,
+                        "显示此文件夹及其子文件夹中的连接。",
+                        "Profiles in this folder and its descendants.",
+                    )
+                } else {
+                    t(
+                        cx,
+                        "显示尚未归档到文件夹的连接。",
+                        "Profiles that are not assigned to a folder.",
+                    )
+                }
+                .to_string(),
+                visual.accent,
+                visual.selected,
+            ),
+        }
+    }
+
+    fn library_filter_summary(
+        &self,
+        total_count: usize,
+        visible_count: usize,
+        query: &str,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let components = crate::design::components(cx);
+        let (icon, title, description, accent, accent_surface) =
+            self.library_scope_presentation(cx);
+        let query = query.trim();
+        let count_label = format!(
+            "{visible_count} / {total_count} {}",
+            t(cx, "个连接", "profiles")
+        );
+        let selected_count = self.library_selection.len();
+        let selection_label = if selected_count == 0 {
+            t(cx, "未选择连接", "No profiles selected").to_string()
+        } else {
+            format!(
+                "{} {}",
+                selected_count,
+                t(cx, "个连接已选择", "profiles selected")
+            )
+        };
+        let aria_label = if query.is_empty() {
+            format!(
+                "{}: {title}. {count_label}. {selection_label}",
+                t(cx, "连接库筛选", "Connection library filter")
+            )
+        } else {
+            format!(
+                "{}: {title}. {}: {query}. {count_label}. {selection_label}",
+                t(cx, "连接库筛选", "Connection library filter"),
+                t(cx, "搜索", "Search")
+            )
+        };
+        let mut metrics = div()
+            .flex()
+            .flex_wrap()
+            .items_center()
+            .justify_end()
+            .gap_1()
+            .child(
+                div()
+                    .id("library-filter-count")
+                    .test_support()
+                    .role(Role::Label)
+                    .aria_label(count_label.clone())
+                    .px_2()
+                    .py_1()
+                    .rounded(px(components.control_radius))
+                    .bg(rgb(visual.surface_active))
+                    .text_xs()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(count_label),
+            );
+        if selected_count > 0 {
+            metrics = metrics.child(
+                div()
+                    .id("library-selection-count")
+                    .test_support()
+                    .role(Role::Label)
+                    .aria_label(selection_label.clone())
+                    .px_2()
+                    .py_1()
+                    .rounded(px(components.control_radius))
+                    .bg(rgb(accent_surface))
+                    .text_color(rgb(accent))
+                    .text_xs()
+                    .child(selection_label),
+            );
+        }
+        if !query.is_empty() {
+            metrics = metrics
+                .child(
+                    div()
+                        .id("library-query-summary")
+                        .test_support()
+                        .role(Role::Label)
+                        .aria_label(format!("{}: {query}", t(cx, "搜索", "Search")))
+                        .max_w(px(180.))
+                        .px_2()
+                        .py_1()
+                        .rounded(px(components.control_radius))
+                        .bg(rgb(visual.surface_hover))
+                        .text_color(rgb(visual.muted))
+                        .text_xs()
+                        .text_ellipsis()
+                        .child(format!("{}: {query}", t(cx, "搜索", "Search"))),
+                )
+                .child(
+                    Button::new("library-clear-filter")
+                        .ghost()
+                        .compact()
+                        .icon(IconName::Close)
+                        .label(t(cx, "清除筛选", "Clear filter"))
+                        .accessibility_label(t(cx, "清除搜索筛选", "Clear search filter"))
+                        .on_click(cx.listener(|view, _, window, cx| {
+                            view.search.update(cx, |input, cx| {
+                                input.set_value("", window, cx);
+                            });
+                            cx.notify();
+                        }))
+                        .map(|button| self.retain_modal_button("library-clear-filter", button, cx)),
+                );
+        }
+        div()
+            .id("library-filter-summary")
+            .test_support()
+            .role(Role::Group)
+            .aria_label(aria_label)
+            .px_3()
+            .py_2()
+            .flex_shrink_0()
+            .flex()
+            .flex_wrap()
+            .items_center()
+            .justify_between()
+            .gap_3()
+            .bg(rgb(visual.chrome))
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .min_w_0()
+                    .flex_1()
+                    .child(
+                        div()
+                            .id("library-scope-icon")
+                            .test_support()
+                            .flex_shrink_0()
+                            .p_2()
+                            .rounded(px(components.control_radius))
+                            .bg(rgb(accent_surface))
+                            .text_color(rgb(accent))
+                            .child(Icon::new(icon).size_3()),
+                    )
+                    .child(
+                        div()
+                            .min_w_0()
+                            .flex()
+                            .flex_col()
+                            .gap_1()
+                            .child(
+                                div()
+                                    .id("library-scope-title")
+                                    .test_support()
+                                    .role(Role::Label)
+                                    .aria_label(title.clone())
+                                    .text_sm()
+                                    .font_weight(FontWeight::SEMIBOLD)
+                                    .text_ellipsis()
+                                    .child(title),
+                            )
+                            .child(
+                                div()
+                                    .id("library-scope-description")
+                                    .test_support()
+                                    .role(Role::Label)
+                                    .aria_label(description.clone())
+                                    .text_xs()
+                                    .text_color(rgb(visual.muted))
+                                    .text_ellipsis()
+                                    .child(description),
+                            ),
+                    ),
+            )
+            .child(metrics)
+            .into_any_element()
+    }
+
+    fn library_empty_state(
+        &self,
+        query: &str,
+        total_count: usize,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let components = crate::design::components(cx);
+        let (icon, _scope_title, scope_description, accent, accent_surface) =
+            self.library_scope_presentation(cx);
+        let query = query.trim();
+        let (title, description) = if !query.is_empty() {
+            (
+                t(cx, "没有匹配的连接", "No matching profiles").to_string(),
+                t(
+                    cx,
+                    "清除搜索条件，或切换左侧的收藏、最近连接、回收站和文件夹。",
+                    "Clear the search or switch between favorites, recent, trash and folders.",
+                )
+                .to_string(),
+            )
+        } else {
+            match self.library_filter {
+                LibraryFilter::Trash => (
+                    t(cx, "回收站为空", "Trash is empty").to_string(),
+                    t(
+                        cx,
+                        "移入回收站的连接会在这里保留，之后可以恢复或经过审核永久删除。",
+                        "Profiles moved to trash stay here until you restore or review permanent deletion.",
+                    )
+                    .to_string(),
+                ),
+                LibraryFilter::Recent => (
+                    t(cx, "暂无最近连接", "No recent connections").to_string(),
+                    t(
+                        cx,
+                        "成功建立 SSH 会话后，连接会按最近使用时间出现在这里。",
+                        "Profiles appear here after a successful SSH session.",
+                    )
+                    .to_string(),
+                ),
+                LibraryFilter::Favorites => (
+                    t(cx, "还没有收藏连接", "No favorite profiles").to_string(),
+                    t(
+                        cx,
+                        "在连接行中点击星标，把常用目标固定到这个工作区。",
+                        "Use the star on a profile row to pin a frequent target here.",
+                    )
+                    .to_string(),
+                ),
+                _ => (
+                    t(cx, "还没有连接配置", "No saved profiles").to_string(),
+                    t(
+                        cx,
+                        "新建或导入一个 SSH 连接，开始建立你的远程工作区。",
+                        "Create or import an SSH profile to start building your remote workspace.",
+                    )
+                    .to_string(),
+                ),
+            }
+        };
+        let empty_aria_label = format!("{title}: {description}");
+        let mut card = div()
+            .id("library-empty-card")
+            .test_support()
+            .max_w(px(520.))
+            .w_full()
+            .p_5()
+            .rounded(px(components.panel_radius))
+            .border_1()
+            .border_color(rgb(visual.border))
+            .bg(rgb(visual.surface))
+            .flex()
+            .flex_col()
+            .items_center()
+            .gap_2()
+            .child(
+                div()
+                    .id("library-empty-icon")
+                    .test_support()
+                    .p_3()
+                    .rounded(px(components.control_radius))
+                    .bg(rgb(accent_surface))
+                    .text_color(rgb(accent))
+                    .child(Icon::new(icon).size_4()),
+            )
+            .child(
+                div()
+                    .id("library-empty-title")
+                    .test_support()
+                    .role(Role::Label)
+                    .aria_label(title.clone())
+                    .text_lg()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(title.clone()),
+            )
+            .child(
+                div()
+                    .id("library-empty-description")
+                    .test_support()
+                    .role(Role::Label)
+                    .aria_label(description.clone())
+                    .text_sm()
+                    .text_color(rgb(visual.muted))
+                    .child(description.clone()),
+            );
+        if !query.is_empty() {
+            card = card.child(
+                Button::new("library-empty-clear-filter")
+                    .ghost()
+                    .compact()
+                    .icon(IconName::Close)
+                    .label(t(cx, "清除搜索", "Clear search"))
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        view.search.update(cx, |input, cx| {
+                            input.set_value("", window, cx);
+                        });
+                        cx.notify();
+                    }))
+                    .map(|button| {
+                        self.retain_modal_button("library-empty-clear-filter", button, cx)
+                    }),
+            );
+        } else if total_count == 0 && matches!(self.library_filter, LibraryFilter::All) {
+            card = card.child(
+                Button::new("library-empty-new-connection")
+                    .primary()
+                    .compact()
+                    .icon(IconName::Plus)
+                    .label(t(cx, "新建连接", "New connection"))
+                    .disabled(self.saving)
+                    .on_click(cx.listener(|view, _, window, cx| view.open_form(window, cx)))
+                    .map(|button| {
+                        self.retain_modal_button("library-empty-new-connection", button, cx)
+                    }),
+            );
+        } else {
+            card = card.child(
+                div()
+                    .id("library-empty-scope-hint")
+                    .test_support()
+                    .role(Role::Label)
+                    .aria_label(scope_description.clone())
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(scope_description),
+            );
+        }
+        div()
+            .id("library-empty-state")
+            .test_support()
+            .role(Role::Group)
+            .aria_label(empty_aria_label)
+            .flex_1()
+            .min_h_0()
+            .flex()
+            .items_center()
+            .justify_center()
+            .p_6()
+            .bg(rgb(visual.canvas))
+            .child(card)
+            .into_any_element()
+    }
+
     pub(super) fn connection_table(
         &self,
         available_width: Pixels,
@@ -78,33 +495,30 @@ impl Workspace {
                 .map(|item| (item, None))
                 .collect(),
         };
+        let scope_count = profiles.len();
+        let profiles: Vec<_> = profiles
+            .into_iter()
+            .filter(|(item, _)| item.matches(&query))
+            .collect();
+        let total_count = profiles.len();
         let mut rows = div()
             .id("connection-rows")
             .flex_1()
             .min_h_0()
             .overflow_y_scroll();
         let mut count = 0;
-        for (index, (connection, time)) in profiles
-            .into_iter()
-            .filter(|(item, _)| item.matches(&query))
-            .enumerate()
-        {
+        for (index, (connection, time)) in profiles.into_iter().enumerate() {
             count += 1;
             rows =
                 rows.child(self.connection_library_row(index, connection, time, cards, trash, cx));
         }
         if count == 0 {
-            rows=rows.child(div().p_5().text_color(rgb(visual.muted)).child(if trash {
-                t(cx,"回收站中没有匹配的连接。删除连接后，可在这里恢复。","No matching connections in trash. Deleted profiles can be restored here.")
-            } else if recent {
-                t(cx,"尚无匹配的成功连接记录。连接失败不会计入最近使用。","No matching successful connections yet. Failed attempts are not added to recents.")
-            } else {
-                t(cx,"没有匹配的 SSH 连接。新建连接，或选择其他文件夹。","No matching SSH connections. Add a profile or choose another folder.")
-            }));
+            rows = rows.child(self.library_empty_state(&query, total_count, cx));
         }
         let tree = self.library_folder_tree(stacked, cx);
         let header = self.library_table_header(trash, recent, cx);
         div().flex().flex_col().size_full().text_sm().bg(rgb(visual.surface))
+            .child(self.library_filter_summary(scope_count, count, &query, cx))
             .child(self.library_import_toolbar(stacked,cx))
             .child(self.library_batch_toolbar(cx))
             .child(div().flex_1().min_h_0().min_w_0().flex().when(stacked,|body|body.flex_col()).child(tree)
@@ -113,9 +527,9 @@ impl Workspace {
                         .when(!cards,|table|table.min_w(px(if trash {880.} else if recent {1070.} else {1010.})).child(header)).child(rows))))
             .child(div().h(px(28.)).flex_shrink_0().px_3().flex().items_center().text_xs().text_color(rgb(visual.muted))
                 .border_t_1().border_color(rgb(visual.border)).child(if trash {
-                    format!("{} · {count}",t(cx,"仅移除连接配置，不会删除服务器或凭据库条目","Profile metadata only; servers and encrypted vault entries are retained"))
+                    format!("{} · {count} / {scope_count}",t(cx,"仅移除连接配置，不会删除服务器或凭据库条目","Profile metadata only; servers and encrypted vault entries are retained"))
                 }else{
-                    format!("{} {count} · {}",t(cx,"连接","Connections"),t(cx,"文件夹筛选包含子文件夹","Folder filters include descendants"))
+                    format!("{} {count} / {scope_count} · {}",t(cx,"连接","Connections"),t(cx,"文件夹筛选包含子文件夹","Folder filters include descendants"))
                 })).into_any_element()
     }
 
@@ -380,12 +794,14 @@ impl Workspace {
             (
                 "all-connections",
                 LibraryFilter::All,
+                IconName::Server,
                 t(cx, "全部连接", "All connections"),
                 self.state.connections.len(),
             ),
             (
                 "favorite-connections",
                 LibraryFilter::Favorites,
+                IconName::Bookmark,
                 t(cx, "收藏", "Favorites"),
                 self.state
                     .connections
@@ -396,18 +812,21 @@ impl Workspace {
             (
                 "recent-connections",
                 LibraryFilter::Recent,
+                IconName::Activity,
                 t(cx, "最近连接", "Recent"),
                 self.state.recent_connections.len(),
             ),
             (
                 "trashed-connections",
                 LibraryFilter::Trash,
+                IconName::Trash,
                 t(cx, "回收站", "Trash"),
                 self.state.deleted_connections.len(),
             ),
             (
                 "unfiled-connections",
                 LibraryFilter::Folder(None),
+                IconName::FolderOpen,
                 t(cx, "未归档", "Unfiled"),
                 self.state
                     .connections
@@ -429,14 +848,21 @@ impl Workspace {
             .flex()
             .flex_col()
             .gap_1();
-        for (id, filter, label, total) in filters {
+        for (id, filter, icon, label, total) in filters {
+            let selected = self.library_filter == filter;
             tree = tree.child(
                 Button::new(id)
                     .ghost()
                     .compact()
                     .w_full()
-                    .selected(self.library_filter == filter)
+                    .icon(icon)
+                    .selected(selected)
+                    .toggled(selected)
                     .label(format!("{label}  {total}"))
+                    .accessibility_label(format!(
+                        "{label}, {total} {}",
+                        t(cx, "个连接", "profiles")
+                    ))
                     .on_click(cx.listener(move |view, _, _, cx| {
                         view.set_library_filter(filter, cx);
                     }))
@@ -529,6 +955,10 @@ impl Workspace {
             t(cx, "最近连接", "Last connected")
         };
         let header = div()
+            .id("connection-table-header")
+            .test_support()
+            .role(Role::Group)
+            .aria_label(t(cx, "连接表格列标题", "Connection table headings"))
             .h(px(30.))
             .flex_shrink_0()
             .flex()
@@ -559,6 +989,10 @@ impl Workspace {
     fn library_import_toolbar(&self, stacked: bool, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         div()
+            .id("library-actions-toolbar")
+            .test_support()
+            .role(Role::Group)
+            .aria_label(t(cx, "连接库操作", "Connection library actions"))
             .min_h(px(46.))
             .px_3()
             .py_2()
