@@ -13,6 +13,12 @@ impl Workspace {
         div()
             .id("session-strip")
             .test_support()
+            .aria_label(t(cx, "SSH 会话导航", "SSH session navigation"))
+            .aria_description(t(
+                cx,
+                "使用左右按钮或 Command/Control 加 Alt 加左右方向键切换会话。",
+                "Use the arrow buttons or Command/Control plus Alt plus Left/Right to switch sessions.",
+            ))
             .h(px(chrome.session_strip_height))
             .flex_shrink_0()
             .min_w_0()
@@ -24,6 +30,33 @@ impl Workspace {
             .border_b_1()
             .border_color(rgb(visual.border))
             .child(tabs)
+            .child(
+                div()
+                    .id("session-count")
+                    .test_support()
+                    .aria_label(if self.tabs.is_empty() {
+                        t(cx, "快速连接", "Quick connect").to_owned()
+                    } else {
+                        format!(
+                            "{} {}",
+                            self.tabs.len(),
+                            t(cx, "个会话", "sessions")
+                        )
+                    })
+                    .flex_shrink_0()
+                    .px_2()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .bg(rgb(visual.surface_active))
+                    .border_1()
+                    .border_color(rgb(visual.border))
+                    .rounded(px(crate::design::components(cx).control_radius))
+                    .child(if self.tabs.is_empty() {
+                        t(cx, "快速连接", "Quick connect").to_owned()
+                    } else {
+                        format!("{} {}", self.tabs.len(), t(cx, "个会话", "sessions"))
+                    }),
+            )
             .child(
                 Button::new("new-workspace-window")
                     .ghost()
@@ -101,6 +134,32 @@ impl Workspace {
             tab.read(cx).focus_handle(cx).focus(window, cx);
         }
         cx.notify();
+    }
+
+    pub(super) fn previous_session(
+        &mut self,
+        _: &PreviousSession,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.tabs.len() > 1 {
+            self.select_session_tab(self.active.saturating_sub(1), window, cx);
+        }
+    }
+
+    pub(super) fn next_session(
+        &mut self,
+        _: &NextSession,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.tabs.len() > 1 {
+            self.select_session_tab(
+                self.active.saturating_add(1).min(self.tabs.len() - 1),
+                window,
+                cx,
+            );
+        }
     }
 
     fn empty_workspace_body(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
@@ -404,6 +463,7 @@ impl Workspace {
         let mut tabs = div()
             .id("session-tabs")
             .test_support()
+            .aria_label(t(cx, "SSH 会话标签", "SSH session tabs"))
             .flex_1()
             .min_w_0()
             .flex()
@@ -436,6 +496,11 @@ impl Workspace {
                     .items_center()
                     .gap_1()
                     .cursor_pointer()
+                    .aria_label(format!(
+                        "{}: {}",
+                        t(cx, "SSH 会话", "SSH session"),
+                        self.session_title(terminal_id, cx)
+                    ))
                     .bg(rgb(if self.active == index {
                         visual.surface_active
                     } else {

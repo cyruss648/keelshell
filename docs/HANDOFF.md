@@ -5,6 +5,33 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 会话、连接库与 AI 助手界面增强
+
+当前工作树继续推进工作区的视觉连续性和操作可达性，源码与文档改动尚未形成新的提交。
+本片包含连接库范围标题与空态、会话条数量与双语 AX、上一个/下一个会话快捷键，
+以及 AI 助手的六阶段工作流轨道。AI 回复到达后会自动滚动到回复审核区，避免
+长上下文把审核入口推到首屏之外；知识保存动作固定在助手底部审核栏，Agent 停止
+并编辑问题会在最新布局完成后按实际几何显露问题输入框。
+
+定向验证已通过：连接库 26/26、AI 助手 6/6、会话条 5/5，快捷键专项 1/1，
+`cargo check -p keelshell-app --locked`、格式和差异检查通过；长 MCP、Agent 编辑
+问题和知识保存回归均为 1/1。AI 定向测试首轮曾因回复区域不可见失败，补充响应
+滚动锚点后精确重跑为 2/2；Agent 编辑问题第一次和一次旧布局修补也曾失败，最终
+改为 render 后 `on_prepaint` 几何滚动并精确重跑为 1/1。所有失败事实保留在
+[本轮测试记录](testing/records/2026-11-07-session-library-ai-ui-polish.md)。
+
+设计决策见 [ADR 0117](adr/0117-session-navigation-and-assistant-workflow-surface.md)；
+产品流程见 [AI 助手审核工作流](product/AI_ASSISTANT_WORKFLOW.md)。Frost「霜白」、
+Graphite「曜石」、Lavender「雾紫」继续由主题 registry、Palette、组件形状、
+Chrome token 和 Typography token 提供，视图不按主题 ID 分支，新增主题只需扩展
+注册定义和语义 token。
+
+完整 `python3 scripts/check.py` 已重新执行并退出 0，包含 Python 131/1 skipped、
+格式、严格 workspace Clippy、workspace tests、doctests、依赖策略和三组 AI
+controller。下一步是提交并推送这片源码与文档，然后固定最新提交启动新的独立只读
+代码/功能复核。Windows/Linux 原生桌面、完整键盘焦点、IME、VoiceOver、当前源码
+包的长流程、Podman/SSH 真实联调和外部 AI provider 仍不能由本轮 headless 门禁代签。
+
 ## 2026-11-07 连接身份栏最终候选
 
 本轮实现已完成源码与测试修复，当前候选包含 pane 连接身份栏、恢复状态语义

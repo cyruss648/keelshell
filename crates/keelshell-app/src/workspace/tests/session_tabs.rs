@@ -33,6 +33,17 @@ fn assert_active_close_visible(fixture: &Fixture, window: &Window, cx: &gpui_kit
     );
 }
 
+fn session_navigation_shortcut(direction: &str) -> String {
+    format!(
+        "{}-alt-{direction}",
+        if cfg!(target_os = "macos") {
+            "cmd"
+        } else {
+            "ctrl"
+        }
+    )
+}
+
 #[gpui_kit::test]
 fn long_session_titles_keep_close_visible_in_both_languages_and_window_sizes(
     cx: &mut TestAppContext,
@@ -126,6 +137,55 @@ fn navigation_reveals_and_closes_the_selected_session_without_sending_drafts(
         assert_active_close_visible(&fixture, window, cx);
     })
     .checked("navigate and close real session controls at minimum width");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
+fn keyboard_session_navigation_keeps_the_active_target_and_exposes_count(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes: Vec<_> = (0..3)
+        .flat_map(|_| attach_remote_panes(&fixture, cx))
+        .collect();
+    cx.update_window(fixture.window, |_, window, cx| {
+        super::super::bind_keys(cx);
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.tabs = panes[..3]
+                .iter()
+                .map(|pane| pane.terminal.clone())
+                .collect();
+            workspace.active = 1;
+            workspace.command.update(cx, |input, cx| {
+                input.set_value("printf '键盘导航草稿'", window, cx);
+            });
+            cx.notify();
+        });
+        render_and_reveal(window, cx);
+        assert_eq!(
+            window.find("session-count").label(),
+            Some("3 个会话"),
+            "Chinese session count"
+        );
+        window.press(&session_navigation_shortcut("right"), cx);
+        render_and_reveal(window, cx);
+        assert_eq!(fixture.workspace.read(cx).active, 2);
+        assert_active_close_visible(&fixture, window, cx);
+        window.press(&session_navigation_shortcut("left"), cx);
+        render_and_reveal(window, cx);
+        assert_eq!(fixture.workspace.read(cx).active, 1);
+        assert_eq!(
+            fixture.workspace.read(cx).command.read(cx).value(),
+            "printf '键盘导航草稿'"
+        );
+        i18n::set_language(Language::En, cx);
+        render_and_reveal(window, cx);
+        assert_eq!(window.find("session-count").label(), Some("3 sessions"));
+        let session_strip = window.find("session-strip");
+        let description = session_strip
+            .description()
+            .checked_option("session shortcut description");
+        assert!(description.contains("Command/Control"));
+    })
+    .checked("navigate sessions from the keyboard without changing the reviewed draft");
     assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
 

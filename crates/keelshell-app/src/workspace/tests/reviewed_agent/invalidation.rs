@@ -500,7 +500,10 @@ async fn reviewed_agent_stop_and_edit_question_is_reachable_in_small_bilingual_t
                 window.render_frame(cx);
                 window.render_frame(cx);
                 let question = window.find("assistant-question").bounds();
-                assert!(question.top() >= px(0.) && question.bottom() <= px(580.), "editing must reveal the actual question from the scrolled history: {question:?}");
+                assert!(
+                    question.top() >= px(0.) && question.bottom() <= px(580.),
+                    "editing must reveal the actual question from the scrolled history: {question:?}"
+                );
                 window.press("secondary-a", cx);
                 window.input("fresh question 中文", cx);
                 assert_eq!(prompt.read(cx).value(), "fresh question 中文");

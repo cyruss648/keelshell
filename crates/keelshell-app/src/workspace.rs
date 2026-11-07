@@ -80,6 +80,8 @@ actions!(
         OpenConnections,
         CloseTab,
         ToggleAssistant,
+        PreviousSession,
+        NextSession,
         CompleteRemoteCommand,
         NewWorkspaceWindow,
         CloseWorkspaceWindow
@@ -3189,11 +3191,18 @@ pub fn bind_keys(cx: &mut App) {
     } else {
         ("ctrl-shift-t", "ctrl-shift-w", "ctrl-shift-j")
     };
+    let (previous_session, next_session) = if cfg!(target_os = "macos") {
+        ("cmd-alt-left", "cmd-alt-right")
+    } else {
+        ("ctrl-alt-left", "ctrl-alt-right")
+    };
     cx.bind_keys([
         KeyBinding::new("ctrl-space", CompleteRemoteCommand, Some("Input")),
         KeyBinding::new(open, OpenConnections, None),
         KeyBinding::new(close, CloseTab, None),
         KeyBinding::new(assistant, ToggleAssistant, None),
+        KeyBinding::new(previous_session, PreviousSession, None),
+        KeyBinding::new(next_session, NextSession, None),
         KeyBinding::new(
             if cfg!(target_os = "macos") {
                 "cmd-shift-n"

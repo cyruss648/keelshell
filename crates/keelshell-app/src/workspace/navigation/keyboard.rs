@@ -21,7 +21,24 @@ impl Workspace {
             if window.window_handle().window_id() != owner_window {
                 return;
             }
-            let blocked = owner.update(cx, |view, _| {
+            let blocked = owner.update(cx, |view, cx| {
+                let modifiers = event.keystroke.modifiers;
+                let session_modifier = if cfg!(target_os = "macos") {
+                    modifiers.platform && modifiers.alt && !modifiers.control && !modifiers.shift
+                } else {
+                    modifiers.control && modifiers.alt && !modifiers.platform && !modifiers.shift
+                };
+                if !modifiers.function
+                    && session_modifier
+                    && matches!(event.keystroke.key.as_str(), "left" | "right")
+                {
+                    if event.keystroke.key == "left" {
+                        view.previous_session(&PreviousSession, window, cx);
+                    } else {
+                        view.next_session(&NextSession, window, cx);
+                    }
+                    return true;
+                }
                 let blocked = view.navigation_tree.held.contains(&event.keystroke.key)
                     && !view.navigation_accepts_keys(window);
                 if blocked {

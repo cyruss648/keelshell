@@ -4,6 +4,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
+use gpui_kit::base::ElementExt;
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::{
     assets::IconName,
@@ -414,7 +415,6 @@ pub struct AssistantPanel {
     _job: Option<Task<()>>,
     prompt: Entity<TextareaState>,
     content_scroll: ScrollHandle,
-    question_anchor: ScrollAnchor,
     response_anchor: ScrollAnchor,
     preview_scroll: ScrollHandle,
     context: String,
@@ -427,6 +427,7 @@ pub struct AssistantPanel {
     request_knowledge: Option<knowledge_context::KnowledgeContextReview>,
     response: String,
     response_reveal_pending: bool,
+    question_reveal_pending: bool,
     status: Message,
     busy: bool,
     preview: bool,
@@ -464,7 +465,6 @@ impl AssistantPanel {
             ))
         });
         let content_scroll = ScrollHandle::new();
-        let question_anchor = ScrollAnchor::for_handle(content_scroll.clone());
         let response_anchor = ScrollAnchor::for_handle(content_scroll.clone());
         let mut subscriptions = vec![cx.subscribe(&prompt, |view, _, event: &InputEvent, cx| {
             if matches!(event, InputEvent::Change) && !view.obsolete_agent_question_change(cx) {
@@ -500,7 +500,6 @@ impl AssistantPanel {
             _job: None,
             prompt,
             content_scroll,
-            question_anchor,
             response_anchor,
             preview_scroll: ScrollHandle::new(),
             context: String::new(),
@@ -513,6 +512,7 @@ impl AssistantPanel {
             request_knowledge: None,
             response: String::new(),
             response_reveal_pending: false,
+            question_reveal_pending: false,
             status: Message::new(
                 "请主动选择上下文，应用不会自动发送任何内容。",
                 "Choose context explicitly. Nothing is sent automatically.",
@@ -1099,6 +1099,7 @@ impl AssistantPanel {
         self.preview_scroll.set_offset(point(px(0.), px(0.)));
         self.response.clear();
         self.response_reveal_pending = false;
+        self.question_reveal_pending = false;
         self.suggestions.clear();
         self.diagnostic_plan = None;
         self.response_target = None;
@@ -2312,86 +2313,11 @@ impl AssistantPanel {
             .into_any_element()
     }
 
-    fn knowledge_preview_view(&self, cx: &mut Context<Self>) -> AnyElement {
-        let visual = crate::design::palette(cx);
+    fn knowledge_save_action(&self, cx: &mut Context<Self>) -> AnyElement {
         let Some(preview) = self.knowledge_preview.as_ref() else {
             return div().into_any_element();
         };
-        let disposition = match preview.document.disposition() {
-            SaveDisposition::Persistable => Message::new(
-                "SaveDisposition：Persistable（仅代表通过本地内容闸门）",
-                "SaveDisposition: Persistable (only the local content gate passed)",
-            ),
-            SaveDisposition::DoNotPersist { reason } => Message::new(
-                format!(
-                    "SaveDisposition：DoNotPersist · {}",
-                    knowledge_save_block_label(reason, cx)
-                ),
-                format!(
-                    "SaveDisposition: DoNotPersist · {}",
-                    knowledge_save_block_label(reason, cx)
-                ),
-            ),
-        };
-        let disposition_color = if preview.document.disposition().is_persistable() {
-            visual.success
-        } else {
-            visual.danger
-        };
-        let capture_kind_label = preview.capture.kind.label(cx);
-        let review_label = match preview.review_outcome {
-            KnowledgeReviewOutcome::Unknown => t(
-                cx,
-                "结果状态：未知（仅审核）",
-                "Outcome: unknown (review only)",
-            ),
-            KnowledgeReviewOutcome::Completed => {
-                t(cx, "结果状态：已确认完成", "Outcome: confirmed completed")
-            }
-            KnowledgeReviewOutcome::Failed => {
-                t(cx, "结果状态：已确认失败", "Outcome: confirmed failed")
-            }
-        };
-        let mut sources = div()
-            .id("knowledge-preview-sources")
-            .test_support()
-            .flex()
-            .flex_col()
-            .gap_1();
-        for (index, entry) in preview.document.entries().iter().enumerate() {
-            sources = sources.child(
-                div()
-                    .id(("knowledge-entry", index))
-                    .test_support()
-                    .text_xs()
-                    .child(format!(
-                        "{} · {} · rev {} · captured {} · {}",
-                        entry.title(),
-                        entry.source().label(),
-                        entry.source().revision(),
-                        entry.occurred_at(),
-                        capture_kind_label,
-                    )),
-            );
-        }
-        for (index, exclusion) in preview.document.exclusions().iter().enumerate() {
-            sources = sources.child(
-                div()
-                    .id(("knowledge-exclusion", index))
-                    .test_support()
-                    .text_xs()
-                    .text_color(rgb(visual.danger))
-                    .child(format!(
-                        "{} · {} · rev {} · captured {} · {}",
-                        knowledge_exclusion_label(exclusion.reason(), cx),
-                        exclusion.source().label(),
-                        exclusion.source().revision(),
-                        exclusion.occurred_at(),
-                        capture_kind_label,
-                    )),
-            );
-        }
-        let save_button = match (preview.document.disposition(), preview.save_state) {
+        match (preview.document.disposition(), preview.save_state) {
             (SaveDisposition::Persistable, KnowledgeSaveState::Ready) => {
                 Button::new("knowledge-save")
                     .ghost()
@@ -2496,7 +2422,106 @@ impl AssistantPanel {
                 .disabled(true)
                 .label(t(cx, "保存已阻止", "Saving blocked"))
                 .into_any_element(),
+        }
+    }
+
+    fn knowledge_action_footer(&self, cx: &mut Context<Self>) -> AnyElement {
+        self.knowledge_preview.as_ref().map_or_else(
+            || div().into_any_element(),
+            |_| {
+                div()
+                    .id("assistant-knowledge-footer")
+                    .test_support()
+                    .flex_shrink_0()
+                    .p_3()
+                    .border_t_1()
+                    .border_color(rgb(crate::design::palette(cx).border))
+                    .bg(rgb(crate::design::palette(cx).canvas))
+                    .child(self.knowledge_save_action(cx))
+                    .into_any_element()
+            },
+        )
+    }
+
+    fn knowledge_preview_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let Some(preview) = self.knowledge_preview.as_ref() else {
+            return div().into_any_element();
         };
+        let disposition = match preview.document.disposition() {
+            SaveDisposition::Persistable => Message::new(
+                "SaveDisposition：Persistable（仅代表通过本地内容闸门）",
+                "SaveDisposition: Persistable (only the local content gate passed)",
+            ),
+            SaveDisposition::DoNotPersist { reason } => Message::new(
+                format!(
+                    "SaveDisposition：DoNotPersist · {}",
+                    knowledge_save_block_label(reason, cx)
+                ),
+                format!(
+                    "SaveDisposition: DoNotPersist · {}",
+                    knowledge_save_block_label(reason, cx)
+                ),
+            ),
+        };
+        let disposition_color = if preview.document.disposition().is_persistable() {
+            visual.success
+        } else {
+            visual.danger
+        };
+        let capture_kind_label = preview.capture.kind.label(cx);
+        let review_label = match preview.review_outcome {
+            KnowledgeReviewOutcome::Unknown => t(
+                cx,
+                "结果状态：未知（仅审核）",
+                "Outcome: unknown (review only)",
+            ),
+            KnowledgeReviewOutcome::Completed => {
+                t(cx, "结果状态：已确认完成", "Outcome: confirmed completed")
+            }
+            KnowledgeReviewOutcome::Failed => {
+                t(cx, "结果状态：已确认失败", "Outcome: confirmed failed")
+            }
+        };
+        let mut sources = div()
+            .id("knowledge-preview-sources")
+            .test_support()
+            .flex()
+            .flex_col()
+            .gap_1();
+        for (index, entry) in preview.document.entries().iter().enumerate() {
+            sources = sources.child(
+                div()
+                    .id(("knowledge-entry", index))
+                    .test_support()
+                    .text_xs()
+                    .child(format!(
+                        "{} · {} · rev {} · captured {} · {}",
+                        entry.title(),
+                        entry.source().label(),
+                        entry.source().revision(),
+                        entry.occurred_at(),
+                        capture_kind_label,
+                    )),
+            );
+        }
+        for (index, exclusion) in preview.document.exclusions().iter().enumerate() {
+            sources = sources.child(
+                div()
+                    .id(("knowledge-exclusion", index))
+                    .test_support()
+                    .text_xs()
+                    .text_color(rgb(visual.danger))
+                    .child(format!(
+                        "{} · {} · rev {} · captured {} · {}",
+                        knowledge_exclusion_label(exclusion.reason(), cx),
+                        exclusion.source().label(),
+                        exclusion.source().revision(),
+                        exclusion.occurred_at(),
+                        capture_kind_label,
+                    )),
+            );
+        }
         div()
             .id("knowledge-preview")
             .test_support()
@@ -2609,7 +2634,6 @@ impl AssistantPanel {
                         "Model sending: not connected; this preview is never sent automatically. Saving requires explicit confirmation.",
                     )),
             )
-            .child(save_button)
             .into_any_element()
     }
 }
@@ -2651,6 +2675,8 @@ impl Render for AssistantPanel {
         } else {
             None
         };
+        let reveal_question = std::mem::take(&mut self.question_reveal_pending);
+        let question_scroll = self.content_scroll.clone();
         let mut content = div()
             .id("assistant-content")
             .test_support()
@@ -2764,7 +2790,23 @@ impl Render for AssistantPanel {
                 div()
                     .id("assistant-question")
                     .test_support()
-                    .anchor_scroll(Some(self.question_anchor.clone()))
+                    .on_prepaint(move |bounds, _, _| {
+                        if !reveal_question {
+                            return;
+                        }
+                        let viewport = question_scroll.bounds();
+                        let offset = question_scroll.offset();
+                        let next_y = if bounds.top() < viewport.top() {
+                            offset.y + viewport.top() - bounds.top()
+                        } else if bounds.bottom() > viewport.bottom() {
+                            offset.y - (bounds.bottom() - viewport.bottom())
+                        } else {
+                            offset.y
+                        };
+                        let minimum_y = -question_scroll.max_offset().y;
+                        question_scroll
+                            .set_offset(point(offset.x, next_y.max(minimum_y).min(px(0.))));
+                    })
                     .child(Textarea::new(&self.prompt).readonly(self.agent_active())),
             )
             .child(
@@ -3164,6 +3206,7 @@ impl Render for AssistantPanel {
                     ),
             )
             .children(confirmation)
+            .child(self.knowledge_action_footer(cx))
             .children(self.agent_action_footer(cx))
             .into_any_element()
     }

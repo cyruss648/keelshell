@@ -1,5 +1,25 @@
 # Capability ledger
 
+## 2026-11-07: session, connection library and AI assistant surface candidate
+
+The connection library now exposes its active scope, result count, search summary and
+selection count, with separate empty states for the library, favorites, recent items,
+trash, folders and zero-result searches. The session strip exposes bilingual
+accessibility semantics, a session count and bounded previous/next navigation; the
+platform shortcuts are Command-Option-Left/Right on macOS and Control-Alt-Left/Right
+on Windows/Linux. The AI assistant now presents a six-stage Capture, Question, Preview,
+Send, Review and Save knowledge rail, with explicit context capture, exact request
+preview, human-confirmed send, reviewed reply targets, command review and local
+knowledge gates. A normal reply reveals its review region in the content viewport
+without changing the response or authorization state. Frost, Graphite and Lavender
+continue to share token-driven rendering, and adding a theme only extends the registry
+and semantic tokens. The knowledge save action stays in a fixed assistant footer, and
+Agent question editing reveals the question after the stopped layout is measured. The
+exact source and full engineering gate for this candidate are locally validated;
+independent review and native desktop evidence remain open. See the [AI assistant
+workflow](AI_ASSISTANT_WORKFLOW.md), [ADR 0117](../adr/0117-session-navigation-and-assistant-workflow-surface.md)
+and [test record](../testing/records/2026-11-07-session-library-ai-ui-polish.md).
+
 ## 2026-11-07: independent workspace windows and editor reachability candidate
 
 The app now has a real native GPUI Kit path for opening an empty second workspace.

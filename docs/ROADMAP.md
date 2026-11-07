@@ -3,6 +3,21 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-07 会话、连接库与 AI 助手界面增强
+
+本片把连接库范围反馈、会话条键盘导航和 AI 审核阶段统一到可扩展的工作台表面：
+连接库区分范围与空态，会话条显示数量并提供平台快捷键，AI 助手显示“捕获、提问、
+预览、发送、审核回复、保存知识”六阶段。普通回复到达后自动显露审核区，长请求
+仍在正文滚动区保留完整预览。
+
+定向结果为连接库 26/26、AI 6/6、会话条 5/5、快捷键 1/1，长 MCP、Agent 编辑
+问题和知识保存回归各 1/1，`cargo check`、格式和差异检查通过。首轮 AI 回复可达性
+测试失败后补充响应锚点，精确重跑 2/2；Agent 编辑问题曾暴露旧布局滚动，最终在
+render 后按实际几何修复。完整工程门禁 `python3 scripts/check.py` 已退出 0；
+exact-tip 独立复核和原生桌面证据仍待执行。设计见
+[ADR 0117](adr/0117-session-navigation-and-assistant-workflow-surface.md)，
+回执见[本轮记录](testing/records/2026-11-07-session-library-ai-ui-polish.md)。
+
 ## 2026-11-07 当前交付位置
 
 当前候选已完成 pane 连接身份栏的源码、测试和文档收口准备。连接身份栏覆盖

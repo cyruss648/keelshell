@@ -352,7 +352,9 @@ impl AssistantPanel {
     }
     fn edit_agent_question(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.invalidate_request(cx);
-        self.question_anchor.scroll_to(window, cx);
+        // Stopping the run removes the active controls above the question.
+        // Let render schedule the anchor after that layout is current.
+        self.question_reveal_pending = true;
         self.prompt.update(cx, |input, cx| input.focus(window, cx));
         self.status = Message::new(
             "已停止旧 Agent，可以编辑问题；下一次需要重新审核。",
