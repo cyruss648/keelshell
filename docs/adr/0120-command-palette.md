@@ -1,7 +1,7 @@
 # ADR 0120：快速操作中心
 
 - 日期：2026-11-08
-- 状态：源码实现与独立复核完成，提交与推送待完成
+- 状态：源码实现与独立复核完成，源码提交已推送
 - 范围：Workspace 快速动作发现、键盘入口和动作上下文过滤
 - 关联：[快速操作中心](../product/COMMAND_PALETTE.md)、[当前交接](../HANDOFF.md)、
   [开发路线](../ROADMAP.md)
@@ -75,3 +75,8 @@ macOS/Windows/Linux 的完整键盘、IME、VoiceOver 和像素验收。
 `cargo test -p keelshell-app --locked --offline command_palette -- --nocapture
 --test-threads=1`，结果为 `16 passed / 1091 filtered out`，并通过
 `git diff --check`；merge recommendation 为 `APPROVE`（限快速操作中心范围）。
+
+源码提交为
+`c13724a9eab9df3d97fdb3ed1eaf25b5dcfabffa`，已推送到
+`feature/main-visual-integration-20261106`；该源码提交的 local、tracking 和
+remote SHA 已读回一致。

@@ -19,9 +19,12 @@
 observer/small-stack AI controller 均通过。workspace 测试中 app 单元为
 `1105 passed / 2 ignored`，core、mcp、session 的单元与集成测试均通过；带有
 Podman、OpenSSH、真实 Linux 采样等显式环境要求的可选测试继续保持 ignored。
-新的独立严格只读复核已完成，P0/P1/P2/P3 均为 `0`，范围内建议为 `APPROVE`；
+源码提交
+`c13724a9eab9df3d97fdb3ed1eaf25b5dcfabffa` 已推送，local、tracking 和 remote
+SHA 已读回一致。新的独立严格只读复核已完成，P0/P1/P2/P3 均为 `0`，范围内建议为
+`APPROVE`；
 新建窗口、分屏、布局保存、原生多平台输入/辅助技术、真实 SSH/Podman 和外部
-AI provider 保持后续验收项。当前只剩提交、推送和 SHA 回读。设计见
+AI provider 保持后续验收项。当前只剩文档收口提交。设计见
 [ADR 0120](adr/0120-command-palette.md)，实现说明见
 [快速操作中心](product/COMMAND_PALETTE.md)，测试回执见
 [快速操作中心记录](testing/records/2026-11-08-command-palette.md)。

@@ -10,8 +10,10 @@
 
 记录创建时的源码基线：`1239ce9077c3471eeb05d53a81a86973affd2e46`
 
-本片代码和文档仍处于未提交状态；提交 SHA、远端 SHA 和独立复核结论在固定提交
-后补写。
+源码实现已提交为
+`c13724a9eab9df3d97fdb3ed1eaf25b5dcfabffa`，并推送到
+`feature/main-visual-integration-20261106`；源码提交的 local、tracking 和
+remote SHA 已读回一致。本测试记录的文档收口仍随本片最后一个文档提交完成。
 
 ## 变更
 
@@ -104,8 +106,7 @@ workspace 测试证据中，`keelshell-app` 单元测试为 `1105 passed / 2 ign
   实际重跑 `cargo test -p keelshell-app --locked --offline command_palette
   -- --nocapture --test-threads=1` 得到 `16 passed / 1091 filtered out`，
   `git diff --check` 退出 `0`；
-- 固定最终源码 SHA 后提交、推送并读回 local/tracking/remote SHA；
-- 补写最终提交 SHA、远端 SHA 和复核结果。
+- 源码提交和 SHA 回读已完成；本记录随文档收口提交继续保留上述证据。
 
 ## 证据边界
 

@@ -7,7 +7,11 @@
 
 ## 2026-11-08 快速操作中心生产布局与键盘收口
 
-本片继续完成 Workspace 快速操作中心。动作目录仍由纯 Rust 元数据、双语标题、
+本片源码已提交为
+`c13724a9eab9df3d97fdb3ed1eaf25b5dcfabffa`，并推送到
+`origin/feature/main-visual-integration-20261106`；源码提交的 local、tracking、
+remote SHA 已读回一致。该提交继续完成 Workspace 快速操作中心。动作目录仍由纯
+Rust 元数据、双语标题、
 关键词、平台快捷键和会话上下文过滤组成；Workspace 只负责模态生命周期与已有
 动作映射。当前生产布局已收敛为单一真实根节点：`command-palette-modal` 覆盖
 模态内容区，`command-palette-card` 承载搜索、结果滚动区和计数栏。结果行有稳定
@@ -19,7 +23,7 @@
 连接模态，主机监控会选择 Monitor 导航面板；快速操作中心不直接执行 SSH、文件、
 AI provider 或持久化写入。
 
-当前未提交源码的定向 GPUI 回归为 `16 passed / 0 failed / 1091 filtered out`，
+该源码提交的定向 GPUI 回归为 `16 passed / 0 failed / 1091 filtered out`，
 覆盖纯动作目录、双语、焦点恢复、连接管理器 Enter 路由、一次性快速连接、主机
 监控路由、首末会话边界、平台快捷键和 `900×580` 卡片/结果区边界。此前失败是
 关闭后对已卸载元素调用 `find`，已改为 GPUI 的 `try_find(...).is_none()` 语义；
@@ -31,8 +35,12 @@ AI provider 或持久化写入。
 observer/small-stack AI controller 均通过。workspace app 单元测试为
 `1105 passed / 2 ignored`，core、mcp、session 的单元与集成测试均通过；显式依赖
 Podman、OpenSSH 或真实 Linux 采样的可选测试仍按边界保持 ignored。当前只剩固定
-源码后的提交和推送；新的原生多平台、真实 SSH/Podman 与外部
+源码交付已完成；新的原生多平台、真实 SSH/Podman 与外部
 AI provider 验收不由本片 headless 门禁代签。
+
+新的独立严格只读复核已针对该源码提交完成，P0/P1/P2/P3 均为 `0`，范围内
+merge recommendation 为 `APPROVE`；复核工作树保持未修改。文档收口提交会继续
+保留本片完整门禁、精确重跑和源码 SHA 证据。
 
 本次完整门禁首轮曾在 Python 阶段因 4 个既有
 `test_windows_native_crash.PreparationTreeTests` 用例的 `124` 超时退出而退出
