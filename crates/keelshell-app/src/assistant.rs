@@ -6,8 +6,9 @@ use std::{
 
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::{
+    assets::IconName,
     component::{
-        Disableable, IconName,
+        Disableable,
         button::{Button, ButtonVariants},
         input::{InputEvent, Textarea, TextareaState},
         label::Label,
@@ -186,6 +187,82 @@ struct LocalRequestProgress {
     expanded: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AssistantWorkflowStep {
+    Capture,
+    Question,
+    Preview,
+    Send,
+    Review,
+    Knowledge,
+}
+
+impl AssistantWorkflowStep {
+    const ALL: [Self; 6] = [
+        Self::Capture,
+        Self::Question,
+        Self::Preview,
+        Self::Send,
+        Self::Review,
+        Self::Knowledge,
+    ];
+
+    fn label(self, cx: &App) -> &'static str {
+        match self {
+            Self::Capture => t(cx, "捕获", "Capture"),
+            Self::Question => t(cx, "提问", "Question"),
+            Self::Preview => t(cx, "预览", "Preview"),
+            Self::Send => t(cx, "发送", "Send"),
+            Self::Review => t(cx, "审核回复", "Review"),
+            Self::Knowledge => t(cx, "保存知识", "Save knowledge"),
+        }
+    }
+
+    fn description(self, cx: &App) -> &'static str {
+        match self {
+            Self::Capture => t(
+                cx,
+                "明确选择终端上下文",
+                "Select terminal context explicitly",
+            ),
+            Self::Question => t(cx, "编辑问题并选择目标", "Edit the question and target"),
+            Self::Preview => t(
+                cx,
+                "检查完整脱敏请求",
+                "Inspect the complete redacted request",
+            ),
+            Self::Send => t(cx, "仅发送你确认的请求", "Send only what you confirm"),
+            Self::Review => t(
+                cx,
+                "回复和命令都要人工审核",
+                "Review replies and commands manually",
+            ),
+            Self::Knowledge => t(
+                cx,
+                "确认结果后再保存本地知识",
+                "Confirm the outcome before saving locally",
+            ),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AssistantWorkflowStepState {
+    Locked,
+    Active,
+    Complete,
+}
+
+impl AssistantWorkflowStepState {
+    fn label(self, cx: &App) -> &'static str {
+        match self {
+            Self::Locked => t(cx, "未解锁", "Locked"),
+            Self::Active => t(cx, "当前", "Current"),
+            Self::Complete => t(cx, "已完成", "Complete"),
+        }
+    }
+}
+
 struct KnowledgePreview {
     review_id: Uuid,
     capture: KnowledgeCapture,
@@ -338,6 +415,7 @@ pub struct AssistantPanel {
     prompt: Entity<TextareaState>,
     content_scroll: ScrollHandle,
     question_anchor: ScrollAnchor,
+    response_anchor: ScrollAnchor,
     preview_scroll: ScrollHandle,
     context: String,
     host: String,
@@ -348,6 +426,7 @@ pub struct AssistantPanel {
     prepared_review_id: Option<Uuid>,
     request_knowledge: Option<knowledge_context::KnowledgeContextReview>,
     response: String,
+    response_reveal_pending: bool,
     status: Message,
     busy: bool,
     preview: bool,
@@ -386,6 +465,7 @@ impl AssistantPanel {
         });
         let content_scroll = ScrollHandle::new();
         let question_anchor = ScrollAnchor::for_handle(content_scroll.clone());
+        let response_anchor = ScrollAnchor::for_handle(content_scroll.clone());
         let mut subscriptions = vec![cx.subscribe(&prompt, |view, _, event: &InputEvent, cx| {
             if matches!(event, InputEvent::Change) && !view.obsolete_agent_question_change(cx) {
                 view.invalidate_request(cx);
@@ -421,6 +501,7 @@ impl AssistantPanel {
             prompt,
             content_scroll,
             question_anchor,
+            response_anchor,
             preview_scroll: ScrollHandle::new(),
             context: String::new(),
             host: String::new(),
@@ -431,6 +512,7 @@ impl AssistantPanel {
             prepared_review_id: None,
             request_knowledge: None,
             response: String::new(),
+            response_reveal_pending: false,
             status: Message::new(
                 "请主动选择上下文，应用不会自动发送任何内容。",
                 "Choose context explicitly. Nothing is sent automatically.",
@@ -1016,6 +1098,7 @@ impl AssistantPanel {
         self.preview = false;
         self.preview_scroll.set_offset(point(px(0.), px(0.)));
         self.response.clear();
+        self.response_reveal_pending = false;
         self.suggestions.clear();
         self.diagnostic_plan = None;
         self.response_target = None;
@@ -1533,6 +1616,7 @@ impl AssistantPanel {
                     self.accept_agent_reply(cx);
                 } else {
                     self.suggestions = shell_blocks(&self.response);
+                    self.response_reveal_pending = true;
                 }
                 self.diagnostic_plan = None;
                 if !self.agent.mode {
@@ -1666,6 +1750,566 @@ impl AssistantPanel {
             Err(error) => self.status = ai_error(&error),
         }
         cx.notify();
+    }
+
+    fn context_capture_ready(&self) -> bool {
+        !self.context.trim().is_empty()
+            && !self.host.trim().is_empty()
+            && !self.session_id.trim().is_empty()
+            && self.knowledge_capture.is_some()
+    }
+
+    fn question_ready(&self, cx: &App) -> bool {
+        !self.prompt.read(cx).value().trim().is_empty()
+    }
+
+    fn workflow_step_state(
+        &self,
+        step: AssistantWorkflowStep,
+        cx: &App,
+    ) -> AssistantWorkflowStepState {
+        let captured = self.context_capture_ready();
+        let question = self.question_ready(cx);
+        let exact_review = self.preview && self.prepared.is_some();
+        let response = !self.response.is_empty();
+        let knowledge = self.knowledge_preview.is_some();
+        let knowledge_saved = self
+            .knowledge_preview
+            .as_ref()
+            .is_some_and(|preview| preview.save_state == KnowledgeSaveState::Saved);
+
+        match step {
+            AssistantWorkflowStep::Capture => {
+                if captured {
+                    AssistantWorkflowStepState::Complete
+                } else {
+                    AssistantWorkflowStepState::Active
+                }
+            }
+            AssistantWorkflowStep::Question => {
+                if question && captured {
+                    AssistantWorkflowStepState::Complete
+                } else if captured {
+                    AssistantWorkflowStepState::Active
+                } else {
+                    AssistantWorkflowStepState::Locked
+                }
+            }
+            AssistantWorkflowStep::Preview => {
+                if exact_review || self.busy || response {
+                    AssistantWorkflowStepState::Complete
+                } else if captured && question {
+                    AssistantWorkflowStepState::Active
+                } else {
+                    AssistantWorkflowStepState::Locked
+                }
+            }
+            AssistantWorkflowStep::Send => {
+                if response {
+                    AssistantWorkflowStepState::Complete
+                } else if exact_review || self.busy {
+                    AssistantWorkflowStepState::Active
+                } else {
+                    AssistantWorkflowStepState::Locked
+                }
+            }
+            AssistantWorkflowStep::Review => {
+                if response {
+                    AssistantWorkflowStepState::Active
+                } else {
+                    AssistantWorkflowStepState::Locked
+                }
+            }
+            AssistantWorkflowStep::Knowledge => {
+                if knowledge_saved {
+                    AssistantWorkflowStepState::Complete
+                } else if knowledge {
+                    AssistantWorkflowStepState::Active
+                } else {
+                    AssistantWorkflowStepState::Locked
+                }
+            }
+        }
+    }
+
+    fn current_workflow_step(&self) -> AssistantWorkflowStep {
+        if self.knowledge_preview.is_some() {
+            AssistantWorkflowStep::Knowledge
+        } else if (self.preview && self.prepared.is_some())
+            || self.busy
+            || self.local_progress.is_some()
+        {
+            AssistantWorkflowStep::Send
+        } else if !self.response.is_empty() {
+            AssistantWorkflowStep::Review
+        } else if self.context_capture_ready() {
+            AssistantWorkflowStep::Question
+        } else {
+            AssistantWorkflowStep::Capture
+        }
+    }
+
+    fn assistant_header_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let current = self.current_workflow_step();
+        let safety_label = if self.agent.mode {
+            t(
+                cx,
+                "Agent 模式：每一回合和每一个操作都需要单独审核",
+                "Agent mode: every round and every action require separate review",
+            )
+        } else {
+            t(
+                cx,
+                "显式捕获 · 完整预览 · 人工确认发送",
+                "Explicit capture · complete preview · human-confirmed send",
+            )
+        };
+        div()
+            .id("assistant-header")
+            .test_support()
+            .aria_label(format!(
+                "{} · {} · {}",
+                t(cx, "AI 助手", "AI assistant"),
+                current.label(cx),
+                safety_label
+            ))
+            .p_3()
+            .rounded(px(crate::design::components(cx).panel_radius))
+            .bg(rgb(visual.chrome))
+            .border_1()
+            .border_color(rgb(visual.border))
+            .flex()
+            .flex_col()
+            .gap_2()
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap_2()
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap_2()
+                            .child(
+                                div()
+                                    .id("assistant-header-icon")
+                                    .test_support()
+                                    .p_2()
+                                    .rounded(px(crate::design::components(cx).control_radius))
+                                    .bg(rgb(visual.selected))
+                                    .text_color(rgb(visual.accent))
+                                    .child(IconName::Sparkles),
+                            )
+                            .child(
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .gap_1()
+                                    .child(
+                                        div().text_lg().font_weight(FontWeight::SEMIBOLD).child(t(
+                                            cx,
+                                            "AI 助手",
+                                            "AI assistant",
+                                        )),
+                                    )
+                                    .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+                                        cx,
+                                        "解释输出、准备动作、保留审核证据",
+                                        "Explain output, prepare actions, and keep review evidence",
+                                    ))),
+                            ),
+                    )
+                    .child(
+                        Button::new("open-knowledge-library")
+                            .ghost()
+                            .compact()
+                            .label(t(cx, "本地知识库", "Local knowledge library"))
+                            .on_click(cx.listener(|view, _, _, cx| {
+                                view.show_knowledge_library = true;
+                                cx.notify();
+                            })),
+                    ),
+            )
+            .child(
+                div()
+                    .id("assistant-safety-summary")
+                    .test_support()
+                    .aria_label(safety_label)
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(IconName::Lock)
+                    .child(safety_label),
+            )
+            .into_any_element()
+    }
+
+    fn workflow_rail_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let current = self.current_workflow_step();
+        let mut rail = div()
+            .id("assistant-workflow-rail")
+            .test_support()
+            .aria_label(format!(
+                "{} · {}",
+                t(cx, "当前 AI 工作流", "Current AI workflow"),
+                current.label(cx)
+            ))
+            .p_2()
+            .rounded(px(crate::design::components(cx).control_radius))
+            .bg(rgb(visual.surface))
+            .border_1()
+            .border_color(rgb(visual.border))
+            .flex()
+            .min_w_0()
+            .overflow_x_scroll()
+            .items_center()
+            .gap_1();
+        for (index, step) in AssistantWorkflowStep::ALL.into_iter().enumerate() {
+            let state = self.workflow_step_state(step, cx);
+            let color = match state {
+                AssistantWorkflowStepState::Locked => visual.muted,
+                AssistantWorkflowStepState::Active => visual.accent,
+                AssistantWorkflowStepState::Complete => visual.success,
+            };
+            let item_label = format!(
+                "{} · {} · {}",
+                step.label(cx),
+                state.label(cx),
+                step.description(cx)
+            );
+            rail = rail.child(
+                div()
+                    .id(("assistant-workflow-step", index))
+                    .test_support()
+                    .aria_label(item_label.clone())
+                    .flex()
+                    .flex_shrink_0()
+                    .items_center()
+                    .gap_1()
+                    .px_1()
+                    .py_1()
+                    .rounded(px(crate::design::components(cx).control_radius))
+                    .bg(rgb(match state {
+                        AssistantWorkflowStepState::Active => visual.selected,
+                        AssistantWorkflowStepState::Complete => visual.surface_active,
+                        AssistantWorkflowStepState::Locked => visual.canvas,
+                    }))
+                    .text_xs()
+                    .text_color(rgb(color))
+                    .child(if state == AssistantWorkflowStepState::Complete {
+                        IconName::Check
+                    } else {
+                        IconName::Circle
+                    })
+                    .child(step.label(cx)),
+            );
+            if index + 1 < AssistantWorkflowStep::ALL.len() {
+                rail = rail.child(div().text_xs().text_color(rgb(visual.border)).child("›"));
+            }
+        }
+        rail.into_any_element()
+    }
+
+    fn context_summary_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let ready = self.context_capture_ready();
+        let capture = self.knowledge_capture.as_ref();
+        let state_label = if ready {
+            t(cx, "已明确捕获", "Explicitly captured")
+        } else if self.context.trim().is_empty() {
+            t(cx, "等待明确捕获", "Waiting for explicit capture")
+        } else {
+            t(cx, "捕获信息不完整", "Capture is incomplete")
+        };
+        let aria_label = if let Some(capture) = capture.filter(|_| ready) {
+            format!(
+                "{} · {} · {} · {} bytes · revision {}",
+                state_label,
+                self.host,
+                self.session_id,
+                self.context.len(),
+                capture.revision
+            )
+        } else {
+            format!(
+                "{} · {}",
+                state_label,
+                t(
+                    cx,
+                    "不会自动读取当前终端",
+                    "The current terminal is never read automatically"
+                )
+            )
+        };
+        let mut card = div()
+            .id("assistant-context-summary")
+            .test_support()
+            .aria_label(aria_label)
+            .p_2()
+            .rounded(px(crate::design::components(cx).control_radius))
+            .bg(rgb(visual.canvas))
+            .border_1()
+            .border_color(rgb(if ready { visual.success } else { visual.border }))
+            .flex()
+            .flex_col()
+            .gap_1()
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap_2()
+                    .child(div().text_xs().font_weight(FontWeight::SEMIBOLD).child(t(
+                        cx,
+                        "上下文摘要",
+                        "Context summary",
+                    )))
+                    .child(
+                        div()
+                            .id("assistant-context-state")
+                            .test_support()
+                            .text_xs()
+                            .text_color(rgb(if ready { visual.success } else { visual.muted }))
+                            .child(state_label),
+                    ),
+            );
+        if let Some(capture) = capture.filter(|_| ready) {
+            card = card
+                .child(
+                    div()
+                        .text_xs()
+                        .font_family(crate::design::typography(cx).code_font_family)
+                        .child(format!("{} · {}", self.host, self.session_id)),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .gap_2()
+                        .text_xs()
+                        .text_color(rgb(visual.muted))
+                        .child(format!(
+                            "{} · {} bytes · rev {}",
+                            capture.kind.label(cx),
+                            self.context.len(),
+                            capture.revision
+                        )),
+                );
+        } else {
+            card = card.child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "请使用“所选文本”或“当前屏幕”明确捕获内容；捕获后才会绑定主机和会话。",
+                        "Use “Selection” or “Visible screen” to capture content explicitly; the host and session bind only after capture.",
+                    )),
+            );
+        }
+        card.into_any_element()
+    }
+
+    fn status_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let current = self.current_workflow_step();
+        let tone = if self.busy || self.agent_active() {
+            visual.accent
+        } else if self.preview {
+            visual.warning
+        } else if !self.response.is_empty() || self.knowledge_preview.is_some() {
+            visual.success
+        } else {
+            visual.muted
+        };
+        let stage = format!("{} · {}", current.label(cx), current.description(cx));
+        div()
+            .id("assistant-status-card")
+            .test_support()
+            .aria_label(format!("{}: {}", stage, self.status.render(cx)))
+            .p_2()
+            .rounded(px(crate::design::components(cx).control_radius))
+            .bg(rgb(visual.canvas))
+            .border_1()
+            .border_color(rgb(visual.border))
+            .flex()
+            .flex_col()
+            .gap_1()
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .text_xs()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(rgb(tone))
+                    .child("●")
+                    .child(stage),
+            )
+            .child(
+                div()
+                    .id("assistant-status-message")
+                    .test_support()
+                    .text_xs()
+                    .text_color(rgb(visual.text))
+                    .child(self.status.render(cx)),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "发送、命令建议、Agent 操作和知识保存都需要单独确认。",
+                        "Sending, command suggestions, Agent actions, and knowledge saving each require separate confirmation.",
+                    )),
+            )
+            .into_any_element()
+    }
+
+    fn request_review_summary(
+        &self,
+        request: &PreparedAssistantRequest,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let report = request.redaction_report();
+        let label = format!(
+            "{} · {} · {} redactions · {} bytes omitted",
+            t(cx, "人工审核请求", "Human-reviewed request"),
+            request.destination(),
+            report.total_redactions(),
+            report.truncated_bytes
+        );
+        div()
+            .id("assistant-request-review-summary")
+            .test_support()
+            .aria_label(label)
+            .p_2()
+            .rounded(px(crate::design::components(cx).control_radius))
+            .bg(rgb(visual.selected))
+            .border_1()
+            .border_color(rgb(visual.accent))
+            .flex()
+            .flex_col()
+            .gap_1()
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap_2()
+                    .child(
+                        div()
+                            .text_xs()
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .child(t(cx, "完整请求预览", "Exact request preview")),
+                    )
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(rgb(visual.warning))
+                            .child(t(cx, "等待确认", "Awaiting confirmation")),
+                    ),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "当前只展示将要发送的完整脱敏载荷；发送动作固定在底部，确认后才会离开审核阶段。",
+                        "This is the complete redacted payload that would be sent; the action stays at the bottom until you confirm.",
+                    )),
+            )
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(format!(
+                        "{}: {} · {}: {}",
+                        t(cx, "脱敏", "Redactions"),
+                        report.total_redactions(),
+                        t(cx, "省略", "Omitted"),
+                        report.truncated_bytes
+                    )),
+            )
+            .into_any_element()
+    }
+
+    fn response_review_header(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        div()
+            .id("assistant-response-header")
+            .test_support()
+            .anchor_scroll(Some(self.response_anchor.clone()))
+            .aria_label(t(
+                cx,
+                "模型回复已到达；回复和命令建议都需要人工审核",
+                "Model response received; the reply and command suggestions require human review",
+            ))
+            .p_2()
+            .rounded(px(crate::design::components(cx).control_radius))
+            .bg(rgb(visual.surface_active))
+            .border_1()
+            .border_color(rgb(visual.success))
+            .flex()
+            .items_center()
+            .justify_between()
+            .gap_2()
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap_2()
+                    .text_xs()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child(IconName::Eye)
+                    .child(t(cx, "回复审核", "Response review")),
+            )
+            .child(div().text_xs().text_color(rgb(visual.success)).child(t(
+                cx,
+                "未自动写入命令栏",
+                "Nothing inserted automatically",
+            )))
+            .into_any_element()
+    }
+
+    fn agent_safety_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        if !self.agent.mode {
+            return div().into_any_element();
+        }
+        let visual = crate::design::palette(cx);
+        div()
+            .id("assistant-agent-safety")
+            .test_support()
+            .aria_label(t(
+                cx,
+                "Agent 操作审核：每一个操作都必须单独批准，模型不能自行执行",
+                "Agent action review: every action requires separate approval; the model cannot execute by itself",
+            ))
+            .p_2()
+            .rounded(px(crate::design::components(cx).control_radius))
+            .bg(rgb(visual.danger_surface))
+            .border_1()
+            .border_color(rgb(visual.danger_border))
+            .flex()
+            .items_center()
+            .gap_2()
+            .text_xs()
+            .text_color(rgb(visual.danger))
+            .child(IconName::Lock)
+            .child(t(
+                cx,
+                "Agent 操作需要逐项审核与批准；模型输出不会绕过命令或文件审核。",
+                "Agent actions require item-by-item review and approval; model output cannot bypass command or file review.",
+            ))
+            .into_any_element()
     }
 
     fn knowledge_preview_view(&self, cx: &mut Context<Self>) -> AnyElement {
@@ -2016,33 +2660,8 @@ impl Render for AssistantPanel {
             .flex_col()
             .gap_3()
             .p_3()
-            .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .justify_between()
-                    .gap_2()
-                    .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child(t(
-                        cx,
-                        "AI 助手",
-                        "AI assistant",
-                    )))
-                    .child(
-                        Button::new("open-knowledge-library")
-                            .ghost()
-                            .compact()
-                            .label(t(cx, "本地知识库", "Local knowledge library"))
-                            .on_click(cx.listener(|view, _, _, cx| {
-                                view.show_knowledge_library = true;
-                                cx.notify();
-                            })),
-                    ),
-            )
-            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
-                cx,
-                "解释远端输出、排查问题、准备命令。",
-                "Explain remote output, investigate issues, and prepare commands.",
-            )))
+            .child(self.assistant_header_view(cx))
+            .child(self.workflow_rail_view(cx))
             .child(
                 div()
                     .flex()
@@ -2073,16 +2692,6 @@ impl Render for AssistantPanel {
                                 cx.listener(|_, _, _, cx| cx.emit(AssistantEvent::OpenSettings)),
                             ),
                     ),
-            )
-            .child(
-                div().text_xs().text_color(rgb(visual.muted)).child(
-                    self.profile
-                        .as_ref()
-                        .map(|p| p.model.clone())
-                        .unwrap_or_else(|| {
-                            t(cx, "尚未配置模型服务", "No model provider configured").to_owned()
-                        }),
-                ),
             )
             .children(profile_choices)
             .child(
@@ -2133,22 +2742,7 @@ impl Render for AssistantPanel {
                             })),
                     ),
             )
-            .child(div().text_xs().text_color(rgb(visual.muted)).child(
-                if self.context.is_empty() {
-                    t(
-                        cx,
-                        "尚未附加远端终端内容",
-                        "No remote terminal context attached",
-                    )
-                    .to_owned()
-                } else {
-                    Message::new(
-                        format!("{} · {} 字节", self.host, self.context.len()),
-                        format!("{} · {} bytes", self.host, self.context.len()),
-                    )
-                    .render(cx)
-                },
-            ))
+            .child(self.context_summary_view(cx))
             .child(
                 Button::new("knowledge-preview-action")
                     .ghost()
@@ -2165,6 +2759,7 @@ impl Render for AssistantPanel {
             })
             .child(self.knowledge_context_view(cx))
             .child(self.agent_controls(cx))
+            .child(self.agent_safety_view(cx))
             .child(
                 div()
                     .id("assistant-question")
@@ -2183,16 +2778,12 @@ impl Render for AssistantPanel {
                     })
                     .on_click(cx.listener(|view, _, _, cx| view.prepare(cx))),
             )
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(rgb(visual.accent))
-                    .child(self.status.render(cx)),
-            );
+            .child(self.status_view(cx));
         if self.preview
             && let Some(request) = self.prepared.as_ref()
         {
             content = content
+                .child(self.request_review_summary(request, cx))
                 .child(div().text_xs().child(
                     Message::detail("发送至", "Destination", request.destination()).render(cx),
                 ))
@@ -2256,12 +2847,24 @@ impl Render for AssistantPanel {
         if !self.response.is_empty() && !self.agent.mode {
             // Provider output stays plain text and never triggers implicit requests.
             content = content
+                .child(self.response_review_header(cx))
                 .child(self.review_target_view("assistant-response-target".into(), cx))
                 .child(
+                    Button::new("build-diagnostic-plan")
+                        .ghost()
+                        .disabled(self.review_target_unavailable().is_some())
+                        .label(t(cx, "整理为诊断计划", "Build diagnostic plan"))
+                        .on_click(cx.listener(|view, _, _, cx| view.build_diagnostic_plan(cx))),
+                )
+                .child(
                     div()
-                        .border_t_1()
+                        .id("assistant-response-body")
+                        .test_support()
+                        .p_2()
+                        .rounded(px(crate::design::components(cx).control_radius))
+                        .bg(rgb(visual.canvas))
+                        .border_1()
                         .border_color(rgb(visual.border))
-                        .pt_3()
                         .text_sm()
                         .child(self.response.clone()),
                 )
@@ -2273,15 +2876,7 @@ impl Render for AssistantPanel {
                             cx.write_to_clipboard(ClipboardItem::new_string(view.response.clone()))
                         })),
                 );
-            content = content
-                .child(self.review_target_view("diagnostic-review-target".into(), cx))
-                .child(
-                    Button::new("build-diagnostic-plan")
-                        .ghost()
-                        .disabled(self.review_target_unavailable().is_some())
-                        .label(t(cx, "整理为诊断计划", "Build diagnostic plan"))
-                        .on_click(cx.listener(|view, _, _, cx| view.build_diagnostic_plan(cx))),
-                );
+            content = content.child(self.review_target_view("diagnostic-review-target".into(), cx));
             if let Some(plan) = self.diagnostic_plan.as_ref() {
                 let mut plan_view = div()
                     .p_2()
@@ -2509,6 +3104,10 @@ impl Render for AssistantPanel {
                         })),
                 )
         });
+        if self.response_reveal_pending && !self.response.is_empty() && !self.agent.mode {
+            self.response_reveal_pending = false;
+            self.response_anchor.scroll_to(window, cx);
+        }
         div()
             .h_full()
             .min_h_0()

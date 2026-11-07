@@ -1535,6 +1535,11 @@ async fn selected_directory_review_runs_in_background_and_preserves_scrollable_p
     });
     cx.update_window(handle, |_, window, cx| {
         window.render_frame(cx);
+        // The workflow header keeps the long request review below the first
+        // viewport; bring the nested preview into view before dispatching
+        // user-like two-axis scroll input.
+        panel.read(cx).content_scroll.scroll_to_bottom();
+        window.render_frame(cx);
         let viewport = window.find("assistant-request-full-preview").bounds();
         let scroll = panel.read(cx).preview_scroll.clone();
         assert!(
@@ -2131,4 +2136,157 @@ fn local_environment_key_requires_explicit_binding_and_freezes_review_snapshot(
             assert!(panel._job.is_none());
         });
     }
+}
+
+#[gpui_kit::test]
+fn assistant_workflow_surface_separates_capture_preview_reply_and_knowledge_review(
+    cx: &mut TestAppContext,
+) {
+    let (window, panel) = mount(cx);
+    cx.update_window(window, |_, window, cx| {
+        set_language(keelshell_core::Language::ZhCn, cx);
+        window.render_frame(cx);
+        assert!(window.find("assistant-header").visible());
+        assert!(window.find("assistant-workflow-rail").visible());
+        assert!(
+            window
+                .find("assistant-header")
+                .label()
+                .unwrap_or_default()
+                .contains("提问")
+        );
+        assert!(
+            window
+                .find("assistant-context-summary")
+                .label()
+                .unwrap_or_default()
+                .contains("已明确捕获")
+        );
+        assert!(window.find("assistant-status-card").visible());
+        assert!(
+            window
+                .try_find("assistant-request-review-summary")
+                .is_none()
+        );
+
+        panel.update(cx, |panel, cx| panel.prepare(cx));
+        window.render_frame(cx);
+        assert!(window.find("assistant-request-review-summary").visible());
+        assert!(window.find("assistant-confirmation-footer").visible());
+        assert!(
+            window
+                .find("assistant-workflow-rail")
+                .label()
+                .unwrap_or_default()
+                .contains("发送")
+        );
+        assert!(
+            window
+                .find("assistant-request-review-summary")
+                .label()
+                .unwrap_or_default()
+                .contains("人工审核请求")
+        );
+
+        panel.update(cx, |panel, cx| {
+            panel.prepared = None;
+            panel.preview = false;
+            panel.receive_review_response_for_test(
+                "已收到回复\n```sh\nprintf 'reviewed'\n```".into(),
+                cx,
+            );
+        });
+        window.render_frame(cx);
+        panel.read(cx).content_scroll.scroll_to_bottom();
+        window.render_frame(cx);
+        assert!(window.find("assistant-response-header").visible());
+        assert!(window.find("assistant-response-body").visible());
+        assert!(window.try_find("assistant-confirmation-footer").is_none());
+        assert!(
+            window
+                .find("assistant-workflow-rail")
+                .label()
+                .unwrap_or_default()
+                .contains("审核回复")
+        );
+
+        panel.update(cx, |panel, cx| {
+            panel.set_context(
+                "service is healthy".into(),
+                "fixture-host".into(),
+                "session-a".into(),
+                cx,
+            );
+            panel.build_knowledge_preview(cx);
+        });
+        window.render_frame(cx);
+        panel
+            .read(cx)
+            .content_scroll
+            .set_offset(point(px(0.), px(0.)));
+        window.render_frame(cx);
+        assert!(window.find("knowledge-preview").visible());
+        assert!(
+            window
+                .find("assistant-workflow-rail")
+                .label()
+                .unwrap_or_default()
+                .contains("保存知识")
+        );
+    })
+    .unwrap_or_else(|error| panic!("assistant workflow surface: {error}"));
+}
+
+#[gpui_kit::test]
+fn assistant_workflow_surface_retranslates_without_replacing_reviewed_payload(
+    cx: &mut TestAppContext,
+) {
+    let (window, panel) = mount(cx);
+    let exact = panel.update(cx, |panel, cx| {
+        panel.prepare(cx);
+        panel
+            .prepared
+            .as_ref()
+            .map(PreparedAssistantRequest::preview_json)
+            .unwrap_or_else(|| panic!("prepared request"))
+            .to_owned()
+    });
+    cx.update_window(window, |_, window, cx| {
+        for language in [keelshell_core::Language::ZhCn, keelshell_core::Language::En] {
+            set_language(language, cx);
+            panel.update(cx, |panel, cx| panel.refresh_locale(window, cx));
+            window.render_frame(cx);
+            assert!(window.find("assistant-request-review-summary").visible());
+            assert!(window.find("send-approved-request").visible());
+            assert_eq!(
+                panel
+                    .read(cx)
+                    .prepared
+                    .as_ref()
+                    .map(PreparedAssistantRequest::preview_json),
+                Some(exact.as_str())
+            );
+            let header = window
+                .find("assistant-header")
+                .label()
+                .unwrap_or_default()
+                .to_owned();
+            let context = window
+                .find("assistant-context-summary")
+                .label()
+                .unwrap_or_default()
+                .to_owned();
+            match language {
+                keelshell_core::Language::ZhCn => {
+                    assert!(header.contains("人工确认发送"));
+                    assert!(context.contains("已明确捕获"));
+                }
+                keelshell_core::Language::En => {
+                    assert!(header.contains("human-confirmed send"));
+                    assert!(context.contains("Explicitly captured"));
+                }
+            }
+        }
+    })
+    .unwrap_or_else(|error| panic!("assistant bilingual review surface: {error}"));
 }
