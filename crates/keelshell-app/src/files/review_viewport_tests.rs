@@ -845,6 +845,114 @@ async fn expanded_merge_versions_and_review_actions_fit_minimum_file_pane(cx: &m
 }
 
 #[gpui_kit::test]
+async fn inline_merge_card_keeps_review_actions_visible_while_body_scrolls(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new_with(cx, |cx, session, runtime| {
+        mount_layout_scene(cx, session, runtime, 900., 580., true)
+    });
+    h.idle(cx).await;
+    let long_conflict = "line-".to_owned() + &"x".repeat(2400);
+    let base = format!("base\n{long_conflict}\n");
+    let draft = format!("draft\n{long_conflict}\n");
+    let remote = format!("remote\n{long_conflict}\n");
+    open_file(&h, "/inline-merge.txt", base.as_bytes(), cx).await;
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel
+            .read(cx)
+            .editor
+            .clone()
+            .update(cx, |input, cx| input.set_value(draft.clone(), window, cx));
+    })
+    .checked("prepare inline merge draft");
+    h.server
+        .filesystem
+        .replace_external_file("/inline-merge.txt", remote.as_bytes())
+        .checked("prepare inline merge remote version");
+    h.click(cx, "read-remote-merge");
+    h.idle(cx).await;
+
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        scroll_tools_to_end(window, cx);
+        let pane = window.find("files-layout-scene").bounds();
+        let tools = window.find("file-tools-scroll").bounds();
+        let card = window.find("text-merge-card").bounds();
+        let body = window.find("text-merge-inline-body").bounds();
+        let actions = window.find("text-merge-inline-actions").bounds();
+        assert!(layout_contains(card, tools));
+        assert!(layout_contains(actions, card));
+        assert!(layout_contains(actions, pane));
+        assert!(
+            body.bottom() <= actions.origin.y,
+            "inline review body must end before its fixed action area"
+        );
+        for id in [
+            "merge-show-base",
+            "merge-show-draft",
+            "merge-show-remote",
+            "merge-show-result",
+            "merge-show-conflict",
+            "adopt-text-merge",
+            "close-text-merge",
+        ] {
+            let action = window.find(id);
+            assert!(
+                action.visible() && layout_contains(action.bounds(), actions),
+                "{id} must stay in the inline fixed action area"
+            );
+        }
+
+        let before_actions = actions;
+        let before_body_offset = h
+            .panel
+            .read(cx)
+            .merge_review
+            .as_ref()
+            .checked_option("inline review")
+            .body_scroll
+            .offset();
+        let position = body.center();
+        for event in [
+            gpui_kit::MouseMoveEvent {
+                position,
+                ..Default::default()
+            }
+            .to_platform_input(),
+            gpui_kit::ScrollEvent {
+                position,
+                delta: ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
+                ..Default::default()
+            }
+            .to_platform_input(),
+        ] {
+            window.dispatch_event(event, cx);
+        }
+        window.render_frame(cx);
+        assert_eq!(
+            window.find("text-merge-inline-actions").bounds(),
+            before_actions,
+            "body scrolling must not move the inline action area"
+        );
+        assert!(
+            h.panel
+                .read(cx)
+                .merge_review
+                .as_ref()
+                .checked_option("inline review after scroll")
+                .body_scroll
+                .offset()
+                .y
+                <= before_body_offset.y,
+            "the inline body owns the wheel when it has scrollable content"
+        );
+    })
+    .checked("inline merge body and fixed review action layout");
+    assert_eq!(h.read("/inline-merge.txt"), remote.as_bytes());
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}
+
+#[gpui_kit::test]
 async fn expanded_merge_focus_keeps_hidden_editor_and_manual_inputs_isolated(
     cx: &mut TestAppContext,
 ) {

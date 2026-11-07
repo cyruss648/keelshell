@@ -32,6 +32,36 @@ fn external(h: &Harness, path: &str, text: &[u8]) {
         .checked("owned external file change");
 }
 
+fn dispatch_pointer(
+    window: &mut gpui_kit::Window,
+    position: gpui_kit::Point<gpui_kit::Pixels>,
+    cx: &mut gpui_kit::App,
+) {
+    for input in [
+        gpui_kit::MouseMoveEvent {
+            position,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        gpui_kit::MouseDownEvent {
+            button: gpui_kit::MouseButton::Left,
+            position,
+            click_count: 1,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        gpui_kit::MouseUpEvent {
+            button: gpui_kit::MouseButton::Left,
+            position,
+            click_count: 1,
+            ..Default::default()
+        }
+        .to_platform_input(),
+    ] {
+        window.dispatch_event(input, cx);
+    }
+}
+
 #[gpui_kit::test]
 async fn queue_details_move_focus_out_of_the_manual_conflict_draft(cx: &mut TestAppContext) {
     let h = Harness::new(cx);
@@ -294,6 +324,98 @@ async fn changed_remote_version_after_merge_adoption_restarts_review_and_link_fa
         assert!(panel.has_unsaved_draft(cx));
         assert!(panel.status.render(cx).contains("regular"));
     });
+    assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+}
+
+#[gpui_kit::test]
+async fn stale_merge_frame_actions_cannot_mutate_a_replacement_review(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    open(
+        &h,
+        "/stale-merge-frame.txt",
+        b"a\nb\nc\nd\n",
+        "LOCAL_A\nb\nLOCAL_C\nd\n",
+        cx,
+    )
+    .await;
+    external(&h, "/stale-merge-frame.txt", b"REMOTE_A\nb\nREMOTE_C\nd\n");
+    h.click(cx, "read-remote-merge");
+    h.idle(cx).await;
+    h.click(cx, "merge-use-draft");
+    h.click(cx, "merge-next-conflict");
+    h.click(cx, "merge-use-remote");
+
+    let (old_review_id, old_actions) = cx
+        .update_window(h.window, |_, window, cx| {
+            window.render_frame(cx);
+            h.panel.read_with(cx, |panel, _| {
+                let review = panel
+                    .merge_review
+                    .as_ref()
+                    .checked_option("old merge review");
+                let actions = [
+                    "merge-use-draft",
+                    "merge-previous-conflict",
+                    "adopt-text-merge",
+                    "close-text-merge",
+                ]
+                .map(|id| (id, window.find(id).bounds().center()));
+                (review.review_id, actions)
+            })
+        })
+        .checked("paint and capture the old merge action frame");
+
+    external(
+        &h,
+        "/stale-merge-frame.txt",
+        b"REMOTE_NEW_A\nb\nREMOTE_NEW_C\nd\n",
+    );
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.request_merge(window, cx);
+        });
+    })
+    .checked("start a fresh remote merge observation");
+    h.idle(cx).await;
+
+    h.panel.read_with(cx, |panel, _| {
+        let review = panel
+            .merge_review
+            .as_ref()
+            .checked_option("replacement merge review");
+        assert_ne!(review.review_id, old_review_id);
+        assert_eq!(review.active, 0);
+        assert!(review.choices.iter().all(Option::is_none));
+    });
+
+    cx.update_window(h.window, |_, window, cx| {
+        // Do not repaint: these coordinates and listeners still belong to the
+        // old frame. Every retained action must fail closed against the new
+        // review identity.
+        for (_, position) in old_actions {
+            dispatch_pointer(window, position, cx);
+        }
+    })
+    .checked("dispatch retained old-frame merge actions");
+
+    h.panel.read_with(cx, |panel, cx| {
+        let review = panel
+            .merge_review
+            .as_ref()
+            .checked_option("current merge review after stale actions");
+        assert_eq!(review.active, 0);
+        assert!(review.choices.iter().all(Option::is_none));
+        assert_eq!(
+            panel.editor.read(cx).value().as_str(),
+            "LOCAL_A\nb\nLOCAL_C\nd\n"
+        );
+        assert!(panel.pending.is_none());
+    });
+    assert_eq!(
+        h.read("/stale-merge-frame.txt"),
+        b"REMOTE_NEW_A\nb\nREMOTE_NEW_C\nd\n"
+    );
     assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
 }
 

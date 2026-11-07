@@ -1,6 +1,7 @@
 //! Explicit text-conflict resolution and patch-to-draft controls.
 use super::*;
 use keelshell_core::{TextMergeChoice, TextMergePlan};
+use uuid::Uuid;
 
 #[derive(Clone, Copy)]
 enum MergeVersion {
@@ -10,15 +11,24 @@ enum MergeVersion {
     Result,
 }
 pub(super) struct MergeReview {
+    /// Binds every rendered merge action to the observation that produced it.
+    ///
+    /// GPUI can retain an old frame until the next paint. A UUID lets those
+    /// listeners fail closed if a newer remote observation has already
+    /// replaced this review.
+    pub(super) review_id: Uuid,
     snapshot: RegularFileSnapshot,
     pub(super) plan: TextMergePlan,
     draft: String,
     base: String,
     overview: Option<MergeVersion>,
-    choices: Vec<Option<TextMergeChoice>>,
-    active: usize,
+    pub(super) choices: Vec<Option<TextMergeChoice>>,
+    pub(super) active: usize,
     manual_drafts: Vec<String>,
     pub(super) manual: Entity<TextareaState>,
+    /// Inline review cards need their own body viewport; the expanded surface
+    /// continues to use `tools_scroll` for the complete review.
+    pub(super) body_scroll: ScrollHandle,
 }
 impl FilesPanel {
     pub(super) fn receive_merge(
@@ -58,6 +68,7 @@ impl FilesPanel {
         let base = String::from_utf8_lossy(&base).into_owned();
         let expanded = self.editor_surface.take().is_some();
         self.merge_review = Some(MergeReview {
+            review_id: Uuid::new_v4(),
             snapshot,
             base,
             overview: None,
@@ -71,6 +82,7 @@ impl FilesPanel {
             draft,
             active: 0,
             manual,
+            body_scroll: ScrollHandle::new(),
         });
         if expanded {
             // The old editor has just been unmounted. Its retained input must
@@ -118,8 +130,18 @@ impl FilesPanel {
             self.run(operation, window, cx);
         }
     }
-    fn select_conflict(&mut self, index: usize, window: &mut Window, cx: &mut Context<Self>) {
-        if let Some(review) = &mut self.merge_review {
+    fn select_conflict(
+        &mut self,
+        review_id: Uuid,
+        index: usize,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if let Some(review) = self
+            .merge_review
+            .as_mut()
+            .filter(|review| review.review_id == review_id)
+        {
             if index >= review.plan.conflicts().len() {
                 return;
             }
@@ -139,22 +161,34 @@ impl FilesPanel {
             cx.notify();
         }
     }
-    fn choose_conflict(&mut self, choice: TextMergeChoice, cx: &mut Context<Self>) {
+    fn choose_conflict(
+        &mut self,
+        review_id: Uuid,
+        choice: TextMergeChoice,
+        cx: &mut Context<Self>,
+    ) {
         if self.suspended || self.pending.is_some() {
             return;
         }
-        if let Some(review) = &mut self.merge_review
+        if let Some(review) = self
+            .merge_review
+            .as_mut()
+            .filter(|review| review.review_id == review_id)
             && review.active < review.choices.len()
         {
             review.choices[review.active] = Some(choice);
             cx.notify();
         }
     }
-    fn adopt_merge(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+    fn adopt_merge(&mut self, review_id: Uuid, window: &mut Window, cx: &mut Context<Self>) {
         if self.suspended || self.busy || self.operation_id.is_some() || self.pending.is_some() {
             return;
         }
-        let Some(review) = &self.merge_review else {
+        let Some(review) = self
+            .merge_review
+            .as_ref()
+            .filter(|review| review.review_id == review_id)
+        else {
             return;
         };
         if !self.draft_matches_bytes(&self.editor.read(cx).value(), review.draft.as_bytes()) {
@@ -336,22 +370,49 @@ impl FilesPanel {
             );
         }
     }
-    fn show_merge_version(&mut self, version: Option<MergeVersion>, cx: &mut Context<Self>) {
-        if let Some(review) = &mut self.merge_review {
+    fn show_merge_version(
+        &mut self,
+        review_id: Uuid,
+        version: Option<MergeVersion>,
+        cx: &mut Context<Self>,
+    ) {
+        if let Some(review) = self
+            .merge_review
+            .as_mut()
+            .filter(|review| review.review_id == review_id)
+        {
             review.overview = version;
             self.text_review_scroll.set_offset(point(px(0.), px(0.)));
             cx.notify();
         }
+    }
+    fn close_merge_review(&mut self, review_id: Uuid, window: &mut Window, cx: &mut Context<Self>) {
+        if self
+            .merge_review
+            .as_ref()
+            .is_none_or(|review| review.review_id != review_id)
+        {
+            return;
+        }
+        self.merge_review = None;
+        if self.editor_surface == Some(review::EditorSurface::Merge) {
+            self.focus_editor(review::EditorSurface::Draft, window, cx);
+        }
+        cx.notify();
     }
     pub(super) fn merge_card(&self, cx: &mut Context<Self>) -> Option<AnyElement> {
         let review = self.merge_review.as_ref()?;
         Some(self.render_merge_card(review, cx))
     }
     fn render_merge_card(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
+        use gpui_kit::component::scroll::ScrollableElement;
         let visual = crate::design::palette(cx);
+        let review_id = review.review_id;
         div()
             .id("text-merge-card")
             .flex_shrink_0()
+            .min_h_0()
+            .h_full()
             .mx_2()
             .my_1()
             .border_1()
@@ -359,10 +420,38 @@ impl FilesPanel {
             .bg(rgb(visual.canvas))
             .flex()
             .flex_col()
-            .child(self.merge_review_body(review, cx))
-            .child(self.merge_apply_controls(review.choices.iter().all(Option::is_some), cx))
+            .child(
+                div()
+                    .id("text-merge-inline-body")
+                    .flex_1()
+                    .min_h_0()
+                    .overflow_y_scroll()
+                    .track_scroll(&review.body_scroll)
+                    .vertical_scrollbar(&review.body_scroll)
+                    .on_scroll(|_, _, cx| cx.stop_propagation())
+                    .on_key_down(cx.listener(move |view, event, _, cx| {
+                        if let Some(review) = view
+                            .merge_review
+                            .as_ref()
+                            .filter(|review| review.review_id == review_id)
+                        {
+                            Self::scroll_bounded(&review.body_scroll, event, cx);
+                        }
+                    }))
+                    .child(self.merge_review_body_without_versions(review, cx))
+                    .test_support(),
+            )
+            .child(self.merge_inline_action_bar(review, cx))
             .test_support()
             .into_any_element()
+    }
+
+    fn merge_review_body_without_versions(
+        &self,
+        review: &MergeReview,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        self.merge_review_body_inner(review, false, cx)
     }
     pub(super) fn merge_surface(&self, cx: &mut Context<Self>) -> AnyElement {
         use gpui_kit::component::scroll::ScrollableElement;
@@ -393,17 +482,26 @@ impl FilesPanel {
                     .on_key_down(cx.listener(|view, event, _, cx| {
                         Self::scroll_bounded(&view.tools_scroll, event, cx);
                     }))
-                    .child(self.merge_review_body(review, cx))
+                    .child(self.merge_review_body_inner(review, true, cx))
                     .test_support(),
             )
             // The complete versions and conflict inputs scroll independently
             // of these actions, even at the minimum file-pane height.
-            .child(self.merge_apply_controls(review.choices.iter().all(Option::is_some), cx))
+            .child(self.merge_apply_controls(
+                review.review_id,
+                review.choices.iter().all(Option::is_some),
+                cx,
+            ))
             .child(self.editor_status(cx))
             .test_support()
             .into_any_element()
     }
-    fn merge_review_body(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
+    fn merge_review_body_inner(
+        &self,
+        review: &MergeReview,
+        include_version_controls: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let total = review.choices.len();
         let resolved = review
             .choices
@@ -428,19 +526,28 @@ impl FilesPanel {
                 .when(
                     self.editor_surface != Some(review::EditorSurface::Merge),
                     |el| {
+                        let review_id = review.review_id;
                         el.child(
                             Button::new("expand-text-merge")
                                 .ghost()
                                 .compact()
                                 .label(t(cx, "展开合并审核", "Expand merge review"))
-                                .on_click(cx.listener(|view, _, window, cx| {
-                                    view.focus_editor(review::EditorSurface::Merge, window, cx);
+                                .on_click(cx.listener(move |view, _, window, cx| {
+                                    if view
+                                        .merge_review
+                                        .as_ref()
+                                        .is_some_and(|review| review.review_id == review_id)
+                                    {
+                                        view.focus_editor(review::EditorSurface::Merge, window, cx);
+                                    }
                                 })),
                         )
                     },
                 ),
         );
-        card = card.child(self.merge_version_controls(resolved, total, cx));
+        if include_version_controls {
+            card = card.child(self.merge_version_controls(review.review_id, resolved, total, cx));
+        }
         if let Some(version) = review.overview {
             let (label, text) = match version {
                 MergeVersion::Base => (
@@ -530,6 +637,7 @@ impl FilesPanel {
     }
     fn merge_version_controls(
         &self,
+        review_id: Uuid,
         resolved: usize,
         total: usize,
         cx: &mut Context<Self>,
@@ -572,9 +680,9 @@ impl FilesPanel {
                             || (id == "merge-show-conflict" && total == 0),
                     )
                     .label(label)
-                    .on_click(
-                        cx.listener(move |view, _, _, cx| view.show_merge_version(version, cx)),
-                    )
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        view.show_merge_version(review_id, version, cx)
+                    }))
                     .into_any_element()
             })
             .collect::<Vec<_>>();
@@ -588,6 +696,7 @@ impl FilesPanel {
             .into_any_element()
     }
     fn merge_conflict_controls(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
+        let review_id = review.review_id;
         let index = review.active;
         let total = review.choices.len();
         let navigation = [
@@ -613,7 +722,7 @@ impl FilesPanel {
                     .disabled(disabled)
                     .label(label)
                     .on_click(cx.listener(move |view, _, window, cx| {
-                        view.select_conflict(next, window, cx)
+                        view.select_conflict(review_id, next, window, cx)
                     }))
                     .into_any_element()
             })
@@ -636,9 +745,9 @@ impl FilesPanel {
                     .ghost()
                     .disabled(self.suspended)
                     .label(label)
-                    .on_click(
-                        cx.listener(move |view, _, _, cx| view.choose_conflict(choice.clone(), cx)),
-                    )
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        view.choose_conflict(review_id, choice.clone(), cx)
+                    }))
                     .into_any_element(),
             );
         }
@@ -660,6 +769,7 @@ impl FilesPanel {
             .into_any_element()
     }
     fn merge_manual_card(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
+        let review_id = review.review_id;
         let mut card = div().flex().flex_col();
         card = card.child(div().px_2().child(t(
             cx,
@@ -697,16 +807,25 @@ impl FilesPanel {
                 .ghost()
                 .disabled(self.suspended)
                 .label(t(cx, "采用手工替换", "Choose manual replacement"))
-                .on_click(cx.listener(|view, _, _, cx| {
-                    if let Some(review) = &view.merge_review {
+                .on_click(cx.listener(move |view, _, _, cx| {
+                    if let Some(review) = view
+                        .merge_review
+                        .as_ref()
+                        .filter(|review| review.review_id == review_id)
+                    {
                         let text = review.manual.read(cx).value().to_string();
-                        view.choose_conflict(TextMergeChoice::Manual(text), cx);
+                        view.choose_conflict(review_id, TextMergeChoice::Manual(text), cx);
                     }
                 })),
         )
         .into_any_element()
     }
-    fn merge_apply_controls(&self, complete: bool, cx: &mut Context<Self>) -> AnyElement {
+    fn merge_apply_controls(
+        &self,
+        review_id: Uuid,
+        complete: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let adopt = Button::new("adopt-text-merge")
             .primary()
             .compact()
@@ -718,17 +837,15 @@ impl FilesPanel {
                     || !complete,
             )
             .label(t(cx, "采用合并草稿", "Adopt merged draft"))
-            .on_click(cx.listener(|view, _, window, cx| view.adopt_merge(window, cx)));
+            .on_click(
+                cx.listener(move |view, _, window, cx| view.adopt_merge(review_id, window, cx)),
+            );
         let close = Button::new("close-text-merge")
             .ghost()
             .compact()
             .label(t(cx, "关闭并保留草稿", "Close; keep draft"))
-            .on_click(cx.listener(|view, _, window, cx| {
-                view.merge_review = None;
-                if view.editor_surface == Some(review::EditorSurface::Merge) {
-                    view.focus_editor(review::EditorSurface::Draft, window, cx);
-                }
-                cx.notify();
+            .on_click(cx.listener(move |view, _, window, cx| {
+                view.close_merge_review(review_id, window, cx)
             }));
         div()
             .id("text-merge-apply-controls")
@@ -741,6 +858,33 @@ impl FilesPanel {
             .gap_1()
             .child(adopt)
             .child(close)
+            .test_support()
+            .into_any_element()
+    }
+
+    fn merge_inline_action_bar(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
+        let complete = review.choices.iter().all(Option::is_some);
+        div()
+            .id("text-merge-inline-actions")
+            .flex_shrink_0()
+            .flex()
+            .flex_col()
+            .border_t_1()
+            .border_color(rgb(crate::design::palette(cx).border))
+            .bg(rgb(crate::design::palette(cx).canvas))
+            .child(
+                self.merge_version_controls(
+                    review.review_id,
+                    review
+                        .choices
+                        .iter()
+                        .filter(|choice| choice.is_some())
+                        .count(),
+                    review.choices.len(),
+                    cx,
+                ),
+            )
+            .child(self.merge_apply_controls(review.review_id, complete, cx))
             .test_support()
             .into_any_element()
     }
