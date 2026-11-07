@@ -759,10 +759,7 @@ impl Workspace {
         let Some(connection) = route.hops().last() else {
             return false;
         };
-        let host = format!(
-            "{}@{}:{}",
-            connection.username, connection.host, connection.port
-        );
+        let host = crate::jump_host_picker::endpoint(connection);
         let terminal = crate::ssh_bridge::open(
             session.clone(),
             self.runtime.clone(),

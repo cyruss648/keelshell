@@ -782,10 +782,7 @@ impl Workspace {
                                     NewRemoteTab {
                                         session,
                                         title: connection.name.clone(),
-                                        host: format!(
-                                            "{}@{}:{}",
-                                            connection.username, connection.host, connection.port
-                                        ),
+                                        host: crate::jump_host_picker::endpoint(&connection),
                                         connection_id: (!ephemeral).then_some(connection.id),
                                         split: None,
                                         restored,
