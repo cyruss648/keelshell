@@ -10,6 +10,7 @@ mod app_windows;
 mod assistant;
 mod batch_commands;
 mod command_history;
+mod command_palette;
 mod command_suggestions;
 mod command_text;
 mod configuration_recovery;

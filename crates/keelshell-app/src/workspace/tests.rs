@@ -28,6 +28,7 @@ use crate::terminal::{TerminalCommand, TerminalView};
 
 mod ai_command_review_target;
 mod ai_metadata;
+mod command_palette;
 mod configuration_recovery;
 pub(crate) mod independent_disk_monitor;
 mod knowledge_library;
@@ -108,6 +109,7 @@ fn mount_state_sized(cx: &mut TestAppContext, state: AppState, width: f32, heigh
     );
     cx.update(|cx| {
         gpui_kit::init(cx);
+        crate::workspace::bind_keys(cx);
         i18n::set_language(state.settings.language, cx);
     });
     let workspace_store = store.clone();

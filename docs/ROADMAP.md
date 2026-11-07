@@ -1,7 +1,30 @@
-# 开发路线 — 2026-11-07
+# 开发路线 — 2026-11-08
 
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
+
+## 2026-11-08 快速操作中心
+
+快速操作中心已完成 Workspace 生产布局和第一批动作接入：纯动作目录提供双语
+标题、关键词、稳定排序、平台快捷键提示和会话上下文过滤；Workspace 复用既有
+连接、会话、工具面板、批量命令、依赖工作流、AI 和设置入口。一次性快速连接、
+主机监控面板路由和首末/唯一会话边界也已接入。模态根、搜索输入、结果列表和
+选中状态共用三套主题的语义 token，新增主题只扩展 registry/Palette/token。
+
+当前定向 GPUI 回归为 `16 passed / 0 failed / 1091 filtered out`，覆盖
+`Command/Ctrl+K`、双语、Escape 焦点恢复、Enter 连接管理器路径、一次性快速连接、
+主机监控路由、会话边界和 `900×580` 内容边界。随后完整
+`python3 scripts/check.py` 已退出 `0`：依赖策略、Python `131 run / 1 skipped`、
+格式、workspace 严格 Clippy、workspace tests、doctests 和 readiness/
+observer/small-stack AI controller 均通过。workspace 测试中 app 单元为
+`1105 passed / 2 ignored`，core、mcp、session 的单元与集成测试均通过；带有
+Podman、OpenSSH、真实 Linux 采样等显式环境要求的可选测试继续保持 ignored。
+新的独立严格只读复核已完成，P0/P1/P2/P3 均为 `0`，范围内建议为 `APPROVE`；
+新建窗口、分屏、布局保存、原生多平台输入/辅助技术、真实 SSH/Podman 和外部
+AI provider 保持后续验收项。当前只剩提交、推送和 SHA 回读。设计见
+[ADR 0120](adr/0120-command-palette.md)，实现说明见
+[快速操作中心](product/COMMAND_PALETTE.md)，测试回执见
+[快速操作中心记录](testing/records/2026-11-08-command-palette.md)。
 
 ## 2026-11-07 连接库选中层级与主动作
 

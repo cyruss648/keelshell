@@ -23,6 +23,10 @@ pub struct CommandPaletteContext {
     pub has_session: bool,
     /// Whether the AI assistant surface is currently open.
     pub assistant_open: bool,
+    /// Whether a previous session tab exists from the active tab.
+    pub can_previous_session: bool,
+    /// Whether a next session tab exists from the active tab.
+    pub can_next_session: bool,
 }
 
 /// The context required before an item can be shown.
@@ -31,9 +35,14 @@ pub enum CommandPaletteContextRequirement {
     /// The action can be offered in either workspace state.
     Any,
     /// The action is meaningful only when no session exists.
+    #[allow(dead_code)]
     NoSession,
     /// The action needs a session-bound workspace surface.
     HasSession,
+    /// The action needs a previous session tab.
+    HasPreviousSession,
+    /// The action needs a next session tab.
+    HasNextSession,
 }
 
 impl CommandPaletteContextRequirement {
@@ -43,6 +52,8 @@ impl CommandPaletteContextRequirement {
             Self::Any => true,
             Self::NoSession => !context.has_session,
             Self::HasSession => context.has_session,
+            Self::HasPreviousSession => context.can_previous_session,
+            Self::HasNextSession => context.can_next_session,
         }
     }
 }
@@ -228,6 +239,7 @@ pub struct CommandPaletteMatch {
 /// Maximum number of results returned by the default palette query.
 pub const DEFAULT_RESULT_LIMIT: usize = 12;
 
+#[cfg(test)]
 const NO_KEYWORDS: &[&str] = &[];
 const OPEN_CONNECTION_KEYWORDS_ZH: &[&str] = &["连接", "连接管理", "主机", "配置"];
 const OPEN_CONNECTION_KEYWORDS_EN: &[&str] = &["connection", "manager", "host", "profile"];
@@ -306,8 +318,8 @@ pub const COMMAND_PALETTE_ITEMS: &[CommandPaletteItem] = &[
         CommandPaletteAction::QuickConnect,
         BilingualText::new("快速连接 / 新建会话", "Quick connect / new session"),
         BilingualText::new(
-            "从连接管理器打开一个新的 SSH 会话",
-            "Open a new SSH session from the connection manager",
+            "打开一次性 SSH 连接表单，不自动保存连接配置",
+            "Open a one-time SSH connection form without saving the profile",
         ),
         QUICK_CONNECT_KEYWORDS_ZH,
         QUICK_CONNECT_KEYWORDS_EN,
@@ -324,7 +336,7 @@ pub const COMMAND_PALETTE_ITEMS: &[CommandPaletteItem] = &[
         PREVIOUS_SESSION_KEYWORDS_ZH,
         PREVIOUS_SESSION_KEYWORDS_EN,
         Some(CMD_ALT_LEFT),
-        CommandPaletteContextRequirement::HasSession,
+        CommandPaletteContextRequirement::HasPreviousSession,
     ),
     item(
         CommandPaletteAction::NextSession,
@@ -336,7 +348,7 @@ pub const COMMAND_PALETTE_ITEMS: &[CommandPaletteItem] = &[
         NEXT_SESSION_KEYWORDS_ZH,
         NEXT_SESSION_KEYWORDS_EN,
         Some(CMD_ALT_RIGHT),
-        CommandPaletteContextRequirement::HasSession,
+        CommandPaletteContextRequirement::HasNextSession,
     ),
     item(
         CommandPaletteAction::ToggleAssistant,
@@ -617,10 +629,10 @@ impl Query {
 #[cfg(test)]
 mod tests {
     use super::{
-        default_items, search, search_in, BilingualText, CommandPaletteAction,
-        CommandPaletteContext, CommandPaletteContextRequirement, CommandPaletteItem,
-        CommandPaletteLanguage, CommandPaletteMatchKind, ShortcutHint, DEFAULT_RESULT_LIMIT,
-        NO_KEYWORDS,
+        BilingualText, CommandPaletteAction, CommandPaletteContext,
+        CommandPaletteContextRequirement, CommandPaletteItem, CommandPaletteLanguage,
+        CommandPaletteMatchKind, DEFAULT_RESULT_LIMIT, NO_KEYWORDS, ShortcutHint, default_items,
+        search, search_in,
     };
 
     fn actions(results: &[super::CommandPaletteMatch]) -> Vec<CommandPaletteAction> {
@@ -632,6 +644,8 @@ mod tests {
         let context = CommandPaletteContext {
             has_session: true,
             assistant_open: false,
+            can_previous_session: true,
+            can_next_session: true,
         };
         assert_eq!(
             actions(&search("主机监控", context)),
@@ -751,6 +765,8 @@ mod tests {
             CommandPaletteContext {
                 has_session: false,
                 assistant_open: false,
+                can_previous_session: false,
+                can_next_session: false,
             },
         );
         assert!(!actions(&no_session).contains(&CommandPaletteAction::OpenFilePanel));
@@ -763,6 +779,8 @@ mod tests {
             CommandPaletteContext {
                 has_session: true,
                 assistant_open: false,
+                can_previous_session: true,
+                can_next_session: true,
             },
         );
         assert!(actions(&with_session).contains(&CommandPaletteAction::OpenFilePanel));
@@ -819,6 +837,8 @@ mod tests {
                 CommandPaletteContext {
                     has_session: true,
                     assistant_open: false,
+                    can_previous_session: true,
+                    can_next_session: true,
                 },
                 DEFAULT_RESULT_LIMIT
             )),
@@ -837,6 +857,8 @@ mod tests {
                 CommandPaletteContext {
                     has_session: true,
                     assistant_open: false,
+                    can_previous_session: true,
+                    can_next_session: true,
                 }
             )
             .len(),
@@ -849,22 +871,28 @@ mod tests {
                 CommandPaletteContext {
                     has_session: true,
                     assistant_open: false,
+                    can_previous_session: true,
+                    can_next_session: true,
                 },
                 3
             )
             .len(),
             3
         );
-        assert!(search_in(
-            default_items(),
-            "session",
-            CommandPaletteContext {
-                has_session: true,
-                assistant_open: false,
-            },
-            0
-        )
-        .is_empty());
+        assert!(
+            search_in(
+                default_items(),
+                "session",
+                CommandPaletteContext {
+                    has_session: true,
+                    assistant_open: false,
+                    can_previous_session: false,
+                    can_next_session: false,
+                },
+                0
+            )
+            .is_empty()
+        );
     }
 
     #[test]
@@ -872,6 +900,8 @@ mod tests {
         let context = CommandPaletteContext {
             has_session: false,
             assistant_open: true,
+            can_previous_session: false,
+            can_next_session: false,
         };
         let results = search("", context);
         assert_eq!(
@@ -896,6 +926,45 @@ mod tests {
             assistant.localized_description(CommandPaletteLanguage::En),
             "Open or close the AI assistant side panel"
         );
+    }
+
+    #[test]
+    fn directional_session_actions_follow_the_actual_tab_boundaries() {
+        let first = search(
+            "",
+            CommandPaletteContext {
+                has_session: true,
+                assistant_open: false,
+                can_previous_session: false,
+                can_next_session: true,
+            },
+        );
+        assert!(!actions(&first).contains(&CommandPaletteAction::PreviousSession));
+        assert!(actions(&first).contains(&CommandPaletteAction::NextSession));
+
+        let last = search(
+            "",
+            CommandPaletteContext {
+                has_session: true,
+                assistant_open: false,
+                can_previous_session: true,
+                can_next_session: false,
+            },
+        );
+        assert!(actions(&last).contains(&CommandPaletteAction::PreviousSession));
+        assert!(!actions(&last).contains(&CommandPaletteAction::NextSession));
+
+        let only = search(
+            "",
+            CommandPaletteContext {
+                has_session: true,
+                assistant_open: false,
+                can_previous_session: false,
+                can_next_session: false,
+            },
+        );
+        assert!(!actions(&only).contains(&CommandPaletteAction::PreviousSession));
+        assert!(!actions(&only).contains(&CommandPaletteAction::NextSession));
     }
 
     #[test]

@@ -49,6 +49,8 @@ pub(super) enum ModalKind {
     Folder,
     Connection,
     Manager,
+    QuickConnect,
+    CommandPalette,
 }
 
 impl ModalKind {
@@ -79,6 +81,8 @@ impl ModalKind {
             Self::Folder => t(cx, "文件夹", "Folder"),
             Self::Connection => t(cx, "SSH 连接配置", "SSH connection profile"),
             Self::Manager => t(cx, "连接管理器", "Connection manager"),
+            Self::QuickConnect => t(cx, "快速连接", "Quick connect"),
+            Self::CommandPalette => t(cx, "快速操作中心", "Command palette"),
         }
     }
 }
@@ -291,6 +295,8 @@ impl Workspace {
             (self.folder_form.is_some(), ModalKind::Folder),
             (self.form.is_some(), ModalKind::Connection),
             (self.show_connections, ModalKind::Manager),
+            (self.show_quick_connect, ModalKind::QuickConnect),
+            (self.show_command_palette, ModalKind::CommandPalette),
         ]
         .into_iter()
         .find_map(|(present, kind)| present.then_some(kind))
@@ -506,6 +512,8 @@ impl Workspace {
             ModalKind::Folder if !self.saving => self.close_folder_form(window, cx),
             ModalKind::Connection if !self.saving => self.form = None,
             ModalKind::Manager => self.show_connections = false,
+            ModalKind::QuickConnect => self.show_quick_connect = false,
+            ModalKind::CommandPalette => self.close_command_palette(window, cx),
             _ => {}
         }
         self.focus_current_surface(window, cx);
@@ -553,6 +561,8 @@ impl Workspace {
             ModalKind::Destination | ModalKind::Folder => self.library_modal(cx),
             ModalKind::Connection => self.connection_form(cx),
             ModalKind::Manager => self.connection_manager(window.viewport_size().width, cx),
+            ModalKind::QuickConnect => self.quick_connect_surface(cx),
+            ModalKind::CommandPalette => self.command_palette_modal(cx),
         }
     }
 
@@ -621,6 +631,7 @@ impl Workspace {
                 }
             }))
             .on_action(cx.listener(Self::open_connections))
+            .on_action(cx.listener(Self::open_command_palette))
             .on_action(cx.listener(Self::close_tab))
             .on_action(cx.listener(Self::toggle_assistant))
             .child(self.modal_chrome(kind, cx))

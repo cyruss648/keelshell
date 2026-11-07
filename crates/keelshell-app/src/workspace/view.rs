@@ -227,7 +227,7 @@ impl Workspace {
             .into_any_element()
     }
 
-    fn quick_connect_surface(&self, cx: &mut Context<Self>) -> AnyElement {
+    pub(super) fn quick_connect_surface(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let field = |label: &'static str, id: &'static str, state: &Entity<InputState>| {
             div()
@@ -1589,6 +1589,7 @@ impl Workspace {
             .text_color(rgb(visual.text))
             .text_sm()
             .on_action(cx.listener(Self::open_connections))
+            .on_action(cx.listener(Self::open_command_palette))
             .on_action(cx.listener(Self::new_workspace_window))
             .on_action(cx.listener(Self::close_workspace_window))
             .on_action(cx.listener(Self::close_tab))

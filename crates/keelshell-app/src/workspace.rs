@@ -23,6 +23,7 @@ use gpui_kit::{
 use keelshell_core::{AppState, AuthMethod, Connection, Language, StateStore};
 mod agent;
 mod appearance;
+mod command_palette;
 mod command_workflows;
 mod commands;
 mod configuration_recovery;
@@ -78,6 +79,7 @@ actions!(
     keelshell,
     [
         OpenConnections,
+        OpenCommandPalette,
         CloseTab,
         ToggleAssistant,
         PreviousSession,
@@ -339,9 +341,13 @@ pub struct Workspace {
     form: Option<ConnectionForm>,
     quick_connect: QuickConnectForm,
     quick_password: bool,
+    command_palette_query: Entity<InputState>,
+    command_palette_selected: usize,
     openssh_review: Option<OpenSshImportReview>,
     status: Message,
     show_connections: bool,
+    show_quick_connect: bool,
+    show_command_palette: bool,
     show_appearance: bool,
     library_filter: LibraryFilter,
     folder_form: Option<FolderForm>,
@@ -519,6 +525,12 @@ impl Workspace {
             window,
             cx,
         );
+        let command_palette_query = input(
+            t(cx, "搜索工作区动作…", "Search workspace actions…"),
+            "",
+            window,
+            cx,
+        );
         let command = cx.new(|cx| {
             TextareaState::new(window, cx).rows(2).placeholder(t(
                 cx,
@@ -582,6 +594,13 @@ impl Workspace {
         let snippet_subscription =
             cx.subscribe(&snippet_search, |_, _, _: &InputEvent, cx| cx.notify());
         let subscription = cx.subscribe(&search, |_, _, _: &InputEvent, cx| cx.notify());
+        let command_palette_subscription =
+            cx.subscribe(&command_palette_query, |view, _, event: &InputEvent, cx| {
+                if matches!(event, InputEvent::Change) {
+                    view.command_palette_selected = 0;
+                }
+                cx.notify();
+            });
         let command_subscription = cx.subscribe_in(
             &command,
             window,
@@ -909,6 +928,8 @@ impl Workspace {
             form: None,
             quick_connect,
             quick_password: false,
+            command_palette_query,
+            command_palette_selected: 0,
             openssh_review: None,
             status: load_error
                 .map(|error| Message::detail("配置加载失败", "Configuration failed", error))
@@ -916,6 +937,8 @@ impl Workspace {
                     Message::new("就绪，请选择 SSH 连接", "Ready. Select an SSH connection")
                 }),
             show_connections: false,
+            show_quick_connect: false,
+            show_command_palette: false,
             show_appearance: false,
             library_filter: LibraryFilter::All,
             folder_form: None,
@@ -1015,6 +1038,7 @@ impl Workspace {
                 navigation_keystrokes,
                 terminal_keystrokes,
                 subscription,
+                command_palette_subscription,
                 assistant_subscription,
                 command_subscription,
                 snippet_subscription,
@@ -1034,6 +1058,9 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if self.show_quick_connect {
+            self.show_quick_connect = false;
+        }
         if self
             .active_modal()
             .is_some_and(|kind| kind != modal_scope::ModalKind::Manager)
@@ -1873,14 +1900,11 @@ impl Workspace {
         Ok(connection)
     }
 
-    /// Submit the no-session draft through the regular SSH route and
+    /// Submit the one-time draft through the regular SSH route and
     /// authentication flow. This never writes the draft to the connection
     /// library; successful one-time sessions are therefore absent from the
     /// persistent recent-profile list as well.
     pub(super) fn connect_quick(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if !self.tabs.is_empty() {
-            return;
-        }
         let connection = match self.quick_connection(cx) {
             Ok(connection) => connection,
             Err(message) => {
@@ -1889,13 +1913,14 @@ impl Workspace {
                 return;
             }
         };
+        self.show_quick_connect = false;
         self.request_ephemeral_connect(connection, window, cx);
     }
 
     /// Copy the one-time endpoint draft into the normal connection editor.
     /// Persistence still requires the editor's explicit Save action.
     pub(super) fn save_quick_as_profile(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if self.saving || !self.tabs.is_empty() {
+        if self.saving {
             return;
         }
         let host = self.quick_connect.host.read(cx).value().to_string();
@@ -1904,6 +1929,7 @@ impl Workspace {
         let key = self.quick_connect.key.read(cx).value().to_string();
         let name = format!("{}@{}", username.trim(), host.trim());
         let password = self.quick_password;
+        self.show_quick_connect = false;
         self.open_form(window, cx);
         if let Some(form) = self.form.as_ref() {
             form.name
@@ -3198,6 +3224,15 @@ pub fn bind_keys(cx: &mut App) {
     };
     cx.bind_keys([
         KeyBinding::new("ctrl-space", CompleteRemoteCommand, Some("Input")),
+        KeyBinding::new(
+            if cfg!(target_os = "macos") {
+                "cmd-k"
+            } else {
+                "ctrl-k"
+            },
+            OpenCommandPalette,
+            None,
+        ),
         KeyBinding::new(open, OpenConnections, None),
         KeyBinding::new(close, CloseTab, None),
         KeyBinding::new(assistant, ToggleAssistant, None),
