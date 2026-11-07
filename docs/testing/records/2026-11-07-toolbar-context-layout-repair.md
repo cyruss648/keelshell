@@ -50,8 +50,49 @@ En/1280: workspace-settings-actions escapes toolbar
 | `cargo test -p keelshell-app --locked --offline -- --test-threads=4`（断点修正前） | 1087 passed / 2 ignored |
 | `cargo test -p keelshell-app --locked --offline toolbar_groups...`（加入 1280 后首次） | 0 passed / 1 failed，失败事实已保留 |
 
-上述最终修复后的完整 app 和工程门禁需要在当前源码候选上重新执行；本记录不把
-断点修正前的 `1087/2` 结果升级为最终候选证明。
+断点修正后的最终完整 app 重跑为 `1087 passed / 2 ignored`；随后当前源码上的
+`python3 scripts/check.py` 退出 `0`，Python 131 passed / 1 skipped、格式、严格
+workspace Clippy、workspace tests、doctests、依赖策略和 readiness/observer/
+small-stack AI controller 均通过。workspace 测试保留已有 linker
+`__eh_frame section too large` warning；没有把它写成测试失败。
+
+## 当前精确包与原生短验
+
+提交 `2d05525c00d21455420d25cce675bacdedf8a73a` 的 macOS release 构建退出 `0`，
+生成包 `work/native-cua-20261107/package-r9/KeelShell.app`。包结构检查：
+
+```text
+python3 packaging/inspect_native.py \
+  --platform macos \
+  --target aarch64-apple-darwin \
+  --stage work/native-cua-20261107/package-r9
+```
+
+退出码为 `0`，manifest 绑定 exact source commit，三项 SHA-256 为：
+
+- manifest：`8cceb76d2807683fc5bd264743834b110f2c94781ff6dffe59ea972b858eb378`
+- app：`524ae37ff3e45694072a906421edb5a2e575da2566a1ca48f237787cecb1d06a`
+- MCP：`94eaf83f8bbb23ae4db7cc190c9c06332ddbc19b4bf9246dcdf35f43b3645d8f`
+
+在解锁后的 macOS 桌面启动当前包，观察到 `Remote workspace` 在默认窗口保持单行，
+主题与外观对话框可以打开和关闭，测试进程退出且 `data-r9` 已删除。尝试通过
+系统窗口调整 API 设置 900×580 时，GPUI 无边框窗口 accessibility frame 没有
+接受调整，截图仍为默认窗口尺寸；因此当前包没有获得 900×580 原生通过。
+
+## 独立复核状态
+
+当前 exact source `2d05525c00d21455420d25cce675bacdedf8a73a` 已完成独立只读复核。
+复核结果为 P0/P1/P2/P3 均为 `0`，范围内 merge recommendation 为 `APPROVE`。
+实际检查包含：
+
+- `workbench_regions_fit_all_registered_themes_without_changing_drafts`：1 passed；
+- `toolbar_groups_keep_action_order_and_accessible_names_at_workbench_widths`：1 passed；
+- `cargo fmt --all -- --check`：exit 0；
+- `git diff --check` 与 `git diff --check HEAD^ HEAD`：exit 0。
+
+复核确认了 900/1280/1440 断点、112px 紧凑上下文、上下文两行的单行省略、
+品牌区显示规则和双语可访问名称。复核没有把作者的完整工程门禁、当前包原生短验、
+Windows/Linux 桌面、IME、VoiceOver 或外部 provider 联调重复计入独立证据。
 
 ## 边界
 

@@ -145,6 +145,22 @@ main已普通推送`fa7c05914e0eefc0f24ab32f8af690bdc50a63ed`，交付读回一�
 两平台各11项OpenSSH获独立`current-ci-r2`限定收口批准。三平台各204候选实际通过。
 CI不代签桌面验收。见[本批记录](testing/records/2026-11-06-monitor-knowledge-categories.md)。
 
+## 2026-11-07 工具栏远程上下文布局修复
+
+工作区顶部工具栏已修复紧凑窗口中远程上下文逐字竖排的问题，并收口 1280px
+断点：1280px 保留品牌区但采用紧凑动作标签，低于 1280px 隐藏品牌区；上下文
+标题和当前主机值使用单行省略，紧凑布局保留 112px 最小宽度。布局回归覆盖
+900/1280/1440 三档、中英文、三主题矩阵中的既有工作区场景，完整 app 为
+1087 passed / 2 ignored，完整 `scripts/check.py` 退出 0。
+
+源码提交为 `2d05525c00d21455420d25cce675bacdedf8a73a`。当前 macOS 包
+`work/native-cua-20261107/package-r9/KeelShell.app` 已做结构检查和默认窗口短验；
+紧凑尺寸因 GPUI accessibility frame 限制仍未形成原生通过证据。当前 exact tip
+的独立只读复核已返回 P0/P1/P2/P3 均为 0、范围内 `APPROVE`；该复核没有代替
+作者完整工程门禁或原生验收。Windows/Linux 原生桌面、完整输入/辅助技术矩阵、
+当前包真实 SSH/Podman 长流程和外部 AI provider 仍开放。
+测试证据见[工具栏上下文布局修复记录](testing/records/2026-11-07-toolbar-context-layout-repair.md)。
+
 ## 当前并行开发
 
 | 优先级 | 用户功能 | 真实状态与下一步 |

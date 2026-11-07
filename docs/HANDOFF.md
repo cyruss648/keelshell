@@ -5,6 +5,36 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 工具栏远程上下文布局修复
+
+本轮修复了 macOS 短验发现的真实布局缺陷：紧凑工具栏中的“远程工作区”上下文
+在窄窗口会被压成逐字竖排。源码提交
+`2d05525c00d21455420d25cce675bacdedf8a73a` 已在本地完成，包含上下文最小宽度、
+标题和值的单行省略、1280px 品牌/紧凑动作断点拆分、1280px 布局回归以及开发机
+绝对路径记录修复。
+
+当前验证结果：
+
+- `keelshell-app` 定向布局、主题和更新面板回归均通过；
+- 当前源码 `cargo test -p keelshell-app --locked --offline -- --test-threads=4`
+  为 `1087 passed / 2 ignored`；
+- `python3 scripts/check.py` 退出 `0`，Python 131 passed / 1 skipped、格式、
+  严格 workspace Clippy、workspace tests、doctests、依赖策略和三组 AI controller
+  均通过；linker `__eh_frame section too large` warning 仍按历史边界保留；
+- 当前精确 macOS 包为 `work/native-cua-20261107/package-r9/KeelShell.app`，
+  manifest 绑定源码 `2d05525...`，包结构检查退出 `0`；manifest/app/MCP SHA-256
+  分别为 `8cceb76d...`、`524ae37f...`、`94eaf83f...`；
+- 解锁后的 macOS 短验启动当前包，观察到工具栏 `Remote workspace` 单行显示，
+  主题对话框可打开/关闭，进程和 `data-r9` 已清理。外部 900×580 调整仍受 GPUI
+  无边框窗口 accessibility frame 限制，本次不把紧凑尺寸原生验收写成通过。
+
+当前 exact tip 已完成一次独立只读复核，复核结果为 P0/P1/P2/P3 均为 0，
+范围内 merge recommendation 为 `APPROVE`。复核实际验证了工作区布局、工具栏
+断点、上下文最小宽度、双语 AX 标签、格式和差异检查；它没有把作者的完整工程
+门禁或 macOS 原生短验重复计入独立证据。此前 exact HEAD 复核提出的窄布局和绝对
+路径问题已由本轮处理。Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、真实
+SSH/Podman 当前包联调和外部 AI provider 仍保持开放。
+
 ## 2026-11-07 Reef / reef-template 参考边界
 
 本次新增文档切片 [ADR 0118](adr/0118-reef-reference-boundary.md)，把 Reef 与
