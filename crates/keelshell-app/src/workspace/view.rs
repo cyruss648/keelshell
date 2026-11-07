@@ -7,9 +7,127 @@ use gpui_kit::{
 };
 
 impl Workspace {
-    fn session_strip(&self, tabs: AnyElement, cx: &mut Context<Self>) -> AnyElement {
+    fn session_strip(
+        &self,
+        tabs: AnyElement,
+        compact_toolbar: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let visual = crate::design::palette(cx);
         let chrome = crate::design::chrome(cx);
+        let components = crate::design::components(cx);
+        let mut session_content = div()
+            .id("session-content-group")
+            .test_support()
+            .flex_1()
+            .min_w_0()
+            .h_full()
+            .flex()
+            .items_center()
+            .gap_1()
+            .child(tabs)
+            .child(
+                div()
+                    .id("session-count")
+                    .test_support()
+                    .aria_label(if self.tabs.is_empty() {
+                        t(cx, "快速连接", "Quick connect").to_owned()
+                    } else {
+                        format!("{} {}", self.tabs.len(), t(cx, "个会话", "sessions"))
+                    })
+                    .flex_shrink_0()
+                    .px_2()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .bg(rgb(visual.surface_active))
+                    .border_1()
+                    .border_color(rgb(visual.border))
+                    .rounded(px(components.control_radius))
+                    .child(if self.tabs.is_empty() {
+                        t(cx, "快速连接", "Quick connect").to_owned()
+                    } else {
+                        format!("{} {}", self.tabs.len(), t(cx, "个会话", "sessions"))
+                    }),
+            );
+        if !compact_toolbar {
+            session_content = session_content
+                .px_1()
+                .bg(rgb(visual.surface))
+                .border_1()
+                .border_color(rgb(visual.border))
+                .rounded(px(components.control_radius));
+        }
+
+        let new_window = Button::new("new-workspace-window")
+            .ghost()
+            .compact()
+            .label(t(cx, "新建窗口", "New window"))
+            .disabled(!self.app_windows.read(cx).can_open() || !self.configuration_current(cx))
+            .on_click(cx.listener(|view, _, window, cx| {
+                view.new_workspace_window(&NewWorkspaceWindow, window, cx)
+            }));
+        let previous_session = Button::new("previous-session")
+            .ghost()
+            .compact()
+            .icon(IconName::ChevronLeft)
+            .accessibility_label(t(cx, "上一个 SSH 会话", "Previous SSH session"))
+            .localized_tooltip("上一个 SSH 会话", "Previous SSH session")
+            .disabled(self.active == 0)
+            .on_click(cx.listener(|view, _, window, cx| {
+                view.select_session_tab(view.active.saturating_sub(1), window, cx);
+            }))
+            .map(|button| self.retain_modal_button("previous-session", button, cx));
+        let next_session = Button::new("next-session")
+            .ghost()
+            .compact()
+            .icon(IconName::ChevronRight)
+            .accessibility_label(t(cx, "下一个 SSH 会话", "Next SSH session"))
+            .localized_tooltip("下一个 SSH 会话", "Next SSH session")
+            .disabled(self.active + 1 >= self.tabs.len())
+            .on_click(cx.listener(|view, _, window, cx| {
+                view.select_session_tab(view.active + 1, window, cx);
+            }))
+            .map(|button| self.retain_modal_button("next-session", button, cx));
+        let new_session = Button::new("new-session")
+            .icon(IconName::Plus)
+            .ghost()
+            .compact()
+            .accessibility_label(t(cx, "新建 SSH 会话", "New SSH session"))
+            .localized_tooltip("新建 SSH 会话", "New SSH session")
+            .on_click(cx.listener(|view, _, window, cx| {
+                view.open_connections(&OpenConnections, window, cx)
+            }))
+            .map(|button| self.retain_modal_button("new-session", button, cx));
+        let mut session_actions = div()
+            .id("session-actions-group")
+            .test_support()
+            .flex_shrink_0()
+            .h_full()
+            .flex()
+            .items_center()
+            .gap_1()
+            .child(new_window)
+            .child(
+                div()
+                    .id("session-action-divider")
+                    .test_support()
+                    .h(px(20.))
+                    .w(px(1.))
+                    .flex_shrink_0()
+                    .bg(rgb(visual.border)),
+            );
+        if !compact_toolbar {
+            session_actions = session_actions
+                .px_1()
+                .bg(rgb(visual.surface))
+                .border_1()
+                .border_color(rgb(visual.border))
+                .rounded(px(components.control_radius));
+        }
+        if self.tabs.len() > 1 {
+            session_actions = session_actions.child(previous_session).child(next_session);
+        }
+        session_actions = session_actions.child(new_session);
         div()
             .id("session-strip")
             .test_support()
@@ -29,84 +147,8 @@ impl Workspace {
             .bg(rgb(visual.chrome))
             .border_b_1()
             .border_color(rgb(visual.border))
-            .child(tabs)
-            .child(
-                div()
-                    .id("session-count")
-                    .test_support()
-                    .aria_label(if self.tabs.is_empty() {
-                        t(cx, "快速连接", "Quick connect").to_owned()
-                    } else {
-                        format!(
-                            "{} {}",
-                            self.tabs.len(),
-                            t(cx, "个会话", "sessions")
-                        )
-                    })
-                    .flex_shrink_0()
-                    .px_2()
-                    .text_xs()
-                    .text_color(rgb(visual.muted))
-                    .bg(rgb(visual.surface_active))
-                    .border_1()
-                    .border_color(rgb(visual.border))
-                    .rounded(px(crate::design::components(cx).control_radius))
-                    .child(if self.tabs.is_empty() {
-                        t(cx, "快速连接", "Quick connect").to_owned()
-                    } else {
-                        format!("{} {}", self.tabs.len(), t(cx, "个会话", "sessions"))
-                    }),
-            )
-            .child(
-                Button::new("new-workspace-window")
-                    .ghost()
-                    .compact()
-                    .label(t(cx, "新建窗口", "New window"))
-                    .disabled(
-                        !self.app_windows.read(cx).can_open() || !self.configuration_current(cx),
-                    )
-                    .on_click(cx.listener(|view, _, window, cx| {
-                        view.new_workspace_window(&NewWorkspaceWindow, window, cx)
-                    })),
-            )
-            .when(self.tabs.len() > 1, |toolbar| {
-                toolbar.children([
-                    Button::new("previous-session")
-                        .ghost()
-                        .compact()
-                        .icon(IconName::ChevronLeft)
-                        .accessibility_label(t(cx, "上一个 SSH 会话", "Previous SSH session"))
-                        .localized_tooltip("上一个 SSH 会话", "Previous SSH session")
-                        .disabled(self.active == 0)
-                        .on_click(cx.listener(|view, _, window, cx| {
-                            view.select_session_tab(view.active.saturating_sub(1), window, cx);
-                        }))
-                        .map(|button| self.retain_modal_button("previous-session", button, cx)),
-                    Button::new("next-session")
-                        .ghost()
-                        .compact()
-                        .icon(IconName::ChevronRight)
-                        .accessibility_label(t(cx, "下一个 SSH 会话", "Next SSH session"))
-                        .localized_tooltip("下一个 SSH 会话", "Next SSH session")
-                        .disabled(self.active + 1 >= self.tabs.len())
-                        .on_click(cx.listener(|view, _, window, cx| {
-                            view.select_session_tab(view.active + 1, window, cx);
-                        }))
-                        .map(|button| self.retain_modal_button("next-session", button, cx)),
-                ])
-            })
-            .child(
-                Button::new("new-session")
-                    .icon(IconName::Plus)
-                    .ghost()
-                    .compact()
-                    .accessibility_label(t(cx, "新建 SSH 会话", "New SSH session"))
-                    .localized_tooltip("新建 SSH 会话", "New SSH session")
-                    .on_click(cx.listener(|view, _, window, cx| {
-                        view.open_connections(&OpenConnections, window, cx)
-                    }))
-                    .map(|button| self.retain_modal_button("new-session", button, cx)),
-            )
+            .child(session_content)
+            .child(session_actions)
             .into_any_element()
     }
 
@@ -728,6 +770,8 @@ impl Workspace {
                     .cloned()
                     .unwrap_or_else(|| t(cx, "选择一个连接", "Select a connection").to_owned());
                 div()
+                    .id("workspace-session-context")
+                    .test_support()
                     .flex_1()
                     .min_w_0()
                     .px_2()
@@ -747,6 +791,13 @@ impl Workspace {
                             .text_color(rgb(visual.text))
                             .child(context),
                     )
+                    .when(!compact_toolbar, |context| {
+                        context
+                            .bg(rgb(visual.surface))
+                            .border_1()
+                            .border_color(rgb(visual.border))
+                            .rounded(px(crate::design::components(cx).control_radius))
+                    })
                     .into_any_element()
             },
             Button::new("split-session")
@@ -992,13 +1043,71 @@ impl Workspace {
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
         let chrome = crate::design::chrome(cx);
+        let components = crate::design::components(cx);
+        let [
+            navigation_toggle,
+            connection_manager,
+            workspace_context,
+            split_horizontal,
+            split_vertical,
+            collapse_pane,
+            zoom_pane,
+            save_layout,
+            assistant,
+        ] = self.workspace_session_actions(show_navigation, compact_toolbar, active_id, cx);
+        let toolbar_group = |id: &'static str| {
+            let group = div()
+                .id(id)
+                .test_support()
+                .flex_shrink_0()
+                .flex()
+                .items_center()
+                .gap_1();
+            if compact_toolbar {
+                group
+            } else {
+                group
+                    .px_1()
+                    .bg(rgb(visual.surface))
+                    .border_1()
+                    .border_color(rgb(visual.border))
+                    .rounded(px(components.control_radius))
+            }
+        };
+        let toolbar_separator = |id: &'static str| {
+            let separator = div()
+                .id(id)
+                .test_support()
+                .h(px(20.))
+                .w(px(1.))
+                .flex_shrink_0()
+                .bg(rgb(visual.border));
+            if compact_toolbar {
+                separator
+            } else {
+                separator.mx_1()
+            }
+        };
+        let navigation_group = toolbar_group("workspace-navigation-group")
+            .child(navigation_toggle)
+            .child(connection_manager);
+        let context_group = workspace_context;
+        let pane_group = toolbar_group("workspace-pane-actions")
+            .child(split_horizontal)
+            .child(split_vertical)
+            .child(collapse_pane)
+            .child(zoom_pane)
+            .child(save_layout);
+        let assistant_group = toolbar_group("workspace-assistant-action").child(assistant);
+        let settings_group = toolbar_group("workspace-settings-actions")
+            .children(self.workspace_settings_actions(compact_toolbar, cx));
         div()
             .id("workspace-toolbar")
             .test_support()
             .h(px(chrome.toolbar_height))
-            .bg(rgb(visual.chrome))
+            .bg(rgb(visual.toolbar))
             .px_2()
-            .gap_1()
+            .gap_2()
             .flex_shrink_0()
             .flex()
             .items_center()
@@ -1007,21 +1116,14 @@ impl Workspace {
             .when(!compact_toolbar, |toolbar| {
                 toolbar.child(self.workspace_brand(cx))
             })
-            // Keep the existing siblings: grouping adds call boundaries, not containers.
-            .children(self.workspace_session_actions(
-                show_navigation,
-                compact_toolbar,
-                active_id,
-                cx,
-            ))
-            .child(
-                div()
-                    .h(px(20.))
-                    .w(px(1.))
-                    .flex_shrink_0()
-                    .bg(rgb(visual.border)),
-            )
-            .children(self.workspace_settings_actions(compact_toolbar, cx))
+            .child(navigation_group)
+            .child(context_group)
+            .child(toolbar_separator("workspace-pane-divider"))
+            .child(pane_group)
+            .child(toolbar_separator("workspace-assistant-divider"))
+            .child(assistant_group)
+            .child(toolbar_separator("workspace-settings-divider"))
+            .child(settings_group)
             .into_any_element()
     }
 
@@ -1402,7 +1504,7 @@ impl Workspace {
             }
         }
         let tabs = self.session_tabs(cx);
-        let session_strip = self.session_strip(tabs, cx);
+        let session_strip = self.session_strip(tabs, compact_toolbar, cx);
         let body = if self.tabs.is_empty() && self.state.workspace_layout.is_none() {
             self.empty_workspace_body(
                 viewport.width

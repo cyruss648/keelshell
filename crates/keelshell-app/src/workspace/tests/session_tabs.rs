@@ -81,6 +81,74 @@ fn long_session_titles_keep_close_visible_in_both_languages_and_window_sizes(
 }
 
 #[gpui_kit::test]
+fn session_strip_groups_keep_navigation_accessible_at_compact_and_wide_widths(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount_sized(cx, Vec::new(), 1440., 580.);
+    let panes: Vec<_> = (0..3)
+        .flat_map(|_| attach_remote_panes(&fixture, cx))
+        .collect();
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.tabs = panes.iter().map(|pane| pane.terminal.clone()).collect();
+            workspace.active = 1;
+            cx.notify();
+        });
+        for (width, language) in [(1440., Language::ZhCn), (900., Language::En)] {
+            window.resize(size(px(width), px(580.)));
+            window.bounds_changed(cx);
+            i18n::set_language(language, cx);
+            render_and_reveal(window, cx);
+
+            let strip = window.find("session-strip").bounds();
+            let content = window.find("session-content-group");
+            let actions = window.find("session-actions-group");
+            let divider = window.find("session-action-divider");
+            assert!(content.visible() && actions.visible() && divider.visible());
+            assert!(content.bounds().left() >= strip.left());
+            assert!(content.bounds().right() <= actions.bounds().left());
+            assert!(actions.bounds().right() <= strip.right());
+            assert!(divider.bounds().left() >= actions.bounds().left());
+            assert!(divider.bounds().right() <= actions.bounds().right());
+            assert_eq!(
+                window.find("session-strip").label(),
+                Some(if language == Language::ZhCn {
+                    "SSH 会话导航"
+                } else {
+                    "SSH session navigation"
+                })
+            );
+            assert_eq!(
+                window.find("previous-session").label(),
+                Some(if language == Language::ZhCn {
+                    "上一个 SSH 会话"
+                } else {
+                    "Previous SSH session"
+                })
+            );
+            assert_eq!(
+                window.find("next-session").label(),
+                Some(if language == Language::ZhCn {
+                    "下一个 SSH 会话"
+                } else {
+                    "Next SSH session"
+                })
+            );
+            assert_eq!(
+                window.find("new-session").label(),
+                Some(if language == Language::ZhCn {
+                    "新建 SSH 会话"
+                } else {
+                    "New SSH session"
+                })
+            );
+        }
+    })
+    .checked("keep grouped session navigation inside the strip in both layouts");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
 fn navigation_reveals_and_closes_the_selected_session_without_sending_drafts(
     cx: &mut TestAppContext,
 ) {

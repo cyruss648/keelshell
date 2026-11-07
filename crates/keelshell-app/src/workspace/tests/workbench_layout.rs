@@ -119,6 +119,103 @@ fn workbench_regions_fit_all_registered_themes_without_changing_drafts(cx: &mut 
 }
 
 #[gpui_kit::test]
+fn toolbar_groups_keep_action_order_and_accessible_names_at_workbench_widths(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount_sized(cx, Vec::new(), 1440., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for (width, language) in [(1440., Language::ZhCn), (900., Language::En)] {
+            window.resize(size(px(width), px(580.)));
+            window.bounds_changed(cx);
+            i18n::set_language(language, cx);
+            settle(window, cx);
+
+            let toolbar = window.find("workspace-toolbar").bounds();
+            let mut previous_right = toolbar.left();
+            for id in [
+                "workspace-navigation-group",
+                "workspace-session-context",
+                "workspace-pane-divider",
+                "workspace-pane-actions",
+                "workspace-assistant-divider",
+                "workspace-assistant-action",
+                "workspace-settings-divider",
+                "workspace-settings-actions",
+            ] {
+                let element = window.find(id);
+                let bounds = element.bounds();
+                assert!(element.visible(), "{language:?}/{width}: {id} hidden");
+                assert!(
+                    inside(bounds, toolbar),
+                    "{language:?}/{width}: {id} escapes toolbar"
+                );
+                assert!(
+                    bounds.left() >= previous_right,
+                    "{language:?}/{width}: {id} overlaps the previous toolbar group"
+                );
+                previous_right = bounds.right();
+            }
+
+            for id in [
+                "toggle-navigation",
+                "connection-manager",
+                "split-session",
+                "split-session-vertical",
+                "collapse-pane",
+                "zoom-pane",
+                "save-pane-layout",
+                "toggle-assistant",
+                "vault-settings",
+                "about-updates",
+                "configuration-recovery",
+                "theme-settings",
+                "language",
+            ] {
+                let element = window.find(id);
+                assert!(element.visible(), "{language:?}/{width}: {id} hidden");
+                assert!(
+                    element.bounds().right() <= toolbar.right(),
+                    "{language:?}/{width}: {id} escapes toolbar"
+                );
+            }
+
+            let labels = [
+                (
+                    "toggle-navigation",
+                    crate::i18n::t(cx, "连接与主机侧栏", "Connections and host sidebar"),
+                ),
+                (
+                    "connection-manager",
+                    crate::i18n::t(cx, "连接", "Connections"),
+                ),
+                (
+                    "split-session",
+                    crate::i18n::t(
+                        cx,
+                        "左右分屏当前 SSH 会话",
+                        "Split current SSH session left and right",
+                    ),
+                ),
+                (
+                    "toggle-assistant",
+                    crate::i18n::t(cx, "AI 助手", "AI assistant"),
+                ),
+            ];
+            for (id, expected) in labels {
+                assert_eq!(
+                    window.find(id).label(),
+                    Some(expected),
+                    "{language:?}/{width}: {id} AX label"
+                );
+            }
+        }
+    })
+    .checked("keep the grouped toolbar ordered and accessible at wide and compact widths");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
 fn every_terminal_pane_keeps_a_bilingual_connection_identity_bar(cx: &mut TestAppContext) {
     let fixture = mount_sized(cx, Vec::new(), 900., 580.);
     let panes = attach_remote_panes(&fixture, cx);
