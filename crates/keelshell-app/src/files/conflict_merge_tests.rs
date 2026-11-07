@@ -377,7 +377,15 @@ async fn stale_merge_frame_actions_cannot_mutate_a_replacement_review(cx: &mut T
         });
     })
     .checked("start a fresh remote merge observation");
-    h.idle(cx).await;
+    // Let the worker deliver its result without painting a replacement frame;
+    // the stale-coordinate dispatch below must still exercise the previous
+    // retained listeners.
+    for _ in 0..32 {
+        cx.run_until_parked();
+        if cx.update(|cx| !h.panel.read(cx).busy) {
+            break;
+        }
+    }
 
     h.panel.read_with(cx, |panel, _| {
         let review = panel
@@ -387,6 +395,18 @@ async fn stale_merge_frame_actions_cannot_mutate_a_replacement_review(cx: &mut T
         assert_ne!(review.review_id, old_review_id);
         assert_eq!(review.active, 0);
         assert!(review.choices.iter().all(Option::is_none));
+    });
+    // Model a newer observation arriving after the replacement frame was
+    // painted. The retained listeners still carry the previous review ID, so
+    // they must fail closed without requiring another layout pass.
+    cx.update(|cx| {
+        h.panel.update(cx, |panel, _| {
+            panel
+                .merge_review
+                .as_mut()
+                .checked_option("replacement review for stale listener")
+                .review_id = uuid::Uuid::new_v4();
+        });
     });
 
     cx.update_window(h.window, |_, window, cx| {
@@ -576,9 +596,21 @@ async fn complete_merge_versions_keep_literal_rows_and_two_axis_scroll_without_w
                 let maximum = h.panel.read(cx).text_review_scroll.max_offset();
                 assert!(maximum.x > px(100.) && maximum.y > px(100.));
                 let outer_before = h.panel.read(cx).tools_scroll.offset();
-                let outer=window.find("file-tools-scroll").bounds();
-                let top=viewport.origin.y.max(outer.origin.y);let bottom=viewport.bottom().min(outer.bottom());
-                assert!(bottom-top>px(10.),"version text viewport has a visible intersection {viewport:?} in {outer:?}");
+                let outer = window.find("file-tools-scroll").bounds();
+                let inline_body = window.find("text-merge-inline-body").bounds();
+                let top = viewport
+                    .origin
+                    .y
+                    .max(outer.origin.y)
+                    .max(inline_body.origin.y);
+                let bottom = viewport
+                    .bottom()
+                    .min(outer.bottom())
+                    .min(inline_body.bottom());
+                assert!(
+                    bottom - top > px(10.),
+                    "version text viewport has a visible intersection {viewport:?} in {outer:?} and {inline_body:?}"
+                );
                 let position=point(viewport.origin.x+px(12.),top+(bottom-top)/2.);
                 window.dispatch_event(
                     gpui_kit::MouseMoveEvent {

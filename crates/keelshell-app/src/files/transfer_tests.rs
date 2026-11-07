@@ -274,6 +274,20 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
     }) {
         return;
     }
+    if matches!(
+        id,
+        "merge-previous-conflict"
+            | "merge-next-conflict"
+            | "merge-use-draft"
+            | "merge-use-remote"
+            | "merge-use-manual"
+            | "merge-manual-draft"
+            | "merge-manual-input"
+    ) && window.try_find("text-merge-inline-body").is_some()
+    {
+        reveal_inline_merge_body_control(window, cx, id);
+        return;
+    }
     // Foreground inspection has a fixed footer cancel; a transfer's individual
     // cancel remains inside the action card and must be scrolled into view.
     let footer_cancel = id == "cancel-active-file-operation"
@@ -365,6 +379,109 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
             && target.bounds().origin.y >= viewport.origin.y
             && target.bounds().bottom() <= viewport.bottom(),
         "{id} must be reachable with platform scrolling: {:?} in {viewport:?}",
+        target.bounds()
+    );
+}
+
+fn reveal_inline_merge_body_control(
+    window: &mut gpui_kit::Window,
+    cx: &mut gpui_kit::App,
+    id: &str,
+) {
+    for _ in 0..8 {
+        let outer = window.find("file-tools-scroll").bounds();
+        let body = window.find("text-merge-inline-body");
+        let target = window.find(gpui_kit::SharedString::from(id.to_owned()));
+        if target.visible()
+            && target.bounds().origin.y >= body.bounds().origin.y
+            && target.bounds().bottom() <= body.bounds().bottom()
+        {
+            return;
+        }
+
+        if !body.visible()
+            || body.bounds().origin.y < outer.origin.y
+            || body.bounds().bottom() < outer.origin.y
+        {
+            // The outer tools viewport is at its tail while the inline body
+            // is above it. Use the outer gutter so the event cannot be
+            // consumed by the nested body or its action controls.
+            let position = point(
+                outer.origin.x + px(2.),
+                outer.origin.y + outer.size.height / 2.,
+            );
+            window.dispatch_event(
+                gpui_kit::MouseMoveEvent {
+                    position,
+                    ..Default::default()
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.dispatch_event(
+                gpui_kit::ScrollEvent {
+                    position,
+                    delta: gpui_kit::ScrollDelta::Pixels(point(px(0.), px(100_000.))),
+                    ..Default::default()
+                }
+                .to_platform_input(),
+                cx,
+            );
+            window.render_frame(cx);
+            continue;
+        }
+
+        // The body has a nested conflict-details viewport at its center.
+        // Target the heading strip so the wheel belongs to the inline body
+        // handle and can reveal the lower conflict controls.
+        let body_bounds = body.bounds();
+        let target_bounds = target.bounds();
+        let delta_y = if target_bounds.bottom() < body_bounds.origin.y {
+            body_bounds.origin.y - target_bounds.origin.y + px(8.)
+        } else if target_bounds.bottom() > body_bounds.bottom() {
+            body_bounds.bottom() - target_bounds.bottom() - px(8.)
+        } else {
+            return;
+        };
+        let position = if target_bounds.bottom() < body_bounds.origin.y {
+            // At the inline body's tail the heading is scrolled away. Use
+            // the scrollbar gutter so the event still targets the body
+            // viewport instead of a lower conflict control.
+            point(
+                body_bounds.right() - px(4.),
+                body_bounds.origin.y + body_bounds.size.height / 2.,
+            )
+        } else {
+            point(body_bounds.origin.x + px(4.), body_bounds.origin.y + px(8.))
+        };
+        window.dispatch_event(
+            gpui_kit::MouseMoveEvent {
+                position,
+                ..Default::default()
+            }
+            .to_platform_input(),
+            cx,
+        );
+        window.dispatch_event(
+            gpui_kit::ScrollEvent {
+                position,
+                delta: gpui_kit::ScrollDelta::Pixels(point(px(0.), delta_y)),
+                touch_phase: gpui_kit::TouchPhase::Started,
+                ..Default::default()
+            }
+            .to_platform_input(),
+            cx,
+        );
+        window.render_frame(cx);
+    }
+
+    let body = window.find("text-merge-inline-body").bounds();
+    let target = window.find(gpui_kit::SharedString::from(id.to_owned()));
+    assert!(
+        target.visible()
+            && target.bounds().origin.y >= body.origin.y
+            && target.bounds().bottom() <= body.bottom(),
+        "{id} must be reachable with nested inline-body scrolling: {:?} in {body:?}",
         target.bounds()
     );
 }

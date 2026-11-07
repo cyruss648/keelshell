@@ -5,6 +5,40 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-08 内联合并审核视口候选
+
+当前分支 `feature/main-visual-integration-20261106` 的源码基线为
+`ed75c9802509b54f4c57dc38f8573fe0f43aeee1`，本片尚有四个未提交源码文件：
+`files/merge.rs`、`files/review_viewport_tests.rs`、`files/transfer_tests.rs` 和
+`files/conflict_merge_tests.rs`。本片将内联三方合并审核收口为固定 `220 px` 卡片；
+正文独立滚动，动作区两行固定，展开按钮移入动作栏。正文滚轮通过 review ID 绑定的
+处理器显式更新并截断 `body_scroll`，旧帧和新审核之间失败关闭；切换冲突、完整版本
+和冲突选择方案会复位正文滚动。
+
+截至本交接片，专项结果为：
+
+- stale replacement frame：`1 passed / 0 failed / 1114 filtered out`；
+- conflict merge：`27 passed / 0 failed / 1088 filtered out`；
+- review viewport：`12 passed / 0 failed / 1103 filtered out`；
+- editor format：`13 passed / 0 failed / 1102 filtered out`；
+- `cargo fmt --all -- --check` 与 `git diff --check`：退出 `0`。
+
+本片随后按[共享 target 指南](testing/SHARED_TARGET.md)失效五个项目包并完成真实
+重编。第一次重编在严格 Clippy 阶段发现并修复了未使用构造器、测试专用清理函数、
+`then_some` 风格和未使用测试参数；最终 `python3 scripts/check.py` 退出 `0`：
+Python `131 run / 1 skipped`，workspace Rust 测试 `2,435 passed / 23 ignored`，
+其中 app 为 `1,113 passed / 2 ignored`，14 项 doctest、严格 Clippy、依赖策略和
+readiness/observer/small-stack controller 全部通过。完整证据保存在[本片测试记录]
+(testing/records/2026-11-08-inline-merge-review-viewport.md)；设计决策见
+[ADR 0121](adr/0121-inline-merge-review-viewport.md)。首次视口回归曾因外层尾部裁掉
+正文命中区域、并因 stop propagation 阻止正文默认滚动而失败，修复后精确重跑通过。
+
+下一步按顺序执行：提交源码候选并记录源码 SHA；启动新的独立严格只读复核；复核完成
+后构建绑定源码 SHA 的 macOS exact package 并做已解锁桌面短验；最后读回
+local/tracking/remote SHA。连续无换行保存、`merge-adopt → merge-save → late newer
+draft/readback`、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和
+外部 AI provider 仍未验收。
+
 ## 2026-11-08 快速操作中心生产布局与键盘收口
 
 本片源码已提交为

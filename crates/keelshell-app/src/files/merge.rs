@@ -31,6 +31,38 @@ pub(super) struct MergeReview {
     pub(super) body_scroll: ScrollHandle,
 }
 impl FilesPanel {
+    fn scroll_inline_merge_body(
+        &mut self,
+        review_id: Uuid,
+        event: &gpui_kit::ScrollEvent,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let Some(review) = self
+            .merge_review
+            .as_ref()
+            .filter(|review| review.review_id == review_id)
+        else {
+            // A retained frame may still deliver a wheel after the model has
+            // replaced the review. It must not reach the outer file-tools
+            // scroller and must never mutate the replacement review.
+            cx.stop_propagation();
+            return;
+        };
+        let offset = review.body_scroll.offset();
+        let maximum = review.body_scroll.max_offset();
+        let delta = event.delta.pixel_delta(window.line_height());
+        let next = point(
+            (offset.x + delta.x).clamp(-maximum.x, px(0.)),
+            (offset.y + delta.y).clamp(-maximum.y, px(0.)),
+        );
+        if next != offset {
+            review.body_scroll.set_offset(next);
+            cx.notify();
+        }
+        cx.stop_propagation();
+    }
+
     pub(super) fn receive_merge(
         &mut self,
         snapshot: RegularFileSnapshot,
@@ -158,6 +190,7 @@ impl FilesPanel {
                 .manual
                 .update(cx, |input, cx| input.set_value(text, window, cx));
             self.text_review_scroll.set_offset(point(px(0.), px(0.)));
+            review.body_scroll.set_offset(point(px(0.), px(0.)));
             cx.notify();
         }
     }
@@ -177,6 +210,7 @@ impl FilesPanel {
             && review.active < review.choices.len()
         {
             review.choices[review.active] = Some(choice);
+            review.body_scroll.set_offset(point(px(0.), px(0.)));
             cx.notify();
         }
     }
@@ -383,6 +417,7 @@ impl FilesPanel {
         {
             review.overview = version;
             self.text_review_scroll.set_offset(point(px(0.), px(0.)));
+            review.body_scroll.set_offset(point(px(0.), px(0.)));
             cx.notify();
         }
     }
@@ -411,8 +446,10 @@ impl FilesPanel {
         div()
             .id("text-merge-card")
             .flex_shrink_0()
-            .min_h_0()
-            .h_full()
+            // Keep the inline review a bounded card so its nested body
+            // receives a real viewport even when the outer file-tools
+            // scroller has only a compact slice of the workbench.
+            .h(px(220.))
             .mx_2()
             .my_1()
             .border_1()
@@ -428,7 +465,9 @@ impl FilesPanel {
                     .overflow_y_scroll()
                     .track_scroll(&review.body_scroll)
                     .vertical_scrollbar(&review.body_scroll)
-                    .on_scroll(|_, _, cx| cx.stop_propagation())
+                    .on_scroll(cx.listener(move |view, event, window, cx| {
+                        view.scroll_inline_merge_body(review_id, event, window, cx);
+                    }))
                     .on_key_down(cx.listener(move |view, event, _, cx| {
                         if let Some(review) = view
                             .merge_review
@@ -522,28 +561,7 @@ impl FilesPanel {
                 .flex()
                 .items_center()
                 .gap_1()
-                .child(div().flex_1().min_w_0().text_ellipsis().child(heading))
-                .when(
-                    self.editor_surface != Some(review::EditorSurface::Merge),
-                    |el| {
-                        let review_id = review.review_id;
-                        el.child(
-                            Button::new("expand-text-merge")
-                                .ghost()
-                                .compact()
-                                .label(t(cx, "展开合并审核", "Expand merge review"))
-                                .on_click(cx.listener(move |view, _, window, cx| {
-                                    if view
-                                        .merge_review
-                                        .as_ref()
-                                        .is_some_and(|review| review.review_id == review_id)
-                                    {
-                                        view.focus_editor(review::EditorSurface::Merge, window, cx);
-                                    }
-                                })),
-                        )
-                    },
-                ),
+                .child(div().flex_1().min_w_0().text_ellipsis().child(heading)),
         );
         if include_version_controls {
             card = card.child(self.merge_version_controls(review.review_id, resolved, total, cx));
@@ -864,6 +882,20 @@ impl FilesPanel {
 
     fn merge_inline_action_bar(&self, review: &MergeReview, cx: &mut Context<Self>) -> AnyElement {
         let complete = review.choices.iter().all(Option::is_some);
+        let review_id = review.review_id;
+        let expand = Button::new("expand-text-merge")
+            .ghost()
+            .compact()
+            .label(t(cx, "展开合并审核", "Expand merge review"))
+            .on_click(cx.listener(move |view, _, window, cx| {
+                if view
+                    .merge_review
+                    .as_ref()
+                    .is_some_and(|review| review.review_id == review_id)
+                {
+                    view.focus_editor(review::EditorSurface::Merge, window, cx);
+                }
+            }));
         div()
             .id("text-merge-inline-actions")
             .flex_shrink_0()
@@ -884,7 +916,20 @@ impl FilesPanel {
                     cx,
                 ),
             )
-            .child(self.merge_apply_controls(review.review_id, complete, cx))
+            .child(
+                div()
+                    .id("text-merge-inline-primary-actions")
+                    .px_2()
+                    .flex()
+                    .flex_wrap()
+                    .items_center()
+                    .gap_1()
+                    .when(
+                        self.editor_surface != Some(review::EditorSurface::Merge),
+                        |row| row.child(expand),
+                    )
+                    .child(self.merge_apply_controls(review.review_id, complete, cx)),
+            )
             .test_support()
             .into_any_element()
     }

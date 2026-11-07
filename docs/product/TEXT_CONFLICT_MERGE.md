@@ -47,6 +47,42 @@
 审核。模型输出和 patch 都不能自行批准。此功能不增加第三方 MCP 客户端；KeelShell
 仍向外部智能体提供 MCP 服务，MCP 文件提案保留既有 64 KiB 预算。
 
+## 内联合并审核的紧凑布局
+
+内联三方合并审核使用固定 `220 px` 卡片。卡片正文拥有独立的纵向滚动句柄，底部
+动作栏固定在卡片内部并分成两行：第一行提供完整基线、完整草稿、完整远端、合并全文
+和当前冲突；第二行提供展开审核、采用合并草稿和关闭并保留草稿。进入完整审核表面后，
+展开按钮隐藏，完整版本与保存动作继续使用独立的审核滚动区。
+
+正文滚轮由当前 `review_id` 绑定的处理器消费，按正文句柄的实际最大偏移截断，并阻止
+事件继续推动外层 `file-tools-scroll`。旧卡片在新远端观察替换后仍可能收到 GPUI 保留
+帧事件；旧 `review_id` 会直接失败关闭，不能修改新审核或外层滚动。切换冲突、完整
+版本或冲突选择方案时，正文滚动复位到顶部，避免旧内容的滚动位置污染新内容。
+
+这一布局只改变审核内容的可达性，不改变“采用草稿”和“保存”之间的授权边界。正文
+和动作区都由主题 registry、语义 Palette 与组件 token 驱动，Frost「霜白」、
+Graphite「曜石」、Lavender「雾紫」无需视图按主题 ID 分支。
+
+## Compact inline merge review
+
+Inline three-way merge review uses a bounded `220 px` card. Its body owns an independent
+vertical scroll handle, while the fixed action area is split into two rows: complete base,
+draft, remote, merged result and current conflict on the first row; expand review, adopt
+merged draft and close while retaining the draft on the second row. The expanded review
+surface hides Expand and keeps complete-version inspection separate from its save actions.
+
+The body consumes wheel input through a handler bound to the current `review_id`, clamps the
+body handle to its measured maximum, and stops the event before it moves the outer
+`file-tools-scroll`. GPUI may deliver an event to a retained old frame after a newer remote
+observation replaces it; the old review ID therefore fails closed and cannot mutate the new
+review or the outer scroll. Switching conflicts, complete versions or conflict choices
+resets the body to the top.
+
+This layout changes review reachability while preserving the separate adopt and save
+authorization steps. The body and action area use the theme registry, semantic Palette and
+component tokens; Frost, Graphite and Lavender remain data-driven choices without
+theme-ID branches in the view.
+
 The editor reads complete checked regular UTF-8 files on the captured authenticated
 SSH/SFTP session. Text operations admit at most 1 MiB and 4,096 lines, preserve exact
 CRLF/EOF bytes, and refuse links, directories, NUL and ambiguous metadata.

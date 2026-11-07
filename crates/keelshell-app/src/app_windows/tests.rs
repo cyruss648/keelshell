@@ -6,7 +6,10 @@ fn configuration_write_lease_excludes_competing_window_and_rejects_old_revision(
     let directory = tempfile::tempdir()?;
     let store = StateStore::new(directory.path().join("state.json"));
     let initial = store.save(&AppState::default())?;
-    let gate = Arc::new(Mutex::new(ConfigurationGate::new(initial.clone())));
+    let gate = Arc::new(Mutex::new(ConfigurationGate::new_with_load_error(
+        initial.clone(),
+        None,
+    )));
     let owner = Uuid::new_v4();
     let lease = ConfigurationGate::begin(&gate, owner, initial.snapshot, 0)?;
     assert!(ConfigurationGate::begin(&gate, Uuid::new_v4(), initial.snapshot, 0).is_err());
@@ -28,7 +31,10 @@ fn configuration_write_lease_excludes_competing_window_and_rejects_old_revision(
 fn configuration_abandoned_write_is_unknown_until_explicit_reload()
 -> Result<(), Box<dyn std::error::Error>> {
     let state = AppState::default();
-    let gate = Arc::new(Mutex::new(ConfigurationGate::new(state.clone())));
+    let gate = Arc::new(Mutex::new(ConfigurationGate::new_with_load_error(
+        state.clone(),
+        None,
+    )));
     drop(ConfigurationGate::begin(
         &gate,
         Uuid::new_v4(),
@@ -52,7 +58,10 @@ fn configuration_abandoned_write_is_unknown_until_explicit_reload()
 fn abandoned_reload_releases_writer_and_requires_explicit_recovery()
 -> Result<(), Box<dyn std::error::Error>> {
     let state = AppState::default();
-    let gate = Arc::new(Mutex::new(ConfigurationGate::new(state.clone())));
+    let gate = Arc::new(Mutex::new(ConfigurationGate::new_with_load_error(
+        state.clone(),
+        None,
+    )));
     drop(ConfigurationGate::begin_reload_lease(
         &gate,
         Uuid::new_v4(),
@@ -121,7 +130,10 @@ fn configuration_conflict_never_retries_or_reopens_old_authority()
     let directory = tempfile::tempdir()?;
     let store = StateStore::new(directory.path().join("state.json"));
     let original = store.save(&AppState::default())?;
-    let gate = Arc::new(Mutex::new(ConfigurationGate::new(original.clone())));
+    let gate = Arc::new(Mutex::new(ConfigurationGate::new_with_load_error(
+        original.clone(),
+        None,
+    )));
     let lease = ConfigurationGate::begin(&gate, Uuid::new_v4(), original.snapshot, 0)?;
     let competitor = StateStore::new(store.path().to_owned());
     let mut external = competitor.load()?;
@@ -142,7 +154,10 @@ fn configuration_conflict_never_retries_or_reopens_old_authority()
 fn maintenance_lease_excludes_new_windows_writes_and_reload()
 -> Result<(), Box<dyn std::error::Error>> {
     let state = AppState::default();
-    let gate = Arc::new(Mutex::new(ConfigurationGate::new(state.clone())));
+    let gate = Arc::new(Mutex::new(ConfigurationGate::new_with_load_error(
+        state.clone(),
+        None,
+    )));
     let owner = Uuid::new_v4();
     {
         let mut shared = gate.lock().map_err(|_| "gate poisoned")?;

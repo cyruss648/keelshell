@@ -76,10 +76,6 @@ pub(crate) struct ReloadLease {
 }
 
 impl ConfigurationGate {
-    fn new(state: AppState) -> Self {
-        Self::new_with_load_error(state, None)
-    }
-
     fn new_with_load_error(state: AppState, load_error: Option<String>) -> Self {
         Self {
             state,

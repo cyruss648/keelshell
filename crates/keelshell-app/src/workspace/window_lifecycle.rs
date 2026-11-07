@@ -584,6 +584,7 @@ impl Workspace {
         cx.notify();
     }
 
+    #[cfg(test)]
     pub(super) fn finish_window_cleanup(
         &mut self,
         result: Result<Vec<String>, String>,
@@ -624,7 +625,7 @@ impl Workspace {
             (attempt.is_some()
                 && shared.cleanup_attempt == attempt
                 && shared.cleanup_participants.contains(&self.window_id))
-            .then(|| shared.cleanup_intent)
+            .then_some(shared.cleanup_intent)
             .flatten()
         });
         let intent = intent.unwrap_or(CloseIntent::Window);

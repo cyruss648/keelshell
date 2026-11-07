@@ -849,7 +849,7 @@ async fn inline_merge_card_keeps_review_actions_visible_while_body_scrolls(
     cx: &mut TestAppContext,
 ) {
     let h = Harness::new_with(cx, |cx, session, runtime| {
-        mount_layout_scene(cx, session, runtime, 900., 580., true)
+        mount_layout_scene(cx, session, runtime, 900., 900., true)
     });
     h.idle(cx).await;
     let long_conflict = "line-".to_owned() + &"x".repeat(2400);
@@ -874,15 +874,50 @@ async fn inline_merge_card_keeps_review_actions_visible_while_body_scrolls(
 
     cx.update_window(h.window, |_, window, cx| {
         window.render_frame(cx);
-        scroll_tools_to_end(window, cx);
-        let pane = window.find("files-layout-scene").bounds();
+        reveal_file_control(window, cx, "adopt-text-merge");
         let tools = window.find("file-tools-scroll").bounds();
-        let card = window.find("text-merge-card").bounds();
-        let body = window.find("text-merge-inline-body").bounds();
-        let actions = window.find("text-merge-inline-actions").bounds();
-        assert!(layout_contains(card, tools));
+        let position = point(
+            tools.origin.x + px(2.),
+            tools.origin.y + tools.size.height / 2.,
+        );
+        window.dispatch_event(
+            gpui_kit::MouseMoveEvent {
+                position,
+                ..Default::default()
+            }
+            .to_platform_input(),
+            cx,
+        );
+        window.dispatch_event(
+            gpui_kit::ScrollEvent {
+                position,
+                delta: ScrollDelta::Pixels(point(px(0.), px(120.))),
+                ..Default::default()
+            }
+            .to_platform_input(),
+            cx,
+        );
+        window.render_frame(cx);
+        let pane = window.find("files-layout-scene").bounds();
+        let tools_snapshot = window.find("file-tools-scroll");
+        let tools = tools_snapshot.bounds();
+        let card_snapshot = window.find("text-merge-card");
+        let card = card_snapshot.bounds();
+        let body_snapshot = window.find("text-merge-inline-body");
+        let actions_snapshot = window.find("text-merge-inline-actions");
+        let actions = actions_snapshot.bounds();
+        let tools_offset = h.panel.read(cx).tools_scroll.offset();
+        assert!(
+            body_snapshot.visible(),
+            "inline body must have a visible hit area: body={body_snapshot:?}, card={card_snapshot:?}, actions={actions_snapshot:?}, tools={tools_snapshot:?}, pane={pane:?}, tools_offset={tools_offset:?}"
+        );
+        let body = body_snapshot.bounds();
         assert!(layout_contains(actions, card));
         assert!(layout_contains(actions, pane));
+        assert!(
+            actions.origin.y < tools.bottom() && actions.bottom() <= tools.bottom(),
+            "outer scrolling must keep the inline action tail in the file viewport"
+        );
         assert!(
             body.bottom() <= actions.origin.y,
             "inline review body must end before its fixed action area"
@@ -901,6 +936,9 @@ async fn inline_merge_card_keeps_review_actions_visible_while_body_scrolls(
                 action.visible() && layout_contains(action.bounds(), actions),
                 "{id} must stay in the inline fixed action area"
             );
+            if matches!(id, "adopt-text-merge" | "close-text-merge") {
+                assert!(layout_contains(action.bounds(), tools));
+            }
         }
 
         let before_actions = actions;
@@ -912,22 +950,33 @@ async fn inline_merge_card_keeps_review_actions_visible_while_body_scrolls(
             .checked_option("inline review")
             .body_scroll
             .offset();
-        let position = body.center();
-        for event in [
+        // The body contains a second text viewport for the conflict excerpt.
+        // Target the heading strip so the wheel bubbles to the inline body
+        // handle instead of being consumed by that nested excerpt viewport.
+        let visible_body_top = body.origin.y.max(tools.origin.y);
+        assert!(
+            body.bottom() > visible_body_top,
+            "inline body must intersect the outer file viewport: body={body:?}, tools={tools:?}"
+        );
+        let position = point(body.origin.x + px(4.), visible_body_top + px(1.));
+        window.dispatch_event(
             gpui_kit::MouseMoveEvent {
                 position,
                 ..Default::default()
             }
             .to_platform_input(),
+            cx,
+        );
+        window.render_frame(cx);
+        window.dispatch_event(
             gpui_kit::ScrollEvent {
                 position,
                 delta: ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
                 ..Default::default()
             }
             .to_platform_input(),
-        ] {
-            window.dispatch_event(event, cx);
-        }
+            cx,
+        );
         window.render_frame(cx);
         assert_eq!(
             window.find("text-merge-inline-actions").bounds(),
@@ -943,8 +992,25 @@ async fn inline_merge_card_keeps_review_actions_visible_while_body_scrolls(
                 .body_scroll
                 .offset()
                 .y
-                <= before_body_offset.y,
-            "the inline body owns the wheel when it has scrollable content"
+                < before_body_offset.y,
+            "the inline body owns the wheel when it has scrollable content: before={}, after={}, max={}, position={position:?}, body={body:?}, tools={tools:?}",
+            before_body_offset.y,
+            h.panel
+                .read(cx)
+                .merge_review
+                .as_ref()
+                .checked_option("inline review max offset")
+                .body_scroll
+                .offset()
+                .y,
+            h.panel
+                .read(cx)
+                .merge_review
+                .as_ref()
+                .checked_option("inline review max offset")
+                .body_scroll
+                .max_offset()
+                .y,
         );
     })
     .checked("inline merge body and fixed review action layout");
@@ -984,10 +1050,9 @@ async fn expanded_merge_focus_keeps_hidden_editor_and_manual_inputs_isolated(
             .clone()
     });
     cx.update_window(h.window, |_, window, cx| {
-        reveal_file_control(window, cx, "merge-manual-draft");
         manual.update(cx, |input, cx| input.focus(window, cx));
     })
-    .checked("focus inline manual draft before expanding");
+    .checked("focus retained manual draft before expanding");
     h.click(cx, "expand-text-merge");
     let original = manual.read_with(cx, |input, _| input.value().to_string());
     let directory = h

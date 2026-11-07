@@ -3,6 +3,27 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-08 内联合并审核视口
+
+内联三方合并审核已收口为固定 `220 px` 卡片：正文拥有独立滚动句柄，动作区固定为
+两行，展开、采用和关闭动作保持在正文滚动之外。正文滚轮由带 `review_id` 的处理器
+显式限幅并阻止外层文件工具区移动；冲突切换、方案选择和完整版本切换都会复位正文
+滚动。旧 GPUI 帧 listener 在审核替换后失败关闭，不能改变新审核。
+
+当前定向回归已通过：stale frame `1/1`、conflict merge `27/27`、review viewport
+`12/12`、editor format `13/13`；格式和差异检查通过。随后按共享 target 规则失效并
+重编五个项目包，完整 `python3 scripts/check.py` 退出 `0`：Python `131 run /
+1 skipped`，workspace Rust 测试 `2,435 passed / 23 ignored`，app 为
+`1,113 passed / 2 ignored`，14 项 doctest、依赖策略、严格 workspace Clippy 和
+三个 AI controller 专项全部通过。首次视口回归的失败原因、首轮 Clippy 修复和完整
+门禁证据已保存在[测试记录](testing/records/2026-11-08-inline-merge-review-viewport.md)；
+设计见 [ADR 0121](adr/0121-inline-merge-review-viewport.md)。
+
+本片下一步仍需：固定源码提交并回读 SHA，启动新的独立严格只读复核，构建绑定源码
+SHA 的 macOS exact package，并进行已解锁桌面短验。连续无换行保存、late newer
+draft/readback 组合、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 和
+外部 AI provider 继续保持未验证边界。
+
 ## 2026-11-08 快速操作中心
 
 快速操作中心已完成 Workspace 生产布局和第一批动作接入：纯动作目录提供双语

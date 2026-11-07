@@ -207,7 +207,7 @@ fn aggregate_cleanup_failure_retains_sibling_after_late_success(cx: &mut TestApp
     });
     let attempt = uuid::Uuid::new_v4();
 
-    cx.update_window(first.window, |_, window, cx| {
+    cx.update_window(first.window, |_, _window, cx| {
         first.workspace.update(cx, |view, cx| {
             view.app_windows.update(cx, |shared, _| {
                 shared.quitting = true;
