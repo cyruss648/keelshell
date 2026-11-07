@@ -8,7 +8,8 @@
 ## 2026-11-07 连接身份栏最终候选
 
 本轮实现已完成源码与测试修复，当前候选包含 pane 连接身份栏、恢复状态语义
-修正以及主题 typography token。源码仍保持 UI、core、session、AI 分层：
+修正、主题 typography token 以及 live IPv6 端点显示修复。源码仍保持 UI、core、
+session、AI 分层：
 
 - 每个终端 pane 都显示会话标签、真实 SSH 用户/主机/端口、`SSH / UTF-8`
   和带文字的生命周期状态；
@@ -27,11 +28,22 @@ observer 和 small-stack AI controller 也通过。严格 workspace Clippy、格
 首轮完整门禁中新增测试曾触发 `needless_borrow`，已修复并保留失败事实；当前还
 不能把该候选写成已获独立复核批准。
 
-上一轮固定提交 `2589d3b` 的独立报告提出的三个证据问题已由当前文档提交
-`9d02440` 修复：Hallmark preflight 已指向当前 pane 记录，ADR 计数已同步，
-原生 `package-r3` 已补齐源码提交、构建退出码、manifest/app/MCP hash 和包绑定。
-本轮针对固定 `9d02440` 新开的代码与功能复核任务在有界等待内没有返回可审计正文；
-因此当前状态仍是 `NON_AUTHOR_REVIEW_UNAVAILABLE`，不能把代理启动或超时写成批准。
+IPv6 P2 已由源码提交 `b2f875458e42cf374cb3d388d808e986a415c2cd` 修复：初始连接
+和重连路径统一调用 `jump_host_picker::endpoint`，身份栏显示
+`operator@[2001:db8::8]:2202`；helper 定向测试 1/1，完整工程门禁再次退出 `0`。
+该提交之后的文档更新只记录证据和状态，不改变这次包构建的 Rust 输入。
+
+`package-r3` 仍保留为源码提交 `2589d3b` 的详细人工 GUI 观察包；
+当前源码精确包为 `work/native-cua-20261107/package-r5/KeelShell.app`，manifest
+绑定 `b2f875458e42cf374cb3d388d808e986a415c2cd`，结构检查退出 `0`，并完成了
+当前包的短范围主题/双语 native smoke check。两份包的证据边界在测试记录中分开。
+
+上一轮固定提交 `2589d3b` 的独立报告提出的证据问题已由 `9d02440` 及后续文档
+提交修复：Hallmark preflight 已指向当前 pane 记录，ADR 计数已同步，旧包补齐
+源码提交、构建退出码和 manifest/app/MCP hash。固定 `9d02440` 的旧复核正文曾
+另外指出 IPv6 显示与包 provenance 两项问题；前者已由 `b2f8754` 修复，后者由
+`package-r5` 的精确 manifest 绑定收口。当前 `b2f8754` 仍需新的独立只读复核，
+不能把旧报告或代理启动写成当前提交批准。
 
 完整 app 并行负载下，route/split 夹具曾在 10 秒 UI 就绪等待内超时；当时
 gateway 和 target 都已认证，跳板通道及 SSH 会话仍存活，`connect_route` 仍在
@@ -46,12 +58,13 @@ SSH 生命周期、命令审核和 AI 权限没有改动。session 还曾出现�
 复核，下一步必须固定最新提交重新审查并返回 P0/P1/P2/P3、路径/行号、真实计数、
 限制和 merge recommendation。
 
-macOS 原生包已在已解锁桌面实际观察单 pane、横/纵分屏、合并、关闭面板、三主题、
-双语、主题切换后的身份栏与会话标签、真实 SSH 连接、断开和恢复状态。当前原生
-验收绑定冷清理共享 target 后的
+macOS 原生包的详细人工观察绑定源码提交 `2589d3b` 的
 `work/native-cua-20261107/package-r3/KeelShell.app` 与隔离数据目录
-`work/native-cua-20261107/data-r3`，回环端点为 `hdh@127.0.0.1:22222`；900×580
-调整因 GPUI 无边框窗口 accessibility frame 异常仍未通过。Windows/Linux 桌面、
+`work/native-cua-20261107/data-r3`，回环端点为 `hdh@127.0.0.1:22222`；已观察
+单 pane、横/纵分屏、合并、关闭面板、三主题、双语、主题切换后的身份栏与会话标签、
+真实 SSH 连接、断开和恢复状态。当前源码的 `package-r5` 已完成结构检查和短范围
+主题/双语 smoke check；900×580 调整因 GPUI 无边框窗口 accessibility frame 异常
+仍未通过。Windows/Linux 桌面、
 完整键盘焦点、IME/VoiceOver 矩阵和 Podman 真实联调仍未验证。Headless GPUI
 测试不能代替这些边界。
 

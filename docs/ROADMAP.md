@@ -6,10 +6,10 @@
 ## 2026-11-07 当前交付位置
 
 当前候选已完成 pane 连接身份栏的源码、测试和文档收口准备。连接身份栏覆盖
-真实 SSH 端点、协议/编码、生命周期状态、恢复占位和双语 AX；未保存连接与
-配置缺失分别呈现，主题字体通过 registry typography token 提供。三套内置主题
-Frost、Graphite、Lavender 仍全部可选，新增主题只扩展主题定义，不让业务视图
-按主题 ID 分支。
+真实 SSH 端点、协议/编码、生命周期状态、恢复占位和双语 AX；live IPv6 端点
+已统一以括号包裹主机；未保存连接与配置缺失分别呈现，主题字体通过 registry
+typography token 提供。三套内置主题 Frost、Graphite、Lavender 仍全部可选，
+新增主题只扩展主题定义，不让业务视图按主题 ID 分支。
 
 定向 GPUI 回归与完整工程门禁通过：Python 131/1 skip，app 1079/2 ignored，
 core 197，session 434/16 ignored，workspace integration、MCP、SSH loopback、
@@ -25,12 +25,14 @@ SSH 操作期限结束；gateway、target 和跳板 SSH 会话当时仍存活。
 （129 passed / 1 failed / 4 ignored），精确重跑、四线程重跑和最终 workspace
 门禁通过，失败事实保留在测试记录中。
 
-macOS 原生包 `package-r3` 已完成主题、双语、横/纵分屏、合并、关闭面板、真实
-回环 SSH、连接中断和恢复场景验收；首次 SSH agent 认证失败、随后隔离私钥认证
-成功均已记录。900×580 紧凑窗口因无边框窗口 accessibility frame 异常保持未完成。
-下一步按交付顺序执行：固定最新提交进行严格只读复核，补齐文档门禁，推送分支并
-读回本地/tracking/远端 SHA。Windows/Linux 原生桌面、完整 IME/VoiceOver 和
-Podman 真实联调仍保持开放。
+源码提交 `b2f875458e42cf374cb3d388d808e986a415c2cd` 已通过完整工程门禁并生成
+精确来源绑定的 `package-r5`；旧 `package-r3` 继续承担详细 macOS 主题、双语、
+横/纵分屏、合并、关闭面板、真实回环 SSH、连接中断和恢复场景人工观察。当前
+`package-r5` 已完成结构检查和短范围主题/双语 smoke check。900×580 紧凑窗口因
+无边框窗口 accessibility frame 异常保持未完成。下一步按交付顺序执行：固定
+`b2f8754` 重新进行独立严格只读复核，补齐最终文档门禁，推送分支并读回本地/
+tracking/远端 SHA。Windows/Linux 原生桌面、完整 IME/VoiceOver 和 Podman 真实
+联调仍保持开放。
 
 上一片工作区视觉节奏收口已提交并推送，提交为
 `e3226e7097b72f6927fbc38f05a94a365d8269d7`，本地、tracking 和远端 SHA 一致。
@@ -44,13 +46,15 @@ TerminalView，并补齐中英文、三主题、最小窗口和焦点/AX 回归�
 [ADR 0116](adr/0116-pane-connection-identity-bar.md) 与
 [测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。
 
-当前身份栏的定向回归和完整 `python3 scripts/check.py` 已通过；macOS 原生部分
-验收已完成，最新提交的独立非作者源码复核仍待完成。
+当前身份栏和 IPv6 endpoint 修复的定向回归、完整 `python3 scripts/check.py`、
+`package-r5` 结构检查及短范围 macOS smoke check 已通过；详细 SSH native 观察仍
+归属于旧 `package-r3`，最新源码提交的独立非作者复核仍待完成。
 
-旧固定提交的复核发现已由 `9d02440` 的文档绑定修订关闭；当前针对
-`9d02440` 新开的代码/功能复核任务在有界等待内未返回报告，状态保持
-`NON_AUTHOR_REVIEW_UNAVAILABLE`。该状态不能视为独立批准，后续维护应先补一次
-有可审计正文的固定提交复核，再更新合并建议。
+旧固定提交的证据绑定问题已由 `9d02440` 及后续文档修订关闭；旧复核指出的
+IPv6 live endpoint 问题已由 `b2f8754` 修复，当前包 provenance 已由 `package-r5`
+精确 manifest 绑定。下一步必须固定 `b2f8754` 补一次有可审计正文的代码/功能
+复核，再更新合并建议；旧 `NON_AUTHOR_REVIEW_UNAVAILABLE` 状态不能视为当前
+提交批准。
 
 `e3226e7097b72f6927fbc38f05a94a365d8269d7` 已推送到
 `feature/main-visual-integration-20261106`，本地、tracking 和远端 SHA 一致；

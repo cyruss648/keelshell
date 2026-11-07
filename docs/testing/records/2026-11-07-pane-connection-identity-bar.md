@@ -3,10 +3,10 @@
 - 日期：2026-11-07
 - 工作树：`feature/main-visual-integration-20261106`
 - 范围：`keelshell-app` pane header 与工作区布局
-- 结论：当前源码定向验证与完整工程门禁通过；macOS 原生包已完成主题、语言、
-  分屏、合并、关闭面板、真实回环 SSH、断线和恢复场景的部分验收；当前候选仍
-  待独立源码复核，900×580 紧凑窗口、Windows/Linux 原生桌面和完整辅助技术矩阵
-  保持未完成
+- 结论：当前源码定向验证与完整工程门禁通过；live SSH pane 的 IPv6 端点显示
+  已统一使用带括号格式；macOS 原生包已完成主题、语言、分屏、合并、关闭面板、
+  真实回环 SSH、断线和恢复场景的部分验收；当前候选仍待独立源码复核，
+  900×580 紧凑窗口、Windows/Linux 原生桌面和完整辅助技术矩阵保持未完成
 
 ## 实现摘要
 
@@ -34,6 +34,7 @@
 | `cargo test -p keelshell-app minimum_window_keeps_bilingual_appearance_and_workspace_actions_visible --locked` | 1 passed |
 | `cargo test -p keelshell-app workspace::tests::pane_layout --locked` | 18 passed |
 | `cargo test -p keelshell-app workspace::tests::routes::reconnect --locked` | 8 passed |
+| `cargo test -p keelshell-app jump_host_picker::tests::endpoint_keeps_ipv6_account_and_port_unambiguous --locked` | 1 passed |
 | `cargo fmt --all` | passed |
 | `git diff --check` | passed |
 
@@ -86,10 +87,11 @@ transfer、doctest、readiness、observer、small-stack AI controller、严格 C
 格式、依赖版本策略和差异检查均通过。该次运行包含完整当前 workspace 重新编译，
 不是只读取旧的成功回执；app 测试阶段保留已有 linker warning，但没有失败。
 
-## macOS 原生验收
+## macOS 原生验收（旧人工观察包 `package-r3`）
 
-验收使用当前提交在共享 Cargo target 冷清理后重新构建，并通过项目标准 `.app`
-staging 启动。包绑定如下：
+以下人工观察绑定源码提交 `2589d3b` 的 `package-r3`。它记录了 IPv4 回环场景
+的完整窗口操作；后续 `b2f8754` 只修正 live IPv6 身份显示格式，因此本节不把
+旧人工观察重新归属于当前包。包绑定如下：
 
 - 源码提交：`2589d3b62acc42a1527bbd5bcaca1d09bc32751f`
 - 构建命令：`MACOSX_DEPLOYMENT_TARGET=15.0 cargo build -p keelshell-app -p keelshell-mcp --locked`
@@ -127,13 +129,13 @@ staging 启动。包绑定如下：
    分隔条；合并活动 pane 后保留 SSH 会话，并在底部显示“已合并面板，会话继续
    保持 / Pane merged; sessions stay alive”。
 4. 关闭一个 SSH 面板后，剩余 pane 和会话继续可用。
-5. 停止当前回环 `sshd` 的会话进程后，按目标工作树的绝对 Bundle 路径重新绑定
+5. 停止当前回环 `sshd` 的会话进程后，按目标工作树相对 Bundle 路径重新绑定
    窗口，观察到断开会话仍保留，但分屏和命令执行动作被禁用，连接表单重新可用；
    这是实际断开状态，没有用 headless 结果代替。
 6. 重启同一 `sshd` 夹具、关闭断开标签并重新认证后，界面恢复为已连接，真实终端
    执行 `printf NATIVE_RECOVERED` 并输出 `NATIVE_RECOVERED`。
 
-本次验收全程绑定上述当前工作树的 `package-r3/KeelShell.app` 绝对路径和
+本次验收全程绑定上述工作树相对的 `package-r3/KeelShell.app` 路径和
 `data-r3` 隔离目录，没有把另一份窗口的状态混入本候选证据。窗口尝试调整为
 900×580 时，macOS accessibility 返回 GPUI 无边框窗口异常 frame，截图仍为
 全屏尺寸，因此该尺寸不能写成通过。当前原生证据只覆盖已列出的 macOS 场景；
@@ -144,13 +146,47 @@ Windows/Linux、IME、VoiceOver 和完整键盘矩阵仍需独立目标环境验
 manifest、构建日志和本记录保留作为不可变验收证据；因此上述隔离数据目录是
 运行时归属说明，不是当前仍存在的凭据或运行资源。
 
+## 当前源码与包绑定（`package-r5`）
+
+当前源码提交 `b2f875458e42cf374cb3d388d808e986a415c2cd` 已在共享 Cargo target
+按项目包范围冷清理后重新构建。此次修复把初始连接和重连路径的 endpoint 字符串
+统一改为 `jump_host_picker::endpoint`，因此 IPv6 目标显示为
+`operator@[2001:db8::8]:2202`；连接 authority 和认证目标没有改变。
+
+- target 失效命令：`cargo clean --locked --offline -p keelshell-app -p keelshell-core -p keelshell-session -p keelshell-ai -p keelshell-mcp`
+- target 失效结果：退出码 `0`，`Removed 40554 files, 9.4GiB total`
+- 构建命令：`MACOSX_DEPLOYMENT_TARGET=15.0 KEELSHELL_BUILD_COMMIT=b2f875458e42cf374cb3d388d808e986a415c2cd cargo build -p keelshell-app -p keelshell-mcp --locked`
+- 构建退出码：`0`
+- target：`aarch64-apple-darwin`
+- rustc：`rustc 1.99.1 (58cf8f9c3 2026-10-13)`
+- 当前 Bundle：`work/native-cua-20261107/package-r5/KeelShell.app`
+- 当前 package manifest：`work/native-cua-20261107/package-r5/package-manifest.json`
+- 当前 package manifest SHA-256：`31ea1613a180b9aa3f2d6a6df7f805bce017f5b4d74b13646302c3b113d725ce`
+- 当前 app SHA-256：`2553a21da6e65e76d73fcea59573fb2dc99d503e622c9f8f5ee653bc3f274f50`
+- 当前 MCP SHA-256：`fa49babd8bcd2c5e421de7449153054c8e023949a8b913d0221117515ed2ee41`
+- 当前构建日志：`work/native-cua-20261107/build-b2f8754-fresh.log`
+- 当前构建日志 SHA-256：`8b65f46cb83012d66bb0362777ea8c64e595b4dda29af5ee193e81401dd59b3a`
+- `packaging/inspect_native.py --platform macos --target aarch64-apple-darwin --stage work/native-cua-20261107/package-r5`：退出码 `0`
+
+当前包已通过短范围真实 macOS smoke check：启动了实际 `.app`，打开主题与外观
+对话框，确认 Frost、Graphite、Lavender 三套主题均存在，应用 Graphite 深色变体，
+切换到 English 并返回工作区；随后通过窗口关闭审核结束窗口。该 smoke check
+没有重新执行 package-r3 已覆盖的真实 SSH、分屏、断开和恢复长流程，不能把旧
+人工观察自动升级为 package-r5 的完整 native acceptance。当前包未安装到系统应用
+目录；`package-r4` 曾因错误 provenance 环境变量生成，已在验收前删除，不属于
+有效证据。
+
+`package-r5` 是当前精确源码包；后续文档提交只记录测试和 provenance，不改变
+该包的源码输入。`package-r3` 的详细 GUI 观察、`package-r5` 的当前源码绑定和
+headless 工程门禁分别保持独立。
+
 ## 复核状态与限制
 
 Avicenna 针对旧提交 `d9072ed` 的严格只读复核发现 1 个 P1 和 3 个 P2：
 固定身份栏宽度压缩 pane 标签命中区域、恢复状态覆盖不足、视图写死字体字面量、
 缺失档案与普通未连接状态没有区分。P1 已由 `1e63165` 修复，三个 P2 已在当前
 源码中修复；该旧报告不构成当前候选的独立批准。当前提交还需要一轮固定最新
-源码的严格只读复核，并要求返回 P0/P1/P2/P3、绝对路径/行号、真实测试计数、
+源码的严格只读复核，并要求返回 P0/P1/P2/P3、路径/行号、真实测试计数、
 限制和直接 merge recommendation。
 
 仍未覆盖：

@@ -342,8 +342,12 @@
       "Web sloplint render is not applicable to Rust/GPUI",
       "900x580 native geometry remains unverified because the borderless GPUI frame was not observable"
     ],
-    "sweep": "Cold package-r3 is bound to source2589d3b, aarch64-apple-darwin, package manifest8c164ec8 and app/MCP hashes recorded in the native test record. Documentation-revision gate exited0: Python131/1skip, app1079/2ignored, core197, session434/16ignored, workspace integration, doctests, SSH loopback, transfer, AI readiness/controllers and strict Clippy passed. macOS package-r3 observed three themes, bilingual switching, split left/right, split top/bottom, merge with session retention, closing a pane, real loopback SSH, disconnect state and re-authenticated recovery. Windows/Linux, IME, VoiceOver and full keyboard matrix remain open.",
+    "sweep": "Cold package-r5 is bound to exact source b2f875458e42cf374cb3d388d808e986a415c2cd, aarch64-apple-darwin, package manifest31ea1613 and app/MCP hashes recorded in the native test record. Full gate exited0: Python131/1skip, app1079/2ignored, core197, session434/16ignored, workspace integration, doctests, SSH loopback, transfer, AI readiness/controllers and strict Clippy passed. Package-r5 structure inspection and a short native theme/bilingual smoke check passed. Detailed macOS SSH pane, split, merge, disconnect and recovery observations remain explicitly bound to package-r3/source2589d3b. IPv6 live endpoint formatting is covered by the shared endpoint helper and its regression test. Windows/Linux, IME, VoiceOver and full keyboard matrix remain open.",
     "native_evidence": "docs/testing/records/2026-11-07-pane-connection-identity-bar.md",
-    "finish_review": "SCOPED_MACOS_NATIVE_ACCEPTANCE; independent fixed-commit source review still pending; full native finish remains open"
+    "artifact_source_commit": "b2f875458e42cf374cb3d388d808e986a415c2cd",
+    "artifact_package": "work/native-cua-20261107/package-r5",
+    "historical_native_artifact": "work/native-cua-20261107/package-r3",
+    "target_invalidation": "cargo clean --locked --offline -p keelshell-app -p keelshell-core -p keelshell-session -p keelshell-ai -p keelshell-mcp exited0; Removed40554files/9.4GiB before package-r5 build",
+    "finish_review": "CURRENT_SOURCE_PACKAGE_BOUND; independent fixed-commit source review still pending; detailed SSH native evidence remains scoped to historical package-r3; full native finish remains open"
   }
 ]
