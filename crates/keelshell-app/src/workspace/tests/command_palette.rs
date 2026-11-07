@@ -203,3 +203,33 @@ fn command_palette_card_and_results_fit_the_narrow_modal_surface(cx: &mut TestAp
     })
     .checked("keep command palette content inside the 900 by 580 modal");
 }
+
+#[gpui_kit::test]
+fn command_palette_scrolls_keyboard_selection_into_view_when_results_overflow(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let _panes = attach_remote_panes(&fixture, cx);
+    open_palette(&fixture, cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for _ in 0..11 {
+            window.press("down", cx);
+        }
+        window.render_frame(cx);
+        window.simulate_next_frame(cx);
+        window.render_frame(cx);
+
+        let results = window.find("command-palette-results").bounds();
+        let selected = window.find("command-palette-item-vault-settings").bounds();
+        assert_eq!(fixture.workspace.read(cx).command_palette_selected, 11);
+        assert!(
+            selected.top() >= results.top(),
+            "selected command row should be visible above the results viewport"
+        );
+        assert!(
+            selected.bottom() <= results.bottom(),
+            "selected command row should be visible below the results viewport"
+        );
+    })
+    .checked("keep the keyboard-selected command visible in an overflowing result list");
+}

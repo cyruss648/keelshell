@@ -323,7 +323,7 @@ pub const COMMAND_PALETTE_ITEMS: &[CommandPaletteItem] = &[
         ),
         QUICK_CONNECT_KEYWORDS_ZH,
         QUICK_CONNECT_KEYWORDS_EN,
-        Some(CMD_T),
+        None,
         CommandPaletteContextRequirement::Any,
     ),
     item(
@@ -564,7 +564,12 @@ impl CommandPaletteItem {
         let metadata = [self.description.zh, self.description.en]
             .into_iter()
             .chain(self.keywords_zh.iter().copied())
-            .chain(self.keywords_en.iter().copied());
+            .chain(self.keywords_en.iter().copied())
+            .chain(
+                self.shortcut
+                    .into_iter()
+                    .flat_map(|hint| [hint.macos, hint.other]),
+            );
         metadata
             .filter_map(|field| query.rank(field))
             .next()
@@ -965,6 +970,50 @@ mod tests {
         );
         assert!(!actions(&only).contains(&CommandPaletteAction::PreviousSession));
         assert!(!actions(&only).contains(&CommandPaletteAction::NextSession));
+    }
+
+    #[test]
+    fn quick_connect_does_not_claim_the_connection_manager_shortcut() {
+        let quick_connect = default_items()
+            .iter()
+            .copied()
+            .find(|item| item.action == CommandPaletteAction::QuickConnect)
+            .unwrap_or_else(|| panic!("default palette must register quick connect"));
+        assert_eq!(quick_connect.shortcut, None);
+    }
+
+    #[test]
+    fn shortcut_text_matches_macos_and_other_platform_variants() {
+        let context = CommandPaletteContext {
+            has_session: true,
+            assistant_open: false,
+            can_previous_session: true,
+            can_next_session: true,
+        };
+        assert_eq!(
+            actions(&search("⌘J", context)),
+            vec![CommandPaletteAction::ToggleAssistant]
+        );
+        assert_eq!(
+            actions(&search("Ctrl+Shift+J", context)),
+            vec![CommandPaletteAction::ToggleAssistant]
+        );
+        assert_eq!(
+            actions(&search("⌘⌥←", context)),
+            vec![CommandPaletteAction::PreviousSession]
+        );
+        assert_eq!(
+            actions(&search("Ctrl+Alt+Left", context)),
+            vec![CommandPaletteAction::PreviousSession]
+        );
+        assert_eq!(
+            actions(&search("⌘T", context)),
+            vec![CommandPaletteAction::OpenConnectionManager]
+        );
+        assert_eq!(
+            actions(&search("Ctrl+Shift+T", context)),
+            vec![CommandPaletteAction::OpenConnectionManager]
+        );
     }
 
     #[test]

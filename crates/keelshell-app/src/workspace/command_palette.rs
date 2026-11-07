@@ -1,12 +1,38 @@
 //! Workspace integration for the keyboard-first command palette.
 
+use std::{cell::RefCell, collections::HashMap};
+
 use super::*;
 use crate::command_palette::{
     self as palette_model, CommandPaletteAction, CommandPaletteContext, CommandPaletteLanguage,
 };
+use gpui_kit::ScrollHandle as GpuiScrollHandle;
 use gpui_kit::{assets::IconName, component::Icon};
 
+thread_local! {
+    // ScrollHandle is UI-thread-only. Keep one per native window so the
+    // command palette does not share scroll state with command suggestions.
+    static COMMAND_PALETTE_SCROLLS: RefCell<HashMap<uuid::Uuid, GpuiScrollHandle>> =
+        RefCell::new(HashMap::new());
+}
+
 impl Workspace {
+    fn command_palette_scroll(&self) -> GpuiScrollHandle {
+        COMMAND_PALETTE_SCROLLS.with(|scrolls| {
+            scrolls
+                .borrow_mut()
+                .entry(self.window_id)
+                .or_default()
+                .clone()
+        })
+    }
+
+    fn discard_command_palette_scroll(&self) {
+        COMMAND_PALETTE_SCROLLS.with(|scrolls| {
+            scrolls.borrow_mut().remove(&self.window_id);
+        });
+    }
+
     pub(super) fn open_command_palette(
         &mut self,
         _: &OpenCommandPalette,
@@ -21,6 +47,9 @@ impl Workspace {
         }
         self.show_command_palette = true;
         self.command_palette_selected = 0;
+        let scroll = self.command_palette_scroll();
+        scroll.set_offset(point(px(0.), px(0.)));
+        scroll.scroll_to_item(0);
         self.command_palette_query
             .update(cx, |input, cx| input.set_value("", window, cx));
         self.command_palette_query
@@ -33,6 +62,7 @@ impl Workspace {
     pub(super) fn close_command_palette(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.show_command_palette = false;
         self.command_palette_selected = 0;
+        self.discard_command_palette_scroll();
         self.focus_current_surface(window, cx);
     }
 
@@ -70,6 +100,8 @@ impl Workspace {
         match event.keystroke.key.as_str() {
             "down" if !matches.is_empty() => {
                 self.command_palette_selected = (self.command_palette_selected + 1) % matches.len();
+                self.command_palette_scroll()
+                    .scroll_to_item(self.command_palette_selected);
                 cx.stop_propagation();
                 cx.notify();
             }
@@ -78,6 +110,8 @@ impl Workspace {
                     .command_palette_selected
                     .checked_sub(1)
                     .unwrap_or(matches.len() - 1);
+                self.command_palette_scroll()
+                    .scroll_to_item(self.command_palette_selected);
                 cx.stop_propagation();
                 cx.notify();
             }
@@ -99,6 +133,7 @@ impl Workspace {
     ) {
         self.show_command_palette = false;
         self.command_palette_selected = 0;
+        self.discard_command_palette_scroll();
         match action {
             CommandPaletteAction::OpenConnectionManager => {
                 self.open_connections(&OpenConnections, window, cx);
@@ -191,6 +226,8 @@ impl Workspace {
         let selected = self
             .command_palette_selected
             .min(matches.len().saturating_sub(1));
+        let scroll = self.command_palette_scroll();
+        scroll.scroll_to_item(selected);
         let mut rows = div()
             .id("command-palette-results")
             .test_support()
@@ -198,7 +235,8 @@ impl Workspace {
             .aria_label(t(cx, "可用工作区动作", "Available workspace actions"))
             .flex_1()
             .min_h_0()
-            .overflow_y_scroll();
+            .overflow_y_scroll()
+            .track_scroll(&scroll);
         for (index, matched) in matches.iter().enumerate() {
             let item = matched.item;
             let action = item.action;
