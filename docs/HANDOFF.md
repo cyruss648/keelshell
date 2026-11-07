@@ -42,8 +42,9 @@ SSH 生命周期、命令审核和 AI 权限没有改动。session 还曾出现�
 
 macOS 原生包已在已解锁桌面实际观察单 pane、横/纵分屏、合并、关闭面板、三主题、
 双语、主题切换后的身份栏与会话标签、真实 SSH 连接、断开和恢复状态。当前原生
-验收使用 `work/native-cua-20261107/package/KeelShell.app` 与隔离数据目录
-`work/native-cua-20261107/data`，回环端点为 `hdh@127.0.0.1:22222`；900×580
+验收绑定冷清理共享 target 后的
+`work/native-cua-20261107/package-r3/KeelShell.app` 与隔离数据目录
+`work/native-cua-20261107/data-r3`，回环端点为 `hdh@127.0.0.1:22222`；900×580
 调整因 GPUI 无边框窗口 accessibility frame 异常仍未通过。Windows/Linux 桌面、
 完整键盘焦点、IME/VoiceOver 矩阵和 Podman 真实联调仍未验证。Headless GPUI
 测试不能代替这些边界。

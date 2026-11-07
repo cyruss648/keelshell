@@ -47,7 +47,7 @@ Frost、Graphite、Lavender 共享同一视图实现，业务代码不按主题 
 - 分屏布局、长标题、最小窗口和 SSH 输入不被布局控件消费。
 
 这些检查证明源码布局和状态映射；本轮完整工程门禁也已通过，包括 Python
-131/1 skip、app 1078/2 ignored、core 197、session 130/4 ignored、严格
+131/1 skip、app 1079/2 ignored、core 197、session 434/16 ignored、严格
 workspace Clippy、workspace integration、MCP、SSH loopback、transfer、
 doctest 和 AI controller。它们不能代替 macOS、Windows、Linux 原生桌面截图、
 IME、VoiceOver 和真实 SSH 交互验收。当前原生边界继续记录在 `docs/HANDOFF.md`

@@ -76,15 +76,46 @@ session 完整测试曾有一次 traceroute 夹具抖动：129 passed、1 failed
 `timeout`。该用例精确重跑、4 线程重跑和最终 workspace 4 线程门禁均通过；
 原始失败事实保留，不能回写成从未发生。
 
+## 文档修订后的最终工程门禁
+
+完成当前包绑定、原生结果和独立复核修订后，再次执行
+`python3 scripts/check.py`，实际退出码为 `0`。本次结果为 Python 131 passed /
+1 skipped，`keelshell-app` 1079 passed / 2 ignored，`keelshell-core` 197 passed，
+session 汇总 434 passed / 16 ignored；workspace integration、MCP、SSH loopback、
+transfer、doctest、readiness、observer、small-stack AI controller、严格 Clippy、
+格式、依赖版本策略和差异检查均通过。该次运行包含完整当前 workspace 重新编译，
+不是只读取旧的成功回执；app 测试阶段保留已有 linker warning，但没有失败。
+
 ## macOS 原生验收
 
-验收使用当前提交构建并通过项目标准 `.app` staging 启动：
+验收使用当前提交在共享 Cargo target 冷清理后重新构建，并通过项目标准 `.app`
+staging 启动。包绑定如下：
 
-- Bundle：`work/native-cua-20261107/package/KeelShell.app`
+- 源码提交：`2589d3b62acc42a1527bbd5bcaca1d09bc32751f`
+- 构建命令：`MACOSX_DEPLOYMENT_TARGET=15.0 cargo build -p keelshell-app -p keelshell-mcp --locked`
+- 构建退出码：`0`
+- target：`aarch64-apple-darwin`
+- rustc：`rustc 1.99.1 (58cf8f9c3 2026-10-13)`
+- Bundle：`work/native-cua-20261107/package-r3/KeelShell.app`
 - Bundle ID：`app.keelshell.desktop`
-- 隔离数据目录：`work/native-cua-20261107/data`
+- 隔离数据目录：`work/native-cua-20261107/data-r3`
+- package manifest：`work/native-cua-20261107/package-r3/package-manifest.json`
+- package manifest SHA-256：`8c164ec8fa7531173c85c657643c25013022be502dd95724fa2a5a835171aa70`
+- app SHA-256：`116ed59468a6a6a0d51af23bcf697b4e5903fae4c344c09de9fca664b5616a16`
+- MCP SHA-256：`036806f27b436bd1dfcbf48c22cee057cca40d2e1909bb8c699c3939cc169e09`
+- 构建日志：`work/native-cua-20261107/build-2589d3b-fresh.log`
+- 构建日志 SHA-256：`223b6ae8f27a3b3f350b97da05fc67c2d012d6f3111d8e680cc94e54632b86d7`
+- 包内 `keelshell-app` 与 `keelshell-mcp` 的 SHA-256 与 package manifest
+  的 `files`、`binary_sha256` 和 `mcp_binary_sha256` 一致；因此该包绑定到上述
+  源码提交和冷构建输入。该包未安装到系统应用目录，native acceptance 由本记录
+  单独观察。
 - 回环端点：`hdh@127.0.0.1:22222`
 - 主机指纹：`SHA256:IUwCETnmQsXnbmdoXhaFF6gbFOIkEb9cvSZHl1pt+yA`
+
+首次使用 `SSH agent` 认证时，目标夹具明确返回 `SSH authentication rejected`；
+随后在同一窗口将认证方式切换为包外的隔离夹具私钥
+`work/native-cua-20261107/ssh/client_key`，空口令认证成功。私钥只用于本次
+本地回环验收，没有写入 profile metadata 或测试记录。
 
 在真实 macOS 窗口中完成并观察到：
 
@@ -102,8 +133,8 @@ session 完整测试曾有一次 traceroute 夹具抖动：129 passed、1 failed
 6. 重启同一 `sshd` 夹具、关闭断开标签并重新认证后，界面恢复为已连接，真实终端
    执行 `printf NATIVE_RECOVERED` 并输出 `NATIVE_RECOVERED`。
 
-原生验收使用了桌面上另一份开发包进行并行工作；后续记录均按当前工作树的
-`.app` 绝对路径绑定，避免把另一份窗口的状态混入本候选证据。窗口尝试调整为
+本次验收全程绑定上述当前工作树的 `package-r3/KeelShell.app` 绝对路径和
+`data-r3` 隔离目录，没有把另一份窗口的状态混入本候选证据。窗口尝试调整为
 900×580 时，macOS accessibility 返回 GPUI 无边框窗口异常 frame，截图仍为
 全屏尺寸，因此该尺寸不能写成通过。当前原生证据只覆盖已列出的 macOS 场景；
 Windows/Linux、IME、VoiceOver 和完整键盘矩阵仍需独立目标环境验收。

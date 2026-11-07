@@ -25,11 +25,12 @@ SSH 操作期限结束；gateway、target 和跳板 SSH 会话当时仍存活。
 （129 passed / 1 failed / 4 ignored），精确重跑、四线程重跑和最终 workspace
 门禁通过，失败事实保留在测试记录中。
 
-macOS 原生包已完成主题、双语、横/纵分屏、合并、关闭面板、真实回环 SSH、连接
-中断和恢复场景验收；900×580 紧凑窗口因无边框窗口 accessibility frame 异常
-保持未完成。下一步按交付顺序执行：固定最新提交进行严格只读复核，补齐文档门禁，
-推送分支并读回本地/tracking/远端 SHA。Windows/Linux 原生桌面、完整
-IME/VoiceOver 和 Podman 真实联调仍保持开放。
+macOS 原生包 `package-r3` 已完成主题、双语、横/纵分屏、合并、关闭面板、真实
+回环 SSH、连接中断和恢复场景验收；首次 SSH agent 认证失败、随后隔离私钥认证
+成功均已记录。900×580 紧凑窗口因无边框窗口 accessibility frame 异常保持未完成。
+下一步按交付顺序执行：固定最新提交进行严格只读复核，补齐文档门禁，推送分支并
+读回本地/tracking/远端 SHA。Windows/Linux 原生桌面、完整 IME/VoiceOver 和
+Podman 真实联调仍保持开放。
 
 上一片工作区视觉节奏收口已提交并推送，提交为
 `e3226e7097b72f6927fbc38f05a94a365d8269d7`，本地、tracking 和远端 SHA 一致。

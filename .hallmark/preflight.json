@@ -30,7 +30,7 @@
   "source_status": "pane identity source and route/split fixture stabilization committed; full local gate previously recorded as Python131/1skip, app1079/2ignored, core197, session434/16ignored, strict Clippy and formatting passed",
   "native_status": "PARTIAL_MACOS_NATIVE_ACCEPTANCE; themes, bilingual UI, split/merge/close, loopback SSH, disconnect and recovery observed; 900x580, Windows/Linux, IME, VoiceOver and full keyboard matrix remain open",
   "finish_review": "SCOPED_MACOS_NATIVE_EVIDENCE_WITH_FULL_PLATFORM_HOLD; latest fixed-commit independent review still required",
-  "evidence": "docs/testing/records/2026-11-06-editor-traceroute-native.md",
+  "evidence": "docs/testing/records/2026-11-07-pane-connection-identity-bar.md",
   "baseline_evidence": "docs/testing/records/2026-11-06-resource-knowledge-native.md",
   "baseline_native_scope": "native-r4 approves scoped macOS resource/batch evidence for14cb801e with same-run parent read-only export; known capture-tool P2/failed-inventory-summary P3 remain open in that immutable attempt",
   "web_render": "not_applicable to native Rust/GPUI; actual GPUI and native checks recorded separately"
