@@ -233,6 +233,50 @@ fn connection_actions_distinguish_same_names_by_complete_endpoint_in_both_langua
 }
 
 #[gpui_kit::test]
+fn selected_library_row_exposes_state_and_keeps_primary_action_reachable(cx: &mut TestAppContext) {
+    for width in [1440., 720.] {
+        let profile = Connection::new("已选主机", "selected.invalid", "operator");
+        let id = profile.id;
+        let fixture = mount_sized(cx, vec![profile], width, 720.);
+        cx.update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.show_connections = true;
+                workspace.library_selection.insert(id);
+                cx.notify();
+            });
+            window.render_frame(cx);
+
+            {
+                let manager = window.within("connection-manager-dialog");
+                let row = manager.find(("connection-row", 0_usize));
+                assert_eq!(row.selected(), Some(true), "selected row at width {width}");
+                assert_eq!(
+                    manager.find(("library-select", 0_usize)).label(),
+                    Some("取消选择: 已选主机 · operator@selected.invalid:22")
+                );
+                let connect = manager.find(("connect", 0_usize));
+                assert!(connect.visible());
+                assert!(
+                    contained(connect.bounds(), row.bounds()),
+                    "connect escaped selected row at width {width}: {:?}",
+                    connect.bounds()
+                );
+            }
+
+            window.click(("library-select", 0_usize), cx);
+            window.render_frame(cx);
+            let manager = window.within("connection-manager-dialog");
+            assert_eq!(
+                manager.find(("connection-row", 0_usize)).selected(),
+                Some(false),
+                "deselected row at width {width}"
+            );
+        })
+        .checked("preserve selected-row semantics across wide and compact layouts");
+    }
+}
+
+#[gpui_kit::test]
 fn library_summary_exposes_filter_query_and_selection_in_both_languages(cx: &mut TestAppContext) {
     let mut favorite = Connection::new("收藏主机", "favorite.invalid", "operator");
     favorite.favorite = true;

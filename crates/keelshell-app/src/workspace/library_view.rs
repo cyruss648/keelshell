@@ -546,18 +546,15 @@ impl Workspace {
         let profile = connection.clone();
         let edit = connection.clone();
         let id = connection.id;
+        let selected = self.library_selection.contains(&id);
         let target = format!("{} · {}", connection.name, endpoint(connection));
         let select = Button::new(("library-select", index))
             .ghost()
             .compact()
-            .label(if self.library_selection.contains(&id) {
-                "☑"
-            } else {
-                "☐"
-            })
-            .selected(self.library_selection.contains(&id))
+            .label(if selected { "☑" } else { "☐" })
+            .selected(selected)
             .accessibility_label(action_label(
-                if self.library_selection.contains(&id) {
+                if selected {
                     t(cx, "取消选择", "Deselect")
                 } else {
                     t(cx, "选择连接", "Select profile")
@@ -588,6 +585,7 @@ impl Workspace {
             .test_support()
             .role(Role::Group)
             .aria_label(target.clone())
+            .aria_selected(selected)
             .tooltip(move |window, cx| Tooltip::new(target.clone()).build(window, cx))
             .min_w_0()
             .flex_shrink_0()
@@ -597,10 +595,16 @@ impl Workspace {
             } else {
                 visual.canvas
             }))
+            .hover(|style| style.bg(rgb(visual.surface_hover)))
             .border_b_1()
             .border_color(rgb(visual.border))
             .when(cards, |row| row.flex_col().p_2().gap_2())
-            .when(!cards, |row| row.h(px(38.)).items_center());
+            .when(!cards, |row| row.h(px(38.)).items_center())
+            .when(selected, |row| {
+                row.bg(rgb(visual.surface_active))
+                    .border_l_1()
+                    .border_color(rgb(visual.accent))
+            });
         if cards {
             row = row.child(
                 div()
@@ -719,7 +723,7 @@ impl Workspace {
             actions = actions
                 .child(
                     Button::new(("connect", index))
-                        .ghost()
+                        .primary()
                         .compact()
                         .label(t(cx, "连接", "Connect"))
                         .accessibility_label(action_label(t(cx, "连接", "Connect"), connection))
