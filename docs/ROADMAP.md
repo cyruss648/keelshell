@@ -3,6 +3,24 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-08 工作区窗口切换器
+
+工作区顶部新增主题化的“工作区 N”入口，持续显示当前原生窗口组数量；展开后列出
+每个窗口的序号、会话数和当前主机或“快速连接”空态。点击条目会激活对应真实
+`AnyWindowHandle`，不会迁移 SSH、终端草稿、AI 审核或远程面板。新建窗口继续复用
+既有配置闸门和八窗口上限。
+
+定向 GPUI 回归已通过：窗口入口 `2/2`、全部窗口生命周期 `17/17`、工作区布局
+`8/8`、主题 `9/9`；窗口列表覆盖中文/英文和 Frost「霜白」、Graphite「曜石」、
+Lavender「雾紫」三套主题。`cargo fmt --all -- --check` 与 `git diff --check`
+通过。详细设计见 [ADR 0123](adr/0123-workspace-window-switcher.md)，产品说明见
+[工作区窗口切换器](product/WORKSPACE_WINDOW_SWITCHER.md)，测试证据见
+[测试记录](testing/records/2026-11-08-workspace-window-switcher.md)。
+
+本片的独立只读复核、当前源码精确包、真实 macOS
+多窗口、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 和外部 AI provider
+仍待后续收口。
+
 ## 2026-11-08 本片交付状态
 
 本片已经补齐连续无换行保存与

@@ -1064,6 +1064,31 @@ impl Workspace {
             save_layout,
             assistant,
         ] = self.workspace_session_actions(show_navigation, compact_toolbar, active_id, cx);
+        self.refresh_window_summary(cx);
+        let window_summaries = self.app_windows.read(cx).summaries();
+        let window_count = window_summaries.len();
+        let window_label = if i18n::language(cx) == Language::ZhCn {
+            format!(
+                "{}，{}",
+                t(cx, "工作区窗口", "Workspace windows"),
+                window_count
+            )
+        } else {
+            format!(
+                "{} {}",
+                t(cx, "工作区窗口", "Workspace windows"),
+                window_count
+            )
+        };
+        let window_switcher = Button::new("workspace-window-switcher")
+            .ghost()
+            .compact()
+            .label(format!("{} {}", t(cx, "工作区", "Workspace"), window_count))
+            .accessibility_label(window_label)
+            .selected(self.show_window_switcher)
+            .toggled(self.show_window_switcher)
+            .on_click(cx.listener(|view, _, window, cx| view.toggle_window_switcher(window, cx)))
+            .map(|button| self.retain_modal_button("workspace-window-switcher", button, cx));
         let toolbar_group = |id: &'static str| {
             let group = div()
                 .id(id)
@@ -1125,6 +1150,7 @@ impl Workspace {
             .when(show_brand, |toolbar| {
                 toolbar.child(self.workspace_brand(cx))
             })
+            .child(window_switcher)
             .child(navigation_group)
             .child(context_group)
             .child(toolbar_separator("workspace-pane-divider"))
@@ -1601,6 +1627,9 @@ impl Workspace {
                 active_id,
                 cx,
             ))
+            .when(self.show_window_switcher, |surface| {
+                surface.child(self.workspace_window_switcher(window, cx))
+            })
             .when(self.configuration_invalidated, |surface| {
                 surface.child(
                     div()
@@ -1698,5 +1727,119 @@ impl Workspace {
             .capture_key_up(cx.listener(Self::capture_navigation_key_up))
             .into_any_element();
         self.protect_surface_input(surface, cx)
+    }
+
+    fn workspace_window_switcher(
+        &self,
+        _window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
+        let summaries = self.app_windows.read(cx).summaries();
+        div()
+            .id("workspace-window-switcher-popover")
+            .test_support()
+            .absolute()
+            .top(px(chrome.toolbar_height))
+            .right(px(12.))
+            .w(px(360.))
+            .max_w(relative(0.92))
+            .max_h(relative(0.72))
+            .min_h_0()
+            .occlude()
+            .p_2()
+            .rounded(px(crate::design::components(cx).panel_radius))
+            .shadow_lg()
+            .bg(rgb(visual.surface))
+            .border_1()
+            .border_color(rgb(visual.border))
+            .flex()
+            .flex_col()
+            .gap_2()
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .px_1()
+                    .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child(t(
+                        cx,
+                        "工作区窗口",
+                        "Workspace windows",
+                    )))
+                    .child(
+                        Button::new("close-workspace-window-switcher")
+                            .ghost()
+                            .compact()
+                            .label("×")
+                            .accessibility_label(t(cx, "关闭窗口列表", "Close window list"))
+                            .on_click(cx.listener(|view, _, _, cx| view.close_window_switcher(cx))),
+                    ),
+            )
+            .child(
+                div()
+                    .id("workspace-window-list")
+                    .test_support()
+                    .flex()
+                    .flex_col()
+                    .gap_1()
+                    .overflow_y_scroll()
+                    .children(summaries.iter().enumerate().map(|(index, summary)| {
+                        let is_current = summary.id == self.window_id;
+                        let session_label = if summary.session_count == 0 {
+                            t(cx, "0 个会话", "0 sessions").to_owned()
+                        } else {
+                            format!("{} {}", summary.session_count, t(cx, "个会话", "sessions"))
+                        };
+                        let visible_label =
+                            format!("{} · {} · {}", index + 1, session_label, summary.context);
+                        let accessible_label = if i18n::language(cx) == Language::ZhCn {
+                            format!(
+                                "{} {}：{}，{}",
+                                t(cx, "窗口", "Window"),
+                                index + 1,
+                                session_label,
+                                summary.context
+                            )
+                        } else {
+                            format!(
+                                "{} {}: {}, {}",
+                                t(cx, "窗口", "Window"),
+                                index + 1,
+                                session_label,
+                                summary.context
+                            )
+                        };
+                        Button::new(("workspace-window", index))
+                            .ghost()
+                            .w_full()
+                            .justify_start()
+                            .selected(is_current)
+                            .toggled(is_current)
+                            .label(visible_label)
+                            .accessibility_label(accessible_label)
+                            .on_click(cx.listener({
+                                let id = summary.id;
+                                move |view, _, window, cx| {
+                                    view.activate_workspace_window(id, window, cx)
+                                }
+                            }))
+                    })),
+            )
+            .child(
+                Button::new("workspace-new-window")
+                    .primary()
+                    .w_full()
+                    .label(t(cx, "新建窗口", "New window"))
+                    .disabled(
+                        !self.app_windows.read(cx).can_open() || !self.configuration_current(cx),
+                    )
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        view.close_window_switcher(cx);
+                        view.new_workspace_window(&NewWorkspaceWindow, window, cx);
+                    })),
+            )
+            .into_any_element()
     }
 }

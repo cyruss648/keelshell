@@ -1,5 +1,24 @@
 # Capability ledger
 
+## 2026-11-08: workspace window switcher
+
+The native multi-window foundation now has an in-workspace switcher. The top toolbar
+shows the number of windows in the current shared configuration group; its popover lists
+each window's stable local order, session count, and active host or the Quick connect
+empty state. Selecting a row activates that real native window handle and closes the
+popover. It does not move SSH sessions, terminal drafts, file edits, AI reviews, remote
+panels, or workers between windows.
+
+The New window action reuses the existing configuration gate, maintenance checks and
+eight-window limit. The switcher uses the registry-driven semantic palette, component and
+chrome tokens, and shared view logic for Frost, Graphite and Lavender. Visible labels and
+accessibility labels are bilingual; English accessibility punctuation is localized.
+Focused GPUI regressions cover empty and active windows, activation, all three theme
+families, both languages and a held configuration write. Native macOS multi-window,
+Windows/Linux desktop, multi-display geometry, IME and VoiceOver remain separate
+acceptance boundaries. See [ADR 0123](../adr/0123-workspace-window-switcher.md) and the
+[test record](../testing/records/2026-11-08-workspace-window-switcher.md).
+
 ## 2026-11-07: session, connection library and AI assistant surface candidate
 
 The connection library now exposes its active scope, result count, search summary and

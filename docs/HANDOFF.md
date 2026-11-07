@@ -5,6 +5,28 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-08 当前片：工作区窗口切换器
+
+当前源码候选在既有多窗口生命周期上增加窗口切换器。`AppWindows` 注册表为
+每个窗口保存轻量 `WindowSummary`，`Workspace` 顶部显示窗口数量，展开列表显示
+会话数和当前主机/快速连接空态，点击后激活真实原生窗口。窗口摘要不共享 SSH、
+终端、文件、AI 或远程面板实体；新建窗口仍经过原配置闸门、维护状态检查和八窗口
+上限。
+
+定向结果已通过：窗口入口 `2/2`、全部窗口生命周期 `17/17`、工作区布局 `8/8`、
+主题 `9/9`；新增中文/英文与 Frost「霜白」、Graphite「曜石」、Lavender「雾紫」
+组合回归，英文无障碍标签使用英文标点。设计、产品和测试记录分别见
+[ADR 0123](adr/0123-workspace-window-switcher.md)、
+[工作区窗口切换器](product/WORKSPACE_WINDOW_SWITCHER.md) 和
+[测试记录](testing/records/2026-11-08-workspace-window-switcher.md)。
+
+作者完整工程门禁已完成并退出 `0`（命令会话 `65860`）：Python `131 tests run /
+1 skipped`，workspace Rust 测试、doctest、严格 Clippy、依赖版本策略和 AI
+controller/readiness/small-stack 检查均通过；`__eh_frame section too large` 仅为
+既有链接器 warning。下一步顺序：固定源码提交；以固定 SHA 启动新的独立严格只读
+复核；复核通过后重新构建绑定当前 SHA 的 macOS 包并执行有限原生多窗口观察。旧
+`package-r4` 只代签主题/语言短验，不代签本片新增窗口切换器。
+
 ## 2026-11-08 当前片：编辑器格式与合并迟到读回组合回归收口
 
 本片在源码基线

@@ -30,6 +30,14 @@ pub(crate) struct Registration {
     pub(crate) id: Uuid,
     pub(crate) window: AnyWindowHandle,
     pub(crate) workspace: WeakEntity<Workspace>,
+    pub(crate) summary: Arc<Mutex<WindowSummary>>,
+}
+
+#[derive(Clone)]
+pub(crate) struct WindowSummary {
+    pub(crate) id: Uuid,
+    pub(crate) session_count: usize,
+    pub(crate) context: String,
 }
 
 pub(crate) struct AppWindows {
@@ -315,6 +323,26 @@ impl AppWindows {
 
     pub(crate) fn register(&mut self, registration: Registration) {
         self.windows.push(registration);
+    }
+
+    pub(crate) fn summaries(&self) -> Vec<WindowSummary> {
+        self.windows
+            .iter()
+            .filter_map(|registration| {
+                registration
+                    .summary
+                    .lock()
+                    .ok()
+                    .map(|summary| summary.clone())
+            })
+            .collect()
+    }
+
+    pub(crate) fn window_handle(&self, id: Uuid) -> Option<AnyWindowHandle> {
+        self.windows
+            .iter()
+            .find(|registration| registration.id == id)
+            .map(|registration| registration.window)
     }
 
     pub(crate) fn begin_aggregate_cleanup(&mut self, ids: &[Uuid], intent: CloseIntent) -> Uuid {

@@ -303,6 +303,7 @@ struct NewRemoteTab {
 
 pub struct Workspace {
     app_windows: Entity<crate::app_windows::AppWindows>,
+    window_summary: Arc<std::sync::Mutex<crate::app_windows::WindowSummary>>,
     configuration_gate: Arc<std::sync::Mutex<crate::app_windows::ConfigurationGate>>,
     window_id: uuid::Uuid,
     native_window: AnyWindowHandle,
@@ -347,6 +348,7 @@ pub struct Workspace {
     status: Message,
     show_connections: bool,
     show_quick_connect: bool,
+    show_window_switcher: bool,
     show_command_palette: bool,
     show_appearance: bool,
     library_filter: LibraryFilter,
@@ -489,6 +491,11 @@ impl Workspace {
         let app_windows =
             crate::app_windows::AppWindows::for_store(&store, &state, runtime.clone(), cx);
         let window_id = uuid::Uuid::new_v4();
+        let window_summary = Arc::new(std::sync::Mutex::new(crate::app_windows::WindowSummary {
+            id: window_id,
+            session_count: 0,
+            context: t(cx, "快速连接", "Quick connect").to_owned(),
+        }));
         let configuration_epoch = app_windows
             .read(cx)
             .gate
@@ -500,6 +507,7 @@ impl Workspace {
                 id: window_id,
                 window: window.window_handle(),
                 workspace: workspace_owner,
+                summary: window_summary.clone(),
             })
         });
         let weak = cx.weak_entity();
@@ -897,6 +905,7 @@ impl Workspace {
         let mut workspace = Self {
             configuration_gate: app_windows.read(cx).gate.clone(),
             app_windows,
+            window_summary,
             window_id,
             native_window: window.window_handle(),
             configuration_epoch,
@@ -938,6 +947,7 @@ impl Workspace {
                 }),
             show_connections: false,
             show_quick_connect: false,
+            show_window_switcher: false,
             show_command_palette: false,
             show_appearance: false,
             library_filter: LibraryFilter::All,
@@ -1489,6 +1499,81 @@ impl Workspace {
         if self.state.settings.theme == keelshell_core::Theme::System {
             crate::design::sync_system(appearance, window, cx);
         }
+    }
+
+    pub(crate) fn current_window_summary(&self, cx: &App) -> (usize, String) {
+        let context = self
+            .tabs
+            .get(self.active)
+            .and_then(|tab| self.remote_hosts.get(&tab.entity_id()))
+            .cloned()
+            .unwrap_or_else(|| t(cx, "快速连接", "Quick connect").to_owned());
+        (self.tabs.len(), context)
+    }
+
+    fn refresh_window_summary(&self, cx: &App) {
+        let (session_count, context) = self.current_window_summary(cx);
+        if let Ok(mut summary) = self.window_summary.lock() {
+            summary.session_count = session_count;
+            summary.context = context;
+        }
+    }
+
+    pub(super) fn toggle_window_switcher(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.active_modal().is_some() {
+            return;
+        }
+        self.show_window_switcher = !self.show_window_switcher;
+        if self.show_window_switcher {
+            self.surface_focus.focus(window, cx);
+        }
+        cx.notify();
+    }
+
+    pub(super) fn close_window_switcher(&mut self, cx: &mut Context<Self>) {
+        if self.show_window_switcher {
+            self.show_window_switcher = false;
+            cx.notify();
+        }
+    }
+
+    pub(super) fn activate_workspace_window(
+        &mut self,
+        id: uuid::Uuid,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.show_window_switcher = false;
+        if id == self.window_id {
+            window.activate_window();
+            self.surface_focus.focus(window, cx);
+            cx.notify();
+            return;
+        }
+        let target = self.app_windows.read(cx).window_handle(id);
+        let source = cx.weak_entity();
+        if let Some(target) = target {
+            cx.defer(move |cx| {
+                if target
+                    .update(cx, |_, window, _| window.activate_window())
+                    .is_err()
+                {
+                    let _ = source.update(cx, |view, cx| {
+                        view.status = Message::new(
+                            "目标工作区窗口已关闭或不可用。",
+                            "The selected workspace window is closed or unavailable.",
+                        );
+                        cx.notify();
+                    });
+                }
+            });
+        } else {
+            self.status = Message::new(
+                "目标工作区窗口已关闭或不可用。",
+                "The selected workspace window is closed or unavailable.",
+            );
+        }
+        cx.notify();
     }
 
     fn select_theme(

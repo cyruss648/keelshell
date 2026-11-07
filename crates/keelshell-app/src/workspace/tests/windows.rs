@@ -85,6 +85,110 @@ fn new_window_is_empty_with_distinct_authority_and_shared_service(cx: &mut TestA
 }
 
 #[gpui_kit::test]
+fn workspace_window_entry_shows_empty_and_two_window_statuses_and_activates_target(
+    cx: &mut TestAppContext,
+) {
+    let first = mount(cx, Vec::new());
+    let _panes = attach_remote_panes(&first, cx);
+    let second = open_empty(&first, cx);
+
+    cx.update_window(first.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert_eq!(
+            window.find("workspace-window-switcher").label(),
+            Some("工作区窗口，2")
+        );
+        window.click("workspace-window-switcher", cx);
+        window.render_frame(cx);
+        assert_eq!(
+            window.find(("workspace-window", 0_usize)).label(),
+            Some("窗口 1：2 个会话，fixture-0@example.invalid:22")
+        );
+        assert_eq!(
+            window.find(("workspace-window", 1_usize)).label(),
+            Some("窗口 2：0 个会话，快速连接")
+        );
+        window.click(("workspace-window", 1_usize), cx);
+    })
+    .checked("inspect and activate a workspace from the visible window entry");
+
+    assert_eq!(
+        cx.update(|cx| cx.active_window().map(|window| window.window_id())),
+        Some(second.window.window_id())
+    );
+    assert!(
+        cx.update(|cx| !first.workspace.read(cx).show_window_switcher),
+        "activating a sibling closes the source popover"
+    );
+}
+
+#[gpui_kit::test]
+fn workspace_window_entry_keeps_bilingual_theme_and_gate_semantics(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+
+    for language in [Language::ZhCn, Language::En] {
+        for family in crate::design::registry() {
+            cx.update_window(fixture.window, |_, window, cx| {
+                i18n::set_language(language, cx);
+                let mut settings = fixture.workspace.read(cx).state.settings.clone();
+                settings.theme_family =
+                    keelshell_core::ThemeId::new(family.id).checked("registered theme id");
+                crate::design::apply_settings(&settings, Some(window), cx);
+                window.render_frame(cx);
+                window.click("workspace-window-switcher", cx);
+                window.render_frame(cx);
+
+                assert!(window.find("workspace-window-switcher-popover").visible());
+                assert!(window.find("workspace-window-list").visible());
+                assert!(
+                    window.find("workspace-window-list").bounds().bottom()
+                        <= window.bounds().bottom()
+                );
+                assert_eq!(
+                    window.find("workspace-window-switcher").label(),
+                    Some(if language == Language::ZhCn {
+                        "工作区窗口，1"
+                    } else {
+                        "Workspace windows 1"
+                    })
+                );
+                assert_eq!(
+                    window.find("workspace-new-window").label(),
+                    Some(if language == Language::ZhCn {
+                        "新建窗口"
+                    } else {
+                        "New window"
+                    })
+                );
+                window.click("close-workspace-window-switcher", cx);
+            })
+            .checked("render the workspace window entry in language and theme variants");
+        }
+    }
+
+    let (gate, owner, revision, epoch) = cx.update(|cx| {
+        fixture.workspace.read_with(cx, |view, _| {
+            (
+                view.app_windows.read(cx).gate.clone(),
+                view.window_id,
+                view.state.snapshot,
+                view.configuration_epoch,
+            )
+        })
+    });
+    let lease = crate::app_windows::ConfigurationGate::begin(&gate, owner, revision, epoch)
+        .checked("hold configuration gate for workspace window entry");
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("workspace-window-switcher", cx);
+        window.render_frame(cx);
+        assert_eq!(window.find("workspace-new-window").disabled(), Some(true));
+    })
+    .checked("disable new window while configuration gate is held");
+    lease.cancel_before_dispatch();
+}
+
+#[gpui_kit::test]
 fn new_window_limit_is_eight_and_saved_layout_does_not_restore_in_new_window(
     cx: &mut TestAppContext,
 ) {
