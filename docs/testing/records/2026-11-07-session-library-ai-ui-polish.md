@@ -101,6 +101,37 @@ python3 packaging/inspect_native.py --platform macos --target aarch64-apple-darw
 KeelShell 进程均已关闭。该 smoke 没有运行真实 SSH、完整分屏/恢复长流程、IME、
 VoiceOver 或外部 AI provider。
 
+## 窄栏工作流轨道修正
+
+当前源码随后增加窄栏视觉修正，精确提交为
+`58fd2d248302958675b0652b7bc15b8aee77b580`，父提交为
+`dd6c88b0710bb56ca785eeeb83ee0835a1b77ede`。六个工作流阶段现在以完整阶段项
+换行，分隔符附着在前一个阶段项内；窄面板不再依赖横向滚动才能看到“保存知识”。
+视图仍只使用语义 Palette 和组件 token，审核状态、保存闸门和授权语义没有变化。
+
+本片验证结果：
+
+- `cargo fmt --all`、`git diff --check`：通过；
+- `cargo test -p keelshell-app --locked assistant_workflow_rail_wraps_all_stages_inside_a_narrow_bilingual_panel -- --nocapture --test-threads=1`：1 passed，1086 filtered；
+- `cargo test -p keelshell-app --locked assistant_ -- --test-threads=1`：7 passed，1080 filtered；
+- `cargo clippy -p keelshell-app --locked --bin keelshell-app --no-deps -- -D warnings`：通过；
+- `cargo check -p keelshell-app --locked`：通过；
+- 清理共享项目包后，重新构建 `package-r7` 并执行 `packaging/inspect_native.py`：均退出 0。
+
+`package-r7` manifest 精确绑定 `58fd2d2`，`installed=false`，GUI SHA-256 为
+`f663b1272dc8ff3736a64b7e27f85b72dc13181e048e31cf39402588477cd6b8`，MCP SHA-256
+为 `94eaf83f8bbb23ae4db7cc190c9c06332ddbc19b4bf9246dcdf35f43b3645d8f`。从当前
+包启动后的 macOS 短验确认助手侧栏的六段轨道完整显示为两行，中英文 AX 元素仍
+可读；测试后 package-r7 进程已关闭。
+
+新的独立严格只读复核固定在 `58fd2d248302958675b0652b7bc15b8aee77b580`，未修改
+工作树，结论为 P0/P1/P2/P3 全部 0，merge recommendation 为 `APPROVE`。复核
+核对了 1087 项 app 测试库存，正确限定的窄栏测试、知识审核 footer、知识分类
+footer 和工作区批量知识 footer 合计 4 passed；首次不匹配的无限定过滤器运行
+为 0 passed / 1087 filtered，未被当作验证。复核保留
+`__eh_frame section too large` warning 及 native、IME、VoiceOver、外部 provider、
+Podman、真实 SSH 和共享 target 只读限制。
+
 ## 尚未完成
 
 完整 `python3 scripts/check.py` 已退出 0，包含 Python 131 run / 1 skipped、格式、

@@ -39,6 +39,25 @@ AI 助手侧栏和其 AX 元素可见，运行进程已关闭。Windows/Linux �
 焦点、IME、VoiceOver、当前源码包的长流程、Podman/SSH 真实联调和外部 AI provider
 仍不能由本轮 headless 或短范围 smoke 代签。
 
+## 2026-11-07 AI 助手窄栏工作流修正
+
+在上述初始提交之后，`58fd2d248302958675b0652b7bc15b8aee77b580` 修正了 AI
+助手窄栏工作流轨道：六个阶段以完整阶段项换行，分隔符附着前一个阶段项，
+当前宽度可以直接看到“保存知识”，不再依赖横向滚动。新增 360×760 中英文 GPUI
+布局测试，确认六个阶段均在轨道边界内可见。
+
+该提交的定向验证为窄栏专项 1/1、assistant 专项 7/7、app Clippy 和
+`cargo check -p keelshell-app --locked` 通过；新的独立严格只读复核返回
+P0/P1/P2/P3 均为 0，并建议 `APPROVE`。复核确认 1087 项 app 测试库存，
+知识审核 footer 相关 3 项与窄栏专项合计 4/4 通过；首次不匹配过滤器的
+0/1087 结果没有计入验收。
+
+当前精确源码包为 `work/native-cua-20261107/package-r7/KeelShell.app`，
+manifest 绑定 `58fd2d2`，结构检查退出 0；macOS 短验观察到六段轨道完整换行
+为两行，助手 AX 元素可读，测试进程已关闭。该提交已推送，文档提交完成后仍会
+读回最终 HEAD/tracking/远端 SHA 一致。跨平台原生桌面、完整键盘焦点、
+IME、VoiceOver、Podman/SSH 真实联调和外部 AI provider 仍保持开放。
+
 ## 2026-11-07 连接身份栏最终候选
 
 本轮实现已完成源码与测试修复，当前候选包含 pane 连接身份栏、恢复状态语义

@@ -14,10 +14,11 @@
 问题和知识保存回归各 1/1，`cargo check`、格式和差异检查通过。首轮 AI 回复可达性
 测试失败后补充响应锚点，精确重跑 2/2；Agent 编辑问题曾暴露旧布局滚动，最终在
 render 后按实际几何修复。完整工程门禁 `python3 scripts/check.py` 已退出 0；
-精确提交 `dd6c88b0710bb56ca785eeeb83ee0835a1b77ede` 已推送，独立严格只读复核
-返回 P0/P1/P2/P3 均为 0 并建议 `APPROVE`。当前源码的 `package-r6` 已按共享
+初始精确提交 `dd6c88b0710bb56ca785eeeb83ee0835a1b77ede` 已推送；随后窄栏修正
+`58fd2d248302958675b0652b7bc15b8aee77b580` 也已推送，新的独立严格只读复核
+返回 P0/P1/P2/P3 均为 0 并建议 `APPROVE`。当前源码的 `package-r7` 已按共享
 target 规则重新构建、精确绑定并通过 macOS 静态结构检查；解锁后的短范围 smoke
-确认三套主题均可切换、AI 助手侧栏和 AX 元素可见。完整原生桌面证据仍待执行。设计见
+确认六段工作流完整换行，AI 助手侧栏和 AX 元素可见。完整原生桌面证据仍待执行。设计见
 [ADR 0117](adr/0117-session-navigation-and-assistant-workflow-surface.md)，
 回执见[本轮记录](testing/records/2026-11-07-session-library-ai-ui-polish.md)。
 
