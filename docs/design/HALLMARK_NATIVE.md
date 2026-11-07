@@ -237,5 +237,31 @@ Palette 状态色、边框和组件圆角 token；端点代码字体使用主题
 定向验证见 [ADR 0116](../adr/0116-pane-connection-identity-bar.md) 和
 [测试记录](../testing/records/2026-11-07-pane-connection-identity-bar.md)。当前
 工程门禁已通过，旧提交的只读报告已指导并关闭身份栏点击区域、恢复状态、字体
-字面量和缺失档案语义问题；当前候选仍需最新提交的独立非作者复核，以及原生桌面
-主题/尺寸/IME/VoiceOver 和 Windows/Linux 运行验收。
+字面量和缺失档案语义问题。macOS 原生包已实际观察三套主题、双语、横/纵分屏、
+合并保留会话、关闭面板、真实回环 SSH、断开状态和重新认证恢复；900×580 因
+无边框窗口 accessibility frame 异常保持未验收。当前候选仍需最新提交的独立
+非作者复核，以及 Windows/Linux、IME、VoiceOver 和完整键盘矩阵验收。
+
+## 2026-11-07 Hallmark 原生收口记录
+
+本次按 Hallmark redesign 的 app-screen 分支收口现有 GPUI 工作台：保留现有
+导航、会话、审核、文件和 AI wiring，只把可观察的工作台视觉系统绑定到
+`Palette`、`ComponentTokens`、`ChromeTokens`、`TypographyTokens` 和主题 registry。
+三套主题仍作为用户可选的完整 family，新增主题只需要增加 registry 定义和语义
+token，工作区视图不按主题 ID 分支。
+
+Picks：
+
+- **Redesign** · restyle/polish · 原生远程工作台与 pane header
+- **Before** · 主题与布局已存在，但 pane 身份、分屏命中区域和恢复状态需要统一
+- **Keeps** · 所有现有连接、终端、文件、命令审核、AI 和持久化 wiring
+- **Changed** · 统一身份层级、主题化代码字体、chrome 几何 token、真实状态文字
+  和分屏/合并后的会话归属
+- **Material** · 真实 GPUI 窗口、真实回环 SSH、真实远程目录；没有虚构在线主机、
+  指标、报价或产品截图
+- **Sweep** · `cargo fmt`、严格 Clippy、workspace 测试、GPUI 定向测试和
+  macOS 原生观察；Web render 对原生 Rust/GPUI 标记为 `not_applicable`
+
+原生验收的完整范围、失败事实和未验收边界见
+[2026-11-07 pane 测试记录](../testing/records/2026-11-07-pane-connection-identity-bar.md)；
+该记录不把局部 macOS 证据扩展为完整三平台产品验收。

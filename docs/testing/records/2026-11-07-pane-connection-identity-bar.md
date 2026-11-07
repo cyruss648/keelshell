@@ -3,9 +3,10 @@
 - 日期：2026-11-07
 - 工作树：`feature/main-visual-integration-20261106`
 - 范围：`keelshell-app` pane header 与工作区布局
-- 结论：当前源码定向验证与完整工程门禁通过；route/split 夹具稳定性已在完整
-  app 并行负载下复核；当前候选待独立源码复核，macOS/Windows/Linux 原生桌面
-  验收仍未完成
+- 结论：当前源码定向验证与完整工程门禁通过；macOS 原生包已完成主题、语言、
+  分屏、合并、关闭面板、真实回环 SSH、断线和恢复场景的部分验收；当前候选仍
+  待独立源码复核，900×580 紧凑窗口、Windows/Linux 原生桌面和完整辅助技术矩阵
+  保持未完成
 
 ## 实现摘要
 
@@ -75,6 +76,38 @@ session 完整测试曾有一次 traceroute 夹具抖动：129 passed、1 failed
 `timeout`。该用例精确重跑、4 线程重跑和最终 workspace 4 线程门禁均通过；
 原始失败事实保留，不能回写成从未发生。
 
+## macOS 原生验收
+
+验收使用当前提交构建并通过项目标准 `.app` staging 启动：
+
+- Bundle：`work/native-cua-20261107/package/KeelShell.app`
+- Bundle ID：`app.keelshell.desktop`
+- 隔离数据目录：`work/native-cua-20261107/data`
+- 回环端点：`hdh@127.0.0.1:22222`
+- 主机指纹：`SHA256:IUwCETnmQsXnbmdoXhaFF6gbFOIkEb9cvSZHl1pt+yA`
+
+在真实 macOS 窗口中完成并观察到：
+
+1. 首屏中文工作区、Frost「霜白」、Graphite「曜石」、Lavender「雾紫」主题，
+   中文/English 切换，以及深浅主题表面。
+2. 使用真实回环 OpenSSH 连接并显示远程目录、命令审核区、文件面板、真实终端
+   和底部已连接状态。
+3. 横向分屏后出现两个独立 pane；再对活动 pane 纵向分屏，出现三 pane 和对应
+   分隔条；合并活动 pane 后保留 SSH 会话，并在底部显示“已合并面板，会话继续
+   保持 / Pane merged; sessions stay alive”。
+4. 关闭一个 SSH 面板后，剩余 pane 和会话继续可用。
+5. 停止当前回环 `sshd` 的会话进程后，按目标工作树的绝对 Bundle 路径重新绑定
+   窗口，观察到断开会话仍保留，但分屏和命令执行动作被禁用，连接表单重新可用；
+   这是实际断开状态，没有用 headless 结果代替。
+6. 重启同一 `sshd` 夹具、关闭断开标签并重新认证后，界面恢复为已连接，真实终端
+   执行 `printf NATIVE_RECOVERED` 并输出 `NATIVE_RECOVERED`。
+
+原生验收使用了桌面上另一份开发包进行并行工作；后续记录均按当前工作树的
+`.app` 绝对路径绑定，避免把另一份窗口的状态混入本候选证据。窗口尝试调整为
+900×580 时，macOS accessibility 返回 GPUI 无边框窗口异常 frame，截图仍为
+全屏尺寸，因此该尺寸不能写成通过。当前原生证据只覆盖已列出的 macOS 场景；
+Windows/Linux、IME、VoiceOver 和完整键盘矩阵仍需独立目标环境验收。
+
 ## 复核状态与限制
 
 Avicenna 针对旧提交 `d9072ed` 的严格只读复核发现 1 个 P1 和 3 个 P2：
@@ -86,7 +119,7 @@ Avicenna 针对旧提交 `d9072ed` 的严格只读复核发现 1 个 P1 和 3 �
 
 仍未覆盖：
 
-- macOS 原生主题切换、截图、900×580 紧凑窗口、键盘焦点、IME 和 VoiceOver；
+- macOS 原生 900×580 紧凑窗口、完整键盘焦点、IME 和 VoiceOver；
 - Windows/Linux 原生桌面运行；
 - 真实 SSH 主机和 Podman 联调；
 - 完整的多主题、多尺寸、辅助技术和跨平台原生矩阵。

@@ -40,10 +40,13 @@ SSH 生命周期、命令审核和 AI 权限没有改动。session 还曾出现�
 复核，下一步必须固定最新提交重新审查并返回 P0/P1/P2/P3、路径/行号、真实计数、
 限制和 merge recommendation。
 
-原生收口仍需使用已解锁的 macOS 桌面实际观察单 pane、横/纵分屏、三主题、双语、
-900×580、主题切换后的身份栏与会话标签、键盘焦点/AX 以及真实 SSH 连接中和断开
-状态；Windows/Linux 桌面、IME/VoiceOver 完整矩阵和 Podman 真实联调仍未验证。
-Headless GPUI 测试不能代替这些边界。
+macOS 原生包已在已解锁桌面实际观察单 pane、横/纵分屏、合并、关闭面板、三主题、
+双语、主题切换后的身份栏与会话标签、真实 SSH 连接、断开和恢复状态。当前原生
+验收使用 `work/native-cua-20261107/package/KeelShell.app` 与隔离数据目录
+`work/native-cua-20261107/data`，回环端点为 `hdh@127.0.0.1:22222`；900×580
+调整因 GPUI 无边框窗口 accessibility frame 异常仍未通过。Windows/Linux 桌面、
+完整键盘焦点、IME/VoiceOver 矩阵和 Podman 真实联调仍未验证。Headless GPUI
+测试不能代替这些边界。
 
 源码设计决策和测试证据见
 [ADR 0116](adr/0116-pane-connection-identity-bar.md) 与

@@ -25,10 +25,11 @@ SSH 操作期限结束；gateway、target 和跳板 SSH 会话当时仍存活。
 （129 passed / 1 failed / 4 ignored），精确重跑、四线程重跑和最终 workspace
 门禁通过，失败事实保留在测试记录中。
 
-下一步按交付顺序执行：提交源码与文档、固定最新提交进行严格只读复核、推送
-分支并读回本地/tracking/远端 SHA，然后完成已解锁 macOS 的原生主题/尺寸/分屏/
-连接中断状态验收。Windows/Linux 原生桌面、完整 IME/VoiceOver 和 Podman 真实
-联调仍保持开放。
+macOS 原生包已完成主题、双语、横/纵分屏、合并、关闭面板、真实回环 SSH、连接
+中断和恢复场景验收；900×580 紧凑窗口因无边框窗口 accessibility frame 异常
+保持未完成。下一步按交付顺序执行：固定最新提交进行严格只读复核，补齐文档门禁，
+推送分支并读回本地/tracking/远端 SHA。Windows/Linux 原生桌面、完整
+IME/VoiceOver 和 Podman 真实联调仍保持开放。
 
 上一片工作区视觉节奏收口已提交并推送，提交为
 `e3226e7097b72f6927fbc38f05a94a365d8269d7`，本地、tracking 和远端 SHA 一致。
@@ -42,8 +43,8 @@ TerminalView，并补齐中英文、三主题、最小窗口和焦点/AX 回归�
 [ADR 0116](adr/0116-pane-connection-identity-bar.md) 与
 [测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。
 
-当前身份栏的定向回归和完整 `python3 scripts/check.py` 已通过；新提交的独立
-非作者源码复核和原生桌面验收仍待完成。
+当前身份栏的定向回归和完整 `python3 scripts/check.py` 已通过；macOS 原生部分
+验收已完成，最新提交的独立非作者源码复核仍待完成。
 
 `e3226e7097b72f6927fbc38f05a94a365d8269d7` 已推送到
 `feature/main-visual-integration-20261106`，本地、tracking 和远端 SHA 一致；

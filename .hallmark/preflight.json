@@ -1,34 +1,35 @@
 {
   "version": "2.0.0",
-  "date": "2026-11-06",
+  "date": "2026-11-07",
   "scope": "app",
   "framework": "native GPUI Kit",
   "genre": "modern-minimal",
   "audience": "developers and operators managing remote SSH hosts",
   "tone": "utilitarian",
   "theme": "Frost, Graphite, Lavender through the existing registry",
-  "job": "edit remote UTF-8 text with exact format-preserving save reviews and inspect explicitly reviewed bounded remote Linux routes",
+  "job": "manage real remote SSH workspaces through pane layouts, exact command review, file operations and AI-assisted diagnostics",
   "sources": [
-    "crates/keelshell-app/src/files.rs",
-    "crates/keelshell-app/src/monitor_protocol.rs",
+    "crates/keelshell-app/src/design.rs",
+    "crates/keelshell-app/src/workspace/pane_view.rs",
     "docs/design/HALLMARK_NATIVE.md",
-    "docs/product/REMOTE_TEXT_FORMAT.md"
+    "docs/adr/0116-pane-connection-identity-bar.md",
+    "docs/testing/records/2026-11-07-pane-connection-identity-bar.md"
   ],
   "preserve": [
     "Frost/Graphite/Lavender registry and semantic tokens",
     "current pane/tab/connection review authority",
-    "complete original/candidate content review and fixed confirm/cancel",
+    "command, file, AI and transport ownership boundaries",
     "background transport work and unknown-result isolation"
   ],
   "introduce": [
-    "one-BOM body/format separation and original uniform LF/CRLF insertion policy",
-    "explicit traceroute protocol/family/limits and complete command review",
-    "unknown stars and distinct hop-limit/unreachable/tool-permission outcomes"
+    "pane identity headers with real SSH endpoint, protocol and lifecycle text",
+    "theme-owned chrome and typography tokens with stable split-pane geometry",
+    "explicit macOS native evidence for split, merge, disconnect and recovery"
   ],
-  "base_sha": "fa7c05914e0eefc0f24ab32f8af690bdc50a63ed",
-  "source_status": "editor-r3 and traceroute-r3 source approved; combined543 inputs/21 paths; full-gate-r3 actual0/reaped,2355 ordinary/23ignored,14rustdoc,Python131/1skip;42 new and204 baseline names passed; combined-r3/r4 scoped source/gate/package approvals",
-  "native_status": "PARTIAL_NATIVE_ACCEPTANCE_FULL_NATIVE_HOLD;non-author native-r1 approves limited macOS BOM/CRLF cancel+confirmed save and SSH UI UDPv4/v6 one-hop observations;NR1-P2-01 inline editor footer actions remain partly clipped;merge-adopt/save,late-save,consecutive-zero-newline NOT_RUN",
-  "finish_review": "APPROVE_LIMITED_543_INPUT_BATCH_DELIVERY_WITH_OPEN_P2_AND_EXPLICIT_NATIVE_HOLDS;full native finish remains HOLD;previous scoped approvals retain their original source/package boundaries",
+  "base_sha": "6dadf5081b0f125b96b294efe23d2664e1ebfc0e",
+  "source_status": "pane identity source and route/split fixture stabilization committed; full local gate previously recorded as Python131/1skip, app1079/2ignored, core197, session434/16ignored, strict Clippy and formatting passed",
+  "native_status": "PARTIAL_MACOS_NATIVE_ACCEPTANCE; themes, bilingual UI, split/merge/close, loopback SSH, disconnect and recovery observed; 900x580, Windows/Linux, IME, VoiceOver and full keyboard matrix remain open",
+  "finish_review": "SCOPED_MACOS_NATIVE_EVIDENCE_WITH_FULL_PLATFORM_HOLD; latest fixed-commit independent review still required",
   "evidence": "docs/testing/records/2026-11-06-editor-traceroute-native.md",
   "baseline_evidence": "docs/testing/records/2026-11-06-resource-knowledge-native.md",
   "baseline_native_scope": "native-r4 approves scoped macOS resource/batch evidence for14cb801e with same-run parent read-only export; known capture-tool P2/failed-inventory-summary P3 remain open in that immutable attempt",

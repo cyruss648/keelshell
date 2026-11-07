@@ -310,5 +310,40 @@
         "F24": "Fine border separates dense workspace panes; restrained external shadow separates the prototype from its preview canvas"
       }
     }
+  },
+  {
+    "date": "2026-11-07",
+    "scope": "app",
+    "shape": "existing native SSH workbench with persistent pane identity",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "entry": "pane identity and resilient split workspace",
+    "signature": "every pane exposes the real SSH target and lifecycle state while split and merge keep sessions understandable",
+    "nav": "connections and host monitoring beside the session strip",
+    "footer": "explicit command review, file workspace and connected/disconnected status",
+    "imagery": "real macOS GPUI window, loopback OpenSSH session and remote directory; no fabricated hosts or metrics",
+    "sections": [
+      "global workbench chrome",
+      "connection identity header",
+      "horizontal and vertical panes",
+      "merge and close actions",
+      "disconnect and recovery state"
+    ],
+    "preserve": "existing SSH, terminal, file, AI, review and persistence wiring",
+    "introduce": [
+      "registry-owned ChromeTokens and TypographyTokens",
+      "bilingual endpoint/protocol/lifecycle identity",
+      "scoped native evidence for split, merge, disconnect and recovery"
+    ],
+    "waived": [
+      "Web sloplint render is not applicable to Rust/GPUI",
+      "900x580 native geometry remains unverified because the borderless GPUI frame was not observable"
+    ],
+    "sweep": "Source gate already passed: Python131/1skip, app1079/2ignored, core197, session434/16ignored, workspace integration and strict Clippy passed. macOS native observed three themes, bilingual switching, split left/right, split top/bottom, merge with session retention, closing a pane, real loopback SSH, disconnect state and re-authenticated recovery. Windows/Linux, IME, VoiceOver and full keyboard matrix remain open.",
+    "native_evidence": "docs/testing/records/2026-11-07-pane-connection-identity-bar.md",
+    "finish_review": "SCOPED_MACOS_NATIVE_ACCEPTANCE; independent fixed-commit source review still pending; full native finish remains open"
   }
 ]
