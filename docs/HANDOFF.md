@@ -27,6 +27,12 @@ observer 和 small-stack AI controller 也通过。严格 workspace Clippy、格
 首轮完整门禁中新增测试曾触发 `needless_borrow`，已修复并保留失败事实；当前还
 不能把该候选写成已获独立复核批准。
 
+上一轮固定提交 `2589d3b` 的独立报告提出的三个证据问题已由当前文档提交
+`9d02440` 修复：Hallmark preflight 已指向当前 pane 记录，ADR 计数已同步，
+原生 `package-r3` 已补齐源码提交、构建退出码、manifest/app/MCP hash 和包绑定。
+本轮针对固定 `9d02440` 新开的代码与功能复核任务在有界等待内没有返回可审计正文；
+因此当前状态仍是 `NON_AUTHOR_REVIEW_UNAVAILABLE`，不能把代理启动或超时写成批准。
+
 完整 app 并行负载下，route/split 夹具曾在 10 秒 UI 就绪等待内超时；当时
 gateway 和 target 都已认证，跳板通道及 SSH 会话仍存活，`connect_route` 仍在
 进行。由于生产 SSH 操作期限为 15 秒，测试就绪等待改为有界 20 秒，route
