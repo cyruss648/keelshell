@@ -33,7 +33,8 @@ cargo test -p keelshell-app minimum_window_keeps_bilingual_appearance_and_worksp
 - `git diff --check`：通过
 
 布局测试额外确认：900px 宽度不渲染品牌区，1280px 和 1440px 宽度渲染品牌
-区并保持在工具栏内；审核目标徽章在所有矩阵场景内可见。
+区并保持在工具栏内；1280px 断点使用紧凑动作标签；审核目标徽章在所有矩阵
+场景内可见。
 
 随后执行：
 

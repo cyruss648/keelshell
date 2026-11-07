@@ -2,9 +2,8 @@
 
 ## 范围与结论
 
-本次在独立 worktree
-`/Users/hdh/.codex/worktrees/podman-ssh-integration-20261107/keelshell`
-中完成真实 Podman/OpenSSH 联调。范围只包含测试容器、SSH 认证、命令执行、
+本次在独立 worktree `<podman-ssh-worktree>` 中完成真实 Podman/OpenSSH 联调。
+范围只包含测试容器、SSH 认证、命令执行、
 SFTP 列表与最小文件往返、错误认证以及资源清理；没有修改 Rust 源码、Cargo
 manifest 或锁文件。
 

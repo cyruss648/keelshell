@@ -125,7 +125,11 @@ fn toolbar_groups_keep_action_order_and_accessible_names_at_workbench_widths(
     let fixture = mount_sized(cx, Vec::new(), 1440., 580.);
     let panes = attach_remote_panes(&fixture, cx);
     cx.update_window(fixture.window, |_, window, cx| {
-        for (width, language) in [(1440., Language::ZhCn), (900., Language::En)] {
+        for (width, language) in [
+            (1440., Language::ZhCn),
+            (1280., Language::En),
+            (900., Language::En),
+        ] {
             window.resize(size(px(width), px(580.)));
             window.bounds_changed(cx);
             i18n::set_language(language, cx);
@@ -179,6 +183,30 @@ fn toolbar_groups_keep_action_order_and_accessible_names_at_workbench_widths(
                     "{language:?}/{width}: {id} escapes toolbar"
                 );
             }
+
+            let context = window.find("workspace-session-context").bounds();
+            let context_label = window.find("workspace-session-context-label").bounds();
+            let context_value = window.find("workspace-session-context-value").bounds();
+            assert!(
+                context.size.width >= px(if width <= 1280. { 112. } else { 72. }),
+                "{language:?}/{width}: context width collapsed"
+            );
+            assert!(
+                context_label.size.width >= px(72.),
+                "{language:?}/{width}: context label collapsed"
+            );
+            assert!(
+                context_value.size.width >= px(72.),
+                "{language:?}/{width}: context value collapsed"
+            );
+            assert!(
+                context_label.size.height <= px(20.),
+                "{language:?}/{width}: context label wrapped vertically"
+            );
+            assert!(
+                context_value.size.height <= px(20.),
+                "{language:?}/{width}: context value wrapped vertically"
+            );
 
             let labels = [
                 (

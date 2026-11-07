@@ -773,21 +773,29 @@ impl Workspace {
                     .id("workspace-session-context")
                     .test_support()
                     .flex_1()
+                    .flex_shrink(1.)
                     .min_w_0()
+                    .when(compact_toolbar, |context| context.min_w(px(112.)))
                     .px_2()
                     .flex()
                     .flex_col()
                     .justify_center()
-                    .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
-                        cx,
-                        "远程工作区",
-                        "Remote workspace",
-                    )))
                     .child(
                         div()
-                            .min_w_0()
+                            .id("workspace-session-context-label")
+                            .test_support()
                             .text_xs()
-                            .text_ellipsis()
+                            .truncate()
+                            .text_color(rgb(visual.muted))
+                            .child(t(cx, "远程工作区", "Remote workspace")),
+                    )
+                    .child(
+                        div()
+                            .id("workspace-session-context-value")
+                            .test_support()
+                            .min_w_0()
+                            .truncate()
+                            .text_xs()
                             .text_color(rgb(visual.text))
                             .child(context),
                     )
@@ -1038,6 +1046,7 @@ impl Workspace {
         &self,
         show_navigation: bool,
         compact_toolbar: bool,
+        show_brand: bool,
         active_id: Option<EntityId>,
         cx: &mut Context<Self>,
     ) -> AnyElement {
@@ -1113,7 +1122,7 @@ impl Workspace {
             .items_center()
             .border_b_1()
             .border_color(rgb(visual.border))
-            .when(!compact_toolbar, |toolbar| {
+            .when(show_brand, |toolbar| {
                 toolbar.child(self.workspace_brand(cx))
             })
             .child(navigation_group)
@@ -1466,7 +1475,10 @@ impl Workspace {
                 }
         };
         let active_id = self.tabs.get(self.active).map(Entity::entity_id);
-        let compact_toolbar = viewport.width < px(1280.);
+        // Keep the brand at the wide breakpoint, but use compact action labels
+        // at the breakpoint itself so every group remains inside the toolbar.
+        let compact_toolbar = viewport.width <= px(1280.);
+        let show_brand = viewport.width >= px(1280.);
         // Only reveal after selection or a layout change: continuous renders must
         // not undo a user's manual horizontal scroll through other sessions.
         let update_action = self.update_service.read(cx).action_label(cx);
@@ -1581,7 +1593,13 @@ impl Workspace {
             .on_action(cx.listener(Self::close_workspace_window))
             .on_action(cx.listener(Self::close_tab))
             .on_action(cx.listener(Self::toggle_assistant))
-            .child(self.workspace_toolbar(show_navigation, compact_toolbar, active_id, cx))
+            .child(self.workspace_toolbar(
+                show_navigation,
+                compact_toolbar,
+                show_brand,
+                active_id,
+                cx,
+            ))
             .when(self.configuration_invalidated, |surface| {
                 surface.child(
                     div()
