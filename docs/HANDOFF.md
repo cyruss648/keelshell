@@ -20,11 +20,20 @@
 - pane 标签区域已收紧身份栏宽度，保留分屏标签与关闭动作的点击命中空间。
 
 当前源码定向回归和完整工程门禁均通过：Python 131 passed/1 skipped，
-`keelshell-app` 1078 passed/2 ignored，core 197 passed，session 130 passed/4
+`keelshell-app` 1079 passed/2 ignored，core 197 passed，session 434 passed/16
 ignored；workspace integration、MCP、SSH loopback、transfer、doctest、readiness、
 observer 和 small-stack AI controller 也通过。严格 workspace Clippy、格式和
-差异检查通过。首轮完整门禁中新增测试曾触发 `needless_borrow`，已修复并保留
-失败事实；当前还不能把该候选写成已获独立复核批准。
+差异检查通过。app 单线程与最终并行重跑、session 四线程重跑均达到相同计数。
+首轮完整门禁中新增测试曾触发 `needless_borrow`，已修复并保留失败事实；当前还
+不能把该候选写成已获独立复核批准。
+
+完整 app 并行负载下，route/split 夹具曾在 10 秒 UI 就绪等待内超时；当时
+gateway 和 target 都已认证，跳板通道及 SSH 会话仍存活，`connect_route` 仍在
+进行。由于生产 SSH 操作期限为 15 秒，测试就绪等待改为有界 20 秒，route
+server session 改为有界 120 秒以覆盖完整 split/close 循环。生产 reconnect、
+SSH 生命周期、命令审核和 AI 权限没有改动。session 还曾出现一次 traceroute
+夹具抖动（129 passed/1 failed/4 ignored，`traceroute_hop_limit` 实际得到
+`timeout`）；精确重跑、四线程重跑和最终 workspace 门禁均通过，失败事实已保留。
 
 旧提交 `d9072ed` 的 Avicenna 只读报告发现 1 个 P1 与 3 个 P2；P1 已由
 `1e63165` 修复，三个 P2 已在当前源码中关闭。该旧报告不替代当前提交的独立
@@ -262,7 +271,16 @@ app exit 0 / reaped，sshd -9 / reaped，容器 exit 0；
 已合并分支及时清理；受管建树已两次超时，旧 worktree 的其他任务/primary 保护保持，
 不用 shell 绕过。失败和不可变原件保留。
 
-## 接续顺序
+## 当前候选接续顺序
+
+1. 提交当前源码、测试和文档候选。
+2. 固定新提交启动独立严格只读复核，返回 P0/P1/P2/P3、路径/行号、真实测试计数、
+   限制和 merge recommendation；发现 P1/P2 时修复并重新门禁、重新复核。
+3. 复核通过后推送当前功能分支，读回本地、tracking 和远端 SHA。
+4. 使用已解锁 macOS 桌面完成三主题、900×580、横/纵分屏、连接中断、键盘/AX
+   观察；Windows/Linux 原生和 Podman 真实联调继续分别验收。
+
+## 历史交付顺序（2026-11-06 交接片）
 
 提交与 CI 身份不能在同一提交正文中自引用。执行下列步骤前先读取实时 Git 和
 `work/next-batch-20261106/delivery-r1.json`、`delivery-exec-readback-r1.json`

@@ -6,6 +6,8 @@ use crate::workspace::ToolPanel;
 use keelshell_core::ReconnectPolicy;
 use keelshell_session::{ConnectionEnd, ShellEnd};
 
+const ROUTE_READY_TIMEOUT: Duration = Duration::from_secs(20);
+
 async fn connect_ready(
     fixture: &Fixture,
     route: &RouteFixture,
@@ -24,9 +26,14 @@ async fn authenticate_route(fixture: &Fixture, route: &RouteFixture, cx: &mut Te
 }
 
 async fn ready_terminal(fixture: &Fixture, cx: &mut TestAppContext) -> Entity<TerminalView> {
-    cx.wait_for(fixture.window, Duration::from_secs(10), |_, cx| {
+    // Production route hops use a 15-second SSH deadline. Keep the assertion
+    // bounded, but allow the UI bridge to observe a healthy result under the
+    // full app suite's parallel network load.
+    cx.wait_for(fixture.window, ROUTE_READY_TIMEOUT, |_, cx| {
         let view = fixture.workspace.read(cx);
         !view.saving
+            && !view.connecting
+            && view.connect_route.is_none()
             && view.tabs.first().is_some_and(|terminal| {
                 terminal.read(cx).is_open()
                     && terminal.read(cx).visible_text().contains("TARGET READY")
@@ -97,6 +104,17 @@ async fn split_preserves_the_selected_remote_tool_and_its_existing_panel(cx: &mu
                     window.render_frame(cx);
                     window.click(button, cx);
                 }
+                window.render_frame(cx);
+            })
+            .checked("choose a remote tool through the production controls");
+            cx.wait_for(fixture.window, Duration::from_secs(5), |window, _| {
+                window
+                    .try_find(split)
+                    .is_some_and(|button| button.disabled() != Some(true))
+            })
+            .await;
+            cx.update_window(fixture.window, |_, window, cx| {
+                window.render_frame(cx);
                 let (selected, files, tunnels) = {
                     let view = fixture.workspace.read(cx);
                     let panels = &view.panels[&original_id];
@@ -106,7 +124,11 @@ async fn split_preserves_the_selected_remote_tool_and_its_existing_panel(cx: &mu
                         panels.tunnels.as_ref().map(Entity::entity_id),
                     )
                 };
-                window.render_frame(cx);
+                assert_ne!(
+                    window.find(split).disabled(),
+                    Some(true),
+                    "the actual split control must be enabled before activation"
+                );
                 window.click(split, cx);
                 window.render_frame(cx);
                 let view = fixture.workspace.read(cx);
@@ -125,8 +147,9 @@ async fn split_preserves_the_selected_remote_tool_and_its_existing_panel(cx: &mu
                 assert_eq!(panels.tunnels.as_ref().map(Entity::entity_id), tunnels);
             })
             .checked("split through production controls after choosing a remote tool");
-            cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
-                fixture.workspace.read(cx).tabs.iter().all(|terminal| {
+            cx.wait_for(fixture.window, ROUTE_READY_TIMEOUT, |_, cx| {
+                let view = fixture.workspace.read(cx);
+                view.tabs.iter().all(|terminal| {
                     terminal.read(cx).is_open()
                         && terminal.read(cx).visible_text().contains("TARGET READY")
                 })
@@ -139,6 +162,19 @@ async fn split_preserves_the_selected_remote_tool_and_its_existing_panel(cx: &mu
                 assert_eq!(fixture.workspace.read(cx).tabs.len(), 1);
             })
             .checked("close only the new peer before checking the next tool choice");
+            cx.wait_for(fixture.window, Duration::from_secs(10), |_, cx| {
+                let view = fixture.workspace.read(cx);
+                !view.saving
+                    && !view.connecting
+                    && view.connect_route.is_none()
+                    && view.tabs.first().is_some_and(|terminal| {
+                        terminal.entity_id() == original_id
+                            && terminal.read(cx).is_open()
+                            && terminal.read(cx).end_reason().is_none()
+                            && terminal.read(cx).visible_text().contains("TARGET READY")
+                    })
+            })
+            .await;
         }
     }
     assert!(

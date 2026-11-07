@@ -131,6 +131,10 @@ fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
         assert!(contrast(theme.terminal.foreground, theme.terminal.selection) >= 4.5);
         assert!(contrast(theme.terminal.cursor, theme.terminal.background) >= 3.);
         assert!(!theme.typography.code_font_family.is_empty());
+        assert_ne!(
+            theme.typography.code_font_weight,
+            gpui_kit::FontWeight::THIN
+        );
     }
 }
 
@@ -210,6 +214,7 @@ fn kit_controls_and_custom_views_receive_the_same_family_snapshot(cx: &mut TestA
                 assert_eq!(kit.radius, px(family.components.control_radius));
                 assert_eq!(kit.radius_lg, px(family.components.panel_radius));
                 assert_eq!(chrome(cx), family.chrome);
+                assert_eq!(typography(cx), family.typography);
             }
         }
         let settings = Settings {

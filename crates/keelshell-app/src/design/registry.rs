@@ -48,6 +48,7 @@ pub(super) const FROST: ThemeDefinition = ThemeDefinition {
     },
     typography: TypographyTokens {
         code_font_family: "monospace",
+        code_font_weight: gpui_kit::FontWeight::NORMAL,
     },
     chrome: ChromeTokens {
         toolbar_height: 42.,
@@ -139,6 +140,7 @@ const GRAPHITE: ThemeDefinition = ThemeDefinition {
     },
     typography: TypographyTokens {
         code_font_family: "monospace",
+        code_font_weight: gpui_kit::FontWeight::MEDIUM,
     },
     chrome: ChromeTokens {
         toolbar_height: 42.,
@@ -230,6 +232,7 @@ const LAVENDER: ThemeDefinition = ThemeDefinition {
     },
     typography: TypographyTokens {
         code_font_family: "monospace",
+        code_font_weight: gpui_kit::FontWeight::SEMIBOLD,
     },
     chrome: ChromeTokens {
         toolbar_height: 42.,

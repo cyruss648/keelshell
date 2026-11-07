@@ -33,9 +33,8 @@ async fn valid_eof_cannot_hide_a_genuinely_unanswered_readonly_close() -> Result
         sftp.write("/independent-close/file", b"independent timely EOF")
             .await?;
         let temporary = tempfile::tempdir()?;
-        let local = temporary
-            .path()
-            .join(if directory { "tree" } else { "file" });
+        let local_root = temporary.path().canonicalize()?;
+        let local = local_root.join(if directory { "tree" } else { "file" });
         let queue = sftp.clone().transfer_queue();
         let mut job = if directory {
             queue
@@ -157,7 +156,7 @@ async fn other_download_owners_eof_cannot_renew_unknown_write_or_writable_close(
                 format!("cross-owner fixture empty-file setup close={close_phase}: {error:?}")
             })?;
         let temporary = tempfile::tempdir()?;
-        let source = temporary.path().join("upload");
+        let source = temporary.path().canonicalize()?.join("upload");
         let content = if close_phase {
             b"review close".to_vec()
         } else {

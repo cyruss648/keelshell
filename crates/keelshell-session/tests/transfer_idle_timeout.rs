@@ -34,7 +34,7 @@ async fn acknowledged_queue_upload_outlives_one_idle_interval() -> Result<(), Bo
     let session = SshSession::connect(configured).await?;
     let sftp = Arc::new(session.sftp().await?);
     let root = tempfile::tempdir()?;
-    let source = root.path().join("source");
+    let source = root.path().canonicalize()?.join("source");
     let content = vec![0x69; CONTENT_BYTES];
     tokio::fs::write(&source, &content).await?;
     server.filesystem.set_transfer_write_delay(WRITE_DELAY_MS);
@@ -83,7 +83,7 @@ async fn acknowledged_direct_upload_outlives_one_idle_interval() -> Result<(), B
     let session = SshSession::connect(configured).await?;
     let sftp = session.sftp().await?;
     let root = tempfile::tempdir()?;
-    let source = root.path().join("source");
+    let source = root.path().canonicalize()?.join("source");
     let content = vec![0x79; CONTENT_BYTES];
     tokio::fs::write(&source, &content).await?;
     server.filesystem.set_transfer_write_delay(WRITE_DELAY_MS);
@@ -138,7 +138,7 @@ async fn direct_and_queued_atomic_uploads_progress_past_idle_and_publish_complet
         let sftp = Arc::new(session.sftp().await?);
         sftp.write("/slow-atomic", b"original").await?;
         let local = tempfile::tempdir()?;
-        let source = local.path().join("source");
+        let source = local.path().canonicalize()?.join("source");
         let content = vec![0x19; CONTENT_BYTES];
         tokio::fs::write(&source, &content).await?;
         server.filesystem.set_transfer_write_delay(WRITE_DELAY_MS);
@@ -180,7 +180,7 @@ async fn directory_and_continuation_uploads_use_the_same_progress_idle_clock()
         let session = idle_session(&server).await?;
         let sftp = Arc::new(session.sftp().await?);
         let local = tempfile::tempdir()?;
-        let tree = local.path().join("tree");
+        let tree = local.path().canonicalize()?.join("tree");
         tokio::fs::create_dir(&tree).await?;
         let source = tree.join("file");
         let content = vec![0x59; CONTENT_BYTES];
@@ -241,7 +241,8 @@ async fn slow_acknowledged_download_and_full_resume_validation_outlive_idle()
         sftp.mkdir("/slow-source").await?;
         sftp.write("/slow-source/file", &content).await?;
         let local = tempfile::tempdir()?;
-        let target = local.path().join("file");
+        let local_root = local.path().canonicalize()?;
+        let target = local_root.join("file");
         if mode == 2 {
             tokio::fs::write(&target, &content[..65536]).await?;
         }
@@ -252,7 +253,7 @@ async fn slow_acknowledged_download_and_full_resume_validation_outlive_idle()
         } else {
             None
         };
-        let tree_target = local.path().join("tree");
+        let tree_target = local_root.join("tree");
         let directory = if mode == 3 {
             Some(
                 sftp.plan_directory_transfer(TransferSpec::download("/slow-source", &tree_target))
@@ -327,10 +328,11 @@ async fn pending_write_and_close_timeout_independently_of_another_jobs_acknowled
         let sftp = Arc::new(session.sftp().await?);
         sftp.write("/idle-blocked", b"original").await?;
         let local = tempfile::tempdir()?;
-        let source = local.path().join("source");
+        let local_root = local.path().canonicalize()?;
+        let source = local_root.join("source");
         let content = vec![0x39; CONTENT_BYTES];
         tokio::fs::write(&source, &content).await?;
-        let short = local.path().join("short");
+        let short = local_root.join("short");
         tokio::fs::write(&short, b"fully acknowledged bytes").await?;
         let writes = if !close_phase {
             Some(
@@ -426,7 +428,7 @@ async fn an_unanswered_read_has_a_bounded_known_partial_download() -> Result<(),
     let content = vec![0x29; CONTENT_BYTES];
     sftp.write("/idle-read", &content).await?;
     let local = tempfile::tempdir()?;
-    let target = local.path().join("partial");
+    let target = local.path().canonicalize()?.join("partial");
     let hold = server.filesystem.hold_transfer_reads_after_first()?;
     let queue = sftp.clone().transfer_queue();
     let spec = TransferSpec::download("/idle-read", &target);

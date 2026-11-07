@@ -31,7 +31,7 @@ async fn same_session_side_queries_do_not_extend_pending_write_or_close()
         let sftp = Arc::new(session.sftp().await?);
         sftp.write("/scope-pending", b"original").await?;
         let local = tempfile::tempdir()?;
-        let source = local.path().join("source");
+        let source = local.path().canonicalize()?.join("source");
         let content = if close_phase {
             b"review close".to_vec()
         } else {
@@ -162,7 +162,7 @@ async fn timely_absence_replies_cannot_extend_fixed_admission_budget() -> Result
     let session = SshSession::connect(configured).await?;
     let sftp = session.sftp().await?;
     let local = tempfile::tempdir()?;
-    let source = local.path().join("source");
+    let source = local.path().canonicalize()?.join("source");
     tokio::fs::write(&source, b"no admitted mutation").await?;
     server.filesystem.set_review_missing_realpath(true);
     server.filesystem.start_review_metadata_cadence(350)?;
@@ -205,7 +205,7 @@ async fn malformed_name_cannot_admit_or_complete_a_transfer() -> Result<(), Box<
     let session = SshSession::connect(configured).await?;
     let sftp = session.sftp().await?;
     let local = tempfile::tempdir()?;
-    let source = local.path().join("source");
+    let source = local.path().canonicalize()?.join("source");
     tokio::fs::write(&source, b"malformed metadata control").await?;
     server.filesystem.set_review_empty_realpath(true);
     server.filesystem.start_review_metadata_cadence(0)?;

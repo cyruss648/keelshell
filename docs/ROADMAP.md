@@ -11,11 +11,19 @@
 Frost、Graphite、Lavender 仍全部可选，新增主题只扩展主题定义，不让业务视图
 按主题 ID 分支。
 
-定向 GPUI 回归与完整工程门禁通过：Python 131/1 skip，app 1078/2 ignored，
-core 197，session 130/4 ignored，workspace integration、MCP、SSH loopback、
+定向 GPUI 回归与完整工程门禁通过：Python 131/1 skip，app 1079/2 ignored，
+core 197，session 434/16 ignored，workspace integration、MCP、SSH loopback、
 transfer、doctest、readiness、observer、small-stack AI controller、严格
 workspace Clippy、格式和差异检查均通过。首轮完整门禁曾因新增测试的
 `needless_borrow` 失败，修复后的结果已重新执行并记录。
+
+route/split 夹具在完整 app 并行负载下的首次 10 秒就绪等待曾早于生产 15 秒
+SSH 操作期限结束；gateway、target 和跳板 SSH 会话当时仍存活。当前测试使用
+有界 20 秒 UI 就绪等待，route server session 使用有界 120 秒上限，最终 app
+单线程与并行重跑均为 1079 passed / 2 ignored。session 曾出现一次
+`traceroute_hop_limit` 预期 hop-limit、实际 timeout 的负载抖动
+（129 passed / 1 failed / 4 ignored），精确重跑、四线程重跑和最终 workspace
+门禁通过，失败事实保留在测试记录中。
 
 下一步按交付顺序执行：提交源码与文档、固定最新提交进行严格只读复核、推送
 分支并读回本地/tracking/远端 SHA，然后完成已解锁 macOS 的原生主题/尺寸/分屏/

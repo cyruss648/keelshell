@@ -799,6 +799,7 @@ impl Workspace {
                                     .text_xs()
                                     .text_ellipsis()
                                     .font_family(typography.code_font_family)
+                                    .font_weight(typography.code_font_weight)
                                     .text_color(rgb(visual.text))
                                     .child(endpoint_label),
                             )

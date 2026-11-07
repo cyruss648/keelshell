@@ -41,6 +41,7 @@ pub struct ComponentTokens {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TypographyTokens {
     pub code_font_family: &'static str,
+    pub code_font_weight: gpui_kit::FontWeight,
 }
 
 /// Geometry tokens for the persistent workbench chrome.

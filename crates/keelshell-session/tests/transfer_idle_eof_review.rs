@@ -34,9 +34,8 @@ async fn timely_read_eof_then_timely_readonly_close_complete_downloads()
         let expected = b"independent timely EOF";
         sftp.write("/eof-source/file", expected).await?;
         let temporary = tempfile::tempdir()?;
-        let local = temporary
-            .path()
-            .join(if directory { "tree" } else { "file" });
+        let local_root = temporary.path().canonicalize()?;
+        let local = local_root.join(if directory { "tree" } else { "file" });
         let queue = sftp.clone().transfer_queue();
         let mut job = if directory {
             let plan = sftp
@@ -117,9 +116,8 @@ async fn empty_read_eof_then_timely_readonly_close_complete_downloads() -> Resul
         let expected = b"";
         sftp.write("/eof-source/file", expected).await?;
         let temporary = tempfile::tempdir()?;
-        let local = temporary
-            .path()
-            .join(if directory { "tree" } else { "file" });
+        let local_root = temporary.path().canonicalize()?;
+        let local = local_root.join(if directory { "tree" } else { "file" });
         let queue = sftp.clone().transfer_queue();
         let mut job = if directory {
             let plan = sftp

@@ -35,7 +35,7 @@ async fn timely_readonly_metadata_completes_directory_and_resume_downloads()
         sftp.mkdir("/review-source").await?;
         sftp.write("/review-source/file", expected).await?;
         let local = tempfile::tempdir()?;
-        let destination = local.path().join("destination");
+        let destination = local.path().canonicalize()?.join("destination");
         let queue = sftp.clone().transfer_queue();
         let mut job = match mode {
             0 => {

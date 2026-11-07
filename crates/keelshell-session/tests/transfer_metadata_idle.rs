@@ -116,7 +116,7 @@ async fn queued_download_handles_timely_metadata_and_closes_the_source()
     let sftp = Arc::new(session.sftp().await?);
     sftp.write("/download-metadata", b"complete source").await?;
     let local = tempfile::tempdir()?;
-    let destination = local.path().join("output");
+    let destination = local.path().canonicalize()?.join("output");
     let queue = sftp.clone().transfer_queue();
     let mut job = queue
         .enqueue(TransferSpec::download("/download-metadata", &destination))
@@ -160,7 +160,7 @@ async fn tree_download_metadata_cadence_outlives_idle_with_complete_files()
             .await?;
     }
     let local = tempfile::tempdir()?;
-    let destination = local.path().join("tree");
+    let destination = local.path().canonicalize()?.join("tree");
     let plan = sftp
         .plan_directory_transfer(TransferSpec::download("/tree-metadata", &destination))
         .await?;
@@ -207,7 +207,7 @@ async fn file_and_directory_resume_metadata_cadence_revalidates_and_publishes_co
         sftp.mkdir("/resume-metadata").await?;
         sftp.write("/resume-metadata/file", b"complete ").await?;
         let local = tempfile::tempdir()?;
-        let tree = local.path().join("tree");
+        let tree = local.path().canonicalize()?.join("tree");
         tokio::fs::create_dir(&tree).await?;
         let source = tree.join("file");
         tokio::fs::write(&source, b"complete resumed content").await?;
@@ -260,7 +260,7 @@ async fn timely_metadata_does_not_extend_fixed_pre_admission_deadline() -> Resul
     sftp.write_atomic("/admission-metadata", b"original")
         .await?;
     let local = tempfile::tempdir()?;
-    let source = local.path().join("source");
+    let source = local.path().canonicalize()?.join("source");
     tokio::fs::write(&source, b"replacement").await?;
     server.filesystem.metadata_cadence.start(CADENCE_MS)?;
     let began = tokio::time::Instant::now();
@@ -304,8 +304,9 @@ async fn held_readonly_close_is_bounded_despite_another_owners_confirmed_activit
     sftp.write_atomic("/held-readonly", b"complete download")
         .await?;
     let local = tempfile::tempdir()?;
-    let destination = local.path().join("output");
-    let peer_source = local.path().join("peer");
+    let local_root = local.path().canonicalize()?;
+    let destination = local_root.join("output");
+    let peer_source = local_root.join("peer");
     tokio::fs::write(&peer_source, b"peer progress").await?;
     let hold = server
         .filesystem

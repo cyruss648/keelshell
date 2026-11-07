@@ -27,7 +27,7 @@ async fn successful_metadata_cadence_renews_direct_atomic_upload_idle() -> Resul
     let sftp = session.sftp().await?;
     sftp.write_atomic("/metadata-cadence", b"original").await?;
     let local = tempfile::tempdir()?;
-    let source = local.path().join("source");
+    let source = local.path().canonicalize()?.join("source");
     let expected = b"independent timely metadata";
     tokio::fs::write(&source, expected).await?;
     server.filesystem.start_review_metadata_cadence(350)?;
@@ -71,7 +71,7 @@ async fn undelayed_atomic_publication_control_has_complete_bytes() -> Result<(),
     let sftp = session.sftp().await?;
     sftp.write_atomic("/metadata-cadence", b"original").await?;
     let local = tempfile::tempdir()?;
-    let source = local.path().join("source");
+    let source = local.path().canonicalize()?.join("source");
     let expected = b"independent timely metadata";
     tokio::fs::write(&source, expected).await?;
     server.filesystem.start_review_metadata_cadence(0)?;

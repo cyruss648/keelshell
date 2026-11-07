@@ -210,7 +210,12 @@ fn listen(
                         let _alive = alive;
                         let peer = Peer { state, target, channels: HashMap::new(), jobs: JoinSet::new() };
                         if let Ok(session) = server::run_stream(config, stream, peer).await {
-                            let _ = tokio::time::timeout(Duration::from_secs(30), session).await;
+                            // The full app suite can spend more than thirty wall-clock
+                            // seconds in this route's repeated split/close loop while
+                            // other real SSH fixtures are active. Keep the fixture
+                            // bounded, but do not let load turn a healthy shared
+                            // SshSession into a false reconnect signal.
+                            let _ = tokio::time::timeout(Duration::from_secs(120), session).await;
                         }
                     });
                 }

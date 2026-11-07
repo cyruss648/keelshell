@@ -126,6 +126,65 @@ fn split_panes_keep_their_connection_identity_and_bilingual_ax_labels(cx: &mut T
     no_writes(&panes);
 }
 
+#[gpui_kit::test]
+fn compact_split_tabs_keep_hit_targets_after_the_identity_bar(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes = attach_count(&fixture, 4, cx);
+    let ids = arrange(
+        &fixture,
+        &panes,
+        &[
+            (0, 1, SplitAxis::Horizontal),
+            (1, 2, SplitAxis::Vertical),
+            (2, 3, SplitAxis::Horizontal),
+        ],
+        0,
+        cx,
+    );
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        for (index, pane) in panes.iter().enumerate() {
+            pane.terminal.update(cx, |terminal, cx| {
+                terminal.title =
+                    format!("超长紧凑分屏标签-{index}-production-readonly@example.invalid");
+                cx.notify();
+            });
+        }
+        redraw(window, cx);
+        window.click("collapse-pane", cx);
+        redraw(window, cx);
+
+        let workspace = fixture.workspace.read(cx);
+        let destination = owner(workspace, ids[1]);
+        let tabs = window.find(pane_id("pane-tabs", destination));
+        let second_tab = window.find(("pane-tab", ids[1]));
+        assert!(tabs.visible());
+        assert!(second_tab.visible());
+        assert!(
+            second_tab.bounds().size.width > px(0.) && second_tab.bounds().size.height > px(0.),
+            "compact split tab must retain a positive hit target: {:?}",
+            second_tab.bounds()
+        );
+        inside(second_tab.bounds(), tabs.bounds());
+
+        window.click(("pane-tab", ids[1]), cx);
+        redraw(window, cx);
+        assert_eq!(
+            fixture.workspace.read(cx).session_panes.active_session(),
+            Some(ids[1])
+        );
+        assert!(
+            panes[1]
+                .terminal
+                .read(cx)
+                .focus_handle(cx)
+                .is_focused(window)
+        );
+    })
+    .checked("retain and activate a pane tab in a compact split header");
+    no_writes(&panes);
+}
+
 fn owner(workspace: &Workspace, key: EntityId) -> PaneNodeId {
     workspace
         .session_panes
