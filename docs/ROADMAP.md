@@ -3,6 +3,22 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-07 主题选择器可见性与交互回归
+
+主题选择器已完成一片可验收的视觉和布局修复：主题卡片目录独立滚动，明暗模式
+控制固定在弹窗可见区，三套内置主题 Frost「霜白」、Graphite「曜石」、
+Lavender「雾紫」均可选择。预览和按钮继续由主题 registry 与语义 token 驱动，
+以后新增主题只扩展注册定义，不增加业务视图分支。
+
+主题模块定向回归为 9/9，磁盘监控主题联动为 1/1，格式、差异检查和应用严格
+Clippy 通过。完整 `python3 scripts/check.py` 退出 0，Python 为 131 run / 1
+skipped，完整 app 测试为 1088 passed / 2 ignored；其余 workspace tests、
+doctests、依赖策略和三组 AI controller 也通过。详细证据见
+[主题选择器记录](testing/records/2026-11-07-theme-picker-layout.md)。
+
+本片仍不代签 macOS/Windows/Linux 原生窗口、900×580 accessibility frame、
+IME、VoiceOver、安装包和真实外部 provider；这些范围继续按平台记录单独验收。
+
 ## 2026-11-07 Reef / reef-template 参考边界
 
 状态：**文档切片已完成，可独立合并**。

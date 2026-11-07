@@ -1,7 +1,7 @@
 //! Registry-driven native theme selection, using the existing serialized save path.
 
 use super::*;
-use crate::design::{self, ThemeDefinition};
+use crate::design::{self, Palette, ThemeDefinition};
 use gpui_kit::base::Selectable;
 use keelshell_core::Theme;
 use modal_scope::ModalKind;
@@ -117,17 +117,14 @@ impl Workspace {
                                     .items_center()
                                     .gap_2()
                                     .child(
-                                        div()
-                                            .w(px(8.))
-                                            .h(px(8.))
-                                            .rounded_full()
-                                            .bg(rgb(p.accent)),
+                                        div().w(px(8.)).h(px(8.)).rounded_full().bg(rgb(p.accent)),
                                     )
                                     .child(
-                                        div()
-                                            .text_xl()
-                                            .font_weight(FontWeight::SEMIBOLD)
-                                            .child(t(cx, "主题与外观", "Themes and appearance")),
+                                        div().text_xl().font_weight(FontWeight::SEMIBOLD).child(t(
+                                            cx,
+                                            "主题与外观",
+                                            "Themes and appearance",
+                                        )),
                                     )
                                     .child(
                                         div()
@@ -154,6 +151,7 @@ impl Workspace {
                     .child(
                         div()
                             .id("theme-catalog-scroll")
+                            .flex_1()
                             .min_h_0()
                             .overflow_y_scroll()
                             .px_5()
@@ -167,18 +165,18 @@ impl Workspace {
                                     .items_center()
                                     .gap_2()
                                     .child(
-                                        div()
-                                            .text_sm()
-                                            .font_weight(FontWeight::SEMIBOLD)
-                                            .child(t(cx, "主题家族", "Theme families")),
+                                        div().text_sm().font_weight(FontWeight::SEMIBOLD).child(t(
+                                            cx,
+                                            "主题家族",
+                                            "Theme families",
+                                        )),
                                     )
                                     .child(div().flex_1().h(px(1.)).bg(rgb(p.border)))
-                                    .child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(rgb(p.muted))
-                                            .child(t(cx, "选择后立即保存", "Saved when selected")),
-                                    ),
+                                    .child(div().text_xs().text_color(rgb(p.muted)).child(t(
+                                        cx,
+                                        "选择后立即保存",
+                                        "Saved when selected",
+                                    ))),
                             )
                             .child(
                                 div().flex().flex_wrap().gap_3().children(
@@ -186,62 +184,9 @@ impl Workspace {
                                         .iter()
                                         .map(|theme| self.theme_card(theme, cx)),
                                 ),
-                            )
-                            .child(
-                                div()
-                                    .id("theme-appearance-section")
-                                    .test_support()
-                                    .p_3()
-                                    .rounded(px(design::components(cx).panel_radius))
-                                    .border_1()
-                                    .border_color(rgb(p.border))
-                                    .bg(rgb(p.canvas))
-                                    .flex()
-                                    .items_center()
-                                    .gap_3()
-                                    .child(
-                                        div()
-                                            .flex_1()
-                                            .flex()
-                                            .flex_col()
-                                            .gap_1()
-                                            .child(t(cx, "明暗模式", "Appearance"))
-                                            .child(
-                                                div()
-                                                    .text_xs()
-                                                    .text_color(rgb(p.muted))
-                                                    .child(t(
-                                                        cx,
-                                                        "三套主题均支持浅色、深色和跟随系统。",
-                                                        "Every family supports light, dark and system modes.",
-                                                    )),
-                                            ),
-                                    )
-                                    .children([
-                                        (keelshell_core::Theme::System, "theme-system", "跟随系统", "System"),
-                                        (keelshell_core::Theme::Light, "theme-light", "浅色", "Light"),
-                                        (keelshell_core::Theme::Dark, "theme-dark", "深色", "Dark"),
-                                    ].into_iter().map(|(mode, id, zh, en)| {
-                                        Button::new(id)
-                                            .label(t(cx, zh, en))
-                                            .selected(self.state.settings.theme == mode)
-                                            .disabled(busy)
-                                            .on_click(cx.listener(move |view, _, window, cx| {
-                                                view.select_theme(mode, window, cx)
-                                            }))
-                                    })),
-                            )
-                            .when(
-                                !design::registry().iter().any(|theme| theme.id == self.state.settings.theme_family.as_str()),
-                                |body| body.child(
-                                    div().text_sm().text_color(rgb(p.warning)).child(t(
-                                        cx,
-                                        "已保存的主题暂不可用，当前显示霜白。选择新主题后才会覆盖原偏好。",
-                                        "The saved family is unavailable. Frost is shown until you choose a replacement.",
-                                    )),
-                                ),
                             ),
                     )
+                    .child(self.appearance_mode_section(busy, p, cx))
                     .child(
                         div()
                             .flex_shrink_0()
@@ -272,6 +217,83 @@ impl Workspace {
                                     })),
                             ),
                     ),
+            )
+            .into_any_element()
+    }
+
+    fn appearance_mode_section(
+        &self,
+        busy: bool,
+        p: Palette,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        div()
+            .id("theme-appearance-section")
+            .test_support()
+            .flex_shrink_0()
+            .mx_5()
+            .mb_4()
+            .p_3()
+            .rounded(px(design::components(cx).panel_radius))
+            .border_1()
+            .border_color(rgb(p.border))
+            .bg(rgb(p.canvas))
+            .flex()
+            .items_center()
+            .gap_3()
+            .child(
+                div()
+                    .flex_1()
+                    .flex()
+                    .flex_col()
+                    .gap_1()
+                    .child(t(cx, "明暗模式", "Appearance"))
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(rgb(p.muted))
+                            .child(t(
+                                cx,
+                                "三套主题均支持浅色、深色和跟随系统。",
+                                "Every family supports light, dark and system modes.",
+                            )),
+                    ),
+            )
+            .children(
+                [
+                    (
+                        keelshell_core::Theme::System,
+                        "theme-system",
+                        "跟随系统",
+                        "System",
+                    ),
+                    (keelshell_core::Theme::Light, "theme-light", "浅色", "Light"),
+                    (keelshell_core::Theme::Dark, "theme-dark", "深色", "Dark"),
+                ]
+                .into_iter()
+                .map(|(mode, id, zh, en)| {
+                    Button::new(id)
+                        .label(t(cx, zh, en))
+                        .selected(self.state.settings.theme == mode)
+                        .disabled(busy)
+                        .on_click(cx.listener(move |view, _, window, cx| {
+                            view.select_theme(mode, window, cx)
+                        }))
+                }),
+            )
+            .when(
+                !design::registry()
+                    .iter()
+                    .any(|theme| theme.id == self.state.settings.theme_family.as_str()),
+                |body| {
+                    body.child(
+                        div().text_sm().text_color(rgb(p.warning)).child(t(
+                            cx,
+                            "已保存的主题暂不可用，当前显示霜白。选择新主题后才会覆盖原偏好。",
+                            "The saved family is unavailable. Frost is shown until you choose a replacement.",
+                        )),
+                    )
+                },
             )
             .into_any_element()
     }
@@ -537,23 +559,15 @@ impl Workspace {
                     }),
             )
             .child(
-                div()
-                    .id(format!("theme-card-action-{}", theme.id))
-                    .test_support()
-                    .pt_1()
-                    .border_t_1()
-                    .border_color(rgb(p.border))
-                    .child(
-                        Button::new(SharedString::from(format!("theme-family-{}", theme.id)))
-                            .w_full()
-                            .label(action_label)
-                            .accessibility_label(accessibility_label)
-                            .selected(state.recommended_preset_applied)
-                            .disabled(self.saving || self.state_reloading)
-                            .on_click(cx.listener(move |view, _, window, cx| {
-                                view.select_theme_family(theme, window, cx)
-                            })),
-                    ),
+                Button::new(SharedString::from(format!("theme-family-{}", theme.id)))
+                    .w_full()
+                    .label(action_label)
+                    .accessibility_label(accessibility_label)
+                    .selected(state.recommended_preset_applied)
+                    .disabled(self.saving || self.state_reloading)
+                    .on_click(cx.listener(move |view, _, window, cx| {
+                        view.select_theme_family(theme, window, cx)
+                    })),
             )
             .into_any_element()
     }

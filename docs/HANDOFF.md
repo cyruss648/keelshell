@@ -5,6 +5,27 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 主题选择器布局与可见性修复
+
+本片继续推进用户选定的三套主题方向：Frost「霜白」、Graphite「曜石」、
+Lavender「雾紫」全部保留在项目中，并通过 registry、语义 Palette、组件形状、
+Chrome/Typography token 解耦。主题卡片目录现在拥有独立滚动区域，明暗模式控制
+固定在弹窗可见动作区；主题卡片的工作台预览和真实生产按钮均保持注册表驱动，
+后续新增主题只需添加主题定义和 token。
+
+定向验证已通过：主题模块 9/9、磁盘监控主题联动 1/1、格式、差异检查和应用
+严格 Clippy 均通过。随后 `python3 scripts/check.py` 退出 0，Python
+`131 run / 1 skipped`，完整 app 测试为 `1088 passed / 2 ignored`，workspace
+其余测试、doctests、依赖版本策略和 readiness/observer/small-stack AI
+controller 均通过。既有 `__eh_frame section too large` linker warning 保留，
+不影响退出码。详细证据见[主题选择器记录](testing/records/2026-11-07-theme-picker-layout.md)。
+
+本片当前待执行交付顺序仍是：固定源码提交后启动新的独立严格只读复核，按
+P0/P1/P2/P3 返回路径/行号、真实测试计数、限制和 merge recommendation；复核
+通过后推送分支并读回本地、tracking、远端 SHA。macOS/Windows/Linux 原生窗口、
+900×580 accessibility frame、IME、VoiceOver、安装包和真实外部 provider 继续
+保持各自独立验收边界。
+
 ## 2026-11-07 工具栏远程上下文布局修复
 
 本轮修复了 macOS 短验发现的真实布局缺陷：紧凑工具栏中的“远程工作区”上下文

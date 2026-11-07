@@ -123,7 +123,23 @@ pub(crate) async fn exercise(
                 window.render_frame(cx);
                 window.click("theme-settings", cx);
                 window.render_frame(cx);
+                let appearance_button = window.find(id);
+                assert!(
+                    appearance_button.visible()
+                        && contained(appearance_button.bounds(), window.bounds()),
+                    "{language:?}/{theme:?}: appearance control {id} is not reachable: {:?}",
+                    appearance_button.bounds()
+                );
                 window.click(id, cx);
+                window.render_frame(cx);
+                let view = fixture.workspace.read(cx);
+                assert!(
+                    view.saving || view.state.settings.theme == theme,
+                    "{language:?}/{theme:?}: clicking {id} did not start or apply the requested appearance; state={:?}, saving={}, reloading={}",
+                    view.state.settings.theme,
+                    view.saving,
+                    view.state_reloading
+                );
             })
             .checked("switch appearance through the production theme preferences");
             cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {

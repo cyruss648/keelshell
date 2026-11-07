@@ -156,7 +156,7 @@ fn theme_picker_renders_registry_driven_workbench_preview_layers(cx: &mut TestAp
                 format!("theme-preview-terminal-{}", family.id),
                 format!("theme-card-heading-{}", family.id),
                 format!("theme-card-details-{}", family.id),
-                format!("theme-card-action-{}", family.id),
+                format!("theme-family-{}", family.id),
             ] {
                 let element = window.find(id.clone());
                 assert!(element.visible(), "{id} hidden");
@@ -420,6 +420,16 @@ async fn all_theme_presets_persist_and_keep_live_session_and_draft_identity(
                     );
                 }
                 window.click(format!("theme-family-{}", theme.id), cx);
+                window.render_frame(cx);
+                let view = fixture.workspace.read(cx);
+                assert!(
+                    view.saving || view.state.settings.theme_family.as_str() == theme.id,
+                    "{language:?}/{}: theme family click did not start or apply; family={}, appearance={:?}, saving={}",
+                    theme.id,
+                    view.state.settings.theme_family.as_str(),
+                    view.state.settings.theme,
+                    view.saving
+                );
             })
             .checked("select a registered family using the actual minimum-window picker");
             cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
