@@ -20,8 +20,9 @@ controller 均通过；`cargo fmt --all -- --check` 与 `git diff --check` 也�
 `9134cfaa771057a0f246ead47479be3706248415`。首次独立严格只读复核以该 SHA 为基线
 返回 `REQUEST CHANGES`：P0/P1/P3 为 `0`，唯一 P2 是提交后的状态文案仍写成待提交；
 本次文档修订已将固定 SHA、复核结果和剩余交付边界写实。后续复核确认该 P2 关闭后，
-再生成绑定新 SHA 的精确包并执行有限 macOS smoke。Windows/Linux 原生、IME、
-VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 继续保持未验证边界。
+第二次独立复核已返回 `APPROVE`，P0/P1/P2/P3 均为 `0`。下一步生成绑定最终
+文档提交 SHA 的精确包并执行有限 macOS smoke。Windows/Linux 原生、IME、VoiceOver、
+真实 SSH/Podman 长流程和外部 AI provider 继续保持未验证边界。
 
 ## 2026-11-08 内联合并审核视口
 
@@ -61,7 +62,8 @@ SSH/Podman 和外部 AI provider 继续保持未验证边界。
 [测试记录](testing/records/2026-11-08-editor-format-merge-combinations.md)。
 首次接入时的闭包上下文编译错误和并行工作树覆盖测试文件的事实已保留，修复后
 重新确认测试清单包含两个新增用例。完整工程门禁已经通过；独立复核、精确包和
-原生验收仍待本片后续步骤。
+原生验收仍待本片后续步骤。文档修订后的第二次独立复核已返回 `APPROVE`，
+P0/P1/P2/P3 均为 `0`。
 
 ## 2026-11-08 快速操作中心
 

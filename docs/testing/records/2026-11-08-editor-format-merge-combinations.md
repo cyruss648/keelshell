@@ -147,9 +147,16 @@ OpenSSH、真实 Linux 采样以及原生桌面边界仍按既有规则保持未
 `git diff --check 9134cfaa^ 9134cfaa`，均确认通过。完整门禁计数未由该复核重复，
 仍以本记录前面的作者门禁回执为界。
 
+第二次独立严格只读复核固定基线为文档修订后的
+`bcc5990f286159a98cdca4156583e3e2148ff534`。复核确认工作树干净、父提交仅包含文档
+修改，首次 P2 已关闭，P0/P1/P2/P3 均为 `0`，结论为 `APPROVE`。它重新执行两个
+新增用例，各为 `1 passed / 0 failed / 1116 filtered out`，并通过格式检查和差异
+检查；没有把作者完整门禁计数作为独立结果。代码和文档复核均未覆盖 Windows/Linux
+原生窗口、IME、VoiceOver、真实客户 SSH 长流程、Podman 联调、外部 AI provider、
+精确 macOS 包或安装发布。
+
 ## 尚未完成
 
-- 文档修订后的独立严格只读复核；
 - 新源码精确 macOS 包和有限桌面短验；
 - Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider。
 
