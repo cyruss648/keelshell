@@ -16,9 +16,12 @@ controller 均通过；`cargo fmt --all -- --check` 与 `git diff --check` 也�
 断言未按 `cargo fmt` 展开；格式化后重新执行并通过。该失败事实和第二轮完整回执
 已记录在[组合回归测试记录](testing/records/2026-11-08-editor-format-merge-combinations.md)。
 
-下一步按交付顺序固定源码提交，针对新提交取得可审计的独立严格只读复核，再生成
-绑定新 SHA 的精确包并执行有限 macOS smoke。Windows/Linux 原生、IME、VoiceOver、
-真实 SSH/Podman 长流程和外部 AI provider 继续保持未验证边界。
+源码实现已固定为
+`9134cfaa771057a0f246ead47479be3706248415`。首次独立严格只读复核以该 SHA 为基线
+返回 `REQUEST CHANGES`：P0/P1/P3 为 `0`，唯一 P2 是提交后的状态文案仍写成待提交；
+本次文档修订已将固定 SHA、复核结果和剩余交付边界写实。后续复核确认该 P2 关闭后，
+再生成绑定新 SHA 的精确包并执行有限 macOS smoke。Windows/Linux 原生、IME、
+VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 继续保持未验证边界。
 
 ## 2026-11-08 内联合并审核视口
 

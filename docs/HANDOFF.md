@@ -31,10 +31,13 @@
 断言尚未按 `cargo fmt` 展开；格式化后重新启动完整门禁并通过。失败事实和最终回执
 保存在[组合回归测试记录](testing/records/2026-11-08-editor-format-merge-combinations.md)。
 
-当前仍需按交付顺序完成：固定源码提交，针对新提交取得可审计的独立严格只读复核，
-重新构建绑定新 SHA 的精确 macOS 包并做有限 smoke，最后读回 local/tracking/remote
-SHA。Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI
-provider 仍未验收；既有旧包不能代签本片新增测试。
+源码实现已固定提交为
+`9134cfaa771057a0f246ead47479be3706248415`。独立严格只读复核已以该 SHA 为基线
+完成首次检查：P0/P1/P3 均为 `0`，结论为 `REQUEST CHANGES`，唯一 P2 是本交接在
+提交后仍保留“待提交/未提交候选”措辞；本次文档修订关闭该状态问题，后续复核只需
+确认文档状态已与固定 SHA 一致。精确 macOS 包、local/tracking/remote SHA 回读、
+Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider
+仍未验收；既有旧包不能代签本片新增测试。
 
 ## 2026-11-08 本片源码与 macOS 包收口
 
@@ -97,7 +100,8 @@ VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 仍未验收。
 
 ## 2026-11-08 编辑器格式与合并迟到读回组合回归
 
-当前未提交候选新增两个真实 GPUI/SFTP 回归：
+源码实现已固定在
+`9134cfaa771057a0f246ead47479be3706248415`，本片包含两个真实 GPUI/SFTP 回归：
 
 - `independent_editor_format_no_newline_keeps_lf_policy_across_empty_and_plain_saves`
   从无换行远端文件开始，验证首次 Enter 使用 LF，连续保存空内容和无换行内容后仍
@@ -115,8 +119,9 @@ VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 仍未验收。
 
 首次接入的测试上下文编译错误已修复，并重新确认新增用例出现在当前测试清单中。
 并行切片曾覆盖第一个测试文件的未提交内容，已按返回差分重新应用并重跑；这一
-事实保留在测试记录中。第二轮完整工程门禁已通过；源码提交、独立复核、精确新包
-和原生验收仍按上方当前交接顺序待执行。
+事实保留在测试记录中。第二轮完整工程门禁已通过；首次独立复核的唯一 P2 是提交
+后状态文案未同步，本次文档修订已补齐固定 SHA 和复核状态。精确新包和原生验收仍
+按上方当前交接顺序待执行。
 
 ## 2026-11-08 快速操作中心生产布局与键盘收口
 

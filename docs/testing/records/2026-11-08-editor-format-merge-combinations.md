@@ -124,10 +124,32 @@ OpenSSH、真实 Linux 采样以及原生桌面边界仍按既有规则保持未
 
 上述失败事实保留在本记录中，没有用最终成功覆盖首次失败。
 
+## 独立严格只读复核
+
+首次复核固定基线为 `9134cfaa771057a0f246ead47479be3706248415`，复核工作树保持
+干净，没有编辑、提交、推送或清理。复核结论为 `REQUEST CHANGES`：
+
+- P0：`0`；
+- P1：`0`；
+- P2：`1`，文档仍把已提交源码写成“待提交/未提交候选”；
+- P3：`0`。
+
+复核指出的文档位置为：
+
+- `docs/HANDOFF.md` 当前片状态与组合回归段落；
+- `docs/ROADMAP.md` 当前片下一步；
+- `docs/adr/0122-editor-format-and-late-readback-regressions.md` 状态行。
+
+本次文档修订已写入固定源码 SHA `9134cfaa771057a0f246ead47479be3706248415`
+并明确首次 `REQUEST CHANGES` 结果；下一次独立复核需确认该 P2 已关闭。复核实际
+运行两个新增用例，均为 `1 passed / 0 failed / 1116 filtered out`，并执行
+`cargo test ... -- --list`、`cargo fmt --all -- --check` 和
+`git diff --check 9134cfaa^ 9134cfaa`，均确认通过。完整门禁计数未由该复核重复，
+仍以本记录前面的作者门禁回执为界。
+
 ## 尚未完成
 
-- 当前源码固定提交及 local/tracking/remote SHA 读回；
-- 新固定源码的独立严格只读代码与功能复核；
+- 文档修订后的独立严格只读复核；
 - 新源码精确 macOS 包和有限桌面短验；
 - Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider。
 
