@@ -25,8 +25,11 @@ AI controller 通过。首次新增测试错误地把可访问标签当成可见
 行悬停状态。设计见[ADR 0119](adr/0119-connection-library-visual-hierarchy.md)，
 回执见[连接库视觉层级记录](testing/records/2026-11-07-connection-library-visual-hierarchy.md)。
 
-下一步必须在固定当前源码（含本次文档提交）后完成新的独立严格只读复核，要求
-返回 P0/P1/P2/P3、绝对路径/行号、实际测试计数、限制和 merge recommendation。
+新的独立严格只读复核已经以
+`48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9` 为代码基线完成，P0/P1/P2/P3 均为
+`0`，merge recommendation 为 `APPROVE`；复核实际执行 selected-row 精确回归
+`1 passed / 0 failed / 1090 filtered out`，并核对了行状态、原生 selectable
+语义、宽窄布局复用、主动作层级和主题 token 解耦。
 当前包不包含 `48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9`，因此不能把既有 macOS 包写成本片原生通过；当前源码
 macOS 包、Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、真实 SSH/Podman
 长流程和外部 AI provider 仍待独立验收。

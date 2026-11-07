@@ -22,7 +22,10 @@ controller。首次新增测试曾把可访问标签误当可见文本而失败�
 [连接库视觉层级回执](testing/records/2026-11-07-connection-library-visual-hierarchy.md)，
 设计决策见[ADR 0119](adr/0119-connection-library-visual-hierarchy.md)。
 
-当前源码仍需新的独立严格只读复核；此前包不包含最终提交
+独立严格只读复核已以最终源码提交
+`48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9` 为基线完成，P0/P1/P2/P3 均为
+`0`，merge recommendation 为 `APPROVE`；复核实际执行 selected-row 精确回归
+`1 passed / 0 failed / 1090 filtered out`。此前包不包含最终提交
 `48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9`，不能代签本片真实
 桌面颜色。macOS 当前源码包、Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、
 真实 SSH/Podman 长流程和外部 AI provider 继续保持独立验收边界。

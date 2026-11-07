@@ -1,7 +1,7 @@
 # ADR 0119：连接库选中层级与主动作
 
 - 日期：2026-11-07
-- 状态：已实现；定向 GPUI 回归和完整工程门禁通过；独立复核与当前源码原生桌面验收待完成
+- 状态：已实现；定向 GPUI 回归、完整工程门禁和独立只读复核通过；当前源码原生桌面验收待完成
 - 范围：`keelshell-app` 连接库表格、窄窗口卡片和连接行动作
 - 关联：[当前交接](../HANDOFF.md)、[开发路线](../ROADMAP.md)
 
@@ -61,3 +61,9 @@ Lavender 的主题 ID。未来新增主题只需补齐注册定义和 token；�
 严格 Clippy、doctests、依赖策略和三组 AI controller。此前测试曾把
 observation 的可访问标签误当成可见按钮文本，修正后的断言已在精确回归和完整
 门禁中通过。
+
+新的独立严格只读复核以 `48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9` 为代码基线，
+返回 P0/P1/P2/P3 均为 `0`，merge recommendation 为 `APPROVE`。复核实际执行
+selected-row 精确测试 `1 passed / 0 failed`，并核对了行状态、List/ListItem
+语义、宽窄布局复用、Connect 主动作和主题 token 解耦。复核没有代替全量门禁、
+原生平台、真实连接、IME/VoiceOver 或像素对比验收。

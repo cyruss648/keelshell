@@ -62,6 +62,28 @@ Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、真实 SSH/Podman 长�
 
 ## 独立复核
 
-本片提交后需要新开独立严格只读复核，要求返回 P0/P1/P2/P3、绝对路径和行号、
-实际测试计数、限制以及 merge recommendation。在形成可审计正文前，不能写成
-非作者批准。
+新的独立严格只读复核以源码提交
+`48eb9f5f73fddd2ccfa14cf630e70b28f4d108c9` 为基线完成，复核 agent 未编辑、
+提交、推送或清理工作树。结果如下：
+
+| 严重级别 | 数量 |
+| --- | ---: |
+| P0 | 0 |
+| P1 | 0 |
+| P2 | 0 |
+| P3 | 0 |
+
+复核确认选中行的 `surface_active`/`accent` 与未选中行的 `surface_hover` 不互相
+覆盖，容器/行使用 `Role::List` / `Role::ListItem` 及完整 set position/size
+语义，宽表格与窄卡片共用 `connection_library_row`，Connect 使用 primary，
+主题只读取 registry/Palette/token。独立执行的精确测试为：
+
+```text
+cargo test -p keelshell-app --locked --offline \
+  workspace::tests::library::selected_library_row_exposes_state_and_keeps_primary_action_reachable \
+  -- --exact --test-threads=1
+```
+
+结果为 `1 passed / 0 failed / 1090 filtered out`。复核未覆盖全量工程门禁、
+原生 macOS/Windows/Linux、真实 VoiceOver/IME/键盘焦点、真实连接流程和像素/
+对比度验收。范围内 merge recommendation：`APPROVE`。
