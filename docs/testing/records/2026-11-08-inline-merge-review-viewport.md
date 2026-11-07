@@ -106,6 +106,70 @@ workspace Rust 测试和三个 AI controller 专项均通过：
 上述完整门禁针对本片最终源码候选执行；文档收口提交只改变文档，不改变已验证
 的生产代码、测试代码和依赖锁定文件。
 
+## 精确 macOS 包与桌面短验
+
+源码提交已固定为：
+
+```text
+e5891d1c8101c00944979ec2761718d376ae60d5
+```
+
+按共享 target 指南再次失效五个项目包后，执行：
+
+```text
+MACOSX_DEPLOYMENT_TARGET=15.0 \
+  cargo build -p keelshell-app -p keelshell-mcp --release --locked
+
+KEELSHELL_BUILD_COMMIT=e5891d1c8101c00944979ec2761718d376ae60d5 \
+  python3 packaging/package.py macos \
+  --binary target/release/keelshell-app \
+  --mcp-binary target/release/keelshell-mcp \
+  --target aarch64-apple-darwin \
+  --output work/native-cua-20261107/package-r11
+
+python3 packaging/inspect_native.py \
+  --platform macos \
+  --target aarch64-apple-darwin \
+  --stage work/native-cua-20261107/package-r11
+```
+
+三个命令均退出 `0`。包路径为
+`work/native-cua-20261107/package-r11/KeelShell.app`，manifest 的
+`build.commit` 精确绑定上述源码 SHA，目标为 `aarch64-apple-darwin`，
+GUI 与 MCP 均为 arm64 Mach-O，实际 `LC_BUILD_VERSION minos=15.0`，
+Info.plist 的最低 macOS 版本为 `15.0`。`installed=false`、
+`signed_by_packaging_script=false`，本次没有安装、签名或发布。
+
+摘要如下：
+
+- manifest SHA-256：
+  `54ed0e165a27c760f4672673bbde16d3572efaff815b50b6b7c629927b49f8d6`；
+- GUI SHA-256：
+  `c6afd91a3cdb219a3974c92b90f0d2310d70c16a45ce1efc068bffe8e22cc139`；
+- MCP SHA-256：
+  `94eaf83f8bbb23ae4db7cc190c9c06332ddbc19b4bf9246dcdf35f43b3645d8f`；
+- manifest 列出的 `5` 个包文件逐一重算哈希并通过。
+
+使用独立 `KEELSHELL_DATA_DIR` 启动 exact package 后，已观察到默认工作台和连接
+库空态、Themes and appearance 对话框、Frost「霜白」、Graphite「曜石」、
+Lavender「雾紫」三套主题切换、英文到中文切换和中文工作台空态。进程与隔离
+数据均已回收。该短验没有代签 inline merge、真实 SSH/SFTP、Podman、900×580
+原生调整、IME、VoiceOver、Windows/Linux 窗口、签名、公证或安装升级。
+
+## 独立只读复核状态
+
+源码提交后新启动了独立复核 agent，但两次尝试都没有返回可审计报告：
+
+- 第一次 agent 在读取旧工具会话时连续重复同一个 `write_stdin` 调用，随后被
+  系统停止；
+- 第二次使用不继承旧会话的隔离 agent，等待和中断请求后仍未输出审查正文，随后
+  被关闭。
+
+因此本片状态明确为 `NON_AUTHOR_REVIEW_UNAVAILABLE`。没有 P0/P1/P2/P3 计数，
+没有 `APPROVE` 或 `REQUEST CHANGES` 的非作者结论；作者的定向回归、完整门禁和
+macOS 短验不能替代独立复核。后续新一轮代码变更仍需重新启动并取得可审计的独立
+报告后，才能把合并建议写成批准。
+
 ## 失败与修复证据
 
 初次完整视口专项中，`inline_merge_card_keeps_review_actions_visible_while_body_scrolls`

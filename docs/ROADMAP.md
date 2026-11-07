@@ -3,6 +3,23 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-08 本片交付状态
+
+源码提交 `e5891d1c8101c00944979ec2761718d376ae60d5` 已推送，local/tracking/remote
+SHA 一致。完整工程门禁通过：Python `131 run / 1 skipped`，workspace Rust
+`2,435 passed / 23 ignored`，app `1,113 passed / 2 ignored`，14 项 doctest、
+严格 Clippy、依赖策略和三个 AI controller 均通过。
+
+当前精确 macOS 包为
+`work/native-cua-20261107/package-r11/KeelShell.app`，manifest 绑定源码 SHA，
+GUI/MCP 为 arm64 Mach-O，最低版本 `15.0`；三套主题和中英文切换已在隔离数据目录
+的桌面短验中观察到。独立复核没有返回可审计正文，状态为
+`NON_AUTHOR_REVIEW_UNAVAILABLE`，不能写成非作者批准。
+
+下一步是重新取得独立只读复核报告，并补齐连续无换行保存与
+`merge-adopt → merge-save → late newer draft/readback` 组合回归；跨平台原生、
+IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 继续保持未验证边界。
+
 ## 2026-11-08 内联合并审核视口
 
 内联三方合并审核已收口为固定 `220 px` 卡片：正文拥有独立滚动句柄，动作区固定为
@@ -19,10 +36,10 @@
 门禁证据已保存在[测试记录](testing/records/2026-11-08-inline-merge-review-viewport.md)；
 设计见 [ADR 0121](adr/0121-inline-merge-review-viewport.md)。
 
-本片下一步仍需：固定源码提交并回读 SHA，启动新的独立严格只读复核，构建绑定源码
-SHA 的 macOS exact package，并进行已解锁桌面短验。连续无换行保存、late newer
-draft/readback 组合、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 和
-外部 AI provider 继续保持未验证边界。
+本片源码提交、SHA 回读、exact package 和 macOS 主题/双语短验已完成；独立复核因
+agent 未返回可审计报告而保持 `NON_AUTHOR_REVIEW_UNAVAILABLE`。连续无换行保存、
+late newer draft/readback 组合、Windows/Linux 原生窗口、IME、VoiceOver、真实
+SSH/Podman 和外部 AI provider 继续保持未验证边界。
 
 ## 2026-11-08 快速操作中心
 

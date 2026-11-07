@@ -5,12 +5,39 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-08 本片源码与 macOS 包收口
+
+本片源码提交为 `e5891d1c8101c00944979ec2761718d376ae60d5`，已推送到
+`feature/main-visual-integration-20261106`；local、tracking、remote 三者已读回
+一致。完整工程门禁已在该源码候选上通过：Python `131 run / 1 skipped`，
+workspace Rust `2,435 passed / 23 ignored`，app `1,113 passed / 2 ignored`，
+14 项 doctest、依赖策略、严格 Clippy 和三个 AI controller 均通过。
+
+当前 exact package 为
+`work/native-cua-20261107/package-r11/KeelShell.app`，manifest 的
+`build.commit` 绑定上述源码 SHA，GUI/MCP 为 arm64 Mach-O，实际最低版本为
+macOS `15.0`。manifest、GUI、MCP SHA-256 分别为：
+
+- `54ed0e165a27c760f4672673bbde16d3572efaff815b50b6b7c629927b49f8d6`
+- `c6afd91a3cdb219a3974c92b90f0d2310d70c16a45ce1efc068bffe8e22cc139`
+- `94eaf83f8bbb23ae4db7cc190c9c06332ddbc19b4bf9246dcdf35f43b3645d8f`
+
+已解锁 macOS 桌面短验确认默认工作台、连接库空态、三套主题 Frost「霜白」、
+Graphite「曜石」、Lavender「雾紫」和中英文切换可见；测试使用隔离数据目录，
+没有安装或替换已有应用，进程与隔离数据已回收。
+
+源码提交后的两次独立只读复核尝试均未返回可审计正文：第一次重复轮询旧会话后
+被系统停止，第二次隔离 agent 在中断请求后仍无报告。当前必须记录
+`NON_AUTHOR_REVIEW_UNAVAILABLE`，不能把作者门禁或原生短验写成非作者批准。
+
 ## 2026-11-08 内联合并审核视口候选
 
 当前分支 `feature/main-visual-integration-20261106` 的源码基线为
-`ed75c9802509b54f4c57dc38f8573fe0f43aeee1`，本片尚有四个未提交源码文件：
+`ed75c9802509b54f4c57dc38f8573fe0f43aeee1`，本片的四个源码变更文件
 `files/merge.rs`、`files/review_viewport_tests.rs`、`files/transfer_tests.rs` 和
-`files/conflict_merge_tests.rs`。本片将内联三方合并审核收口为固定 `220 px` 卡片；
+`files/conflict_merge_tests.rs` 已随源码提交
+`e5891d1c8101c00944979ec2761718d376ae60d5` 收口。它们将内联三方合并审核收口为固定
+`220 px` 卡片；
 正文独立滚动，动作区两行固定，展开按钮移入动作栏。正文滚轮通过 review ID 绑定的
 处理器显式更新并截断 `body_scroll`，旧帧和新审核之间失败关闭；切换冲突、完整版本
 和冲突选择方案会复位正文滚动。
@@ -33,11 +60,9 @@ readiness/observer/small-stack controller 全部通过。完整证据保存在[�
 [ADR 0121](adr/0121-inline-merge-review-viewport.md)。首次视口回归曾因外层尾部裁掉
 正文命中区域、并因 stop propagation 阻止正文默认滚动而失败，修复后精确重跑通过。
 
-下一步按顺序执行：提交源码候选并记录源码 SHA；启动新的独立严格只读复核；复核完成
-后构建绑定源码 SHA 的 macOS exact package 并做已解锁桌面短验；最后读回
-local/tracking/remote SHA。连续无换行保存、`merge-adopt → merge-save → late newer
-draft/readback`、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和
-外部 AI provider 仍未验收。
+后续工作：重新启动并取得可审计的独立严格只读复核；补齐连续无换行保存、
+`merge-adopt → merge-save → late newer draft/readback` 组合回归。Windows/Linux
+原生窗口、IME、VoiceOver、真实 SSH/Podman 长流程和外部 AI provider 仍未验收。
 
 ## 2026-11-08 快速操作中心生产布局与键盘收口
 

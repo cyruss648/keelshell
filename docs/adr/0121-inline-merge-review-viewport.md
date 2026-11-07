@@ -73,4 +73,10 @@ GPUI headless 测试在派发 wheel 前先让外层文件工具区露出目标�
 共享 target 归属切换后的项目包失效重编和完整 `python3 scripts/check.py` 已完成并
 退出 `0`：Python `131 run / 1 skipped`，workspace Rust 测试 `2,435 passed /
 23 ignored`，app 为 `1,113 passed / 2 ignored`，14 项 doctest 和三个 AI controller
-专项均通过。当前源码 macOS exact package、独立严格只读复核和真实桌面验收仍待完成。
+专项均通过。源码提交 `e5891d1c8101c00944979ec2761718d376ae60d5` 已绑定到
+`work/native-cua-20261107/package-r11/KeelShell.app`，GUI/MCP 均为 arm64
+Mach-O，实际 `minos=15.0`；主题三套和中英文切换已完成隔离桌面短验。
+
+源码提交后的两次独立只读复核尝试均未返回可审计报告，当前状态为
+`NON_AUTHOR_REVIEW_UNAVAILABLE`，不能写成非作者批准。Windows/Linux 原生窗口、
+IME、VoiceOver、真实 SSH/Podman 长流程、签名、公证、安装包和组合时序回归仍待完成。
