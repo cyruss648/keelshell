@@ -3,6 +3,26 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-07 连接库选中层级与主动作
+
+连接库视觉层级已完成一片源码候选并提交为 `09e05e2`。宽表格和窄卡片共用
+selected-row 反馈：行公开 `aria-selected`，使用当前主题的 `surface_active`
+背景和 `accent` 左边界，悬停使用 `surface_hover`。活动连接库中的 Connect
+改为 GPUI Kit `primary`，编辑、移动、复制和回收站动作继续保持次级层级；回收站
+仍不会暴露连接入口。视图继续只消费 registry/Palette token，没有主题 ID 分支，
+未来新增主题只扩展注册定义。
+
+定向连接库回归为 `27 passed / 0 failed`，应用严格 Clippy、格式和差异检查通过。
+完整 `python3 scripts/check.py` 退出 `0`，实际完成 Python `131 run / 1 skipped`、
+app `1089 passed / 2 ignored`、workspace 其它测试、doctests、依赖策略和三组 AI
+controller。首次新增测试曾把可访问标签误当可见文本而失败，已保留失败事实并
+精确重跑通过，记录见[连接库视觉层级回执](testing/records/2026-11-07-connection-library-visual-hierarchy.md)，
+设计决策见[ADR 0119](adr/0119-connection-library-visual-hierarchy.md)。
+
+当前源码仍需新的独立严格只读复核；此前包不包含 `09e05e2`，不能代签本片真实
+桌面颜色。macOS 当前源码包、Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、
+真实 SSH/Podman 长流程和外部 AI provider 继续保持独立验收边界。
+
 ## 2026-11-07 exact package smoke 与复核边界
 
 当前主题选择器源码提交 `37b8eaf7d65fe31133c5e5058848341c50c8a820` 已重新构建

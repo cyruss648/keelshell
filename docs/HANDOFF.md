@@ -5,6 +5,29 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 连接库视觉层级与主动作候选
+
+本片源码已提交为 `09e05e2`，当前连接库行在宽表格和窄卡片中统一表达
+selected 状态：行公开 `aria-selected`，使用 `Palette.surface_active` 和
+`Palette.accent` 左边界，非选中悬停使用 `surface_hover`。活动连接库中的
+Connect 使用 GPUI Kit `primary` 变体，Edit/Move/Copy/Trash 保持次级动作；
+回收站继续只提供 Restore 和永久删除。没有增加主题 ID 分支，Frost「霜白」、
+Graphite「曜石」、Lavender「雾紫」继续通过 registry/Palette/token 驱动，新增
+主题只扩展注册定义。
+
+验证已完成：连接库定向 `27 passed / 0 failed`，app 严格 Clippy、格式和差异
+检查通过；完整 `python3 scripts/check.py` 退出 `0`，Python `131 run / 1 skipped`、
+app `1089 passed / 2 ignored`，workspace 其它测试、doctests、依赖策略和三组
+AI controller 通过。首次新增测试错误地把可访问标签当成可见文本的失败已保留，
+精确重跑已通过。设计见[ADR 0119](adr/0119-connection-library-visual-hierarchy.md)，
+回执见[连接库视觉层级记录](testing/records/2026-11-07-connection-library-visual-hierarchy.md)。
+
+下一步必须在固定当前源码（含后续文档提交）后启动新的独立严格只读复核，要求
+返回 P0/P1/P2/P3、绝对路径/行号、实际测试计数、限制和 merge recommendation。
+当前包不包含 `09e05e2`，因此不能把既有 macOS 包写成本片原生通过；当前源码
+macOS 包、Windows/Linux 原生窗口、完整键盘/IME/VoiceOver、真实 SSH/Podman
+长流程和外部 AI provider 仍待独立验收。
+
 ## 2026-11-07 主题选择器 exact package 与复核状态
 
 主题选择器源码已提交并推送到
