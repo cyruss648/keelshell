@@ -5,6 +5,27 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 Reef / reef-template 参考边界
+
+本次新增文档切片 [ADR 0118](adr/0118-reef-reference-boundary.md)，把 Reef 与
+reef-template 的工程参考价值固定为 workspace resolver 3、workspace 版本/元数据
+继承、配置分层、显式生命周期与 shutdown、owner 归属和证据管理。KeelShell
+继续使用自己的 GPUI Kit 原生桌面分层，不引入 Reef 依赖。
+
+本轮只读检查记录了 Reef revision
+`75ccbf5d864fadb543ecfa62fc9871c7cff04153`；该 checkout 在检查时已有一处
+`Cargo.toml` 工作树修改。检查覆盖 Reef workspace、`reef-compose` 的 feature
+装配和 `application` 生命周期实现、Core 配置读取，以及模板的
+`crates/app` 继承、`conf/` 三层配置、入口和工程同步文档。reef-template
+revision 为 `03bd71c096fdd941e389584c44bdcb40dfed0cdf`，检查时工作树干净。
+两处源仓库均未被本任务修改、提交或清理。
+
+边界已明确：不复制 server runtime、全局 Compose、HTTP/MQ/DB/telemetry 等
+服务端中间件，不引入私有 Git 依赖、内网 URL、模板 Liquid 或服务部署约定。
+本轮只做 Markdown 文档和差异验证，未把静态源码检查写成 Reef 最新版本或
+KeelShell 原生/远端功能验收。未来任何真实 Reef 接入都必须另建 ADR，固定
+可公开依赖、API revision、配置、owner 和平台验收。
+
 ## 2026-11-07 会话、连接库与 AI 助手界面增强
 
 本片已提交并推送到 `feature/main-visual-integration-20261106`，精确提交为

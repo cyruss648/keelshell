@@ -3,6 +3,28 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-07 Reef / reef-template 参考边界
+
+状态：**文档切片已完成，可独立合并**。
+
+新增 [ADR 0118](adr/0118-reef-reference-boundary.md)，记录本轮对指定 Reef
+checkout（`75ccbf5d864fadb543ecfa62fc9871c7cff04153`）和 reef-template checkout
+（`03bd71c096fdd941e389584c44bdcb40dfed0cdf`）的只读检查。证据覆盖：
+
+- Reef 的 resolver 3、workspace package/依赖集中声明、`reef-compose` feature
+  装配、`application` 的 owner/启动失败回滚/join/shutdown report，以及
+  Core 的配置 loader 和 revision snapshot；
+- reef-template 的 workspace 继承、单一 `crates/app`、公共/dev/release 配置、
+  `build.rs`/入口、模板生成限制和工程同步文档；
+- Reef checkout 检查时存在一处预先存在的 `Cargo.toml` 修改，模板 checkout
+  干净；两者都没有被本轮修改或清理。
+
+后续 KeelShell 只采用这些工程原则，继续保持 `keelshell-app`、
+`keelshell-core`、`keelshell-session`、`keelshell-ai` 的桌面边界。服务端
+runtime、私有 Git 依赖、内网 URL、HTTP/MQ/DB/telemetry 等 Reef 中间件、
+模板 Liquid 和服务部署约定均不进入桌面产品。若未来需要真实 Reef 接入，先
+创建新的 ADR，补齐公开依赖、版本 revision、配置路径、生命周期和跨平台验收。
+
 ## 2026-11-07 会话、连接库与 AI 助手界面增强
 
 本片把连接库范围反馈、会话条键盘导航和 AI 审核阶段统一到可扩展的工作台表面：
