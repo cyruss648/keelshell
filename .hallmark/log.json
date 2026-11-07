@@ -348,6 +348,6 @@
     "artifact_package": "work/native-cua-20261107/package-r5",
     "historical_native_artifact": "work/native-cua-20261107/package-r3",
     "target_invalidation": "cargo clean --locked --offline -p keelshell-app -p keelshell-core -p keelshell-session -p keelshell-ai -p keelshell-mcp exited0; Removed40554files/9.4GiB before package-r5 build",
-    "finish_review": "CURRENT_SOURCE_PACKAGE_BOUND; independent fixed-commit source review still pending; detailed SSH native evidence remains scoped to historical package-r3; full native finish remains open"
+    "finish_review": "CURRENT_SOURCE_PACKAGE_BOUND; two exact-tip independent review attempts returned no auditable body and were stopped; status NON_AUTHOR_REVIEW_UNAVAILABLE; provisional APPROVE_WITH_HOLDS only; detailed SSH native evidence remains scoped to historical package-r3; full native finish remains open"
   }
 ]

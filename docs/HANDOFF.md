@@ -42,8 +42,10 @@ IPv6 P2 已由源码提交 `b2f875458e42cf374cb3d388d808e986a415c2cd` 修复：�
 提交修复：Hallmark preflight 已指向当前 pane 记录，ADR 计数已同步，旧包补齐
 源码提交、构建退出码和 manifest/app/MCP hash。固定 `9d02440` 的旧复核正文曾
 另外指出 IPv6 显示与包 provenance 两项问题；前者已由 `b2f8754` 修复，后者由
-`package-r5` 的精确 manifest 绑定收口。当前 `b2f8754` 仍需新的独立只读复核，
-不能把旧报告或代理启动写成当前提交批准。
+`package-r5` 的精确 manifest 绑定收口。针对当前 exact source `b2f8754` 新开的
+两次独立只读复核任务均在有界等待内没有返回可审计正文，随后已停止；它们没有
+修改、提交、推送或清理目标工作树。因此当前状态是
+`NON_AUTHOR_REVIEW_UNAVAILABLE`，不能把旧报告、代理启动或超时写成当前提交批准。
 
 完整 app 并行负载下，route/split 夹具曾在 10 秒 UI 就绪等待内超时；当时
 gateway 和 target 都已认证，跳板通道及 SSH 会话仍存活，`connect_route` 仍在
@@ -55,8 +57,8 @@ SSH 生命周期、命令审核和 AI 权限没有改动。session 还曾出现�
 
 旧提交 `d9072ed` 的 Avicenna 只读报告发现 1 个 P1 与 3 个 P2；P1 已由
 `1e63165` 修复，三个 P2 已在当前源码中关闭。该旧报告不替代当前提交的独立
-复核，下一步必须固定最新提交重新审查并返回 P0/P1/P2/P3、路径/行号、真实计数、
-限制和 merge recommendation。
+复核；当前 exact source 的两次新复核没有形成正文，后续维护仍必须固定最新提交
+重新审查并返回 P0/P1/P2/P3、路径/行号、真实计数、限制和 merge recommendation。
 
 macOS 原生包的详细人工观察绑定源码提交 `2589d3b` 的
 `work/native-cua-20261107/package-r3/KeelShell.app` 与隔离数据目录

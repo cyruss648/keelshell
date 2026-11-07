@@ -189,6 +189,12 @@ Avicenna 针对旧提交 `d9072ed` 的严格只读复核发现 1 个 P1 和 3 �
 源码的严格只读复核，并要求返回 P0/P1/P2/P3、路径/行号、真实测试计数、
 限制和直接 merge recommendation。
 
+针对当前 exact source `b2f875458e42cf374cb3d388d808e986a415c2cd`，本轮先后启动
+两次独立只读复核：一次在两次有界等待后停止，另一次在窄范围复核和收口请求后仍
+未返回正文；两次任务均未修改、提交、推送或清理目标工作树。当前状态保持
+`NON_AUTHOR_REVIEW_UNAVAILABLE`，直接 merge recommendation 只能暂记为
+`APPROVE_WITH_HOLDS`，不能升级为无条件批准。
+
 仍未覆盖：
 
 - macOS 原生 900×580 紧凑窗口、完整键盘焦点、IME 和 VoiceOver；

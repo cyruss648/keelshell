@@ -32,7 +32,7 @@
   "artifact_source_commit": "b2f875458e42cf374cb3d388d808e986a415c2cd",
   "artifact_package": "work/native-cua-20261107/package-r5",
   "historical_native_artifact": "work/native-cua-20261107/package-r3",
-  "finish_review": "CURRENT_SOURCE_PACKAGE_BOUND_WITH_SCOPED_NATIVE_HISTORY; latest fixed-commit independent review still required",
+  "finish_review": "CURRENT_SOURCE_PACKAGE_BOUND_WITH_SCOPED_NATIVE_HISTORY; exact-tip independent review unavailable after two bounded attempts; provisional APPROVE_WITH_HOLDS only",
   "evidence": "docs/testing/records/2026-11-07-pane-connection-identity-bar.md",
   "baseline_evidence": "docs/testing/records/2026-11-06-resource-knowledge-native.md",
   "baseline_native_scope": "native-r4 approves scoped macOS resource/batch evidence for14cb801e with same-run parent read-only export; known capture-tool P2/failed-inventory-summary P3 remain open in that immutable attempt",

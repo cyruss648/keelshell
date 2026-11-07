@@ -30,9 +30,10 @@ SSH 操作期限结束；gateway、target 和跳板 SSH 会话当时仍存活。
 横/纵分屏、合并、关闭面板、真实回环 SSH、连接中断和恢复场景人工观察。当前
 `package-r5` 已完成结构检查和短范围主题/双语 smoke check。900×580 紧凑窗口因
 无边框窗口 accessibility frame 异常保持未完成。下一步按交付顺序执行：固定
-`b2f8754` 重新进行独立严格只读复核，补齐最终文档门禁，推送分支并读回本地/
-tracking/远端 SHA。Windows/Linux 原生桌面、完整 IME/VoiceOver 和 Podman 真实
-联调仍保持开放。
+`b2f8754` 重新进行独立严格只读复核；本轮已启动两次 exact-tip 复核，但均未在
+有界等待内形成可审计正文，状态保持 `NON_AUTHOR_REVIEW_UNAVAILABLE`。后续仍需
+补一次有正文的复核，再更新合并建议。Windows/Linux 原生桌面、完整 IME/VoiceOver
+和 Podman 真实联调仍保持开放。
 
 上一片工作区视觉节奏收口已提交并推送，提交为
 `e3226e7097b72f6927fbc38f05a94a365d8269d7`，本地、tracking 和远端 SHA 一致。
@@ -52,9 +53,9 @@ TerminalView，并补齐中英文、三主题、最小窗口和焦点/AX 回归�
 
 旧固定提交的证据绑定问题已由 `9d02440` 及后续文档修订关闭；旧复核指出的
 IPv6 live endpoint 问题已由 `b2f8754` 修复，当前包 provenance 已由 `package-r5`
-精确 manifest 绑定。下一步必须固定 `b2f8754` 补一次有可审计正文的代码/功能
-复核，再更新合并建议；旧 `NON_AUTHOR_REVIEW_UNAVAILABLE` 状态不能视为当前
-提交批准。
+精确 manifest 绑定。当前 exact-tip 复核仍是 `NON_AUTHOR_REVIEW_UNAVAILABLE`，
+不能视为当前提交批准；后续必须固定 `b2f8754` 补一次有可审计正文的代码/功能
+复核，再更新合并建议。
 
 `e3226e7097b72f6927fbc38f05a94a365d8269d7` 已推送到
 `feature/main-visual-integration-20261106`，本地、tracking 和远端 SHA 一致；
