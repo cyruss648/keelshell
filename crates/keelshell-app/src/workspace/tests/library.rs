@@ -168,7 +168,7 @@ fn connection_actions_distinguish_same_names_by_complete_endpoint_in_both_langua
                 );
                 assert_eq!(
                     window.find(("connection-row", index)).role(),
-                    Some(gpui_kit::Role::Group)
+                    Some(gpui_kit::Role::ListItem)
                 );
                 let actions = if language == Language::En {
                     [
@@ -244,33 +244,66 @@ fn selected_library_row_exposes_state_and_keeps_primary_action_reachable(cx: &mu
                 workspace.library_selection.insert(id);
                 cx.notify();
             });
-            window.render_frame(cx);
+            for (language, selected_label, unselected_label) in [
+                (
+                    Language::ZhCn,
+                    "取消选择: 已选主机 · operator@selected.invalid:22",
+                    "选择连接: 已选主机 · operator@selected.invalid:22",
+                ),
+                (
+                    Language::En,
+                    "Deselect: 已选主机 · operator@selected.invalid:22",
+                    "Select profile: 已选主机 · operator@selected.invalid:22",
+                ),
+            ] {
+                i18n::set_language(language, cx);
+                window.render_frame(cx);
 
-            {
+                {
+                    let manager = window.within("connection-manager-dialog");
+                    assert_eq!(
+                        manager.find("connection-rows").role(),
+                        Some(gpui_kit::Role::List),
+                        "connection list role at width {width} and {language:?}"
+                    );
+                    let row = manager.find(("connection-row", 0_usize));
+                    assert_eq!(
+                        row.role(),
+                        Some(gpui_kit::Role::ListItem),
+                        "connection item role at width {width} and {language:?}"
+                    );
+                    assert_eq!(row.selected(), Some(true), "selected row at width {width}");
+                    assert_eq!(
+                        manager.find(("library-select", 0_usize)).label(),
+                        Some(selected_label),
+                        "selected action label at width {width} and {language:?}"
+                    );
+                    let connect = manager.find(("connect", 0_usize));
+                    assert!(connect.visible());
+                    assert!(
+                        contained(connect.bounds(), row.bounds()),
+                        "connect escaped selected row at width {width}: {:?}",
+                        connect.bounds()
+                    );
+                }
+
+                window.click(("library-select", 0_usize), cx);
+                window.render_frame(cx);
                 let manager = window.within("connection-manager-dialog");
-                let row = manager.find(("connection-row", 0_usize));
-                assert_eq!(row.selected(), Some(true), "selected row at width {width}");
+                assert_eq!(
+                    manager.find(("connection-row", 0_usize)).selected(),
+                    Some(false),
+                    "deselected row at width {width} and {language:?}"
+                );
                 assert_eq!(
                     manager.find(("library-select", 0_usize)).label(),
-                    Some("取消选择: 已选主机 · operator@selected.invalid:22")
+                    Some(unselected_label),
+                    "unselected action label at width {width} and {language:?}"
                 );
-                let connect = manager.find(("connect", 0_usize));
-                assert!(connect.visible());
-                assert!(
-                    contained(connect.bounds(), row.bounds()),
-                    "connect escaped selected row at width {width}: {:?}",
-                    connect.bounds()
-                );
-            }
 
-            window.click(("library-select", 0_usize), cx);
-            window.render_frame(cx);
-            let manager = window.within("connection-manager-dialog");
-            assert_eq!(
-                manager.find(("connection-row", 0_usize)).selected(),
-                Some(false),
-                "deselected row at width {width}"
-            );
+                window.click(("library-select", 0_usize), cx);
+            }
+            i18n::set_language(Language::ZhCn, cx);
         })
         .checked("preserve selected-row semantics across wide and compact layouts");
     }

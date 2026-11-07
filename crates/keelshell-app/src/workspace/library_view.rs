@@ -29,6 +29,13 @@ fn timestamp(seconds: u64) -> String {
         .unwrap_or_else(|| "—".into())
 }
 
+#[derive(Clone, Copy)]
+struct ConnectionLibraryRowOptions {
+    cards: bool,
+    trash: bool,
+    list_size: usize,
+}
+
 impl Workspace {
     fn library_scope_presentation(
         &self,
@@ -503,14 +510,28 @@ impl Workspace {
         let total_count = profiles.len();
         let mut rows = div()
             .id("connection-rows")
+            .test_support()
+            // Keep one selectable-list accessibility contract across the
+            // wide visual table and the compact card layout.
+            .role(Role::List)
+            .aria_label(t(cx, "连接列表", "Connection profiles"))
             .flex_1()
             .min_h_0()
             .overflow_y_scroll();
         let mut count = 0;
         for (index, (connection, time)) in profiles.into_iter().enumerate() {
             count += 1;
-            rows =
-                rows.child(self.connection_library_row(index, connection, time, cards, trash, cx));
+            rows = rows.child(self.connection_library_row(
+                index,
+                connection,
+                time,
+                ConnectionLibraryRowOptions {
+                    cards,
+                    trash,
+                    list_size: total_count,
+                },
+                cx,
+            ));
         }
         if count == 0 {
             rows = rows.child(self.library_empty_state(&query, total_count, cx));
@@ -538,10 +559,14 @@ impl Workspace {
         index: usize,
         connection: &Connection,
         time: Option<u64>,
-        cards: bool,
-        trash: bool,
+        options: ConnectionLibraryRowOptions,
         cx: &mut Context<Self>,
     ) -> AnyElement {
+        let ConnectionLibraryRowOptions {
+            cards,
+            trash,
+            list_size,
+        } = options;
         let visual = crate::design::palette(cx);
         let profile = connection.clone();
         let edit = connection.clone();
@@ -583,8 +608,10 @@ impl Workspace {
         let mut row = div()
             .id(("connection-row", index))
             .test_support()
-            .role(Role::Group)
+            .role(Role::ListItem)
             .aria_label(target.clone())
+            .aria_position_in_set(index + 1)
+            .aria_size_of_set(list_size)
             .aria_selected(selected)
             .tooltip(move |window, cx| Tooltip::new(target.clone()).build(window, cx))
             .min_w_0()
@@ -595,7 +622,9 @@ impl Workspace {
             } else {
                 visual.canvas
             }))
-            .hover(|style| style.bg(rgb(visual.surface_hover)))
+            .when(!selected, |row| {
+                row.hover(|style| style.bg(rgb(visual.surface_hover)))
+            })
             .border_b_1()
             .border_color(rgb(visual.border))
             .when(cards, |row| row.flex_col().p_2().gap_2())
