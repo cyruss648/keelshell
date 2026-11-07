@@ -225,14 +225,17 @@ KeelShell 品牌和远程工作台身份，中部显示当前 SSH 主机；命�
 所有终端 pane 现在都保留一行紧凑 header：左侧是会话标签，右侧是来自
 Workspace 快照的真实用户、主机和端口，下面以独立文字表示 `SSH / UTF-8`，
 状态使用同时具备文字和语义色的 badge。单 pane 与分屏 pane 使用同一组件路径，
-恢复占位使用当前 profile 或明确的缺失状态。
+恢复占位使用当前 profile 或明确的缺失状态；未保存连接与已移除配置分别显示，
+避免把两种不可连接原因压成同一个警告状态。
 
 该身份栏不把连接状态写入 `TerminalView`，不改变 SSH 输入焦点、命令审核目标、
 AI 权限或传输线程。布局和 AX 标签使用 `ChromeTokens::pane_header_height`、
-Palette 状态色、边框和组件圆角 token；Frost、Graphite、Lavender 共享视图实现，
-新增主题只需要扩展 registry/token。
+Palette 状态色、边框和组件圆角 token；端点代码字体使用主题
+`TypographyTokens`。Frost、Graphite、Lavender 共享视图实现，新增主题只需要
+扩展 registry、Palette、组件、chrome 和 typography token。
 
 定向验证见 [ADR 0116](../adr/0116-pane-connection-identity-bar.md) 和
-[测试记录](../testing/records/2026-11-07-pane-connection-identity-bar.md)。
-完整工程门禁、独立非作者复核、原生桌面主题/尺寸/IME/VoiceOver 和
-Windows/Linux 运行仍开放。
+[测试记录](../testing/records/2026-11-07-pane-connection-identity-bar.md)。当前
+工程门禁已通过，旧提交的只读报告已指导并关闭身份栏点击区域、恢复状态、字体
+字面量和缺失档案语义问题；当前候选仍需最新提交的独立非作者复核，以及原生桌面
+主题/尺寸/IME/VoiceOver 和 Windows/Linux 运行验收。

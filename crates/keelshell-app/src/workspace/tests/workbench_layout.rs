@@ -2,6 +2,10 @@
 use super::*;
 use gpui_kit::{App, Pixels, SharedString, Window};
 use keelshell_core::{Theme, ThemeId};
+use keelshell_session::{ConnectionEnd, ShellEnd};
+use tokio::sync::watch;
+
+use crate::{i18n::Message, terminal::TransportState};
 
 fn settle(window: &mut Window, cx: &mut App) {
     window.render_frame(cx);
@@ -169,6 +173,76 @@ fn every_terminal_pane_keeps_a_bilingual_connection_identity_bar(cx: &mut TestAp
         }
     })
     .checked("render the real connection identity bar in both supported languages");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
+fn connection_identity_bar_tracks_starting_and_transport_loss_in_both_languages(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    let (_, lifecycle_rx) = watch::channel(TransportState::Starting);
+    panes[0].terminal.update(cx, |terminal, _| {
+        terminal.attach_lifecycle(lifecycle_rx);
+        terminal.status = Message::new("正在连接…", "Starting…");
+    });
+
+    cx.run_until_parked();
+    cx.update_window(fixture.window, |_, window, cx| {
+        let pane = fixture.workspace.read(cx).session_panes.active_pane();
+        for (language, expected) in [(Language::ZhCn, "正在连接…"), (Language::En, "Starting…")]
+        {
+            i18n::set_language(language, cx);
+            settle(window, cx);
+            let identity = window.find(SharedString::from(format!("pane-identity-{}", pane.0)));
+            let status = window.find(SharedString::from(format!(
+                "pane-identity-status-{}",
+                pane.0
+            )));
+            assert_eq!(
+                status.label(),
+                Some(expected),
+                "{language:?}: starting status"
+            );
+            let label = identity
+                .label()
+                .unwrap_or_else(|| panic!("{language:?}: identity AX label"));
+            assert!(label.contains("fixture-0@example.invalid:22"));
+            assert!(label.contains(expected));
+        }
+    })
+    .checked("render the connecting identity in both supported languages");
+
+    let (_, ended_rx) = watch::channel(TransportState::Ended(ShellEnd::ConnectionClosed(
+        ConnectionEnd::TransportLost,
+    )));
+    panes[0].terminal.update(cx, |terminal, _| {
+        terminal.attach_lifecycle(ended_rx);
+        terminal.status = Message::new("SSH 连接已断开", "SSH connection lost");
+    });
+    cx.update_window(fixture.window, |_, window, cx| {
+        let pane = fixture.workspace.read(cx).session_panes.active_pane();
+        for (language, expected) in [
+            (Language::ZhCn, "SSH 连接已断开"),
+            (Language::En, "SSH connection lost"),
+        ] {
+            i18n::set_language(language, cx);
+            settle(window, cx);
+            let identity = window.find(SharedString::from(format!("pane-identity-{}", pane.0)));
+            let status = window.find(SharedString::from(format!(
+                "pane-identity-status-{}",
+                pane.0
+            )));
+            assert_eq!(status.label(), Some(expected), "{language:?}: loss status");
+            let label = identity
+                .label()
+                .unwrap_or_else(|| panic!("{language:?}: loss identity AX label"));
+            assert!(label.contains("fixture-0@example.invalid:22"));
+            assert!(label.contains(expected));
+        }
+    })
+    .checked("render the typed transport loss in both supported languages");
     assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
 

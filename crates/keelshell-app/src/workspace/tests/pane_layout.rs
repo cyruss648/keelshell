@@ -89,6 +89,43 @@ fn nested_scene(cx: &mut TestAppContext) -> (Fixture, Vec<RemotePane>, Vec<Entit
     (fixture, panes, ids)
 }
 
+#[gpui_kit::test]
+fn split_panes_keep_their_connection_identity_and_bilingual_ax_labels(cx: &mut TestAppContext) {
+    let (fixture, panes, ids) = nested_scene(cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for language in [Language::ZhCn, Language::En] {
+            i18n::set_language(language, cx);
+            redraw(window, cx);
+            let workspace = fixture.workspace.read(cx);
+            for (index, id) in ids.iter().enumerate() {
+                let pane = owner(workspace, *id);
+                let terminal = window.find(("terminal-pane", *id));
+                let identity = window.find(pane_id("pane-identity", pane));
+                let endpoint = window.find(pane_id("pane-identity-endpoint", pane));
+                let expected_endpoint = format!("fixture-{}@example.invalid:22", index % 2);
+                assert!(identity.visible(), "{language:?}: pane {index} identity");
+                inside(identity.bounds(), terminal.bounds());
+                assert_eq!(
+                    endpoint.label(),
+                    Some(expected_endpoint.as_str()),
+                    "{language:?}: pane {index} endpoint"
+                );
+                let label = identity
+                    .label()
+                    .unwrap_or_else(|| panic!("{language:?}: pane {index} AX label"));
+                assert!(label.contains(&expected_endpoint));
+                assert!(label.contains(if language == Language::ZhCn {
+                    "状态"
+                } else {
+                    "Status"
+                }));
+            }
+        }
+    })
+    .checked("render every split pane's endpoint and bilingual identity label");
+    no_writes(&panes);
+}
+
 fn owner(workspace: &Workspace, key: EntityId) -> PaneNodeId {
     workspace
         .session_panes

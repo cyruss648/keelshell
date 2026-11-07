@@ -5,6 +5,23 @@
 
 ## 2026-11-07 当前交付位置
 
+当前候选已完成 pane 连接身份栏的源码、测试和文档收口准备。连接身份栏覆盖
+真实 SSH 端点、协议/编码、生命周期状态、恢复占位和双语 AX；未保存连接与
+配置缺失分别呈现，主题字体通过 registry typography token 提供。三套内置主题
+Frost、Graphite、Lavender 仍全部可选，新增主题只扩展主题定义，不让业务视图
+按主题 ID 分支。
+
+定向 GPUI 回归与完整工程门禁通过：Python 131/1 skip，app 1078/2 ignored，
+core 197，session 130/4 ignored，workspace integration、MCP、SSH loopback、
+transfer、doctest、readiness、observer、small-stack AI controller、严格
+workspace Clippy、格式和差异检查均通过。首轮完整门禁曾因新增测试的
+`needless_borrow` 失败，修复后的结果已重新执行并记录。
+
+下一步按交付顺序执行：提交源码与文档、固定最新提交进行严格只读复核、推送
+分支并读回本地/tracking/远端 SHA，然后完成已解锁 macOS 的原生主题/尺寸/分屏/
+连接中断状态验收。Windows/Linux 原生桌面、完整 IME/VoiceOver 和 Podman 真实
+联调仍保持开放。
+
 上一片工作区视觉节奏收口已提交并推送，提交为
 `e3226e7097b72f6927fbc38f05a94a365d8269d7`，本地、tracking 和远端 SHA 一致。
 它包含主题 registry 的 chrome 几何 token、宽窗品牌与当前主机上下文、命令审核
@@ -17,7 +34,7 @@ TerminalView，并补齐中英文、三主题、最小窗口和焦点/AX 回归�
 [ADR 0116](adr/0116-pane-connection-identity-bar.md) 与
 [测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。
 
-当前身份栏的定向回归已通过；本轮完整 `python3 scripts/check.py`、新提交的独立
+当前身份栏的定向回归和完整 `python3 scripts/check.py` 已通过；新提交的独立
 非作者源码复核和原生桌面验收仍待完成。
 
 `e3226e7097b72f6927fbc38f05a94a365d8269d7` 已推送到

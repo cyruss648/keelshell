@@ -1,7 +1,7 @@
 # ADR 0116：终端 pane 持续连接身份栏
 
 - 日期：2026-11-07
-- 状态：已实现，完整工程门禁与独立复核待完成
+- 状态：已实现，工程门禁通过；当前提交独立复核与原生桌面验收待完成
 - 范围：`keelshell-app` 工作区外壳
 
 ## 背景
@@ -32,9 +32,10 @@ UI 线程之外。
 
 身份栏使用 `Palette` 的 `text`、`muted`、`success`、`warning`、`danger`、
 `danger_surface` 和 `border`，高度使用 `ChromeTokens::pane_header_height`，
-状态 badge 的圆角使用组件 token。Frost、Graphite、Lavender 共享同一视图实现，
-业务代码不按主题 ID 分支。以后增加主题时，只需在主题 registry 中补齐语义
-Palette、组件形状和 chrome token；身份栏不需要增加条件分支。
+状态 badge 的圆角使用组件 token，端点字体使用主题 `TypographyTokens`。
+Frost、Graphite、Lavender 共享同一视图实现，业务代码不按主题 ID 分支。以后
+增加主题时，只需在主题 registry 中补齐语义 Palette、组件形状、chrome token
+和 typography token；身份栏不需要增加条件分支。
 
 ## 验收
 
@@ -45,7 +46,10 @@ Palette、组件形状和 chrome token；身份栏不需要增加条件分支。
 - 900×580、1280×840、1440×900 等工作区尺寸；
 - 分屏布局、长标题、最小窗口和 SSH 输入不被布局控件消费。
 
-这些检查证明源码布局和状态映射，不能代替 macOS、Windows、Linux 原生桌面
-截图、IME、VoiceOver 和真实 SSH 交互验收。当前原生边界继续记录在
-`docs/HANDOFF.md` 与对应测试记录中。
+这些检查证明源码布局和状态映射；本轮完整工程门禁也已通过，包括 Python
+131/1 skip、app 1078/2 ignored、core 197、session 130/4 ignored、严格
+workspace Clippy、workspace integration、MCP、SSH loopback、transfer、
+doctest 和 AI controller。它们不能代替 macOS、Windows、Linux 原生桌面截图、
+IME、VoiceOver 和真实 SSH 交互验收。当前原生边界继续记录在 `docs/HANDOFF.md`
+与对应测试记录中。
 

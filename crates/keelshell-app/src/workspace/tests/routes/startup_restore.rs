@@ -3,7 +3,7 @@
 use super::*;
 use crate::command_suggestions::SuggestionSource;
 use crate::workspace::ToolPanel;
-use gpui_kit::EntityId;
+use gpui_kit::{EntityId, SharedString};
 use keelshell_core::{
     LayoutPane, LayoutTab, LayoutWindow, MAX_LAYOUT_TABS, MAX_LAYOUT_TABS_PER_PANE, PaneLayout,
     PaneNodeId, ReconnectPolicy, SplitAxis, WORKSPACE_LAYOUT_VERSION, WorkspaceLayout,
@@ -347,6 +347,20 @@ async fn startup_renders_only_the_saved_active_window_without_ssh_or_runtime_aut
                 window
                     .try_find(("connect-restored-tab", ids[index]))
                     .is_none()
+            );
+            let pane = fixture.workspace.read(cx).session_panes.active_pane();
+            let identity = window.find(SharedString::from(format!("pane-identity-{}", pane.0)));
+            let identity_label = identity
+                .label()
+                .unwrap_or_else(|| panic!("restored {label} identity AX label"));
+            assert!(identity_label.contains(label));
+            assert!(
+                identity_label.contains(if index == 0 {
+                    "未保存连接"
+                } else {
+                    "配置已移除"
+                }),
+                "unexpected restored identity label: {identity_label}"
             );
         }
     })

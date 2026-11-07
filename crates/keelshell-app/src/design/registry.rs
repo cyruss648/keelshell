@@ -1,6 +1,6 @@
 //! Built-in families. Adding a theme requires a definition and one registry entry.
 
-use super::{ChromeTokens, ComponentTokens, Palette, TerminalPalette};
+use super::{ChromeTokens, ComponentTokens, Palette, TerminalPalette, TypographyTokens};
 use gpui_kit::component::ThemeMode;
 use keelshell_core::Theme;
 
@@ -17,6 +17,7 @@ pub struct ThemeDefinition {
     pub light: Palette,
     pub dark: Palette,
     pub components: ComponentTokens,
+    pub typography: TypographyTokens,
     pub chrome: ChromeTokens,
     pub terminal: TerminalPalette,
 }
@@ -44,6 +45,9 @@ pub(super) const FROST: ThemeDefinition = ThemeDefinition {
     components: ComponentTokens {
         control_radius: 6.,
         panel_radius: 8.,
+    },
+    typography: TypographyTokens {
+        code_font_family: "monospace",
     },
     chrome: ChromeTokens {
         toolbar_height: 42.,
@@ -133,6 +137,9 @@ const GRAPHITE: ThemeDefinition = ThemeDefinition {
         control_radius: 4.,
         panel_radius: 6.,
     },
+    typography: TypographyTokens {
+        code_font_family: "monospace",
+    },
     chrome: ChromeTokens {
         toolbar_height: 42.,
         session_strip_height: 40.,
@@ -220,6 +227,9 @@ const LAVENDER: ThemeDefinition = ThemeDefinition {
     components: ComponentTokens {
         control_radius: 12.,
         panel_radius: 14.,
+    },
+    typography: TypographyTokens {
+        code_font_family: "monospace",
     },
     chrome: ChromeTokens {
         toolbar_height: 42.,

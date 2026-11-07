@@ -650,6 +650,7 @@ impl Workspace {
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
         let chrome = crate::design::chrome(cx);
+        let typography = crate::design::typography(cx);
         let mut tabs = div()
             .id(SharedString::from(format!("pane-tabs-{}", pane.0)))
             .test_support()
@@ -684,13 +685,21 @@ impl Workspace {
         let endpoint = self.session_endpoint(selected, cx);
         let restored = self.restored_tabs.contains_key(&selected);
         let (status, status_color, status_surface) = if restored {
-            (
-                self.restored_status(selected, cx)
-                    .unwrap_or_else(|| t(cx, "待连接", "Awaiting connection"))
-                    .to_owned(),
-                visual.warning,
-                visual.surface_active,
-            )
+            let availability = self
+                .restored_tabs
+                .get(&selected)
+                .map(|tab| tab.availability(&self.state));
+            let status = self
+                .restored_status(selected, cx)
+                .unwrap_or_else(|| t(cx, "待连接", "Awaiting connection"))
+                .to_owned();
+            let (status_color, status_surface) = match availability {
+                Some(keelshell_core::LayoutTabAvailability::Missing) => {
+                    (visual.danger, visual.danger_surface)
+                }
+                _ => (visual.warning, visual.surface_active),
+            };
+            (status, status_color, status_surface)
         } else if let Some(terminal) = self.tabs.iter().find(|tab| tab.entity_id() == selected) {
             if terminal.read(cx).is_open() {
                 (
@@ -789,7 +798,7 @@ impl Workspace {
                                     .min_w_0()
                                     .text_xs()
                                     .text_ellipsis()
-                                    .font_family("monospace")
+                                    .font_family(typography.code_font_family)
                                     .text_color(rgb(visual.text))
                                     .child(endpoint_label),
                             )
@@ -835,14 +844,13 @@ impl Workspace {
         let Some(restored) = self.restored_tabs.get(&id) else {
             return t(cx, "未连接", "Disconnected").to_owned();
         };
-        restored
-            .connection_id
-            .and_then(|connection_id| {
-                self.state
-                    .connections
-                    .iter()
-                    .find(|connection| connection.id == connection_id)
-            })
+        let Some(connection_id) = restored.connection_id else {
+            return t(cx, "未保存连接", "Unsaved connection").to_owned();
+        };
+        self.state
+            .connections
+            .iter()
+            .find(|connection| connection.id == connection_id)
             .map(crate::jump_host_picker::endpoint)
             .unwrap_or_else(|| t(cx, "配置已移除", "Profile unavailable").to_owned())
     }

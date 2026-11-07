@@ -130,6 +130,7 @@ fn every_registered_variant_has_readable_text_actions_and_input_boundaries() {
         assert!(contrast(theme.terminal.foreground, theme.terminal.background) >= 7.);
         assert!(contrast(theme.terminal.foreground, theme.terminal.selection) >= 4.5);
         assert!(contrast(theme.terminal.cursor, theme.terminal.background) >= 3.);
+        assert!(!theme.typography.code_font_family.is_empty());
     }
 }
 

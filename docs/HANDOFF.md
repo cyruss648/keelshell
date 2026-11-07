@@ -5,7 +5,42 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
-## 2026-11-07 连接身份栏继续推进
+## 2026-11-07 连接身份栏最终候选
+
+本轮实现已完成源码与测试修复，当前候选包含 pane 连接身份栏、恢复状态语义
+修正以及主题 typography token。源码仍保持 UI、core、session、AI 分层：
+
+- 每个终端 pane 都显示会话标签、真实 SSH 用户/主机/端口、`SSH / UTF-8`
+  和带文字的生命周期状态；
+- 单 pane、横向/纵向分屏和恢复占位共用同一身份栏渲染路径；
+- 未保存的一次性连接显示 `未保存连接 / Unsaved connection`，连接档案缺失
+  显示 `配置已移除 / Profile unavailable`，两者使用不同语义色；
+- Frost、Graphite、Lavender 仍全部可选，主题由 registry、Palette、组件形状、
+  chrome token 和 typography token 组成，新增主题只需添加注册定义；
+- pane 标签区域已收紧身份栏宽度，保留分屏标签与关闭动作的点击命中空间。
+
+当前源码定向回归和完整工程门禁均通过：Python 131 passed/1 skipped，
+`keelshell-app` 1078 passed/2 ignored，core 197 passed，session 130 passed/4
+ignored；workspace integration、MCP、SSH loopback、transfer、doctest、readiness、
+observer 和 small-stack AI controller 也通过。严格 workspace Clippy、格式和
+差异检查通过。首轮完整门禁中新增测试曾触发 `needless_borrow`，已修复并保留
+失败事实；当前还不能把该候选写成已获独立复核批准。
+
+旧提交 `d9072ed` 的 Avicenna 只读报告发现 1 个 P1 与 3 个 P2；P1 已由
+`1e63165` 修复，三个 P2 已在当前源码中关闭。该旧报告不替代当前提交的独立
+复核，下一步必须固定最新提交重新审查并返回 P0/P1/P2/P3、路径/行号、真实计数、
+限制和 merge recommendation。
+
+原生收口仍需使用已解锁的 macOS 桌面实际观察单 pane、横/纵分屏、三主题、双语、
+900×580、主题切换后的身份栏与会话标签、键盘焦点/AX 以及真实 SSH 连接中和断开
+状态；Windows/Linux 桌面、IME/VoiceOver 完整矩阵和 Podman 真实联调仍未验证。
+Headless GPUI 测试不能代替这些边界。
+
+源码设计决策和测试证据见
+[ADR 0116](adr/0116-pane-connection-identity-bar.md) 与
+[测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。
+
+## 2026-11-07 连接身份栏继续推进（历史状态）
 
 上一片视觉节奏收口已由 `e3226e7097b72f6927fbc38f05a94a365d8269d7` 提交并推送，
 本地、tracking 和远端分支已读回一致。当前候选把每个终端 pane 的顶部统一成
@@ -20,9 +55,8 @@
 
 源码、设计决策和测试记录分别见 `crates/keelshell-app/src/workspace/pane_view.rs`、
 [ADR 0116](adr/0116-pane-connection-identity-bar.md) 和
-[测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。本轮定向
-身份栏 1/1、工作区主题/尺寸 1/1、长标题 1/1、最小窗口 1/1、分屏布局 16/16，
-格式化和差异检查通过；完整工程门禁和独立复核尚未完成。
+[测试记录](testing/records/2026-11-07-pane-connection-identity-bar.md)。本段保留
+提交前的历史状态；最终候选的门禁结果以上方记录为准。
 
 该实现继续保持 UI、core、session、AI 分层，阻塞 I/O 不进入 UI 线程，连接身份栏
 不改变 SSH 生命周期、命令审核或 AI 权限。真实 macOS/Windows/Linux 桌面、主题

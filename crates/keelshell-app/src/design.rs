@@ -34,6 +34,15 @@ pub struct ComponentTokens {
     pub panel_radius: f32,
 }
 
+/// Typography roles used by custom surfaces that need a stable visual grammar.
+///
+/// Keeping the family in the registered theme lets future themes choose their
+/// own code presentation without making workspace views branch on theme IDs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TypographyTokens {
+    pub code_font_family: &'static str,
+}
+
 /// Geometry tokens for the persistent workbench chrome.
 ///
 /// These values live with a theme definition so future families can tune the
@@ -84,6 +93,11 @@ pub fn terminal_palette(cx: &App) -> TerminalPalette {
 /// Shared shape tokens for custom application surfaces.
 pub fn components(cx: &App) -> ComponentTokens {
     current_definition(cx).components
+}
+
+/// Return a copied snapshot of the current theme typography.
+pub fn typography(cx: &App) -> TypographyTokens {
+    current_definition(cx).typography
 }
 
 /// Return a copied snapshot of the current workbench geometry.
