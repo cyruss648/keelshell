@@ -1968,7 +1968,7 @@ impl AssistantPanel {
             .border_color(rgb(visual.border))
             .flex()
             .min_w_0()
-            .overflow_x_scroll()
+            .flex_wrap()
             .items_center()
             .gap_1();
         for (index, step) in AssistantWorkflowStep::ALL.into_iter().enumerate() {
@@ -1984,35 +1984,40 @@ impl AssistantPanel {
                 state.label(cx),
                 step.description(cx)
             );
-            rail = rail.child(
-                div()
-                    .id(("assistant-workflow-step", index))
-                    .test_support()
-                    .aria_label(item_label.clone())
-                    .flex()
-                    .flex_shrink_0()
-                    .items_center()
-                    .gap_1()
-                    .px_1()
-                    .py_1()
-                    .rounded(px(crate::design::components(cx).control_radius))
-                    .bg(rgb(match state {
-                        AssistantWorkflowStepState::Active => visual.selected,
-                        AssistantWorkflowStepState::Complete => visual.surface_active,
-                        AssistantWorkflowStepState::Locked => visual.canvas,
-                    }))
-                    .text_xs()
-                    .text_color(rgb(color))
-                    .child(if state == AssistantWorkflowStepState::Complete {
-                        IconName::Check
-                    } else {
-                        IconName::Circle
-                    })
-                    .child(step.label(cx)),
-            );
+            let mut item = div()
+                .id(("assistant-workflow-step", index))
+                .test_support()
+                .aria_label(item_label)
+                .flex()
+                .flex_shrink_0()
+                .items_center()
+                .gap_1()
+                .px_1()
+                .py_1()
+                .rounded(px(crate::design::components(cx).control_radius))
+                .bg(rgb(match state {
+                    AssistantWorkflowStepState::Active => visual.selected,
+                    AssistantWorkflowStepState::Complete => visual.surface_active,
+                    AssistantWorkflowStepState::Locked => visual.canvas,
+                }))
+                .text_xs()
+                .text_color(rgb(color))
+                .child(if state == AssistantWorkflowStepState::Complete {
+                    IconName::Check
+                } else {
+                    IconName::Circle
+                })
+                .child(step.label(cx));
             if index + 1 < AssistantWorkflowStep::ALL.len() {
-                rail = rail.child(div().text_xs().text_color(rgb(visual.border)).child("›"));
+                item = item.child(
+                    div()
+                        .flex_shrink_0()
+                        .text_xs()
+                        .text_color(rgb(visual.border))
+                        .child("›"),
+                );
             }
+            rail = rail.child(item);
         }
         rail.into_any_element()
     }

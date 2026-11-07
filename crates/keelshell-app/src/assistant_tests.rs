@@ -1,6 +1,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use super::{AssistantEvent, AssistantPanel, PreparedAssistantRequest, shell_blocks};
+use super::{
+    AssistantEvent, AssistantPanel, AssistantWorkflowStep, PreparedAssistantRequest, shell_blocks,
+};
 use crate::{ai_settings::EphemeralCredentials, i18n::set_language};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Entity, InputEvent as _, TestAppContext, WindowBounds,
@@ -753,6 +755,14 @@ fn request_options_credential_change_on_inactive_profile_revokes_review(cx: &mut
 }
 
 fn mount(cx: &mut TestAppContext) -> (AnyWindowHandle, Entity<AssistantPanel>) {
+    mount_with_size(cx, 720., 900.)
+}
+
+fn mount_with_size(
+    cx: &mut TestAppContext,
+    width: f32,
+    height: f32,
+) -> (AnyWindowHandle, Entity<AssistantPanel>) {
     cx.update(gpui_kit::init);
     let one = profile("Profile A");
     let catalog = AiProfileCatalog {
@@ -771,7 +781,7 @@ fn mount(cx: &mut TestAppContext) -> (AnyWindowHandle, Entity<AssistantPanel>) {
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(Bounds::new(
                     point(px(0.), px(0.)),
-                    size(px(720.), px(900.)),
+                    size(px(width), px(height)),
                 ))),
                 ..Default::default()
             },
@@ -2235,6 +2245,31 @@ fn assistant_workflow_surface_separates_capture_preview_reply_and_knowledge_revi
         );
     })
     .unwrap_or_else(|error| panic!("assistant workflow surface: {error}"));
+}
+
+#[gpui_kit::test]
+fn assistant_workflow_rail_wraps_all_stages_inside_a_narrow_bilingual_panel(
+    cx: &mut TestAppContext,
+) {
+    let (window, _) = mount_with_size(cx, 360., 760.);
+    cx.update_window(window, |_, window, cx| {
+        for language in [keelshell_core::Language::ZhCn, keelshell_core::Language::En] {
+            set_language(language, cx);
+            window.render_frame(cx);
+            let rail = window.find("assistant-workflow-rail");
+            let rail_bounds = rail.bounds();
+            for index in 0..AssistantWorkflowStep::ALL.len() {
+                let step = window.find(("assistant-workflow-step", index));
+                let bounds = step.bounds();
+                assert!(step.visible(), "workflow step {index} is hidden");
+                assert!(
+                    bounds.left() >= rail_bounds.left() && bounds.right() <= rail_bounds.right(),
+                    "workflow step {index} is clipped: {bounds:?} / {rail_bounds:?}"
+                );
+            }
+        }
+    })
+    .unwrap_or_else(|error| panic!("narrow workflow rail: {error}"));
 }
 
 #[gpui_kit::test]
