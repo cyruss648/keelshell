@@ -2,7 +2,7 @@
 use super::*;
 use crate::design::{Palette, palette};
 use gpui_kit::{
-    WindowAppearance,
+    Pixels, WindowAppearance,
     component::{Theme as UiTheme, ThemeMode},
     rgb,
 };
@@ -53,6 +53,13 @@ fn assert_theme_cards_are_visible_by_wrapped_row(window: &mut gpui_kit::Window) 
         previous_right = bounds.right();
     }
     assert!(rows > 0);
+}
+
+fn inside(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
+    inner.left() >= outer.left()
+        && inner.right() <= outer.right()
+        && inner.top() >= outer.top()
+        && inner.bottom() <= outer.bottom()
 }
 
 #[gpui_kit::test]
@@ -119,6 +126,48 @@ fn minimum_window_keeps_bilingual_appearance_and_workspace_actions_visible(
         })
         .checked("render minimum bilingual toolbar with empty and two-session states");
     }
+}
+
+#[gpui_kit::test]
+fn theme_picker_renders_registry_driven_workbench_preview_layers(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 1440., 900.);
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.click("theme-settings", cx);
+    })
+    .checked("open the registry-driven theme picker");
+    cx.run_until_parked();
+    cx.update_window(fixture.window, |_, window, _| {
+        let preferences = window.find("theme-preferences").bounds();
+        assert!(preferences.size.width > px(0.));
+        for family in crate::design::registry() {
+            let card = window.find(format!("theme-card-{}", family.id));
+            let card_bounds = card.bounds();
+            assert!(card.visible(), "{} card hidden", family.id);
+            assert!(
+                inside(card_bounds, preferences),
+                "{} card escapes preferences",
+                family.id
+            );
+
+            for id in [
+                format!("theme-preview-{}", family.id),
+                format!("theme-preview-sidebar-{}", family.id),
+                format!("theme-preview-workspace-{}", family.id),
+                format!("theme-preview-terminal-{}", family.id),
+                format!("theme-card-heading-{}", family.id),
+                format!("theme-card-details-{}", family.id),
+                format!("theme-card-action-{}", family.id),
+            ] {
+                let element = window.find(id.clone());
+                assert!(element.visible(), "{id} hidden");
+                assert!(
+                    inside(element.bounds(), card_bounds),
+                    "{id} escapes its theme card"
+                );
+            }
+        }
+    })
+    .checked("render every registered theme as a complete workbench preview");
 }
 
 #[gpui_kit::test]

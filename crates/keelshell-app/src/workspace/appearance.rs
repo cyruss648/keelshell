@@ -354,13 +354,7 @@ impl Workspace {
                             .bg(rgb(p.chrome))
                             .border_b_1()
                             .border_color(rgb(p.border))
-                            .child(
-                                div()
-                                    .w(px(7.))
-                                    .h(px(7.))
-                                    .rounded_full()
-                                    .bg(rgb(p.accent)),
-                            )
+                            .child(div().w(px(7.)).h(px(7.)).rounded_full().bg(rgb(p.accent)))
                             .child(
                                 div()
                                     .flex_1()
@@ -398,25 +392,13 @@ impl Workspace {
                                     .flex_col()
                                     .gap_2()
                                     .child(
-                                        div()
-                                            .h(px(5.))
-                                            .w(px(24.))
-                                            .rounded_full()
-                                            .bg(rgb(p.accent)),
+                                        div().h(px(5.)).w(px(24.)).rounded_full().bg(rgb(p.accent)),
                                     )
                                     .child(
-                                        div()
-                                            .h(px(5.))
-                                            .w(px(30.))
-                                            .rounded_full()
-                                            .bg(rgb(p.border)),
+                                        div().h(px(5.)).w(px(30.)).rounded_full().bg(rgb(p.border)),
                                     )
                                     .child(
-                                        div()
-                                            .h(px(5.))
-                                            .w(px(19.))
-                                            .rounded_full()
-                                            .bg(rgb(p.border)),
+                                        div().h(px(5.)).w(px(19.)).rounded_full().bg(rgb(p.border)),
                                     ),
                             )
                             .child(
@@ -455,23 +437,26 @@ impl Workspace {
                                             .id(format!("theme-preview-terminal-{}", theme.id))
                                             .test_support()
                                             .flex_1()
-                                    .m_2()
-                                    .p_2()
-                                    .rounded(px(theme.components.control_radius))
-                                    .bg(rgb(theme.terminal.background))
-                                    .text_color(rgb(theme.terminal.foreground))
+                                            .m_2()
+                                            .p_2()
+                                            .rounded(px(theme.components.control_radius))
+                                            .bg(rgb(theme.terminal.background))
+                                            .text_color(rgb(theme.terminal.foreground))
                                             .font_family(theme.typography.code_font_family)
                                             .font_weight(theme.typography.code_font_weight)
-                                    .text_xs()
-                                    .flex()
-                                    .flex_col()
-                                    .gap_1()
-                                    .child("Aa 012345")
-                                    .child(
-                                        div().text_color(rgb(theme.terminal.cursor)).child("> _"),
+                                            .text_xs()
+                                            .flex()
+                                            .flex_col()
+                                            .gap_1()
+                                            .child("Aa 012345")
+                                            .child(
+                                                div()
+                                                    .text_color(rgb(theme.terminal.cursor))
+                                                    .child("> _"),
+                                            ),
                                     ),
                             ),
-                    ),
+                    )
                     .child(
                         div()
                             .h(px(20.))
@@ -483,13 +468,7 @@ impl Workspace {
                             .bg(rgb(p.chrome))
                             .border_t_1()
                             .border_color(rgb(p.border))
-                            .child(
-                                div()
-                                    .h(px(4.))
-                                    .w(px(44.))
-                                    .rounded_full()
-                                    .bg(rgb(p.border)),
-                            )
+                            .child(div().h(px(4.)).w(px(44.)).rounded_full().bg(rgb(p.border)))
                             .child(
                                 div()
                                     .h(px(4.))
@@ -506,13 +485,7 @@ impl Workspace {
                     .flex()
                     .items_center()
                     .gap_2()
-                    .child(
-                        div()
-                            .w(px(8.))
-                            .h(px(8.))
-                            .rounded_full()
-                            .bg(rgb(p.accent)),
-                    )
+                    .child(div().w(px(8.)).h(px(8.)).rounded_full().bg(rgb(p.accent)))
                     .child(
                         div()
                             .flex_1()
@@ -550,13 +523,7 @@ impl Workspace {
                             .flex()
                             .items_center()
                             .gap_1()
-                            .child(
-                                div()
-                                    .w(px(5.))
-                                    .h(px(5.))
-                                    .rounded_full()
-                                    .bg(rgb(p.accent)),
-                            )
+                            .child(div().w(px(5.)).h(px(5.)).rounded_full().bg(rgb(p.accent)))
                             .child(format!(
                                 "{}：{recommended}",
                                 t(cx, "推荐外观", "Recommended appearance")
