@@ -54,8 +54,8 @@ P0/P1/P2/P3 均为 0，并建议 `APPROVE`。复核确认 1087 项 app 测试库
 
 当前精确源码包为 `work/native-cua-20261107/package-r7/KeelShell.app`，
 manifest 绑定 `58fd2d2`，结构检查退出 0；macOS 短验观察到六段轨道完整换行
-为两行，助手 AX 元素可读，测试进程已关闭。该提交已推送，文档提交完成后仍会
-读回最终 HEAD/tracking/远端 SHA 一致。跨平台原生桌面、完整键盘焦点、
+为两行，助手 AX 元素可读，测试进程已关闭。该提交与文档提交均已推送，最终
+HEAD/tracking/远端 SHA 已读回一致。跨平台原生桌面、完整键盘焦点、
 IME、VoiceOver、Podman/SSH 真实联调和外部 AI provider 仍保持开放。
 
 ## 2026-11-07 连接身份栏最终候选
