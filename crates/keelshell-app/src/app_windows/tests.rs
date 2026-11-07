@@ -73,6 +73,49 @@ fn abandoned_reload_releases_writer_and_requires_explicit_recovery()
 }
 
 #[::core::prelude::v1::test]
+fn startup_load_error_blocks_new_windows_until_explicit_reload_succeeds()
+-> Result<(), Box<dyn std::error::Error>> {
+    let state = AppState::default();
+    let gate = Arc::new(Mutex::new(ConfigurationGate::new_with_load_error(
+        state.clone(),
+        Some("fixture load failure".into()),
+    )));
+    assert!(
+        !gate
+            .lock()
+            .map_err(|_| "gate poisoned")?
+            .allows_new_window()
+    );
+
+    let failed_reload = ConfigurationGate::begin_reload_lease(&gate, Uuid::new_v4())?;
+    failed_reload.finish(None);
+    assert!(
+        !gate
+            .lock()
+            .map_err(|_| "gate poisoned")?
+            .allows_new_window(),
+        "a failed reload must retain the startup fail-closed state"
+    );
+
+    let successful_reload = ConfigurationGate::begin_reload_lease(&gate, Uuid::new_v4())?;
+    successful_reload.finish(Some(&state));
+    assert!(
+        gate.lock()
+            .map_err(|_| "gate poisoned")?
+            .allows_new_window(),
+        "only an explicit successful reload may admit a new window"
+    );
+    Ok(())
+}
+
+#[::core::prelude::v1::test]
+fn last_window_contract_counts_all_store_groups() {
+    assert!(is_last_window(1, 1));
+    assert!(!is_last_window(1, 2));
+    assert!(!is_last_window(2, 2));
+}
+
+#[::core::prelude::v1::test]
 fn configuration_conflict_never_retries_or_reopens_old_authority()
 -> Result<(), Box<dyn std::error::Error>> {
     let directory = tempfile::tempdir()?;

@@ -412,8 +412,7 @@ impl Workspace {
         let ids = expected_ids;
         if intent != CloseIntent::Window {
             self.app_windows.update(cx, |shared, _| {
-                shared.quitting = true;
-                shared.quit_install = intent == CloseIntent::Install;
+                shared.begin_aggregate_cleanup(&ids, intent);
             });
         }
         if intent == CloseIntent::Install {
@@ -422,6 +421,10 @@ impl Workspace {
                 self.app_windows.update(cx, |shared, _| {
                     shared.quitting = false;
                     shared.quit_install = false;
+                    shared.cleanup_attempt = None;
+                    shared.cleanup_intent = None;
+                    shared.cleanup_participants.clear();
+                    shared.cleanup_aborted = false;
                 });
                 self.close_review = None;
                 self.focus_current_surface(window, cx);
@@ -478,6 +481,15 @@ impl Workspace {
 
     fn begin_window_cleanup(&mut self, intent: CloseIntent, cx: &mut Context<Self>) {
         self.remember_window_workers(cx);
+        let attempt = self.app_windows.update(cx, |shared, _| {
+            if intent == CloseIntent::Window {
+                shared.begin_window_cleanup(self.window_id)
+            } else {
+                shared
+                    .cleanup_attempt
+                    .unwrap_or_else(|| shared.begin_aggregate_cleanup(&[self.window_id], intent))
+            }
+        });
         self.close_review = None;
         self.cleanup_unknown = None;
         self.closing_intent = Some(intent);
@@ -559,11 +571,12 @@ impl Workspace {
             crate::terminal::stop_window_workers(&owners, deadline)
         });
         let native = self.native_window;
+        let attempt = Some(attempt);
         cx.spawn(async move |this, cx| {
             let result = task.await;
             let _ = native.update(cx, |_, window, cx| {
                 let _ = this.update(cx, |view, cx| {
-                    view.finish_window_cleanup(result, window, cx);
+                    view.finish_window_cleanup_for_attempt(attempt, result, window, cx);
                 });
             });
         })
@@ -577,9 +590,47 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        let attempt = self
+            .closing_intent
+            .filter(|intent| *intent != CloseIntent::Window)
+            .and_then(|_| {
+                self.app_windows
+                    .read(cx)
+                    .cleanup_attempt_for(self.window_id)
+            });
+        self.finish_window_cleanup_for_attempt(attempt, result, window, cx);
+    }
+
+    pub(super) fn finish_window_cleanup_for_attempt(
+        &mut self,
+        attempt: Option<uuid::Uuid>,
+        result: Result<Vec<String>, String>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if let Some(attempt) = attempt
+            && self
+                .app_windows
+                .read(cx)
+                .cleanup_attempt_for(self.window_id)
+                != Some(attempt)
+        {
+            // A completion from an abandoned cleanup must never mutate a
+            // newer close review or remove its owner.
+            return;
+        }
+        let intent = self.closing_intent.or_else(|| {
+            let shared = self.app_windows.read(cx);
+            (attempt.is_some()
+                && shared.cleanup_attempt == attempt
+                && shared.cleanup_participants.contains(&self.window_id))
+            .then(|| shared.cleanup_intent)
+            .flatten()
+        });
+        let intent = intent.unwrap_or(CloseIntent::Window);
         match result {
             Err(error) => {
-                let intent = self.closing_intent.take().unwrap_or(CloseIntent::Window);
+                self.closing_intent = None;
                 self.closing = None;
                 self.cleanup_unknown = Some(CleanupUnknown {
                     intent,
@@ -591,33 +642,22 @@ impl Workspace {
                 });
                 if intent != CloseIntent::Window {
                     let registrations = self.app_windows.read(cx).windows.clone();
-                    let cleaned_peers = self.app_windows.update(cx, |shared, _| {
-                        shared.quitting = false;
-                        shared.quit_install = false;
-                        let cleaned_peers: Vec<_> = shared
-                            .windows
-                            .iter()
-                            .filter(|entry| {
-                                entry.id != self.window_id && shared.cleaned.contains(&entry.id)
-                            })
-                            .map(|entry| entry.id)
-                            .collect();
-                        for id in &cleaned_peers {
-                            shared.cleaned.remove(id);
-                        }
-                        cleaned_peers
+                    let retained_peers = self.app_windows.update(cx, |shared, _| {
+                        shared.abort_aggregate_cleanup(attempt, self.window_id)
                     });
                     for registration in registrations {
-                        if cleaned_peers.contains(&registration.id)
+                        if retained_peers.contains(&registration.id)
                             && let Some(peer) = registration.workspace.upgrade()
                         {
                             peer.update(cx, |view, cx| {
-                                view.closing = None;
-                                view.closing_intent = None;
-                                view.status = Message::new(
-                                    "退出/安装已暂停；另一窗口清理结果未知，请重新审核。",
-                                    "Quit/install paused because another window's cleanup is unknown; review again.",
-                                );
+                                if view.cleanup_unknown.is_none() {
+                                    view.closing = None;
+                                    view.closing_intent = None;
+                                    view.status = Message::new(
+                                        "退出/安装已暂停；另一窗口清理结果未知，请保留并重新审核。",
+                                        "Quit/install paused because another window's cleanup is unknown; retain it and review again.",
+                                    );
+                                }
                                 cx.notify();
                             });
                         }
@@ -631,6 +671,18 @@ impl Workspace {
                 return;
             }
             Ok(failures) => {
+                if intent != CloseIntent::Window
+                    && self.app_windows.read(cx).aggregate_cleanup_aborted(attempt)
+                {
+                    self.closing = None;
+                    self.closing_intent = None;
+                    self.status = Message::new(
+                        "退出/安装已暂停；本窗清理随后完成，但 owner 仍需重新审核。",
+                        "Quit/install paused; this window finished cleanup later, but its owner remains until a fresh review.",
+                    );
+                    cx.notify();
+                    return;
+                }
                 self.closing = Some(if failures.is_empty() {
                     Message::new(
                         "本窗 worker 已 join，SSH 已关闭。",
@@ -651,14 +703,18 @@ impl Workspace {
                 self.closing_intent = None;
             }
         }
-        let (quitting, all_clean, last) = self.app_windows.update(cx, |shared, _| {
+        let (quitting, all_clean, group_window_count) = self.app_windows.update(cx, |shared, _| {
             shared.cleaned.insert(self.window_id);
             let all_clean = shared
                 .windows
                 .iter()
                 .all(|entry| shared.cleaned.contains(&entry.id));
-            (shared.quitting, all_clean, shared.windows.len() == 1)
+            (shared.quitting, all_clean, shared.windows.len())
         });
+        let last = crate::app_windows::is_last_window(
+            group_window_count,
+            crate::app_windows::total_window_count(cx),
+        );
         if quitting {
             if all_clean {
                 crate::terminal::shutdown_and_quit(cx);

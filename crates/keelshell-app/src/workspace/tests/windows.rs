@@ -196,6 +196,88 @@ fn unknown_quit_cleanup_releases_global_quit_lock_without_retry(cx: &mut TestApp
 }
 
 #[gpui_kit::test]
+fn aggregate_cleanup_failure_retains_sibling_after_late_success(cx: &mut TestAppContext) {
+    let first = mount(cx, Vec::new());
+    let second = open_empty(&first, cx);
+    let (first_id, second_id) = cx.update(|cx| {
+        (
+            first.workspace.read(cx).window_id,
+            second.workspace.read(cx).window_id,
+        )
+    });
+    let attempt = uuid::Uuid::new_v4();
+
+    cx.update_window(first.window, |_, window, cx| {
+        first.workspace.update(cx, |view, cx| {
+            view.app_windows.update(cx, |shared, _| {
+                shared.quitting = true;
+                shared.cleanup_attempt = Some(attempt);
+                shared.cleanup_intent = Some(CloseIntent::Quit);
+                shared.cleanup_participants = [first_id, second_id].into_iter().collect();
+                shared.cleanup_attempts.insert(first_id, attempt);
+                shared.cleanup_attempts.insert(second_id, attempt);
+            });
+            view.closing = Some(Message::new("first cleanup", "first cleanup"));
+            view.closing_intent = Some(CloseIntent::Quit);
+        });
+    })
+    .checked("prepare failing aggregate cleanup");
+    cx.update_window(second.window, |_, _, cx| {
+        second.workspace.update(cx, |view, _| {
+            view.closing = Some(Message::new("second cleanup", "second cleanup"));
+            view.closing_intent = Some(CloseIntent::Quit);
+        });
+    })
+    .checked("prepare sibling cleanup");
+
+    cx.update_window(first.window, |_, window, cx| {
+        first.workspace.update(cx, |view, cx| {
+            view.finish_window_cleanup_for_attempt(
+                Some(attempt),
+                Err("first cleanup became unknown".into()),
+                window,
+                cx,
+            );
+        });
+    })
+    .checked("fail the first aggregate cleanup");
+
+    let (window_count, quitting, cleanup_aborted) = cx.update(|cx| {
+        let shared = first.workspace.read(cx).app_windows.read(cx);
+        (
+            shared.windows.len(),
+            shared.quitting,
+            shared.cleanup_aborted,
+        )
+    });
+    assert_eq!(window_count, 2);
+    assert!(!quitting);
+    assert!(cleanup_aborted);
+    cx.update(|cx| {
+        assert!(first.workspace.read(cx).cleanup_unknown.is_some());
+        assert!(second.workspace.read(cx).closing.is_none());
+    });
+
+    cx.update_window(second.window, |_, window, cx| {
+        second.workspace.update(cx, |view, cx| {
+            view.finish_window_cleanup_for_attempt(Some(attempt), Ok(Vec::new()), window, cx);
+        });
+    })
+    .checked("deliver late successful sibling completion");
+
+    cx.update(|cx| {
+        assert_eq!(
+            first.workspace.read(cx).app_windows.read(cx).windows.len(),
+            2,
+            "late success must retain the sibling owner"
+        );
+        assert!(second.workspace.read(cx).closing.is_none());
+        assert!(second.workspace.read(cx).cleanup_unknown.is_none());
+    });
+    assert!(!crate::terminal::application_is_quitting_for_test());
+}
+
+#[gpui_kit::test]
 fn stale_close_ticket_rejects_exact_command_change_without_stopping_any_window(
     cx: &mut TestAppContext,
 ) {

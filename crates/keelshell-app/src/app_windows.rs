@@ -19,7 +19,10 @@ use crate::{
 };
 
 #[derive(Default)]
-struct Stores(HashMap<PathBuf, WeakEntity<AppWindows>>);
+struct Stores {
+    windows: HashMap<PathBuf, WeakEntity<AppWindows>>,
+    startup_load_errors: HashMap<PathBuf, String>,
+}
 impl Global for Stores {}
 
 #[derive(Clone)]
@@ -37,11 +40,17 @@ pub(crate) struct AppWindows {
     pub(crate) quitting: bool,
     pub(crate) quit_install: bool,
     pub(crate) cleaned: std::collections::HashSet<Uuid>,
+    pub(crate) cleanup_attempt: Option<Uuid>,
+    pub(crate) cleanup_intent: Option<CloseIntent>,
+    pub(crate) cleanup_participants: std::collections::HashSet<Uuid>,
+    pub(crate) cleanup_attempts: HashMap<Uuid, Uuid>,
+    pub(crate) cleanup_aborted: bool,
 }
 pub(crate) struct ConfigurationGate {
     state: AppState,
     epoch: u64,
     uncertain: bool,
+    load_error: Option<String>,
     writer: Option<Uuid>,
     maintenance: Option<Uuid>,
 }
@@ -68,17 +77,25 @@ pub(crate) struct ReloadLease {
 
 impl ConfigurationGate {
     fn new(state: AppState) -> Self {
+        Self::new_with_load_error(state, None)
+    }
+
+    fn new_with_load_error(state: AppState, load_error: Option<String>) -> Self {
         Self {
             state,
             epoch: 0,
             uncertain: false,
+            load_error,
             writer: None,
             maintenance: None,
         }
     }
 
     pub(crate) fn current(&self, revision: SnapshotRevision, epoch: u64) -> bool {
-        !self.uncertain && self.state.snapshot == revision && self.epoch == epoch
+        !self.uncertain
+            && self.load_error.is_none()
+            && self.state.snapshot == revision
+            && self.epoch == epoch
     }
 
     pub(crate) fn epoch(&self) -> u64 {
@@ -91,6 +108,10 @@ impl ConfigurationGate {
 
     pub(crate) fn available(&self) -> bool {
         self.writer.is_none() && self.maintenance.is_none()
+    }
+
+    pub(crate) fn allows_new_window(&self) -> bool {
+        self.available() && !self.uncertain && self.load_error.is_none()
     }
 
     pub(crate) fn begin(
@@ -154,6 +175,7 @@ impl ConfigurationGate {
         }
         self.state = state.clone();
         self.uncertain = false;
+        self.load_error = None;
         self.epoch = self.epoch.wrapping_add(1);
         true
     }
@@ -200,6 +222,7 @@ impl ReloadLease {
             if let Some(state) = state {
                 gate.state = state.clone();
                 gate.uncertain = false;
+                gate.load_error = None;
             } else {
                 gate.uncertain = true;
             }
@@ -241,29 +264,48 @@ impl AppWindows {
         runtime: Arc<tokio::runtime::Runtime>,
         cx: &mut App,
     ) -> Entity<Self> {
+        if cx.try_global::<Stores>().is_none() {
+            cx.set_global(Stores::default());
+        }
+        let startup_load_error = cx.update_global::<Stores, _>(|stores, _| {
+            stores.startup_load_errors.remove(store.path())
+        });
         if let Some(shared) = cx
-            .try_global::<Stores>()
-            .and_then(|stores| stores.0.get(store.path()))
+            .global::<Stores>()
+            .windows
+            .get(store.path())
             .and_then(WeakEntity::upgrade)
         {
+            if let Some(error) = startup_load_error {
+                shared.update(cx, |shared, _| {
+                    if let Ok(mut gate) = shared.gate.lock() {
+                        gate.load_error = Some(error);
+                    }
+                });
+            }
             return shared;
         }
         let updater = cx.new(|cx| UpdatePanel::new(runtime, state.settings.updates, cx));
         let shared = cx.new(|_| Self {
             windows: Vec::new(),
-            gate: Arc::new(Mutex::new(ConfigurationGate::new(state.clone()))),
+            gate: Arc::new(Mutex::new(ConfigurationGate::new_with_load_error(
+                state.clone(),
+                startup_load_error,
+            ))),
             updater,
             update_owner: None,
             quitting: false,
             quit_install: false,
             cleaned: Default::default(),
+            cleanup_attempt: None,
+            cleanup_intent: None,
+            cleanup_participants: Default::default(),
+            cleanup_attempts: Default::default(),
+            cleanup_aborted: false,
         });
-        if cx.try_global::<Stores>().is_none() {
-            cx.set_global(Stores::default());
-        }
         cx.update_global::<Stores, _>(|stores, _| {
             stores
-                .0
+                .windows
                 .insert(store.path().to_path_buf(), shared.downgrade());
         });
         shared
@@ -272,20 +314,83 @@ impl AppWindows {
     pub(crate) fn can_open(&self) -> bool {
         !self.quitting
             && self.windows.len() < keelshell_core::MAX_LAYOUT_WINDOWS
-            && self
-                .gate
-                .lock()
-                .is_ok_and(|gate| gate.available() && !gate.uncertain)
+            && self.gate.lock().is_ok_and(|gate| gate.allows_new_window())
     }
 
     pub(crate) fn register(&mut self, registration: Registration) {
         self.windows.push(registration);
     }
 
+    pub(crate) fn begin_aggregate_cleanup(&mut self, ids: &[Uuid], intent: CloseIntent) -> Uuid {
+        let attempt = Uuid::new_v4();
+        self.quitting = true;
+        self.quit_install = intent == CloseIntent::Install;
+        self.cleaned.clear();
+        self.cleanup_attempt = Some(attempt);
+        self.cleanup_intent = Some(intent);
+        self.cleanup_participants = ids.iter().copied().collect();
+        self.cleanup_aborted = false;
+        for id in ids {
+            self.cleanup_attempts.insert(*id, attempt);
+        }
+        attempt
+    }
+
+    pub(crate) fn begin_window_cleanup(&mut self, id: Uuid) -> Uuid {
+        let attempt = Uuid::new_v4();
+        self.cleanup_attempts.insert(id, attempt);
+        attempt
+    }
+
+    pub(crate) fn cleanup_attempt_for(&self, id: Uuid) -> Option<Uuid> {
+        self.cleanup_attempts.get(&id).copied()
+    }
+
+    pub(crate) fn aggregate_cleanup_aborted(&self, attempt: Option<Uuid>) -> bool {
+        self.cleanup_aborted && attempt.is_none_or(|attempt| self.cleanup_attempt == Some(attempt))
+    }
+
+    pub(crate) fn abort_aggregate_cleanup(
+        &mut self,
+        attempt: Option<Uuid>,
+        failed_id: Uuid,
+    ) -> Vec<Uuid> {
+        let matches_attempt = attempt.is_none_or(|attempt| self.cleanup_attempt == Some(attempt));
+        if !matches_attempt || self.cleanup_aborted {
+            return Vec::new();
+        }
+        self.quitting = false;
+        self.quit_install = false;
+        self.cleaned.clear();
+        self.cleanup_aborted = true;
+        self.cleanup_participants
+            .iter()
+            .copied()
+            .filter(|id| *id != failed_id)
+            .collect()
+    }
+
     pub(crate) fn changed(&mut self, cx: &mut Context<Self>) {
         cx.emit(ConfigurationChanged);
         cx.notify();
     }
+}
+
+pub(crate) fn is_last_window(group_window_count: usize, total_window_count: usize) -> bool {
+    group_window_count == 1 && total_window_count == 1
+}
+
+pub(crate) fn total_window_count(cx: &App) -> usize {
+    cx.try_global::<Stores>()
+        .map(|stores| {
+            stores
+                .windows
+                .values()
+                .filter_map(WeakEntity::upgrade)
+                .map(|shared| shared.read(cx).windows.len())
+                .sum()
+        })
+        .unwrap_or_default()
 }
 
 pub(crate) fn open(
@@ -296,6 +401,16 @@ pub(crate) fn open(
     restore: bool,
     cx: &mut App,
 ) -> gpui_kit::Result<(AnyWindowHandle, Entity<Workspace>)> {
+    if let Some(load_error) = load_error.clone() {
+        if cx.try_global::<Stores>().is_none() {
+            cx.set_global(Stores::default());
+        }
+        cx.update_global::<Stores, _>(|stores, _| {
+            stores
+                .startup_load_errors
+                .insert(store.path().to_path_buf(), load_error);
+        });
+    }
     let options = WindowOptions {
         app_id: Some("keelshell".into()),
         #[cfg(target_os = "linux")]
@@ -331,7 +446,7 @@ pub(crate) fn request_quit(cx: &mut App) {
         .try_global::<Stores>()
         .map(|stores| {
             stores
-                .0
+                .windows
                 .values()
                 .filter_map(WeakEntity::upgrade)
                 .flat_map(|shared| shared.read(cx).windows.clone())
