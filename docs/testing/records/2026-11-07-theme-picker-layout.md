@@ -45,3 +45,28 @@ controller。app 测试在完整 workspace 门禁中为 `1088 passed / 2 ignored
 本片没有把 GPUI headless 几何测试写成原生桌面验收。主题切换后的 macOS 窗口
 截图、900×580 accessibility frame、Windows/Linux 原生窗口、IME、VoiceOver、
 安装升级和真实外部 provider 请求仍需对应平台和运行环境的独立证据。
+
+## 精确 macOS 包与短范围 smoke
+
+源码提交 `37b8eaf7d65fe31133c5e5058848341c50c8a820` 重新失效项目 crate 后构建
+了 `work/native-cua-20261107/package-r10/KeelShell.app`。构建和结构检查均退出
+0；`package-manifest.json` 的 `build.commit` 精确绑定该 SHA，目标为
+`aarch64-apple-darwin`，最低 macOS 版本为 15.0，`installed=false`，
+`signed_by_packaging_script=false`。manifest、GUI 和 MCP SHA-256 分别为：
+
+- `7bbdfc0b066beeafc9190afac6ebce69c7474623f311ee33f09fcc6cae59c521`
+- `2f8f0eae2258857e24baf0731fa015342671825ac4cec54b8687047f5d393a11`
+- `94eaf83f8bbb23ae4db7cc190c9c06332ddbc19b4bf9246dcdf35f43b3645d8f`
+
+已解锁 macOS 桌面从该 exact package 启动并观察到：主题对话框可打开和关闭，
+Frost、Graphite、Lavender 三套主题可逐一应用，System/Light/Dark 控件始终可读，
+当前主题与“应用推荐”状态会随选择更新，返回后的空连接库和主题入口仍可见。
+测试结束后，本次 exact package 进程已回收。该 smoke 未执行真实 SSH、分屏、900×580
+调整、IME、VoiceOver、签名、公证或安装。
+
+## 独立复核状态
+
+针对 exact source 的三次新独立严格只读复核尝试均在有界等待内没有返回可审计正文，
+随后停止；它们没有编辑、提交、推送或清理工作树。当前状态保持
+`NON_AUTHOR_REVIEW_UNAVAILABLE`，不能把作者定向/完整门禁或本次原生 smoke 写成
+非作者批准。

@@ -5,6 +5,27 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-07 主题选择器 exact package 与复核状态
+
+主题选择器源码已提交并推送到
+`feature/main-visual-integration-20261106`，源码 SHA 为
+`37b8eaf7d65fe31133c5e5058848341c50c8a820`；local、tracking 和远端 SHA 已读回
+一致。该提交已通过完整工程门禁：Python `131 run / 1 skipped`，app
+`1088 passed / 2 ignored`，workspace Clippy、Rust tests、doctests、依赖策略和
+三组 AI controller 均通过。
+
+当前 exact source 已重新构建
+`work/native-cua-20261107/package-r10/KeelShell.app`，bundle 结构检查退出 0，
+manifest 精确绑定上述 SHA。解锁 macOS 短验确认三套主题均可切换，明暗模式按钮
+保持可见，空连接库和主题对话框 AX 元素可读；测试进程已按 PID 读回并回收。该
+smoke 仍不覆盖真实 SSH、分屏、900×580 accessibility frame、IME、VoiceOver、
+签名、公证、安装、Windows/Linux 原生桌面。
+
+针对该 exact source 已启动三次新的独立严格只读复核，但均在有界等待内没有返回
+可审计正文，随后停止；没有任何复核任务修改、提交、推送或清理工作树。当前状态
+保持 `NON_AUTHOR_REVIEW_UNAVAILABLE`，不能把本片写成非作者批准。包、smoke 和
+复核边界见[主题选择器记录](testing/records/2026-11-07-theme-picker-layout.md)。
+
 ## 2026-11-07 主题选择器布局与可见性修复
 
 本片继续推进用户选定的三套主题方向：Frost「霜白」、Graphite「曜石」、

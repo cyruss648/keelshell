@@ -3,6 +3,20 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-07 exact package smoke 与复核边界
+
+当前主题选择器源码提交 `37b8eaf7d65fe31133c5e5058848341c50c8a820` 已重新构建
+精确 macOS 开发包 `work/native-cua-20261107/package-r10/KeelShell.app`，
+结构检查退出 0，manifest 绑定该 SHA。解锁桌面短验确认 Frost、Graphite、
+Lavender 三套主题可以切换，System/Light/Dark 控件和 AX 文案可读，空连接库返回
+正常；exact package 进程已清理。
+
+本次仅覆盖主题弹窗和空工作区短流程，未覆盖真实 SSH、分屏、900×580、IME、
+VoiceOver、签名/安装和 Windows/Linux。针对 exact source 的三次新独立复核尝试
+均未在有界等待内返回正文，当前状态为 `NON_AUTHOR_REVIEW_UNAVAILABLE`；不能把
+本片标成非作者批准。详细包和 smoke 证据见
+[主题选择器记录](testing/records/2026-11-07-theme-picker-layout.md)。
+
 ## 2026-11-07 主题选择器可见性与交互回归
 
 主题选择器已完成一片可验收的视觉和布局修复：主题卡片目录独立滚动，明暗模式
