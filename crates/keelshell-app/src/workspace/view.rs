@@ -1785,20 +1785,22 @@ impl Workspace {
                     .flex_col()
                     .gap_1()
                     .overflow_y_scroll()
-                    .children(summaries.iter().enumerate().map(|(index, summary)| {
+                    .children(summaries.iter().map(|summary| {
                         let is_current = summary.id == self.window_id;
                         let session_label = if summary.session_count == 0 {
                             t(cx, "0 个会话", "0 sessions").to_owned()
                         } else {
                             format!("{} {}", summary.session_count, t(cx, "个会话", "sessions"))
                         };
-                        let visible_label =
-                            format!("{} · {} · {}", index + 1, session_label, summary.context);
+                        let visible_label = format!(
+                            "{} · {} · {}",
+                            summary.sequence, session_label, summary.context
+                        );
                         let accessible_label = if i18n::language(cx) == Language::ZhCn {
                             format!(
                                 "{} {}：{}，{}",
                                 t(cx, "窗口", "Window"),
-                                index + 1,
+                                summary.sequence,
                                 session_label,
                                 summary.context
                             )
@@ -1806,12 +1808,12 @@ impl Workspace {
                             format!(
                                 "{} {}: {}, {}",
                                 t(cx, "窗口", "Window"),
-                                index + 1,
+                                summary.sequence,
                                 session_label,
                                 summary.context
                             )
                         };
-                        Button::new(("workspace-window", index))
+                        Button::new(("workspace-window", summary.sequence))
                             .ghost()
                             .w_full()
                             .justify_start()

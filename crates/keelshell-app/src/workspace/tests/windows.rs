@@ -101,14 +101,14 @@ fn workspace_window_entry_shows_empty_and_two_window_statuses_and_activates_targ
         window.click("workspace-window-switcher", cx);
         window.render_frame(cx);
         assert_eq!(
-            window.find(("workspace-window", 0_usize)).label(),
+            window.find(("workspace-window", 1_usize)).label(),
             Some("窗口 1：2 个会话，fixture-0@example.invalid:22")
         );
         assert_eq!(
-            window.find(("workspace-window", 1_usize)).label(),
+            window.find(("workspace-window", 2_usize)).label(),
             Some("窗口 2：0 个会话，快速连接")
         );
-        window.click(("workspace-window", 1_usize), cx);
+        window.click(("workspace-window", 2_usize), cx);
     })
     .checked("inspect and activate a workspace from the visible window entry");
 
@@ -186,6 +186,44 @@ fn workspace_window_entry_keeps_bilingual_theme_and_gate_semantics(cx: &mut Test
     })
     .checked("disable new window while configuration gate is held");
     lease.cancel_before_dispatch();
+}
+
+#[gpui_kit::test]
+async fn workspace_window_entry_keeps_sequence_after_a_prior_window_closes(
+    cx: &mut TestAppContext,
+) {
+    let first = mount(cx, Vec::new());
+    let second = open_empty(&first, cx);
+    let _third = open_empty(&first, cx);
+    let ticket = review(&first, CloseIntent::Window, cx);
+
+    cx.update_window(first.window, |_, window, cx| {
+        first
+            .workspace
+            .update(cx, |view, cx| view.confirm_window_close(ticket, window, cx));
+    })
+    .checked("close the first window through its actual review");
+
+    cx.wait_for(second.window, std::time::Duration::from_secs(5), |_, cx| {
+        second.workspace.read(cx).app_windows.read(cx).windows.len() == 2
+    })
+    .await;
+
+    cx.update_window(second.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("workspace-window-switcher", cx);
+        window.render_frame(cx);
+        assert_eq!(
+            window.find(("workspace-window", 2_usize)).label(),
+            Some("窗口 2：0 个会话，快速连接")
+        );
+        assert_eq!(
+            window.find(("workspace-window", 3_usize)).label(),
+            Some("窗口 3：0 个会话，快速连接")
+        );
+        assert!(window.try_find(("workspace-window", 1_usize)).is_none());
+    })
+    .checked("retain stable window sequence after removing the first window");
 }
 
 #[gpui_kit::test]

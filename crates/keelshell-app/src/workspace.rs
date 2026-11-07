@@ -493,6 +493,7 @@ impl Workspace {
         let window_id = uuid::Uuid::new_v4();
         let window_summary = Arc::new(std::sync::Mutex::new(crate::app_windows::WindowSummary {
             id: window_id,
+            sequence: 0,
             session_count: 0,
             context: t(cx, "快速连接", "Quick connect").to_owned(),
         }));

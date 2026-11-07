@@ -1,7 +1,7 @@
 # package-r4 原生主题与语言短验
 
-日期：2026-11-08（Asia/Shanghai）  
-范围：当前源码提交 `fac90fef5d4edcd4e53a48ef1dfb559e101aa169` 的精确 macOS 开发包  
+日期：2026-11-08（Asia/Shanghai）
+范围：当前源码提交 `fac90fef5d4edcd4e53a48ef1dfb559e101aa169` 的精确 macOS 开发包
 结论：**LIMITED_NATIVE_OBSERVED**
 
 ## 包绑定与静态检查

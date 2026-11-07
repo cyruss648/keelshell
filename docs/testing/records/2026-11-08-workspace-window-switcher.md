@@ -1,7 +1,7 @@
 # 工作区窗口切换器测试记录
 
-日期：2026-11-08（Asia/Shanghai）  
-范围：工作区窗口入口、窗口摘要、原生窗口激活、主题/语言和配置闸门  
+日期：2026-11-08（Asia/Shanghai）
+范围：工作区窗口入口、窗口摘要、原生窗口激活、主题/语言和配置闸门
 状态：**源码定向通过；作者完整工程门禁通过；原生多窗口待复验**
 
 ## 实现范围
@@ -21,15 +21,15 @@
 
 在共享 target 归属切换后，按 `docs/testing/SHARED_TARGET.md` 失效
 `keelshell-app`、`keelshell-core`、`keelshell-session`、`keelshell-ai` 和
-`keelshell-mcp` 项目包，再重新生成测试清单。当前清单包含 `1,119 tests`，并确认
-新增的两个测试名存在。
+`keelshell-mcp` 项目包，再重新生成测试清单。当前清单包含 `1,120 tests`，并确认
+新增的三个窗口切换测试名存在。
 
 实际执行：
 
 | 命令范围 | 结果 |
 | --- | --- |
-| `workspace::tests::windows::workspace_window_entry` | `2 passed / 0 failed / 1117 filtered out` |
-| `workspace::tests::windows` | `17 passed / 0 failed / 1102 filtered out` |
+| `workspace::tests::windows::workspace_window_entry` | `3 passed / 0 failed / 1117 filtered out` |
+| `workspace::tests::windows` | `18 passed / 0 failed / 1102 filtered out` |
 | `workspace::tests::workbench_layout` | `8 passed / 0 failed / 1111 filtered out` |
 | `workspace::tests::themes` | `9 passed / 0 failed / 1110 filtered out` |
 | `cargo fmt --all -- --check` | 通过 |
@@ -49,6 +49,8 @@
 2. 点击空窗口条目后，`active_window` 切换到对应真实窗口，原窗口弹出层关闭；
 3. Frost、Graphite、Lavender 与中文/英文组合下切换器可渲染，列表不越过窗口底部；
 4. 配置写 lease 占用时，新建窗口按钮禁用。
+5. 关闭第一个窗口后，后续窗口仍显示进程生命周期内分配的序号 `2`、`3`，不会把
+   后续窗口重编号为 `1`、`2`。
 
 ## 边界
 

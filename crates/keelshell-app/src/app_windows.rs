@@ -36,6 +36,7 @@ pub(crate) struct Registration {
 #[derive(Clone)]
 pub(crate) struct WindowSummary {
     pub(crate) id: Uuid,
+    pub(crate) sequence: usize,
     pub(crate) session_count: usize,
     pub(crate) context: String,
 }
@@ -53,6 +54,7 @@ pub(crate) struct AppWindows {
     pub(crate) cleanup_participants: std::collections::HashSet<Uuid>,
     pub(crate) cleanup_attempts: HashMap<Uuid, Uuid>,
     pub(crate) cleanup_aborted: bool,
+    next_window_sequence: usize,
 }
 pub(crate) struct ConfigurationGate {
     state: AppState,
@@ -306,6 +308,7 @@ impl AppWindows {
             cleanup_participants: Default::default(),
             cleanup_attempts: Default::default(),
             cleanup_aborted: false,
+            next_window_sequence: 1,
         });
         cx.update_global::<Stores, _>(|stores, _| {
             stores
@@ -322,6 +325,11 @@ impl AppWindows {
     }
 
     pub(crate) fn register(&mut self, registration: Registration) {
+        let sequence = self.next_window_sequence;
+        self.next_window_sequence = self.next_window_sequence.saturating_add(1);
+        if let Ok(mut summary) = registration.summary.lock() {
+            summary.sequence = sequence;
+        }
         self.windows.push(registration);
     }
 
