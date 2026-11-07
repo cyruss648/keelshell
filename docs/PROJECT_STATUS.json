@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "KeelShell",
+    "repository": "https://github.com/cyruss648/keelshell",
+    "branch": "main",
+    "revision": "3f9ec9581d086b301bd8cac56f06176e7a95e415",
+    "revision_short": "3f9ec95",
+    "updated_at": "2026-11-07T14:21:53+08:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "session": {
+    "state": "in_progress",
+    "headline": "进度看板已发布，本地会话状态桥正在运行",
+    "detail": "KeelShell Progress Console 已发布为私有 Sites 站点。页面优先读取本机 127.0.0.1:7357/status；不可用时回退到 GitHub main 的 docs/PROJECT_STATUS.json。",
+    "started_at": "2026-11-07T14:05:09+08:00",
+    "owner": "Codex local session",
+    "next": "后续开发、修复、测试和验收阶段更新本文件；站点会在 30 秒内刷新状态。"
+  },
+  "summary": {
+    "headline": "产品目标仍在进行中；当前基线已完成一批功能交付和限定原生收口",
+    "facts": [
+      "main 当前提交为 3f9ec9581d086b301bd8cac56f06176e7a95e415，包含远程文本格式与审核式 traceroute 变更。",
+      "r3 完整门禁、macOS 打包和静态检查已通过；原生验证仍有编辑器底部动作可达性和完整多平台验收边界。",
+      "独立工作窗口正在隔离工作树中开发，尚无实现或验收结论。",
+      "Windows/Linux 真实桌面、外部 AI 供应商账户、签名安装、多窗口和若干运行态恢复矩阵仍开放。"
+    ]
+  },
+  "workstreams": [
+    {
+      "id": "remote-text-format",
+      "title": "远程文本格式",
+      "priority": "P1",
+      "status": "limited_native",
+      "stage": "限定原生已批准",
+      "summary": "UTF-8 BOM、LF/CRLF 保持和连续编辑修复已通过工程门禁；完整编辑器原生验收仍保持 HOLD。",
+      "acceptance": "工程与限定 macOS 原生证据可用；inline 编辑器底部动作可达性尚未完整收口。",
+      "evidence": [
+        "docs/testing/records/2026-11-06-editor-format.md",
+        "docs/testing/records/2026-11-06-editor-traceroute-native.md"
+      ],
+      "next": "完成底部动作可达性修复的独立复核，并重新运行合并/保存相关原生场景。"
+    },
+    {
+      "id": "traceroute",
+      "title": "审核式有界 traceroute",
+      "priority": "P2",
+      "status": "limited_native",
+      "stage": "工程完成，部分原生已确认",
+      "summary": "stderr 版本合同、错误流负例和最终门禁已通过；同包真实 SSH UI 的 UDP IPv4/IPv6 各完成一次审核确认。",
+      "acceptance": "一跳回复证据已取得；原生 ICMP、取消和完整跨平台场景仍待验。",
+      "evidence": [
+        "docs/testing/records/2026-11-06-traceroute-diagnostics.md",
+        "docs/testing/records/2026-11-06-editor-traceroute-native.md"
+      ],
+      "next": "补齐原生 ICMP、取消和其他平台的验收矩阵。"
+    },
+    {
+      "id": "multiwindow",
+      "title": "独立工作窗口",
+      "priority": "P1",
+      "status": "in_progress",
+      "stage": "隔离开发中",
+      "summary": "Dewey 正在隔离工作树中实现空白新窗、独立会话/草稿/审核、安全关闭、worker 回收与共享 StateStore 协调。",
+      "acceptance": "尚无实现合入或验收结论。",
+      "evidence": [
+        "docs/HANDOFF.md",
+        "docs/ROADMAP.md"
+      ],
+      "next": "等待隔离实现、独立审查和 fresh 完整门禁。"
+    },
+    {
+      "id": "editor-accessibility",
+      "title": "编辑器动作可达性",
+      "priority": "P1",
+      "status": "blocked",
+      "stage": "修复与复核待完成",
+      "summary": "原生观察发现 inline 编辑器底部动作难以触达，Carver 正在限定文件范围内修复。",
+      "acceptance": "合并采用/保存、late-save 和连续零换行保存仍为 NOT_RUN。",
+      "evidence": [
+        "docs/testing/records/2026-11-06-editor-traceroute-native.md"
+      ],
+      "next": "完成专项修复并取得独立复核，再决定是否导入本批。"
+    },
+    {
+      "id": "platform-release",
+      "title": "平台与发行",
+      "priority": "P1",
+      "status": "open",
+      "stage": "持续缺口",
+      "summary": "三平台 CI 与 macOS 限定原生证据已存在，但 Windows/Linux 真实桌面、签名安装和完整辅助技术验收仍开放。",
+      "acceptance": "不能把 CI 或局部原生观察当作三平台桌面验收。",
+      "evidence": [
+        "docs/HANDOFF.md",
+        "docs/ROADMAP.md",
+        "docs/RELEASING.md"
+      ],
+      "next": "继续真实 Windows/Linux 桌面和发布安装矩阵。"
+    }
+  ],
+  "validation": {
+    "overall": "partial",
+    "gate": {
+      "name": "full-gate-r3",
+      "status": "passed",
+      "details": "2355 ordinary / 23 ignored，14 rustdoc，Python 131 run = 130 passed + 1 skipped；42 新增与基线 204 个具体名通过。"
+    },
+    "native": {
+      "status": "limited",
+      "details": "runtime-r3 外层 exit 0 / reaped；38 组 AX/JPEG 和原件证据获限定批准，完整原生继续 HOLD。"
+    },
+    "release": {
+      "status": "open",
+      "details": "当前交接要求将 543 输入提交并启动新 SHA 对应的 current-ci 观察器；新的 run/exec/deadline 尚未绑定。"
+    }
+  },
+  "blockers": [
+    {
+      "severity": "P1",
+      "title": "inline 编辑器底部动作可达性",
+      "status": "open",
+      "detail": "合并与保存相关原生场景保持 NOT_RUN，不能用源码或夹具观察替代。"
+    },
+    {
+      "severity": "P1",
+      "title": "多平台真实桌面验收",
+      "status": "open",
+      "detail": "Windows/Linux 真实桌面、完整几何/IME/辅助技术和签名安装仍未关闭。"
+    },
+    {
+      "severity": "P2",
+      "title": "新的 CI 观察器尚未绑定",
+      "status": "pending",
+      "detail": "需要基于新 main SHA 启动一次新的 current-ci 观察器，旧 fa7 run 不代表本批结果。"
+    }
+  ],
+  "maintenance_contract": {
+    "source_of_truth": "docs/PROJECT_STATUS.json",
+    "supporting_sources": [
+      "docs/HANDOFF.md",
+      "docs/ROADMAP.md",
+      "docs/testing/records/*.md",
+      "main commit history"
+    ],
+    "update_rule": "每次进入新的开发、测试、验收或阻塞阶段时更新本文件；只有可验证证据才能把状态推进到下一阶段。",
+    "site_refresh_seconds": 30,
+    "public_data": true,
+    "secret_policy": "不写入凭据、主密码、私钥、nonce 或带访问权的 URL。"
+  },
+  "recent_commits": [
+    {
+      "sha": "3f9ec9581d086b301bd8cac56f06176e7a95e415",
+      "short_sha": "3f9ec95",
+      "date": "2026-11-06T13:41:15+08:00",
+      "title": "feat: preserve remote text formats and add reviewed traceroute"
+    },
+    {
+      "sha": "fa7c05914e0eefc0f24ab32f8af690bdc50a63ed",
+      "short_sha": "fa7c059",
+      "date": "2026-11-06T10:59:28+08:00",
+      "title": "feat: add per-function monitoring and reviewed knowledge categories"
+    },
+    {
+      "sha": "850b77b77b576f3bd2527883ffef9d97a666afd0",
+      "short_sha": "850b77b",
+      "date": "2026-11-06T07:29:43+08:00",
+      "title": "feat: add resource history and reviewed knowledge batch deletion"
+    },
+    {
+      "sha": "5b7772ca45b0562af6b623792322087842758654",
+      "short_sha": "5b7772c",
+      "date": "2026-11-06T02:51:19+08:00",
+      "title": "feat: add reviewed ICMP diagnostics and pane consent isolation"
+    },
+    {
+      "sha": "56d5440e4fa260f53ee6ea404fee9223f41d2188",
+      "short_sha": "56d5440",
+      "date": "2026-11-06T00:18:55+08:00",
+      "title": "feat: restore saved SSH workspace panes on startup"
+    }
+  ]
+}
