@@ -103,6 +103,7 @@ impl Workspace {
                     .border_1()
                     .border_color(rgb(p.border))
                     .bg(rgb(p.surface))
+                    .shadow_lg()
                     .child(
                         div()
                             .p_5()
@@ -112,9 +113,37 @@ impl Workspace {
                             .gap_1()
                             .child(
                                 div()
-                                    .text_xl()
-                                    .font_weight(FontWeight::SEMIBOLD)
-                                    .child(t(cx, "主题与外观", "Themes and appearance")),
+                                    .flex()
+                                    .items_center()
+                                    .gap_2()
+                                    .child(
+                                        div()
+                                            .w(px(8.))
+                                            .h(px(8.))
+                                            .rounded_full()
+                                            .bg(rgb(p.accent)),
+                                    )
+                                    .child(
+                                        div()
+                                            .text_xl()
+                                            .font_weight(FontWeight::SEMIBOLD)
+                                            .child(t(cx, "主题与外观", "Themes and appearance")),
+                                    )
+                                    .child(
+                                        div()
+                                            .ml_auto()
+                                            .px_2()
+                                            .py_1()
+                                            .rounded_full()
+                                            .bg(rgb(p.selected))
+                                            .text_xs()
+                                            .text_color(rgb(p.accent))
+                                            .child(format!(
+                                                "{} {}",
+                                                design::registry().len(),
+                                                t(cx, "套主题", "themes")
+                                            )),
+                                    ),
                             )
                             .child(div().text_sm().text_color(rgb(p.muted)).child(t(
                                 cx,
@@ -131,7 +160,26 @@ impl Workspace {
                             .pb_5()
                             .flex()
                             .flex_col()
-                            .gap_5()
+                            .gap_4()
+                            .child(
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .gap_2()
+                                    .child(
+                                        div()
+                                            .text_sm()
+                                            .font_weight(FontWeight::SEMIBOLD)
+                                            .child(t(cx, "主题家族", "Theme families")),
+                                    )
+                                    .child(div().flex_1().h(px(1.)).bg(rgb(p.border)))
+                                    .child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(rgb(p.muted))
+                                            .child(t(cx, "选择后立即保存", "Saved when selected")),
+                                    ),
+                            )
                             .child(
                                 div().flex().flex_wrap().gap_3().children(
                                     design::registry()
@@ -141,6 +189,13 @@ impl Workspace {
                             )
                             .child(
                                 div()
+                                    .id("theme-appearance-section")
+                                    .test_support()
+                                    .p_3()
+                                    .rounded(px(design::components(cx).panel_radius))
+                                    .border_1()
+                                    .border_color(rgb(p.border))
+                                    .bg(rgb(p.canvas))
                                     .flex()
                                     .items_center()
                                     .gap_3()
@@ -256,35 +311,75 @@ impl Workspace {
             )
         };
         div()
+            .id(format!("theme-card-{}", theme.id))
+            .test_support()
             .flex_1()
             .min_w(px(220.))
+            .p_2()
+            .rounded(px(theme.components.panel_radius + 2.))
+            .border_1()
+            .border_color(rgb(if state.current_family {
+                visual.accent
+            } else {
+                visual.border
+            }))
+            .bg(rgb(if state.current_family {
+                visual.selected
+            } else {
+                visual.surface
+            }))
             .flex()
             .flex_col()
             .gap_2()
             .child(
                 div()
-                    .h(px(124.))
+                    .id(format!("theme-preview-{}", theme.id))
+                    .test_support()
+                    .h(px(136.))
+                    .flex_shrink_0()
                     .flex()
                     .flex_col()
                     .overflow_hidden()
                     .rounded(px(theme.components.panel_radius))
-                    .border_2()
-                    .border_color(rgb(if state.current_family {
-                        visual.accent
-                    } else {
-                        visual.border
-                    }))
-                    .bg(rgb(p.canvas))
+                    .border_1()
+                    .border_color(rgb(p.border))
                     .child(
                         div()
-                            .h(px(24.))
+                            .h(px(28.))
                             .px_2()
-                            .bg(rgb(p.chrome))
-                            .text_color(rgb(p.muted))
-                            .text_xs()
+                            .flex_shrink_0()
                             .flex()
                             .items_center()
-                            .child(t(cx, "配色预览", "Color preview")),
+                            .gap_2()
+                            .bg(rgb(p.chrome))
+                            .border_b_1()
+                            .border_color(rgb(p.border))
+                            .child(
+                                div()
+                                    .w(px(7.))
+                                    .h(px(7.))
+                                    .rounded_full()
+                                    .bg(rgb(p.accent)),
+                            )
+                            .child(
+                                div()
+                                    .flex_1()
+                                    .min_w_0()
+                                    .text_color(rgb(p.text))
+                                    .text_xs()
+                                    .font_weight(FontWeight::MEDIUM)
+                                    .truncate()
+                                    .child(t(cx, "工作台预览", "Workbench preview")),
+                            )
+                            .child(
+                                div()
+                                    .px_1()
+                                    .rounded_full()
+                                    .bg(rgb(p.surface_active))
+                                    .text_color(rgb(p.accent))
+                                    .text_xs()
+                                    .child(t(cx, "就绪", "Ready")),
+                            ),
                     )
                     .child(
                         div()
@@ -293,20 +388,80 @@ impl Workspace {
                             .flex()
                             .child(
                                 div()
-                                    .w(px(46.))
+                                    .id(format!("theme-preview-sidebar-{}", theme.id))
+                                    .test_support()
+                                    .w(px(48.))
+                                    .flex_shrink_0()
                                     .p_2()
                                     .bg(rgb(p.sidebar))
-                                    .child(div().h(px(5.)).bg(rgb(p.accent)).rounded(px(2.))),
+                                    .flex()
+                                    .flex_col()
+                                    .gap_2()
+                                    .child(
+                                        div()
+                                            .h(px(5.))
+                                            .w(px(24.))
+                                            .rounded_full()
+                                            .bg(rgb(p.accent)),
+                                    )
+                                    .child(
+                                        div()
+                                            .h(px(5.))
+                                            .w(px(30.))
+                                            .rounded_full()
+                                            .bg(rgb(p.border)),
+                                    )
+                                    .child(
+                                        div()
+                                            .h(px(5.))
+                                            .w(px(19.))
+                                            .rounded_full()
+                                            .bg(rgb(p.border)),
+                                    ),
                             )
                             .child(
                                 div()
+                                    .id(format!("theme-preview-workspace-{}", theme.id))
+                                    .test_support()
                                     .flex_1()
+                                    .min_w_0()
+                                    .p_2()
+                                    .bg(rgb(p.canvas))
+                                    .flex()
+                                    .flex_col()
+                                    .gap_1()
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .items_center()
+                                            .gap_1()
+                                            .child(
+                                                div()
+                                                    .h(px(5.))
+                                                    .w(px(30.))
+                                                    .rounded_full()
+                                                    .bg(rgb(p.accent)),
+                                            )
+                                            .child(
+                                                div()
+                                                    .h(px(5.))
+                                                    .flex_1()
+                                                    .rounded_full()
+                                                    .bg(rgb(p.border)),
+                                            ),
+                                    )
+                                    .child(
+                                        div()
+                                            .id(format!("theme-preview-terminal-{}", theme.id))
+                                            .test_support()
+                                            .flex_1()
                                     .m_2()
                                     .p_2()
                                     .rounded(px(theme.components.control_radius))
                                     .bg(rgb(theme.terminal.background))
                                     .text_color(rgb(theme.terminal.foreground))
-                                    .font_family("monospace")
+                                            .font_family(theme.typography.code_font_family)
+                                            .font_weight(theme.typography.code_font_weight)
                                     .text_xs()
                                     .flex()
                                     .flex_col()
@@ -317,17 +472,55 @@ impl Workspace {
                                     ),
                             ),
                     ),
+                    .child(
+                        div()
+                            .h(px(20.))
+                            .flex_shrink_0()
+                            .px_2()
+                            .flex()
+                            .items_center()
+                            .gap_2()
+                            .bg(rgb(p.chrome))
+                            .border_t_1()
+                            .border_color(rgb(p.border))
+                            .child(
+                                div()
+                                    .h(px(4.))
+                                    .w(px(44.))
+                                    .rounded_full()
+                                    .bg(rgb(p.border)),
+                            )
+                            .child(
+                                div()
+                                    .h(px(4.))
+                                    .flex_1()
+                                    .rounded_full()
+                                    .bg(rgb(p.surface_active)),
+                            ),
+                    ),
             )
             .child(
                 div()
+                    .id(format!("theme-card-heading-{}", theme.id))
+                    .test_support()
                     .flex()
                     .items_center()
                     .gap_2()
-                    .child(div().font_weight(FontWeight::SEMIBOLD).child(t(
-                        cx,
-                        theme.name_zh,
-                        theme.name_en,
-                    )))
+                    .child(
+                        div()
+                            .w(px(8.))
+                            .h(px(8.))
+                            .rounded_full()
+                            .bg(rgb(p.accent)),
+                    )
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .truncate()
+                            .child(t(cx, theme.name_zh, theme.name_en)),
+                    )
                     .when(state.current_family, |row| {
                         row.child(
                             div()
@@ -343,6 +536,8 @@ impl Workspace {
             )
             .child(
                 div()
+                    .id(format!("theme-card-details-{}", theme.id))
+                    .test_support()
                     .min_h(px(36.))
                     .flex()
                     .flex_col()
@@ -350,10 +545,23 @@ impl Workspace {
                     .text_xs()
                     .text_color(rgb(visual.muted))
                     .child(t(cx, theme.description_zh, theme.description_en))
-                    .child(format!(
-                        "{}：{recommended}",
-                        t(cx, "推荐外观", "Recommended appearance")
-                    ))
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap_1()
+                            .child(
+                                div()
+                                    .w(px(5.))
+                                    .h(px(5.))
+                                    .rounded_full()
+                                    .bg(rgb(p.accent)),
+                            )
+                            .child(format!(
+                                "{}：{recommended}",
+                                t(cx, "推荐外观", "Recommended appearance")
+                            )),
+                    )
                     .when(state.current_family, |body| {
                         body.child(format!(
                             "{}：{current}",
@@ -362,15 +570,23 @@ impl Workspace {
                     }),
             )
             .child(
-                Button::new(SharedString::from(format!("theme-family-{}", theme.id)))
-                    .w_full()
-                    .label(action_label)
-                    .accessibility_label(accessibility_label)
-                    .selected(state.recommended_preset_applied)
-                    .disabled(self.saving || self.state_reloading)
-                    .on_click(cx.listener(move |view, _, window, cx| {
-                        view.select_theme_family(theme, window, cx)
-                    })),
+                div()
+                    .id(format!("theme-card-action-{}", theme.id))
+                    .test_support()
+                    .pt_1()
+                    .border_t_1()
+                    .border_color(rgb(p.border))
+                    .child(
+                        Button::new(SharedString::from(format!("theme-family-{}", theme.id)))
+                            .w_full()
+                            .label(action_label)
+                            .accessibility_label(accessibility_label)
+                            .selected(state.recommended_preset_applied)
+                            .disabled(self.saving || self.state_reloading)
+                            .on_click(cx.listener(move |view, _, window, cx| {
+                                view.select_theme_family(theme, window, cx)
+                            })),
+                    ),
             )
             .into_any_element()
     }
