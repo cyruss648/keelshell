@@ -17,9 +17,10 @@
 `373d4157ae816a29a74aa72cf490f688e3563457`。定向结果已通过：窗口入口 `3/3`、
 全部窗口生命周期 `19/19`、modal/focus `12/12`、工作区布局 `8/8`、
 主题 `9/9`；新增中文/英文与 Frost「霜白」、Graphite「曜石」、Lavender「雾紫」
-组合回归，英文无障碍标签使用英文标点。当前未提交修复还将窗口列表接入统一
-modal scope，增加 Dialog 语义、全屏输入隔离、focus trap、Escape 关闭和工作区焦点
-恢复。设计、产品和测试记录分别见
+组合回归，英文无障碍标签使用英文标点。窗口列表已接入统一 modal scope，增加
+Dialog 语义、全屏输入隔离、focus trap、Escape 关闭和工作区焦点恢复。作者完整工程
+门禁已通过，独立严格只读复核以该源码基线返回 `APPROVE`，P0/P1/P2/P3 均为 `0`。
+设计、产品和测试记录分别见
 [ADR 0123](adr/0123-workspace-window-switcher.md)、
 [工作区窗口切换器](product/WORKSPACE_WINDOW_SWITCHER.md) 和
 [测试记录](testing/records/2026-11-08-workspace-window-switcher.md)。
@@ -29,9 +30,8 @@ modal scope，增加 Dialog 语义、全屏输入隔离、focus trap、Escape �
 `131 run / 1 skipped`，app `1,119 passed / 2 ignored`，workspace 其余 Rust
 测试、14 项 doctest、严格 Clippy、依赖策略和 readiness/observer/small-stack 三组
 AI controller 均通过；`__eh_frame section too large` 仍只是链接器 warning。
-当前正在以该 SHA 做独立严格只读复核；复核通过后重新构建绑定当前 SHA 的 macOS 包
-并执行有限原生多窗口观察。旧 `package-r4` 只代签主题/语言短验，不代签本片新增
-窗口切换器。
+独立复核已完成；下一步重新构建绑定当前源码 SHA 的 macOS 包并执行有限原生多窗口
+观察。旧 `package-r4` 只代签主题/语言短验，不代签本片新增窗口切换器。
 
 ## 2026-11-08 当前片：编辑器格式与合并迟到读回组合回归收口
 

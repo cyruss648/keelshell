@@ -1,7 +1,7 @@
 # ADR 0123：工作区窗口切换器
 
 - 日期：2026-11-08
-- 状态：已实现；作者完整工程门禁通过；独立复核与原生复验待收口
+- 状态：已实现；作者完整工程门禁和独立只读复核通过；原生复验待收口
 - 关联：[工作区窗口切换器](../product/WORKSPACE_WINDOW_SWITCHER.md)、[独立工作窗口](0114-independent-workspace-windows.md)
 
 ## 背景
@@ -55,3 +55,8 @@ focus trap、Escape 焦点恢复、中英文、Frost/Graphite/Lavender 三套主
 14 项 doctest、严格 Clippy、依赖版本策略和三组 AI controller 均通过。
 独立只读复核、当前源码新包、真实 macOS 多窗口、Windows/Linux 原生窗口、IME、
 VoiceOver 和多显示器几何仍按独立验收边界记录。
+
+独立复核以 `373d4157ae816a29a74aa72cf490f688e3563457` 为源码基线，P0/P1/P2
+和 P3 均为 `0`，范围内 merge recommendation 为 `APPROVE`。复核使用已有当前
+测试二进制核对 1,121 项清单和窗口切换器定向回归，没有把该结果扩大解释为新包或
+原生平台验收。

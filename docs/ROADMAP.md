@@ -25,6 +25,12 @@ controller 均通过。独立只读复核、当前源码精确包、真实 macOS
 多窗口、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 和外部 AI provider
 仍待后续收口。
 
+独立严格只读复核以
+`373d4157ae816a29a74aa72cf490f688e3563457` 为基线完成，P0/P1/P2/P3 均为 `0`，
+范围内 merge recommendation 为 `APPROVE`。复核确认 1,121 项 app 测试清单及窗口
+切换器 modal/focus 定向回归；当前源码精确包、真实 macOS 多窗口、Windows/Linux
+原生窗口、IME、VoiceOver、真实 SSH/Podman 和外部 AI provider 仍待后续收口。
+
 ## 2026-11-08 本片交付状态
 
 本片已经补齐连续无换行保存与

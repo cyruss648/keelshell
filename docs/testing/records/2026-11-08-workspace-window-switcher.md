@@ -55,6 +55,30 @@ modal/focus 回归实际出现在当前测试二进制中。
 输出中的 `__eh_frame section too large` 是既有链接器 warning，未形成失败。该门禁
 不代签独立只读复核、当前源码新包或原生多窗口验收。
 
+## 独立严格只读复核
+
+复核基线为生产代码
+`373d4157ae816a29a74aa72cf490f688e3563457`；复核期间工作树后来只增加了本记录
+对应的文档提交 `a6b0380cf324e46c35f58341825c9046f91b1c45`，生产源码差异为空。
+复核结论为 `APPROVE`：
+
+- P0：`0`
+- P1：`0`
+- P2：`0`
+- P3：`0`
+- 范围内 merge recommendation：`APPROVE`
+
+复核实际执行了当前 `keelshell-app` 测试二进制的 `--list`，确认普通测试 `1,121`
+项、ignored `2` 项，并重新运行窗口测试 `19` 项、modal scope `11` 项、工作区布局
+`8` 项、主题 `9` 项和新增 Escape/focus 用例 `1` 项，全部 `0 failed / 0 ignored`。
+复核还检查了 modal 优先级、Escape 路由、焦点恢复、全屏输入遮罩、Dialog 语义、
+focus trap、全局会话快捷键拦截和八窗口创建闸门。
+
+复核没有重新编译共享 target，也没有重新执行完整门禁；它使用已有测试二进制并核对
+其依赖清单包含本片相关源码。因此该 `APPROVE` 只覆盖本次窗口切换器源码 diff，
+不代签绑定 `373d4157` 的新 macOS 包、Windows/Linux 原生桌面、IME、VoiceOver、
+真实 SSH/Podman 长流程、外部 AI provider、签名、公证或安装。
+
 新增回归覆盖：
 
 1. 两个窗口中一个有两个会话、一个为空时，切换器显示准确摘要；
@@ -68,8 +92,7 @@ modal/focus 回归实际出现在当前测试二进制中。
 
 ## 边界
 
-本记录没有代签独立只读复核、当前源码新包、真实 macOS 多窗口桌面观察、Windows/Linux
-原生桌面、多显示器几何、IME、VoiceOver、真实 SSH/Podman 长流程或外部 AI provider。
-旧 `package-r4` 只属于
+本记录没有代签当前源码新包、真实 macOS 多窗口桌面观察、Windows/Linux 原生桌面、
+多显示器几何、IME、VoiceOver、真实 SSH/Podman 长流程或外部 AI provider。旧 `package-r4` 只属于
 [主题与语言短验](2026-11-08-package-r4-theme-language-smoke.md)，不能代签本片新增
 窗口切换器或本次 modal/focus 修复。
