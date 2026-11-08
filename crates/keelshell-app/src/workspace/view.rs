@@ -3,6 +3,7 @@ use super::*;
 use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::{
     assets::IconName,
+    base::FocusTrapElement,
     component::{Icon, Selectable},
 };
 
@@ -488,7 +489,9 @@ impl Render for Workspace {
         self.maintain_command_workflows(cx);
         self.refresh_command_suggestions(window, cx);
         self.synchronize_modal_focus(window, cx);
-        if let Some(kind) = self.active_modal() {
+        if let Some(kind) = self.active_modal()
+            && kind != modal_scope::ModalKind::WindowSwitcher
+        {
             return self.isolated_modal_surface(kind, window, cx);
         }
         self.render_workspace(window, cx)
@@ -1729,15 +1732,15 @@ impl Workspace {
         self.protect_surface_input(surface, cx)
     }
 
-    fn workspace_window_switcher(
+    pub(super) fn workspace_window_switcher(
         &self,
-        _window: &mut Window,
+        _window: &Window,
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let visual = crate::design::palette(cx);
         let chrome = crate::design::chrome(cx);
         let summaries = self.app_windows.read(cx).summaries();
-        div()
+        let popover = div()
             .id("workspace-window-switcher-popover")
             .test_support()
             .absolute()
@@ -1774,7 +1777,9 @@ impl Workspace {
                             .compact()
                             .label("×")
                             .accessibility_label(t(cx, "关闭窗口列表", "Close window list"))
-                            .on_click(cx.listener(|view, _, _, cx| view.close_window_switcher(cx))),
+                            .on_click(cx.listener(|view, _, window, cx| {
+                                view.close_window_switcher(window, cx)
+                            })),
                     ),
             )
             .child(
@@ -1838,10 +1843,30 @@ impl Workspace {
                         !self.app_windows.read(cx).can_open() || !self.configuration_current(cx),
                     )
                     .on_click(cx.listener(|view, _, window, cx| {
-                        view.close_window_switcher(cx);
+                        view.close_window_switcher(window, cx);
                         view.new_workspace_window(&NewWorkspaceWindow, window, cx);
                     })),
             )
+            .into_any_element();
+        div()
+            .id("workspace-window-switcher-overlay")
+            .test_support()
+            .absolute()
+            .inset_0()
+            .occlude()
+            .role(accesskit::Role::Dialog)
+            .accessibility_id("keelshell.workspace-window-switcher")
+            .aria_label(t(cx, "工作区窗口", "Workspace windows"))
+            .on_key_down(cx.listener(|view, event: &KeyDownEvent, window, cx| {
+                if event.keystroke.key == "escape"
+                    && !event.keystroke.modifiers.modified()
+                    && view.close_active_modal(window, cx)
+                {
+                    cx.stop_propagation();
+                }
+            }))
+            .child(popover)
+            .focus_trap("workspace-window-switcher-trap", &self.modal_focus)
             .into_any_element()
     }
 }

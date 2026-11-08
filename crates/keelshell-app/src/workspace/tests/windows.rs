@@ -1,6 +1,7 @@
 //! Production GPUI controllers in independent native test-window handles.
 use super::*;
 use crate::workspace::Message;
+use crate::workspace::modal_scope::ModalKind;
 use crate::workspace::{AfterSave, NewWorkspaceWindow, window_lifecycle::CloseIntent};
 use std::sync::atomic::Ordering;
 
@@ -186,6 +187,60 @@ fn workspace_window_entry_keeps_bilingual_theme_and_gate_semantics(cx: &mut Test
     })
     .checked("disable new window while configuration gate is held");
     lease.cancel_before_dispatch();
+}
+
+#[gpui_kit::test]
+fn workspace_window_switcher_uses_modal_scope_and_escape_restores_surface(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("workspace-window-switcher", cx);
+        window.render_frame(cx);
+        window.simulate_next_frame(cx);
+        window.render_frame(cx);
+
+        assert_eq!(
+            fixture.workspace.read(cx).active_modal(),
+            Some(ModalKind::WindowSwitcher)
+        );
+        let overlay = window.find("workspace-window-switcher-trap");
+        assert_eq!(overlay.role(), Some(gpui_kit::accesskit::Role::Dialog));
+        assert_eq!(overlay.label(), Some("工作区窗口"));
+        assert!(
+            fixture
+                .workspace
+                .read(cx)
+                .modal_focus
+                .contains_focused(window, cx)
+        );
+        for _ in 0..16 {
+            window.press("tab", cx);
+            window.render_frame(cx);
+            assert!(
+                fixture
+                    .workspace
+                    .read(cx)
+                    .modal_focus
+                    .contains_focused(window, cx)
+            );
+        }
+
+        window.press("escape", cx);
+        window.render_frame(cx);
+        window.simulate_next_frame(cx);
+        window.render_frame(cx);
+        assert_eq!(fixture.workspace.read(cx).active_modal(), None);
+        assert!(!fixture.workspace.read(cx).show_window_switcher);
+        assert!(
+            fixture
+                .workspace
+                .read(cx)
+                .surface_focus
+                .contains_focused(window, cx)
+        );
+    })
+    .checked("close the real workspace switcher modal with Escape and restore surface focus");
 }
 
 #[gpui_kit::test]

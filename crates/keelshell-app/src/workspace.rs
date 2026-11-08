@@ -1525,15 +1525,16 @@ impl Workspace {
             return;
         }
         self.show_window_switcher = !self.show_window_switcher;
-        if self.show_window_switcher {
-            self.surface_focus.focus(window, cx);
+        if !self.show_window_switcher {
+            self.focus_current_surface(window, cx);
         }
         cx.notify();
     }
 
-    pub(super) fn close_window_switcher(&mut self, cx: &mut Context<Self>) {
+    pub(super) fn close_window_switcher(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.show_window_switcher {
             self.show_window_switcher = false;
+            self.focus_current_surface(window, cx);
             cx.notify();
         }
     }

@@ -13,19 +13,22 @@
 终端、文件、AI 或远程面板实体；新建窗口仍经过原配置闸门、维护状态检查和八窗口
 上限。窗口序号由进程生命周期内的单调计数分配，关闭前置窗口后保留后续窗口序号。
 
-定向结果已通过：窗口入口 `3/3`、全部窗口生命周期 `18/18`、工作区布局 `8/8`、
+定向结果已通过：窗口入口 `3/3`、全部窗口生命周期 `19/19`、modal/focus `12/12`、
+工作区布局 `8/8`、
 主题 `9/9`；新增中文/英文与 Frost「霜白」、Graphite「曜石」、Lavender「雾紫」
-组合回归，英文无障碍标签使用英文标点。设计、产品和测试记录分别见
+组合回归，英文无障碍标签使用英文标点。当前未提交修复还将窗口列表接入统一
+modal scope，增加 Dialog 语义、全屏输入隔离、focus trap、Escape 关闭和工作区焦点
+恢复。设计、产品和测试记录分别见
 [ADR 0123](adr/0123-workspace-window-switcher.md)、
 [工作区窗口切换器](product/WORKSPACE_WINDOW_SWITCHER.md) 和
 [测试记录](testing/records/2026-11-08-workspace-window-switcher.md)。
 
-作者完整工程门禁已完成并退出 `0`（命令会话 `65860`）：Python `131 tests run /
-1 skipped`，workspace Rust 测试、doctest、严格 Clippy、依赖版本策略和 AI
-controller/readiness/small-stack 检查均通过；`__eh_frame section too large` 仅为
-既有链接器 warning。下一步顺序：固定源码提交；以固定 SHA 启动新的独立严格只读
-复核；复核通过后重新构建绑定当前 SHA 的 macOS 包并执行有限原生多窗口观察。旧
-`package-r4` 只代签主题/语言短验，不代签本片新增窗口切换器。
+当前定向结果使用重新编译的 `1,121` 项 app 测试清单；旧源码候选的完整工程门禁不能
+代签当前 modal/focus 修复。下一步顺序：完成定向回归
+和文档收口，固定源码提交；按共享 target 规则重新执行 `python3 scripts/check.py`；
+以最终 SHA 启动新的独立严格只读复核；复核通过后重新构建绑定当前 SHA 的 macOS 包
+并执行有限原生多窗口观察。旧 `package-r4` 只代签主题/语言短验，不代签本片新增
+窗口切换器。
 
 ## 2026-11-08 当前片：编辑器格式与合并迟到读回组合回归收口
 

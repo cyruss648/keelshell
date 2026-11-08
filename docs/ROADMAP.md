@@ -10,14 +10,15 @@
 `AnyWindowHandle`，不会迁移 SSH、终端草稿、AI 审核或远程面板。新建窗口继续复用
 既有配置闸门和八窗口上限。
 
-定向 GPUI 回归已通过：窗口入口 `3/3`、全部窗口生命周期 `18/18`、工作区布局
-`8/8`、主题 `9/9`；窗口列表覆盖中文/英文和 Frost「霜白」、Graphite「曜石」、
-Lavender「雾紫」三套主题。`cargo fmt --all -- --check` 与 `git diff --check`
-通过。详细设计见 [ADR 0123](adr/0123-workspace-window-switcher.md)，产品说明见
+定向 GPUI 回归已通过：窗口入口 `3/3`、全部窗口生命周期 `19/19`、modal/focus
+`12/12`、工作区布局 `8/8`、主题 `9/9`；窗口列表覆盖中文/英文和 Frost「霜白」、Graphite「曜石」、
+Lavender「雾紫」三套主题。当前修复还覆盖统一 modal scope、Dialog 语义、全屏输入
+隔离、focus trap、Escape 关闭和工作区焦点恢复。详细设计见
+[ADR 0123](adr/0123-workspace-window-switcher.md)，产品说明见
 [工作区窗口切换器](product/WORKSPACE_WINDOW_SWITCHER.md)，测试证据见
 [测试记录](testing/records/2026-11-08-workspace-window-switcher.md)。
 
-本片的独立只读复核、当前源码精确包、真实 macOS
+本片的完整工程门禁需要在当前修复候选上重新执行；独立只读复核、当前源码精确包、真实 macOS
 多窗口、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 和外部 AI provider
 仍待后续收口。
 

@@ -10,6 +10,7 @@
 
 | 日期（Asia/Shanghai） | 记录与范围 |
 | --- | --- |
+| 2026-11-08 | [工作区窗口切换器](records/2026-11-08-workspace-window-switcher.md)：窗口摘要、真实原生窗口激活、稳定序号，以及 modal/Dialog、focus trap、Escape 和焦点恢复；当前源码候选的完整门禁、独立复核与原生多窗口仍待收口。 |
 | 2026-11-06 | [文本与路由诊断组合](records/2026-11-06-editor-traceroute-integration.md)：543输入/21源码路径，2355 ordinary/23 ignored、14 rustdoc、Python131/1 skip通过；combined-r3/r4限定批准源码和新包。 |
 | 2026-11-06 | [文本与路径探测原生](records/2026-11-06-editor-traceroute-native.md)：38组macOS AX/JPEG，BOM/CRLF取消与保存、SSH UDP双栈一跳获native-r1限定批准；inline动作P2与合并验收开放，完整native HOLD。 |
 | 2026-11-06 | [文本格式](records/2026-11-06-editor-format.md)：r3隔离538输入与25新增通过，差分审关闭三项P2；父最终组合、新包及限定原生续记分别列明。 |

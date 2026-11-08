@@ -1,7 +1,7 @@
 # ADR 0123：工作区窗口切换器
 
 - 日期：2026-11-08
-- 状态：已实现；作者完整工程门禁通过；独立复核与原生复验待本片收口
+- 状态：已实现；modal/focus 修复待当前源码候选重新收口
 - 关联：[工作区窗口切换器](../product/WORKSPACE_WINDOW_SWITCHER.md)、[独立工作窗口](0114-independent-workspace-windows.md)
 
 ## 背景
@@ -31,6 +31,12 @@ Workspace 在渲染工作区时刷新自己的摘要，窗口注册和清理仍�
 时只在原窗口显示失败状态。新建窗口继续复用既有 `NewWorkspaceWindow` 路径，因此
 配置写入、维护、关闭审核、不确定结果和八窗口上限仍由原有闸门决定。
 
+窗口切换器纳入 `ModalKind` 的统一优先级和返回焦点流程。窗口列表在工作区内部
+保留背景上下文，但通过全屏 occluding overlay 阻断底层输入，并用 AccessKit Dialog
+语义和 GPUI Kit focus trap 限制键盘焦点。Escape 与关闭按钮走同一关闭入口，关闭后
+恢复工作区焦点；这保证窗口切换器不会把后续键盘输入误发送到被遮挡的 SSH、命令或
+文件控件。
+
 可见文案与可访问标签分开维护。可见条目保持紧凑的中点布局；可访问标签使用完整
 的窗口、会话和主机语义，并按中文/英文使用对应标点。颜色、圆角、边框、选中态和
 主按钮全部来自当前主题的 registry、Palette、组件 token 与 chrome token。
@@ -42,11 +48,9 @@ Workspace 在渲染工作区时刷新自己的摘要，窗口注册和清理仍�
 是展示快照，短暂的窗口清理或摘要锁失败可能使列表暂时缺少条目；切换器不会把
 展示状态当作 SSH 或配置权限。
 
-本片定向验证覆盖空窗、活动会话窗、目标窗口激活、中英文、Frost/Graphite/Lavender
-三套主题和配置闸门禁用新建窗口。`python3 scripts/check.py` 已在共享 target
-失效并重新编译后通过，命令会话 `65860` 退出码为 `0`；其中 Python 检查为
-`131 tests run / 1 skipped`，工作区 Rust 测试、doctest、严格 Clippy、依赖版本策略
-和 AI controller/readiness/small-stack 检查均通过。期间观察到的
-`__eh_frame section too large` 仅为既有链接器 warning，没有形成失败。
-独立只读复核、当前源码新包、真实 macOS 多窗口、Windows/Linux 原生窗口、IME、
-VoiceOver 和多显示器几何仍按独立验收边界记录。
+本片定向验证覆盖空窗、活动会话窗、目标窗口激活、稳定窗口序号、modal Dialog 语义、
+focus trap、Escape 焦点恢复、中英文、Frost/Graphite/Lavender 三套主题和配置闸门
+禁用新建窗口。旧提交上的完整门禁不能代签本次 modal/focus 修改；当前源码候选需要
+按共享 target 规则重新生成测试清单、执行完整工程门禁并取得独立只读复核。原生
+macOS 多窗口、Windows/Linux 原生窗口、IME、VoiceOver 和多显示器几何仍按独立验收
+边界记录。
