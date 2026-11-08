@@ -18,7 +18,10 @@ Lavender「雾紫」三套主题。当前修复还覆盖统一 modal scope、Dia
 [工作区窗口切换器](product/WORKSPACE_WINDOW_SWITCHER.md)，测试证据见
 [测试记录](testing/records/2026-11-08-workspace-window-switcher.md)。
 
-本片的完整工程门禁需要在当前修复候选上重新执行；独立只读复核、当前源码精确包、真实 macOS
+源码提交 `373d4157ae816a29a74aa72cf490f688e3563457` 的完整工程门禁已通过：
+Python `131 run / 1 skipped`，app `1,119 passed / 2 ignored`，workspace 其余 Rust
+测试、14 项 doctest、严格 Clippy、依赖策略和 readiness/observer/small-stack 三组 AI
+controller 均通过。独立只读复核、当前源码精确包、真实 macOS
 多窗口、Windows/Linux 原生窗口、IME、VoiceOver、真实 SSH/Podman 和外部 AI provider
 仍待后续收口。
 

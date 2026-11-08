@@ -1,7 +1,7 @@
 # ADR 0123：工作区窗口切换器
 
 - 日期：2026-11-08
-- 状态：已实现；modal/focus 修复待当前源码候选重新收口
+- 状态：已实现；作者完整工程门禁通过；独立复核与原生复验待收口
 - 关联：[工作区窗口切换器](../product/WORKSPACE_WINDOW_SWITCHER.md)、[独立工作窗口](0114-independent-workspace-windows.md)
 
 ## 背景
@@ -50,7 +50,8 @@ Workspace 在渲染工作区时刷新自己的摘要，窗口注册和清理仍�
 
 本片定向验证覆盖空窗、活动会话窗、目标窗口激活、稳定窗口序号、modal Dialog 语义、
 focus trap、Escape 焦点恢复、中英文、Frost/Graphite/Lavender 三套主题和配置闸门
-禁用新建窗口。旧提交上的完整门禁不能代签本次 modal/focus 修改；当前源码候选需要
-按共享 target 规则重新生成测试清单、执行完整工程门禁并取得独立只读复核。原生
-macOS 多窗口、Windows/Linux 原生窗口、IME、VoiceOver 和多显示器几何仍按独立验收
-边界记录。
+禁用新建窗口。源码提交 `373d4157ae816a29a74aa72cf490f688e3563457` 的作者完整工程
+门禁已通过：Python `131 run / 1 skipped`，app `1,119 passed / 2 ignored`，
+14 项 doctest、严格 Clippy、依赖版本策略和三组 AI controller 均通过。
+独立只读复核、当前源码新包、真实 macOS 多窗口、Windows/Linux 原生窗口、IME、
+VoiceOver 和多显示器几何仍按独立验收边界记录。

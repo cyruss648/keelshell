@@ -2,7 +2,7 @@
 
 日期：2026-11-08（Asia/Shanghai）
 范围：工作区窗口入口、窗口摘要、原生窗口激活、modal/focus、主题/语言和配置闸门
-状态：**modal/focus 修复待当前源码候选重新跑完整门禁；原生多窗口待复验**
+状态：**作者完整工程门禁通过；独立复核与原生多窗口待收口**
 
 ## 实现范围
 
@@ -42,11 +42,18 @@ modal/focus 回归实际出现在当前测试二进制中。
 
 ## 作者完整门禁
 
-旧提交上的 `python3 scripts/check.py` 不能覆盖本次 modal/focus 修改。当前源码候选
-的完整工程门禁尚未执行；专项结果只证明窗口切换器与相关 modal/focus 路径。完整门禁
-仍需记录 Python、workspace Rust、doctest、严格 Clippy、依赖策略和 AI controller
-阶段的实际退出码。输出中的既有 `__eh_frame section too large` 若再次出现仍只记录
-为链接器 warning，不能替代退出码和当前测试清单。
+源码提交 `373d4157ae816a29a74aa72cf490f688e3563457` 的
+`python3 scripts/check.py` 使用命令会话 `63031` 退出 `0`。实际结果为：
+
+- Python：`131 run / 1 skipped`；
+- `keelshell-app`：`1,119 passed / 2 ignored`，当前 app 测试清单为 `1,121`；
+- workspace 其余 Rust 单元/集成测试全部通过；
+- 14 项 doctest 全部通过；
+- 严格 workspace Clippy、直接依赖版本策略和 readiness/observer/small-stack 三组
+  AI controller 全部通过。
+
+输出中的 `__eh_frame section too large` 是既有链接器 warning，未形成失败。该门禁
+不代签独立只读复核、当前源码新包或原生多窗口验收。
 
 新增回归覆盖：
 
@@ -61,8 +68,8 @@ modal/focus 回归实际出现在当前测试二进制中。
 
 ## 边界
 
-本记录没有代签当前源码候选的完整工程门禁、独立只读复核、当前源码新包、真实 macOS
-多窗口桌面观察、Windows/Linux 原生桌面、多显示器几何、IME、VoiceOver、真实
-SSH/Podman 长流程或外部 AI provider。旧 `package-r4` 只属于
+本记录没有代签独立只读复核、当前源码新包、真实 macOS 多窗口桌面观察、Windows/Linux
+原生桌面、多显示器几何、IME、VoiceOver、真实 SSH/Podman 长流程或外部 AI provider。
+旧 `package-r4` 只属于
 [主题与语言短验](2026-11-08-package-r4-theme-language-smoke.md)，不能代签本片新增
 窗口切换器或本次 modal/focus 修复。
