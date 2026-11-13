@@ -3,19 +3,24 @@ use super::*;
 use gpui_kit::component::Selectable;
 
 impl Workspace {
-    pub(in crate::workspace) fn library_batch_toolbar(&self, cx: &mut Context<Self>) -> AnyElement {
+    pub(in crate::workspace) fn library_batch_toolbar(
+        &self,
+        stacked: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let trash = self.library_filter == LibraryFilter::Trash;
         let disabled = self.saving || self.library_selection.is_empty();
         let mut bar = div()
             .id("library-bulk-toolbar")
             .test_support()
-            .px_3()
-            .py_2()
+            .role(Role::Group)
+            .aria_label(t(cx, "连接批量操作", "Connection bulk actions"))
+            .when(stacked, |toolbar| toolbar.px_2().py_1().gap_1())
+            .when(!stacked, |toolbar| toolbar.px_3().py_2().gap_1())
             .flex_shrink_0()
             .flex()
             .flex_wrap()
             .items_center()
-            .gap_1()
             .child(div().text_xs().child(format!(
                 "{}: {}",
                 t(cx, "已选", "Selected"),
@@ -63,11 +68,15 @@ impl Workspace {
                 div()
                     .text_xs()
                     .text_color(rgb(crate::design::palette(cx).muted))
-                    .child(t(
-                        cx,
-                        "勾选连接后批量组织",
-                        "Select profiles to organize them together",
-                    )),
+                    .child(if stacked {
+                        t(cx, "批量", "Batch")
+                    } else {
+                        t(
+                            cx,
+                            "勾选连接后批量组织",
+                            "Select profiles to organize them together",
+                        )
+                    }),
             );
         } else {
             for (id, action) in actions {

@@ -144,6 +144,119 @@ fn compact_library_keeps_identity_and_actions_visible_with_assistant_open(cx: &m
 }
 
 #[gpui_kit::test]
+fn compact_library_keeps_full_surface_inside_narrow_theme_language_height_matrix(
+    cx: &mut TestAppContext,
+) {
+    for height in [580., 900.] {
+        let fixture = mount_sized(
+            cx,
+            vec![
+                Connection::new("审核主机", "192.0.2.10", "operator"),
+                Connection::new("备用主机", "192.0.2.11", "operator"),
+            ],
+            480.,
+            height,
+        );
+        cx.update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.show_connections = true;
+                cx.notify();
+            });
+            for definition in crate::design::registry() {
+                for appearance in [Theme::Light, Theme::Dark] {
+                    for language in [Language::ZhCn, Language::En] {
+                        i18n::set_language(language, cx);
+                        fixture.workspace.update(cx, |workspace, cx| {
+                            workspace.state.settings.theme_family =
+                                keelshell_core::ThemeId::new(definition.id)
+                                    .checked("valid theme family");
+                            workspace.state.settings.theme = appearance;
+                            let settings = workspace.state.settings.clone();
+                            crate::design::apply_settings(&settings, Some(window), cx);
+                            cx.notify();
+                        });
+                        window.render_frame(cx);
+
+                        let scene = format!(
+                            "480x{height}/{}/{appearance:?}/{language:?}",
+                            definition.id
+                        );
+                        let dialog = window.find("connection-manager-dialog");
+                        assert!(
+                            dialog.visible() && contained(dialog.bounds(), window.bounds()),
+                            "{scene}: manager escaped window: {:?}",
+                            dialog.bounds()
+                        );
+                        let dialog_bounds = dialog.bounds();
+                        let manager = window.within("connection-manager-dialog");
+                        for id in [
+                            "close-manager",
+                            "library-filter-summary",
+                            "library-actions-toolbar",
+                            "connection-folders",
+                            "connection-table-scroll",
+                            "connection-rows",
+                        ] {
+                            let element = manager.find(id);
+                            assert!(element.visible(), "{scene}: {id} is hidden");
+                            assert!(
+                                contained(element.bounds(), dialog_bounds),
+                                "{scene}: {id} escaped manager: {:?}",
+                                element.bounds()
+                            );
+                        }
+
+                        assert_eq!(
+                            manager.find("connection-rows").role(),
+                            Some(gpui_kit::Role::List),
+                            "{scene}: connection list role"
+                        );
+                        let row = manager.find(("connection-row", 0_usize));
+                        let rows = manager.find("connection-rows").bounds();
+                        assert!(
+                            row.visible() && contained(row.bounds(), rows),
+                            "{scene}: first profile row is outside the scroll viewport: {:?} in {rows:?}",
+                            row.bounds()
+                        );
+                        for id in [
+                            "library-select",
+                            "favorite",
+                            "connection-name",
+                            "connection-endpoint",
+                            "connection-actions",
+                            "connect",
+                            "edit",
+                            "move",
+                            "duplicate",
+                            "delete",
+                        ] {
+                            let element = manager.find((id, 0_usize));
+                            assert!(element.visible(), "{scene}: {id} is hidden");
+                            assert!(
+                                contained(element.bounds(), row.bounds()),
+                                "{scene}: {id} escaped row: {:?} in {:?}",
+                                element.bounds(),
+                                row.bounds()
+                            );
+                        }
+                    }
+                }
+            }
+            i18n::set_language(Language::ZhCn, cx);
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.state.settings.theme_family =
+                    keelshell_core::ThemeId::default();
+                workspace.state.settings.theme = Theme::Light;
+                let settings = workspace.state.settings.clone();
+                crate::design::apply_settings(&settings, Some(window), cx);
+                cx.notify();
+            });
+        })
+        .checked("keep the complete narrow connection library surface inside the window");
+    }
+}
+
+#[gpui_kit::test]
 fn connection_actions_distinguish_same_names_by_complete_endpoint_in_both_languages(
     cx: &mut TestAppContext,
 ) {

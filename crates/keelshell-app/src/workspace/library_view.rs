@@ -541,9 +541,9 @@ impl Workspace {
         div().flex().flex_col().size_full().text_sm().bg(rgb(visual.surface))
             .child(self.library_filter_summary(scope_count, count, &query, cx))
             .child(self.library_import_toolbar(stacked,cx))
-            .child(self.library_batch_toolbar(cx))
+            .child(self.library_batch_toolbar(stacked, cx))
             .child(div().flex_1().min_h_0().min_w_0().flex().when(stacked,|body|body.flex_col()).child(tree)
-                .child(div().id("connection-table-scroll").flex_1().min_w_0().overflow_x_scroll()
+                .child(div().id("connection-table-scroll").test_support().flex_1().min_h_0().min_w_0().overflow_x_scroll()
                     .child(div().min_w_0().size_full().flex().flex_col()
                         .when(!cards,|table|table.min_w(px(if trash {880.} else if recent {1070.} else {1010.})).child(header)).child(rows))))
             .child(div().h(px(28.)).flex_shrink_0().px_3().flex().items_center().text_xs().text_color(rgb(visual.muted))
@@ -870,6 +870,7 @@ impl Workspace {
         ];
         let mut tree = div()
             .id("connection-folders")
+            .test_support()
             .flex_shrink_0()
             .min_w_0()
             .when(stacked, |tree| tree.w_full().h(px(100.)).border_b_1())
@@ -1021,26 +1022,36 @@ impl Workspace {
 
     fn library_import_toolbar(&self, stacked: bool, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let new_label = t(cx, "新建连接", "New connection");
+        let import_json_label = t(cx, "导入 JSON", "Import JSON");
+        let import_openssh_label = t(
+            cx,
+            "从剪贴板导入 SSH 配置",
+            "Import SSH config from clipboard",
+        );
+        let sync_label = t(cx, "加密同步", "Encrypted sync");
+        let export_label = t(cx, "导出 JSON", "Export JSON");
         div()
             .id("library-actions-toolbar")
             .test_support()
             .role(Role::Group)
             .aria_label(t(cx, "连接库操作", "Connection library actions"))
             .min_h(px(46.))
-            .px_3()
-            .py_2()
+            .when(stacked, |toolbar| toolbar.px_2().py_1().gap_1())
+            .when(!stacked, |toolbar| toolbar.px_3().py_2().gap_2())
             .flex_shrink_0()
             .flex()
             .flex_wrap()
             .items_center()
-            .gap_2()
             .border_b_1()
             .border_color(rgb(visual.border))
             .child(
                 Button::new("new-connection")
                     .compact()
                     .icon(IconName::Plus)
-                    .label(t(cx, "新建连接", "New connection"))
+                    .when(!stacked, |button| button.label(new_label))
+                    .accessibility_label(new_label)
+                    .localized_tooltip("新建连接", "New connection")
                     .disabled(self.saving)
                     .on_click(cx.listener(|view, _, window, cx| view.open_form(window, cx)))
                     .map(|button| self.retain_modal_button("new-connection", button, cx)),
@@ -1049,7 +1060,9 @@ impl Workspace {
                 Button::new("import-connections")
                     .compact()
                     .icon(IconName::Download)
-                    .label(t(cx, "导入 JSON", "Import JSON"))
+                    .when(!stacked, |button| button.label(import_json_label))
+                    .accessibility_label(import_json_label)
+                    .localized_tooltip("导入 JSON", "Import JSON")
                     .disabled(self.saving)
                     .on_click(
                         cx.listener(|view, _, window, cx| view.import_connections(window, cx)),
@@ -1060,11 +1073,8 @@ impl Workspace {
                 Button::new("import-openssh")
                     .compact()
                     .icon(IconName::Download)
-                    .label(t(
-                        cx,
-                        "从剪贴板导入 SSH 配置",
-                        "Import SSH config from clipboard",
-                    ))
+                    .when(!stacked, |button| button.label(import_openssh_label))
+                    .accessibility_label(import_openssh_label)
                     .localized_tooltip(
                         "从剪贴板导入受限 OpenSSH 配置",
                         "Import the supported OpenSSH subset from the clipboard",
@@ -1078,7 +1088,10 @@ impl Workspace {
             .child(
                 Button::new("profile-sync-open")
                     .compact()
-                    .label(t(cx, "加密同步", "Encrypted sync"))
+                    .icon(IconName::Lock)
+                    .when(!stacked, |button| button.label(sync_label))
+                    .accessibility_label(sync_label)
+                    .localized_tooltip("加密同步", "Encrypted sync")
                     .disabled(!self.can_open_vault() || !self.profile_sync_maintenance_idle(cx))
                     .on_click(cx.listener(|view, _, window, cx| view.open_profile_sync(window, cx)))
                     .map(|button| self.retain_modal_button("profile-sync-open", button, cx)),
@@ -1087,7 +1100,9 @@ impl Workspace {
                 Button::new("export-connections")
                     .compact()
                     .icon(IconName::Upload)
-                    .label(t(cx, "导出 JSON", "Export JSON"))
+                    .when(!stacked, |button| button.label(export_label))
+                    .accessibility_label(export_label)
+                    .localized_tooltip("导出 JSON", "Export JSON")
                     .on_click(cx.listener(|view, _, _, cx| view.export_connections(cx)))
                     .map(|button| self.retain_modal_button("export-connections", button, cx)),
             )
