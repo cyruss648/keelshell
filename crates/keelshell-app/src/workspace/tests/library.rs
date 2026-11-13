@@ -150,13 +150,19 @@ fn compact_library_keeps_full_surface_inside_narrow_theme_language_height_matrix
     for height in [580., 900.] {
         let fixture = mount_sized(
             cx,
-            vec![
-                Connection::new("审核主机", "192.0.2.10", "operator"),
-                Connection::new("备用主机", "192.0.2.11", "operator"),
-            ],
+            (0..12)
+                .map(|index| {
+                    Connection::new(
+                        format!("审核主机 {index}"),
+                        format!("192.0.2.{}", index + 10),
+                        "operator",
+                    )
+                })
+                .collect(),
             480.,
             height,
         );
+        let mut clicked_scrolled_action = false;
         cx.update_window(fixture.window, |_, window, cx| {
             fixture.workspace.update(cx, |workspace, cx| {
                 workspace.show_connections = true;
@@ -188,7 +194,7 @@ fn compact_library_keeps_full_surface_inside_narrow_theme_language_height_matrix
                             dialog.bounds()
                         );
                         let dialog_bounds = dialog.bounds();
-                        let manager = window.within("connection-manager-dialog");
+                        let mut manager = window.within("connection-manager-dialog");
                         for id in [
                             "close-manager",
                             "library-filter-summary",
@@ -239,6 +245,64 @@ fn compact_library_keeps_full_surface_inside_narrow_theme_language_height_matrix
                                 row.bounds()
                             );
                         }
+
+                        manager.scroll(
+                            "connection-rows",
+                            ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
+                            cx,
+                        );
+                        let last_index = 11_usize;
+                        let last_row = manager.find(("connection-row", last_index));
+                        let rows = manager.find("connection-rows").bounds();
+                        assert!(
+                            last_row.visible() && contained(last_row.bounds(), rows),
+                            "{scene}: last profile row is not reachable after scrolling: {:?} in {rows:?}",
+                            last_row.bounds()
+                        );
+                        for id in [
+                            "library-select",
+                            "favorite",
+                            "connection-name",
+                            "connection-endpoint",
+                            "connection-actions",
+                            "connect",
+                            "edit",
+                            "move",
+                            "duplicate",
+                            "delete",
+                        ] {
+                            let element = manager.find((id, last_index));
+                            assert!(element.visible(), "{scene}: last {id} is hidden");
+                            assert!(
+                                contained(element.bounds(), last_row.bounds()),
+                                "{scene}: last {id} escaped row: {:?} in {:?}",
+                                element.bounds(),
+                                last_row.bounds()
+                            );
+                        }
+                        let opened_editor = if !clicked_scrolled_action {
+                            manager.click(("edit", last_index), cx);
+                            assert!(
+                                fixture.workspace.read(cx).form.is_some(),
+                                "{scene}: last-row edit action did not open the real editor"
+                            );
+                            clicked_scrolled_action = true;
+                            true
+                        } else {
+                            false
+                        };
+                        drop(manager);
+                        if opened_editor {
+                            window.click("cancel-connection", cx);
+                            window.render_frame(cx);
+                        }
+                        let mut manager = window.within("connection-manager-dialog");
+                        manager.scroll(
+                            "connection-rows",
+                            ScrollDelta::Pixels(point(px(0.), px(100_000.))),
+                            cx,
+                        );
+                        window.render_frame(cx);
                     }
                 }
             }
@@ -254,6 +318,124 @@ fn compact_library_keeps_full_surface_inside_narrow_theme_language_height_matrix
         })
         .checked("keep the complete narrow connection library surface inside the window");
     }
+}
+
+#[gpui_kit::test]
+fn compact_library_exposes_bilingual_toolbar_and_batch_semantics(cx: &mut TestAppContext) {
+    let fixture = mount_sized(
+        cx,
+        vec![Connection::new("审核主机", "192.0.2.10", "operator")],
+        480.,
+        580.,
+    );
+    cx.update_window(fixture.window, |_, _, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.show_connections = true;
+            cx.notify();
+        });
+    })
+    .checked("bilingual compact toolbar and batch semantics");
+    for language in [Language::ZhCn, Language::En] {
+        let actions = match language {
+            Language::ZhCn => [
+                ("new-connection", "新建连接"),
+                ("import-connections", "导入 JSON"),
+                ("import-openssh", "从剪贴板导入 SSH 配置"),
+                ("profile-sync-open", "加密同步"),
+                ("export-connections", "导出 JSON"),
+            ],
+            Language::En => [
+                ("new-connection", "New connection"),
+                ("import-connections", "Import JSON"),
+                ("import-openssh", "Import SSH config from clipboard"),
+                ("profile-sync-open", "Encrypted sync"),
+                ("export-connections", "Export JSON"),
+            ],
+        };
+        let batch_bounds = cx
+            .update_window(fixture.window, |_, window, cx| {
+                i18n::set_language(language, cx);
+                window.render_frame(cx);
+                let manager = window.within("connection-manager-dialog");
+                let toolbar = manager.find("library-actions-toolbar");
+                let batch = manager.find("library-bulk-toolbar");
+                assert_eq!(
+                    toolbar.role(),
+                    Some(gpui_kit::Role::Group),
+                    "{language:?}: connection toolbar role"
+                );
+                assert_eq!(
+                    batch.role(),
+                    Some(gpui_kit::Role::Group),
+                    "{language:?}: batch toolbar role"
+                );
+                assert_eq!(
+                    toolbar.label(),
+                    Some(match language {
+                        Language::ZhCn => "连接库操作",
+                        Language::En => "Connection library actions",
+                    }),
+                    "{language:?}: connection toolbar label"
+                );
+                assert_eq!(
+                    batch.label(),
+                    Some(match language {
+                        Language::ZhCn => "连接批量操作",
+                        Language::En => "Connection bulk actions",
+                    }),
+                    "{language:?}: batch toolbar label"
+                );
+                for &(id, label) in &actions {
+                    let button = manager.find(id);
+                    assert!(
+                        button.visible() && contained(button.bounds(), toolbar.bounds()),
+                        "{language:?}: {id} escaped compact toolbar: {:?} in {:?}",
+                        button.bounds(),
+                        toolbar.bounds()
+                    );
+                    assert_eq!(
+                        button.label(),
+                        Some(label),
+                        "{language:?}: {id} accessibility label"
+                    );
+                }
+                assert!(
+                    contained(
+                        manager.find("library-clear-selection").bounds(),
+                        batch.bounds()
+                    ),
+                    "{language:?}: clear selection escaped batch toolbar"
+                );
+                batch.bounds()
+            })
+            .checked("render bilingual compact connection toolbars");
+        cx.update_window(fixture.window, |_, window, cx| {
+            window.click(("library-select", 0_usize), cx);
+        })
+        .checked("select one compact connection for batch actions");
+        cx.update_window(fixture.window, |_, window, cx| {
+            window.render_frame(cx);
+            let manager = window.within("connection-manager-dialog");
+            let bulk_move = manager.find("library-bulk-move");
+            assert!(
+                bulk_move.visible() && contained(bulk_move.bounds(), batch_bounds),
+                "{language:?}: compact batch move action is not reachable"
+            );
+            assert_eq!(
+                bulk_move.label(),
+                Some(match language {
+                    Language::ZhCn => "移动所选连接",
+                    Language::En => "Move selected profiles",
+                })
+            );
+        })
+        .checked("inspect compact batch action semantics");
+        cx.update_window(fixture.window, |_, window, cx| {
+            window.click("library-clear-selection", cx);
+        })
+        .checked("clear compact connection selection");
+    }
+    cx.update(|cx| i18n::set_language(Language::ZhCn, cx));
 }
 
 #[gpui_kit::test]

@@ -1,5 +1,13 @@
 use super::*;
 use crate::workspace::OpenCommandPalette;
+use gpui_kit::Pixels;
+
+fn contained(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
+    inner.origin.x >= outer.origin.x
+        && inner.origin.y >= outer.origin.y
+        && inner.right() <= outer.right()
+        && inner.bottom() <= outer.bottom()
+}
 
 fn open_palette(fixture: &Fixture, cx: &mut TestAppContext) {
     cx.update_window(fixture.window, |_, window, cx| {
@@ -27,6 +35,56 @@ fn search_palette(fixture: &Fixture, query: &str, cx: &mut TestAppContext) {
         window.render_frame(cx);
     })
     .checked("search command palette action");
+}
+
+#[gpui_kit::test]
+fn compact_english_quick_connect_scroll_keeps_connect_action_reachable(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 480., 900.);
+    cx.update_window(fixture.window, |_, window, cx| {
+        i18n::set_language(Language::En, cx);
+        window.render_frame(cx);
+        let surface = window.find("quick-connect-surface").bounds();
+        assert!(
+            contained(surface, window.bounds()),
+            "quick-connect surface escaped compact window: {surface:?}"
+        );
+        let library = window.find("connection-table-scroll");
+        assert!(
+            library.visible()
+                && library.bounds().size.height >= px(48.)
+                && contained(library.bounds(), window.bounds()),
+            "compact quick-connect surface consumed the connection library viewport: surface={surface:?}, library={:?}, window={:?}",
+            library.bounds(),
+            window.bounds()
+        );
+        let before = window.find("quick-connect").bounds();
+        assert!(contained(before, surface));
+        window.scroll(
+            "quick-connect-surface",
+            gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
+            cx,
+        );
+        window.render_frame(cx);
+        assert_eq!(
+            window.find("quick-connect-surface").bounds(),
+            surface,
+            "quick-connect wheel changed the fixed compact surface bounds"
+        );
+        assert_eq!(
+            window.find("connection-table-scroll").bounds(),
+            library.bounds(),
+            "quick-connect wheel changed the sibling connection library bounds"
+        );
+        let connect = window.find("quick-connect");
+        assert!(
+            connect.visible() && contained(connect.bounds(), surface),
+            "Connect action is not reachable after scrolling compact quick-connect: {:?} in {surface:?}",
+            connect.bounds()
+        );
+        assert_eq!(connect.label(), Some("Connect"));
+        i18n::set_language(Language::ZhCn, cx);
+    })
+    .checked("compact English quick-connect scroll reaches Connect");
 }
 
 #[gpui_kit::test]
