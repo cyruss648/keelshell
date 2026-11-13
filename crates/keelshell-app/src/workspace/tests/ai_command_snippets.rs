@@ -50,6 +50,39 @@ fn reveal_ai_save_button(window: &mut Window, cx: &mut App) {
     panic!("AI save-as-snippet button did not become visible");
 }
 
+fn reveal_diagnostic_save_button(window: &mut Window, cx: &mut App) {
+    for _ in 0..40 {
+        window.render_frame(cx);
+        let button = window.find(("save-diagnostic-step", 0_usize));
+        if button.visible() {
+            return;
+        }
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+    }
+    panic!("diagnostic save-as-snippet button did not become visible");
+}
+
+fn reveal_diagnostic_plan_button(window: &mut Window, cx: &mut App) {
+    for _ in 0..40 {
+        window.render_frame(cx);
+        if let Some(button) = window.try_find("build-diagnostic-plan")
+            && button.visible()
+        {
+            return;
+        }
+        window.scroll(
+            "assistant-scroll",
+            ScrollDelta::Lines(point(0., -1000.)),
+            cx,
+        );
+    }
+    panic!("diagnostic plan button did not become visible");
+}
+
 fn open_ai_snippet_editor(
     fixture: &Fixture,
     pane: &RemotePane,
@@ -186,6 +219,70 @@ fn stale_ai_session_blocks_save_retains_draft_and_does_not_change_state_store(
 }
 
 #[gpui_kit::test]
+fn state_reload_blocks_ai_snippet_save_but_restores_retry_and_cancel(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    let panes = attach_remote_panes(&fixture, cx);
+    let before = fixture
+        .store
+        .load()
+        .checked("load state before blocked AI save")
+        .snippets;
+    let editor = open_ai_snippet_editor(&fixture, &panes[0], cx);
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.state_reloading = true;
+            cx.notify();
+        });
+        window.render_frame(cx);
+        window.click("snippet-editor-save", cx);
+    })
+    .checked("submit AI snippet while configuration reload is active");
+    cx.run_until_parked();
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(fixture.workspace.read(cx).snippet_editor.is_some());
+        assert!(!editor.read(cx).is_saving());
+        let error = window.find("snippet-editor-error");
+        assert!(error.visible());
+        let error_text = error.label().unwrap_or_default();
+        assert!(
+            error_text.contains("重新加载") || error_text.contains("reload"),
+            "reload gate error is unclear: {error_text}"
+        );
+        window.click("snippet-editor-save", cx);
+    })
+    .checked("retry blocked AI snippet save after the first failure");
+    cx.run_until_parked();
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(!editor.read(cx).is_saving());
+        assert!(window.find("snippet-editor-error").visible());
+        window.click("snippet-editor-cancel", cx);
+    })
+    .checked("cancel the retained AI snippet draft");
+    cx.run_until_parked();
+
+    assert!(
+        fixture
+            .workspace
+            .read_with(cx, |workspace, _| workspace.snippet_editor.is_none()),
+        "cancel must close the recovered editor"
+    );
+    assert_eq!(
+        fixture
+            .store
+            .load()
+            .checked("load state after blocked AI saves")
+            .snippets,
+        before
+    );
+    assert!(writes(&panes[0]).is_empty() && writes(&panes[1]).is_empty());
+}
+
+#[gpui_kit::test]
 fn duplicate_ai_snippet_id_reports_failure_without_persisting(cx: &mut TestAppContext) {
     let fixture = mount(cx, Vec::new());
     let existing = Snippet::new("existing", "printf existing");
@@ -227,5 +324,53 @@ fn duplicate_ai_snippet_id_reports_failure_without_persisting(cx: &mut TestAppCo
             .snippets,
         saved.snippets
     );
+    assert!(writes(&panes[0]).is_empty() && writes(&panes[1]).is_empty());
+}
+
+#[gpui_kit::test]
+fn diagnostic_save_button_opens_bound_snippet_editor(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Vec::new());
+    let panes = attach_remote_panes(&fixture, cx);
+    prepare_ai_review(&fixture, &panes[0], cx);
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        reveal_diagnostic_plan_button(window, cx);
+        window.click("build-diagnostic-plan", cx);
+        window.render_frame(cx);
+        reveal_diagnostic_save_button(window, cx);
+        let button = window.find(("save-diagnostic-step", 0_usize));
+        assert!(button.visible());
+        assert_eq!(button.label(), Some("保存为命令片段"));
+        window.click(("save-diagnostic-step", 0_usize), cx);
+    })
+    .checked("click diagnostic save-as-snippet action");
+    cx.run_until_parked();
+
+    let editor = fixture.workspace.read_with(cx, |workspace, _| {
+        workspace
+            .snippet_editor
+            .clone()
+            .checked_option("diagnostic save action opens the snippet editor")
+    });
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert_eq!(
+            editor
+                .read(cx)
+                .draft(cx)
+                .checked("diagnostic snippet draft")
+                .command,
+            ORIGINAL_COMMAND
+        );
+        let source = window.find("snippet-ai-review-target");
+        assert!(source.visible());
+        let label = source.label().unwrap_or_default();
+        assert!(
+            label.contains("fixture-0@example.invalid:22"),
+            "diagnostic target missing from snippet editor: {label}"
+        );
+    })
+    .checked("verify diagnostic snippet editor binding");
     assert!(writes(&panes[0]).is_empty() && writes(&panes[1]).is_empty());
 }

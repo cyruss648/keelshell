@@ -29,7 +29,9 @@ Workspace 在接受保存事件时重新检查审核来源：命令不能为空�
 通过后继续调用既有 `AppState::insert_snippet` 和 `Workspace::persist`。因此现有
 `Snippet::validate`、重复 ID 检查、StateStore revision/锁和原子替换仍是唯一的
 持久化边界。重复 ID、空命令和危险控制字符都以可恢复错误返回，用户可以继续编辑
-或取消。
+或取消。Workspace 在进入持久化前因为配置恢复、重载、已有写入或写入 lease 被阻止时，
+也会把错误回传给当前片段编辑器并解除 `Saving` 状态；草稿保持可编辑、可取消、可重试，
+StateStore 不发生写入。
 
 来源横幅和命令预览使用现有主题的 `TypographyTokens::code_font_family`。本片不增加
 主题分支、不改变主题注册表，也不引入依赖。

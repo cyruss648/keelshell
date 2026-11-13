@@ -56,8 +56,9 @@ SSH 授权，不根据历史知识自动连接主机，也不把知识条目当�
 
 本片 focused 证据见[AI 命令片段测试记录](../testing/records/2026-11-13-ai-command-snippet-save.md)：
 GPUI 回归覆盖保存按钮、原始目标/会话、命令修改后的重新审核提示、stale 会话阻止保存、
-草稿保留和重复 ID；纯逻辑测试覆盖来源内容边界和 120 秒单调过期。headless GPUI 不
-代表三平台原生窗口、IME、VoiceOver、真实 provider、真实 SSH 或客户业务验收。
+配置重载期间的可恢复失败、诊断步骤入口、草稿保留和重复 ID；纯逻辑测试覆盖来源内容
+边界和 120 秒单调过期。headless GPUI 不代表三平台原生窗口、IME、VoiceOver、真实
+provider、真实 SSH 或客户业务验收。
 
 ## 验收边界
 

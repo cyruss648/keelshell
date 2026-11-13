@@ -2443,6 +2443,14 @@ impl Workspace {
                 "请先关闭配置管理面板，再修改配置。",
                 "Close the configuration management panel before changing configuration.",
             );
+            self.report_snippet_save_preflight_failure(
+                &after,
+                Message::new(
+                    "配置管理面板正在使用配置写入，片段草稿已保留；关闭面板后可重试。",
+                    "Configuration management is using the configuration write gate; the snippet draft was retained. Close the panel and retry.",
+                ),
+                cx,
+            );
             cx.notify();
             return;
         }
@@ -2451,11 +2459,27 @@ impl Workspace {
                 "正在保存或重新加载，请完成后重试本次修改。",
                 "A save or reload is in progress. Wait for it to finish, then retry this change.",
             );
+            self.report_snippet_save_preflight_failure(
+                &after,
+                Message::new(
+                    "保存或重新加载正在进行，片段草稿已保留；完成后可重试。",
+                    "A save or reload is in progress; the snippet draft was retained. Retry after it finishes.",
+                ),
+                cx,
+            );
             cx.notify();
             return;
         }
         let update_history = matches!(&after, AfterSave::UpdateHistory);
         let Some(write_lease) = self.acquire_configuration_write(cx) else {
+            self.report_snippet_save_preflight_failure(
+                &after,
+                Message::new(
+                    "配置写入被阻止，片段草稿已保留；请查看工作区状态后重试。",
+                    "Configuration write was blocked; the snippet draft was retained. Check the workspace status and retry.",
+                ),
+                cx,
+            );
             return;
         };
         if let AfterSave::KnowledgeLibrary { panel, review_id } = &after
@@ -2858,6 +2882,24 @@ impl Workspace {
         })
         .detach();
         cx.notify();
+    }
+
+    fn report_snippet_save_preflight_failure(
+        &self,
+        after: &AfterSave,
+        message: Message,
+        cx: &mut Context<Self>,
+    ) {
+        let AfterSave::SnippetSaved { panel } = after else {
+            return;
+        };
+        if let Some(editor) = self
+            .snippet_editor
+            .as_ref()
+            .filter(|editor| editor.entity_id() == *panel)
+        {
+            editor.update(cx, |editor, cx| editor.set_error(message, cx));
+        }
     }
 
     fn import_openssh_connections(&mut self, window: &mut Window, cx: &mut Context<Self>) {
