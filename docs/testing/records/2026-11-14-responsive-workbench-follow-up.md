@@ -1,7 +1,7 @@
 # 响应式工作台紧凑修复与完整门禁记录 — 2026-11-14
 
-日期：2026-11-14（Asia/Shanghai）  
-源码基线：`f5f787b8153fba2dcc563b0b258e0350ee5a2056`  
+日期：2026-11-14（Asia/Shanghai）
+源码基线：`f5f787b8153fba2dcc563b0b258e0350ee5a2056`
 关联记录：[响应式工作台视觉切片](2026-11-13-responsive-workbench-polish.md)
 
 ## 本次修复
