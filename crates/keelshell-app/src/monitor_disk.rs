@@ -154,7 +154,7 @@ impl MonitorPanel {
             .id("monitor-disk-devices")
             .test_support()
             .min_w_0()
-            .max_h(px(144.))
+            .h(px(160.))
             .overflow_y_scroll()
             .flex_shrink_0()
             .flex()

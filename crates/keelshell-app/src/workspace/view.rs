@@ -9,7 +9,16 @@ use gpui_kit::{
 
 impl Workspace {
     fn responsive_assistant_width(viewport_width: Pixels) -> Pixels {
-        px(360.).min(viewport_width * 0.34).max(px(240.))
+        // Keep a narrow empty workspace usable when the assistant is open:
+        // the quick-connect form needs a little room for its three endpoint
+        // fields. At the 900px compact-workbench target this still enforces
+        // the 240px assistant budget.
+        let minimum = if viewport_width < px(720.) {
+            px(200.)
+        } else {
+            px(240.)
+        };
+        px(360.).min(viewport_width * 0.34).max(minimum)
     }
 
     fn responsive_navigation_width(&self, viewport_width: Pixels) -> Pixels {
