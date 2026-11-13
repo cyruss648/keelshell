@@ -2,8 +2,9 @@
 
 日期：2026-11-13（Asia/Shanghai）
 基线：`e1d410d2d61753f2e90296981199ed2b4b3d3703`
+最终源码提交：`43ae21ebc079dddd66245e36dd084d2c83c67c1a`
 范围：`keelshell-app` 工作区响应式 chrome、连接库、快速连接、主机监控 rail、GPUI 几何和辅助技术语义
-状态：**focused 源码验证通过；原生桌面验收未执行**
+状态：**focused 与完整工程门禁通过；原生桌面验收未执行**
 
 ## 实现范围
 
@@ -78,6 +79,7 @@ AccessKit label/tooltip；快速连接卡片在固定的 `300px` 区域内允许
 | `cargo test -p keelshell-app --bin keelshell-app design::tests -- --test-threads=1` | `4 passed / 0 failed / 1125 filtered out` |
 | `cargo clippy -p keelshell-app --locked --offline --all-targets -- -D warnings` | 通过 |
 | `git diff --check` | 通过 |
+| `python3 scripts/check.py`（提交前最终源码内容，命令会话 `99566`） | 退出 `0`；`keelshell-app` `1127 passed / 0 failed / 2 ignored`，其余 workspace Rust 测试、14 项 doctest、严格 Clippy、依赖策略和三组 AI controller 通过 |
 
 测试进程输出了既有 macOS 链接器 warning：`__eh_frame section too large`。它没有
 转化为编译或测试失败。
@@ -94,6 +96,7 @@ AccessKit label/tooltip；快速连接卡片在固定的 `300px` 区域内允许
 
 ## 交付边界
 
-提交前再次执行 focused fmt/check/test/clippy，并以单个 feature commit 固定本片。
-本记录只证明源码范围内的受控 GPUI 几何和可访问性回归；不把 headless 结果扩大为
+本片已由提交
+`43ae21ebc079dddd66245e36dd084d2c83c67c1a` 固定。记录只证明源码范围内的受控
+GPUI 几何和可访问性回归；不把 headless 结果扩大为
 原生桌面或完整产品验收。

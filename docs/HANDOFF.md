@@ -1,4 +1,4 @@
-# KeelShell 当前交接 — 2026-11-08
+# KeelShell 当前交接 — 2026-11-13
 
 先读[AGENTS](../AGENTS.md)、本页、[路线图](ROADMAP.md)及
 [共享 Cargo 指南](testing/SHARED_TARGET.md)。时间使用 Asia/Shanghai，
@@ -7,7 +7,8 @@
 
 ## 2026-11-13 当前片：响应式工作区层级
 
-当前 worktree 基于源码基线
+本片最终源码提交为
+`43ae21ebc079dddd66245e36dd084d2c83c67c1a`，基于源码基线
 `e1d410d2d61753f2e90296981199ed2b4b3d3703`，实现了最小响应式工作区视觉切片：
 
 - `900×580` 紧凑布局保留 AI、新建工作区窗口、凭据库和配置备份/恢复入口；
@@ -54,12 +55,19 @@ cargo clippy -p keelshell-app --locked --offline --all-targets -- -D warnings
 git diff --check
 ```
 
-结果为：fmt check 通过，design `4 passed / 0 failed / 1119 filtered out`，
-workbench `10 passed / 0 failed / 1113 filtered out`，focused all-targets Clippy
+结果为：fmt check 通过，design `4 passed / 0 failed / 1125 filtered out`，
+workbench `10 passed / 0 failed / 1119 filtered out`，focused all-targets Clippy
 通过，`git diff --check` 通过。这些命令验证源码和受控 GPUI 渲染树。
 macOS/Windows/Linux 原生窗口、IME、
 VoiceOver/NVDA、真实 SSH/Podman、最终安装包、签名、公证、像素对比度和多显示器
 几何仍未由本片覆盖。
+
+提交前的最终源码内容已经执行完整工程门禁
+`python3 scripts/check.py`，命令会话 `99566` 返回 `0`。其中
+`keelshell-app` 为 `1127 passed / 0 failed / 2 ignored`，其余 workspace Rust
+测试、14 项 doctest、严格 Clippy、依赖版本策略以及 readiness、observer、
+small-stack 三组 AI controller 均通过。提交只固化已验证源码和文档，源码内容
+没有在门禁之后改变。
 
 ## 2026-11-13 当前片：保存已审核的 AI 命令为可复用片段
 

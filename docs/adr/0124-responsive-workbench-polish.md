@@ -84,9 +84,13 @@ macOS、Windows 或 Linux 原生窗口、IME、VoiceOver、真实终端输入和
 
 ## 验证
 
-`workbench_layout` 当前 focused 结果为 `10 passed / 0 failed / 1113 filtered
+`workbench_layout` 当前 focused 结果为 `10 passed / 0 failed / 1119 filtered
 out`。新增回归覆盖 900×580 下三套注册表主题、明暗模式和中英文，检查关键动作
 的可见 bounds、完整 AX label、AI 打开后的助手和终端预算，以及连接/监控 header
 的 `Role::Group`、双语名称、`236px`/`260px` rail 宽度和
 `ChromeTokens::pane_header_height`。`cargo clippy -p keelshell-app --locked
 --offline --all-targets -- -D warnings` 已通过。
+
+最终源码提交为
+`43ae21ebc079dddd66245e36dd084d2c83c67c1a`；提交前以相同源码内容执行的完整
+`python3 scripts/check.py` 返回 `0`。完整门禁结果和未覆盖的原生桌面边界见测试记录。

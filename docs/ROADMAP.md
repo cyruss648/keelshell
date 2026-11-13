@@ -20,8 +20,7 @@ KeelShell 工作区已收紧窄窗口的工作台层级。900×580 下，AI、�
 本片的首轮完整门禁还发现并修复了窄列回归：极窄连接库动作改为图标加双语
 tooltip，快速连接区域支持固定预算内滚动，主机监控磁盘选择器扩大到 `160px`
 并保留末项可见的滚轮手势区，首次启动测试核对完整辅助技术名称。修复后的
-磁盘监控、紧凑连接库、首次启动和工作区布局 focused 回归均通过；完整工程门禁
-需在当前源码提交后重新执行。
+磁盘监控、紧凑连接库、首次启动和工作区布局 focused 回归均通过。
 
 focused GPUI 回归已通过：工作区布局 `10 passed / 0 failed / 1119 filtered out`，
 覆盖三套主题、明暗模式和中英文的关键入口 bounds/AX label、AI/终端预算、导航
@@ -29,6 +28,12 @@ rail role/header label、236/260px 宽度及 pane header token。focused app Cli
 使用 `--all-targets -- -D warnings` 通过；格式与差异检查通过。详细证据见
 [ADR 0124](adr/0124-responsive-workbench-polish.md)、[产品说明](product/NATIVE_WORKBENCH.md)
 和[测试记录](testing/records/2026-11-13-responsive-workbench-polish.md)。
+
+本片最终源码提交为
+`43ae21ebc079dddd66245e36dd084d2c83c67c1a`。提交前以相同源码内容执行
+`python3 scripts/check.py`，命令会话 `99566` 返回 `0`；`keelshell-app`
+为 `1127 passed / 0 failed / 2 ignored`，其余 workspace Rust 测试、14 项
+doctest、严格 Clippy、依赖策略和三组 AI controller 均通过。
 
 源码提交后仍需独立形成 macOS/Windows/Linux 原生窗口、IME、VoiceOver/NVDA、
 真实 SSH/Podman、像素对比度、安装包和签名验收；headless GPUI 结果不代签这些边界。
