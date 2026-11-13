@@ -2040,6 +2040,22 @@ impl Workspace {
         if self.saving {
             return;
         }
+        let form_id = self.form.as_ref().and_then(|form| form.id);
+        let original = form_id.and_then(|id| {
+            self.state
+                .connections
+                .iter()
+                .find(|item| item.id == id)
+                .cloned()
+        });
+        if form_id.is_some() && original.is_none() {
+            self.status = Message::new(
+                "连接已移除，编辑未保存；请重新选择当前连接。",
+                "The connection was removed; edits were not saved. Select the current profile.",
+            );
+            cx.notify();
+            return;
+        }
         let Some(form) = self.form.as_ref() else {
             return;
         };
@@ -2075,9 +2091,9 @@ impl Workspace {
             .map(str::to_owned)
             .collect();
         let folder_id = form.folder_id;
-        if let Some(id) = form.id {
+        if let Some(id) = form_id {
             connection.id = id;
-            if let Some(original) = self.state.connections.iter().find(|item| item.id == id) {
+            if let Some(original) = original.as_ref() {
                 connection.group = original.group.clone();
                 connection.favorite = original.favorite;
             }
@@ -2115,11 +2131,7 @@ impl Workspace {
             cx.notify();
             return;
         }
-        if let Some(original) = self
-            .state
-            .connections
-            .iter()
-            .find(|item| item.id == connection.id)
+        if let Some(original) = original.as_ref()
             && vault::same_destination(original, &connection)
         {
             connection.credential_ref = original.credential_ref;
@@ -2130,11 +2142,7 @@ impl Workspace {
         };
         let mut candidate = self.state.clone();
         let connection_id = connection.id;
-        if candidate
-            .connections
-            .iter()
-            .any(|item| item.id == connection.id)
-        {
+        if form_id.is_some() {
             if let Err(error) = candidate.update_connection(connection) {
                 self.status = Message::detail(
                     "连接或跳板路线无效，未保存",
@@ -3233,9 +3241,19 @@ impl Workspace {
         };
         cx.notify();
     }
+    #[cfg(test)]
     fn edit_connection(
         &mut self,
         connection: Connection,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.edit_connection_by_id(connection.id, window, cx);
+    }
+
+    fn edit_connection_by_id(
+        &mut self,
+        id: uuid::Uuid,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -3246,8 +3264,22 @@ impl Workspace {
         if self.saving {
             return;
         }
-        self.cancel_reconnect_for_profile(connection.id, window, cx);
-        if self.editing_active_route(connection.id) {
+        let Some(connection) = self
+            .state
+            .connections
+            .iter()
+            .find(|profile| profile.id == id)
+            .cloned()
+        else {
+            self.status = Message::new(
+                "连接已移除，请重新选择。",
+                "Connection removed. Select another saved connection.",
+            );
+            cx.notify();
+            return;
+        };
+        self.cancel_reconnect_for_profile(id, window, cx);
+        if self.editing_active_route(id) {
             self.cancel_connect_route(window, cx);
         }
         let key = match &connection.auth {

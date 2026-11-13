@@ -1,12 +1,61 @@
 use super::*;
 use crate::workspace::library::{DestinationTarget, LibraryFilter};
-use gpui_kit::{Bounds, Pixels};
+use gpui_kit::{App, Bounds, MouseButton, Pixels, Point, Window};
 
 fn contained(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
     inner.origin.x >= outer.origin.x
         && inner.origin.y >= outer.origin.y
         && inner.right() <= outer.right()
         && inner.bottom() <= outer.bottom()
+}
+
+fn click_painted_library_position(position: Point<Pixels>, window: &mut Window, cx: &mut App) {
+    // Keep the old frame's listeners attached while the live profile changes.
+    for event in [
+        gpui_kit::MouseDownEvent {
+            button: MouseButton::Left,
+            position,
+            click_count: 1,
+            ..Default::default()
+        }
+        .to_platform_input(),
+        gpui_kit::MouseUpEvent {
+            button: MouseButton::Left,
+            position,
+            click_count: 1,
+            ..Default::default()
+        }
+        .to_platform_input(),
+    ] {
+        window.dispatch_event(event, cx);
+    }
+}
+
+fn persist_fixture_state_without_repaint(
+    fixture: &Fixture,
+    state: AppState,
+    operation: &str,
+    cx: &mut TestAppContext,
+) -> AppState {
+    let saved = fixture.store.save(&state).checked(operation);
+    let adopted = saved.clone();
+    cx.update_window(fixture.window, |_, _, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.state = adopted.clone();
+            let gate = workspace.app_windows.read(cx).gate.clone();
+            let reload = crate::app_windows::ConfigurationGate::begin_reload_lease(
+                &gate,
+                workspace.window_id,
+            )
+            .checked("begin no-repaint fixture adoption");
+            reload.finish(Some(&adopted));
+            workspace.configuration_epoch =
+                gate.lock().checked("lock no-repaint fixture gate").epoch();
+            workspace.configuration_invalidated = false;
+        });
+    })
+    .checked("adopt fixture state without repaint");
+    saved
 }
 
 #[gpui_kit::test]
@@ -318,6 +367,122 @@ fn compact_library_keeps_full_surface_inside_narrow_theme_language_height_matrix
         })
         .checked("keep the complete narrow connection library surface inside the window");
     }
+}
+
+#[gpui_kit::test]
+async fn painted_library_edit_uses_current_profile_after_same_id_replacement(
+    cx: &mut TestAppContext,
+) {
+    let original = Connection::new("旧配置", "old.invalid", "old-user");
+    let id = original.id;
+    let fixture = mount(cx, vec![original.clone()]);
+    let position = cx
+        .update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.show_connections = true;
+                cx.notify();
+            });
+            window.render_frame(cx);
+            window.find(("edit", 0_usize)).bounds().center()
+        })
+        .checked("paint the original library edit action");
+
+    let mut replacement = original.clone();
+    replacement.name = "当前配置".into();
+    replacement.host = "current.invalid".into();
+    replacement.port = 2222;
+    replacement.username = "current-user".into();
+    let mut replacement_state = fixture.store.load().checked("load original library state");
+    replacement_state.connections[0] = replacement.clone();
+    persist_fixture_state_without_repaint(
+        &fixture,
+        replacement_state,
+        "persist same-id profile replacement",
+        cx,
+    );
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        click_painted_library_position(position, window, cx);
+        fixture.workspace.read_with(cx, |workspace, cx| {
+            let form = workspace
+                .form
+                .as_ref()
+                .checked_option("current profile editor");
+            assert_eq!(form.id, Some(id));
+            assert_eq!(form.host.read(cx).value(), "current.invalid");
+            assert_eq!(form.port.read(cx).value(), "2222");
+            assert_eq!(form.username.read(cx).value(), "current-user");
+        });
+        window.render_frame(cx);
+        window.click("save-connection", cx);
+    })
+    .checked("route painted edit through the current profile");
+    saved(&fixture, cx).await;
+
+    let state = fixture
+        .store
+        .load()
+        .checked("load current profile after edit");
+    let persisted = state
+        .connections
+        .iter()
+        .find(|connection| connection.id == id)
+        .checked_option("persisted replacement profile");
+    assert_eq!(persisted.host, "current.invalid");
+    assert_eq!(persisted.port, 2222);
+    assert_eq!(persisted.username, "current-user");
+}
+
+#[gpui_kit::test]
+async fn painted_library_edit_cannot_resurrect_removed_profile(cx: &mut TestAppContext) {
+    let original = Connection::new("待移除配置", "removed.invalid", "operator");
+    let id = original.id;
+    let fixture = mount(cx, vec![original]);
+    let position = cx
+        .update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |workspace, cx| {
+                workspace.show_connections = true;
+                cx.notify();
+            });
+            window.render_frame(cx);
+            window.find(("edit", 0_usize)).bounds().center()
+        })
+        .checked("paint the removable library edit action");
+
+    let mut removed_state = fixture.store.load().checked("load removable library state");
+    removed_state.connections.clear();
+    persist_fixture_state_without_repaint(&fixture, removed_state, "persist profile removal", cx);
+
+    cx.update_window(fixture.window, |_, window, cx| {
+        click_painted_library_position(position, window, cx);
+        fixture.workspace.read_with(cx, |workspace, cx| {
+            assert!(workspace.form.is_none());
+            assert_eq!(workspace.status.render(cx), "连接已移除，请重新选择。");
+        });
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.save_connection(window, cx);
+        });
+    })
+    .checked("reject the stale removed-profile edit before saving");
+    saved(&fixture, cx).await;
+
+    assert!(
+        fixture
+            .store
+            .load()
+            .checked("load library after rejected stale edit")
+            .connections
+            .is_empty()
+    );
+    let active = fixture.workspace.read_with(cx, |workspace, _| {
+        workspace
+            .state
+            .connections
+            .iter()
+            .filter(|connection| connection.id == id)
+            .count()
+    });
+    assert_eq!(active, 0);
 }
 
 #[gpui_kit::test]

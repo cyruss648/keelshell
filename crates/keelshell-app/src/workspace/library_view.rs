@@ -569,7 +569,6 @@ impl Workspace {
         } = options;
         let visual = crate::design::palette(cx);
         let profile = connection.clone();
-        let edit = connection.clone();
         let id = connection.id;
         let selected = self.library_selection.contains(&id);
         let target = format!("{} · {}", connection.name, endpoint(connection));
@@ -770,7 +769,7 @@ impl Workspace {
                         .accessibility_label(action_label(t(cx, "编辑", "Edit"), connection))
                         .disabled(self.saving)
                         .on_click(cx.listener(move |view, _, window, cx| {
-                            view.edit_connection(edit.clone(), window, cx)
+                            view.edit_connection_by_id(id, window, cx)
                         }))
                         .map(|button| self.retain_modal_button(("edit", index), button, cx)),
                 )
