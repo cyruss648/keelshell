@@ -118,11 +118,27 @@ app 测试期间仍可能看到既有 macOS 链接器 warning
 `78091e684f95cba5faecc54571992142f5fcd766` 的复核又发现上述 P1/P2，已由
 `6d1f1a1` 和 `a33e4c3` 修复，并以当前源码重新执行完整门禁。
 
-针对包含本片最终文档快照的新提交，独立严格只读代码与功能复核尚待启动。复核
-必须使用独立 Cargo target，报告 P0/P1/P2/P3 计数、绝对路径和行号、实际命令及
-测试计数、未验证边界和 merge recommendation；复核 agent 不得编辑、格式化、提交、
-推送、合并或清理共享 worktree。第一次独立复核尝试因无法形成可审计正文被终止，
-不能计入批准。
+针对文档提交
+`251a8ee0398f5927685ae36f2f486e2d6d77d71d` 的新的独立严格只读代码与功能复核
+已完成。复核 worktree 为
+`/Users/hdh/.codex/worktrees/responsive-workbench-review-20261114/keelshell`，
+Cargo target 为 `/private/tmp/keelshell-review-target-251a8ee`；复核 agent 未编辑、
+格式化、提交、推送、合并或清理仓库。
+
+复核结果为 merge recommendation `APPROVE`，P0/P1/P2/P3 均为 `0`。实际独立
+回执包括 app `--list` 的 `1129 tests, 0 benchmarks`、design
+`4 passed / 1125 filtered out`、workbench `11 passed / 1118 filtered out`、
+stale painted Edit `2 passed / 1127 filtered out`、`workspace::tests::library::`
+`31 passed / 1098 filtered out`、session-tabs `6 passed / 1123 filtered out`、
+窄窗/快速连接/磁盘/工具栏矩阵各 `1 passed / 1128 filtered out`、core
+workspace layout `12 passed`，以及严格 Clippy、fmt 和差异检查通过。
+
+独立复核还记录了两个有界中止：宽 `library` 过滤器匹配 84 项但未在该复核中
+形成最终摘要，app 全量测试超过五分钟未形成摘要；这两项没有被计入独立通过。
+作者门禁在源码 `a33e4c3b154867e4ef542cd9ef6a1193aee31c19` 上的 app 全量
+`1127 passed / 2 ignored` 仍作为单独作者回执保留。原生窗口、IME、VoiceOver/
+NVDA、真实 SSH/Podman、外部 AI provider、打包签名安装升级等边界仍未验收。
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。
 
 ## 未覆盖边界
 
@@ -142,5 +158,7 @@ app 测试期间仍可能看到既有 macOS 链接器 warning
 
 `a33e4c3b154867e4ef542cd9ef6a1193aee31c19` 的响应式紧凑修复与复核补强已通过
 focused 回归、Rust 1.100.0 下的完整工程门禁和三套主题/双语受控布局检查，可以
-作为当前本地源码候选继续维护。文档提交后仍需针对最终提交执行独立复核；上述
-原生/真实联调边界保持开放。公司内网暂不可用，本片只做本地提交，不执行 push。
+作为当前本地源码候选继续维护。文档提交 `251a8ee` 的独立复核已返回
+`APPROVE`，P0/P1/P2/P3 均为 `0`；本次后续文档提交只记录该复核结果，不改变
+源码。上述原生/真实联调边界保持开放。公司内网暂不可用，本片只做本地提交，不
+执行 push。

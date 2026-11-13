@@ -44,8 +44,14 @@
 此前独立严格只读复核针对 `78091e684f95cba5faecc54571992142f5fcd766` 返回
 P0 `0`、P1 `1`、P2 `1`、P3 `2`；P1/P2 已分别由 `6d1f1a1` 和 `a33e4c3`
 修复，当前文档也已同步修正 P3 指出的旧证据。针对包含本片最终文档快照的新提交，
-独立复核尚未启动，当前状态仍为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。480×580/480×900 的 headless
+针对文档提交 `251a8ee0398f5927685ae36f2f486e2d6d77d71d` 的新的独立严格只读复核
+已在独立 worktree 和独立 Cargo target 中完成，P0/P1/P2/P3 均为 `0`，范围内
+merge recommendation 为 `APPROVE`。复核重新确认当前 `1129` 项 app 测试清单、
+stale Edit 与 session-tab reveal 回归、三套主题 token 解耦、双语 Group/List
+语义、Clippy、fmt 和差异检查；作者门禁的 app 全量 `1127 passed / 2 ignored`
+作为独立证据之外的作者回执保留。独立复核没有重新完成宽 `library` 过滤集和 app
+全量测试，未把中止命令计入通过。当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。480×580/480×900 的 headless
 GPUI 几何和受控交互已覆盖；Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实
 SSH/Podman、外部 AI provider、当前源码包、签名、公证和安装升级继续保持开放。
 

@@ -10,7 +10,7 @@
 
 | 日期（Asia/Shanghai） | 记录与范围 |
 | --- | --- |
-| 2026-11-14 | [响应式工作台紧凑修复](records/2026-11-14-responsive-workbench-follow-up.md)：`a33e4c3b154867e4ef542cd9ef6a1193aee31c19` 收口紧凑 AI/磁盘布局、stale Edit 与 session-tab reveal 修复；Rust 1.100.0 完整门禁通过，最终文档提交后的独立复核待回执；原生桌面和真实联调边界保持开放。 |
+| 2026-11-14 | [响应式工作台紧凑修复](records/2026-11-14-responsive-workbench-follow-up.md)：`a33e4c3b154867e4ef542cd9ef6a1193aee31c19` 收口紧凑 AI/磁盘布局、stale Edit 与 session-tab reveal 修复；Rust 1.100.0 完整门禁通过，文档提交 `251a8ee` 的独立复核返回 `APPROVE`（P0/P1/P2/P3 均为 0）；原生桌面和真实联调边界保持开放。 |
 | 2026-11-08 | [工作区窗口切换器](records/2026-11-08-workspace-window-switcher.md)：窗口摘要、真实原生窗口激活、稳定序号，以及 modal/Dialog、focus trap、Escape 和焦点恢复；作者完整工程门禁与独立复核通过，原生多窗口仍待收口。 |
 | 2026-11-06 | [文本与路由诊断组合](records/2026-11-06-editor-traceroute-integration.md)：543输入/21源码路径，2355 ordinary/23 ignored、14 rustdoc、Python131/1 skip通过；combined-r3/r4限定批准源码和新包。 |
 | 2026-11-06 | [文本与路径探测原生](records/2026-11-06-editor-traceroute-native.md)：38组macOS AX/JPEG，BOM/CRLF取消与保存、SSH UDP双栈一跳获native-r1限定批准；inline动作P2与合并验收开放，完整native HOLD。 |

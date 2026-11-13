@@ -60,8 +60,16 @@ stale painted Edit `2 passed / 1127 filtered out`、连接库相关过滤测试
 严格只读复核返回 P0 `0`、P1 `1`、P2 `1`、P3 `2`。P1 stale painted Edit
 和 P2 session-tab reveal 已分别由 `6d1f1a1` 与 `a33e4c3` 修复，并通过上述
 回归和完整门禁；本次文档提交同步修正复核指出的旧 SHA 与旧测试清单。新的独立
-复核必须针对包含本片最终文档的提交重新启动，因此当前状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。第一次复核尝试因无法形成可审计
+针对包含本片文档修订的提交
+`251a8ee0398f5927685ae36f2f486e2d6d77d71d`，新的独立严格只读代码与功能复核
+已经在独立 worktree 和独立 Cargo target 中完成，merge recommendation 为
+`APPROVE`，P0/P1/P2/P3 均为 `0`。复核实际确认 app 测试清单为 `1129` 项，
+design `4/1125`、workbench `11/1118`、stale painted Edit `2/1127`、
+session-tabs `6/1123`、core workspace layout `12/12`，Clippy、fmt 和差异检查
+均通过；作者门禁的 app 全量 `1127 passed / 2 ignored` 仍单独保留为作者回执。
+独立复核没有重新完成宽 `library` 过滤集和 app 全量测试，也没有把这些中止命令
+写成独立通过。当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。第一次复核尝试因无法形成可审计
 正文被终止，不能计入批准。
 
 480×580/480×900 的 headless GPUI 几何和受控交互现在已经覆盖。真实 macOS 包、
