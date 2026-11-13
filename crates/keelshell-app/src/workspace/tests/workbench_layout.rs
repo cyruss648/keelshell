@@ -644,6 +644,84 @@ fn sidebar_and_assistant_transitions_reveal_the_active_tab_without_sending_text(
 }
 
 #[gpui_kit::test]
+fn navigation_panel_width_change_reveals_active_session_close(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes: Vec<_> = (0..4)
+        .flat_map(|_| attach_remote_panes(&fixture, cx))
+        .collect();
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.workspace.update(cx, |workspace, cx| {
+            workspace.tabs = panes.iter().map(|pane| pane.terminal.clone()).collect();
+            workspace.active = panes.len() - 1;
+            workspace.show_assistant = false;
+            workspace.show_navigation = true;
+            workspace.navigation_panel = NavigationPanel::Connections;
+            cx.notify();
+        });
+        settle(window, cx);
+
+        let session_tabs = window.find("session-tabs").bounds();
+        assert_eq!(
+            window.find("monitor-column").bounds().size.width,
+            px(236.),
+            "compact Connections rail width"
+        );
+        assert!(
+            fixture.workspace.read(cx).session_tab_scroll.max_offset().x > px(0.)
+                && fixture.workspace.read(cx).session_tab_scroll.offset().x < px(0.),
+            "last active tab must require horizontal scrolling"
+        );
+        assert!(
+            window.find(("session-tab", panes.len() - 1)).visible()
+                && inside(
+                    window.find(("session-tab", panes.len() - 1)).bounds(),
+                    session_tabs
+                ),
+            "active session tab is initially revealed"
+        );
+        assert!(
+            window.find(("close-tab", panes.len() - 1)).visible()
+                && inside(
+                    window.find(("close-tab", panes.len() - 1)).bounds(),
+                    session_tabs
+                ),
+            "active close control is initially revealed"
+        );
+
+        window.click("navigation-monitor", cx);
+        settle(window, cx);
+
+        assert_eq!(
+            fixture.workspace.read(cx).navigation_panel,
+            NavigationPanel::Monitor
+        );
+        assert_eq!(
+            window.find("monitor-column").bounds().size.width,
+            px(260.),
+            "compact Monitor rail width"
+        );
+        assert!(
+            window.find(("session-tab", panes.len() - 1)).visible()
+                && inside(
+                    window.find(("session-tab", panes.len() - 1)).bounds(),
+                    window.find("session-tabs").bounds()
+                ),
+            "active session tab remains revealed after the rail shrinks the tab viewport"
+        );
+        assert!(
+            window.find(("close-tab", panes.len() - 1)).visible()
+                && inside(
+                    window.find(("close-tab", panes.len() - 1)).bounds(),
+                    window.find("session-tabs").bounds()
+                ),
+            "active close control remains revealed after the rail shrinks the tab viewport"
+        );
+    })
+    .checked("reveal the active session close control after a compact navigation-panel resize");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
 fn resized_navigation_does_not_leave_a_hidden_search_or_terminal_focused(cx: &mut TestAppContext) {
     let fixture = mount_sized(cx, Vec::new(), 1440., 840.);
     let panes = attach_remote_panes(&fixture, cx);

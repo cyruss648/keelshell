@@ -136,6 +136,19 @@ impl KeyboardInteractivePrompt {
         }
     }
 }
+
+#[derive(Clone, Copy, PartialEq)]
+struct SessionTabReveal {
+    active_id: EntityId,
+    viewport_width: Pixels,
+    navigation_width: Pixels,
+    tabs_len: usize,
+    language: keelshell_core::Language,
+    update_action: &'static str,
+    show_navigation: bool,
+    show_assistant: bool,
+}
+
 struct HostApproval {
     attempt: uuid::Uuid,
     index: usize,
@@ -373,15 +386,7 @@ pub struct Workspace {
     navigation_panel: NavigationPanel,
     navigation_tree: navigation::tree::NavigationTree,
     session_tab_scroll: ScrollHandle,
-    session_tab_reveal: Option<(
-        EntityId,
-        Pixels,
-        usize,
-        keelshell_core::Language,
-        &'static str,
-        bool,
-        bool,
-    )>,
+    session_tab_reveal: Option<SessionTabReveal>,
     assistant: Entity<AssistantPanel>,
     agent: Option<agent::AgentState>,
     ai_credentials: EphemeralCredentials,

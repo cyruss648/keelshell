@@ -1589,16 +1589,15 @@ impl Workspace {
         // Only reveal after selection or a layout change: continuous renders must
         // not undo a user's manual horizontal scroll through other sessions.
         let update_action = self.update_service.read(cx).action_label(cx);
-        let reveal = active_id.map(|id| {
-            (
-                id,
-                viewport.width,
-                self.tabs.len(),
-                i18n::language(cx),
-                update_action,
-                show_navigation,
-                self.show_assistant,
-            )
+        let reveal = active_id.map(|active_id| SessionTabReveal {
+            active_id,
+            viewport_width: viewport.width,
+            navigation_width,
+            tabs_len: self.tabs.len(),
+            language: i18n::language(cx),
+            update_action,
+            show_navigation,
+            show_assistant: self.show_assistant,
         });
         if self.session_tab_reveal != reveal {
             self.session_tab_reveal = reveal;
@@ -1608,13 +1607,16 @@ impl Workspace {
                 // viewport. Reapply once after layout, against the new bounds.
                 cx.on_next_frame(window, move |view, window, cx| {
                     if view.session_tab_reveal == Some(expected)
-                        && view.tabs.get(view.active).map(Entity::entity_id) == Some(expected.0)
-                        && window.viewport_size().width == expected.1
-                        && view.tabs.len() == expected.2
-                        && i18n::language(cx) == expected.3
-                        && view.update_service.read(cx).action_label(cx) == expected.4
-                        && view.show_assistant == expected.6
-                        && view.navigation_visible(window) == expected.5
+                        && view.tabs.get(view.active).map(Entity::entity_id)
+                            == Some(expected.active_id)
+                        && window.viewport_size().width == expected.viewport_width
+                        && view.responsive_navigation_width(window.viewport_size().width)
+                            == expected.navigation_width
+                        && view.tabs.len() == expected.tabs_len
+                        && i18n::language(cx) == expected.language
+                        && view.update_service.read(cx).action_label(cx) == expected.update_action
+                        && view.navigation_visible(window) == expected.show_navigation
+                        && view.show_assistant == expected.show_assistant
                     {
                         view.session_tab_scroll.scroll_to_item(view.active);
                         cx.notify();
