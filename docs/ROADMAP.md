@@ -6,7 +6,7 @@
 ## 2026-11-14 响应式工作台紧凑连接库收口
 
 当前源码与测试补强已固定为
-`9194d7da6c7fc628bc3d8f7c1155afb5c91e31f1`。上一片响应式工作台在 900×580
+`a33e4c3b154867e4ef542cd9ef6a1193aee31c19`。上一片响应式工作台在 900×580
 目标下保留 AI、导航和终端的设计层级；本片继续收口边界：
 
 - AI 列在 720px 以下最低为 200px，在 720px 及以上最低为 240px，上限均为
@@ -26,19 +26,25 @@
 - 工具栏与批量栏覆盖中英文 Group 语义、AX label、按钮 bounds 和批量 Move；
 - 三套主题、明暗模式、中英文和 480×580/480×900 高度矩阵覆盖连接管理器边界、
   文件夹、工具栏、列表视口、首条记录及其全部动作。
+- 连接库旧帧 Edit 回调按当前 UUID 重新解析，连接删除或失效时失败关闭；
+  `6d1f1a1` 加入两条 stale painted Edit 回归。
+- session-tab reveal key 纳入导航 rail 宽度，修复 Connections `236px` 切换到
+  Monitor `260px` 后关闭动作可能被旧布局裁切的问题；`a33e4c3` 加入对应
+  workbench 回归。
 
-定向回归包括 workbench layout `10/10`、主题设计 `4/4`、磁盘监控独立回归
+定向回归包括 workbench layout `11/11`、主题设计 `4/4`、stale painted Edit
+`2/2`、连接库相关过滤测试 `84/84`、session-tabs `6/6`、磁盘监控独立回归
 `1/1`、紧凑快速连接 `1/1`、工具栏/批量栏 `1/1`、窄窗主题/语言/高度矩阵
-`1/1`、连接库专项 `29/29`、
-首次中文启动 `1/1` 和 core workspace layout `12/12`。完整
+`1/1`、首次中文启动 `1/1` 和 core workspace layout `12/12`。完整
 `python3 scripts/check.py` 返回 `0`，Python 为 `131 run / 1 skipped`，app 为
-`1124 passed / 2 ignored`，14 项 doctest、
+`1127 passed / 2 ignored`（测试清单共 `1129` 项，新增测试已进入二进制），14 项 doctest、
 严格 workspace Clippy、依赖策略和三组 AI controller 均通过。门禁与未覆盖边界
 见[本片测试记录](testing/records/2026-11-14-responsive-workbench-follow-up.md)。
 
-第二次独立严格只读复核以 `8dd5732` 为基线发现一个 P2 证据缺口，已在
-`9194d7da6c7fc628bc3d8f7c1155afb5c91e31f1` 中补齐；针对包含本片最终文档快照的
-新提交，独立复核尚未启动，当前状态仍为
+此前独立严格只读复核针对 `78091e684f95cba5faecc54571992142f5fcd766` 返回
+P0 `0`、P1 `1`、P2 `1`、P3 `2`；P1/P2 已分别由 `6d1f1a1` 和 `a33e4c3`
+修复，当前文档也已同步修正 P3 指出的旧证据。针对包含本片最终文档快照的新提交，
+独立复核尚未启动，当前状态仍为
 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。480×580/480×900 的 headless
 GPUI 几何和受控交互已覆盖；Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实
 SSH/Podman、外部 AI provider、当前源码包、签名、公证和安装升级继续保持开放。

@@ -8,8 +8,9 @@
 ## 2026-11-14 响应式工作台紧凑连接库收口与完整门禁
 
 响应式工作台上一片的实现基线为
-`e1d410d2d61753f2e90296981199ed2b4b3d3703`；当前源码与测试补强已固定在
-`9194d7da6c7fc628bc3d8f7c1155afb5c91e31f1`。本片没有新增依赖，仍保持直接
+`e1d410d2d61753f2e90296981199ed2b4b3d3703`；上一轮紧凑布局源码固定在
+`9194d7da6c7fc628bc3d8f7c1155afb5c91e31f1`，当前源码与测试补强已固定在
+`a33e4c3b154867e4ef542cd9ef6a1193aee31c19`。本片没有新增依赖，仍保持直接
 registry 依赖使用 `x.y`、Cargo.lock 保存解析版本和三套主题通过 registry、
 Palette、组件与 chrome token 扩展。
 
@@ -35,20 +36,33 @@ Palette、组件与 chrome token 扩展。
   文件夹树、操作栏、列表视口、首条连接及全部动作的真实 bounds 和 List/ListItem
   语义；两个尺寸均挂载真实保存连接，确认保存连接和快速连接的 Connect 动作在
   滚动后可达，快速连接滚动不会改变连接库 sibling bounds。
+- 连接库旧帧的 Edit 回调现在按当前连接 UUID 重新解析；连接已删除、失效或不再
+  可编辑时失败关闭，不能把旧绘制帧的动作转发到新记录。对应提交为
+  `6d1f1a1`，并加入两条 stale painted Edit 回归。
+- session-tab reveal key 纳入当前导航 rail 宽度；Connections `236px` 切换到
+  Monitor `260px` 后会重新计算可见区域，关闭动作不会因旧布局结果被裁切。对应
+  提交为 `a33e4c3`，并加入 workbench 回归。
 
-最终源码 `9194d7da` 上的 `python3 scripts/check.py` 已退出 `0`：依赖策略、Python
+最终源码 `a33e4c3b154867e4ef542cd9ef6a1193aee31c19` 上的 `python3 scripts/check.py`
+已退出 `0`：依赖策略、Python
 `131 passed / 1 skipped`、fmt、workspace 严格 Clippy、workspace Rust 测试、14 项
 doctest 和 readiness/observer/small-stack 三组 AI controller 均通过；app 完整
-测试为 `1124 passed / 2 ignored`。连接库专项为 `29 passed / 0 failed`，快速连接、
-工具栏/批量栏和窄窗主题/语言/高度矩阵各为 `1 passed / 0 failed`；磁盘监控独立
-回归、首次中文启动回归和 `keelshell-core` workspace layout `12/12` 也已通过。
+测试为 `1127 passed / 2 ignored`，测试清单共 `1129` 项，新增测试已实际进入二进制。
+当前 focused 回执为
+design `4 passed / 1125 filtered out`、workbench `11 passed / 1118 filtered out`、
+stale painted Edit `2 passed / 1127 filtered out`、连接库相关过滤测试
+`84 passed / 1045 filtered out` 和 session-tabs `6 passed / 1123 filtered out`；
+快速连接、工具栏/批量栏、窄窗主题/语言/高度矩阵各为 `1 passed / 0 failed`，
+磁盘监控独立回归、首次中文启动回归和 `keelshell-core` workspace layout `12/12`
+也已通过。
 
-独立严格只读复核的第二次可审计报告以 `8dd5732` 为基线，P0/P1/P3 为 `0`，唯一
-P2 是回归证据只覆盖首条记录和容器边界，没有覆盖末条滚动后的动作、工具栏/批量栏
-语义及快速连接滚动。本片已在 `9194d7da` 中补齐这些回归，并对最终源码重新通过
-完整门禁；针对包含本片最终文档快照的新提交，新的独立复核尚待启动，因此当前
-状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。第一次复核尝试因无法形成
-可审计正文被终止，不能计入批准。
+此前针对文档快照与源码提交 `78091e684f95cba5faecc54571992142f5fcd766` 的独立
+严格只读复核返回 P0 `0`、P1 `1`、P2 `1`、P3 `2`。P1 stale painted Edit
+和 P2 session-tab reveal 已分别由 `6d1f1a1` 与 `a33e4c3` 修复，并通过上述
+回归和完整门禁；本次文档提交同步修正复核指出的旧 SHA 与旧测试清单。新的独立
+复核必须针对包含本片最终文档的提交重新启动，因此当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。第一次复核尝试因无法形成可审计
+正文被终止，不能计入批准。
 
 480×580/480×900 的 headless GPUI 几何和受控交互现在已经覆盖。真实 macOS 包、
 Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实 SSH/Podman、外部 AI provider、
@@ -107,9 +121,9 @@ cargo clippy -p keelshell-app --locked --offline --all-targets -- -D warnings
 git diff --check
 ```
 
-结果为：fmt check 通过，design `4 passed / 0 failed / 1119 filtered out`，
-workbench `10 passed / 0 failed / 1113 filtered out`，focused all-targets Clippy
-通过，`git diff --check` 通过。这些命令验证源码和受控 GPUI 渲染树。
+结果为：fmt check 通过，design `4 passed / 0 failed / 1125 filtered out`，
+workbench `11 passed / 0 failed / 1118 filtered out`，focused all-targets Clippy
+通过，`git diff --check` 通过。这些命令验证当前源码和受控 GPUI 渲染树。
 macOS/Windows/Linux 原生窗口、IME、
 VoiceOver/NVDA、真实 SSH/Podman、最终安装包、签名、公证、像素对比度和多显示器
 几何仍未由本片覆盖。
