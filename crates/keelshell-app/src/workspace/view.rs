@@ -29,6 +29,18 @@ impl Workspace {
         }
     }
 
+    fn responsive_quick_connect_height(viewport_height: Pixels) -> Pixels {
+        // The connection library keeps a filter row, two action bars, a compact
+        // folder tree and a footer outside its profile-list viewport. Reserve
+        // that chrome in short empty workspaces while keeping the full form
+        // available through the quick-connect scroll surface.
+        if viewport_height < px(680.) {
+            px(120.)
+        } else {
+            px(300.)
+        }
+    }
+
     fn session_strip(
         &self,
         tabs: AnyElement,
@@ -231,22 +243,27 @@ impl Workspace {
         }
     }
 
-    fn empty_workspace_body(&self, width: Pixels, cx: &mut Context<Self>) -> AnyElement {
+    fn empty_workspace_body(
+        &self,
+        width: Pixels,
+        viewport_height: Pixels,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         div()
-            .size_full()
             .flex_1()
             .min_h_0()
             .flex()
             .flex_col()
             .child(
                 div()
-                    .h(px(300.))
+                    .h(Self::responsive_quick_connect_height(viewport_height))
                     .flex_shrink_0()
-                    .child(self.quick_connect_surface(cx)),
+                    .child(self.quick_connect_surface_with_layout(viewport_height < px(680.), cx)),
             )
             .child(
                 div()
                     .id("connection-library")
+                    .test_support()
                     .flex_1()
                     .min_h_0()
                     .child(self.connection_table(width, cx)),
@@ -255,6 +272,14 @@ impl Workspace {
     }
 
     pub(super) fn quick_connect_surface(&self, cx: &mut Context<Self>) -> AnyElement {
+        self.quick_connect_surface_with_layout(false, cx)
+    }
+
+    fn quick_connect_surface_with_layout(
+        &self,
+        compact: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let visual = crate::design::palette(cx);
         let field = |label: &'static str, id: &'static str, state: &Entity<InputState>| {
             div()
@@ -286,7 +311,8 @@ impl Workspace {
             .overflow_y_scroll()
             .flex()
             .items_center()
-            .justify_center()
+            .when(compact, |surface| surface.justify_start())
+            .when(!compact, |surface| surface.justify_center())
             .bg(rgb(visual.canvas))
             .p_4()
             .child(
@@ -1606,6 +1632,7 @@ impl Workspace {
                     } else {
                         px(0.)
                     },
+                viewport.height,
                 cx,
             )
         } else {
@@ -1779,7 +1806,7 @@ impl Workspace {
                             .flex()
                             .flex_col()
                             .child(session_strip)
-                            .child(div().flex_1().min_h_0().child(body))
+                            .child(div().flex_1().min_h_0().flex().flex_col().child(body))
                             .when(active_id.is_some(), |el| {
                                 el.child(self.command_input_bar(
                                     active_id,

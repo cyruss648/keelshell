@@ -9,6 +9,13 @@ fn contained(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
         && inner.bottom() <= outer.bottom()
 }
 
+fn overlaps(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
+    inner.origin.x < outer.right()
+        && inner.right() > outer.origin.x
+        && inner.origin.y < outer.bottom()
+        && inner.bottom() > outer.origin.y
+}
+
 fn open_palette(fixture: &Fixture, cx: &mut TestAppContext) {
     cx.update_window(fixture.window, |_, window, cx| {
         window.render_frame(cx);
@@ -39,52 +46,91 @@ fn search_palette(fixture: &Fixture, query: &str, cx: &mut TestAppContext) {
 
 #[gpui_kit::test]
 fn compact_english_quick_connect_scroll_keeps_connect_action_reachable(cx: &mut TestAppContext) {
-    let fixture = mount_sized(cx, Vec::new(), 480., 900.);
-    cx.update_window(fixture.window, |_, window, cx| {
-        i18n::set_language(Language::En, cx);
-        window.render_frame(cx);
-        let surface = window.find("quick-connect-surface").bounds();
-        assert!(
-            contained(surface, window.bounds()),
-            "quick-connect surface escaped compact window: {surface:?}"
-        );
-        let library = window.find("connection-table-scroll");
-        assert!(
-            library.visible()
-                && library.bounds().size.height >= px(48.)
-                && contained(library.bounds(), window.bounds()),
-            "compact quick-connect surface consumed the connection library viewport: surface={surface:?}, library={:?}, window={:?}",
-            library.bounds(),
-            window.bounds()
-        );
-        let before = window.find("quick-connect").bounds();
-        assert!(contained(before, surface));
-        window.scroll(
-            "quick-connect-surface",
-            gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-100_000.))),
+    for height in [580., 900.] {
+        let fixture = mount_sized(
             cx,
+            vec![Connection::new("审核主机", "192.0.2.10", "operator")],
+            480.,
+            height,
         );
-        window.render_frame(cx);
-        assert_eq!(
-            window.find("quick-connect-surface").bounds(),
-            surface,
-            "quick-connect wheel changed the fixed compact surface bounds"
-        );
-        assert_eq!(
-            window.find("connection-table-scroll").bounds(),
-            library.bounds(),
-            "quick-connect wheel changed the sibling connection library bounds"
-        );
-        let connect = window.find("quick-connect");
-        assert!(
-            connect.visible() && contained(connect.bounds(), surface),
-            "Connect action is not reachable after scrolling compact quick-connect: {:?} in {surface:?}",
-            connect.bounds()
-        );
-        assert_eq!(connect.label(), Some("Connect"));
-        i18n::set_language(Language::ZhCn, cx);
-    })
-    .checked("compact English quick-connect scroll reaches Connect");
+        cx.update_window(fixture.window, |_, window, cx| {
+            i18n::set_language(Language::En, cx);
+            window.render_frame(cx);
+            let surface = window.find("quick-connect-surface").bounds();
+            assert!(
+                contained(surface, window.bounds()),
+                "480x{height}: quick-connect surface escaped compact window: {surface:?}"
+            );
+            let library = window.find("connection-table-scroll");
+            assert!(
+                library.visible()
+                    && library.bounds().size.height >= px(48.)
+                    && contained(library.bounds(), window.bounds()),
+                "480x{height}: quick-connect surface consumed the connection library viewport: surface={surface:?}, library={:?}, connection-library={:?}, command-column={:?}, session-strip={:?}, tool-tabs={:?}, window={:?}",
+                library.bounds(),
+                window.find("connection-library").bounds(),
+                window.find("command-column").bounds(),
+                window.find("session-strip").bounds(),
+                window.find("workspace-tool-tabs").bounds(),
+                window.bounds()
+            );
+            let rows = window.find("connection-rows");
+            assert!(
+                rows.visible()
+                    && rows.role() == Some(gpui_kit::Role::List)
+                    && contained(rows.bounds(), library.bounds()),
+                "480x{height}: connection rows are not reachable inside the library viewport: rows={:?}, library={:?}",
+                rows.bounds(),
+                library.bounds()
+            );
+            let first_row = window.find(("connection-row", 0_usize));
+            assert!(
+                first_row.visible() && overlaps(first_row.bounds(), rows.bounds()),
+                "480x{height}: first saved connection has no visible list intersection: row={:?}, rows={:?}",
+                first_row.bounds(),
+                rows.bounds()
+            );
+            window.scroll(
+                "connection-rows",
+                gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-60.))),
+                cx,
+            );
+            window.render_frame(cx);
+            let saved_connect = window.find(("connect", 0_usize));
+            assert!(
+                saved_connect.visible() && contained(saved_connect.bounds(), rows.bounds()),
+                "480x{height}: saved connection Connect action is not reachable after list scroll: action={:?}, rows={:?}",
+                saved_connect.bounds(),
+                rows.bounds()
+            );
+            let before_connect = window.find("quick-connect").bounds();
+            window.scroll(
+                "quick-connect-surface",
+                gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-100.))),
+                cx,
+            );
+            window.render_frame(cx);
+            assert_eq!(
+                window.find("quick-connect-surface").bounds(),
+                surface,
+                "480x{height}: quick-connect wheel changed the compact surface bounds"
+            );
+            assert_eq!(
+                window.find("connection-table-scroll").bounds(),
+                library.bounds(),
+                "480x{height}: quick-connect wheel changed the sibling connection library bounds"
+            );
+            let connect = window.find("quick-connect");
+            assert!(
+                connect.visible() && contained(connect.bounds(), surface),
+                "480x{height}: Connect action is not reachable after scrolling compact quick-connect: before={before_connect:?}, after={:?} in {surface:?}",
+                connect.bounds()
+            );
+            assert_eq!(connect.label(), Some("Connect"));
+            i18n::set_language(Language::ZhCn, cx);
+        })
+        .checked("compact English quick-connect scroll reaches Connect");
+    }
 }
 
 #[gpui_kit::test]
