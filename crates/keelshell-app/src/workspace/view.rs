@@ -8,6 +8,18 @@ use gpui_kit::{
 };
 
 impl Workspace {
+    fn responsive_assistant_width(viewport_width: Pixels) -> Pixels {
+        px(360.).min(viewport_width * 0.34).max(px(240.))
+    }
+
+    fn responsive_navigation_width(&self, viewport_width: Pixels) -> Pixels {
+        if self.navigation_panel == NavigationPanel::Monitor || viewport_width >= px(1120.) {
+            px(260.)
+        } else {
+            px(236.)
+        }
+    }
+
     fn session_strip(
         &self,
         tabs: AnyElement,
@@ -62,7 +74,12 @@ impl Workspace {
         let new_window = Button::new("new-workspace-window")
             .ghost()
             .compact()
-            .label(t(cx, "新建窗口", "New window"))
+            .icon(IconName::Plus)
+            .accessibility_label(t(cx, "新建工作区窗口", "New workspace window"))
+            .localized_tooltip("新建工作区窗口", "New workspace window")
+            .when(!compact_toolbar, |button| {
+                button.label(t(cx, "新建窗口", "New window"))
+            })
             .disabled(!self.app_windows.read(cx).can_open() || !self.configuration_current(cx))
             .on_click(cx.listener(|view, _, window, cx| {
                 view.new_workspace_window(&NewWorkspaceWindow, window, cx)
@@ -928,6 +945,7 @@ impl Workspace {
                 .compact()
                 .accessibility_label(t(cx, "AI 助手", "AI assistant"))
                 .localized_tooltip("AI 助手", "AI assistant")
+                .when(compact_toolbar, |button| button.label(t(cx, "AI", "AI")))
                 .when(!compact_toolbar, |button| {
                     button.label(t(cx, "AI 助手", "AI assistant"))
                 })
@@ -991,9 +1009,14 @@ impl Workspace {
     ) -> [AnyElement; 5] {
         [
             Button::new("vault-settings")
+                .icon(IconName::Lock)
                 .ghost()
                 .compact()
-                .label(t(cx, "凭据库", "Vault"))
+                .accessibility_label(t(cx, "凭据库", "Credential vault"))
+                .localized_tooltip("凭据库", "Credential vault")
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "凭据库", "Vault"))
+                })
                 .disabled(!self.can_open_vault())
                 .on_click(cx.listener(|view, _, window, cx| {
                     view.open_vault_settings(window, cx)
@@ -1011,11 +1034,14 @@ impl Workspace {
                 })).map(|button| self.retain_modal_button("about-updates", button, cx))
             .into_any_element(),
             Button::new("configuration-recovery")
+                .icon(IconName::RefreshCw)
                 .ghost()
                 .compact()
                 .disabled(self.state_reloading)
                 .accessibility_label(t(cx, "配置备份与恢复", "Configuration backup and recovery"))
-                .label(t(cx, "配置恢复", "Recovery"))
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "配置恢复", "Recovery"))
+                })
                 .localized_tooltip("备份和恢复本机配置；恢复前先关闭 SSH 标签并停止 AI、批量、定时与 MCP 操作", "Back up and restore local metadata; close SSH tabs and stop AI, batch, scheduled and MCP work before recovery")
                 .on_click(cx.listener(|view, _, window, cx| {
                     view.open_configuration_recovery(window, cx)
@@ -1025,7 +1051,9 @@ impl Workspace {
                 .ghost()
                 .compact()
                 .icon(IconName::Settings)
-                .label(t(cx, "主题", "Themes"))
+                .when(!compact_toolbar, |button| {
+                    button.label(t(cx, "主题", "Themes"))
+                })
                 .accessibility_label(t(cx, "主题与外观", "Themes and appearance"))
                 .disabled(self.saving || self.state_reloading)
                 .localized_tooltip("选择霜白、曜石、雾紫及明暗模式", "Choose a theme family and appearance")
@@ -1035,7 +1063,9 @@ impl Workspace {
             Button::new("language")
                 .ghost()
                 .compact()
-                .label(t(cx, "中文 / EN", "EN / 中文"))
+                .label(t(cx, "中/EN", "EN/中"))
+                .accessibility_label(t(cx, "切换语言：中文或英文", "Switch language: Chinese or English"))
+                .localized_tooltip("切换中文或英文", "Switch between Chinese and English")
                 .disabled(self.saving || self.state_reloading)
                 .on_click(
                     cx.listener(|view, _, window, cx| view.switch_language(window, cx)),
@@ -1478,8 +1508,18 @@ impl Workspace {
     fn render_workspace(&mut self, window: &mut Window, cx: &mut Context<Self>) -> AnyElement {
         self.sync_session_panes();
         let visual = crate::design::palette(cx);
+        let chrome = crate::design::chrome(cx);
         let viewport = window.viewport_size();
-        let assistant_width = px(380.).min(viewport.width * 0.42);
+        let assistant_width = Self::responsive_assistant_width(viewport.width);
+        let navigation_width = self.responsive_navigation_width(viewport.width);
+        let navigation_title = match self.navigation_panel {
+            NavigationPanel::Connections => t(cx, "连接导航", "Connection navigation"),
+            NavigationPanel::Monitor => t(cx, "主机监控", "Host monitoring"),
+        };
+        let navigation_icon = match self.navigation_panel {
+            NavigationPanel::Connections => IconName::FolderOpen,
+            NavigationPanel::Monitor => IconName::Activity,
+        };
         // At compact widths keep the terminal usable while the assistant is open.
         let show_navigation = self.navigation_visible(window);
         if !show_navigation {
@@ -1668,12 +1708,54 @@ impl Workspace {
                                 .id("monitor-column")
                                 .test_support()
                                 .track_focus(&self.navigation_focus)
-                                .w(px(260.))
+                                .w(navigation_width)
                                 .h_full()
                                 .flex_shrink_0()
                                 .border_r_1()
                                 .border_color(rgb(visual.border))
-                                .child(self.navigation_column(window, cx)),
+                                .child(
+                                    div()
+                                        .id("workspace-navigation-rail")
+                                        .test_support()
+                                        .role(accesskit::Role::Group)
+                                        .aria_label(t(cx, "工作区导航", "Workspace navigation"))
+                                        .size_full()
+                                        .min_w_0()
+                                        .min_h_0()
+                                        .flex()
+                                        .flex_col()
+                                        .bg(rgb(visual.sidebar))
+                                        .child(
+                                            div()
+                                                .id("workspace-navigation-header")
+                                                .test_support()
+                                                .aria_label(navigation_title)
+                                                .h(px(chrome.pane_header_height))
+                                                .flex_shrink_0()
+                                                .px_3()
+                                                .flex()
+                                                .items_center()
+                                                .gap_2()
+                                                .bg(rgb(visual.chrome))
+                                                .border_b_1()
+                                                .border_color(rgb(visual.border))
+                                                .text_xs()
+                                                .font_weight(FontWeight::SEMIBOLD)
+                                                .child(
+                                                    div()
+                                                        .text_color(rgb(visual.accent))
+                                                        .child(Icon::new(navigation_icon).size_3()),
+                                                )
+                                                .child(navigation_title),
+                                        )
+                                        .child(
+                                            div()
+                                                .flex_1()
+                                                .min_w_0()
+                                                .min_h_0()
+                                                .child(self.navigation_column(window, cx)),
+                                        ),
+                                ),
                         )
                     })
                     .child(

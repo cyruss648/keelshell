@@ -3,6 +3,24 @@
 工作区按全局操作、连接导航、当前会话和工具区组织。霜白、曜石、雾紫共享同一布局；
 主题家族、明暗模式与布局状态分别管理，增加主题不需要改业务视图。
 
+## 响应式工作区层级
+
+2026-11-13 的工作区视觉切片为窄窗口保留明确的专业工作台层级。900×580 的
+紧凑布局中，新建工作区窗口、AI、凭据库和配置备份/恢复入口都保持可见；动作
+可以使用图标理解，并通过完整双语 AccessKit label 和 tooltip 保留语义。AI
+助手列按窗口宽度的 34% 计算，并限制在 240–360px，避免打开后把活动终端压缩
+到不可用尺寸。
+
+连接导航和主机监控共享同一 rail，但各自有持续可读的 header。紧凑连接导航
+使用 236px，主机监控使用现有 260px 监控根布局；header 高度来自
+`ChromeTokens::pane_header_height`。工作区 rail 使用 `Group` 语义并标记为
+“工作区导航”/`Workspace navigation`，当前 panel 分别标记为“连接导航”/
+`Connection navigation` 和“主机监控”/`Host monitoring`。
+
+本片继续复用 registry、Palette、组件和 chrome token。三套主题不在工作区视图中
+按 theme id 分支；新增主题仍只扩展 registry 和对应 token。键盘动作、现有 focus
+handle、SSH 会话、AI 审核和配置状态沿用原路径。
+
 ## 连接和主机信息
 
 连接后，左侧默认显示保存的 SSH 连接，按文件夹层级排列。搜索匹配连接的现有字段；
@@ -48,7 +66,8 @@ Command-Option-Left/Right，Windows/Linux 使用 Control-Alt-Left/Right。快捷
 文件、命令和隧道入口标明当前选择；隐藏后重新显示使用原来的面板和草稿。
 
 顶部侧栏按钮可收起连接区。窗口宽度不足 1280 时，显示 AI 助手会让出左侧空间；
-此时主动打开连接区会收起 AI，保留 AI 实体和草稿。侧栏被窗口调整隐藏时，
+此时主动打开连接区会收起 AI，保留 AI 实体和草稿。AI 侧栏在窄窗口按有界比例
+分配宽度，连接导航在紧凑宽度收窄到 236px，监控页保留 260px。侧栏被窗口调整隐藏时，
 其中的输入焦点回到工作区背景，避免继续编辑不可见搜索框或把后续按键送入终端。
 侧栏显示偏好和选中的导航页目前只属于本次应用进程。
 
@@ -60,8 +79,10 @@ AI 助手使用“捕获、提问、预览、发送、审核回复、保存知�
 
 ## 验收边界
 
-本轮实现和实际验证状态见[工作区记录](../testing/records/2026-11-05-native-workbench.md)，
-设计约束见 [ADR 0096](../adr/0096-native-workbench-navigation.md)。
+本轮实现和实际验证状态见[工作区记录](../testing/records/2026-11-13-responsive-workbench-polish.md)
+及[原生工作区记录](../testing/records/2026-11-05-native-workbench.md)，设计约束见
+[ADR 0096](../adr/0096-native-workbench-navigation.md) 和
+[ADR 0124](../adr/0124-responsive-workbench-polish.md)。
 受控 GPUI 测试、macOS 原生观察、Windows/Linux 桌面验收分别记录。
 文件区的浏览与可展开设置见[文件工作区](FILES_WORKSPACE.md)及
 [ADR 0097](../adr/0097-file-workbench-disclosures.md)。连接树候选实现与按轮状态见

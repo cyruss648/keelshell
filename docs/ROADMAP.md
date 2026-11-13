@@ -3,6 +3,30 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-13 响应式工作区视觉切片
+
+KeelShell 工作区已收紧窄窗口的工作台层级。900×580 下，AI、新建工作区窗口、
+凭据库和配置备份/恢复入口保留可见图标、完整双语 AX label 与 tooltip；AI 打开后
+助手列按 34% 比例并限制在 240–360px，活动终端仍保留至少 200px 宽和 80px 高的
+受控预算。连接导航与主机监控继续是同一 rail 中的互斥 panel，连接页使用 236px，
+监控页保留 260px。
+
+导航 rail 现在公开 `Role::Group` 和 `Workspace navigation` 语义，header 复用
+`ChromeTokens::pane_header_height`，并随互斥 panel 显示 `Connection navigation`
+或 `Host monitoring`。Frost「霜白」、Graphite「曜石」、Lavender「雾紫」共用同一
+视图路径；业务布局没有 theme id 分支，新增主题仍只扩展 registry/Palette/token。
+本片没有新增依赖，直接依赖版本继续遵循 `x.y`。
+
+focused GPUI 回归已通过：工作区布局 `10 passed / 0 failed / 1113 filtered out`，
+覆盖三套主题、明暗模式和中英文的关键入口 bounds/AX label、AI/终端预算、导航
+rail role/header label、236/260px 宽度及 pane header token。focused app Clippy
+使用 `--all-targets -- -D warnings` 通过；格式与差异检查通过。详细证据见
+[ADR 0124](adr/0124-responsive-workbench-polish.md)、[产品说明](product/NATIVE_WORKBENCH.md)
+和[测试记录](testing/records/2026-11-13-responsive-workbench-polish.md)。
+
+源码提交后仍需独立形成 macOS/Windows/Linux 原生窗口、IME、VoiceOver/NVDA、
+真实 SSH/Podman、像素对比度、安装包和签名验收；headless GPUI 结果不代签这些边界。
+
 ## 2026-11-08 工作区窗口切换器
 
 工作区顶部新增主题化的“工作区 N”入口，持续显示当前原生窗口组数量；展开后列出

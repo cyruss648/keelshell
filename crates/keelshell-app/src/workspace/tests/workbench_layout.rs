@@ -1,5 +1,6 @@
 //! Rendered workspace regions and navigation transitions, not native GUI evidence.
 use super::*;
+use crate::workspace::navigation::NavigationPanel;
 use gpui_kit::{App, Pixels, SharedString, Window};
 use keelshell_core::{Theme, ThemeId};
 use keelshell_session::{ConnectionEnd, ShellEnd};
@@ -240,6 +241,210 @@ fn toolbar_groups_keep_action_order_and_accessible_names_at_workbench_widths(
         }
     })
     .checked("keep the grouped toolbar ordered and accessible at wide and compact widths");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
+fn compact_toolbar_keeps_critical_actions_discoverable_and_terminal_usable(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for family in crate::design::registry() {
+            let family_id = family.id;
+            for appearance in [Theme::Light, Theme::Dark] {
+                for language in [Language::ZhCn, Language::En] {
+                    i18n::set_language(language, cx);
+                    fixture.workspace.update(cx, |view, cx| {
+                        view.show_assistant = false;
+                        view.state.settings.theme_family =
+                            ThemeId::new(family.id).checked("registered theme identity");
+                        view.state.settings.theme = appearance;
+                        crate::design::apply_settings(&view.state.settings, Some(window), cx);
+                    });
+                    settle(window, cx);
+
+                    let toolbar = window.find("workspace-toolbar").bounds();
+                    let strip = window.find("session-strip").bounds();
+                    for (id, expected) in [
+                        (
+                            "toggle-assistant",
+                            crate::i18n::t(cx, "AI 助手", "AI assistant"),
+                        ),
+                        (
+                            "vault-settings",
+                            crate::i18n::t(cx, "凭据库", "Credential vault"),
+                        ),
+                        (
+                            "configuration-recovery",
+                            crate::i18n::t(
+                                cx,
+                                "配置备份与恢复",
+                                "Configuration backup and recovery",
+                            ),
+                        ),
+                    ] {
+                        let action = window.find(id);
+                        assert!(
+                            action.visible(),
+                            "{family_id}/{appearance:?}/{language:?}: {id} hidden"
+                        );
+                        assert!(
+                            inside(action.bounds(), toolbar),
+                            "{family_id}/{appearance:?}/{language:?}: {id} escapes toolbar"
+                        );
+                        assert!(
+                            action.bounds().size.width >= px(20.)
+                                && action.bounds().size.height >= px(20.),
+                            "{family_id}/{appearance:?}/{language:?}: {id} collapsed {:?}",
+                            action.bounds()
+                        );
+                        assert_eq!(
+                            action.label(),
+                            Some(expected),
+                            "{family_id}/{appearance:?}/{language:?}: {id} AX label"
+                        );
+                    }
+
+                    let new_window = window.find("new-workspace-window");
+                    assert!(
+                        new_window.visible() && inside(new_window.bounds(), strip),
+                        "{family_id}/{appearance:?}/{language:?}: new window discovery"
+                    );
+                    assert!(
+                        new_window.bounds().size.width >= px(20.)
+                            && new_window.bounds().size.height >= px(20.),
+                        "{family_id}/{appearance:?}/{language:?}: new window collapsed {:?}",
+                        new_window.bounds()
+                    );
+                    assert_eq!(
+                        new_window.label(),
+                        Some(crate::i18n::t(cx, "新建工作区窗口", "New workspace window")),
+                        "{family_id}/{appearance:?}/{language:?}: new window AX label"
+                    );
+
+                    window.click("toggle-assistant", cx);
+                    settle(window, cx);
+                    let assistant = window.find("assistant-column").bounds();
+                    let terminal = window
+                        .find(("terminal-pane", panes[0].terminal.entity_id()))
+                        .bounds();
+                    assert!(
+                        assistant.size.width >= px(240.) && assistant.size.width <= px(360.),
+                        "{family_id}/{appearance:?}/{language:?}: assistant width {:?}",
+                        assistant
+                    );
+                    assert!(
+                        terminal.size.width >= px(200.) && terminal.size.height >= px(80.),
+                        "{family_id}/{appearance:?}/{language:?}: terminal budget {:?}",
+                        terminal
+                    );
+                    assert!(
+                        window.find("toggle-assistant").visible(),
+                        "{family_id}/{appearance:?}/{language:?}: AI entry hidden while open"
+                    );
+                    assert_eq!(
+                        window.find("toggle-assistant").label(),
+                        Some(crate::i18n::t(cx, "AI 助手", "AI assistant")),
+                        "{family_id}/{appearance:?}/{language:?}: open AI AX label"
+                    );
+                    window.click("toggle-assistant", cx);
+                    settle(window, cx);
+                }
+            }
+        }
+    })
+    .checked("keep compact workbench actions discoverable across themes and languages");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
+
+#[gpui_kit::test]
+fn navigation_headers_expose_panel_semantics_and_token_geometry(cx: &mut TestAppContext) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for family in crate::design::registry() {
+            let family_id = family.id;
+            for appearance in [Theme::Light, Theme::Dark] {
+                for language in [Language::ZhCn, Language::En] {
+                    i18n::set_language(language, cx);
+                    fixture.workspace.update(cx, |view, cx| {
+                        view.show_assistant = false;
+                        view.navigation_panel = NavigationPanel::Connections;
+                        view.state.settings.theme_family =
+                            ThemeId::new(family.id).checked("registered theme identity");
+                        view.state.settings.theme = appearance;
+                        crate::design::apply_settings(&view.state.settings, Some(window), cx);
+                    });
+                    settle(window, cx);
+
+                    let chrome = crate::design::chrome(cx);
+                    let rail = window.find("workspace-navigation-rail");
+                    let rail_bounds = rail.bounds();
+                    assert_eq!(
+                        rail.role(),
+                        Some(gpui_kit::accesskit::Role::Group),
+                        "{family_id}/{appearance:?}/{language:?}: navigation rail role"
+                    );
+                    assert_eq!(
+                        rail.label(),
+                        Some(crate::i18n::t(cx, "工作区导航", "Workspace navigation")),
+                        "{family_id}/{appearance:?}/{language:?}: navigation rail AX label"
+                    );
+                    let column = window.find("monitor-column").bounds();
+                    assert_eq!(
+                        column.size.width,
+                        px(236.),
+                        "{family_id}/{appearance:?}/{language:?}: compact connection rail width"
+                    );
+                    let header = window.find("workspace-navigation-header");
+                    assert_eq!(
+                        header.label(),
+                        Some(crate::i18n::t(cx, "连接导航", "Connection navigation")),
+                        "{family_id}/{appearance:?}/{language:?}: connection header AX label"
+                    );
+                    assert_eq!(
+                        header.bounds().size.height,
+                        px(chrome.pane_header_height),
+                        "{family_id}/{appearance:?}/{language:?}: connection header token height"
+                    );
+                    assert!(
+                        inside(header.bounds(), rail_bounds),
+                        "{family_id}/{appearance:?}/{language:?}: connection header escapes rail"
+                    );
+
+                    window.click("navigation-monitor", cx);
+                    settle(window, cx);
+                    let monitor_column = window.find("monitor-column").bounds();
+                    let monitor_header = window.find("workspace-navigation-header");
+                    assert_eq!(
+                        monitor_column.size.width,
+                        px(260.),
+                        "{family_id}/{appearance:?}/{language:?}: monitor rail width"
+                    );
+                    assert_eq!(
+                        monitor_header.label(),
+                        Some(crate::i18n::t(cx, "主机监控", "Host monitoring")),
+                        "{family_id}/{appearance:?}/{language:?}: monitor header AX label"
+                    );
+                    assert_eq!(
+                        monitor_header.bounds().size.height,
+                        px(chrome.pane_header_height),
+                        "{family_id}/{appearance:?}/{language:?}: monitor header token height"
+                    );
+                    assert!(
+                        inside(
+                            monitor_header.bounds(),
+                            window.find("workspace-navigation-rail").bounds()
+                        ),
+                        "{family_id}/{appearance:?}/{language:?}: monitor header escapes rail"
+                    );
+                }
+            }
+        }
+    })
+    .checked("keep connection and host-monitor navigation semantics stable across themes");
     assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
 
