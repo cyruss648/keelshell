@@ -74,6 +74,21 @@ osascript -e 'tell application "System Events" to tell process "keelshell-app" t
 脚本化查询没有读到可访问窗口，因此不把它记录为窗口布局、AX 控件或视觉
 验收通过。
 
+随后使用同一当前源码构建出的临时 debug `.app`，通过 LaunchServices 启动并用
+CoreGraphics `CGWindowListCopyWindowInfo` 查询屏幕窗口。查询发现一个属于
+KeelShell 的可见窗口：
+
+```text
+matches=1
+kCGWindowName=KeelShell
+kCGWindowIsOnscreen=1
+kCGWindowBounds=1440×933 at (144,126)
+```
+
+这确认 GPUI 原生窗口已经创建并出现在屏幕上；`System Events` 的 `0` 只代表
+本次会话没有读到该进程的 AX 窗口节点。VoiceOver、完整 AX 控件树、IME 和
+窗口内交互仍需具备相应辅助技术权限后单独验收。
+
 ## 打包测试
 
 ```text
