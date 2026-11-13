@@ -84,6 +84,15 @@ python3 -m unittest discover -s packaging -p 'test_*.py' -v
 manifest/架构/权限、归档安全、发布幂等性和原生检查失败关闭路径；它们不代替
 实际 Windows/Linux GUI。
 
+## Podman 联调检查
+
+本机 Podman 客户端为 `6.2.0`，已有 `podman-machine-default`，初始状态为
+stopped。两次执行 `podman machine start podman-machine-default` 都返回启动成功，
+但 machine 随后立即回到 stopped；紧接着执行 `podman info` 均因
+`127.0.0.1:56260` connection refused 失败。没有成功读取 Podman image 列表，
+也没有创建、启动或清理任何测试容器，因此本片不把 Podman 主机监控或容器真实
+联调写成通过。当前 machine 已保持 stopped。
+
 ## 未覆盖边界
 
 本次没有覆盖：
