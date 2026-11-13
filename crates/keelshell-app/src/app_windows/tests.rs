@@ -1,4 +1,71 @@
 use super::*;
+use ::core::prelude::v1::test;
+
+#[::core::prelude::v1::test]
+fn application_window_contract_is_positive_and_minimum_fits_initial_size() {
+    let contract = application_window_contract();
+
+    assert!(contract.is_valid());
+    assert!(contract.initial_size.is_positive());
+    assert!(contract.minimum_size.is_positive());
+    assert!(contract.initial_size.width >= contract.minimum_size.width);
+    assert!(contract.initial_size.height >= contract.minimum_size.height);
+}
+
+#[gpui_kit::test]
+fn application_window_options_match_the_native_window_contract(cx: &mut gpui_kit::TestAppContext) {
+    let contract = application_window_contract();
+    let options = cx.update(|cx| application_window_options(cx));
+
+    assert_eq!(options.app_id.as_deref(), Some(WINDOW_APP_ID));
+    let Some(window_bounds) = options.window_bounds else {
+        panic!("application windows must have an initial windowed size");
+    };
+    let bounds = window_bounds.get_bounds();
+    assert_eq!(bounds.size, contract.initial_size.pixels());
+    assert_eq!(
+        options.window_min_size,
+        Some(contract.minimum_size.pixels())
+    );
+    assert_eq!(
+        options
+            .titlebar
+            .and_then(|titlebar| titlebar.title)
+            .as_deref(),
+        Some(WINDOW_TITLE)
+    );
+
+    #[cfg(target_os = "linux")]
+    assert!(
+        options.icon.is_some(),
+        "Linux windows must receive the embedded X11 icon"
+    );
+    #[cfg(not(target_os = "linux"))]
+    assert!(
+        options.icon.is_none(),
+        "non-Linux windows must leave the X11-only icon unset"
+    );
+}
+
+#[cfg(target_os = "linux")]
+#[::core::prelude::v1::test]
+fn linux_window_icon_decodes_the_embedded_256px_rgba_asset() {
+    let Some(icon) = linux_window_icon() else {
+        panic!("embedded Linux icon must decode");
+    };
+
+    assert_eq!(icon.width(), 256);
+    assert_eq!(icon.height(), 256);
+    assert_eq!(icon.as_raw().len(), 256 * 256 * 4);
+}
+
+#[::core::prelude::v1::test]
+fn native_identity_contract_keeps_system_and_window_ids_distinct() {
+    assert_eq!(APPLICATION_IDENTIFIER, "app.keelshell.desktop");
+    assert_eq!(APPLICATION_NAME, "KeelShell");
+    assert_eq!(WINDOW_APP_ID, "keelshell");
+    assert_eq!(WINDOW_TITLE, APPLICATION_NAME);
+}
 
 #[::core::prelude::v1::test]
 fn configuration_write_lease_excludes_competing_window_and_rejects_old_revision()

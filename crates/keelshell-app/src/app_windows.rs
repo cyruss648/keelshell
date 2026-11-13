@@ -18,6 +18,105 @@ use crate::{
     workspace::{Workspace, window_lifecycle::CloseIntent},
 };
 
+/// Stable application identity used by native platform services such as the
+/// Windows AppUserModelID and the macOS bundle identity.
+pub(crate) const APPLICATION_IDENTIFIER: &str = "app.keelshell.desktop";
+pub(crate) const APPLICATION_NAME: &str = "KeelShell";
+
+/// The window manager grouping identifier. This intentionally stays aligned
+/// with `packaging/linux/keelshell.desktop`'s `StartupWMClass`.
+pub(crate) const WINDOW_APP_ID: &str = "keelshell";
+pub(crate) const WINDOW_TITLE: &str = APPLICATION_NAME;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct WindowSizeSpec {
+    width: f32,
+    height: f32,
+}
+
+impl WindowSizeSpec {
+    const fn new(width: f32, height: f32) -> Self {
+        Self { width, height }
+    }
+
+    fn is_positive(self) -> bool {
+        self.width > 0.0 && self.height > 0.0
+    }
+
+    fn pixels(self) -> Size<Pixels> {
+        size(px(self.width), px(self.height))
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct ApplicationWindowContract {
+    initial_size: WindowSizeSpec,
+    minimum_size: WindowSizeSpec,
+}
+
+impl ApplicationWindowContract {
+    const fn desktop() -> Self {
+        Self {
+            initial_size: WindowSizeSpec::new(1440.0, 900.0),
+            minimum_size: WindowSizeSpec::new(900.0, 580.0),
+        }
+    }
+
+    fn is_valid(self) -> bool {
+        self.initial_size.is_positive()
+            && self.minimum_size.is_positive()
+            && self.initial_size.width >= self.minimum_size.width
+            && self.initial_size.height >= self.minimum_size.height
+    }
+}
+
+fn application_window_contract() -> ApplicationWindowContract {
+    ApplicationWindowContract::desktop()
+}
+
+/// Build the native window contract in one place so every future window entry
+/// point can reuse the same identity, geometry and titlebar policy.
+fn application_window_options(cx: &App) -> WindowOptions {
+    let contract = application_window_contract();
+    debug_assert!(
+        contract.is_valid(),
+        "application window contract must have a usable minimum size"
+    );
+
+    WindowOptions {
+        app_id: Some(WINDOW_APP_ID.into()),
+        #[cfg(target_os = "linux")]
+        icon: linux_window_icon(),
+        window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
+            None,
+            contract.initial_size.pixels(),
+            cx,
+        ))),
+        window_min_size: Some(contract.minimum_size.pixels()),
+        titlebar: Some(TitlebarOptions {
+            title: Some(WINDOW_TITLE.into()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn linux_window_icon() -> Option<Arc<image::RgbaImage>> {
+    // GPUI consumes this RGBA image on X11. Wayland uses the desktop-file icon
+    // through app_id instead; no runtime filesystem path is required here.
+    match image::load_from_memory_with_format(
+        include_bytes!("../../../assets/icons/png/256.png"),
+        image::ImageFormat::Png,
+    ) {
+        Ok(icon) => Some(Arc::new(icon.into_rgba8())),
+        Err(error) => {
+            eprintln!("Unable to decode the embedded KeelShell window icon: {error}");
+            None
+        }
+    }
+}
+
 #[derive(Default)]
 struct Stores {
     windows: HashMap<PathBuf, WeakEntity<AppWindows>>,
@@ -443,22 +542,7 @@ pub(crate) fn open(
                 .insert(store.path().to_path_buf(), load_error);
         });
     }
-    let options = WindowOptions {
-        app_id: Some("keelshell".into()),
-        #[cfg(target_os = "linux")]
-        icon: crate::linux_window_icon(),
-        window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
-            None,
-            size(px(1440.), px(900.)),
-            cx,
-        ))),
-        window_min_size: Some(size(px(900.), px(580.))),
-        titlebar: Some(TitlebarOptions {
-            title: Some("KeelShell".into()),
-            ..Default::default()
-        }),
-        ..Default::default()
-    };
+    let options = application_window_options(cx);
     gpui_kit::open_window(options, cx, |window, cx| {
         cx.new(|cx| {
             if restore {

@@ -84,7 +84,10 @@ fn main() {
     gpui_kit::application()
         .with_assets(application_assets())
         .run(move |cx| {
-            cx.set_app_identity("app.keelshell.desktop", "KeelShell");
+            cx.set_app_identity(
+                app_windows::APPLICATION_IDENTIFIER,
+                app_windows::APPLICATION_NAME,
+            );
             gpui_kit::init(cx);
             design::apply_settings(&state.settings, None, cx);
             i18n::set_language(state.settings.language, cx);
@@ -96,22 +99,6 @@ fn main() {
             }
             cx.activate(true);
         });
-}
-
-#[cfg(target_os = "linux")]
-fn linux_window_icon() -> Option<Arc<image::RgbaImage>> {
-    // GPUI consumes this RGBA image on X11. Wayland uses the desktop-file icon
-    // through app_id instead; no runtime filesystem path is required here.
-    match image::load_from_memory_with_format(
-        include_bytes!("../../../assets/icons/png/256.png"),
-        image::ImageFormat::Png,
-    ) {
-        Ok(icon) => Some(Arc::new(icon.into_rgba8())),
-        Err(error) => {
-            eprintln!("Unable to decode the embedded KeelShell window icon: {error}");
-            None
-        }
-    }
 }
 
 // The component-default bundle omits application icons such as split, AI and
