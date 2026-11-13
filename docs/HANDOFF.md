@@ -5,6 +5,21 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 Rust 工具链读回
+
+本机当前 `rustc 1.100.0 (0ef1bc386 2026-11-09)`、`cargo 1.100.0
+(3acc79c0c 2026-11-05)`，`stable-aarch64-apple-darwin` 为 rustup 的
+active/default toolchain。本仓库没有 `rust-toolchain.toml`、`.cargo/config*` 或
+环境变量覆盖；`cargo metadata --format-version 1 --no-deps --locked --offline`
+显示 5 个 workspace crate 的 `rust_version` 均为 `null`。
+
+因此当前编译默认跟随开发机或 CI runner 选择的 active toolchain，当前本地命令
+实际使用 Rust 1.100.0。`Cargo.toml` 不需要写入 `rust-version = "1.100"`：
+该字段声明最低支持版本（MSRV），不会选择最新编译器；写入本地最新版本还会把
+环境事实错误地变成项目兼容性限制。项目继续不 pin Rust toolchain，直接 registry
+依赖保持 `x.y`，`Cargo.lock` 保留解析后的完整版本。验证和决策记录见
+[Rust 1.100.0 工具链记录](testing/records/2026-11-14-rust-1-100-0-toolchain.md)。
+
 ## 2026-11-13 当前片：响应式工作区层级
 
 当前 worktree 基于源码基线
