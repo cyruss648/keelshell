@@ -8,8 +8,9 @@
 2026-11-13 的工作区视觉切片为窄窗口保留明确的专业工作台层级。900×580 的
 紧凑布局中，新建工作区窗口、AI、凭据库和配置备份/恢复入口都保持可见；动作
 可以使用图标理解，并通过完整双语 AccessKit label 和 tooltip 保留语义。AI
-助手列按窗口宽度的 34% 计算，并限制在 240–360px，避免打开后把活动终端压缩
-到不可用尺寸。
+助手列按窗口宽度的 34% 计算，上限为 360px；在 720px 及以上窗口保持
+240px 最低宽度，低于 720px 时使用 200px 最低宽度，为快速连接表单和活动终端
+保留可用空间。900×580 目标仍使用 240px 最低宽度。
 
 连接导航和主机监控共享同一 rail，但各自有持续可读的 header。紧凑连接导航
 使用 236px，主机监控使用现有 260px 监控根布局；header 高度来自
@@ -80,7 +81,8 @@ AI 助手使用“捕获、提问、预览、发送、审核回复、保存知�
 ## 验收边界
 
 本轮实现和实际验证状态见[工作区记录](../testing/records/2026-11-13-responsive-workbench-polish.md)
-及[原生工作区记录](../testing/records/2026-11-05-native-workbench.md)，设计约束见
+及[紧凑修复记录](../testing/records/2026-11-14-responsive-workbench-follow-up.md)，
+原生边界见[原生工作区记录](../testing/records/2026-11-05-native-workbench.md)，设计约束见
 [ADR 0096](../adr/0096-native-workbench-navigation.md) 和
 [ADR 0124](../adr/0124-responsive-workbench-polish.md)。
 受控 GPUI 测试、macOS 原生观察、Windows/Linux 桌面验收分别记录。

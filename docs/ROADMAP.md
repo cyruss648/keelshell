@@ -3,6 +3,30 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-14 响应式工作台紧凑修复
+
+当前源码候选为 `f5f787b8153fba2dcc563b0b258e0350ee5a2056`。上一片响应式工作台
+在 900×580 目标下保留 AI、导航和终端的设计层级；本片继续收口边界：
+
+- AI 列在 720px 以下最低为 200px，在 720px 及以上最低为 240px，上限均为
+  360px，900×580 仍保持 240px；
+- 磁盘设备列表固定为 160px 高度，避免新增导航 header 后最后一行设备被视口
+  裁掉；
+- Rust 1.100.0 下的 workspace layout Clippy 诊断和未使用依赖已修复；
+- 首次中文工作区的 AX label 与生产按钮语义保持一致。
+
+定向回归包括 workbench layout `10/10`、主题设计 `4/4`、磁盘监控独立回归
+`1/1`、紧凑连接库 `1/1`、首次中文启动 `1/1` 和 core workspace layout
+`12/12`。完整 `python3 scripts/check.py` 返回 `0`，Python 为
+`131 run / 1 skipped`，app 为 `1121 passed / 2 ignored`，14 项 doctest、
+严格 workspace Clippy、依赖策略和三组 AI controller 均通过。门禁与未覆盖边界
+见[本片测试记录](testing/records/2026-11-14-responsive-workbench-follow-up.md)。
+
+独立严格只读复核已针对固定源码 SHA 启动，报告尚未返回；因此当前状态仍为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。Windows/Linux 原生桌面、IME、
+VoiceOver/NVDA、真实 SSH/Podman、外部 AI provider、当前源码包、签名、公证和
+安装升级继续保持开放。
+
 ## 2026-11-13 响应式工作区视觉切片
 
 KeelShell 工作区已收紧窄窗口的工作台层级。900×580 下，AI、新建工作区窗口、

@@ -35,8 +35,10 @@ KeelShell 的工作区已经具备连接导航、SSH 会话、AI 助手、凭据
 ### AI 面板使用受控宽度预算
 
 AI 列宽使用现有 GPUI `Pixels` 几何，在窗口宽度上取 `34%`，并限制在
-`240px..=360px`。900px 窗口因此保留约 594px 的主工作区宽度；已有
-`200px` 终端宽度和 `80px` 终端高度作为受控 GPUI 回归的最低可用预算。
+`240px..=360px`。当窗口宽度低于 `720px` 时，最低宽度降为 `200px`，避免
+空工作区的快速连接表单被助手列挤压；900×580 目标仍保持 240px 最低宽度。
+900px 窗口因此保留约 594px 的主工作区宽度；已有 `200px` 终端宽度和
+`80px` 终端高度作为受控 GPUI 回归的最低可用预算。
 
 ### 导航 rail 增加结构 header
 
@@ -77,5 +79,7 @@ macOS、Windows 或 Linux 原生窗口、IME、VoiceOver、真实终端输入和
 out`。新增回归覆盖 900×580 下三套注册表主题、明暗模式和中英文，检查关键动作
 的可见 bounds、完整 AX label、AI 打开后的助手和终端预算，以及连接/监控 header
 的 `Role::Group`、双语名称、`236px`/`260px` rail 宽度和
-`ChromeTokens::pane_header_height`。`cargo clippy -p keelshell-app --locked
---offline --all-targets -- -D warnings` 已通过。
+`ChromeTokens::pane_header_height`。后续紧凑修复还通过了 480px 连接库、磁盘
+设备列表和首次中文工作区回归；`cargo clippy -p keelshell-app --locked
+--offline --all-targets -- -D warnings` 已通过。完整结果见
+[2026-11-14 测试记录](../testing/records/2026-11-14-responsive-workbench-follow-up.md)。
