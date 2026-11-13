@@ -1,7 +1,7 @@
 # 响应式工作台紧凑修复与完整门禁记录 — 2026-11-14
 
 日期：2026-11-14（Asia/Shanghai）
-源码基线：`f5f787b8153fba2dcc563b0b258e0350ee5a2056`
+源码基线：`8dd57321acd527a6c5ce66bed8a339f284de8b0f`
 关联记录：[响应式工作台视觉切片](2026-11-13-responsive-workbench-polish.md)
 
 ## 本次修复
@@ -18,6 +18,12 @@
 - 移除未使用的 workspace `anyhow` 依赖声明。
 - 首次中文工作区测试改为断言生产按钮的完整无障碍标签
   “切换语言：中文或英文”。
+- 480px 窄窗口中的快速连接表单限制在连接管理器内部滚动，避免英文长文案把
+  连接列表压缩到不可操作的高度。
+- 窄宽度连接库工具栏使用图标优先布局；每个动作仍保留完整双语
+  `accessibility_label` 和 tooltip，加密同步增加 Lock 图标。
+- 批量操作栏在窄宽度使用紧凑间距和“批量 / Batch”短文案，同时保留 Group 语义；
+  连接列表滚动容器和文件夹树增加测试句柄与最小高度约束。
 
 生产视图仍只消费现有 registry、Palette、组件和 chrome token。三套主题 Frost
 「霜白」、Graphite「曜石」、Lavender「雾紫」继续共用同一布局路径；新增主题
@@ -25,7 +31,7 @@
 
 ## 定向验证
 
-以下验证均在源码基线 `f5f787b`、Rust 1.100.0、锁定依赖和隔离测试数据下完成：
+以下验证均在源码基线 `8dd5732`、Rust 1.100.0、锁定依赖和隔离测试数据下完成：
 
 | 范围 | 结果 |
 | --- | --- |
@@ -33,6 +39,8 @@
 | 主题设计测试 | `4 passed / 0 failed` |
 | 磁盘监控独立工作区回归 | `1 passed / 0 failed` |
 | 紧凑连接库回归 | `1 passed / 0 failed` |
+| 窄窗主题/语言/高度矩阵 | `1 passed / 0 failed` |
+| 连接库专项 | `28 passed / 0 failed` |
 | 首次中文工作区回归 | `1 passed / 0 failed` |
 | `cargo test -p keelshell-core --test workspace_layout` | `12 passed / 0 failed` |
 | `cargo fmt --all -- --check` | 通过 |
@@ -62,7 +70,7 @@ python3 scripts/check.py
   三组专项；
 - 14 项 rustdoc/doctest。
 
-app 完整测试结果为 `1121 passed / 2 ignored`。core、session、MCP、AI 和工作区
+app 完整测试结果为 `1122 passed / 2 ignored`。core、session、MCP、AI 和工作区
 集成测试均在 workspace 测试阶段通过；需要 Podman、OpenSSH、真实 Linux 采样、
 Windows/Linux 原生桌面或外部 provider 的测试继续按测试合同保持 `ignored`，
 没有被计入已执行通过的真实联调。
@@ -73,7 +81,7 @@ app 测试期间仍可能看到既有 macOS 链接器 warning
 
 ## 独立代码与功能复核
 
-已启动固定源码 SHA `f5f787b8153fba2dcc563b0b258e0350ee5a2056` 的独立严格只读
+已启动固定源码 SHA `8dd57321acd527a6c5ce66bed8a339f284de8b0f` 的独立严格只读
 复核 agent，使用独立 Cargo target。复核要求包括 P0/P1/P2/P3 严重级别、绝对
 文件/行号证据、触发条件、实际命令计数、未验证边界和 merge recommendation；
 复核 agent 不得编辑、格式化、提交、推送、合并或清理共享 worktree。
@@ -94,7 +102,7 @@ app 测试期间仍可能看到既有 macOS 链接器 warning
 
 ## 结论
 
-`f5f787b` 的响应式紧凑修复已通过 focused 回归、Rust 1.100.0 下的完整
+`8dd5732` 的响应式紧凑修复已通过 focused 回归、Rust 1.100.0 下的完整
 工程门禁和三套主题/双语受控布局检查，可以作为当前本地源码候选继续维护。
 独立复核和上述原生/真实联调边界仍保持开放。公司内网暂不可用，本片只做本地
 提交，不执行 push。

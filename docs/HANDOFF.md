@@ -5,11 +5,11 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
-## 2026-11-14 响应式工作台紧凑修复与完整门禁
+## 2026-11-14 响应式工作台紧凑连接库收口与完整门禁
 
 响应式工作台上一片的实现基线为
 `e1d410d2d61753f2e90296981199ed2b4b3d3703`；当前源码修复已固定在
-`f5f787b8153fba2dcc563b0b258e0350ee5a2056`。本片没有新增依赖，仍保持直接
+`8dd57321acd527a6c5ce66bed8a339f284de8b0f`。本片没有新增依赖，仍保持直接
 registry 依赖使用 `x.y`、Cargo.lock 保存解析版本和三套主题通过 registry、
 Palette、组件与 chrome token 扩展。
 
@@ -21,14 +21,22 @@ Palette、组件与 chrome token 扩展。
 - 磁盘设备列表改为固定 160px 高度，导航 header 增加后最后一行仍可滚动到达；
 - workspace layout 测试和 workspace manifest 清理已适配 Rust 1.100.0 的严格
   Clippy；首次中文工作区测试与生产完整 AX label 对齐。
+- 480px 窄窗口下，英文快速连接表单限制在连接管理器内部滚动，连接库列表和
+  Connect 动作继续留在可达视口；
+- 窄宽度连接库工具栏切换为图标优先布局，保留完整双语 AX label 和 tooltip；
+  加密同步使用 Lock 图标，批量操作栏同步收紧间距并保留完整语义；
+- 新增 480×580、480×900，三套主题、明暗模式和中英文矩阵回归，检查连接管理器、
+  文件夹树、操作栏、列表视口、首条连接及全部动作的真实 bounds 和 List/ListItem
+  语义。
 
 `python3 scripts/check.py` 已在该源码候选上退出 `0`：依赖策略、Python
 `131 run / 1 skipped`、fmt、workspace 严格 Clippy、workspace Rust 测试、14 项
 doctest 和 readiness/observer/small-stack 三组 AI controller 均通过；app 完整
-测试为 `1121 passed / 2 ignored`。磁盘监控独立回归、紧凑连接库回归、首次中文
-启动回归和 `keelshell-core` workspace layout `12/12` 也已通过。
+测试为 `1122 passed / 2 ignored`。连接库专项为 `28 passed / 0 failed`，新增窄窗
+主题/语言/高度矩阵为 `1 passed / 0 failed`；磁盘监控独立回归、首次中文启动回归
+和 `keelshell-core` workspace layout `12/12` 也已通过。
 
-独立严格只读复核已固定在 `f5f787b` 并使用独立 Cargo target 启动；截至当前文档
+独立严格只读复核已固定在 `8dd5732` 并使用独立 Cargo target 启动；截至当前文档
 收口尚未返回可审计正文，因此不能写成非作者批准。真实 macOS 包、Windows/Linux
 原生桌面、IME、VoiceOver/NVDA、真实 SSH/Podman、外部 AI provider、签名、公证、
 安装升级和像素/多显示器验收仍保持开放。完整本片记录见

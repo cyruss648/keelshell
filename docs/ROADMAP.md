@@ -3,9 +3,9 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
-## 2026-11-14 响应式工作台紧凑修复
+## 2026-11-14 响应式工作台紧凑连接库收口
 
-当前源码候选为 `f5f787b8153fba2dcc563b0b258e0350ee5a2056`。上一片响应式工作台
+当前源码候选为 `8dd57321acd527a6c5ce66bed8a339f284de8b0f`。上一片响应式工作台
 在 900×580 目标下保留 AI、导航和终端的设计层级；本片继续收口边界：
 
 - AI 列在 720px 以下最低为 200px，在 720px 及以上最低为 240px，上限均为
@@ -14,11 +14,18 @@
   裁掉；
 - Rust 1.100.0 下的 workspace layout Clippy 诊断和未使用依赖已修复；
 - 首次中文工作区的 AX label 与生产按钮语义保持一致。
+- 480px 窄窗口下，快速连接表单在自身区域滚动，连接库列表和 Connect 动作保持
+  可见和可操作；
+- 窄宽度工具栏使用图标优先布局，保留完整双语无障碍标签、tooltip、Lock 同步图标
+  和紧凑批量操作栏；
+- 三套主题、明暗模式、中英文和 480×580/480×900 高度矩阵覆盖连接管理器边界、
+  文件夹、工具栏、列表视口、首条记录及其全部动作。
 
 定向回归包括 workbench layout `10/10`、主题设计 `4/4`、磁盘监控独立回归
-`1/1`、紧凑连接库 `1/1`、首次中文启动 `1/1` 和 core workspace layout
-`12/12`。完整 `python3 scripts/check.py` 返回 `0`，Python 为
-`131 run / 1 skipped`，app 为 `1121 passed / 2 ignored`，14 项 doctest、
+`1/1`、紧凑连接库 `1/1`、窄窗主题/语言/高度矩阵 `1/1`、连接库专项 `28/28`、
+首次中文启动 `1/1` 和 core workspace layout `12/12`。完整
+`python3 scripts/check.py` 返回 `0`，Python 为 `131 run / 1 skipped`，app 为
+`1122 passed / 2 ignored`，14 项 doctest、
 严格 workspace Clippy、依赖策略和三组 AI controller 均通过。门禁与未覆盖边界
 见[本片测试记录](testing/records/2026-11-14-responsive-workbench-follow-up.md)。
 
