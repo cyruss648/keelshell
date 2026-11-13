@@ -6,7 +6,7 @@
 ## 2026-11-14 响应式工作台紧凑连接库收口
 
 当前源码与测试补强已固定为
-`56cf180f9c865f249bc3d3dae4ee316c481df9cb`。上一片响应式工作台在 900×580
+`9194d7da6c7fc628bc3d8f7c1155afb5c91e31f1`。上一片响应式工作台在 900×580
 目标下保留 AI、导航和终端的设计层级；本片继续收口边界：
 
 - AI 列在 720px 以下最低为 200px，在 720px 及以上最低为 240px，上限均为
@@ -16,7 +16,10 @@
 - Rust 1.100.0 下的 workspace layout Clippy 诊断和未使用依赖已修复；
 - 首次中文工作区的 AX label 与生产按钮语义保持一致。
 - 480px 窄窗口下，快速连接表单在自身区域滚动，连接库列表和 Connect 动作保持
-  可见和可操作；新增 480×900 英文滚动回归确认滚动后 Connect 仍可达；
+  可见和可操作；480×580 低高度窗口将快速连接区域收紧为 `120px` 并保留连接库
+  约 `48px` 的正向列表视口；
+- 480×580/480×900 均挂载真实保存连接，验证保存连接与快速连接的 Connect 动作在
+  滚动后可达，快速连接滚动不会改变连接库 sibling bounds；
 - 窄宽度工具栏使用图标优先布局，保留完整双语无障碍标签、tooltip、Lock 同步图标
   和紧凑批量操作栏；
 - 连接库回归扩展为 12 条记录，覆盖末条滚动、全部动作 bounds 和实际编辑点击；
@@ -34,11 +37,11 @@
 见[本片测试记录](testing/records/2026-11-14-responsive-workbench-follow-up.md)。
 
 第二次独立严格只读复核以 `8dd5732` 为基线发现一个 P2 证据缺口，已在
-`56cf180` 中补齐；针对 `56cf180` 的新复核尚未启动，当前状态仍为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。480×580 空工作区同时展示快速
-连接和下方连接库的正向高度未纳入本片承诺；Windows/Linux 原生桌面、IME、
-VoiceOver/NVDA、真实 SSH/Podman、外部 AI provider、当前源码包、签名、公证和
-安装升级继续保持开放。
+`9194d7da6c7fc628bc3d8f7c1155afb5c91e31f1` 中补齐；针对包含本片最终文档快照的
+新提交，独立复核尚未启动，当前状态仍为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。480×580/480×900 的 headless
+GPUI 几何和受控交互已覆盖；Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实
+SSH/Podman、外部 AI provider、当前源码包、签名、公证和安装升级继续保持开放。
 
 ## 2026-11-13 响应式工作区视觉切片
 

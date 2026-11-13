@@ -9,7 +9,7 @@
 
 响应式工作台上一片的实现基线为
 `e1d410d2d61753f2e90296981199ed2b4b3d3703`；当前源码与测试补强已固定在
-`56cf180f9c865f249bc3d3dae4ee316c481df9cb`。本片没有新增依赖，仍保持直接
+`9194d7da6c7fc628bc3d8f7c1155afb5c91e31f1`。本片没有新增依赖，仍保持直接
 registry 依赖使用 `x.y`、Cargo.lock 保存解析版本和三套主题通过 registry、
 Palette、组件与 chrome token 扩展。
 
@@ -23,6 +23,8 @@ Palette、组件与 chrome token 扩展。
   Clippy；首次中文工作区测试与生产完整 AX label 对齐；
 - 480px 窄窗口下，英文快速连接表单限制在自身区域滚动，Connect 动作在
   480×900 目标中滚动后仍可达；
+- 480×580 低高度窗口将快速连接区域收紧为 `120px`，内容顶部对齐并在自身区域
+  内滚动；连接库保留约 `48px` 的正向列表视口；
 - 窄宽度连接库工具栏切换为图标优先布局，保留完整双语 AX label 和 tooltip；
   加密同步使用 Lock 图标，批量操作栏同步收紧间距并保留完整语义；
 - 连接库回归扩展为 12 条连接记录，分别验证首条和末条记录、末条滚动后的全部
@@ -31,9 +33,10 @@ Palette、组件与 chrome token 扩展。
   Move 动作回归；
 - 新增 480×580、480×900，三套主题、明暗模式和中英文矩阵回归，检查连接管理器、
   文件夹树、操作栏、列表视口、首条连接及全部动作的真实 bounds 和 List/ListItem
-  语义。
+  语义；两个尺寸均挂载真实保存连接，确认保存连接和快速连接的 Connect 动作在
+  滚动后可达，快速连接滚动不会改变连接库 sibling bounds。
 
-最终源码 `56cf180` 上的 `python3 scripts/check.py` 已退出 `0`：依赖策略、Python
+最终源码 `9194d7da` 上的 `python3 scripts/check.py` 已退出 `0`：依赖策略、Python
 `131 passed / 1 skipped`、fmt、workspace 严格 Clippy、workspace Rust 测试、14 项
 doctest 和 readiness/observer/small-stack 三组 AI controller 均通过；app 完整
 测试为 `1124 passed / 2 ignored`。连接库专项为 `29 passed / 0 failed`，快速连接、
@@ -42,17 +45,14 @@ doctest 和 readiness/observer/small-stack 三组 AI controller 均通过；app 
 
 独立严格只读复核的第二次可审计报告以 `8dd5732` 为基线，P0/P1/P3 为 `0`，唯一
 P2 是回归证据只覆盖首条记录和容器边界，没有覆盖末条滚动后的动作、工具栏/批量栏
-语义及快速连接滚动。本片已在 `56cf180` 中补齐这些回归，并对最终源码重新通过完整
-门禁；针对 `56cf180` 的新独立复核仍待启动，因此当前状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。第一次复核尝试因无法形成可审计
-正文被终止，不能计入批准。
+语义及快速连接滚动。本片已在 `9194d7da` 中补齐这些回归，并对最终源码重新通过
+完整门禁；针对包含本片最终文档快照的新提交，新的独立复核尚待启动，因此当前
+状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。第一次复核尝试因无法形成
+可审计正文被终止，不能计入批准。
 
-480×580 空工作区同时展示快速连接与下方连接库的几何边界仍未作为本片产品承诺：
-固定 300px 的快速连接区域在该高度下可能耗尽连接库正向视口；本片只验收
-480×900 的快速连接滚动，以及连接管理器自身的 480×580 完整矩阵。若产品后续要求
-两块区域在 480×580 同时保持正向高度，应作为独立布局变更提出并补充真实桌面验收。
-真实 macOS 包、Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实 SSH/Podman、
-外部 AI provider、签名、公证、安装升级和像素/多显示器验收仍保持开放。完整本片
+480×580/480×900 的 headless GPUI 几何和受控交互现在已经覆盖。真实 macOS 包、
+Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实 SSH/Podman、外部 AI provider、
+签名、公证、安装升级和像素/多显示器验收仍保持开放。完整本片
 记录见[响应式工作台紧凑修复](testing/records/2026-11-14-responsive-workbench-follow-up.md)。
 
 ## 2026-11-14 Rust 工具链读回
