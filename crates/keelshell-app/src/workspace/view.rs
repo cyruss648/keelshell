@@ -53,6 +53,8 @@ impl Workspace {
         let mut session_content = div()
             .id("session-content-group")
             .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "活动 SSH 会话", "Active SSH sessions"))
             .flex_1()
             .min_w_0()
             .h_full()
@@ -77,6 +79,10 @@ impl Workspace {
                     .border_1()
                     .border_color(rgb(visual.border))
                     .rounded(px(components.control_radius))
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .child(Icon::new(IconName::Server).size_3())
                     .child(if self.tabs.is_empty() {
                         t(cx, "快速连接", "Quick connect").to_owned()
                     } else {
@@ -140,6 +146,8 @@ impl Workspace {
         let mut session_actions = div()
             .id("session-actions-group")
             .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "会话操作", "Session actions"))
             .flex_shrink_0()
             .h_full()
             .flex()
@@ -170,6 +178,7 @@ impl Workspace {
         div()
             .id("session-strip")
             .test_support()
+            .role(accesskit::Role::Group)
             .aria_label(t(cx, "SSH 会话导航", "SSH session navigation"))
             .aria_description(t(
                 cx,
@@ -563,11 +572,14 @@ impl Workspace {
         let mut tabs = div()
             .id("session-tabs")
             .test_support()
+            .role(accesskit::Role::TabList)
             .aria_label(t(cx, "SSH 会话标签", "SSH session tabs"))
+            .aria_orientation(accesskit::Orientation::Horizontal)
             .flex_1()
             .min_w_0()
             .flex()
             .items_center()
+            .gap_1()
             .overflow_x_scroll()
             .track_scroll(&self.session_tab_scroll);
         if self.tabs.is_empty() {
@@ -583,10 +595,14 @@ impl Workspace {
         }
         for (index, terminal) in self.tabs.iter().enumerate() {
             let terminal_id = terminal.entity_id();
+            let active = self.active == index;
+            let offline = terminal.read(cx).end_reason().is_some();
             tabs = tabs.child(
                 div()
                     .id(("session-tab", index))
                     .test_support()
+                    .role(accesskit::Role::Tab)
+                    .aria_selected(active)
                     .h(px(chrome.session_tab_height))
                     .w(px(184.))
                     .flex_shrink_0()
@@ -595,6 +611,12 @@ impl Workspace {
                     .flex()
                     .items_center()
                     .gap_1()
+                    .focusable()
+                    .focus_visible(|style| {
+                        style
+                            .border_color(rgb(visual.focus))
+                            .bg(rgb(visual.surface_hover))
+                    })
                     .cursor_pointer()
                     .aria_label(format!(
                         "{}: {}",
@@ -605,6 +627,11 @@ impl Workspace {
                         visual.surface_active
                     } else {
                         visual.canvas
+                    }))
+                    .text_color(rgb(if active {
+                        visual.text
+                    } else {
+                        visual.muted
                     }))
                     .border_1()
                     .border_color(rgb(if self.active == index {
@@ -654,7 +681,19 @@ impl Workspace {
                                 )
                             }),
                     )
-                    .when(terminal.read(cx).end_reason().is_some(), |tab| {
+                    .child(
+                        div()
+                            .id(("session-tab-status", index))
+                            .test_support()
+                            .size(px(6.))
+                            .rounded(px(3.))
+                            .bg(rgb(if offline {
+                                visual.warning
+                            } else {
+                                visual.success
+                            })),
+                    )
+                    .when(offline, |tab| {
                         tab.child(
                             div()
                                 .flex_shrink_0()
@@ -698,26 +737,53 @@ impl Workspace {
         let mut bottom_tabs = div()
             .id("workspace-tool-tabs")
             .test_support()
+            .role(accesskit::Role::TabList)
+            .aria_label(t(cx, "工作区工具标签", "Workspace tool tabs"))
+            .aria_orientation(accesskit::Orientation::Horizontal)
             .h(px(chrome.tool_tabs_height))
             .flex_shrink_0()
             .flex()
             .items_center()
+            .gap_1()
+            .px_1()
             .border_t_1()
             .border_b_1()
             .border_color(rgb(visual.border))
             .bg(rgb(visual.chrome));
-        for (id, kind, zh, en) in [
-            ("files", ToolPanel::Files, "文件", "Files"),
-            ("commands", ToolPanel::Commands, "命令", "Commands"),
-            ("tunnels", ToolPanel::Tunnels, "隧道", "Tunnels"),
+        for (id, kind, icon, zh, en) in [
+            (
+                "files",
+                ToolPanel::Files,
+                IconName::FolderOpen,
+                "文件",
+                "Files",
+            ),
+            (
+                "commands",
+                ToolPanel::Commands,
+                IconName::Server,
+                "命令",
+                "Commands",
+            ),
+            (
+                "tunnels",
+                ToolPanel::Tunnels,
+                IconName::Network,
+                "隧道",
+                "Tunnels",
+            ),
         ] {
             bottom_tabs = bottom_tabs.child(
                 Button::new(id)
                     .ghost()
                     .compact()
+                    .role(accesskit::Role::Tab)
+                    .icon(icon)
                     .label(t(cx, zh, en))
                     .selected(self.visible_panel == Some(kind))
                     .toggled(self.visible_panel == Some(kind))
+                    .accessibility_label(t(cx, zh, en))
+                    .localized_tooltip(zh, en)
                     .disabled(
                         kind != ToolPanel::Commands
                             && active_id.is_none_or(|id| self.restored_tabs.contains_key(&id)),
@@ -830,6 +896,8 @@ impl Workspace {
                 div()
                     .id("workspace-session-context")
                     .test_support()
+                    .role(accesskit::Role::Group)
+                    .aria_label(t(cx, "当前工作区上下文", "Current workspace context"))
                     .flex_1()
                     .flex_shrink(1.)
                     .min_w_0()
@@ -1160,20 +1228,27 @@ impl Workspace {
             .toggled(self.show_window_switcher)
             .on_click(cx.listener(|view, _, window, cx| view.toggle_window_switcher(window, cx)))
             .map(|button| self.retain_modal_button("workspace-window-switcher", button, cx));
-        let toolbar_group = |id: &'static str| {
+        let toolbar_group =
+            |id: &'static str, label_zh: &'static str, label_en: &'static str| {
             let group = div()
                 .id(id)
                 .test_support()
+                .role(accesskit::Role::Group)
+                .aria_label(t(cx, label_zh, label_en))
                 .flex_shrink_0()
                 .flex()
                 .items_center()
                 .gap_1();
             if compact_toolbar {
                 group
+                    .bg(rgb(visual.chrome))
+                    .border_1()
+                    .border_color(rgb(visual.border))
+                    .rounded(px(components.control_radius))
             } else {
                 group
                     .px_1()
-                    .bg(rgb(visual.surface))
+                    .bg(rgb(visual.chrome))
                     .border_1()
                     .border_color(rgb(visual.border))
                     .rounded(px(components.control_radius))
@@ -1193,22 +1268,38 @@ impl Workspace {
                 separator.mx_1()
             }
         };
-        let navigation_group = toolbar_group("workspace-navigation-group")
+        let navigation_group = toolbar_group(
+            "workspace-navigation-group",
+            "连接导航工具",
+            "Connection navigation tools",
+        )
             .child(navigation_toggle)
             .child(connection_manager);
         let context_group = workspace_context;
-        let pane_group = toolbar_group("workspace-pane-actions")
+        let pane_group = toolbar_group(
+            "workspace-pane-actions",
+            "面板布局操作",
+            "Pane layout actions",
+        )
             .child(split_horizontal)
             .child(split_vertical)
             .child(collapse_pane)
             .child(zoom_pane)
             .child(save_layout);
-        let assistant_group = toolbar_group("workspace-assistant-action").child(assistant);
-        let settings_group = toolbar_group("workspace-settings-actions")
+        let assistant_group =
+            toolbar_group("workspace-assistant-action", "AI 助手", "AI assistant")
+                .child(assistant);
+        let settings_group = toolbar_group(
+            "workspace-settings-actions",
+            "工作区设置",
+            "Workspace settings",
+        )
             .children(self.workspace_settings_actions(compact_toolbar, cx));
         div()
             .id("workspace-toolbar")
             .test_support()
+            .role(accesskit::Role::Toolbar)
+            .aria_label(t(cx, "工作区工具栏", "Workspace toolbar"))
             .h(px(chrome.toolbar_height))
             .bg(rgb(visual.toolbar))
             .px_2()
@@ -1216,6 +1307,7 @@ impl Workspace {
             .flex_shrink_0()
             .flex()
             .items_center()
+            .text_color(rgb(visual.text))
             .border_b_1()
             .border_color(rgb(visual.border))
             .when(show_brand, |toolbar| {
@@ -1251,11 +1343,17 @@ impl Workspace {
             visual.accent
         };
         div()
+            .id("command-input-bar")
+            .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "命令输入与审核目标", "Command input and review target"))
             .flex_shrink_0()
             .px_2()
             .py_1()
             .when(compact_command_tools, |bar| bar.py_0())
-            .bg(rgb(visual.surface))
+            .bg(rgb(visual.chrome))
+            .border_t_1()
+            .border_color(rgb(visual.border))
             .flex()
             .items_center()
             .gap_2()
@@ -1275,11 +1373,8 @@ impl Workspace {
                     .rounded(px(crate::design::components(cx).control_radius))
                     .bg(rgb(visual.chrome))
                     .border_1()
-                    .border_color(rgb(if reviewed_id != active_id {
-                        visual.warning
-                    } else {
-                        visual.border
-                    }))
+                    .border_l_2()
+                    .border_color(rgb(target_color))
                     .child(
                         div()
                             .flex()
@@ -1350,6 +1445,10 @@ impl Workspace {
                     .flex_1()
                     .min_w_0()
                     .h(px(chrome.command_input_height))
+                    .rounded(px(crate::design::components(cx).control_radius))
+                    .border_1()
+                    .border_color(rgb(visual.field_border))
+                    .bg(rgb(visual.canvas))
                     .child(Textarea::new(&self.command).h_full()),
             )
             .when(stale_command, |bar| {
@@ -1392,13 +1491,15 @@ impl Workspace {
         div()
             .id("command-actions")
             .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "命令操作", "Command actions"))
             .flex_shrink_0()
             .min_w_0()
             .px_2()
             .py_1()
             .border_t_1()
             .border_color(rgb(visual.border))
-            .bg(rgb(visual.canvas))
+            .bg(rgb(visual.chrome))
             .flex()
             .flex_wrap()
             .items_center()
@@ -1500,7 +1601,22 @@ impl Workspace {
     fn workspace_status_bar(&self, terminal_status: String, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let chrome = crate::design::chrome(cx);
+        let offline = self
+            .tabs
+            .get(self.active)
+            .is_some_and(|tab| tab.read(cx).end_reason().is_some());
+        let status_color = if self.tabs.is_empty() {
+            visual.muted
+        } else if offline {
+            visual.warning
+        } else {
+            visual.success
+        };
         div()
+            .id("workspace-status-bar")
+            .test_support()
+            .role(accesskit::Role::Status)
+            .aria_label(t(cx, "工作区状态", "Workspace status"))
             .h(px(chrome.status_bar_height))
             .px_3()
             .flex_shrink_0()
@@ -1514,13 +1630,28 @@ impl Workspace {
             .text_color(rgb(visual.muted))
             .child(
                 div()
+                    .id("workspace-connection-status")
+                    .test_support()
                     .flex_1()
                     .min_w_0()
+                    .flex()
+                    .items_center()
+                    .gap_2()
                     .text_ellipsis()
+                    .child(
+                        div()
+                            .id("workspace-connection-status-indicator")
+                            .test_support()
+                            .size(px(6.))
+                            .rounded(px(3.))
+                            .bg(rgb(status_color)),
+                    )
                     .child(terminal_status),
             )
             .child(
                 div()
+                    .id("workspace-operation-status")
+                    .test_support()
                     .min_w_0()
                     .text_ellipsis()
                     .child(self.status.render(cx)),

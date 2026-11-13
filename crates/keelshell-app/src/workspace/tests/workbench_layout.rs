@@ -834,3 +834,181 @@ fn workspace_selected_controls_expose_accessible_state(cx: &mut TestAppContext) 
     .checked("selected tools and actual sidebar visibility reach the accessibility tree");
     assert!(panes.iter().all(|pane| writes(pane).is_empty()));
 }
+
+#[gpui_kit::test]
+fn workbench_chrome_keeps_layered_semantics_and_bounds_in_compact_theme_matrix(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount_sized(cx, Vec::new(), 900., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    cx.update_window(fixture.window, |_, window, cx| {
+        for family in crate::design::registry() {
+            for appearance in [Theme::Light, Theme::Dark] {
+                for language in [Language::ZhCn, Language::En] {
+                    i18n::set_language(language, cx);
+                    fixture.workspace.update(cx, |view, cx| {
+                        view.state.settings.theme_family =
+                            ThemeId::new(family.id).checked("registered theme identity");
+                        view.state.settings.theme = appearance;
+                        crate::design::apply_settings(&view.state.settings, Some(window), cx);
+                    });
+                    settle(window, cx);
+                    let scene = format!("{}/{appearance:?}/{language:?}", family.id);
+                    let toolbar = window.find("workspace-toolbar");
+                    assert_eq!(
+                        toolbar.role(),
+                        Some(gpui_kit::accesskit::Role::Toolbar),
+                        "{scene}"
+                    );
+                    assert_eq!(
+                        toolbar.label(),
+                        Some(crate::i18n::t(cx, "工作区工具栏", "Workspace toolbar")),
+                        "{scene}: toolbar label"
+                    );
+                    for (id, expected) in [
+                        (
+                            "workspace-navigation-group",
+                            crate::i18n::t(cx, "连接导航工具", "Connection navigation tools"),
+                        ),
+                        (
+                            "workspace-pane-actions",
+                            crate::i18n::t(cx, "面板布局操作", "Pane layout actions"),
+                        ),
+                        (
+                            "workspace-assistant-action",
+                            crate::i18n::t(cx, "AI 助手", "AI assistant"),
+                        ),
+                        (
+                            "workspace-settings-actions",
+                            crate::i18n::t(cx, "工作区设置", "Workspace settings"),
+                        ),
+                    ] {
+                        let group = window.find(id);
+                        assert_eq!(
+                            group.role(),
+                            Some(gpui_kit::accesskit::Role::Group),
+                            "{scene}: {id} role"
+                        );
+                        assert_eq!(group.label(), Some(expected), "{scene}: {id} label");
+                        assert!(
+                            inside(group.bounds(), toolbar.bounds()),
+                            "{scene}: {id} bounds"
+                        );
+                    }
+                    let strip = window.find("session-strip");
+                    assert_eq!(
+                        strip.role(),
+                        Some(gpui_kit::accesskit::Role::Group),
+                        "{scene}: session strip role"
+                    );
+                    assert_eq!(
+                        strip.label(),
+                        Some(crate::i18n::t(cx, "SSH 会话导航", "SSH session navigation")),
+                        "{scene}: session strip label"
+                    );
+                    let session_tabs = window.find("session-tabs");
+                    assert_eq!(
+                        session_tabs.role(),
+                        Some(gpui_kit::accesskit::Role::TabList),
+                        "{scene}: session tabs role"
+                    );
+                    assert!(
+                        inside(session_tabs.bounds(), strip.bounds()),
+                        "{scene}: session tabs"
+                    );
+                    let session_tab = window.find(("session-tab", 0usize));
+                    assert_eq!(
+                        session_tab.role(),
+                        Some(gpui_kit::accesskit::Role::Tab),
+                        "{scene}: session tab role"
+                    );
+                    assert_eq!(
+                        session_tab.selected(),
+                        Some(true),
+                        "{scene}: active session tab"
+                    );
+                    assert!(
+                        session_tab.bounds().size.width >= px(160.)
+                            && session_tab.bounds().size.height >= px(30.),
+                        "{scene}: compact session tab collapsed {:?}",
+                        session_tab.bounds()
+                    );
+                    assert!(
+                        inside(session_tab.bounds(), session_tabs.bounds()),
+                        "{scene}: tab"
+                    );
+                    let tool_tabs = window.find("workspace-tool-tabs");
+                    assert_eq!(
+                        tool_tabs.role(),
+                        Some(gpui_kit::accesskit::Role::TabList),
+                        "{scene}: tool tabs role"
+                    );
+                    assert_eq!(
+                        tool_tabs.label(),
+                        Some(crate::i18n::t(cx, "工作区工具标签", "Workspace tool tabs")),
+                        "{scene}: tool tabs label"
+                    );
+                    for (id, zh, en) in [
+                        ("files", "文件", "Files"),
+                        ("commands", "命令", "Commands"),
+                        ("tunnels", "隧道", "Tunnels"),
+                    ] {
+                        let tab = window.find(id);
+                        assert_eq!(
+                            tab.role(),
+                            Some(gpui_kit::accesskit::Role::Tab),
+                            "{scene}: {id} role"
+                        );
+                        assert_eq!(
+                            tab.label(),
+                            Some(crate::i18n::t(cx, zh, en)),
+                            "{scene}: {id} label"
+                        );
+                        assert!(
+                            tab.bounds().size.width >= px(20.)
+                                && tab.bounds().size.height >= px(20.),
+                            "{scene}: {id} collapsed {:?}",
+                            tab.bounds()
+                        );
+                        assert!(
+                            inside(tab.bounds(), tool_tabs.bounds()),
+                            "{scene}: {id} bounds"
+                        );
+                    }
+                    for (id, label) in [
+                        (
+                            "command-input-bar",
+                            crate::i18n::t(
+                                cx,
+                                "命令输入与审核目标",
+                                "Command input and review target",
+                            ),
+                        ),
+                        (
+                            "command-actions",
+                            crate::i18n::t(cx, "命令操作", "Command actions"),
+                        ),
+                        (
+                            "workspace-status-bar",
+                            crate::i18n::t(cx, "工作区状态", "Workspace status"),
+                        ),
+                    ] {
+                        let chrome = window.find(id);
+                        assert_eq!(chrome.label(), Some(label), "{scene}: {id} label");
+                        assert!(
+                            inside(chrome.bounds(), window.bounds()),
+                            "{scene}: {id} bounds"
+                        );
+                    }
+                    assert_eq!(
+                        window.find("workspace-status-bar").role(),
+                        Some(gpui_kit::accesskit::Role::Status),
+                        "{scene}: status role"
+                    );
+                }
+            }
+        }
+    })
+    .checked("keep workbench chrome hierarchy readable in compact bilingual theme matrix");
+    assert!(panes.iter().all(|pane| writes(pane).is_empty()));
+}
