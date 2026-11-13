@@ -1,10 +1,10 @@
 # 响应式工作台紧凑修复与完整门禁记录 — 2026-11-14
 
 日期：2026-11-14（Asia/Shanghai）
-源码基线：`8dd57321acd527a6c5ce66bed8a339f284de8b0f`
+源码基线：`56cf180f9c865f249bc3d3dae4ee316c481df9cb`
 关联记录：[响应式工作台视觉切片](2026-11-13-responsive-workbench-polish.md)
 
-## 本次修复
+## 本次修复与复核补强
 
 本片收口上一片响应式工作台在完整门禁中暴露的紧凑边界问题：
 
@@ -24,23 +24,31 @@
   `accessibility_label` 和 tooltip，加密同步增加 Lock 图标。
 - 批量操作栏在窄宽度使用紧凑间距和“批量 / Batch”短文案，同时保留 Group 语义；
   连接列表滚动容器和文件夹树增加测试句柄与最小高度约束。
+- 连接库回归使用 12 条连接记录，验证首条和末条记录、滚动后的全部动作 bounds，
+  并实际点击末条编辑动作；
+- 工具栏和批量操作栏增加中英文 Group role、AX label、按钮 bounds 及批量 Move
+  动作回归；
+- 快速连接增加 480×900 英文滚动回归，确认滚动后 Connect 动作仍在快速连接区域
+  内且不会改变下方连接库 sibling bounds。
 
 生产视图仍只消费现有 registry、Palette、组件和 chrome token。三套主题 Frost
 「霜白」、Graphite「曜石」、Lavender「雾紫」继续共用同一布局路径；新增主题
-仍只扩展主题注册表和 token，不在业务视图中增加主题 ID 分支。
+仍只扩展主题注册表和 token，不在业务视图中增加主题 ID 分支。本次最终源码没有
+保留无效的固定高度包装层 `min_h_0()` 差异，生产代码基线仍为上一片已验证布局。
 
 ## 定向验证
 
-以下验证均在源码基线 `8dd5732`、Rust 1.100.0、锁定依赖和隔离测试数据下完成：
+以下验证均在源码基线 `56cf180`、Rust 1.100.0、锁定依赖和隔离测试数据下完成：
 
 | 范围 | 结果 |
 | --- | --- |
 | `workbench_layout` | `10 passed / 0 failed` |
 | 主题设计测试 | `4 passed / 0 failed` |
 | 磁盘监控独立工作区回归 | `1 passed / 0 failed` |
-| 紧凑连接库回归 | `1 passed / 0 failed` |
+| 紧凑快速连接滚动回归 | `1 passed / 0 failed` |
+| 紧凑工具栏/批量栏语义回归 | `1 passed / 0 failed` |
 | 窄窗主题/语言/高度矩阵 | `1 passed / 0 failed` |
-| 连接库专项 | `28 passed / 0 failed` |
+| 连接库专项 | `29 passed / 0 failed` |
 | 首次中文工作区回归 | `1 passed / 0 failed` |
 | `cargo test -p keelshell-core --test workspace_layout` | `12 passed / 0 failed` |
 | `cargo fmt --all -- --check` | 通过 |
@@ -70,7 +78,7 @@ python3 scripts/check.py
   三组专项；
 - 14 项 rustdoc/doctest。
 
-app 完整测试结果为 `1122 passed / 2 ignored`。core、session、MCP、AI 和工作区
+app 完整测试结果为 `1124 passed / 2 ignored`。core、session、MCP、AI 和工作区
 集成测试均在 workspace 测试阶段通过；需要 Podman、OpenSSH、真实 Linux 采样、
 Windows/Linux 原生桌面或外部 provider 的测试继续按测试合同保持 `ignored`，
 没有被计入已执行通过的真实联调。
@@ -81,14 +89,15 @@ app 测试期间仍可能看到既有 macOS 链接器 warning
 
 ## 独立代码与功能复核
 
-已启动固定源码 SHA `8dd57321acd527a6c5ce66bed8a339f284de8b0f` 的独立严格只读
-复核 agent，使用独立 Cargo target。复核要求包括 P0/P1/P2/P3 严重级别、绝对
-文件/行号证据、触发条件、实际命令计数、未验证边界和 merge recommendation；
-复核 agent 不得编辑、格式化、提交、推送、合并或清理共享 worktree。
+第二次独立严格只读复核以源码 SHA `8dd5732` 为基线并使用独立 Cargo target。
+复核报告为：P0 `0`、P1 `0`、P2 `1`、P3 `0`，建议
+`MERGE WITH P2 FOLLOW-UP`。唯一 P2 是新增回归只验证首条连接和容器边界，没有
+验证末条连接滚动后的动作可达、工具栏/批量栏语义和快速连接滚动行为。
 
-截至本记录写入时，复核 agent 尚未返回可审计正文，因此作者门禁不能写成独立
-批准。收到报告后应在本记录和交接文档中补充结论；如果发现问题，修复后必须以
-新源码 SHA 重新执行相关门禁并重新启动复核。
+本片在 `56cf180` 中补齐上述证据，并以最终源码重新执行完整门禁。第一次独立复核
+尝试因反复轮询失控测试会话被系统终止，没有形成可审计报告，不能计入批准。针对
+`56cf180` 的新独立复核仍待启动；复核 agent 必须保持严格只读，不得编辑、格式化、
+提交、推送、合并或清理共享 worktree。
 
 ## 未覆盖边界
 
@@ -99,10 +108,12 @@ app 测试期间仍可能看到既有 macOS 链接器 warning
 - IME、VoiceOver/NVDA、完整键盘辅助技术和真实像素对比度；
 - 真实 SSH、Podman 主机监控和长时间外部 AI provider；
 - 900×580 在真实桌面上的窗口调整、多显示器和系统缩放表现。
+- 480×580 空工作区同时展示快速连接与下方连接库的正向高度；当前只验收
+  480×900 快速连接滚动和连接管理器自身的 480×580 矩阵。
 
 ## 结论
 
-`8dd5732` 的响应式紧凑修复已通过 focused 回归、Rust 1.100.0 下的完整
-工程门禁和三套主题/双语受控布局检查，可以作为当前本地源码候选继续维护。
+`56cf180` 的响应式紧凑修复与复核补强已通过 focused 回归、Rust 1.100.0 下的
+完整工程门禁和三套主题/双语受控布局检查，可以作为当前本地源码候选继续维护。
 独立复核和上述原生/真实联调边界仍保持开放。公司内网暂不可用，本片只做本地
 提交，不执行 push。
