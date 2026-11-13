@@ -72,10 +72,12 @@ session-tabs `6/1123`、core workspace layout `12/12`，Clippy、fmt 和差异�
 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。第一次复核尝试因无法形成可审计
 正文被终止，不能计入批准。
 
-480×580/480×900 的 headless GPUI 几何和受控交互现在已经覆盖。真实 macOS 包、
+480×580/480×900 的 headless GPUI 几何和受控交互现在已经覆盖；当前源码还完成了
+精确 macOS arm64 包结构检查和启动级原生短验，完整窗口级 AX/布局验收仍未关闭。
 Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实 SSH/Podman、外部 AI provider、
-签名、公证、安装升级和像素/多显示器验收仍保持开放。完整本片
-记录见[响应式工作台紧凑修复](testing/records/2026-11-14-responsive-workbench-follow-up.md)。
+签名、公证、安装升级和像素/多显示器验收仍保持开放。完整记录见
+[响应式工作台紧凑修复](testing/records/2026-11-14-responsive-workbench-follow-up.md)
+和[macOS 精确包短验](testing/records/2026-11-14-responsive-workbench-native-smoke.md)。
 
 ## 2026-11-14 Rust 工具链读回
 

@@ -52,8 +52,10 @@ stale Edit 与 session-tab reveal 回归、三套主题 token 解耦、双语 Gr
 作为独立证据之外的作者回执保留。独立复核没有重新完成宽 `library` 过滤集和 app
 全量测试，未把中止命令计入通过。当前状态为
 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。480×580/480×900 的 headless
-GPUI 几何和受控交互已覆盖；Windows/Linux 原生桌面、IME、VoiceOver/NVDA、真实
-SSH/Podman、外部 AI provider、当前源码包、签名、公证和安装升级继续保持开放。
+GPUI 几何和受控交互已覆盖；当前源码随后完成精确 macOS arm64 包结构检查和
+启动级原生短验，但没有读到可访问窗口。Windows/Linux 原生桌面、IME、VoiceOver/
+NVDA、真实 SSH/Podman、外部 AI provider、签名、公证和安装升级继续保持开放。
+证据见[macOS 精确包短验](testing/records/2026-11-14-responsive-workbench-native-smoke.md)。
 
 ## 2026-11-13 响应式工作区视觉切片
 
