@@ -5,6 +5,50 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-13 当前片：响应式工作区层级
+
+当前 worktree 基于源码基线
+`e1d410d2d61753f2e90296981199ed2b4b3d3703`，实现了最小响应式工作区视觉切片：
+
+- `900×580` 紧凑布局保留 AI、新建工作区窗口、凭据库和配置备份/恢复入口；
+- 紧凑入口使用图标或短文案，同时保留完整双语 AccessKit label 和 tooltip；
+- AI 列按窗口宽度的 34% 计算并限制在 `240..=360px`；
+- 连接导航和主机监控仍在同一 rail 中互斥切换，连接页使用 `236px`，监控页使用
+  `260px`，没有改变现有导航状态、按钮路由或 focus handle；
+- `workspace-navigation-rail` 使用 `Role::Group` 和 `Workspace navigation`，
+  header 使用 `ChromeTokens::pane_header_height` 并公开连接/监控双语语义；
+- 视图继续只消费 registry、Palette、组件和 chrome token；没有新增依赖，没有修改
+  `assistant.rs`、`files/**`、`snippet/**`、`session/core`。
+
+新增 `workbench_layout` 回归已经过 focused 编译和运行：
+`10 passed / 0 failed / 1113 filtered out`。覆盖 Frost、Graphite、Lavender，
+明暗模式和中英文，检查关键入口可发现性、容器 bounds、完整 AX label、AI 打开后
+终端预算、导航 rail `Group` role、header label、236/260px rail 宽度和 token 高度。
+focused app Clippy（`--all-targets -- -D warnings`）、fmt 和 `git diff --check`
+均通过。ADR、产品说明和测试记录分别见
+[ADR 0124](adr/0124-responsive-workbench-polish.md)、
+[原生工作区](product/NATIVE_WORKBENCH.md) 和
+[测试记录](testing/records/2026-11-13-responsive-workbench-polish.md)。
+
+## 交付边界
+
+提交前的最终 focused 回执已执行并保留：
+
+```text
+cargo fmt --all -- --check
+cargo test -p keelshell-app --locked --offline design::tests -- --test-threads=1
+cargo test -p keelshell-app --locked --offline workbench_layout -- --test-threads=1
+cargo clippy -p keelshell-app --locked --offline --all-targets -- -D warnings
+git diff --check
+```
+
+结果为：fmt check 通过，design `4 passed / 0 failed / 1119 filtered out`，
+workbench `10 passed / 0 failed / 1113 filtered out`，focused all-targets Clippy
+通过，`git diff --check` 通过。这些命令验证源码和受控 GPUI 渲染树。
+macOS/Windows/Linux 原生窗口、IME、
+VoiceOver/NVDA、真实 SSH/Podman、最终安装包、签名、公证、像素对比度和多显示器
+几何仍未由本片覆盖。
+
 ## 2026-11-08 当前片：工作区窗口切换器
 
 当前源码候选在既有多窗口生命周期上增加窗口切换器。`AppWindows` 注册表为
