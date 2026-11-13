@@ -27,6 +27,27 @@ rail role/header label、236/260px 宽度及 pane header token。focused app Cli
 源码提交后仍需独立形成 macOS/Windows/Linux 原生窗口、IME、VoiceOver/NVDA、
 真实 SSH/Podman、像素对比度、安装包和签名验收；headless GPUI 结果不代签这些边界。
 
+## 2026-11-13 AI 审核命令保存为片段
+
+AI 命令片段最终实现提交为
+`844917ddad45887e09d9a8be9deb6ef99f4ff949`。普通建议和诊断计划步骤可从审核结果
+进入既有片段编辑器；来源保留原始命令、目标、会话、review ID 和 120 秒单调审核时间。
+保存前允许修改名称、说明、标签、命令和参数，修改命令会显示重新审核提示。保存会再次
+检查来源和活动会话/目标，失败时保留草稿并阻止 StateStore 写入，不填入命令栏、不向
+终端发送字节、不执行命令。
+
+本片补齐了配置重载、已有保存和 write lease 被阻止时的可恢复状态：编辑器收到错误后
+解除 `Saving`，用户可以重试或取消。新增 GPUI 回归覆盖普通建议、stale 会话、配置重载
+重试/取消、重复 ID和诊断步骤入口；来源逻辑、AI review target、严格 Clippy、fmt、
+check 和差异检查均通过。独立只读复核固定在该 exact SHA，P0/P1/P2/P3 均为 `0`，
+范围内建议 `APPROVE`。
+
+完整 `scripts/check.py`、workspace 全量测试、真实 AI provider/SSH、三平台原生窗口、
+IME、VoiceOver、安装包和签名仍需独立验收。证据见
+[ADR 0125](adr/0125-reviewed-ai-command-snippet-save.md)、
+[产品说明](product/AI_COMMAND_SNIPPETS.md)和
+[测试记录](testing/records/2026-11-13-ai-command-snippet-save.md)。
+
 ## 2026-11-08 工作区窗口切换器
 
 工作区顶部新增主题化的“工作区 N”入口，持续显示当前原生窗口组数量；展开后列出

@@ -1,6 +1,9 @@
 //! Reviewed command insertion and explicit, revision-safe snippet management.
+use std::time::Instant;
+
 use super::*;
 use crate::command_suggestions::{self, SuggestionSource};
+use crate::snippet_editor::ReviewedCommandSourceIssue;
 use keelshell_core::Snippet;
 mod view;
 
@@ -355,17 +358,69 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        self.open_snippet_editor_with_source(snippet, None, window, cx);
+    }
+
+    pub(super) fn open_ai_snippet_editor(
+        &mut self,
+        source: ReviewedCommandSource,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if let Some(issue) = self.ai_review_source_issue(&source, cx) {
+            self.status = ai_review_source_message(issue, false);
+            cx.notify();
+            return;
+        }
+        self.open_snippet_editor_with_source(None, Some(source), window, cx);
+    }
+
+    fn ai_review_source_issue(
+        &self,
+        source: &ReviewedCommandSource,
+        cx: &App,
+    ) -> Option<ReviewedCommandSourceIssue> {
+        if let Some(issue) = source.content_issue(Instant::now()) {
+            return Some(issue);
+        }
+        let Some(terminal) = self.tabs.get(self.active) else {
+            return Some(ReviewedCommandSourceIssue::SessionUnavailable);
+        };
+        let id = terminal.entity_id();
+        if !terminal.read(cx).is_open() || format!("{id:?}") != source.session_id {
+            return Some(ReviewedCommandSourceIssue::SessionUnavailable);
+        }
+        if !self
+            .remote_hosts
+            .get(&id)
+            .is_some_and(|target| target == &source.target)
+        {
+            return Some(ReviewedCommandSourceIssue::TargetChanged);
+        }
+        None
+    }
+
+    fn open_snippet_editor_with_source(
+        &mut self,
+        snippet: Option<Snippet>,
+        source: Option<ReviewedCommandSource>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         if !self.can_manage_snippets() {
             return;
         }
-        self.snippet_editing = snippet.is_some();
-        let panel = cx.new(|cx| SnippetEditor::new(snippet, window, cx));
+        self.snippet_editing = snippet.is_some() && source.is_none();
+        let panel = cx.new(|cx| match source {
+            Some(source) => SnippetEditor::new_from_reviewed_command(source, window, cx),
+            None => SnippetEditor::new(snippet, window, cx),
+        });
         self.snippet_subscription = Some(cx.subscribe_in(
             &panel,
             window,
             |view, panel, event, window, cx| match event {
                 SnippetEditorEvent::Cancel => view.close_snippet_modal(window, cx),
-                SnippetEditorEvent::Save(snippet) => {
+                SnippetEditorEvent::Save { snippet, source } => {
                     if view.saving {
                         panel.update(cx, |panel, cx| {
                             panel.set_error(
@@ -375,11 +430,20 @@ impl Workspace {
                         });
                         return;
                     }
+                    if let Some(source) = source.as_ref()
+                        && let Some(issue) = view.ai_review_source_issue(source, cx)
+                    {
+                        let message = ai_review_source_message(issue, true);
+                        panel.update(cx, |panel, cx| panel.set_error(message.clone(), cx));
+                        view.status = message;
+                        cx.notify();
+                        return;
+                    }
                     let mut candidate = view.state.clone();
                     let result = if view.snippet_editing {
-                        candidate.update_snippet(snippet.clone())
+                        candidate.update_snippet(snippet.as_ref().clone())
                     } else {
-                        candidate.insert_snippet(snippet.clone())
+                        candidate.insert_snippet(snippet.as_ref().clone())
                     };
                     if let Err(error) = result {
                         panel.update(cx, |panel, cx| {
@@ -459,5 +523,74 @@ impl Workspace {
             return;
         }
         self.persist(candidate, AfterSave::SnippetDeleted { id }, window, cx);
+    }
+}
+
+fn ai_review_source_message(issue: ReviewedCommandSourceIssue, saving: bool) -> Message {
+    let action_zh = if saving {
+        "片段未保存"
+    } else {
+        "未打开命令片段编辑器"
+    };
+    let action_en = if saving {
+        "the snippet was not saved"
+    } else {
+        "the snippet editor was not opened"
+    };
+    match issue {
+        ReviewedCommandSourceIssue::EmptyCommand => Message::new(
+            format!("AI 审核命令为空，{action_zh}；请重新生成并审核。"),
+            format!("The reviewed AI command is empty; {action_en}. Generate and review it again."),
+        ),
+        ReviewedCommandSourceIssue::InvalidCommand => Message::new(
+            format!("AI 审核命令含危险控制字符，{action_zh}；请重新生成并审核。"),
+            format!(
+                "The reviewed AI command contains unsafe control characters; {action_en}. Generate and review it again."
+            ),
+        ),
+        ReviewedCommandSourceIssue::EmptyTarget => Message::new(
+            format!("AI 审核缺少目标主机，{action_zh}；请重新选择终端并审核。"),
+            format!(
+                "The AI review has no target host; {action_en}. Select a terminal and review it again."
+            ),
+        ),
+        ReviewedCommandSourceIssue::InvalidTarget => Message::new(
+            format!("AI 审核目标含无效控制字符，{action_zh}；请重新选择终端并审核。"),
+            format!(
+                "The AI review target contains invalid control characters; {action_en}. Select a terminal and review it again."
+            ),
+        ),
+        ReviewedCommandSourceIssue::EmptySession => Message::new(
+            format!("AI 审核缺少会话，{action_zh}；请重新选择终端并审核。"),
+            format!(
+                "The AI review has no session; {action_en}. Select a terminal and review it again."
+            ),
+        ),
+        ReviewedCommandSourceIssue::InvalidSession => Message::new(
+            format!("AI 审核会话标识无效，{action_zh}；请重新选择终端并审核。"),
+            format!(
+                "The AI review session identifier is invalid; {action_en}. Select a terminal and review it again."
+            ),
+        ),
+        ReviewedCommandSourceIssue::MissingReviewId => Message::new(
+            format!("AI 审核票据无效，{action_zh}；请重新审核。"),
+            format!("The AI review ticket is invalid; {action_en}. Review it again."),
+        ),
+        ReviewedCommandSourceIssue::Expired => Message::new(
+            format!("AI 审核已过期，{action_zh}；请重新审核。"),
+            format!("The AI review has expired; {action_en}. Review it again."),
+        ),
+        ReviewedCommandSourceIssue::SessionUnavailable => Message::new(
+            format!("原始 AI 审核会话已结束或不可用，{action_zh}；请重新选择终端并审核。"),
+            format!(
+                "The original AI review session ended or is unavailable; {action_en}. Select the terminal and review again."
+            ),
+        ),
+        ReviewedCommandSourceIssue::TargetChanged => Message::new(
+            format!("AI 审核目标已变化，{action_zh}；请重新选择终端并审核。"),
+            format!(
+                "The AI review target changed; {action_en}. Select the terminal and review again."
+            ),
+        ),
     }
 }

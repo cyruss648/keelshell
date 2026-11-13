@@ -49,6 +49,35 @@ macOS/Windows/Linux 原生窗口、IME、
 VoiceOver/NVDA、真实 SSH/Podman、最终安装包、签名、公证、像素对比度和多显示器
 几何仍未由本片覆盖。
 
+## 2026-11-13 当前片：保存已审核的 AI 命令为可复用片段
+
+AI 命令片段切片的最终实现提交为
+`844917ddad45887e09d9a8be9deb6ef99f4ff949`，基于
+`e1d410d2d61753f2e90296981199ed2b4b3d3703`。普通命令建议和诊断计划步骤提供
+“保存为命令片段”入口；入口重新生成绑定当前命令、目标、会话、review ID 和 120 秒
+单调时效的审核票据，然后打开既有 `SnippetEditor`。用户可以修改名称、说明、标签、
+命令和参数；编辑命令会明确提示原审核只覆盖原始命令，后续使用仍需重新审核。
+
+保存边界重新校验来源、活动会话和目标，空命令、危险控制字符、非法或过期审核、
+stale 会话/目标和重复 ID 都 fail closed。配置恢复、重载、已有写入或 write lease
+被阻止时，当前片段编辑器会收到双语可访问错误并恢复可编辑、可取消、可重试状态；
+StateStore 不发生写入。保存不会填入命令栏、发送终端输入或执行远程命令。来源横幅、
+诊断预览和命令库预览复用 `TypographyTokens::code_font_family`，没有新增主题分支
+或依赖。
+
+最终 focused 证据：AI 片段 GPUI `5 passed / 0 failed / 1122 filtered out`，
+来源纯逻辑 `1 passed / 0 failed / 1126 filtered out`，诊断计划两项回归各
+`1 passed / 0 failed / 1126 filtered out`，AI review target `1 passed / 0 failed /
+1126 filtered out`，精确 SHA 上的 `cargo check`、严格 Clippy、fmt 和差异检查均通过。
+新的独立只读复核固定在 `844917d`，P0/P1/P2/P3 均为 `0`，merge recommendation 为
+`APPROVE`。完整 `scripts/check.py`、workspace 全量测试、真实 AI provider、真实 SSH、
+远程执行、macOS/Windows/Linux 原生窗口、IME、VoiceOver、签名安装发布仍未由本片覆盖。
+
+设计、产品和测试记录分别见 [ADR 0125](adr/0125-reviewed-ai-command-snippet-save.md)、
+[AI 命令片段](product/AI_COMMAND_SNIPPETS.md)、
+[AI 助手审核工作流](product/AI_ASSISTANT_WORKFLOW.md) 和
+[测试记录](testing/records/2026-11-13-ai-command-snippet-save.md)。
+
 ## 2026-11-08 当前片：工作区窗口切换器
 
 当前源码候选在既有多窗口生命周期上增加窗口切换器。`AppWindows` 注册表为

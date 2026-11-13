@@ -83,6 +83,13 @@ pub enum AssistantEvent {
         command: String,
         session_id: String,
     },
+    SaveSuggestion {
+        command: String,
+        target: String,
+        session_id: String,
+        review_id: Uuid,
+        reviewed_at: std::time::Instant,
+    },
     SaveKnowledge {
         review_id: Uuid,
     },
@@ -178,6 +185,14 @@ enum KnowledgeSaveState {
 enum PreparedAssistantRequest {
     Api(PreparedRequest),
     Local(PreparedLocalAsk),
+}
+
+struct ReviewedCommandSuggestion {
+    command: String,
+    target: String,
+    session_id: String,
+    review_id: Uuid,
+    reviewed_at: std::time::Instant,
 }
 
 struct LocalRequestProgress {
@@ -1640,20 +1655,51 @@ impl AssistantPanel {
         cx.notify();
     }
 
-    fn suggest(&mut self, index: usize, cx: &mut Context<Self>) {
+    fn review_proposal(
+        &self,
+        proposal: CommandProposal,
+    ) -> Result<ReviewedCommandSuggestion, Message> {
+        let target = proposal.target.clone();
+        let session_id = proposal.session_id.clone();
+        let reviewed_at = std::time::Instant::now();
+        let ticket = proposal
+            .review(crate::snippet_editor::AI_REVIEW_LIFETIME)
+            .map_err(|error| ai_error(&error))?;
+        let review_id = ticket.id();
+        let command = ticket
+            .into_suggestion(&proposal, &session_id)
+            .map_err(|error| ai_error(&error))?;
+        Ok(ReviewedCommandSuggestion {
+            command,
+            target,
+            session_id,
+            review_id,
+            reviewed_at,
+        })
+    }
+
+    fn reviewed_suggestion(
+        &self,
+        index: usize,
+        cx: &mut Context<Self>,
+    ) -> Result<ReviewedCommandSuggestion, Message> {
         if let Some(reason) = self.review_target_unavailable() {
-            self.status = reason;
-            cx.notify();
-            return;
+            return Err(reason);
         }
         let Some(command) = self.suggestions.get(index).cloned() else {
-            return;
+            return Err(Message::new(
+                "命令建议已过期，请重新生成回复。",
+                "The command suggestion is stale. Generate a new reply.",
+            ));
         };
         let Some((target, session_id)) = self.response_target.clone() else {
-            return;
+            return Err(Message::new(
+                "命令建议缺少审核目标，请重新生成回复。",
+                "The command suggestion has no review target. Generate a new reply.",
+            ));
         };
         let proposal = CommandProposal {
-            command,
+            command: command.clone(),
             explanation: t(
                 cx,
                 "AI 生成的建议；执行前请核对全部参数与目标主机",
@@ -1671,15 +1717,30 @@ impl AssistantPanel {
             target,
             session_id: session_id.clone(),
         };
-        match proposal
-            .review(Duration::from_secs(120))
-            .and_then(|ticket| ticket.into_suggestion(&proposal, &session_id))
-        {
-            Ok(command) => cx.emit(AssistantEvent::Suggestion {
-                command,
-                session_id,
+        self.review_proposal(proposal)
+    }
+
+    fn suggest(&mut self, index: usize, cx: &mut Context<Self>) {
+        match self.reviewed_suggestion(index, cx) {
+            Ok(reviewed) => cx.emit(AssistantEvent::Suggestion {
+                command: reviewed.command,
+                session_id: reviewed.session_id,
             }),
-            Err(error) => self.status = ai_error(&error),
+            Err(error) => self.status = error,
+        }
+        cx.notify();
+    }
+
+    fn save_suggestion(&mut self, index: usize, cx: &mut Context<Self>) {
+        match self.reviewed_suggestion(index, cx) {
+            Ok(reviewed) => cx.emit(AssistantEvent::SaveSuggestion {
+                command: reviewed.command,
+                target: reviewed.target,
+                session_id: reviewed.session_id,
+                review_id: reviewed.review_id,
+                reviewed_at: reviewed.reviewed_at,
+            }),
+            Err(error) => self.status = error,
         }
         cx.notify();
     }
@@ -1710,45 +1771,60 @@ impl AssistantPanel {
         cx.notify();
     }
 
-    fn suggest_diagnostic_step(&mut self, index: usize, cx: &mut Context<Self>) {
+    fn reviewed_diagnostic_step(
+        &self,
+        index: usize,
+        _cx: &mut Context<Self>,
+    ) -> Result<ReviewedCommandSuggestion, Message> {
         if let Some(reason) = self.review_target_unavailable() {
-            self.status = reason;
-            cx.notify();
-            return;
+            return Err(reason);
         }
         let Some((target, session_id)) = self.response_target.as_ref() else {
-            return;
+            return Err(Message::new(
+                "诊断步骤缺少审核目标，请重新生成回复。",
+                "The diagnostic step has no review target. Generate a new reply.",
+            ));
         };
         let Some(plan) = self.diagnostic_plan.as_ref() else {
-            return;
+            return Err(Message::new(
+                "诊断计划已过期，请重新生成。",
+                "The diagnostic plan is stale. Generate it again.",
+            ));
         };
         if plan.target() != target || plan.session_id() != session_id {
-            self.status = ai_error(&AiError::DiagnosticPlanMismatch);
-            cx.notify();
-            return;
+            return Err(ai_error(&AiError::DiagnosticPlanMismatch));
         }
         let Ok(review) = plan.review_step(index, Duration::from_secs(120)) else {
-            self.status = ai_error(&AiError::InvalidDiagnosticPlan);
-            cx.notify();
-            return;
+            return Err(ai_error(&AiError::InvalidDiagnosticPlan));
         };
         let proposal = match review.into_proposal(plan, session_id) {
             Ok(proposal) => proposal,
-            Err(error) => {
-                self.status = ai_error(&error);
-                cx.notify();
-                return;
-            }
+            Err(error) => return Err(ai_error(&error)),
         };
-        match proposal
-            .review(Duration::from_secs(120))
-            .and_then(|ticket| ticket.into_suggestion(&proposal, session_id))
-        {
-            Ok(command) => cx.emit(AssistantEvent::Suggestion {
-                command,
-                session_id: session_id.clone(),
+        self.review_proposal(proposal)
+    }
+
+    fn suggest_diagnostic_step(&mut self, index: usize, cx: &mut Context<Self>) {
+        match self.reviewed_diagnostic_step(index, cx) {
+            Ok(reviewed) => cx.emit(AssistantEvent::Suggestion {
+                command: reviewed.command,
+                session_id: reviewed.session_id,
             }),
-            Err(error) => self.status = ai_error(&error),
+            Err(error) => self.status = error,
+        }
+        cx.notify();
+    }
+
+    fn save_diagnostic_step(&mut self, index: usize, cx: &mut Context<Self>) {
+        match self.reviewed_diagnostic_step(index, cx) {
+            Ok(reviewed) => cx.emit(AssistantEvent::SaveSuggestion {
+                command: reviewed.command,
+                target: reviewed.target,
+                session_id: reviewed.session_id,
+                review_id: reviewed.review_id,
+                reviewed_at: reviewed.reviewed_at,
+            }),
+            Err(error) => self.status = error,
         }
         cx.notify();
     }
@@ -2626,7 +2702,7 @@ impl AssistantPanel {
                     .overflow_y_scroll()
                     .p_2()
                     .bg(rgb(visual.surface))
-                    .font_family("monospace")
+                    .font_family(crate::design::typography(cx).code_font_family)
                     .child(Label::new(preview.markdown.text().to_owned()).text_xs()),
             )
             .child(
@@ -2861,7 +2937,7 @@ impl Render for AssistantPanel {
                                 .p_2()
                                 .pr_5()
                                 .pb_5()
-                                .font_family("monospace")
+                                .font_family(crate::design::typography(cx).code_font_family)
                                 .child(
                                     Label::new(request.preview_json().to_owned())
                                         .text_xs()
@@ -2955,11 +3031,12 @@ impl Render for AssistantPanel {
                             .flex()
                             .flex_col()
                             .gap_1()
-                            .child(div().text_xs().font_family("monospace").child(format!(
-                                "{}. {}",
-                                index + 1,
-                                step.command()
-                            )))
+                            .child(
+                                div()
+                                    .text_xs()
+                                    .font_family(crate::design::typography(cx).code_font_family)
+                                    .child(format!("{}. {}", index + 1, step.command())),
+                            )
                             .child(div().text_xs().text_color(rgb(visual.muted)).child(format!(
                                 "line {} · {}",
                                 step.source_line(),
@@ -2978,6 +3055,15 @@ impl Render for AssistantPanel {
                                     .label(t(cx, "送入命令审阅区", "Place in command review"))
                                     .on_click(cx.listener(move |view, _, _, cx| {
                                         view.suggest_diagnostic_step(index, cx)
+                                    })),
+                            )
+                            .child(
+                                Button::new(("save-diagnostic-step", index))
+                                    .ghost()
+                                    .disabled(self.review_target_unavailable().is_some())
+                                    .label(t(cx, "保存为命令片段", "Save as snippet"))
+                                    .on_click(cx.listener(move |view, _, _, cx| {
+                                        view.save_diagnostic_step(index, cx)
                                     })),
                             ),
                     );
@@ -2998,7 +3084,7 @@ impl Render for AssistantPanel {
                         .child(
                             div()
                                 .text_xs()
-                                .font_family("monospace")
+                                .font_family(crate::design::typography(cx).code_font_family)
                                 .child(command.clone()),
                         )
                         .child(
@@ -3012,6 +3098,15 @@ impl Render for AssistantPanel {
                                 .on_click(
                                     cx.listener(move |view, _, _, cx| view.suggest(index, cx)),
                                 ),
+                        )
+                        .child(
+                            Button::new(("save-suggestion", index))
+                                .ghost()
+                                .disabled(self.review_target_unavailable().is_some())
+                                .label(t(cx, "保存为命令片段", "Save as snippet"))
+                                .on_click(cx.listener(move |view, _, _, cx| {
+                                    view.save_suggestion(index, cx)
+                                })),
                         ),
                 );
             }

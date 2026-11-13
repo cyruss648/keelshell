@@ -27,6 +27,7 @@ use crate::i18n;
 use crate::terminal::{TerminalCommand, TerminalView};
 
 mod ai_command_review_target;
+mod ai_command_snippets;
 mod ai_metadata;
 mod command_palette;
 mod configuration_recovery;

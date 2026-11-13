@@ -51,7 +51,77 @@ impl Render for SnippetEditor {
                         cx,
                         "保存常用命令，使用时先填入命令栏审核。",
                         "Save reusable commands and review them in the command bar before running.",
-                    ))),
+                    )))
+                    .when_some(self.source.as_ref(), |body, source| {
+                        let command_changed =
+                            self.command.read(cx).value().as_ref() != source.original_command;
+                        let review_state = if command_changed {
+                            t(
+                                cx,
+                                "命令已编辑；原审核只覆盖原始命令。保存后使用前仍需重新审核。",
+                                "Command edited; the original review covers only the original command. Review again before use.",
+                            )
+                        } else {
+                            t(
+                                cx,
+                                "保存只写入命令库，不会执行命令。",
+                                "Saving writes to the command library only; it does not execute the command.",
+                            )
+                        };
+                        body.child(
+                            div()
+                                .id("snippet-ai-review-source")
+                                .test_support()
+                                .mt_1()
+                                .p_2()
+                                .rounded(px(crate::design::components(cx).control_radius))
+                                .bg(rgb(visual.selected))
+                                .border_1()
+                                .border_color(rgb(visual.accent))
+                                .flex()
+                                .flex_col()
+                                .gap_1()
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .font_weight(FontWeight::SEMIBOLD)
+                                        .text_color(rgb(visual.accent))
+                                        .child(t(
+                                            cx,
+                                            "AI 建议已通过审核",
+                                            "AI suggestion reviewed",
+                                        )),
+                                )
+                                .child(
+                                    div()
+                                        .id("snippet-ai-review-target")
+                                        .test_support()
+                                        .text_xs()
+                                        .font_family(crate::design::typography(cx).code_font_family)
+                                .aria_label(format!(
+                                    "{} · {}",
+                                    source.target, source.session_id
+                                ))
+                                        .child(format!(
+                                            "{} · {}",
+                                            source.target, source.session_id
+                                        )),
+                                )
+                                .child(
+                                    div()
+                                        .id("snippet-ai-review-state")
+                                        .test_support()
+                                        .text_xs()
+                                        .text_color(rgb(if command_changed {
+                                            visual.warning
+                                        } else {
+                                            visual.muted
+                                        }))
+                                        .aria_label(review_state)
+                                        .child(review_state),
+                                ),
+                        )
+                    }),
             )
             .child(
                 div()
@@ -99,7 +169,7 @@ impl Render for SnippetEditor {
                                 .child(Button::new("snippet-parameters-toggle").ghost().label(if self.parameterized {t(cx,"已启用", "Enabled")}else{t(cx,"未启用", "Disabled")}).disabled(self.saving).on_click(cx.listener(|editor,_,_,cx|editor.toggle_parameters(cx)))))
                             .when(self.parameterized,|body|body
                                 .child(label(cx, t(cx,"使用 {{name}}；填写值时自动作为字面参数引用，不要给变量加引号。", "Use {{name}}. Values are quoted as literal arguments; do not quote placeholders.")))
-                                .child(div().text_xs().font_family("monospace").child("cat {{path}} · tar --file={{archive}}"))
+                                .child(div().text_xs().font_family(crate::design::typography(cx).code_font_family).child("cat {{path}} · tar --file={{archive}}"))
                                 .when_some(self.template_feedback.as_ref(),|body,feedback| {
                                     if let Some(error)=&feedback.error {
                                         body.child(div().id("snippet-template-feedback").test_support().text_xs().text_color(rgb(visual.danger)).child(error.render(cx)))
@@ -131,7 +201,7 @@ impl Render for SnippetEditor {
                                             .accessibility_id("snippet-command")
                                             .aria_label(t(cx, "命令内容", "Command text"))
                                             .h(relative(1.))
-                                            .font_family("monospace")
+                                            .font_family(crate::design::typography(cx).code_font_family)
                                             .disabled(self.saving),
                                     ),
                             ),
@@ -162,6 +232,7 @@ impl Render for SnippetEditor {
                             )),
                     )
                     .when_some(self.error.as_ref(), |footer, error| {
+                        let error_text = error.render(cx);
                         footer.child(
                             div()
                                 .id("snippet-editor-error")
@@ -170,7 +241,8 @@ impl Render for SnippetEditor {
                                 .overflow_y_scroll()
                                 .text_xs()
                                 .text_color(rgb(visual.danger))
-                                .child(error.render(cx)),
+                                .aria_label(error_text.clone())
+                                .child(error_text),
                         )
                     })
                     .child(

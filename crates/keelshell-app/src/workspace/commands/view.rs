@@ -62,7 +62,7 @@ impl Workspace {
                             .flex_1()
                             .min_w_0()
                             .text_ellipsis()
-                            .font_family("monospace")
+                            .font_family(crate::design::typography(cx).code_font_family)
                             .child(preview),
                     )
                     .on_click(cx.listener(move |view, _, window, cx| {
@@ -239,7 +239,7 @@ impl Workspace {
                             div()
                                 .flex_1()
                                 .min_w_0()
-                                .font_family("monospace")
+                                .font_family(crate::design::typography(cx).code_font_family)
                                 .text_ellipsis()
                                 .child(command.to_owned()),
                         )
@@ -332,7 +332,7 @@ impl Workspace {
                             })
                             .child(
                                 div()
-                                    .font_family("monospace")
+                                    .font_family(crate::design::typography(cx).code_font_family)
                                     .text_xs()
                                     .text_ellipsis()
                                     .child(preview),

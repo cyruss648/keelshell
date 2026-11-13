@@ -1,8 +1,12 @@
 //! Exercise production fields and buttons through the GPUI input/render paths.
 
+use std::time::{Duration, Instant};
 use std::{cell::RefCell, rc::Rc};
 
-use super::{SnippetEditor, SnippetEditorEvent, format_tags, parse_tags};
+use super::{
+    AI_REVIEW_LIFETIME, ReviewedCommandSource, ReviewedCommandSourceIssue, SnippetEditor,
+    SnippetEditorEvent, format_tags, parse_tags,
+};
 use crate::i18n::{Message, set_language};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Context, Entity, Focusable, InteractiveElement,
@@ -10,6 +14,7 @@ use gpui_kit::{
     TestSupportExt, Window, WindowBounds, WindowOptions, div, point, px, size, test::TestWindowExt,
 };
 use keelshell_core::{Language, Snippet};
+use uuid::Uuid;
 
 trait Checked<T> {
     fn checked(self, label: &str) -> T;
@@ -79,7 +84,9 @@ fn mount(cx: &mut TestAppContext, snippet: Option<Snippet>) -> Fixture {
         let events = Rc::new(RefCell::new(Events::default()));
         let received = Rc::clone(&events);
         let subscription = cx.subscribe(&editor, move |_, event, _| match event {
-            SnippetEditorEvent::Save(snippet) => received.borrow_mut().saved.push(snippet.clone()),
+            SnippetEditorEvent::Save { snippet, .. } => {
+                received.borrow_mut().saved.push(snippet.as_ref().clone())
+            }
             SnippetEditorEvent::Cancel => received.borrow_mut().cancelled += 1,
         });
         Fixture {
@@ -122,6 +129,61 @@ fn csv_tags_round_trip_existing_commas_quotes_and_unicode() {
         );
     }
     assert!(parse_tags(&vec!["tag"; 33].join(",")).is_err());
+}
+
+#[test]
+fn reviewed_ai_source_validation_is_bounded_and_monotonic() {
+    let now = Instant::now();
+    let valid = ReviewedCommandSource {
+        original_command: "printf 'ok'\n\tprintf 'done'".into(),
+        target: "fixture@example.invalid:22".into(),
+        session_id: "session-A".into(),
+        review_id: Uuid::new_v4(),
+        reviewed_at: now,
+    };
+    assert_eq!(valid.content_issue(now), None);
+
+    let mut source = valid.clone();
+    source.original_command = " \n\t ".into();
+    assert_eq!(
+        source.content_issue(now),
+        Some(ReviewedCommandSourceIssue::EmptyCommand)
+    );
+
+    source = valid.clone();
+    source.original_command = "printf '\u{1b}[2J'".into();
+    assert_eq!(
+        source.content_issue(now),
+        Some(ReviewedCommandSourceIssue::InvalidCommand)
+    );
+
+    source = valid.clone();
+    source.target.clear();
+    assert_eq!(
+        source.content_issue(now),
+        Some(ReviewedCommandSourceIssue::EmptyTarget)
+    );
+
+    source = valid.clone();
+    source.session_id = "session\nA".into();
+    assert_eq!(
+        source.content_issue(now),
+        Some(ReviewedCommandSourceIssue::InvalidSession)
+    );
+
+    source = valid.clone();
+    source.review_id = Uuid::nil();
+    assert_eq!(
+        source.content_issue(now),
+        Some(ReviewedCommandSourceIssue::MissingReviewId)
+    );
+
+    source = valid;
+    source.reviewed_at = now - AI_REVIEW_LIFETIME - Duration::from_millis(1);
+    assert_eq!(
+        source.content_issue(now),
+        Some(ReviewedCommandSourceIssue::Expired)
+    );
 }
 
 #[gpui_kit::test]

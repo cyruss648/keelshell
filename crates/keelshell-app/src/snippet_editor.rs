@@ -1,6 +1,8 @@
 //! An isolated, explicitly saved command-template draft. Opening it never reads
 //! command history or copies the command bar, and saving never executes commands.
 
+use std::time::{Duration, Instant};
+
 use gpui_kit::{
     component::input::{InputEvent, InputState, TextareaState},
     *,
@@ -14,16 +16,94 @@ use crate::i18n::{Message, t};
 mod tests;
 mod view;
 
+/// The maximum time for which the save editor may rely on the command review
+/// that opened it. The editor still writes only to the local command library;
+/// execution requires the normal command-bar review path later.
+pub(crate) const AI_REVIEW_LIFETIME: Duration = Duration::from_secs(120);
+
 /// The workspace owns persistence and closes the editor only after a successful
 /// save. Failed saves must call [`SnippetEditor::set_error`] to retain the draft.
 pub enum SnippetEditorEvent {
-    Save(Snippet),
+    Save {
+        snippet: Box<Snippet>,
+        source: Option<ReviewedCommandSource>,
+    },
     Cancel,
+}
+
+/// The reviewed AI proposal that opened a new snippet draft.
+///
+/// The command editor may change the draft after review, but the original
+/// command, target, session and review ticket remain available to the workspace
+/// until the explicit snippet save is accepted.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct ReviewedCommandSource {
+    pub(crate) original_command: String,
+    pub(crate) target: String,
+    pub(crate) session_id: String,
+    pub(crate) review_id: Uuid,
+    pub(crate) reviewed_at: Instant,
+}
+
+/// A reviewed AI source cannot be admitted into the snippet save flow when one
+/// of these bounded invariants has failed. Target/session liveness is checked
+/// by the workspace because it owns the live terminal registry.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ReviewedCommandSourceIssue {
+    EmptyCommand,
+    InvalidCommand,
+    EmptyTarget,
+    InvalidTarget,
+    EmptySession,
+    InvalidSession,
+    MissingReviewId,
+    Expired,
+    SessionUnavailable,
+    TargetChanged,
+}
+
+impl ReviewedCommandSource {
+    /// Validate source data and the monotonic review lifetime without I/O.
+    pub(crate) fn content_issue(&self, now: Instant) -> Option<ReviewedCommandSourceIssue> {
+        if self.original_command.trim().is_empty() {
+            return Some(ReviewedCommandSourceIssue::EmptyCommand);
+        }
+        if self
+            .original_command
+            .chars()
+            .any(|character| character.is_control() && !matches!(character, '\n' | '\t'))
+        {
+            return Some(ReviewedCommandSourceIssue::InvalidCommand);
+        }
+        if self.target.trim().is_empty() {
+            return Some(ReviewedCommandSourceIssue::EmptyTarget);
+        }
+        if self.target.chars().any(char::is_control) {
+            return Some(ReviewedCommandSourceIssue::InvalidTarget);
+        }
+        if self.session_id.trim().is_empty() {
+            return Some(ReviewedCommandSourceIssue::EmptySession);
+        }
+        if self.session_id.chars().any(char::is_control) {
+            return Some(ReviewedCommandSourceIssue::InvalidSession);
+        }
+        if self.review_id.is_nil() {
+            return Some(ReviewedCommandSourceIssue::MissingReviewId);
+        }
+        if now
+            .checked_duration_since(self.reviewed_at)
+            .is_some_and(|age| age >= AI_REVIEW_LIFETIME)
+        {
+            return Some(ReviewedCommandSourceIssue::Expired);
+        }
+        None
+    }
 }
 
 pub struct SnippetEditor {
     id: Uuid,
     editing: bool,
+    source: Option<ReviewedCommandSource>,
     focus: FocusHandle,
     name: Entity<InputState>,
     description: Entity<InputState>,
@@ -62,9 +142,37 @@ impl SnippetEditor {
             .update(cx, |command, cx| command.set_value(text, window, cx));
     }
 
+    #[cfg(test)]
+    pub(crate) fn set_id_for_test(&mut self, id: Uuid) {
+        self.id = id;
+    }
+
     /// Create a blank draft or preserve the identity and text of an existing one.
     pub fn new(snippet: Option<Snippet>, window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let editing = snippet.is_some();
+        Self::new_with_source(snippet, None, window, cx)
+    }
+
+    /// Create a new snippet draft from an already reviewed AI command.
+    ///
+    /// The source remains attached to the draft until the workspace either
+    /// persists or rejects it. Saving the draft never executes the command.
+    pub fn new_from_reviewed_command(
+        source: ReviewedCommandSource,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        let mut snippet = Snippet::new("AI 命令建议", source.original_command.clone());
+        snippet.description = "AI 建议；保存前请检查名称、命令和参数。".into();
+        Self::new_with_source(Some(snippet), Some(source), window, cx)
+    }
+
+    fn new_with_source(
+        snippet: Option<Snippet>,
+        source: Option<ReviewedCommandSource>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        let editing = snippet.is_some() && source.is_none();
         let snippet = snippet.unwrap_or_else(|| Snippet::new("", ""));
         let command = cx.new(|cx| {
             let mut command = TextareaState::new(window, cx).rows(8);
@@ -80,6 +188,7 @@ impl SnippetEditor {
         let mut editor = Self {
             id: snippet.id,
             editing,
+            source,
             focus: cx.focus_handle(),
             name: field(snippet.name, window, cx),
             description: field(snippet.description, window, cx),
@@ -186,7 +295,10 @@ impl SnippetEditor {
                 self.error = None;
                 self.set_saving(true, cx);
                 self.focus.focus(window, cx);
-                cx.emit(SnippetEditorEvent::Save(snippet));
+                cx.emit(SnippetEditorEvent::Save {
+                    snippet: Box::new(snippet),
+                    source: self.source.clone(),
+                });
             }
             Err(error) => {
                 self.error = Some(

@@ -69,7 +69,7 @@ use crate::assistant::{
 use crate::command_history::CommandHistory;
 use crate::jump_host_picker::JumpHostPicker;
 use crate::proxy_editor::ProxyEditor;
-use crate::snippet_editor::{SnippetEditor, SnippetEditorEvent};
+use crate::snippet_editor::{ReviewedCommandSource, SnippetEditor, SnippetEditorEvent};
 use crate::terminal::TerminalView;
 use crate::updater::{UpdatePanel, UpdatePanelEvent};
 use crate::vault_settings::{VaultSettings, VaultSettingsEvent};
@@ -797,6 +797,25 @@ impl Workspace {
                         );
                     }
                     cx.notify();
+                }
+                AssistantEvent::SaveSuggestion {
+                    command,
+                    target,
+                    session_id,
+                    review_id,
+                    reviewed_at,
+                } => {
+                    view.open_ai_snippet_editor(
+                        ReviewedCommandSource {
+                            original_command: command.clone(),
+                            target: target.clone(),
+                            session_id: session_id.clone(),
+                            review_id: *review_id,
+                            reviewed_at: *reviewed_at,
+                        },
+                        window,
+                        cx,
+                    );
                 }
             },
         );
