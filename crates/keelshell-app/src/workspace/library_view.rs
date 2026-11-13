@@ -463,6 +463,7 @@ impl Workspace {
         // Wide windows retain comparable columns; compact regions keep each
         // target's identity beside its actions rather than hiding them off-screen.
         let stacked = available_width < px(760.);
+        let compact = available_width < px(360.);
         let query = self.search.read(cx).value();
         let trash = self.library_filter == LibraryFilter::Trash;
         let recent = self.library_filter == LibraryFilter::Recent;
@@ -540,7 +541,7 @@ impl Workspace {
         let header = self.library_table_header(trash, recent, cx);
         div().flex().flex_col().size_full().text_sm().bg(rgb(visual.surface))
             .child(self.library_filter_summary(scope_count, count, &query, cx))
-            .child(self.library_import_toolbar(stacked,cx))
+            .child(self.library_import_toolbar(stacked, compact, cx))
             .child(self.library_batch_toolbar(cx))
             .child(div().flex_1().min_h_0().min_w_0().flex().when(stacked,|body|body.flex_col()).child(tree)
                 .child(div().id("connection-table-scroll").flex_1().min_w_0().overflow_x_scroll()
@@ -1019,7 +1020,12 @@ impl Workspace {
         header.into_any_element()
     }
 
-    fn library_import_toolbar(&self, stacked: bool, cx: &mut Context<Self>) -> AnyElement {
+    fn library_import_toolbar(
+        &self,
+        stacked: bool,
+        compact: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
         let visual = crate::design::palette(cx);
         div()
             .id("library-actions-toolbar")
@@ -1040,7 +1046,11 @@ impl Workspace {
                 Button::new("new-connection")
                     .compact()
                     .icon(IconName::Plus)
-                    .label(t(cx, "新建连接", "New connection"))
+                    .accessibility_label(t(cx, "新建连接", "New connection"))
+                    .localized_tooltip("新建连接", "New connection")
+                    .when(!compact, |button| {
+                        button.label(t(cx, "新建连接", "New connection"))
+                    })
                     .disabled(self.saving)
                     .on_click(cx.listener(|view, _, window, cx| view.open_form(window, cx)))
                     .map(|button| self.retain_modal_button("new-connection", button, cx)),
@@ -1049,7 +1059,11 @@ impl Workspace {
                 Button::new("import-connections")
                     .compact()
                     .icon(IconName::Download)
-                    .label(t(cx, "导入 JSON", "Import JSON"))
+                    .accessibility_label(t(cx, "导入 JSON", "Import JSON"))
+                    .localized_tooltip("导入 JSON", "Import JSON")
+                    .when(!compact, |button| {
+                        button.label(t(cx, "导入 JSON", "Import JSON"))
+                    })
                     .disabled(self.saving)
                     .on_click(
                         cx.listener(|view, _, window, cx| view.import_connections(window, cx)),
@@ -1060,7 +1074,7 @@ impl Workspace {
                 Button::new("import-openssh")
                     .compact()
                     .icon(IconName::Download)
-                    .label(t(
+                    .accessibility_label(t(
                         cx,
                         "从剪贴板导入 SSH 配置",
                         "Import SSH config from clipboard",
@@ -1069,6 +1083,13 @@ impl Workspace {
                         "从剪贴板导入受限 OpenSSH 配置",
                         "Import the supported OpenSSH subset from the clipboard",
                     )
+                    .when(!compact, |button| {
+                        button.label(t(
+                            cx,
+                            "从剪贴板导入 SSH 配置",
+                            "Import SSH config from clipboard",
+                        ))
+                    })
                     .disabled(self.saving)
                     .on_click(cx.listener(|view, _, window, cx| {
                         view.import_openssh_connections(window, cx)
@@ -1078,7 +1099,12 @@ impl Workspace {
             .child(
                 Button::new("profile-sync-open")
                     .compact()
-                    .label(t(cx, "加密同步", "Encrypted sync"))
+                    .icon(IconName::Lock)
+                    .accessibility_label(t(cx, "加密同步", "Encrypted sync"))
+                    .localized_tooltip("加密同步", "Encrypted sync")
+                    .when(!compact, |button| {
+                        button.label(t(cx, "加密同步", "Encrypted sync"))
+                    })
                     .disabled(!self.can_open_vault() || !self.profile_sync_maintenance_idle(cx))
                     .on_click(cx.listener(|view, _, window, cx| view.open_profile_sync(window, cx)))
                     .map(|button| self.retain_modal_button("profile-sync-open", button, cx)),
@@ -1087,7 +1113,11 @@ impl Workspace {
                 Button::new("export-connections")
                     .compact()
                     .icon(IconName::Upload)
-                    .label(t(cx, "导出 JSON", "Export JSON"))
+                    .accessibility_label(t(cx, "导出 JSON", "Export JSON"))
+                    .localized_tooltip("导出 JSON", "Export JSON")
+                    .when(!compact, |button| {
+                        button.label(t(cx, "导出 JSON", "Export JSON"))
+                    })
                     .on_click(cx.listener(|view, _, _, cx| view.export_connections(cx)))
                     .map(|button| self.retain_modal_button("export-connections", button, cx)),
             )

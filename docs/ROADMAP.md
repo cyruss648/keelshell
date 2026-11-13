@@ -17,7 +17,13 @@ KeelShell 工作区已收紧窄窗口的工作台层级。900×580 下，AI、�
 视图路径；业务布局没有 theme id 分支，新增主题仍只扩展 registry/Palette/token。
 本片没有新增依赖，直接依赖版本继续遵循 `x.y`。
 
-focused GPUI 回归已通过：工作区布局 `10 passed / 0 failed / 1113 filtered out`，
+本片的首轮完整门禁还发现并修复了窄列回归：极窄连接库动作改为图标加双语
+tooltip，快速连接区域支持固定预算内滚动，主机监控磁盘选择器扩大到 `160px`
+并保留末项可见的滚轮手势区，首次启动测试核对完整辅助技术名称。修复后的
+磁盘监控、紧凑连接库、首次启动和工作区布局 focused 回归均通过；完整工程门禁
+需在当前源码提交后重新执行。
+
+focused GPUI 回归已通过：工作区布局 `10 passed / 0 failed / 1119 filtered out`，
 覆盖三套主题、明暗模式和中英文的关键入口 bounds/AX label、AI/终端预算、导航
 rail role/header label、236/260px 宽度及 pane header token。focused app Clippy
 使用 `--all-targets -- -D warnings` 通过；格式与差异检查通过。详细证据见

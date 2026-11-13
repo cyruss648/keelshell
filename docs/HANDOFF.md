@@ -21,7 +21,7 @@
   `assistant.rs`、`files/**`、`snippet/**`、`session/core`。
 
 新增 `workbench_layout` 回归已经过 focused 编译和运行：
-`10 passed / 0 failed / 1113 filtered out`。覆盖 Frost、Graphite、Lavender，
+`10 passed / 0 failed / 1119 filtered out`。覆盖 Frost、Graphite、Lavender，
 明暗模式和中英文，检查关键入口可发现性、容器 bounds、完整 AX label、AI 打开后
 终端预算、导航 rail `Group` role、header label、236/260px rail 宽度和 token 高度。
 focused app Clippy（`--all-targets -- -D warnings`）、fmt 和 `git diff --check`
@@ -29,6 +29,18 @@ focused app Clippy（`--all-targets -- -D warnings`）、fmt 和 `git diff --che
 [ADR 0124](adr/0124-responsive-workbench-polish.md)、
 [原生工作区](product/NATIVE_WORKBENCH.md) 和
 [测试记录](testing/records/2026-11-13-responsive-workbench-polish.md)。
+
+随后完整工程门禁暴露了三个由窄布局触发的回归，已在同一片修复：磁盘设备末行
+滚动显露、AI 打开后的极窄连接库卡片高度，以及语言按钮的完整辅助技术名称断言。
+极窄连接库动作现在使用图标加 tooltip，快速连接区域可在固定高度内滚动，监控磁盘
+选择器扩大到 `160px` 并保留右侧滚轮手势区。相关 focused 回归已通过：
+
+- 磁盘监控工作区 `1 passed / 0 failed / 1128 filtered out`；
+- 独立磁盘/主题/命令草稿回归 `1 passed / 0 failed / 1128 filtered out`；
+- AI 打开时紧凑连接库 `1 passed / 0 failed / 1128 filtered out`；
+- 首次启动双语回归 `1 passed / 0 failed / 1128 filtered out`；
+- design `4 passed / 0 failed / 1125 filtered out`；
+- workbench layout `10 passed / 0 failed / 1119 filtered out`。
 
 ## 交付边界
 

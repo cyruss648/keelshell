@@ -2,7 +2,7 @@
 
 日期：2026-11-13（Asia/Shanghai）
 基线：`e1d410d2d61753f2e90296981199ed2b4b3d3703`
-范围：`keelshell-app` 工作区响应式 chrome、导航 rail/header、GPUI 几何和辅助技术语义
+范围：`keelshell-app` 工作区响应式 chrome、连接库、快速连接、主机监控 rail、GPUI 几何和辅助技术语义
 状态：**focused 源码验证通过；原生桌面验收未执行**
 
 ## 实现范围
@@ -10,7 +10,12 @@
 源码和测试只涉及：
 
 - `crates/keelshell-app/src/workspace/view.rs`
+- `crates/keelshell-app/src/workspace/library_view.rs`
+- `crates/keelshell-app/src/monitor_disk.rs`
 - `crates/keelshell-app/src/workspace/tests/workbench_layout.rs`
+- `crates/keelshell-app/src/workspace/tests/independent_disk_monitor.rs`
+- `crates/keelshell-app/src/workspace/tests/library.rs`
+- `crates/keelshell-app/src/workspace/tests.rs`
 
 本片使用现有 `Palette`、`ChromeTokens`、组件 token 和 registry 主题定义。没有
 修改 `assistant.rs`、`files/**`、`snippet/**`、`session/core`，没有新增依赖，
@@ -25,6 +30,19 @@
 - 关键动作保留完整双语 AccessKit label 和 tooltip；
 - 导航 rail 使用 `Role::Group` 和 `Workspace navigation` 语义；
 - 连接导航和主机监控使用 token 高度的双语 header。
+
+## 门禁回归修复
+
+完整工程门禁在 2026-11-13 首轮发现三项与本片响应式布局直接相关的回归：
+
+- `900×580` 主机监控中，磁盘设备列表最后一行在固定高度内无法完整显露；
+- `480px` 工作区打开 AI 后，连接库卡片因英文工具栏文字撑高而越出窗口；
+- 首次启动测试把语言按钮的完整 AccessKit 名称误当成可见短标签。
+
+修复后，磁盘设备选择器调整为 `160px` 的嵌套滚动视口，并在右侧保留窄手势
+区域；极窄连接库将新建、导入、加密同步和导出动作收敛为图标并保留完整双语
+AccessKit label/tooltip；快速连接卡片在固定的 `300px` 区域内允许纵向滚动。语言
+回归改为核对按钮的完整辅助技术名称。
 
 ## 新增 focused 回归
 
@@ -52,7 +70,12 @@
 | --- | --- |
 | `cargo fmt --all` | 通过 |
 | `cargo fmt --all -- --check` | 通过 |
-| `cargo test -p keelshell-app --locked --offline workbench_layout -- --test-threads=1` | `10 passed / 0 failed / 1113 filtered out` |
+| `cargo test -p keelshell-app --locked --offline workbench_layout -- --test-threads=1` | `10 passed / 0 failed / 1119 filtered out` |
+| `cargo test -p keelshell-app --bin keelshell-app disk_monitor_minimum_workspace_languages_themes_scroll_and_selection_are_stable -- --test-threads=1` | `1 passed / 0 failed / 1128 filtered out` |
+| `cargo test -p keelshell-app --bin keelshell-app independent_disk_samples_survive_production_theme_buttons_and_focused_input -- --test-threads=1` | `1 passed / 0 failed / 1128 filtered out` |
+| `cargo test -p keelshell-app --bin keelshell-app compact_library_keeps_identity_and_actions_visible_with_assistant_open -- --test-threads=1` | `1 passed / 0 failed / 1128 filtered out` |
+| `cargo test -p keelshell-app --bin keelshell-app first_launch_is_chinese_without_a_local_or_remote_terminal -- --test-threads=1` | `1 passed / 0 failed / 1128 filtered out` |
+| `cargo test -p keelshell-app --bin keelshell-app design::tests -- --test-threads=1` | `4 passed / 0 failed / 1125 filtered out` |
 | `cargo clippy -p keelshell-app --locked --offline --all-targets -- -D warnings` | 通过 |
 | `git diff --check` | 通过 |
 

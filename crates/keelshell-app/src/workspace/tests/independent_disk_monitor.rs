@@ -14,7 +14,7 @@ fn contained(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
 }
 
 fn reveal_device(window: &mut Window, index: usize, cx: &mut App) {
-    for _ in 0..60 {
+    for _ in 0..120 {
         let viewport = window.find("monitor-scroll").bounds();
         let choices = window.find("monitor-disk-devices").bounds();
         if contained(choices, viewport) {
@@ -42,15 +42,21 @@ fn reveal_device(window: &mut Window, index: usize, cx: &mut App) {
         contained(choices, viewport),
         "outer wheel cannot reveal chooser {choices:?} in {viewport:?}"
     );
-    for _ in 0..60 {
+    for _ in 0..120 {
         let choices = window.find("monitor-disk-devices").bounds();
         let row = window.find(("monitor-disk-device", index));
         if row.visible() && contained(row.bounds(), choices) {
             break;
         }
-        window.scroll(
-            "monitor-disk-devices",
-            ScrollDelta::Lines(point(0., -1.)),
+        // Aim at the production chooser's right gutter so GPUI routes the
+        // synthetic wheel to the nested scroller instead of the final row.
+        window.dispatch_event(
+            gpui_kit::ScrollEvent {
+                position: point(choices.right() - px(2.), choices.center().y),
+                delta: ScrollDelta::Lines(point(0., -1.)),
+                ..Default::default()
+            }
+            .to_platform_input(),
             cx,
         );
         window.render_frame(cx);

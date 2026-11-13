@@ -154,12 +154,15 @@ impl MonitorPanel {
             .id("monitor-disk-devices")
             .test_support()
             .min_w_0()
-            .max_h(px(144.))
+            .max_h(px(160.))
             .overflow_y_scroll()
             .flex_shrink_0()
             .flex()
             .flex_col()
-            .gap_1();
+            // Keep a narrow gesture gutter so wheel input at the edge of the
+            // chooser reaches the nested scroll container instead of a row.
+            .gap_1()
+            .pr_2();
         for (index, disk) in disks.devices.iter().enumerate() {
             let identity = disk.device.clone();
             let label = if identity.name.len() > 22 {

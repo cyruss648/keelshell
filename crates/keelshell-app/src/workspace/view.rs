@@ -4,6 +4,7 @@ use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::{
     assets::IconName,
     base::FocusTrapElement,
+    component::scroll::ScrollableElement,
     component::{Icon, Selectable},
 };
 
@@ -233,6 +234,7 @@ impl Workspace {
                 div()
                     .h(px(300.))
                     .flex_shrink_0()
+                    .overflow_y_scrollbar()
                     .child(self.quick_connect_surface(cx)),
             )
             .child(

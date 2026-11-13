@@ -345,7 +345,10 @@ fn first_launch_is_chinese_without_a_local_or_remote_terminal(cx: &mut TestAppCo
         assert!(workspace.remote_sessions.is_empty());
         assert!(workspace.panels.is_empty());
         assert_eq!(window.find("new-connection").label(), Some("新建连接"));
-        assert_eq!(window.find("language").label(), Some("中文 / EN"));
+        assert_eq!(
+            window.find("language").label(),
+            Some("切换语言：中文或英文")
+        );
         assert_eq!(window.find("new-session").label(), Some("新建 SSH 会话"));
         assert_eq!(window.find("quick-host").label(), Some("主机或 IP 地址"));
         assert_eq!(window.find("quick-port").label(), Some("端口"));

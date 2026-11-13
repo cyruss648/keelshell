@@ -398,8 +398,12 @@ fn aggregate_window_and_tab_limits_apply_across_individually_valid_panes() -> Te
     candidate.windows.pop();
 
     let mut next_id = 10_000;
-    for index in 0..MAX_LAYOUT_TABS / MAX_LAYOUT_TABS_PER_PANE {
-        let pane = &mut candidate.windows[index].panes[0];
+    for window in candidate
+        .windows
+        .iter_mut()
+        .take(MAX_LAYOUT_TABS / MAX_LAYOUT_TABS_PER_PANE)
+    {
+        let pane = &mut window.panes[0];
         pane.tabs.clear();
         for _ in 0..MAX_LAYOUT_TABS_PER_PANE {
             pane.tabs.push(LayoutTab {
