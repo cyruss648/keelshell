@@ -176,6 +176,43 @@ fn recovery_rejects_changed_auth_target_without_persisting_the_target() -> TestR
 }
 
 #[test]
+fn recovery_rejects_changed_private_key_passphrase_target() -> TestResult {
+    let (mut state, connection_id, rule_id) = fixture();
+    let first_credential = uuid::Uuid::new_v4();
+    let mut private_key_connection = state.connections[0].clone();
+    private_key_connection.auth = AuthMethod::PrivateKey {
+        path: "/Users/operator/.ssh/recovery-key".into(),
+    };
+    state.update_connection(private_key_connection)?;
+    let mut linked_connection = state.connections[0].clone();
+    linked_connection.credential_ref = Some(first_credential);
+    state.update_connection(linked_connection)?;
+
+    let snapshot = candidate(&state, connection_id, rule_id);
+    let snapshot_id = snapshot.id;
+    let document = serde_json::to_string(&snapshot)?;
+    assert!(!document.contains(&first_credential.to_string()));
+    state.upsert_tunnel_runtime_snapshot(snapshot)?;
+
+    let mut rotated_credential = state.connections[0].clone();
+    rotated_credential.credential_ref = Some(uuid::Uuid::new_v4());
+    state.update_connection(rotated_credential)?;
+    assert_eq!(
+        state.assess_tunnel_runtime_snapshot(snapshot_id),
+        Err(TunnelRecoveryError::AuthenticationTargetChanged)
+    );
+
+    let mut unbound = state.connections[0].clone();
+    unbound.credential_ref = None;
+    state.update_connection(unbound)?;
+    assert_eq!(
+        state.assess_tunnel_runtime_snapshot(snapshot_id),
+        Err(TunnelRecoveryError::AuthenticationTargetChanged)
+    );
+    Ok(())
+}
+
+#[test]
 fn missing_rule_and_unsupported_version_keep_candidates_fail_closed() -> TestResult {
     let (mut state, connection_id, rule_id) = fixture();
     let mut snapshot = candidate(&state, connection_id, rule_id);

@@ -160,6 +160,15 @@ fn auth_target_fingerprint(profile: &crate::Connection) -> String {
         AuthMethod::PrivateKey { path } => {
             digest.update(b"private_key\0");
             digest.update(path.to_string_lossy().as_bytes());
+            match profile.credential_ref {
+                Some(credential_ref) => {
+                    digest.update(b"\0vault-passphrase\0");
+                    digest.update(credential_ref.as_bytes());
+                }
+                None => {
+                    digest.update(b"\0ephemeral-passphrase");
+                }
+            }
         }
     }
     digest_hex(&digest.finalize())
