@@ -620,7 +620,7 @@ impl SftpSession {
         })?;
         if reviewed_document.format().encoding() != replacement_document.format().encoding() {
             return Err(SessionError::Invalid(
-                "editor replacement encoding or line format differs from the reviewed file",
+                "editor replacement encoding differs from the reviewed file",
             ));
         }
         inspection::inspection_path(&reviewed.entry.path)?;

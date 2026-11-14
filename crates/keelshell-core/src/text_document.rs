@@ -159,6 +159,15 @@ impl TextFormat {
         self.line_ending
     }
 
+    /// Replace only the observed line-ending profile while retaining the
+    /// authoritative encoding and BOM envelope.
+    pub fn with_line_ending(self, line_ending: TextLineEnding) -> Self {
+        Self {
+            line_ending,
+            ..self
+        }
+    }
+
     /// Decode bytes using this already observed format.
     ///
     /// This differs from [`TextDocument::decode`] only for an important UTF-8

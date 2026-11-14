@@ -3,6 +3,25 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-14 Unicode 编辑器复核修复
+
+上一轮对本地提交 `b239d78691420a30d54c914c9ad7253023b0b681` 的独立复核返回
+P1 `1`、P2 `2`、P3 `1`。本片已修复成功保存读回的 BOM-less U+FEFF 解释、
+UTF-16 差异预览、测试记录 SHA/target 绑定和 session 编码错误文案；原始回执保留
+在 `work/unicode-review-fix-20261114/review/b239-review-receipt.md`。
+
+修复后的完整 `python3 scripts/check.py` 已实际等待并退出 `0`：
+Python `131 run / 1 skipped`，ordinary Rust `2462 passed / 0 failed / 23 ignored`，
+app `1138 passed / 2 ignored`，14 项 doctest、依赖策略、fmt、workspace 严格
+Clippy 和 readiness/observer/small-stack controller 均通过。新增两条 GPUI 回归
+覆盖成功保存后的 BOM-less 首个 U+FEFF 和 UTF-16 LE/BE 差异预览。
+
+当前源码与文档已本地提交为
+`bfdc06633666a4cfa419ff2f0e47ce5f73a1ae10`；必须以该最终 SHA 启动新的独立严格
+只读复核，并取得 P0/P1/P2/P3 计数及 `APPROVE`/`REQUEST_CHANGES`。公司内网不可用，
+本片只做本地 commit，不执行 push。原生桌面、跨平台窗口、IME、辅助技术、真实
+SSH、Podman 联调和发行验收继续保持开放。
+
 ## 2026-11-14 连接状态灯审查修复
 
 首轮新独立复核在 `98f8f9d` 上发现一个 P2：恢复未连接、Starting 或空活动
@@ -494,7 +513,7 @@ Gauss的combined-r3/r4已批准限定源码及门禁/新包；
 | P1 | 工作区 | 已有分屏、比例、逐叶标签、显式保存和单窗恢复；多OS窗口、外框及完整关闭/重连审核矩阵仍开放 |
 | P1 | 平台与发行 | 继续Windows/Linux真实桌面、完整几何/IME/辅助技术、六目标签名/公证和隔离安装回退；三平台CI不等于桌面验收 |
 | P1 | 外部AI集成 | API/受控CLI Ask、逐步审核Agent及对外MCP已有实现；供应商账户/完整外部客户端、CLI登录身份复用的请求前隔离证明仍待验 |
-| P2 | 日常文件操作 | UTF-16 LE/BE 编辑、审核和读回已实现；继续原生文件管理器拖放、更多编码边界、完整键盘/辅助技术及其他平台验收；现有字节与备份合同不扩大 |
+| P2 | 日常文件操作 | UTF-16 LE/BE 编辑、审核、成功保存读回和解码差异预览已实现；继续原生文件管理器拖放、更多编码边界、完整键盘/辅助技术及其他平台验收；现有字节与备份合同不扩大 |
 | P2 | 监控与网络 | 按项能力与缓存已交付；继续df/ps缺失后恢复、ss可用、真实诊断错误/取消，以及远端macOS/Windows适配 |
 | P2 | 持久化隧道 | 命名规则、三方向转发、流量与显式审核/停止已有实现；重启后的运行态恢复与重连owner完整矩阵开放 |
 | P2 | 配置恢复/同步 | 已有审核恢复、回退与认证加密目录同步；跨机器挂载、断电耐久性及最终一致同步器待验 |
@@ -502,8 +521,9 @@ Gauss的combined-r3/r4已批准限定源码及门禁/新包；
 | P3 | AI知识复用 | 本地分类、显式Ask和审核式批量管理已交付；跨设备同步及更多复用待设计，不恢复旧SSH权限或自动执行runbook |
 
 2026-11-14 的更多文本编码切片已实现 UTF-16 LE/BE 的 BOM 识别、严格解码、保存、
-审核、合并和完整读回，并通过 core、session loopback 与 GPUI 定向回归。完整工程
-门禁已通过；独立复核和各平台原生验收仍未完成。当前源码已本地提交，尚未推送。
+审核、合并、成功读回和解码差异预览，并通过 core、session loopback 与 GPUI
+定向回归。完整工程门禁已通过；最终修复提交后的独立复核和各平台原生验收仍未
+完成。当前只做本地提交，尚未推送。
 
 清理遵循资源所有权。已合并分支、无消费者自有容器/镜像及时清理；
 受其他任务或primary保护的工作树保留，失败/UNKNOWN与不可变原件不删改。

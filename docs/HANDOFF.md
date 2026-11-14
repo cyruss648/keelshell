@@ -5,6 +5,37 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 Unicode 编辑器复核修复
+
+上一轮对 `b239d78691420a30d54c914c9ad7253023b0b681` 的独立严格只读复核返回
+`REQUEST_CHANGES`：P0 `0`、P1 `1`、P2 `2`、P3 `1`。原始回执已复制到
+`work/unicode-review-fix-20261114/review/b239-review-receipt.md`，不要删除。
+
+本轮已完成四项修复：
+
+- 成功保存后的完整读回继续使用审核时的 `TextFormat`，只把实际读回得到的换行
+  策略合并回原编码/BOM 外壳，避免 BOM-less UTF-8 正文首个 U+FEFF 被重新解释
+  为 BOM；
+- UTF-16 LE/BE 差异预览先解码两侧正文，再调用逻辑文本差异 API；
+- 测试记录改为绑定实际 target、r2 门禁计数和工作树 `source_head`，不再保留旧
+  SHA 描述；
+- session 错误文案改为准确说明当前入口只比较编码。
+
+本轮 `unicode-full-gate-r2` 已实际等待并退出 `0`：Python `131 run / 1 skipped`，
+ordinary Rust `2462 passed / 0 failed / 23 ignored`，app `1138 passed / 2 ignored`，
+14 项 doctest、fmt、workspace 严格 Clippy 和 readiness/observer/small-stack
+controller 均通过；日志和 exit 回执保存在
+`work/unicode-review-fix-20261114/`。新增 app 回归为
+`editor_format_successful_save_preserves_bomless_leading_feff` 与
+`editor_format_utf16_diff_preview_uses_decoded_bodies`。
+
+源码、测试和文档已本地提交为
+`bfdc06633666a4cfa419ff2f0e47ce5f73a1ae10`；之后只通过文档 amend 回填该 SHA。
+下一步是在该最终提交上启动新的独立严格只读复核，返回 P0/P1/P2/P3、绝对路径/行号、
+实际验证命令和 `APPROVE` 或 `REQUEST_CHANGES`。公司内网不可用，本片只允许本地
+commit，不执行 push。macOS 当前桌面、Windows/Linux 原生窗口、IME、辅助技术、
+真实客户 SSH、Podman 联调、签名、公证、安装升级仍不由本片门禁代签。
+
 ## 2026-11-14 连接状态灯审查修复与完整门禁
 
 对依赖提交 `98f8f9d0558098061563fcb9c24f500551fb361a`、窗口契约和工作台

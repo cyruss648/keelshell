@@ -12,7 +12,7 @@ use gpui_kit::{
 use keelshell_core::{
     DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
     DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextDocument, TextFormat,
-    TextLineEnding, diff_utf8,
+    TextLineEnding,
 };
 use keelshell_session::{
     SessionError, SshSession,
@@ -116,7 +116,8 @@ enum Outcome {
     Saved {
         snapshot: RegularFileSnapshot,
         backup: String,
-        document: TextDocument,
+        format: TextFormat,
+        body: String,
     },
     MergeLoaded {
         snapshot: RegularFileSnapshot,
@@ -1156,15 +1157,20 @@ impl FilesPanel {
                             view.status = Message::new("加载期间检测到新编辑，已保留当前内容；请在准备好后重新打开文件。", "Your edits changed while loading; preserved the editor. Open the file again when ready.");
                         }
                     }
-                    Ok(Outcome::Saved { snapshot, backup, document }) => {
+                    Ok(Outcome::Saved {
+                        snapshot,
+                        backup,
+                        format,
+                        body,
+                    }) => {
                         let path = snapshot.entry.path.clone();
                         let content = snapshot.content.clone();
                         if view.editing.as_ref().is_some_and(|(current,_)| current == &path) {
                             let current = view.editor.read(cx).value();
                             let dirty = !view.draft_matches_bytes(&current, &content);
-                            let previous_format = view.editor_format.unwrap_or(document.format());
-                            if !dirty && current.as_ref() != document.body() {
-                                view.editor.update(cx, |input, cx| input.set_value(document.body().to_owned(), window, cx));
+                            let previous_format = view.editor_format.unwrap_or(format);
+                            if !dirty && current.as_ref() != body {
+                                view.editor.update(cx, |input, cx| input.set_value(body, window, cx));
                             }
                             view.editing = Some((path,content));
                             // Retained newer text still owns its original envelope.
@@ -1172,7 +1178,7 @@ impl FilesPanel {
                             view.editor_format = Some(if dirty {
                                 previous_format
                             } else {
-                                document.format().retain_insertion_policy(previous_format)
+                                format.retain_insertion_policy(previous_format)
                             });
                             view.editor_snapshot = Some(snapshot);
                             view.merge_review = None;
@@ -1415,10 +1421,31 @@ impl FilesPanel {
             }
         };
         self.diff_preview_scroll.set_offset(point(px(0.), px(0.)));
-        match diff_utf8(original, &draft) {
+        let Some(format) = self.editor_format else {
+            self.status = FileFailure::InvalidEditor.message();
+            cx.notify();
+            return;
+        };
+        let original = match format.decode_body(original) {
+            Ok(body) => body,
+            Err(error) => {
+                self.status = FileFailure::TextDocument(error).message();
+                cx.notify();
+                return;
+            }
+        };
+        let draft = match format.decode_body(&draft) {
+            Ok(body) => body,
+            Err(error) => {
+                self.status = FileFailure::TextDocument(error).message();
+                cx.notify();
+                return;
+            }
+        };
+        match keelshell_core::diff_text(&original, &draft) {
             Ok(diff) => {
                 match diff.render(&format!("{path} (remote)"), &format!("{path} (draft)")) {
-                    Ok(rendered) if rendered.is_empty() && original == &draft => {
+                    Ok(rendered) if rendered.is_empty() && original == draft => {
                         self.diff_preview = Some("（当前草稿与读取的基线字节相同）\n(The draft is byte-identical to the captured baseline.)".into());
                         self.status = Message::new(
                             "当前草稿与读取的基线字节相同",

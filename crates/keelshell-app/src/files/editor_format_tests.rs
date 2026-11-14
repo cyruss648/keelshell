@@ -161,6 +161,38 @@ async fn independent_editor_format_r1_late_save_rebases_new_bom_once(cx: &mut Te
 }
 
 #[gpui_kit::test]
+async fn editor_format_successful_save_preserves_bomless_leading_feff(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    let path = "/saved-leading-feff.txt";
+    let original = b"base\n";
+    let draft = "\u{feff}reviewed\n";
+
+    open(&h, path, original, draft, cx).await;
+    h.click(cx, "save-remote-file");
+    assert_eq!(
+        reviewed_bytes(&h, cx),
+        (original.to_vec(), draft.as_bytes().to_vec())
+    );
+    h.click(cx, "confirm-file-operation");
+    h.idle(cx).await;
+
+    assert_eq!(h.read(path), draft.as_bytes());
+    h.panel.read_with(cx, |panel, cx| {
+        assert_eq!(panel.editor.read(cx).value().as_str(), draft);
+        let format = panel.editor_format.checked_option("saved BOM-less format");
+        assert!(!format.has_bom());
+        assert_eq!(
+            panel
+                .prepare_editor_bytes(&panel.editor.read(cx).value())
+                .checked("preserve saved leading FEFF"),
+            draft.as_bytes()
+        );
+        assert!(!panel.has_unsaved_draft(cx));
+    });
+}
+
+#[gpui_kit::test]
 async fn independent_editor_format_r1_merge_keeps_new_leading_feff(cx: &mut TestAppContext) {
     let h = Harness::new(cx);
     h.idle(cx).await;
@@ -520,6 +552,32 @@ async fn editor_format_utf16_merge_uses_decoded_bodies_and_preserves_remote_enco
         h.click(cx, "confirm-file-operation");
         h.idle(cx).await;
         assert_eq!(h.read(path), expected);
+    }
+}
+
+#[gpui_kit::test]
+async fn editor_format_utf16_diff_preview_uses_decoded_bodies(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    for (little_endian, suffix) in [(true, "le"), (false, "be")] {
+        let path = format!("/utf16-diff-{suffix}.txt");
+        let original = utf16_with_bom("a\r\n旧", little_endian);
+        open_raw(&h, &path, &original, cx).await;
+        edit(&h, "a\n新", cx);
+        cx.update(|cx| {
+            h.panel
+                .update(cx, |panel, cx| panel.toggle_diff_preview(cx));
+        });
+        h.panel.read_with(cx, |panel, cx| {
+            let preview = panel
+                .diff_preview
+                .as_ref()
+                .checked_option("UTF-16 diff preview");
+            assert!(preview.contains("逻辑行预览"));
+            assert!(preview.contains("新"));
+            assert!(preview.contains("旧"));
+            assert!(!panel.status.render(cx).contains("无法生成差异"));
+        });
     }
 }
 

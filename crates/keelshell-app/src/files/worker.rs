@@ -575,12 +575,17 @@ async fn operate_inner(
                 if saved.content != content {
                     return Err(FileFailure::SavedReadback("saved contents differ from the acknowledged review; inspect the remote file".into()));
                 }
-                let document = TextDocument::decode(&saved.content)
+                let observed = TextDocument::decode(&saved.content)
+                    .map_err(|error| FileFailure::SavedReadback(error.to_string()))?;
+                let format = format.with_line_ending(observed.format().line_ending());
+                let body = format
+                    .decode_body(&saved.content)
                     .map_err(|error| FileFailure::SavedReadback(error.to_string()))?;
                 Ok(Outcome::Saved {
                     snapshot: saved,
                     backup,
-                    document,
+                    format,
+                    body,
                 })
             }
         }
