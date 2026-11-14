@@ -227,6 +227,25 @@ fn real_transport_lock_refuses_apply_without_local_or_shared_replacement() {
 }
 
 #[test]
+fn reviewed_apply_rejects_non_regular_shared_payload_without_local_write() {
+    let pair = Pair::new();
+    pair.sync(&pair.a, ProfileSyncChoice::Local);
+    let review = pair.inspect(&pair.b);
+    let local = std::fs::read(pair.b.path()).checked();
+    let payload = pair.directory.join(FILE);
+    std::fs::remove_file(&payload).checked();
+    std::fs::create_dir(&payload).checked();
+
+    let choices = choices(&review, ProfileSyncChoice::Remote);
+    assert!(matches!(
+        Pair::service(&pair.b).apply(review, choices, password(), &AtomicBool::new(false)),
+        Err(ProfileSyncError::Invalid)
+    ));
+    assert_eq!(std::fs::read(pair.b.path()).checked(), local);
+    assert!(payload.is_dir());
+}
+
+#[test]
 fn simultaneous_reviewed_publishers_have_one_winner_and_preserve_the_loser() {
     let pair = Pair::new();
     pair.establish();

@@ -975,6 +975,13 @@ fn peer_lock(directory: &Path) -> Result<File, ProfileSyncError> {
     Ok(lock)
 }
 fn write_peer(directory: &Path, bytes: &[u8]) -> Result<(), ProfileSyncError> {
+    let destination = directory.join(FILE);
+    match fs::symlink_metadata(&destination) {
+        Ok(metadata) if metadata.file_type().is_file() => {}
+        Ok(_) => return Err(ProfileSyncError::Invalid),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error.into()),
+    }
     let mut temp = tempfile::Builder::new()
         .prefix(".keelshell-sync-")
         .tempfile_in(directory)?;
@@ -986,7 +993,7 @@ fn write_peer(directory: &Path, bytes: &[u8]) -> Result<(), ProfileSyncError> {
     }
     temp.write_all(bytes)?;
     temp.as_file().sync_all()?;
-    temp.persist(directory.join(FILE))
+    temp.persist(destination)
         .map_err(|e| ProfileSyncError::Io(e.error))?;
     #[cfg(unix)]
     File::open(directory)?.sync_all()?;
@@ -1082,6 +1089,54 @@ mod tests {
         assert!(result.published);
         assert!(!result.state.profile_sync.checked().publication_pending());
         assert_eq!(read_peer(&dir).checked().checked(), bytes);
+    }
+    #[test]
+    fn atomic_publish_replaces_payload_and_cleans_same_directory_staging_file() {
+        let t = tempfile::tempdir().checked();
+        let directory = t.path().join("shared");
+        fs::create_dir(&directory).checked();
+
+        write_peer(&directory, b"old encrypted payload").checked();
+        write_peer(&directory, b"new encrypted payload").checked();
+
+        assert_eq!(
+            read_peer(&directory).checked().checked(),
+            b"new encrypted payload"
+        );
+        assert!(
+            fs::read_dir(&directory)
+                .checked()
+                .filter_map(Result::ok)
+                .all(|entry| !entry
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with(".keelshell-sync-")),
+            "successful atomic publish must not leave a staging file behind"
+        );
+    }
+    #[test]
+    fn atomic_publish_rejects_non_regular_destination_without_touching_it() {
+        let t = tempfile::tempdir().checked();
+        let directory = t.path().join("shared");
+        fs::create_dir(&directory).checked();
+        let destination = directory.join(FILE);
+        fs::create_dir(&destination).checked();
+
+        assert!(matches!(
+            write_peer(&directory, b"must not replace directory"),
+            Err(ProfileSyncError::Invalid)
+        ));
+        assert!(destination.is_dir());
+        assert!(
+            fs::read_dir(&directory)
+                .checked()
+                .filter_map(Result::ok)
+                .all(|entry| !entry
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with(".keelshell-sync-")),
+            "rejected publish must not leave a staging file behind"
+        );
     }
     #[test]
     fn explicit_resume_wrong_password_and_cancel_keep_approved_pending_receipt() {
