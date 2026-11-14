@@ -1,4 +1,4 @@
-# ADR 0111：UTF-8编辑正文、格式外壳与精确保存字节
+# ADR 0111：Unicode 编辑正文、格式外壳与精确保存字节
 
 日期：2026-11-06。状态：已接受的源码候选设计；r3必要差分复审关闭三项P2，新的完整工程门禁通过；
 原生验收未运行。2026-11-06 03:26 UTC父已导入r3；03:34 UTC与获批traceroute r2
@@ -13,8 +13,8 @@ patch 偏移；编辑器新输入的 LF 也需要按原均匀换行策略形成�
 
 ## 决定
 
-core 新增纯类型 `Utf8TextDocument` / `Utf8TextFormat` / `TextLineEnding`，
-正文与恰好一个文件头 BOM 分离，原始 snapshot 仍由调用方保留。
+core 使用纯类型 `TextDocument` / `TextFormat` / `TextEncoding` /
+`TextLineEnding`，正文与恰好一个文件头 BOM 分离，原始 snapshot 仍由调用方保留。
 解码不丢失字节，不猜测编码；错误有类型且不包含正文。
 公开 API 具有 rustdoc，不引入依赖或持久化格式设置。
 
@@ -52,9 +52,11 @@ SFTP观察不是CAS；普通rwx保留不代表 owner/ACL/特殊mode 或崩溃耐
 
 ## 后果与验证
 
-本方案只覆盖 UTF-8 BOM 和既有均匀 LF/CRLF 策略，避免编码猜测、格式目录、
-独立设置菜单或备份管理框架。较新草稿、审核身份、完整基线及重读闸门继续
-拒绝 stale/迟到授权。MCP预算仍为64 KiB，本片不扩大其权限。
+本 ADR 的原始切片只覆盖 UTF-8 BOM 和既有均匀 LF/CRLF 策略，避免编码猜测、
+格式目录、独立设置菜单或备份管理框架。2026-11-14 的 UTF-16 LE/BE 扩展、
+已观测格式解码和 app/session 接入见 [ADR 0126](0126-unicode-editor-encoding-envelope.md)。
+较新草稿、审核身份、完整基线及重读闸门继续拒绝 stale/迟到授权。MCP预算仍为
+64 KiB，本片不扩大其权限。
 
 r2新增 core7、app11、session3，共21个用例；专项去重42通过，历史不回写。
 独立审揭示三个连续编辑生命周期遗漏，新增三条GPUI回归先实际0过3失败，再修复

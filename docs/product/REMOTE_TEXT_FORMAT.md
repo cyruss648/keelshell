@@ -1,4 +1,4 @@
-# 远程文本 UTF-8 BOM 与换行保持
+# 远程文本 Unicode 编码、BOM 与换行保持
 
 日期：2026-11-06。r3/538输入的源码候选已导入开发分支，逐项匹配作者冻结；
 组合工程、新包与原生验收分别记录，不把源码候选视为已发布功能。
@@ -13,13 +13,23 @@ inline合并操作可达性待修，其他格式与跨平台原生仍待验，�
 
 ## 可用行为
 
-远程编辑仍使用当前已认证 SSH 的 SFTP 通道，只接受完整、检查过的常规 UTF-8
-文件。类型、路径、句柄、元数据、无效 UTF-8、NUL 与读取上限的既有拒绝规则保持。
-UTF-16/32 文件头不猜测或转换；错误不回显文件正文。
+远程编辑仍使用当前已认证 SSH 的 SFTP 通道，只接受完整、检查过的常规 Unicode
+文本文件。类型、路径、句柄、元数据、无效文本、NUL 与读取上限的既有拒绝规则
+保持。UTF-8 可带或不带 BOM；UTF-16 只接受明确的 UTF-16 LE/BE BOM，不猜测
+无 BOM 的 UTF-16，也不转换 UTF-32。错误不回显文件正文。
 
-文件头恰好一个 UTF-8 BOM 作为格式外壳保留，不占编辑正文的查找、替换或 patch
-偏移。内部或额外的 U+FEFF 仍属于正文。保存审核显示 BOM、换行策略、完整最终
-内容、原始与最终字节数以及末尾 LF/CR 状态，使用既有双语和三主题语义 token。
+文件头恰好一个编码 BOM 作为格式外壳保留，不占编辑正文的查找、替换或 patch
+偏移。UTF-16 的字节序和 BOM 在保存时保持。内部或额外的 U+FEFF 仍属于正文；
+BOM-less UTF-8 开头的 U+FEFF 由已观测格式解释，避免在合并或迟到读回时被误删。
+保存审核显示编码、BOM、换行策略、完整最终内容、原始与最终字节数以及末尾
+LF/CR 状态，使用既有双语和三主题语义 token。
+
+| 观测到的编码 | 编辑器行为 |
+| --- | --- |
+| UTF-8，可带 BOM | 以 UTF-8 正文编辑，保存时只保留原观测到的 BOM 状态 |
+| UTF-16 LE，带 `FF FE` | 以 Unicode 正文编辑，保存时使用小端序和 `FF FE` |
+| UTF-16 BE，带 `FE FF` | 以 Unicode 正文编辑，保存时使用大端序和 `FE FF` |
+| UTF-16 无 BOM、UTF-32、非法代理项或奇数字节 | 拒绝打开，不猜测、不写回 |
 
 | 打开时观察到的换行 | 保存策略 |
 | --- | --- |
@@ -34,8 +44,9 @@ UTF-16/32 文件头不猜测或转换；错误不回显文件正文。
 同一打开文档连续保存为空或无换行版本时，保留已知插入策略；明确重新打开一个
 无换行文件才重新采用LF默认值。合并中新加入的头部U+FEFF不被误删。
 
-读取保留原1 MiB字节上限。保存、合并与 patch 结果的1 MiB / 4096行上限不扩大，
-最终字节预算包含 BOM 和 CRLF 扩张。超过4096行但未变动的已读文件不被误标为脏。
+读取保留原1 MiB原始字节上限，并额外限制解码后的 UTF-8 正文不超过1 MiB。
+保存、合并与 patch 结果的1 MiB / 4096行上限不扩大，最终字节预算包含 BOM、
+UTF-16 编码扩张和 CRLF 扩张。超过4096行但未变动的已读文件不被误标为脏。
 
 ## 连续无换行保存回归
 
@@ -84,14 +95,16 @@ r2专项去重42条通过、含新增21条的历史保留；独立审三项P2先
 最新完整门禁状态见[测试记录](../testing/records/2026-11-06-editor-format.md)；
 设计见[ADR0111](../adr/0111-utf8-editor-format-envelope.md)。
 
-The editor preserves one leading UTF-8 BOM separately from the editable body and
-retains the original uniform LF/CRLF save policy. Mixed/CR-only drafts stay verbatim.
+The editor preserves the observed UTF-8 or BOM-qualified UTF-16 envelope separately from
+the editable Unicode body and retains the original uniform LF/CRLF save policy.
+Mixed/CR-only drafts stay verbatim.
 Exact outbound bytes drive dirty state, review, limits and confirmation. An incompatible
 format observation requires an explicit successful reread and a fresh review.
 Backup ACK, target publication ACK and complete target readback are distinct:
 production does not independently reread the backup; only complete target byte equality
 permits baseline adoption. Cancellation is not rollback, and SFTP is not remote CAS.
-The existing 1 MiB / 4096-line limits remain. A new macOS package has scoped native
+The existing 1 MiB / 4096-line limits remain, including the decoded-body and UTF-16
+encoded-byte budgets. A new macOS package has scoped native
 BOM/CRLF cancel/save observations; inline merge accessibility and complete native
 acceptance remain open.
 

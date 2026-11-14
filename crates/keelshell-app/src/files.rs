@@ -1,4 +1,4 @@
-//! SFTP browser and bounded UTF-8 editor. Mutations are explicit reviewed actions.
+//! SFTP browser and bounded Unicode editor. Mutations are explicit reviewed actions.
 use crate::i18n::{Message, t};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::{
@@ -11,8 +11,8 @@ use gpui_kit::{
 };
 use keelshell_core::{
     DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
-    DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextLineEnding,
-    Utf8TextDocument, Utf8TextFormat, diff_utf8,
+    DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextDocument, TextFormat,
+    TextLineEnding, diff_utf8,
 };
 use keelshell_session::{
     SessionError, SshSession,
@@ -72,6 +72,7 @@ enum Operation {
     ReadMerge {
         path: String,
         base: Vec<u8>,
+        format: TextFormat,
         draft: String,
     },
     ApplyPatchToDraft {
@@ -104,17 +105,18 @@ enum Operation {
     Save {
         path: String,
         reviewed: RegularFileSnapshot,
+        format: TextFormat,
         content: Vec<u8>,
     },
 }
 enum Outcome {
     QuarantineInspected(TransferQuarantineReview),
     Listed(String, Vec<RemoteEntry>),
-    Read(RegularFileSnapshot, Utf8TextDocument),
+    Read(RegularFileSnapshot, TextDocument),
     Saved {
         snapshot: RegularFileSnapshot,
         backup: String,
-        document: Utf8TextDocument,
+        document: TextDocument,
     },
     MergeLoaded {
         snapshot: RegularFileSnapshot,
@@ -141,7 +143,7 @@ enum WorkerMessage {
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct CloseDraft {
     text: SharedString,
-    format: Option<Utf8TextFormat>,
+    format: Option<TextFormat>,
     original: Option<(String, Vec<u8>)>,
     reload_required: bool,
     session: uuid::Uuid,
@@ -188,7 +190,7 @@ pub struct FilesPanel {
     selected: Option<RemoteEntry>,
     editing: Option<(String, Vec<u8>)>,
     editor_snapshot: Option<RegularFileSnapshot>,
-    editor_format: Option<Utf8TextFormat>,
+    editor_format: Option<TextFormat>,
     // Once an incompatible remote format was observed, only an explicit
     // successful reopen may establish a new save/merge baseline.
     editor_reload_required: bool,
@@ -410,9 +412,11 @@ impl std::fmt::Display for FileFailure {
             Self::CancelledBeforeStart => {
                 f.write_str("File operation cancelled before SFTP initialization")
             }
-            Self::InvalidEditor => f.write_str("Editor accepts UTF-8 files up to 1 MiB"),
+            Self::InvalidEditor => f.write_str("Editor accepts supported Unicode text files up to 1 MiB"),
             Self::TextDocument(error) => write!(f, "{error}"),
-            Self::EditorFormatChanged => f.write_str("Remote BOM or line-ending format changed; read and review again"),
+            Self::EditorFormatChanged => {
+                f.write_str("Remote encoding, BOM or line-ending format changed; read and review again")
+            }
             Self::TextEdit(error) => write!(f,"{error}"),
             Self::SavedReadback(error) => write!(f,"publication acknowledged but content readback failed: {error}"),
             Self::Symlink => f.write_str("Permission changes on symbolic links are disabled"),
@@ -479,17 +483,17 @@ impl FileFailure {
                 "Operation cancelled before opening SFTP",
             ),
             Self::InvalidEditor => Message::new(
-                "编辑器仅支持不超过 1 MiB 的 UTF-8 文件",
-                "The editor accepts UTF-8 files up to 1 MiB",
+                "编辑器仅支持不超过 1 MiB 的受支持 Unicode 文本文件",
+                "The editor accepts supported Unicode text files up to 1 MiB",
             ),
             Self::TextDocument(error) => Message::detail(
-                "UTF-8 格式准备未通过，保留原文件和草稿",
-                "UTF-8 format preparation failed; original and draft retained",
+                "文本格式准备未通过，保留原文件和草稿",
+                "Text format preparation failed; original and draft retained",
                 error,
             ),
             Self::EditorFormatChanged => Message::new(
-                "远端 BOM 或换行格式已变化；当前草稿保留。请保留所需草稿，再显式重新打开文件并审核；未写入。",
-                "Remote BOM or line-ending format changed; draft retained. Preserve the draft you need, then explicitly reopen and review the file; no write occurred.",
+                "远端编码、BOM 或换行格式已变化；当前草稿保留。请保留所需草稿，再显式重新打开文件并审核；未写入。",
+                "Remote encoding, BOM or line-ending format changed; draft retained. Preserve the draft you need, then explicitly reopen and review the file; no write occurred.",
             ),
             Self::TextEdit(error) => Message::detail(
                 "文本审核未完成，草稿已保留",
@@ -749,6 +753,19 @@ impl FilesPanel {
         )
     }
 
+    /// Compare the editor's canonical Unicode body with a worker snapshot.
+    ///
+    /// The worker carries decoded text for merge planning, while the editor
+    /// may currently contain LF insertions that are normalized by its saved
+    /// format. Encoding the current draft and decoding it again keeps this
+    /// check byte-format aware without comparing UTF-16 bytes as UTF-8.
+    pub(super) fn draft_matches_text(&self, draft: &str, expected: &str) -> bool {
+        self.prepare_editor_bytes(draft)
+            .ok()
+            .and_then(|bytes| self.editor_format?.decode_body(&bytes).ok())
+            .is_some_and(|body| body == expected)
+    }
+
     fn prepare_editor_bytes(&self, draft: &str) -> Result<Vec<u8>, FileFailure> {
         self.editor_format
             .ok_or(FileFailure::InvalidEditor)?
@@ -801,7 +818,7 @@ impl FilesPanel {
 
     #[cfg(test)]
     pub(crate) fn set_window_close_format_for_test(&mut self, raw: &[u8]) {
-        self.editor_format = Utf8TextDocument::decode(raw)
+        self.editor_format = TextDocument::decode(raw)
             .ok()
             .map(|document| document.format());
     }
@@ -816,7 +833,7 @@ impl FilesPanel {
         cx: &mut Context<Self>,
     ) {
         self.editing = Some((path.to_owned(), original.as_bytes().to_vec()));
-        self.editor_format = Utf8TextDocument::decode(original.as_bytes())
+        self.editor_format = TextDocument::decode(original.as_bytes())
             .ok()
             .map(|document| document.format());
         self.editor_reload_required = false;
@@ -1717,7 +1734,7 @@ impl Operation {
     }
 }
 
-fn text_format_description(format: Utf8TextFormat) -> (String, String) {
+fn text_format_description(format: TextFormat) -> (String, String) {
     let (zh, en) = match format.line_ending() {
         TextLineEnding::None => ("无换行；新增使用 LF", "no line breaks; new breaks use LF"),
         TextLineEnding::Lf => ("LF", "LF"),
@@ -1727,11 +1744,13 @@ fn text_format_description(format: Utf8TextFormat) -> (String, String) {
     };
     (
         format!(
-            "UTF-8；BOM：{}；换行：{zh}",
+            "{}；BOM：{}；换行：{zh}",
+            format.encoding().name(),
             if format.has_bom() { "有" } else { "无" }
         ),
         format!(
-            "UTF-8; BOM: {}; line endings: {en}",
+            "{}; BOM: {}; line endings: {en}",
+            format.encoding().name(),
             if format.has_bom() { "yes" } else { "no" }
         ),
     )

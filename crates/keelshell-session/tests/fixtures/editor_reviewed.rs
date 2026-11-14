@@ -2,9 +2,64 @@
 use super::*;
 
 #[tokio::test]
+async fn editor_reviewed_utf16_le_and_be_preserve_encoding_and_backup() -> Result<(), Box<dyn Error>>
+{
+    use keelshell_core::{TextDocument, TextEncoding};
+
+    fn encode(body: &str, little_endian: bool) -> Vec<u8> {
+        let mut bytes = if little_endian {
+            vec![0xff, 0xfe]
+        } else {
+            vec![0xfe, 0xff]
+        };
+        for unit in body.encode_utf16() {
+            let encoded = if little_endian {
+                unit.to_le_bytes()
+            } else {
+                unit.to_be_bytes()
+            };
+            bytes.extend_from_slice(&encoded);
+        }
+        bytes
+    }
+
+    let server = serve().await?;
+    let session = SshSession::connect(options(&server)).await?;
+    let sftp = session.sftp().await?;
+    for little_endian in [true, false] {
+        let path = if little_endian {
+            "/editor-utf16-le.txt"
+        } else {
+            "/editor-utf16-be.txt"
+        };
+        let original = encode("alpha\r\n旧", little_endian);
+        let replacement = encode("alpha\r\n新\r\n😀", little_endian);
+        sftp.write(path, &original).await?;
+        let reviewed = sftp.read_regular_snapshot(path, 1024 * 1024).await?;
+        let document = TextDocument::decode(&reviewed.content)?;
+        assert_eq!(
+            document.format().encoding(),
+            if little_endian {
+                TextEncoding::Utf16Le
+            } else {
+                TextEncoding::Utf16Be
+            }
+        );
+        let backup = sftp
+            .write_editor_reviewed_authorized(&reviewed, &replacement, &|| true)
+            .await?;
+        assert_eq!(sftp.read_regular(&backup, 1024 * 1024).await?, original);
+        assert_eq!(sftp.read_regular(path, 1024 * 1024).await?, replacement);
+    }
+    sftp.close().await?;
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
 async fn editor_reviewed_utf8_bom_crlf_final_budget_and_original_backup_are_exact()
 -> Result<(), Box<dyn Error>> {
-    use keelshell_core::{MAX_TEXT_EDIT_BYTES, TextDocumentError, Utf8TextDocument};
+    use keelshell_core::{MAX_TEXT_EDIT_BYTES, TextDocument, TextDocumentError};
 
     let server = serve().await?;
     let session = SshSession::connect(options(&server)).await?;
@@ -14,7 +69,7 @@ async fn editor_reviewed_utf8_bom_crlf_final_budget_and_original_backup_are_exac
     let reviewed = sftp
         .read_regular_snapshot("/format-budget.txt", MAX_TEXT_EDIT_BYTES)
         .await?;
-    let document = Utf8TextDocument::decode(&reviewed.content)?;
+    let document = TextDocument::decode(&reviewed.content)?;
     assert_eq!(document.body(), "old\r\nlast");
     let draft = format!("{}\n", "x".repeat(MAX_TEXT_EDIT_BYTES - 5));
     let prepared = document.format().prepare_save(&draft)?;

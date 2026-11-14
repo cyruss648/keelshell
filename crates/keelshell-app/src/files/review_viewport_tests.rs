@@ -50,6 +50,7 @@ fn review_bytes(h: &Harness, cx: &TestAppContext) -> (String, Vec<u8>, Vec<u8>) 
                 path,
                 reviewed,
                 content,
+                ..
             } => (path.clone(), reviewed.content.clone(), content.clone()),
             _ => panic!("expected exact reviewed save"),
         }

@@ -1,7 +1,8 @@
-//! UTF-8 envelopes through real GPUI actions and owned loopback SFTP.
+//! Unicode envelopes through real GPUI actions and owned loopback SFTP.
 use super::*;
 use keelshell_core::{
-    MAX_TEXT_EDIT_BYTES, MAX_TEXT_EDIT_LINES, Settings, TextLineEnding, Theme, ThemeId,
+    MAX_TEXT_EDIT_BYTES, MAX_TEXT_EDIT_LINES, Settings, TextEncoding, TextLineEnding, Theme,
+    ThemeId,
 };
 use keelshell_session::sftp::RegularFileSnapshot;
 
@@ -81,6 +82,23 @@ fn assert_backup_versions(h: &Harness, path: &str, expected: &[Vec<u8>]) {
         assert_eq!(actual, expected);
         sftp.close().await.checked("close backup versions");
     });
+}
+
+fn utf16_with_bom(body: &str, little_endian: bool) -> Vec<u8> {
+    let mut bytes = if little_endian {
+        vec![0xff, 0xfe]
+    } else {
+        vec![0xfe, 0xff]
+    };
+    for unit in body.encode_utf16() {
+        let encoded = if little_endian {
+            unit.to_le_bytes()
+        } else {
+            unit.to_be_bytes()
+        };
+        bytes.extend_from_slice(&encoded);
+    }
+    bytes
 }
 
 #[gpui_kit::test]
@@ -413,6 +431,99 @@ async fn editor_format_open_separates_one_signature_without_false_dirty(cx: &mut
 }
 
 #[gpui_kit::test]
+async fn editor_format_utf16_le_and_be_round_trip_through_reviewed_sftp(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    for (little_endian, encoding) in [
+        (true, TextEncoding::Utf16Le),
+        (false, TextEncoding::Utf16Be),
+    ] {
+        let path = if little_endian {
+            "/utf16-le.txt"
+        } else {
+            "/utf16-be.txt"
+        };
+        let original = utf16_with_bom("alpha\r\n旧", little_endian);
+        let expected = utf16_with_bom("alpha\r\n新\r\n😀", little_endian);
+        open_raw(&h, path, &original, cx).await;
+        h.panel.read_with(cx, |panel, cx| {
+            let format = panel.editor_format.checked_option("UTF-16 format");
+            assert_eq!(format.encoding(), encoding);
+            assert!(format.has_bom());
+            assert_eq!(panel.editor.read(cx).value().as_str(), "alpha\r\n旧");
+            assert!(!panel.has_unsaved_draft(cx));
+        });
+
+        edit(&h, "alpha\n新\n😀", cx);
+        h.click(cx, "save-remote-file");
+        assert_eq!(reviewed_bytes(&h, cx), (original.clone(), expected.clone()));
+        h.click(cx, "confirm-file-operation");
+        h.idle(cx).await;
+        assert_eq!(h.read(path), expected);
+        h.panel.read_with(cx, |panel, cx| {
+            assert_eq!(panel.editor.read(cx).value().as_str(), "alpha\r\n新\r\n😀");
+            assert!(!panel.has_unsaved_draft(cx));
+            assert_eq!(
+                panel
+                    .editor_format
+                    .checked_option("retained UTF-16 format")
+                    .encoding(),
+                encoding
+            );
+        });
+    }
+}
+
+#[gpui_kit::test]
+async fn editor_format_utf16_merge_uses_decoded_bodies_and_preserves_remote_encoding(
+    cx: &mut TestAppContext,
+) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    for (little_endian, encoding) in [
+        (true, TextEncoding::Utf16Le),
+        (false, TextEncoding::Utf16Be),
+    ] {
+        let path = if little_endian {
+            "/utf16-merge-le.txt"
+        } else {
+            "/utf16-merge-be.txt"
+        };
+        let original = utf16_with_bom("a\r\nb\r\n", little_endian);
+        let remote = utf16_with_bom("a\r\nB\r\n", little_endian);
+        let expected = utf16_with_bom("A\r\nB\r\n", little_endian);
+        open_raw(&h, path, &original, cx).await;
+        edit(&h, "A\nb\n", cx);
+        external(&h, path, &remote);
+        h.click(cx, "read-remote-merge");
+        h.idle(cx).await;
+        h.panel.read_with(cx, |panel, _| {
+            let review = panel
+                .merge_review
+                .as_ref()
+                .checked_option("UTF-16 merge review");
+            assert_eq!(review.plan.conflicts().len(), 0);
+        });
+        h.click(cx, "adopt-text-merge");
+        h.panel.read_with(cx, |panel, cx| {
+            assert_eq!(panel.editor.read(cx).value().as_str(), "A\r\nB\r\n");
+            assert_eq!(
+                panel
+                    .editor_format
+                    .checked_option("UTF-16 merge format")
+                    .encoding(),
+                encoding
+            );
+        });
+        h.click(cx, "save-remote-file");
+        assert_eq!(reviewed_bytes(&h, cx), (remote.clone(), expected.clone()));
+        h.click(cx, "confirm-file-operation");
+        h.idle(cx).await;
+        assert_eq!(h.read(path), expected);
+    }
+}
+
+#[gpui_kit::test]
 async fn editor_format_actual_enter_cancel_and_save_use_exact_bom_crlf_bytes(
     cx: &mut TestAppContext,
 ) {
@@ -567,7 +678,7 @@ async fn editor_format_final_bom_expansion_line_and_nul_limits_refuse_before_wri
             assert!(!panel.busy && panel.operation_id.is_none());
             assert!(panel.has_unsaved_draft(cx));
             let status = panel.status.render(cx);
-            assert!(status.contains("UTF-8"));
+            assert!(status.contains("格式") || status.contains("format"));
             assert!(
                 !status.contains("private"),
                 "errors do not echo document data"

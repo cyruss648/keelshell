@@ -606,19 +606,24 @@ impl SftpSession {
         data: &[u8],
         authorized: &(dyn Fn() -> bool + Sync),
     ) -> Result<String> {
-        if std::str::from_utf8(data).is_err()
-            || data.contains(&0)
-            || std::str::from_utf8(&reviewed.content).is_err()
-            || reviewed.content.contains(&0)
-        {
-            return Err(SessionError::Invalid(
-                "editor replacement requires UTF-8 text without NUL",
-            ));
-        }
-        inspection::inspection_path(&reviewed.entry.path)?;
         if reviewed.content.len() > 1024 * 1024 || data.len() > 1024 * 1024 {
             return Err(SessionError::OutputLimit(1024 * 1024));
         }
+        let reviewed_document =
+            keelshell_core::TextDocument::decode(&reviewed.content).map_err(|_| {
+                SessionError::Invalid(
+                    "editor replacement requires supported Unicode text without NUL",
+                )
+            })?;
+        let replacement_document = keelshell_core::TextDocument::decode(data).map_err(|_| {
+            SessionError::Invalid("editor replacement requires supported Unicode text without NUL")
+        })?;
+        if reviewed_document.format().encoding() != replacement_document.format().encoding() {
+            return Err(SessionError::Invalid(
+                "editor replacement encoding or line format differs from the reviewed file",
+            ));
+        }
+        inspection::inspection_path(&reviewed.entry.path)?;
         let (parent, name) = reviewed
             .entry
             .path

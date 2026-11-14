@@ -167,7 +167,9 @@ pub use workflow_audit::{
     WorkflowTaskAudit,
 };
 
-pub use text_document::{TextDocumentError, TextLineEnding, Utf8TextDocument, Utf8TextFormat};
+pub use text_document::{
+    TextDocument, TextDocumentError, TextEncoding, TextFormat, TextLineEnding,
+};
 pub use text_merge::{
     MAX_TEXT_EDIT_BYTES, MAX_TEXT_EDIT_LINES, TextEditError, TextMergeChoice, TextMergeConflict,
     TextMergePlan, merge_text,

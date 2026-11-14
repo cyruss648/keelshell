@@ -325,13 +325,18 @@ async fn operate_inner(
             }
             Operation::Read(entry) => {
                 let snapshot = sftp.read_regular_snapshot(&entry.path, 1024 * 1024).await?;
-                let document = Utf8TextDocument::decode(&snapshot.content)
-                    .map_err(FileFailure::TextDocument)?;
+                let document =
+                    TextDocument::decode(&snapshot.content).map_err(FileFailure::TextDocument)?;
                 Ok(Outcome::Read(snapshot, document))
             }
-            Operation::ReadMerge { path, base, draft } => {
+            Operation::ReadMerge {
+                path,
+                base,
+                format,
+                draft,
+            } => {
                 let snapshot = sftp.read_regular_snapshot(&path, 1024 * 1024).await?;
-                merge_outcome(snapshot, base, draft)
+                merge_outcome(snapshot, base, format, draft)
             }
             Operation::ApplyPatchToDraft { path, draft, patch } => {
                 let result = keelshell_core::apply_text_patch(&path, &draft, &patch)
@@ -538,6 +543,7 @@ async fn operate_inner(
             Operation::Save {
                 path,
                 reviewed,
+                format,
                 content,
             } => {
                 if path != reviewed.entry.path {
@@ -549,11 +555,13 @@ async fn operate_inner(
                     || current.entry.permissions != reviewed.entry.permissions
                     || current.entry.modified != reviewed.entry.modified
                 {
-                    return merge_outcome(
-                        current,
-                        reviewed.content,
-                        String::from_utf8(content).map_err(|_| FileFailure::InvalidEditor)?,
-                    );
+                    // The reviewed format is authoritative here. In a
+                    // BOM-less UTF-8 document, leading U+FEFF bytes are
+                    // editable content rather than a newly observed BOM.
+                    let draft = format
+                        .decode_body(&content)
+                        .map_err(FileFailure::TextDocument)?;
+                    return merge_outcome(current, reviewed.content, format, draft);
                 }
                 let backup = sftp
                     .write_editor_reviewed_authorized(&reviewed, &content, &|| {
@@ -567,7 +575,7 @@ async fn operate_inner(
                 if saved.content != content {
                     return Err(FileFailure::SavedReadback("saved contents differ from the acknowledged review; inspect the remote file".into()));
                 }
-                let document = Utf8TextDocument::decode(&saved.content)
+                let document = TextDocument::decode(&saved.content)
                     .map_err(|error| FileFailure::SavedReadback(error.to_string()))?;
                 Ok(Outcome::Saved {
                     snapshot: saved,
@@ -683,21 +691,19 @@ mod future_size_tests {
 fn merge_outcome(
     snapshot: RegularFileSnapshot,
     base: Vec<u8>,
+    format: TextFormat,
     draft: String,
 ) -> Result<Outcome, FileFailure> {
-    let original_document = Utf8TextDocument::decode(&base).map_err(FileFailure::TextDocument)?;
+    let original = format
+        .decode_body(&base)
+        .map_err(FileFailure::TextDocument)?;
     let remote_document =
-        Utf8TextDocument::decode(&snapshot.content).map_err(FileFailure::TextDocument)?;
-    if !original_document
-        .format()
-        .is_compatible_with(remote_document.format())
-    {
+        TextDocument::decode(&snapshot.content).map_err(FileFailure::TextDocument)?;
+    if !format.is_compatible_with(remote_document.format()) {
         return Err(FileFailure::EditorFormatChanged);
     }
-    let original = std::str::from_utf8(&base).map_err(|_| FileFailure::InvalidEditor)?;
-    let remote = std::str::from_utf8(&snapshot.content).map_err(|_| FileFailure::InvalidEditor)?;
-    let plan =
-        keelshell_core::merge_text(original, &draft, remote).map_err(FileFailure::TextEdit)?;
+    let plan = keelshell_core::merge_text(&original, &draft, remote_document.body())
+        .map_err(FileFailure::TextEdit)?;
     Ok(Outcome::MergeLoaded {
         snapshot,
         plan,

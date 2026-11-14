@@ -32,10 +32,10 @@ mod tests {
 
     #[test]
     fn editor_search_and_patch_address_body_offsets_and_keep_bom_crlf_envelope() {
-        use keelshell_core::{Utf8TextDocument, apply_text_patch};
+        use keelshell_core::{TextDocument, apply_text_patch};
 
         let original = "\u{feff}中文\u{feff}\r\nkeep\r\n";
-        let document = draft(Utf8TextDocument::decode(original.as_bytes()));
+        let document = draft(TextDocument::decode(original.as_bytes()));
         let matches = draft(editor_matches(document.body(), "中文"));
         assert_eq!((matches[0].start, matches[0].end), (0, "中文".len()));
         assert_eq!(
