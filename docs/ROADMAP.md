@@ -1,7 +1,33 @@
-# 开发路线 — 2026-11-14
+# 开发路线 — 2026-11-15
 
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
+
+## 2026-11-15 恢复 claim 生命周期与计划进度
+
+本片源码实现提交为
+`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`。首次写入
+`Unfinished` 恢复记录时先取得同一记录的 OS claim，再把记录公开给其它窗口；
+持久恢复的只读计划在后台 worker 中持有 claim，完成后把 claim 交回审核状态。
+取消审核、确认前置失败、worker 失败、挂起、导航撤销和旧审核替换均释放
+claim。只读计划重新计算的已有字节数会同时回写持久记录和当前面板内存状态。
+
+本片 focused 结果为 core `8 passed / 0 failed`，app persisted-recovery
+`8 passed / 0 failed`，app recovery `37 passed / 0 failed`，app parallel
+`14 passed / 0 failed`。最终源码 SHA 的完整门禁已退出 `0`：普通 Rust
+`2530 passed / 0 failed / 23 ignored`，doctest `14 passed / 0 failed`，
+Python `131 run / 1 skipped`；app `1167/0/2`、core `644/0/0`、AI
+`194/0/5`、session `448/0/16`、MCP `77/0/0`，依赖策略、fmt、workspace
+严格 Clippy 和三组 AI controller 均通过。日志见
+[恢复日志测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)、
+[ADR 0130](adr/0130-persisted-transfer-recovery-journal.md)和当前交接。
+
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。下一步是让新的
+独立严格只读 reviewer 固定文档提交后的 exact SHA，复核 P0/P1/P2/P3、绝对
+文件/行号、实际测试计数、未验证边界和 merge recommendation；同时仍需单独
+完成 macOS/Windows/Linux 原生桌面、真实客户 SSH/SFTP、Podman 长流程、
+IME/辅助技术、签名、公证、安装升级和发布验收。公司内网不可用，在线依赖
+最新版本检查尚未完成；本片只做本地 commit，不 push。
 
 ## 2026-11-14 重启后传输恢复日志
 

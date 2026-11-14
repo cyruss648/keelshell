@@ -1,16 +1,16 @@
-# KeelShell 当前交接 — 2026-11-14
+# KeelShell 当前交接 — 2026-11-15
 
 先读[AGENTS](../AGENTS.md)、本页、[路线图](ROADMAP.md)及
 [共享 Cargo 指南](testing/SHARED_TARGET.md)。时间使用 Asia/Shanghai，
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
-## 2026-11-14 当前交接校正
+## 2026-11-15 当前交接校正
 
 当前维护 checkout 为
 `/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell`，
 分支 `feature/editor-unicode-codec-20261114`。本片当前源码 exact HEAD 为
-`52f861e3130749715ea20824efa1f1b1619f1e3b`（`fix(files): claim persisted transfer recovery`）；
+`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`（`fix(files): retain recovery claims through review`）；
 当前 checkout 的 exact HEAD 仍以 `git rev-parse HEAD` 现场读取。本片已经完成命名隧道 owner
 边界、恢复候选卡片视觉与可达性、配置同步发布前置检查，以及对应的 ADR、路线图
 和测试记录。公司内网不可用，当前只允许本地 commit，不执行 push。
@@ -21,23 +21,39 @@
 `rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，Cargo 继续跟随开发机或
 CI runner 的 active toolchain。
 
-最近继续推进的本地提交为 `52f861e`（恢复记录跨窗口/跨进程 claim）、
+最近继续推进的本地提交为 `3a61562`（恢复 claim 生命周期与计划进度修复）、
+`52f861e`（恢复记录跨窗口/跨进程 claim）、
 `f85407b`（恢复日志文档初稿）、`03a4e18`（恢复日志主体实现）、
 `540f9fc`（配置同步原子发布前置检查）、`90fbca7`（命名隧道 owner 与重连
 边界）、`1c8df52`（恢复候选卡片视觉与可达性）和 `36a1fcd`（ADR、测试记录、
 路线图和交接收口）。此前独立 reviewer 对 `36a1fcd` 的结论仍只适用于命名
-隧道与恢复卡片历史切片；当前恢复日志 claim 修复的完整门禁与复核状态见本节
-下方。独立 reviewer 使用
-独立 target 复核了源码实现；实现没有发现 P0/P1/P2，后续文档复核指出的 EOF
-空行与 provenance 表述问题已在本片文档中修正。历史完整门禁绑定源码实现基线
-`36a1fcd`；当前恢复日志完整门禁绑定 `52f861e`，文档提交只补充证据和状态，
-不改变产品源码。公司内网不可用，本轮
-只做本地 commit，不 push。
+隧道与恢复卡片历史切片；本轮恢复 claim 修复的作者门禁已完成，独立严格只读
+复核尚未启动。最终源码和作者验证绑定到 `3a61562`，证据见
+[传输恢复测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)
+的当前修复段落。文档提交只补充证据和状态，
+不改变产品源码。公司内网不可用，本轮只做本地 commit，不 push。
 
-本片最终独立严格只读复核固定在 `79c9090a7754b049f5a91fe3b71f96e15710d66b`，
-使用独立源码 checkout 和 Cargo target，结论为 `APPROVE`，P0/P1/P2/P3 均为
-`0`。复核确认源码实现与 `36a1fcd` 相同，当前 exact HEAD 仍应以
-`git rev-parse HEAD` 现场读取；本次后续提交只归档复核原文和最终状态。
+作者完整门禁使用独立 target：
+
+```text
+CARGO_TARGET_DIR=work/transfer-recovery-fix-v2-20261115/full-target \
+python3 scripts/check.py
+```
+
+日志为
+`work/transfer-recovery-fix-v2-20261115/full-gate-3a61562.log`，workspace
+doctest 日志为
+`work/transfer-recovery-fix-v2-20261115/doctest-3a61562.log`。实际结果为
+Python `131 run / 1 skipped`、普通 Rust `2530 passed / 0 failed / 23 ignored`、
+workspace doctest `14 passed / 0 failed`；其中 app `1167/0/2`、core `644/0/0`、
+AI `194/0/5`、session `448/0/16`、MCP `77/0/0`。依赖策略、fmt、workspace
+严格 Clippy、readiness/observer/small-stack controller 均通过。app 链接阶段的
+`__eh_frame section too large` 仍是已知 warning，没有改变退出码。
+
+当前状态：`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。下一位维护者应先
+固定文档提交后的 exact SHA，启动新的独立严格只读 reviewer，要求报告包含
+P0/P1/P2/P3、绝对文件/行号、实际测试计数、未验证边界和 merge recommendation，
+再清理 reviewer 的 worktree、target、临时文件和本地分支。不要 push。
 
 ## 2026-11-14 重启后传输恢复日志
 

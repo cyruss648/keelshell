@@ -1,7 +1,7 @@
 # ADR 0130：重启后传输恢复日志与显式续传
 
-日期：2026-11-14。当前实现提交：
-`52f861e3130749715ea20824efa1f1b1619f1e3b`。本 ADR 只描述文件传输恢复
+日期：2026-11-15。当前实现提交：
+`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`。本 ADR 只描述文件传输恢复
 日志；它不把日志记录当作自动恢复指令。
 
 ## 背景
@@ -51,6 +51,12 @@ worker 继续持有它；普通 `upsert` 在已有 claim 时拒绝，带 claim �
 迟到的 worker 覆盖新审核或删除新的状态。队列初始化失败、取消、worker
 启动失败、挂起、导航撤销和旧审核替换都会释放 claim。
 
+首次写入 `Unfinished` 时使用 `upsert_and_claim`，在记录公开前取得同一条
+记录的 claim，消除“恢复记录已经可见但传输 worker 尚未取得排他权”的窗口。
+持久恢复的只读计划把 claim 随后台 worker 传递，计划完成后交还给审核状态；
+取消审核、确认前置失败、worker 失败和会话撤销会通过 claim 的生命周期释放
+它。
+
 ### 4. 在真实传输生命周期中写入检查点和终态
 
 实际开始传输前先持久化 `Unfinished`。传输进度在有界检查点更新已传输字节；
@@ -80,11 +86,11 @@ UI 结果继续显示该风险，不能伪装成已完成。
 ## 验证与边界
 
 本片作者完整工程门禁绑定当前实现提交
-`52f861e3130749715ea20824efa1f1b1619f1e3b`，日志为
-`work/transfer-recovery-fix-20261114/logs/full-gate-52f861e.log`。workspace
+`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`，日志为
+`work/transfer-recovery-fix-v2-20261115/full-gate-3a61562.log`。workspace
 doctest 日志为
-`work/transfer-recovery-fix-20261114/logs/doctest-52f861e.log`。完整结果为
-Python `131 run / 1 skipped`；普通 Rust 测试 `2526 passed / 0 failed /
+`work/transfer-recovery-fix-v2-20261115/doctest-3a61562.log`。完整结果为
+Python `131 run / 1 skipped`；普通 Rust 测试 `2530 passed / 0 failed /
 23 ignored`；workspace doctest `14 passed / 0 failed`；依赖策略、格式、
 workspace 严格 Clippy、readiness/observer/small-stack controller 均通过。
 新增恢复 focused 回归见
@@ -92,7 +98,8 @@ workspace 严格 Clippy、readiness/observer/small-stack controller 均通过。
 
 当前证据覆盖独立恢复日志、绑定校验、终态幂等性、三主题双语恢复卡片、
 跨窗口/跨进程 claim 排他、claim 所有权校验、无绑定记录的主机确认前置、
-恢复进度回写、显式丢弃和后台文件写入。独立 reviewer 尚未完成；依赖在线
-最新版本检查因公司内网不可用尚未完成；
+首次 `Unfinished` 发布前 claim、恢复计划 claim 交接、恢复进度回写、
+显式丢弃和后台文件写入。独立 reviewer 尚未启动；依赖在线最新版本检查因
+公司内网不可用尚未完成；
 macOS/Windows/Linux 原生桌面、真实客户 SSH、Podman 长流程、IME、
 VoiceOver/NVDA、签名、公证、安装升级和发布验收仍需单独证据。
