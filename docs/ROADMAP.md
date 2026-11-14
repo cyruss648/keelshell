@@ -7,20 +7,24 @@
 
 上一轮对本地提交 `b239d78691420a30d54c914c9ad7253023b0b681` 的独立复核返回
 P1 `1`、P2 `2`、P3 `1`。本片已修复成功保存读回的 BOM-less U+FEFF 解释、
-UTF-16 差异预览、测试记录 SHA/target 绑定和 session 编码错误文案；原始回执保留
-在 `work/unicode-review-fix-20261114/review/b239-review-receipt.md`。
+UTF-16 LE/BE 差异预览、测试记录 SHA/target 绑定和 session 编码错误文案；历史回执
+保留在 [`previous-b239-review.md`](../work/unicode-codec-20261114/review/previous-b239-review.md)。
 
-修复后的完整 `python3 scripts/check.py` 已实际等待并退出 `0`：
+修复后的实现和测试源码提交为
+`368a7f836f72ca06b34276e5d587a34497fc7f13`。完整 `python3 scripts/check.py` 已实际
+等待并退出 `0`，使用 `work/unicode-codec-20261114/full-target`，耗时约 `697s`：
 Python `131 run / 1 skipped`，ordinary Rust `2462 passed / 0 failed / 23 ignored`，
 app `1138 passed / 2 ignored`，14 项 doctest、依赖策略、fmt、workspace 严格
-Clippy 和 readiness/observer/small-stack controller 均通过。新增两条 GPUI 回归
-覆盖成功保存后的 BOM-less 首个 U+FEFF 和 UTF-16 LE/BE 差异预览。
+Clippy 和 readiness/observer/small-stack controller 均通过。日志和 exit 回执见
+[`unicode-full-gate.log`](../work/unicode-codec-20261114/unicode-full-gate.log) 与
+[`unicode-full-gate.exit.json`](../work/unicode-codec-20261114/unicode-full-gate.exit.json)。
+门禁结束后的外层 zsh wrapper 因使用只读变量名 `status` 返回 `1`，但门禁日志已到达
+成功末段，exit 回执记录了这一 wrapper 问题；不能把 wrapper 退出码当作测试失败。
 
-当前源码与文档已本地提交为
-`bfdc06633666a4cfa419ff2f0e47ce5f73a1ae10`；必须以该最终 SHA 启动新的独立严格
-只读复核，并取得 P0/P1/P2/P3 计数及 `APPROVE`/`REQUEST_CHANGES`。公司内网不可用，
-本片只做本地 commit，不执行 push。原生桌面、跨平台窗口、IME、辅助技术、真实
-SSH、Podman 联调和发行验收继续保持开放。
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。必须先提交本段文档绑定，
+再以该 exact SHA 启动新的独立严格只读复核，取得 P0/P1/P2/P3 计数及
+`APPROVE`/`REQUEST_CHANGES`。公司内网不可用，本片只做本地 commit，不执行 push。
+原生桌面、跨平台窗口、IME、辅助技术、真实 SSH、Podman 联调和发行验收继续开放。
 
 ## 2026-11-14 连接状态灯审查修复
 

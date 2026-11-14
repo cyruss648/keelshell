@@ -8,33 +8,41 @@
 ## 2026-11-14 Unicode 编辑器复核修复
 
 上一轮对 `b239d78691420a30d54c914c9ad7253023b0b681` 的独立严格只读复核返回
-`REQUEST_CHANGES`：P0 `0`、P1 `1`、P2 `2`、P3 `1`。原始回执已复制到
-`work/unicode-review-fix-20261114/review/b239-review-receipt.md`，不要删除。
+`REQUEST_CHANGES`：P0 `0`、P1 `1`、P2 `2`、P3 `1`。历史回执已复制到当前
+工作证据目录 [`previous-b239-review.md`](../work/unicode-codec-20261114/review/previous-b239-review.md)，
+原始内容不要删除。
 
-本轮已完成四项修复：
+本轮实现与修复源码、测试已绑定到提交
+`368a7f836f72ca06b34276e5d587a34497fc7f13`，完成四项修复：
 
 - 成功保存后的完整读回继续使用审核时的 `TextFormat`，只把实际读回得到的换行
   策略合并回原编码/BOM 外壳，避免 BOM-less UTF-8 正文首个 U+FEFF 被重新解释
   为 BOM；
 - UTF-16 LE/BE 差异预览先解码两侧正文，再调用逻辑文本差异 API；
-- 测试记录改为绑定实际 target、r2 门禁计数和工作树 `source_head`，不再保留旧
-  SHA 描述；
+- 测试记录改为绑定实际 target、完整门禁计数和当前 `source_head`，不再保留旧
+  工作树的 SHA 或路径；
 - session 错误文案改为准确说明当前入口只比较编码。
 
-本轮 `unicode-full-gate-r2` 已实际等待并退出 `0`：Python `131 run / 1 skipped`，
-ordinary Rust `2462 passed / 0 failed / 23 ignored`，app `1138 passed / 2 ignored`，
-14 项 doctest、fmt、workspace 严格 Clippy 和 readiness/observer/small-stack
-controller 均通过；日志和 exit 回执保存在
-`work/unicode-review-fix-20261114/`。新增 app 回归为
+完整 `python3 scripts/check.py` 已在当前源码提交上实际等待并退出 `0`。它使用
+当前 checkout 的 `work/unicode-codec-20261114/full-target`，耗时约 `697s`：
+Python `131 run / 1 skipped`，ordinary Rust `2462 passed / 0 failed / 23 ignored`，
+app `1138 passed / 2 ignored`，14 项 doctest、依赖策略、fmt、workspace 严格
+Clippy 和 readiness/observer/small-stack controller 均通过。日志和手工生成的
+exit 回执保存在 [`unicode-full-gate.log`](../work/unicode-codec-20261114/unicode-full-gate.log)
+和 [`unicode-full-gate.exit.json`](../work/unicode-codec-20261114/unicode-full-gate.exit.json)。
+app 链接阶段有已知 `__eh_frame section too large` warning，但门禁命令退出 `0`。
+门禁结束后的外层 zsh wrapper 曾复用只读变量名 `status`，因此 wrapper 返回 `1`；
+该问题发生在门禁成功末段之后，不能作为测试失败，已记录在 exit 回执中。
+新增 app 回归为
 `editor_format_successful_save_preserves_bomless_leading_feff` 与
 `editor_format_utf16_diff_preview_uses_decoded_bodies`。
 
-源码、测试和文档已本地提交为
-`bfdc06633666a4cfa419ff2f0e47ce5f73a1ae10`；之后只通过文档 amend 回填该 SHA。
-下一步是在该最终提交上启动新的独立严格只读复核，返回 P0/P1/P2/P3、绝对路径/行号、
-实际验证命令和 `APPROVE` 或 `REQUEST_CHANGES`。公司内网不可用，本片只允许本地
-commit，不执行 push。macOS 当前桌面、Windows/Linux 原生窗口、IME、辅助技术、
-真实客户 SSH、Podman 联调、签名、公证、安装升级仍不由本片门禁代签。
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。下一步必须以包含本段
+准确绑定信息的文档提交 exact SHA 启动新的独立严格只读复核，返回 P0/P1/P2/P3、
+绝对路径/行号、实际验证命令和 `APPROVE` 或 `REQUEST_CHANGES`；复核回执应保存到
+当前 work evidence 目录。公司内网不可用，本片只允许本地 commit，不执行 push。
+macOS 当前桌面、Windows/Linux 原生窗口、IME、辅助技术、真实客户 SSH、Podman
+联调、签名、公证、安装升级仍不由本片门禁代签。
 
 ## 2026-11-14 连接状态灯审查修复与完整门禁
 
