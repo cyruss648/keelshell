@@ -24,7 +24,7 @@ process-wrap = { version = "10.0", default-features = false, features = ["tokio1
 nix = { version = "0.31", default-features = false, features = ["fs", "poll", "process", "signal", "socket", "user"] }
 
 [target.'cfg(windows)'.dependencies]
-win32job = "2.0"
+win32job = "2.1"
 
 [[test]]
 name = "local_agent_process"

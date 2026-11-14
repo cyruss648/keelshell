@@ -5,6 +5,33 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 依赖官方升级与 Rust 1.100.0 完整门禁
+
+在 `4340b19e0099a00e460281502fd5cebd7c753ab9` 的父工作树集成八个直接包升级：
+GPUI Kit `0.9.1`、rust-embed `8.14.0`、zip `9.5.1`、rmcp `3.10.0`、
+toml `1.2.1+spec-1.1.0`、win32job `2.1.0`、uuid `1.29.2`、flate2 `1.1.11`。
+官方在线复查在 UTC `2026-11-14T00:58:01Z` 完成，`33 packages /
+103 declarations and uses / 5 workspace members` 全部通过。所有直接 registry
+依赖要求仍使用 `x.y`，Cargo.lock 保存解析版本；没有修改 Rust 源码。
+
+本机默认工具链再次读回为 Rust/Cargo `1.100.0`。仓库继续没有工具链 pin 或
+`rust-version`；后者表示最低支持版本，不负责选择最新编译器。
+
+升级后的第二轮完整 `python3 scripts/check.py` 已实际 wait 并退出 `0`：
+Python `131 run / 1 skipped`，workspace ordinary Rust
+`2440 passed / 0 failed / 23 ignored`（app 子集 `1132 passed / 2 ignored`），
+14 项 doctest（其中含 2 项 compile-fail）、fmt、workspace 严格 Clippy 和三组
+AI controller 均通过。全新 target 的 app 清单为 `1134` 项，并核对了监控、
+工作台 chrome 和窗口契约具体用例名。首轮门禁因缓存编译 `E0514` 退出 `1`；
+具体根因仍未确定，失败原件保留。第二轮使用空 target 和显式当前工具链路径，
+不把后续成功反推为首轮根因。
+
+当前为 `AUTHOR_GATE_PASS / INDEPENDENT_REVIEW_PENDING`，本地提交固定后需新开
+严格只读复核；公司内网暂不可用，只做本地提交，不执行 push。隔离实现
+worktree 已归档，日志已复制到父工作树。Windows/Linux、原生桌面与真实远端等
+边界仍开放；旧 `0.9.0` 原生包不能代签新依赖，锁屏导致的主题/紧凑窗口
+`HOLD` 继续保留。详见[依赖升级记录](testing/records/2026-11-14-dependency-refresh.md)。
+
 ## 2026-11-14 主机监控面板视觉层级与紧凑几何收口
 
 本片在 `31ca92b feat: refine workbench chrome` 上继续完善主机监控 rail，源码、

@@ -1,7 +1,22 @@
-# 开发路线 — 2026-11-08
+# 开发路线 — 2026-11-14
 
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
+
+## 2026-11-14 依赖升级与当前工具链验证
+
+八个直接包已集成升级，含 GPUI Kit `0.9.1`、rmcp `3.10.0`、rust-embed
+`8.14.0`、zip `9.5.1` 和 win32job `2.1.0`；33 个直接 registry 包、103 处
+声明/使用、5 个 workspace member 的官方最新稳定版本检查通过，版本要求保持
+`x.y`。Rust/Cargo 默认使用开发环境的 `1.100.0`，不把本地版本写成 MSRV。
+
+升级后的完整工程门禁第二轮 exit `0`：Python `131 run / 1 skipped`，
+workspace ordinary `2440 passed / 0 failed / 23 ignored`，app 子集
+`1132 passed / 2 ignored`，14 项 doctest、fmt、严格 Clippy 和三组 AI controller
+通过；新编译 app 清单 `1134` 项。首轮缓存编译 `E0514` 的失败回执保留，根因
+未定。当前独立复核待固定本地提交后执行；临时实现 worktree 已归档，只做本地
+提交、不推送。原生锁屏 `HOLD`、Windows/Linux、真实远端与发布安装边界保持开放。
+详见[依赖升级记录](testing/records/2026-11-14-dependency-refresh.md)。
 
 ## 2026-11-14 主机监控面板视觉层级
 
