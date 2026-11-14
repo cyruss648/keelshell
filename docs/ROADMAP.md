@@ -3,6 +3,54 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-14 命名隧道运行状态持久化与显式恢复
+
+本片固定基线为 exact HEAD
+`fd4cc894aa876f23cde49698b693779e81027489`，主体实现提交为
+`093f725037d5c037cfdd7b75a66f7448bc0732a`，最终实现 SHA 为
+`7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec`。命名规则在 worker 首次报告监听端点
+后保存一个只含非敏感元数据的 `TunnelRuntimeSnapshot`；快照不是恢复指令，不含
+密码、私钥原值、SSH session、socket、worker、命令或流量。
+
+重启后的隧道面板只显示可能运行过的候选和只读详情。当前规则、connection ID、
+路由/跳板、认证类别和认证目标指纹必须重新匹配，用户必须 Inspect、Review start、
+检查完整 review token 并显式 Confirm and start fresh；没有自动重连、自动启动、
+旧 listener/session/worker/traffic 复用或命令重放。规则缺失、连接或路由变化、
+不支持版本、清理未确认、StateStore 冲突或未知保存结果均保留候选并 fail closed。
+正常停止且清理确认后删除候选，Discard 也只能由用户显式删除观察记录。
+
+实现分层为 core 快照/校验、app 面板审核和 Workspace 后台 StateStore 事件；
+阻塞 I/O 不进入 GPUI 线程。恢复卡片使用现有 Frost、Graphite、Lavender 的
+registry/Palette/token、双语文本和 fixed footer/scroll 习惯，不按 theme ID 分支。
+
+作者完整门禁已在独立 target
+`work/named-tunnel-runtime-20261114/target` 实际退出 `0`：
+Python `131 run / 1 skipped`、workspace ordinary Rust
+`2476 passed / 0 failed / 23 ignored`、app `1144 passed / 0 failed / 2 ignored`、
+14 项 doctest（含 2 项 compile-fail）、fmt、workspace 严格 Clippy、依赖策略和三组
+AI controller 均通过。focused core runtime 为 `8 passed / 0 failed`，
+app `tunnel_rule_tests` 为 `19 passed / 0 failed / 1127 filtered`，app `tunnels`
+为 `22 passed / 0 failed / 1124 filtered`。完整日志见
+`work/named-tunnel-runtime-20261114/logs/full-gate-7e6ecb3-rerun.log`。
+
+独立严格只读复核已经完成，报告位于
+`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`，
+项目内归档摘要见
+[独立复核记录](testing/records/2026-11-14-named-tunnel-runtime-recovery-review.md)；
+审查 exact SHA 为 `7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec`，结论为
+`APPROVE`，P0/P1/P2/P3 均为 `0`。独立 target 上 core `tunnel_runtime`
+为 `8/8`，app `tunnel_rule_tests` 为 `19/19`，app `tunnels` 为 `22/22`，
+app 测试清单为 `1146` 项；fmt、core/app 严格 Clippy 和 diff check 均 exit `0`。
+
+本片当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。独立复核没有
+扩大为原生 macOS/Windows/Linux、真实 SSH/Podman、IME、辅助技术、签名、公证和
+安装发布验收；作者完整 `scripts/check.py` 的通过证据仍以作者独立 target 日志
+为准，复核 agent 没有重复执行完整脚本。公司内网不可用，本片只做本地 commit，
+不执行 push。设计、产品和测试证据分别见
+[ADR 0127](adr/0127-named-tunnel-runtime-recovery.md)、
+[命名隧道规则管理](product/NAMED_TUNNEL_RULE_MANAGEMENT.md) 和
+[测试记录](testing/records/2026-11-14-named-tunnel-runtime-recovery.md)。
+
 ## 2026-11-14 Unicode 编辑器复核修复
 
 上一轮对本地提交 `b239d78691420a30d54c914c9ad7253023b0b681` 的独立复核返回

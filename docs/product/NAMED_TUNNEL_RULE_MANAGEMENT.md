@@ -2,6 +2,66 @@
 
 本指南描述 NET-01 的原生 GPUI 管理入口。它只管理已保存 SSH 连接的规则元数据；活动监听器属于创建它们的原 SSH 会话。
 
+## 2026-11-14：重启后的命名隧道显式恢复
+
+本次实现基线为 exact HEAD
+`fd4cc894aa876f23cde49698b693779e81027489`，主体实现提交为
+`093f725037d5c037cfdd7b75a66f7448bc0732a`，最终实现固定在
+`7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec`。命名规则 worker 首次报告实际监听
+端点后，应用保存一个 `TunnelRuntimeSnapshot`。它是过去运行的非敏感观察记录，
+不是恢复指令；加载它不会连接、启动、复用旧运行时或重放命令。
+
+快照只保存规则内容、connection ID、顺序化跳板/profile ID、规范化路由身份、
+认证类别、认证目标的域隔离 SHA-256 指纹、实际监听端点、首次监听时间以及
+`PossibleRunning` 或 `CleanupUnconfirmed` 状态。它绝不保存密码、私钥内容、私钥
+路径原值、vault credential ID 原值、SSH session、socket、worker handle、代理
+凭据、命令内容或流量原始数据。
+
+重启后，当前连接的隧道面板只显示“可能仍在运行；需要重新审核”的候选和只读
+详情。用户必须 Inspect、Review start，重新核对当前规则、连接 ID、路由/跳板、
+认证类别和认证目标，并通过完整 review token 后显式选择 `Confirm and start fresh`。
+确认只创建全新的 worker；不会自动重连、自动启动或复用旧 listener、SSH session、
+worker、traffic。`Discard` 是删除观察记录的显式动作，不执行网络清理，也不声称
+旧 worker 已停止。
+
+规则缺失、连接缺失、规则内容变化、路由或认证目标变化、快照版本不支持、清理未
+确认、review token/revision 过期、StateStore 冲突或保存结果未知时，恢复必须
+fail closed，候选保留并提示重新加载/重新审核。正常停止只有在原 listener 和所属
+连接流得到确认释放后才删除候选。恢复区域继续使用现有 GPUI Kit、Frost/Graphite/
+Lavender registry、Palette、组件 token、双语文案和 fixed footer/scroll 习惯，
+业务视图不按 theme ID 分支，也不显示模拟在线指标。
+
+## 恢复状态与工程边界
+
+```text
+PossibleRunning ── confirmed cleanup ──► removed
+        │
+        ├── restart ──► read-only candidate
+        ├── Review start + Confirm ──► new worker; old candidate retained
+        └── Discard ──► removed by explicit user action
+
+CleanupUnconfirmed ── confirmed cleanup ──► removed
+        ├── restart ──► retained, recovery blocked
+        └── Discard ──► removed by explicit user action
+```
+
+`keelshell-core` 负责快照序列化、绑定指纹、校验、冲突和 typed errors；
+`keelshell-session` 继续拥有实际 worker 与传输清理；`keelshell-app` 只发出
+`TunnelRuntimeEvent`；Workspace 在后台 executor 中完成阻塞 StateStore I/O。作者
+完整门禁、独立复核和未验证边界见
+[测试记录](../testing/records/2026-11-14-named-tunnel-runtime-recovery.md)、
+[ADR 0127](../adr/0127-named-tunnel-runtime-recovery.md) 和[当前交接](../HANDOFF.md)。
+
+独立严格只读复核已在 exact SHA
+`7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec` 上完成，报告位于
+`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`，
+项目内归档摘要见
+[独立复核记录](../testing/records/2026-11-14-named-tunnel-runtime-recovery-review.md)；
+P0/P1/P2/P3 均为 `0`，结论为 `APPROVE`。复核使用独立 target，验证了 core
+`8/8`、app 命名规则 `19/19`、隧道面板 `22/22`，以及 fmt、严格 Clippy 和
+diff check。复核只证明当前受控代码路径，不替代原生桌面、真实远端、Podman
+或发布验收。
+
 ## 使用流程
 
 1. 从已保存连接打开 SSH 标签，选择“隧道”。临时连接仍可使用临时端点，但不能拥有命名规则。

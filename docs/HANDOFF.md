@@ -5,6 +5,83 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 命名隧道运行状态持久化与显式恢复
+
+本片产品实现基线是 exact HEAD
+`fd4cc894aa876f23cde49698b693779e81027489`，最终实现 SHA 为
+`7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec`。主体实现提交为
+`093f725037d5c037cfdd7b75a66f7448bc0732a`，最终提交补上私钥认证目标绑定。
+从基线到最终实现共有 13 个源码/测试文件：
+
+- `crates/keelshell-core/src/tunnel_runtime.rs`
+- `crates/keelshell-core/tests/tunnel_runtime.rs`
+- `crates/keelshell-core/src/model.rs`
+- `crates/keelshell-core/src/connection_library.rs`
+- `crates/keelshell-core/src/error.rs`
+- `crates/keelshell-core/src/lib.rs`
+- `crates/keelshell-app/src/tunnels.rs`
+- `crates/keelshell-app/src/tunnels/rules.rs`
+- `crates/keelshell-app/src/tunnels/management_tests.rs`
+- `crates/keelshell-app/src/tunnels/workspace_tests.rs`
+- `crates/keelshell-app/src/tunnels/workspace_review_tests.rs`
+- `crates/keelshell-app/src/workspace.rs`
+- `crates/keelshell-app/src/workspace/view.rs`
+
+运行快照只保存规则、连接路由/认证目标指纹、实际监听端点、开始时间和
+`PossibleRunning`/`CleanupUnconfirmed` 状态。它不保存密码、私钥原值、私钥路径
+原值、vault credential ID 原值、SSH session、socket、worker handle、代理凭据、
+命令或流量。加载候选不会连接、启动、复用旧运行时或重放命令。
+
+重启后的面板只读显示候选；用户必须 Inspect、Review start、重新匹配当前规则和
+连接绑定、通过 review token 并显式 Confirm and start fresh。规则/连接/路由/认证
+目标变化、版本不支持、清理未确认、StateStore 冲突和未知保存结果都 fail closed
+并保留候选。正常确认清理或用户明确 Discard 才删除候选。Workspace 负责在后台
+executor 中处理 StateStore 事件，GPUI 面板不做阻塞 I/O。
+
+作者工程门禁已在当前 worktree 的独立 target
+`/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/named-tunnel-runtime-20261114/target`
+实际完成并退出 `0`。命令为：
+
+```text
+CARGO_TARGET_DIR=work/named-tunnel-runtime-20261114/target python3 scripts/check.py
+```
+
+实际结果：Python `131 run / 1 skipped`；workspace ordinary Rust
+`2476 passed / 0 failed / 23 ignored`；app `1144 passed / 0 failed / 2 ignored`；
+14 项 doctest（含 2 项 compile-fail）；依赖策略、fmt、workspace 严格 Clippy、
+readiness/observer/small-stack controller 全部通过。focused core
+`tunnel_runtime` 为 `8 passed / 0 failed`，app `tunnel_rule_tests` 为
+`19 passed / 0 failed / 1127 filtered`，app `tunnels` 为
+`22 passed / 0 failed / 1124 filtered`。完整门禁脚本日志在
+`work/named-tunnel-runtime-20261114/logs/full-gate-7e6ecb3-rerun.log`，
+专项日志也保留在同一目录。
+app 链接阶段的 `__eh_frame section too large` 是已知 warning，未导致门禁失败。
+
+独立严格只读代码与功能复核已经完成，固定同一 exact SHA，使用独立源码 worktree
+和独立 Cargo target。复核报告为
+`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`，
+项目内归档摘要见
+[独立复核记录](testing/records/2026-11-14-named-tunnel-runtime-recovery-review.md)；
+复核结论为 `APPROVE`，P0/P1/P2/P3 均为 `0`。独立复核实际完成：
+
+- `keelshell-core` `tunnel_runtime`：`8 passed / 0 failed / 0 ignored`；
+- `keelshell-app` `tunnel_rule_tests`：`19 passed / 0 failed / 1127 filtered`；
+- `keelshell-app` `tunnels`：`22 passed / 0 failed / 1124 filtered`；
+- app 测试清单：`1146 tests listed`；
+- `cargo fmt --all -- --check`、core/app 严格 Clippy 和基线到实现 SHA 的
+  `git diff --check`：全部 exit `0`。
+
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。复核没有把原生
+macOS/Windows/Linux、真实客户 SSH、Podman、IME、辅助技术、签名、公证、安装升级
+和发布验收写成通过；作者完整 `scripts/check.py` 的结果由作者日志提供，独立复核
+没有重复执行该完整脚本。app 测试链接阶段的 `__eh_frame section too large`
+仍是已知 warning，没有改变任何 exit code。公司内网不可用，本片只允许本地
+commit，不执行 push。
+
+详细设计、产品边界和测试证据见 [ADR 0127](adr/0127-named-tunnel-runtime-recovery.md)、
+[命名隧道规则管理](product/NAMED_TUNNEL_RULE_MANAGEMENT.md) 和
+[测试记录](testing/records/2026-11-14-named-tunnel-runtime-recovery.md)。
+
 ## 2026-11-14 Unicode 编辑器复核修复
 
 上一轮对 `b239d78691420a30d54c914c9ad7253023b0b681` 的独立严格只读复核返回
