@@ -10,7 +10,7 @@
 
 | 日期（Asia/Shanghai） | 记录与范围 |
 | --- | --- |
-| 2026-11-14 | [连接状态灯审查修复](records/2026-11-14-connection-indicator-review-fix.md)：首轮独立 P2 修复，生命周期/恢复占位/空活动面板按真实状态绘制；完整门禁 ordinary `2442/23 ignored`、app `1134/2 ignored`、doctest `14` 通过，新冻结源码复核 `APPROVE`（P0–P3 全 0），独立预构建回归 `36` 项通过；原生仍 `HOLD`。 |
+| 2026-11-14 | [连接状态灯审查修复](records/2026-11-14-connection-indicator-review-fix.md)：`9363485` 修复首轮独立 P2；完整门禁 ordinary `2442/23 ignored`、app `1134/2 ignored`、doctest `14` 通过，新冻结源码复核 `APPROVE`（P0–P3 全 0），独立预构建回归 `36` 项通过，519 个提交输入与冻结摘要一致；原生仍 `HOLD`。 |
 | 2026-11-14 | [依赖官方复查与升级](records/2026-11-14-dependency-refresh.md)：`98f8f9d` 八个直接包升级，官方 `33/103/5` 版本检查与 Rust 1.100.0 完整门禁通过；ordinary `2440/23 ignored`、doctest `14`、app 清单 `1134`；首轮 `E0514` 原件保留，独立复核发现 UI 状态灯 P2，依赖输入无待修发现。 |
 | 2026-11-14 | [响应式工作台紧凑修复](records/2026-11-14-responsive-workbench-follow-up.md)：`a33e4c3b154867e4ef542cd9ef6a1193aee31c19` 收口紧凑 AI/磁盘布局、stale Edit 与 session-tab reveal 修复；Rust 1.100.0 完整门禁通过，文档提交 `251a8ee` 的独立复核返回 `APPROVE`（P0/P1/P2/P3 均为 0）；原生桌面和真实联调边界保持开放。 |
 | 2026-11-14 | [响应式工作台 macOS 精确包与启动短验](records/2026-11-14-responsive-workbench-native-smoke.md)：当前 `e4e9eb5` 的 arm64 包结构检查、真实进程启动和 57 项打包测试通过；窗口级 AX、跨平台桌面和真实联调边界保持开放。 |

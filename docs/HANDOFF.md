@@ -26,8 +26,13 @@ workspace 严格 Clippy 和三组 AI controller 通过。
 另一位新 agent 对相同冻结输入返回 `APPROVE`，P0/P1/P2/P3 均为 `0`；
 独立执行作者预构建二进制的 36 项重点回归通过，未独立重编译或代签作者完整
 门禁。5 个显式输入与补充 519 个 Rust/Cargo 输入在审查期间不变。该复核发生于
-本地修复提交前，提交后须单独核对 Git 对象与冻结输入相符；当前状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_FROZEN_SOURCE_REVIEW_APPROVED`。
+本地修复提交前；父线程随后将源码、测试和文档固定在本地提交
+`9363485ef19802c7b9b1292e2ba5b4adb57fd589`，逐一读取该提交的 519 个 Rust/Cargo
+Git 对象，与复核冻结摘要全部一致。当前二进制摘要与独立执行复制件也相同，
+实际 `--list` 仍为 `1136` 项，两个具体新增名称均存在。
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_FROZEN_SOURCE_REVIEW_APPROVED /
+COMMIT_BYTES_VERIFIED`；独立报告保留其复核时点与范围，提交绑定原件为
+`work/dependency-refresh-20261114/indicator-fix-commit-binding-r1.json`。
 
 依赖实现 worktree 已归档，两位审查 agent 已关闭，复核临时二进制与 runtime
 已清理；只保留当前构建缓存和审计回执。修复完整记录见

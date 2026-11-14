@@ -15,7 +15,11 @@
 `1134 passed / 2 ignored`、14 项 doctest、Python `131 run / 1 skipped`、
 fmt、严格 Clippy 和三组 AI controller 通过。另一位新 agent 对冻结源码返回
 `APPROVE`（P0/P1/P2/P3 均为 `0`），独立执行作者预构建二进制的 36 项重点
-回归通过，未独立重编译。本地修复提交需核对与冻结输入字节一致；
+回归通过，未独立重编译。修复已本地提交为
+`9363485ef19802c7b9b1292e2ba5b4adb57fd589`；父线程读取该提交的 519 个 Rust/Cargo
+Git 对象，确认与复核冻结输入逐字节一致，二进制摘要和 `1136` 项清单也匹配。
+状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_FROZEN_SOURCE_REVIEW_APPROVED /
+COMMIT_BYTES_VERIFIED`，未推送；
 详见[状态灯修复记录](testing/records/2026-11-14-connection-indicator-review-fix.md)。
 
 ## 2026-11-14 依赖升级与当前工具链验证

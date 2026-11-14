@@ -109,8 +109,13 @@ ordinary、app 子集、doctest 不重复相加；按原始日志分段的摘要
 合计 `36 passed / 0 failed / 0 ignored`；每条测试使用独立临时数据、
 单线程、`180s` 上限，均实际 wait。独立报告于 UTC `01:54:05Z` 完成，当时
 作者完整门禁尚未结束；作者随后收取的 exit `0` 与非作者定向证据分别保留。
-状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_FROZEN_SOURCE_REVIEW_APPROVED`，
-提交绑定从[当前交接](../../HANDOFF.md)接续。
+父线程后续将修复源码、测试和文档固定在本地提交
+`9363485ef19802c7b9b1292e2ba5b4adb57fd589`，逐一读取 519 个 Rust/Cargo
+Git 对象，与审查的冻结摘要全部一致。当前 target 二进制摘要仍为上述
+`eaf386ff…`，`--list` 为 `1136` 项，并核对了两个新增名称。提交绑定原件为
+`indicator-fix-commit-binding-r1.json`，独立报告保留其原复核时点和范围。
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_FROZEN_SOURCE_REVIEW_APPROVED /
+COMMIT_BYTES_VERIFIED`，后续维护从[当前交接](../../HANDOFF.md)接续。
 
 独立报告、源码快照、二进制清单和逐命令回执位于
 `work/dependency-refresh-20261114/review-fix/`。两位本轮审查 agent 已关闭，
