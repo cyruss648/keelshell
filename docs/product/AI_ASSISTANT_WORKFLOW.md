@@ -53,7 +53,8 @@ configuration gate 和 modal scope。目标切换、会话关闭、配置恢复/
 或其他审核上下文。编辑器明确提示片段会以明文保存在本机，用户不要保存密码、
 API key 或其他秘密。Frost、Graphite、Lavender 三套主题共享同一套视图代码，
 使用 registry、Palette 和组件 token；中英文、fixed footer、滚动表单和命令
-输入的 accessibility label 保持一致。
+输入的 accessibility label 保持一致。片段草稿的名称、说明和标签输入使用稳定
+accessibility ID 与双语显式可访问名称，便于键盘和辅助技术识别元数据字段。
 
 Agent 模式还要为每一回合和每一项 SSH/SFTP 操作单独审核。AI 助手不恢复历史
 SSH 授权，不根据历史知识自动连接主机，也不把知识条目当作可执行 runbook。Agent

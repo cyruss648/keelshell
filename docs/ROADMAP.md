@@ -6,8 +6,10 @@
 ## 2026-11-14 AI 审核命令保存为片段草稿
 
 本片基线为 exact HEAD
-`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，主体/修复提交为
-`9b831103aae5563a5450561988d668d2e77a19dd`。实现位于独立 worktree
+`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，主体实现提交为
+`9b831103aae5563a5450561988d668d2e77a19dd`，无障碍修复提交为
+`50ca0ead2fead7b0e92679ee9d531604ae040772`，当前最终实现 SHA 为
+`50ca0ead2fead7b0e92679ee9d531604ae040772`。实现位于独立 worktree
 `/Users/hdh/.codex/worktrees/ai-command-snippet-save-20261114/keelshell`，
 使用专用 target `work/ai-command-snippet-save-20261114/target`，全量门禁使用
 `work/ai-command-snippet-save-20261114/full-target`。
@@ -23,7 +25,8 @@ tab/session/target、configuration gate 和 modal scope，失效时双语报错�
 保存结果是普通本地片段，不持久化 session、host、凭据、AI profile、review token
 或秘密元数据；界面明确说明明文保存风险，保存/取消都不执行命令。Frost、
 Graphite、Lavender、中文/英文、fixed footer/scroll 和 accessibility label
-复用 registry、Palette 与组件 token，业务代码不按 theme ID 分支。具体决策见
+复用 registry、Palette 与组件 token；名称、说明、标签输入均有稳定
+accessibility ID 与中英文 `aria-label`，业务代码不按 theme ID 分支。具体决策见
 [ADR 0128](adr/0128-ai-reviewed-snippet-draft.md)，产品流程见
 [AI 助手审核工作流](product/AI_ASSISTANT_WORKFLOW.md)。
 
@@ -37,11 +40,17 @@ small-stack controller 均通过。脚本外单独 doctest 为 `14 passed / 0 fa
 `work/ai-command-snippet-save-20261114/logs/full-gate-9b83110.log`，测试记录见
 [2026-11-14 AI 片段保存](testing/records/2026-11-14-ai-reviewed-snippet-save.md)。
 
-当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。独立严格只读复核必须
-固定最终文档 SHA，重新给出 P0/P1/P2/P3、绝对路径/行号、触发条件、影响、实际
-测试计数和 `APPROVE`/`REQUEST_CHANGES`。macOS/Windows/Linux 原生窗口、真实 SSH、
-Podman、外部 AI provider、IME、辅助技术、签名、公证、安装升级和发布验收仍开放。
-公司内网不可用，本片只做本地 commit，不 push。
+无障碍修复后的 focused 回归绑定最终实现 SHA
+`50ca0ead2fead7b0e92679ee9d531604ae040772`：SnippetEditor `12/12`、AI 片段
+`6/6`、Assistant review `6/6`；fmt、app tests 严格 Clippy 和基线到最终实现 SHA
+的 diff check 均通过。第一次独立复核在 `db808e0b45a788f4744acf2fe98cde7bae7b2f0a`
+发现 P2 无障碍标签问题，修复后第二次独立复核已固定最终实现 SHA 并返回
+`APPROVE`，P0/P1/P2/P3 均为 `0`。原始复核报告见
+[AI 片段保存独立复核原文](testing/records/2026-11-14-ai-reviewed-snippet-save-independent-review-raw.md)，
+测试与未验证边界见
+[AI 片段保存测试记录](testing/records/2026-11-14-ai-reviewed-snippet-save.md)。
+完整 `scripts/check.py` 没有在无障碍修复提交上重复运行；已有完整脚本结果仍绑定
+`9b831103aae5563a5450561988d668d2e77a19dd`，不能代签最终修复提交的 full gate。
 
 ## 2026-11-14 命名隧道运行状态持久化与显式恢复
 

@@ -1,10 +1,10 @@
 # ADR 0128：AI 审核命令保存为片段草稿
 
 日期：2026-11-14。产品实现基线为 exact HEAD
-`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，主体实现与作者修复提交为
-`9b831103aae5563a5450561988d668d2e77a19dd`。文档和独立复核会在后续提交中
-继续绑定新的最终 SHA；在独立复核完成前，本 ADR 的作者状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。
+`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，主体实现提交为
+`9b831103aae5563a5450561988d668d2e77a19dd`，无障碍修复提交与当前最终实现
+SHA 为 `50ca0ead2fead7b0e92679ee9d531604ae040772`。当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。
 
 ## 背景
 
@@ -80,9 +80,10 @@ I/O 失败或未知结果都保留完整草稿和错误，只有成功保存才�
 ### 5. 主题、语言和可达性
 
 新增文案使用中文/英文翻译，编辑器继续使用 fixed footer、独立滚动表单、
-`aria-label` 命令输入和稳定 test/accessibility hooks。Frost、Graphite、
-Lavender 三套主题均从设计 registry、Palette 和组件 token 取得颜色与形状；
-业务代码不按 theme ID 分支。新增主题时只需扩展主题注册表和语义 token。
+`aria-label` 命令输入、名称/说明/标签输入和稳定 test/accessibility hooks。
+Frost、Graphite、Lavender 三套主题均从设计 registry、Palette 和组件 token
+取得颜色与形状；业务代码不按 theme ID 分支。新增主题时只需扩展主题注册表和
+语义 token。GPUI 回归会在中文和英文下按精确可访问性名称查找三个元数据输入。
 
 ## 分层与并发
 
@@ -94,7 +95,7 @@ Workspace background executor 执行，UI 线程不直接做磁盘写入。
 
 ## 验证与边界
 
-作者在实现提交 `9b831103aae5563a5450561988d668d2e77a19dd` 上使用独立
+作者在主体实现提交 `9b831103aae5563a5450561988d668d2e77a19dd` 上使用独立
 worktree `/Users/hdh/.codex/worktrees/ai-command-snippet-save-20261114/keelshell`
 和专用 target `work/ai-command-snippet-save-20261114/target` 完成 focused
 回归、格式和严格 Clippy；全量门禁使用
@@ -108,8 +109,14 @@ workspace 为 `2499 passed / 0 failed / 23 ignored`，workspace Clippy、fmt、
 依赖策略和三个 AI controller 均通过；单独 workspace doctest 为
 `14 passed / 0 failed`，其中 2 项 compile-fail。
 
-独立严格只读复核尚未绑定最终文档 SHA；完成后必须给出 P0/P1/P2/P3 计数、绝对
-路径/行号、实际测试计数和 `APPROVE`/`REQUEST_CHANGES`。本 ADR 不把 GPUI
+无障碍修复后的最终实现 SHA `50ca0ead2fead7b0e92679ee9d531604ae040772`
+重新运行 focused 回归：
+SnippetEditor `12 passed`、AI 片段 `6 passed`、Assistant review `6 passed`，
+fmt、app tests 严格 Clippy 和 diff check 均通过。第一次独立复核发现名称、说明、
+标签输入没有显式无障碍名称，修复后第二次独立复核固定该 SHA 返回 `APPROVE`，
+P0/P1/P2/P3 均为 `0`；完整原始报告见
+[独立复核原文](../testing/records/2026-11-14-ai-reviewed-snippet-save-independent-review-raw.md)。
+本 ADR 不把 GPUI
 headless 回归写成原生验收，也不把真实客户 SSH、Podman、外部 AI provider、
 macOS/Windows/Linux 原生窗口、IME、辅助技术、签名、公证、安装升级或发布验收
 写成已通过。

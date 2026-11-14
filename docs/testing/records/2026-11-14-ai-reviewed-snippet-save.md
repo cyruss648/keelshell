@@ -6,8 +6,11 @@
 作者 worktree：
 `/Users/hdh/.codex/worktrees/ai-command-snippet-save-20261114/keelshell`
 
-主体/修复提交：
+主体实现提交：
 `9b831103aae5563a5450561988d668d2e77a19dd`
+
+无障碍修复与最终实现提交：
+`50ca0ead2fead7b0e92679ee9d531604ae040772`
 
 作者专用 Cargo target：
 `work/ai-command-snippet-save-20261114/target`
@@ -20,9 +23,10 @@
 
 ## 结论
 
-作者工程门禁在主体/修复提交上实际完成并通过。当前作者状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；独立严格只读复核尚未完成，因此
-这里的 P0/P1/P2/P3 只是作者自查，不是独立批准。
+主体实现提交上的作者工程门禁实际完成并通过。无障碍修复后的最终实现提交完成了
+focused 回归、fmt、app tests 严格 Clippy 和 diff check。当前作者状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`；独立批准来自第二次复核的最终
+实现 SHA，不由作者自查代签。
 
 ## 功能回归
 
@@ -37,6 +41,17 @@ warning 没有改变任何命令的 exit code。
 | `CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/target cargo test -p keelshell-app --bin keelshell-app --tests snippet_editor --locked --offline -- --nocapture --test-threads=1` | `11 passed / 0 failed / 1144 filtered; exit 0` |
 | `CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/target cargo test -p keelshell-app --bin keelshell-app --tests command_review_target --locked --offline -- --nocapture --test-threads=1` | `6 passed / 0 failed / 1149 filtered; exit 0` |
 | `CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/target cargo test -p keelshell-core --locked --offline -- --nocapture` | `634 passed / 0 failed / 0 ignored; exit 0` |
+
+无障碍修复提交 `50ca0ead2fead7b0e92679ee9d531604ae040772` 的 focused rerun：
+
+| 命令 | 实际结果 |
+| --- | --- |
+| `cargo fmt --all -- --check` | `exit 0` |
+| `CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/target cargo test -p keelshell-app --bin keelshell-app --tests snippet_editor --locked --offline -- --nocapture --test-threads=1` | `12 passed / 0 failed / 1144 filtered; exit 0` |
+| `CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/target cargo test -p keelshell-app --bin keelshell-app --tests ai_snippet_save --locked --offline -- --nocapture --test-threads=1` | `6 passed / 0 failed / 1150 filtered; exit 0` |
+| `CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/target cargo test -p keelshell-app --bin keelshell-app --tests command_review_target --locked --offline -- --nocapture --test-threads=1` | `6 passed / 0 failed / 1150 filtered; exit 0` |
+| `CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/target cargo clippy -p keelshell-app --bin keelshell-app --tests --locked --offline -- -D warnings` | `exit 0` |
+| `git diff --check b89445604b4ce44fc5a80ff26605f6e6b9039d57 50ca0ead2fead7b0e92679ee9d531604ae040772` | `exit 0` |
 
 覆盖内容包括：
 
@@ -101,8 +116,26 @@ CARGO_TARGET_DIR=work/ai-command-snippet-save-20261114/full-target cargo test --
 
 ## 独立严格只读复核
 
-状态：`PENDING`。复核必须固定最终文档 SHA，在独立源码 worktree、独立 Cargo
-target 和独立日志目录中运行。复核范围包括：
+第一次复核固定在 `db808e0b45a788f4744acf2fe98cde7bae7b2f0a`，返回
+`REQUEST_CHANGES`：P0 `0`、P1 `0`、P2 `1`、P3 `0`。唯一 P2 是
+`crates/keelshell-app/src/snippet_editor/view.rs` 的名称、说明和标签输入缺少
+显式无障碍名称；修复提交 `50ca0ead2fead7b0e92679ee9d531604ae040772` 增加
+稳定 accessibility ID、中英文 `aria-label` 和 GPUI 回归。
+
+第二次复核固定最终实现 SHA
+`50ca0ead2fead7b0e92679ee9d531604ae040772`，在独立源码 worktree
+`/Users/hdh/.codex/worktrees/d362/keelshell`、独立 target
+`work/review-final-50ca0ea/target` 和独立日志目录
+`work/review-final-50ca0ea/logs/` 中完成，结论为 `APPROVE`：
+P0 `0`、P1 `0`、P2 `0`、P3 `0`。完整原始报告见
+[独立复核原文](2026-11-14-ai-reviewed-snippet-save-independent-review-raw.md)，
+独立日志归档见
+[独立复核日志目录](2026-11-14-ai-reviewed-snippet-save-independent-review-logs/)。
+独立实际结果为 SnippetEditor `12/12`、AI 片段 `6/6`、Assistant review `6/6`、
+core `634/634`、core doctest `7/7`，fmt、app tests 严格 Clippy 和 diff check
+均 exit `0`。
+
+复核范围包括：
 
 - P0/P1/P2/P3；
 - 每个 finding 的绝对路径、行号、触发条件和影响；

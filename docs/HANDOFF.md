@@ -8,8 +8,10 @@
 ## 2026-11-14 AI 审核命令保存为片段草稿
 
 本片基线是 exact HEAD
-`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，作者主体/修复提交为
-`9b831103aae5563a5450561988d668d2e77a19dd`。源码位于独立 worktree
+`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，主体实现提交为
+`9b831103aae5563a5450561988d668d2e77a19dd`，无障碍修复提交为
+`50ca0ead2fead7b0e92679ee9d531604ae040772`，当前最终实现 SHA 为
+`50ca0ead2fead7b0e92679ee9d531604ae040772`。源码位于独立 worktree
 `/Users/hdh/.codex/worktrees/ai-command-snippet-save-20261114/keelshell`，
 分支为 `feature/ai-command-snippet-save-20261114`。父工作树
 `/Users/hdh/work/develop/projects/keelshell` 和旧的
@@ -29,7 +31,8 @@
 - 保存使用普通 `Snippet`，不写 session、host、凭据、AI profile、review token
   或秘密元数据；界面警告片段以明文保存在本机，保存和取消不执行命令。
 - Frost、Graphite、Lavender 通过 registry/Palette/token 共享 UI 代码，双语、
-  fixed footer、滚动和 accessibility label 已覆盖，业务代码没有 theme ID 分支。
+  fixed footer、滚动和 accessibility label 已覆盖。名称、说明、标签输入也有
+  稳定 accessibility ID 与中英文 `aria-label`，业务代码没有 theme ID 分支。
 
 ### 作者验证
 
@@ -52,13 +55,37 @@ core 包全测试 `634/634`。日志保存在
 [AI 片段保存测试记录](testing/records/2026-11-14-ai-reviewed-snippet-save.md)。
 app 链接阶段的 `__eh_frame section too large` 是已知 warning，没有改变 exit code。
 
-### 当前状态与接续
+无障碍修复后的 focused 回归绑定最终实现 SHA
+`50ca0ead2fead7b0e92679ee9d531604ae040772`：SnippetEditor `12/12`、AI 片段
+`6/6`、Assistant review `6/6`；`cargo fmt --all -- --check`、app tests
+严格 Clippy 和基线到最终实现 SHA 的 `git diff --check` 均通过。该修复没有重新
+运行完整 `scripts/check.py`；此前完整脚本的通过结果仍绑定主体实现提交
+`9b831103aae5563a5450561988d668d2e77a19dd`，最终提交的 focused 证据见测试记录。
 
-当前为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。必须在文档最终提交后启动
-另一位严格只读 agent，固定最终 exact SHA，使用独立源码 worktree、Cargo target
-和日志复核 P0/P1/P2/P3、绝对路径/行号、触发条件、影响、实际测试计数和
-`APPROVE`/`REQUEST_CHANGES`。复核完成后更新本节、路线图、ADR 0128 和测试记录，
-再清理复核 worktree/target，保留原始回执。
+### 独立复核与当前状态
+
+第一次独立严格只读复核固定在 `db808e0b45a788f4744acf2fe98cde7bae7b2f0a`，
+发现一个 P2：SnippetEditor 的名称、说明、标签缺少显式无障碍名称。该问题已在
+`50ca0ead2fead7b0e92679ee9d531604ae040772` 修复，并增加 GPUI 中英文可访问性
+名称回归。第一次原始回执已归档到
+[修复前独立复核原文](testing/records/2026-11-14-ai-reviewed-snippet-save-independent-review-before-fix-raw.md)。
+
+第二次独立严格只读复核固定在最终实现 SHA
+`50ca0ead2fead7b0e92679ee9d531604ae040772`，使用独立源码 worktree
+`/Users/hdh/.codex/worktrees/d362/keelshell`、target
+`work/review-final-50ca0ea/target` 和日志目录
+`work/review-final-50ca0ea/logs/`。原始报告已归档到
+[AI 片段保存独立复核原文](testing/records/2026-11-14-ai-reviewed-snippet-save-independent-review-raw.md)。
+结论为 `APPROVE`，P0/P1/P2/P3 均为 `0`。独立实际通过 SnippetEditor `12/12`、
+AI 片段 `6/6`、Assistant review `6/6`、core `634/634`、core doctest `7/7`，
+并通过 fmt、app tests 严格 Clippy 和 diff check。对应独立日志已归档到
+[独立复核日志目录](testing/records/2026-11-14-ai-reviewed-snippet-save-independent-review-logs/)。
+
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。独立复核没有把
+macOS/Windows/Linux 原生窗口、真实 SSH、Podman、外部 AI provider、IME、
+VoiceOver/NVDA 或其他完整辅助技术矩阵、跨进程 StateStore、签名、公证、安装升级
+和发布验收写成通过。公司内网不可用，本片只允许本地 commit，不 push。复核原始
+报告、独立日志和作者日志保留在项目中；临时复核 worktree、target 和分支已清理。
 
 不要把 headless GPUI、loopback fixture 或 full gate 写成 macOS/Windows/Linux
 原生、真实 SSH、Podman、外部 AI provider、IME、辅助技术、签名、公证、安装升级
