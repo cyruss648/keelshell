@@ -58,9 +58,9 @@ readiness/observer/small-stack controller 全部通过。focused core
 app 链接阶段的 `__eh_frame section too large` 是已知 warning，未导致门禁失败。
 
 独立严格只读代码与功能复核已经完成，固定同一 exact SHA，使用独立源码 worktree
-和独立 Cargo target。复核报告为
-`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`，
-项目内归档摘要见
+和独立 Cargo target。原始复核报告已归档到
+[项目内原始复核报告](testing/records/2026-11-14-named-tunnel-runtime-recovery-review-raw.md)，
+项目内复核摘要见
 [独立复核记录](testing/records/2026-11-14-named-tunnel-runtime-recovery-review.md)；
 复核结论为 `APPROVE`，P0/P1/P2/P3 均为 `0`。独立复核实际完成：
 
@@ -76,7 +76,8 @@ macOS/Windows/Linux、真实客户 SSH、Podman、IME、辅助技术、签名、
 和发布验收写成通过；作者完整 `scripts/check.py` 的结果由作者日志提供，独立复核
 没有重复执行该完整脚本。app 测试链接阶段的 `__eh_frame section too large`
 仍是已知 warning，没有改变任何 exit code。公司内网不可用，本片只允许本地
-commit，不执行 push。
+commit，不执行 push。证据采集完成后已清理临时独立 Cargo target、评审
+worktree 和旧的命名隧道恢复 worktree；作者门禁日志与复核原文已保留在项目内。
 
 详细设计、产品边界和测试证据见 [ADR 0127](adr/0127-named-tunnel-runtime-recovery.md)、
 [命名隧道规则管理](product/NAMED_TUNNEL_RULE_MANAGEMENT.md) 和

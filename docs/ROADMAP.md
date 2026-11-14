@@ -33,8 +33,8 @@ app `tunnel_rule_tests` 为 `19 passed / 0 failed / 1127 filtered`，app `tunnel
 为 `22 passed / 0 failed / 1124 filtered`。完整日志见
 `work/named-tunnel-runtime-20261114/logs/full-gate-7e6ecb3-rerun.log`。
 
-独立严格只读复核已经完成，报告位于
-`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`，
+独立严格只读复核已经完成，原始报告已归档到
+[项目内原始复核报告](testing/records/2026-11-14-named-tunnel-runtime-recovery-review-raw.md)，
 项目内归档摘要见
 [独立复核记录](testing/records/2026-11-14-named-tunnel-runtime-recovery-review.md)；
 审查 exact SHA 为 `7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec`，结论为
@@ -46,7 +46,8 @@ app 测试清单为 `1146` 项；fmt、core/app 严格 Clippy 和 diff check 均
 扩大为原生 macOS/Windows/Linux、真实 SSH/Podman、IME、辅助技术、签名、公证和
 安装发布验收；作者完整 `scripts/check.py` 的通过证据仍以作者独立 target 日志
 为准，复核 agent 没有重复执行完整脚本。公司内网不可用，本片只做本地 commit，
-不执行 push。设计、产品和测试证据分别见
+不执行 push。证据采集完成后已清理临时独立 target、评审 worktree 和旧的命名隧道
+恢复 worktree；作者日志和复核原文已保留。设计、产品和测试证据分别见
 [ADR 0127](adr/0127-named-tunnel-runtime-recovery.md)、
 [命名隧道规则管理](product/NAMED_TUNNEL_RULE_MANAGEMENT.md) 和
 [测试记录](testing/records/2026-11-14-named-tunnel-runtime-recovery.md)。

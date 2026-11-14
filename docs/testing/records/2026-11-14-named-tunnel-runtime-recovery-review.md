@@ -7,11 +7,11 @@
 
 - 产品基线：`fd4cc894aa876f23cde49698b693779e81027489`
 - 复核实现 SHA：`7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec`
-- 复核 worktree：`/Users/hdh/.codex/worktrees/6711/keelshell`
+- 复核 worktree：`/Users/hdh/.codex/worktrees/6711/keelshell`（证据采集后已清理）
 - 独立 Cargo target：
-  `/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/target`
+  `/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/target`（证据采集后已清理）
 - 原始复核报告：
-  `/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`
+  [项目内归档原文](2026-11-14-named-tunnel-runtime-recovery-review-raw.md)
 - 工具链：`rustc 1.100.0`、`cargo 1.100.0`
 
 ## 结论

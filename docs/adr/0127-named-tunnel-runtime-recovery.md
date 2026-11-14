@@ -117,13 +117,14 @@ StateStore 中会多出最多 256 条有界的非敏感候选。未知候选可�
 
 源码和测试绑定最终实现提交
 `7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec`、作者独立 Cargo target、
-独立复核 Cargo target 和原始门禁日志。独立严格只读复核报告位于
-`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`，
+独立复核 Cargo target 和原始门禁日志。独立严格只读复核报告已归档到
+[项目内原始复核报告](../testing/records/2026-11-14-named-tunnel-runtime-recovery-review-raw.md)，
 项目内归档摘要见
 [独立复核记录](../testing/records/2026-11-14-named-tunnel-runtime-recovery-review.md)；
 其 P0/P1/P2/P3 计数均为 `0`，merge recommendation 为 `APPROVE`。独立复核实际
 验证了 core `8/8`、app 命名规则 `19/19`、隧道面板 `22/22`、测试清单
-`1146` 项、fmt、core/app 严格 Clippy 和 diff check；作者完整
+`1146` 项、fmt、core/app 严格 Clippy 和 diff check；原始 target 和复核 worktree
+在证据归档后已清理。作者完整
 `scripts/check.py` 的通过证据仍绑定作者日志，而不是被独立复核重复声称。
 
 对应的完整测试记录见

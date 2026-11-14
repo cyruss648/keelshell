@@ -54,13 +54,13 @@ CleanupUnconfirmed ── confirmed cleanup ──► removed
 
 独立严格只读复核已在 exact SHA
 `7e6ecb3ea8c347f7f633ba0f205d936cd58d72ec` 上完成，报告位于
-`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`，
+[`项目内原始复核报告`](../testing/records/2026-11-14-named-tunnel-runtime-recovery-review-raw.md)，
 项目内归档摘要见
 [独立复核记录](../testing/records/2026-11-14-named-tunnel-runtime-recovery-review.md)；
 P0/P1/P2/P3 均为 `0`，结论为 `APPROVE`。复核使用独立 target，验证了 core
 `8/8`、app 命名规则 `19/19`、隧道面板 `22/22`，以及 fmt、严格 Clippy 和
-diff check。复核只证明当前受控代码路径，不替代原生桌面、真实远端、Podman
-或发布验收。
+diff check。原始 target 和复核 worktree 在证据归档后已清理；复核只证明当前
+受控代码路径，不替代原生桌面、真实远端、Podman 或发布验收。
 
 ## 使用流程
 

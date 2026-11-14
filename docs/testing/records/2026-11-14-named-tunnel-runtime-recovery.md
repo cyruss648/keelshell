@@ -12,6 +12,7 @@
 
 独立 Cargo target：
 `/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/named-tunnel-runtime-20261114/target`
+（证据采集后已清理）
 
 完整门禁日志：
 `work/named-tunnel-runtime-20261114/logs/full-gate-7e6ecb3-rerun.log`
@@ -34,8 +35,8 @@
 `__eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table`。
 它没有改变门禁 exit `0`，也没有形成本片的编译失败。
 
-独立严格只读复核已经完成，报告为
-`/Users/hdh/.codex/worktrees/6711/keelshell/work/review-final-7e6ecb3/review-report.md`。
+独立严格只读复核已经完成，原始报告已归档为
+[项目内原始复核报告](2026-11-14-named-tunnel-runtime-recovery-review-raw.md)。
 项目内归档摘要见
 [独立复核记录](2026-11-14-named-tunnel-runtime-recovery-review.md)。
 复核固定 exact SHA
@@ -108,6 +109,9 @@ app 测试链接阶段出现已知 macOS warning：
 `__eh_frame section too large`；它没有改变 exit code 或测试结果。
 独立复核没有重复运行作者完整 `scripts/check.py`，因此完整 Python/Rust
 计数仍以作者日志为证据。
+
+上述作者/复核 target 和评审 worktree 均在证据采集、原始报告归档后清理；
+作者专项日志仍保留在 `work/named-tunnel-runtime-20261114/logs/`。
 
 ## 未验证边界
 
