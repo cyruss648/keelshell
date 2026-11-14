@@ -11,20 +11,25 @@ UTF-16 LE/BE 差异预览、测试记录 SHA/target 绑定和 session 编码错�
 保留在 [`previous-b239-review.md`](../work/unicode-codec-20261114/review/previous-b239-review.md)。
 
 修复后的实现和测试源码提交为
-`368a7f836f72ca06b34276e5d587a34497fc7f13`。完整 `python3 scripts/check.py` 已实际
-等待并退出 `0`，使用 `work/unicode-codec-20261114/full-target`，耗时约 `697s`：
-Python `131 run / 1 skipped`，ordinary Rust `2462 passed / 0 failed / 23 ignored`，
-app `1138 passed / 2 ignored`，14 项 doctest、依赖策略、fmt、workspace 严格
-Clippy 和 readiness/observer/small-stack controller 均通过。日志和 exit 回执见
-[`unicode-full-gate.log`](../work/unicode-codec-20261114/unicode-full-gate.log) 与
-[`unicode-full-gate.exit.json`](../work/unicode-codec-20261114/unicode-full-gate.exit.json)。
+`368a7f836f72ca06b34276e5d587a34497fc7f13`。完整 `python3 scripts/check.py` 已实际等待并退出 `0`，使用
+`work/unicode-codec-20261114/full-target`，耗时约 `697s`：Python `131 run / 1 skipped`，
+ordinary Rust `2462 passed / 0 failed / 23 ignored`，app `1138 passed / 2 ignored`，
+14 项 doctest、依赖策略、fmt、workspace 严格 Clippy 和 readiness/observer/small-stack
+controller 均通过。日志和 exit 回执见 [`unicode-full-gate.log`](../work/unicode-codec-20261114/unicode-full-gate.log)
+与 [`unicode-full-gate.exit.json`](../work/unicode-codec-20261114/unicode-full-gate.exit.json)。
 门禁结束后的外层 zsh wrapper 因使用只读变量名 `status` 返回 `1`，但门禁日志已到达
 成功末段，exit 回执记录了这一 wrapper 问题；不能把 wrapper 退出码当作测试失败。
 
-当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。必须先提交本段文档绑定，
-再以该 exact SHA 启动新的独立严格只读复核，取得 P0/P1/P2/P3 计数及
-`APPROVE`/`REQUEST_CHANGES`。公司内网不可用，本片只做本地 commit，不执行 push。
-原生桌面、跨平台窗口、IME、辅助技术、真实 SSH、Podman 联调和发行验收继续开放。
+文档绑定与新的独立严格只读代码/功能复核提交为 `6add70cdd367c65f500b7fadf35c7a4fc296ec5a`，复核结论为
+`APPROVE`，P0/P1/P2/P3 均为 `0`。独立 core Unicode、session `editor_reviewed_`、
+app `editor_format` 和 app `merge` 分别为 `23`、`9`、`18`、`39` 项通过；targeted
+Clippy、fmt、diff check、文档绑定检查和 BOM-less U+FEFF probe 均通过。完整回执见
+[`final-review-6add70c.md`](../work/unicode-codec-20261114/review/final-review-6add70c.md)。
+独立复核没有代签作者 full gate、原生桌面、真实 SSH、Podman 或发行验收。
+
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。公司内网不可用，本片
+只做本地 commit，不执行 push。原生桌面、跨平台窗口、IME、辅助技术、真实 SSH、
+Podman 联调和发行验收继续开放。
 
 ## 2026-11-14 连接状态灯审查修复
 

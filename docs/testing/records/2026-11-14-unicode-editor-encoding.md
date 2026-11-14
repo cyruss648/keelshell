@@ -1,9 +1,10 @@
 # Unicode 编辑器编码扩展测试记录
 
 日期：2026-11-14（Asia/Shanghai）。源码与测试实现提交：
-`368a7f836f72ca06b34276e5d587a34497fc7f13`。本记录随后会随文档绑定提交更新，
-但门禁的 `source_head`、源码提交和测试输入均以该实现提交为准。公司内网不可用，
-本片只做本地提交，不执行 push。
+`368a7f836f72ca06b34276e5d587a34497fc7f13`；文档绑定与独立复核提交：
+`6add70cdd367c65f500b7fadf35c7a4fc296ec5a`。门禁的 `source_head`、源码提交和测试输入均以实现提交为准；
+文档绑定提交未修改 core/session/app 或 Cargo 输入。公司内网不可用，本片只做本地
+提交，不执行 push。
 
 ## 实现范围
 
@@ -74,10 +75,31 @@ P0 `0`、P1 `1`、P2 `2`、P3 `1`，原始回执已复制到
 - P2：修正测试记录的旧提交绑定、旧 `source_head`、旧 target 和门禁计数。
 - P3：session 错误文案改为准确描述当前入口实际校验的编码合同。
 
-当前记录状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。文档绑定提交后，
-必须以包含本记录的 exact SHA 启动新的独立严格只读代码与功能复核，回执至少包含
-P0/P1/P2/P3 计数、每个 finding 的绝对路径和行号、触发条件、影响、实际验证命令、
-`APPROVE` 或 `REQUEST_CHANGES`，并保存到当前 work evidence 目录。
+## 新的独立复核
+
+复核固定在文档绑定提交
+`6add70cdd367c65f500b7fadf35c7a4fc296ec5a`，回执保存在
+[`final-review-6add70c.md`](../../../work/unicode-codec-20261114/review/final-review-6add70c.md)。
+独立 checkout、target 和日志均位于父工作树之外；复核期间 checkout 为 detached，
+工作树无源码变化。
+
+结论为 `APPROVE`：P0 `0`、P1 `0`、P2 `0`、P3 `0`。独立验证结果如下：
+
+| 验证 | 结果 |
+| --- | --- |
+| core `text_document::tests` | `23 passed / 0 failed / 189 filtered` |
+| session `editor_reviewed_` | `9 passed / 0 failed / 145 filtered` |
+| app `editor_format` | `18 passed / 0 failed / 1122 filtered` |
+| app `merge` | `39 passed / 0 failed / 1101 filtered` |
+| targeted Clippy、fmt、diff check | 全部 exit `0` |
+| 文档绑定检查 | `binding_check=PASS` |
+| BOM-less U+FEFF 独立 probe | exit `0`，确认 generic/authoritative 语义和 fail-closed 边界 |
+
+独立复核确认上一轮四项 finding 均已关闭，并检查了 Unicode 路径的 UI/worker 分层。
+它没有代签作者完整 `python3 scripts/check.py`、macOS/Windows/Linux 原生窗口、IME、
+辅助技术、真实客户 SSH、Podman、签名、公证、发布、安装升级或生产验收。
+
+当前记录状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。
 
 ## 验收边界
 

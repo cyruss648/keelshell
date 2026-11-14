@@ -12,8 +12,9 @@
 工作证据目录 [`previous-b239-review.md`](../work/unicode-codec-20261114/review/previous-b239-review.md)，
 原始内容不要删除。
 
-本轮实现与修复源码、测试已绑定到提交
-`368a7f836f72ca06b34276e5d587a34497fc7f13`，完成四项修复：
+本轮实现与修复源码、测试绑定在提交
+`368a7f836f72ca06b34276e5d587a34497fc7f13`，文档绑定和独立复核固定在最终提交
+`6add70cdd367c65f500b7fadf35c7a4fc296ec5a`，完成四项修复：
 
 - 成功保存后的完整读回继续使用审核时的 `TextFormat`，只把实际读回得到的换行
   策略合并回原编码/BOM 外壳，避免 BOM-less UTF-8 正文首个 U+FEFF 被重新解释
@@ -23,26 +24,32 @@
   工作树的 SHA 或路径；
 - session 错误文案改为准确说明当前入口只比较编码。
 
-完整 `python3 scripts/check.py` 已在当前源码提交上实际等待并退出 `0`。它使用
-当前 checkout 的 `work/unicode-codec-20261114/full-target`，耗时约 `697s`：
-Python `131 run / 1 skipped`，ordinary Rust `2462 passed / 0 failed / 23 ignored`，
-app `1138 passed / 2 ignored`，14 项 doctest、依赖策略、fmt、workspace 严格
-Clippy 和 readiness/observer/small-stack controller 均通过。日志和手工生成的
-exit 回执保存在 [`unicode-full-gate.log`](../work/unicode-codec-20261114/unicode-full-gate.log)
+完整 `python3 scripts/check.py` 已在实现提交上实际等待并退出 `0`。它使用当前
+checkout 的 `work/unicode-codec-20261114/full-target`，耗时约 `697s`：Python
+`131 run / 1 skipped`，ordinary Rust `2462 passed / 0 failed / 23 ignored`，app
+`1138 passed / 2 ignored`，14 项 doctest、依赖策略、fmt、workspace 严格 Clippy
+和 readiness/observer/small-stack controller 均通过。日志和手工生成的 exit 回执
+保存在 [`unicode-full-gate.log`](../work/unicode-codec-20261114/unicode-full-gate.log)
 和 [`unicode-full-gate.exit.json`](../work/unicode-codec-20261114/unicode-full-gate.exit.json)。
 app 链接阶段有已知 `__eh_frame section too large` warning，但门禁命令退出 `0`。
 门禁结束后的外层 zsh wrapper 曾复用只读变量名 `status`，因此 wrapper 返回 `1`；
 该问题发生在门禁成功末段之后，不能作为测试失败，已记录在 exit 回执中。
-新增 app 回归为
-`editor_format_successful_save_preserves_bomless_leading_feff` 与
+新增 app 回归为 `editor_format_successful_save_preserves_bomless_leading_feff` 与
 `editor_format_utf16_diff_preview_uses_decoded_bodies`。
 
-当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。下一步必须以包含本段
-准确绑定信息的文档提交 exact SHA 启动新的独立严格只读复核，返回 P0/P1/P2/P3、
-绝对路径/行号、实际验证命令和 `APPROVE` 或 `REQUEST_CHANGES`；复核回执应保存到
-当前 work evidence 目录。公司内网不可用，本片只允许本地 commit，不执行 push。
-macOS 当前桌面、Windows/Linux 原生窗口、IME、辅助技术、真实客户 SSH、Podman
-联调、签名、公证、安装升级仍不由本片门禁代签。
+新的独立严格只读代码与功能复核已固定到最终提交 `6add70cdd367c65f500b7fadf35c7a4fc296ec5a`，使用父工作树之外的
+独立源码、Cargo target 和日志目录，结论为 `APPROVE`：P0 `0`、P1 `0`、P2 `0`、
+P3 `0`。复核回执保存在
+[`final-review-6add70c.md`](../work/unicode-codec-20261114/review/final-review-6add70c.md)。
+独立执行的 core Unicode 为 `23 passed / 0 failed / 189 filtered`，session
+`editor_reviewed_` 为 `9 passed / 0 failed / 145 filtered`，app `editor_format`
+为 `18 passed / 0 failed / 1122 filtered`，app `merge` 为 `39 passed / 0 failed /
+1101 filtered`，targeted Clippy、fmt、diff check、文档绑定检查和 BOM-less U+FEFF
+probe 均通过。独立复核没有代签作者完整门禁、原生桌面或真实远端边界。
+
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。公司内网不可用，本片
+只允许本地 commit，不执行 push。macOS 当前桌面、Windows/Linux 原生窗口、IME、
+辅助技术、真实客户 SSH、Podman 联调、签名、公证、安装升级仍不由本片门禁代签。
 
 ## 2026-11-14 连接状态灯审查修复与完整门禁
 
