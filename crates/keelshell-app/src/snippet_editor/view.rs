@@ -80,7 +80,13 @@ impl Render for SnippetEditor {
                             .flex_col()
                             .gap_1()
                             .child(label(cx, t(cx, "名称", "Name")))
-                            .child(Input::new(&self.name).id("snippet-name").disabled(self.saving)),
+                            .child(
+                                Input::new(&self.name)
+                                    .id("snippet-name")
+                                    .accessibility_id("snippet-name")
+                                    .aria_label(t(cx, "片段名称", "Snippet name"))
+                                    .disabled(self.saving),
+                            ),
                     )
                     .child(
                         div()
@@ -89,7 +95,13 @@ impl Render for SnippetEditor {
                             .flex_col()
                             .gap_1()
                             .child(label(cx, t(cx, "说明 · 可选", "Description · optional")))
-                            .child(Input::new(&self.description).id("snippet-description").disabled(self.saving)),
+                            .child(
+                                Input::new(&self.description)
+                                    .id("snippet-description")
+                                    .accessibility_id("snippet-description")
+                                    .aria_label(t(cx, "片段说明", "Snippet description"))
+                                    .disabled(self.saving),
+                            ),
                     )
                     .child(
                         div()
@@ -98,7 +110,13 @@ impl Render for SnippetEditor {
                             .flex_col()
                             .gap_1()
                             .child(label(cx, t(cx, "标签 · 逗号分隔", "Tags · comma-separated")))
-                            .child(Input::new(&self.tags).id("snippet-tags").disabled(self.saving)),
+                            .child(
+                                Input::new(&self.tags)
+                                    .id("snippet-tags")
+                                    .accessibility_id("snippet-tags")
+                                    .aria_label(t(cx, "片段标签", "Snippet tags"))
+                                    .disabled(self.saving),
+                            ),
                     )
                     .child(
                         div().flex_shrink_0().flex().flex_col().gap_2()

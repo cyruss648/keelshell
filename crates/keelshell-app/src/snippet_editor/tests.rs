@@ -7,7 +7,8 @@ use crate::i18n::{Message, set_language};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Context, Entity, Focusable, InteractiveElement,
     IntoElement, ParentElement, Pixels, Render, Styled, Subscription, TestAppContext,
-    TestSupportExt, Window, WindowBounds, WindowOptions, div, point, px, size, test::TestWindowExt,
+    TestSupportExt, Window, WindowBounds, WindowOptions, div, point, px, size,
+    test::{TestQueryExt, TestWindowExt},
 };
 use keelshell_core::{Language, Snippet};
 
@@ -245,6 +246,36 @@ fn locale_change_preserves_identity_command_whitespace_and_current_focus(cx: &mu
         fixture.events.borrow().saved.is_empty(),
         "command Enter must not save or run a snippet"
     );
+}
+
+#[gpui_kit::test]
+fn metadata_inputs_expose_bilingual_accessible_names(cx: &mut TestAppContext) {
+    let fixture = mount(cx, Some(sample()));
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        for label in ["片段名称", "片段说明", "片段标签"] {
+            assert_eq!(
+                window.find_by_label(label).label(),
+                Some(label),
+                "Chinese accessible label for {label}"
+            );
+        }
+
+        set_language(Language::En, cx);
+        fixture
+            .editor
+            .update(cx, |editor, cx| editor.refresh_locale(window, cx));
+        window.render_frame(cx);
+        for label in ["Snippet name", "Snippet description", "Snippet tags"] {
+            assert_eq!(
+                window.find_by_label(label).label(),
+                Some(label),
+                "English accessible label for {label}"
+            );
+        }
+    })
+    .checked("metadata input accessible names");
+    cx.run_until_parked();
 }
 
 #[gpui_kit::test]
