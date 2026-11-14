@@ -185,8 +185,9 @@ pub use text_merge::{
 pub use text_patch::apply_text_patch;
 pub use transfer_recovery::{
     MAX_TRANSFER_RECOVERY_DOCUMENT_BYTES, MAX_TRANSFER_RECOVERY_PATH_BYTES,
-    MAX_TRANSFER_RECOVERY_RECORDS, TRANSFER_RECOVERY_SCHEMA_VERSION, TransferRecoveryDirection,
-    TransferRecoveryRecord, TransferRecoveryState, TransferRecoveryStore,
+    MAX_TRANSFER_RECOVERY_RECORDS, TRANSFER_RECOVERY_SCHEMA_VERSION, TransferRecoveryClaim,
+    TransferRecoveryDirection, TransferRecoveryRecord, TransferRecoveryState,
+    TransferRecoveryStore,
 };
 pub use workspace_layout::{
     LayoutPane, LayoutTab, LayoutTabAvailability, LayoutWindow, MAX_LAYOUT_TABS,

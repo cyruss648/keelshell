@@ -94,6 +94,15 @@ impl FilesPanel {
     // Only an unexecuted proposal is withdrawn. An issued remote operation owns
     // its captured path and result until the original transport completes.
     pub(super) fn withdraw_browser_review(&mut self) {
+        if self
+            .pending
+            .as_ref()
+            .and_then(|(_, operation)| operation.persisted_recovery_id())
+            .is_some()
+        {
+            self.recovery_claim = None;
+            self.active_recovery_id = None;
+        }
         self.pending = None;
         self.confirmation_expanded = false;
         self.browser_review_revision = uuid::Uuid::new_v4();

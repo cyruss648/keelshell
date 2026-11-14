@@ -128,6 +128,15 @@ impl FilesPanel {
                 if expected_review.is_none() || view.pending_review_identity() != expected_review {
                     return;
                 }
+                if view
+                    .pending
+                    .as_ref()
+                    .and_then(|(_, operation)| operation.persisted_recovery_id())
+                    .is_some()
+                {
+                    view.recovery_claim = None;
+                    view.active_recovery_id = None;
+                }
                 view.pending = None;
                 view.confirmation_expanded = false;
                 cx.notify();

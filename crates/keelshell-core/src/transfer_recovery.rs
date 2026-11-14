@@ -239,13 +239,31 @@ impl TransferRecoveryRecord {
 /// Separate atomic storage for transfer-recovery metadata.
 ///
 /// Every public method performs blocking filesystem I/O and must run off the
-/// GPUI event/render thread. The store uses an owner-only JSON file and a
-/// sibling lock file. `upsert` and `remove` read the latest file while holding
-/// that lock, so multiple KeelShell windows do not overwrite each other's
-/// records.
+/// GPUI event/render thread. The store uses an owner-only JSON file, a sibling
+/// journal lock and per-record claim locks. `upsert` and `remove` read the
+/// latest file while holding both relevant locks, so multiple KeelShell
+/// windows do not overwrite or concurrently recover the same record.
 pub struct TransferRecoveryStore {
     path: Option<PathBuf>,
     synchronization: Mutex<()>,
+}
+
+/// An ephemeral exclusive claim for one persisted recovery record.
+///
+/// The claim is held by an OS file lock rather than written into the recovery
+/// JSON. It therefore coordinates windows and processes without turning the
+/// journal into a source of runtime authority. Dropping the claim releases it.
+pub struct TransferRecoveryClaim {
+    path: Option<PathBuf>,
+    id: Uuid,
+    _lock: Option<File>,
+}
+
+impl TransferRecoveryClaim {
+    /// Return the record identifier protected by this ephemeral claim.
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
 }
 
 impl TransferRecoveryStore {
@@ -296,29 +314,64 @@ impl TransferRecoveryStore {
         read_records(path)
     }
 
+    /// Claim one existing record for a single recovery review or transfer.
+    ///
+    /// The claim is exclusive across cooperating processes and remains held
+    /// until the returned value is dropped. It does not persist a session,
+    /// credential, review token or transfer worker.
+    pub fn claim(&self, id: Uuid) -> Result<TransferRecoveryClaim, Error> {
+        let Some(path) = self.path.as_deref() else {
+            return Ok(TransferRecoveryClaim {
+                path: None,
+                id,
+                _lock: None,
+            });
+        };
+        let _guard = self.synchronization.lock().map_err(|_| Error::Poisoned)?;
+        let lock = self.open_claim_lock(path, id)?;
+        let records = read_records(path)?;
+        if !records.iter().any(|record| record.id == id) {
+            return Err(Error::TransferRecoveryNotFound);
+        }
+        Ok(TransferRecoveryClaim {
+            path: Some(path.to_path_buf()),
+            id,
+            _lock: Some(lock),
+        })
+    }
+
     /// Atomically add or replace one record.
-    pub fn upsert(&self, mut record: TransferRecoveryRecord) -> Result<(), Error> {
+    pub fn upsert(&self, record: TransferRecoveryRecord) -> Result<(), Error> {
+        record.validate()?;
+        let Some(path) = self.path.as_deref() else {
+            return Ok(());
+        };
+        let _guard = self.synchronization.lock().map_err(|_| Error::Poisoned)?;
+        let _claim_lock = self.open_claim_lock(path, record.id)?;
+        let _lock = self.lock_file(path)?;
+        upsert_record(path, record)
+    }
+
+    /// Atomically update a record while holding its exclusive claim.
+    ///
+    /// Recovery workers use this method after a record has been inspected and
+    /// approved. The claim prevents another process from starting or
+    /// discarding the same recovery while these checkpoints are written.
+    pub fn upsert_with_claim(
+        &self,
+        claim: &TransferRecoveryClaim,
+        record: TransferRecoveryRecord,
+    ) -> Result<(), Error> {
+        if claim.path != self.path || claim.id.is_nil() || claim.id != record.id {
+            return Err(Error::TransferRecoveryClaimMismatch);
+        }
         record.validate()?;
         let Some(path) = self.path.as_deref() else {
             return Ok(());
         };
         let _guard = self.synchronization.lock().map_err(|_| Error::Poisoned)?;
         let _lock = self.lock_file(path)?;
-        let mut records = read_records(path)?;
-        if let Some(index) = records.iter().position(|item| item.id == record.id) {
-            // The first durable write owns the creation timestamp. A later
-            // terminal result must not make a long-lived record look new.
-            record.created_at = records[index].created_at;
-            record.validate()?;
-            records[index] = record;
-        } else {
-            if records.len() >= MAX_TRANSFER_RECOVERY_RECORDS {
-                return Err(Error::TransferRecoveryLimit);
-            }
-            records.push(record);
-        }
-        validate_records(&records)?;
-        write_records(path, &records)
+        upsert_record(path, record)
     }
 
     /// Remove one record after an explicit successful recovery or discard.
@@ -326,6 +379,22 @@ impl TransferRecoveryStore {
     /// Removing a missing record is idempotent because a crash may have
     /// completed a cleanup in another process before this call.
     pub fn remove(&self, id: Uuid) -> Result<(), Error> {
+        match self.claim(id) {
+            Ok(claim) => self.remove_with_claim(&claim),
+            Err(Error::TransferRecoveryNotFound) => Ok(()),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Remove a record while holding its exclusive claim.
+    ///
+    /// This is used by the worker that owns a successful reviewed recovery.
+    /// Other windows cannot discard or replace the same record while the
+    /// claim remains alive.
+    pub fn remove_with_claim(&self, claim: &TransferRecoveryClaim) -> Result<(), Error> {
+        if claim.path != self.path || claim.id.is_nil() {
+            return Err(Error::TransferRecoveryClaimMismatch);
+        }
         let Some(path) = self.path.as_deref() else {
             return Ok(());
         };
@@ -333,11 +402,38 @@ impl TransferRecoveryStore {
         let _lock = self.lock_file(path)?;
         let mut records = read_records(path)?;
         let original_len = records.len();
-        records.retain(|record| record.id != id);
+        records.retain(|record| record.id != claim.id);
         if records.len() == original_len {
             return Ok(());
         }
         write_records(path, &records)
+    }
+
+    fn open_claim_lock(&self, path: &Path, id: Uuid) -> Result<File, Error> {
+        let parent = path
+            .parent()
+            .filter(|parent| !parent.as_os_str().is_empty())
+            .ok_or(Error::UnsafePath)?;
+        prepare_directory(parent)?;
+        let file_name = path.file_name().ok_or(Error::UnsafePath)?;
+        let mut claim_name = file_name.to_os_string();
+        claim_name.push(format!(".claim-{id}.lock"));
+        let claim_path = parent.join(claim_name);
+        regular_metadata(&claim_path)?;
+        let mut options = OpenOptions::new();
+        options.read(true).write(true).create(true).truncate(false);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let file = options.open(claim_path)?;
+        check_owner_permissions(&file.metadata()?)?;
+        file.try_lock().map_err(|error| match error {
+            fs::TryLockError::WouldBlock => Error::Busy,
+            fs::TryLockError::Error(error) => Error::Io(error),
+        })?;
+        Ok(file)
     }
 
     fn lock_file(&self, path: &Path) -> Result<File, Error> {
@@ -366,6 +462,24 @@ impl TransferRecoveryStore {
         })?;
         Ok(file)
     }
+}
+
+fn upsert_record(path: &Path, mut record: TransferRecoveryRecord) -> Result<(), Error> {
+    let mut records = read_records(path)?;
+    if let Some(index) = records.iter().position(|item| item.id == record.id) {
+        // The first durable write owns the creation timestamp. A later
+        // terminal result must not make a long-lived record look new.
+        record.created_at = records[index].created_at;
+        record.validate()?;
+        records[index] = record;
+    } else {
+        if records.len() >= MAX_TRANSFER_RECOVERY_RECORDS {
+            return Err(Error::TransferRecoveryLimit);
+        }
+        records.push(record);
+    }
+    validate_records(&records)?;
+    write_records(path, &records)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -637,6 +751,60 @@ mod tests {
                 "{forbidden} leaked into metadata"
             );
         }
+    }
+
+    #[test]
+    fn claim_is_exclusive_and_remove_requires_the_claim() {
+        let directory = TempDir::new().expect("temporary directory");
+        let path = directory.path().join("transfer-recovery.json");
+        let first = TransferRecoveryStore::new(&path);
+        let second = TransferRecoveryStore::new(&path);
+        let id = Uuid::new_v4();
+        first
+            .upsert(record(id, TransferRecoveryState::Unfinished))
+            .expect("persist recovery record");
+
+        let claim = first.claim(id).expect("claim recovery record");
+        assert!(matches!(second.claim(id), Err(Error::Busy)));
+        assert!(matches!(
+            second.upsert(record(id, TransferRecoveryState::Failed)),
+            Err(Error::Busy)
+        ));
+        assert!(matches!(second.remove(id), Err(Error::Busy)));
+        first
+            .remove_with_claim(&claim)
+            .expect("remove with owned claim");
+        drop(claim);
+        assert!(matches!(
+            second.claim(id),
+            Err(Error::TransferRecoveryNotFound)
+        ));
+    }
+
+    #[test]
+    fn claimed_upsert_rejects_a_different_record_id_or_journal() {
+        let directory = TempDir::new().expect("temporary directory");
+        let path = directory.path().join("transfer-recovery.json");
+        let first = TransferRecoveryStore::new(&path);
+        let second = TransferRecoveryStore::new(directory.path().join("other.json"));
+        let first_id = Uuid::new_v4();
+        let second_id = Uuid::new_v4();
+        first
+            .upsert(record(first_id, TransferRecoveryState::Unfinished))
+            .expect("persist first record");
+        first
+            .upsert(record(second_id, TransferRecoveryState::Failed))
+            .expect("persist second record");
+
+        let claim = first.claim(first_id).expect("claim first record");
+        assert!(matches!(
+            first.upsert_with_claim(&claim, record(second_id, TransferRecoveryState::Failed)),
+            Err(Error::TransferRecoveryClaimMismatch)
+        ));
+        assert!(matches!(
+            second.upsert_with_claim(&claim, record(first_id, TransferRecoveryState::Failed)),
+            Err(Error::TransferRecoveryClaimMismatch)
+        ));
     }
 
     #[test]

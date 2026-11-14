@@ -295,6 +295,128 @@ async fn persisted_recovery_card_is_reachable_in_all_registered_families_and_dis
 }
 
 #[gpui_kit::test]
+async fn unbound_persisted_recovery_requires_host_confirmation_before_read_only_inspection(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("recovery fixture directory");
+    let source = directory.path().join("legacy-source.bin");
+    std::fs::write(&source, b"legacy partial bytes").expect("write recovery fixture source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let recovery_id = uuid::Uuid::new_v4();
+    store
+        .upsert(
+            TransferRecoveryRecord::new(
+                recovery_id,
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/legacy-restart.bin",
+                false,
+                TransferRecoveryState::Failed,
+                6,
+                Some(18),
+                6,
+                100,
+                100,
+            )
+            .expect("valid unbound recovery fixture"),
+        )
+        .expect("persist unbound recovery fixture");
+
+    let h = Harness::new_with(cx, {
+        let store = store.clone();
+        move |cx, session, runtime| {
+            cx.update(|cx| {
+                gpui_kit::init(cx);
+                i18n::set_language(Language::ZhCn, cx);
+                gpui_kit::open_window(
+                    WindowOptions {
+                        window_bounds: Some(WindowBounds::Windowed(Bounds::new(
+                            point(px(0.), px(0.)),
+                            size(px(1100.), px(440.)),
+                        ))),
+                        ..Default::default()
+                    },
+                    cx,
+                    |window, cx| {
+                        cx.new(|cx| {
+                            FilesPanel::new_with_recovery_store_and_connection(
+                                session,
+                                "legacy fixture SSH".into(),
+                                None,
+                                runtime,
+                                store,
+                                window,
+                                cx,
+                            )
+                        })
+                    },
+                )
+                .checked("mount unbound recovery fixture")
+            })
+        }
+    });
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        if window.try_find("file-transfer-queue-details").is_none() {
+            window.click("toggle-file-transfer-queue", cx);
+        }
+        window.render_frame(cx);
+        assert!(
+            window
+                .find(format!("inspect-persisted-transfer-{recovery_id}"))
+                .visible()
+        );
+        window.click(format!("inspect-persisted-transfer-{recovery_id}"), cx);
+    })
+    .checked("request unbound persisted recovery inspection");
+
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel
+            .read(cx)
+            .pending
+            .as_ref()
+            .is_some_and(|(_, operation)| {
+                matches!(
+                    operation,
+                    Operation::PlanPersistedRecovery { id, .. } if *id == recovery_id
+                )
+            })
+            && h.panel.read(cx).operation_id.is_none()
+    })
+    .await;
+    h.panel.read_with(cx, |panel, cx| {
+        let (message, operation) = panel.pending.as_ref().expect("host confirmation review");
+        assert!(matches!(
+            operation,
+            Operation::PlanPersistedRecovery { id, .. } if *id == recovery_id
+        ));
+        let (zh, _) = message.translations();
+        assert!(zh.contains("没有保存连接身份"));
+        assert!(panel.recovery_claim.is_some());
+        assert!(panel.operation_id.is_none());
+        let _ = cx;
+    });
+
+    h.click(cx, "cancel-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel.read(cx).recovery_claim.is_none()
+    })
+    .await;
+    let claim = store
+        .claim(recovery_id)
+        .expect("cancelling host confirmation releases the claim");
+    drop(claim);
+}
+
+#[gpui_kit::test]
 async fn isolation_inspection_requires_full_bilingual_risk_review_and_preserves_unknown_history(
     cx: &mut TestAppContext,
 ) {

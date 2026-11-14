@@ -86,6 +86,9 @@ pub enum Error {
     /// A transfer-recovery record was not found during an explicit removal.
     #[error("transfer recovery record was not found")]
     TransferRecoveryNotFound,
+    /// A recovery claim was used with a different journal or record.
+    #[error("transfer recovery claim does not belong to this journal record")]
+    TransferRecoveryClaimMismatch,
     /// The bounded transfer-recovery journal cannot accept another record.
     #[error("transfer recovery journal has reached its bounded record limit")]
     TransferRecoveryLimit,

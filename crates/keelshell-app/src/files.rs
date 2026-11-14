@@ -12,8 +12,8 @@ use gpui_kit::{
 use keelshell_core::{
     DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
     DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextDocument, TextFormat,
-    TextLineEnding, TransferRecoveryDirection, TransferRecoveryRecord, TransferRecoveryState,
-    TransferRecoveryStore,
+    TextLineEnding, TransferRecoveryClaim, TransferRecoveryDirection, TransferRecoveryRecord,
+    TransferRecoveryState, TransferRecoveryStore,
 };
 use keelshell_session::{
     SessionError, SshSession,
@@ -187,6 +187,8 @@ pub struct FilesPanel {
     recovery_loading: bool,
     recovery_load_error: Option<String>,
     recovery_writes: HashSet<uuid::Uuid>,
+    recovery_claim_requests: HashSet<uuid::Uuid>,
+    recovery_claim: Option<TransferRecoveryClaim>,
     // The input is a navigation draft; mutations use only this canonical directory.
     directory: Option<String>,
     path: Entity<InputState>,
@@ -312,6 +314,38 @@ fn recovery_connection_matches(
     record.connection_id.is_none() || record.connection_id == current_connection_id
 }
 
+fn persisted_recovery_progress(operation: &Operation) -> Option<(u64, u64)> {
+    match operation {
+        Operation::ResumePersistedFile(_, plan) => Some((plan.existing_bytes(), plan.bytes())),
+        Operation::ResumePersistedDirectory(_, plan) => Some((plan.existing_bytes(), plan.bytes())),
+        _ => None,
+    }
+}
+
+fn update_persisted_recovery_progress(
+    record: &mut TransferRecoveryRecord,
+    existing_bytes: u64,
+    total_bytes: u64,
+) -> Result<(), String> {
+    if existing_bytes > total_bytes {
+        return Err("verified bytes exceed the source total".to_owned());
+    }
+    record.reviewed_existing_bytes = existing_bytes;
+    record.total_bytes = Some(total_bytes);
+    record.transferred_bytes = record
+        .transferred_bytes
+        .max(existing_bytes)
+        .min(total_bytes);
+    record.validate().map_err(|error| error.to_string())
+}
+
+fn persisted_recovery_is_bound(records: &[TransferRecoveryRecord], id: uuid::Uuid) -> Option<bool> {
+    records
+        .iter()
+        .find(|record| record.id == id)
+        .map(|record| record.connection_id.is_some())
+}
+
 fn transfer_spec_from_recovery(record: &TransferRecoveryRecord) -> TransferSpec {
     TransferSpec {
         direction: match record.direction {
@@ -365,17 +399,23 @@ fn current_unix_timestamp() -> u64 {
 struct TransferRecoveryWriter {
     store: Arc<TransferRecoveryStore>,
     record: TransferRecoveryRecord,
+    claim: Option<TransferRecoveryClaim>,
     last_persisted_bytes: u64,
     last_error: Option<String>,
     finished: bool,
 }
 
 impl TransferRecoveryWriter {
-    fn new(store: Arc<TransferRecoveryStore>, record: TransferRecoveryRecord) -> Self {
+    fn new(
+        store: Arc<TransferRecoveryStore>,
+        record: TransferRecoveryRecord,
+        claim: Option<TransferRecoveryClaim>,
+    ) -> Self {
         Self {
             last_persisted_bytes: record.transferred_bytes,
             store,
             record,
+            claim,
             last_error: None,
             finished: false,
         }
@@ -385,13 +425,19 @@ impl TransferRecoveryWriter {
         let mut record = self.record.clone();
         record.state = TransferRecoveryState::Unfinished;
         record.updated_at = current_unix_timestamp().max(record.created_at);
-        self.store
-            .upsert(record.clone())
+        self.persist(record.clone())
             .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
         self.record = record;
         self.last_persisted_bytes = self.record.transferred_bytes;
         self.last_error = None;
         Ok(())
+    }
+
+    fn persist(&self, record: TransferRecoveryRecord) -> Result<(), keelshell_core::Error> {
+        match self.claim.as_ref() {
+            Some(claim) => self.store.upsert_with_claim(claim, record),
+            None => self.store.upsert(record),
+        }
     }
 
     fn checkpoint(&mut self, transferred_bytes: u64, total_bytes: Option<u64>) {
@@ -407,7 +453,7 @@ impl TransferRecoveryWriter {
         record.transferred_bytes = transferred_bytes;
         record.total_bytes = total_bytes.or(record.total_bytes);
         record.updated_at = current_unix_timestamp().max(record.created_at);
-        match self.store.upsert(record.clone()) {
+        match self.persist(record.clone()) {
             Ok(()) => {
                 self.record = record;
                 self.last_persisted_bytes = transferred_bytes;
@@ -429,10 +475,15 @@ impl TransferRecoveryWriter {
             return;
         }
         self.finished = true;
+        let transferred_bytes = transferred_bytes.max(self.record.reviewed_existing_bytes);
         self.checkpoint(transferred_bytes, total_bytes);
         let mut terminal_error = self.last_error.take();
         if outcome.is_ok() {
-            if let Err(error) = self.store.remove(self.record.id) {
+            let result = self.claim.as_ref().map_or_else(
+                || self.store.remove(self.record.id),
+                |claim| self.store.remove_with_claim(claim),
+            );
+            if let Err(error) = result {
                 terminal_error = Some(combine_recovery_errors(terminal_error, error.to_string()));
             }
             self.last_error = terminal_error;
@@ -447,7 +498,7 @@ impl TransferRecoveryWriter {
             _ => TransferRecoveryState::Failed,
         };
         record.updated_at = current_unix_timestamp().max(record.created_at);
-        match self.store.upsert(record.clone()) {
+        match self.persist(record.clone()) {
             Ok(()) => {
                 self.record = record;
                 self.last_persisted_bytes = transferred_bytes;
@@ -487,6 +538,17 @@ fn recovery_finish_warning(detail: impl Into<String>) -> Message {
         "传输结束，但恢复记录未能更新",
         "Transfer ended, but recovery metadata was not updated",
         detail.into(),
+    )
+}
+
+fn persisted_recovery_host_confirmation(host: &str) -> Message {
+    Message::new(
+        format!(
+            "当前 SSH 会话：{host}。这条重启后传输记录没有保存连接身份。请确认当前 SSH 主机就是原目标主机；确认后才会执行只读检查，尚未写入远端。"
+        ),
+        format!(
+            "Current SSH session: {host}. This post-restart transfer record has no saved connection identity. Confirm that the current SSH host is the original target; only then will the read-only inspection start. Nothing has been written remotely."
+        ),
     )
 }
 
@@ -885,6 +947,8 @@ impl FilesPanel {
             recovery_loading: true,
             recovery_load_error: None,
             recovery_writes: HashSet::new(),
+            recovery_claim_requests: HashSet::new(),
+            recovery_claim: None,
             directory: None,
             path: field(t(cx, "远程目录", "Remote directory"), ".", window, cx),
             name: field(
@@ -1018,6 +1082,8 @@ impl FilesPanel {
         self.session = None;
         self.session_token = uuid::Uuid::new_v4();
         self.recovery = None;
+        self.recovery_claim = None;
+        self.recovery_claim_requests.clear();
         self.pending = None;
         self.confirmation_expanded = false;
         self.local_browser.retire_navigation();
@@ -1163,10 +1229,19 @@ impl FilesPanel {
         cx.notify();
     }
     fn run(&mut self, operation: Operation, window: &mut Window, cx: &mut Context<Self>) {
+        let persisted_recovery_id = operation.persisted_recovery_id();
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
+            if persisted_recovery_id.is_some() {
+                self.recovery_claim = None;
+                self.active_recovery_id = None;
+            }
             return;
         };
         if self.operation_id.is_some() || (self.busy && !operation.can_run_beside_transfers()) {
+            if persisted_recovery_id.is_some() {
+                self.recovery_claim = None;
+                self.active_recovery_id = None;
+            }
             self.status = Message::new(
                 "请等待或取消当前文件操作",
                 "Wait for or cancel the active file operation",
@@ -1367,6 +1442,10 @@ impl FilesPanel {
             if is_transfer && let Some(transfer) = &mut self.transfer {
                 transfer.phase = TransferPhase::Failed;
             }
+            if persisted_recovery_id.is_some() {
+                self.recovery_claim = None;
+                self.active_recovery_id = None;
+            }
             self.status =
                 Message::detail("无法启动文件工作线程", "Unable to start file worker", error);
             cx.notify();
@@ -1430,6 +1509,10 @@ impl FilesPanel {
                     transfer.phase = phase;
                 }
                 if view.suspended {
+                    if persisted_recovery_id.is_some() {
+                        view.recovery_claim = None;
+                        view.active_recovery_id = None;
+                    }
                     // A late worker may acknowledge a write, but may not replace the
                     // archived editor, its original baseline, or an approved plan.
                     let message = match &result {
@@ -1446,11 +1529,26 @@ impl FilesPanel {
                     // changes. Retire its original result owner above, but do
                     // not recreate a proposal that navigation withdrew. Writes
                     // never enter this branch and retain their actual outcome.
+                    if persisted_recovery_id.is_some() {
+                        view.recovery_claim = None;
+                        view.active_recovery_id = None;
+                    }
                     view.status = Message::new("只读审核准备已完成，但路径或选择已变化；未采用旧计划，请重新准备。", "Read-only review preparation completed, but the path or selection changed; the old plan was not adopted. Prepare it again.");
                     cx.notify();
                     return;
                 }
                 let succeeded = result.is_ok();
+                let keeps_recovery_claim = matches!(
+                    &result,
+                    Ok(
+                        Outcome::PlannedPersistedFileResume { .. }
+                            | Outcome::PlannedPersistedDirectoryResume { .. }
+                    )
+                );
+                if persisted_recovery_id.is_some() && !keeps_recovery_claim {
+                    view.recovery_claim = None;
+                    view.active_recovery_id = None;
+                }
                 match result {
                     Ok(Outcome::Listed(path,entries)) => {
                         if view.path.read(cx).value().as_ref() == navigation_before.as_str() {
@@ -1564,6 +1662,18 @@ impl FilesPanel {
                         view.replace_pending_review(resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan));
                     }
                     Ok(Outcome::PlannedPersistedFileResume { id, plan }) => {
+                        let Some(connection_bound) =
+                            persisted_recovery_is_bound(&view.recovery_records, id)
+                        else {
+                            view.recovery_claim = None;
+                            view.active_recovery_id = None;
+                            view.status = Message::new(
+                                "恢复记录已消失，已拒绝继续；请重新加载文件面板。",
+                                "The recovery record disappeared; continuation was refused. Reload the file panel.",
+                            );
+                            cx.notify();
+                            return;
+                        };
                         view.status = Message::new(
                             "重启后记录校验通过，请重新审核续传",
                             "Post-restart record verified; review the continuation again",
@@ -1578,12 +1688,24 @@ impl FilesPanel {
                                 plan.existing_bytes(),
                                 None,
                                 &view.host,
-                                view.connection_id.is_some(),
+                                connection_bound,
                             ),
                             Operation::ResumePersistedFile(id, plan),
                         );
                     }
                     Ok(Outcome::PlannedPersistedDirectoryResume { id, plan }) => {
+                        let Some(connection_bound) =
+                            persisted_recovery_is_bound(&view.recovery_records, id)
+                        else {
+                            view.recovery_claim = None;
+                            view.active_recovery_id = None;
+                            view.status = Message::new(
+                                "恢复记录已消失，已拒绝继续；请重新加载文件面板。",
+                                "The recovery record disappeared; continuation was refused. Reload the file panel.",
+                            );
+                            cx.notify();
+                            return;
+                        };
                         view.status = Message::new(
                             "重启后目录记录校验通过，请重新审核续传",
                             "Post-restart directory record verified; review the continuation again",
@@ -1598,7 +1720,7 @@ impl FilesPanel {
                                 plan.existing_bytes(),
                                 Some((plan.files(), plan.directories())),
                                 &view.host,
-                                view.connection_id.is_some(),
+                                connection_bound,
                             ),
                             Operation::ResumePersistedDirectory(id, plan),
                         );
@@ -1709,6 +1831,13 @@ impl FilesPanel {
     fn replace_pending_review(&mut self, message: Message, operation: Operation) {
         // Each proposal needs fresh approval, even when two non-batch actions
         // have identical text or replace one another before the next frame.
+        let keep_recovery_claim = operation
+            .persisted_recovery_id()
+            .zip(self.active_recovery_id)
+            .is_some_and(|(operation_id, active_id)| operation_id == active_id);
+        if !keep_recovery_claim {
+            self.recovery_claim = None;
+        }
         self.pending_review_id = uuid::Uuid::new_v4();
         self.confirmation_scroll.set_offset(point(px(0.), px(0.)));
         self.confirmation_expanded = false;
@@ -2374,9 +2503,10 @@ mod tests {
     use super::{
         FileFailure, Operation, Outcome, RecoveryCandidate, TransferDirection, TransferPhase,
         TransferRecoveryWriter, child_path, modified_label, parse_permissions_mode,
-        permissions_label, persisted_resume_review_message, recovery_connection_matches,
-        recovery_is_available, recovery_record_for, recovery_request_is_allowed, size_label,
-        terminal_transfer_phase, transfer_progress_message,
+        permissions_label, persisted_recovery_is_bound, persisted_resume_review_message,
+        recovery_connection_matches, recovery_is_available, recovery_record_for,
+        recovery_request_is_allowed, size_label, terminal_transfer_phase,
+        transfer_progress_message, update_persisted_recovery_progress,
     };
     use keelshell_core::{
         TransferRecoveryDirection, TransferRecoveryRecord, TransferRecoveryState,
@@ -2541,6 +2671,76 @@ mod tests {
     }
 
     #[test]
+    fn persisted_recovery_review_uses_the_record_binding_and_fresh_plan_progress() {
+        let id = uuid::Uuid::new_v4();
+        let mut record = TransferRecoveryRecord::new(
+            id,
+            TransferRecoveryDirection::Upload,
+            "/tmp/source.txt",
+            "/srv/source.txt",
+            false,
+            TransferRecoveryState::Failed,
+            20,
+            Some(100),
+            8,
+            10,
+            10,
+        )
+        .expect("valid unbound recovery record");
+        assert_eq!(
+            persisted_recovery_is_bound(&[record.clone()], id),
+            Some(false)
+        );
+
+        update_persisted_recovery_progress(&mut record, 40, 80)
+            .expect("fresh read-only plan progress");
+        assert_eq!(record.reviewed_existing_bytes, 40);
+        assert_eq!(record.total_bytes, Some(80));
+        assert_eq!(
+            record.transferred_bytes, 40,
+            "reviewed existing bytes cannot be lost when the old checkpoint is stale"
+        );
+        let connection_bound =
+            persisted_recovery_is_bound(std::slice::from_ref(&record), id).expect("record binding");
+
+        let message = persisted_resume_review_message(
+            TransferDirection::Upload,
+            &record.local_path,
+            &record.remote_path,
+            record.total_bytes.expect("total bytes"),
+            record.reviewed_existing_bytes,
+            None,
+            "fixture SSH",
+            connection_bound,
+        );
+        let (zh, en) = message.translations();
+        assert!(zh.contains("没有保存连接身份"));
+        assert!(en.contains("no saved connection identity"));
+    }
+
+    #[test]
+    fn persisted_recovery_progress_rejects_an_impossible_plan() {
+        let mut record = TransferRecoveryRecord::new(
+            uuid::Uuid::new_v4(),
+            TransferRecoveryDirection::Download,
+            "/tmp/target.txt",
+            "/srv/source.txt",
+            false,
+            TransferRecoveryState::OutcomeUnknown,
+            4,
+            Some(8),
+            4,
+            10,
+            10,
+        )
+        .expect("valid recovery record");
+        assert!(update_persisted_recovery_progress(&mut record, 9, 8).is_err());
+        assert_eq!(record.reviewed_existing_bytes, 4);
+        assert_eq!(record.total_bytes, Some(8));
+        assert_eq!(record.transferred_bytes, 4);
+    }
+
+    #[test]
     fn recovery_writer_marks_resume_active_and_classifies_terminal_results() {
         let directory = TempDir::new().expect("temporary directory");
         let store = Arc::new(TransferRecoveryStore::new(
@@ -2561,7 +2761,7 @@ mod tests {
             10,
         )
         .expect("valid terminal record");
-        let mut writer = TransferRecoveryWriter::new(store.clone(), record.clone());
+        let mut writer = TransferRecoveryWriter::new(store.clone(), record.clone(), None);
         writer.start().expect("resume start is durably recorded");
         assert_eq!(
             store.load().expect("load active record")[0].state,
@@ -2603,6 +2803,7 @@ mod tests {
                 10,
             )
             .expect("valid retained record"),
+            None,
         );
         completed.start().expect("second recovery start");
         completed.finish(&success, 8, Some(8));
@@ -2611,6 +2812,45 @@ mod tests {
                 .load()
                 .expect("load after successful cleanup")
                 .is_empty()
+        );
+    }
+
+    #[test]
+    fn claimed_recovery_writer_preserves_reviewed_bytes_when_startup_fails() {
+        let directory = TempDir::new().expect("temporary directory");
+        let store = Arc::new(TransferRecoveryStore::new(
+            directory.path().join("transfer-recovery.json"),
+        ));
+        let id = uuid::Uuid::new_v4();
+        let record = TransferRecoveryRecord::new(
+            id,
+            TransferRecoveryDirection::Upload,
+            "/tmp/source.txt",
+            "/srv/source.txt",
+            false,
+            TransferRecoveryState::OutcomeUnknown,
+            4,
+            Some(8),
+            4,
+            10,
+            10,
+        )
+        .expect("valid recovery record");
+        store
+            .upsert(record.clone())
+            .expect("persist recovery record");
+        let claim = store.claim(id).expect("claim recovery record");
+        let mut writer = TransferRecoveryWriter::new(store.clone(), record, Some(claim));
+        writer.start().expect("start claimed recovery");
+
+        let failure: Result<Outcome, FileFailure> =
+            Err(FileFailure::Transport("queue unavailable".into()));
+        writer.finish(&failure, 0, None);
+        let retained = store.load().expect("load failed claimed recovery");
+        assert_eq!(retained[0].state, TransferRecoveryState::Failed);
+        assert_eq!(
+            retained[0].transferred_bytes, 4,
+            "a queue startup failure cannot erase the reviewed existing prefix"
         );
     }
 

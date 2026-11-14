@@ -304,6 +304,7 @@ impl FilesPanel {
         };
         let persisted_id = operation.persisted_recovery_id();
         let recovery_id = persisted_id.unwrap_or_else(uuid::Uuid::new_v4);
+        let persisted_progress = super::persisted_recovery_progress(&operation);
         let recovery_record = if let Some(id) = persisted_id {
             let Some(record) = self.recovery_records.iter().find(|record| record.id == id) else {
                 self.status = Message::new(
@@ -337,7 +338,22 @@ impl FilesPanel {
                 cx.notify();
                 return;
             }
-            record.clone()
+            let mut record = record.clone();
+            if let Some((existing_bytes, total_bytes)) = persisted_progress
+                && let Err(error) = super::update_persisted_recovery_progress(
+                    &mut record,
+                    existing_bytes,
+                    total_bytes,
+                )
+            {
+                self.status = Message::new(
+                    format!("恢复计划进度无效：{error}"),
+                    format!("The recovery plan progress is invalid: {error}"),
+                );
+                cx.notify();
+                return;
+            }
+            record
         } else {
             match recovery_record_for(
                 recovery_id,
@@ -371,6 +387,35 @@ impl FilesPanel {
             cx.notify();
             return;
         }
+        let recovery_claim = if let Some(id) = persisted_id {
+            if self.active_recovery_id != Some(id) {
+                self.status = Message::new(
+                    "恢复审核已失效，请重新检查该传输记录。",
+                    "The recovery review is stale; inspect the transfer record again.",
+                );
+                cx.notify();
+                return;
+            }
+            let Some(claim) = self.recovery_claim.take() else {
+                self.status = Message::new(
+                    "无法确认恢复记录的独占审核权，已拒绝继续。",
+                    "The recovery record is not exclusively claimed; continuation was refused.",
+                );
+                cx.notify();
+                return;
+            };
+            if claim.id() != id {
+                self.status = Message::new(
+                    "恢复记录审核权与目标不一致，已拒绝继续。",
+                    "The recovery claim does not match the reviewed target; continuation was refused.",
+                );
+                cx.notify();
+                return;
+            }
+            Some(claim)
+        } else {
+            None
+        };
         // Keep at most 32 completed records in addition to the bounded active
         // queue. Removing a record never drops an active handle or replays it.
         while self
@@ -419,6 +464,7 @@ impl FilesPanel {
         let runtime = self.runtime.clone();
         let recovery_store = self.recovery_store.clone();
         let recovery_record_for_worker = recovery_record.clone();
+        let recovery_claim_for_worker = recovery_claim;
         let worker_stop = stop.clone();
         let (sender, receiver) = mpsc::sync_channel(16);
         #[cfg(test)]
@@ -432,8 +478,11 @@ impl FilesPanel {
                     if worker_stop.load(Ordering::Acquire) {
                         return (Err(FileFailure::CancelledBeforeStart), None);
                     }
-                    let mut recovery_writer =
-                        TransferRecoveryWriter::new(recovery_store, recovery_record_for_worker);
+                    let mut recovery_writer = TransferRecoveryWriter::new(
+                        recovery_store,
+                        recovery_record_for_worker,
+                        recovery_claim_for_worker,
+                    );
                     if let Err(error) = recovery_writer.start() {
                         return (Err(error), None);
                     }
@@ -524,6 +573,10 @@ impl FilesPanel {
             }
             self.busy = self.has_active_transfers();
             self.select_job(id);
+            if persisted_id.is_some() {
+                self.recovery_claim = None;
+                self.active_recovery_id = None;
+            }
             cx.notify();
             return;
         }
@@ -681,6 +734,7 @@ impl FilesPanel {
             || self.pending.is_some()
             || self.operation_id.is_some()
             || self.recovery_writes.contains(&id)
+            || self.recovery_claim_requests.contains(&id)
         {
             return;
         }
@@ -695,16 +749,66 @@ impl FilesPanel {
             cx.notify();
             return;
         }
-        self.active_recovery_id = Some(id);
-        self.run(
-            Operation::PlanPersistedRecovery {
-                id,
-                spec: super::transfer_spec_from_recovery(record),
-                directory: record.directory,
-            },
-            window,
-            cx,
-        );
+        let spec = super::transfer_spec_from_recovery(record);
+        let directory = record.directory;
+        let connection_bound = record.connection_id.is_some();
+        self.recovery_claim_requests.insert(id);
+        let store = self.recovery_store.clone();
+        let runtime = self.runtime.clone();
+        let executor = cx.background_executor().clone();
+        let expected_session = self.session_token;
+        let task = crate::runtime_bridge::spawn(&runtime, executor, async move {
+            tokio::task::spawn_blocking(move || store.claim(id))
+                .await
+                .map_err(|error| format!("transfer recovery claim worker stopped: {error}"))?
+                .map_err(|error| error.to_string())
+        });
+        cx.spawn_in(window, async move |this, cx| {
+            let result = task.await;
+            let _ = this.update_in(cx, |view, window, cx| {
+                view.recovery_claim_requests.remove(&id);
+                if view.session_token != expected_session || view.suspended {
+                    return;
+                }
+                match result {
+                    Ok(Ok(claim)) => {
+                        view.active_recovery_id = Some(id);
+                        view.recovery_claim = Some(claim);
+                        let operation = Operation::PlanPersistedRecovery {
+                            id,
+                            spec,
+                            directory,
+                        };
+                        if connection_bound {
+                            view.run(operation, window, cx);
+                        } else {
+                            view.status = Message::new(
+                                "请先确认当前 SSH 主机，再开始只读检查。",
+                                "Confirm the current SSH host before starting the read-only inspection.",
+                            );
+                            view.replace_pending_review(
+                                super::persisted_recovery_host_confirmation(&view.host),
+                                operation,
+                            );
+                        }
+                    }
+                    Ok(Err(error)) => {
+                        view.status = Message::new(
+                            format!("无法占用传输恢复记录：{error}"),
+                            format!("Unable to claim the transfer recovery record: {error}"),
+                        );
+                    }
+                    Err(error) => {
+                        view.status = Message::new(
+                            format!("无法占用传输恢复记录：{error}"),
+                            format!("Unable to claim the transfer recovery record: {error}"),
+                        );
+                    }
+                }
+                cx.notify();
+            });
+        })
+        .detach();
     }
 
     fn discard_persisted_recovery(
@@ -717,6 +821,7 @@ impl FilesPanel {
             || self.pending.is_some()
             || self.operation_id.is_some()
             || self.recovery_writes.contains(&id)
+            || self.recovery_claim_requests.contains(&id)
         {
             return;
         }
@@ -888,11 +993,13 @@ impl FilesPanel {
             let inspect_disabled = self.suspended
                 || self.pending.is_some()
                 || self.operation_id.is_some()
-                || self.recovery_writes.contains(&id);
+                || self.recovery_writes.contains(&id)
+                || self.recovery_claim_requests.contains(&id);
             let discard_disabled = self.suspended
                 || self.pending.is_some()
                 || self.operation_id.is_some()
-                || self.recovery_writes.contains(&id);
+                || self.recovery_writes.contains(&id)
+                || self.recovery_claim_requests.contains(&id);
             card = card.child(
                 div()
                     .id(SharedString::from(format!(
