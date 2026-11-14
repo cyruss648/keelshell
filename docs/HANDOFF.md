@@ -5,6 +5,65 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 AI 审核命令保存为片段草稿
+
+本片基线是 exact HEAD
+`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，作者主体/修复提交为
+`9b831103aae5563a5450561988d668d2e77a19dd`。源码位于独立 worktree
+`/Users/hdh/.codex/worktrees/ai-command-snippet-save-20261114/keelshell`，
+分支为 `feature/ai-command-snippet-save-20261114`。父工作树
+`/Users/hdh/work/develop/projects/keelshell` 和旧的
+`/Users/hdh/.codex/worktrees/ai-command-snippets-20261113` 未修改。
+
+### 已实现
+
+- `AssistantPanel` 为 suggestion 与 diagnostic step 复用 `CommandProposal::review`，
+  只在审核成功后发出带 command、target、session identity、一次性 review ID 的
+  `AssistantEvent::SaveSnippet`；事件处理不直接写 StateStore。
+- `Workspace` 在事件打开草稿和编辑器提交保存时重新确认活动 SSH tab、terminal/
+  session、target、configuration gate 和 modal scope。迟到、切换、恢复、关闭、
+  退休或被替换的目标双语报错并 fail closed。
+- `SnippetEditor::new_reviewed_draft` 把已审核正文锁定；名称、描述、标签可编辑。
+  第一次保存点击只进入确认态，第二次才发出保存事件；编辑命令必须取消并重新
+  审核。冲突和失败保留完整草稿，保存成功才关闭编辑器。
+- 保存使用普通 `Snippet`，不写 session、host、凭据、AI profile、review token
+  或秘密元数据；界面警告片段以明文保存在本机，保存和取消不执行命令。
+- Frost、Graphite、Lavender 通过 registry/Palette/token 共享 UI 代码，双语、
+  fixed footer、滚动和 accessibility label 已覆盖，业务代码没有 theme ID 分支。
+
+### 作者验证
+
+作者专用 target：
+`work/ai-command-snippet-save-20261114/target`。
+
+完整门禁 target：
+`work/ai-command-snippet-save-20261114/full-target`。
+
+`python3 scripts/check.py` 已实际等待并退出 `0`。Python 为 `131 run / 1 skipped`；
+workspace 测试为 `2499 passed / 0 failed / 23 ignored`，其中 app `1153/0/2`、
+core `627/0/0`、AI `194/0/5`、session `448/0/16`、MCP `77/0/0`；依赖策略、
+fmt、workspace 严格 Clippy 和 readiness/observer/small-stack controller 均通过。
+单独 `cargo test --workspace --doc` 为 `14 passed / 0 failed`，含 2 项 compile-fail。
+
+专项回归为 AI 片段 `6/6`、SnippetEditor `11/11`、Assistant review `6/6`，
+core 包全测试 `634/634`。日志保存在
+`work/ai-command-snippet-save-20261114/logs/`，主门禁日志为
+`full-gate-9b83110.log`，测试记录为
+[AI 片段保存测试记录](testing/records/2026-11-14-ai-reviewed-snippet-save.md)。
+app 链接阶段的 `__eh_frame section too large` 是已知 warning，没有改变 exit code。
+
+### 当前状态与接续
+
+当前为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。必须在文档最终提交后启动
+另一位严格只读 agent，固定最终 exact SHA，使用独立源码 worktree、Cargo target
+和日志复核 P0/P1/P2/P3、绝对路径/行号、触发条件、影响、实际测试计数和
+`APPROVE`/`REQUEST_CHANGES`。复核完成后更新本节、路线图、ADR 0128 和测试记录，
+再清理复核 worktree/target，保留原始回执。
+
+不要把 headless GPUI、loopback fixture 或 full gate 写成 macOS/Windows/Linux
+原生、真实 SSH、Podman、外部 AI provider、IME、辅助技术、签名、公证、安装升级
+或发布验收。公司内网不可用，本片只允许本地 commit，不 push。
+
 ## 2026-11-14 命名隧道运行状态持久化与显式恢复
 
 本片产品实现基线是 exact HEAD

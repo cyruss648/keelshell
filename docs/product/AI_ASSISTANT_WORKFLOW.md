@@ -30,6 +30,31 @@ KeelShell 的 AI 助手把解释、请求准备、回复审核和本地知识整
 - 将明确确认结果的终端快照整理为带来源的本地知识；
 - 使用已保存知识作为 Ask 的显式上下文，仍需再次预览、脱敏和发送确认。
 
+## 把已审核命令保存为片段
+
+回复中的 shell 建议和诊断计划中的每一步都可以点击“审核并保存为片段”。这个
+入口会复用现有 `CommandProposal::review`：只有命令提取结果、当前 SSH target
+和 session identity 都通过 review 后，AssistantPanel 才发出一次性的
+`AssistantEvent::SaveSnippet`。事件携带命令正文、原始 target、session identity
+和内存中的 review ID；AssistantPanel 不直接写 StateStore。
+
+Workspace 接收事件时会重新确认活动 SSH tab、terminal/session、远端 target、
+configuration gate 和 modal scope。目标切换、会话关闭、配置恢复/重新加载/关闭或
+操作范围被替换时，候选被丢弃并显示双语错误。草稿已经打开后，保存边界还会再次
+执行同样的确认，因此迟到的 AI 事件不会改写当前状态。
+
+片段编辑器中的审核命令正文默认只读锁定。名称、说明和标签可以修改；第一次点击
+保存只进入二次确认，第二次点击才提交给 Workspace 的后台 StateStore persist。
+如果需要修改命令，用户必须点击“取消并重新审核命令”，回到命令栏重新审核；
+取消和保存都不会执行命令。StateStore 冲突或失败会保留完整草稿和错误，成功后
+片段才进入本地搜索和命令建议。
+
+保存结果是普通本地片段，不带 session ID、host、凭据、AI profile、review token
+或其他审核上下文。编辑器明确提示片段会以明文保存在本机，用户不要保存密码、
+API key 或其他秘密。Frost、Graphite、Lavender 三套主题共享同一套视图代码，
+使用 registry、Palette 和组件 token；中英文、fixed footer、滚动表单和命令
+输入的 accessibility label 保持一致。
+
 Agent 模式还要为每一回合和每一项 SSH/SFTP 操作单独审核。AI 助手不恢复历史
 SSH 授权，不根据历史知识自动连接主机，也不把知识条目当作可执行 runbook。Agent
 停止并编辑问题时，旧回合先被撤销，问题输入框按停止后的最新布局自动显露，便于
@@ -44,6 +69,9 @@ SSH 授权，不根据历史知识自动连接主机，也不把知识条目当�
 ## 验收边界
 
 GPUI 测试覆盖状态派生、双语标签、回复审核可达性、请求快照不被语言切换替换、
-长 MCP 审核、Agent 问题编辑和固定知识保存 footer。完整工程门禁已经退出 0；
-真实供应商请求、完整 Agent 客户端流程、macOS/Windows/Linux 原生窗口和辅助技术
-矩阵仍需单独验收。当前实现与回执见[测试记录](../testing/records/2026-11-07-session-library-ai-ui-polish.md)。
+长 MCP 审核、Agent 问题编辑和固定知识保存 footer。AI 审核命令保存切片的作者
+回归、全量门禁和未验证边界见
+[2026-11-14 测试记录](../testing/records/2026-11-14-ai-reviewed-snippet-save.md)，
+设计决策见 [ADR 0128](../adr/0128-ai-reviewed-snippet-draft.md)。真实供应商请求、
+完整 Agent 客户端流程、macOS/Windows/Linux 原生窗口、IME 和辅助技术矩阵仍需
+单独验收；headless GPUI 回归不代签这些边界。

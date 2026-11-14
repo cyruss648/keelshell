@@ -3,6 +3,46 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-14 AI 审核命令保存为片段草稿
+
+本片基线为 exact HEAD
+`b89445604b4ce44fc5a80ff26605f6e6b9039d57`，主体/修复提交为
+`9b831103aae5563a5450561988d668d2e77a19dd`。实现位于独立 worktree
+`/Users/hdh/.codex/worktrees/ai-command-snippet-save-20261114/keelshell`，
+使用专用 target `work/ai-command-snippet-save-20261114/target`，全量门禁使用
+`work/ai-command-snippet-save-20261114/full-target`。
+
+Assistant suggestion 和 diagnostic step 只有在现有 `CommandProposal::review`
+成功后才发出一次性 `AssistantEvent::SaveSnippet`；AssistantPanel 不直接写
+StateStore。Workspace 在打开草稿和提交保存两个边界重新确认活动 SSH
+tab/session/target、configuration gate 和 modal scope，失效时双语报错并丢弃
+候选。SnippetEditor 保持 reviewed command body locked until explicit re-review，
+名称/说明/标签可编辑，保存需要二次确认；失败或冲突保留完整草稿和错误，成功后
+复用现有后台 persist、`AfterSave::SnippetSaved`、revision/conflict 检查。
+
+保存结果是普通本地片段，不持久化 session、host、凭据、AI profile、review token
+或秘密元数据；界面明确说明明文保存风险，保存/取消都不执行命令。Frost、
+Graphite、Lavender、中文/英文、fixed footer/scroll 和 accessibility label
+复用 registry、Palette 与组件 token，业务代码不按 theme ID 分支。具体决策见
+[ADR 0128](adr/0128-ai-reviewed-snippet-draft.md)，产品流程见
+[AI 助手审核工作流](product/AI_ASSISTANT_WORKFLOW.md)。
+
+作者 focused 回归通过：AI 片段 `6/6`、SnippetEditor `11/11`、Assistant review
+`6/6`，core 包 `634/634`。完整 `python3 scripts/check.py` 实际退出 `0`：
+Python `131 run / 1 skipped`，workspace `2499 passed / 0 failed / 23 ignored`，
+其中 app `1153/0/2`、core `627/0/0`、AI `194/0/5`、session `448/0/16`、
+MCP `77/0/0`；依赖策略、fmt、workspace 严格 Clippy、readiness/observer/
+small-stack controller 均通过。脚本外单独 doctest 为 `14 passed / 0 failed`，
+含 2 项 compile-fail。完整日志见
+`work/ai-command-snippet-save-20261114/logs/full-gate-9b83110.log`，测试记录见
+[2026-11-14 AI 片段保存](testing/records/2026-11-14-ai-reviewed-snippet-save.md)。
+
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。独立严格只读复核必须
+固定最终文档 SHA，重新给出 P0/P1/P2/P3、绝对路径/行号、触发条件、影响、实际
+测试计数和 `APPROVE`/`REQUEST_CHANGES`。macOS/Windows/Linux 原生窗口、真实 SSH、
+Podman、外部 AI provider、IME、辅助技术、签名、公证、安装升级和发布验收仍开放。
+公司内网不可用，本片只做本地 commit，不 push。
+
 ## 2026-11-14 命名隧道运行状态持久化与显式恢复
 
 本片固定基线为 exact HEAD
