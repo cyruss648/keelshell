@@ -14,8 +14,9 @@
 `50ca0ead2fead7b0e92679ee9d531604ae040772`。源码位于独立 worktree
 `/Users/hdh/.codex/worktrees/ai-command-snippet-save-20261114/keelshell`，
 分支为 `feature/ai-command-snippet-save-20261114`。父工作树
-`/Users/hdh/work/develop/projects/keelshell` 和旧的
-`/Users/hdh/.codex/worktrees/ai-command-snippets-20261113` 未修改。
+`/Users/hdh/work/develop/projects/keelshell` 保持 clean；旧的
+`/Users/hdh/.codex/worktrees/ai-command-snippets-20261113` 保留其原有未提交 WIP，
+本片没有触碰或清理它。
 
 ### 已实现
 

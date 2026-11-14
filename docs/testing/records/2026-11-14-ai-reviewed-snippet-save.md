@@ -157,5 +157,6 @@ core `634/634`、core doctest `7/7`，fmt、app tests 严格 Clippy 和 diff che
 - 签名、公证、安装升级、发布制品和 CI runner；
 - 完整业务验收。
 
-没有 push。父工作树和旧
-`/Users/hdh/.codex/worktrees/ai-command-snippets-20261113` WIP 未修改。
+没有 push。父工作树保持 clean；旧
+`/Users/hdh/.codex/worktrees/ai-command-snippets-20261113` WIP 保留其原有未提交状态，
+本片没有触碰或清理它。
