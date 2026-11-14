@@ -396,6 +396,10 @@ async fn closing_tab_guards_deletion_until_remote_cleanup_ack_and_releases_owner
         cleanup.requested.load(Ordering::Acquire)
     })
     .await;
+    cx.wait_for(fixture.window, Duration::from_secs(5), |_, cx| {
+        !fixture.workspace.read(cx).saving
+    })
+    .await;
     let before = std::fs::read(fixture.store.path()).expect("pre-delete bytes");
     cx.update_window(fixture.window, |_, window, cx| {
         assert!(

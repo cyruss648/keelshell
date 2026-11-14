@@ -69,6 +69,9 @@ pub enum Error {
     /// The requested named tunnel rule does not exist.
     #[error("tunnel rule was not found")]
     TunnelRuleNotFound,
+    /// The requested persisted named-tunnel runtime snapshot does not exist.
+    #[error("named tunnel runtime snapshot was not found")]
+    TunnelRuntimeSnapshotNotFound,
     /// Atomic replacement succeeded but syncing its directory failed.
     #[error("state was replaced, but directory durability could not be confirmed: {0}")]
     Durability(std::io::Error),

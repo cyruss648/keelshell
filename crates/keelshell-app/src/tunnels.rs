@@ -5,7 +5,7 @@ use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{self, Receiver};
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::input::{Input, InputState};
@@ -13,8 +13,9 @@ use gpui_kit::component::{Disableable, Selectable, Sizable};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use keelshell_core::{
-    AppState, TunnelRule, TunnelRuleAction, TunnelRuleKind, TunnelRuleReviewToken,
-    ValidatedTunnelRulePlan,
+    AppState, TunnelConnectionBinding, TunnelRecoveryError, TunnelRecoveryReviewToken, TunnelRule,
+    TunnelRuleAction, TunnelRuleKind, TunnelRuleReviewToken, TunnelRuntimeSnapshot,
+    TunnelRuntimeStatus, ValidatedTunnelRecoveryPlan, ValidatedTunnelRulePlan,
 };
 use keelshell_session::forwarding::{
     DynamicForward, LocalForward, RemoteForward, TrafficSnapshot, TrafficStats,
@@ -26,7 +27,73 @@ use crate::i18n::{LocalizedTooltipExt, Message, t};
 
 mod rules;
 pub(crate) use rules::TunnelRuleEvent;
-use rules::{RuleChangeReview, RuleEditor, RuleStopReview};
+use rules::{RuleChangeReview, RuleEditor, RuleStopReview, RuntimeRecoveryReview};
+
+/// A panel event that asks the Workspace to persist one runtime observation.
+///
+/// The panel never performs blocking StateStore I/O. The Workspace rechecks the
+/// exact state snapshot and performs the mutation on its background executor.
+#[derive(Clone, PartialEq)]
+pub(crate) enum TunnelRuntimeEvent {
+    Upsert {
+        expected_state: Arc<AppState>,
+        snapshot: Box<TunnelRuntimeSnapshot>,
+        operation: uuid::Uuid,
+    },
+    Remove {
+        expected_state: Arc<AppState>,
+        snapshot_id: uuid::Uuid,
+        operation: uuid::Uuid,
+    },
+}
+
+impl TunnelRuntimeEvent {
+    pub(crate) fn operation(&self) -> uuid::Uuid {
+        match self {
+            Self::Upsert { operation, .. } | Self::Remove { operation, .. } => *operation,
+        }
+    }
+
+    pub(crate) fn snapshot_id(&self) -> uuid::Uuid {
+        match self {
+            Self::Upsert { snapshot, .. } => snapshot.id,
+            Self::Remove { snapshot_id, .. } => *snapshot_id,
+        }
+    }
+
+    pub(crate) fn removing(&self) -> bool {
+        matches!(self, Self::Remove { .. })
+    }
+
+    pub(crate) fn expected_state(&self) -> &Arc<AppState> {
+        match self {
+            Self::Upsert { expected_state, .. } | Self::Remove { expected_state, .. } => {
+                expected_state
+            }
+        }
+    }
+
+    pub(crate) fn candidate(&self, state: &AppState) -> Result<AppState, keelshell_core::Error> {
+        let expected = match self {
+            Self::Upsert { expected_state, .. } | Self::Remove { expected_state, .. } => {
+                expected_state
+            }
+        };
+        if state.snapshot != expected.snapshot || state != expected.as_ref() {
+            return Err(keelshell_core::Error::Conflict);
+        }
+        let mut candidate = state.clone();
+        match self {
+            Self::Upsert { snapshot, .. } => {
+                candidate.upsert_tunnel_runtime_snapshot((**snapshot).clone())?
+            }
+            Self::Remove { snapshot_id, .. } => {
+                candidate.remove_tunnel_runtime_snapshot(*snapshot_id)?
+            }
+        }
+        Ok(candidate)
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum Direction {
@@ -130,6 +197,13 @@ struct TunnelRow {
     proxy_address: Option<String>,
     traffic: TrafficStats,
     last_traffic: TrafficSnapshot,
+    rule_snapshot: Option<TunnelRule>,
+    connection_binding: Option<TunnelConnectionBinding>,
+    runtime_snapshot: Option<TunnelRuntimeSnapshot>,
+    runtime_persisted: bool,
+    runtime_dirty: bool,
+    runtime_remove_requested: bool,
+    runtime_operation: Option<(uuid::Uuid, bool)>,
 }
 
 impl TunnelRow {
@@ -183,6 +257,9 @@ pub struct TunnelsPanel {
     rule_editor: Option<RuleEditor>,
     rule_change_review: Option<RuleChangeReview>,
     rule_stop_review: Option<RuleStopReview>,
+    recovery_inspected: Option<uuid::Uuid>,
+    recovery_review: Option<RuntimeRecoveryReview>,
+    recovery_discard_pending: Option<(uuid::Uuid, uuid::Uuid)>,
     rule_mutation: Option<TunnelRuleEvent>,
     rule_store_blocked: bool,
     rule_configuration_busy: bool,
@@ -246,6 +323,9 @@ impl TunnelsPanel {
             rule_epoch: uuid::Uuid::new_v4(),
             rule_change_review: None,
             rule_stop_review: None,
+            recovery_inspected: None,
+            recovery_review: None,
+            recovery_discard_pending: None,
             rule_mutation: None,
             rule_store_blocked: false,
             rule_configuration_busy: false,
@@ -314,6 +394,9 @@ impl TunnelsPanel {
         self.selected_rule = None;
         self.rule_plan = None;
         self.rule_stop_review = None;
+        self.recovery_inspected = None;
+        self.recovery_review = None;
+        self.recovery_discard_pending = None;
         self.clear_change_review(cx);
         if authoritative {
             self.rule_store_blocked = false;
@@ -470,6 +553,19 @@ impl TunnelsPanel {
                 return;
             }
         };
+        let connection_binding =
+            match TunnelConnectionBinding::from_state(&state, rule.connection_id) {
+                Ok(binding) => binding,
+                Err(error) => {
+                    self.rule_status = Message::detail(
+                        "无法确认当前连接路由",
+                        "Unable to confirm the current connection route",
+                        error,
+                    );
+                    cx.notify();
+                    return;
+                }
+            };
         self.rule_status = Message::new(
             format!("已批准启动规则“{}”；结果见下方运行状态。", rule.name),
             format!(
@@ -477,7 +573,14 @@ impl TunnelsPanel {
                 rule.name
             ),
         );
-        self.start_specification(specification, Some(rule.name), Some(rule.id), cx);
+        self.start_specification(
+            specification,
+            Some(rule.name.clone()),
+            Some(rule.id),
+            Some(rule),
+            Some(connection_binding),
+            cx,
+        );
     }
 
     /// Retire listeners without transferring their remote authority to a new session.
@@ -490,6 +593,7 @@ impl TunnelsPanel {
         self.rule_epoch = uuid::Uuid::new_v4();
         self.rule_plan = None;
         self.rule_stop_review = None;
+        self.recovery_review = None;
         self.clear_change_review(cx);
         for row in &mut self.rows {
             if !row.finished {
@@ -592,7 +696,7 @@ impl TunnelsPanel {
                 return;
             }
         };
-        self.start_specification(spec, None, None, cx);
+        self.start_specification(spec, None, None, None, None, cx);
     }
 
     fn start_specification(
@@ -600,6 +704,8 @@ impl TunnelsPanel {
         spec: Specification,
         rule_name: Option<String>,
         rule_id: Option<uuid::Uuid>,
+        rule_snapshot: Option<TunnelRule>,
+        connection_binding: Option<TunnelConnectionBinding>,
         cx: &mut Context<Self>,
     ) {
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
@@ -719,6 +825,13 @@ impl TunnelsPanel {
                     proxy_address: None,
                     traffic: TrafficStats::default(),
                     last_traffic: TrafficSnapshot::default(),
+                    rule_snapshot,
+                    connection_binding,
+                    runtime_snapshot: None,
+                    runtime_persisted: false,
+                    runtime_dirty: false,
+                    runtime_remove_requested: false,
+                    runtime_operation: None,
                 });
                 self.next_id += 1;
                 self.status = tunnel_summary(&self.rows);
@@ -736,6 +849,7 @@ impl TunnelsPanel {
 
     fn poll(&mut self, cx: &mut Context<Self>) {
         let mut changed = false;
+        let mut runtime_candidates = Vec::new();
         for row in &mut self.rows {
             while let Ok(event) = row.incoming.try_recv() {
                 changed = true;
@@ -757,6 +871,32 @@ impl TunnelsPanel {
                                 format!("正在监听 {address}"),
                                 format!("Listening at {address}"),
                             )
+                        };
+                        if row.runtime_snapshot.is_none()
+                            && let (Some(rule), Some(connection)) =
+                                (&row.rule_snapshot, &row.connection_binding)
+                        {
+                            match TunnelRuntimeSnapshot::new(
+                                rule.clone(),
+                                connection.clone(),
+                                address,
+                                unix_timestamp(),
+                            ) {
+                                Ok(snapshot) => {
+                                    row.runtime_snapshot = Some(snapshot);
+                                    row.runtime_persisted = false;
+                                    row.runtime_dirty = false;
+                                    runtime_candidates.push(row.id);
+                                }
+                                Err(error) => {
+                                    row.failed = true;
+                                    row.status = Message::detail(
+                                        "无法记录命名隧道恢复候选",
+                                        "Unable to record named tunnel recovery candidate",
+                                        error,
+                                    );
+                                }
+                            }
                         }
                     }
                     TunnelEvent::CleanupUnconfirmed(cleanup) => {
@@ -770,11 +910,23 @@ impl TunnelsPanel {
                             &cleanup.error,
                         );
                         row.unresolved_cleanup = Some(cleanup);
+                        if let Some(snapshot) = &mut row.runtime_snapshot {
+                            snapshot.status = TunnelRuntimeStatus::CleanupUnconfirmed;
+                            row.runtime_dirty = true;
+                            runtime_candidates.push(row.id);
+                        }
                     }
                     TunnelEvent::Finished(result) => {
                         row.finished = true;
                         row.failed = result.is_err();
                         row.unresolved_cleanup = None;
+                        let confirmed_cleanup = matches!(&result, Ok(()))
+                            || matches!(
+                                &result,
+                                Err(error)
+                                    if error
+                                        == "SSH connection closed; tunnel listener has been released"
+                            );
                         row.status = match result {
                             Ok(()) => Message::new(
                                 "已停止；监听器和所属连接流已关闭",
@@ -782,6 +934,9 @@ impl TunnelsPanel {
                             ),
                             Err(error) => tunnel_error(&error),
                         };
+                        if confirmed_cleanup {
+                            row.runtime_remove_requested = row.runtime_snapshot.is_some();
+                        }
                     }
                 }
             }
@@ -800,6 +955,11 @@ impl TunnelsPanel {
                     "Original SSH connection closed; rule ownership released after cleanup failure",
                     cleanup.error,
                 );
+                if let Some(snapshot) = &mut row.runtime_snapshot {
+                    snapshot.status = TunnelRuntimeStatus::CleanupUnconfirmed;
+                    row.runtime_dirty = true;
+                    runtime_candidates.push(row.id);
+                }
                 changed = true;
             }
             let snapshot = row.traffic.snapshot();
@@ -807,12 +967,193 @@ impl TunnelsPanel {
                 row.last_traffic = snapshot;
                 changed = true;
             }
+            if row.runtime_snapshot.is_some()
+                && (row.runtime_dirty
+                    || (!row.runtime_persisted && row.runtime_operation.is_none())
+                    || row.runtime_remove_requested)
+            {
+                runtime_candidates.push(row.id);
+            }
+        }
+        for row_id in runtime_candidates {
+            self.schedule_runtime_event(row_id, cx);
         }
         if changed {
             self.status = tunnel_summary(&self.rows);
             cx.notify();
         }
     }
+
+    fn schedule_runtime_event(&mut self, row_id: usize, cx: &mut Context<Self>) {
+        if self.rule_store_blocked || self.rule_configuration_busy {
+            return;
+        }
+        let Some(index) = self.rows.iter().position(|row| row.id == row_id) else {
+            return;
+        };
+        let row = &mut self.rows[index];
+        if row.runtime_operation.is_some() {
+            return;
+        }
+        let Some(snapshot) = row.runtime_snapshot.clone() else {
+            return;
+        };
+        let Some(expected_state) = self.rule_state.clone() else {
+            return;
+        };
+        let operation = uuid::Uuid::new_v4();
+        if row.runtime_remove_requested && row.runtime_persisted {
+            row.runtime_operation = Some((operation, true));
+            cx.emit(TunnelRuntimeEvent::Remove {
+                expected_state: Arc::new(expected_state),
+                snapshot_id: snapshot.id,
+                operation,
+            });
+        } else if !row.runtime_persisted || row.runtime_dirty {
+            row.runtime_operation = Some((operation, false));
+            row.runtime_dirty = false;
+            cx.emit(TunnelRuntimeEvent::Upsert {
+                expected_state: Arc::new(expected_state),
+                snapshot: Box::new(snapshot),
+                operation,
+            });
+        }
+    }
+
+    pub(crate) fn mark_runtime_event_deferred(
+        &mut self,
+        operation: uuid::Uuid,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let Some(row) = self.rows.iter_mut().find(|row| {
+            row.runtime_operation
+                .is_some_and(|pending| pending.0 == operation)
+        }) else {
+            if self
+                .recovery_discard_pending
+                .is_some_and(|pending| pending.1 == operation)
+            {
+                self.recovery_discard_pending = None;
+                self.rule_status = Message::new(
+                    "配置正在保存，丢弃动作已延后；请再次确认 Discard。",
+                    "Configuration is being saved; discard was deferred. Confirm Discard again.",
+                );
+                cx.notify();
+                return true;
+            }
+            return false;
+        };
+        row.runtime_operation = None;
+        row.runtime_dirty = true;
+        cx.notify();
+        true
+    }
+
+    pub(crate) fn mark_runtime_event_succeeded(
+        &mut self,
+        operation: uuid::Uuid,
+        snapshot_id: uuid::Uuid,
+        removing: bool,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        if let Some(row) = self.rows.iter_mut().find(|row| {
+            row.runtime_snapshot
+                .as_ref()
+                .is_some_and(|snapshot| snapshot.id == snapshot_id)
+                && row
+                    .runtime_operation
+                    .is_some_and(|pending| pending.0 == operation && pending.1 == removing)
+        }) {
+            row.runtime_operation = None;
+            if removing {
+                row.runtime_snapshot = None;
+                row.runtime_persisted = false;
+                row.runtime_dirty = false;
+                row.runtime_remove_requested = false;
+            } else {
+                row.runtime_persisted = true;
+            }
+            cx.notify();
+            return true;
+        }
+        if self
+            .recovery_discard_pending
+            .is_some_and(|pending| pending == (snapshot_id, operation))
+        {
+            self.recovery_discard_pending = None;
+            self.recovery_review = None;
+            self.recovery_inspected = None;
+            self.rule_status = Message::new(
+                "已丢弃上次命名隧道恢复候选",
+                "Previous named tunnel recovery candidate discarded",
+            );
+            cx.notify();
+            return true;
+        }
+        false
+    }
+
+    pub(crate) fn mark_runtime_event_failed(
+        &mut self,
+        operation: uuid::Uuid,
+        message: Message,
+        storage_uncertain: bool,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let matches = self.rows.iter().any(|row| {
+            row.runtime_operation
+                .is_some_and(|pending| pending.0 == operation)
+        }) || self
+            .recovery_discard_pending
+            .is_some_and(|pending| pending.1 == operation);
+        if !matches {
+            return false;
+        }
+        for row in &mut self.rows {
+            if row
+                .runtime_operation
+                .is_some_and(|pending| pending.0 == operation)
+            {
+                row.runtime_operation = None;
+                row.runtime_dirty = true;
+            }
+        }
+        if self
+            .recovery_discard_pending
+            .is_some_and(|pending| pending.1 == operation)
+        {
+            self.recovery_discard_pending = None;
+        }
+        self.rule_store_blocked |= storage_uncertain;
+        self.rule_status = message;
+        cx.notify();
+        true
+    }
+
+    pub(crate) fn accepts_runtime_event(&self, event: &TunnelRuntimeEvent) -> bool {
+        if self.suspended
+            || self.rule_store_blocked
+            || self.rule_configuration_busy
+            || self
+                .rule_state
+                .as_ref()
+                .is_none_or(|state| state.snapshot != event.expected_state().snapshot)
+        {
+            return false;
+        }
+        self.rows.iter().any(|row| {
+            row.runtime_operation
+                .is_some_and(|pending| pending.0 == event.operation())
+        }) || self
+            .recovery_discard_pending
+            .is_some_and(|pending| pending.1 == event.operation())
+    }
+}
+
+fn unix_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(1, |duration| duration.as_secs().max(1))
 }
 
 fn tunnel_summary(rows: &[TunnelRow]) -> Message {
@@ -1188,13 +1529,8 @@ impl Render for TunnelsPanel {
             named_rule_section.child(div().max_w(px(460.)).text_color(rgb(visual.muted)).child(
                 tunnel_text("tunnel-rule-feedback", self.rule_feedback().render(cx)),
             ));
-        let mut rows = div()
-            .id("tunnels-list")
-            .flex_1()
-            .min_h_0()
-            .overflow_y_scroll()
-            .flex()
-            .flex_col();
+        let recovery_section = self.recovery_section(cx);
+        let mut rows = div().id("tunnels-list").test_support().flex().flex_col();
         for (index, row) in self.rows.iter().enumerate() {
             let id = row.id;
             let row_icon = if row.rule_id.is_some() {
@@ -1357,7 +1693,17 @@ impl Render for TunnelsPanel {
                 ),
             )
         };
-        div().h_full().min_h_0().flex().flex_col().bg(rgb(visual.surface)).text_color(rgb(visual.text)).text_xs()
+        let management_body = div()
+            .id("tunnel-management-scroll")
+            .test_support()
+            .flex_1()
+            .min_h_0()
+            .overflow_y_scroll()
+            .flex()
+            .flex_col()
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
+            .text_xs()
             .child(div().h(px(38.)).px_3().flex_shrink_0().flex().items_center().gap_3().bg(rgb(visual.canvas)).border_b_1().border_color(rgb(visual.border))
                 .child(div().text_color(rgb(visual.accent)).child(IconName::Network))
                 .child(div().font_weight(FontWeight::SEMIBOLD).child(t(cx,"端口转发","Port forwarding")))
@@ -1366,6 +1712,7 @@ impl Render for TunnelsPanel {
                 .child(Button::new("tunnel-remote").ghost().compact().rounded(px(6.)).icon(IconName::ArrowDown).selected(self.direction==Direction::Remote).toggled(self.direction==Direction::Remote).label(t(cx,"远程转发","Remote forwarding")).on_click(cx.listener(|view,_,_,cx| {view.direction=Direction::Remote;cx.notify();})))
                 .child(Button::new("tunnel-dynamic").ghost().compact().rounded(px(6.)).icon(IconName::Network).selected(self.direction==Direction::Dynamic).toggled(self.direction==Direction::Dynamic).label(t(cx,"动态 SOCKS5","Dynamic SOCKS5")).on_click(cx.listener(|view,_,window,cx| {view.direction=Direction::Dynamic;view.bind_host.read(cx).focus_handle(cx).focus(window,cx);cx.notify();}))))
             .child(named_rule_section)
+            .when_some(recovery_section, |panel, section| panel.child(section))
             .child(div().px_3().py_3().flex_shrink_0().flex().items_end().gap_2().border_b_1().border_color(rgb(visual.border))
                 .child(div().flex_1().flex().flex_col().gap_1().child(t(cx,"监听地址","Bind host")).child(Input::new(&self.bind_host).aria_label(t(cx,"监听地址","Bind host")).small().rounded(px(6.))))
                 .child(div().w(px(88.)).flex().flex_col().gap_1().child(t(cx,"监听端口","Bind port")).child(Input::new(&self.bind_port).aria_label(t(cx,"监听端口","Bind port")).small().rounded(px(6.))))
@@ -1383,8 +1730,32 @@ impl Render for TunnelsPanel {
                 .child(div().w(px(170.)).child(t(cx,"流量","Traffic")))
                 .child(div().w(px(45.)).child(t(cx,"操作","Action"))))
             .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(t(cx, "上一会话隧道记录，不会自动重建", "Previous session tunnels. Never restarted automatically"))))
-            .child(rows)
-            .child(div().min_h(px(28.)).px_3().flex_shrink_0().flex().items_center().bg(rgb(visual.canvas)).border_t_1().border_color(rgb(visual.border)).text_color(rgb(visual.muted)).child(tunnel_text("tunnel-runtime-summary", self.status.render(cx))))
+            .child(rows);
+        div()
+            .h_full()
+            .min_h_0()
+            .flex()
+            .flex_col()
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
+            .text_xs()
+            .child(management_body)
+            .child(
+                div()
+                    .min_h(px(28.))
+                    .px_3()
+                    .flex_shrink_0()
+                    .flex()
+                    .items_center()
+                    .bg(rgb(visual.canvas))
+                    .border_t_1()
+                    .border_color(rgb(visual.border))
+                    .text_color(rgb(visual.muted))
+                    .child(tunnel_text(
+                        "tunnel-runtime-summary",
+                        self.status.render(cx),
+                    )),
+            )
             .into_any_element()
     }
 }
@@ -1458,6 +1829,7 @@ async fn cancellation(cancelled: &AtomicBool) {
 }
 
 impl EventEmitter<TunnelRuleEvent> for TunnelsPanel {}
+impl EventEmitter<TunnelRuntimeEvent> for TunnelsPanel {}
 
 #[cfg(test)]
 mod tests {

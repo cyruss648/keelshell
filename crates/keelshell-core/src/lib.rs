@@ -42,6 +42,7 @@ mod text_merge;
 mod text_patch;
 mod theme;
 mod tunnel_rules;
+mod tunnel_runtime;
 mod updates;
 mod vault;
 mod workflow_audit;
@@ -152,6 +153,11 @@ pub use tunnel_rules::{
     ConfirmedTunnelRuleAction, MAX_TUNNEL_RULES, TUNNEL_RULE_VERSION, TunnelRule, TunnelRuleAction,
     TunnelRuleKind, TunnelRuleReviewError, TunnelRuleReviewToken, TunnelRuleType,
     ValidatedTunnelRulePlan,
+};
+pub use tunnel_runtime::{
+    ConfirmedTunnelRecovery, MAX_TUNNEL_RUNTIME_SNAPSHOTS, TUNNEL_RUNTIME_SNAPSHOT_VERSION,
+    TunnelAuthKind, TunnelConnectionBinding, TunnelRecoveryError, TunnelRecoveryReviewToken,
+    TunnelRuntimeSnapshot, TunnelRuntimeStatus, ValidatedTunnelRecoveryPlan,
 };
 pub use updates::{UpdateCheckFrequency, UpdatePreferences};
 pub use vault::{CredentialKind, CredentialMetadata, CredentialVault, VaultStore};

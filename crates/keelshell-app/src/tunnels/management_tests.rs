@@ -992,7 +992,14 @@ async fn stop_review_rejects_instances_started_after_the_preview(cx: &mut TestAp
             // selection guard which normally invalidates the old preview first.
             let specification = crate::tunnels::specification_from_rule(rule)
                 .unwrap_or_else(|_| panic!("valid fixture rule"));
-            panel.start_specification(specification, Some(rule.name.clone()), Some(rule.id), cx);
+            panel.start_specification(
+                specification,
+                Some(rule.name.clone()),
+                Some(rule.id),
+                None,
+                None,
+                cx,
+            );
         });
         activate_painted(window, old_confirm, cx);
         assert!(panel.read(cx).rule_stop_review.is_none());
@@ -1145,6 +1152,13 @@ fn unresolved_cleanup_ignores_worker_exit_and_closing_until_original_watch_is_cl
                 proxy_address: None,
                 traffic: TrafficStats::default(),
                 last_traffic: Default::default(),
+                rule_snapshot: None,
+                connection_binding: None,
+                runtime_snapshot: None,
+                runtime_persisted: false,
+                runtime_dirty: false,
+                runtime_remove_requested: false,
+                runtime_operation: None,
             });
             assert!(panel.retire_workers(cx), "worker exit is not cleanup proof");
             assert!(

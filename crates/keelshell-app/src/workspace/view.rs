@@ -1709,7 +1709,16 @@ impl Workspace {
         let tool_height = if self.visible_panel == Some(ToolPanel::Files) {
             crate::files::FilesPanel::workbench_height(viewport.height)
         } else {
-            px(340.).min(viewport.height * 0.40)
+            // Tunnel management has a fixed review/action row in addition to
+            // the endpoint form and named-rule controls. Give it enough
+            // vertical room for the common multi-row case while retaining the
+            // compact-workbench budget at short window heights.
+            let (preferred, viewport_share) = if self.visible_panel == Some(ToolPanel::Tunnels) {
+                (px(500.), 0.45)
+            } else {
+                (px(340.), 0.40)
+            };
+            preferred.min(viewport.height * viewport_share)
                 - if compact_command_tools {
                     px(32.)
                 } else {

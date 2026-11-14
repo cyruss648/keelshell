@@ -293,6 +293,12 @@ enum AfterSave {
         panel: WeakEntity<crate::tunnels::TunnelsPanel>,
         operation: uuid::Uuid,
     },
+    TunnelRuntime {
+        panel: WeakEntity<crate::tunnels::TunnelsPanel>,
+        operation: uuid::Uuid,
+        snapshot_id: uuid::Uuid,
+        removing: bool,
+    },
     SnippetSaved {
         panel: EntityId,
     },
@@ -452,6 +458,7 @@ pub struct Workspace {
     terminal_observers: HashMap<EntityId, Subscription>,
     terminal_focus: HashMap<EntityId, Subscription>,
     tunnel_subscriptions: HashMap<EntityId, Subscription>,
+    tunnel_runtime_subscriptions: HashMap<EntityId, Subscription>,
     // Keep runtime owners reachable after tab/archive removal until cleanup.
     tunnel_owners: HashMap<EntityId, Entity<crate::tunnels::TunnelsPanel>>,
     tunnel_rule_store_blocked: bool,
@@ -1044,6 +1051,7 @@ impl Workspace {
             terminal_observers: HashMap::new(),
             terminal_focus: HashMap::new(),
             tunnel_subscriptions: HashMap::new(),
+            tunnel_runtime_subscriptions: HashMap::new(),
             tunnel_owners: HashMap::new(),
             tunnel_rule_store_blocked: false,
             _subscriptions: vec![
@@ -1150,6 +1158,8 @@ impl Workspace {
         self.forget_reconnect(terminal.entity_id(), window, cx);
         self.remote_sessions.remove(&terminal.entity_id());
         self.tunnel_subscriptions.remove(&terminal.entity_id());
+        self.tunnel_runtime_subscriptions
+            .remove(&terminal.entity_id());
         self.knowledge_source_ids.remove(&terminal.entity_id());
         self.knowledge_source_revisions
             .remove(&terminal.entity_id());
@@ -2503,6 +2513,26 @@ impl Workspace {
                         } else {
                             None
                         };
+                        let tunnel_runtime_saved = if let AfterSave::TunnelRuntime {
+                            panel,
+                            operation,
+                            snapshot_id,
+                            removing,
+                        } = &after
+                        {
+                            panel.upgrade().map(|panel| {
+                                panel.update(cx, |panel, cx| {
+                                    panel.mark_runtime_event_succeeded(
+                                        *operation,
+                                        *snapshot_id,
+                                        *removing,
+                                        cx,
+                                    )
+                                })
+                            })
+                        } else {
+                            None
+                        };
                         view.refresh_tunnel_panels(cx);
                         view.update_service.update(cx, |panel, cx| panel.set_preferences(view.state.settings.updates, cx));
                         if view.pending_update_check.is_some_and(|pending| view.state.settings.updates.last_successful_check.is_some_and(|saved| saved >= pending)) {
@@ -2681,6 +2711,19 @@ impl Workspace {
                                     )
                                 };
                             }
+                            AfterSave::TunnelRuntime { removing, .. } => {
+                                if tunnel_runtime_saved != Some(true) {
+                                    view.status = Message::new(
+                                        "运行状态已保存，但当前隧道面板已过期。",
+                                        "Runtime state was saved, but the current tunnel panel is stale.",
+                                    );
+                                } else if removing {
+                                    view.status = Message::new(
+                                        "命名隧道清理已确认，恢复候选已移除。",
+                                        "Named tunnel cleanup was confirmed; the recovery candidate was removed.",
+                                    );
+                                }
+                            }
                             AfterSave::BatchAudit { .. } => {
                                 view.status = Message::new(
                                     "批量审计摘要已保存（不含命令正文、输出或主机地址）",
@@ -2777,7 +2820,10 @@ impl Workspace {
                         {
                             panel.update(cx, |panel, cx| panel.save_failed(*review_id, &error, cx));
                         }
-                        if matches!(&after, AfterSave::TunnelRule { .. })
+                        if matches!(
+                            &after,
+                            AfterSave::TunnelRule { .. } | AfterSave::TunnelRuntime { .. }
+                        )
                             || matches!(&error, keelshell_core::Error::Conflict | keelshell_core::Error::Durability(_))
                         {
                             view.mark_tunnel_rule_store_uncertain(cx);
@@ -2822,6 +2868,26 @@ impl Workspace {
                             };
                             panel.update(cx, |panel, cx| {
                                 panel.mark_rule_mutation_failed(*operation, message, true, cx)
+                            });
+                        }
+                        if let AfterSave::TunnelRuntime {
+                            panel,
+                            operation,
+                            ..
+                        } = &after
+                            && let Some(panel) = panel.upgrade()
+                        {
+                            panel.update(cx, |panel, cx| {
+                                panel.mark_runtime_event_failed(
+                                    *operation,
+                                    Message::detail(
+                                        "命名隧道运行状态保存失败或结果未知；候选已保留，请重新加载配置后再操作。",
+                                        "Named tunnel runtime state could not be confirmed; the candidate was retained. Reload configuration before acting again.",
+                                        &error,
+                                    ),
+                                    true,
+                                    cx,
+                                )
                             });
                         }
                         // observe_shared_configuration marks the shared
@@ -3136,6 +3202,95 @@ impl Workspace {
         );
     }
 
+    fn handle_tunnel_runtime_event(
+        &mut self,
+        panel: &Entity<crate::tunnels::TunnelsPanel>,
+        event: &crate::tunnels::TunnelRuntimeEvent,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let bound = self
+            .panels
+            .values()
+            .chain(self.archived_panels.values())
+            .filter_map(|panels| panels.tunnels.as_ref())
+            .any(|candidate| candidate == panel)
+            || self
+                .tunnel_owners
+                .values()
+                .any(|candidate| candidate == panel);
+        if !bound {
+            panel.update(cx, |panel, cx| {
+                panel.mark_runtime_event_failed(
+                    event.operation(),
+                    Message::new(
+                        "隧道面板已过期，未保存运行状态。",
+                        "The tunnel panel is stale; runtime state was not saved.",
+                    ),
+                    false,
+                    cx,
+                )
+            });
+            return;
+        }
+        let busy = self.saving
+            || self.state_reloading
+            || self.configuration_recovery.is_some()
+            || self.vault_settings.is_some()
+            || self.profile_sync.is_some()
+            || self.snippet_modal_open();
+        if busy {
+            panel.update(cx, |panel, cx| {
+                panel.mark_runtime_event_deferred(event.operation(), cx);
+            });
+            return;
+        }
+        if self.tunnel_rule_store_blocked || !panel.read(cx).accepts_runtime_event(event) {
+            panel.update(cx, |panel, cx| {
+                panel.mark_runtime_event_failed(
+                    event.operation(),
+                    Message::new(
+                        "配置保存结果未知或面板审核已过期，运行候选已保留；请重新加载配置。",
+                        "The configuration result is unknown or the panel review is stale. The runtime candidate was retained; reload configuration.",
+                    ),
+                    true,
+                    cx,
+                )
+            });
+            return;
+        }
+        let candidate = match event.candidate(&self.state) {
+            Ok(candidate) => candidate,
+            Err(error) => {
+                self.mark_tunnel_rule_store_uncertain(cx);
+                panel.update(cx, |panel, cx| {
+                    panel.mark_runtime_event_failed(
+                        event.operation(),
+                        Message::detail(
+                            "命名隧道运行状态审核已过期，候选已保留",
+                            "Named tunnel runtime state review expired; candidate retained",
+                            error,
+                        ),
+                        true,
+                        cx,
+                    )
+                });
+                return;
+            }
+        };
+        self.persist(
+            candidate,
+            AfterSave::TunnelRuntime {
+                panel: panel.downgrade(),
+                operation: event.operation(),
+                snapshot_id: event.snapshot_id(),
+                removing: event.removing(),
+            },
+            window,
+            cx,
+        );
+    }
+
     fn toggle_panel(&mut self, kind: ToolPanel, window: &mut Window, cx: &mut Context<Self>) {
         if self.remote_completion.visible() {
             self.cancel_remote_completion(cx);
@@ -3216,6 +3371,13 @@ impl Workspace {
                         view.handle_tunnel_rule_event(panel, event, window, cx)
                     },
                 );
+                let runtime_subscription = cx.subscribe_in(
+                    &panel,
+                    window,
+                    |view, panel, event: &crate::tunnels::TunnelRuntimeEvent, window, cx| {
+                        view.handle_tunnel_runtime_event(panel, event, window, cx)
+                    },
+                );
                 panel.update(cx, |panel, cx| {
                     panel.set_rule_configuration_busy(self.saving || self.state_reloading, cx);
                     if self.tunnel_rule_store_blocked {
@@ -3224,6 +3386,8 @@ impl Workspace {
                 });
                 self.tunnel_owners.insert(panel.entity_id(), panel.clone());
                 self.tunnel_subscriptions.insert(id, subscription);
+                self.tunnel_runtime_subscriptions
+                    .insert(id, runtime_subscription);
                 self.panels.entry(id).or_default().tunnels = Some(panel);
             }
             ToolPanel::Tunnels => {

@@ -3,13 +3,15 @@
 
 use super::{RemotePanels, ToolPanel, Workspace};
 use crate::terminal::TerminalView;
-use crate::tunnels::test_support::{SshFixture, click};
+use crate::tunnels::test_support::{SshFixture, click, rule_cleanup_unconfirmed};
 use gpui_kit::test::{TestAppContextExt, TestWindowExt};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
     point, px, size,
 };
-use keelshell_core::{StateStore, TunnelRuleKind};
+use keelshell_core::{
+    StateStore, TunnelConnectionBinding, TunnelRuleKind, TunnelRuntimeSnapshot, TunnelRuntimeStatus,
+};
 use std::{
     sync::{Arc, atomic::AtomicBool, mpsc},
     time::Duration,
@@ -142,6 +144,48 @@ fn fill(window: &mut gpui_kit::Window, id: &str, value: &str, cx: &mut gpui_kit:
         cx,
     );
     window.input(value, cx);
+}
+
+fn current_tunnel_panel(
+    fixture: &Fixture,
+    cx: &mut TestAppContext,
+) -> Entity<crate::tunnels::TunnelsPanel> {
+    fixture.workspace.read_with(cx, |workspace, _| {
+        let terminal = workspace.tabs[workspace.active].entity_id();
+        workspace.panels[&terminal]
+            .tunnels
+            .clone()
+            .expect("tunnel panel")
+    })
+}
+
+fn seed_runtime_candidate(fixture: &Fixture, cx: &mut TestAppContext) -> uuid::Uuid {
+    let mut state = fixture.store.load().expect("load seed state");
+    let rule = state.tunnel_rules[0].clone();
+    let snapshot = TunnelRuntimeSnapshot::new(
+        rule,
+        TunnelConnectionBinding::from_state(&state, fixture.ssh.connection_id)
+            .expect("connection binding"),
+        "127.0.0.1:40123",
+        1_700_000_000,
+    )
+    .expect("runtime candidate");
+    let id = snapshot.id;
+    state
+        .upsert_tunnel_runtime_snapshot(snapshot)
+        .expect("upsert runtime candidate");
+    let saved = fixture
+        .store
+        .save(&state)
+        .expect("persist runtime candidate");
+    adopt_fixture_state(fixture, saved, cx);
+    cx.update_window(fixture.window, |_, _, cx| {
+        fixture
+            .workspace
+            .update(cx, |workspace, cx| workspace.refresh_tunnel_panels(cx));
+    })
+    .expect("refresh runtime candidate");
+    id
 }
 
 #[gpui_kit::test]
@@ -322,4 +366,296 @@ async fn tunnel_rule_delete_rechecks_active_owners_in_other_tabs(cx: &mut TestAp
         !other_panel.read(cx).has_active_rule(id)
     })
     .await;
+}
+
+#[gpui_kit::test]
+async fn crash_candidate_is_read_only_until_explicit_review_and_confirm(cx: &mut TestAppContext) {
+    let fixture = mount(cx);
+    let window = fixture.window;
+    let candidate_id = seed_runtime_candidate(&fixture, cx);
+    let panel = current_tunnel_panel(&fixture, cx);
+    let inspect = format!("inspect-tunnel-recovery-{candidate_id}");
+    let review = format!("review-recovery-start-{candidate_id}");
+
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.try_find(inspect.clone()).is_some());
+        assert!(panel.read(cx).runtime_row_count() == 0);
+        click(window, inspect, cx);
+        assert!(
+            window
+                .try_find(format!(
+                    "tunnel-recovery-candidate-inspected-{candidate_id}"
+                ))
+                .is_some()
+        );
+        click(window, review, cx);
+        assert!(window.try_find("confirm-tunnel-recovery-start").is_some());
+        assert!(panel.read(cx).runtime_row_count() == 0);
+    })
+    .expect("candidate remains read-only before confirmation");
+
+    cx.update_window(window, |_, window, cx| {
+        click(window, "confirm-tunnel-recovery-start", cx);
+        assert_eq!(panel.read(cx).runtime_row_count(), 1);
+    })
+    .expect("explicit recovery confirmation creates a fresh worker");
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).any_runtime_listener()
+    })
+    .await;
+
+    let persisted = fixture.store.load().expect("read recovery state");
+    assert!(
+        persisted
+            .tunnel_runtime_snapshots
+            .iter()
+            .any(|snapshot| snapshot.id == candidate_id),
+        "old candidate stays until cleanup or explicit discard"
+    );
+    panel.update(cx, |panel, cx| panel.suspend(cx));
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).all_runtime_rows_finished()
+    })
+    .await;
+}
+
+#[gpui_kit::test]
+async fn recovery_discard_is_explicit_and_persisted_through_workspace_worker(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount(cx);
+    let window = fixture.window;
+    let candidate_id = seed_runtime_candidate(&fixture, cx);
+    let panel = current_tunnel_panel(&fixture, cx);
+    let discard = format!("discard-tunnel-recovery-{candidate_id}");
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        click(window, discard, cx);
+    })
+    .expect("explicit discard");
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        !fixture.workspace.read(cx).saving
+            && fixture
+                .store
+                .load()
+                .expect("load after discard")
+                .tunnel_runtime_snapshots
+                .iter()
+                .all(|snapshot| snapshot.id != candidate_id)
+    })
+    .await;
+    assert!(panel.read_with(cx, |panel, _| panel.recovery_candidates().is_empty()));
+}
+
+#[gpui_kit::test]
+async fn changed_rule_keeps_candidate_and_blocks_review_start(cx: &mut TestAppContext) {
+    let fixture = mount(cx);
+    let window = fixture.window;
+    let candidate_id = seed_runtime_candidate(&fixture, cx);
+    let panel = current_tunnel_panel(&fixture, cx);
+    let mut changed = fixture.store.load().expect("load current state");
+    changed.tunnel_rules[0].name = "Changed after crash".into();
+    let changed = fixture.store.save(&changed).expect("persist changed rule");
+    adopt_fixture_state(&fixture, changed, cx);
+    cx.update_window(window, |_, _, cx| {
+        fixture
+            .workspace
+            .update(cx, |workspace, cx| workspace.refresh_tunnel_panels(cx));
+    })
+    .expect("refresh changed rule");
+    let review = format!("review-recovery-start-{candidate_id}");
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        click(window, review, cx);
+        assert!(window.try_find("confirm-tunnel-recovery-start").is_none());
+        assert!(panel.read(cx).runtime_row_count() == 0);
+    })
+    .expect("changed rule cannot be reviewed for recovery");
+    assert!(
+        fixture
+            .store
+            .load()
+            .expect("candidate retained")
+            .tunnel_runtime_snapshots
+            .iter()
+            .any(|snapshot| snapshot.id == candidate_id)
+    );
+}
+
+#[gpui_kit::test]
+async fn mismatched_current_connection_keeps_candidate_visible_and_blocks_review(
+    cx: &mut TestAppContext,
+) {
+    let fixture = mount(cx);
+    let window = fixture.window;
+    let candidate_id = seed_runtime_candidate(&fixture, cx);
+    let panel = current_tunnel_panel(&fixture, cx);
+    let state = fixture.store.load().expect("load candidate state");
+    let other_connection_id = uuid::Uuid::new_v4();
+
+    panel.update(cx, |panel, cx| {
+        panel.refresh_rule_state(Some(state), Some(other_connection_id), cx);
+    });
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(
+            window
+                .find(format!("tunnel-recovery-candidate-status-{candidate_id}"))
+                .visible()
+        );
+        assert_eq!(
+            window
+                .find(format!("review-recovery-start-{candidate_id}"))
+                .disabled(),
+            Some(true)
+        );
+        assert!(
+            window
+                .try_find(format!("discard-tunnel-recovery-{candidate_id}"))
+                .is_some()
+        );
+        click(window, format!("review-recovery-start-{candidate_id}"), cx);
+        assert!(window.try_find("confirm-tunnel-recovery-start").is_none());
+        assert_eq!(panel.read(cx).runtime_row_count(), 0);
+    })
+    .expect("mismatched connection keeps candidate visible but non-startable");
+}
+
+#[gpui_kit::test]
+async fn confirmed_normal_stop_removes_the_persisted_runtime_candidate(cx: &mut TestAppContext) {
+    let fixture = mount(cx);
+    let window = fixture.window;
+    let panel = current_tunnel_panel(&fixture, cx);
+    let rule_id = fixture.ssh.state.tunnel_rules[0].id;
+    cx.update_window(window, |_, window, cx| {
+        click(window, format!("named-tunnel-rule-{rule_id}"), cx);
+        click(window, "review-start-named-tunnel", cx);
+    })
+    .expect("explicit named start");
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).any_runtime_listener()
+    })
+    .await;
+    cx.wait_for(window, Duration::from_secs(5), |_, _cx| {
+        fixture
+            .store
+            .load()
+            .expect("load persisted runtime")
+            .tunnel_runtime_snapshots
+            .iter()
+            .any(|snapshot| snapshot.rule.id == rule_id)
+    })
+    .await;
+
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        window.scroll(
+            "tunnel-management-scroll",
+            gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-500.))),
+            cx,
+        );
+        window.render_frame(cx);
+        click(window, ("stop-tunnel", 0_usize), cx);
+        click(window, "confirm-tunnel-rule-stop", cx);
+    })
+    .expect("explicit named stop");
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).all_runtime_rows_finished()
+            && !fixture.workspace.read(cx).saving
+            && fixture
+                .store
+                .load()
+                .expect("load after confirmed cleanup")
+                .tunnel_runtime_snapshots
+                .iter()
+                .all(|snapshot| snapshot.rule.id != rule_id)
+    })
+    .await;
+}
+
+#[gpui_kit::test]
+async fn unconfirmed_cleanup_retains_candidate_and_blocks_recovery(cx: &mut TestAppContext) {
+    let (mut ssh, _cleanup) = SshFixture::with_rejected_cleanup();
+    let rule = &mut ssh.state.tunnel_rules[0];
+    rule.kind = TunnelRuleKind::Remote;
+    rule.target_host = Some("127.0.0.1".into());
+    rule.target_port = Some(22);
+    let rule_id = rule.id;
+    let fixture = mount_with_ssh(ssh, cx);
+    let window = fixture.window;
+    let panel = current_tunnel_panel(&fixture, cx);
+
+    cx.update_window(window, |_, window, cx| {
+        click(window, format!("named-tunnel-rule-{rule_id}"), cx);
+        click(window, "review-start-named-tunnel", cx);
+    })
+    .expect("explicit named remote start");
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        panel.read(cx).any_runtime_listener()
+    })
+    .await;
+    cx.wait_for(window, Duration::from_secs(5), |_, _cx| {
+        fixture
+            .store
+            .load()
+            .expect("load persisted runtime")
+            .tunnel_runtime_snapshots
+            .iter()
+            .any(|snapshot| snapshot.rule.id == rule_id)
+    })
+    .await;
+
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        window.scroll(
+            "tunnel-management-scroll",
+            gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-500.))),
+            cx,
+        );
+        window.render_frame(cx);
+        click(window, ("stop-tunnel", 0_usize), cx);
+        click(window, "confirm-tunnel-rule-stop", cx);
+    })
+    .expect("request cleanup that the fixture rejects");
+    cx.wait_for(window, Duration::from_secs(5), |_, cx| {
+        let persisted = fixture.store.load().expect("load unconfirmed runtime");
+        rule_cleanup_unconfirmed(panel.read(cx), rule_id)
+            && persisted.tunnel_runtime_snapshots.iter().any(|snapshot| {
+                snapshot.rule.id == rule_id
+                    && snapshot.status == TunnelRuntimeStatus::CleanupUnconfirmed
+            })
+    })
+    .await;
+
+    let snapshot_id = fixture
+        .store
+        .load()
+        .expect("load retained candidate")
+        .tunnel_runtime_snapshots
+        .into_iter()
+        .find(|snapshot| snapshot.rule.id == rule_id)
+        .expect("retained cleanup candidate")
+        .id;
+    cx.update_window(window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(
+            window
+                .find(format!("tunnel-recovery-candidate-status-{snapshot_id}"))
+                .visible()
+        );
+        assert_eq!(
+            window
+                .find(format!("review-recovery-start-{snapshot_id}"))
+                .disabled(),
+            Some(true)
+        );
+        assert!(
+            window
+                .try_find(format!("discard-tunnel-recovery-{snapshot_id}"))
+                .is_some()
+        );
+        assert_eq!(panel.read(cx).runtime_row_count(), 1);
+    })
+    .expect("unconfirmed cleanup remains a visible, non-recoverable candidate");
 }

@@ -510,6 +510,11 @@ pub struct AppState {
     /// Named, non-secret forwarding intents. Loading these rules never starts a listener.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tunnel_rules: Vec<crate::TunnelRule>,
+    /// Non-sensitive records left by named tunnel workers that may have
+    /// survived a process crash. Loading these records never reconnects,
+    /// starts a listener, reuses a worker, or replays a command.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tunnel_runtime_snapshots: Vec<crate::TunnelRuntimeSnapshot>,
     /// Explicitly reviewed local knowledge entries; only known completed or failed
     /// session captures are stored, and each entry retains its source/session binding.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -546,6 +551,7 @@ impl PartialEq for AppState {
             && self.profile_sync == other.profile_sync
             && self.workflow_audits == other.workflow_audits
             && self.tunnel_rules == other.tunnel_rules
+            && self.tunnel_runtime_snapshots == other.tunnel_runtime_snapshots
             && self.knowledge_entries == other.knowledge_entries
             && self.workspace_layout == other.workspace_layout
             && self.settings == other.settings
@@ -589,6 +595,7 @@ impl Default for AppState {
             profile_sync: None,
             workflow_audits: Vec::new(),
             tunnel_rules: Vec::new(),
+            tunnel_runtime_snapshots: Vec::new(),
             knowledge_entries: Vec::new(),
             workspace_layout: None,
             settings: Settings::default(),
@@ -631,6 +638,7 @@ impl AppState {
         }
         crate::workflow_audit::validate_workflow_audits(&self.workflow_audits)?;
         self.validate_tunnel_rules()?;
+        self.validate_tunnel_runtime_snapshots()?;
         crate::ai_knowledge::validate_saved_knowledge_entries(&self.knowledge_entries)?;
         if let Some(layout) = &self.workspace_layout {
             layout.validate()?;

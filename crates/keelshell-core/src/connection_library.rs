@@ -104,6 +104,8 @@ impl<'de> Deserialize<'de> for AppState {
             #[serde(default)]
             tunnel_rules: Vec<crate::TunnelRule>,
             #[serde(default)]
+            tunnel_runtime_snapshots: Vec<crate::TunnelRuntimeSnapshot>,
+            #[serde(default)]
             knowledge_entries: Vec<crate::SavedKnowledgeEntry>,
             #[serde(default, deserialize_with = "present_workspace_layout")]
             workspace_layout: Option<crate::WorkspaceLayout>,
@@ -127,6 +129,7 @@ impl<'de> Deserialize<'de> for AppState {
             profile_sync: wire.profile_sync,
             workflow_audits: wire.workflow_audits,
             tunnel_rules: wire.tunnel_rules,
+            tunnel_runtime_snapshots: wire.tunnel_runtime_snapshots,
             knowledge_entries: wire.knowledge_entries,
             workspace_layout: wire.workspace_layout,
             settings: wire.settings,

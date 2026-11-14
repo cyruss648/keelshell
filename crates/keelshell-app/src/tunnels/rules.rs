@@ -40,6 +40,237 @@ impl TunnelRuleEvent {
 }
 
 impl TunnelsPanel {
+    pub(crate) fn recovery_candidates(&self) -> Vec<TunnelRuntimeSnapshot> {
+        self.rule_state
+            .as_ref()
+            .into_iter()
+            .flat_map(|state| state.tunnel_runtime_snapshots.iter())
+            // A snapshot created by the currently listening row is already
+            // represented by the live runtime row. Keep the recovery area
+            // reserved for previous-session candidates, and retain a
+            // CleanupUnconfirmed snapshot so the user can inspect or discard
+            // the unresolved cleanup explicitly.
+            .filter(|snapshot| {
+                !self.rows.iter().any(|row| {
+                    !row.finished
+                        && row.unresolved_cleanup.is_none()
+                        && row
+                            .runtime_snapshot
+                            .as_ref()
+                            .is_some_and(|current| current.id == snapshot.id)
+                })
+            })
+            .cloned()
+            .collect()
+    }
+
+    fn inspect_recovery_candidate(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
+        if self.suspended {
+            return;
+        }
+        if self
+            .recovery_inspected
+            .is_some_and(|inspected| inspected == id)
+        {
+            self.recovery_inspected = None;
+        } else {
+            self.recovery_inspected = Some(id);
+        }
+        self.recovery_review = None;
+        cx.notify();
+    }
+
+    fn review_recovery_start(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
+        if !self.accept_rule_action(self.rule_epoch)
+            || self.rule_store_blocked
+            || self.recovery_discard_pending.is_some()
+        {
+            return;
+        }
+        let Some(state) = self.rule_state.as_ref() else {
+            self.rule_status = Message::new(
+                "配置快照不可用，请重新加载配置后再审核恢复。",
+                "Configuration snapshot unavailable. Reload it before reviewing recovery.",
+            );
+            cx.notify();
+            return;
+        };
+        let Some(snapshot) = state
+            .tunnel_runtime_snapshots
+            .iter()
+            .find(|snapshot| snapshot.id == id)
+        else {
+            self.rule_status = recovery_error_message(TunnelRecoveryError::SnapshotNotFound);
+            cx.notify();
+            return;
+        };
+        if self.connection_id != Some(snapshot.connection.connection_id) {
+            self.rule_status = Message::new(
+                "当前面板连接与候选 connection_id 不匹配；请重新选择原连接后再审核。",
+                "The current panel connection does not match the candidate connection_id. Select the original connection before reviewing.",
+            );
+            cx.notify();
+            return;
+        }
+        match state.plan_tunnel_runtime_recovery(id) {
+            Ok(plan) => {
+                self.recovery_inspected = Some(id);
+                self.recovery_review = Some(RuntimeRecoveryReview { plan });
+                self.rule_plan = None;
+                self.clear_change_review(cx);
+                self.rule_stop_review = None;
+                self.rule_status = Message::new(
+                    "恢复候选已通过当前规则和连接绑定检查；请检查详情后确认重新启动。",
+                    "The candidate matches the current rule and connection binding. Inspect the details, then confirm a fresh start.",
+                );
+                cx.notify();
+            }
+            Err(error) => {
+                self.rule_status = recovery_error_message(error);
+                cx.notify();
+            }
+        }
+    }
+
+    fn cancel_recovery_review(&mut self, token: TunnelRecoveryReviewToken, cx: &mut Context<Self>) {
+        if self
+            .recovery_review
+            .as_ref()
+            .is_some_and(|review| review.plan.review_token() == token)
+        {
+            self.recovery_review = None;
+            self.rule_status = Message::new(
+                "已取消恢复审核；候选仍保留。",
+                "Recovery review cancelled; the candidate was retained.",
+            );
+            cx.notify();
+        }
+    }
+
+    fn confirm_recovery_start(&mut self, token: TunnelRecoveryReviewToken, cx: &mut Context<Self>) {
+        if self.suspended
+            || self.rule_configuration_busy
+            || self.rule_store_blocked
+            || self.rule_mutation.is_some()
+        {
+            return;
+        }
+        let Some(review) = self
+            .recovery_review
+            .as_ref()
+            .filter(|review| review.plan.review_token() == token)
+        else {
+            return;
+        };
+        let Some(state) = self.rule_state.clone() else {
+            self.rule_status = Message::new(
+                "配置快照不可用，未启动恢复隧道。",
+                "Configuration snapshot unavailable; recovery was not started.",
+            );
+            cx.notify();
+            return;
+        };
+        let confirmed = match review.plan.clone().confirm(&state, token) {
+            Ok(confirmed) => confirmed,
+            Err(error) => {
+                self.recovery_review = None;
+                self.rule_status = recovery_error_message(error);
+                cx.notify();
+                return;
+            }
+        };
+        let rule = confirmed.plan().snapshot().rule.clone();
+        if self.connection_id != Some(rule.connection_id) {
+            self.recovery_review = None;
+            self.rule_status = Message::new(
+                "当前连接已变化，未启动恢复隧道；请重新选择原连接并审核。",
+                "The current connection changed, so recovery was not started. Select the original connection and review again.",
+            );
+            cx.notify();
+            return;
+        }
+        let specification = match specification_from_rule(&rule) {
+            Ok(specification) => specification,
+            Err(error) => {
+                self.rule_status = error;
+                cx.notify();
+                return;
+            }
+        };
+        let connection_binding =
+            match TunnelConnectionBinding::from_state(&state, rule.connection_id) {
+                Ok(binding) => binding,
+                Err(error) => {
+                    self.rule_status = Message::detail(
+                        "无法确认当前连接路由",
+                        "Unable to confirm the current connection route",
+                        error,
+                    );
+                    cx.notify();
+                    return;
+                }
+            };
+        self.recovery_review = None;
+        self.rule_status = Message::new(
+            format!(
+                "已确认恢复审核；将为规则“{}”创建全新的隧道 worker。",
+                rule.name
+            ),
+            format!(
+                "Recovery review confirmed; a new tunnel worker will be created for “{}”.",
+                rule.name
+            ),
+        );
+        self.start_specification(
+            specification,
+            Some(rule.name.clone()),
+            Some(rule.id),
+            Some(rule),
+            Some(connection_binding),
+            cx,
+        );
+    }
+
+    fn discard_recovery_candidate(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
+        if self.suspended
+            || self.rule_configuration_busy
+            || self.rule_store_blocked
+            || self.recovery_discard_pending.is_some()
+        {
+            return;
+        }
+        let Some(state) = self.rule_state.clone() else {
+            self.rule_status = Message::new(
+                "配置快照不可用，无法安全丢弃候选。",
+                "Configuration snapshot unavailable; the candidate could not be safely discarded.",
+            );
+            cx.notify();
+            return;
+        };
+        if !state
+            .tunnel_runtime_snapshots
+            .iter()
+            .any(|snapshot| snapshot.id == id)
+        {
+            self.rule_status = Message::new(
+                "恢复候选已不在当前快照中，请重新加载配置。",
+                "The recovery candidate is absent from the current snapshot. Reload configuration.",
+            );
+            cx.notify();
+            return;
+        }
+        let operation = uuid::Uuid::new_v4();
+        self.recovery_discard_pending = Some((id, operation));
+        self.recovery_review = None;
+        self.rule_status = Message::new("正在丢弃恢复候选…", "Discarding recovery candidate…");
+        cx.emit(TunnelRuntimeEvent::Remove {
+            expected_state: Arc::new(state),
+            snapshot_id: id,
+            operation,
+        });
+        cx.notify();
+    }
+
     pub(super) fn rule_feedback(&self) -> Message {
         if self.rule_mutation.is_some() {
             Message::new("正在保存命名规则…", "Saving named tunnel rule…")
@@ -417,6 +648,21 @@ impl TunnelsPanel {
             .any(|row| row.rule_id == Some(id) && !row.finished)
     }
 
+    #[cfg(test)]
+    pub(crate) fn runtime_row_count(&self) -> usize {
+        self.rows.len()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn any_runtime_listener(&self) -> bool {
+        self.rows.iter().any(|row| row.listening && !row.finished)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn all_runtime_rows_finished(&self) -> bool {
+        self.rows.iter().all(|row| row.finished)
+    }
+
     pub(super) fn rule_workers(&self, id: uuid::Uuid) -> Vec<usize> {
         self.rows
             .iter()
@@ -511,6 +757,10 @@ pub(super) struct RuleStopReview {
     pub rule_id: uuid::Uuid,
     // Panel-local IDs are never reused; a later start cannot inherit this review.
     pub workers: Vec<usize>,
+}
+
+pub(super) struct RuntimeRecoveryReview {
+    pub plan: ValidatedTunnelRecoveryPlan,
 }
 
 pub(super) struct RuleManagementView {
@@ -680,6 +930,76 @@ fn rule_validation_message(error: &keelshell_core::ValidationError) -> Message {
     }
 }
 
+fn recovery_error_message(error: TunnelRecoveryError) -> Message {
+    match error {
+        TunnelRecoveryError::SnapshotNotFound => Message::new(
+            "恢复候选不存在，请重新加载配置。",
+            "The recovery candidate is missing. Reload configuration.",
+        ),
+        TunnelRecoveryError::UnsupportedSnapshotVersion => Message::new(
+            "恢复候选版本不受支持；候选已保留，请使用支持该版本的构建或明确丢弃。",
+            "The recovery candidate uses an unsupported version. It was retained; use a compatible build or explicitly discard it.",
+        ),
+        TunnelRecoveryError::CleanupUnconfirmed => Message::new(
+            "上次清理结果未确认，已阻止恢复；请先重新加载并确认清理，或明确丢弃候选。",
+            "Previous cleanup was not confirmed, so recovery is blocked. Reload and confirm cleanup, or explicitly discard the candidate.",
+        ),
+        TunnelRecoveryError::InvalidSnapshot => Message::new(
+            "恢复候选数据无效，已阻止启动；请重新加载配置。",
+            "The recovery candidate is invalid. Start was blocked; reload configuration.",
+        ),
+        TunnelRecoveryError::RuleMissing => Message::new(
+            "当前规则已不存在；候选已保留，请重新加载规则或明确丢弃。",
+            "The current rule no longer exists. The candidate was retained; reload the rule or explicitly discard it.",
+        ),
+        TunnelRecoveryError::RuleChanged => Message::new(
+            "当前规则内容已变化；必须重新检查规则后才能恢复。",
+            "The current rule changed. Inspect the current rule before recovery.",
+        ),
+        TunnelRecoveryError::ConnectionMissing => Message::new(
+            "当前连接已不存在；候选已保留，请重新加载连接或明确丢弃。",
+            "The saved connection no longer exists. The candidate was retained; reload the connection or explicitly discard it.",
+        ),
+        TunnelRecoveryError::ConnectionRouteChanged => Message::new(
+            "连接路由或跳板目标已变化；已阻止恢复，请重新选择连接并审核。",
+            "The connection route or jump target changed. Recovery was blocked; select and review the connection again.",
+        ),
+        TunnelRecoveryError::AuthenticationTargetChanged => Message::new(
+            "连接认证目标已变化；已阻止恢复，请重新审核。",
+            "The connection authentication target changed. Recovery was blocked; review it again.",
+        ),
+        TunnelRecoveryError::StateInvalid => Message::new(
+            "当前配置状态无效；请重新加载配置后再审核恢复。",
+            "The current configuration is invalid. Reload it before reviewing recovery.",
+        ),
+        TunnelRecoveryError::TokenMismatch => Message::new(
+            "恢复审核 token 不匹配，未启动。",
+            "The recovery review token did not match; nothing was started.",
+        ),
+        TunnelRecoveryError::StateChanged => Message::new(
+            "恢复审核已过期；请重新 Inspect 并 Review start。",
+            "The recovery review expired. Inspect the candidate and choose Review start again.",
+        ),
+    }
+}
+
+fn tunnel_kind_label(kind: TunnelRuleKind, cx: &App) -> String {
+    t(
+        cx,
+        match kind {
+            TunnelRuleKind::Local => "本地转发",
+            TunnelRuleKind::Remote => "远程转发",
+            TunnelRuleKind::Dynamic => "动态 SOCKS5",
+        },
+        match kind {
+            TunnelRuleKind::Local => "Local forwarding",
+            TunnelRuleKind::Remote => "Remote forwarding",
+            TunnelRuleKind::Dynamic => "Dynamic SOCKS5",
+        },
+    )
+    .to_owned()
+}
+
 impl TunnelsPanel {
     pub(super) fn rule_review_view(&self, cx: &mut Context<Self>) -> Option<RuleManagementView> {
         let visual = crate::design::palette(cx);
@@ -691,7 +1011,78 @@ impl TunnelsPanel {
             .flex()
             .flex_col()
             .gap_2();
-        let footer = if let Some(review) = &self.rule_change_review {
+        let footer = if let Some(review) = &self.recovery_review {
+            let token = review.plan.review_token();
+            let snapshot = review.plan.snapshot();
+            let assessment = self
+                .rule_state
+                .as_ref()
+                .and_then(|state| state.assess_tunnel_runtime_snapshot(snapshot.id).err());
+            body = body
+                .child(
+                    div()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .child(t(cx, "确认恢复命名隧道", "Confirm named tunnel recovery")),
+                )
+                .child(tunnel_text(
+                    "tunnel-recovery-review-target",
+                    format!(
+                        "{}\n{}: {}\n{}: {}\n{}: {}\n{}: {}\n{}",
+                        t(cx, "规则", "Rule"),
+                        t(cx, "规则 ID", "Rule ID"),
+                        snapshot.rule.id,
+                        t(cx, "连接 ID", "Connection ID"),
+                        snapshot.connection.connection_id,
+                        t(cx, "上次实际监听", "Last assigned listener"),
+                        snapshot.assigned_listener,
+                        t(cx, "上次观察时间", "Last observed"),
+                        snapshot.started_at,
+                        t(
+                            cx,
+                            "这只会创建全新的 worker，不会复用旧 listener、SSH session 或流量。",
+                            "This creates a new worker; it never reuses the old listener, SSH session or traffic.",
+                        ),
+                    ),
+                ))
+                .child(tunnel_text(
+                    "tunnel-recovery-review-effect",
+                    assessment
+                        .map(recovery_error_message)
+                        .unwrap_or_else(|| {
+                            Message::new(
+                                "当前规则、路由和认证目标均与候选一致；确认后仍需重新建立当前连接并重新启动。",
+                                "The current rule, route and authentication target match; confirmation still creates a fresh start on the current connection.",
+                            )
+                        })
+                        .render(cx),
+                ));
+            div()
+                .flex()
+                .gap_2()
+                .child(
+                    Button::new("cancel-tunnel-recovery-review")
+                        .ghost()
+                        .min_h(px(32.))
+                        .label(t(cx, "取消审核", "Cancel review"))
+                        .on_click(cx.listener(move |view, _, _, cx| {
+                            view.cancel_recovery_review(token, cx)
+                        })),
+                )
+                .child(
+                    Button::new("confirm-tunnel-recovery-start")
+                        .primary()
+                        .min_h(px(32.))
+                        .disabled(
+                            self.rule_configuration_busy
+                                || self.rule_store_blocked
+                                || assessment.is_some(),
+                        )
+                        .label(t(cx, "确认并重新启动", "Confirm and start fresh"))
+                        .on_click(cx.listener(move |view, _, _, cx| {
+                            view.confirm_recovery_start(token, cx)
+                        })),
+                )
+        } else if let Some(review) = &self.rule_change_review {
             let operation = review.event.operation;
             let rule = &review.event.rule;
             body = body
@@ -811,6 +1202,224 @@ impl TunnelsPanel {
             body: body.into_any_element(),
             footer: footer.into_any_element(),
         })
+    }
+
+    pub(super) fn recovery_section(&self, cx: &mut Context<Self>) -> Option<AnyElement> {
+        let visual = crate::design::palette(cx);
+        let candidates = self.recovery_candidates();
+        if candidates.is_empty() {
+            return None;
+        }
+        let inspected = self.recovery_inspected;
+        let mut cards = div().flex().flex_col().gap_1();
+        for snapshot in candidates {
+            let id = snapshot.id;
+            let connection_matches = self.connection_id == Some(snapshot.connection.connection_id);
+            let assessment_error = self
+                .rule_state
+                .as_ref()
+                .and_then(|state| state.assess_tunnel_runtime_snapshot(id).err());
+            let review_blocked = !connection_matches || assessment_error.is_some();
+            let status = if !connection_matches {
+                t(
+                    cx,
+                    "当前连接不匹配；请重新选择原连接",
+                    "Current connection does not match; select the original connection",
+                )
+            } else {
+                match snapshot.status {
+                    TunnelRuntimeStatus::PossibleRunning => t(
+                        cx,
+                        "可能仍在运行；需要重新审核",
+                        "May still be running; review required",
+                    ),
+                    TunnelRuntimeStatus::CleanupUnconfirmed => t(
+                        cx,
+                        "清理未确认；候选保留",
+                        "Cleanup unconfirmed; candidate retained",
+                    ),
+                }
+            };
+            let reason = if !connection_matches {
+                Message::new(
+                    "请打开候选所属的已保存连接；候选仍保留。",
+                    "Open the saved connection that owns this candidate; the candidate was retained.",
+                )
+            } else {
+                assessment_error
+                    .map(recovery_error_message)
+                    .unwrap_or_else(|| {
+                        Message::new(
+                            "当前规则和连接绑定可供审核",
+                            "Current rule and connection binding are reviewable",
+                        )
+                    })
+            };
+            let details = format!(
+                "{}\n{}: {}\n{}: {}\n{}: {}",
+                snapshot.rule.name,
+                t(cx, "类型", "Type"),
+                tunnel_kind_label(snapshot.rule.kind, cx),
+                t(cx, "实际监听", "Assigned listener"),
+                snapshot.assigned_listener,
+                t(cx, "观察时间", "Observed"),
+                snapshot.started_at,
+            );
+            let mut card = div()
+                .id(format!("tunnel-recovery-candidate-{id}"))
+                .test_support()
+                .px_2()
+                .py_2()
+                .flex()
+                .flex_col()
+                .gap_1()
+                .border_b_1()
+                .border_color(rgb(visual.border))
+                .bg(rgb(if inspected == Some(id) {
+                    visual.canvas
+                } else {
+                    visual.surface
+                }))
+                .child(
+                    div()
+                        .flex()
+                        .items_start()
+                        .gap_2()
+                        .child(
+                            div()
+                                .pt_1()
+                                .text_color(rgb(visual.warning))
+                                .child(IconName::CircleAlert),
+                        )
+                        .child(
+                            div()
+                                .flex_1()
+                                .min_w_0()
+                                .child(tunnel_text(
+                                    format!("tunnel-recovery-candidate-details-{id}"),
+                                    details,
+                                ))
+                                .child(div().text_color(rgb(visual.warning)).child(tunnel_text(
+                                    format!("tunnel-recovery-candidate-status-{id}"),
+                                    format!("{}\n{}", status, reason.render(cx)),
+                                ))),
+                        )
+                        .child(
+                            Button::new(format!("inspect-tunnel-recovery-{id}"))
+                                .ghost()
+                                .compact()
+                                .icon(IconName::Eye)
+                                .label(t(cx, "Inspect", "Inspect"))
+                                .accessibility_label(format!(
+                                    "{}: {}",
+                                    t(cx, "检查恢复候选", "Inspect recovery candidate"),
+                                    snapshot.rule.name
+                                ))
+                                .on_click(cx.listener(move |view, _, _, cx| {
+                                    view.inspect_recovery_candidate(id, cx)
+                                })),
+                        )
+                        .child(
+                            Button::new(format!("review-recovery-start-{id}"))
+                                .ghost()
+                                .compact()
+                                .icon(IconName::Play)
+                                .label(t(cx, "Review start", "Review start"))
+                                .disabled(
+                                    review_blocked
+                                        || self.suspended
+                                        || self.rule_store_blocked
+                                        || self.rule_configuration_busy
+                                        || self.recovery_discard_pending.is_some(),
+                                )
+                                .accessibility_label(format!(
+                                    "{}: {}",
+                                    t(cx, "审核恢复启动", "Review recovery start"),
+                                    snapshot.rule.name
+                                ))
+                                .on_click(cx.listener(move |view, _, _, cx| {
+                                    view.review_recovery_start(id, cx)
+                                })),
+                        )
+                        .child(
+                            Button::new(format!("discard-tunnel-recovery-{id}"))
+                                .ghost()
+                                .compact()
+                                .icon(IconName::Trash)
+                                .label(t(cx, "Discard", "Discard"))
+                                .disabled(
+                                    self.suspended
+                                        || self.rule_store_blocked
+                                        || self.rule_configuration_busy
+                                        || self.recovery_discard_pending.is_some(),
+                                )
+                                .accessibility_label(format!(
+                                    "{}: {}",
+                                    t(cx, "丢弃恢复候选", "Discard recovery candidate"),
+                                    snapshot.rule.name
+                                ))
+                                .on_click(cx.listener(move |view, _, _, cx| {
+                                    view.discard_recovery_candidate(id, cx)
+                                })),
+                        ),
+                );
+            if inspected == Some(id) {
+                card = card.child(
+                    div()
+                        .px_2()
+                        .py_1()
+                        .text_color(rgb(visual.muted))
+                        .child(tunnel_text(
+                            format!("tunnel-recovery-candidate-inspected-{id}"),
+                            format!(
+                                "{}\n{}",
+                                t(
+                                    cx,
+                                    "只读详情：不会复用旧 listener、SSH session、worker 或流量。",
+                                    "Read-only details: the old listener, SSH session, worker and traffic are never reused.",
+                                ),
+                                snapshot.connection.connection_id
+                            ),
+                        )),
+                );
+            }
+            cards = cards.child(card);
+        }
+        Some(
+            div()
+                .id("tunnel-recovery-section")
+                .test_support()
+                .px_3()
+                .py_2()
+                .flex_shrink_0()
+                .border_b_1()
+                .border_color(rgb(visual.border))
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap_2()
+                        .text_color(rgb(visual.warning))
+                        .child(IconName::CircleAlert)
+                        .child(
+                            div()
+                                .font_weight(FontWeight::SEMIBOLD)
+                                .child(t(cx, "上次可能运行过的命名隧道", "Named tunnels that may have survived")),
+                        ),
+                )
+                .child(
+                    div()
+                        .py_1()
+                        .text_color(rgb(visual.muted))
+                        .child(t(
+                            cx,
+                            "这是恢复候选，不代表当前仍在线；必须选择当前连接并重新审核后才能启动。",
+                            "These are recovery candidates, not an online indicator. Select the current connection and review again before starting.",
+                        )),
+                )
+                .child(cards)
+                .into_any_element(),
+        )
     }
 
     pub(super) fn rule_editor_view(&self, cx: &mut Context<Self>) -> Option<RuleManagementView> {
