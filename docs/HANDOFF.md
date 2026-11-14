@@ -34,6 +34,55 @@ CI runner 的 active toolchain。
 `0`。复核确认源码实现与 `36a1fcd` 相同，当前 exact HEAD 仍应以
 `git rev-parse HEAD` 现场读取；本次后续提交只归档复核原文和最终状态。
 
+## 2026-11-14 重启后传输恢复日志
+
+本片源码实现提交为 exact SHA
+`03a4e18c7f57635072230154fdf90269a067f23a`，当前 checkout 在文档提交前的
+HEAD 为该提交。实现新增独立的 `transfer-recovery.json` 日志，最多 32 条
+记录、文档最多 256 KiB、单路径最多 4096 字节；记录仅保存方向、路径、
+文件/目录、进度、审核已有字节、时间、状态和可选 `connection_id`。它不保存
+SSH session、SFTP handle、socket、worker、review token、凭据、私钥、命令、
+秘密、代理认证或流量。
+
+真实传输开始前写入 `Unfinished`，进度、失败、取消、未知结果、队列初始化
+失败和 SFTP 入队失败更新终态。恢复前必须在当前 SSH 会话完成
+`Inspect → Review → Confirm`；保存连接绑定不匹配在任何远端只读检查前拒绝。
+旧格式或快速连接没有绑定时，界面要求用户确认当前 SSH 主机。成功的显式
+恢复或用户明确 `Discard` 才删除记录；Discard 只删除本地观察记录。
+
+存储使用 owner-only 文件、同目录锁、临时文件、`sync_all`、原子替换和 Unix
+父目录同步，所有阻塞文件系统操作在后台 worker。三主题、双语、终态幂等性、
+旧格式主机确认、连接绑定和显式丢弃均有回归。设计、能力和测试证据分别见
+[ADR 0130](adr/0130-persisted-transfer-recovery-journal.md)、
+[能力清单](product/CAPABILITIES.md)和
+[测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)。
+
+作者完整门禁使用：
+
+```text
+CARGO_TARGET_DIR=work/transfer-recovery-20261114/full-target \
+python3 scripts/check.py
+```
+
+日志为
+`work/transfer-recovery-20261114/logs/full-gate-03a4e18.log`，实际结果为
+Python `131 run / 1 skipped`、普通 Rust `2506 passed / 0 failed / 23 ignored`、
+doctest `14 passed / 0 failed`；其中 app `1160/0/2`、core `641/0/0`、
+AI `194/0/5`、session `434/0/16`、MCP `77/0/0`。依赖策略、fmt、workspace
+严格 Clippy、readiness/observer/small-stack controller 均通过。
+app 链接阶段的 `__eh_frame section too large` 是已知 warning，没有改变退出码。
+
+当前开发机 active/default Rust/Cargo 仍为 `1.100.0`。仓库没有
+`rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，因此 Cargo 默认
+跟随开发机或 CI runner 的 active toolchain；不会把本机版本误写成项目 MSRV。
+直接依赖仍遵守 `x.y`，Cargo.lock 保留 patch 解析结果。在线依赖最新版本检查
+因公司内网不可用尚未完成。
+
+当前状态：`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。下一位维护者应先
+固定文档提交后的 exact SHA，启动独立严格只读 reviewer，保存 P0/P1/P2/P3、
+绝对文件/行号、实际测试计数、未验证边界和 merge recommendation，再清理
+reviewer 的 worktree、target、临时文件和本地分支。不要 push。
+
 ## 2026-11-14 AI 审核命令保存为片段草稿
 
 本片基线是 exact HEAD

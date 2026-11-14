@@ -1,5 +1,40 @@
 # Capability ledger
 
+## 2026-11-14: persisted transfer recovery journal
+
+File and directory transfers now keep a separate, bounded local recovery journal
+for work that started and ended unfinished, failed, cancelled, or with an unknown
+remote outcome. The journal stores only the direction, local and remote paths,
+file/directory type, bounded progress, reviewed existing bytes, timestamps, and an
+optional saved connection identity. It does not store SSH sessions, SFTP handles,
+workers, sockets, review tokens, credentials, private keys, commands, secrets,
+proxy authentication, or traffic.
+
+After restart, the file panel loads the journal as an observation. A user must
+inspect the record, reconnect through the normal host-key and authentication flow,
+confirm the current host when a legacy or quick-connect record has no saved
+connection binding, and complete a new read-only review before confirming a fresh
+continuation. A saved connection mismatch is rejected before any remote read.
+Successful reviewed recovery removes its record; explicit Discard removes only
+the local record. No journal action reconnects, starts a transfer, or replays a
+previous worker.
+
+The journal is stored in a separate owner-only file with a lock, bounded JSON
+schema, temporary-file flush, atomic replacement and parent-directory
+synchronization. All filesystem work runs in a background worker. The Frost,
+Graphite and Lavender recovery card uses the existing registry, Palette and
+component tokens, so adding another theme extends the registry and tokens without
+adding recovery business branches.
+
+The implementation and full local engineering gate are bound to
+`03a4e18c7f57635072230154fdf90269a067f23a`. The gate passed 2506 ordinary Rust
+tests / 23 ignored, 14 doctests, and Python 131 run / 1 skipped; strict formatting,
+Clippy, dependency policy and all three AI controllers passed. Native macOS,
+Windows and Linux desktop behavior, real customer SSH, Podman long flows, full
+IME/accessibility, signing, installation and release acceptance remain separate
+boundaries. See [ADR 0130](../adr/0130-persisted-transfer-recovery-journal.md) and
+the [test record](../testing/records/2026-11-14-transfer-recovery-journal.md).
+
 ## 2026-11-08: workspace window switcher
 
 The native multi-window foundation now has an in-workspace switcher. The top toolbar
