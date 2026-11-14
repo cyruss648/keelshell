@@ -188,6 +188,7 @@ pub struct FilesPanel {
     recovery_records: Vec<TransferRecoveryRecord>,
     recovery_loading: bool,
     recovery_load_generation: u64,
+    recovery_mutation_generation: u64,
     recovery_load_error: Option<String>,
     recovery_writes: HashSet<uuid::Uuid>,
     recovery_claim_requests: HashSet<uuid::Uuid>,
@@ -354,8 +355,12 @@ fn recovery_load_is_current(
     current_session: uuid::Uuid,
     expected_generation: u64,
     current_generation: u64,
+    expected_mutation_generation: u64,
+    current_mutation_generation: u64,
 ) -> bool {
-    expected_session == current_session && expected_generation == current_generation
+    expected_session == current_session
+        && expected_generation == current_generation
+        && expected_mutation_generation == current_mutation_generation
 }
 
 fn remember_persisted_recovery_progress(
@@ -981,6 +986,7 @@ impl FilesPanel {
             recovery_records: Vec::new(),
             recovery_loading: true,
             recovery_load_generation: 0,
+            recovery_mutation_generation: 0,
             recovery_load_error: None,
             recovery_writes: HashSet::new(),
             recovery_claim_requests: HashSet::new(),
@@ -1075,6 +1081,7 @@ impl FilesPanel {
         let runtime = self.runtime.clone();
         let executor = cx.background_executor().clone();
         let expected_session = self.session_token;
+        let expected_mutation_generation = self.recovery_mutation_generation;
         self.recovery_load_generation = self.recovery_load_generation.wrapping_add(1);
         let expected_generation = self.recovery_load_generation;
         self.recovery_loading = true;
@@ -1085,36 +1092,72 @@ impl FilesPanel {
                 .map_err(|error| error.to_string())
         });
         cx.spawn_in(window, async move |this, cx| {
-            let result = task.await;
+            let result = match task.await {
+                Ok(result) => result,
+                Err(_) => Err("transfer recovery worker did not return".to_owned()),
+            };
             let _ = this.update_in(cx, |view, _, cx| {
-                if !recovery_load_is_current(
+                view.apply_recovery_load(
                     expected_session,
-                    view.session_token,
                     expected_generation,
-                    view.recovery_load_generation,
-                ) {
-                    return;
-                }
-                view.recovery_loading = false;
-                match result {
-                    Ok(Ok(records)) => {
-                        view.recovery_records = records;
-                        view.recovery_load_error = None;
-                    }
-                    Ok(Err(error)) => {
-                        view.recovery_records.clear();
-                        view.recovery_load_error = Some(error);
-                    }
-                    Err(_) => {
-                        view.recovery_records.clear();
-                        view.recovery_load_error =
-                            Some("transfer recovery worker did not return".to_owned());
-                    }
-                }
-                cx.notify();
+                    expected_mutation_generation,
+                    result,
+                    cx,
+                );
             });
         })
         .detach();
+    }
+
+    pub(super) fn apply_recovery_load(
+        &mut self,
+        expected_session: uuid::Uuid,
+        expected_generation: u64,
+        expected_mutation_generation: u64,
+        result: Result<Vec<TransferRecoveryRecord>, String>,
+        cx: &mut Context<Self>,
+    ) {
+        if !recovery_load_is_current(
+            expected_session,
+            self.session_token,
+            expected_generation,
+            self.recovery_load_generation,
+            expected_mutation_generation,
+            self.recovery_mutation_generation,
+        ) {
+            return;
+        }
+        self.recovery_loading = false;
+        match result {
+            Ok(records) => {
+                self.recovery_records = records;
+                self.recovery_load_error = None;
+            }
+            Err(error) => {
+                self.recovery_records.clear();
+                self.recovery_load_error = Some(error);
+            }
+        }
+        cx.notify();
+    }
+
+    fn advance_recovery_mutation_generation(&mut self) {
+        self.recovery_mutation_generation = self.recovery_mutation_generation.wrapping_add(1);
+    }
+
+    pub(super) fn apply_persisted_recovery_progress(
+        &mut self,
+        id: uuid::Uuid,
+        existing_bytes: u64,
+        total_bytes: u64,
+    ) -> Result<(), String> {
+        self.advance_recovery_mutation_generation();
+        remember_persisted_recovery_progress(
+            &mut self.recovery_records,
+            id,
+            existing_bytes,
+            total_bytes,
+        )
     }
 
     /// Preserve local drafts and completed records while retiring remote capabilities.
@@ -1729,8 +1772,7 @@ impl FilesPanel {
                             cx.notify();
                             return;
                         };
-                        if let Err(error) = remember_persisted_recovery_progress(
-                            &mut view.recovery_records,
+                        if let Err(error) = view.apply_persisted_recovery_progress(
                             id,
                             plan.existing_bytes(),
                             plan.bytes(),
@@ -1779,8 +1821,7 @@ impl FilesPanel {
                             cx.notify();
                             return;
                         };
-                        if let Err(error) = remember_persisted_recovery_progress(
-                            &mut view.recovery_records,
+                        if let Err(error) = view.apply_persisted_recovery_progress(
                             id,
                             plan.existing_bytes(),
                             plan.bytes(),
@@ -2678,13 +2719,16 @@ mod tests {
     #[test]
     fn stale_recovery_load_cannot_replace_a_newer_session_or_generation() {
         let session = uuid::Uuid::new_v4();
-        assert!(recovery_load_is_current(session, session, 7, 7));
-        assert!(!recovery_load_is_current(session, session, 6, 7));
+        assert!(recovery_load_is_current(session, session, 7, 7, 3, 3));
+        assert!(!recovery_load_is_current(session, session, 6, 7, 3, 3));
+        assert!(!recovery_load_is_current(session, session, 7, 7, 2, 3));
         assert!(!recovery_load_is_current(
             session,
             uuid::Uuid::new_v4(),
             7,
-            7
+            7,
+            3,
+            3,
         ));
     }
 

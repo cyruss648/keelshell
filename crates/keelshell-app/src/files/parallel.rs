@@ -844,43 +844,50 @@ impl FilesPanel {
                 .map_err(|error| error.to_string())
         });
         cx.spawn_in(window, async move |this, cx| {
-            let result = task.await;
+            let result = match task.await {
+                Ok(result) => result,
+                Err(_) => Err("transfer recovery discard worker did not return".to_owned()),
+            };
             let _ = this.update_in(cx, |view, _, cx| {
-                view.recovery_writes.remove(&id);
-                if view.session_token != expected_session {
-                    return;
-                }
-                match result {
-                    Ok(Ok(())) => {
-                        view.recovery_records.retain(|record| record.id != id);
-                        if view.active_recovery_id == Some(id) {
-                            view.active_recovery_id = None;
-                            view.recovery = None;
-                        }
-                        view.status = Message::new(
-                            "已丢弃这条传输恢复记录；未连接、未检查、未重放。",
-                            "Discarded the transfer recovery record; nothing connected, inspected or replayed.",
-                        );
-                    }
-                    Ok(Err(error)) => {
-                        view.recovery_load_error = Some(error.to_string());
-                        view.status = Message::new(
-                            format!("无法丢弃传输恢复记录：{error}"),
-                            format!("Unable to discard transfer recovery metadata: {error}"),
-                        );
-                    }
-                    Err(error) => {
-                        view.recovery_load_error = Some(error.to_string());
-                        view.status = Message::new(
-                            format!("无法丢弃传输恢复记录：{error}"),
-                            format!("Unable to discard transfer recovery metadata: {error}"),
-                        );
-                    }
-                }
-                cx.notify();
+                view.apply_discard_result(id, expected_session, result, cx);
             });
         })
         .detach();
+    }
+
+    pub(super) fn apply_discard_result(
+        &mut self,
+        id: uuid::Uuid,
+        expected_session: uuid::Uuid,
+        result: Result<(), String>,
+        cx: &mut Context<Self>,
+    ) {
+        self.recovery_writes.remove(&id);
+        if self.session_token != expected_session {
+            return;
+        }
+        match result {
+            Ok(()) => {
+                self.advance_recovery_mutation_generation();
+                self.recovery_records.retain(|record| record.id != id);
+                if self.active_recovery_id == Some(id) {
+                    self.active_recovery_id = None;
+                    self.recovery = None;
+                }
+                self.status = Message::new(
+                    "已丢弃这条传输恢复记录；未连接、未检查、未重放。",
+                    "Discarded the transfer recovery record; nothing connected, inspected or replayed.",
+                );
+            }
+            Err(error) => {
+                self.recovery_load_error = Some(error.clone());
+                self.status = Message::new(
+                    format!("无法丢弃传输恢复记录：{error}"),
+                    format!("Unable to discard transfer recovery metadata: {error}"),
+                );
+            }
+        }
+        cx.notify();
     }
 
     fn persisted_recovery_card(&self, cx: &mut Context<Self>) -> AnyElement {

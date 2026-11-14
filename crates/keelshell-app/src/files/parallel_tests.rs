@@ -796,6 +796,155 @@ async fn persistent_concurrent_terminals_leave_a_current_empty_recovery_list(
 }
 
 #[gpui_kit::test]
+async fn stale_recovery_load_cannot_restore_a_record_after_discard_mutation(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("discard race fixture directory");
+    let source = directory.path().join("discard-race-source.bin");
+    std::fs::write(&source, b"discard race").expect("write discard race source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let recovery_id = uuid::Uuid::new_v4();
+    let connection_id = uuid::Uuid::new_v4();
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                recovery_id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/discard-race.bin",
+                false,
+                TransferRecoveryState::Failed,
+                4,
+                Some(12),
+                4,
+                100,
+                100,
+            )
+            .expect("valid discard race fixture"),
+        )
+        .expect("persist discard race fixture");
+
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    let (session, load_generation, mutation_generation, stale_records) =
+        h.panel.read_with(cx, |panel, _| {
+            (
+                panel.session_token,
+                panel.recovery_load_generation,
+                panel.recovery_mutation_generation,
+                panel.recovery_records.clone(),
+            )
+        });
+    assert_eq!(stale_records.len(), 1);
+
+    store.remove(recovery_id).expect("discard recovery fixture");
+    h.panel.update(cx, |panel, cx| {
+        panel.apply_discard_result(recovery_id, session, Ok(()), cx);
+        panel.apply_recovery_load(
+            session,
+            load_generation,
+            mutation_generation,
+            Ok(stale_records),
+            cx,
+        );
+    });
+    h.panel.read_with(cx, |panel, _| {
+        assert!(panel.recovery_records.is_empty());
+    });
+    assert!(store.load().expect("load after discard race").is_empty());
+}
+
+#[gpui_kit::test]
+async fn stale_recovery_load_cannot_revert_persisted_plan_progress(cx: &mut TestAppContext) {
+    let directory = tempfile::TempDir::new().expect("plan progress race fixture directory");
+    let source = directory.path().join("plan-progress-race-source.bin");
+    std::fs::write(&source, b"plan progress race").expect("write plan progress race source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let recovery_id = uuid::Uuid::new_v4();
+    let connection_id = uuid::Uuid::new_v4();
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                recovery_id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/plan-progress-race.bin",
+                false,
+                TransferRecoveryState::Failed,
+                2,
+                Some(16),
+                2,
+                100,
+                100,
+            )
+            .expect("valid plan progress race fixture"),
+        )
+        .expect("persist plan progress race fixture");
+
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    let (session, load_generation, mutation_generation, stale_records) =
+        h.panel.read_with(cx, |panel, _| {
+            (
+                panel.session_token,
+                panel.recovery_load_generation,
+                panel.recovery_mutation_generation,
+                panel.recovery_records.clone(),
+            )
+        });
+    let mut persisted = stale_records[0].clone();
+    persisted.reviewed_existing_bytes = 6;
+    persisted.transferred_bytes = 6;
+    persisted.total_bytes = Some(16);
+    persisted.updated_at = 101;
+    store
+        .upsert(persisted)
+        .expect("persist updated plan progress");
+
+    h.panel.update(cx, |panel, cx| {
+        panel
+            .apply_persisted_recovery_progress(recovery_id, 6, 16)
+            .expect("apply updated plan progress");
+        panel.apply_recovery_load(
+            session,
+            load_generation,
+            mutation_generation,
+            Ok(stale_records),
+            cx,
+        );
+    });
+    h.panel.read_with(cx, |panel, _| {
+        let record = panel
+            .recovery_records
+            .iter()
+            .find(|record| record.id == recovery_id)
+            .expect("updated recovery record");
+        assert_eq!(record.reviewed_existing_bytes, 6);
+        assert_eq!(record.transferred_bytes, 6);
+    });
+    let persisted = store
+        .load()
+        .expect("load after plan progress race")
+        .into_iter()
+        .find(|record| record.id == recovery_id)
+        .expect("persisted updated recovery record");
+    assert_eq!(persisted.reviewed_existing_bytes, 6);
+    assert_eq!(persisted.transferred_bytes, 6);
+}
+
+#[gpui_kit::test]
 async fn isolation_inspection_requires_full_bilingual_risk_review_and_preserves_unknown_history(
     cx: &mut TestAppContext,
 ) {
