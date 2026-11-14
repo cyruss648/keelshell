@@ -6,28 +6,34 @@
 ## 2026-11-15 恢复 claim 生命周期与计划进度
 
 本片源码实现提交为
-`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`。首次写入
+`d180ece6fb4c91517532938f3ab2d9dfa30ede64`。在首次写入
 `Unfinished` 恢复记录时先取得同一记录的 OS claim，再把记录公开给其它窗口；
 持久恢复的只读计划在后台 worker 中持有 claim，完成后把 claim 交回审核状态。
 取消审核、确认前置失败、worker 失败、挂起、导航撤销和旧审核替换均释放
 claim。只读计划重新计算的已有字节数会同时回写持久记录和当前面板内存状态。
+针对修复前复核发现的恢复列表旧快照竞态，本片增加单调 load generation 与
+session 校验；同时加入真实持久 store 队列成功、初始化失败、取消和并发终态
+回归，确保真实 queued worker 的终态与恢复记录一致。
 
 本片 focused 结果为 core `8 passed / 0 failed`，app persisted-recovery
-`8 passed / 0 failed`，app recovery `37 passed / 0 failed`，app parallel
-`14 passed / 0 failed`。最终源码 SHA 的完整门禁已退出 `0`：普通 Rust
-`2530 passed / 0 failed / 23 ignored`，doctest `14 passed / 0 failed`，
-Python `131 run / 1 skipped`；app `1167/0/2`、core `644/0/0`、AI
+`8 passed / 0 failed`，app recovery `39 passed / 0 failed`，app parallel
+`18 passed / 0 failed`。最终源码 SHA 的完整门禁已退出 `0`：普通 Rust
+`2535 passed / 0 failed / 23 ignored`，doctest `14 passed / 0 failed`，
+Python `131 run / 1 skipped`；app `1172/0/2`、core `644/0/0`、AI
 `194/0/5`、session `448/0/16`、MCP `77/0/0`，依赖策略、fmt、workspace
 严格 Clippy 和三组 AI controller 均通过。日志见
 [恢复日志测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)、
 [ADR 0130](adr/0130-persisted-transfer-recovery-journal.md)和当前交接。
 
-当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。下一步是让新的
-独立严格只读 reviewer 固定文档提交后的 exact SHA，复核 P0/P1/P2/P3、绝对
-文件/行号、实际测试计数、未验证边界和 merge recommendation；同时仍需单独
-完成 macOS/Windows/Linux 原生桌面、真实客户 SSH/SFTP、Podman 长流程、
-IME/辅助技术、签名、公证、安装升级和发布验收。公司内网不可用，在线依赖
-最新版本检查尚未完成；本片只做本地 commit，不 push。
+修复前独立严格只读 reviewer 固定在文档提交后的 exact SHA
+`83db250d175845d084926c0742d2ab20620edc2f` 并返回
+`REQUEST_CHANGES`，P0/P1/P2/P3 为 `0/0/2/0`；发现项和修复要求见
+[修复前复核记录](testing/records/2026-11-15-transfer-recovery-review-before-fix.md)。
+修复后的作者门禁已通过，当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；
+下一步是固定文档提交后的 exact SHA，启动新的独立复核。仍需单独完成
+macOS/Windows/Linux 原生桌面、真实客户 SSH/SFTP、Podman 长流程、IME/辅助技术、
+签名、公证、安装升级和发布验收。公司内网不可用，在线依赖最新版本检查尚未完成；
+本片只做本地 commit，不 push。
 
 ## 2026-11-14 重启后传输恢复日志
 
@@ -51,9 +57,10 @@ fmt、workspace 严格 Clippy 和三组 AI controller 均通过。完整证据�
 [恢复日志测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)
 和 [ADR 0130](adr/0130-persisted-transfer-recovery-journal.md)。
 
-当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`，下一步是独立严格
-只读复核；同时仍需单独完成 macOS/Windows/Linux 原生桌面、真实
-客户 SSH/SFTP、Podman 长流程、IME/辅助技术、签名、公证、安装升级和发布验收。
+该历史片在 2026-11-14 文档提交时的状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；后续 claim 生命周期修复和最终
+独立复核状态见本路线顶部。macOS/Windows/Linux 原生桌面、真实客户 SSH/SFTP、
+Podman 长流程、IME/辅助技术、签名、公证、安装升级和发布验收仍需单独完成。
 公司内网不可用，在线依赖最新版本检查尚未完成；本片只做本地 commit，不 push。
 
 ## 2026-11-14 命名隧道 owner 与恢复卡片

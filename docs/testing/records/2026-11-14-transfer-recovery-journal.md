@@ -1,14 +1,17 @@
 # 重启后传输恢复日志测试记录 — 2026-11-14
 
 日期：2026-11-14 至 2026-11-15（Asia/Shanghai）。当前源码与测试实现提交：
-`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`。公司内网不可用，本片只做本地
+`d180ece6fb4c91517532938f3ab2d9dfa30ede64`。公司内网不可用，本片只做本地
 commit，不执行 push。
 
 ## 结论
 
-作者完整工程门禁和 workspace doctest 已在当前源码提交和独立 target 上实际
-退出 `0`。本片状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；新的
-独立严格只读代码与功能复核尚未启动。
+作者完整工程门禁和 workspace doctest 已在当前修复源码提交和独立 target 上实际
+退出 `0`。修复前独立严格只读代码与功能复核固定在文档提交基线
+`83db250d175845d084926c0742d2ab20620edc2f` 并返回 `REQUEST_CHANGES`，
+P0/P1/P2/P3 为 `0/0/2/0`；修复后的本片状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。发现项见
+[修复前复核记录](2026-11-15-transfer-recovery-review-before-fix.md)。
 
 本记录区分源码测试、GPUI headless 行为和真实桌面/远端验收。它没有把本地
 loopback、受控 GPUI 或完整工程门禁写成 macOS/Windows/Linux 原生桌面、真实
@@ -53,14 +56,14 @@ loopback、受控 GPUI 或完整工程门禁写成 macOS/Windows/Linux 原生桌
 
 定向 Cargo 验证使用 Rust/Cargo `1.100.0`、`--locked --offline`，并使用当前
 checkout 的独立 target：
-`work/transfer-recovery-fix-v2-20261115/target`。
+`work/transfer-recovery-fix-v3-20261115/target`。
 
 | 验证 | 结果 |
 | --- | --- |
 | core transfer-recovery focused | `8 passed / 0 failed` |
 | app persisted-recovery focused 回归 | `8 passed / 0 failed` |
-| app recovery focused 回归 | `37 passed / 0 failed` |
-| app parallel focused 回归 | `14 passed / 0 failed` |
+| app recovery focused 回归 | `39 passed / 0 failed` |
+| app parallel focused 回归 | `18 passed / 0 failed` |
 | core strict Clippy | exit `0` |
 | app strict Clippy | exit `0` |
 | `cargo fmt --all -- --check` | exit `0` |
@@ -75,33 +78,38 @@ checkout 的独立 target：
 - 显式丢弃恢复记录；
 - 保存连接与恢复记录的绑定校验；
 - 恢复日志不会携带运行时执行权。
+- 旧 recovery load generation 不能覆盖较新的 session/generation；
+- 真实持久 store queued upload 成功后删除记录；
+- 真实持久 store 队列初始化失败保留 Failed；
+- 真实持久 store 取消保留 Cancelled/OutcomeUnknown；
+- 两个持久 queued worker 同时终态后恢复列表保持最新且为空。
 
 ## 完整工程门禁
 
 命令：
 
 ```text
-CARGO_TARGET_DIR=work/transfer-recovery-fix-v2-20261115/full-target \
+CARGO_TARGET_DIR=work/transfer-recovery-fix-v3-20261115/full-target \
 python3 scripts/check.py
 ```
 
 日志：
-`work/transfer-recovery-fix-v2-20261115/full-gate-3a61562.log`
+`work/transfer-recovery-fix-v3-20261115/full-gate-current.log`
 
 workspace doctest 日志：
-`work/transfer-recovery-fix-v2-20261115/doctest-3a61562.log`
+`work/transfer-recovery-fix-v3-20261115/doctest-current.log`
 
 实际结果：
 
 | 范围 | 通过 | 失败 | 忽略 |
 | --- | ---: | ---: | ---: |
 | Python scripts | 131 | 0 | 1 |
-| keelshell-app | 1167 | 0 | 2 |
+| keelshell-app | 1172 | 0 | 2 |
 | keelshell-core | 644 | 0 | 0 |
 | keelshell-ai | 194 | 0 | 5 |
 | keelshell-session | 448 | 0 | 16 |
 | keelshell-mcp | 77 | 0 | 0 |
-| 普通 Rust 合计 | 2530 | 0 | 23 |
+| 普通 Rust 合计 | 2535 | 0 | 23 |
 | workspace doctest 合计 | 14 | 0 | 0 |
 
 完整门禁使用 `--locked` 并从当前本地 Cargo 缓存完成并退出 `0`；依赖版本策略、
@@ -127,6 +135,36 @@ Cargo 默认使用开发机或 CI runner 的 active toolchain；`Cargo.toml` 的
 
 在线 registry 最新版本检查尚未完成，因为公司内网仍不可用；本次门禁使用
 现有 `Cargo.lock` 和离线缓存完成。
+
+## 修复内容
+
+修复提交 `d180ece6fb4c91517532938f3ab2d9dfa30ede64` 增加
+`recovery_load_generation`。每次恢复记录异步加载都绑定当前 SSH session 和
+单调 generation，旧的 `store.load()` 回调不能覆盖较新的加载、丢弃、终态刷新
+或计划进度。
+
+同一提交还补充了真实 `FilesPanel + TransferRecoveryStore + queued worker`
+回归：成功上传后恢复记录删除，队列初始化失败保留 `Failed`，取消保留
+`Cancelled` 或 `OutcomeUnknown`，两个持久 worker 同时完成后界面和磁盘恢复列表
+都保持为空。这样把修复前 reviewer 指出的持久 store 与真实队列接线缺口纳入
+可重复验证。
+
+## 修复前独立严格只读复核
+
+reviewer 使用独立 detached worktree 和独立 Cargo target，复核了源码提交
+`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73` 与文档提交基线
+`83db250d175845d084926c0742d2ab20620edc2f` 的关系。实际 focused 结果为：
+
+- core `transfer_recovery`：`8 passed / 0 failed / 0 ignored`；
+- app `persisted_recovery`：`8 passed / 0 failed / 0 ignored`；
+- app `recovery`：`37 passed / 0 failed / 0 ignored`；
+- app `parallel`：`14 passed / 0 failed / 0 ignored`；
+- `cargo fmt --all -- --check`、core/app 严格 Clippy：全部 exit `0`；
+- P0/P1/P2/P3：`0/0/2/0`，merge recommendation：`REQUEST_CHANGES`。
+
+reviewer 没有修改、提交、推送或创建项目文档；复核完成后 reviewer 会话、
+worktree、独立 target 和临时文件已清理。app 测试链接阶段的
+`__eh_frame section too large` warning 没有改变退出码。
 
 ## 未验证边界
 

@@ -1,7 +1,7 @@
 # ADR 0130：重启后传输恢复日志与显式续传
 
 日期：2026-11-15。当前实现提交：
-`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`。本 ADR 只描述文件传输恢复
+`d180ece6fb4c91517532938f3ab2d9dfa30ede64`。本 ADR 只描述文件传输恢复
 日志；它不把日志记录当作自动恢复指令。
 
 ## 背景
@@ -86,11 +86,11 @@ UI 结果继续显示该风险，不能伪装成已完成。
 ## 验证与边界
 
 本片作者完整工程门禁绑定当前实现提交
-`3a61562f2cc5031b6b6e5d4d69a452e283ea4a73`，日志为
-`work/transfer-recovery-fix-v2-20261115/full-gate-3a61562.log`。workspace
+`d180ece6fb4c91517532938f3ab2d9dfa30ede64`，日志为
+`work/transfer-recovery-fix-v3-20261115/full-gate-current.log`。workspace
 doctest 日志为
-`work/transfer-recovery-fix-v2-20261115/doctest-3a61562.log`。完整结果为
-Python `131 run / 1 skipped`；普通 Rust 测试 `2530 passed / 0 failed /
+`work/transfer-recovery-fix-v3-20261115/doctest-current.log`。完整结果为
+Python `131 run / 1 skipped`；普通 Rust 测试 `2535 passed / 0 failed /
 23 ignored`；workspace doctest `14 passed / 0 failed`；依赖策略、格式、
 workspace 严格 Clippy、readiness/observer/small-stack controller 均通过。
 新增恢复 focused 回归见
@@ -99,7 +99,11 @@ workspace 严格 Clippy、readiness/observer/small-stack controller 均通过。
 当前证据覆盖独立恢复日志、绑定校验、终态幂等性、三主题双语恢复卡片、
 跨窗口/跨进程 claim 排他、claim 所有权校验、无绑定记录的主机确认前置、
 首次 `Unfinished` 发布前 claim、恢复计划 claim 交接、恢复进度回写、
-显式丢弃和后台文件写入。独立 reviewer 尚未启动；依赖在线最新版本检查因
-公司内网不可用尚未完成；
+显式丢弃和后台文件写入。修复前独立严格只读 reviewer 固定在文档提交基线
+`83db250d175845d084926c0742d2ab20620edc2f`，返回 `REQUEST_CHANGES`，P0/P1/P2/P3
+为 `0/0/2/0`；发现项见
+[修复前复核记录](../testing/records/2026-11-15-transfer-recovery-review-before-fix.md)。
+修复后的作者门禁已通过；新的独立复核尚未启动。
+依赖在线最新版本检查因公司内网不可用尚未完成；
 macOS/Windows/Linux 原生桌面、真实客户 SSH、Podman 长流程、IME、
 VoiceOver/NVDA、签名、公证、安装升级和发布验收仍需单独证据。
