@@ -20,6 +20,12 @@
 `rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，Cargo 继续跟随开发机或
 CI runner 的 active toolchain。
 
+最近继续推进的本地提交为 `540f9fc`（配置同步原子发布前置检查）、
+`90fbca7`（命名隧道 owner 与重连边界）和 `1c8df52`（恢复候选卡片视觉与
+可达性）。owner/recovery card 的 focused 结果已记录为
+`AUTHOR_FOCUSED_PASS / NON_AUTHOR_REVIEW_PENDING`，新的独立 reviewer 必须固定
+`1c8df52` 并使用独立 target；公司内网不可用，本轮只做本地 commit，不 push。
+
 ## 2026-11-14 AI 审核命令保存为片段草稿
 
 本片基线是 exact HEAD

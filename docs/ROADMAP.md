@@ -3,6 +3,33 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-14 命名隧道 owner 与恢复卡片
+
+本片在运行状态恢复基础上补齐会话替换边界和恢复候选的视觉层级。`90fbca7`
+新增瞬时 `ReconnectSessionId`、`TunnelRuntimeOwner` 与
+`TunnelRuntimeReviewToken`；恢复 plan 使用当前 owner 的 `confirm_for`，旧
+SSH 会话替换后旧恢复/停止审核 fail closed，不自动重连、不自动重启、不重放
+命令。`1c8df52` 将恢复候选重排为规则名称/详情、状态 callout、动作区和只读
+详情，并补齐 Group/Status AX 语义、数量提示、三主题 token 和布局回归。
+
+专用 target 的 focused 结果为 app `19 + 18`、core `18 + 10` 全部通过，core/app
+严格 Clippy、fmt 和差异检查通过。测试记录见
+[owner 与恢复卡片记录](testing/records/2026-11-14-named-tunnel-owner-and-recovery-card.md)，
+设计见 [ADR 0129](adr/0129-named-tunnel-owner-and-recovery-card.md)。当前状态为
+`AUTHOR_FOCUSED_PASS / NON_AUTHOR_REVIEW_PENDING`；原生三平台、真实 SSH/Podman、
+完整辅助技术和完整工程门禁仍需独立证据。
+
+## 2026-11-14 配置同步原子发布前置检查
+
+本片提交 `540f9fc39e46d22bcdd810d6d23b3ca15132f8ca` 在共享 payload 发布前检查
+目标路径，只接受不存在或普通文件；目录、符号链接及其他非普通文件在创建
+staging 文件前被拒绝，保留目标和本地 StateStore。现有同目录临时文件、
+`sync_all`、原子替换和 Unix 父目录同步行为保持不变。focused core 为
+`7` 个单元测试加四个 integration suite 共 `28` 项通过，严格 Clippy、fmt 和
+差异检查通过。边界与证据见
+[配置同步原子发布记录](testing/records/2026-11-14-profile-sync-atomic-publish.md)；
+断电、任意网络挂载和真实多机共享目录仍未验。
+
 ## 2026-11-14 AI 审核命令保存为片段草稿
 
 本片基线为 exact HEAD
