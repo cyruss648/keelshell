@@ -50,10 +50,58 @@ app 链接阶段出现已知 warning：
 `__eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table`。
 相关命令 exit `0`，该 warning 没有被写成失败。
 
+## 作者完整门禁
+
+最终命令为：
+
+`CARGO_TARGET_DIR=work/tunnel-owner-ui-polish-20261114/full-target python3 scripts/check.py`
+
+源码和文档工作树基线为 `36a1fcd` 加本轮文档收口修改。最终日志见
+`work/tunnel-owner-ui-polish-20261114/logs/full-gate-final-rerun.log`，末尾
+`[full-gate-exit] 0`。实际记录包括：
+
+- 依赖版本策略通过；
+- Python 工程检查 `131` 项运行、`1` 项跳过，exit `0`；
+- `cargo fmt --all --check` 通过；
+- workspace 严格 Clippy 命令完成；
+- app workspace 测试 `1155 passed / 0 failed / 2 ignored`；
+- core 单元测试 `214 passed / 0 failed / 0 ignored`，其余 integration test
+  result 均为 `0 failed`；
+- AI 本地 agent process、readiness、observer 和 controller 场景均报告
+  assertions/scenario groups passed，未调用供应商 CLI 或模型。
+
+第一次完整门禁日志
+`work/tunnel-owner-ui-polish-20261114/logs/full-gate-final.log` 曾在
+`local_agent_process --controller-small-stack` 中因 `EmptyReply` 返回 exit `1`；
+同一场景单独复跑 exit `0`，随后完整门禁 rerun exit `0`。该时序失败没有修改
+源码。早先基线门禁日志
+`work/tunnel-owner-ui-polish-20261114/logs/full-gate-36a1fcd.log` 也保留。
+最终文档工作树另行执行 `git diff --check` 和
+`cargo fmt --all -- --check`。
+
+## 独立严格只读复核
+
+独立 reviewer 固定 exact SHA
+`36a1fcdd679b81dc4cc774a3efa7a2ceb330d1ed`，使用独立 target
+`/tmp/keelshell-review-36a1fcd-target`，原始报告见
+[独立复核原文](2026-11-14-named-tunnel-owner-and-recovery-card-independent-review-raw.md)。
+复核结论为 `REQUEST_CHANGES`，仅有一个 P3 文档质量问题：
+
+- P0 `0`、P1 `0`、P2 `0`、P3 `1`；
+- 两份本记录与 ADR 文件末尾存在多余空行，触发
+  `git diff --check 540f9fc^ HEAD` exit `2`；
+- 没有发现运行时、状态、安全或 UX 缺陷；
+- core `tunnel_runtime` `10/10`、`reconnect` `18/18`、profile-sync `7/7`
+  与 `11/11`，app `tunnel_rule_tests` `19/19`、`tunnels::rules::tests`
+  `18/18`，严格 Clippy 均 exit `0`；
+- app 测试清单为 `1159` 项，其中 `1157` 项可运行、`2` 项 ignored。
+
+作者已在复核后删除两处多余空行；该文档修正不改变产品源码。最终 exact SHA
+仍需在本地文档收口提交后重新固定，并保留原生窗口、真实 SSH、Podman、完整
+IME/VoiceOver/NVDA、签名、公证、安装升级和发布验收为未验证边界。
+
 ## 未验证边界
 
 本轮没有运行 macOS 真实窗口、Windows/Linux 原生窗口、真实客户 SSH、Podman
 多节点转发、断电恢复、跨进程旧 listener 探测、完整 IME/VoiceOver/NVDA、
-签名、公证、安装升级、发布流程或业务验收。完整工程门禁尚未在本轮最终源码
-上重复运行；后续复核必须固定当前 exact SHA 并独立建立 target。
-
+签名、公证、安装升级、发布流程或业务验收。

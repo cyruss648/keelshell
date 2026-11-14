@@ -70,4 +70,3 @@ owner 下重新 Inspect、Review 和 Confirm。旧 worker 的生命周期仍由�
 当前记录只覆盖 core、GPUI headless 行为、布局几何和辅助技术语义。macOS/
 Windows/Linux 原生窗口、真实客户 SSH、Podman 长流程、完整 IME/VoiceOver/NVDA、
 签名、公证、安装升级和发布验收仍需单独证据。
-
