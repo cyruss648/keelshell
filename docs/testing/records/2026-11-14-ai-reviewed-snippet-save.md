@@ -157,6 +157,9 @@ core `634/634`、core doctest `7/7`，fmt、app tests 严格 Clippy 和 diff che
 - 签名、公证、安装升级、发布制品和 CI runner；
 - 完整业务验收。
 
-没有 push。父工作树保持 clean；旧
-`/Users/hdh/.codex/worktrees/ai-command-snippets-20261113` WIP 保留其原有未提交状态，
-本片没有触碰或清理它。
+没有 push。当前任务父 checkout
+`/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell` 保持 clean；
+共享项目 checkout `/Users/hdh/work/develop/projects/keelshell` 保留其现有未提交改动，
+本片没有触碰或清理。旧
+`/Users/hdh/.codex/worktrees/ai-command-snippets-20261113` WIP 也保留其原有未提交
+状态，本片没有触碰或清理它。
