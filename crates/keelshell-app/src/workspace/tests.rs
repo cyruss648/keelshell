@@ -28,6 +28,7 @@ use crate::terminal::{TerminalCommand, TerminalView};
 
 mod ai_command_review_target;
 mod ai_metadata;
+mod ai_snippet_save;
 mod command_palette;
 mod configuration_recovery;
 mod connection_indicators;

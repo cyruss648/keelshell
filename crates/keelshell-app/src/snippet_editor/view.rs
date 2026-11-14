@@ -49,8 +49,16 @@ impl Render for SnippetEditor {
                     }))
                     .child(label(cx, t(
                         cx,
-                        "保存常用命令，使用时先填入命令栏审核。",
-                        "Save reusable commands and review them in the command bar before running.",
+                        if self.ai_reviewed {
+                            "AI 命令已审核；请填写片段信息并再次确认保存。"
+                        } else {
+                            "保存常用命令，使用时先填入命令栏审核。"
+                        },
+                        if self.ai_reviewed {
+                            "The AI command was reviewed; complete the snippet details and confirm saving."
+                        } else {
+                            "Save reusable commands and review them in the command bar before running."
+                        },
                     ))),
             )
             .child(
@@ -118,7 +126,30 @@ impl Render for SnippetEditor {
                             .flex()
                             .flex_col()
                             .gap_1()
-                            .child(label(cx, t(cx, "命令 · 支持多行", "Command · multiple lines supported")))
+                            .child(
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .gap_2()
+                                    .child(label(
+                                        cx,
+                                        t(cx, "命令 · 支持多行", "Command · multiple lines supported"),
+                                    ))
+                                    .when(self.command_locked, |row| {
+                                        row.child(
+                                            div()
+                                                .id("snippet-command-locked")
+                                                .test_support()
+                                                .text_xs()
+                                                .text_color(rgb(visual.accent))
+                                                .child(t(
+                                                    cx,
+                                                    "已审核正文 · 只读",
+                                                    "Reviewed body · read-only",
+                                                )),
+                                        )
+                                    }),
+                            )
                             .child(
                                 div()
                                     .id("snippet-command-container")
@@ -132,7 +163,7 @@ impl Render for SnippetEditor {
                                             .aria_label(t(cx, "命令内容", "Command text"))
                                             .h(relative(1.))
                                             .font_family("monospace")
-                                            .disabled(self.saving),
+                                            .disabled(self.saving || self.command_locked),
                                     ),
                             ),
                     ),
@@ -153,6 +184,7 @@ impl Render for SnippetEditor {
                     .child(
                         div()
                             .id("snippet-plaintext-notice")
+                            .test_support()
                             .text_xs()
                             .text_color(rgb(visual.muted))
                             .child(t(
@@ -161,6 +193,20 @@ impl Render for SnippetEditor {
                                 "Snippets are saved as plain text on this device. Do not include passwords, API keys or other secrets.",
                             )),
                     )
+                    .when(self.ai_reviewed, |footer| {
+                        footer.child(
+                            div()
+                                .id("snippet-ai-review-notice")
+                                .test_support()
+                                .text_xs()
+                                .text_color(rgb(visual.muted))
+                                .child(t(
+                                    cx,
+                                    "要修改命令，请取消当前保存流程并重新审核；不会自动执行命令。",
+                                    "To change the command, cancel this save flow and review it again. Nothing runs automatically.",
+                                )),
+                        )
+                    })
                     .when_some(self.error.as_ref(), |footer, error| {
                         footer.child(
                             div()
@@ -197,10 +243,29 @@ impl Render for SnippetEditor {
                             .child(
                                 Button::new("snippet-editor-save")
                                     .primary()
-                                    .label(t(cx, "保存片段", "Save snippet"))
+                                    .label(if self.ai_reviewed && !self.save_confirmed {
+                                        t(cx, "确认保存片段", "Confirm save snippet")
+                                    } else {
+                                        t(cx, "保存片段", "Save snippet")
+                                    })
                                     .disabled(self.saving)
                                     .on_click(cx.listener(|editor, _, window, cx| editor.save(window, cx))),
-                            ),
+                            )
+                            .when(self.ai_reviewed, |actions| {
+                                actions.child(
+                                    Button::new("snippet-editor-re-review")
+                                        .ghost()
+                                        .label(t(
+                                            cx,
+                                            "取消并重新审核命令",
+                                            "Cancel and re-review command",
+                                        ))
+                                        .disabled(self.saving)
+                                        .on_click(cx.listener(|editor, _, _, cx| {
+                                            editor.re_review(cx)
+                                        })),
+                                )
+                            }),
                     ),
             )
     }

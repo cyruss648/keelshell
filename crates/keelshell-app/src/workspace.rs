@@ -311,6 +311,19 @@ enum AfterSave {
     },
 }
 
+/// Binding retained by an AI snippet draft until its ordinary local save.
+///
+/// It contains only process-local identity needed for a second Workspace
+/// admission check. It is never serialized into the saved [`Snippet`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct AiSnippetReviewBinding {
+    command: String,
+    target: String,
+    session_id: String,
+    terminal: EntityId,
+    review_id: uuid::Uuid,
+}
+
 struct NewRemoteTab {
     session: SshSession,
     title: String,
@@ -424,6 +437,7 @@ pub struct Workspace {
     snippet_editor: Option<Entity<SnippetEditor>>,
     snippet_subscription: Option<Subscription>,
     snippet_editing: bool,
+    ai_snippet_review: Option<AiSnippetReviewBinding>,
     snippet_delete: Option<keelshell_core::Snippet>,
     snippet_parameters: Option<Entity<crate::snippet_parameters::SnippetParameters>>,
     parameter_subscription: Option<Subscription>,
@@ -787,6 +801,22 @@ impl Workspace {
                         cx.notify();
                     }
                 }
+                AssistantEvent::SaveSnippet {
+                    command,
+                    target,
+                    session_id,
+                    review_id,
+                } => view.handle_ai_snippet_save(
+                    panel,
+                    commands::AiSnippetSaveRequest {
+                        command: command.clone(),
+                        target: target.clone(),
+                        session_id: session_id.clone(),
+                        review_id: *review_id,
+                    },
+                    window,
+                    cx,
+                ),
                 AssistantEvent::Suggestion {
                     command,
                     session_id,
@@ -1017,6 +1047,7 @@ impl Workspace {
             snippet_editor: None,
             snippet_subscription: None,
             snippet_editing: false,
+            ai_snippet_review: None,
             snippet_delete: None,
             snippet_parameters: None,
             parameter_subscription: None,
@@ -2570,6 +2601,7 @@ impl Workspace {
                                 if view.snippet_editor.as_ref().is_some_and(|editor| editor.entity_id() == panel) {
                                     view.snippet_editor = None; view.snippet_subscription = None;
                                 }
+                                view.ai_snippet_review = None;
                                 view.status = Message::new("命令片段已保存", "Command snippet saved");
                                 view.focus_current_surface(window, cx);
                             }

@@ -83,6 +83,15 @@ pub enum AssistantEvent {
         command: String,
         session_id: String,
     },
+    /// A command that passed the one-use command review may open a local
+    /// snippet draft. The Workspace must re-check the target before opening
+    /// the editor; this event never writes the StateStore.
+    SaveSnippet {
+        command: String,
+        target: String,
+        session_id: String,
+        review_id: Uuid,
+    },
     SaveKnowledge {
         review_id: Uuid,
     },
@@ -186,6 +195,14 @@ struct LocalRequestProgress {
     facts: Vec<LocalAskStage>,
     outcome: Option<bool>,
     expanded: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct PendingSnippetSave {
+    command: String,
+    target: String,
+    session_id: String,
+    review_id: Uuid,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -435,6 +452,7 @@ pub struct AssistantPanel {
     diagnostic_plan: Option<DiagnosticPlan>,
     request_revision: u64,
     response_target: Option<(String, String)>,
+    pending_snippet_save: Option<PendingSnippetSave>,
     local_progress: Option<LocalRequestProgress>,
     knowledge_preview: Option<KnowledgePreview>,
     pub(crate) knowledge_library: Entity<knowledge_library::KnowledgeLibrary>,
@@ -523,6 +541,7 @@ impl AssistantPanel {
             diagnostic_plan: None,
             request_revision: 0,
             response_target: None,
+            pending_snippet_save: None,
             local_progress: None,
             knowledge_preview: None,
             knowledge_library,
@@ -1103,6 +1122,7 @@ impl AssistantPanel {
         self.suggestions.clear();
         self.diagnostic_plan = None;
         self.response_target = None;
+        self.pending_snippet_save = None;
         self.local_progress = None;
         self.status = Message::new(
             "请求已修改，请重新预览后再发送；已请求取消旧请求。",
@@ -1428,6 +1448,7 @@ impl AssistantPanel {
         self.response.clear();
         self.suggestions.clear();
         self.diagnostic_plan = None;
+        self.pending_snippet_save = None;
         self.preview = false;
         self.local_progress = None;
         match request {
@@ -1607,6 +1628,7 @@ impl AssistantPanel {
         match result {
             Ok(text) => {
                 self.response_target = Some(target);
+                self.pending_snippet_save = None;
                 // A response may reflect a credential from another configuration.
                 // Revision admission precedes redaction, so obsolete results never
                 // reach the UI after their owning slots have been replaced/cleared.
@@ -1684,6 +1706,42 @@ impl AssistantPanel {
         cx.notify();
     }
 
+    fn save_suggestion(&mut self, index: usize, cx: &mut Context<Self>) {
+        if let Some(reason) = self.review_target_unavailable() {
+            self.status = reason;
+            cx.notify();
+            return;
+        }
+        let Some(command) = self.suggestions.get(index).cloned() else {
+            return;
+        };
+        let Some((target, session_id)) = self.response_target.clone() else {
+            return;
+        };
+        self.review_and_emit_snippet_save(
+            CommandProposal {
+                command,
+                explanation: t(
+                    cx,
+                    "AI 生成的建议；保存前请核对命令正文与目标主机",
+                    "AI-generated suggestion; verify the command and target before saving",
+                )
+                .into(),
+                risks: vec![
+                    t(
+                        cx,
+                        "模型输出不可信，可能包含错误或敏感内容",
+                        "Model output is untrusted and may be incorrect or sensitive",
+                    )
+                    .into(),
+                ],
+                target,
+                session_id,
+            },
+            cx,
+        );
+    }
+
     fn build_diagnostic_plan(&mut self, cx: &mut Context<Self>) {
         if self.response.is_empty() {
             return;
@@ -1750,6 +1808,125 @@ impl AssistantPanel {
             }),
             Err(error) => self.status = ai_error(&error),
         }
+        cx.notify();
+    }
+
+    fn save_diagnostic_step(&mut self, index: usize, cx: &mut Context<Self>) {
+        if let Some(reason) = self.review_target_unavailable() {
+            self.status = reason;
+            cx.notify();
+            return;
+        }
+        let Some((target, session_id)) = self.response_target.as_ref() else {
+            return;
+        };
+        let Some(plan) = self.diagnostic_plan.as_ref() else {
+            return;
+        };
+        if plan.target() != target || plan.session_id() != session_id {
+            self.status = ai_error(&AiError::DiagnosticPlanMismatch);
+            cx.notify();
+            return;
+        }
+        let Ok(review) = plan.review_step(index, Duration::from_secs(120)) else {
+            self.status = ai_error(&AiError::InvalidDiagnosticPlan);
+            cx.notify();
+            return;
+        };
+        let proposal = match review.into_proposal(plan, session_id) {
+            Ok(proposal) => proposal,
+            Err(error) => {
+                self.status = ai_error(&error);
+                cx.notify();
+                return;
+            }
+        };
+        self.review_and_emit_snippet_save(proposal, cx);
+    }
+
+    fn review_and_emit_snippet_save(&mut self, proposal: CommandProposal, cx: &mut Context<Self>) {
+        let target = proposal.target.clone();
+        let session_id = proposal.session_id.clone();
+        let review = match proposal.review(Duration::from_secs(120)) {
+            Ok(review) => review,
+            Err(error) => {
+                self.status = ai_error(&error);
+                cx.notify();
+                return;
+            }
+        };
+        let review_id = review.id();
+        match review.into_suggestion(&proposal, &session_id) {
+            Ok(command) => {
+                self.pending_snippet_save = Some(PendingSnippetSave {
+                    command: command.clone(),
+                    target: target.clone(),
+                    session_id: session_id.clone(),
+                    review_id,
+                });
+                self.status = Message::new(
+                    "命令已审核，正在打开片段草稿；保存仍需二次确认。",
+                    "Command reviewed. Opening a snippet draft; saving requires a second confirmation.",
+                );
+                cx.emit(AssistantEvent::SaveSnippet {
+                    command,
+                    target,
+                    session_id,
+                    review_id,
+                });
+            }
+            Err(error) => self.status = ai_error(&error),
+        }
+        cx.notify();
+    }
+
+    /// Consume the exact pending review that created a snippet event.
+    ///
+    /// The event is only useful during the same response/target lifetime. A
+    /// replayed or stale event is rejected before the Workspace can open a
+    /// persistence-capable editor.
+    pub(crate) fn consume_snippet_save_review(
+        &mut self,
+        command: &str,
+        target: &str,
+        session_id: &str,
+        review_id: Uuid,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        let accepted = self.pending_snippet_save.as_ref().is_some_and(|pending| {
+            pending.command == command
+                && pending.target == target
+                && pending.session_id == session_id
+                && pending.review_id == review_id
+                && self
+                    .response_target
+                    .as_ref()
+                    .is_some_and(|(host, id)| host == target && id == session_id)
+                && self.host == target
+                && self.session_id == session_id
+        });
+        if accepted {
+            self.pending_snippet_save = None;
+            cx.notify();
+        }
+        accepted
+    }
+
+    /// Discard an event candidate that failed Workspace admission.
+    pub(crate) fn reject_snippet_save_review(
+        &mut self,
+        review_id: Uuid,
+        message: Message,
+        cx: &mut Context<Self>,
+    ) {
+        if self
+            .pending_snippet_save
+            .as_ref()
+            .is_some_and(|pending| pending.review_id == review_id)
+        {
+            self.pending_snippet_save = None;
+        }
+        self.status = message;
         cx.notify();
     }
 
@@ -2972,13 +3149,36 @@ impl Render for AssistantPanel {
                                 ),
                             )
                             .child(
-                                Button::new(("review-diagnostic-step", index))
-                                    .ghost()
-                                    .disabled(self.review_target_unavailable().is_some())
-                                    .label(t(cx, "送入命令审阅区", "Place in command review"))
-                                    .on_click(cx.listener(move |view, _, _, cx| {
-                                        view.suggest_diagnostic_step(index, cx)
-                                    })),
+                                div()
+                                    .flex()
+                                    .flex_wrap()
+                                    .gap_2()
+                                    .child(
+                                        Button::new(("review-diagnostic-step", index))
+                                            .ghost()
+                                            .disabled(self.review_target_unavailable().is_some())
+                                            .label(t(
+                                                cx,
+                                                "送入命令审阅区",
+                                                "Place in command review",
+                                            ))
+                                            .on_click(cx.listener(move |view, _, _, cx| {
+                                                view.suggest_diagnostic_step(index, cx)
+                                            })),
+                                    )
+                                    .child(
+                                        Button::new(("save-diagnostic-step", index))
+                                            .ghost()
+                                            .disabled(self.review_target_unavailable().is_some())
+                                            .label(t(
+                                                cx,
+                                                "审核并保存为片段",
+                                                "Review and save snippet",
+                                            ))
+                                            .on_click(cx.listener(move |view, _, _, cx| {
+                                                view.save_diagnostic_step(index, cx)
+                                            })),
+                                    ),
                             ),
                     );
                 }
@@ -3005,12 +3205,27 @@ impl Render for AssistantPanel {
                             self.review_target_view(("suggestion-review-target", index).into(), cx),
                         )
                         .child(
-                            Button::new(("review-suggestion", index))
-                                .ghost()
-                                .disabled(self.review_target_unavailable().is_some())
-                                .label(t(cx, "送入命令审阅区", "Place in command review"))
-                                .on_click(
-                                    cx.listener(move |view, _, _, cx| view.suggest(index, cx)),
+                            div()
+                                .flex()
+                                .flex_wrap()
+                                .gap_2()
+                                .child(
+                                    Button::new(("review-suggestion", index))
+                                        .ghost()
+                                        .disabled(self.review_target_unavailable().is_some())
+                                        .label(t(cx, "送入命令审阅区", "Place in command review"))
+                                        .on_click(cx.listener(move |view, _, _, cx| {
+                                            view.suggest(index, cx)
+                                        })),
+                                )
+                                .child(
+                                    Button::new(("save-suggestion", index))
+                                        .ghost()
+                                        .disabled(self.review_target_unavailable().is_some())
+                                        .label(t(cx, "审核并保存为片段", "Review and save snippet"))
+                                        .on_click(cx.listener(move |view, _, _, cx| {
+                                            view.save_suggestion(index, cx)
+                                        })),
                                 ),
                         ),
                 );

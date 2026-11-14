@@ -23,6 +23,13 @@ pub(super) struct SuggestionRequest {
     sources_revision: u64,
 }
 
+pub(super) struct AiSnippetSaveRequest {
+    pub(super) command: String,
+    pub(super) target: String,
+    pub(super) session_id: String,
+    pub(super) review_id: uuid::Uuid,
+}
+
 impl Workspace {
     pub(super) fn snippet_modal_open(&self) -> bool {
         self.snippet_editor.is_some()
@@ -359,49 +366,288 @@ impl Workspace {
             return;
         }
         self.snippet_editing = snippet.is_some();
+        self.ai_snippet_review = None;
         let panel = cx.new(|cx| SnippetEditor::new(snippet, window, cx));
-        self.snippet_subscription = Some(cx.subscribe_in(
-            &panel,
+        self.snippet_subscription = Some(Self::subscribe_snippet_editor(&panel, window, cx));
+        self.snippet_editor = Some(panel);
+        self.focus_current_surface(window, cx);
+        cx.notify();
+    }
+
+    fn subscribe_snippet_editor(
+        panel: &Entity<SnippetEditor>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Subscription {
+        cx.subscribe_in(
+            panel,
             window,
             |view, panel, event, window, cx| match event {
                 SnippetEditorEvent::Cancel => view.close_snippet_modal(window, cx),
+                SnippetEditorEvent::ReReview { command } => {
+                    view.re_review_snippet(command, window, cx)
+                }
                 SnippetEditorEvent::Save(snippet) => {
-                    if view.saving {
-                        panel.update(cx, |panel, cx| {
-                            panel.set_error(
-                                Message::new("请等待当前保存完成", "Wait for the current save"),
-                                cx,
-                            )
-                        });
-                        return;
-                    }
-                    let mut candidate = view.state.clone();
-                    let result = if view.snippet_editing {
-                        candidate.update_snippet(snippet.clone())
-                    } else {
-                        candidate.insert_snippet(snippet.clone())
-                    };
-                    if let Err(error) = result {
-                        panel.update(cx, |panel, cx| {
-                            panel.set_error(
-                                Message::detail("片段未保存", "Snippet not saved", error),
-                                cx,
-                            )
-                        });
-                        return;
-                    }
-                    view.persist(
-                        candidate,
-                        AfterSave::SnippetSaved {
-                            panel: panel.entity_id(),
-                        },
-                        window,
-                        cx,
-                    );
+                    view.save_snippet_from_editor(panel, snippet, window, cx)
                 }
             },
-        ));
-        self.snippet_editor = Some(panel);
+        )
+    }
+
+    fn re_review_snippet(&mut self, command: &str, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(binding) = self.ai_snippet_review.clone() else {
+            return;
+        };
+        if binding.command != command {
+            self.close_snippet_modal(window, cx);
+            self.status = Message::new(
+                "重新审核候选已变化，片段保存流程已取消。",
+                "The re-review candidate changed; the snippet save flow was canceled.",
+            );
+            cx.notify();
+            return;
+        }
+        if let Err(message) = self.admit_ai_snippet_binding(&binding, cx) {
+            self.close_snippet_modal(window, cx);
+            self.status = message;
+            cx.notify();
+            return;
+        }
+        let target = binding.terminal;
+        self.close_snippet_modal(window, cx);
+        self.set_reviewed_command(command.to_owned(), Some(target), window, cx);
+        self.status = Message::new(
+            "已取消片段保存，请在命令栏中重新审核命令。",
+            "Snippet saving was canceled. Review the command again in the command bar.",
+        );
+        cx.notify();
+    }
+
+    fn save_snippet_from_editor(
+        &mut self,
+        panel: &Entity<SnippetEditor>,
+        snippet: &Snippet,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.saving {
+            panel.update(cx, |panel, cx| {
+                panel.set_error(
+                    Message::new("请等待当前保存完成", "Wait for the current save"),
+                    cx,
+                )
+            });
+            return;
+        }
+        if panel.read(cx).is_ai_reviewed() {
+            let Some(binding) = self.ai_snippet_review.clone() else {
+                panel.update(cx, |panel, cx| {
+                    panel.set_error(
+                        Message::new(
+                            "AI 片段审核已失效，草稿未保存。",
+                            "The AI snippet review is stale; the draft was not saved.",
+                        ),
+                        cx,
+                    )
+                });
+                return;
+            };
+            if binding.command != snippet.command
+                || self.admit_ai_snippet_binding(&binding, cx).is_err()
+            {
+                let message = Message::new(
+                    "AI 片段审核已失效，当前目标或配置已变化；未保存片段。",
+                    "The AI snippet review is stale because the target or configuration changed; no snippet was saved.",
+                );
+                panel.update(cx, |panel, cx| panel.set_error(message.clone(), cx));
+                self.ai_snippet_review = None;
+                self.close_snippet_modal(window, cx);
+                self.status = message;
+                cx.notify();
+                return;
+            }
+        }
+        let mut candidate = self.state.clone();
+        let result = if self.snippet_editing {
+            candidate.update_snippet(snippet.clone())
+        } else {
+            candidate.insert_snippet(snippet.clone())
+        };
+        if let Err(error) = result {
+            panel.update(cx, |panel, cx| {
+                panel.set_error(
+                    Message::detail("片段未保存", "Snippet not saved", error),
+                    cx,
+                )
+            });
+            return;
+        }
+        self.persist(
+            candidate,
+            AfterSave::SnippetSaved {
+                panel: panel.entity_id(),
+            },
+            window,
+            cx,
+        );
+    }
+
+    /// Admit a reviewed AI event against the live SSH tab and configuration.
+    ///
+    /// The event carries only process-local identity. This second check is the
+    /// authority boundary that prevents a delayed review from opening a draft
+    /// for a replaced session, target, configuration or modal scope.
+    pub(super) fn admit_ai_snippet_target(
+        &self,
+        target: &str,
+        session_id: &str,
+        cx: &App,
+    ) -> Result<EntityId, Message> {
+        if self.saving
+            || self.state_reloading
+            || self.configuration_recovery.is_some()
+            || self.configuration_invalidated
+            || !self.configuration_current(cx)
+        {
+            return Err(Message::new(
+                "配置正在切换、重新加载或关闭，AI 片段审核已丢弃。",
+                "The configuration is switching, reloading or closing; the AI snippet review was discarded.",
+            ));
+        }
+        if self.active_modal().is_some()
+            || self.modal_scope.current.is_some()
+            || self.snippet_modal_open()
+        {
+            return Err(Message::new(
+                "当前操作范围已被其他面板替换，AI 片段审核已丢弃。",
+                "The current operation scope was replaced by another panel; the AI snippet review was discarded.",
+            ));
+        }
+        let Some(terminal) = self.tabs.get(self.active) else {
+            return Err(Message::new(
+                "当前没有活动 SSH 标签，AI 片段审核已丢弃。",
+                "There is no active SSH tab; the AI snippet review was discarded.",
+            ));
+        };
+        let terminal_id = terminal.entity_id();
+        let active_session_id = format!("{terminal_id:?}");
+        if active_session_id != session_id
+            || !terminal.read(cx).is_open()
+            || self.remote_hosts.get(&terminal_id).map(String::as_str) != Some(target)
+        {
+            return Err(Message::new(
+                "当前活动 SSH 标签或目标已变化，AI 片段审核已丢弃。",
+                "The active SSH tab or target changed; the AI snippet review was discarded.",
+            ));
+        }
+        Ok(terminal_id)
+    }
+
+    fn admit_ai_snippet_binding(
+        &self,
+        binding: &AiSnippetReviewBinding,
+        cx: &App,
+    ) -> Result<(), Message> {
+        if binding.review_id.is_nil() {
+            return Err(Message::new(
+                "AI 命令审核凭据无效，片段未保存。",
+                "The AI command review receipt is invalid; the snippet was not saved.",
+            ));
+        }
+        if self.saving
+            || self.state_reloading
+            || self.configuration_recovery.is_some()
+            || self.configuration_invalidated
+            || !self.configuration_current(cx)
+        {
+            return Err(Message::new(
+                "配置正在切换、重新加载或关闭，AI 片段审核已失效。",
+                "The configuration is switching, reloading or closing; the AI snippet review is stale.",
+            ));
+        }
+        if self.active_modal() != Some(modal_scope::ModalKind::SnippetEditor)
+            || self.modal_scope.current != Some(modal_scope::ModalKind::SnippetEditor)
+            || self.snippet_editor.is_none()
+        {
+            return Err(Message::new(
+                "片段编辑器操作范围已被替换，AI 片段审核已失效。",
+                "The snippet editor scope was replaced; the AI snippet review is stale.",
+            ));
+        }
+        let Some(terminal) = self.tabs.get(self.active) else {
+            return Err(Message::new(
+                "当前没有活动 SSH 标签，AI 片段审核已失效。",
+                "There is no active SSH tab; the AI snippet review is stale.",
+            ));
+        };
+        let terminal_id = terminal.entity_id();
+        if terminal_id != binding.terminal
+            || format!("{terminal_id:?}") != binding.session_id
+            || !terminal.read(cx).is_open()
+            || self.remote_hosts.get(&terminal_id).map(String::as_str)
+                != Some(binding.target.as_str())
+        {
+            return Err(Message::new(
+                "当前活动 SSH 标签或目标已变化，AI 片段审核已失效。",
+                "The active SSH tab or target changed; the AI snippet review is stale.",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Handle the AI event without touching StateStore.
+    pub(super) fn handle_ai_snippet_save(
+        &mut self,
+        panel: &Entity<AssistantPanel>,
+        request: AiSnippetSaveRequest,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let AiSnippetSaveRequest {
+            command,
+            target,
+            session_id,
+            review_id,
+        } = request;
+        let terminal = match self.admit_ai_snippet_target(&target, &session_id, cx) {
+            Ok(terminal) => terminal,
+            Err(message) => {
+                panel.update(cx, |panel, cx| {
+                    panel.reject_snippet_save_review(review_id, message.clone(), cx)
+                });
+                self.status = message;
+                cx.notify();
+                return;
+            }
+        };
+        let accepted = panel.update(cx, |panel, cx| {
+            panel.consume_snippet_save_review(&command, &target, &session_id, review_id, cx)
+        });
+        if !accepted {
+            let message = Message::new(
+                "AI 命令审核已过期或已使用，未打开片段草稿。",
+                "The AI command review is stale or already used; no snippet draft was opened.",
+            );
+            self.status = message.clone();
+            cx.notify();
+            return;
+        }
+        let snippet = Snippet::new(t(cx, "AI 命令片段", "AI command snippet"), command.clone());
+        self.snippet_editing = false;
+        self.ai_snippet_review = Some(AiSnippetReviewBinding {
+            command: command.clone(),
+            target,
+            session_id,
+            terminal,
+            review_id,
+        });
+        let editor = cx.new(|cx| SnippetEditor::new_reviewed_draft(snippet, window, cx));
+        self.snippet_subscription = Some(Self::subscribe_snippet_editor(&editor, window, cx));
+        self.snippet_editor = Some(editor);
+        self.status = Message::new(
+            "已打开锁定的片段草稿；填写信息后需再次确认保存。",
+            "A locked snippet draft is open; complete its details and confirm saving.",
+        );
         self.focus_current_surface(window, cx);
         cx.notify();
     }
@@ -425,6 +671,7 @@ impl Workspace {
         }
         self.snippet_editor = None;
         self.snippet_subscription = None;
+        self.ai_snippet_review = None;
         self.snippet_delete = None;
         self.snippet_parameters = None;
         self.parameter_subscription = None;

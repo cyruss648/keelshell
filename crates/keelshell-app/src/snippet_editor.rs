@@ -17,13 +17,23 @@ mod view;
 /// The workspace owns persistence and closes the editor only after a successful
 /// save. Failed saves must call [`SnippetEditor::set_error`] to retain the draft.
 pub enum SnippetEditorEvent {
+    /// The user confirmed a validated snippet snapshot for Workspace persistence.
     Save(Snippet),
+    /// The user canceled the current editor without running the command.
     Cancel,
+    /// Leave the AI save flow and place the reviewed command back in command review.
+    ReReview { command: String },
 }
 
 pub struct SnippetEditor {
     id: Uuid,
     editing: bool,
+    /// AI-reviewed command bodies stay locked until the user explicitly leaves
+    /// this flow through [`SnippetEditorEvent::ReReview`].
+    command_locked: bool,
+    locked_command: Option<String>,
+    ai_reviewed: bool,
+    save_confirmed: bool,
     focus: FocusHandle,
     name: Entity<InputState>,
     description: Entity<InputState>,
@@ -66,9 +76,35 @@ impl SnippetEditor {
     pub fn new(snippet: Option<Snippet>, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let editing = snippet.is_some();
         let snippet = snippet.unwrap_or_else(|| Snippet::new("", ""));
+        Self::from_snippet(snippet, editing, false, window, cx)
+    }
+
+    /// Create a new draft from a command that already passed AI command review.
+    ///
+    /// The command body is disabled and remains equal to the reviewed snapshot
+    /// until the user explicitly chooses re-review. Naming, description, tags
+    /// and the second save confirmation remain available.
+    pub fn new_reviewed_draft(
+        snippet: Snippet,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        Self::from_snippet(snippet, false, true, window, cx)
+    }
+
+    fn from_snippet(
+        snippet: Snippet,
+        editing: bool,
+        ai_reviewed: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        let command_locked = ai_reviewed;
+        let locked_command = command_locked.then(|| snippet.command.clone());
         let command = cx.new(|cx| {
             let mut command = TextareaState::new(window, cx).rows(8);
             command.set_value(snippet.command, window, cx);
+            command.set_disabled(command_locked, cx);
             command
         });
         let command_subscription = cx.subscribe(&command, |view, _, event: &InputEvent, cx| {
@@ -80,6 +116,10 @@ impl SnippetEditor {
         let mut editor = Self {
             id: snippet.id,
             editing,
+            command_locked,
+            locked_command,
+            ai_reviewed,
+            save_confirmed: false,
             focus: cx.focus_handle(),
             name: field(snippet.name, window, cx),
             description: field(snippet.description, window, cx),
@@ -114,11 +154,15 @@ impl SnippetEditor {
     /// Freeze input immediately while the workspace persists the emitted snapshot.
     pub fn set_saving(&mut self, saving: bool, cx: &mut Context<Self>) {
         self.saving = saving;
+        if saving {
+            self.save_confirmed = false;
+        }
         for input in [&self.name, &self.description, &self.tags] {
             input.update(cx, |input, cx| input.set_disabled(saving, cx));
         }
-        self.command
-            .update(cx, |input, cx| input.set_disabled(saving, cx));
+        self.command.update(cx, |input, cx| {
+            input.set_disabled(saving || self.command_locked, cx)
+        });
         cx.notify();
     }
 
@@ -127,9 +171,29 @@ impl SnippetEditor {
         self.saving
     }
 
+    pub(crate) fn is_ai_reviewed(&self) -> bool {
+        self.ai_reviewed
+    }
+
+    #[cfg(test)]
+    pub(crate) fn command_is_editable(&self, cx: &App) -> bool {
+        self.command.read(cx).is_editable()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn command_value_for_test(&self, cx: &App) -> SharedString {
+        self.command.read(cx).value()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn has_error_for_test(&self) -> bool {
+        self.error.is_some()
+    }
+
     /// Show a persistence failure and make the exact unsaved draft editable again.
     pub fn set_error(&mut self, message: Message, cx: &mut Context<Self>) {
         self.error = Some(message);
+        self.save_confirmed = false;
         self.set_saving(false, cx);
     }
 
@@ -181,8 +245,30 @@ impl SnippetEditor {
         if self.saving {
             return;
         }
+        if self.command_locked
+            && self
+                .locked_command
+                .as_ref()
+                .is_some_and(|command| self.command.read(cx).value().as_ref() != command)
+        {
+            self.error = Some(Message::new(
+                "已审核的命令正文已锁定；如需修改，请取消保存并重新审核。",
+                "The reviewed command body is locked. Cancel this save flow and review the edited command again.",
+            ));
+            self.save_confirmed = false;
+            self.command.read(cx).focus_handle(cx).focus(window, cx);
+            cx.notify();
+            return;
+        }
         match self.draft(cx) {
             Ok(snippet) => {
+                if self.ai_reviewed && !self.save_confirmed {
+                    self.error = None;
+                    self.save_confirmed = true;
+                    self.focus(window, cx);
+                    cx.notify();
+                    return;
+                }
                 self.error = None;
                 self.set_saving(true, cx);
                 self.focus.focus(window, cx);
@@ -247,6 +333,16 @@ impl SnippetEditor {
     pub fn cancel(&mut self, cx: &mut Context<Self>) {
         if !self.saving {
             cx.emit(SnippetEditorEvent::Cancel);
+        }
+    }
+
+    fn re_review(&mut self, cx: &mut Context<Self>) {
+        if self.ai_reviewed && !self.saving {
+            let command = self
+                .locked_command
+                .clone()
+                .unwrap_or_else(|| self.command.read(cx).value().to_string());
+            cx.emit(SnippetEditorEvent::ReReview { command });
         }
     }
 }

@@ -7,6 +7,7 @@ use gpui_kit::{
 };
 
 type Observed = Arc<std::sync::Mutex<Vec<(String, String)>>>;
+type SaveObserved = Arc<std::sync::Mutex<Vec<(String, String, String, uuid::Uuid)>>>;
 
 fn observe(
     panel: &Entity<AssistantPanel>,
@@ -25,6 +26,36 @@ fn observe(
                     .lock()
                     .unwrap_or_else(|_| panic!("events lock"))
                     .push((command.clone(), session_id.clone()));
+            }
+        })
+    });
+    (observed, subscription)
+}
+
+fn observe_save(
+    panel: &Entity<AssistantPanel>,
+    cx: &mut TestAppContext,
+) -> (SaveObserved, gpui_kit::Subscription) {
+    let observed = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let copied = observed.clone();
+    let subscription = cx.update(|cx| {
+        cx.subscribe(panel, move |_, event: &AssistantEvent, _| {
+            if let AssistantEvent::SaveSnippet {
+                command,
+                target,
+                session_id,
+                review_id,
+            } = event
+            {
+                copied
+                    .lock()
+                    .unwrap_or_else(|_| panic!("save events lock"))
+                    .push((
+                        command.clone(),
+                        target.clone(),
+                        session_id.clone(),
+                        *review_id,
+                    ));
             }
         })
     });
@@ -170,6 +201,51 @@ fn exact_captured_command_and_diagnostic_step_emit_only_after_manual_click(
             (COMMAND.into(), "session-A".into())
         ]
     );
+}
+
+#[gpui_kit::test]
+fn reviewed_snippet_events_carry_target_and_are_consumed_once(cx: &mut TestAppContext) {
+    const COMMAND: &str = "printf 'save me'";
+    let (_, panel) = mount(cx);
+    let (observed, _subscription) = observe_save(&panel, cx);
+    panel.update(cx, |panel, cx| {
+        panel.set_context(
+            "selected".into(),
+            "ops@server.example:22".into(),
+            "session-A".into(),
+            cx,
+        );
+        panel.receive_review_response_for_test(format!("```sh\n{COMMAND}\n```"), cx);
+        panel.save_suggestion(0, cx);
+    });
+    cx.run_until_parked();
+    let event = observed
+        .lock()
+        .unwrap_or_else(|_| panic!("save event"))
+        .first()
+        .cloned()
+        .unwrap_or_else(|| panic!("reviewed suggestion save event"));
+    assert_eq!(event.0, COMMAND);
+    assert_eq!(event.1, "ops@server.example:22");
+    assert_eq!(event.2, "session-A");
+    assert!(!event.3.is_nil());
+    panel.update(cx, |panel, cx| {
+        assert!(panel.consume_snippet_save_review(&event.0, &event.1, &event.2, event.3, cx));
+        assert!(!panel.consume_snippet_save_review(&event.0, &event.1, &event.2, event.3, cx));
+    });
+
+    panel.update(cx, |panel, cx| {
+        panel.receive_review_response_for_test(format!("```sh\n{COMMAND}\n```"), cx);
+        panel.build_diagnostic_plan(cx);
+        panel.save_diagnostic_step(0, cx);
+    });
+    cx.run_until_parked();
+    let events = observed.lock().unwrap_or_else(|_| panic!("save events"));
+    assert_eq!(events.len(), 2);
+    assert_eq!(events[1].0, COMMAND);
+    assert_eq!(events[1].1, "ops@server.example:22");
+    assert_eq!(events[1].2, "session-A");
+    assert_ne!(events[0].3, events[1].3);
 }
 
 #[gpui_kit::test]

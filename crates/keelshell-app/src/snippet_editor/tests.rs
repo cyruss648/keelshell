@@ -24,6 +24,7 @@ impl<T, E: std::fmt::Debug> Checked<T> for Result<T, E> {
 struct Events {
     saved: Vec<Snippet>,
     cancelled: usize,
+    re_reviewed: Vec<String>,
 }
 
 struct FixtureView {
@@ -53,6 +54,14 @@ struct Fixture {
 }
 
 fn mount(cx: &mut TestAppContext, snippet: Option<Snippet>) -> Fixture {
+    mount_with_mode(cx, snippet, false)
+}
+
+fn mount_reviewed(cx: &mut TestAppContext, snippet: Snippet) -> Fixture {
+    mount_with_mode(cx, Some(snippet), true)
+}
+
+fn mount_with_mode(cx: &mut TestAppContext, snippet: Option<Snippet>, reviewed: bool) -> Fixture {
     cx.update(|cx| {
         gpui_kit::init(cx);
         set_language(Language::ZhCn, cx);
@@ -66,7 +75,17 @@ fn mount(cx: &mut TestAppContext, snippet: Option<Snippet>) -> Fixture {
             },
             cx,
             |window, cx| {
-                let editor = cx.new(|cx| SnippetEditor::new(snippet, window, cx));
+                let editor = cx.new(|cx| {
+                    if reviewed {
+                        SnippetEditor::new_reviewed_draft(
+                            snippet.clone().unwrap_or_else(|| Snippet::new("", "")),
+                            window,
+                            cx,
+                        )
+                    } else {
+                        SnippetEditor::new(snippet, window, cx)
+                    }
+                });
                 cx.new(|_| FixtureView {
                     editor,
                     width: 900.,
@@ -81,6 +100,9 @@ fn mount(cx: &mut TestAppContext, snippet: Option<Snippet>) -> Fixture {
         let subscription = cx.subscribe(&editor, move |_, event, _| match event {
             SnippetEditorEvent::Save(snippet) => received.borrow_mut().saved.push(snippet.clone()),
             SnippetEditorEvent::Cancel => received.borrow_mut().cancelled += 1,
+            SnippetEditorEvent::ReReview { command } => {
+                received.borrow_mut().re_reviewed.push(command.clone())
+            }
         });
         Fixture {
             window,
@@ -286,6 +308,69 @@ fn save_freezes_exact_snapshot_and_failure_restores_the_draft(cx: &mut TestAppCo
     cx.run_until_parked();
     assert_eq!(fixture.events.borrow().saved, vec![original]);
     assert_eq!(fixture.events.borrow().cancelled, 0);
+}
+
+#[gpui_kit::test]
+fn reviewed_ai_draft_locks_command_allows_metadata_and_requires_second_confirmation(
+    cx: &mut TestAppContext,
+) {
+    let original = sample();
+    let fixture = mount_reviewed(cx, original.clone());
+    cx.update_window(fixture.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(!fixture.editor.read(cx).command.read(cx).is_editable());
+        assert!(window.find("snippet-command-locked").visible());
+        assert_eq!(
+            window.find("snippet-editor-save").label(),
+            Some("确认保存片段")
+        );
+
+        window.click("snippet-name", cx);
+        window.input(" · AI", cx);
+        window.click("snippet-editor-save", cx);
+        assert!(!fixture.editor.read(cx).is_saving());
+        assert!(fixture.events.borrow().saved.is_empty());
+        assert_eq!(window.find("snippet-editor-save").label(), Some("保存片段"));
+
+        window.click("snippet-editor-save", cx);
+        assert!(fixture.editor.read(cx).is_saving());
+    })
+    .checked("reviewed draft metadata and confirmation");
+    cx.run_until_parked();
+    let saved = &fixture.events.borrow().saved;
+    assert_eq!(saved.len(), 1);
+    assert_eq!(saved[0].command, original.command);
+    assert!(saved[0].name.ends_with(" · AI"));
+}
+
+#[gpui_kit::test]
+fn reviewed_ai_draft_rejects_changed_command_and_exposes_explicit_rereview(
+    cx: &mut TestAppContext,
+) {
+    let original = sample();
+    let fixture = mount_reviewed(cx, original.clone());
+    cx.update_window(fixture.window, |_, window, cx| {
+        fixture.editor.update(cx, |editor, cx| {
+            editor.set_command_text("edited after review", window, cx)
+        });
+        window.render_frame(cx);
+        window.click("snippet-editor-save", cx);
+        assert!(!fixture.editor.read(cx).is_saving());
+        assert!(fixture.events.borrow().saved.is_empty());
+        assert!(
+            fixture
+                .editor
+                .read(cx)
+                .error
+                .as_ref()
+                .is_some_and(|message| message.render(cx).contains("重新审核"))
+        );
+        window.click("snippet-editor-re-review", cx);
+    })
+    .checked("locked command rejects direct save");
+    cx.run_until_parked();
+    assert_eq!(fixture.events.borrow().saved, Vec::<Snippet>::new());
+    assert_eq!(fixture.events.borrow().re_reviewed, vec![original.command]);
 }
 
 fn contained(inner: Bounds<Pixels>, outer: Bounds<Pixels>) -> bool {
