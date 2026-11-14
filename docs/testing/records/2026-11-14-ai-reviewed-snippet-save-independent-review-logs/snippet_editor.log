@@ -609,4 +609,3 @@ test snippet_editor::tests::save_freezes_exact_snapshot_and_failure_restores_the
 test snippet_editor::tests::valid_template_lists_unique_names_and_freezes_parameter_mode_with_snapshot ... ok
 
 test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1144 filtered out; finished in 0.40s
-

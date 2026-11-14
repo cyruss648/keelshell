@@ -15,4 +15,3 @@ test assistant::tests::command_review_target::unavailable_target_disables_contro
 test workspace::tests::ai_command_review_target::captured_ai_command_review_target_uses_live_active_terminal_without_rebinding ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1150 filtered out; finished in 2.31s
-

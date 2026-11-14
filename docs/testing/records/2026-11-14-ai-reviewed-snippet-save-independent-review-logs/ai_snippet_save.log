@@ -15,4 +15,3 @@ test workspace::tests::ai_snippet_save::state_store_conflict_keeps_complete_ai_d
 test workspace::tests::ai_snippet_save::target_switch_after_opening_ai_draft_rejects_save_and_drops_candidate ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1150 filtered out; finished in 1.79s
-
