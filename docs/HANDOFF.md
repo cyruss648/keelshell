@@ -5,6 +5,35 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 连接状态灯审查修复与完整门禁
+
+对依赖提交 `98f8f9d0558098061563fcb9c24f500551fb361a`、窗口契约和工作台
+chrome 的首轮新独立复核返回 `REQUEST_CHANGES`，P0/P1/P3 为 `0`，唯一 P2
+是恢复未连接、Starting 和空活动面板可能误画成功色。依赖输入本身无待修发现。
+
+当前源码把标签和底部状态栏统一按当前终端与恢复状态选择主题语义色，仅当前
+`is_open()` 使用 `success`；缺失连接为 `danger`，其他未连接状态为 `warning`，
+没有活动目标为 `muted`。两条新回归实际检查 painted quad 的背景，覆盖三套主题、
+明暗、中英文、生命周期、恢复占位及真实 tab/空面板点击。修复前两项均复现失败，
+修复后 `2 passed / 0 failed / 1134 filtered`，app 新清单为 `1136` 项。
+
+源码与 Cargo 输入已通过 `indicator-fix-inputs-r1.json` 冻结；修复后的完整
+`scripts/check.py` 已实际 wait 并 exit `0`：ordinary
+`2442 passed / 0 failed / 23 ignored`，app 子集 `1134 passed / 2 ignored`，
+14 项 doctest（含 2 compile-fail）、Python `131 run / 1 skipped`、fmt、
+workspace 严格 Clippy 和三组 AI controller 通过。
+
+另一位新 agent 对相同冻结输入返回 `APPROVE`，P0/P1/P2/P3 均为 `0`；
+独立执行作者预构建二进制的 36 项重点回归通过，未独立重编译或代签作者完整
+门禁。5 个显式输入与补充 519 个 Rust/Cargo 输入在审查期间不变。该复核发生于
+本地修复提交前，提交后须单独核对 Git 对象与冻结输入相符；当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_FROZEN_SOURCE_REVIEW_APPROVED`。
+
+依赖实现 worktree 已归档，两位审查 agent 已关闭，复核临时二进制与 runtime
+已清理；只保留当前构建缓存和审计回执。修复完整记录见
+[状态灯修复](testing/records/2026-11-14-connection-indicator-review-fix.md)；
+公司内网不可用期间只本地提交，原生锁屏 `HOLD` 和跨平台边界继续保留。
+
 ## 2026-11-14 依赖官方升级与 Rust 1.100.0 完整门禁
 
 在 `4340b19e0099a00e460281502fd5cebd7c753ab9` 的父工作树集成八个直接包升级：
@@ -26,8 +55,9 @@ AI controller 均通过。全新 target 的 app 清单为 `1134` 项，并核对
 具体根因仍未确定，失败原件保留。第二轮使用空 target 和显式当前工具链路径，
 不把后续成功反推为首轮根因。
 
-当前为 `AUTHOR_GATE_PASS / INDEPENDENT_REVIEW_PENDING`，本地提交固定后需新开
-严格只读复核；公司内网暂不可用，只做本地提交，不执行 push。隔离实现
+依赖切片已本地提交为 `98f8f9d`，作者门禁为 `AUTHOR_GATE_PASS`；首轮新独立
+复核发现上述 UI 状态灯 P2，返回 `REQUEST_CHANGES`，后续从本页顶部修复接续。
+公司内网暂不可用，只做本地提交，不执行 push。隔离实现
 worktree 已归档，日志已复制到父工作树。Windows/Linux、原生桌面与真实远端等
 边界仍开放；旧 `0.9.0` 原生包不能代签新依赖，锁屏导致的主题/紧凑窗口
 `HOLD` 继续保留。详见[依赖升级记录](testing/records/2026-11-14-dependency-refresh.md)。

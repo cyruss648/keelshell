@@ -247,9 +247,38 @@ monitor `21` 项、workbench layout `12` 项、design `4` 项，窗口契约的�
 52fd382e6155b6be0d129df4d35243e9be712d218a1112187add243215056b69
 ```
 
-命令完成后另行执行依赖策略与 `git diff --check`，均退出 `0`。当前结论为
-`AUTHOR_GATE_PASS / INDEPENDENT_REVIEW_PENDING`；本地提交固定后交给新子 agent
-严格只读复核，包含依赖输入及此前窗口契约、工作台 chrome 增量。
+命令完成后另行执行依赖策略与 `git diff --check`，均退出 `0`。依赖输入与本节
+作者门禁固定在本地提交 `98f8f9d0558098061563fcb9c24f500551fb361a`。
+
+## 首轮独立复核与后续修复
+
+新审查 agent 对固定 `98f8f9d` 的依赖输入，以及窗口契约 `84a5c7b`、
+工作台 chrome `31ca92b` 的增量返回 `REQUEST_CHANGES`：
+P0 `0`、P1 `0`、P2 `1`、P3 `0`。唯一 P2 是此前 chrome 状态灯只检查
+`end_reason()`，把尚未连接的恢复占位和 Starting 终端误画为成功色；依赖升级
+本身没有需修改的发现。该拒绝结论保留，不能把作者完整门禁写成独立批准。
+修复、真实绘制回归与后续独立复核从
+[状态灯修复记录](2026-11-14-connection-indicator-review-fix.md)接续。
+
+审查独立执行作者预构建二进制，核对本节 SHA-256 与 `1134` 项清单：
+窗口管理 `10/1124`、workbench layout `12/1122`、design `4/1130`、inactive
+生命周期和 restored compact 各 `1/1133`（通过/过滤），总计
+`28 passed / 0 failed / 0 ignored`。所有命令实际 wait 并退出 `0`；这不是
+独立重新编译，也不是独立 app 全量或原生验收。
+
+独立官方复查首轮使用 `15s` 请求超时，exit `1`：32 个包通过，zip 的两处
+声明/使用为 `registry_check_failed`。随后只对 zip 做一次 `30s` 上限补查，
+耗时 `3.068s`，UTC `2026-11-14T01:33:15Z` 完成，确认最新非 yanked 稳定版本
+`9.5.1`、当前 `9.5` 要求和直接锁边一致。两份结果合计覆盖 33 个包、
+103 处声明/使用，但不能称为一条全量官方命令 exit `0`。首轮失败查询原件保留；
+它表示查询失败，不表示包版本落后。
+
+审查还逐文件比较 win32job 官方归档，当前使用的 Job 创建、进程分配、
+kill-on-close 和进程列表接口静态兼容；47 个新版本锁记录均匹配官方索引缓存，
+已有归档的 37 项摘要匹配，没有同版本 checksum 异常。Windows 编译与运行仍未
+验证。首轮独立原件位于 `work/dependency-refresh-20261114/review/`，包含
+`review-report-r1.json`、`official-independent-r1.*`、`official-zip-r2.json`、
+源码/锁边/归档核对与各组测试回执。
 
 ## 原生与交付边界
 

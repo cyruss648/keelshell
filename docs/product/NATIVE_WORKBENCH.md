@@ -62,6 +62,11 @@ Command-Option-Left/Right，Windows/Linux 使用 Control-Alt-Left/Right。快捷
 窗口尺寸或侧栏变化后，活动标签的关闭入口重新显露；正常渲染不打断用户的手动滚动。
 全局设置和主题按钮保留在最上方。
 
+会话标签与底部连接状态灯使用同一套真实状态映射：当前已就绪且允许输入的
+连接使用成功色；正在连接、已断开及恢复后尚未连接的占位使用提示色，引用缺失的
+恢复连接使用错误色。空活动面板使用中性色，即使其他面板仍有会话。状态文字保留
+完整的双语说明，主题切换只改变语义色，不开始连接或获得命令执行权限。
+
 终端下方保留多行命令草稿、准确的审核目标、执行按钮和独立补全目录。
 紧凑补全只调整布局，不把补全目录当作远程 shell 的当前目录，也不因切换面板自动查询。
 文件、命令和隧道入口标明当前选择；隐藏后重新显示使用原来的面板和草稿。
@@ -81,7 +86,9 @@ AI 助手使用“捕获、提问、预览、发送、审核回复、保存知�
 ## 验收边界
 
 本轮实现和实际验证状态见[工作区记录](../testing/records/2026-11-13-responsive-workbench-polish.md)
-及[紧凑修复记录](../testing/records/2026-11-14-responsive-workbench-follow-up.md)，
+及[紧凑修复记录](../testing/records/2026-11-14-responsive-workbench-follow-up.md)；
+连接状态灯的生命周期、恢复占位和空面板绘制回归见
+[状态灯修复记录](../testing/records/2026-11-14-connection-indicator-review-fix.md)，
 原生边界见[原生工作区记录](../testing/records/2026-11-05-native-workbench.md)，设计约束见
 [ADR 0096](../adr/0096-native-workbench-navigation.md) 和
 [ADR 0124](../adr/0124-responsive-workbench-polish.md)。

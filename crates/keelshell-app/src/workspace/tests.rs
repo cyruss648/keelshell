@@ -30,6 +30,7 @@ mod ai_command_review_target;
 mod ai_metadata;
 mod command_palette;
 mod configuration_recovery;
+mod connection_indicators;
 pub(crate) mod independent_disk_monitor;
 mod knowledge_library;
 pub(crate) mod mirror_sync_combination;

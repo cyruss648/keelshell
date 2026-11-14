@@ -563,6 +563,26 @@ impl Render for Workspace {
 }
 
 impl Workspace {
+    fn session_status_color(&self, terminal: Option<&Entity<TerminalView>>, cx: &App) -> u32 {
+        let visual = crate::design::palette(cx);
+        let Some(terminal) = terminal else {
+            return visual.muted;
+        };
+        if let Some(restored) = self.restored_tabs.get(&terminal.entity_id()) {
+            return match restored.availability(&self.state) {
+                keelshell_core::LayoutTabAvailability::Missing => visual.danger,
+                _ => visual.warning,
+            };
+        }
+        // Starting and inactive terminals also have no end reason. Success
+        // requires the same current readiness check that gates terminal input.
+        if terminal.read(cx).is_open() {
+            visual.success
+        } else {
+            visual.warning
+        }
+    }
+
     // Finish each child behind a call boundary so debug builder temporaries
     // do not accumulate in the workspace renderer's stack frame.
     #[inline(never)]
@@ -683,11 +703,7 @@ impl Workspace {
                             .test_support()
                             .size(px(6.))
                             .rounded(px(3.))
-                            .bg(rgb(if offline {
-                                visual.warning
-                            } else {
-                                visual.success
-                            })),
+                            .bg(rgb(self.session_status_color(Some(terminal), cx))),
                     )
                     .when(offline, |tab| {
                         tab.child(
@@ -1599,17 +1615,7 @@ impl Workspace {
     fn workspace_status_bar(&self, terminal_status: String, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let chrome = crate::design::chrome(cx);
-        let offline = self
-            .tabs
-            .get(self.active)
-            .is_some_and(|tab| tab.read(cx).end_reason().is_some());
-        let status_color = if self.tabs.is_empty() {
-            visual.muted
-        } else if offline {
-            visual.warning
-        } else {
-            visual.success
-        };
+        let status_color = self.session_status_color(self.tabs.get(self.active), cx);
         div()
             .id("workspace-status-bar")
             .test_support()

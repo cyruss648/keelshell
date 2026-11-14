@@ -3,6 +3,21 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-14 连接状态灯审查修复
+
+首轮新独立复核在 `98f8f9d` 上发现一个 P2：恢复未连接、Starting 或空活动
+面板可能使用成功色，原结论为 `REQUEST_CHANGES`。当前修复让标签/底部状态栏
+共用当前生命周期与恢复状态的颜色映射，两条真实 painted quad 回归先复现失败，
+修复后通过，覆盖三主题/明暗/中英文、Ready/Ended、缺失连接和有 sibling 标签的
+空活动面板。app 清单已更新为 `1136` 项。
+
+完整门禁已 exit `0`：ordinary `2442 passed / 23 ignored`，app 子集
+`1134 passed / 2 ignored`、14 项 doctest、Python `131 run / 1 skipped`、
+fmt、严格 Clippy 和三组 AI controller 通过。另一位新 agent 对冻结源码返回
+`APPROVE`（P0/P1/P2/P3 均为 `0`），独立执行作者预构建二进制的 36 项重点
+回归通过，未独立重编译。本地修复提交需核对与冻结输入字节一致；
+详见[状态灯修复记录](testing/records/2026-11-14-connection-indicator-review-fix.md)。
+
 ## 2026-11-14 依赖升级与当前工具链验证
 
 八个直接包已集成升级，含 GPUI Kit `0.9.1`、rmcp `3.10.0`、rust-embed
@@ -14,8 +29,9 @@
 workspace ordinary `2440 passed / 0 failed / 23 ignored`，app 子集
 `1132 passed / 2 ignored`，14 项 doctest、fmt、严格 Clippy 和三组 AI controller
 通过；新编译 app 清单 `1134` 项。首轮缓存编译 `E0514` 的失败回执保留，根因
-未定。当前独立复核待固定本地提交后执行；临时实现 worktree 已归档，只做本地
-提交、不推送。原生锁屏 `HOLD`、Windows/Linux、真实远端与发布安装边界保持开放。
+未定。切片已本地提交为 `98f8f9d`，首轮独立复核返回一个工作台状态灯 P2，
+依赖输入本身无待修发现，后续修复从本页顶部接续。临时实现 worktree 已归档，只做
+本地提交、不推送。原生锁屏 `HOLD`、Windows/Linux、真实远端与发布安装边界保持开放。
 详见[依赖升级记录](testing/records/2026-11-14-dependency-refresh.md)。
 
 ## 2026-11-14 主机监控面板视觉层级
