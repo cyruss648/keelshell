@@ -1,7 +1,7 @@
 # ADR 0125：监控面板视觉层级与紧凑几何
 
 - 日期：2026-11-14
-- 状态：已实现；本地 focused GPUI 回归和完整工程门禁通过，独立复核待完成
+- 状态：已实现；本地定向 GPUI 回归、完整工程门禁和固定源码独立复核通过
 - 范围：主机监控 panel 的控制区、资源卡片、网络/端口行、能力状态和磁盘设备选择器
 - 关联：[响应式工作台](0124-responsive-workbench-polish.md)、[测试记录](../testing/records/2026-11-14-monitor-panel-visual-polish.md)
 

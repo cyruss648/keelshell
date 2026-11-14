@@ -5,7 +5,7 @@
 
 ## 2026-11-14 主机监控面板视觉层级
 
-当前本地候选在已提交的工作区 chrome 视觉切片上继续完善主机监控 rail：控制区
+本地提交 `aab1718` 在已提交的工作区 chrome 视觉切片上继续完善主机监控 rail：控制区
 显示采样状态，资源/网络/端口/能力分区使用主题语义 token 和稳定的分组语义，
 磁盘设备列表维持 160px 内层滚动视口。长英文能力状态会在详情列换行，状态
 徽章保持单行；磁盘设备行保持紧凑连续布局，确保末条设备完整进入视口并可点击。
@@ -13,10 +13,15 @@
 监控定向回归当前为 `21 passed / 0 failed`，磁盘末条滚动与能力状态双语可达性
 分别有独立回归。设计决策见[ADR 0125](adr/0125-monitor-panel-visual-hierarchy.md)，
 测试证据见[测试记录](testing/records/2026-11-14-monitor-panel-visual-polish.md)。
-完整工程门禁已通过：Python `131 run / 1 skipped`，workspace `2454 passed / 0 failed / 23 ignored`，
-app `1132 passed / 0 failed / 2 ignored`，14 个正常 doctest 与 2 个 compile-fail doctest
-均通过。提交后的独立复核和原生/真实远端联调仍待完成；公司内网暂不可用，本片只做本地
-提交，不执行 push。
+完整工程门禁已通过：Python `131 run / 1 skipped`，workspace ordinary
+`2440 passed / 0 failed / 23 ignored`（app 子集 `1132 passed / 0 failed / 2 ignored`），
+14 项 doctest（含 2 项 compile-fail）均通过。独立固定 SHA 复核返回 `APPROVE`，
+P0/P1/P2/P3 均为 `0`，独立监控 `21`、工作台布局 `12` 项及 app 严格 Clippy、
+fmt 和差异检查通过；其被中止的 app 全量命令未计为独立通过。
+原生/真实远端联调仍待完成；公司内网暂不可用，本片只做本地提交，不执行 push。
+本片 macOS arm64 精确包构建与静态检查通过；桌面专用通道确认锁屏，主题截图
+来源/新鲜度未获核验，原生视觉和紧凑窗口保持 `HOLD`，详见
+[原生记录](testing/records/2026-11-14-monitor-panel-native-smoke.md)。
 
 ## 2026-11-14 响应式工作台紧凑连接库收口
 

@@ -8,7 +8,8 @@
 ## 2026-11-14 主机监控面板视觉层级与紧凑几何收口
 
 本片在 `31ca92b feat: refine workbench chrome` 上继续完善主机监控 rail，源码、
-测试和文档改动尚待本地提交；公司内网暂不可用，不执行 push。
+测试和首轮文档已固定在本地提交
+`aab1718f6682a82860ded8f0510ab7ccb843a902`；公司内网暂不可用，不执行 push。
 
 本次内容：
 
@@ -30,17 +31,30 @@
   独立回归；
 - app 测试清单为 `1134` 项，本片新增层级回归已进入二进制；
 - 完整 `python3 scripts/check.py` 已通过：依赖版本策略、Python `131 run / 1 skipped`、
-  `cargo fmt --all -- --check`、workspace 严格 Clippy、workspace Rust `2454 passed /
-  0 failed / 23 ignored`、app `1132 passed / 0 failed / 2 ignored`、14 个正常 doctest、
-  2 个 compile-fail doctest 以及 readiness/observer/small-stack 三组 AI controller；
+  `cargo fmt --all -- --check`、workspace 严格 Clippy、workspace ordinary Rust
+  `2440 passed / 0 failed / 23 ignored`（app 子集 `1132 passed / 0 failed / 2 ignored`）、
+  14 项 doctest（含 2 项 compile-fail）以及 readiness/observer/small-stack 三组
+  AI controller。首轮文档误把 2454 个通过结果当作 ordinary，又重复列出
+  compile-fail；本次按原始日志纠正，未重新定义测试或改变其执行结果；
 - 已确认当前本地 active/default toolchain 为 Rust `1.100.0`，项目没有
   `rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，Cargo 默认跟随开发机或
   CI runner 的 active toolchain；不把本地最新版本写成项目 MSRV。
 
-独立提交后复核、macOS/Windows/Linux 原生窗口、IME、VoiceOver/NVDA、真实远端监控、
-Podman 联调、签名安装和像素级验收仍保持开放。详见
+独立严格只读复核已固定上述 SHA，在独立 worktree 和 Cargo target 中返回
+`APPROVE`，P0/P1/P2/P3 均为 `0`。独立回执为 app 清单 `1134` 项、监控 `21/1113`、
+层级回归 `1/1133`、磁盘几何 `1/1133`、工作台布局 `12/1122`（通过/过滤），
+app 严格 Clippy、fmt 和差异检查均退出 `0`。复核中的 app 全量命令被中止并退出
+`130`，未计为独立通过；作者完整门禁与独立定向证据分别保留。
+
+macOS/Windows/Linux 原生窗口、IME、VoiceOver/NVDA、真实远端监控、Podman 联调、
+签名安装和像素级验收仍保持开放。详见
 [ADR 0125](adr/0125-monitor-panel-visual-hierarchy.md) 和
 [测试记录](testing/records/2026-11-14-monitor-panel-visual-polish.md)。
+
+本片精确 macOS arm64 release 包已完成构建和静态检查，但桌面专用通道本次实际
+读回锁屏。三套输入的截图摘要完全相同，不能证明真实主题或语言变化；原生视觉
+仍为 `HOLD`。本次自行启动的四个进程均已终止并 `wait`，没有安装应用。来源、
+摘要和失败证据见[原生观察记录](testing/records/2026-11-14-monitor-panel-native-smoke.md)。
 
 ## 2026-11-14 响应式工作台紧凑连接库收口与完整门禁
 
