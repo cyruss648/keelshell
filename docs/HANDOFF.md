@@ -9,10 +9,11 @@
 
 当前维护 checkout 为
 `/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell`，
-分支 `feature/editor-unicode-codec-20261114`，本地 HEAD 为
-`36a1fcd`（`docs: record tunnel owner and recovery card`）。本片已经完成命名
-隧道 owner 边界、恢复候选卡片视觉与可达性、配置同步发布前置检查，以及对应
-的 ADR、路线图和测试记录；公司内网不可用，当前只允许本地 commit，不执行 push。
+分支 `feature/editor-unicode-codec-20261114`。本片源码实现基线为
+`36a1fcd`（`docs: record tunnel owner and recovery card`）；当前 checkout 的
+exact HEAD 始终以 `git rev-parse HEAD` 现场读取。本片已经完成命名隧道 owner
+边界、恢复候选卡片视觉与可达性、配置同步发布前置检查，以及对应的 ADR、路线图
+和测试记录。公司内网不可用，当前只允许本地 commit，不执行 push。
 
 命名隧道的运行状态快照与重启后的显式恢复已经实现。新候选仍需完成完整重连/
 管理矩阵、跨平台原生和真实远端验收；不要把受控 GPUI、loopback 或作者门禁写成
@@ -22,11 +23,11 @@ CI runner 的 active toolchain。
 
 最近继续推进的本地提交为 `540f9fc`（配置同步原子发布前置检查）、
 `90fbca7`（命名隧道 owner 与重连边界）、`1c8df52`（恢复候选卡片视觉与
-可达性）和 `36a1fcd`（ADR、测试记录、路线图和交接收口）。独立 reviewer 已固定
-`36a1fcd` 并使用独立 target；实现没有发现 P0/P1/P2，唯一 P3 是两份新文档末尾
-多余空行，已在当前工作树删除，待最终文档收口提交。完整门禁在
-`36a1fcd` 源码与文档基线运行；最终文档 HEAD 还需完成一次本地质量检查。公司
-内网不可用，本轮只做本地 commit，不 push。
+可达性）和 `36a1fcd`（ADR、测试记录、路线图和交接收口）。独立 reviewer 使用
+独立 target 复核了源码实现；实现没有发现 P0/P1/P2，后续文档复核指出的 EOF
+空行与 provenance 表述问题已在本片文档中修正。完整门禁绑定源码实现基线
+`36a1fcd`，文档提交只补充证据和状态，不改变产品源码。公司内网不可用，本轮
+只做本地 commit，不 push。
 
 ## 2026-11-14 AI 审核命令保存为片段草稿
 

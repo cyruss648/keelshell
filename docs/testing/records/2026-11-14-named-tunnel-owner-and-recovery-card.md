@@ -15,7 +15,7 @@
 
 ## 结论
 
-作者 focused 验证通过，当前状态为 `AUTHOR_FOCUSED_PASS / NON_AUTHOR_REVIEW_PENDING`。
+作者 focused 验证通过，当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。
 本记录没有把 headless GPUI、loopback fixture 或本地 focused gate 写成原生桌面、
 真实客户 SSH、Podman、外部 AI provider 或发布验收。
 
@@ -56,7 +56,8 @@ app 链接阶段出现已知 warning：
 
 `CARGO_TARGET_DIR=work/tunnel-owner-ui-polish-20261114/full-target python3 scripts/check.py`
 
-源码和文档工作树基线为 `36a1fcd` 加本轮文档收口修改。最终日志见
+源码门禁绑定的实现基线为 `36a1fcd`；本轮文档只补充门禁、复核和交接证据，不改变
+产品源码。最终日志见
 `work/tunnel-owner-ui-polish-20261114/logs/full-gate-final-rerun.log`，末尾
 `[full-gate-exit] 0`。实际记录包括：
 
@@ -96,9 +97,10 @@ app 链接阶段出现已知 warning：
   `18/18`，严格 Clippy 均 exit `0`；
 - app 测试清单为 `1159` 项，其中 `1157` 项可运行、`2` 项 ignored。
 
-作者已在复核后删除两处多余空行；该文档修正不改变产品源码。最终 exact SHA
-仍需在本地文档收口提交后重新固定，并保留原生窗口、真实 SSH、Podman、完整
-IME/VoiceOver/NVDA、签名、公证、安装升级和发布验收为未验证边界。
+作者已在复核后删除两处多余空行，并把当前 HEAD 改为现场读取，把门禁证据明确
+绑定到源码实现基线，避免把某个文档提交误写成永远有效的当前 HEAD。该文档修正
+不改变产品源码；原生窗口、真实 SSH、Podman、完整 IME/VoiceOver/NVDA、签名、
+公证、安装升级和发布验收仍为未验证边界。
 
 ## 未验证边界
 
