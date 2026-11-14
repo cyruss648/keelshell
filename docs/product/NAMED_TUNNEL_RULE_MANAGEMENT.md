@@ -96,7 +96,8 @@ StateStore 写入在 Workspace 后台 executor 执行，保存期间阻止其他
 中英文 AX 名称另有原生观察，各包范围分别保留于
 [原生记录](../testing/records/2026-11-05-net-native-acceptance.md)。
 完整布局/主题/语言、键盘与辅助技术、其它平台、远程转发未知结果、
-运行状态持久化或重启恢复仍未完成验收。
+完整重连/管理矩阵和真实远端验收仍未完成；运行状态持久化与重启后的显式恢复
+已经实现，并以本页上方的专门记录为准。
 
 ## English
 
@@ -115,4 +116,7 @@ Reviews and stopped rows retain the allocated listener; dynamic rules describe c
 destinations, and approval feedback no longer suggests ongoing startup. Bilingual field and runtime
 AX labels have separate native observations; evidence remains bound to each package.
 See the [native record](../testing/records/2026-11-05-net-native-acceptance.md).
-The complete native platform/layout matrix, uncertain remote cleanup and runtime recovery remain open.
+Runtime snapshots and explicit restart recovery are implemented and covered by the
+[2026-11-14 recovery record](../testing/records/2026-11-14-named-tunnel-runtime-recovery.md).
+The complete native platform/layout matrix, uncertain remote cleanup and the full
+reconnect/management matrix remain open.
