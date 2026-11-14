@@ -5,6 +5,21 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 当前交接校正
+
+当前维护 checkout 为
+`/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell`，
+分支 `feature/editor-unicode-codec-20261114`，本地 HEAD 为
+`370ba0c`（`docs: reconcile tunnel recovery status`）。本次只修正路线图、
+命名隧道产品指南、能力清单和早期命名规则 ADR 中的过时状态，没有改变产品源码；
+公司内网不可用，当前只允许本地 commit，不执行 push。
+
+命名隧道的运行状态快照与重启后的显式恢复已经实现。新候选仍需完成完整重连/
+管理矩阵、跨平台原生和真实远端验收；不要把受控 GPUI、loopback 或作者门禁写成
+这些边界的通过。当前开发机 active/default Rust/Cargo 为 `1.100.0`，仓库没有
+`rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，Cargo 继续跟随开发机或
+CI runner 的 active toolchain。
+
 ## 2026-11-14 AI 审核命令保存为片段草稿
 
 本片基线是 exact HEAD
