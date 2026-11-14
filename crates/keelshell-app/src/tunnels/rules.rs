@@ -1215,10 +1215,12 @@ impl TunnelsPanel {
 
     pub(super) fn recovery_section(&self, cx: &mut Context<Self>) -> Option<AnyElement> {
         let visual = crate::design::palette(cx);
+        let components = crate::design::components(cx);
         let candidates = self.recovery_candidates();
         if candidates.is_empty() {
             return None;
         }
+        let candidate_count = candidates.len();
         let inspected = self.recovery_inspected;
         let mut cards = div().flex().flex_col().gap_1();
         for snapshot in candidates {
@@ -1229,6 +1231,20 @@ impl TunnelsPanel {
                 .as_ref()
                 .and_then(|state| state.assess_tunnel_runtime_snapshot(id).err());
             let review_blocked = !connection_matches || assessment_error.is_some();
+            let state_color = if !connection_matches
+                || snapshot.status == TunnelRuntimeStatus::CleanupUnconfirmed
+            {
+                visual.danger
+            } else {
+                visual.warning
+            };
+            let state_surface = if !connection_matches
+                || snapshot.status == TunnelRuntimeStatus::CleanupUnconfirmed
+            {
+                visual.danger_surface
+            } else {
+                visual.selected
+            };
             let status = if !connection_matches {
                 t(
                     cx,
@@ -1265,8 +1281,7 @@ impl TunnelsPanel {
                     })
             };
             let details = format!(
-                "{}\n{}: {}\n{}: {}\n{}: {}",
-                snapshot.rule.name,
+                "{}: {}\n{}: {}\n{}: {}",
                 t(cx, "类型", "Type"),
                 tunnel_kind_label(snapshot.rule.kind, cx),
                 t(cx, "实际监听", "Assigned listener"),
@@ -1274,21 +1289,20 @@ impl TunnelsPanel {
                 t(cx, "观察时间", "Observed"),
                 snapshot.started_at,
             );
+            let card_label = format!("{}\n{}\n{}", snapshot.rule.name, status, reason.render(cx));
             let mut card = div()
                 .id(format!("tunnel-recovery-candidate-{id}"))
                 .test_support()
-                .px_2()
-                .py_2()
+                .role(accesskit::Role::Group)
+                .aria_label(card_label)
+                .p_2()
                 .flex()
                 .flex_col()
-                .gap_1()
-                .border_b_1()
+                .gap_2()
+                .rounded(px(components.panel_radius))
+                .border_1()
                 .border_color(rgb(visual.border))
-                .bg(rgb(if inspected == Some(id) {
-                    visual.canvas
-                } else {
-                    visual.surface
-                }))
+                .bg(rgb(visual.surface))
                 .child(
                     div()
                         .flex()
@@ -1297,22 +1311,52 @@ impl TunnelsPanel {
                         .child(
                             div()
                                 .pt_1()
-                                .text_color(rgb(visual.warning))
+                                .text_color(rgb(state_color))
                                 .child(IconName::CircleAlert),
                         )
                         .child(
                             div()
                                 .flex_1()
                                 .min_w_0()
-                                .child(tunnel_text(
-                                    format!("tunnel-recovery-candidate-details-{id}"),
-                                    details,
-                                ))
-                                .child(div().text_color(rgb(visual.warning)).child(tunnel_text(
-                                    format!("tunnel-recovery-candidate-status-{id}"),
-                                    format!("{}\n{}", status, reason.render(cx)),
-                                ))),
-                        )
+                                .child(div().font_weight(FontWeight::SEMIBOLD).child(tunnel_text(
+                                    format!("tunnel-recovery-candidate-name-{id}"),
+                                    snapshot.rule.name.clone(),
+                                )))
+                                .child(div().text_xs().text_color(rgb(visual.muted)).child(
+                                    tunnel_text(
+                                        format!("tunnel-recovery-candidate-details-{id}"),
+                                        details,
+                                    ),
+                                )),
+                        ),
+                )
+                .child(
+                    div()
+                        .id(format!("tunnel-recovery-candidate-state-{id}"))
+                        .test_support()
+                        .role(accesskit::Role::Status)
+                        .aria_label(format!("{}\n{}", status, reason.render(cx)))
+                        .px_2()
+                        .py_1()
+                        .rounded(px(components.control_radius))
+                        .bg(rgb(state_surface))
+                        .text_color(rgb(state_color))
+                        .child(tunnel_text(
+                            format!("tunnel-recovery-candidate-status-{id}"),
+                            format!("{}\n{}", status, reason.render(cx)),
+                        )),
+                )
+                .child(
+                    div()
+                        .id(format!("tunnel-recovery-candidate-actions-{id}"))
+                        .test_support()
+                        .flex()
+                        .flex_wrap()
+                        .justify_end()
+                        .gap_1()
+                        .border_t_1()
+                        .border_color(rgb(visual.border))
+                        .pt_2()
                         .child(
                             Button::new(format!("inspect-tunnel-recovery-{id}"))
                                 .ghost()
@@ -1333,7 +1377,7 @@ impl TunnelsPanel {
                                 .ghost()
                                 .compact()
                                 .icon(IconName::Play)
-                                .label(t(cx, "Review start", "Review start"))
+                                .label(t(cx, "审核启动", "Review start"))
                                 .disabled(
                                     review_blocked
                                         || self.suspended
@@ -1375,8 +1419,16 @@ impl TunnelsPanel {
             if inspected == Some(id) {
                 card = card.child(
                     div()
+                        .id(format!("tunnel-recovery-candidate-inspected-panel-{id}"))
+                        .test_support()
                         .px_2()
                         .py_1()
+                        .rounded(px(components.control_radius))
+                        .bg(rgb(if connection_matches {
+                            visual.canvas
+                        } else {
+                            visual.danger_surface
+                        }))
                         .text_color(rgb(visual.muted))
                         .child(tunnel_text(
                             format!("tunnel-recovery-candidate-inspected-{id}"),
@@ -1398,8 +1450,10 @@ impl TunnelsPanel {
             div()
                 .id("tunnel-recovery-section")
                 .test_support()
+                .role(accesskit::Role::Group)
+                .aria_label(t(cx, "隧道恢复候选", "Tunnel recovery candidates"))
                 .px_3()
-                .py_2()
+                .py_3()
                 .flex_shrink_0()
                 .border_b_1()
                 .border_color(rgb(visual.border))
@@ -1413,17 +1467,25 @@ impl TunnelsPanel {
                         .child(
                             div()
                                 .font_weight(FontWeight::SEMIBOLD)
-                                .child(t(cx, "上次可能运行过的命名隧道", "Named tunnels that may have survived")),
+                                .child(t(
+                                    cx,
+                                    "上次可能运行过的命名隧道",
+                                    "Named tunnels that may have survived",
+                                ))
+                                .child(
+                                    div()
+                                        .text_color(rgb(visual.muted))
+                                        .child(format!("({candidate_count})")),
+                                ),
                         ),
                 )
                 .child(
-                    div()
-                        .py_1()
+                    div().py_2()
                         .text_color(rgb(visual.muted))
                         .child(t(
                             cx,
-                            "这是恢复候选，不代表当前仍在线；必须选择当前连接并重新审核后才能启动。",
-                            "These are recovery candidates, not an online indicator. Select the current connection and review again before starting.",
+                            "候选只记录上次观察到的状态，不代表当前仍在线。请先检查，再审核并确认全新启动。",
+                            "Candidates record the last observed state and are not an online indicator. Inspect, review, then confirm a fresh start.",
                         )),
                 )
                 .child(cards)

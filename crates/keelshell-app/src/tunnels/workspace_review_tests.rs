@@ -673,6 +673,12 @@ async fn authoritative_removal_of_rule_metadata_keeps_live_rows_stoppable(cx: &m
             !fixture.ssh.session.is_closed(),
             "shared SSH session is retained"
         );
+        window.scroll(
+            "tunnel-management-scroll",
+            gpui_kit::ScrollDelta::Pixels(point(px(0.), px(-500.))),
+            cx,
+        );
+        window.render_frame(cx);
         click(window, ("stop-tunnel", 1_usize), cx);
         click(window, "confirm-tunnel-rule-stop", cx);
     })

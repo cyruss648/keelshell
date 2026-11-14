@@ -379,6 +379,46 @@ async fn crash_candidate_is_read_only_until_explicit_review_and_confirm(cx: &mut
 
     cx.update_window(window, |_, window, cx| {
         window.render_frame(cx);
+        let section = window.find("tunnel-recovery-section");
+        assert_eq!(
+            section.role(),
+            Some(gpui_kit::accesskit::Role::Group),
+            "recovery section is announced as a group"
+        );
+        assert!(
+            section
+                .label()
+                .unwrap_or_else(|| panic!("recovery section AX label"))
+                .contains("隧道恢复候选")
+        );
+        let card = window.find(format!("tunnel-recovery-candidate-{candidate_id}"));
+        assert_eq!(
+            card.role(),
+            Some(gpui_kit::accesskit::Role::Group),
+            "recovery card is announced as a group"
+        );
+        assert!(
+            card.label()
+                .unwrap_or_else(|| panic!("recovery card AX label"))
+                .contains(&fixture.ssh.state.tunnel_rules[0].name)
+        );
+        let state = window.find(format!("tunnel-recovery-candidate-state-{candidate_id}"));
+        assert_eq!(
+            state.role(),
+            Some(gpui_kit::accesskit::Role::Status),
+            "recovery state is announced as status"
+        );
+        assert!(
+            state
+                .label()
+                .unwrap_or_else(|| panic!("recovery state AX label"))
+                .contains("可能仍在运行")
+        );
+        let actions = window.find(format!("tunnel-recovery-candidate-actions-{candidate_id}"));
+        assert!(
+            actions.bounds().top() >= state.bounds().bottom(),
+            "actions are separated from the state callout"
+        );
         assert!(window.try_find(inspect.clone()).is_some());
         assert!(panel.read(cx).runtime_row_count() == 0);
         click(window, inspect, cx);
