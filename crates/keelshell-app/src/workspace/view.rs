@@ -628,11 +628,7 @@ impl Workspace {
                     } else {
                         visual.canvas
                     }))
-                    .text_color(rgb(if active {
-                        visual.text
-                    } else {
-                        visual.muted
-                    }))
+                    .text_color(rgb(if active { visual.text } else { visual.muted }))
                     .border_1()
                     .border_color(rgb(if self.active == index {
                         visual.accent
@@ -1228,8 +1224,7 @@ impl Workspace {
             .toggled(self.show_window_switcher)
             .on_click(cx.listener(|view, _, window, cx| view.toggle_window_switcher(window, cx)))
             .map(|button| self.retain_modal_button("workspace-window-switcher", button, cx));
-        let toolbar_group =
-            |id: &'static str, label_zh: &'static str, label_en: &'static str| {
+        let toolbar_group = |id: &'static str, label_zh: &'static str, label_en: &'static str| {
             let group = div()
                 .id(id)
                 .test_support()
@@ -1273,28 +1268,27 @@ impl Workspace {
             "连接导航工具",
             "Connection navigation tools",
         )
-            .child(navigation_toggle)
-            .child(connection_manager);
+        .child(navigation_toggle)
+        .child(connection_manager);
         let context_group = workspace_context;
         let pane_group = toolbar_group(
             "workspace-pane-actions",
             "面板布局操作",
             "Pane layout actions",
         )
-            .child(split_horizontal)
-            .child(split_vertical)
-            .child(collapse_pane)
-            .child(zoom_pane)
-            .child(save_layout);
+        .child(split_horizontal)
+        .child(split_vertical)
+        .child(collapse_pane)
+        .child(zoom_pane)
+        .child(save_layout);
         let assistant_group =
-            toolbar_group("workspace-assistant-action", "AI 助手", "AI assistant")
-                .child(assistant);
+            toolbar_group("workspace-assistant-action", "AI 助手", "AI assistant").child(assistant);
         let settings_group = toolbar_group(
             "workspace-settings-actions",
             "工作区设置",
             "Workspace settings",
         )
-            .children(self.workspace_settings_actions(compact_toolbar, cx));
+        .children(self.workspace_settings_actions(compact_toolbar, cx));
         div()
             .id("workspace-toolbar")
             .test_support()
@@ -1346,7 +1340,11 @@ impl Workspace {
             .id("command-input-bar")
             .test_support()
             .role(accesskit::Role::Group)
-            .aria_label(t(cx, "命令输入与审核目标", "Command input and review target"))
+            .aria_label(t(
+                cx,
+                "命令输入与审核目标",
+                "Command input and review target",
+            ))
             .flex_shrink_0()
             .px_2()
             .py_1()

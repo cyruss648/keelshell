@@ -3,6 +3,21 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+## 2026-11-14 主机监控面板视觉层级
+
+当前本地候选在已提交的工作区 chrome 视觉切片上继续完善主机监控 rail：控制区
+显示采样状态，资源/网络/端口/能力分区使用主题语义 token 和稳定的分组语义，
+磁盘设备列表维持 160px 内层滚动视口。长英文能力状态会在详情列换行，状态
+徽章保持单行；磁盘设备行保持紧凑连续布局，确保末条设备完整进入视口并可点击。
+
+监控定向回归当前为 `21 passed / 0 failed`，磁盘末条滚动与能力状态双语可达性
+分别有独立回归。设计决策见[ADR 0125](adr/0125-monitor-panel-visual-hierarchy.md)，
+测试证据见[测试记录](testing/records/2026-11-14-monitor-panel-visual-polish.md)。
+完整工程门禁已通过：Python `131 run / 1 skipped`，workspace `2454 passed / 0 failed / 23 ignored`，
+app `1132 passed / 0 failed / 2 ignored`，14 个正常 doctest 与 2 个 compile-fail doctest
+均通过。提交后的独立复核和原生/真实远端联调仍待完成；公司内网暂不可用，本片只做本地
+提交，不执行 push。
+
 ## 2026-11-14 响应式工作台紧凑连接库收口
 
 当前源码与测试补强已固定为

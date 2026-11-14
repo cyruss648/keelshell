@@ -5,6 +5,43 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-14 主机监控面板视觉层级与紧凑几何收口
+
+本片在 `31ca92b feat: refine workbench chrome` 上继续完善主机监控 rail，源码、
+测试和文档改动尚待本地提交；公司内网暂不可用，不执行 push。
+
+本次内容：
+
+- 控制区显示监控对象、采样状态和诊断动作；资源指标、网络接口、监听端口、
+  文件系统和 Linux 能力状态使用现有 registry、Palette、组件 token 和完整的
+  双语 AccessKit 分组语义；
+- 资源指标与网络接口采用卡片层级，监听端口使用协议/状态/端点的两级布局，
+  探测结果公开独立语义；状态颜色只读取主题语义 token；
+- 窄 rail 中的磁盘设备选择器继续使用固定 `160px` 内层视口，移除会让 GPUI
+  内层滚动末端只露出半行的额外 gap，末条设备现在要求 bounds 完整落入视口后再点击；
+- Linux 能力状态把状态徽章和检测年龄放到详情列元信息行，长英文能力名称可以换行，
+  状态徽章保持单行并保留键盘可达性；
+- `workspace/view.rs` 同步收录 Rust 1.100.0 `cargo fmt` 对上一片工作区代码的
+  格式归一化，未改变工作区业务行为。
+
+当前证据：
+
+- 监控定向回归 `21 passed / 0 failed`，磁盘末条滚动选择和能力状态双语可达性均有
+  独立回归；
+- app 测试清单为 `1134` 项，本片新增层级回归已进入二进制；
+- 完整 `python3 scripts/check.py` 已通过：依赖版本策略、Python `131 run / 1 skipped`、
+  `cargo fmt --all -- --check`、workspace 严格 Clippy、workspace Rust `2454 passed /
+  0 failed / 23 ignored`、app `1132 passed / 0 failed / 2 ignored`、14 个正常 doctest、
+  2 个 compile-fail doctest 以及 readiness/observer/small-stack 三组 AI controller；
+- 已确认当前本地 active/default toolchain 为 Rust `1.100.0`，项目没有
+  `rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，Cargo 默认跟随开发机或
+  CI runner 的 active toolchain；不把本地最新版本写成项目 MSRV。
+
+独立提交后复核、macOS/Windows/Linux 原生窗口、IME、VoiceOver/NVDA、真实远端监控、
+Podman 联调、签名安装和像素级验收仍保持开放。详见
+[ADR 0125](adr/0125-monitor-panel-visual-hierarchy.md) 和
+[测试记录](testing/records/2026-11-14-monitor-panel-visual-polish.md)。
+
 ## 2026-11-14 响应式工作台紧凑连接库收口与完整门禁
 
 响应式工作台上一片的实现基线为

@@ -273,11 +273,12 @@ pub(crate) fn verify_disk_monitor_minimum_workspace(
                     );
                     window.render_frame(cx);
                 }
+                let row_bounds = window.find(("monitor-disk-device", 11_usize)).bounds();
+                let choices_bounds = window.find("monitor-disk-devices").bounds();
                 assert!(
-                    window.find(("monitor-disk-device", 11_usize)).visible(),
-                    "{language:?}/{theme:?}: chooser {:?}, row {:?}, viewport {:?}",
-                    window.find("monitor-disk-devices").bounds(),
-                    window.find(("monitor-disk-device", 11_usize)).bounds(),
+                    row_bounds.origin.y >= choices_bounds.origin.y
+                        && row_bounds.bottom() <= choices_bounds.bottom(),
+                    "{language:?}/{theme:?}: last disk row is clipped: row={row_bounds:?}, chooser={choices_bounds:?}, outer={:?}",
                     window.find("monitor-scroll").bounds()
                 );
                 assert_eq!(

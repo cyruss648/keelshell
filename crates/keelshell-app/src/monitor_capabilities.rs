@@ -81,13 +81,17 @@ impl MonitorPanel {
             }))
     }
 
-    pub(super) fn capabilities_view(&self, cx: &mut Context<Self>) -> Div {
+    pub(super) fn capabilities_view(&self, cx: &mut Context<Self>) -> impl gpui_kit::IntoElement {
         let visual = crate::design::palette(cx);
         let mut view = section(
             cx,
             t(cx, "Linux 监控能力", "Linux capabilities"),
             IconName::Activity,
-        );
+        )
+        .id("monitor-capabilities")
+        .test_support()
+        .role(accesskit::Role::Group)
+        .aria_label(t(cx, "Linux 监控能力", "Linux capabilities"));
         for (index, (capability, zh, en)) in [
             (
                 Capability::Resources,
@@ -106,10 +110,13 @@ impl MonitorPanel {
         .enumerate()
         {
             let observation = self.capabilities.observation(capability);
-            let (state_zh, state_en) = match observation.state {
-                CapabilityState::Unknown => ("未检测", "Not checked"),
-                CapabilityState::Available => ("可用", "Available"),
-                CapabilityState::Unavailable(reason) => reason_text(reason),
+            let (state_zh, state_en, state_color) = match observation.state {
+                CapabilityState::Unknown => ("未检测", "Not checked", visual.muted),
+                CapabilityState::Available => ("可用", "Available", visual.success),
+                CapabilityState::Unavailable(reason) => {
+                    let (zh, en) = reason_text(reason);
+                    (zh, en, visual.warning)
+                }
             };
             let label =
                 Message::new(format!("{zh}：{state_zh}"), format!("{en}: {state_en}")).render(cx);
@@ -124,18 +131,52 @@ impl MonitorPanel {
             let accessible = checked_age
                 .as_ref()
                 .map_or_else(|| label.clone(), |age| format!("{label}, {age}"));
-            let mut row = div()
+            let mut details = div()
+                .flex_1()
+                .min_w_0()
+                .flex()
+                .flex_col()
+                .gap_1()
+                .text_xs()
+                .text_color(rgb(visual.muted))
+                .whitespace_normal()
+                .child(label);
+            let mut metadata = div().flex().items_center().flex_wrap().gap_1().child(
+                div()
+                    .flex_shrink_0()
+                    .px_1()
+                    .rounded_full()
+                    .bg(rgb(visual.surface_active))
+                    .text_xs()
+                    .whitespace_nowrap()
+                    .text_color(rgb(state_color))
+                    .child(Message::new(state_zh, state_en).render(cx)),
+            );
+            if let Some(age) = checked_age {
+                metadata = metadata.child(div().text_xs().child(age));
+            }
+            details = details.child(metadata);
+            let row = div()
                 .id(("monitor-capability", index))
                 .test_support()
                 .role(accesskit::Role::Label)
                 .aria_label(accessible)
+                .flex()
+                .items_start()
+                .gap_2()
+                .p_1()
+                .rounded(px(crate::design::components(cx).control_radius))
                 .min_w_0()
-                .text_xs()
-                .text_color(rgb(visual.muted))
-                .child(label);
-            if let Some(age) = checked_age {
-                row = row.child(div().child(age));
-            }
+                .child(
+                    div()
+                        .mt(px(4.))
+                        .w(px(7.))
+                        .h(px(7.))
+                        .flex_shrink_0()
+                        .rounded_full()
+                        .bg(rgb(state_color)),
+                )
+                .child(details);
             view = view.child(row);
         }
         view

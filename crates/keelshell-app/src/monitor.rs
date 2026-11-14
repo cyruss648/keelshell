@@ -770,14 +770,37 @@ fn metric(
         .flex()
         .flex_col()
         .gap_1()
+        .p_2()
+        .rounded(px(crate::design::components(cx).control_radius))
+        .bg(rgb(visual.surface))
+        .border_1()
+        .border_color(rgb(visual.border))
+        .id(format!("monitor-metric-{label}"))
+        .test_support()
+        .role(accesskit::Role::Label)
+        .aria_label(format!("{label}: {value}"))
         .child(
             div()
                 .flex()
+                .items_start()
                 .justify_between()
                 .gap_2()
                 .text_xs()
-                .child(div().text_color(rgb(visual.muted)).child(label.to_owned()))
-                .child(div().text_color(rgb(visual.text)).child(value)),
+                .child(
+                    div()
+                        .flex_1()
+                        .min_w_0()
+                        .whitespace_normal()
+                        .text_color(rgb(visual.muted))
+                        .child(label.to_owned()),
+                )
+                .child(
+                    div()
+                        .flex_shrink_0()
+                        .text_right()
+                        .text_color(rgb(visual.text))
+                        .child(value),
+                ),
         )
         .child(track)
 }
@@ -788,9 +811,12 @@ fn section(cx: &App, label: &'static str, icon: IconName) -> Div {
         .flex()
         .flex_col()
         .gap_2()
-        .py_3()
-        .border_b_1()
+        .p_2()
+        .my_1()
+        .rounded(px(crate::design::components(cx).panel_radius))
+        .border_1()
         .border_color(rgb(visual.border))
+        .bg(rgb(visual.canvas))
         .child(
             div()
                 .text_xs()
@@ -799,46 +825,158 @@ fn section(cx: &App, label: &'static str, icon: IconName) -> Div {
                 .flex()
                 .items_center()
                 .gap_2()
-                .child(div().text_color(rgb(visual.muted)).child(icon))
-                .child(label),
+                .child(
+                    div()
+                        .w(px(20.))
+                        .h(px(20.))
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .rounded(px(crate::design::components(cx).control_radius))
+                        .bg(rgb(visual.surface_active))
+                        .text_color(rgb(visual.accent))
+                        .child(icon),
+                )
+                .child(div().flex_1().min_w_0().child(label)),
         )
 }
 
 impl Render for MonitorPanel {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let visual = crate::design::palette(cx);
+        let components = crate::design::components(cx);
+        let monitor_state = if self.suspended {
+            (
+                t(cx, "快照", "Snapshot"),
+                t(
+                    cx,
+                    "上一会话快照；不会继续采集",
+                    "Previous-session snapshot; collection is stopped",
+                ),
+                visual.warning,
+            )
+        } else if self.busy {
+            (
+                t(cx, "读取中", "Updating"),
+                t(
+                    cx,
+                    "正在从主机读取监控数据",
+                    "Reading monitoring data from the host",
+                ),
+                visual.accent,
+            )
+        } else if self.paused {
+            (
+                t(cx, "已暂停", "Paused"),
+                t(
+                    cx,
+                    "自动刷新已暂停，可手动刷新",
+                    "Automatic refresh is paused; manual refresh is available",
+                ),
+                visual.warning,
+            )
+        } else {
+            (
+                t(cx, "实时", "Live"),
+                t(
+                    cx,
+                    "自动刷新每 5 秒运行",
+                    "Automatic refresh runs every 5 seconds",
+                ),
+                visual.success,
+            )
+        };
         let controls = div()
+            .id("monitor-controls")
+            .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "主机监控控制区", "Host monitor controls"))
             .px_3()
             .py_2()
             .border_b_1()
             .border_color(rgb(visual.border))
             .flex()
             .flex_col()
-            .gap_1()
+            .gap_2()
             .child(
                 div()
                     .flex()
                     .items_center()
+                    .justify_between()
                     .gap_2()
-                    .text_sm()
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .child(div().text_color(rgb(visual.accent)).child(IconName::Server))
-                    .child(if self.suspended {
-                        t(cx, "上一会话监控快照", "Previous session snapshot")
-                    } else {
-                        t(cx, "主机监控", "Host monitor")
-                    }),
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap_2()
+                            .min_w_0()
+                            .text_sm()
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .child(
+                                div()
+                                    .w(px(22.))
+                                    .h(px(22.))
+                                    .flex()
+                                    .items_center()
+                                    .justify_center()
+                                    .rounded(px(components.control_radius))
+                                    .bg(rgb(visual.surface_active))
+                                    .text_color(rgb(visual.accent))
+                                    .child(IconName::Server),
+                            )
+                            .child(div().flex_1().min_w_0().text_ellipsis().child(
+                                if self.suspended {
+                                    t(cx, "上一会话监控快照", "Previous session snapshot")
+                                } else {
+                                    t(cx, "主机监控", "Host monitor")
+                                },
+                            )),
+                    )
+                    .child(
+                        div()
+                            .id("monitor-state")
+                            .test_support()
+                            .role(accesskit::Role::Label)
+                            .aria_label(monitor_state.1)
+                            .flex_shrink_0()
+                            .px_2()
+                            .py_1()
+                            .rounded_full()
+                            .bg(rgb(visual.surface_active))
+                            .text_xs()
+                            .text_color(rgb(monitor_state.2))
+                            .child(monitor_state.0),
+                    ),
             )
             .child(
                 div()
+                    .id("monitor-host")
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(self.host.clone())
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .min_w_0()
                     .text_xs()
                     .text_color(rgb(visual.muted))
-                    .text_ellipsis()
-                    .child(self.host.clone()),
+                    .child(IconName::Globe)
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .text_ellipsis()
+                            .child(self.host.clone()),
+                    ),
             )
             .child(
                 div()
+                    .id("monitor-actions")
+                    .test_support()
+                    .role(accesskit::Role::Group)
+                    .aria_label(t(cx, "主机监控操作", "Host monitor actions"))
                     .flex()
+                    .flex_wrap()
                     .gap_1()
                     .child(
                         Button::new("refresh-monitor")
@@ -846,12 +984,17 @@ impl Render for MonitorPanel {
                             .icon(IconName::RefreshCw)
                             .ghost()
                             .compact()
-                            .rounded(px(crate::design::components(cx).control_radius))
+                            .rounded(px(components.control_radius))
                             .label(if self.busy {
                                 t(cx, "读取中…", "Reading…")
                             } else {
                                 t(cx, "刷新", "Refresh")
                             })
+                            .accessibility_label(t(
+                                cx,
+                                "刷新主机监控数据",
+                                "Refresh host monitoring data",
+                            ))
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if panel.pending.is_none() {
                                     panel.run(Job::Refresh, cx);
@@ -868,11 +1011,16 @@ impl Render for MonitorPanel {
                             })
                             .ghost()
                             .compact()
-                            .rounded(px(crate::design::components(cx).control_radius))
+                            .rounded(px(components.control_radius))
                             .label(if self.paused {
                                 t(cx, "继续", "Resume")
                             } else {
                                 t(cx, "暂停", "Pause")
+                            })
+                            .accessibility_label(if self.paused {
+                                t(cx, "继续自动刷新", "Resume automatic refresh")
+                            } else {
+                                t(cx, "暂停自动刷新", "Pause automatic refresh")
                             })
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if !panel.suspended && panel.pending.is_none() {
@@ -887,8 +1035,9 @@ impl Render for MonitorPanel {
                             .icon(IconName::Network)
                             .ghost()
                             .compact()
-                            .rounded(px(crate::design::components(cx).control_radius))
+                            .rounded(px(components.control_radius))
                             .label(t(cx, "端口", "Sockets"))
+                            .accessibility_label(t(cx, "读取监听端口", "Read listening sockets"))
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if panel.pending.is_none() {
                                     panel.run(Job::Sockets, cx);
@@ -898,9 +1047,11 @@ impl Render for MonitorPanel {
             )
             .child(
                 div()
+                    .text_xs()
                     .flex()
                     .items_center()
-                    .gap_1()
+                    .gap_2()
+                    .min_w_0()
                     .child(
                         div()
                             .flex_1()
@@ -957,6 +1108,10 @@ impl Render for MonitorPanel {
             }
         });
         let mut resources = section(cx, t(cx, "资源使用", "Resources"), IconName::Activity)
+            .id("monitor-resources")
+            .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "资源使用", "Resources"))
             .child(metric(
                 cx,
                 t(cx, "CPU", "CPU"),
@@ -1037,9 +1192,13 @@ impl Render for MonitorPanel {
                     .child(t(cx, "运行时间", "Uptime"))
                     .child(uptime),
             );
-        let mut networks = section(cx, t(cx, "网络", "Network"), IconName::Network);
+        let mut networks = section(cx, t(cx, "网络", "Network"), IconName::Network)
+            .id("monitor-network")
+            .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "网络", "Network"));
         if let Some(snapshot) = &self.snapshot {
-            for interface in &snapshot.networks {
+            for (interface_index, interface) in snapshot.networks.iter().enumerate() {
                 let sample = self
                     .rates
                     .networks
@@ -1047,24 +1206,38 @@ impl Render for MonitorPanel {
                     .find(|rate| rate.name == interface.name);
                 networks = networks.child(
                     div()
+                        .id(("monitor-network-interface", interface_index))
+                        .test_support()
+                        .role(accesskit::Role::Group)
+                        .aria_label(interface.name.clone())
+                        .min_w_0()
+                        .p_2()
+                        .rounded(px(components.control_radius))
+                        .bg(rgb(visual.surface))
+                        .border_1()
+                        .border_color(rgb(visual.border))
                         .flex()
                         .flex_col()
                         .gap_1()
                         .text_xs()
                         .child(
                             div()
+                                .font_weight(FontWeight::SEMIBOLD)
                                 .text_color(rgb(visual.muted))
                                 .child(interface.name.clone()),
                         )
                         .child(
                             div()
                                 .flex()
+                                .flex_wrap()
+                                .gap_2()
                                 .justify_between()
                                 .child(
                                     div()
                                         .flex()
                                         .items_center()
                                         .gap_1()
+                                        .text_color(rgb(visual.success))
                                         .child(IconName::ArrowDown)
                                         .child(rate(
                                             sample.and_then(|r| r.received_bytes_per_second),
@@ -1075,6 +1248,7 @@ impl Render for MonitorPanel {
                                         .flex()
                                         .items_center()
                                         .gap_1()
+                                        .text_color(rgb(visual.accent))
                                         .child(IconName::ArrowUp)
                                         .child(rate(
                                             sample.and_then(|r| r.transmitted_bytes_per_second),
@@ -1082,21 +1256,24 @@ impl Render for MonitorPanel {
                                 ),
                         )
                         .child(
-                            div().text_color(rgb(visual.muted)).child(
-                                Message::new(
-                                    format!(
-                                        "接收 {} · 发送 {}",
-                                        bytes(interface.received_bytes),
-                                        bytes(interface.transmitted_bytes)
-                                    ),
-                                    format!(
-                                        "Received {} · Sent {}",
-                                        bytes(interface.received_bytes),
-                                        bytes(interface.transmitted_bytes)
-                                    ),
-                                )
-                                .render(cx),
-                            ),
+                            div()
+                                .text_color(rgb(visual.muted))
+                                .whitespace_normal()
+                                .child(
+                                    Message::new(
+                                        format!(
+                                            "接收 {} · 发送 {}",
+                                            bytes(interface.received_bytes),
+                                            bytes(interface.transmitted_bytes)
+                                        ),
+                                        format!(
+                                            "Received {} · Sent {}",
+                                            bytes(interface.received_bytes),
+                                            bytes(interface.transmitted_bytes)
+                                        ),
+                                    )
+                                    .render(cx),
+                                ),
                         ),
                 );
             }
@@ -1112,6 +1289,10 @@ impl Render for MonitorPanel {
             t(cx, "监听端口", "Listening sockets"),
             IconName::Network,
         )
+        .id("monitor-sockets")
+        .test_support()
+        .role(accesskit::Role::Group)
+        .aria_label(t(cx, "监听端口", "Listening sockets"))
         .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
             cx,
             "通过 ss 读取，结果仅供诊断",
@@ -1139,31 +1320,45 @@ impl Render for MonitorPanel {
                     .as_deref()
                     .map(|value| format!(" · {value}"))
                     .unwrap_or_default();
+                let endpoint = format!("{} → {}{}", socket.local, socket.peer, process);
                 let mut row = div()
+                    .id(("monitor-socket", socket_index))
+                    .test_support()
                     .flex()
-                    .items_center()
+                    .flex_col()
                     .gap_1()
+                    .py_1()
                     .text_xs()
                     .border_b_1()
                     .border_color(rgb(visual.border))
                     .child(
                         div()
-                            .w(px(42.))
-                            .text_color(rgb(visual.muted))
-                            .child(socket.protocol.clone()),
-                    )
-                    .child(
-                        div()
-                            .w(px(54.))
-                            .text_color(rgb(visual.muted))
-                            .child(socket.state.clone()),
+                            .flex()
+                            .items_center()
+                            .gap_1()
+                            .child(
+                                div()
+                                    .px_1()
+                                    .rounded_full()
+                                    .bg(rgb(visual.surface_active))
+                                    .text_color(rgb(visual.muted))
+                                    .child(socket.protocol.clone()),
+                            )
+                            .child(
+                                div()
+                                    .flex_1()
+                                    .min_w_0()
+                                    .text_color(rgb(visual.muted))
+                                    .child(socket.state.clone()),
+                            ),
                     )
                     .child(
                         div()
                             .flex_1()
                             .min_w_0()
                             .truncate()
-                            .child(format!("{} → {}{}", socket.local, socket.peer, process)),
+                            .text_color(rgb(visual.text))
+                            .child(endpoint),
                     );
                 if socket.protocol == "tcp" {
                     let selected = socket.clone();
@@ -1172,8 +1367,9 @@ impl Render for MonitorPanel {
                             .disabled(self.busy || self.suspended || self.pending.is_some())
                             .ghost()
                             .compact()
-                            .rounded(px(crate::design::components(cx).control_radius))
+                            .rounded(px(components.control_radius))
                             .label(t(cx, "探测", "Probe"))
+                            .accessibility_label(t(cx, "探测 TCP 端口", "Probe TCP socket"))
                             .on_click(cx.listener(move |panel, _, _, cx| {
                                 if !panel.busy && panel.pending.is_none() {
                                     panel.run(Job::Probe(selected.clone()), cx);
@@ -1184,6 +1380,14 @@ impl Render for MonitorPanel {
                 if let Some(probe) = self.probes.get(&probe_key) {
                     row = row.child(
                         div()
+                            .id(("probe-result", socket_index))
+                            .test_support()
+                            .role(accesskit::Role::Label)
+                            .aria_label(if probe.reachable {
+                                t(cx, "探测可达", "Probe reachable")
+                            } else {
+                                t(cx, "探测不可达", "Probe unreachable")
+                            })
                             .text_color(rgb(if probe.reachable {
                                 visual.success
                             } else {
@@ -1207,7 +1411,11 @@ impl Render for MonitorPanel {
             cx,
             t(cx, "磁盘容量", "Filesystem capacity"),
             IconName::HardDrive,
-        );
+        )
+        .id("monitor-filesystems")
+        .test_support()
+        .role(accesskit::Role::Group)
+        .aria_label(t(cx, "磁盘容量", "Filesystem capacity"));
         if let Some(snapshot) = &self.snapshot {
             for filesystem in &snapshot.filesystems {
                 disks = disks
@@ -1268,13 +1476,16 @@ impl Render for MonitorPanel {
                 "No filesystem sample",
             )));
         }
-        let mut processes = section(cx, t(cx, "进程", "Processes"), IconName::Cpu).child(
-            div().text_xs().text_color(rgb(visual.muted)).child(t(
+        let mut processes = section(cx, t(cx, "进程", "Processes"), IconName::Cpu)
+            .id("monitor-processes")
+            .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "进程", "Processes"))
+            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 "按 CPU 排序 · 生命周期均值",
                 "CPU order · lifetime average",
-            )),
-        );
+            )));
         processes = processes.child(
             div()
                 .flex()
@@ -1394,6 +1605,7 @@ impl Render for MonitorPanel {
             .min_h_0()
             .overflow_y_scroll()
             .px_3()
+            .pb_2()
             .child(resources)
             .child(processes)
             .child(self.disk_view(cx))
@@ -1418,6 +1630,10 @@ impl Render for MonitorPanel {
                         .on_click(cx.listener(|panel, _, _, cx| { panel.pending = None; panel.status = Message::new("已取消终止，自动刷新仍暂停。", "Termination cancelled. Polling remains paused."); cx.notify(); })))));
         }
         div()
+            .id("monitor-panel")
+            .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "主机监控面板", "Host monitor panel"))
             .w(px(260.))
             .h_full()
             .flex_shrink_0()

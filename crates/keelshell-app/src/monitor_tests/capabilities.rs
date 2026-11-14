@@ -753,3 +753,190 @@ async fn compact_capability_reasons_ages_and_recheck_are_keyboard_accessible(
     });
     h.close_history_fixture(cx).await;
 }
+
+#[gpui_kit::test]
+async fn monitor_hierarchy_and_narrow_controls_keep_bilingual_actions_reachable(
+    cx: &mut TestAppContext,
+) {
+    let mut h = Harness::new(cx);
+    h.idle(cx).await;
+    h.panel.update(cx, |panel, cx| panel.set_paused(true, cx));
+
+    let section_labels = [
+        ("monitor-resources", "资源使用", "Resources", true),
+        ("monitor-processes", "进程", "Processes", true),
+        ("monitor-disk-io", "磁盘 I/O", "Disk I/O", false),
+        ("monitor-network", "网络", "Network", true),
+        ("monitor-sockets", "监听端口", "Listening sockets", true),
+        (
+            "monitor-filesystems",
+            "磁盘容量",
+            "Filesystem capacity",
+            true,
+        ),
+        (
+            "monitor-capabilities",
+            "Linux 监控能力",
+            "Linux capabilities",
+            true,
+        ),
+    ];
+    let action_labels = [
+        (
+            "refresh-monitor",
+            "刷新主机监控数据",
+            "Refresh host monitoring data",
+        ),
+        ("pause-monitor", "继续自动刷新", "Resume automatic refresh"),
+        ("refresh-sockets", "读取监听端口", "Read listening sockets"),
+        (
+            "redetect-monitor",
+            "重新检测 Linux 监控能力",
+            "Recheck Linux monitoring capabilities",
+        ),
+    ];
+
+    for family in crate::design::registry() {
+        for mode in [keelshell_core::Theme::Light, keelshell_core::Theme::Dark] {
+            for language in [Language::ZhCn, Language::En] {
+                let family_id = family.id;
+                cx.update_window(h.window, |_, window, cx| {
+                    let settings = keelshell_core::Settings {
+                        theme_family: keelshell_core::ThemeId::new(family.id)
+                            .checked("monitor hierarchy theme"),
+                        theme: mode,
+                        ..Default::default()
+                    };
+                    crate::design::apply_settings(&settings, Some(window), cx);
+                    crate::i18n::set_language(language, cx);
+                    h.panel
+                        .update(cx, |panel, cx| panel.refresh_locale(window, cx));
+                    window.render_frame(cx);
+
+                    let panel = window.find("monitor-panel");
+                    let panel_bounds = panel.bounds();
+                    assert!(
+                        panel_bounds.size.width <= px(260.),
+                        "{family_id}/{mode:?}/{language:?}: monitor width grew: {panel_bounds:?}"
+                    );
+                    assert_eq!(
+                        panel.role(),
+                        Some(gpui_kit::accesskit::Role::Group),
+                        "{family_id}/{mode:?}/{language:?}: panel role"
+                    );
+                    assert_eq!(
+                        panel.label(),
+                        Some(if language == Language::En {
+                            "Host monitor panel"
+                        } else {
+                            "主机监控面板"
+                        })
+                    );
+
+                    let state = window.find("monitor-state");
+                    assert_eq!(state.role(), Some(gpui_kit::accesskit::Role::Label));
+                    assert_eq!(
+                        state.label(),
+                        Some(if language == Language::En {
+                            "Automatic refresh is paused; manual refresh is available"
+                        } else {
+                            "自动刷新已暂停，可手动刷新"
+                        })
+                    );
+                    assert!(
+                        state.bounds().right() <= panel_bounds.right()
+                            && state.bounds().bottom() <= panel_bounds.bottom()
+                    );
+
+                    for (id, zh, en) in action_labels.iter().copied() {
+                        let action = window.find(id);
+                        assert!(action.visible(), "{family_id}/{mode:?}/{language:?}: {id}");
+                        assert_eq!(
+                            action.role(),
+                            Some(gpui_kit::accesskit::Role::Button),
+                            "{family_id}/{mode:?}/{language:?}: {id} role"
+                        );
+                        assert_eq!(
+                            action.label(),
+                            Some(if language == Language::En { en } else { zh }),
+                            "{family_id}/{mode:?}/{language:?}: {id} AX label"
+                        );
+                        let bounds = action.bounds();
+                        assert!(
+                            bounds.origin.x >= panel_bounds.origin.x
+                                && bounds.right() <= panel_bounds.right()
+                                && bounds.origin.y >= panel_bounds.origin.y
+                                && bounds.bottom() <= panel_bounds.bottom(),
+                            "{family_id}/{mode:?}/{language:?}: {id} escaped panel: {bounds:?} in {panel_bounds:?}"
+                        );
+                    }
+
+                    for (id, zh, en, has_group_role) in section_labels.iter().copied() {
+                        for _ in 0..80 {
+                            let viewport = window.find("monitor-scroll").bounds();
+                            let bounds = window.find(id).bounds();
+                            if bounds.origin.y >= viewport.origin.y
+                                && bounds.bottom() <= viewport.bottom()
+                            {
+                                break;
+                            }
+                            let direction = if bounds.origin.y < viewport.origin.y {
+                                2.
+                            } else {
+                                -2.
+                            };
+                            window.scroll(
+                                "monitor-scroll",
+                                gpui_kit::ScrollDelta::Lines(point(0., direction)),
+                                cx,
+                            );
+                            window.render_frame(cx);
+                        }
+                        let section = window.find(id);
+                        let viewport = window.find("monitor-scroll").bounds();
+                        let bounds = section.bounds();
+                        assert!(
+                            section.visible()
+                                && bounds.origin.x >= viewport.origin.x
+                                && bounds.right() <= viewport.right()
+                                && bounds.origin.y >= viewport.origin.y
+                                && bounds.bottom() <= viewport.bottom(),
+                            "{family_id}/{mode:?}/{language:?}: {id} is not readable: {bounds:?} in {viewport:?}"
+                        );
+                        if has_group_role {
+                            assert_eq!(
+                                section.role(),
+                                Some(gpui_kit::accesskit::Role::Group),
+                                "{family_id}/{mode:?}/{language:?}: {id} role"
+                            );
+                            assert_eq!(
+                                section.label(),
+                                Some(if language == Language::En { en } else { zh }),
+                                "{family_id}/{mode:?}/{language:?}: {id} AX label"
+                            );
+                        }
+                    }
+
+                    let capability = window.find(("monitor-capability", 0_usize));
+                    assert_eq!(
+                        capability.role(),
+                        Some(gpui_kit::accesskit::Role::Label)
+                    );
+                    let label = capability
+                        .label()
+                        .unwrap_or_else(|| panic!("capability state AX label"));
+                    assert!(
+                        label.contains(if language == Language::En {
+                            "Core resources /proc: Available"
+                        } else {
+                            "核心资源 /proc：可用"
+                        }),
+                        "{family_id}/{mode:?}/{language:?}: {label}"
+                    );
+                })
+                .checked("bilingual narrow monitor hierarchy and AX reachability");
+            }
+        }
+    }
+    h.close_history_fixture(cx).await;
+}

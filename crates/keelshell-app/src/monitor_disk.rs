@@ -158,8 +158,7 @@ impl MonitorPanel {
             .overflow_y_scroll()
             .flex_shrink_0()
             .flex()
-            .flex_col()
-            .gap_1();
+            .flex_col();
         for (index, disk) in disks.devices.iter().enumerate() {
             let identity = disk.device.clone();
             let label = if identity.name.len() > 22 {
