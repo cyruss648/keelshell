@@ -16,10 +16,10 @@ SSH 会话替换后旧恢复/停止审核 fail closed，不自动重连、不自
 严格 Clippy、fmt 和差异检查通过。测试记录见
 [owner 与恢复卡片记录](testing/records/2026-11-14-named-tunnel-owner-and-recovery-card.md)，
 设计见 [ADR 0129](adr/0129-named-tunnel-owner-and-recovery-card.md)。当前状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；独立 reviewer 已完成源码复核，
-实现没有 P0/P1/P2，发现的 EOF 空行与 provenance 表述问题已修正，最终 reviewer
-需要固定当前 checkout 的 exact SHA。原生三平台、真实 SSH/Podman、完整辅助技术
-仍需独立证据。
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`；最终独立 reviewer 固定
+`79c9090a7754b049f5a91fe3b71f96e15710d66b`，结论为 `APPROVE`，P0/P1/P2/P3
+均为 `0`。EOF 空行与 provenance 表述问题已修正。原生三平台、真实 SSH/Podman、
+完整辅助技术仍需独立证据。
 
 ## 2026-11-14 配置同步原子发布前置检查
 

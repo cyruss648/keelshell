@@ -29,6 +29,11 @@ CI runner 的 active toolchain。
 `36a1fcd`，文档提交只补充证据和状态，不改变产品源码。公司内网不可用，本轮
 只做本地 commit，不 push。
 
+本片最终独立严格只读复核固定在 `79c9090a7754b049f5a91fe3b71f96e15710d66b`，
+使用独立源码 checkout 和 Cargo target，结论为 `APPROVE`，P0/P1/P2/P3 均为
+`0`。复核确认源码实现与 `36a1fcd` 相同，当前 exact HEAD 仍应以
+`git rev-parse HEAD` 现场读取；本次后续提交只归档复核原文和最终状态。
+
 ## 2026-11-14 AI 审核命令保存为片段草稿
 
 本片基线是 exact HEAD

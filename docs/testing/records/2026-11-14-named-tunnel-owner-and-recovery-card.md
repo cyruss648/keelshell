@@ -15,7 +15,7 @@
 
 ## 结论
 
-作者 focused 验证通过，当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。
+作者 focused 验证通过，当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。
 本记录没有把 headless GPUI、loopback fixture 或本地 focused gate 写成原生桌面、
 真实客户 SSH、Podman、外部 AI provider 或发布验收。
 
@@ -102,6 +102,30 @@ app 链接阶段出现已知 warning：
 不改变产品源码；原生窗口、真实 SSH、Podman、完整 IME/VoiceOver/NVDA、签名、
 公证、安装升级和发布验收仍为未验证边界。
 
+## 最终独立严格只读复核
+
+最终 reviewer 固定 exact SHA
+`79c9090a7754b049f5a91fe3b71f96e15710d66b`，使用独立源码 checkout
+`/private/tmp/keelshell-review-79c9090a` 和独立 Cargo target
+`/private/tmp/keelshell-review-79c9090a-target`。原始报告见
+[最终独立复核原文](2026-11-14-named-tunnel-owner-and-recovery-card-final-review-raw.md)。
+结论为 `APPROVE`：
+
+- P0 `0`、P1 `0`、P2 `0`、P3 `0`；
+- `36a1fcd..79c9090` 的非文档源码差异为空，非文档差异检查 exit `0`；
+- `git diff --check 540f9fc^..79c9090` 与
+  `git diff --check 36a1fcd^..79c9090` 均 exit `0`；
+- core `tunnel_runtime` `10/10`、`reconnect` `18/18`，app
+  `tunnel_rule_tests` `19/19`、`tunnels::rules::tests` `18/18`、更宽的
+  `tunnels` filter `23/23`，严格 Clippy、fmt 和测试清单检查均 exit `0`；
+- app 测试清单为 `1157` 项；作者完整门禁的 `1155 passed / 0 failed /
+  2 ignored`、core `214 passed / 0 failed / 0 ignored` 及 rerun exit `0`
+  与保存日志一致。
+
+该复核没有把作者完整 `scripts/check.py` 再执行一遍，而是使用独立 focused
+测试、源码关系、差异检查和保存的作者日志进行复核。macOS/Windows/Linux 原生
+窗口、真实客户 SSH、Podman 多节点转发、断电恢复、跨进程 stale-listener、完整
+IME/VoiceOver/NVDA、签名、公证、安装升级、发布执行和业务验收仍保持未验证。
 ## 未验证边界
 
 本轮没有运行 macOS 真实窗口、Windows/Linux 原生窗口、真实客户 SSH、Podman
