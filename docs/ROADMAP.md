@@ -3,34 +3,27 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
-## 2026-11-15 恢复 claim 生命周期与计划进度
+## 2026-11-15 恢复列表 mutation 刷新与最终复核
 
-本片源码实现提交为
-`d180ece6fb4c91517532938f3ab2d9dfa30ede64`。在首次写入
-`Unfinished` 恢复记录时先取得同一记录的 OS claim，再把记录公开给其它窗口；
-持久恢复的只读计划在后台 worker 中持有 claim，完成后把 claim 交回审核状态。
-取消审核、确认前置失败、worker 失败、挂起、导航撤销和旧审核替换均释放
-claim。只读计划重新计算的已有字节数会同时回写持久记录和当前面板内存状态。
-针对修复前复核发现的恢复列表旧快照竞态，本片增加单调 load generation 与
-session 校验；同时加入真实持久 store 队列成功、初始化失败、取消和并发终态
-回归，确保真实 queued worker 的终态与恢复记录一致。
+源码实现提交为
+`e2b00af3cb8bcae67d54cbf69cf04e8baab2b7cd`。成功的 Discard 和 persisted plan
+progress mutation 会推进 mutation generation，并立即启动新的持久 store reload；
+旧 load callback 同时校验 session、load generation 和 mutation generation，不能
+覆盖新的恢复列表。两个真实 GPUI window/context 交错回归覆盖旧快照、durable
+mutation、旧 callback 和新异步快照的顺序，并验证并发完成记录不会回流。
 
-本片 focused 结果为 core `8 passed / 0 failed`，app persisted-recovery
-`8 passed / 0 failed`，app recovery `39 passed / 0 failed`，app parallel
-`18 passed / 0 failed`。最终源码 SHA 的完整门禁已退出 `0`：普通 Rust
-`2535 passed / 0 failed / 23 ignored`，doctest `14 passed / 0 failed`，
-Python `131 run / 1 skipped`；app `1172/0/2`、core `644/0/0`、AI
-`194/0/5`、session `448/0/16`、MCP `77/0/0`，依赖策略、fmt、workspace
-严格 Clippy 和三组 AI controller 均通过。日志见
-[恢复日志测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)、
-[ADR 0130](adr/0130-persisted-transfer-recovery-journal.md)和当前交接。
+作者 full gate 实际退出 `0`：Python `131 run / 1 skipped`、普通 Rust
+`2537 passed / 0 failed / 23 ignored`、workspace doctest `14 passed / 0 failed`；
+app `1174/0/2`、core `644/0/0`、AI `194/0/5`、session `448/0/16`、MCP
+`77/0/0`。依赖策略、fmt、workspace 严格 Clippy 和三组 AI controller 均通过。
+完整证据见[最终测试记录](testing/records/2026-11-15-transfer-recovery-review-final.md)。
 
-修复前独立严格只读 reviewer 固定在文档提交后的 exact SHA
-`83db250d175845d084926c0742d2ab20620edc2f` 并返回
-`REQUEST_CHANGES`，P0/P1/P2/P3 为 `0/0/2/0`；发现项和修复要求见
-[修复前复核记录](testing/records/2026-11-15-transfer-recovery-review-before-fix.md)。
-修复后的作者门禁已通过，当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；
-下一步是固定文档提交后的 exact SHA，启动新的独立复核。仍需单独完成
+新的独立严格只读 reviewer 固定在同一 exact SHA，返回 `APPROVE`，P0/P1/P2/P3
+为 `0/0/0/0`。独立 focused app parallel 为 `19/19`，新增两个交错回归为
+`2/2`，core recovery unit/integration 为 `8/8` 和 `3/3`，fmt、workspace
+严格 Clippy 和 diff check 均通过。复核原文见
+[最终独立复核原文](testing/records/2026-11-15-transfer-recovery-review-final-raw.md)。
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。仍需单独完成
 macOS/Windows/Linux 原生桌面、真实客户 SSH/SFTP、Podman 长流程、IME/辅助技术、
 签名、公证、安装升级和发布验收。公司内网不可用，在线依赖最新版本检查尚未完成；
 本片只做本地 commit，不 push。
