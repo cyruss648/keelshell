@@ -1,7 +1,7 @@
 # ADR 0130：重启后传输恢复日志与显式续传
 
-日期：2026-11-14。实现提交：
-`03a4e18c7f57635072230154fdf90269a067f23a`。本 ADR 只描述文件传输恢复
+日期：2026-11-14。当前实现提交：
+`52f861e3130749715ea20824efa1f1b1619f1e3b`。本 ADR 只描述文件传输恢复
 日志；它不把日志记录当作自动恢复指令。
 
 ## 背景
@@ -44,6 +44,13 @@ owner-only 权限。写入先创建同目录临时文件，写完后 `sync_all`�
 目标文件，并同步父目录。文档损坏、未知 schema、重复 ID、超出数量/大小、
 路径越界或权限不安全时 fail closed。
 
+每条记录在审核和执行生命周期中还持有一个独立的 OS 文件锁 claim。claim
+覆盖当前记录的日志路径和记录 ID，窗口和进程之间只能有一个恢复审核或
+worker 继续持有它；普通 `upsert` 在已有 claim 时拒绝，带 claim 的更新和
+删除会重新校验所有权。这样同一恢复记录不会被两个窗口同时续传，也不会由
+迟到的 worker 覆盖新审核或删除新的状态。队列初始化失败、取消、worker
+启动失败、挂起、导航撤销和旧审核替换都会释放 claim。
+
 ### 4. 在真实传输生命周期中写入检查点和终态
 
 实际开始传输前先持久化 `Unfinished`。传输进度在有界检查点更新已传输字节；
@@ -54,6 +61,11 @@ UI 结果继续显示该风险，不能伪装成已完成。
 成功的显式恢复完成后删除对应记录；用户的 `Discard` 也只删除本地记录，不
 连接、不检查、不写远端、不重放传输。恢复失败、取消或结果未知时保留记录，
 供用户再次检查。
+
+恢复 Inspect 先获取 claim。没有 `connection_id` 的旧格式或快速连接记录，
+必须先让用户确认当前 SSH 主机，确认前不执行远端只读计划。只读计划重新
+计算的已有字节数、总字节数和安全范围内的已传输字节数会回写持久记录；
+审核文案使用记录自身保存的连接绑定，而不是当前面板的瞬时绑定状态。
 
 ## 后果
 
@@ -67,16 +79,20 @@ UI 结果继续显示该风险，不能伪装成已完成。
 
 ## 验证与边界
 
-本片作者完整工程门禁绑定实现提交 `03a4e18c7f57635072230154fdf90269a067f23a`，
-日志为
-`work/transfer-recovery-20261114/logs/full-gate-03a4e18.log`。完整结果为
-Python `131 run / 1 skipped`；普通 Rust 测试 `2506 passed / 0 failed /
-23 ignored`；doctest `14 passed / 0 failed`；依赖策略、格式、workspace
-严格 Clippy、readiness/observer/small-stack controller 均通过。新增恢复
-focused 回归见
+本片作者完整工程门禁绑定当前实现提交
+`52f861e3130749715ea20824efa1f1b1619f1e3b`，日志为
+`work/transfer-recovery-fix-20261114/logs/full-gate-52f861e.log`。workspace
+doctest 日志为
+`work/transfer-recovery-fix-20261114/logs/doctest-52f861e.log`。完整结果为
+Python `131 run / 1 skipped`；普通 Rust 测试 `2526 passed / 0 failed /
+23 ignored`；workspace doctest `14 passed / 0 failed`；依赖策略、格式、
+workspace 严格 Clippy、readiness/observer/small-stack controller 均通过。
+新增恢复 focused 回归见
 [测试记录](../testing/records/2026-11-14-transfer-recovery-journal.md)。
 
 当前证据覆盖独立恢复日志、绑定校验、终态幂等性、三主题双语恢复卡片、
-显式丢弃和后台文件写入。依赖在线最新版本检查因公司内网不可用尚未完成；
+跨窗口/跨进程 claim 排他、claim 所有权校验、无绑定记录的主机确认前置、
+恢复进度回写、显式丢弃和后台文件写入。独立 reviewer 尚未完成；依赖在线
+最新版本检查因公司内网不可用尚未完成；
 macOS/Windows/Linux 原生桌面、真实客户 SSH、Podman 长流程、IME、
 VoiceOver/NVDA、签名、公证、安装升级和发布验收仍需单独证据。

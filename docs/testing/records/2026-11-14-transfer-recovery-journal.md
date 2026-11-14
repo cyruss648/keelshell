@@ -1,14 +1,14 @@
 # 重启后传输恢复日志测试记录 — 2026-11-14
 
-日期：2026-11-14（Asia/Shanghai）。源码与测试实现提交：
-`03a4e18c7f57635072230154fdf90269a067f23a`。公司内网不可用，本片只做本地
+日期：2026-11-14 至 2026-11-15（Asia/Shanghai）。当前源码与测试实现提交：
+`52f861e3130749715ea20824efa1f1b1619f1e3b`。公司内网不可用，本片只做本地
 commit，不执行 push。
 
 ## 结论
 
-作者完整工程门禁已在当前源码提交和独立 target 上实际退出 `0`。本片状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；独立严格只读代码与功能复核
-在文档提交后进行。
+作者完整工程门禁和 workspace doctest 已在当前源码提交和独立 target 上实际
+退出 `0`。本片状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`；独立
+严格只读代码与功能复核在本记录提交后进行。
 
 本记录区分源码测试、GPUI headless 行为和真实桌面/远端验收。它没有把本地
 loopback、受控 GPUI 或完整工程门禁写成 macOS/Windows/Linux 原生桌面、真实
@@ -28,24 +28,34 @@ loopback、受控 GPUI 或完整工程门禁写成 macOS/Windows/Linux 原生桌
   schema 和超限文档；
 - 应用在真实传输开始前持久化 `Unfinished`，在进度、失败、取消、未知结果、
   队列初始化失败和 SFTP 入队失败时更新日志；
+- 每条恢复记录在审核与 worker 生命周期内使用独立的 OS 文件锁 claim，窗口和
+  进程之间不能同时续传、覆盖或删除同一条记录；带 claim 的更新和删除会校验
+  记录 ID、日志路径和 claim 所有权；
 - 恢复路径必须经过当前会话的 `Inspect → Review → Confirm`，绑定不匹配在
   任何远端只读检查前拒绝；
+- 没有保存 `connection_id` 的旧格式或快速连接记录，必须先确认当前 SSH 主机，
+  然后才会生成只读远端检查计划；确认前不会访问远端；
+- 只读计划重新计算的已有字节数会回写审核进度、总字节数和安全范围内的已传输
+  字节数，避免界面审核值与持久记录分离；
 - 成功的显式恢复和用户明确 `Discard` 才会删除记录；`Discard` 不建立连接、
   不发起远端检查、不写入远端；
+- 队列初始化失败、取消、worker 启动失败、挂起、导航撤销和旧审核替换都会
+  释放 claim；worker 只有在持有 claim 时才能写入恢复终态或删除成功记录；
 - 所有恢复日志文件系统读写在后台 worker 中执行，GPUI 线程只处理事件和
   状态展示。
 
 ## 定向验证
 
-所有 Cargo 验证使用 Rust/Cargo `1.100.0`、`--locked --offline`，并使用当前
+定向 Cargo 验证使用 Rust/Cargo `1.100.0`、`--locked --offline`，并使用当前
 checkout 的独立 target：
-`work/transfer-recovery-20261114/full-target`。
+`work/transfer-recovery-fix-20261114/full-target`。
 
 | 验证 | 结果 |
 | --- | --- |
-| core transfer-recovery focused | `5 passed / 0 failed` |
-| app 文件 focused 回归 | `16 passed / 0 failed` |
-| app 并行队列与恢复 GPUI 回归 | `10 passed / 0 failed` |
+| core transfer-recovery focused | `7 passed / 0 failed` |
+| app 持久恢复 focused 回归 | `3 passed / 0 failed` |
+| app 文件恢复与并行队列回归 | `34 passed / 0 failed` |
+| app 无绑定记录主机确认前置回归 | `1 passed / 0 failed` |
 | core strict Clippy | exit `0` |
 | app strict Clippy | exit `0` |
 | `cargo fmt --all -- --check` | exit `0` |
@@ -66,30 +76,34 @@ checkout 的独立 target：
 命令：
 
 ```text
-CARGO_TARGET_DIR=work/transfer-recovery-20261114/full-target \
+CARGO_TARGET_DIR=work/transfer-recovery-fix-20261114/full-target \
 python3 scripts/check.py
 ```
 
 日志：
-`work/transfer-recovery-20261114/logs/full-gate-03a4e18.log`
+`work/transfer-recovery-fix-20261114/logs/full-gate-52f861e.log`
+
+workspace doctest 日志：
+`work/transfer-recovery-fix-20261114/logs/doctest-52f861e.log`
 
 实际结果：
 
 | 范围 | 通过 | 失败 | 忽略 |
 | --- | ---: | ---: | ---: |
 | Python scripts | 131 | 0 | 1 |
-| keelshell-app | 1160 | 0 | 2 |
-| keelshell-core | 641 | 0 | 0 |
+| keelshell-app | 1164 | 0 | 2 |
+| keelshell-core | 643 | 0 | 0 |
 | keelshell-ai | 194 | 0 | 5 |
-| keelshell-session | 434 | 0 | 16 |
+| keelshell-session | 448 | 0 | 16 |
 | keelshell-mcp | 77 | 0 | 0 |
-| 普通 Rust 合计 | 2506 | 0 | 23 |
-| doctest 合计 | 14 | 0 | 0 |
+| 普通 Rust 合计 | 2526 | 0 | 23 |
+| workspace doctest 合计 | 14 | 0 | 0 |
 
-依赖版本策略、`cargo fmt --all --check`、workspace 严格 Clippy、
+完整门禁使用 `--locked` 并从当前本地 Cargo 缓存完成；依赖版本策略、
+`cargo fmt --all --check`、workspace 严格 Clippy、
 readiness controller、observer controller 和 small-stack controller 均通过。
 app 链接阶段出现已知 `__eh_frame section too large` warning，但命令实际
-退出码为 `0`。
+退出码为 `0`。doctest 使用相同的独立 target，14 项全部通过。
 
 ## 工具链与依赖边界
 

@@ -5,24 +5,28 @@
 
 ## 2026-11-14 重启后传输恢复日志
 
-源码实现提交为 `03a4e18c7f57635072230154fdf90269a067f23a`。文件与目录传输现在
+源码实现提交为 `52f861e3130749715ea20824efa1f1b1619f1e3b`。文件与目录传输现在
 会把已开始但未完成、失败、取消或结果未知的任务写入独立的
 `transfer-recovery.json`。日志有 schema version、记录数量、文档大小和路径
 边界，使用 owner-only 文件、锁、临时文件、`sync_all`、原子替换和后台 worker
 写入。记录不包含 SSH session、凭据、review token、worker、socket、命令或
-秘密；绑定连接 ID 不匹配时在远端只读检查前拒绝。
+秘密；绑定连接 ID 不匹配时在远端只读检查前拒绝。每条恢复记录由跨窗口、
+跨进程的 OS 文件锁 claim 排他保护；队列/worker 启动失败、取消、挂起、导航
+撤销和旧审核替换会释放 claim。无绑定记录必须先确认当前 SSH 主机，确认前
+不会执行远端只读检查；计划刷新后的已有字节数会回写持久记录。
 
 重启后只显示观察记录。用户必须检查当前 SSH 主机、重新完成只读目标审核并
 显式确认新的续传；成功后或明确 Discard 后才删除记录。恢复日志的三主题双语
 卡片、终态幂等性、旧格式主机确认、连接绑定和队列失败路径已有回归。
 
-当前作者完整门禁通过：普通 Rust `2506 passed / 0 failed / 23 ignored`，
+当前作者完整门禁通过：普通 Rust `2526 passed / 0 failed / 23 ignored`，
 doctest `14 passed / 0 failed`，Python `131 run / 1 skipped`，依赖策略、
 fmt、workspace 严格 Clippy 和三组 AI controller 均通过。完整证据见
 [恢复日志测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)
 和 [ADR 0130](adr/0130-persisted-transfer-recovery-journal.md)。
 
-下一步仍需独立严格只读复核，并单独完成 macOS/Windows/Linux 原生桌面、真实
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`，下一步是独立严格
+只读复核；同时仍需单独完成 macOS/Windows/Linux 原生桌面、真实
 客户 SSH/SFTP、Podman 长流程、IME/辅助技术、签名、公证、安装升级和发布验收。
 公司内网不可用，在线依赖最新版本检查尚未完成；本片只做本地 commit，不 push。
 

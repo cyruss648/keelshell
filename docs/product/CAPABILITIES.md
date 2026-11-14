@@ -27,7 +27,13 @@ component tokens, so adding another theme extends the registry and tokens withou
 adding recovery business branches.
 
 The implementation and full local engineering gate are bound to
-`03a4e18c7f57635072230154fdf90269a067f23a`. The gate passed 2506 ordinary Rust
+`52f861e3130749715ea20824efa1f1b1619f1e3b`. Each reviewed recovery record holds
+an OS file lock claim across windows and processes; claimed updates and removal
+verify the record and journal owner. A claim is released on cancellation, queue
+startup failure, worker startup failure, suspension, navigation revocation or
+replacement of an older review. Unbound legacy or quick-connect records require
+current SSH host confirmation before any read-only remote inspection, and the
+inspection refreshes persisted reviewed progress. The gate passed 2526 ordinary Rust
 tests / 23 ignored, 14 doctests, and Python 131 run / 1 skipped; strict formatting,
 Clippy, dependency policy and all three AI controllers passed. Native macOS,
 Windows and Linux desktop behavior, real customer SSH, Podman long flows, full

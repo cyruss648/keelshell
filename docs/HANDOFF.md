@@ -9,9 +9,9 @@
 
 当前维护 checkout 为
 `/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell`，
-分支 `feature/editor-unicode-codec-20261114`。本片源码实现基线为
-`36a1fcd`（`docs: record tunnel owner and recovery card`）；当前 checkout 的
-exact HEAD 始终以 `git rev-parse HEAD` 现场读取。本片已经完成命名隧道 owner
+分支 `feature/editor-unicode-codec-20261114`。本片当前源码 exact HEAD 为
+`52f861e3130749715ea20824efa1f1b1619f1e3b`（`fix(files): claim persisted transfer recovery`）；
+当前 checkout 的 exact HEAD 仍以 `git rev-parse HEAD` 现场读取。本片已经完成命名隧道 owner
 边界、恢复候选卡片视觉与可达性、配置同步发布前置检查，以及对应的 ADR、路线图
 和测试记录。公司内网不可用，当前只允许本地 commit，不执行 push。
 
@@ -21,12 +21,17 @@ exact HEAD 始终以 `git rev-parse HEAD` 现场读取。本片已经完成命�
 `rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，Cargo 继续跟随开发机或
 CI runner 的 active toolchain。
 
-最近继续推进的本地提交为 `540f9fc`（配置同步原子发布前置检查）、
-`90fbca7`（命名隧道 owner 与重连边界）、`1c8df52`（恢复候选卡片视觉与
-可达性）和 `36a1fcd`（ADR、测试记录、路线图和交接收口）。独立 reviewer 使用
+最近继续推进的本地提交为 `52f861e`（恢复记录跨窗口/跨进程 claim）、
+`f85407b`（恢复日志文档初稿）、`03a4e18`（恢复日志主体实现）、
+`540f9fc`（配置同步原子发布前置检查）、`90fbca7`（命名隧道 owner 与重连
+边界）、`1c8df52`（恢复候选卡片视觉与可达性）和 `36a1fcd`（ADR、测试记录、
+路线图和交接收口）。此前独立 reviewer 对 `36a1fcd` 的结论仍只适用于命名
+隧道与恢复卡片历史切片；当前恢复日志 claim 修复的完整门禁与复核状态见本节
+下方。独立 reviewer 使用
 独立 target 复核了源码实现；实现没有发现 P0/P1/P2，后续文档复核指出的 EOF
-空行与 provenance 表述问题已在本片文档中修正。完整门禁绑定源码实现基线
-`36a1fcd`，文档提交只补充证据和状态，不改变产品源码。公司内网不可用，本轮
+空行与 provenance 表述问题已在本片文档中修正。历史完整门禁绑定源码实现基线
+`36a1fcd`；当前恢复日志完整门禁绑定 `52f861e`，文档提交只补充证据和状态，
+不改变产品源码。公司内网不可用，本轮
 只做本地 commit，不 push。
 
 本片最终独立严格只读复核固定在 `79c9090a7754b049f5a91fe3b71f96e15710d66b`，
@@ -37,7 +42,7 @@ CI runner 的 active toolchain。
 ## 2026-11-14 重启后传输恢复日志
 
 本片源码实现提交为 exact SHA
-`03a4e18c7f57635072230154fdf90269a067f23a`，当前 checkout 在文档提交前的
+`52f861e3130749715ea20824efa1f1b1619f1e3b`，当前 checkout 在本次文档提交前的
 HEAD 为该提交。实现新增独立的 `transfer-recovery.json` 日志，最多 32 条
 记录、文档最多 256 KiB、单路径最多 4096 字节；记录仅保存方向、路径、
 文件/目录、进度、审核已有字节、时间、状态和可选 `connection_id`。它不保存
@@ -51,8 +56,12 @@ SSH session、SFTP handle、socket、worker、review token、凭据、私钥、�
 恢复或用户明确 `Discard` 才删除记录；Discard 只删除本地观察记录。
 
 存储使用 owner-only 文件、同目录锁、临时文件、`sync_all`、原子替换和 Unix
-父目录同步，所有阻塞文件系统操作在后台 worker。三主题、双语、终态幂等性、
-旧格式主机确认、连接绑定和显式丢弃均有回归。设计、能力和测试证据分别见
+父目录同步，所有阻塞文件系统操作在后台 worker。每条记录还有跨窗口/跨进程
+排他的 OS 文件锁 claim，带 claim 的更新与删除校验所有权；队列或 worker
+失败、取消、挂起、导航撤销和旧审核替换会释放 claim。无绑定记录必须先确认
+当前 SSH 主机，确认前不会执行远端只读检查；只读计划刷新后的已有字节数会回写
+持久记录。三主题、双语、终态幂等性、旧格式主机确认、连接绑定和显式丢弃均有
+回归。设计、能力和测试证据分别见
 [ADR 0130](adr/0130-persisted-transfer-recovery-journal.md)、
 [能力清单](product/CAPABILITIES.md)和
 [测试记录](testing/records/2026-11-14-transfer-recovery-journal.md)。
@@ -60,15 +69,16 @@ SSH session、SFTP handle、socket、worker、review token、凭据、私钥、�
 作者完整门禁使用：
 
 ```text
-CARGO_TARGET_DIR=work/transfer-recovery-20261114/full-target \
+CARGO_TARGET_DIR=work/transfer-recovery-fix-20261114/full-target \
 python3 scripts/check.py
 ```
 
 日志为
-`work/transfer-recovery-20261114/logs/full-gate-03a4e18.log`，实际结果为
-Python `131 run / 1 skipped`、普通 Rust `2506 passed / 0 failed / 23 ignored`、
-doctest `14 passed / 0 failed`；其中 app `1160/0/2`、core `641/0/0`、
-AI `194/0/5`、session `434/0/16`、MCP `77/0/0`。依赖策略、fmt、workspace
+`work/transfer-recovery-fix-20261114/logs/full-gate-52f861e.log`，doctest 日志为
+`work/transfer-recovery-fix-20261114/logs/doctest-52f861e.log`，实际结果为
+Python `131 run / 1 skipped`、普通 Rust `2526 passed / 0 failed / 23 ignored`、
+workspace doctest `14 passed / 0 failed`；其中 app `1164/0/2`、core `643/0/0`、
+AI `194/0/5`、session `448/0/16`、MCP `77/0/0`。依赖策略、fmt、workspace
 严格 Clippy、readiness/observer/small-stack controller 均通过。
 app 链接阶段的 `__eh_frame section too large` 是已知 warning，没有改变退出码。
 
