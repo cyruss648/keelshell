@@ -1154,6 +1154,8 @@ impl FilesPanel {
         id: uuid::Uuid,
         existing_bytes: u64,
         total_bytes: u64,
+        window: &mut Window,
+        cx: &mut Context<Self>,
     ) -> Result<(), String> {
         let result = remember_persisted_recovery_progress(
             &mut self.recovery_records,
@@ -1163,6 +1165,12 @@ impl FilesPanel {
         );
         if result.is_ok() {
             self.advance_recovery_mutation_generation();
+            // The in-memory record is updated immediately for the review
+            // surface, but another record may have completed or been
+            // discarded while the old load was in flight. Re-read the
+            // authoritative store after every successful mutation so a
+            // stale callback cannot leave unrelated records in the panel.
+            self.load_recovery_records(window, cx);
         }
         result
     }
@@ -1783,6 +1791,8 @@ impl FilesPanel {
                             id,
                             plan.existing_bytes(),
                             plan.bytes(),
+                            window,
+                            cx,
                         ) {
                             view.active_recovery_id = None;
                             view.status = Message::new(
@@ -1832,6 +1842,8 @@ impl FilesPanel {
                             id,
                             plan.existing_bytes(),
                             plan.bytes(),
+                            window,
+                            cx,
                         ) {
                             view.active_recovery_id = None;
                             view.status = Message::new(

@@ -806,6 +806,7 @@ async fn stale_recovery_load_cannot_restore_a_record_after_discard_mutation(
         directory.path().join("transfer-recovery.json"),
     ));
     let recovery_id = uuid::Uuid::new_v4();
+    let completed_id = uuid::Uuid::new_v4();
     let connection_id = uuid::Uuid::new_v4();
     store
         .upsert(
@@ -826,6 +827,25 @@ async fn stale_recovery_load_cannot_restore_a_record_after_discard_mutation(
             .expect("valid discard race fixture"),
         )
         .expect("persist discard race fixture");
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                completed_id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/completed-while-loading.bin",
+                false,
+                TransferRecoveryState::Failed,
+                5,
+                Some(12),
+                5,
+                100,
+                100,
+            )
+            .expect("valid concurrent completion fixture"),
+        )
+        .expect("persist concurrent completion fixture");
 
     let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
     cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
@@ -841,23 +861,29 @@ async fn stale_recovery_load_cannot_restore_a_record_after_discard_mutation(
                 panel.recovery_records.clone(),
             )
         });
-    assert_eq!(stale_records.len(), 1);
+    assert_eq!(stale_records.len(), 2);
 
     store.remove(recovery_id).expect("discard recovery fixture");
-    h.panel.update(cx, |panel, cx| {
-        panel.apply_discard_result(recovery_id, session, Ok(()), cx);
-        panel.apply_recovery_load(
-            session,
-            load_generation,
-            mutation_generation,
-            Ok(stale_records),
-            cx,
-        );
+    store
+        .remove(completed_id)
+        .expect("complete another recovery fixture");
+    let _ = cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.apply_discard_result(recovery_id, session, Ok(()), window, cx);
+            panel.apply_recovery_load(
+                session,
+                load_generation,
+                mutation_generation,
+                Ok(stale_records),
+                cx,
+            );
+        });
     });
-    h.panel.read_with(cx, |panel, _| {
-        assert!(panel.recovery_records.is_empty());
-        assert!(!panel.recovery_loading);
-    });
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        let panel = h.panel.read(cx);
+        !panel.recovery_loading && panel.recovery_records.is_empty()
+    })
+    .await;
     assert!(store.load().expect("load after discard race").is_empty());
 }
 
@@ -870,6 +896,7 @@ async fn stale_recovery_load_cannot_revert_persisted_plan_progress(cx: &mut Test
         directory.path().join("transfer-recovery.json"),
     ));
     let recovery_id = uuid::Uuid::new_v4();
+    let completed_id = uuid::Uuid::new_v4();
     let connection_id = uuid::Uuid::new_v4();
     store
         .upsert(
@@ -890,6 +917,25 @@ async fn stale_recovery_load_cannot_revert_persisted_plan_progress(cx: &mut Test
             .expect("valid plan progress race fixture"),
         )
         .expect("persist plan progress race fixture");
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                completed_id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/completed-during-plan-progress.bin",
+                false,
+                TransferRecoveryState::Failed,
+                3,
+                Some(16),
+                3,
+                100,
+                100,
+            )
+            .expect("valid plan progress sibling fixture"),
+        )
+        .expect("persist plan progress sibling fixture");
 
     let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
     cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
@@ -913,19 +959,38 @@ async fn stale_recovery_load_cannot_revert_persisted_plan_progress(cx: &mut Test
     store
         .upsert(persisted)
         .expect("persist updated plan progress");
+    store
+        .remove(completed_id)
+        .expect("complete plan progress sibling fixture");
 
-    h.panel.update(cx, |panel, cx| {
-        panel
-            .apply_persisted_recovery_progress(recovery_id, 6, 16)
-            .expect("apply updated plan progress");
-        panel.apply_recovery_load(
-            session,
-            load_generation,
-            mutation_generation,
-            Ok(stale_records),
-            cx,
-        );
+    let _ = cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel
+                .apply_persisted_recovery_progress(recovery_id, 6, 16, window, cx)
+                .expect("apply updated plan progress");
+            panel.apply_recovery_load(
+                session,
+                load_generation,
+                mutation_generation,
+                Ok(stale_records),
+                cx,
+            );
+        });
     });
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel.read_with(cx, |panel, _| {
+            !panel.recovery_loading
+                && panel.recovery_records.len() == 1
+                && panel
+                    .recovery_records
+                    .iter()
+                    .find(|record| record.id == recovery_id)
+                    .is_some_and(|record| {
+                        record.reviewed_existing_bytes == 6 && record.transferred_bytes == 6
+                    })
+        })
+    })
+    .await;
     h.panel.read_with(cx, |panel, _| {
         let record = panel
             .recovery_records

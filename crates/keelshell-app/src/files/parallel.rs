@@ -848,8 +848,8 @@ impl FilesPanel {
                 Ok(result) => result,
                 Err(_) => Err("transfer recovery discard worker did not return".to_owned()),
             };
-            let _ = this.update_in(cx, |view, _, cx| {
-                view.apply_discard_result(id, expected_session, result, cx);
+            let _ = this.update_in(cx, |view, window, cx| {
+                view.apply_discard_result(id, expected_session, result, window, cx);
             });
         })
         .detach();
@@ -860,6 +860,7 @@ impl FilesPanel {
         id: uuid::Uuid,
         expected_session: uuid::Uuid,
         result: Result<(), String>,
+        window: &mut Window,
         cx: &mut Context<Self>,
     ) {
         self.recovery_writes.remove(&id);
@@ -874,6 +875,11 @@ impl FilesPanel {
                     self.active_recovery_id = None;
                     self.recovery = None;
                 }
+                // Discard changes the durable set, so refresh the complete
+                // snapshot after invalidating any older load. This also
+                // reconciles records completed by another worker while the
+                // discarded row was in flight.
+                self.load_recovery_records(window, cx);
                 self.status = Message::new(
                     "已丢弃这条传输恢复记录；未连接、未检查、未重放。",
                     "Discarded the transfer recovery record; nothing connected, inspected or replayed.",
