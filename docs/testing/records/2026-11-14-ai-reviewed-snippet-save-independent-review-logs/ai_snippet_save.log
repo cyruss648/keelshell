@@ -1,0 +1,18 @@
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running unittests src/main.rs (work/review-final-50ca0ea/target/debug/build/keelshell-app/88f4ac837a6936f7/out/keelshell_app-88f4ac837a6936f7)
+
+running 6 tests
+test workspace::tests::ai_snippet_save::closing_ai_target_after_draft_open_keeps_no_save_authority ... ok
+test workspace::tests::ai_snippet_save::reviewed_ai_diagnostic_step_uses_the_same_locked_draft_flow ... ok
+test workspace::tests::ai_snippet_save::reviewed_ai_suggestion_opens_locked_draft_and_persists_plain_local_snippet ... ok
+test workspace::tests::ai_snippet_save::reviewed_snippet_surface_covers_language_and_theme_tokens ... ok
+test workspace::tests::ai_snippet_save::state_store_conflict_keeps_complete_ai_draft_and_error ... ok
+test workspace::tests::ai_snippet_save::target_switch_after_opening_ai_draft_rejects_save_and_drops_candidate ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1150 filtered out; finished in 1.79s
+

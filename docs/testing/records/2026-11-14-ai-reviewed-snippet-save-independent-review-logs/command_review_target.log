@@ -1,0 +1,18 @@
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running unittests src/main.rs (work/review-final-50ca0ea/target/debug/build/keelshell-app/88f4ac837a6936f7/out/keelshell_app-88f4ac837a6936f7)
+
+running 6 tests
+test assistant::tests::command_review_target::exact_captured_command_and_diagnostic_step_emit_only_after_manual_click ... ok
+test assistant::tests::command_review_target::long_reply_keeps_target_reason_review_and_progress_reachable_in_minimum_layout ... ok
+test assistant::tests::command_review_target::reviewed_snippet_events_carry_target_and_are_consumed_once ... ok
+test assistant::tests::command_review_target::stale_response_target_and_plan_cannot_rebind_to_changed_panel_session ... ok
+test assistant::tests::command_review_target::unavailable_target_disables_controls_with_localized_reason_and_defensive_guard ... ok
+test workspace::tests::ai_command_review_target::captured_ai_command_review_target_uses_live_active_terminal_without_rebinding ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1150 filtered out; finished in 2.31s
+

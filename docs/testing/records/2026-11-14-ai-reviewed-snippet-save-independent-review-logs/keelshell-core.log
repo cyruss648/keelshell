@@ -1,0 +1,962 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling getrandom v0.4.3
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling serde_core v1.0.229
+   Compiling smallvec v1.16.4
+   Compiling zeroize v1.9.1
+   Compiling ctutils v0.4.8
+   Compiling inout v0.2.5
+   Compiling serde_json v1.0.154
+   Compiling percent-encoding v2.3.2
+   Compiling once_cell v1.21.4
+   Compiling memchr v2.8.3
+   Compiling directories v6.0.0
+   Compiling form_urlencoded v1.2.2
+   Compiling crypto-common v0.2.2
+   Compiling phc v0.6.1
+   Compiling tempfile v3.27.0
+   Compiling password-hash v0.6.1
+   Compiling quote v1.0.47
+   Compiling digest v0.11.3
+   Compiling cipher v0.5.2
+   Compiling universal-hash v0.6.1
+   Compiling aead v0.6.1
+   Compiling syn v3.0.9
+   Compiling poly1305 v0.9.1
+   Compiling blake2 v0.11.0
+   Compiling sha2 v0.11.1
+   Compiling chacha20 v0.10.2
+   Compiling argon2 v0.6.0
+   Compiling rand v0.10.3
+   Compiling chacha20poly1305 v0.11.0
+   Compiling uuid v1.29.2
+   Compiling synstructure v0.14.0
+   Compiling zerovec-derive v0.11.7
+   Compiling displaydoc v0.2.7
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerofrom v0.1.8
+   Compiling thiserror v2.0.21
+   Compiling yoke v0.8.4
+   Compiling serde v1.0.229
+   Compiling zerovec v0.11.9
+   Compiling zerotrie v0.2.5
+   Compiling tinystr v0.8.5
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.4.0
+   Compiling icu_locale_core v2.4.0
+   Compiling icu_provider v2.4.0
+   Compiling icu_properties v2.4.0
+   Compiling icu_normalizer v2.4.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling keelshell-core v0.1.0 (/Users/hdh/.codex/worktrees/d362/keelshell/crates/keelshell-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.63s
+     Running unittests src/lib.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/6be759b2e60e8348/out/keelshell_core-6be759b2e60e8348)
+
+running 212 tests
+test ai_backends::tests::directory_change_revokes_request_equality_without_redirecting_credentials ... ok
+test ai_backends::tests::credential_identity_excludes_budgets_but_request_equality_includes_them ... ok
+test ai_backends::tests::relative_control_and_batch_paths_fail_before_any_io ... ok
+test ai_knowledge::tests::selection_and_search_limits_return_typed_errors ... ok
+test ai_knowledge::tests::source_metadata_rejects_authorization_and_private_key_markers ... ok
+test ai_knowledge::tests::unicode_search_maps_folded_offsets_to_original_columns ... ok
+test ai_knowledge::tests::runbook_and_local_search_are_bounded_and_non_executable ... ok
+test ai_knowledge::tests::sensitive_markers_include_spaced_api_keys_and_snippets_stay_bounded ... ok
+test ai_knowledge::tests::build_keeps_source_bound_completed_facts_and_orders_timeline ... ok
+test ai_knowledge::tests::unknown_and_sensitive_facts_are_marked_without_retaining_content ... ok
+test ai_knowledge::tests::saved_entry_round_trips_as_flat_source_bound_state ... ok
+test ai_profiles::tests::implemented_protocols_and_advanced_options_are_not_silently_downgraded ... ok
+test ai_profiles::tests::credentials_queries_and_non_loopback_http_are_refused ... ok
+test ai_profiles::tests::anthropic_transport_requires_x_api_key_header_and_secret_store_or_transient_value ... ok
+test ai_backends::tests::directory_defaults_migrate_and_are_never_api_fields ... ok
+test ai_backends::tests::tagged_backends_reject_secret_and_shell_fields ... ok
+test ai_profiles::tests::token_limits_are_supported_but_cannot_be_lost_in_legacy_projection ... ok
+test batch_audit::tests::invalid_outcome_counts_and_duplicate_targets_fail_closed ... ok
+test ai_profiles::tests::reasoning_values_are_bound_to_their_model_capability ... ok
+test ai_profiles::tests::header_injection_and_authentication_collisions_are_refused ... ok
+test batch_audit::tests::constructor_hashes_without_retaining_command_text ... ok
+test ai_backends::tests::native_path_metadata_is_portable_and_debug_hides_it ... ok
+test ai_profiles::tests::legacy_migration_keeps_empty_state_and_does_not_append_twice ... ok
+test ai_profiles::tests::catalog_edit_is_transactional_and_selection_cannot_dangle ... ok
+test ai_knowledge::tests::saved_entry_wire_rejects_sensitive_content_and_unknown_fields ... ok
+test batch_template::tests::no_marker_preserves_existing_commands ... ok
+test ai_profiles::tests::serialized_profiles_have_references_and_reject_plaintext_secret_fields ... ok
+test batch_template::tests::rejects_unknown_markers_before_any_rendering ... ok
+test batch_template::tests::rejects_unsupported_marker_context ... ok
+test ai_backends::tests::missing_local_limits_preserve_defaults_and_strict_numbers ... ok
+test batch_template::tests::renders_each_supported_target_value_as_a_literal ... ok
+test batch_workflow::tests::cancellation_never_claims_a_running_task_or_process_was_stopped ... ok
+test batch_workflow::tests::all_dependencies_need_confirmed_success_and_invalid_transitions_are_atomic ... ok
+test ai_profiles::tests::ephemeral_references_are_value_free_and_reserved_headers_rejected_without_authentication ... ok
+test batch_workflow::tests::fingerprint_covers_exact_command_target_identity_and_edges ... ok
+test batch_workflow::tests::graph_rejects_duplicate_missing_self_and_long_cycles ... ok
+test batch_workflow::tests::only_success_releases_dependencies_and_failed_unknown_or_skipped_cascade ... ok
+test batch_workflow::tests::topology_prioritizes_dependencies_before_lexicographic_ties ... ok
+test batch_workflow::tests::topology_and_review_are_independent_of_task_and_edge_input_order ... ok
+test completion::tests::a_new_query_revokes_the_old_resolved_directory_binding ... ok
+test completion::tests::a_standalone_continuation_does_not_consume_the_command_position ... ok
+test completion::tests::all_argument_positions_and_file_redirections_query_paths ... ok
+test completion::tests::assignment_looking_arguments_are_complete_literal_filenames ... ok
+test completion::tests::assignment_value_replacement_keeps_the_name_and_command_position ... ok
+test completion::tests::attached_long_option_and_leading_assignment_preserve_their_prefix ... ok
+test completion::tests::bindings_reject_unrelated_queries_and_require_canonical_remote_parents ... ok
+test completion::tests::command_candidates_insert_only_the_basename_and_reject_directories ... ok
+test completion::tests::candidate_quoting_never_exposes_shell_metacharacters ... ok
+test completion::tests::caret_boundaries_and_size_limits_are_checked_before_lexing ... ok
+test completion::tests::commands_after_pipelines_lists_and_literal_assignments_are_detected ... ok
+test completion::tests::completion_in_the_middle_preserves_component_suffix_and_following_path ... ok
+test completion::tests::comments_are_contextual_and_hash_inside_a_word_is_literal ... ok
+test completion::tests::descriptor_duplication_is_never_a_path_query ... ok
+test completion::tests::double_quotes_preserve_backslashes_before_ordinary_characters ... ok
+test completion::tests::expansions_and_compound_syntax_fail_closed_without_a_lookup_plan ... ok
+test completion::tests::directory_completion_places_caret_inside_closed_quotes_for_continuation ... ok
+test completion::tests::escaped_newlines_join_words_without_modifying_other_lines ... ok
+test completion::tests::controls_invalid_utf8_markers_and_bidi_candidates_are_rejected ... ok
+test completion::tests::middle_command_completion_matches_both_sides_without_duplicating_suffix ... ok
+test completion::tests::mixed_quotes_and_unicode_decode_to_one_literal_component ... ok
+test completion::tests::path_candidates_cannot_escape_the_bound_parent_or_change_the_name ... ok
+test completion::tests::quoted_or_escaped_expansion_characters_remain_literal_data ... ok
+test completion::tests::invisible_candidate_rejection_matches_the_transport_contract ... ok
+test completion::tests::edited_command_size_limit_includes_quote_escaping ... ok
+test completion::tests::unclosed_quote_at_end_can_be_completed_but_not_swallow_later_text ... ok
+test completion::tests::redirection_targets_are_not_reserved_words_or_cd_arguments ... ok
+test completion::tests::query_and_candidate_name_limits_match_transport_bounds ... ok
+test completion::tests::relative_paths_require_an_explicit_base_and_do_not_collapse_dot_components ... ok
+test completion::tests::stale_text_or_caret_cannot_apply_even_when_the_current_word_still_matches ... ok
+test completion::tests::unicode_whitespace_is_part_of_a_word_not_a_shell_separator ... ok
+test diff::tests::labels_and_context_are_checked ... ok
+test diff::tests::crlf_is_compared_as_a_line_ending_and_missing_final_newline_is_reported ... ok
+test diff::tests::insertion_and_deletion_at_boundaries_use_unified_zero_ranges ... ok
+test diff::tests::replacement_has_stable_hunk_and_line_numbers ... ok
+test diff::tests::equal_text_has_no_hunks_or_rendered_output ... ok
+test batch_workflow::tests::maximum_depth_cascades_without_recursive_walk_or_command_logging ... ok
+test diff::tests::unchanged_regions_are_split_into_bounded_context_hunks ... ok
+test directory_compare::tests::content_hash_is_stable_and_bounded ... ok
+test directory_compare::tests::missing_metadata_is_uncertain_and_equal_directories_can_be_proven ... ok
+test directory_compare::tests::matching_hash_proves_file_content_even_when_mtime_differs ... ok
+test directory_compare::tests::comparison_is_sorted_and_classifies_metadata_and_presence ... ok
+test directory_sync::tests::delete_policy_controls_destination_only_rows ... ok
+test directory_sync::tests::plan_is_reviewable_and_does_not_execute_writes ... ok
+test directory_sync::tests::uncertain_rows_are_rejected_until_content_is_available ... ok
+test directory_sync::tests::mismatched_review_token_is_rejected ... ok
+test knowledge_library::tests::knowledge_category_bounds_use_raw_utf8_bytes_before_trimming ... ok
+test knowledge_library::tests::knowledge_category_old_state_defaults_to_uncategorized_and_content_edits_preserve_category ... ok
+test knowledge_library::tests::knowledge_batch_delete_keeps_sensitive_content_validation_at_deserialization ... ok
+test knowledge_library::tests::knowledge_batch_delete_ambiguous_identity_rejects_whole_batch ... ok
+test diff::tests::utf8_bytes_and_rejections_are_bounded ... ok
+test knowledge_library::tests::knowledge_batch_delete_missing_last_record_never_removes_valid_predecessor ... ok
+test knowledge_library::tests::knowledge_batch_delete_invalid_remaining_configuration_leaves_everything_unchanged ... ok
+test knowledge_library::tests::knowledge_category_change_revokes_old_edit_single_delete_and_batch_delete_atomically ... ok
+test knowledge_library::tests::knowledge_batch_delete_empty_duplicate_and_over_limit_are_atomic ... ok
+test knowledge_library::tests::knowledge_category_controls_sensitive_markers_and_diagnostics_never_echo_labels ... ok
+test knowledge_library::tests::knowledge_batch_delete_checks_every_original_field_before_mutation ... ok
+test network_diagnostic::tests::endpoint_validation_precedes_every_transport ... ok
+test model::locale_tests::language_defaults_to_chinese_for_older_settings ... ok
+test network_diagnostic::tests::traceroute_limits_include_cumulative_wait_and_literal_family ... ok
+test network_diagnostic::tests::traceroute_rejects_argument_injection_without_echoing_input ... ok
+test model::locale_tests::explicitly_selected_english_roundtrips ... ok
+test network_diagnostic::tests::errors_do_not_echo_rejected_input ... ok
+test network_diagnostic::tests::icmp_admission_is_host_only_and_never_accepts_utility_options ... ok
+test network_diagnostic::tests::traceroute_serialization_preserves_complete_reviewed_request ... ok
+test model::locale_tests::missing_theme_follows_system_and_explicit_legacy_choices_survive ... ok
+test openssh::tests::accepts_open_ssh_equals_separators ... ok
+test network_diagnostic::tests::urls_cannot_smuggle_credentials_controls_or_other_protocols ... ok
+test pane_layout::tests::empty_layout_is_rejected_before_any_mutation ... ok
+test pane_layout::tests::duplicate_ids_are_rejected_across_leaf_and_split_kinds ... ok
+test openssh::tests::imports_jump_aliases_only_after_all_exact_hosts_are_indexed ... ok
+test openssh::tests::include_inside_ignored_host_pattern_is_not_imported ... ok
+test openssh::tests::include_inside_an_exact_host_is_skipped_without_guessing_scope ... ok
+test openssh::tests::parses_exact_hosts_with_first_value_defaults_and_identity ... ok
+test openssh::tests::include_requires_explicit_selected_content_and_preserves_warning ... ok
+test openssh::tests::rejects_shell_expansions_and_unresolved_jump_aliases ... ok
+test openssh::tests::unsupported_and_duplicate_directives_are_review_warnings ... ok
+test openssh::tests::warns_when_global_directives_are_duplicated ... ok
+test openssh::tests::skips_patterns_and_reports_dangerous_semantics_without_execution ... ok
+test directory_compare::tests::invalid_and_duplicate_paths_are_rejected_with_bounds ... ok
+test pane_layout::tests::identical_split_children_are_rejected ... ok
+test pane_layout::tests::leaf_count_is_bounded_even_when_total_node_count_is_small ... ok
+test pane_layout::tests::invalid_ratios_are_rejected_even_in_an_unreachable_split ... ok
+test pane_layout::tests::missing_or_split_active_node_is_rejected ... ok
+test pane_layout::tests::missing_root_and_either_missing_child_are_rejected ... ok
+test pane_layout::tests::node_count_is_bounded_before_traversal ... ok
+test pane_layout::tests::nil_ids_are_rejected_in_every_identity_position ... ok
+test pane_layout::tests::self_and_ancestor_cycles_are_rejected_iteratively ... ok
+test pane_layout::tests::shared_leaf_and_shared_subtree_are_rejected ... ok
+test pane_layout::tests::unreachable_second_parent_is_rejected ... ok
+test pane_layout::tests::unreachable_nodes_and_disconnected_cycles_are_rejected ... ok
+test pane_layout::tests::root_depth_zero_and_depth_eight_are_valid_but_nine_is_rejected ... ok
+test scheduled_workflow::tests::backward_wall_clock_invalidates_even_when_both_clocks_move_back ... ok
+test scheduled_workflow::tests::binding_invalidation_preserves_running_result_and_terminal_reason ... ok
+test scheduled_workflow::tests::calendar_fixed_offset_round_trip_preserves_negative_epochs_and_dst_dates ... ok
+test scheduled_workflow::tests::calendar_parser_validates_leap_days_unicode_controls_and_boundaries ... ok
+test scheduled_workflow::tests::arming_rejects_past_and_beyond_seven_day_final_window ... ok
+test scheduled_workflow::tests::cancellation_withdraws_due_and_future_slots_without_reviving_on_finish ... ok
+test scheduled_workflow::tests::duplicate_ticks_claims_and_finishes_cannot_repeat_an_occurrence ... ok
+test scheduled_workflow::tests::count_interval_grace_span_and_overflow_validation_are_explicit ... ok
+test scheduled_workflow::tests::expired_offered_token_is_missed_and_never_claimed ... ok
+test scheduled_workflow::tests::exact_grace_boundary_can_be_claimed_and_one_millisecond_later_is_missed ... ok
+test scheduled_workflow::tests::forward_wall_jump_without_elapsed_monotonic_time_permanently_invalidates ... ok
+test scheduled_workflow::tests::inclusive_overlapping_windows_offer_only_one_token_per_tick ... ok
+test scheduled_workflow::tests::matching_forward_jump_marks_passed_occurrences_and_never_backfills ... ok
+test scheduled_workflow::tests::monotonic_origin_change_invalidates_and_cumulative_drift_is_bounded ... ok
+test scheduled_workflow::tests::non_success_results_stop_all_subsequent_occurrences ... ok
+test scheduled_workflow::tests::overlapping_occurrence_is_skipped_permanently_while_running ... ok
+test scheduled_workflow::tests::fixed_offsets_are_strict_bounded_ascii_and_round_trip ... ok
+test scheduled_workflow::tests::token_from_another_schedule_is_rejected_without_mutation ... ok
+test scheduled_workflow::tests::revised_binding_rejects_old_token_even_when_schedule_id_is_same ... ok
+test text_document::tests::text_document_all_encodings_reject_nul_on_read_save_and_comparison ... ok
+test text_document::tests::text_document_bomless_input_is_utf8_and_never_guessed_as_utf16 ... ok
+test text_document::tests::text_document_encoding_names_and_utf16_known_bytes_preserve_byte_order ... ok
+test text_document::tests::text_document_continuing_no_break_observation_retains_insertion_policy ... ok
+test text_document::tests::text_document_format_changes_require_a_new_observation ... ok
+test text_document::tests::text_document_insertion_policy_does_not_cross_encoding_changes ... ok
+test text_document::tests::text_document_only_one_signature_is_removed_and_internal_feff_remains ... ok
+test text_document::tests::text_document_format_compatibility_checks_encoding_bom_and_line_policy ... ok
+test text_document::tests::text_document_preserves_uniform_policy_without_double_cr_or_forced_eof ... ok
+test text_document::tests::text_document_unchanged_round_trip_keeps_bom_unicode_terminators_and_eof ... ok
+test text_document::tests::text_document_rejects_binary_invalid_and_other_encoding_signatures ... ok
+test text_document::tests::text_document_utf16_continuing_empty_and_plain_saves_retain_original_policy ... ok
+test text_document::tests::text_document_final_raw_budget_includes_bom_and_crlf_expansion ... ok
+test text_document::tests::text_document_save_line_bound_does_not_mark_an_unchanged_read_dirty ... ok
+test text_document::tests::text_document_utf16_rejects_odd_bytes_and_malformed_surrogates_without_contents ... ok
+test text_document::tests::text_document_utf16_round_trip_removes_only_one_bom_and_keeps_all_line_profiles ... ok
+test text_document::tests::text_document_utf16_saves_follow_existing_newline_policy_and_eof ... ok
+test text_document::tests::text_document_utf32_boms_are_rejected_before_utf16_classification ... ok
+test text_document::tests::text_document_utf8_never_replaces_malformed_or_partial_sequences ... ok
+test text_document::tests::text_format_decode_body_uses_observed_bom_and_preserves_leading_feff_content ... ok
+test text_merge::tests::bounded_inputs_outputs_and_nul_fail_closed ... ok
+test text_merge::tests::conflict_requires_explicit_choice_and_manual_text ... ok
+test text_merge::tests::exact_line_endings_and_eof_are_preserved ... ok
+test text_merge::tests::independent_adjacent_edits_merge_without_conflict ... ok
+test text_merge::tests::same_edit_and_unchanged_sides_do_not_conflict ... ok
+test text_merge::tests::simultaneous_insertions_and_delete_edit_are_conflicts ... ok
+test text_merge::tests::small_document_matrix_preserves_every_exact_one_sided_change ... ok
+test text_patch::tests::additions_deletions_and_ordered_hunks_apply ... ok
+test text_patch::tests::exact_patch_preserves_crlf_and_missing_eof ... ok
+test text_patch::tests::generated_lf_unified_diffs_roundtrip_exact_small_document_matrix ... ok
+test text_patch::tests::malformed_counts_markers_and_binary_are_rejected ... ok
+test text_patch::tests::mismatch_wrong_coordinates_and_cross_file_are_rejected ... ok
+test text_patch::tests::no_final_newline_cannot_create_unreviewed_line_concatenation ... ok
+test theme::tests::default_identifier_is_frost ... ok
+test theme::tests::invalid_identifiers_fail_construction_and_deserialization ... ok
+test theme::tests::non_string_identifiers_are_rejected ... ok
+test theme::tests::valid_identifiers_round_trip_as_exact_strings ... ok
+test tunnel_rules::tests::changing_the_bound_connection_invalidates_an_old_review_plan ... ok
+test tunnel_rules::tests::rule_plan_confirmation_is_pure_and_token_bound ... ok
+test tunnel_rules::tests::rule_validation_requires_mode_specific_targets_and_loopback_dynamic_bind ... ok
+test tunnel_rules::tests::serde_rejects_secret_shaped_extra_fields ... ok
+test updates::tests::check_metadata_round_trips_and_rejects_unbounded_timestamps ... ok
+test updates::tests::policy_is_strict_and_never_enables_automatic_installation ... ok
+test vault::tests::credential_role_codes_preserve_schema2_entry_authentication ... ok
+test batch_workflow::tests::command_identity_and_storage_bounds_fail_before_confirmation ... ok
+test batch_workflow::tests::inclusive_command_target_and_dependency_bounds_remain_usable ... ok
+test text_document::tests::text_document_utf16_line_bound_keeps_unchanged_observation_clean ... ok
+test batch_audit::tests::record_batch_audit_is_atomic_and_fifo_bounded ... ok
+test knowledge_library::tests::knowledge_batch_delete_32_preserves_survivor_bytes_order_and_loaded_revision ... ok
+test store::recovery::tests::post_commit_sync_failure_rolls_back_missing_current_file_to_absence ... ok
+test text_document::tests::text_document_utf16_decoded_body_and_save_draft_have_independent_utf8_budget ... ok
+test knowledge_library::tests::knowledge_batch_delete_competing_store_conflict_requires_fresh_review ... ok
+test store::recovery::tests::failed_rollback_retains_original_and_discards_loaded_baseline ... ok
+test profile_sync::tests::higher_generation_cannot_omit_tombstones_or_replay_record_versions ... ok
+test vault::tests::failed_later_entry_decryption_cannot_partially_rotate_vault ... ok
+test store::recovery::tests::post_commit_sync_failure_rolls_back_corrupt_original_and_keeps_preserved_copy ... ok
+test knowledge_library::tests::knowledge_category_set_change_clear_persist_once_preserving_facts_and_order ... ok
+test text_document::tests::text_document_utf16_raw_budget_includes_bom_and_newline_expansion ... ok
+test profile_sync::tests::explicit_resume_wrong_password_and_cancel_keep_approved_pending_receipt ... ok
+test profile_sync::tests::explicit_resume_recovers_local_commit_and_is_idempotent_for_already_published_bytes ... ok
+test profile_sync::tests::changed_peer_leaves_pending_until_explicit_discard_preserves_local_approval ... ok
+test profile_sync::tests::forgetting_pending_is_refused_and_completed_pairing_can_be_forgotten_without_peer_deletion ... ok
+
+test result: ok. 212 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+     Running tests/ai_inference.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/cc1b4fa3c0ef0e5a/out/ai_inference-cc1b4fa3c0ef0e5a)
+
+running 5 tests
+test exact_decimal_bounds_precision_and_nonfinite_input ... ok
+test sampling_declaration_omission_zero_and_combinations ... ok
+test protocol_reasoning_and_strict_messages_output_budget ... ok
+test named_inference_roundtrip_missing_field_and_strict_metadata ... ok
+test messages_composition_declarations_migration_limits_and_storage ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/ai_profile_storage.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/a3e5766c4d23b97a/out/ai_profile_storage-a3e5766c4d23b97a)
+
+running 14 tests
+test local_agent_request_rejects_api_options_or_wrong_authentication ... ok
+test bearer_references_admit_supported_sources_but_reject_invalid_reference_identity ... ok
+test unit_metadata_variants_refuse_inline_secret_fields ... ok
+test legacy_disabled_and_unselected_models_preserve_user_intent ... ok
+test missing_backend_preserves_api_intent_without_rewriting_metadata ... ok
+test invalid_catalog_edit_cannot_replace_a_valid_state_file ... ok
+test local_agent_metadata_roundtrips_and_never_falls_back_to_http ... ok
+test named_configuration_metadata_and_references_survive_real_disk_roundtrip ... ok
+test null_catalog_unknown_fields_and_failed_migration_preserve_original_bytes ... ok
+test selected_directory_roundtrips_and_missing_field_migrates_without_filesystem_access ... ok
+test local_key_environment_references_roundtrip_without_resolution_or_load_rewrite ... ok
+test saved_local_budgets_and_old_metadata_keep_exact_intent_without_load_rewrite ... ok
+test explicit_empty_or_disabled_catalog_never_resurrects_legacy_selection ... ok
+test legacy_schema_one_migrates_on_read_and_persists_stable_named_identity ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/batch_audit.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/10beeb73749af198/out/batch_audit-10beeb73749af198)
+
+running 2 tests
+test batch_audit_roundtrips_through_real_state_store_without_command_text ... ok
+test older_state_without_batch_audits_loads_as_empty ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/batch_parameters.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/81cfd759da25e842/out/batch_parameters-81cfd759da25e842)
+
+running 5 tests
+test public_required_name_validation_rejects_untrusted_names_without_echoing_them ... ok
+test metadata_and_distinct_target_literals_keep_the_original_quote_contract ... ok
+test task_subset_requires_validated_union_and_never_exposes_values_in_debug ... ok
+test missing_extra_duplicate_reserved_invalid_and_oversized_inputs_fail_without_values ... ok
+test grammar_and_render_budgets_cannot_be_bypassed_by_named_parameters ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/batch_workflow.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/77bd3ece4b6dd1e0/out/batch_workflow-77bd3ece4b6dd1e0)
+
+running 3 tests
+test unknown_receipt_skips_dependents_but_keeps_an_independent_running_task ... ok
+test target_or_command_changes_need_new_review_even_with_identical_task_ids ... ok
+test rendered_target_commands_survive_review_and_only_success_opens_the_join ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/completion_shell.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/53c1849f3df8260b/out/completion_shell-53c1849f3df8260b)
+
+running 4 tests
+test completing_assignment_values_preserves_assignment_and_option_semantics ... ok
+test middle_path_completion_preserves_quoted_tail_and_surrounding_multiline_bytes ... ok
+test command_candidates_are_literal_names_without_absolute_path_substitution ... ok
+test remote_filename_metacharacters_remain_one_literal_posix_argument ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/configuration_recovery.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/135a65102310f809/out/configuration_recovery-135a65102310f809)
+
+running 24 tests
+test first_save_has_no_previous_snapshot_and_listing_creates_no_directory ... ok
+test another_store_cannot_reuse_an_opaque_review_for_the_same_path ... ok
+test corrupted_load_never_triggers_automatic_restore_or_new_backup ... ok
+test missing_to_existing_race_refuses_recovery_without_overwrite ... ok
+test future_backup_schema_remains_listed_and_cannot_be_restored ... ok
+test changing_selected_backup_after_review_is_rejected ... ok
+test oversized_current_file_refuses_bounded_recovery_without_overwrite ... ok
+test backup_sequence_overflow_refuses_save_before_primary_replacement ... ok
+test corrupt_to_changed_corrupt_race_refuses_recovery_without_preservation_side_effect ... ok
+test missing_current_file_can_be_restored_without_fabricated_original ... ok
+test same_bytes_saved_after_review_still_invalidate_the_revision ... ok
+test backup_and_original_files_remain_owner_only ... ok
+test legacy_schema_one_backup_keeps_existing_default_field_migration ... ok
+test empty_valid_current_has_real_zero_counts_instead_of_unavailable_counts ... ok
+test unexpected_history_file_prevents_save_and_keeps_valid_state ... ok
+test future_current_schema_requires_explicit_review_and_preserves_original ... ok
+test symlinked_backup_is_rejected_without_touching_its_target ... ok
+test truncated_original_is_preserved_exactly_before_explicit_restore ... ok
+test vault_is_never_opened_copied_or_replaced_by_metadata_recovery ... ok
+test valid_current_file_is_preserved_and_restore_issues_a_new_revision ... ok
+test ninth_history_entry_fails_closed_without_pruning_any_backup ... ok
+test preserved_originals_are_bounded_and_never_rotated_away ... ok
+test wrong_vault_password_remains_rejected_and_metadata_recovery_keeps_credential_binding ... ok
+test saves_rotate_eight_valid_snapshots_and_keep_current_metadata ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
+
+     Running tests/connection_library.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/94762a0fde7f54d3/out/connection_library-94762a0fde7f54d3)
+
+running 22 tests
+test folder_tree_preorder_and_descendant_membership_use_identity ... ok
+test restore_rejects_an_existing_id_without_changing_either_profile ... ok
+test moving_a_folder_rejects_self_and_descendant_cycles_atomically ... ok
+test duplication_keeps_folder_but_clears_local_vault_reference_and_recent_history ... ok
+test permanently_removing_active_metadata_cleans_folder_and_recent_links ... ok
+test renaming_and_moving_folder_updates_active_and_deleted_legacy_paths ... ok
+test restore_retains_original_metadata_without_manufacturing_a_success ... ok
+test restore_rejects_equivalent_dns_and_ipv6_endpoints_without_overwriting ... ok
+test folder_deletion_requires_no_children_active_profiles_or_trash_memberships ... ok
+test updating_folder_checks_final_path_length_and_keeps_failed_edits_atomic ... ok
+test updating_folder_uses_final_destination_for_sibling_uniqueness ... ok
+test import_never_reactivates_a_deleted_endpoint_or_changes_its_credentials ... ok
+test explicit_empty_tree_never_reactivates_legacy_group_labels ... ok
+test validation_rejects_dangling_history_memberships_duplicate_folders_and_cycles ... ok
+test malformed_tree_and_membership_imports_leave_state_unchanged ... ok
+test legacy_connection_exports_are_accepted_and_vault_references_removed ... ok
+test export_round_trips_nested_and_empty_folders_with_fresh_local_ids ... ok
+test legacy_groups_migrate_stably_without_changing_profile_identity_or_authentication ... ok
+test folder_names_depth_and_descendant_path_limits_are_atomic ... ok
+test recent_successes_are_bounded_unique_and_ordered_by_observed_success ... ok
+test folder_only_import_changes_the_candidate_even_when_no_profile_is_added ... ok
+test migration_and_trash_restore_survive_state_store_reload ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/connection_library_batch.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/f4b0684c9c845fd2/out/connection_library_batch-f4b0684c9c845fd2)
+
+running 9 tests
+test invalid_later_tag_result_rolls_back_every_profile_and_revision ... ok
+test unselected_active_or_deleted_dependents_block_removal_without_partial_changes ... ok
+test exact_selection_rejects_empty_duplicate_missing_and_wrong_collection ... ok
+test jump_chain_trash_restore_and_purge_are_atomic_and_order_independent ... ok
+test unrelated_existing_duplicate_routes_do_not_block_restoration ... ok
+test restoration_rejects_duplicate_routes_and_deleted_unselected_jumps ... ok
+test purge_removes_membership_but_retains_vault_reference_owner_and_shared_trust ... ok
+test organization_preserves_routes_credentials_trust_and_unselected_profiles ... ok
+test one_store_save_advances_revision_once_and_rejects_external_changes ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/directory_compare.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/056f6e1791061b1f/out/directory_compare-056f6e1791061b1f)
+
+running 2 tests
+test public_validation_identifies_side_and_rejects_unsafe_paths ... ok
+test public_comparison_reports_stable_rows_for_a_remote_review ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/directory_mirror.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/b6f68af9bf39772d/out/directory_mirror-b6f68af9bf39772d)
+
+running 6 tests
+test no_incomplete_content_or_kind_conflict_can_reach_a_mirror_executor ... ok
+test exact_direction_and_restricted_policy_are_part_of_the_confirmation ... ok
+test complete_nonempty_subtrees_are_reviewed_children_before_parents_in_both_directions ... ok
+test links_names_case_collisions_and_missing_parent_evidence_fail_closed ... ok
+test mirror_budget_refuses_deep_trees_and_combined_large_content_without_approval ... ok
+test the_read_only_conflict_list_does_not_truncate_after_one_hundred_rows ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/directory_sync.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/bb1962711488a123/out/directory_sync-bb1962711488a123)
+
+running 2 tests
+test public_sync_plan_refuses_uncertain_metadata_before_any_action ... ok
+test public_sync_plan_keeps_deletes_explicit_and_carries_source_revalidation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/host_keys.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/a8c9d6467362c60a/out/host_keys-a8c9d6467362c60a)
+
+running 4 tests
+test invalid_fingerprints_and_destinations_do_not_modify_trust ... ok
+test dns_and_ipv6_addresses_use_canonical_host_port_keys ... ok
+test direct_edits_to_the_trust_map_are_validated_before_persistence ... ok
+test connection_exports_and_imports_do_not_transfer_host_trust ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/independent_workflow_audit.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/2ba6d1bdc2914a87/out/independent_workflow_audit-2ba6d1bdc2914a87)
+
+running 3 tests
+test independent_audit_untrusted_nested_extra_fields_cannot_reintroduce_execution_context ... ok
+strict nested variant controls checked=60; accepted extra-field cases=[]
+test independent_audit_all_unit_and_data_variants_reject_untrusted_extra_keys ... ok
+test independent_audit_whole_run_fifo_exact_budget_and_failed_append_are_atomic ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/knowledge_context.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/0936515e97d6a63b/out/knowledge_context-0936515e97d6a63b)
+
+running 6 tests
+test saved_context_category_is_local_only_but_changes_revoke_the_complete_selected_object ... ok
+test saved_context_rejects_edited_deleted_and_ambiguous_versions_without_retargeting ... ok
+test saved_context_ingress_cannot_bypass_the_existing_sensitive_content_gate ... ok
+test saved_context_is_explicit_ordered_and_preserves_complete_historical_identity ... ok
+test saved_context_limits_are_atomic_and_count_serialized_unicode_metadata ... ok
+test saved_context_category_does_not_consume_request_bytes_at_the_exact_budget ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/knowledge_library.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/566490e1dd2cabc2/out/knowledge_library-566490e1dd2cabc2)
+
+running 19 tests
+test reviewed_content_rechecks_sensitive_markers_after_summary_normalization ... ok
+test reviewed_content_rejects_empty_and_control_data_in_either_field ... ok
+test reviewed_content_rejects_synthetic_sensitive_markers_without_echoing_input ... ok
+test reviewed_content_preserves_loaded_session_metadata_byte_for_byte ... ok
+test ambiguous_ids_are_rejected_even_if_only_one_entry_matches_the_review ... ok
+test invalid_candidate_state_preserves_data_and_loaded_revision_on_failure ... ok
+test editing_invalidates_old_review_for_replacement_and_deletion ... ok
+test missing_and_already_removed_entries_cannot_be_removed_or_reinserted ... ok
+test both_operations_require_the_complete_expected_entry ... ok
+test replacement_with_identical_reviewed_content_is_a_no_op ... ok
+test replacement_rejects_each_changed_immutable_metadata_field_atomically ... ok
+test reviewed_content_normalizes_text_and_preserves_every_other_field ... ok
+test reviewed_edits_preserve_order_unrelated_state_and_revision_without_io ... ok
+test reviewed_content_limits_raw_utf8_bytes_before_normalization ... ok
+test a_full_library_allows_replacement_and_removal_frees_one_slot ... ok
+test sensitive_titles_with_alternative_whitespace_never_reach_state_store ... ok
+test edited_and_deleted_knowledge_round_trips_through_real_state_store ... ok
+test store_revision_rejects_stale_writer_even_when_reviewed_entry_is_unchanged ... ok
+test stale_external_edits_and_deletions_cannot_overwrite_a_winning_edit_or_delete ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/knowledge_persistence.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/4db6854e48261412/out/knowledge_persistence-4db6854e48261412)
+
+running 6 tests
+test mixed_review_document_cannot_save_only_its_safe_subset ... ok
+test non_session_capture_cannot_cross_the_saved_entry_boundary ... ok
+test identical_knowledge_receipt_is_idempotent_in_app_state ... ok
+test stale_state_revision_rejects_a_knowledge_save_without_replacing_the_file ... ok
+test completed_and_failed_knowledge_entries_round_trip_through_state_store ... ok
+test state_load_rejects_sensitive_saved_knowledge_wire ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/openssh.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/cd936e3cc935e822/out/openssh-cd936e3cc935e822)
+
+running 7 tests
+test unsupported_directives_are_exposed_for_review ... ok
+test missing_include_is_a_review_warning_and_never_reads_disk ... ok
+test include_entries_and_warnings_keep_literal_source_names ... ok
+test include_inside_host_does_not_pollute_following_host_defaults ... ok
+test imports_exact_hosts_and_reports_unsafe_blocks ... ok
+test accepts_open_ssh_equals_separators_in_imported_profiles ... ok
+test supplied_include_is_literal_and_proxy_jump_is_resolved_on_import ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/pane_layout.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/b876e813ee2c40ea/out/pane_layout-b876e813ee2c40ea)
+
+running 20 tests
+test closing_second_child_selects_first_leaf_of_first_sibling_subtree ... ok
+test closing_active_leaf_promotes_sibling_subtree_and_selects_its_first_leaf ... ok
+test closing_deep_first_or_second_leaf_rewrites_the_correct_parent_edge ... ok
+test closing_inactive_leaf_preserves_selection_inside_or_outside_sibling_subtree ... ok
+test closing_root_child_promotes_whole_subtree_including_nested_ratios ... ok
+test setters_preserve_structure_and_accept_inclusive_ratio_bounds ... ok
+test duplicate_json_fields_are_rejected_including_leaf_identity ... ok
+test split_single_leaf_keeps_identity_and_sets_new_leaf_active ... ok
+test repeated_close_reaches_one_leaf_and_then_refuses_without_mutating ... ok
+test deep_split_replaces_either_child_reference_without_changing_other_branches ... ok
+test json_contract_uses_uuid_strings_struct_variants_and_snake_case_axes ... ok
+test unknown_fields_are_rejected_at_layout_leaf_and_split_boundaries ... ok
+test malformed_tags_ids_axes_and_ratios_are_not_accepted_as_wire_values ... ok
+test required_layout_and_variant_fields_cannot_be_missing_or_null ... ok
+test new_split_ids_must_be_non_nil_distinct_and_globally_unused ... ok
+test depth_limit_rejection_preserves_selection_and_all_original_nodes ... ok
+test invalid_targets_and_ratios_leave_complete_layout_unchanged ... ok
+test domain_invalid_json_requires_validation_and_cannot_be_repaired_by_mutators ... ok
+test thirty_two_panes_and_sixty_three_nodes_are_valid_but_one_more_is_atomic_error ... ok
+test repeated_edits_round_trip_with_stable_screen_order_and_node_identities ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/profile_sync.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/32d0ad159623c687/out/profile_sync-32d0ad159623c687)
+
+running 6 tests
+test wrong_password_tamper_and_cancel_do_not_reset_or_write ... ok
+test two_clients_pull_review_publish_and_keep_credentials_device_local ... ok
+test disabled_client_keeps_replay_anchor_and_explicit_pull_can_reenable ... ok
+test local_or_peer_change_after_review_refuses_stale_approval ... ok
+test deletion_tombstone_beats_old_snapshot_and_conflicts_with_offline_edit ... ok
+test offline_conflicts_require_exact_explicit_choices_and_converge ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.77s
+
+     Running tests/profile_sync_independent.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/afaac0f248e48028/out/profile_sync_independent-afaac0f248e48028)
+
+running 10 tests
+test unknown_envelope_and_kdf_fields_are_not_accepted ... ok
+test established_client_refuses_another_directory_even_with_identical_channel_bytes ... ok
+test selecting_only_some_of_multiple_differences_cannot_save_or_publish ... ok
+test higher_generation_cannot_drop_a_previously_acknowledged_live_record ... ok
+test additional_or_substituted_unreviewed_identity_cannot_save_or_publish ... ok
+test acknowledged_generation_rejects_a_different_valid_ciphertext_of_the_same_snapshot ... ok
+test unknown_authenticated_snapshot_record_and_profile_fields_are_not_accepted ... ok
+test higher_generation_cannot_drop_a_previously_acknowledged_deletion_tombstone ... ok
+test multiple_offline_conflicts_accept_individual_local_and_remote_choices ... ok
+test remote_deletion_conflicts_with_local_edit_and_can_explicitly_restore_local ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.69s
+
+     Running tests/profile_sync_review.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/76b9d8cb78081d76/out/profile_sync_review-76b9d8cb78081d76)
+
+running 10 tests
+test absent_optional_ledger_migrates_and_unknown_ledger_fields_stay_rejected ... ok
+test byte_capacity_rejection_below_record_ceiling_keeps_original_state_and_peer_absent ... ok
+test real_transport_lock_refuses_apply_without_local_or_shared_replacement ... ok
+test simultaneous_reviewed_publishers_have_one_winner_and_preserve_the_loser ... ok
+test display_only_shared_edits_keep_existing_local_authentication ... ok
+test remote_deletion_uses_local_receipt_time_and_keeps_local_recycle_metadata ... ok
+test upstream_endpoint_change_resets_unchanged_downstream_local_authentication ... ok
+test pure_preview_discloses_downstream_route_changes_without_modifying_state ... ok
+test accepting_shared_legacy_group_keeps_local_folder_and_does_not_create_echo_edits ... ok
+test local_folder_rename_reassignment_removal_and_peer_round_trip_do_not_echo ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.36s
+
+     Running tests/profiles.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/990456e9ef06c277/out/profiles-990456e9ef06c277)
+
+running 13 tests
+test snippets_allow_multiline_commands_but_reject_escape_sequences ... ok
+test search_combines_name_group_host_user_and_tags ... ok
+test duplicate_connection_ids_are_rejected ... ok
+test connection_validation_rejects_commands_urls_controls_and_zero_port ... ok
+test removing_connection_returns_metadata_and_favorite_toggle_is_persistable ... ok
+test clone_uses_new_identity_and_preserves_authentication_reference ... ok
+test persistent_authentication_rejects_embedded_password_fields ... ok
+test export_excludes_snippets_and_ai_settings ... ok
+test settings_refuse_nonfinite_sizes_unbounded_scrollback_and_url_credentials ... ok
+test fresh_state_has_no_hosts_and_only_valid_templates ... ok
+test import_validation_is_atomic_when_later_profile_is_invalid ... ok
+test repeated_ids_inside_an_import_are_deduplicated ... ok
+test import_is_idempotent_by_normalized_endpoint_and_preserves_existing_values ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/proxies.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/64d22f09fa96cd33/out/proxies-64d22f09fa96cd33)
+
+running 19 tests
+test proxy_usernames_are_bounded_by_utf8_bytes_and_http_colon_rules ... ok
+test proxy_validation_rejects_unsafe_endpoints_without_echoing_input ... ok
+test normalized_proxy_endpoints_keep_account_case_protocol_and_order ... ok
+test route_prefix_versions_change_only_when_a_proxy_enters_the_prefix ... ok
+test copy_preserves_proxy_metadata_but_never_inherits_ssh_credential_reference ... ok
+test proxy_wire_addresses_share_ascii_bounds_without_changing_legacy_hosts ... ok
+test proxy_authentication_rejects_inline_secrets_unknown_fields_and_implicit_modes ... ok
+test upstream_proxy_changes_isolate_every_downstream_pin_but_keep_direct_first_hop ... ok
+test missing_proxy_fields_preserve_legacy_profile_and_identity_bytes ... ok
+test invalid_proxy_updates_fail_atomically_and_cannot_hide_invalid_jump_graphs ... ok
+test restore_distinguishes_proxy_routes_and_deletion_still_protects_dependencies ... ok
+test one_hop_proxy_trust_never_falls_back_to_legacy_direct_pins ... ok
+test canonical_proxy_spelling_and_display_edits_keep_credentials_and_recent_history ... ok
+test malformed_late_proxy_import_rejects_the_whole_document ... ok
+test identity_validation_rejects_version_downgrades_noncanonical_proxy_and_extra_secrets ... ok
+test proxy_export_import_round_trip_remaps_routes_without_credentials_or_host_trust ... ok
+test importing_different_proxies_cannot_merge_routes_or_rebind_conflicting_jump_ids ... ok
+test changed_proxy_clears_current_and_active_or_deleted_descendant_credentials_and_recents ... ok
+test proxy_routes_and_pins_persist_without_bypassing_revision_conflicts ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/reconnect.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/641e50b074803ee4/out/reconnect-641e50b074803ee4)
+
+running 17 tests
+test validation_rejects_unbounded_zero_and_reversed_policies_without_scheduling ... ok
+test automatic_backoff_is_one_based_capped_and_exhausted_after_the_whole_route_budget ... ok
+test legacy_profiles_default_to_manual_and_keep_identical_json ... ok
+test numeric_wire_types_cannot_wrap_or_coerce_into_valid_policies ... ok
+test route_guard_rejects_private_key_path_change_even_when_trust_identity_matches ... ok
+test route_guard_rejects_changed_hop_order_and_depth ... ok
+test route_guard_accepts_metadata_new_credential_references_and_canonical_spelling ... ok
+test explicit_modes_round_trip_and_reject_unknown_fields_including_manual ... ok
+test route_guard_rejects_new_profile_ids_and_rebound_equivalent_jump_profiles ... ok
+test route_guard_rejects_proxy_protocol_address_port_and_exact_auth_username_changes ... ok
+test deleted_profiles_cannot_be_resolved_but_explicit_restore_retains_policy_and_identity ... ok
+test route_guard_rejects_changed_network_account_authentication_or_proxy_on_any_hop ... ok
+test invalid_import_and_update_leave_the_entire_state_unchanged ... ok
+test skipped_import_does_not_override_an_existing_manual_policy ... ok
+test duplicate_and_import_preserve_policy_but_do_not_inherit_credentials_or_activity ... ok
+test policy_edits_preserve_route_bytes_pins_credentials_and_recent_success ... ok
+test policy_round_trips_real_storage_and_rejects_invalid_and_stale_writes ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/recursive_mirror_final_review.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/59934b7e769d2c3f/out/recursive_mirror_final_review-59934b7e769d2c3f)
+
+running 1 test
+test combined_byte_budget_counts_identical_entries_on_both_sides_at_the_exact_boundary ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/routes.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/55f5c9928d7397c0/out/routes-55f5c9928d7397c0)
+
+running 27 tests
+test direct_ephemeral_route_rejects_saved_route_metadata ... ok
+test active_routes_cannot_load_through_trash_even_if_ids_exist ... ok
+test direct_ephemeral_route_does_not_require_a_saved_profile ... ok
+test normalized_ipv6_routes_ignore_uuids_and_display_labels_but_keep_order_and_accounts ... ok
+test import_refuses_to_guess_external_uuid_references_even_when_local_profile_exists ... ok
+test duplicate_retains_jump_identity_but_never_copies_the_targets_credential ... ok
+test conflicting_repeated_import_id_cannot_select_an_arbitrary_jump_definition ... ok
+test graph_rejects_missing_nil_self_cycles_duplicate_ids_and_excessive_depth ... ok
+test existing_unambiguous_compatible_gateway_is_reused_without_changing_its_credentials ... ok
+test identical_private_addresses_behind_distinct_gateways_are_not_deduplicated ... ok
+test changing_auth_invalidates_itself_and_downstream_but_keeps_upstream ... ok
+test imported_equivalent_gateway_aliases_remap_to_one_new_local_identity ... ok
+test changing_jump_destination_clears_active_and_trash_descendant_credentials_only ... ok
+test invalid_route_update_is_atomic_and_unknown_update_never_inserts ... ok
+test restore_same_private_endpoint_is_allowed_when_its_complete_route_differs ... ok
+test changing_the_jump_link_invalidates_only_the_changed_subtree ... ok
+test direct_profiles_and_old_documents_keep_single_endpoint_identity ... ok
+test renaming_tagging_and_normalized_dns_spelling_preserve_route_credentials_and_recent ... ok
+test route_snapshot_connects_outermost_first_and_remains_owned ... ok
+test trash_references_block_permanent_removal_without_blocking_safe_recycling ... ok
+test malformed_or_noncanonical_route_pins_fail_before_storage ... ok
+test recycle_requires_dependents_first_and_restore_requires_jumps_first ... ok
+test export_import_remaps_unordered_chain_and_omits_all_local_secrets_and_trust ... ok
+test routed_host_trust_isolated_from_direct_and_other_gateway_namespaces ... ok
+test imported_dependencies_reject_id_collisions_trash_auth_conflicts_and_ambiguous_aliases ... ok
+test total_pin_budget_is_shared_by_legacy_and_routed_scopes ... ok
+test route_and_scoped_pins_round_trip_real_storage_and_stale_edits_cannot_overwrite ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/scheduled_workflow_review.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/e4a6acb3ad01c3e6/out/scheduled_workflow_review-e4a6acb3ad01c3e6)
+
+running 6 tests
+test independent_schedule_fixed_calendar_agrees_with_external_gregorian_epoch_vectors ... ok
+test independent_schedule_expired_ticket_cannot_complete_a_later_running_slot ... ok
+test independent_schedule_seven_day_authorization_boundary_includes_grace_and_milliseconds ... ok
+test independent_schedule_claim_time_clock_regression_permanently_withdraws_authority ... ok
+test independent_schedule_all_thirty_two_authorized_slots_run_once_and_exhaust ... ok
+test independent_schedule_failed_or_unknown_run_cannot_release_an_already_busy_slot ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/snippet_template_shell.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/aaa2dd7328f913b7/out/snippet_template_shell-aaa2dd7328f913b7)
+
+running 4 tests
+test quoted_interpolation_is_not_a_sandbox_for_explicit_eval ... ok
+test repeated_values_and_multiline_templates_preserve_exact_bytes_and_argument_count ... ok
+test assignment_and_option_prefixes_retain_posix_meaning_with_empty_and_special_values ... ok
+test arbitrary_literal_values_remain_exactly_one_argument_without_side_effects ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/snippet_templates.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/cc01c0a1b3bc7e83/out/snippet_templates-cc01c0a1b3bc7e83)
+
+running 20 tests
+test marker_fragments_and_multiple_markers_in_one_word_are_refused ... ok
+test expansions_compound_syntax_and_here_documents_fail_closed ... ok
+test quoted_escaped_and_commented_markers_are_refused ... ok
+test incomplete_quotes_operators_and_dynamic_descriptors_are_refused ... ok
+test names_are_bounded_ascii_identifiers_and_offsets_are_utf8_bytes ... ok
+test lists_pipelines_boolean_operators_and_file_redirections_are_supported ... ok
+test old_snippet_json_keeps_double_braces_literal_and_opt_in_is_strict ... ok
+test parameters_follow_first_occurrence_order_and_share_repeated_values ... ok
+test literal_zero_parameter_templates_require_an_empty_value_map ... ok
+test ordinary_quotes_comments_whitespace_and_unicode_are_preserved_exactly ... ok
+test empty_values_are_explicit_and_missing_or_extra_keys_are_rejected ... ok
+test variable_limit_counts_unique_names_not_occurrences ... ok
+test controls_are_refused_without_echoing_supplied_values_in_errors ... ok
+test full_assignment_and_long_option_values_preserve_their_prefixes ... ok
+test final_render_budget_is_not_rejected_by_temporary_growth_before_later_shrinkage ... ok
+test rendered_limit_includes_repetitions_and_quote_escaping ... ok
+test source_and_value_limits_measure_bytes_and_preserve_empty_values ... ok
+test real_legacy_state_without_opt_in_loads_literal_text_and_refuses_value_fields ... ok
+test invalid_opt_in_disk_data_fails_validation_and_stale_changes_cannot_overwrite ... ok
+test explicit_template_crud_and_persistence_never_store_supplied_values ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/snippets.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/3bcea317302767d8/out/snippets-3bcea317302767d8)
+
+running 13 tests
+test missing_update_is_not_an_upsert_and_missing_remove_is_atomic ... ok
+test nil_identity_and_ambiguous_existing_id_are_rejected_atomically ... ok
+test unrelated_validation_failures_do_not_commit_any_template_mutation ... ok
+test duplicate_insert_cannot_overwrite_an_existing_template ... ok
+test terminal_controls_are_rejected_but_tabs_and_line_feeds_are_preserved ... ok
+test duplicate_display_names_have_distinct_identities ... ok
+test unicode_metadata_and_multiline_command_reach_their_existing_limits ... ok
+test crud_preserves_identity_display_order_and_unrelated_state ... ok
+test invalid_metadata_and_command_limits_leave_both_insert_and_update_unchanged ... ok
+test collection_limit_allows_update_and_delete_but_refuses_one_more_insert ... ok
+test explicit_crud_round_trips_through_real_storage_and_keeps_revision ... ok
+test stale_template_update_and_delete_cannot_overwrite_another_process ... ok
+test failed_oversized_document_save_preserves_disk_and_editable_draft ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.91s
+
+     Running tests/storage.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/091fe350b32a9095/out/storage-091fe350b32a9095)
+
+running 18 tests
+test oversized_file_is_rejected_before_json_decoding ... ok
+test corrupt_document_is_never_replaced_with_defaults ... ok
+test schema_one_documents_without_host_pins_remain_loadable ... ok
+test old_and_future_schemas_are_preserved_without_implicit_migration ... ok
+test symlink_state_cannot_read_or_replace_its_target ... ok
+test existing_valid_file_requires_successful_load_before_save ... ok
+test concurrent_writers_on_one_store_cannot_both_commit_one_revision ... ok
+test profiles_and_preferences_round_trip_through_real_disk ... ok
+test external_change_after_absent_load_is_not_overwritten ... ok
+test same_store_rejects_a_second_edited_snapshot_after_first_save ... ok
+test serialized_snapshots_cannot_recreate_a_store_revision ... ok
+test invalid_edit_does_not_modify_last_valid_file ... ok
+test absent_state_does_not_create_directories_until_saved ... ok
+test state_is_owner_only_and_insecure_existing_permissions_are_rejected ... ok
+test explicitly_trusted_host_pins_round_trip_through_disk ... ok
+test returned_snapshot_can_be_saved_again_but_previous_clone_cannot ... ok
+test operating_system_lock_excludes_another_store_without_waiting ... ok
+test second_store_cannot_overwrite_changes_after_its_load ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/theme_preferences.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/f54c0d6ae6a0ded6/out/theme_preferences-f54c0d6ae6a0ded6)
+
+running 5 tests
+test theme_family_preserves_custom_legacy_ai_migration_and_explicit_catalog_rules ... ok
+test unknown_valid_family_survives_reload_and_unrelated_preference_save ... ok
+test invalid_or_null_family_is_rejected_without_overwriting_state ... ok
+test legacy_missing_family_defaults_to_frost_without_changing_appearance_or_disk ... ok
+test all_theme_families_round_trip_through_state_store_independently_of_appearance ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/tunnel_rules.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/d7f5f0c1a3dfca67/out/tunnel_rules-d7f5f0c1a3dfca67)
+
+running 10 tests
+test purging_a_deleted_connection_with_a_named_rule_is_rejected ... ok
+test deleting_a_connection_with_a_named_rule_is_rejected_atomically ... ok
+test rule_binding_and_review_are_explicit_and_do_not_start_a_listener ... ok
+test disabled_rule_cannot_be_planned_for_start_and_missing_binding_is_rejected ... ok
+test batch_trash_rejects_any_referenced_connection_without_partial_deletion ... ok
+test stale_review_plan_is_rejected_after_connection_update ... ok
+test changing_or_removing_a_rule_invalidates_its_old_review_plan ... ok
+test named_rules_round_trip_through_state_store_without_runtime_side_effects ... ok
+test legacy_state_without_tunnel_rules_migrates_to_empty_without_rewriting_on_load ... ok
+test saving_again_rotates_state_revision_and_invalidates_old_review_plan ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/tunnel_runtime.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/cb2ba6f1dd687d48/out/tunnel_runtime-cb2ba6f1dd687d48)
+
+running 8 tests
+test confirmed_cleanup_or_explicit_discard_removes_only_the_selected_candidate ... ok
+test recovery_rejects_changed_private_key_passphrase_target ... ok
+test runtime_snapshot_round_trip_contains_only_non_sensitive_recovery_metadata ... ok
+test recovery_rejects_changed_auth_target_without_persisting_the_target ... ok
+test recovery_plan_requires_exact_rule_route_and_authentication_binding ... ok
+test missing_rule_and_unsupported_version_keep_candidates_fail_closed ... ok
+test runtime_snapshot_persists_and_reload_keeps_the_candidate_without_starting_anything ... ok
+test recovery_confirmation_is_token_bound_and_state_stale ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/update_preferences.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/f5a2aaba8776a94d/out/update_preferences-f5a2aaba8776a94d)
+
+running 7 tests
+test out_of_range_check_timestamps_preserve_the_rejected_document ... ok
+test legacy_settings_without_updates_migrate_without_rewriting_original_bytes ... ok
+test successful_check_metadata_save_preserves_policy_and_unrelated_settings ... ok
+test timestamp_boundaries_round_trip_and_invalid_edits_preserve_last_valid_state ... ok
+test stale_successful_check_cannot_overwrite_another_instances_new_policy ... ok
+test every_saved_update_policy_and_successful_check_round_trip_through_real_disk ... ok
+test present_null_unknown_fields_and_invalid_types_cannot_be_migrated_or_overwritten ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/vault.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/1b90e905539e86b6/out/vault-1b90e905539e86b6)
+
+running 33 tests
+test connection_exports_clear_local_vault_references ... ok
+test invalid_kdf_parameters_and_legacy_documents_fail_before_expensive_work ... ok
+test load_existing_authenticates_saved_credentials_and_establishes_save_snapshot ... ok
+test load_existing_missing_vault_creates_neither_files_nor_directories ... ok
+test failed_existing_authentication_revokes_previous_save_baseline ... ok
+test changed_or_deleted_disk_snapshot_is_never_silently_recreated ... ok
+test invalid_secret_input_cannot_modify_existing_entry ... ok
+test original_schema2_document_remains_readable_with_authenticated_metadata ... ok
+test cooperative_lock_blocks_both_load_and_save ... ok
+test insecure_vault_and_lock_permissions_fail_closed ... ok
+test invalid_existing_file_is_preserved_without_replacement ... ok
+test invalid_rotation_retains_original_key_manifest_and_save_snapshot ... ok
+test removed_existing_vault_revokes_save_baseline_and_cannot_be_recreated ... ok
+test save_without_load_cannot_replace_existing_vault_with_another_key ... ok
+test symlinked_vault_lock_and_parent_are_rejected_without_touching_targets ... ok
+test failed_unlock_discards_previous_save_authority_and_preserves_original ... ok
+test independent_writers_cannot_lose_saved_changes ... ok
+test vault_encrypts_and_round_trips_both_credential_roles_without_secret_debug ... ok
+test references_cannot_be_copied_to_other_profiles_or_rebound_during_update ... ok
+test stale_snapshots_from_same_store_cannot_overwrite_a_new_revision ... ok
+test copied_serialized_snapshot_and_cross_store_snapshot_cannot_replace_loaded_vault ... ok
+test vault_store_creates_owner_only_file_only_on_save_and_reuses_saved_snapshot ... ok
+test rotated_vault_can_retry_save_after_cooperative_lock_is_released ... ok
+test loaded_rotation_persists_and_allows_second_save_and_new_password_reload ... ok
+test rotation_preserves_all_credentials_with_fresh_salt_and_nonces ... ok
+test rotation_rekeys_an_empty_vault ... ok
+test manifest_rejects_deleted_reordered_inserted_and_replaced_entries_before_unlock ... ok
+test wrong_password_cannot_unlock_either_empty_or_nonempty_vault ... ok
+test envelope_authenticates_entry_identity_role_nonce_and_kdf_salt ... ok
+test ai_api_keys_enforce_owner_and_role_bindings_and_authenticate_metadata ... ok
+test aggregate_document_limit_rolls_back_new_and_replacement_entries ... ok
+test stale_old_key_writer_cannot_overwrite_committed_rotation ... ok
+test stale_rotation_cannot_overwrite_a_newer_save_with_original_key ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.06s
+
+     Running tests/workflow_audit.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/4fcc7b53055fffd7/out/workflow_audit-4fcc7b53055fffd7)
+
+running 7 tests
+test invalid_wire_rejects_unknown_fields_duplicate_ids_and_impossible_outcomes ... ok
+test intended_schedule_time_uses_the_existing_signed_calendar_domain ... ok
+test repeated_receipt_is_idempotent_but_conflicting_receipts_are_atomic ... ok
+test finite_occurrence_identity_is_not_reused_by_another_run ... ok
+test backward_clock_retains_insertion_order_without_replaying ... ok
+test restart_preserves_distinct_outcomes_and_legacy_missing_field_is_empty ... ok
+workflow audit 100x128 input -> retained 16 runs / 2048 tasks; state 582178 bytes; actual restart validation 15.113792ms
+test max_workload_is_trimmed_as_whole_runs_with_bounded_disk_and_validation ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/workflow_audit_profile_sync.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/190fd12639743e6f/out/workflow_audit_profile_sync-190fd12639743e6f)
+
+running 1 test
+test reviewed_sync_preserves_both_local_histories_and_legacy_state_loading ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+
+     Running tests/workflow_audit_schema.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/b4478100583dc933/out/workflow_audit_schema-b4478100583dc933)
+
+running 4 tests
+test reviewed_parser_rejects_duplicate_tags_missing_fields_and_wrong_scalar_types ... ok
+nonauthor documented compatibility: 15 outcome + 2 trigger representations
+test reviewed_parser_preserves_exact_documented_wire_for_every_valid_variant ... ok
+nonauthor hostile extra-field controls: 510 rejected
+test reviewed_parser_rejects_extra_keys_regardless_of_json_value_type ... ok
+nonauthor real temporary StateStore: 15 valid history records load; unknown context rejects whole state
+test reviewed_parser_loads_complete_valid_history_and_fails_closed_on_extra_context ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/workflow_audit_wire_compatibility.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/6c54df6f28b373c1/out/workflow_audit_wire_compatibility-6c54df6f28b373c1)
+
+running 1 test
+test legacy_forms_have_fixed_projections_and_cannot_attach_context ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/workspace_layout.rs (work/review-final-50ca0ea/target/debug/build/keelshell-core/51ec1b5c27d1114e/out/workspace_layout-51ec1b5c27d1114e)
+
+running 12 tests
+test every_leaf_must_have_one_tab_collection_and_splits_cannot_have_tabs ... ok
+test window_pane_and_tab_identities_and_selections_are_checked ... ok
+test aggregate_window_and_tab_limits_apply_across_individually_valid_panes ... ok
+test connection_export_omits_layout_and_import_preserves_local_layout ... ok
+test unknown_action_and_secret_fields_are_rejected_at_every_layout_level ... ok
+test nested_layout_tabs_and_selections_round_trip_through_disk ... ok
+test missing_trashed_and_unsaved_profiles_are_inactive_placeholders ... ok
+test legacy_state_load_does_not_add_layout_or_write_disk ... ok
+test layout_edit_invalidates_equality_and_cannot_overwrite_a_newer_save ... ok
+test invalid_in_memory_layout_save_keeps_last_valid_disk_and_revision ... ok
+test unsupported_null_and_malformed_layout_documents_cannot_be_overwritten ... ok
+test explicit_backup_restore_preserves_exact_layout_and_issues_new_revision ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+   Doc-tests keelshell_core
+
+running 7 tests
+test crates/keelshell-core/src/diff.rs - diff::diff_text (line 220) ... ok
+test crates/keelshell-core/src/snippet_template.rs - snippet_template::compile_snippet_template (line 228) ... ok
+test crates/keelshell-core/src/text_merge.rs - text_merge::merge_text (line 113) ... ok
+test crates/keelshell-core/src/pane_layout.rs - pane_layout::PaneLayout (line 121) ... ok
+test crates/keelshell-core/src/text_patch.rs - text_patch::apply_text_patch (line 17) ... ok
+test crates/keelshell-core/src/batch_workflow.rs - batch_workflow::BatchWorkflowPlan::new (line 142) ... ok
+test crates/keelshell-core/src/connection_library.rs - connection_library::AppState::create_folder (line 237) ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.91s; merged doctests compilation took 0.62s
