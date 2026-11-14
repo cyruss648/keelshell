@@ -1143,6 +1143,10 @@ impl FilesPanel {
 
     fn advance_recovery_mutation_generation(&mut self) {
         self.recovery_mutation_generation = self.recovery_mutation_generation.wrapping_add(1);
+        // The mutation has already updated the authoritative in-memory
+        // snapshot. Any load captured before it is stale and must not leave
+        // the panel permanently marked as loading when its callback returns.
+        self.recovery_loading = false;
     }
 
     pub(super) fn apply_persisted_recovery_progress(
@@ -1151,13 +1155,16 @@ impl FilesPanel {
         existing_bytes: u64,
         total_bytes: u64,
     ) -> Result<(), String> {
-        self.advance_recovery_mutation_generation();
-        remember_persisted_recovery_progress(
+        let result = remember_persisted_recovery_progress(
             &mut self.recovery_records,
             id,
             existing_bytes,
             total_bytes,
-        )
+        );
+        if result.is_ok() {
+            self.advance_recovery_mutation_generation();
+        }
+        result
     }
 
     /// Preserve local drafts and completed records while retiring remote capabilities.

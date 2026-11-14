@@ -856,6 +856,7 @@ async fn stale_recovery_load_cannot_restore_a_record_after_discard_mutation(
     });
     h.panel.read_with(cx, |panel, _| {
         assert!(panel.recovery_records.is_empty());
+        assert!(!panel.recovery_loading);
     });
     assert!(store.load().expect("load after discard race").is_empty());
 }
@@ -933,6 +934,7 @@ async fn stale_recovery_load_cannot_revert_persisted_plan_progress(cx: &mut Test
             .expect("updated recovery record");
         assert_eq!(record.reviewed_existing_bytes, 6);
         assert_eq!(record.transferred_bytes, 6);
+        assert!(!panel.recovery_loading);
     });
     let persisted = store
         .load()
