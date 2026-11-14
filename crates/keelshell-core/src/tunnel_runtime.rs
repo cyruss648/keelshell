@@ -13,7 +13,8 @@ use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::{
-    AppState, AuthMethod, Error, RouteIdentity, SnapshotRevision, TunnelRule, ValidationError,
+    AppState, AuthMethod, Error, ReconnectSessionId, RouteIdentity, SnapshotRevision, TunnelRule,
+    ValidationError,
 };
 
 /// Current format for a named tunnel runtime snapshot.
@@ -21,6 +22,64 @@ pub const TUNNEL_RUNTIME_SNAPSHOT_VERSION: u32 = 1;
 /// Maximum number of crash-recovery candidates retained in one state file.
 pub const MAX_TUNNEL_RUNTIME_SNAPSHOTS: usize = 256;
 const MAX_ASSIGNED_LISTENER_BYTES: usize = 512;
+
+/// Ephemeral authority for tunnel actions owned by one SSH session.
+///
+/// The owner is not persisted with a recovery candidate. A session replacement
+/// must rotate it so a stop or recovery review created for the old session
+/// cannot authorize work against the new one. Retiring an owner does not cancel
+/// its workers; the old panel still owns cleanup until the original transport
+/// reports a terminal result.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct TunnelRuntimeOwner {
+    session: ReconnectSessionId,
+    nonce: Uuid,
+}
+
+impl TunnelRuntimeOwner {
+    /// Create an owner for a newly established SSH session.
+    pub fn fresh() -> Self {
+        Self {
+            session: ReconnectSessionId::fresh(),
+            nonce: Uuid::new_v4(),
+        }
+    }
+
+    /// Rotate authority across a session replacement.
+    pub fn replaced(self) -> Self {
+        Self {
+            session: self.session.replaced(),
+            nonce: Uuid::new_v4(),
+        }
+    }
+
+    /// Issue a review token bound to this exact owner.
+    pub fn review_token(self) -> TunnelRuntimeReviewToken {
+        TunnelRuntimeReviewToken {
+            owner: self,
+            nonce: Uuid::new_v4(),
+        }
+    }
+
+    /// Return whether a review token belongs to this live owner.
+    pub fn accepts(self, token: TunnelRuntimeReviewToken) -> bool {
+        token.owner == self
+    }
+}
+
+/// Ephemeral review receipt bound to one tunnel runtime owner.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct TunnelRuntimeReviewToken {
+    owner: TunnelRuntimeOwner,
+    nonce: Uuid,
+}
+
+impl TunnelRuntimeReviewToken {
+    /// Return the owner that issued this receipt.
+    pub const fn owner(self) -> TunnelRuntimeOwner {
+        self.owner
+    }
+}
 
 /// The authentication category used by each saved route hop.
 ///
@@ -229,6 +288,9 @@ pub enum TunnelRecoveryError {
     /// The state or candidate changed after review.
     #[error("named tunnel recovery review is stale; inspect and review again")]
     StateChanged,
+    /// The SSH session that issued the review was replaced.
+    #[error("named tunnel recovery review belongs to a replaced SSH session")]
+    RuntimeOwnerChanged,
 }
 
 /// A candidate status that can be displayed without implying that a listener
@@ -348,6 +410,7 @@ fn validate_assigned_listener(value: &str) -> Result<(), ValidationError> {
 pub struct ValidatedTunnelRecoveryPlan {
     snapshot: TunnelRuntimeSnapshot,
     state_revision: SnapshotRevision,
+    runtime_owner: TunnelRuntimeOwner,
     review_token: TunnelRecoveryReviewToken,
 }
 
@@ -362,6 +425,11 @@ impl ValidatedTunnelRecoveryPlan {
         self.review_token
     }
 
+    /// Return the transient tunnel owner that reviewed this candidate.
+    pub const fn runtime_owner(&self) -> TunnelRuntimeOwner {
+        self.runtime_owner
+    }
+
     /// Confirm the exact candidate against a fresh current state.
     ///
     /// Confirmation only authorizes a new explicit start. It does not carry or
@@ -371,8 +439,23 @@ impl ValidatedTunnelRecoveryPlan {
         state: &AppState,
         token: TunnelRecoveryReviewToken,
     ) -> Result<ConfirmedTunnelRecovery, TunnelRecoveryError> {
+        let runtime_owner = self.runtime_owner;
+        self.confirm_for(state, token, runtime_owner)
+    }
+
+    /// Confirm the candidate only while the reviewing SSH session remains the
+    /// current owner.
+    pub fn confirm_for(
+        self,
+        state: &AppState,
+        token: TunnelRecoveryReviewToken,
+        runtime_owner: TunnelRuntimeOwner,
+    ) -> Result<ConfirmedTunnelRecovery, TunnelRecoveryError> {
         if token != self.review_token {
             return Err(TunnelRecoveryError::TokenMismatch);
+        }
+        if runtime_owner != self.runtime_owner {
+            return Err(TunnelRecoveryError::RuntimeOwnerChanged);
         }
         if state.snapshot != self.state_revision {
             return Err(TunnelRecoveryError::StateChanged);
@@ -545,6 +628,15 @@ impl AppState {
         &self,
         snapshot_id: Uuid,
     ) -> Result<ValidatedTunnelRecoveryPlan, TunnelRecoveryError> {
+        self.plan_tunnel_runtime_recovery_for(snapshot_id, TunnelRuntimeOwner::fresh())
+    }
+
+    /// Build a recovery plan bound to the current SSH session's tunnel owner.
+    pub fn plan_tunnel_runtime_recovery_for(
+        &self,
+        snapshot_id: Uuid,
+        runtime_owner: TunnelRuntimeOwner,
+    ) -> Result<ValidatedTunnelRecoveryPlan, TunnelRecoveryError> {
         self.assess_tunnel_runtime_snapshot(snapshot_id)?;
         let snapshot = self
             .tunnel_runtime_snapshots
@@ -555,6 +647,7 @@ impl AppState {
         Ok(ValidatedTunnelRecoveryPlan {
             snapshot,
             state_revision: self.snapshot,
+            runtime_owner,
             review_token: TunnelRecoveryReviewToken(Uuid::new_v4()),
         })
     }

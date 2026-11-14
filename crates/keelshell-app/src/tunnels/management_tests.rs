@@ -756,6 +756,57 @@ fn stale_editor_and_suspended_panel_cannot_save_or_retarget(cx: &mut TestAppCont
 }
 
 #[gpui_kit::test]
+fn session_replacement_rotates_tunnel_owner_and_clears_stop_review(cx: &mut TestAppContext) {
+    use crate::tunnels::{TrafficStats, TunnelRow};
+    use keelshell_session::forwarding::TrafficSnapshot;
+    use std::sync::atomic::AtomicBool;
+
+    let fixture = SshFixture::new();
+    let (window, panel) = fixture.mount(cx);
+    let rule_id = fixture.state.tunnel_rules[0].id;
+    cx.update_window(window, |_, _, cx| {
+        panel.update(cx, |panel, cx| {
+            let owner = panel.runtime_owner;
+            panel.rows.push(TunnelRow {
+                id: 0,
+                rule_id: Some(rule_id),
+                direction: crate::tunnels::Direction::Local,
+                bound_address: Some("127.0.0.1:40123".into()),
+                description: Message::new("旧会话", "Old session"),
+                status: Message::new("正在监听", "Listening"),
+                cancel: Arc::new(AtomicBool::new(false)),
+                incoming: std::sync::mpsc::sync_channel(1).1,
+                finished: false,
+                listening: true,
+                failed: false,
+                unresolved_cleanup: None,
+                proxy_address: None,
+                traffic: TrafficStats::default(),
+                last_traffic: TrafficSnapshot::default(),
+                rule_snapshot: Some(fixture.state.tunnel_rules[0].clone()),
+                connection_binding: None,
+                runtime_snapshot: None,
+                runtime_persisted: false,
+                runtime_dirty: false,
+                runtime_remove_requested: false,
+                runtime_operation: None,
+            });
+            let workers = panel.rule_workers(rule_id);
+            panel.review_rule_stop(rule_id, panel.rule_epoch, &workers, cx);
+            assert!(panel.rule_stop_review.is_some());
+
+            panel.suspend(cx);
+
+            assert_ne!(panel.runtime_owner, owner);
+            assert!(panel.rule_stop_review.is_none());
+            assert!(panel.rows[0].cancel.load(Ordering::Acquire));
+            assert!(panel.has_active_rule(rule_id));
+        });
+    })
+    .expect("session replacement retires old tunnel review authority");
+}
+
+#[gpui_kit::test]
 async fn rule_stop_preserves_other_workers_and_original_ownership_after_edit(
     cx: &mut TestAppContext,
 ) {

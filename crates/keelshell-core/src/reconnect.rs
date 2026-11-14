@@ -3,8 +3,29 @@
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::ValidationError;
+
+/// Ephemeral identity for one live SSH session.
+///
+/// This identity is deliberately not serialized. Replacing a session creates a
+/// fresh identity even when it reconnects to the same saved route, so reviews
+/// and runtime owners cannot cross the replacement boundary.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct ReconnectSessionId(Uuid);
+
+impl ReconnectSessionId {
+    /// Create an identity for a newly established session.
+    pub fn fresh() -> Self {
+        Self(Uuid::new_v4())
+    }
+
+    /// Create the identity for a replacement session.
+    pub fn replaced(self) -> Self {
+        Self::fresh()
+    }
+}
 
 /// Reconnection preferences for the final profile of an SSH route.
 ///

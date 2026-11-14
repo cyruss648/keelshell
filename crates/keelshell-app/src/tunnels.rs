@@ -14,8 +14,9 @@ use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use keelshell_core::{
     AppState, TunnelConnectionBinding, TunnelRecoveryError, TunnelRecoveryReviewToken, TunnelRule,
-    TunnelRuleAction, TunnelRuleKind, TunnelRuleReviewToken, TunnelRuntimeSnapshot,
-    TunnelRuntimeStatus, ValidatedTunnelRecoveryPlan, ValidatedTunnelRulePlan,
+    TunnelRuleAction, TunnelRuleKind, TunnelRuleReviewToken, TunnelRuntimeOwner,
+    TunnelRuntimeReviewToken, TunnelRuntimeSnapshot, TunnelRuntimeStatus,
+    ValidatedTunnelRecoveryPlan, ValidatedTunnelRulePlan,
 };
 use keelshell_session::forwarding::{
     DynamicForward, LocalForward, RemoteForward, TrafficSnapshot, TrafficStats,
@@ -244,7 +245,7 @@ impl Drop for TunnelRow {
 
 pub struct TunnelsPanel {
     session: Option<SshSession>,
-    runtime_owner: uuid::Uuid,
+    runtime_owner: TunnelRuntimeOwner,
     suspended: bool,
     host: String,
     runtime: Arc<Runtime>,
@@ -307,7 +308,7 @@ impl TunnelsPanel {
         });
         let mut panel = Self {
             session: Some(session),
-            runtime_owner: uuid::Uuid::new_v4(),
+            runtime_owner: TunnelRuntimeOwner::fresh(),
             suspended: false,
             host,
             runtime,
@@ -590,6 +591,7 @@ impl TunnelsPanel {
         }
         self.suspended = true;
         self.session = None;
+        self.runtime_owner = self.runtime_owner.replaced();
         self.rule_epoch = uuid::Uuid::new_v4();
         self.rule_plan = None;
         self.rule_stop_review = None;

@@ -2,7 +2,8 @@
 
 use keelshell_core::{
     AppState, AuthMethod, Connection, Error, StateStore, TunnelConnectionBinding,
-    TunnelRecoveryError, TunnelRule, TunnelRuleKind, TunnelRuntimeSnapshot, TunnelRuntimeStatus,
+    TunnelRecoveryError, TunnelRule, TunnelRuleKind, TunnelRuntimeOwner, TunnelRuntimeSnapshot,
+    TunnelRuntimeStatus,
 };
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
@@ -45,6 +46,17 @@ fn candidate(
         1_700_000_000,
     )
     .expect("candidate")
+}
+
+#[test]
+fn replacing_runtime_owner_rejects_old_review_tokens() {
+    let original = TunnelRuntimeOwner::fresh();
+    let token = original.review_token();
+    let replacement = original.replaced();
+
+    assert!(original.accepts(token));
+    assert!(!replacement.accepts(token));
+    assert_eq!(token.owner(), original);
 }
 
 #[test]
@@ -279,6 +291,26 @@ fn recovery_confirmation_is_token_bound_and_state_stale() -> TestResult {
     assert_eq!(
         plan.confirm(&changed, token).expect_err("changed revision"),
         TunnelRecoveryError::StateChanged
+    );
+    Ok(())
+}
+
+#[test]
+fn recovery_confirmation_rejects_a_replaced_runtime_owner() -> TestResult {
+    let (mut state, connection_id, rule_id) = fixture();
+    let snapshot = candidate(&state, connection_id, rule_id);
+    let snapshot_id = snapshot.id;
+    state.upsert_tunnel_runtime_snapshot(snapshot)?;
+
+    let original = TunnelRuntimeOwner::fresh();
+    let plan = state.plan_tunnel_runtime_recovery_for(snapshot_id, original)?;
+    let token = plan.review_token();
+    let replacement = original.replaced();
+
+    assert_eq!(
+        plan.confirm_for(&state, token, replacement)
+            .expect_err("replaced session must not confirm old recovery"),
+        TunnelRecoveryError::RuntimeOwnerChanged
     );
     Ok(())
 }

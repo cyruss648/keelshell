@@ -129,7 +129,7 @@ pub use pane_layout::{
     PaneNode, PaneNodeId, SplitAxis,
 };
 pub use proxy::{ConnectionProxy, ProxyAuthentication, ProxyKind};
-pub use reconnect::ReconnectPolicy;
+pub use reconnect::{ReconnectPolicy, ReconnectSessionId};
 pub use routes::{ConnectionRoute, HostKeyScope, MAX_JUMP_HOSTS, RouteEndpoint, RouteIdentity};
 pub use scheduled_workflow::{
     MAX_WORKFLOW_SCHEDULE_COUNT, MAX_WORKFLOW_SCHEDULE_GRACE_SECONDS,
@@ -157,7 +157,8 @@ pub use tunnel_rules::{
 pub use tunnel_runtime::{
     ConfirmedTunnelRecovery, MAX_TUNNEL_RUNTIME_SNAPSHOTS, TUNNEL_RUNTIME_SNAPSHOT_VERSION,
     TunnelAuthKind, TunnelConnectionBinding, TunnelRecoveryError, TunnelRecoveryReviewToken,
-    TunnelRuntimeSnapshot, TunnelRuntimeStatus, ValidatedTunnelRecoveryPlan,
+    TunnelRuntimeOwner, TunnelRuntimeReviewToken, TunnelRuntimeSnapshot, TunnelRuntimeStatus,
+    ValidatedTunnelRecoveryPlan,
 };
 pub use updates::{UpdateCheckFrequency, UpdatePreferences};
 pub use vault::{CredentialKind, CredentialMetadata, CredentialVault, VaultStore};

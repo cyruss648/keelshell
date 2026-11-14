@@ -2,7 +2,7 @@ use std::{fs, path::PathBuf, time::Duration};
 
 use keelshell_core::{
     AppState, AuthMethod, Connection, ConnectionProxy, Error, ProxyAuthentication, ProxyKind,
-    ReconnectPolicy, StateStore,
+    ReconnectPolicy, ReconnectSessionId, StateStore,
 };
 use serde_json::{Value, json};
 use uuid::Uuid;
@@ -15,6 +15,14 @@ fn automatic() -> ReconnectPolicy {
         initial_delay_seconds: 2,
         max_delay_seconds: 30,
     }
+}
+
+#[test]
+fn replacing_a_session_always_creates_a_new_ephemeral_identity() {
+    let original = ReconnectSessionId::fresh();
+    let replacement = original.replaced();
+    assert_ne!(original, replacement);
+    assert_ne!(ReconnectSessionId::fresh(), original);
 }
 
 fn chain() -> AppState {

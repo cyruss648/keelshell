@@ -112,7 +112,7 @@ impl TunnelsPanel {
             cx.notify();
             return;
         }
-        match state.plan_tunnel_runtime_recovery(id) {
+        match state.plan_tunnel_runtime_recovery_for(id, self.runtime_owner) {
             Ok(plan) => {
                 self.recovery_inspected = Some(id);
                 self.recovery_review = Some(RuntimeRecoveryReview { plan });
@@ -170,7 +170,11 @@ impl TunnelsPanel {
             cx.notify();
             return;
         };
-        let confirmed = match review.plan.clone().confirm(&state, token) {
+        let confirmed = match review
+            .plan
+            .clone()
+            .confirm_for(&state, token, self.runtime_owner)
+        {
             Ok(confirmed) => confirmed,
             Err(error) => {
                 self.recovery_review = None;
@@ -690,7 +694,7 @@ impl TunnelsPanel {
         // Runtime ownership outlives saved metadata. A reload can remove the
         // rule or its connection without revoking the ability to stop its rows.
         self.rule_stop_review = Some(RuleStopReview {
-            token: uuid::Uuid::new_v4(),
+            token: self.runtime_owner.review_token(),
             owner: self.runtime_owner,
             rule_id: id,
             workers: workers.to_vec(),
@@ -700,7 +704,7 @@ impl TunnelsPanel {
         cx.notify();
     }
 
-    fn confirm_rule_stop(&mut self, token: uuid::Uuid, cx: &mut Context<Self>) {
+    fn confirm_rule_stop(&mut self, token: TunnelRuntimeReviewToken, cx: &mut Context<Self>) {
         let Some(review) = self
             .rule_stop_review
             .as_ref()
@@ -712,6 +716,7 @@ impl TunnelsPanel {
             return;
         }
         let valid = self.runtime_owner == review.owner
+            && self.runtime_owner.accepts(token)
             && self.rule_workers(review.rule_id) == review.workers;
         if valid {
             let workers = review.workers.clone();
@@ -752,8 +757,8 @@ pub(super) struct RuleChangeReview {
 }
 
 pub(super) struct RuleStopReview {
-    pub token: uuid::Uuid,
-    pub owner: uuid::Uuid,
+    pub token: TunnelRuntimeReviewToken,
+    pub owner: TunnelRuntimeOwner,
     pub rule_id: uuid::Uuid,
     // Panel-local IDs are never reused; a later start cannot inherit this review.
     pub workers: Vec<usize>,
@@ -979,6 +984,10 @@ fn recovery_error_message(error: TunnelRecoveryError) -> Message {
         TunnelRecoveryError::StateChanged => Message::new(
             "恢复审核已过期；请重新 Inspect 并 Review start。",
             "The recovery review expired. Inspect the candidate and choose Review start again.",
+        ),
+        TunnelRecoveryError::RuntimeOwnerChanged => Message::new(
+            "原 SSH 会话已被替换，恢复审核已失效；请在当前会话重新审核。",
+            "The original SSH session was replaced, so recovery review expired. Review it again on the current session.",
         ),
     }
 }
