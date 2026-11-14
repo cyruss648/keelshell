@@ -187,6 +187,7 @@ pub struct FilesPanel {
     recovery_store: Arc<TransferRecoveryStore>,
     recovery_records: Vec<TransferRecoveryRecord>,
     recovery_loading: bool,
+    recovery_load_generation: u64,
     recovery_load_error: Option<String>,
     recovery_writes: HashSet<uuid::Uuid>,
     recovery_claim_requests: HashSet<uuid::Uuid>,
@@ -346,6 +347,15 @@ fn persisted_recovery_is_bound(records: &[TransferRecoveryRecord], id: uuid::Uui
         .iter()
         .find(|record| record.id == id)
         .map(|record| record.connection_id.is_some())
+}
+
+fn recovery_load_is_current(
+    expected_session: uuid::Uuid,
+    current_session: uuid::Uuid,
+    expected_generation: u64,
+    current_generation: u64,
+) -> bool {
+    expected_session == current_session && expected_generation == current_generation
 }
 
 fn remember_persisted_recovery_progress(
@@ -970,6 +980,7 @@ impl FilesPanel {
             recovery_store,
             recovery_records: Vec::new(),
             recovery_loading: true,
+            recovery_load_generation: 0,
             recovery_load_error: None,
             recovery_writes: HashSet::new(),
             recovery_claim_requests: HashSet::new(),
@@ -1064,6 +1075,9 @@ impl FilesPanel {
         let runtime = self.runtime.clone();
         let executor = cx.background_executor().clone();
         let expected_session = self.session_token;
+        self.recovery_load_generation = self.recovery_load_generation.wrapping_add(1);
+        let expected_generation = self.recovery_load_generation;
+        self.recovery_loading = true;
         let task = crate::runtime_bridge::spawn(&runtime, executor, async move {
             tokio::task::spawn_blocking(move || store.load())
                 .await
@@ -1073,7 +1087,12 @@ impl FilesPanel {
         cx.spawn_in(window, async move |this, cx| {
             let result = task.await;
             let _ = this.update_in(cx, |view, _, cx| {
-                if view.session_token != expected_session {
+                if !recovery_load_is_current(
+                    expected_session,
+                    view.session_token,
+                    expected_generation,
+                    view.recovery_load_generation,
+                ) {
                     return;
                 }
                 view.recovery_loading = false;
@@ -2591,8 +2610,8 @@ mod tests {
         FileFailure, Operation, Outcome, RecoveryCandidate, TransferDirection, TransferPhase,
         TransferRecoveryWriter, child_path, modified_label, parse_permissions_mode,
         permissions_label, persisted_recovery_is_bound, persisted_resume_review_message,
-        recovery_connection_matches, recovery_is_available, recovery_record_for,
-        recovery_request_is_allowed, size_label, terminal_transfer_phase,
+        recovery_connection_matches, recovery_is_available, recovery_load_is_current,
+        recovery_record_for, recovery_request_is_allowed, size_label, terminal_transfer_phase,
         transfer_progress_message, update_persisted_recovery_progress,
     };
     use keelshell_core::{
@@ -2654,6 +2673,19 @@ mod tests {
                 "{name:?}"
             );
         }
+    }
+
+    #[test]
+    fn stale_recovery_load_cannot_replace_a_newer_session_or_generation() {
+        let session = uuid::Uuid::new_v4();
+        assert!(recovery_load_is_current(session, session, 7, 7));
+        assert!(!recovery_load_is_current(session, session, 6, 7));
+        assert!(!recovery_load_is_current(
+            session,
+            uuid::Uuid::new_v4(),
+            7,
+            7
+        ));
     }
 
     #[test]

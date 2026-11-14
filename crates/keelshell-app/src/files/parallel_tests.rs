@@ -635,6 +635,167 @@ async fn persisted_recovery_confirmation_failure_releases_the_claim(cx: &mut Tes
 }
 
 #[gpui_kit::test]
+async fn persistent_queued_upload_removes_its_record_after_success(cx: &mut TestAppContext) {
+    let directory = tempfile::TempDir::new().expect("persistent queue fixture directory");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let h = mount_recovery_harness(cx, store.clone(), Some(uuid::Uuid::new_v4()));
+    h.idle(cx).await;
+
+    let bytes = vec![0x4a; 96 * 1024];
+    let source = h.source("persistent-success.bin", &bytes);
+    h.local_input(cx, &source);
+    h.click(cx, "upload-file");
+    h.click(cx, "confirm-file-operation");
+
+    cx.wait_for(h.window, Duration::from_secs(12), |_, cx| {
+        h.panel.read(cx).transfer_jobs.first().is_some_and(|job| {
+            job.status.phase == TransferPhase::Completed
+                && store.load().is_ok_and(|records| records.is_empty())
+        })
+    })
+    .await;
+
+    assert_eq!(h.read("/persistent-success.bin"), bytes);
+}
+
+#[gpui_kit::test]
+async fn persistent_queue_initialization_failure_retains_a_failed_record(cx: &mut TestAppContext) {
+    let directory = tempfile::TempDir::new().expect("persistent queue failure fixture directory");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let h = mount_recovery_harness(cx, store.clone(), Some(uuid::Uuid::new_v4()));
+    h.idle(cx).await;
+
+    let source = h.source("persistent-queue-failure.bin", b"queue failure");
+    h.local_input(cx, &source);
+    h.click(cx, "upload-file");
+    h.runtime
+        .block_on(h.session.close())
+        .checked("close session before queue initialization");
+    h.click(cx, "confirm-file-operation");
+
+    cx.wait_for(h.window, Duration::from_secs(12), |_, cx| {
+        h.panel.read(cx).transfer_jobs.first().is_some_and(|job| {
+            job.status.phase == TransferPhase::Failed
+                && store.load().is_ok_and(|records| {
+                    records
+                        .iter()
+                        .any(|record| record.state == TransferRecoveryState::Failed)
+                })
+        })
+    })
+    .await;
+}
+
+#[gpui_kit::test]
+async fn persistent_cancel_retains_an_uncertain_or_cancelled_record(cx: &mut TestAppContext) {
+    let directory = tempfile::TempDir::new().expect("persistent cancellation fixture directory");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let h = mount_recovery_harness(cx, store.clone(), Some(uuid::Uuid::new_v4()));
+    h.idle(cx).await;
+
+    let bytes = vec![0x6b; 256 * 1024];
+    let source = h.source("persistent-cancel.bin", &bytes);
+    let hold = h
+        .server
+        .filesystem
+        .hold_atomic_upload_after_first("/persistent-cancel.bin")
+        .checked("hold persistent cancellation upload");
+    h.local_input(cx, &source);
+    h.click(cx, "upload-file");
+    h.click(cx, "confirm-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        hold.entered() == 1
+            && h.panel.read(cx).transfer_jobs.first().is_some_and(|job| {
+                matches!(
+                    job.status.phase,
+                    TransferPhase::Running | TransferPhase::Pausing
+                )
+            })
+    })
+    .await;
+
+    let job_id = h.panel.read_with(cx, |panel, _| panel.transfer_jobs[0].id);
+    h.click(cx, &format!("cancel-transfer-{job_id}"));
+    cx.wait_for(h.window, Duration::from_secs(12), |_, cx| {
+        h.panel.read(cx).transfer_jobs.first().is_some_and(|job| {
+            matches!(
+                job.status.phase,
+                TransferPhase::Uncertain | TransferPhase::Cancelled
+            )
+        }) && store.load().is_ok_and(|records| {
+            records.iter().any(|record| {
+                matches!(
+                    record.state,
+                    TransferRecoveryState::OutcomeUnknown | TransferRecoveryState::Cancelled
+                )
+            })
+        })
+    })
+    .await;
+    hold.release();
+}
+
+#[gpui_kit::test]
+async fn persistent_concurrent_terminals_leave_a_current_empty_recovery_list(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("persistent concurrent fixture directory");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let h = mount_recovery_harness(cx, store.clone(), Some(uuid::Uuid::new_v4()));
+    h.idle(cx).await;
+
+    let first_bytes = vec![0x71; 160 * 1024];
+    let second_bytes = vec![0x72; 160 * 1024];
+    let first = h.source("persistent-concurrent-one.bin", &first_bytes);
+    let second = h.source("persistent-concurrent-two.bin", &second_bytes);
+    let hold = h
+        .server
+        .filesystem
+        .hold_atomic_writes_after_first()
+        .checked("hold persistent concurrent uploads");
+    for source in [&first, &second] {
+        h.local_input(cx, source);
+        h.click(cx, "upload-file");
+        h.click(cx, "confirm-file-operation");
+    }
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        hold.entered() == 2
+            && h.panel.read(cx).transfer_jobs.len() == 2
+            && h.panel.read(cx).transfer_jobs.iter().all(|job| {
+                matches!(
+                    job.status.phase,
+                    TransferPhase::Running | TransferPhase::Queued
+                )
+            })
+    })
+    .await;
+
+    hold.release();
+    cx.wait_for(h.window, Duration::from_secs(15), |_, cx| {
+        let panel = h.panel.read(cx);
+        panel.transfer_jobs.len() == 2
+            && panel
+                .transfer_jobs
+                .iter()
+                .all(|job| job.status.phase == TransferPhase::Completed)
+            && !panel.recovery_loading
+            && panel.recovery_records.is_empty()
+            && store.load().is_ok_and(|records| records.is_empty())
+    })
+    .await;
+    assert_eq!(h.read("/persistent-concurrent-one.bin"), first_bytes);
+    assert_eq!(h.read("/persistent-concurrent-two.bin"), second_bytes);
+}
+
+#[gpui_kit::test]
 async fn isolation_inspection_requires_full_bilingual_risk_review_and_preserves_unknown_history(
     cx: &mut TestAppContext,
 ) {
