@@ -340,6 +340,35 @@ impl TransferRecoveryStore {
         })
     }
 
+    /// Persist one record and retain its exclusive claim for the caller.
+    ///
+    /// This closes the gap between the first durable `Unfinished` checkpoint
+    /// and the worker that owns the transfer. The record becomes visible only
+    /// while its per-record claim is already held, so another process cannot
+    /// inspect and start a competing recovery between those two actions.
+    pub fn upsert_and_claim(
+        &self,
+        record: TransferRecoveryRecord,
+    ) -> Result<TransferRecoveryClaim, Error> {
+        record.validate()?;
+        let Some(path) = self.path.as_deref() else {
+            return Ok(TransferRecoveryClaim {
+                path: None,
+                id: record.id,
+                _lock: None,
+            });
+        };
+        let _guard = self.synchronization.lock().map_err(|_| Error::Poisoned)?;
+        let claim_lock = self.open_claim_lock(path, record.id)?;
+        let _lock = self.lock_file(path)?;
+        upsert_record(path, record.clone())?;
+        Ok(TransferRecoveryClaim {
+            path: Some(path.to_path_buf()),
+            id: record.id,
+            _lock: Some(claim_lock),
+        })
+    }
+
     /// Atomically add or replace one record.
     pub fn upsert(&self, record: TransferRecoveryRecord) -> Result<(), Error> {
         record.validate()?;
@@ -779,6 +808,29 @@ mod tests {
             second.claim(id),
             Err(Error::TransferRecoveryNotFound)
         ));
+    }
+
+    #[test]
+    fn upsert_and_claim_publishes_a_record_only_while_the_claim_is_held() {
+        let directory = TempDir::new().expect("temporary directory");
+        let path = directory.path().join("transfer-recovery.json");
+        let first = TransferRecoveryStore::new(&path);
+        let second = TransferRecoveryStore::new(&path);
+        let id = Uuid::new_v4();
+
+        let claim = first
+            .upsert_and_claim(record(id, TransferRecoveryState::Unfinished))
+            .expect("persist and claim recovery record");
+        assert_eq!(first.load().expect("load claimed record").len(), 1);
+        assert!(matches!(second.claim(id), Err(Error::Busy)));
+        assert!(matches!(
+            second.upsert(record(id, TransferRecoveryState::Failed)),
+            Err(Error::Busy)
+        ));
+
+        drop(claim);
+        let second_claim = second.claim(id).expect("claim after owner release");
+        drop(second_claim);
     }
 
     #[test]

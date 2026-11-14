@@ -13,6 +13,46 @@ use keelshell_session::sftp::{TransferEvent, TransferSpec};
 use std::sync::Arc;
 use std::time::Duration;
 
+fn mount_recovery_harness(
+    cx: &mut TestAppContext,
+    store: Arc<TransferRecoveryStore>,
+    connection_id: Option<uuid::Uuid>,
+) -> Harness {
+    Harness::new_with(cx, {
+        let store = store.clone();
+        move |cx, session, runtime| {
+            cx.update(|cx| {
+                gpui_kit::init(cx);
+                i18n::set_language(Language::ZhCn, cx);
+                gpui_kit::open_window(
+                    WindowOptions {
+                        window_bounds: Some(WindowBounds::Windowed(Bounds::new(
+                            point(px(0.), px(0.)),
+                            size(px(1100.), px(440.)),
+                        ))),
+                        ..Default::default()
+                    },
+                    cx,
+                    |window, cx| {
+                        cx.new(|cx| {
+                            FilesPanel::new_with_recovery_store_and_connection(
+                                session,
+                                "fixture SSH".into(),
+                                connection_id,
+                                runtime,
+                                store,
+                                window,
+                                cx,
+                            )
+                        })
+                    },
+                )
+                .checked("mount persisted recovery fixture")
+            })
+        }
+    })
+}
+
 #[gpui_kit::test]
 async fn reviewed_queue_overlaps_jobs_and_targets_pause_cancel_and_concurrency_controls(
     cx: &mut TestAppContext,
@@ -413,6 +453,184 @@ async fn unbound_persisted_recovery_requires_host_confirmation_before_read_only_
     let claim = store
         .claim(recovery_id)
         .expect("cancelling host confirmation releases the claim");
+    drop(claim);
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_plan_progress_is_durable_when_review_is_cancelled(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("recovery fixture directory");
+    let source = directory
+        .path()
+        .canonicalize()
+        .expect("canonical recovery fixture directory")
+        .join("plan-source.bin");
+    std::fs::write(&source, b"0123456789abcdef").expect("write recovery fixture source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let recovery_id = uuid::Uuid::new_v4();
+    let connection_id = uuid::Uuid::new_v4();
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                recovery_id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/plan-restart.bin",
+                false,
+                TransferRecoveryState::Failed,
+                2,
+                Some(16),
+                2,
+                100,
+                100,
+            )
+            .expect("valid persisted recovery fixture"),
+        )
+        .expect("persist recovery fixture");
+
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    h.seed("/plan-restart.bin", b"012345");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        if window.try_find("file-transfer-queue-details").is_none() {
+            window.click("toggle-file-transfer-queue", cx);
+        }
+        window.render_frame(cx);
+    })
+    .checked("open persisted recovery queue");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        let inspect = format!("inspect-persisted-transfer-{recovery_id}");
+        assert!(window.find(inspect.clone()).visible());
+        window.click(inspect, cx);
+    })
+    .checked("inspect persisted recovery after queue render");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel
+            .read(cx)
+            .pending
+            .as_ref()
+            .is_some_and(|(_, operation)| {
+                matches!(
+                    operation,
+                    Operation::ResumePersistedFile(id, plan)
+                        if *id == recovery_id && plan.existing_bytes() == 6
+                )
+            })
+    })
+    .await;
+
+    let updated = store
+        .load()
+        .expect("load progress after read-only plan")
+        .into_iter()
+        .find(|record| record.id == recovery_id)
+        .expect("planned recovery record");
+    assert_eq!(updated.reviewed_existing_bytes, 6);
+    assert_eq!(updated.total_bytes, Some(16));
+    assert_eq!(updated.transferred_bytes, 6);
+
+    h.click(cx, "cancel-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel.read(cx).recovery_claim.is_none()
+    })
+    .await;
+    let retained = store
+        .load()
+        .expect("load progress after cancelled review")
+        .into_iter()
+        .find(|record| record.id == recovery_id)
+        .expect("retained recovery record");
+    assert_eq!(retained.reviewed_existing_bytes, 6);
+    assert_eq!(retained.transferred_bytes, 6);
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_confirmation_failure_releases_the_claim(cx: &mut TestAppContext) {
+    let directory = tempfile::TempDir::new().expect("recovery fixture directory");
+    let source = directory
+        .path()
+        .canonicalize()
+        .expect("canonical recovery fixture directory")
+        .join("stale-source.bin");
+    std::fs::write(&source, b"0123456789abcdef").expect("write recovery fixture source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let recovery_id = uuid::Uuid::new_v4();
+    let connection_id = uuid::Uuid::new_v4();
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                recovery_id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/stale-restart.bin",
+                false,
+                TransferRecoveryState::Failed,
+                2,
+                Some(16),
+                2,
+                100,
+                100,
+            )
+            .expect("valid persisted recovery fixture"),
+        )
+        .expect("persist recovery fixture");
+
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    h.seed("/stale-restart.bin", b"012345");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        if window.try_find("file-transfer-queue-details").is_none() {
+            window.click("toggle-file-transfer-queue", cx);
+        }
+        window.render_frame(cx);
+    })
+    .checked("open persisted recovery queue for failed confirmation");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        let inspect = format!("inspect-persisted-transfer-{recovery_id}");
+        assert!(window.find(inspect.clone()).visible());
+        window.click(inspect, cx);
+    })
+    .checked("inspect persisted recovery before failed confirmation");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel.read(cx).pending.as_ref().is_some_and(|(_, operation)| {
+            matches!(operation, Operation::ResumePersistedFile(id, _) if *id == recovery_id)
+        })
+    })
+    .await;
+
+    h.panel.update(cx, |panel, _| {
+        panel.recovery_records.clear();
+    });
+    h.click(cx, "confirm-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel.read(cx).pending.is_none() && h.panel.read(cx).operation_id.is_none()
+    })
+    .await;
+
+    let claim = store
+        .claim(recovery_id)
+        .expect("confirmation preflight failure releases the claim");
     drop(claim);
 }
 

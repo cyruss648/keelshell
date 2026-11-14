@@ -293,6 +293,34 @@ impl FilesPanel {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        let persisted_id = operation.persisted_recovery_id();
+        let recovery_claim = if let Some(id) = persisted_id {
+            let claim = self.recovery_claim.take();
+            if self.active_recovery_id != Some(id) {
+                self.status = Message::new(
+                    "恢复审核已失效，请重新检查该传输记录。",
+                    "The recovery review is stale; inspect the transfer record again.",
+                );
+                return;
+            }
+            let Some(claim) = claim else {
+                self.status = Message::new(
+                    "无法确认恢复记录的独占审核权，已拒绝继续。",
+                    "The recovery record is not exclusively claimed; continuation was refused.",
+                );
+                return;
+            };
+            if claim.id() != id {
+                self.status = Message::new(
+                    "恢复记录审核权与目标不一致，已拒绝继续。",
+                    "The recovery claim does not match the reviewed target; continuation was refused.",
+                );
+                return;
+            }
+            Some(claim)
+        } else {
+            None
+        };
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
             return;
         };
@@ -302,7 +330,6 @@ impl FilesPanel {
         let Some((spec, directory)) = operation.recovery_spec() else {
             return;
         };
-        let persisted_id = operation.persisted_recovery_id();
         let recovery_id = persisted_id.unwrap_or_else(uuid::Uuid::new_v4);
         let persisted_progress = super::persisted_recovery_progress(&operation);
         let recovery_record = if let Some(id) = persisted_id {
@@ -387,35 +414,6 @@ impl FilesPanel {
             cx.notify();
             return;
         }
-        let recovery_claim = if let Some(id) = persisted_id {
-            if self.active_recovery_id != Some(id) {
-                self.status = Message::new(
-                    "恢复审核已失效，请重新检查该传输记录。",
-                    "The recovery review is stale; inspect the transfer record again.",
-                );
-                cx.notify();
-                return;
-            }
-            let Some(claim) = self.recovery_claim.take() else {
-                self.status = Message::new(
-                    "无法确认恢复记录的独占审核权，已拒绝继续。",
-                    "The recovery record is not exclusively claimed; continuation was refused.",
-                );
-                cx.notify();
-                return;
-            };
-            if claim.id() != id {
-                self.status = Message::new(
-                    "恢复记录审核权与目标不一致，已拒绝继续。",
-                    "The recovery claim does not match the reviewed target; continuation was refused.",
-                );
-                cx.notify();
-                return;
-            }
-            Some(claim)
-        } else {
-            None
-        };
         // Keep at most 32 completed records in addition to the bounded active
         // queue. Removing a record never drops an active handle or replays it.
         while self
@@ -445,7 +443,7 @@ impl FilesPanel {
             stop: stop.clone(),
             pause,
             recovery: RecoveryCandidate {
-                persisted_id,
+                persisted_id: Some(recovery_id),
                 session_token,
                 spec,
                 directory,
@@ -657,8 +655,14 @@ impl FilesPanel {
                                         view.recovery = None;
                                     }
                                     view.active_recovery_id = None;
-                                    view.load_recovery_records(window, cx);
                                 }
+                                // Every queued transfer owns a durable record,
+                                // including jobs that were added while another
+                                // transfer was active. Refreshing on every
+                                // terminal result keeps those records visible
+                                // even when the single selected recovery ID
+                                // has since moved to another job.
+                                view.load_recovery_records(window, cx);
                                 view.prune_transfer_history();
                             }
                             cx.notify();
@@ -723,7 +727,7 @@ impl FilesPanel {
         }
     }
 
-    fn request_persisted_recovery(
+    pub(super) fn request_persisted_recovery(
         &mut self,
         id: uuid::Uuid,
         window: &mut Window,
@@ -773,12 +777,12 @@ impl FilesPanel {
                 match result {
                     Ok(Ok(claim)) => {
                         view.active_recovery_id = Some(id);
-                        view.recovery_claim = Some(claim);
                         let operation = Operation::PlanPersistedRecovery {
                             id,
                             spec,
                             directory,
                         };
+                        view.recovery_claim = Some(claim);
                         if connection_bound {
                             view.run(operation, window, cx);
                         } else {

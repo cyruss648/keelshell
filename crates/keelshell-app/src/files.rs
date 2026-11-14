@@ -143,10 +143,12 @@ enum Outcome {
     PlannedPersistedFileResume {
         id: uuid::Uuid,
         plan: FileResumePlan,
+        recovery_claim: TransferRecoveryClaim,
     },
     PlannedPersistedDirectoryResume {
         id: uuid::Uuid,
         plan: DirectoryResumePlan,
+        recovery_claim: TransferRecoveryClaim,
     },
     Compared(DirectoryComparison),
     DirectorySyncPlanned(DirectorySyncComparison),
@@ -346,6 +348,21 @@ fn persisted_recovery_is_bound(records: &[TransferRecoveryRecord], id: uuid::Uui
         .map(|record| record.connection_id.is_some())
 }
 
+fn remember_persisted_recovery_progress(
+    records: &mut [TransferRecoveryRecord],
+    id: uuid::Uuid,
+    existing_bytes: u64,
+    total_bytes: u64,
+) -> Result<(), String> {
+    let record = records
+        .iter_mut()
+        .find(|record| record.id == id)
+        .ok_or_else(|| "the recovery record disappeared".to_owned())?;
+    update_persisted_recovery_progress(record, existing_bytes, total_bytes)?;
+    record.updated_at = current_unix_timestamp().max(record.created_at);
+    Ok(())
+}
+
 fn transfer_spec_from_recovery(record: &TransferRecoveryRecord) -> TransferSpec {
     TransferSpec {
         direction: match record.direction {
@@ -425,8 +442,16 @@ impl TransferRecoveryWriter {
         let mut record = self.record.clone();
         record.state = TransferRecoveryState::Unfinished;
         record.updated_at = current_unix_timestamp().max(record.created_at);
-        self.persist(record.clone())
-            .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
+        if self.claim.is_none() {
+            self.claim = Some(
+                self.store
+                    .upsert_and_claim(record.clone())
+                    .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?,
+            );
+        } else {
+            self.persist(record.clone())
+                .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
+        }
         self.record = record;
         self.last_persisted_bytes = self.record.transferred_bytes;
         self.last_error = None;
@@ -1230,6 +1255,13 @@ impl FilesPanel {
     }
     fn run(&mut self, operation: Operation, window: &mut Window, cx: &mut Context<Self>) {
         let persisted_recovery_id = operation.persisted_recovery_id();
+        let recovery_context = if matches!(&operation, Operation::PlanPersistedRecovery { .. }) {
+            self.recovery_claim
+                .take()
+                .map(|claim| (self.recovery_store.clone(), claim))
+        } else {
+            None
+        };
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
             if persisted_recovery_id.is_some() {
                 self.recovery_claim = None;
@@ -1422,6 +1454,7 @@ impl FilesPanel {
                     worker_stop,
                     pause_receiver,
                     &sender,
+                    recovery_context,
                 ));
                 let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
                 let _ = sender.send(WorkerMessage::Result {
@@ -1661,11 +1694,14 @@ impl FilesPanel {
                         view.status = Message::new("部分目录校验通过，请审核续传", "Existing tree verified; review continuation");
                         view.replace_pending_review(resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan));
                     }
-                    Ok(Outcome::PlannedPersistedFileResume { id, plan }) => {
+                    Ok(Outcome::PlannedPersistedFileResume {
+                        id,
+                        plan,
+                        recovery_claim,
+                    }) => {
                         let Some(connection_bound) =
                             persisted_recovery_is_bound(&view.recovery_records, id)
                         else {
-                            view.recovery_claim = None;
                             view.active_recovery_id = None;
                             view.status = Message::new(
                                 "恢复记录已消失，已拒绝继续；请重新加载文件面板。",
@@ -1674,6 +1710,21 @@ impl FilesPanel {
                             cx.notify();
                             return;
                         };
+                        if let Err(error) = remember_persisted_recovery_progress(
+                            &mut view.recovery_records,
+                            id,
+                            plan.existing_bytes(),
+                            plan.bytes(),
+                        ) {
+                            view.active_recovery_id = None;
+                            view.status = Message::new(
+                                format!("恢复计划进度无法保留：{error}"),
+                                format!("The recovery plan progress could not be retained: {error}"),
+                            );
+                            cx.notify();
+                            return;
+                        }
+                        view.recovery_claim = Some(recovery_claim);
                         view.status = Message::new(
                             "重启后记录校验通过，请重新审核续传",
                             "Post-restart record verified; review the continuation again",
@@ -1693,11 +1744,14 @@ impl FilesPanel {
                             Operation::ResumePersistedFile(id, plan),
                         );
                     }
-                    Ok(Outcome::PlannedPersistedDirectoryResume { id, plan }) => {
+                    Ok(Outcome::PlannedPersistedDirectoryResume {
+                        id,
+                        plan,
+                        recovery_claim,
+                    }) => {
                         let Some(connection_bound) =
                             persisted_recovery_is_bound(&view.recovery_records, id)
                         else {
-                            view.recovery_claim = None;
                             view.active_recovery_id = None;
                             view.status = Message::new(
                                 "恢复记录已消失，已拒绝继续；请重新加载文件面板。",
@@ -1706,6 +1760,21 @@ impl FilesPanel {
                             cx.notify();
                             return;
                         };
+                        if let Err(error) = remember_persisted_recovery_progress(
+                            &mut view.recovery_records,
+                            id,
+                            plan.existing_bytes(),
+                            plan.bytes(),
+                        ) {
+                            view.active_recovery_id = None;
+                            view.status = Message::new(
+                                format!("恢复计划进度无法保留：{error}"),
+                                format!("The recovery plan progress could not be retained: {error}"),
+                            );
+                            cx.notify();
+                            return;
+                        }
+                        view.recovery_claim = Some(recovery_claim);
                         view.status = Message::new(
                             "重启后目录记录校验通过，请重新审核续传",
                             "Post-restart directory record verified; review the continuation again",
@@ -2005,14 +2074,20 @@ impl FilesPanel {
     /// Start a fresh, read-only continuation plan after explicit user action.
     /// This never reuses a stale resume plan and cannot cross a session token.
     pub(super) fn can_offer_recovery(&self) -> bool {
-        recovery_is_available(
-            self.recovery.as_ref(),
-            self.session_token,
-            self.suspended,
-            self.busy,
-            self.pending.is_some(),
-            self.transfer.as_ref().map(|transfer| transfer.phase),
-        )
+        let candidate = self.recovery.as_ref();
+        let record_loaded = candidate
+            .and_then(|candidate| candidate.persisted_id)
+            .is_none_or(|id| self.recovery_records.iter().any(|record| record.id == id));
+        record_loaded
+            && !self.recovery_loading
+            && recovery_is_available(
+                candidate,
+                self.session_token,
+                self.suspended,
+                self.busy,
+                self.pending.is_some(),
+                self.transfer.as_ref().map(|transfer| transfer.phase),
+            )
     }
 
     pub(super) fn request_recovery(&mut self, window: &mut Window, cx: &mut Context<Self>) {
@@ -2053,6 +2128,18 @@ impl FilesPanel {
                 },
             );
             cx.notify();
+            return;
+        }
+        if let Some(id) = candidate.persisted_id {
+            if !self.recovery_records.iter().any(|record| record.id == id) {
+                self.status = Message::new(
+                    "恢复记录仍在加载，请稍后重试。",
+                    "The recovery record is still loading; try again shortly.",
+                );
+                cx.notify();
+                return;
+            }
+            self.request_persisted_recovery(id, window, cx);
             return;
         }
         let spec = candidate.spec.clone();
@@ -2591,11 +2678,19 @@ mod tests {
         assert!(!directory);
 
         assert!(Operation::PlanResume(spec, false).recovery_spec().is_none());
+        let recovery_store = Arc::new(TransferRecoveryStore::disabled());
+        let recovery_record = recovery_record_for(uuid::Uuid::new_v4(), None, &recovery, false, 0)
+            .expect("valid recovery record");
+        let recovery_claim = recovery_store
+            .upsert_and_claim(recovery_record.clone())
+            .expect("claim recovery record");
+        drop(recovery_store);
         let persisted = Operation::PlanPersistedRecovery {
-            id: uuid::Uuid::new_v4(),
+            id: recovery_record.id,
             spec: recovery.clone(),
             directory: false,
         };
+        drop(recovery_claim);
         assert!(persisted.recovery_spec().is_none());
         assert!(persisted.transfer_status().is_none());
         assert!(persisted.can_run_beside_transfers());
@@ -2786,6 +2881,7 @@ mod tests {
             retained_after_duplicate_finish[0].transferred_bytes, 6,
             "a late duplicate terminal event cannot rewrite the retained outcome"
         );
+        drop(writer);
 
         let mut completed = TransferRecoveryWriter::new(
             store.clone(),
@@ -2813,6 +2909,48 @@ mod tests {
                 .expect("load after successful cleanup")
                 .is_empty()
         );
+    }
+
+    #[test]
+    fn new_recovery_writer_claims_the_record_before_transfer_start() {
+        let directory = TempDir::new().expect("temporary directory");
+        let path = directory.path().join("transfer-recovery.json");
+        let store = Arc::new(TransferRecoveryStore::new(&path));
+        let observer = TransferRecoveryStore::new(&path);
+        let record = TransferRecoveryRecord::new(
+            uuid::Uuid::new_v4(),
+            TransferRecoveryDirection::Upload,
+            "/tmp/source.txt",
+            "/srv/source.txt",
+            false,
+            TransferRecoveryState::Failed,
+            0,
+            Some(8),
+            0,
+            10,
+            10,
+        )
+        .expect("valid new transfer record");
+        let mut writer = TransferRecoveryWriter::new(store, record.clone(), None);
+
+        writer.start().expect("new transfer recovery start");
+        assert_eq!(
+            observer.load().expect("load first durable checkpoint")[0].state,
+            TransferRecoveryState::Unfinished
+        );
+        assert!(
+            matches!(observer.claim(record.id), Err(keelshell_core::Error::Busy)),
+            "another process cannot inspect a record while the first worker owns it"
+        );
+
+        let failure: Result<Outcome, FileFailure> =
+            Err(FileFailure::Transport("queue unavailable".into()));
+        writer.finish(&failure, 0, None);
+        drop(writer);
+        let claim = observer
+            .claim(record.id)
+            .expect("claim after the worker releases ownership");
+        drop(claim);
     }
 
     #[test]

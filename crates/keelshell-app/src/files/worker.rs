@@ -350,6 +350,7 @@ pub(super) async fn operate(
     stop: Arc<AtomicBool>,
     pause: tokio::sync::watch::Receiver<bool>,
     progress: &mpsc::SyncSender<WorkerMessage>,
+    recovery_context: Option<(Arc<TransferRecoveryStore>, TransferRecoveryClaim)>,
 ) -> Result<Outcome, FileFailure> {
     let journal = if let Operation::ApplyDirectorySync(_, journal) = &operation {
         Some(journal.clone())
@@ -363,6 +364,7 @@ pub(super) async fn operate(
         pause,
         progress,
         journal.as_ref(),
+        recovery_context,
     )
     .await;
     if let Some(journal) = journal
@@ -383,6 +385,7 @@ async fn operate_inner(
     pause: tokio::sync::watch::Receiver<bool>,
     progress: &mpsc::SyncSender<WorkerMessage>,
     journal: Option<&super::sync::journal::SharedJournal>,
+    recovery_context: Option<(Arc<TransferRecoveryStore>, TransferRecoveryClaim)>,
 ) -> Result<Outcome, FileFailure> {
     let sftp = tokio::select! {
         biased;
@@ -585,15 +588,66 @@ async fn operate_inner(
                 spec,
                 directory,
             } => {
+                let Some((recovery_store, recovery_claim)) = recovery_context else {
+                    return Err(FileFailure::RecoveryUnavailable(
+                        "the recovery claim was not retained for inspection".to_owned(),
+                    ));
+                };
                 if directory {
+                    let plan = sftp.plan_directory_resume(spec).await?;
+                    let mut records = recovery_store
+                        .load()
+                        .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
+                    let mut record = records
+                        .drain(..)
+                        .find(|record| record.id == id)
+                        .ok_or_else(|| {
+                            FileFailure::RecoveryUnavailable(
+                                "the claimed recovery record disappeared".to_owned(),
+                            )
+                        })?;
+                    super::update_persisted_recovery_progress(
+                        &mut record,
+                        plan.existing_bytes(),
+                        plan.bytes(),
+                    )
+                    .map_err(FileFailure::RecoveryUnavailable)?;
+                    record.updated_at = super::current_unix_timestamp().max(record.created_at);
+                    recovery_store
+                        .upsert_with_claim(&recovery_claim, record)
+                        .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
                     Ok(Outcome::PlannedPersistedDirectoryResume {
                         id,
-                        plan: sftp.plan_directory_resume(spec).await?,
+                        plan,
+                        recovery_claim,
                     })
                 } else {
+                    let plan = sftp.plan_file_resume(spec).await?;
+                    let mut records = recovery_store
+                        .load()
+                        .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
+                    let mut record = records
+                        .drain(..)
+                        .find(|record| record.id == id)
+                        .ok_or_else(|| {
+                            FileFailure::RecoveryUnavailable(
+                                "the claimed recovery record disappeared".to_owned(),
+                            )
+                        })?;
+                    super::update_persisted_recovery_progress(
+                        &mut record,
+                        plan.existing_bytes(),
+                        plan.bytes(),
+                    )
+                    .map_err(FileFailure::RecoveryUnavailable)?;
+                    record.updated_at = super::current_unix_timestamp().max(record.created_at);
+                    recovery_store
+                        .upsert_with_claim(&recovery_claim, record)
+                        .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
                     Ok(Outcome::PlannedPersistedFileResume {
                         id,
-                        plan: sftp.plan_file_resume(spec).await?,
+                        plan,
+                        recovery_claim,
                     })
                 }
             }
@@ -841,7 +895,10 @@ mod tests {
 
 #[cfg(test)]
 mod future_size_tests {
-    use super::{Arc, AtomicBool, Operation, SshSession, WorkerMessage, mpsc, operate};
+    use super::{
+        Arc, AtomicBool, Operation, SshSession, TransferRecoveryClaim, TransferRecoveryStore,
+        WorkerMessage, mpsc, operate,
+    };
     #[test]
     fn file_worker_keeps_directory_mirror_state_within_its_stack_budget() {
         fn size<F>(
@@ -851,6 +908,7 @@ mod future_size_tests {
                 Arc<AtomicBool>,
                 tokio::sync::watch::Receiver<bool>,
                 &'static mpsc::SyncSender<WorkerMessage>,
+                Option<(Arc<TransferRecoveryStore>, TransferRecoveryClaim)>,
             ) -> F,
         ) -> usize {
             std::mem::size_of::<F>()
