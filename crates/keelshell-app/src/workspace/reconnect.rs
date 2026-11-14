@@ -835,7 +835,19 @@ impl Workspace {
         monitor.update(cx, |panel, panel_cx| {
             panel.bind_protocol_authority(protocol_workspace, id, panel_cx)
         });
-        let files = cx.new(|cx| crate::files::FilesPanel::new(session, host, runtime, window, cx));
+        let files = cx.new(|cx| {
+            crate::files::FilesPanel::new_with_recovery_store_and_connection(
+                session,
+                host,
+                connection_id,
+                runtime,
+                Arc::new(keelshell_core::TransferRecoveryStore::from_state_path(
+                    self.store.path(),
+                )),
+                window,
+                cx,
+            )
+        });
         self.panels.insert(
             id,
             RemotePanels {

@@ -41,6 +41,7 @@ mod text_document;
 mod text_merge;
 mod text_patch;
 mod theme;
+mod transfer_recovery;
 mod tunnel_rules;
 mod tunnel_runtime;
 mod updates;
@@ -182,6 +183,11 @@ pub use text_merge::{
     TextMergePlan, merge_text,
 };
 pub use text_patch::apply_text_patch;
+pub use transfer_recovery::{
+    MAX_TRANSFER_RECOVERY_DOCUMENT_BYTES, MAX_TRANSFER_RECOVERY_PATH_BYTES,
+    MAX_TRANSFER_RECOVERY_RECORDS, TRANSFER_RECOVERY_SCHEMA_VERSION, TransferRecoveryDirection,
+    TransferRecoveryRecord, TransferRecoveryState, TransferRecoveryStore,
+};
 pub use workspace_layout::{
     LayoutPane, LayoutTab, LayoutTabAvailability, LayoutWindow, MAX_LAYOUT_TABS,
     MAX_LAYOUT_TABS_PER_PANE, MAX_LAYOUT_WINDOWS, WORKSPACE_LAYOUT_VERSION, WorkspaceLayout,

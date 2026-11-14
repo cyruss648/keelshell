@@ -3373,10 +3373,19 @@ impl Workspace {
                     .and_then(|panels| panels.files.as_ref())
                     .is_none() =>
             {
-                self.panels.entry(id).or_default().files =
-                    Some(cx.new(|cx| {
-                        crate::files::FilesPanel::new(session, host, runtime, window, cx)
-                    }));
+                self.panels.entry(id).or_default().files = Some(cx.new(|cx| {
+                    crate::files::FilesPanel::new_with_recovery_store_and_connection(
+                        session,
+                        host,
+                        rule_connection_id,
+                        runtime,
+                        Arc::new(keelshell_core::TransferRecoveryStore::from_state_path(
+                            self.store.path(),
+                        )),
+                        window,
+                        cx,
+                    )
+                }));
             }
             ToolPanel::Tunnels
                 if self

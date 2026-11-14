@@ -1,7 +1,17 @@
 //! Production GPUI controls submit multiple reviewed jobs on one real SSH peer.
+#![allow(clippy::expect_used, clippy::unwrap_used)]
+
 use super::*;
 use crate::files::{FileFailure, worker};
+use crate::i18n;
+use gpui_kit::{Bounds, WindowBounds, WindowOptions, point, px, size, test::TestWindowExt};
+use keelshell_core::{
+    Language, Settings, ThemeId, TransferRecoveryDirection, TransferRecoveryRecord,
+    TransferRecoveryState, TransferRecoveryStore,
+};
 use keelshell_session::sftp::{TransferEvent, TransferSpec};
+use std::sync::Arc;
+use std::time::Duration;
 
 #[gpui_kit::test]
 async fn reviewed_queue_overlaps_jobs_and_targets_pause_cancel_and_concurrency_controls(
@@ -162,6 +172,126 @@ async fn suspension_cancels_all_jobs_and_revokes_a_new_pending_review(cx: &mut T
     .await;
     h.missing("/retire-one.bin");
     h.missing("/retire-two.bin");
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_card_is_reachable_in_all_registered_families_and_discard_is_explicit(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("recovery fixture directory");
+    let source = directory.path().join("partial-source.bin");
+    std::fs::write(&source, b"partial bytes").expect("recovery fixture source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let recovery_id = uuid::Uuid::new_v4();
+    let connection_id = uuid::Uuid::new_v4();
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                recovery_id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                "/restart.bin",
+                false,
+                TransferRecoveryState::Failed,
+                6,
+                Some(12),
+                6,
+                100,
+                100,
+            )
+            .expect("valid persisted recovery fixture"),
+        )
+        .expect("persist recovery fixture");
+
+    let h = Harness::new_with(cx, {
+        let store = store.clone();
+        move |cx, session, runtime| {
+            cx.update(|cx| {
+                gpui_kit::init(cx);
+                i18n::set_language(Language::ZhCn, cx);
+                gpui_kit::open_window(
+                    WindowOptions {
+                        window_bounds: Some(WindowBounds::Windowed(Bounds::new(
+                            point(px(0.), px(0.)),
+                            size(px(1100.), px(440.)),
+                        ))),
+                        ..Default::default()
+                    },
+                    cx,
+                    |window, cx| {
+                        cx.new(|cx| {
+                            FilesPanel::new_with_recovery_store_and_connection(
+                                session,
+                                "fixture SSH".into(),
+                                Some(connection_id),
+                                runtime,
+                                store,
+                                window,
+                                cx,
+                            )
+                        })
+                    },
+                )
+                .checked("mount persisted recovery card")
+            })
+        }
+    });
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+
+    for family in crate::design::registry() {
+        for language in [Language::ZhCn, Language::En] {
+            cx.update_window(h.window, |_, window, cx| {
+                let settings = Settings {
+                    theme_family: ThemeId::new(family.id).expect("registered recovery card theme"),
+                    theme: keelshell_core::Theme::Light,
+                    ..Settings::default()
+                };
+                crate::design::apply_settings(&settings, Some(window), cx);
+                i18n::set_language(language, cx);
+                if window.try_find("file-transfer-queue-details").is_none() {
+                    window.click("toggle-file-transfer-queue", cx);
+                }
+                window.render_frame(cx);
+                let inspect = format!("inspect-persisted-transfer-{recovery_id}");
+                let discard = format!("discard-persisted-transfer-{recovery_id}");
+                assert!(window.find(inspect.clone()).visible());
+                assert!(window.find(discard).visible());
+                assert!(
+                    window
+                        .find("persisted-transfer-recovery-current-session")
+                        .visible()
+                );
+            })
+            .checked("render persisted recovery card across themes and languages");
+        }
+    }
+
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click(format!("discard-persisted-transfer-{recovery_id}"), cx);
+    })
+    .checked("explicitly discard persisted recovery record");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        h.panel.read(cx).recovery_records.is_empty()
+    })
+    .await;
+    assert!(
+        store
+            .load()
+            .expect("load after explicit discard")
+            .is_empty()
+    );
+    h.panel.read_with(cx, |panel, _| {
+        assert!(panel.transfer_jobs.is_empty());
+        assert!(panel.pending.is_none());
+    });
 }
 
 #[gpui_kit::test]
@@ -436,6 +566,7 @@ async fn lost_pause_control_waits_for_unknown_terminal_instead_of_claiming_cance
             Arc::new(std::sync::atomic::AtomicBool::new(false)),
             receiver,
             &progress,
+            None,
         )
         .await;
         assert!(

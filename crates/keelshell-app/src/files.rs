@@ -12,7 +12,8 @@ use gpui_kit::{
 use keelshell_core::{
     DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
     DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextDocument, TextFormat,
-    TextLineEnding,
+    TextLineEnding, TransferRecoveryDirection, TransferRecoveryRecord, TransferRecoveryState,
+    TransferRecoveryStore,
 };
 use keelshell_session::{
     SessionError, SshSession,
@@ -23,13 +24,14 @@ use keelshell_session::{
     },
 };
 use std::{
+    collections::HashSet,
     path::PathBuf,
     sync::{
         Arc,
         atomic::{AtomicBool, Ordering},
         mpsc,
     },
-    time::Duration,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 mod action_view;
@@ -92,8 +94,15 @@ enum Operation {
     TransferFile(FileTransferPlan),
     TransferDirectory(DirectoryTransferPlan),
     PlanResume(TransferSpec, bool),
+    PlanPersistedRecovery {
+        id: uuid::Uuid,
+        spec: TransferSpec,
+        directory: bool,
+    },
     ResumeFile(FileResumePlan),
     ResumeDirectory(DirectoryResumePlan),
+    ResumePersistedFile(uuid::Uuid, FileResumePlan),
+    ResumePersistedDirectory(uuid::Uuid, DirectoryResumePlan),
     Compare(PathBuf, String),
     PlanDirectorySync(
         PathBuf,
@@ -131,6 +140,14 @@ enum Outcome {
     PlannedBatch(Box<batch::BatchPlan>),
     PlannedFileResume(FileResumePlan),
     PlannedDirectoryResume(DirectoryResumePlan),
+    PlannedPersistedFileResume {
+        id: uuid::Uuid,
+        plan: FileResumePlan,
+    },
+    PlannedPersistedDirectoryResume {
+        id: uuid::Uuid,
+        plan: DirectoryResumePlan,
+    },
     Compared(DirectoryComparison),
     DirectorySyncPlanned(DirectorySyncComparison),
 }
@@ -138,7 +155,10 @@ enum Outcome {
 enum WorkerMessage {
     Progress(Message),
     Transfer(TransferUpdate),
-    Result(Box<Result<Outcome, FileFailure>>),
+    Result {
+        result: Box<Result<Outcome, FileFailure>>,
+        recovery_warning: Option<Message>,
+    },
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -160,7 +180,13 @@ pub struct FilesPanel {
     session_token: uuid::Uuid,
     suspended: bool,
     host: String,
+    connection_id: Option<uuid::Uuid>,
     runtime: Arc<tokio::runtime::Runtime>,
+    recovery_store: Arc<TransferRecoveryStore>,
+    recovery_records: Vec<TransferRecoveryRecord>,
+    recovery_loading: bool,
+    recovery_load_error: Option<String>,
+    recovery_writes: HashSet<uuid::Uuid>,
     // The input is a navigation draft; mutations use only this canonical directory.
     directory: Option<String>,
     path: Entity<InputState>,
@@ -209,6 +235,7 @@ pub struct FilesPanel {
     operation_id: Option<uuid::Uuid>,
     transfer_pause: Option<tokio::sync::watch::Sender<bool>>,
     transfer: Option<TransferStatus>,
+    active_recovery_id: Option<uuid::Uuid>,
     recovery: Option<RecoveryCandidate>,
     isolation_target: Option<IsolationTarget>,
     resume_mode: bool,
@@ -243,9 +270,57 @@ struct DirectorySyncComparison {
 /// replay. The token binds the proposal to the live authenticated session that
 /// produced the partial output.
 struct RecoveryCandidate {
+    persisted_id: Option<uuid::Uuid>,
     session_token: uuid::Uuid,
     spec: TransferSpec,
     directory: bool,
+}
+
+fn recovery_record_for(
+    id: uuid::Uuid,
+    connection_id: Option<uuid::Uuid>,
+    spec: &TransferSpec,
+    directory: bool,
+    existing_bytes: u64,
+) -> Result<TransferRecoveryRecord, String> {
+    let direction = match spec.direction {
+        TransferDirection::Upload => TransferRecoveryDirection::Upload,
+        TransferDirection::Download => TransferRecoveryDirection::Download,
+    };
+    let timestamp = current_unix_timestamp();
+    TransferRecoveryRecord::new_with_connection_id(
+        id,
+        connection_id,
+        direction,
+        spec.local.clone(),
+        spec.remote.clone(),
+        directory,
+        TransferRecoveryState::Unfinished,
+        existing_bytes,
+        None,
+        existing_bytes,
+        timestamp,
+        timestamp,
+    )
+    .map_err(|error| error.to_string())
+}
+
+fn recovery_connection_matches(
+    record: &TransferRecoveryRecord,
+    current_connection_id: Option<uuid::Uuid>,
+) -> bool {
+    record.connection_id.is_none() || record.connection_id == current_connection_id
+}
+
+fn transfer_spec_from_recovery(record: &TransferRecoveryRecord) -> TransferSpec {
+    TransferSpec {
+        direction: match record.direction {
+            TransferRecoveryDirection::Upload => TransferDirection::Upload,
+            TransferRecoveryDirection::Download => TransferDirection::Download,
+        },
+        local: record.local_path.clone(),
+        remote: record.remote_path.clone(),
+    }
 }
 
 fn recovery_is_available(
@@ -278,6 +353,143 @@ fn recovery_request_is_allowed(
     session_available
         && recovery_is_available(candidate, session_token, suspended, busy, pending, phase)
 }
+
+const TRANSFER_RECOVERY_CHECKPOINT_BYTES: u64 = 64 * 1024;
+
+fn current_unix_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_secs())
+}
+
+struct TransferRecoveryWriter {
+    store: Arc<TransferRecoveryStore>,
+    record: TransferRecoveryRecord,
+    last_persisted_bytes: u64,
+    last_error: Option<String>,
+    finished: bool,
+}
+
+impl TransferRecoveryWriter {
+    fn new(store: Arc<TransferRecoveryStore>, record: TransferRecoveryRecord) -> Self {
+        Self {
+            last_persisted_bytes: record.transferred_bytes,
+            store,
+            record,
+            last_error: None,
+            finished: false,
+        }
+    }
+
+    fn start(&mut self) -> Result<(), FileFailure> {
+        let mut record = self.record.clone();
+        record.state = TransferRecoveryState::Unfinished;
+        record.updated_at = current_unix_timestamp().max(record.created_at);
+        self.store
+            .upsert(record.clone())
+            .map_err(|error| FileFailure::RecoveryUnavailable(error.to_string()))?;
+        self.record = record;
+        self.last_persisted_bytes = self.record.transferred_bytes;
+        self.last_error = None;
+        Ok(())
+    }
+
+    fn checkpoint(&mut self, transferred_bytes: u64, total_bytes: Option<u64>) {
+        if transferred_bytes
+            < self
+                .last_persisted_bytes
+                .saturating_add(TRANSFER_RECOVERY_CHECKPOINT_BYTES)
+            && total_bytes.is_none()
+        {
+            return;
+        }
+        let mut record = self.record.clone();
+        record.transferred_bytes = transferred_bytes;
+        record.total_bytes = total_bytes.or(record.total_bytes);
+        record.updated_at = current_unix_timestamp().max(record.created_at);
+        match self.store.upsert(record.clone()) {
+            Ok(()) => {
+                self.record = record;
+                self.last_persisted_bytes = transferred_bytes;
+                self.last_error = None;
+            }
+            Err(error) => {
+                self.last_error = Some(error.to_string());
+            }
+        }
+    }
+
+    fn finish(
+        &mut self,
+        outcome: &Result<Outcome, FileFailure>,
+        transferred_bytes: u64,
+        total_bytes: Option<u64>,
+    ) {
+        if self.finished {
+            return;
+        }
+        self.finished = true;
+        self.checkpoint(transferred_bytes, total_bytes);
+        let mut terminal_error = self.last_error.take();
+        if outcome.is_ok() {
+            if let Err(error) = self.store.remove(self.record.id) {
+                terminal_error = Some(combine_recovery_errors(terminal_error, error.to_string()));
+            }
+            self.last_error = terminal_error;
+            return;
+        }
+        let mut record = self.record.clone();
+        record.transferred_bytes = transferred_bytes;
+        record.total_bytes = total_bytes.or(record.total_bytes);
+        record.state = match outcome {
+            Err(error) if error.is_outcome_unknown() => TransferRecoveryState::OutcomeUnknown,
+            Err(error) if error.is_cancelled() => TransferRecoveryState::Cancelled,
+            _ => TransferRecoveryState::Failed,
+        };
+        record.updated_at = current_unix_timestamp().max(record.created_at);
+        match self.store.upsert(record.clone()) {
+            Ok(()) => {
+                self.record = record;
+                self.last_persisted_bytes = transferred_bytes;
+                self.last_error = terminal_error;
+            }
+            Err(error) => {
+                self.last_error = Some(combine_recovery_errors(terminal_error, error.to_string()));
+            }
+        }
+    }
+
+    fn take_error(&mut self) -> Option<String> {
+        self.last_error.take()
+    }
+}
+
+fn combine_recovery_errors(previous: Option<String>, next: String) -> String {
+    previous.map_or(next.clone(), |previous| {
+        format!("{previous}; terminal update: {next}")
+    })
+}
+
+fn append_recovery_warning(message: Message, warning: Option<&Message>) -> Message {
+    let Some(warning) = warning else {
+        return message;
+    };
+    let (message_zh, message_en) = message.translations();
+    let (warning_zh, warning_en) = warning.translations();
+    Message::new(
+        format!("{message_zh}\n{warning_zh}"),
+        format!("{message_en}\n{warning_en}"),
+    )
+}
+
+fn recovery_finish_warning(detail: impl Into<String>) -> Message {
+    Message::detail(
+        "传输结束，但恢复记录未能更新",
+        "Transfer ended, but recovery metadata was not updated",
+        detail.into(),
+    )
+}
+
 impl Drop for FilesPanel {
     fn drop(&mut self) {
         self.local_browser.cancel_read();
@@ -344,6 +556,7 @@ fn parse_permissions_mode(value: &str) -> Result<u32, &'static str> {
 #[derive(Debug)]
 enum FileFailure {
     Transport(String),
+    RecoveryUnavailable(String),
     IsolationBusy,
     IsolationUnknown,
     Cancelled,
@@ -403,6 +616,9 @@ impl std::fmt::Display for FileFailure {
             Self::IsolationBusy=>f.write_str("file target is owned by an active application mutation"),
             Self::IsolationUnknown=>f.write_str("file target is isolated by an unknown mutation; exact risk acknowledgement required"),
             Self::Transport(detail) => f.write_str(detail),
+            Self::RecoveryUnavailable(detail) => {
+                write!(f, "transfer recovery metadata is unavailable: {detail}")
+            }
             Self::Cancelled => {
                 f.write_str("File operation cancelled; remote outcome may be unknown")
             }
@@ -440,6 +656,14 @@ impl FileFailure {
         }
     }
 
+    fn is_outcome_unknown(&self) -> bool {
+        match self {
+            Self::OutcomeUncertain(_) | Self::CancellationUnconfirmed | Self::WorkerStopped => true,
+            Self::DirectoryTransfer { error, .. } => error.is_outcome_unknown(),
+            _ => false,
+        }
+    }
+
     fn message(&self) -> Message {
         match self {
             Self::IsolationBusy => Message::new(
@@ -449,6 +673,11 @@ impl FileFailure {
             Self::IsolationUnknown => Message::new(
                 "目标存在未知写入结果，已隔离。普通保存或 MCP 提案确认不会解除隔离；请只读检查并显式审核风险。",
                 "This target is isolated by an unknown mutation. Ordinary save or MCP approval cannot release it; inspect read-only and explicitly review its risk.",
+            ),
+            Self::RecoveryUnavailable(detail) => Message::detail(
+                "传输恢复记录无法安全保存，传输尚未开始",
+                "Transfer recovery metadata could not be saved safely; the transfer did not start",
+                detail,
             ),
             Self::MirrorConflicts(conflicts) => Message::new(
                 format!(
@@ -614,10 +843,31 @@ impl FilesPanel {
             }
     }
 
+    #[cfg(test)]
     pub fn new(
         session: SshSession,
         host: String,
         runtime: Arc<tokio::runtime::Runtime>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        Self::new_with_recovery_store_and_connection(
+            session,
+            host,
+            None,
+            runtime,
+            Arc::new(TransferRecoveryStore::disabled()),
+            window,
+            cx,
+        )
+    }
+
+    pub fn new_with_recovery_store_and_connection(
+        session: SshSession,
+        host: String,
+        connection_id: Option<uuid::Uuid>,
+        runtime: Arc<tokio::runtime::Runtime>,
+        recovery_store: Arc<TransferRecoveryStore>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
@@ -628,7 +878,13 @@ impl FilesPanel {
             session_token: uuid::Uuid::new_v4(),
             suspended: false,
             host,
+            connection_id,
             runtime,
+            recovery_store,
+            recovery_records: Vec::new(),
+            recovery_loading: true,
+            recovery_load_error: None,
+            recovery_writes: HashSet::new(),
             directory: None,
             path: field(t(cx, "远程目录", "Remote directory"), ".", window, cx),
             name: field(
@@ -694,6 +950,7 @@ impl FilesPanel {
             operation_id: None,
             transfer_pause: None,
             transfer: None,
+            active_recovery_id: None,
             recovery: None,
             isolation_target: None,
             resume_mode: false,
@@ -709,8 +966,49 @@ impl FilesPanel {
         };
         panel.install_browser_subscriptions(window, cx);
         panel.run(Operation::List(".".into()), window, cx);
+        panel.load_recovery_records(window, cx);
         panel
     }
+
+    fn load_recovery_records(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let store = self.recovery_store.clone();
+        let runtime = self.runtime.clone();
+        let executor = cx.background_executor().clone();
+        let expected_session = self.session_token;
+        let task = crate::runtime_bridge::spawn(&runtime, executor, async move {
+            tokio::task::spawn_blocking(move || store.load())
+                .await
+                .map_err(|error| format!("transfer recovery worker stopped: {error}"))?
+                .map_err(|error| error.to_string())
+        });
+        cx.spawn_in(window, async move |this, cx| {
+            let result = task.await;
+            let _ = this.update_in(cx, |view, _, cx| {
+                if view.session_token != expected_session {
+                    return;
+                }
+                view.recovery_loading = false;
+                match result {
+                    Ok(Ok(records)) => {
+                        view.recovery_records = records;
+                        view.recovery_load_error = None;
+                    }
+                    Ok(Err(error)) => {
+                        view.recovery_records.clear();
+                        view.recovery_load_error = Some(error);
+                    }
+                    Err(_) => {
+                        view.recovery_records.clear();
+                        view.recovery_load_error =
+                            Some("transfer recovery worker did not return".to_owned());
+                    }
+                }
+                cx.notify();
+            });
+        })
+        .detach();
+    }
+
     /// Preserve local drafts and completed records while retiring remote capabilities.
     pub fn suspend(&mut self, cx: &mut Context<Self>) {
         if self.suspended {
@@ -891,13 +1189,28 @@ impl FilesPanel {
         let is_transfer = recovery_spec.is_some();
         if let Some((spec, directory)) = recovery_spec {
             self.recovery = Some(RecoveryCandidate {
+                persisted_id: operation.persisted_recovery_id(),
                 session_token: self.session_token,
                 spec,
                 directory,
             });
+        } else if let Operation::PlanPersistedRecovery {
+            id,
+            spec,
+            directory,
+        } = &operation
+        {
+            self.active_recovery_id = Some(*id);
+            self.recovery = Some(RecoveryCandidate {
+                persisted_id: Some(*id),
+                session_token: self.session_token,
+                spec: spec.clone(),
+                directory: *directory,
+            });
         } else if !matches!(
             &operation,
             Operation::PlanResume(..)
+                | Operation::PlanPersistedRecovery { .. }
                 | Operation::InspectFileQuarantine(_)
                 | Operation::InspectQuarantine(_)
                 | Operation::AcknowledgeQuarantine(_)
@@ -949,6 +1262,7 @@ impl FilesPanel {
         } else if !matches!(
             &operation,
             Operation::PlanResume(..)
+                | Operation::PlanPersistedRecovery { .. }
                 | Operation::InspectFileQuarantine(_)
                 | Operation::InspectQuarantine(_)
                 | Operation::AcknowledgeQuarantine(_)
@@ -970,10 +1284,20 @@ impl FilesPanel {
                 "正在只读校验源与已有部分内容，完成后需审核确认…",
                 "Verifying the source and existing content without writing; review is required…",
             ),
+            Operation::PlanPersistedRecovery { .. } => Message::new(
+                "正在检查重启后传输记录，完成后需重新审核确认…",
+                "Inspecting a post-restart transfer record; review is required again…",
+            ),
             Operation::ResumeFile(_) | Operation::ResumeDirectory(_) => Message::new(
                 "正在复核已审核的续传内容…",
                 "Rechecking the reviewed continuation…",
             ),
+            Operation::ResumePersistedFile(..) | Operation::ResumePersistedDirectory(..) => {
+                Message::new(
+                    "正在复核重启后传输记录对应的续传…",
+                    "Rechecking the continuation from the post-restart record…",
+                )
+            }
             Operation::Compare(_, _) => Message::new(
                 "正在读取两侧目录快照（只读）…",
                 "Reading both directory snapshots (read-only)…",
@@ -994,6 +1318,7 @@ impl FilesPanel {
             Operation::InspectFileQuarantine(_)
                 | Operation::InspectQuarantine(_)
                 | Operation::PlanResume(..)
+                | Operation::PlanPersistedRecovery { .. }
                 | Operation::PlanDirectory(_)
                 | Operation::PlanBatch(_)
                 | Operation::PlanDirectorySync(..)
@@ -1024,7 +1349,10 @@ impl FilesPanel {
                     &sender,
                 ));
                 let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
-                let _ = sender.send(WorkerMessage::Result(Box::new(result)));
+                let _ = sender.send(WorkerMessage::Result {
+                    result: Box::new(result),
+                    recovery_warning: None,
+                });
                 completion
             },
         ) {
@@ -1046,9 +1374,12 @@ impl FilesPanel {
         }
         let executor = cx.background_executor().clone();
         cx.spawn_in(window,async move |this,cx| {
-            let result = loop {
+            let (result, recovery_warning) = loop {
                 match receiver.try_recv() {
-                    Ok(WorkerMessage::Result(result)) => break *result,
+                    Ok(WorkerMessage::Result {
+                        result,
+                        recovery_warning,
+                    }) => break (*result, recovery_warning),
                     Ok(WorkerMessage::Progress(message)) => {
                         if this
                             .update_in(cx, |view, _, cx| {
@@ -1080,7 +1411,7 @@ impl FilesPanel {
                         }).is_err() { return; }
                     }
                     Err(mpsc::TryRecvError::Disconnected) => {
-                        break Err(FileFailure::WorkerStopped)
+                        break (Err(FileFailure::WorkerStopped), None)
                     }
                     Err(mpsc::TryRecvError::Empty) => {},
                 }
@@ -1101,10 +1432,11 @@ impl FilesPanel {
                 if view.suspended {
                     // A late worker may acknowledge a write, but may not replace the
                     // archived editor, its original baseline, or an approved plan.
-                    view.status = match &result {
+                    let message = match &result {
                         Ok(_) => Message::new("旧会话任务已完成；保留归档内容。", "Previous session task completed; archived contents retained."),
                         Err(error) => Message::detail("旧会话任务结束", "Previous session task ended", error),
                     };
+                    view.status = append_recovery_warning(message, recovery_warning.as_ref());
                     cx.notify();
                     return;
                 }
@@ -1208,7 +1540,9 @@ impl FilesPanel {
                             view.status = Message::new("差异已精确应用到草稿；远端未写入，请审核最终全文。", "Patch applied exactly to the draft; remote unchanged. Review the complete result.");
                         } else { view.status = Message::new("解析期间草稿已变化，保留当前草稿；请重新预览差异。", "Draft changed during patch parsing; preserved it. Preview the patch again."); }
                     }
-                    Ok(Outcome::Done(message)) => view.status = message,
+                    Ok(Outcome::Done(message)) => {
+                        view.status = append_recovery_warning(message, recovery_warning.as_ref())
+                    }
                     Ok(Outcome::QuarantineInspected(review)) => {
                         view.status = Message::new("只读检查完成；请审核解除隔离的未知风险", "Read-only inspection complete; review the risk before releasing isolation");
                         view.replace_pending_review(parallel::quarantine_review_message(&review), Operation::AcknowledgeQuarantine(review));
@@ -1228,6 +1562,46 @@ impl FilesPanel {
                     Ok(Outcome::PlannedDirectoryResume(plan)) => {
                         view.status = Message::new("部分目录校验通过，请审核续传", "Existing tree verified; review continuation");
                         view.replace_pending_review(resume_review_message(plan.direction(), plan.local_path(), plan.remote_path(), plan.bytes(), plan.existing_bytes(), Some((plan.files(),plan.directories()))), Operation::ResumeDirectory(plan));
+                    }
+                    Ok(Outcome::PlannedPersistedFileResume { id, plan }) => {
+                        view.status = Message::new(
+                            "重启后记录校验通过，请重新审核续传",
+                            "Post-restart record verified; review the continuation again",
+                        );
+                        view.active_recovery_id = Some(id);
+                        view.replace_pending_review(
+                            persisted_resume_review_message(
+                                plan.direction(),
+                                plan.local_path(),
+                                plan.remote_path(),
+                                plan.bytes(),
+                                plan.existing_bytes(),
+                                None,
+                                &view.host,
+                                view.connection_id.is_some(),
+                            ),
+                            Operation::ResumePersistedFile(id, plan),
+                        );
+                    }
+                    Ok(Outcome::PlannedPersistedDirectoryResume { id, plan }) => {
+                        view.status = Message::new(
+                            "重启后目录记录校验通过，请重新审核续传",
+                            "Post-restart directory record verified; review the continuation again",
+                        );
+                        view.active_recovery_id = Some(id);
+                        view.replace_pending_review(
+                            persisted_resume_review_message(
+                                plan.direction(),
+                                plan.local_path(),
+                                plan.remote_path(),
+                                plan.bytes(),
+                                plan.existing_bytes(),
+                                Some((plan.files(), plan.directories())),
+                                &view.host,
+                                view.connection_id.is_some(),
+                            ),
+                            Operation::ResumePersistedDirectory(id, plan),
+                        );
                     }
                     Ok(Outcome::Compared(comparison)) => {
                         let review_count = comparison.report.review_count();
@@ -1264,9 +1638,18 @@ impl FilesPanel {
                         view.merge_review = None;
                         view.status = FileFailure::EditorFormatChanged.message();
                     }
-                    Err(error) => view.status = if review_only {
-                        Message::detail("审核未完成，尚未开始传输", "Review incomplete; transfer not started", error)
-                    } else { error.message() },
+                    Err(error) => {
+                        let message = if review_only {
+                            Message::detail(
+                                "审核未完成，尚未开始传输",
+                                "Review incomplete; transfer not started",
+                                error,
+                            )
+                        } else {
+                            error.message()
+                        };
+                        view.status = append_recovery_warning(message, recovery_warning.as_ref());
+                    }
                 }
                 if is_transfer && succeeded {
                     // A completed transfer has no recovery action. Failed or
@@ -1610,6 +1993,44 @@ fn resume_review_message(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn persisted_resume_review_message(
+    direction: TransferDirection,
+    local: &std::path::Path,
+    remote: &str,
+    total: u64,
+    existing: u64,
+    tree: Option<(usize, usize)>,
+    host: &str,
+    connection_bound: bool,
+) -> Message {
+    let base = resume_review_message(direction, local, remote, total, existing, tree);
+    let (base_zh, base_en) = base.translations();
+    let (host_zh, host_en) = if connection_bound {
+        (
+            format!(
+                "当前 SSH 会话：{host}。记录已绑定当前保存连接；请确认该会话仍对应原目标主机后再确认续传。"
+            ),
+            format!(
+                "Current SSH session: {host}. The record is bound to the current saved connection; confirm that this session still reaches the original target host before continuing."
+            ),
+        )
+    } else {
+        (
+            format!(
+                "当前 SSH 会话：{host}。这条记录没有保存连接身份；请明确确认当前 SSH 主机就是原目标主机。确认前不会写入。"
+            ),
+            format!(
+                "Current SSH session: {host}. This record has no saved connection identity; explicitly confirm that the current SSH host is the original target. Nothing is written before confirmation."
+            ),
+        )
+    };
+    Message::new(
+        format!("{host_zh}\n\n{base_zh}"),
+        format!("{host_en}\n\n{base_en}"),
+    )
+}
+
 impl Operation {
     fn isolation_target(&self) -> Option<IsolationTarget> {
         match self {
@@ -1645,10 +2066,21 @@ impl Operation {
                     | Self::PlanBatch(_)
                     | Self::TransferBatch(_)
                     | Self::PlanResume(..)
+                    | Self::PlanPersistedRecovery { .. }
                     | Self::Compare(..)
                     | Self::PlanDirectorySync(..)
             )
     }
+
+    fn persisted_recovery_id(&self) -> Option<uuid::Uuid> {
+        match self {
+            Self::PlanPersistedRecovery { id, .. }
+            | Self::ResumePersistedFile(id, _)
+            | Self::ResumePersistedDirectory(id, _) => Some(*id),
+            _ => None,
+        }
+    }
+
     /// Derive a fresh continuation request only from an operation that already
     /// performed transfer I/O. Review-only plans intentionally return `None`.
     fn recovery_spec(&self) -> Option<(TransferSpec, bool)> {
@@ -1687,6 +2119,22 @@ impl Operation {
                 },
                 true,
             )),
+            Self::ResumePersistedFile(_, plan) => Some((
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                false,
+            )),
+            Self::ResumePersistedDirectory(_, plan) => Some((
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                true,
+            )),
             Self::InspectFileQuarantine(_)
             | Self::InspectQuarantine(_)
             | Self::AcknowledgeQuarantine(_)
@@ -1702,6 +2150,7 @@ impl Operation {
             | Self::PlanBatch(_)
             | Self::TransferBatch(_)
             | Self::PlanResume(..)
+            | Self::PlanPersistedRecovery { .. }
             | Self::Compare(..)
             | Self::ApplyDirectorySync(..)
             | Self::PlanDirectorySync(..)
@@ -1749,12 +2198,32 @@ impl Operation {
                 true,
                 true,
             ),
+            Self::ResumePersistedFile(_, plan) => (
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                false,
+                true,
+            ),
+            Self::ResumePersistedDirectory(_, plan) => (
+                TransferSpec {
+                    local: plan.local_path().to_owned(),
+                    remote: plan.remote_path().to_owned(),
+                    direction: plan.direction(),
+                },
+                true,
+                true,
+            ),
             _ => return None,
         };
         let mut status = TransferStatus::new(spec, directory, continuation);
         status.reviewed_existing = match self {
-            Self::ResumeFile(plan) => plan.existing_bytes(),
-            Self::ResumeDirectory(plan) => plan.existing_bytes(),
+            Self::ResumeFile(plan) | Self::ResumePersistedFile(_, plan) => plan.existing_bytes(),
+            Self::ResumeDirectory(plan) | Self::ResumePersistedDirectory(_, plan) => {
+                plan.existing_bytes()
+            }
             _ => 0,
         };
         Some(status)
@@ -1900,13 +2369,22 @@ fn confirmation_bar(
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
+
     use super::{
         FileFailure, Operation, Outcome, RecoveryCandidate, TransferDirection, TransferPhase,
-        child_path, modified_label, parse_permissions_mode, permissions_label,
-        recovery_is_available, recovery_request_is_allowed, size_label, terminal_transfer_phase,
-        transfer_progress_message,
+        TransferRecoveryWriter, child_path, modified_label, parse_permissions_mode,
+        permissions_label, persisted_resume_review_message, recovery_connection_matches,
+        recovery_is_available, recovery_record_for, recovery_request_is_allowed, size_label,
+        terminal_transfer_phase, transfer_progress_message,
+    };
+    use keelshell_core::{
+        TransferRecoveryDirection, TransferRecoveryRecord, TransferRecoveryState,
+        TransferRecoveryStore,
     };
     use keelshell_session::sftp::RemoteEntry;
+    use std::sync::Arc;
+    use tempfile::TempDir;
 
     #[test]
     fn mutation_requires_a_loaded_absolute_directory() {
@@ -1983,13 +2461,164 @@ mod tests {
         assert!(!directory);
 
         assert!(Operation::PlanResume(spec, false).recovery_spec().is_none());
+        let persisted = Operation::PlanPersistedRecovery {
+            id: uuid::Uuid::new_v4(),
+            spec: recovery.clone(),
+            directory: false,
+        };
+        assert!(persisted.recovery_spec().is_none());
+        assert!(persisted.transfer_status().is_none());
+        assert!(persisted.can_run_beside_transfers());
         assert!(Operation::List("/srv".into()).recovery_spec().is_none());
+    }
+
+    #[test]
+    fn persisted_recovery_record_captures_direction_paths_progress_and_connection_binding() {
+        let connection_id = uuid::Uuid::new_v4();
+        let spec =
+            keelshell_session::sftp::TransferSpec::upload("/tmp/source.txt", "/srv/source.txt");
+        let record =
+            recovery_record_for(uuid::Uuid::new_v4(), Some(connection_id), &spec, false, 128)
+                .expect("valid recovery record");
+        assert_eq!(record.connection_id, Some(connection_id));
+        assert_eq!(record.direction, TransferRecoveryDirection::Upload);
+        assert_eq!(
+            record.local_path,
+            std::path::PathBuf::from("/tmp/source.txt")
+        );
+        assert_eq!(record.remote_path, "/srv/source.txt");
+        assert_eq!(record.transferred_bytes, 128);
+        assert_eq!(record.reviewed_existing_bytes, 128);
+        assert_eq!(record.state, TransferRecoveryState::Unfinished);
+    }
+
+    #[test]
+    fn persisted_recovery_connection_binding_is_optional_but_mismatch_fails_closed() {
+        let bound = TransferRecoveryRecord::new_with_connection_id(
+            uuid::Uuid::new_v4(),
+            Some(uuid::Uuid::from_u128(7)),
+            TransferRecoveryDirection::Download,
+            "/tmp/source.txt",
+            "/srv/source.txt",
+            false,
+            TransferRecoveryState::Failed,
+            0,
+            None,
+            0,
+            10,
+            10,
+        )
+        .expect("valid bound record");
+        assert!(recovery_connection_matches(
+            &bound,
+            Some(uuid::Uuid::from_u128(7))
+        ));
+        assert!(!recovery_connection_matches(
+            &bound,
+            Some(uuid::Uuid::from_u128(8))
+        ));
+        assert!(!recovery_connection_matches(&bound, None));
+
+        let unbound = TransferRecoveryRecord::new(
+            uuid::Uuid::new_v4(),
+            TransferRecoveryDirection::Download,
+            "/tmp/source.txt",
+            "/srv/source.txt",
+            false,
+            TransferRecoveryState::Failed,
+            0,
+            None,
+            0,
+            10,
+            10,
+        )
+        .expect("valid legacy record");
+        assert!(recovery_connection_matches(&unbound, None));
+        assert!(recovery_connection_matches(
+            &unbound,
+            Some(uuid::Uuid::from_u128(9))
+        ));
+    }
+
+    #[test]
+    fn recovery_writer_marks_resume_active_and_classifies_terminal_results() {
+        let directory = TempDir::new().expect("temporary directory");
+        let store = Arc::new(TransferRecoveryStore::new(
+            directory.path().join("transfer-recovery.json"),
+        ));
+        let id = uuid::Uuid::new_v4();
+        let record = TransferRecoveryRecord::new(
+            id,
+            TransferRecoveryDirection::Upload,
+            "/tmp/source.txt",
+            "/srv/source.txt",
+            false,
+            TransferRecoveryState::Failed,
+            4,
+            Some(8),
+            4,
+            10,
+            10,
+        )
+        .expect("valid terminal record");
+        let mut writer = TransferRecoveryWriter::new(store.clone(), record.clone());
+        writer.start().expect("resume start is durably recorded");
+        assert_eq!(
+            store.load().expect("load active record")[0].state,
+            TransferRecoveryState::Unfinished
+        );
+
+        let unknown: Result<Outcome, FileFailure> =
+            Err(FileFailure::OutcomeUncertain("late reply".into()));
+        writer.finish(&unknown, 6, Some(8));
+        let retained = store.load().expect("load unknown result");
+        assert_eq!(retained[0].state, TransferRecoveryState::OutcomeUnknown);
+        assert_eq!(retained[0].transferred_bytes, 6);
+        let success: Result<Outcome, FileFailure> =
+            Ok(Outcome::Done(crate::i18n::Message::empty()));
+        writer.finish(&success, 8, Some(8));
+        let retained_after_duplicate_finish = store.load().expect("load after duplicate finish");
+        assert_eq!(
+            retained_after_duplicate_finish[0].state,
+            TransferRecoveryState::OutcomeUnknown
+        );
+        assert_eq!(
+            retained_after_duplicate_finish[0].transferred_bytes, 6,
+            "a late duplicate terminal event cannot rewrite the retained outcome"
+        );
+
+        let mut completed = TransferRecoveryWriter::new(
+            store.clone(),
+            TransferRecoveryRecord::new(
+                id,
+                TransferRecoveryDirection::Upload,
+                "/tmp/source.txt",
+                "/srv/source.txt",
+                false,
+                TransferRecoveryState::OutcomeUnknown,
+                6,
+                Some(8),
+                4,
+                10,
+                10,
+            )
+            .expect("valid retained record"),
+        );
+        completed.start().expect("second recovery start");
+        completed.finish(&success, 8, Some(8));
+        assert!(
+            store
+                .load()
+                .expect("load after successful cleanup")
+                .is_empty()
+        );
     }
 
     #[test]
     fn recovery_candidate_requires_failed_transfer_and_current_session() {
         let token = uuid::Uuid::new_v4();
         let candidate = RecoveryCandidate {
+            persisted_id: None,
             session_token: token,
             spec: keelshell_session::sftp::TransferSpec::download(
                 "/srv/source.txt",
@@ -2060,10 +2689,40 @@ mod tests {
         );
     }
 
+    #[gpui_kit::test]
+    fn persisted_resume_review_requires_current_host_confirmation(
+        cx: &mut gpui_kit::TestAppContext,
+    ) {
+        let message = persisted_resume_review_message(
+            TransferDirection::Upload,
+            std::path::Path::new("/tmp/source.txt"),
+            "/srv/source.txt",
+            100,
+            40,
+            None,
+            "ops@example:22",
+            false,
+        );
+        cx.update(|cx| {
+            assert!(
+                message
+                    .render(cx)
+                    .contains("请明确确认当前 SSH 主机就是原目标主机")
+            );
+            crate::i18n::set_language(keelshell_core::Language::En, cx);
+            assert!(
+                message.render(cx).contains(
+                    "explicitly confirm that the current SSH host is the original target"
+                )
+            );
+        });
+    }
+
     #[test]
     fn recovery_click_guard_rejects_changed_state_without_requiring_a_new_candidate() {
         let token = uuid::Uuid::new_v4();
         let candidate = RecoveryCandidate {
+            persisted_id: None,
             session_token: token,
             spec: keelshell_session::sftp::TransferSpec::download(
                 "/srv/source.txt",

@@ -230,6 +230,7 @@ impl FilesPanel {
                 && job.session_token == self.session_token
                 && job.status.phase == TransferPhase::Failed)
                 .then(|| RecoveryCandidate {
+                    persisted_id: job.recovery.persisted_id,
                     session_token: job.recovery.session_token,
                     spec: job.recovery.spec.clone(),
                     directory: job.recovery.directory,
@@ -301,6 +302,61 @@ impl FilesPanel {
         let Some((spec, directory)) = operation.recovery_spec() else {
             return;
         };
+        let persisted_id = operation.persisted_recovery_id();
+        let recovery_id = persisted_id.unwrap_or_else(uuid::Uuid::new_v4);
+        let recovery_record = if let Some(id) = persisted_id {
+            let Some(record) = self.recovery_records.iter().find(|record| record.id == id) else {
+                self.status = Message::new(
+                    "重启后的传输记录已消失，请重新加载文件面板后再检查。",
+                    "The post-restart transfer record is gone; reload the file panel before inspecting it again.",
+                );
+                cx.notify();
+                return;
+            };
+            let direction = match spec.direction {
+                TransferDirection::Upload => TransferRecoveryDirection::Upload,
+                TransferDirection::Download => TransferRecoveryDirection::Download,
+            };
+            if record.direction != direction
+                || record.local_path != spec.local
+                || record.remote_path != spec.remote
+                || record.directory != directory
+            {
+                self.status = Message::new(
+                    "恢复记录与当前审核目标不一致，已拒绝继续。",
+                    "The recovery record does not match the reviewed target; continuation was refused.",
+                );
+                cx.notify();
+                return;
+            }
+            if !recovery_connection_matches(record, self.connection_id) {
+                self.status = Message::new(
+                    "恢复记录绑定了另一条保存连接，已拒绝继续。",
+                    "The recovery record belongs to another saved connection; continuation was refused.",
+                );
+                cx.notify();
+                return;
+            }
+            record.clone()
+        } else {
+            match recovery_record_for(
+                recovery_id,
+                self.connection_id,
+                &spec,
+                directory,
+                status.reviewed_existing,
+            ) {
+                Ok(record) => record,
+                Err(error) => {
+                    self.status = Message::new(
+                        format!("无法创建传输恢复记录：{error}"),
+                        format!("Unable to create transfer recovery metadata: {error}"),
+                    );
+                    cx.notify();
+                    return;
+                }
+            }
+        };
         if self
             .transfer_jobs
             .iter()
@@ -344,6 +400,7 @@ impl FilesPanel {
             stop: stop.clone(),
             pause,
             recovery: RecoveryCandidate {
+                persisted_id,
                 session_token,
                 spec,
                 directory,
@@ -352,6 +409,7 @@ impl FilesPanel {
         self.select_job(id);
         self.pending = None;
         self.busy = true;
+        self.active_recovery_id = Some(recovery_id);
         self.status = Message::new(
             "已加入传输队列；可继续审核加入其它任务。",
             "Added to the transfer queue; review and add more jobs while it runs.",
@@ -359,6 +417,8 @@ impl FilesPanel {
         let queue_cell = self.transfer_queue.clone();
         let parallelism = self.queue_parallelism.clone();
         let runtime = self.runtime.clone();
+        let recovery_store = self.recovery_store.clone();
+        let recovery_record_for_worker = recovery_record.clone();
         let worker_stop = stop.clone();
         let (sender, receiver) = mpsc::sync_channel(16);
         #[cfg(test)]
@@ -368,28 +428,82 @@ impl FilesPanel {
             "keelshell-queued-sftp",
             stop,
             move || {
-                let result = runtime.block_on(async {
-                if worker_stop.load(Ordering::Acquire) { return Err(FileFailure::CancelledBeforeStart); }
-                let queue = tokio::select! {
-                    biased;
-                    _ = cancellation(&worker_stop) => return Err(FileFailure::CancelledBeforeStart),
-                    result = queue_cell.get_or_try_init(|| async {
-                        let sftp = Arc::new(session.sftp().await?);
-                        let queue = Arc::new(sftp.transfer_queue());
-                        queue.set_parallelism(parallelism.load(Ordering::Acquire))?;
-                        Ok::<_, SessionError>(queue)
-                    }) => result.map_err(FileFailure::from)?.clone(),
-                };
-                #[cfg(test)]
-                if let Some(group) = &fixture_group {
-                    group.retain_queue(&runtime, &queue);
-                }
-                queue.set_parallelism(parallelism.load(Ordering::Acquire))?;
-                if worker_stop.load(Ordering::Acquire) { return Err(FileFailure::CancelledBeforeStart); }
-                queued_operation(&queue, operation, worker_stop, pause_receiver, &sender).await
-            });
+                let (result, recovery_warning) = runtime.block_on(async {
+                    if worker_stop.load(Ordering::Acquire) {
+                        return (Err(FileFailure::CancelledBeforeStart), None);
+                    }
+                    let mut recovery_writer =
+                        TransferRecoveryWriter::new(recovery_store, recovery_record_for_worker);
+                    if let Err(error) = recovery_writer.start() {
+                        return (Err(error), None);
+                    }
+                    let queue = tokio::select! {
+                        biased;
+                        _ = cancellation(&worker_stop) => {
+                            let result = Err(FileFailure::CancelledBeforeStart);
+                            recovery_writer.finish(&result, 0, None);
+                            let warning = recovery_writer
+                                .take_error()
+                                .map(super::recovery_finish_warning);
+                            return (result, warning);
+                        }
+                        result = queue_cell.get_or_try_init(|| async {
+                            let sftp = Arc::new(session.sftp().await?);
+                            let queue = Arc::new(sftp.transfer_queue());
+                            queue.set_parallelism(parallelism.load(Ordering::Acquire))?;
+                            Ok::<_, SessionError>(queue)
+                        }) => match result {
+                            Ok(queue) => queue.clone(),
+                            Err(error) => {
+                                let result = Err(FileFailure::from(error));
+                                recovery_writer.finish(&result, 0, None);
+                                let warning = recovery_writer
+                                    .take_error()
+                                    .map(super::recovery_finish_warning);
+                                return (result, warning);
+                            }
+                        },
+                    };
+                    #[cfg(test)]
+                    if let Some(group) = &fixture_group {
+                        group.retain_queue(&runtime, &queue);
+                    }
+                    if let Err(error) = queue.set_parallelism(parallelism.load(Ordering::Acquire)) {
+                        let result = Err(FileFailure::from(error));
+                        recovery_writer.finish(&result, 0, None);
+                        let warning = recovery_writer
+                            .take_error()
+                            .map(super::recovery_finish_warning);
+                        return (result, warning);
+                    }
+                    if worker_stop.load(Ordering::Acquire) {
+                        let result = Err(FileFailure::CancelledBeforeStart);
+                        recovery_writer.finish(&result, 0, None);
+                        let warning = recovery_writer
+                            .take_error()
+                            .map(super::recovery_finish_warning);
+                        return (result, warning);
+                    }
+                    let result = queued_operation(
+                        &queue,
+                        operation,
+                        worker_stop,
+                        pause_receiver,
+                        &sender,
+                        Some(&mut recovery_writer),
+                    )
+                    .await;
+                    recovery_writer.finish(&result, 0, None);
+                    let warning = recovery_writer
+                        .take_error()
+                        .map(super::recovery_finish_warning);
+                    (result, warning)
+                });
                 let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
-                let _ = sender.send(WorkerMessage::Result(Box::new(result)));
+                let _ = sender.send(WorkerMessage::Result {
+                    result: Box::new(result),
+                    recovery_warning,
+                });
                 #[cfg(test)]
                 {
                     // Release the captured cell before the final group owner;
@@ -418,15 +532,16 @@ impl FilesPanel {
             loop {
                 let message = match receiver.try_recv() {
                     Ok(message) => Some(message),
-                    Err(mpsc::TryRecvError::Disconnected) => Some(WorkerMessage::Result(Box::new(
-                        Err(FileFailure::WorkerStopped),
-                    ))),
+                    Err(mpsc::TryRecvError::Disconnected) => Some(WorkerMessage::Result {
+                        result: Box::new(Err(FileFailure::WorkerStopped)),
+                        recovery_warning: None,
+                    }),
                     Err(mpsc::TryRecvError::Empty) => None,
                 };
-                let terminal = matches!(message, Some(WorkerMessage::Result(_)));
+                let terminal = matches!(message, Some(WorkerMessage::Result { .. }));
                 if let Some(message) = message {
                     if this
-                        .update_in(cx, |view, _, cx| {
+                        .update_in(cx, |view, window, cx| {
                             let Some(job) = view
                                 .transfer_jobs
                                 .iter_mut()
@@ -434,18 +549,29 @@ impl FilesPanel {
                             else {
                                 return;
                             };
+                            let succeeded = match &message {
+                                WorkerMessage::Result { result, .. } => result.is_ok(),
+                                _ => false,
+                            };
                             match message {
                                 WorkerMessage::Transfer(event) => job.status.update(event),
                                 WorkerMessage::Progress(message) => job.result = Some(message),
-                                WorkerMessage::Result(result) => {
+                                WorkerMessage::Result {
+                                    result,
+                                    recovery_warning,
+                                } => {
                                     if let Some(phase) = terminal_transfer_phase(true, &result) {
                                         job.status.phase = phase;
                                     }
-                                    job.result = Some(match *result {
+                                    let message = match *result {
                                         Ok(Outcome::Done(message)) => message,
                                         Ok(_) => Message::new("传输已结束", "Transfer ended"),
                                         Err(error) => error.message(),
-                                    });
+                                    };
+                                    job.result = Some(append_recovery_warning(
+                                        message,
+                                        recovery_warning.as_ref(),
+                                    ));
                                 }
                             }
                             // A retired panel retains honest results, but late
@@ -473,6 +599,13 @@ impl FilesPanel {
                                 view.status = message.clone();
                             }
                             if terminal {
+                                if view.active_recovery_id == Some(recovery_id) {
+                                    if succeeded {
+                                        view.recovery = None;
+                                    }
+                                    view.active_recovery_id = None;
+                                    view.load_recovery_records(window, cx);
+                                }
                                 view.prune_transfer_history();
                             }
                             cx.notify();
@@ -536,6 +669,290 @@ impl FilesPanel {
             self.run(Operation::InspectFileQuarantine(target), window, cx);
         }
     }
+
+    fn request_persisted_recovery(
+        &mut self,
+        id: uuid::Uuid,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.suspended
+            || self.recovery_loading
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || self.recovery_writes.contains(&id)
+        {
+            return;
+        }
+        let Some(record) = self.recovery_records.iter().find(|record| record.id == id) else {
+            return;
+        };
+        if !recovery_connection_matches(record, self.connection_id) {
+            self.status = Message::new(
+                "恢复记录绑定了另一条保存连接；请在原连接标签中检查。",
+                "This recovery record belongs to another saved connection; inspect it from the original connection tab.",
+            );
+            cx.notify();
+            return;
+        }
+        self.active_recovery_id = Some(id);
+        self.run(
+            Operation::PlanPersistedRecovery {
+                id,
+                spec: super::transfer_spec_from_recovery(record),
+                directory: record.directory,
+            },
+            window,
+            cx,
+        );
+    }
+
+    fn discard_persisted_recovery(
+        &mut self,
+        id: uuid::Uuid,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.suspended
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || self.recovery_writes.contains(&id)
+        {
+            return;
+        }
+        if !self.recovery_records.iter().any(|record| record.id == id) {
+            return;
+        }
+        self.recovery_writes.insert(id);
+        let store = self.recovery_store.clone();
+        let runtime = self.runtime.clone();
+        let executor = cx.background_executor().clone();
+        let expected_session = self.session_token;
+        let task = crate::runtime_bridge::spawn(&runtime, executor, async move {
+            tokio::task::spawn_blocking(move || store.remove(id))
+                .await
+                .map_err(|error| format!("transfer recovery discard worker stopped: {error}"))?
+                .map_err(|error| error.to_string())
+        });
+        cx.spawn_in(window, async move |this, cx| {
+            let result = task.await;
+            let _ = this.update_in(cx, |view, _, cx| {
+                view.recovery_writes.remove(&id);
+                if view.session_token != expected_session {
+                    return;
+                }
+                match result {
+                    Ok(Ok(())) => {
+                        view.recovery_records.retain(|record| record.id != id);
+                        if view.active_recovery_id == Some(id) {
+                            view.active_recovery_id = None;
+                            view.recovery = None;
+                        }
+                        view.status = Message::new(
+                            "已丢弃这条传输恢复记录；未连接、未检查、未重放。",
+                            "Discarded the transfer recovery record; nothing connected, inspected or replayed.",
+                        );
+                    }
+                    Ok(Err(error)) => {
+                        view.recovery_load_error = Some(error.to_string());
+                        view.status = Message::new(
+                            format!("无法丢弃传输恢复记录：{error}"),
+                            format!("Unable to discard transfer recovery metadata: {error}"),
+                        );
+                    }
+                    Err(error) => {
+                        view.recovery_load_error = Some(error.to_string());
+                        view.status = Message::new(
+                            format!("无法丢弃传输恢复记录：{error}"),
+                            format!("Unable to discard transfer recovery metadata: {error}"),
+                        );
+                    }
+                }
+                cx.notify();
+            });
+        })
+        .detach();
+    }
+
+    fn persisted_recovery_card(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
+        let mut card = div()
+            .id("persisted-transfer-recovery")
+            .test_support()
+            .flex()
+            .flex_col()
+            .gap_1()
+            .p_2()
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .child(
+                        div()
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .flex_shrink_0()
+                            .child(t(
+                                cx,
+                                "重启后传输记录",
+                                "Post-restart transfer records",
+                            )),
+                    )
+                    .child(
+                        div()
+                            .id("persisted-transfer-recovery-current-session")
+                            .test_support()
+                            .flex_1()
+                            .min_w_0()
+                            .text_ellipsis()
+                            .text_color(rgb(visual.muted))
+                            .child(format!(
+                                "{}: {}",
+                                t(cx, "当前 SSH 会话", "Current SSH session"),
+                                self.host
+                            )),
+                    ),
+            )
+            .child(
+                div()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "记录只保存路径、方向和进度；必须在当前 SSH 会话中重新检查、审核并确认，应用不会自动连接或重放。",
+                        "Records contain paths, direction and progress only. The current SSH session must inspect, review and confirm again; the app never connects or replays automatically.",
+                    )),
+            );
+        if self.recovery_loading {
+            return card
+                .child(
+                    div()
+                        .id("persisted-transfer-recovery-loading")
+                        .text_color(rgb(visual.muted))
+                        .child(t(cx, "正在读取恢复记录…", "Loading recovery records…")),
+                )
+                .into_any_element();
+        }
+        if let Some(error) = &self.recovery_load_error {
+            return card
+                .child(
+                    div()
+                        .id("persisted-transfer-recovery-error")
+                        .text_color(rgb(visual.danger))
+                        .child(format!(
+                            "{}: {error}",
+                            t(cx, "恢复记录读取失败", "Recovery record load failed")
+                        )),
+                )
+                .into_any_element();
+        }
+        if self.recovery_records.is_empty() {
+            return card
+                .child(
+                    div()
+                        .id("persisted-transfer-recovery-empty")
+                        .text_color(rgb(visual.muted))
+                        .child(t(cx, "没有待处理记录", "No pending records")),
+                )
+                .into_any_element();
+        }
+        for record in &self.recovery_records {
+            let id = record.id;
+            let spec = super::transfer_spec_from_recovery(record);
+            let direction = match record.direction {
+                TransferRecoveryDirection::Upload => t(cx, "上传", "Upload"),
+                TransferRecoveryDirection::Download => t(cx, "下载", "Download"),
+            };
+            let state = match record.state {
+                TransferRecoveryState::Unfinished => t(cx, "未完成", "Unfinished"),
+                TransferRecoveryState::OutcomeUnknown => t(cx, "结果未知", "Outcome unknown"),
+                TransferRecoveryState::Failed => t(cx, "失败", "Failed"),
+                TransferRecoveryState::Cancelled => t(cx, "已取消", "Cancelled"),
+            };
+            let binding = if record.connection_id.is_some() {
+                t(cx, "已绑定保存连接", "Bound to saved connection")
+            } else {
+                t(
+                    cx,
+                    "未绑定连接身份，请确认当前 SSH 主机",
+                    "No connection binding; verify the current SSH host",
+                )
+            };
+            let summary = format!(
+                "{direction} · {state} · {binding} · {} → {} · {} B",
+                spec.local.display(),
+                spec.remote,
+                record.transferred_bytes
+            );
+            let inspect_disabled = self.suspended
+                || self.pending.is_some()
+                || self.operation_id.is_some()
+                || self.recovery_writes.contains(&id);
+            let discard_disabled = self.suspended
+                || self.pending.is_some()
+                || self.operation_id.is_some()
+                || self.recovery_writes.contains(&id);
+            card = card.child(
+                div()
+                    .id(SharedString::from(format!(
+                        "persisted-transfer-recovery-row-{id}"
+                    )))
+                    .test_support()
+                    .flex()
+                    .flex_wrap()
+                    .items_center()
+                    .gap_1()
+                    .child(div().flex_1().min_w_0().text_ellipsis().child(summary))
+                    .child(
+                        Button::new(SharedString::from(format!(
+                            "inspect-persisted-transfer-{id}"
+                        )))
+                        .primary()
+                        .compact()
+                        .disabled(inspect_disabled)
+                        .label(t(cx, "检查", "Inspect"))
+                        .accessibility_label(t(
+                            cx,
+                            "检查并重新审核传输记录",
+                            "Inspect and re-review transfer record",
+                        ))
+                        .on_click(cx.listener(
+                            move |view, _, window, cx| {
+                                view.request_persisted_recovery(id, window, cx)
+                            },
+                        )),
+                    )
+                    .child(
+                        Button::new(SharedString::from(format!(
+                            "discard-persisted-transfer-{id}"
+                        )))
+                        .ghost()
+                        .compact()
+                        .disabled(discard_disabled)
+                        .label(t(cx, "丢弃", "Discard"))
+                        .accessibility_label(t(
+                            cx,
+                            "丢弃传输恢复记录",
+                            "Discard transfer recovery record",
+                        ))
+                        .on_click(cx.listener(
+                            move |view, _, window, cx| {
+                                view.discard_persisted_recovery(id, window, cx)
+                            },
+                        )),
+                    ),
+            );
+        }
+        card.into_any_element()
+    }
+
+    fn persisted_recovery_surface_visible(&self) -> bool {
+        self.recovery_loading
+            || self.recovery_load_error.is_some()
+            || !self.recovery_records.is_empty()
+    }
+
     fn prune_transfer_history(&mut self) {
         while self
             .transfer_jobs
@@ -732,15 +1149,22 @@ impl FilesPanel {
             .p_2()
             .border_t_1()
             .border_color(rgb(visual.border));
+        let recovery_visible = self.persisted_recovery_surface_visible();
         // The dedicated queue starts with actual outcomes. The full concurrency
         // controls and isolation explanation remain reachable below the rows.
         let card = if self.queue_details_visible {
-            card.when(!self.transfer_jobs.is_empty(), |view| view.child(list))
-                .child(header)
-                .child(explanation)
+            card.when(recovery_visible, |view| {
+                view.child(self.persisted_recovery_card(cx))
+            })
+            .when(!self.transfer_jobs.is_empty(), |view| view.child(list))
+            .child(header)
+            .child(explanation)
         } else {
             card.child(header)
                 .child(explanation)
+                .when(recovery_visible, |view| {
+                    view.child(self.persisted_recovery_card(cx))
+                })
                 .when(!self.transfer_jobs.is_empty(), |view| view.child(list))
         };
         card.into_any_element()
@@ -753,6 +1177,7 @@ async fn queued_operation(
     stop: Arc<AtomicBool>,
     pause: tokio::sync::watch::Receiver<bool>,
     progress: &mpsc::SyncSender<WorkerMessage>,
+    recovery: Option<&mut TransferRecoveryWriter>,
 ) -> Result<Outcome, FileFailure> {
     let (direction, existing) = match &operation {
         Operation::TransferFile(plan) => (plan.direction(), None),
@@ -761,6 +1186,12 @@ async fn queued_operation(
         Operation::TransferDirectory(plan) => (plan.direction(), None),
         Operation::ResumeFile(plan) => (plan.direction(), Some((plan.existing_bytes(), false))),
         Operation::ResumeDirectory(plan) => (plan.direction(), Some((plan.existing_bytes(), true))),
+        Operation::ResumePersistedFile(_, plan) => {
+            (plan.direction(), Some((plan.existing_bytes(), false)))
+        }
+        Operation::ResumePersistedDirectory(_, plan) => {
+            (plan.direction(), Some((plan.existing_bytes(), true)))
+        }
         _ => return Err(FileFailure::WorkerStopped),
     };
     let mut transfer = tokio::select! {
@@ -773,10 +1204,23 @@ async fn queued_operation(
             Operation::TransferDirectory(plan) => queue.enqueue_directory(plan).await,
             Operation::ResumeFile(plan) => queue.enqueue_resume(plan).await,
             Operation::ResumeDirectory(plan) => queue.enqueue_directory_resume(plan).await,
+            Operation::ResumePersistedFile(_, plan) => queue.enqueue_resume(plan).await,
+            Operation::ResumePersistedDirectory(_, plan) => {
+                queue.enqueue_directory_resume(plan).await
+            }
             _ => Err(SessionError::Worker),
         }} => result.map_err(FileFailure::from)?,
     };
-    worker::observe_transfer(&mut transfer, direction, existing, stop, pause, progress).await
+    worker::observe_transfer(
+        &mut transfer,
+        direction,
+        existing,
+        stop,
+        pause,
+        progress,
+        recovery,
+    )
+    .await
 }
 
 /// The complete observed targets and unresolved risk stay in the existing
@@ -839,6 +1283,7 @@ mod queue_summary_tests {
             stop: Arc::new(AtomicBool::new(false)),
             pause,
             recovery: RecoveryCandidate {
+                persisted_id: None,
                 session_token,
                 spec,
                 directory: false,

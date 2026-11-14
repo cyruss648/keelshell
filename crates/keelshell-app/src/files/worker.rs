@@ -110,7 +110,7 @@ async fn queued_transfer(
     let direction = spec.direction;
     let queue = sftp.transfer_queue();
     let mut transfer = queue.enqueue(spec).await.map_err(FileFailure::from)?;
-    observe_transfer(&mut transfer, direction, None, stop, pause, progress).await
+    observe_transfer(&mut transfer, direction, None, stop, pause, progress, None).await
 }
 
 pub(super) async fn observe_transfer(
@@ -120,7 +120,11 @@ pub(super) async fn observe_transfer(
     stop: Arc<AtomicBool>,
     mut pause: tokio::sync::watch::Receiver<bool>,
     progress: &mpsc::SyncSender<WorkerMessage>,
+    recovery: Option<&mut TransferRecoveryWriter>,
 ) -> Result<Outcome, FileFailure> {
+    let mut recovery = recovery;
+    let mut last_bytes = existing.map_or(0, |(bytes, _)| bytes);
+    let mut last_total = None;
     #[cfg(test)]
     let pause_handoff = super::test_server::pause_handoff_fixture::before_forward(&pause).await;
     if *pause.borrow_and_update() {
@@ -135,14 +139,34 @@ pub(super) async fn observe_transfer(
             biased;
             _ = cancellation(&stop) => {
                 transfer.cancel();
-                return tokio::time::timeout(Duration::from_secs(6), finish_cancelled_transfer(transfer,progress))
-                    .await.unwrap_or(Err(FileFailure::CancellationUnconfirmed));
+                let (result, bytes, total) = tokio::time::timeout(
+                    Duration::from_secs(6),
+                    finish_cancelled_transfer(transfer, progress),
+                )
+                .await
+                .unwrap_or((
+                    Err(FileFailure::CancellationUnconfirmed),
+                    last_bytes,
+                    last_total,
+                ));
+                recovery_finish(&mut recovery, &result, bytes, total);
+                return result;
             }
             changed = pause.changed() => {
                 if changed.is_err() {
                     transfer.cancel();
-                    return tokio::time::timeout(Duration::from_secs(6), finish_cancelled_transfer(transfer, progress))
-                        .await.unwrap_or(Err(FileFailure::CancellationUnconfirmed));
+                    let (result, bytes, total) = tokio::time::timeout(
+                        Duration::from_secs(6),
+                        finish_cancelled_transfer(transfer, progress),
+                    )
+                    .await
+                    .unwrap_or((
+                        Err(FileFailure::CancellationUnconfirmed),
+                        last_bytes,
+                        last_total,
+                    ));
+                    recovery_finish(&mut recovery, &result, bytes, total);
+                    return result;
                 }
                 #[cfg(test)]
                 let pause_handoff = super::test_server::pause_handoff_fixture::before_forward(&pause).await;
@@ -158,83 +182,166 @@ pub(super) async fn observe_transfer(
                 match event {
                     Some(TransferEvent::Queued { .. }) => { let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Queued)); }
                     Some(TransferEvent::Started { total, .. }) => {
+                        last_total = total;
+                        recovery_checkpoint(&mut recovery, last_bytes, total, progress);
                         let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Started(total)));
                         if existing.is_none() { send_worker_progress(progress, transfer_progress_message(direction, 0, total)); }
                     }
                     Some(TransferEvent::Progress { transferred, total, .. }) => {
+                        last_bytes = transferred;
+                        last_total = total;
+                        recovery_checkpoint(&mut recovery, transferred, total, progress);
                         let _ = progress.try_send(WorkerMessage::Transfer(TransferUpdate::Progress(transferred,total)));
                         send_worker_progress(progress, existing.map_or_else(|| transfer_progress_message(direction,transferred,total), |(existing,directory)| resume_progress_message(transferred,total,existing,directory)));
                     }
                     Some(TransferEvent::Paused { transferred, total, .. }) => {
+                        last_bytes = transferred;
+                        last_total = total;
+                        recovery_checkpoint(&mut recovery, transferred, total, progress);
                         let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Paused(transferred,total)));
                     }
                     Some(TransferEvent::Resumed { transferred, total, .. }) => {
+                        last_bytes = transferred;
+                        last_total = total;
+                        recovery_checkpoint(&mut recovery, transferred, total, progress);
                         let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Resumed(transferred,total)));
                     }
                     Some(TransferEvent::Completed { bytes, .. }) => {
+                        recovery_checkpoint(&mut recovery, bytes, last_total, progress);
                         let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
-                        if let Some((existing,directory)) = existing {
-                            if directory { return Ok(Outcome::Done(Message::new(format!("目录续传完成：{bytes} 字节（含原有部分）；请刷新列表"),format!("Folder continuation complete: {bytes} bytes including existing content; refresh to reload")))); }
-                            return Ok(Outcome::Done(Message::new(
-                                format!("续传完成：目标 {bytes} 字节，本次新增 {} 字节；请刷新列表",bytes.saturating_sub(existing)),
-                                format!("Continuation complete: {bytes} destination bytes, {} new bytes; refresh to reload",bytes.saturating_sub(existing)),
-                            )));
-                        }
-                        let (zh, en) = match direction {
-                            TransferDirection::Upload => (
-                                format!("已通过传输队列上传 {bytes} 字节，请刷新列表"),
-                                format!("Uploaded {bytes} bytes through the transfer queue; refresh to reload"),
-                            ),
-                            TransferDirection::Download => (
-                                format!("已通过传输队列下载 {bytes} 字节"),
-                                format!("Downloaded {bytes} bytes through the transfer queue"),
-                            ),
+                        let result = if let Some((existing,directory)) = existing {
+                            if directory {
+                                Ok(Outcome::Done(Message::new(format!("目录续传完成：{bytes} 字节（含原有部分）；请刷新列表"),format!("Folder continuation complete: {bytes} bytes including existing content; refresh to reload"))))
+                            } else {
+                                Ok(Outcome::Done(Message::new(
+                                    format!("续传完成：目标 {bytes} 字节，本次新增 {} 字节；请刷新列表",bytes.saturating_sub(existing)),
+                                    format!("Continuation complete: {bytes} destination bytes, {} new bytes; refresh to reload",bytes.saturating_sub(existing)),
+                                )))
+                            }
+                        } else {
+                            let (zh, en) = match direction {
+                                TransferDirection::Upload => (
+                                    format!("已通过传输队列上传 {bytes} 字节，请刷新列表"),
+                                    format!("Uploaded {bytes} bytes through the transfer queue; refresh to reload"),
+                                ),
+                                TransferDirection::Download => (
+                                    format!("已通过传输队列下载 {bytes} 字节"),
+                                    format!("Downloaded {bytes} bytes through the transfer queue"),
+                                ),
+                            };
+                            Ok(Outcome::Done(Message::new(zh, en)))
                         };
-                        return Ok(Outcome::Done(Message::new(zh, en)));
+                        recovery_finish(&mut recovery, &result, bytes, last_total);
+                        return result;
                     }
                     Some(TransferEvent::Cancelled { bytes, .. }) => {
+                        recovery_checkpoint(&mut recovery, bytes, last_total, progress);
                         let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
-                        return Err(FileFailure::Cancelled);
+                        let result = Err(FileFailure::Cancelled);
+                        recovery_finish(&mut recovery, &result, bytes, last_total);
+                        return result;
                     }
-                    Some(TransferEvent::Uncertain { bytes, error, .. }) => { let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes))); return Err(FileFailure::OutcomeUncertain(error)); }
-                    Some(TransferEvent::Failed { error, .. }) => return Err(FileFailure::Transport(error)),
-                    None => return Err(FileFailure::WorkerStopped),
+                    Some(TransferEvent::Uncertain { bytes, error, .. }) => {
+                        recovery_checkpoint(&mut recovery, bytes, last_total, progress);
+                        let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
+                        let result = Err(FileFailure::OutcomeUncertain(error));
+                        recovery_finish(&mut recovery, &result, bytes, last_total);
+                        return result;
+                    }
+                    Some(TransferEvent::Failed { error, .. }) => {
+                        let result = Err(FileFailure::Transport(error));
+                        recovery_finish(&mut recovery, &result, last_bytes, last_total);
+                        return result;
+                    }
+                    None => {
+                        let result = Err(FileFailure::WorkerStopped);
+                        recovery_finish(&mut recovery, &result, last_bytes, last_total);
+                        return result;
+                    }
                 }
             }
         }
     }
 }
 
+fn recovery_checkpoint(
+    recovery: &mut Option<&mut TransferRecoveryWriter>,
+    bytes: u64,
+    total: Option<u64>,
+    progress: &mpsc::SyncSender<WorkerMessage>,
+) {
+    if let Some(writer) = recovery.as_deref_mut() {
+        writer.checkpoint(bytes, total);
+        if let Some(error) = writer.take_error() {
+            send_worker_progress(
+                progress,
+                Message::new(
+                    format!("传输恢复记录暂时无法保存：{error}"),
+                    format!("Transfer recovery metadata could not be saved: {error}"),
+                ),
+            );
+        }
+    }
+}
+
+fn recovery_finish(
+    recovery: &mut Option<&mut TransferRecoveryWriter>,
+    result: &Result<Outcome, FileFailure>,
+    bytes: u64,
+    total: Option<u64>,
+) {
+    if let Some(writer) = recovery.as_deref_mut() {
+        writer.finish(result, bytes, total);
+    }
+}
+
 async fn finish_cancelled_transfer(
     transfer: &mut keelshell_session::sftp::TransferHandle,
     progress: &mpsc::SyncSender<WorkerMessage>,
-) -> Result<Outcome, FileFailure> {
+) -> (Result<Outcome, FileFailure>, u64, Option<u64>) {
+    let mut last_bytes = 0;
+    let mut last_total = None;
     while let Some(event) = transfer.recv().await {
         match event {
             TransferEvent::Completed { bytes, .. } => {
                 let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
-                return Ok(Outcome::Done(Message::new(
-                    format!("传输在取消请求前已完成 {bytes} 字节"),
-                    format!("Transfer completed {bytes} bytes before cancellation took effect"),
-                )));
+                return (
+                    Ok(Outcome::Done(Message::new(
+                        format!("传输在取消请求前已完成 {bytes} 字节"),
+                        format!("Transfer completed {bytes} bytes before cancellation took effect"),
+                    ))),
+                    bytes,
+                    last_total,
+                );
             }
             TransferEvent::Cancelled { bytes, .. } => {
                 let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
-                return Err(FileFailure::Cancelled);
+                return (Err(FileFailure::Cancelled), bytes, last_total);
             }
             TransferEvent::Uncertain { bytes, error, .. } => {
                 let _ = progress.send(WorkerMessage::Transfer(TransferUpdate::Finished(bytes)));
-                return Err(FileFailure::OutcomeUncertain(error));
+                return (Err(FileFailure::OutcomeUncertain(error)), bytes, last_total);
             }
-            TransferEvent::Failed { error, .. } => return Err(FileFailure::Transport(error)),
-            TransferEvent::Queued { .. }
-            | TransferEvent::Started { .. }
-            | TransferEvent::Progress { .. }
-            | TransferEvent::Paused { .. }
-            | TransferEvent::Resumed { .. } => {}
+            TransferEvent::Failed { error, .. } => {
+                return (Err(FileFailure::Transport(error)), last_bytes, last_total);
+            }
+            TransferEvent::Queued { .. } => {}
+            TransferEvent::Started { total, .. } => last_total = total,
+            TransferEvent::Progress {
+                transferred, total, ..
+            }
+            | TransferEvent::Paused {
+                transferred, total, ..
+            }
+            | TransferEvent::Resumed {
+                transferred, total, ..
+            } => {
+                last_bytes = transferred;
+                last_total = total;
+            }
         }
     }
-    Err(FileFailure::WorkerStopped)
+    (Err(FileFailure::WorkerStopped), last_bytes, last_total)
 }
 
 pub(super) async fn operate(
@@ -290,6 +397,8 @@ async fn operate_inner(
             | Operation::TransferFile(..)
             | Operation::ResumeFile(..)
             | Operation::ResumeDirectory(..)
+            | Operation::ResumePersistedFile(..)
+            | Operation::ResumePersistedDirectory(..)
     );
     let action = async {
         match operation {
@@ -416,6 +525,7 @@ async fn operate_inner(
                     stop.clone(),
                     pause,
                     progress,
+                    None,
                 )
                 .await
             }
@@ -470,6 +580,23 @@ async fn operate_inner(
                     ))
                 }
             }
+            Operation::PlanPersistedRecovery {
+                id,
+                spec,
+                directory,
+            } => {
+                if directory {
+                    Ok(Outcome::PlannedPersistedDirectoryResume {
+                        id,
+                        plan: sftp.plan_directory_resume(spec).await?,
+                    })
+                } else {
+                    Ok(Outcome::PlannedPersistedFileResume {
+                        id,
+                        plan: sftp.plan_file_resume(spec).await?,
+                    })
+                }
+            }
             Operation::ResumeFile(plan) => {
                 let direction = plan.direction();
                 let existing = plan.existing_bytes();
@@ -485,6 +612,26 @@ async fn operate_inner(
                     stop.clone(),
                     pause,
                     progress,
+                    None,
+                )
+                .await
+            }
+            Operation::ResumePersistedFile(_, plan) => {
+                let direction = plan.direction();
+                let existing = plan.existing_bytes();
+                let queue = sftp.clone().transfer_queue();
+                let mut transfer = queue
+                    .enqueue_resume(plan)
+                    .await
+                    .map_err(FileFailure::from)?;
+                observe_transfer(
+                    &mut transfer,
+                    direction,
+                    Some((existing, false)),
+                    stop.clone(),
+                    pause,
+                    progress,
+                    None,
                 )
                 .await
             }
@@ -503,6 +650,26 @@ async fn operate_inner(
                     stop.clone(),
                     pause,
                     progress,
+                    None,
+                )
+                .await
+            }
+            Operation::ResumePersistedDirectory(_, plan) => {
+                let direction = plan.direction();
+                let existing = plan.existing_bytes();
+                let queue = sftp.clone().transfer_queue();
+                let mut transfer = queue
+                    .enqueue_directory_resume(plan)
+                    .await
+                    .map_err(FileFailure::from)?;
+                observe_transfer(
+                    &mut transfer,
+                    direction,
+                    Some((existing, true)),
+                    stop.clone(),
+                    pause,
+                    progress,
+                    None,
                 )
                 .await
             }
@@ -525,6 +692,7 @@ async fn operate_inner(
                         stop.clone(),
                         pause,
                         progress,
+                        None,
                     )
                     .await
                 }

@@ -75,6 +75,20 @@ pub enum Error {
     /// Atomic replacement succeeded but syncing its directory failed.
     #[error("state was replaced, but directory durability could not be confirmed: {0}")]
     Durability(std::io::Error),
+    /// A transfer-recovery document uses a schema this build cannot interpret.
+    #[error("unsupported transfer recovery schema {found}; expected {expected}")]
+    UnsupportedTransferRecoverySchema {
+        /// Version found in the recovery document.
+        found: u32,
+        /// Version understood by this build.
+        expected: u32,
+    },
+    /// A transfer-recovery record was not found during an explicit removal.
+    #[error("transfer recovery record was not found")]
+    TransferRecoveryNotFound,
+    /// The bounded transfer-recovery journal cannot accept another record.
+    #[error("transfer recovery journal has reached its bounded record limit")]
+    TransferRecoveryLimit,
     /// The chosen configuration backup disappeared or is not owned by this store.
     #[error("configuration backup was not found")]
     ConfigBackupNotFound,
