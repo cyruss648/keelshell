@@ -31,5 +31,12 @@
 `verify_binding.py` 核对原件、预览、完整工程集合与 Git index 或精确提交的 blob；
 提交/清理后回执单列，不能用后来成功覆盖旧失败。
 
+本地源码提交 `546bc8577e53b61bc50ebabea2e26d5057af834f` 的
+`index-input-binding.json`、`commit-input-binding.json`、
+`pre-cleanup-commit-binding.json` 和 `post-cleanup-commit-binding.json`
+均为零 mismatch；只本地提交，没有 push。
+`cleanup-final.json` 记录删除本批 293 个临时文件、逻辑 `471,461,892` 字节，
+正常程序与唯一有效 target 保持。持久原件已经进入源码提交，不依赖已删除临时目录。
+
 例如可使用 `gzip -dc raw/native-notes.md.gz` 阅读原件；暂存、绑定与清理回执
 是否完成，应以实际存在的 JSON 和批次记录为准。

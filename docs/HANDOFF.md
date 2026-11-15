@@ -32,8 +32,12 @@ chat 或容器。正常 arm64 GUI/MCP 构建及暂存包结构检查通过，没
 
 从[本批记录](testing/records/2026-11-16-editor-keyboard-native.md)和
 [持久证据](testing/records/2026-11-16-editor-keyboard-native-evidence/README.md)接续；
-本地源码提交与自有临时目录清理待 Git 绑定后完成。后续只改文档不重复运行
-工程输入未变的门禁。Rust/Cargo 实测 `1.100.0`、默认 stable，无 toolchain pin、
+本地源码提交 `546bc8577e53b61bc50ebabea2e26d5057af834f`。
+715 项工程输入、278 份原件与三个未修改预览均已通过 Git index、精确源码提交
+及清理后绑定，零 mismatch。随后回收本批 293 个临时文件、逻辑 `471,461,892`
+字节；正常 app/MCP 摘要、唯一有效 target 和其他任务资源保留。
+清理及提交绑定回执在持久证据目录单列；本批临时目录已 absent。
+后续只改文档不重复运行工程输入未变的门禁。Rust/Cargo 实测 `1.100.0`、默认 stable，无 toolchain pin、
 rust-version 或新增依赖；官方最新版本查询超时并 reap，不签全部依赖最新。
 三主题共用 registry/Palette/token；完整产品、三平台桌面、IME/辅助技术与发行保持开放。
 

@@ -11,8 +11,11 @@
 源码、Python 测试窄差分与限定原生证据三份新非作者报告均批准，开放 P0–P3 为 0。
 Frost UTF-16/GBK 明确接续片段及完整目标/唯一原始备份读回通过；
 早期失败、Graphite HOLD、Lavender NOT_RUN 与三平台/IME/辅助技术开放项保持。
-四个 agent 已关闭，作者受管 worktree 已回收；本地提交与临时目录清理接续 Git 绑定，
-不签完整产品。
+四个 agent 已关闭，作者受管 worktree 已回收；源码本地提交
+`546bc8577e53b61bc50ebabea2e26d5057af834f`，没有 push。
+715 项工程输入、278 份原件与预览在 index/源码提交/清理后绑定均零 mismatch；
+回收本批 293 个临时文件、逻辑 `471,461,892` 字节，正常程序与唯一有效 target
+保持。不签完整产品。
 见[设计](adr/0144-focused-editor-keyboard.md)与
 [本批记录](testing/records/2026-11-16-editor-keyboard-native.md)。
 

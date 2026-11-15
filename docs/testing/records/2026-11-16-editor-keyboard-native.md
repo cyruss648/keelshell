@@ -99,8 +99,17 @@ MCP 为 `14,548,464 bytes`，SHA-256
 [持久证据入口](2026-11-16-editor-keyboard-native-evidence/README.md)读取。
 278 份原件共 `42,326,696` 字节已逐字节 gzip 封存并验证解压摘要；15 个派生包、
 编译 helper 和缓存文件另列原路径、完整字节数与摘要，不重复保存在 Git。
-最终门禁、三份原报告、失败与 HOLD 都保留；Git index/精确源码提交绑定和自有
-临时目录清理仍待完成后写入单列回执。完整产品目标保持 active。
+最终门禁、三份原报告、失败与 HOLD 都保留。
+本地源码提交为 `546bc8577e53b61bc50ebabea2e26d5057af834f`，没有 push。
+[index 绑定](2026-11-16-editor-keyboard-native-evidence/index-input-binding.json)、
+[源码提交绑定](2026-11-16-editor-keyboard-native-evidence/commit-input-binding.json)及
+[清理后绑定](2026-11-16-editor-keyboard-native-evidence/post-cleanup-commit-binding.json)
+核对 715 项完整工程路径/字节、278 份原件及三个预览与精确 Git blob，零 mismatch。
+[清理回执](2026-11-16-editor-keyboard-native-evidence/cleanup-final.json)记录回收本批
+293 个临时文件、逻辑 `471,461,892` 字节；删除前每项原件及 15 份派生文件均与
+封存摘要匹配。正常 app/MCP 在删除后重新计算摘要一致，唯一有效 target、其他任务
+资源保留。四个 agent 已释放，作者受管 worktree 和临时目录均 absent。
+后续仅补文档与回执，不重跑工程输入未变的门禁。完整产品目标保持 active。
 
 Rust/Cargo 实测 `1.100.0`，默认 stable；无项目 toolchain pin、rust-version
 或新依赖。官方最新依赖检查在 45 秒超时，SIGTERM 后实际 reap；
