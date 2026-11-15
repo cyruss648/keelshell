@@ -1,0 +1,41 @@
+{
+  "utc": "2026-11-15T14:47:08.140004+00:00",
+  "verdict": "APPROVE_SOURCE_ONLY",
+  "scope": "r2 app and complete command review text only",
+  "input_digest": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "app_files_rechecked": 8,
+  "app_mismatches": [],
+  "documentation_changes_from_r1": [
+    "docs/adr/0139-reviewed-archive-tool-validation.md"
+  ],
+  "reviewed_docs_sha256": {
+    "docs/adr/0139-reviewed-archive-tool-validation.md": "676ff01019dcbb9d87e745cf320e62e0f00a92ec53f7b839a5dc10300e2ba44e",
+    "docs/product/ARCHIVE_TOOL_INSPECTION.md": "bf2cd6429291ed8dbb984f970f612ba477dc56645800da6cc044f1a91d157400"
+  },
+  "previous_audit_assertion": "input-audit-r2 correctly recorded ADR drift; broad no-document-change assertion failed. No engineering input or app-source mismatch. This supplement treats intended documentation changes separately.",
+  "rust_execution_scope": "User narrowed to 7 new controller cases; original 18-case selection is superseded and remains unexecuted.",
+  "selection": {
+    "label": "archive_validation_tests",
+    "filter": "files::transfer_tests::archive_validation_tests::",
+    "exact": false,
+    "expected_tests": [
+      "files::transfer_tests::archive_validation_tests::archive_validation_reviews_full_command_and_runs_once_without_sftp",
+      "files::transfer_tests::archive_validation_tests::archive_validation_rejects_old_approval_after_transport_replacement",
+      "files::transfer_tests::archive_validation_tests::archive_validation_discards_a_late_result_for_the_same_display_host",
+      "files::transfer_tests::archive_validation_tests::archive_validation_cancellation_does_not_replay_without_new_approval",
+      "files::transfer_tests::archive_validation_tests::archive_validation_failed_refresh_retires_only_its_previous_result",
+      "files::transfer_tests::archive_validation_tests::archive_validation_path_discovery_does_not_grant_stream_check_results",
+      "files::transfer_tests::archive_validation_tests::archive_validation_theme_language_and_detail_changes_do_not_run_tools"
+    ],
+    "reason": "New approval, real connection replacement, late reply, cancellation, failed refresh, PATH separation and theme/command regression"
+  },
+  "rust_test_cases_planned": 7,
+  "rust_tests_executed": 0,
+  "cargo_commands_executed": 0,
+  "blocking_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  }
+}

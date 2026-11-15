@@ -1,0 +1,16 @@
+test_same_group_descendant_cannot_survive_a_successful_leader (__main__.DescendantCleanup) ... {'helper_state': 'passed', 'direct_exit': 0, 'stderr': '', 'leader': 31496, 'descendant': 31497, 'descendant_group': 31496, 'same_group': True, 'descendant_still_exists': True}
+reviewer_cleanup: descendant absent
+FAIL
+
+======================================================================
+FAIL: test_same_group_descendant_cannot_survive_a_successful_leader (__main__.DescendantCleanup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/probe_descendant_eof_r1.py", line 59, in test_same_group_descendant_cannot_survive_a_successful_leader
+    self.assertFalse(
+AssertionError: True is not false : successful helper returned while its ordinary same-group descendant was alive
+
+----------------------------------------------------------------------
+Ran 1 test in 0.039s
+
+FAILED (failures=1)

@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-I",
+    "-S",
+    "-B",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/archive_validation/test_archive_validation.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session",
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/fixture-home",
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "TZ": "UTC",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "started_unix": 1794753835.1466901,
+  "elapsed_seconds": 2.5185540829988895,
+  "timeout_seconds": 45.0,
+  "timed_out": false,
+  "pid": 47989,
+  "exit_code": 0,
+  "direct_child_waited": true,
+  "log_sha256": "b8d520794a7580c70fc8c0d5d90423c304622b69cd87f7e4e2d51cf2c2f8a239",
+  "independent_rust_rebuild": false,
+  "scoped_sha256_before": {
+    "crates/keelshell-session/src/archive_validation.rs": "2f3ebc2aa7abe9b03844d4080c97304ba3fa3178baf86fd1e51a4972b8c3c6f2",
+    "crates/keelshell-session/src/archive_validation.py": "f51a2e99d7f7f8c18a73900dbcd3119f891a08cee29610533b247b7d79ca2229",
+    "crates/keelshell-session/src/archive_validation/tests.rs": "61e8b8b9845ce89c6f22143e9875c6b3e848c97634c8af630fbc032c4fcb9f3f",
+    "crates/keelshell-session/src/archive_validation/test_archive_validation.py": "42fa50ae3a589acced4ccf967dec411d1fa217d5d244cfb91cc51dfcff672524",
+    "crates/keelshell-session/tests/archive_validation.rs": "5b8baa93280544b51cf0d3d5c05c512793b42b08eb50a2347e00f12fc7c238a7",
+    "crates/keelshell-session/tests/openssh_interop.rs": "62d17cc361efb2434e92b92fe18cdbc41a476d41d57b07b37dff111fe6b2513b",
+    "crates/keelshell-session/src/lib.rs": "ad5c7a947ec07e98ca5da0953b706d4b2b6c2ea3e68954a8f6dded085edcb7f3"
+  },
+  "scoped_sha256_after": {
+    "crates/keelshell-session/src/archive_validation.rs": "2f3ebc2aa7abe9b03844d4080c97304ba3fa3178baf86fd1e51a4972b8c3c6f2",
+    "crates/keelshell-session/src/archive_validation.py": "f51a2e99d7f7f8c18a73900dbcd3119f891a08cee29610533b247b7d79ca2229",
+    "crates/keelshell-session/src/archive_validation/tests.rs": "61e8b8b9845ce89c6f22143e9875c6b3e848c97634c8af630fbc032c4fcb9f3f",
+    "crates/keelshell-session/src/archive_validation/test_archive_validation.py": "42fa50ae3a589acced4ccf967dec411d1fa217d5d244cfb91cc51dfcff672524",
+    "crates/keelshell-session/tests/archive_validation.rs": "5b8baa93280544b51cf0d3d5c05c512793b42b08eb50a2347e00f12fc7c238a7",
+    "crates/keelshell-session/tests/openssh_interop.rs": "62d17cc361efb2434e92b92fe18cdbc41a476d41d57b07b37dff111fe6b2513b",
+    "crates/keelshell-session/src/lib.rs": "ad5c7a947ec07e98ca5da0953b706d4b2b6c2ea3e68954a8f6dded085edcb7f3"
+  }
+}

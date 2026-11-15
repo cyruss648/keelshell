@@ -1,0 +1,337 @@
+{
+  "checked_at_utc": "2026-11-15T14:57:49.604496+00:00",
+  "review_status": "SOURCE_AND_NECESSARY_FOCUSED_TESTS_APPROVE",
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "closed_r1_findings": {
+    "P2": 2,
+    "notices": [
+      "notice-1.md",
+      "notice-2.md"
+    ]
+  },
+  "worktree": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "baseline_sha": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0",
+  "head_sha": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0",
+  "freeze": {
+    "manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/frozen-inputs-r2.json",
+    "manifest_sha256": "12e7e0bf2032c3cb9534ccd685cd4013521d982c2bf5b5494579fc9574ce8280",
+    "count": 607,
+    "declared_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+    "recomputed_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+    "mismatches": []
+  },
+  "binaries": {
+    "session-unit": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/session-unit-r2",
+      "sha256": "3db521334709761a4da7acce561573c45e14ab5767fdc4121544031d9ee9a075",
+      "matches_parent_binding": true,
+      "inventory_count": 205,
+      "inventory_sha256": "4b4c32f63db2f0de65477bc45781c2fb6d52f0ba9324b6f8caf41d1ff28944e0",
+      "inventory_bytes_equal_parent": true,
+      "frozen_source_matches_binding": true,
+      "independent_rebuild": false
+    },
+    "session-ssh": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/session-ssh-r2",
+      "sha256": "ea8d14c29eae9e112fe370ca7ebe4aa50c9bda3a2b0ffa6e3c1a579e6d50c892",
+      "matches_parent_binding": true,
+      "inventory_count": 11,
+      "inventory_sha256": "3a8187d3657ffeeecbf26a6a9de725dc1f1e55500261642e6922156bad437e31",
+      "inventory_bytes_equal_parent": true,
+      "frozen_source_matches_binding": true,
+      "independent_rebuild": false
+    }
+  },
+  "binary_source_inventory_binding_receipt": {
+    "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/binary-inventory-verified-r2.json",
+    "sha256": "456a379248035ed0ce01cf5d3d4afc6d6a7fa01959572b481d70ac7744e5fc32"
+  },
+  "final_focused_executions": [
+    {
+      "receipt": "python-author-suite-r2.json",
+      "argv": [
+        "/usr/bin/python3",
+        "-I",
+        "-S",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/archive_validation/test_archive_validation.py"
+      ],
+      "counts": {
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 2.5185540829988895,
+      "timeout_seconds": 45.0,
+      "source_before_and_after_match_r2": true,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-independent-risks-r2b.json",
+      "argv": [
+        "/usr/bin/python3",
+        "-I",
+        "-S",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/independent_python_risks_r2.py"
+      ],
+      "counts": {
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 1.1480844170000637,
+      "timeout_seconds": 15.0,
+      "source_before_and_after_match_r2": true,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-descendant-eof-r2.json",
+      "argv": [
+        "/usr/bin/python3",
+        "-I",
+        "-S",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/probe_descendant_eof_r1.py"
+      ],
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 0.17331654200097546,
+      "timeout_seconds": 8.0,
+      "source_before_and_after_match_r2": true,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "rust-unit-risk-r2.json",
+      "argv": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/session-unit-r2",
+        "archive_validation::tests::",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "counts": {
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 194
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 3.1539850419940194,
+      "timeout_seconds": 60.0,
+      "source_before_and_after_match_r2": true,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "rust-ssh-risk-r2.json",
+      "argv": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/session-ssh-r2",
+        "--test-threads=4",
+        "--nocapture"
+      ],
+      "counts": {
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 0
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 10.073177250000299,
+      "timeout_seconds": 45.0,
+      "source_before_and_after_match_r2": true,
+      "direct_child_waited": true
+    }
+  ],
+  "repeated_python_bridge_suite": {
+    "passed": 25,
+    "failed": 0,
+    "counted_as_additional_independent_coverage": false,
+    "evidence": "rust-unit-risk-r2.log"
+  },
+  "log_integrity": [
+    {
+      "receipt": "python-author-suite-r1.json",
+      "receipt_sha256": "08ee4242c0235c73fdbaf496a6f7dba34d9036eafebbc4956964f42dcd95541c",
+      "log": "python-author-suite-r1.log",
+      "log_sha256": "0ebd2df11fb4f9a6be91c3f8768aba52fae0a3c276b2597facb6ac1d10d0b5c0",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-author-suite-r2.json",
+      "receipt_sha256": "056713ead3ea5ece0b09d6df791b5de5e6aa540f11843e620c871129d823edec",
+      "log": "python-author-suite-r2.log",
+      "log_sha256": "b8d520794a7580c70fc8c0d5d90423c304622b69cd87f7e4e2d51cf2c2f8a239",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-descendant-eof-r1.json",
+      "receipt_sha256": "fdd5c94c92d479bf7be572bc6ea6b5e32dd7e8d319473e78421ddb6deadb4060",
+      "log": "python-descendant-eof-r1.log",
+      "log_sha256": "18b0d3c80a43f0faf04d2d237e6e2c7c32a82363fc39083fec4299f699170fc5",
+      "exit_code": 1,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-descendant-eof-r2.json",
+      "receipt_sha256": "b4e26c372bbf52c0a3477ecf3a28777f40f824694978f2e33e3e42c9dcb2a0c5",
+      "log": "python-descendant-eof-r2.log",
+      "log_sha256": "bc994f6a77da669444d296e332e14b72db10cbd94962f1682b00941803a1a1e3",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-independent-risks-r1.json",
+      "receipt_sha256": "925e8e8a7931522dd430243fceb34ebd89b8b28e8ddbd71d3842c3532462d09a",
+      "log": "python-independent-risks-r1.log",
+      "log_sha256": "80b28629217cc70f4eb1f90a81418cb2685c390409ac24f1ffeef8ca524ebe31",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-independent-risks-r2.json",
+      "receipt_sha256": "1fe0ddc7f0b7e198ce781ad5179b47e9fc49c44736ae89717e2e4c609fac28b9",
+      "log": "python-independent-risks-r2.log",
+      "log_sha256": "6cec2cf620be994721df90bec75822e2b05df061e0195a1834308f8dbca4f01d",
+      "exit_code": 1,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "python-independent-risks-r2b.json",
+      "receipt_sha256": "b8da35707d77c0dbe1d4781c1a3ce895f21d649a5ef1aa6b58a2cad75a190627",
+      "log": "python-independent-risks-r2b.log",
+      "log_sha256": "91a60db1a726150f32a44b81a5e949181f54728109a851c7ad08e576e2cbe0af",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "reviewer-python-runtime-r1.json",
+      "receipt_sha256": "093ba9fb9cbca3be9bc91e5d1cc3a108c95f9b87a8e964eb915def1810881905",
+      "log": "reviewer-python-runtime-r1.log",
+      "log_sha256": "d868fd13300381812915dbdbb6801a4a9760d11065e06bf48f68ea1f817ad052",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "rust-ssh-inventory-r2.json",
+      "receipt_sha256": "9d845d82cc4393012cc9aac424332c98132d537afa057b0d5d74c17b51a2d829",
+      "log": "rust-ssh-inventory-r2.log",
+      "log_sha256": "3a8187d3657ffeeecbf26a6a9de725dc1f1e55500261642e6922156bad437e31",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "rust-ssh-risk-r2.json",
+      "receipt_sha256": "f47da3b235eb7eae6f015976fe39613cf359f2d54bba0d3ed751e8060b90d869",
+      "log": "rust-ssh-risk-r2.log",
+      "log_sha256": "1206d0027dfab31f015b6c598463062b0e052872b9464257cfb795d33a9d4046",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "rust-unit-inventory-r2.json",
+      "receipt_sha256": "a84c43882b98d9c7d0dd0a3542976fc8ff0d6cb61422e4d87ea5b9d37252543d",
+      "log": "rust-unit-inventory-r2.log",
+      "log_sha256": "4b4c32f63db2f0de65477bc45781c2fb6d52f0ba9324b6f8caf41d1ff28944e0",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    },
+    {
+      "receipt": "rust-unit-risk-r2.json",
+      "receipt_sha256": "ca5be50187be1eafb6476077a76f9eaaf8e58255675a41b0b445788b8ba5f188",
+      "log": "rust-unit-risk-r2.log",
+      "log_sha256": "240dbf0e683bd92ae24ccf937bda51ccba5789cc78f5e3e24eb7f9525330c455",
+      "exit_code": 0,
+      "timed_out": false,
+      "direct_child_waited": true
+    }
+  ],
+  "preserved_r1_and_failure_evidence": {
+    "notice-1.md": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/notice-1.md",
+      "sha256": "09bf6e558bca646af3d9628e7da22e261b8c7002285f3f622fbb9757ca88c051"
+    },
+    "notice-2.md": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/notice-2.md",
+      "sha256": "72e0ca983d956ce960d2573a66f977441d35b89562c7f37453b272cf6344bd4f"
+    },
+    "report.md": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/report.md",
+      "sha256": "f3d593dc3eb2abe38651d8693c1a95e3dc5d163451eb568847bc6b4b94eae81d"
+    },
+    "probe_descendant_eof_r1.py": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/probe_descendant_eof_r1.py",
+      "sha256": "73e22871e6ed6d80c198fd968283e2d91e2dbdcda8f029f9d8af2967fc38a488"
+    },
+    "python-descendant-eof-r1.log": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/python-descendant-eof-r1.log",
+      "sha256": "18b0d3c80a43f0faf04d2d237e6e2c7c32a82363fc39083fec4299f699170fc5"
+    },
+    "python-descendant-eof-r1.json": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/python-descendant-eof-r1.json",
+      "sha256": "fdd5c94c92d479bf7be572bc6ea6b5e32dd7e8d319473e78421ddb6deadb4060"
+    },
+    "python-independent-risks-r2.log": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/python-independent-risks-r2.log",
+      "sha256": "6cec2cf620be994721df90bec75822e2b05df061e0195a1834308f8dbca4f01d"
+    },
+    "python-independent-risks-r2.json": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/python-independent-risks-r2.json",
+      "sha256": "1fe0ddc7f0b7e198ce781ad5179b47e9fc49c44736ae89717e2e4c609fac28b9"
+    },
+    "independent_python_risks_r1.py": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/independent_python_risks_r1.py",
+      "sha256": "d55ec931c2bf4c6cb4f480d68fc03c826469f84a15dee4ae9da74b37dc9cb36c"
+    },
+    "signal-fixture-adjustment-r2.json": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/signal-fixture-adjustment-r2.json",
+      "sha256": "60040dce4dd5a2f9804ee33a1c200402864909a2cbef7eea984b2efea6513d0e"
+    }
+  },
+  "preserved_failure_classification": {
+    "python-descendant-eof-r1": "original_production_defect_closed_by_r2",
+    "python-independent-risks-r2": "reviewer_signal_fixture_target_adjusted_for_supervisor_topology; original_failure_preserved; corrected_11_passed_in_r2b"
+  },
+  "reviewer_execution_limits": {
+    "cargo_run": false,
+    "independent_rust_rebuild": false,
+    "full_gate_run": false,
+    "real_openssh_run": false,
+    "linux_container_run": false,
+    "source_modified": false,
+    "shared_target_modified": false,
+    "writes_confined_to": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session",
+    "native_three_platform_acceptance_signed": false
+  },
+  "full_gate": {
+    "status": "PENDING",
+    "basis": "parent_reported_started; reviewer_did_not_wait_for_terminal_state",
+    "merge_condition": "parent confirms successful full-gate-r2 terminal state on identical 607 frozen inputs with zero drift"
+  },
+  "report": {
+    "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/report-r2.md",
+    "sha256": "c572fa0923bb8287d3ef968adbbde12ed94131ccafc9811545fcf1926abb3325"
+  }
+}

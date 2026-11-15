@@ -1,0 +1,18 @@
+{
+  "session-unit": {
+    "source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e2d86a6a6d9452c5/out/keelshell_session-e2d86a6a6d9452c5",
+    "copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/session-unit-r2",
+    "sha256": "3db521334709761a4da7acce561573c45e14ab5767fdc4121544031d9ee9a075",
+    "inventory_count": 205,
+    "inventory_sha256": "4b4c32f63db2f0de65477bc45781c2fb6d52f0ba9324b6f8caf41d1ff28944e0",
+    "frozen_input_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17"
+  },
+  "session-ssh": {
+    "source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/6ff9e152c5f2162b/out/archive_validation-6ff9e152c5f2162b",
+    "copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/session-ssh-r2",
+    "sha256": "ea8d14c29eae9e112fe370ca7ebe4aa50c9bda3a2b0ffa6e3c1a579e6d50c892",
+    "inventory_count": 11,
+    "inventory_sha256": "3a8187d3657ffeeecbf26a6a9de725dc1f1e55500261642e6922156bad437e31",
+    "frozen_input_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "podman",
+    "machine",
+    "ssh",
+    "uname",
+    "-s",
+    "-m"
+  ],
+  "exit_code": 0,
+  "stdout": "Linux aarch64\n",
+  "stderr": "",
+  "boundary": "Current Podman VM platform, retrospectively observed; r2 image metadata binds exact tested image"
+}

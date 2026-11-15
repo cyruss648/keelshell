@@ -1,0 +1,12 @@
+{
+  "base_sha": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0",
+  "branch": "feature/editor-unicode-codec-20261114",
+  "active_target": "work/recovery-batch-integration-20261115/target",
+  "target_owner_changed": false,
+  "rustc": "1.100.0 (0ef1bc386 2026-11-09)",
+  "cargo": "1.100.0 (3acc79c0c 2026-11-05)",
+  "toolchain": "stable-aarch64-apple-darwin (default)",
+  "delivery": "local_only_no_push",
+  "batch": "archive tool versions and fixed in-memory stream checks",
+  "native_desktop": "NOT_RUN"
+}

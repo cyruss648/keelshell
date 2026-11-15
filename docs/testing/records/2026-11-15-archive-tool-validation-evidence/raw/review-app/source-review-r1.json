@@ -1,0 +1,29 @@
+{
+  "utc": "2026-11-15T14:30:11.756501+00:00",
+  "status": "SOURCE_REVIEW_COMPLETE_AWAITING_FINAL_PREBUILT",
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "new_tests_expected": [
+    "archive_validation_reviews_full_command_and_runs_once_without_sftp",
+    "archive_validation_rejects_old_approval_after_transport_replacement",
+    "archive_validation_discards_a_late_result_for_the_same_display_host",
+    "archive_validation_cancellation_does_not_replay_without_new_approval",
+    "archive_validation_failed_refresh_retires_only_its_previous_result",
+    "archive_validation_path_discovery_does_not_grant_stream_check_results",
+    "archive_validation_theme_language_and_detail_changes_do_not_run_tools"
+  ],
+  "new_tests_count": 7,
+  "rust_tests_executed": 0,
+  "cargo_commands_executed": 0,
+  "native_desktop_test_runs": 0,
+  "artifacts_required": [
+    "final stable app test binary and SHA256",
+    "complete compiled --list test inventory",
+    "build provenance and final input digest binding"
+  ],
+  "messaging_limitation": "App send_message_to_thread refused native-ancestor delivery; parent polls this batch directory. No successful direct message delivery claimed."
+}

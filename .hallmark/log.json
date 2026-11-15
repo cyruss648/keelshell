@@ -2,6 +2,27 @@
   {
     "date": "2026-11-15",
     "scope": "app",
+    "shape": "existing server tools disclosure with separate version and stream checks",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "signature": "an explicit complete-command review before real version observations and tiny in-memory samples",
+    "material": "actual current-connection replies; no invented capability or interoperability claims",
+    "preserve": "registry, Palette, Kit controls, fixed confirmation actions, identity binding, existing file and recovery authority",
+    "introduce": [
+      "separate version and stream results",
+      "bounded seven-item details with explicit untested rows",
+      "retired failed refreshes and no approval replay"
+    ],
+    "sweep": "PASS: seven GPUI cases, final full gate, real OpenSSH 16/16, Linux helper/Python and two scoped nonauthor reviews; web render not applicable to native Rust/GPUI",
+    "native_evidence": "NOT_RUN for this batch; full native matrix remains open",
+    "finish_review": "SOURCE_APPROVED; native desktop finish NOT_RUN"
+  },
+  {
+    "date": "2026-11-15",
+    "scope": "app",
     "shape": "existing native archive actions with separate inspection and server packing reviews",
     "theme": [
       "frost",

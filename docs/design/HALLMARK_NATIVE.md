@@ -73,6 +73,19 @@ Frost、Graphite、Lavender 从同一 registry、Palette 和 Kit 控件获取颜
 
 ## Native mapping
 
+### 2026-11-15 工具版本与流式自测
+
+既有工具观察区增加独立的「版本与自测」操作，PATH 与版本/功能分别显示来源。
+结果默认摘要、详情折叠；七项详情有独立 144px 高度上限，版本和流式状态使用
+明确文字，不用找到路径或版本成功暗示完整工具可用。完整命令沿用固定动作和
+滚动正文，窄窗保持确认/取消可达。
+
+三主题与其明暗变体继续消费同一 Palette、组件半径及 Kit 字体；没有新增主题 ID
+业务分支、字面颜色或动画。七项 GPUI 新回归已通过，覆盖完整审核、连接替换、
+迟到、取消、失败刷新和三主题双语。完整工程门禁、正常程序构建、非作者复核及
+原生桌面仍分别记录在[本批记录](../testing/records/2026-11-15-archive-tool-validation.md)；
+网页 render 不适用于 Rust/GPUI，也不以 headless 结果签署原生 finish。
+
 Hallmark 的 HTML/CSS 规则在本项目映射到原生实现：
 
 | Hallmark 检查意图 | GPUI 对应实现与验证 |

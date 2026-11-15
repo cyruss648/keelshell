@@ -1,6 +1,7 @@
 # 服务器归档 / Server archives
 
-本批工程门禁和真实 OpenSSH 已通过，独立复核与原生边界分别记录。
+审核式服务器 ZIP/tar.gz 打包已实现，既有集中工程门禁、真实 OpenSSH 协议测试
+与限定非作者源码复核通过；三平台原生交互另行验收。
 设计见 [ADR 0135](../adr/0135-reviewed-server-archive-packing.md)，当前证据见
 [集中验证记录](../testing/records/2026-11-15-server-archive-integration.md)。
 
@@ -34,12 +35,23 @@
 隔离和关闭保护。SSH 通道关闭不表示远程压缩进程已经终止。
 
 三套主题使用同一注册表和组件 token，正文审核可滚动，确认/取消保持固定。
-完整原生平台交互、Windows 安全解包、Zmodem、中继与性能收益仍独立验收。
+[客户端归档](ARCHIVE_TRANSFERS.md)的 Windows 来源/安全解包后端及入口已接入，
+Windows 验证为 platform/session 严格交叉 Clippy 和四个 AMD64 PE32+ 测试 target
+链接；原生文件系统/桌面实际执行仍为 `0 / NOT_RUN`。最终 Linux arm64 本地
+后端/codec 专项 `252/0/0` 不代签 GUI、x64、独立 peer 或更广远端服务器权限
+矩阵，见[本地后端记录](../testing/records/2026-11-15-windows-local-backend.md)。
+[审核式 Zmodem](ZMODEM.md)也已实现，direct PTY strict `OO` 兼容仍
+`HOLD/PARTIAL`，缺握手结果不等于严格完成，见
+[收尾记录](../testing/records/2026-11-15-bounded-zmodem-farewell.md)。
+[工具版本/流式自测](ARCHIVE_TOOL_INSPECTION.md#版本与流式自测)的集中工程、真实 OpenSSH、Linux helper 专项与限定非作者复核已通过；更广远端 Linux 权限/default ACL、旧 Python
+runtime、三平台完整原生交互、IME/辅助技术、用户中继、可重复性能收益和发行
+仍待验收，FILE-05/M4 保持开放。
 
 ## English
 
-Engineering checks and real OpenSSH interoperability have passed. Independent
-review and native acceptance boundaries are recorded separately.
+Reviewed server-side ZIP/tar.gz packing is implemented. Its engineering gate,
+real OpenSSH interoperability tests and scoped nonauthor source reviews passed;
+full native platform interactions remain separately unverified.
 
 Select sibling ordinary files or folders using the remote checkboxes. Under
 Transfer settings → Archive transfer, select ZIP or tar.gz and enter a new
@@ -63,4 +75,17 @@ Changing the actual SSH connection, folder, selection, format or name retires
 approval. Failure, interruption or an unknown outcome can retain staging and
 destination isolation; nothing is automatically retried, removed or resumed
 after restart. Closing an SSH channel does not prove the remote process stopped.
-Native platform interactions and release acceptance remain separately unverified.
+The Windows [client archive](ARCHIVE_TRANSFERS.md) source/extraction backend and
+controls are integrated. Windows validation consists of platform/session strict
+cross Clippy and four AMD64 PE32+ test links; native filesystem/desktop execution
+remains 0 / NOT_RUN. The final Linux arm64 selection passed 252 local
+backend/codec tests with no failures or ignores; it does not establish GUI, x64,
+independent peer or wider remote-server permission acceptance. See the
+[local backend record](../testing/records/2026-11-15-windows-local-backend.md).
+[Reviewed Zmodem](ZMODEM.md) is also implemented. Direct PTY strict OO
+interoperability remains HOLD/PARTIAL; a missing-farewell result is not strict
+completion, as tracked in the
+[bounded Zmodem record](../testing/records/2026-11-15-bounded-zmodem-farewell.md).
+[Tool version and stream checks](ARCHIVE_TOOL_INSPECTION.md#versions-and-stream-checks) passed the engineering gate, real OpenSSH, Linux helper checks and scoped nonauthor reviews. Wider remote Linux permissions/default ACLs, older Python runtimes,
+full native interactions, IME/accessibility, user relay, repeatable performance
+gains and release acceptance remain open; FILE-05/M4 is not complete.

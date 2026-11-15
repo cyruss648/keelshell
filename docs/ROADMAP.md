@@ -7,6 +7,27 @@
 功能集中集成、全量验证、修复及非作者复核，开发过程中保留编译与关键专项。正式
 功能提交前完成本批门禁和评审，减少重复全仓运行和文档专属评审循环。
 
+## 2026-11-15 工具版本与流式自测
+
+服务端工具区新增独立审核的七项固定版本观察和 tar/gzip/Python 微小内存样本。
+PATH 与版本/流式结果分别绑定实际连接；zip/unzip/rz/sz 功能仍显式未测试。
+不创建文件、不读取用户归档、不开始 Zmodem，也不授予后续传输权限。
+
+最终 607 项工程输入的完整门禁 `exit 0 / 674.299s / reaped`：
+普通 Rust `2987/0/36 ignored`、rustdoc `14/0`、工程 Python
+`187 run / 1 skipped`、helper Python `25/25`；格式、严格 Clippy、
+x.y 策略及三组 controller 通过，29 项新增默认 Rust 逐名通过，完整路径及摘要
+零漂移。真实 localhost OpenSSH `16/16`、Linux arm64 helper/Python 专项、
+正常 arm64 GUI/MCP 构建通过。两个非作者范围批准、零开放 P0–P3、两个 P2 已关闭；
+Rust 专项独立执行使用父预构建，无独立重编译。旧失败和原报告条件保留。
+只本地提交，不 push；本批三平台原生、IME/辅助技术、strict peer、
+用户中继、性能收益和 FILE-05/M4 仍开放。接续从
+[本批记录](testing/records/2026-11-15-archive-tool-validation.md)与
+[持久证据](testing/records/2026-11-15-archive-tool-validation-evidence/README.md)读取。
+156 份原件与 607 项输入已通过 Git index/blob 核验；本批临时目录及重复测试副本
+`325,398,545` 字节已回收，四个自有容器 absent，作者 worktree 和 agent 已释放，
+唯一有效 target、共享缓存和其他任务资源保留。
+
 ## 2026-11-15 Windows 文件后端与 Linux 专项
 
 Windows 平台安全接口、Zmodem、归档和 UI capability 已接入。
@@ -893,7 +914,7 @@ Gauss的combined-r3/r4已批准限定源码及门禁/新包；
 | P2 | 监控与网络 | 按项能力与缓存已交付；继续df/ps缺失后恢复、ss可用、真实诊断错误/取消，以及远端macOS/Windows适配 |
 | P2 | 持久化隧道 | 命名规则、三方向转发、流量、显式审核/停止及运行状态持久化与显式恢复已实现；完整重连/管理矩阵、跨平台和真实远端验收仍开放 |
 | P2 | 配置恢复/同步 | 已有审核恢复、回退与认证加密目录同步；跨机器挂载、断电耐久性及最终一致同步器待验 |
-| P3 | 高级传输 | ZIP/tar.gz 客户端归档、审核式服务器打包、服务端 PATH 观察及有界 PAX 子集已通过集中门禁和非作者复核。Windows 解包后端、原生矩阵、远端 Linux 权限/旧 Python、工具版本/功能验证、rz/sz 实机、用户中继及可重复收益验收仍开放 |
+| P3 | 高级传输 | ZIP/tar.gz 客户端归档、有界 PAX、两次审核的服务器打包、服务端 PATH 观察及现有 SSH PTY 上的审核式 Zmodem 已实现，既有集中门禁与限定非作者复核通过。Windows 归档来源/安全解包、Zmodem 来源/保存后端及入口已接入；Windows 验证仅交叉 Clippy 与四个 AMD64 PE32+ 测试 target 链接，原生执行 0。Linux arm64 后端/codec 专项 `252/0/0` 不代签 GUI、x64 或独立 peer；direct PTY strict `OO` 兼容仍 `HOLD/PARTIAL`，缺握手结果不等于严格完成。工具版本/流式自测已通过本批门禁、真实 OpenSSH、Linux helper 专项与限定非作者复核，见[工具记录](testing/records/2026-11-15-archive-tool-validation.md)；更广远端 Linux 权限/旧 Python runtime、三平台原生矩阵、用户中继及可重复收益验收仍开放。见[本地后端记录](testing/records/2026-11-15-windows-local-backend.md)和[Zmodem 收尾记录](testing/records/2026-11-15-bounded-zmodem-farewell.md) |
 | P3 | AI知识复用 | 本地分类、显式Ask和审核式批量管理已交付；跨设备同步及更多复用待设计，不恢复旧SSH权限或自动执行runbook |
 
 2026-11-14 的更多文本编码切片已实现 UTF-16 LE/BE 的 BOM 识别、严格解码、保存、

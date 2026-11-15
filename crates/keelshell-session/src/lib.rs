@@ -5,6 +5,7 @@
 #![deny(missing_docs)]
 
 pub mod archive_tools;
+pub mod archive_validation;
 pub mod batch;
 pub mod completion;
 mod error;

@@ -1,0 +1,13 @@
+{
+  "utc": "2026-11-15T14:41:17.485778+00:00",
+  "status": "PLAN_NOT_EXECUTED",
+  "purpose": "The app source and descriptor names stay the same while the embedded session helper changes. Inventory alone cannot distinguish the old and repaired command.",
+  "checks_before_tests": [
+    "Recompute full final frozen input map and digest",
+    "Verify final stable binary SHA256 and provenance manifest",
+    "Run binary --list and compare full inventory plus all 18 selected exact descriptors",
+    "Read-only search the binary for the current include_str helper bytes to distinguish repaired command from r1",
+    "Recheck the 8 app source hashes and bilingual complete-command review boundaries"
+  ],
+  "source_and_shared_target_write": false
+}

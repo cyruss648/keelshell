@@ -1,0 +1,42 @@
+    Checking gpui-pre-collections v0.3.12
+    Checking gpui-pre-http-client v0.3.12
+    Checking keelshell-core v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core)
+    Checking keelshell-platform v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-platform)
+    Checking keelshell-ai v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-ai)
+    Checking keelshell-mcp v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-mcp)
+    Checking gpui-pre v0.3.12
+    Checking keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Checking gpui-pre-apple v0.3.12
+    Checking gpui-kit-assets v0.9.1
+    Checking gpui-base v0.9.1
+    Checking gpui-pre-macos v0.3.12
+    Checking gpui-pre-platform v0.3.12
+    Checking gpui-component v0.9.1
+    Checking gpui-kit v0.9.1
+    Checking keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+error[E0433]: cannot find type `Language` in this scope
+   --> crates/keelshell-app/src/files/archive_validation.rs:126:17
+    |
+126 |                 Language::ZhCn => format!("{passed} 项流式检查通过；{seconds} 秒前核验"),
+    |                 ^^^^^^^^ use of undeclared type `Language`
+
+error[E0433]: cannot find type `Language` in this scope
+   --> crates/keelshell-app/src/files/archive_validation.rs:127:17
+    |
+127 |                 Language::En => format!("{passed} stream checks passed; checked {seconds}s ago"),
+    |                 ^^^^^^^^ use of undeclared type `Language`
+
+error[E0433]: cannot find type `Language` in this scope
+   --> crates/keelshell-app/src/files/archive_validation.rs:212:21
+    |
+212 |                     Language::ZhCn => format!(
+    |                     ^^^^^^^^ use of undeclared type `Language`
+
+error[E0433]: cannot find type `Language` in this scope
+   --> crates/keelshell-app/src/files/archive_validation.rs:216:21
+    |
+216 |                     Language::En => format!(
+    |                     ^^^^^^^^ use of undeclared type `Language`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `keelshell-app` (bin "keelshell-app") due to 4 previous errors

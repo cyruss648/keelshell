@@ -1,0 +1,2 @@
+# Preserve original report/log bytes, including line endings and whitespace.
+raw/** -text -diff -merge

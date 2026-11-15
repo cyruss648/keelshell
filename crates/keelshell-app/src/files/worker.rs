@@ -399,10 +399,18 @@ async fn operate_inner(
         if !probe.matches_session(&session) {
             return Err(FileFailure::CancelledBeforeStart);
         }
-        let report = tokio::select! {
-            biased;
-            _ = cancellation(&stop) => return Err(FileFailure::CancelledBeforeStart),
-            result = session.inspect_archive_tools(&stop) => result?,
+        let report = if probe.validates_tools() {
+            archive_inspection::Reply::Validation(tokio::select! {
+                biased;
+                _ = cancellation(&stop) => return Err(FileFailure::CancelledBeforeStart),
+                result = session.validate_archive_tools(&stop) => result?,
+            })
+        } else {
+            archive_inspection::Reply::Paths(tokio::select! {
+                biased;
+                _ = cancellation(&stop) => return Err(FileFailure::CancelledBeforeStart),
+                result = session.inspect_archive_tools(&stop) => result?,
+            })
         };
         return Ok(Outcome::ArchiveTools(probe.clone(), report));
     }

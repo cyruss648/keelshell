@@ -10,6 +10,7 @@
 
 | 日期（Asia/Shanghai） | 记录与范围 |
 | --- | --- |
+| 2026-11-15 | [工具版本与流式自测集中验证](records/2026-11-15-archive-tool-validation.md)：607 输入零漂移，普通 Rust `2987/36 ignored`、rustdoc `14`、工程 Python `187 run/1 skipped`、helper Python `25/25`；29 项新增默认 Rust 逐名通过，真实 OpenSSH `16/16`、Linux arm64 helper 专项和正常 GUI/MCP 构建通过。两个非作者范围批准、两个 P2 关闭、零开放 P0–P3，预构建限制与原生 NOT_RUN 保留。 |
 | 2026-11-15 | [审核式 PTY Zmodem 候选集中验证](records/2026-11-15-reviewed-pty-zmodem.md)：最终普通 Rust `2876/34 ignored`、rustdoc `14`、Python `141 run/1 skipped`，新增 `129` 项逐名通过，`570 + 12` 输入零 drift；两名非作者关闭四项 P2、一项 P3，零开放 P0–P3，预构建专项范围明确。直接 PTY 本机 `6/7`、Debian `5/7` 和 `4/7` 的最终 OO 缺失保持 HOLD/PARTIAL；relay `7/7`、真实 archive/ACL `17/17` 不代签直接 PTY、Linux 本地后端或三平台原生验收。 |
 | 2026-11-15 | [客户端归档传输集中验证](records/2026-11-15-reviewed-archive-transfer.md)：ZIP/tar.gz 完整成员审核、源重验、新目标发布、取消与隔离；两项 P2 先红后绿并经独立复核关闭，P0–P3 为零，独立预构建 `9/9`。最终普通 Rust `2601/25 ignored`、rustdoc `14`、Python `131/1 skipped`，真实本机 OpenSSH `13/13` 和正常 GUI/MCP 构建通过；Windows 解包后端、原生矩阵及其余高级传输范围开放。 |
 | 2026-11-15 | [恢复记录批量整理集中验证](records/2026-11-15-transfer-recovery-batch-integration.md)：有序逐条审核、显式批量丢弃、快照/claim/旧回调及三主题双语紧凑布局；worker 启动失败回队 P2 已修复，两项 GPUI 先红后绿，传输队列 `29/29`。最终完整门禁普通 `2533/23 ignored`、rustdoc `14`、Python `131/1 skipped` 通过；新独立复核批准冻结修复，P0–P3 均为零。修复前真实本机 OpenSSH `11/11` 与 macOS 可见窗口短验保留原归属；Podman 与在线依赖检查网络受阻，历史 rustdoc 重复分类已校正。 |

@@ -1,0 +1,10 @@
+{
+  "helper_sha256": "f51a2e99d7f7f8c18a73900dbcd3119f891a08cee29610533b247b7d79ca2229",
+  "image_id": "77353e13649fe86ce434ffb958fcdf43317abe4ffdc0916fa7225edd407bb082",
+  "user": "65534:65534",
+  "network": "none",
+  "read_only_root": true,
+  "read_only_tmpfs": false,
+  "init": true,
+  "boundary": "Linux arm64 helper and Python process tests; not Rust or desktop acceptance"
+}

@@ -1,5 +1,42 @@
 # KeelShell 当前交接 — 2026-11-15
 
+## 当前批次：服务端工具版本与流式自测，工程门禁与限定复核通过
+
+基线为本地 `6e2b0a7ee3493ace52ba157049ab668ba464c4f0`。新增独立审核的
+工具版本与固定内存归档样本检查；PATH 观察继续保留，不授权工具执行或传输。
+后端在受管 worktree 并行开发，父负责原生界面、集成及集中验证。
+设计见 [ADR 0139](adr/0139-reviewed-archive-tool-validation.md)，使用入口见
+[工具指南](product/ARCHIVE_TOOL_INSPECTION.md)。
+
+最终 r2 共 607 项 Rust/Cargo/Python 输入，集合 SHA-256
+`523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17`。
+完整门禁实际 `exit 0 / 674.299s / reaped`：普通 Rust `2987/0/36 ignored`、
+rustdoc `14/0`、工程 Python `187 run / 1 skipped`、helper Python `25/25`，
+格式、严格 Clippy、x.y 策略和三组 controller 全通过。29 项新增默认 Rust 逐名
+通过并包含在总数中，门禁前后完整路径及摘要零漂移。
+
+真实 disposable localhost OpenSSH `16/16`、Linux arm64 helper/Python `25/25`、
+正常 arm64 GUI/MCP 构建通过。两个新非作者范围均 APPROVE、零开放 P0–P3，
+两个 P2 已关闭；Rust 复核为核对来源和库存后的父预构建独立执行，没有独立重编译。
+原报告签署时门禁 PENDING，父已在相同冻结核验成功终态，满足其工程条件。
+旧失败、notice 和中止门禁均保留，不能改签成功。详见
+[本批记录](testing/records/2026-11-15-archive-tool-validation.md)与
+[持久证据入口](testing/records/2026-11-15-archive-tool-validation-evidence/README.md)。
+
+156 份原件已无损导出并与 607 项工程输入一起从 Git index/blob 读回；
+随后回收本批临时目录和稳定测试副本 `325,398,545` 字节。四个自有容器按完整 ID
+再次确认 absent，作者 worktree 已受管归档且路径 absent，四个 agent 已释放。
+唯一有效 Cargo target、其他任务 worktree/容器、共享 image/VM 与原始失败保留，
+清理回执从持久入口读取。本批未新建用户 chat。
+
+唯一 Cargo target 仍为 `work/recovery-batch-integration-20261115/target`，
+归属没有切换；作者 worktree 不运行 Cargo。继续只本地提交，不 push。
+Rust/Cargo 实测 1.100.0，默认 stable，无项目 toolchain pin；本批在线最新依赖
+检查 60 秒超时，已停止并实际 reap，不能签全部最新。按阶段集中集成、验证、
+修复和非作者复核，减少重复全仓重跑。本批原生三平台执行为 0，不以构建、
+容器或 headless 签署桌面验收。完整输入/辅助技术、严格 Zmodem peer
+`HOLD/PARTIAL`、用户中继、性能收益、FILE-05/M4 与完整产品目标保持开放。
+
 ## 当前批次：Windows 文件后端与 Linux 专项，工程门禁通过
 
 基线为本地 `a092dd5712c0a92ee4af18970fb0500fb230b760`，当前

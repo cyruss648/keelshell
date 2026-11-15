@@ -1,0 +1,6 @@
+test_actual_helper_performs_no_file_mutations_or_network_calls (__main__.HelperTests.test_actual_helper_performs_no_file_mutations_or_network_calls) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.078s
+
+OK

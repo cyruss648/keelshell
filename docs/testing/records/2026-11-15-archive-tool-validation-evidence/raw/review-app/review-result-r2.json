@@ -1,0 +1,37 @@
+{
+  "utc": "2026-11-15T14:55:31.563700+00:00",
+  "verdict": "CONDITIONAL_APPROVE",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "scope": "r2 FilesPanel app source and seven specified prebuilt controller cases",
+  "frozen_input_count": 607,
+  "frozen_input_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "prebuilt_binary_sha256": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2",
+  "passed": 7,
+  "failed": 0,
+  "ignored": 0,
+  "filtered_out": 1239,
+  "test_invocations": 1,
+  "inventory_invocations": 1,
+  "cargo_commands": 0,
+  "independent_rust_recompilation": false,
+  "native_desktop_runs": 0,
+  "integration_condition": "Parent verifies successful full-gate-r2 terminal state on the same 607-input freeze; native acceptance remains separate.",
+  "parent_reported_only": [
+    "r2 real OpenSSH 16/16",
+    "normal GUI/MCP builds passed",
+    "full-gate-r2 started"
+  ],
+  "retained_failure_evidence": [
+    "input-audit-r2.json and source-result-r2.json: overbroad no-document-change assertion exited 1",
+    "../full-gate-r1.json: interrupted exit -15, 499.942 seconds, reaped"
+  ],
+  "report": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-app/report-r2.md",
+  "report_sha256": "f5672d0a751a491134b938cf1ca1048df2ac71bd3e4cc6c093e45575d75ffb49",
+  "execution_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-app/execution-summary-r2.json",
+  "report_links_valid": true
+}

@@ -57,6 +57,7 @@ struct Peer {
     active: Arc<AtomicUsize>,
     jobs: JoinSet<()>,
     archive_tools: Arc<archive_tools_fixture::Fixture>,
+    archive_validation: Arc<archive_tools_fixture::Fixture>,
     exec_requests: Arc<AtomicUsize>,
     server_archives: Arc<server_archive_fixture::Fixture>,
 }
@@ -126,15 +127,20 @@ impl server::Handler for Peer {
             });
             return Ok(());
         }
-        if command != keelshell_session::archive_tools::probe_command().as_bytes() {
+        let fixture = if command == keelshell_session::archive_tools::probe_command().as_bytes() {
+            &self.archive_tools
+        } else if command == keelshell_session::archive_validation::validation_command().as_bytes()
+        {
+            &self.archive_validation
+        } else {
             session.channel_failure(id)?;
             session.close(id)?;
             return Ok(());
-        }
+        };
         let Some(mut channel) = self.channels.remove(&id) else {
             return Err(russh::Error::Disconnect);
         };
-        let (response, hold) = self.archive_tools.reply();
+        let (response, hold) = fixture.reply();
         session.channel_success(id)?;
         self.jobs.spawn(async move {
             if let Some(mut hold) = hold {
@@ -171,6 +177,7 @@ pub(crate) struct Server {
     pub(crate) filesystem: filesystem::Filesystem,
     pub(crate) active: Arc<AtomicUsize>,
     pub(super) archive_tools: Arc<archive_tools_fixture::Fixture>,
+    pub(super) archive_validation: Arc<archive_tools_fixture::Fixture>,
     pub(super) exec_requests: Arc<AtomicUsize>,
     #[cfg(unix)]
     pub(super) server_archives: Arc<server_archive_fixture::Fixture>,
@@ -211,6 +218,8 @@ impl Server {
         let shared_active = active.clone();
         let archive_tools = Arc::new(archive_tools_fixture::Fixture::default());
         let shared_archive_tools = archive_tools.clone();
+        let archive_validation = Arc::new(archive_tools_fixture::Fixture::validation());
+        let shared_archive_validation = archive_validation.clone();
         let exec_requests = Arc::new(AtomicUsize::new(0));
         let shared_exec_requests = exec_requests.clone();
         let server_archives = Arc::new(server_archive_fixture::Fixture::default());
@@ -238,6 +247,7 @@ impl Server {
                             active: shared_active.clone(),
                             jobs: JoinSet::new(),
                             archive_tools: shared_archive_tools.clone(),
+                            archive_validation: shared_archive_validation.clone(),
                             exec_requests: shared_exec_requests.clone(),
                             server_archives: shared_server_archives.clone(),
                         };
@@ -258,6 +268,7 @@ impl Server {
             filesystem,
             active,
             archive_tools,
+            archive_validation,
             exec_requests,
             #[cfg(unix)]
             server_archives,

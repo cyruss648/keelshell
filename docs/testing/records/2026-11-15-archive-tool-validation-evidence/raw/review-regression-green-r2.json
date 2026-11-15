@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-I",
+    "-S",
+    "-B",
+    "work/archive-validation-batch-20261115/review-session/probe_descendant_eof_r1.py"
+  ],
+  "started_utc": "2026-11-15T14:42:30.376326+00:00",
+  "finished_utc": "2026-11-15T14:42:30.556898+00:00",
+  "elapsed_seconds": 0.181,
+  "exit_code": 0,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "e1e0bcc07d46fa0a9e9980e0d1afaed684ec345992d767916c69759574202759"
+}

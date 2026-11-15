@@ -1,0 +1,49 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.13s
+     Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e2d86a6a6d9452c5/out/keelshell_session-e2d86a6a6d9452c5)
+
+running 11 tests
+test archive_validation::tests::missing_tools_preserve_explicit_untested_functional_boundaries ... ok
+test archive_validation::tests::parser_preserves_safe_unicode_paths_and_version_observations ... ok
+test archive_validation::tests::exact_utf8_field_limits_fit_the_response_and_overruns_are_rejected ... ok
+test archive_validation::tests::parser_rejects_control_bidi_replacement_and_hidden_text ... ok
+test archive_validation::tests::parser_rejects_unknown_missing_duplicate_or_mistyped_fields ... ok
+test archive_validation::tests::parser_rejects_unknown_protocol_tools_statuses_order_and_count ... ok
+test archive_validation::tests::preview_embeds_the_entire_helper_as_one_fixed_shell_argument ... ok
+test archive_validation::tests::parser_rejects_inconsistent_paths_versions_and_functional_claims ... ok
+test archive_validation::tests::version_and_stream_outcomes_remain_independent_and_typed ... ok
+test archive_validation::tests::every_truncated_document_invalid_utf8_banner_and_extra_document_is_rejected ... ok
+test_actual_helper_performs_no_file_mutations_or_network_calls (__main__.HelperTests.test_actual_helper_performs_no_file_mutations_or_network_calls) ... ok
+test_actual_isolated_python_roundtrip_uses_only_bytesio (__main__.HelperTests.test_actual_isolated_python_roundtrip_uses_only_bytesio) ... ok
+test_actual_review_command_has_no_user_arguments_or_persistent_script (__main__.HelperTests.test_actual_review_command_has_no_user_arguments_or_persistent_script) ... ok
+test_environment_allowlist_excludes_options_loader_hooks_and_relative_paths (__main__.HelperTests.test_environment_allowlist_excludes_options_loader_hooks_and_relative_paths) ... ok
+test_fixed_tar_and_gzip_samples_are_regular_in_memory_payloads (__main__.HelperTests.test_fixed_tar_and_gzip_samples_are_regular_in_memory_payloads) ... ok
+test_helper_rejects_user_arguments_without_running_any_checks (__main__.HelperTests.test_helper_rejects_user_arguments_without_running_any_checks) ... ok
+test_no_adoptable_report_after_signal_or_unconfirmed_cleanup (__main__.HelperTests.test_no_adoptable_report_after_signal_or_unconfirmed_cleanup) ... ok
+test_stream_payload_stderr_and_version_failures_are_independent (__main__.HelperTests.test_stream_payload_stderr_and_version_failures_are_independent) ... ok
+test_tool_dispatch_is_fixed_and_function_checks_never_run_zip_or_zmodem (__main__.HelperTests.test_tool_dispatch_is_fixed_and_function_checks_never_run_zip_or_zmodem) ... ok
+test_unsafe_and_missing_resolutions_do_not_dispatch_any_process (__main__.HelperTests.test_unsafe_and_missing_resolutions_do_not_dispatch_any_process) ... ok
+test_version_text_is_safe_bounded_utf8_without_authenticity_parsing (__main__.HelperTests.test_version_text_is_safe_bounded_utf8_without_authenticity_parsing) ... ok
+test_actual_fixed_input_and_both_output_streams_are_drained_concurrently (__main__.OwnedProcessTests.test_actual_fixed_input_and_both_output_streams_are_drained_concurrently) ... ok
+test_actual_shared_deadline_bounds_a_stage_and_prevents_following_dispatch (__main__.OwnedProcessTests.test_actual_shared_deadline_bounds_a_stage_and_prevents_following_dispatch) ... ok
+test_child_that_never_reads_fixed_stdin_cannot_block_output_or_timeout (__main__.OwnedProcessTests.test_child_that_never_reads_fixed_stdin_cannot_block_output_or_timeout) ... ok
+test_combined_per_command_stdout_stderr_flood_is_capped_and_reaped (__main__.OwnedProcessTests.test_combined_per_command_stdout_stderr_flood_is_capped_and_reaped) ... ok
+test_denied_group_kill_fails_closed_and_fixture_still_reaps_its_child (__main__.OwnedProcessTests.test_denied_group_kill_fails_closed_and_fixture_still_reaps_its_child) ... ok
+test_early_stdin_close_cannot_pass_a_stream_check (__main__.OwnedProcessTests.test_early_stdin_close_cannot_pass_a_stream_check) ... ok
+test_eof_before_exit_cannot_bypass_the_same_deadline (__main__.OwnedProcessTests.test_eof_before_exit_cannot_bypass_the_same_deadline) ... ok
+test_exited_leader_with_descendant_holding_pipes_is_timed_out_and_group_killed (__main__.OwnedProcessTests.test_exited_leader_with_descendant_holding_pipes_is_timed_out_and_group_killed) ... ok
+test_process_spawn_failures_are_unavailable_and_never_reflect_exception_text (__main__.OwnedProcessTests.test_process_spawn_failures_are_unavailable_and_never_reflect_exception_text) ... ok
+test_shared_deadline_prevents_later_process_dispatch (__main__.OwnedProcessTests.test_shared_deadline_prevents_later_process_dispatch) ... ok
+test_shared_output_budget_counts_both_streams_across_commands (__main__.OwnedProcessTests.test_shared_output_budget_counts_both_streams_across_commands) ... ok
+test_success_kills_same_group_descendant_with_closed_stdio_before_reaping_leader (__main__.OwnedProcessTests.test_success_kills_same_group_descendant_with_closed_stdio_before_reaping_leader) ... ok
+test_timeout_kills_and_actually_waits_the_owned_child (__main__.OwnedProcessTests.test_timeout_kills_and_actually_waits_the_owned_child) ... ok
+test_unconfirmed_child_wait_fails_closed_instead_of_returning_a_status (__main__.OwnedProcessTests.test_unconfirmed_child_wait_fails_closed_instead_of_returning_a_status) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 1.424s
+
+OK
+test archive_validation::tests::actual_archive_validation_python_safety_suite_runs_under_the_default_gate ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 194 filtered out; finished in 1.51s
+

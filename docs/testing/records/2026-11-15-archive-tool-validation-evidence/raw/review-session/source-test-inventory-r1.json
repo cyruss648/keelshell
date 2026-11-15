@@ -1,0 +1,41 @@
+{
+  "crates/keelshell-session/src/archive_validation/tests.rs": {
+    "count": 11,
+    "names": [
+      "preview_embeds_the_entire_helper_as_one_fixed_shell_argument",
+      "parser_preserves_safe_unicode_paths_and_version_observations",
+      "missing_tools_preserve_explicit_untested_functional_boundaries",
+      "version_and_stream_outcomes_remain_independent_and_typed",
+      "parser_rejects_unknown_missing_duplicate_or_mistyped_fields",
+      "parser_rejects_unknown_protocol_tools_statuses_order_and_count",
+      "parser_rejects_inconsistent_paths_versions_and_functional_claims",
+      "parser_rejects_control_bidi_replacement_and_hidden_text",
+      "exact_utf8_field_limits_fit_the_response_and_overruns_are_rejected",
+      "every_truncated_document_invalid_utf8_banner_and_extra_document_is_rejected",
+      "actual_archive_validation_python_safety_suite_runs_under_the_default_gate"
+    ],
+    "sha256": "c120f592bfbabcb2547aea8721e98ee01c4e96b93a10882ac4ef35017d0045e0"
+  },
+  "crates/keelshell-session/tests/archive_validation.rs": {
+    "count": 11,
+    "names": [
+      "complete_reviewed_helper_is_sent_verbatim_on_only_the_selected_connection",
+      "each_validation_request_uses_a_fresh_channel_and_no_cached_report",
+      "pre_cancelled_or_closing_validation_never_opens_a_channel",
+      "validation_cancellation_reaps_a_late_open_without_exec",
+      "dropped_validation_future_reaps_a_late_open_without_exec",
+      "cancelled_validation_discards_a_late_valid_reply_without_claiming_remote_stop",
+      "validation_cancellation_while_waiting_for_exec_ack_preserves_the_connection",
+      "validation_deadline_includes_exec_ack_and_channel_close",
+      "validation_unconfirmed_open_times_out_without_exec_or_a_successful_report",
+      "malformed_validation_stderr_missing_exit_and_helper_failure_fail_closed",
+      "validation_combined_output_flood_is_bounded_without_closing_the_connection"
+    ],
+    "sha256": "5b8baa93280544b51cf0d3d5c05c512793b42b08eb50a2347e00f12fc7c238a7"
+  },
+  "crates/keelshell-session/tests/openssh_interop.rs": {
+    "new_test": "openssh_archive_tool_validation_checks_streams_without_creating_files",
+    "default_ignored": true,
+    "native_openssh_executed_by_reviewer": false
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/app-r2",
+    "--list"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "started_utc": "2026-11-15T14:49:45.895883+00:00",
+  "finished_utc": "2026-11-15T14:49:45.910897+00:00",
+  "elapsed_seconds": 0.015,
+  "exit_code": 0,
+  "timeout": false,
+  "reaped": true,
+  "binary_sha256": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2",
+  "frozen_input_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "log_sha256": "64b807803c8f028dacedbaccb1a94fbc17c894d882fe99ca06bfa5d98f12122c",
+  "prebuilt": true,
+  "independent_recompile": false
+}

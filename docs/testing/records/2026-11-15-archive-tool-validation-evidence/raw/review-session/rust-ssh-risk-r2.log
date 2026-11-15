@@ -1,0 +1,16 @@
+
+running 11 tests
+test each_validation_request_uses_a_fresh_channel_and_no_cached_report ... ok
+test dropped_validation_future_reaps_a_late_open_without_exec ... ok
+test complete_reviewed_helper_is_sent_verbatim_on_only_the_selected_connection ... ok
+test pre_cancelled_or_closing_validation_never_opens_a_channel ... ok
+test cancelled_validation_discards_a_late_valid_reply_without_claiming_remote_stop ... ok
+test malformed_validation_stderr_missing_exit_and_helper_failure_fail_closed ... ok
+test validation_combined_output_flood_is_bounded_without_closing_the_connection ... ok
+test validation_cancellation_reaps_a_late_open_without_exec ... ok
+test validation_cancellation_while_waiting_for_exec_ack_preserves_the_connection ... ok
+test validation_unconfirmed_open_times_out_without_exec_or_a_successful_report ... ok
+test validation_deadline_includes_exec_ack_and_channel_close ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.06s
+

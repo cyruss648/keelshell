@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check.py"
+  ],
+  "started_utc": "2026-11-15T14:52:38.606269+00:00",
+  "finished_utc": "2026-11-15T15:03:52.907806+00:00",
+  "elapsed_seconds": 674.299,
+  "exit_code": 0,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "f3094efe4a3c378160e89b9027cb99e7c32ea4be3e73db29a4de21b10c09a433"
+}

@@ -1,0 +1,32 @@
+{
+  "utc": "2026-11-15T14:49:47.937513+00:00",
+  "verdict": "PASS",
+  "rust_cases_passed": 7,
+  "rust_cases_failed": 0,
+  "rust_cases_ignored": 0,
+  "filtered_out": 1239,
+  "rust_case_names": [
+    "files::transfer_tests::archive_validation_tests::archive_validation_failed_refresh_retires_only_its_previous_result",
+    "files::transfer_tests::archive_validation_tests::archive_validation_discards_a_late_result_for_the_same_display_host",
+    "files::transfer_tests::archive_validation_tests::archive_validation_path_discovery_does_not_grant_stream_check_results",
+    "files::transfer_tests::archive_validation_tests::archive_validation_cancellation_does_not_replay_without_new_approval",
+    "files::transfer_tests::archive_validation_tests::archive_validation_rejects_old_approval_after_transport_replacement",
+    "files::transfer_tests::archive_validation_tests::archive_validation_reviews_full_command_and_runs_once_without_sftp",
+    "files::transfer_tests::archive_validation_tests::archive_validation_theme_language_and_detail_changes_do_not_run_tools"
+  ],
+  "binary_test_invocations": 1,
+  "inventory_invocations": 1,
+  "cargo_commands_executed": 0,
+  "independent_rust_recompilation": false,
+  "native_desktop_runs": 0,
+  "input_count_before": 607,
+  "input_count_after": 607,
+  "input_sha256_before": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "input_sha256_after": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "source_input_drift": [],
+  "binary_sha256_after": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2",
+  "controller_receipt": "app-controller-r2.json",
+  "controller_elapsed_seconds": 1.899,
+  "inventory_receipt": "binary-inventory-r2.json",
+  "head_after": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0"
+}

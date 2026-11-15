@@ -1,0 +1,749 @@
+{
+  "gate": {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/check.py"
+    ],
+    "started_utc": "2026-11-15T14:52:38.606269+00:00",
+    "finished_utc": "2026-11-15T15:03:52.907806+00:00",
+    "elapsed_seconds": 674.299,
+    "exit_code": 0,
+    "timeout_or_interrupt": false,
+    "reaped": true,
+    "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+    "log_sha256": "f3094efe4a3c378160e89b9027cb99e7c32ea4be3e73db29a4de21b10c09a433"
+  },
+  "totals": {
+    "ordinary": {
+      "passed": 2987,
+      "failed": 0,
+      "ignored": 36
+    },
+    "rustdoc": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "suites": [
+    {
+      "kind": "ordinary",
+      "target": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/50ac3b81bb7f6304/out/keelshell_ai-50ac3b81bb7f6304)",
+      "passed": 129,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/discovery_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/cde86858806b4804/out/discovery_http-cde86858806b4804)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/header_name_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/416f9434392ad260/out/header_name_secrets_http-416f9434392ad260)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/known_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/27548ce1aa5fe1ba/out/known_secrets_http-27548ce1aa5fe1ba)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/local_agent_cli.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/6cb13e5572180480/out/local_agent_cli-6cb13e5572180480)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 4
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/local_environment_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/2b0b548e67a72bcc/out/local_environment_independent-2b0b548e67a72bcc)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/provider_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/849df446cb6a7c35/out/provider_http-849df446cb6a7c35)",
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/request_options_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/00d3bd5743f55614/out/request_options_http-00d3bd5743f55614)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/74a1e55a81a61939/out/keelshell_app-74a1e55a81a61939)",
+      "passed": 1244,
+      "failed": 0,
+      "ignored": 2
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/96657fab632ebf17/out/keelshell_core-96657fab632ebf17)",
+      "passed": 222,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/ai_inference.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/03d101948afd0e5c/out/ai_inference-03d101948afd0e5c)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/ai_profile_storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/9b9487af50165e3e/out/ai_profile_storage-9b9487af50165e3e)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f2c9e0d293a2e4f6/out/archive-f2c9e0d293a2e4f6)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/archive_pax.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/5ddbd10840455633/out/archive_pax-5ddbd10840455633)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/batch_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/cfb3d5d9b5ba0059/out/batch_audit-cfb3d5d9b5ba0059)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/batch_parameters.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3d452e922930f520/out/batch_parameters-3d452e922930f520)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/batch_workflow.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/819c29bea63f66b4/out/batch_workflow-819c29bea63f66b4)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/completion_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f6ae347c8d960ff6/out/completion_shell-f6ae347c8d960ff6)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/configuration_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/95b10d18a41ffe3e/out/configuration_recovery-95b10d18a41ffe3e)",
+      "passed": 24,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/connection_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6f3c0f0da0ff52e5/out/connection_library-6f3c0f0da0ff52e5)",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/connection_library_batch.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/013664f4e932b31b/out/connection_library_batch-013664f4e932b31b)",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/directory_compare.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6429720617b07044/out/directory_compare-6429720617b07044)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/directory_mirror.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3068cc5f33f9417c/out/directory_mirror-3068cc5f33f9417c)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/directory_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/eda50b36739fba94/out/directory_sync-eda50b36739fba94)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/host_keys.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d4c5671fdecc9e33/out/host_keys-d4c5671fdecc9e33)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/259de3c11aaadb90/out/independent_workflow_audit-259de3c11aaadb90)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/knowledge_context.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/35c48bf60e82ce11/out/knowledge_context-35c48bf60e82ce11)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/knowledge_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/eec896ef0d75616c/out/knowledge_library-eec896ef0d75616c)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/knowledge_persistence.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/139de27cf9ed548a/out/knowledge_persistence-139de27cf9ed548a)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/9241af6380d986af/out/openssh-9241af6380d986af)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/pane_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/2188ab300176cfef/out/pane_layout-2188ab300176cfef)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/06904a0563dacf1e/out/profile_sync-06904a0563dacf1e)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/profile_sync_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/20cc859b68937021/out/profile_sync_independent-20cc859b68937021)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/profile_sync_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/1d613f7d7ee7b380/out/profile_sync_review-1d613f7d7ee7b380)",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/profiles.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f6557ddc66789910/out/profiles-f6557ddc66789910)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/proxies.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0286c9fd6d5790de/out/proxies-0286c9fd6d5790de)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/reconnect.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/794d9f290af5efe3/out/reconnect-794d9f290af5efe3)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/recursive_mirror_final_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/c4188a551cdc1a13/out/recursive_mirror_final_review-c4188a551cdc1a13)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/routes.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0cd56afe8aaad032/out/routes-0cd56afe8aaad032)",
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/scheduled_workflow_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/edf124082a0b9e1e/out/scheduled_workflow_review-edf124082a0b9e1e)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/server_archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d1b3db9853096ee3/out/server_archive-d1b3db9853096ee3)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/snippet_template_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/7dc82ff0cdf6b412/out/snippet_template_shell-7dc82ff0cdf6b412)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/snippet_templates.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/01f323480397cc6f/out/snippet_templates-01f323480397cc6f)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/snippets.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/5501f21e2b798557/out/snippets-5501f21e2b798557)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/da18a87edbc400d0/out/storage-da18a87edbc400d0)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/theme_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/ee10ec6948535d5b/out/theme_preferences-ee10ec6948535d5b)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/b914962e75bc9890/out/transfer_recovery-b914962e75bc9890)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/tunnel_rules.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/25133bbb2169386b/out/tunnel_rules-25133bbb2169386b)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/tunnel_runtime.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/2216ed16b5649f17/out/tunnel_runtime-2216ed16b5649f17)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/update_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6fb625d6ec8d238a/out/update_preferences-6fb625d6ec8d238a)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/vault.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/a54ff072e2b7238f/out/vault-a54ff072e2b7238f)",
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/4fba8b769ec94231/out/workflow_audit-4fba8b769ec94231)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/workflow_audit_profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f8b7ec3fb531998a/out/workflow_audit_profile_sync-f8b7ec3fb531998a)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/workflow_audit_schema.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/263fe9d5ee357821/out/workflow_audit_schema-263fe9d5ee357821)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/workflow_audit_wire_compatibility.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/00a2039617bed266/out/workflow_audit_wire_compatibility-00a2039617bed266)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/workspace_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/efcabf62cebf2b1b/out/workspace_layout-efcabf62cebf2b1b)",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6302e17300340b80/out/zmodem-6302e17300340b80)",
+      "passed": 102,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/eea92bd5a76d0993/out/keelshell_mcp-eea92bd5a76d0993)",
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/9cfb119c7fd5d530/out/keelshell_mcp-9cfb119c7fd5d530)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/authority.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/42d2bdfd51778375/out/authority-42d2bdfd51778375)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/ipc_transport.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/b9083de129ee38ba/out/ipc_transport-b9083de129ee38ba)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/startup_eof.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/c2ddcb085304a571/out/startup_eof-c2ddcb085304a571)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/stdio_process.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/bc54a2d57e0884f9/out/stdio_process-bc54a2d57e0884f9)",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/stream_protocol.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/a112071752f6d2d1/out/stream_protocol-a112071752f6d2d1)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-platform/5db0383be55b5ad0/out/keelshell_platform-5db0383be55b5ad0)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/4708879328820e6a/out/keelshell_session-4708879328820e6a)",
+      "passed": 201,
+      "failed": 0,
+      "ignored": 4
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/archive_tools.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/edd6b91810ba65a9/out/archive_tools-edd6b91810ba65a9)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/archive_transfer.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/cd0b9cb00ea9b65b/out/archive_transfer-cd0b9cb00ea9b65b)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/archive_validation.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/573de382a0cff373/out/archive_validation-573de382a0cff373)",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/batch_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/879545a123e51d67/out/batch_exec-879545a123e51d67)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/disk_monitor.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ce43eb196f18c0a0/out/disk_monitor-ce43eb196f18c0a0)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/disk_monitor_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/f932d4d9a5e7e93e/out/disk_monitor_independent-f932d4d9a5e7e93e)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/0575314c28f9b169/out/independent_workflow_audit-0575314c28f9b169)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/openssh_interop.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/a1db54db36720903/out/openssh_interop-a1db54db36720903)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 16
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/remote_completion.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ba3c3f84dcd00514/out/remote_completion-ba3c3f84dcd00514)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/remote_only.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/6534421091ea53b2/out/remote_only-6534421091ea53b2)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/server_archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/5a094d04d09b905a/out/server_archive-5a094d04d09b905a)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/ssh_loopback.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/46a8a8b935328be3/out/ssh_loopback-46a8a8b935328be3)",
+      "passed": 154,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_idle_eof_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/dc2e48da556debd1/out/transfer_idle_eof_independent-dc2e48da556debd1)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_idle_eof_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ac1eece3629afd47/out/transfer_idle_eof_review-ac1eece3629afd47)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_idle_metadata_negative_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/9f74183954455fa9/out/transfer_idle_metadata_negative_review-9f74183954455fa9)",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_idle_metadata_positive_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/2dd97df257625e60/out/transfer_idle_metadata_positive_review-2dd97df257625e60)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_idle_metadata_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/d8cb387f52793a19/out/transfer_idle_metadata_review-d8cb387f52793a19)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_idle_timeout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/f7bcd5582ad2bbc8/out/transfer_idle_timeout-f7bcd5582ad2bbc8)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/transfer_metadata_idle.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/524e670c1d2c3cf5/out/transfer_metadata_idle-524e670c1d2c3cf5)",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/da7f425ca1e6b3e1/out/workflow_audit-da7f425ca1e6b3e1)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/workflow_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/2106cb3771ec17ad/out/workflow_exec-2106cb3771ec17ad)",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/08a6404fc5fc3da9/out/zmodem-08a6404fc5fc3da9)",
+      "passed": 26,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "target": "Running tests/zmodem_openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/817e670b582cce44/out/zmodem_openssh-817e670b582cce44)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 8
+    },
+    {
+      "kind": "rustdoc",
+      "target": "Doc-tests keelshell_ai",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "target": "Doc-tests keelshell_ai",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "target": "Doc-tests keelshell_core",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "target": "Doc-tests keelshell_mcp",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "target": "Doc-tests keelshell_platform",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "target": "Doc-tests keelshell_session",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "python_runs": [
+    {
+      "phase": "/opt/homebrew/opt/python@3.15/bin/python3.15 -m unittest discover -s scripts -p test_*.py",
+      "run": 187,
+      "duration": "9.435s"
+    },
+    {
+      "phase": "cargo test --workspace --locked -- --test-threads=4",
+      "run": 25,
+      "duration": "1.446s"
+    }
+  ],
+  "new_default_rust": {
+    "count": 29,
+    "all_passed": true,
+    "names": [
+      "archive_validation::tests::actual_archive_validation_python_safety_suite_runs_under_the_default_gate",
+      "archive_validation::tests::every_truncated_document_invalid_utf8_banner_and_extra_document_is_rejected",
+      "archive_validation::tests::exact_utf8_field_limits_fit_the_response_and_overruns_are_rejected",
+      "archive_validation::tests::missing_tools_preserve_explicit_untested_functional_boundaries",
+      "archive_validation::tests::parser_preserves_safe_unicode_paths_and_version_observations",
+      "archive_validation::tests::parser_rejects_control_bidi_replacement_and_hidden_text",
+      "archive_validation::tests::parser_rejects_inconsistent_paths_versions_and_functional_claims",
+      "archive_validation::tests::parser_rejects_unknown_missing_duplicate_or_mistyped_fields",
+      "archive_validation::tests::parser_rejects_unknown_protocol_tools_statuses_order_and_count",
+      "archive_validation::tests::preview_embeds_the_entire_helper_as_one_fixed_shell_argument",
+      "archive_validation::tests::version_and_stream_outcomes_remain_independent_and_typed",
+      "cancelled_validation_discards_a_late_valid_reply_without_claiming_remote_stop",
+      "complete_reviewed_helper_is_sent_verbatim_on_only_the_selected_connection",
+      "dropped_validation_future_reaps_a_late_open_without_exec",
+      "each_validation_request_uses_a_fresh_channel_and_no_cached_report",
+      "files::transfer_tests::archive_validation_tests::archive_validation_cancellation_does_not_replay_without_new_approval",
+      "files::transfer_tests::archive_validation_tests::archive_validation_discards_a_late_result_for_the_same_display_host",
+      "files::transfer_tests::archive_validation_tests::archive_validation_failed_refresh_retires_only_its_previous_result",
+      "files::transfer_tests::archive_validation_tests::archive_validation_path_discovery_does_not_grant_stream_check_results",
+      "files::transfer_tests::archive_validation_tests::archive_validation_rejects_old_approval_after_transport_replacement",
+      "files::transfer_tests::archive_validation_tests::archive_validation_reviews_full_command_and_runs_once_without_sftp",
+      "files::transfer_tests::archive_validation_tests::archive_validation_theme_language_and_detail_changes_do_not_run_tools",
+      "malformed_validation_stderr_missing_exit_and_helper_failure_fail_closed",
+      "pre_cancelled_or_closing_validation_never_opens_a_channel",
+      "validation_cancellation_reaps_a_late_open_without_exec",
+      "validation_cancellation_while_waiting_for_exec_ack_preserves_the_connection",
+      "validation_combined_output_flood_is_bounded_without_closing_the_connection",
+      "validation_deadline_includes_exec_ack_and_channel_close",
+      "validation_unconfirmed_open_times_out_without_exec_or_a_successful_report"
+    ]
+  },
+  "repeat_counts_excluded": [
+    "readiness/observer/small-stack controller reruns",
+    "targeted and independent reviewer Rust reruns",
+    "Python suites repeated by the Rust bridge",
+    "opt-in real OpenSSH tests"
+  ]
+}

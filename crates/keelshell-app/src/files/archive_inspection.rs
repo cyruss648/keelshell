@@ -3,17 +3,42 @@ use super::*;
 use keelshell_session::archive_tools::{ArchiveToolAvailability, ArchiveToolReport, probe_command};
 use std::time::Instant;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Kind {
+    Paths,
+    Validation,
+}
+
 #[derive(Clone)]
 pub(super) struct Probe {
     token: uuid::Uuid,
     session: SshSession,
     host: String,
+    kind: Kind,
 }
 
 impl Probe {
+    pub(super) fn new(token: uuid::Uuid, session: SshSession, host: String, kind: Kind) -> Self {
+        Self {
+            token,
+            session,
+            host,
+            kind,
+        }
+    }
+
     pub(super) fn matches_session(&self, session: &SshSession) -> bool {
         self.session.same_connection(session)
     }
+
+    pub(super) fn validates_tools(&self) -> bool {
+        self.kind == Kind::Validation
+    }
+}
+
+pub(super) enum Reply {
+    Paths(ArchiveToolReport),
+    Validation(keelshell_session::archive_validation::ArchiveValidationReport),
 }
 
 pub(super) struct Observation {
@@ -28,6 +53,7 @@ pub(super) struct State {
     running: bool,
     pub(super) failed: bool,
     expanded: bool,
+    pub(super) validation: super::archive_validation::State,
 }
 
 impl FilesPanel {
@@ -41,7 +67,7 @@ impl FilesPanel {
                 .is_some_and(|session| probe.matches_session(session))
     }
 
-    fn can_inspect_archive_tools(&self) -> bool {
+    pub(super) fn can_inspect_archive_tools(&self) -> bool {
         !self.suspended
             && self.session.is_some()
             && self.operation_id.is_none()
@@ -61,6 +87,7 @@ impl FilesPanel {
             token: self.session_token,
             session,
             host: self.host.clone(),
+            kind: Kind::Paths,
         };
         self.confirm(
             Message::new(
@@ -78,7 +105,11 @@ impl FilesPanel {
         );
     }
 
-    pub(super) fn begin_archive_probe(&mut self) {
+    pub(super) fn begin_archive_probe(&mut self, probe: &Probe) {
+        if probe.validates_tools() {
+            self.archive_inspection.validation.begin();
+            return;
+        }
         // A failed refresh cannot leave an older successful observation looking
         // like the result of the user's latest explicit inspection.
         self.archive_inspection.observation = None;
@@ -86,15 +117,23 @@ impl FilesPanel {
         self.archive_inspection.failed = false;
     }
 
-    pub(super) fn fail_archive_probe(&mut self) {
+    pub(super) fn fail_archive_probe(&mut self, probe: &Probe) {
+        if probe.validates_tools() {
+            self.archive_inspection.validation.finish(true);
+            return;
+        }
         self.archive_inspection.running = false;
         self.archive_inspection.failed = true;
     }
 
     pub(super) fn finish_archive_probe(&mut self, probe: &Probe, failed: bool) {
         if self.archive_probe_is_current(probe) {
-            self.archive_inspection.running = false;
-            self.archive_inspection.failed = failed;
+            if probe.validates_tools() {
+                self.archive_inspection.validation.finish(failed);
+            } else {
+                self.archive_inspection.running = false;
+                self.archive_inspection.failed = failed;
+            }
         } else {
             self.archive_inspection = State::default();
         }
@@ -103,7 +142,7 @@ impl FilesPanel {
     pub(super) fn receive_archive_tools(
         &mut self,
         probe: Probe,
-        report: ArchiveToolReport,
+        reply: Reply,
         cx: &mut Context<Self>,
     ) {
         if !self.archive_probe_is_current(&probe) {
@@ -114,6 +153,22 @@ impl FilesPanel {
             cx.notify();
             return;
         }
+        let report = match reply {
+            Reply::Validation(report) if probe.validates_tools() => {
+                self.receive_archive_validation(probe, report, cx);
+                return;
+            }
+            Reply::Paths(report) if !probe.validates_tools() => report,
+            _ => {
+                self.fail_archive_probe(&probe);
+                self.status = Message::new(
+                    "工具结果与已审核的检测类型不一致，请重新审核。",
+                    "The tool result did not match the reviewed check. Review a new check.",
+                );
+                cx.notify();
+                return;
+            }
+        };
         self.archive_inspection.running = false;
         self.archive_inspection.failed = false;
         self.archive_inspection.observation = Some(Observation {
@@ -272,6 +327,8 @@ impl FilesPanel {
             }
             card = card.child(rows.test_support());
         }
-        card.test_support().into_any_element()
+        card.child(self.archive_validation_view(cx))
+            .test_support()
+            .into_any_element()
     }
 }

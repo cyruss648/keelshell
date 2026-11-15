@@ -1,0 +1,23 @@
+{
+  "files": [
+    {
+      "path": "stable-binaries/app-r2",
+      "bytes": 266251648,
+      "sha256": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2",
+      "reason": "Regenerable prebuilt test copy; binding, complete inventory and execution receipts preserved"
+    },
+    {
+      "path": "stable-binaries/session-ssh-r2",
+      "bytes": 19280528,
+      "sha256": "ea8d14c29eae9e112fe370ca7ebe4aa50c9bda3a2b0ffa6e3c1a579e6d50c892",
+      "reason": "Regenerable prebuilt test copy; binding, complete inventory and execution receipts preserved"
+    },
+    {
+      "path": "stable-binaries/session-unit-r2",
+      "bytes": 36368560,
+      "sha256": "3db521334709761a4da7acce561573c45e14ab5767fdc4121544031d9ee9a075",
+      "reason": "Regenerable prebuilt test copy; binding, complete inventory and execution receipts preserved"
+    }
+  ],
+  "total_bytes": 321900736
+}

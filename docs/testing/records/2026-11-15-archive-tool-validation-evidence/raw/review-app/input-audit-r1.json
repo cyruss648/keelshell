@@ -1,0 +1,29 @@
+{
+  "reviewer_thread_id": "01a1df99-58c4-7c71-a55b-b151dd871e88",
+  "timestamp_utc": "2026-11-15T14:27:27.657376+00:00",
+  "root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "head": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0",
+  "freeze_file_sha256": "0d6a2b75914fe90175066f9103f984a1669c81fda4d03b2be4faecafe62a9222",
+  "expected_count": 607,
+  "actual_count": 607,
+  "expected_digest": "d68bec67c2cd4313383736733096f5c4ae68ccc6d786793609d31cb34aedc210",
+  "actual_digest": "d68bec67c2cd4313383736733096f5c4ae68ccc6d786793609d31cb34aedc210",
+  "mismatches": [],
+  "extra_paths": [],
+  "review_scope_hashes": {
+    "crates/keelshell-app/src/files.rs": "0cc9024b53c1ca69d8a9f1bafae53a358263419db1f37351d16b08989eb0047e",
+    "crates/keelshell-app/src/files/archive_inspection.rs": "8087a25a4b955dc96fee99eafecd0e57695dad8bf04e5a52a6efcf291be8466b",
+    "crates/keelshell-app/src/files/archive_validation.rs": "d89a5de5402e7ae3222a9cc2b91802c0308edbe818cbc72128e8d1d9a7b7eaac",
+    "crates/keelshell-app/src/files/worker.rs": "bb3d11258b4e46a1584cae98644f6863e11939fe8eb1cc6ee39c8391ce0c3cde",
+    "crates/keelshell-app/src/files/test_server.rs": "831dcc79129080a7d31d8394f094fc54f6fcaefe850b27eb609c00e1b29dda24",
+    "crates/keelshell-app/src/files/archive_tools_fixture.rs": "a975b168c6323c9bf7aecc21b060fd50d13bc675980dd51367b72a5d746d1b68",
+    "crates/keelshell-app/src/files/transfer_tests.rs": "d239df2a6cd8371759059b5204ad20f9092e8a11ae0c42f0de1580987ee4d965",
+    "crates/keelshell-app/src/files/archive_validation_tests.rs": "9cfa33dbfbc92735935325ac1ccd6ee91338b8c8dd5b8b4657bd588d1ba43505",
+    "docs/adr/0139-reviewed-archive-tool-validation.md": "a9b72b99236859c8454a0d22dee7cef76220b7e316ff2af21d806b3a668cb5ca",
+    "docs/product/ARCHIVE_TOOL_INSPECTION.md": "bf2cd6429291ed8dbb984f970f612ba477dc56645800da6cc044f1a91d157400"
+  },
+  "git_status_porcelain": " M .hallmark/log.json\n M .hallmark/preflight.json\n M crates/keelshell-app/src/files.rs\n M crates/keelshell-app/src/files/archive_inspection.rs\n M crates/keelshell-app/src/files/archive_tools_fixture.rs\n M crates/keelshell-app/src/files/test_server.rs\n M crates/keelshell-app/src/files/transfer_tests.rs\n M crates/keelshell-app/src/files/worker.rs\n M crates/keelshell-session/src/lib.rs\n M crates/keelshell-session/tests/openssh_interop.rs\n M docs/HANDOFF.md\n M docs/ROADMAP.md\n M docs/product/ARCHIVE_TOOL_INSPECTION.md\n M docs/product/ARCHIVE_TRANSFERS.md\n M docs/product/CAPABILITIES.md\n M docs/product/SERVER_ARCHIVES.md\n?? crates/keelshell-app/src/files/archive_validation.rs\n?? crates/keelshell-app/src/files/archive_validation_tests.rs\n?? crates/keelshell-session/src/archive_validation.py\n?? crates/keelshell-session/src/archive_validation.rs\n?? crates/keelshell-session/src/archive_validation/\n?? crates/keelshell-session/tests/archive_validation.rs\n?? docs/adr/0139-reviewed-archive-tool-validation.md\n?? docs/testing/records/2026-11-15-archive-tool-validation.md\n",
+  "cargo_commands_executed": 0,
+  "tests_executed": 0,
+  "shared_target_modified": false
+}

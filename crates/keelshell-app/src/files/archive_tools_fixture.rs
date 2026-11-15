@@ -29,15 +29,46 @@ impl Default for Fixture {
                 response.push(0);
             }
         }
+        Self::with_response(response)
+    }
+}
+
+impl Fixture {
+    pub(crate) fn validation() -> Self {
+        let tools: Vec<_> = keelshell_session::archive_tools::ArchiveTool::ALL
+            .into_iter()
+            .map(|tool| {
+                let stream_check = match tool {
+                    keelshell_session::archive_tools::ArchiveTool::Tar
+                    | keelshell_session::archive_tools::ArchiveTool::Gzip
+                    | keelshell_session::archive_tools::ArchiveTool::Python3 => "passed",
+                    _ => "not_tested",
+                };
+                serde_json::json!({
+                    "tool": tool.name(),
+                    "path": format!("/fixture/bin/{}", tool.name()),
+                    "version": format!("{} fixture 1.0", tool.name()),
+                    "version_status": "passed",
+                    "stream_check": stream_check,
+                })
+            })
+            .collect();
+        Self::with_response(
+            serde_json::to_vec(&serde_json::json!({
+                "protocol": "keelshell.archive-validation.v1",
+                "tools": tools,
+            }))
+            .checked("encode fixture validation report"),
+        )
+    }
+
+    fn with_response(response: Vec<u8>) -> Self {
         Self {
             calls: AtomicUsize::new(0),
             response: Mutex::new(response),
             hold: Mutex::new(None),
         }
     }
-}
-
-impl Fixture {
     pub(crate) fn reply(&self) -> (Vec<u8>, Option<oneshot::Receiver<()>>) {
         self.calls.fetch_add(1, Ordering::AcqRel);
         (

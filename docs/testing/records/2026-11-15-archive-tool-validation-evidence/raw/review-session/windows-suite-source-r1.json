@@ -1,0 +1,20 @@
+{
+  "created_unix": 1794753050.737252,
+  "kind": "static_source_review_plus_mocked_platform_admission_only",
+  "native_windows_execution": false,
+  "rust_test_module_first_line": "#![cfg(test)]",
+  "rust_test_declaration": "#[test]\nfn actual_archive_validation_python_safety_suite_runs_under_the_default_gate() {\n",
+  "python_tests": 24,
+  "python_suite_skip_decorators": [],
+  "main_result_with_os_name_nt": 65,
+  "actual_review_command_expected": {
+    "state": "passed",
+    "code": 0,
+    "source_line": 47
+  },
+  "paths": {
+    "helper": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/archive_validation.py",
+    "python_suite": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/archive_validation/test_archive_validation.py",
+    "rust_test": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/archive_validation/tests.rs"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "classification": "review_fixture_parent_identity_assumption_outdated_after_supervisor",
+  "production_source_finding": false,
+  "preserved_failed_log": "python-independent-risks-r2.log",
+  "original_fixture_sha256": "d55ec931c2bf4c6cb4f480d68fc03c826469f84a15dee4ae9da74b37dc9cb36c",
+  "replacement_fixture_sha256": "b505d20f52b1b188e64d83b2405f4b56e298efe9a4fc321d4ce2007b8e1fcc7b",
+  "change": "target the known helper/reviewer PID directly instead of tool getppid(), which now identifies its supervisor",
+  "production_changes": 0
+}

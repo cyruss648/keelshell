@@ -1,0 +1,40 @@
+{
+  "phase": "SOURCE_AND_PYTHON_DONE_RUST_AWAITING_PARENT",
+  "checked_unix": 1794753295.942563,
+  "recommendation": "REQUEST_CHANGES",
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 0
+  },
+  "head": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0",
+  "engineering_drift_from_r1": [],
+  "rust_commands_executed": 0,
+  "shared_target_mutations": 0,
+  "report_sha256": "f3d593dc3eb2abe38651d8693c1a95e3dc5d163451eb568847bc6b4b94eae81d",
+  "notices": [
+    "notice-1.md",
+    "notice-2.md"
+  ],
+  "python_invocations": {
+    "author_suite": {
+      "run": 24,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "independent_risks": {
+      "run": 11,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0
+    },
+    "descendant_regression": {
+      "run": 1,
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0
+    }
+  }
+}

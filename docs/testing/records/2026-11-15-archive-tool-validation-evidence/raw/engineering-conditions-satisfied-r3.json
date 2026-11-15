@@ -1,0 +1,21 @@
+{
+  "recorded_utc": "2026-11-15T15:13:03.089028+00:00",
+  "freeze_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "engineering_inputs": 607,
+  "path_sets_and_contents_before_after_equal": true,
+  "full_gate_exit": 0,
+  "full_gate_reaped": true,
+  "full_gate_log_sha256": "f3094efe4a3c378160e89b9027cb99e7c32ea4be3e73db29a4de21b10c09a433",
+  "review_reports": [
+    "review-session/report-r2.md",
+    "review-app/report-r2.md"
+  ],
+  "review_conditions_satisfied_by_parent": true,
+  "historical_pending_reports_left_unchanged": true,
+  "independent_rust_rebuild": false,
+  "native_desktop_runs": {
+    "macos": 0,
+    "windows": 0,
+    "linux": 0
+  }
+}

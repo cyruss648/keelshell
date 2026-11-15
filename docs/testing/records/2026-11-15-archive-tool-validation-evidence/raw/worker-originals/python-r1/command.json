@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/python3",
+    "-I",
+    "-S",
+    "-B",
+    "/Users/hdh/.codex/worktrees/archive-tool-validation-20261115/keelshell/crates/keelshell-session/src/archive_validation/test_archive_validation.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/archive-tool-validation-20261115/keelshell",
+  "timeout_seconds": 45
+}

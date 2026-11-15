@@ -2,9 +2,13 @@
 
 客户端实现已接入；集中工程验证、真实 OpenSSH 协议测试及独立复核结果见
 [测试记录](../testing/records/2026-11-15-reviewed-archive-transfer.md)。
-这项能力属于 FILE-05 的客户端部分。[服务端工具观察](ARCHIVE_TOOL_INSPECTION.md)
-另行审核；服务端实际打包、版本与功能验证、Zmodem、中继加速和三平台完整
-原生验收另行追踪。
+这项能力属于 FILE-05 的客户端部分。[服务端工具观察](ARCHIVE_TOOL_INSPECTION.md)、
+[服务器打包](SERVER_ARCHIVES.md)和[现有 SSH PTY 上的审核式 Zmodem](ZMODEM.md)
+均已实现，分别按各自流程审核。direct PTY strict `OO` 兼容仍为 `HOLD/PARTIAL`，
+缺少最终握手的结果不等于严格完成，见
+[Zmodem 收尾记录](../testing/records/2026-11-15-bounded-zmodem-farewell.md)。
+[工具版本/流式自测](ARCHIVE_TOOL_INSPECTION.md#版本与流式自测)的集中工程、真实 OpenSSH、Linux helper 专项与限定非作者复核已通过；用户中继、可重复性能收益和三平台完整原生
+验收仍开放，FILE-05/M4 未完成。
 
 ## 打包上传
 
@@ -33,8 +37,11 @@
 安全解包已接入 macOS、Linux 与 Windows 后端。Windows 逐组件保留祖先句柄，
 在创建时设置私有 DACL，完整验证私有目录树后以无覆盖方式发布；只接纳满足
 对象身份、权限和 NT 发布契约的本地 drive 文件系统。UNC、设备路径、重解析、
-多硬链接与不可移植名称均拒绝。界面已启用 Windows 下载解包入口，但 Windows
-原生文件系统和桌面流程尚未执行验证，实际工程与 Linux 本地运行范围见
+多硬链接与不可移植名称均拒绝。界面已启用 Windows 下载解包入口。
+Windows platform/session 严格交叉 Clippy 和四个 AMD64 PE32+ 测试 target 链接
+通过，原生文件系统和桌面实际执行仍为 `0 / NOT_RUN`。最终 Linux arm64
+后端/codec 专项 `252 passed / 0 failed / 0 ignored` 仅覆盖本地后端与编解码，
+不代签 Linux GUI、x64 或独立 peer；实际输入与验证范围见
 [本地后端记录](../testing/records/2026-11-15-windows-local-backend.md)。
 取消或丢弃 await 后，后台 mutation worker 继续持有保留权直到确实退出；
 失败及未知 staging 保留隔离，不按路径自动删除。
@@ -43,8 +50,9 @@
 
 归档最多 64 MiB，展开最多 128 MiB，2048 项，32 层，单成员路径最多
 4096 字节，所有成员名累计最多 48 KiB。超过限制直接拒绝，不能省略成员后执行。
-压缩与解包在客户端完成，不需要远端安装 ZIP 或 tar。
-这不表示服务器端压缩加速已经实现。
+本页的打包上传与下载解包在客户端完成，不需要远端安装 ZIP 或 tar。
+[服务器打包](SERVER_ARCHIVES.md)是另行两次审核后执行的已实现流程；
+可重复性能收益仍需单独验收。
 ZIP 支持单盘 ZIP32 的 stored/deflate 成员，不接纳 ZIP64 和多盘格式。
 tar.gz 支持普通成员、有界 GNU 长名称及严格 PAX 元数据子集。
 PAX 允许 `path`、`size` 和验证后丢弃的时间/所有者字段；不恢复这些元数据。
@@ -86,17 +94,30 @@ review. Inspect the destination after interruption or an unknown publication
 result; operations are never replayed automatically. Prepare again after restart.
 Verified completion releases the archive's own window-close hold while preserving
 any older unresolved destination and quarantine.
-Server-side packing, version/feature verification, Zmodem, relay acceleration
-and full native platform acceptance remain separate open work.
+[Server-side packing](SERVER_ARCHIVES.md) and
+[reviewed Zmodem on the existing SSH PTY](ZMODEM.md) are implemented as separately
+reviewed workflows. Direct PTY strict OO interoperability remains HOLD/PARTIAL;
+a missing-farewell result is not strict completion. See the
+[bounded Zmodem record](../testing/records/2026-11-15-bounded-zmodem-farewell.md).
+[Tool version and stream checks](ARCHIVE_TOOL_INSPECTION.md#versions-and-stream-checks) passed the engineering gate, real OpenSSH, Linux helper checks and scoped nonauthor reviews.
+User relay, repeatable performance gains and full native platform acceptance
+remain open; FILE-05/M4 is not complete.
 Extraction integrates no-replace directory backends for macOS, Linux and
 Windows. Windows retains every ancestor handle, creates objects with a private
 DACL and verifies the complete staged tree before publication. Only supported
 local drive filesystems are admitted; UNC/device paths, reparse points, multiple
 hard links and nonportable names are rejected. Windows extraction controls are
-enabled, but native filesystem and desktop execution remain unverified. See the
+enabled. Windows platform/session strict cross Clippy and four AMD64 PE32+ test
+links passed; native filesystem and desktop execution remains 0 / NOT_RUN.
+The final Linux arm64 selection passed 252 local backend/codec tests with no
+failures or ignores; it does not establish Linux GUI, x64 or independent peer
+acceptance. See the
 [local backend record](../testing/records/2026-11-15-windows-local-backend.md)
 for actual platform-specific results. A cancelled await does not release an
 active mutation worker's reservation; unknown staging remains quarantined.
+The packed upload and extraction workflows on this page run on the client
+without remote ZIP/tar dependencies. Server packing has its own two reviews;
+repeatable performance gains remain separately unverified.
 The codec
 admits single-disk ZIP32 stored/deflate and regular TAR members with bounded GNU
 long names and a strict PAX subset. ZIP64 and multidisk ZIP are not admitted.

@@ -1,0 +1,12 @@
+{
+  "helper_sha256": "63ff3471ca7c4e725778719f0212bbfe5a73c16198146a7930f8d201c595eec4",
+  "image_id": "77353e13649fe86ce434ffb958fcdf43317abe4ffdc0916fa7225edd407bb082",
+  "image_is_local_cached_test_environment": true,
+  "runtime": "Linux arm64 container, not GUI or full native product acceptance",
+  "uid_gid": "65534:65534",
+  "network": "none",
+  "read_only_root": true,
+  "read_only_tmpfs": false,
+  "dropped_capabilities": "ALL",
+  "no_new_privileges": true
+}

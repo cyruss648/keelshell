@@ -1,0 +1,39 @@
+{
+  "utc": "2026-11-15T14:46:16.002544+00:00",
+  "freeze": "frozen-inputs-r2.json",
+  "freeze_file_sha256": "12e7e0bf2032c3cb9534ccd685cd4013521d982c2bf5b5494579fc9574ce8280",
+  "expected_count": 607,
+  "actual_count": 607,
+  "expected_digest": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "actual_digest": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "mismatches": [],
+  "extra_paths": [],
+  "r1_to_r2_changed_inputs": {
+    "crates/keelshell-session/src/archive_validation.py": {
+      "r1": "63ff3471ca7c4e725778719f0212bbfe5a73c16198146a7930f8d201c595eec4",
+      "r2": "f51a2e99d7f7f8c18a73900dbcd3119f891a08cee29610533b247b7d79ca2229"
+    },
+    "crates/keelshell-session/src/archive_validation.rs": {
+      "r1": "9eb14183b7445901b89d00a44f609326366e99e443c73923851064dbfdc05778",
+      "r2": "2f3ebc2aa7abe9b03844d4080c97304ba3fa3178baf86fd1e51a4972b8c3c6f2"
+    },
+    "crates/keelshell-session/src/archive_validation/test_archive_validation.py": {
+      "r1": "f2e2f2a649e44de31196214bb20480ffeb21947ac89a030ad4348915f66dbd7b",
+      "r2": "42fa50ae3a589acced4ccf967dec411d1fa217d5d244cfb91cc51dfcff672524"
+    },
+    "crates/keelshell-session/src/archive_validation/tests.rs": {
+      "r1": "c120f592bfbabcb2547aea8721e98ee01c4e96b93a10882ac4ef35017d0045e0",
+      "r2": "61e8b8b9845ce89c6f22143e9875c6b3e848c97634c8af630fbc032c4fcb9f3f"
+    }
+  },
+  "original_app_and_review_document_mismatches": [
+    "docs/adr/0139-reviewed-archive-tool-validation.md"
+  ],
+  "helper_sha256": "f51a2e99d7f7f8c18a73900dbcd3119f891a08cee29610533b247b7d79ca2229",
+  "current_reviewed_command_sha256": "6bdc38e2797396357debe58e87da207798778b4d4216d9840da0dbc49215987d",
+  "current_reviewed_command_bytes": 14892,
+  "current_reviewed_command_lines": 394,
+  "old_reviewed_command_helper_matches_r1": true,
+  "rust_tests_executed": 0,
+  "cargo_commands_executed": 0
+}

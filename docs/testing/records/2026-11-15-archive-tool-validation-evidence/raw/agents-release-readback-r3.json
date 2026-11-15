@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-11-15T15:12:53.944016+00:00",
+  "agents": [
+    {
+      "id": "01a1df83-ab55-7910-acb7-95eccb4996a6",
+      "role": "backend author",
+      "close_recheck": "not_found"
+    },
+    {
+      "id": "01a1df83-f020-7832-92e7-4e96a458b12c",
+      "role": "documentation",
+      "close_recheck": "not_found"
+    },
+    {
+      "id": "01a1df99-1f74-73e0-9884-ad40cffee674",
+      "role": "backend reviewer",
+      "close_recheck": "not_found"
+    },
+    {
+      "id": "01a1df99-58c4-7c71-a55b-b151dd871e88",
+      "role": "app reviewer",
+      "close_recheck": "not_found"
+    }
+  ],
+  "boundary": "Previously closed agents are no longer present in the current multi-agent registry; no new user-owned chats created for this batch. Not a claim of permanent transcript deletion."
+}

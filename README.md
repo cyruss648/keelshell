@@ -80,6 +80,8 @@ ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝
 
 [服务端归档工具观察](docs/product/ARCHIVE_TOOL_INSPECTION.md)先审核完整固定命令，再查询当前 SSH 环境中七个工具名称的 PATH 解析；找到路径仅是观察，不验证版本、功能或互通。tar.gz 增加[有界 PAX 子集](docs/adr/0134-bounded-pax-archive-metadata.md)，仍检查原始与有效路径及完整原始大小。两项增量已通过集中工程门禁、真实 OpenSSH 联调和非作者源码复核，原生平台交互仍开放，见[本批记录](docs/testing/records/2026-11-15-archive-tools-pax-integration.md)。
 
+[工具版本与流式自测](docs/product/ARCHIVE_TOOL_INSPECTION.md#版本与流式自测)使用独立审核运行七项固定版本参数，并核对 tar、gzip、Python 的微小内存归档样本；不创建文件、不读取用户归档、不启动 Zmodem。zip、unzip、rz、sz 的功能明确为未测试，版本文字和样本通过均不授予后续传输权限。集中工程、真实 OpenSSH、Linux helper 专项与限定非作者复核通过；本批原生桌面验收仍开放，见[本批记录](docs/testing/records/2026-11-15-archive-tool-validation.md)。
+
 [本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；[多选整批删除](docs/product/KNOWLEDGE_BULK_MANAGEMENT.md)最多32条，审核包含筛选隐藏项，取消不写入，确认只保存一次。管理选择与[显式加入 Ask](docs/product/AI_KNOWLEDGE_CONTEXT.md)分别维护；发送前仍须核对历史来源和完整请求，保存开始就撤销受影响的旧审核。工程验证和新包原生验收见[本轮记录](docs/testing/records/2026-11-06-resource-knowledge-integration.md)。
 
 [主机资源趋势](docs/product/HOST_RESOURCE_TRENDS.md)复用当前认证会话的Linux采样，显示最近五分钟、最多60点的CPU和内存历史。缺失值不作零值，暂停、错误或计数异常会断段；显示和切换主题不增加远端命令。历史仅保存在对应会话内存中，真实采样与原生平台覆盖按本轮记录分别验收。

@@ -1,0 +1,17 @@
+{
+  "python_version": "3.9.6 (default, Oct 19 2026, 19:18:13) \n[Clang 21.0.0 (clang-2100.4.1.1)]",
+  "executable": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+  "platform": "darwin",
+  "uname": [
+    "Darwin",
+    "hdh-MacBook-Pro.local",
+    "27.2.0",
+    "Darwin Kernel Version 27.2.0: Wed Oct 14 23:47:58 PDT 2026; root:xnu-13432.41.4~25/RELEASE_ARM64_T6050",
+    "arm64"
+  ],
+  "waitid_available": false,
+  "WNOWAIT_available": true,
+  "isolated": 1,
+  "no_site": 1,
+  "dont_write_bytecode": true
+}

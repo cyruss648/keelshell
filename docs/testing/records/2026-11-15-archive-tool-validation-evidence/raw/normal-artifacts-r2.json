@@ -1,0 +1,20 @@
+{
+  "frozen_input_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "artifacts": [
+    {
+      "target": "keelshell-mcp",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "bytes": 14566512,
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp: Mach-O 64-bit executable arm64"
+    },
+    {
+      "target": "keelshell-app",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "bytes": 197626320,
+      "sha256": "a1f53a80e9c8f2db3e2f563080c3deb3e31e3ec65012a6171a1a961c2fb32564",
+      "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app: Mach-O 64-bit executable arm64"
+    }
+  ],
+  "native_window_acceptance": "NOT_RUN"
+}

@@ -1,0 +1,7 @@
+{
+  "note": "early production compile only; worker tests pending; not final validation",
+  "files": {
+    "crates/keelshell-session/src/archive_validation.rs": "3996b517f450c248fce7876558ab750396dae76f006cf9d21fe98b27724d8b65",
+    "crates/keelshell-session/src/archive_validation.py": "da8c1019857c4ad3c6a4f6ae4c1f9bad48b33c96acedd0934943a6321751b4c3"
+  }
+}

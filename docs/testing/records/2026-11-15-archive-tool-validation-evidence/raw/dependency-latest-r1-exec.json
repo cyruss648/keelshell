@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_dependencies.py",
+    "--timeout",
+    "5",
+    "--jobs",
+    "8",
+    "--json-report",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/dependency-latest-r1.json"
+  ],
+  "exit_code": -15,
+  "timeout": true,
+  "reaped": true,
+  "elapsed_seconds": 60.011,
+  "utc": "2026-11-15T14:03:39.442149+00:00"
+}

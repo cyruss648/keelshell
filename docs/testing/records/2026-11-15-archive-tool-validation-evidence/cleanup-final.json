@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-11-15T15:15:40.657878+00:00",
+  "removed_batch_directory": "work/archive-validation-batch-20261115",
+  "removed_files": 159,
+  "removed_bytes": 325398545,
+  "originals_preserved_and_verified": 156,
+  "stable_test_copy_bytes_removed": 321900736,
+  "index_binding_sha256": "b4df0d3251ed36c56de97ee2f3db551027cff9a40e3d52c3a306e5a101ed9857",
+  "containers_absent_full_ids": [
+    "3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4",
+    "be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798",
+    "7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62",
+    "aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b"
+  ],
+  "openssh_temporary_directory_absent": true,
+  "author_worktree_absent": true,
+  "temporary_author_branch_matches": 0,
+  "agents_registry_recheck": "All four batch agents not_found after previous shutdown; no new user-owned chats created",
+  "preserved": [
+    "unique valid Cargo target",
+    "normal GUI/MCP binaries",
+    "other tasks worktrees and containers",
+    "shared cached image and Podman VM",
+    "historical failures and raw receipts"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "files": {
+    "crates/keelshell-session/src/archive_validation.rs": "9eb14183b7445901b89d00a44f609326366e99e443c73923851064dbfdc05778",
+    "crates/keelshell-session/src/archive_validation.py": "63ff3471ca7c4e725778719f0212bbfe5a73c16198146a7930f8d201c595eec4",
+    "crates/keelshell-session/src/archive_validation/tests.rs": "c120f592bfbabcb2547aea8721e98ee01c4e96b93a10882ac4ef35017d0045e0",
+    "crates/keelshell-session/src/archive_validation/test_archive_validation.py": "f2e2f2a649e44de31196214bb20480ffeb21947ac89a030ad4348915f66dbd7b",
+    "crates/keelshell-session/tests/archive_validation.rs": "5b8baa93280544b51cf0d3d5c05c512793b42b08eb50a2347e00f12fc7c238a7"
+  },
+  "source": "managed author worktree",
+  "candidate_not_yet_frozen": true
+}

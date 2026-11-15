@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-I",
+    "-S",
+    "-B",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/probe_descendant_eof_r1.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session",
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session/fixture-home",
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/review-session",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "TZ": "UTC",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "started_unix": 1794752954.196196,
+  "elapsed_seconds": 0.16665508299774956,
+  "timeout_seconds": 8.0,
+  "timed_out": false,
+  "pid": 31494,
+  "exit_code": 1,
+  "direct_child_waited": true,
+  "log_sha256": "18b0d3c80a43f0faf04d2d237e6e2c7c32a82363fc39083fec4299f699170fc5",
+  "independent_rust_rebuild": false
+}

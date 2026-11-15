@@ -1,0 +1,17 @@
+{
+  "source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/74a1e55a81a61939/out/keelshell_app-74a1e55a81a61939",
+  "copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/app-r2",
+  "sha256": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2",
+  "inventory_count": 1246,
+  "new_names": [
+    "files::transfer_tests::archive_validation_tests::archive_validation_cancellation_does_not_replay_without_new_approval",
+    "files::transfer_tests::archive_validation_tests::archive_validation_discards_a_late_result_for_the_same_display_host",
+    "files::transfer_tests::archive_validation_tests::archive_validation_failed_refresh_retires_only_its_previous_result",
+    "files::transfer_tests::archive_validation_tests::archive_validation_path_discovery_does_not_grant_stream_check_results",
+    "files::transfer_tests::archive_validation_tests::archive_validation_rejects_old_approval_after_transport_replacement",
+    "files::transfer_tests::archive_validation_tests::archive_validation_reviews_full_command_and_runs_once_without_sftp",
+    "files::transfer_tests::archive_validation_tests::archive_validation_theme_language_and_detail_changes_do_not_run_tools"
+  ],
+  "inventory_sha256": "64b807803c8f028dacedbaccb1a94fbc17c894d882fe99ca06bfa5d98f12122c",
+  "frozen_input_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17"
+}

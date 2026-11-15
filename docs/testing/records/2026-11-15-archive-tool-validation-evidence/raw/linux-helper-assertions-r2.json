@@ -1,0 +1,33 @@
+{
+  "assertions_passed": true,
+  "checks": {
+    "tar": {
+      "version": "passed",
+      "stream": "passed"
+    },
+    "gzip": {
+      "version": "passed",
+      "stream": "passed"
+    },
+    "zip": {
+      "version": "unavailable",
+      "stream": "not_tested"
+    },
+    "unzip": {
+      "version": "unavailable",
+      "stream": "not_tested"
+    },
+    "python3": {
+      "version": "passed",
+      "stream": "passed"
+    },
+    "rz": {
+      "version": "unavailable",
+      "stream": "not_tested"
+    },
+    "sz": {
+      "version": "unavailable",
+      "stream": "not_tested"
+    }
+  }
+}

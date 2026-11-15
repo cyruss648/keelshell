@@ -1,0 +1,25 @@
+{
+  "utc": "2026-11-15T14:49:45.895142+00:00",
+  "input_count": 607,
+  "input_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "input_mismatches": [],
+  "extra_paths": [],
+  "app_source_files_unchanged_from_r1": 8,
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-validation-batch-20261115/stable-binaries/app-r2",
+  "binary_sha256": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2",
+  "origin_binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/74a1e55a81a61939/out/keelshell_app-74a1e55a81a61939",
+  "origin_binary_sha256": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2",
+  "binding_file_sha256": "6eedc3bdec9b1db731bdaccca617442b11bd753e76f5e9cc0e73448760b49af0",
+  "parent_inventory_sha256": "64b807803c8f028dacedbaccb1a94fbc17c894d882fe99ca06bfa5d98f12122c",
+  "current_helper_sha256": "f51a2e99d7f7f8c18a73900dbcd3119f891a08cee29610533b247b7d79ca2229",
+  "current_helper_literal_offset": 85791124,
+  "current_complete_command_bytes": 14892,
+  "current_complete_command_lines": 394,
+  "current_complete_command_sha256": "6bdc38e2797396357debe58e87da207798778b4d4216d9840da0dbc49215987d",
+  "review_docs_sha256": {
+    "docs/adr/0139-reviewed-archive-tool-validation.md": "676ff01019dcbb9d87e745cf320e62e0f00a92ec53f7b839a5dc10300e2ba44e",
+    "docs/product/ARCHIVE_TOOL_INSPECTION.md": "bf2cd6429291ed8dbb984f970f612ba477dc56645800da6cc044f1a91d157400"
+  },
+  "cargo_commands_executed": 0,
+  "independent_rust_recompilation": false
+}

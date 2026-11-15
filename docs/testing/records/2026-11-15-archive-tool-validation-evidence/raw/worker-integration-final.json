@@ -1,0 +1,90 @@
+{
+  "verified_files": [
+    {
+      "path": "crates/keelshell-session/src/archive_validation.rs",
+      "bytes": 11996,
+      "sha256": "9eb14183b7445901b89d00a44f609326366e99e443c73923851064dbfdc05778",
+      "test_names": []
+    },
+    {
+      "path": "crates/keelshell-session/src/archive_validation.py",
+      "bytes": 11757,
+      "sha256": "63ff3471ca7c4e725778719f0212bbfe5a73c16198146a7930f8d201c595eec4"
+    },
+    {
+      "path": "crates/keelshell-session/src/archive_validation/tests.rs",
+      "bytes": 11819,
+      "sha256": "c120f592bfbabcb2547aea8721e98ee01c4e96b93a10882ac4ef35017d0045e0",
+      "test_names": [
+        "preview_embeds_the_entire_helper_as_one_fixed_shell_argument",
+        "parser_preserves_safe_unicode_paths_and_version_observations",
+        "missing_tools_preserve_explicit_untested_functional_boundaries",
+        "version_and_stream_outcomes_remain_independent_and_typed",
+        "parser_rejects_unknown_missing_duplicate_or_mistyped_fields",
+        "parser_rejects_unknown_protocol_tools_statuses_order_and_count",
+        "parser_rejects_inconsistent_paths_versions_and_functional_claims",
+        "parser_rejects_control_bidi_replacement_and_hidden_text",
+        "exact_utf8_field_limits_fit_the_response_and_overruns_are_rejected",
+        "every_truncated_document_invalid_utf8_banner_and_extra_document_is_rejected",
+        "actual_archive_validation_python_safety_suite_runs_under_the_default_gate"
+      ]
+    },
+    {
+      "path": "crates/keelshell-session/src/archive_validation/test_archive_validation.py",
+      "bytes": 17883,
+      "sha256": "f2e2f2a649e44de31196214bb20480ffeb21947ac89a030ad4348915f66dbd7b",
+      "test_names": [
+        "HelperTests.test_actual_review_command_has_no_user_arguments_or_persistent_script",
+        "HelperTests.test_fixed_tar_and_gzip_samples_are_regular_in_memory_payloads",
+        "HelperTests.test_actual_isolated_python_roundtrip_uses_only_bytesio",
+        "HelperTests.test_actual_helper_performs_no_file_mutations_or_network_calls",
+        "HelperTests.test_tool_dispatch_is_fixed_and_function_checks_never_run_zip_or_zmodem",
+        "HelperTests.test_environment_allowlist_excludes_options_loader_hooks_and_relative_paths",
+        "HelperTests.test_unsafe_and_missing_resolutions_do_not_dispatch_any_process",
+        "HelperTests.test_version_text_is_safe_bounded_utf8_without_authenticity_parsing",
+        "HelperTests.test_stream_payload_stderr_and_version_failures_are_independent",
+        "HelperTests.test_helper_rejects_user_arguments_without_running_any_checks",
+        "HelperTests.test_no_adoptable_report_after_signal_or_unconfirmed_cleanup",
+        "OwnedProcessTests.test_actual_fixed_input_and_both_output_streams_are_drained_concurrently",
+        "OwnedProcessTests.test_combined_per_command_stdout_stderr_flood_is_capped_and_reaped",
+        "OwnedProcessTests.test_shared_output_budget_counts_both_streams_across_commands",
+        "OwnedProcessTests.test_timeout_kills_and_actually_waits_the_owned_child",
+        "OwnedProcessTests.test_eof_before_exit_cannot_bypass_the_same_deadline",
+        "OwnedProcessTests.test_exited_leader_with_descendant_holding_pipes_is_timed_out_and_group_killed",
+        "OwnedProcessTests.test_child_that_never_reads_fixed_stdin_cannot_block_output_or_timeout",
+        "OwnedProcessTests.test_early_stdin_close_cannot_pass_a_stream_check",
+        "OwnedProcessTests.test_shared_deadline_prevents_later_process_dispatch",
+        "OwnedProcessTests.test_actual_shared_deadline_bounds_a_stage_and_prevents_following_dispatch",
+        "OwnedProcessTests.test_denied_group_kill_fails_closed_and_fixture_still_reaps_its_child",
+        "OwnedProcessTests.test_unconfirmed_child_wait_fails_closed_instead_of_returning_a_status",
+        "OwnedProcessTests.test_process_spawn_failures_are_unavailable_and_never_reflect_exception_text"
+      ]
+    },
+    {
+      "path": "crates/keelshell-session/tests/archive_validation.rs",
+      "bytes": 19248,
+      "sha256": "5b8baa93280544b51cf0d3d5c05c512793b42b08eb50a2347e00f12fc7c238a7",
+      "test_names": [
+        "complete_reviewed_helper_is_sent_verbatim_on_only_the_selected_connection",
+        "each_validation_request_uses_a_fresh_channel_and_no_cached_report",
+        "pre_cancelled_or_closing_validation_never_opens_a_channel",
+        "validation_cancellation_reaps_a_late_open_without_exec",
+        "dropped_validation_future_reaps_a_late_open_without_exec",
+        "cancelled_validation_discards_a_late_valid_reply_without_claiming_remote_stop",
+        "validation_cancellation_while_waiting_for_exec_ack_preserves_the_connection",
+        "validation_deadline_includes_exec_ack_and_channel_close",
+        "validation_unconfirmed_open_times_out_without_exec_or_a_successful_report",
+        "malformed_validation_stderr_missing_exit_and_helper_failure_fail_closed",
+        "validation_combined_output_flood_is_bounded_without_closing_the_connection"
+      ]
+    },
+    {
+      "path": "crates/keelshell-session/src/lib.rs",
+      "bytes": 1346,
+      "sha256": "ad5c7a947ec07e98ca5da0953b706d4b2b6c2ea3e68954a8f6dded085edcb7f3",
+      "test_names": []
+    }
+  ],
+  "cargo_in_author_worktree": false,
+  "evidence_exported": true
+}

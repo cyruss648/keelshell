@@ -1,0 +1,52 @@
+{
+  "checked_unix": 1794754005.8521442,
+  "head": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0",
+  "count": 607,
+  "expected_count": 607,
+  "declared_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "actual_sha256": "523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17",
+  "manifest_file_sha256": "12e7e0bf2032c3cb9534ccd685cd4013521d982c2bf5b5494579fc9574ce8280",
+  "mismatches": [],
+  "r1_to_r2_changes": [
+    {
+      "path": "crates/keelshell-session/src/archive_validation/test_archive_validation.py",
+      "r1_sha256": "f2e2f2a649e44de31196214bb20480ffeb21947ac89a030ad4348915f66dbd7b",
+      "r2_sha256": "42fa50ae3a589acced4ccf967dec411d1fa217d5d244cfb91cc51dfcff672524"
+    },
+    {
+      "path": "crates/keelshell-session/src/archive_validation/tests.rs",
+      "r1_sha256": "c120f592bfbabcb2547aea8721e98ee01c4e96b93a10882ac4ef35017d0045e0",
+      "r2_sha256": "61e8b8b9845ce89c6f22143e9875c6b3e848c97634c8af630fbc032c4fcb9f3f"
+    },
+    {
+      "path": "crates/keelshell-session/src/archive_validation.py",
+      "r1_sha256": "63ff3471ca7c4e725778719f0212bbfe5a73c16198146a7930f8d201c595eec4",
+      "r2_sha256": "f51a2e99d7f7f8c18a73900dbcd3119f891a08cee29610533b247b7d79ca2229"
+    },
+    {
+      "path": "crates/keelshell-session/src/archive_validation.rs",
+      "r1_sha256": "9eb14183b7445901b89d00a44f609326366e99e443c73923851064dbfdc05778",
+      "r2_sha256": "2f3ebc2aa7abe9b03844d4080c97304ba3fa3178baf86fd1e51a4972b8c3c6f2"
+    }
+  ],
+  "reviewer_r2_runtime_binding": {
+    "python-descendant-eof-r2": {
+      "exit_code": 0,
+      "before_matches_r2": true,
+      "after_matches_r2": true,
+      "direct_child_waited": true
+    },
+    "python-independent-risks-r2": {
+      "exit_code": 1,
+      "before_matches_r2": true,
+      "after_matches_r2": true,
+      "direct_child_waited": true
+    },
+    "python-author-suite-r2": {
+      "exit_code": 0,
+      "before_matches_r2": true,
+      "after_matches_r2": true,
+      "direct_child_waited": true
+    }
+  }
+}

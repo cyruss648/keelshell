@@ -1,0 +1,86 @@
+[
+  {
+    "name": "keelshell-archive-validation-preflight-20261115",
+    "command": [
+      "podman",
+      "events",
+      "--since",
+      "2026-11-15T13:50:00Z",
+      "--until",
+      "2026-11-15T15:05:00Z",
+      "--stream=false",
+      "--filter",
+      "type=container",
+      "--filter",
+      "container=keelshell-archive-validation-preflight-20261115",
+      "--format",
+      "json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"ContainerExitCode\":0,\"ID\":\"3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-preflight-20261115\",\"Status\":\"create\",\"time\":1794751984,\"timeNano\":1794751984911740499,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-preflight-20261115\",\"Status\":\"init\",\"time\":1794751984,\"timeNano\":1794751984941604901,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-preflight-20261115\",\"Status\":\"attach\",\"time\":1794751984,\"timeNano\":1794751984941646734,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-preflight-20261115\",\"Status\":\"start\",\"time\":1794751984,\"timeNano\":1794751984944000035,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-preflight-20261115\",\"Status\":\"died\",\"time\":1794751984,\"timeNano\":1794751984946512252,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-preflight-20261115\",\"Status\":\"remove\",\"time\":1794751984,\"timeNano\":1794751984954133905,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "keelshell-archive-validation-helper-20261115-r1",
+    "command": [
+      "podman",
+      "events",
+      "--since",
+      "2026-11-15T13:50:00Z",
+      "--until",
+      "2026-11-15T15:05:00Z",
+      "--stream=false",
+      "--filter",
+      "type=container",
+      "--filter",
+      "container=keelshell-archive-validation-helper-20261115-r1",
+      "--format",
+      "json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"ContainerExitCode\":0,\"ID\":\"be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r1\",\"Status\":\"create\",\"time\":1794752773,\"timeNano\":1794752773140008549,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r1\",\"Status\":\"init\",\"time\":1794752773,\"timeNano\":1794752773181750827,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r1\",\"Status\":\"attach\",\"time\":1794752773,\"timeNano\":1794752773181830619,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r1\",\"Status\":\"start\",\"time\":1794752773,\"timeNano\":1794752773185235882,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r1\",\"Status\":\"died\",\"time\":1794752773,\"timeNano\":1794752773256191226,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r1\",\"Status\":\"remove\",\"time\":1794752773,\"timeNano\":1794752773266291638,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "keelshell-archive-validation-helper-20261115-r2",
+    "command": [
+      "podman",
+      "events",
+      "--since",
+      "2026-11-15T13:50:00Z",
+      "--until",
+      "2026-11-15T15:05:00Z",
+      "--stream=false",
+      "--filter",
+      "type=container",
+      "--filter",
+      "container=keelshell-archive-validation-helper-20261115-r2",
+      "--format",
+      "json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"ContainerExitCode\":0,\"ID\":\"7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r2\",\"Status\":\"create\",\"time\":1794753888,\"timeNano\":1794753888361254350,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r2\",\"Status\":\"init\",\"time\":1794753888,\"timeNano\":1794753888390290088,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r2\",\"Status\":\"attach\",\"time\":1794753888,\"timeNano\":1794753888390345588,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r2\",\"Status\":\"start\",\"time\":1794753888,\"timeNano\":1794753888392726889,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r2\",\"Status\":\"died\",\"time\":1794753888,\"timeNano\":1794753888508719754,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-helper-20261115-r2\",\"Status\":\"remove\",\"time\":1794753888,\"timeNano\":1794753888518978960,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n",
+    "stderr": ""
+  },
+  {
+    "name": "keelshell-archive-validation-python-20261115-r2",
+    "command": [
+      "podman",
+      "events",
+      "--since",
+      "2026-11-15T13:50:00Z",
+      "--until",
+      "2026-11-15T15:05:00Z",
+      "--stream=false",
+      "--filter",
+      "type=container",
+      "--filter",
+      "container=keelshell-archive-validation-python-20261115-r2",
+      "--format",
+      "json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"ContainerExitCode\":0,\"ID\":\"aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-python-20261115-r2\",\"Status\":\"create\",\"time\":1794753888,\"timeNano\":1794753888627042587,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-python-20261115-r2\",\"Status\":\"init\",\"time\":1794753888,\"timeNano\":1794753888650074176,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-python-20261115-r2\",\"Status\":\"attach\",\"time\":1794753888,\"timeNano\":1794753888650148426,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-python-20261115-r2\",\"Status\":\"start\",\"time\":1794753888,\"timeNano\":1794753888652398976,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-python-20261115-r2\",\"Status\":\"died\",\"time\":1794753889,\"timeNano\":1794753889689505071,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n{\"ContainerExitCode\":0,\"ID\":\"aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b\",\"Image\":\"localhost/slipway-native-rust100-tools:native-feishu-speed-20261115\",\"Name\":\"keelshell-archive-validation-python-20261115-r2\",\"Status\":\"remove\",\"time\":1794753889,\"timeNano\":1794753889699566693,\"Type\":\"container\",\"Attributes\":{\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\",\"slipway.batch\":\"native-feishu-speed-20261115\"}}\n",
+    "stderr": ""
+  }
+]

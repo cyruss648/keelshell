@@ -1,0 +1,30 @@
+test_actual_helper_performs_no_file_mutations_or_network_calls (__main__.HelperTests) ... ok
+test_actual_isolated_python_roundtrip_uses_only_bytesio (__main__.HelperTests) ... ok
+test_actual_review_command_has_no_user_arguments_or_persistent_script (__main__.HelperTests) ... ok
+test_environment_allowlist_excludes_options_loader_hooks_and_relative_paths (__main__.HelperTests) ... ok
+test_fixed_tar_and_gzip_samples_are_regular_in_memory_payloads (__main__.HelperTests) ... ok
+test_helper_rejects_user_arguments_without_running_any_checks (__main__.HelperTests) ... ok
+test_no_adoptable_report_after_signal_or_unconfirmed_cleanup (__main__.HelperTests) ... ok
+test_stream_payload_stderr_and_version_failures_are_independent (__main__.HelperTests) ... ok
+test_tool_dispatch_is_fixed_and_function_checks_never_run_zip_or_zmodem (__main__.HelperTests) ... ok
+test_unsafe_and_missing_resolutions_do_not_dispatch_any_process (__main__.HelperTests) ... ok
+test_version_text_is_safe_bounded_utf8_without_authenticity_parsing (__main__.HelperTests) ... ok
+test_actual_fixed_input_and_both_output_streams_are_drained_concurrently (__main__.OwnedProcessTests) ... ok
+test_actual_shared_deadline_bounds_a_stage_and_prevents_following_dispatch (__main__.OwnedProcessTests) ... ok
+test_child_that_never_reads_fixed_stdin_cannot_block_output_or_timeout (__main__.OwnedProcessTests) ... ok
+test_combined_per_command_stdout_stderr_flood_is_capped_and_reaped (__main__.OwnedProcessTests) ... ok
+test_denied_group_kill_fails_closed_and_fixture_still_reaps_its_child (__main__.OwnedProcessTests) ... ok
+test_early_stdin_close_cannot_pass_a_stream_check (__main__.OwnedProcessTests) ... ok
+test_eof_before_exit_cannot_bypass_the_same_deadline (__main__.OwnedProcessTests) ... ok
+test_exited_leader_with_descendant_holding_pipes_is_timed_out_and_group_killed (__main__.OwnedProcessTests) ... ok
+test_process_spawn_failures_are_unavailable_and_never_reflect_exception_text (__main__.OwnedProcessTests) ... ok
+test_shared_deadline_prevents_later_process_dispatch (__main__.OwnedProcessTests) ... ok
+test_shared_output_budget_counts_both_streams_across_commands (__main__.OwnedProcessTests) ... ok
+test_success_kills_same_group_descendant_with_closed_stdio_before_reaping_leader (__main__.OwnedProcessTests) ... ok
+test_timeout_kills_and_actually_waits_the_owned_child (__main__.OwnedProcessTests) ... ok
+test_unconfirmed_child_wait_fails_closed_instead_of_returning_a_status (__main__.OwnedProcessTests) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 2.338s
+
+OK

@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-15T14:37:08.953862+00:00",
+  "verdict": "APPROVE_SOURCE_ONLY",
+  "findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "app_files_rechecked": 8,
+  "app_source_mismatches": [],
+  "report_sha256": "e3893646f7bb9626957958525849a133dfdf0d23baa29cfafe6021978e4ad980",
+  "rust_tests_executed": 0,
+  "cargo_commands_executed": 0,
+  "full_gate_r1": {
+    "exit_code": -15,
+    "elapsed_seconds": 499.942,
+    "reaped": true
+  },
+  "final_prebuilt": "AWAITING_PARENT"
+}

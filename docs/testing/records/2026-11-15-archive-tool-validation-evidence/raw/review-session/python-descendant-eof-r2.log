@@ -1,0 +1,8 @@
+test_same_group_descendant_cannot_survive_a_successful_leader (__main__.DescendantCleanup) ... {'helper_state': 'passed', 'direct_exit': 0, 'stderr': '', 'leader': 47992, 'descendant': 47993, 'descendant_group': None, 'same_group': False, 'descendant_still_exists': False}
+reviewer_cleanup: descendant absent
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.066s
+
+OK

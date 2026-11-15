@@ -1,0 +1,10 @@
+{
+  "initial_archive": "rejected: current primary checkout protection",
+  "resolution": "reattached original integration worktree, retried managed archive",
+  "final_archive": "queued and original author path confirmed absent",
+  "author_agent": "closed",
+  "source_manifest_verified": true,
+  "worker_originals_exported": true,
+  "author_worktree_absent": true,
+  "other_worktrees_preserved": true
+}

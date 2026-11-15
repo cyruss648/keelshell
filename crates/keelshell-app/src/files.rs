@@ -37,6 +37,7 @@ use std::{
 mod action_view;
 mod archive;
 mod archive_inspection;
+mod archive_validation;
 mod batch;
 mod browser;
 mod editor_language;
@@ -156,10 +157,7 @@ enum Outcome {
     PlannedBatch(Box<batch::BatchPlan>),
     PlannedArchive(Box<archive::ArchivePlan>),
     PlannedServerArchive(Box<server_archive::Plan>),
-    ArchiveTools(
-        archive_inspection::Probe,
-        keelshell_session::archive_tools::ArchiveToolReport,
-    ),
+    ArchiveTools(archive_inspection::Probe, archive_inspection::Reply),
     PlannedFileResume(FileResumePlan),
     PlannedDirectoryResume(DirectoryResumePlan),
     PlannedPersistedFileResume {
@@ -1562,8 +1560,8 @@ impl FilesPanel {
             self.selected = None;
             self.withdraw_browser_review();
         }
-        if archive_probe.is_some() {
-            self.begin_archive_probe();
+        if let Some(probe) = &archive_probe {
+            self.begin_archive_probe(probe);
         }
         self.busy = true;
         self.pending = None;
@@ -1598,6 +1596,10 @@ impl FilesPanel {
             Operation::TransferArchive(_) => Message::new(
                 "正在重新校验归档源并发布新目标…",
                 "Revalidating archive sources and publishing the new destination…",
+            ),
+            Operation::InspectArchiveTools(probe) if probe.validates_tools() => Message::new(
+                "正在核验工具版本与固定内存归档样本…",
+                "Checking tool versions and fixed in-memory archive samples…",
             ),
             Operation::InspectArchiveTools(_) => Message::new(
                 "正在只读检测当前 SSH 会话的工具 PATH…",
@@ -1700,8 +1702,8 @@ impl FilesPanel {
             self.operation_stop = None;
             self.operation_id = None;
             self.transfer_pause = None;
-            if archive_probe.is_some() {
-                self.fail_archive_probe();
+            if let Some(probe) = &archive_probe {
+                self.fail_archive_probe(probe);
             }
             if let Some(previous) = archive_previous_isolation {
                 self.isolation_target = previous;

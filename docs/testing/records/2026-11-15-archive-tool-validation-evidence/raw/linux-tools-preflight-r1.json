@@ -1,0 +1,32 @@
+{
+  "command": [
+    "podman",
+    "run",
+    "--pull=never",
+    "--rm",
+    "--network",
+    "none",
+    "--read-only",
+    "--cap-drop",
+    "ALL",
+    "--user",
+    "65534:65534",
+    "--name",
+    "keelshell-archive-validation-preflight-20261115",
+    "--cidfile",
+    "work/archive-validation-batch-20261115/linux-preflight.cid",
+    "--entrypoint",
+    "/bin/sh",
+    "77353e13649f",
+    "-c",
+    "for ks_tool in python3 tar gzip; do command -v \"$ks_tool\" || exit 65; done"
+  ],
+  "started_utc": "2026-11-15T14:13:04.883791+00:00",
+  "finished_utc": "2026-11-15T14:13:05.022749+00:00",
+  "elapsed_seconds": 0.139,
+  "exit_code": 0,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "ada0a7deb035a996b18d656f103bf29f015722d2cb650539f47c042e3668b35e"
+}

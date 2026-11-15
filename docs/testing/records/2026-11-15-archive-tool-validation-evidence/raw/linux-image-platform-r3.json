@@ -1,0 +1,17 @@
+{
+  "command": [
+    "podman",
+    "image",
+    "inspect",
+    "77353e13649fe86ce434ffb958fcdf43317abe4ffdc0916fa7225edd407bb082",
+    "--format",
+    "{{json .}}"
+  ],
+  "exit_code": 0,
+  "image": {
+    "Id": "77353e13649fe86ce434ffb958fcdf43317abe4ffdc0916fa7225edd407bb082",
+    "Os": "linux",
+    "Architecture": "arm64"
+  },
+  "boundary": "Retrospective inspection of the exact cached image used by r2; no new Linux execution and no native desktop acceptance"
+}

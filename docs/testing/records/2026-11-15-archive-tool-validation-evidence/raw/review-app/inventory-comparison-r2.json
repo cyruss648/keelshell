@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-15T14:49:45.911817+00:00",
+  "complete_count": 1246,
+  "full_inventory_equal": true,
+  "expected_new_count": 7,
+  "actual_new_count": 7,
+  "missing_new_names": [],
+  "unexpected_new_names": [],
+  "new_names": [
+    "files::transfer_tests::archive_validation_tests::archive_validation_cancellation_does_not_replay_without_new_approval",
+    "files::transfer_tests::archive_validation_tests::archive_validation_discards_a_late_result_for_the_same_display_host",
+    "files::transfer_tests::archive_validation_tests::archive_validation_failed_refresh_retires_only_its_previous_result",
+    "files::transfer_tests::archive_validation_tests::archive_validation_path_discovery_does_not_grant_stream_check_results",
+    "files::transfer_tests::archive_validation_tests::archive_validation_rejects_old_approval_after_transport_replacement",
+    "files::transfer_tests::archive_validation_tests::archive_validation_reviews_full_command_and_runs_once_without_sftp",
+    "files::transfer_tests::archive_validation_tests::archive_validation_theme_language_and_detail_changes_do_not_run_tools"
+  ],
+  "actual_inventory_log_sha256": "64b807803c8f028dacedbaccb1a94fbc17c894d882fe99ca06bfa5d98f12122c",
+  "parent_inventory_sha256": "64b807803c8f028dacedbaccb1a94fbc17c894d882fe99ca06bfa5d98f12122c",
+  "binary_sha256": "94b2eb017e0e3965ac0f804f2291fcab7f2384aa4e256be817509b9b4109ebc2"
+}

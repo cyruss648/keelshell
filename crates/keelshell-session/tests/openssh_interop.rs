@@ -17,6 +17,56 @@ type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
 #[tokio::test]
 #[ignore = "requires the disposable pinned OpenSSH loopback runner"]
+async fn openssh_archive_tool_validation_checks_streams_without_creating_files() -> TestResult {
+    use keelshell_session::{archive_tools::ArchiveTool, archive_validation::ToolCheckStatus};
+    use std::sync::atomic::AtomicBool;
+
+    tokio::time::timeout(Duration::from_secs(40), async {
+        let fixture = Fixture::connect().await?;
+        let mut before: Vec<_> = fixture
+            .sftp
+            .list(&fixture.directory)
+            .await?
+            .into_iter()
+            .map(|entry| (entry.name, entry.size))
+            .collect();
+        before.sort();
+        let report = fixture
+            .ssh
+            .validate_archive_tools(&AtomicBool::new(false))
+            .await?;
+        assert_eq!(report.tools.len(), ArchiveTool::ALL.len());
+        for (check, tool) in report.tools.iter().zip(ArchiveTool::ALL) {
+            assert_eq!(check.tool, tool);
+            match tool {
+                ArchiveTool::Tar | ArchiveTool::Gzip | ArchiveTool::Python3 => {
+                    assert_eq!(check.version_status, ToolCheckStatus::Passed, "{tool:?}");
+                    assert_eq!(check.stream_check, ToolCheckStatus::Passed, "{tool:?}");
+                    assert!(check.version.as_ref().is_some_and(|text| !text.is_empty()));
+                }
+                _ => assert_eq!(check.stream_check, ToolCheckStatus::NotTested),
+            }
+        }
+        let mut after: Vec<_> = fixture
+            .sftp
+            .list(&fixture.directory)
+            .await?
+            .into_iter()
+            .map(|entry| (entry.name, entry.size))
+            .collect();
+        after.sort();
+        assert_eq!(after, before, "stream probes preserve the owned directory");
+        assert_eq!(
+            fixture.ssh.exec("printf validation-survives").await?.stdout,
+            b"validation-survives",
+        );
+        fixture.close(&[], &[]).await
+    })
+    .await?
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable pinned OpenSSH loopback runner"]
 async fn openssh_server_archive_packs_remote_sources_with_exact_manifest_and_readback() -> TestResult
 {
     use keelshell_core::{ArchiveBundle, ArchiveFormat, server_archive::ServerArchiveRequest};

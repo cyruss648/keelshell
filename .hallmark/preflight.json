@@ -36,5 +36,25 @@
   "evidence": "docs/testing/records/2026-11-07-pane-connection-identity-bar.md",
   "baseline_evidence": "docs/testing/records/2026-11-06-resource-knowledge-native.md",
   "baseline_native_scope": "native-r4 approves scoped macOS resource/batch evidence for14cb801e with same-run parent read-only export; known capture-tool P2/failed-inventory-summary P3 remain open in that immutable attempt",
-  "web_render": "not_applicable to native Rust/GPUI; actual GPUI and native checks recorded separately"
+  "web_render": "not_applicable to native Rust/GPUI; actual GPUI and native checks recorded separately",
+  "archive_validation_20261115": {
+    "base_sha": "6e2b0a7ee3493ace52ba157049ab668ba464c4f0",
+    "scope": "existing native FilesPanel server-tool component",
+    "preserve": [
+      "three registered theme families",
+      "semantic state colors and shared Kit controls",
+      "background transport and exact approval identity"
+    ],
+    "introduce": [
+      "reviewed tool version observations",
+      "fixed in-memory stream checks with explicit untested rows"
+    ],
+    "source_evidence": [
+      "crates/keelshell-app/src/files/archive_inspection.rs",
+      "crates/keelshell-app/src/files/archive_validation.rs",
+      "docs/adr/0139-reviewed-archive-tool-validation.md"
+    ],
+    "status": "AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / NATIVE_DESKTOP_NOT_RUN",
+    "evidence": "docs/testing/records/2026-11-15-archive-tool-validation.md"
+  }
 }

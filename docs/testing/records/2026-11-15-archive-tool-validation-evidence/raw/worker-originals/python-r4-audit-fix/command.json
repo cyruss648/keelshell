@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/python3",
+    "-I",
+    "-S",
+    "-B",
+    "/Users/hdh/.codex/worktrees/archive-tool-validation-20261115/keelshell/crates/keelshell-session/src/archive_validation/test_archive_validation.py",
+    "HelperTests.test_actual_helper_performs_no_file_mutations_or_network_calls"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/archive-tool-validation-20261115/keelshell",
+  "timeout_seconds": 10,
+  "input_sha256": {
+    "crates/keelshell-session/src/archive_validation/test_archive_validation.py": "f2e2f2a649e44de31196214bb20480ffeb21947ac89a030ad4348915f66dbd7b",
+    "crates/keelshell-session/src/archive_validation.py": "63ff3471ca7c4e725778719f0212bbfe5a73c16198146a7930f8d201c595eec4"
+  }
+}

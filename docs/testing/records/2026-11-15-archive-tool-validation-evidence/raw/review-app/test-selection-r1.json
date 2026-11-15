@@ -1,0 +1,84 @@
+{
+  "utc": "2026-11-15T14:39:29.726517+00:00",
+  "status": "SELECTION_ONLY_NOT_EXECUTED",
+  "planned_binary_invocations": 7,
+  "planned_rust_test_cases": 18,
+  "selections": [
+    {
+      "label": "archive_validation_tests",
+      "filter": "files::transfer_tests::archive_validation_tests::",
+      "exact": false,
+      "expected_tests": [
+        "files::transfer_tests::archive_validation_tests::archive_validation_reviews_full_command_and_runs_once_without_sftp",
+        "files::transfer_tests::archive_validation_tests::archive_validation_rejects_old_approval_after_transport_replacement",
+        "files::transfer_tests::archive_validation_tests::archive_validation_discards_a_late_result_for_the_same_display_host",
+        "files::transfer_tests::archive_validation_tests::archive_validation_cancellation_does_not_replay_without_new_approval",
+        "files::transfer_tests::archive_validation_tests::archive_validation_failed_refresh_retires_only_its_previous_result",
+        "files::transfer_tests::archive_validation_tests::archive_validation_path_discovery_does_not_grant_stream_check_results",
+        "files::transfer_tests::archive_validation_tests::archive_validation_theme_language_and_detail_changes_do_not_run_tools"
+      ],
+      "reason": "New approval, real connection replacement, late reply, cancellation, failed refresh, PATH separation and theme/command regression"
+    },
+    {
+      "label": "archive_inspection_tests",
+      "filter": "files::transfer_tests::archive_inspection_tests::",
+      "exact": false,
+      "expected_tests": [
+        "files::transfer_tests::archive_inspection_tests::archive_tools_require_complete_review_and_run_once_without_sftp",
+        "files::transfer_tests::archive_inspection_tests::archive_tool_review_rejects_a_replaced_connection_without_token_change",
+        "files::transfer_tests::archive_inspection_tests::archive_tool_late_reply_cannot_attach_to_a_replacement_connection",
+        "files::transfer_tests::archive_inspection_tests::archive_tool_cancel_and_retry_need_separate_explicit_reviews",
+        "files::transfer_tests::archive_inspection_tests::archive_tool_failed_refresh_retires_the_previous_success",
+        "files::transfer_tests::archive_inspection_tests::archive_tool_observations_render_in_all_themes_and_languages_without_reprobing"
+      ],
+      "reason": "Changed Kind/Reply dispatcher and separate state must preserve prior PATH behavior"
+    },
+    {
+      "label": "reviewed_queue_overlaps_jobs_and_targets_pause_cancel_and_concurrency_controls",
+      "filter": "files::transfer_tests::parallel_tests::reviewed_queue_overlaps_jobs_and_targets_pause_cancel_and_concurrency_controls",
+      "exact": true,
+      "expected_tests": [
+        "files::transfer_tests::parallel_tests::reviewed_queue_overlaps_jobs_and_targets_pause_cancel_and_concurrency_controls"
+      ],
+      "reason": "Shared foreground/queue admission and independent transfer controls"
+    },
+    {
+      "label": "queue_entry_completed_results_are_visible_and_return_preserves_browser_selection_and_drafts",
+      "filter": "files::transfer_tests::parallel_tests::queue_entry_completed_results_are_visible_and_return_preserves_browser_selection_and_drafts",
+      "exact": true,
+      "expected_tests": [
+        "files::transfer_tests::parallel_tests::queue_entry_completed_results_are_visible_and_return_preserves_browser_selection_and_drafts"
+      ],
+      "reason": "Completed transfers and UI disclosure preserve path drafts and selections"
+    },
+    {
+      "label": "queue_entry_keeps_pending_review_and_fixed_actions_without_dispatch_or_approval",
+      "filter": "files::transfer_tests::parallel_tests::queue_entry_keeps_pending_review_and_fixed_actions_without_dispatch_or_approval",
+      "exact": true,
+      "expected_tests": [
+        "files::transfer_tests::parallel_tests::queue_entry_keeps_pending_review_and_fixed_actions_without_dispatch_or_approval"
+      ],
+      "reason": "Queue disclosure cannot consume pending approval or hide fixed review actions"
+    },
+    {
+      "label": "old_painted_save_confirmation_cannot_approve_replacement_read_review",
+      "filter": "files::transfer_tests::review_viewport_tests::old_painted_save_confirmation_cannot_approve_replacement_read_review",
+      "exact": true,
+      "expected_tests": [
+        "files::transfer_tests::review_viewport_tests::old_painted_save_confirmation_cannot_approve_replacement_read_review"
+      ],
+      "reason": "Shared review identity rejects stale confirmation callbacks"
+    },
+    {
+      "label": "expanded_review_preserves_changed_draft_and_suspension_guards",
+      "filter": "files::transfer_tests::review_viewport_tests::expanded_review_preserves_changed_draft_and_suspension_guards",
+      "exact": true,
+      "expected_tests": [
+        "files::transfer_tests::review_viewport_tests::expanded_review_preserves_changed_draft_and_suspension_guards"
+      ],
+      "reason": "Shared expanded review does not overwrite changed editor drafts and honors suspension"
+    }
+  ],
+  "must_verify_final_binary_sha_inventory_and_freeze_before_execution": true,
+  "no_independent_recompile": true
+}

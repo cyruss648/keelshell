@@ -25,6 +25,8 @@ mod action_view_tests;
 mod archive_inspection_tests;
 #[path = "archive_tests.rs"]
 mod archive_tests;
+#[path = "archive_validation_tests.rs"]
+mod archive_validation_tests;
 #[path = "batch_tests.rs"]
 mod batch_tests;
 #[path = "browser_tests.rs"]
@@ -256,7 +258,9 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
         | "review-archive-extract"
         | "review-server-archive"
         | "review-archive-tool-inspection"
-        | "toggle-archive-tool-details" => Some("toggle-file-transfer-settings"),
+        | "toggle-archive-tool-details"
+        | "review-archive-tool-validation"
+        | "toggle-archive-validation-details" => Some("toggle-file-transfer-settings"),
         _ => None,
     };
     if window

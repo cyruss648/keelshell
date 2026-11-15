@@ -1,0 +1,91 @@
+{
+  "recorded_utc": "2026-11-15T15:13:03.367987+00:00",
+  "containers": [
+    {
+      "name": "keelshell-archive-validation-preflight-20261115",
+      "id": "3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4",
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "3ababec0ccde45516366fade362cc90f49aa3b07be9dbe13c709eda5f848f0b4"
+      ],
+      "exit_code": 1,
+      "absent": true,
+      "event_statuses": [
+        "create",
+        "init",
+        "attach",
+        "start",
+        "died",
+        "remove"
+      ]
+    },
+    {
+      "name": "keelshell-archive-validation-helper-20261115-r1",
+      "id": "be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798",
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "be1b6561f34877e602b62639aa3f20e8ff31d8aef9d7999476aee1339660b798"
+      ],
+      "exit_code": 1,
+      "absent": true,
+      "event_statuses": [
+        "create",
+        "init",
+        "attach",
+        "start",
+        "died",
+        "remove"
+      ]
+    },
+    {
+      "name": "keelshell-archive-validation-helper-20261115-r2",
+      "id": "7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62",
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "7302c655ed2249340438e6428b0870e0e2a610bdb6cfa96a717e4a0305450f62"
+      ],
+      "exit_code": 1,
+      "absent": true,
+      "event_statuses": [
+        "create",
+        "init",
+        "attach",
+        "start",
+        "died",
+        "remove"
+      ]
+    },
+    {
+      "name": "keelshell-archive-validation-python-20261115-r2",
+      "id": "aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b",
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "aaa6212b47aaa69bc5d73b52e55ef55be46baeb35a3ba23ecebc92c0292c2b1b"
+      ],
+      "exit_code": 1,
+      "absent": true,
+      "event_statuses": [
+        "create",
+        "init",
+        "attach",
+        "start",
+        "died",
+        "remove"
+      ]
+    }
+  ],
+  "cidfile_boundary": "Podman --rm removed the cidfiles; exact IDs recovered from owned-name events",
+  "author_worktree_absent": true,
+  "author_worktree": "/Users/hdh/.codex/worktrees/archive-tool-validation-20261115/keelshell",
+  "openssh_owned_processes_stopped": true,
+  "openssh_temporary_directory_removed": true,
+  "other_worktrees_containers_images_and_unique_target_preserved": true
+}

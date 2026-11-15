@@ -1,0 +1,12 @@
+
+running 7 tests
+test files::transfer_tests::archive_validation_tests::archive_validation_failed_refresh_retires_only_its_previous_result ... ok
+test files::transfer_tests::archive_validation_tests::archive_validation_discards_a_late_result_for_the_same_display_host ... ok
+test files::transfer_tests::archive_validation_tests::archive_validation_path_discovery_does_not_grant_stream_check_results ... ok
+test files::transfer_tests::archive_validation_tests::archive_validation_cancellation_does_not_replay_without_new_approval ... ok
+test files::transfer_tests::archive_validation_tests::archive_validation_rejects_old_approval_after_transport_replacement ... ok
+test files::transfer_tests::archive_validation_tests::archive_validation_reviews_full_command_and_runs_once_without_sftp ... ok
+test files::transfer_tests::archive_validation_tests::archive_validation_theme_language_and_detail_changes_do_not_run_tools ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1239 filtered out; finished in 1.89s
+

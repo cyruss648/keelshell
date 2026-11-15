@@ -1,0 +1,24 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.27s
+     Running tests/openssh_interop.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/026edb07698d8099/out/openssh_interop-026edb07698d8099)
+
+running 16 tests
+test openssh_acknowledged_pause_stops_writes_and_cancel_preserves_the_session ... ok
+test openssh_archive_tool_inspection_observes_path_and_preserves_the_connection ... ok
+test openssh_archive_tool_validation_checks_streams_without_creating_files ... ok
+test openssh_batch_exec_preserves_results_policy_and_unknown_timeout ... ok
+test openssh_checked_content_reads_inspect_regular_files_and_refuse_truncation ... ok
+test openssh_directory_resume_fills_partial_trees_in_both_directions ... ok
+test openssh_file_resume_revalidates_content_and_works_on_a_new_connection ... ok
+test openssh_parallel_atomic_replacement_handles_hardlinks_and_canonical_aliases ... ok
+test openssh_remote_completion_is_literal_read_only_and_uses_canonical_paths ... ok
+test openssh_resume_rejects_a_replaced_inode_without_writing_either_file ... ok
+test openssh_reviewed_archive_preserves_a_concurrently_created_remote_target ... ok
+test openssh_reviewed_archives_pack_and_extract_zip_and_tar_gz_exactly ... ok
+test openssh_reviewed_workflow_runs_dependencies_and_blocks_failed_descendants ... ok
+test openssh_server_archive_packs_remote_sources_with_exact_manifest_and_readback ... ok
+test openssh_target_parameter_values_are_exact_literals_on_separate_reviewed_connections ... ok
+test openssh_workflow_ui_collection_keeps_exact_output_and_connection_identity ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.70s
+
