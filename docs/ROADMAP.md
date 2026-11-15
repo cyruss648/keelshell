@@ -30,6 +30,9 @@ Podman 容器联调与在线最新版本检查受网络阻断，原生恢复控�
 命令、真实结果与未验证边界统一收录到
 [集中验证记录](testing/records/2026-11-15-transfer-recovery-batch-integration.md)。
 保持本地提交，不推送。
+修复源码提交为 `e94f31e49897ac981f4c3d20d22bc39f0cfba3bb`，与门禁和独立复核
+冻结逐项一致。agent、两套多余 target 和测试临时目录已收口；review worktree
+受 Codex 的“其他活动任务仍在使用”保护，受管归档两次被拒绝，继续保留。
 
 ## 2026-11-15 恢复列表 mutation 刷新与最终复核
 

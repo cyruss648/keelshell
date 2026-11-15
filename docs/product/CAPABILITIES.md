@@ -25,7 +25,8 @@ The final author gate passed 2533 ordinary Rust tests, 14 doctests and
 Python 131 run / 1 skipped. A new independent delta review approved the frozen
 candidate, with 29 actual queue tests passing and zero P0–P3 findings. It
 independently rebuilt the 1186-test inventory, including all 10 batch regressions.
-The frozen inputs will be bound to the formal local commit.
+The frozen inputs are bound to local source commit
+`e94f31e49897ac981f4c3d20d22bc39f0cfba3bb`.
 The pre-fix source also passed 11 checks against an isolated real localhost
 OpenSSH server, and its normal macOS executable created a visible window in an
 isolated launch smoke; those receipts are not reissued for the final app fix.

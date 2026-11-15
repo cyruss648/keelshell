@@ -15,6 +15,9 @@ P0–P3 均为 `0`。下文保留原有门禁、真实本机 OpenSSH 和限定 m
 短验的修复前源码归属。本地修复前集成提交为
 `5cdbc9617164d6cfbd5e7a9a022539934221ee75`，保留实现提交为其第二父节点。
 提交后的 524 个 Rust/Cargo 文件已与通过门禁的冻结输入逐项核对一致。
+最终修复源码提交为 `e94f31e49897ac981f4c3d20d22bc39f0cfba3bb`，对应
+`fix/commit-input-binding.json` 核对的 524 个 Rust/Cargo 和 10 个 gate 脚本
+全部一致，同时绑定作者最终 gate、非作者 delta 复核和正常程序构建。
 公司内网不可用，当前仅本地提交，不推送。
 
 ## 验证计划
@@ -78,7 +81,7 @@ P2 的触发条件是逐条确认恢复记录后，OS worker 创建返回错误�
 `f8d1acaa5dffdbf27fa0207dbceb03774cc154ffa84adde7f55b9befc98df724`。
 作者完整门禁与新的独立 delta 复核并行完成；两者使用不同 target。
 复核源码显式为 `5cdbc96` 加三文件未提交候选，524 个输入与冻结逐项匹配；
-不把基线 HEAD 当成包含修复。正式提交须在门禁和复核完成后绑定相同字节。
+不把基线 HEAD 当成包含修复。正式提交已在门禁和复核完成后绑定相同字节。
 最终 `python3 -B scripts/check.py` 实际退出 `0`，耗时 `608.170s`；524 个输入
 和 10 个 gate 脚本结束后逐字节匹配。所有 10 个批量用例在完整门禁中为 `ok`，
 app 实际清单为 `1186`。回执为 `fix/full-gate-after-fix.json`，完整日志
@@ -108,7 +111,10 @@ Rust 总通过 `2547`，其中 rustdoc `14` 不重复计入普通测试。
 fmt 与 diff 检查均退出 `0`。清单、重复专项和作者结果没有重复累计。
 开始/结束 524 个 Rust/Cargo 输入、1139 个 tracked 文件、HEAD、索引和原三文件
 未提交状态均不变；不把此快照描述为已经存在的修复提交。
-正式提交之后由父线程核对相同冻结字节，绑定回执另行归档。
+正式提交之后父线程已核对相同冻结字节，`fix/commit-input-binding.json`
+记录源码提交、冻结清单与原始报告摘要、两项构建/gate 成功退出码及零 mismatch。
+冻结清单中脚本键为绝对路径，Git/复核副本绑定时明确规范化为仓库相对路径；
+原冻结原件及其摘要没有改写。
 
 最终源码另执行正常程序构建：
 
@@ -252,7 +258,17 @@ CoreGraphics 按新实例 PID `78670` 读到一个可见的 KeelShell 窗口：
 真实 OpenSSH 的进程与临时密钥已按 runner 回执清理。Podman 自有资源核验
 不存在，VM 保持 stopped；未改动原有业务容器。限定 macOS 实例已退出，
 临时 package、隔离数据、Swift module cache 与两份临时 runner 脚本已删除。
-独立 reviewer 及其独占 target/工作树仍在使用，待报告归档后统一收口。
+实现及两轮独立 reviewer agent 均已关闭，最后一轮报告返回后即关闭。
+报告及原始日志归档后，独占 reviewer target 和旧依赖刷新 target 已删除，
+测试临时目录和状态 probe 可执行文件也已清理；当前主树有效 author target
+保留供继续开发。原始源码、失败日志、冻结和正常程序摘要不依赖这些可重建
+产物保留。
+
+复核 worktree 仍保留。两次受管 `archive_worktree` 均返回
+`Another active task still uses this worktree.`；第二次在重新附加主开发树后
+仍被活动任务保护拒绝。没有恢复或删除这份检出的三文件候选，没有使用 shell
+绕过受管保护，也没有删除任何其它任务或其 WIP。清理回执为 `fix/cleanup.json`，
+保留 `PROTECTED_ACTIVE_TASK` 状态，不能将该 worktree 记录为已归档。
 
 ## 验收边界
 

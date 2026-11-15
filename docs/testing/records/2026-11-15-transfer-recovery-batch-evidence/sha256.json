@@ -3,6 +3,8 @@
   "dependency-network-summary.json": "5cdfab4d6f151b4352d1785c43f5626daba4802af86ef991a4d76e817c01e751",
   "fix/app-parallel-after-fix.json": "5621a4b6e00986a557f211cde2b232e34a775eee7f436dcbc994023d968d7bca",
   "fix/app-parallel-after-fix.log.gz": "e9ba6bb85d47c37cfa91c1b00b71db6d204955afea42f33b3cb51f26858453b3",
+  "fix/cleanup.json": "1a4c0b27f28b6fb7dfb3034fd95918949c60943facc932d1744fbc6255ea8864",
+  "fix/commit-input-binding.json": "b977a8332c24cccb4b434dbee0f1dee60b1dc451d78902187e44550c9ac53154",
   "fix/fmt-after-fix.json": "cad59daf848c397b4e1226bc00d6fd595828631da0159c8a155ff83312508d88",
   "fix/fmt-after-fix.log.gz": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83",
   "fix/frozen-inputs.json": "f8d1acaa5dffdbf27fa0207dbceb03774cc154ffa84adde7f55b9befc98df724",

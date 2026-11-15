@@ -1,0 +1,12 @@
+{
+  "commit": "e94f31e49897ac981f4c3d20d22bc39f0cfba3bb",
+  "bound_utc": "2026-11-15T01:58:35.476414+00:00",
+  "matched_rust_cargo_files": 524,
+  "matched_gate_scripts": 10,
+  "mismatches": [],
+  "frozen_manifest_sha256": "f8d1acaa5dffdbf27fa0207dbceb03774cc154ffa84adde7f55b9befc98df724",
+  "independent_report_sha256": "06699b0df54982ca47eccaa27a76ce313e19b73d027ef4d03a83473dc0b8a545",
+  "full_gate_exit": 0,
+  "normal_build_exit": 0,
+  "binding_scope": "Author full gate, independent delta review and normal binaries bind to the same committed source bytes; no native acceptance is inferred."
+}

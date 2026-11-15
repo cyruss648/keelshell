@@ -1,0 +1,26 @@
+{
+  "cleaned_utc": "2026-11-15T02:01:06.460506+00:00",
+  "removed_owned_targets": [
+    "work/recovery-batch-integration-20261115/review/target",
+    "work/full-gate-dependency-refresh-20261115/target"
+  ],
+  "owned_target_executables_found": [],
+  "retained_useful_author_target": "work/recovery-batch-integration-20261115/target",
+  "reviewer_agents_closed": true,
+  "review_worktree": {
+    "path": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+    "archive_status": "PROTECTED_ACTIVE_TASK",
+    "message": "Another active task still uses this worktree.",
+    "attempts": 2,
+    "main_checkout_reattached_before_second_attempt": true,
+    "source_not_removed_or_restored": true
+  },
+  "other_worktrees_and_wip_preserved": true,
+  "ssh_and_podman_owned_runtime_resources": "Prior runtime-cleanup receipts retained; this repair only ran bounded test fixtures and normal builds.",
+  "removed_finished_parent_command_helpers": [
+    "work/recovery-batch-integration-20261115/run_fix_command.py",
+    "work/recovery-batch-integration-20261115/summarize_fix.py",
+    "work/recovery-batch-integration-20261115/archive_fix_evidence.py"
+  ],
+  "helpers_cleaned_utc": "2026-11-15T02:02:58.688909+00:00"
+}

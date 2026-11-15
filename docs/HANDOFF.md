@@ -24,7 +24,8 @@ rustdoc `14/0`、Python `131 run / 1 skipped`；fmt、整仓严格 Clippy、依�
 三组 AI controller 通过。最终 app 清单 `1186` 项，10 个批量回归均实际通过。
 新的非作者复核独立重编译清单、通过传输队列 `29/29` 及相关门禁，P0–P3 均为
 `0`，原 P2 关闭。冻结的 524 个 Rust/Cargo 输入及 10 个 gate 脚本前后相同，
-复核使用另一 target 的相同冻结候选，正式提交后逐项绑定源码字节。
+复核使用另一 target 的相同冻结候选，已与本地修复提交
+`e94f31e49897ac981f4c3d20d22bc39f0cfba3bb` 逐项绑定源码字节。
 修复前源码另有独立本机 OpenSSH `11/11` 和 macOS 可见窗口隔离启动短验；
 本次状态修复不把旧正常程序或原生短验改签为最终源码。
 
@@ -39,6 +40,12 @@ Podman 引擎已成功读回，但 Docker Hub 拉取超时，容器联调未开�
 [ADR 0131](adr/0131-persisted-transfer-recovery-batch-review.md)，实时证据和
 边界见[集中验证记录](testing/records/2026-11-15-transfer-recovery-batch-integration.md)。
 公司内网不可用，当前仍只做本地 commit，不 push。
+
+本批实现及两轮复核 agent 均已关闭。独立 reviewer target、旧依赖刷新 target
+和测试临时目录已清理，保留当前主树一个有效编译缓存。复核 worktree 的两次
+受管归档均因 `Another active task still uses this worktree.` 被保护拒绝，
+重新附加主开发树后仍相同；保留这份检出及其三文件候选，不绕过保护删除。
+源码绑定、持久日志与清理回执统一位于本批证据目录。
 
 ## 2026-11-15 当前交接校正
 
