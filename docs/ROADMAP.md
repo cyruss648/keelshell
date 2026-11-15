@@ -25,8 +25,15 @@ app `1174/0/2`、core `644/0/0`、AI `194/0/5`、session `448/0/16`、MCP
 [最终独立复核原文](testing/records/2026-11-15-transfer-recovery-review-final-raw.md)。
 当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。仍需单独完成
 macOS/Windows/Linux 原生桌面、真实客户 SSH/SFTP、Podman 长流程、IME/辅助技术、
-签名、公证、安装升级和发布验收。公司内网不可用，在线依赖最新版本检查尚未完成；
-本片只做本地 commit，不 push。
+签名、公证、安装升级和发布验收。本地 commit 仍不 push。
+
+## 2026-11-15 直接依赖复查
+
+官方依赖复查发现 `keelshell-ai` 的 Unix 目标直接 `nix` requirement 需要从
+`0.31` 更新为 `0.32`；Cargo.lock 保留 `nix 0.31.3` 供
+`process-wrap 10.0.0` 使用，同时锁定直接边 `nix 0.32.0`。`103` 项直接依赖
+检查和 `keelshell-ai` `129 passed / 0 failed / 1 ignored` 已通过。详细命令、
+失败证据和边界见[依赖复查记录](testing/records/2026-11-15-dependency-refresh.md)。
 
 ## 2026-11-14 重启后传输恢复日志
 

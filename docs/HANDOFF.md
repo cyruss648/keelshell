@@ -44,8 +44,11 @@ reviewer worktree、独立 target、日志和临时报告已清理。
 当前开发机 active/default Rust/Cargo 为 `1.100.0`。仓库没有
 `rust-toolchain.toml`、`.cargo/config*` 或 `rust-version`，Cargo 继续跟随开发机或
 CI runner 的 active toolchain；项目没有把本机版本误写成 MSRV。直接依赖继续使用
-`x.y`，Cargo.lock 保留 patch 解析结果。在线依赖最新版本检查因公司内网不可用
-尚未完成。原生三平台、真实 SSH/SFTP、Podman、IME/辅助技术、签名公证、安装
+`x.y`，Cargo.lock 保留 patch 解析结果。2026-11-15 已完成官方依赖复查并将
+`keelshell-ai` 的 Unix 目标直接 `nix` requirement 更新为 `0.32`；由于
+`process-wrap 10.0.0` 仍要求 `nix ^0.31.1`，锁文件同时保留 `0.31.3` 与
+`0.32.0`。证据见[依赖复查记录](testing/records/2026-11-15-dependency-refresh.md)。
+原生三平台、真实 SSH/SFTP、Podman、IME/辅助技术、签名公证、安装
 升级和发布验收仍需单独完成。不要把 headless GPUI、loopback 或作者门禁写成
 这些边界的通过。
 
