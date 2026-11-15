@@ -24,7 +24,7 @@ use keelshell_session::{
     },
 };
 use std::{
-    collections::HashSet,
+    collections::{HashSet, VecDeque},
     path::PathBuf,
     sync::{
         Arc,
@@ -64,6 +64,13 @@ enum IsolationTarget {
     Remote(String),
     Local(PathBuf),
 }
+
+#[derive(Clone)]
+struct RecoveryDiscardCandidate {
+    id: uuid::Uuid,
+    record: TransferRecoveryRecord,
+}
+
 #[derive(Clone)]
 enum Operation {
     InspectFileQuarantine(IsolationTarget),
@@ -99,6 +106,7 @@ enum Operation {
         spec: TransferSpec,
         directory: bool,
     },
+    DiscardPersistedRecoveryBatch(Vec<RecoveryDiscardCandidate>),
     ResumeFile(FileResumePlan),
     ResumeDirectory(DirectoryResumePlan),
     ResumePersistedFile(uuid::Uuid, FileResumePlan),
@@ -193,6 +201,14 @@ pub struct FilesPanel {
     recovery_writes: HashSet<uuid::Uuid>,
     recovery_claim_requests: HashSet<uuid::Uuid>,
     recovery_claim: Option<TransferRecoveryClaim>,
+    /// User-visible selection for the persisted recovery list.
+    recovery_selection: selection::Selection<uuid::Uuid>,
+    /// IDs waiting for explicit, one-at-a-time recovery review. The queue is
+    /// session-bound and never authorizes a transfer by itself.
+    recovery_review_queue: VecDeque<uuid::Uuid>,
+    recovery_review_session: Option<uuid::Uuid>,
+    recovery_review_active: Option<uuid::Uuid>,
+    recovery_review_revision: u64,
     // The input is a navigation draft; mutations use only this canonical directory.
     directory: Option<String>,
     path: Entity<InputState>,
@@ -991,6 +1007,11 @@ impl FilesPanel {
             recovery_writes: HashSet::new(),
             recovery_claim_requests: HashSet::new(),
             recovery_claim: None,
+            recovery_selection: selection::Selection::default(),
+            recovery_review_queue: VecDeque::new(),
+            recovery_review_session: None,
+            recovery_review_active: None,
+            recovery_review_revision: 0,
             directory: None,
             path: field(t(cx, "远程目录", "Remote directory"), ".", window, cx),
             name: field(
@@ -1138,6 +1159,34 @@ impl FilesPanel {
                 self.recovery_load_error = Some(error);
             }
         }
+        let visible_ids: Vec<_> = self
+            .recovery_records
+            .iter()
+            .map(|record| record.id)
+            .collect();
+        self.recovery_selection.retain_visible(&visible_ids);
+        let queue_lost_record = (!self.recovery_review_queue.is_empty()
+            || self.recovery_review_session.is_some())
+            && !self.recovery_review_queue_is_current();
+        let active_lost_record = self
+            .active_recovery_id
+            .is_some_and(|id| !self.recovery_records.iter().any(|record| record.id == id));
+        if queue_lost_record || active_lost_record {
+            let pending_recovery = self
+                .pending
+                .as_ref()
+                .and_then(|(_, operation)| operation.persisted_recovery_id());
+            self.revoke_recovery_review();
+            if pending_recovery.is_some() || active_lost_record {
+                self.pending = None;
+                self.confirmation_expanded = false;
+                self.recovery = None;
+            }
+            self.status = Message::new(
+                "恢复记录已消失或待审核队列已失效；已清空待审核状态，未执行传输。",
+                "A recovery record disappeared or the review queue became stale; pending review state was cleared and no transfer ran.",
+            );
+        }
         cx.notify();
     }
 
@@ -1184,7 +1233,7 @@ impl FilesPanel {
         self.session = None;
         self.session_token = uuid::Uuid::new_v4();
         self.recovery = None;
-        self.recovery_claim = None;
+        self.revoke_recovery_review();
         self.recovery_claim_requests.clear();
         self.pending = None;
         self.confirmation_expanded = false;
@@ -1341,15 +1390,13 @@ impl FilesPanel {
         };
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
             if persisted_recovery_id.is_some() {
-                self.recovery_claim = None;
-                self.active_recovery_id = None;
+                self.revoke_recovery_review();
             }
             return;
         };
         if self.operation_id.is_some() || (self.busy && !operation.can_run_beside_transfers()) {
             if persisted_recovery_id.is_some() {
-                self.recovery_claim = None;
-                self.active_recovery_id = None;
+                self.revoke_recovery_review();
             }
             self.status = Message::new(
                 "请等待或取消当前文件操作",
@@ -1509,6 +1556,7 @@ impl FilesPanel {
         );
         let navigation_before = self.path.read(cx).value().to_string();
         let browser_review_revision = self.browser_review_revision;
+        let recovery_review_revision = self.recovery_review_revision;
         let runtime = self.runtime.clone();
         let stop = Arc::new(AtomicBool::new(false));
         self.operation_stop = Some(stop.clone());
@@ -1553,8 +1601,7 @@ impl FilesPanel {
                 transfer.phase = TransferPhase::Failed;
             }
             if persisted_recovery_id.is_some() {
-                self.recovery_claim = None;
-                self.active_recovery_id = None;
+                self.revoke_recovery_review();
             }
             self.status =
                 Message::detail("无法启动文件工作线程", "Unable to start file worker", error);
@@ -1620,8 +1667,7 @@ impl FilesPanel {
                 }
                 if view.suspended {
                     if persisted_recovery_id.is_some() {
-                        view.recovery_claim = None;
-                        view.active_recovery_id = None;
+                        view.revoke_recovery_review();
                     }
                     // A late worker may acknowledge a write, but may not replace the
                     // archived editor, its original baseline, or an approved plan.
@@ -1634,14 +1680,16 @@ impl FilesPanel {
                     return;
                 }
                 if let Err(FileFailure::MirrorConflicts(conflicts)) = &result { view.mirror_conflicts = conflicts.clone(); }
-                if review_only && result.is_ok() && view.browser_review_revision != browser_review_revision {
+                if review_only && result.is_ok()
+                    && (view.browser_review_revision != browser_review_revision
+                        || (persisted_recovery_id.is_some()
+                            && view.recovery_review_revision != recovery_review_revision)) {
                     // A read-only plan may finish after a local or remote draft
                     // changes. Retire its original result owner above, but do
                     // not recreate a proposal that navigation withdrew. Writes
                     // never enter this branch and retain their actual outcome.
                     if persisted_recovery_id.is_some() {
-                        view.recovery_claim = None;
-                        view.active_recovery_id = None;
+                        view.revoke_recovery_review();
                     }
                     view.status = Message::new("只读审核准备已完成，但路径或选择已变化；未采用旧计划，请重新准备。", "Read-only review preparation completed, but the path or selection changed; the old plan was not adopted. Prepare it again.");
                     cx.notify();
@@ -1656,8 +1704,7 @@ impl FilesPanel {
                     )
                 );
                 if persisted_recovery_id.is_some() && !keeps_recovery_claim {
-                    view.recovery_claim = None;
-                    view.active_recovery_id = None;
+                    view.revoke_recovery_review();
                 }
                 match result {
                     Ok(Outcome::Listed(path,entries)) => {
@@ -1779,7 +1826,7 @@ impl FilesPanel {
                         let Some(connection_bound) =
                             persisted_recovery_is_bound(&view.recovery_records, id)
                         else {
-                            view.active_recovery_id = None;
+                            view.revoke_recovery_review();
                             view.status = Message::new(
                                 "恢复记录已消失，已拒绝继续；请重新加载文件面板。",
                                 "The recovery record disappeared; continuation was refused. Reload the file panel.",
@@ -1794,7 +1841,7 @@ impl FilesPanel {
                             window,
                             cx,
                         ) {
-                            view.active_recovery_id = None;
+                            view.revoke_recovery_review();
                             view.status = Message::new(
                                 format!("恢复计划进度无法保留：{error}"),
                                 format!("The recovery plan progress could not be retained: {error}"),
@@ -1830,7 +1877,7 @@ impl FilesPanel {
                         let Some(connection_bound) =
                             persisted_recovery_is_bound(&view.recovery_records, id)
                         else {
-                            view.active_recovery_id = None;
+                            view.revoke_recovery_review();
                             view.status = Message::new(
                                 "恢复记录已消失，已拒绝继续；请重新加载文件面板。",
                                 "The recovery record disappeared; continuation was refused. Reload the file panel.",
@@ -1845,7 +1892,7 @@ impl FilesPanel {
                             window,
                             cx,
                         ) {
-                            view.active_recovery_id = None;
+                            view.revoke_recovery_review();
                             view.status = Message::new(
                                 format!("恢复计划进度无法保留：{error}"),
                                 format!("The recovery plan progress could not be retained: {error}"),
@@ -1984,7 +2031,7 @@ impl FilesPanel {
             .zip(self.active_recovery_id)
             .is_some_and(|(operation_id, active_id)| operation_id == active_id);
         if !keep_recovery_claim {
-            self.recovery_claim = None;
+            self.revoke_recovery_review();
         }
         self.pending_review_id = uuid::Uuid::new_v4();
         self.confirmation_scroll.set_offset(point(px(0.), px(0.)));
@@ -2018,7 +2065,12 @@ impl FilesPanel {
             return;
         }
         if let Some((_, operation)) = self.pending.take() {
-            self.run(operation, window, cx);
+            self.confirmation_expanded = false;
+            if let Operation::DiscardPersistedRecoveryBatch(candidates) = operation {
+                self.start_batch_discard(candidates, window, cx);
+            } else {
+                self.run(operation, window, cx);
+            }
         }
     }
 
@@ -2362,6 +2414,7 @@ impl Operation {
                     | Self::TransferBatch(_)
                     | Self::PlanResume(..)
                     | Self::PlanPersistedRecovery { .. }
+                    | Self::DiscardPersistedRecoveryBatch(_)
                     | Self::Compare(..)
                     | Self::PlanDirectorySync(..)
             )
@@ -2446,6 +2499,7 @@ impl Operation {
             | Self::TransferBatch(_)
             | Self::PlanResume(..)
             | Self::PlanPersistedRecovery { .. }
+            | Self::DiscardPersistedRecoveryBatch(_)
             | Self::Compare(..)
             | Self::ApplyDirectorySync(..)
             | Self::PlanDirectorySync(..)

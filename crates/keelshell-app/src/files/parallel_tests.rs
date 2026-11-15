@@ -10,8 +10,8 @@ use keelshell_core::{
     TransferRecoveryState, TransferRecoveryStore,
 };
 use keelshell_session::sftp::{TransferEvent, TransferSpec};
-use std::sync::Arc;
 use std::time::Duration;
+use std::{path::Path, sync::Arc};
 
 fn mount_recovery_harness(
     cx: &mut TestAppContext,
@@ -51,6 +51,662 @@ fn mount_recovery_harness(
             })
         }
     })
+}
+
+fn persist_recovery_fixture(
+    store: &TransferRecoveryStore,
+    id: uuid::Uuid,
+    connection_id: uuid::Uuid,
+    source: &Path,
+    remote: &str,
+) {
+    let source = source.canonicalize().expect("canonical recovery source");
+    store
+        .upsert(
+            TransferRecoveryRecord::new_with_connection_id(
+                id,
+                Some(connection_id),
+                TransferRecoveryDirection::Upload,
+                &source,
+                remote,
+                false,
+                TransferRecoveryState::Failed,
+                2,
+                Some(10),
+                2,
+                100,
+                100,
+            )
+            .expect("valid persisted recovery fixture"),
+        )
+        .expect("persist recovery fixture");
+}
+
+fn open_recovery_queue(h: &Harness, cx: &mut TestAppContext) {
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        if window.try_find("file-transfer-queue-details").is_none() {
+            window.click("toggle-file-transfer-queue", cx);
+        }
+        window.render_frame(cx);
+    })
+    .checked("open persisted recovery queue");
+}
+
+fn click_recovery_checkbox(h: &Harness, id: uuid::Uuid, cx: &mut TestAppContext) {
+    let selector = format!("select-persisted-transfer-{id}");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click(selector, cx);
+    })
+    .checked("toggle persisted recovery selection");
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_selection_counts_and_preserves_record_order(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("batch selection fixture directory");
+    let source = directory.path().join("batch-selection.bin");
+    std::fs::write(&source, b"0123456789").expect("write batch selection source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let ids = [
+        uuid::Uuid::new_v4(),
+        uuid::Uuid::new_v4(),
+        uuid::Uuid::new_v4(),
+    ];
+    for (id, name) in ids
+        .iter()
+        .zip(["/batch-first.bin", "/batch-second.bin", "/batch-third.bin"])
+    {
+        persist_recovery_fixture(&store, *id, connection_id, &source, name);
+    }
+
+    let h = mount_recovery_harness(cx, store, Some(connection_id));
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+
+    for id in [ids[2], ids[0]] {
+        click_recovery_checkbox(&h, id, cx);
+    }
+    h.panel.read_with(cx, |panel, _| {
+        assert_eq!(panel.recovery_selection.len(), 2);
+        assert!(panel.pending.is_none());
+        assert!(panel.operation_id.is_none());
+    });
+    for family in ["frost", "graphite", "lavender"] {
+        for language in [Language::ZhCn, Language::En] {
+            cx.update_window(h.window, |_, window, cx| {
+                i18n::set_language(language, cx);
+                crate::design::apply_settings(
+                    &Settings {
+                        theme_family: ThemeId::new(family).expect("registered theme family"),
+                        ..Settings::default()
+                    },
+                    Some(window),
+                    cx,
+                );
+                window.resize(size(px(560.), px(440.)));
+                window.bounds_changed(cx);
+                window.render_frame(cx);
+                assert_eq!(
+                    window
+                        .find("persisted-transfer-recovery-selection-count")
+                        .label(),
+                    Some(if language == Language::ZhCn {
+                        "已选择: 2"
+                    } else {
+                        "Selected: 2"
+                    })
+                );
+                for id in [
+                    "queue-selected-persisted-transfers",
+                    "discard-selected-persisted-transfers",
+                ] {
+                    reveal_file_control(window, cx, id);
+                    let button = window.find(id);
+                    assert!(button.visible());
+                    assert!(button.label().is_some());
+                    assert!(queue_entry_contains(
+                        button.bounds(),
+                        window.find("file-transfer-queue-details").bounds()
+                    ));
+                }
+            })
+            .checked("compact bilingual batch recovery controls across theme families");
+        }
+    }
+    cx.update_window(h.window, |_, window, cx| {
+        i18n::set_language(Language::ZhCn, cx);
+        window.resize(size(px(1100.), px(440.)));
+        window.bounds_changed(cx);
+    })
+    .checked("restore recovery fixture bounds");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(
+            window
+                .find("persisted-transfer-recovery-selection-count")
+                .visible()
+        );
+        assert!(window.find("queue-selected-persisted-transfers").visible());
+    })
+    .checked("render recovery selection count and queue entry");
+
+    h.click(cx, "queue-selected-persisted-transfers");
+    h.panel.read_with(cx, |panel, _| {
+        let queued: Vec<_> = panel.recovery_review_queue.iter().copied().collect();
+        assert_eq!(queued, vec![ids[0], ids[2]]);
+        assert!(panel.recovery_selection.paths().next().is_none());
+        assert!(panel.pending.is_none());
+        assert!(panel.operation_id.is_none());
+    });
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        assert!(window.find("review-next-persisted-transfer").visible());
+        assert!(
+            window
+                .find("persisted-transfer-recovery-queue-count")
+                .visible()
+        );
+    })
+    .checked("render ordered review queue entry without dispatch");
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_enters_one_independent_review_and_cancel_clears_queue(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("batch review fixture directory");
+    let source = directory.path().join("batch-review.bin");
+    std::fs::write(&source, b"0123456789").expect("write batch review source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let first = uuid::Uuid::new_v4();
+    let second = uuid::Uuid::new_v4();
+    persist_recovery_fixture(
+        &store,
+        first,
+        connection_id,
+        &source,
+        "/batch-review-first.bin",
+    );
+    persist_recovery_fixture(
+        &store,
+        second,
+        connection_id,
+        &source,
+        "/batch-review-second.bin",
+    );
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    h.seed("/batch-review-first.bin", b"01");
+    h.seed("/batch-review-second.bin", b"01");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+    for id in [second, first] {
+        click_recovery_checkbox(&h, id, cx);
+    }
+    h.click(cx, "queue-selected-persisted-transfers");
+    h.click(cx, "review-next-persisted-transfer");
+
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        let panel = h.panel.read(cx);
+        panel.recovery_claim_requests.is_empty() && panel.operation_id.is_none()
+    })
+    .await;
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(
+            matches!(
+                panel.pending.as_ref().map(|(_, operation)| operation),
+                Some(Operation::ResumePersistedFile(id, _)) if *id == first
+            ),
+            "expected the first independent review: {}",
+            panel.status.render(cx)
+        );
+    });
+    h.panel.read_with(cx, |panel, _| {
+        assert_eq!(panel.recovery_review_active, Some(first));
+        assert_eq!(
+            panel
+                .recovery_review_queue
+                .iter()
+                .copied()
+                .collect::<Vec<_>>(),
+            vec![second]
+        );
+        assert!(panel.recovery_claim.is_some());
+        assert!(panel.transfer_jobs.is_empty());
+    });
+
+    h.click(cx, "cancel-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        let panel = h.panel.read(cx);
+        panel.pending.is_none()
+            && panel.recovery_claim.is_none()
+            && panel.recovery_review_active.is_none()
+            && panel.recovery_review_queue.is_empty()
+    })
+    .await;
+    assert_eq!(
+        store
+            .load()
+            .expect("load after cancelled batch review")
+            .len(),
+        2
+    );
+    for id in [second, first] {
+        click_recovery_checkbox(&h, id, cx);
+    }
+    h.click(cx, "queue-selected-persisted-transfers");
+    h.click(cx, "review-next-persisted-transfer");
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        h.panel.read(cx).pending.as_ref().is_some_and(|(_, operation)| {
+            matches!(operation, Operation::ResumePersistedFile(id, _) if *id == first)
+        })
+    })
+    .await;
+    h.panel.update(cx, |panel, _| {
+        panel.recovery_claim = None;
+    });
+    h.click(cx, "confirm-file-operation");
+    h.panel.read_with(cx, |panel, _| {
+        assert!(panel.pending.is_none());
+        assert!(panel.recovery_review_queue.is_empty());
+        assert!(panel.recovery_review_session.is_none());
+        assert!(panel.transfer_jobs.is_empty());
+    });
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_close_rejects_late_claim_and_old_session_entry(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("stale batch recovery directory");
+    let source = directory.path().join("stale-batch.bin");
+    std::fs::write(&source, b"0123456789").expect("write stale batch source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let id = uuid::Uuid::new_v4();
+    persist_recovery_fixture(&store, id, connection_id, &source, "/stale-batch.bin");
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+    click_recovery_checkbox(&h, id, cx);
+    h.click(cx, "queue-selected-persisted-transfers");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        window.click("review-next-persisted-transfer", cx);
+        // The GPUI callback cannot run between these two synchronous events.
+        window.click("toggle-file-transfer-queue", cx);
+    })
+    .checked("close the recovery queue while its independent claim is in flight");
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        h.panel.read(cx).recovery_claim_requests.is_empty()
+    })
+    .await;
+    h.panel.read_with(cx, |panel, _| {
+        assert!(panel.pending.is_none());
+        assert!(panel.recovery_claim.is_none());
+        assert!(panel.recovery_review_queue.is_empty());
+        assert!(panel.operation_id.is_none());
+        assert!(panel.transfer_jobs.is_empty());
+    });
+    let claim = store.claim(id).expect("late cancelled claim released");
+    drop(claim);
+
+    open_recovery_queue(&h, cx);
+    click_recovery_checkbox(&h, id, cx);
+    h.click(cx, "queue-selected-persisted-transfers");
+    cx.update_window(h.window, |_, window, cx| {
+        window.render_frame(cx);
+        h.panel
+            .update(cx, |panel, _| panel.session_token = uuid::Uuid::new_v4());
+        window.click("review-next-persisted-transfer", cx);
+        h.panel.read_with(cx, |panel, _| {
+            assert!(panel.recovery_review_queue.is_empty());
+            assert!(panel.recovery_review_session.is_none());
+            assert!(panel.recovery_claim_requests.is_empty());
+            assert!(panel.pending.is_none());
+            assert!(panel.transfer_jobs.is_empty());
+        });
+        h.panel.update(cx, |panel, cx| panel.suspend(cx));
+    })
+    .checked("old painted review entry rejects a replacement SSH session");
+    assert_eq!(store.load().expect("retained after stale session").len(), 1);
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_busy_claim_fails_closed_and_keeps_record_available(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("busy claim fixture directory");
+    let source = directory.path().join("busy-claim.bin");
+    std::fs::write(&source, b"0123456789").expect("write busy claim source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let id = uuid::Uuid::new_v4();
+    persist_recovery_fixture(&store, id, connection_id, &source, "/busy-claim.bin");
+    let held_claim = store.claim(id).expect("hold recovery claim");
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+    click_recovery_checkbox(&h, id, cx);
+    h.click(cx, "queue-selected-persisted-transfers");
+    h.click(cx, "review-next-persisted-transfer");
+
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        let panel = h.panel.read(cx);
+        panel.recovery_claim_requests.is_empty()
+            && panel.recovery_review_queue.is_empty()
+            && panel.recovery_review_active.is_none()
+            && panel.pending.is_none()
+    })
+    .await;
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(panel.recovery_claim.is_none());
+        assert!(panel.status.render(cx).contains("无法占用"));
+    });
+    drop(held_claim);
+    let claim = store.claim(id).expect("record remains claimable");
+    drop(claim);
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_record_disappearance_clears_waiting_queue(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("disappearing record fixture directory");
+    let source = directory.path().join("disappearing.bin");
+    std::fs::write(&source, b"0123456789").expect("write disappearing source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let first = uuid::Uuid::new_v4();
+    let second = uuid::Uuid::new_v4();
+    persist_recovery_fixture(
+        &store,
+        first,
+        connection_id,
+        &source,
+        "/disappearing-first.bin",
+    );
+    persist_recovery_fixture(
+        &store,
+        second,
+        connection_id,
+        &source,
+        "/disappearing-second.bin",
+    );
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+    for id in [first, second] {
+        click_recovery_checkbox(&h, id, cx);
+    }
+    h.click(cx, "queue-selected-persisted-transfers");
+    let (session, load_generation, mutation_generation, records) =
+        h.panel.read_with(cx, |panel, _| {
+            (
+                panel.session_token,
+                panel.recovery_load_generation,
+                panel.recovery_mutation_generation,
+                panel
+                    .recovery_records
+                    .iter()
+                    .filter(|record| record.id == first)
+                    .cloned()
+                    .collect::<Vec<_>>(),
+            )
+        });
+    store
+        .remove(second)
+        .expect("remove queued record externally");
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.apply_recovery_load(
+                session,
+                load_generation,
+                mutation_generation,
+                Ok(records),
+                cx,
+            );
+            assert!(panel.recovery_review_queue.is_empty());
+            assert!(panel.recovery_review_session.is_none());
+            assert!(panel.pending.is_none());
+            let _ = window;
+        });
+    })
+    .checked("clear queue when a queued record disappears");
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_discard_confirms_once_and_retains_busy_record(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("batch discard fixture directory");
+    let source = directory.path().join("batch-discard.bin");
+    std::fs::write(&source, b"0123456789").expect("write batch discard source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let ids = [
+        uuid::Uuid::new_v4(),
+        uuid::Uuid::new_v4(),
+        uuid::Uuid::new_v4(),
+    ];
+    for (id, name) in ids.iter().zip([
+        "/discard-first.bin",
+        "/discard-busy.bin",
+        "/discard-last.bin",
+    ]) {
+        persist_recovery_fixture(&store, *id, connection_id, &source, name);
+    }
+    let held_claim = store.claim(ids[1]).expect("hold busy batch discard claim");
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+    for id in ids {
+        click_recovery_checkbox(&h, id, cx);
+    }
+    h.click(cx, "discard-selected-persisted-transfers");
+    h.panel.read_with(cx, |panel, _| {
+        assert!(matches!(
+            &panel.pending,
+            Some((_, Operation::DiscardPersistedRecoveryBatch(batch)))
+                if batch.iter().map(|candidate| candidate.id).eq(ids)
+        ));
+    });
+    assert_eq!(
+        store
+            .load()
+            .expect("load before explicit discard confirmation")
+            .len(),
+        3
+    );
+
+    h.click(cx, "confirm-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        let panel = h.panel.read(cx);
+        !panel.recovery_loading
+            && panel.recovery_writes.is_empty()
+            && panel.recovery_records.len() == 1
+            && panel.recovery_records[0].id == ids[1]
+            && store
+                .load()
+                .is_ok_and(|records| records.len() == 1 && records[0].id == ids[1])
+    })
+    .await;
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(panel.status.render(cx).contains("保留"));
+        assert_eq!(panel.recovery_selection.len(), 1);
+    });
+    drop(held_claim);
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_discard_retains_record_changed_after_confirmation(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("stale discard fixture directory");
+    let source = directory.path().join("stale-discard.bin");
+    std::fs::write(&source, b"0123456789").expect("write stale discard source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let id = uuid::Uuid::new_v4();
+    persist_recovery_fixture(&store, id, connection_id, &source, "/stale-discard.bin");
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+    click_recovery_checkbox(&h, id, cx);
+    h.click(cx, "discard-selected-persisted-transfers");
+    h.panel.read_with(cx, |panel, _| {
+        assert!(matches!(
+            &panel.pending,
+            Some((_, Operation::DiscardPersistedRecoveryBatch(candidates)))
+                if candidates.len() == 1 && candidates[0].id == id
+        ));
+    });
+
+    let replacement = TransferRecoveryRecord::new_with_connection_id(
+        id,
+        Some(connection_id),
+        TransferRecoveryDirection::Upload,
+        &source,
+        "/replacement-after-confirmation.bin",
+        false,
+        TransferRecoveryState::OutcomeUnknown,
+        7,
+        Some(10),
+        7,
+        100,
+        101,
+    )
+    .expect("valid replacement recovery record");
+    store.upsert(replacement).expect("replace recovery record");
+
+    h.click(cx, "confirm-file-operation");
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        let panel = h.panel.read(cx);
+        !panel.recovery_loading
+            && panel.recovery_writes.is_empty()
+            && panel.recovery_records.len() == 1
+            && panel.recovery_records[0].id == id
+            && panel.recovery_records[0].remote_path == "/replacement-after-confirmation.bin"
+            && store.load().is_ok_and(|records| {
+                records.len() == 1
+                    && records[0].remote_path == "/replacement-after-confirmation.bin"
+            })
+    })
+    .await;
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(panel.status.render(cx).contains("保留"));
+        assert_eq!(panel.recovery_selection.len(), 1);
+    });
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_discard_unknown_worker_result_reloads_actual_store(
+    cx: &mut TestAppContext,
+) {
+    let directory = tempfile::TempDir::new().expect("unknown discard fixture directory");
+    let source = directory.path().join("unknown-discard.bin");
+    std::fs::write(&source, b"0123456789").expect("write unknown discard source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let ids = [uuid::Uuid::new_v4(), uuid::Uuid::new_v4()];
+    for (id, name) in ids.iter().zip([
+        "/removed-before-worker-error.bin",
+        "/retained-after-worker-error.bin",
+    ]) {
+        persist_recovery_fixture(&store, *id, connection_id, &source, name);
+    }
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+
+    // A successful durable removal followed by a lost overall worker result
+    // must be reconciled from storage, never guessed or automatically retried.
+    store
+        .remove(ids[0])
+        .expect("simulate a completed partial discard");
+    cx.update_window(h.window, |_, window, cx| {
+        h.panel.update(cx, |panel, cx| {
+            panel.recovery_writes.extend(ids);
+            panel.apply_batch_discard_result(
+                ids.to_vec(),
+                panel.session_token,
+                Err("worker result unknown after a partial write".to_owned()),
+                window,
+                cx,
+            );
+            assert!(panel.recovery_loading);
+        });
+    })
+    .checked("inject unknown worker result into the production GPUI result path");
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        let panel = h.panel.read(cx);
+        !panel.recovery_loading
+            && panel.recovery_records.len() == 1
+            && panel.recovery_records[0].id == ids[1]
+    })
+    .await;
+    h.panel.read_with(cx, |panel, cx| {
+        assert!(panel.recovery_writes.is_empty());
+        assert!(panel.recovery_selection.contains(&ids[1]));
+        assert!(!panel.recovery_selection.contains(&ids[0]));
+        assert!(panel.status.render(cx).contains("未确认删除"));
+        assert!(panel.transfer_jobs.is_empty());
+    });
+    assert_eq!(
+        store.load().expect("no retry of the retained record").len(),
+        1
+    );
 }
 
 #[gpui_kit::test]

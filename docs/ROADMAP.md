@@ -7,6 +7,24 @@
 功能集中集成、全量验证、修复及非作者复核，开发过程中保留编译与关键专项。正式
 功能提交前完成本批门禁和评审，减少重复全仓运行和文档专属评审循环。
 
+## 2026-11-15 恢复记录批量整理：作者门禁通过
+
+开发范围为恢复记录复选、多选数量、有序待审核队列、逐条独立审核和
+显式批量丢弃。当前 session、claim 和记录快照继续逐条核验；取消、导航、
+会话替换和旧回调撤销待审核状态。批量丢弃只删除本地日志，逐项错误保留
+并报告，未知结果通过存储 reload 校正。
+
+本批状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。
+集中完整门禁退出 `0`，普通 Rust `2531/0/23 ignored`、rustdoc `14/0`、
+Python `131 run / 1 skipped`，fmt、整仓严格 Clippy、依赖策略和三组 controller
+全部通过。隔离本机 OpenSSH `11/11`；macOS 正常程序已完成可见窗口启动短验。
+Podman 容器联调与在线最新版本检查受网络阻断，原生恢复控件、跨平台及发行
+边界继续开放。历史汇总中的 rustdoc 重复分类已在本批记录校正。
+设计见 [ADR 0131](adr/0131-persisted-transfer-recovery-batch-review.md)，
+命令、真实结果与未验证边界统一收录到
+[集中验证记录](testing/records/2026-11-15-transfer-recovery-batch-integration.md)。
+保持本地提交，不推送。
+
 ## 2026-11-15 恢复列表 mutation 刷新与最终复核
 
 源码实现提交为

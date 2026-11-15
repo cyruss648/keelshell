@@ -517,6 +517,7 @@ async fn operate_inner(
                 batch::prepare(&sftp, request, &stop).await?,
             ))),
             Operation::TransferBatch(_) => Err(FileFailure::WorkerStopped),
+            Operation::DiscardPersistedRecoveryBatch(_) => Err(FileFailure::WorkerStopped),
             Operation::TransferFile(plan) => {
                 let direction = plan.direction();
                 let queue = sftp.clone().transfer_queue();

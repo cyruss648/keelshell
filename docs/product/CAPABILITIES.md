@@ -1,5 +1,32 @@
 # Capability ledger
 
+## 2026-11-15: ordered persisted recovery review inbox
+
+The current integration batch adds bounded multi-selection, a visible selection
+count, a review queue in the current list order, and explicit batch discard.
+Each next recovery independently claims and revalidates its persisted record,
+then uses the existing current-host/connection binding and
+`Inspect → Review → Confirm` flow. Queue selection alone never connects,
+inspects the next target, or authorizes a transfer.
+
+Batch discard requires an explicit review of the selected record snapshots.
+The background worker claims and checks each snapshot before removing local
+metadata; Busy, changed records and errors retain unprocessed items, and unknown
+results reload the actual store. Cancellation and stale callbacks revoke pending
+review state while confirmed transfers retain their original ownership.
+The controls share the Frost, Graphite and Lavender registry and semantic tokens,
+with bilingual labels and accessible compact layouts.
+
+The integrated author gate passed 2531 ordinary Rust tests, 14 doctests and
+Python 131 run / 1 skipped; the independent non-author review is pending.
+An isolated real localhost OpenSSH server passed 11 transport checks, and the
+normal macOS executable created a visible window in an isolated launch smoke.
+Container interoperability and live latest-version checks were network-blocked;
+native recovery interactions, other desktop platforms and release acceptance
+remain open.
+See [ADR 0131](../adr/0131-persisted-transfer-recovery-batch-review.md) and the
+[integration record](../testing/records/2026-11-15-transfer-recovery-batch-integration.md).
+
 ## 2026-11-14: persisted transfer recovery journal
 
 File and directory transfers now keep a separate, bounded local recovery journal

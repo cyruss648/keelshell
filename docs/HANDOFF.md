@@ -5,6 +5,34 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-15 当前批次：恢复记录批量整理
+
+本批新增恢复记录多选、按当前列表顺序建立待审核队列、逐条进入既有独立
+审核，以及需要明确确认的批量丢弃。队列没有连接或执行权限；每条审核仍
+取得独占 claim，重新确认当前 SSH 主机/保存连接，并完成
+`Inspect → Review → Confirm`。批量丢弃在 claim 内核对确认过的记录快照，
+记录变化、Busy 和失败保留未处理项，未知结果重新读取持久存储。
+
+采用阶段集中验证：实现 agent 只做受影响包编译和风险专项，主线程统一
+集成、全仓门禁、真实协议联调与新的独立复核。当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。完整门禁退出 `0`：
+普通 Rust `2531/0/23 ignored`、rustdoc `14/0`、Python `131 run / 1 skipped`；
+fmt、整仓严格 Clippy、依赖策略和三组 AI controller 通过。新 app 清单为
+`1184` 项，8 个新增回归均实际执行通过。独立本机 OpenSSH `11/11`，
+macOS 正常程序创建一个可见窗口并完成隔离启动短验。
+
+Podman 引擎已成功读回，但 Docker Hub 拉取超时，容器联调未开始；自有资源
+已核验不存在，VM 已停止。官方依赖在线检查因请求无响应/HTTPS `403`
+未能完成；本轮不代签最新版本。原生恢复控件交互、Windows/Linux、IME、
+完整辅助技术及发行安装仍开放。
+
+本轮按原始日志校正历史计数：依赖刷新基线实际为普通 `2523` 加 rustdoc `14`，
+合计 `2537`；此前“普通 2537 / session 448”包含重复分类，session 普通应为
+`434`。下方保留历史记录，本批以集中验证记录中的逐 suite 汇总为准。设计见
+[ADR 0131](adr/0131-persisted-transfer-recovery-batch-review.md)，实时证据和
+边界见[集中验证记录](testing/records/2026-11-15-transfer-recovery-batch-integration.md)。
+公司内网不可用，当前仍只做本地 commit，不 push。
+
 ## 2026-11-15 当前交接校正
 
 当前维护 checkout 为
