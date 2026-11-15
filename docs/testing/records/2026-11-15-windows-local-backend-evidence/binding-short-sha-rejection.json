@@ -1,0 +1,8 @@
+{
+  "command_commit_argument": "51f7cb7",
+  "exit": 1,
+  "reason": "Verifier requires an exact 40-character commit; rejected before reading Git blobs or creating output.",
+  "corrected_commit": "51f7cb7cd6eca78c930e25bbd2644de839ce3d84",
+  "successful_receipt": "commit-input-binding.json",
+  "engineering_inputs_unchanged": true
+}

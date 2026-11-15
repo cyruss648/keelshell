@@ -2,6 +2,9 @@
 
 当前状态：`AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / WINDOWS_NATIVE_NOT_RUN`。
 基线：`a092dd5712c0a92ee4af18970fb0500fb230b760`。
+本地源码提交：`51f7cb7cd6eca78c930e25bbd2644de839ce3d84`。
+[提交绑定](2026-11-15-windows-local-backend-evidence/commit-input-binding.json)
+确认 602 项工程输入和 1301 份原件与 Git blob、最终冻结及当前文件一致。
 本批只本地提交，不 push；完整产品、FILE-05/M4 和发行保持开放。
 
 ## 交付与最终输入
@@ -104,7 +107,7 @@ Linux fixture 的缓存镜像版本是运行事实，不是最新工具链声明
 持久原件从[证据入口](2026-11-15-windows-local-backend-evidence/README.md)读取。
 1301 份原件已逐字/无损压缩核验，
 [index/blob 读回](2026-11-15-windows-local-backend-evidence/index-input-binding.json)
-确认同一 602 项工程输入与全部原件一致；提交后继续绑定精确功能提交。
+确认同一 602 项工程输入与全部原件一致；提交后精确功能提交绑定也已通过。
 纯文档/绑定变化不触发不变工程的重复门禁。
 三个 reviewer 已关闭，六个自有容器重新确认 absent；SDK、registry payload、
 稳定测试副本及批次目录等 `2,609,954,825` 字节临时内容已回收。

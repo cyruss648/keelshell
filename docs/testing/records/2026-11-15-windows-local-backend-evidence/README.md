@@ -38,7 +38,11 @@ Windows PE 字节扫描不是 native `--list` 或执行，Windows 原生运行�
 
 提交前已从 Git index/blob 读回全部 **602 项工程输入**与 **1301 份原件**，
 见 [index-input-binding.json](index-input-binding.json)；
-提交后使用同一清单核验精确功能提交及当前文件。绑定回执与清理回执放在本目录
+提交后已使用同一清单核验精确功能提交
+`51f7cb7cd6eca78c930e25bbd2644de839ce3d84` 及当前文件，零 mismatch，
+见 [commit-input-binding.json](commit-input-binding.json)。
+首次以缩写提交参数调用被校验器拒绝，随后用完整 SHA 成功，拒绝原件另存。
+绑定回执与清理回执放在本目录
 根部，不覆盖 `raw/` 或原始报告。可使用 [verify_binding.py](verify_binding.py)
 复核 index 或一个精确 commit，输出路径必须尚不存在。
 

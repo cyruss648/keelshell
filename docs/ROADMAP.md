@@ -10,6 +10,8 @@
 ## 2026-11-15 Windows 文件后端与 Linux 专项
 
 Windows 平台安全接口、Zmodem、归档和 UI capability 已接入。
+本地源码 `51f7cb7cd6eca78c930e25bbd2644de839ce3d84` 的提交绑定已核验
+全部 602 项工程输入和 1301 份原件，Git blob 与当前文件零 mismatch。
 最终 `588 + 14` 输入的全仓门禁 `exit 0 / 632.963s`：
 Rust `2958/0/35 ignored`、rustdoc `14/0`、Python `187 run / 1 skipped`，
 格式、严格 Clippy、x.y 策略和三组 controller 通过。23 项新增默认 Rust

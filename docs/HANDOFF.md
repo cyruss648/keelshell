@@ -4,9 +4,13 @@
 
 基线为本地 `a092dd5712c0a92ee4af18970fb0500fb230b760`，当前
 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / WINDOWS_NATIVE_NOT_RUN`。
+本地源码提交为 `51f7cb7cd6eca78c930e25bbd2644de839ce3d84`；
+[提交绑定](testing/records/2026-11-15-windows-local-backend-evidence/commit-input-binding.json)
+逐项核对该提交 Git blob、最终冻结与当前文件：602 项工程输入和 1301 份原件
+零 mismatch。后续仅补文档回执，不重跑输入未变的 Rust 门禁。
 仍只本地提交，不 push。唯一父 target 为
 `work/recovery-batch-integration-20261115/target`，源码归属没有切换。
-正式提交、原件导出及清理收口从
+实际运行、原件和清理从
 [本批记录](testing/records/2026-11-15-windows-local-backend.md)和
 [证据入口](testing/records/2026-11-15-windows-local-backend-evidence/README.md)接续。
 
