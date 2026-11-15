@@ -4,6 +4,9 @@
 
 本批基线为本地 `b66ec7e564e97c3cc8261b447288377ac1ffccc2`，当前状态为
 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
+本地源码提交为 `590cdfb654c41d615f01bc135375ffc02d525461`；
+[提交绑定](testing/records/2026-11-15-bounded-zmodem-farewell-evidence/commit-input-binding.json)
+从 Git blob 和当前文件两侧核对 `583` 个工程输入及 `708` 份原件，零 mismatch。
 最终 r5 冻结 `571 + 12`，SHA-256
 `d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e`。
 完整 `full-gate-r5` 已实际 wait/reap，`exit 0 / 646.751s`：

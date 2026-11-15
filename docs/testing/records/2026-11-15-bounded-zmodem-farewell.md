@@ -247,3 +247,18 @@ Rust 文件后端、旧 Python runtime、真实三平台桌面、IME/辅助技�
 owned 容器再次确认不存在；自有 SSH/peer 进程及临时密钥有原始清理回执。
 未新建用户 chat 或实现 worktree，不删除其他任务资源；唯一有效 Cargo
 target 的目录身份在清理前后相同。入口及最终清理回执在持久证据目录内。
+
+## 本地提交与原件 Git 保存
+
+本地源码提交为 `590cdfb654c41d615f01bc135375ffc02d525461`，父提交为本批基线。
+[提交绑定](2026-11-15-bounded-zmodem-farewell-evidence/commit-input-binding.json)
+从精确提交 Git blob 和当前文件两侧各核对 `1291` 项：
+最终 `571 + 12` 工程输入及 `708` 份原件，零 mismatch。
+本地 commit 命令退出 `0`，未执行 push，也未查询远端 SHA。
+
+提交前的首次 staged diff check 在三份原始 stdout 的 EOF 空行报错，使用局部
+binary 属性保存原件，没有裁剪空白。随后 index 检查发现根目录 `*.log`
+忽略规则使原始 `.log` 尚未纳入；为本批证据目录增加局部 `!*.log` 规则后，
+全部 `708` 份原件逐项纳入且摘要匹配，staged diff check 通过。两次检查失败与
+修正保留为 `post-export-index-check-r1/r2.json`，不改写原始运行。
+后续提交只补文档、证据属性和提交回执，最终工程输入不变。

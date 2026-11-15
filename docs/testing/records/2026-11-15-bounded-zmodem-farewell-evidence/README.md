@@ -69,3 +69,10 @@ headless GPUI 均不代签三平台桌面、Linux 本地 Rust 文件后端或 Wi
 自有 SSH/peer 进程和临时密钥的原始清理回执继续保留。未创建新的用户 chat 或
 实现 worktree；保留唯一有效 Cargo target、当前工作树和其他任务资源。
 只本地提交，不 push。后续提交绑定属于文档回执，不改变已验证工程输入。
+
+[提交绑定](commit-input-binding.json)将本地源码
+`590cdfb654c41d615f01bc135375ffc02d525461` 与 `583` 个工程输入及 `708` 份原件
+从 Git blob 和当前文件两侧逐项匹配，零 mismatch。本地提交命令及其原始输出
+分别保存在 `local-feature-commit.json` 和 `local-feature-commit.stdout.log.gz`。
+`post-export-index-check-r1/r2.json` 保留 EOF 空行属性与全局日志忽略规则的
+原始检查失败；最终 `precommit-input-binding-r5.json` 核实全部原件已经纳入 Git。

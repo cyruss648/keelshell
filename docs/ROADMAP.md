@@ -32,6 +32,8 @@ target 和其他任务。仅本地提交，不 push，在线依赖复查超时�
 [ADR 0137](adr/0137-bounded-zmodem-farewell.md)、
 [本批记录](testing/records/2026-11-15-bounded-zmodem-farewell.md)与
 [持久证据](testing/records/2026-11-15-bounded-zmodem-farewell-evidence/README.md)。
+本地源码为 `590cdfb654c41d615f01bc135375ffc02d525461`，最终 `583` 个工程
+输入和 `708` 份原件已逐项与提交 Git blob 及当前文件匹配；后续仅补文档回执。
 
 ## 2026-11-15 PTY Zmodem 候选：工程门禁与源码复核通过，直接 PTY 验收开放
 

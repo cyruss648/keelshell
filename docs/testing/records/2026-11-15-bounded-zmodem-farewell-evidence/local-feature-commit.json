@@ -1,0 +1,17 @@
+{
+  "recorded_utc": "2026-11-15T11:36:43.802233+00:00",
+  "command": [
+    "git",
+    "commit",
+    "-m",
+    "feat(zmodem): bound farewell waits and preserve terminal recovery"
+  ],
+  "exit": 0,
+  "seconds": 0.069,
+  "stdout_artifact": "local-feature-commit.stdout.log.gz",
+  "stdout_sha256": "7574799a692b0537c4d00962611c6f1c1f543e369d39a6d7cf028672f9cc3a8b",
+  "stdout_artifact_sha256": "e9d06c29fedf8592cb2a9e904acb311858dc989df2cd03cfabcdeb34bbdf4876",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "push_performed": false,
+  "source_commit": "590cdfb654c41d615f01bc135375ffc02d525461"
+}
