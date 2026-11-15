@@ -1,0 +1,8 @@
+{
+  "attempted_tool": "mcp__codex_app.send_message_to_thread",
+  "parent_thread_id": "01a1a5b2-40b8-7cb1-8de1-07ec8f4efa6c",
+  "outcome": "rejected native ancestor delivery; native collaboration sending tool unavailable in exposed toolset",
+  "notice_1": "notice-P2-001.md",
+  "notice_2": "notice-P2-002.md",
+  "fallback": "immediate commentary plus final native-agent result; not claimed as delivered tool message"
+}

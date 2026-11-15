@@ -1,0 +1,16 @@
+
+running 11 tests
+test ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails ... ok
+test ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup ... ok
+test ssh_bridge::tests::quiet_shell_becomes_ready_before_data_and_cancels_cleanly ... ok
+test ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff ... ok
+test ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write ... ok
+test ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer ... ok
+test ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer ... ok
+test ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer ... ok
+test ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail ... ok
+test ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion ... ok
+test ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1223 filtered out; finished in 12.57s
+

@@ -1,0 +1,37 @@
+{
+  "recorded_utc": "2026-11-15T10:35:52.434209+00:00",
+  "status": "R2_SUPERSEDED_PENDING_R3_NO_FINAL_SIGNOFF",
+  "reason": "User reports CORE-R2-01: peer Cancel/5CAN or Command failure can discard retained farewell terminal tail; parent stopped and reaped full-gate-r2 and is fixing core/session cleanup",
+  "r2_freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "r2_inputs": 571,
+  "r2_scripts": 12,
+  "observed_current_tree_mismatches": [],
+  "parent_gate_r2_reported_exit": -15,
+  "parent_gate_r2_reported_elapsed_seconds_approx": 218,
+  "independent_test_receipts_preserved": [
+    "receipt-ssh-write-barrier-r2.json",
+    "receipt-session-zmodem-r3.json",
+    "receipt-app-zmodem-r3.json",
+    "receipt-app-ssh-bridge-r3.json"
+  ],
+  "independent_results": {
+    "transport_barrier": {
+      "passed": 4,
+      "failed": 0
+    },
+    "session_zmodem": {
+      "passed": 23,
+      "failed": 0
+    },
+    "app_zmodem": {
+      "passed": 26,
+      "failed": 0
+    },
+    "app_ssh_bridge": {
+      "passed": 11,
+      "failed": 0,
+      "overlap_with_zmodem": 8
+    }
+  },
+  "independently_recompiled": false
+}

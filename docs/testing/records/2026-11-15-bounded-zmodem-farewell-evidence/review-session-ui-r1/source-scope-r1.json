@@ -1,0 +1,60 @@
+{
+  "base_sha": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "method": "libgit2 read-only object lookup; no Git commands or repository mutation",
+  "files": [
+    {
+      "path": "crates/keelshell-session/src/zmodem.rs",
+      "baseline_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+      "current_sha256": "0dde97987c164a87e866dd6a09cca0e07306eec26fb214b8c4d5584ddba62441",
+      "added": 123,
+      "removed": 2
+    },
+    {
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "baseline_sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179",
+      "current_sha256": "2c1a2295b64f06a2ef76479c23c1d149c723cde3bde9f8e1238ada51e92a3f36",
+      "added": 196,
+      "removed": 0
+    },
+    {
+      "path": "crates/keelshell-session/tests/zmodem_openssh.rs",
+      "baseline_sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1",
+      "current_sha256": "892e8268e02cc85ab21f3f00c517efed554def6adf26e2874fedb2284638c880",
+      "added": 144,
+      "removed": 22
+    },
+    {
+      "path": "crates/keelshell-app/src/ssh_bridge_zmodem.rs",
+      "baseline_sha256": "e0a33146f9f8aebe73b4fe6f7c997b0d73eec6cdea5320dff5afadc690802ca1",
+      "current_sha256": "91fb8170787298112b4f3c98a30394139a03727e11bfccc383346686918996cb",
+      "added": 17,
+      "removed": 0
+    },
+    {
+      "path": "crates/keelshell-app/src/ssh_bridge_tests.rs",
+      "baseline_sha256": "85a6ad77bd46823bdfe50045a6e553dcc2cb12e902b6980b58206f8ec18fdbe9",
+      "current_sha256": "2b337a15dd566a1977e90cd94b4a54ef31c8ad3fbfc26fe22aa148f45b283ed9",
+      "added": 75,
+      "removed": 0
+    },
+    {
+      "path": "crates/keelshell-app/src/terminal_zmodem.rs",
+      "baseline_sha256": "6766b9c6c6656b2bafe87ac62b4f55879ab53f57db99b56d36f97ceb5e635e8d",
+      "current_sha256": "c5e16836c117752d16a5e157c4e355d79d581b326367c3aeb6f4068facc77cc5",
+      "added": 6,
+      "removed": 0
+    },
+    {
+      "path": "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "baseline_sha256": "8c271a421d7fab7871728257a817efcb6cdbb5065e028fbfe8ad465d0f3abc23",
+      "current_sha256": "4d98fb161d6d67a6227505532bd7c68f9b3484d4ee6ddf09ae72c5fb5fb39aff",
+      "added": 73,
+      "removed": 0
+    },
+    {
+      "path": "crates/keelshell-app/src/ssh_bridge.rs",
+      "unchanged": true,
+      "current_sha256": "967204fa4546bf2420240c86900539a09e505ddfc14341a0e3e3df11dd9da3b6"
+    }
+  ]
+}

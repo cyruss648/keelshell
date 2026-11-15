@@ -1,0 +1,55 @@
+{
+  "recorded_utc": "2026-11-15T10:58:09.323210+00:00",
+  "reuse": {
+    "session-r4": {
+      "binary_sha256": "01f3b882bf6d3d9e4be81f5567f0314a92c22702fd130a7d5269769e0f144007",
+      "metadata_sha256": "c1edf9249a294de7a1280bb4c43cde936edea8afdefef50d127f8448d89a331e",
+      "inventory_sha256": "c31c0f876b00ce6554ada69d57e63f370c7f9dbd65f41bbbb6a3c612487379e8",
+      "full_inventory_count": 25,
+      "independent_r3_inventory_bytes_still_equal": true,
+      "prior_freeze": "frozen-inputs-r3.json",
+      "prior_execution_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r3/receipt-session-zmodem-r4.json",
+      "prior_execution_receipt_sha256": "444f43e568a673dc51c10372fadb54a6dc01cba5347d96e30f8403a7b9e60370",
+      "prior_inventory_receipt_sha256": "9ffc930a0e6c399246a8cc802170b9e0ad99688d6fe6c835b56ebeb48274651f",
+      "prior_counts": {
+        "result": "ok",
+        "passed": 25,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "rerun_on_r4": false,
+      "reason": "all 231 core/session/root inputs match r3 and r4; no corresponding source change",
+      "independently_recompiled": false
+    },
+    "barrier-r3": {
+      "binary_sha256": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+      "metadata_sha256": "a6ac9a3c654b9553579f0141ef0313ba1cf0ff0e758f54143c4a3b9a39566ab4",
+      "inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+      "full_inventory_count": 189,
+      "independent_r3_inventory_bytes_still_equal": true,
+      "prior_freeze": "frozen-inputs-r3.json",
+      "prior_execution_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r3/receipt-ssh-write-barrier-r3.json",
+      "prior_execution_receipt_sha256": "ce86bd8d69870992530f6c0fea893f2724624d5c186127b1252dc5c91e7c1396",
+      "prior_inventory_receipt_sha256": "8d1015b12a109286ff4f9e94ca46cca3d575f452a591dc4823679f3be0745524",
+      "prior_counts": {
+        "result": "ok",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 185
+      },
+      "rerun_on_r4": false,
+      "reason": "all 231 core/session/root inputs match r3 and r4; no corresponding source change",
+      "independently_recompiled": false
+    }
+  },
+  "no_new_test_execution": true,
+  "core_execution": "Separate core reviewer/parent owns 102-case core result; not executed here",
+  "strict_peer_file_unchanged_r2_r3_r4": true,
+  "strict_peer_file_sha256": "2fad393e12f41197dfff10dd43e6c4ef643a7407bb60f6801c17198df55639cf",
+  "strict_seven_function_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r2/receipt-r2-source-evidence.json",
+  "strict_peer_rerun": false
+}

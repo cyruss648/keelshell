@@ -1,0 +1,33 @@
+{
+  "recorded_utc": "2026-11-15T10:54:08.972657+00:00",
+  "r4_freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "source_equivalence_count": 231,
+  "core_unchanged_input_count": 106,
+  "parent_equivalence_sha256": "b7b29829a020d109358d7557d04cc289cd97bbb9b5d3bffc3476b69615047425",
+  "parent_equivalence_independently_verified": true,
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/core-r4",
+  "binary_sha256": "8c51f02d4bf32d05d5757d310fe596c583cf7f986465ca958538098bff2cf75e",
+  "binary_inventory_sha256": "5f10332d584c90afc174aadc8747666becd94f11275281a6bfe5600c00f745b6",
+  "inventory_count": 102,
+  "retained_execution_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-core-r3/core-r4-independent-execution.json",
+  "retained_execution_receipt_sha256": "f1d7ec8eeb613306aee9b3b71c487933eb01c6a8b9a7257ba9a1a3193d2aaabb",
+  "retained_execution_log_hashes_verified": true,
+  "prior_independent_execution": {
+    "binary_built_by_parent": true,
+    "independently_recompiled": false,
+    "test_invocations": 1,
+    "passed": 102,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 0,
+    "exit": 0
+  },
+  "new_r4_test_executions": 0,
+  "new_r4_inventory_executions": 0,
+  "original_r2_94_tests_unchanged": true,
+  "original_head_65_tests_unchanged": true,
+  "closed_CORE_R2_01": true,
+  "closure_receipt_sha256": "8024f3b2d7fef3063d1d7aa132763612725da17e5fdb7ec08e6fe43bc9274262",
+  "r4_reuse_authorized_by_user": true
+}

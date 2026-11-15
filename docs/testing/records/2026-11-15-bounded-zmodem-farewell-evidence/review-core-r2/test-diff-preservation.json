@@ -1,0 +1,6 @@
+{
+  "path": "crates/keelshell-core/tests/zmodem.rs",
+  "removed_lines": [],
+  "removed_lines_count": 0,
+  "baseline_helpers_and_assertions_unchanged_by_additions_only": true
+}

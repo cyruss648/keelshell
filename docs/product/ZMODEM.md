@@ -1,9 +1,14 @@
 # 远端终端中的审核式 Zmodem
 
 状态：2026-11-15 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
-本批集中工程门禁与限定源码复核通过，直接 PTY 兼容仍为 HOLD/PARTIAL。
-完整门禁、独立非作者复核和真实协议结果以
-[本批测试记录](../testing/records/2026-11-15-reviewed-pty-zmodem.md)为准。
+接收端增加有界最终握手等待：确认最终回复已写出之后等待三秒，缺少 `OO` 时
+显示独立的握手未确认警告，保留已验证保存回执和普通终端尾部。精确交还输入后
+可在同一 shell 继续新输入；严格 `Finished` 仍只认实际 `OO`。
+本批集中工程门禁与三份限定非作者复核通过，严格直接 PTY 兼容仍为
+`HOLD/PARTIAL`。完整门禁、真实协议结果及范围见
+[本批测试记录](../testing/records/2026-11-15-bounded-zmodem-farewell.md)与
+[ADR 0137](../adr/0137-bounded-zmodem-farewell.md)；
+[前批记录](../testing/records/2026-11-15-reviewed-pty-zmodem.md)保留初始实现和失败。
 本页不是三平台原生验收或 FILE-05 完成声明。
 
 ## 使用流程
@@ -37,7 +42,13 @@
 已核对的未知结果，不清理文件、不释放后台仍在工作的写入，也不解除后端隔离。
 不会自动重试不确定的写入。
 
-目前本地文件观察和安全发布后端支持 macOS/Linux；Windows 后端显式返回
+“最终握手未确认”与失败、取消及严格完成分别报告。它只适用于已收到完整有效
+ZFIN、所有当前文件审核和保存均已处理、精确回复写出已确认的接收收尾；
+有序的成功退出可提前结束等待，失败或未知退出不能转成此警告。
+它不增加保存回执，不清除未知隔离，也不重放占用期间被拒绝的旧输入。
+
+目前本地文件观察和安全发布后端实现面向 macOS/Linux；本批没有验证 Linux
+本地 Rust 文件后端。Windows 后端显式返回
 `Unsupported`，不能把协议编译、错误分支或 headless 检查表示为 Windows
 文件传输已完成。Windows 安全后端与三平台桌面、IME、辅助技术及发行验收
 继续列入路线图。
@@ -45,8 +56,10 @@
 本批实际观察到 Debian `sz 0.12.21rc` 和 macOS lrzsz `0.13.1` 直接连接 PTY 时，
 部分下载在完整保存之后、收到 ZFIN 之后退出 `0`，但应用没有收到最终 `OO`。此时单文件
 “已验证保存”与整批协议成功分别报告；不因为退出码为 `0` 就补签握手完成。
-同一独立 peer 经临时管道转发到真实 SSH PTY 的对照检查通过，但不替代
-直接 PTY 兼容验收。该兼容缺口继续开放，具体失败及对照见本批测试记录。
+本批原版 peer 在 macOS 的八项联调通过；Linux r3 的缺握手警告场景实测可在
+同一 shell 继续输入，同时两项旧严格握手断言失败，原件保持。先前同一独立
+peer 经临时管道转发到真实 SSH PTY 的对照通过，不能替代直接 PTY 兼容验收。
+该兼容缺口继续开放，具体失败及对照见两批测试记录。
 
 ## 协议与预算
 
@@ -62,4 +75,5 @@ core 只负责纯协议；session 负责文件、连接及审核；app 负责唯
 和原生审核。Frost、Graphite、Lavender 共用注册表、Palette 与组件 token，
 完整审核正文滚动，确认和取消位于固定动作区。
 
-设计见 [ADR 0136](../adr/0136-reviewed-pty-zmodem.md)。
+基础协议设计见 [ADR 0136](../adr/0136-reviewed-pty-zmodem.md)，
+有界收尾与尾部恢复见 [ADR 0137](../adr/0137-bounded-zmodem-farewell.md)。

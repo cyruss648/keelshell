@@ -1,0 +1,973 @@
+{
+  "scope": "Only rebuildable or temporary artifacts; all original receipts preserved.",
+  "count": 161,
+  "bytes": 616301880,
+  "files": [
+    {
+      "path": "build-original/Makefile",
+      "bytes": 33916,
+      "sha256": "670eac7390fc5f2badea61d8d500c691ab88d119550724a4315017fcc1d99c38",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/Specfile",
+      "bytes": 2441,
+      "sha256": "cee53cd2899f6c96de100176aaf80b4c720964c25ee004824a90bacd9c4f8b14",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/config.h",
+      "bytes": 6381,
+      "sha256": "d9ee9e1d58a1459d02fad5f5780198d5db2bdff52beb5ca7e6a5b164eadf55dd",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/config.log",
+      "bytes": 56741,
+      "sha256": "7686c9238e3c8ce626fd76515e168a9f40558bfb5361b98edbd517dea0f2cd31",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/config.status",
+      "bytes": 43060,
+      "sha256": "00293096bec6a080412ac035cf6a66afab74e7c453923d53e25663a1bf6e7a5f",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/man/Makefile",
+      "bytes": 18617,
+      "sha256": "2cd588aec9c99f648e67d3e9d0dfec16d5cb61244045b2838b47e4d44838c8d6",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/po/Makefile",
+      "bytes": 27197,
+      "sha256": "134f6ccb724c7c80238b1116e7a0ad1dac01c9914419b3f31bba9af5d514ab56",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/po/Makefile.in",
+      "bytes": 21051,
+      "sha256": "006865ea1e3d56aa93619d67ea692712a6e9f96d400fa6958b28fa28cc1e6acc",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/po/POTFILES",
+      "bytes": 852,
+      "sha256": "94d8bb25720c55aab56a24f30719467f2e1ba0669e1d55a8a8229da895489098",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/canit.Po",
+      "bytes": 39505,
+      "sha256": "770d4abc36b54eaae411e5f494b5eb714a63e545b80f3e64eca2d20e063735eb",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/crctab.Po",
+      "bytes": 659,
+      "sha256": "9a3fc26ac19378cfa4577c9aafdf3a89657786537d559dd88d61414523931084",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/linesimulator.Po",
+      "bytes": 29198,
+      "sha256": "a6e25fae43cc545e422eb0a8fbe37153cdc6e970d1c0dbeeac47ad55a4e334a7",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/lrz.Po",
+      "bytes": 48278,
+      "sha256": "66c3461a2246b3185827200606f6b2e27b89a083f90b819831c8321344c95488",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/lsyslog.Po",
+      "bytes": 46320,
+      "sha256": "9c212858d4ebcdeddec3435eed2a8fabe5be3bf8cab897b408c9743600095774",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/lsz.Po",
+      "bytes": 48043,
+      "sha256": "b24e7d743c29699a6f430d327016cfda9e87d803a9236d3cc7fc979b2df8fb93",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/protname.Po",
+      "bytes": 39033,
+      "sha256": "f2587d476f0655229c603ae61f151d26ff5c29bd5f02891eb4640d12e52e6383",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/rbsb.Po",
+      "bytes": 39503,
+      "sha256": "eceaf914fd03f5ce1ebd61286db0513aadf35047f291573b47e9e21df2bc60b8",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/stats.Po",
+      "bytes": 46320,
+      "sha256": "c123d9a8f451196ebf9eedf5956453f492341d0a9cd5e3da031765122f9b6550",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/timestamp.Po",
+      "bytes": 11620,
+      "sha256": "37401e67eca1aeacd234877367c11eff1763ba53c0ed9b6861b68e0acd81ddc6",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/timing.Po",
+      "bytes": 39308,
+      "sha256": "4153409386077efdb4636b958be267eb5da7ba739eb2ee300c1fc1c17ed18d1b",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/util.Po",
+      "bytes": 43505,
+      "sha256": "a5471dff718d49af6630e9314c6ed8d31fcc8595109c0de136d6c400ff22d662",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/zm.Po",
+      "bytes": 39021,
+      "sha256": "29872bfcafd1dc21a537e93510962de09bfc6fb04ab242135f23240b72b2ac3c",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/zmodemfuzz.Po",
+      "bytes": 31441,
+      "sha256": "6955aa034aca97495e8e2039aa6e4ebc15a4022c40ef491e01aca8d0c9fbafdd",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/zmodemsnif.Po",
+      "bytes": 28718,
+      "sha256": "906ddc08dfaabe1a50a86c29a6f16447abbba4d4dd787fb440db1a09d8ac1aa2",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/zperr.Po",
+      "bytes": 46320,
+      "sha256": "9daa8056dc6b717671dcba5ff31bf80a88f5851fa23ff5729ba56afd2c8855e9",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/.deps/zreadline.Po",
+      "bytes": 46328,
+      "sha256": "73106786e16677fb52256d24d32051ecf39fbfc9555da9548109edbe555bf126",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/Makefile",
+      "bytes": 29013,
+      "sha256": "e4dc3e8a6248d96c0e51b1402d0e87ca8d4e9ff4c285624717bec433301cc3d6",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/canit.o",
+      "bytes": 5208,
+      "sha256": "1c8f50f209492b29901da10c4ed5a9abec550562d9d0b2032dbb07619ff4e903",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/crctab.o",
+      "bytes": 5096,
+      "sha256": "4c01f49683e69da4fe4f12b04a672f0f6ec095453ea49e137416b54dee81140b",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/linesimulator",
+      "bytes": 35744,
+      "sha256": "0c58b32f461cecee256e1e9b194841283beebc24a3035ce29c6c53cf85e8cdfb",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/linesimulator.o",
+      "bytes": 39600,
+      "sha256": "3296175cbef978702238f3c97c7c2b4e2f5692509defa90a78a028f5a2545a9a",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/lrz",
+      "bytes": 121440,
+      "sha256": "e535acbd890eab25eac866b474c6c6db787b0243f9e69d64c1852d9766c16e88",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/lrz.o",
+      "bytes": 105616,
+      "sha256": "56eba5a8874ef65455a5f983d9b02cca2e7e0cd7677a8354b489721077976f5f",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/lsyslog.o",
+      "bytes": 6856,
+      "sha256": "8c609de58928b160c09be8df50bd95c7d8fb1314ed72852955fd0c2d0861e3eb",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/lsz",
+      "bytes": 122816,
+      "sha256": "09b84b984ea77fa8f6cbfc2a1198dde88f7185dea433150699aebff40b0dbb0c",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/lsz.o",
+      "bytes": 112712,
+      "sha256": "db741c64c9b8fbb6df6cda02853dd51b8bef6b6c5f1d0050d838931619d89bd6",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/protname.o",
+      "bytes": 3368,
+      "sha256": "9fad0caa1cfd96067ced267ea7d675879e7ed99038668671e1e036ae4e7e887b",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/rbsb.o",
+      "bytes": 14328,
+      "sha256": "d905f8676a9512c08306403bb73ea6d9233618888d7b1bdc7aaf243cf1b92795",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/stats.o",
+      "bytes": 24464,
+      "sha256": "59a6af5ddf885433082a07a1a4c945b8f79b435cda272ae2cb2bf0ffd0eaa0fb",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/timestamp",
+      "bytes": 33944,
+      "sha256": "72e4db0089e1f846e58de8925dc9793f31e1c1ed21f58801909302818ec7b173",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/timestamp.o",
+      "bytes": 4304,
+      "sha256": "d11de6606ec2b2fc37cf2d14602c5240aeb06b19737eacc7336ac3ea889d4c61",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/timing.o",
+      "bytes": 5920,
+      "sha256": "d50bdc96701dba5c888341818b61664943cda4df0e386296e62f94ff8c1527fd",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/util.o",
+      "bytes": 30176,
+      "sha256": "4bfd8a012016d3c1bdabf833ed9395d0ba5ae0408322bcbb4adb0a038b1f33e3",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/zm.o",
+      "bytes": 52776,
+      "sha256": "7408cbc7e3158ac4cf1251af4e21c6f5f0c769ba0d0a3db1bff0ca1d6acf06c1",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/zmodemfuzz",
+      "bytes": 74888,
+      "sha256": "305dca858350cb791dacdae113a4bf34d38212ee4136c11d483f2eeef32c08fe",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/zmodemfuzz.o",
+      "bytes": 136280,
+      "sha256": "eabaf47320b6b583d519caa7112236d3d6db0342cc11e1deff93354f5a553632",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/zmodemsnif",
+      "bytes": 36184,
+      "sha256": "ddaa90315962150e6e359af44a94e4352cedd5592083798392574d95cab807cc",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/zmodemsnif.o",
+      "bytes": 47424,
+      "sha256": "c62d64cac2c3c55c7fe64a015f55fcf89f68b2683579c4a6ee81e0410397bca8",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/zperr.o",
+      "bytes": 6960,
+      "sha256": "8d7325239d77251bb77462b3d9148f011a416f133c209b2f064a397e90893641",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/src/zreadline.o",
+      "bytes": 12288,
+      "sha256": "7f48e208c4640d3372817475f26417ce383f77ffd7205bd8ab236acb52e05dd5",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "build-original/stamp-h1",
+      "bytes": 23,
+      "sha256": "24fdde0aee1f49666fc7a5bd7f422dc0118e4db128bc1f606f7f047c9b245bb4",
+      "reason": "Rebuildable third-party compiler output; provenance retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/ABOUT-NLS",
+      "bytes": 67,
+      "sha256": "fbe8681a07eab3934d302edb4db8fbcea014b460232e3638e7f4cdb7da53e5aa",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/AUTHORS",
+      "bytes": 250,
+      "sha256": "5d7c37714d00beaa2ae1e9e6e5620c2ea87478de9ef506d87348f1fa1ec92ea3",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/COMPATABILITY",
+      "bytes": 1368,
+      "sha256": "5f44908d522acbf6a8813030605245e308cefe56a9c9f103b63f5c3178d8c8d2",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/COPYING",
+      "bytes": 18007,
+      "sha256": "dcc100d4161cc0b7177545ab6e47216f84857cda3843847c792a25289852dcaa",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/ChangeLog",
+      "bytes": 42041,
+      "sha256": "d51ecc2470664192d24e2cd86779c324f45768dbf7c27f2c8b2b0c5c8304b059",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/INSTALL",
+      "bytes": 10193,
+      "sha256": "5e7eff8c565244aee8164669de86fe83e0ed52e1771f97e76cfd003aad83867c",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/Makefile.am",
+      "bytes": 4668,
+      "sha256": "67aacf186a18ed785f91781e63939a026de6e6b5a39a5b966fe11cf8d5405b96",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/Makefile.in",
+      "bytes": 31464,
+      "sha256": "b8b8079b8293a43201f4c3e3d8190f55395efe7f74c7c7a8b95c4afb552595a4",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/NEWS",
+      "bytes": 29757,
+      "sha256": "f53d959b1c0b2ed6c26c93de59e6ed3a40b15efb9ab0e3fc7d685c9014e1195d",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/README",
+      "bytes": 703,
+      "sha256": "8cf519f7693d1675f4578a367b9b6fbec383af9d460e455144e3249df0faf9f3",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/README.cvs",
+      "bytes": 647,
+      "sha256": "26693e7ea2e05b662796f5b11bfd04e54a73012e608ef3a55261ff3af4c9d8c9",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/README.isdn4linux",
+      "bytes": 769,
+      "sha256": "cb4481dcbead7d193f7396d298bd77d0ee57c8bea032a80929646922ce094636",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/README.tests",
+      "bytes": 4173,
+      "sha256": "903ebce1fb75779061052f6040a0b2a99a38d4863c3892b8ff07f017a8116f6f",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/Specfile.in",
+      "bytes": 2450,
+      "sha256": "e571f522a37931a9fe92abd6ffec4f2ffb9236aaf4f95c6c758bcd9f85611ed5",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/THANKS",
+      "bytes": 178,
+      "sha256": "aa6ac6093b42e292259468265070679d2fde0502ccf2c571de4b815d17ab31ee",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/TODO",
+      "bytes": 7290,
+      "sha256": "011dc2f2512f0adc680448a5ded029bddb118508f1bbbc50ad55a3395f6dc20d",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/aclocal.m4",
+      "bytes": 49167,
+      "sha256": "831549dfe85df1981a57ab323571e26f702e75c82a65efcaa3c14a02c110edfc",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/check.lrzsz",
+      "bytes": 90509,
+      "sha256": "49d500a3ee7a4fdcc0bc10cdca307c69886ca148ccd167a474650d6aa199bcb5",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/compile",
+      "bytes": 7621,
+      "sha256": "07089708e9aba8bcd58d7d4b150a6a7d9f6669dda23a169e6609a448332b9800",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/config.guess",
+      "bytes": 50743,
+      "sha256": "e3d148130e9151735f8b9a8e69a70d06890ece51468a9762eb7ac0feddddcc2f",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/config.h.in",
+      "bytes": 6064,
+      "sha256": "76c01a326dfefa871472c3de4ddac76e05849fac4087731921aa7a19f30d032d",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/config.rpath",
+      "bytes": 20196,
+      "sha256": "46e05ef0ed1805729438662c040e85b0abdeba5fbedd448c4d79a3f0f3af6250",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/config.sub",
+      "bytes": 39713,
+      "sha256": "11c54f55c3ac99e5d2c3dc2bb0bcccbf69f8223cc68f6b2438daa806cf0d16d8",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/configure",
+      "bytes": 381426,
+      "sha256": "e751b5def14cdf3817b9eda13d9c1c018788ca9d35cd474dbce004d633d686c9",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/configure.ac",
+      "bytes": 8956,
+      "sha256": "b499faf7badaa22fd87540b8e7671f95696ca9e53ecb405ea9edccaa617b641e",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/depcomp",
+      "bytes": 23695,
+      "sha256": "62cde010a373e569b5921b8ef1ef34e1f47f2c7b62086c7e8b4a67e4737b79c2",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/doc/README",
+      "bytes": 1155,
+      "sha256": "00cd2425483ab46342a87f7df1d870bf2cf900f248baf06d471503915839f8e5",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/doc/zmodem-forsberg.txt",
+      "bytes": 104047,
+      "sha256": "24dc81099c747c794f58896c4a627ca67f798c47eca185f1d94d28645564c007",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/doc/zmodem-wip.txt",
+      "bytes": 60927,
+      "sha256": "6ddf96d7272ed54865188e45f0e6d364c9be70b33d7e03444698517d3bb1cb8f",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/doc/zmodem-zmtx-zmrx.txt",
+      "bytes": 37474,
+      "sha256": "cb80ca3e7bf61fcf06a5dd4bd7065cee156373398a32ff6d9e3a85641ac20b4e",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/doc/zmodemsnif.txt",
+      "bytes": 2163,
+      "sha256": "4fb069afeed5863cdcab0e3aef85be8575599d82a17a1d289ca0c18bf54617da",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/install-sh",
+      "bytes": 15437,
+      "sha256": "250865025dcfc1b511e3899a16f793a7d7717d3ac2af1bdea8af9171bf1dc9ff",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/ChangeLog",
+      "bytes": 567,
+      "sha256": "5fe268a6d03e18f3d5815df9fa9c218c87e793b8beccf81c592f143d9551d3ef",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/ax_append_compile_flags.m4",
+      "bytes": 1765,
+      "sha256": "ecbcac20f9872c57e7615d57874b3798b809288a48602b790b2977446e272323",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/ax_append_flag.m4",
+      "bytes": 1552,
+      "sha256": "392cb0e965351b1d6a9847cf165dc4092fb1853fd63dbe010ac8b21c286f5e16",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/ax_check_compile_flag.m4",
+      "bytes": 2480,
+      "sha256": "be21ce9e7bdc5826e00709d4163cd7bf46faff8a0fae3fcfa86b1ee17a18ea6e",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/ax_compiler_flags_cflags.m4",
+      "bytes": 5785,
+      "sha256": "d2ae243e93a556b9e81e6f4027996a2b2aeca3b4480d0bb78c2cf32305e5d2d1",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/ax_require_defined.m4",
+      "bytes": 1218,
+      "sha256": "d870b21e817747c6a61a9dd72e06ea45f87e012c7a1a9aa5ff90cd3af89b3774",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/build-to-host.m4",
+      "bytes": 9242,
+      "sha256": "8307c1f05ec9d5b8da3e3e5af369ed91b9209e517c632d8a95c7c2aa32650ec5",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/gettext.m4",
+      "bytes": 14990,
+      "sha256": "791f7bb934ad202a7a7624da2042073316449657bd6bfbb970c395137fae62bb",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/host-cpu-c-abi.m4",
+      "bytes": 17194,
+      "sha256": "73f20b40965b3668719502fe1264aa3a37d48ed99612e855a090a067e51ae715",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/iconv.m4",
+      "bytes": 11052,
+      "sha256": "dfb9b8007e8e699b1633ad7ed23ffb71b5bc211a0389d91335a6335ff51a2a90",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/intlmacosx.m4",
+      "bytes": 3560,
+      "sha256": "85fadf4b8dd2374d2e804f1516ba7cc6607b04e1d2c6c60f8729f73675566718",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/lib-ld.m4",
+      "bytes": 5440,
+      "sha256": "083fac15a131fa7c3a40dbb86caba82821fc76271d0dd2ea991fd9cb226f7744",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/lib-link.m4",
+      "bytes": 35796,
+      "sha256": "a70f24ecbaa65fa2ed415ecf30db5abbd464436046f6579c0122ef3a7d721109",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/lib-prefix.m4",
+      "bytes": 12582,
+      "sha256": "bcc517c7e2e3d67e82a5dc4c58e81174f5aa766c820fb8c0381e2ae5351beedb",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/nls.m4",
+      "bytes": 1236,
+      "sha256": "421f67f14db75dc9529baab642dd951fb3fd1358d0a29afa283da621a5ededa5",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/po.m4",
+      "bytes": 19013,
+      "sha256": "fa3041b174ad0e9f6ca23745214cdffe1ca3c9556da67b3fad722527dd683075",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/m4/progtest.m4",
+      "bytes": 3091,
+      "sha256": "6a8297736873c61922265b4367223b91377cc2ebd5d2a148a937dd102851e099",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/man/Makefile.am",
+      "bytes": 137,
+      "sha256": "3378b25bd174bb015181b5df97b8b748f571542efa94de209b099eeba5e08708",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/man/Makefile.in",
+      "bytes": 16136,
+      "sha256": "f9a5dc719aef5a9c6c2ff8675397c9a9801283fbb230658345515c36a536ba69",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/man/lrz.1",
+      "bytes": 16236,
+      "sha256": "37ddddf83a8ee99cbcec2123cebcb654c0830e81f558afb3a6a3e03d644534b1",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/man/lsz.1",
+      "bytes": 19817,
+      "sha256": "bbd5e27df9f4414ac862768f8e2cb22f55cacbc3fa49294beb35931c2beabd1c",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/missing",
+      "bytes": 7728,
+      "sha256": "1509d72c676d3b757ab9a0b251cb4c2ff5f1391d694839e71091358cb5e18f69",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/mkinstalldirs",
+      "bytes": 3660,
+      "sha256": "b6320dda6e14f0a2251df86aa812298a8098ead37d506ed65f62f27eeae9de2c",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/ChangeLog",
+      "bytes": 5681,
+      "sha256": "b059711eeeb9b145e614354acf00123556a2723780cd8aeb61dac30b619bc6df",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/LINGUAS",
+      "bytes": 238,
+      "sha256": "dfb7415a70b42e2d9b1115ff48e0693c06d2958edab7fd069b5558c1b3a221f0",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/Makefile.in.in",
+      "bytes": 20250,
+      "sha256": "8a276dda7a246d267add6fa33ad8c7c26af4d0ee6f7094c78f264bd75a82ee50",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/Makevars",
+      "bytes": 2866,
+      "sha256": "d8b638eede805e1fbe1b9690963b2daff60a3dcbd957e12d7bee7b7bd3bd2931",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/POTFILES.in",
+      "bytes": 68,
+      "sha256": "53f3b908be87bcd09b362425e915fc1c56200837185acea90dc6653e1f8392c3",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/Rules-quot",
+      "bytes": 2483,
+      "sha256": "ff0938a507a30899173bb116bcdf44f961ee810fb0d28d48b1be0a89f2f37351",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/boldquot.sed",
+      "bytes": 717,
+      "sha256": "c109dbd6b520bb784590fe4b3bbec28d4877b0e8618e180d0f53d695bee43fc7",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/en@boldquot.header",
+      "bytes": 1771,
+      "sha256": "80b9c9513f18b49d75e23f0e54e7a331a2ebda50eb0b28f82d48b012340ff5f7",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/en@quot.header",
+      "bytes": 1633,
+      "sha256": "b277bf95b5e1c56f5d860ed3d479a20c37a41d3f965d0954531a8e907bb2f960",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/insert-header.sed",
+      "bytes": 1019,
+      "sha256": "120513c5348e88d0f9f0381da50dfb5f2dc6557581f8ac76125f2f4d84ab0f45",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/lrzsz.pot",
+      "bytes": 13704,
+      "sha256": "889a7cdd594157d9b5c5d0581b676b61642c82fe3500be696f877a0cdddbcb0d",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/quot.sed",
+      "bytes": 608,
+      "sha256": "a2a83b6f6c4d6a0c28828c81ff621f1d7cb703ed07b56d83bdafe86dcb4d316f",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/remove-potcdate.sed",
+      "bytes": 720,
+      "sha256": "d582513385c800f75224f4041fbff207053d4229be6038c6810af382420ac362",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/po/stamp-po",
+      "bytes": 10,
+      "sha256": "2cd8ec3de6a07e1fd39676100db57ba62372e820c19812fee55899f65746e192",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/remote-build-check.sh",
+      "bytes": 266,
+      "sha256": "fe30e48c8b0c901859e92560c017bae06a4b14718864348f3f57fb1c7893d9b8",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/Makefile.am",
+      "bytes": 2557,
+      "sha256": "d48189923c161f1ab3c1940237e110cfd875434449785d4e1db008f4acdaf1d6",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/Makefile.in",
+      "bytes": 26720,
+      "sha256": "e70538a73274c81c78df39297bc2f575786abb571c32a7e7b1d32134dd87d7ce",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/canit.c",
+      "bytes": 1684,
+      "sha256": "030998a70f56b8dac67ecabb437f687eb3ae0adb9b09c5e5a9e939551c190d69",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/crctab.c",
+      "bytes": 9099,
+      "sha256": "d156e680435a9a92b3caaa335a25e079238b11a6e29d09c7e92791d8365a971a",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/crctab.h",
+      "bytes": 392,
+      "sha256": "ebd570941e3af804dc98d3a1fe9799419a82d9a1157966d547bdf8cc0914482b",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/linesimulator.c",
+      "bytes": 29403,
+      "sha256": "703b6c3670457e36a7e6686371404fb1fce12a2ea440f6606850904e159b6abe",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/lrz.c",
+      "bytes": 71127,
+      "sha256": "741dccf765ddc00820c42e36a36b79ca8b8a487e4f3a38d7826d40ae72df0e2b",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/lsyslog.c",
+      "bytes": 1895,
+      "sha256": "fddf6faca3a618581564986a890ff79fa1f9a2cd09db930a39699c7c1a39925d",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/lsz.c",
+      "bytes": 75721,
+      "sha256": "7e67f3108760b1b9c31d2652b3a01ed88fff369fb42099161995852bd2cea000",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/protname.c",
+      "bytes": 1109,
+      "sha256": "93fdc4d095a4836415ad117b4ae8b1cac54233a1cdeb29d0fecb3558aa22418d",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/rbsb.c",
+      "bytes": 6837,
+      "sha256": "3e76bf2b71b2f8ac7c6aaa6458aa9ef2df3ede1afa6eb3092c183d2f49d0d777",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/stats.c",
+      "bytes": 9960,
+      "sha256": "323a0f1918e1c52236f9d9d69b688f489c401fe62f025c6d40110f0ca5145ba3",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/stats.h",
+      "bytes": 3363,
+      "sha256": "798d915d171650550e39af6f535e7dfd47e37cce1ac2f0054c71ce661917c117",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/timestamp.c",
+      "bytes": 338,
+      "sha256": "77ea78ea45bbaf65ef332298a0a5adc711acecac2165e7baabf5e73ca7b74e6a",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/timing.c",
+      "bytes": 1890,
+      "sha256": "c9bb76603372c229f777229d2d0045e2bab0361ce8ff6e0f72e145f0b4d8bb15",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/timing.h",
+      "bytes": 140,
+      "sha256": "90201af30c9c285d68f330bcad6d88e0429fdc68a7ac0a50f3f9392c1d5e8dbc",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/util.c",
+      "bytes": 12156,
+      "sha256": "c7052f5a753265fc76f8d884e685260b6a43669dcf1a4d7dbe8827816495e0bd",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/util.h",
+      "bytes": 4442,
+      "sha256": "1354f8d76228156ef3ea3f326010bc441cd146c2d25e3f0a6cdbc5075ae386b6",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/zglobal.h",
+      "bytes": 6855,
+      "sha256": "eb6420df0ee2707df6f6ba1b8b93cb560a07686446c26478aa057d7734caf380",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/zm.c",
+      "bytes": 24630,
+      "sha256": "cc368ae19dd1d360b63358cf5f389e5800e3c0e10d10b7563c209b409ac245c2",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/zmodem.h",
+      "bytes": 5729,
+      "sha256": "5f395b92863866da35702324fe3d6c339558a9e5b6778bdb69e8876f16c3c0ea",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/zmodemfuzz.c",
+      "bytes": 92705,
+      "sha256": "06f37be836f943b9200248f5948f345d49d72d40e5ae08830f8de5999a28400f",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/zmodemsnif.c",
+      "bytes": 31231,
+      "sha256": "3488bc064807c195ebed1a1e4af832e83395ffd1b721cee215468992cd2ea9cb",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/zperr.c",
+      "bytes": 1514,
+      "sha256": "ec7ec575849b2d33014dfa18c59de34d1e421329e53332c6a460c5d432333db8",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "external-source/lrzsz-0.13.1/src/zreadline.c",
+      "bytes": 3453,
+      "sha256": "f19a9f60ad5c4babd9fcfca834b23fbb8aa6352a45748fc4eda525680718b6e7",
+      "reason": "Unmodified upstream extraction; archive identity retained."
+    },
+    {
+      "path": "lrzsz-0.13.1.tar.gz",
+      "bytes": 483782,
+      "sha256": "112f91059fbd118e016d800c1a5c5a1702e965d8b9bfbda6015e44e20bfb93c9",
+      "reason": "Downloaded third-party archive; SHA256 retained."
+    },
+    {
+      "path": "observe_flush.dylib",
+      "bytes": 33712,
+      "sha256": "615ed270c0411ee1126f7baff892aa244429095e03cc37c2294abe3db7474516",
+      "reason": "Temporary diagnostic executable; source retained."
+    },
+    {
+      "path": "peer/lrz",
+      "bytes": 121440,
+      "sha256": "e535acbd890eab25eac866b474c6c6db787b0243f9e69d64c1852d9766c16e88",
+      "reason": "Temporary peer executables; provenance retained."
+    },
+    {
+      "path": "peer/lsz",
+      "bytes": 122816,
+      "sha256": "09b84b984ea77fa8f6cbfc2a1198dde88f7185dea433150699aebff40b0dbb0c",
+      "reason": "Temporary peer executables; provenance retained."
+    },
+    {
+      "path": "peer/observed-sz",
+      "bytes": 408,
+      "sha256": "f30f58d86cf0d7e792d9b2486b79d20bfa8085864333119ffa081c329accaa64",
+      "reason": "Temporary peer executables; provenance retained."
+    },
+    {
+      "path": "stable-tests/app-r5",
+      "bytes": 265754544,
+      "sha256": "e2a7c4842570c80c632e5c7b40b72d8e383bf19f48146b8d17ad09efd50cc369",
+      "reason": "Temporary executable copies; hashes and inventories retained."
+    },
+    {
+      "path": "stable-tests/app-r6",
+      "bytes": 265754272,
+      "sha256": "a5d0dc66845eb7124dde4e1a7b66f586ecc22dd9f0fe5bfe13c259145046e720",
+      "reason": "Temporary executable copies; hashes and inventories retained."
+    },
+    {
+      "path": "stable-tests/barrier-r3",
+      "bytes": 32727664,
+      "sha256": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+      "reason": "Temporary executable copies; hashes and inventories retained."
+    },
+    {
+      "path": "stable-tests/core-r4",
+      "bytes": 2182760,
+      "sha256": "8c51f02d4bf32d05d5757d310fe596c583cf7f986465ca958538098bff2cf75e",
+      "reason": "Temporary executable copies; hashes and inventories retained."
+    },
+    {
+      "path": "stable-tests/peer-r3",
+      "bytes": 21269440,
+      "sha256": "1544619858f0f8f72fc1e72adca9679d5118c81c263bd8eebb28062713588441",
+      "reason": "Temporary executable copies; hashes and inventories retained."
+    },
+    {
+      "path": "stable-tests/session-r4",
+      "bytes": 22635048,
+      "sha256": "01f3b882bf6d3d9e4be81f5567f0314a92c22702fd130a7d5269769e0f144007",
+      "reason": "Temporary executable copies; hashes and inventories retained."
+    },
+    {
+      "path": "tmp/keelshell-check-46a0ghy1/keelshell-file-ui-6646c66a-c347-44d1-999b-09f45e7d3401/uploaded-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.bin",
+      "bytes": 786432,
+      "sha256": "46e5adcf90eecaf3dee136703780c3d2066cd129677192ebaff7416164b05919",
+      "reason": "Isolated scratch data, including interrupted gate fixtures."
+    },
+    {
+      "path": "tmp/keelshell-check-lp42tsng/keelshell-file-ui-9f62cb3e-164d-4171-bdaa-861978f8fb7f/uploaded-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.bin",
+      "bytes": 786432,
+      "sha256": "46e5adcf90eecaf3dee136703780c3d2066cd129677192ebaff7416164b05919",
+      "reason": "Isolated scratch data, including interrupted gate fixtures."
+    },
+    {
+      "path": "tmp/keelshell-check-lp42tsng/keelshell-ui-5e256504-b742-4b98-89d0-a80ae2271853/state.json",
+      "bytes": 1747,
+      "sha256": "fb7af61d916b4893f8841d6a55240228abedeec994beacd3b595686f80feba46",
+      "reason": "Isolated scratch data, including interrupted gate fixtures."
+    },
+    {
+      "path": "tmp/keelshell-check-lp42tsng/keelshell-ui-5e256504-b742-4b98-89d0-a80ae2271853/state.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reason": "Isolated scratch data, including interrupted gate fixtures."
+    }
+  ]
+}

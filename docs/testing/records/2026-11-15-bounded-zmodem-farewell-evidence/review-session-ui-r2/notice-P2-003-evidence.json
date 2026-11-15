@@ -1,0 +1,69 @@
+{
+  "recorded_utc": "2026-11-15T10:37:57.986787+00:00",
+  "id": "P2-003",
+  "severity": "P2",
+  "status": "OPEN",
+  "title": "Bridge cleanup queues retained terminal tail after pump exit but never delivers it",
+  "baseline": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "original_freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "scope": "App cleanup path; independently actionable in r3 in addition to CORE-R2-01",
+  "proof_kind": "Deterministic source control-flow trace; no new Rust probe or compilation performed",
+  "source_evidence": {
+    "crates/keelshell-app/src/ssh_bridge.rs": {
+      "sha256": "bbd4ef2d764714f43c217f5296ac33b47c9f222122cdf9533357ff2ac6cd878c",
+      "frozen_r2_sha256": "bbd4ef2d764714f43c217f5296ac33b47c9f222122cdf9533357ff2ac6cd878c",
+      "matches_frozen_r2": true,
+      "source": [
+        {
+          "start": 100,
+          "end": 127,
+          "text": "100:     lifecycle.send_replace(TransportState::Ready);\n101:     let result = pump(\n102:         &mut shell,\n103:         &session,\n104:         &mut protocol,\n105:         &commands,\n106:         &output,\n107:         &cancelled,\n108:         &lifecycle,\n109:     )\n110:     .await;\n111:     let protocol_result = protocol.fail();\n112:     let reason = shell.completion().unwrap_or_else(|| {\n113:         if cancelled.load(Ordering::Acquire) {\n114:             ShellEnd::Cancelled\n115:         } else {\n116:             connection_end(&session)\n117:         }\n118:     });\n119:     lifecycle.send_replace(TransportState::Ended(reason));\n120:     // Cleanup has its own bounded deadline and is not interrupted by the view's\n121:     // cancellation signal. The worker registry observes this final outcome.\n122:     let cleanup = tokio::time::timeout(Duration::from_secs(2), shell.close())\n123:         .await\n124:         .map_err(|_| \"SSH_SHELL_CLEANUP_TIMEOUT\".to_owned())\n125:         .and_then(|result| result.map_err(|error| error.to_string()));\n126:     protocol.transport_closed();\n127:     result.and(protocol_result).and(cleanup)"
+        },
+        {
+          "start": 313,
+          "end": 359,
+          "text": "313: async fn write_and_drain(\n314:     shell: &mut SshShell,\n315:     session: &SshSession,\n316:     protocol: &mut Protocol,\n317:     write: ShellWrite<'_>,\n318:     output: &SyncSender<SessionEvent>,\n319:     cancelled: &AtomicBool,\n320:     lifecycle: &watch::Sender<TransportState>,\n321: ) -> Result<WriteOutcome, String> {\n322:     let (ShellWrite::Ordinary(bytes) | ShellWrite::Protocol(bytes)) = write;\n323:     let writer = shell.writer();\n324:     let writing = async {\n325:         match write {\n326:             ShellWrite::Ordinary(_) => writer.write(bytes).await,\n327:             ShellWrite::Protocol(_) => writer.write_confirmed(bytes).await,\n328:         }\n329:     };\n330:     let mut completion = shell.subscribe_completion();\n331:     tokio::pin!(writing);\n332:     loop {\n333:         tokio::select! {\n334:             biased;\n335:             _ = cancellation(cancelled) => return Ok(WriteOutcome::Stopped),\n336:             reason = shell_end(&mut completion) => {\n337:                 lifecycle.send_replace(TransportState::Ended(reason));\n338:                 return Ok(WriteOutcome::ShellEnded);\n339:             },\n340:             result = &mut writing => {\n341:                 if let Some(reason) = shell.completion() {\n342:                     lifecycle.send_replace(TransportState::Ended(reason));\n343:                     return Ok(WriteOutcome::ShellEnded);\n344:                 }\n345:                 return result.map(|()| WriteOutcome::Written).map_err(|error| error.to_string());\n346:             },\n347:             _ = tokio::time::sleep(Duration::from_millis(4)) => {\n348:                 if drain_output(shell, session, protocol, output).await? {\n349:                     return Ok(WriteOutcome::Stopped);\n350:                 }\n351:                 if matches!(write, ShellWrite::Ordinary(_)) && protocol.input_blocked() {\n352:                     // A remote peer can begin Zmodem while SSH flow control\n353:                     // suspends an already admitted ordinary write. Stop polling\n354:                     // that future at the ownership boundary: its unknown prefix\n355:                     // cannot be replayed or mixed with protocol negotiation.\n356:                     protocol.interrupt_ordinary_write();\n357:                     return Err(\"SSH_ZMODEM_INPUT_HANDOFF_INTERRUPTED\".into());\n358:                 }\n359:             }"
+        }
+      ]
+    },
+    "crates/keelshell-app/src/ssh_bridge_zmodem.rs": {
+      "sha256": "7238f22758aed9a2f38afd84e42cf55da0426a34b143c77ceff64d68856fd4f3",
+      "frozen_r2_sha256": "7238f22758aed9a2f38afd84e42cf55da0426a34b143c77ceff64d68856fd4f3",
+      "matches_frozen_r2": true,
+      "source": [
+        {
+          "start": 130,
+          "end": 160,
+          "text": "130:     pub(super) fn fail(&mut self) -> Result<(), String> {\n131:         if let Some(id) = self.finished.take() {\n132:             self.safety.publish(ZmodemUiEvent::Failed {\n133:                 id,\n134:                 reason: ZmodemFailure::ConnectionClosed,\n135:                 uncertain: self.uploading\n136:                     || self.controller.mutation_pending().load(Ordering::Acquire),\n137:             })?;\n138:         }\n139:         let mut effects = self.controller.transport_failed();\n140:         if self.interrupted_input\n141:             && let Some(id) = self.blocked\n142:         {\n143:             effects.events.retain(|event| {\n144:                 !matches!(\n145:                     event,\n146:                     ZmodemUiEvent::Failed { .. }\n147:                         | ZmodemUiEvent::Cancelled { .. }\n148:                         | ZmodemUiEvent::Finished { .. }\n149:                         | ZmodemUiEvent::EndedWithoutFarewell { .. }\n150:                 )\n151:             });\n152:             effects.events.push(ZmodemUiEvent::Failed {\n153:                 id,\n154:                 reason: ZmodemFailure::Protocol,\n155:                 uncertain: true,\n156:             });\n157:             self.interrupted_input = false;\n158:         }\n159:         self.effects(effects)\n160:     }"
+        },
+        {
+          "start": 206,
+          "end": 218,
+          "text": "206:     fn effects(&mut self, effects: ZmodemOutput) -> Result<(), String> {\n207:         if let Some(lease) = self.controller.lease_id() {\n208:             if self.blocked != Some(lease) {\n209:                 self.input_rejection_seen = false;\n210:                 self.resume_requested = false;\n211:             }\n212:             self.blocked = Some(lease);\n213:             self.safety.active.store(true, Ordering::Release);\n214:         }\n215:         if !effects.terminal.is_empty() {\n216:             self.push_event(SessionEvent::Data(effects.terminal))?;\n217:         }\n218:         for event in effects.events {"
+        }
+      ]
+    },
+    "crates/keelshell-session/src/zmodem.rs": {
+      "sha256": "50913b9a73047dea17d4ea722c9d78ffe4e5d3c86d6d1281858ca58582555ab1",
+      "frozen_r2_sha256": "50913b9a73047dea17d4ea722c9d78ffe4e5d3c86d6d1281858ca58582555ab1",
+      "matches_frozen_r2": true,
+      "source": [
+        {
+          "start": 706,
+          "end": 718,
+          "text": "706:     /// End a broken PTY/write/connection without inferring remote cleanup.\n707:     ///\n708:     /// The bridge may ignore returned cancellation writes if its channel is no\n709:     /// longer writable. Shared worker/uncertainty handles survive this call.\n710:     pub fn transport_failed(&mut self) -> ZmodemOutput {\n711:         let mut output = ZmodemOutput::default();\n712:         if self.is_active() {\n713:             self.fail(ZmodemFailure::ConnectionClosed, &mut output);\n714:         } else {\n715:             output.terminal.extend(self.detector.reset());\n716:         }\n717:         output\n718:     }"
+        },
+        {
+          "start": 792,
+          "end": 808,
+          "text": "792:     fn cancel_wire(&mut self, output: &mut ZmodemOutput) {\n793:         if let Some(stop) = &self.operation_stop {\n794:             stop.store(true, Ordering::Release);\n795:         }\n796:         if let Some(machine) = &mut self.machine {\n797:             match machine.cancel() {\n798:                 Ok(events) => {\n799:                     for event in events {\n800:                         match event {\n801:                             Event::Send(bytes) => output.writes.push(bytes),\n802:                             Event::Terminal(bytes) => output.terminal.extend(bytes),\n803:                             _ => {}\n804:                         }\n805:                     }\n806:                 }\n807:                 Err(_) => output.writes.push(CANCELLATION.to_vec()),\n808:             }"
+        },
+        {
+          "start": 835,
+          "end": 847,
+          "text": "835:     fn fail(&mut self, reason: ZmodemFailure, output: &mut ZmodemOutput) {\n836:         let Some(id) = self.transfer else {\n837:             return;\n838:         };\n839:         let uncertain = self.uncertain();\n840:         self.cancel_wire(output);\n841:         self.end(ZmodemState::Failed, output);\n842:         output.events.push(ZmodemUiEvent::Failed {\n843:             id,\n844:             reason,\n845:             uncertain,\n846:         });\n847:     }"
+        }
+      ]
+    }
+  }
+}

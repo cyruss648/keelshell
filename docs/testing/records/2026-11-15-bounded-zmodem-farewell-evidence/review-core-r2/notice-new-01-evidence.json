@@ -1,0 +1,66 @@
+{
+  "recorded_utc": "2026-11-15T10:32:32.640692+00:00",
+  "finding": "CORE-R2-01",
+  "severity": "P2",
+  "status": "OPEN",
+  "freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "frozen_items_verified": 583,
+  "mismatches": [],
+  "retained_ordinary_tail_hex": "e4b8aa2420",
+  "scenarios": [
+    {
+      "name": "peer_cancellation",
+      "entry_state": "Finishing",
+      "successful_prior_feed_hex": "e4b8aa2420",
+      "trigger": "valid Cancel/Abort/FileError header or five CAN",
+      "source_predicted_events": "Cancelled and only bytes after cancellation; preceding tail omitted",
+      "then_cancel": "empty",
+      "actual_new_rust_probe_executed": false
+    },
+    {
+      "name": "input_error_cleanup",
+      "entry_state": "Finishing",
+      "successful_prior_feed_hex": "e4b8aa2420",
+      "trigger": "valid Command header",
+      "feed_result": "Err(RemoteCommand), state Failed",
+      "then_cancel": "Send(CANCEL), Cancelled; preceding tail omitted",
+      "actual_new_rust_probe_executed": false
+    }
+  ],
+  "source_evidence": {
+    "crates/keelshell-core/src/zmodem/receiver.rs": [
+      {
+        "start": 98,
+        "end": 101,
+        "text": "98:         let result = self.feed_inner(bytes);\n99:         if result.is_err() {\n100:             self.state = State::Failed;\n101:         }"
+      },
+      {
+        "start": 122,
+        "end": 147,
+        "text": "122:                     Token::Cancelled => {\n123:                         self.state = State::Cancelled;\n124:                         self.bytes.clear();\n125:                         events.push(Event::Cancelled);\n126:                     }\n127:                     Token::OverAndOut => {\n128:                         if self.state != State::Finishing {\n129:                             return Err(Error::WrongState(\"unsolicited OO\"));\n130:                         }\n131:                         self.state = State::Done;\n132:                         events.push(Event::Finished);\n133:                     }\n134:                 }\n135:                 check_events(&events)?;\n136:                 if matches!(self.state, State::Done | State::Cancelled) {\n137:                     let mut terminal = if self.state == State::Done {\n138:                         self.decoder.take_farewell_bytes()\n139:                     } else {\n140:                         Vec::new()\n141:                     };\n142:                     if index + 1 < bytes.len() {\n143:                         terminal.extend_from_slice(&bytes[index + 1..]);\n144:                     }\n145:                     if !terminal.is_empty() {\n146:                         events.push(Event::Terminal(terminal));\n147:                     }"
+      },
+      {
+        "start": 244,
+        "end": 267,
+        "text": "244:     /// Cancellation is available after an error and never performs cleanup or\n245:     /// claims the peer removed any partial file.\n246:     pub fn cancel(&mut self) -> Result<Vec<Event>, Error> {\n247:         if matches!(\n248:             self.state,\n249:             State::Done | State::FarewellMissing | State::Cancelled\n250:         ) {\n251:             return Ok(Vec::new());\n252:         }\n253:         let terminal = if self.state == State::Finishing {\n254:             self.decoder.take_farewell_bytes()\n255:         } else {\n256:             Vec::new()\n257:         };\n258:         self.state = State::Cancelled;\n259:         self.bytes.clear();\n260:         self.offer = None;\n261:         self.payload = None;\n262:         self.decoder.expect_header();\n263:         let mut events = vec![Event::Send(CANCEL.to_vec()), Event::Cancelled];\n264:         if !terminal.is_empty() {\n265:             events.push(Event::Terminal(terminal));\n266:         }\n267:         Ok(events)"
+      },
+      {
+        "start": 335,
+        "end": 346,
+        "text": "335:     fn header(&mut self, header: Header, events: &mut Vec<Event>) -> Result<(), Error> {\n336:         let kind = header.kind;\n337:         if kind == FrameType::Command\n338:             || (kind == FrameType::RequestInit && header.flags()[3] == FrameType::Command as u8)\n339:         {\n340:             return Err(Error::RemoteCommand);\n341:         }\n342:         match kind {\n343:             FrameType::Cancel | FrameType::Abort | FrameType::FileError => {\n344:                 self.state = State::Cancelled;\n345:                 self.bytes.clear();\n346:                 events.push(Event::Cancelled);"
+      }
+    ],
+    "crates/keelshell-core/tests/zmodem.rs": [
+      {
+        "start": 1199,
+        "end": 1269,
+        "text": "1199: fn receiver_missing_farewell_cannot_convert_finishing_input_errors() {\n1200:     for (bytes, error) in [\n1201:         (header(FrameType::Command, 0), Error::RemoteCommand),\n1202:         (\n1203:             header(FrameType::RequestInit, (FrameType::Command as u32) << 24),\n1204:             Error::RemoteCommand,\n1205:         ),\n1206:         (\n1207:             header(FrameType::File, 1 << 24),\n1208:             Error::UnexpectedFrame(FrameType::File),\n1209:         ),\n1210:         (\n1211:             header(FrameType::Data, 0),\n1212:             Error::UnexpectedFrame(FrameType::Data),\n1213:         ),\n1214:         (header(FrameType::EndOfFile, 0), Error::ApprovalRequired),\n1215:         (\n1216:             header(FrameType::SenderInit, 0),\n1217:             Error::UnexpectedFrame(FrameType::SenderInit),\n1218:         ),\n1219:     ] {\n1220:         let mut receiver = waiting_for_farewell();\n1221:         assert_eq!(receiver.feed(&bytes), Err(error));\n1222:         assert!(!receiver.is_waiting_for_farewell());\n1223:         assert!(!receiver.is_finished());\n1224:         assert!(matches!(\n1225:             receiver.finish_without_farewell(),\n1226:             Err(Error::WrongState(_))\n1227:         ));\n1228:         assert!(matches!(\n1229:             receiver.feed(&header(FrameType::Finish, 0)),\n1230:             Err(Error::WrongState(_))\n1231:         ));\n1232:         assert!(matches!(\n1233:             receiver.cancel().unwrap().as_slice(),\n1234:             [Event::Send(_), Event::Cancelled]\n1235:         ));\n1236:     }\n1237: }\n1238: \n1239: #[test]\n1240: fn receiver_missing_farewell_cannot_convert_peer_or_local_cancellation() {\n1241:     for (bytes, trailing_xon) in [\n1242:         (header(FrameType::Cancel, 0), true),\n1243:         (header(FrameType::Abort, 0), true),\n1244:         (header(FrameType::FileError, 0), true),\n1245:         (vec![24; 5], false),\n1246:     ] {\n1247:         let mut receiver = waiting_for_farewell();\n1248:         let mut events = Vec::new();\n1249:         for byte in bytes {\n1250:             events.extend(receiver.feed(&[byte]).unwrap());\n1251:         }\n1252:         let mut expected = vec![Event::Cancelled];\n1253:         if trailing_xon {\n1254:             expected.push(Event::Terminal(vec![0x11]));\n1255:         }\n1256:         assert_eq!(events, expected);\n1257:         assert!(!receiver.is_waiting_for_farewell());\n1258:         assert!(!receiver.is_finished());\n1259:         assert!(matches!(\n1260:             receiver.finish_without_farewell(),\n1261:             Err(Error::WrongState(_))\n1262:         ));\n1263:     }\n1264:     let mut receiver = waiting_for_farewell();\n1265:     receiver.cancel().unwrap();\n1266:     assert!(matches!(\n1267:         receiver.finish_without_farewell(),\n1268:         Err(Error::WrongState(_))\n1269:     ));"
+      },
+      {
+        "start": 1937,
+        "end": 1997,
+        "text": "1937: #[test]\n1938: fn receiver_finishing_cancel_preserves_utf8_tail_after_repeated_zfin() {\n1939:     let bytes = repeated_hex_finish_tail(\"个\".as_bytes(), &header(FrameType::Finish, 0), false);\n1940:     for chunk_bytes in [1, 2, bytes.len()] {\n1941:         let mut receiver = waiting_for_farewell();\n1942:         let mut events = Vec::new();\n1943:         for chunk in bytes.chunks(chunk_bytes) {\n1944:             events.extend(receiver.feed(chunk).unwrap());\n1945:         }\n1946:         assert_eq!(events, vec![Event::Send(header(FrameType::Finish, 0))]);\n1947:         assert!(receiver.is_waiting_for_farewell());\n1948:         assert_eq!(\n1949:             receiver.cancel().unwrap(),\n1950:             vec![\n1951:                 Event::Send([vec![24; 8], vec![8; 10]].concat()),\n1952:                 Event::Cancelled,\n1953:                 Event::Terminal(\"个$ \".as_bytes().to_vec())\n1954:             ]\n1955:         );\n1956:         assert!(!receiver.is_waiting_for_farewell());\n1957:         assert!(!receiver.is_finished());\n1958:         assert!(matches!(\n1959:             receiver.finish_without_farewell(),\n1960:             Err(Error::WrongState(_))\n1961:         ));\n1962:         assert!(receiver.cancel().unwrap().is_empty());\n1963:         assert_eq!(\n1964:             receiver.feed(b\"OO$ next\").unwrap(),\n1965:             vec![Event::Terminal(b\"OO$ next\".to_vec())]\n1966:         );\n1967:     }\n1968: }\n1969: \n1970: #[test]\n1971: fn receiver_cancel_after_actual_oo_does_not_repeat_utf8_tail() {\n1972:     let bytes = repeated_hex_finish_tail(\"个\".as_bytes(), &header(FrameType::Finish, 0), true);\n1973:     for chunk_bytes in [1, 2, bytes.len()] {\n1974:         let mut receiver = waiting_for_farewell();\n1975:         let mut events = Vec::new();\n1976:         for chunk in bytes.chunks(chunk_bytes) {\n1977:             events.extend(receiver.feed(chunk).unwrap());\n1978:         }\n1979:         assert_eq!(\n1980:             events,\n1981:             vec![\n1982:                 Event::Send(header(FrameType::Finish, 0)),\n1983:                 Event::Finished,\n1984:                 Event::Terminal(\"个$ \".as_bytes().to_vec())\n1985:             ]\n1986:         );\n1987:         assert!(receiver.is_finished());\n1988:         assert!(!receiver.is_waiting_for_farewell());\n1989:         assert!(receiver.cancel().unwrap().is_empty());\n1990:         assert!(receiver.cancel().unwrap().is_empty());\n1991:         assert_eq!(\n1992:             receiver.feed(b\"$ next\").unwrap(),\n1993:             vec![Event::Terminal(b\"$ next\".to_vec())]\n1994:         );\n1995:         assert!(receiver.is_finished());\n1996:     }\n1997: }"
+      }
+    ]
+  }
+}

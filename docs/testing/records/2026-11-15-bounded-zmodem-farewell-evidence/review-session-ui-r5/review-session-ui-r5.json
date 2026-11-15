@@ -1,0 +1,93 @@
+{
+  "recorded_utc": "2026-11-15T11:11:28.216494+00:00",
+  "recommendation": "APPROVE",
+  "scope": "final r5 bounded farewell session/real transport barrier/bridge/UI source and targeted tests",
+  "base_head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "input_counts": {
+    "engineering": 571,
+    "scripts": 12
+  },
+  "severity_open_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "open_findings": [],
+  "closed_findings": [
+    "P2-001",
+    "P2-002",
+    "P2-003",
+    "P2-004"
+  ],
+  "closure_notice": "notice-P2-003-P2-004-closed-r5.md",
+  "production_changes_since_r4": [],
+  "r4_to_r5_changed_paths": [
+    "crates/keelshell-app/src/ssh_bridge_tests.rs"
+  ],
+  "independently_recompiled": false,
+  "independent_r5_inventory_commands": 1,
+  "independent_r5_test_commands": 1,
+  "independent_r5_execution": {
+    "binary": "app-r6",
+    "binary_sha256": "a5d0dc66845eb7124dde4e1a7b66f586ecc22dd9f0fe5bfe13c259145046e720",
+    "complete_inventory": 1238,
+    "filter": "ssh_bridge::tests",
+    "counts": {
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered_out": 1223
+    },
+    "exit_code": 0,
+    "seconds": 22.99,
+    "verified": true,
+    "receipt": "receipt-app-ssh-bridge-r6.json"
+  },
+  "reused_independent_results": {
+    "app_zmodem": {
+      "binary": "app-r5",
+      "freeze": "r4",
+      "passed": 30,
+      "failed": 0,
+      "ignored": 0,
+      "rerun_for_r5": false
+    },
+    "session_integration": {
+      "binary": "session-r4",
+      "freeze": "r3",
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "rerun_for_r5": false
+    },
+    "transport_barrier": {
+      "binary": "barrier-r3",
+      "freeze": "r3",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "rerun_for_r5": false
+    }
+  },
+  "unchanged_core_session_root_input_count": 231,
+  "app_group_overlap": 12,
+  "unique_app_test_union": 33,
+  "parent_gate_r4": {
+    "exit": -15,
+    "seconds": 235.951,
+    "stopped_reaped": true
+  },
+  "engineering_gate_r5": "PENDING_PARENT; successful final gate bound to the same freeze remains an engineering integration condition",
+  "linux_strict_interop": "HOLD_PARTIAL; original failed assertion retained; no peer rerun",
+  "native_platform_acceptance": "UNVERIFIED",
+  "full_product_acceptance": "UNVERIFIED",
+  "python_source_approval": "Separate reviewer; not signed here",
+  "original_hold_reports_preserved": true,
+  "final_freeze_receipt": "receipt-final-freeze.json",
+  "final_freeze_verified": true,
+  "report_sha256": "046da2d34a54853f31b2cb14b79116498258835997af3b1f90f9334aca45fa22",
+  "closure_notice_sha256": "8022b0f873b85d0e4becb20640a2d0190e40329c8bd201e79c05eb5256dd0c40"
+}

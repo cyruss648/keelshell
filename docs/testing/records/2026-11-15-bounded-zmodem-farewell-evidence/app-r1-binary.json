@@ -1,0 +1,11 @@
+{
+  "source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dec5f1080a7dd190/out/keelshell_app-dec5f1080a7dd190",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/app-r1",
+  "sha256": "75a9c3b7082104076f5e80d06af6ddd7b619abb26ad8c78937a12fd6a9bdb112",
+  "inventory": "app-r1-inventory.txt",
+  "inventory_sha256": "6d29852a8ecca416b502518071c5b11e9c5abd66d0885f134aa4f7293532e4ee",
+  "inventory_count": 1230,
+  "freeze": "frozen-inputs-r1.json",
+  "built_by": "app-r1.log",
+  "parent_built": true
+}

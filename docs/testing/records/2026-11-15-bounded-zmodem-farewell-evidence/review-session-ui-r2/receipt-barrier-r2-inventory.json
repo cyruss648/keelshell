@@ -1,0 +1,26 @@
+{
+  "metadata_sha256": "f4b670f3d85f9ef02a966d89e9d58d5d99692a3b88aef687a81f48b0d4529798",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/barrier-r2",
+  "expected_binary_sha256": "c5e3408f21f1e4a7a418d97a064fb48b3ffe51cac2e94a6d02ab0046dca9ba55",
+  "binary_sha256_before": "c5e3408f21f1e4a7a418d97a064fb48b3ffe51cac2e94a6d02ab0046dca9ba55",
+  "binary_sha256_after": "c5e3408f21f1e4a7a418d97a064fb48b3ffe51cac2e94a6d02ab0046dca9ba55",
+  "expected_inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+  "saved_inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+  "independent_inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+  "inventory_exact_bytes_equal": true,
+  "inventory_count": 189,
+  "metadata_inventory_count": 189,
+  "expected_count": 189,
+  "names_unique": true,
+  "freeze_binding": "frozen-inputs-r2.json",
+  "parent_built": true,
+  "built_by": "barrier-r2.log",
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/barrier-r2",
+    "--list"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.00549058300384786,
+  "independently_recompiled": false,
+  "verified": true
+}

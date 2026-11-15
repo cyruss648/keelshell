@@ -1,0 +1,89 @@
+{
+  "files": {
+    "work/pty-farewell-20261115/python-deadline-fix/baseline.json": {
+      "bytes": 618,
+      "sha256": "399d710f2667588c8c8cecc37fda3fac6ce3f0b208703a820ec849f1e904dab5"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/diff-check.json": {
+      "bytes": 215,
+      "sha256": "e26454002a11a593bc530e1e17324fa007ef4dbc5b68cdec702c121957601927"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/diff-check.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/fix.patch": {
+      "bytes": 8912,
+      "sha256": "054f979903fa35059508e53c6a7ff46c6853bad579c77b3a294e1f84f1309f73"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/freeze.json": {
+      "bytes": 774,
+      "sha256": "a7deaf88eb66881776e6f9deca97a2dac7ed2c607842522d6107d371719e9ced"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/green-boundary.json": {
+      "bytes": 1123,
+      "sha256": "06d9822a024886d419f4adcca489a0b2bf10bb1d18acb8b026a8ccb8772345bf"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/green-boundary.log": {
+      "bytes": 1328,
+      "sha256": "204f0ec318909ed4d64f157977754d345cc75d315ff97b3937b862a41cfc26a1"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/handoff.json": {
+      "bytes": 3143,
+      "sha256": "b94394a9539df61be2b3c217fe50b33ef9d403f544b10473d8df3fab38916099"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/python-suite.json": {
+      "bytes": 1084,
+      "sha256": "b9055f1bd5e04d3be200791510c10e9c06778852ba1ce734d937c927b341cd99"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/python-suite.log": {
+      "bytes": 30661,
+      "sha256": "3f4bbb9291756da227162ef0322f8565d1dbef1e3732ca83e29c3dc48ee4380e"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/real-descendant-timeout.json": {
+      "bytes": 1157,
+      "sha256": "cf9fb553c2485a74bf10da8ff67a7409be2716249e84ebb389674e85961aca3d"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/real-descendant-timeout.log": {
+      "bytes": 255,
+      "sha256": "d20f03b5638916e69038cc247718e166a66515706c8cdd579bdcc84d5c941e42"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/red-boundary.json": {
+      "bytes": 767,
+      "sha256": "55d2ebcb6605cdfb1bdff6d54995fecfe2eb88da2f693ef4e0182efd0abeddec"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/red-boundary.log": {
+      "bytes": 13471,
+      "sha256": "6319426efea8393d55983933a8a04a0d1d77135e3166e1c1b1746d9b15173bb8"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/run_linux_file_interop.py.before": {
+      "bytes": 52042,
+      "sha256": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/run_linux_file_interop.py.frozen": {
+      "bytes": 52893,
+      "sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/test_linux_file_interop.py.before": {
+      "bytes": 8663,
+      "sha256": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9"
+    },
+    "work/pty-farewell-20261115/python-deadline-fix/test_linux_file_interop.py.frozen": {
+      "bytes": 14875,
+      "sha256": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c"
+    },
+    "work/pty-farewell-20261115/logs/full-gate-r3.json": {
+      "bytes": 570,
+      "sha256": "2e5bccf2dc00202c8a97facda3b29a58f30dea238c6911e93cacd70c706729a0"
+    },
+    "work/pty-farewell-20261115/logs/full-gate-r3.log": {
+      "bytes": 9674,
+      "sha256": "4d981e70ced450bc72f661a81be562aa1848c5cd2bc355c70f2a25901c0e3483"
+    }
+  },
+  "original_full_gate_r3_exit": 1,
+  "original_full_gate_r3_log_matches_recorded_hash": true,
+  "author_red": "7 run; failures=4, errors=3; retained as originally written",
+  "independent_red": "7 run; failures=2, errors=5; final test assertion nesting used against pinned original implementation",
+  "no_author_artifact_writes": true
+}

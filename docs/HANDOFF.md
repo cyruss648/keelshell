@@ -1,5 +1,49 @@
 # KeelShell 当前交接 — 2026-11-15
 
+## 2026-11-15 有界 Zmodem 收尾：集中门禁与非作者复核通过
+
+本批基线为本地 `b66ec7e564e97c3cc8261b447288377ac1ffccc2`，当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
+最终 r5 冻结 `571 + 12`，SHA-256
+`d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e`。
+完整 `full-gate-r5` 已实际 wait/reap，`exit 0 / 646.751s`：
+普通 Rust `2935/0/35 ignored`、rustdoc `14/0`、Python `148 run / 1 skipped`，
+格式、严格 workspace all-targets Clippy、`x.y` 策略和三组 AI controller 通过。
+新增默认 Rust `59` 项逐名通过且已包含在总数，另有 Python `7` 和 opt-in peer
+`1`；门禁后摘要及完整工程路径集合零漂移，完整 app 库存 `1238`。
+
+三名新非作者在各自范围均 APPROVE、零开放 P0–P3，已关闭六项 P2。
+core `102/102`、session `25/25`、真实 barrier `4/4`、app Zmodem `30/30` 与
+final bridge `15/15` 的重复与同源复用明确单列；Rust reviewer 使用核对摘要和
+完整库存的父预构建副本，没有独立重编译。父在相同最终冻结取得成功门禁，满足
+原报告的工程条件，不改写此前 HOLD、失败、drift 或签署时条件。
+设计见 [ADR 0137](adr/0137-bounded-zmodem-farewell.md)，接续从
+[本批记录](testing/records/2026-11-15-bounded-zmodem-farewell.md)与
+[持久证据](testing/records/2026-11-15-bounded-zmodem-farewell-evidence/README.md)读取，
+原临时 `work/pty-farewell-20261115` 已删除。
+
+`EndedWithoutFarewell` 明确区分缺握手与严格 `Finished`，只在精确 lease/revision
+回复经真实认证连接往返确认、等待到期或有序 clean exit 后收尾；已知 completion
+禁止计时抢先。普通尾部跨取消/失败保留，worker 有界投递到实际 UI receiver；
+持续背压或断开显式失败，保留 primary error。逐文件回执、未知隔离和精确输入
+交接保持，旧输入不重放，七项原 strict peer 断言没有放宽。
+
+macOS 原版 peer `native-current-r3` `8/8`，其 `231` 个 core/session/root 输入
+与最终 r5 相同；正常 GUI/MCP arm64 Mach-O r4 构建通过，生产输入到 r5 未变。
+Linux r3 `6/8` 的两项严格 Finished 失败保持；interactive 实测
+`strict_OO=0 / missing_optional_OO=1 / same_shell_continued=true`。
+Linux r4 停在公开包安装连接失败，未进入协议。严格互操作仍为 `HOLD/PARTIAL`；
+Windows 安全后端、Linux 本地 Rust 后端、旧 Python、真实三平台桌面、IME/
+辅助技术及发行保持开放，FILE-05/M4 和完整产品总目标未结束。
+
+708 份原件已无损校验，随后回收本批重复目录、稳定测试副本与临时 peer，
+本次 `626,097,502` 字节、连同先前过期副本合计 `1,547,625,534` 字节。
+所有实现及复核 agent 已关闭，四轮 owned 容器、进程、临时密钥有清理回执。
+本批没有新建用户 chat 或实现 worktree；保留唯一有效 target
+`work/recovery-batch-integration-20261115/target` 和其他任务资源，没有切换源码归属。
+两轮在线最新依赖检查超时，不能签全部最新；本批不新增依赖。
+Rust/Cargo 实测 `1.100.0`，无 toolchain pin 或新 MSRV。仅本地提交，不 push。
+
 ## 当前批次：审核式 PTY Zmodem 候选，工程门禁与源码复核通过
 
 基线为 `721bad2157da8d3a0bc11a1eab5ac59b6616aa9c`。

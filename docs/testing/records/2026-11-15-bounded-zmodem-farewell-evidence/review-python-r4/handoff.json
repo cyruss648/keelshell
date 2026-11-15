@@ -1,0 +1,95 @@
+{
+  "status": "APPROVE",
+  "review_kind": "INDEPENDENT_READ_ONLY_SCOPED_SOURCE_REVIEW",
+  "completed_utc": "2026-11-15T11:01:12.482709+00:00",
+  "base_and_head_sha": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "scope": [
+    "scripts/run_linux_file_interop.py",
+    "scripts/test_linux_file_interop.py"
+  ],
+  "read_dependency": "scripts/openssh_interop.py",
+  "source_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "freeze": "work/pty-farewell-20261115/frozen-inputs-r4.json",
+  "freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "freeze_inputs": {
+    "inputs": 571,
+    "scripts": 12,
+    "total": 583
+  },
+  "before_mismatches": 0,
+  "after_mismatches": 0,
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "notices": [],
+  "independent_executions": {
+    "test_subprocesses": 2,
+    "named_test_executions": 24,
+    "unique_current_candidate_tests": 17,
+    "candidate_passed": 17,
+    "candidate_failed": 0,
+    "candidate_errors": 0,
+    "candidate_skipped": 0,
+    "new_named_tests_included": 7,
+    "new_controlled_scenarios_included": 17,
+    "real_child_grandchild_test_included": 1,
+    "real_timeout_seconds_unchanged": 0.8,
+    "baseline_red": {
+      "run": 7,
+      "failures": 2,
+      "errors": 5,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "elapsed_seconds": 0.325184
+    },
+    "final_file_suite": {
+      "run": 17,
+      "actual_exit": 0,
+      "elapsed_seconds": 1.393398
+    },
+    "test_timeout_each_seconds": 45,
+    "all_test_processes_reaped": true,
+    "supervisor_observed_live_owned_processes_after": 0,
+    "scoped_git_diff_check": {
+      "actual_exit": 0,
+      "count": 1
+    },
+    "no_full_python_or_workspace_gate_rerun": true
+  },
+  "source_approval_conditions": {
+    "only_identified_freeze_and_scope": true,
+    "recognized_inventory_budget_error_and_actual_absolute_deadline_required": true,
+    "unrelated_original_exceptions_fail_before_and_after_deadline": true,
+    "cleanup_finally_and_identity_trust_boundary_unchanged": true,
+    "independent_green_and_baseline_red_observed": true,
+    "original_author_failures_preserved": true
+  },
+  "parent_delivery_condition": "Parent must obtain successful full-gate-r4 terminal receipt and bind unchanged final inputs. This review does not sign that gate.",
+  "author_evidence_only": {
+    "python_suite_run": 148,
+    "python_suite_passed": 147,
+    "python_suite_skipped": 1,
+    "not_independent_test_credit": true
+  },
+  "not_accepted_by_this_review": [
+    "native desktop",
+    "real Linux fixture",
+    "Linux/Windows host process cleanup runtime",
+    "Python 3.8 or other old runtime",
+    "full-gate-r4"
+  ],
+  "environment": {
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.3.34.2)]",
+  "persistent_write_scope": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-python-r4",
+  "explicit_test_tmp_scope": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/tmp",
+  "report": "report.md",
+  "report_sha256": "9993b3d35b996f6ce6b9b0ffb4adafdccf95228a4123e8df55c54c154c5f08c5",
+  "artifact_directory": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-python-r4",
+  "agent_disposition": "Final handoff ready; stop work after delivery; parent may close reviewer."
+}

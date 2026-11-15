@@ -1,0 +1,11 @@
+{
+  "source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/718bcbe8252551a1/out/keelshell_session-718bcbe8252551a1",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/barrier-r3",
+  "sha256": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "inventory": "barrier-r3-inventory.txt",
+  "inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+  "inventory_count": 189,
+  "freeze": "frozen-inputs-r3.json",
+  "built_by": "barrier-r3.log",
+  "parent_built": true
+}

@@ -1,0 +1,12 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.21s
+     Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/718bcbe8252551a1/out/keelshell_session-718bcbe8252551a1)
+
+running 4 tests
+test ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply ... ok
+test ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply ... ok
+test ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked ... ok
+test ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 185 filtered out; finished in 3.12s
+

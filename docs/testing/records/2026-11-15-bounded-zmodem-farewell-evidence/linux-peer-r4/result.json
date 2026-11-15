@@ -1,0 +1,343 @@
+{
+  "schema": 1,
+  "outcome": "failed",
+  "started_utc": "2026-11-15T10:53:18+00:00",
+  "owner": "d2a49e0063f54932b8468ff20a4af2e6",
+  "container_name": "keelshell-file-interop-d2a49e0063f5",
+  "steps": [
+    {
+      "name": "create-container",
+      "argv": [
+        "podman",
+        "run",
+        "--pull=never",
+        "--http-proxy=false",
+        "--label",
+        "io.keelshell.fixture=linux-file-interop",
+        "--label",
+        "io.keelshell.owner=d2a49e0063f54932b8468ff20a4af2e6",
+        "--name",
+        "keelshell-file-interop-d2a49e0063f5",
+        "--detach",
+        "--publish",
+        "127.0.0.1::2222",
+        "--entrypoint",
+        "sleep",
+        "docker.io/library/rust:1.98.1-slim-bookworm",
+        "infinity"
+      ],
+      "pid": 88611,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.185,
+      "stdout_log": "001-create-container.stdout.log",
+      "stderr_log": "001-create-container.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55"
+      ],
+      "pid": 88617,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.104,
+      "stdout_log": "002-container-identity.stdout.log",
+      "stderr_log": "002-container-identity.stderr.log"
+    },
+    {
+      "name": "linux-release",
+      "argv": [
+        "podman",
+        "exec",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55",
+        "cat",
+        "/etc/os-release"
+      ],
+      "pid": 88622,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.174,
+      "stdout_log": "003-linux-release.stdout.log",
+      "stderr_log": "003-linux-release.stderr.log"
+    },
+    {
+      "name": "debian-bridge-repositories",
+      "argv": [
+        "podman",
+        "exec",
+        "-i",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55",
+        "sh",
+        "-ec",
+        "cat > /etc/apt/sources.list.d/debian.sources"
+      ],
+      "pid": 88629,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.173,
+      "stdout_log": "004-debian-bridge-repositories.stdout.log",
+      "stderr_log": "004-debian-bridge-repositories.stderr.log"
+    },
+    {
+      "name": "apt-index-host-bridge",
+      "argv": [
+        "podman",
+        "exec",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55",
+        "timeout",
+        "--kill-after=3",
+        "40",
+        "apt-get",
+        "-o",
+        "Acquire::Retries=0",
+        "-o",
+        "Acquire::http::Timeout=8",
+        "-o",
+        "Acquire::Languages=none",
+        "update"
+      ],
+      "pid": 88634,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 9.032,
+      "stdout_log": "005-apt-index-host-bridge.stdout.log",
+      "stderr_log": "005-apt-index-host-bridge.stderr.log"
+    },
+    {
+      "name": "install-tools-host-bridge",
+      "argv": [
+        "podman",
+        "exec",
+        "--env",
+        "DEBIAN_FRONTEND=noninteractive",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55",
+        "timeout",
+        "--kill-after=3",
+        "40",
+        "apt-get",
+        "-o",
+        "Acquire::Retries=0",
+        "-o",
+        "Acquire::http::Timeout=8",
+        "-o",
+        "Acquire::Languages=none",
+        "install",
+        "--no-install-recommends",
+        "-y",
+        "python3",
+        "openssh-server",
+        "lrzsz",
+        "acl"
+      ],
+      "pid": 88961,
+      "returncode": 100,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 21.758,
+      "stdout_log": "006-install-tools-host-bridge.stdout.log",
+      "stderr_log": "006-install-tools-host-bridge.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55"
+      ],
+      "pid": 89471,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.103,
+      "stdout_log": "007-container-identity.stdout.log",
+      "stderr_log": "007-container-identity.stderr.log"
+    },
+    {
+      "name": "sshd-final-log",
+      "argv": [
+        "podman",
+        "exec",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55",
+        "cat",
+        "/fixture/sshd.log"
+      ],
+      "pid": 89476,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.173,
+      "stdout_log": "008-sshd-final-log.stdout.log",
+      "stderr_log": "008-sshd-final-log.stderr.log"
+    },
+    {
+      "name": "remove-owned-container",
+      "argv": [
+        "podman",
+        "rm",
+        "--force",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55"
+      ],
+      "pid": 89482,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 10.208,
+      "stdout_log": "009-remove-owned-container.stdout.log",
+      "stderr_log": "009-remove-owned-container.stderr.log"
+    },
+    {
+      "name": "confirm-container-absent",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "73a0d36a5f5cadf3d9e626709a19912e5dd39a59605f8deec73942888cdc8e55"
+      ],
+      "pid": 89789,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.107,
+      "stdout_log": "010-confirm-container-absent.stdout.log",
+      "stderr_log": "010-confirm-container-absent.stderr.log"
+    }
+  ],
+  "cleanup": {
+    "owned_host_processes_stopped": true,
+    "owned_container_absent": true,
+    "temporary_keys_removed": true
+  },
+  "source_inputs": {
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+    "crates/keelshell-core/src/server_archive.py": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+  },
+  "boundary": "owned Linux SSH/lrzsz/archive helper fixture; no Cargo, GUI, packaging or all-Linux acceptance",
+  "error": "FixtureFailure: install-tools-host-bridge failed; inspect 006-install-tools-host-bridge logs",
+  "finished_utc": "2026-11-15T10:54:01+00:00",
+  "elapsed_seconds": 42.691,
+  "files": {
+    "001-create-container.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "001-create-container.stdout.log": {
+      "bytes": 65,
+      "sha256": "3ffcdffc366df1f5dac18bd4d23d82c33b2916e586cb40d3051a562513300a6b"
+    },
+    "002-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "002-container-identity.stdout.log": {
+      "bytes": 13049,
+      "sha256": "d6e59b8d673e70f233d1b2945bbaab41351d57566be9a7997c860d29a4685cb2"
+    },
+    "003-linux-release.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "003-linux-release.stdout.log": {
+      "bytes": 267,
+      "sha256": "59a77b5f2666d9c85c489bd1911a6eebbd91ef22fe48b90a3b75f1b21f3844d4"
+    },
+    "004-debian-bridge-repositories.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "004-debian-bridge-repositories.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "005-apt-index-host-bridge.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "005-apt-index-host-bridge.stdout.log": {
+      "bytes": 816,
+      "sha256": "aadab33838706c35984e3a4279578297ecbb3fa5b6dada3a002da2247d5f617e"
+    },
+    "006-install-tools-host-bridge.stderr.log": {
+      "bytes": 3798,
+      "sha256": "a634ff5cced5f93cfd5db427cf0bd95e82bbee680503704010848d93056739bf"
+    },
+    "006-install-tools-host-bridge.stdout.log": {
+      "bytes": 6652,
+      "sha256": "0b35fdc0c4d4c94c7c4001002aeb8fd0d6cf5adb469e9c084512076c28e9ef93"
+    },
+    "007-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "007-container-identity.stdout.log": {
+      "bytes": 13049,
+      "sha256": "d6e59b8d673e70f233d1b2945bbaab41351d57566be9a7997c860d29a4685cb2"
+    },
+    "008-sshd-final-log.stderr.log": {
+      "bytes": 50,
+      "sha256": "5b3a43dc9e09fc519c0773c94259311fdc65335f2298b3f1aa1a609e49d06f9d"
+    },
+    "008-sshd-final-log.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "009-remove-owned-container.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "009-remove-owned-container.stdout.log": {
+      "bytes": 65,
+      "sha256": "3ffcdffc366df1f5dac18bd4d23d82c33b2916e586cb40d3051a562513300a6b"
+    },
+    "010-confirm-container-absent.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "010-confirm-container-absent.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "progress.json": {
+      "bytes": 6891,
+      "sha256": "ff5843e60c9b4cc32cfe83f377af2af69bae4b6f62c23b9ba9184b8f9e11f53e"
+    },
+    "public-package-bridge.json": {
+      "bytes": 4867,
+      "sha256": "7379abc4fb35e776c1752d0d7cc8bb885d354c213b394d03d9f9605bca87274c"
+    },
+    "source-snapshot/crates__keelshell-core__src__server_archive.py.txt": {
+      "bytes": 28798,
+      "sha256": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+    },
+    "source-snapshot/scripts__openssh_interop.py.txt": {
+      "bytes": 24831,
+      "sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+    },
+    "source-snapshot/scripts__run_linux_file_interop.py.txt": {
+      "bytes": 52893,
+      "sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e"
+    }
+  }
+}

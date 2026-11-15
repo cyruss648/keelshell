@@ -1,0 +1,78 @@
+   Compiling keelshell-core v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.94s
+     Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/80a83cd31344afd3/out/zmodem-80a83cd31344afd3)
+
+running 7 tests
+test receiver_failed_input_preserves_farewell_tail_at_every_split ... FAILED
+test receiver_failed_input_preserves_farewell_tail_bytewise ... FAILED
+test receiver_peer_cancel_preserves_farewell_tail_at_every_split ... FAILED
+test receiver_failed_input_preserves_farewell_tail_whole ... FAILED
+test receiver_peer_cancel_preserves_farewell_tail_whole ... FAILED
+test receiver_peer_cancel_preserves_farewell_tail_bytewise ... FAILED
+test receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup ... FAILED
+
+failures:
+
+---- receiver_failed_input_preserves_farewell_tail_at_every_split stdout ----
+
+thread 'receiver_failed_input_preserves_farewell_tail_at_every_split' (7256980) panicked at crates/keelshell-core/tests/zmodem.rs:2084:5:
+assertion `left == right` failed
+  left: [Send([24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]), Cancelled]
+ right: [Send([24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]), Cancelled, Terminal([228, 184, 170, 36, 32])]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- receiver_failed_input_preserves_farewell_tail_bytewise stdout ----
+
+thread 'receiver_failed_input_preserves_farewell_tail_bytewise' (7256981) panicked at crates/keelshell-core/tests/zmodem.rs:2084:5:
+assertion `left == right` failed
+  left: [Send([24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]), Cancelled]
+ right: [Send([24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]), Cancelled, Terminal([228, 184, 170, 36, 32])]
+
+---- receiver_peer_cancel_preserves_farewell_tail_at_every_split stdout ----
+
+thread 'receiver_peer_cancel_preserves_farewell_tail_at_every_split' (7256983) panicked at crates/keelshell-core/tests/zmodem.rs:2024:5:
+assertion `left == right` failed
+  left: [17, 110, 101, 120, 116]
+ right: [228, 184, 170, 36, 32, 17, 110, 101, 120, 116]
+
+---- receiver_failed_input_preserves_farewell_tail_whole stdout ----
+
+thread 'receiver_failed_input_preserves_farewell_tail_whole' (7256982) panicked at crates/keelshell-core/tests/zmodem.rs:2084:5:
+assertion `left == right` failed
+  left: [Send([24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]), Cancelled]
+ right: [Send([24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]), Cancelled, Terminal([228, 184, 170, 36, 32])]
+
+---- receiver_peer_cancel_preserves_farewell_tail_whole stdout ----
+
+thread 'receiver_peer_cancel_preserves_farewell_tail_whole' (7256985) panicked at crates/keelshell-core/tests/zmodem.rs:2024:5:
+assertion `left == right` failed
+  left: [17, 110, 101, 120, 116]
+ right: [228, 184, 170, 36, 32, 17, 110, 101, 120, 116]
+
+---- receiver_peer_cancel_preserves_farewell_tail_bytewise stdout ----
+
+thread 'receiver_peer_cancel_preserves_farewell_tail_bytewise' (7256984) panicked at crates/keelshell-core/tests/zmodem.rs:2024:5:
+assertion `left == right` failed
+  left: [17, 110, 101, 120, 116]
+ right: [228, 184, 170, 36, 32, 17, 110, 101, 120, 116]
+
+---- receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup stdout ----
+
+thread 'receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup' (7256986) panicked at crates/keelshell-core/tests/zmodem.rs:2143:5:
+assertion `left == right` failed
+  left: Some(Cancelled)
+ right: Some(Terminal([228, 184, 170, 36, 32]))
+
+
+failures:
+    receiver_failed_input_preserves_farewell_tail_at_every_split
+    receiver_failed_input_preserves_farewell_tail_bytewise
+    receiver_failed_input_preserves_farewell_tail_whole
+    receiver_peer_cancel_preserves_farewell_tail_at_every_split
+    receiver_peer_cancel_preserves_farewell_tail_bytewise
+    receiver_peer_cancel_preserves_farewell_tail_whole
+    receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup
+
+test result: FAILED. 0 passed; 7 failed; 0 ignored; 0 measured; 95 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p keelshell-core --test zmodem`

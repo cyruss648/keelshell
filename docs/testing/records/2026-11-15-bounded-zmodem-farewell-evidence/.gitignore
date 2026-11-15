@@ -1,0 +1,2 @@
+# Raw validation logs are intentional evidence in this directory.
+!*.log

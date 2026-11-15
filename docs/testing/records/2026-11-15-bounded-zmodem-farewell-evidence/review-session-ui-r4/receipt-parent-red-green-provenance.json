@@ -1,0 +1,66 @@
+{
+  "recorded_utc": "2026-11-15T10:55:15.637021+00:00",
+  "parent_evidence": {
+    "app-cleanup-red-r1": {
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/logs/app-cleanup-red-r1.json",
+      "receipt_sha256": "018718495bd223af604e4ecdbc3895ac458e2e7bba6dab871e5bdafa9b374d34",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/logs/app-cleanup-red-r1.log",
+      "log_sha256": "58e2a24d5e1f108dbf72f2f99731bb96232185bdc861770a2fc940607d3cf027",
+      "parent_receipt": {
+        "command": [
+          "cargo",
+          "test",
+          "-p",
+          "keelshell-app",
+          "--locked",
+          "zmodem_cleanup",
+          "--",
+          "--test-threads=4"
+        ],
+        "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+        "label": "app-cleanup-red-r1",
+        "pid": 80401,
+        "started_utc": "2026-11-15T10:48:40.628812+00:00",
+        "finished_utc": "2026-11-15T10:49:16.683094+00:00",
+        "seconds": 36.054,
+        "exit": 101,
+        "timed_out": false,
+        "log_sha256": "58e2a24d5e1f108dbf72f2f99731bb96232185bdc861770a2fc940607d3cf027",
+        "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+      },
+      "parent_execution_not_independent": true
+    },
+    "app-r5": {
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/logs/app-r5.json",
+      "receipt_sha256": "847888a1440843771265a252be72727cf743b4b7c52684d1020deb5aebaa2735",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/logs/app-r5.log",
+      "log_sha256": "fdef3e63cb0541f080618eab55d3008721440860c56d4ef4f59a72a7c688503d",
+      "parent_receipt": {
+        "command": [
+          "cargo",
+          "test",
+          "-p",
+          "keelshell-app",
+          "--locked",
+          "zmodem",
+          "--",
+          "--test-threads=4"
+        ],
+        "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+        "label": "app-r5",
+        "pid": 86045,
+        "started_utc": "2026-11-15T10:50:12.464741+00:00",
+        "finished_utc": "2026-11-15T10:50:30.102541+00:00",
+        "seconds": 17.638,
+        "exit": 0,
+        "timed_out": false,
+        "log_sha256": "fdef3e63cb0541f080618eab55d3008721440860c56d4ef4f59a72a7c688503d",
+        "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+      },
+      "parent_execution_not_independent": true
+    }
+  },
+  "red_result": "0 passed / 4 failed / 1234 filtered / exit 101",
+  "green_result": "30 passed / 0 failed / 1208 filtered / exit 0",
+  "red_dynamically_reproduced_by_reviewer": false
+}

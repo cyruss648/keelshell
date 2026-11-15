@@ -1,0 +1,40 @@
+{
+  "recorded_utc": "2026-11-15T11:20:31.054369+00:00",
+  "closed_reviewers": [
+    {
+      "id": "01a1debf-9007-7360-b8da-4407e7267983",
+      "name": "Copernicus",
+      "scope": "core",
+      "report": "review-core-r5/final-closeout.md",
+      "report_sha256": "88cbb24f84b9c76d6f0666fae903ef22a5edf906ad104199883d2462f407e58c",
+      "close_tool": "multi_agent_v1.close_agent",
+      "close_tool_previous_status": "completed",
+      "close_success": true
+    },
+    {
+      "id": "01a1dec0-61ae-7300-9a06-cee5bf0f7644",
+      "name": "Sagan",
+      "scope": "session/transport/bridge/UI",
+      "report": "review-session-ui-r5/review-session-ui-r5.md",
+      "report_sha256": "046da2d34a54853f31b2cb14b79116498258835997af3b1f90f9334aca45fa22",
+      "close_tool": "multi_agent_v1.close_agent",
+      "close_tool_previous_status": "completed",
+      "close_success": true
+    },
+    {
+      "id": "01a1ded6-d490-7bd2-b307-d64fce26ec8b",
+      "name": "Tesla",
+      "scope": "Python fixture runner",
+      "report": "review-python-r4/final-r5.md",
+      "report_sha256": "6fec2c6e0e59dc227c5248b705d345a45c91660a7423ea819370fb6e7f016b53",
+      "close_tool": "multi_agent_v1.close_agent",
+      "close_tool_previous_status": "completed",
+      "close_success": true
+    }
+  ],
+  "implementation_author_closure": "All implementation authors were already closed in the supplied prior-turn handoff; no new author agents were started in this continuation.",
+  "new_user_chats_created_in_this_batch": 0,
+  "new_worktrees_created_in_this_batch": 0,
+  "other_task_chats_modified": false,
+  "permanent_deletion_of_unrelated_chats": false
+}

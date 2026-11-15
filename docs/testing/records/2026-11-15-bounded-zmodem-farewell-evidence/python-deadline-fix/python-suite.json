@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/opt/homebrew/opt/python@3.15/bin/python3.15",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "scripts",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "timeout_seconds": 60,
+  "environment": {
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "source_sha256": {
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/test_linux_file_interop.py": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c"
+  },
+  "returncode": 0,
+  "timed_out": false,
+  "reaped": true,
+  "elapsed_seconds": 8.841461,
+  "source_sha256_after": {
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/test_linux_file_interop.py": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c"
+  },
+  "source_drift": false,
+  "tests_run": 148,
+  "result_lines": [
+    "Ran 148 tests in 8.683s",
+    "OK (skipped=1)"
+  ]
+}

@@ -1,0 +1,9 @@
+
+running 4 tests
+test ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure ... ok
+test ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply ... ok
+test ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked ... ok
+test ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 185 filtered out; finished in 3.56s
+

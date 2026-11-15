@@ -1,0 +1,89 @@
+{
+  "freeze": "frozen-inputs-r3.json",
+  "files": [
+    {
+      "source": "crates/keelshell-app/src/ssh_bridge.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-app__src__ssh_bridge.rs.txt",
+      "sha256": "bbd4ef2d764714f43c217f5296ac33b47c9f222122cdf9533357ff2ac6cd878c",
+      "bytes": 13866
+    },
+    {
+      "source": "crates/keelshell-app/src/ssh_bridge_tests.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-app__src__ssh_bridge_tests.rs.txt",
+      "sha256": "fa52af544058b9720e60428ba5832969e9f4d19a02aec51aa1e21150d25e634f",
+      "bytes": 31073
+    },
+    {
+      "source": "crates/keelshell-app/src/ssh_bridge_zmodem.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-app__src__ssh_bridge_zmodem.rs.txt",
+      "sha256": "7238f22758aed9a2f38afd84e42cf55da0426a34b143c77ceff64d68856fd4f3",
+      "bytes": 9981
+    },
+    {
+      "source": "crates/keelshell-app/src/terminal_zmodem.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-app__src__terminal_zmodem.rs.txt",
+      "sha256": "c5e16836c117752d16a5e157c4e355d79d581b326367c3aeb6f4068facc77cc5",
+      "bytes": 36344
+    },
+    {
+      "source": "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-app__src__terminal_zmodem_tests.rs.txt",
+      "sha256": "4d98fb161d6d67a6227505532bd7c68f9b3484d4ee6ddf09ae72c5fb5fb39aff",
+      "bytes": 36470
+    },
+    {
+      "source": "crates/keelshell-core/src/zmodem.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-core__src__zmodem.rs.txt",
+      "sha256": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+      "bytes": 16776
+    },
+    {
+      "source": "crates/keelshell-core/src/zmodem/codec.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-core__src__zmodem__codec.rs.txt",
+      "sha256": "4fc61667741af0188b3372afc7ce9fde0fd9229410bda4951c929ceef3314bc7",
+      "bytes": 19543
+    },
+    {
+      "source": "crates/keelshell-core/src/zmodem/receiver.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-core__src__zmodem__receiver.rs.txt",
+      "sha256": "cfc9207ae8a878a51c55228c4c6310f52b07507ffb481d9a6130eb5d329cb071",
+      "bytes": 22715
+    },
+    {
+      "source": "crates/keelshell-core/tests/zmodem.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-core__tests__zmodem.rs.txt",
+      "sha256": "15c628a9300a37ee8942b7dbd0468ffb463783a48bec8fecea9001b59f8d720f",
+      "bytes": 71556
+    },
+    {
+      "source": "crates/keelshell-session/src/ssh.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-session__src__ssh.rs.txt",
+      "sha256": "e55a426d7110e8120eb1fa53c617b7362360fa7d2be7309cc259e242859194f8",
+      "bytes": 65298
+    },
+    {
+      "source": "crates/keelshell-session/src/ssh/write_barrier_tests.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-session__src__ssh__write_barrier_tests.rs.txt",
+      "sha256": "a7a77b151b2cb334bc3e96ad96a8c83859061bcf33d1d17e46692f8d6eb86a99",
+      "bytes": 16280
+    },
+    {
+      "source": "crates/keelshell-session/src/zmodem.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-session__src__zmodem.rs.txt",
+      "sha256": "50913b9a73047dea17d4ea722c9d78ffe4e5d3c86d6d1281858ca58582555ab1",
+      "bytes": 52950
+    },
+    {
+      "source": "crates/keelshell-session/tests/zmodem.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-session__tests__zmodem.rs.txt",
+      "sha256": "67ea18033dcfafdb41050f8e8d1766c53bfc4497ed07a710daa284c713fcb34b",
+      "bytes": 42662
+    },
+    {
+      "source": "crates/keelshell-session/tests/zmodem_openssh.rs",
+      "snapshot": "source-snapshot-r3/crates__keelshell-session__tests__zmodem_openssh.rs.txt",
+      "sha256": "2fad393e12f41197dfff10dd43e6c4ef643a7407bb60f6801c17198df55639cf",
+      "bytes": 22468
+    }
+  ]
+}

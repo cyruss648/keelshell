@@ -1,0 +1,35 @@
+{
+  "recorded_utc": "2026-11-15T10:55:59.940951+00:00",
+  "files": [
+    {
+      "path": "freeze-final.json",
+      "bytes": 161664,
+      "sha256": "a01531a7b3dbde73e5dc72d11a4d7b8bf37918ce771043e71af0886859ddca3c"
+    },
+    {
+      "path": "freeze-initial.json",
+      "bytes": 162832,
+      "sha256": "7504087df6370b4deb2e9720b944b239b11928582509be2099a89dda3b58055d"
+    },
+    {
+      "path": "retained-core-execution-binding.json",
+      "bytes": 1618,
+      "sha256": "94105f692ac3c2903794ede79190ee693d00c5a509ac7332431157c0bf86456d"
+    },
+    {
+      "path": "review-core-r4.json",
+      "bytes": 4491,
+      "sha256": "9031f34c806e5dfdd4e9bdd5cd4efefe933454ac872968f78ea05a1d27640b5d"
+    },
+    {
+      "path": "review-core-r4.md",
+      "bytes": 7071,
+      "sha256": "840fb1bcc1b50c1b03b3a0352bb69fcf59ef22f012d8c31acf5d04f17e2daa6a"
+    },
+    {
+      "path": "source-equivalence-r3-r4-independent.json",
+      "bytes": 79970,
+      "sha256": "dbe8eed04e6ebd117e27c4ae4b3eff56161cbedf38f37dd437421be69563c181"
+    }
+  ]
+}

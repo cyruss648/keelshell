@@ -1,0 +1,52 @@
+{
+  "recorded_utc": "2026-11-15T10:40:05.803311+00:00",
+  "status": "REVIEW_IN_PROGRESS_P2_003_OPEN_AWAITING_R3_BOUND_BINARIES",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "expected_freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "engineering_input_count": 571,
+  "script_count": 12,
+  "mismatches": [],
+  "extra_engineering_inputs": [],
+  "missing_engineering_inputs": [],
+  "r2_to_r3_delta": [
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/src/zmodem/codec.rs",
+      "r2_sha256": "946c35e4b1dedb506c8e18197e1eec5fd88b19a8f547c3c194dc303ddaf0326b",
+      "r3_sha256": "4fc61667741af0188b3372afc7ce9fde0fd9229410bda4951c929ceef3314bc7"
+    },
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/src/zmodem/receiver.rs",
+      "r2_sha256": "49f90debe598db4f3f54ad33662334c6c741b04215386c3690b3772884b79967",
+      "r3_sha256": "cfc9207ae8a878a51c55228c4c6310f52b07507ffb481d9a6130eb5d329cb071"
+    },
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/tests/zmodem.rs",
+      "r2_sha256": "8c5427082ce1c2c88a1a17907519842dcd3a3af0030b8f7859f1faa62e96ee95",
+      "r3_sha256": "15c628a9300a37ee8942b7dbd0468ffb463783a48bec8fecea9001b59f8d720f"
+    },
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "r2_sha256": "d91e54ebd92544bf21ae972ba31786516930b51f5f0e2d844cc9ec32c66062dd",
+      "r3_sha256": "67ea18033dcfafdb41050f8e8d1766c53bfc4497ed07a710daa284c713fcb34b"
+    }
+  ],
+  "requested_binaries": {
+    "session-r4": false,
+    "app-r4": false,
+    "barrier-r3": false
+  },
+  "open_findings": [
+    {
+      "id": "P2-003",
+      "severity": "P2",
+      "original_notice": "../review-session-ui-r2/notice-P2-003.md",
+      "r3_bridge_source_unchanged": true
+    }
+  ],
+  "independently_recompiled": false
+}

@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/usr/bin/curl",
+    "--fail",
+    "--silent",
+    "--show-error",
+    "--location",
+    "--max-time",
+    "25",
+    "--output",
+    "work/pty-farewell-20261115/lrzsz-0.13.1.tar.gz",
+    "https://www.ohse.de/uwe/releases/lrzsz-0.13.1.tar.gz"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "peer-source-r1",
+  "pid": 7531,
+  "started_utc": "2026-11-15T09:38:38.473529+00:00",
+  "finished_utc": "2026-11-15T09:38:40.259162+00:00",
+  "seconds": 1.786,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

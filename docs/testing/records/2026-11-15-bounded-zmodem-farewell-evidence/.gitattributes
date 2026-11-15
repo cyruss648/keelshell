@@ -1,0 +1,27 @@
+# Original evidence preserves exact bytes, including upstream line endings.
+*.gz binary
+*.log binary
+"linux-peer-r1/006-install-tools-host-bridge.stdout.log" binary
+"linux-peer-r2/006-install-tools-host-bridge.stdout.log" binary
+"linux-peer-r3/006-install-tools-host-bridge.stdout.log" binary
+"native-current-r1/sshd.log" binary
+"native-current-r2/sshd.log" binary
+"native-current-r3/sshd.log" binary
+"native-observed-r1/sshd.log" binary
+"native-original-r1/sshd.log" binary
+"peer-build-0.log" binary
+"peer-build-1.log" binary
+"python-deadline-fix/fix.patch" binary
+"python-deadline-fix/red-boundary.log" binary
+"review-core-r2/source-diff-r2.patch" binary
+"review-core-r3/session-tests-diff-r2-r3.patch" binary
+"review-python-r4/independent-baseline-red.log" binary
+"review-python-r4/reviewed.patch" binary
+"review-session-ui-r1/source-diff-r1.patch" binary
+"review-session-ui-r4/app-ssh-bridge-r5.stdout.txt" binary
+"review-session-ui-r4/app-zmodem-r5.stdout.txt" binary
+"review-session-ui-r5/app-ssh-bridge-r6.stdout.txt" binary
+"tail-probe-r2/tail-peer-0.log" binary
+"tail-probe-r2/tail-peer-1.log" binary
+"tail-probe-r2/tail-peer-2.log" binary
+"tail-probe-r2/tail-peer-3.log" binary

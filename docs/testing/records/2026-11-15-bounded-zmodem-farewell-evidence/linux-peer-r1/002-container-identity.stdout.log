@@ -1,0 +1,314 @@
+[
+     {
+          "Id": "de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112",
+          "Created": "2026-11-15T18:07:46.913661334+08:00",
+          "Path": "sleep",
+          "Args": [
+               "infinity"
+          ],
+          "State": {
+               "OciVersion": "1.3.0",
+               "Status": "running",
+               "Running": true,
+               "Paused": false,
+               "Restarting": false,
+               "OOMKilled": false,
+               "Dead": false,
+               "Pid": 55587,
+               "ConmonPid": 55585,
+               "ExitCode": 0,
+               "Error": "",
+               "StartedAt": "2026-11-15T18:07:46.977348603+08:00",
+               "FinishedAt": "0001-01-01T00:00:00Z",
+               "CgroupPath": "/user.slice/user-501.slice/user@501.service/user.slice/libpod-de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112.scope",
+               "CheckpointedAt": "0001-01-01T00:00:00Z",
+               "RestoredAt": "0001-01-01T00:00:00Z"
+          },
+          "Image": "17156b215e21a0b10b1d7576ee47b656ef76bb4f59575f396adcf59320dc6d8a",
+          "ImageDigest": "sha256:ff521445a372125ed4f76e1453a1f8098f2d05332d1601d30db1c1f62757e730",
+          "ImageName": "docker.io/library/rust:1.98.1-slim-bookworm",
+          "Rootfs": "",
+          "Pod": "",
+          "ResolvConfPath": "/run/user/501/containers/overlay-containers/de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112/userdata/resolv.conf",
+          "HostnamePath": "/run/user/501/containers/overlay-containers/de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112/userdata/hostname",
+          "HostsPath": "/run/user/501/containers/overlay-containers/de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112/userdata/hosts",
+          "StaticDir": "/var/home/core/.local/share/containers/storage/overlay-containers/de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112/userdata",
+          "OCIConfigPath": "/var/home/core/.local/share/containers/storage/overlay-containers/de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112/userdata/config.json",
+          "OCIRuntime": "crun",
+          "ConmonPidFile": "/run/user/501/containers/overlay-containers/de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112/userdata/conmon.pid",
+          "PidFile": "/run/user/501/containers/overlay-containers/de597905ec4612e16acaf3f9aa9801ccbd6dec70bd6ac2bc4c2cc55381e11112/userdata/pidfile",
+          "Name": "keelshell-file-interop-c43a07e51804",
+          "RestartCount": 0,
+          "Driver": "overlay",
+          "MountLabel": "system_u:object_r:container_file_t:s0:c163,c557",
+          "ProcessLabel": "system_u:system_r:container_t:s0:c163,c557",
+          "AppArmorProfile": "",
+          "EffectiveCaps": [
+               "CAP_CHOWN",
+               "CAP_DAC_OVERRIDE",
+               "CAP_FOWNER",
+               "CAP_FSETID",
+               "CAP_KILL",
+               "CAP_NET_BIND_SERVICE",
+               "CAP_SETFCAP",
+               "CAP_SETGID",
+               "CAP_SETPCAP",
+               "CAP_SETUID",
+               "CAP_SYS_CHROOT"
+          ],
+          "BoundingCaps": [
+               "CAP_CHOWN",
+               "CAP_DAC_OVERRIDE",
+               "CAP_FOWNER",
+               "CAP_FSETID",
+               "CAP_KILL",
+               "CAP_NET_BIND_SERVICE",
+               "CAP_SETFCAP",
+               "CAP_SETGID",
+               "CAP_SETPCAP",
+               "CAP_SETUID",
+               "CAP_SYS_CHROOT"
+          ],
+          "ExecIDs": [],
+          "GraphDriver": {
+               "Name": "overlay",
+               "Data": {
+                    "LowerDir": "/var/home/core/.local/share/containers/storage/overlay/7bfc478f98ac2a9cbd586331bc661930b8f50dd9f03655882d19a2a0b20d20e7/diff:/var/home/core/.local/share/containers/storage/overlay/055ab12bd547e17a0630037f06a186cf405e3f61bb03a614562ca8f5ab52a8be/diff",
+                    "MergedDir": "/var/home/core/.local/share/containers/storage/overlay/1772fef66c6a87314cfccb00d944bda627950a7cd199645810a6c2715bb96d29/merged",
+                    "UpperDir": "/var/home/core/.local/share/containers/storage/overlay/1772fef66c6a87314cfccb00d944bda627950a7cd199645810a6c2715bb96d29/diff",
+                    "WorkDir": "/var/home/core/.local/share/containers/storage/overlay/1772fef66c6a87314cfccb00d944bda627950a7cd199645810a6c2715bb96d29/work"
+               }
+          },
+          "Mounts": [],
+          "Dependencies": [],
+          "NetworkSettings": {
+               "EndpointID": "",
+               "Gateway": "10.88.0.1",
+               "IPAddress": "10.88.0.15",
+               "IPPrefixLen": 16,
+               "IPv6Gateway": "",
+               "GlobalIPv6Address": "",
+               "GlobalIPv6PrefixLen": 0,
+               "MacAddress": "36:3f:3d:af:cc:f6",
+               "Bridge": "",
+               "SandboxID": "",
+               "HairpinMode": false,
+               "LinkLocalIPv6Address": "",
+               "LinkLocalIPv6PrefixLen": 0,
+               "Ports": {
+                    "2222/tcp": [
+                         {
+                              "HostIp": "127.0.0.1",
+                              "HostPort": "38797"
+                         }
+                    ]
+               },
+               "SandboxKey": "/run/user/501/netns/netns-93f3671b-b2a6-901c-59a3-c65b1d946619",
+               "Networks": {
+                    "podman": {
+                         "EndpointID": "",
+                         "Gateway": "10.88.0.1",
+                         "IPAddress": "10.88.0.15",
+                         "IPPrefixLen": 16,
+                         "IPv6Gateway": "",
+                         "GlobalIPv6Address": "",
+                         "GlobalIPv6PrefixLen": 0,
+                         "MacAddress": "36:3f:3d:af:cc:f6",
+                         "NetworkID": "2f259bab93aaaaa2542ba43ef33eb990d0999ee1b9924b557b7be53c0b7a1bb9",
+                         "DriverOpts": null,
+                         "IPAMConfig": null,
+                         "Links": null,
+                         "Aliases": [
+                              "de597905ec46"
+                         ]
+                    }
+               }
+          },
+          "Namespace": "",
+          "IsInfra": false,
+          "IsService": false,
+          "IsInitCtr": false,
+          "KubeExitCodePropagation": "invalid",
+          "lockNumber": 19,
+          "Config": {
+               "Hostname": "de597905ec46",
+               "Domainname": "",
+               "User": "",
+               "AttachStdin": false,
+               "AttachStdout": false,
+               "AttachStderr": false,
+               "Tty": false,
+               "OpenStdin": false,
+               "StdinOnce": false,
+               "Env": [
+                    "CARGO_HOME=/usr/local/cargo",
+                    "RUST_VERSION=1.98.1",
+                    "PATH=/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "container=podman",
+                    "RUSTUP_HOME=/usr/local/rustup",
+                    "HOME=/root",
+                    "HOSTNAME=de597905ec46"
+               ],
+               "Cmd": [
+                    "infinity"
+               ],
+               "Image": "docker.io/library/rust:1.98.1-slim-bookworm",
+               "Volumes": null,
+               "WorkingDir": "/",
+               "Entrypoint": [
+                    "sleep"
+               ],
+               "OnBuild": null,
+               "Labels": {
+                    "io.keelshell.fixture": "linux-file-interop",
+                    "io.keelshell.owner": "c43a07e51804479584fd351e59ef8e9f",
+                    "org.opencontainers.image.source": "https://github.com/rust-lang/docker-rust"
+               },
+               "Annotations": {
+                    "io.container.manager": "libpod",
+                    "org.opencontainers.image.stopSignal": "15",
+                    "org.systemd.property.KillSignal": "15",
+                    "org.systemd.property.TimeoutStopUSec": "uint64 10000000"
+               },
+               "StopSignal": "SIGTERM",
+               "HealthcheckOnFailureAction": "none",
+               "HealthLogDestination": "local",
+               "HealthcheckMaxLogCount": 5,
+               "HealthcheckMaxLogSize": 500,
+               "CreateCommand": [
+                    "podman",
+                    "run",
+                    "--pull=never",
+                    "--http-proxy=false",
+                    "--label",
+                    "io.keelshell.fixture=linux-file-interop",
+                    "--label",
+                    "io.keelshell.owner=c43a07e51804479584fd351e59ef8e9f",
+                    "--name",
+                    "keelshell-file-interop-c43a07e51804",
+                    "--detach",
+                    "--publish",
+                    "127.0.0.1::2222",
+                    "--entrypoint",
+                    "sleep",
+                    "docker.io/library/rust:1.98.1-slim-bookworm",
+                    "infinity"
+               ],
+               "Umask": "0022",
+               "Timeout": 0,
+               "StopTimeout": 10,
+               "Passwd": true,
+               "sdNotifyMode": "container",
+               "ExposedPorts": {
+                    "2222/tcp": {}
+               }
+          },
+          "HostConfig": {
+               "Binds": [],
+               "CgroupManager": "systemd",
+               "CgroupMode": "private",
+               "ContainerIDFile": "",
+               "LogConfig": {
+                    "Type": "journald",
+                    "Config": null,
+                    "Path": "",
+                    "Tag": "",
+                    "Size": "-1B"
+               },
+               "NetworkMode": "bridge",
+               "PortBindings": {
+                    "2222/tcp": [
+                         {
+                              "HostIp": "127.0.0.1",
+                              "HostPort": "38797"
+                         }
+                    ]
+               },
+               "RestartPolicy": {
+                    "Name": "no",
+                    "MaximumRetryCount": 0
+               },
+               "AutoRemove": false,
+               "AutoRemoveImage": false,
+               "Annotations": {
+                    "io.container.manager": "libpod",
+                    "org.opencontainers.image.stopSignal": "15",
+                    "org.systemd.property.KillSignal": "15",
+                    "org.systemd.property.TimeoutStopUSec": "uint64 10000000"
+               },
+               "VolumeDriver": "",
+               "VolumesFrom": null,
+               "CapAdd": [],
+               "CapDrop": [],
+               "Dns": [],
+               "DnsOptions": null,
+               "DnsSearch": null,
+               "ExtraHosts": null,
+               "HostsFile": "",
+               "GroupAdd": null,
+               "IpcMode": "shareable",
+               "Cgroup": "",
+               "Cgroups": "default",
+               "Links": null,
+               "OomScoreAdj": 0,
+               "PidMode": "private",
+               "Privileged": false,
+               "PublishAllPorts": false,
+               "ReadonlyRootfs": false,
+               "SecurityOpt": [],
+               "Tmpfs": {},
+               "UTSMode": "private",
+               "UsernsMode": "",
+               "ShmSize": 65536000,
+               "Runtime": "oci",
+               "ConsoleSize": [
+                    0,
+                    0
+               ],
+               "Isolation": "",
+               "CpuShares": 0,
+               "Memory": 0,
+               "NanoCpus": 0,
+               "CgroupParent": "user.slice",
+               "BlkioWeight": 0,
+               "BlkioWeightDevice": null,
+               "BlkioDeviceReadBps": null,
+               "BlkioDeviceWriteBps": null,
+               "BlkioDeviceReadIOps": null,
+               "BlkioDeviceWriteIOps": null,
+               "CpuPeriod": 0,
+               "CpuQuota": 0,
+               "CpuRealtimePeriod": 0,
+               "CpuRealtimeRuntime": 0,
+               "CpusetCpus": "",
+               "CpusetMems": "",
+               "Devices": [],
+               "DiskQuota": 0,
+               "KernelMemory": 0,
+               "MemoryReservation": 0,
+               "MemorySwap": 0,
+               "MemorySwappiness": null,
+               "OomKillDisable": false,
+               "PidsLimit": 0,
+               "Ulimits": [
+                    {
+                         "Name": "RLIMIT_NOFILE",
+                         "Soft": 524288,
+                         "Hard": 524288
+                    },
+                    {
+                         "Name": "RLIMIT_NPROC",
+                         "Soft": 31610,
+                         "Hard": 31610
+                    }
+               ],
+               "CpuCount": 0,
+               "CpuPercent": 0,
+               "IOMaximumIOps": 0,
+               "IOMaximumBandwidth": 0,
+               "CgroupConf": null
+          },
+          "UseImageHosts": false,
+          "UseImageHostname": false
+     }
+]

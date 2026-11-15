@@ -1,0 +1,43 @@
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.72s
+     Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dec5f1080a7dd190/out/keelshell_app-dec5f1080a7dd190)
+
+running 30 tests
+test ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation ... ok
+test ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff ... ok
+test ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write ... ok
+test ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout ... ok
+test ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order ... ok
+test ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer ... ok
+test ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases ... ok
+test ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion ... ok
+test ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff ... ok
+test terminal::zmodem::tests::zmodem_cancel_submits_once_while_waiting_for_its_terminal_event ... ok
+test terminal::zmodem::tests::zmodem_complete_reviews_keep_actions_visible_across_registered_themes ... ok
+test terminal::zmodem::tests::zmodem_completion_requests_exact_input_handoff_without_replaying_old_bytes ... ok
+test terminal::zmodem::tests::zmodem_late_stale_rejection_preserves_each_terminal_result ... ok
+test terminal::zmodem::tests::zmodem_live_lease_blocks_input_before_its_ui_notification_is_read ... ok
+test terminal::zmodem::tests::zmodem_missing_farewell_before_an_offer_requests_exact_handoff ... ok
+test terminal::zmodem::tests::zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown ... ok
+test terminal::zmodem::tests::zmodem_preoffer_cancelled_requests_exact_handoff ... ok
+test terminal::zmodem::tests::zmodem_preoffer_failed_requests_exact_handoff ... ok
+test terminal::zmodem::tests::zmodem_preoffer_finished_requests_exact_handoff ... ok
+test terminal::zmodem::tests::zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids ... ok
+test terminal::zmodem::tests::zmodem_retained_confirm_cannot_authorize_a_replaced_offer ... ok
+test terminal::zmodem::tests::zmodem_review_binds_the_actual_endpoint_despite_remote_osc_titles ... ok
+test terminal::zmodem::tests::zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer ... ok
+test terminal::zmodem::tests::zmodem_unknown_acknowledgement_waits_for_the_real_publication_latch ... ok
+test terminal::zmodem::tests::zmodem_unknown_result_survives_later_success_and_rejects_unread_acknowledgement ... ok
+test terminal::zmodem::tests::zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound ... ok
+test terminal::zmodem::tests::zmodem_verified_saves_survive_next_offer_finished_and_dismissal ... ok
+test ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer ... ok
+test ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer ... ok
+test ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 1208 filtered out; finished in 6.29s
+

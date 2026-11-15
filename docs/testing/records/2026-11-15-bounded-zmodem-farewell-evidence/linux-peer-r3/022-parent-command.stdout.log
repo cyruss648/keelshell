@@ -1,0 +1,19 @@
+
+running 8 tests
+test real_rz_cancel_before_source_review_does_not_create_files ... ok
+test real_rz_receives_a_reviewed_empty_file ... ok
+test real_rz_receives_reviewed_binary_and_unicode_batch ... ok
+test real_sz_existing_local_destination_is_preserved_and_peer_cancelled ... ok
+test real_sz_returns_to_the_same_shell_after_a_bounded_receive_farewell ... ok
+test real_sz_sends_an_individually_reviewed_empty_file ... ok
+test real_sz_sends_binary_content_over_crc16 ... FAILED
+test real_sz_sends_binary_unicode_content_over_crc32 ... FAILED
+
+failures:
+
+failures:
+    real_sz_sends_binary_content_over_crc16
+    real_sz_sends_binary_unicode_content_over_crc32
+
+test result: FAILED. 6 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.13s
+

@@ -189,7 +189,22 @@ class Commands:
                     if time.monotonic() >= deadline:
                         timed_out = True
                         break
-                    self.capture(deadline)
+                    try:
+                        self.capture(deadline)
+                    except ownership.InteropFailure as error:
+                        # Identity failures share this type with inventory deadlines.
+                        # Only a recognized budget failure at the command deadline expires it.
+                        if time.monotonic() < deadline or not (
+                            isinstance(error.__cause__, subprocess.TimeoutExpired)
+                            or str(error) in (
+                                "Deadline reached while inspecting owned processes",
+                                "Deadline reached while reading process identities",
+                            )
+                        ):
+                            raise
+                    if time.monotonic() >= deadline:
+                        timed_out = True
+                        break
                     self.check_interrupt()
                     if stdout.tell() + stderr.tell() > MAX_LOG_BYTES:
                         raise FixtureFailure("Command exceeded the fixture log budget")

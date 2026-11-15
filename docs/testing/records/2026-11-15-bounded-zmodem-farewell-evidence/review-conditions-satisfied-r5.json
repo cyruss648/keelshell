@@ -1,0 +1,61 @@
+{
+  "recorded_utc": "2026-11-15T11:25:07.007058+00:00",
+  "status": "SCOPED_SOURCE_APPROVAL_ENGINEERING_CONDITIONS_SATISFIED_BY_PARENT",
+  "freeze": "frozen-inputs-r5.json",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "input_count": 571,
+  "script_count": 12,
+  "gate": {
+    "receipt": "logs/full-gate-r5.json",
+    "receipt_sha256": "ccf8312aca49f8f6153fa659bc1ae610ee6ba7349dfeee0c7424e1df7e7f52a8",
+    "log": "logs/full-gate-r5.log",
+    "log_sha256": "d812c4dde3ee5b56fe70eaec33847bef14fd69cab07180b92a30a5bda72ebf60",
+    "exit": 0,
+    "seconds": 646.751,
+    "timed_out": false,
+    "subprocess_wait_completed": true
+  },
+  "reports": [
+    {
+      "scope": "core",
+      "report": "review-core-r5/final-closeout.md",
+      "sha256": "88cbb24f84b9c76d6f0666fae903ef22a5edf906ad104199883d2462f407e58c",
+      "source_status": "APPROVE_SCOPED",
+      "open_findings": {
+        "P0": 0,
+        "P1": 0,
+        "P2": 0,
+        "P3": 0
+      }
+    },
+    {
+      "scope": "session/transport/bridge/UI",
+      "report": "review-session-ui-r5/review-session-ui-r5.md",
+      "sha256": "046da2d34a54853f31b2cb14b79116498258835997af3b1f90f9334aca45fa22",
+      "source_status": "APPROVE_SCOPED",
+      "open_findings": {
+        "P0": 0,
+        "P1": 0,
+        "P2": 0,
+        "P3": 0
+      }
+    },
+    {
+      "scope": "Python fixture runner",
+      "report": "review-python-r4/final-r5.md",
+      "sha256": "6fec2c6e0e59dc227c5248b705d345a45c91660a7423ea819370fb6e7f016b53",
+      "source_status": "APPROVE_SCOPED",
+      "open_findings": {
+        "P0": 0,
+        "P1": 0,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "original_reports_rewritten": false,
+  "reviewers_independently_recompiled_rust": false,
+  "strict_linux_peer_acceptance": "HOLD/PARTIAL",
+  "native_desktop_acceptance": "OPEN",
+  "whole_product_goal": "ACTIVE"
+}

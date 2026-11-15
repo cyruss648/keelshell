@@ -1,0 +1,135 @@
+{
+  "recorded_utc": "2026-11-15T10:49:52.962859+00:00",
+  "files": [
+    {
+      "path": "closure-and-coverage.json",
+      "bytes": 3676,
+      "sha256": "8024f3b2d7fef3063d1d7aa132763612725da17e5fdb7ec08e6fe43bc9274262"
+    },
+    {
+      "path": "core-r4-all102.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "core-r4-all102.stdout.log",
+      "bytes": 7917,
+      "sha256": "261c07863afb47bb898ffb8d4cbbf224658a669835687db2ee1d4bc64f5dab5d"
+    },
+    {
+      "path": "core-r4-independent-execution.json",
+      "bytes": 17608,
+      "sha256": "f1d7ec8eeb613306aee9b3b71c487933eb01c6a8b9a7257ba9a1a3193d2aaabb"
+    },
+    {
+      "path": "core-r4-inventory.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "core-r4-inventory.stdout.log",
+      "bytes": 7213,
+      "sha256": "5f10332d584c90afc174aadc8747666becd94f11275281a6bfe5600c00f745b6"
+    },
+    {
+      "path": "crates__keelshell-core__src__zmodem.rs.r2.txt",
+      "bytes": 16776,
+      "sha256": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea"
+    },
+    {
+      "path": "crates__keelshell-core__src__zmodem.rs.r3.txt",
+      "bytes": 16776,
+      "sha256": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea"
+    },
+    {
+      "path": "crates__keelshell-core__src__zmodem__codec.rs.r2.txt",
+      "bytes": 19191,
+      "sha256": "946c35e4b1dedb506c8e18197e1eec5fd88b19a8f547c3c194dc303ddaf0326b"
+    },
+    {
+      "path": "crates__keelshell-core__src__zmodem__codec.rs.r3.txt",
+      "bytes": 19543,
+      "sha256": "4fc61667741af0188b3372afc7ce9fde0fd9229410bda4951c929ceef3314bc7"
+    },
+    {
+      "path": "crates__keelshell-core__src__zmodem__receiver.rs.r2.txt",
+      "bytes": 22844,
+      "sha256": "49f90debe598db4f3f54ad33662334c6c741b04215386c3690b3772884b79967"
+    },
+    {
+      "path": "crates__keelshell-core__src__zmodem__receiver.rs.r3.txt",
+      "bytes": 22715,
+      "sha256": "cfc9207ae8a878a51c55228c4c6310f52b07507ffb481d9a6130eb5d329cb071"
+    },
+    {
+      "path": "crates__keelshell-core__tests__zmodem.rs.r2.txt",
+      "bytes": 65078,
+      "sha256": "8c5427082ce1c2c88a1a17907519842dcd3a3af0030b8f7859f1faa62e96ee95"
+    },
+    {
+      "path": "crates__keelshell-core__tests__zmodem.rs.r3.txt",
+      "bytes": 71556,
+      "sha256": "15c628a9300a37ee8942b7dbd0468ffb463783a48bec8fecea9001b59f8d720f"
+    },
+    {
+      "path": "freeze-final.json",
+      "bytes": 161664,
+      "sha256": "a111a581621e1adc24579fda9dde5079510d60bf294535f97902e9c2a077c465"
+    },
+    {
+      "path": "freeze-initial.json",
+      "bytes": 162843,
+      "sha256": "ea6e6deccbcdb1d2fbc47b633f7c3a3000eae413b8ee4727132bc6be38681051"
+    },
+    {
+      "path": "freeze-post-report.json",
+      "bytes": 161664,
+      "sha256": "c9e58fd85b2b90fb2cfd4c6567631bd01ef884c3a8f7bac2d3775d3f6cad0c15"
+    },
+    {
+      "path": "original-94-tests-preserved.json",
+      "bytes": 28311,
+      "sha256": "e80489ed768035be4051ed4f229da5e057c4b838d46de5eb4147f06e96b0b81a"
+    },
+    {
+      "path": "r3-closeout-while-other-scopes-change.json",
+      "bytes": 27836,
+      "sha256": "bcec5df1a98053e3de5c493daa93e8c2b257f7f93ddc6792bd82b3b850b77ff1"
+    },
+    {
+      "path": "r3-closeout-while-other-scopes-change.md",
+      "bytes": 1413,
+      "sha256": "4275b751f12e956c4851511556e779532e83b56b2cc97d4e3629278ef3c413e2"
+    },
+    {
+      "path": "review-core-r3.json",
+      "bytes": 5119,
+      "sha256": "fa72d632ec284d8d57ce87137596b92bf2bc8c840859784f4ae2f292571eda59"
+    },
+    {
+      "path": "review-core-r3.md",
+      "bytes": 10067,
+      "sha256": "29d974b0d068fcd23b402d19a8434d8f51b98228d394cba66850a26a989358d3"
+    },
+    {
+      "path": "session-tests-diff-r2-r3.patch",
+      "bytes": 2409,
+      "sha256": "cda98ecee07715598109c04286849615399227e559d885233aee674b022b6e02"
+    },
+    {
+      "path": "session-tests-static-delta.json",
+      "bytes": 561,
+      "sha256": "cdb81341e46b91b0503f95f9522850d7c4a71ef5bf5301658c0271a108495dc6"
+    },
+    {
+      "path": "source-diff-r2-r3.patch",
+      "bytes": 9723,
+      "sha256": "18e5c2daac03c3fec6ba097a368911faf5d5ffde3712cc729af2e8659f571b04"
+    },
+    {
+      "path": "source-reconstruction.json",
+      "bytes": 973,
+      "sha256": "325b7e60ff9356189af23553c77d79790736a4bcbe90e96d8fc224c912b29b24"
+    }
+  ]
+}

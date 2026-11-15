@@ -1,0 +1,284 @@
+--- r2/crates/keelshell-core/src/zmodem/codec.rs
++++ r3/crates/keelshell-core/src/zmodem/codec.rs
+@@ -533,6 +533,11 @@
+         if byte == ZDLE {
+             self.cans = self.cans.saturating_add(1);
+             if self.cans == 5 {
++                if let Some(farewell) = &mut self.farewell {
++                    farewell
++                        .bytes
++                        .truncate(farewell.bytes.len().saturating_sub(5));
++                }
+                 self.expect_header();
+                 return Ok(Some(Token::Cancelled));
+             }
+@@ -606,9 +611,10 @@
+         match probe_header(&self.header) {
+             Probe::NeedMore => Ok(None),
+             Probe::Header(header, _) => {
+-                if header.kind == FrameType::Finish
+-                    && let Some(farewell) = &mut self.farewell
+-                {
++                // A validated control frame remains protocol-owned even when
++                // it cancels or fails the receiver. Only surrounding ordinary
++                // bytes belong to terminal cleanup.
++                if let Some(farewell) = &mut self.farewell {
+                     farewell
+                         .bytes
+                         .truncate(farewell.bytes.len() - self.header.len());
+--- r2/crates/keelshell-core/src/zmodem/receiver.rs
++++ r3/crates/keelshell-core/src/zmodem/receiver.rs
+@@ -134,11 +134,7 @@
+                 }
+                 check_events(&events)?;
+                 if matches!(self.state, State::Done | State::Cancelled) {
+-                    let mut terminal = if self.state == State::Done {
+-                        self.decoder.take_farewell_bytes()
+-                    } else {
+-                        Vec::new()
+-                    };
++                    let mut terminal = self.decoder.take_farewell_bytes();
+                     if index + 1 < bytes.len() {
+                         terminal.extend_from_slice(&bytes[index + 1..]);
+                     }
+@@ -242,7 +238,8 @@
+     /// Cancel once, emitting the fixed standard CAN/backspace sequence.
+     ///
+     /// Cancellation is available after an error and never performs cleanup or
+-    /// claims the peer removed any partial file.
++    /// claims the peer removed any partial file. Previously retained ordinary
++    /// farewell bytes are returned once, including after failed input or retry.
+     pub fn cancel(&mut self) -> Result<Vec<Event>, Error> {
+         if matches!(
+             self.state,
+@@ -250,11 +247,7 @@
+         ) {
+             return Ok(Vec::new());
+         }
+-        let terminal = if self.state == State::Finishing {
+-            self.decoder.take_farewell_bytes()
+-        } else {
+-            Vec::new()
+-        };
++        let terminal = self.decoder.take_farewell_bytes();
+         self.state = State::Cancelled;
+         self.bytes.clear();
+         self.offer = None;
+--- r2/crates/keelshell-core/tests/zmodem.rs
++++ r3/crates/keelshell-core/tests/zmodem.rs
+@@ -1995,3 +1995,215 @@
+         assert!(receiver.is_finished());
+     }
+ }
++
++fn assert_peer_cancellation_preserves_farewell_tail(wire: &[u8], split: Option<usize>) {
++    let mut receiver = waiting_for_farewell();
++    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
++    let mut events = Vec::new();
++    match split {
++        Some(split) => {
++            events.extend(receiver.feed(&wire[..split]).unwrap());
++            events.extend(receiver.feed(&wire[split..]).unwrap());
++        }
++        None => {
++            for byte in wire {
++                events.extend(receiver.feed(&[*byte]).unwrap());
++            }
++        }
++    }
++    assert_eq!(
++        events
++            .iter()
++            .filter(|event| matches!(event, Event::Cancelled))
++            .count(),
++        1
++    );
++    let terminal: Vec<u8> = events
++        .iter()
++        .filter_map(|event| match event {
++            Event::Terminal(bytes) => Some(bytes.as_slice()),
++            _ => None,
++        })
++        .flatten()
++        .copied()
++        .collect();
++    let expected = if wire.starts_with(&[24; 5]) {
++        "个$ next".as_bytes().to_vec()
++    } else {
++        ["个$ ".as_bytes(), b"\x11next"].concat()
++    };
++    assert_eq!(terminal, expected);
++    assert!(
++        events
++            .iter()
++            .all(|event| matches!(event, Event::Cancelled | Event::Terminal(_)))
++    );
++    assert!(receiver.cancel().unwrap().is_empty());
++    assert!(receiver.cancel().unwrap().is_empty());
++    assert!(!receiver.is_finished());
++    assert!(!receiver.is_waiting_for_farewell());
++    assert!(receiver.finish_without_farewell().is_err());
++    assert_eq!(
++        receiver.feed(b"later").unwrap(),
++        vec![Event::Terminal(b"later".to_vec())]
++    );
++}
++
++fn peer_cancel_frames() -> Vec<Vec<u8>> {
++    [
++        header(FrameType::Cancel, 0),
++        header(FrameType::Abort, 0),
++        header(FrameType::FileError, 0),
++        vec![24; 5],
++    ]
++    .into_iter()
++    .map(|frame| [frame.as_slice(), b"next"].concat())
++    .collect()
++}
++
++#[test]
++fn receiver_peer_cancel_preserves_farewell_tail_whole() {
++    for wire in peer_cancel_frames() {
++        assert_peer_cancellation_preserves_farewell_tail(&wire, Some(0));
++    }
++}
++
++#[test]
++fn receiver_peer_cancel_preserves_farewell_tail_bytewise() {
++    for wire in peer_cancel_frames() {
++        assert_peer_cancellation_preserves_farewell_tail(&wire, None);
++    }
++}
++
++#[test]
++fn receiver_peer_cancel_preserves_farewell_tail_at_every_split() {
++    for wire in peer_cancel_frames() {
++        for split in 0..=wire.len() {
++            assert_peer_cancellation_preserves_farewell_tail(&wire, Some(split));
++        }
++    }
++}
++
++fn assert_failed_input_preserves_farewell_tail(chunks: Vec<&[u8]>, expected: Error) {
++    let mut receiver = waiting_for_farewell();
++    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
++    let mut failed = false;
++    for chunk in chunks {
++        match receiver.feed(chunk) {
++            Ok(events) => assert!(events.is_empty()),
++            Err(error) => {
++                assert_eq!(error, expected);
++                failed = true;
++                break;
++            }
++        }
++    }
++    assert!(failed);
++    assert!(!receiver.is_finished());
++    assert!(!receiver.is_waiting_for_farewell());
++    assert!(receiver.finish_without_farewell().is_err());
++    assert_eq!(
++        receiver.cancel().unwrap(),
++        vec![
++            Event::Send([vec![24; 8], vec![8; 10]].concat()),
++            Event::Cancelled,
++            Event::Terminal("个$ ".as_bytes().to_vec()),
++        ]
++    );
++    assert!(receiver.cancel().unwrap().is_empty());
++    assert_eq!(
++        receiver.feed(b"later").unwrap(),
++        vec![Event::Terminal(b"later".to_vec())]
++    );
++}
++
++fn invalid_finishing_frames() -> Vec<(Vec<u8>, Error)> {
++    vec![
++        (header(FrameType::Command, 0), Error::RemoteCommand),
++        (
++            header(FrameType::RequestInit, (FrameType::Command as u32) << 24),
++            Error::RemoteCommand,
++        ),
++        (
++            header(FrameType::File, 1 << 24),
++            Error::UnexpectedFrame(FrameType::File),
++        ),
++        (
++            header(FrameType::Data, 0),
++            Error::UnexpectedFrame(FrameType::Data),
++        ),
++        (header(FrameType::EndOfFile, 0), Error::ApprovalRequired),
++        (
++            header(FrameType::SenderInit, 0),
++            Error::UnexpectedFrame(FrameType::SenderInit),
++        ),
++    ]
++}
++
++#[test]
++fn receiver_failed_input_preserves_farewell_tail_whole() {
++    for (wire, error) in invalid_finishing_frames() {
++        assert_failed_input_preserves_farewell_tail(vec![&wire], error);
++    }
++}
++
++#[test]
++fn receiver_failed_input_preserves_farewell_tail_bytewise() {
++    for (wire, error) in invalid_finishing_frames() {
++        assert_failed_input_preserves_farewell_tail(wire.chunks(1).collect(), error);
++    }
++}
++
++#[test]
++fn receiver_failed_input_preserves_farewell_tail_at_every_split() {
++    for (wire, error) in invalid_finishing_frames() {
++        for split in 0..=wire.len() {
++            assert_failed_input_preserves_farewell_tail(
++                vec![&wire[..split], &wire[split..]],
++                error.clone(),
++            );
++        }
++    }
++}
++
++#[test]
++fn receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup() {
++    let mut receiver = waiting_for_farewell();
++    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
++    let mut failed = false;
++    for _ in 0..128 {
++        if receiver.timeout().is_err() {
++            failed = true;
++            break;
++        }
++    }
++    assert!(failed, "the bounded retry budget must fail");
++    let events = receiver.cancel().unwrap();
++    assert_eq!(
++        events.last(),
++        Some(&Event::Terminal("个$ ".as_bytes().to_vec()))
++    );
++    assert!(events.iter().all(|event| matches!(
++        event,
++        Event::Send(_) | Event::Cancelled | Event::Terminal(_)
++    )));
++    assert!(receiver.cancel().unwrap().is_empty());
++    assert!(!receiver.is_finished());
++}
++
++#[test]
++fn receiver_input_limit_failure_preserves_only_previously_retained_farewell_tail() {
++    let mut receiver = waiting_for_farewell();
++    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
++    assert_eq!(
++        receiver.feed(&vec![b'x'; MAX_FEED_BYTES + 1]),
++        Err(Error::Limit("feed bytes"))
++    );
++    let events = receiver.cancel().unwrap();
++    assert_eq!(
++        events.last(),
++        Some(&Event::Terminal("个$ ".as_bytes().to_vec()))
++    );
++    assert!(receiver.cancel().unwrap().is_empty());
++    assert!(!receiver.is_finished());
++}

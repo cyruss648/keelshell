@@ -1,0 +1,13 @@
+{
+  "recorded_utc": "2026-11-15T10:59:06.331060+00:00",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "group_counts": {
+    "inputs": 571,
+    "scripts": 12
+  },
+  "files_checked": 583,
+  "mismatch_count": 0,
+  "mismatches": [],
+  "same_freeze_bytes_as_start": true
+}

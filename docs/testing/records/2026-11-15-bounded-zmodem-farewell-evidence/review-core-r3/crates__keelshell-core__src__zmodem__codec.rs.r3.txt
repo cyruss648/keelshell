@@ -1,0 +1,644 @@
+use super::{Error, MAX_NOISE_BYTES, MAX_SUBPACKET_BYTES};
+
+pub(super) const ZDLE: u8 = 0x18;
+const MAX_HEADER_BYTES: usize = 96;
+
+/// Standard ZMODEM frame identifier.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
+pub enum FrameType {
+    /// Sender invitation (ZRQINIT).
+    RequestInit = 0,
+    /// Receiver capabilities (ZRINIT).
+    ReceiverInit = 1,
+    /// Sender escaping/attention metadata (ZSINIT).
+    SenderInit = 2,
+    /// Position acknowledgement (ZACK).
+    Ack = 3,
+    /// File metadata follows (ZFILE).
+    File = 4,
+    /// Skip the current file (ZSKIP).
+    Skip = 5,
+    /// Negative acknowledgement (ZNAK).
+    Nak = 6,
+    /// Abort the batch (ZABORT).
+    Abort = 7,
+    /// Session finish (ZFIN).
+    Finish = 8,
+    /// Request a contiguous file position (ZRPOS).
+    Position = 9,
+    /// File data follows (ZDATA).
+    Data = 10,
+    /// File ending position (ZEOF).
+    EndOfFile = 11,
+    /// Peer could not save a file (ZFERR).
+    FileError = 12,
+    /// File-prefix CRC request/response (ZCRC).
+    Crc = 13,
+    /// Numeric challenge, answered verbatim with ZACK.
+    Challenge = 14,
+    /// Command completion (ZCOMPL), never executed here.
+    Complete = 15,
+    /// Cancel (ZCAN).
+    Cancel = 16,
+    /// Free-space query (ZFREECNT); no filesystem information is inferred.
+    FreeCount = 17,
+    /// Remote command (ZCOMMAND), always rejected.
+    Command = 18,
+    /// Remote diagnostic-data frame (ZSTDERR), unsupported.
+    Stderr = 19,
+}
+
+impl FrameType {
+    fn from_byte(value: u8) -> Result<Self, Error> {
+        Ok(match value {
+            0 => Self::RequestInit,
+            1 => Self::ReceiverInit,
+            2 => Self::SenderInit,
+            3 => Self::Ack,
+            4 => Self::File,
+            5 => Self::Skip,
+            6 => Self::Nak,
+            7 => Self::Abort,
+            8 => Self::Finish,
+            9 => Self::Position,
+            10 => Self::Data,
+            11 => Self::EndOfFile,
+            12 => Self::FileError,
+            13 => Self::Crc,
+            14 => Self::Challenge,
+            15 => Self::Complete,
+            16 => Self::Cancel,
+            17 => Self::FreeCount,
+            18 => Self::Command,
+            19 => Self::Stderr,
+            _ => return Err(Error::Unsupported("frame identifier")),
+        })
+    }
+}
+
+/// Header encoding and the CRC used by its following data subpackets.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum HeaderFormat {
+    /// ZHEX: ASCII lowercase hex, CRC16; data still uses binary escapes.
+    Hex,
+    /// ZBIN: escaped binary, CRC16.
+    Binary16,
+    /// ZBIN32: escaped binary, CRC32.
+    Binary32,
+}
+
+impl HeaderFormat {
+    fn crc_len(self) -> usize {
+        if self == Self::Binary32 { 4 } else { 2 }
+    }
+}
+
+/// Decoded fixed-size header.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Header {
+    /// Standard frame identifier.
+    pub kind: FrameType,
+    /// Little-endian ZP0..ZP3, or ZF3..ZF0 flag bytes.
+    pub position: u32,
+    /// Determines the CRC of subsequent data subpackets.
+    pub format: HeaderFormat,
+}
+
+impl Header {
+    /// Construct a header with its position/flags and wire encoding.
+    pub fn new(kind: FrameType, position: u32, format: HeaderFormat) -> Self {
+        Self {
+            kind,
+            position,
+            format,
+        }
+    }
+
+    /// Flag bytes in wire order: ZF3, ZF2, ZF1, ZF0.
+    pub fn flags(self) -> [u8; 4] {
+        self.position.to_le_bytes()
+    }
+}
+
+/// Data-subpacket terminator; it participates in the CRC.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
+pub enum FrameEnd {
+    /// End frame without ACK (ZCRCE).
+    End = b'h',
+    /// Continue with another subpacket, no ACK (ZCRCG).
+    Continue = b'i',
+    /// Continue with another subpacket and request an ACK (ZCRCQ).
+    ContinueAck = b'j',
+    /// End frame and wait for ACK (ZCRCW).
+    EndAck = b'k',
+}
+
+impl FrameEnd {
+    pub(super) fn ends_frame(self) -> bool {
+        matches!(self, Self::End | Self::EndAck)
+    }
+
+    pub(super) fn needs_ack(self) -> bool {
+        matches!(self, Self::ContinueAck | Self::EndAck)
+    }
+
+    fn from_byte(byte: u8) -> Option<Self> {
+        match byte {
+            b'h' => Some(Self::End),
+            b'i' => Some(Self::Continue),
+            b'j' => Some(Self::ContinueAck),
+            b'k' => Some(Self::EndAck),
+            _ => None,
+        }
+    }
+}
+
+/// Encode a header, escaping all control bytes in binary encodings.
+///
+/// Hex headers include CR/LF and include XON except for ZACK and ZFIN.
+pub fn encode_header(header: Header) -> Vec<u8> {
+    let mut raw = Vec::with_capacity(9);
+    raw.push(header.kind as u8);
+    raw.extend_from_slice(&header.position.to_le_bytes());
+    append_crc(&mut raw, header.format);
+    let mut wire = Vec::with_capacity(24);
+    match header.format {
+        HeaderFormat::Hex => {
+            wire.extend_from_slice(b"**\x18B");
+            const HEX: &[u8] = b"0123456789abcdef";
+            for byte in raw {
+                wire.push(HEX[(byte >> 4) as usize]);
+                wire.push(HEX[(byte & 15) as usize]);
+            }
+            wire.extend_from_slice(b"\r\n");
+            if !matches!(header.kind, FrameType::Ack | FrameType::Finish) {
+                wire.push(0x11);
+            }
+        }
+        HeaderFormat::Binary16 | HeaderFormat::Binary32 => {
+            wire.extend_from_slice(&[
+                b'*',
+                ZDLE,
+                if header.format == HeaderFormat::Binary32 {
+                    b'C'
+                } else {
+                    b'A'
+                },
+            ]);
+            for byte in raw {
+                escape(byte, &mut wire);
+            }
+        }
+    }
+    wire
+}
+
+/// Encode one bounded data subpacket, including terminator and matching CRC.
+///
+/// The caller must first send the associated ZFILE/ZSINIT/ZDATA header.
+/// Controls, rubouts and their high-bit variants are always escaped.
+pub fn encode_data(bytes: &[u8], end: FrameEnd, format: HeaderFormat) -> Result<Vec<u8>, Error> {
+    if bytes.len() > MAX_SUBPACKET_BYTES {
+        return Err(Error::Limit("subpacket bytes"));
+    }
+    let mut wire = Vec::with_capacity(bytes.len() * 2 + 12);
+    for &byte in bytes {
+        escape(byte, &mut wire);
+    }
+    wire.extend_from_slice(&[ZDLE, end as u8]);
+    let mut checked = Vec::with_capacity(bytes.len() + 5);
+    checked.extend_from_slice(bytes);
+    checked.push(end as u8);
+    let length = checked.len();
+    append_crc(&mut checked, format);
+    for &byte in &checked[length..] {
+        escape(byte, &mut wire);
+    }
+    // Releases a peer paused by a spurious XOFF after a stop-and-wait frame.
+    if end == FrameEnd::EndAck {
+        wire.push(0x11);
+    }
+    Ok(wire)
+}
+
+fn escape(byte: u8, wire: &mut Vec<u8>) {
+    if byte == 0x7f {
+        wire.extend_from_slice(&[ZDLE, b'l']);
+    } else if byte == 0xff {
+        wire.extend_from_slice(&[ZDLE, b'm']);
+    } else if byte & 0x60 == 0 {
+        wire.extend_from_slice(&[ZDLE, byte ^ 0x40]);
+    } else {
+        wire.push(byte);
+    }
+}
+
+fn unescape(byte: u8) -> Result<u8, Error> {
+    match byte {
+        b'l' => Ok(0x7f),
+        b'm' => Ok(0xff),
+        byte if byte & 0x60 == 0x40 => Ok(byte ^ 0x40),
+        _ => Err(Error::InvalidEscape),
+    }
+}
+
+pub(super) fn crc32(bytes: &[u8]) -> u32 {
+    let mut crc = u32::MAX;
+    for &byte in bytes {
+        crc ^= u32::from(byte);
+        for _ in 0..8 {
+            crc = (crc >> 1) ^ (0xedb8_8320 & 0_u32.wrapping_sub(crc & 1));
+        }
+    }
+    !crc
+}
+
+fn crc16(bytes: &[u8]) -> u16 {
+    let mut crc = 0_u16;
+    for &byte in bytes {
+        crc ^= u16::from(byte) << 8;
+        for _ in 0..8 {
+            crc = (crc << 1) ^ (0x1021 & 0_u16.wrapping_sub(crc >> 15));
+        }
+    }
+    crc
+}
+
+fn append_crc(bytes: &mut Vec<u8>, format: HeaderFormat) {
+    if format == HeaderFormat::Binary32 {
+        let crc = crc32(bytes);
+        bytes.extend_from_slice(&crc.to_le_bytes());
+    } else {
+        let crc = crc16(bytes);
+        bytes.extend_from_slice(&crc.to_be_bytes());
+    }
+}
+
+fn crc_matches(bytes: &[u8], format: HeaderFormat) -> bool {
+    let split = bytes.len() - format.crc_len();
+    if format == HeaderFormat::Binary32 {
+        crc32(&bytes[..split]).to_le_bytes() == bytes[split..]
+    } else {
+        crc16(&bytes[..split]).to_be_bytes() == bytes[split..]
+    }
+}
+
+pub(super) enum Probe {
+    NeedMore,
+    NotHeader,
+    Header(Header, usize),
+    Corrupt(Error),
+}
+
+fn flow(byte: u8) -> bool {
+    matches!(byte & 0x7f, 0x11 | 0x13)
+}
+
+fn next(bytes: &[u8], index: &mut usize) -> Option<u8> {
+    while let Some(&byte) = bytes.get(*index) {
+        *index += 1;
+        if !flow(byte) {
+            return Some(byte);
+        }
+    }
+    None
+}
+
+pub(super) fn probe_header(bytes: &[u8]) -> Probe {
+    let mut index = 0;
+    let mut pads = 0;
+    let marker = loop {
+        let Some(byte) = next(bytes, &mut index) else {
+            return Probe::NeedMore;
+        };
+        match byte & 0x7f {
+            b'*' => {
+                pads += 1;
+                if pads > 8 {
+                    return Probe::NotHeader;
+                }
+            }
+            ZDLE if pads > 0 => {
+                let Some(marker) = next(bytes, &mut index) else {
+                    return Probe::NeedMore;
+                };
+                break marker & 0x7f;
+            }
+            _ => return Probe::NotHeader,
+        }
+    };
+    let format = match marker {
+        b'A' => HeaderFormat::Binary16,
+        b'B' => HeaderFormat::Hex,
+        b'C' => HeaderFormat::Binary32,
+        _ => return Probe::NotHeader,
+    };
+    let needed = 5 + format.crc_len();
+    let mut raw = Vec::with_capacity(needed);
+    for _ in 0..needed {
+        let Some(byte) = next(bytes, &mut index) else {
+            return Probe::NeedMore;
+        };
+        if format == HeaderFormat::Hex {
+            let high = hex(byte & 0x7f);
+            let Some(low) = next(bytes, &mut index) else {
+                return Probe::NeedMore;
+            };
+            match (high, hex(low & 0x7f)) {
+                (Some(high), Some(low)) => raw.push((high << 4) | low),
+                _ => return Probe::Corrupt(Error::CorruptHeader),
+            }
+        } else if byte == ZDLE {
+            let Some(escaped) = next(bytes, &mut index) else {
+                return Probe::NeedMore;
+            };
+            match unescape(escaped) {
+                Ok(value) => raw.push(value),
+                Err(error) => return Probe::Corrupt(error),
+            }
+        } else {
+            raw.push(byte);
+        }
+    }
+    if !crc_matches(&raw, format) {
+        return Probe::Corrupt(Error::CorruptHeader);
+    }
+    if format == HeaderFormat::Hex {
+        let Some(ending) = next(bytes, &mut index) else {
+            return Probe::NeedMore;
+        };
+        match ending & 0x7f {
+            b'\r' => {
+                let Some(lf) = next(bytes, &mut index) else {
+                    return Probe::NeedMore;
+                };
+                if lf & 0x7f != b'\n' {
+                    return Probe::Corrupt(Error::CorruptHeader);
+                }
+            }
+            b'\n' => {}
+            _ => return Probe::Corrupt(Error::CorruptHeader),
+        }
+    }
+    match FrameType::from_byte(raw[0]) {
+        Ok(kind) => Probe::Header(
+            Header::new(
+                kind,
+                u32::from_le_bytes([raw[1], raw[2], raw[3], raw[4]]),
+                format,
+            ),
+            index,
+        ),
+        Err(error) => Probe::Corrupt(error),
+    }
+}
+
+fn hex(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        _ => None,
+    }
+}
+
+pub(super) enum Token {
+    Header(Header),
+    Data(Vec<u8>, FrameEnd),
+    Cancelled,
+    OverAndOut,
+}
+
+struct Data {
+    format: HeaderFormat,
+    bytes: Vec<u8>,
+    crc: Vec<u8>,
+    end: Option<FrameEnd>,
+    escaped: bool,
+}
+
+impl Data {
+    fn push(&mut self, byte: u8) -> Result<Option<(Vec<u8>, FrameEnd)>, Error> {
+        if flow(byte) {
+            return Ok(None);
+        }
+        let decoded = if self.escaped {
+            self.escaped = false;
+            if self.end.is_none()
+                && let Some(end) = FrameEnd::from_byte(byte)
+            {
+                self.end = Some(end);
+                return Ok(None);
+            }
+            unescape(byte)?
+        } else if byte == ZDLE {
+            self.escaped = true;
+            return Ok(None);
+        } else {
+            byte
+        };
+        if let Some(end) = self.end {
+            self.crc.push(decoded);
+            if self.crc.len() == self.format.crc_len() {
+                let original_len = self.bytes.len();
+                self.bytes.push(end as u8);
+                self.bytes.extend_from_slice(&self.crc);
+                if !crc_matches(&self.bytes, self.format) {
+                    return Err(Error::CorruptData);
+                }
+                self.bytes.truncate(original_len);
+                return Ok(Some((std::mem::take(&mut self.bytes), end)));
+            }
+        } else {
+            if self.bytes.len() >= MAX_SUBPACKET_BYTES {
+                return Err(Error::Limit("subpacket bytes"));
+            }
+            self.bytes.push(decoded);
+        }
+        Ok(None)
+    }
+}
+
+#[derive(Default)]
+struct Farewell {
+    bytes: Vec<u8>,
+    first_o: Option<usize>,
+}
+
+impl Farewell {
+    fn pad_continues_utf8(&self) -> bool {
+        // A terminal continuation byte can equal the parity pad 0xaa.
+        // Inspect only one UTF-8 sequence, including an incomplete prefix.
+        let tail = &self.bytes[self.bytes.len().saturating_sub(4)..];
+        let Some(start) = tail.iter().rposition(|byte| byte & 0xc0 != 0x80) else {
+            return false;
+        };
+        match std::str::from_utf8(&tail[start..]) {
+            Ok(_) => true,
+            Err(error) => error.error_len().is_none(),
+        }
+    }
+}
+
+#[derive(Default)]
+pub(super) struct Decoder {
+    header: Vec<u8>,
+    data: Option<Data>,
+    noise: usize,
+    cans: u8,
+    farewell: Option<Farewell>,
+}
+
+impl Decoder {
+    pub(super) fn expect_data(&mut self, format: HeaderFormat) {
+        self.header.clear();
+        self.data = Some(Data {
+            format,
+            bytes: Vec::new(),
+            crc: Vec::new(),
+            end: None,
+            escaped: false,
+        });
+    }
+
+    pub(super) fn expect_header(&mut self) {
+        self.header.clear();
+        self.data = None;
+    }
+
+    pub(super) fn expect_finish(&mut self) {
+        self.expect_header();
+        self.farewell.get_or_insert_with(Farewell::default).first_o = None;
+    }
+
+    pub(super) fn take_farewell_bytes(&mut self) -> Vec<u8> {
+        self.expect_header();
+        self.farewell
+            .take()
+            .map(|farewell| farewell.bytes)
+            .unwrap_or_default()
+    }
+
+    pub(super) fn push(&mut self, byte: u8) -> Result<Option<Token>, Error> {
+        if let Some(farewell) = &mut self.farewell {
+            // Controls skipped by the parser must not grow retention without
+            // bound. Include room for the existing small header candidate;
+            // retries retain every byte not validated as repeated ZFIN.
+            if farewell.bytes.len() >= MAX_NOISE_BYTES + MAX_HEADER_BYTES {
+                return Err(Error::Limit("farewell bytes"));
+            }
+            farewell.bytes.push(byte);
+        }
+        if byte == ZDLE {
+            self.cans = self.cans.saturating_add(1);
+            if self.cans == 5 {
+                if let Some(farewell) = &mut self.farewell {
+                    farewell
+                        .bytes
+                        .truncate(farewell.bytes.len().saturating_sub(5));
+                }
+                self.expect_header();
+                return Ok(Some(Token::Cancelled));
+            }
+            if self.cans > 1 {
+                return Ok(None);
+            }
+        } else {
+            let previous = std::mem::take(&mut self.cans);
+            if previous >= 2 {
+                self.expect_header();
+                return Err(Error::InvalidEscape);
+            }
+        }
+        if let Some(data) = &mut self.data {
+            match data.push(byte) {
+                Ok(Some((bytes, end))) => {
+                    if end.ends_frame() {
+                        self.data = None;
+                    } else {
+                        data.crc.clear();
+                        data.end = None;
+                    }
+                    return Ok(Some(Token::Data(bytes, end)));
+                }
+                Err(error) => {
+                    self.expect_header();
+                    return Err(error);
+                }
+                Ok(None) => return Ok(None),
+            }
+        }
+        if self.header.is_empty() && flow(byte) {
+            return Ok(None);
+        }
+        if self.header.is_empty()
+            && byte == b'O'
+            && let Some(farewell) = &mut self.farewell
+        {
+            if let Some(first_o) = farewell.first_o.take() {
+                farewell.bytes.truncate(farewell.bytes.len() - 1);
+                farewell.bytes.remove(first_o);
+                return Ok(Some(Token::OverAndOut));
+            }
+            farewell.first_o = Some(farewell.bytes.len() - 1);
+            return Ok(None);
+        }
+        if let Some(farewell) = &mut self.farewell {
+            farewell.first_o = None;
+        }
+        if self.header.is_empty()
+            && (byte & 0x7f != b'*'
+                || (byte == 0xaa
+                    && self
+                        .farewell
+                        .as_ref()
+                        .is_some_and(Farewell::pad_continues_utf8)))
+        {
+            if !flow(byte) {
+                self.noise += 1;
+                if self.noise > MAX_NOISE_BYTES {
+                    return Err(Error::Limit("out-of-frame noise"));
+                }
+            }
+            return Ok(None);
+        }
+        self.header.push(byte);
+        if self.header.len() > MAX_HEADER_BYTES {
+            self.expect_header();
+            return Err(Error::Limit("header bytes"));
+        }
+        match probe_header(&self.header) {
+            Probe::NeedMore => Ok(None),
+            Probe::Header(header, _) => {
+                // A validated control frame remains protocol-owned even when
+                // it cancels or fails the receiver. Only surrounding ordinary
+                // bytes belong to terminal cleanup.
+                if let Some(farewell) = &mut self.farewell {
+                    farewell
+                        .bytes
+                        .truncate(farewell.bytes.len() - self.header.len());
+                }
+                self.header.clear();
+                Ok(Some(Token::Header(header)))
+            }
+            Probe::NotHeader => {
+                // Preserve a new possible prefix at the current byte rather
+                // than swallowing the first star of a following real frame.
+                self.noise += self.header.len();
+                self.header.clear();
+                if byte & 0x7f == b'*' {
+                    self.header.push(byte);
+                }
+                if self.noise > MAX_NOISE_BYTES {
+                    return Err(Error::Limit("out-of-frame noise"));
+                }
+                Ok(None)
+            }
+            Probe::Corrupt(error) => {
+                self.header.clear();
+                Err(error)
+            }
+        }
+    }
+}

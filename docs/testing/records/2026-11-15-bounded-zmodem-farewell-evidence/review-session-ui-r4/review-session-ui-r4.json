@@ -1,0 +1,74 @@
+{
+  "recorded_utc": "2026-11-15T11:00:22.867056+00:00",
+  "recommendation": "HOLD",
+  "scope": "bounded farewell r4 session/real transport barrier/bridge/UI; production cleanup correction and targeted execution",
+  "base_head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "severity_open_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0
+  },
+  "open_findings": [
+    "P2-004"
+  ],
+  "corrected_findings": [
+    "P2-001",
+    "P2-002",
+    "P2-003"
+  ],
+  "production_cleanup_correction": "APPROVED within inspected path and four new regressions; separate default test acceptance failure P2-004",
+  "independently_recompiled": false,
+  "independent_inventory_commands": 1,
+  "independent_test_commands": 2,
+  "tests": {
+    "app-zmodem-r5": {
+      "exit_code": 0,
+      "counts": {
+        "passed": 30,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 1208
+      },
+      "receipt": "receipt-app-zmodem-r5.json",
+      "all_expected_passed": true
+    },
+    "app-ssh-bridge-r5": {
+      "exit_code": 101,
+      "counts": {
+        "passed": 14,
+        "failed": 1,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 1223
+      },
+      "receipt": "receipt-app-ssh-bridge-r5.json",
+      "all_expected_passed": false
+    }
+  },
+  "app_group_overlap": 12,
+  "unique_app_test_union": 33,
+  "unique_app_test_passed": 32,
+  "unique_app_test_failed": 1,
+  "reused_r3_specialties": {
+    "barrier": {
+      "passed": 4,
+      "rerun": false
+    },
+    "session": {
+      "passed": 25,
+      "rerun": false
+    }
+  },
+  "unchanged_core_session_root_inputs": 231,
+  "python_source_review": "Separate non-author reviewer; not signed here",
+  "engineering_gate_r4": "PENDING parent startup at user update; not run or approved by reviewer",
+  "linux_strict_peer_acceptance": "HOLD_PARTIAL; original r2 results only, no rerun",
+  "native_platform_acceptance": "UNVERIFIED",
+  "full_product_acceptance": "UNVERIFIED",
+  "final_freeze_receipt": "receipt-final-freeze.json",
+  "final_freeze_verified": false,
+  "report_sha256": "7ccb5d22ea8f2b4e7bec35039bd02f168133fc1d3d167d98c8f2aa7076e87daa"
+}

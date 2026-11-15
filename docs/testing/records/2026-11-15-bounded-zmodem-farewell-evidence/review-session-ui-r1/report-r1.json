@@ -1,0 +1,132 @@
+{
+  "recommendation": "HOLD",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 0
+  },
+  "open_findings": [
+    "notice-P2-001.md",
+    "notice-P2-002.md"
+  ],
+  "scope_files": [
+    "crates/keelshell-session/src/zmodem.rs",
+    "crates/keelshell-session/tests/zmodem.rs",
+    "crates/keelshell-session/tests/zmodem_openssh.rs",
+    "crates/keelshell-app/src/ssh_bridge_zmodem.rs",
+    "crates/keelshell-app/src/ssh_bridge_tests.rs",
+    "crates/keelshell-app/src/terminal_zmodem.rs",
+    "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+    "crates/keelshell-app/src/ssh_bridge.rs"
+  ],
+  "additional_referenced_files": [
+    "crates/keelshell-session/src/ssh.rs",
+    "crates/keelshell-session/src/ssh/lifecycle.rs",
+    "crates/keelshell-session/src/zmodem/local.rs",
+    "crates/keelshell-core/src/zmodem/receiver.rs",
+    "crates/keelshell-core/src/zmodem/codec.rs",
+    "exact Cargo.lock russh0.65.1 channels/mod.rs, channels/io/tx.rs and client/mod.rs"
+  ],
+  "base_sha": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "cf4cb0e53b80b09c44da99e3fe358cd7091622314625f881fd2769df783beba4",
+  "verified_input_count": 582,
+  "mismatches": [],
+  "independent_execution": [
+    {
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/session-all-r1.log",
+      "exit_code": 0,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "names": [
+        "zmodem_controller_acquires_a_unique_lease_only_after_complete_valid_detection",
+        "zmodem_controller_changed_upload_selection_invalidates_previous_review",
+        "zmodem_controller_cannot_rebind_review_to_a_different_authenticated_connection",
+        "zmodem_controller_existing_local_target_is_preserved_without_consuming_offer",
+        "zmodem_controller_empty_receive_still_requires_review_publication_and_readback",
+        "zmodem_controller_old_lease_actions_cannot_cancel_a_new_request",
+        "zmodem_controller_local_claims_exclude_other_connections_and_existing_sftp_scopes",
+        "zmodem_controller_preserves_fragmented_lookalikes_without_file_or_channel_authority",
+        "zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no_replace_readback",
+        "zmodem_controller_remote_command_frames_fail_closed_without_exec",
+        "zmodem_controller_stale_offer_cannot_select_a_destination",
+        "zmodem_controller_ui_events_support_session_event_clone_and_equality_without_file_bytes",
+        "zmodem_controller_target_created_after_accept_is_preserved_without_saved_ack",
+        "zmodem_controller_unreviewed_data_cannot_create_a_file",
+        "zmodem_controller_target_created_after_review_rejects_confirmation_without_accepting_data",
+        "zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_review_authority",
+        "zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review",
+        "zmodem_controller_upload_confirmation_rejects_same_length_source_edits_and_consumes_review",
+        "zmodem_controller_upload_reviews_complete_digests_before_releasing_any_source_bytes",
+        "zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease",
+        "zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits",
+        "zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown"
+      ]
+    },
+    {
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/app-zmodem-r1.log",
+      "exit_code": 0,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "names": [
+        "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+        "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+        "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff",
+        "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+        "terminal::zmodem::tests::zmodem_cancel_submits_once_while_waiting_for_its_terminal_event",
+        "terminal::zmodem::tests::zmodem_completion_requests_exact_input_handoff_without_replaying_old_bytes",
+        "terminal::zmodem::tests::zmodem_late_stale_rejection_preserves_each_terminal_result",
+        "terminal::zmodem::tests::zmodem_live_lease_blocks_input_before_its_ui_notification_is_read",
+        "terminal::zmodem::tests::zmodem_missing_farewell_before_an_offer_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown",
+        "terminal::zmodem::tests::zmodem_preoffer_cancelled_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_failed_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_finished_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids",
+        "terminal::zmodem::tests::zmodem_retained_confirm_cannot_authorize_a_replaced_offer",
+        "terminal::zmodem::tests::zmodem_review_binds_the_actual_endpoint_despite_remote_osc_titles",
+        "terminal::zmodem::tests::zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer",
+        "terminal::zmodem::tests::zmodem_unknown_acknowledgement_waits_for_the_real_publication_latch",
+        "terminal::zmodem::tests::zmodem_unknown_result_survives_later_success_and_rejects_unread_acknowledgement",
+        "terminal::zmodem::tests::zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound",
+        "terminal::zmodem::tests::zmodem_verified_saves_survive_next_offer_finished_and_dismissal",
+        "terminal::zmodem::tests::zmodem_complete_reviews_keep_actions_visible_across_registered_themes"
+      ]
+    },
+    {
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/app-bridge-r1.log",
+      "exit_code": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "names": [
+        "ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup",
+        "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+        "ssh_bridge::tests::quiet_shell_becomes_ready_before_data_and_cancels_cleanly",
+        "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+        "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+        "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff",
+        "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff"
+      ]
+    }
+  ],
+  "independent_test_invocations": 51,
+  "independent_distinct_tests": 47,
+  "overlap": 4,
+  "parent_only_evidence": {
+    "native_current_r1": "8/8, original7 plus new interactive1; result/log read only; reviewer did not launch",
+    "core_tests": "83/83 reported by parent; reviewer did not execute",
+    "full_gate": "pending at last parent update"
+  },
+  "limitations": [
+    "No independent compilation/Cargo/fmt/Clippy/dependency-policy/full-gate run.",
+    "No new independent rz/sz fixture, container, native GUI or platform acceptance.",
+    "P2 findings are frozen-source contract/control-flow proofs; no new runtime reproduction compiled.",
+    "Do not combine parent-only evidence with independent test counts.",
+    "A single passing strict peer run does not replace earlier strict failures.",
+    "No installation, release, native GUI, IME/accessibility, Windows or Linux local-backend acceptance."
+  ],
+  "notification_status": "Attempt to message native ancestor rejected by desktop tool; notices immediately written and commentary provided; final result is return path."
+}

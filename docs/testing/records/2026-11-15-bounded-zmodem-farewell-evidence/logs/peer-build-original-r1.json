@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "work/pty-farewell-20261115/build_peer.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "peer-build-original-r1",
+  "pid": 8722,
+  "started_utc": "2026-11-15T09:40:23.433435+00:00",
+  "finished_utc": "2026-11-15T09:40:32.102130+00:00",
+  "seconds": 8.669,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "0766cfe3c14d5a3036e460eeea130edb64de4f9aec3b8ccd18b590853c2da198",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

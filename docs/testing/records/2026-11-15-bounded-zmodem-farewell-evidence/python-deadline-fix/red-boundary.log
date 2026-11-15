@@ -1,0 +1,156 @@
+test_deadline_does_not_override_unverified_cleanup (test_linux_file_interop.CommandDeadlineTests.test_deadline_does_not_override_unverified_cleanup) ... ERROR
+test_inventory_completion_at_or_past_deadline_cannot_report_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_at_or_past_deadline_cannot_report_success) ... 
+  test_inventory_completion_at_or_past_deadline_cannot_report_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_at_or_past_deadline_cannot_report_success) (completed_at=10.8) ... FAIL
+test_inventory_completion_at_or_past_deadline_cannot_report_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_at_or_past_deadline_cannot_report_success) ... FAIL
+test_inventory_completion_before_deadline_preserves_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_before_deadline_preserves_success) ... ok
+test_inventory_failures_before_deadline_are_not_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_failures_before_deadline_are_not_timeouts) ... ok
+test_inventory_internal_deadline_failures_are_command_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_internal_deadline_failures_are_command_timeouts) ... 
+  test_inventory_internal_deadline_failures_are_command_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_internal_deadline_failures_are_command_timeouts) (message='Deadline reached while inspecting owned processes') ... ERROR
+test_inventory_internal_deadline_failures_are_command_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_internal_deadline_failures_are_command_timeouts) ... FAIL
+test_inventory_probe_timeout_at_command_deadline_is_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_inventory_probe_timeout_at_command_deadline_is_a_timeout) ... 
+  test_inventory_probe_timeout_at_command_deadline_is_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_inventory_probe_timeout_at_command_deadline_is_a_timeout) (completed_at=10.8) ... ERROR
+test_inventory_probe_timeout_at_command_deadline_is_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_inventory_probe_timeout_at_command_deadline_is_a_timeout) ... FAIL
+test_unrelated_inventory_failure_after_deadline_is_not_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_unrelated_inventory_failure_after_deadline_is_not_a_timeout) ... ok
+
+======================================================================
+ERROR: test_deadline_does_not_override_unverified_cleanup (test_linux_file_interop.CommandDeadlineTests.test_deadline_does_not_override_unverified_cleanup)
+----------------------------------------------------------------------
+subprocess.TimeoutExpired: Command '['ps', '-eo', 'pid=']' timed out after 0.05 seconds
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 235, in test_deadline_does_not_override_unverified_cleanup
+    self.run_inventory(10.9, self.probe_timeout, clean=False)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 167, in run_inventory
+    return commands.run("inventory-boundary", ["controlled-child"], timeout=0.8)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 192, in run
+    self.capture(deadline)
+    ~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 162, in capture
+    table = ownership.process_table(deadline)
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1247, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 152, in inventory
+    raise error
+openssh_interop.InteropFailure: Process inventory exceeded its bounded deadline
+
+======================================================================
+ERROR: test_inventory_internal_deadline_failures_are_command_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_internal_deadline_failures_are_command_timeouts) (message='Deadline reached while inspecting owned processes')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 197, in test_inventory_internal_deadline_failures_are_command_timeouts
+    self.run_inventory(10.8, fixture.ownership.InteropFailure(message))
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 167, in run_inventory
+    return commands.run("inventory-boundary", ["controlled-child"], timeout=0.8)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 192, in run
+    self.capture(deadline)
+    ~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 162, in capture
+    table = ownership.process_table(deadline)
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1247, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 152, in inventory
+    raise error
+openssh_interop.InteropFailure: Deadline reached while inspecting owned processes
+
+======================================================================
+ERROR: test_inventory_probe_timeout_at_command_deadline_is_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_inventory_probe_timeout_at_command_deadline_is_a_timeout) (completed_at=10.8)
+----------------------------------------------------------------------
+subprocess.TimeoutExpired: Command '['ps', '-eo', 'pid=']' timed out after 0.05 seconds
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 188, in test_inventory_probe_timeout_at_command_deadline_is_a_timeout
+    self.run_inventory(completed_at, self.probe_timeout)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 167, in run_inventory
+    return commands.run("inventory-boundary", ["controlled-child"], timeout=0.8)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 192, in run
+    self.capture(deadline)
+    ~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 162, in capture
+    table = ownership.process_table(deadline)
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1247, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 152, in inventory
+    raise error
+openssh_interop.InteropFailure: Process inventory exceeded its bounded deadline
+
+======================================================================
+FAIL: test_inventory_completion_at_or_past_deadline_cannot_report_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_at_or_past_deadline_cannot_report_success) (completed_at=10.8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 202, in test_inventory_completion_at_or_past_deadline_cannot_report_success
+    with self.subTest(completed_at=completed_at), self.assertRaisesRegex(
+                                                  ~~~~~~~~~~~~~~~~~~~~~~^
+        fixture.FixtureFailure, "inventory-boundary failed"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+AssertionError: FixtureFailure not raised
+
+======================================================================
+FAIL: test_inventory_completion_at_or_past_deadline_cannot_report_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_at_or_past_deadline_cannot_report_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 206, in test_inventory_completion_at_or_past_deadline_cannot_report_success
+    self.assert_recorded_step(timed_out=True, interrupted=False)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 175, in assert_recorded_step
+    self.assertEqual(step["timed_out"], timed_out)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True
+
+======================================================================
+FAIL: test_inventory_internal_deadline_failures_are_command_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_internal_deadline_failures_are_command_timeouts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 198, in test_inventory_internal_deadline_failures_are_command_timeouts
+    self.assert_recorded_step(timed_out=True, interrupted=False)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 175, in assert_recorded_step
+    self.assertEqual(step["timed_out"], timed_out)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True
+
+======================================================================
+FAIL: test_inventory_probe_timeout_at_command_deadline_is_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_inventory_probe_timeout_at_command_deadline_is_a_timeout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 189, in test_inventory_probe_timeout_at_command_deadline_is_a_timeout
+    self.assert_recorded_step(timed_out=True, interrupted=False)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 175, in assert_recorded_step
+    self.assertEqual(step["timed_out"], timed_out)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.127s
+
+FAILED (failures=4, errors=3)

@@ -1,0 +1,31 @@
+{
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/session-r1",
+  "binary_sha256": "a732ded9a3a76985d17afbb56963ab8dd01921420d6cb192389759e466b5b3f8",
+  "parent_inventory_sha256": "48d2f1ff634abe748696dadb37159dd8e7c24f8efca95b96a17826dae4de5173",
+  "binary_sha256_after": "a732ded9a3a76985d17afbb56963ab8dd01921420d6cb192389759e466b5b3f8",
+  "results": [
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/session-r1",
+        "--list"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1",
+      "exit_code": 0,
+      "duration_seconds": 0.004745750004076399,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/session-inventory-r1.log",
+      "log_sha256": "48d2f1ff634abe748696dadb37159dd8e7c24f8efca95b96a17826dae4de5173"
+    },
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/session-r1",
+        "--test-threads=4"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1",
+      "exit_code": 0,
+      "duration_seconds": 3.1706284999963827,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/session-all-r1.log",
+      "log_sha256": "b545bc3907eed1e8fd2d85be79f0d696eb672a535cf2ed018e07fead456d8c61"
+    }
+  ],
+  "prebuilt_limitation": "Parent built; no independent compile; no external fixtures started."
+}

@@ -27,6 +27,10 @@
 //! Call `timeout()` on an outer, bounded idle timer (normally ten seconds).
 //! Human-review and saved-file pauses do not advance on timeout. The caller must
 //! impose a separate overall/review deadline, including when no bytes arrive.
+//! Missing receive-side OO may be closed explicitly with
+//! [`Receiver::finish_without_farewell`] only after the caller proves its
+//! transport and deadline preconditions. That emits [`Event::FarewellMissing`],
+//! never [`Event::Finished`].
 
 mod codec;
 mod detector;
@@ -153,9 +157,15 @@ pub enum Event {
     },
     /// Completed the ZFIN/OO handshake.
     Finished,
+    /// The caller explicitly closed a receiver waiting for missing OO.
+    ///
+    /// This distinct terminal outcome does not complete the strict handshake.
+    /// The caller owns proof of the transport/deadline preconditions described
+    /// by [`Receiver::finish_without_farewell`]; core infers neither.
+    FarewellMissing,
     /// Local cancellation or peer cancellation; no remote cleanup is inferred.
     Cancelled,
-    /// Bytes following session completion, to return to the terminal unchanged.
+    /// Ordinary bytes returned unchanged after a terminal protocol outcome.
     Terminal(Vec<u8>),
 }
 

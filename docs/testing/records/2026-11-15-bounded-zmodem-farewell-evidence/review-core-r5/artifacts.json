@@ -1,0 +1,9 @@
+{
+  "recorded_utc": "2026-11-15T11:05:40.119135+00:00",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "files": {
+    "freeze-final.json": "8739d911a7d3b56fc84b08165447be0ced77aebac2795060f70c0e249502b635",
+    "r5-continuity-receipt.json": "9e24aa7561d990482c0cee5abfa4696695a95d89d20e2c92ed7c0ca11220bbf2",
+    "review-core-r5.md": "4921afb5e135bf433d34efeda997a2a8d0bb84879fa021bc62dfcbfdeed62cb4"
+  }
+}

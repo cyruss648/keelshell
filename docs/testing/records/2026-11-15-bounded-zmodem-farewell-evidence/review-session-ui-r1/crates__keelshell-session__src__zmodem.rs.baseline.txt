@@ -1,0 +1,1242 @@
+//! Ephemeral, reviewed Zmodem transfers on an existing authenticated SSH PTY.
+//!
+//! The controller never writes to the channel or launches a command. Its owner
+//! serializes [`ZmodemOutput::writes`] with PTY traffic and excludes ordinary
+//! input for the exact [`ZmodemController::lease_id`]. All methods run on the
+//! transport worker, never on the application's UI thread.
+
+use std::collections::VecDeque;
+use std::path::PathBuf;
+use std::sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, Ordering},
+};
+use std::time::{Duration, Instant};
+
+use keelshell_core::zmodem::{
+    self as protocol, DetectEvent, Detector, Event, FileOffer, Receiver, Role, Sender,
+};
+use uuid::Uuid;
+
+use crate::SshSession;
+use crate::sftp::ZmodemLocalReservation;
+
+mod local;
+
+/// Human-reviewed direction, relative to this application.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ZmodemDirection {
+    /// Selected local files are sent to the remote peer.
+    Upload,
+    /// One individually reviewed remote offer is received locally.
+    Download,
+}
+
+/// A complete file description safe to show in a review; contains no bytes.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ZmodemFileReview {
+    /// Exact local source, or chosen destination for a received file.
+    pub path: PathBuf,
+    /// Portable UTF-8 basename presented to the protocol.
+    pub name: String,
+    /// Exact declared or observed byte count.
+    pub size: u64,
+    /// Lowercase SHA-256 of a local source; absent for an unreceived offer.
+    pub sha256: Option<String>,
+}
+
+/// A bounded, structured failure category; the application localizes it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ZmodemFailure {
+    /// The action does not belong to the current transfer/review/connection.
+    Stale,
+    /// A selected file, destination or protocol filename was invalid.
+    InvalidPath,
+    /// Source identity, metadata, content or ancestors changed after review.
+    SourceChanged,
+    /// A transfer, count, size, packet or retry budget was exceeded.
+    Limit,
+    /// The peer sent an invalid or disallowed protocol sequence.
+    Protocol,
+    /// The peer cancelled the transfer.
+    PeerCancelled,
+    /// The absolute elapsed or idle deadline expired.
+    Timeout,
+    /// Another application mutation already owns the local destination.
+    DestinationBusy,
+    /// An unknown application mutation isolates the local destination.
+    DestinationQuarantined,
+    /// The new local destination already exists and was preserved.
+    DestinationExists,
+    /// The platform lacks the required verified private publication backend.
+    Unsupported,
+    /// A local filesystem operation failed.
+    LocalIo,
+    /// A mutation or final readback could not be confirmed.
+    UnverifiedPublication,
+    /// The authenticated SSH connection closed or was replaced.
+    ConnectionClosed,
+}
+
+/// File-byte-free notifications bound to one ephemeral transfer.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ZmodemUiEvent {
+    /// The remote receiver is waiting for explicit local source selection.
+    UploadRequested {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+    },
+    /// Ordinary queued PTY input was rejected while this lease owned the channel.
+    InputRejected {
+        /// Exact lease that excluded the write; never implies protocol failure.
+        id: Uuid,
+    },
+    /// A UI action was refused without ending the current transfer.
+    ActionRejected {
+        /// Lease named by the rejected action; stale leases cannot affect a new one.
+        id: Uuid,
+        /// Localizable refusal category; no protocol or file authority was granted.
+        reason: ZmodemFailure,
+    },
+    /// The remote sender offered a file; no file data has been accepted.
+    DownloadOffered {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+        /// Unique identity of this particular offer.
+        offer: Uuid,
+        /// Validated portable basename.
+        name: String,
+        /// Required declared length.
+        size: u64,
+    },
+    /// Full review that must be explicitly confirmed without changing inputs.
+    Review {
+        /// Unique PTY ownership lease.
+        transfer: Uuid,
+        /// One-use review identity.
+        review: Uuid,
+        /// Human-reviewed direction.
+        direction: ZmodemDirection,
+        /// Full file names, paths, sizes and available source digests.
+        files: Vec<ZmodemFileReview>,
+        /// Exact new local target, only for receiving.
+        destination: Option<PathBuf>,
+    },
+    /// Protocol-acknowledged progress; never implies a durable local save.
+    Progress {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+        /// Bytes acknowledged or completely received for the current file.
+        bytes: u64,
+        /// Exact current-file declared length.
+        total: u64,
+    },
+    /// No-replace local publication and complete readback both succeeded.
+    FileSaved {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+        /// Exact published local filename.
+        path: PathBuf,
+        /// Verified byte count.
+        bytes: u64,
+        /// Lowercase SHA-256 of the verified saved bytes.
+        sha256: String,
+    },
+    /// The protocol exchange reached its successful terminal state.
+    Finished {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+    },
+    /// Explicit cancellation, without inferring remote cleanup.
+    Cancelled {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+        /// A local or remote mutation may have an unconfirmed outcome.
+        uncertain: bool,
+    },
+    /// A typed failure; existing targets and unknown outcomes are retained.
+    Failed {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+        /// Category for application localization.
+        reason: ZmodemFailure,
+        /// A local or remote mutation may have an unconfirmed outcome.
+        uncertain: bool,
+    },
+}
+
+/// Explicit UI actions. Old queued actions cannot authorize a newer transfer.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ZmodemControl {
+    /// Observe complete ordinary local files before presenting an upload review.
+    PrepareUpload {
+        /// Current upload-request lease.
+        transfer: Uuid,
+        /// One through 32 exact absolute source paths.
+        sources: Vec<PathBuf>,
+    },
+    /// Review an exact new absolute filename for this single remote offer.
+    PrepareReceive {
+        /// Current receive lease.
+        transfer: Uuid,
+        /// Exact currently pending offer.
+        offer: Uuid,
+        /// New absolute local filename; existing targets are never replaced.
+        destination: PathBuf,
+    },
+    /// Consume one exact current review after revalidating its inputs.
+    Confirm {
+        /// Current PTY lease.
+        transfer: Uuid,
+        /// Exact one-use review to confirm.
+        review: Uuid,
+    },
+    /// Cancel the current transfer and emit bounded protocol cancellation.
+    Cancel {
+        /// Exact current PTY lease.
+        transfer: Uuid,
+    },
+}
+
+/// Effects returned to the single PTY-owning bridge.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ZmodemOutput {
+    /// Ordinary terminal output in original order, excluding protocol bytes.
+    pub terminal: Vec<u8>,
+    /// Ordered protocol chunks; the bridge performs actual channel writes.
+    pub writes: Vec<Vec<u8>>,
+    /// Structured notifications with no file contents.
+    pub events: Vec<ZmodemUiEvent>,
+}
+
+const MAX_ELAPSED: Duration = Duration::from_secs(15 * 60);
+const REVIEW_TIMEOUT: Duration = Duration::from_secs(3 * 60);
+const RETRY_INTERVAL: Duration = Duration::from_secs(10);
+const LOCAL_TIMEOUT: Duration = Duration::from_secs(30);
+const CANCELLATION: &[u8] = &[24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+
+/// Observable controller state. Terminal states own no ordinary-input lease.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ZmodemState {
+    /// No transfer has been detected.
+    Idle,
+    /// A remote receiver is waiting for local source selection.
+    AwaitingSources,
+    /// A remote offer is waiting for an exact new local filename.
+    AwaitingDestination,
+    /// An immutable review awaits explicit confirmation.
+    AwaitingConfirmation,
+    /// Approved local files are being sent.
+    Sending,
+    /// One approved remote file is being collected in bounded memory.
+    Receiving,
+    /// A local publication worker is creating or verifying a new destination.
+    Saving,
+    /// The protocol completed successfully.
+    Finished,
+    /// The current transfer was explicitly cancelled.
+    Cancelled,
+    /// A terminal protocol, connection or publication failure occurred.
+    Failed,
+}
+
+enum Machine {
+    Send(Sender),
+    Receive(Receiver),
+}
+
+impl Machine {
+    fn feed(&mut self, bytes: &[u8]) -> std::result::Result<Vec<Event>, protocol::Error> {
+        match self {
+            Self::Send(sender) => sender.feed(bytes),
+            Self::Receive(receiver) => receiver.feed(bytes),
+        }
+    }
+
+    fn timeout(&mut self) -> std::result::Result<Vec<Event>, protocol::Error> {
+        match self {
+            Self::Send(sender) => sender.timeout(),
+            Self::Receive(receiver) => receiver.timeout(),
+        }
+    }
+
+    fn cancel(&mut self) -> std::result::Result<Vec<Event>, protocol::Error> {
+        match self {
+            Self::Send(sender) => sender.cancel(),
+            Self::Receive(receiver) => receiver.cancel(),
+        }
+    }
+}
+
+enum Review {
+    Upload {
+        id: Uuid,
+        plan: local::UploadPlan,
+    },
+    Receive {
+        id: Uuid,
+        offer: Uuid,
+        destination: local::Destination,
+    },
+}
+
+impl Review {
+    fn id(&self) -> Uuid {
+        match self {
+            Self::Upload { id, .. } | Self::Receive { id, .. } => *id,
+        }
+    }
+}
+
+/// Owns a reviewed protocol exchange on one exact authenticated SSH connection.
+///
+/// Construct one controller per interactive PTY. The caller passes that PTY's
+/// current [`SshSession`] to every asynchronous operation. Endpoint equality is
+/// insufficient: a replacement authenticated connection revokes all reviews.
+/// `target` is caller-captured display metadata, never a remote terminal title.
+///
+/// Filesystem work runs in bounded, cancellable `spawn_blocking` operations.
+/// Dropping a wait cannot stop a running syscall: its reservation and shared
+/// close-protection handles remain owned until actual worker completion.
+pub struct ZmodemController {
+    session: SshSession,
+    target: String,
+    detector: Detector,
+    machine: Option<Machine>,
+    transfer: Option<Uuid>,
+    state: ZmodemState,
+    review: Option<Review>,
+    offer: Option<(Uuid, FileOffer)>,
+    approved: Option<local::Destination>,
+    reservation: Option<ZmodemLocalReservation>,
+    upload_initial: Vec<u8>,
+    began: Option<Instant>,
+    action_at: Instant,
+    received_at: Instant,
+    retried_at: Instant,
+    remote_write_possible: bool,
+    local_uncertain: bool,
+    publication: Arc<PublicationHold>,
+    running: Arc<AtomicBool>,
+    operation_stop: Option<Arc<AtomicBool>>,
+}
+
+impl ZmodemController {
+    /// Monitor one existing PTY without executing a command or opening a channel.
+    pub fn new(session: SshSession, target: impl Into<String>) -> Self {
+        let now = Instant::now();
+        Self {
+            session,
+            target: target.into(),
+            detector: Detector::new(),
+            machine: None,
+            transfer: None,
+            state: ZmodemState::Idle,
+            review: None,
+            offer: None,
+            approved: None,
+            reservation: None,
+            upload_initial: Vec::new(),
+            began: None,
+            action_at: now,
+            received_at: now,
+            retried_at: now,
+            remote_write_possible: false,
+            local_uncertain: false,
+            publication: Arc::new(PublicationHold::default()),
+            running: Arc::new(AtomicBool::new(false)),
+            operation_stop: None,
+        }
+    }
+
+    /// Caller-captured actual endpoint display, independent of remote OSC titles.
+    pub fn target(&self) -> &str {
+        &self.target
+    }
+
+    /// Current explicit idle, human-pause, active or terminal state.
+    pub fn state(&self) -> ZmodemState {
+        self.state
+    }
+
+    /// Whether the controller currently excludes ordinary terminal writes.
+    ///
+    /// The bridge also rejects queued writes from this generation after the
+    /// lease ends. A final event never authorizes replay of old ordinary input.
+    pub fn is_active(&self) -> bool {
+        self.transfer.is_some()
+    }
+
+    /// Exact ephemeral input-exclusion lease, absent in idle and terminal states.
+    pub fn lease_id(&self) -> Option<Uuid> {
+        self.transfer
+    }
+
+    /// Shared close hold for a pending or unresolved local publication.
+    ///
+    /// Retain the returned handle when replacing/dropping this controller.
+    /// A later successful transfer never erases an earlier unresolved outcome.
+    /// This marker does not itself authorize clearing backend quarantine.
+    pub fn mutation_pending(&self) -> Arc<AtomicBool> {
+        self.publication.pending.clone()
+    }
+
+    /// Whether an actual publication worker still owns or may issue local I/O.
+    ///
+    /// User risk acknowledgement must not bypass a `true` value. The worker
+    /// clears it on actual termination, including when its await was abandoned.
+    pub fn publication_running(&self) -> Arc<AtomicBool> {
+        self.running.clone()
+    }
+
+    /// Consume raw PTY bytes, returning ordered terminal/protocol/UI effects.
+    ///
+    /// Every chunk is split to the pure codec's feed bound. Incomplete detection
+    /// prefixes are retained without changing ordinary output order. No file
+    /// content enters a UI event.
+    pub async fn feed(&mut self, current: &SshSession, raw: &[u8]) -> ZmodemOutput {
+        let mut output = ZmodemOutput::default();
+        if !self.connection(current) {
+            if self.is_active() {
+                self.fail(ZmodemFailure::ConnectionClosed, &mut output);
+            } else {
+                output.terminal.extend(self.detector.reset());
+            }
+            output.terminal.extend_from_slice(raw);
+            return output;
+        }
+        self.check_deadline(&mut output);
+        for chunk in raw.chunks(protocol::MAX_FEED_BYTES) {
+            if self.is_active() {
+                self.received_at = Instant::now();
+                if let Some(machine) = &mut self.machine {
+                    match machine.feed(chunk) {
+                        Ok(events) => self.events(events, &mut output).await,
+                        Err(error) => self.fail(protocol_failure(&error), &mut output),
+                    }
+                } else if self.upload_initial.len() + chunk.len() <= protocol::MAX_FEED_BYTES {
+                    self.upload_initial.extend_from_slice(chunk);
+                } else {
+                    self.fail(ZmodemFailure::Limit, &mut output);
+                }
+            } else if self.running.load(Ordering::Acquire) {
+                // A prior abandoned publication has not stopped. Its worker
+                // must not share mutable controller state with a new transfer.
+                output.terminal.extend_from_slice(chunk);
+            } else {
+                match self.detector.feed(chunk) {
+                    Ok(events) => {
+                        for event in events {
+                            match event {
+                                DetectEvent::Terminal(bytes) => output.terminal.extend(bytes),
+                                DetectEvent::Start { role, bytes } => {
+                                    self.begin(role, &mut output);
+                                    if self.machine.is_some() {
+                                        for chunk in bytes.chunks(protocol::MAX_FEED_BYTES) {
+                                            if let Some(machine) = &mut self.machine {
+                                                match machine.feed(chunk) {
+                                                    Ok(events) => {
+                                                        self.events(events, &mut output).await
+                                                    }
+                                                    Err(error) => {
+                                                        self.fail(
+                                                            protocol_failure(&error),
+                                                            &mut output,
+                                                        );
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        self.upload_initial = bytes;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Err(error) => {
+                        output.terminal.extend(self.detector.reset());
+                        output.terminal.extend_from_slice(chunk);
+                        if self.is_active() {
+                            self.fail(protocol_failure(&error), &mut output);
+                        }
+                    }
+                }
+            }
+        }
+        output
+    }
+
+    /// Apply one explicit UI action to its exact transfer/offer/review.
+    ///
+    /// Invalid paths, changed sources and stale actions emit `ActionRejected`,
+    /// never a terminal event while retaining a live lease. A failed review is
+    /// consumed: the user prepares and reviews fresh inputs before retrying.
+    pub async fn control(&mut self, current: &SshSession, action: ZmodemControl) -> ZmodemOutput {
+        let mut output = ZmodemOutput::default();
+        let transfer = match &action {
+            ZmodemControl::PrepareUpload { transfer, .. }
+            | ZmodemControl::PrepareReceive { transfer, .. }
+            | ZmodemControl::Confirm { transfer, .. }
+            | ZmodemControl::Cancel { transfer } => *transfer,
+        };
+        if self.transfer != Some(transfer) {
+            reject(transfer, ZmodemFailure::Stale, &mut output);
+            return output;
+        }
+        if !self.connection(current) {
+            self.fail(ZmodemFailure::ConnectionClosed, &mut output);
+            return output;
+        }
+        self.check_deadline(&mut output);
+        if self.transfer != Some(transfer) {
+            reject(transfer, ZmodemFailure::Stale, &mut output);
+            return output;
+        }
+        match action {
+            ZmodemControl::PrepareUpload { sources, .. } => {
+                self.prepare_upload(sources, &mut output).await;
+            }
+            ZmodemControl::PrepareReceive {
+                offer, destination, ..
+            } => {
+                self.prepare_receive(offer, destination, &mut output).await;
+            }
+            ZmodemControl::Confirm { review, .. } => {
+                self.confirm(review, &mut output).await;
+            }
+            ZmodemControl::Cancel { .. } => {
+                let uncertain = self.uncertain();
+                self.cancel_wire(&mut output);
+                self.end(ZmodemState::Cancelled, &mut output);
+                output.events.push(ZmodemUiEvent::Cancelled {
+                    id: transfer,
+                    uncertain,
+                });
+            }
+        }
+        output
+    }
+
+    /// Drive absolute/review deadlines and bounded idle retransmission.
+    ///
+    /// Call regularly even when no bytes arrive. This never advances a human
+    /// review or acknowledges a local save.
+    pub fn tick(&mut self) -> ZmodemOutput {
+        let mut output = ZmodemOutput::default();
+        if !self.is_active() {
+            return output;
+        }
+        if self.session.is_closed() {
+            self.fail(ZmodemFailure::ConnectionClosed, &mut output);
+            return output;
+        }
+        self.check_deadline(&mut output);
+        if !self.is_active()
+            || self.is_human_pause()
+            || self.received_at.elapsed() < RETRY_INTERVAL
+            || self.retried_at.elapsed() < RETRY_INTERVAL
+        {
+            return output;
+        }
+        self.retried_at = Instant::now();
+        if let Some(machine) = &mut self.machine {
+            match machine.timeout() {
+                Ok(events) => {
+                    for event in events {
+                        match event {
+                            Event::Send(bytes) => output.writes.push(bytes),
+                            Event::Retry { .. } => {}
+                            _ => {
+                                // Current pure timers emit only bounded retry
+                                // effects, never a file or caller approval.
+                                self.fail(ZmodemFailure::Protocol, &mut output);
+                                break;
+                            }
+                        }
+                    }
+                }
+                Err(error) => self.fail(protocol_failure(&error), &mut output),
+            }
+        }
+        output
+    }
+
+    /// End a broken PTY/write/connection without inferring remote cleanup.
+    ///
+    /// The bridge may ignore returned cancellation writes if its channel is no
+    /// longer writable. Shared worker/uncertainty handles survive this call.
+    pub fn transport_failed(&mut self) -> ZmodemOutput {
+        let mut output = ZmodemOutput::default();
+        if self.is_active() {
+            self.fail(ZmodemFailure::ConnectionClosed, &mut output);
+        } else {
+            output.terminal.extend(self.detector.reset());
+        }
+        output
+    }
+
+    fn connection(&self, current: &SshSession) -> bool {
+        self.session.same_connection(current) && !self.session.is_closed()
+    }
+
+    fn begin(&mut self, role: Role, output: &mut ZmodemOutput) {
+        let id = Uuid::new_v4();
+        let now = Instant::now();
+        self.transfer = Some(id);
+        self.began = Some(now);
+        self.action_at = now;
+        self.received_at = now;
+        self.retried_at = now;
+        self.remote_write_possible = false;
+        self.local_uncertain = false;
+        self.upload_initial.clear();
+        self.review = None;
+        self.offer = None;
+        self.approved = None;
+        match role {
+            Role::Send => {
+                self.state = ZmodemState::AwaitingSources;
+                self.machine = None;
+                output.events.push(ZmodemUiEvent::UploadRequested { id });
+            }
+            Role::Receive => {
+                self.state = ZmodemState::Receiving;
+                let mut receiver = Receiver::new();
+                match receiver.start() {
+                    Ok(events) => {
+                        self.machine = Some(Machine::Receive(receiver));
+                        for event in events {
+                            if let Event::Send(bytes) = event {
+                                output.writes.push(bytes);
+                            }
+                        }
+                    }
+                    Err(error) => self.fail(protocol_failure(&error), output),
+                }
+            }
+        }
+    }
+
+    fn is_human_pause(&self) -> bool {
+        matches!(
+            self.state,
+            ZmodemState::AwaitingSources
+                | ZmodemState::AwaitingDestination
+                | ZmodemState::AwaitingConfirmation
+        )
+    }
+
+    fn check_deadline(&mut self, output: &mut ZmodemOutput) {
+        if self.is_active()
+            && expired(
+                self.began,
+                self.action_at,
+                self.is_human_pause(),
+                Instant::now(),
+            )
+        {
+            self.fail(ZmodemFailure::Timeout, output);
+        }
+    }
+
+    fn uncertain(&self) -> bool {
+        self.remote_write_possible || self.local_uncertain || self.running.load(Ordering::Acquire)
+    }
+
+    fn cancel_wire(&mut self, output: &mut ZmodemOutput) {
+        if let Some(stop) = &self.operation_stop {
+            stop.store(true, Ordering::Release);
+        }
+        if let Some(machine) = &mut self.machine {
+            match machine.cancel() {
+                Ok(events) => {
+                    for event in events {
+                        if let Event::Send(bytes) = event {
+                            output.writes.push(bytes);
+                        }
+                    }
+                }
+                Err(_) => output.writes.push(CANCELLATION.to_vec()),
+            }
+        } else if self.is_active() {
+            output.writes.push(CANCELLATION.to_vec());
+        }
+    }
+
+    fn end(&mut self, state: ZmodemState, output: &mut ZmodemOutput) {
+        if let Some(ticket) = self.reservation.take() {
+            // This slot only owns a reviewed in-memory receive. Publication
+            // moves its ticket into the actual worker before touching files.
+            ticket.finish(true);
+        }
+        self.transfer = None;
+        self.state = state;
+        self.machine = None;
+        self.review = None;
+        self.offer = None;
+        self.approved = None;
+        self.upload_initial.clear();
+        self.began = None;
+        self.operation_stop = None;
+        output.terminal.extend(self.detector.reset());
+    }
+
+    fn fail(&mut self, reason: ZmodemFailure, output: &mut ZmodemOutput) {
+        let Some(id) = self.transfer else {
+            return;
+        };
+        let uncertain = self.uncertain();
+        self.cancel_wire(output);
+        self.end(ZmodemState::Failed, output);
+        output.events.push(ZmodemUiEvent::Failed {
+            id,
+            reason,
+            uncertain,
+        });
+    }
+
+    fn stop_token(&mut self) -> Arc<AtomicBool> {
+        let stop = Arc::new(AtomicBool::new(false));
+        self.operation_stop = Some(stop.clone());
+        stop
+    }
+
+    async fn prepare_upload(&mut self, sources: Vec<PathBuf>, output: &mut ZmodemOutput) {
+        let Some(id) = self.transfer else { return };
+        if self.machine.is_some()
+            || !matches!(
+                self.state,
+                ZmodemState::AwaitingSources | ZmodemState::AwaitingConfirmation
+            )
+        {
+            reject(id, ZmodemFailure::Stale, output);
+            return;
+        }
+        self.review = None;
+        self.state = ZmodemState::AwaitingSources;
+        let stop = self.stop_token();
+        let result = blocking(stop, move |stop| local::UploadPlan::prepare(sources, stop)).await;
+        self.operation_stop = None;
+        if self.session.is_closed() {
+            self.fail(ZmodemFailure::ConnectionClosed, output);
+            return;
+        }
+        match result {
+            Ok(plan) => {
+                let review = Uuid::new_v4();
+                output.events.push(ZmodemUiEvent::Review {
+                    transfer: id,
+                    review,
+                    direction: ZmodemDirection::Upload,
+                    files: plan.review(),
+                    destination: None,
+                });
+                self.review = Some(Review::Upload { id: review, plan });
+                self.state = ZmodemState::AwaitingConfirmation;
+                self.action_at = Instant::now();
+            }
+            Err(reason) => reject(id, reason, output),
+        }
+    }
+
+    async fn prepare_receive(
+        &mut self,
+        requested_offer: Uuid,
+        destination: PathBuf,
+        output: &mut ZmodemOutput,
+    ) {
+        let Some(id) = self.transfer else { return };
+        let Some((offer_id, offer)) = self.offer.clone() else {
+            reject(id, ZmodemFailure::Stale, output);
+            return;
+        };
+        if offer_id != requested_offer
+            || !matches!(
+                &self.machine,
+                Some(Machine::Receive(receiver)) if receiver.is_waiting_for_accept()
+            )
+        {
+            reject(id, ZmodemFailure::Stale, output);
+            return;
+        }
+        self.review = None;
+        self.state = ZmodemState::AwaitingDestination;
+        let stop = self.stop_token();
+        let result = blocking(stop, move |stop| {
+            local::Destination::prepare(destination, stop)
+        })
+        .await;
+        self.operation_stop = None;
+        if self.session.is_closed() {
+            self.fail(ZmodemFailure::ConnectionClosed, output);
+            return;
+        }
+        match result {
+            Ok(destination) => {
+                let review = Uuid::new_v4();
+                output.events.push(ZmodemUiEvent::Review {
+                    transfer: id,
+                    review,
+                    direction: ZmodemDirection::Download,
+                    files: vec![ZmodemFileReview {
+                        path: destination.path.clone(),
+                        name: offer.name,
+                        size: offer.size,
+                        sha256: None,
+                    }],
+                    destination: Some(destination.path.clone()),
+                });
+                self.review = Some(Review::Receive {
+                    id: review,
+                    offer: offer_id,
+                    destination,
+                });
+                self.state = ZmodemState::AwaitingConfirmation;
+                self.action_at = Instant::now();
+            }
+            Err(reason) => reject(id, reason, output),
+        }
+    }
+
+    async fn confirm(&mut self, review_id: Uuid, output: &mut ZmodemOutput) {
+        let Some(id) = self.transfer else { return };
+        if self
+            .review
+            .as_ref()
+            .is_none_or(|review| review.id() != review_id)
+        {
+            reject(id, ZmodemFailure::Stale, output);
+            return;
+        }
+        let Some(review) = self.review.take() else {
+            return;
+        };
+        match review {
+            Review::Upload { plan, .. } => {
+                self.state = ZmodemState::AwaitingSources;
+                let stop = self.stop_token();
+                let result = blocking(stop, move |stop| plan.confirm(stop)).await;
+                self.operation_stop = None;
+                if self.session.is_closed() {
+                    self.fail(ZmodemFailure::ConnectionClosed, output);
+                    return;
+                }
+                match result {
+                    Ok(files) => match Sender::new(files) {
+                        Ok(mut sender) => match sender.start() {
+                            Ok(events) => {
+                                self.machine = Some(Machine::Send(sender));
+                                self.state = ZmodemState::Sending;
+                                self.remote_write_possible = true;
+                                self.received_at = Instant::now();
+                                self.events(events, output).await;
+                                let initial = std::mem::take(&mut self.upload_initial);
+                                for chunk in initial.chunks(protocol::MAX_FEED_BYTES) {
+                                    if let Some(machine) = &mut self.machine {
+                                        match machine.feed(chunk) {
+                                            Ok(events) => self.events(events, output).await,
+                                            Err(error) => {
+                                                self.fail(protocol_failure(&error), output)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Err(error) => self.fail(protocol_failure(&error), output),
+                        },
+                        Err(error) => reject(id, protocol_failure(&error), output),
+                    },
+                    Err(reason) => reject(id, reason, output),
+                }
+            }
+            Review::Receive {
+                offer, destination, ..
+            } => {
+                self.state = ZmodemState::AwaitingDestination;
+                if self
+                    .offer
+                    .as_ref()
+                    .is_none_or(|(current, _)| *current != offer)
+                {
+                    reject(id, ZmodemFailure::Stale, output);
+                    return;
+                }
+                let plan = destination.clone();
+                let stop = self.stop_token();
+                let result = blocking(stop, move |stop| plan.revalidate(stop).map(|_| ())).await;
+                self.operation_stop = None;
+                if let Err(reason) = result {
+                    reject(id, reason, output);
+                    return;
+                }
+                let ticket = tokio::time::timeout(
+                    LOCAL_TIMEOUT,
+                    ZmodemLocalReservation::acquire(
+                        &self.session,
+                        &[destination.path.clone(), destination.staging.clone()],
+                    ),
+                )
+                .await;
+                let ticket = match ticket {
+                    Ok(Ok(ticket)) => ticket,
+                    Ok(Err(error)) => {
+                        reject(id, reservation_failure(&error), output);
+                        return;
+                    }
+                    Err(_) => {
+                        reject(id, ZmodemFailure::Timeout, output);
+                        return;
+                    }
+                };
+                if self.session.is_closed() || !ticket.is_active() {
+                    ticket.finish(true);
+                    self.fail(ZmodemFailure::ConnectionClosed, output);
+                    return;
+                }
+                let accepted = match &mut self.machine {
+                    Some(Machine::Receive(receiver)) if receiver.is_waiting_for_accept() => {
+                        receiver.accept()
+                    }
+                    _ => {
+                        ticket.finish(true);
+                        reject(id, ZmodemFailure::Stale, output);
+                        return;
+                    }
+                };
+                match accepted {
+                    Ok(events) => {
+                        self.reservation = Some(ticket);
+                        self.approved = Some(destination);
+                        self.state = ZmodemState::Receiving;
+                        self.received_at = Instant::now();
+                        self.events(events, output).await;
+                    }
+                    Err(error) => {
+                        ticket.finish(true);
+                        self.fail(protocol_failure(&error), output);
+                    }
+                }
+            }
+        }
+    }
+
+    async fn events(&mut self, events: Vec<Event>, output: &mut ZmodemOutput) {
+        let mut queue = VecDeque::from(events);
+        while let Some(event) = queue.pop_front() {
+            match event {
+                Event::Send(bytes) => output.writes.push(bytes),
+                Event::Terminal(bytes) => output.terminal.extend(bytes),
+                Event::Offer(offer) => {
+                    let Some(id) = self.transfer else { continue };
+                    if self.approved.is_some() || self.reservation.is_some() {
+                        self.fail(ZmodemFailure::Protocol, output);
+                        break;
+                    }
+                    let offer_id = Uuid::new_v4();
+                    self.review = None;
+                    self.state = ZmodemState::AwaitingDestination;
+                    self.action_at = Instant::now();
+                    output.events.push(ZmodemUiEvent::DownloadOffered {
+                        id,
+                        offer: offer_id,
+                        name: offer.name.clone(),
+                        size: offer.size,
+                    });
+                    self.offer = Some((offer_id, offer));
+                }
+                Event::Progress { offer, bytes } => {
+                    if let Some(id) = self.transfer {
+                        output.events.push(ZmodemUiEvent::Progress {
+                            id,
+                            bytes,
+                            total: offer.size,
+                        });
+                    }
+                }
+                Event::FileReceived { offer, bytes } => {
+                    let Some(id) = self.transfer else { continue };
+                    if self
+                        .offer
+                        .as_ref()
+                        .is_none_or(|(_, approved)| *approved != offer)
+                        || bytes.len() as u64 != offer.size
+                    {
+                        self.fail(ZmodemFailure::Protocol, output);
+                        break;
+                    }
+                    match self.publish(bytes).await {
+                        Ok(saved) => {
+                            output.events.push(ZmodemUiEvent::FileSaved {
+                                id,
+                                path: saved.path,
+                                bytes: saved.bytes,
+                                sha256: saved.sha256,
+                            });
+                            self.offer = None;
+                            self.state = ZmodemState::Receiving;
+                            self.action_at = Instant::now();
+                            let acknowledged = match &mut self.machine {
+                                Some(Machine::Receive(receiver)) => receiver.acknowledge_saved(),
+                                _ => {
+                                    self.fail(ZmodemFailure::Protocol, output);
+                                    break;
+                                }
+                            };
+                            match acknowledged {
+                                Ok(events) => queue.extend(events),
+                                Err(error) => {
+                                    self.fail(protocol_failure(&error), output);
+                                    break;
+                                }
+                            }
+                        }
+                        Err(reason) => {
+                            self.fail(reason, output);
+                            break;
+                        }
+                    }
+                }
+                Event::FileSent(_) | Event::Retry { .. } => {}
+                Event::FileSkipped(_) => {
+                    // There is no implicit skip UI action. An unsolicited
+                    // skipped upload does not establish the requested outcome.
+                    self.fail(ZmodemFailure::Protocol, output);
+                    break;
+                }
+                Event::Finished => {
+                    if let Some(id) = self.transfer {
+                        self.remote_write_possible = false;
+                        self.end(ZmodemState::Finished, output);
+                        output.events.push(ZmodemUiEvent::Finished { id });
+                    }
+                }
+                Event::Cancelled => {
+                    if let Some(id) = self.transfer {
+                        let uncertain = self.uncertain();
+                        self.end(ZmodemState::Cancelled, output);
+                        output
+                            .events
+                            .push(ZmodemUiEvent::Cancelled { id, uncertain });
+                    }
+                }
+            }
+        }
+    }
+
+    async fn publish(
+        &mut self,
+        bytes: Vec<u8>,
+    ) -> std::result::Result<local::Saved, ZmodemFailure> {
+        let destination = self.approved.take().ok_or(ZmodemFailure::Stale)?;
+        let ticket = self.reservation.take().ok_or(ZmodemFailure::Stale)?;
+        if !ticket.is_active() {
+            ticket.finish(false);
+            return Err(ZmodemFailure::DestinationQuarantined);
+        }
+        self.state = ZmodemState::Saving;
+        let stop = self.stop_token();
+        let wait = StopOnDrop(stop.clone());
+        let mutated = Arc::new(AtomicBool::new(false));
+        let worker_ticket =
+            PublicationTicket::new(ticket, mutated.clone(), self.publication.clone());
+        let running = self.running.clone();
+        let observed_mutated = mutated.clone();
+        self.running.store(true, Ordering::Release);
+        let task = tokio::task::spawn_blocking(move || {
+            let _running = RunningOnDrop(running);
+            let result = destination.publish(bytes, &stop, &mutated);
+            (worker_ticket, result)
+        });
+        let result = tokio::time::timeout(LOCAL_TIMEOUT, task).await;
+        drop(wait);
+        self.operation_stop = None;
+        let result = match result {
+            Ok(Ok((mut ticket, Ok(saved)))) if !self.session.is_closed() => {
+                ticket.known();
+                Ok(saved)
+            }
+            Ok(Ok((_ticket, Ok(_)))) => Err(ZmodemFailure::ConnectionClosed),
+            Ok(Ok((_ticket, Err(reason)))) => Err(reason),
+            Ok(Err(_)) => Err(ZmodemFailure::UnverifiedPublication),
+            Err(_) => Err(ZmodemFailure::Timeout),
+        };
+        if result.is_err()
+            && (observed_mutated.load(Ordering::Acquire) || self.running.load(Ordering::Acquire))
+        {
+            self.local_uncertain = true;
+        }
+        result
+    }
+}
+
+impl Drop for ZmodemController {
+    fn drop(&mut self) {
+        if let Some(stop) = &self.operation_stop {
+            stop.store(true, Ordering::Release);
+        }
+        if let Some(ticket) = self.reservation.take() {
+            ticket.finish(true);
+        }
+    }
+}
+
+fn reject(id: Uuid, reason: ZmodemFailure, output: &mut ZmodemOutput) {
+    output
+        .events
+        .push(ZmodemUiEvent::ActionRejected { id, reason });
+}
+
+fn protocol_failure(error: &protocol::Error) -> ZmodemFailure {
+    match error {
+        protocol::Error::Limit(_) | protocol::Error::RetryLimit => ZmodemFailure::Limit,
+        protocol::Error::InvalidName(_) | protocol::Error::NameAlias => ZmodemFailure::InvalidPath,
+        _ => ZmodemFailure::Protocol,
+    }
+}
+
+fn reservation_failure(error: &crate::SessionError) -> ZmodemFailure {
+    match error {
+        crate::SessionError::MutationBusy => ZmodemFailure::DestinationBusy,
+        crate::SessionError::MutationQuarantined | crate::SessionError::MutationUncertain => {
+            ZmodemFailure::DestinationQuarantined
+        }
+        crate::SessionError::Closed => ZmodemFailure::ConnectionClosed,
+        _ => ZmodemFailure::LocalIo,
+    }
+}
+
+fn expired(began: Option<Instant>, action_at: Instant, human_pause: bool, now: Instant) -> bool {
+    began.is_some_and(|start| now.saturating_duration_since(start) >= MAX_ELAPSED)
+        || (human_pause && now.saturating_duration_since(action_at) >= REVIEW_TIMEOUT)
+}
+
+struct StopOnDrop(Arc<AtomicBool>);
+impl Drop for StopOnDrop {
+    fn drop(&mut self) {
+        self.0.store(true, Ordering::Release);
+    }
+}
+
+struct RunningOnDrop(Arc<AtomicBool>);
+impl Drop for RunningOnDrop {
+    fn drop(&mut self) {
+        self.0.store(false, Ordering::Release);
+    }
+}
+
+#[derive(Default)]
+struct PublicationState {
+    active: usize,
+    unresolved: bool,
+}
+
+/// A stopped worker can still own an unobserved result. Account for its ticket
+/// until disposition, and publish the hold in the same lock as sticky unknowns.
+#[derive(Default)]
+struct PublicationHold {
+    state: Mutex<PublicationState>,
+    pending: Arc<AtomicBool>,
+}
+
+impl PublicationHold {
+    fn begin(&self) {
+        self.update(|state| {
+            if let Some(active) = state.active.checked_add(1) {
+                state.active = active;
+            } else {
+                state.unresolved = true;
+            }
+        });
+    }
+
+    fn finish(&self, known: bool) {
+        self.update(|state| {
+            if let Some(active) = state.active.checked_sub(1) {
+                state.active = active;
+            } else {
+                state.unresolved = true;
+            }
+            state.unresolved |= !known;
+        });
+    }
+
+    fn update(&self, change: impl FnOnce(&mut PublicationState)) {
+        let mut state = match self.state.lock() {
+            Ok(state) => state,
+            Err(poisoned) => {
+                // Interrupted accounting cannot establish a safe release.
+                // Keep poison and uncertainty sticky for all later tickets.
+                let mut state = poisoned.into_inner();
+                state.unresolved = true;
+                state
+            }
+        };
+        // Only bounded in-memory accounting belongs in this critical section.
+        change(&mut state);
+        self.pending
+            .store(state.active != 0 || state.unresolved, Ordering::Release);
+    }
+}
+
+/// The result owns admission until its actual observer confirms full readback.
+/// Dropping a JoinHandle/result cannot erase late local mutations.
+struct PublicationTicket {
+    ticket: Option<ZmodemLocalReservation>,
+    mutated: Arc<AtomicBool>,
+    hold: Option<Arc<PublicationHold>>,
+}
+
+impl PublicationTicket {
+    fn new(
+        ticket: ZmodemLocalReservation,
+        mutated: Arc<AtomicBool>,
+        hold: Arc<PublicationHold>,
+    ) -> Self {
+        hold.begin();
+        Self {
+            ticket: Some(ticket),
+            mutated,
+            hold: Some(hold),
+        }
+    }
+
+    fn known(&mut self) {
+        self.finish(true);
+    }
+
+    fn finish(&mut self, known: bool) {
+        let Some(hold) = self.hold.take() else {
+            return;
+        };
+        if let Some(ticket) = self.ticket.take() {
+            // Backend admission/quarantine has its own synchronization. Never
+            // nest it under the publication accounting lock.
+            ticket.finish(known);
+        }
+        hold.finish(known);
+    }
+}
+
+impl Drop for PublicationTicket {
+    fn drop(&mut self) {
+        self.finish(!self.mutated.load(Ordering::Acquire));
+    }
+}
+
+async fn blocking<T: Send + 'static>(
+    stop: Arc<AtomicBool>,
+    operation: impl FnOnce(&AtomicBool) -> std::result::Result<T, ZmodemFailure> + Send + 'static,
+) -> std::result::Result<T, ZmodemFailure> {
+    let _wait = StopOnDrop(stop.clone());
+    tokio::time::timeout(
+        LOCAL_TIMEOUT,
+        tokio::task::spawn_blocking(move || operation(&stop)),
+    )
+    .await
+    .map_err(|_| ZmodemFailure::Timeout)?
+    .map_err(|_| ZmodemFailure::LocalIo)?
+}
+
+#[cfg(test)]
+mod tests;

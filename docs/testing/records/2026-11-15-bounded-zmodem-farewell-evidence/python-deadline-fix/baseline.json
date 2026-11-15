@@ -1,0 +1,18 @@
+{
+  "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.3.34.2)]",
+  "executable": "/opt/homebrew/opt/python@3.15/bin/python3.15",
+  "files": [
+    {
+      "path": "scripts/run_linux_file_interop.py",
+      "sha256": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0",
+      "bytes": 52042,
+      "snapshot": "run_linux_file_interop.py.before"
+    },
+    {
+      "path": "scripts/test_linux_file_interop.py",
+      "sha256": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9",
+      "bytes": 8663,
+      "snapshot": "test_linux_file_interop.py.before"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/opt/homebrew/opt/python@3.15/bin/python3.15",
+    "-B",
+    "work/pty-farewell-20261115/run_native.py",
+    "native-current-r3",
+    "lsz"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "native-current-r3",
+  "pid": 64531,
+  "started_utc": "2026-11-15T10:40:34.007406+00:00",
+  "finished_utc": "2026-11-15T10:40:42.142512+00:00",
+  "seconds": 8.135,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "ede34a2aafe15f040492215102d075dfea4a7d9dc22a4bc1efbbfdee659f74c9",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

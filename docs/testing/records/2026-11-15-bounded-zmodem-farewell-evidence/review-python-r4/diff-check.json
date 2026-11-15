@@ -1,0 +1,17 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--check",
+    "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+    "--",
+    "scripts/run_linux_file_interop.py",
+    "scripts/test_linux_file_interop.py"
+  ],
+  "timeout_seconds": 10,
+  "returncode": 0,
+  "elapsed_seconds": 0.014465,
+  "reaped": true
+}

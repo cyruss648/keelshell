@@ -1,0 +1,46 @@
+{
+  "recorded_utc": "2026-11-15T10:41:25.302241+00:00",
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/barrier-r3",
+    "write_barrier_tests",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "binary_label": "barrier-r3",
+  "parent_built": true,
+  "independently_recompiled": false,
+  "binary_sha256_before": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "binary_sha256_after": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "expected_binary_sha256": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "source_freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "exit_code": 0,
+  "elapsed_seconds": 3.612271583013353,
+  "expected_passed": 4,
+  "counts": {
+    "result": "ok",
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 185
+  },
+  "expected_names": [
+    "ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure",
+    "ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply",
+    "ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked",
+    "ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply"
+  ],
+  "passed_names": [
+    "ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure",
+    "ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply",
+    "ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked",
+    "ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply"
+  ],
+  "missing_names": [],
+  "unexpected_names": [],
+  "stdout_sha256": "78712ce01b12b0a3161b5177a4d8bd164d0a831da388de48f67189b5ef0642a5",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tmpdir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r3/tmp/ssh-write-barrier-r3",
+  "verified": true
+}

@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "started_utc": "2026-11-15T09:42:14+00:00",
+  "platform": "Darwin",
+  "timeout_seconds": 280.0,
+  "outcome": "passed",
+  "steps": [
+    {
+      "name": "openssh-version",
+      "returncode": 0
+    },
+    {
+      "name": "generate-host-key",
+      "returncode": 0
+    },
+    {
+      "name": "generate-client-key",
+      "returncode": 0
+    },
+    {
+      "name": "validate-sshd-config",
+      "returncode": 0
+    },
+    {
+      "name": "tests",
+      "returncode": 0
+    }
+  ],
+  "processes": [
+    {
+      "name": "openssh-version",
+      "pid": 12281
+    },
+    {
+      "name": "generate-host-key",
+      "pid": 12284
+    },
+    {
+      "name": "generate-client-key",
+      "pid": 12288
+    },
+    {
+      "name": "validate-sshd-config",
+      "pid": 12291
+    },
+    {
+      "name": "sshd",
+      "pid": 12294
+    },
+    {
+      "name": "tests",
+      "pid": 12299
+    }
+  ],
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-session",
+    "--test",
+    "zmodem_openssh",
+    "--locked",
+    "--",
+    "--ignored",
+    "--test-threads=1"
+  ],
+  "cleanup": {
+    "observed_processes_stopped": true,
+    "ancestry_unverified": [],
+    "owned_processes_stopped": true,
+    "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+    "tracked_process_identities": 37,
+    "temporary_directory_removed": true
+  },
+  "boundary": "Disposable localhost OpenSSH transport interoperability; not production or target-native desktop acceptance",
+  "temporary_directory": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/.openssh-private/run-_gm26n6m",
+  "sshd": "/usr/sbin/sshd",
+  "listen": "127.0.0.1:55682",
+  "passed_tests": 7,
+  "finished_utc": "2026-11-15T09:42:20+00:00",
+  "elapsed_seconds": 6.353,
+  "logs": {
+    "generate-client-key.log": 0,
+    "generate-host-key.log": 0,
+    "openssh-version.log": 31,
+    "sshd.log": 581,
+    "tests.log": 793,
+    "validate-sshd-config.log": 0
+  }
+}

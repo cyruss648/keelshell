@@ -1,0 +1,14 @@
+{
+  "final-r5.md": {
+    "sha256": "6fec2c6e0e59dc227c5248b705d345a45c91660a7423ea819370fb6e7f016b53",
+    "bytes": 3570
+  },
+  "final-r5.json": {
+    "sha256": "923035721c20751dea45776dace64e9b0fed9669c9a9f3c0b767c63808e56744",
+    "bytes": 6996
+  },
+  "frozen-inputs-r5.json": {
+    "sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+    "bytes": 73509
+  }
+}

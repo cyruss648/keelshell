@@ -1,0 +1,77 @@
+{
+  "freeze": "frozen-inputs-r4.json",
+  "groups": {
+    "core-zmodem": [
+      "receiver_actual_oo_preserves_earlier_ordinary_bytes_and_suffix_order",
+      "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin",
+      "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split",
+      "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise",
+      "receiver_actual_oo_stays_strict_and_cannot_be_reclassified_as_missing",
+      "receiver_actual_oo_strips_repeated_hex_zfin_with_parity_pads",
+      "receiver_cancel_after_actual_oo_does_not_repeat_utf8_tail",
+      "receiver_failed_input_preserves_farewell_tail_at_every_split",
+      "receiver_failed_input_preserves_farewell_tail_bytewise",
+      "receiver_failed_input_preserves_farewell_tail_whole",
+      "receiver_finish_accepts_parity_tolerant_hex_protocol_pads",
+      "receiver_finishing_cancel_preserves_utf8_tail_after_repeated_zfin",
+      "receiver_input_limit_failure_preserves_only_previously_retained_farewell_tail",
+      "receiver_missing_farewell_bounds_retained_flow_control_bytes",
+      "receiver_missing_farewell_cannot_bypass_review_or_unacknowledged_save",
+      "receiver_missing_farewell_cannot_convert_finishing_input_errors",
+      "receiver_missing_farewell_cannot_convert_peer_or_local_cancellation",
+      "receiver_missing_farewell_enforces_feed_and_noise_bounds",
+      "receiver_missing_farewell_follows_explicit_save_acknowledgement",
+      "receiver_missing_farewell_is_distinct_idempotent_and_terminal",
+      "receiver_missing_farewell_preserves_controls_outside_validated_zfin",
+      "receiver_missing_farewell_preserves_fragmented_raw_and_incomplete_lookalikes",
+      "receiver_missing_farewell_preserves_suffix_arriving_with_initial_zfin",
+      "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin",
+      "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split",
+      "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise",
+      "receiver_missing_farewell_rejects_every_other_state_without_advancing",
+      "receiver_missing_farewell_requires_a_complete_valid_initial_zfin",
+      "receiver_missing_farewell_retains_header_candidate_bound",
+      "receiver_missing_farewell_retains_lookalikes_across_recovery_and_timeout",
+      "receiver_missing_farewell_retry_exhaustion_never_finishes_automatically",
+      "receiver_missing_farewell_strips_fragmented_repeated_zfin_in_all_formats",
+      "receiver_missing_farewell_strips_repeated_hex_zfin_with_parity_pads",
+      "receiver_peer_cancel_preserves_farewell_tail_at_every_split",
+      "receiver_peer_cancel_preserves_farewell_tail_bytewise",
+      "receiver_peer_cancel_preserves_farewell_tail_whole",
+      "receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup"
+    ],
+    "session-zmodem": [
+      "zmodem_failed_input_preserves_retained_terminal_tail_without_success",
+      "zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review",
+      "zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease",
+      "zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown",
+      "zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits",
+      "zmodem_missing_farewell_rejects_same_lease_receipts_after_new_output",
+      "zmodem_peer_cancel_preserves_retained_terminal_tail_without_warning"
+    ],
+    "app-bridge": [
+      "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout",
+      "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation",
+      "ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases",
+      "ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order",
+      "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+      "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+      "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+      "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+      "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff"
+    ],
+    "app-ui": [
+      "terminal::zmodem::tests::zmodem_missing_farewell_before_an_offer_requests_exact_handoff",
+      "terminal::zmodem::tests::zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown"
+    ],
+    "session-transport": [
+      "ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure",
+      "ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply",
+      "ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked",
+      "ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply"
+    ]
+  },
+  "rust_default_total": 59,
+  "python_new_methods": 7,
+  "opt_in_new_peer_tests": 1
+}

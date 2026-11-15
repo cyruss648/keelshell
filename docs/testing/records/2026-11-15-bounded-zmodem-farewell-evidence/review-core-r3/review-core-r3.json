@@ -1,0 +1,141 @@
+{
+  "recorded_utc": "2026-11-15T10:46:44.166533+00:00",
+  "recommendation": "APPROVE_CORE_SOURCE_AND_FOCUSED_TESTS",
+  "scope": "r2 to r3 core source delta and independently executed core focused tests only",
+  "full_batch_approval": false,
+  "baseline_head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze": "frozen-inputs-r3.json",
+  "freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "frozen_inputs": 571,
+  "frozen_scripts": 12,
+  "all_frozen_items_match_at_delivery": true,
+  "delivery_mismatches": [],
+  "changes_from_r2": [
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/src/zmodem/codec.rs",
+      "r2_sha256": "946c35e4b1dedb506c8e18197e1eec5fd88b19a8f547c3c194dc303ddaf0326b",
+      "r3_sha256": "4fc61667741af0188b3372afc7ce9fde0fd9229410bda4951c929ceef3314bc7"
+    },
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/src/zmodem/receiver.rs",
+      "r2_sha256": "49f90debe598db4f3f54ad33662334c6c741b04215386c3690b3772884b79967",
+      "r3_sha256": "cfc9207ae8a878a51c55228c4c6310f52b07507ffb481d9a6130eb5d329cb071"
+    },
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/tests/zmodem.rs",
+      "r2_sha256": "8c5427082ce1c2c88a1a17907519842dcd3a3af0030b8f7859f1faa62e96ee95",
+      "r3_sha256": "15c628a9300a37ee8942b7dbd0468ffb463783a48bec8fecea9001b59f8d720f"
+    },
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "r2_sha256": "d91e54ebd92544bf21ae972ba31786516930b51f5f0e2d844cc9ec32c66062dd",
+      "r3_sha256": "67ea18033dcfafdb41050f8e8d1766c53bfc4497ed07a710daa284c713fcb34b"
+    }
+  ],
+  "open_core_severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "new_core_findings": [],
+  "closed_findings": [
+    {
+      "id": "CORE-R2-01",
+      "closed_on": "r3",
+      "parent_red_failures": 7,
+      "independent_new_green_cases": 8,
+      "evidence": "closure-and-coverage.json"
+    },
+    {
+      "id": "CORE-R1-01",
+      "status": "REMAINS_CLOSED",
+      "utf8_cases": 6,
+      "parity_cases": 3,
+      "all_independently_passed": true
+    }
+  ],
+  "independent_execution": {
+    "binary": "../stable-tests/core-r4",
+    "binary_sha256": "8c51f02d4bf32d05d5757d310fe596c583cf7f986465ca958538098bff2cf75e",
+    "inventory_sha256": "5f10332d584c90afc174aadc8747666becd94f11275281a6bfe5600c00f745b6",
+    "parent_built": true,
+    "independently_recompiled": false,
+    "inventory_invocations": 1,
+    "inventory_count": 102,
+    "test_invocations": 1,
+    "passed": 102,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 0,
+    "exit": 0,
+    "evidence": "core-r4-independent-execution.json"
+  },
+  "test_preservation": {
+    "r2_original_count": 94,
+    "r2_modified": [],
+    "r2_missing": [],
+    "head_original_count": 65,
+    "head_modified": [],
+    "head_missing": [],
+    "r3_additions": [
+      "receiver_failed_input_preserves_farewell_tail_at_every_split",
+      "receiver_failed_input_preserves_farewell_tail_bytewise",
+      "receiver_failed_input_preserves_farewell_tail_whole",
+      "receiver_input_limit_failure_preserves_only_previously_retained_farewell_tail",
+      "receiver_peer_cancel_preserves_farewell_tail_at_every_split",
+      "receiver_peer_cancel_preserves_farewell_tail_bytewise",
+      "receiver_peer_cancel_preserves_farewell_tail_whole",
+      "receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup"
+    ],
+    "core_test_delta_added_lines": 212,
+    "core_test_delta_removed_lines": 0
+  },
+  "session_tests": {
+    "reviewed_statically": true,
+    "r2_reconstructed_hash_matches": true,
+    "new_cases": 2,
+    "independently_executed_by_this_reviewer": false
+  },
+  "external_review_boundary": {
+    "finding": "P2-003",
+    "source": "../review-session-ui-r2/notice-P2-003.md",
+    "notice_status": "OPEN",
+    "core_review_does_not_close_it": true,
+    "production_scope": "app bridge post-pump cleanup"
+  },
+  "engineering_gate": {
+    "reviewer_executed": false,
+    "same_freeze_success_receipt_signed_by_this_reviewer": false,
+    "required_parent_followup": "Bind actual successful complete gate to the final unchanged freeze; changes require a new input binding and differential review",
+    "historical_r2_gate": "stopped/reaped exit -15, 218.112s; preserved"
+  },
+  "reviewer_prohibited_actions_performed": {
+    "cargo": 0,
+    "compiler": 0,
+    "format": 0,
+    "clippy": 0,
+    "git_mutation": 0,
+    "shared_target_access": 0,
+    "source_or_test_changes": 0,
+    "worktree_creation": 0,
+    "new_user_chat_creation": 0
+  },
+  "unverified": [
+    "independent recompilation",
+    "complete engineering gate",
+    "session/barrier/bridge/app execution",
+    "external P2-003 closure",
+    "full real peer interoperability including retained Linux strict failure",
+    "native macOS Windows Linux",
+    "Linux local Rust file backend",
+    "Windows safe publication",
+    "IME accessibility installation signing release and full product"
+  ],
+  "report_sha256": "29d974b0d068fcd23b402d19a8434d8f51b98228d394cba66850a26a989358d3"
+}

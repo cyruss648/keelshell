@@ -1,0 +1,18 @@
+{
+  "recorded_utc": "2026-11-15T11:11:28.216719+00:00",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "all_571_plus_12_match": true,
+  "report_sha256": "046da2d34a54853f31b2cb14b79116498258835997af3b1f90f9334aca45fa22",
+  "machine_report_sha256": "eee0dfedc85ed525501f232f6827b93c651e9b22195173a1a676b663bbfa4159",
+  "closure_notice_sha256": "8022b0f873b85d0e4becb20640a2d0190e40329c8bd201e79c05eb5256dd0c40",
+  "final_freeze_receipt_sha256": "58b1917b192ab705fe61b94b2a97bc6ef0db7acad1f194b22396e41c7cfb100c",
+  "recommendation": "APPROVE",
+  "severity_open_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "verified": true
+}

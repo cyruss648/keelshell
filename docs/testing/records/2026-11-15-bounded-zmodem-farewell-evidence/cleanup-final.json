@@ -1,0 +1,153 @@
+{
+  "recorded_utc": "2026-11-15T11:27:52.093458+00:00",
+  "scope": "Only this completed batch's duplicate evidence, executables, upstream extraction and scratch data.",
+  "persistent_manifest": {
+    "artifact": "archive-manifest.json",
+    "sha256": "8c428734e72d778f993c1f84de1286eb3cc67818769bd99edc538b7c7606bc2d",
+    "count": 708,
+    "all_artifact_and_decoded_hashes_verified": true,
+    "all_source_and_omitted_hashes_verified_before_removal": true
+  },
+  "removed": {
+    "path": "work/pty-farewell-20261115",
+    "files_before": 869,
+    "bytes_before": 626097502,
+    "absent_after": true
+  },
+  "effective_cargo_target": {
+    "path": "work/recovery-batch-integration-20261115/target",
+    "exists": true,
+    "directory_identity_preserved": true,
+    "source_owner": "Current checkout throughout this batch; no source ownership switch."
+  },
+  "closed_reviewers": [
+    {
+      "id": "01a1debf-9007-7360-b8da-4407e7267983",
+      "name": "Copernicus",
+      "scope": "core",
+      "report": "review-core-r5/final-closeout.md",
+      "report_sha256": "88cbb24f84b9c76d6f0666fae903ef22a5edf906ad104199883d2462f407e58c",
+      "close_tool": "multi_agent_v1.close_agent",
+      "close_tool_previous_status": "completed",
+      "close_success": true
+    },
+    {
+      "id": "01a1dec0-61ae-7300-9a06-cee5bf0f7644",
+      "name": "Sagan",
+      "scope": "session/transport/bridge/UI",
+      "report": "review-session-ui-r5/review-session-ui-r5.md",
+      "report_sha256": "046da2d34a54853f31b2cb14b79116498258835997af3b1f90f9334aca45fa22",
+      "close_tool": "multi_agent_v1.close_agent",
+      "close_tool_previous_status": "completed",
+      "close_success": true
+    },
+    {
+      "id": "01a1ded6-d490-7bd2-b307-d64fce26ec8b",
+      "name": "Tesla",
+      "scope": "Python fixture runner",
+      "report": "review-python-r4/final-r5.md",
+      "report_sha256": "6fec2c6e0e59dc227c5248b705d345a45c91660a7423ea819370fb6e7f016b53",
+      "close_tool": "multi_agent_v1.close_agent",
+      "close_tool_previous_status": "completed",
+      "close_success": true
+    }
+  ],
+  "prior_author_closure": "All implementation authors were already closed in the supplied prior-turn handoff; no new author agents were started in this continuation.",
+  "new_user_chats_created_in_this_batch": 0,
+  "new_worktrees_created_in_this_batch": 0,
+  "fixture_cleanup": {
+    "recorded_utc": "2026-11-15T11:20:13.167031+00:00",
+    "checks": [
+      {
+        "fixture": "linux-peer-r1",
+        "original_result_sha256": "5c2bff6ab4b656cf057a591f0a6a9a9a868485fcd5838a3bc93bc113b7bd0e37",
+        "original_cleanup": {
+          "owned_host_processes_stopped": true,
+          "owned_container_absent": true,
+          "temporary_keys_removed": true
+        },
+        "command": [
+          "podman",
+          "container",
+          "exists",
+          "keelshell-file-interop-c43a07e51804"
+        ],
+        "exit": 1,
+        "absent": true,
+        "seconds": 0.155,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "fixture": "linux-peer-r2",
+        "original_result_sha256": "6dc2c4647bd4a1f84a618a476de36cf9106958bd35678dc6f05782a1aee47917",
+        "original_cleanup": {
+          "owned_host_processes_stopped": true,
+          "owned_container_absent": true,
+          "temporary_keys_removed": true
+        },
+        "command": [
+          "podman",
+          "container",
+          "exists",
+          "keelshell-file-interop-43e13e14e9ef"
+        ],
+        "exit": 1,
+        "absent": true,
+        "seconds": 0.155,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "fixture": "linux-peer-r3",
+        "original_result_sha256": "b3da736db1c1df2a38f3c7eb3dc3489e508ab1c896297ec04f0dd351b50df40c",
+        "original_cleanup": {
+          "owned_host_processes_stopped": true,
+          "owned_container_absent": true,
+          "temporary_keys_removed": true
+        },
+        "command": [
+          "podman",
+          "container",
+          "exists",
+          "keelshell-file-interop-0d03158192f1"
+        ],
+        "exit": 1,
+        "absent": true,
+        "seconds": 0.151,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "fixture": "linux-peer-r4",
+        "original_result_sha256": "34171b5acf91d6356ee7d20ede299109bd5fbd0cfe4c90c9769650a704cf0588",
+        "original_cleanup": {
+          "owned_host_processes_stopped": true,
+          "owned_container_absent": true,
+          "temporary_keys_removed": true
+        },
+        "command": [
+          "podman",
+          "container",
+          "exists",
+          "keelshell-file-interop-d2a49e0063f5"
+        ],
+        "exit": 1,
+        "absent": true,
+        "seconds": 0.152,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "all_owned_containers_absent": true,
+    "other_task_resources_modified": false
+  },
+  "owned_batch_process_matches_before_removal": [],
+  "full_gate": {
+    "receipt": "logs/full-gate-r5.json",
+    "exit": 0,
+    "parent_tool_session_reaped": true
+  },
+  "preserved": "Current checkout and effective target; unrelated worktrees, branches, user chats, containers and WIP; all original failures and scoped reviews.",
+  "git_delivery": "Local feature commit and source binding pending; no push."
+}

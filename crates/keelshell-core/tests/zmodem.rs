@@ -829,6 +829,525 @@ fn receiver_finish_nak_and_timeout_repeat_zfin_without_returning_to_init() {
     );
 }
 
+fn waiting_for_farewell() -> Receiver {
+    let mut receiver = receiver();
+    assert_eq!(
+        receiver.feed(&header(FrameType::Finish, 0)).unwrap(),
+        vec![Event::Send(header(FrameType::Finish, 0))]
+    );
+    assert!(receiver.is_waiting_for_farewell());
+    assert!(receiver.pending_offer().is_none());
+    assert!(!receiver.is_finished());
+    receiver
+}
+
+#[test]
+fn receiver_missing_farewell_rejects_every_other_state_without_advancing() {
+    let mut reviewing = receiver();
+    reviewing
+        .feed(&offer_bytes("review", 0, HeaderFormat::Binary32))
+        .unwrap();
+    let receiving = accepted("receive", 1, HeaderFormat::Binary32);
+    let mut saving = accepted("save", 0, HeaderFormat::Binary32);
+    saving.feed(&header(FrameType::EndOfFile, 0)).unwrap();
+    let mut done = waiting_for_farewell();
+    assert_eq!(done.feed(b"OO").unwrap(), vec![Event::Finished]);
+    let mut cancelled = waiting_for_farewell();
+    cancelled.cancel().unwrap();
+    let mut failed = waiting_for_farewell();
+    assert_eq!(
+        failed.feed(&header(FrameType::Command, 0)),
+        Err(Error::RemoteCommand)
+    );
+    let cases = [
+        ("new", Receiver::new()),
+        ("ready", receiver()),
+        ("review", reviewing),
+        ("receiving", receiving),
+        ("saving", saving),
+        ("done", done),
+        ("cancelled", cancelled),
+        ("failed", failed),
+    ];
+    for (state, mut receiver) in cases {
+        let offer = receiver.pending_offer().cloned();
+        let waiting_for_accept = receiver.is_waiting_for_accept();
+        let waiting_for_saved = receiver.is_waiting_for_saved();
+        let finished = receiver.is_finished();
+        assert!(!receiver.is_waiting_for_farewell(), "{state}");
+        for _ in 0..2 {
+            assert_eq!(
+                receiver.finish_without_farewell(),
+                Err(Error::WrongState("receiver not waiting for farewell")),
+                "{state}"
+            );
+        }
+        assert_eq!(receiver.pending_offer(), offer.as_ref(), "{state}");
+        assert_eq!(
+            receiver.is_waiting_for_accept(),
+            waiting_for_accept,
+            "{state}"
+        );
+        assert_eq!(
+            receiver.is_waiting_for_saved(),
+            waiting_for_saved,
+            "{state}"
+        );
+        assert_eq!(receiver.is_finished(), finished, "{state}");
+        if state == "new" {
+            receiver.start().unwrap();
+        } else if state == "review" {
+            receiver.accept().unwrap();
+        } else if state == "saving" {
+            receiver.acknowledge_saved().unwrap();
+        }
+    }
+}
+
+#[test]
+fn receiver_missing_farewell_requires_a_complete_valid_initial_zfin() {
+    let finish = header(FrameType::Finish, 0);
+    for split in 0..finish.len() {
+        let mut receiver = receiver();
+        assert!(receiver.feed(&finish[..split]).unwrap().is_empty());
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(matches!(
+            receiver.finish_without_farewell(),
+            Err(Error::WrongState(_))
+        ));
+        assert_eq!(
+            receiver.feed(&finish[split..]).unwrap(),
+            vec![Event::Send(finish.clone())]
+        );
+        assert!(receiver.is_waiting_for_farewell());
+        assert_eq!(
+            receiver.finish_without_farewell().unwrap(),
+            vec![Event::FarewellMissing]
+        );
+    }
+}
+
+#[test]
+fn receiver_missing_farewell_cannot_bypass_review_or_unacknowledged_save() {
+    for save_pause in [false, true] {
+        let mut receiver = receiver();
+        receiver
+            .feed(&offer_bytes("pending", 0, HeaderFormat::Binary32))
+            .unwrap();
+        if save_pause {
+            receiver.accept().unwrap();
+            receiver.feed(&header(FrameType::EndOfFile, 0)).unwrap();
+        }
+        assert!(receiver.pending_offer().is_some());
+        assert!(receiver.timeout().unwrap().is_empty());
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(matches!(
+            receiver.finish_without_farewell(),
+            Err(Error::WrongState(_))
+        ));
+        assert_eq!(
+            receiver.feed(&header(FrameType::Finish, 0)),
+            Err(Error::UnexpectedFrame(FrameType::Finish))
+        );
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(matches!(
+            receiver.finish_without_farewell(),
+            Err(Error::WrongState(_))
+        ));
+    }
+}
+
+#[test]
+fn receiver_missing_farewell_follows_explicit_save_acknowledgement() {
+    let mut receiver = accepted("verified", 3, HeaderFormat::Binary32);
+    assert!(
+        complete(&mut receiver, b"abc", HeaderFormat::Binary32)
+            .iter()
+            .any(|event| matches!(event, Event::FileReceived { bytes, .. } if bytes == b"abc"))
+    );
+    assert!(matches!(
+        receiver.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+    receiver.acknowledge_saved().unwrap();
+    assert!(receiver.pending_offer().is_none());
+    assert!(!receiver.is_waiting_for_farewell());
+    assert_eq!(
+        receiver.feed(&header(FrameType::Finish, 0)).unwrap(),
+        vec![Event::Send(header(FrameType::Finish, 0))]
+    );
+    assert_eq!(
+        receiver.finish_without_farewell().unwrap(),
+        vec![Event::FarewellMissing]
+    );
+    assert!(!receiver.is_finished());
+}
+
+#[test]
+fn receiver_missing_farewell_is_distinct_idempotent_and_terminal() {
+    let mut receiver = waiting_for_farewell();
+    assert_eq!(
+        receiver.finish_without_farewell().unwrap(),
+        vec![Event::FarewellMissing]
+    );
+    assert!(!receiver.is_waiting_for_farewell());
+    assert!(!receiver.is_finished());
+    assert!(receiver.finish_without_farewell().unwrap().is_empty());
+    assert!(receiver.timeout().unwrap().is_empty());
+    assert!(receiver.cancel().unwrap().is_empty());
+    let mut terminal = b"OO\r\n\x1b[0m".to_vec();
+    terminal.extend(header(FrameType::Command, 0));
+    terminal.extend_from_slice(&[24; 5]);
+    assert_eq!(
+        receiver.feed(&terminal).unwrap(),
+        vec![Event::Terminal(terminal)]
+    );
+    assert!(receiver.feed(b"").unwrap().is_empty());
+    assert_eq!(
+        receiver.feed(&vec![0; MAX_FEED_BYTES + 1]),
+        Err(Error::Limit("feed bytes"))
+    );
+    assert!(receiver.finish_without_farewell().unwrap().is_empty());
+    assert!(!receiver.is_finished());
+}
+
+#[test]
+fn receiver_missing_farewell_preserves_suffix_arriving_with_initial_zfin() {
+    let suffix = "\r\n\x1b[?2004h用户@host:~/资料$ \x1b[0m".as_bytes();
+    let mut bytes = header(FrameType::Finish, 0);
+    bytes.extend_from_slice(suffix);
+    let mut receiver = receiver();
+    assert_eq!(
+        receiver.feed(&bytes).unwrap(),
+        vec![Event::Send(header(FrameType::Finish, 0))]
+    );
+    assert_eq!(
+        receiver.finish_without_farewell().unwrap(),
+        vec![Event::FarewellMissing, Event::Terminal(suffix.to_vec())]
+    );
+    assert!(receiver.finish_without_farewell().unwrap().is_empty());
+}
+
+#[test]
+fn receiver_missing_farewell_preserves_fragmented_raw_and_incomplete_lookalikes() {
+    let finish = header(FrameType::Finish, 0);
+    let mut suffixes = vec![
+        b"O".to_vec(),
+        b"prompt O".to_vec(),
+        b"**\x18Qnot-a-header".to_vec(),
+        b"*\x18C\x18H".to_vec(),
+        b"*********literal".to_vec(),
+        b"\x1b[?2004".to_vec(),
+        b"\xe4\xb8".to_vec(),
+        b"\x00\x11\x13\x91\x93\x7f\xff\x18".to_vec(),
+    ];
+    suffixes.extend((1..finish.len()).map(|length| finish[..length].to_vec()));
+    for suffix in suffixes {
+        for chunk_bytes in [1, 2, 7, MAX_FEED_BYTES] {
+            let mut receiver = waiting_for_farewell();
+            for chunk in suffix.chunks(chunk_bytes) {
+                assert!(receiver.feed(chunk).unwrap().is_empty());
+            }
+            assert!(receiver.is_waiting_for_farewell());
+            assert_eq!(
+                receiver.finish_without_farewell().unwrap(),
+                vec![Event::FarewellMissing, Event::Terminal(suffix.clone())]
+            );
+        }
+    }
+}
+
+#[test]
+fn receiver_missing_farewell_strips_fragmented_repeated_zfin_in_all_formats() {
+    for format in [
+        HeaderFormat::Hex,
+        HeaderFormat::Binary16,
+        HeaderFormat::Binary32,
+    ] {
+        let prefix = b"\r\n\x1b[0mO";
+        let middle = "用户@host:~$ ".as_bytes();
+        let suffix = b"\x1b[?2004hO**\x18B0800";
+        let repeated = encode_header(Header::new(FrameType::Finish, 0, format));
+        let bytes = [
+            prefix.as_slice(),
+            repeated.as_slice(),
+            middle,
+            repeated.as_slice(),
+            suffix.as_slice(),
+        ]
+        .concat();
+        let terminal = [prefix.as_slice(), middle, suffix.as_slice()].concat();
+        for split in 0..=bytes.len() {
+            let mut receiver = waiting_for_farewell();
+            let mut events = receiver.feed(&bytes[..split]).unwrap();
+            events.extend(receiver.feed(&bytes[split..]).unwrap());
+            assert_eq!(
+                events,
+                vec![
+                    Event::Send(header(FrameType::Finish, 0)),
+                    Event::Send(header(FrameType::Finish, 0))
+                ]
+            );
+            assert_eq!(
+                receiver.finish_without_farewell().unwrap(),
+                vec![Event::FarewellMissing, Event::Terminal(terminal.clone())]
+            );
+        }
+        let mut receiver = waiting_for_farewell();
+        for byte in &bytes {
+            receiver.feed(&[*byte]).unwrap();
+        }
+        assert_eq!(
+            receiver.finish_without_farewell().unwrap(),
+            vec![Event::FarewellMissing, Event::Terminal(terminal)]
+        );
+    }
+}
+
+#[test]
+fn receiver_missing_farewell_preserves_controls_outside_validated_zfin() {
+    let mut receiver = waiting_for_farewell();
+    let prefix = b"\x11\x93\r\n";
+    let suffix = b"\x91\x13\x1b[0m$ ";
+    let mut bytes = prefix.to_vec();
+    for (index, byte) in header(FrameType::Finish, 0).into_iter().enumerate() {
+        if index > 0 {
+            bytes.push(0x13);
+        }
+        bytes.push(byte | 0x80);
+    }
+    bytes.extend_from_slice(suffix);
+    for byte in bytes {
+        receiver.feed(&[byte]).unwrap();
+    }
+    assert_eq!(
+        receiver.finish_without_farewell().unwrap(),
+        vec![
+            Event::FarewellMissing,
+            Event::Terminal([prefix.as_slice(), suffix.as_slice()].concat())
+        ]
+    );
+}
+
+#[test]
+fn receiver_missing_farewell_retains_lookalikes_across_recovery_and_timeout() {
+    let mut receiver = waiting_for_farewell();
+    let mut corrupt = header(FrameType::Finish, 0);
+    corrupt[8] = b'1';
+    assert_eq!(
+        receiver.feed(&corrupt).unwrap(),
+        vec![
+            Event::Retry { position: None },
+            Event::Send(header(FrameType::Finish, 0))
+        ]
+    );
+    let partial = b"\x1b[0m$ **\x18B08";
+    assert!(receiver.feed(partial).unwrap().is_empty());
+    assert_eq!(
+        receiver.timeout().unwrap(),
+        vec![
+            Event::Retry { position: None },
+            Event::Send(header(FrameType::Finish, 0))
+        ]
+    );
+    assert_eq!(
+        receiver.finish_without_farewell().unwrap(),
+        vec![
+            Event::FarewellMissing,
+            Event::Terminal([corrupt.as_slice(), partial.as_slice()].concat())
+        ]
+    );
+}
+
+#[test]
+fn receiver_actual_oo_stays_strict_and_cannot_be_reclassified_as_missing() {
+    let mut receiver = waiting_for_farewell();
+    assert!(receiver.feed(b"O").unwrap().is_empty());
+    assert!(receiver.is_waiting_for_farewell());
+    assert!(!receiver.is_finished());
+    assert_eq!(
+        receiver.feed(b"O$ prompt").unwrap(),
+        vec![Event::Finished, Event::Terminal(b"$ prompt".to_vec())]
+    );
+    assert!(receiver.is_finished());
+    assert!(!receiver.is_waiting_for_farewell());
+    assert!(matches!(
+        receiver.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+}
+
+#[test]
+fn receiver_actual_oo_preserves_earlier_ordinary_bytes_and_suffix_order() {
+    let mut receiver = waiting_for_farewell();
+    let prefix = "\r\n\x1b[0m终端 O text ".as_bytes();
+    for byte in prefix {
+        assert!(receiver.feed(&[*byte]).unwrap().is_empty());
+    }
+    assert!(receiver.feed(b"O\x13").unwrap().is_empty());
+    assert_eq!(
+        receiver.feed(b"O$ ").unwrap(),
+        vec![
+            Event::Finished,
+            Event::Terminal([prefix, b"\x13$ "].concat())
+        ]
+    );
+    assert!(receiver.is_finished());
+}
+
+#[test]
+fn receiver_missing_farewell_cannot_convert_finishing_input_errors() {
+    for (bytes, error) in [
+        (header(FrameType::Command, 0), Error::RemoteCommand),
+        (
+            header(FrameType::RequestInit, (FrameType::Command as u32) << 24),
+            Error::RemoteCommand,
+        ),
+        (
+            header(FrameType::File, 1 << 24),
+            Error::UnexpectedFrame(FrameType::File),
+        ),
+        (
+            header(FrameType::Data, 0),
+            Error::UnexpectedFrame(FrameType::Data),
+        ),
+        (header(FrameType::EndOfFile, 0), Error::ApprovalRequired),
+        (
+            header(FrameType::SenderInit, 0),
+            Error::UnexpectedFrame(FrameType::SenderInit),
+        ),
+    ] {
+        let mut receiver = waiting_for_farewell();
+        assert_eq!(receiver.feed(&bytes), Err(error));
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(!receiver.is_finished());
+        assert!(matches!(
+            receiver.finish_without_farewell(),
+            Err(Error::WrongState(_))
+        ));
+        assert!(matches!(
+            receiver.feed(&header(FrameType::Finish, 0)),
+            Err(Error::WrongState(_))
+        ));
+        assert!(matches!(
+            receiver.cancel().unwrap().as_slice(),
+            [Event::Send(_), Event::Cancelled]
+        ));
+    }
+}
+
+#[test]
+fn receiver_missing_farewell_cannot_convert_peer_or_local_cancellation() {
+    for (bytes, trailing_xon) in [
+        (header(FrameType::Cancel, 0), true),
+        (header(FrameType::Abort, 0), true),
+        (header(FrameType::FileError, 0), true),
+        (vec![24; 5], false),
+    ] {
+        let mut receiver = waiting_for_farewell();
+        let mut events = Vec::new();
+        for byte in bytes {
+            events.extend(receiver.feed(&[byte]).unwrap());
+        }
+        let mut expected = vec![Event::Cancelled];
+        if trailing_xon {
+            expected.push(Event::Terminal(vec![0x11]));
+        }
+        assert_eq!(events, expected);
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(!receiver.is_finished());
+        assert!(matches!(
+            receiver.finish_without_farewell(),
+            Err(Error::WrongState(_))
+        ));
+    }
+    let mut receiver = waiting_for_farewell();
+    receiver.cancel().unwrap();
+    assert!(matches!(
+        receiver.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+}
+
+#[test]
+fn receiver_missing_farewell_enforces_feed_and_noise_bounds() {
+    let mut oversized = waiting_for_farewell();
+    assert_eq!(
+        oversized.feed(&vec![b'x'; MAX_FEED_BYTES + 1]),
+        Err(Error::Limit("feed bytes"))
+    );
+    assert!(matches!(
+        oversized.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+    let mut receiver = waiting_for_farewell();
+    let bytes = vec![b'x'; MAX_FEED_BYTES];
+    assert!(receiver.feed(&bytes).unwrap().is_empty());
+    assert_eq!(
+        receiver.finish_without_farewell().unwrap(),
+        vec![Event::FarewellMissing, Event::Terminal(bytes.clone())]
+    );
+    let mut excessive_noise = waiting_for_farewell();
+    excessive_noise.feed(&bytes).unwrap();
+    assert_eq!(
+        excessive_noise.feed(b"x"),
+        Err(Error::Limit("out-of-frame noise"))
+    );
+    assert!(!excessive_noise.is_waiting_for_farewell());
+    assert!(matches!(
+        excessive_noise.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+}
+
+#[test]
+fn receiver_missing_farewell_bounds_retained_flow_control_bytes() {
+    let mut receiver = waiting_for_farewell();
+    receiver.feed(&vec![0x11; MAX_FEED_BYTES]).unwrap();
+    receiver.feed(&[0x13; 96]).unwrap();
+    assert_eq!(receiver.feed(&[0x11]), Err(Error::Limit("farewell bytes")));
+    assert!(!receiver.is_waiting_for_farewell());
+    assert!(matches!(
+        receiver.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+}
+
+#[test]
+fn receiver_missing_farewell_retains_header_candidate_bound() {
+    let mut receiver = waiting_for_farewell();
+    let mut bytes = b"**\x18B".to_vec();
+    bytes.extend_from_slice(&[0x11; 92]);
+    assert!(receiver.feed(&bytes).unwrap().is_empty());
+    assert_eq!(receiver.feed(&[0x11]), Err(Error::Limit("header bytes")));
+    assert!(matches!(
+        receiver.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+}
+
+#[test]
+fn receiver_missing_farewell_retry_exhaustion_never_finishes_automatically() {
+    let mut receiver = waiting_for_farewell();
+    for _ in 0..MAX_RETRIES {
+        assert_eq!(
+            receiver.timeout().unwrap(),
+            vec![
+                Event::Retry { position: None },
+                Event::Send(header(FrameType::Finish, 0))
+            ]
+        );
+        assert!(receiver.is_waiting_for_farewell());
+        assert!(!receiver.is_finished());
+    }
+    assert_eq!(receiver.timeout(), Err(Error::RetryLimit));
+    assert!(!receiver.is_waiting_for_farewell());
+    assert!(matches!(
+        receiver.finish_without_farewell(),
+        Err(Error::WrongState(_))
+    ));
+}
+
 #[test]
 fn receiver_empty_file_is_still_approved_and_saved_before_finish() {
     let mut receiver = accepted("empty", 0, HeaderFormat::Binary32);
@@ -1265,4 +1784,426 @@ fn bounded_batch_state_machine_regression_uses_fragmentation_and_explicit_save_a
             ]
         );
     }
+}
+
+fn repeated_hex_finish_tail(prefix: &[u8], finish: &[u8], strict: bool) -> Vec<u8> {
+    let mut bytes = [prefix, finish, b"$ "].concat();
+    if strict {
+        bytes.extend_from_slice(b"OO");
+    }
+    bytes
+}
+
+fn assert_repeated_hex_finish_tail<'a>(
+    chunks: impl IntoIterator<Item = &'a [u8]>,
+    strict: bool,
+    terminal: &[u8],
+) {
+    let mut receiver = waiting_for_farewell();
+    let mut events = Vec::new();
+    for chunk in chunks {
+        events.extend(receiver.feed(chunk).unwrap());
+    }
+    if strict {
+        assert!(receiver.is_finished());
+        assert!(!receiver.is_waiting_for_farewell());
+        assert_eq!(
+            receiver.finish_without_farewell(),
+            Err(Error::WrongState("receiver not waiting for farewell"))
+        );
+    } else {
+        assert!(receiver.is_waiting_for_farewell());
+        assert!(!receiver.is_finished());
+        events.extend(receiver.finish_without_farewell().unwrap());
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(!receiver.is_finished());
+        assert!(receiver.finish_without_farewell().unwrap().is_empty());
+    }
+    assert_eq!(
+        events,
+        vec![
+            Event::Send(header(FrameType::Finish, 0)),
+            if strict {
+                Event::Finished
+            } else {
+                Event::FarewellMissing
+            },
+            Event::Terminal(terminal.to_vec())
+        ],
+        "strict farewell: {strict}"
+    );
+}
+
+#[test]
+fn receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin() {
+    // CORE-R1-01: the final byte of 个 is 0xaa, also a parity-masked pad.
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), false);
+    assert_repeated_hex_finish_tail([bytes.as_slice()], false, "个$ ".as_bytes());
+}
+
+#[test]
+fn receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise() {
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), false);
+    assert_repeated_hex_finish_tail(bytes.chunks(1), false, "个$ ".as_bytes());
+}
+
+#[test]
+fn receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split() {
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), false);
+    for split in 0..=bytes.len() {
+        assert_repeated_hex_finish_tail(
+            [&bytes[..split], &bytes[split..]],
+            false,
+            "个$ ".as_bytes(),
+        );
+    }
+}
+
+#[test]
+fn receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin() {
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), true);
+    assert_repeated_hex_finish_tail([bytes.as_slice()], true, "个$ ".as_bytes());
+}
+
+#[test]
+fn receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise() {
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), true);
+    assert_repeated_hex_finish_tail(bytes.chunks(1), true, "个$ ".as_bytes());
+}
+
+#[test]
+fn receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split() {
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), true);
+    for split in 0..=bytes.len() {
+        assert_repeated_hex_finish_tail(
+            [&bytes[..split], &bytes[split..]],
+            true,
+            "个$ ".as_bytes(),
+        );
+    }
+}
+
+fn parity_padded_hex_finishes() -> Vec<Vec<u8>> {
+    let finish = header(FrameType::Finish, 0);
+    [
+        b"\xaa".as_slice(),
+        b"\xaa\xaa".as_slice(),
+        b"*\xaa".as_slice(),
+        b"\xaa*".as_slice(),
+        b"\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa".as_slice(),
+    ]
+    .into_iter()
+    .map(|pads| [pads, &finish[2..]].concat())
+    .collect()
+}
+
+#[test]
+fn receiver_finish_accepts_parity_tolerant_hex_protocol_pads() {
+    for finish in parity_padded_hex_finishes() {
+        for split in 0..=finish.len() {
+            let mut receiver = receiver();
+            let mut events = receiver.feed(&finish[..split]).unwrap();
+            events.extend(receiver.feed(&finish[split..]).unwrap());
+            assert_eq!(events, vec![Event::Send(header(FrameType::Finish, 0))]);
+            assert!(receiver.is_waiting_for_farewell());
+            assert_eq!(receiver.feed(b"OO").unwrap(), vec![Event::Finished]);
+            assert!(receiver.is_finished());
+        }
+    }
+}
+
+#[test]
+fn receiver_missing_farewell_strips_repeated_hex_zfin_with_parity_pads() {
+    for finish in parity_padded_hex_finishes() {
+        let bytes = repeated_hex_finish_tail(b"tail ", &finish, false);
+        assert_repeated_hex_finish_tail(bytes.chunks(1), false, b"tail $ ");
+        for split in 0..=bytes.len() {
+            assert_repeated_hex_finish_tail([&bytes[..split], &bytes[split..]], false, b"tail $ ");
+        }
+    }
+}
+
+#[test]
+fn receiver_actual_oo_strips_repeated_hex_zfin_with_parity_pads() {
+    for finish in parity_padded_hex_finishes() {
+        let bytes = repeated_hex_finish_tail(b"tail ", &finish, true);
+        assert_repeated_hex_finish_tail(bytes.chunks(1), true, b"tail $ ");
+        for split in 0..=bytes.len() {
+            assert_repeated_hex_finish_tail([&bytes[..split], &bytes[split..]], true, b"tail $ ");
+        }
+    }
+}
+
+#[test]
+fn receiver_finishing_cancel_preserves_utf8_tail_after_repeated_zfin() {
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), false);
+    for chunk_bytes in [1, 2, bytes.len()] {
+        let mut receiver = waiting_for_farewell();
+        let mut events = Vec::new();
+        for chunk in bytes.chunks(chunk_bytes) {
+            events.extend(receiver.feed(chunk).unwrap());
+        }
+        assert_eq!(events, vec![Event::Send(header(FrameType::Finish, 0))]);
+        assert!(receiver.is_waiting_for_farewell());
+        assert_eq!(
+            receiver.cancel().unwrap(),
+            vec![
+                Event::Send([vec![24; 8], vec![8; 10]].concat()),
+                Event::Cancelled,
+                Event::Terminal("个$ ".as_bytes().to_vec())
+            ]
+        );
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(!receiver.is_finished());
+        assert!(matches!(
+            receiver.finish_without_farewell(),
+            Err(Error::WrongState(_))
+        ));
+        assert!(receiver.cancel().unwrap().is_empty());
+        assert_eq!(
+            receiver.feed(b"OO$ next").unwrap(),
+            vec![Event::Terminal(b"OO$ next".to_vec())]
+        );
+    }
+}
+
+#[test]
+fn receiver_cancel_after_actual_oo_does_not_repeat_utf8_tail() {
+    let bytes = repeated_hex_finish_tail("个".as_bytes(), &header(FrameType::Finish, 0), true);
+    for chunk_bytes in [1, 2, bytes.len()] {
+        let mut receiver = waiting_for_farewell();
+        let mut events = Vec::new();
+        for chunk in bytes.chunks(chunk_bytes) {
+            events.extend(receiver.feed(chunk).unwrap());
+        }
+        assert_eq!(
+            events,
+            vec![
+                Event::Send(header(FrameType::Finish, 0)),
+                Event::Finished,
+                Event::Terminal("个$ ".as_bytes().to_vec())
+            ]
+        );
+        assert!(receiver.is_finished());
+        assert!(!receiver.is_waiting_for_farewell());
+        assert!(receiver.cancel().unwrap().is_empty());
+        assert!(receiver.cancel().unwrap().is_empty());
+        assert_eq!(
+            receiver.feed(b"$ next").unwrap(),
+            vec![Event::Terminal(b"$ next".to_vec())]
+        );
+        assert!(receiver.is_finished());
+    }
+}
+
+fn assert_peer_cancellation_preserves_farewell_tail(wire: &[u8], split: Option<usize>) {
+    let mut receiver = waiting_for_farewell();
+    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
+    let mut events = Vec::new();
+    match split {
+        Some(split) => {
+            events.extend(receiver.feed(&wire[..split]).unwrap());
+            events.extend(receiver.feed(&wire[split..]).unwrap());
+        }
+        None => {
+            for byte in wire {
+                events.extend(receiver.feed(&[*byte]).unwrap());
+            }
+        }
+    }
+    assert_eq!(
+        events
+            .iter()
+            .filter(|event| matches!(event, Event::Cancelled))
+            .count(),
+        1
+    );
+    let terminal: Vec<u8> = events
+        .iter()
+        .filter_map(|event| match event {
+            Event::Terminal(bytes) => Some(bytes.as_slice()),
+            _ => None,
+        })
+        .flatten()
+        .copied()
+        .collect();
+    let expected = if wire.starts_with(&[24; 5]) {
+        "个$ next".as_bytes().to_vec()
+    } else {
+        ["个$ ".as_bytes(), b"\x11next"].concat()
+    };
+    assert_eq!(terminal, expected);
+    assert!(
+        events
+            .iter()
+            .all(|event| matches!(event, Event::Cancelled | Event::Terminal(_)))
+    );
+    assert!(receiver.cancel().unwrap().is_empty());
+    assert!(receiver.cancel().unwrap().is_empty());
+    assert!(!receiver.is_finished());
+    assert!(!receiver.is_waiting_for_farewell());
+    assert!(receiver.finish_without_farewell().is_err());
+    assert_eq!(
+        receiver.feed(b"later").unwrap(),
+        vec![Event::Terminal(b"later".to_vec())]
+    );
+}
+
+fn peer_cancel_frames() -> Vec<Vec<u8>> {
+    [
+        header(FrameType::Cancel, 0),
+        header(FrameType::Abort, 0),
+        header(FrameType::FileError, 0),
+        vec![24; 5],
+    ]
+    .into_iter()
+    .map(|frame| [frame.as_slice(), b"next"].concat())
+    .collect()
+}
+
+#[test]
+fn receiver_peer_cancel_preserves_farewell_tail_whole() {
+    for wire in peer_cancel_frames() {
+        assert_peer_cancellation_preserves_farewell_tail(&wire, Some(0));
+    }
+}
+
+#[test]
+fn receiver_peer_cancel_preserves_farewell_tail_bytewise() {
+    for wire in peer_cancel_frames() {
+        assert_peer_cancellation_preserves_farewell_tail(&wire, None);
+    }
+}
+
+#[test]
+fn receiver_peer_cancel_preserves_farewell_tail_at_every_split() {
+    for wire in peer_cancel_frames() {
+        for split in 0..=wire.len() {
+            assert_peer_cancellation_preserves_farewell_tail(&wire, Some(split));
+        }
+    }
+}
+
+fn assert_failed_input_preserves_farewell_tail(chunks: Vec<&[u8]>, expected: Error) {
+    let mut receiver = waiting_for_farewell();
+    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
+    let mut failed = false;
+    for chunk in chunks {
+        match receiver.feed(chunk) {
+            Ok(events) => assert!(events.is_empty()),
+            Err(error) => {
+                assert_eq!(error, expected);
+                failed = true;
+                break;
+            }
+        }
+    }
+    assert!(failed);
+    assert!(!receiver.is_finished());
+    assert!(!receiver.is_waiting_for_farewell());
+    assert!(receiver.finish_without_farewell().is_err());
+    assert_eq!(
+        receiver.cancel().unwrap(),
+        vec![
+            Event::Send([vec![24; 8], vec![8; 10]].concat()),
+            Event::Cancelled,
+            Event::Terminal("个$ ".as_bytes().to_vec()),
+        ]
+    );
+    assert!(receiver.cancel().unwrap().is_empty());
+    assert_eq!(
+        receiver.feed(b"later").unwrap(),
+        vec![Event::Terminal(b"later".to_vec())]
+    );
+}
+
+fn invalid_finishing_frames() -> Vec<(Vec<u8>, Error)> {
+    vec![
+        (header(FrameType::Command, 0), Error::RemoteCommand),
+        (
+            header(FrameType::RequestInit, (FrameType::Command as u32) << 24),
+            Error::RemoteCommand,
+        ),
+        (
+            header(FrameType::File, 1 << 24),
+            Error::UnexpectedFrame(FrameType::File),
+        ),
+        (
+            header(FrameType::Data, 0),
+            Error::UnexpectedFrame(FrameType::Data),
+        ),
+        (header(FrameType::EndOfFile, 0), Error::ApprovalRequired),
+        (
+            header(FrameType::SenderInit, 0),
+            Error::UnexpectedFrame(FrameType::SenderInit),
+        ),
+    ]
+}
+
+#[test]
+fn receiver_failed_input_preserves_farewell_tail_whole() {
+    for (wire, error) in invalid_finishing_frames() {
+        assert_failed_input_preserves_farewell_tail(vec![&wire], error);
+    }
+}
+
+#[test]
+fn receiver_failed_input_preserves_farewell_tail_bytewise() {
+    for (wire, error) in invalid_finishing_frames() {
+        assert_failed_input_preserves_farewell_tail(wire.chunks(1).collect(), error);
+    }
+}
+
+#[test]
+fn receiver_failed_input_preserves_farewell_tail_at_every_split() {
+    for (wire, error) in invalid_finishing_frames() {
+        for split in 0..=wire.len() {
+            assert_failed_input_preserves_farewell_tail(
+                vec![&wire[..split], &wire[split..]],
+                error.clone(),
+            );
+        }
+    }
+}
+
+#[test]
+fn receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup() {
+    let mut receiver = waiting_for_farewell();
+    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
+    let mut failed = false;
+    for _ in 0..128 {
+        if receiver.timeout().is_err() {
+            failed = true;
+            break;
+        }
+    }
+    assert!(failed, "the bounded retry budget must fail");
+    let events = receiver.cancel().unwrap();
+    assert_eq!(
+        events.last(),
+        Some(&Event::Terminal("个$ ".as_bytes().to_vec()))
+    );
+    assert!(events.iter().all(|event| matches!(
+        event,
+        Event::Send(_) | Event::Cancelled | Event::Terminal(_)
+    )));
+    assert!(receiver.cancel().unwrap().is_empty());
+    assert!(!receiver.is_finished());
+}
+
+#[test]
+fn receiver_input_limit_failure_preserves_only_previously_retained_farewell_tail() {
+    let mut receiver = waiting_for_farewell();
+    assert!(receiver.feed("个$ ".as_bytes()).unwrap().is_empty());
+    assert_eq!(
+        receiver.feed(&vec![b'x'; MAX_FEED_BYTES + 1]),
+        Err(Error::Limit("feed bytes"))
+    );
+    let events = receiver.cancel().unwrap();
+    assert_eq!(
+        events.last(),
+        Some(&Event::Terminal("个$ ".as_bytes().to_vec()))
+    );
+    assert!(receiver.cancel().unwrap().is_empty());
+    assert!(!receiver.is_finished());
 }

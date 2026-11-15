@@ -1,0 +1,68 @@
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libbsd0 libcbor0.8 libedit2 libexpat1 libfido2-1 libncursesw6 libproc2-0
+  libpython3-stdlib libpython3.11-minimal libpython3.11-stdlib libreadline8
+  libsqlite3-0 libwrap0 media-types openssh-client openssh-sftp-server procps
+  python3-minimal python3.11 python3.11-minimal readline-common runit-helper
+  sensible-utils ucf
+Suggested packages:
+  minicom keychain libpam-ssh monkeysphere ssh-askpass molly-guard ufw
+  python3-doc python3-tk python3-venv python3.11-venv python3.11-doc
+  binfmt-support readline-doc
+Recommended packages:
+  libgpm2 xauth default-logind | logind | libpam-systemd ncurses-term psmisc
+The following NEW packages will be installed:
+  acl libbsd0 libcbor0.8 libedit2 libexpat1 libfido2-1 libncursesw6 libproc2-0
+  libpython3-stdlib libpython3.11-minimal libpython3.11-stdlib libreadline8
+  libsqlite3-0 libwrap0 lrzsz media-types openssh-client openssh-server
+  openssh-sftp-server procps python3 python3-minimal python3.11
+  python3.11-minimal readline-common runit-helper sensible-utils ucf
+0 upgraded, 28 newly installed, 0 to remove and 9 not upgraded.
+Need to get 9058 kB of archives.
+After this operation, 40.7 MB of additional disk space will be used.
+Get:1 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libbsd0 arm64 0.11.7-2 [115 kB]
+Get:2 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libedit2 arm64 3.1-20221030-2 [88.1 kB]
+Get:3 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libcbor0.8 arm64 0.8.0-2+b1 [26.0 kB]
+Get:4 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libfido2-1 arm64 1.12.0-2+b1 [72.6 kB]
+Get:5 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 openssh-client arm64 1:9.2p1-2+deb12u10 [935 kB]
+Get:6 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 openssh-sftp-server arm64 1:9.2p1-2+deb12u10 [60.3 kB]
+Get:7 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libncursesw6 arm64 6.4-4 [122 kB]
+Get:8 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libproc2-0 arm64 2:4.0.2-3 [60.1 kB]
+Get:9 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 procps arm64 2:4.0.2-3 [698 kB]
+Get:10 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 sensible-utils all 0.0.17+nmu1 [19.0 kB]
+Get:11 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 ucf all 3.0043+nmu1+deb12u1 [55.3 kB]
+Get:12 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 runit-helper all 2.15.2 [6520 B]
+Get:13 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libwrap0 arm64 7.6.q-32 [54.7 kB]
+Err:14 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 openssh-server arm64 1:9.2p1-2+deb12u10
+  Could not connect to host.containers.internal:51857 (192.168.127.254), connection timed out [IP: 192.168.127.254 51857]
+Err:15 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian-security bookworm-security/main arm64 libpython3.11-minimal arm64 3.11.2-6+deb12u9
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:16 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian-security bookworm-security/main arm64 libexpat1 arm64 2.5.0-1+deb12u5
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:17 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian-security bookworm-security/main arm64 python3.11-minimal arm64 3.11.2-6+deb12u9
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:18 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 python3-minimal arm64 3.11.2-1+b1
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:19 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 media-types all 10.0.0
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:20 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 readline-common all 8.2-1.3
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:21 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libreadline8 arm64 8.2-1.3
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:22 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libsqlite3-0 arm64 3.40.1-2+deb12u2
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:23 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian-security bookworm-security/main arm64 libpython3.11-stdlib arm64 3.11.2-6+deb12u9
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:24 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian-security bookworm-security/main arm64 python3.11 arm64 3.11.2-6+deb12u9
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:25 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 libpython3-stdlib arm64 3.11.2-1+b1
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:26 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 python3 arm64 3.11.2-1+b1
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:27 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 acl arm64 2.3.1-3
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Err:28 http://host.containers.internal:51857/3bd9ed5b474e453e9c63da002beb7c93/debian bookworm/main arm64 lrzsz arm64 0.12.21-10
+  Unable to connect to host.containers.internal:51857: [IP: 192.168.127.254 51857]
+Fetched 2312 kB in 21s (109 kB/s)

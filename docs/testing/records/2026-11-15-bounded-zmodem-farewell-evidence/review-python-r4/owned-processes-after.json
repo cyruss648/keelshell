@@ -1,0 +1,66 @@
+{
+  "independent-baseline-red.json": [
+    {
+      "pid": 99475,
+      "recorded_identity": [
+        99459,
+        99475,
+        [
+          "darwin",
+          1794740205,
+          109511
+        ],
+        "R"
+      ],
+      "current_identity": null,
+      "same_recorded_process_live": false
+    }
+  ],
+  "independent-file-suite.json": [
+    {
+      "pid": 99483,
+      "recorded_identity": [
+        99459,
+        99483,
+        [
+          "darwin",
+          1794740205,
+          415603
+        ],
+        "R"
+      ],
+      "current_identity": null,
+      "same_recorded_process_live": false
+    },
+    {
+      "pid": 99504,
+      "recorded_identity": [
+        99483,
+        99504,
+        [
+          "darwin",
+          1794740205,
+          882584
+        ],
+        "R"
+      ],
+      "current_identity": null,
+      "same_recorded_process_live": false
+    },
+    {
+      "pid": 99507,
+      "recorded_identity": [
+        99504,
+        99504,
+        [
+          "darwin",
+          1794740205,
+          904533
+        ],
+        "R"
+      ],
+      "current_identity": null,
+      "same_recorded_process_live": false
+    }
+  ]
+}

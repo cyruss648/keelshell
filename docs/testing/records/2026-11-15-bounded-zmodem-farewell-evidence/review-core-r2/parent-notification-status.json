@@ -1,0 +1,13 @@
+{
+  "recorded_utc": "2026-11-15T10:33:10.632436+00:00",
+  "attempted_tool": "mcp__codex_app.send_message_to_thread",
+  "target_thread_id": "01a1a5b2-40b8-7cb1-8de1-07ec8f4efa6c",
+  "delivered": false,
+  "reason": "Tool rejects messages to native ancestor; native collaboration messaging is not exposed in this session.",
+  "notice_written": [
+    "notice-new-01.md",
+    "notice-new-01-evidence.json"
+  ],
+  "interim_commentary_emitted": true,
+  "completion_delivery": "Return final report to native parent."
+}

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "scripts/run_linux_file_interop.py",
+    "scripts/test_linux_file_interop.py"
+  ],
+  "timeout_seconds": 10,
+  "returncode": 0,
+  "reaped": true
+}

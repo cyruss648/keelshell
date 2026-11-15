@@ -1,0 +1,1203 @@
+//! Reviewed authority and real SSH identity tests, without executing commands.
+//!
+//! The wire fixtures below use the pure codec. They verify integration and
+//! publication invariants, not interoperability with an independent rz/sz peer.
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::atomic::Ordering;
+
+use keelshell_core::zmodem::{
+    FrameEnd, FrameType, Header, HeaderFormat, encode_data, encode_header,
+};
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+use keelshell_session::zmodem::ZmodemDirection as Direction;
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+use keelshell_session::{SessionError, sftp::TransferSpec};
+use keelshell_session::{
+    SessionEvent, SshAuth, SshOptions, SshSession,
+    zmodem::{
+        ZmodemControl as Control, ZmodemController as Controller, ZmodemFailure as Failure,
+        ZmodemOutput as Output, ZmodemState as State, ZmodemUiEvent as Ui,
+    },
+};
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+use sha2::{Digest, Sha256};
+use uuid::Uuid;
+
+#[path = "support/zmodem_fixture.rs"]
+mod fixture;
+use fixture::{Fixture, TestResult};
+
+fn header(kind: FrameType, position: u32) -> Vec<u8> {
+    encode_header(Header::new(kind, position, HeaderFormat::Hex))
+}
+
+fn offer(name: &str, size: u64) -> TestResult<Vec<u8>> {
+    let mut bytes = header(FrameType::RequestInit, 0);
+    bytes.extend(encode_header(Header::new(
+        FrameType::File,
+        0,
+        HeaderFormat::Binary32,
+    )));
+    bytes.extend(encode_data(
+        format!("{name}\0{size} 0 100600 0 1 {size}\0").as_bytes(),
+        FrameEnd::EndAck,
+        HeaderFormat::Binary32,
+    )?);
+    Ok(bytes)
+}
+
+fn contents(bytes: &[u8]) -> TestResult<Vec<u8>> {
+    let mut wire = encode_header(Header::new(FrameType::Data, 0, HeaderFormat::Binary32));
+    if bytes.len() > 8192 {
+        return Err("wire fixture uses one bounded subpacket".into());
+    }
+    wire.extend(encode_data(
+        bytes,
+        FrameEnd::EndAck,
+        HeaderFormat::Binary32,
+    )?);
+    wire.extend(header(FrameType::EndOfFile, bytes.len() as u32));
+    Ok(wire)
+}
+
+async fn waiting_for_farewell(fixture: &Fixture) -> TestResult<(Controller, Uuid)> {
+    let mut controller = Controller::new(fixture.session.clone(), "farewell fixture");
+    controller
+        .feed(&fixture.session, &header(FrameType::RequestInit, 0))
+        .await;
+    let id = controller.lease_id().ok_or("missing receive lease")?;
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Finish, 0))
+        .await;
+    assert!(!output.writes.is_empty());
+    assert!(output.events.is_empty());
+    Ok((controller, id))
+}
+
+fn confirm_protocol_output(controller: &mut Controller) -> TestResult {
+    let token = controller
+        .protocol_output_token()
+        .ok_or("missing protocol output token")?;
+    controller.protocol_output_flushed(token);
+    Ok(())
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let (unrelated, _) = waiting_for_farewell(&fixture).await?;
+    let foreign_token = unrelated
+        .protocol_output_token()
+        .ok_or("missing foreign output token")?;
+    for acknowledged in [false, true] {
+        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
+        controller.protocol_output_flushed(foreign_token);
+        if acknowledged {
+            confirm_protocol_output(&mut controller)?;
+        }
+        let output = controller.transport_exited(&fixture.session, 0, true);
+        assert_eq!(
+            output.events.iter().any(
+                |event| matches!(event, Ui::EndedWithoutFarewell { id: found } if *found == id)
+            ),
+            acknowledged,
+        );
+        assert!(
+            !output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Finished { .. }))
+        );
+        assert_eq!(
+            controller.state(),
+            if acknowledged {
+                State::EndedWithoutFarewell
+            } else {
+                State::Failed
+            },
+        );
+        assert!(!controller.is_active());
+        assert!(
+            controller
+                .transport_exited(&fixture.session, 0, true)
+                .events
+                .is_empty()
+        );
+    }
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let foreign = Fixture::start().await?;
+    for (code, success, replaced) in [(1, false, false), (0, false, false), (0, true, true)] {
+        let (mut controller, _) = waiting_for_farewell(&fixture).await?;
+        confirm_protocol_output(&mut controller)?;
+        let current = if replaced {
+            &foreign.session
+        } else {
+            &fixture.session
+        };
+        let output = controller.transport_exited(current, code, success);
+        assert!(
+            output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Failed { .. }))
+        );
+        assert!(
+            !output.events.iter().any(|event| matches!(
+                event,
+                Ui::EndedWithoutFarewell { .. } | Ui::Finished { .. }
+            ))
+        );
+    }
+    foreign.finish().await?;
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review() -> TestResult {
+    let fixture = Fixture::start().await?;
+    for offered in [false, true] {
+        let mut controller = Controller::new(fixture.session.clone(), "unfinished fixture");
+        controller
+            .feed(&fixture.session, &header(FrameType::RequestInit, 0))
+            .await;
+        if offered {
+            controller
+                .feed(&fixture.session, &offer("unapproved.bin", 0)?)
+                .await;
+        }
+        confirm_protocol_output(&mut controller)?;
+        let output = controller.transport_exited(&fixture.session, 0, true);
+        assert!(
+            output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Failed { .. }))
+        );
+        assert!(
+            !output.events.iter().any(|event| matches!(
+                event,
+                Ui::EndedWithoutFarewell { .. } | Ui::Finished { .. }
+            ))
+        );
+    }
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown() -> TestResult
+{
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let destination = root.join("verified-empty.bin");
+    let mut controller = Controller::new(fixture.session.clone(), "saved farewell fixture");
+    let (id, _, review) =
+        prepare_receive(&fixture, &mut controller, "empty.bin", 0, &destination).await?;
+    controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer: id,
+                review,
+            },
+        )
+        .await;
+    let saved = controller
+        .feed(&fixture.session, &header(FrameType::EndOfFile, 0))
+        .await;
+    assert!(
+        saved
+            .events
+            .iter()
+            .any(|event| matches!(event, Ui::FileSaved { bytes: 0, .. }))
+    );
+    assert_eq!(std::fs::read(&destination)?, b"");
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Finish, 0))
+        .await;
+    assert!(!output.writes.is_empty());
+    let old_token = controller
+        .protocol_output_token()
+        .ok_or("missing first FIN output token")?;
+    controller.protocol_output_flushed(old_token);
+    assert!(
+        controller.tick().events.is_empty(),
+        "the grace period must actually elapse"
+    );
+    let prompt = b"\x1b[32moperator@host\x1b[0m $ ";
+    for byte in prompt {
+        let output = controller.feed(&fixture.session, &[*byte]).await;
+        assert!(output.events.is_empty());
+        assert!(output.terminal.is_empty());
+    }
+    // An additional valid FIN queues another real reply; an earlier flush
+    // acknowledgement must not authorize ending while that reply is pending.
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Finish, 0))
+        .await;
+    assert!(!output.writes.is_empty());
+    tokio::time::sleep(std::time::Duration::from_millis(3100)).await;
+    assert!(controller.tick().events.is_empty());
+    assert!(controller.is_active());
+    controller.mutation_pending().store(true, Ordering::Release);
+    controller.protocol_output_flushed(old_token);
+    assert!(controller.tick().events.is_empty());
+    confirm_protocol_output(&mut controller)?;
+    let output = controller.tick();
+    assert_eq!(output.events, vec![Ui::EndedWithoutFarewell { id }]);
+    assert!(
+        output
+            .terminal
+            .windows(prompt.len())
+            .any(|bytes| bytes == prompt)
+    );
+    assert!(!output.terminal.windows(3).any(|bytes| bytes == b"**\x18"));
+    assert!(controller.mutation_pending().load(Ordering::Acquire));
+    assert!(!controller.publication_running().load(Ordering::Acquire));
+    assert!(!controller.is_active());
+    assert_eq!(std::fs::read(&destination)?, b"");
+    let output = controller.feed(&fixture.session, b"next output\n").await;
+    assert_eq!(output.terminal, b"next output\n");
+    assert!(output.events.is_empty());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_rejects_same_lease_receipts_after_new_output() -> TestResult {
+    let fixture = Fixture::start().await?;
+    for stale_receipt in [true, false] {
+        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
+        let old = controller
+            .protocol_output_token()
+            .ok_or("missing initial reply")?;
+        let output = controller
+            .feed(&fixture.session, &header(FrameType::Finish, 0))
+            .await;
+        assert!(!output.writes.is_empty());
+        let current = controller
+            .protocol_output_token()
+            .ok_or("missing current reply")?;
+        assert_ne!(old, current);
+        controller.protocol_output_flushed(if stale_receipt { old } else { current });
+        let output = controller.transport_exited(&fixture.session, 0, true);
+        assert_eq!(
+            output.events.contains(&Ui::EndedWithoutFarewell { id }),
+            !stale_receipt,
+        );
+        assert!(
+            !output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Finished { .. }))
+        );
+        // A late receipt after terminal failure cannot reactivate its lease.
+        controller.protocol_output_flushed(current);
+        assert!(!controller.is_active());
+    }
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+fn upload_request(output: &Output) -> TestResult<Uuid> {
+    output
+        .events
+        .iter()
+        .find_map(|event| {
+            if let Ui::UploadRequested { id } = event {
+                Some(*id)
+            } else {
+                None
+            }
+        })
+        .ok_or_else(|| format!("missing upload request: {:?}", output.events).into())
+}
+
+fn download_offer(output: &Output) -> TestResult<(Uuid, Uuid)> {
+    output
+        .events
+        .iter()
+        .find_map(|event| {
+            if let Ui::DownloadOffered { id, offer, .. } = event {
+                Some((*id, *offer))
+            } else {
+                None
+            }
+        })
+        .ok_or_else(|| format!("missing download offer: {:?}", output.events).into())
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+fn review(output: &Output) -> TestResult<Uuid> {
+    output
+        .events
+        .iter()
+        .find_map(|event| {
+            if let Ui::Review { review, .. } = event {
+                Some(*review)
+            } else {
+                None
+            }
+        })
+        .ok_or_else(|| format!("missing review: {:?}", output.events).into())
+}
+
+fn rejected(output: &Output, reason: Failure) {
+    assert!(
+        output.events.iter().any(
+            |event| matches!(event, Ui::ActionRejected { reason: found, .. } if *found == reason)
+        ),
+        "{:?}",
+        output.events
+    );
+    assert!(!output.events.iter().any(|event| matches!(
+        event,
+        Ui::Failed { .. } | Ui::Cancelled { .. } | Ui::Finished { .. }
+    )));
+    assert!(output.writes.is_empty());
+}
+
+fn root() -> TestResult<(tempfile::TempDir, PathBuf)> {
+    let temp = tempfile::tempdir()?;
+    let root = temp.path().canonicalize()?;
+    Ok((temp, root))
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+async fn prepare_receive(
+    fixture: &Fixture,
+    controller: &mut Controller,
+    name: &str,
+    size: u64,
+    destination: &Path,
+) -> TestResult<(Uuid, Uuid, Uuid)> {
+    let output = controller.feed(&fixture.session, &offer(name, size)?).await;
+    let (transfer, offer) = download_offer(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareReceive {
+                transfer,
+                offer,
+                destination: destination.to_owned(),
+            },
+        )
+        .await;
+    Ok((transfer, offer, review(&output)?))
+}
+
+#[tokio::test]
+async fn zmodem_controller_preserves_fragmented_lookalikes_without_file_or_channel_authority()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let mut controller = Controller::new(fixture.session.clone(), "actual-reviewed-endpoint:22");
+    assert_eq!(controller.state(), State::Idle);
+    assert!(!controller.is_active());
+    assert_eq!(controller.target(), "actual-reviewed-endpoint:22");
+    let bytes = b"ordinary\0\xff\r\n**\x18B00000000000000broken\r\nlast*";
+    let mut terminal = Vec::new();
+    for byte in bytes {
+        let output = controller.feed(&fixture.session, &[*byte]).await;
+        terminal.extend(output.terminal);
+        assert!(output.writes.is_empty());
+        assert!(output.events.is_empty());
+    }
+    terminal.extend(controller.transport_failed().terminal);
+    assert_eq!(terminal, bytes);
+    assert!(!controller.is_active());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_controller_acquires_a_unique_lease_only_after_complete_valid_detection()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let request = header(FrameType::ReceiverInit, 0);
+    let mut events = Vec::new();
+    for (index, byte) in request.iter().enumerate() {
+        let output = controller.feed(&fixture.session, &[*byte]).await;
+        events.extend(output.events);
+        if index + 3 < request.len() {
+            assert!(!controller.is_active());
+        }
+    }
+    let id = upload_request(&Output {
+        events,
+        ..Output::default()
+    })?;
+    assert_ne!(id, Uuid::nil());
+    assert_eq!(controller.lease_id(), Some(id));
+    assert_eq!(controller.state(), State::AwaitingSources);
+    let output = controller
+        .control(&fixture.session, Control::Cancel { transfer: id })
+        .await;
+    assert!(output.events.contains(&Ui::Cancelled {
+        id,
+        uncertain: false
+    }));
+    assert_eq!(controller.state(), State::Cancelled);
+    assert!(!controller.is_active());
+    assert_eq!(controller.lease_id(), None);
+    assert!(
+        output
+            .writes
+            .iter()
+            .any(|bytes| bytes.starts_with(&[24; 8]))
+    );
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_controller_cannot_rebind_review_to_a_different_authenticated_connection()
+-> TestResult {
+    let first = Fixture::start().await?;
+    let second = Fixture::start().await?;
+    let mut controller = Controller::new(first.session.clone(), "fixture");
+    let output = controller
+        .feed(&first.session, &header(FrameType::ReceiverInit, 0))
+        .await;
+    let transfer = upload_request(&output)?;
+    let output = controller
+        .control(
+            &second.session,
+            Control::PrepareUpload {
+                transfer,
+                sources: vec![PathBuf::from("/irrelevant")],
+            },
+        )
+        .await;
+    assert!(output.events.contains(&Ui::Failed {
+        id: transfer,
+        reason: Failure::ConnectionClosed,
+        uncertain: false
+    }));
+    assert!(!controller.is_active());
+    first.assert_no_authority_used();
+    second.assert_no_authority_used();
+    first.finish().await?;
+    second.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_controller_old_lease_actions_cannot_cancel_a_new_request() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::ReceiverInit, 0))
+        .await;
+    let old = upload_request(&output)?;
+    controller
+        .control(&fixture.session, Control::Cancel { transfer: old })
+        .await;
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::ReceiverInit, 0))
+        .await;
+    let current = upload_request(&output)?;
+    assert_ne!(old, current);
+    let output = controller
+        .control(&fixture.session, Control::Cancel { transfer: old })
+        .await;
+    rejected(&output, Failure::Stale);
+    assert_eq!(controller.lease_id(), Some(current));
+    controller
+        .control(&fixture.session, Control::Cancel { transfer: current })
+        .await;
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_controller_remote_command_frames_fail_closed_without_exec() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &offer("safe.txt", 1)?)
+        .await;
+    let (id, _) = download_offer(&output)?;
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Command, 0))
+        .await;
+    assert!(output.events.contains(&Ui::Failed {
+        id,
+        reason: Failure::Protocol,
+        uncertain: false
+    }));
+    assert!(!controller.is_active());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_controller_unreviewed_data_cannot_create_a_file() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &offer("safe.txt", 3)?)
+        .await;
+    let (id, _) = download_offer(&output)?;
+    let output = controller.feed(&fixture.session, &contents(b"raw")?).await;
+    assert!(output.events.contains(&Ui::Failed {
+        id,
+        reason: Failure::Protocol,
+        uncertain: false
+    }));
+    assert_eq!(std::fs::read_dir(&root)?.count(), 0);
+    assert!(!controller.is_active());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_controller_stale_offer_cannot_select_a_destination() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &offer("safe.txt", 3)?)
+        .await;
+    let (transfer, _) = download_offer(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareReceive {
+                transfer,
+                offer: Uuid::new_v4(),
+                destination: root.join("safe.txt"),
+            },
+        )
+        .await;
+    rejected(&output, Failure::Stale);
+    assert_eq!(controller.lease_id(), Some(transfer));
+    assert_eq!(std::fs::read_dir(&root)?.count(), 0);
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_controller_ui_events_support_session_event_clone_and_equality_without_file_bytes()
+-> TestResult {
+    let id = Uuid::new_v4();
+    let event = SessionEvent::Zmodem(Ui::ActionRejected {
+        id,
+        reason: Failure::Stale,
+    });
+    assert_eq!(event, event.clone());
+    let event = SessionEvent::Zmodem(Ui::InputRejected { id });
+    assert_eq!(event, event.clone());
+    Ok(())
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_upload_reviews_complete_digests_before_releasing_any_source_bytes()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let source = root.join("报告.bin");
+    let bytes = [0, 255, 128, 10, 13, 24, 17, 19, 42];
+    std::fs::write(&source, bytes)?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::ReceiverInit, 0))
+        .await;
+    let transfer = upload_request(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareUpload {
+                transfer,
+                sources: vec![source.clone()],
+            },
+        )
+        .await;
+    assert!(output.writes.is_empty());
+    let review_id = review(&output)?;
+    assert!(output.events.iter().any(|event| matches!(event,
+        Ui::Review { direction: Direction::Upload, files, destination: None, .. }
+        if files.len() == 1 && files[0].path == source && files[0].name == "报告.bin"
+        && files[0].size == bytes.len() as u64
+        && files[0].sha256 == Some(Sha256::digest(bytes).iter().map(|byte| format!("{byte:02x}")).collect())
+    )));
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: review_id,
+            },
+        )
+        .await;
+    assert!(!output.writes.is_empty());
+    assert_eq!(controller.state(), State::Sending);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: review_id,
+            },
+        )
+        .await;
+    rejected(&output, Failure::Stale);
+    assert_eq!(controller.state(), State::Sending);
+    let output = controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    assert!(output.events.contains(&Ui::Cancelled {
+        id: transfer,
+        uncertain: true
+    }));
+    assert!(!controller.is_active());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_upload_confirmation_rejects_same_length_source_edits_and_consumes_review()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let source = root.join("source.txt");
+    std::fs::write(&source, b"first")?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::ReceiverInit, 0))
+        .await;
+    let transfer = upload_request(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareUpload {
+                transfer,
+                sources: vec![source.clone()],
+            },
+        )
+        .await;
+    let old = review(&output)?;
+    std::fs::write(&source, b"other")?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: old,
+            },
+        )
+        .await;
+    rejected(&output, Failure::SourceChanged);
+    assert_eq!(controller.state(), State::AwaitingSources);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareUpload {
+                transfer,
+                sources: vec![source],
+            },
+        )
+        .await;
+    assert_ne!(old, review(&output)?);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: old,
+            },
+        )
+        .await;
+    rejected(&output, Failure::Stale);
+    assert_eq!(controller.state(), State::AwaitingConfirmation);
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_changed_upload_selection_invalidates_previous_review() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let first = root.join("first.txt");
+    let second = root.join("second.txt");
+    std::fs::write(&first, b"first")?;
+    std::fs::write(&second, b"second")?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::ReceiverInit, 0))
+        .await;
+    let transfer = upload_request(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareUpload {
+                transfer,
+                sources: vec![first],
+            },
+        )
+        .await;
+    let old = review(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareUpload {
+                transfer,
+                sources: vec![second],
+            },
+        )
+        .await;
+    let current = review(&output)?;
+    assert_ne!(old, current);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: old,
+            },
+        )
+        .await;
+    rejected(&output, Failure::Stale);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: current,
+            },
+        )
+        .await;
+    assert!(!output.writes.is_empty());
+    assert_eq!(controller.state(), State::Sending);
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no_replace_readback()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let destination = root.join("收到.bin");
+    let bytes = [0, 255, 128, 13, 10, 24, 17, 19];
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let (transfer, _, review) = prepare_receive(
+        &fixture,
+        &mut controller,
+        "远端.bin",
+        bytes.len() as u64,
+        &destination,
+    )
+    .await?;
+    assert!(!destination.exists());
+    assert_eq!(std::fs::read_dir(&root)?.count(), 0);
+    let output = controller
+        .control(&fixture.session, Control::Confirm { transfer, review })
+        .await;
+    assert!(!output.writes.is_empty());
+    assert!(!destination.exists());
+    let output = controller.feed(&fixture.session, &contents(&bytes)?).await;
+    assert!(
+        output.events.contains(&Ui::FileSaved {
+            id: transfer,
+            path: destination.clone(),
+            bytes: bytes.len() as u64,
+            sha256: Sha256::digest(bytes)
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect()
+        }),
+        "{:?}",
+        output.events
+    );
+    assert_eq!(std::fs::read(&destination)?, bytes);
+    assert_eq!(std::fs::read_dir(&root)?.count(), 1);
+    assert!(!controller.mutation_pending().load(Ordering::Acquire));
+    assert!(!controller.publication_running().load(Ordering::Acquire));
+    assert!(controller.is_active());
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Finish, 0))
+        .await;
+    assert!(!output.writes.is_empty());
+    let output = controller.feed(&fixture.session, b"OOprompt>\0\xff").await;
+    assert!(output.events.contains(&Ui::Finished { id: transfer }));
+    assert_eq!(output.terminal, b"prompt>\0\xff");
+    assert_eq!(controller.state(), State::Finished);
+    assert!(!controller.is_active());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_empty_receive_still_requires_review_publication_and_readback()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let destination = root.join("empty.bin");
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let (transfer, _, review) =
+        prepare_receive(&fixture, &mut controller, "empty.bin", 0, &destination).await?;
+    controller
+        .control(&fixture.session, Control::Confirm { transfer, review })
+        .await;
+    assert!(!destination.exists());
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::EndOfFile, 0))
+        .await;
+    assert!(
+        output
+            .events
+            .iter()
+            .any(|event| matches!(event, Ui::FileSaved { bytes: 0, .. })),
+        "{:?}",
+        output.events
+    );
+    assert_eq!(std::fs::read(&destination)?, b"");
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_existing_local_target_is_preserved_without_consuming_offer() -> TestResult
+{
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let destination = root.join("existing.txt");
+    std::fs::write(&destination, b"existing belongs to another operation")?;
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &offer("safe.txt", 3)?)
+        .await;
+    let (transfer, offer) = download_offer(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareReceive {
+                transfer,
+                offer,
+                destination: destination.clone(),
+            },
+        )
+        .await;
+    rejected(&output, Failure::DestinationExists);
+    assert!(controller.is_active());
+    assert_eq!(
+        std::fs::read(&destination)?,
+        b"existing belongs to another operation"
+    );
+    assert_eq!(std::fs::read_dir(&root)?.count(), 1);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareReceive {
+                transfer,
+                offer,
+                destination: root.join("fresh.txt"),
+            },
+        )
+        .await;
+    assert!(!review(&output)?.is_nil());
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_target_created_after_review_rejects_confirmation_without_accepting_data()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let destination = root.join("raced.txt");
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let (transfer, _, review) =
+        prepare_receive(&fixture, &mut controller, "safe.txt", 3, &destination).await?;
+    std::fs::write(&destination, b"external owner")?;
+    let output = controller
+        .control(&fixture.session, Control::Confirm { transfer, review })
+        .await;
+    rejected(&output, Failure::DestinationExists);
+    assert!(controller.is_active());
+    assert_eq!(std::fs::read(&destination)?, b"external owner");
+    assert_eq!(std::fs::read_dir(&root)?.count(), 1);
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_target_created_after_accept_is_preserved_without_saved_ack() -> TestResult
+{
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let destination = root.join("raced.txt");
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let (transfer, _, review) =
+        prepare_receive(&fixture, &mut controller, "safe.txt", 3, &destination).await?;
+    controller
+        .control(&fixture.session, Control::Confirm { transfer, review })
+        .await;
+    std::fs::write(&destination, b"external owner")?;
+    let output = controller.feed(&fixture.session, &contents(b"new")?).await;
+    assert!(
+        output.events.contains(&Ui::Failed {
+            id: transfer,
+            reason: Failure::DestinationExists,
+            uncertain: false
+        }),
+        "{:?}",
+        output.events
+    );
+    assert!(
+        !output
+            .events
+            .iter()
+            .any(|event| matches!(event, Ui::FileSaved { .. }))
+    );
+    assert!(!output.writes.iter().any(
+        |bytes| bytes == &header(FrameType::ReceiverInit, u32::from_le_bytes([0, 4, 0, 0x60]))
+    ));
+    assert_eq!(std::fs::read(&destination)?, b"external owner");
+    assert_eq!(std::fs::read_dir(&root)?.count(), 1);
+    assert!(!controller.mutation_pending().load(Ordering::Acquire));
+    assert!(!controller.is_active());
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_review_authority()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let first = root.join("first.txt");
+    let second = root.join("second.txt");
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let (transfer, first_offer, old) =
+        prepare_receive(&fixture, &mut controller, "first.txt", 3, &first).await?;
+    controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: old,
+            },
+        )
+        .await;
+    let output = controller.feed(&fixture.session, &contents(b"one")?).await;
+    assert!(
+        output
+            .events
+            .iter()
+            .any(|event| matches!(event, Ui::FileSaved { .. }))
+    );
+    let output = controller
+        .feed(&fixture.session, &offer("second.txt", 3)?)
+        .await;
+    let (same_transfer, next_offer) = download_offer(&output)?;
+    assert_eq!(transfer, same_transfer);
+    assert_ne!(first_offer, next_offer);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: old,
+            },
+        )
+        .await;
+    rejected(&output, Failure::Stale);
+    assert!(!second.exists());
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareReceive {
+                transfer,
+                offer: first_offer,
+                destination: second.clone(),
+            },
+        )
+        .await;
+    rejected(&output, Failure::Stale);
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareReceive {
+                transfer,
+                offer: next_offer,
+                destination: second.clone(),
+            },
+        )
+        .await;
+    let next = review(&output)?;
+    controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer,
+                review: next,
+            },
+        )
+        .await;
+    let output = controller.feed(&fixture.session, &contents(b"two")?).await;
+    assert!(
+        output
+            .events
+            .iter()
+            .any(|event| matches!(event, Ui::FileSaved { .. }))
+    );
+    assert_eq!(std::fs::read(first)?, b"one");
+    assert_eq!(std::fs::read(second)?, b"two");
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_controller_local_claims_exclude_other_connections_and_existing_sftp_scopes()
+-> TestResult {
+    let first = Fixture::start().await?;
+    let second = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let target = root.join("shared.txt");
+    let mut one = Controller::new(first.session.clone(), "first");
+    let mut two = Controller::new(second.session.clone(), "second");
+    let (transfer_one, _, review_one) =
+        prepare_receive(&first, &mut one, "one.txt", 3, &target).await?;
+    one.control(
+        &first.session,
+        Control::Confirm {
+            transfer: transfer_one,
+            review: review_one,
+        },
+    )
+    .await;
+    assert_eq!(one.state(), State::Receiving);
+    let (transfer_two, offer_two, review_two) =
+        prepare_receive(&second, &mut two, "two.txt", 3, &target).await?;
+    let output = two
+        .control(
+            &second.session,
+            Control::Confirm {
+                transfer: transfer_two,
+                review: review_two,
+            },
+        )
+        .await;
+    rejected(&output, Failure::DestinationBusy);
+    assert!(two.is_active());
+    let sftp = second.session.sftp().await?;
+    let spec = TransferSpec::download("/", &target);
+    assert!(matches!(
+        sftp.reserve_directory_sync(&spec, &|| true).await,
+        Err(SessionError::MutationBusy)
+    ));
+    let output = one
+        .control(
+            &first.session,
+            Control::Cancel {
+                transfer: transfer_one,
+            },
+        )
+        .await;
+    assert!(output.events.contains(&Ui::Cancelled {
+        id: transfer_one,
+        uncertain: false
+    }));
+    let output = two
+        .control(
+            &second.session,
+            Control::PrepareReceive {
+                transfer: transfer_two,
+                offer: offer_two,
+                destination: target.clone(),
+            },
+        )
+        .await;
+    let fresh = review(&output)?;
+    let output = two
+        .control(
+            &second.session,
+            Control::Confirm {
+                transfer: transfer_two,
+                review: fresh,
+            },
+        )
+        .await;
+    assert!(!output.writes.is_empty());
+    assert_eq!(two.state(), State::Receiving);
+    assert!(!target.exists());
+    two.control(
+        &second.session,
+        Control::Cancel {
+            transfer: transfer_two,
+        },
+    )
+    .await;
+    assert!(sftp.reserve_directory_sync(&spec, &|| true).await.is_ok());
+    sftp.close().await?;
+    assert_eq!(first.observed.commands.load(Ordering::Acquire), 0);
+    assert_eq!(second.observed.commands.load(Ordering::Acquire), 0);
+    first.finish().await?;
+    second.finish().await
+}
+
+#[cfg(not(any(target_os = "linux", target_os = "macos")))]
+#[tokio::test]
+async fn zmodem_controller_unverified_local_backend_is_explicitly_unsupported_without_file_writes()
+-> TestResult {
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let target = root.join("new.txt");
+    let mut controller = Controller::new(fixture.session.clone(), "fixture");
+    let output = controller
+        .feed(&fixture.session, &offer("safe.txt", 3)?)
+        .await;
+    let (transfer, offer) = download_offer(&output)?;
+    let output = controller
+        .control(
+            &fixture.session,
+            Control::PrepareReceive {
+                transfer,
+                offer,
+                destination: target.clone(),
+            },
+        )
+        .await;
+    rejected(&output, Failure::Unsupported);
+    assert!(controller.is_active());
+    assert!(!target.exists());
+    controller
+        .control(&fixture.session, Control::Cancel { transfer })
+        .await;
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}

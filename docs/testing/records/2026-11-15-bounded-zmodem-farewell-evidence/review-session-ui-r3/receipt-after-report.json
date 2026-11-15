@@ -1,0 +1,16 @@
+{
+  "recorded_utc": "2026-11-15T10:45:42.578199+00:00",
+  "phase": "after final report creation",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "engineering_input_count": 571,
+  "script_count": 12,
+  "mismatches": [],
+  "binary_or_inventory_or_binding_changes": [],
+  "report_sha256": "d911dc436e5f1fa8f29b692faa049afb9b3eaa64d050a23b2b53193add93f6d0",
+  "recommendation": "HOLD",
+  "open_p2": [
+    "P2-003"
+  ],
+  "verified": true
+}

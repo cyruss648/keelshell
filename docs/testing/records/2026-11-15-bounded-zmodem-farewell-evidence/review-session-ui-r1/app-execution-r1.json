@@ -1,0 +1,45 @@
+{
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/app-r1",
+  "binary_sha256": "75a9c3b7082104076f5e80d06af6ddd7b619abb26ad8c78937a12fd6a9bdb112",
+  "parent_inventory_sha256": "6d29852a8ecca416b502518071c5b11e9c5abd66d0885f134aa4f7293532e4ee",
+  "inventory_tests": 1230,
+  "binary_sha256_after": "75a9c3b7082104076f5e80d06af6ddd7b619abb26ad8c78937a12fd6a9bdb112",
+  "results": [
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/app-r1",
+        "--list"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1",
+      "exit_code": 0,
+      "duration_seconds": 0.013343290993361734,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/app-inventory-r1.log",
+      "log_sha256": "6d29852a8ecca416b502518071c5b11e9c5abd66d0885f134aa4f7293532e4ee"
+    },
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/app-r1",
+        "zmodem",
+        "--test-threads=2"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1",
+      "exit_code": 0,
+      "duration_seconds": 0.5292327089991886,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/app-zmodem-r1.log",
+      "log_sha256": "01977d5e6c0079def187b52550d64b6a8940ac9d2c196e0c44a05283fb769c20"
+    },
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/app-r1",
+        "ssh_bridge::tests::",
+        "--test-threads=2"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1",
+      "exit_code": 0,
+      "duration_seconds": 0.07599520801159088,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r1/app-bridge-r1.log",
+      "log_sha256": "3d216529f9274d49e190979cbb2a6e55cd5760f6907b0504ff6a42c8b06b2a8d"
+    }
+  ],
+  "prebuilt_limitation": "Parent built; no independent compile; no independent peer fixture runner or native GUI started."
+}

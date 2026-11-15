@@ -1,0 +1,17 @@
+{
+  "recorded_utc": "2026-11-15T11:01:14.812104+00:00",
+  "status": "R4_HOLD_PRESERVED_LIVE_TEST_CORRECTION_NOT_YET_BOUND",
+  "r4_freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "changed_since_r4": [
+    "crates/keelshell-app/src/ssh_bridge_tests.rs"
+  ],
+  "r4_test_sha256": "8825c13cea74f348259c57b19179e59d0366147da751c12bc84ea453679e4655",
+  "live_test_sha256": "47771ef2e6d6e14a7afe3698281ee5e9334e4a230578e6dce003e6437d178c01",
+  "r4_exact_bytes_reconstructed_in_memory": true,
+  "observed_correction": "worker result now explicitly expects SSH_SHELL_OUTPUT_CLEANUP_TIMEOUT; output assertion strengthened to exact 128 x bytes; six-second bound, actual Full setup, Cancelled lifecycle and session.close retained",
+  "live_correction_status": "Source shape addresses P2-004; no new bound binary executed yet",
+  "production_bridge_sha256": "d00ea89460a4d54837d0540c7c42b8b1e544c3cd07df6bb24fffd65277f2992f",
+  "production_bridge_matches_r4": true,
+  "p2_004_status": "OPEN pending new freeze and bound execution",
+  "no_r4_results_overwritten": true
+}

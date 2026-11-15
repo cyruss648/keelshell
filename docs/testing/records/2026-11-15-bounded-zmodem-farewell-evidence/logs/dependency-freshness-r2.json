@@ -1,0 +1,23 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_dependencies.py",
+    "--timeout",
+    "3",
+    "--jobs",
+    "8",
+    "--json-report",
+    "work/pty-farewell-20261115/dependency-freshness-r2.json"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "dependency-freshness-r2",
+  "pid": 43423,
+  "started_utc": "2026-11-15T10:21:04.351168+00:00",
+  "finished_utc": "2026-11-15T10:21:59.364649+00:00",
+  "seconds": 55.013,
+  "exit": -15,
+  "timed_out": true,
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

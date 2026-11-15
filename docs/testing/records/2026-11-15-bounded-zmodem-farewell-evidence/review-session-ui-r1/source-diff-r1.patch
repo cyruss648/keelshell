@@ -1,0 +1,987 @@
+--- baseline/crates/keelshell-session/src/zmodem.rs
++++ frozen-r1/crates/keelshell-session/src/zmodem.rs
+@@ -145,10 +145,18 @@
+     /// The protocol exchange reached its successful terminal state.
+     Finished {
+         /// Unique PTY ownership lease.
+         id: Uuid,
+     },
++    /// Receive negotiation ended without the optional final OO trailer.
++    ///
++    /// This is distinct from `Finished`; only separate `FileSaved` receipts
++    /// establish local publication. Existing uncertainty is not acknowledged.
++    EndedWithoutFarewell {
++        /// Unique PTY ownership lease.
++        id: Uuid,
++    },
+     /// Explicit cancellation, without inferring remote cleanup.
+     Cancelled {
+         /// Unique PTY ownership lease.
+         id: Uuid,
+         /// A local or remote mutation may have an unconfirmed outcome.
+@@ -210,10 +218,11 @@
+ }
+ 
+ const MAX_ELAPSED: Duration = Duration::from_secs(15 * 60);
+ const REVIEW_TIMEOUT: Duration = Duration::from_secs(3 * 60);
+ const RETRY_INTERVAL: Duration = Duration::from_secs(10);
++const FAREWELL_GRACE: Duration = Duration::from_secs(3);
+ const LOCAL_TIMEOUT: Duration = Duration::from_secs(30);
+ const CANCELLATION: &[u8] = &[24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+ 
+ /// Observable controller state. Terminal states own no ordinary-input lease.
+ #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+@@ -232,10 +241,12 @@
+     Receiving,
+     /// A local publication worker is creating or verifying a new destination.
+     Saving,
+     /// The protocol completed successfully.
+     Finished,
++    /// A receive ended with an explicit missing-farewell warning.
++    EndedWithoutFarewell,
+     /// The current transfer was explicitly cancelled.
+     Cancelled,
+     /// A terminal protocol, connection or publication failure occurred.
+     Failed,
+ }
+@@ -312,10 +323,12 @@
+     upload_initial: Vec<u8>,
+     began: Option<Instant>,
+     action_at: Instant,
+     received_at: Instant,
+     retried_at: Instant,
++    farewell_started: Option<Instant>,
++    protocol_writes_flushed: bool,
+     remote_write_possible: bool,
+     local_uncertain: bool,
+     publication: Arc<PublicationHold>,
+     running: Arc<AtomicBool>,
+     operation_stop: Option<Arc<AtomicBool>>,
+@@ -339,10 +352,12 @@
+             upload_initial: Vec::new(),
+             began: None,
+             action_at: now,
+             received_at: now,
+             retried_at: now,
++            farewell_started: None,
++            protocol_writes_flushed: false,
+             remote_write_possible: false,
+             local_uncertain: false,
+             publication: Arc::new(PublicationHold::default()),
+             running: Arc::new(AtomicBool::new(false)),
+             operation_stop: None,
+@@ -530,10 +545,18 @@
+         if self.session.is_closed() {
+             self.fail(ZmodemFailure::ConnectionClosed, &mut output);
+             return output;
+         }
+         self.check_deadline(&mut output);
++        if self.can_end_without_farewell()
++            && self
++                .farewell_started
++                .is_some_and(|started| started.elapsed() >= FAREWELL_GRACE)
++        {
++            self.end_without_farewell(&mut output);
++            return output;
++        }
+         if !self.is_active()
+             || self.is_human_pause()
+             || self.received_at.elapsed() < RETRY_INTERVAL
+             || self.retried_at.elapsed() < RETRY_INTERVAL
+         {
+@@ -543,11 +566,14 @@
+         if let Some(machine) = &mut self.machine {
+             match machine.timeout() {
+                 Ok(events) => {
+                     for event in events {
+                         match event {
+-                            Event::Send(bytes) => output.writes.push(bytes),
++                            Event::Send(bytes) => {
++                                self.protocol_writes_flushed = false;
++                                output.writes.push(bytes);
++                            }
+                             Event::Retry { .. } => {}
+                             _ => {
+                                 // Current pure timers emit only bounded retry
+                                 // effects, never a file or caller approval.
+                                 self.fail(ZmodemFailure::Protocol, &mut output);
+@@ -558,10 +584,92 @@
+                 }
+                 Err(error) => self.fail(protocol_failure(&error), &mut output),
+             }
+         }
+         output
++    }
++
++    /// Acknowledge that every queued protocol write for this lease completed.
++    ///
++    /// The single PTY owner calls this only after its write queue and in-flight
++    /// write are both empty. Producing bytes or observing peer exit is not a
++    /// substitute. Old lease IDs cannot start another transfer's grace period.
++    pub fn protocol_output_flushed(&mut self, transfer: Uuid) {
++        if self.transfer != Some(transfer) {
++            return;
++        }
++        self.protocol_writes_flushed = true;
++        if matches!(
++            &self.machine,
++            Some(Machine::Receive(receiver)) if receiver.is_waiting_for_farewell()
++        ) {
++            self.farewell_started.get_or_insert_with(Instant::now);
++        }
++    }
++
++    /// Observe the ordered SSH exit event after all preceding channel bytes.
++    ///
++    /// A clean exit may retire a receive waiting only for OO after the final
++    /// ZFIN reply was actually written. It never manufactures `Finished`, ends
++    /// a pending review/save, or clears an older publication quarantine.
++    pub fn transport_exited(
++        &mut self,
++        current: &SshSession,
++        code: u32,
++        success: bool,
++    ) -> ZmodemOutput {
++        let mut output = ZmodemOutput::default();
++        if code == 0 && success && self.connection(current) && self.can_end_without_farewell() {
++            self.end_without_farewell(&mut output);
++            output
++        } else {
++            self.transport_failed()
++        }
++    }
++
++    fn can_end_without_farewell(&self) -> bool {
++        self.is_active()
++            && self.protocol_writes_flushed
++            && self.farewell_started.is_some()
++            && self.offer.is_none()
++            && self.review.is_none()
++            && self.approved.is_none()
++            && self.reservation.is_none()
++            && !self.uncertain()
++            && matches!(
++                &self.machine,
++                Some(Machine::Receive(receiver)) if receiver.is_waiting_for_farewell()
++            )
++    }
++
++    fn end_without_farewell(&mut self, output: &mut ZmodemOutput) {
++        let result = match &mut self.machine {
++            Some(Machine::Receive(receiver)) => receiver.finish_without_farewell(),
++            _ => return,
++        };
++        match result {
++            Ok(events) => {
++                for event in events {
++                    match event {
++                        Event::FarewellMissing => {
++                            if let Some(id) = self.transfer {
++                                self.end(ZmodemState::EndedWithoutFarewell, output);
++                                output
++                                    .events
++                                    .push(ZmodemUiEvent::EndedWithoutFarewell { id });
++                            }
++                        }
++                        Event::Terminal(bytes) => output.terminal.extend(bytes),
++                        _ => {
++                            self.fail(ZmodemFailure::Protocol, output);
++                            break;
++                        }
++                    }
++                }
++            }
++            Err(error) => self.fail(protocol_failure(&error), output),
++        }
+     }
+ 
+     /// End a broken PTY/write/connection without inferring remote cleanup.
+     ///
+     /// The bridge may ignore returned cancellation writes if its channel is no
+@@ -586,10 +694,12 @@
+         self.transfer = Some(id);
+         self.began = Some(now);
+         self.action_at = now;
+         self.received_at = now;
+         self.retried_at = now;
++        self.farewell_started = None;
++        self.protocol_writes_flushed = false;
+         self.remote_write_possible = false;
+         self.local_uncertain = false;
+         self.upload_initial.clear();
+         self.review = None;
+         self.offer = None;
+@@ -676,10 +786,12 @@
+         self.review = None;
+         self.offer = None;
+         self.approved = None;
+         self.upload_initial.clear();
+         self.began = None;
++        self.farewell_started = None;
++        self.protocol_writes_flushed = false;
+         self.operation_stop = None;
+         output.terminal.extend(self.detector.reset());
+     }
+ 
+     fn fail(&mut self, reason: ZmodemFailure, output: &mut ZmodemOutput) {
+@@ -923,11 +1035,14 @@
+ 
+     async fn events(&mut self, events: Vec<Event>, output: &mut ZmodemOutput) {
+         let mut queue = VecDeque::from(events);
+         while let Some(event) = queue.pop_front() {
+             match event {
+-                Event::Send(bytes) => output.writes.push(bytes),
++                Event::Send(bytes) => {
++                    self.protocol_writes_flushed = false;
++                    output.writes.push(bytes);
++                }
+                 Event::Terminal(bytes) => output.terminal.extend(bytes),
+                 Event::Offer(offer) => {
+                     let Some(id) = self.transfer else { continue };
+                     if self.approved.is_some() || self.reservation.is_some() {
+                         self.fail(ZmodemFailure::Protocol, output);
+@@ -1009,10 +1124,16 @@
+                         self.remote_write_possible = false;
+                         self.end(ZmodemState::Finished, output);
+                         output.events.push(ZmodemUiEvent::Finished { id });
+                     }
+                 }
++                Event::FarewellMissing => {
++                    // Only the outer flush/deadline or ordered-exit path may
++                    // request this result; ordinary codec input cannot do so.
++                    self.fail(ZmodemFailure::Protocol, output);
++                    break;
++                }
+                 Event::Cancelled => {
+                     if let Some(id) = self.transfer {
+                         let uncertain = self.uncertain();
+                         self.end(ZmodemState::Cancelled, output);
+                         output
+--- baseline/crates/keelshell-session/tests/zmodem.rs
++++ frozen-r1/crates/keelshell-session/tests/zmodem.rs
+@@ -59,10 +59,206 @@
+         FrameEnd::EndAck,
+         HeaderFormat::Binary32,
+     )?);
+     wire.extend(header(FrameType::EndOfFile, bytes.len() as u32));
+     Ok(wire)
++}
++
++async fn waiting_for_farewell(fixture: &Fixture) -> TestResult<(Controller, Uuid)> {
++    let mut controller = Controller::new(fixture.session.clone(), "farewell fixture");
++    controller
++        .feed(&fixture.session, &header(FrameType::RequestInit, 0))
++        .await;
++    let id = controller.lease_id().ok_or("missing receive lease")?;
++    let output = controller
++        .feed(&fixture.session, &header(FrameType::Finish, 0))
++        .await;
++    assert!(!output.writes.is_empty());
++    assert!(output.events.is_empty());
++    Ok((controller, id))
++}
++
++#[tokio::test]
++async fn zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease() -> TestResult {
++    let fixture = Fixture::start().await?;
++    for acknowledged in [false, true] {
++        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
++        controller.protocol_output_flushed(Uuid::new_v4());
++        if acknowledged {
++            controller.protocol_output_flushed(id);
++        }
++        let output = controller.transport_exited(&fixture.session, 0, true);
++        assert_eq!(
++            output.events.iter().any(
++                |event| matches!(event, Ui::EndedWithoutFarewell { id: found } if *found == id)
++            ),
++            acknowledged,
++        );
++        assert!(
++            !output
++                .events
++                .iter()
++                .any(|event| matches!(event, Ui::Finished { .. }))
++        );
++        assert_eq!(
++            controller.state(),
++            if acknowledged {
++                State::EndedWithoutFarewell
++            } else {
++                State::Failed
++            },
++        );
++        assert!(!controller.is_active());
++        assert!(
++            controller
++                .transport_exited(&fixture.session, 0, true)
++                .events
++                .is_empty()
++        );
++    }
++    fixture.assert_no_authority_used();
++    fixture.finish().await
++}
++
++#[tokio::test]
++async fn zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits() -> TestResult {
++    let fixture = Fixture::start().await?;
++    let foreign = Fixture::start().await?;
++    for (code, success, replaced) in [(1, false, false), (0, false, false), (0, true, true)] {
++        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
++        controller.protocol_output_flushed(id);
++        let current = if replaced {
++            &foreign.session
++        } else {
++            &fixture.session
++        };
++        let output = controller.transport_exited(current, code, success);
++        assert!(
++            output
++                .events
++                .iter()
++                .any(|event| matches!(event, Ui::Failed { .. }))
++        );
++        assert!(
++            !output.events.iter().any(|event| matches!(
++                event,
++                Ui::EndedWithoutFarewell { .. } | Ui::Finished { .. }
++            ))
++        );
++    }
++    foreign.finish().await?;
++    fixture.finish().await
++}
++
++#[tokio::test]
++async fn zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review() -> TestResult {
++    let fixture = Fixture::start().await?;
++    for offered in [false, true] {
++        let mut controller = Controller::new(fixture.session.clone(), "unfinished fixture");
++        controller
++            .feed(&fixture.session, &header(FrameType::RequestInit, 0))
++            .await;
++        if offered {
++            controller
++                .feed(&fixture.session, &offer("unapproved.bin", 0)?)
++                .await;
++        }
++        let id = controller.lease_id().ok_or("missing receive lease")?;
++        controller.protocol_output_flushed(id);
++        let output = controller.transport_exited(&fixture.session, 0, true);
++        assert!(
++            output
++                .events
++                .iter()
++                .any(|event| matches!(event, Ui::Failed { .. }))
++        );
++        assert!(
++            !output.events.iter().any(|event| matches!(
++                event,
++                Ui::EndedWithoutFarewell { .. } | Ui::Finished { .. }
++            ))
++        );
++    }
++    fixture.assert_no_authority_used();
++    fixture.finish().await
++}
++
++#[cfg(any(target_os = "linux", target_os = "macos"))]
++#[tokio::test]
++async fn zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown() -> TestResult
++{
++    let fixture = Fixture::start().await?;
++    let (_temp, root) = root()?;
++    let destination = root.join("verified-empty.bin");
++    let mut controller = Controller::new(fixture.session.clone(), "saved farewell fixture");
++    let (id, _, review) =
++        prepare_receive(&fixture, &mut controller, "empty.bin", 0, &destination).await?;
++    controller
++        .control(
++            &fixture.session,
++            Control::Confirm {
++                transfer: id,
++                review,
++            },
++        )
++        .await;
++    let saved = controller
++        .feed(&fixture.session, &header(FrameType::EndOfFile, 0))
++        .await;
++    assert!(
++        saved
++            .events
++            .iter()
++            .any(|event| matches!(event, Ui::FileSaved { bytes: 0, .. }))
++    );
++    assert_eq!(std::fs::read(&destination)?, b"");
++    let output = controller
++        .feed(&fixture.session, &header(FrameType::Finish, 0))
++        .await;
++    assert!(!output.writes.is_empty());
++    controller.protocol_output_flushed(id);
++    assert!(
++        controller.tick().events.is_empty(),
++        "the grace period must actually elapse"
++    );
++    let prompt = b"\x1b[32moperator@host\x1b[0m $ ";
++    for byte in prompt {
++        let output = controller.feed(&fixture.session, &[*byte]).await;
++        assert!(output.events.is_empty());
++        assert!(output.terminal.is_empty());
++    }
++    // An additional valid FIN queues another real reply; an earlier flush
++    // acknowledgement must not authorize ending while that reply is pending.
++    let output = controller
++        .feed(&fixture.session, &header(FrameType::Finish, 0))
++        .await;
++    assert!(!output.writes.is_empty());
++    tokio::time::sleep(std::time::Duration::from_millis(3100)).await;
++    assert!(controller.tick().events.is_empty());
++    assert!(controller.is_active());
++    controller.mutation_pending().store(true, Ordering::Release);
++    controller.protocol_output_flushed(Uuid::new_v4());
++    assert!(controller.tick().events.is_empty());
++    controller.protocol_output_flushed(id);
++    let output = controller.tick();
++    assert_eq!(output.events, vec![Ui::EndedWithoutFarewell { id }]);
++    assert!(
++        output
++            .terminal
++            .windows(prompt.len())
++            .any(|bytes| bytes == prompt)
++    );
++    assert!(!output.terminal.windows(3).any(|bytes| bytes == b"**\x18"));
++    assert!(controller.mutation_pending().load(Ordering::Acquire));
++    assert!(!controller.publication_running().load(Ordering::Acquire));
++    assert!(!controller.is_active());
++    assert_eq!(std::fs::read(&destination)?, b"");
++    let output = controller.feed(&fixture.session, b"next output\n").await;
++    assert_eq!(output.terminal, b"next output\n");
++    assert!(output.events.is_empty());
++    fixture.assert_no_authority_used();
++    fixture.finish().await
+ }
+ 
+ fn upload_request(output: &Output) -> TestResult<Uuid> {
+     output
+         .events
+--- baseline/crates/keelshell-session/tests/zmodem_openssh.rs
++++ frozen-r1/crates/keelshell-session/tests/zmodem_openssh.rs
+@@ -35,10 +35,11 @@
+ }
+ 
+ struct Report {
+     events: Vec<Ui>,
+     end: ShellEnd,
++    terminal: Vec<u8>,
+ }
+ 
+ impl Fixture {
+     async fn new() -> TestResult<Self> {
+         let mut options = SshOptions::new("127.0.0.1", std::env::var("KEELSHELL_OPENSSH_USER")?);
+@@ -82,10 +83,21 @@
+         receiving: bool,
+         flags: &[&str],
+         names: &[&str],
+         intent: Intent,
+     ) -> TestResult<Report> {
++        self.run_peer(receiving, flags, names, intent, false).await
++    }
++
++    async fn run_peer(
++        &self,
++        receiving: bool,
++        flags: &[&str],
++        names: &[&str],
++        intent: Intent,
++        interactive: bool,
++    ) -> TestResult<Report> {
+         let peer = std::env::var(if receiving {
+             "KEELSHELL_ZMODEM_RZ"
+         } else {
+             "KEELSHELL_ZMODEM_SZ"
+         })?;
+@@ -99,27 +111,35 @@
+             .chain(names.iter().copied())
+             .map(quote)
+             .collect::<Vec<_>>()
+             .join(" ");
+         let command = format!(
+-            "cd {} && stty raw -echo -onlcr && exec {} {args} 2>{}\n",
++            "cd {} && stty raw -echo -onlcr && {}{} {args} 2>{}{}\n",
+             quote(&self.remote),
++            if interactive { "" } else { "exec " },
+             quote(&peer),
+             quote(&self.path("peer.log")),
++            if interactive {
++                "; printf '\\n__KS_PEER_RETURN__\\n'"
++            } else {
++                ""
++            },
+         );
+         let mut shell = self.session.start_shell(30, 100).await?;
+         shell.write(command.as_bytes()).await?;
+         let mut controller = ZmodemController::new(self.session.clone(), "owned loopback OpenSSH");
+         let mut events = Vec::new();
++        let mut terminal = Vec::new();
+         let mut ended = false;
+         let mut preserve_rejected = false;
+         let mut peer_headers = VecDeque::new();
+         while !ended {
+-            let Some(event) = shell.recv().await else {
+-                return Err("peer closed before protocol result".into());
++            let event = tokio::select! {
++                event = shell.recv() => Some(event.ok_or("peer closed before protocol result")?),
++                _ = tokio::time::sleep(Duration::from_millis(20)) => None,
+             };
+-            if let SessionEvent::Data(bytes) = &event {
++            if let Some(SessionEvent::Data(bytes)) = &event {
+                 peer_headers.push_back(
+                     bytes
+                         .iter()
+                         .take(96)
+                         .map(|byte| format!("{byte:02x}"))
+@@ -127,36 +147,42 @@
+                 );
+                 if peer_headers.len() > 6 {
+                     peer_headers.pop_front();
+                 }
+             }
+-            let mut effects = controller
+-                .feed(
+-                    &self.session,
+-                    match &event {
+-                        SessionEvent::Data(bytes) => bytes,
+-                        other => {
+-                            let log = self
+-                                .sftp
+-                                .read_regular(&self.path("peer.log"), 64 * 1024)
+-                                .await
+-                                .unwrap_or_default();
+-                            return Err(format!(
++            let mut effects = match event {
++                Some(SessionEvent::Data(bytes)) => controller.feed(&self.session, &bytes).await,
++                Some(SessionEvent::Exited { code, success }) => {
++                    controller.transport_exited(&self.session, code, success)
++                }
++                Some(other) => {
++                    let log = self
++                        .sftp
++                        .read_regular(&self.path("peer.log"), 64 * 1024)
++                        .await
++                        .unwrap_or_default();
++                    return Err(format!(
+                                 "unexpected SSH terminal event: {other:?}; controller: {:?}; latest incoming headers: {peer_headers:?}; prior events: {:?}; peer diagnostics: {}",
+                                 controller.state(),
+                                 events.iter().rev().take(5).collect::<Vec<_>>(),
+                                 String::from_utf8_lossy(&log),
+                             ).into());
+-                        }
+-                    },
+-                )
+-                .await;
++                }
++                None => controller.tick(),
++            };
+             loop {
+                 // Flush actual SSH output before accepting the corresponding
+                 // event. Merely producing OO is not a successful write.
+                 for bytes in effects.writes.drain(..) {
+                     shell.write(&bytes).await?;
++                }
++                if let Some(id) = controller.lease_id() {
++                    controller.protocol_output_flushed(id);
++                }
++                terminal.extend(effects.terminal.drain(..));
++                if terminal.len() > 32 * 1024 {
++                    return Err("fixture terminal output exceeded its bounded capture".into());
+                 }
+                 let mut pending: VecDeque<_> = effects.events.drain(..).collect();
+                 if pending.is_empty() {
+                     break;
+                 }
+@@ -207,11 +233,16 @@
+                             Intent::Preserve(_),
+                         ) => {
+                             preserve_rejected = true;
+                             Some(Control::Cancel { transfer: *id })
+                         }
+-                        (Ui::Finished { .. } | Ui::Cancelled { .. }, _) => {
++                        (
++                            Ui::Finished { .. }
++                            | Ui::EndedWithoutFarewell { .. }
++                            | Ui::Cancelled { .. },
++                            _,
++                        ) => {
+                             ended = true;
+                             None
+                         }
+                         (Ui::Failed { .. } | Ui::ActionRejected { .. }, _) => {
+                             let log = self
+@@ -232,10 +263,67 @@
+                 }
+             }
+         }
+         if matches!(intent, Intent::Preserve(_)) {
+             assert!(preserve_rejected);
++        }
++        if interactive {
++            tokio::time::timeout(Duration::from_secs(5), async {
++                while !terminal
++                    .windows(b"__KS_PEER_RETURN__".len())
++                    .any(|part| part == b"__KS_PEER_RETURN__")
++                {
++                    match shell.recv().await {
++                        Some(SessionEvent::Data(bytes)) => {
++                            terminal.extend(controller.feed(&self.session, &bytes).await.terminal);
++                            if terminal.len() > 32 * 1024 {
++                                return Err(
++                                    "fixture terminal output exceeded its bounded capture".into()
++                                );
++                            }
++                        }
++                        other => {
++                            return Err(format!(
++                                "interactive shell ended before its return marker: {other:?}"
++                            )
++                            .into());
++                        }
++                    }
++                }
++                shell
++                    .write(b"printf '__KS_AFTER_ZMODEM__\\n'; exit 0\n")
++                    .await?;
++                while let Some(event) = shell.recv().await {
++                    match event {
++                        SessionEvent::Data(bytes) => {
++                            terminal.extend(bytes);
++                            if terminal.len() > 32 * 1024 {
++                                return Err(
++                                    "fixture terminal output exceeded its bounded capture".into()
++                                );
++                            }
++                        }
++                        SessionEvent::Exited {
++                            code: 0,
++                            success: true,
++                        } => break,
++                        other => {
++                            return Err(format!(
++                                "interactive shell did not finish cleanly: {other:?}"
++                            )
++                            .into());
++                        }
++                    }
++                }
++                Ok::<_, Box<dyn Error + Send + Sync>>(())
++            })
++            .await??;
++            assert!(
++                terminal
++                    .windows(b"__KS_AFTER_ZMODEM__".len())
++                    .any(|part| part == b"__KS_AFTER_ZMODEM__")
++            );
+         }
+         // The peer replaces its shell, so its independently observed exit
+         // establishes whether it accepted the final protocol trailer.
+         let peer_cancelled = events
+             .iter()
+@@ -258,11 +346,15 @@
+         let end = match end {
+             Ok(end) => end,
+             Err(_) if peer_cancelled => ShellEnd::Cancelled,
+             Err(error) => return Err(error.into()),
+         };
+-        Ok(Report { events, end })
++        Ok(Report {
++            events,
++            end,
++            terminal,
++        })
+     }
+ 
+     async fn close(self, names: &[&str]) -> TestResult {
+         for name in names {
+             if self.sftp.inspect_entry(&self.path(name)).await?.is_some() {
+@@ -391,10 +483,40 @@
+ 
+ #[tokio::test]
+ #[ignore = "requires the disposable pinned OpenSSH runner and independent rz/sz"]
+ async fn real_sz_sends_an_individually_reviewed_empty_file() -> TestResult {
+     tokio::time::timeout(Duration::from_secs(25), receive("empty.bin", &[], &[])).await?
++}
++
++#[tokio::test]
++#[ignore = "requires the disposable pinned OpenSSH runner and independent rz/sz"]
++async fn real_sz_returns_to_the_same_shell_after_a_bounded_receive_farewell() -> TestResult {
++    tokio::time::timeout(Duration::from_secs(45), async {
++        let fixture = Fixture::new().await?;
++        let name = "interactive-源.bin";
++        let bytes = binary();
++        fixture.sftp.write(&fixture.path(name), &bytes).await?;
++        let destination = fixture.local.join(name);
++        let report = fixture.run_peer(
++            false,
++            &[],
++            &[name],
++            Intent::Download(destination.clone()),
++            true,
++        ).await?;
++        assert_eq!(std::fs::read(destination)?, bytes);
++        assert_eq!(report.end, ShellEnd::Exited { code: 0 });
++        let strict = report.events.iter().filter(|event| matches!(event, Ui::Finished { .. })).count();
++        let missing = report.events.iter().filter(|event| matches!(event, Ui::EndedWithoutFarewell { .. })).count();
++        assert_eq!(strict + missing, 1, "exactly one explicitly classified receive outcome");
++        assert!(!report.events.iter().any(|event| matches!(event, Ui::Failed { .. } | Ui::Cancelled { .. })));
++        assert_eq!(report.events.iter().filter(|event| matches!(event, Ui::FileSaved { .. })).count(), 1);
++        assert!(report.terminal.windows(b"__KS_PEER_RETURN__".len()).any(|part| part == b"__KS_PEER_RETURN__"));
++        assert!(report.terminal.windows(b"__KS_AFTER_ZMODEM__".len()).any(|part| part == b"__KS_AFTER_ZMODEM__"));
++        eprintln!("interactive receive outcome: strict_OO={strict}; missing_optional_OO={missing}; same_shell_continued=true");
++        fixture.close(&[name]).await
++    }).await?
+ }
+ 
+ #[tokio::test]
+ #[ignore = "requires the disposable pinned OpenSSH runner and independent rz/sz"]
+ async fn real_sz_existing_local_destination_is_preserved_and_peer_cancelled() -> TestResult {
+--- baseline/crates/keelshell-app/src/ssh_bridge_zmodem.rs
++++ frozen-r1/crates/keelshell-app/src/ssh_bridge_zmodem.rs
+@@ -65,10 +65,16 @@
+         Some(bytes)
+     }
+ 
+     pub(super) fn write_completed(&mut self) -> Result<(), String> {
+         self.write_in_flight = false;
++        if self.writes.is_empty()
++            && !self.interrupted_input
++            && let Some(id) = self.blocked
++        {
++            self.controller.protocol_output_flushed(id);
++        }
+         self.finish_if_flushed()?;
+         self.release_input();
+         Ok(())
+     }
+ 
+@@ -80,10 +86,20 @@
+         match event {
+             SessionEvent::Data(bytes) => {
+                 let effects = self.controller.feed(session, &bytes).await;
+                 self.effects(effects)
+             }
++            event @ SessionEvent::Exited { code, success } => {
++                let effects =
++                    if self.writes.is_empty() && !self.write_in_flight && !self.interrupted_input {
++                        self.controller.transport_exited(session, code, success)
++                    } else {
++                        self.controller.transport_failed()
++                    };
++                self.effects(effects)?;
++                self.push_event(event)
++            }
+             event => {
+                 let effects = self.controller.transport_failed();
+                 self.effects(effects)?;
+                 self.push_event(event)
+             }
+@@ -121,10 +137,11 @@
+                 !matches!(
+                     event,
+                     ZmodemUiEvent::Failed { .. }
+                         | ZmodemUiEvent::Cancelled { .. }
+                         | ZmodemUiEvent::Finished { .. }
++                        | ZmodemUiEvent::EndedWithoutFarewell { .. }
+                 )
+             });
+             effects.events.push(ZmodemUiEvent::Failed {
+                 id,
+                 reason: ZmodemFailure::Protocol,
+--- baseline/crates/keelshell-app/src/ssh_bridge_tests.rs
++++ frozen-r1/crates/keelshell-app/src/ssh_bridge_tests.rs
+@@ -544,5 +544,80 @@
+         }
+         session.close().await?;
+         Ok::<_, Box<dyn Error>>(())
+     }).await?
+ }
++
++#[tokio::test]
++async fn zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff()
++-> Result<(), Box<dyn Error>> {
++    tokio::time::timeout(Duration::from_secs(8), async {
++        use keelshell_core::zmodem::{FrameType, Header, HeaderFormat, encode_header};
++        let fixture = serve(Script::Quiet).await?;
++        let session = connect(&fixture).await?;
++        for (finish_sent, reply_state, exit_code) in [
++            (false, 2, 0),
++            (true, 0, 0),
++            (true, 1, 0),
++            (true, 2, 1),
++            (true, 2, 0),
++        ] {
++            let mut protocol = super::Protocol::new(session.clone(), "farewell SSH fixture".into());
++            let header =
++                |kind| SessionEvent::Data(encode_header(Header::new(kind, 0, HeaderFormat::Hex)));
++            protocol
++                .feed(&session, header(FrameType::RequestInit))
++                .await?;
++            while protocol.pop_write().is_some() {
++                protocol.write_completed()?;
++            }
++            if finish_sent {
++                protocol.feed(&session, header(FrameType::Finish)).await?;
++                if reply_state > 0 {
++                    assert!(protocol.pop_write().is_some());
++                }
++                if reply_state == 2 {
++                    protocol.write_completed()?;
++                }
++            }
++            protocol
++                .feed(
++                    &session,
++                    SessionEvent::Exited {
++                        code: exit_code,
++                        success: exit_code == 0,
++                    },
++                )
++                .await?;
++            let events = protocol.safety.take_events()?;
++            let warning = events.iter().find_map(|event| match event {
++                ZmodemUiEvent::EndedWithoutFarewell { id } => Some(*id),
++                _ => None,
++            });
++            assert_eq!(
++                warning.is_some(),
++                finish_sent && reply_state == 2 && exit_code == 0
++            );
++            assert!(
++                !events
++                    .iter()
++                    .any(|event| matches!(event, ZmodemUiEvent::Finished { .. }))
++            );
++            if let Some(id) = warning {
++                assert!(protocol.safety.active.load(Ordering::Acquire));
++                protocol.resume_input(Uuid::new_v4());
++                assert!(protocol.safety.active.load(Ordering::Acquire));
++                protocol.resume_input(id);
++                assert!(!protocol.safety.active.load(Ordering::Acquire));
++            } else {
++                assert!(
++                    events
++                        .iter()
++                        .any(|event| matches!(event, ZmodemUiEvent::Failed { .. }))
++                );
++            }
++        }
++        session.close().await?;
++        Ok::<_, Box<dyn Error>>(())
++    })
++    .await?
++}
+--- baseline/crates/keelshell-app/src/terminal_zmodem.rs
++++ frozen-r1/crates/keelshell-app/src/terminal_zmodem.rs
+@@ -330,10 +330,16 @@
+             }
+             ZmodemUiEvent::Finished { id } => {
+                 self.end_zmodem(id, Message::new(
+                     "Zmodem 协议已完成。上传结果仍需在远端检查；下载以已验证保存的回执为准。",
+                     "Zmodem protocol completed. Inspect uploaded files remotely; downloads are confirmed by their verified save receipts.",
++                ), false);
++            }
++            ZmodemUiEvent::EndedWithoutFarewell { id } => {
++                self.end_zmodem(id, Message::new(
++                    "远端未发送最终 OO，Zmodem 已结束等待。此结果不表示完整握手成功；下载仅以各文件的已验证保存回执为准。",
++                    "The peer did not send the final OO; Zmodem stopped waiting. The full handshake was not confirmed. Only each file's verified save receipt confirms its download.",
+                 ), false);
+             }
+             ZmodemUiEvent::Cancelled { id, uncertain } => {
+                 self.end_zmodem(id, Message::new(
+                     "Zmodem 已取消。取消不能证明远端文件已删除或本地发布已回滚。",
+--- baseline/crates/keelshell-app/src/terminal_zmodem_tests.rs
++++ frozen-r1/crates/keelshell-app/src/terminal_zmodem_tests.rs
+@@ -704,10 +704,83 @@
+     .checked("a new transfer still exposes the retained receipt history");
+     assert!(
+         h.controls().is_empty(),
+         "observing receipts grants no file or protocol action"
+     );
++}
++
++#[gpui_kit::test]
++fn zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown(cx: &mut TestAppContext) {
++    let h = Harness::new(cx);
++    let old = Uuid::new_v4();
++    let id = Uuid::new_v4();
++    let path = std::env::temp_dir().join("verified-without-farewell.bin");
++    let digest = "cd".repeat(32);
++    h.terminal.update(cx, |view, _| {
++        view.zmodem.safety.active.store(true, Ordering::Release);
++    });
++    h.bridge_events(
++        [
++            ZmodemUiEvent::Failed {
++                id: old,
++                reason: ZmodemFailure::UnverifiedPublication,
++                uncertain: true,
++            },
++            ZmodemUiEvent::DownloadOffered {
++                id,
++                offer: Uuid::new_v4(),
++                name: "verified-without-farewell.bin".into(),
++                size: 7,
++            },
++            ZmodemUiEvent::FileSaved {
++                id,
++                path: path.clone(),
++                bytes: 7,
++                sha256: digest.clone(),
++            },
++            ZmodemUiEvent::EndedWithoutFarewell { id },
++        ],
++        cx,
++    );
++    h.terminal.read_with(cx, |view, _| {
++        let current = view
++            .zmodem
++            .current
++            .as_ref()
++            .checked("retained warning card");
++        assert!(matches!(current.stage, Stage::Ended));
++        let (zh, en) = current.feedback.translations();
++        assert!(zh.contains("未发送最终 OO"));
++        assert!(en.contains("full handshake was not confirmed"));
++        let saved = view
++            .zmodem
++            .verified_saves
++            .front()
++            .checked("verified save receipt");
++        assert_eq!(
++            (&saved.path, saved.bytes, &saved.sha256),
++            (&path, 7, &digest)
++        );
++        assert!(view.zmodem.unresolved.contains_key(&old));
++        assert!(
++            view.zmodem_close_busy(),
++            "older unknown results remain protected"
++        );
++    });
++    let commands: Vec<_> = h.commands.try_iter().collect();
++    assert!(commands.contains(&TerminalCommand::ResumeInput(id)));
++    assert!(
++        !commands
++            .iter()
++            .any(|command| matches!(command, TerminalCommand::Write(_)))
++    );
++}
++
++#[gpui_kit::test]
++fn zmodem_missing_farewell_before_an_offer_requests_exact_handoff(cx: &mut TestAppContext) {
++    let id = Uuid::new_v4();
++    assert_preoffer_handoff(id, ZmodemUiEvent::EndedWithoutFarewell { id }, cx);
+ }
+ 
+ #[gpui_kit::test]
+ fn zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound(
+     cx: &mut TestAppContext,

@@ -1,0 +1,93 @@
+{
+  "crates/keelshell-session/tests/zmodem.rs": {
+    "original_test_functions_count": 19,
+    "original_test_functions_changed": [],
+    "original_test_functions_preserved": [
+      "zmodem_controller_acquires_a_unique_lease_only_after_complete_valid_detection",
+      "zmodem_controller_cannot_rebind_review_to_a_different_authenticated_connection",
+      "zmodem_controller_changed_upload_selection_invalidates_previous_review",
+      "zmodem_controller_empty_receive_still_requires_review_publication_and_readback",
+      "zmodem_controller_existing_local_target_is_preserved_without_consuming_offer",
+      "zmodem_controller_local_claims_exclude_other_connections_and_existing_sftp_scopes",
+      "zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no_replace_readback",
+      "zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_review_authority",
+      "zmodem_controller_old_lease_actions_cannot_cancel_a_new_request",
+      "zmodem_controller_preserves_fragmented_lookalikes_without_file_or_channel_authority",
+      "zmodem_controller_remote_command_frames_fail_closed_without_exec",
+      "zmodem_controller_stale_offer_cannot_select_a_destination",
+      "zmodem_controller_target_created_after_accept_is_preserved_without_saved_ack",
+      "zmodem_controller_target_created_after_review_rejects_confirmation_without_accepting_data",
+      "zmodem_controller_ui_events_support_session_event_clone_and_equality_without_file_bytes",
+      "zmodem_controller_unreviewed_data_cannot_create_a_file",
+      "zmodem_controller_unverified_local_backend_is_explicitly_unsupported_without_file_writes",
+      "zmodem_controller_upload_confirmation_rejects_same_length_source_edits_and_consumes_review",
+      "zmodem_controller_upload_reviews_complete_digests_before_releasing_any_source_bytes"
+    ],
+    "added_functions": [
+      "waiting_for_farewell",
+      "zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review",
+      "zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease",
+      "zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown",
+      "zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits"
+    ],
+    "original_tests_absent_from_current_platform_inventory": [
+      "zmodem_controller_unverified_local_backend_is_explicitly_unsupported_without_file_writes"
+    ]
+  },
+  "crates/keelshell-session/tests/zmodem_openssh.rs": {
+    "original_test_functions_count": 7,
+    "original_test_functions_changed": [],
+    "original_test_functions_preserved": [
+      "real_rz_cancel_before_source_review_does_not_create_files",
+      "real_rz_receives_a_reviewed_empty_file",
+      "real_rz_receives_reviewed_binary_and_unicode_batch",
+      "real_sz_existing_local_destination_is_preserved_and_peer_cancelled",
+      "real_sz_sends_an_individually_reviewed_empty_file",
+      "real_sz_sends_binary_content_over_crc16",
+      "real_sz_sends_binary_unicode_content_over_crc32"
+    ],
+    "added_functions": [
+      "real_sz_returns_to_the_same_shell_after_a_bounded_receive_farewell"
+    ],
+    "strict_completed_helper_unchanged": true,
+    "strict_receive_helper_unchanged": true
+  },
+  "crates/keelshell-app/src/ssh_bridge_tests.rs": {
+    "original_test_functions_count": 3,
+    "original_test_functions_changed": [],
+    "original_test_functions_preserved": [
+      "zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+      "zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+      "zmodem_final_oo_is_acknowledged_only_after_actual_write_completion"
+    ],
+    "added_functions": [
+      "zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff"
+    ]
+  },
+  "crates/keelshell-app/src/terminal_zmodem_tests.rs": {
+    "original_test_functions_count": 16,
+    "original_test_functions_changed": [],
+    "original_test_functions_preserved": [
+      "zmodem_cancel_submits_once_while_waiting_for_its_terminal_event",
+      "zmodem_complete_reviews_keep_actions_visible_across_registered_themes",
+      "zmodem_completion_requests_exact_input_handoff_without_replaying_old_bytes",
+      "zmodem_late_stale_rejection_preserves_each_terminal_result",
+      "zmodem_live_lease_blocks_input_before_its_ui_notification_is_read",
+      "zmodem_preoffer_cancelled_requests_exact_handoff",
+      "zmodem_preoffer_failed_requests_exact_handoff",
+      "zmodem_preoffer_finished_requests_exact_handoff",
+      "zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids",
+      "zmodem_retained_confirm_cannot_authorize_a_replaced_offer",
+      "zmodem_review_binds_the_actual_endpoint_despite_remote_osc_titles",
+      "zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer",
+      "zmodem_unknown_acknowledgement_waits_for_the_real_publication_latch",
+      "zmodem_unknown_result_survives_later_success_and_rejects_unread_acknowledgement",
+      "zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound",
+      "zmodem_verified_saves_survive_next_offer_finished_and_dismissal"
+    ],
+    "added_functions": [
+      "zmodem_missing_farewell_before_an_offer_requests_exact_handoff",
+      "zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown"
+    ]
+  }
+}

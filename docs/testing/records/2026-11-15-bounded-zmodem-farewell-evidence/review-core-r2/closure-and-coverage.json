@@ -1,0 +1,140 @@
+{
+  "recorded_utc": "2026-11-15T10:34:55.859249+00:00",
+  "original_finding": "CORE-R1-01",
+  "status": "CLOSED_ON_R2",
+  "closure": "Bounded UTF-8 continuation guard plus exact whole, bytewise and every two-chunk split regressions, all six independently run and passed; parity preserved.",
+  "parent_red_evidence": {
+    "receipt": "../logs/core-utf8-red-r1.json",
+    "log_sha256": "6e10bcd84fdbd4acdda5179f50b06c300488bda348eca9b50b5564ea06591e62",
+    "exit": 101,
+    "test_count": 6,
+    "failed_names": [
+      "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin",
+      "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin",
+      "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split",
+      "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise",
+      "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split",
+      "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise"
+    ],
+    "independently_executed_by_this_reviewer": false
+  },
+  "parent_green_evidence": {
+    "receipt": "../logs/core-r3.json",
+    "log_sha256": "c7cc843313e1d28f24711140abc042cd9e4b464285338d12077ba7829ac473d8",
+    "exit": 0,
+    "test_count": 94,
+    "recompiled_line_present": true,
+    "independently_executed_by_this_reviewer": false
+  },
+  "independent_green": {
+    "receipt": "core-r3-independent-execution.json",
+    "passed": 94,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 0,
+    "independently_recompiled": false
+  },
+  "coverage_groups": {
+    "closed_CORE_R1_01_utf8_all_six": [
+      {
+        "name": "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin",
+        "line": 1863,
+        "passed": true
+      },
+      {
+        "name": "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split",
+        "line": 1875,
+        "passed": true
+      },
+      {
+        "name": "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise",
+        "line": 1869,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin",
+        "line": 1838,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split",
+        "line": 1851,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise",
+        "line": 1845,
+        "passed": true
+      }
+    ],
+    "parity_compatibility": [
+      {
+        "name": "receiver_actual_oo_strips_repeated_hex_zfin_with_parity_pads",
+        "line": 1927,
+        "passed": true
+      },
+      {
+        "name": "receiver_finish_accepts_parity_tolerant_hex_protocol_pads",
+        "line": 1901,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_strips_repeated_hex_zfin_with_parity_pads",
+        "line": 1916,
+        "passed": true
+      }
+    ],
+    "local_cancel_and_after_strict_no_repeat": [
+      {
+        "name": "receiver_cancel_after_actual_oo_does_not_repeat_utf8_tail",
+        "line": 1971,
+        "passed": true
+      },
+      {
+        "name": "receiver_finishing_cancel_preserves_utf8_tail_after_repeated_zfin",
+        "line": 1938,
+        "passed": true
+      }
+    ],
+    "bounded_tail": [
+      {
+        "name": "receiver_missing_farewell_bounds_retained_flow_control_bytes",
+        "line": 1304,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_enforces_feed_and_noise_bounds",
+        "line": 1273,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_retains_header_candidate_bound",
+        "line": 1317,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_retry_exhaustion_never_finishes_automatically",
+        "line": 1330,
+        "passed": true
+      }
+    ],
+    "strict_and_distinct": [
+      {
+        "name": "receiver_actual_oo_stays_strict_and_cannot_be_reclassified_as_missing",
+        "line": 1163,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_cannot_bypass_review_or_unacknowledged_save",
+        "line": 931,
+        "passed": true
+      },
+      {
+        "name": "receiver_missing_farewell_is_distinct_idempotent_and_terminal",
+        "line": 987,
+        "passed": true
+      }
+    ]
+  },
+  "remaining_issue": "CORE-R2-01"
+}

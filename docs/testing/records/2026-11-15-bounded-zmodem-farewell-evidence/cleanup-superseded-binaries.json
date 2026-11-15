@@ -1,0 +1,64 @@
+{
+  "reason": "superseded prebuilt copies; completed reviews and runs retain logs, inventories and binary digests",
+  "files": [
+    {
+      "path": "stable-tests/app-r1",
+      "bytes": 265571152,
+      "sha256": "75a9c3b7082104076f5e80d06af6ddd7b619abb26ad8c78937a12fd6a9bdb112"
+    },
+    {
+      "path": "stable-tests/app-r3",
+      "bytes": 265681392,
+      "sha256": "3136d8da594df410289ceaf4527710ce9485129dfabc30fae6ec6f8b750405f4"
+    },
+    {
+      "path": "stable-tests/app-r4",
+      "bytes": 265681392,
+      "sha256": "6d81eacb2bd32e5f26d10efb032583859bb2220dae19871dcd9cc5ae94f23216"
+    },
+    {
+      "path": "stable-tests/barrier-r2",
+      "bytes": 32727664,
+      "sha256": "c5e3408f21f1e4a7a418d97a064fb48b3ffe51cac2e94a6d02ab0046dca9ba55"
+    },
+    {
+      "path": "stable-tests/core-r1",
+      "bytes": 2043352,
+      "sha256": "7ab53e1a12a21132a3b80ebda3254cb29c517986a90c7d3a14e12fa16cf45bc3"
+    },
+    {
+      "path": "stable-tests/core-r3",
+      "bytes": 2103192,
+      "sha256": "40586dcf5a757695a86c1cf1a50ca9ae8426cda277b27499836c02e65c97970c"
+    },
+    {
+      "path": "stable-tests/peer-r1",
+      "bytes": 21237696,
+      "sha256": "144b50eb57b76a93c976609f2b62c7858b9f9e9938730b924b68dc1172ac8066"
+    },
+    {
+      "path": "stable-tests/peer-r2",
+      "bytes": 21269440,
+      "sha256": "5961335078d13ceba68baa8b1bb85cb11b67338353ca75c38c1d2aa6f735eed7"
+    },
+    {
+      "path": "stable-tests/session-r1",
+      "bytes": 22601368,
+      "sha256": "a732ded9a3a76985d17afbb56963ab8dd01921420d6cb192389759e466b5b3f8"
+    },
+    {
+      "path": "stable-tests/session-r3",
+      "bytes": 22611384,
+      "sha256": "3c1916e45100df88aa671acc650098671a3ba3081b3c46311458d116fac9f865"
+    }
+  ],
+  "bytes_reclaimed": 921528032,
+  "preserved_current": [
+    "core-r4",
+    "session-r4",
+    "barrier-r3",
+    "app-r5",
+    "peer-r3"
+  ],
+  "shared_target_touched": false
+}

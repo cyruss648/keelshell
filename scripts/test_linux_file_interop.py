@@ -14,6 +14,7 @@ import shlex
 import sys
 import tempfile
 import unittest
+from unittest.mock import MagicMock, patch
 
 sys.dont_write_bytecode = True
 import run_linux_file_interop as fixture
@@ -122,6 +123,124 @@ class CommandConstructionTests(unittest.TestCase):
         self.assertEqual(args.command, ["/tmp/copied-test", "--ignored", "--exact", "some_test"])
 
 
+class CommandDeadlineTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.output = Path(directory.name)
+        self.probe_timeout = fixture.ownership.InteropFailure(
+            "Process inventory exceeded its bounded deadline"
+        )
+        self.probe_timeout.__cause__ = fixture.subprocess.TimeoutExpired(
+            ["ps", "-eo", "pid="], 0.05
+        )
+
+    def run_inventory(self, completed_at, error=None, clean=True):
+        """Complete one inventory at a controlled time, with an already-exited child."""
+        self.receipt = {"steps": []}
+        commands = fixture.Commands(self.output, self.receipt, lambda: None)
+        process = MagicMock(pid=101, returncode=None)
+        process.poll.return_value = None
+        identity = (1, 101, ("kernel", 7), "R")
+
+        def inventory(deadline):
+            self.assertEqual(deadline, 10.8)
+            clock.return_value = completed_at
+            process.returncode = 0
+            process.poll.return_value = 0
+            if error is not None:
+                raise error
+            return {process.pid: identity}
+
+        def stop(child, deadline, identities):
+            self.assertIs(child, process)
+            self.assertEqual(deadline, completed_at + 7)
+            self.assertEqual(identities, {process.pid: identity})
+            return clean
+
+        with patch.object(fixture.time, "monotonic", return_value=10) as clock, \
+                patch.object(fixture.subprocess, "Popen", return_value=process), \
+                patch.object(fixture.ownership, "process_info", return_value=identity), \
+                patch.object(fixture.ownership, "process_table", side_effect=inventory) as capture, \
+                patch.object(fixture.ownership, "stop_owned", side_effect=stop) as cleanup:
+            try:
+                return commands.run("inventory-boundary", ["controlled-child"], timeout=0.8)
+            finally:
+                capture.assert_called_once_with(10.8)
+                cleanup.assert_called_once()
+
+    def assert_recorded_step(self, timed_out, interrupted, clean=True):
+        self.assertEqual(len(self.receipt["steps"]), 1)
+        step = self.receipt["steps"][0]
+        self.assertEqual(step["timed_out"], timed_out)
+        self.assertEqual(step["interrupted"], interrupted)
+        self.assertEqual(step["owned_processes_stopped"], clean)
+        self.assertEqual(step["returncode"], 0)
+        self.assertEqual(
+            json.loads((self.output / "progress.json").read_text()), self.receipt
+        )
+
+    def test_inventory_probe_timeout_at_command_deadline_is_a_timeout(self):
+        for completed_at in (10.8, 10.9):
+            with self.subTest(completed_at=completed_at):
+                with self.assertRaisesRegex(fixture.FixtureFailure, "inventory-boundary failed"):
+                    self.run_inventory(completed_at, self.probe_timeout)
+                self.assert_recorded_step(timed_out=True, interrupted=False)
+
+    def test_inventory_internal_deadline_failures_are_command_timeouts(self):
+        for message in (
+            "Deadline reached while inspecting owned processes",
+            "Deadline reached while reading process identities",
+        ):
+            with self.subTest(message=message):
+                with self.assertRaises(fixture.FixtureFailure):
+                    self.run_inventory(10.8, fixture.ownership.InteropFailure(message))
+                self.assert_recorded_step(timed_out=True, interrupted=False)
+
+    def test_inventory_completion_at_or_past_deadline_cannot_report_success(self):
+        for completed_at in (10.8, 10.9):
+            with self.subTest(completed_at=completed_at):
+                with self.assertRaisesRegex(fixture.FixtureFailure, "inventory-boundary failed"):
+                    self.run_inventory(completed_at)
+                self.assert_recorded_step(timed_out=True, interrupted=False)
+
+    def test_inventory_failures_before_deadline_are_not_timeouts(self):
+        for error in (
+            self.probe_timeout,
+            fixture.ownership.InteropFailure("Deadline reached while inspecting owned processes"),
+            fixture.ownership.InteropFailure("Deadline reached while reading process identities"),
+            fixture.ownership.InteropFailure("Cannot verify process identity for PID 101"),
+            PermissionError("Process inventory is not permitted"),
+            fixture.subprocess.CalledProcessError(1, ["ps", "-eo", "pid="]),
+        ):
+            with self.subTest(error=str(error)):
+                with self.assertRaises(type(error)) as caught:
+                    self.run_inventory(10.4, error)
+                self.assertIs(caught.exception, error)
+                self.assert_recorded_step(timed_out=False, interrupted=True)
+
+    def test_unrelated_inventory_failure_after_deadline_is_not_a_timeout(self):
+        for error in (
+            fixture.ownership.InteropFailure("Cannot verify process identity for PID 101"),
+            PermissionError("Process inventory is not permitted"),
+            fixture.subprocess.CalledProcessError(1, ["ps", "-eo", "pid="]),
+        ):
+            with self.subTest(error=str(error)):
+                with self.assertRaises(type(error)) as caught:
+                    self.run_inventory(10.9, error)
+                self.assertIs(caught.exception, error)
+                self.assert_recorded_step(timed_out=False, interrupted=True)
+
+    def test_deadline_does_not_override_unverified_cleanup(self):
+        with self.assertRaisesRegex(fixture.FixtureFailure, "verify owned command cleanup"):
+            self.run_inventory(10.9, self.probe_timeout, clean=False)
+        self.assert_recorded_step(timed_out=True, interrupted=False, clean=False)
+
+    def test_inventory_completion_before_deadline_preserves_success(self):
+        self.assertEqual(self.run_inventory(10.4), (0, b""))
+        self.assert_recorded_step(timed_out=False, interrupted=False)
+
+
 class ProcessTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
@@ -168,12 +287,15 @@ class ProcessTests(unittest.TestCase):
             ], timeout=0.8)
         step = self.receipt["steps"][0]
         self.assertTrue(step["timed_out"])
+        self.assertFalse(step["interrupted"])
         self.assertTrue(step["owned_processes_stopped"])
         self.assertIsNotNone(step["returncode"])
-        identity = fixture.ownership.process_info(int(child_pid.read_text()))
+        grandchild_pid = int(child_pid.read_text())
+        self.assertIn(grandchild_pid, self.commands.identities[self.commands.processes[0]])
+        identity = fixture.ownership.process_info(grandchild_pid)
         self.assertTrue(identity is None or identity[3].startswith("Z"))
         saved = json.loads((self.output / "progress.json").read_text())
-        self.assertEqual(saved["steps"][0]["name"], "expected-timeout")
+        self.assertEqual(saved["steps"][0], step)
 
 
 if __name__ == "__main__":

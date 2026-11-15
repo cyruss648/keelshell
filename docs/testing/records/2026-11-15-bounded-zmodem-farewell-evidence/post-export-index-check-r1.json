@@ -1,0 +1,33 @@
+{
+  "recorded_utc": "2026-11-15T11:33:23.458904+00:00",
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "observed_exit": 2,
+  "origin": "Parent exec_command staged check; original tool diagnostics retained here without replay.",
+  "diagnostics": [
+    {
+      "artifact": "review-session-ui-r4/app-ssh-bridge-r5.stdout.txt",
+      "line": 25,
+      "diagnostic": "new blank line at EOF.",
+      "source_sha256": "1b1d30fd4a1b21bd18c69354388489005c2af9882e0d6269c334b18ced0bf62f"
+    },
+    {
+      "artifact": "review-session-ui-r4/app-zmodem-r5.stdout.txt",
+      "line": 35,
+      "diagnostic": "new blank line at EOF.",
+      "source_sha256": "843180b950309d3ede668e33dbb9d7f444c545d1be7425f3f13bb07dae89b1be"
+    },
+    {
+      "artifact": "review-session-ui-r5/app-ssh-bridge-r6.stdout.txt",
+      "line": 20,
+      "diagnostic": "new blank line at EOF.",
+      "source_sha256": "1a1d9940d230e2e6186d71b932ad8b381fb73cdd2d0674aee84de58d5fba389a"
+    }
+  ],
+  "correction": "Local binary attributes for the three original stdout files; no original bytes changed.",
+  "engineering_inputs_changed": false
+}

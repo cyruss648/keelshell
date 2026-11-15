@@ -1,0 +1,15 @@
+{
+  "recorded_utc": "2026-11-15T10:37:33.225075+00:00",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "inputs": 571,
+  "scripts": 12,
+  "mismatches": [
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/tests/zmodem.rs",
+      "expected": "8c5427082ce1c2c88a1a17907519842dcd3a3af0030b8f7859f1faa62e96ee95",
+      "actual": "e2a62d25a865054b20c1a16e645ef5c9922efe33d45574537690362198544507"
+    }
+  ]
+}

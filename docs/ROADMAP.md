@@ -7,6 +7,32 @@
 功能集中集成、全量验证、修复及非作者复核，开发过程中保留编译与关键专项。正式
 功能提交前完成本批门禁和评审，减少重复全仓运行和文档专属评审循环。
 
+## 2026-11-15 有界 Zmodem 收尾：工程门禁与限定复核通过
+
+针对原版 peer 在最终 PTY flush 中可能丢失 OO，新增独立的缺失握手警告结果、
+三秒有界等待、真实认证连接往返写入确认、lease/revision token 和普通终端
+尾部恢复。已知 completion 先按序处理；取消或失败后，worker 继续有界投递尾部，
+持续背压显式失败。严格 Finished 与七项旧 strict peer 断言保持。
+
+最终 r5 完整门禁实际 `exit 0 / 646.751s`：普通 Rust `2935/0/35 ignored`、
+rustdoc `14/0`、Python `148 run / 1 skipped`，格式、严格 Clippy、依赖策略和
+三组 controller 通过。新增默认 Rust `59` 项逐名通过，全部 `571 + 12`
+工程输入零漂移。三名非作者限定 APPROVE、零开放 P0–P3，六项 P2 均已关闭；
+Rust 独立执行使用核对摘要和完整库存的父预构建副本，没有独立重编译。
+macOS 独立 peer `8/8`、正常 arm64 GUI/MCP 构建通过；Linux r3 `6/8`，
+缺握手 interactive 同一 shell 继续输入成功，两项严格 Finished 失败保留；
+r4 停在公开包安装连接失败。严格兼容仍为 `HOLD/PARTIAL`，原生矩阵、Windows
+安全后端和 Linux 本地 Rust 后端等保持开放。FILE-05/M4 与产品总目标继续进行。
+
+708 份原件无损保存后，已清理本批重复运行目录、稳定副本和临时 peer；
+当前 `626,097,502` 字节，含先前过期副本共 `1,547,625,534` 字节。
+实现/复核 agent 已关闭，四轮 owned 容器、进程和临时密钥已回收；保留唯一有效
+target 和其他任务。仅本地提交，不 push，在线依赖复查超时原件保留。
+基线 `b66ec7e564e97c3cc8261b447288377ac1ffccc2`，详见
+[ADR 0137](adr/0137-bounded-zmodem-farewell.md)、
+[本批记录](testing/records/2026-11-15-bounded-zmodem-farewell.md)与
+[持久证据](testing/records/2026-11-15-bounded-zmodem-farewell-evidence/README.md)。
+
 ## 2026-11-15 PTY Zmodem 候选：工程门禁与源码复核通过，直接 PTY 验收开放
 
 新增 core 有界协议、session 文件审核与安全发布、原生审核及唯一 PTY 写入

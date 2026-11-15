@@ -5,7 +5,10 @@ use std::sync::atomic::Ordering;
 
 use keelshell_session::{
     SessionEvent, SshSession,
-    zmodem::{ZmodemControl, ZmodemController, ZmodemFailure, ZmodemOutput, ZmodemUiEvent},
+    zmodem::{
+        ZmodemControl, ZmodemController, ZmodemFailure, ZmodemOutput, ZmodemOutputToken,
+        ZmodemUiEvent,
+    },
 };
 use uuid::Uuid;
 
@@ -25,6 +28,7 @@ pub(super) struct Protocol {
     input_rejection_seen: bool,
     resume_requested: bool,
     write_in_flight: bool,
+    write_token: Option<ZmodemOutputToken>,
     finished: Option<Uuid>,
     uploading: bool,
     interrupted_input: bool,
@@ -44,6 +48,7 @@ impl Protocol {
             input_rejection_seen: false,
             resume_requested: false,
             write_in_flight: false,
+            write_token: None,
             finished: None,
             uploading: false,
             interrupted_input: false,
@@ -62,11 +67,19 @@ impl Protocol {
         let bytes = self.writes.pop_front()?;
         self.pending_bytes = self.pending_bytes.saturating_sub(bytes.len());
         self.write_in_flight = true;
+        self.write_token = self.controller.protocol_output_token();
         Some(bytes)
     }
 
     pub(super) fn write_completed(&mut self) -> Result<(), String> {
         self.write_in_flight = false;
+        if self.writes.is_empty()
+            && !self.interrupted_input
+            && let Some(token) = self.write_token.take()
+        {
+            self.controller.protocol_output_flushed(token);
+        }
+        self.write_token = None;
         self.finish_if_flushed()?;
         self.release_input();
         Ok(())
@@ -81,6 +94,16 @@ impl Protocol {
             SessionEvent::Data(bytes) => {
                 let effects = self.controller.feed(session, &bytes).await;
                 self.effects(effects)
+            }
+            event @ SessionEvent::Exited { code, success } => {
+                let effects =
+                    if self.writes.is_empty() && !self.write_in_flight && !self.interrupted_input {
+                        self.controller.transport_exited(session, code, success)
+                    } else {
+                        self.controller.transport_failed()
+                    };
+                self.effects(effects)?;
+                self.push_event(event)
             }
             event => {
                 let effects = self.controller.transport_failed();
@@ -123,6 +146,7 @@ impl Protocol {
                     ZmodemUiEvent::Failed { .. }
                         | ZmodemUiEvent::Cancelled { .. }
                         | ZmodemUiEvent::Finished { .. }
+                        | ZmodemUiEvent::EndedWithoutFarewell { .. }
                 )
             });
             effects.events.push(ZmodemUiEvent::Failed {
@@ -161,6 +185,7 @@ impl Protocol {
         self.writes.clear();
         self.pending_bytes = 0;
         self.write_in_flight = false;
+        self.write_token = None;
         self.safety.active.store(false, Ordering::Release);
     }
 

@@ -1,0 +1,71 @@
+{
+  "recorded_utc": "2026-11-15T10:56:37.208520+00:00",
+  "started_utc": "2026-11-15T10:56:14.175824+00:00",
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/app-r5",
+    "ssh_bridge::tests",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "temporary_directory": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r4/tmp-app-ssh-bridge-r5",
+  "pid": 97488,
+  "seconds": 22.933,
+  "exit_code": 101,
+  "timed_out": false,
+  "binary_sha256_before": "e2a7c4842570c80c632e5c7b40b72d8e383bf19f48146b8d17ad09efd50cc369",
+  "binary_sha256_after": "e2a7c4842570c80c632e5c7b40b72d8e383bf19f48146b8d17ad09efd50cc369",
+  "metadata_sha256": "04107b54d10cd06d98dacc8397d05160326b07e9f49b3d346c8330dc3a25d64c",
+  "freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "independently_recompiled": false,
+  "counts": {
+    "passed": 14,
+    "failed": 1,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 1223
+  },
+  "expected_names": [
+    "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+    "ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup",
+    "ssh_bridge::tests::quiet_shell_becomes_ready_before_data_and_cancels_cleanly",
+    "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+    "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout",
+    "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation",
+    "ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases",
+    "ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order",
+    "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+    "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+    "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+    "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+    "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+    "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+    "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff"
+  ],
+  "passed_names": [
+    "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+    "ssh_bridge::tests::quiet_shell_becomes_ready_before_data_and_cancels_cleanly",
+    "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+    "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout",
+    "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation",
+    "ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases",
+    "ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order",
+    "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+    "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+    "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+    "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+    "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+    "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+    "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff"
+  ],
+  "failed_names": [
+    "ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup"
+  ],
+  "missing_names": [
+    "ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup"
+  ],
+  "unexpected_names": [],
+  "stdout_sha256": "1b1d30fd4a1b21bd18c69354388489005c2af9882e0d6269c334b18ced0bf62f",
+  "stderr_sha256": "a845dc13a7a7ec1c3180c986a646bd70105b0332cd21e8cfa250c6f416eaaa2d",
+  "verified": false
+}

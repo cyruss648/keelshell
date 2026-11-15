@@ -1,0 +1,12 @@
+test_deadline_does_not_override_unverified_cleanup (test_linux_file_interop.CommandDeadlineTests.test_deadline_does_not_override_unverified_cleanup) ... ok
+test_inventory_completion_at_or_past_deadline_cannot_report_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_at_or_past_deadline_cannot_report_success) ... ok
+test_inventory_completion_before_deadline_preserves_success (test_linux_file_interop.CommandDeadlineTests.test_inventory_completion_before_deadline_preserves_success) ... ok
+test_inventory_failures_before_deadline_are_not_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_failures_before_deadline_are_not_timeouts) ... ok
+test_inventory_internal_deadline_failures_are_command_timeouts (test_linux_file_interop.CommandDeadlineTests.test_inventory_internal_deadline_failures_are_command_timeouts) ... ok
+test_inventory_probe_timeout_at_command_deadline_is_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_inventory_probe_timeout_at_command_deadline_is_a_timeout) ... ok
+test_unrelated_inventory_failure_after_deadline_is_not_a_timeout (test_linux_file_interop.CommandDeadlineTests.test_unrelated_inventory_failure_after_deadline_is_not_a_timeout) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.367s
+
+OK

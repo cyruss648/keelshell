@@ -1,0 +1,110 @@
+{
+  "recorded_utc": "2026-11-15T10:43:05.550734+00:00",
+  "finding": "CORE-R2-01",
+  "status": "CLOSED_ON_R3",
+  "freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "parent_red": {
+    "exit": 101,
+    "failed": 7,
+    "failed_names": [
+      "receiver_failed_input_preserves_farewell_tail_at_every_split",
+      "receiver_failed_input_preserves_farewell_tail_bytewise",
+      "receiver_peer_cancel_preserves_farewell_tail_at_every_split",
+      "receiver_failed_input_preserves_farewell_tail_whole",
+      "receiver_peer_cancel_preserves_farewell_tail_whole",
+      "receiver_peer_cancel_preserves_farewell_tail_bytewise",
+      "receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup"
+    ],
+    "log_sha256": "d51d36c44317a477150865af31aeadee2ef3c49933602265197e9c41ccd0bdaa",
+    "independently_run_by_reviewer": false
+  },
+  "parent_green": {
+    "exit": 0,
+    "passed": 102,
+    "log_sha256": "99a5f43cc76942d1a7b2580f02043cbb9d15cdca25411039403fdb73a35d77c5",
+    "compile_record_present": true,
+    "independently_run_by_reviewer": false
+  },
+  "independent_green": {
+    "exit": 0,
+    "passed": 102,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 0,
+    "independently_recompiled": false
+  },
+  "new_regressions": [
+    {
+      "name": "receiver_failed_input_preserves_farewell_tail_at_every_split",
+      "line": 2158,
+      "parent_red_failure": true,
+      "independent_green_pass": true
+    },
+    {
+      "name": "receiver_failed_input_preserves_farewell_tail_bytewise",
+      "line": 2151,
+      "parent_red_failure": true,
+      "independent_green_pass": true
+    },
+    {
+      "name": "receiver_failed_input_preserves_farewell_tail_whole",
+      "line": 2144,
+      "parent_red_failure": true,
+      "independent_green_pass": true
+    },
+    {
+      "name": "receiver_input_limit_failure_preserves_only_previously_retained_farewell_tail",
+      "line": 2195,
+      "parent_red_failure": false,
+      "independent_green_pass": true
+    },
+    {
+      "name": "receiver_peer_cancel_preserves_farewell_tail_at_every_split",
+      "line": 2079,
+      "parent_red_failure": true,
+      "independent_green_pass": true
+    },
+    {
+      "name": "receiver_peer_cancel_preserves_farewell_tail_bytewise",
+      "line": 2072,
+      "parent_red_failure": true,
+      "independent_green_pass": true
+    },
+    {
+      "name": "receiver_peer_cancel_preserves_farewell_tail_whole",
+      "line": 2065,
+      "parent_red_failure": true,
+      "independent_green_pass": true
+    },
+    {
+      "name": "receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup",
+      "line": 2170,
+      "parent_red_failure": true,
+      "independent_green_pass": true
+    }
+  ],
+  "source_fix": [
+    {
+      "file": "crates/keelshell-core/src/zmodem/codec.rs",
+      "line": 535,
+      "invariant": "Strip precisely the five recognized CAN bytes while retaining preceding ordinary bytes"
+    },
+    {
+      "file": "crates/keelshell-core/src/zmodem/codec.rs",
+      "line": 613,
+      "invariant": "Strip complete CRC-validated header before semantic cancellation or error"
+    },
+    {
+      "file": "crates/keelshell-core/src/zmodem/receiver.rs",
+      "line": 137,
+      "invariant": "Peer-cancel terminal drain takes retained farewell bytes once"
+    },
+    {
+      "file": "crates/keelshell-core/src/zmodem/receiver.rs",
+      "line": 250,
+      "invariant": "Local cancel after Failed takes retained farewell bytes once"
+    }
+  ],
+  "earlier_finding": "CORE-R1-01 remains closed: unchanged UTF-8 guard and six UTF-8/three parity cases all independently passed",
+  "session_execution_by_this_reviewer": false
+}

@@ -1,0 +1,14 @@
+{
+  "checked_utc": "2026-11-15T10:03:59.177444+00:00",
+  "source_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/frozen-inputs-r1.json",
+  "freeze_sha256": "cf4cb0e53b80b09c44da99e3fe358cd7091622314625f881fd2769df783beba4",
+  "expected_freeze_sha256": "cf4cb0e53b80b09c44da99e3fe358cd7091622314625f881fd2769df783beba4",
+  "counts": {
+    "inputs": 570,
+    "scripts": 12
+  },
+  "mismatch_count": 0,
+  "mismatches": []
+}

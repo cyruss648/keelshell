@@ -1,0 +1,16 @@
+{
+  "freeze": "frozen-inputs-r2.json",
+  "artifacts": [
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "sha256": "812c9489f5617be5f68c5eae10b4b6f7a5f6468cf9a1c00a33ff0ecf69a74317",
+      "file": "work/recovery-batch-integration-20261115/target/debug/keelshell-app: Mach-O 64-bit executable arm64"
+    },
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "file": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp: Mach-O 64-bit executable arm64"
+    }
+  ],
+  "desktop_interaction": "NOT_RUN"
+}

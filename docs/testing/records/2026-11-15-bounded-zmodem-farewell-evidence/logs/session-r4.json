@@ -1,0 +1,23 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-session",
+    "--locked",
+    "--test",
+    "zmodem",
+    "--",
+    "--test-threads=4"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "session-r4",
+  "pid": 62933,
+  "started_utc": "2026-11-15T10:38:55.298385+00:00",
+  "finished_utc": "2026-11-15T10:39:01.649977+00:00",
+  "seconds": 6.351,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "86e92956df4f2e3e2ed920e757dcae1f4f77f872cafa135548eaf7cedc7aff97",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

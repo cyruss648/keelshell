@@ -98,7 +98,7 @@ async fn run_with_protocol(
         }
     };
     lifecycle.send_replace(TransportState::Ready);
-    let result = pump(
+    let mut result = pump(
         &mut shell,
         &session,
         &mut protocol,
@@ -117,14 +117,51 @@ async fn run_with_protocol(
         }
     });
     lifecycle.send_replace(TransportState::Ended(reason));
-    // Cleanup has its own bounded deadline and is not interrupted by the view's
-    // cancellation signal. The worker registry observes this final outcome.
-    let cleanup = tokio::time::timeout(Duration::from_secs(2), shell.close())
+    // Channel cleanup and retained terminal output share a bounded deadline,
+    // independent of cancellation. Failure recovery can append ordinary bytes
+    // after pump has stopped; retain ownership until delivery or explicit error.
+    let until = tokio::time::Instant::now() + Duration::from_secs(2);
+    let cleanup = tokio::time::timeout_at(until, shell.close())
         .await
         .map_err(|_| "SSH_SHELL_CLEANUP_TIMEOUT".to_owned())
         .and_then(|result| result.map_err(|error| error.to_string()));
+    let output_cleanup = flush_cleanup_output(&mut protocol, &output, until).await;
     protocol.transport_closed();
-    result.and(protocol_result).and(cleanup)
+    for outcome in [protocol_result, cleanup, output_cleanup] {
+        if let Err(error) = outcome {
+            result = Err(match result {
+                Ok(()) => error,
+                Err(primary) => format!("{primary}; {error}"),
+            });
+        }
+    }
+    result
+}
+
+async fn flush_cleanup_output(
+    protocol: &mut Protocol,
+    output: &SyncSender<SessionEvent>,
+    until: tokio::time::Instant,
+) -> Result<(), String> {
+    while let Some(event) = protocol.output.pop_front() {
+        match output.try_send(event) {
+            Ok(()) => {}
+            Err(TrySendError::Full(event)) => {
+                protocol.output.push_front(event);
+                if tokio::time::Instant::now() >= until {
+                    return Err("SSH_SHELL_OUTPUT_CLEANUP_TIMEOUT".into());
+                }
+                tokio::time::sleep_until(
+                    until.min(tokio::time::Instant::now() + Duration::from_millis(4)),
+                )
+                .await;
+            }
+            Err(TrySendError::Disconnected(_)) => {
+                return Err("SSH_SHELL_OUTPUT_CLEANUP_DISCONNECTED".into());
+            }
+        }
+    }
+    Ok(())
 }
 
 async fn pump(
@@ -146,15 +183,22 @@ async fn pump(
             lifecycle.send_replace(TransportState::Ended(reason));
             completion_seen = true;
         }
-        protocol.tick()?;
         if drain_output(shell, session, protocol, output).await? {
             return Ok(());
         }
 
+        // A lifecycle outcome can precede its ordered terminal event. Drain
+        // queued OO/tail first and never let a due timer retire that lease
+        // while its unsuccessful or unknown end is already observable.
+        if !completion_seen && let Some(reason) = shell.completion() {
+            lifecycle.send_replace(TransportState::Ended(reason));
+            completion_seen = true;
+        }
         if completion_seen {
             tokio::time::sleep(Duration::from_millis(4)).await;
             continue;
         }
+        protocol.tick()?;
 
         while let Some(bytes) = protocol.pop_write() {
             match write_and_drain(
@@ -314,7 +358,12 @@ async fn write_and_drain(
 ) -> Result<WriteOutcome, String> {
     let (ShellWrite::Ordinary(bytes) | ShellWrite::Protocol(bytes)) = write;
     let writer = shell.writer();
-    let writing = writer.write(bytes);
+    let writing = async {
+        match write {
+            ShellWrite::Ordinary(_) => writer.write(bytes).await,
+            ShellWrite::Protocol(_) => writer.write_confirmed(bytes).await,
+        }
+    };
     let mut completion = shell.subscribe_completion();
     tokio::pin!(writing);
     loop {

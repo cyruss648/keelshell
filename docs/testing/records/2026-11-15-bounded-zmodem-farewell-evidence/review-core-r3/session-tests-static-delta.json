@@ -1,0 +1,14 @@
+{
+  "path": "crates/keelshell-session/tests/zmodem.rs",
+  "r2_sha256": "d91e54ebd92544bf21ae972ba31786516930b51f5f0e2d844cc9ec32c66062dd",
+  "r3_sha256": "67ea18033dcfafdb41050f8e8d1766c53bfc4497ed07a710daa284c713fcb34b",
+  "reconstructed_r2_hash_matches": true,
+  "inserted_start_line": 312,
+  "inserted_lines": 65,
+  "production_changes": false,
+  "new_test_names": [
+    "zmodem_peer_cancel_preserves_retained_terminal_tail_without_warning",
+    "zmodem_failed_input_preserves_retained_terminal_tail_without_success"
+  ],
+  "independently_executed": false
+}

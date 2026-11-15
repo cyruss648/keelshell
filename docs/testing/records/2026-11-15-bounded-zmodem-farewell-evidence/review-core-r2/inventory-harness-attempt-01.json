@@ -1,0 +1,11 @@
+{
+  "recorded_utc": "2026-11-15T10:30:04.187413+00:00",
+  "stage": "inventory_only",
+  "error": "Reviewer inventory validation selected all baseline functions, including non-test helpers, causing assertion failure before test execution. Test invocation not yet attempted.",
+  "inventory_command_exit": 0,
+  "inventory_count": 94,
+  "inventory_matches_parent_bytes": true,
+  "inventory_stdout_sha256": "4107f95f28226d66845d3cd04d3a008f370c31c1b2eb4a900a7e0c8311204a7a",
+  "rust_tests_executed": 0,
+  "source_or_binary_failure": false
+}

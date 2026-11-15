@@ -63,6 +63,317 @@ fn contents(bytes: &[u8]) -> TestResult<Vec<u8>> {
     Ok(wire)
 }
 
+async fn waiting_for_farewell(fixture: &Fixture) -> TestResult<(Controller, Uuid)> {
+    let mut controller = Controller::new(fixture.session.clone(), "farewell fixture");
+    controller
+        .feed(&fixture.session, &header(FrameType::RequestInit, 0))
+        .await;
+    let id = controller.lease_id().ok_or("missing receive lease")?;
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Finish, 0))
+        .await;
+    assert!(!output.writes.is_empty());
+    assert!(output.events.is_empty());
+    Ok((controller, id))
+}
+
+fn confirm_protocol_output(controller: &mut Controller) -> TestResult {
+    let token = controller
+        .protocol_output_token()
+        .ok_or("missing protocol output token")?;
+    controller.protocol_output_flushed(token);
+    Ok(())
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let (unrelated, _) = waiting_for_farewell(&fixture).await?;
+    let foreign_token = unrelated
+        .protocol_output_token()
+        .ok_or("missing foreign output token")?;
+    for acknowledged in [false, true] {
+        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
+        controller.protocol_output_flushed(foreign_token);
+        if acknowledged {
+            confirm_protocol_output(&mut controller)?;
+        }
+        let output = controller.transport_exited(&fixture.session, 0, true);
+        assert_eq!(
+            output.events.iter().any(
+                |event| matches!(event, Ui::EndedWithoutFarewell { id: found } if *found == id)
+            ),
+            acknowledged,
+        );
+        assert!(
+            !output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Finished { .. }))
+        );
+        assert_eq!(
+            controller.state(),
+            if acknowledged {
+                State::EndedWithoutFarewell
+            } else {
+                State::Failed
+            },
+        );
+        assert!(!controller.is_active());
+        assert!(
+            controller
+                .transport_exited(&fixture.session, 0, true)
+                .events
+                .is_empty()
+        );
+    }
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let foreign = Fixture::start().await?;
+    for (code, success, replaced) in [(1, false, false), (0, false, false), (0, true, true)] {
+        let (mut controller, _) = waiting_for_farewell(&fixture).await?;
+        confirm_protocol_output(&mut controller)?;
+        let current = if replaced {
+            &foreign.session
+        } else {
+            &fixture.session
+        };
+        let output = controller.transport_exited(current, code, success);
+        assert!(
+            output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Failed { .. }))
+        );
+        assert!(
+            !output.events.iter().any(|event| matches!(
+                event,
+                Ui::EndedWithoutFarewell { .. } | Ui::Finished { .. }
+            ))
+        );
+    }
+    foreign.finish().await?;
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review() -> TestResult {
+    let fixture = Fixture::start().await?;
+    for offered in [false, true] {
+        let mut controller = Controller::new(fixture.session.clone(), "unfinished fixture");
+        controller
+            .feed(&fixture.session, &header(FrameType::RequestInit, 0))
+            .await;
+        if offered {
+            controller
+                .feed(&fixture.session, &offer("unapproved.bin", 0)?)
+                .await;
+        }
+        confirm_protocol_output(&mut controller)?;
+        let output = controller.transport_exited(&fixture.session, 0, true);
+        assert!(
+            output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Failed { .. }))
+        );
+        assert!(
+            !output.events.iter().any(|event| matches!(
+                event,
+                Ui::EndedWithoutFarewell { .. } | Ui::Finished { .. }
+            ))
+        );
+    }
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[tokio::test]
+async fn zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown() -> TestResult
+{
+    let fixture = Fixture::start().await?;
+    let (_temp, root) = root()?;
+    let destination = root.join("verified-empty.bin");
+    let mut controller = Controller::new(fixture.session.clone(), "saved farewell fixture");
+    let (id, _, review) =
+        prepare_receive(&fixture, &mut controller, "empty.bin", 0, &destination).await?;
+    controller
+        .control(
+            &fixture.session,
+            Control::Confirm {
+                transfer: id,
+                review,
+            },
+        )
+        .await;
+    let saved = controller
+        .feed(&fixture.session, &header(FrameType::EndOfFile, 0))
+        .await;
+    assert!(
+        saved
+            .events
+            .iter()
+            .any(|event| matches!(event, Ui::FileSaved { bytes: 0, .. }))
+    );
+    assert_eq!(std::fs::read(&destination)?, b"");
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Finish, 0))
+        .await;
+    assert!(!output.writes.is_empty());
+    let old_token = controller
+        .protocol_output_token()
+        .ok_or("missing first FIN output token")?;
+    controller.protocol_output_flushed(old_token);
+    assert!(
+        controller.tick().events.is_empty(),
+        "the grace period must actually elapse"
+    );
+    let prompt = b"\x1b[32moperator@host\x1b[0m $ ";
+    for byte in prompt {
+        let output = controller.feed(&fixture.session, &[*byte]).await;
+        assert!(output.events.is_empty());
+        assert!(output.terminal.is_empty());
+    }
+    // An additional valid FIN queues another real reply; an earlier flush
+    // acknowledgement must not authorize ending while that reply is pending.
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Finish, 0))
+        .await;
+    assert!(!output.writes.is_empty());
+    tokio::time::sleep(std::time::Duration::from_millis(3100)).await;
+    assert!(controller.tick().events.is_empty());
+    assert!(controller.is_active());
+    controller.mutation_pending().store(true, Ordering::Release);
+    controller.protocol_output_flushed(old_token);
+    assert!(controller.tick().events.is_empty());
+    confirm_protocol_output(&mut controller)?;
+    let output = controller.tick();
+    assert_eq!(output.events, vec![Ui::EndedWithoutFarewell { id }]);
+    assert!(
+        output
+            .terminal
+            .windows(prompt.len())
+            .any(|bytes| bytes == prompt)
+    );
+    assert!(!output.terminal.windows(3).any(|bytes| bytes == b"**\x18"));
+    assert!(controller.mutation_pending().load(Ordering::Acquire));
+    assert!(!controller.publication_running().load(Ordering::Acquire));
+    assert!(!controller.is_active());
+    assert_eq!(std::fs::read(&destination)?, b"");
+    let output = controller.feed(&fixture.session, b"next output\n").await;
+    assert_eq!(output.terminal, b"next output\n");
+    assert!(output.events.is_empty());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_rejects_same_lease_receipts_after_new_output() -> TestResult {
+    let fixture = Fixture::start().await?;
+    for stale_receipt in [true, false] {
+        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
+        let old = controller
+            .protocol_output_token()
+            .ok_or("missing initial reply")?;
+        let output = controller
+            .feed(&fixture.session, &header(FrameType::Finish, 0))
+            .await;
+        assert!(!output.writes.is_empty());
+        let current = controller
+            .protocol_output_token()
+            .ok_or("missing current reply")?;
+        assert_ne!(old, current);
+        controller.protocol_output_flushed(if stale_receipt { old } else { current });
+        let output = controller.transport_exited(&fixture.session, 0, true);
+        assert_eq!(
+            output.events.contains(&Ui::EndedWithoutFarewell { id }),
+            !stale_receipt,
+        );
+        assert!(
+            !output
+                .events
+                .iter()
+                .any(|event| matches!(event, Ui::Finished { .. }))
+        );
+        // A late receipt after terminal failure cannot reactivate its lease.
+        controller.protocol_output_flushed(current);
+        assert!(!controller.is_active());
+    }
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_peer_cancel_preserves_retained_terminal_tail_without_warning() -> TestResult {
+    let fixture = Fixture::start().await?;
+    for kind in [FrameType::Cancel, FrameType::Abort, FrameType::FileError] {
+        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
+        assert!(
+            controller
+                .feed(&fixture.session, "个$ ".as_bytes())
+                .await
+                .terminal
+                .is_empty()
+        );
+        let output = controller.feed(&fixture.session, &header(kind, 0)).await;
+        assert_eq!(
+            output.events,
+            vec![Ui::Cancelled {
+                id,
+                uncertain: false
+            }]
+        );
+        assert_eq!(output.terminal, ["个$ ".as_bytes(), b"\x11"].concat());
+        assert!(controller.transport_failed().terminal.is_empty());
+        assert_eq!(
+            controller.feed(&fixture.session, b"next").await.terminal,
+            b"next"
+        );
+        assert!(!controller.is_active());
+    }
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
+#[tokio::test]
+async fn zmodem_failed_input_preserves_retained_terminal_tail_without_success() -> TestResult {
+    let fixture = Fixture::start().await?;
+    let (mut controller, id) = waiting_for_farewell(&fixture).await?;
+    assert!(
+        controller
+            .feed(&fixture.session, "个$ ".as_bytes())
+            .await
+            .terminal
+            .is_empty()
+    );
+    let output = controller
+        .feed(&fixture.session, &header(FrameType::Command, 0))
+        .await;
+    assert_eq!(
+        output.events,
+        vec![Ui::Failed {
+            id,
+            reason: Failure::Protocol,
+            uncertain: false
+        }]
+    );
+    assert_eq!(output.terminal, "个$ ".as_bytes());
+    assert!(controller.transport_failed().terminal.is_empty());
+    assert_eq!(
+        controller.feed(&fixture.session, b"next").await.terminal,
+        b"next"
+    );
+    assert!(!controller.is_active());
+    fixture.assert_no_authority_used();
+    fixture.finish().await
+}
+
 fn upload_request(output: &Output) -> TestResult<Uuid> {
     output
         .events

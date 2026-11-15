@@ -1,0 +1,6 @@
+test_timeout_drains_birth_verified_child_and_grandchild (test_linux_file_interop.ProcessTests.test_timeout_drains_birth_verified_child_and_grandchild) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.936s
+
+OK

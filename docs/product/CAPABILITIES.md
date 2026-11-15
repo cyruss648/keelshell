@@ -1,5 +1,38 @@
 # Capability ledger
 
+## 2026-11-15: bounded Zmodem receive cleanup
+
+Status: `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`.
+Receive cleanup reports a distinct unconfirmed-handshake result when actual OO
+is missing after a valid ZFIN and confirmed output of the exact final response.
+The three-second wait may end earlier on an ordered successful shell exit.
+Strict Finished still requires actual OO. Ordinary terminal tail, verified
+per-file receipts, older unknown results, quarantine and precise input handoff
+remain owned; old queued input is never replayed. Failed/cancelled cleanup
+delivers retained ordinary tail through the actual UI receiver within the
+existing cleanup budget, or reports an explicit delivery error.
+
+The final r5 gate exited 0 in 646.751 seconds: 2935 ordinary Rust tests passed
+with 35 ignored, 14 doctests passed, and Python ran 148 tests with one skipped.
+Formatting, strict workspace Clippy, x.y dependency policy and all three AI
+controller groups passed. All 59 new default Rust cases were matched by name
+to successful results; seven new Python methods are included in full discovery.
+All 571 engineering inputs and 12 scripts matched after the gate. Three scoped
+nonauthor approvals closed six P2 findings with no open P0–P3. Rust reviewers
+used verified parent-built binaries without independently recompiling; original
+HOLD reports, failures and signing-time conditions remain preserved.
+
+The normal arm64 GUI/MCP build passed with identical final production inputs.
+The macOS independent peer passed 8/8 on unchanged core/session/root inputs.
+Linux r3 passed its missing-OO same-shell continuation case while two original
+strict handshake cases failed; Linux r4 failed during public package setup
+before protocol execution. Strict interoperability remains HOLD/PARTIAL.
+Owned containers, processes and temporary keys have cleanup receipts. Windows
+safe publication, Linux Rust local-backend execution, native desktops, IME,
+accessibility and release acceptance remain open. See the
+[guide](ZMODEM.md), [decision](../adr/0137-bounded-zmodem-farewell.md) and
+[test record](../testing/records/2026-11-15-bounded-zmodem-farewell.md).
+
 ## 2026-11-15: reviewed Zmodem on the existing SSH PTY
 
 Status: `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`.

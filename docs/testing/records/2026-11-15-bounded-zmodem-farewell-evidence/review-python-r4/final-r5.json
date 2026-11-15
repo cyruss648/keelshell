@@ -1,0 +1,143 @@
+{
+  "status": "APPROVE",
+  "review_kind": "FINAL_R5_BINDING_OF_UNCHANGED_SCOPED_PYTHON_SOURCE",
+  "recorded_utc": "2026-11-15T11:02:11.800388+00:00",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "source_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "scope": [
+    "scripts/run_linux_file_interop.py",
+    "scripts/test_linux_file_interop.py"
+  ],
+  "prior_r4_report": "report.md",
+  "prior_r4_report_sha256": "9993b3d35b996f6ce6b9b0ffb4adafdccf95228a4123e8df55c54c154c5f08c5",
+  "prior_r4_handoff": "handoff.json",
+  "prior_artifacts_verified_against_original_manifest": 16,
+  "prior_artifact_mismatches": 0,
+  "r4_freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "final_r5_freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "final_r5_freeze_path": "work/pty-farewell-20261115/frozen-inputs-r5.json",
+  "r4_r5_path_additions": 0,
+  "r4_r5_path_removals": 0,
+  "r4_r5_changes": [
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/ssh_bridge_tests.rs",
+      "r4_sha256": "8825c13cea74f348259c57b19179e59d0366147da751c12bc84ea453679e4655",
+      "r5_sha256": "47771ef2e6d6e14a7afe3698281ee5e9334e4a230578e6dce003e6437d178c01"
+    }
+  ],
+  "final_r5_counts": {
+    "inputs": 571,
+    "scripts": 12,
+    "total": 583
+  },
+  "final_r5_current_file_mismatches": 0,
+  "all_12_python_scripts_unchanged": true,
+  "all_other_570_engineering_inputs_unchanged": true,
+  "changed_path_is_out_of_python_review_scope": true,
+  "no_production_source_path_changed": true,
+  "changed_rust_test_assertion_not_reviewed_or_approved_here": true,
+  "python_bindings": {
+    "scripts/build-icons.py": {
+      "r4_sha256": "dd5f27fc138a9f44e46efda446bb74d49a8fc269e43cf18887d18cba00638c21",
+      "r5_sha256": "dd5f27fc138a9f44e46efda446bb74d49a8fc269e43cf18887d18cba00638c21",
+      "current_sha256": "dd5f27fc138a9f44e46efda446bb74d49a8fc269e43cf18887d18cba00638c21"
+    },
+    "scripts/changelog.py": {
+      "r4_sha256": "cde29b01a8f5720a59c0e5bfde0e9687ee74d39f9ce4d1dd1768af53b0b9eb21",
+      "r5_sha256": "cde29b01a8f5720a59c0e5bfde0e9687ee74d39f9ce4d1dd1768af53b0b9eb21",
+      "current_sha256": "cde29b01a8f5720a59c0e5bfde0e9687ee74d39f9ce4d1dd1768af53b0b9eb21"
+    },
+    "scripts/check.py": {
+      "r4_sha256": "0fdec38618e108478ebe3c6596f65bc6cbd1955c03f70756205f5662c3899bf9",
+      "r5_sha256": "0fdec38618e108478ebe3c6596f65bc6cbd1955c03f70756205f5662c3899bf9",
+      "current_sha256": "0fdec38618e108478ebe3c6596f65bc6cbd1955c03f70756205f5662c3899bf9"
+    },
+    "scripts/check_dependencies.py": {
+      "r4_sha256": "a0076483af2a5e157c5afc012e2dcb7cdabf712d1d624a5f6f4790af0808edd1",
+      "r5_sha256": "a0076483af2a5e157c5afc012e2dcb7cdabf712d1d624a5f6f4790af0808edd1",
+      "current_sha256": "a0076483af2a5e157c5afc012e2dcb7cdabf712d1d624a5f6f4790af0808edd1"
+    },
+    "scripts/openssh_interop.py": {
+      "r4_sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+      "r5_sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+      "current_sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+    },
+    "scripts/run_linux_file_interop.py": {
+      "r4_sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "r5_sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "current_sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e"
+    },
+    "scripts/test_check_dependencies.py": {
+      "r4_sha256": "73347ad0b4d357397bdaa9d9cf8485a3b1d69b8358459a4d93b659297b1e1860",
+      "r5_sha256": "73347ad0b4d357397bdaa9d9cf8485a3b1d69b8358459a4d93b659297b1e1860",
+      "current_sha256": "73347ad0b4d357397bdaa9d9cf8485a3b1d69b8358459a4d93b659297b1e1860"
+    },
+    "scripts/test_check_storage.py": {
+      "r4_sha256": "cbc2ba45bb245bc8f5f4b5fb9e53425059251ba0cacd71031fb3bb9f91a4db5e",
+      "r5_sha256": "cbc2ba45bb245bc8f5f4b5fb9e53425059251ba0cacd71031fb3bb9f91a4db5e",
+      "current_sha256": "cbc2ba45bb245bc8f5f4b5fb9e53425059251ba0cacd71031fb3bb9f91a4db5e"
+    },
+    "scripts/test_linux_file_interop.py": {
+      "r4_sha256": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c",
+      "r5_sha256": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c",
+      "current_sha256": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c"
+    },
+    "scripts/test_openssh_interop.py": {
+      "r4_sha256": "8cd12adac45126b30e5250eb078313e4ef47d309ef7e167e1151090c84ec6760",
+      "r5_sha256": "8cd12adac45126b30e5250eb078313e4ef47d309ef7e167e1151090c84ec6760",
+      "current_sha256": "8cd12adac45126b30e5250eb078313e4ef47d309ef7e167e1151090c84ec6760"
+    },
+    "scripts/test_windows_native_crash.py": {
+      "r4_sha256": "c568607a69826e86fa7cdcccbcc84e87e9d1fdc85abf81b8781a6127ce17bad4",
+      "r5_sha256": "c568607a69826e86fa7cdcccbcc84e87e9d1fdc85abf81b8781a6127ce17bad4",
+      "current_sha256": "c568607a69826e86fa7cdcccbcc84e87e9d1fdc85abf81b8781a6127ce17bad4"
+    },
+    "scripts/windows_native_crash.py": {
+      "r4_sha256": "664c77bfb6c6337b3f3707e4703614ff986162c3488754218b76328f2af3b27f",
+      "r5_sha256": "664c77bfb6c6337b3f3707e4703614ff986162c3488754218b76328f2af3b27f",
+      "current_sha256": "664c77bfb6c6337b3f3707e4703614ff986162c3488754218b76328f2af3b27f"
+    }
+  },
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "test_execution_credit": {
+    "new_test_subprocesses_for_r5": 0,
+    "reused_independent_candidate_tests": 17,
+    "candidate_passed": 17,
+    "candidate_failed": 0,
+    "candidate_errors": 0,
+    "candidate_skipped": 0,
+    "green_receipt": "independent-file-suite.json",
+    "green_exit": 0,
+    "green_elapsed_seconds": 1.393398,
+    "baseline_red_receipt": "independent-baseline-red.json",
+    "baseline_red_run": 7,
+    "baseline_red_failures": 2,
+    "baseline_red_errors": 5,
+    "baseline_red_expected_exit": 1,
+    "total_review_test_subprocesses_remains": 2,
+    "total_named_test_executions_remains": 24,
+    "unique_current_candidate_tests_remains": 17,
+    "rationale": "All scoped source and Python read dependencies are byte-identical; user expressly requested no rerun."
+  },
+  "source_approval_conditions": [
+    "Only the two scoped Python files with the same reviewed SHA256 values are approved.",
+    "All 583 final r5 inputs matched current files at binding.",
+    "r4 reports, logs, expected red, and original failures stay unmodified."
+  ],
+  "parent_integration_condition": "Parent must obtain successful final engineering gate and bind its terminal receipt to final r5 inputs; this Python source review does not sign the full gate.",
+  "unverified": [
+    "full-gate-r4 terminal acceptance",
+    "changed Rust test assertion",
+    "native desktop",
+    "real Linux fixture",
+    "Linux/Windows process runtime",
+    "old Python runtimes"
+  ],
+  "final_report": "final-r5.md"
+}

@@ -1,0 +1,22 @@
+{
+  "crates/keelshell-core/src/zmodem.rs": {
+    "r2_sha256": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+    "r3_sha256": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+    "changed": false
+  },
+  "crates/keelshell-core/src/zmodem/codec.rs": {
+    "r2_sha256": "946c35e4b1dedb506c8e18197e1eec5fd88b19a8f547c3c194dc303ddaf0326b",
+    "r3_sha256": "4fc61667741af0188b3372afc7ce9fde0fd9229410bda4951c929ceef3314bc7",
+    "changed": true
+  },
+  "crates/keelshell-core/src/zmodem/receiver.rs": {
+    "r2_sha256": "49f90debe598db4f3f54ad33662334c6c741b04215386c3690b3772884b79967",
+    "r3_sha256": "cfc9207ae8a878a51c55228c4c6310f52b07507ffb481d9a6130eb5d329cb071",
+    "changed": true
+  },
+  "crates/keelshell-core/tests/zmodem.rs": {
+    "r2_sha256": "8c5427082ce1c2c88a1a17907519842dcd3a3af0030b8f7859f1faa62e96ee95",
+    "r3_sha256": "15c628a9300a37ee8942b7dbd0468ffb463783a48bec8fecea9001b59f8d720f",
+    "changed": true
+  }
+}

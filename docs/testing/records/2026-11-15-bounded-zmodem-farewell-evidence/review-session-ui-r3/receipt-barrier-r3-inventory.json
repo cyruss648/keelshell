@@ -1,0 +1,28 @@
+{
+  "metadata_sha256": "a6ac9a3c654b9553579f0141ef0313ba1cf0ff0e758f54143c4a3b9a39566ab4",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/barrier-r3",
+  "metadata_binary_sha256": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "expected_binary_sha256": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "binary_sha256_before": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "binary_sha256_after": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+  "metadata_inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+  "saved_inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+  "independent_inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+  "inventory_exact_bytes_equal": true,
+  "inventory_count": 189,
+  "expected_count": 189,
+  "metadata_count": 189,
+  "names_unique": true,
+  "freeze_binding": "frozen-inputs-r3.json",
+  "freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "parent_built": true,
+  "built_by": "barrier-r3.log",
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/barrier-r3",
+    "--list"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.01790241700655315,
+  "independently_recompiled": false,
+  "verified": true
+}

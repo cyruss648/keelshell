@@ -1,0 +1,13 @@
+{
+  "recorded_utc": "2026-11-15T10:12:18.164826+00:00",
+  "head_sha": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "cf4cb0e53b80b09c44da99e3fe358cd7091622314625f881fd2769df783beba4",
+  "inputs_count": 570,
+  "scripts_count": 12,
+  "checked": 582,
+  "mismatches": [],
+  "binary_hashes_after": {
+    "session": "a732ded9a3a76985d17afbb56963ab8dd01921420d6cb192389759e466b5b3f8",
+    "app": "75a9c3b7082104076f5e80d06af6ddd7b619abb26ad8c78937a12fd6a9bdb112"
+  }
+}

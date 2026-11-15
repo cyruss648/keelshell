@@ -1,0 +1,10 @@
+{
+  "recorded_utc": "2026-11-15T11:35:52.757409+00:00",
+  "check": "git cat-file --batch for staged evidence and engineering inputs",
+  "parent_verification_exit": 1,
+  "first_missing_index_artifact": "linux-peer-r1/001-create-container.stderr.log",
+  "root_cause": "Repository-wide *.log ignore rule omitted raw log artifacts from initial git add.",
+  "correction": "This evidence directory has a local !*.log rule; raw log bytes use local binary attributes.",
+  "original_disk_artifacts_preserved": true,
+  "engineering_inputs_changed": false
+}

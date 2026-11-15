@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "work/pty-farewell-20261115/run_linux.py",
+    "linux-peer-r3",
+    "peer-r3"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "linux-peer-r3",
+  "pid": 66450,
+  "started_utc": "2026-11-15T10:41:45.289440+00:00",
+  "finished_utc": "2026-11-15T10:43:17.296823+00:00",
+  "seconds": 92.007,
+  "exit": 1,
+  "timed_out": false,
+  "log_sha256": "66ebb83a3a73b7652837662c7035479ccfb6d4a1d9a8032c8f148c19bee7cf09",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

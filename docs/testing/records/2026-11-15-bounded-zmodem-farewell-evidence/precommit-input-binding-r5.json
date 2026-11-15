@@ -1,0 +1,25 @@
+{
+  "recorded_utc": "2026-11-15T11:35:52.907329+00:00",
+  "status": "STAGED_ORIGINAL_BYTES_AND_ENGINEERING_INPUTS_VERIFIED",
+  "base_sha": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze": "frozen-inputs-r5.json.gz",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "frozen_engineering_inputs": 571,
+  "frozen_scripts": 12,
+  "original_archived_artifacts": 708,
+  "git_index_blob_checks": 1291,
+  "mismatches": [],
+  "staged_diff_check": {
+    "exit": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "raw_stdout_files_preserved": [
+    "review-session-ui-r4/app-ssh-bridge-r5.stdout.txt",
+    "review-session-ui-r4/app-zmodem-r5.stdout.txt",
+    "review-session-ui-r5/app-ssh-bridge-r6.stdout.txt"
+  ],
+  "raw_logs_included_by_local_ignore_exception": true,
+  "engineering_gate_rerun": false,
+  "reason": "Only documentation and evidence-preservation metadata changed after the successful frozen-source gate."
+}

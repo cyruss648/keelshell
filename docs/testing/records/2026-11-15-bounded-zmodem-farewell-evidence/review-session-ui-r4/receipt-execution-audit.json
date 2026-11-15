@@ -1,0 +1,34 @@
+{
+  "recorded_utc": "2026-11-15T10:58:09.330033+00:00",
+  "executions": {
+    "app-zmodem-r5": {
+      "receipt_sha256": "518c4b4b00b2f7ff9d3c5b25717fee1884b115f27fa677508f447d664f19eb09",
+      "receipt_result_accurate": true,
+      "complete_expected_names_accounted_for": true,
+      "all_expected_passed": true,
+      "counts": {
+        "passed": 30,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 1208
+      },
+      "exit_code": 0
+    },
+    "app-ssh-bridge-r5": {
+      "receipt_sha256": "cfc963de723e22af5a7932d9df7b0c5ed253a8e58719330312be208fb822dcf7",
+      "receipt_result_accurate": true,
+      "complete_expected_names_accounted_for": true,
+      "all_expected_passed": false,
+      "counts": {
+        "passed": 14,
+        "failed": 1,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 1223
+      },
+      "exit_code": 101
+    }
+  },
+  "explanation": "The failed receipt is accurate and fully accounts for 15 names; verified=false means the all-green expectation failed, not invalid provenance."
+}

@@ -1,0 +1,16 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running tests/zmodem_openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/772ec39f73e6d9ac/out/zmodem_openssh-772ec39f73e6d9ac)
+
+running 8 tests
+test real_rz_cancel_before_source_review_does_not_create_files ... ok
+test real_rz_receives_a_reviewed_empty_file ... ok
+test real_rz_receives_reviewed_binary_and_unicode_batch ... ok
+test real_sz_existing_local_destination_is_preserved_and_peer_cancelled ... ok
+test real_sz_returns_to_the_same_shell_after_a_bounded_receive_farewell ... ok
+test real_sz_sends_an_individually_reviewed_empty_file ... ok
+test real_sz_sends_binary_content_over_crc16 ... ok
+test real_sz_sends_binary_unicode_content_over_crc32 ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.44s
+

@@ -1,0 +1,36 @@
+{
+  "path": "crates/keelshell-core/tests/zmodem.rs",
+  "changes": [
+    {
+      "op": "insert",
+      "old_start_1based": 832,
+      "old_end": 831,
+      "new_start_1based": 832,
+      "new_end": 1350
+    }
+  ],
+  "original_test_count": 65,
+  "candidate_test_count": 83,
+  "removed_tests": [],
+  "new_tests": [
+    "receiver_actual_oo_preserves_earlier_ordinary_bytes_and_suffix_order",
+    "receiver_actual_oo_stays_strict_and_cannot_be_reclassified_as_missing",
+    "receiver_missing_farewell_bounds_retained_flow_control_bytes",
+    "receiver_missing_farewell_cannot_bypass_review_or_unacknowledged_save",
+    "receiver_missing_farewell_cannot_convert_finishing_input_errors",
+    "receiver_missing_farewell_cannot_convert_peer_or_local_cancellation",
+    "receiver_missing_farewell_enforces_feed_and_noise_bounds",
+    "receiver_missing_farewell_follows_explicit_save_acknowledgement",
+    "receiver_missing_farewell_is_distinct_idempotent_and_terminal",
+    "receiver_missing_farewell_preserves_controls_outside_validated_zfin",
+    "receiver_missing_farewell_preserves_fragmented_raw_and_incomplete_lookalikes",
+    "receiver_missing_farewell_preserves_suffix_arriving_with_initial_zfin",
+    "receiver_missing_farewell_rejects_every_other_state_without_advancing",
+    "receiver_missing_farewell_requires_a_complete_valid_initial_zfin",
+    "receiver_missing_farewell_retains_header_candidate_bound",
+    "receiver_missing_farewell_retains_lookalikes_across_recovery_and_timeout",
+    "receiver_missing_farewell_retry_exhaustion_never_finishes_automatically",
+    "receiver_missing_farewell_strips_fragmented_repeated_zfin_in_all_formats"
+  ],
+  "all_original_bytes_preserved": true
+}

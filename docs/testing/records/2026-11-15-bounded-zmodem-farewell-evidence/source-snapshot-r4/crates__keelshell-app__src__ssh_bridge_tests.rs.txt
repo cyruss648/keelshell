@@ -1,0 +1,934 @@
+//! Production bridge exercised with real SSH and bounded UI byte queues.
+use super::{TransportState, run};
+use crate::terminal::TerminalCommand;
+use keelshell_session::zmodem::{ZmodemControl, ZmodemUiEvent};
+use keelshell_session::{SessionEvent, ShellEnd, SshAuth, SshOptions, SshSession};
+use russh::{
+    Channel, ChannelId,
+    keys::{HashAlg, PrivateKey, ssh_key::private::Ed25519Keypair},
+    server,
+};
+use std::{
+    error::Error,
+    net::Shutdown,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+        mpsc,
+    },
+    time::Duration,
+};
+use tokio::{net::TcpListener, sync::watch, task::JoinHandle};
+use uuid::Uuid;
+use zeroize::Zeroizing;
+
+#[derive(Clone, Copy)]
+enum Script {
+    Quiet,
+    CloseOnInput,
+    OutputBacklog,
+    ZmodemReceiver,
+    ZmodemDuringInput,
+    ZmodemFailedExit,
+    ZmodemSignalExit,
+    ZmodemUnknownExit,
+    ZmodemOoThenFailedExit,
+    StallProtocolReply,
+}
+struct Peer {
+    script: Script,
+    channels: Vec<Channel<server::Msg>>,
+    received: Arc<AtomicUsize>,
+    payload: Arc<Mutex<Vec<u8>>>,
+    ended: bool,
+}
+impl server::Handler for Peer {
+    type Error = russh::Error;
+    async fn auth_password(&mut self, _: &str, _: &str) -> Result<server::Auth, Self::Error> {
+        Ok(server::Auth::Accept)
+    }
+    async fn channel_open_session(
+        &mut self,
+        channel: Channel<server::Msg>,
+        reply: server::ChannelOpenHandle,
+        _: &mut server::Session,
+    ) -> Result<(), Self::Error> {
+        self.channels.push(channel);
+        reply.accept().await;
+        Ok(())
+    }
+    async fn pty_request(
+        &mut self,
+        id: ChannelId,
+        _: &str,
+        _: u32,
+        _: u32,
+        _: u32,
+        _: u32,
+        _: &[(russh::Pty, u32)],
+        session: &mut server::Session,
+    ) -> Result<(), Self::Error> {
+        session.channel_success(id)?;
+        Ok(())
+    }
+    async fn shell_request(
+        &mut self,
+        id: ChannelId,
+        session: &mut server::Session,
+    ) -> Result<(), Self::Error> {
+        session.channel_success(id)?;
+        if matches!(self.script, Script::OutputBacklog) {
+            for _ in 0..96 {
+                session.data(id, vec![b'x'; 128])?;
+            }
+        }
+        if matches!(self.script, Script::ZmodemReceiver) {
+            use keelshell_core::zmodem::{FrameType, Header, HeaderFormat, encode_header};
+            let mut bytes = b"ready\n".to_vec();
+            bytes.extend(encode_header(Header::new(
+                FrameType::ReceiverInit,
+                0x23000000,
+                HeaderFormat::Hex,
+            )));
+            session.data(id, bytes)?;
+        }
+        Ok(())
+    }
+    fn adjust_window(&mut self, _: ChannelId, _: u32) -> u32 {
+        1
+    }
+    async fn data(
+        &mut self,
+        id: ChannelId,
+        data: &[u8],
+        session: &mut server::Session,
+    ) -> Result<(), Self::Error> {
+        self.received.fetch_add(data.len(), Ordering::Release);
+        if let Ok(mut payload) = self.payload.lock()
+            && payload.len().saturating_add(data.len()) <= 8 * 1024 * 1024
+        {
+            payload.extend_from_slice(data);
+        }
+        if matches!(self.script, Script::StallProtocolReply) {
+            // Block the actual server event loop behind received channel data,
+            // so it cannot answer the subsequent write-confirmation request.
+            tokio::time::sleep(Duration::from_secs(3)).await;
+        }
+        if matches!(self.script, Script::CloseOnInput) && !self.ended {
+            self.ended = true;
+            session.data(id, b"tail after blocked input".to_vec())?;
+            session.exit_status_request(id, 0)?;
+            session.close(id)?;
+        }
+        if matches!(self.script, Script::ZmodemDuringInput) && !self.ended {
+            use keelshell_core::zmodem::{FrameType, Header, HeaderFormat, encode_header};
+            self.ended = true;
+            session.data(
+                id,
+                encode_header(Header::new(
+                    FrameType::ReceiverInit,
+                    0x23000000,
+                    HeaderFormat::Hex,
+                )),
+            )?;
+        }
+        if matches!(
+            self.script,
+            Script::ZmodemFailedExit
+                | Script::ZmodemSignalExit
+                | Script::ZmodemUnknownExit
+                | Script::ZmodemOoThenFailedExit
+        ) && !self.ended
+        {
+            self.ended = true;
+            let mut tail = b"\x1b[32mqueued-tail\x1b[0m $ ".to_vec();
+            if matches!(self.script, Script::ZmodemOoThenFailedExit) {
+                tail.extend_from_slice(b"OOafter-oo");
+            }
+            session.data(id, tail)?;
+            match self.script {
+                Script::ZmodemSignalExit => {
+                    session.exit_signal_request(id, russh::Sig::TERM, false, "", "en")?;
+                }
+                Script::ZmodemFailedExit | Script::ZmodemOoThenFailedExit => {
+                    session.exit_status_request(id, 19)?;
+                }
+                _ => {}
+            }
+            session.close(id)?;
+        }
+        Ok(())
+    }
+}
+struct Fixture {
+    options: SshOptions,
+    socket: Arc<Mutex<Option<std::net::TcpStream>>>,
+    received: Arc<AtomicUsize>,
+    payload: Arc<Mutex<Vec<u8>>>,
+    task: JoinHandle<()>,
+}
+impl Drop for Fixture {
+    fn drop(&mut self) {
+        if let Ok(socket) = self.socket.lock()
+            && let Some(socket) = &*socket
+        {
+            let _ = socket.shutdown(Shutdown::Both);
+        }
+        self.task.abort();
+    }
+}
+async fn serve(script: Script) -> Result<Fixture, Box<dyn Error>> {
+    let key = PrivateKey::from(Ed25519Keypair::from_seed(&[67; 32]));
+    let fingerprint = key.public_key().fingerprint(HashAlg::Sha256).to_string();
+    let config = Arc::new(server::Config {
+        keys: vec![key],
+        window_size: 1024,
+        maximum_packet_size: 512,
+        ..Default::default()
+    });
+    let listener = TcpListener::bind("127.0.0.1:0").await?;
+    let address = listener.local_addr()?;
+    let socket = Arc::new(Mutex::new(None));
+    let control = socket.clone();
+    let received = Arc::new(AtomicUsize::new(0));
+    let counter = received.clone();
+    let payload = Arc::new(Mutex::new(Vec::new()));
+    let captured_payload = payload.clone();
+    let task = tokio::spawn(async move {
+        let Ok((stream, _)) = listener.accept().await else {
+            return;
+        };
+        let Ok(stream) = stream.into_std() else {
+            return;
+        };
+        if let Ok(duplicate) = stream.try_clone()
+            && let Ok(mut control) = control.lock()
+        {
+            *control = Some(duplicate);
+        }
+        let Ok(stream) = tokio::net::TcpStream::from_std(stream) else {
+            return;
+        };
+        if let Ok(running) = server::run_stream(
+            config,
+            stream,
+            Peer {
+                script,
+                channels: Vec::new(),
+                received: counter,
+                payload: captured_payload,
+                ended: false,
+            },
+        )
+        .await
+        {
+            let _ = running.await;
+        }
+    });
+    Ok(Fixture {
+        options: SshOptions {
+            host: address.ip().to_string(),
+            port: address.port(),
+            username: "fixture".into(),
+            auth: SshAuth::Password(Zeroizing::new("fixture".into())),
+            proxy: None,
+            expected_host_key: Some(fingerprint),
+            timeout: Duration::from_secs(2),
+        },
+        socket,
+        received,
+        payload,
+        task,
+    })
+}
+async fn connect(fixture: &Fixture) -> Result<SshSession, Box<dyn Error>> {
+    Ok(SshSession::connect(SshOptions {
+        host: fixture.options.host.clone(),
+        port: fixture.options.port,
+        username: "fixture".into(),
+        auth: SshAuth::Password(Zeroizing::new("fixture".into())),
+        proxy: None,
+        expected_host_key: fixture.options.expected_host_key.clone(),
+        timeout: Duration::from_secs(2),
+    })
+    .await?)
+}
+async fn ready(state: &mut watch::Receiver<TransportState>) -> Result<(), Box<dyn Error>> {
+    loop {
+        if matches!(*state.borrow_and_update(), TransportState::Ready) {
+            return Ok(());
+        }
+        state.changed().await?;
+    }
+}
+
+#[tokio::test]
+async fn quiet_shell_becomes_ready_before_data_and_cancels_cleanly() -> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(6), async {
+        let fixture = serve(Script::Quiet).await?;
+        let session = connect(&fixture).await?;
+        let (_commands, receiver) = mpsc::sync_channel(1);
+        let (output, incoming) = mpsc::sync_channel(1);
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let (lifecycle, mut state) = watch::channel(TransportState::Starting);
+        let (worker, driver) = tokio::join!(
+            run(
+                session.clone(),
+                receiver,
+                output,
+                cancelled.clone(),
+                lifecycle
+            ),
+            async {
+                ready(&mut state).await?;
+                assert!(incoming.try_recv().is_err());
+                cancelled.store(true, Ordering::Release);
+                Ok::<_, Box<dyn Error>>(())
+            }
+        );
+        driver?;
+        worker?;
+        assert!(matches!(
+            *state.borrow(),
+            TransportState::Ended(ShellEnd::Cancelled)
+        ));
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    })
+    .await?
+}
+
+#[tokio::test]
+async fn blocked_input_preserves_tail_and_exit_when_write_fails() -> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(6), async {
+        let fixture = serve(Script::CloseOnInput).await?;
+        let session = connect(&fixture).await?;
+        let (commands, receiver) = mpsc::sync_channel(1);
+        let (output, incoming) = mpsc::sync_channel(1);
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let (lifecycle, mut state) = watch::channel(TransportState::Starting);
+        let (worker, driver) = tokio::join!(
+            run(session.clone(), receiver, output, cancelled, lifecycle),
+            async {
+                ready(&mut state).await?;
+                commands.send(TerminalCommand::Write(vec![b'a'; 8 * 1024 * 1024]))?;
+                let mut bytes = Vec::new();
+                loop {
+                    match incoming.try_recv() {
+                        Ok(SessionEvent::Data(data)) => bytes.extend(data),
+                        Ok(SessionEvent::Exited { code, success }) => {
+                            assert_eq!(code, 0);
+                            assert!(success);
+                            break;
+                        }
+                        Ok(SessionEvent::Error(error)) => return Err(error.into()),
+                        Ok(SessionEvent::Zmodem(_)) => {
+                            return Err("unexpected protocol notification".into());
+                        }
+                        Err(mpsc::TryRecvError::Disconnected) => {
+                            return Err("bridge lost tail".into());
+                        }
+                        Err(mpsc::TryRecvError::Empty) => {
+                            tokio::time::sleep(Duration::from_millis(2)).await
+                        }
+                    }
+                }
+                assert_eq!(bytes, b"tail after blocked input");
+                Ok::<_, Box<dyn Error>>(())
+            }
+        );
+        driver?;
+        worker?;
+        assert!(matches!(
+            *state.borrow(),
+            TransportState::Ended(ShellEnd::Exited { code: 0 })
+        ));
+        assert!(fixture.received.load(Ordering::Acquire) <= 1024);
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    })
+    .await?
+}
+
+#[tokio::test]
+async fn full_ui_output_queue_does_not_block_cancel_or_owned_cleanup() -> Result<(), Box<dyn Error>>
+{
+    tokio::time::timeout(Duration::from_secs(6), async {
+        let fixture = serve(Script::OutputBacklog).await?;
+        let session = connect(&fixture).await?;
+        let (_commands, receiver) = mpsc::sync_channel(1);
+        let (output, incoming) = mpsc::sync_channel(1);
+        let readiness_output = output.clone();
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let (lifecycle, mut state) = watch::channel(TransportState::Starting);
+        let (worker, driver) = tokio::join!(
+            run(
+                session.clone(),
+                receiver,
+                output,
+                cancelled.clone(),
+                lifecycle
+            ),
+            async {
+                ready(&mut state).await?;
+                // Ready precedes output. Observe actual SSH data, then keep the
+                // single UI slot occupied until cancellation finishes.
+                loop {
+                    match incoming.try_recv() {
+                        Ok(event @ SessionEvent::Data(_)) => {
+                            match readiness_output.try_send(event) {
+                                Ok(()) | Err(mpsc::TrySendError::Full(_)) => break,
+                                Err(mpsc::TrySendError::Disconnected(_)) => {
+                                    return Err("UI output disconnected before cancellation".into());
+                                }
+                            }
+                        }
+                        Ok(SessionEvent::Error(error)) => return Err(error.into()),
+                        Ok(SessionEvent::Zmodem(_)) => {
+                            return Err("unexpected protocol notification".into());
+                        }
+                        Ok(SessionEvent::Exited { .. }) => {
+                            return Err("SSH ended before output backpressure".into());
+                        }
+                        Err(mpsc::TryRecvError::Disconnected) => {
+                            return Err("SSH output disconnected before backpressure".into());
+                        }
+                        Err(mpsc::TryRecvError::Empty) => {
+                            tokio::time::sleep(Duration::from_millis(2)).await;
+                        }
+                    }
+                }
+                assert!(matches!(
+                    readiness_output.try_send(SessionEvent::Data(Vec::new())),
+                    Err(mpsc::TrySendError::Full(_))
+                ));
+                cancelled.store(true, Ordering::Release);
+                Ok::<_, Box<dyn Error>>(())
+            }
+        );
+        driver?;
+        worker?;
+        assert!(incoming.try_recv().is_ok());
+        assert!(matches!(
+            *state.borrow(),
+            TransportState::Ended(ShellEnd::Cancelled)
+        ));
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    })
+    .await?
+}
+
+async fn transfer_event(
+    safety: &crate::terminal::ZmodemSafety,
+    matches: impl Fn(&ZmodemUiEvent) -> bool,
+) -> Result<ZmodemUiEvent, Box<dyn Error>> {
+    loop {
+        for event in safety.take_events()? {
+            if matches(&event) {
+                return Ok(event);
+            }
+        }
+        tokio::time::sleep(Duration::from_millis(2)).await;
+    }
+}
+
+#[tokio::test]
+async fn zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff()
+-> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(8), async {
+        let fixture = serve(Script::ZmodemReceiver).await?;
+        let session = connect(&fixture).await?;
+        let protocol = super::Protocol::new(session.clone(), "reviewed SSH fixture".into());
+        let safety = protocol.safety.clone();
+        let (commands, receiver) = mpsc::sync_channel(32);
+        // Keep the raw terminal's only UI slot full throughout cancellation.
+        let (output, incoming) = mpsc::sync_channel(1);
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let (lifecycle, mut state) = watch::channel(TransportState::Starting);
+        let (worker, driver) = tokio::join!(
+            super::run_with_protocol(session.clone(), receiver, output, cancelled.clone(), lifecycle, protocol),
+            async {
+                ready(&mut state).await?;
+                let ZmodemUiEvent::UploadRequested { id } = transfer_event(
+                    &safety, |event| matches!(event, ZmodemUiEvent::UploadRequested { .. }),
+                ).await? else { return Err("missing upload lease".into()); };
+                assert!(safety.active.load(Ordering::Acquire));
+                commands.send(TerminalCommand::Write(b"rejected during transfer\n".to_vec()))?;
+                transfer_event(&safety, |event| matches!(event, ZmodemUiEvent::InputRejected { id: current } if *current == id)).await?;
+                commands.send(TerminalCommand::Zmodem(Box::new(ZmodemControl::Cancel { transfer: id })))?;
+                transfer_event(&safety, |event| matches!(event, ZmodemUiEvent::Cancelled { id: current, uncertain: false } if *current == id)).await?;
+                assert!(safety.active.load(Ordering::Acquire), "terminal result alone cannot release ownership");
+                commands.send(TerminalCommand::ResumeInput(Uuid::new_v4()))?;
+                commands.send(TerminalCommand::Write(b"rejected after stale handoff\n".to_vec()))?;
+                let stale = Uuid::new_v4();
+                commands.send(TerminalCommand::Zmodem(Box::new(ZmodemControl::Cancel { transfer: stale })))?;
+                transfer_event(&safety, |event| matches!(event, ZmodemUiEvent::ActionRejected { id: current, .. } if *current == stale)).await?;
+                assert!(safety.active.load(Ordering::Acquire));
+                commands.send(TerminalCommand::ResumeInput(id))?;
+                commands.send(TerminalCommand::Write(b"fresh input after exact handoff\n".to_vec()))?;
+                loop {
+                    let arrived = fixture.payload.lock().map_err(|_| "fixture lock")?
+                        .windows(b"fresh input after exact handoff\n".len())
+                        .any(|bytes| bytes == b"fresh input after exact handoff\n");
+                    if arrived { break; }
+                    tokio::time::sleep(Duration::from_millis(2)).await;
+                }
+                assert!(!safety.active.load(Ordering::Acquire));
+                let payload = fixture.payload.lock().map_err(|_| "fixture lock")?.clone();
+                assert!(!payload.windows(b"rejected".len()).any(|bytes| bytes == b"rejected"));
+                cancelled.store(true, Ordering::Release);
+                Ok::<_, Box<dyn Error>>(())
+            }
+        );
+        driver?;
+        worker?;
+        assert!(matches!(incoming.try_recv(), Ok(SessionEvent::Data(_))), "raw UI backpressure did not consume the shared result mailbox");
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    }).await?
+}
+
+#[tokio::test]
+async fn zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write()
+-> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(8), async {
+        let fixture = serve(Script::ZmodemDuringInput).await?;
+        let session = connect(&fixture).await?;
+        let protocol = super::Protocol::new(session.clone(), "reviewed SSH fixture".into());
+        let safety = protocol.safety.clone();
+        let (commands, receiver) = mpsc::sync_channel(4);
+        let (output, _incoming) = mpsc::sync_channel(32);
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let (lifecycle, mut state) = watch::channel(TransportState::Starting);
+        let (worker, driver) = tokio::join!(
+            super::run_with_protocol(
+                session.clone(),
+                receiver,
+                output,
+                cancelled,
+                lifecycle,
+                protocol
+            ),
+            async {
+                ready(&mut state).await?;
+                commands.send(TerminalCommand::Write(vec![b'a'; 8 * 1024 * 1024]))?;
+                Ok::<_, Box<dyn Error>>(())
+            }
+        );
+        driver?;
+        assert_eq!(worker, Err("SSH_ZMODEM_INPUT_HANDOFF_INTERRUPTED".into()));
+        let admitted = fixture.received.load(Ordering::Acquire);
+        // SSH may replenish its window before the client sees the start frame.
+        // That admitted prefix is unknown; the exact handoff error establishes
+        // that the suspended future was dropped instead of being polled again.
+        assert!(
+            admitted > 0 && admitted < 8 * 1024 * 1024,
+            "unexpected admitted prefix: {admitted}"
+        );
+        assert!(safety.uncertain_epoch.load(Ordering::Acquire) > 0);
+        assert!(
+            safety.close_busy(),
+            "unknown already-sent prefix keeps risk acknowledgement necessary"
+        );
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    })
+    .await?
+}
+
+#[tokio::test]
+async fn zmodem_final_oo_is_acknowledged_only_after_actual_write_completion()
+-> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(8), async {
+        use keelshell_core::zmodem::{FrameType, Header, HeaderFormat, encode_header};
+        let fixture = serve(Script::Quiet).await?;
+        let session = connect(&fixture).await?;
+        let root = tempfile::tempdir()?;
+        let source = root.path().canonicalize()?.join("empty.bin");
+        std::fs::write(&source, [])?;
+        for fail_final_write in [false, true] {
+            let mut protocol = super::Protocol::new(session.clone(), "reviewed SSH fixture".into());
+            let header = |kind, position| SessionEvent::Data(encode_header(Header::new(kind, position, HeaderFormat::Hex)));
+            protocol.feed(&session, header(FrameType::ReceiverInit, 0x23000000)).await?;
+            let events = protocol.safety.take_events()?;
+            let id = events.iter().find_map(|event| match event { ZmodemUiEvent::UploadRequested { id } => Some(*id), _ => None }).ok_or("missing upload lease")?;
+            protocol.control(&session, ZmodemControl::PrepareUpload { transfer: id, sources: vec![source.clone()] }).await?;
+            let events = protocol.safety.take_events()?;
+            let review = events.iter().find_map(|event| match event { ZmodemUiEvent::Review { review, .. } => Some(*review), _ => None }).ok_or("missing upload review")?;
+            protocol.control(&session, ZmodemControl::Confirm { transfer: id, review }).await?;
+            while protocol.pop_write().is_some() { protocol.write_completed()?; }
+            protocol.feed(&session, header(FrameType::Position, 0)).await?;
+            while protocol.pop_write().is_some() { protocol.write_completed()?; }
+            protocol.feed(&session, header(FrameType::ReceiverInit, 0x23000000)).await?;
+            while protocol.pop_write().is_some() { protocol.write_completed()?; }
+            protocol.feed(&session, header(FrameType::Finish, 0)).await?;
+            let events = protocol.safety.take_events()?;
+            assert!(!events.iter().any(|event| matches!(event, ZmodemUiEvent::Finished { .. })));
+            assert_eq!(protocol.pop_write(), Some(b"OO".to_vec()));
+            assert!(protocol.safety.take_events()?.is_empty(), "taking the write is not completing the write");
+            if fail_final_write {
+                protocol.fail()?;
+                let events = protocol.safety.take_events()?;
+                assert!(events.iter().any(|event| matches!(event, ZmodemUiEvent::Failed { id: current, uncertain: true, .. } if *current == id)));
+                assert!(!events.iter().any(|event| matches!(event, ZmodemUiEvent::Finished { .. })));
+            } else {
+                protocol.write_completed()?;
+                assert_eq!(protocol.safety.take_events()?, vec![ZmodemUiEvent::Finished { id }]);
+            }
+        }
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    }).await?
+}
+
+#[tokio::test]
+async fn zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff()
+-> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(8), async {
+        use keelshell_core::zmodem::{FrameType, Header, HeaderFormat, encode_header};
+        let fixture = serve(Script::Quiet).await?;
+        let session = connect(&fixture).await?;
+        for (finish_sent, reply_state, exit_code) in [
+            (false, 2, 0),
+            (true, 0, 0),
+            (true, 1, 0),
+            (true, 2, 1),
+            (true, 2, 0),
+        ] {
+            let mut protocol = super::Protocol::new(session.clone(), "farewell SSH fixture".into());
+            let header =
+                |kind| SessionEvent::Data(encode_header(Header::new(kind, 0, HeaderFormat::Hex)));
+            protocol
+                .feed(&session, header(FrameType::RequestInit))
+                .await?;
+            while protocol.pop_write().is_some() {
+                protocol.write_completed()?;
+            }
+            if finish_sent {
+                protocol.feed(&session, header(FrameType::Finish)).await?;
+                if reply_state > 0 {
+                    assert!(protocol.pop_write().is_some());
+                }
+                if reply_state == 2 {
+                    protocol.write_completed()?;
+                }
+            }
+            protocol
+                .feed(
+                    &session,
+                    SessionEvent::Exited {
+                        code: exit_code,
+                        success: exit_code == 0,
+                    },
+                )
+                .await?;
+            let events = protocol.safety.take_events()?;
+            let warning = events.iter().find_map(|event| match event {
+                ZmodemUiEvent::EndedWithoutFarewell { id } => Some(*id),
+                _ => None,
+            });
+            assert_eq!(
+                warning.is_some(),
+                finish_sent && reply_state == 2 && exit_code == 0
+            );
+            assert!(
+                !events
+                    .iter()
+                    .any(|event| matches!(event, ZmodemUiEvent::Finished { .. }))
+            );
+            if let Some(id) = warning {
+                assert!(protocol.safety.active.load(Ordering::Acquire));
+                protocol.resume_input(Uuid::new_v4());
+                assert!(protocol.safety.active.load(Ordering::Acquire));
+                protocol.resume_input(id);
+                assert!(!protocol.safety.active.load(Ordering::Acquire));
+            } else {
+                assert!(
+                    events
+                        .iter()
+                        .any(|event| matches!(event, ZmodemUiEvent::Failed { .. }))
+                );
+            }
+        }
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    })
+    .await?
+}
+
+async fn due_farewell_with_queued_completion(
+    script: Script,
+    strict_oo: bool,
+) -> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(8), async {
+        use keelshell_core::zmodem::{FrameType, Header, HeaderFormat, encode_header};
+        let fixture = serve(script).await?;
+        let session = connect(&fixture).await?;
+        let mut shell = session.start_shell(30, 100).await?;
+        let mut protocol =
+            super::Protocol::new(session.clone(), "queued completion fixture".into());
+        for kind in [FrameType::RequestInit, FrameType::Finish] {
+            protocol
+                .feed(
+                    &session,
+                    SessionEvent::Data(encode_header(Header::new(kind, 0, HeaderFormat::Hex))),
+                )
+                .await?;
+            // This test isolates production pump ordering. The separate
+            // transport tests prove the source of actual write receipts.
+            while protocol.pop_write().is_some() {
+                protocol.write_completed()?;
+            }
+        }
+        assert!(protocol.safety.take_events()?.is_empty());
+        shell.write(b"end-fixture").await?;
+        let mut completion = shell.subscribe_completion();
+        let _ = super::shell_end(&mut completion).await;
+        assert!(shell.completion().is_some());
+        tokio::time::sleep(Duration::from_millis(3100)).await;
+        let (_commands, receiver) = mpsc::sync_channel(4);
+        let (output, incoming) = mpsc::sync_channel(16);
+        let cancelled = AtomicBool::new(false);
+        let (lifecycle, _) = watch::channel(TransportState::Ready);
+        super::pump(
+            &mut shell,
+            &session,
+            &mut protocol,
+            &receiver,
+            &output,
+            &cancelled,
+            &lifecycle,
+        )
+        .await?;
+        let events = protocol.safety.take_events()?;
+        assert!(
+            !events
+                .iter()
+                .any(|event| matches!(event, ZmodemUiEvent::EndedWithoutFarewell { .. })),
+            "an observed unsuccessful completion must suppress timer retirement: {events:?}",
+        );
+        let id = events
+            .iter()
+            .find_map(|event| match event {
+                ZmodemUiEvent::Finished { id } | ZmodemUiEvent::Failed { id, .. } => Some(*id),
+                _ => None,
+            })
+            .ok_or("missing ordered result")?;
+        if strict_oo {
+            assert_eq!(events, vec![ZmodemUiEvent::Finished { id }]);
+        } else {
+            assert_eq!(
+                events,
+                vec![ZmodemUiEvent::Failed {
+                    id,
+                    reason: keelshell_session::zmodem::ZmodemFailure::ConnectionClosed,
+                    uncertain: false,
+                }]
+            );
+        }
+        let terminal: Vec<u8> = incoming
+            .try_iter()
+            .filter_map(|event| match event {
+                SessionEvent::Data(bytes) => Some(bytes),
+                _ => None,
+            })
+            .flatten()
+            .collect();
+        if strict_oo {
+            assert_eq!(terminal, b"\x1b[32mqueued-tail\x1b[0m $ after-oo");
+        } else {
+            assert_eq!(terminal, b"\x1b[32mqueued-tail\x1b[0m $ ");
+        }
+        assert!(protocol.input_blocked());
+        protocol.resume_input(Uuid::new_v4());
+        assert!(protocol.input_blocked());
+        protocol.resume_input(id);
+        assert_eq!(
+            protocol.input_blocked(),
+            !strict_oo,
+            "unsent cancellation on a failed shell stays held until transport cleanup"
+        );
+        shell.close().await?;
+        protocol.transport_closed();
+        assert!(!protocol.input_blocked());
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    })
+    .await?
+}
+
+#[tokio::test]
+async fn zmodem_due_farewell_drains_nonzero_exit_before_timer() -> Result<(), Box<dyn Error>> {
+    due_farewell_with_queued_completion(Script::ZmodemFailedExit, false).await
+}
+
+#[tokio::test]
+async fn zmodem_due_farewell_drains_signal_before_timer() -> Result<(), Box<dyn Error>> {
+    due_farewell_with_queued_completion(Script::ZmodemSignalExit, false).await
+}
+
+#[tokio::test]
+async fn zmodem_due_farewell_drains_unknown_close_before_timer() -> Result<(), Box<dyn Error>> {
+    due_farewell_with_queued_completion(Script::ZmodemUnknownExit, false).await
+}
+
+#[tokio::test]
+async fn zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail()
+-> Result<(), Box<dyn Error>> {
+    due_farewell_with_queued_completion(Script::ZmodemOoThenFailedExit, true).await
+}
+
+#[derive(Clone, Copy)]
+enum CleanupOutput {
+    Available,
+    TemporarilyFull,
+    PermanentlyFull,
+    Cancelled,
+}
+
+async fn retained_tail_reaches_real_ui_after_worker_cleanup(
+    scenario: CleanupOutput,
+) -> Result<(), Box<dyn Error>> {
+    tokio::time::timeout(Duration::from_secs(9), async {
+        use keelshell_core::zmodem::{FrameType, Header, HeaderFormat, encode_header};
+        let fixture = serve(Script::StallProtocolReply).await?;
+        let session = connect(&fixture).await?;
+        let mut protocol = super::Protocol::new(session.clone(), "cleanup fixture".into());
+        for kind in [FrameType::RequestInit, FrameType::Finish] {
+            protocol
+                .feed(
+                    &session,
+                    SessionEvent::Data(encode_header(Header::new(kind, 0, HeaderFormat::Hex))),
+                )
+                .await?;
+        }
+        let tail = "个$ \x1b[32mretained\x1b[0m";
+        protocol
+            .feed(&session, SessionEvent::Data(tail.as_bytes().to_vec()))
+            .await?;
+        let safety = protocol.safety.clone();
+        let capacity = if matches!(
+            scenario,
+            CleanupOutput::Available | CleanupOutput::Cancelled
+        ) {
+            4
+        } else {
+            1
+        };
+        let (output, incoming) = mpsc::sync_channel(capacity);
+        output.send(SessionEvent::Data(b"before-tail\n".to_vec()))?;
+        let (_commands, receiver) = mpsc::sync_channel(4);
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let worker_stop = cancelled.clone();
+        let (lifecycle, mut state) = watch::channel(TransportState::Starting);
+        let (result, drained) = tokio::join!(
+            super::run_with_protocol(
+                session.clone(),
+                receiver,
+                output,
+                worker_stop,
+                lifecycle,
+                protocol,
+            ),
+            async {
+                ready(&mut state).await?;
+                if matches!(scenario, CleanupOutput::Cancelled) {
+                    cancelled.store(true, Ordering::Release);
+                }
+                if matches!(scenario, CleanupOutput::TemporarilyFull) {
+                    while fixture.received.load(Ordering::Acquire) == 0 {
+                        tokio::time::sleep(Duration::from_millis(2)).await;
+                    }
+                    tokio::time::sleep(Duration::from_millis(2250)).await;
+                    assert!(
+                        safety.active.load(Ordering::Acquire),
+                        "a full UI receiver must retain cleanup ownership"
+                    );
+                    let first = incoming.try_recv()?;
+                    let second = tokio::time::timeout(Duration::from_secs(2), async {
+                        loop {
+                            match incoming.try_recv() {
+                                Ok(event) => break Ok(event),
+                                Err(mpsc::TryRecvError::Empty) => {
+                                    tokio::time::sleep(Duration::from_millis(2)).await;
+                                }
+                                Err(error) => break Err(error),
+                            }
+                        }
+                    })
+                    .await??;
+                    Ok::<_, Box<dyn Error>>(vec![first, second])
+                } else {
+                    Ok(Vec::new())
+                }
+            }
+        );
+        let drained = drained?;
+        if matches!(scenario, CleanupOutput::Cancelled) {
+            assert!(result.is_ok(), "cancelled cleanup: {result:?}");
+        } else {
+            let error = result
+                .as_ref()
+                .err()
+                .ok_or("missing actual write failure")?;
+            assert!(error.contains("SSH terminal write confirmation"), "{error}");
+            assert_eq!(
+                error.contains("SSH_SHELL_OUTPUT_CLEANUP_TIMEOUT"),
+                matches!(scenario, CleanupOutput::PermanentlyFull),
+                "full receiver must have an explicit bounded cleanup result: {error}"
+            );
+        }
+        let events = safety.take_events()?;
+        assert_eq!(events.len(), 1);
+        assert!(matches!(
+            events[0],
+            ZmodemUiEvent::Failed {
+                uncertain: false,
+                ..
+            }
+        ));
+        assert!(!safety.active.load(Ordering::Acquire));
+        let delivered = if drained.is_empty() {
+            incoming.try_iter().collect::<Vec<_>>()
+        } else {
+            drained
+        };
+        let expected = if matches!(scenario, CleanupOutput::PermanentlyFull) {
+            vec![SessionEvent::Data(b"before-tail\n".to_vec())]
+        } else {
+            vec![
+                SessionEvent::Data(b"before-tail\n".to_vec()),
+                SessionEvent::Data(tail.as_bytes().to_vec()),
+            ]
+        };
+        assert_eq!(delivered, expected);
+        session.close().await?;
+        Ok::<_, Box<dyn Error>>(())
+    })
+    .await?
+}
+
+#[tokio::test]
+async fn zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout()
+-> Result<(), Box<dyn Error>> {
+    retained_tail_reaches_real_ui_after_worker_cleanup(CleanupOutput::Available).await
+}
+
+#[tokio::test]
+async fn zmodem_cleanup_delivers_retained_tail_after_worker_cancellation()
+-> Result<(), Box<dyn Error>> {
+    retained_tail_reaches_real_ui_after_worker_cleanup(CleanupOutput::Cancelled).await
+}
+
+#[tokio::test]
+async fn zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order()
+-> Result<(), Box<dyn Error>> {
+    retained_tail_reaches_real_ui_after_worker_cleanup(CleanupOutput::TemporarilyFull).await
+}
+
+#[tokio::test]
+async fn zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases()
+-> Result<(), Box<dyn Error>> {
+    retained_tail_reaches_real_ui_after_worker_cleanup(CleanupOutput::PermanentlyFull).await
+}

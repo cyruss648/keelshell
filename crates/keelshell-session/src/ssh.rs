@@ -8,6 +8,8 @@ use lifecycle::{ConnectionMonitor, ShellMonitor};
 mod proxy;
 pub use proxy::{ProxyCredentials, ProxyError, ProxyKind, SshProxy};
 mod transport;
+#[cfg(test)]
+mod write_barrier_tests;
 pub(crate) use channel::{ChannelStreamOwner, OwnedRawSftpSession};
 use channel::{open_direct, open_session, open_session_until};
 
@@ -1122,6 +1124,37 @@ impl SshShellWriter {
     pub async fn write(&self, bytes: &[u8]) -> Result<()> {
         deadline(self.timeout, "SSH terminal write", async {
             Ok(self.writer.data(bytes).await?)
+        })
+        .await
+    }
+
+    /// Send bytes and await an authenticated reply ordered after their output.
+    ///
+    /// A channel write alone acknowledges queue admission. The reply to this
+    /// connection's subsequent keepalive request also proves that the transport
+    /// owner sent the preceding channel data. A request denial is a valid reply;
+    /// timeout, disconnect and a dropped reply are failures. This does not prove
+    /// that the remote application consumed the data. A failed or cancelled
+    /// wait may have sent a prefix and must never be replayed.
+    pub async fn write_confirmed(&self, bytes: &[u8]) -> Result<()> {
+        deadline(self.timeout, "SSH terminal write confirmation", async {
+            self.writer.data(bytes).await?;
+            // Client-created channels and this handle share russh's FIFO.
+            // Its owner suspends later messages during rekey or pending data.
+            // ChannelTx::flush and Handle::send_ping do not provide this proof:
+            // the former is a no-op, the latter also succeeds on a dropped reply.
+            match self
+                ._session
+                .handle
+                .send_global_request("keepalive@openssh.com", &[], true)
+                .await
+            {
+                Ok(_) | Err(russh::Error::RequestDenied) if !self._session.is_closed() => Ok(()),
+                Ok(_) | Err(russh::Error::RequestDenied) => Err(SessionError::Invalid(
+                    "SSH connection closed before write confirmation",
+                )),
+                Err(error) => Err(error.into()),
+            }
         })
         .await
     }

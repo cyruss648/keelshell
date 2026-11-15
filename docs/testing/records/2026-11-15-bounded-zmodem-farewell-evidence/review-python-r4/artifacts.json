@@ -1,0 +1,66 @@
+{
+  "diff-check.json": {
+    "bytes": 336,
+    "sha256": "dda2eecbe975049b51e379c36ffcca7c7dfe5dbbd49a0d9a55a47c55a3fd5e32"
+  },
+  "diff-check.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "frozen-inputs-r4.json": {
+    "bytes": 73509,
+    "sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c"
+  },
+  "handoff.json": {
+    "bytes": 3611,
+    "sha256": "7cc376472cf29b44f285f21cbc7aadbdcdc90193d52275a145d97db4a177da90"
+  },
+  "independent-baseline-red.json": {
+    "bytes": 2780,
+    "sha256": "c24a050832de3f065af75491e93279091c7d3d811df1266f35d064725619fcca"
+  },
+  "independent-baseline-red.log": {
+    "bytes": 17330,
+    "sha256": "e49785ab946799a374a9cd7eadd1801e722aaa919aaed77c441ba663c7ad2356"
+  },
+  "independent-file-suite.json": {
+    "bytes": 2220,
+    "sha256": "d6363924a8000f26611c898646e405c47ad84cb57550c7265569e2a6fbbff2b2"
+  },
+  "independent-file-suite.log": {
+    "bytes": 2859,
+    "sha256": "be5385d5f4c3bd08ede538d0d718c1ad8032cdb1f3f1943a5fd12ad133b367cc"
+  },
+  "inputs-after.json": {
+    "bytes": 365,
+    "sha256": "d6894f1aa36cefd677f2c380d90a50302e39be41ea9ae6697b4a03a53379099c"
+  },
+  "inputs-before.json": {
+    "bytes": 183140,
+    "sha256": "b65a0c126f06aa8a7a52ad6408f2d9d393b3e358860ebb011b6f26c288807a32"
+  },
+  "owned-processes-after.json": {
+    "bytes": 1151,
+    "sha256": "fa9699697876afdd3221e3a6ef0af84dc587123751e29eafae46354f591ed078"
+  },
+  "preserved-author-evidence.json": {
+    "bytes": 4077,
+    "sha256": "8af0f2d392e10da167621fa39f5f627aee373a6559c501263c194dc8591428bf"
+  },
+  "report.md": {
+    "bytes": 9191,
+    "sha256": "9993b3d35b996f6ce6b9b0ffb4adafdccf95228a4123e8df55c54c154c5f08c5"
+  },
+  "reviewed.patch": {
+    "bytes": 9259,
+    "sha256": "f263c28e6962455c46ff4133f5a04597e0ae111db8807585f155a557a187cca0"
+  },
+  "run_independent.py": {
+    "bytes": 6702,
+    "sha256": "8bdc6112d6e710bc9789cfa379fd6e9ec6f18f7c9e2f03e6dcf770e7f269cb18"
+  },
+  "static-invariants.json": {
+    "bytes": 2463,
+    "sha256": "65530a3033a74bb14d49e23ef69187e7ec56ca5eb1cdee9a2ce8e84949d37a77"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "recorded_utc": "2026-11-15T11:08:20.187222+00:00",
+  "freeze": "frozen-inputs-r5.json",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "build_receipt": "logs/native-build-r4.json",
+  "r4_to_r5_changes": [
+    "crates/keelshell-app/src/ssh_bridge_tests.rs"
+  ],
+  "production_inputs_unchanged": true,
+  "artifacts": [
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "sha256": "256ea3cf9df7d0d81b7cf9cf3b74bd8e2582339f577fd8066a82f1cd874a3dc4",
+      "file": "work/recovery-batch-integration-20261115/target/debug/keelshell-app: Mach-O 64-bit executable arm64"
+    },
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "file": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp: Mach-O 64-bit executable arm64"
+    }
+  ],
+  "desktop_interaction": "NOT_RUN",
+  "toolchain": [
+    {
+      "command": [
+        "rustc",
+        "--version"
+      ],
+      "stdout": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+      "exit": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "--version"
+      ],
+      "stdout": "cargo 1.100.0 (3acc79c0c 2026-11-05)",
+      "exit": 0
+    }
+  ]
+}

@@ -37,6 +37,7 @@ enum Intent {
 struct Report {
     events: Vec<Ui>,
     end: ShellEnd,
+    terminal: Vec<u8>,
 }
 
 impl Fixture {
@@ -84,6 +85,17 @@ impl Fixture {
         names: &[&str],
         intent: Intent,
     ) -> TestResult<Report> {
+        self.run_peer(receiving, flags, names, intent, false).await
+    }
+
+    async fn run_peer(
+        &self,
+        receiving: bool,
+        flags: &[&str],
+        names: &[&str],
+        intent: Intent,
+        interactive: bool,
+    ) -> TestResult<Report> {
         let peer = std::env::var(if receiving {
             "KEELSHELL_ZMODEM_RZ"
         } else {
@@ -101,23 +113,31 @@ impl Fixture {
             .collect::<Vec<_>>()
             .join(" ");
         let command = format!(
-            "cd {} && stty raw -echo -onlcr && exec {} {args} 2>{}\n",
+            "cd {} && stty raw -echo -onlcr && {}{} {args} 2>{}{}\n",
             quote(&self.remote),
+            if interactive { "" } else { "exec " },
             quote(&peer),
             quote(&self.path("peer.log")),
+            if interactive {
+                "; printf '\\n__KS_PEER_RETURN__\\n'"
+            } else {
+                ""
+            },
         );
         let mut shell = self.session.start_shell(30, 100).await?;
         shell.write(command.as_bytes()).await?;
         let mut controller = ZmodemController::new(self.session.clone(), "owned loopback OpenSSH");
         let mut events = Vec::new();
+        let mut terminal = Vec::new();
         let mut ended = false;
         let mut preserve_rejected = false;
         let mut peer_headers = VecDeque::new();
         while !ended {
-            let Some(event) = shell.recv().await else {
-                return Err("peer closed before protocol result".into());
+            let event = tokio::select! {
+                event = shell.recv() => Some(event.ok_or("peer closed before protocol result")?),
+                _ = tokio::time::sleep(Duration::from_millis(20)) => None,
             };
-            if let SessionEvent::Data(bytes) = &event {
+            if let Some(SessionEvent::Data(bytes)) = &event {
                 peer_headers.push_back(
                     bytes
                         .iter()
@@ -129,32 +149,40 @@ impl Fixture {
                     peer_headers.pop_front();
                 }
             }
-            let mut effects = controller
-                .feed(
-                    &self.session,
-                    match &event {
-                        SessionEvent::Data(bytes) => bytes,
-                        other => {
-                            let log = self
-                                .sftp
-                                .read_regular(&self.path("peer.log"), 64 * 1024)
-                                .await
-                                .unwrap_or_default();
-                            return Err(format!(
+            let mut effects = match event {
+                Some(SessionEvent::Data(bytes)) => controller.feed(&self.session, &bytes).await,
+                Some(SessionEvent::Exited { code, success }) => {
+                    controller.transport_exited(&self.session, code, success)
+                }
+                Some(other) => {
+                    let log = self
+                        .sftp
+                        .read_regular(&self.path("peer.log"), 64 * 1024)
+                        .await
+                        .unwrap_or_default();
+                    return Err(format!(
                                 "unexpected SSH terminal event: {other:?}; controller: {:?}; latest incoming headers: {peer_headers:?}; prior events: {:?}; peer diagnostics: {}",
                                 controller.state(),
                                 events.iter().rev().take(5).collect::<Vec<_>>(),
                                 String::from_utf8_lossy(&log),
                             ).into());
-                        }
-                    },
-                )
-                .await;
+                }
+                None => controller.tick(),
+            };
             loop {
                 // Flush actual SSH output before accepting the corresponding
                 // event. Merely producing OO is not a successful write.
+                let token = controller.protocol_output_token();
+                let has_writes = !effects.writes.is_empty();
                 for bytes in effects.writes.drain(..) {
-                    shell.write(&bytes).await?;
+                    shell.writer().write_confirmed(&bytes).await?;
+                }
+                if has_writes && let Some(token) = token {
+                    controller.protocol_output_flushed(token);
+                }
+                terminal.append(&mut effects.terminal);
+                if terminal.len() > 32 * 1024 {
+                    return Err("fixture terminal output exceeded its bounded capture".into());
                 }
                 let mut pending: VecDeque<_> = effects.events.drain(..).collect();
                 if pending.is_empty() {
@@ -209,7 +237,12 @@ impl Fixture {
                             preserve_rejected = true;
                             Some(Control::Cancel { transfer: *id })
                         }
-                        (Ui::Finished { .. } | Ui::Cancelled { .. }, _) => {
+                        (
+                            Ui::Finished { .. }
+                            | Ui::EndedWithoutFarewell { .. }
+                            | Ui::Cancelled { .. },
+                            _,
+                        ) => {
                             ended = true;
                             None
                         }
@@ -234,6 +267,63 @@ impl Fixture {
         }
         if matches!(intent, Intent::Preserve(_)) {
             assert!(preserve_rejected);
+        }
+        if interactive {
+            tokio::time::timeout(Duration::from_secs(5), async {
+                while !terminal
+                    .windows(b"__KS_PEER_RETURN__".len())
+                    .any(|part| part == b"__KS_PEER_RETURN__")
+                {
+                    match shell.recv().await {
+                        Some(SessionEvent::Data(bytes)) => {
+                            terminal.extend(controller.feed(&self.session, &bytes).await.terminal);
+                            if terminal.len() > 32 * 1024 {
+                                return Err(
+                                    "fixture terminal output exceeded its bounded capture".into()
+                                );
+                            }
+                        }
+                        other => {
+                            return Err(format!(
+                                "interactive shell ended before its return marker: {other:?}"
+                            )
+                            .into());
+                        }
+                    }
+                }
+                shell
+                    .write(b"printf '__KS_AFTER_ZMODEM__\\n'; exit 0\n")
+                    .await?;
+                while let Some(event) = shell.recv().await {
+                    match event {
+                        SessionEvent::Data(bytes) => {
+                            terminal.extend(bytes);
+                            if terminal.len() > 32 * 1024 {
+                                return Err(
+                                    "fixture terminal output exceeded its bounded capture".into()
+                                );
+                            }
+                        }
+                        SessionEvent::Exited {
+                            code: 0,
+                            success: true,
+                        } => break,
+                        other => {
+                            return Err(format!(
+                                "interactive shell did not finish cleanly: {other:?}"
+                            )
+                            .into());
+                        }
+                    }
+                }
+                Ok::<_, Box<dyn Error + Send + Sync>>(())
+            })
+            .await??;
+            assert!(
+                terminal
+                    .windows(b"__KS_AFTER_ZMODEM__".len())
+                    .any(|part| part == b"__KS_AFTER_ZMODEM__")
+            );
         }
         // The peer replaces its shell, so its independently observed exit
         // establishes whether it accepted the final protocol trailer.
@@ -260,7 +350,11 @@ impl Fixture {
             Err(_) if peer_cancelled => ShellEnd::Cancelled,
             Err(error) => return Err(error.into()),
         };
-        Ok(Report { events, end })
+        Ok(Report {
+            events,
+            end,
+            terminal,
+        })
     }
 
     async fn close(self, names: &[&str]) -> TestResult {
@@ -393,6 +487,36 @@ async fn real_sz_sends_binary_content_over_crc16() -> TestResult {
 #[ignore = "requires the disposable pinned OpenSSH runner and independent rz/sz"]
 async fn real_sz_sends_an_individually_reviewed_empty_file() -> TestResult {
     tokio::time::timeout(Duration::from_secs(25), receive("empty.bin", &[], &[])).await?
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable pinned OpenSSH runner and independent rz/sz"]
+async fn real_sz_returns_to_the_same_shell_after_a_bounded_receive_farewell() -> TestResult {
+    tokio::time::timeout(Duration::from_secs(45), async {
+        let fixture = Fixture::new().await?;
+        let name = "interactive-源.bin";
+        let bytes = binary();
+        fixture.sftp.write(&fixture.path(name), &bytes).await?;
+        let destination = fixture.local.join(name);
+        let report = fixture.run_peer(
+            false,
+            &[],
+            &[name],
+            Intent::Download(destination.clone()),
+            true,
+        ).await?;
+        assert_eq!(std::fs::read(destination)?, bytes);
+        assert_eq!(report.end, ShellEnd::Exited { code: 0 });
+        let strict = report.events.iter().filter(|event| matches!(event, Ui::Finished { .. })).count();
+        let missing = report.events.iter().filter(|event| matches!(event, Ui::EndedWithoutFarewell { .. })).count();
+        assert_eq!(strict + missing, 1, "exactly one explicitly classified receive outcome");
+        assert!(!report.events.iter().any(|event| matches!(event, Ui::Failed { .. } | Ui::Cancelled { .. })));
+        assert_eq!(report.events.iter().filter(|event| matches!(event, Ui::FileSaved { .. })).count(), 1);
+        assert!(report.terminal.windows(b"__KS_PEER_RETURN__".len()).any(|part| part == b"__KS_PEER_RETURN__"));
+        assert!(report.terminal.windows(b"__KS_AFTER_ZMODEM__".len()).any(|part| part == b"__KS_AFTER_ZMODEM__"));
+        eprintln!("interactive receive outcome: strict_OO={strict}; missing_optional_OO={missing}; same_shell_continued=true");
+        fixture.close(&[name]).await
+    }).await?
 }
 
 #[tokio::test]

@@ -1,0 +1,86 @@
+{
+  "recorded_utc": "2026-11-15T10:45:17.237703+00:00",
+  "recommendation": "HOLD",
+  "scope": "bounded farewell r3 session/transport barrier/bridge/UI plus r2-to-r3 contract delta",
+  "base_head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "severity_open_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0
+  },
+  "open_findings": [
+    "P2-003"
+  ],
+  "corrected_original_findings": [
+    "P2-001",
+    "P2-002"
+  ],
+  "core_r2_01_scope": "new two session controller integration cases verified; separate core review owns core approval",
+  "independently_recompiled": false,
+  "independent_inventory_commands": 3,
+  "independent_test_commands": 4,
+  "tests": {
+    "ssh-write-barrier-r3": {
+      "exit_code": 0,
+      "counts": {
+        "result": "ok",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 185
+      },
+      "verified": true,
+      "receipt": "receipt-ssh-write-barrier-r3.json"
+    },
+    "session-zmodem-r4": {
+      "exit_code": 0,
+      "counts": {
+        "result": "ok",
+        "passed": 25,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "verified": true,
+      "receipt": "receipt-session-zmodem-r4.json"
+    },
+    "app-zmodem-r4": {
+      "exit_code": 0,
+      "counts": {
+        "result": "ok",
+        "passed": 26,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 1208
+      },
+      "verified": true,
+      "receipt": "receipt-app-zmodem-r4.json"
+    },
+    "app-ssh-bridge-r4": {
+      "exit_code": 0,
+      "counts": {
+        "result": "ok",
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 1223
+      },
+      "verified": true,
+      "receipt": "receipt-app-ssh-bridge-r4.json"
+    }
+  },
+  "app_group_overlap": 8,
+  "unique_app_test_union": 29,
+  "final_freeze_receipt": "receipt-final-freeze.json",
+  "parent_gate_r3_exit": 1,
+  "linux_strict_peer_acceptance": "HOLD_PARTIAL_R2_RECEIPTS_ONLY_NOT_RERUN",
+  "native_platform_acceptance": "UNVERIFIED",
+  "full_product_acceptance": "UNVERIFIED",
+  "report_sha256": "d911dc436e5f1fa8f29b692faa049afb9b3eaa64d050a23b2b53193add93f6d0"
+}

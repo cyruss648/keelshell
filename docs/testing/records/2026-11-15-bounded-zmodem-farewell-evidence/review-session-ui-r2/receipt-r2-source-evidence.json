@@ -1,0 +1,340 @@
+{
+  "recorded_utc": "2026-11-15T10:36:35.681722+00:00",
+  "scope": "Retained r2 review evidence; superseded pending r3, not a final signoff",
+  "strict_peer_functions": {
+    "completed": {
+      "byte_equal": true,
+      "head_sha256": "575e256cb7f46fe5adaf96be0f478f32e325febacbb07f997c5021ef5472360c",
+      "reviewed_sha256": "575e256cb7f46fe5adaf96be0f478f32e325febacbb07f997c5021ef5472360c"
+    },
+    "receive": {
+      "byte_equal": true,
+      "head_sha256": "7ce875506f5994a7b056b4a75b28914eba8bf77c9e93e1a1a4ae34a59a2c5824",
+      "reviewed_sha256": "7ce875506f5994a7b056b4a75b28914eba8bf77c9e93e1a1a4ae34a59a2c5824"
+    },
+    "real_rz_receives_reviewed_binary_and_unicode_batch": {
+      "byte_equal": true,
+      "head_sha256": "4ac909b30fdb029ea19283e8f53f8e131e00f9242d3fcbec76b8ccd87fddf184",
+      "reviewed_sha256": "4ac909b30fdb029ea19283e8f53f8e131e00f9242d3fcbec76b8ccd87fddf184"
+    },
+    "real_rz_receives_a_reviewed_empty_file": {
+      "byte_equal": true,
+      "head_sha256": "891b8ca01b075df21f9c76369ea311a9ac0b7f9c6c9678c38156c93c3763be7c",
+      "reviewed_sha256": "891b8ca01b075df21f9c76369ea311a9ac0b7f9c6c9678c38156c93c3763be7c"
+    },
+    "real_sz_sends_binary_unicode_content_over_crc32": {
+      "byte_equal": true,
+      "head_sha256": "1be136461ac66e2db65425fa37ae232fe620bad455cce5a3ca86145df02f57ed",
+      "reviewed_sha256": "1be136461ac66e2db65425fa37ae232fe620bad455cce5a3ca86145df02f57ed"
+    },
+    "real_sz_sends_binary_content_over_crc16": {
+      "byte_equal": true,
+      "head_sha256": "ad6252e58299f3ddecc5d9194f60ea7d816c07addb007d49530d53b375de13e0",
+      "reviewed_sha256": "ad6252e58299f3ddecc5d9194f60ea7d816c07addb007d49530d53b375de13e0"
+    },
+    "real_sz_sends_an_individually_reviewed_empty_file": {
+      "byte_equal": true,
+      "head_sha256": "0e47fb517d7bebf4bb24f6d603f4f2a5754f8faee925e1068249db690c5b5cdd",
+      "reviewed_sha256": "0e47fb517d7bebf4bb24f6d603f4f2a5754f8faee925e1068249db690c5b5cdd"
+    },
+    "real_sz_existing_local_destination_is_preserved_and_peer_cancelled": {
+      "byte_equal": true,
+      "head_sha256": "f8ba8570be2a70c7a7a3fe539c21629da274de02a1843ff6e69f5c2826ae5ac0",
+      "reviewed_sha256": "f8ba8570be2a70c7a7a3fe539c21629da274de02a1843ff6e69f5c2826ae5ac0"
+    },
+    "real_rz_cancel_before_source_review_does_not_create_files": {
+      "byte_equal": true,
+      "head_sha256": "6a6d9eddaf213029221dd9232035a2296a38c5acce7ab58203d3dcd74abf1d3f",
+      "reviewed_sha256": "6a6d9eddaf213029221dd9232035a2296a38c5acce7ab58203d3dcd74abf1d3f"
+    }
+  },
+  "all_original_strict_assertions_byte_identical": true,
+  "locked_dependency": {
+    "name": "russh",
+    "version": "0.65.1",
+    "lock_checksum": "94be3d86c71b9ed220a675c405e35c7a02565a009bf8da2e9cc13a700320a5c5",
+    "cached_archive_sha256": "94be3d86c71b9ed220a675c405e35c7a02565a009bf8da2e9cc13a700320a5c5",
+    "archive_matches_lock": true,
+    "files": {
+      "src/client/mod.rs": {
+        "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/russh-0.65.1/src/client/mod.rs",
+        "sha256": "51e0de4f67ab2b48788f56b9297335833f679d87ddf1fd2bea8c2ef55a974cf3",
+        "archive_match": true
+      },
+      "src/client/session.rs": {
+        "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/russh-0.65.1/src/client/session.rs",
+        "sha256": "4380af480ec8efb82126b0fa970bee1506fc534f3ee923a6f33cc9a26038023c",
+        "archive_match": true
+      },
+      "src/client/encrypted.rs": {
+        "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/russh-0.65.1/src/client/encrypted.rs",
+        "sha256": "4366e6b81d60f8a124b5865bd8f86b8dbf028d1b6639d12566a4184ff71eb2a7",
+        "archive_match": true
+      },
+      "src/channels/io/tx.rs": {
+        "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/russh-0.65.1/src/channels/io/tx.rs",
+        "sha256": "8c62048b5176ba6b330c5b74148a328172920ca950bfe6bddd1ba5b1a2d16767",
+        "archive_match": true
+      },
+      "src/channels/mod.rs": {
+        "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/russh-0.65.1/src/channels/mod.rs",
+        "sha256": "5285c0e988da125a9402cc72d080028860f50d22bf510b7e36e6b50013de6222",
+        "archive_match": true
+      },
+      "src/session.rs": {
+        "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/russh-0.65.1/src/session.rs",
+        "sha256": "fa836a54dd8ecd73fe68d76a3e7f2bf878c38e6cb511a986982c5f972e279e9e",
+        "archive_match": true
+      }
+    }
+  },
+  "app_overlap": {
+    "zmodem": 26,
+    "ssh_bridge_tests": 11,
+    "overlap": 8,
+    "unique": 29,
+    "overlapping_names": [
+      "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+      "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+      "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+      "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+      "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+      "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+      "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+      "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff"
+    ]
+  },
+  "named_test_verification": {
+    "ssh-write-barrier-r2": {
+      "expected": [
+        "ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure",
+        "ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply",
+        "ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked",
+        "ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply"
+      ],
+      "passed": [
+        "ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure",
+        "ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply",
+        "ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked",
+        "ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "exact_name_set_match": true
+    },
+    "session-zmodem-r3": {
+      "expected": [
+        "zmodem_controller_acquires_a_unique_lease_only_after_complete_valid_detection",
+        "zmodem_controller_cannot_rebind_review_to_a_different_authenticated_connection",
+        "zmodem_controller_changed_upload_selection_invalidates_previous_review",
+        "zmodem_controller_empty_receive_still_requires_review_publication_and_readback",
+        "zmodem_controller_existing_local_target_is_preserved_without_consuming_offer",
+        "zmodem_controller_local_claims_exclude_other_connections_and_existing_sftp_scopes",
+        "zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no_replace_readback",
+        "zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_review_authority",
+        "zmodem_controller_old_lease_actions_cannot_cancel_a_new_request",
+        "zmodem_controller_preserves_fragmented_lookalikes_without_file_or_channel_authority",
+        "zmodem_controller_remote_command_frames_fail_closed_without_exec",
+        "zmodem_controller_stale_offer_cannot_select_a_destination",
+        "zmodem_controller_target_created_after_accept_is_preserved_without_saved_ack",
+        "zmodem_controller_target_created_after_review_rejects_confirmation_without_accepting_data",
+        "zmodem_controller_ui_events_support_session_event_clone_and_equality_without_file_bytes",
+        "zmodem_controller_unreviewed_data_cannot_create_a_file",
+        "zmodem_controller_upload_confirmation_rejects_same_length_source_edits_and_consumes_review",
+        "zmodem_controller_upload_reviews_complete_digests_before_releasing_any_source_bytes",
+        "zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review",
+        "zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease",
+        "zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown",
+        "zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits",
+        "zmodem_missing_farewell_rejects_same_lease_receipts_after_new_output"
+      ],
+      "passed": [
+        "zmodem_controller_acquires_a_unique_lease_only_after_complete_valid_detection",
+        "zmodem_controller_cannot_rebind_review_to_a_different_authenticated_connection",
+        "zmodem_controller_changed_upload_selection_invalidates_previous_review",
+        "zmodem_controller_empty_receive_still_requires_review_publication_and_readback",
+        "zmodem_controller_existing_local_target_is_preserved_without_consuming_offer",
+        "zmodem_controller_local_claims_exclude_other_connections_and_existing_sftp_scopes",
+        "zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no_replace_readback",
+        "zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_review_authority",
+        "zmodem_controller_old_lease_actions_cannot_cancel_a_new_request",
+        "zmodem_controller_preserves_fragmented_lookalikes_without_file_or_channel_authority",
+        "zmodem_controller_remote_command_frames_fail_closed_without_exec",
+        "zmodem_controller_stale_offer_cannot_select_a_destination",
+        "zmodem_controller_target_created_after_accept_is_preserved_without_saved_ack",
+        "zmodem_controller_target_created_after_review_rejects_confirmation_without_accepting_data",
+        "zmodem_controller_ui_events_support_session_event_clone_and_equality_without_file_bytes",
+        "zmodem_controller_unreviewed_data_cannot_create_a_file",
+        "zmodem_controller_upload_confirmation_rejects_same_length_source_edits_and_consumes_review",
+        "zmodem_controller_upload_reviews_complete_digests_before_releasing_any_source_bytes",
+        "zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review",
+        "zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease",
+        "zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown",
+        "zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits",
+        "zmodem_missing_farewell_rejects_same_lease_receipts_after_new_output"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "exact_name_set_match": true
+    },
+    "app-zmodem-r3": {
+      "expected": [
+        "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+        "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+        "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+        "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff",
+        "terminal::zmodem::tests::zmodem_cancel_submits_once_while_waiting_for_its_terminal_event",
+        "terminal::zmodem::tests::zmodem_complete_reviews_keep_actions_visible_across_registered_themes",
+        "terminal::zmodem::tests::zmodem_completion_requests_exact_input_handoff_without_replaying_old_bytes",
+        "terminal::zmodem::tests::zmodem_late_stale_rejection_preserves_each_terminal_result",
+        "terminal::zmodem::tests::zmodem_live_lease_blocks_input_before_its_ui_notification_is_read",
+        "terminal::zmodem::tests::zmodem_missing_farewell_before_an_offer_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown",
+        "terminal::zmodem::tests::zmodem_preoffer_cancelled_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_failed_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_finished_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids",
+        "terminal::zmodem::tests::zmodem_retained_confirm_cannot_authorize_a_replaced_offer",
+        "terminal::zmodem::tests::zmodem_review_binds_the_actual_endpoint_despite_remote_osc_titles",
+        "terminal::zmodem::tests::zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer",
+        "terminal::zmodem::tests::zmodem_unknown_acknowledgement_waits_for_the_real_publication_latch",
+        "terminal::zmodem::tests::zmodem_unknown_result_survives_later_success_and_rejects_unread_acknowledgement",
+        "terminal::zmodem::tests::zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound",
+        "terminal::zmodem::tests::zmodem_verified_saves_survive_next_offer_finished_and_dismissal"
+      ],
+      "passed": [
+        "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+        "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+        "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+        "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff",
+        "terminal::zmodem::tests::zmodem_cancel_submits_once_while_waiting_for_its_terminal_event",
+        "terminal::zmodem::tests::zmodem_complete_reviews_keep_actions_visible_across_registered_themes",
+        "terminal::zmodem::tests::zmodem_completion_requests_exact_input_handoff_without_replaying_old_bytes",
+        "terminal::zmodem::tests::zmodem_late_stale_rejection_preserves_each_terminal_result",
+        "terminal::zmodem::tests::zmodem_live_lease_blocks_input_before_its_ui_notification_is_read",
+        "terminal::zmodem::tests::zmodem_missing_farewell_before_an_offer_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown",
+        "terminal::zmodem::tests::zmodem_preoffer_cancelled_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_failed_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_finished_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids",
+        "terminal::zmodem::tests::zmodem_retained_confirm_cannot_authorize_a_replaced_offer",
+        "terminal::zmodem::tests::zmodem_review_binds_the_actual_endpoint_despite_remote_osc_titles",
+        "terminal::zmodem::tests::zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer",
+        "terminal::zmodem::tests::zmodem_unknown_acknowledgement_waits_for_the_real_publication_latch",
+        "terminal::zmodem::tests::zmodem_unknown_result_survives_later_success_and_rejects_unread_acknowledgement",
+        "terminal::zmodem::tests::zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound",
+        "terminal::zmodem::tests::zmodem_verified_saves_survive_next_offer_finished_and_dismissal"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "exact_name_set_match": true
+    },
+    "app-ssh-bridge-r3": {
+      "expected": [
+        "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+        "ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup",
+        "ssh_bridge::tests::quiet_shell_becomes_ready_before_data_and_cancels_cleanly",
+        "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+        "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+        "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+        "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff"
+      ],
+      "passed": [
+        "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+        "ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup",
+        "ssh_bridge::tests::quiet_shell_becomes_ready_before_data_and_cancels_cleanly",
+        "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+        "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer",
+        "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail",
+        "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+        "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff"
+      ],
+      "missing": [],
+      "unexpected": [],
+      "exact_name_set_match": true
+    }
+  },
+  "parent_evidence": {
+    "logs/app-exit-order-red-r1.json": {
+      "sha256": "d4e82f5b5cff6f79ccfa858f57bee5731cdb81d4aa95f3e74f00b3b2623d6f54",
+      "bytes": 667,
+      "parent_evidence_not_independently_executed": true
+    },
+    "logs/app-exit-order-red-r1.log": {
+      "sha256": "be63aa1f122cb4917e1c0a6f42b4765cb6070eb050f69185c327712cf8da580e",
+      "bytes": 3432,
+      "parent_evidence_not_independently_executed": true
+    },
+    "logs/app-r2.json": {
+      "sha256": "59f82619d38e91a81400f00892e29d2da6eb20d5d5942849faaac794ab94caf7",
+      "bytes": 639,
+      "parent_evidence_not_independently_executed": true
+    },
+    "logs/app-r2.log": {
+      "sha256": "fb7e82895391b720c880873740a25048074e0898e1d673d6b37de2a49181f5a0",
+      "bytes": 4617,
+      "parent_evidence_not_independently_executed": true
+    },
+    "logs/app-r3.json": {
+      "sha256": "f64e8ba08add5793c0dcd6feeca7ff3a05466fc7eaf11823cf0f35a87ac7571b",
+      "bytes": 637,
+      "parent_evidence_not_independently_executed": true
+    },
+    "logs/app-r3.log": {
+      "sha256": "0671ea744b51720c8dd2b2349c550a39b8788c98846d35432e76a40ff23f0b86",
+      "bytes": 3477,
+      "parent_evidence_not_independently_executed": true
+    },
+    "logs/full-gate-r1.json": {
+      "sha256": "c0805b3bc6b537db8bfa664d2a0264ab6b64bbb33930d3f0e9489dfe57c924d6",
+      "bytes": 572,
+      "parent_evidence_not_independently_executed": true
+    },
+    "native-current-r2/result.json": {
+      "sha256": "4264287c93a8098f0b77586eb6527b8d5589e68c91a6061ef51b931c3171d8f9",
+      "bytes": 2083,
+      "parent_evidence_not_independently_executed": true
+    },
+    "native-current-r2/tests.log": {
+      "sha256": "683282d4c6e6c6e881b4b422f80aafe5d7820167a1427eea03376d716e8d180c",
+      "bytes": 1005,
+      "parent_evidence_not_independently_executed": true
+    },
+    "linux-peer-r2/result.json": {
+      "sha256": "6dc2c4647bd4a1f84a618a476de36cf9106958bd35678dc6f05782a1aee47917",
+      "bytes": 27141,
+      "parent_evidence_not_independently_executed": true
+    },
+    "linux-peer-r2/022-parent-command.stdout.log": {
+      "sha256": "0b0ad78a5deb8b038530e0c659261d3d1ad4ad83130565c1a1ff9ac3f1abbb6d",
+      "bytes": 711,
+      "parent_evidence_not_independently_executed": true
+    },
+    "linux-peer-r2/022-parent-command.stderr.log": {
+      "sha256": "822982ca6e772021527adfd40a7b5d80f06adea915e436ab4d1a3b1de0639579",
+      "bytes": 394,
+      "parent_evidence_not_independently_executed": true
+    },
+    "linux-peer-r2/zmodem-reference.json": {
+      "sha256": "2e4aee784340e1fa500b8f46e8192f21391592bc21d088d4f4e72da282918a92",
+      "bytes": 587,
+      "parent_evidence_not_independently_executed": true
+    }
+  }
+}

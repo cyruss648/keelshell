@@ -147,6 +147,14 @@ pub enum ZmodemUiEvent {
         /// Unique PTY ownership lease.
         id: Uuid,
     },
+    /// Receive negotiation ended without the optional final OO trailer.
+    ///
+    /// This is distinct from `Finished`; only separate `FileSaved` receipts
+    /// establish local publication. Existing uncertainty is not acknowledged.
+    EndedWithoutFarewell {
+        /// Unique PTY ownership lease.
+        id: Uuid,
+    },
     /// Explicit cancellation, without inferring remote cleanup.
     Cancelled {
         /// Unique PTY ownership lease.
@@ -212,6 +220,7 @@ pub struct ZmodemOutput {
 const MAX_ELAPSED: Duration = Duration::from_secs(15 * 60);
 const REVIEW_TIMEOUT: Duration = Duration::from_secs(3 * 60);
 const RETRY_INTERVAL: Duration = Duration::from_secs(10);
+const FAREWELL_GRACE: Duration = Duration::from_secs(3);
 const LOCAL_TIMEOUT: Duration = Duration::from_secs(30);
 const CANCELLATION: &[u8] = &[24, 24, 24, 24, 24, 24, 24, 24, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
 
@@ -234,6 +243,8 @@ pub enum ZmodemState {
     Saving,
     /// The protocol completed successfully.
     Finished,
+    /// A receive ended with an explicit missing-farewell warning.
+    EndedWithoutFarewell,
     /// The current transfer was explicitly cancelled.
     Cancelled,
     /// A terminal protocol, connection or publication failure occurred.
@@ -288,6 +299,17 @@ impl Review {
     }
 }
 
+/// Identifies one lease's current prefix of generated protocol output.
+///
+/// Capture this before sending that output, and confirm it only after all
+/// corresponding bytes have a transport receipt. Generating another reply
+/// invalidates the token even on the same lease. It grants no input authority.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ZmodemOutputToken {
+    transfer: Uuid,
+    revision: Uuid,
+}
+
 /// Owns a reviewed protocol exchange on one exact authenticated SSH connection.
 ///
 /// Construct one controller per interactive PTY. The caller passes that PTY's
@@ -314,6 +336,9 @@ pub struct ZmodemController {
     action_at: Instant,
     received_at: Instant,
     retried_at: Instant,
+    farewell_started: Option<Instant>,
+    protocol_writes_flushed: bool,
+    protocol_output_token: Option<ZmodemOutputToken>,
     remote_write_possible: bool,
     local_uncertain: bool,
     publication: Arc<PublicationHold>,
@@ -341,6 +366,9 @@ impl ZmodemController {
             action_at: now,
             received_at: now,
             retried_at: now,
+            farewell_started: None,
+            protocol_writes_flushed: false,
+            protocol_output_token: None,
             remote_write_possible: false,
             local_uncertain: false,
             publication: Arc::new(PublicationHold::default()),
@@ -532,6 +560,14 @@ impl ZmodemController {
             return output;
         }
         self.check_deadline(&mut output);
+        if self.can_end_without_farewell()
+            && self
+                .farewell_started
+                .is_some_and(|started| started.elapsed() >= FAREWELL_GRACE)
+        {
+            self.end_without_farewell(&mut output);
+            return output;
+        }
         if !self.is_active()
             || self.is_human_pause()
             || self.received_at.elapsed() < RETRY_INTERVAL
@@ -545,7 +581,10 @@ impl ZmodemController {
                 Ok(events) => {
                     for event in events {
                         match event {
-                            Event::Send(bytes) => output.writes.push(bytes),
+                            Event::Send(bytes) => {
+                                self.invalidate_protocol_receipt();
+                                output.writes.push(bytes);
+                            }
                             Event::Retry { .. } => {}
                             _ => {
                                 // Current pure timers emit only bounded retry
@@ -560,6 +599,108 @@ impl ZmodemController {
             }
         }
         output
+    }
+
+    /// Capture the exact lease and current protocol output revision.
+    ///
+    /// Queue admission is not a transport receipt. The single PTY owner retains
+    /// this token while awaiting [`crate::ssh::SshShellWriter::write_confirmed`].
+    pub fn protocol_output_token(&self) -> Option<ZmodemOutputToken> {
+        self.protocol_output_token
+    }
+
+    /// Acknowledge that every protocol write through this token was confirmed.
+    ///
+    /// The single PTY owner calls this only after its write queue and in-flight
+    /// write are both empty. Producing bytes or observing peer exit is not a
+    /// substitute. Old leases and older replies on the same lease cannot start
+    /// another output revision's grace period.
+    pub fn protocol_output_flushed(&mut self, token: ZmodemOutputToken) {
+        if self.transfer != Some(token.transfer)
+            || self.protocol_output_token != Some(token)
+            || !self.is_active()
+        {
+            return;
+        }
+        self.protocol_writes_flushed = true;
+        if matches!(
+            &self.machine,
+            Some(Machine::Receive(receiver)) if receiver.is_waiting_for_farewell()
+        ) {
+            self.farewell_started.get_or_insert_with(Instant::now);
+        }
+    }
+
+    fn invalidate_protocol_receipt(&mut self) {
+        self.protocol_writes_flushed = false;
+        self.protocol_output_token = self.transfer.map(|transfer| ZmodemOutputToken {
+            transfer,
+            revision: Uuid::new_v4(),
+        });
+    }
+
+    /// Observe the ordered SSH exit event after all preceding channel bytes.
+    ///
+    /// A clean exit may retire a receive waiting only for OO after the final
+    /// ZFIN reply was actually written. It never manufactures `Finished`, ends
+    /// a pending review/save, or clears an older publication quarantine.
+    pub fn transport_exited(
+        &mut self,
+        current: &SshSession,
+        code: u32,
+        success: bool,
+    ) -> ZmodemOutput {
+        let mut output = ZmodemOutput::default();
+        if code == 0 && success && self.connection(current) && self.can_end_without_farewell() {
+            self.end_without_farewell(&mut output);
+            output
+        } else {
+            self.transport_failed()
+        }
+    }
+
+    fn can_end_without_farewell(&self) -> bool {
+        self.is_active()
+            && self.protocol_writes_flushed
+            && self.farewell_started.is_some()
+            && self.offer.is_none()
+            && self.review.is_none()
+            && self.approved.is_none()
+            && self.reservation.is_none()
+            && !self.uncertain()
+            && matches!(
+                &self.machine,
+                Some(Machine::Receive(receiver)) if receiver.is_waiting_for_farewell()
+            )
+    }
+
+    fn end_without_farewell(&mut self, output: &mut ZmodemOutput) {
+        let result = match &mut self.machine {
+            Some(Machine::Receive(receiver)) => receiver.finish_without_farewell(),
+            _ => return,
+        };
+        match result {
+            Ok(events) => {
+                for event in events {
+                    match event {
+                        Event::FarewellMissing => {
+                            if let Some(id) = self.transfer {
+                                self.end(ZmodemState::EndedWithoutFarewell, output);
+                                output
+                                    .events
+                                    .push(ZmodemUiEvent::EndedWithoutFarewell { id });
+                            }
+                        }
+                        Event::Terminal(bytes) => output.terminal.extend(bytes),
+                        _ => {
+                            self.fail(ZmodemFailure::Protocol, output);
+                            break;
+                        }
+                    }
+                }
+            }
+            Err(error) => self.fail(protocol_failure(&error), output),
+        }
     }
 
     /// End a broken PTY/write/connection without inferring remote cleanup.
@@ -588,6 +729,9 @@ impl ZmodemController {
         self.action_at = now;
         self.received_at = now;
         self.retried_at = now;
+        self.farewell_started = None;
+        self.protocol_writes_flushed = false;
+        self.protocol_output_token = None;
         self.remote_write_possible = false;
         self.local_uncertain = false;
         self.upload_initial.clear();
@@ -608,6 +752,7 @@ impl ZmodemController {
                         self.machine = Some(Machine::Receive(receiver));
                         for event in events {
                             if let Event::Send(bytes) = event {
+                                self.invalidate_protocol_receipt();
                                 output.writes.push(bytes);
                             }
                         }
@@ -652,8 +797,10 @@ impl ZmodemController {
             match machine.cancel() {
                 Ok(events) => {
                     for event in events {
-                        if let Event::Send(bytes) = event {
-                            output.writes.push(bytes);
+                        match event {
+                            Event::Send(bytes) => output.writes.push(bytes),
+                            Event::Terminal(bytes) => output.terminal.extend(bytes),
+                            _ => {}
                         }
                     }
                 }
@@ -678,6 +825,9 @@ impl ZmodemController {
         self.approved = None;
         self.upload_initial.clear();
         self.began = None;
+        self.farewell_started = None;
+        self.protocol_writes_flushed = false;
+        self.protocol_output_token = None;
         self.operation_stop = None;
         output.terminal.extend(self.detector.reset());
     }
@@ -925,7 +1075,10 @@ impl ZmodemController {
         let mut queue = VecDeque::from(events);
         while let Some(event) = queue.pop_front() {
             match event {
-                Event::Send(bytes) => output.writes.push(bytes),
+                Event::Send(bytes) => {
+                    self.invalidate_protocol_receipt();
+                    output.writes.push(bytes);
+                }
                 Event::Terminal(bytes) => output.terminal.extend(bytes),
                 Event::Offer(offer) => {
                     let Some(id) = self.transfer else { continue };
@@ -1010,6 +1163,12 @@ impl ZmodemController {
                         self.end(ZmodemState::Finished, output);
                         output.events.push(ZmodemUiEvent::Finished { id });
                     }
+                }
+                Event::FarewellMissing => {
+                    // Only the outer flush/deadline or ordered-exit path may
+                    // request this result; ordinary codec input cannot do so.
+                    self.fail(ZmodemFailure::Protocol, output);
+                    break;
                 }
                 Event::Cancelled => {
                     if let Some(id) = self.transfer {

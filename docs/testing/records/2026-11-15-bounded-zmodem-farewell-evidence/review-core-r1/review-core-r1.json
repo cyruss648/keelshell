@@ -1,0 +1,149 @@
+{
+  "review": "NEW NONAUTHOR strictly read-only core protocol review r1",
+  "status": "COMPLETE",
+  "recommendation": "HOLD",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0
+  },
+  "open_finding_ids": [
+    "CORE-R1-01"
+  ],
+  "baseline_head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_verification": {
+    "checked_utc": "2026-11-15T10:09:46.871013+00:00",
+    "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+    "freeze_sha256": "cf4cb0e53b80b09c44da99e3fe358cd7091622314625f881fd2769df783beba4",
+    "input_count": 570,
+    "script_count": 12,
+    "mismatch_count": 0,
+    "mismatches": []
+  },
+  "reviewed_source_sha256": {
+    "crates/keelshell-core/src/zmodem.rs": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+    "crates/keelshell-core/src/zmodem/codec.rs": "0344f2e97a0be81ed638aea9e3972527a12b6af6a66738d989473a5e0558ee3d",
+    "crates/keelshell-core/src/zmodem/receiver.rs": "5a397eea5676f0987f547424ce3c605aa95e5bc09a5285388df8cac7f42fc1f5",
+    "crates/keelshell-core/tests/zmodem.rs": "ecbed49a5e72db3c93e4427e26ec3e8ac8fd1209436719c48778f7624583bbf4",
+    "crates/keelshell-core/src/zmodem/sender.rs": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006"
+  },
+  "finding": {
+    "id": "CORE-R1-01",
+    "severity": "P2",
+    "status": "OPEN",
+    "title": "Repeated-ZFIN removal consumes a preceding UTF-8 continuation byte",
+    "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/codec.rs",
+    "line": 590,
+    "related_lines": [
+      309,
+      316,
+      317,
+      570,
+      579,
+      586,
+      590,
+      592
+    ],
+    "trigger": "After initial valid ZFIN, feed UTF-8 个 immediately followed by one valid repeated hex ZFIN and then $ ; invoke finish_without_farewell.",
+    "impact": "The ordinary terminal text loses byte 0xaa, turning valid UTF-8 e4b8aa into invalid e4b8. Same retained-tail corruption can occur before actual OO. File bytes and FileSaved receipts are not implicated.",
+    "expected_terminal_hex": "e4b8aa2420",
+    "predicted_actual_terminal_hex": "e4b82420",
+    "input_tail_hex": "e4b8aa2a2a184230383030303030303030303232640d0a2420",
+    "zfin_hex": "2a2a184230383030303030303030303232640d0a",
+    "proof_kind": "Deterministic source trace; no new Rust regression was compiled or executed by reviewer. Parent centralized regression requested.",
+    "proof": [
+      "0xe4 and 0xb8 are retained ordinary noise at codec.rs:570-577.",
+      "0xaa & 0x7f == 0x2a, so codec.rs:570-579 starts a header candidate at the final byte of 个.",
+      "probe_header at 316-329 permits three padding stars: the 0xaa byte and both ordinary 0x2a ZFIN padding bytes. CRC validation succeeds for the actual frame at 365-366.",
+      "The new truncate at 590-592 subtracts the entire candidate length, including preceding ordinary 0xaa. finish_without_farewell emits the shortened buffer."
+    ],
+    "freeze_sha256": "cf4cb0e53b80b09c44da99e3fe358cd7091622314625f881fd2769df783beba4",
+    "recorded_utc": "2026-11-15T10:06:43.942851+00:00",
+    "requested_regression": "Feed initial valid ZFIN; then [\"个\".as_bytes(), encode_header(Finish,0,Hex).as_slice(), b\"$ \"].concat(); assert finish_without_farewell == [FarewellMissing, Terminal(\"个$ \".as_bytes().to_vec())]. Also check fragmented feeds and the strict OO terminal path.",
+    "recommendation": "HOLD until raw-tail boundary preserves preceding ordinary UTF-8 bytes while removing only the repeat frame."
+  },
+  "tests": {
+    "actual_executed": 83,
+    "passed": 83,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "original": 65,
+    "new": 18,
+    "execution_receipt": "core-r1-independent-execution.json",
+    "independent_list": "core-r1-independent-inventory.txt",
+    "log": "core-r1-independent-execution.log",
+    "new_reported_regression_executed": 0,
+    "prebuilt": true,
+    "independent_recompile": false
+  },
+  "original_tests": {
+    "path": "crates/keelshell-core/tests/zmodem.rs",
+    "changes": [
+      {
+        "op": "insert",
+        "old_start_1based": 832,
+        "old_end": 831,
+        "new_start_1based": 832,
+        "new_end": 1350
+      }
+    ],
+    "original_test_count": 65,
+    "candidate_test_count": 83,
+    "removed_tests": [],
+    "new_tests": [
+      "receiver_actual_oo_preserves_earlier_ordinary_bytes_and_suffix_order",
+      "receiver_actual_oo_stays_strict_and_cannot_be_reclassified_as_missing",
+      "receiver_missing_farewell_bounds_retained_flow_control_bytes",
+      "receiver_missing_farewell_cannot_bypass_review_or_unacknowledged_save",
+      "receiver_missing_farewell_cannot_convert_finishing_input_errors",
+      "receiver_missing_farewell_cannot_convert_peer_or_local_cancellation",
+      "receiver_missing_farewell_enforces_feed_and_noise_bounds",
+      "receiver_missing_farewell_follows_explicit_save_acknowledgement",
+      "receiver_missing_farewell_is_distinct_idempotent_and_terminal",
+      "receiver_missing_farewell_preserves_controls_outside_validated_zfin",
+      "receiver_missing_farewell_preserves_fragmented_raw_and_incomplete_lookalikes",
+      "receiver_missing_farewell_preserves_suffix_arriving_with_initial_zfin",
+      "receiver_missing_farewell_rejects_every_other_state_without_advancing",
+      "receiver_missing_farewell_requires_a_complete_valid_initial_zfin",
+      "receiver_missing_farewell_retains_header_candidate_bound",
+      "receiver_missing_farewell_retains_lookalikes_across_recovery_and_timeout",
+      "receiver_missing_farewell_retry_exhaustion_never_finishes_automatically",
+      "receiver_missing_farewell_strips_fragmented_repeated_zfin_in_all_formats"
+    ],
+    "all_original_bytes_preserved": true
+  },
+  "reviewed_contracts": [
+    "FarewellMissing is receive-only, distinct from Finished, and keeps is_finished false; its own repeated close/cancel/timeout are empty, later feeds are raw terminal bytes.",
+    "Initial transition is restricted to Finishing with no offer/payload, reached through valid decoded ZFIN after all prior review/save gates. Existing CRC parsing precedes recognition.",
+    "The caller alone must prove exact lease, all write completions, grace deadline or ordered clean exit. Core contains no clock, transport or FileSaved authority.",
+    "Repeat FIN removal occurs only after a decoded CRC-valid Finish, with the concrete preceding UTF-8-boundary defect in CORE-R1-01. Other examined prompt/ANSI/fragmented/incomplete cases retain raw bytes in order.",
+    "Retention is capped at 65536+96 bytes, header candidate at 96, feed at 65536, retry at 64; cumulative wire/packet/event limits remain. Errors enter Failed, and cancellation/ZCOMMAND cannot be converted to FarewellMissing.",
+    "Sender source is unchanged; shared Decoder farewell mode is activated only by the receiver. Existing sender finish/cancellation/CRC/pacing tests passed."
+  ],
+  "diagnostic_evidence": {
+    "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/tail-probe-r2/result.json",
+    "sha256": "5ce910bdd40379c5d211ae384818dcee2c1c4075dfd931ffbee6e0584e8c6c8d",
+    "flush_log_sha256": "d1a25544e64266e37dc2f8b518aa1f9aafdf53bfe68966425c745a1263c752d3",
+    "reviewed_existing_cases": 4,
+    "observed": "Each unchanged peer exited 0; final selector 3 TCIOFLUSH recorded queued_output_before=2 and flush_result=0, with empty tail/no OO after held master read.",
+    "boundary": "Existing controlled local PTY syscall diagnostic only; does not prove strict Finished, universal historical SSH cause, fresh interoperability, or native acceptance. Reviewer started no peer/fixture."
+  },
+  "scope_limits": [
+    "No Cargo, rustc, fmt, Clippy, dependency-policy gate, target writes, source edits, Git mutations, fixtures or worktrees performed. Writes restricted to this review directory.",
+    "Stable macOS arm64 binary came from parent; reviewer verified hashes, build-log receipt, exact complete inventory, all executed names, and unchanged binary afterwards. This is not an independent compile.",
+    "The concrete new UTF-8 adjacency regression was not present in the parent binary and was not executed by reviewer. It requires a parent centralized regression and new frozen candidate.",
+    "No review signoff for session/app/PTY lease and grace implementation, full workspace gate, Linux or Windows local backend, native desktop/IME/accessibility, installation or release.",
+    "No historical direct-PTY strict failure is reclassified."
+  ],
+  "parent_notification": {
+    "attempted_tool": "mcp__codex_app.send_message_to_thread",
+    "target_thread_id": "01a1a5b2-40b8-7cb1-8de1-07ec8f4efa6c",
+    "delivered": false,
+    "reason": "Tool rejects messages to native ancestor; requires native collaboration messaging, which is not exposed in this session.",
+    "notice_written": "notice-01.md / notice-01.json",
+    "interim_commentary_emitted": true,
+    "completion_delivery": "Return final report to native parent."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "recorded_utc": "2026-11-15T10:40:59.324905+00:00",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "expected_freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "input_count": 571,
+  "script_count": 12,
+  "mismatches": [],
+  "independently_recompiled": false,
+  "open_p2": [
+    "P2-003"
+  ]
+}

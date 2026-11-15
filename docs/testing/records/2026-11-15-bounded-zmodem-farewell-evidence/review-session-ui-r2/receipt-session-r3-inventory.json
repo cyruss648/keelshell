@@ -1,0 +1,26 @@
+{
+  "metadata_sha256": "c90072505ea92486f0e2e440a348419ea7bd8c9713c727b812af9162f8aa8b27",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/session-r3",
+  "expected_binary_sha256": "3c1916e45100df88aa671acc650098671a3ba3081b3c46311458d116fac9f865",
+  "binary_sha256_before": "3c1916e45100df88aa671acc650098671a3ba3081b3c46311458d116fac9f865",
+  "binary_sha256_after": "3c1916e45100df88aa671acc650098671a3ba3081b3c46311458d116fac9f865",
+  "expected_inventory_sha256": "f4c725c5af064819a0ac82c8f448dca0eabc993976913a1f965101ae7a48033c",
+  "saved_inventory_sha256": "f4c725c5af064819a0ac82c8f448dca0eabc993976913a1f965101ae7a48033c",
+  "independent_inventory_sha256": "f4c725c5af064819a0ac82c8f448dca0eabc993976913a1f965101ae7a48033c",
+  "inventory_exact_bytes_equal": true,
+  "inventory_count": 23,
+  "metadata_inventory_count": 23,
+  "expected_count": 23,
+  "names_unique": true,
+  "freeze_binding": "frozen-inputs-r2.json",
+  "parent_built": true,
+  "built_by": "session-r3.log",
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/session-r3",
+    "--list"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.00591883399465587,
+  "independently_recompiled": false,
+  "verified": true
+}

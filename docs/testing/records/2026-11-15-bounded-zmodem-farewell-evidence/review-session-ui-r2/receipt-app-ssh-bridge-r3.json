@@ -1,0 +1,46 @@
+{
+  "recorded_utc": "2026-11-15T10:31:11.900096+00:00",
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/app-r3",
+    "ssh_bridge::tests",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "binary_label": "app-r3",
+  "parent_built": true,
+  "independently_recompiled": false,
+  "binary_sha256_before": "3136d8da594df410289ceaf4527710ce9485129dfabc30fae6ec6f8b750405f4",
+  "binary_sha256_after": "3136d8da594df410289ceaf4527710ce9485129dfabc30fae6ec6f8b750405f4",
+  "expected_binary_sha256": "3136d8da594df410289ceaf4527710ce9485129dfabc30fae6ec6f8b750405f4",
+  "source_freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "exit_code": 0,
+  "elapsed_seconds": 12.699401417004992,
+  "expected_passed": 11,
+  "counts": {
+    "result": "ok",
+    "passed": 11,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 1223
+  },
+  "test_result_lines": [
+    "test ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails ... ok",
+    "test ssh_bridge::tests::full_ui_output_queue_does_not_block_cancel_or_owned_cleanup ... ok",
+    "test ssh_bridge::tests::quiet_shell_becomes_ready_before_data_and_cancels_cleanly ... ok",
+    "test ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff ... ok",
+    "test ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write ... ok",
+    "test ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer ... ok",
+    "test ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer ... ok",
+    "test ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer ... ok",
+    "test ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail ... ok",
+    "test ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion ... ok",
+    "test ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff ... ok",
+    "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1223 filtered out; finished in 12.57s"
+  ],
+  "stdout_sha256": "0ee604fe9ed185e9ec0b0f544b7ab1cd3bebbf678459dd6c05b25bcacfc3ebdb",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tmpdir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r2/tmp/app-ssh-bridge-r3",
+  "verified": true
+}

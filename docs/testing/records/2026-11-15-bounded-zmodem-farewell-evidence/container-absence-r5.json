@@ -1,0 +1,87 @@
+{
+  "recorded_utc": "2026-11-15T11:20:13.167031+00:00",
+  "checks": [
+    {
+      "fixture": "linux-peer-r1",
+      "original_result_sha256": "5c2bff6ab4b656cf057a591f0a6a9a9a868485fcd5838a3bc93bc113b7bd0e37",
+      "original_cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      },
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "keelshell-file-interop-c43a07e51804"
+      ],
+      "exit": 1,
+      "absent": true,
+      "seconds": 0.155,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "fixture": "linux-peer-r2",
+      "original_result_sha256": "6dc2c4647bd4a1f84a618a476de36cf9106958bd35678dc6f05782a1aee47917",
+      "original_cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      },
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "keelshell-file-interop-43e13e14e9ef"
+      ],
+      "exit": 1,
+      "absent": true,
+      "seconds": 0.155,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "fixture": "linux-peer-r3",
+      "original_result_sha256": "b3da736db1c1df2a38f3c7eb3dc3489e508ab1c896297ec04f0dd351b50df40c",
+      "original_cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      },
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "keelshell-file-interop-0d03158192f1"
+      ],
+      "exit": 1,
+      "absent": true,
+      "seconds": 0.151,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "fixture": "linux-peer-r4",
+      "original_result_sha256": "34171b5acf91d6356ee7d20ede299109bd5fbd0cfe4c90c9769650a704cf0588",
+      "original_cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      },
+      "command": [
+        "podman",
+        "container",
+        "exists",
+        "keelshell-file-interop-d2a49e0063f5"
+      ],
+      "exit": 1,
+      "absent": true,
+      "seconds": 0.152,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "all_owned_containers_absent": true,
+  "other_task_resources_modified": false
+}

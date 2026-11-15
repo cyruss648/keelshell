@@ -1,0 +1,50 @@
+   Compiling keelshell-core v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core)
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.35s
+     Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dec5f1080a7dd190/out/keelshell_app-dec5f1080a7dd190)
+
+running 4 tests
+test ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail ... FAILED
+test ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer ... FAILED
+test ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer ... FAILED
+test ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer ... FAILED
+
+failures:
+
+---- ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail stdout ----
+
+thread 'ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail' (7178417) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:698:9:
+an observed unsuccessful completion must suppress timer retirement: [EndedWithoutFarewell { id: 77ed149d-3498-4124-a27f-4aa7d140370f }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer stdout ----
+
+thread 'ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer' (7178416) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:698:9:
+an observed unsuccessful completion must suppress timer retirement: [EndedWithoutFarewell { id: 045db202-c0ca-4919-9d37-2d661ed9fdac }]
+
+---- ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer stdout ----
+
+thread 'ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer' (7178414) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:698:9:
+an observed unsuccessful completion must suppress timer retirement: [EndedWithoutFarewell { id: 761db24a-ef00-414e-adc6-ac160d1d0b85 }]
+
+---- ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer stdout ----
+
+thread 'ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer' (7178415) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:698:9:
+an observed unsuccessful completion must suppress timer retirement: [EndedWithoutFarewell { id: 049cc201-3ad1-4c6c-812b-90aed0ad7e91 }]
+
+
+failures:
+    ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer
+    ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer
+    ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer
+    ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 1230 filtered out; finished in 3.16s
+
+error: test failed, to rerun pass `-p keelshell-app --bin keelshell-app`

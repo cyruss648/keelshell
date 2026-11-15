@@ -1,0 +1,51 @@
+{
+  "register_ast_unchanged": true,
+  "capture_ast_unchanged": true,
+  "finish_ast_unchanged": true,
+  "run_finally_ast_unchanged": true,
+  "ownership_helper_bytes_unchanged_from_base": true,
+  "new_class_tests": [
+    "CommandDeadlineTests"
+  ],
+  "test_inventory_before": [
+    "test_adoption_and_timeouts_must_be_explicit",
+    "test_exact_container_identity_is_required",
+    "test_nonzero_exit_is_preserved_before_exception",
+    "test_only_exact_owner_token_releases_lease",
+    "test_package_bridge_decodes_versions_and_refuses_arbitrary_paths",
+    "test_private_stdin_does_not_appear_in_receipts_or_logs",
+    "test_pty_is_explicit_and_config_is_an_argv_element",
+    "test_remote_pty_quoting_preserves_shell_metacharacters_as_data",
+    "test_remote_pty_stays_in_owned_tree",
+    "test_timeout_drains_birth_verified_child_and_grandchild"
+  ],
+  "test_inventory_after": [
+    "test_adoption_and_timeouts_must_be_explicit",
+    "test_deadline_does_not_override_unverified_cleanup",
+    "test_exact_container_identity_is_required",
+    "test_inventory_completion_at_or_past_deadline_cannot_report_success",
+    "test_inventory_completion_before_deadline_preserves_success",
+    "test_inventory_failures_before_deadline_are_not_timeouts",
+    "test_inventory_internal_deadline_failures_are_command_timeouts",
+    "test_inventory_probe_timeout_at_command_deadline_is_a_timeout",
+    "test_nonzero_exit_is_preserved_before_exception",
+    "test_only_exact_owner_token_releases_lease",
+    "test_package_bridge_decodes_versions_and_refuses_arbitrary_paths",
+    "test_private_stdin_does_not_appear_in_receipts_or_logs",
+    "test_pty_is_explicit_and_config_is_an_argv_element",
+    "test_remote_pty_quoting_preserves_shell_metacharacters_as_data",
+    "test_remote_pty_stays_in_owned_tree",
+    "test_timeout_drains_birth_verified_child_and_grandchild",
+    "test_unrelated_inventory_failure_after_deadline_is_not_a_timeout"
+  ],
+  "new_test_names": [
+    "test_deadline_does_not_override_unverified_cleanup",
+    "test_inventory_completion_at_or_past_deadline_cannot_report_success",
+    "test_inventory_completion_before_deadline_preserves_success",
+    "test_inventory_failures_before_deadline_are_not_timeouts",
+    "test_inventory_internal_deadline_failures_are_command_timeouts",
+    "test_inventory_probe_timeout_at_command_deadline_is_a_timeout",
+    "test_unrelated_inventory_failure_after_deadline_is_not_a_timeout"
+  ],
+  "removed_test_names": []
+}

@@ -1,0 +1,44 @@
+{
+  "boundary": "controlled local PTY empty-file wire diagnostic; no application acceptance",
+  "peer_sha256": "09b84b984ea77fa8f6cbfc2a1198dde88f7185dea433150699aebff40b0dbb0c",
+  "cases": [
+    {
+      "case": 0,
+      "peer_exit": 0,
+      "tail_hex": "",
+      "farewell_received": false,
+      "pre_farewell_wire_sha256": "4785beb86836bebb7f173774da51dd45866d5abe10432bd9f72e7be74f1190fb",
+      "peer_code_modified": false,
+      "master_read_held_until_peer_exit": true
+    },
+    {
+      "case": 1,
+      "peer_exit": 0,
+      "tail_hex": "",
+      "farewell_received": false,
+      "pre_farewell_wire_sha256": "4785beb86836bebb7f173774da51dd45866d5abe10432bd9f72e7be74f1190fb",
+      "peer_code_modified": false,
+      "master_read_held_until_peer_exit": true
+    },
+    {
+      "case": 2,
+      "peer_exit": 0,
+      "tail_hex": "",
+      "farewell_received": false,
+      "pre_farewell_wire_sha256": "4785beb86836bebb7f173774da51dd45866d5abe10432bd9f72e7be74f1190fb",
+      "peer_code_modified": false,
+      "master_read_held_until_peer_exit": true
+    },
+    {
+      "case": 3,
+      "peer_exit": 0,
+      "tail_hex": "",
+      "farewell_received": false,
+      "pre_farewell_wire_sha256": "4785beb86836bebb7f173774da51dd45866d5abe10432bd9f72e7be74f1190fb",
+      "peer_code_modified": false,
+      "master_read_held_until_peer_exit": true
+    }
+  ],
+  "all_peer_processes_reaped": true,
+  "all_temporary_roots_removed": true
+}

@@ -13,6 +13,7 @@ enum State {
     Saving,
     Finishing,
     Done,
+    FarewellMissing,
     Cancelled,
     Failed,
 }
@@ -82,7 +83,7 @@ impl Receiver {
     pub fn feed(&mut self, bytes: &[u8]) -> Result<Vec<Event>, Error> {
         match self.state {
             State::New | State::Failed => return Err(Error::WrongState("receiver inactive")),
-            State::Done | State::Cancelled => {
+            State::Done | State::FarewellMissing | State::Cancelled => {
                 if bytes.len() > super::MAX_FEED_BYTES {
                     return Err(Error::Limit("feed bytes"));
                 }
@@ -133,8 +134,12 @@ impl Receiver {
                 }
                 check_events(&events)?;
                 if matches!(self.state, State::Done | State::Cancelled) {
+                    let mut terminal = self.decoder.take_farewell_bytes();
                     if index + 1 < bytes.len() {
-                        events.push(Event::Terminal(bytes[index + 1..].to_vec()));
+                        terminal.extend_from_slice(&bytes[index + 1..]);
+                    }
+                    if !terminal.is_empty() {
+                        events.push(Event::Terminal(terminal));
                     }
                     break;
                 }
@@ -208,7 +213,10 @@ impl Receiver {
         if matches!(self.state, State::New | State::Failed) {
             return Err(Error::WrongState("receiver inactive"));
         }
-        if matches!(self.state, State::Done | State::Cancelled) {
+        if matches!(
+            self.state,
+            State::Done | State::FarewellMissing | State::Cancelled
+        ) {
             return Ok(Vec::new());
         }
         let mut events = Vec::new();
@@ -230,17 +238,26 @@ impl Receiver {
     /// Cancel once, emitting the fixed standard CAN/backspace sequence.
     ///
     /// Cancellation is available after an error and never performs cleanup or
-    /// claims the peer removed any partial file.
+    /// claims the peer removed any partial file. Previously retained ordinary
+    /// farewell bytes are returned once, including after failed input or retry.
     pub fn cancel(&mut self) -> Result<Vec<Event>, Error> {
-        if matches!(self.state, State::Done | State::Cancelled) {
+        if matches!(
+            self.state,
+            State::Done | State::FarewellMissing | State::Cancelled
+        ) {
             return Ok(Vec::new());
         }
+        let terminal = self.decoder.take_farewell_bytes();
         self.state = State::Cancelled;
         self.bytes.clear();
         self.offer = None;
         self.payload = None;
         self.decoder.expect_header();
-        Ok(vec![Event::Send(CANCEL.to_vec()), Event::Cancelled])
+        let mut events = vec![Event::Send(CANCEL.to_vec()), Event::Cancelled];
+        if !terminal.is_empty() {
+            events.push(Event::Terminal(terminal));
+        }
+        Ok(events)
     }
 
     /// Metadata requiring acceptance, or awaiting local-save acknowledgement.
@@ -256,6 +273,51 @@ impl Receiver {
     /// Whether complete bytes have been emitted and local save is unacknowledged.
     pub fn is_waiting_for_saved(&self) -> bool {
         self.state == State::Saving
+    }
+
+    /// Whether a valid peer ZFIN produced a reply and its OO is awaited.
+    ///
+    /// No offer or local-save acknowledgement is pending. An emitted
+    /// [`Event::Send`] is only a requested write, not proof that the ZFIN reply
+    /// was written. This predicate establishes no elapsed-time or exit evidence.
+    pub fn is_waiting_for_farewell(&self) -> bool {
+        self.state == State::Finishing && self.offer.is_none() && self.payload.is_none()
+    }
+
+    /// Explicitly close a valid receive finish when the peer's OO is missing.
+    ///
+    /// The caller must prove that all protocol reply writes, including the
+    /// latest ZFIN reply, completed for the currently leased stream. Only then
+    /// may a bounded farewell grace period or an ordered clean SSH channel exit
+    /// authorize this call. A newly queued reply invalidates that write proof.
+    /// Merely producing [`Event::Send`], a queued write, or a timeout in any
+    /// unrelated state is insufficient. Core has no transport or clock and
+    /// cannot establish these preconditions for the caller.
+    ///
+    /// Only [`Self::is_waiting_for_farewell`] may make the initial transition.
+    /// Emits [`Event::FarewellMissing`] once, followed by any retained ordinary
+    /// bytes as [`Event::Terminal`] in their original order. Validated repeated
+    /// ZFIN framing is excluded; incomplete lookalikes and unmatched O remain.
+    /// Retention is bounded by 64 KiB plus the 96-byte header-candidate budget.
+    /// Further calls are empty and subsequent `feed` returns bytes unchanged.
+    /// [`Self::is_finished`] stays false; no OO or strict success is fabricated.
+    ///
+    /// Returns [`Error::WrongState`] outside a valid finishing state or this
+    /// method's own terminal state, including after errors or cancellation.
+    pub fn finish_without_farewell(&mut self) -> Result<Vec<Event>, Error> {
+        if self.state == State::FarewellMissing {
+            return Ok(Vec::new());
+        }
+        if !self.is_waiting_for_farewell() {
+            return Err(Error::WrongState("receiver not waiting for farewell"));
+        }
+        let terminal = self.decoder.take_farewell_bytes();
+        self.state = State::FarewellMissing;
+        let mut events = vec![Event::FarewellMissing];
+        if !terminal.is_empty() {
+            events.push(Event::Terminal(terminal));
+        }
+        Ok(events)
     }
 
     /// Whether the ZFIN/OO handshake completed successfully.

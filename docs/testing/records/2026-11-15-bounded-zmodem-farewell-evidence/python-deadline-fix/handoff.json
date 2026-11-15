@@ -1,0 +1,84 @@
+{
+  "status": "PYTHON_SUITE_PASS_FROZEN",
+  "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.3.34.2)]",
+  "freeze": "freeze.json",
+  "patch": "fix.patch",
+  "source_write_set": [
+    "scripts/run_linux_file_interop.py",
+    "scripts/test_linux_file_interop.py"
+  ],
+  "behavior": [
+    "Recognized process-inventory budget failures become command timed_out only once the absolute command deadline has been reached.",
+    "Successful capture is followed immediately by the same absolute-deadline check, even if the child has exited with returncode 0.",
+    "Before-deadline inventory errors and unrelated identity/permission/ps errors remain explicit failures; unrelated errors remain failures after the deadline too.",
+    "Existing finally stop_owned, birth-identity verification, seven-second cleanup budget and progress receipt remain in effect; failed cleanup remains a FixtureFailure."
+  ],
+  "regressions": {
+    "new_named_tests": 7,
+    "controlled_cases": 17,
+    "original_real_descendant_timeout_seconds": 0.8,
+    "real_descendant_checks": [
+      "timed_out",
+      "not interrupted",
+      "cleanup verified",
+      "grandchild identity was recorded",
+      "grandchild absent or zombie",
+      "saved receipt equals in-memory step"
+    ]
+  },
+  "executions": [
+    {
+      "label": "red-boundary",
+      "receipt": "red-boundary.json",
+      "log": "red-boundary.log",
+      "returncode": 1,
+      "elapsed_seconds": 0.224704,
+      "tests_run": 7
+    },
+    {
+      "label": "green-boundary",
+      "receipt": "green-boundary.json",
+      "log": "green-boundary.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.464553,
+      "tests_run": 7
+    },
+    {
+      "label": "real-descendant-timeout",
+      "receipt": "real-descendant-timeout.json",
+      "log": "real-descendant-timeout.log",
+      "returncode": 0,
+      "elapsed_seconds": 1.046235,
+      "tests_run": 1
+    },
+    {
+      "label": "python-suite",
+      "receipt": "python-suite.json",
+      "log": "python-suite.log",
+      "returncode": 0,
+      "elapsed_seconds": 8.841461,
+      "tests_run": 148
+    }
+  ],
+  "test_subprocess_count": {
+    "total": 4,
+    "expected_red": 1,
+    "successful_green": 3
+  },
+  "red_result": "7 tests run; raw unittest reports 4 failures and 3 errors, including subtest and following assertion records. Preserved without rewriting. Test assertion nesting was tightened before green validation.",
+  "final_python_suite": {
+    "run": 148,
+    "passed": 147,
+    "skipped": 1,
+    "failed": 0,
+    "errors": 0
+  },
+  "counting": "The 7 focused regressions and the 1 real descendant timeout are included in the 148-test suite; do not add these to the unique suite count.",
+  "diff_check": "diff-check.json",
+  "constraints_observed": [
+    "TMPDIR=work/pty-farewell-20261115/tmp",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "No Cargo, formatter, commit, new worktree/chat, Podman, or other task resource operations"
+  ],
+  "remaining_parent_work": "Parent owns production bridge cleanup and the full gate. This handoff attests Python validation only; Rust/native/Podman validation was not executed here."
+}

@@ -1,0 +1,8 @@
+interactive receive outcome: strict_OO=0; missing_optional_OO=1; same_shell_continued=true
+
+thread 'real_sz_sends_binary_content_over_crc16' (7297579) panicked at crates/keelshell-session/tests/zmodem_openssh.rs:376:5:
+assertion failed: report.events.iter().any(|event| matches!(event, Ui::Finished { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'real_sz_sends_binary_unicode_content_over_crc32' (7297600) panicked at crates/keelshell-session/tests/zmodem_openssh.rs:376:5:
+assertion failed: report.events.iter().any(|event| matches!(event, Ui::Finished { .. }))

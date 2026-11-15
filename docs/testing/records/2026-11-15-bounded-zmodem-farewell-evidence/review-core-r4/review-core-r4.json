@@ -1,0 +1,125 @@
+{
+  "recorded_utc": "2026-11-15T10:55:59.940461+00:00",
+  "recommendation": "APPROVE_CORE_SOURCE_AND_RETAINED_FOCUSED_EVIDENCE",
+  "scope": "core source and retained independent focused execution evidence, rebound from r3 to final r4",
+  "core_open_severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "new_core_findings": [],
+  "closed_findings": [
+    {
+      "id": "CORE-R2-01",
+      "status": "REMAINS_CLOSED_ON_IDENTICAL_R4_CORE_INPUTS",
+      "prior_parent_red_cases": 7,
+      "prior_independent_green_new_cases": 8
+    },
+    {
+      "id": "CORE-R1-01",
+      "status": "REMAINS_CLOSED",
+      "utf8_cases": 6,
+      "parity_cases": 3
+    }
+  ],
+  "baseline_head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze": "frozen-inputs-r4.json",
+  "freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "engineering_inputs": 571,
+  "script_inputs": 12,
+  "all_583_items_match_at_delivery": true,
+  "final_mismatches": [],
+  "unfrozen_inputs": [],
+  "missing_inputs": [],
+  "r3_r4_changed_inputs": [
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-app/src/ssh_bridge.rs",
+      "r3_sha256": "bbd4ef2d764714f43c217f5296ac33b47c9f222122cdf9533357ff2ac6cd878c",
+      "r4_sha256": "d00ea89460a4d54837d0540c7c42b8b1e544c3cd07df6bb24fffd65277f2992f"
+    },
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-app/src/ssh_bridge_tests.rs",
+      "r3_sha256": "fa52af544058b9720e60428ba5832969e9f4d19a02aec51aa1e21150d25e634f",
+      "r4_sha256": "8825c13cea74f348259c57b19179e59d0366147da751c12bc84ea453679e4655"
+    },
+    {
+      "section": "scripts",
+      "path": "scripts/run_linux_file_interop.py",
+      "r3_sha256": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0",
+      "r4_sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e"
+    },
+    {
+      "section": "scripts",
+      "path": "scripts/test_linux_file_interop.py",
+      "r3_sha256": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9",
+      "r4_sha256": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c"
+    }
+  ],
+  "source_equivalence": {
+    "total": 231,
+    "core": 106,
+    "session": 123,
+    "root": 2,
+    "added": [],
+    "removed": [],
+    "mismatches": [],
+    "parent_claim_independently_verified": true,
+    "evidence": "source-equivalence-r3-r4-independent.json"
+  },
+  "retained_execution": {
+    "binary_sha256": "8c51f02d4bf32d05d5757d310fe596c583cf7f986465ca958538098bff2cf75e",
+    "binary_sha256_at_delivery": "8c51f02d4bf32d05d5757d310fe596c583cf7f986465ca958538098bff2cf75e",
+    "inventory_sha256": "5f10332d584c90afc174aadc8747666becd94f11275281a6bfe5600c00f745b6",
+    "passed": 102,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 0,
+    "exit": 0,
+    "test_invocations_original_r3": 1,
+    "inventory_invocations_original_r3": 1,
+    "new_r4_test_invocations": 0,
+    "new_r4_inventory_invocations": 0,
+    "parent_built": true,
+    "independently_recompiled": false,
+    "reuse_explicitly_authorized_by_user": true,
+    "original_receipt_sha256": "f1d7ec8eeb613306aee9b3b71c487933eb01c6a8b9a7257ba9a1a3193d2aaabb",
+    "evidence": "retained-core-execution-binding.json"
+  },
+  "assertion_preservation": {
+    "r2_original_tests": 94,
+    "head_original_tests": 65,
+    "all_unchanged": true,
+    "evidence": "../review-core-r3/original-94-tests-preserved.json"
+  },
+  "engineering_gate": {
+    "r4_status": "PENDING_PARENT_BOUND_FINAL_RECEIPT",
+    "reviewer_executed": false,
+    "success_signed": false,
+    "condition": "Parent must bind actual successful full-gate terminal receipt to this same final freeze; changed inputs require a new binding and delta verification"
+  },
+  "other_scopes_approved_by_this_report": false,
+  "other_scopes": [
+    "r4 app bridge production/tests and P2-003 closure",
+    "r4 Python runner and tests",
+    "full Linux and real-peer interoperability",
+    "native macOS Windows Linux and full product"
+  ],
+  "reviewer_prohibited_actions_performed": {
+    "cargo": 0,
+    "compiler": 0,
+    "format": 0,
+    "clippy": 0,
+    "shared_target_access": 0,
+    "git_mutation": 0,
+    "source_or_test_changes": 0,
+    "worktree_creation": 0,
+    "new_user_chat_creation": 0
+  },
+  "write_scope": "work/pty-farewell-20261115/review-core-r4/",
+  "historical_r2_r3_reports_preserved": true,
+  "report_sha256": "840fb1bcc1b50c1b03b3a0352bb69fcf59ef22f012d8c31acf5d04f17e2daa6a"
+}

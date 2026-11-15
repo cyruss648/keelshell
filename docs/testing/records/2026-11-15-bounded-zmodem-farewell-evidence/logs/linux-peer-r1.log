@@ -1,0 +1,4 @@
+LINUX_FIXTURE_READY /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/linux-peer-r1/readiness.json
+Endpoint fixture@127.0.0.1:38797; Python/lrzsz/OpenSSH/ACL tools installed
+FixtureFailure: Supplied parent command failed
+Linux file interoperability failed: /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/linux-peer-r1

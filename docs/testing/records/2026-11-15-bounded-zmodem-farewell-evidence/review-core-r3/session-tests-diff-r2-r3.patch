@@ -1,0 +1,74 @@
+--- r2/crates/keelshell-session/tests/zmodem.rs
++++ r3/crates/keelshell-session/tests/zmodem.rs
+@@ -309,6 +309,71 @@
+     fixture.finish().await
+ }
+ 
++#[tokio::test]
++async fn zmodem_peer_cancel_preserves_retained_terminal_tail_without_warning() -> TestResult {
++    let fixture = Fixture::start().await?;
++    for kind in [FrameType::Cancel, FrameType::Abort, FrameType::FileError] {
++        let (mut controller, id) = waiting_for_farewell(&fixture).await?;
++        assert!(
++            controller
++                .feed(&fixture.session, "个$ ".as_bytes())
++                .await
++                .terminal
++                .is_empty()
++        );
++        let output = controller.feed(&fixture.session, &header(kind, 0)).await;
++        assert_eq!(
++            output.events,
++            vec![Ui::Cancelled {
++                id,
++                uncertain: false
++            }]
++        );
++        assert_eq!(output.terminal, ["个$ ".as_bytes(), b"\x11"].concat());
++        assert!(controller.transport_failed().terminal.is_empty());
++        assert_eq!(
++            controller.feed(&fixture.session, b"next").await.terminal,
++            b"next"
++        );
++        assert!(!controller.is_active());
++    }
++    fixture.assert_no_authority_used();
++    fixture.finish().await
++}
++
++#[tokio::test]
++async fn zmodem_failed_input_preserves_retained_terminal_tail_without_success() -> TestResult {
++    let fixture = Fixture::start().await?;
++    let (mut controller, id) = waiting_for_farewell(&fixture).await?;
++    assert!(
++        controller
++            .feed(&fixture.session, "个$ ".as_bytes())
++            .await
++            .terminal
++            .is_empty()
++    );
++    let output = controller
++        .feed(&fixture.session, &header(FrameType::Command, 0))
++        .await;
++    assert_eq!(
++        output.events,
++        vec![Ui::Failed {
++            id,
++            reason: Failure::Protocol,
++            uncertain: false
++        }]
++    );
++    assert_eq!(output.terminal, "个$ ".as_bytes());
++    assert!(controller.transport_failed().terminal.is_empty());
++    assert_eq!(
++        controller.feed(&fixture.session, b"next").await.terminal,
++        b"next"
++    );
++    assert!(!controller.is_active());
++    fixture.assert_no_authority_used();
++    fixture.finish().await
++}
++
+ fn upload_request(output: &Output) -> TestResult<Uuid> {
+     output
+         .events

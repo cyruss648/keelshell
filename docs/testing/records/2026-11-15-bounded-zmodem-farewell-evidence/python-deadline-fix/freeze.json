@@ -1,0 +1,23 @@
+{
+  "status": "FROZEN_FOR_PARENT_INTEGRATION",
+  "frozen_at_utc": "2026-11-15T10:50:09.267228+00:00",
+  "files": [
+    {
+      "path": "scripts/run_linux_file_interop.py",
+      "sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "bytes": 52893,
+      "snapshot": "run_linux_file_interop.py.frozen"
+    },
+    {
+      "path": "scripts/test_linux_file_interop.py",
+      "sha256": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c",
+      "bytes": 14875,
+      "snapshot": "test_linux_file_interop.py.frozen"
+    }
+  ],
+  "read_dependency": {
+    "path": "scripts/openssh_interop.py",
+    "sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+  },
+  "successful_test_receipts_bind_current_files": true
+}

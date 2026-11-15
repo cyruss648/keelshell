@@ -1,0 +1,25 @@
+[
+  {
+    "command": [
+      "podman",
+      "machine",
+      "list",
+      "--format",
+      "json"
+    ],
+    "exit": 0,
+    "stdout": "[\n    {\n        \"Name\": \"podman-machine-default\",\n        \"Default\": true,\n        \"Created\": \"2026-09-18T23:12:42.062146+08:00\",\n        \"Running\": true,\n        \"Starting\": false,\n        \"LastUp\": \"2026-11-15T09:00:22.468781+08:00\",\n        \"Stream\": \"default\",\n        \"VMType\": \"applehv\",\n        \"CPUs\": 9,\n        \"Memory\": \"8589934592\",\n        \"Swap\": \"0\",\n        \"DiskSize\": \"161061273600\",\n        \"Port\": 56260,\n        \"RemoteUsername\": \"core\",\n        \"IdentityPath\": \"/Users/hdh/.local/share/containers/podman/machine/machine\",\n        \"UserModeNetworking\": true\n    }\n]",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "podman",
+      "image",
+      "exists",
+      "docker.io/library/rust:1.98.1-slim-bookworm"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

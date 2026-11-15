@@ -709,6 +709,79 @@ fn zmodem_verified_saves_survive_next_offer_finished_and_dismissal(cx: &mut Test
 }
 
 #[gpui_kit::test]
+fn zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown(cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    let old = Uuid::new_v4();
+    let id = Uuid::new_v4();
+    let path = std::env::temp_dir().join("verified-without-farewell.bin");
+    let digest = "cd".repeat(32);
+    h.terminal.update(cx, |view, _| {
+        view.zmodem.safety.active.store(true, Ordering::Release);
+    });
+    h.bridge_events(
+        [
+            ZmodemUiEvent::Failed {
+                id: old,
+                reason: ZmodemFailure::UnverifiedPublication,
+                uncertain: true,
+            },
+            ZmodemUiEvent::DownloadOffered {
+                id,
+                offer: Uuid::new_v4(),
+                name: "verified-without-farewell.bin".into(),
+                size: 7,
+            },
+            ZmodemUiEvent::FileSaved {
+                id,
+                path: path.clone(),
+                bytes: 7,
+                sha256: digest.clone(),
+            },
+            ZmodemUiEvent::EndedWithoutFarewell { id },
+        ],
+        cx,
+    );
+    h.terminal.read_with(cx, |view, _| {
+        let current = view
+            .zmodem
+            .current
+            .as_ref()
+            .checked("retained warning card");
+        assert!(matches!(current.stage, Stage::Ended));
+        let (zh, en) = current.feedback.translations();
+        assert!(zh.contains("未发送最终 OO"));
+        assert!(en.contains("full handshake was not confirmed"));
+        let saved = view
+            .zmodem
+            .verified_saves
+            .front()
+            .checked("verified save receipt");
+        assert_eq!(
+            (&saved.path, saved.bytes, &saved.sha256),
+            (&path, 7, &digest)
+        );
+        assert!(view.zmodem.unresolved.contains_key(&old));
+        assert!(
+            view.zmodem_close_busy(),
+            "older unknown results remain protected"
+        );
+    });
+    let commands: Vec<_> = h.commands.try_iter().collect();
+    assert!(commands.contains(&TerminalCommand::ResumeInput(id)));
+    assert!(
+        !commands
+            .iter()
+            .any(|command| matches!(command, TerminalCommand::Write(_)))
+    );
+}
+
+#[gpui_kit::test]
+fn zmodem_missing_farewell_before_an_offer_requests_exact_handoff(cx: &mut TestAppContext) {
+    let id = Uuid::new_v4();
+    assert_preoffer_handoff(id, ZmodemUiEvent::EndedWithoutFarewell { id }, cx);
+}
+
+#[gpui_kit::test]
 fn zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound(
     cx: &mut TestAppContext,
 ) {

@@ -1,0 +1,39 @@
+{
+  "recorded_utc": "2026-11-15T10:30:58.145079+00:00",
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/stable-tests/barrier-r2",
+    "write_barrier_tests",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "binary_label": "barrier-r2",
+  "parent_built": true,
+  "independently_recompiled": false,
+  "binary_sha256_before": "c5e3408f21f1e4a7a418d97a064fb48b3ffe51cac2e94a6d02ab0046dca9ba55",
+  "binary_sha256_after": "c5e3408f21f1e4a7a418d97a064fb48b3ffe51cac2e94a6d02ab0046dca9ba55",
+  "expected_binary_sha256": "c5e3408f21f1e4a7a418d97a064fb48b3ffe51cac2e94a6d02ab0046dca9ba55",
+  "source_freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "exit_code": 0,
+  "elapsed_seconds": 3.5942339160101255,
+  "expected_passed": 4,
+  "counts": {
+    "result": "ok",
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 185
+  },
+  "test_result_lines": [
+    "test ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure ... ok",
+    "test ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply ... ok",
+    "test ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked ... ok",
+    "test ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply ... ok",
+    "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 185 filtered out; finished in 3.56s"
+  ],
+  "stdout_sha256": "bd95f7ee302883f0be1991308b936f7e7046c662b3e53ae391f1f9bc0e639b6b",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tmpdir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r2/tmp/ssh-write-barrier-r2",
+  "verified": true
+}

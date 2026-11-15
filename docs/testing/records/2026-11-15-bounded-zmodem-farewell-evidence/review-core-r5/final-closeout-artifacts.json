@@ -1,0 +1,9 @@
+{
+  "recorded_utc": "2026-11-15T11:09:12.537801+00:00",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "files": {
+    "final-closeout.md": "88cbb24f84b9c76d6f0666fae903ef22a5edf906ad104199883d2462f407e58c",
+    "final-closeout-receipt.json": "22c1776cf9ce6aaaa0ec38509cd0b3690d4f013cc66811dc9d89ba6d7ac2871b"
+  },
+  "previous_artifacts_manifest_sha256": "33ffb032b77e3da4951377aa8b52cd5501eb60a35e89ce2ba44f4fc9dbc463e4"
+}

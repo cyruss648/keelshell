@@ -1,0 +1,68 @@
+{
+  "recorded_utc": "2026-11-15T11:02:57.129044+00:00",
+  "unchanged_core_session_root_count": 231,
+  "reuse": {
+    "app-r5": {
+      "original_freeze": "frozen-inputs-r4.json",
+      "binary_sha256": "e2a7c4842570c80c632e5c7b40b72d8e383bf19f48146b8d17ad09efd50cc369",
+      "metadata_sha256": "04107b54d10cd06d98dacc8397d05160326b07e9f49b3d346c8330dc3a25d64c",
+      "inventory_sha256": "a9c65e4e9965d895d7341ca8a3200803e15a8427c04034ca48a2ae16ead5d27a",
+      "complete_inventory_count": 1238,
+      "prior_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r4/receipt-app-zmodem-r5.json",
+      "prior_receipt_sha256": "518c4b4b00b2f7ff9d3c5b25717fee1884b115f27fa677508f447d664f19eb09",
+      "counts": {
+        "passed": 30,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 1208
+      },
+      "actual_rerun_for_r5": false,
+      "parent_prebuilt_no_independent_recompilation": true,
+      "reason": "r4-to-r5 exact diff touches only full_ui_output_queue_does_not_block_cancel_or_owned_cleanup; all 30 zmodem cases and all production inputs unchanged. New full bridge execution will overlap 12 names."
+    },
+    "session-r4": {
+      "original_freeze": "frozen-inputs-r3.json",
+      "binary_sha256": "01f3b882bf6d3d9e4be81f5567f0314a92c22702fd130a7d5269769e0f144007",
+      "metadata_sha256": "c1edf9249a294de7a1280bb4c43cde936edea8afdefef50d127f8448d89a331e",
+      "inventory_sha256": "c31c0f876b00ce6554ada69d57e63f370c7f9dbd65f41bbbb6a3c612487379e8",
+      "complete_inventory_count": 25,
+      "prior_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r3/receipt-session-zmodem-r4.json",
+      "prior_receipt_sha256": "444f43e568a673dc51c10372fadb54a6dc01cba5347d96e30f8403a7b9e60370",
+      "counts": {
+        "result": "ok",
+        "passed": 25,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "actual_rerun_for_r5": false,
+      "parent_prebuilt_no_independent_recompilation": true,
+      "reason": "231 core/session/root inputs identical r3 through r5; prior bound inventories and binaries unchanged."
+    },
+    "barrier-r3": {
+      "original_freeze": "frozen-inputs-r3.json",
+      "binary_sha256": "2a19de8a3f4edfc77fbcbb9f542e3d20020ea2c49141205dfa0a3b6dc2ae2d8d",
+      "metadata_sha256": "a6ac9a3c654b9553579f0141ef0313ba1cf0ff0e758f54143c4a3b9a39566ab4",
+      "inventory_sha256": "2e2a567b8c4322f9d2d2c9cd3d5ccc543d344e2bf38d548310848b7fc34149c7",
+      "complete_inventory_count": 189,
+      "prior_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/review-session-ui-r3/receipt-ssh-write-barrier-r3.json",
+      "prior_receipt_sha256": "ce86bd8d69870992530f6c0fea893f2724624d5c186127b1252dc5c91e7c1396",
+      "counts": {
+        "result": "ok",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 185
+      },
+      "actual_rerun_for_r5": false,
+      "parent_prebuilt_no_independent_recompilation": true,
+      "reason": "231 core/session/root inputs identical r3 through r5; prior bound inventories and binaries unchanged."
+    }
+  },
+  "strict_original_seven_peer_assertions": "r2 checked byte-identical to HEAD, full peer file unchanged r2 through r5",
+  "peer_executed_by_reviewer": false,
+  "no_additive_unique_test_count_across_repeated_groups": true
+}

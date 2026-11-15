@@ -1,6 +1,7 @@
 use super::{Error, MAX_NOISE_BYTES, MAX_SUBPACKET_BYTES};
 
 pub(super) const ZDLE: u8 = 0x18;
+const MAX_HEADER_BYTES: usize = 96;
 
 /// Standard ZMODEM frame identifier.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -460,13 +461,33 @@ impl Data {
 }
 
 #[derive(Default)]
+struct Farewell {
+    bytes: Vec<u8>,
+    first_o: Option<usize>,
+}
+
+impl Farewell {
+    fn pad_continues_utf8(&self) -> bool {
+        // A terminal continuation byte can equal the parity pad 0xaa.
+        // Inspect only one UTF-8 sequence, including an incomplete prefix.
+        let tail = &self.bytes[self.bytes.len().saturating_sub(4)..];
+        let Some(start) = tail.iter().rposition(|byte| byte & 0xc0 != 0x80) else {
+            return false;
+        };
+        match std::str::from_utf8(&tail[start..]) {
+            Ok(_) => true,
+            Err(error) => error.error_len().is_none(),
+        }
+    }
+}
+
+#[derive(Default)]
 pub(super) struct Decoder {
     header: Vec<u8>,
     data: Option<Data>,
     noise: usize,
     cans: u8,
-    finish: bool,
-    first_o: bool,
+    farewell: Option<Farewell>,
 }
 
 impl Decoder {
@@ -488,14 +509,35 @@ impl Decoder {
 
     pub(super) fn expect_finish(&mut self) {
         self.expect_header();
-        self.finish = true;
-        self.first_o = false;
+        self.farewell.get_or_insert_with(Farewell::default).first_o = None;
+    }
+
+    pub(super) fn take_farewell_bytes(&mut self) -> Vec<u8> {
+        self.expect_header();
+        self.farewell
+            .take()
+            .map(|farewell| farewell.bytes)
+            .unwrap_or_default()
     }
 
     pub(super) fn push(&mut self, byte: u8) -> Result<Option<Token>, Error> {
+        if let Some(farewell) = &mut self.farewell {
+            // Controls skipped by the parser must not grow retention without
+            // bound. Include room for the existing small header candidate;
+            // retries retain every byte not validated as repeated ZFIN.
+            if farewell.bytes.len() >= MAX_NOISE_BYTES + MAX_HEADER_BYTES {
+                return Err(Error::Limit("farewell bytes"));
+            }
+            farewell.bytes.push(byte);
+        }
         if byte == ZDLE {
             self.cans = self.cans.saturating_add(1);
             if self.cans == 5 {
+                if let Some(farewell) = &mut self.farewell {
+                    farewell
+                        .bytes
+                        .truncate(farewell.bytes.len().saturating_sub(5));
+                }
                 self.expect_header();
                 return Ok(Some(Token::Cancelled));
             }
@@ -530,15 +572,29 @@ impl Decoder {
         if self.header.is_empty() && flow(byte) {
             return Ok(None);
         }
-        if self.finish && self.header.is_empty() && byte == b'O' {
-            if self.first_o {
+        if self.header.is_empty()
+            && byte == b'O'
+            && let Some(farewell) = &mut self.farewell
+        {
+            if let Some(first_o) = farewell.first_o.take() {
+                farewell.bytes.truncate(farewell.bytes.len() - 1);
+                farewell.bytes.remove(first_o);
                 return Ok(Some(Token::OverAndOut));
             }
-            self.first_o = true;
+            farewell.first_o = Some(farewell.bytes.len() - 1);
             return Ok(None);
         }
-        self.first_o = false;
-        if self.header.is_empty() && byte & 0x7f != b'*' {
+        if let Some(farewell) = &mut self.farewell {
+            farewell.first_o = None;
+        }
+        if self.header.is_empty()
+            && (byte & 0x7f != b'*'
+                || (byte == 0xaa
+                    && self
+                        .farewell
+                        .as_ref()
+                        .is_some_and(Farewell::pad_continues_utf8)))
+        {
             if !flow(byte) {
                 self.noise += 1;
                 if self.noise > MAX_NOISE_BYTES {
@@ -548,13 +604,21 @@ impl Decoder {
             return Ok(None);
         }
         self.header.push(byte);
-        if self.header.len() > 96 {
+        if self.header.len() > MAX_HEADER_BYTES {
             self.expect_header();
             return Err(Error::Limit("header bytes"));
         }
         match probe_header(&self.header) {
             Probe::NeedMore => Ok(None),
             Probe::Header(header, _) => {
+                // A validated control frame remains protocol-owned even when
+                // it cancels or fails the receiver. Only surrounding ordinary
+                // bytes belong to terminal cleanup.
+                if let Some(farewell) = &mut self.farewell {
+                    farewell
+                        .bytes
+                        .truncate(farewell.bytes.len() - self.header.len());
+                }
                 self.header.clear();
                 Ok(Some(Token::Header(header)))
             }

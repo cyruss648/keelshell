@@ -334,6 +334,12 @@ impl TerminalView {
                     "Zmodem protocol completed. Inspect uploaded files remotely; downloads are confirmed by their verified save receipts.",
                 ), false);
             }
+            ZmodemUiEvent::EndedWithoutFarewell { id } => {
+                self.end_zmodem(id, Message::new(
+                    "远端未发送最终 OO，Zmodem 已结束等待。此结果不表示完整握手成功；下载仅以各文件的已验证保存回执为准。",
+                    "The peer did not send the final OO; Zmodem stopped waiting. The full handshake was not confirmed. Only each file's verified save receipt confirms its download.",
+                ), false);
+            }
             ZmodemUiEvent::Cancelled { id, uncertain } => {
                 self.end_zmodem(id, Message::new(
                     "Zmodem 已取消。取消不能证明远端文件已删除或本地发布已回滚。",

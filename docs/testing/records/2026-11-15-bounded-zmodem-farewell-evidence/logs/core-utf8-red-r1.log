@@ -1,0 +1,69 @@
+   Compiling keelshell-core v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s
+     Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/80a83cd31344afd3/out/zmodem-80a83cd31344afd3)
+
+running 6 tests
+test receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin ... FAILED
+test receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin ... FAILED
+test receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split ... FAILED
+test receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise ... FAILED
+test receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split ... FAILED
+test receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise ... FAILED
+
+failures:
+
+---- receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin stdout ----
+
+thread 'receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin' (7158701) panicked at crates/keelshell-core/tests/zmodem.rs:1822:5:
+assertion `left == right` failed: strict farewell: true
+  left: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), Finished, Terminal([228, 184, 36, 32])]
+ right: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), Finished, Terminal([228, 184, 170, 36, 32])]
+
+---- receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin stdout ----
+
+thread 'receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin' (7158704) panicked at crates/keelshell-core/tests/zmodem.rs:1822:5:
+assertion `left == right` failed: strict farewell: false
+  left: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), FarewellMissing, Terminal([228, 184, 36, 32])]
+ right: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), FarewellMissing, Terminal([228, 184, 170, 36, 32])]
+
+---- receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split stdout ----
+
+thread 'receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split' (7158702) panicked at crates/keelshell-core/tests/zmodem.rs:1822:5:
+assertion `left == right` failed: strict farewell: true
+  left: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), Finished, Terminal([228, 184, 36, 32])]
+ right: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), Finished, Terminal([228, 184, 170, 36, 32])]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise stdout ----
+
+thread 'receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise' (7158703) panicked at crates/keelshell-core/tests/zmodem.rs:1822:5:
+assertion `left == right` failed: strict farewell: true
+  left: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), Finished, Terminal([228, 184, 36, 32])]
+ right: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), Finished, Terminal([228, 184, 170, 36, 32])]
+
+---- receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split stdout ----
+
+thread 'receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split' (7158705) panicked at crates/keelshell-core/tests/zmodem.rs:1822:5:
+assertion `left == right` failed: strict farewell: false
+  left: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), FarewellMissing, Terminal([228, 184, 36, 32])]
+ right: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), FarewellMissing, Terminal([228, 184, 170, 36, 32])]
+
+---- receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise stdout ----
+
+thread 'receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise' (7158706) panicked at crates/keelshell-core/tests/zmodem.rs:1822:5:
+assertion `left == right` failed: strict farewell: false
+  left: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), FarewellMissing, Terminal([228, 184, 36, 32])]
+ right: [Send([42, 42, 24, 66, 48, 56, 48, 48, 48, 48, 48, 48, 48, 48, 48, 50, 50, 100, 13, 10]), FarewellMissing, Terminal([228, 184, 170, 36, 32])]
+
+
+failures:
+    receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin
+    receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split
+    receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise
+    receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin
+    receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split
+    receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise
+
+test result: FAILED. 0 passed; 6 failed; 0 ignored; 0 measured; 86 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p keelshell-core --test zmodem`

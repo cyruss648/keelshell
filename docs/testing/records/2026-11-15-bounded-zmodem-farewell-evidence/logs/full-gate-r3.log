@@ -1,0 +1,57 @@
+Dependency version policy: passed
+{"storage_observation": {"phase": "before-python-tests", "locations": {"workspace": {"available": true, "total_bytes": 1995165736960, "used_bytes": 864450174976, "free_bytes": 1130715561984}, "temporary": {"available": true, "total_bytes": 1995165736960, "used_bytes": 864450174976, "free_bytes": 1130715561984}}}}
+Running: /opt/homebrew/opt/python@3.15/bin/python3.15 -m unittest discover -s scripts -p test_*.py
+.................................................................E.................................s.........................................
+======================================================================
+ERROR: test_timeout_drains_birth_verified_child_and_grandchild (test_linux_file_interop.ProcessTests.test_timeout_drains_birth_verified_child_and_grandchild)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/openssh_interop.py", line 136, in process_table
+    result = subprocess.run(
+        ["ps", "-eo", "pid="], capture_output=True, text=True,
+        check=True, timeout=min(PROCESS_TABLE_TIMEOUT, remaining),
+    )
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/subprocess.py", line 671, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/subprocess.py", line 1395, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/subprocess.py", line 2424, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        skip_check_and_raise=True)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/subprocess.py", line 1434, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['ps', '-eo', 'pid=']' timed out after 0.003871541004627943 seconds
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_file_interop.py", line 166, in test_timeout_drains_birth_verified_child_and_grandchild
+    self.commands.run("expected-timeout", [
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+        sys.executable, "-c", script, str(child_pid),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ], timeout=0.8)
+    ^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 192, in run
+    self.capture(deadline)
+    ~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/run_linux_file_interop.py", line 162, in capture
+    table = ownership.process_table(deadline)
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/openssh_interop.py", line 141, in process_table
+    raise InteropFailure("Process inventory exceeded its bounded deadline") from error
+openssh_interop.InteropFailure: Process inventory exceeded its bounded deadline
+
+----------------------------------------------------------------------
+Ran 141 tests in 7.237s
+
+FAILED (errors=1, skipped=1)
+{"actual_preparation_controls": [{"elapsed_seconds": 1.47985, "identity_bound_before_ack": true, "job_membership": null, "partial_publications_rejected": [], "pids": {"child": 66531, "parent": 66529}, "post_identity_seconds": 0.85648, "post_pid_query_states": {"child": "ABSENT", "parent": "ABSENT"}, "post_states": {"child": "ABSENT", "parent": "ABSENT"}, "preparation_seconds": 0.623526, "publication_delay_seconds": 0.6000000000000001, "receipt": {"controller_exit": 124, "errors": [], "interrupted": false, "observed_exit": null, "terminal": {"active_processes": 0, "direct_reaped": true, "errors": [], "pipes_drained": true}, "timed_out": true}, "requested_parent_exit": null, "signal": null, "signal_sent": false, "state_identity": "owned_group_pids", "stdio": "detached"}, {"elapsed_seconds": 0.469116, "identity_bound_before_ack": true, "job_membership": null, "partial_publications_rejected": [], "pids": {"child": 66564, "parent": 66563}, "post_identity_seconds": 0.437076, "post_pid_query_states": {"child": "ABSENT", "parent": "ABSENT"}, "post_states": {"child": "ABSENT", "parent": "ABSENT"}, "preparation_seconds": 0.032168, "publication_delay_seconds": 0, "receipt": {"controller_exit": 7, "errors": [], "interrupted": false, "observed_exit": 7, "terminal": {"active_processes": 0, "direct_reaped": true, "errors": [], "pipes_drained": true}, "timed_out": true}, "requested_parent_exit": 7, "signal": null, "signal_sent": false, "state_identity": "owned_group_pids", "stdio": "inherited"}, {"elapsed_seconds": 0.075341, "identity_bound_before_ack": true, "job_membership": null, "partial_publications_rejected": [], "pids": {"child": 66579, "parent": 66577}, "post_identity_seconds": 0.046869, "post_pid_query_states": {"child": "ABSENT", "parent": "ABSENT"}, "post_states": {"child": "ABSENT", "parent": "ABSENT"}, "preparation_seconds": 0.02861, "publication_delay_seconds": 0, "receipt": {"controller_exit": 0, "errors": [], "interrupted": false, "observed_exit": 0, "terminal": {"active_processes": 0, "direct_reaped": true, "errors": [], "pipes_drained": true}, "timed_out": false}, "requested_parent_exit": 0, "signal": null, "signal_sent": false, "state_identity": "owned_group_pids", "stdio": "detached"}, {"elapsed_seconds": 0.470239, "identity_bound_before_ack": true, "job_membership": null, "partial_publications_rejected": [], "pids": {"child": 66587, "parent": 66585}, "post_identity_seconds": 0.439983, "post_pid_query_states": {"child": "ABSENT", "parent": "ABSENT"}, "post_states": {"child": "ABSENT", "parent": "ABSENT"}, "preparation_seconds": 0.030378, "publication_delay_seconds": 0, "receipt": {"controller_exit": 130, "errors": [], "interrupted": true, "observed_exit": null, "terminal": {"active_processes": 0, "direct_reaped": true, "errors": [], "pipes_drained": true}, "timed_out": false}, "requested_parent_exit": null, "signal": "SIGINT", "signal_sent": true, "state_identity": "owned_group_pids", "stdio": "inherited"}, {"elapsed_seconds": 0.495703, "identity_bound_before_ack": true, "job_membership": null, "partial_publications_rejected": ["empty", "partial"], "pids": {"child": 66601, "parent": 66600}, "post_identity_seconds": 0.4341, "post_pid_query_states": {"child": "ABSENT", "parent": "ABSENT"}, "post_states": {"child": "ABSENT", "parent": "ABSENT"}, "preparation_seconds": 0.061741, "publication_delay_seconds": 0, "receipt": {"controller_exit": 130, "errors": [], "interrupted": true, "observed_exit": null, "terminal": {"active_processes": 0, "direct_reaped": true, "errors": [], "pipes_drained": true}, "timed_out": false}, "requested_parent_exit": null, "signal": "SIGINT", "signal_sent": true, "state_identity": "owned_group_pids", "stdio": "inherited"}, {"elapsed_seconds": 0.876925, "identity_bound_before_ack": true, "job_membership": null, "partial_publications_rejected": [], "pids": {"child": 66617, "parent": 66615}, "post_identity_seconds": 0.844918, "post_pid_query_states": {"child": "ABSENT", "parent": "ABSENT"}, "post_states": {"child": "ABSENT", "parent": "ABSENT"}, "preparation_seconds": 0.032139, "publication_delay_seconds": 0, "receipt": {"controller_exit": 124, "errors": [], "interrupted": false, "observed_exit": null, "terminal": {"active_processes": 0, "direct_reaped": true, "errors": [], "pipes_drained": true}, "timed_out": true}, "requested_parent_exit": null, "signal": null, "signal_sent": false, "state_identity": "owned_group_pids", "stdio": "inherited"}, {"elapsed_seconds": 0.88242, "identity_bound_before_ack": true, "job_membership": null, "partial_publications_rejected": [], "pids": {"child": 66645, "parent": 66644}, "post_identity_seconds": 0.850834, "post_pid_query_states": {"child": "ABSENT", "parent": "ABSENT"}, "post_states": {"child": "ABSENT", "parent": "ABSENT"}, "preparation_seconds": 0.03173, "publication_delay_seconds": 0, "receipt": {"controller_exit": 124, "errors": [], "interrupted": false, "observed_exit": null, "terminal": {"active_processes": 0, "direct_reaped": true, "errors": [], "pipes_drained": true}, "timed_out": true}, "requested_parent_exit": null, "signal": null, "signal_sent": false, "state_identity": "owned_group_pids", "stdio": "detached"}], "host": "posix"}
+{"actual_concurrent_projection": {"descendant_output_observed_in_private_raw": true, "projection_rejected": true, "original_failure_preserved": 3221226505, "owned_cleanup_complete": true}}
+{"storage_observation": {"phase": "after-python-tests", "locations": {"workspace": {"available": true, "total_bytes": 1995165736960, "used_bytes": 864450297856, "free_bytes": 1130715439104}, "temporary": {"available": true, "total_bytes": 1995165736960, "used_bytes": 864450297856, "free_bytes": 1130715439104}}}}
+Command ['/opt/homebrew/opt/python@3.15/bin/python3.15', '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_*.py'] returned non-zero exit status 1.

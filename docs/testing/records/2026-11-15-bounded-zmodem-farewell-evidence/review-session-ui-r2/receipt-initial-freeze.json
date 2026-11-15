@@ -1,0 +1,15 @@
+{
+  "recorded_utc": "2026-11-15T10:30:05.768387+00:00",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "expected_head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "expected_freeze_sha256": "8efdd6ebf0253323d169abd4e87a05bef98011e17c3dfa63beed52dac5eecd1a",
+  "input_count": 571,
+  "script_count": 12,
+  "extra_engineering_inputs": [],
+  "missing_engineering_inputs": [],
+  "mismatches": [],
+  "status_short": " M crates/keelshell-app/src/ssh_bridge.rs\n M crates/keelshell-app/src/ssh_bridge_tests.rs\n M crates/keelshell-app/src/ssh_bridge_zmodem.rs\n M crates/keelshell-app/src/terminal_zmodem.rs\n M crates/keelshell-app/src/terminal_zmodem_tests.rs\n M crates/keelshell-core/src/zmodem.rs\n M crates/keelshell-core/src/zmodem/codec.rs\n M crates/keelshell-core/src/zmodem/receiver.rs\n M crates/keelshell-core/tests/zmodem.rs\n M crates/keelshell-session/src/ssh.rs\n M crates/keelshell-session/src/zmodem.rs\n M crates/keelshell-session/tests/zmodem.rs\n M crates/keelshell-session/tests/zmodem_openssh.rs\n M docs/HANDOFF.md\n M docs/ROADMAP.md\n M docs/product/ZMODEM.md\n?? crates/keelshell-session/src/ssh/write_barrier_tests.rs\n?? docs/adr/0137-bounded-zmodem-farewell.md\n?? docs/testing/records/2026-11-15-bounded-zmodem-farewell.md\n",
+  "method": "independent read-only hash verification; no Cargo, rebuild, target mutation, source or Git writes",
+  "binaries": {}
+}

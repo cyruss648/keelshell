@@ -1,0 +1,54 @@
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 32.22s
+     Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dec5f1080a7dd190/out/keelshell_app-dec5f1080a7dd190)
+
+running 4 tests
+test ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation ... FAILED
+test ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout ... FAILED
+test ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases ... FAILED
+test ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order ... FAILED
+
+failures:
+
+---- ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation stdout ----
+
+thread 'ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation' (7376516) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:887:9:
+assertion `left == right` failed
+  left: [Data([98, 101, 102, 111, 114, 101, 45, 116, 97, 105, 108, 10])]
+ right: [Data([98, 101, 102, 111, 114, 101, 45, 116, 97, 105, 108, 10]), Data([228, 184, 170, 36, 32, 27, 91, 51, 50, 109, 114, 101, 116, 97, 105, 110, 101, 100, 27, 91, 48, 109])]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout stdout ----
+
+thread 'ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout' (7376515) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:887:9:
+assertion `left == right` failed
+  left: [Data([98, 101, 102, 111, 114, 101, 45, 116, 97, 105, 108, 10])]
+ right: [Data([98, 101, 102, 111, 114, 101, 45, 116, 97, 105, 108, 10]), Data([228, 184, 170, 36, 32, 27, 91, 51, 50, 109, 114, 101, 116, 97, 105, 110, 101, 100, 27, 91, 48, 109])]
+
+---- ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases stdout ----
+
+thread 'ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases' (7376517) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:864:13:
+assertion `left == right` failed: full receiver must have an explicit bounded cleanup result: operation timed out: SSH terminal write confirmation
+  left: false
+ right: true
+
+---- ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order stdout ----
+
+thread 'ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order' (7376518) panicked at crates/keelshell-app/src/ssh_bridge_tests.rs:836:21:
+a full UI receiver must retain cleanup ownership
+
+
+failures:
+    ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout
+    ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation
+    ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases
+    ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 1234 filtered out; finished in 2.28s
+
+error: test failed, to rerun pass `-p keelshell-app --bin keelshell-app`

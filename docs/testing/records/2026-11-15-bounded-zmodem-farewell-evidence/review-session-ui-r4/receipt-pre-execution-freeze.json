@@ -1,0 +1,11 @@
+{
+  "recorded_utc": "2026-11-15T10:55:52.208632+00:00",
+  "freeze_sha256": "9133ce6141be9498034641d25fe064b60c0904fb4ced9f8d73f52a76e2e4c58c",
+  "input_count": 571,
+  "script_count": 12,
+  "mismatches": [],
+  "binary_sha256": "e2a7c4842570c80c632e5c7b40b72d8e383bf19f48146b8d17ad09efd50cc369",
+  "metadata_sha256": "04107b54d10cd06d98dacc8397d05160326b07e9f49b3d346c8330dc3a25d64c",
+  "inventory_sha256": "a9c65e4e9965d895d7341ca8a3200803e15a8427c04034ca48a2ae16ead5d27a",
+  "verified": true
+}

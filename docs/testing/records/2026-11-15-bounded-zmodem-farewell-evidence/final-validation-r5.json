@@ -1,0 +1,1039 @@
+{
+  "recorded_utc": "2026-11-15T11:23:50.480596+00:00",
+  "status": "FINAL_AUTHOR_GATE_PASS_BOUND_TO_R5",
+  "freeze": "frozen-inputs-r5.json",
+  "freeze_sha256": "d8d27989768ae1827697458ee52d366d407ca8543a9eebd41baf6d8f283a2b2e",
+  "input_count": 571,
+  "script_count": 12,
+  "post_gate_mismatches": [],
+  "complete_engineering_path_set_matches": true,
+  "gate": {
+    "receipt": "logs/full-gate-r5.json",
+    "receipt_sha256": "ccf8312aca49f8f6153fa659bc1ae610ee6ba7349dfeee0c7424e1df7e7f52a8",
+    "log": "logs/full-gate-r5.log",
+    "log_sha256": "d812c4dde3ee5b56fe70eaec33847bef14fd69cab07180b92a30a5bda72ebf60",
+    "exit": 0,
+    "seconds": 646.751,
+    "timed_out": false,
+    "subprocess_wait_completed": true
+  },
+  "ordinary_rust": {
+    "passed": 2935,
+    "failed": 0,
+    "ignored": 35
+  },
+  "rustdoc": {
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0
+  },
+  "python": {
+    "run": 148,
+    "skipped": 1,
+    "seconds": 7.499,
+    "passed": 147,
+    "failed": 0,
+    "errors": 0
+  },
+  "suites": [
+    {
+      "kind": "ordinary",
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/50ac3b81bb7f6304/out/keelshell_ai-50ac3b81bb7f6304)",
+      "passed": 129,
+      "failed": 0,
+      "ignored": 1,
+      "original_summary": "test result: ok. 129 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 6.25s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/discovery_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/cde86858806b4804/out/discovery_http-cde86858806b4804)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.82s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/header_name_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/416f9434392ad260/out/header_name_secrets_http-416f9434392ad260)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/known_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/27548ce1aa5fe1ba/out/known_secrets_http-27548ce1aa5fe1ba)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/local_agent_cli.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/6cb13e5572180480/out/local_agent_cli-6cb13e5572180480)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 4,
+      "original_summary": "test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/local_environment_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/2b0b548e67a72bcc/out/local_environment_independent-2b0b548e67a72bcc)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/provider_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/849df446cb6a7c35/out/provider_http-849df446cb6a7c35)",
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/request_options_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/00d3bd5743f55614/out/request_options_http-00d3bd5743f55614)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.15s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dec5f1080a7dd190/out/keelshell_app-dec5f1080a7dd190)",
+      "passed": 1236,
+      "failed": 0,
+      "ignored": 2,
+      "original_summary": "test result: ok. 1236 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 314.19s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/96657fab632ebf17/out/keelshell_core-96657fab632ebf17)",
+      "passed": 222,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 222 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.66s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/ai_inference.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/03d101948afd0e5c/out/ai_inference-03d101948afd0e5c)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/ai_profile_storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/9b9487af50165e3e/out/ai_profile_storage-9b9487af50165e3e)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f2c9e0d293a2e4f6/out/archive-f2c9e0d293a2e4f6)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.24s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/archive_pax.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/5ddbd10840455633/out/archive_pax-5ddbd10840455633)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/batch_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/cfb3d5d9b5ba0059/out/batch_audit-cfb3d5d9b5ba0059)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/batch_parameters.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3d452e922930f520/out/batch_parameters-3d452e922930f520)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/batch_workflow.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/819c29bea63f66b4/out/batch_workflow-819c29bea63f66b4)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/completion_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f6ae347c8d960ff6/out/completion_shell-f6ae347c8d960ff6)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/configuration_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/95b10d18a41ffe3e/out/configuration_recovery-95b10d18a41ffe3e)",
+      "passed": 24,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.10s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/connection_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6f3c0f0da0ff52e5/out/connection_library-6f3c0f0da0ff52e5)",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/connection_library_batch.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/013664f4e932b31b/out/connection_library_batch-013664f4e932b31b)",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/directory_compare.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6429720617b07044/out/directory_compare-6429720617b07044)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/directory_mirror.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3068cc5f33f9417c/out/directory_mirror-3068cc5f33f9417c)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/directory_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/eda50b36739fba94/out/directory_sync-eda50b36739fba94)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/host_keys.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d4c5671fdecc9e33/out/host_keys-d4c5671fdecc9e33)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/259de3c11aaadb90/out/independent_workflow_audit-259de3c11aaadb90)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/knowledge_context.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/35c48bf60e82ce11/out/knowledge_context-35c48bf60e82ce11)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/knowledge_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/eec896ef0d75616c/out/knowledge_library-eec896ef0d75616c)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/knowledge_persistence.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/139de27cf9ed548a/out/knowledge_persistence-139de27cf9ed548a)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/9241af6380d986af/out/openssh-9241af6380d986af)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/pane_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/2188ab300176cfef/out/pane_layout-2188ab300176cfef)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/06904a0563dacf1e/out/profile_sync-06904a0563dacf1e)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.62s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/profile_sync_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/20cc859b68937021/out/profile_sync_independent-20cc859b68937021)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.96s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/profile_sync_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/1d613f7d7ee7b380/out/profile_sync_review-1d613f7d7ee7b380)",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.11s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/profiles.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f6557ddc66789910/out/profiles-f6557ddc66789910)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/proxies.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0286c9fd6d5790de/out/proxies-0286c9fd6d5790de)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/reconnect.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/794d9f290af5efe3/out/reconnect-794d9f290af5efe3)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/recursive_mirror_final_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/c4188a551cdc1a13/out/recursive_mirror_final_review-c4188a551cdc1a13)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/routes.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0cd56afe8aaad032/out/routes-0cd56afe8aaad032)",
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/scheduled_workflow_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/edf124082a0b9e1e/out/scheduled_workflow_review-edf124082a0b9e1e)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/server_archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d1b3db9853096ee3/out/server_archive-d1b3db9853096ee3)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.63s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/snippet_template_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/7dc82ff0cdf6b412/out/snippet_template_shell-7dc82ff0cdf6b412)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/snippet_templates.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/01f323480397cc6f/out/snippet_templates-01f323480397cc6f)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/snippets.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/5501f21e2b798557/out/snippets-5501f21e2b798557)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.99s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/da18a87edbc400d0/out/storage-da18a87edbc400d0)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/theme_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/ee10ec6948535d5b/out/theme_preferences-ee10ec6948535d5b)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/b914962e75bc9890/out/transfer_recovery-b914962e75bc9890)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/tunnel_rules.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/25133bbb2169386b/out/tunnel_rules-25133bbb2169386b)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/tunnel_runtime.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/2216ed16b5649f17/out/tunnel_runtime-2216ed16b5649f17)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/update_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6fb625d6ec8d238a/out/update_preferences-6fb625d6ec8d238a)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/vault.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/a54ff072e2b7238f/out/vault-a54ff072e2b7238f)",
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.94s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/4fba8b769ec94231/out/workflow_audit-4fba8b769ec94231)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/workflow_audit_profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f8b7ec3fb531998a/out/workflow_audit_profile_sync-f8b7ec3fb531998a)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/workflow_audit_schema.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/263fe9d5ee357821/out/workflow_audit_schema-263fe9d5ee357821)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/workflow_audit_wire_compatibility.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/00a2039617bed266/out/workflow_audit_wire_compatibility-00a2039617bed266)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/workspace_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/efcabf62cebf2b1b/out/workspace_layout-efcabf62cebf2b1b)",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6302e17300340b80/out/zmodem-6302e17300340b80)",
+      "passed": 102,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 102 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/eea92bd5a76d0993/out/keelshell_mcp-eea92bd5a76d0993)",
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/9cfb119c7fd5d530/out/keelshell_mcp-9cfb119c7fd5d530)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/authority.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/42d2bdfd51778375/out/authority-42d2bdfd51778375)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/ipc_transport.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/b9083de129ee38ba/out/ipc_transport-b9083de129ee38ba)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.13s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/startup_eof.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/c2ddcb085304a571/out/startup_eof-c2ddcb085304a571)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/stdio_process.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/bc54a2d57e0884f9/out/stdio_process-bc54a2d57e0884f9)",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.12s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/stream_protocol.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/a112071752f6d2d1/out/stream_protocol-a112071752f6d2d1)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/adb8f58e1f5df749/out/keelshell_session-adb8f58e1f5df749)",
+      "passed": 185,
+      "failed": 0,
+      "ignored": 4,
+      "original_summary": "test result: ok. 185 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 13.04s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/archive_tools.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/1fa8784ab805402d/out/archive_tools-1fa8784ab805402d)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.09s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/archive_transfer.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/81029422370ba598/out/archive_transfer-81029422370ba598)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/batch_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/484a3f93adc921f2/out/batch_exec-484a3f93adc921f2)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.08s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/disk_monitor.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/08a04846ebdec8a4/out/disk_monitor-08a04846ebdec8a4)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 1,
+      "original_summary": "test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/disk_monitor_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/40b62f8c26dc147a/out/disk_monitor_independent-40b62f8c26dc147a)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/d43f5e09ef0f46bc/out/independent_workflow_audit-d43f5e09ef0f46bc)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/openssh_interop.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/35224e47fc97debc/out/openssh_interop-35224e47fc97debc)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 15,
+      "original_summary": "test result: ok. 0 passed; 0 failed; 15 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/remote_completion.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/edf195a4f721978c/out/remote_completion-edf195a4f721978c)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.15s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/remote_only.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/f3790d6a7e7e9e60/out/remote_only-f3790d6a7e7e9e60)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/server_archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/06fe89777fc214e2/out/server_archive-06fe89777fc214e2)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/ssh_loopback.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/c52b337ae4a14ba6/out/ssh_loopback-c52b337ae4a14ba6)",
+      "passed": 154,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 154 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.52s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_idle_eof_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ff6b26ccdb1ba2f3/out/transfer_idle_eof_independent-ff6b26ccdb1ba2f3)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.49s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_idle_eof_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/cb8ab17aabe24d12/out/transfer_idle_eof_review-cb8ab17aabe24d12)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.51s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_idle_metadata_negative_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/442df0253bf68acd/out/transfer_idle_metadata_negative_review-442df0253bf68acd)",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.06s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_idle_metadata_positive_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ea8f79df02e80f4e/out/transfer_idle_metadata_positive_review-ea8f79df02e80f4e)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 44.70s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_idle_metadata_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/fa6e30951fc1eca5/out/transfer_idle_metadata_review-fa6e30951fc1eca5)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.20s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_idle_timeout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e38a600bd0c98b05/out/transfer_idle_timeout-e38a600bd0c98b05)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.28s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/transfer_metadata_idle.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/b2465d998899e8f6/out/transfer_metadata_idle-b2465d998899e8f6)",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 27.74s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/37ce3f00d8838d33/out/workflow_audit-37ce3f00d8838d33)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/workflow_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/5a3f82038e36306e/out/workflow_exec-5a3f82038e36306e)",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.08s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/1bf3417362b87c3d/out/zmodem-1bf3417362b87c3d)",
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.18s"
+    },
+    {
+      "kind": "ordinary",
+      "preamble": "Running tests/zmodem_openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/17266d1327cd36c4/out/zmodem_openssh-17266d1327cd36c4)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 8,
+      "original_summary": "test result: ok. 0 passed; 0 failed; 8 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "rustdoc",
+      "preamble": "Doc-tests keelshell_ai",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    },
+    {
+      "kind": "rustdoc",
+      "preamble": "Doc-tests keelshell_ai",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s"
+    },
+    {
+      "kind": "rustdoc",
+      "preamble": "Doc-tests keelshell_core",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "rustdoc",
+      "preamble": "Doc-tests keelshell_mcp",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+    },
+    {
+      "kind": "rustdoc",
+      "preamble": "Doc-tests keelshell_session",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "original_summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    }
+  ],
+  "stages": [
+    "/opt/homebrew/opt/python@3.15/bin/python3.15 -m unittest discover -s scripts -p test_*.py",
+    "cargo fmt --all --check",
+    "cargo clippy --workspace --all-targets --locked -- -D warnings",
+    "cargo test --workspace --locked -- --test-threads=4",
+    "cargo test -p keelshell-ai --test local_agent_process --locked -- --readiness-error-tests",
+    "cargo test -p keelshell-ai --test local_agent_directory_process --locked -- --observer-io-error-tests",
+    "cargo test -p keelshell-ai --test local_agent_process --locked -- --controller-small-stack"
+  ],
+  "new_default_rust_count": 59,
+  "new_default_rust_named_passes": {
+    "receiver_actual_oo_preserves_earlier_ordinary_bytes_and_suffix_order": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_at_every_split": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_actual_oo_preserves_utf8_before_repeated_hex_zfin_bytewise": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_actual_oo_stays_strict_and_cannot_be_reclassified_as_missing": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_actual_oo_strips_repeated_hex_zfin_with_parity_pads": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_cancel_after_actual_oo_does_not_repeat_utf8_tail": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_failed_input_preserves_farewell_tail_at_every_split": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_failed_input_preserves_farewell_tail_bytewise": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_failed_input_preserves_farewell_tail_whole": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_finish_accepts_parity_tolerant_hex_protocol_pads": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_finishing_cancel_preserves_utf8_tail_after_repeated_zfin": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_input_limit_failure_preserves_only_previously_retained_farewell_tail": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_bounds_retained_flow_control_bytes": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_cannot_bypass_review_or_unacknowledged_save": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_cannot_convert_finishing_input_errors": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_cannot_convert_peer_or_local_cancellation": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_enforces_feed_and_noise_bounds": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_follows_explicit_save_acknowledgement": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_is_distinct_idempotent_and_terminal": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_preserves_controls_outside_validated_zfin": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_preserves_fragmented_raw_and_incomplete_lookalikes": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_preserves_suffix_arriving_with_initial_zfin": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_at_every_split": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_preserves_utf8_before_repeated_hex_zfin_bytewise": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_rejects_every_other_state_without_advancing": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_requires_a_complete_valid_initial_zfin": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_retains_header_candidate_bound": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_retains_lookalikes_across_recovery_and_timeout": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_retry_exhaustion_never_finishes_automatically": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_strips_fragmented_repeated_zfin_in_all_formats": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_missing_farewell_strips_repeated_hex_zfin_with_parity_pads": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_peer_cancel_preserves_farewell_tail_at_every_split": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_peer_cancel_preserves_farewell_tail_bytewise": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_peer_cancel_preserves_farewell_tail_whole": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "receiver_retry_failure_preserves_farewell_tail_during_cancel_cleanup": {
+      "group": "core-zmodem",
+      "gate_passed": true
+    },
+    "zmodem_failed_input_preserves_retained_terminal_tail_without_success": {
+      "group": "session-zmodem",
+      "gate_passed": true
+    },
+    "zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review": {
+      "group": "session-zmodem",
+      "gate_passed": true
+    },
+    "zmodem_missing_farewell_clean_exit_requires_the_exact_flushed_lease": {
+      "group": "session-zmodem",
+      "gate_passed": true
+    },
+    "zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown": {
+      "group": "session-zmodem",
+      "gate_passed": true
+    },
+    "zmodem_missing_farewell_refuses_nonzero_inconsistent_and_foreign_exits": {
+      "group": "session-zmodem",
+      "gate_passed": true
+    },
+    "zmodem_missing_farewell_rejects_same_lease_receipts_after_new_output": {
+      "group": "session-zmodem",
+      "gate_passed": true
+    },
+    "zmodem_peer_cancel_preserves_retained_terminal_tail_without_warning": {
+      "group": "session-zmodem",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_actual_write_timeout": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_cleanup_delivers_retained_tail_after_worker_cancellation": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_cleanup_reports_timeout_when_ui_backpressure_never_releases": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_cleanup_waits_for_bounded_ui_backpressure_and_preserves_order": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_due_farewell_drains_nonzero_exit_before_timer": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_due_farewell_drains_signal_before_timer": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_due_farewell_drains_unknown_close_before_timer": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_due_farewell_preserves_queued_actual_oo_and_terminal_tail": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "ssh_bridge::tests::zmodem_missing_farewell_requires_completed_reply_and_exact_input_handoff": {
+      "group": "app-bridge",
+      "gate_passed": true
+    },
+    "terminal::zmodem::tests::zmodem_missing_farewell_before_an_offer_requests_exact_handoff": {
+      "group": "app-ui",
+      "gate_passed": true
+    },
+    "terminal::zmodem::tests::zmodem_missing_farewell_keeps_verified_receipts_and_older_unknown": {
+      "group": "app-ui",
+      "gate_passed": true
+    },
+    "ssh::write_barrier_tests::write_confirmed_keeps_farewell_active_past_three_seconds_of_transport_backpressure": {
+      "group": "session-transport",
+      "gate_passed": true
+    },
+    "ssh::write_barrier_tests::write_confirmed_rejects_disconnect_after_data_without_a_peer_reply": {
+      "group": "session-transport",
+      "gate_passed": true
+    },
+    "ssh::write_barrier_tests::write_confirmed_times_out_when_data_arrives_but_the_peer_reply_is_blocked": {
+      "group": "session-transport",
+      "gate_passed": true
+    },
+    "ssh::write_barrier_tests::write_confirmed_waits_for_a_preceding_rekey_before_receiving_a_reply": {
+      "group": "session-transport",
+      "gate_passed": true
+    }
+  },
+  "new_python_methods": [
+    "CommandDeadlineTests.test_deadline_does_not_override_unverified_cleanup",
+    "CommandDeadlineTests.test_inventory_completion_at_or_past_deadline_cannot_report_success",
+    "CommandDeadlineTests.test_inventory_completion_before_deadline_preserves_success",
+    "CommandDeadlineTests.test_inventory_failures_before_deadline_are_not_timeouts",
+    "CommandDeadlineTests.test_inventory_internal_deadline_failures_are_command_timeouts",
+    "CommandDeadlineTests.test_inventory_probe_timeout_at_command_deadline_is_a_timeout",
+    "CommandDeadlineTests.test_unrelated_inventory_failure_after_deadline_is_not_a_timeout"
+  ],
+  "python_new_methods_in_full_discovery": true,
+  "python_focused_execution_receipt": "python-deadline-fix/green-boundary.json",
+  "opt_in_new_peer_test_count": 1,
+  "opt_in_peer_tests_not_in_default_counts": true,
+  "overlapping_specialty_and_review_runs_not_added_to_default_counts": true,
+  "controllers_reported_separately_from_harness_counts": true
+}

@@ -1,0 +1,580 @@
+{
+  "recorded_utc": "2026-11-15T10:49:52.949172+00:00",
+  "head": "b66ec7e564e97c3cc8261b447288377ac1ffccc2",
+  "r3_freeze_sha256": "e83c251520832cbb3a15f0c52c9ae23365729e0c4f192cf0edf2c537c0ba6434",
+  "core_frozen_input_count": 106,
+  "core_mismatches": [],
+  "r3_whole_tree_mismatches": [
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-app/src/ssh_bridge_tests.rs",
+      "expected": "fa52af544058b9720e60428ba5832969e9f4d19a02aec51aa1e21150d25e634f",
+      "actual": "08c6ae85519889e74f7ee18c5a70315b75731f4220ae95ec65e671b65eb84bb6"
+    },
+    {
+      "section": "scripts",
+      "path": "scripts/run_linux_file_interop.py",
+      "expected": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0",
+      "actual": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e"
+    },
+    {
+      "section": "scripts",
+      "path": "scripts/test_linux_file_interop.py",
+      "expected": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9",
+      "actual": "68a62eb77d67d47af1a4be92bbaa1c3a6fba8be794f4bf92e30971e46a00f57c"
+    }
+  ],
+  "core_checked": [
+    {
+      "path": "crates/keelshell-core/Cargo.toml",
+      "expected": "de9bf6b218eb7637342567b55500d24f5bbf17ca74fb965734fbc852eb66813f",
+      "actual": "de9bf6b218eb7637342567b55500d24f5bbf17ca74fb965734fbc852eb66813f"
+    },
+    {
+      "path": "crates/keelshell-core/src/ai_backends.rs",
+      "expected": "a76800b0be2974ef83a2738f7911504970d8bebd111a744605caffec7e391753",
+      "actual": "a76800b0be2974ef83a2738f7911504970d8bebd111a744605caffec7e391753"
+    },
+    {
+      "path": "crates/keelshell-core/src/ai_knowledge.rs",
+      "expected": "2ee8c6226e0a58fbc907867d06136cd7e20d16c39485b2bf63ae54b6f4242417",
+      "actual": "2ee8c6226e0a58fbc907867d06136cd7e20d16c39485b2bf63ae54b6f4242417"
+    },
+    {
+      "path": "crates/keelshell-core/src/ai_messages.rs",
+      "expected": "dde0e05169e8e7b5d841c58d43dc8650fae6a7b1f1a64a67758b3e2e77dd5914",
+      "actual": "dde0e05169e8e7b5d841c58d43dc8650fae6a7b1f1a64a67758b3e2e77dd5914"
+    },
+    {
+      "path": "crates/keelshell-core/src/ai_profiles.rs",
+      "expected": "387399f5c0b1c7ff551763f19e794599eb7e01205eda85cc967b3d4a411f9b3c",
+      "actual": "387399f5c0b1c7ff551763f19e794599eb7e01205eda85cc967b3d4a411f9b3c"
+    },
+    {
+      "path": "crates/keelshell-core/src/ai_sampling.rs",
+      "expected": "0a85ab9cc670b9e2b27612b2ac8d189dc187f159d8c865f1e8a5918491ce91bb",
+      "actual": "0a85ab9cc670b9e2b27612b2ac8d189dc187f159d8c865f1e8a5918491ce91bb"
+    },
+    {
+      "path": "crates/keelshell-core/src/archive.rs",
+      "expected": "786773b3839adaf01cb52f08e071e0d9ba8c70db97cfb4fdce4befbfdcd64d77",
+      "actual": "786773b3839adaf01cb52f08e071e0d9ba8c70db97cfb4fdce4befbfdcd64d77"
+    },
+    {
+      "path": "crates/keelshell-core/src/batch_audit.rs",
+      "expected": "1432b108439450e3191e786d579d4e92f4f5e69431406568805e48fc193625f7",
+      "actual": "1432b108439450e3191e786d579d4e92f4f5e69431406568805e48fc193625f7"
+    },
+    {
+      "path": "crates/keelshell-core/src/batch_parameters.rs",
+      "expected": "c7da90575a16ddddba1ca5c7fd6f5650b28bac0a427fa945cf476ee8424f2b19",
+      "actual": "c7da90575a16ddddba1ca5c7fd6f5650b28bac0a427fa945cf476ee8424f2b19"
+    },
+    {
+      "path": "crates/keelshell-core/src/batch_template.rs",
+      "expected": "d09425b0560f65ee917897d3490163559f5384dab68722b2fdb2505b32e2e783",
+      "actual": "d09425b0560f65ee917897d3490163559f5384dab68722b2fdb2505b32e2e783"
+    },
+    {
+      "path": "crates/keelshell-core/src/batch_workflow.rs",
+      "expected": "370826938338d7121aeb7bb3747a78cd19978d74e9697649bc0b13b62d26d33e",
+      "actual": "370826938338d7121aeb7bb3747a78cd19978d74e9697649bc0b13b62d26d33e"
+    },
+    {
+      "path": "crates/keelshell-core/src/completion.rs",
+      "expected": "52a766509d3eea0dfba9f1cf1e7f29e22c79d70798fb6d6f14f879148b929dbf",
+      "actual": "52a766509d3eea0dfba9f1cf1e7f29e22c79d70798fb6d6f14f879148b929dbf"
+    },
+    {
+      "path": "crates/keelshell-core/src/completion/lexer.rs",
+      "expected": "d7f3bf0865f5e038e80adc7edebf627bed3bdebfa880994f5b691fbc6f08e359",
+      "actual": "d7f3bf0865f5e038e80adc7edebf627bed3bdebfa880994f5b691fbc6f08e359"
+    },
+    {
+      "path": "crates/keelshell-core/src/completion/tests.rs",
+      "expected": "ee4a7dd66989bf946525eff6302e4ba67dbe97aa3833202495b35f6a9a3790b5",
+      "actual": "ee4a7dd66989bf946525eff6302e4ba67dbe97aa3833202495b35f6a9a3790b5"
+    },
+    {
+      "path": "crates/keelshell-core/src/connection_library.rs",
+      "expected": "34748360708e59dcd02e73c35c6bf722e4a55291e753033fbba5a909c58353da",
+      "actual": "34748360708e59dcd02e73c35c6bf722e4a55291e753033fbba5a909c58353da"
+    },
+    {
+      "path": "crates/keelshell-core/src/connection_library_batch.rs",
+      "expected": "4c63030c7bdde95afe39ca805f3e2bf6748984c5d4b6d3efc4755df0bf24f32e",
+      "actual": "4c63030c7bdde95afe39ca805f3e2bf6748984c5d4b6d3efc4755df0bf24f32e"
+    },
+    {
+      "path": "crates/keelshell-core/src/diff.rs",
+      "expected": "564356b0678baa3b0c0a77d3e88847335d73cb6880c08c9a2a5f5d7a915b445d",
+      "actual": "564356b0678baa3b0c0a77d3e88847335d73cb6880c08c9a2a5f5d7a915b445d"
+    },
+    {
+      "path": "crates/keelshell-core/src/directory_compare.rs",
+      "expected": "c5a196b5b84ed7d218cd7b2e6844bd4668ce60d5104d0c070bb53bc432328a77",
+      "actual": "c5a196b5b84ed7d218cd7b2e6844bd4668ce60d5104d0c070bb53bc432328a77"
+    },
+    {
+      "path": "crates/keelshell-core/src/directory_sync.rs",
+      "expected": "fdcd467b9d561a1a806198eefb907eefeb238662d5d92017fe5565a28c3e9905",
+      "actual": "fdcd467b9d561a1a806198eefb907eefeb238662d5d92017fe5565a28c3e9905"
+    },
+    {
+      "path": "crates/keelshell-core/src/error.rs",
+      "expected": "1eaa96b29e4cbc1a5c90669ce6a4b224d3b7346d1d1def5984035b268e294835",
+      "actual": "1eaa96b29e4cbc1a5c90669ce6a4b224d3b7346d1d1def5984035b268e294835"
+    },
+    {
+      "path": "crates/keelshell-core/src/knowledge_context.rs",
+      "expected": "457a8965d7d558314ed3e945b8c7af474101a0c0fa8e54f3ed8d63360e519596",
+      "actual": "457a8965d7d558314ed3e945b8c7af474101a0c0fa8e54f3ed8d63360e519596"
+    },
+    {
+      "path": "crates/keelshell-core/src/knowledge_library.rs",
+      "expected": "e0d219a95a6e0ea42f673acb73d22a0b51348e4892095bfb2196cd350daf56c8",
+      "actual": "e0d219a95a6e0ea42f673acb73d22a0b51348e4892095bfb2196cd350daf56c8"
+    },
+    {
+      "path": "crates/keelshell-core/src/knowledge_library/tests.rs",
+      "expected": "a64f52fce60e98058c419da8e8c6a286bd4096cf461a8a153862c9066f3ed9fc",
+      "actual": "a64f52fce60e98058c419da8e8c6a286bd4096cf461a8a153862c9066f3ed9fc"
+    },
+    {
+      "path": "crates/keelshell-core/src/lib.rs",
+      "expected": "d22c1a1776b05031689c0d97499c6ffd723fe685c106abcc8c45d69ce01f6bb4",
+      "actual": "d22c1a1776b05031689c0d97499c6ffd723fe685c106abcc8c45d69ce01f6bb4"
+    },
+    {
+      "path": "crates/keelshell-core/src/model.rs",
+      "expected": "4fab9f7f3b8d1e35c434d157eac60fe8c16d694651604ce7197fbb5cfcea2290",
+      "actual": "4fab9f7f3b8d1e35c434d157eac60fe8c16d694651604ce7197fbb5cfcea2290"
+    },
+    {
+      "path": "crates/keelshell-core/src/network_diagnostic.rs",
+      "expected": "20bfeda771b31da6fcd6829b6daacf5c866a78fc241454fdc97647c4ac54d48f",
+      "actual": "20bfeda771b31da6fcd6829b6daacf5c866a78fc241454fdc97647c4ac54d48f"
+    },
+    {
+      "path": "crates/keelshell-core/src/openssh.rs",
+      "expected": "ed145525554df7e5a95313c366c9b82ac9ed0e572fc5378adcf1cd4c83b1ad3c",
+      "actual": "ed145525554df7e5a95313c366c9b82ac9ed0e572fc5378adcf1cd4c83b1ad3c"
+    },
+    {
+      "path": "crates/keelshell-core/src/pane_layout.rs",
+      "expected": "13efe0758082c0de9dc3267b398d6b5dc3e888ab47c1a90d16be72a57f8f79b7",
+      "actual": "13efe0758082c0de9dc3267b398d6b5dc3e888ab47c1a90d16be72a57f8f79b7"
+    },
+    {
+      "path": "crates/keelshell-core/src/pane_layout/tests.rs",
+      "expected": "cf0bbc0d8020b488b27d7862c2cc4fe942fd0666f0ab88a28016f80a4a0d9b50",
+      "actual": "cf0bbc0d8020b488b27d7862c2cc4fe942fd0666f0ab88a28016f80a4a0d9b50"
+    },
+    {
+      "path": "crates/keelshell-core/src/profile_sync.rs",
+      "expected": "6113c52ba34bf58432d81ef3f6e1b4bcb3ffae88b8d5ba81135fa481cd84fb9f",
+      "actual": "6113c52ba34bf58432d81ef3f6e1b4bcb3ffae88b8d5ba81135fa481cd84fb9f"
+    },
+    {
+      "path": "crates/keelshell-core/src/proxy.rs",
+      "expected": "24ff5dcf55328b6331a05aedc1d87632dc761e7fb471f324d340b24993aaa7cb",
+      "actual": "24ff5dcf55328b6331a05aedc1d87632dc761e7fb471f324d340b24993aaa7cb"
+    },
+    {
+      "path": "crates/keelshell-core/src/reconnect.rs",
+      "expected": "156ee58c313a42d95e1a1a1a67a92d392dfb3e396e3ac5e20513172e05462f1a",
+      "actual": "156ee58c313a42d95e1a1a1a67a92d392dfb3e396e3ac5e20513172e05462f1a"
+    },
+    {
+      "path": "crates/keelshell-core/src/routes.rs",
+      "expected": "c9b4a75d40eb9b651245d99339ce869693de3b887ce3241cd57080d045861098",
+      "actual": "c9b4a75d40eb9b651245d99339ce869693de3b887ce3241cd57080d045861098"
+    },
+    {
+      "path": "crates/keelshell-core/src/routes/import.rs",
+      "expected": "150c6aa94b1b3844ddb34d24f1b15d9f45be29a0e57bc7a29e7868d941792361",
+      "actual": "150c6aa94b1b3844ddb34d24f1b15d9f45be29a0e57bc7a29e7868d941792361"
+    },
+    {
+      "path": "crates/keelshell-core/src/scheduled_workflow.rs",
+      "expected": "3373e73c185ad2a604f12bfaafeb7b90209dfd7f671b17734f708d0a25669d0b",
+      "actual": "3373e73c185ad2a604f12bfaafeb7b90209dfd7f671b17734f708d0a25669d0b"
+    },
+    {
+      "path": "crates/keelshell-core/src/server_archive.py",
+      "expected": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2",
+      "actual": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+    },
+    {
+      "path": "crates/keelshell-core/src/server_archive.rs",
+      "expected": "215094b5cdc7f6cbb93ada567a6f34d717835c0d0f2b01065e063775a85802f4",
+      "actual": "215094b5cdc7f6cbb93ada567a6f34d717835c0d0f2b01065e063775a85802f4"
+    },
+    {
+      "path": "crates/keelshell-core/src/snippet_template.rs",
+      "expected": "1565acc2063ef4e814ccd5696e713b623bfba81ac269c97421eacc8d76a060f0",
+      "actual": "1565acc2063ef4e814ccd5696e713b623bfba81ac269c97421eacc8d76a060f0"
+    },
+    {
+      "path": "crates/keelshell-core/src/snippet_template/syntax.rs",
+      "expected": "66eb7cdfac6d1a170aa93f52f23f16825266032f091dff01d6f87101225183ba",
+      "actual": "66eb7cdfac6d1a170aa93f52f23f16825266032f091dff01d6f87101225183ba"
+    },
+    {
+      "path": "crates/keelshell-core/src/snippets.rs",
+      "expected": "956b48edbc066b2d5514990983cc52f63fce365c6350cdd9b79a69d61b40019e",
+      "actual": "956b48edbc066b2d5514990983cc52f63fce365c6350cdd9b79a69d61b40019e"
+    },
+    {
+      "path": "crates/keelshell-core/src/store.rs",
+      "expected": "b92a58a7b4b50d5f992b87609a058702f6626ac54ff9e37623135a6816eb7bd6",
+      "actual": "b92a58a7b4b50d5f992b87609a058702f6626ac54ff9e37623135a6816eb7bd6"
+    },
+    {
+      "path": "crates/keelshell-core/src/store/recovery.rs",
+      "expected": "b757bacd4e11859f29e228598dd02eb4eef8f89fcf4467f9a6e962307fde0ed6",
+      "actual": "b757bacd4e11859f29e228598dd02eb4eef8f89fcf4467f9a6e962307fde0ed6"
+    },
+    {
+      "path": "crates/keelshell-core/src/store/recovery/tests.rs",
+      "expected": "b75903037572d6c648ff32609db7f763ce4fcfce472353bd2fbe4f2d4555e26f",
+      "actual": "b75903037572d6c648ff32609db7f763ce4fcfce472353bd2fbe4f2d4555e26f"
+    },
+    {
+      "path": "crates/keelshell-core/src/text_document.rs",
+      "expected": "b23321c7b0e93c2d05cd3ff5b07102b612d93f0d21d740d47c1e8eb5ced7a25f",
+      "actual": "b23321c7b0e93c2d05cd3ff5b07102b612d93f0d21d740d47c1e8eb5ced7a25f"
+    },
+    {
+      "path": "crates/keelshell-core/src/text_merge.rs",
+      "expected": "b30fee7168125b11fff1252767eaed9b32c458400960efe9dc59c95f781e110b",
+      "actual": "b30fee7168125b11fff1252767eaed9b32c458400960efe9dc59c95f781e110b"
+    },
+    {
+      "path": "crates/keelshell-core/src/text_patch.rs",
+      "expected": "309177d57a7e93cd24e68071258fa3e1b475c555ad435e66f83cc8242377ce67",
+      "actual": "309177d57a7e93cd24e68071258fa3e1b475c555ad435e66f83cc8242377ce67"
+    },
+    {
+      "path": "crates/keelshell-core/src/theme.rs",
+      "expected": "b6e84210777a2657542d26ca986c6c75c97d75d08a4d50f69be1e68283f98b81",
+      "actual": "b6e84210777a2657542d26ca986c6c75c97d75d08a4d50f69be1e68283f98b81"
+    },
+    {
+      "path": "crates/keelshell-core/src/transfer_recovery.rs",
+      "expected": "f8de211f17b758e7348aa38ab7a9e53239be9f53cf2e6dde5ce8c5a119f2596d",
+      "actual": "f8de211f17b758e7348aa38ab7a9e53239be9f53cf2e6dde5ce8c5a119f2596d"
+    },
+    {
+      "path": "crates/keelshell-core/src/tunnel_rules.rs",
+      "expected": "2fbc2a4d645d7613a58ff8cdbba28be1ac24411aaa990a2553d62f79e5d796b5",
+      "actual": "2fbc2a4d645d7613a58ff8cdbba28be1ac24411aaa990a2553d62f79e5d796b5"
+    },
+    {
+      "path": "crates/keelshell-core/src/tunnel_runtime.rs",
+      "expected": "ac0526ef0e9411d15c744a53233bb5a5d208c8df6f0f75c110d1b3bc2babef69",
+      "actual": "ac0526ef0e9411d15c744a53233bb5a5d208c8df6f0f75c110d1b3bc2babef69"
+    },
+    {
+      "path": "crates/keelshell-core/src/updates.rs",
+      "expected": "989670abcea5fde773f447cb3417c55167babc03fd1ba0032da272775ce2ae7a",
+      "actual": "989670abcea5fde773f447cb3417c55167babc03fd1ba0032da272775ce2ae7a"
+    },
+    {
+      "path": "crates/keelshell-core/src/vault.rs",
+      "expected": "53223df67688c7e764baef42df7b5329b382c8b6977d54530157eb024901d13a",
+      "actual": "53223df67688c7e764baef42df7b5329b382c8b6977d54530157eb024901d13a"
+    },
+    {
+      "path": "crates/keelshell-core/src/workflow_audit.rs",
+      "expected": "baa2ab40e6b92595a9d136e9295b58c8b6b378aea796e17a673195f8807ecaff",
+      "actual": "baa2ab40e6b92595a9d136e9295b58c8b6b378aea796e17a673195f8807ecaff"
+    },
+    {
+      "path": "crates/keelshell-core/src/workspace_layout.rs",
+      "expected": "537fd561bd98a11b373ba14b32fe506783c3eff7bd1a0f863f9f330bec6721f8",
+      "actual": "537fd561bd98a11b373ba14b32fe506783c3eff7bd1a0f863f9f330bec6721f8"
+    },
+    {
+      "path": "crates/keelshell-core/src/zmodem.rs",
+      "expected": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+      "actual": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea"
+    },
+    {
+      "path": "crates/keelshell-core/src/zmodem/codec.rs",
+      "expected": "4fc61667741af0188b3372afc7ce9fde0fd9229410bda4951c929ceef3314bc7",
+      "actual": "4fc61667741af0188b3372afc7ce9fde0fd9229410bda4951c929ceef3314bc7"
+    },
+    {
+      "path": "crates/keelshell-core/src/zmodem/detector.rs",
+      "expected": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+      "actual": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1"
+    },
+    {
+      "path": "crates/keelshell-core/src/zmodem/receiver.rs",
+      "expected": "cfc9207ae8a878a51c55228c4c6310f52b07507ffb481d9a6130eb5d329cb071",
+      "actual": "cfc9207ae8a878a51c55228c4c6310f52b07507ffb481d9a6130eb5d329cb071"
+    },
+    {
+      "path": "crates/keelshell-core/src/zmodem/sender.rs",
+      "expected": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006",
+      "actual": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006"
+    },
+    {
+      "path": "crates/keelshell-core/tests/ai_inference.rs",
+      "expected": "e4fd072bd07430024331d069b638b3be7936d6572127a150f248832d30122b49",
+      "actual": "e4fd072bd07430024331d069b638b3be7936d6572127a150f248832d30122b49"
+    },
+    {
+      "path": "crates/keelshell-core/tests/ai_profile_storage.rs",
+      "expected": "03c51040827f5fc3b857ca152a9fcc1d91b9cccba806d6758b927de2a1465b25",
+      "actual": "03c51040827f5fc3b857ca152a9fcc1d91b9cccba806d6758b927de2a1465b25"
+    },
+    {
+      "path": "crates/keelshell-core/tests/archive.rs",
+      "expected": "21e9c068d823cead5007f41153107c331ee1e6270e4aaa35dcde06cc20a9ff07",
+      "actual": "21e9c068d823cead5007f41153107c331ee1e6270e4aaa35dcde06cc20a9ff07"
+    },
+    {
+      "path": "crates/keelshell-core/tests/archive_pax.rs",
+      "expected": "7ae59ddfdc1b03709edbe3394bd893c76f44c2ae1cac46e67860d68606d20e96",
+      "actual": "7ae59ddfdc1b03709edbe3394bd893c76f44c2ae1cac46e67860d68606d20e96"
+    },
+    {
+      "path": "crates/keelshell-core/tests/batch_audit.rs",
+      "expected": "99bc6b1c0b9b6bdbd648ba502d6edecc7d354be04191b380c9d8e50b88f10bd0",
+      "actual": "99bc6b1c0b9b6bdbd648ba502d6edecc7d354be04191b380c9d8e50b88f10bd0"
+    },
+    {
+      "path": "crates/keelshell-core/tests/batch_parameters.rs",
+      "expected": "a133d20fac0c52fbdb0eb61f7b461c52340ea301768b5932dcd9f53163b81e20",
+      "actual": "a133d20fac0c52fbdb0eb61f7b461c52340ea301768b5932dcd9f53163b81e20"
+    },
+    {
+      "path": "crates/keelshell-core/tests/batch_workflow.rs",
+      "expected": "950ca17d1c71e3a13279cb6dc1e536b3958806d32555960a6c92872e5312b070",
+      "actual": "950ca17d1c71e3a13279cb6dc1e536b3958806d32555960a6c92872e5312b070"
+    },
+    {
+      "path": "crates/keelshell-core/tests/completion_shell.rs",
+      "expected": "58e8d7337476c32451b04e323e31fdcf86eda8f869afabc1ec5292b5769282a5",
+      "actual": "58e8d7337476c32451b04e323e31fdcf86eda8f869afabc1ec5292b5769282a5"
+    },
+    {
+      "path": "crates/keelshell-core/tests/configuration_recovery.rs",
+      "expected": "6d28a4b1807154109ef4e1f0a6126c84b154dc5d0978de259fbcba489bc12d48",
+      "actual": "6d28a4b1807154109ef4e1f0a6126c84b154dc5d0978de259fbcba489bc12d48"
+    },
+    {
+      "path": "crates/keelshell-core/tests/connection_library.rs",
+      "expected": "39a6e7e5cabf3b9cc9123a638aba298a1c2495245e6415eaf88de4ecd06c5f9d",
+      "actual": "39a6e7e5cabf3b9cc9123a638aba298a1c2495245e6415eaf88de4ecd06c5f9d"
+    },
+    {
+      "path": "crates/keelshell-core/tests/connection_library_batch.rs",
+      "expected": "ba44812507a948adfacdd755f0ab223d583e3d826857147f1963dc28d1cc4eb6",
+      "actual": "ba44812507a948adfacdd755f0ab223d583e3d826857147f1963dc28d1cc4eb6"
+    },
+    {
+      "path": "crates/keelshell-core/tests/directory_compare.rs",
+      "expected": "4a1e41e3d738df7b99254d4a02bdddfd2702baf5bed76f4ac5ca35bf70edac16",
+      "actual": "4a1e41e3d738df7b99254d4a02bdddfd2702baf5bed76f4ac5ca35bf70edac16"
+    },
+    {
+      "path": "crates/keelshell-core/tests/directory_mirror.rs",
+      "expected": "70ceb1850b7af134b52c55ee07ca86f36557564ba66b925333c2bcac94bf8075",
+      "actual": "70ceb1850b7af134b52c55ee07ca86f36557564ba66b925333c2bcac94bf8075"
+    },
+    {
+      "path": "crates/keelshell-core/tests/directory_sync.rs",
+      "expected": "d02730cf91428ad75a36a7854c7f1555cfeffaeed48f40a4804398b44425543c",
+      "actual": "d02730cf91428ad75a36a7854c7f1555cfeffaeed48f40a4804398b44425543c"
+    },
+    {
+      "path": "crates/keelshell-core/tests/host_keys.rs",
+      "expected": "3fe367aacb002e0ffc233de39f018d35cc1634e394b5ad539a88ddba857eb96d",
+      "actual": "3fe367aacb002e0ffc233de39f018d35cc1634e394b5ad539a88ddba857eb96d"
+    },
+    {
+      "path": "crates/keelshell-core/tests/independent_workflow_audit.rs",
+      "expected": "9fc9bb056d64e4a6f4627f0750c2ed6084512ed8aed9c7b53959e951db55fb88",
+      "actual": "9fc9bb056d64e4a6f4627f0750c2ed6084512ed8aed9c7b53959e951db55fb88"
+    },
+    {
+      "path": "crates/keelshell-core/tests/knowledge_context.rs",
+      "expected": "ac180bbaf084d89947211a70f767fbb2c803c0a8b384a7671e234c69661c12de",
+      "actual": "ac180bbaf084d89947211a70f767fbb2c803c0a8b384a7671e234c69661c12de"
+    },
+    {
+      "path": "crates/keelshell-core/tests/knowledge_library.rs",
+      "expected": "d62e09b166cbababc6630b8b1eb57393f8753f50f8ee4f21413f3d00df59809e",
+      "actual": "d62e09b166cbababc6630b8b1eb57393f8753f50f8ee4f21413f3d00df59809e"
+    },
+    {
+      "path": "crates/keelshell-core/tests/knowledge_persistence.rs",
+      "expected": "86c0b14bcc5b630ce6e007c070c70d10d836975c9bae397ae86c4ebc8e3bd267",
+      "actual": "86c0b14bcc5b630ce6e007c070c70d10d836975c9bae397ae86c4ebc8e3bd267"
+    },
+    {
+      "path": "crates/keelshell-core/tests/openssh.rs",
+      "expected": "22c0e261c2054661b4ad3d99c1f5e6736cf8201f185541850546ebdc997b9f12",
+      "actual": "22c0e261c2054661b4ad3d99c1f5e6736cf8201f185541850546ebdc997b9f12"
+    },
+    {
+      "path": "crates/keelshell-core/tests/pane_layout.rs",
+      "expected": "be1cbebcb9e401252b492e8a02b040a0b9ee9e9f80bb421b751765e3f7b1a25d",
+      "actual": "be1cbebcb9e401252b492e8a02b040a0b9ee9e9f80bb421b751765e3f7b1a25d"
+    },
+    {
+      "path": "crates/keelshell-core/tests/profile_sync.rs",
+      "expected": "9fc82046f1fa064a5d60c25dbacb3d496611b89477996529e8a2313bea763bfd",
+      "actual": "9fc82046f1fa064a5d60c25dbacb3d496611b89477996529e8a2313bea763bfd"
+    },
+    {
+      "path": "crates/keelshell-core/tests/profile_sync_independent.rs",
+      "expected": "0d42e1b2e4a238d0c42732b5e3185458d9f3a460d9129b54a927b4b30c7a7394",
+      "actual": "0d42e1b2e4a238d0c42732b5e3185458d9f3a460d9129b54a927b4b30c7a7394"
+    },
+    {
+      "path": "crates/keelshell-core/tests/profile_sync_review.rs",
+      "expected": "2b2f52b158901e4dfc4675b3193512c65fccb380b676435a80bfff4deee8e311",
+      "actual": "2b2f52b158901e4dfc4675b3193512c65fccb380b676435a80bfff4deee8e311"
+    },
+    {
+      "path": "crates/keelshell-core/tests/profiles.rs",
+      "expected": "8e7df80cd4a4981a3ea1a1cc2f06b8373ebc0b29ba3b97d8946db1815b5d1fcc",
+      "actual": "8e7df80cd4a4981a3ea1a1cc2f06b8373ebc0b29ba3b97d8946db1815b5d1fcc"
+    },
+    {
+      "path": "crates/keelshell-core/tests/proxies.rs",
+      "expected": "1f56055868bec1373e5f6ea276f27ea7b25420d87c90d5425d414871b5bb2db8",
+      "actual": "1f56055868bec1373e5f6ea276f27ea7b25420d87c90d5425d414871b5bb2db8"
+    },
+    {
+      "path": "crates/keelshell-core/tests/reconnect.rs",
+      "expected": "86075481985ab6ddbcde047f5fbb8b26f731b77fac782b965b7212949fb21442",
+      "actual": "86075481985ab6ddbcde047f5fbb8b26f731b77fac782b965b7212949fb21442"
+    },
+    {
+      "path": "crates/keelshell-core/tests/recursive_mirror_final_review.rs",
+      "expected": "8c93f4d624d35553516eb3a6fceedbb046e4eaa422a25af663bd6acdcc64d2b5",
+      "actual": "8c93f4d624d35553516eb3a6fceedbb046e4eaa422a25af663bd6acdcc64d2b5"
+    },
+    {
+      "path": "crates/keelshell-core/tests/routes.rs",
+      "expected": "306c858aa1ee00d44b3e90b3bc980dfe8f569db55e83df19f11f258c24b8af34",
+      "actual": "306c858aa1ee00d44b3e90b3bc980dfe8f569db55e83df19f11f258c24b8af34"
+    },
+    {
+      "path": "crates/keelshell-core/tests/scheduled_workflow_review.rs",
+      "expected": "9ba9182f773bde082c809d3e4f45eeaa83405fd6fd1f9204a25a1e59c698d3a1",
+      "actual": "9ba9182f773bde082c809d3e4f45eeaa83405fd6fd1f9204a25a1e59c698d3a1"
+    },
+    {
+      "path": "crates/keelshell-core/tests/server_archive.rs",
+      "expected": "4441aa67e701035bf3a8c3454d75dedc6af22bca613b6a151a02b9e55611cb5b",
+      "actual": "4441aa67e701035bf3a8c3454d75dedc6af22bca613b6a151a02b9e55611cb5b"
+    },
+    {
+      "path": "crates/keelshell-core/tests/snippet_template_shell.rs",
+      "expected": "35a2e5548ae51d9de76dfc080cacafd150f602752eb17df27e603ac8cf3bc82a",
+      "actual": "35a2e5548ae51d9de76dfc080cacafd150f602752eb17df27e603ac8cf3bc82a"
+    },
+    {
+      "path": "crates/keelshell-core/tests/snippet_templates.rs",
+      "expected": "3a2ec78b9c5289566407ffb4ea9b8ff63bb0cc5d351115229efdead4f343a88a",
+      "actual": "3a2ec78b9c5289566407ffb4ea9b8ff63bb0cc5d351115229efdead4f343a88a"
+    },
+    {
+      "path": "crates/keelshell-core/tests/snippets.rs",
+      "expected": "f9f7bc8078c4b413590914b6a6bfce6122b3dc7c7a3b173562bd320ec5e5230f",
+      "actual": "f9f7bc8078c4b413590914b6a6bfce6122b3dc7c7a3b173562bd320ec5e5230f"
+    },
+    {
+      "path": "crates/keelshell-core/tests/storage.rs",
+      "expected": "ea12c3c013f2fb932c0ee24fdda1c5cf2c7cc234d72d197ec63db37e09770bbe",
+      "actual": "ea12c3c013f2fb932c0ee24fdda1c5cf2c7cc234d72d197ec63db37e09770bbe"
+    },
+    {
+      "path": "crates/keelshell-core/tests/theme_preferences.rs",
+      "expected": "d6484d331526fe9496fa60a6cd04a39f5309a287530f94796736c24145598c0d",
+      "actual": "d6484d331526fe9496fa60a6cd04a39f5309a287530f94796736c24145598c0d"
+    },
+    {
+      "path": "crates/keelshell-core/tests/transfer_recovery.rs",
+      "expected": "49d471ec5953dcebdf309e25a7ff24853c7848b125f8e129de69d365a6a44468",
+      "actual": "49d471ec5953dcebdf309e25a7ff24853c7848b125f8e129de69d365a6a44468"
+    },
+    {
+      "path": "crates/keelshell-core/tests/tunnel_rules.rs",
+      "expected": "7708bd2e3b35fb8839facceffca9040ad98f1a6ff77906dab7bf793c62f573db",
+      "actual": "7708bd2e3b35fb8839facceffca9040ad98f1a6ff77906dab7bf793c62f573db"
+    },
+    {
+      "path": "crates/keelshell-core/tests/tunnel_runtime.rs",
+      "expected": "02a293ab875ab766dd6fd81965ef6ef6bbe704b10ddd69bbab676b2523d59dea",
+      "actual": "02a293ab875ab766dd6fd81965ef6ef6bbe704b10ddd69bbab676b2523d59dea"
+    },
+    {
+      "path": "crates/keelshell-core/tests/update_preferences.rs",
+      "expected": "907918f16b042ec3040fef6781d19b59779e8e4923b4c6b6deb69c6789975c6c",
+      "actual": "907918f16b042ec3040fef6781d19b59779e8e4923b4c6b6deb69c6789975c6c"
+    },
+    {
+      "path": "crates/keelshell-core/tests/vault.rs",
+      "expected": "782089761e54149c63fa0f572f9a910f66234be871853d5b76f724af4c695ec8",
+      "actual": "782089761e54149c63fa0f572f9a910f66234be871853d5b76f724af4c695ec8"
+    },
+    {
+      "path": "crates/keelshell-core/tests/workflow_audit.rs",
+      "expected": "99df178166d18ed06781a001fd4be66dae2d03986dcd526c534e938cce9d3c8a",
+      "actual": "99df178166d18ed06781a001fd4be66dae2d03986dcd526c534e938cce9d3c8a"
+    },
+    {
+      "path": "crates/keelshell-core/tests/workflow_audit_profile_sync.rs",
+      "expected": "2821dd386307fc8a13d2864d9a958d39559fcee7f1f89fa44bd34592d1a8cc1d",
+      "actual": "2821dd386307fc8a13d2864d9a958d39559fcee7f1f89fa44bd34592d1a8cc1d"
+    },
+    {
+      "path": "crates/keelshell-core/tests/workflow_audit_schema.rs",
+      "expected": "cc2f6b5369b0a8fb3c0420b696b4d68f978ba5cefab738914220df75d2941cd5",
+      "actual": "cc2f6b5369b0a8fb3c0420b696b4d68f978ba5cefab738914220df75d2941cd5"
+    },
+    {
+      "path": "crates/keelshell-core/tests/workflow_audit_wire_compatibility.rs",
+      "expected": "9e631086ba1d9956d51750e2836b54e65f873f2ca6cbb0053d0097200a55bcac",
+      "actual": "9e631086ba1d9956d51750e2836b54e65f873f2ca6cbb0053d0097200a55bcac"
+    },
+    {
+      "path": "crates/keelshell-core/tests/workspace_layout.rs",
+      "expected": "42b82edf8755e92fccbe7e37b2fa4f3a4dfcbba875c4b5adf6cb17dd2e0bdcff",
+      "actual": "42b82edf8755e92fccbe7e37b2fa4f3a4dfcbba875c4b5adf6cb17dd2e0bdcff"
+    },
+    {
+      "path": "crates/keelshell-core/tests/zmodem.rs",
+      "expected": "15c628a9300a37ee8942b7dbd0468ffb463783a48bec8fecea9001b59f8d720f",
+      "actual": "15c628a9300a37ee8942b7dbd0468ffb463783a48bec8fecea9001b59f8d720f"
+    }
+  ],
+  "parent_reported_gate_r3": {
+    "exit": 1,
+    "state": "EARLY_STOPPED",
+    "reason": "Python fixture process inventory deadline conversion error",
+    "not_signed_as_pass": true
+  },
+  "parent_reported_active_work": [
+    "app ssh_bridge and tests for external reviewer P2-003 bounded post-pump cleanup output",
+    "Python fixture scripts by independent author"
+  ],
+  "existing_core_focused_execution": {
+    "passed": 102,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 0,
+    "new_execution_performed": false,
+    "receipt": "core-r4-independent-execution.json"
+  },
+  "core_r3_source_approval": "REMAINS_SCOPED_TO_RECORDED_R3_INPUTS",
+  "current_whole_tree_approval": false,
+  "next_binding": "Wait for final r4 freeze; verify all frozen items and compare every core input against r3; reuse existing independent 102-case execution only if core input set and hashes are unchanged"
+}

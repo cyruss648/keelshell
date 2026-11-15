@@ -1,0 +1,5 @@
+interactive receive outcome: strict_OO=1; missing_optional_OO=0; same_shell_continued=true
+
+thread 'real_sz_sends_binary_unicode_content_over_crc32' (7218202) panicked at crates/keelshell-session/tests/zmodem_openssh.rs:376:5:
+assertion failed: report.events.iter().any(|event| matches!(event, Ui::Finished { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

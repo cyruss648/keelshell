@@ -1,0 +1,35 @@
+{
+  "id": "CORE-R1-01",
+  "severity": "P2",
+  "status": "OPEN",
+  "title": "Repeated-ZFIN removal consumes a preceding UTF-8 continuation byte",
+  "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/codec.rs",
+  "line": 590,
+  "related_lines": [
+    309,
+    316,
+    317,
+    570,
+    579,
+    586,
+    590,
+    592
+  ],
+  "trigger": "After initial valid ZFIN, feed UTF-8 个 immediately followed by one valid repeated hex ZFIN and then $ ; invoke finish_without_farewell.",
+  "impact": "The ordinary terminal text loses byte 0xaa, turning valid UTF-8 e4b8aa into invalid e4b8. Same retained-tail corruption can occur before actual OO. File bytes and FileSaved receipts are not implicated.",
+  "expected_terminal_hex": "e4b8aa2420",
+  "predicted_actual_terminal_hex": "e4b82420",
+  "input_tail_hex": "e4b8aa2a2a184230383030303030303030303232640d0a2420",
+  "zfin_hex": "2a2a184230383030303030303030303232640d0a",
+  "proof_kind": "Deterministic source trace; no new Rust regression was compiled or executed by reviewer. Parent centralized regression requested.",
+  "proof": [
+    "0xe4 and 0xb8 are retained ordinary noise at codec.rs:570-577.",
+    "0xaa & 0x7f == 0x2a, so codec.rs:570-579 starts a header candidate at the final byte of 个.",
+    "probe_header at 316-329 permits three padding stars: the 0xaa byte and both ordinary 0x2a ZFIN padding bytes. CRC validation succeeds for the actual frame at 365-366.",
+    "The new truncate at 590-592 subtracts the entire candidate length, including preceding ordinary 0xaa. finish_without_farewell emits the shortened buffer."
+  ],
+  "freeze_sha256": "cf4cb0e53b80b09c44da99e3fe358cd7091622314625f881fd2769df783beba4",
+  "recorded_utc": "2026-11-15T10:06:43.942851+00:00",
+  "requested_regression": "Feed initial valid ZFIN; then [\"个\".as_bytes(), encode_header(Finish,0,Hex).as_slice(), b\"$ \"].concat(); assert finish_without_farewell == [FarewellMissing, Terminal(\"个$ \".as_bytes().to_vec())]. Also check fragmented feeds and the strict OO terminal path.",
+  "recommendation": "HOLD until raw-tail boundary preserves preceding ordinary UTF-8 bytes while removing only the repeat frame."
+}

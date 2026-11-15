@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/probe_peer_tail.py", line 63, in <module>
+    wire.extend(read_until(master, b"empty.bin\x00"))
+                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/pty-farewell-20261115/probe_peer_tail.py", line 31, in read_until
+    raise RuntimeError("independent empty-file probe deadline: " + output.hex())
+RuntimeError: independent empty-file probe deadline: 2a1843184418401840184018414b61a544656d7074792e62696e184030203135323736323737353330203130303634342030203120301840186b18cc32af6811

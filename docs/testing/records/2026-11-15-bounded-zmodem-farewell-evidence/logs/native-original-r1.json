@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "work/pty-farewell-20261115/run_native.py",
+    "native-original-r1",
+    "lsz"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "native-original-r1",
+  "pid": 11492,
+  "started_utc": "2026-11-15T09:41:44.920532+00:00",
+  "finished_utc": "2026-11-15T09:41:51.599367+00:00",
+  "seconds": 6.679,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "4ff667f07b05abd55f4743b0e94d2926d9ddb76dd79275a2b92b9f7a63e5f837",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}
