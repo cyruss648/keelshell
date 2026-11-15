@@ -52,9 +52,13 @@ qdisc drops 是调用窗口的 skb 计数，不做逐样本归因，也不承诺
 
 [verify_binding.py](verify_binding.py) 核对完整 Git-visible non-doc 路径集合、
 冻结摘要、当前文件、Git index 或精确 commit 的 blob，以及所有 gzip 原件和解压字节。
-正式本地功能提交前生成 `index-binding-r1.json`，随后生成
-`commit-input-binding.json` 与 `post-cleanup-binding.json`。
-`cleanup-final.json` 记录本批可重建副本的删除及实际资源读回。
+正式本地功能提交前已生成 [index-binding-r1.json](index-binding-r1.json)，
+[commit-input-binding.json](commit-input-binding.json) 和
+[post-cleanup-binding.json](post-cleanup-binding.json) 绑定源码提交
+`6699148b0fd9b5455c69a2ae6b9187ecb1cc3633`：699 项工程输入、
+1422 份原件和当前文件零 mismatch。
+[cleanup-final.json](cleanup-final.json) 记录删除本批 1435 个文件、
+逻辑 `781,265,332` 字节以及实际资源读回，原批次目录已不存在。
 不得通过修改原成功/失败回执来补签最终冻结。
 
 唯一有效 Cargo target 的源码归属保持父 checkout；

@@ -9,7 +9,7 @@
 唯一 Cargo target 归属仍保持父 checkout，作者不运行 Cargo。
 从[本批记录](testing/records/2026-11-16-native-network.md)和
 [持久证据](testing/records/2026-11-16-native-network-evidence/README.md)接续；
-本批工作目录在完成 Git blob 核验后回收，不作为后续唯一证据入口。
+本批工作目录在完成 Git blob 核验后已回收，不作为后续唯一证据入口。
 真实 macOS 流程发现并修复待完成跳板被周期清理、审核正文缺 AX 语义两项问题；
 19 项相关回归与非作者预构建独立执行通过。正常 GUI/MCP 构建及暂存包检查通过。
 修后原生实际核对三处公钥 pin，目标认证停留后完成两条 SSH/SFTP 连接，
@@ -38,6 +38,14 @@ app 非作者 r2 已批准七文件、开放 P0–P3 为 0，并已关闭；
 其签署时全门禁待定保持，父已绑定最终 gate 与不变 app 输入；网络非作者 r3 也已批准、
 唯一 P2 及其残余全部关闭，开放 P0–P3 为 0，独立 Python `26/26`，
 已关闭 reviewer。两报告原签署与预构建/非独立重编译限制保持。
+本地源码提交 `6699148b0fd9b5455c69a2ae6b9187ecb1cc3633`，
+[提交绑定](testing/records/2026-11-16-native-network-evidence/commit-input-binding.json)
+核对 699 项工程输入、1422 份原件与当前文件零 mismatch；
+清理后再次绑定通过。删除本批 1435 个临时文件、逻辑 `781,265,332` 字节，
+[最终清理](testing/records/2026-11-16-native-network-evidence/cleanup-final.json)
+记录正常程序、唯一 target、共享 base image 及其他任务资源保留。
+作者受管 worktree、匹配分支与本批三个 agent 均已清理；没有新建用户 chat。
+后续仅补文档回执，不重跑相同工程输入的门禁。
 在线依赖检查 45 秒超时并 reap，无新增依赖，不签全部最新。
 完整产品总目标保持 active，三平台完整桌面、IME/VoiceOver、签名发行和 M4 仍开放。
 

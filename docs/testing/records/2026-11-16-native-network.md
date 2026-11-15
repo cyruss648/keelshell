@@ -165,7 +165,16 @@ x.y 策略与三组 AI controller 通过。两个新默认 Rust 名在实际运�
 共 1422 份、`64,975,404` 原始字节，gzip 后 `46,813,810` 字节逐项解压一致。
 首轮导出因 helper 的字面标记误触自身扫描而退出，保留回执与旧 helper；
 1418 个未完成导出先与原文核验后重建，原件未删，最终完整导出成功。
-正式本地功能提交前核对 Git index/blob，提交后绑定精确源码提交，再清理临时副本。
+正式本地功能提交前已核对 Git index/blob，源码提交为
+`6699148b0fd9b5455c69a2ae6b9187ecb1cc3633`；
+[提交绑定](2026-11-16-native-network-evidence/commit-input-binding.json)及
+[清理后绑定](2026-11-16-native-network-evidence/post-cleanup-binding.json)
+核验 699 项工程输入与 1422 份原件、当前文件零 mismatch。
+随后删除本批 1435 个临时文件，逻辑 `781,265,332` 字节；
+[最终清理](2026-11-16-native-network-evidence/cleanup-final.json)
+确认批次目录 absent、正常 GUI/MCP 摘要不变、唯一 target/共享 base image 保留，
+作者 worktree 与匹配分支 absent，三个 agent 已关闭，没有新建用户 chat。
+后续仅补文档回执，不重跑相同工程输入的门禁；没有 push。
 原始自动流程失败、红回归、非作者 r1/r2、零 drop 失败及中断始终保留。
 本批限定结论不代签三平台完整原生、完整输入法/辅助技术、签名发行、
 生产性能或整个产品目标。

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-15T19:36:17.274437+00:00",
+  "source_commit": "6699148b0fd9b5455c69a2ae6b9187ecb1cc3633",
+  "scope": "Only this batch temporary directory, stable test/helper binaries and duplicate packages; archive/Git blob binding completed first",
+  "removed_directory": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/native-network-20261116",
+  "removed_directory_absent": true,
+  "files_removed": 1435,
+  "logical_bytes_removed": 781265332,
+  "archived_originals_verified": 1422,
+  "omitted_rebuildable_copies_verified": 13,
+  "open_handle_probe_exit": 1,
+  "normal_programs_preserved_and_hashes_match": [
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "sha256": "64a9af1f2bbd3f0a52414bff237d1df665ee1c015aeeef4b6eb49ef329aff3e8",
+      "bytes": 198707888
+    },
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816",
+      "bytes": 14548464
+    }
+  ],
+  "valid_cargo_target_retained": "work/recovery-batch-integration-20261115/target",
+  "managed_author_worktree_absent": true,
+  "author_branch_absent": true,
+  "agents_closed": [
+    "01a1e06d-8591-7a61-9d98-3fb0732ee935",
+    "01a1e081-6940-72f2-b719-6001803074af",
+    "01a1e08a-b6d8-7323-a620-a934c49d2405"
+  ],
+  "native_supervisors_reaped": true,
+  "native_ports_closed": true,
+  "native_private_directories_absent": true,
+  "real_r6_resources_absent": 9,
+  "real_r7_resources_absent": 9,
+  "real_r7_live_matching_birth_identities": 0,
+  "shared_base_image_retained": true,
+  "other_task_worktrees_resources_retained": true,
+  "user_owned_chats_created": 0,
+  "remote_push_performed": false
+}
