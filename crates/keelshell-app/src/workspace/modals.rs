@@ -81,6 +81,26 @@ fn route_steps(steps: &[Connection], current: usize, cx: &App) -> AnyElement {
             div()
                 .id(("connection-route-step", index))
                 .test_support()
+                .role(accesskit::Role::Group)
+                .aria_label(format!(
+                    "{} {}{}: {} · {}{}",
+                    t(cx, "连接步骤", "Connection step"),
+                    index + 1,
+                    if index == current {
+                        t(cx, "，当前", ", current")
+                    } else {
+                        ""
+                    },
+                    connection.name,
+                    endpoint(connection),
+                    connection.proxy.as_ref().map_or_else(String::new, |proxy| {
+                        format!(
+                            " · {}: {}",
+                            t(cx, "网络代理", "Network proxy"),
+                            proxy_endpoint(proxy)
+                        )
+                    }),
+                ))
                 .p_2()
                 .rounded(px(6.))
                 .bg(rgb(if index == current {
@@ -168,6 +188,19 @@ impl Workspace {
             .id("connection-route-status")
             .flex_shrink_0()
             .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(format!(
+                "{title}; {}; {}{}",
+                connection.name,
+                endpoint(connection),
+                connection.proxy.as_ref().map_or_else(String::new, |proxy| {
+                    format!(
+                        "; {}: {}",
+                        t(cx, "网络代理", "Network proxy"),
+                        proxy_endpoint(proxy)
+                    )
+                }),
+            ))
             .flex()
             .flex_col()
             .gap_2()
@@ -500,6 +533,21 @@ impl Workspace {
                 footer.into_any_element(),
             )
         } else if let Some(approval) = &self.host_approval {
+            let title = if approval.previous.is_some() {
+                t(cx, "服务器指纹已变更", "Server identity changed")
+            } else {
+                t(cx, "验证服务器指纹", "Verify server identity")
+            };
+            let guidance = t(
+                cx,
+                "请与可信来源核对服务器指纹后再接受。",
+                "Compare this fingerprint with a trusted source before accepting it.",
+            );
+            let received = format!(
+                "{}: {}",
+                t(cx, "收到的指纹", "Received"),
+                approval.fingerprint
+            );
             let body = div()
                 .flex()
                 .flex_col()
@@ -513,21 +561,41 @@ impl Workspace {
                             .child(endpoint(&approval.connection)),
                     )
                 })
-                .child(div().text_sm().text_color(rgb(visual.muted)).child(t(
-                    cx,
-                    "请与可信来源核对服务器指纹后再接受。",
-                    "Compare this fingerprint with a trusted source before accepting it.",
-                )))
-                .child(div().text_sm().font_family("monospace").child(format!(
-                    "{}: {}",
-                    t(cx, "收到的指纹", "Received"),
-                    approval.fingerprint
-                )))
+                .child(
+                    div()
+                        .id("ssh-host-key-guidance")
+                        .test_support()
+                        .role(accesskit::Role::Label)
+                        .aria_label(guidance)
+                        .text_sm()
+                        .text_color(rgb(visual.muted))
+                        .child(guidance),
+                )
+                .child(
+                    div()
+                        .id("ssh-host-key-received")
+                        .test_support()
+                        .role(accesskit::Role::Label)
+                        .aria_label(received.clone())
+                        .text_sm()
+                        .font_family("monospace")
+                        .child(received),
+                )
                 .when_some(approval.previous.as_ref(), |body, previous| {
-                    body.child(div().text_sm().font_family("monospace").child(format!(
+                    let text = format!(
                         "{}: {previous}",
                         t(cx, "已信任的指纹", "Previously trusted")
-                    )))
+                    );
+                    body.child(
+                        div()
+                            .id("ssh-host-key-previous")
+                            .test_support()
+                            .role(accesskit::Role::Label)
+                            .aria_label(text.clone())
+                            .text_sm()
+                            .font_family("monospace")
+                            .child(text),
+                    )
                 });
             let footer = div()
                 .flex()
@@ -560,6 +628,10 @@ impl Workspace {
             (
                 px(480.),
                 div()
+                    .id("ssh-host-key-title")
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(title)
                     .text_lg()
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(rgb(if approval.previous.is_some() {
@@ -567,11 +639,7 @@ impl Workspace {
                     } else {
                         visual.accent
                     }))
-                    .child(if approval.previous.is_some() {
-                        t(cx, "服务器指纹已变更", "Server identity changed")
-                    } else {
-                        t(cx, "验证服务器指纹", "Verify server identity")
-                    })
+                    .child(title)
                     .into_any_element(),
                 body.into_any_element(),
                 footer.into_any_element(),

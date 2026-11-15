@@ -86,6 +86,12 @@ impl Workspace {
         Some((route.snapshot.hops().to_vec(), route.current))
     }
 
+    /// An authenticated prefix remains in use while the next hop awaits review
+    /// or authentication, even though no terminal tab owns it yet.
+    pub(super) fn pending_route_session(&self) -> Option<&SshSession> {
+        self.connect_route.as_ref()?.upstream.as_ref()
+    }
+
     fn route_is_current(&self) -> bool {
         let configuration_current = self.configuration_token_current();
         if !configuration_current || self.close_review.is_some() {

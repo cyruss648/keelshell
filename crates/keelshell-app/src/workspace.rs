@@ -1280,7 +1280,12 @@ impl Workspace {
     }
 
     fn close_orphaned_window_sessions(&mut self, cx: &App) {
-        let active: Vec<_> = self.remote_sessions.values().cloned().collect();
+        let active: Vec<_> = self
+            .remote_sessions
+            .values()
+            .chain(self.pending_route_session())
+            .cloned()
+            .collect();
         let required = self.retain_route_dependencies(&active);
         let background_busy = self.window_agent_busy(cx)
             || self.retired_window_panels.iter().any(|panels| {

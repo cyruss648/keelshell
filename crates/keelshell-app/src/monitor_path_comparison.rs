@@ -457,11 +457,15 @@ fn localized_review(plan: &PathComparisonPlan, cx: &App) -> String {
     )
 }
 
-fn observed_text(text: String) -> impl IntoElement {
-    // The observer and renderer share one string, never a second description.
-    // In normal builds this adds no element or state.
+fn observed_text(id: impl Into<ElementId>, text: String) -> impl IntoElement {
+    // The accessibility label, observer and renderer share the exact same text.
     let text: SharedString = text.into();
-    text.clone().test_text(text)
+    div()
+        .id(id)
+        .test_support()
+        .role(accesskit::Role::Label)
+        .aria_label(text.clone())
+        .child(text.clone().test_text(text))
 }
 
 fn review_text(routes: [&keelshell_session::SshConnectionInfo; 2], cx: &App) -> String {
@@ -644,7 +648,10 @@ impl Render for PathComparisonPanel {
                             .overflow_y_scroll()
                             .text_xs()
                             .whitespace_normal()
-                            .child(observed_text(localized_review(&review.plan, cx))),
+                            .child(observed_text(
+                                "path-comparison-review-text",
+                                localized_review(&review.plan, cx),
+                            )),
                     )
                     .child(
                         div()
@@ -687,6 +694,8 @@ impl Render for PathComparisonPanel {
             div()
                 .id("path-comparison-status")
                 .test_support()
+                .role(accesskit::Role::Label)
+                .aria_label(self.status.render(cx))
                 .min_w_0()
                 .text_xs()
                 .whitespace_normal()
@@ -705,6 +714,16 @@ impl Render for PathComparisonPanel {
                 if let (Some(a), Some(b)) = (a, b) {
                     view = view.child(
                         div()
+                            .id(("path-comparison-median", kind as usize))
+                            .test_support()
+                            .role(accesskit::Role::Group)
+                            .aria_label(format!(
+                                "{} ({}); A: {}; B: {}",
+                                kind_name(kind, cx),
+                                t(cx, "三次中位数", "median of three"),
+                                sample_time(a, kind),
+                                sample_time(b, kind),
+                            ))
                             .min_w_0()
                             .flex()
                             .flex_col()
@@ -721,17 +740,23 @@ impl Render for PathComparisonPanel {
                                 div()
                                     .id(("path-comparison-difference", kind as usize))
                                     .test_support()
-                                    .child(observed_text(difference_text(a, b, cx))),
+                                    .child(observed_text(
+                                        ("path-comparison-difference-text", kind as usize),
+                                        difference_text(a, b, cx),
+                                    )),
                             ),
                     );
                 } else {
-                    view = view.child(div().text_xs().child(format!(
-                        "{}: {}",
-                        kind_name(kind, cx),
-                        t(
-                            cx,
-                            "数据不足，无法完整比较。",
-                            "Insufficient data for a complete comparison."
+                    view = view.child(div().text_xs().child(observed_text(
+                        ("path-comparison-insufficient", kind as usize),
+                        format!(
+                            "{}: {}",
+                            kind_name(kind, cx),
+                            t(
+                                cx,
+                                "数据不足，无法完整比较。",
+                                "Insufficient data for a complete comparison."
+                            ),
                         ),
                     )));
                 }
@@ -779,10 +804,9 @@ impl Render for PathComparisonPanel {
                                     )
                                 }
                             };
-                            div()
-                                .text_xs()
-                                .whitespace_normal()
-                                .child(observed_text(format!(
+                            div().text_xs().whitespace_normal().child(observed_text(
+                                ("path-comparison-sample", index),
+                                format!(
                                     "#{} {:?}  {} {}  {}  {} B  {:.2} ms  {}",
                                     index + 1,
                                     sample.path,
@@ -792,7 +816,8 @@ impl Render for PathComparisonPanel {
                                     sample.bytes,
                                     sample.elapsed.as_secs_f64() * 1000.,
                                     outcome,
-                                )))
+                                ),
+                            ))
                         })),
                 );
             }
@@ -809,10 +834,10 @@ impl Render for PathComparisonPanel {
                         .min_w_0()
                         .text_xs()
                         .whitespace_normal()
-                        .child(observed_text(review_text(
-                            [&source.routes[0], &source.routes[1]],
-                            cx,
-                        ))),
+                        .child(observed_text(
+                            "path-comparison-run-source-text",
+                            review_text([&source.routes[0], &source.routes[1]], cx),
+                        )),
                 );
             }
         }

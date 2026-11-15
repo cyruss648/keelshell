@@ -133,9 +133,50 @@ target 禁止转发，jump 仅允许转发到这一个 target 且禁止 exec/PTY
 
 ## IP 层实验的验收边界
 
-该 runner 在回执中将 netem/IP 丢包明确标为 `HOLD / NOT_TESTED`。
-如果另行具备 Podman/Linux `tc netem` 条件，应仅在独立自有容器与网络命名空间
-配置、读取实际 qdisc 及计数器，分别执行基线、A 受损、B 受损，保留原始样本与
-完整容器/网络清理回执。不要对宿主或其他任务容器应用 qdisc，也不要用关闭流、
-丢弃应用字节或引入等待来冒充 IP 层随机丢包。未取得该证据，NET-03 的 IP 层
-损伤及性能收益验收仍开放；本地 OpenSSH 互操作也不替代三平台原生 UI 验收。
+以上用户态流 runner 继续将 netem/IP 丢包标为 `HOLD / NOT_TESTED`。
+真实 IP 实验由独立的 `scripts/ssh_path_netem_lab.py` 执行，
+使用自有容器的 Linux network namespace，直接通过 rtnetlink 配置和读取
+kernel netem，不依赖在镜像内安装 `tc`。CONNECT gate 保持字节原样转发，
+不加应用等待，不丢弃应用字节。它不修改宿主、Podman VM 或其他任务的 qdisc。
+
+先准备本地已有的 Linux 镜像，包含 Python 3.11+、OpenSSH 和 `useradd`。
+runner 在离线派生镜像中生成专用账户；不 pull、不下载公共包、不编译 Rust。
+只给 gate 容器 `NET_ADMIN`，使用专用 internal 网络、关闭 DNS，
+不挂载宿主目录，发布端口全部绑定 `127.0.0.1`。
+测试 binary 须先按本节前述来源与库存要求核验，传入完整 SHA-256：
+
+```sh
+python3 scripts/ssh_path_netem_lab.py \
+  --test-binary /absolute/path/to/prebuilt/ssh_path_interop-TEST_HASH \
+  --test-binary-sha256 EXPECTED_64_HEX_DIGEST \
+  --base-image EXISTING_LINUX_IMAGE \
+  --delay-ms 20 --loss-percent 5 \
+  --output work/ssh-path-netem/run-001
+```
+
+默认运行三个场景；损伤只作用于所选 gate 的 `eth0` egress，
+包括其向上游与向客户端发送的包。它不声称某一物理方向的单向 RTT，
+也不代表整条互联网线路。`--scenario` 可选单个场景，总上限为 120–600 秒，
+包含预留清理时间。已有输出目录被拒绝。默认丢包率为 1%，上例明确选择 5%；
+小样本在已配置随机丢包时仍可能没有实际 drop，这种运行必须失败，
+不能自动重试、补签中位数或冒称测到了丢包。
+
+每个 gate 保存前后 qdisc 原始 netlink 字节、namespace 身份、配置及计数。
+受损路径必须有实际流量和 drop；清洁对照不得有 drop。队列必须排空，
+还要能排除 queue limit 溢出导致的 drop。计数单位是内核 skb，
+GSO 可能合并线上的包，不能把它直接写成 wire packet 数或实际丢包百分比。
+认证、审核、固定三轮 18 样本与失败分类继续使用同一个生产传输测试。
+所有容器、网络、派生镜像和宿主子进程按 owner/full ID/birth identity 回收。
+
+创建客户端超时、中断、返回非零或被信号终止时，先停止并实际 reap 自有客户端，
+再进入资源检查；仅成功返回的创建请求记为完成，
+资源清理前另有全部自有客户端的停止屏障。杀掉客户端不代表 Podman 服务端请求
+已经取消：创建完成状态未知时保留 `UNKNOWN`，即使两次查询暂时不存在，
+或稍后观察到并删除了匹配 owner 的资源，也不能签署 `cleanup.confirmed=true`。
+这类回执保留 `CleanupUnconfirmed`，不接纳性能观察；调用者应继续依据确切身份
+核对，不重放不确定的创建请求。正常回收同时复查完整 ID 与登记名称。
+
+2026-11-16 的限定实验已取得三个场景各 18 样本、实际 kernel drop 和清理回执；
+原始零 drop 失败与中断结果保持。工程/非作者复核状态和精确输入见
+[本批记录](../testing/records/2026-11-16-native-network.md)。
+这是本地 Linux IP 损伤实验，不能替代生产性能收益或三平台原生 UI 验收。

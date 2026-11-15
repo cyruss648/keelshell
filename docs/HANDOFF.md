@@ -1,5 +1,46 @@
 # KeelShell 当前交接 — 2026-11-16
 
+## 当前批次：原生流程与真实 IP 网络实验，集中门禁与限定复核通过
+
+基线 `5a6b30a2b9cca6d89aea551409738145608ac689`。继续按并行实现、集中集成验证
+修复、非作者复核、本地提交推进；不 push。父在独立状态目录、暂存 macOS arm64
+包和 disposable localhost SSH 服务上实际检查窗口、三主题及路径比较。
+隔离作者负责自有 Linux network namespace 的真实 IP 延迟/丢包实验。
+唯一 Cargo target 归属仍保持父 checkout，作者不运行 Cargo。
+从[本批记录](testing/records/2026-11-16-native-network.md)和
+[持久证据](testing/records/2026-11-16-native-network-evidence/README.md)接续；
+本批工作目录在完成 Git blob 核验后回收，不作为后续唯一证据入口。
+真实 macOS 流程发现并修复待完成跳板被周期清理、审核正文缺 AX 语义两项问题；
+19 项相关回归与非作者预构建独立执行通过。正常 GUI/MCP 构建及暂存包检查通过。
+修后原生实际核对三处公钥 pin，目标认证停留后完成两条 SSH/SFTP 连接，
+显式审核并完成 18 个比较样本；三主题切换、中英文结果和请求 900×580 的
+窄窗口已留截图与 AX 原件。初始自动流程 `exit 1` 保留，后续滚动接续单列；
+AX 屏外存在不算同屏可见。会话已停止，两个端口关闭，18 条 birth 身份无活匹配。
+
+首轮全门禁 `exit 0 / reaped / 705.126s`：Rust `3105/0/40 ignored`、
+rustdoc `14/0`、工程 Python `225 run / 1 skipped`、helper Python `25/25`。
+网络非作者发现超时创建可能被提前签 absent 的 P2，已补真实子进程红/绿回归，
+创建请求未知时保留 `UNKNOWN/CleanupUnconfirmed`。Python 专项 `24/24`，
+全套重跑 `227 run / 1 skipped` 通过。最终真实 netem r7 五次 opt-in 通过，
+三场景各 18 样本，受损侧实际 skb drops 分别为 7 与 8，控制侧均为 0；
+9 个自有资源、164 个客户端及私有目录清理确认。r5、失败及中断原件保持。
+非作者补充发现返回非零/信号退出仍误记完成的残余，另两项真实子进程回归先红，
+修后专项 `26/26`。旧 `full-gate-r2` 已停止并实际 reap，
+`exit -15 / 404.37s`，3 条 birth 身份无活匹配，自有中断临时目录已回收。
+最终 r3 冻结 699 项，SHA-256
+`f435b9fa78f9a40bc2962fa3043b983cf5818e1ab4e34db5deae5960dfc50e21`；
+相对 r1/r2 仍仅 runner 与其 Python 测试变化，其余 697 项不变。
+最终 `full-gate-r3` 实际 `exit 0 / reaped / 701.952s`：Rust
+`3105/0/40 ignored`、rustdoc `14/0`、工程 Python `229 run / 1 skipped`、
+helper Python `25/25`，格式、严格 Clippy、x.y 策略与三组 controller 通过，
+两个新默认 Rust 名逐项通过，最终完整路径和摘要零漂移。
+app 非作者 r2 已批准七文件、开放 P0–P3 为 0，并已关闭；
+其签署时全门禁待定保持，父已绑定最终 gate 与不变 app 输入；网络非作者 r3 也已批准、
+唯一 P2 及其残余全部关闭，开放 P0–P3 为 0，独立 Python `26/26`，
+已关闭 reviewer。两报告原签署与预构建/非独立重编译限制保持。
+在线依赖检查 45 秒超时并 reap，无新增依赖，不签全部最新。
+完整产品总目标保持 active，三平台完整桌面、IME/VoiceOver、签名发行和 M4 仍开放。
+
 ## 当前批次：审核式 SSH 路径比较，集中门禁通过
 
 基线 `162d883460a98cd03056731fd8d4be76a41d5c15`。继续按独立功能并行实现、

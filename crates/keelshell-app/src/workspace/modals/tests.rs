@@ -216,6 +216,86 @@ fn ordinary_authentication_is_compact_without_a_duplicate_endpoint(cx: &mut Test
 }
 
 #[gpui_kit::test]
+fn host_key_review_exposes_exact_identity_and_change_warning_to_accessibility(
+    cx: &mut TestAppContext,
+) {
+    for previous in [None, Some("SHA256:previous-fixture-only".to_owned())] {
+        let fixture = mount(cx, 760., 560.);
+        cx.update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |view, cx| {
+                let mut connection = view.state.connections[0].clone();
+                connection.name = "Owned target".into();
+                connection.host = "target.example.test".into();
+                connection.username = "operator".into();
+                view.state
+                    .update_connection(connection.clone())
+                    .checked("synthetic endpoint metadata");
+                view.prepare_login(connection.clone(), None, window, cx);
+                view.login = None;
+                let scope = view
+                    .state
+                    .connection_route(connection.id)
+                    .checked("fixture route")
+                    .host_key_scope(0)
+                    .unwrap_or_else(|| panic!("fixture scope"));
+                view.host_approval = Some(super::super::HostApproval {
+                    attempt: uuid::Uuid::new_v4(),
+                    index: 0,
+                    scope,
+                    connection,
+                    fingerprint: "SHA256:received-fixture-only".into(),
+                    previous: previous.clone(),
+                });
+                cx.notify();
+            });
+            for language in [Language::ZhCn, Language::En] {
+                i18n::set_language(language, cx);
+                window.render_frame(cx);
+                let identity = window.find("connection-route-status");
+                let label = identity.label().unwrap_or_default();
+                assert!(label.contains("Owned target"));
+                assert!(label.contains("operator@target.example.test:22"));
+                let received = window.find("ssh-host-key-received");
+                assert_eq!(received.role(), Some(gpui_kit::accesskit::Role::Label));
+                assert_eq!(
+                    received.label(),
+                    Some(if language == Language::En {
+                        "Received: SHA256:received-fixture-only"
+                    } else {
+                        "收到的指纹: SHA256:received-fixture-only"
+                    })
+                );
+                let title = window.find("ssh-host-key-title");
+                assert_eq!(
+                    title.label(),
+                    Some(match (language, previous.is_some()) {
+                        (Language::ZhCn, true) => "服务器指纹已变更",
+                        (Language::ZhCn, false) => "验证服务器指纹",
+                        (Language::En, true) => "Server identity changed",
+                        (Language::En, false) => "Verify server identity",
+                    })
+                );
+                if previous.is_some() {
+                    assert!(
+                        window
+                            .find("ssh-host-key-previous")
+                            .label()
+                            .unwrap_or_default()
+                            .contains("SHA256:previous-fixture-only")
+                    );
+                } else {
+                    assert!(window.try_find("ssh-host-key-previous").is_none());
+                }
+                assert!(!fixture.workspace.read(cx).connecting);
+                assert!(window.find("accept-host-key").visible());
+                assert!(window.find("reject-host-key").visible());
+            }
+        })
+        .checked("bilingual first-use and changed-key AX review without network actions");
+    }
+}
+
+#[gpui_kit::test]
 fn proxy_authentication_keeps_footer_and_password_focus_in_small_bilingual_windows(
     cx: &mut TestAppContext,
 ) {

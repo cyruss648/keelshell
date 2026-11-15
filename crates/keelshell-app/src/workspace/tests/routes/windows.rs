@@ -39,6 +39,69 @@ async fn connected(
 }
 
 #[gpui_kit::test]
+async fn orphan_cleanup_keeps_pending_jump_live_then_releases_cancelled_route(
+    cx: &mut TestAppContext,
+) {
+    for cancel in [false, true] {
+        let (fixture, route) = mount_route(cx, false, true);
+        start_route(&fixture, &route, cx);
+        submit_secret(&fixture, route.gateway.id, cx);
+        login_for(&fixture, route.target.id, cx).await;
+        cx.update_window(fixture.window, |_, _, cx| {
+            fixture.workspace.update(cx, |view, cx| {
+                assert_eq!(view.owned_window_sessions.len(), 1);
+                let gateway = view.owned_window_sessions[0].clone();
+                // Force the production maintenance tick while a user is still
+                // reviewing the next hop, rather than racing a short prompt.
+                for _ in 0..3 {
+                    view.close_orphaned_window_sessions(cx);
+                }
+                assert!(
+                    view.owned_window_sessions
+                        .iter()
+                        .any(|session| session.same_connection(&gateway)),
+                    "an authenticated hop awaiting downstream credentials is still in use"
+                );
+                assert!(!gateway.is_closed());
+            });
+        })
+        .checked("maintenance must retain the live pending route prefix");
+        if cancel {
+            cx.update_window(fixture.window, |_, window, cx| {
+                fixture
+                    .workspace
+                    .update(cx, |view, cx| view.cancel_login(window, cx));
+            })
+            .checked("cancel the pending route through its production login action");
+            assert_eq!(route.target_state.authenticated.load(Ordering::Acquire), 0);
+        } else {
+            submit_secret(&fixture, route.target.id, cx);
+            cx.wait_for(fixture.window, Duration::from_secs(10), |_, cx| {
+                fixture
+                    .workspace
+                    .read(cx)
+                    .tabs
+                    .first()
+                    .is_some_and(|tab| tab.read(cx).visible_text().contains("TARGET READY"))
+            })
+            .await;
+            cx.update_window(fixture.window, |_, window, cx| {
+                fixture.workspace.update(cx, |view, cx| {
+                    view.show_connections = false;
+                    view.close_tab(&crate::workspace::CloseTab, window, cx);
+                });
+            })
+            .checked("a completed target releases its prefix when its last tab closes");
+        }
+        cx.wait_for(fixture.window, Duration::from_secs(10), |_, _| {
+            route.gateway_state.alive.load(Ordering::Acquire) == 0
+                && route.target_state.alive.load(Ordering::Acquire) == 0
+        })
+        .await;
+    }
+}
+
+#[gpui_kit::test]
 async fn multiwindow_close_rejects_format_only_drift_then_reaps_a_and_keeps_b_ssh_live(
     cx: &mut TestAppContext,
 ) {

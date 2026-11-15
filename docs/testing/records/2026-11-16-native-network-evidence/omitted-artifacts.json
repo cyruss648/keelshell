@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "count": 13,
+  "bytes": 716289928,
+  "files": [
+    {
+      "path": "bins/keelshell-app-tests-green-r1",
+      "bytes": 269521920,
+      "sha256": "054a8da30a98f78588997bf96a9b89886463a34c121ff40584d83776ac554444",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/ssh_path_interop",
+      "bytes": 18062000,
+      "sha256": "c8fdcf0925cdd098044152714635ccb3581f2cc7dede6bdcc5b90e3b3407551c",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "native_ax",
+      "bytes": 147384,
+      "sha256": "efc8ccf5b56a60dc4e1e107e49882ca8412eae9390dd872ba82bd60183635d37",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/Info.plist",
+      "bytes": 993,
+      "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-app",
+      "bytes": 198760096,
+      "sha256": "b4795ce2ba31c60308205acc0e1dd4e9caf881bceb91e1aca682cac3fc7ca410",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-mcp",
+      "bytes": 14548464,
+      "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/PkgInfo",
+      "bytes": 8,
+      "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/Resources/KeelShell.icns",
+      "bytes": 995855,
+      "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r2/KeelShell.app/Contents/Info.plist",
+      "bytes": 993,
+      "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r2/KeelShell.app/Contents/MacOS/keelshell-app",
+      "bytes": 198707888,
+      "sha256": "64a9af1f2bbd3f0a52414bff237d1df665ee1c015aeeef4b6eb49ef329aff3e8",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r2/KeelShell.app/Contents/MacOS/keelshell-mcp",
+      "bytes": 14548464,
+      "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r2/KeelShell.app/Contents/PkgInfo",
+      "bytes": 8,
+      "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "package-r2/KeelShell.app/Contents/Resources/KeelShell.icns",
+      "bytes": 995855,
+      "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    }
+  ]
+}

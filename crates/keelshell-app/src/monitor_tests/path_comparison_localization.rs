@@ -41,6 +41,15 @@ fn path_comparison_localizes_painted_review_failures_and_observed_differences(
             });
             window.render_frame(cx);
             let text = painted_text(window, "path-comparison-review-body");
+            assert_eq!(
+                window.find("path-comparison-review-text").role(),
+                Some(gpui_kit::accesskit::Role::Label)
+            );
+            assert_eq!(
+                window.find("path-comparison-review-text").label(),
+                Some(text.as_str()),
+                "the exact painted routes, commands and limits must be readable through AX"
+            );
             if language == keelshell_core::Language::ZhCn {
                 assert!(text.contains("单样本绝对期限八秒"));
                 assert!(text.contains("已核验密钥"));
@@ -77,6 +86,11 @@ fn path_comparison_localizes_painted_review_failures_and_observed_differences(
                 "Sample output limit exceeded"
             };
             assert!(text.contains(expected_failure), "{text}");
+            assert_eq!(
+                window.find(("path-comparison-sample", 0_usize)).label(),
+                Some(text.as_str()),
+                "a failed raw sample must retain its reason in AX"
+            );
             h.panel.update(cx, |panel, cx| {
                 panel.result = Some(report(PathComparisonStatus::Complete));
                 panel.show_samples = false;
@@ -85,6 +99,16 @@ fn path_comparison_localizes_painted_review_failures_and_observed_differences(
             window.render_frame(cx);
             let id = ("path-comparison-difference", PathProbeKind::Exec as usize);
             assert!(window.find(id).bounds().size.height > px(0.));
+            let difference = window.find(("path-comparison-difference-text", 0_usize));
+            assert_eq!(difference.role(), Some(gpui_kit::accesskit::Role::Label));
+            assert!(difference.label().is_some());
+            assert!(
+                window
+                    .find(("path-comparison-median", PathProbeKind::Exec as usize))
+                    .label()
+                    .unwrap_or_default()
+                    .contains("ms")
+            );
             let text = gpui_kit::base::test_support::texts(window)
                 .into_iter()
                 .map(|text| text.text().to_owned())

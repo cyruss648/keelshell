@@ -1,0 +1,7 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+# Existing public image must already contain Python 3.11+, OpenSSH and useradd.
+# This build is offline; an unusable password hash unlocks public-key-only SSH.
+RUN useradd --create-home --shell /bin/sh --password x netem
+COPY container.py qdisc.py /opt/keelshell-netem/
+ENTRYPOINT ["python3", "-u", "/opt/keelshell-netem/container.py"]
