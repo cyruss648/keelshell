@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-11-15T06:29:14.210205+00:00",
+  "comparison_freeze": "frozen-inputs-r3.json",
+  "mismatches": [
+    {
+      "path": "crates/keelshell-core/src/server_archive.py",
+      "expected_r3": "96e06a6e5c51b062208bcb3108c720656a560a902c67ca85e2378e7b1570685b",
+      "current": "8ad70dc681d4d8cb51f2ecca5da5c3f8a30d68a59ddd7adf06e497132ce28ea0"
+    },
+    {
+      "path": "crates/keelshell-core/tests/server_archive.rs",
+      "expected_r3": "b61f8fd17ecc542cab745f3b3099fb541c386a4c3b92ff8703e2085e7e7029e0",
+      "current": "4441aa67e701035bf3a8c3454d75dedc6af22bca613b6a151a02b9e55611cb5b"
+    }
+  ],
+  "available_freezes": [
+    "frozen-inputs-r1.json",
+    "frozen-inputs-r2.json",
+    "frozen-inputs-r3.json"
+  ],
+  "available_binary_metadata": [
+    "app-binary-r2.json",
+    "core-binary-r1.json",
+    "session-binary-r1.json"
+  ]
+}

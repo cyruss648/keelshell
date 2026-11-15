@@ -1,4 +1,5 @@
-//! SFTP operations on the authenticated SSH transport, without shell commands.
+//! SFTP operations on the authenticated SSH transport. Reviewed server archives
+//! explicitly execute the core's bounded helper; ordinary file operations use SFTP.
 
 use std::sync::{
     Arc, Mutex,
@@ -28,6 +29,8 @@ pub use file_transfer::{FileTransferPlan, MAX_REVIEWED_FILE_BYTES};
 mod inspection;
 mod mutation;
 pub use mutation::FileMutationScope;
+mod server_archive;
+pub use server_archive::{ServerArchivePlan, ServerArchiveTransferReceipt};
 mod queue;
 use control::{TransferContext, TransferControl, local_io, remote_io};
 

@@ -1,0 +1,218 @@
+{
+  "recorded_utc": "2026-11-15T06:38:26.745290+00:00",
+  "total_passed": 67,
+  "failed": 0,
+  "ignored": 0,
+  "independently_compiled": false,
+  "groups": [
+    {
+      "label": "session-inventory-r4",
+      "pgid": 64092,
+      "process_group_absent": true
+    },
+    {
+      "label": "session-lib-inventory-r4",
+      "pgid": 64093,
+      "process_group_absent": true
+    },
+    {
+      "label": "app-inventory-r4",
+      "pgid": 64098,
+      "process_group_absent": true
+    },
+    {
+      "label": "session-focused-r4",
+      "pgid": 64587,
+      "process_group_absent": true
+    },
+    {
+      "label": "session-lib-focused-r4",
+      "pgid": 64588,
+      "process_group_absent": true
+    },
+    {
+      "label": "app-focused-r4",
+      "pgid": 64634,
+      "process_group_absent": true
+    },
+    {
+      "label": "app-shared-archive-r4",
+      "pgid": 65049,
+      "process_group_absent": true
+    }
+  ],
+  "tmp_entries": [],
+  "runs": [
+    {
+      "label": "session-focused-r4",
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/prebuilt-r4/session",
+        "--test-threads=4"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+      "binary_sha256": "23475667fa92ce812723f0024f613ed04850a74115148ced8b72be0c0b763366",
+      "source_freeze": "frozen-inputs-r4.json",
+      "rebuilt_by_reviewer": false,
+      "started_utc": "2026-11-15T06:36:16.640178+00:00",
+      "timeout_seconds": 180.0,
+      "pid": 64587,
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 1.751,
+      "finished_utc": "2026-11-15T06:36:18.390890+00:00",
+      "log_sha256": "1e8de6e0181d1a98815fe64eee0073ed9db76589621894ecbeafc0482a0ad8cf",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "names": [
+        "server_archive_cancel_before_planning_or_dispatch_creates_no_unknown_hold",
+        "server_archive_busy_source_tree_rejects_before_dispatch",
+        "server_archive_busy_final_tree_rejects_before_dispatch",
+        "server_archive_busy_staging_tree_rejects_before_dispatch",
+        "server_archive_cancel_during_inspection_open_cannot_execute_a_late_inspection",
+        "server_archive_cancel_during_final_readback_does_not_clear_pending",
+        "server_archive_cancel_during_late_exec_open_never_dispatches_and_can_review_again",
+        "server_archive_cancel_during_admission_releases_without_unknown_write",
+        "server_archive_cancel_during_stdin_retains_both_quarantines",
+        "server_archive_cancel_while_exec_ack_is_pending_retains_both_quarantines",
+        "server_archive_combined_stdout_stderr_budget_retains_quarantine",
+        "server_archive_changed_source_is_dispatched_failure_and_quarantines_both_writes",
+        "server_archive_existing_destination_prevents_even_inspection",
+        "server_archive_dropped_dispatched_future_retains_quarantine_and_unrelated_ssh",
+        "server_archive_exec_rejection_is_conservatively_unknown",
+        "server_archive_late_destination_is_preserved_without_unknown_hold",
+        "server_archive_failed_sftp_readback_retains_quarantine",
+        "server_archive_failed_read_handle_close_retains_quarantine",
+        "server_archive_malformed_receipt_retains_quarantine",
+        "server_archive_malformed_inspection_never_creates_mutation_authority",
+        "server_archive_missing_eof_retains_quarantine",
+        "server_archive_missing_exit_retains_quarantine",
+        "server_archive_missing_receipt_retains_quarantine",
+        "server_archive_nonzero_exit_after_publication_retains_quarantine",
+        "server_archive_overbudget_inspection_never_creates_mutation_authority",
+        "server_archive_overbudget_stdout_retains_quarantine",
+        "server_archive_partial_input_and_early_close_retain_quarantine",
+        "server_archive_preexisting_exact_stage_is_preserved_without_unknown_hold",
+        "server_archive_readback_keeps_source_destination_and_stage_admission",
+        "server_archive_replacement_connection_to_same_endpoint_cannot_use_review",
+        "server_archive_retained_stage_after_success_retains_quarantine",
+        "server_archive_symlink_publication_retains_quarantine",
+        "server_archive_dispatch_and_readback_share_one_fixed_execution_deadline",
+        "server_archive_valid_receipt_for_different_members_retains_quarantine",
+        "server_archive_wrong_published_bytes_retain_quarantine",
+        "server_archive_tar_gz_executes_the_real_helper_and_verifies_every_member",
+        "server_archive_wrong_receipt_size_retains_quarantine",
+        "server_archive_wrong_receipt_digest_retains_quarantine",
+        "server_archive_zip_executes_the_real_helper_and_verifies_every_member",
+        "server_archive_missing_exec_ack_uses_the_single_deadline_and_retains_quarantine"
+      ]
+    },
+    {
+      "label": "session-lib-focused-r4",
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/prebuilt-r4/session-lib",
+        "sftp::server_archive::tests::",
+        "--test-threads=4"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+      "binary_sha256": "70ca84e15aacdabbcf4afd5e7553d8c016b9894bef60dfd20edcf66c0b58044f",
+      "source_freeze": "frozen-inputs-r4.json",
+      "rebuilt_by_reviewer": false,
+      "started_utc": "2026-11-15T06:36:16.641064+00:00",
+      "timeout_seconds": 180.0,
+      "pid": 64588,
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 0.006,
+      "finished_utc": "2026-11-15T06:36:16.646930+00:00",
+      "log_sha256": "7d68f1197b681e0e885af4e44d2eef271d246657bf60962d5e5133f47817be16",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 147,
+      "names": [
+        "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_receipt_length_mismatch",
+        "sftp::server_archive::tests::server_archive_published_file_stamp_accepts_private_complete_regular_file",
+        "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_symlinks_even_with_correct_size",
+        "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_size_over_encoded_cap",
+        "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_unexpected_public_permissions",
+        "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_unknown_size",
+        "sftp::server_archive::tests::server_archive_receipt_rejects_empty_stdout_even_with_zero_exit",
+        "sftp::server_archive::tests::server_archive_receipt_rejects_nonempty_stderr_even_with_zero_exit",
+        "sftp::server_archive::tests::server_archive_receipt_requires_an_explicit_successful_exit",
+        "sftp::server_archive::tests::server_archive_root_sibling_stage_has_no_double_separator",
+        "sftp::server_archive::tests::server_archive_stage_is_an_exact_uuid_sibling_before_review"
+      ]
+    },
+    {
+      "label": "app-focused-r4",
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/prebuilt-r4/app",
+        "files::transfer_tests::server_archive_tests::",
+        "--test-threads=4"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+      "binary_sha256": "8b249ab269786157589fc6ffa58cd294f3c9de59dd991c0bb1518f499b559a4c",
+      "source_freeze": "frozen-inputs-r4.json",
+      "rebuilt_by_reviewer": false,
+      "started_utc": "2026-11-15T06:36:16.992577+00:00",
+      "timeout_seconds": 240.0,
+      "pid": 64634,
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 4.903,
+      "finished_utc": "2026-11-15T06:36:21.895253+00:00",
+      "log_sha256": "a3db0840fd492d83e56bdc4181275c3f6e3f28633febcff6b2af4630542aa09f",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 1201,
+      "names": [
+        "files::transfer_tests::server_archive_tests::server_archive_inspection_controls_use_all_themes_and_languages_without_dispatch",
+        "files::transfer_tests::server_archive_tests::server_archive_failed_inspection_never_creates_a_write_review_or_close_hold",
+        "files::transfer_tests::server_archive_tests::server_archive_both_reviews_execute_the_real_helper_and_verify_both_formats",
+        "files::transfer_tests::server_archive_tests::server_archive_inspection_is_reviewed_in_full_and_cancel_never_dispatches",
+        "files::transfer_tests::server_archive_tests::server_archive_late_scan_cannot_authorize_a_replaced_actual_connection",
+        "files::transfer_tests::server_archive_tests::server_archive_name_change_retires_the_review_and_rejects_a_retained_operation",
+        "files::transfer_tests::server_archive_tests::server_archive_replaced_connection_cannot_confirm_with_the_same_host_and_token"
+      ]
+    },
+    {
+      "label": "app-shared-archive-r4",
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/prebuilt-r4/app",
+        "files::transfer_tests::archive_tests::",
+        "--test-threads=4"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+      "binary_sha256": "8b249ab269786157589fc6ffa58cd294f3c9de59dd991c0bb1518f499b559a4c",
+      "source_freeze": "frozen-inputs-r4.json",
+      "rebuilt_by_reviewer": false,
+      "started_utc": "2026-11-15T06:36:53.696372+00:00",
+      "timeout_seconds": 240.0,
+      "pid": 65049,
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 2.001,
+      "finished_utc": "2026-11-15T06:36:55.697870+00:00",
+      "log_sha256": "91ead2b6f4d510249b057c9fae5f376bfe98d035d7f4e923ded0ad21a1c03d60",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 1199,
+      "names": [
+        "files::transfer_tests::archive_tests::archive_corrupt_download_and_existing_local_target_preserve_destination",
+        "files::transfer_tests::archive_tests::archive_controls_share_all_themes_and_locales_without_changing_drafts",
+        "files::transfer_tests::archive_tests::archive_changed_local_content_is_rejected_before_any_publication",
+        "files::transfer_tests::archive_tests::archive_cancel_and_selection_change_never_publish_an_old_approval",
+        "files::transfer_tests::archive_tests::archive_draft_change_and_retired_session_reject_review",
+        "files::transfer_tests::archive_tests::archive_large_manifest_keeps_last_member_and_fixed_review_actions",
+        "files::transfer_tests::archive_tests::archive_pending_write_cancel_retains_close_hold_across_another_verified_upload",
+        "files::transfer_tests::archive_tests::archive_tar_gz_download_extract_reviews_empty_folders_and_publishes_new_tree",
+        "files::transfer_tests::archive_tests::archive_zip_upload_requires_confirmation_and_preserves_exact_binary_members"
+      ]
+    }
+  ],
+  "original_report_r1_sha256": "280aa9f4c43d26109d8440f18c6b414d6bf3d8fbcd9cae8d7553e89a5e7df87e"
+}

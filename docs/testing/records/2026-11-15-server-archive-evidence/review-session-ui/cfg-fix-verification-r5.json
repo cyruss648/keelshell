@@ -1,0 +1,51 @@
+{
+  "recorded_utc": "2026-11-15T06:52:45.851317+00:00",
+  "freeze_r5_sha256": "30770f74d710b231936e8537d5ce4082798e68a2894aa1ad7e5b9110afa08f92",
+  "input_count": 553,
+  "script_count": 10,
+  "mismatches": [],
+  "r4_to_r5": [
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/files/server_archive_fixture.rs",
+      "r4": "d3a784673c23245d77b174efba01d282db37f6ae2e2a1bcd17ce6dae41d25e9c",
+      "r5": "4df7cfa53766a05799ec0f198eccacccd8f586795ab8355853e400dbc2d35b69"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/files/test_server.rs",
+      "r4": "bbc22f6f4e6989c5977072f6d9c88e0ef905e98b27299fd8b9c9e0ef0f4147a0",
+      "r5": "b954f6c7593ed6efa3622a3f10326943888152bc2b5a33c5658ca91ba2412a63"
+    }
+  ],
+  "reversals": [
+    {
+      "path": "crates/keelshell-app/src/files/server_archive_fixture.rs",
+      "reconstructed_r4_sha256": "d3a784673c23245d77b174efba01d282db37f6ae2e2a1bcd17ce6dae41d25e9c",
+      "exact_reversal": true
+    },
+    {
+      "path": "crates/keelshell-app/src/files/test_server.rs",
+      "reconstructed_r4_sha256": "bbc22f6f4e6989c5977072f6d9c88e0ef905e98b27299fd8b9c9e0ef0f4147a0",
+      "exact_reversal": true
+    }
+  ],
+  "all_production_core_and_scripts_unchanged": true,
+  "app_unix_runtime_body_unchanged": true,
+  "original_report_r1_sha256": "280aa9f4c43d26109d8440f18c6b414d6bf3d8fbcd9cae8d7553e89a5e7df87e",
+  "original_report_r2_sha256": "3f85a2197d95466f2e680ea3622b50354ec7563979ae344f2adbf449b23ad85d",
+  "earlier_verification_attempts": [
+    {
+      "exit": 1,
+      "cause": "literal cfg line removal retained indentation on test_server initializer",
+      "engineering_input_mismatch": false,
+      "executed_tests": 0
+    },
+    {
+      "exit": 1,
+      "cause": "broad whitespace regex also removed a fixture blank line",
+      "engineering_input_mismatch": false,
+      "executed_tests": 0
+    }
+  ]
+}

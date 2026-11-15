@@ -242,6 +242,24 @@ impl FileMutationScope<'_> {
     }
 }
 impl SftpSession {
+    pub(super) async fn reserve_server_archive<'a>(
+        &'a self,
+        request: &keelshell_core::server_archive::ServerArchiveRequest,
+        staging: &str,
+        authorized: &'a (dyn Fn() -> bool + Sync),
+    ) -> Result<FileMutationScope<'a>> {
+        let targets = request
+            .sources()
+            .iter()
+            .map(|path| RequestedTarget::Remote(path.clone(), false, true))
+            .chain([
+                RequestedTarget::Remote(request.destination().to_owned(), true, true),
+                RequestedTarget::Remote(staging.to_owned(), true, true),
+            ])
+            .collect();
+        self.reserve_mutation(targets, authorized).await
+    }
+
     pub(super) async fn reserve_archive_transfer<'a>(
         &'a self,
         request: &ArchiveTransferRequest,

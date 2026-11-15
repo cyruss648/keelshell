@@ -1,0 +1,19 @@
+{
+  "recorded_utc": "2026-11-15T07:09:57.767808+00:00",
+  "reason": "Two original libtest stdout files end with blank lines; preserve raw output using lossless gzip rather than trim forensic bytes.",
+  "previous_manifest_sha256": "e49891c337bbf0744361bd620668780f1b339b858089406cac034593a053d26b",
+  "changes": [
+    {
+      "from": "review-core/prebuilt-core-r4.stdout.txt",
+      "to": "review-core/prebuilt-core-r4.stdout.txt.gz",
+      "original_sha256": "16586926385a77ac4a67b6d2fce9a0a40d503941aa0596ae45174f0801fef9d3",
+      "saved_sha256": "4a83f9dcaeac465aa17fe7545f91c2f4da19844bd43e90527a32bcdb0e8e23b4"
+    },
+    {
+      "from": "review-core/prebuilt-core-r1.stdout.txt",
+      "to": "review-core/prebuilt-core-r1.stdout.txt.gz",
+      "original_sha256": "b9f535b5dd8cc791f6569e5ad35d5c7077a660a334254d9509365b63e730a459",
+      "saved_sha256": "aba79b9f5c7fe2bc6683a6bcf0f61f569f2216fcfa1558878eb9033042a5d542"
+    }
+  ]
+}

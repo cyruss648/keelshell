@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/prebuilt-r4/app",
+    "files::transfer_tests::archive_tests::",
+    "--test-threads=4"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "binary_sha256": "8b249ab269786157589fc6ffa58cd294f3c9de59dd991c0bb1518f499b559a4c",
+  "source_freeze": "frozen-inputs-r4.json",
+  "rebuilt_by_reviewer": false,
+  "started_utc": "2026-11-15T06:36:53.696372+00:00",
+  "timeout_seconds": 240.0,
+  "pid": 65049,
+  "exit": 0,
+  "timed_out": false,
+  "seconds": 2.001,
+  "finished_utc": "2026-11-15T06:36:55.697870+00:00",
+  "log_sha256": "91ead2b6f4d510249b057c9fae5f376bfe98d035d7f4e923ded0ad21a1c03d60"
+}

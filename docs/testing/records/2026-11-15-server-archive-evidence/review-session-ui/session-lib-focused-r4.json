@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/prebuilt-r4/session-lib",
+    "sftp::server_archive::tests::",
+    "--test-threads=4"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "binary_sha256": "70ca84e15aacdabbcf4afd5e7553d8c016b9894bef60dfd20edcf66c0b58044f",
+  "source_freeze": "frozen-inputs-r4.json",
+  "rebuilt_by_reviewer": false,
+  "started_utc": "2026-11-15T06:36:16.641064+00:00",
+  "timeout_seconds": 180.0,
+  "pid": 64588,
+  "exit": 0,
+  "timed_out": false,
+  "seconds": 0.006,
+  "finished_utc": "2026-11-15T06:36:16.646930+00:00",
+  "log_sha256": "7d68f1197b681e0e885af4e44d2eef271d246657bf60962d5e5133f47817be16"
+}

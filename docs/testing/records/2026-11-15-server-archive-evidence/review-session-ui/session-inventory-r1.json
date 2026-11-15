@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/cb81b114512a82d8/out/server_archive-cb81b114512a82d8",
+    "--list"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "binary_sha256": "1cada206d038ee0f0bc370911e33ffb50b4c81ca76d38e9d02a18780ae94832b",
+  "source_freeze": "frozen-inputs-r1.json",
+  "rebuilt_by_reviewer": false,
+  "started_utc": "2026-11-15T06:15:41.205334+00:00",
+  "timeout_seconds": 30.0,
+  "pid": 42265,
+  "exit": 0,
+  "timed_out": false,
+  "seconds": 0.017,
+  "finished_utc": "2026-11-15T06:15:41.222592+00:00",
+  "log_sha256": "4e283e8cfd84788f9c76b5ffe3c3ec6dbd84a70aeb1fe0d62787f95f4bede784"
+}

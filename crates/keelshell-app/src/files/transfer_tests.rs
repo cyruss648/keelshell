@@ -59,6 +59,8 @@ mod review_independent_tests;
 mod review_viewport_tests;
 #[path = "review_visibility_tests.rs"]
 mod review_visibility_tests;
+#[path = "server_archive_tests.rs"]
+mod server_archive_tests;
 #[path = "workspace_layout_tests.rs"]
 mod workspace_layout_tests;
 
@@ -252,6 +254,7 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
         | "archive-format-tar-gz"
         | "review-archive-upload"
         | "review-archive-extract"
+        | "review-server-archive"
         | "review-archive-tool-inspection"
         | "toggle-archive-tool-details" => Some("toggle-file-transfer-settings"),
         _ => None,

@@ -1,0 +1,30 @@
+{
+  "recorded_utc": "2026-11-15T06:59:03.607068+00:00",
+  "head": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "freeze_r5_sha256": "30770f74d710b231936e8537d5ce4082798e68a2894aa1ad7e5b9110afa08f92",
+  "inputs": 553,
+  "scripts": 10,
+  "mismatches": [],
+  "parent_full_gate_r4": {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/check.py"
+    ],
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "label": "full-gate-r4",
+    "pid": 72321,
+    "started_utc": "2026-11-15T06:48:58.335653+00:00",
+    "finished_utc": "2026-11-15T06:59:02.142805+00:00",
+    "seconds": 603.804,
+    "exit": 0,
+    "timed_out": false,
+    "log_sha256": "c2e1396e5805919abe1a5343f705f9006dcdacd274b3ef1a80ba5385050652c9",
+    "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+  },
+  "gate_log_sha256_matches": true,
+  "original_report_r1_sha256": "280aa9f4c43d26109d8440f18c6b414d6bf3d8fbcd9cae8d7553e89a5e7df87e",
+  "original_report_r2_sha256": "3f85a2197d95466f2e680ea3622b50354ec7563979ae344f2adbf449b23ad85d",
+  "reviewer_tmp_entries": [],
+  "reviewer_tests_after_r4": 0
+}

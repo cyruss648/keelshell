@@ -1,0 +1,24 @@
+{
+  "recorded_utc": "2026-11-15T06:02:54.975454+00:00",
+  "base_sha": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "main_tree": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_owner": "parent only; implementation agents forbidden Cargo",
+  "cargo_target": "work/recovery-batch-integration-20261115/target",
+  "worktrees": {
+    "core_helper": {
+      "agent_id": "01a1ddbd-6aba-7c72-9b0f-b51c278bbc73",
+      "path": "/Users/hdh/.codex/worktrees/server-archive-helper-20261115/keelshell"
+    },
+    "session_transport": {
+      "agent_id": "01a1ddbf-3d2a-76d1-b8d4-4fbdb1b21cd5",
+      "path": "/Users/hdh/.codex/worktrees/server-archive-transport-20261115/keelshell"
+    }
+  },
+  "parent_write_scope": [
+    "crates/keelshell-app/src/files*",
+    "crates/keelshell-session/tests/openssh_interop.rs",
+    "docs",
+    ".hallmark/log.json"
+  ],
+  "status": "implementation in progress; no validation approval"
+}

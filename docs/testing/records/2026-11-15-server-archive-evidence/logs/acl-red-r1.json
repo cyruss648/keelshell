@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "work/server-archive-20261115/acl_check.py",
+    "work/server-archive-20261115/pre-acl-helper.py.txt"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "acl-red-r1",
+  "pid": 53464,
+  "started_utc": "2026-11-15T06:23:21.178710+00:00",
+  "finished_utc": "2026-11-15T06:23:21.852774+00:00",
+  "seconds": 0.674,
+  "exit": 1,
+  "timed_out": false,
+  "log_sha256": "69ae0f83173343af10f3a9721e462953ad29f5f2291125e089cf63f18534b227",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

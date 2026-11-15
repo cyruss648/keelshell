@@ -1,0 +1,81 @@
+"""Run only the supplied prebuilt tests with bounded process-group cleanup."""
+import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+
+out = Path(__file__).resolve().parent
+root = out.parents[2]
+stem, label, seconds, *args = sys.argv[1:]
+meta = json.loads((out.parent / f"{stem}.json").read_text())
+binary = Path(meta["binary"])
+actual = hashlib.sha256(binary.read_bytes()).hexdigest()
+if actual != meta["sha256"]:
+    raise SystemExit("binary SHA mismatch")
+if any((out / f"{label}.{suffix}").exists() for suffix in ("log", "json")):
+    raise SystemExit("refusing to replace evidence")
+command = [str(binary), *args]
+env = dict(os.environ)
+env.update(
+    TMPDIR=str(out / "tmp") + "/",
+    TMP=str(out / "tmp"),
+    TEMP=str(out / "tmp"),
+    PYTHONDONTWRITEBYTECODE="1",
+)
+start = time.monotonic()
+record = {
+    "command": command,
+    "cwd": str(root),
+    "binary_sha256": actual,
+    "source_freeze": meta["source_freeze"],
+    "rebuilt_by_reviewer": False,
+    "started_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "timeout_seconds": float(seconds),
+}
+timed_out = False
+with (out / f"{label}.log").open("xb") as stream:
+    proc = subprocess.Popen(
+        command, cwd=root, env=env, stdout=stream, stderr=subprocess.STDOUT,
+        start_new_session=True,
+    )
+    try:
+        code = proc.wait(timeout=float(seconds))
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        os.killpg(proc.pid, signal.SIGTERM)
+        try:
+            code = proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            os.killpg(proc.pid, signal.SIGKILL)
+            code = proc.wait(timeout=5)
+    finally:
+        # Reap this command's descendants only. A remote channel close alone
+        # cannot establish process exit; local helper descendants are bounded.
+        try:
+            os.killpg(proc.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        else:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+record.update(
+    pid=proc.pid,
+    exit=code,
+    timed_out=timed_out,
+    seconds=round(time.monotonic() - start, 3),
+    finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    log_sha256=hashlib.sha256((out / f"{label}.log").read_bytes()).hexdigest(),
+)
+with (out / f"{label}.json").open("x") as stream:
+    json.dump(record, stream, indent=2)
+    stream.write("\n")
+print(json.dumps(record, indent=2))
+print("\n".join((out / f"{label}.log").read_text(errors="replace").splitlines()[-55:]))
+raise SystemExit(124 if timed_out else code)

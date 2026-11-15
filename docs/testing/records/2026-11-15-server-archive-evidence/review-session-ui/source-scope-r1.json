@@ -1,0 +1,47 @@
+{
+  "tracked_diff_command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--unified=5",
+    "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+    "--",
+    "crates/keelshell-session/src/sftp.rs",
+    "crates/keelshell-session/src/sftp/mutation.rs",
+    "crates/keelshell-session/src/ssh.rs",
+    "crates/keelshell-session/tests/openssh_interop.rs",
+    "crates/keelshell-app/src/files.rs",
+    "crates/keelshell-app/src/files/archive.rs",
+    "crates/keelshell-app/src/files/worker.rs",
+    "crates/keelshell-app/src/files/test_server.rs",
+    "crates/keelshell-app/src/files/transfer_tests.rs"
+  ],
+  "tracked_diff_sha256": "9d01355303a7013f30b75dcc38f634b97d4b6e8680404ac1d899bb106f5f97c8",
+  "new_files_read": {
+    "crates/keelshell-session/src/sftp/server_archive.rs": {
+      "sha256": "d31d4eecccb5566097dd1f49e86a803b38fb43763f0cc6334449e8cfc1c2d8ba",
+      "lines": 633
+    },
+    "crates/keelshell-session/tests/server_archive.rs": {
+      "sha256": "64ef1264cadcab779cd5893c86762a036150bf5a89cbbe9f930a4a67aba00ea3",
+      "lines": 686
+    },
+    "crates/keelshell-session/tests/support/server_archive_fixture.rs": {
+      "sha256": "04157a403f3d1a141e55413c1f4291e358175410ba71511cb9226e80709c380d",
+      "lines": 861
+    },
+    "crates/keelshell-app/src/files/server_archive.rs": {
+      "sha256": "8f0a61cf2a61216173413e63b91b111c5ed08850db600cf9e9866a08f99b84e6",
+      "lines": 233
+    },
+    "crates/keelshell-app/src/files/server_archive_tests.rs": {
+      "sha256": "4308051eba20bb93f55d953400ea4ba2d6f14b8c2f4bc655e2505e30d29251ab",
+      "lines": 391
+    },
+    "crates/keelshell-app/src/files/server_archive_fixture.rs": {
+      "sha256": "d3a784673c23245d77b174efba01d282db37f6ae2e2a1bcd17ce6dae41d25e9c",
+      "lines": 203
+    }
+  }
+}

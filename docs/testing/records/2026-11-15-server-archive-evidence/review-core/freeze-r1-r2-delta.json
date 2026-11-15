@@ -1,0 +1,7 @@
+{
+  "inputs": [
+    "crates/keelshell-app/src/files/server_archive_fixture.rs",
+    "crates/keelshell-app/src/files/transfer_tests.rs"
+  ],
+  "scripts": []
+}

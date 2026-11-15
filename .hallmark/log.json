@@ -2,6 +2,27 @@
   {
     "date": "2026-11-15",
     "scope": "app",
+    "shape": "existing native archive actions with separate inspection and server packing reviews",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "signature": "complete remote member and digest review alongside exact command and standard input",
+    "material": "owned real source observations and actual helper output only",
+    "preserve": "theme registry, Palette, Kit controls, fixed confirmation actions, exact SSH authority and previous isolation holds",
+    "introduce": [
+      "explicit read-only source inspection before packing review",
+      "separate complete server packing command and stdin review",
+      "verified new-archive completion with a separate download choice"
+    ],
+    "sweep": "Actual GPUI new suite 7/7 covers both reviews, both codecs, three families x light/dark x two languages; final r5 gate exit 0, strict Clippy/policy/fmt and real OpenSSH 15/15; two independent reviews APPROVE, zero open P0-P3; prebuilt focused execution without independent compilation. Web render does not apply to native Rust/GPUI.",
+    "native_evidence": "docs/testing/records/2026-11-15-server-archive-integration.md",
+    "finish_review": "AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED for source and engineering scope. Native/platform matrix remains open."
+  },
+  {
+    "date": "2026-11-15",
+    "scope": "app",
     "shape": "existing native file archive disclosure with server-tool observations",
     "theme": [
       "frost",

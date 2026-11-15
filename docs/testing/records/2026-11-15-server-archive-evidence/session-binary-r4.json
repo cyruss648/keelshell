@@ -1,0 +1,11 @@
+{
+  "recorded_utc": "2026-11-15T06:33:05.840165+00:00",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/prebuilt-r4/session",
+  "source_binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/cb81b114512a82d8/out/server_archive-cb81b114512a82d8",
+  "sha256": "23475667fa92ce812723f0024f613ed04850a74115148ced8b72be0c0b763366",
+  "inventory_sha256": "4e283e8cfd84788f9c76b5ffe3c3ec6dbd84a70aeb1fe0d62787f95f4bede784",
+  "source_freeze": "frozen-inputs-r4.json",
+  "author_build_run": "session-r4",
+  "rebuild_by_reviewer": false,
+  "reason": "Stable isolated executable snapshot so later sole-owner Cargo commands cannot replace the reviewed bytes."
+}

@@ -1,0 +1,17 @@
+{
+  "recorded_utc": "2026-11-15T06:36:18.370130+00:00",
+  "interrupted_gate_r2_group_present": false,
+  "implementation_worktrees": {
+    "server-archive-helper-20261115": {
+      "exists": false,
+      "managed_status": "archived_worktree from list_artifacts"
+    },
+    "server-archive-transport-20261115": {
+      "exists": false,
+      "managed_status": "archived_worktree from list_artifacts"
+    }
+  },
+  "cargo_target_retained": "work/recovery-batch-integration-20261115/target",
+  "no_containers_created": true,
+  "preserve_other_tasks": true
+}

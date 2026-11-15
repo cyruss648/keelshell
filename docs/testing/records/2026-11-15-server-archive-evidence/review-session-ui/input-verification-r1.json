@@ -1,0 +1,59 @@
+{
+  "recorded_utc": "2026-11-15T06:15:10.415481+00:00",
+  "head": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "freezes": {
+    "frozen-inputs-r1.json": {
+      "sha256": "a7805633400c49c967499ada69eb4121cea8a76e0a258d10b7ad2dd96b57617a",
+      "base_sha": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+      "input_count": 553,
+      "script_count": 10,
+      "mismatches": [
+        {
+          "path": "crates/keelshell-app/src/files/server_archive_fixture.rs",
+          "expected": "c76a01275072278d6f24395dcd642d59f7e5cb2ff042f5f691238e65946691e7",
+          "actual": "feab7c8643425baa32601c6d2ac056580c30dbe334d939526331c736ed5d083b",
+          "group": "inputs"
+        },
+        {
+          "path": "crates/keelshell-app/src/files/transfer_tests.rs",
+          "expected": "7428c63c668f35a7c78c033a702edf7371257916b9d066efb04e9ace39e177c8",
+          "actual": "7812eb69fe17bc569b6498b9bc8a8dfe836165a6037608c5ea05ad7c4f011885",
+          "group": "inputs"
+        }
+      ]
+    },
+    "frozen-inputs-r2.json": {
+      "sha256": "9b01e8e98cfc3a2039cfe213ee2b1fff2f3e54e688f0cbdff19be4e384662719",
+      "base_sha": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+      "input_count": 553,
+      "script_count": 10,
+      "mismatches": []
+    }
+  },
+  "binaries": {
+    "session-binary-r1": {
+      "metadata": {
+        "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/cb81b114512a82d8/out/server_archive-cb81b114512a82d8",
+        "sha256": "1cada206d038ee0f0bc370911e33ffb50b4c81ca76d38e9d02a18780ae94832b",
+        "inventory_sha256": "4e283e8cfd84788f9c76b5ffe3c3ec6dbd84a70aeb1fe0d62787f95f4bede784",
+        "source_freeze": "frozen-inputs-r1.json",
+        "rebuild_by_reviewer": false
+      },
+      "actual_sha256": "1cada206d038ee0f0bc370911e33ffb50b4c81ca76d38e9d02a18780ae94832b",
+      "actual_inventory_sha256": "4e283e8cfd84788f9c76b5ffe3c3ec6dbd84a70aeb1fe0d62787f95f4bede784",
+      "hashes_match": true
+    },
+    "app-binary-r2": {
+      "metadata": {
+        "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dd89ff795559e915/out/keelshell_app-dd89ff795559e915",
+        "sha256": "14d3cf04556dbf81c321e59e3d2988a7216129d36b1c43c426b0c3f97af2a981",
+        "inventory_sha256": "c8a63f9415cb332f52ef18c9eb1b0c7623831462bcafccb351e6a6d59789ab34",
+        "source_freeze": "frozen-inputs-r2.json",
+        "rebuild_by_reviewer": false
+      },
+      "actual_sha256": "14d3cf04556dbf81c321e59e3d2988a7216129d36b1c43c426b0c3f97af2a981",
+      "actual_inventory_sha256": "c8a63f9415cb332f52ef18c9eb1b0c7623831462bcafccb351e6a6d59789ab34",
+      "hashes_match": true
+    }
+  }
+}

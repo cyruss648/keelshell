@@ -1,0 +1,236 @@
+"""Run bounded real-helper probes entirely under the review directory."""
+
+import base64
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+import uuid
+
+REVIEW = Path(__file__).resolve().parent
+HELPER = REVIEW / "snapshot-r1/crates__keelshell-core__src__server_archive.py"
+FAULT_WORKER = REVIEW / "fault_worker_r1.py"
+assert hashlib.sha256(HELPER.read_bytes()).hexdigest() == (
+    "96e06a6e5c51b062208bcb3108c720656a560a902c67ca85e2378e7b1570685b"
+)
+FIXTURES = REVIEW / "independent-fixtures-r1"
+FIXTURES.mkdir(exist_ok=False)
+ENV = dict(os.environ, TMPDIR=str(REVIEW / "tmp-r1"),
+           PYTHONDONTWRITEBYTECODE="1")
+RECORDS = []
+CASES = []
+
+
+def execute(arguments, data=b""):
+    started = time.monotonic()
+    child = subprocess.Popen(arguments, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, env=ENV, start_new_session=True)
+    timed_out = False
+    try:
+        stdout, stderr = child.communicate(data, timeout=12)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        os.killpg(child.pid, signal.SIGKILL)
+        stdout, stderr = child.communicate()
+    finally:
+        try:
+            os.killpg(child.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        child.wait()
+    RECORDS.append({
+        "command": arguments, "stdin_sha256": hashlib.sha256(data).hexdigest(),
+        "exit_code": child.returncode, "timed_out": timed_out,
+        "seconds": time.monotonic() - started,
+        "stdout": stdout.decode("utf-8", "backslashreplace"),
+        "stderr": stderr.decode("utf-8", "backslashreplace"),
+        "process_group_reaped": True,
+    })
+    return child.returncode, stdout, stderr
+
+
+def fixture(name, fmt="zip"):
+    parent = FIXTURES / name
+    parent.mkdir()
+    source = parent / "private-source"
+    source.write_bytes(b"reviewer-only binary\0\xff and private bytes")
+    source.chmod(0o600)
+    destination = parent / ("result." + fmt)
+    request = {"version": 1, "sources": [str(source)],
+               "destination": str(destination), "format": fmt}
+    argument = base64.b64encode(json.dumps(request, ensure_ascii=False).encode()).decode()
+    stage = parent / (".keelshell-server-archive-" + str(uuid.uuid4()))
+    return parent, source, destination, argument, stage
+
+
+def inspect(argument):
+    code, stdout, stderr = execute([sys.executable, "-B", str(HELPER),
+                                   "inspect", argument])
+    assert code == 0 and not stderr
+    return stdout
+
+
+def pack(argument, stage, inspected, fault=None):
+    prefix = ([sys.executable, "-B", str(FAULT_WORKER), str(HELPER), fault]
+              if fault else [sys.executable, "-B", str(HELPER)])
+    return execute(prefix + ["pack", argument, str(stage)], inspected)
+
+
+def rejected(result):
+    code, stdout, stderr = result
+    assert code == 65 and stdout == b"" and stderr == b"KeelShell server archive rejected\n"
+
+
+def check(name, function):
+    first_command = len(RECORDS)
+    try:
+        detail = function()
+        CASES.append({"case": name, "passed": True, "detail": detail,
+                      "commands": list(range(first_command, len(RECORDS)))})
+        print("PASS", name, flush=True)
+    except Exception as error:
+        CASES.append({"case": name, "passed": False, "error": repr(error),
+                      "commands": list(range(first_command, len(RECORDS)))})
+        print("FAIL", name, repr(error), flush=True)
+
+
+def failure_probe(fault):
+    parent, source, destination, argument, stage = fixture(fault)
+    original = source.read_bytes()
+    inspected = inspect(argument)
+    rejected(pack(argument, stage, inspected, fault))
+    assert source.read_bytes() == original
+    assert not destination.is_symlink()
+    if fault == "unsupported-link":
+        assert not destination.exists() and (stage / "payload").is_file()
+    elif fault in ("parent-fsync", "payload-unlink"):
+        assert destination.is_file() and (stage / "payload").is_file()
+        assert destination.stat().st_nlink == 2
+    elif fault == "stage-rmdir":
+        assert destination.is_file() and stage.is_dir() and list(stage.iterdir()) == []
+        assert destination.stat().st_nlink == 1
+    elif fault == "final-readback":
+        assert destination.is_file() and not stage.exists()
+        assert destination.stat().st_nlink == 1
+    elif fault == "payload-replacement":
+        assert not destination.exists()
+        assert (stage / "payload").read_bytes() == b"unknown replacement payload; preserve"
+        assert (stage / "retained-original-payload").is_file()
+    elif fault == "stage-replacement":
+        assert destination.is_file()
+        assert (stage / "unknown").read_bytes() == b"unknown replacement stage; preserve"
+        assert (Path(str(stage) + "-retained-original") / "payload").is_file()
+    return {"fixture": str(parent), "final_exists": destination.exists(),
+            "stage_exists": stage.exists(), "fault": fault}
+
+
+for fault in ("unsupported-link", "parent-fsync", "payload-unlink", "stage-rmdir",
+              "final-readback", "payload-replacement", "stage-replacement"):
+    check(fault, lambda fault=fault: failure_probe(fault))
+
+
+def parent_probe(kind):
+    parent, source, destination, argument, stage = fixture("parent-" + kind)
+    original = source.read_bytes()
+    inspected = inspect(argument)
+    retained = Path(str(parent) + "-retained-original")
+    parent.rename(retained)
+    if kind == "symlink":
+        parent.symlink_to(retained, target_is_directory=True)
+    else:
+        parent.mkdir()
+        (parent / source.name).write_bytes(original)
+    rejected(pack(argument, stage, inspected))
+    assert not stage.exists() and not destination.exists()
+    assert (retained / source.name).read_bytes() == original
+    return {"fixture": str(parent), "retained_original": str(retained)}
+
+
+for kind in ("symlink", "new-inode"):
+    check("parent-replaced-" + kind, lambda kind=kind: parent_probe(kind))
+
+
+def dangling_destination():
+    parent, source, destination, argument, stage = fixture("dangling-destination")
+    inspected = inspect(argument)
+    destination.symlink_to(parent / "nonexistent-target")
+    rejected(pack(argument, stage, inspected))
+    assert destination.is_symlink() and not stage.exists()
+    assert not (parent / "nonexistent-target").exists()
+    return {"fixture": str(parent), "symlink_preserved": True}
+
+
+check("existing-dangling-destination", dangling_destination)
+
+
+def socket_source():
+    import socket
+    parent, source, destination, argument, stage = fixture("socket-source")
+    sock = socket.socket(socket.AF_UNIX)
+    try:
+        prior_directory = Path.cwd()
+        try:
+            os.chdir(parent)
+            sock.bind("source-socket")
+        finally:
+            os.chdir(prior_directory)
+        request = {"version": 1, "sources": [str(source.with_name("source-socket"))],
+                   "destination": str(destination), "format": "zip"}
+        argument = base64.b64encode(json.dumps(request).encode()).decode()
+        rejected(execute([sys.executable, "-B", str(HELPER), "inspect", argument]))
+        assert not stage.exists() and not destination.exists()
+    finally:
+        sock.close()
+    return {"fixture": str(parent)}
+
+
+check("socket-source-fails-without-blocking", socket_source)
+
+
+def inherited_acl_probe(retain_stage):
+    suffix = "retained-stage" if retain_stage else "published"
+    parent, source, destination, argument, stage = fixture("private-acl-" + suffix, "tar.gz")
+    code, _, stderr = execute([
+        "/bin/chmod", "+a",
+        "everyone allow read,execute,file_inherit,directory_inherit", str(parent)
+    ])
+    assert code == 0, stderr
+    inspected = inspect(argument)
+    result = pack(argument, stage, inspected, "unsupported-link" if retain_stage else None)
+    if retain_stage:
+        rejected(result)
+        paths = [str(source), str(stage), str(stage / "payload")]
+    else:
+        assert result[0] == 0 and not result[2]
+        paths = [str(source), str(destination)]
+    code, listing, stderr = execute(["/bin/ls", "-led"] + paths)
+    assert code == 0 and not stderr
+    text = listing.decode()
+    assert "everyone inherited allow read,execute" in text
+    assert source.stat().st_mode & 0o7777 == 0o600
+    return {"fixture": str(parent), "finding": "P2-001 reproduced",
+            "source_mode": "0600", "acl_listing": text,
+            "helper_success": result[0] == 0}
+
+
+if sys.platform == "darwin":
+    check("P2-001-private-source-published", lambda: inherited_acl_probe(False))
+    check("P2-001-private-source-retained-stage", lambda: inherited_acl_probe(True))
+
+summary = {
+    "helper_sha256": hashlib.sha256(HELPER.read_bytes()).hexdigest(),
+    "passed_probes": sum(case["passed"] for case in CASES),
+    "failed_probes": sum(not case["passed"] for case in CASES),
+    "skipped_probes": 0, "cases": CASES, "commands": RECORDS,
+    "fixtures_preserved": True, "independent_compile": False,
+}
+(REVIEW / "independent-probes-r1.json").write_text(
+    json.dumps(summary, ensure_ascii=False, indent=2) + "\n"
+)
+print(json.dumps({key: value for key, value in summary.items()
+                  if key not in ("cases", "commands")}, indent=2), flush=True)
+raise SystemExit(bool(summary["failed_probes"]))

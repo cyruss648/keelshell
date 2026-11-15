@@ -1,0 +1,101 @@
+"""Reviewer-only deterministic syscall faults; imports the unmodified snapshot."""
+
+import errno
+import os
+import pathlib
+import stat
+import sys
+
+helper_path, fault = sys.argv[1:3]
+namespace = {"__name__": "review_core_import"}
+exec(compile(pathlib.Path(helper_path).read_bytes(), helper_path, "exec"), namespace)
+namespace["capabilities"]()
+namespace["capabilities"] = lambda: None
+original_link = os.link
+original_fsync = os.fsync
+original_unlink = os.unlink
+original_rmdir = os.rmdir
+original_readback = namespace["readback"]
+
+
+def fail_link(*args, **kwargs):
+    raise OSError(errno.EOPNOTSUPP, "reviewer-owned injected link failure")
+
+
+def fail_parent_sync(descriptor):
+    if stat.S_ISDIR(os.fstat(descriptor).st_mode):
+        raise OSError(errno.EIO, "reviewer-owned injected parent fsync failure")
+    return original_fsync(descriptor)
+
+
+def fail_unlink(name, *args, **kwargs):
+    if name == namespace["PAYLOAD"]:
+        raise OSError(errno.EACCES, "reviewer-owned injected unlink failure")
+    return original_unlink(name, *args, **kwargs)
+
+
+def fail_rmdir(name, *args, **kwargs):
+    if str(name).startswith(namespace["PREFIX"]):
+        raise OSError(errno.EACCES, "reviewer-owned injected rmdir failure")
+    return original_rmdir(name, *args, **kwargs)
+
+
+def final_readback_fault(parent_fd, name, inode, size, links):
+    if links == 1 and name != namespace["PAYLOAD"]:
+        raise OSError(errno.EIO, "reviewer-owned injected final readback failure")
+    return original_readback(parent_fd, name, inode, size, links)
+
+
+swapped = False
+
+
+def swapped_payload(parent_fd, name, inode, size, links):
+    global swapped
+    if not swapped and links == 1 and name == namespace["PAYLOAD"]:
+        swapped = True
+        os.rename(name, "retained-original-payload", src_dir_fd=parent_fd,
+                  dst_dir_fd=parent_fd)
+        descriptor = os.open(name, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600,
+                             dir_fd=parent_fd)
+        try:
+            os.write(descriptor, b"unknown replacement payload; preserve")
+        finally:
+            os.close(descriptor)
+    return original_readback(parent_fd, name, inode, size, links)
+
+
+def swapped_stage(parent_fd, name, inode, size, links):
+    global swapped
+    digest = original_readback(parent_fd, name, inode, size, links)
+    if not swapped and links == 2:
+        swapped = True
+        stage = pathlib.Path(sys.argv[3])
+        stage.rename(str(stage) + "-retained-original")
+        stage.mkdir(mode=0o700)
+        (stage / "unknown").write_bytes(b"unknown replacement stage; preserve")
+    return digest
+
+
+if fault == "unsupported-link":
+    os.link = fail_link
+elif fault == "parent-fsync":
+    os.fsync = fail_parent_sync
+elif fault == "payload-unlink":
+    os.unlink = fail_unlink
+elif fault == "stage-rmdir":
+    os.rmdir = fail_rmdir
+elif fault == "final-readback":
+    namespace["readback"] = final_readback_fault
+elif fault == "payload-replacement":
+    namespace["readback"] = swapped_payload
+elif fault == "stage-replacement":
+    namespace["readback"] = swapped_stage
+else:
+    raise ValueError("unknown reviewer fault")
+
+sys.argv = [helper_path] + sys.argv[3:]
+try:
+    namespace["main"]()
+except Exception:
+    sys.stderr.buffer.write(b"KeelShell server archive rejected\n")
+    raise SystemExit(65)

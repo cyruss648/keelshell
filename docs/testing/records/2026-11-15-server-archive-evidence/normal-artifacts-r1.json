@@ -1,0 +1,24 @@
+{
+  "recorded_utc": "2026-11-15T06:48:58.309581+00:00",
+  "build_receipt": "logs/normal-build-r1.json",
+  "validated_freeze": "frozen-inputs-r4.json",
+  "current_freeze": "frozen-inputs-r5.json",
+  "r4_r5_test_only_delta": [
+    "crates/keelshell-app/src/files/server_archive_fixture.rs",
+    "crates/keelshell-app/src/files/test_server.rs"
+  ],
+  "production_inputs_unchanged": true,
+  "artifacts": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "sha256": "fef16361ec31e0998f0f533f68ccdcbb76858dd38970a0d8cc9abadd641041b9",
+      "file_output": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app: Mach-O 64-bit executable arm64"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "file_output": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp: Mach-O 64-bit executable arm64"
+    }
+  ],
+  "scope": "Normal macOS arm64 GUI/MCP build only; no native interaction, package or installation acceptance."
+}

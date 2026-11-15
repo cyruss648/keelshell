@@ -1,0 +1,181 @@
+{
+  "recorded_utc": "2026-11-15T07:00:58.633585+00:00",
+  "head": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "freeze": "frozen-inputs-r5.json",
+  "freeze_sha256": "30770f74d710b231936e8537d5ce4082798e68a2894aa1ad7e5b9110afa08f92",
+  "inputs": 553,
+  "scripts": 10,
+  "mismatches": [],
+  "r4_r5_test_only_delta": [
+    "crates/keelshell-app/src/files/server_archive_fixture.rs",
+    "crates/keelshell-app/src/files/test_server.rs"
+  ],
+  "production_core_scripts_unchanged": true,
+  "parent_gate_receipt": {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/check.py"
+    ],
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "label": "full-gate-r4",
+    "pid": 72321,
+    "started_utc": "2026-11-15T06:48:58.335653+00:00",
+    "finished_utc": "2026-11-15T06:59:02.142805+00:00",
+    "seconds": 603.804,
+    "exit": 0,
+    "timed_out": false,
+    "log_sha256": "c2e1396e5805919abe1a5343f705f9006dcdacd274b3ef1a80ba5385050652c9",
+    "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+  },
+  "parent_gate_summary_sha256": "13adbb3704861f6fc9c57e10d81f7707a5b9a698f71cbe940015bec3f27a2940",
+  "independently_parsed_parent_totals": {
+    "ordinary": {
+      "passed": 2747,
+      "failed": 0,
+      "ignored": 27
+    },
+    "rustdoc": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "new_cases": {
+    "app": [
+      "files::transfer_tests::server_archive_tests::server_archive_both_reviews_execute_the_real_helper_and_verify_both_formats",
+      "files::transfer_tests::server_archive_tests::server_archive_failed_inspection_never_creates_a_write_review_or_close_hold",
+      "files::transfer_tests::server_archive_tests::server_archive_inspection_controls_use_all_themes_and_languages_without_dispatch",
+      "files::transfer_tests::server_archive_tests::server_archive_inspection_is_reviewed_in_full_and_cancel_never_dispatches",
+      "files::transfer_tests::server_archive_tests::server_archive_late_scan_cannot_authorize_a_replaced_actual_connection",
+      "files::transfer_tests::server_archive_tests::server_archive_name_change_retires_the_review_and_rejects_a_retained_operation",
+      "files::transfer_tests::server_archive_tests::server_archive_replaced_connection_cannot_confirm_with_the_same_host_and_token"
+    ],
+    "session_unit": [
+      "sftp::server_archive::tests::server_archive_published_file_stamp_accepts_private_complete_regular_file",
+      "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_receipt_length_mismatch",
+      "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_size_over_encoded_cap",
+      "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_symlinks_even_with_correct_size",
+      "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_unexpected_public_permissions",
+      "sftp::server_archive::tests::server_archive_published_file_stamp_rejects_unknown_size",
+      "sftp::server_archive::tests::server_archive_receipt_rejects_empty_stdout_even_with_zero_exit",
+      "sftp::server_archive::tests::server_archive_receipt_rejects_nonempty_stderr_even_with_zero_exit",
+      "sftp::server_archive::tests::server_archive_receipt_requires_an_explicit_successful_exit",
+      "sftp::server_archive::tests::server_archive_root_sibling_stage_has_no_double_separator",
+      "sftp::server_archive::tests::server_archive_stage_is_an_exact_uuid_sibling_before_review"
+    ],
+    "session_ssh": [
+      "server_archive_busy_staging_tree_rejects_before_dispatch",
+      "server_archive_busy_final_tree_rejects_before_dispatch",
+      "server_archive_cancel_before_planning_or_dispatch_creates_no_unknown_hold",
+      "server_archive_busy_source_tree_rejects_before_dispatch",
+      "server_archive_cancel_during_inspection_open_cannot_execute_a_late_inspection",
+      "server_archive_cancel_during_final_readback_does_not_clear_pending",
+      "server_archive_cancel_during_late_exec_open_never_dispatches_and_can_review_again",
+      "server_archive_cancel_during_admission_releases_without_unknown_write",
+      "server_archive_cancel_during_stdin_retains_both_quarantines",
+      "server_archive_cancel_while_exec_ack_is_pending_retains_both_quarantines",
+      "server_archive_combined_stdout_stderr_budget_retains_quarantine",
+      "server_archive_changed_source_is_dispatched_failure_and_quarantines_both_writes",
+      "server_archive_existing_destination_prevents_even_inspection",
+      "server_archive_dropped_dispatched_future_retains_quarantine_and_unrelated_ssh",
+      "server_archive_exec_rejection_is_conservatively_unknown",
+      "server_archive_late_destination_is_preserved_without_unknown_hold",
+      "server_archive_failed_read_handle_close_retains_quarantine",
+      "server_archive_failed_sftp_readback_retains_quarantine",
+      "server_archive_malformed_receipt_retains_quarantine",
+      "server_archive_malformed_inspection_never_creates_mutation_authority",
+      "server_archive_missing_eof_retains_quarantine",
+      "server_archive_missing_exit_retains_quarantine",
+      "server_archive_missing_receipt_retains_quarantine",
+      "server_archive_nonzero_exit_after_publication_retains_quarantine",
+      "server_archive_overbudget_inspection_never_creates_mutation_authority",
+      "server_archive_overbudget_stdout_retains_quarantine",
+      "server_archive_partial_input_and_early_close_retain_quarantine",
+      "server_archive_preexisting_exact_stage_is_preserved_without_unknown_hold",
+      "server_archive_readback_keeps_source_destination_and_stage_admission",
+      "server_archive_replacement_connection_to_same_endpoint_cannot_use_review",
+      "server_archive_retained_stage_after_success_retains_quarantine",
+      "server_archive_symlink_publication_retains_quarantine",
+      "server_archive_valid_receipt_for_different_members_retains_quarantine",
+      "server_archive_tar_gz_executes_the_real_helper_and_verifies_every_member",
+      "server_archive_dispatch_and_readback_share_one_fixed_execution_deadline",
+      "server_archive_wrong_published_bytes_retain_quarantine",
+      "server_archive_wrong_receipt_digest_retains_quarantine",
+      "server_archive_wrong_receipt_size_retains_quarantine",
+      "server_archive_zip_executes_the_real_helper_and_verifies_every_member",
+      "server_archive_missing_exec_ack_uses_the_single_deadline_and_retains_quarantine"
+    ],
+    "core": [
+      "complete_manifest_roundtrips_canonical_utf8_without_placeholder_file_allocation",
+      "manifest_rejects_missing_roots_ancestors_aliases_and_escaping_members",
+      "manifest_rejects_wrong_request_versions_unknown_duplicate_and_missing_fields",
+      "manifest_rejects_stat_type_hardlinks_digests_and_aggregate_corruptions",
+      "protocol_limits_are_at_most_one_mib",
+      "packing_command_requires_a_canonical_sibling_stage_directory_uuid",
+      "receipt_rejects_ambiguous_malformed_and_out_of_bound_results",
+      "request_bounds_sources_full_path_bytes_and_path_depth",
+      "request_keeps_exact_unicode_quotes_and_metacharacters_inside_quoted_arguments",
+      "request_rejects_differing_parents_aliases_collisions_and_wrong_suffix",
+      "request_rejects_unnormalized_nonportable_and_format_control_paths",
+      "archive_verification_checks_exact_paths_kinds_sizes_and_full_digests",
+      "embedded_commands_pack_real_sources_and_existing_codec_verifies_both_formats",
+      "real_python_helper_adversarial_suite"
+    ]
+  },
+  "new_case_count": 72,
+  "new_cases_all_present_in_raw_gate_ok_lines": true,
+  "app_final_binary_sha256": "b8f4a55037feb8126cf70ea31240bd6b18604f385f23447f607ac438b09361ca",
+  "app_final_binary_matches_r5_metadata": true,
+  "app_final_inventory_sha256": "c8a63f9415cb332f52ef18c9eb1b0c7623831462bcafccb351e6a6d59789ab34",
+  "app_final_inventory_count": 1208,
+  "app_final_inventory_byte_equal_to_reviewed_r4_inventory": true,
+  "final_binary_not_executed_by_reviewer": true,
+  "reviewer_executed_r4_tests": 67,
+  "reviewer_executed_r5_tests": 0,
+  "core_report_sha256": "837ed7b582fe41e9fc687d1ee604c4857b73bf57f05bd69a163e43601d4fcf4e",
+  "core_report_approved_and_old_P2_closed": true,
+  "normal_gui_mcp_build_verified_by": "normal-build-verification-r5.json",
+  "original_report_r1_sha256": "280aa9f4c43d26109d8440f18c6b414d6bf3d8fbcd9cae8d7553e89a5e7df87e",
+  "original_report_r2_sha256": "3f85a2197d95466f2e680ea3622b50354ec7563979ae344f2adbf449b23ad85d",
+  "intermediate_addendum_r3_sha256": "452aa3848ca01f4480876ae0de7169982e82eb8736ff9ff4aac3962990f13dfd",
+  "owned_test_process_groups": [
+    {
+      "label": "session-inventory-r4",
+      "pgid": 64092,
+      "absent": true
+    },
+    {
+      "label": "session-lib-inventory-r4",
+      "pgid": 64093,
+      "absent": true
+    },
+    {
+      "label": "app-inventory-r4",
+      "pgid": 64098,
+      "absent": true
+    },
+    {
+      "label": "session-focused-r4",
+      "pgid": 64587,
+      "absent": true
+    },
+    {
+      "label": "session-lib-focused-r4",
+      "pgid": 64588,
+      "absent": true
+    },
+    {
+      "label": "app-focused-r4",
+      "pgid": 64634,
+      "absent": true
+    },
+    {
+      "label": "app-shared-archive-r4",
+      "pgid": 65049,
+      "absent": true
+    }
+  ],
+  "tmp_entries": [],
+  "windows_target_compiled": false
+}

@@ -1,0 +1,14 @@
+mod files {
+    pub(crate) mod test_server {
+        pub(super) mod fixture {
+            pub(in crate::files) struct Fixture;
+            impl Fixture {
+                pub(in crate::files) fn allow(&self) {}
+                pub(super) fn lookup(&self) {}
+            }
+        }
+        pub(crate) fn exercise() { fixture::Fixture.lookup(); }
+    }
+    pub(crate) fn exercise() { test_server::exercise(); }
+}
+fn main() { files::exercise(); }

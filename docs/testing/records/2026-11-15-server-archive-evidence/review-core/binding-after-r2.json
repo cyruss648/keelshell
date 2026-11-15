@@ -1,0 +1,18 @@
+{
+  "recorded_utc": "2026-11-15T06:40:50.670234+00:00",
+  "base_sha": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "freeze_sha256": "c01ae7a78099b4805bff413a795176e0aa7732871bf6a909cd83fff6277c5eda",
+  "binary_sha256": "2db85e430ddfa8cef5b1d915b413579e4b7ebb49e0aa431458aafd0eb013a88c",
+  "inputs_checked": 553,
+  "scripts_checked": 10,
+  "mismatches": {
+    "inputs": [],
+    "scripts": []
+  },
+  "r1_report_sha256": "2b180bf3b1f66e7a10505917e851fab67777663385cb8162df97f759d79fb4fb",
+  "r1_notice_sha256": "65877da29fb6ea0883c1a7eb728c73476a96136d9aa46c2e3ceb2f67137e9de8",
+  "r1_report_unchanged": true,
+  "r1_notice_unchanged": true,
+  "owned_running_workers": [],
+  "rebuild_by_reviewer": false
+}

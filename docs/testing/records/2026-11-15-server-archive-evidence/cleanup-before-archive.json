@@ -1,0 +1,17 @@
+{
+  "recorded_utc": "2026-11-15T07:00:11.525920+00:00",
+  "source_freeze": "frozen-inputs-r5.json",
+  "inputs": 553,
+  "scripts": 10,
+  "input_mismatches": [],
+  "implementation_worktrees_removed": {
+    "server-archive-helper-20261115": true,
+    "server-archive-transport-20261115": true
+  },
+  "implementation_local_branches": [],
+  "normal_build_boundary": "Two changed files are test-only; all production inputs identical from r4 to r5.",
+  "reviewer_core_closed": true,
+  "reviewer_session_ui_cleanup": "pending final report",
+  "no_containers_created": true,
+  "keep_target": "work/recovery-batch-integration-20261115/target"
+}

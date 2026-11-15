@@ -1,0 +1,82 @@
+"""Preserve original attempts, including failures, without executable snapshots."""
+from pathlib import Path
+import datetime
+import gzip
+import hashlib
+import json
+import os
+import stat
+
+root = Path(__file__).resolve().parents[2]
+source = Path(__file__).resolve().parent
+dest = root / "docs/testing/records/2026-11-15-server-archive-evidence"
+if dest.exists():
+    raise SystemExit("refusing to replace evidence")
+summary = json.loads((source / "validation-summary-r4.json").read_text())
+if summary["gate_exit"] or any(v["mismatches"] for v in summary["integrity_after_gate"].values()):
+    raise SystemExit("successful final binding required")
+for report in ("review-core/report-r2.md", "review-session-ui/report-r3.md"):
+    if not (source / report).is_file():
+        raise SystemExit("independent report missing: " + report)
+files = []
+links = []
+special = []
+for folder, dirs, names in os.walk(source, followlinks=False):
+    current = Path(folder)
+    dirs[:] = [name for name in dirs if name not in ("tmp", "prebuilt-r4", "__pycache__")]
+    for name in list(dirs):
+        path = current / name
+        if path.is_symlink():
+            links.append(dict(source=str(path.relative_to(source)), target=os.readlink(path)))
+            dirs.remove(name)
+    for name in names:
+        path = current / name
+        rel = path.relative_to(source)
+        if path.is_symlink():
+            links.append(dict(source=str(rel), target=os.readlink(path)))
+            continue
+        if not path.is_file():
+            info = path.lstat()
+            special.append(dict(source=str(rel), mode=info.st_mode,
+                                kind="socket" if stat.S_ISSOCK(info.st_mode) else
+                                "fifo" if stat.S_ISFIFO(info.st_mode) else "other",
+                                metadata_only=True))
+            continue
+        archived = rel
+        if path.suffix in (".rs", ".py") or (
+                path.suffix == "" and "snapshot" in str(rel)):
+            archived = rel.with_name(rel.name + ".txt")
+        elif path.suffix == "":
+            archived = rel.with_name(rel.name + ".bin")
+        compressed = path.suffix in (".log", ".diff", ".patch")
+        if compressed:
+            archived = archived.with_name(archived.name + ".gz")
+        files.append((path, archived, compressed))
+dest.mkdir()
+manifest = []
+for path, rel, compressed in files:
+    original = path.read_bytes()
+    saved = gzip.compress(original, mtime=0) if compressed else original
+    target = dest / rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("xb") as stream:
+        stream.write(saved)
+    restored = gzip.decompress(target.read_bytes()) if compressed else target.read_bytes()
+    if restored != original:
+        raise SystemExit("archive verification failed: " + str(rel))
+    manifest.append(dict(
+        source=str(path.relative_to(source)), archived=str(rel),
+        original_bytes=len(original), original_sha256=hashlib.sha256(original).hexdigest(),
+        saved_bytes=len(saved), saved_sha256=hashlib.sha256(saved).hexdigest(),
+        gzip=compressed,
+    ))
+record = dict(
+    recorded_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    source_directory=str(source), files=manifest, fixture_symlink_metadata=links,
+    fixture_special_metadata=special,
+    boundary="Raw failures and conditional reviews are unchanged. Logs/patches are losslessly compressed; source snapshots use inert .txt names. Symlinks are metadata only, never followed. Stable prebuilt executables and temporary data are omitted.",
+)
+(dest / "archive-manifest.json").write_text(json.dumps(record, indent=2) + "\n")
+print(json.dumps(dict(directory=str(dest), files=len(manifest), symlinks=len(links),
+                      original_bytes=sum(r["original_bytes"] for r in manifest),
+                      saved_bytes=sum(r["saved_bytes"] for r in manifest)), indent=2))

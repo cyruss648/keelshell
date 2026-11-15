@@ -1,0 +1,31 @@
+{
+  "recorded_utc": "2026-11-15T06:07:09.107217+00:00",
+  "implementation_agents_closed": [
+    "01a1ddbd-6aba-7c72-9b0f-b51c278bbc73",
+    "01a1ddbf-3d2a-76d1-b8d4-4fbdb1b21cd5"
+  ],
+  "implementation_worktrees": {
+    "server-archive-helper-20261115": {
+      "checkout_exists": false
+    },
+    "server-archive-transport-20261115": {
+      "checkout_exists": false
+    }
+  },
+  "session_archive_attempts": [
+    {
+      "result": "error",
+      "message": "The task's primary checkout cannot be removed."
+    },
+    {
+      "action": "attach original main tree with managed tool",
+      "result": "created"
+    },
+    {
+      "action": "archive session implementation worktree with managed tool",
+      "result": "queued"
+    }
+  ],
+  "scope": "this batch implementation resources; protected and unrelated worktrees untouched",
+  "cargo_target_retained": "work/recovery-batch-integration-20261115/target"
+}

@@ -1,0 +1,6 @@
+{
+  "crates/keelshell-core/src/server_archive.py": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2",
+  "crates/keelshell-core/src/server_archive.rs": "215094b5cdc7f6cbb93ada567a6f34d717835c0d0f2b01065e063775a85802f4",
+  "crates/keelshell-core/src/archive.rs": "786773b3839adaf01cb52f08e071e0d9ba8c70db97cfb4fdce4befbfdcd64d77",
+  "crates/keelshell-core/tests/server_archive.rs": "4441aa67e701035bf3a8c3454d75dedc6af22bca613b6a151a02b9e55611cb5b"
+}

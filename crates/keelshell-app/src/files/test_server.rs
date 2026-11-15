@@ -28,6 +28,9 @@ mod identity_tests;
 #[path = "archive_tools_fixture.rs"]
 pub(super) mod archive_tools_fixture;
 
+#[path = "server_archive_fixture.rs"]
+pub(super) mod server_archive_fixture;
+
 #[path = "pause_handoff_fixture.rs"]
 pub(crate) mod pause_handoff_fixture;
 
@@ -54,6 +57,8 @@ struct Peer {
     active: Arc<AtomicUsize>,
     jobs: JoinSet<()>,
     archive_tools: Arc<archive_tools_fixture::Fixture>,
+    exec_requests: Arc<AtomicUsize>,
+    server_archives: Arc<server_archive_fixture::Fixture>,
 }
 impl server::Handler for Peer {
     type Error = russh::Error;
@@ -108,6 +113,19 @@ impl server::Handler for Peer {
         command: &[u8],
         session: &mut server::Session,
     ) -> Result<(), Self::Error> {
+        self.exec_requests.fetch_add(1, Ordering::AcqRel);
+        if let Some(recipe) = self.server_archives.lookup(command) {
+            let Some(channel) = self.channels.remove(&id) else {
+                return Err(russh::Error::Disconnect);
+            };
+            session.channel_success(id)?;
+            let fixture = self.server_archives.clone();
+            let filesystem = self.filesystem.clone();
+            self.jobs.spawn(async move {
+                fixture.serve(channel, recipe, filesystem).await;
+            });
+            return Ok(());
+        }
         if command != keelshell_session::archive_tools::probe_command().as_bytes() {
             session.channel_failure(id)?;
             session.close(id)?;
@@ -153,6 +171,9 @@ pub(crate) struct Server {
     pub(crate) filesystem: filesystem::Filesystem,
     pub(crate) active: Arc<AtomicUsize>,
     pub(super) archive_tools: Arc<archive_tools_fixture::Fixture>,
+    pub(super) exec_requests: Arc<AtomicUsize>,
+    #[cfg(unix)]
+    pub(super) server_archives: Arc<server_archive_fixture::Fixture>,
     address: std::net::SocketAddr,
     fingerprint: String,
     task: JoinHandle<()>,
@@ -190,6 +211,10 @@ impl Server {
         let shared_active = active.clone();
         let archive_tools = Arc::new(archive_tools_fixture::Fixture::default());
         let shared_archive_tools = archive_tools.clone();
+        let exec_requests = Arc::new(AtomicUsize::new(0));
+        let shared_exec_requests = exec_requests.clone();
+        let server_archives = Arc::new(server_archive_fixture::Fixture::default());
+        let shared_server_archives = server_archives.clone();
         let (listener_handoff, mut handoff_request) =
             oneshot::channel::<oneshot::Sender<TcpListener>>();
         let task = runtime.spawn(async move {
@@ -213,6 +238,8 @@ impl Server {
                             active: shared_active.clone(),
                             jobs: JoinSet::new(),
                             archive_tools: shared_archive_tools.clone(),
+                            exec_requests: shared_exec_requests.clone(),
+                            server_archives: shared_server_archives.clone(),
                         };
                         clients.spawn(async move {
                             if let Ok(client) = server::run_stream(config, socket, peer).await {
@@ -231,6 +258,9 @@ impl Server {
             filesystem,
             active,
             archive_tools,
+            exec_requests,
+            #[cfg(unix)]
+            server_archives,
             address,
             fingerprint,
             task,

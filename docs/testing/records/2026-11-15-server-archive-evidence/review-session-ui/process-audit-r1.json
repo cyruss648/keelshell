@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-11-15T06:24:44.287399+00:00",
+  "runs": [
+    {
+      "label": "session-inventory-r1",
+      "pid_and_pgid": 42265,
+      "exited": 0,
+      "process_group_present": false
+    },
+    {
+      "label": "app-inventory-r1",
+      "pid_and_pgid": 42273,
+      "exited": 0,
+      "process_group_present": false
+    },
+    {
+      "label": "session-focused-r1",
+      "pid_and_pgid": 44530,
+      "exited": 0,
+      "process_group_present": false
+    },
+    {
+      "label": "app-focused-r1",
+      "pid_and_pgid": 44604,
+      "exited": 0,
+      "process_group_present": false
+    }
+  ],
+  "temporary_files_remaining": [],
+  "cleanup_performed": false,
+  "boundary": "Read-only group liveness audit; no unrelated processes signalled; fixture-owned temp deletion occurs inside supplied tests."
+}

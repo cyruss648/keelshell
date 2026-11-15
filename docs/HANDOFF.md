@@ -5,6 +5,45 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-15 服务器归档：最终门禁与非作者复核通过
+
+基线为本地 `9112e232b6f0e022d299cba9e8498088c77b3d3f`，当前状态为
+`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。本批实际实现服务器多选 ZIP/tar.gz 打包；
+先审核只读扫描命令，再审核完整成员、摘要、写入命令和标准输入，确认后才在
+服务器压缩并发布新的同级归档。完成后可另行下载或解包，不自动串联操作。
+不是工具 PATH 观察的替代界面。
+
+core/Python 与 session 由两个独立实现 agent 在受管 worktree 并行开发，
+父负责原生 UI、集成和唯一 Cargo target
+`work/recovery-batch-integration-20261115/target`。集成后集中验证，没有切换
+该 target 的源码归属。实现 agent 已关闭、两个实现 worktree 及本地分支均已回收。
+
+最终 r5 冻结包含 `553` 个 Rust/Cargo/Python 工程输入及 `10` 个门禁脚本，
+完整 gate r4 实际退出 `0`、`603.804s`：普通 Rust `2747/0/27 ignored`、
+rustdoc `14/0`、Python `131 run / 1 skipped`；fmt、严格 workspace all-targets
+Clippy、`x.y` 策略和三组 AI controller 通过。新增默认用例 `72` 项逐名通过，
+已经包含在普通总数中。最终 app 库存 `1208`，不只核对数量。
+
+core 非作者发现的继承 ACL P2 已由真实 macOS 红回归确认、fd 权限修复、
+独立真实探针及差分复核关闭。session/UI 收口发现的 Unix-only 测试声明条件
+P2 已修正方法、导入和字段的 cfg，r4→r5 仅两个测试文件变化；两个 reviewer
+最终均 APPROVE、零开放 P0–P3，已关闭。所有原始 notice、HOLD、失败及被终止门禁
+保留。独立执行使用
+核对摘要和清单的父预构建稳定副本，未独立重编译，不能代签原生平台。
+
+真实 localhost OpenSSH r2 `15/15`、正常 GUI/MCP arm64 Mach-O 构建通过；
+它们与最终 r5 的生产输入相同。自有 SSH 进程和临时目录已回收，本批未建容器。
+本次两轮在线依赖复查均超时，无最新版本报告；当前实际 Rust/Cargo `1.100.0`，
+无 toolchain pin 或新 MSRV。完整运行、评审、源码绑定与清理证据持久保存在
+[本批证据](testing/records/2026-11-15-server-archive-evidence/README.md)，
+提交绑定及清理从
+[集中验证记录](testing/records/2026-11-15-server-archive-integration.md)接续。
+设计见 [ADR 0135](adr/0135-reviewed-server-archive-packing.md)。
+
+只本地提交、不推送；产品总目标和 FILE-05/M4 继续开放。远端 Linux 文件系统
+权限与 Python 3.8 运行、Windows 安全解包、Zmodem、中继、三平台原生交互、
+IME/完整辅助技术及发行验收尚未完成，不能由本机 gate 或 headless 结果补签。
+
 ## 2026-11-15 已完成批次：服务端工具观察与 PAX 兼容
 
 在本地已提交的 `e97705c3d773ea6919d76441685c5064e641ca86` 上继续开发。

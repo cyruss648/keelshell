@@ -333,6 +333,15 @@ pub struct ExecOutput {
     pub exit_status: Option<u32>,
 }
 
+/// One envelope for the reviewed archive helper, including its exact stdin.
+pub(crate) struct ServerArchiveExec<'a> {
+    pub(crate) command: &'a str,
+    pub(crate) input: &'a [u8],
+    pub(crate) until: Instant,
+    pub(crate) cancelled: &'a std::sync::atomic::AtomicBool,
+    pub(crate) pending: Option<&'a std::sync::atomic::AtomicBool>,
+}
+
 impl SshSession {
     /// Connect, verify the host key, then authenticate. All three stages share a
     /// deadline. Authentication is never attempted for an unknown/changed key.
@@ -781,6 +790,138 @@ impl SshSession {
         }
         pending.close().await;
         Ok(output)
+    }
+
+    /// Execute only the archive helper with bounded concurrent input and output.
+    /// The caller keeps admission alive and revalidates it after channel open.
+    /// Once dispatched, even explicit rejection cannot resolve a possible write.
+    pub(crate) async fn server_archive_exec_until<F, Fut>(
+        &self,
+        request: ServerArchiveExec<'_>,
+        before_dispatch: F,
+    ) -> Result<ExecOutput>
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = Result<()>>,
+    {
+        use keelshell_core::server_archive::{
+            MAX_SERVER_ARCHIVE_INPUT_BYTES, MAX_SERVER_ARCHIVE_RESPONSE_BYTES,
+        };
+        use std::sync::atomic::Ordering;
+        use tokio::io::AsyncWriteExt;
+
+        if request.input.len() > MAX_SERVER_ARCHIVE_INPUT_BYTES {
+            return Err(SessionError::OutputLimit(MAX_SERVER_ARCHIVE_INPUT_BYTES));
+        }
+        let check = || {
+            if request.cancelled.load(Ordering::Acquire) || self.is_closed() {
+                Err(SessionError::Closed)
+            } else if Instant::now() >= request.until {
+                Err(SessionError::Timeout("server archive exec"))
+            } else {
+                Ok(())
+            }
+        };
+        check()?;
+        let operation = async {
+            let mut owned = open_session_until(self, request.until).await?;
+            // A late OPEN is owned by channel.rs, but never grants a late EXEC.
+            check()?;
+            before_dispatch().await?;
+            check()?;
+            let channel = owned.channel.as_mut().ok_or(SessionError::Closed)?;
+            if let Some(pending) = request.pending {
+                pending.store(true, Ordering::Release);
+            }
+            channel.exec(true, request.command).await?;
+            let mut output = ExecOutput {
+                stdout: Vec::new(),
+                stderr: Vec::new(),
+                exit_status: None,
+            };
+            // Do not feed a manifest into a rejected/unacknowledged command.
+            loop {
+                match channel.wait().await {
+                    Some(ChannelMsg::Success) => break,
+                    Some(ChannelMsg::Data { data })
+                    | Some(ChannelMsg::ExtendedData { data, ext: 0 }) => {
+                        check_output(&output, data.len(), MAX_SERVER_ARCHIVE_RESPONSE_BYTES)?;
+                        output.stdout.extend_from_slice(&data);
+                    }
+                    Some(ChannelMsg::ExtendedData { data, .. }) => {
+                        check_output(&output, data.len(), MAX_SERVER_ARCHIVE_RESPONSE_BYTES)?;
+                        output.stderr.extend_from_slice(&data);
+                    }
+                    Some(ChannelMsg::Failure) => {
+                        return Err(SessionError::Rejected("server archive exec"));
+                    }
+                    Some(ChannelMsg::WindowAdjusted { .. }) => {}
+                    _ => return Err(SessionError::Invalid("archive exec was not acknowledged")),
+                }
+            }
+            let mut writer = channel.make_writer();
+            let input = async {
+                writer.write_all(request.input).await?;
+                // Channel writer shutdown enqueues SSH EOF after every input byte.
+                writer.shutdown().await?;
+                Ok::<_, SessionError>(())
+            };
+            let receive = async {
+                let mut eof = false;
+                loop {
+                    match channel.wait().await {
+                        Some(ChannelMsg::Data { data })
+                        | Some(ChannelMsg::ExtendedData { data, ext: 0 }) => {
+                            if eof {
+                                return Err(SessionError::Invalid("archive output after EOF"));
+                            }
+                            check_output(&output, data.len(), MAX_SERVER_ARCHIVE_RESPONSE_BYTES)?;
+                            output.stdout.extend_from_slice(&data);
+                        }
+                        Some(ChannelMsg::ExtendedData { data, .. }) => {
+                            if eof {
+                                return Err(SessionError::Invalid("archive output after EOF"));
+                            }
+                            check_output(&output, data.len(), MAX_SERVER_ARCHIVE_RESPONSE_BYTES)?;
+                            output.stderr.extend_from_slice(&data);
+                        }
+                        Some(ChannelMsg::ExitStatus { exit_status }) => {
+                            if output.exit_status.replace(exit_status).is_some() {
+                                return Err(SessionError::Invalid("duplicate archive exit status"));
+                            }
+                        }
+                        Some(ChannelMsg::Eof) if !eof => eof = true,
+                        Some(ChannelMsg::Close) if eof && output.exit_status.is_some() => {
+                            return Ok(output);
+                        }
+                        Some(ChannelMsg::WindowAdjusted { .. }) => {}
+                        _ => return Err(SessionError::Invalid("incomplete archive exec result")),
+                    }
+                }
+            };
+            // Drain output during window-limited input. An output flood or early
+            // close must not hide behind a blocked manifest write.
+            let (_, output) = tokio::try_join!(input, receive)?;
+            check()?;
+            owned.close().await;
+            Ok(output)
+        };
+        let revoked = async {
+            let mut interval = tokio::time::interval(Duration::from_millis(10));
+            loop {
+                interval.tick().await;
+                if request.cancelled.load(Ordering::Acquire) || self.is_closed() {
+                    break;
+                }
+            }
+        };
+        tokio::select! {
+            biased;
+            _ = revoked => Err(SessionError::Closed),
+            result = timeout_at(request.until, operation) => {
+                result.map_err(|_| SessionError::Timeout("server archive exec"))?
+            }
+        }
     }
 
     pub(crate) async fn completion_sftp_until(

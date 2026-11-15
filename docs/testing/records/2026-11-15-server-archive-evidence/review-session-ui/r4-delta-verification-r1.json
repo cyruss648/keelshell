@@ -1,0 +1,42 @@
+{
+  "recorded_utc": "2026-11-15T06:32:11.217377+00:00",
+  "freeze": "frozen-inputs-r4.json",
+  "freeze_sha256": "c01ae7a78099b4805bff413a795176e0aa7732871bf6a909cd83fff6277c5eda",
+  "inputs": 553,
+  "scripts": 10,
+  "r3_to_r4": [
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/files/server_archive.rs",
+      "r3": "8f0a61cf2a61216173413e63b91b111c5ed08850db600cf9e9866a08f99b84e6",
+      "r4": "57ae68df7b15516785a05b696bd3b77665f39f3f761ad16972b16d0996df8415"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-core/src/server_archive.py",
+      "r3": "96e06a6e5c51b062208bcb3108c720656a560a902c67ca85e2378e7b1570685b",
+      "r4": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-core/src/server_archive.rs",
+      "r3": "2be35019f791892d3796238113dc3985aea69aa89c616e1999dfe65391e77d2c",
+      "r4": "215094b5cdc7f6cbb93ada567a6f34d717835c0d0f2b01065e063775a85802f4"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-core/tests/server_archive.rs",
+      "r3": "b61f8fd17ecc542cab745f3b3099fb541c386a4c3b92ff8703e2085e7e7029e0",
+      "r4": "4441aa67e701035bf3a8c3454d75dedc6af22bca613b6a151a02b9e55611cb5b"
+    }
+  ],
+  "mismatches": [],
+  "app_four_wordings_count": {
+    "zh": 2,
+    "en": 2
+  },
+  "wording_reverse_sha": "8f0a61cf2a61216173413e63b91b111c5ed08850db600cf9e9866a08f99b84e6",
+  "previous_app_sha": "8f0a61cf2a61216173413e63b91b111c5ed08850db600cf9e9866a08f99b84e6",
+  "exact_four_wording_only": true,
+  "original_report_r1_sha256": "280aa9f4c43d26109d8440f18c6b414d6bf3d8fbcd9cae8d7553e89a5e7df87e"
+}

@@ -1,0 +1,27 @@
+{
+  "recorded_utc": "2026-11-15T06:52:24.184650+00:00",
+  "from_freeze": "frozen-inputs-r4.json",
+  "to_freeze": "frozen-inputs-r5.json",
+  "changed_inputs": [
+    "crates/keelshell-app/src/files/server_archive_fixture.rs",
+    "crates/keelshell-app/src/files/test_server.rs"
+  ],
+  "changed_scripts": [],
+  "changed_files_are_test_only": true,
+  "test_module_boundary": "crates/keelshell-app/src/files.rs contains #[cfg(test)] pub(crate) mod test_server; that module owns server_archive_fixture.rs",
+  "core_inputs_changed": [],
+  "all_other_inputs_equal": true,
+  "normal_build_and_openssh_production_inputs_equal": true,
+  "core_reviewer_closed": {
+    "id": "01a1ddd5-9b6a-7260-8eff-593004d1232f",
+    "previous_status": "completed",
+    "report": "review-core/report-r2.md",
+    "p0_p1_p2_p3": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "final_r5_gate_required": "logs/full-gate-r4.json"
+}

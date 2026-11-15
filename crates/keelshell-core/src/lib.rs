@@ -35,6 +35,7 @@ mod proxy;
 mod reconnect;
 mod routes;
 mod scheduled_workflow;
+pub mod server_archive;
 mod snippet_template;
 mod snippets;
 mod store;
@@ -146,6 +147,10 @@ pub use scheduled_workflow::{
     WorkflowScheduleLedger, WorkflowScheduleOutcome, WorkflowScheduleSlot,
     WorkflowScheduleSlotStatus, WorkflowScheduleSpec, WorkflowScheduleStatus, format_fixed_offset,
     format_fixed_offset_datetime, parse_fixed_offset, parse_fixed_offset_datetime,
+};
+pub use server_archive::{
+    MAX_SERVER_ARCHIVE_INPUT_BYTES, MAX_SERVER_ARCHIVE_RESPONSE_BYTES, ServerArchiveError,
+    ServerArchiveManifest, ServerArchiveMember, ServerArchiveReceipt, ServerArchiveRequest,
 };
 pub use snippet_template::{
     MAX_SNIPPET_TEMPLATE_BYTES, MAX_SNIPPET_VALUE_BYTES, MAX_SNIPPET_VARIABLES, SnippetTemplate,

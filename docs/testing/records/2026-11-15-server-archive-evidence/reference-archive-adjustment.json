@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-11-15T07:08:40.195204+00:00",
+  "reason": "Preserve exact raw reference bytes containing trailing whitespace while keeping staged whitespace checks meaningful. No content trimmed.",
+  "original_manifest_sha256": "f2f054391fc9103afad7d14e49bb8d1ea8b2ee0ff59d808911ed0b448e041556",
+  "original_manifest_saved": "archive-manifest-original.json",
+  "changes": [
+    {
+      "from": "review-core/official-references-r2/apple-acl-entry.txt",
+      "to": "review-core/official-references-r2/apple-acl-entry.txt.gz",
+      "original_sha256": "9fdc2b0c787a6305f1a26a11910f34de031e7ac242086428de8feade43680919",
+      "saved_sha256": "73458a4d6ee258c761f678294db7c0e736974cb08c56b589ffe60dd3c312b028"
+    },
+    {
+      "from": "review-core/official-references-r2/linux-listxattr.txt",
+      "to": "review-core/official-references-r2/linux-listxattr.txt.gz",
+      "original_sha256": "f989eee6a2e2cb2832c2cf58319b6104935829d2786a0d4f84cc34c377d4108d",
+      "saved_sha256": "fef86d9773fa2ae0466b4219d64d80e08d4be1d3f358df37e37a29789971d5b3"
+    },
+    {
+      "from": "review-core/official-references-r2/python-os.txt",
+      "to": "review-core/official-references-r2/python-os.txt.gz",
+      "original_sha256": "3f43d85a3616cac7b81e5a10ada7d18008902cde8503179a9e981e47b637f9e0",
+      "saved_sha256": "9e0335e9ca6235653b4378df74b5907e318fc897010ed743e559377e839fc5d6"
+    },
+    {
+      "from": "review-core/official-references-r2/apple-acl-file.txt",
+      "to": "review-core/official-references-r2/apple-acl-file.txt.gz",
+      "original_sha256": "61a075c38c4c3d5d382248d9b0a52894012f54d8310009402c218e7907c76b78",
+      "saved_sha256": "1d585add25b20c3d8212d3d9be60aeff84f554513794d7b69e484ce1c4b7a0b2"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "work/server-archive-20261115/review-session-ui/run-prebuilt.py",
+    "app-binary-r2",
+    "app-shared-archive-r1",
+    "240",
+    "files::transfer_tests::archive_tests::",
+    "--test-threads=4"
+  ],
+  "wrapper_exit": 1,
+  "tests_started": false,
+  "reason": "binary SHA mismatch; shared target artifact replaced during parent gate",
+  "recorded_sha256": "14d3cf04556dbf81c321e59e3d2988a7216129d36b1c43c426b0c3f97af2a981",
+  "actual_sha256": "e371bf1ea1c7b4cfd594f84897a22a81a8cb20d79e1b5ecf4b15ae7758babc49"
+}

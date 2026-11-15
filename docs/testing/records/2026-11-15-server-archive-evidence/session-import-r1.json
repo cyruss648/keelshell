@@ -1,0 +1,16 @@
+{
+  "recorded_utc": "2026-11-15T06:05:26.906616+00:00",
+  "agent": "01a1ddbf-3d2a-76d1-b8d4-4fbdb1b21cd5",
+  "source_root": "/Users/hdh/.codex/worktrees/server-archive-transport-20261115/keelshell",
+  "base_sha": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "files": {
+    "crates/keelshell-session/src/sftp/server_archive.rs": "bf54670983a89f388a0b1272c0a8d3c025d63bbf862e8571d88d7e357bb3bd34",
+    "crates/keelshell-session/src/sftp.rs": "a9457eebe53833cf9d2238af64b8b97cfb791e782ee0de253fc02607aa2ffb63",
+    "crates/keelshell-session/src/sftp/mutation.rs": "63a310b60a710f0077646f8741e8763e6cf8d52eda853df48dd83bcba52dafe8",
+    "crates/keelshell-session/src/ssh.rs": "d86a3cf3f42cbc1ac06f41d5e793b1f042fe558992836730df06184e865fb79b",
+    "crates/keelshell-session/tests/server_archive.rs": "0111b40fd5349719bf65ad1ca6397c541a588e9a4e4b3182f6b747640864d4e9",
+    "crates/keelshell-session/tests/support/server_archive_fixture.rs": "6bc1b1d818f72234f607c86daa3571de366dbd92c6afb790dc63822b7554aab4"
+  },
+  "cargo_executed_by_author": false,
+  "mtime_policy": "write fresh bytes in parent tree; no target ownership switch"
+}

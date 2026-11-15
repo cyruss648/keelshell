@@ -53,6 +53,7 @@ mod navigation_view;
 mod parallel;
 mod review;
 mod selection;
+mod server_archive;
 mod sync;
 mod transfer;
 mod view;
@@ -103,6 +104,8 @@ enum Operation {
     PlanArchive(archive::ArchiveRequest),
     TransferArchive(Box<archive::ArchivePlan>),
     InspectArchiveTools(archive_inspection::Probe),
+    PlanServerArchive(server_archive::Request),
+    PackServerArchive(Box<server_archive::Plan>),
     TransferFile(FileTransferPlan),
     TransferDirectory(DirectoryTransferPlan),
     PlanResume(TransferSpec, bool),
@@ -152,6 +155,7 @@ enum Outcome {
     PlannedDirectory(DirectoryTransferPlan),
     PlannedBatch(Box<batch::BatchPlan>),
     PlannedArchive(Box<archive::ArchivePlan>),
+    PlannedServerArchive(Box<server_archive::Plan>),
     ArchiveTools(
         archive_inspection::Probe,
         keelshell_session::archive_tools::ArchiveToolReport,
@@ -1447,6 +1451,18 @@ impl FilesPanel {
             cx.notify();
             return;
         }
+        let server_archive_current = match &operation {
+            Operation::PlanServerArchive(request) => {
+                self.server_archive_request_is_current(request, cx)
+            }
+            Operation::PackServerArchive(plan) => self.server_archive_plan_is_current(plan, cx),
+            _ => true,
+        };
+        if !server_archive_current {
+            self.status = archive::expired_message();
+            cx.notify();
+            return;
+        }
         let archive_probe = if let Operation::InspectArchiveTools(probe) = &operation {
             if !self.archive_probe_is_current(probe) {
                 self.status = Message::new(
@@ -1466,8 +1482,11 @@ impl FilesPanel {
         }
         // An archive owns only its newly installed close hold. A verified
         // completion must restore any older unresolved target, not erase it.
-        let archive_previous_isolation = matches!(&operation, Operation::TransferArchive(_))
-            .then(|| self.isolation_target.clone());
+        let archive_previous_isolation = matches!(
+            &operation,
+            Operation::TransferArchive(_) | Operation::PackServerArchive(_)
+        )
+        .then(|| self.isolation_target.clone());
         if let Some(target) = operation.isolation_target() {
             self.isolation_target = Some(target);
         }
@@ -1498,6 +1517,7 @@ impl FilesPanel {
             Operation::PlanResume(..)
                 | Operation::PlanPersistedRecovery { .. }
                 | Operation::InspectArchiveTools(_)
+                | Operation::PlanServerArchive(_)
                 | Operation::InspectFileQuarantine(_)
                 | Operation::InspectQuarantine(_)
                 | Operation::AcknowledgeQuarantine(_)
@@ -1511,6 +1531,7 @@ impl FilesPanel {
             Operation::Compare(..)
                 | Operation::PlanDirectorySync(..)
                 | Operation::InspectArchiveTools(_)
+                | Operation::PlanServerArchive(_)
         ) {
             self.comparison = None;
         }
@@ -1556,6 +1577,7 @@ impl FilesPanel {
             Operation::PlanResume(..)
                 | Operation::PlanPersistedRecovery { .. }
                 | Operation::InspectArchiveTools(_)
+                | Operation::PlanServerArchive(_)
                 | Operation::InspectFileQuarantine(_)
                 | Operation::InspectQuarantine(_)
                 | Operation::AcknowledgeQuarantine(_)
@@ -1580,6 +1602,14 @@ impl FilesPanel {
             Operation::InspectArchiveTools(_) => Message::new(
                 "正在只读检测当前 SSH 会话的工具 PATH…",
                 "Inspecting tool resolution in the current SSH session PATH…",
+            ),
+            Operation::PlanServerArchive(_) => Message::new(
+                "正在服务器只读扫描完整归档源，完成后需再次审核…",
+                "Inspecting all archive sources on the server read-only; another review is required…",
+            ),
+            Operation::PackServerArchive(_) => Message::new(
+                "正在服务器重新核验、打包并完整读回新归档…",
+                "Revalidating, packing and fully reading back the new server archive…",
             ),
             Operation::TransferDirectory(_) => Message::new(
                 "正在复核已审核的目录…",
@@ -1627,6 +1657,7 @@ impl FilesPanel {
                 | Operation::PlanDirectory(_)
                 | Operation::PlanBatch(_)
                 | Operation::PlanArchive(_)
+                | Operation::PlanServerArchive(_)
                 | Operation::PlanDirectorySync(..)
         );
         let navigation_before = self.path.read(cx).value().to_string();
@@ -1899,6 +1930,14 @@ impl FilesPanel {
                         if view.archive_plan_is_current(&plan, cx) {
                             view.status = Message::new("归档准备完成，请审核完整清单及新目标。", "Archive prepared; review the complete manifest and new destination.");
                             view.confirm(plan.review_message(), Operation::TransferArchive(plan), cx);
+                        } else {
+                            view.status = archive::expired_message();
+                        }
+                    }
+                    Ok(Outcome::PlannedServerArchive(plan)) => {
+                        if view.server_archive_plan_is_current(&plan, cx) {
+                            view.status = Message::new("服务器归档只读扫描完成，请审核完整清单、命令与标准输入。", "Read-only server inspection completed; review the complete manifest, command and standard input.");
+                            view.confirm(plan.review_message(), Operation::PackServerArchive(plan), cx);
                         } else {
                             view.status = archive::expired_message();
                         }
@@ -2489,6 +2528,7 @@ impl Operation {
                 Some(IsolationTarget::Remote(entry.path.clone()))
             }
             Self::TransferArchive(plan) => Some(plan.isolation_target()),
+            Self::PackServerArchive(plan) => Some(plan.isolation_target()),
             Self::ApplyDirectorySync(review, _) => Some(
                 if review.plan.direction() == DirectorySyncDirection::LeftToRight {
                     IsolationTarget::Remote(review.remote.clone())
@@ -2513,6 +2553,7 @@ impl Operation {
                     | Self::PlanDirectory(_)
                     | Self::PlanBatch(_)
                     | Self::PlanArchive(_)
+                    | Self::PlanServerArchive(_)
                     | Self::InspectArchiveTools(_)
                     | Self::TransferBatch(_)
                     | Self::PlanResume(..)
@@ -2603,6 +2644,8 @@ impl Operation {
             | Self::PlanArchive(_)
             | Self::TransferArchive(_)
             | Self::InspectArchiveTools(_)
+            | Self::PlanServerArchive(_)
+            | Self::PackServerArchive(_)
             | Self::PlanResume(..)
             | Self::PlanPersistedRecovery { .. }
             | Self::DiscardPersistedRecoveryBatch(_)

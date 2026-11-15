@@ -1,0 +1,20 @@
+{
+  "recorded_utc": "2026-11-15T06:23:21.057583+00:00",
+  "base_sha": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "r1_core_input_count": 102,
+  "current_differences_from_r1": {
+    "crates/keelshell-core/tests/server_archive.rs": {
+      "r1": "b61f8fd17ecc542cab745f3b3099fb541c386a4c3b92ff8703e2085e7e7029e0",
+      "current": "a95d4d297e6f5ca10c75d8349cbf2bd8a6cf5a516c130bd27b56a52fc264113d"
+    }
+  },
+  "r1_snapshot_verified": {
+    "crates__keelshell-core__tests__server_archive.rs": "b61f8fd17ecc542cab745f3b3099fb541c386a4c3b92ff8703e2085e7e7029e0",
+    "crates__keelshell-core__src__archive.rs": "786773b3839adaf01cb52f08e071e0d9ba8c70db97cfb4fdce4befbfdcd64d77",
+    "crates__keelshell-core__src__server_archive.py": "96e06a6e5c51b062208bcb3108c720656a560a902c67ca85e2378e7b1570685b",
+    "crates__keelshell-core__src__server_archive.rs": "2be35019f791892d3796238113dc3985aea69aa89c616e1999dfe65391e77d2c"
+  },
+  "owned_running_workers": [],
+  "binary_current_sha256": "ef7c3adfb0ad5943ac48e57aa8a67fd367f7dc036217957e8e4e690adf2b5214",
+  "rebuild_by_reviewer": false
+}

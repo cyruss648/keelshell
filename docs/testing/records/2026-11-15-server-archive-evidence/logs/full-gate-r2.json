@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "full-gate-r2",
+  "pid": 46846,
+  "started_utc": "2026-11-15T06:16:45.301820+00:00",
+  "finished_utc": "2026-11-15T06:18:21.549669+00:00",
+  "seconds": 96.247,
+  "exit": -15,
+  "timed_out": false,
+  "log_sha256": "691d1154a3c040ffd063c291a084adab674f37e5fae99c58d16d51a303989440",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

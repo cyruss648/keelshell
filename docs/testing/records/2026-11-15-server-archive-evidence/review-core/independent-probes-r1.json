@@ -1,0 +1,679 @@
+{
+  "helper_sha256": "96e06a6e5c51b062208bcb3108c720656a560a902c67ca85e2378e7b1570685b",
+  "passed_probes": 13,
+  "failed_probes": 0,
+  "skipped_probes": 0,
+  "cases": [
+    {
+      "case": "unsupported-link",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/unsupported-link",
+        "final_exists": false,
+        "stage_exists": true,
+        "fault": "unsupported-link"
+      },
+      "commands": [
+        0,
+        1
+      ]
+    },
+    {
+      "case": "parent-fsync",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-fsync",
+        "final_exists": true,
+        "stage_exists": true,
+        "fault": "parent-fsync"
+      },
+      "commands": [
+        2,
+        3
+      ]
+    },
+    {
+      "case": "payload-unlink",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-unlink",
+        "final_exists": true,
+        "stage_exists": true,
+        "fault": "payload-unlink"
+      },
+      "commands": [
+        4,
+        5
+      ]
+    },
+    {
+      "case": "stage-rmdir",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-rmdir",
+        "final_exists": true,
+        "stage_exists": true,
+        "fault": "stage-rmdir"
+      },
+      "commands": [
+        6,
+        7
+      ]
+    },
+    {
+      "case": "final-readback",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/final-readback",
+        "final_exists": true,
+        "stage_exists": false,
+        "fault": "final-readback"
+      },
+      "commands": [
+        8,
+        9
+      ]
+    },
+    {
+      "case": "payload-replacement",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-replacement",
+        "final_exists": false,
+        "stage_exists": true,
+        "fault": "payload-replacement"
+      },
+      "commands": [
+        10,
+        11
+      ]
+    },
+    {
+      "case": "stage-replacement",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-replacement",
+        "final_exists": true,
+        "stage_exists": true,
+        "fault": "stage-replacement"
+      },
+      "commands": [
+        12,
+        13
+      ]
+    },
+    {
+      "case": "parent-replaced-symlink",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-symlink",
+        "retained_original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-symlink-retained-original"
+      },
+      "commands": [
+        14,
+        15
+      ]
+    },
+    {
+      "case": "parent-replaced-new-inode",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-new-inode",
+        "retained_original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-new-inode-retained-original"
+      },
+      "commands": [
+        16,
+        17
+      ]
+    },
+    {
+      "case": "existing-dangling-destination",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/dangling-destination",
+        "symlink_preserved": true
+      },
+      "commands": [
+        18,
+        19
+      ]
+    },
+    {
+      "case": "socket-source-fails-without-blocking",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/socket-source"
+      },
+      "commands": [
+        20
+      ]
+    },
+    {
+      "case": "P2-001-private-source-published",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published",
+        "finding": "P2-001 reproduced",
+        "source_mode": "0600",
+        "acl_listing": "-rw-------@ 1 hdh  staff   40 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/private-source\n-rw-------@ 1 hdh  staff  125 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/result.tar.gz\n 0: group:everyone inherited allow read,execute\n",
+        "helper_success": true
+      },
+      "commands": [
+        21,
+        22,
+        23,
+        24
+      ]
+    },
+    {
+      "case": "P2-001-private-source-retained-stage",
+      "passed": true,
+      "detail": {
+        "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage",
+        "finding": "P2-001 reproduced",
+        "source_mode": "0600",
+        "acl_listing": "drwx------@ 3 hdh  staff   96 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/.keelshell-server-archive-6062fb42-7f06-4298-8466-242e260c0bc1\n 0: group:everyone inherited allow list,search,file_inherit,directory_inherit\n-rw-------@ 1 hdh  staff  125 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/.keelshell-server-archive-6062fb42-7f06-4298-8466-242e260c0bc1/payload\n 0: group:everyone inherited allow read,execute\n-rw-------@ 1 hdh  staff   40 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/private-source\n",
+        "helper_success": false
+      },
+      "commands": [
+        25,
+        26,
+        27,
+        28
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS91bnN1cHBvcnRlZC1saW5rL3ByaXZhdGUtc291cmNlIl0sICJkZXN0aW5hdGlvbiI6ICIvVXNlcnMvaGRoLy5jb2RleC93b3JrdHJlZXMvZWRpdG9yLXVuaWNvZGUtY29kZWMtMjAyNjExMTQva2VlbHNoZWxsL3dvcmsvc2VydmVyLWFyY2hpdmUtMjAyNjExMTUvcmV2aWV3LWNvcmUvaW5kZXBlbmRlbnQtZml4dHVyZXMtcjEvdW5zdXBwb3J0ZWQtbGluay9yZXN1bHQuemlwIiwgImZvcm1hdCI6ICJ6aXAifQ=="
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.03095824999763863,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/unsupported-link/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/unsupported-link/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546213,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700156129784,\"ctime_ns\":1794723700156129784,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546214,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700156176076,\"ctime_ns\":1794723700156251910,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "unsupported-link",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS91bnN1cHBvcnRlZC1saW5rL3ByaXZhdGUtc291cmNlIl0sICJkZXN0aW5hdGlvbiI6ICIvVXNlcnMvaGRoLy5jb2RleC93b3JrdHJlZXMvZWRpdG9yLXVuaWNvZGUtY29kZWMtMjAyNjExMTQva2VlbHNoZWxsL3dvcmsvc2VydmVyLWFyY2hpdmUtMjAyNjExMTUvcmV2aWV3LWNvcmUvaW5kZXBlbmRlbnQtZml4dHVyZXMtcjEvdW5zdXBwb3J0ZWQtbGluay9yZXN1bHQuemlwIiwgImZvcm1hdCI6ICJ6aXAifQ==",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/unsupported-link/.keelshell-server-archive-f74d93a4-9f98-4ce7-9909-15ab7c031b0a"
+      ],
+      "stdin_sha256": "272063a0154de082612228a86127b6192b9e72cabc77358d18816a650c29786d",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.032601833998342045,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtZnN5bmMvcHJpdmF0ZS1zb3VyY2UiXSwgImRlc3RpbmF0aW9uIjogIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtZnN5bmMvcmVzdWx0LnppcCIsICJmb3JtYXQiOiAiemlwIn0="
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.030851041003188584,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-fsync/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-fsync/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546217,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700220289792,\"ctime_ns\":1794723700220289792,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546218,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700220325917,\"ctime_ns\":1794723700220358084,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "parent-fsync",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtZnN5bmMvcHJpdmF0ZS1zb3VyY2UiXSwgImRlc3RpbmF0aW9uIjogIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtZnN5bmMvcmVzdWx0LnppcCIsICJmb3JtYXQiOiAiemlwIn0=",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-fsync/.keelshell-server-archive-fb588e69-a5e3-4109-a04a-d3fd503f8183"
+      ],
+      "stdin_sha256": "f70fe8945299e8afdbec54375b2d6abfdfd237edc5c16efe56210e7c13ea7c68",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03219212499971036,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXlsb2FkLXVubGluay9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3BheWxvYWQtdW5saW5rL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.031095542006369215,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-unlink/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-unlink/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546223,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700283720088,\"ctime_ns\":1794723700283720088,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546224,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700283766505,\"ctime_ns\":1794723700283810672,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "payload-unlink",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXlsb2FkLXVubGluay9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3BheWxvYWQtdW5saW5rL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-unlink/.keelshell-server-archive-e38d26d3-8aec-47e1-92e2-ea28a4a58a9a"
+      ],
+      "stdin_sha256": "2cff99c95d89dda1fee122989e309a45e4b3d1f01c491ccbb805cb117741c2b8",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03586570900370134,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9zdGFnZS1ybWRpci9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3N0YWdlLXJtZGlyL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.0328652919997694,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-rmdir/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-rmdir/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546229,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700351119363,\"ctime_ns\":1794723700351119363,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546230,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700351160363,\"ctime_ns\":1794723700351205447,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "stage-rmdir",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9zdGFnZS1ybWRpci9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3N0YWdlLXJtZGlyL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-rmdir/.keelshell-server-archive-bedab2c0-ccd8-43b6-82fb-02878e17c4c7"
+      ],
+      "stdin_sha256": "90b02ad163e5cbe89b111a29c165b99501184fa5ecbce6a50da07e18c7650c24",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03362508300051559,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9maW5hbC1yZWFkYmFjay9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL2ZpbmFsLXJlYWRiYWNrL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.032174582993320655,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/final-readback/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/final-readback/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546236,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700418042927,\"ctime_ns\":1794723700418042927,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546237,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700418089553,\"ctime_ns\":1794723700418126220,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "final-readback",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9maW5hbC1yZWFkYmFjay9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL2ZpbmFsLXJlYWRiYWNrL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/final-readback/.keelshell-server-archive-67cf2a2e-20f1-4fa6-b3ee-7e439d5d204f"
+      ],
+      "stdin_sha256": "ad7b5a4fd3410846c34f9cf602c69cf76ffce1ef8a8c1d3ee71c55d595826dbd",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03479133300425019,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXlsb2FkLXJlcGxhY2VtZW50L3ByaXZhdGUtc291cmNlIl0sICJkZXN0aW5hdGlvbiI6ICIvVXNlcnMvaGRoLy5jb2RleC93b3JrdHJlZXMvZWRpdG9yLXVuaWNvZGUtY29kZWMtMjAyNjExMTQva2VlbHNoZWxsL3dvcmsvc2VydmVyLWFyY2hpdmUtMjAyNjExMTUvcmV2aWV3LWNvcmUvaW5kZXBlbmRlbnQtZml4dHVyZXMtcjEvcGF5bG9hZC1yZXBsYWNlbWVudC9yZXN1bHQuemlwIiwgImZvcm1hdCI6ICJ6aXAifQ=="
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.03617070899781538,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-replacement/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-replacement/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546242,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700485407244,\"ctime_ns\":1794723700485407244,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546243,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700485448286,\"ctime_ns\":1794723700485491578,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "payload-replacement",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXlsb2FkLXJlcGxhY2VtZW50L3ByaXZhdGUtc291cmNlIl0sICJkZXN0aW5hdGlvbiI6ICIvVXNlcnMvaGRoLy5jb2RleC93b3JrdHJlZXMvZWRpdG9yLXVuaWNvZGUtY29kZWMtMjAyNjExMTQva2VlbHNoZWxsL3dvcmsvc2VydmVyLWFyY2hpdmUtMjAyNjExMTUvcmV2aWV3LWNvcmUvaW5kZXBlbmRlbnQtZml4dHVyZXMtcjEvcGF5bG9hZC1yZXBsYWNlbWVudC9yZXN1bHQuemlwIiwgImZvcm1hdCI6ICJ6aXAifQ==",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/payload-replacement/.keelshell-server-archive-066e5f61-200f-4bf8-956d-443822241838"
+      ],
+      "stdin_sha256": "4a017e446b018e0714eb93084ff5289b48f1e262edd92117a2d5fcf2ee6a9918",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.032603542000288144,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9zdGFnZS1yZXBsYWNlbWVudC9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3N0YWdlLXJlcGxhY2VtZW50L3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.031084499998542015,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-replacement/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-replacement/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546247,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700554580112,\"ctime_ns\":1794723700554580112,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546248,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700554614404,\"ctime_ns\":1794723700554647196,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "stage-replacement",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9zdGFnZS1yZXBsYWNlbWVudC9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3N0YWdlLXJlcGxhY2VtZW50L3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/stage-replacement/.keelshell-server-archive-e549e087-6510-4739-aead-22cc3cab76a9"
+      ],
+      "stdin_sha256": "6cc8a539fb3c76301abdbdf7df7c1f1af1ac5ecbd9f6f79ef96bf49cf308a6e8",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03306133300065994,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtc3ltbGluay9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3BhcmVudC1zeW1saW5rL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.03159908299858216,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-symlink/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-symlink/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546255,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700619160622,\"ctime_ns\":1794723700619160622,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546256,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700619198498,\"ctime_ns\":1794723700619235706,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtc3ltbGluay9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3BhcmVudC1zeW1saW5rL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-symlink/.keelshell-server-archive-319702a3-1470-454a-94ee-0216a586abdc"
+      ],
+      "stdin_sha256": "7fb08fc76a561c3999620fa825a241bbd9f645d5e71b48d62bd9f7c5c2fd67fc",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03255599999829428,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtbmV3LWlub2RlL3ByaXZhdGUtc291cmNlIl0sICJkZXN0aW5hdGlvbiI6ICIvVXNlcnMvaGRoLy5jb2RleC93b3JrdHJlZXMvZWRpdG9yLXVuaWNvZGUtY29kZWMtMjAyNjExMTQva2VlbHNoZWxsL3dvcmsvc2VydmVyLWFyY2hpdmUtMjAyNjExMTUvcmV2aWV3LWNvcmUvaW5kZXBlbmRlbnQtZml4dHVyZXMtcjEvcGFyZW50LW5ldy1pbm9kZS9yZXN1bHQuemlwIiwgImZvcm1hdCI6ICJ6aXAifQ=="
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.030912792004528455,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-new-inode/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-new-inode/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546258,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700683903008,\"ctime_ns\":1794723700683903008,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546259,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700683957509,\"ctime_ns\":1794723700684041592,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wYXJlbnQtbmV3LWlub2RlL3ByaXZhdGUtc291cmNlIl0sICJkZXN0aW5hdGlvbiI6ICIvVXNlcnMvaGRoLy5jb2RleC93b3JrdHJlZXMvZWRpdG9yLXVuaWNvZGUtY29kZWMtMjAyNjExMTQva2VlbHNoZWxsL3dvcmsvc2VydmVyLWFyY2hpdmUtMjAyNjExMTUvcmV2aWV3LWNvcmUvaW5kZXBlbmRlbnQtZml4dHVyZXMtcjEvcGFyZW50LW5ldy1pbm9kZS9yZXN1bHQuemlwIiwgImZvcm1hdCI6ICJ6aXAifQ==",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/parent-new-inode/.keelshell-server-archive-a354b7d9-b3d8-47db-9ec2-e09bd95109d6"
+      ],
+      "stdin_sha256": "0cf70110072d04a9206bbb5aec6208243d83debcccceb123d2c1fa2c34a038c8",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03110520899645053,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9kYW5nbGluZy1kZXN0aW5hdGlvbi9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL2RhbmdsaW5nLWRlc3RpbmF0aW9uL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.031090292002772912,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/dangling-destination/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/dangling-destination/result.zip\",\"format\":\"zip\"},\"root\":{\"dev\":16777233,\"ino\":271546262,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700746838760,\"ctime_ns\":1794723700746838760,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546263,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700746889635,\"ctime_ns\":1794723700746945802,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9kYW5nbGluZy1kZXN0aW5hdGlvbi9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL2RhbmdsaW5nLWRlc3RpbmF0aW9uL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/dangling-destination/.keelshell-server-archive-4aee87d2-d3e0-4e6f-b8f1-9b57fb2138fa"
+      ],
+      "stdin_sha256": "0a92491191f6f03c30fe67eb1c724ca31d8c9907356cfcdc720284acdeb3e8f8",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.030356417002622038,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9zb2NrZXQtc291cmNlL3NvdXJjZS1zb2NrZXQiXSwgImRlc3RpbmF0aW9uIjogIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9zb2NrZXQtc291cmNlL3Jlc3VsdC56aXAiLCAiZm9ybWF0IjogInppcCJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.02992583300510887,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/bin/chmod",
+        "+a",
+        "everyone allow read,execute,file_inherit,directory_inherit",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.004377124998427462,
+      "stdout": "",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wcml2YXRlLWFjbC1wdWJsaXNoZWQvcHJpdmF0ZS1zb3VyY2UiXSwgImRlc3RpbmF0aW9uIjogIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wcml2YXRlLWFjbC1wdWJsaXNoZWQvcmVzdWx0LnRhci5neiIsICJmb3JtYXQiOiAidGFyLmd6In0="
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.03340358300192747,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/result.tar.gz\",\"format\":\"tar.gz\"},\"root\":{\"dev\":16777233,\"ino\":271546268,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700840385841,\"ctime_ns\":1794723700844622197,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546269,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700840437091,\"ctime_ns\":1794723700840479258,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wcml2YXRlLWFjbC1wdWJsaXNoZWQvcHJpdmF0ZS1zb3VyY2UiXSwgImRlc3RpbmF0aW9uIjogIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wcml2YXRlLWFjbC1wdWJsaXNoZWQvcmVzdWx0LnRhci5neiIsICJmb3JtYXQiOiAidGFyLmd6In0=",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/.keelshell-server-archive-a5c1d50a-220f-4071-a07b-87ea9aea14d9"
+      ],
+      "stdin_sha256": "03fb984904325a323492312705fd8c90560dd66f4d13c1bcf024110284bd6c96",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.03473904199927347,
+      "stdout": "{\"version\":1,\"archive_bytes\":125,\"sha256\":\"5f13c64593772c16b7c4fbbb06b1ffaff2a42eadf917f37201550fb4e7a4b83e\"}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/bin/ls",
+        "-led",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/private-source",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/result.tar.gz"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.004219499998725951,
+      "stdout": "-rw-------@ 1 hdh  staff   40 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/private-source\n-rw-------@ 1 hdh  staff  125 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-published/result.tar.gz\n 0: group:everyone inherited allow read,execute\n",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/bin/chmod",
+        "+a",
+        "everyone allow read,execute,file_inherit,directory_inherit",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.004029208001156803,
+      "stdout": "",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "inspect",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wcml2YXRlLWFjbC1yZXRhaW5lZC1zdGFnZS9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3ByaXZhdGUtYWNsLXJldGFpbmVkLXN0YWdlL3Jlc3VsdC50YXIuZ3oiLCAiZm9ybWF0IjogInRhci5neiJ9"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.03530662499542814,
+      "stdout": "{\"version\":1,\"request\":{\"version\":1,\"sources\":[\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/private-source\"],\"destination\":\"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/result.tar.gz\",\"format\":\"tar.gz\"},\"root\":{\"dev\":16777233,\"ino\":271546274,\"mode\":16877,\"nlink\":3,\"size\":96,\"mtime_ns\":1794723700917537668,\"ctime_ns\":1794723700921314771,\"uid\":501,\"gid\":20,\"flags\":0},\"members\":[{\"path\":\"private-source\",\"kind\":\"file\",\"bytes\":40,\"sha256\":\"8ab9c61cc298a865d482c9778570b6d8423ea2a130c218ee837e1b99a36be2df\",\"stat\":{\"dev\":16777233,\"ino\":271546275,\"mode\":33152,\"nlink\":1,\"size\":40,\"mtime_ns\":1794723700917598585,\"ctime_ns\":1794723700917654210,\"uid\":501,\"gid\":20,\"flags\":0}}],\"expanded_bytes\":40}",
+      "stderr": "",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/fault_worker_r1.py",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/snapshot-r1/crates__keelshell-core__src__server_archive.py",
+        "unsupported-link",
+        "pack",
+        "eyJ2ZXJzaW9uIjogMSwgInNvdXJjZXMiOiBbIi9Vc2Vycy9oZGgvLmNvZGV4L3dvcmt0cmVlcy9lZGl0b3ItdW5pY29kZS1jb2RlYy0yMDI2MTExNC9rZWVsc2hlbGwvd29yay9zZXJ2ZXItYXJjaGl2ZS0yMDI2MTExNS9yZXZpZXctY29yZS9pbmRlcGVuZGVudC1maXh0dXJlcy1yMS9wcml2YXRlLWFjbC1yZXRhaW5lZC1zdGFnZS9wcml2YXRlLXNvdXJjZSJdLCAiZGVzdGluYXRpb24iOiAiL1VzZXJzL2hkaC8uY29kZXgvd29ya3RyZWVzL2VkaXRvci11bmljb2RlLWNvZGVjLTIwMjYxMTE0L2tlZWxzaGVsbC93b3JrL3NlcnZlci1hcmNoaXZlLTIwMjYxMTE1L3Jldmlldy1jb3JlL2luZGVwZW5kZW50LWZpeHR1cmVzLXIxL3ByaXZhdGUtYWNsLXJldGFpbmVkLXN0YWdlL3Jlc3VsdC50YXIuZ3oiLCAiZm9ybWF0IjogInRhci5neiJ9",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/.keelshell-server-archive-6062fb42-7f06-4298-8466-242e260c0bc1"
+      ],
+      "stdin_sha256": "e119ce40f2ee0f28ee9c37c8fe884facff3edea10dd8a254a80385bb04e9e1fe",
+      "exit_code": 65,
+      "timed_out": false,
+      "seconds": 0.03447849999793107,
+      "stdout": "",
+      "stderr": "KeelShell server archive rejected\n",
+      "process_group_reaped": true
+    },
+    {
+      "command": [
+        "/bin/ls",
+        "-led",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/private-source",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/.keelshell-server-archive-6062fb42-7f06-4298-8466-242e260c0bc1",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/.keelshell-server-archive-6062fb42-7f06-4298-8466-242e260c0bc1/payload"
+      ],
+      "stdin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "timed_out": false,
+      "seconds": 0.005025792001106311,
+      "stdout": "drwx------@ 3 hdh  staff   96 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/.keelshell-server-archive-6062fb42-7f06-4298-8466-242e260c0bc1\n 0: group:everyone inherited allow list,search,file_inherit,directory_inherit\n-rw-------@ 1 hdh  staff  125 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/.keelshell-server-archive-6062fb42-7f06-4298-8466-242e260c0bc1/payload\n 0: group:everyone inherited allow read,execute\n-rw-------@ 1 hdh  staff   40 Nov 15 14:21 /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-core/independent-fixtures-r1/private-acl-retained-stage/private-source\n",
+      "stderr": "",
+      "process_group_reaped": true
+    }
+  ],
+  "fixtures_preserved": true,
+  "independent_compile": false
+}

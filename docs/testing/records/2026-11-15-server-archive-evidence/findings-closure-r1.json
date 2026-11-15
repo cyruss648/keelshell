@@ -1,0 +1,38 @@
+{
+  "recorded_utc": "2026-11-15T07:06:39.404840+00:00",
+  "source_freeze": "frozen-inputs-r5.json",
+  "findings": {
+    "core": {
+      "report": "review-core/report-r2.md",
+      "sha256": "837ed7b582fe41e9fc687d1ee604c4857b73bf57f05bd69a163e43601d4fcf4e",
+      "finding": "P2-001",
+      "state": "closed",
+      "open_p0_p1_p2_p3": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "session-ui": {
+      "report": "review-session-ui/report-r3.md",
+      "sha256": "be9a35ac1ed481f4fde04bb8ac4045fd5603aa9b8b52af357fbe34ee01a21547",
+      "finding": "P2-001",
+      "state": "closed",
+      "open_p0_p1_p2_p3": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "full_gate_receipt": "logs/full-gate-r4.json",
+  "gate_exit": 0,
+  "reviewers_closed": [
+    "01a1ddd5-9b6a-7260-8eff-593004d1232f",
+    "01a1ddd7-27aa-73d0-9328-cafc179f7415"
+  ],
+  "original_notices_and_reports_preserved": true,
+  "prebuilt_execution_without_independent_recompile": true
+}

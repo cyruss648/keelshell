@@ -1,0 +1,106 @@
+"""Summarize one successful gate without double-counting focused executions."""
+from pathlib import Path
+import datetime
+import hashlib
+import json
+import re
+import sys
+
+root = Path(__file__).resolve().parents[2]
+out = Path(__file__).resolve().parent
+gate_revision, freeze_revision = sys.argv[1:]
+freeze_name = f"frozen-inputs-{freeze_revision}.json"
+freeze_path = out / freeze_name
+freeze = json.loads(freeze_path.read_text())
+receipt_name = f"logs/full-gate-{gate_revision}.json"
+receipt = json.loads((out / receipt_name).read_text())
+if receipt["exit"] != 0 or receipt["timed_out"]:
+    raise SystemExit("the gate has not passed")
+log = out / f"logs/full-gate-{gate_revision}.log"
+if hashlib.sha256(log.read_bytes()).hexdigest() != receipt["log_sha256"]:
+    raise SystemExit("gate log digest mismatch")
+text = log.read_text()
+suites, commands = [], []
+phase = current = doc_context = None
+for line in text.splitlines():
+    line = line.strip()
+    if line.startswith("Running:"):
+        commands.append(line)
+        phase = "workspace" if "cargo test --workspace" in line else "other"
+    if phase != "workspace":
+        continue
+    if line.startswith("Running ") and "(" in line:
+        doc_context = None
+        package = re.search(r"/build/(keelshell-[^/]+)/", line)
+        if not package:
+            raise SystemExit("unknown suite: " + line)
+        current = dict(kind="ordinary", package=package[1], suite=line, passed_case_names=[])
+    elif line.startswith("Doc-tests "):
+        doc_context = line
+        current = dict(kind="rustdoc", package=line.split()[-1].replace("_", "-"),
+                       suite=line, passed_case_names=[])
+    elif line.startswith("running ") and current is None and doc_context:
+        current = dict(kind="rustdoc", package=doc_context.split()[-1].replace("_", "-"),
+                       suite=doc_context + " (additional group)", passed_case_names=[])
+    elif current and (match := re.search(r"\btest (.+) \.\.\. ok$", line)):
+        current["passed_case_names"].append(match[1])
+    elif line.startswith("test result:"):
+        counts = re.search(r"(\d+) passed; (\d+) failed; (\d+) ignored;", line)
+        if not counts or not current:
+            raise SystemExit("unbound result: " + line)
+        current.update(zip(("passed", "failed", "ignored"), map(int, counts.groups())))
+        if len(current["passed_case_names"]) != current["passed"]:
+            raise SystemExit("case count mismatch: " + current["suite"])
+        suites.append(current)
+        current = None
+totals = {kind: {k: sum(s[k] for s in suites if s["kind"] == kind)
+                 for k in ("passed", "failed", "ignored")}
+          for kind in ("ordinary", "rustdoc")}
+by_package = {p: {k: sum(s[k] for s in suites if s["kind"] == "ordinary"
+                        and s["package"] == p) for k in ("passed", "failed", "ignored")}
+              for p in sorted({s["package"] for s in suites})}
+integrity = {group: dict(count=len(freeze[group]), mismatches=[
+    name for name, sha in freeze[group].items()
+    if hashlib.sha256((root / name).read_bytes()).hexdigest() != sha
+]) for group in ("inputs", "scripts")}
+if any(item["mismatches"] for item in integrity.values()):
+    raise SystemExit("frozen inputs changed")
+app = next(s for s in suites if s["kind"] == "ordinary" and s["package"] == "keelshell-app")
+binary = root / app["suite"].split("(", 1)[1].rstrip(")")
+inventory = (out / f"app-inventory-{freeze_revision}.txt").read_text()
+app_names = [line.removesuffix(": test") for line in inventory.splitlines() if line.endswith(": test")]
+new_cases = {
+    "app": [n for n in app["passed_case_names"] if "::server_archive_tests::" in n],
+    "session_unit": [n for s in suites if s["package"] == "keelshell-session"
+                     for n in s["passed_case_names"] if n.startswith("sftp::server_archive::tests::")],
+    "session_ssh": [n for s in suites if "Running tests/server_archive.rs " in s["suite"]
+                    and s["package"] == "keelshell-session" for n in s["passed_case_names"]],
+    "core": [n for s in suites if "Running tests/server_archive.rs " in s["suite"]
+             and s["package"] == "keelshell-core" for n in s["passed_case_names"]],
+}
+if {k: len(v) for k, v in new_cases.items()} != dict(app=7, session_unit=11, session_ssh=40, core=14):
+    raise SystemExit("new test inventory differs: " + repr({k: len(v) for k, v in new_cases.items()}))
+if not all(name in app_names for name in new_cases["app"]):
+    raise SystemExit("app inventory missing new cases")
+python_section = text.split("Running: cargo fmt", 1)[0]
+ran = re.search(r"Ran (\d+) tests in ", python_section)
+ok = re.search(r"^OK(?: \(skipped=(\d+)\))?$", python_section, re.M)
+if not ran or not ok:
+    raise SystemExit("Python result not found")
+python_run, python_skipped = int(ran[1]), int(ok[1] or 0)
+result = dict(
+    recorded_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    freeze=freeze_name, freeze_sha256=hashlib.sha256(freeze_path.read_bytes()).hexdigest(),
+    integrity_after_gate=integrity, gate_receipt=receipt_name,
+    gate_exit=receipt["exit"], gate_seconds=receipt["seconds"],
+    gate_log_sha256=receipt["log_sha256"], ordinary=totals["ordinary"],
+    ordinary_by_package=by_package, rustdoc=totals["rustdoc"],
+    python=dict(run=python_run, skipped=python_skipped, passed=python_run-python_skipped, failed=0),
+    commands=commands, app_test_inventory=len(app_names), app_test_binary=str(binary),
+    app_test_binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
+    new_cases=new_cases, suites=suites,
+    ordinary_excludes="rustdoc, embedded helper Python case repetitions, controller repetitions, focused/reviewer runs and separately executed ignored OpenSSH tests",
+)
+(out / f"validation-summary-{gate_revision}.json").write_text(json.dumps(result, indent=2) + "\n")
+print(json.dumps({k: result[k] for k in ("ordinary", "ordinary_by_package", "rustdoc", "python", "gate_seconds")}, indent=2))
+print("New cases:", {k: len(v) for k, v in new_cases.items()})

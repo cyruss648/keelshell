@@ -1,0 +1,17 @@
+{
+  "recorded_utc": "2026-11-15T06:44:12.091581+00:00",
+  "report_r2_sha256": "837ed7b582fe41e9fc687d1ee604c4857b73bf57f05bd69a163e43601d4fcf4e",
+  "r1_report_unchanged": true,
+  "r1_notice_unchanged": true,
+  "freeze_sha256": "c01ae7a78099b4805bff413a795176e0aa7732871bf6a909cd83fff6277c5eda",
+  "binary_sha256": "2db85e430ddfa8cef5b1d915b413579e4b7ebb49e0aa431458aafd0eb013a88c",
+  "inputs_checked": 553,
+  "scripts_checked": 10,
+  "mismatches": {
+    "inputs": [],
+    "scripts": []
+  },
+  "owned_running_workers": [],
+  "test_receipts_consistent": true,
+  "cargo_executed_by_reviewer": false
+}

@@ -1,0 +1,14 @@
+{
+  "recorded_utc": "2026-11-15T06:21:06.019077+00:00",
+  "freeze": "frozen-inputs-r3.json",
+  "freeze_sha256": "af92acf079df41b4d4f12ef45af5abd49ba96c06d5275010cbc458e1fd6965cf",
+  "inputs": 553,
+  "scripts": 10,
+  "mismatches": [],
+  "r2_to_r3_paths": [
+    "crates/keelshell-app/src/files/server_archive_fixture.rs"
+  ],
+  "fixture_reverse_expected_r2": "feab7c8643425baa32601c6d2ac056580c30dbe334d939526331c736ed5d083b",
+  "fixture_reverse_actual_r2": "feab7c8643425baa32601c6d2ac056580c30dbe334d939526331c736ed5d083b",
+  "exact_three_expect_and_import_only": true
+}

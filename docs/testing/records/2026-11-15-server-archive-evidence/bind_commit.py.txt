@@ -1,0 +1,49 @@
+"""Bind a completed local commit to the preserved freeze and actual Git blobs."""
+from pathlib import Path
+import datetime
+import hashlib
+import json
+import subprocess
+import sys
+
+root = Path(__file__).resolve().parents[2]
+evidence = root / "docs/testing/records/2026-11-15-server-archive-evidence"
+source_commit = subprocess.check_output(
+    ["git", "rev-parse", sys.argv[1] + "^{commit}"], cwd=root, text=True).strip()
+freeze_file = evidence / "frozen-inputs-r5.json"
+freeze = json.loads(freeze_file.read_text())
+engineering = set(freeze["inputs"])
+expected_inventory = {"Cargo.toml", "Cargo.lock"}
+expected_inventory.update(
+    str(p.relative_to(root)) for p in (root / "crates").rglob("*")
+    if p.is_file() and (p.suffix in (".rs", ".py") or p.name == "Cargo.toml"))
+blob_differences, current_differences, git_ids = [], [], {}
+for group in ("inputs", "scripts"):
+    for rel, expected in freeze[group].items():
+        blob = subprocess.check_output(["git", "show", source_commit + ":" + rel], cwd=root)
+        actual = (root / rel).read_bytes()
+        if hashlib.sha256(blob).hexdigest() != expected:
+            blob_differences.append(rel)
+        if actual != blob:
+            current_differences.append(rel)
+        git_ids[rel] = subprocess.check_output(
+            ["git", "rev-parse", source_commit + ":" + rel], cwd=root, text=True).strip()
+record = dict(
+    recorded_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    source_commit=source_commit, base_commit=freeze["base_sha"],
+    freeze_file=freeze_file.name, freeze_sha256=hashlib.sha256(freeze_file.read_bytes()).hexdigest(),
+    verified_source_inputs=len(freeze["inputs"]), verified_gate_scripts=len(freeze["scripts"]),
+    git_blob_to_freeze_mismatches=blob_differences,
+    working_file_to_git_blob_mismatches=current_differences,
+    engineering_inventory_missing=sorted(engineering - expected_inventory),
+    engineering_inventory_unexpected=sorted(expected_inventory - engineering),
+    git_blob_ids=git_ids,
+)
+if any(record[key] for key in (
+        "git_blob_to_freeze_mismatches", "working_file_to_git_blob_mismatches",
+        "engineering_inventory_missing", "engineering_inventory_unexpected")):
+    raise SystemExit("commit binding failed: " + repr(record))
+with (evidence / "commit-input-binding.json").open("x") as stream:
+    json.dump(record, stream, indent=2)
+    stream.write("\n")
+print(json.dumps({key: record[key] for key in record if key != "git_blob_ids"}, indent=2))

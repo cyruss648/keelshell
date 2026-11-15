@@ -1,0 +1,52 @@
+{
+  "recorded_utc": "2026-11-15T06:40:31.815795+00:00",
+  "head": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "r3_to_r4": [
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/files/server_archive.rs",
+      "r3": "8f0a61cf2a61216173413e63b91b111c5ed08850db600cf9e9866a08f99b84e6",
+      "r4": "57ae68df7b15516785a05b696bd3b77665f39f3f761ad16972b16d0996df8415"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-core/src/server_archive.py",
+      "r3": "96e06a6e5c51b062208bcb3108c720656a560a902c67ca85e2378e7b1570685b",
+      "r4": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-core/src/server_archive.rs",
+      "r3": "2be35019f791892d3796238113dc3985aea69aa89c616e1999dfe65391e77d2c",
+      "r4": "215094b5cdc7f6cbb93ada567a6f34d717835c0d0f2b01065e063775a85802f4"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-core/tests/server_archive.rs",
+      "r3": "b61f8fd17ecc542cab745f3b3099fb541c386a4c3b92ff8703e2085e7e7029e0",
+      "r4": "4441aa67e701035bf3a8c3454d75dedc6af22bca613b6a151a02b9e55611cb5b"
+    }
+  ],
+  "app_session_inputs_count": 402,
+  "app_session_unchanged_count": 401,
+  "app_only_four_prerequisite_wordings": true,
+  "core_rust_only_rustdoc_changes": true,
+  "core_snapshot_sha256": "2be35019f791892d3796238113dc3985aea69aa89c616e1999dfe65391e77d2c",
+  "core_snapshot_matches_r3": true,
+  "core_helper_body_review_owner": "review-core",
+  "source_sha256": {
+    "crates/keelshell-app/src/files/archive.rs": "f39b6cd5fb6d19da653abd6a3d63a8ca0b79ce2f3503599cc36cfa30bea0588f",
+    "crates/keelshell-app/src/files/server_archive.rs": "57ae68df7b15516785a05b696bd3b77665f39f3f761ad16972b16d0996df8415",
+    "crates/keelshell-app/src/files/server_archive_fixture.rs": "d3a784673c23245d77b174efba01d282db37f6ae2e2a1bcd17ce6dae41d25e9c",
+    "crates/keelshell-app/src/files/server_archive_tests.rs": "4308051eba20bb93f55d953400ea4ba2d6f14b8c2f4bc655e2505e30d29251ab",
+    "crates/keelshell-app/src/files/worker.rs": "5fe1ef62fb1eef8650f66bb54d5bb1017539beac5bf2b22df518f391a04d637a",
+    "crates/keelshell-app/src/files.rs": "402ed3f18ae174fcc579858e2d3865e92da2770aa4ae7a00a1112832cedad6cc",
+    "crates/keelshell-app/src/updater/worker.rs": "cb67b3f2e9afdf36836fac4cb4f76ba6a6ed2f4efaf085f84917e3c3e2697fcc",
+    "crates/keelshell-app/src/vault_settings/worker.rs": "c0c5a051fae5b7fdfb8ded14a69b1588d8cefdde499ee38c20740c558fb7bb4f",
+    "crates/keelshell-session/src/sftp/mutation.rs": "63a310b60a710f0077646f8741e8763e6cf8d52eda853df48dd83bcba52dafe8",
+    "crates/keelshell-session/src/sftp/server_archive.rs": "d31d4eecccb5566097dd1f49e86a803b38fb43763f0cc6334449e8cfc1c2d8ba",
+    "crates/keelshell-session/src/ssh.rs": "d86a3cf3f42cbc1ac06f41d5e793b1f042fe558992836730df06184e865fb79b",
+    "crates/keelshell-session/tests/server_archive.rs": "64ef1264cadcab779cd5893c86762a036150bf5a89cbbe9f930a4a67aba00ea3",
+    "crates/keelshell-session/tests/support/server_archive_fixture.rs": "04157a403f3d1a141e55413c1f4291e358175410ba71511cb9226e80709c380d"
+  }
+}

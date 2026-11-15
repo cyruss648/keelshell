@@ -1,0 +1,586 @@
+//! Ephemeral contracts for explicitly reviewed, server-side archive creation.
+//!
+//! Commands embed the complete POSIX Python helper for review. Constructing a
+//! request, parsing a report, and verifying an archive perform no filesystem or
+//! transport I/O and grant no execution authority. Callers must separately admit
+//! the reviewed mutation, deliver the complete expected report on stdin, and
+//! quarantine dispatched operations whose outcome is unknown or unsuccessful.
+
+use std::collections::{BTreeMap, BTreeSet};
+
+use base64::{Engine as _, engine::general_purpose::STANDARD};
+use serde::{Deserialize, Deserializer, Serialize};
+use sha2::{Digest, Sha256};
+
+use crate::{
+    ArchiveBundle, ArchiveEntryKind, ArchiveError, ArchiveFormat, ArchiveMember, MAX_ARCHIVE_BYTES,
+    MAX_ARCHIVE_ENTRIES, MAX_ARCHIVE_EXPANDED_BYTES, MAX_ARCHIVE_MANIFEST_BYTES,
+    MAX_ARCHIVE_PATH_BYTES,
+};
+
+/// Maximum stdout bytes admitted for an inspection report or packing receipt.
+pub const MAX_SERVER_ARCHIVE_RESPONSE_BYTES: usize = 1024 * 1024;
+/// Maximum canonical expected report bytes sent to the packing helper on stdin.
+pub const MAX_SERVER_ARCHIVE_INPUT_BYTES: usize = 1024 * 1024;
+
+const HELPER: &str = include_str!("server_archive.py");
+const STAGING_PREFIX: &str = ".keelshell-server-archive-";
+const VERSION: u32 = 1;
+
+/// A bounded request, protocol, or archive-verification failure.
+///
+/// Error messages omit source paths, source contents, and untrusted JSON.
+#[derive(Debug, thiserror::Error)]
+pub enum ServerArchiveError {
+    /// Sources, destination, or staging fail the reviewed portable-path contract.
+    #[error("invalid server archive request or staging path")]
+    InvalidRequest,
+    /// An inspection response, receipt, or canonical input exceeds its budget.
+    #[error("server archive protocol byte limit exceeded")]
+    ProtocolTooLarge,
+    /// JSON is malformed, incomplete, ambiguous, or outside the versioned schema.
+    #[error("invalid server archive response")]
+    InvalidResponse,
+    /// A well-formed report is bound to a different request.
+    #[error("server archive report does not match the reviewed request")]
+    RequestMismatch,
+    /// A member, snapshot, aggregate, or digest fails manifest validation.
+    #[error("invalid server archive manifest")]
+    InvalidManifest,
+    /// The bounded archive differs from the complete reviewed manifest.
+    #[error("server archive differs from the reviewed manifest")]
+    ArchiveMismatch,
+    /// The existing archive codec rejected a path, manifest, or encoded archive.
+    #[error("server archive codec validation failed")]
+    Archive(#[from] ArchiveError),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+enum WireFormat {
+    #[serde(rename = "zip")]
+    Zip,
+    #[serde(rename = "tar.gz")]
+    TarGz,
+}
+
+impl From<ArchiveFormat> for WireFormat {
+    fn from(format: ArchiveFormat) -> Self {
+        match format {
+            ArchiveFormat::Zip => Self::Zip,
+            ArchiveFormat::TarGz => Self::TarGz,
+        }
+    }
+}
+
+impl From<WireFormat> for ArchiveFormat {
+    fn from(format: WireFormat) -> Self {
+        match format {
+            WireFormat::Zip => Self::Zip,
+            WireFormat::TarGz => Self::TarGz,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireRequest {
+    version: u32,
+    sources: Vec<String>,
+    destination: String,
+    format: WireFormat,
+}
+
+/// Validated sibling sources and a new sibling destination for remote packing.
+///
+/// The request accepts 1–32 absolute portable paths with one identical parent,
+/// at most 48 KiB of selected source-path bytes, and an explicit `.zip` or
+/// `.tar.gz` destination suffix. Actual source existence and absence of the
+/// destination are verified by the helper, not by this transport-free type.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ServerArchiveRequest {
+    wire: WireRequest,
+    encoded_request: String,
+}
+
+impl ServerArchiveRequest {
+    /// Validate the exact selected sources, destination, and codec.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error for nonportable or unnormalized paths, differing parents,
+    /// aliases, destination/source collisions, incorrect suffixes, or bounds.
+    pub fn new(
+        sources: Vec<String>,
+        destination: String,
+        format: ArchiveFormat,
+    ) -> Result<Self, ServerArchiveError> {
+        if !(1..=32).contains(&sources.len())
+            || sources.iter().map(String::len).sum::<usize>() > MAX_ARCHIVE_MANIFEST_BYTES
+        {
+            return Err(ServerArchiveError::InvalidRequest);
+        }
+        let (parent, destination_name) = absolute_parts(&destination)?;
+        let suffix = match format {
+            ArchiveFormat::Zip => ".zip",
+            ArchiveFormat::TarGz => ".tar.gz",
+        };
+        if !destination_name.ends_with(suffix) {
+            return Err(ServerArchiveError::InvalidRequest);
+        }
+        let mut names = Vec::with_capacity(sources.len() + 1);
+        for source in &sources {
+            let (source_parent, name) = absolute_parts(source)?;
+            if source_parent != parent {
+                return Err(ServerArchiveError::InvalidRequest);
+            }
+            names.push(ArchiveMember::new_file(name, Vec::new())?);
+        }
+        names.push(ArchiveMember::new_file(destination_name, Vec::new())?);
+        ArchiveBundle::new(names)?;
+        let wire = WireRequest {
+            version: VERSION,
+            sources,
+            destination,
+            format: format.into(),
+        };
+        let json = serde_json::to_vec(&wire).map_err(|_| ServerArchiveError::InvalidRequest)?;
+        if json.len() > MAX_SERVER_ARCHIVE_INPUT_BYTES {
+            return Err(ServerArchiveError::ProtocolTooLarge);
+        }
+        Ok(Self {
+            wire,
+            encoded_request: STANDARD.encode(json),
+        })
+    }
+
+    /// Return the selected absolute paths in reviewed order.
+    pub fn sources(&self) -> &[String] {
+        &self.wire.sources
+    }
+
+    /// Return the exact absolute destination, which must not already exist.
+    pub fn destination(&self) -> &str {
+        &self.wire.destination
+    }
+
+    /// Return the explicitly selected bounded archive codec.
+    pub fn format(&self) -> ArchiveFormat {
+        self.wire.format.into()
+    }
+
+    /// Return the entire exact POSIX command for read-only human review.
+    ///
+    /// The quoted helper opens every ancestor and child without following links,
+    /// hashes complete regular-file contents, and verifies the complete inventory
+    /// twice before emitting a bounded v1 report. It requires POSIX Python 3.8+
+    /// and supported descriptor-relative operations; there is no platform fallback.
+    /// The helper has a fixed 60-second process deadline in both explicit modes.
+    pub fn inspection_command(&self) -> String {
+        self.command("inspect", None)
+    }
+
+    /// Return the entire exact mutation command for separate human review.
+    ///
+    /// `staging` must name a canonical lowercase UUID directory with the prefix
+    /// `.keelshell-server-archive-` under the shared parent. The helper creates
+    /// that absent directory as owner-only `0700`, streams a new `0600` payload,
+    /// verifies the sources, and uses an anchored atomic no-replace hard link.
+    /// It reads [`ServerArchiveManifest::packing_input`] through SSH stdin.
+    /// Success requires named archive digest readback and removal of its known
+    /// staging objects. Failure retains uncertain state for caller quarantine.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error for an unsafe, aliased, non-sibling, or noncanonical
+    /// staging path. This method neither inspects nor creates the directory.
+    pub fn packing_command(&self, staging: &str) -> Result<String, ServerArchiveError> {
+        let (parent, _) = absolute_parts(self.destination())?;
+        let (stage_parent, name) = absolute_parts(staging)?;
+        let suffix = name
+            .strip_prefix(STAGING_PREFIX)
+            .ok_or(ServerArchiveError::InvalidRequest)?;
+        let identifier =
+            uuid::Uuid::parse_str(suffix).map_err(|_| ServerArchiveError::InvalidRequest)?;
+        if stage_parent != parent || identifier.hyphenated().to_string() != suffix {
+            return Err(ServerArchiveError::InvalidRequest);
+        }
+        let stage_key = alias_key(name);
+        for path in self
+            .sources()
+            .iter()
+            .map(String::as_str)
+            .chain(std::iter::once(self.destination()))
+        {
+            let (_, leaf) = absolute_parts(path)?;
+            if alias_key(leaf) == stage_key {
+                return Err(ServerArchiveError::InvalidRequest);
+            }
+        }
+        Ok(self.command("pack", Some(staging)))
+    }
+
+    fn command(&self, mode: &str, staging: Option<&str>) -> String {
+        let mut command = format!(
+            "python3 -c {} {mode} {}",
+            shell_quote(HELPER),
+            shell_quote(&self.encoded_request)
+        );
+        if let Some(staging) = staging {
+            command.push(' ');
+            command.push_str(&shell_quote(staging));
+        }
+        command
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum WireKind {
+    File,
+    Directory,
+}
+
+impl From<WireKind> for ArchiveEntryKind {
+    fn from(kind: WireKind) -> Self {
+        match kind {
+            WireKind::File => Self::File,
+            WireKind::Directory => Self::Directory,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct StatSnapshot {
+    dev: u64,
+    ino: u64,
+    mode: u32,
+    nlink: u64,
+    size: u64,
+    mtime_ns: i64,
+    ctime_ns: i64,
+    uid: u64,
+    gid: u64,
+    flags: u64,
+}
+
+impl StatSnapshot {
+    fn valid(&self, kind: ArchiveEntryKind) -> bool {
+        let expected_type = match kind {
+            ArchiveEntryKind::File => 0o100000,
+            ArchiveEntryKind::Directory => 0o040000,
+        };
+        self.ino != 0
+            && self.nlink != 0
+            && self.mode <= 0o177777
+            && self.mode & 0o170000 == expected_type
+            && (kind == ArchiveEntryKind::Directory || self.nlink == 1)
+    }
+}
+
+fn required_digest<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
+    Option::<String>::deserialize(deserializer)
+}
+
+/// One explicit reviewed member, with ephemeral source metadata and file hash.
+///
+/// Directory paths omit the container's trailing slash and have zero bytes and
+/// no digest. Regular files carry their complete byte count and lowercase SHA256.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ServerArchiveMember {
+    path: String,
+    kind: WireKind,
+    bytes: u64,
+    #[serde(deserialize_with = "required_digest")]
+    sha256: Option<String>,
+    stat: StatSnapshot,
+}
+
+impl ServerArchiveMember {
+    /// Return the portable relative path, including the selected root name.
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    /// Return whether this explicit member is a regular file or directory.
+    pub fn kind(&self) -> ArchiveEntryKind {
+        self.kind.into()
+    }
+
+    /// Return the full regular-file byte count, or zero for directories.
+    pub fn bytes(&self) -> u64 {
+        self.bytes
+    }
+
+    /// Return the exact lowercase file SHA256, or `None` for a directory.
+    pub fn sha256(&self) -> Option<&str> {
+        self.sha256.as_deref()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Report {
+    version: u32,
+    request: WireRequest,
+    root: StatSnapshot,
+    members: Vec<ServerArchiveMember>,
+    expanded_bytes: u64,
+}
+
+/// A complete bounded source observation, bound to one exact reviewed request.
+///
+/// Retain this value only for the current review. It includes no credential and
+/// confers no authority to execute a command or retry an uncertain mutation.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ServerArchiveManifest {
+    report: Report,
+    input: Vec<u8>,
+}
+
+impl ServerArchiveManifest {
+    /// Parse and validate the helper's complete strict v1 inspection report.
+    ///
+    /// All selected roots and explicit ancestors must be present. Paths,
+    /// aliases, member counts, source snapshots, per-file sizes/hashes, and the
+    /// aggregate payload are checked without allocating placeholder file data.
+    ///
+    /// # Errors
+    ///
+    /// Rejects excessive output, unsupported schemas, duplicate/unknown JSON
+    /// fields, mismatched requests, unsafe inventories, and malformed snapshots.
+    pub fn parse(
+        request: &ServerArchiveRequest,
+        output: &[u8],
+    ) -> Result<Self, ServerArchiveError> {
+        let report: Report = parse_json(output)?;
+        if report.version != VERSION {
+            return Err(ServerArchiveError::InvalidResponse);
+        }
+        if report.request != request.wire {
+            return Err(ServerArchiveError::RequestMismatch);
+        }
+        if !report.root.valid(ArchiveEntryKind::Directory)
+            || !(1..=MAX_ARCHIVE_ENTRIES).contains(&report.members.len())
+            || report.expanded_bytes > MAX_ARCHIVE_EXPANDED_BYTES
+        {
+            return Err(ServerArchiveError::InvalidManifest);
+        }
+        let roots = request
+            .sources()
+            .iter()
+            .map(|source| absolute_parts(source).map(|(_, name)| name))
+            .collect::<Result<BTreeSet<_>, _>>()?;
+        let mut explicit = BTreeMap::new();
+        let mut placeholders = Vec::with_capacity(report.members.len());
+        let mut expanded = 0_u64;
+        for member in &report.members {
+            let kind = member.kind();
+            validate_format_characters(member.path())?;
+            if !member.stat.valid(kind)
+                || !roots.contains(member.path().split('/').next().unwrap_or_default())
+            {
+                return Err(ServerArchiveError::InvalidManifest);
+            }
+            match kind {
+                ArchiveEntryKind::Directory => {
+                    if member.bytes != 0 || member.sha256.is_some() {
+                        return Err(ServerArchiveError::InvalidManifest);
+                    }
+                    placeholders.push(ArchiveMember::new_directory(member.path())?);
+                }
+                ArchiveEntryKind::File => {
+                    if member.bytes != member.stat.size
+                        || !member.sha256().is_some_and(valid_digest)
+                    {
+                        return Err(ServerArchiveError::InvalidManifest);
+                    }
+                    expanded = expanded
+                        .checked_add(member.bytes)
+                        .filter(|value| *value <= MAX_ARCHIVE_EXPANDED_BYTES)
+                        .ok_or(ServerArchiveError::InvalidManifest)?;
+                    placeholders.push(ArchiveMember::new_file(member.path(), Vec::new())?);
+                }
+            }
+            explicit.insert(member.path(), kind);
+        }
+        ArchiveBundle::new(placeholders)?;
+        if expanded != report.expanded_bytes
+            || roots.iter().any(|root| !explicit.contains_key(root))
+        {
+            return Err(ServerArchiveError::InvalidManifest);
+        }
+        for path in explicit.keys() {
+            for (index, _) in path.match_indices('/') {
+                if explicit.get(&path[..index]) != Some(&ArchiveEntryKind::Directory) {
+                    return Err(ServerArchiveError::InvalidManifest);
+                }
+            }
+        }
+        let input = serde_json::to_vec(&report).map_err(|_| ServerArchiveError::InvalidResponse)?;
+        if input.len() > MAX_SERVER_ARCHIVE_INPUT_BYTES {
+            return Err(ServerArchiveError::ProtocolTooLarge);
+        }
+        Ok(Self { report, input })
+    }
+
+    /// Return every explicit member in the inspected traversal order.
+    pub fn members(&self) -> &[ServerArchiveMember] {
+        &self.report.members
+    }
+
+    /// Return the cumulative exact regular-file byte count.
+    pub fn expanded_bytes(&self) -> u64 {
+        self.report.expanded_bytes
+    }
+
+    /// Return the full canonical expected report and request binding for stdin.
+    ///
+    /// The helper independently validates this document before creating a stage
+    /// and matches fresh snapshots, complete inventories, and full file digests.
+    pub fn packing_input(&self) -> Vec<u8> {
+        self.input.clone()
+    }
+
+    /// Decode the archive with the existing bounded codec and verify all members.
+    ///
+    /// # Errors
+    ///
+    /// Rejects malformed/oversized archives, missing or extra members, changed
+    /// types or lengths, and any file digest differing from the reviewed report.
+    /// No extraction, source download, or client-side repacking is performed.
+    pub fn verify_archive(&self, encoded: &[u8]) -> Result<(), ServerArchiveError> {
+        let bundle = ArchiveBundle::decode(self.report.request.format.into(), encoded)?;
+        if bundle.members().len() != self.members().len()
+            || bundle.expanded_bytes() != self.expanded_bytes()
+        {
+            return Err(ServerArchiveError::ArchiveMismatch);
+        }
+        let expected = self
+            .members()
+            .iter()
+            .map(|member| (member.path(), member))
+            .collect::<BTreeMap<_, _>>();
+        for actual in bundle.members() {
+            let member = expected
+                .get(actual.path())
+                .ok_or(ServerArchiveError::ArchiveMismatch)?;
+            if actual.kind() != member.kind() || actual.bytes().len() as u64 != member.bytes() {
+                return Err(ServerArchiveError::ArchiveMismatch);
+            }
+            if member.kind() == ArchiveEntryKind::File
+                && member.sha256() != Some(digest_hex(actual.bytes()).as_str())
+            {
+                return Err(ServerArchiveError::ArchiveMismatch);
+            }
+        }
+        Ok(())
+    }
+}
+
+fn digest_hex(bytes: &[u8]) -> String {
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+/// A successful no-replace publication and exact archive readback receipt.
+///
+/// Parsing alone does not bind a receipt to a session or destination. The caller
+/// must consume it only from the explicitly reviewed packing operation and must
+/// independently read back and verify the archive against its manifest.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ServerArchiveReceipt {
+    version: u32,
+    archive_bytes: u64,
+    sha256: String,
+}
+
+impl ServerArchiveReceipt {
+    /// Parse a complete strict v1 receipt with bounded size and lowercase digest.
+    ///
+    /// # Errors
+    ///
+    /// Rejects malformed, duplicate/unknown fields, unsupported versions, zero
+    /// or excessive archive lengths, invalid digests, and excessive stdout.
+    pub fn parse(output: &[u8]) -> Result<Self, ServerArchiveError> {
+        let receipt: Self = parse_json(output)?;
+        if receipt.version != VERSION
+            || !(1..=MAX_ARCHIVE_BYTES).contains(&receipt.archive_bytes)
+            || !valid_digest(&receipt.sha256)
+        {
+            return Err(ServerArchiveError::InvalidResponse);
+        }
+        Ok(receipt)
+    }
+
+    /// Return the exact published encoded archive length.
+    pub fn archive_bytes(&self) -> u64 {
+        self.archive_bytes
+    }
+
+    /// Return the exact lowercase SHA256 read back from the published archive.
+    pub fn sha256(&self) -> &str {
+        &self.sha256
+    }
+}
+
+fn parse_json<T: serde::de::DeserializeOwned>(output: &[u8]) -> Result<T, ServerArchiveError> {
+    if output.len() > MAX_SERVER_ARCHIVE_RESPONSE_BYTES {
+        return Err(ServerArchiveError::ProtocolTooLarge);
+    }
+    serde_json::from_slice(output).map_err(|_| ServerArchiveError::InvalidResponse)
+}
+
+fn valid_digest(digest: &str) -> bool {
+    digest.len() == 64
+        && digest
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+}
+
+fn absolute_parts(path: &str) -> Result<(&str, &str), ServerArchiveError> {
+    if path.len() > MAX_ARCHIVE_PATH_BYTES {
+        return Err(ServerArchiveError::InvalidRequest);
+    }
+    let relative = path
+        .strip_prefix('/')
+        .ok_or(ServerArchiveError::InvalidRequest)?;
+    validate_format_characters(relative)?;
+    ArchiveMember::new_file(relative, Vec::new())?;
+    let (parent, name) = path
+        .rsplit_once('/')
+        .ok_or(ServerArchiveError::InvalidRequest)?;
+    Ok((if parent.is_empty() { "/" } else { parent }, name))
+}
+
+fn alias_key(path: &str) -> String {
+    path.chars()
+        .flat_map(char::to_uppercase)
+        .flat_map(char::to_lowercase)
+        .collect()
+}
+
+fn validate_format_characters(path: &str) -> Result<(), ServerArchiveError> {
+    // Unicode format controls are excluded in addition to the codec's Cc
+    // controls. This explicit Cf table needs no extra registry dependency.
+    if path.chars().any(|character| {
+        matches!(character as u32,
+            0x00ad | 0x0600..=0x0605 | 0x061c | 0x06dd | 0x070f
+            | 0x0890..=0x0891 | 0x08e2 | 0x180e | 0x200b..=0x200f
+            | 0x202a..=0x202e | 0x2060..=0x2064 | 0x2066..=0x206f
+            | 0xfeff | 0xfff9..=0xfffb | 0x110bd | 0x110cd
+            | 0x13430..=0x13455 | 0x1bca0..=0x1bca3 | 0x1d173..=0x1d17a
+            | 0xe0001 | 0xe0020..=0xe007f)
+    }) {
+        return Err(ServerArchiveError::InvalidRequest);
+    }
+    Ok(())
+}
+
+fn shell_quote(value: &str) -> String {
+    format!("'{}'", value.replace('\'', "'\"'\"'"))
+}

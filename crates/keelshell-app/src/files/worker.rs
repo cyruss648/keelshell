@@ -387,6 +387,14 @@ async fn operate_inner(
     journal: Option<&super::sync::journal::SharedJournal>,
     recovery_context: Option<(Arc<TransferRecoveryStore>, TransferRecoveryClaim)>,
 ) -> Result<Outcome, FileFailure> {
+    let server_archive_matches = match &operation {
+        Operation::PlanServerArchive(request) => request.matches_session(&session),
+        Operation::PackServerArchive(plan) => plan.matches_session(&session),
+        _ => true,
+    };
+    if !server_archive_matches {
+        return Err(FileFailure::CancelledBeforeStart);
+    }
     if let Operation::InspectArchiveTools(probe) = &operation {
         if !probe.matches_session(&session) {
             return Err(FileFailure::CancelledBeforeStart);
@@ -414,6 +422,7 @@ async fn operate_inner(
             | Operation::ResumePersistedFile(..)
             | Operation::ResumePersistedDirectory(..)
             | Operation::TransferArchive(_)
+            | Operation::PackServerArchive(_)
     );
     let action = async {
         match operation {
@@ -531,6 +540,28 @@ async fn operate_inner(
             Operation::PlanArchive(request) => Ok(Outcome::PlannedArchive(Box::new(
                 archive::prepare(&sftp, request, &stop).await?,
             ))),
+            Operation::PlanServerArchive(request) => Ok(Outcome::PlannedServerArchive(Box::new(
+                server_archive::prepare(&sftp, request, &stop).await?,
+            ))),
+            Operation::PackServerArchive(plan) => {
+                let receipt = sftp.execute_server_archive(plan.transfer, &stop).await?;
+                Ok(Outcome::Done(Message::new(
+                    format!(
+                        "服务器归档已生成并完整核验：{} 项，归档 {} 字节，源文件 {} 字节。\n{}\n请刷新列表，再选择下载或解包。",
+                        receipt.member_count,
+                        receipt.archive_bytes,
+                        receipt.expanded_bytes,
+                        receipt.remote
+                    ),
+                    format!(
+                        "Server archive created and fully verified: {} members, {} archive bytes, {} source bytes.\n{}\nRefresh the list, then choose download or extraction.",
+                        receipt.member_count,
+                        receipt.archive_bytes,
+                        receipt.expanded_bytes,
+                        receipt.remote
+                    ),
+                )))
+            }
             Operation::TransferArchive(plan) => {
                 let receipt = sftp
                     .execute_archive_transfer(plan.transfer, &|| !stop.load(Ordering::Acquire))

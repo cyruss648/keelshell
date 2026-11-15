@@ -1,0 +1,14 @@
+{
+  "recorded_utc": "2026-11-15T06:03:38.938960+00:00",
+  "agent": "01a1ddbd-6aba-7c72-9b0f-b51c278bbc73",
+  "source_root": "/Users/hdh/.codex/worktrees/server-archive-helper-20261115/keelshell",
+  "base_sha": "9112e232b6f0e022d299cba9e8498088c77b3d3f",
+  "files": {
+    "crates/keelshell-core/src/server_archive.rs": "33820cfc44f000e1245b43542a87b5286cd772b9104f7bace69b1a2dc0f0a451",
+    "crates/keelshell-core/src/server_archive.py": "96e06a6e5c51b062208bcb3108c720656a560a902c67ca85e2378e7b1570685b",
+    "crates/keelshell-core/tests/server_archive.rs": "a68e93a5dcaaf740f7c66d65ec62c1b5dc50c7e293d5ce1d1f363acbd8ddcb12",
+    "crates/keelshell-core/src/lib.rs": "863354d0563484e45c2fefd90f6fa84a0bd436df25a793e3acdcb4e6ab345b9f"
+  },
+  "cargo_executed_by_author": false,
+  "mtime_policy": "write fresh bytes in parent tree; no target ownership switch"
+}

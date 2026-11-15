@@ -17,6 +17,129 @@ type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
 #[tokio::test]
 #[ignore = "requires the disposable pinned OpenSSH loopback runner"]
+async fn openssh_server_archive_packs_remote_sources_with_exact_manifest_and_readback() -> TestResult
+{
+    use keelshell_core::{ArchiveBundle, ArchiveFormat, server_archive::ServerArchiveRequest};
+    use std::sync::atomic::AtomicBool;
+
+    tokio::time::timeout(Duration::from_secs(70), async {
+        let fixture = Fixture::connect().await?;
+        let binary_name = "源 '$(printf never).bin";
+        fixture
+            .sftp
+            .write(&fixture.path(binary_name), &[0, 255, 10, 128])
+            .await?;
+        fixture.sftp.mkdir(&fixture.path("tree")).await?;
+        fixture.sftp.mkdir(&fixture.path("tree/empty")).await?;
+        fixture
+            .sftp
+            .write(&fixture.path("tree/text.txt"), "服务器压缩\n".as_bytes())
+            .await?;
+        for (format, name) in [
+            (ArchiveFormat::Zip, "server-packed.zip"),
+            (ArchiveFormat::TarGz, "server-packed.tar.gz"),
+        ] {
+            let request = ServerArchiveRequest::new(
+                vec![fixture.path(binary_name), fixture.path("tree")],
+                fixture.path(name),
+                format,
+            )?;
+            // Production callers review this exact inspection command first,
+            // and separately review the returned command, input and manifest.
+            assert!(request.inspection_command().contains("python3"));
+            let plan = fixture
+                .sftp
+                .plan_server_archive(request, &AtomicBool::new(false))
+                .await?;
+            assert_eq!(plan.manifest().members().len(), 4);
+            assert!(
+                fixture
+                    .sftp
+                    .inspect_entry(&fixture.path(name))
+                    .await?
+                    .is_none()
+            );
+            assert!(
+                fixture
+                    .sftp
+                    .inspect_entry(plan.staging_path())
+                    .await?
+                    .is_none()
+            );
+            let staging = plan.staging_path().to_owned();
+            let manifest = plan.manifest().clone();
+            assert!(
+                fixture
+                    .sftp
+                    .execute_server_archive(plan.clone(), &AtomicBool::new(true))
+                    .await
+                    .is_err()
+            );
+            assert!(
+                fixture
+                    .sftp
+                    .inspect_entry(&fixture.path(name))
+                    .await?
+                    .is_none()
+            );
+            let receipt = fixture
+                .sftp
+                .execute_server_archive(plan, &AtomicBool::new(false))
+                .await?;
+            assert_eq!(receipt.remote, fixture.path(name));
+            assert_eq!(receipt.member_count, 4);
+            let bytes = fixture
+                .sftp
+                .read_regular(&receipt.remote, 64 * 1024 * 1024)
+                .await?;
+            assert_eq!(receipt.archive_bytes, bytes.len() as u64);
+            manifest.verify_archive(&bytes)?;
+            let bundle = ArchiveBundle::decode(format, &bytes)?;
+            assert_eq!(
+                bundle
+                    .members()
+                    .iter()
+                    .find(|member| member.path() == binary_name)
+                    .ok_or("server-packed binary member missing")?
+                    .bytes(),
+                &[0, 255, 10, 128]
+            );
+            assert_eq!(
+                bundle
+                    .members()
+                    .iter()
+                    .find(|member| member.path() == "tree/text.txt")
+                    .ok_or("server-packed text member missing")?
+                    .bytes(),
+                "服务器压缩\n".as_bytes()
+            );
+            assert!(fixture.sftp.inspect_entry(&staging).await?.is_none());
+        }
+        assert_eq!(
+            fixture
+                .ssh
+                .exec("printf server-packing-survives")
+                .await?
+                .stdout,
+            b"server-packing-survives"
+        );
+        fixture
+            .close(
+                &[
+                    binary_name,
+                    "tree/text.txt",
+                    "server-packed.zip",
+                    "server-packed.tar.gz",
+                ],
+                &["tree/empty", "tree"],
+            )
+            .await
+    })
+    .await?
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable pinned OpenSSH loopback runner"]
 async fn openssh_archive_tool_inspection_observes_path_and_preserves_the_connection() -> TestResult
 {
     use keelshell_session::archive_tools::{ArchiveTool, ArchiveToolAvailability};

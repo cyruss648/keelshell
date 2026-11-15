@@ -349,11 +349,11 @@ impl FilesPanel {
             .child(
                 div().text_color(rgb(visual.muted)).child(t(
                     cx,
-                    "上传使用本地多选；解包使用远端所选和上方本地路径。目标必须不存在。",
-                    "Pack the local selection, or extract the remote selection to the local path above. Destination must be new.",
+                    "打包上传使用本地多选；远端打包使用远端多选。下载解包使用上方本地路径，目标必须不存在。",
+                    "Packed upload uses the local selection; server packing uses the remote selection. Extraction uses the local path above. Destination must be new.",
                 )),
             )
-            .child(actions)
+            .child(actions.child(self.server_archive_button(cx)))
             .when(!cfg!(any(target_os = "macos", target_os = "linux")), |tools| {
                 tools.child(div().text_color(rgb(visual.muted)).child(t(
                     cx,

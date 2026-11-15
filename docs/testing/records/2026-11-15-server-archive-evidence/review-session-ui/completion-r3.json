@@ -1,0 +1,33 @@
+{
+  "completed_utc": "2026-11-15T07:03:32.691603+00:00",
+  "conclusion": "APPROVE",
+  "report": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-session-ui/report-r3.md",
+  "report_sha256": "be9a35ac1ed481f4fde04bb8ac4045fd5603aa9b8b52af357fbe34ee01a21547",
+  "binding_receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-session-ui/final-binding-r3.json",
+  "binding_sha256": "17bdedc19d4a5c6f91cbb0a1017bd1058ad570837dfd314cdef2dd25c24b3dd7",
+  "freeze": "frozen-inputs-r5.json",
+  "freeze_sha256": "30770f74d710b231936e8537d5ce4082798e68a2894aa1ad7e5b9110afa08f92",
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "historical_findings": {
+    "P2": 1
+  },
+  "P2_001": {
+    "notice": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115/review-session-ui/notice-P2-001.md",
+    "notice_sha256": "0edbc89051ad33fdc3ac2599e08a67075e3768dd3088bea38611627288f4a7bf",
+    "status": "closed",
+    "closure": "Exact r4-r5 test-only cfg diff, matching production/core inputs, final freeze-r5 full-gate-r4 exit 0 and final zero-mismatch binding",
+    "original_notice_preserved": true
+  },
+  "parent_final_gate_exit": 0,
+  "parent_final_gate_seconds": 603.804,
+  "reviewer_r4_tests_passed": 67,
+  "reviewer_r5_tests_run": 0,
+  "independent_project_compilation": false,
+  "windows_target_compiled": false,
+  "original_reports_preserved": true
+}
