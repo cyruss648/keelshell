@@ -1,0 +1,8 @@
+{
+  "status": "NOT_COMPLETED_TIMEOUT",
+  "bound_seconds": 75,
+  "command_receipt": "logs/dependencies-live.json",
+  "network_latest_versions_verified": false,
+  "direct_registry_requirement_policy": "x.y",
+  "added_direct_dependency": "rustix 1.1 (resolved 1.1.6; already in lock transitively)"
+}

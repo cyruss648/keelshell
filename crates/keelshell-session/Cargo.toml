@@ -17,6 +17,9 @@ base64.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 
+[target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
+rustix = { version = "1.1", features = ["fs"] }
+
 [dev-dependencies]
 tempfile.workspace = true
 rand = "0.10"

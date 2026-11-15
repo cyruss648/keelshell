@@ -57,7 +57,7 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 | --- | --- |
 | **连接管理** | 一次性快速连接、连接目录树、标签、收藏、最近连接与回收站；批量组织、导入导出、审核式加密配置同步；密码、私钥、SSH Agent 与键盘交互认证；跳板与 SOCKS5 / HTTP CONNECT 上游代理 |
 | **远程终端** | 多会话与逐叶标签、嵌套分屏、显式布局保存和单窗启动恢复、ANSI/VT 终端、滚动区搜索、选择、粘贴与中文输入；原标签手动重连及可选的有界自动重连 |
-| **远程文件** | SFTP 浏览、文件和递归目录传输、暂停与内容校验续传；权限修改、文本编辑、逐项冲突选择的三方合并与严格 patch 草稿；目录比较、内容校验、双向合并及逐项审核的目录镜像 |
+| **远程文件** | SFTP 浏览、文件和递归目录传输、暂停与内容校验续传；审核式 ZIP/tar.gz 打包上传及下载解包；权限修改、文本编辑、逐项冲突选择的三方合并与严格 patch 草稿；目录比较、内容校验、双向合并及逐项审核的目录镜像 |
 | **命令与任务** | 会话历史、命令片段、显式参数、远端命令与路径补全；逐目标批量命令、依赖工作流、有限定时与只读任务记录 |
 | **监控与网络** | Linux 主机和逐设备磁盘 I/O 状态、按项能力说明与显式复查；监听端口、远程 DNS / TLS / HTTP(S) HEAD 诊断；显式审核的有界 [ICMP ping 候选](docs/product/ICMP_DIAGNOSTICS.md)；本地及远端 TCP 转发、回环 SOCKS5 隧道；[命名规则的审核式增改删和停止](docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md) |
 | **AI 助手** | 命名模型 API / Codex CLI / Claude Code 配置；模型发现与连接测试、明确上下文、完整请求预览、回答、诊断建议及逐轮审核的有限 Agent 工作流；来源绑定的本地知识保存、搜索与分类、审核式编辑及多选整批删除 |
@@ -71,6 +71,8 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝试和未获回复不能证明成功发包或纯粹网络丢包。精确生产Python命令已通过自有OpenSSH CLI的真实Linux双栈回环probe；Rust传输/解析、审核UI、外部路由及原生验收仍独立开放，见[诊断记录](docs/testing/records/2026-11-06-reviewed-diagnostics-integration.md)。
 
 文件工作区的[多选与审核式批量传输](docs/product/FILE_BROWSER_BATCH_TRANSFERS.md)已接入选择、逐目标预览与传输队列。拖放上传已实现受控 GPUI 事件路径，原生文件管理器拖放仍有独立验收缺口；当前证据与下一步以[交接文档](docs/HANDOFF.md)为准。
+
+[客户端归档传输](docs/product/ARCHIVE_TRANSFERS.md)将本地多选打包为 ZIP/tar.gz 后上传，或将一个远端归档下载并解包到新的本地目录。全部成员、路径和大小先审核，确认时重新核验源，已有目标保留。归档有格式与大小限制；本地安全解包后端面向 macOS/Linux，Windows 暂停用解包并显示原因，打包上传仍可用。工程验证、真实 OpenSSH 联调和原生验收分别记录在[归档测试记录](docs/testing/records/2026-11-15-reviewed-archive-transfer.md)。
 
 [本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；[多选整批删除](docs/product/KNOWLEDGE_BULK_MANAGEMENT.md)最多32条，审核包含筛选隐藏项，取消不写入，确认只保存一次。管理选择与[显式加入 Ask](docs/product/AI_KNOWLEDGE_CONTEXT.md)分别维护；发送前仍须核对历史来源和完整请求，保存开始就撤销受影响的旧审核。工程验证和新包原生验收见[本轮记录](docs/testing/records/2026-11-06-resource-knowledge-integration.md)。
 

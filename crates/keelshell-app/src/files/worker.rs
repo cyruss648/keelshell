@@ -402,6 +402,7 @@ async fn operate_inner(
             | Operation::ResumeDirectory(..)
             | Operation::ResumePersistedFile(..)
             | Operation::ResumePersistedDirectory(..)
+            | Operation::TransferArchive(_)
     );
     let action = async {
         match operation {
@@ -516,6 +517,24 @@ async fn operate_inner(
             Operation::PlanBatch(request) => Ok(Outcome::PlannedBatch(Box::new(
                 batch::prepare(&sftp, request, &stop).await?,
             ))),
+            Operation::PlanArchive(request) => Ok(Outcome::PlannedArchive(Box::new(
+                archive::prepare(&sftp, request, &stop).await?,
+            ))),
+            Operation::TransferArchive(plan) => {
+                let receipt = sftp
+                    .execute_archive_transfer(plan.transfer, &|| !stop.load(Ordering::Acquire))
+                    .await?;
+                Ok(Outcome::Done(Message::new(
+                    format!(
+                        "归档传输完成：{} 项，归档 {} 字节，展开 {} 字节。请刷新目标列表。",
+                        receipt.member_count, receipt.archive_bytes, receipt.expanded_bytes
+                    ),
+                    format!(
+                        "Archive transfer completed: {} members, {} archive bytes, {} expanded bytes. Refresh the destination list.",
+                        receipt.member_count, receipt.archive_bytes, receipt.expanded_bytes
+                    ),
+                )))
+            }
             Operation::TransferBatch(_) => Err(FileFailure::WorkerStopped),
             Operation::DiscardPersistedRecoveryBatch(_) => Err(FileFailure::WorkerStopped),
             Operation::TransferFile(plan) => {

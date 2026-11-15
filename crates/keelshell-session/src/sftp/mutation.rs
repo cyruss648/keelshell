@@ -242,6 +242,39 @@ impl FileMutationScope<'_> {
     }
 }
 impl SftpSession {
+    pub(super) async fn reserve_archive_transfer<'a>(
+        &'a self,
+        request: &ArchiveTransferRequest,
+        staging: Option<&Path>,
+        authorized: &'a (dyn Fn() -> bool + Sync),
+    ) -> Result<FileMutationScope<'a>> {
+        let targets = match request {
+            ArchiveTransferRequest::PackUpload {
+                sources, remote, ..
+            } => sources
+                .iter()
+                .map(|path| RequestedTarget::Local(path.clone(), false, true))
+                .chain(std::iter::once(RequestedTarget::Remote(
+                    remote.clone(),
+                    true,
+                    true,
+                )))
+                .collect(),
+            ArchiveTransferRequest::DownloadExtract { remote, local, .. } => vec![
+                RequestedTarget::Remote(remote.clone(), false, true),
+                RequestedTarget::Local(local.clone(), true, true),
+                RequestedTarget::Local(
+                    staging
+                        .ok_or(SessionError::Invalid("archive staging was not reserved"))?
+                        .to_owned(),
+                    true,
+                    true,
+                ),
+            ],
+        };
+        self.reserve_mutation(targets, authorized).await
+    }
+
     async fn reserve_mutation<'a>(
         &'a self,
         targets: Vec<RequestedTarget>,

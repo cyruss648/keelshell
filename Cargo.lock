@@ -4508,15 +4508,18 @@ dependencies = [
  "base64 0.23.1",
  "chacha20poly1305",
  "directories",
+ "flate2",
  "rand 0.10.3",
  "serde",
  "serde_json",
  "sha2 0.11.1",
+ "tar",
  "tempfile",
  "thiserror 2.0.21",
  "url",
  "uuid",
  "zeroize",
+ "zip",
 ]
 
 [[package]]
@@ -4546,6 +4549,7 @@ dependencies = [
  "rand 0.10.3",
  "russh",
  "russh-sftp",
+ "rustix",
  "serde",
  "serde_json",
  "sha2 0.11.1",

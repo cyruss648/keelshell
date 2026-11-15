@@ -1,0 +1,20 @@
+{
+  "freeze": "r3",
+  "build_receipt": "logs/normal-build-r3.json",
+  "artifacts": {
+    "keelshell-app": {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "sha256": "90ab21c8412ed9ea29bc877f5e73ffcb8ec7b05aa5d4d781e83890b4627534c7",
+      "bytes": 194627648,
+      "file": "work/recovery-batch-integration-20261115/target/debug/keelshell-app: Mach-O 64-bit executable arm64"
+    },
+    "keelshell-mcp": {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "bytes": 14566512,
+      "file": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp: Mach-O 64-bit executable arm64"
+    }
+  },
+  "native_gui_executed_this_batch": false,
+  "packaging_installation_and_release_executed_this_batch": false
+}

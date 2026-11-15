@@ -386,6 +386,7 @@ impl Render for FilesPanel {
             (&self.name, hidden_actions),
             (&self.mode, hidden_actions),
             (&self.local, hidden_transfer),
+            (&self.archive_name, hidden_transfer),
             (&self.editor_find, self.queue_details_visible),
             (&self.editor_replace, self.queue_details_visible),
         ]

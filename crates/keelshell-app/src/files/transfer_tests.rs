@@ -21,6 +21,8 @@ use super::{
 
 #[path = "action_view_tests.rs"]
 mod action_view_tests;
+#[path = "archive_tests.rs"]
+mod archive_tests;
 #[path = "batch_tests.rs"]
 mod batch_tests;
 #[path = "browser_tests.rs"]
@@ -242,7 +244,12 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
         | "compare-directories"
         | "use-local-selection"
         | "use-local-folder"
-        | "download-into-local-folder" => Some("toggle-file-transfer-settings"),
+        | "download-into-local-folder"
+        | "archive-name-draft"
+        | "archive-format-zip"
+        | "archive-format-tar-gz"
+        | "review-archive-upload"
+        | "review-archive-extract" => Some("toggle-file-transfer-settings"),
         _ => None,
     };
     if window

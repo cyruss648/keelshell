@@ -195,6 +195,8 @@ impl FilesPanel {
                         view.run(Operation::Compare(local, remote), window, cx);
                     }
                     cx.notify();
-                }))).test_support().into_any_element()
+                })))
+                .child(self.archive_tools(cx))
+                .test_support().into_any_element()
     }
 }

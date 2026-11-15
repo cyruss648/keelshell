@@ -1,0 +1,9 @@
+{
+  "source_checkout": "/Users/hdh/.codex/worktrees/archive-codec-20261115/keelshell",
+  "files": {
+    "crates/keelshell-core/Cargo.toml": "de9bf6b218eb7637342567b55500d24f5bbf17ca74fb965734fbc852eb66813f",
+    "crates/keelshell-core/src/lib.rs": "ddb46e73488b04981492aaa04592f508b80e11930c4b787b93f9d103578e213e",
+    "crates/keelshell-core/src/archive.rs": "36ef2405ca6d8b20016206ec6648c16779695b015f33783bc0b8cfe285d32b0f",
+    "crates/keelshell-core/tests/archive.rs": "4c7cf2ba4f84efb463712c4d9a0fed003c5d636efd31f470d3a95dc2dac3d2db"
+  }
+}

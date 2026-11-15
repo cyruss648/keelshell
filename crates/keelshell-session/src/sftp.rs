@@ -18,7 +18,9 @@ use tokio::sync::{mpsc, oneshot};
 use crate::ssh::{ChannelStreamOwner, OwnedRawSftpSession, SshSession, deadline};
 use crate::{Result, SessionError};
 
+mod archive_transfer;
 mod control;
+pub use archive_transfer::{ArchiveTransferPlan, ArchiveTransferReceipt, ArchiveTransferRequest};
 mod directory;
 mod file_resume;
 mod file_transfer;

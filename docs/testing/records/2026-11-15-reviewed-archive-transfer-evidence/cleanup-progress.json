@@ -1,0 +1,29 @@
+{
+  "codec_agent_closed": true,
+  "codec_worktree_archive_attempts": [
+    {
+      "result": "The task's primary checkout cannot be removed."
+    },
+    {
+      "after_main_checkout_reattach": true,
+      "result": "queued"
+    }
+  ],
+  "protected_previous_review_worktree_preserved": true,
+  "codec_worktree_absent": true,
+  "transport_agent_closed": true,
+  "independent_reviewer": {
+    "id": "01a1dd48-f138-7500-ade5-fd2657607164",
+    "closed": true,
+    "source_review": "APPROVED_DELTA",
+    "open_findings": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 0,
+      "P3": 0
+    },
+    "engineering_condition": "fulfilled: final r3 gate exit 0 and all 532 inputs / 10 scripts unchanged"
+  },
+  "full_gate_process_reaped": true,
+  "normal_build_process_reaped": true
+}

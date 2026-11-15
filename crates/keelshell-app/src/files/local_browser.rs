@@ -117,7 +117,13 @@ impl FilesPanel {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        for input in [&self.path, &self.name, &self.mode, &self.local] {
+        for input in [
+            &self.path,
+            &self.name,
+            &self.mode,
+            &self.local,
+            &self.archive_name,
+        ] {
             self._browser_subscriptions.push(cx.subscribe_in(
                 input,
                 window,

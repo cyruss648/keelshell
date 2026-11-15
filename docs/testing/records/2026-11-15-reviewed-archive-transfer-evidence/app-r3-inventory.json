@@ -1,0 +1,21 @@
+{
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dd89ff795559e915/out/keelshell_app-dd89ff795559e915",
+  "binary_sha256": "4d3b056207ecc19b55fb81587886a0a210202cb576c30a30b1b386a46bb38620",
+  "exit": 0,
+  "archive_test_count": 9,
+  "archive_tests": [
+    "files::transfer_tests::archive_tests::archive_cancel_and_selection_change_never_publish_an_old_approval: test",
+    "files::transfer_tests::archive_tests::archive_changed_local_content_is_rejected_before_any_publication: test",
+    "files::transfer_tests::archive_tests::archive_controls_share_all_themes_and_locales_without_changing_drafts: test",
+    "files::transfer_tests::archive_tests::archive_corrupt_download_and_existing_local_target_preserve_destination: test",
+    "files::transfer_tests::archive_tests::archive_draft_change_and_retired_session_reject_review: test",
+    "files::transfer_tests::archive_tests::archive_large_manifest_keeps_last_member_and_fixed_review_actions: test",
+    "files::transfer_tests::archive_tests::archive_pending_write_cancel_retains_close_hold_across_another_verified_upload: test",
+    "files::transfer_tests::archive_tests::archive_tar_gz_download_extract_reviews_empty_folders_and_publishes_new_tree: test",
+    "files::transfer_tests::archive_tests::archive_zip_upload_requires_confirmation_and_preserves_exact_binary_members: test"
+  ],
+  "inventory_tail": [
+    "",
+    "1195 tests, 0 benchmarks"
+  ]
+}

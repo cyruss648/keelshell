@@ -12,6 +12,7 @@ mod ai_knowledge;
 mod ai_messages;
 mod ai_profiles;
 mod ai_sampling;
+mod archive;
 mod batch_audit;
 mod batch_parameters;
 mod batch_template;
@@ -67,6 +68,11 @@ pub use ai_profiles::{
     AiProxy, AiReasoningCapability, AiReasoningSelection, AiSecretRef, NamedAiProfile,
 };
 pub use ai_sampling::{AiModelSampling, AiSamplingValue};
+pub use archive::{
+    ArchiveBundle, ArchiveEntryKind, ArchiveError, ArchiveFormat, ArchiveMember, MAX_ARCHIVE_BYTES,
+    MAX_ARCHIVE_DEPTH, MAX_ARCHIVE_ENTRIES, MAX_ARCHIVE_EXPANDED_BYTES, MAX_ARCHIVE_MANIFEST_BYTES,
+    MAX_ARCHIVE_PATH_BYTES,
+};
 pub use batch_audit::{
     BatchAuditRecord, BatchAuditSummary, MAX_BATCH_AUDIT_TARGETS, MAX_BATCH_AUDITS, command_sha256,
 };

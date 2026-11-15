@@ -17,6 +17,116 @@ type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
 #[tokio::test]
 #[ignore = "requires the disposable pinned OpenSSH loopback runner"]
+async fn openssh_reviewed_archives_pack_and_extract_zip_and_tar_gz_exactly() -> TestResult {
+    use keelshell_core::{ArchiveBundle, ArchiveFormat};
+    use keelshell_session::sftp::ArchiveTransferRequest;
+
+    tokio::time::timeout(Duration::from_secs(60), async {
+        let fixture = Fixture::connect().await?;
+        let scratch = tempfile::tempdir()?;
+        let local = scratch.path().canonicalize()?;
+        let binary = local.join("binary.bin");
+        let tree = local.join("tree");
+        std::fs::write(&binary, [0, 255, 128, 10])?;
+        std::fs::create_dir(&tree)?;
+        std::fs::create_dir(tree.join("empty"))?;
+        std::fs::write(tree.join("text.txt"), "完整内容\n".as_bytes())?;
+        for (format, name, destination) in [
+            (ArchiveFormat::Zip, "packed.zip", "zip-result"),
+            (ArchiveFormat::TarGz, "packed.tar.gz", "tar-result"),
+        ] {
+            let remote = fixture.path(name);
+            let plan = fixture
+                .sftp
+                .plan_archive_transfer(
+                    ArchiveTransferRequest::PackUpload {
+                        sources: vec![binary.clone(), tree.clone()],
+                        remote: remote.clone(),
+                        format,
+                    },
+                    &|| true,
+                )
+                .await?;
+            assert_eq!(plan.members().len(), 4);
+            assert!(fixture.sftp.inspect_entry(&remote).await?.is_none());
+            fixture
+                .sftp
+                .execute_archive_transfer(plan, &|| true)
+                .await?;
+            let bytes = fixture.sftp.read(&remote, 64 * 1024 * 1024).await?;
+            let bundle = ArchiveBundle::decode(format, &bytes)?;
+            assert_eq!(bundle.members().len(), 4);
+            let target = local.join(destination);
+            let download = fixture
+                .sftp
+                .plan_archive_transfer(
+                    ArchiveTransferRequest::DownloadExtract {
+                        remote,
+                        local: target.clone(),
+                        format,
+                    },
+                    &|| true,
+                )
+                .await?;
+            assert!(!target.exists());
+            fixture
+                .sftp
+                .execute_archive_transfer(download, &|| true)
+                .await?;
+            assert_eq!(std::fs::read(target.join("binary.bin"))?, [0, 255, 128, 10]);
+            assert_eq!(
+                std::fs::read(target.join("tree/text.txt"))?,
+                "完整内容\n".as_bytes()
+            );
+            assert!(target.join("tree/empty").is_dir());
+        }
+        fixture.close(&["packed.zip", "packed.tar.gz"], &[]).await
+    })
+    .await?
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable pinned OpenSSH loopback runner"]
+async fn openssh_reviewed_archive_preserves_a_concurrently_created_remote_target() -> TestResult {
+    use keelshell_core::ArchiveFormat;
+    use keelshell_session::sftp::ArchiveTransferRequest;
+
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let fixture = Fixture::connect().await?;
+        let scratch = tempfile::tempdir()?;
+        let source = scratch.path().canonicalize()?.join("source.txt");
+        std::fs::write(&source, b"reviewed source")?;
+        let remote = fixture.path("keep.zip");
+        let plan = fixture
+            .sftp
+            .plan_archive_transfer(
+                ArchiveTransferRequest::PackUpload {
+                    sources: vec![source],
+                    remote: remote.clone(),
+                    format: ArchiveFormat::Zip,
+                },
+                &|| true,
+            )
+            .await?;
+        fixture.sftp.write(&remote, b"concurrently created").await?;
+        assert!(
+            fixture
+                .sftp
+                .execute_archive_transfer(plan, &|| true)
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            fixture.sftp.read(&remote, 1024).await?,
+            b"concurrently created"
+        );
+        fixture.close(&["keep.zip"], &[]).await
+    })
+    .await?
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable pinned OpenSSH loopback runner"]
 async fn openssh_target_parameter_values_are_exact_literals_on_separate_reviewed_connections()
 -> TestResult {
     tokio::time::timeout(Duration::from_secs(30), async {

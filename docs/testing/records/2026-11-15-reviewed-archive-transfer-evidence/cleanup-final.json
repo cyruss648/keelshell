@@ -1,0 +1,21 @@
+{
+  "recorded_utc": "2026-11-15T04:11:41.537363+00:00",
+  "archived_original_files_verified": 51,
+  "owned_work_directory": "work/archive-transfer-20261115",
+  "owned_work_directory_removed": true,
+  "temporary_entries_removed": 0,
+  "runner_helper_and_duplicate_work_logs_removed": true,
+  "implementation_agents_closed": true,
+  "independent_reviewer_closed": true,
+  "codec_worktree_absent": true,
+  "protected_prior_review_worktree_preserved": true,
+  "other_tasks_wip_preserved": true,
+  "valid_main_cargo_target_preserved": true,
+  "openssh_owned_processes_stopped_as_reported": true,
+  "openssh_private_directory_absent_readback": true,
+  "podman_resources_created_this_batch": false,
+  "full_gate_and_normal_build_waited_and_reaped": true,
+  "native_gui_started_this_batch": false,
+  "push_attempted": false,
+  "note": "Do not bypass prior active-task worktree protection. Raw failures and reports are byte-preserved in the evidence directory."
+}

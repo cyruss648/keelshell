@@ -35,6 +35,7 @@ use std::{
 };
 
 mod action_view;
+mod archive;
 mod batch;
 mod browser;
 mod editor_language;
@@ -98,6 +99,8 @@ enum Operation {
     PlanDirectory(TransferSpec),
     PlanBatch(batch::BatchRequest),
     TransferBatch(Box<batch::BatchPlan>),
+    PlanArchive(archive::ArchiveRequest),
+    TransferArchive(Box<archive::ArchivePlan>),
     TransferFile(FileTransferPlan),
     TransferDirectory(DirectoryTransferPlan),
     PlanResume(TransferSpec, bool),
@@ -146,6 +149,7 @@ enum Outcome {
     Done(Message),
     PlannedDirectory(DirectoryTransferPlan),
     PlannedBatch(Box<batch::BatchPlan>),
+    PlannedArchive(Box<archive::ArchivePlan>),
     PlannedFileResume(FileResumePlan),
     PlannedDirectoryResume(DirectoryResumePlan),
     PlannedPersistedFileResume {
@@ -215,6 +219,8 @@ pub struct FilesPanel {
     name: Entity<InputState>,
     mode: Entity<InputState>,
     local: Entity<InputState>,
+    archive_name: Entity<InputState>,
+    archive_format: keelshell_core::ArchiveFormat,
     local_browser: local_browser::LocalBrowser,
     remote_sort: browser::BrowserSort,
     remote_selection: selection::Selection<String>,
@@ -1029,6 +1035,13 @@ impl FilesPanel {
                 cx,
             ),
             local: field(t(cx, "本地传输路径", "Local transfer path"), "", window, cx),
+            archive_name: field(
+                t(cx, "远端新归档名称", "New remote archive name"),
+                "",
+                window,
+                cx,
+            ),
+            archive_format: keelshell_core::ArchiveFormat::Zip,
             local_browser: local_browser::LocalBrowser::new(window, cx),
             remote_sort: browser::BrowserSort::default(),
             remote_selection: selection::Selection::default(),
@@ -1371,6 +1384,11 @@ impl FilesPanel {
             (&self.mode, "权限（八进制）", "Permissions (octal)"),
             (&self.local, "本地传输路径", "Local transfer path"),
             (
+                &self.archive_name,
+                "远端新归档名称",
+                "New remote archive name",
+            ),
+            (
                 &self.local_browser.path,
                 "本地绝对目录",
                 "Absolute local folder",
@@ -1413,10 +1431,21 @@ impl FilesPanel {
             self.run_batch(*plan, window, cx);
             return;
         }
+        if let Operation::TransferArchive(plan) = &operation
+            && !self.archive_plan_is_current(plan, cx)
+        {
+            self.status = archive::expired_message();
+            cx.notify();
+            return;
+        }
         if operation.transfer_status().is_some() {
             self.run_queued_transfer(operation, window, cx);
             return;
         }
+        // An archive owns only its newly installed close hold. A verified
+        // completion must restore any older unresolved target, not erase it.
+        let archive_previous_isolation = matches!(&operation, Operation::TransferArchive(_))
+            .then(|| self.isolation_target.clone());
         if let Some(target) = operation.isolation_target() {
             self.isolation_target = Some(target);
         }
@@ -1511,6 +1540,14 @@ impl FilesPanel {
                 "正在扫描目录，完成后需确认…",
                 "Scanning directory; confirmation is required before transfer…",
             ),
+            Operation::PlanArchive(_) => Message::new(
+                "正在只读准备归档和完整条目清单，完成后需审核…",
+                "Preparing the archive and complete manifest read-only; review is required…",
+            ),
+            Operation::TransferArchive(_) => Message::new(
+                "正在重新校验归档源并发布新目标…",
+                "Revalidating archive sources and publishing the new destination…",
+            ),
             Operation::TransferDirectory(_) => Message::new(
                 "正在复核已审核的目录…",
                 "Rechecking the reviewed directory…",
@@ -1556,6 +1593,7 @@ impl FilesPanel {
                 | Operation::PlanPersistedRecovery { .. }
                 | Operation::PlanDirectory(_)
                 | Operation::PlanBatch(_)
+                | Operation::PlanArchive(_)
                 | Operation::PlanDirectorySync(..)
         );
         let navigation_before = self.path.read(cx).value().to_string();
@@ -1598,6 +1636,9 @@ impl FilesPanel {
             self.operation_stop = None;
             self.operation_id = None;
             self.transfer_pause = None;
+            if let Some(previous) = archive_previous_isolation {
+                self.isolation_target = previous;
+            }
             if is_transfer {
                 self.recovery = None;
             }
@@ -1664,6 +1705,11 @@ impl FilesPanel {
                 view.operation_stop = None;
                 view.operation_id = None;
                 view.transfer_pause = None;
+                if let Some(previous) = archive_previous_isolation
+                    && !archive::retains_close_hold(&result)
+                {
+                    view.isolation_target = previous;
+                }
                 if let Some(phase) = terminal_transfer_phase(is_transfer, &result)
                     && let Some(transfer) = &mut view.transfer
                 {
@@ -1809,6 +1855,14 @@ impl FilesPanel {
                     Ok(Outcome::PlannedBatch(plan)) => {
                         view.status = Message::new("批量只读准备完成，请审核每个目标。", "Read-only batch preparation completed; review every target.");
                         view.confirm(plan.review_message(), Operation::TransferBatch(plan), cx);
+                    }
+                    Ok(Outcome::PlannedArchive(plan)) => {
+                        if view.archive_plan_is_current(&plan, cx) {
+                            view.status = Message::new("归档准备完成，请审核完整清单及新目标。", "Archive prepared; review the complete manifest and new destination.");
+                            view.confirm(plan.review_message(), Operation::TransferArchive(plan), cx);
+                        } else {
+                            view.status = archive::expired_message();
+                        }
                     }
                     Ok(Outcome::PlannedDirectory(plan)) => {
                         view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
@@ -2392,6 +2446,7 @@ impl Operation {
             Self::Delete(entry) | Self::SetPermissions(entry, _) => {
                 Some(IsolationTarget::Remote(entry.path.clone()))
             }
+            Self::TransferArchive(plan) => Some(plan.isolation_target()),
             Self::ApplyDirectorySync(review, _) => Some(
                 if review.plan.direction() == DirectorySyncDirection::LeftToRight {
                     IsolationTarget::Remote(review.remote.clone())
@@ -2415,6 +2470,7 @@ impl Operation {
                     | Self::ApplyPatchToDraft { .. }
                     | Self::PlanDirectory(_)
                     | Self::PlanBatch(_)
+                    | Self::PlanArchive(_)
                     | Self::TransferBatch(_)
                     | Self::PlanResume(..)
                     | Self::PlanPersistedRecovery { .. }
@@ -2501,6 +2557,8 @@ impl Operation {
             | Self::PlanDirectory(_)
             | Self::PlanBatch(_)
             | Self::TransferBatch(_)
+            | Self::PlanArchive(_)
+            | Self::TransferArchive(_)
             | Self::PlanResume(..)
             | Self::PlanPersistedRecovery { .. }
             | Self::DiscardPersistedRecoveryBatch(_)

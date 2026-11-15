@@ -5,7 +5,41 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
-## 2026-11-15 当前批次：恢复记录批量整理
+## 2026-11-15 已完成批次：审核式客户端归档传输
+
+本批在 FILE-05 下实现本地多选打包上传和远端归档下载后安全解包，
+格式为 ZIP、tar.gz。core 编解码、session 传输、app 原生面板按独立写集
+并行开发，集成后统一执行完整门禁和新的非作者复核。审核包含每个成员及准确
+目标，确认时重新核验源；已有目标保留，未知写入和未验证 staging 保留隔离。
+Frost、Graphite、Lavender 继续共用 registry、Palette 和组件 token。
+
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。
+首轮复核的两项 P2 已修复：归档成功或已知终态恢复之前的隔离目标，未知结果
+仍保留关闭保护；目录 builder 只在 Unix 分支可变，修正 Windows lint 原因。
+真实 GPUI 生命周期回归先红后绿，最终作者和独立执行均 `9/9`；独立 reviewer
+确认 P0–P3 均为 `0`。reviewer 使用已核对 SHA/1195 项清单的作者预构建二进制，
+没有独立重编译。其原始报告保留最终 gate 尚在运行时的条件性 HOLD；父随后核验
+相同冻结的最终 gate exit `0`，满足该工程条件，没有改写报告。
+
+最终完整 gate `588.762s`：普通 Rust `2601/0/25 ignored`、rustdoc `14/0`、
+Python `131 run / 1 skipped`，fmt、workspace all-targets strict Clippy、`x.y`
+依赖策略和三组 AI controller 全部通过。532 个 Rust/Cargo 输入和 10 个脚本
+在门禁、复核及正常程序构建后均匹配 r3 冻结。当前源码的真实 localhost
+OpenSSH `13/13`，临时服务与目录已回收；GUI/MCP 正常 arm64 Mach-O 构建通过。
+源码提交及冻结绑定见本批证据目录的 `commit-input-binding.json`。
+
+Windows 安全解包后端尚待实现，界面明确停用解包，打包上传保留；Windows
+strict gate 和 Linux 运行没有在本机执行。在线最新依赖检查 75s 超时，不能
+宣称本批所有版本最新；Podman 仅只读确认 VM stopped，没有创建容器。
+服务器端打包/能力探测、Zmodem、中继、归档原生操作、跨平台、IME/辅助技术
+和发行验收仍开放，FILE-05/M4 没有整体完成。
+设计与限制见 [ADR 0132](adr/0132-reviewed-client-archive-transfer.md)、
+[归档指南](product/ARCHIVE_TRANSFERS.md)与
+[集中验证记录](testing/records/2026-11-15-reviewed-archive-transfer.md)。
+两个实现 agent 和 reviewer 已关闭，已合入 core worktree 已受管归档。
+当前仅本地提交，不 push；其他任务 WIP 和受保护 worktree 保留。
+
+## 2026-11-15 已完成批次：恢复记录批量整理
 
 本批新增恢复记录多选、按当前列表顺序建立待审核队列、逐条进入既有独立
 审核，以及需要明确确认的批量丢弃。队列没有连接或执行权限；每条审核仍

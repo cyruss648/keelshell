@@ -1,0 +1,22 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "-p",
+    "keelshell-app",
+    "-p",
+    "keelshell-mcp",
+    "--locked",
+    "--offline"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "normal-build-r3",
+  "pid": 11549,
+  "started_utc": "2026-11-15T04:06:42.102639+00:00",
+  "finished_utc": "2026-11-15T04:06:53.418999+00:00",
+  "seconds": 11.316,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "6f6f49a18b2f06d988eddd28b8c9f0ff2ebe1b175293279f5bc67f49a303170e",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

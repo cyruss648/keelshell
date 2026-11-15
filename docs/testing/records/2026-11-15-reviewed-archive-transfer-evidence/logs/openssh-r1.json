@@ -1,0 +1,21 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/openssh_interop.py",
+    "--output",
+    "work/archive-transfer-20261115/openssh",
+    "--timeout",
+    "300"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "openssh-r1",
+  "pid": 96928,
+  "started_utc": "2026-11-15T03:53:09.570876+00:00",
+  "finished_utc": "2026-11-15T03:53:17.485779+00:00",
+  "seconds": 7.915,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "b6dc0f53858635530692f2986a74a476b7674781efc6e115c8a4d39fffaa3576",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

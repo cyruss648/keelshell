@@ -1,0 +1,16 @@
+{
+  "freeze": "r2",
+  "matched_inputs": 532,
+  "input_count": 532,
+  "mismatches": [],
+  "ordinary": {
+    "passed": 2600,
+    "failed": 0,
+    "ignored": 25
+  },
+  "rustdoc": {
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0
+  }
+}

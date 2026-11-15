@@ -1,5 +1,22 @@
 # 文件工作区 / Files workspace
 
+## 2026-11-15 客户端归档批次
+
+传输设置新增 ZIP/tar.gz 归档区域，本地多选可准备打包上传，单个远端归档可
+准备下载解包到新的本地目录。完整成员和准确路径先审核，确认后重新校验源；
+不静默覆盖目标。输入、选择和格式变化撤销旧审核，三主题继续共用语义 token。
+客户端实现已接入，工程与独立复核结果见
+[本批测试记录](../testing/records/2026-11-15-reviewed-archive-transfer.md)；
+下方历史原生验收不覆盖归档流程。Windows 暂停用解包，打包上传保留。
+见[归档指南](ARCHIVE_TRANSFERS.md)与 [HANDOFF](../HANDOFF.md)。
+
+The transfer settings include reviewed ZIP/tar.gz packing and extraction.
+Sources, every member and the new destination require explicit review; changing
+drafts, selection or format invalidates approval. The client implementation is
+integrated; the batch test record tracks engineering and independent review.
+Historical native receipts do not approve the new archive flow. Windows
+extraction remains disabled while packed uploads are retained.
+
 ## 当前文件布局 — 2026-11-05
 
 文件区默认优先展示本地与远程文件列表。正常浏览时，路径独占一行；

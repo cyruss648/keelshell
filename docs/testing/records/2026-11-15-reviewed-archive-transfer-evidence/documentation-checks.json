@@ -1,0 +1,197 @@
+{
+  "recorded_utc": "2026-11-15T04:12:20.413552+00:00",
+  "introduced_relative_markdown_links_checked": 37,
+  "missing": [],
+  "git_diff_check_exit": 0,
+  "freeze_inputs": 532,
+  "freeze_script_count": 10,
+  "input_mismatches": [],
+  "scope": "Introduced documentation links and new product/ADR/test/evidence guide. Byte-preserved original reports retain historical execution paths; external URLs were not fetched. No unrelated Rust gate was repeated for documentation.",
+  "links": [
+    {
+      "document": "README.en.md",
+      "target": "docs/product/ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "README.en.md",
+      "target": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "docs/product/ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/HANDOFF.md",
+      "target": "adr/0132-reviewed-client-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/HANDOFF.md",
+      "target": "product/ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/HANDOFF.md",
+      "target": "testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/README.md",
+      "target": "product/ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/README.md",
+      "target": "adr/0132-reviewed-client-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/README.md",
+      "target": "testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/ROADMAP.md",
+      "target": "adr/0132-reviewed-client-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/ROADMAP.md",
+      "target": "product/ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/ROADMAP.md",
+      "target": "testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "../testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "../adr/0132-reviewed-client-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "../testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "../testing/records/2026-10-07-remote-protocol-main-integration.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "../testing/records/2026-10-06-remote-protocol-diagnostics.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/CAPABILITIES.md",
+      "target": "REMOTE_PROTOCOL_DIAGNOSTICS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/FILES_WORKSPACE.md",
+      "target": "../testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/FILES_WORKSPACE.md",
+      "target": "ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/FILES_WORKSPACE.md",
+      "target": "../HANDOFF.md",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/README.md",
+      "target": "records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/adr/0132-reviewed-client-archive-transfer.md",
+      "target": "../testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/product/ARCHIVE_TRANSFERS.md",
+      "target": "../testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "../../adr/0132-reviewed-client-archive-transfer.md",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "../../product/ARCHIVE_TRANSFERS.md",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/validation-summary-r3.json",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/independent-review-r1.md",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/independent-review-r3.md",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/openssh/result.json",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/logs/normal-build-r3.json",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/normal-build-artifacts-r3.json",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer-evidence/README.md",
+      "target": "../2026-11-15-reviewed-archive-transfer.md",
+      "exists": true
+    }
+  ]
+}

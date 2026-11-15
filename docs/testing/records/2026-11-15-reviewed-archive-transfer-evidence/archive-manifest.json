@@ -1,0 +1,470 @@
+{
+  "recorded_utc": "2026-11-15T04:08:32.398483+00:00",
+  "source_work_directory": "work/archive-transfer-20261115",
+  "entries": [
+    {
+      "source_relative": "app-r3-inventory.json",
+      "archive_relative": "app-r3-inventory.json",
+      "encoding": "identity",
+      "source_sha256": "e57b7c07acbc9f77727af8e8c80bdbc16f452d5ee593716641465785f8269bb1",
+      "archive_sha256": "e57b7c07acbc9f77727af8e8c80bdbc16f452d5ee593716641465785f8269bb1",
+      "source_bytes": 1515,
+      "archive_bytes": 1515
+    },
+    {
+      "source_relative": "app-r3-inventory.log",
+      "archive_relative": "app-r3-inventory.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "9408880b887e541193cbdf4003a63bf335d82c32107bc05bb222af8e0b660957",
+      "archive_sha256": "e7e13bca06feeedfcda5a0930bb590b133ca44edda877fa77602d605f5fdc412",
+      "source_bytes": 127337,
+      "archive_bytes": 28432
+    },
+    {
+      "source_relative": "cleanup-progress.json",
+      "archive_relative": "cleanup-progress.json",
+      "encoding": "identity",
+      "source_sha256": "044ba4c2093c479c107c1b5fa1fb747d99e11c97a55d434dd30c868d551e4895",
+      "archive_sha256": "044ba4c2093c479c107c1b5fa1fb747d99e11c97a55d434dd30c868d551e4895",
+      "source_bytes": 770,
+      "archive_bytes": 770
+    },
+    {
+      "source_relative": "codec-integration.json",
+      "archive_relative": "codec-integration.json",
+      "encoding": "identity",
+      "source_sha256": "6c894756e537f44979a32400bb397a80129deee12433d5c482dcd779309be922",
+      "archive_sha256": "6c894756e537f44979a32400bb397a80129deee12433d5c482dcd779309be922",
+      "source_bytes": 547,
+      "archive_bytes": 547
+    },
+    {
+      "source_relative": "dependency-boundary.json",
+      "archive_relative": "dependency-boundary.json",
+      "encoding": "identity",
+      "source_sha256": "df311b3885c1e3393dc16b00128949a04dc935aa89458132a265f63d07b62bb3",
+      "archive_sha256": "df311b3885c1e3393dc16b00128949a04dc935aa89458132a265f63d07b62bb3",
+      "source_bytes": 297,
+      "archive_bytes": 297
+    },
+    {
+      "source_relative": "frozen-inputs-r1.json",
+      "archive_relative": "frozen-inputs-r1.json",
+      "encoding": "identity",
+      "source_sha256": "86c3fd6035402e0ee1b43c51351890230a2c399e9380eb285c1fe88c6482be13",
+      "archive_sha256": "86c3fd6035402e0ee1b43c51351890230a2c399e9380eb285c1fe88c6482be13",
+      "source_bytes": 68492,
+      "archive_bytes": 68492
+    },
+    {
+      "source_relative": "frozen-inputs-r2.json",
+      "archive_relative": "frozen-inputs-r2.json",
+      "encoding": "identity",
+      "source_sha256": "1facaaa0024025cb2c6e840c3d9f2fff57af9764c8812fea61d31dc0d56ab64f",
+      "archive_sha256": "1facaaa0024025cb2c6e840c3d9f2fff57af9764c8812fea61d31dc0d56ab64f",
+      "source_bytes": 68542,
+      "archive_bytes": 68542
+    },
+    {
+      "source_relative": "frozen-inputs-r3.json",
+      "archive_relative": "frozen-inputs-r3.json",
+      "encoding": "identity",
+      "source_sha256": "2b768eaeeb9a57498cdcc881ce142cd778227711aaed405d70c82b15082c71c2",
+      "archive_sha256": "2b768eaeeb9a57498cdcc881ce142cd778227711aaed405d70c82b15082c71c2",
+      "source_bytes": 68606,
+      "archive_bytes": 68606
+    },
+    {
+      "source_relative": "independent-review-r1.md",
+      "archive_relative": "independent-review-r1.md",
+      "encoding": "identity",
+      "source_sha256": "9f0afd56a39046b34c2cab63c5df36f273af38ddaac3440a96c909114fb0fc2d",
+      "archive_sha256": "9f0afd56a39046b34c2cab63c5df36f273af38ddaac3440a96c909114fb0fc2d",
+      "source_bytes": 11716,
+      "archive_bytes": 11716
+    },
+    {
+      "source_relative": "independent-review-r3-app.log",
+      "archive_relative": "independent-review-r3-app.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "7a13b732c4d1bf00601555c08494be57fb77353f42771ec1270d669b68a9e749",
+      "archive_sha256": "966c59e6bf27c0b460e63252816feb4f36ea887ef8932c7b228e44c8b14a45c3",
+      "source_bytes": 1192,
+      "archive_bytes": 444
+    },
+    {
+      "source_relative": "independent-review-r3.md",
+      "archive_relative": "independent-review-r3.md",
+      "encoding": "identity",
+      "source_sha256": "4c15f437401bb54ed64294d23c10c60890c54f89324dabcefea3930f8fe11acc",
+      "archive_sha256": "4c15f437401bb54ed64294d23c10c60890c54f89324dabcefea3930f8fe11acc",
+      "source_bytes": 12959,
+      "archive_bytes": 12959
+    },
+    {
+      "source_relative": "logs/app-archive-r1.json",
+      "archive_relative": "logs/app-archive-r1.json",
+      "encoding": "identity",
+      "source_sha256": "c6a177ba467209f1dd1b3665ef7f54f237faf4fc678a80d9a7a4cab0a5cb91d9",
+      "archive_sha256": "c6a177ba467209f1dd1b3665ef7f54f237faf4fc678a80d9a7a4cab0a5cb91d9",
+      "source_bytes": 677,
+      "archive_bytes": 677
+    },
+    {
+      "source_relative": "logs/app-archive-r1.log",
+      "archive_relative": "logs/app-archive-r1.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "3b22cbb36f9556ce18a2a8f2b2defe325d6f1076ad87b7e640169830df4203b8",
+      "archive_sha256": "c49a04e3a1254698499965d2868dffe08385a5320f93626d09fae53f9934e91f",
+      "source_bytes": 17159,
+      "archive_bytes": 1883
+    },
+    {
+      "source_relative": "logs/app-archive-r2.json",
+      "archive_relative": "logs/app-archive-r2.json",
+      "encoding": "identity",
+      "source_sha256": "8c20ad3264ce305e860f1664c566b30582c4bcfb41352ac2e0e1556655bc9bcc",
+      "archive_sha256": "8c20ad3264ce305e860f1664c566b30582c4bcfb41352ac2e0e1556655bc9bcc",
+      "source_bytes": 676,
+      "archive_bytes": 676
+    },
+    {
+      "source_relative": "logs/app-archive-r2.log",
+      "archive_relative": "logs/app-archive-r2.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "a57c9a5ea60a047a89241d64fac2afe52330fb6f3263f68acff703b02846e18e",
+      "archive_sha256": "8b81d0a887bc3fbdeea70de161e384101e6d60737ebfffecaf73fd54910c2700",
+      "source_bytes": 889,
+      "archive_bytes": 429
+    },
+    {
+      "source_relative": "logs/app-archive-r3.json",
+      "archive_relative": "logs/app-archive-r3.json",
+      "encoding": "identity",
+      "source_sha256": "df90f73f56f66fdc8c71d8a292a6868f560470385213ca3e52d95cfe6337a452",
+      "archive_sha256": "df90f73f56f66fdc8c71d8a292a6868f560470385213ca3e52d95cfe6337a452",
+      "source_bytes": 675,
+      "archive_bytes": 675
+    },
+    {
+      "source_relative": "logs/app-archive-r3.log",
+      "archive_relative": "logs/app-archive-r3.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "e5064ac4561f44f0739e3cedf285d8839535fe24b0e3ec9db7c40143a6e032c6",
+      "archive_sha256": "d6f1a2f23ca49ee85fe7f45040c14b1a4ba8a62ab671dc85ab527b69c4c9c1cf",
+      "source_bytes": 1861,
+      "archive_bytes": 801
+    },
+    {
+      "source_relative": "logs/app-compile-r1.json",
+      "archive_relative": "logs/app-compile-r1.json",
+      "encoding": "identity",
+      "source_sha256": "0d9f5c0a472cbc952aadd667e9c7a95bd96c37583c70e8a7652ed91768b7e579",
+      "archive_sha256": "0d9f5c0a472cbc952aadd667e9c7a95bd96c37583c70e8a7652ed91768b7e579",
+      "source_bytes": 616,
+      "archive_bytes": 616
+    },
+    {
+      "source_relative": "logs/app-compile-r1.log",
+      "archive_relative": "logs/app-compile-r1.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "04c97350650c05704cb225283d0cb530ffeb4b9bee64ffa00aeab3686e1170b1",
+      "archive_sha256": "c1d614f5889beedf9c3f2d70fbafa1dd65d0c5b46ffc43846ed9fd56c888e022",
+      "source_bytes": 1640,
+      "archive_bytes": 700
+    },
+    {
+      "source_relative": "logs/archive-lifecycle-after-fix.json",
+      "archive_relative": "logs/archive-lifecycle-after-fix.json",
+      "encoding": "identity",
+      "source_sha256": "0c90a4cc672915fb63bedbbe689fcd4e1a63586eaf87bc30131c1408334e6458",
+      "archive_sha256": "0c90a4cc672915fb63bedbbe689fcd4e1a63586eaf87bc30131c1408334e6458",
+      "source_bytes": 688,
+      "archive_bytes": 688
+    },
+    {
+      "source_relative": "logs/archive-lifecycle-after-fix.log",
+      "archive_relative": "logs/archive-lifecycle-after-fix.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "edf700280fa70d538c4e0b4171764a9712fbae03f8330d6c249aaf42bdd74ee4",
+      "archive_sha256": "a217314c4333dfee2723b9a8cacf23cb18cc01363dc53bcf432b845eaec23bf7",
+      "source_bytes": 1991,
+      "archive_bytes": 842
+    },
+    {
+      "source_relative": "logs/archive-lifecycle-before-fix.json",
+      "archive_relative": "logs/archive-lifecycle-before-fix.json",
+      "encoding": "identity",
+      "source_sha256": "2f102e8c92089933e2f9a6785ee1615a8a814beb69005d8797744acf190c24f9",
+      "archive_sha256": "2f102e8c92089933e2f9a6785ee1615a8a814beb69005d8797744acf190c24f9",
+      "source_bytes": 691,
+      "archive_bytes": 691
+    },
+    {
+      "source_relative": "logs/archive-lifecycle-before-fix.log",
+      "archive_relative": "logs/archive-lifecycle-before-fix.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "d087df48458e15596a8a425c0792be675023e789666d08221d2bb212469741ee",
+      "archive_sha256": "f5d0755394546615b19dfef7a69c0b1798386ac389e8a10b9e74df8755eca3bf",
+      "source_bytes": 4134,
+      "archive_bytes": 1242
+    },
+    {
+      "source_relative": "logs/core-archive-r1.json",
+      "archive_relative": "logs/core-archive-r1.json",
+      "encoding": "identity",
+      "source_sha256": "b691e281153b3becfbc1126606e1b78150ea6d35054d352fc9e24fcfdac89e20",
+      "archive_sha256": "b691e281153b3becfbc1126606e1b78150ea6d35054d352fc9e24fcfdac89e20",
+      "source_bytes": 663,
+      "archive_bytes": 663
+    },
+    {
+      "source_relative": "logs/core-archive-r1.log",
+      "archive_relative": "logs/core-archive-r1.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "630dae0c7d2f61b124957187e779021dc9ea1e41467e99ed80fea991416e2885",
+      "archive_sha256": "44a859f041002c2971ed70b0ad2f20428ba336cb364d26eed1798c8ee4743dce",
+      "source_bytes": 5080,
+      "archive_bytes": 1854
+    },
+    {
+      "source_relative": "logs/dependencies-live.json",
+      "archive_relative": "logs/dependencies-live.json",
+      "encoding": "identity",
+      "source_sha256": "1b545df43bc2f447a7788cc5cf34f0dca6d32a200b4025b68556c48903b66118",
+      "archive_sha256": "1b545df43bc2f447a7788cc5cf34f0dca6d32a200b4025b68556c48903b66118",
+      "source_bytes": 722,
+      "archive_bytes": 722
+    },
+    {
+      "source_relative": "logs/dependencies-live.log",
+      "archive_relative": "logs/dependencies-live.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83",
+      "source_bytes": 0,
+      "archive_bytes": 20
+    },
+    {
+      "source_relative": "logs/full-gate-r1.json",
+      "archive_relative": "logs/full-gate-r1.json",
+      "encoding": "identity",
+      "source_sha256": "36d81fbba4748376f5963ac6044ec31b9825ae2c894f19a93c47c44f0d946a47",
+      "archive_sha256": "36d81fbba4748376f5963ac6044ec31b9825ae2c894f19a93c47c44f0d946a47",
+      "source_bytes": 572,
+      "archive_bytes": 572
+    },
+    {
+      "source_relative": "logs/full-gate-r1.log",
+      "archive_relative": "logs/full-gate-r1.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "735f5d8158ed8f0852a34075964698ffbde59ae061a1ef645f4d8dd56406c043",
+      "archive_sha256": "9c271bc2f72247696485c5c9a3b4d56f97e55404beef96cbde4ceaa0e5e710d8",
+      "source_bytes": 9576,
+      "archive_bytes": 1875
+    },
+    {
+      "source_relative": "logs/full-gate-r2.json",
+      "archive_relative": "logs/full-gate-r2.json",
+      "encoding": "identity",
+      "source_sha256": "9d82a44f6c6c88baf53ffc3ec72de93194a1ca57b34f2697e31ab09b33cac054",
+      "archive_sha256": "9d82a44f6c6c88baf53ffc3ec72de93194a1ca57b34f2697e31ab09b33cac054",
+      "source_bytes": 573,
+      "archive_bytes": 573
+    },
+    {
+      "source_relative": "logs/full-gate-r2.log",
+      "archive_relative": "logs/full-gate-r2.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "ecfda0da04d41fc8baa7302d4f0b1f86caa05743450ca9dd1296fb1501df6b50",
+      "archive_sha256": "185e1c8c2ee492f47ae8e209800194a2b2d719feba65c15bd6293e42130242c0",
+      "source_bytes": 574961,
+      "archive_bytes": 88267
+    },
+    {
+      "source_relative": "logs/full-gate-r3.json",
+      "archive_relative": "logs/full-gate-r3.json",
+      "encoding": "identity",
+      "source_sha256": "5e1aae5c353fc75742fa968d73837d446640fdc885646c1cf464caee71841fc3",
+      "archive_sha256": "5e1aae5c353fc75742fa968d73837d446640fdc885646c1cf464caee71841fc3",
+      "source_bytes": 571,
+      "archive_bytes": 571
+    },
+    {
+      "source_relative": "logs/full-gate-r3.log",
+      "archive_relative": "logs/full-gate-r3.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "7f030127fd915aefa976e0df801a61df8e2e40aa8187d94310b63add4c526731",
+      "archive_sha256": "69f05a289c6a2b9aa18b5118e2f025802b8527b41a5b496b920133c311343d2d",
+      "source_bytes": 574640,
+      "archive_bytes": 88300
+    },
+    {
+      "source_relative": "logs/normal-build-r3.json",
+      "archive_relative": "logs/normal-build-r3.json",
+      "encoding": "identity",
+      "source_sha256": "b4021ef95de97c2ef1d4e06c6acd8cf85d2aeab37eb79cf4a7e9ea9e4b741f9b",
+      "archive_sha256": "b4021ef95de97c2ef1d4e06c6acd8cf85d2aeab37eb79cf4a7e9ea9e4b741f9b",
+      "source_bytes": 647,
+      "archive_bytes": 647
+    },
+    {
+      "source_relative": "logs/normal-build-r3.log",
+      "archive_relative": "logs/normal-build-r3.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "6f6f49a18b2f06d988eddd28b8c9f0ff2ebe1b175293279f5bc67f49a303170e",
+      "archive_sha256": "ee1af7c9a99dbf53cffbb971d9b3d9ee64a468c5e97fef86da2aab61a07198c7",
+      "source_bytes": 198,
+      "archive_bytes": 174
+    },
+    {
+      "source_relative": "logs/openssh-r1.json",
+      "archive_relative": "logs/openssh-r1.json",
+      "encoding": "identity",
+      "source_sha256": "f83a5bb8bfd7c73f01725be12824afaf0339f7053bea30baac8fafab32d6eb01",
+      "archive_sha256": "f83a5bb8bfd7c73f01725be12824afaf0339f7053bea30baac8fafab32d6eb01",
+      "source_bytes": 669,
+      "archive_bytes": 669
+    },
+    {
+      "source_relative": "logs/openssh-r1.log",
+      "archive_relative": "logs/openssh-r1.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "b6dc0f53858635530692f2986a74a476b7674781efc6e115c8a4d39fffaa3576",
+      "archive_sha256": "15e741adffe5edadc04bb23874d128eed37ff455664b2747af4d00b953f6a19f",
+      "source_bytes": 297,
+      "archive_bytes": 163
+    },
+    {
+      "source_relative": "logs/session-archive-r1.json",
+      "archive_relative": "logs/session-archive-r1.json",
+      "encoding": "identity",
+      "source_sha256": "2c83ededead20807b20317f132c3316296ae9d0ac844d128f417bf6ab640654c",
+      "archive_sha256": "2c83ededead20807b20317f132c3316296ae9d0ac844d128f417bf6ab640654c",
+      "source_bytes": 676,
+      "archive_bytes": 676
+    },
+    {
+      "source_relative": "logs/session-archive-r1.log",
+      "archive_relative": "logs/session-archive-r1.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "1b43ede0996042afa8bca64352d19f650f9c50b5c737626505e5c8f7dafea73a",
+      "archive_sha256": "35436952577c5c507182d594b8b0fbe46620dcc4446788fac96ce666f18300ec",
+      "source_bytes": 5443,
+      "archive_bytes": 1931
+    },
+    {
+      "source_relative": "normal-build-artifacts-r3.json",
+      "archive_relative": "normal-build-artifacts-r3.json",
+      "encoding": "identity",
+      "source_sha256": "d814b4a422be703ed768226b35ab12f3381c9c609a2454c723d477048d778dce",
+      "archive_sha256": "d814b4a422be703ed768226b35ab12f3381c9c609a2454c723d477048d778dce",
+      "source_bytes": 881,
+      "archive_bytes": 881
+    },
+    {
+      "source_relative": "openssh/generate-client-key.log",
+      "archive_relative": "openssh/generate-client-key.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83",
+      "source_bytes": 0,
+      "archive_bytes": 20
+    },
+    {
+      "source_relative": "openssh/generate-host-key.log",
+      "archive_relative": "openssh/generate-host-key.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83",
+      "source_bytes": 0,
+      "archive_bytes": 20
+    },
+    {
+      "source_relative": "openssh/openssh-version.log",
+      "archive_relative": "openssh/openssh-version.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7",
+      "archive_sha256": "e79139219172bed53c1c8abdce7990705b379256d475c6773613a59152414c99",
+      "source_bytes": 31,
+      "archive_bytes": 51
+    },
+    {
+      "source_relative": "openssh/result.json",
+      "archive_relative": "openssh/result.json",
+      "encoding": "identity",
+      "source_sha256": "d057f7516c3e99a2456c43a5fa56aee3a9bf9761ccd50bf8b339adefdd245e29",
+      "archive_sha256": "d057f7516c3e99a2456c43a5fa56aee3a9bf9761ccd50bf8b339adefdd245e29",
+      "source_bytes": 2090,
+      "archive_bytes": 2090
+    },
+    {
+      "source_relative": "openssh/sshd.log",
+      "archive_relative": "openssh/sshd.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "bbed21346a00081190b3f4eb1bbb17c3bcb76933cd4127e231f8dbb1b81f7519",
+      "archive_sha256": "ffeeb2e376b5bc48e0086a6ff5be5c2682903ecc3c1983cb4fb7202b25ba75a5",
+      "source_bytes": 1411,
+      "archive_bytes": 105
+    },
+    {
+      "source_relative": "openssh/tests.log",
+      "archive_relative": "openssh/tests.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "f042633bfa97998e84f76d411d0bd52333d288751a6a267009211a955e1d9205",
+      "archive_sha256": "690b29aa40f900492148f4d60b4b47b9ac6c7065df29643f5256b66521cedc3c",
+      "source_bytes": 1580,
+      "archive_bytes": 746
+    },
+    {
+      "source_relative": "openssh/validate-sshd-config.log",
+      "archive_relative": "openssh/validate-sshd-config.log.gz",
+      "encoding": "gzip",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83",
+      "source_bytes": 0,
+      "archive_bytes": 20
+    },
+    {
+      "source_relative": "podman-readback.json",
+      "archive_relative": "podman-readback.json",
+      "encoding": "identity",
+      "source_sha256": "28055c800e7559c98c9687648c3e5aec1804e3f468a5c1ad851cc1fa7fba87bb",
+      "archive_sha256": "28055c800e7559c98c9687648c3e5aec1804e3f468a5c1ad851cc1fa7fba87bb",
+      "source_bytes": 280,
+      "archive_bytes": 280
+    },
+    {
+      "source_relative": "r2-summary.json",
+      "archive_relative": "r2-summary.json",
+      "encoding": "identity",
+      "source_sha256": "bd9e173a68e4b08072e8b3bf865de4e16d93697d0f7b9f20fb5087b83325b9e5",
+      "archive_sha256": "bd9e173a68e4b08072e8b3bf865de4e16d93697d0f7b9f20fb5087b83325b9e5",
+      "source_bytes": 236,
+      "archive_bytes": 236
+    },
+    {
+      "source_relative": "run.py",
+      "archive_relative": "command-runner.py.txt",
+      "encoding": "identity",
+      "source_sha256": "a876b62a7e2aa5a1d5f9a61b71d2a264eda4e0e1ecc4ae7f35ad6edd30505692",
+      "archive_sha256": "a876b62a7e2aa5a1d5f9a61b71d2a264eda4e0e1ecc4ae7f35ad6edd30505692",
+      "source_bytes": 1933,
+      "archive_bytes": 1933
+    },
+    {
+      "source_relative": "validation-summary-r3.json",
+      "archive_relative": "validation-summary-r3.json",
+      "encoding": "identity",
+      "source_sha256": "241dd27454dca084903429feb76d6902c3f9c37009e2119473cebd4b5600a902",
+      "archive_sha256": "241dd27454dca084903429feb76d6902c3f9c37009e2119473cebd4b5600a902",
+      "source_bytes": 292176,
+      "archive_bytes": 292176
+    }
+  ],
+  "excluded": [
+    "tmp runtime fixtures"
+  ],
+  "raw_reports_preserved_byte_for_byte": true,
+  "log_gzip_decompression_is_byte_exact": true
+}
