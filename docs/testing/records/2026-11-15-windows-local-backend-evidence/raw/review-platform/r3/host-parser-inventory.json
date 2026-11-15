@@ -1,0 +1,28 @@
+{
+  "label": "host-parser-inventory",
+  "argv": [
+    "cargo",
+    "test",
+    "--offline",
+    "--locked",
+    "-p",
+    "keelshell-platform",
+    "--all-targets",
+    "--target-dir",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r3/target",
+    "--",
+    "--list"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r3/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T13:10:53.003110+00:00",
+  "finished_utc": "2026-11-15T13:10:54.761654+00:00",
+  "elapsed_seconds": 1.758443,
+  "pid": 67868,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r3/host-parser-inventory.txt",
+  "output_sha256": "279782fac76e2217d7e0c5679b56ed517d11f1b0179367bf7c7a05bf43e9ee5b"
+}

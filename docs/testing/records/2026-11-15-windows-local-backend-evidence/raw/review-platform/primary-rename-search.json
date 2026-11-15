@@ -1,0 +1,19 @@
+{
+  "label": "primary-rename-search",
+  "argv": [
+    "python3",
+    "-"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:32:50.588883+00:00",
+  "finished_utc": "2026-11-15T12:32:52.527203+00:00",
+  "elapsed_seconds": 1.938168,
+  "pid": 7046,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/primary-rename-search.txt",
+  "output_sha256": "879912d50044d9a5947b08966e2cee19902e192a5bdee1c0ab5969527961938f"
+}

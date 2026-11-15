@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/r3/verify_final_r2.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "script_sha256": "2518435f7c8868326c075351a2ee8705d6e096c8a43af54c97fb3280051cac61",
+  "timeout_seconds": 55,
+  "returncode": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "elapsed_seconds": 0.513,
+  "stdout_sha256": "3a17d6ad3fd49349eedde596e146c09505a593374d33be750ad7e01592008e49",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

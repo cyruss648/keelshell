@@ -1,0 +1,10 @@
+{
+  "name": "localalloc",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-localalloc",
+  "retrieved_at": "2026-11-15T11:53:01.924518+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-localalloc",
+  "bytes": 56628,
+  "sha256": "d9429524fa17fcd20fa73ba27e4744c1c486da51a9607194c847f10be7b3595e",
+  "title": "LocalAlloc function (winbase.h) - Win32 apps | Microsoft Learn"
+}

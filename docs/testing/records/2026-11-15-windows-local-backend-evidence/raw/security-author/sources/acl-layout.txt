@@ -1,0 +1,82 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+ACL structure (winnt.h)
+Feedback
+Summarize this article for me
+In this article
+The ACL structure is the header of an access control list (ACL). A complete ACL consists of an ACL structure followed by an ordered list of zero or more  access control entries (ACEs).
+Syntax
+typedef struct _ACL {
+BYTE AclRevision;
+BYTE Sbz1;
+WORD AclSize;
+WORD AceCount;
+WORD Sbz2;
+} ACL;
+Members
+AclRevision
+Specifies the revision level of the ACL. This value should be ACL_REVISION, unless the ACL contains an object-specific ACE, in which case this value must be ACL_REVISION_DS. All ACEs in an ACL must be at the same revision level.
+Sbz1
+Specifies a zero byte of padding that aligns the AclRevision member on a 16-bit boundary.
+AclSize
+Specifies the size, in bytes, of the ACL. This value includes the ACL structure, all the ACEs, and the potential unused memory.
+AceCount
+Specifies the number of ACEs stored in the ACL.
+Sbz2
+Specifies two zero-bytes of padding that align the ACL structure on a 32-bit boundary.
+Remarks
+An ACL includes a sequential list of zero or more ACEs. The individual ACEs in an ACL are numbered from 0 to n, where n+1 is the number of ACEs in the ACL. When editing an ACL, an application refers to an ACE within the ACL by the ACE's index.
+There are two types of ACL: discretionary and system.
+A discretionary access control list (DACL) is controlled by the owner of an object or anyone granted WRITE_DAC access to the object. It specifies the access particular users and groups can have to an object. For example, the owner of a file can use a DACL to control which users and groups can and cannot have access to the file.
+An object can also have system-level security information associated with it, in the form of a system access control list (SACL) controlled by a system administrator. A SACL  allows the system administrator to audit any attempts to gain access to an object.
+For a list of currently defined ACE structures, see ACE.
+A fourth ACE structure, SYSTEM_ALARM_ACE, is not currently supported.
+The ACL structure is to be treated as though it were opaque and applications are not to attempt to work with its members directly. To ensure that ACLs are semantically correct, applications can use the functions listed in the See Also section to create and manipulate ACLs.
+Each ACL and ACE structure begins on a DWORD boundary.
+The maximum size for an ACL, including its ACEs, is 64 KB.
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps only]
+Minimum supported server
+Windows Server 2003 [desktop apps only]
+Header
+winnt.h (include Windows.h)
+See also
+AddAce
+DeleteAce
+GetAclInformation
+GetSecurityDescriptorDacl
+GetSecurityDescriptorSacl
+InitializeAcl
+IsValidAcl
+SetAclInformation
+SetSecurityDescriptorDacl
+SetSecurityDescriptorSacl
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2024-02-22

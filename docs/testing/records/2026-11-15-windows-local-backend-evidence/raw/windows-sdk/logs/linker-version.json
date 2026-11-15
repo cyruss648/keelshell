@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/lld-link",
+    "--version"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "seconds": 1.959,
+  "stdout": "Homebrew LLD 23.1.5\n",
+  "stderr": ""
+}

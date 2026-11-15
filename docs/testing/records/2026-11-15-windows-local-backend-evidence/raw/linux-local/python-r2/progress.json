@@ -1,0 +1,45 @@
+{
+  "steps": [
+    {
+      "name": "error-receipt-baseline-red",
+      "argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/linux-local/error-receipt-before-fix.py"
+      ],
+      "pid": 67844,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.192,
+      "stdout_log": "001-error-receipt-baseline-red.stdout.log",
+      "stderr_log": "001-error-receipt-baseline-red.stderr.log"
+    },
+    {
+      "name": "python-final-suite",
+      "argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_linux_local_backend.py",
+        "-v"
+      ],
+      "pid": 67850,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 1.254,
+      "stdout_log": "002-python-final-suite.stdout.log",
+      "stderr_log": "002-python-final-suite.stderr.log"
+    }
+  ],
+  "scope": "Linux-local runner error receipt regression and full unit suite",
+  "budget_seconds_per_command": 45
+}

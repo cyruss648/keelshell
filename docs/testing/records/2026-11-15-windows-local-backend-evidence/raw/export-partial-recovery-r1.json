@@ -1,0 +1,495 @@
+{
+  "partial_artifacts": [
+    {
+      "artifact": "agents-closed.json",
+      "source_sha256": "0ded7caa7c07a67d7ff9477fa4210af4163adef40e4ea6df88c3aaf15a8b037e"
+    },
+    {
+      "artifact": "archive-windows-author/HANDOFF.md",
+      "source_sha256": "ac8a2b218af536e489efb05b1e6d036784bf47e84970fde25a1ed3626b764055"
+    },
+    {
+      "artifact": "archive-windows-author/inspect_source.py",
+      "source_sha256": "1db85ad28f9ad23ee04d32d63640ce90439b9f551e3bc8e18b0a809f17e1a4f6"
+    },
+    {
+      "artifact": "archive-windows-author/notice-001-contract.md",
+      "source_sha256": "5c3729a9c28aca18341f2c37aa23a811c75d23e2b7fe794c3ad19fae136b23d4"
+    },
+    {
+      "artifact": "archive-windows-author/notice-002-close-baselines.md",
+      "source_sha256": "bb3963e7766c942d8699ec1ee6297284f50ac585c200e9076babb8095f86b1dc"
+    },
+    {
+      "artifact": "archive-windows-author/notice-003-parent-cfg.md",
+      "source_sha256": "ff6ce721ade376abac00dc0bf3e1c140412727c2434f61085b9cb3c94567d0f7"
+    },
+    {
+      "artifact": "archive-windows-author/source-inspection.json",
+      "source_sha256": "605b74cd0b955ec0dbd294385fc5087b335f4e2267910504a9c136318f4685a3"
+    },
+    {
+      "artifact": "combined-inputs-r1.json",
+      "source_sha256": "5b12cc24a420cc85e9f1fba17bd261f2fe51318887cc024175dc39db2fdcd223"
+    },
+    {
+      "artifact": "combined-inputs-r2.json",
+      "source_sha256": "1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9"
+    },
+    {
+      "artifact": "containers-final-absence.json",
+      "source_sha256": "4ffdc0c52860f7f218f8876b46ed17ef8a39693c6696fbb7b47620db440d0ea5"
+    },
+    {
+      "artifact": "export_evidence.py",
+      "source_sha256": "5f0bd47234ac792af96dfe14262866e97a55f75ef5ba28433221c332ae256a93"
+    },
+    {
+      "artifact": "freeze.py",
+      "source_sha256": "8425c0abed0e3d2ec4ba0106325cb9cb8e51214774973f5cadade98fa43bf1cb"
+    },
+    {
+      "artifact": "full-gate-r1-stop.json",
+      "source_sha256": "0f63dcc779f22206632d72cb1e4559574328d8e668a004cc6cc378186708bed2"
+    },
+    {
+      "artifact": "gate-summary-r2.json",
+      "source_sha256": "a0d5500e9203ac898c37f375a6367d8e7ea918d1611ead043ec4f8379039f9d9"
+    },
+    {
+      "artifact": "linux-final-r1/001-resolve-revision.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/001-resolve-revision.stdout.log",
+      "source_sha256": "0bd866634e996a34335dc0118a36ec3aaed3530c4c5516a9530ed1fd536337b0"
+    },
+    {
+      "artifact": "linux-final-r1/002-source-git-archive.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/002-source-git-archive.stdout.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/003-podman-vm-architecture.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/003-podman-vm-architecture.stdout.log",
+      "source_sha256": "c1669e1d8edca98769c37d494b76442a1d6e5ffffd7b4da1fb63aef8ebaf6f01"
+    },
+    {
+      "artifact": "linux-final-r1/004-create-container.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/004-create-container.stdout.log",
+      "source_sha256": "6dd3c41d0bc1cc5765609ab0e60c772511c9040f5ab6e0134824eead4d805ae8"
+    },
+    {
+      "artifact": "linux-final-r1/005-container-identity.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/005-container-identity.stdout.log",
+      "source_sha256": "72afafc4e0b5e3ab1fb90d4f7b44541b6a14b7ff889e05d587e488ee1fd93ebf"
+    },
+    {
+      "artifact": "linux-final-r1/006-start-container.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/006-start-container.stdout.log",
+      "source_sha256": "6dd3c41d0bc1cc5765609ab0e60c772511c9040f5ab6e0134824eead4d805ae8"
+    },
+    {
+      "artifact": "linux-final-r1/007-linux-toolchain.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/007-linux-toolchain.stdout.log",
+      "source_sha256": "29562244590523fad8a76bc50c951a62713d02904d9d2a774d42b8177c8e0c73"
+    },
+    {
+      "artifact": "linux-final-r1/008-container-image-id.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/008-container-image-id.stdout.log",
+      "source_sha256": "0ae63247db9ecf29a3646f4f9c14d35816636d3ce0677f0655713d0b3b9bbc01"
+    },
+    {
+      "artifact": "linux-final-r1/009-prepare-private-directories.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/009-prepare-private-directories.stdout.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/010-copy-source.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/010-copy-source.stdout.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/011-copy-registry.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/011-copy-registry.stdout.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/012-extract-private-inputs.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/012-extract-private-inputs.stdout.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/013-test-user.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/013-test-user.stdout.log",
+      "source_sha256": "e02633b3e3160a15fc3f3f98b658ca400774e81dac5cab00dbb5486e94004a13"
+    },
+    {
+      "artifact": "linux-final-r1/014-container-identity.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/014-container-identity.stdout.log",
+      "source_sha256": "72afafc4e0b5e3ab1fb90d4f7b44541b6a14b7ff889e05d587e488ee1fd93ebf"
+    },
+    {
+      "artifact": "linux-final-r1/015-compile-keelshell-session.stderr.log",
+      "source_sha256": "b94269c886883797e5a43697d3a8da47e6839f1799abb290880016e715d95654"
+    },
+    {
+      "artifact": "linux-final-r1/015-compile-keelshell-session.stdout.log.gz",
+      "source_sha256": "d2b10e8b7996bfbcd56e09b37c379a12535d802e4b87f528a2f78d9e2a5f732b"
+    },
+    {
+      "artifact": "linux-final-r1/016-container-identity.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/016-container-identity.stdout.log",
+      "source_sha256": "72afafc4e0b5e3ab1fb90d4f7b44541b6a14b7ff889e05d587e488ee1fd93ebf"
+    },
+    {
+      "artifact": "linux-final-r1/017-compile-keelshell-core.stderr.log",
+      "source_sha256": "f5ad638bdbb5a2741d080de02623c7d7e05c553be2a128cd61ba87d773101381"
+    },
+    {
+      "artifact": "linux-final-r1/017-compile-keelshell-core.stdout.log.gz",
+      "source_sha256": "1a4f0632ad901c348e7086381603a1495417bca66fe6797e960750ccc1e7a57a"
+    },
+    {
+      "artifact": "linux-final-r1/018-inventory-keelshell-session-keelshell_session.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/018-inventory-keelshell-session-keelshell_session.stdout.log",
+      "source_sha256": "f1f2ddbf10cae98cbd8bcc60a3ecd07ad51c2bc36baf1304ac0795721cac7154"
+    },
+    {
+      "artifact": "linux-final-r1/019-binary-sha-keelshell-session-keelshell_session.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/019-binary-sha-keelshell-session-keelshell_session.stdout.log",
+      "source_sha256": "f8e32afead2ca6decf346e83dc3d46ad9045c881220172025aca769ac6241950"
+    },
+    {
+      "artifact": "linux-final-r1/020-binary-elf-keelshell-session-keelshell_session.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/020-binary-elf-keelshell-session-keelshell_session.stdout.log",
+      "source_sha256": "8d0ec02f26c815adbd60614b133ed9c1392fd3a6fd90edddd6542b86db69ed6f"
+    },
+    {
+      "artifact": "linux-final-r1/021-test-keelshell-session-keelshell_session.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/021-test-keelshell-session-keelshell_session.stdout.log",
+      "source_sha256": "5883fb06edd916df8afd8e5ce3de36a8e31e130a2c97ae266ebbd26c5961e247"
+    },
+    {
+      "artifact": "linux-final-r1/022-test-keelshell-session-keelshell_session-archive-local.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/022-test-keelshell-session-keelshell_session-archive-local.stdout.log",
+      "source_sha256": "8e86e3fbe1add7a0c15b501ad325d528c916411f86e632dfeadd181150050aab"
+    },
+    {
+      "artifact": "linux-final-r1/023-inventory-keelshell-session-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/023-inventory-keelshell-session-zmodem.stdout.log",
+      "source_sha256": "530db493695dddb7416135f45f5bf762fe8265e2efa5b1423a3e58e209ffdda0"
+    },
+    {
+      "artifact": "linux-final-r1/024-binary-sha-keelshell-session-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/024-binary-sha-keelshell-session-zmodem.stdout.log",
+      "source_sha256": "18e89c3b45234b7069f48999a864755b6c375a6716b59665735ac0f7525bf743"
+    },
+    {
+      "artifact": "linux-final-r1/025-binary-elf-keelshell-session-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/025-binary-elf-keelshell-session-zmodem.stdout.log",
+      "source_sha256": "c4aa3f904621184e9774cddcaf64d9cab376aa601b30054c3308f3ccd64271ee"
+    },
+    {
+      "artifact": "linux-final-r1/026-test-keelshell-session-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/026-test-keelshell-session-zmodem.stdout.log",
+      "source_sha256": "128457aa270d1f2b8123eb59299ea1c6cd67845bc085f1277cb73471f9e4a7f8"
+    },
+    {
+      "artifact": "linux-final-r1/027-inventory-keelshell-session-archive_transfer.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/027-inventory-keelshell-session-archive_transfer.stdout.log",
+      "source_sha256": "73d7523d329b2995e7d94d48bca21b05d60daf38fe0754bdd5f315e6550da7b2"
+    },
+    {
+      "artifact": "linux-final-r1/028-binary-sha-keelshell-session-archive_transfer.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/028-binary-sha-keelshell-session-archive_transfer.stdout.log",
+      "source_sha256": "a88484158bda7f35e576f0d2b53839849410ac638c27a15837cb87cd5a0dcc77"
+    },
+    {
+      "artifact": "linux-final-r1/029-binary-elf-keelshell-session-archive_transfer.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/029-binary-elf-keelshell-session-archive_transfer.stdout.log",
+      "source_sha256": "7ef1f8440b9e23d49c6010517308a4496c0b3a589902f69fe28c67f86cced07d"
+    },
+    {
+      "artifact": "linux-final-r1/030-test-keelshell-session-archive_transfer.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/030-test-keelshell-session-archive_transfer.stdout.log",
+      "source_sha256": "6194aa58e759f3016c57ba1dd20509e22946d68d03a0190cb411d9b6e9501df0"
+    },
+    {
+      "artifact": "linux-final-r1/031-inventory-keelshell-core-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/031-inventory-keelshell-core-zmodem.stdout.log",
+      "source_sha256": "b0333192f834243fdfcffab4a03e545e669e39e71998b57295d45a3f580d0410"
+    },
+    {
+      "artifact": "linux-final-r1/032-binary-sha-keelshell-core-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/032-binary-sha-keelshell-core-zmodem.stdout.log",
+      "source_sha256": "977f9186a8916b7bd764e012bd7f4f1c607d3ab821823cba0c53258967acde0d"
+    },
+    {
+      "artifact": "linux-final-r1/033-binary-elf-keelshell-core-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/033-binary-elf-keelshell-core-zmodem.stdout.log",
+      "source_sha256": "5656175bb39efd84273ba516f47e721e3304dd09b72b0747b9467d89f146fe0c"
+    },
+    {
+      "artifact": "linux-final-r1/034-test-keelshell-core-zmodem.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/034-test-keelshell-core-zmodem.stdout.log",
+      "source_sha256": "5cd35578b4247c4b4f6eca345a52b7b7cdbb798189e5732c1f584004ee7312bc"
+    },
+    {
+      "artifact": "linux-final-r1/035-inventory-keelshell-core-archive.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/035-inventory-keelshell-core-archive.stdout.log",
+      "source_sha256": "002f5aee8fa12baaa20b177182691ca7d4fe0ee45d489de999369ecf5d2f7e31"
+    },
+    {
+      "artifact": "linux-final-r1/036-binary-sha-keelshell-core-archive.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/036-binary-sha-keelshell-core-archive.stdout.log",
+      "source_sha256": "d81e207313b55a612789b2e9e9187e69b6e4dbe44cbf3f35ecabe2247ffea5b1"
+    },
+    {
+      "artifact": "linux-final-r1/037-binary-elf-keelshell-core-archive.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/037-binary-elf-keelshell-core-archive.stdout.log",
+      "source_sha256": "6e1cb54fdf2b3d9b10db969d01b2598fbd07f838951fd8305291af2642e0a9b4"
+    },
+    {
+      "artifact": "linux-final-r1/038-test-keelshell-core-archive.stderr.log",
+      "source_sha256": "9c6241238108ff2b0762a7add1171eabb04a5e8ab885cdcdf83f0218a4dbcd95"
+    },
+    {
+      "artifact": "linux-final-r1/038-test-keelshell-core-archive.stdout.log",
+      "source_sha256": "db35850382aee2aa84d7bedcc4dfd97544f380f383239431f7b2eaf975881bca"
+    },
+    {
+      "artifact": "linux-final-r1/039-inventory-keelshell-core-archive_pax.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/039-inventory-keelshell-core-archive_pax.stdout.log",
+      "source_sha256": "4ad67e5ebfbc920727f9c2d2dde970fc116d93ff18c47aeda3a029498ca1fe44"
+    },
+    {
+      "artifact": "linux-final-r1/040-binary-sha-keelshell-core-archive_pax.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/040-binary-sha-keelshell-core-archive_pax.stdout.log",
+      "source_sha256": "029db09a1dbcf7433725a9391619f43dac8c638421755754feecbc98b4e77986"
+    },
+    {
+      "artifact": "linux-final-r1/041-binary-elf-keelshell-core-archive_pax.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/041-binary-elf-keelshell-core-archive_pax.stdout.log",
+      "source_sha256": "0c01a044509d6a5ef4d503c2b6ad3c308e36cc18089f4743fb6806b901c4a642"
+    },
+    {
+      "artifact": "linux-final-r1/042-test-keelshell-core-archive_pax.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/042-test-keelshell-core-archive_pax.stdout.log",
+      "source_sha256": "fa43353cd4709c5f3541969aeef77d4df82a7b14a9b00919c8b0863f8698c781"
+    },
+    {
+      "artifact": "linux-final-r1/043-source-after-run.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/043-source-after-run.stdout.log.gz",
+      "source_sha256": "47d89b1ee674df797e77295660c1ce24fdd5c8a74ef7e8f42c191568f2876197"
+    },
+    {
+      "artifact": "linux-final-r1/044-container-identity.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/044-container-identity.stdout.log",
+      "source_sha256": "72afafc4e0b5e3ab1fb90d4f7b44541b6a14b7ff889e05d587e488ee1fd93ebf"
+    },
+    {
+      "artifact": "linux-final-r1/045-remove-owned-container.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/045-remove-owned-container.stdout.log",
+      "source_sha256": "6dd3c41d0bc1cc5765609ab0e60c772511c9040f5ab6e0134824eead4d805ae8"
+    },
+    {
+      "artifact": "linux-final-r1/046-owned-container-absent.stderr.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/046-owned-container-absent.stdout.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "artifact": "linux-final-r1/artifacts.json",
+      "source_sha256": "16c5383a99e896e48fef126579e9986bedb2744e999b9502926a408c0e2adab9"
+    },
+    {
+      "artifact": "linux-final-r1/cleanup.json",
+      "source_sha256": "7847c31b93208d1a3238e174018a4c0ae1d3488af2da181cb3098d2cc2db7957"
+    },
+    {
+      "artifact": "linux-final-r1/host-runner-inputs/openssh_interop.py",
+      "source_sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+    },
+    {
+      "artifact": "linux-final-r1/host-runner-inputs/run_linux_file_interop.py",
+      "source_sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e"
+    },
+    {
+      "artifact": "linux-final-r1/host-runner-inputs/run_linux_local_backend.py",
+      "source_sha256": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0"
+    },
+    {
+      "artifact": "linux-final-r1/host-runner-manifest.json",
+      "source_sha256": "45ef3e98a52d8d761ec67a95ecbf68ec3971006f9361ffa1449e15d3b28dbc2f"
+    },
+    {
+      "artifact": "linux-final-r1/keelshell-core-archive-binary.json",
+      "source_sha256": "d05b7700da138d45bd027a216790e48558703a04b198f1753ecb76f5a870f4fa"
+    },
+    {
+      "artifact": "linux-final-r1/keelshell-core-archive_pax-binary.json",
+      "source_sha256": "e29bb497842e5edc1d0fea9f19b5429b561a5a037d7a117fb78d453e38b95926"
+    },
+    {
+      "artifact": "linux-final-r1/keelshell-core-zmodem-binary.json",
+      "source_sha256": "ff9f9539c9d05009fd3244e6a6983590598c368ad7573b028d23f4f42361c341"
+    },
+    {
+      "artifact": "linux-final-r1/keelshell-session-archive_transfer-binary.json",
+      "source_sha256": "ba2ad54efee34d939cc34e9daed23736d743f50b3a14e1fbe4a483a90edcfb80"
+    },
+    {
+      "artifact": "linux-final-r1/keelshell-session-keelshell_session-binary.json",
+      "source_sha256": "3a708ce289d163f2788b38414bdd003b9cf59216d141f36c0dcf91e63ca4128f"
+    },
+    {
+      "artifact": "linux-final-r1/keelshell-session-zmodem-binary.json",
+      "source_sha256": "6ebf6d917cda7ef76c807488f04e332384eed5917d67bc6a6a86324aa21e7b6f"
+    },
+    {
+      "artifact": "linux-final-r1/progress.json.gz",
+      "source_sha256": "181d09668c6fea6faef79c42957149d2c6b23693278fae8dbbd9229de9e5cc63"
+    },
+    {
+      "artifact": "linux-final-r1/receipt.json.gz",
+      "source_sha256": "5461f9d796690c0f00c2e592fcf4eb051cde44b2221b1c2ab23e842d19882959"
+    },
+    {
+      "artifact": "linux-final-r1/registry-manifest.json.gz",
+      "source_sha256": "924e832efbafe3645813c2b9e2954ddc92bfc5b06e3a6be460d1b3e34aa28108"
+    },
+    {
+      "artifact": "linux-final-r1/source-manifest.json.gz",
+      "source_sha256": "4c5e6ed73fda76acb76dae9c40d752b9330dd96099d5dc4bb85ccde7fbd67054"
+    }
+  ],
+  "all_originals_still_in_batch": true,
+  "partial_manifest_never_written": true,
+  "action": "remove verified duplicate partial raw directory before retry"
+}

@@ -1,0 +1,39 @@
+{
+  "review": "historical r1; source contract only",
+  "decision": "HOLD",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 0
+  },
+  "findings": [
+    "R1-P2-01",
+    "R1-P2-02"
+  ],
+  "notice_03": "supplement to R1-P2-01, not a third finding",
+  "engineering_commands": {
+    "total": 7,
+    "cargo": 3,
+    "rustc": 4
+  },
+  "engineering_expected_exit_zero": 5,
+  "engineering_expected_exit_one_negative_probes": 2,
+  "environment_commands_separate": 4,
+  "captured_wrapper_receipts": 11,
+  "host_tests": {
+    "passed": 15,
+    "failed": 0,
+    "ignored": 0
+  },
+  "windows_conditional_typechecked": 42,
+  "windows_tests_executed": 0,
+  "windows_native": "NOT_RUN",
+  "frozen_inputs": {
+    "count": 9,
+    "retained_match_count": 9
+  },
+  "live_changed_from_r1": 3,
+  "subsequent_r2": "separate differential review and decision",
+  "own_r1_target_deleted": true
+}

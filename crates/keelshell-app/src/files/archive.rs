@@ -284,7 +284,7 @@ impl FilesPanel {
             let unavailable = if upload {
                 self.local_browser.selection.len() == 0
             } else {
-                !cfg!(any(target_os = "macos", target_os = "linux"))
+                !cfg!(any(target_os = "macos", target_os = "linux", windows))
                     || self
                         .selected
                         .as_ref()
@@ -354,7 +354,7 @@ impl FilesPanel {
                 )),
             )
             .child(actions.child(self.server_archive_button(cx)))
-            .when(!cfg!(any(target_os = "macos", target_os = "linux")), |tools| {
+            .when(!cfg!(any(target_os = "macos", target_os = "linux", windows)), |tools| {
                 tools.child(div().text_color(rgb(visual.muted)).child(t(
                     cx,
                     "当前平台的安全新目录发布仍待实现，下载解包暂不可用；可继续打包上传。",

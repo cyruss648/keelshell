@@ -1,0 +1,10 @@
+{
+  "name": "gettokeninformation",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation",
+  "retrieved_at": "2026-11-15T11:53:00.544281+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation",
+  "bytes": 56601,
+  "sha256": "d1c6e809f2ac0cf72f9aa34347575290ccb2a930f912700d4bb360997b6bb0c8",
+  "title": "GetTokenInformation function (securitybaseapi.h) - Win32 apps | Microsoft Learn"
+}

@@ -1,0 +1,10 @@
+{
+  "gnu-jitterentropy-base": 0,
+  "gnu-jitterentropy-gcd": 0,
+  "gnu-jitterentropy-health": 0,
+  "gnu-jitterentropy-noise": 0,
+  "gnu-jitterentropy-sha3": 0,
+  "gnu-jitterentropy-timer": 0,
+  "gnu-probe-c": 0,
+  "gnu-probe-cxx": 0
+}

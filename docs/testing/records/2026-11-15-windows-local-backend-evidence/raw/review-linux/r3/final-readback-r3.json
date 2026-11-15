@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-11-15T13:29:17.234802+00:00",
+  "recommendation": "APPROVE",
+  "revision": "f945c4c780010067aee664bf7ccbf6caace4eea5",
+  "signed_files_hash_match": true,
+  "historical_review_files_unchanged": 140,
+  "native_nonpayload_files_unchanged": 110,
+  "registry_payload_still_present": true,
+  "empty_reclaimable_directories": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/tmp",
+      "files": 0,
+      "bytes": 0,
+      "removed": false
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/r2/tmp",
+      "files": 0,
+      "bytes": 0,
+      "removed": false
+    }
+  ],
+  "owned_live_resources": [],
+  "no_test_reruns": true
+}

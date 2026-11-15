@@ -1,0 +1,129 @@
+--- original-hold/scripts/run_linux_local_backend.py
++++ r2/scripts/run_linux_local_backend.py
+@@ -263,6 +263,25 @@
+         "ignored": sum(value.startswith("ignored") for value in results.values()),
+         "results": results,
+     }
++
++
++def validate_binary(integrity, elf, executable, toolchain):
++    """Bind an executable's recorded hash and ELF architecture to the native VM."""
++    match = re.fullmatch(r"([0-9a-f]{64})  " + re.escape(executable) + r"\n?", integrity)
++    machines = {"aarch64": "AArch64", "x86_64": "Advanced Micro Devices X86-64"}
++    machine = machines.get(toolchain.get("kernel_arch"))
++    fields = {}
++    for field in ("Class", "Data", "Type", "Machine"):
++        values = re.findall(r"^\s*" + field + r":\s+(.+)$", elf, re.MULTILINE)
++        if len(values) != 1:
++            raise BackendFailure("ELF header is missing or ambiguous: " + field)
++        fields[field] = values[0].strip()
++    if (not match or machine is None or fields["Class"] != "ELF64"
++            or fields["Data"] != "2's complement, little endian"
++            or fields["Type"].split()[0] not in ("DYN", "EXEC")
++            or fields["Machine"] != machine):
++        raise BackendFailure("Test executable hash or ELF architecture contradicts the native VM")
++    return {"sha256": match[1], "elf_class": fields["Class"], "machine": machine}
+ 
+ 
+ class Commands(fixture.Commands):
+@@ -480,10 +499,13 @@
+                 _, elf = commands.run("binary-elf-" + label, linux_exec(container, [
+                     "readelf", "-h", executable,
+                 ], 10))
++                binary = validate_binary(
++                    integrity.decode(), elf.decode(), executable, receipt["toolchain"],
++                )
+                 write_json(output / (label + "-binary.json"), {
+                     "executable": executable, "sha256sum": integrity.decode(),
+                     "elf_header": elf.decode(), "revision": args.revision,
+-                    "inventory": inventories[key],
++                    "inventory": inventories[key], "verified_native_binary": binary,
+                 })
+             selected = [test for test in inventories[key] if not prefix or test.startswith(prefix)]
+             if not selected or not set(required).issubset(selected):
+@@ -500,8 +522,8 @@
+                            "selected": selected, "step": step["name"]})
+             receipt["suites"].append(result)
+             write_json(output / "test-results.json", receipt["suites"])
+-            if step["returncode"] or step["timed_out"] or result["failed"]:
+-                raise BackendFailure("Linux test suite failed: " + label)
++            if step["returncode"] or step["timed_out"] or result["failed"] or result["ignored"]:
++                raise BackendFailure("Linux suite did not pass every selected test: " + label)
+         _, hashes = commands.run("source-after-run", linux_exec(container, [
+             "sha256sum", "--", *manifest["files"],
+         ], 15, user=True), timeout=20)
+@@ -522,26 +544,55 @@
+         receipt.update({"status": "FAIL", "error": type(error).__name__ + ": " + str(error)})
+     finally:
+         commands.cleaning = True
++        execution_status = receipt["status"]
++        receipt["execution_status"] = execution_status
++        # A process killed during cleanup must leave a provisional outcome, not
++        # an unwarranted PASS. Preserve the primary error before cleanup starts.
++        receipt["status"] = "FINALIZING"
++        receipt["cleanup"] = cleanup
++        persistence_errors = []
++
++        def persist(path, value):
++            try:
++                write_json(output / path, value)
++            except (OSError, ValueError) as error:
++                persistence_errors.append(path + ": " + type(error).__name__ + ": " + str(error))
++                receipt["persistence_errors"] = persistence_errors
++                receipt["status"] = "FAIL"
++
+         try:
+-            cleanup.update(remove_owned_container(commands, container, candidate_name, owner))
+-        except (fixture.FixtureFailure, fixture.ownership.InteropFailure, OSError,
+-                ValueError, subprocess.SubprocessError) as error:
+-            cleanup["error"] = type(error).__name__ + ": " + str(error)
+-        cleanup["owned_processes_stopped"] = commands.finish()
+-        cleanup["container_filesystem_and_target_removed"] = cleanup["container_removed"]
+-        receipt["cleanup"] = cleanup
+-        receipt["elapsed_seconds"] = round(time.monotonic() - start, 3)
+-        receipt["finished_unix"] = time.time()
+-        if not cleanup["owned_processes_stopped"] or cleanup["container_removed"] is False:
+-            receipt["status"] = "FAIL"
+-        receipt["totals"] = {
+-            outcome: sum(suite[outcome] for suite in receipt["suites"])
+-            for outcome in ("passed", "failed", "ignored")
+-        }
+-        write_json(output / "cleanup.json", cleanup)
+-        write_json(output / "receipt.json", receipt)
+-        for sig, handler in previous.items():
+-            signal.signal(sig, handler)
++            persist("receipt.json", receipt)
++            try:
++                cleanup.update(remove_owned_container(commands, container, candidate_name, owner))
++            except (fixture.FixtureFailure, fixture.ownership.InteropFailure, OSError,
++                    ValueError, subprocess.SubprocessError) as error:
++                cleanup["error"] = type(error).__name__ + ": " + str(error)
++            try:
++                cleanup["owned_processes_stopped"] = commands.finish()
++            except (fixture.FixtureFailure, fixture.ownership.InteropFailure, OSError,
++                    ValueError, subprocess.SubprocessError) as error:
++                # The inherited fallback can itself fail while signaling an
++                # unconfirmed child. Do not lose the primary failure or claim
++                # that ownership and cleanup have been established.
++                cleanup["process_cleanup_error"] = type(error).__name__ + ": " + str(error)
++                cleanup["owned_processes_stopped"] = False
++            cleanup["container_filesystem_and_target_removed"] = cleanup["container_removed"]
++            receipt["elapsed_seconds"] = round(time.monotonic() - start, 3)
++            receipt["finished_unix"] = time.time()
++            receipt["status"] = (
++                "PASS" if execution_status == "PASS" and not persistence_errors
++                and cleanup["owned_processes_stopped"] and cleanup["container_removed"] is not False
++                else "FAIL"
++            )
++            receipt["totals"] = {
++                outcome: sum(suite[outcome] for suite in receipt["suites"])
++                for outcome in ("passed", "failed", "ignored")
++            }
++            persist("cleanup.json", cleanup)
++            persist("receipt.json", receipt)
++        finally:
++            for sig, handler in previous.items():
++                signal.signal(sig, handler)
+     print(json.dumps({key: receipt.get(key) for key in (
+         "status", "revision", "error", "elapsed_seconds", "toolchain", "totals", "cleanup",
+     )}, indent=2))

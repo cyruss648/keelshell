@@ -1,0 +1,10 @@
+{
+  "name": "getace",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getace",
+  "retrieved_at": "2026-11-15T11:53:02.075445+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getace",
+  "bytes": 52468,
+  "sha256": "182f0d7f4dd825de3dc11cedd3ba4504b9e419ee740429df7b60a915709969ed",
+  "title": "GetAce function (securitybaseapi.h) - Win32 apps | Microsoft Learn"
+}

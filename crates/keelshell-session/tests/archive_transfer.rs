@@ -9,7 +9,7 @@ use std::sync::{
 };
 use std::time::Duration;
 
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 use keelshell_core::ArchiveMember;
 use keelshell_core::{ArchiveBundle, ArchiveFormat};
 use keelshell_session::{
@@ -293,7 +293,7 @@ fn upload(sources: Vec<PathBuf>, remote: &str, format: ArchiveFormat) -> Archive
     }
 }
 
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 fn extract(remote: &str, local: PathBuf, format: ArchiveFormat) -> ArchiveTransferRequest {
     ArchiveTransferRequest::DownloadExtract {
         remote: remote.into(),
@@ -324,7 +324,7 @@ async fn entered(mut condition: impl FnMut() -> bool) -> TestResult {
     Ok(())
 }
 
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 #[tokio::test]
 async fn reviewed_archive_binary_multiselect_roundtrip_uses_private_exclusive_staging_and_standard_rename()
 -> TestResult {
@@ -747,7 +747,7 @@ async fn lost_standard_rename_acknowledgement_is_unknown_even_when_remote_bytes_
     Ok(())
 }
 
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 #[tokio::test]
 async fn extraction_rechecks_all_remote_bytes_and_preserves_a_late_local_destination() -> TestResult
 {
@@ -794,7 +794,7 @@ async fn extraction_rechecks_all_remote_bytes_and_preserves_a_late_local_destina
     Ok(())
 }
 
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 #[tokio::test]
 async fn corrupt_and_traversing_archives_never_reach_review_or_create_local_output() -> TestResult {
     let server = Server::start().await?;

@@ -1,0 +1,10 @@
+{
+  "name": "accessallowedace",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-access_allowed_ace",
+  "retrieved_at": "2026-11-15T11:53:02.102053+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-access_allowed_ace",
+  "bytes": 53742,
+  "sha256": "fcb8fc624bc419e9a5f468f9744f44b60c5b569f97680e0b29dcf861fdf50000",
+  "title": "ACCESS_ALLOWED_ACE (winnt.h) - Win32 apps | Microsoft Learn"
+}

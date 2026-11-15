@@ -1,0 +1,20 @@
+{
+  "observed_utc": "2026-11-15T13:14:07.235450+00:00",
+  "histories": [
+    {
+      "scope": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform",
+      "evidence_manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/evidence-manifest.json",
+      "manifest_sha256": "9c56ac5deff83b9cfed97a35fe7235eec39c2e33efee88279a79edb9ef95a2cf",
+      "listed_file_count": 99,
+      "all_listed_files_unchanged": true
+    },
+    {
+      "scope": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2",
+      "evidence_manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2/evidence-manifest.json",
+      "manifest_sha256": "e82e0a8560e86230035f544e44d02ae01487e25fa8579ca43b801b3102da3fa3",
+      "listed_file_count": 42,
+      "all_listed_files_unchanged": true
+    }
+  ],
+  "historical_targets_still_absent": true
+}

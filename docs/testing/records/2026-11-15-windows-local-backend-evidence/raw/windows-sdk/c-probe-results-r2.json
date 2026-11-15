@@ -1,0 +1,12 @@
+{
+  "probe-c-r2": 0,
+  "probe-cxx-r2": 0,
+  "jitterentropy-base-r2": 0,
+  "jitterentropy-gcd-r2": 0,
+  "jitterentropy-health-r2": 0,
+  "jitterentropy-noise-r2": 0,
+  "jitterentropy-sha3-r2": 0,
+  "jitterentropy-timer-r2": 0,
+  "aws-c11-r2": 0,
+  "aws-stdalign_check-r2": 0
+}

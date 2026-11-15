@@ -21,6 +21,7 @@ use uuid::Uuid;
 use crate::SshSession;
 use crate::sftp::ZmodemLocalReservation;
 
+#[cfg_attr(windows, path = "zmodem/local_windows.rs")]
 mod local;
 
 /// Human-reviewed direction, relative to this application.

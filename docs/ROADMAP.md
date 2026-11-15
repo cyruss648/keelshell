@@ -7,6 +7,27 @@
 功能集中集成、全量验证、修复及非作者复核，开发过程中保留编译与关键专项。正式
 功能提交前完成本批门禁和评审，减少重复全仓运行和文档专属评审循环。
 
+## 2026-11-15 Windows 文件后端与 Linux 专项
+
+Windows 平台安全接口、Zmodem、归档和 UI capability 已接入。
+最终 `588 + 14` 输入的全仓门禁 `exit 0 / 632.963s`：
+Rust `2958/0/35 ignored`、rustdoc `14/0`、Python `187 run / 1 skipped`，
+格式、严格 Clippy、x.y 策略和三组 controller 通过。23 项新增默认 Rust
+逐名通过，完整路径和摘要零漂移。Windows 组合 strict cross Clippy 与四个
+AMD64 PE32+ 测试链接通过，Windows native 执行 0，不能补签原生。
+
+最终精确验证快照 `f945c4c780010067aee664bf7ccbf6caace4eea5` 的 Linux
+arm64 本地后端/codec 为 `252/0/0 / 59.797s`，源码/Git/ELF/名字及清理
+经非作者核验。平台、runner 和 session 各自 APPROVE、零开放 P0–P3，
+共关闭六项 P2；Unicode reservation 和 worker 结果交接有真实红/绿回归。
+停止的旧门禁、HOLD、notice 和旧快照结果保留。仅本地提交，不 push。
+设计见 [ADR 0138](adr/0138-windows-handle-local-files.md)，收口与原生边界见
+[本批记录](testing/records/2026-11-15-windows-local-backend.md)。
+1301 份原件及 602 项工程输入已经 Git index/blob 逐项读回；reviewer 全部关闭、
+六个自有容器 absent，批次临时目录约 2.61 GB 已回收，保留唯一有效 target。
+后续仍需 Windows 真实文件系统/桌面、三平台 IME/辅助技术、strict peer
+`HOLD/PARTIAL` 与发行；FILE-05/M4 和完整产品目标保持进行中。
+
 ## 2026-11-15 有界 Zmodem 收尾：工程门禁与限定复核通过
 
 针对原版 peer 在最终 PTY flush 中可能丢失 OO，新增独立的缺失握手警告结果、

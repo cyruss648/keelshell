@@ -1,0 +1,30 @@
+
+running 25 tests
+test zmodem::local::tests::zmodem_local_destination_preparation_is_read_only_and_cancellation_creates_nothing ... ok
+test zmodem::local::tests::zmodem_local_destination_rejects_existing_case_aliases_and_symlinks ... ok
+test zmodem::local::tests::zmodem_local_no_replace_primitive_preserves_existing_files_directories_and_links ... ok
+test zmodem::local::tests::zmodem_local_paths_reject_relative_traversal_and_reserved_source_names ... ok
+test zmodem::local::tests::zmodem_local_publication_preserves_a_target_created_after_preparation ... ok
+test zmodem::local::tests::zmodem_local_publication_rejects_a_replaced_parent_without_writing_either_tree ... ok
+test zmodem::local::tests::zmodem_review_paths_reject_invisible_or_line_breaking_ancestor_names ... ok
+test zmodem::local::tests::zmodem_upload_local_confirmation_rejects_an_identical_replacement_inode ... ok
+test zmodem::local::tests::zmodem_upload_local_confirmation_rejects_missing_and_changed_sources ... ok
+test zmodem::local::tests::zmodem_local_publication_verifies_binary_content_identity_private_acl_and_new_target ... ok
+test zmodem::local::tests::zmodem_upload_local_confirmation_rejects_replaced_ancestor_even_with_same_bytes ... ok
+test zmodem::local::tests::zmodem_upload_local_observation_rejects_case_aliases ... ok
+test zmodem::local::tests::zmodem_upload_local_observation_keeps_complete_binary_and_empty_content ... ok
+test zmodem::local::tests::zmodem_upload_local_observation_rejects_empty_and_excessive_batches_before_io ... ok
+test zmodem::local::tests::zmodem_upload_local_observation_rejects_size_excess_before_reading_sparse_content ... ok
+test zmodem::local::tests::zmodem_upload_local_observation_rejects_links_and_hardlink_aliases ... ok
+test zmodem::tests::zmodem_abandoned_source_observation_marks_actual_blocking_worker_cancelled ... ok
+test zmodem::tests::zmodem_publication_hold_counts_old_unobserved_results_after_new_success ... ok
+test zmodem::tests::zmodem_publication_late_unknown_races_new_success_without_clearing_hold ... ok
+test zmodem::tests::zmodem_publication_late_unknown_races_unmutated_drop_without_clearing_hold ... ok
+test zmodem::tests::zmodem_publication_poison_keeps_hold_after_known_and_unmutated_disposition ... ok
+test zmodem::local::tests::zmodem_upload_local_observation_rejects_symlinked_ancestors_and_special_files ... ok
+test zmodem::tests::zmodem_publication_unknown_survives_later_success_and_unmutated_drop ... ok
+test zmodem::tests::zmodem_review_and_absolute_deadlines_do_not_depend_on_peer_traffic ... ok
+test zmodem::tests::zmodem_publication_worker_hold_survives_a_dropped_wait_until_actual_worker_exit ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 167 filtered out; finished in 0.00s
+

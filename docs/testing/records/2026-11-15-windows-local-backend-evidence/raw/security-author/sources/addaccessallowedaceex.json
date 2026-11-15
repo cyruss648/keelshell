@@ -1,0 +1,10 @@
+{
+  "name": "addaccessallowedaceex",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-addaccessallowedaceex",
+  "retrieved_at": "2026-11-15T11:53:00.544430+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-addaccessallowedaceex",
+  "bytes": 56951,
+  "sha256": "bbabbd7304779970feeddf9299423ad7e38448e01690aaa13809923afcf693a2",
+  "title": "AddAccessAllowedAceEx function (securitybaseapi.h) - Win32 apps | Microsoft Learn"
+}

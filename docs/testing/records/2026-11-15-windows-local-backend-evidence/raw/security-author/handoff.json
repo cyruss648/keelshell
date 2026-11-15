@@ -1,0 +1,51 @@
+{
+  "status": "IMPLEMENTED_NOT_COMPILED_WINDOWS_NATIVE_NOT_RUN_NON_AUTHOR_REVIEW_PENDING",
+  "interfaces": {
+    "PrivateSecurity::new": "pub(super) fn new(directory: bool) -> std::io::Result<Self>",
+    "PrivateSecurity::descriptor": "pub(super) fn descriptor(&self) -> *mut std::ffi::c_void",
+    "verify_private": "pub(super) fn verify_private(file: &std::fs::File, directory: bool) -> std::io::Result<()>",
+    "observation": "pub(super) fn observation(file: &std::fs::File) -> std::io::Result<Vec<u8>>"
+  },
+  "windows_sys_requirement": "0.61",
+  "online_latest_observed": "0.61.2",
+  "features": [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Memory",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading"
+  ],
+  "dev_dependency": "tempfile.workspace = true",
+  "files": [
+    {
+      "path": "crates/keelshell-platform/src/windows/security.rs",
+      "sha256": "d3c86ccac0ef241e1b3a199f0c2fa82ecc979ddfa202fba85ac36b878eff0f28",
+      "bytes": 25479,
+      "import_symbols_checked": 52,
+      "missing_symbols": [],
+      "forbidden_production_patterns": []
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "sha256": "6f56a712f76321ff59f2fa65d360629abaf64aca2f65fef2741d187892c9d4e2",
+      "bytes": 22643,
+      "import_symbols_checked": 20,
+      "missing_symbols": [],
+      "forbidden_production_patterns": []
+    }
+  ],
+  "test_inventory": "test-inventory.json",
+  "tests_written": 27,
+  "tests_executed": 0,
+  "handoff": "HANDOFF.md",
+  "scope": "Only security.rs, security/tests.rs and security-author evidence directory",
+  "parent_required": [
+    "Declare Windows module under scoped unsafe_code allow with package deny; other packages keep forbid",
+    "Retain descriptor owner through synchronous creation call",
+    "Open security-query handles with READ_CONTROL",
+    "Format/compile/check test inventory centrally without competing Cargo users",
+    "Run meaningful native Windows tests and new non-author review; macOS checks cannot substitute"
+  ]
+}

@@ -4,6 +4,20 @@ use keelshell_core::{
     ArchiveBundle, ArchiveEntryKind, ArchiveFormat, ArchiveMember, Settings, Theme, ThemeId,
 };
 
+#[test]
+fn archive_unobserved_worker_result_keeps_the_unknown_close_hold() {
+    use crate::files::{FileFailure, Outcome, archive, terminal_transfer_phase};
+    use keelshell_session::SessionError;
+
+    let result: Result<Outcome, FileFailure> = Err(SessionError::MutationUncertain.into());
+    assert!(matches!(&result, Err(FileFailure::OutcomeUncertain(_))));
+    assert!(archive::retains_close_hold(&result));
+    assert_eq!(
+        terminal_transfer_phase(true, &result),
+        Some(TransferPhase::Uncertain)
+    );
+}
+
 async fn browse_and_select(h: &Harness, names: &[&str], cx: &mut TestAppContext) {
     cx.update_window(h.window, |_, window, cx| {
         h.panel.update(cx, |panel, cx| {
@@ -145,7 +159,7 @@ async fn archive_zip_upload_requires_confirmation_and_preserves_exact_binary_mem
 }
 
 #[gpui_kit::test]
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 async fn archive_tar_gz_download_extract_reviews_empty_folders_and_publishes_new_tree(
     cx: &mut TestAppContext,
 ) {
@@ -266,7 +280,7 @@ async fn archive_changed_local_content_is_rejected_before_any_publication(cx: &m
 }
 
 #[gpui_kit::test]
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 async fn archive_corrupt_download_and_existing_local_target_preserve_destination(
     cx: &mut TestAppContext,
 ) {
@@ -406,7 +420,7 @@ async fn archive_pending_write_cancel_retains_close_hold_across_another_verified
 }
 
 #[gpui_kit::test]
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos", target_os = "linux", windows))]
 async fn archive_large_manifest_keeps_last_member_and_fixed_review_actions(
     cx: &mut TestAppContext,
 ) {
@@ -457,7 +471,7 @@ async fn archive_large_manifest_keeps_last_member_and_fixed_review_actions(
 }
 
 #[gpui_kit::test]
-#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+#[cfg(not(any(target_os = "macos", target_os = "linux", windows)))]
 async fn archive_unsupported_extraction_is_disabled_without_creating_a_target(
     cx: &mut TestAppContext,
 ) {

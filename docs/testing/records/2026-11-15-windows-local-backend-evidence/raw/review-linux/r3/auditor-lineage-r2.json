@@ -1,0 +1,5 @@
+{
+  "original_r1_auditor_sha256": "5813295d36e80c793150e092e2ed1940ca2f8a8e655b85443f28ab1a57ff5133",
+  "final_r2_auditor_sha256": "babc9b862f83e6b9f4d4850dd30d90c3baee0eafae37ae42f596c070a3e70bd3",
+  "scope": "Retarget immutable r2 artifacts; derive revision/counts from snapshot and freeze; record mutable Rust input drift as a boundary; preserve every r1 artifact; do not infer parent outer exit/reap."
+}

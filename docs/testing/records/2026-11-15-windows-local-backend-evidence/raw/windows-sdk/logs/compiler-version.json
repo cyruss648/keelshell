@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/llvm/bin/clang-cl",
+    "--version"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "seconds": 0.135,
+  "stdout": "Homebrew clang version 23.1.5\nTarget: arm64-pc-windows-msvc\nThread model: posix\nInstalledDir: /opt/homebrew/Cellar/llvm/23.1.5_1/bin\n",
+  "stderr": ""
+}

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/tools/xwin-0.6.5-aarch64-apple-darwin/xwin",
+    "--version"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk",
+  "pid": 5331,
+  "started_utc": "2026-11-15T12:30:57.581671+00:00",
+  "finished_utc": "2026-11-15T12:30:57.912759+00:00",
+  "seconds": 0.331,
+  "timeout_seconds": 10.0,
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/logs/xwin-help-0.log",
+  "log_sha256": "2920bc3012e519ecd3583fce1f66872500c261ff95cacb21b2460b1acb91f248"
+}

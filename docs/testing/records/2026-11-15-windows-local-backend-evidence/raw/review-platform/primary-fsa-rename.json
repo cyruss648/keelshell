@@ -1,0 +1,19 @@
+{
+  "label": "primary-fsa-rename",
+  "argv": [
+    "python3",
+    "-"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:42:36.779785+00:00",
+  "finished_utc": "2026-11-15T12:42:39.182170+00:00",
+  "elapsed_seconds": 2.402282,
+  "pid": 17676,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/primary-fsa-rename.txt",
+  "output_sha256": "7af9a1d7fd5391e2a04c7e8730d9c8d76c87a1d3e27b194c2092094e7b37c0de"
+}

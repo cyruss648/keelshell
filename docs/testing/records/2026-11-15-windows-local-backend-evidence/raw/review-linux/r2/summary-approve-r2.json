@@ -1,0 +1,35 @@
+{
+  "recommendation": "APPROVE",
+  "scope": "r2 Linux runner source difference and Python behavior only",
+  "signed_utc": "2026-11-15T12:38:57.002377+00:00",
+  "baseline": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "inputs": {
+    "scripts/run_linux_local_backend.py": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+    "scripts/test_linux_local_backend.py": "660a7b8fc6347364eb6dd0be340d421ff207c708cc1da3f64ac8ad964bbef8af",
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+  },
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "closed_findings": [
+    "LINUX-RUNNER-P2-001",
+    "LINUX-RUNNER-P2-002"
+  ],
+  "independent_python": {
+    "run": 47,
+    "passed": 47,
+    "failed": 0,
+    "skipped": 0,
+    "repository_suite": 39,
+    "reviewer_boundary_probes": 8
+  },
+  "independent_rust_tests_executed": 0,
+  "old_native_251_remains_old_source_and_old_runner": true,
+  "native_execution_with_r2_runner": "NOT_RUN",
+  "original_history_files_unchanged": 35,
+  "writes": "Only work/windows-local-backend-20261115/review-linux/r2/"
+}

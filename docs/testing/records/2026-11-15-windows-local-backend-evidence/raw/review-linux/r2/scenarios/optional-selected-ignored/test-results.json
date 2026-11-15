@@ -1,0 +1,19 @@
+[
+  {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 1,
+    "results": {
+      "zmodem::selected_required_test": "ok",
+      "zmodem::optional_selected": "ignored"
+    },
+    "package": "keelshell-session",
+    "target": "keelshell_session",
+    "filter": "zmodem::",
+    "selected": [
+      "zmodem::selected_required_test",
+      "zmodem::optional_selected"
+    ],
+    "step": "test-keelshell-session-keelshell_session"
+  }
+]

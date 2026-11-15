@@ -1,0 +1,21 @@
+{
+  "baseline": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "files": {
+    "crates/keelshell-platform/Cargo.toml": "7f99c1d3beeaa9cc8aa70d4835ef5376e9a26340af3abfde6e7adf6c2749aa90",
+    "crates/keelshell-platform/src/directory_records.rs": "ad7b4d896fbe2cf3ae955bdd69590a1228b48e0b97db7ab38e87720ec54557f8",
+    "crates/keelshell-platform/src/lib.rs": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+    "crates/keelshell-platform/src/path.rs": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+    "crates/keelshell-platform/src/windows/mod.rs": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63",
+    "crates/keelshell-platform/src/windows/native.rs": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+    "crates/keelshell-platform/src/windows/security/tests.rs": "ea706dac54a2eae75f489a89966f331b420e0af192b234c575c56c6bc72e2dce",
+    "crates/keelshell-platform/src/windows/security.rs": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+    "crates/keelshell-platform/src/windows/tests.rs": "797f725c9b07048b9a508b8edab3227ba595f5a219eaa500fc9bc1ac3c660244"
+  },
+  "windows_cross_clippy": "logs/windows-platform-clippy-r3.json",
+  "native_status": "NOT_RUN",
+  "changes_since_r1": [
+    "directory read target capability and short-lived held-object DELETE lease",
+    "documented full rename buffer minimum and initialized extent",
+    "four native regressions plus primitive positive control"
+  ]
+}

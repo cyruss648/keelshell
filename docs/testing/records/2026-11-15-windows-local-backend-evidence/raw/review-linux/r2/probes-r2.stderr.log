@@ -1,0 +1,13 @@
+test_final_cleanup_receipt_write_failure_still_saves_fail_and_restores_handlers (__main__.ReviewerCases.test_final_cleanup_receipt_write_failure_still_saves_fail_and_restores_handlers) ... ok
+test_final_receipt_write_failure_leaves_finalizing_instead_of_false_pass (__main__.ReviewerCases.test_final_receipt_write_failure_leaves_finalizing_instead_of_false_pass) ... ok
+test_optional_selected_ignored_is_rejected_even_when_the_required_test_passes (__main__.ReviewerCases.test_optional_selected_ignored_is_rejected_even_when_the_required_test_passes) ... ok
+test_primary_error_is_durable_before_cleanup_and_finish_error_is_preserved (__main__.ReviewerCases.test_primary_error_is_durable_before_cleanup_and_finish_error_is_preserved) ... ok
+test_provisional_write_failure_after_success_does_not_skip_cleanup_or_pass (__main__.ReviewerCases.test_provisional_write_failure_after_success_does_not_skip_cleanup_or_pass) ... ok
+test_retained_native_headers_satisfy_new_validator_without_relabeling_old_run (__main__.ReviewerCases.test_retained_native_headers_satisfy_new_validator_without_relabeling_old_run) ... ok
+test_successful_execution_with_failed_finish_cannot_pass (__main__.ReviewerCases.test_successful_execution_with_failed_finish_cannot_pass) ... ok
+test_wrong_elf_machine_is_rejected_in_execute_before_selected_execution (__main__.ReviewerCases.test_wrong_elf_machine_is_rejected_in_execute_before_selected_execution) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.017s
+
+OK

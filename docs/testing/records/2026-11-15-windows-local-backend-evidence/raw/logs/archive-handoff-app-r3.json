@@ -1,0 +1,24 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-app",
+    "--locked",
+    "--offline",
+    "archive_unobserved_worker_result",
+    "--",
+    "--nocapture"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "archive-handoff-app-r3",
+  "pid": 78605,
+  "started_utc": "2026-11-15T13:22:54.730306+00:00",
+  "finished_utc": "2026-11-15T13:23:06.319990+00:00",
+  "seconds": 11.59,
+  "exit": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log_sha256": "5b96e9fdb130d2eb73fd79293541c10f78ce99e7e1745a739297720c8deeeb2a",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

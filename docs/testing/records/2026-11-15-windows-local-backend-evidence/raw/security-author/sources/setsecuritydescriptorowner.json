@@ -1,0 +1,10 @@
+{
+  "name": "setsecuritydescriptorowner",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-setsecuritydescriptorowner",
+  "retrieved_at": "2026-11-15T11:53:00.986976+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-setsecuritydescriptorowner",
+  "bytes": 54202,
+  "sha256": "7a556537da7a57d2414b533c6e7a21b37da3a59b12b44801a5a3b02c67837af2",
+  "title": "SetSecurityDescriptorOwner function (securitybaseapi.h) - Win32 apps | Microsoft Learn"
+}

@@ -1,0 +1,19 @@
+{
+  "label": "primary-fsa-sharing-appendix",
+  "argv": [
+    "python3",
+    "-"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:43:36.745284+00:00",
+  "finished_utc": "2026-11-15T12:43:39.244810+00:00",
+  "elapsed_seconds": 2.49937,
+  "pid": 18725,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/primary-fsa-sharing-appendix.txt",
+  "output_sha256": "38597d34bbca1b350ace85154e7a34dfc913150177a4df40ee5bd4cd7166e628"
+}

@@ -1,0 +1,284 @@
+{
+  "recorded_utc": "2026-11-15T12:36:23.649706+00:00",
+  "source": {
+    "path": "crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+    "bytes": 37204,
+    "sha256": "02e2e8d6f23d8e30548d41ca47317c711aa6a1584cfbc124848ef8e366044926"
+  },
+  "total_source_tests": 45,
+  "default_source_tests": 43,
+  "opt_in_source_tests": 2,
+  "actually_executed": 0,
+  "tests": [
+    {
+      "name": "zmodem::local::tests::zmodem_upload_local_observation_keeps_complete_binary_and_empty_content",
+      "source_line": 38,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_upload_local_observation_rejects_empty_and_excessive_batches_before_io",
+      "source_line": 72,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_upload_local_observation_rejects_case_aliases",
+      "source_line": 86,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_upload_rejects_expanding_unicode_case_aliases",
+      "source_line": 102,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_upload_rejects_hardlink_aliases",
+      "source_line": 118,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_upload_local_observation_rejects_size_excess_before_reading_sparse_content",
+      "source_line": 137,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_upload_enforces_the_remaining_batch_byte_budget_before_reading",
+      "source_line": 150,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_upload_rejects_total_byte_excess_before_reading_the_last_file",
+      "source_line": 163,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_upload_rejects_directories_without_reading_them_as_files",
+      "source_line": 180,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_upload_local_confirmation_rejects_an_identical_replacement_inode",
+      "source_line": 193,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_upload_local_confirmation_rejects_missing_and_changed_sources",
+      "source_line": 210,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_confirmation_rejects_metadata_only_changes",
+      "source_line": 231,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_upload_local_confirmation_rejects_replaced_ancestor_even_with_same_bytes",
+      "source_line": 249,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_confirmation_rejects_a_new_hardlink_after_review",
+      "source_line": 268,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_confirmation_rejects_reused_path_after_hardlink_rebinding",
+      "source_line": 286,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_confirmation_releases_no_batch_when_the_last_source_changed",
+      "source_line": 306,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_upload_cancellation_releases_no_review_or_sender_bytes",
+      "source_line": 323,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_local_paths_reject_relative_traversal_and_reserved_source_names",
+      "source_line": 341,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_review_paths_reject_invisible_or_line_breaking_ancestor_names",
+      "source_line": 371,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_paths_reject_unc_and_device_namespaces_before_io",
+      "source_line": 386,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_paths_reject_non_unicode_names_before_io",
+      "source_line": 407,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_reviews_retain_every_original_ancestor",
+      "source_line": 429,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_reviews_reject_replaced_grandparent_with_original_leaf_and_source",
+      "source_line": 452,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_destination_rejects_existing_files_directories_and_unicode_aliases",
+      "source_line": 487,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_local_destination_preparation_is_read_only_and_cancellation_creates_nothing",
+      "source_line": 506,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_local_publication_preserves_a_target_created_after_preparation",
+      "source_line": 528,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_publication_preserves_a_unicode_alias_created_after_review",
+      "source_line": 547,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_publication_preserves_a_precreated_staging_name_before_mutation",
+      "source_line": 567,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_exclusive_create_marks_mutated_before_a_late_collision",
+      "source_line": 587,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_local_publication_rejects_a_replaced_parent_without_writing_either_tree",
+      "source_line": 605,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_create_sets_private_dacl_before_any_content_is_written",
+      "source_line": 626,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_cancellation_after_create_retains_empty_private_staging_and_mutation",
+      "source_line": 646,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_cancellation_after_readback_retains_complete_private_staging",
+      "source_line": 668,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_target_race_after_staging_preserves_both_names_for_quarantine",
+      "source_line": 691,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_cancellation_after_rename_retains_the_published_target_for_quarantine",
+      "source_line": 713,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_final_readback_rejects_a_late_unicode_alias_and_retains_mutation",
+      "source_line": 738,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_final_readback_rejects_reappeared_staging_and_retains_both_paths",
+      "source_line": 762,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_retained_creation_handle_blocks_stage_replacement_and_other_writers",
+      "source_line": 786,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_publication_rejects_an_identical_staging_replacement_identity",
+      "source_line": 815,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_no_replace_primitive_preserves_existing_files_and_directories",
+      "source_line": 842,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_content_readback_rejects_same_length_corruption_short_and_long_files",
+      "source_line": 867,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_publication_verifies_binary_content_identity_private_dacl_and_new_target",
+      "source_line": 891,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_publication_verifies_an_empty_file_without_leaving_staging",
+      "source_line": 928,
+      "ignored": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_upload_rejects_real_file_and_ancestor_reparse_points",
+      "source_line": 955,
+      "ignored": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "name": "zmodem::local::tests::zmodem_windows_destination_preserves_a_dangling_reparse_point",
+      "source_line": 984,
+      "ignored": true,
+      "execution": "NOT_RUN"
+    }
+  ]
+}

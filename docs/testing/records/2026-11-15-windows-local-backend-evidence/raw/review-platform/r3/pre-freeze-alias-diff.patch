@@ -1,0 +1,65 @@
+--- r2/crates/keelshell-platform/src/path.rs
++++ live-not-yet-frozen/crates/keelshell-platform/src/path.rs
+@@ -2,6 +2,18 @@
+ 
+ /// Maximum UTF-8 byte length of a reviewed local Windows path.
+ pub const MAX_WINDOWS_PATH_BYTES: usize = 4096;
++
++/// Return the conservative Unicode case alias used for local names and claims.
++///
++/// Uppercasing before lowercasing also folds expanding and final-sigma forms.
++/// This is a portable exclusion policy, not a filesystem lookup, Unicode
++/// normalization, or a claim about a volume's native case-comparison algorithm.
++pub fn filename_alias(name: &str) -> String {
++    name.chars()
++        .flat_map(char::to_uppercase)
++        .flat_map(char::to_lowercase)
++        .collect()
++}
+ 
+ /// A checked absolute drive path whose components cannot escape a held directory.
+ ///
+@@ -111,6 +123,18 @@
+     use super::*;
+ 
+     #[test]
++    fn portable_aliases_fold_expanding_and_final_sigma_case_forms() {
++        for (first, second) in [
++            ("New", "new"),
++            ("STRASSE.bin", "straße.bin"),
++            ("σ.bin", "ς.bin"),
++        ] {
++            assert_eq!(filename_alias(first), filename_alias(second));
++        }
++        assert_ne!(filename_alias("first"), filename_alias("second"));
++    }
++
++    #[test]
+     fn absolute_drive_and_extended_drive_have_identical_literal_components() -> io::Result<()> {
+         let ordinary = WindowsPath::parse(r"c:\用户\日志.txt")?;
+         let extended = WindowsPath::parse(r"\\?\C:\用户\日志.txt")?;
+--- r2/crates/keelshell-platform/src/lib.rs
++++ live-not-yet-frozen/crates/keelshell-platform/src/lib.rs
+@@ -7,7 +7,7 @@
+ //! removes failed staging or grants authority to retry a filesystem mutation.
+ 
+ mod path;
+-pub use path::{MAX_WINDOWS_PATH_BYTES, WindowsPath, validate_windows_component};
++pub use path::{MAX_WINDOWS_PATH_BYTES, WindowsPath, filename_alias, validate_windows_component};
+ 
+ #[cfg(any(windows, test))]
+ mod directory_records;
+--- r2/crates/keelshell-platform/src/windows/mod.rs
++++ live-not-yet-frozen/crates/keelshell-platform/src/windows/mod.rs
+@@ -332,10 +332,7 @@
+ }
+ 
+ fn alias(name: &str) -> String {
+-    name.chars()
+-        .flat_map(char::to_uppercase)
+-        .flat_map(char::to_lowercase)
+-        .collect()
++    crate::filename_alias(name)
+ }
+ 
+ fn invalid(message: &'static str) -> io::Error {

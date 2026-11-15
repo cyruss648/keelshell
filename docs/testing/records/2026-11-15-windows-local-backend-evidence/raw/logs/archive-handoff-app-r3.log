@@ -1,0 +1,14 @@
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.99s
+     Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/74a1e55a81a61939/out/keelshell_app-74a1e55a81a61939)
+
+running 1 test
+test files::transfer_tests::archive_tests::archive_unobserved_worker_result_keeps_the_unknown_close_hold ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1238 filtered out; finished in 0.00s
+

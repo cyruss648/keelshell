@@ -1,0 +1,309 @@
+{
+  "captured_utc": "2026-11-15T12:53:46.268449+00:00",
+  "host": "Darwin",
+  "status": "SOURCE_ONLY_NOT_COMPILED",
+  "checks": {
+    "unsafe_blocks_or_unsafe_functions_absent": true,
+    "production_forbids_unsafe": true,
+    "production_panic_unwrap_expect_absent": true,
+    "production_path_based_file_io_absent": true,
+    "external_tests_begin_with_inner_test_cfg": true,
+    "external_tests_are_windows_only": true,
+    "exact_test_names_are_unique": true,
+    "test_inventory_is_29": true,
+    "one_privileged_reparse_test_is_opt_in": true,
+    "required_manifest_traits_present": true,
+    "async_interface_names_present": true,
+    "sync_interface_names_present": true,
+    "owned_files_have_no_trailing_whitespace": true,
+    "read_only_contract_inputs_stable_during_inspection": true
+  },
+  "test_inventory": [
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_slash_members_join_literal_windows_components",
+      "source_line": 98,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_rejects_device_stream_traversal_and_direction_marker_components",
+      "source_line": 105,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_rejects_unc_device_namespace_and_non_normalized_drive_paths",
+      "source_line": 123,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_selected_extended_drive_and_unicode_case_aliases_overlap",
+      "source_line": 138,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_implicit_directory_aliases_and_file_parents_are_rejected",
+      "source_line": 149,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_implicit_directory_inventory_has_its_own_entry_bound",
+      "source_line": 172,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_destinations_enforce_combined_absolute_path_bound",
+      "source_line": 185,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_member_depth_is_bounded_before_any_native_io",
+      "source_line": 197,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_cancel_guard_marks_its_worker_on_drop",
+      "source_line": 205,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_fresh_scan_manifest_equality_ignores_handle_values",
+      "source_line": 212,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_manifest_clone_retains_every_original_ancestor_capability",
+      "source_line": 240,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_scan_rechecks_children_even_when_directory_stamps_match",
+      "source_line": 278,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_scan_rechecks_digest_and_bytes_even_when_file_stamps_match",
+      "source_line": 301,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_scan_rejects_hard_linked_sources",
+      "source_line": 320,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_scan_rejects_source_and_ancestor_reparse_points",
+      "source_line": 333,
+      "ignored_by_default": true,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_destination_observations_ignore_sibling_write_timestamps",
+      "source_line": 351,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_destination_refuses_existing_unicode_case_alias",
+      "source_line": 363,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_private_nested_tree_publishes_after_child_creation_handles_close",
+      "source_line": 376,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_empty_private_tree_publishes_with_exact_root_identity",
+      "source_line": 420,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_publication_preserves_existing_file_and_quarantines_stage",
+      "source_line": 496,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_publication_preserves_existing_empty_directory_and_quarantines_stage",
+      "source_line": 501,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_changed_staging_content_is_not_published_or_deleted",
+      "source_line": 507,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_changed_staging_children_are_not_published_or_deleted",
+      "source_line": 543,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_cancel_before_publication_preserves_complete_staging",
+      "source_line": 577,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_unobserved_successful_publication_remains_quarantined",
+      "source_line": 611,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_abandoned_stage_result_keeps_isolation_after_pending_clears",
+      "source_line": 642,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_dropping_stage_await_quarantines_its_detached_worker_result",
+      "source_line": 670,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_panicking_worker_keeps_pending_and_partial_stage_isolation",
+      "source_line": 717,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    },
+    {
+      "name": "sftp::archive_transfer::local::tests::windows_archive_queued_cancel_retains_ticket_until_worker_confirms_stop",
+      "source_line": 743,
+      "ignored_by_default": false,
+      "platform": "windows",
+      "result": "NOT_RUN"
+    }
+  ],
+  "test_count": 29,
+  "executed_test_count": 0,
+  "windows_native": "NOT_RUN",
+  "cargo": "NOT_RUN_USER_CONSTRAINT",
+  "rustc": "NOT_RUN_USER_CONSTRAINT",
+  "formatter": "NOT_RUN_USER_CONSTRAINT",
+  "clippy": "NOT_RUN_USER_CONSTRAINT",
+  "git": "NOT_READ_OR_CHANGED_USER_CONSTRAINT",
+  "source_inputs": [
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "bytes": 38121,
+      "sha256": "7fbe527fcc9d110a6c5bd36bdbd319b97874ae1358867e0ef6e3900f0f62de41",
+      "role": "owned"
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "bytes": 27858,
+      "sha256": "e49d2ca86c6ca9c36962eb0c0b92f627f35301857aeec940b82947620a1712a3",
+      "role": "owned"
+    },
+    {
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "bytes": 797,
+      "sha256": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-platform/src/path.rs",
+      "bytes": 6770,
+      "sha256": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "bytes": 12363,
+      "sha256": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/native.rs",
+      "bytes": 14872,
+      "sha256": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security.rs",
+      "bytes": 25583,
+      "sha256": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "bytes": 16144,
+      "sha256": "3b0f8d01aa336c14315a15d61c3b591be0cb1e3a98af59122892dfe4f264ef94",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local.rs",
+      "bytes": 26196,
+      "sha256": "e8f8486f26d4b65bcc0550c540a1e689afd6638875d16d052d0bf3da83ee069f",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/mutation.rs",
+      "bytes": 15084,
+      "sha256": "63a310b60a710f0077646f8741e8763e6cf8d52eda853df48dd83bcba52dafe8",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue/reservations.rs",
+      "bytes": 21876,
+      "sha256": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+      "role": "read_only_contract"
+    },
+    {
+      "path": "crates/keelshell-core/src/archive.rs",
+      "bytes": 41922,
+      "sha256": "786773b3839adaf01cb52f08e071e0d9ba8c70db97cfb4fdce4befbfdcd64d77",
+      "role": "read_only_contract"
+    }
+  ],
+  "limits": "Text inspection and SHA-256 inventory only. No syntax parser, compiler, test execution, native acceptance, parent integration approval, or crash durability is established by this record."
+}

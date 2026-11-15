@@ -1,0 +1,24 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_dependencies.py",
+    "--timeout",
+    "4",
+    "--jobs",
+    "8",
+    "--json-report",
+    "work/windows-local-backend-20261115/dependencies-live-r1.json"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "dependencies-live-r1",
+  "pid": 89963,
+  "started_utc": "2026-11-15T12:23:39.897589+00:00",
+  "finished_utc": "2026-11-15T12:24:39.911215+00:00",
+  "seconds": 60.013,
+  "exit": -15,
+  "timed_out": true,
+  "reaped": true,
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

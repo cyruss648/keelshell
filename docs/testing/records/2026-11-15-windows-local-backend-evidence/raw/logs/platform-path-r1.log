@@ -1,0 +1,34 @@
+   Compiling libc v0.2.191
+   Compiling keelshell-platform v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-platform)
+   Compiling errno v0.3.15
+   Compiling getrandom v0.4.3
+   Compiling rustix v1.1.6
+   Compiling tempfile v3.27.0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.71s
+     Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-platform/130a91f67fd80b1d/out/keelshell_platform-130a91f67fd80b1d)
+
+running 15 tests
+test directory_records::tests::odd_or_oversized_utf16_name_lengths_are_rejected ... ok
+test directory_records::tests::next_entry_offset_can_include_native_alignment_padding ... ok
+test directory_records::tests::fragmented_query_batches_preserve_unicode_names_and_exclude_dot_entries ... ok
+test directory_records::tests::truncated_header_and_name_never_yield_partial_success ... ok
+test directory_records::tests::lone_surrogates_and_embedded_path_separators_are_rejected ... ok
+test path::tests::drive_root_is_a_directory_capability_without_a_fabricated_name ... ok
+test path::tests::controls_streams_and_visual_path_disguises_are_rejected ... ok
+test directory_records::tests::overlapping_or_out_of_bounds_entry_offsets_are_rejected ... ok
+test path::tests::drive_relative_and_normalizing_path_spellings_are_rejected ... ok
+test path::tests::full_path_review_bound_is_enforced_before_native_access ... ok
+test path::tests::absolute_drive_and_extended_drive_have_identical_literal_components ... ok
+test path::tests::unc_and_device_namespaces_do_not_fall_back_to_drive_access ... ok
+test path::tests::reserved_dos_names_are_rejected_with_extensions_and_superscript_aliases ... ok
+test path::tests::filename_bound_counts_utf16_units_instead_of_utf8_bytes ... ok
+test directory_records::tests::name_budget_is_shared_across_all_native_query_batches ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests keelshell_platform
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

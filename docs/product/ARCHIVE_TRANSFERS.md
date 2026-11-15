@@ -30,8 +30,14 @@
 完整准备，再发布新目录。不会恢复归档中的可执行权限、所有者或特殊权限。
 不接纳链接、特殊类型、路径穿越、绝对成员路径、不可移植名称或冲突成员。
 已有本地目标不覆盖。
-本批安全解包后端面向 macOS/Linux；Windows 的原子新目录发布与权限处理尚待
-实现，界面明确停用下载解包并说明原因，打包上传仍可使用。
+安全解包已接入 macOS、Linux 与 Windows 后端。Windows 逐组件保留祖先句柄，
+在创建时设置私有 DACL，完整验证私有目录树后以无覆盖方式发布；只接纳满足
+对象身份、权限和 NT 发布契约的本地 drive 文件系统。UNC、设备路径、重解析、
+多硬链接与不可移植名称均拒绝。界面已启用 Windows 下载解包入口，但 Windows
+原生文件系统和桌面流程尚未执行验证，实际工程与 Linux 本地运行范围见
+[本地后端记录](../testing/records/2026-11-15-windows-local-backend.md)。
+取消或丢弃 await 后，后台 mutation worker 继续持有保留权直到确实退出；
+失败及未知 staging 保留隔离，不按路径自动删除。
 
 ## 限制与恢复
 
@@ -82,9 +88,16 @@ Verified completion releases the archive's own window-close hold while preservin
 any older unresolved destination and quarantine.
 Server-side packing, version/feature verification, Zmodem, relay acceleration
 and full native platform acceptance remain separate open work.
-Extraction currently requires the macOS/Linux no-replace directory backend.
-Windows extraction is disabled with an explicit explanation pending a safe
-publication and permissions backend; packed uploads remain available. The codec
+Extraction integrates no-replace directory backends for macOS, Linux and
+Windows. Windows retains every ancestor handle, creates objects with a private
+DACL and verifies the complete staged tree before publication. Only supported
+local drive filesystems are admitted; UNC/device paths, reparse points, multiple
+hard links and nonportable names are rejected. Windows extraction controls are
+enabled, but native filesystem and desktop execution remain unverified. See the
+[local backend record](../testing/records/2026-11-15-windows-local-backend.md)
+for actual platform-specific results. A cancelled await does not release an
+active mutation worker's reservation; unknown staging remains quarantined.
+The codec
 admits single-disk ZIP32 stored/deflate and regular TAR members with bounded GNU
 long names and a strict PAX subset. ZIP64 and multidisk ZIP are not admitted.
 PAX accepts `path`, `size` and validated but discarded time/owner fields, with

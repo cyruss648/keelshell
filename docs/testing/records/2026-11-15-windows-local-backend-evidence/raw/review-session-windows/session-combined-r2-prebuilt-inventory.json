@@ -1,0 +1,67 @@
+{
+  "observed_at_utc": "2026-11-15T13:30:40.973150+00:00",
+  "evidence": "REVIEWER_EXECUTED_PARENT_PREBUILT_HOST_COPIES",
+  "host": {
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "receipt_sha256": "af22cf3be08ea51c6e0244c84537ee66bd8a925f3e6d20b73d6011b6cb82fb16",
+  "freeze_sha256": "1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9",
+  "inventories": [
+    {
+      "binary": "session",
+      "sha256_before": "f49acffd8e45528769264228cb481777e5e3195c32cbdcc5fb4e32bd1ed03d3c",
+      "sha256_after": "f49acffd8e45528769264228cb481777e5e3195c32cbdcc5fb4e32bd1ed03d3c",
+      "expected_inventory_count": 194,
+      "inventory_count": 194,
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-binaries-r2/session",
+        "--list"
+      ],
+      "exit": 0,
+      "seconds": 0.006,
+      "reaped": true,
+      "outer_timeout_seconds": 30,
+      "stdout": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-session-inventory.stdout.log",
+      "stdout_sha256": "12f7874fd86d2c5d2c9113da6bfdd8b716c625cc77b72e24af63136939eae328",
+      "stderr": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-session-inventory.stderr.log",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "parent_inventory_sha256": "12f7874fd86d2c5d2c9113da6bfdd8b716c625cc77b72e24af63136939eae328",
+      "matches_parent_inventory": true,
+      "relevant_tests": [
+        "sftp::archive_transfer::mutation_worker::tests::cancelled_publication_handoff_reports_uncertain_before_worker_result_is_returned",
+        "sftp::archive_transfer::mutation_worker::tests::cancelled_stage_handoff_reports_uncertain_before_worker_result_is_returned",
+        "sftp::archive_transfer::mutation_worker::tests::observed_mutation_result_acknowledges_a_stopped_worker",
+        "sftp::queue::tests::local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components",
+        "sftp::queue::tests::local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging"
+      ]
+    },
+    {
+      "binary": "app",
+      "sha256_before": "f19a98c17ca52619cc13e7c1e16332958c7b594691291099833f45b75eccaebc",
+      "sha256_after": "f19a98c17ca52619cc13e7c1e16332958c7b594691291099833f45b75eccaebc",
+      "expected_inventory_count": 1239,
+      "inventory_count": 1239,
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-binaries-r2/app",
+        "--list"
+      ],
+      "exit": 0,
+      "seconds": 0.015,
+      "reaped": true,
+      "outer_timeout_seconds": 30,
+      "stdout": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-app-inventory.stdout.log",
+      "stdout_sha256": "81b048868d9891116bdfccfa273129020ca769c25d24b7ff81a83eed356d9273",
+      "stderr": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-app-inventory.stderr.log",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "parent_inventory_sha256": "81b048868d9891116bdfccfa273129020ca769c25d24b7ff81a83eed356d9273",
+      "matches_parent_inventory": true,
+      "relevant_tests": [
+        "files::transfer_tests::archive_tests::archive_unobserved_worker_result_keeps_the_unknown_close_hold"
+      ]
+    }
+  ],
+  "original_target_access": false,
+  "independent_compilation": false,
+  "native_windows": "NOT_RUN"
+}

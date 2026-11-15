@@ -100,10 +100,7 @@ fn cancelled(stop: &AtomicBool) -> Result<()> {
 }
 
 fn alias(name: &str) -> String {
-    name.chars()
-        .flat_map(char::to_uppercase)
-        .flat_map(char::to_lowercase)
-        .collect()
+    keelshell_platform::filename_alias(name)
 }
 
 fn path(path: &Path) -> Result<&str> {

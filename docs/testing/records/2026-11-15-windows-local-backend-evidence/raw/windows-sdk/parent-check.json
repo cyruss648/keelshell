@@ -1,0 +1,31 @@
+{
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "env_delta": {
+    "CC_x86_64_pc_windows_msvc": "/opt/homebrew/opt/llvm/bin/clang",
+    "CXX_x86_64_pc_windows_msvc": "/opt/homebrew/opt/llvm/bin/clang++",
+    "AR_x86_64_pc_windows_msvc": "/opt/homebrew/opt/llvm/bin/llvm-lib",
+    "CFLAGS_x86_64_pc_windows_msvc": "--target=x86_64-pc-windows-msvc -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/crt/include -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/ucrt -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/um -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/shared -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/winrt",
+    "CXXFLAGS_x86_64_pc_windows_msvc": "--target=x86_64-pc-windows-msvc -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/crt/include -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/ucrt -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/um -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/shared -isystem /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/include/winrt",
+    "CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER": "/opt/homebrew/bin/lld-link",
+    "LIB": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/crt/lib/x86_64;/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/lib/um/x86_64;/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/lib/ucrt/x86_64"
+  },
+  "argv": [
+    "cargo",
+    "check",
+    "-p",
+    "keelshell-session",
+    "--all-targets",
+    "--target",
+    "x86_64-pc-windows-msvc",
+    "--locked",
+    "--offline"
+  ],
+  "execution_status": "NOT_RUN_BY_SIDECAR",
+  "target_directory": "Parent retains ownership of its existing CARGO_TARGET_DIR; this recommendation does not set or touch it.",
+  "driver": "GNU clang targeting the real MSVC ABI; verified against the six actual failed C commands. clang-cl accepts /Users input paths only after --, so it is not the default recommendation.",
+  "limits": [
+    "Independent C/C++ object compilation and SDK library link probes only.",
+    "This does not establish a passing parent cargo check or Windows native acceptance.",
+    "No changes to cryptography dependencies, headers, Rust cfg, Cargo.lock or Cargo configuration."
+  ]
+}

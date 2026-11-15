@@ -1,0 +1,27 @@
+{
+  "receipt": "logs/normal-gui-mcp-r1.json",
+  "freeze_sha256": "1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9",
+  "artifacts": [
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "sha256": "9936f6175fc8451c14056aa634f071ec34ca5842dff4c8f6bc5f9cad2b3c7adf",
+      "bytes": 197416192,
+      "format": "Mach-O 64-bit arm64",
+      "file_observation": "Mach-O 64-bit executable arm64"
+    },
+    {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "bytes": 14566512,
+      "format": "Mach-O 64-bit arm64",
+      "file_observation": "Mach-O 64-bit executable arm64"
+    }
+  ],
+  "native_window_interactions": "NOT_RUN",
+  "package_install_release": "NOT_RUN",
+  "toolchain": {
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+    "cargo": "cargo 1.100.0 (3acc79c0c 2026-11-05)",
+    "active": "stable-aarch64-apple-darwin (default)"
+  }
+}

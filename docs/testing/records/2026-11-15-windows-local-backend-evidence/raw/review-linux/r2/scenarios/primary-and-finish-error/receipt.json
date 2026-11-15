@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "scope": "native Linux Rust local filesystem and codecs; no desktop/peer acceptance",
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "owner": "36edbe44079248d09349a311d4778707",
+  "image": "synthetic",
+  "started_unix": 1794746168.311332,
+  "budget_seconds": 60,
+  "steps": [],
+  "suites": [],
+  "status": "FAIL",
+  "host_cargo_used": false,
+  "host_target_accessed": false,
+  "network": "none",
+  "msrv_bypass": false,
+  "host_runner_inputs": {
+    "scripts/run_linux_local_backend.py": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+  },
+  "error": "BackendFailure: reviewer primary failure",
+  "execution_status": "FAIL",
+  "cleanup": {
+    "container_removed": true,
+    "owned_processes_stopped": false,
+    "process_cleanup_error": "PermissionError: reviewer finish signal denied",
+    "container_filesystem_and_target_removed": true
+  },
+  "elapsed_seconds": 0.0,
+  "finished_unix": 1794746168.311777,
+  "totals": {
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "run_id": "zmodem-r1-20261115T124545Z",
+  "observed_at_utc": "2026-11-15T12:45:45.566972+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "host": {
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "git_metadata_read_only": {
+    "gitdir": "/Users/hdh/work/develop/projects/keelshell/.git/worktrees/keelshell",
+    "head": "ref: refs/heads/feature/editor-unicode-codec-20261114",
+    "commit_sha": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+    "ref_source": "/Users/hdh/work/develop/projects/keelshell/.git/refs/heads/feature/editor-unicode-codec-20261114"
+  },
+  "manifest_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/zmodem-inputs-r1.json",
+  "manifest_sha256": "8fb6ea161f2ce4d4ba0d882901ff867b9cf44f1cfcb19138af6d088a9ed01075",
+  "files": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem.rs",
+      "expected_sha256": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+      "actual_sha256": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+      "match": true,
+      "bytes": 53005,
+      "lines": 1402
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local_windows.rs",
+      "expected_sha256": "68ebb6fc05cf61c7b3fd8a64138038c981c03a469d99f7a9c6ca7456ba0f842f",
+      "actual_sha256": "68ebb6fc05cf61c7b3fd8a64138038c981c03a469d99f7a9c6ca7456ba0f842f",
+      "match": true,
+      "bytes": 18444,
+      "lines": 525
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "expected_sha256": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+      "actual_sha256": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+      "match": true,
+      "bytes": 37204,
+      "lines": 993
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/Cargo.toml",
+      "expected_sha256": "61e707d92be30616f67f5171034d99c70168edb55167313bcb5d67b31b4eac3f",
+      "actual_sha256": "61e707d92be30616f67f5171034d99c70168edb55167313bcb5d67b31b4eac3f",
+      "match": true,
+      "bytes": 981,
+      "lines": 36
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "expected_sha256": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "actual_sha256": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "match": true,
+      "bytes": 36353,
+      "lines": 863
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/tests/zmodem.rs",
+      "expected_sha256": "67a196d6a429258f13e137919d2dece286704746ff6a74a20a5e1b450c1ed8de",
+      "actual_sha256": "67a196d6a429258f13e137919d2dece286704746ff6a74a20a5e1b450c1ed8de",
+      "match": true,
+      "bytes": 42824,
+      "lines": 1268
+    }
+  ],
+  "applicable_agents_files": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/AGENTS.md",
+    "/Users/hdh/.codex/AGENTS.md"
+  ],
+  "native_status": "NOT_RUN",
+  "cargo_rustc_format_git_commands": 0,
+  "target_access": false,
+  "archive_review_started": false
+}

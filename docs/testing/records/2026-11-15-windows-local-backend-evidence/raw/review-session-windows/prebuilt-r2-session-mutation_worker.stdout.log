@@ -1,0 +1,8 @@
+
+running 3 tests
+test sftp::archive_transfer::mutation_worker::tests::observed_mutation_result_acknowledges_a_stopped_worker ... ok
+test sftp::archive_transfer::mutation_worker::tests::cancelled_stage_handoff_reports_uncertain_before_worker_result_is_returned ... ok
+test sftp::archive_transfer::mutation_worker::tests::cancelled_publication_handoff_reports_uncertain_before_worker_result_is_returned ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 191 filtered out; finished in 0.01s
+

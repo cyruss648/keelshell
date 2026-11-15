@@ -1,0 +1,44 @@
+{
+  "decision": "APPROVE",
+  "approval_scope": "SOURCE_CONTRACT_ONLY",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "r1_historical_decision": "HOLD",
+  "r1_findings_closed_source_contract": [
+    "R1-P2-01",
+    "R1-P2-02"
+  ],
+  "engineering_commands": {
+    "total": 1,
+    "cargo": 1,
+    "rustc": 0
+  },
+  "engineering_exit_zero": 1,
+  "combined_r1_r2_engineering_commands": {
+    "total": 8,
+    "cargo": 4,
+    "rustc": 4
+  },
+  "windows_conditional_tests_typechecked": 46,
+  "common_tests_typechecked": 15,
+  "windows_tests_executed": 0,
+  "host_tests_newly_executed_r2": 0,
+  "r1_host_tests_reused_identical_common_source": 15,
+  "windows_native": "NOT_RUN",
+  "manifest_sha256": "567a74e6bfccdb8b9bc846e30ed613ccd1051fc90caffa5e6a35e3a525143c81",
+  "inputs": 9,
+  "frozen_match_count": 9,
+  "live_match_count": 9,
+  "changed_from_r1": 3,
+  "own_target_deleted": true,
+  "limitations": [
+    "No Windows filesystem or driver runtime verification",
+    "ReOpenFile on native NtCreateFile-origin file objects not executed",
+    "Independent writer/delete negatives assert error rather than exact Windows code",
+    "Concurrency/remote/reparse/drive-map native gaps from r1 remain"
+  ]
+}

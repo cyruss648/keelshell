@@ -1,0 +1,8 @@
+{
+  "binding": "captured after native-r1; no runner/helper edits occurred during the run",
+  "files": {
+    "scripts/run_linux_local_backend.py": "745d02e758f43f98ce1e1280c31acc12d51ba6bd41b098f91821954321108bef",
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+  }
+}

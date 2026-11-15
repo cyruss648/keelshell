@@ -1,0 +1,3 @@
+clang-cl: warning: '/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.cpp' treated as the '/U' option [-Wslash-u-filename]
+clang-cl: note: use '--' to treat subsequent arguments as filenames
+clang-cl: error: no input files

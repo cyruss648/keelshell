@@ -1,0 +1,29 @@
+{
+  "steps": [
+    {
+      "name": "python-runner-suite",
+      "argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_linux_local_backend.py",
+        "-v"
+      ],
+      "pid": 57474,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 1.234,
+      "stdout_log": "001-python-runner-suite.stdout.log",
+      "stderr_log": "001-python-runner-suite.stderr.log"
+    }
+  ],
+  "scope": "Linux-local runner only",
+  "budget_seconds": 45
+}

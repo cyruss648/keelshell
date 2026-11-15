@@ -1,0 +1,10 @@
+{
+  "name": "setsecuritydescriptorcontrol",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-setsecuritydescriptorcontrol",
+  "retrieved_at": "2026-11-15T11:53:00.544569+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-setsecuritydescriptorcontrol",
+  "bytes": 53991,
+  "sha256": "7e09fded42a7232b0df12e2a5c2d18881b435cd26372404e98e4205190ec7fbf",
+  "title": "SetSecurityDescriptorControl function (securitybaseapi.h) - Win32 apps | Microsoft Learn"
+}

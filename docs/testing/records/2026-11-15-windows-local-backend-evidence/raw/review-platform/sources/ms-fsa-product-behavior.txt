@@ -1,0 +1,1464 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+5 Appendix A: Product Behavior
+Feedback
+Summarize this article for me
+In this article
+The information in this specification is applicable to the
+following Microsoft products or supplemental software. References to product
+versions include updates to those products.
+The terms "earlier" and "later", when
+used with a product version, refer to either all preceding versions or all
+subsequent versions, respectively. The term "through" refers to the
+inclusive range of versions. Applicable Microsoft products are listed
+chronologically in this section.
+Windows Client
+§
+Windows 2000 Professional operating system
+§
+Windows XP operating system
+§
+Windows Vista operating system
+§
+Windows 7 operating system
+§
+Windows 8 operating system
+§
+Windows 8.1 operating system
+§
+Windows 10 operating system
+§
+Windows 11 operating system
+Windows Server
+§
+Windows 2000 Server operating system
+§
+Windows Server 2003 operating system
+§
+Windows Server 2008 operating system
+§
+Windows Server 2008 R2 operating system
+§
+Windows Server 2012 operating system
+§
+Windows Server 2012 R2 operating system
+§
+Windows Server 2016 operating system
+§
+Windows Server 2019 operating system
+§
+Windows Server 2022 operating system
+§
+Windows Server 2025 operating system
+Exceptions, if any, are noted in this section. If an update
+version, service pack or Knowledge Base (KB) number appears with a product
+name, the behavior changed in that update. The new behavior also applies to
+subsequent updates unless otherwise specified. If a product edition appears
+with the product version, behavior is different in that product edition.
+Unless otherwise specified, any statement of optional
+behavior in this specification that is prescribed using the terms
+"SHOULD" or "SHOULD NOT" implies product behavior in accordance
+with the SHOULD or SHOULD NOT prescription. Unless otherwise specified, the
+term "MAY" implies that the product does not follow the prescription.
+<1>
+Section 2.1.1.1: Hard links are supported on NTFS volumes, UDFS volumes,
+and ReFS volumes formatted version 3.5 or later (Windows Server 2022 and
+later).
+<2>
+Section 2.1.1.1: NTFS uses a default cluster size of 4
+KB, a maximum cluster size of 64 KB on Windows 10 v1703 operating system and
+earlier and Windows Server 2016 and earlier, and 2 MB on Windows 10 v1709
+operating system and later and Windows Server 2019 and later, and a minimum
+cluster size of 512 bytes. ReFS in Windows 8, Windows 8.1, Windows Server 2012
+operating system and Windows Server 2012 R2 use a fixed cluster size of 64 KB.
+ReFS in Windows 10 and later and Windows Server 2016 and later use a default
+cluster size of 4 KB. ReFS also supports a 64-KB cluster size.
+<3>
+Section 2.1.1.1: For AMD64, x86, and ARM systems, this value is 4 KB. For
+ia64 systems, this value is 8 KB.
+<4>
+Section 2.1.1.1: In NTFS, the CompressionUnitSize is 64 KB for encrypted
+files, 64 KB for sparse files, and the lesser of 64 KB or (16 * ClusterSize)
+for compressed files. Other file systems do not implement this field.
+<5>
+Section 2.1.1.1: In NTFS, the CompressedChunkSize is 4 KB. Other Windows
+file systems do not implement this field.
+<6>
+Section 2.1.1.1: Only ReFS supports integrity.
+<7>
+Section 2.1.1.1: Only NTFS supports quotas.
+<8>
+Section 2.1.1.1: This field is present for compatibility with the file
+level FileObjectIdInformation structure ([MS-FSCC]
+section 2.4.36).
+These fields are not currently used by Windows and always contain zeroes.
+<9>
+Section 2.1.1.1: The USN journal is supported on ReFS all versions and NTFS
+version 3.0 volumes or greater. The USN journal is active by default on Windows
+Vista and later. The USN journal is not active by default on Windows-based
+servers.
+<10>
+Section 2.1.1.1: For Windows 2000 operating system, Windows XP, Windows
+Server 2003, Windows Vista, Windows Server 2008, Windows 7, and Windows Server
+2008 R2, the maximum file size of a file on an NTFS volume is the smaller of (232
+– 1) * cluster size, and 16 terabytes (TB). For Windows 8 and Windows Server
+2012, the maximum file size of a file on an NTFS volume is (232 – 1)
+* cluster size. For Windows 8.1 and later the maximum file size of a file on an
+NTFS volume is (((232 * cluster size) – 64K). For example, if the
+cluster size is 512 bytes, the maximum file size is 2 TB.
+<11>
+Section 2.1.1.2: ReFS does not implement the TunnelCache.
+<12>
+Section 2.1.1.3:  Only NTFS supports view index files.
+<13>
+Section 2.1.1.3: ReFS and exFAT do not implement ShortNames.
+<14>
+Section 2.1.1.3: The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<15>
+Section 2.1.1.3: The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<16>
+Section 2.1.1.3: The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<17>
+Section 2.1.1.3: In Windows Vista and later, LastAccessTime updates are
+disabled by default in the ReFS and NTFS file systems. It is only updated when
+the file is closed. This behavior is controlled by the following registry
+values (respectively):
+HKLM\System\CurrentControlSet\Control\FileSystem\RefsDisableLastAccessUpdate,
+and HKLM\System\CurrentControlSet\Control\FileSystem\NtfsDisableLastAccessUpdate.
+A value of 1 means LastAccessTime updates are disabled. Any other value (or
+undefined) means they are enabled.
+In Windows 10 v1803 operating system and later, NTFS has two
+registry values controlling LastAccessTime updates:
+HKLM\System\CurrentControlSet\Control\FileSystem\NtfsDisableLastAccessUpdate
+and HKLM\System\CurrentControlSet\Control\FileSystem\
+NtfsLastAccessUpdatePolicyVolumeSizeThreshold. The NtfsDisableLastAccessUpdate value
+is now treated as a bitfield as follows:
+Value
+Meaning
+0x00000001
+Disable LastAccessTime updates.
+0x00000002
+System managed. Indicates that NTFS uses its own
+policy for updating LastAccessTime as follows:
+On client systems,
+LastAccessTime updates are enabled if any of the following conditions are
+true:
+NtfsLastAccessUpdatePolicyVolumeSizeThreshold
+is 0.
+The size of the boot volume is
+<= NtfsLastAccessUpdatePolicyVolumeSizeThreshold in GB.
+NtfsLastAccessUpdatePolicyVolumeSizeThreshold
+is undefined and (earlier than Windows 10 v2004 operating system) the size of
+the boot volume is <= 128GB.
+On server systems, or client
+systems where the above conditions do not apply, LastAccessTime updates are
+always disabled.
+At system startup, after evaluating the above policy,
+NTFS will set/clear flag 0x00000001 accordingly to reflect that
+LastAccessTime updates are disabled/enabled.
+0x80000000
+Flags initialized. Indicates NTFS recognizes flags
+other than 0x00000001. At system startup, if flag 0x80000000 is not set, the
+system will automatically set flag 0x80000000 and will additionally set flag
+0x00000002 (becoming system managed) if flag 0x00000001 was set.
+If the value of NtfsDisableLastAccessUpdate is controlled by
+group policy, then only flag 0x00000001 is recognized.
+<18>
+Section 2.1.1.3: The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<19>
+Section 2.1.1.3: Only NTFS implements EAs.
+<20>
+Section 2.1.1.3: Only NTFS implements EAs.
+<21>
+Section 2.1.1.3: Only NTFS implements object IDs.
+<22>
+Section 2.1.1.3: Only NTFS implements object IDs.
+<23>
+Section 2.1.1.3: Only NTFS, UDFS, and ReFS implement named streams.
+<24>
+Section 2.1.1.3: ReFS and exFAT do not implement ShortNames.
+<25>
+Section 2.1.1.3: Only NTFS implements encryption.
+<26>
+Section 2.1.1.4: For ReFS, there will always be exactly one link per file
+or directory.
+<27>
+Section 2.1.1.4: On ReFS or exFAT, this field MUST be empty.
+<28>
+Section 2.1.1.4:  The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<29>
+Section 2.1.1.4:  The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<30>
+Section 2.1.1.4:  The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<31>
+Section 2.1.1.4:  In Windows Vista and later, LastAccessTime updates are
+disabled by default in the ReFS and NTFS file systems. It is updated only when
+the file is closed. This behavior is controlled by the following registry
+values (respectively): HKLM\System\CurrentControlSet\Control\FileSystem\RefsDisableLastAccessUpdate,
+and
+HKLM\System\CurrentControlSet\Control\FileSystem\NtfsDisableLastAccessUpdate. A
+value of 1 means LastAccessTime updates are disabled. Any other value (or
+undefined) means they are enabled.
+In Windows 10 v1803 and later, NTFS has two registry values
+controlling LastAccessTime updates:
+HKLM\System\CurrentControlSet\Control\FileSystem\NtfsDisableLastAccessUpdate
+and HKLM\System\CurrentControlSet\Control\FileSystem\
+NtfsLastAccessUpdatePolicyVolumeSizeThreshold. The NtfsDisableLastAccessUpdate
+value is now treated as a bitfield as follows:
+Value
+Meaning
+0x00000001
+Disable LastAccessTime updates.
+0x00000002
+System managed. Indicates that NTFS uses its own
+policy for updating LastAccessTime as follows:
+On client systems, LastAccessTime
+updates are enabled if any of the following conditions are true:
+NtfsLastAccessUpdatePolicyVolumeSizeThreshold
+is 0.
+The size of the boot volume is
+less than or equal to NtfsLastAccessUpdatePolicyVolumeSizeThreshold in GB.
+NtfsLastAccessUpdatePolicyVolumeSizeThreshold
+is undefined and (earlier than Windows 10 v2004) the size of the boot volume
+is <= 128GB.
+On server systems, or client
+systems where the above conditions do not apply, LastAccessTime updates are
+always disabled.
+At system startup, after evaluating the above policy,
+NTFS will set/clear flag 0x00000001 accordingly to reflect that
+LastAccessTime updates are disabled/enabled.
+0x80000000
+Flags initialized. Indicates NTFS recognizes flags
+other than 0x00000001. At system startup, if flag 0x80000000 is not set, the
+system will automatically set flag 0x80000000 and will additionally set flag
+0x00000002 (becoming system managed) if flag 0x00000001 was set.
+If the value of NtfsDisableLastAccessUpdate is controlled by
+group policy, then only flag 0x00000001 is recognized.
+<32>
+Section 2.1.1.4:  The following table defines the support of file time
+stamps across various Windows file systems. More information can be found in
+section 6 of the File System Behavior Overview document [FSBO].
+Timestamp
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CreationTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastAccessTime
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in UTC
+100 nanosecond granularity
+Updated at 60 minute granularity
+Stored in local time
+1 day granularity
+Stored in UTC if available, else in local time
+2 second granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+ChangeTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Not Supported
+Not Supported
+Stored in UTC if available, else in local time
+1 microsecond granularity
+LastWriteTime
+Stored in UTC
+100 nanosecond granularity
+Stored in UTC
+100 nanosecond granularity
+Stored in local time
+2 second granularity
+Stored in UTC if available, else in local time
+10 millisecond granularity
+Stored in UTC if available, else in local time
+1 microsecond granularity
+<33>
+Section 2.1.1.4:  Only NTFS implements EAs.
+<34>
+Section 2.1.1.5:  Only NTFS supports view index streams.
+<35>
+Section 2.1.1.5: Only NTFS supports compression.
+<36>
+Section 2.1.1.5: Only ReFS supports integrity.
+<37>
+Section 2.1.1.5: Only ReFS supports integrity.
+<38>
+Section 2.1.1.5: Only NTFS, ReFS, and UDFS support sparse files.
+<39>
+Section 2.1.1.5: Only NTFS supports encryption.
+<40>
+Section 2.1.1.6: Only NTFS implements EAs.
+<41>
+Section 2.1.4.11: NTFS sets RecordLength to BlockAlign(FieldOffset(USN_RECORD_V2.FileName)
++ FileNameLength, 8). ReFS sets RecordLength to BlockAlign(FieldOffset(USN_RECORD_V3.FileName)
++ FileNameLength, 8).
+<42>
+Section 2.1.4.12:  Windows 2000 through Windows Server 2008 R2 do not
+perform any of the following checks because PARENT_OBJECT is never set in the Flags
+field so you will always take the ELSE statement to the SWITCH statement.
+Windows 8 and Windows Server 2012 will perform the following
+checks before the Switch(Operation) statement:
+If Flags contains PARENT_OBJECT:
+If Operation
+is OPEN, as specified in section 2.1.5.1, or
+Operation is FLUSH_DATA, as specified in section
+2.1.5.6,
+or
+Operation is CLOSE, as specified in section 2.1.5.4,
+or
+Operation is FS_CONTROL, as specified in
+section 2.1.5.9, and OpParams.ControlCode
+is FSCTL_SET_ENCRYPTION, or
+Operation is
+SET_INFORMATION, as specified in section 2.1.5.14, and OpParams.FileInformationClass
+is one of FileBasicInformation or FileAllocationInformation or
+FileEndOfFileInformation or FileRenameInformation or FileLinkInformation or
+FileShortNameInformation or FileValidDataLengthInformation.
+Set BreakCacheState to (READ_CACHING|WRITE_CACHING).
+Else:
+Switch
+(Operation):
+<43>
+Section 2.1.4.17:  File systems may choose to defer processing for a file
+that has been modified to a later time, favoring performance over accuracy. The
+NTFS file system on versions earlier than Windows 10 v1809 operating system and
+non-NTFS file systems on all versions of Windows, defer this processing until
+the Open gets closed.
+<44>
+Section 2.1.4.20:  File systems may choose to defer processing for a file
+that has been accessed to a later time, favoring performance over accuracy. The
+NTFS file system on versions Windows 10 v1809 and earlier and non-NTFS file
+systems on all versions of Windows, defer this processing until the Open
+gets closed.
+<45>
+Section 2.1.5.1:  NTFS and ReFS recognize the following complex name
+suffixes:
+§
+":$I30"
+§
+"::$INDEX_ALLOCATION"
+§
+":$I30:$INDEX_ALLOCATION"
+§
+"::$BITMAP"
+§
+":$I30:$BITMAP"
+§
+"::$ATTRIBUTE_LIST"
+§
+"::$REPARSE_POINT"
+Other Windows file systems do not recognize any complex name
+suffixes.
+<46>
+Section 2.1.5.1: NTFS and ReFS recognize the following stream type names:
+"$STANDARD_INFORMATION"
+"$ATTRIBUTE_LIST"
+"$FILE_NAME"
+"$OBJECT_ID"
+"$SECURITY_DESCRIPTOR"
+"$VOLUME_NAME"
+"$VOLUME_INFORMATION"
+"$DATA"
+"$INDEX_ROOT"
+"$INDEX_ALLOCATION"
+"$BITMAP"
+"$REPARSE_POINT"
+"$EA_INFORMATION"
+"$EA"
+"$LOGGED_UTILITY_STREAM"
+Other Windows file systems do not recognize any stream type
+names.
+<47>
+Section 2.1.5.1:  Only the NTFS and ReFS file systems support complex name
+suffixes and StreamTypeNames. File systems that do not support this return
+STATUS_OBJECT_NAME_INVALID.
+<48>
+Section 2.1.5.1.1: For the NTFS file system, the FileId128 consists
+of a 48-bit index into the MFT (the low 48 bits) and a 16-bit sequence number
+(the next higher 16 bits), with the high 64 bits unused and always equal to 0.
+For the ReFS file system, the FileId128 consists of a 64-bit index
+uniquely identifying the file's parent directory on the volume (the low 64
+bits) and a 64-bit index uniquely identifying the file within that directory
+(the high 64 bits).
+<49>
+Section 2.1.5.1.1: For the NTFS file system this is the index and sequence
+number portions (low 64 bits) of the FileId128.  The ReFS file system
+maps a subset of the possible FileId128 values to FileId64 values
+using a reversible compression algorithm; for values outside of this subset,
+ReFS sets the FileId64 to -1.
+<50>
+Section 2.1.5.1.1: For the NTFS file system, this is the index portion (low
+48 bits) of the FileId128. The ReFS file system does not implement this
+field.
+<51>
+Section 2.1.5.1.1: Only ReFS supports FILE_ATTRIBUTE_INTEGRITY_STREAM.
+<52>
+Section 2.1.5.1.1: Only NTFS and ReFS support FILE_ATTRIBUTE_NO_SCRUB_DATA.
+<53>
+Section 2.1.5.1.1: Only NTFS and UDFS implement named streams.
+<54>
+Section 2.1.5.1.1: The ReFS filesystem limits a named stream size to 128KB.
+If the Create operation for a new named stream specifies a larger size, ReFS
+fails the Create operation with STATUS_FILE_SYSTEM_LIMITATION.
+<55>
+Section 2.1.5.1.2: Windows 2000, Windows XP, Windows Server 2003, and
+Windows Vista, treat the FILE_DISALLOW_EXCLUSIVE option as always being FALSE.
+<56>
+Section 2.1.5.6.1: This is implemented only by the NTFS file system.
+<57>
+Section 2.1.5.6.1: This directory is only available on NTFS volumes
+formatted to NTFS version 3.0 or late.
+<58>
+Section 2.1.5.6.1: "*" is treated as 0x0000002A during the
+search, and it gives the practical behavior of a wildcard since an ObjectId
+starts with a much larger value. Similarly, "?" is treated as
+0x0000003F and so practically it behaves like "*".
+<59>
+Section 2.1.5.6.2: This is implemented only by the NTFS file system. This
+is not implemented on the FAT32 file system and STATUS_INVALID_PARAMETER will
+be returned.
+<60>
+Section 2.1.5.6.2: This directory is only available on NTFS volumes
+formatted to NTFS version 3.x.
+<61>
+Section 2.1.5.6.3: Windows Vista operating system with Service Pack 1
+(SP1), Windows Server 2008, Windows 7, and Windows Server 2008 R2 execute this
+portion only when FirstQuery is TRUE; the remaining conditions are ignored.
+This means the query pattern for a given Open cannot be changed once it is set.
+<62>
+Section 2.1.5.6.3.1: For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<63>
+Section 2.1.5.6.3.3: For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<64>
+Section 2.1.5.6.3.4:  For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<65>
+Section 2.1.5.6.3.4:  The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<66>
+Section 2.1.5.6.3.5:  For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<67>
+Section 2.1.5.6.3.5:  The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<68>
+Section 2.1.5.6.3.6:  For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<69>
+Section 2.1.5.6.3.6:  The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<70>
+Section 2.1.5.6.3.6:  The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<71>
+Section 2.1.5.6.3.7:  For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<72>
+Section 2.1.5.6.3.7:  The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<73>
+Section 2.1.5.6.3.7:  The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<74>
+Section 2.1.5.6.3.8: For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<75>
+Section 2.1.5.6.3.8: The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<76>
+Section 2.1.5.6.3.9: For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<77>
+Section 2.1.5.6.3.9: The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<78>
+Section 2.1.5.6.3.10: For file systems that don’t support Extended
+Attributes, this value MUST be zero.
+<79>
+Section 2.1.5.6.3.10: The NTFS file system on versions earlier than Windows
+11 and earlier than Windows Server 2022, and non-NTFS file systems on all
+versions of Windows, always set the FileID field to zero in the
+".." entry.
+<80>
+Section 2.1.5.7: This is only implemented by the NTFS file system. Other
+file systems return STATUS_SUCCESS and perform no other action.
+<81>
+Section 2.1.5.8:  In Windows 2000, Windows XP, Windows Server 2003, Windows
+Vista, Windows Server 2008, Windows 7, and Windows Server 2008 R2, NTFS checks
+for an oplock break even when (FileOffset >= Open.Stream.AllocationSize).
+<82>
+Section 2.1.5.10.1: This is only implemented by the NTFS file system.
+<83>
+Section 2.1.5.10.1: If the generated ObjectId collides with existing
+ObjectIds on the volume, Windows
+retries up to 16 times before failing the operation with STATUS_DUPLICATE_NAME.
+<84>
+Section 2.1.5.10.1: The file system only updates LastChangeTime if
+no user has explicitly set LastChangeTime. The NTFS and ReFS file
+systems defer setting LastChangeTime until the handle is closed.
+<85>
+Section 2.1.5.10.2: This is only implemented by the NTFS file system.
+<86>
+Section 2.1.5.10.2: The file system only updates LastChangeTime if
+no user has explicitly set LastChangeTime. The NTFS and ReFS file
+systems defer setting LastChangeTime until the handle is closed.
+<87>
+Section 2.1.5.10.3: This is only implemented by the NTFS file system.
+<88>
+Section 2.1.5.10.3: The file system only updates LastChangeTime if
+no user has explicitly set LastChangeTime. The NTFS and ReFS file
+systems defer setting LastChangeTime until the handle is closed.
+<89>
+Section 2.1.5.10.4: FSCTL_DUPLICATE_EXTENTS_TO_FILE is only supported by
+the ReFS file system in Windows 10 and later, Windows Server 2016 and later.
+<90>
+Section 2.1.5.10.4:  Windows returns STATUS_INVALID_HANDLE if the source
+file handle is closed.
+<91>
+Section 2.1.5.10.4:  The ReFS file system in Windows Server 2016 and later
+does not check for byte range lock conflicts on Open.Stream.
+<92>
+Section 2.1.5.10.4:  The ReFS file system in Windows Server 2016 and later
+does not check for byte range lock conflicts on Source.
+<93>
+Section 2.1.5.10.5:  FSCTL_DUPLICATE_EXTENTS_TO_FILE_EX is only supported
+by the ReFS file system in Windows 10 v1803 and later, Windows Server v1803
+operating system and later and Windows Server 2019 and later.
+<94>
+Section 2.1.5.10.5:  Windows returns STATUS_INVALID_HANDLE if the source
+file handle is closed.
+<95>
+Section 2.1.5.10.5:  The ReFS file system in Windows 10 v1803 and Windows
+Server v1803 does not check for byte range lock conflicts on Open.Stream.
+<96>
+Section 2.1.5.10.5:  The ReFS file system in Windows 10 v1803 and Windows
+Server v1803 does not check for byte range lock conflicts on Source.
+<97>
+Section 2.1.5.10.6: If the Open is a directory on a Cluster Shared Volume
+File System (CSVFS), the operation MUST be failed with STATUS_NOT_IMPLEMENTED.
+<98>
+Section 2.1.5.10.7: This is only implemented by the ReFS, NTFS, FAT, FAT32,
+and exFAT file systems.
+<99>
+Section 2.1.5.10.7: The NTFS file system sets an NTFS_STATISTICS structure
+as specified in [MS-FSCC] section 2.3.12.2.
+The FAT file system sets a FAT_STATISTICS structure as specified in [MS-FSCC]
+section 2.3.12.3.
+The EXFAT file system sets a EXFAT_STATISTICS structure as specified in
+[MS-FSCC] section 2.3.12.4.
+<100>
+Section 2.1.5.10.8: This is only implemented by the NTFS file system.
+<101>
+Section 2.1.5.10.8: Some file systems have more efficient mechanisms to
+obtain a list of files. For instance, NTFS iterates through all base file
+records of the MFT.
+<102>
+Section 2.1.5.10.9: This is only implemented by the NTFS and ReFS file
+systems.
+<103>
+Section 2.1.5.10.10: This operation is only implemented by the ReFS file
+system.
+<104>
+Section 2.1.5.10.11: This is only implemented by the NTFS file system.
+<105>
+Section 2.1.5.10.11: Several of the fields being set in this section are
+specific to how the NTFS file system is implemented and are not defined in the
+Object Stores Abstract Data Model.
+<106>
+Section 2.1.5.10.13: This is only implemented by the NTFS file system.
+<107>
+Section 2.1.5.10.14: This is only implemented by the ReFS and NTFS file
+systems.
+<108>
+Section 2.1.5.10.16: Only ReFS supports this FSCTL.
+<109>
+Section 2.1.5.10.19: This operation is only supported on the NTFS and ReFS
+file systems. This feature is supported in Windows Server 2019 and later.
+<110>
+Section 2.1.5.10.19: The ReFS file system returns STATUS_INVALID_PARAMETER
+for directory files.
+<111>
+Section 2.1.5.10.19: Only the NTFS file system supports the concept of
+resident files, and it is an implementation-specific concept to a given file
+system.
+<112>
+Section 2.1.5.10.20: This is implemented only by the NTFS file system.
+<113>
+Section 2.1.5.10.21: This is implemented only by the NTFS file system.
+<114>
+Section 2.1.5.10.22: This is only implemented by the ReFS and NTFS file
+systems.
+<115>
+Section 2.1.5.10.23: Support for this FSCTL is only implemented in the FAT
+file system. The data returned by this FSCTL is incomplete and incorrect on
+FAT32, and it is unsupported on all other file systems, as specified in
+[MS-FSCC] section 2.3.57.
+<116>
+Section 2.1.5.10.24:  This operation is only supported by the NTFS and ReFS
+file systems.
+<117>
+Section 2.1.5.10.24: In Windows Server 2012 R2, InputRegion.DesiredUsage
+is set to FILE_REGION_USAGE_VALID_CACHED_DATA for ReFS.
+<118>
+Section 2.1.5.10.25: This is only implemented by the UDFS file system.
+<119>
+Section 2.1.5.10.26: This is only implemented by the UDFS file system.
+<120>
+Section 2.1.5.10.27: This is only implemented by the ReFS and NTFS file
+systems.
+<121>
+Section 2.1.5.10.27: In Windows 2000, Windows XP, Windows Server 2003,
+Windows Vista, Windows Server 2008, Windows 7, Windows Server 2008 R2, Windows
+8, and Windows Server 2012, NTFS uses a MaxMajorVersionSupported value
+of 2.
+<122>
+Section 2.1.5.10.27: In Windows 2000, Windows XP, Windows Server 2003,
+Windows Vista, Windows Server 2008, Windows 7 and Windows Server 2008 R2, NTFS
+ignores the input buffer completely; all requests are treated as having an InputBufferSize
+of 0.
+<123>
+Section 2.1.5.10.27: In Windows 8 and Windows Server 2012, the operation
+MUST be failed with STATUS_NOT_IMPLEMENTED.
+<124>
+Section 2.1.5.10.28: This file system request is handled by the optional
+hierarchical storage management (HSM) file system filter. This filter has been
+deprecated as of Windows Server 2008 and is a server-only feature.
+<125>
+Section 2.1.5.10.29.2: On Microsoft Windows the query can include asterisks
+to match spans of zero or more characters. No other special matching characters
+are supported.
+<126>
+Section 2.1.5.10.29.4: REFS_STREAM_SNAPSHOT_OPERATION_REVERT is not
+supported on Windows and returns STATUS_NOT_IMPLEMENTED.
+<127>
+Section 2.1.5.10.29.5: REFS_STREAM_SNAPSHOT_OPERATION_SET_SHADOW_BTREE
+is not supported on Windows and returns STATUS_NOT_IMPLEMENTED.
+<128>
+Section 2.1.5.10.29.6: REFS_STREAM_SNAPSHOT_OPERATION_CLEAR_SHADOW_BTREE
+is not supported on Windows and returns STATUS_NOT_IMPLEMENTED.
+<129>
+Section 2.1.5.10.30: If the Open is a directory on a Cluster Shared Volume
+File System (CSVFS), the operation MUST be failed with STATUS_NOT_IMPLEMENTED.
+<130>
+Section 2.1.5.10.30: This method is fully supported with NTFS, but for
+ReFS, it is only supported and returns STATUS_SUCCESS when CompressionState
+is set to COMPRESSION_FORMAT_NONE. The method fails with STATUS_NOT_SUPPORTED
+for any other value of CompressionState.
+<131>
+Section 2.1.5.10.30: NTFS File Compression can be disabled globally on a
+system by setting the registry key
+HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\NtfsDisableCompression to 1
+and then rebooting the system to have the change take effect. Compression can
+be re-enabled by setting this key to zero and rebooting the system.
+<132>
+Section 2.1.5.10.31: This is only implemented by the UDFS file system on
+media types that require software defect management.
+<133>
+Section 2.1.5.10.32: This is implemented by the NTFS file system and the
+FAT32 file systems on Windows 10 v1511 operating system and later and Windows
+Server 2016 and later.
+<134>
+Section 2.1.5.10.33: Only ReFS supports integrity.
+<135>
+Section 2.1.5.10.33: If the Open is a directory on a Cluster Shared Volume
+File System (CSVFS), the operation MUST be failed with STATUS_NOT_IMPLEMENTED.
+<136>
+Section 2.1.5.10.33: This is implemented only by the ReFS file system.
+<137>
+Section 2.1.5.10.34:  The FSCTL_SET_INTEGRITY_INFORMATION_EX operation is
+only supported by the ReFS file system v3.2 or higher (Windows 10 v1507
+operating system and later). FSCTL_SET_INTEGRITY_INFORMATION_EX is handled
+following the process in this section on systems updated with [MSKB-5014019],
+[MSKB-5014021],
+[MSKB-5014022],
+[MSKB-5014023],
+[MSKB-5014702],
+or [MSKB-5014710].
+<138>
+Section 2.1.5.10.34: If the Open is a directory on a Cluster Shared Volume
+File System (CSVFS), the operation MUST be failed with STATUS_NOT_IMPLEMENTED.
+<139>
+Section 2.1.5.10.34: This is implemented only by the ReFS file system.
+<140>
+Section 2.1.5.10.34:  If the ReFS cluster size is 4KB the checksum used is
+CRC32 otherwise if the cluster size is 64K the CRC64 checksum is used.
+<141>
+Section 2.1.5.10.34:  If the ReFS cluster size is 4KB the checksum used is
+CRC32 otherwise if the cluster size is 64K the CRC64 checksum is used.
+<142>
+Section 2.1.5.10.35: This is only implemented by the NTFS file system.
+<143>
+Section 2.1.5.10.35: The file system only updates LastChangeTime if
+no user has explicitly set LastChangeTime. The NTFS and ReFS file
+systems defer setting LastChangeTime until the handle is closed.
+<144>
+Section 2.1.5.10.36: This is only implemented by the NTFS file system.
+<145>
+Section 2.1.5.10.36: The file system only updates LastChangeTime if no user
+has explicitly set LastChangeTime. The NTFS and ReFS file systems defer setting
+the LastChangeTime until the handle is closed.
+<146>
+Section 2.1.5.10.37: This is only implemented by the ReFS and NTFS file
+systems. The FAT32 file system will return STATUS_IO_REPARSE_DATA_INVALID.
+<147>
+Section 2.1.5.10.37: The file system only updates LastChangeTime if no user
+has explicitly set LastChangeTime. The NTFS and ReFS file systems defer setting
+the LastChangeTime until the handle is closed.
+<148>
+Section 2.1.5.10.38: If the Open is a directory on a Cluster Shared Volume
+File System (CSVFS), the operation MUST be failed with STATUS_NOT_IMPLEMENTED.
+<149>
+Section 2.1.5.10.38: This is only implemented by the NTFS file system and
+by the ReFS file system on non-integrity streams. In Windows 8.1 and later, ReFS
+supports this for both conventional and integrity streams.
+<150>
+Section 2.1.5.10.39: If the Open is a directory on a Cluster Shared Volume
+File System (CSVFS), the operation MUST be failed with STATUS_NOT_IMPLEMENTED.
+<151>
+Section 2.1.5.10.39: This is only implemented by the NTFS file system and
+by the ReFS file system on non-integrity streams. In Windows 8.1 and later,
+ReFS supports this for both conventional and integrity streams.
+<152>
+Section 2.1.5.10.40: This is only implemented by the NTFS file system and
+FAT32 file system on Windows 10 v1511 and later and Windows Server 2016 and
+later.
+<153>
+Section 2.1.5.10.41: Single Instance Storage is an optional feature
+available in the following versions of Windows Server: Windows Storage Server
+2003 R2 operating system, Standard Edition, Windows Storage Server 2008, and
+Windows Storage Server 2008 R2. Single Instance Storage is not supported
+directly by any of the Windows file systems but is implemented as a file system
+filter.
+<154>
+Section 2.1.5.10.41: This is implemented only by the NTFS file system. The
+FAT32 file system will return STATUS_NOT_SUPPORTED.
+<155>
+Section 2.1.5.10.41: In the Windows environment file system are implemented
+in kernel mode. If a NULL security context is specified and the originator of
+the operation is running in kernel mode, a built-in SYSTEM security context is
+used that grants all access.
+<156>
+Section 2.1.5.10.41: In the Windows environment file system are implemented
+in kernel mode. If a NULL security context is specified and the originator of
+the operation is running in kernel mode, a built-in SYSTEM security context is
+used that grants all access.
+<157>
+Section 2.1.5.10.41: In the Windows environment this is done by creating a
+new file in what is known as the "SIS Common Store". Reparse
+points are attached to any file controlled by Single Instance
+Storage that contains information on how to access the Common Store file that
+contains the data for this file.
+<158>
+Section 2.1.5.10.42: This is only implemented by the NTFS file system.
+<159>
+Section 2.1.5.12.5: Only ReFS supports integrity.
+<160>
+Section 2.1.5.12.5: Only ReFS supports integrity.
+<161>
+Section 2.1.5.12.6: Only ReFS supports integrity.
+<162>
+Section 2.1.5.12.6: Only ReFS supports integrity.
+<163>
+Section 2.1.5.12.8:  The FAT32 file system doesn’t support
+FILE_COMPRESSION_INFORMATION and will return STATUS_INVALID_PARAMETER.
+<164>
+Section 2.1.5.12.10: Only the NTFS file system implements EAs.
+<165>
+Section 2.1.5.12.12: This operation is only supported by the NTFS file
+system.
+<166>
+Section 2.1.5.12.21: Available only in ReFS.
+<167>
+Section 2.1.5.12.21: Available only in ReFS.
+<168>
+Section 2.1.5.12.23: If Open.Mode contains neither
+FILE_SYNCHRONOUS_IO_ALERT nor FILE_SYNCHRONOUS_IO_NONALERT, this operation does
+not return meaningful information in OutputBuffer.CurrentByteOffset,
+because Open.CurrentByteOffset is not maintained for any Open
+that does not have either of those flags set.
+<169>
+Section 2.1.5.12.27: This algorithm is only implemented by NTFS and ReFS.
+The FAT, EXFAT, CDFS, and UDFS file systems always return 1.
+<170>
+Section 2.1.5.12.29:  The FAT32 file system doesn’t support
+FILE_STREAM_INFORMATION and will return STATUS_INVALID_PARAMETER.
+<171>
+Section 2.1.5.13.5: The following table defines what FileSystemAttributes
+flags, as defined in [MS-FSCC] section 2.5.1,
+are set by various Windows file systems and why they are set:
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CDFS
+FILE_SUPPORTS_USN_JOURNAL
+0x02000000
+Always Set
+Set if 3.0 format or higher volume
+FILE_SUPPORTS_OPEN_BY_FILE_ID
+0x01000000
+Always Set
+Always Set
+Set if volume mounted read-only
+Always Set
+FILE_SUPPORTS_EXTENDED_ATTRIBUTES
+0x00800000
+Always Set
+FILE_SUPPORTS_HARD_LINKS
+0x00400000
+Set if 3.5 format or higher volume (formatted using
+Windows Server 2022 or later)
+Always Set
+Always Set
+FILE_SUPPORTS_TRANSACTIONS
+0x00200000
+Set if 3.0 format or higher volume
+FILE_SEQUENTIAL_WRITE_ONCE
+0x00100000
+Set if volume not mounted read-only
+FILE_READ_ONLY_VOLUME
+0x00080000
+Set if volume mounted read-only
+Set if volume mounted read-only
+Set if volume mounted read-only
+Set if volume mounted read-only
+Set if volume mounted read-only
+Always Set
+FILE_NAMED_STREAMS
+0x00040000
+Always Set
+Set if 2.0 format or higher
+FILE_SUPPORTS_ENCRYPTION
+0x00020000
+Set if 3.0 format or higher volume and encryption is
+enabled on the system
+FILE_SUPPORTS_OBJECT_IDS
+0x00010000
+Set if 3.0 format or higher volume
+FILE_VOLUME_IS_COMPRESSED
+0x00008000
+FILE_SUPPORTS_REMOTE_STORAGE
+0x00000100
+FILE_SUPPORTS_REPARSE_POINTS
+0x00000080
+Always Set
+Set if 3.0 format or higher volume
+FILE_SUPPORTS_SPARSE_FILES
+0x00000040
+Set if 3.0 format or higher volume
+FILE_VOLUME_QUOTAS
+0x00000020
+Set if 3.0 format or higher volume
+FILE_FILE_COMPRESSION
+0x00000010
+Set if volume cluster size is 4K or less
+FILE_PERSISTENT_ACLS
+0x00000008
+Always Set
+Always Set
+FILE_UNICODE_ON_DISK
+0x00000004
+Always Set
+Always Set
+Always Set
+Always Set
+Always Set
+Set if Joliet Format
+FILE_CASE_PRESERVED_NAMES
+0x00000002
+Always Set
+Always Set
+Always Set
+Always Set
+Always Set
+FILE_CASE_SENSITIVE_SEARCH
+0x00000001
+Always Set
+Always Set
+Always Set
+Always Set
+<172>
+Section 2.1.5.13.5: The following table defines the
+MaximumComponentNameLength, as defined in [MS-FSCC] section 2.5.1, that is set
+by each file system:
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CDFS
+MaximumComponentNameLength Value
+255
+255
+255
+255
+254
+110 if Joliet Format
+221 otherwise
+<173>
+Section 2.1.5.13.6: This is implemented only by the NTFS file system.
+<174>
+Section 2.1.5.13.8: ReFS does not implement object IDs.
+<175>
+Section 2.1.5.13.8: This is implemented only by the NTFS file system.
+<176>
+Section 2.1.5.14: The FAT32 file system will return ACCESS_DENIED.
+<177>
+Section 2.1.5.15.1: The following table describes the maximum file size
+supported by various Windows File Systems.
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CDFS
+MaximumFileSize
+((2^32)-1) * ClusterSize
+16 TB for Windows 2000, Windows XP, Windows Server
+2003, Windows Vista, Windows Server 2008, Windows 7, and Windows Server 2008
+R2
+(((2^32)-1) * ClusterSize) for Windows 8 and Windows
+Server 2012
+(((2^32) * ClusterSize) - 64K) for Windows 8.1 and
+later and Windows Server 2012 R2 and later
+The physical format will support 16 exabytes.
+4 GB
+16 exabytes
+8 TB
+8 TB
+<178>
+Section 2.1.5.15.1:  The FAT, FAT32, exFAT, and UDFS file systems instead
+set NewFileSize to min(Open.Stream.Size, InputBuffer.AllocationSize).
+<179>
+Section 2.1.5.15.2:  The FAT32 file system doesn’t process the ChangeTime
+field.
+<180>
+Section 2.1.5.15.5:  The FAT32 file system will return STATUS_DISK_FULL if
+the object size is greater than 2^32 – 1 bytes.
+<181>
+Section 2.1.5.15.5: The following table describes the maximum file size
+supported by various Windows File Systems.
+ReFS
+NTFS
+FAT
+EXFAT
+UDFS
+CDFS
+MaximumFileSize
+((2^32)-1) * ClusterSize
+16 TB for Windows 2000, Windows XP, Windows Server
+2003, Windows Vista, Windows Server 2008, Windows 7, and Windows Server 2008
+R2
+(((2^32)-1) * ClusterSize) for Windows 8 and Windows
+Server 2012
+(((2^32) * ClusterSize) - 64K) for Windows 8.1 and
+later and Windows Server 2012 R2 and later
+The physical format will support 16 exabytes.
+4 GB
+16 exabytes
+8 TB
+8 TB
+<182>
+Section 2.1.5.15.6: Only NTFS implements EAs.
+<183>
+Section 2.1.5.15.7: In Windows 11 and earlier and Windows Server 2022 and
+earlier, the destination directory of a FileLinkInformation operation is opened
+with ShareAccess equal to FILE_SHARE_READ|FILE_SHARE_WRITE. If there is
+a pre-existing handle with FILE_SHARE_DELETE access on the destination
+directory, this will result in the operation failing with
+STATUS_SHARING_VIOLATION.
+<184>
+Section 2.1.5.15.10: If Open.Mode contains neither
+FILE_SYNCHRONOUS_IO_ALERT nor FILE_SYNCHRONOUS_IO_NONALERT, this operation does
+not have any meaningful effect, because Open.CurrentByteOffset is not
+used for any Open that does not have either of those flags set.
+<185>
+Section 2.1.5.15.12: In Windows 11 and earlier and Windows Server 2022 and
+earlier, the destination directory of a FileRenameInformation operation is
+opened with ShareAccess equal to FILE_SHARE_READ|FILE_SHARE_WRITE. If
+there is a pre-existing handle with DELETE access on the destination directory
+this will result in the operation failing with STATUS_SHARING_VIOLATION.
+<186>
+Section 2.1.5.15.12:  On Windows NTFS, NTFS checks for open files beneath
+the directory being renamed (performs section 2.1.4.2), it
+records the count of open files. If there is a lease to break, NTFS requests
+the break and then goes back to the start of performing 2.1.5.15.12.
+NTFS waits for the lease break acknowledgment and restarts the rename
+operation. When NTFS performs section 2.1.4.2 again, it again records how many
+open files there are beneath the directory and compares that to the previous
+count. If the current count is greater than or equal to the previous count,
+NTFS fails the rename and prevents a possible race condition.
+<187>
+Section 2.1.5.15.12: The file system only updates LastChangeTime if
+no user has explicitly set LastChangeTime. The NTFS and ReFS file
+systems defer setting LastChangeTime until the handle is closed.
+<188>
+Section 2.1.5.15.14: ReFS does not implement short names.
+<189>
+Section 2.1.5.15.15: ValidDataLength is an internal implementation detail
+of the NTFS, FAT, FAT32, ExFAT, and the ReFS file system. It is not a notion that
+exists in other Windows file systems. ValidDataLength refers to a
+high-watermark in the file that is considered to be initialized data by a user
+writing in the region or by the file system writing zeros. Any reads within
+that value are required to return data from the persistent store. Any reads
+beyond that value are required to return zeros. On the NTFS and ReFS file
+systems, when committing the file to media the value for ValidataLength is
+retained. The FAT, FAT32, and ExFAT file systems do not retain the value of
+ValidDataLength. FSCTL_QUERY_FILE_REGIONS, as specified in section 2.1.5.10.24,
+can be used to retrieve the value of ValidDataLength from the media but this
+FSCTL is only supported on NTFS and ReFS.
+<190>
+Section 2.1.5.16.6: This is implemented only by the NTFS file system.
+<191>
+Section 2.1.5.16.8: Only NTFS implements object IDs.
+<192>
+Section 2.1.5.16.8: This is only implemented by the NTFS file system.
+<193>
+Section 2.1.5.17:  The FAT32 file system will return ACCESS_DENIED.
+<194>
+Section 2.1.5.17: The file system only updates LastChangeTime if no
+user has explicitly set LastChangeTime. The NTFS and ReFS file systems
+defer setting LastChangeTime until the handle is closed.
+<195>
+Section 2.1.5.18: In Windows 2000, Windows XP, Windows Server 2003, Windows
+Vista, Windows Server 2008, Windows 7, and Windows Server 2008 R2, NTFS does
+not grant the oplock even when Open.Stream.AllocationSize is greater
+than any ByteRangeLock.LockOffset in Open.Stream.ByteRangeLockList.
+<196>
+Section 2.1.5.18: In Windows 2000, Windows XP, Windows Server 2003, Windows
+Vista, Windows Server 2008, Windows 7, and Windows Server 2008 R2, NTFS does
+not grant the oplock even when Open.Stream.AllocationSize is greater
+than any ByteRangeLock.LockOffset in Open.Stream.ByteRangeLockList.
+<197>
+Section 2.1.5.20: In Windows file systems, operations are only cancelable
+if they are blocked and put on a wait queue of some kind. Operations that are
+actively being processed are not cancelable.
+<198>
+Section 2.1.5.21: The name of the quota file in the Windows environment is:
+$Extend\$Quota:$Q:$INDEX_ALLOCATION
+Opening the quota stream is only supported when the share is
+defined at the root of the volume.
+<199>
+Section 2.1.5.21: This operation is implemented only by the NTFS file
+system.
+<200>
+Section 2.1.5.22: The name of the quota file in the Windows environment is:
+$Extend\$Quota:$Q:$INDEX_ALLOCATION
+<201>
+Section 2.1.5.22: This operation is only implemented by the NTFS file
+system.
+Additional resources
+Last updated on
+2024-07-03

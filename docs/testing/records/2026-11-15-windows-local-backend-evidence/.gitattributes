@@ -1,0 +1,2 @@
+# Preserve the original receipt/report bytes, including CRLF and EOF whitespace.
+raw/** -text -diff -merge

@@ -1,0 +1,61 @@
+{
+  "url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/4e3695bd-7574-4f24-a223-b4679c065b63",
+  "fragment": "Appendix_A_185",
+  "sha256": "dcb8b8f6e95a8170fce368f51f1d3717d7117ccaa0a1e8e230deb56b430ca9d0",
+  "bytes": 136606
+}
+1386: used for any Open that does not have either of those flags set.
+1387: <185>
+1388: Section 2.1.5.15.12: In Windows 11 and earlier and Windows Server 2022 and
+1389: earlier, the destination directory of a FileRenameInformation operation is
+1390: opened with ShareAccess equal to FILE_SHARE_READ|FILE_SHARE_WRITE. If
+1391: there is a pre-existing handle with DELETE access on the destination directory
+1392: this will result in the operation failing with STATUS_SHARING_VIOLATION.
+1393: <186>
+1394: Section 2.1.5.15.12:  On Windows NTFS, NTFS checks for open files beneath
+1395: the directory being renamed (performs section 2.1.4.2), it
+1396: records the count of open files. If there is a lease to break, NTFS requests
+1387: <185>
+1388: Section 2.1.5.15.12: In Windows 11 and earlier and Windows Server 2022 and
+1389: earlier, the destination directory of a FileRenameInformation operation is
+1390: opened with ShareAccess equal to FILE_SHARE_READ|FILE_SHARE_WRITE. If
+1391: there is a pre-existing handle with DELETE access on the destination directory
+1392: this will result in the operation failing with STATUS_SHARING_VIOLATION.
+1393: <186>
+1394: Section 2.1.5.15.12:  On Windows NTFS, NTFS checks for open files beneath
+1395: the directory being renamed (performs section 2.1.4.2), it
+1396: records the count of open files. If there is a lease to break, NTFS requests
+1397: the break and then goes back to the start of performing 2.1.5.15.12.
+1393: <186>
+1394: Section 2.1.5.15.12:  On Windows NTFS, NTFS checks for open files beneath
+1395: the directory being renamed (performs section 2.1.4.2), it
+1396: records the count of open files. If there is a lease to break, NTFS requests
+1397: the break and then goes back to the start of performing 2.1.5.15.12.
+1398: NTFS waits for the lease break acknowledgment and restarts the rename
+1399: operation. When NTFS performs section 2.1.4.2 again, it again records how many
+1400: open files there are beneath the directory and compares that to the previous
+1401: count. If the current count is greater than or equal to the previous count,
+1402: NTFS fails the rename and prevents a possible race condition.
+1403: <187>
+1396: records the count of open files. If there is a lease to break, NTFS requests
+1397: the break and then goes back to the start of performing 2.1.5.15.12.
+1398: NTFS waits for the lease break acknowledgment and restarts the rename
+1399: operation. When NTFS performs section 2.1.4.2 again, it again records how many
+1400: open files there are beneath the directory and compares that to the previous
+1401: count. If the current count is greater than or equal to the previous count,
+1402: NTFS fails the rename and prevents a possible race condition.
+1403: <187>
+1404: Section 2.1.5.15.12: The file system only updates LastChangeTime if
+1405: no user has explicitly set LastChangeTime. The NTFS and ReFS file
+1406: systems defer setting LastChangeTime until the handle is closed.
+1403: <187>
+1404: Section 2.1.5.15.12: The file system only updates LastChangeTime if
+1405: no user has explicitly set LastChangeTime. The NTFS and ReFS file
+1406: systems defer setting LastChangeTime until the handle is closed.
+1407: <188>
+1408: Section 2.1.5.15.14: ReFS does not implement short names.
+1409: <189>
+1410: Section 2.1.5.15.15: ValidDataLength is an internal implementation detail
+1411: of the NTFS, FAT, FAT32, ExFAT, and the ReFS file system. It is not a notion that
+1412: exists in other Windows file systems. ValidDataLength refers to a
+1413: high-watermark in the file that is considered to be initialized data by a user

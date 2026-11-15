@@ -1,0 +1,11 @@
+{
+  "finished_utc": "2026-11-15T13:14:07.295691+00:00",
+  "report_links_checked": 13,
+  "report_links_valid": true,
+  "frozen_inputs_verified": 9,
+  "host_inventory_execution_matches": 16,
+  "windows_conditional_inventory": 46,
+  "own_target_absent": true,
+  "historical_originals_unchanged": true,
+  "windows_native": "NOT_RUN"
+}

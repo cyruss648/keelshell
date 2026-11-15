@@ -1,0 +1,9 @@
+{
+  "files": {
+    "scripts/run_linux_local_backend.py": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+    "scripts/test_linux_local_backend.py": "660a7b8fc6347364eb6dd0be340d421ff207c708cc1da3f64ac8ad964bbef8af"
+  },
+  "author_python": "logs/linux-runner-python-r3.json",
+  "tests_passed": 39,
+  "native_run_still_bound_to_old_runner": "linux-local/native-r3/receipt.json"
+}

@@ -1,0 +1,75 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+GetAce function (securitybaseapi.h)
+Feedback
+Summarize this article for me
+In this article
+The GetAce function obtains a pointer to an access control entry (ACE) in an access control list (ACL).
+Syntax
+BOOL GetAce(
+[in]  PACL   pAcl,
+[in]  DWORD  dwAceIndex,
+[out] LPVOID *pAce
+);
+Parameters
+[in] pAcl
+A pointer to an
+ACL that contains the ACE to be retrieved.
+[in] dwAceIndex
+The index of the ACE to be retrieved. A value of zero corresponds to the first ACE in the ACL, a value of one to the second ACE, and so on.
+[out] pAce
+A pointer to a pointer that the function sets to the address of the ACE.
+Return value
+If the function succeeds, the function returns nonzero.
+If the function fails, it returns zero. To get extended error information, call
+GetLastError.
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps | UWP apps]
+Minimum supported server
+Windows Server 2003 [desktop apps | UWP apps]
+Target Platform
+Windows
+Header
+securitybaseapi.h (include Windows.h)
+Library
+Advapi32.lib
+DLL
+Advapi32.dll
+See also
+AddAccessAllowedAce
+AddAccessDeniedAce
+AddAce
+AddAuditAccessAce
+GetAclInformation
+InitializeAcl
+Low-level Access Control
+Low-level Access Control Functions
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2024-02-22

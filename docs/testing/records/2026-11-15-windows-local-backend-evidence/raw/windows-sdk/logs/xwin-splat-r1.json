@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/tools/xwin-0.6.5-aarch64-apple-darwin/xwin",
+    "--accept-license",
+    "--cache-dir",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/cache/xwin",
+    "--arch",
+    "x86_64",
+    "--variant",
+    "desktop",
+    "--timeout",
+    "35s",
+    "splat",
+    "--output",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk",
+  "pid": 5788,
+  "started_utc": "2026-11-15T12:31:26.568283+00:00",
+  "finished_utc": "2026-11-15T12:32:08.668062+00:00",
+  "seconds": 42.099,
+  "timeout_seconds": 240.0,
+  "exit_code": 1,
+  "timed_out": false,
+  "reaped": true,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/logs/xwin-splat-r1.log",
+  "log_sha256": "c67929b42eea8133adfe8bedc8c34cc9a228fbbad8fccc4e586b860b434a778d"
+}

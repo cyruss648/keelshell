@@ -1,0 +1,65 @@
+{
+  "tools": [
+    {
+      "requested_path": "/opt/homebrew/opt/llvm/bin/clang",
+      "resolved_path": "/opt/homebrew/Cellar/llvm/23.1.5_1/bin/clang-23",
+      "sha256": "fc0f50b14693c7a20df1fbd4b9bd8f20af22f3985f684300945449662ff4896a",
+      "provenance": "Pre-existing local Homebrew LLVM 23.1.5; no install, update or Homebrew command run."
+    },
+    {
+      "requested_path": "/opt/homebrew/opt/llvm/bin/clang-cl",
+      "resolved_path": "/opt/homebrew/Cellar/llvm/23.1.5_1/bin/clang-23",
+      "sha256": "fc0f50b14693c7a20df1fbd4b9bd8f20af22f3985f684300945449662ff4896a",
+      "provenance": "pre-existing local Homebrew Cellar; not installed or updated by this sidecar"
+    },
+    {
+      "requested_path": "/opt/homebrew/opt/llvm/bin/clang++",
+      "resolved_path": "/opt/homebrew/Cellar/llvm/23.1.5_1/bin/clang-23",
+      "sha256": "fc0f50b14693c7a20df1fbd4b9bd8f20af22f3985f684300945449662ff4896a",
+      "provenance": "pre-existing local Homebrew Cellar; not installed or updated by this sidecar"
+    },
+    {
+      "requested_path": "/opt/homebrew/opt/llvm/bin/llvm-lib",
+      "resolved_path": "/opt/homebrew/Cellar/llvm/23.1.5_1/bin/llvm-ar",
+      "sha256": "e844988759008731ebd2493cef494f0caf9f494ef4ecf1c2ad305b300a772b20",
+      "provenance": "pre-existing local Homebrew Cellar; not installed or updated by this sidecar"
+    },
+    {
+      "requested_path": "/opt/homebrew/opt/llvm/bin/llvm-ar",
+      "resolved_path": "/opt/homebrew/Cellar/llvm/23.1.5_1/bin/llvm-ar",
+      "sha256": "e844988759008731ebd2493cef494f0caf9f494ef4ecf1c2ad305b300a772b20",
+      "provenance": "pre-existing local Homebrew Cellar; not installed or updated by this sidecar"
+    },
+    {
+      "requested_path": "/opt/homebrew/opt/llvm/bin/llvm-readobj",
+      "resolved_path": "/opt/homebrew/Cellar/llvm/23.1.5_1/bin/llvm-readobj",
+      "sha256": "b12dad1d44faf839fd61c7cbcd4f3c0e26c1444cefe7d146f3be529572427268",
+      "provenance": "pre-existing local Homebrew Cellar; not installed or updated by this sidecar"
+    },
+    {
+      "requested_path": "/opt/homebrew/bin/lld-link",
+      "resolved_path": "/opt/homebrew/Cellar/lld/23.1.5/bin/lld",
+      "sha256": "57aa226bcac0488f519a5c7114c5ec4b7a982a4aca929f973cd100890a6d4367",
+      "provenance": "pre-existing local Homebrew Cellar; not installed or updated by this sidecar"
+    }
+  ],
+  "local_formula_metadata": [
+    {
+      "path": "/opt/homebrew/Cellar/llvm/23.1.5_1/.brew/llvm.rb",
+      "sha256": "f31a19345a8d15cee9570136079e02fc78e70924a5ad588d8c9baba95c5919b0",
+      "upstream_source_lines": [
+        "url \"https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz\"",
+        "sha256 \"fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e\""
+      ]
+    },
+    {
+      "path": "/opt/homebrew/Cellar/lld/23.1.5/.brew/lld.rb",
+      "sha256": "0627c4d65cec137ae6fb87964daf0b9f961dac7a0e3f30360e2c4a4423163afa",
+      "upstream_source_lines": [
+        "url \"https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz\"",
+        "sha256 \"fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e\""
+      ]
+    }
+  ],
+  "note": "Existing local binaries are hashed for identification. Upstream bottle signatures or Homebrew receipts were not independently authenticated."
+}

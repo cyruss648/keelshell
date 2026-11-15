@@ -1,0 +1,14 @@
+{
+  "scripts/run_linux_local_backend.py": {
+    "sha256": "b23088c77569e0ab9b745597bf30de2a706f2040c0df70e1ce7340d4cf61a299",
+    "ast_parse": true,
+    "trailing_whitespace_lines": [],
+    "final_newline": true
+  },
+  "scripts/test_linux_local_backend.py": {
+    "sha256": "71fe6599b031e426b3a7eed410a1b079fd2c3d8d2608c9c717946b0eb6932d08",
+    "ast_parse": true,
+    "trailing_whitespace_lines": [],
+    "final_newline": true
+  }
+}

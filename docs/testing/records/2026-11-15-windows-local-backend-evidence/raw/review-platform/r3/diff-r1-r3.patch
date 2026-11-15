@@ -1,0 +1,320 @@
+--- r1/crates/keelshell-platform/src/lib.rs
++++ r3/crates/keelshell-platform/src/lib.rs
+@@ -7,7 +7,7 @@
+ //! removes failed staging or grants authority to retry a filesystem mutation.
+ 
+ mod path;
+-pub use path::{MAX_WINDOWS_PATH_BYTES, WindowsPath, validate_windows_component};
++pub use path::{MAX_WINDOWS_PATH_BYTES, WindowsPath, filename_alias, validate_windows_component};
+ 
+ #[cfg(any(windows, test))]
+ mod directory_records;
+--- r1/crates/keelshell-platform/src/path.rs
++++ r3/crates/keelshell-platform/src/path.rs
+@@ -2,6 +2,18 @@
+ 
+ /// Maximum UTF-8 byte length of a reviewed local Windows path.
+ pub const MAX_WINDOWS_PATH_BYTES: usize = 4096;
++
++/// Return the conservative Unicode case alias used for local names and claims.
++///
++/// Uppercasing before lowercasing also folds expanding and final-sigma forms.
++/// This is a portable exclusion policy, not a filesystem lookup, Unicode
++/// normalization, or a claim about a volume's native case-comparison algorithm.
++pub fn filename_alias(name: &str) -> String {
++    name.chars()
++        .flat_map(char::to_uppercase)
++        .flat_map(char::to_lowercase)
++        .collect()
++}
+ 
+ /// A checked absolute drive path whose components cannot escape a held directory.
+ ///
+@@ -111,6 +123,18 @@
+     use super::*;
+ 
+     #[test]
++    fn portable_aliases_fold_expanding_and_final_sigma_case_forms() {
++        for (first, second) in [
++            ("New", "new"),
++            ("STRASSE.bin", "straße.bin"),
++            ("σ.bin", "ς.bin"),
++        ] {
++            assert_eq!(filename_alias(first), filename_alias(second));
++        }
++        assert_ne!(filename_alias("first"), filename_alias("second"));
++    }
++
++    #[test]
+     fn absolute_drive_and_extended_drive_have_identical_literal_components() -> io::Result<()> {
+         let ordinary = WindowsPath::parse(r"c:\用户\日志.txt")?;
+         let extended = WindowsPath::parse(r"\\?\C:\用户\日志.txt")?;
+--- r1/crates/keelshell-platform/src/windows/mod.rs
++++ r3/crates/keelshell-platform/src/windows/mod.rs
+@@ -168,6 +168,10 @@
+     }
+ 
+     /// Create a new private directory with the DACL set by the create syscall.
++    ///
++    /// The retained directory capability has read access and shares all access.
++    /// It can serve as a rename target without retaining conflicting DELETE
++    /// access. Publication obtains its source lease from the actual held object.
+     pub fn create_directory(&self, name: &str) -> io::Result<PrivateEntry> {
+         self.create(name, true)
+     }
+@@ -238,7 +242,16 @@
+         validate_windows_component(name)?;
+         self.require_absent(name)?;
+         verify_private(&source.file, source.directory)?;
+-        native::rename_no_replace(&source.file, &self.file, name)
++        let directory_lease = if source.directory {
++            Some(native::directory_rename_handle(&source.file)?)
++        } else {
++            None
++        };
++        native::rename_no_replace(
++            directory_lease.as_ref().unwrap_or(&source.file),
++            &self.file,
++            name,
++        )
+     }
+ }
+ 
+@@ -246,6 +259,8 @@
+ ///
+ /// Its descriptor cannot be replaced through the safe API. This keeps native
+ /// rename buffers synchronous and ensures that rename addresses the held object.
++/// Files retain their sole writer/DELETE creation handle. Directories retain a
++/// read capability; publication opens a short-lived source lease by that handle.
+ /// Dropping it closes the handle and leaves any named file or directory intact.
+ #[derive(Debug)]
+ pub struct PrivateEntry {
+@@ -317,10 +332,7 @@
+ }
+ 
+ fn alias(name: &str) -> String {
+-    name.chars()
+-        .flat_map(char::to_uppercase)
+-        .flat_map(char::to_lowercase)
+-        .collect()
++    crate::filename_alias(name)
+ }
+ 
+ fn invalid(message: &'static str) -> io::Error {
+--- r1/crates/keelshell-platform/src/windows/native.rs
++++ r3/crates/keelshell-platform/src/windows/native.rs
+@@ -2,7 +2,7 @@
+ 
+ use std::fs::File;
+ use std::io;
+-use std::mem::{offset_of, size_of};
++use std::mem::size_of;
+ use std::os::windows::io::{AsRawHandle, FromRawHandle};
+ use std::ptr;
+ 
+@@ -17,14 +17,15 @@
+     FILE_FS_DEVICE_INFORMATION, FILE_REMOTE_DEVICE, FILE_REMOTE_DEVICE_VSMB,
+ };
+ use windows_sys::Win32::Foundation::{
+-    HANDLE, NTSTATUS, OBJ_CASE_INSENSITIVE, OBJ_DONT_REPARSE, RtlNtStatusToDosError, UNICODE_STRING,
++    HANDLE, INVALID_HANDLE_VALUE, NTSTATUS, OBJ_CASE_INSENSITIVE, OBJ_DONT_REPARSE,
++    RtlNtStatusToDosError, UNICODE_STRING,
+ };
+ use windows_sys::Win32::Storage::FileSystem::{
+     DELETE, FILE_ATTRIBUTE_DIRECTORY, FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_REPARSE_POINT,
+-    FILE_BASIC_INFO, FILE_DEVICE_DISK, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_ID_INFO,
+-    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_STANDARD_INFO, FILE_TYPE_DISK,
+-    FileBasicInfo, FileIdInfo, FileStandardInfo, GetDriveTypeW, GetFileInformationByHandleEx,
+-    GetFileType,
++    FILE_BASIC_INFO, FILE_DEVICE_DISK, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
++    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_ID_INFO, FILE_SHARE_DELETE, FILE_SHARE_READ,
++    FILE_SHARE_WRITE, FILE_STANDARD_INFO, FILE_TYPE_DISK, FileBasicInfo, FileIdInfo,
++    FileStandardInfo, GetDriveTypeW, GetFileInformationByHandleEx, GetFileType, ReOpenFile,
+ };
+ use windows_sys::Win32::System::IO::IO_STATUS_BLOCK;
+ 
+@@ -129,7 +130,7 @@
+     let mut handle = ptr::null_mut();
+     let mut status_block = IO_STATUS_BLOCK::default();
+     let access = FILE_GENERIC_READ
+-        | if writable {
++        | if writable && !directory {
+             FILE_GENERIC_WRITE | DELETE
+         } else {
+             0
+@@ -150,7 +151,7 @@
+             } else {
+                 FILE_ATTRIBUTE_NORMAL
+             },
+-            if disposition == FILE_CREATE {
++            if disposition == FILE_CREATE && !directory {
+                 FILE_SHARE_READ
+             } else {
+                 SHARE_ALL
+@@ -315,13 +316,49 @@
+     }
+ }
+ 
++pub(super) fn directory_rename_handle(source: &File) -> io::Result<File> {
++    let original = metadata(source)?;
++    if !original.directory {
++        return Err(invalid("directory publication requires a directory"));
++    }
++    // SAFETY: ReOpenFile addresses the actual retained object, not a pathname.
++    // Omitting OVERLAPPED creates a synchronous file object; the borrowed
++    // original stays live for the call and the returned handle is adopted once.
++    // Only this short-lived source lease requests DELETE. Long-lived directory
++    // capabilities must not conflict with Windows' target-directory open, which
++    // on supported Windows versions shares READ/WRITE but does not share DELETE.
++    let handle = unsafe {
++        ReOpenFile(
++            source.as_raw_handle(),
++            FILE_GENERIC_READ | DELETE,
++            FILE_SHARE_READ | FILE_SHARE_WRITE,
++            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
++        )
++    };
++    if handle.is_null() || handle == INVALID_HANDLE_VALUE {
++        return Err(io::Error::last_os_error());
++    }
++    // SAFETY: ReOpenFile succeeded with a new, exclusively owned handle.
++    let file = unsafe { File::from_raw_handle(handle) };
++    local_device(&file)?;
++    if metadata(&file)? != original {
++        return Err(invalid(
++            "directory publication object changed while reopening",
++        ));
++    }
++    security::verify_private(&file, true)?;
++    Ok(file)
++}
++
+ pub(super) fn rename_no_replace(source: &File, parent: &File, name: &str) -> io::Result<()> {
+     let name: Vec<u16> = name.encode_utf16().collect();
+-    let prefix = offset_of!(FILE_RENAME_INFORMATION, FileName);
+-    let length = prefix
++    // The documented minimum includes the complete fixed structure plus the
++    // name bytes, even though FileName starts before the structure's tail pad.
++    let required = size_of::<FILE_RENAME_INFORMATION>()
+         .checked_add(name.len() * size_of::<u16>())
+         .ok_or_else(|| invalid("native rename name exceeds its bound"))?;
+-    let mut storage = vec![0usize; length.div_ceil(size_of::<usize>())];
++    let mut storage = vec![0usize; required.div_ceil(size_of::<usize>())];
++    let length = storage.len() * size_of::<usize>();
+     let information = storage.as_mut_ptr().cast::<FILE_RENAME_INFORMATION>();
+     // SAFETY: storage has pointer alignment and enough initialized space for the
+     // header and exact UTF-16 tail. ReplaceIfExists remains false; RootDirectory
+--- r1/crates/keelshell-platform/src/windows/tests.rs
++++ r3/crates/keelshell-platform/src/windows/tests.rs
+@@ -155,12 +155,110 @@
+     let (_temporary, path, parent) = fixture()?;
+     std::fs::create_dir(path.join("existing"))?;
+     let stage = parent.create_directory("stage")?;
+-    assert!(native::rename_no_replace(stage.as_file(), parent.as_file(), "existing").is_err());
++    let source_lease = native::directory_rename_handle(stage.as_file())?;
++    assert!(native::rename_no_replace(&source_lease, parent.as_file(), "existing").is_err());
+     assert_eq!(
+         parent.open_directory("stage")?.entries()?,
+         Vec::<String>::new()
+     );
+     assert!(std::fs::read_dir(path.join("existing"))?.next().is_none());
++    native::rename_no_replace(&source_lease, parent.as_file(), "published")?;
++    assert_eq!(
++        metadata(parent.open_directory("published")?.as_file())?.identity,
++        metadata(stage.as_file())?.identity
++    );
++    Ok(())
++}
++
++#[test]
++fn publication_into_a_retained_private_target_directory_supports_files_and_directories()
++-> io::Result<()> {
++    let (_temporary, _path, parent) = fixture()?;
++    let private_target = parent.create_directory("private-target")?;
++    let target = private_target.as_directory()?;
++    let mut file = parent.create_file("file-stage")?;
++    file.write_all(b"private target content")?;
++    file.sync_all()?;
++    let file_identity = metadata(file.as_file())?.identity;
++    target.rename_no_replace(&file, "file")?;
++    assert_eq!(
++        metadata(&target.open_file("file")?)?.identity,
++        file_identity
++    );
++    let directory = parent.create_directory("directory-stage")?;
++    let directory_identity = metadata(directory.as_file())?.identity;
++    target.rename_no_replace(&directory, "directory")?;
++    assert_eq!(
++        metadata(target.open_directory("directory")?.as_file())?.identity,
++        directory_identity
++    );
++    verify_private(private_target.as_file(), true)?;
++    parent.require_absent("file-stage")?;
++    parent.require_absent("directory-stage")?;
++    Ok(())
++}
++
++fn rename_boundary_names(directory: bool) -> io::Result<()> {
++    for name in ["x".to_owned(), format!("{}x", "🦀".repeat(127))] {
++        let (_temporary, _path, parent) = fixture()?;
++        let mut stage = if directory {
++            parent.create_directory("stage")?
++        } else {
++            parent.create_file("stage")?
++        };
++        if !directory {
++            stage.write_all(b"short and 255-unit destination")?;
++            stage.sync_all()?;
++        }
++        let identity = metadata(stage.as_file())?.identity;
++        parent.rename_no_replace(&stage, &name)?;
++        let actual = if directory {
++            metadata(parent.open_directory(&name)?.as_file())?
++        } else {
++            metadata(&parent.open_file(&name)?)?
++        };
++        assert_eq!(actual.identity, identity);
++        parent.require_unique_name(&name)?;
++        parent.require_absent("stage")?;
++    }
++    Ok(())
++}
++
++#[test]
++fn file_rename_buffers_cover_one_and_255_utf16_unit_names() -> io::Result<()> {
++    rename_boundary_names(false)
++}
++
++#[test]
++fn directory_rename_buffers_cover_one_and_255_utf16_unit_names() -> io::Result<()> {
++    rename_boundary_names(true)
++}
++
++#[test]
++fn private_file_sharing_allows_readback_and_rejects_other_writers_and_delete_openers()
++-> io::Result<()> {
++    use std::os::windows::fs::OpenOptionsExt;
++    use windows_sys::Win32::Storage::FileSystem::DELETE;
++
++    let (_temporary, path, parent) = fixture()?;
++    let mut entry = parent.create_file("stage")?;
++    entry.write_all(b"sole writer")?;
++    entry.sync_all()?;
++    assert_eq!(std::fs::read(path.join("stage"))?, b"sole writer");
++    assert!(
++        std::fs::OpenOptions::new()
++            .write(true)
++            .open(path.join("stage"))
++            .is_err()
++    );
++    assert!(
++        std::fs::OpenOptions::new()
++            .access_mode(DELETE)
++            .open(path.join("stage"))
++            .is_err()
++    );
++    assert!(std::fs::remove_file(path.join("stage")).is_err());
++    verify_private(entry.as_file(), false)?;
+     Ok(())
+ }
+ 

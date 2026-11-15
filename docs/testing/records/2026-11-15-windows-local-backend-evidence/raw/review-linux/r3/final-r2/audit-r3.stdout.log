@@ -1,0 +1,31 @@
+{
+  "recommendation": "APPROVE",
+  "validation_revision": "f945c4c780010067aee664bf7ccbf6caace4eea5",
+  "totals": {
+    "passed": 252,
+    "failed": 0,
+    "ignored": 0
+  },
+  "recorded_steps": 46,
+  "audit_assertions_passed": 9373,
+  "historical_review_files_preserved": 140,
+  "added_selected_names_vs_old_251": [
+    [
+      "keelshell-session",
+      "zmodem",
+      "zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data"
+    ]
+  ],
+  "registry": {
+    "audited_in_place": true,
+    "vendor_payload_copied": false,
+    "bundle_sha256": "4d22edf25fc5268f59c7d6d0b5a92d7cf48e3c16f6f79b05798ee32e7ef0378c",
+    "locked_packages": 978,
+    "verified_cached_crates": 949,
+    "verified_sparse_entries": 855,
+    "missing_archives": 29,
+    "missing_index": 0,
+    "allowlisted_payload_files": 1805,
+    "payload_retention": "Parent may remove registry.tar; retain registry-manifest.json and this audit"
+  }
+}

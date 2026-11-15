@@ -1,0 +1,25 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "scripts",
+    "-p",
+    "test_linux_local_backend.py",
+    "-v"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "linux-runner-python-r3",
+  "pid": 5600,
+  "started_utc": "2026-11-15T12:31:14.459750+00:00",
+  "finished_utc": "2026-11-15T12:31:15.637045+00:00",
+  "seconds": 1.177,
+  "exit": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log_sha256": "b856ae231e689f7c4ce5aca346615cbe3c1f25ce28f723c0367d08c8b52b5383",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

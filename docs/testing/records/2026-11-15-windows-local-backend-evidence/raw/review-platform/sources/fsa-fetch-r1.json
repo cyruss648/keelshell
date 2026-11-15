@@ -1,0 +1,16 @@
+[
+  {
+    "name": "ms-fsa-rename",
+    "url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/87f86c9b-6c2a-4803-84b7-131a74a434fa",
+    "sha256": "ced9c46ea004e29941aff65db2dcaea3cce1b79ef6f9639c43d3f4747e4a70c4",
+    "bytes": 73048,
+    "text_bytes": 20506
+  },
+  {
+    "name": "ms-fscc-rename",
+    "url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/1d2673a8-8fb9-4868-920a-775ccaa30cf8",
+    "sha256": "4b34f77754d19e1572208a6e5fdcc1a171e8407ee5567850491dea614caaac6f",
+    "bytes": 38220,
+    "text_bytes": 1882
+  }
+]

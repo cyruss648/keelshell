@@ -1,0 +1,1116 @@
+{
+  "description": "artifact hashes, not retained binaries; zero byte Windows test rmeta is typecheck output",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "files": [
+    {
+      "path": ".rustc_info.json",
+      "bytes": 2990,
+      "sha256": "c0c47c2fe3bf93b4da4e4f420f03fd00afb3da2c53dafde40a7e8b829920ac28"
+    },
+    {
+      "path": "CACHEDIR.TAG",
+      "bytes": 177,
+      "sha256": "6d9d1d216e0f83abc5e5662ca62c92b4f23009466b54fa27321a69acdb778bb2"
+    },
+    {
+      "path": "debug/.cargo-artifact-lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "debug/.cargo-build-lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "debug/.cargo-lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/fingerprint/dep-lib-bitflags",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/fingerprint/lib-bitflags",
+      "bytes": 16,
+      "sha256": "73018d2d52b412f1b6c72bf506c70cc6d81cd1df0d06ccf0cdbfa3837ec9b8c7"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/fingerprint/lib-bitflags.json",
+      "bytes": 451,
+      "sha256": "d15da4aeedec4470b7192ccd82715b0102e2b22cca65146102e30aeebca1d1ac"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/fingerprint/output-lib-bitflags",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/out/bitflags-2f63565bc18867c6.d",
+      "bytes": 3105,
+      "sha256": "52b3da714bfdc175ed1bd5542ba79c034a27f982272ab0de4ff3d3e710994864"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/out/libbitflags-2f63565bc18867c6.rlib",
+      "bytes": 283152,
+      "sha256": "71a707db38963af69366b49e1741bfd092c5553ed5d4ae2d08d211869e0814f0"
+    },
+    {
+      "path": "debug/build/bitflags/2f63565bc18867c6/out/libbitflags-2f63565bc18867c6.rmeta",
+      "bytes": 225997,
+      "sha256": "ee0ce23686176f04899e88add53905d9f27e6ebd0f765b44a631c157c375a473"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/fingerprint/dep-lib-cfg_if",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/fingerprint/lib-cfg_if",
+      "bytes": 16,
+      "sha256": "6316b41be6455f201f7e32b0f00702d188bdbaece1fdc5fbd6ab122009265fd5"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/fingerprint/lib-cfg_if.json",
+      "bytes": 385,
+      "sha256": "513136952ac9c9cd2b9424e08d5ccf98a99edbe7cbec435edff28cfeb4a22326"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/fingerprint/output-lib-cfg_if",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/out/cfg_if-567e9e5c05a7f04d.d",
+      "bytes": 931,
+      "sha256": "72157a797037384a1b039952dc1720c2f52e229003dc97fef80adca4e2e4ae68"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/out/libcfg_if-567e9e5c05a7f04d.rlib",
+      "bytes": 7296,
+      "sha256": "70a33b36d9663f63999230cf884f50252dfc57bc0f632e1dc521fd7cec31e026"
+    },
+    {
+      "path": "debug/build/cfg-if/567e9e5c05a7f04d/out/libcfg_if-567e9e5c05a7f04d.rmeta",
+      "bytes": 5871,
+      "sha256": "157d09b15945434d14fb3b0d0e6bed632a6e3a190399841c6a1fbbdacbb12555"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/fingerprint/dep-lib-errno",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/fingerprint/lib-errno",
+      "bytes": 16,
+      "sha256": "cc38cbfd388b1ab218243b3069d31c0e2ea45cf4d8c691d45f44d8808edd54c9"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/fingerprint/lib-errno.json",
+      "bytes": 436,
+      "sha256": "e2fc4dcad244ada240fd4c8c1728966aa1791384f27bd52995c7c54cf98610f7"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/fingerprint/output-lib-errno",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/out/errno-d29ffc1483c67d5b.d",
+      "bytes": 1262,
+      "sha256": "9d8ec1746b6ba488f9583f607783cd250cad0fe7ffb74bbd451a90bd895beb55"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/out/liberrno-d29ffc1483c67d5b.rlib",
+      "bytes": 38968,
+      "sha256": "8f9c219f71c7658cb74ebedc53e3349c10450d2d35e869a635e5845593ba99b0"
+    },
+    {
+      "path": "debug/build/errno/d29ffc1483c67d5b/out/liberrno-d29ffc1483c67d5b.rmeta",
+      "bytes": 17238,
+      "sha256": "41575c9643e8c322c2f26344ba924e163616ea4860724c0ce4c8849cb5193dd1"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/fingerprint/dep-lib-fastrand",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/fingerprint/lib-fastrand",
+      "bytes": 16,
+      "sha256": "c2ed5e3774405262c8fe27045a5fb71da06f92b5b90e8bdc366b56f5b1300f58"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/fingerprint/lib-fastrand.json",
+      "bytes": 443,
+      "sha256": "bfcfcf899fc477d98f0004d249bc25ef124f586b41dcf1b701066bea6160ac50"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/fingerprint/output-lib-fastrand",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/out/fastrand-5f1459dc438cd2bc.d",
+      "bytes": 1320,
+      "sha256": "3449c417389d2a12fea8e046889044893933f1579eb7fed675a04b2ffa0a850f"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/out/libfastrand-5f1459dc438cd2bc.rlib",
+      "bytes": 211288,
+      "sha256": "db6158bb890dcdb2ef375801359158e78a347b2e7e1610c070c26408d2556efc"
+    },
+    {
+      "path": "debug/build/fastrand/5f1459dc438cd2bc/out/libfastrand-5f1459dc438cd2bc.rmeta",
+      "bytes": 153083,
+      "sha256": "20e1df7ddfbac77f00d2e78e015ef09fa1e07279f54791123b7107575d1cbef5"
+    },
+    {
+      "path": "debug/build/getrandom/13de4d652dce4be4/fingerprint/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "713ae8b59ff4ecde9bbf2aa9cdbfcdd8d4545ee12d6a934e91f2060adb3be791"
+    },
+    {
+      "path": "debug/build/getrandom/13de4d652dce4be4/fingerprint/build-script-build-script-build.json",
+      "bytes": 413,
+      "sha256": "fdb770d54ed8b1051dfd60fdfd30ad2c7a8e956feb9f2df8ee25871fed9bae11"
+    },
+    {
+      "path": "debug/build/getrandom/13de4d652dce4be4/fingerprint/dep-build-script-build-script-build",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/getrandom/13de4d652dce4be4/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/getrandom/13de4d652dce4be4/fingerprint/output-build-script-build-script-build",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/getrandom/13de4d652dce4be4/out/build_script_build",
+      "bytes": 481008,
+      "sha256": "66f5737012d680d9f9ccced193ee10bcad0008fed41f47043360df1070cfd8d2"
+    },
+    {
+      "path": "debug/build/getrandom/13de4d652dce4be4/out/build_script_build.d",
+      "bytes": 637,
+      "sha256": "110b9fc3f1967f34ea9b073c89106c669bafc7f780cb3d8809493e2f11e15a6e"
+    },
+    {
+      "path": "debug/build/getrandom/33f3e36a17266662/fingerprint/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "1772f1a39744663e81cf2e0e1ccc75203605a8254f3f25f8b57b5996b3bb5252"
+    },
+    {
+      "path": "debug/build/getrandom/33f3e36a17266662/fingerprint/run-build-script-build-script-build.json",
+      "bytes": 333,
+      "sha256": "5d0e0bb2f7655609450c61ae2152193c737b6bebf70a2bd099b6bfdc7a6a29bb"
+    },
+    {
+      "path": "debug/build/getrandom/33f3e36a17266662/run/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/getrandom/33f3e36a17266662/run/root-output",
+      "bytes": 169,
+      "sha256": "3f58ef5b510429e76b84752f814f355a0b12dbd6791d0633ae5006efcce3642d"
+    },
+    {
+      "path": "debug/build/getrandom/33f3e36a17266662/run/stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "debug/build/getrandom/33f3e36a17266662/run/stdout",
+      "bytes": 32,
+      "sha256": "dd454a92dee8a02b053b2cf6f15c04b2ff982baaa108229e76ba230456bca222"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/fingerprint/dep-lib-getrandom",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/fingerprint/lib-getrandom",
+      "bytes": 16,
+      "sha256": "a5254dc74d041664884c4d636b47ca80029d897653d6ee43232221325fccecd7"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/fingerprint/lib-getrandom.json",
+      "bytes": 578,
+      "sha256": "27da60ad7bee8e14b9824827b536f8dde815fafc8725dfff028ecc46e0382aa4"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/fingerprint/output-lib-getrandom",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/out/getrandom-4698df8b250dd70c.d",
+      "bytes": 3247,
+      "sha256": "46cdc20eb123363bf6b94e100a42592efe44228be1393ccf8a1a0340146c42e6"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/out/libgetrandom-4698df8b250dd70c.rlib",
+      "bytes": 75704,
+      "sha256": "d8163ab9728aea714daffa4f2829edb450c0b52641629104c1ce70c5ffc8fecd"
+    },
+    {
+      "path": "debug/build/getrandom/4698df8b250dd70c/out/libgetrandom-4698df8b250dd70c.rmeta",
+      "bytes": 59375,
+      "sha256": "f130faefe9042ce0b3f06f2ecd24288a206a338b82df5c48b8ed9b74c033fd78"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/dep-test-lib-keelshell_platform",
+      "bytes": 77,
+      "sha256": "099c834663f128da4364e3eae7e71790b73f0048041f3ef404d7405249b9347d"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/output-test-lib-keelshell_platform",
+      "bytes": 95,
+      "sha256": "6925e7eab9ed2aeb0f8e9c867999980e203da35f10acac2bebfd576bfa53b93f"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/test-lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "08d179b7c102c68ce2018513d5da6bfd395437222b0306551e86bf05c6c84b2c"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/test-lib-keelshell_platform.json",
+      "bytes": 442,
+      "sha256": "8c915149426097620287b5dcfa3ce8f33472acb69dc51f85149dee08dc821825"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23",
+      "bytes": 1274080,
+      "sha256": "5fa894e5b2a5ca537be722b35deec92f8eb95e024ba72511f54968e035b683ff"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23.d",
+      "bytes": 817,
+      "sha256": "de9c0342671bdaec7be6c6bec5aa3acd11eadd3ad88f775171dcdeddabb7ef16"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23.keelshell_platform.5b6c96f9f7ffd7e5-cgu.0.rcgu.o",
+      "bytes": 293224,
+      "sha256": "bce2256c62a7c3778c75e9d54d6ecf0bf17edabd4311427fc186ae881cbfaffd"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23.keelshell_platform.5b6c96f9f7ffd7e5-cgu.1.rcgu.o",
+      "bytes": 201472,
+      "sha256": "58110412b9a5ca8b3c0bb74d96bd96e725068cb22865191f5ede0c61898f97f6"
+    },
+    {
+      "path": "debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23.keelshell_platform.5b6c96f9f7ffd7e5-cgu.2.rcgu.o",
+      "bytes": 168120,
+      "sha256": "ee39d107eca97c9988cc50dbe12d87e191dfbdec48734bf2bb583dbdcf792d12"
+    },
+    {
+      "path": "debug/build/libc/b729c1dccb7e4f33/fingerprint/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "9a96d0a305181bbbba3c9aa439b9e87d59ee92b4f315ef629f47df809d8487e4"
+    },
+    {
+      "path": "debug/build/libc/b729c1dccb7e4f33/fingerprint/run-build-script-build-script-build.json",
+      "bytes": 469,
+      "sha256": "6c7faef72b4ec9db73319cebdb2cf1bce22b97fca6ea943b2e6416fcbd502a56"
+    },
+    {
+      "path": "debug/build/libc/b729c1dccb7e4f33/run/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/libc/b729c1dccb7e4f33/run/root-output",
+      "bytes": 164,
+      "sha256": "6b9641e67230896d1f72861a9ec5eb319053b7b6e9ae508ee1f14e894670cf11"
+    },
+    {
+      "path": "debug/build/libc/b729c1dccb7e4f33/run/stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "debug/build/libc/b729c1dccb7e4f33/run/stdout",
+      "bytes": 1444,
+      "sha256": "6f776f86e11ab91082efc0ab6884b51d6ee0059b2a7cd01934ef0e68a91e2cbe"
+    },
+    {
+      "path": "debug/build/libc/c717411e6f42648b/fingerprint/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "8c16601983a8b984d9758e86dbb8a2d5b01b73bfc6a7e0aae8302478d253dbbd"
+    },
+    {
+      "path": "debug/build/libc/c717411e6f42648b/fingerprint/build-script-build-script-build.json",
+      "bytes": 515,
+      "sha256": "150e934042baa8c1e9e2823ddb2c9297b70b24af9b3613c8f5a0b5e843cd18bb"
+    },
+    {
+      "path": "debug/build/libc/c717411e6f42648b/fingerprint/dep-build-script-build-script-build",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/libc/c717411e6f42648b/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/libc/c717411e6f42648b/fingerprint/output-build-script-build-script-build",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/libc/c717411e6f42648b/out/build_script_build",
+      "bytes": 656688,
+      "sha256": "a273d5a6f3273f27c3cbcbcc8e91c3cd24a00cbc654774c37037ec7731aea4f9"
+    },
+    {
+      "path": "debug/build/libc/c717411e6f42648b/out/build_script_build.d",
+      "bytes": 618,
+      "sha256": "3368594409c3bb473f649a68fcf9c977a67b1819ce43c9feee057e6681803d02"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/fingerprint/dep-lib-libc",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/fingerprint/lib-libc",
+      "bytes": 16,
+      "sha256": "78c5d194a859a0ec03a011d59020e7d447eab6ef97e2d8aeaef28c658ecb7919"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/fingerprint/lib-libc.json",
+      "bytes": 564,
+      "sha256": "0ee13dd67f52e42a3bd8f32bb71e8e0affd9a847762a30f7a56ce3e874d2f638"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/fingerprint/output-lib-libc",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/out/libc-ec2c263f8ef263be.d",
+      "bytes": 20658,
+      "sha256": "2d5247f48162f7c8c1417f7b98f2f17be36fa7ee157c23efd7dd8cdc4dc9e4fe"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/out/liblibc-ec2c263f8ef263be.rlib",
+      "bytes": 2909696,
+      "sha256": "e1a6cf14572af47ff8518e22b43ec6d95547ed72751a5be8731bf55915ab8fa3"
+    },
+    {
+      "path": "debug/build/libc/ec2c263f8ef263be/out/liblibc-ec2c263f8ef263be.rmeta",
+      "bytes": 2812633,
+      "sha256": "1fea0bc5ccdf05ee585f0919b71faffc986488db3379b5f785b8a6408314d32e"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/fingerprint/dep-lib-once_cell",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/fingerprint/lib-once_cell",
+      "bytes": 16,
+      "sha256": "19d3d1f8447a48cfee178717e9763b62b5504a85f6986e767346695ec7fed4bf"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/fingerprint/lib-once_cell.json",
+      "bytes": 525,
+      "sha256": "838674e240f3bf9774293d0f9a4f054475289d52d28a5bb26e1126f8541f70cd"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/fingerprint/output-lib-once_cell",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/out/libonce_cell-0553586e09eb2e6f.rlib",
+      "bytes": 222048,
+      "sha256": "0933923d53c151c3f17c4c79dba7bdcaa3cf509546065c50f307791fa424e145"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/out/libonce_cell-0553586e09eb2e6f.rmeta",
+      "bytes": 197572,
+      "sha256": "b073f8a0db29c7a723293a62bf46650614369ec397aec727c1ef49f53ca9a2ed"
+    },
+    {
+      "path": "debug/build/once_cell/0553586e09eb2e6f/out/once_cell-0553586e09eb2e6f.d",
+      "bytes": 1683,
+      "sha256": "4afce10241779e4ab8682419b30e30f1672ded9976190217953a6adae0c2c8d6"
+    },
+    {
+      "path": "debug/build/rustix/3281a1e1143ec091/fingerprint/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "0b683f9182beb9aad602466579c68742baa39315bf06dbc9702cd534c45746bb"
+    },
+    {
+      "path": "debug/build/rustix/3281a1e1143ec091/fingerprint/build-script-build-script-build.json",
+      "bytes": 889,
+      "sha256": "8e72a8a7f0284450493cba76d39cdabe81718e08de63dea984f34c8b775a6eaa"
+    },
+    {
+      "path": "debug/build/rustix/3281a1e1143ec091/fingerprint/dep-build-script-build-script-build",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/rustix/3281a1e1143ec091/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/rustix/3281a1e1143ec091/fingerprint/output-build-script-build-script-build",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/rustix/3281a1e1143ec091/out/build_script_build",
+      "bytes": 604880,
+      "sha256": "a127c4e9a301a5767fc9d9f6ef6f598ce07bf3eb5d954a424ef7326f97142c1a"
+    },
+    {
+      "path": "debug/build/rustix/3281a1e1143ec091/out/build_script_build.d",
+      "bytes": 622,
+      "sha256": "6c038b91a1400f10e46ed8cf92db5959fb94c7a2412ee0a37b2a9796b9ef7f81"
+    },
+    {
+      "path": "debug/build/rustix/5df1114f5476ea89/fingerprint/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "343a51f0fd50fa06f7e109a69869f7efb8233ab586be02264f427a768624b74f"
+    },
+    {
+      "path": "debug/build/rustix/5df1114f5476ea89/fingerprint/run-build-script-build-script-build.json",
+      "bytes": 678,
+      "sha256": "34b44ed90cf9652d523b6959e84dec717b6280bbc464407059b3d86caca722f7"
+    },
+    {
+      "path": "debug/build/rustix/5df1114f5476ea89/run/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/rustix/5df1114f5476ea89/run/root-output",
+      "bytes": 166,
+      "sha256": "b5b23599ab94bee0f6ffa598b9da9ada355cf84866c1cfd6645473260a85c20e"
+    },
+    {
+      "path": "debug/build/rustix/5df1114f5476ea89/run/stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "debug/build/rustix/5df1114f5476ea89/run/stdout",
+      "bytes": 442,
+      "sha256": "63e6758ef9d2fff979d48f56f37aadb1726074cadffd5ab7dcc78e453d86897e"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/fingerprint/dep-lib-rustix",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/fingerprint/lib-rustix",
+      "bytes": 16,
+      "sha256": "03160b80803ba850e14401907259604e8812a34dfb51751bfb0ab17975396d8a"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/fingerprint/lib-rustix.json",
+      "bytes": 1116,
+      "sha256": "af258ab4135ffae379ba153a94fc6fa348941688c4e7285f3df756e0ae430ee7"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/fingerprint/output-lib-rustix",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/out/librustix-ead1e771d3e74c05.rlib",
+      "bytes": 3317136,
+      "sha256": "54a631defec6de99abf9b0b7c591639a463e6361fa5e67e9fe6eb21be8f8d1e5"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/out/librustix-ead1e771d3e74c05.rmeta",
+      "bytes": 2626747,
+      "sha256": "7cd21ff26d386529aaf242d0d3bd17f1580548bea5756718a90ba1e9fbac0c9a"
+    },
+    {
+      "path": "debug/build/rustix/ead1e771d3e74c05/out/rustix-ead1e771d3e74c05.d",
+      "bytes": 20368,
+      "sha256": "f7d624e3945a399d9bd7d5aa28c689fbcad6466a9ccde3297f9e962eee5f2d2a"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/fingerprint/dep-lib-tempfile",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/fingerprint/lib-tempfile",
+      "bytes": 16,
+      "sha256": "b1d1839821f9ecbaa946d3db43f131a883e0c9d4c8f80b1410264244f926ef2a"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/fingerprint/lib-tempfile.json",
+      "bytes": 657,
+      "sha256": "500aef1f8ba6e37b9cc98ac80e100407dc5250db92d380b19b3e5faa938734ce"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/fingerprint/output-lib-tempfile",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/out/libtempfile-0c06ac9bd65fd683.rlib",
+      "bytes": 573352,
+      "sha256": "f5baedc627a2466a3247a6e932f48fd3819d4e35a8507271177dcc816797fc45"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/out/libtempfile-0c06ac9bd65fd683.rmeta",
+      "bytes": 242563,
+      "sha256": "63da32472960e7b64c9318390191cc025b79b0d9e669c945534149509ff76e54"
+    },
+    {
+      "path": "debug/build/tempfile/0c06ac9bd65fd683/out/tempfile-0c06ac9bd65fd683.d",
+      "bytes": 4613,
+      "sha256": "b0b317f87773114d655734a3e0bca76be0e26a737b575e876b2bae0be9a21879"
+    },
+    {
+      "path": "reviewer-probes/libpublic_composition_control.rmeta",
+      "bytes": 4123,
+      "sha256": "4647baf6571aabf2ad580830f6c537614a0f0f8ccfe9dcdd7cc119760b647722"
+    },
+    {
+      "path": "reviewer-probes/librename_buffer_layout.rmeta",
+      "bytes": 6822,
+      "sha256": "64f70287506045f4ecb508123534d278e6febf73bbc2798b8818c37c60c00a13"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/CACHEDIR.TAG",
+      "bytes": 177,
+      "sha256": "6d9d1d216e0f83abc5e5662ca62c92b4f23009466b54fa27321a69acdb778bb2"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/.cargo-build-lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/.cargo-lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/fingerprint/dep-lib-cfg_if",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/fingerprint/lib-cfg_if",
+      "bytes": 16,
+      "sha256": "43494071bc605d8f31e82f6dd940cf812edc43bdf612652296d702c8041f4eec"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/fingerprint/lib-cfg_if.json",
+      "bytes": 428,
+      "sha256": "0ac5f4d6aaa21ff075261f2c2028410233b4c1ca2ce1cfa3fe6183599d384216"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/fingerprint/output-lib-cfg_if",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/out/cfg_if-88f8613be06afe4f.d",
+      "bytes": 693,
+      "sha256": "5235da3781ddf54865b88e39210974e7989fbd5a7dcde49807474edbd43d96cd"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/out/libcfg_if-88f8613be06afe4f.rmeta",
+      "bytes": 5873,
+      "sha256": "2d1681f1c1bc918003e03662d8e5bd555ad927aeb4a8a08f53e3cf4b122fd0b5"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/fingerprint/dep-lib-fastrand",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/fingerprint/lib-fastrand",
+      "bytes": 16,
+      "sha256": "7dacae05b277838c2577171d1d299dd0b40a7b793ffde374b151f287a7329415"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/fingerprint/lib-fastrand.json",
+      "bytes": 486,
+      "sha256": "e1d3b0a99e99e9c1bdde9d0f0d12ff9f468bf08f728799f014dc7dee4eb66e85"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/fingerprint/output-lib-fastrand",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/out/fastrand-068a09a3b800eaf9.d",
+      "bytes": 984,
+      "sha256": "1b9bc75c98adebce4bd7c9789c42fad56b427503ef15df32c9fdc048f70fbd69"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/out/libfastrand-068a09a3b800eaf9.rmeta",
+      "bytes": 64642,
+      "sha256": "d6a76300eea059c3cf3daf01494383838081b43e2c405f3677b5da183a74e739"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/fingerprint/dep-lib-getrandom",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/fingerprint/lib-getrandom",
+      "bytes": 16,
+      "sha256": "067efcf57b813137306b90c56372dce4b7aaedf998a0f99056659ed6127f873b"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/fingerprint/lib-getrandom.json",
+      "bytes": 565,
+      "sha256": "9a7cf48ec877895703432755e8bcf62510cb971966ea8ed8826c093a0ea39749"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/fingerprint/output-lib-getrandom",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/out/getrandom-d4a3c213010c7039.d",
+      "bytes": 2090,
+      "sha256": "801b1d70b1e0da87597452433420f5dabc378d65a6ed54d60eb6d0dd9a97549a"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/out/libgetrandom-d4a3c213010c7039.rmeta",
+      "bytes": 52444,
+      "sha256": "a7ab02bce9470b437439e97313246b9f4080d0bf12349eaf5103177761c96e1d"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/f9c47f6d6f6c83d8/fingerprint/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "4a0d129709fb861aad27b98266f3894114af422d3ae23524a8fe28447d239616"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/f9c47f6d6f6c83d8/fingerprint/run-build-script-build-script-build.json",
+      "bytes": 356,
+      "sha256": "4b1c8b6706d4f3e85eec5d85db4c6294fb19df5217cb81e9e2eccbfb4b165ec8"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/f9c47f6d6f6c83d8/run/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/f9c47f6d6f6c83d8/run/root-output",
+      "bytes": 192,
+      "sha256": "4662e31c8a95164f2e1ef0b361a4e99e25e2d5b3eff46dcd55e9610baa804f0c"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/f9c47f6d6f6c83d8/run/stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/getrandom/f9c47f6d6f6c83d8/run/stdout",
+      "bytes": 32,
+      "sha256": "dd454a92dee8a02b053b2cf6f15c04b2ff982baaa108229e76ba230456bca222"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/dep-lib-keelshell_platform",
+      "bytes": 327,
+      "sha256": "0acf3f2731b815eadd225dc144c56d9567540acccb52892fcb64f0d09033c59b"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "22ca0293be9ff5c455e18cff26892e35038a3268889e0673480bff3d738318b4"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform.json",
+      "bytes": 481,
+      "sha256": "dae347380ec6764722f977cdf641cb5434792953a6237588f188dc7bbb1772a2"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/output-lib-keelshell_platform",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/out/keelshell_platform-4f705ef2f88f67d1.d",
+      "bytes": 1434,
+      "sha256": "891408915da344be942d79732f4e9be940c1e545ab6955140bb9657714104dc2"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/out/libkeelshell_platform-4f705ef2f88f67d1.rmeta",
+      "bytes": 97173,
+      "sha256": "19962d6be25f9507dbdd13f68b816ffca1c5a8533a806a7fd419e09471223717"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/dep-test-lib-keelshell_platform",
+      "bytes": 388,
+      "sha256": "7dc14411813f080a810ba86418ecf35dd8b73cb7f78f7a596e72e195c332af07"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/output-test-lib-keelshell_platform",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "684bd3021da39978c4e1294155b92554d7231e6966c9d6c92d44668b2cf58c54"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform.json",
+      "bytes": 545,
+      "sha256": "b6809d5771c3c02ff08601e629348eea1b25661b70b05a3d03e2c3b2ccaf1d91"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/out/keelshell_platform-ef54deb44d3e9261.d",
+      "bytes": 1745,
+      "sha256": "09c1bc76d30cf52fc3b619b0572a3d0e3ed9e938a8ba133d083ffd3540d68ed8"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/out/libkeelshell_platform-ef54deb44d3e9261.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/fingerprint/dep-lib-once_cell",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/fingerprint/lib-once_cell",
+      "bytes": 16,
+      "sha256": "845e07bae1590c456292e4596d91fa9208d51c4212b4b3abbe1a15989051b990"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/fingerprint/lib-once_cell.json",
+      "bytes": 568,
+      "sha256": "aec53aec9077a93baa7c87bf262a82ec488e2cc9f03b61232577a4ce44dc19c9"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/fingerprint/output-lib-once_cell",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/out/libonce_cell-662a719e393417b9.rmeta",
+      "bytes": 141047,
+      "sha256": "8861e887a388140fc393648c990247e5f9b5c1acf015b909779bd54e1c9ff27c"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/out/once_cell-662a719e393417b9.d",
+      "bytes": 1256,
+      "sha256": "e7fdd45bc0c19685331985f0bcd64f485ab3608e5e77773d8b60c261202c2ee4"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/fingerprint/dep-lib-tempfile",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/fingerprint/lib-tempfile",
+      "bytes": 16,
+      "sha256": "38abdbd3ef3192b98bcbfe81707b905e73fc5c9563bb3c935c9607891c1e7c40"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/fingerprint/lib-tempfile.json",
+      "bytes": 706,
+      "sha256": "a4c1f956a9756c3a12c0e3e21db2b0b0a3e10baf886a145de564def0f29f88ae"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/fingerprint/output-lib-tempfile",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/out/libtempfile-c03cfd4a3d15eb64.rmeta",
+      "bytes": 192638,
+      "sha256": "8fb40538a9f93573fd0feca7c52e51d74a5e4d0a34922b5ee0761764fd2f3c7c"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/out/tempfile-c03cfd4a3d15eb64.d",
+      "bytes": 3462,
+      "sha256": "9628d7a9662a2346a52ef9ec0f0522783d8c21f44fa2b77845607828ec49d0f6"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/fingerprint/dep-lib-windows_link",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/fingerprint/lib-windows_link",
+      "bytes": 16,
+      "sha256": "64399928724b7e01052ace7f247fc0424bc6036c308fffda2419a3a6e2fdb55f"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/fingerprint/lib-windows_link.json",
+      "bytes": 409,
+      "sha256": "603204ae9d177d860433efeec45523a8bf592f8e421b1a91483c482dc20ccd81"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/fingerprint/output-lib-windows_link",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/out/libwindows_link-93703ce16cb69846.rmeta",
+      "bytes": 4091,
+      "sha256": "a7b38d0c41af8b136598d5556dea702165338c3937d07fdd912341f93f76337f"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/out/windows_link-93703ce16cb69846.d",
+      "bytes": 1021,
+      "sha256": "bd771c085e26cc95df00e441c783a804e150e7654e9c252b733a36b31a668515"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/fingerprint/dep-lib-windows_sys",
+      "bytes": 14,
+      "sha256": "93a4afc37518a1bf7830744017176e1d1946e5df993e47159069839f61fe49ab"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/fingerprint/lib-windows_sys",
+      "bytes": 16,
+      "sha256": "b3b41258ceed832c47adc620ab734b271a6e476a0d242368cccbcaa8ad8d6fce"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/fingerprint/lib-windows_sys.json",
+      "bytes": 8535,
+      "sha256": "8bda33f3438a810fe8f5a0238f0e0ab6cdf4b69ccf0dd4abf01f827755fe51ce"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/fingerprint/output-lib-windows_sys",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/out/libwindows_sys-4cda570739262029.rmeta",
+      "bytes": 11755630,
+      "sha256": "a36a2c08805b9f8cf77ccf4a1a64616ea06e159fae2ea7e654c962d8c6d7d5cd"
+    },
+    {
+      "path": "x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/out/windows_sys-4cda570739262029.d",
+      "bytes": 7459,
+      "sha256": "81a26934b25ede6fcba35786070b659e313f197ac373409eebff348fcd86cf04"
+    }
+  ],
+  "retained_dep_info_and_fingerprints": [
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/dep-test-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/dep-test-lib-keelshell_platform",
+      "bytes": 77,
+      "sha256": "099c834663f128da4364e3eae7e71790b73f0048041f3ef404d7405249b9347d"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/invoked.timestamp",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/output-test-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/output-test-lib-keelshell_platform",
+      "bytes": 95,
+      "sha256": "6925e7eab9ed2aeb0f8e9c867999980e203da35f10acac2bebfd576bfa53b93f"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/test-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/test-lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "08d179b7c102c68ce2018513d5da6bfd395437222b0306551e86bf05c6c84b2c"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/test-lib-keelshell_platform.json",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/debug/build/keelshell-platform/bc537aa40ecafd23/fingerprint/test-lib-keelshell_platform.json",
+      "bytes": 442,
+      "sha256": "8c915149426097620287b5dcfa3ce8f33472acb69dc51f85149dee08dc821825"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23.d",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23.d",
+      "bytes": 817,
+      "sha256": "de9c0342671bdaec7be6c6bec5aa3acd11eadd3ad88f775171dcdeddabb7ef16"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/dep-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/dep-lib-keelshell_platform",
+      "bytes": 327,
+      "sha256": "0acf3f2731b815eadd225dc144c56d9567540acccb52892fcb64f0d09033c59b"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/invoked.timestamp",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "22ca0293be9ff5c455e18cff26892e35038a3268889e0673480bff3d738318b4"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform.json",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform.json",
+      "bytes": 481,
+      "sha256": "dae347380ec6764722f977cdf641cb5434792953a6237588f188dc7bbb1772a2"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/output-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/output-lib-keelshell_platform",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/out/keelshell_platform-4f705ef2f88f67d1.d",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/out/keelshell_platform-4f705ef2f88f67d1.d",
+      "bytes": 1434,
+      "sha256": "891408915da344be942d79732f4e9be940c1e545ab6955140bb9657714104dc2"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/dep-test-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/dep-test-lib-keelshell_platform",
+      "bytes": 388,
+      "sha256": "7dc14411813f080a810ba86418ecf35dd8b73cb7f78f7a596e72e195c332af07"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/invoked.timestamp",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/output-test-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/output-test-lib-keelshell_platform",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "684bd3021da39978c4e1294155b92554d7231e6966c9d6c92d44668b2cf58c54"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform.json",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform.json",
+      "bytes": 545,
+      "sha256": "b6809d5771c3c02ff08601e629348eea1b25661b70b05a3d03e2c3b2ccaf1d91"
+    },
+    {
+      "original": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/out/keelshell_platform-ef54deb44d3e9261.d",
+      "retained": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/out/keelshell_platform-ef54deb44d3e9261.d",
+      "bytes": 1745,
+      "sha256": "09c1bc76d30cf52fc3b619b0572a3d0e3ed9e938a8ba133d083ffd3540d68ed8"
+    }
+  ]
+}

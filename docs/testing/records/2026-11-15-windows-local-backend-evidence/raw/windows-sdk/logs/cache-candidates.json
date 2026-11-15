@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/usr/bin/mdfind",
+    "-onlyin",
+    "/Users/hdh",
+    "kMDItemFSName == \"xwin\" || kMDItemFSName == \"windows.h\" || kMDItemFSName == \"Windows.h\" || kMDItemFSName == \"vcruntime.h\""
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "seconds": 0.084,
+  "stdout": "/Users/hdh/work/kingstar/projects/svn/Dimple_Dev/01trunk/trade/t_newclient/d_api_client/Dependency/OpenSource/boost/boost_1_68_0/boost/predef/os/windows.h\n/Users/hdh/work/kingstar/projects/svn/Dimple_Dev/DTP_DIMPLE/public/PyApi/linux/include/boost/predef/os/windows.h\n/Users/hdh/work/kingstar/projects/svn/Dimple_Dev/DTP_DIMPLE/public/PyApi/boost_1_69_0/boost/predef/os/windows.h\n/Users/hdh/work/kingstar/projects/svn/Dimple_Dev/01trunk/public/PyApi/boost_1_69_0/boost/predef/os/windows.h\n/Users/hdh/work/kingstar/projects/svn/Dimple_Dev/01trunk/public/PyApi/linux/include/boost/predef/os/windows.h\n",
+  "stderr": ""
+}

@@ -1,0 +1,10 @@
+{
+  "name": "getsecurityinfo",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo",
+  "retrieved_at": "2026-11-15T11:53:00.544106+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo",
+  "bytes": 56900,
+  "sha256": "89082d630970c302ff1b4abe5c7ab20c0ef02d9685ea887855d3759b86530368",
+  "title": "GetSecurityInfo function (aclapi.h) - Win32 apps | Microsoft Learn"
+}

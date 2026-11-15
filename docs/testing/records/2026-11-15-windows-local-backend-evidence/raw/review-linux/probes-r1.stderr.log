@@ -1,0 +1,25 @@
+test_cleanup_identity_and_signal_error_must_preserve_failure_receipt (__main__.FailureProbes.test_cleanup_identity_and_signal_error_must_preserve_failure_receipt) ... FAIL
+test_required_inventory_ignored_must_fail_the_runner (__main__.FailureProbes.test_required_inventory_ignored_must_fail_the_runner) ... FAIL
+
+======================================================================
+FAIL: test_cleanup_identity_and_signal_error_must_preserve_failure_receipt (__main__.FailureProbes.test_cleanup_identity_and_signal_error_must_preserve_failure_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/probe_failure_paths.py", line 186, in test_cleanup_identity_and_signal_error_must_preserve_failure_receipt
+    self.assertIsNone(raised, "Expected cleanup errors must not bypass receipt persistence")
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PermissionError: Synthetic cleanup signal denied' is not None : Expected cleanup errors must not bypass receipt persistence
+
+======================================================================
+FAIL: test_required_inventory_ignored_must_fail_the_runner (__main__.FailureProbes.test_required_inventory_ignored_must_fail_the_runner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/probe_failure_paths.py", line 143, in test_required_inventory_ignored_must_fail_the_runner
+    self.assertEqual(result, 1, "Required tests were listed but none ran")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : Required tests were listed but none ran
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.048s
+
+FAILED (failures=2)

@@ -1,0 +1,15 @@
+{
+  "files": {
+    "crates/keelshell-session/src/zmodem.rs": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+    "crates/keelshell-session/src/zmodem/local_windows.rs": "68ebb6fc05cf61c7b3fd8a64138038c981c03a469d99f7a9c6ca7456ba0f842f",
+    "crates/keelshell-session/src/zmodem/local_windows/tests.rs": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+    "crates/keelshell-session/Cargo.toml": "61e707d92be30616f67f5171034d99c70168edb55167313bcb5d67b31b4eac3f",
+    "crates/keelshell-app/src/terminal_zmodem.rs": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+    "crates/keelshell-session/tests/zmodem.rs": "67a196d6a429258f13e137919d2dece286704746ff6a74a20a5e1b450c1ed8de"
+  },
+  "status": "AUTHOR_SOURCE_READY / WINDOWS_NATIVE_NOT_RUN",
+  "platform_findings_pending": [
+    "retained private target directory sharing",
+    "rename buffer minimum extent"
+  ]
+}

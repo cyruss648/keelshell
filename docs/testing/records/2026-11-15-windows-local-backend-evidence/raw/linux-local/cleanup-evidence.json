@@ -1,0 +1,61 @@
+{
+  "source_snapshot": "source-a092dd5712c0a92ee4af18970fb0500fb230b760.tar.gz",
+  "source_archive_sha256": "1588c0927d10cecf45839b30639ac14a54d5dc6e8f26aee82e97d99128236a3c",
+  "compressed_sha256": "df4dcc055cfc4f86eff7dbbfb921f62b897fc43670eb71bf15e6c1dade2c5957",
+  "git_files_verified": 573,
+  "removed": [
+    {
+      "path": "preflight-r1/source.tar",
+      "bytes": 11765760,
+      "sha256": "1588c0927d10cecf45839b30639ac14a54d5dc6e8f26aee82e97d99128236a3c",
+      "replacement": "source-a092dd5712c0a92ee4af18970fb0500fb230b760.tar.gz"
+    },
+    {
+      "path": "native-r1/source.tar",
+      "bytes": 11765760,
+      "sha256": "1588c0927d10cecf45839b30639ac14a54d5dc6e8f26aee82e97d99128236a3c",
+      "replacement": "source-a092dd5712c0a92ee4af18970fb0500fb230b760.tar.gz"
+    },
+    {
+      "path": "native-r1/registry.tar",
+      "bytes": 228782080,
+      "sha256": "4d22edf25fc5268f59c7d6d0b5a92d7cf48e3c16f6f79b05798ee32e7ef0378c",
+      "replacement": "native-r1/registry-manifest.json"
+    },
+    {
+      "path": "native-r2/source.tar",
+      "bytes": 11765760,
+      "sha256": "1588c0927d10cecf45839b30639ac14a54d5dc6e8f26aee82e97d99128236a3c",
+      "replacement": "source-a092dd5712c0a92ee4af18970fb0500fb230b760.tar.gz"
+    },
+    {
+      "path": "native-r2/registry.tar",
+      "bytes": 228782080,
+      "sha256": "4d22edf25fc5268f59c7d6d0b5a92d7cf48e3c16f6f79b05798ee32e7ef0378c",
+      "replacement": "native-r2/registry-manifest.json"
+    }
+  ],
+  "containers": [
+    {
+      "run": "preflight-r1",
+      "container_id": "4d409ad05808b6e8443ede4e73a2d4a42c6f2123203fe8eb0e5360be393c3204",
+      "absent_exit": 1,
+      "absent": true
+    },
+    {
+      "run": "native-r1",
+      "container_id": "df0bc70daf2d5d8033b16ad4cd0eb571587d3c7dd67f28f7c93ba2555c5fbe66",
+      "absent_exit": 1,
+      "absent": true
+    },
+    {
+      "run": "native-r2",
+      "container_id": "b44ac0d71bcc0ea3654f19700ba480a72451e414126320e79761e2cea5feeaa3",
+      "absent_exit": 1,
+      "absent": true
+    }
+  ],
+  "reclaimed_bytes": 492861440,
+  "source_gzip_verified": true,
+  "all_removed_paths_absent": true
+}

@@ -1,0 +1,14 @@
+{
+  "observed_utc": "2026-11-15T13:05:47.980278+00:00",
+  "parent_receipt_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/platform-pe-r1.json",
+  "parent_receipt_sha256": "94ff6950cae06b9498b796b5af3eb16fe729ace577ad3856fee80d334f3b2053",
+  "receipt_source_binding": "r2 only",
+  "receipt_names_compared_to_retained_r2_source": 61,
+  "names_match": true,
+  "parent_claimed_binary_sha256": "66e6fdfd41641c782466809ae594eaaa37c25ca483e2af0051721fc43f774cb0",
+  "parent_claimed_machine": "0x8664",
+  "binary_independently_opened": false,
+  "parent_target_accessed": false,
+  "native_status": "NOT_RUN",
+  "validation_level": "parent receipt checked for source/name consistency; no independent PE parsing, --list or execution"
+}

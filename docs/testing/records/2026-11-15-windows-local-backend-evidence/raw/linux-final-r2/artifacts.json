@@ -1,0 +1,12 @@
+{
+  "keelshell-session": {
+    "zmodem": "/linux-target/debug/deps/zmodem-713b942430ffc8de",
+    "archive_transfer": "/linux-target/debug/deps/archive_transfer-7bbf275d047bcf3a",
+    "keelshell_session": "/linux-target/debug/deps/keelshell_session-3b02a1712a1959d9"
+  },
+  "keelshell-core": {
+    "archive_pax": "/linux-target/debug/deps/archive_pax-e930d9584d808119",
+    "archive": "/linux-target/debug/deps/archive-3a0cd31ec7215911",
+    "zmodem": "/linux-target/debug/deps/zmodem-dce1c2b63a0a1142"
+  }
+}

@@ -1,5 +1,40 @@
 # Capability ledger
 
+## 2026-11-15: Windows local file backends and native Linux backend tests
+
+Status: `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / WINDOWS_NATIVE_NOT_RUN`.
+Windows Zmodem source review/save and archive source review/extraction now use
+component-relative synchronous handles, observed object identities, private
+creation DACLs, retained capabilities and no-replace publication. File selection
+and extraction controls are enabled. UNC/device paths, reparse points, multiple
+hard links and unsupported filesystem capabilities are rejected.
+Local reservations and namespace checks share the same conservative Unicode
+alias policy. Blocking mutation obligations persist until their result is
+actually observed; cancelled handoffs retain unknown classification and the
+archive's close hold.
+
+The final 588+14 input gate passed 2958 ordinary Rust tests with 35 ignored,
+14 doctests, and Python 187 run / 1 skipped. All 23 new default Rust cases were
+matched by name. Formatting, strict Clippy, x.y policy and the three AI controller
+groups passed. Windows cross Clippy and four AMD64 test PE links passed; these
+are not native execution. Native Windows filesystem and desktop checks remain
+NOT_RUN. Normal macOS GUI/MCP binaries built; no new window acceptance is claimed.
+The exact final Linux arm64 snapshot passed 252 selected local backend/codec
+tests with no failures or ignores; source, ELF, named results and owned cleanup
+were independently verified. Platform, runner and session scoped reviews
+approved with zero open P0–P3 findings, closing six P2 findings. Six focused
+session/app cases were independently executed using verified parent-built
+binaries, without independent compilation. The three shared worker
+tests are not part of the Linux selection and are accounted for in host results.
+
+This supersedes the historical disabled Windows controls described by earlier
+batch entries below without changing their original evidence. See the
+[local backend record](../testing/records/2026-11-15-windows-local-backend.md),
+[decision](../adr/0138-windows-handle-local-files.md),
+[Zmodem guide](ZMODEM.md) and [archive guide](ARCHIVE_TRANSFERS.md).
+Strict peer HOLD/PARTIAL, full native desktops, IME/accessibility, FILE-05/M4,
+the complete product and release acceptance remain open.
+
 ## 2026-11-15: bounded Zmodem receive cleanup
 
 Status: `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`.

@@ -1,0 +1,31 @@
+{
+  "command": [
+    "python3",
+    "work/windows-local-backend-20261115/with_windows_sdk.py",
+    "cargo",
+    "clippy",
+    "-p",
+    "keelshell-platform",
+    "-p",
+    "keelshell-session",
+    "--all-targets",
+    "--target",
+    "x86_64-pc-windows-msvc",
+    "--locked",
+    "--offline",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "windows-combined-clippy-r2",
+  "pid": 67376,
+  "started_utc": "2026-11-15T13:10:04.144647+00:00",
+  "finished_utc": "2026-11-15T13:10:08.811488+00:00",
+  "seconds": 4.667,
+  "exit": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log_sha256": "957160f40ad5b356763881ff6d70f8d95b5637c460304049375889cfb562d214",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

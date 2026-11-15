@@ -1,0 +1,25 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.33s
+     Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/718bcbe8252551a1/out/keelshell_session-718bcbe8252551a1)
+
+running 2 tests
+
+thread 'sftp::queue::tests::local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components' (8040471) panicked at crates/keelshell-session/src/sftp/queue.rs:669:13:
+STRASSE.bin / straße.bin
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'sftp::queue::tests::local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging' (8040472) panicked at crates/keelshell-session/src/sftp/queue.rs:715:13:
+assertion failed: matches!(TransferReservations::admit_resources(&second_owner, &alias),
+    Admission::Quarantined)
+test sftp::queue::tests::local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components ... FAILED
+test sftp::queue::tests::local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging ... FAILED
+
+failures:
+
+failures:
+    sftp::queue::tests::local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components
+    sftp::queue::tests::local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 189 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p keelshell-session --lib`

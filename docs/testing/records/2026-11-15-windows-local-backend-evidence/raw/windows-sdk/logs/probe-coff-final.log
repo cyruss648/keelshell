@@ -1,0 +1,150 @@
+
+File: /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/gnu-sdk_probe.obj
+Format: COFF-x86-64
+Arch: x86_64
+AddressSize: 64bit
+ImageFileHeader {
+  Machine: IMAGE_FILE_MACHINE_AMD64 (0x8664)
+  SectionCount: 8
+  TimeDateStamp: 2026-11-15 12:36:04 (0x6AF9A734)
+  PointerToSymbolTable: 0x284
+  SymbolCount: 23
+  StringTableSize: 58
+  OptionalHeaderSize: 0
+  Characteristics [ (0x0)
+  ]
+}
+
+File: /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe_final.dll
+Format: COFF-x86-64
+Arch: x86_64
+AddressSize: 64bit
+ImageFileHeader {
+  Machine: IMAGE_FILE_MACHINE_AMD64 (0x8664)
+  SectionCount: 3
+  TimeDateStamp: 2026-11-15 12:37:04 (0x6AF9A770)
+  PointerToSymbolTable: 0x0
+  SymbolCount: 0
+  StringTableSize: 0
+  OptionalHeaderSize: 240
+  Characteristics [ (0x2022)
+    IMAGE_FILE_DLL (0x2000)
+    IMAGE_FILE_EXECUTABLE_IMAGE (0x2)
+    IMAGE_FILE_LARGE_ADDRESS_AWARE (0x20)
+  ]
+}
+ImageOptionalHeader {
+  Magic: 0x20B
+  MajorLinkerVersion: 14
+  MinorLinkerVersion: 0
+  SizeOfCode: 512
+  SizeOfInitializedData: 1024
+  SizeOfUninitializedData: 0
+  AddressOfEntryPoint: 0x0
+  BaseOfCode: 0x1000
+  ImageBase: 0x180000000
+  SectionAlignment: 4096
+  FileAlignment: 512
+  MajorOperatingSystemVersion: 6
+  MinorOperatingSystemVersion: 0
+  MajorImageVersion: 0
+  MinorImageVersion: 0
+  MajorSubsystemVersion: 6
+  MinorSubsystemVersion: 0
+  SizeOfImage: 16384
+  SizeOfHeaders: 1024
+  CheckSum: 0x0
+  Subsystem: IMAGE_SUBSYSTEM_WINDOWS_GUI (0x2)
+  Characteristics [ (0x160)
+    IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE (0x40)
+    IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA (0x20)
+    IMAGE_DLL_CHARACTERISTICS_NX_COMPAT (0x100)
+  ]
+  SizeOfStackReserve: 1048576
+  SizeOfStackCommit: 4096
+  SizeOfHeapReserve: 1048576
+  SizeOfHeapCommit: 4096
+  NumberOfRvaAndSize: 16
+  DataDirectory {
+    ExportTableRVA: 0x2000
+    ExportTableSize: 0x50
+    ImportTableRVA: 0x2050
+    ImportTableSize: 0x3C
+    ResourceTableRVA: 0x0
+    ResourceTableSize: 0x0
+    ExceptionTableRVA: 0x3000
+    ExceptionTableSize: 0xC
+    CertificateTableRVA: 0x0
+    CertificateTableSize: 0x0
+    BaseRelocationTableRVA: 0x0
+    BaseRelocationTableSize: 0x0
+    DebugRVA: 0x0
+    DebugSize: 0x0
+    ArchitectureRVA: 0x0
+    ArchitectureSize: 0x0
+    GlobalPtrRVA: 0x0
+    GlobalPtrSize: 0x0
+    TLSTableRVA: 0x0
+    TLSTableSize: 0x0
+    LoadConfigTableRVA: 0x0
+    LoadConfigTableSize: 0x0
+    BoundImportRVA: 0x0
+    BoundImportSize: 0x0
+    IATRVA: 0x20B8
+    IATSize: 0x28
+    DelayImportDescriptorRVA: 0x0
+    DelayImportDescriptorSize: 0x0
+    CLRRuntimeHeaderRVA: 0x0
+    CLRRuntimeHeaderSize: 0x0
+    ReservedRVA: 0x0
+    ReservedSize: 0x0
+  }
+}
+DOSHeader {
+  Magic: MZ
+  UsedBytesInTheLastPage: 120
+  FileSizeInPages: 1
+  NumberOfRelocationItems: 0
+  HeaderSizeInParagraphs: 4
+  MinimumExtraParagraphs: 0
+  MaximumExtraParagraphs: 0
+  InitialRelativeSS: 0
+  InitialSP: 0
+  Checksum: 0
+  InitialIP: 0
+  InitialRelativeCS: 0
+  AddressOfRelocationTable: 64
+  OverlayNumber: 0
+  OEMid: 0
+  OEMinfo: 0
+  AddressOfNewExeHeader: 120
+}
+Import {
+  Name: KERNEL32.dll
+  ImportLookupTableRVA: 0x2090
+  ImportAddressTableRVA: 0x20B8
+  Symbol: QueryPerformanceCounter (1136)
+}
+Import {
+  Name: api-ms-win-crt-heap-l1-1-0.dll
+  ImportLookupTableRVA: 0x20A0
+  ImportAddressTableRVA: 0x20C8
+  Symbol: free (24)
+  Symbol: malloc (25)
+}
+
+File: /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe_static.lib(/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/gnu-sdk_probe.obj)
+Format: COFF-x86-64
+Arch: x86_64
+AddressSize: 64bit
+ImageFileHeader {
+  Machine: IMAGE_FILE_MACHINE_AMD64 (0x8664)
+  SectionCount: 8
+  TimeDateStamp: 2026-11-15 12:36:04 (0x6AF9A734)
+  PointerToSymbolTable: 0x284
+  SymbolCount: 23
+  StringTableSize: 58
+  OptionalHeaderSize: 0
+  Characteristics [ (0x0)
+  ]
+}

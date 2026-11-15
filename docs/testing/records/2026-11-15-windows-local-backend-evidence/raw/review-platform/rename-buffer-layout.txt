@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "rustc",
+    "--edition=2024",
+    "--crate-type=lib",
+    "--crate-name",
+    "rename_buffer_layout",
+    "--target",
+    "x86_64-pc-windows-msvc",
+    "--emit=metadata",
+    "--extern",
+    "windows_sys=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/out/libwindows_sys-4cda570739262029.rmeta",
+    "--out-dir",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/reviewer-probes",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/cfg-if/88f8613be06afe4f/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/fastrand/068a09a3b800eaf9/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/getrandom/d4a3c213010c7039/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/once_cell/662a719e393417b9/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/tempfile/c03cfd4a3d15eb64/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/windows-link/93703ce16cb69846/out",
+    "-L",
+    "dependency=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target/x86_64-pc-windows-msvc/debug/build/windows-sys/4cda570739262029/out",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/probes/rename_buffer_layout.rs"
+  ],
+  "exit_code": 0,
+  "source_sha256": "4def6019b5b9049e8c85e84340661ff0a4636c4fd866332fc48ae5454b8ee738",
+  "compile_time_assertions": {
+    "file_name_offset": 20,
+    "structure_size": 24,
+    "current_one_unit_length": 22,
+    "documented_one_unit_minimum": 26
+  },
+  "native_execution": "NOT_RUN"
+}
+

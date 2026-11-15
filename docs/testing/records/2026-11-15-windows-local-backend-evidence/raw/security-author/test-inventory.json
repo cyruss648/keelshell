@@ -1,0 +1,116 @@
+{
+  "status": "SOURCE_INVENTORY_ONLY_NOT_COMPILED_OR_EXECUTED",
+  "count": 27,
+  "source": "crates/keelshell-platform/src/windows/security/tests.rs",
+  "sha256": "6f56a712f76321ff59f2fa65d360629abaf64aca2f65fef2741d187892c9d4e2",
+  "tests": [
+    {
+      "name": "private_file_is_verified_before_the_first_content_write",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "private_directory_is_protected_with_object_and_container_inheritance",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "creation_descriptor_retains_sid_and_acl_ownership_across_moves",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "private_creation_does_not_inherit_a_broad_parent_dacl",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_an_additional_everyone_allow_entry",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_a_single_everyone_allow_entry",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_a_null_dacl",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_an_empty_dacl",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_an_unprotected_dacl",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_insufficient_owner_rights",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_a_real_deny_ace",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "verify_private_rejects_a_directory_without_inheritance_flags",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_is_stable_across_requeries_and_duplicated_handles",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "security_queries_require_read_control_on_the_actual_handle",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_detects_real_dacl_rights_changes",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_detects_real_dacl_protection_changes",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_remains_bound_to_the_handle_after_path_replacement",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "private_snapshot_rejects_an_owner_mismatch",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "private_snapshot_rejects_unknown_ace_types",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "private_snapshot_rejects_inherited_and_inherit_only_flags",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "private_snapshot_rejects_a_truncated_or_extended_allow_entry",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_encoding_detects_owner_and_group_sid_changes",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_encoding_distinguishes_absent_null_and_empty_dacls",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "bounded_sid_parser_rejects_truncation_revision_and_subauthority_overflow",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_encoding_rejects_excessive_entry_bytes",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_excludes_sacl_and_pointer_representation_control_bits",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "observation_excludes_acl_free_space",
+      "status": "NOT_RUN"
+    }
+  ]
+}

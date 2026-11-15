@@ -1,0 +1,53 @@
+{
+  "environment": [
+    {
+      "argv": [
+        "rustc",
+        "--version",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "stdout": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: aarch64-apple-darwin\nrelease: 1.100.0\nLLVM version: 23.1.5\n"
+    },
+    {
+      "argv": [
+        "cargo",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "cargo 1.100.0 (3acc79c0c 2026-11-05)\n"
+    },
+    {
+      "argv": [
+        "cargo",
+        "clippy",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "clippy 0.1.100 (0ef1bc3860 2026-11-09)\n"
+    },
+    {
+      "argv": [
+        "rustup",
+        "target",
+        "list",
+        "--installed"
+      ],
+      "exit_code": 0,
+      "stdout": "aarch64-apple-darwin\nx86_64-pc-windows-msvc\n"
+    }
+  ],
+  "windows_conditional_test_count": 42,
+  "tests_by_file": {
+    "crates/keelshell-platform/src/windows/tests.rs": 15,
+    "crates/keelshell-platform/src/windows/security/tests.rs": 27
+  },
+  "supplementary_observed_sha256_after_first_cargo": {
+    "Cargo.toml": "8162655942f96c4eaf2c77e41da82dfa2786d28a1994509cda151052f0b212c3",
+    "Cargo.lock": "03491b38ce696fdcfd5a9f1e95f0306424b9b3732a5e33914bc4e40f7c39275c",
+    "AGENTS.md": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb",
+    "docs/adr/0138-windows-handle-local-files.md": "be5755488d6dc43e1ab585ec0023a35ceb70f06cfdff7b52da8c2bbbd1269009",
+    "docs/testing/STRATEGY.md": "e81486d57f8a2cb18d526750273fc85f74127bea37e1232cd4c1e63c88b61b24",
+    "docs/testing/SHARED_TARGET.md": "49762c249b1d2fc13981f65d3b8f8602954ba9eecde537156390c009fc8a6955"
+  }
+}

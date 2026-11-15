@@ -1,0 +1,24 @@
+{
+  "files": {
+    "session": {
+      "path": "work/windows-local-backend-20261115/review-session-binaries-r2/session",
+      "origin": "work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e2d86a6a6d9452c5/out/keelshell_session-e2d86a6a6d9452c5",
+      "sha256": "f49acffd8e45528769264228cb481777e5e3195c32cbdcc5fb4e32bd1ed03d3c",
+      "bytes": 36063520,
+      "inventory_count": 194,
+      "inventory": "session-inventory.txt"
+    },
+    "app": {
+      "path": "work/windows-local-backend-20261115/review-session-binaries-r2/app",
+      "origin": "work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/74a1e55a81a61939/out/keelshell_app-74a1e55a81a61939",
+      "sha256": "f19a98c17ca52619cc13e7c1e16332958c7b594691291099833f45b75eccaebc",
+      "bytes": 265844128,
+      "inventory_count": 1239,
+      "inventory": "app-inventory.txt"
+    }
+  },
+  "freeze": "combined-inputs-r2.json",
+  "freeze_sha256": "1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9",
+  "engineering_input_drift": false,
+  "origin": "parent built on same checkout, target ownership unchanged; not reviewer independent compilation"
+}

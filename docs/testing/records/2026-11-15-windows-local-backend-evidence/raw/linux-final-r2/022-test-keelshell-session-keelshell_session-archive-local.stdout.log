@@ -1,0 +1,6 @@
+
+running 1 test
+test sftp::archive_transfer::local::tests::local_archive_publication_primitive_never_replaces_files_or_empty_directories ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 191 filtered out; finished in 0.00s
+

@@ -1,0 +1,11 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.59s
+     Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e2d86a6a6d9452c5/out/keelshell_session-e2d86a6a6d9452c5)
+
+running 3 tests
+test sftp::archive_transfer::mutation_worker::tests::observed_mutation_result_acknowledges_a_stopped_worker ... ok
+test sftp::archive_transfer::mutation_worker::tests::cancelled_publication_handoff_reports_uncertain_before_worker_result_is_returned ... ok
+test sftp::archive_transfer::mutation_worker::tests::cancelled_stage_handoff_reports_uncertain_before_worker_result_is_returned ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 191 filtered out; finished in 0.02s
+

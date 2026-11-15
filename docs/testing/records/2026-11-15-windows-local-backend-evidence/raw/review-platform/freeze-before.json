@@ -1,0 +1,74 @@
+{
+  "utc": "2026-11-15T12:27:45.838206+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "baseline_claim_only_no_git": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "freeze_sha256": "c10ab180854098fbe636f7c57805b7e10ad4c9498043918f06ea655d4bb34954",
+  "frozen_count": 9,
+  "mismatch_count": 0,
+  "extra_platform_paths": [],
+  "files": [
+    {
+      "path": "crates/keelshell-platform/Cargo.toml",
+      "expected": "7f99c1d3beeaa9cc8aa70d4835ef5376e9a26340af3abfde6e7adf6c2749aa90",
+      "actual": "7f99c1d3beeaa9cc8aa70d4835ef5376e9a26340af3abfde6e7adf6c2749aa90",
+      "match": true,
+      "size": 818
+    },
+    {
+      "path": "crates/keelshell-platform/src/directory_records.rs",
+      "expected": "ad7b4d896fbe2cf3ae955bdd69590a1228b48e0b97db7ab38e87720ec54557f8",
+      "actual": "ad7b4d896fbe2cf3ae955bdd69590a1228b48e0b97db7ab38e87720ec54557f8",
+      "match": true,
+      "size": 4400
+    },
+    {
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "expected": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "actual": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "match": true,
+      "size": 797
+    },
+    {
+      "path": "crates/keelshell-platform/src/path.rs",
+      "expected": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "actual": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "match": true,
+      "size": 6770
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "expected": "e44c71c65dd9c8662f58999024b51c184a9100ded6a2b21d79955928d479d61a",
+      "actual": "e44c71c65dd9c8662f58999024b51c184a9100ded6a2b21d79955928d479d61a",
+      "match": true,
+      "size": 11708
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/native.rs",
+      "expected": "60cc0d303e66a25d949d224ee4bf26bcc733d0cc13a797557941e60bce44a46e",
+      "actual": "60cc0d303e66a25d949d224ee4bf26bcc733d0cc13a797557941e60bce44a46e",
+      "match": true,
+      "size": 13138
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "expected": "ea706dac54a2eae75f489a89966f331b420e0af192b234c575c56c6bc72e2dce",
+      "actual": "ea706dac54a2eae75f489a89966f331b420e0af192b234c575c56c6bc72e2dce",
+      "match": true,
+      "size": 23356
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security.rs",
+      "expected": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "actual": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "match": true,
+      "size": 25583
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "expected": "ac59162fc4cd1dc304ee58f080b10c7a7f1135f2d3adc4e4d04911d6f1e09aa6",
+      "actual": "ac59162fc4cd1dc304ee58f080b10c7a7f1135f2d3adc4e4d04911d6f1e09aa6",
+      "match": true,
+      "size": 10473
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "observed_at_utc": "2026-11-15T13:31:04.717664+00:00",
+  "evidence": "REVIEWER_EXECUTED_PARENT_PREBUILT_HOST_COPIES",
+  "host": {
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "receipt_sha256": "af22cf3be08ea51c6e0244c84537ee66bd8a925f3e6d20b73d6011b6cb82fb16",
+  "freeze_sha256": "1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9",
+  "executions": [
+    {
+      "binary": "session",
+      "filter": "mutation_worker",
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-binaries-r2/session",
+        "mutation_worker",
+        "--nocapture"
+      ],
+      "expected_tests": 3,
+      "exit": 0,
+      "seconds": 0.019,
+      "reaped": true,
+      "outer_timeout_seconds": 45,
+      "timed_out": false,
+      "test_results": [
+        {
+          "status": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 191
+        }
+      ],
+      "sha256_before": "f49acffd8e45528769264228cb481777e5e3195c32cbdcc5fb4e32bd1ed03d3c",
+      "sha256_after": "f49acffd8e45528769264228cb481777e5e3195c32cbdcc5fb4e32bd1ed03d3c",
+      "stdout": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-session-mutation_worker.stdout.log",
+      "stdout_sha256": "c83e3a55d7aa544b821991d26d7004117a5b7430003f19c073a8018ea9ac3838",
+      "stderr": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-session-mutation_worker.stderr.log",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "binary": "session",
+      "filter": "local_unicode_case_aliases",
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-binaries-r2/session",
+        "local_unicode_case_aliases",
+        "--nocapture"
+      ],
+      "expected_tests": 2,
+      "exit": 0,
+      "seconds": 0.007,
+      "reaped": true,
+      "outer_timeout_seconds": 45,
+      "timed_out": false,
+      "test_results": [
+        {
+          "status": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 192
+        }
+      ],
+      "sha256_before": "f49acffd8e45528769264228cb481777e5e3195c32cbdcc5fb4e32bd1ed03d3c",
+      "sha256_after": "f49acffd8e45528769264228cb481777e5e3195c32cbdcc5fb4e32bd1ed03d3c",
+      "stdout": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-session-local_unicode_case_aliases.stdout.log",
+      "stdout_sha256": "831846053fc20055ae6cf0171b43acb698bbbdbad382cc77a59096fa8d55c2f8",
+      "stderr": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-session-local_unicode_case_aliases.stderr.log",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "binary": "app",
+      "filter": "archive_unobserved_worker_result",
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-binaries-r2/app",
+        "archive_unobserved_worker_result",
+        "--nocapture"
+      ],
+      "expected_tests": 1,
+      "exit": 0,
+      "seconds": 0.014,
+      "reaped": true,
+      "outer_timeout_seconds": 45,
+      "timed_out": false,
+      "test_results": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 1238
+        }
+      ],
+      "sha256_before": "f19a98c17ca52619cc13e7c1e16332958c7b594691291099833f45b75eccaebc",
+      "sha256_after": "f19a98c17ca52619cc13e7c1e16332958c7b594691291099833f45b75eccaebc",
+      "stdout": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-app-archive_unobserved_worker_result.stdout.log",
+      "stdout_sha256": "f3cb536953126e57bd1a274da661ef2546f7b38cd7955a4aef35d3bf4e68d473",
+      "stderr": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/prebuilt-r2-app-archive_unobserved_worker_result.stderr.log",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    }
+  ],
+  "all_expected_passed": true,
+  "total_passed": 6,
+  "original_target_access": false,
+  "independent_compilation": false,
+  "native_windows": "NOT_RUN"
+}

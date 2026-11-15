@@ -1,0 +1,973 @@
+{
+  "observed_at_utc": "2026-11-15T13:37:01.166104+00:00",
+  "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_RECEIPT_AND_LOG_READBACK",
+  "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/full-gate-r2.json",
+  "receipt_sha256": "7bd8421da5afe55f7536c778857f5d877eab345adaa4a7f4a12b011046f97776",
+  "summary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/gate-summary-r2.json",
+  "summary_sha256": "a0d5500e9203ac898c37f375a6367d8e7ea918d1611ead043ec4f8379039f9d9",
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/full-gate-r2.log",
+  "log_sha256": "7cdb4d6029584a800e5f48e5a306f192091934705726309326d76252f0fc5873",
+  "log_matches_receipt": true,
+  "command": [
+    "python3",
+    "scripts/check.py"
+  ],
+  "exit": 0,
+  "seconds": 632.963,
+  "reaped": true,
+  "freeze_sha256": "1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9",
+  "source_drift": [],
+  "full_source_and_script_path_sets_match_parent_record": true,
+  "log_parsed_totals": {
+    "ordinary": {
+      "passed": 2958,
+      "failed": 0,
+      "ignored": 35
+    },
+    "rustdoc": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "summary_totals_match": true,
+  "python_parent_totals": {
+    "run": 187,
+    "skipped": 1,
+    "passed": 186,
+    "failed": 0
+  },
+  "python_log_result_lines": [
+    {
+      "line": 6,
+      "text": "Ran 187 tests in 8.422s"
+    },
+    {
+      "line": 8,
+      "text": "OK (skipped=1)"
+    }
+  ],
+  "additional_summary_fields": {
+    "new_default_rust_cases": {
+      "path::tests::portable_aliases_fold_expanding_and_final_sigma_case_forms": "passed in workspace gate",
+      "path::tests::absolute_drive_and_extended_drive_have_identical_literal_components": "passed in workspace gate",
+      "path::tests::drive_root_is_a_directory_capability_without_a_fabricated_name": "passed in workspace gate",
+      "path::tests::drive_relative_and_normalizing_path_spellings_are_rejected": "passed in workspace gate",
+      "path::tests::unc_and_device_namespaces_do_not_fall_back_to_drive_access": "passed in workspace gate",
+      "path::tests::reserved_dos_names_are_rejected_with_extensions_and_superscript_aliases": "passed in workspace gate",
+      "path::tests::controls_streams_and_visual_path_disguises_are_rejected": "passed in workspace gate",
+      "path::tests::filename_bound_counts_utf16_units_instead_of_utf8_bytes": "passed in workspace gate",
+      "path::tests::full_path_review_bound_is_enforced_before_native_access": "passed in workspace gate",
+      "directory_records::tests::fragmented_query_batches_preserve_unicode_names_and_exclude_dot_entries": "passed in workspace gate",
+      "directory_records::tests::next_entry_offset_can_include_native_alignment_padding": "passed in workspace gate",
+      "directory_records::tests::truncated_header_and_name_never_yield_partial_success": "passed in workspace gate",
+      "directory_records::tests::overlapping_or_out_of_bounds_entry_offsets_are_rejected": "passed in workspace gate",
+      "directory_records::tests::odd_or_oversized_utf16_name_lengths_are_rejected": "passed in workspace gate",
+      "directory_records::tests::lone_surrogates_and_embedded_path_separators_are_rejected": "passed in workspace gate",
+      "directory_records::tests::name_budget_is_shared_across_all_native_query_batches": "passed in workspace gate",
+      "sftp::queue::tests::local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components": "passed in workspace gate",
+      "sftp::queue::tests::local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging": "passed in workspace gate",
+      "zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data": "passed in workspace gate",
+      "files::transfer_tests::archive_tests::archive_unobserved_worker_result_keeps_the_unknown_close_hold": "passed in workspace gate",
+      "sftp::archive_transfer::mutation_worker::tests::cancelled_stage_handoff_reports_uncertain_before_worker_result_is_returned": "passed in workspace gate",
+      "sftp::archive_transfer::mutation_worker::tests::cancelled_publication_handoff_reports_uncertain_before_worker_result_is_returned": "passed in workspace gate",
+      "sftp::archive_transfer::mutation_worker::tests::observed_mutation_result_acknowledges_a_stopped_worker": "passed in workspace gate"
+    },
+    "windows_test_definitions": {
+      "crates/keelshell-platform/src/windows/tests.rs": [
+        "drive_chain_keeps_every_literal_ancestor_and_reopens_the_same_object",
+        "private_file_has_its_verified_dacl_before_the_first_content_write",
+        "private_directory_and_child_creation_do_not_rely_on_default_permissions",
+        "exclusive_create_preserves_an_existing_file_directory_and_case_alias",
+        "held_file_publication_retains_identity_and_leaves_no_old_name",
+        "retained_object_rename_never_replaces_a_file_or_empty_directory",
+        "complete_private_tree_is_published_through_its_retained_root",
+        "directory_no_replace_syscall_preserves_other_empty_directories",
+        "publication_into_a_retained_private_target_directory_supports_files_and_directories",
+        "file_rename_buffers_cover_one_and_255_utf16_unit_names",
+        "directory_rename_buffers_cover_one_and_255_utf16_unit_names",
+        "private_file_sharing_allows_readback_and_rejects_other_writers_and_delete_openers",
+        "simultaneous_enumerations_have_independent_native_scan_positions",
+        "directory_enumeration_continues_after_a_full_native_query_buffer",
+        "opening_a_hard_linked_file_fails_instead_of_using_size_as_identity",
+        "directory_stamp_survives_sibling_writes_but_distinguishes_replacement",
+        "existing_private_entry_can_be_reopened_only_after_the_creation_writer_closes",
+        "component_relative_operations_reject_every_escape_before_native_io",
+        "security_observations_are_opaque_in_public_debug_output"
+      ],
+      "crates/keelshell-platform/src/windows/security/tests.rs": [
+        "private_file_is_verified_before_the_first_content_write",
+        "private_directory_is_protected_with_object_and_container_inheritance",
+        "creation_descriptor_retains_sid_and_acl_ownership_across_moves",
+        "private_creation_does_not_inherit_a_broad_parent_dacl",
+        "verify_private_rejects_an_additional_everyone_allow_entry",
+        "verify_private_rejects_a_single_everyone_allow_entry",
+        "verify_private_rejects_a_null_dacl",
+        "verify_private_rejects_an_empty_dacl",
+        "verify_private_rejects_an_unprotected_dacl",
+        "verify_private_rejects_insufficient_owner_rights",
+        "verify_private_rejects_a_real_deny_ace",
+        "verify_private_rejects_a_directory_without_inheritance_flags",
+        "observation_is_stable_across_requeries_and_duplicated_handles",
+        "security_queries_require_read_control_on_the_actual_handle",
+        "observation_detects_real_dacl_rights_changes",
+        "observation_detects_real_dacl_protection_changes",
+        "observation_remains_bound_to_the_handle_after_path_replacement",
+        "private_snapshot_rejects_an_owner_mismatch",
+        "private_snapshot_rejects_unknown_ace_types",
+        "private_snapshot_rejects_inherited_and_inherit_only_flags",
+        "private_snapshot_rejects_a_truncated_or_extended_allow_entry",
+        "observation_encoding_detects_owner_and_group_sid_changes",
+        "observation_encoding_distinguishes_absent_null_and_empty_dacls",
+        "bounded_sid_parser_rejects_truncation_revision_and_subauthority_overflow",
+        "observation_encoding_rejects_excessive_entry_bytes",
+        "observation_excludes_sacl_and_pointer_representation_control_bits",
+        "observation_excludes_acl_free_space"
+      ],
+      "crates/keelshell-session/src/zmodem/local_windows/tests.rs": [
+        "zmodem_upload_local_observation_keeps_complete_binary_and_empty_content",
+        "zmodem_upload_local_observation_rejects_empty_and_excessive_batches_before_io",
+        "zmodem_upload_local_observation_rejects_case_aliases",
+        "zmodem_windows_upload_rejects_expanding_unicode_case_aliases",
+        "zmodem_windows_upload_rejects_hardlink_aliases",
+        "zmodem_upload_local_observation_rejects_size_excess_before_reading_sparse_content",
+        "zmodem_windows_upload_enforces_the_remaining_batch_byte_budget_before_reading",
+        "zmodem_windows_upload_rejects_total_byte_excess_before_reading_the_last_file",
+        "zmodem_windows_upload_rejects_directories_without_reading_them_as_files",
+        "zmodem_upload_local_confirmation_rejects_an_identical_replacement_inode",
+        "zmodem_upload_local_confirmation_rejects_missing_and_changed_sources",
+        "zmodem_windows_confirmation_rejects_metadata_only_changes",
+        "zmodem_upload_local_confirmation_rejects_replaced_ancestor_even_with_same_bytes",
+        "zmodem_windows_confirmation_rejects_a_new_hardlink_after_review",
+        "zmodem_windows_confirmation_rejects_reused_path_after_hardlink_rebinding",
+        "zmodem_windows_confirmation_releases_no_batch_when_the_last_source_changed",
+        "zmodem_windows_upload_cancellation_releases_no_review_or_sender_bytes",
+        "zmodem_local_paths_reject_relative_traversal_and_reserved_source_names",
+        "zmodem_review_paths_reject_invisible_or_line_breaking_ancestor_names",
+        "zmodem_windows_paths_reject_unc_and_device_namespaces_before_io",
+        "zmodem_windows_paths_reject_non_unicode_names_before_io",
+        "zmodem_windows_reviews_retain_every_original_ancestor",
+        "zmodem_windows_reviews_reject_replaced_grandparent_with_original_leaf_and_source",
+        "zmodem_windows_destination_rejects_existing_files_directories_and_unicode_aliases",
+        "zmodem_local_destination_preparation_is_read_only_and_cancellation_creates_nothing",
+        "zmodem_local_publication_preserves_a_target_created_after_preparation",
+        "zmodem_windows_publication_preserves_a_unicode_alias_created_after_review",
+        "zmodem_windows_publication_preserves_a_precreated_staging_name_before_mutation",
+        "zmodem_windows_exclusive_create_marks_mutated_before_a_late_collision",
+        "zmodem_local_publication_rejects_a_replaced_parent_without_writing_either_tree",
+        "zmodem_windows_create_sets_private_dacl_before_any_content_is_written",
+        "zmodem_windows_cancellation_after_create_retains_empty_private_staging_and_mutation",
+        "zmodem_windows_cancellation_after_readback_retains_complete_private_staging",
+        "zmodem_windows_target_race_after_staging_preserves_both_names_for_quarantine",
+        "zmodem_windows_cancellation_after_rename_retains_the_published_target_for_quarantine",
+        "zmodem_windows_final_readback_rejects_a_late_unicode_alias_and_retains_mutation",
+        "zmodem_windows_final_readback_rejects_reappeared_staging_and_retains_both_paths",
+        "zmodem_windows_retained_creation_handle_blocks_stage_replacement_and_other_writers",
+        "zmodem_windows_publication_rejects_an_identical_staging_replacement_identity",
+        "zmodem_windows_no_replace_primitive_preserves_existing_files_and_directories",
+        "zmodem_windows_content_readback_rejects_same_length_corruption_short_and_long_files",
+        "zmodem_windows_publication_verifies_binary_content_identity_private_dacl_and_new_target",
+        "zmodem_windows_publication_verifies_an_empty_file_without_leaving_staging",
+        "zmodem_windows_upload_rejects_real_file_and_ancestor_reparse_points",
+        "zmodem_windows_destination_preserves_a_dangling_reparse_point"
+      ],
+      "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs": [
+        "windows_archive_slash_members_join_literal_windows_components",
+        "windows_archive_rejects_device_stream_traversal_and_direction_marker_components",
+        "windows_archive_rejects_unc_device_namespace_and_non_normalized_drive_paths",
+        "windows_archive_selected_extended_drive_and_unicode_case_aliases_overlap",
+        "windows_archive_implicit_directory_aliases_and_file_parents_are_rejected",
+        "windows_archive_implicit_directory_inventory_has_its_own_entry_bound",
+        "windows_archive_destinations_enforce_combined_absolute_path_bound",
+        "windows_archive_member_depth_is_bounded_before_any_native_io",
+        "windows_archive_cancel_guard_marks_its_worker_on_drop",
+        "windows_archive_fresh_scan_manifest_equality_ignores_handle_values",
+        "windows_archive_manifest_clone_retains_every_original_ancestor_capability",
+        "windows_archive_scan_rechecks_children_even_when_directory_stamps_match",
+        "windows_archive_scan_rechecks_digest_and_bytes_even_when_file_stamps_match",
+        "windows_archive_scan_rejects_hard_linked_sources",
+        "windows_archive_scan_rejects_source_and_ancestor_reparse_points",
+        "windows_archive_destination_observations_ignore_sibling_write_timestamps",
+        "windows_archive_destination_refuses_existing_unicode_case_alias",
+        "windows_archive_private_nested_tree_publishes_after_child_creation_handles_close",
+        "windows_archive_empty_private_tree_publishes_with_exact_root_identity",
+        "windows_archive_publication_preserves_existing_file_and_quarantines_stage",
+        "windows_archive_publication_preserves_existing_empty_directory_and_quarantines_stage",
+        "windows_archive_changed_staging_content_is_not_published_or_deleted",
+        "windows_archive_changed_staging_children_are_not_published_or_deleted",
+        "windows_archive_cancel_before_publication_preserves_complete_staging",
+        "windows_archive_unobserved_successful_publication_remains_quarantined",
+        "windows_archive_abandoned_stage_result_keeps_isolation_after_pending_clears",
+        "windows_archive_dropping_stage_await_quarantines_its_detached_worker_result",
+        "windows_archive_panicking_worker_keeps_pending_and_partial_stage_isolation",
+        "windows_archive_queued_cancel_retains_ticket_until_worker_confirms_stop"
+      ]
+    },
+    "stages": [
+      "/opt/homebrew/opt/python@3.15/bin/python3.15 -m unittest discover -s scripts -p test_*.py",
+      "cargo fmt --all --check",
+      "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "cargo test --workspace --locked -- --test-threads=4",
+      "cargo test -p keelshell-ai --test local_agent_process --locked -- --readiness-error-tests",
+      "cargo test -p keelshell-ai --test local_agent_directory_process --locked -- --observer-io-error-tests",
+      "cargo test -p keelshell-ai --test local_agent_process --locked -- --controller-small-stack"
+    ]
+  },
+  "suites": [
+    {
+      "kind": "ordinary",
+      "log_line": 164,
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/50ac3b81bb7f6304/out/keelshell_ai-50ac3b81bb7f6304)",
+      "passed": 129,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 190,
+      "preamble": "Running tests/discovery_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/cde86858806b4804/out/discovery_http-cde86858806b4804)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 200,
+      "preamble": "Running tests/header_name_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/416f9434392ad260/out/header_name_secrets_http-416f9434392ad260)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 211,
+      "preamble": "Running tests/known_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/27548ce1aa5fe1ba/out/known_secrets_http-27548ce1aa5fe1ba)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 221,
+      "preamble": "Running tests/local_agent_cli.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/6cb13e5572180480/out/local_agent_cli-6cb13e5572180480)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 4
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 954,
+      "preamble": "Running tests/local_environment_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/2b0b548e67a72bcc/out/local_environment_independent-2b0b548e67a72bcc)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 977,
+      "preamble": "Running tests/provider_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/849df446cb6a7c35/out/provider_http-849df446cb6a7c35)",
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 1001,
+      "preamble": "Running tests/request_options_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/00d3bd5743f55614/out/request_options_http-00d3bd5743f55614)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2250,
+      "preamble": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/74a1e55a81a61939/out/keelshell_app-74a1e55a81a61939)",
+      "passed": 1237,
+      "failed": 0,
+      "ignored": 2
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2478,
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/96657fab632ebf17/out/keelshell_core-96657fab632ebf17)",
+      "passed": 222,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2489,
+      "preamble": "Running tests/ai_inference.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/03d101948afd0e5c/out/ai_inference-03d101948afd0e5c)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2509,
+      "preamble": "Running tests/ai_profile_storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/9b9487af50165e3e/out/ai_profile_storage-9b9487af50165e3e)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2555,
+      "preamble": "Running tests/archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f2c9e0d293a2e4f6/out/archive-f2c9e0d293a2e4f6)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2601,
+      "preamble": "Running tests/archive_pax.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/5ddbd10840455633/out/archive_pax-5ddbd10840455633)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2609,
+      "preamble": "Running tests/batch_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/cfb3d5d9b5ba0059/out/batch_audit-cfb3d5d9b5ba0059)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2620,
+      "preamble": "Running tests/batch_parameters.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3d452e922930f520/out/batch_parameters-3d452e922930f520)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2629,
+      "preamble": "Running tests/batch_workflow.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/819c29bea63f66b4/out/batch_workflow-819c29bea63f66b4)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2639,
+      "preamble": "Running tests/completion_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f6ae347c8d960ff6/out/completion_shell-f6ae347c8d960ff6)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2669,
+      "preamble": "Running tests/configuration_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/95b10d18a41ffe3e/out/configuration_recovery-95b10d18a41ffe3e)",
+      "passed": 24,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2697,
+      "preamble": "Running tests/connection_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6f3c0f0da0ff52e5/out/connection_library-6f3c0f0da0ff52e5)",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2712,
+      "preamble": "Running tests/connection_library_batch.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/013664f4e932b31b/out/connection_library_batch-013664f4e932b31b)",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2720,
+      "preamble": "Running tests/directory_compare.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6429720617b07044/out/directory_compare-6429720617b07044)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2732,
+      "preamble": "Running tests/directory_mirror.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3068cc5f33f9417c/out/directory_mirror-3068cc5f33f9417c)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2740,
+      "preamble": "Running tests/directory_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/eda50b36739fba94/out/directory_sync-eda50b36739fba94)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2750,
+      "preamble": "Running tests/host_keys.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d4c5671fdecc9e33/out/host_keys-d4c5671fdecc9e33)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2759,
+      "preamble": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/259de3c11aaadb90/out/independent_workflow_audit-259de3c11aaadb90)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2771,
+      "preamble": "Running tests/knowledge_context.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/35c48bf60e82ce11/out/knowledge_context-35c48bf60e82ce11)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2796,
+      "preamble": "Running tests/knowledge_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/eec896ef0d75616c/out/knowledge_library-eec896ef0d75616c)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2808,
+      "preamble": "Running tests/knowledge_persistence.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/139de27cf9ed548a/out/knowledge_persistence-139de27cf9ed548a)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2821,
+      "preamble": "Running tests/openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/9241af6380d986af/out/openssh-9241af6380d986af)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2847,
+      "preamble": "Running tests/pane_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/2188ab300176cfef/out/pane_layout-2188ab300176cfef)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2859,
+      "preamble": "Running tests/profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/06904a0563dacf1e/out/profile_sync-06904a0563dacf1e)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2875,
+      "preamble": "Running tests/profile_sync_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/20cc859b68937021/out/profile_sync_independent-20cc859b68937021)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2892,
+      "preamble": "Running tests/profile_sync_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/1d613f7d7ee7b380/out/profile_sync_review-1d613f7d7ee7b380)",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2911,
+      "preamble": "Running tests/profiles.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f6557ddc66789910/out/profiles-f6557ddc66789910)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2936,
+      "preamble": "Running tests/proxies.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0286c9fd6d5790de/out/proxies-0286c9fd6d5790de)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2960,
+      "preamble": "Running tests/reconnect.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/794d9f290af5efe3/out/reconnect-794d9f290af5efe3)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 2967,
+      "preamble": "Running tests/recursive_mirror_final_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/c4188a551cdc1a13/out/recursive_mirror_final_review-c4188a551cdc1a13)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3000,
+      "preamble": "Running tests/routes.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0cd56afe8aaad032/out/routes-0cd56afe8aaad032)",
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3012,
+      "preamble": "Running tests/scheduled_workflow_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/edf124082a0b9e1e/out/scheduled_workflow_review-edf124082a0b9e1e)",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3032,
+      "preamble": "Running tests/server_archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d1b3db9853096ee3/out/server_archive-d1b3db9853096ee3)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3042,
+      "preamble": "Running tests/snippet_template_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/7dc82ff0cdf6b412/out/snippet_template_shell-7dc82ff0cdf6b412)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3068,
+      "preamble": "Running tests/snippet_templates.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/01f323480397cc6f/out/snippet_templates-01f323480397cc6f)",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3087,
+      "preamble": "Running tests/snippets.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/5501f21e2b798557/out/snippets-5501f21e2b798557)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3111,
+      "preamble": "Running tests/storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/da18a87edbc400d0/out/storage-da18a87edbc400d0)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3122,
+      "preamble": "Running tests/theme_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/ee10ec6948535d5b/out/theme_preferences-ee10ec6948535d5b)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3131,
+      "preamble": "Running tests/transfer_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/b914962e75bc9890/out/transfer_recovery-b914962e75bc9890)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3147,
+      "preamble": "Running tests/tunnel_rules.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/25133bbb2169386b/out/tunnel_rules-25133bbb2169386b)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3163,
+      "preamble": "Running tests/tunnel_runtime.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/2216ed16b5649f17/out/tunnel_runtime-2216ed16b5649f17)",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3176,
+      "preamble": "Running tests/update_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6fb625d6ec8d238a/out/update_preferences-6fb625d6ec8d238a)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3215,
+      "preamble": "Running tests/vault.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/a54ff072e2b7238f/out/vault-a54ff072e2b7238f)",
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3228,
+      "preamble": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/4fba8b769ec94231/out/workflow_audit-4fba8b769ec94231)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3235,
+      "preamble": "Running tests/workflow_audit_profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f8b7ec3fb531998a/out/workflow_audit_profile_sync-f8b7ec3fb531998a)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3245,
+      "preamble": "Running tests/workflow_audit_schema.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/263fe9d5ee357821/out/workflow_audit_schema-263fe9d5ee357821)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3252,
+      "preamble": "Running tests/workflow_audit_wire_compatibility.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/00a2039617bed266/out/workflow_audit_wire_compatibility-00a2039617bed266)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3270,
+      "preamble": "Running tests/workspace_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/efcabf62cebf2b1b/out/workspace_layout-efcabf62cebf2b1b)",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3378,
+      "preamble": "Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6302e17300340b80/out/zmodem-6302e17300340b80)",
+      "passed": 102,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3407,
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/eea92bd5a76d0993/out/keelshell_mcp-eea92bd5a76d0993)",
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3413,
+      "preamble": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/9cfb119c7fd5d530/out/keelshell_mcp-9cfb119c7fd5d530)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3438,
+      "preamble": "Running tests/authority.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/42d2bdfd51778375/out/authority-42d2bdfd51778375)",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3460,
+      "preamble": "Running tests/ipc_transport.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/b9083de129ee38ba/out/ipc_transport-b9083de129ee38ba)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3469,
+      "preamble": "Running tests/startup_eof.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/c2ddcb085304a571/out/startup_eof-c2ddcb085304a571)",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3486,
+      "preamble": "Running tests/stdio_process.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/bc54a2d57e0884f9/out/stdio_process-bc54a2d57e0884f9)",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3497,
+      "preamble": "Running tests/stream_protocol.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/a112071752f6d2d1/out/stream_protocol-a112071752f6d2d1)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3519,
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-platform/5db0383be55b5ad0/out/keelshell_platform-5db0383be55b5ad0)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3719,
+      "preamble": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/4708879328820e6a/out/keelshell_session-4708879328820e6a)",
+      "passed": 190,
+      "failed": 0,
+      "ignored": 4
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3741,
+      "preamble": "Running tests/archive_tools.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/edd6b91810ba65a9/out/archive_tools-edd6b91810ba65a9)",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3765,
+      "preamble": "Running tests/archive_transfer.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/cd0b9cb00ea9b65b/out/archive_transfer-cd0b9cb00ea9b65b)",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3785,
+      "preamble": "Running tests/batch_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/879545a123e51d67/out/batch_exec-879545a123e51d67)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3794,
+      "preamble": "Running tests/disk_monitor.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ce43eb196f18c0a0/out/disk_monitor-ce43eb196f18c0a0)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3804,
+      "preamble": "Running tests/disk_monitor_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/f932d4d9a5e7e93e/out/disk_monitor_independent-f932d4d9a5e7e93e)",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3811,
+      "preamble": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/0575314c28f9b169/out/independent_workflow_audit-0575314c28f9b169)",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3832,
+      "preamble": "Running tests/openssh_interop.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/a1db54db36720903/out/openssh_interop-a1db54db36720903)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 15
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3852,
+      "preamble": "Running tests/remote_completion.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ba3c3f84dcd00514/out/remote_completion-ba3c3f84dcd00514)",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3863,
+      "preamble": "Running tests/remote_only.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/6534421091ea53b2/out/remote_only-6534421091ea53b2)",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 3909,
+      "preamble": "Running tests/server_archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/5a094d04d09b905a/out/server_archive-5a094d04d09b905a)",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4069,
+      "preamble": "Running tests/ssh_loopback.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/46a8a8b935328be3/out/ssh_loopback-46a8a8b935328be3)",
+      "passed": 154,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4083,
+      "preamble": "Running tests/transfer_idle_eof_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/dc2e48da556debd1/out/transfer_idle_eof_independent-dc2e48da556debd1)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4097,
+      "preamble": "Running tests/transfer_idle_eof_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/ac1eece3629afd47/out/transfer_idle_eof_review-ac1eece3629afd47)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4112,
+      "preamble": "Running tests/transfer_idle_metadata_negative_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/9f74183954455fa9/out/transfer_idle_metadata_negative_review-9f74183954455fa9)",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4125,
+      "preamble": "Running tests/transfer_idle_metadata_positive_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/2dd97df257625e60/out/transfer_idle_metadata_positive_review-2dd97df257625e60)",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4139,
+      "preamble": "Running tests/transfer_idle_metadata_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/d8cb387f52793a19/out/transfer_idle_metadata_review-d8cb387f52793a19)",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4158,
+      "preamble": "Running tests/transfer_idle_timeout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/f7bcd5582ad2bbc8/out/transfer_idle_timeout-f7bcd5582ad2bbc8)",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4207,
+      "preamble": "Running tests/transfer_metadata_idle.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/524e670c1d2c3cf5/out/transfer_metadata_idle-524e670c1d2c3cf5)",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4215,
+      "preamble": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/da7f425ca1e6b3e1/out/workflow_audit-da7f425ca1e6b3e1)",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4233,
+      "preamble": "Running tests/workflow_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/2106cb3771ec17ad/out/workflow_exec-2106cb3771ec17ad)",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4265,
+      "preamble": "Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/08a6404fc5fc3da9/out/zmodem-08a6404fc5fc3da9)",
+      "passed": 26,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "ordinary",
+      "log_line": 4279,
+      "preamble": "Running tests/zmodem_openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/817e670b582cce44/out/zmodem_openssh-817e670b582cce44)",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 8
+    },
+    {
+      "kind": "rustdoc",
+      "log_line": 4288,
+      "preamble": "Doc-tests keelshell_ai",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "log_line": 4295,
+      "preamble": "Doc-tests keelshell_ai",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "log_line": 4309,
+      "preamble": "Doc-tests keelshell_core",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "log_line": 4317,
+      "preamble": "Doc-tests keelshell_mcp",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "log_line": 4324,
+      "preamble": "Doc-tests keelshell_platform",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "kind": "rustdoc",
+      "log_line": 4331,
+      "preamble": "Doc-tests keelshell_session",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "target_access": false,
+  "independent_compilation": false,
+  "native_windows": "NOT_RUN"
+}

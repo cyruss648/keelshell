@@ -1,0 +1,49 @@
+{
+  "recommendation": "APPROVE",
+  "scope": "linux-final-r2 retained native Linux arm64 filesystem/codec evidence only",
+  "signed_utc": "2026-11-15T13:28:29.055306+00:00",
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "revision": "f945c4c780010067aee664bf7ccbf6caace4eea5",
+  "freeze_sha256": "1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9",
+  "runner_sha256": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+  "source_files": 588,
+  "scripts": 14,
+  "native_parent_run": {
+    "passed": 252,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 59.797,
+    "outer_exit": 0,
+    "outer_reaped": true,
+    "outer_provenance": "Parent/user explicit completion; reviewer did not wait parent outer process"
+  },
+  "reviewer_tests_this_round": {
+    "Rust": 0,
+    "Python": 0
+  },
+  "prior_r2_independent_python": 47,
+  "six_native_elf_chains_match": true,
+  "named_inventory": 418,
+  "unselected_shared_worker_tests": [
+    "sftp::archive_transfer::mutation_worker::tests::cancelled_publication_handoff_reports_uncertain_before_worker_result_is_returned",
+    "sftp::archive_transfer::mutation_worker::tests::cancelled_stage_handoff_reports_uncertain_before_worker_result_is_returned",
+    "sftp::archive_transfer::mutation_worker::tests::observed_mutation_result_acknowledges_a_stopped_worker"
+  ],
+  "parent_full_gate_not_waited": true,
+  "live_container_absent": true,
+  "all_recorded_command_pids_absent": true,
+  "registry_payload_audited_in_place": true,
+  "registry_payload_copied": false,
+  "r1_hold_and_r2_originals_preserved": true,
+  "notice003_preserved": true,
+  "audit_sha256": "92fa9e04b8243f28891b8ad005c1e9b64d9ee019b50c16cc116653bc9b4435c3",
+  "audit_command_sha256": "4efccdf29eb159e0195eb80290b1cb8694ccae02a0d067613f4dcb18294cd5ef",
+  "report_sha256": "d83e445486c724fd026fbfb34df6a01c8b78f01fda11b8162b3a18c872e5d175",
+  "owned_live_resources": [],
+  "write_scope": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/r3"
+}

@@ -1,0 +1,27 @@
+{
+  "observed_utc": "2026-11-15T13:08:40.329999+00:00",
+  "state": "AWAITING_R3_FREEZE_NO_CURRENT_APPROVAL",
+  "changed_from_r2": [
+    {
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "r2_sha256": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "observed_live_sha256": "d1786ed0c2355df19da364d913fae5a2bc6172f7ddc875e4e84091294057db76"
+    },
+    {
+      "path": "crates/keelshell-platform/src/path.rs",
+      "r2_sha256": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "observed_live_sha256": "8af2fc8f87eedf3021802bd6d584480a6cdcd813df7497bd60b832cd182801c7"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "r2_sha256": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63",
+      "observed_live_sha256": "3aa3141173a87a1a9338aec8471c1026c6d56f11d543bc8e26f60a2c49b1f349"
+    }
+  ],
+  "expected_common_tests_after_alias_extraction": 16,
+  "expected_windows_only_tests": 46,
+  "expected_windows_total_typechecked": 62,
+  "preliminary_assessment": "pure extraction matches prior Windows alias body; public re-export and Windows delegation; no new unsafe or native ABI changes",
+  "session_scope": "not reviewed; no closure claim for global admission/quarantine integration",
+  "windows_native": "NOT_RUN"
+}

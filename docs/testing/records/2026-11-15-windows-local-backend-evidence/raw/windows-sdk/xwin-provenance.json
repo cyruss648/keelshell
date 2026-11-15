@@ -1,0 +1,16 @@
+{
+  "version": "0.6.5",
+  "upstream_repository": "https://github.com/Jake-Shadle/xwin",
+  "release_url": "https://github.com/Jake-Shadle/xwin/releases/tag/0.6.5",
+  "published_at": "2024-08-21T16:14:38Z",
+  "archive": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/downloads/xwin-0.6.5-aarch64-apple-darwin.tar.gz",
+  "archive_sha256": "21acd1e35d23b72efc8c47cbeda5028989f98089174b8c87074f892b65adbc01",
+  "upstream_sha256": "21acd1e35d23b72efc8c47cbeda5028989f98089174b8c87074f892b65adbc01",
+  "checksum_matches": true,
+  "binary": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/tools/xwin-0.6.5-aarch64-apple-darwin/xwin",
+      "sha256": "edd8b3483939f1a1eb5a5c70dd83983641621cc69f701c89facb331aecb27261"
+    }
+  ]
+}

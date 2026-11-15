@@ -1,0 +1,56 @@
+{
+  "review": "windows-session-zmodem-r1",
+  "observed_at_utc": "2026-11-15T12:57:27.794992+00:00",
+  "status": "HOLD / REQUEST_CHANGES",
+  "new_open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0
+  },
+  "findings": [
+    {
+      "id": "WS-ZM-01",
+      "severity": "P2",
+      "status": "OPEN",
+      "title": "Portable Unicode alias can bypass active/local quarantine reservation matching",
+      "primary_location": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem.rs:1026",
+      "root_cause_location": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp/queue.rs:151",
+      "notice": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/notice-zmodem-r1-p2-01-unicode-reservation-alias.md",
+      "evidence": "STATIC_SOURCE_ONLY"
+    }
+  ],
+  "head_sha": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "candidate_committed": false,
+  "manifest_sha256": "8fb6ea161f2ce4d4ba0d882901ff867b9cf44f1cfcb19138af6d088a9ed01075",
+  "frozen_files_match": 6,
+  "supporting_context_unchanged": 12,
+  "static_source_checks": {
+    "matched": 22,
+    "mismatched": 0,
+    "original_r1_preserved": true,
+    "not_rust_tests": true
+  },
+  "test_source_inventory": {
+    "local_windows": {
+      "defined": 45,
+      "default_candidates": 43,
+      "ignored": 2
+    },
+    "integration": {
+      "defined": 26,
+      "windows_source_candidates": 25,
+      "excluded_fallback": 1
+    }
+  },
+  "executed_rust_tests": 0,
+  "native": "NOT_RUN",
+  "compiled_inventory_verified": false,
+  "parent_crosscheck_signed": false,
+  "target_access": false,
+  "cargo_rustc_format_git_commands": 0,
+  "archive_review": "NOT_STARTED / AWAIT_PARENT_FROZEN_INPUTS",
+  "platform_two_p2": "USER_REPORTED / OUT_OF_DUPLICATE_SCOPE / NOT_SIGNED",
+  "report": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-review-r1.md",
+  "report_sha256": "eae806a289939e64fef2656d07d54225b17937627360f73dfbfde96269c97e61"
+}

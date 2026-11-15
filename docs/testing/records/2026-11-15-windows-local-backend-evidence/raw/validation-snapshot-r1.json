@@ -1,0 +1,10 @@
+{
+  "revision": "8a7523ec8a21d5a9439592b99b6c30390b1be9a2",
+  "tree": "9c2202484c81251c9d600c2e3124060d5eed583c",
+  "base": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "engineering_freeze": "combined-inputs-r1.json",
+  "freeze_sha256": "5b12cc24a420cc85e9f1fba17bd261f2fe51318887cc024175dc39db2fdcd223",
+  "branch_moved": false,
+  "main_index_changed": false,
+  "purpose": "immutable git archive validation only; formal feature commit follows gates and independent review"
+}

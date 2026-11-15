@@ -1,0 +1,19 @@
+{
+  "label": "rename-buffer-layout",
+  "argv": [
+    "python3",
+    "-"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:42:00.912447+00:00",
+  "finished_utc": "2026-11-15T12:42:00.982984+00:00",
+  "elapsed_seconds": 0.070417,
+  "pid": 17020,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/rename-buffer-layout.txt",
+  "output_sha256": "cfb074589c003cb572c8b7b8d06846adc5bcbb68a5dbbbfba8ca72f38485b710"
+}

@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running unittests src/lib.rs (work/windows-local-backend-20261115/review-platform/r3/target/debug/build/keelshell-platform/bc537aa40ecafd23/out/keelshell_platform-bc537aa40ecafd23)
+
+running 16 tests
+test directory_records::tests::fragmented_query_batches_preserve_unicode_names_and_exclude_dot_entries ... ok
+test directory_records::tests::lone_surrogates_and_embedded_path_separators_are_rejected ... ok
+test directory_records::tests::name_budget_is_shared_across_all_native_query_batches ... ok
+test directory_records::tests::next_entry_offset_can_include_native_alignment_padding ... ok
+test directory_records::tests::odd_or_oversized_utf16_name_lengths_are_rejected ... ok
+test directory_records::tests::overlapping_or_out_of_bounds_entry_offsets_are_rejected ... ok
+test directory_records::tests::truncated_header_and_name_never_yield_partial_success ... ok
+test path::tests::absolute_drive_and_extended_drive_have_identical_literal_components ... ok
+test path::tests::controls_streams_and_visual_path_disguises_are_rejected ... ok
+test path::tests::drive_relative_and_normalizing_path_spellings_are_rejected ... ok
+test path::tests::drive_root_is_a_directory_capability_without_a_fabricated_name ... ok
+test path::tests::filename_bound_counts_utf16_units_instead_of_utf8_bytes ... ok
+test path::tests::full_path_review_bound_is_enforced_before_native_access ... ok
+test path::tests::portable_aliases_fold_expanding_and_final_sigma_case_forms ... ok
+test path::tests::reserved_dos_names_are_rejected_with_extensions_and_superscript_aliases ... ok
+test path::tests::unc_and_device_namespaces_do_not_fall_back_to_drive_access ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

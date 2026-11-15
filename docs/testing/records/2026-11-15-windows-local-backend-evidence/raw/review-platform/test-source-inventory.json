@@ -1,0 +1,345 @@
+{
+  "environment": [
+    {
+      "argv": [
+        "rustc",
+        "--version",
+        "--verbose"
+      ],
+      "exit_code": 0,
+      "stdout": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: aarch64-apple-darwin\nrelease: 1.100.0\nLLVM version: 23.1.5\n"
+    },
+    {
+      "argv": [
+        "cargo",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "cargo 1.100.0 (3acc79c0c 2026-11-05)\n"
+    },
+    {
+      "argv": [
+        "cargo",
+        "clippy",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "clippy 0.1.100 (0ef1bc3860 2026-11-09)\n"
+    },
+    {
+      "argv": [
+        "rustup",
+        "target",
+        "list",
+        "--installed"
+      ],
+      "exit_code": 0,
+      "stdout": "aarch64-apple-darwin\nx86_64-pc-windows-msvc\n"
+    }
+  ],
+  "windows_conditional_test_count": 42,
+  "windows_conditional_tests": [
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 15,
+      "name": "drive_chain_keeps_every_literal_ancestor_and_reopens_the_same_object",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 36,
+      "name": "private_file_has_its_verified_dacl_before_the_first_content_write",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 52,
+      "name": "private_directory_and_child_creation_do_not_rely_on_default_permissions",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 65,
+      "name": "exclusive_create_preserves_an_existing_file_directory_and_case_alias",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 79,
+      "name": "held_file_publication_retains_identity_and_leaves_no_old_name",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 98,
+      "name": "retained_object_rename_never_replaces_a_file_or_empty_directory",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 123,
+      "name": "complete_private_tree_is_published_through_its_retained_root",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 153,
+      "name": "directory_no_replace_syscall_preserves_other_empty_directories",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 167,
+      "name": "simultaneous_enumerations_have_independent_native_scan_positions",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 202,
+      "name": "directory_enumeration_continues_after_a_full_native_query_buffer",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 218,
+      "name": "opening_a_hard_linked_file_fails_instead_of_using_size_as_identity",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 229,
+      "name": "directory_stamp_survives_sibling_writes_but_distinguishes_replacement",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 242,
+      "name": "existing_private_entry_can_be_reopened_only_after_the_creation_writer_closes",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 257,
+      "name": "component_relative_operations_reject_every_escape_before_native_io",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/tests.rs",
+      "line": 271,
+      "name": "security_observations_are_opaque_in_public_debug_output",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 165,
+      "name": "private_file_is_verified_before_the_first_content_write",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 178,
+      "name": "private_directory_is_protected_with_object_and_container_inheritance",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 187,
+      "name": "creation_descriptor_retains_sid_and_acl_ownership_across_moves",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 208,
+      "name": "private_creation_does_not_inherit_a_broad_parent_dacl",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 230,
+      "name": "verify_private_rejects_an_additional_everyone_allow_entry",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 249,
+      "name": "verify_private_rejects_a_single_everyone_allow_entry",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 264,
+      "name": "verify_private_rejects_a_null_dacl",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 277,
+      "name": "verify_private_rejects_an_empty_dacl",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 291,
+      "name": "verify_private_rejects_an_unprotected_dacl",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 306,
+      "name": "verify_private_rejects_insufficient_owner_rights",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 321,
+      "name": "verify_private_rejects_a_real_deny_ace",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 350,
+      "name": "verify_private_rejects_a_directory_without_inheritance_flags",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 365,
+      "name": "observation_is_stable_across_requeries_and_duplicated_handles",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 387,
+      "name": "security_queries_require_read_control_on_the_actual_handle",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 430,
+      "name": "observation_detects_real_dacl_rights_changes",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 446,
+      "name": "observation_detects_real_dacl_protection_changes",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 462,
+      "name": "observation_remains_bound_to_the_handle_after_path_replacement",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 501,
+      "name": "private_snapshot_rejects_an_owner_mismatch",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 512,
+      "name": "private_snapshot_rejects_unknown_ace_types",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 523,
+      "name": "private_snapshot_rejects_inherited_and_inherit_only_flags",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 536,
+      "name": "private_snapshot_rejects_a_truncated_or_extended_allow_entry",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 553,
+      "name": "observation_encoding_detects_owner_and_group_sid_changes",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 571,
+      "name": "observation_encoding_distinguishes_absent_null_and_empty_dacls",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 587,
+      "name": "bounded_sid_parser_rejects_truncation_revision_and_subauthority_overflow",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 603,
+      "name": "observation_encoding_rejects_excessive_entry_bytes",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 614,
+      "name": "observation_excludes_sacl_and_pointer_representation_control_bits",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "line": 632,
+      "name": "observation_excludes_acl_free_space",
+      "runtime": "NOT_RUN",
+      "typecheck": "windows-cross-clippy"
+    }
+  ],
+  "supplementary_observed_sha256_after_first_cargo": {
+    "Cargo.toml": "8162655942f96c4eaf2c77e41da82dfa2786d28a1994509cda151052f0b212c3",
+    "Cargo.lock": "03491b38ce696fdcfd5a9f1e95f0306424b9b3732a5e33914bc4e40f7c39275c",
+    "AGENTS.md": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb",
+    "docs/adr/0138-windows-handle-local-files.md": "be5755488d6dc43e1ab585ec0023a35ceb70f06cfdff7b52da8c2bbbd1269009",
+    "docs/testing/STRATEGY.md": "e81486d57f8a2cb18d526750273fc85f74127bea37e1232cd4c1e63c88b61b24",
+    "docs/testing/SHARED_TARGET.md": "49762c249b1d2fc13981f65d3b8f8602954ba9eecde537156390c009fc8a6955"
+  }
+}

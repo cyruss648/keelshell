@@ -1,0 +1,220 @@
+{
+  "sealed_utc": "2026-11-15T13:03:01.711154+00:00",
+  "scope": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2",
+  "excluded_top_level_paths": [],
+  "self_excluded": true,
+  "file_count": 42,
+  "retained_bytes": 342989,
+  "files": [
+    {
+      "path": "binding-evidence.json",
+      "bytes": 1974,
+      "sha256": "7f7aa266deb1ada76d1bf3cc7437a1ac259936467a5f2b2b9cfc12f63b8e2de9"
+    },
+    {
+      "path": "capture.py",
+      "bytes": 2281,
+      "sha256": "ce67ebc192585eb576dbc33b1647204be5195b2714798958d5a2444f08d62e2c"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 656,
+      "sha256": "9992c04692ee362951be6e78ae479d388ade24b0bbc8af2abc89c37304c1025c"
+    },
+    {
+      "path": "compiler-artifacts.json",
+      "bytes": 26583,
+      "sha256": "c9e09cd7e51629a6393c6b6cde13942aa95325cb93fe8c641e169cc7dfa19ca5"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/dep-lib-keelshell_platform",
+      "bytes": 327,
+      "sha256": "0acf3f2731b815eadd225dc144c56d9567540acccb52892fcb64f0d09033c59b"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "22ca0293be9ff5c455e18cff26892e35038a3268889e0673480bff3d738318b4"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/lib-keelshell_platform.json",
+      "bytes": 481,
+      "sha256": "dae347380ec6764722f977cdf641cb5434792953a6237588f188dc7bbb1772a2"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/fingerprint/output-lib-keelshell_platform",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/4f705ef2f88f67d1/out/keelshell_platform-4f705ef2f88f67d1.d",
+      "bytes": 1440,
+      "sha256": "ab7b260ae5eb27b934014e000f9ed5d242dc041232b47d3a72567723b8f08417"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/dep-test-lib-keelshell_platform",
+      "bytes": 388,
+      "sha256": "7dc14411813f080a810ba86418ecf35dd8b73cb7f78f7a596e72e195c332af07"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/output-test-lib-keelshell_platform",
+      "bytes": 85,
+      "sha256": "22252f8f4f23b0064ec76bad71b525405eece542d506d590268e604156526a41"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform",
+      "bytes": 16,
+      "sha256": "684bd3021da39978c4e1294155b92554d7231e6966c9d6c92d44668b2cf58c54"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/fingerprint/test-lib-keelshell_platform.json",
+      "bytes": 545,
+      "sha256": "b6809d5771c3c02ff08601e629348eea1b25661b70b05a3d03e2c3b2ccaf1d91"
+    },
+    {
+      "path": "compiler-evidence/x86_64-pc-windows-msvc/debug/build/keelshell-platform/ef54deb44d3e9261/out/keelshell_platform-ef54deb44d3e9261.d",
+      "bytes": 1751,
+      "sha256": "559a14fc6738adf1bfcd367e4440ef0c81eb208036d78cc0d6d912be9fbbb3f1"
+    },
+    {
+      "path": "diff-r1-r2.patch",
+      "bytes": 10461,
+      "sha256": "0499998b0968b7a099dd7eb8fa9a97233715d93ec2daa60ebcddfda53991da42"
+    },
+    {
+      "path": "fetch_reopen_docs.py",
+      "bytes": 1503,
+      "sha256": "4dcae8881bdbc45be7436ed55e38c6d2cceb35d6674a81ef498144803aa1efe4"
+    },
+    {
+      "path": "final-audit.json",
+      "bytes": 994,
+      "sha256": "9ea3c8a67603281f4e8f22207f5e3eca4988891349474c5f09ec9b799cc9f9e8"
+    },
+    {
+      "path": "freeze-before.json",
+      "bytes": 3122,
+      "sha256": "f0dc6a30ac933d40d87deee27ad52e1b985ac21c7b549c9ac87928a367ff1dc7"
+    },
+    {
+      "path": "freeze-final.json",
+      "bytes": 3522,
+      "sha256": "7771cb43ff048c15e8f1f57d00ac5708d854710050691bb41fd5685629082e07"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/Cargo.toml",
+      "bytes": 818,
+      "sha256": "7f99c1d3beeaa9cc8aa70d4835ef5376e9a26340af3abfde6e7adf6c2749aa90"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/directory_records.rs",
+      "bytes": 4400,
+      "sha256": "ad7b4d896fbe2cf3ae955bdd69590a1228b48e0b97db7ab38e87720ec54557f8"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/lib.rs",
+      "bytes": 797,
+      "sha256": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/path.rs",
+      "bytes": 6770,
+      "sha256": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/windows/mod.rs",
+      "bytes": 12363,
+      "sha256": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/windows/native.rs",
+      "bytes": 14872,
+      "sha256": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/windows/security/tests.rs",
+      "bytes": 23356,
+      "sha256": "ea706dac54a2eae75f489a89966f331b420e0af192b234c575c56c6bc72e2dce"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/windows/security.rs",
+      "bytes": 25583,
+      "sha256": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465"
+    },
+    {
+      "path": "frozen-platform/crates/keelshell-platform/src/windows/tests.rs",
+      "bytes": 13874,
+      "sha256": "797f725c9b07048b9a508b8edab3227ba595f5a219eaa500fc9bc1ac3c660244"
+    },
+    {
+      "path": "platform-inputs-r2.original.json",
+      "bytes": 1498,
+      "sha256": "567a74e6bfccdb8b9bc846e30ed613ccd1051fc90caffa5e6a35e3a525143c81"
+    },
+    {
+      "path": "primary-reopen-documents.json",
+      "bytes": 901,
+      "sha256": "283af2b05109bbd5298dbbdd6d8d32709b28007d4a75dae1ade991724445de6a"
+    },
+    {
+      "path": "primary-reopen-documents.txt",
+      "bytes": 897,
+      "sha256": "a5d383db1e36431788080979c9b89b6dbe895360af3bfecf4f79e05756069e96"
+    },
+    {
+      "path": "report-r2.md",
+      "bytes": 13651,
+      "sha256": "ef3751f759889229267310030f98795ae579556c318c1f3dd886dbcdc792b3ec"
+    },
+    {
+      "path": "result-r2.json",
+      "bytes": 1229,
+      "sha256": "7a4a3625d0726ed173dda9cd2b4a9188157e84ffcbbb39f5185afb959804b4c6"
+    },
+    {
+      "path": "sources/createfilew.md",
+      "bytes": 64528,
+      "sha256": "f3e2604b109bc721d4bb6674ce0e10dd883c3d820c48156ca527690b5d19e437"
+    },
+    {
+      "path": "sources/fetch-reopen.json",
+      "bytes": 897,
+      "sha256": "a5d383db1e36431788080979c9b89b6dbe895360af3bfecf4f79e05756069e96"
+    },
+    {
+      "path": "sources/reopenfile.md",
+      "bytes": 17543,
+      "sha256": "c567682de9ba5e356d74a325258fb465c3dcee9c6253df6fbe5dd0dd772a149b"
+    },
+    {
+      "path": "sources/rust-openoptions-access-mode.md",
+      "bytes": 68411,
+      "sha256": "fad927cc7eed07ae2704ae33a292cd8ca23207d5f60cf295c383b4e55bc3ddca"
+    },
+    {
+      "path": "test-source-inventory.json",
+      "bytes": 12704,
+      "sha256": "ba320eeadd4363571c3403cd1d86c6af04713f783614b785c3e51204fa211025"
+    },
+    {
+      "path": "windows-cross-clippy.json",
+      "bytes": 1151,
+      "sha256": "09eead72204652b35b62ad7fb025c8492885a283f8554bffee62555c4d58a521"
+    },
+    {
+      "path": "windows-cross-clippy.txt",
+      "bytes": 420,
+      "sha256": "d5de9fef2ce0bf07bbe17d643dbfda26aaba75c4e5874d763cda35dd0152558e"
+    }
+  ]
+}

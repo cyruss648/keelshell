@@ -1,0 +1,26 @@
+{
+  "fresh_inventory_count": 16,
+  "executed_count": 16,
+  "source_inventory_names_match": true,
+  "new_alias_test_executed": true,
+  "names": [
+    "directory_records::tests::fragmented_query_batches_preserve_unicode_names_and_exclude_dot_entries",
+    "directory_records::tests::lone_surrogates_and_embedded_path_separators_are_rejected",
+    "directory_records::tests::name_budget_is_shared_across_all_native_query_batches",
+    "directory_records::tests::next_entry_offset_can_include_native_alignment_padding",
+    "directory_records::tests::odd_or_oversized_utf16_name_lengths_are_rejected",
+    "directory_records::tests::overlapping_or_out_of_bounds_entry_offsets_are_rejected",
+    "directory_records::tests::truncated_header_and_name_never_yield_partial_success",
+    "path::tests::absolute_drive_and_extended_drive_have_identical_literal_components",
+    "path::tests::controls_streams_and_visual_path_disguises_are_rejected",
+    "path::tests::drive_relative_and_normalizing_path_spellings_are_rejected",
+    "path::tests::drive_root_is_a_directory_capability_without_a_fabricated_name",
+    "path::tests::filename_bound_counts_utf16_units_instead_of_utf8_bytes",
+    "path::tests::full_path_review_bound_is_enforced_before_native_access",
+    "path::tests::portable_aliases_fold_expanding_and_final_sigma_case_forms",
+    "path::tests::reserved_dos_names_are_rejected_with_extensions_and_superscript_aliases",
+    "path::tests::unc_and_device_namespaces_do_not_fall_back_to_drive_access"
+  ],
+  "inventory_receipt": "host-parser-inventory.json",
+  "execution_receipt": "host-parser-tests.json"
+}

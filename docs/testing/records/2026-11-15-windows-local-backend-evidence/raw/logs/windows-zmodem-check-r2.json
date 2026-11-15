@@ -1,0 +1,26 @@
+{
+  "command": [
+    "python3",
+    "work/windows-local-backend-20261115/with_windows_sdk.py",
+    "cargo",
+    "check",
+    "-p",
+    "keelshell-session",
+    "--all-targets",
+    "--target",
+    "x86_64-pc-windows-msvc",
+    "--locked",
+    "--offline"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "windows-zmodem-check-r2",
+  "pid": 18520,
+  "started_utc": "2026-11-15T12:43:32.746238+00:00",
+  "finished_utc": "2026-11-15T12:43:46.333115+00:00",
+  "seconds": 13.587,
+  "exit": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log_sha256": "95e9c1fa628803c2418099759859390c2db6be75310aef65cdb1e6591e2e3915",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

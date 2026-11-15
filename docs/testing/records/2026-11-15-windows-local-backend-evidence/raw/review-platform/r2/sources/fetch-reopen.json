@@ -1,0 +1,23 @@
+[
+  {
+    "name": "reopenfile",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/winbase/nf-winbase-reopenfile.md",
+    "http_status": 200,
+    "bytes": 17543,
+    "sha256": "c567682de9ba5e356d74a325258fb465c3dcee9c6253df6fbe5dd0dd772a149b"
+  },
+  {
+    "name": "createfilew",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/sdk-api/docs/sdk-api-src/content/fileapi/nf-fileapi-createfilew.md",
+    "http_status": 200,
+    "bytes": 64528,
+    "sha256": "f3e2604b109bc721d4bb6674ce0e10dd883c3d820c48156ca527690b5d19e437"
+  },
+  {
+    "name": "rust-openoptions-access-mode",
+    "url": "https://raw.githubusercontent.com/rust-lang/rust/0ef1bc386059596dada8fb65b50425aab2ea637a/library/std/src/sys/fs/windows.rs",
+    "http_status": 200,
+    "bytes": 68411,
+    "sha256": "fad927cc7eed07ae2704ae33a292cd8ca23207d5f60cf295c383b4e55bc3ddca"
+  }
+]

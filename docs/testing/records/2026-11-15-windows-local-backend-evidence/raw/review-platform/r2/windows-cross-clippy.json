@@ -1,0 +1,31 @@
+{
+  "label": "windows-cross-clippy",
+  "argv": [
+    "cargo",
+    "clippy",
+    "--offline",
+    "--locked",
+    "-p",
+    "keelshell-platform",
+    "--all-targets",
+    "--target",
+    "x86_64-pc-windows-msvc",
+    "--target-dir",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2/target",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:54:48.410958+00:00",
+  "finished_utc": "2026-11-15T12:54:52.350574+00:00",
+  "elapsed_seconds": 3.939433,
+  "pid": 39379,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2/windows-cross-clippy.txt",
+  "output_sha256": "d5de9fef2ce0bf07bbe17d643dbfda26aaba75c4e5874d763cda35dd0152558e"
+}

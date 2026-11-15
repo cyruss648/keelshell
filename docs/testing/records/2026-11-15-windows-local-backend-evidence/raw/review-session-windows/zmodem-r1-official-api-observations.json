@@ -1,0 +1,83 @@
+{
+  "observed_at_utc": "2026-11-15T12:47:30.634152+00:00",
+  "method": "HTTPS GET official Microsoft docs only; read-only; no Windows execution",
+  "results": [
+    {
+      "name": "file-times",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/sysinfo/file-times",
+      "http_status": 200,
+      "raw_sha256": "428e21f9037099f9959a53b4b9d106d97e776aa65a9e48d02f94dd90012b24b2",
+      "snippets": [
+        {
+          "term": "last write",
+          "text": "cess date. The NTFS file system delays updates to the last access time for a file by up to 1 hour after the last access. To retrieve the file times for a specified file, use the GetFileTime function. GetFileTime copies the creation, last access, and last write times to individual FILETIME structures. You can also retrieve file times using the FindFirstFile and FindNextFile functions. These functions copy the file times to FILETIME structures in a WIN32_FIND_DATA structure. When writing to a file, the last write time is not fully updated until all handles that are used for writing are closed. To set the file times for a file, use the SetFileTime function. This function lets you modify creation, last access, and last write times without changing the co"
+        },
+        {
+          "term": "last write",
+          "text": "rite times to individual FILETIME structures. You can also retrieve file times using the FindFirstFile and FindNextFile functions. These functions copy the file times to FILETIME structures in a WIN32_FIND_DATA structure. When writing to a file, the last write time is not fully updated until all handles that are used for writing are closed. To set the file times for a file, use the SetFileTime function. This function lets you modify creation, last access, and last write times without changing the content of the file. You can compare the times of different files by using the CompareFileTime function. The function compares two file times and returns a value that indicates which time is later or returns 0 (zero) if the times are equal. If you plan to mo"
+        },
+        {
+          "term": "last write",
+          "text": "ucture. When writing to a file, the last write time is not fully updated until all handles that are used for writing are closed. To set the file times for a file, use the SetFileTime function. This function lets you modify creation, last access, and last write times without changing the content of the file. You can compare the times of different files by using the CompareFileTime function. The function compares two file times and returns a value that indicates which time is later or returns 0 (zero) if the times are equal. If you plan to modify file times for specified files, you can convert a date and time of day to a file time by using the SystemTimeToFileTime function. You can also obtain the system time in a FILETIME structure by calling the GetS"
+        },
+        {
+          "term": "closed",
+          "text": " it is seen as 3:00pm EST in New York on a FAT volume. Time stamps are updated at various times and for various reasons. The only guarantee about a file time stamp is that the file time is correctly reflected when the handle that makes the change is closed. Not all file systems can record creation and last access times, and not all file systems record them in the same manner. For example, the resolution of create time on FAT is 10 milliseconds, while write time has a resolution of 2 seconds and access time has a resolution of 1 day, so it is really the access date. The NTFS file system delays updates to the last access time for a file by up to 1 hour after the last access. To retrieve the file times for a specified file, use the GetFileTime funct"
+        },
+        {
+          "term": "closed",
+          "text": "the FindFirstFile and FindNextFile functions. These functions copy the file times to FILETIME structures in a WIN32_FIND_DATA structure. When writing to a file, the last write time is not fully updated until all handles that are used for writing are closed. To set the file times for a file, use the SetFileTime function. This function lets you modify creation, last access, and last write times without changing the content of the file. You can compare the times of different files by using the CompareFileTime function. The function compares two file times and returns a value that indicates which time is later or returns 0 (zero) if the times are equal. If you plan to modify file times for specified files, you can convert a date and time of day to a "
+        },
+        {
+          "term": "last access",
+          "text": ". Time stamps are updated at various times and for various reasons. The only guarantee about a file time stamp is that the file time is correctly reflected when the handle that makes the change is closed. Not all file systems can record creation and last access times, and not all file systems record them in the same manner. For example, the resolution of create time on FAT is 10 milliseconds, while write time has a resolution of 2 seconds and access time has a resolution of 1 day, so it is really the access date. The NTFS file system delays updates to the last access time for a file by up to 1 hour after the last access. To retrieve the file times for a specified file, use the GetFileTime function. GetFileTime copies the creation, last access, and las"
+        },
+        {
+          "term": "last access",
+          "text": " same manner. For example, the resolution of create time on FAT is 10 milliseconds, while write time has a resolution of 2 seconds and access time has a resolution of 1 day, so it is really the access date. The NTFS file system delays updates to the last access time for a file by up to 1 hour after the last access. To retrieve the file times for a specified file, use the GetFileTime function. GetFileTime copies the creation, last access, and last write times to individual FILETIME structures. You can also retrieve file times using the FindFirstFile and FindNextFile functions. These functions copy the file times to FILETIME structures in a WIN32_FIND_DATA structure. When writing to a file, the last write time is not fully updated until all handles that"
+        },
+        {
+          "term": "last access",
+          "text": "me on FAT is 10 milliseconds, while write time has a resolution of 2 seconds and access time has a resolution of 1 day, so it is really the access date. The NTFS file system delays updates to the last access time for a file by up to 1 hour after the last access. To retrieve the file times for a specified file, use the GetFileTime function. GetFileTime copies the creation, last access, and last write times to individual FILETIME structures. You can also retrieve file times using the FindFirstFile and FindNextFile functions. These functions copy the file times to FILETIME structures in a WIN32_FIND_DATA structure. When writing to a file, the last write time is not fully updated until all handles that are used for writing are closed. To set the file time"
+        },
+        {
+          "term": "last access",
+          "text": " is really the access date. The NTFS file system delays updates to the last access time for a file by up to 1 hour after the last access. To retrieve the file times for a specified file, use the GetFileTime function. GetFileTime copies the creation, last access, and last write times to individual FILETIME structures. You can also retrieve file times using the FindFirstFile and FindNextFile functions. These functions copy the file times to FILETIME structures in a WIN32_FIND_DATA structure. When writing to a file, the last write time is not fully updated until all handles that are used for writing are closed. To set the file times for a file, use the SetFileTime function. This function lets you modify creation, last access, and last write times without"
+        },
+        {
+          "term": "last access",
+          "text": "N32_FIND_DATA structure. When writing to a file, the last write time is not fully updated until all handles that are used for writing are closed. To set the file times for a file, use the SetFileTime function. This function lets you modify creation, last access, and last write times without changing the content of the file. You can compare the times of different files by using the CompareFileTime function. The function compares two file times and returns a value that indicates which time is later or returns 0 (zero) if the times are equal. If you plan to modify file times for specified files, you can convert a date and time of day to a file time by using the SystemTimeToFileTime function. You can also obtain the system time in a FILETIME structure by "
+        }
+      ]
+    },
+    {
+      "name": "ntcreatefile",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-ntcreatefile",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "name": "writefile",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-writefile",
+      "http_status": 200,
+      "raw_sha256": "d1d1ae7eede507ce90f93f84373b8ef55c8af7f8d7736f2dc62bc7b613ebdb8f",
+      "snippets": [
+        {
+          "term": "last write",
+          "text": "alling process's buffer could not be page-locked. For more information, see SetProcessWorkingSetSize . If part of the file is locked by another process and the write operation overlaps the locked portion, WriteFile fails. When writing to a file, the last write time is not fully updated until all handles used for writing have been closed. Therefore, to ensure an accurate last write time, close the file handle immediately after writing to the file. Accessing the output buffer while a write operation is using the buffer may lead to corruption of the data written from that buffer. Applications must not write to, reallocate, or free the output buffer that a write operation is using until the write operation completes. This can be particularly problematic "
+        },
+        {
+          "term": "last write",
+          "text": "is locked by another process and the write operation overlaps the locked portion, WriteFile fails. When writing to a file, the last write time is not fully updated until all handles used for writing have been closed. Therefore, to ensure an accurate last write time, close the file handle immediately after writing to the file. Accessing the output buffer while a write operation is using the buffer may lead to corruption of the data written from that buffer. Applications must not write to, reallocate, or free the output buffer that a write operation is using until the write operation completes. This can be particularly problematic when using an asynchronous file handle. Additional information regarding synchronous versus asynchronous file handles can b"
+        },
+        {
+          "term": "closed",
+          "text": "cessWorkingSetSize . If part of the file is locked by another process and the write operation overlaps the locked portion, WriteFile fails. When writing to a file, the last write time is not fully updated until all handles used for writing have been closed. Therefore, to ensure an accurate last write time, close the file handle immediately after writing to the file. Accessing the output buffer while a write operation is using the buffer may lead to corruption of the data written from that buffer. Applications must not write to, reallocate, or free the output buffer that a write operation is using until the write operation completes. This can be particularly problematic when using an asynchronous file handle. Additional information regarding synch"
+        },
+        {
+          "term": "closed",
+          "text": " updates the OVERLAPPED Internal and InternalHigh fields and the file pointer before WriteFile returns. For more information, see CreateFile and Synchronous and Asynchronous I/O . Pipes If an anonymous pipe is being used and the read handle has been closed, when WriteFile attempts to write using the pipe's corresponding write handle, the function returns FALSE and GetLastError returns ERROR_BROKEN_PIPE . If the pipe buffer is full when an application uses the WriteFile function to write to a pipe, the write operation may not finish immediately. The write operation will be completed when a read operation (using the ReadFile function) makes more system buffer space available for the pipe. When writing to a non-blocking, byte-mode pipe handle with i"
+        }
+      ]
+    }
+  ]
+}

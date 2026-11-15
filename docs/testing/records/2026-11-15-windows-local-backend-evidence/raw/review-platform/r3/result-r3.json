@@ -1,0 +1,51 @@
+{
+  "decision": "APPROVE",
+  "approval_scope": "SOURCE_CONTRACT_ONLY",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "manifest_sha256": "c927ff6a42813bc2824133fdb6c00121234401c1857f34a7ec55651806f0813a",
+  "inputs": 9,
+  "frozen_match_count": 9,
+  "live_match_count": 9,
+  "live_mismatch_count": 0,
+  "changed_from_r2": 3,
+  "changed_from_r1": 5,
+  "r1_historical_decision": "HOLD",
+  "r1_findings_closed_source_contract": [
+    "R1-P2-01",
+    "R1-P2-02"
+  ],
+  "r2_historical_decision": "APPROVE_SOURCE_CONTRACT_ONLY",
+  "historical_originals_unchanged": true,
+  "engineering_commands": {
+    "total": 3,
+    "cargo": 3,
+    "rustc": 0,
+    "exit_zero": 3
+  },
+  "cumulative_r1_r2_r3_engineering_commands": {
+    "total": 11,
+    "cargo": 7,
+    "rustc": 4,
+    "expected_rustc_exit_one_negatives": 2
+  },
+  "host_tests": {
+    "passed": 16,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0
+  },
+  "windows_conditional_tests_typechecked": 46,
+  "common_tests_typechecked": 16,
+  "windows_typechecked_source_functions_total": 62,
+  "windows_tests_executed": 0,
+  "windows_native": "NOT_RUN",
+  "parent_pe_receipt_binding": "r2 only; 61 names compared, PE binary not independently inspected",
+  "parent_target_accessed": false,
+  "own_target_deleted": true,
+  "session_WSZM01_end_to_end_closure": "OUTSIDE_PLATFORM_SOURCE_SCOPE"
+}

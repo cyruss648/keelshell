@@ -21,13 +21,19 @@ python3 -m unittest discover -s packaging -p 'test_*.py' -v
 | `crates/keelshell-app` | GPUI Kit 界面、交互、会话生命周期 |
 | `crates/keelshell-core` | 配置模型、校验、持久化 |
 | `crates/keelshell-session` | SSH、SFTP、转发、监控 |
+| `crates/keelshell-platform` | Windows 同步句柄、私有 DACL 与无覆盖文件发布的安全边界 |
 | `crates/keelshell-ai` | 服务请求、上下文、脱敏、建议审阅 |
+| `crates/keelshell-mcp` | 桌面 IPC 的 stdio MCP 配套程序 |
 | `packaging` | 平台打包、归档验证与发布 |
 | `docs` | 产品、设计决策、测试证据和路线图 |
 
 ## 提交改动
 
 保持一次改动围绕一个明确问题，说明变化前后的行为。对涉及行为的改动增加相应测试；不要通过忽略失败或扩大超时来掩盖问题。阻塞网络和文件 I/O 应放在界面线程之外。
+
+Windows ABI 仅限平台 crate 的 Windows 模块，并逐块说明所有权、对齐与同步
+生命周期；其他 crate 继续禁止 unsafe。调用方仍须完成完整审核、取消、身份
+重验与未知写入隔离，不能把安全 syscall 包装当成整项发布成功。
 
 提交前运行适用的检查，更新相关产品文档与测试记录。请分别写清编译结果、自动测试、原生界面验收和真实服务互操作情况；某个平台通过不代表所有平台通过。
 

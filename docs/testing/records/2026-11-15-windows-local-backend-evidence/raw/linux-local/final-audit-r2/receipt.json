@@ -1,0 +1,91 @@
+{
+  "steps": [
+    {
+      "name": "owned-absent-preflight-r1",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "4d409ad05808b6e8443ede4e73a2d4a42c6f2123203fe8eb0e5360be393c3204"
+      ],
+      "pid": 70964,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.194,
+      "stdout_log": "001-owned-absent-preflight-r1.stdout.log",
+      "stderr_log": "001-owned-absent-preflight-r1.stderr.log"
+    },
+    {
+      "name": "owned-absent-native-r1",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "df0bc70daf2d5d8033b16ad4cd0eb571587d3c7dd67f28f7c93ba2555c5fbe66"
+      ],
+      "pid": 70970,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.109,
+      "stdout_log": "002-owned-absent-native-r1.stdout.log",
+      "stderr_log": "002-owned-absent-native-r1.stderr.log"
+    },
+    {
+      "name": "owned-absent-native-r2",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "b44ac0d71bcc0ea3654f19700ba480a72451e414126320e79761e2cea5feeaa3"
+      ],
+      "pid": 70977,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.105,
+      "stdout_log": "003-owned-absent-native-r2.stdout.log",
+      "stderr_log": "003-owned-absent-native-r2.stderr.log"
+    },
+    {
+      "name": "owned-absent-native-r3",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "090ccd648c0976c8e04611bbf5e7ba547bb9dc36a1bded5b137ed73f5c5abedb"
+      ],
+      "pid": 70981,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.105,
+      "stdout_log": "004-owned-absent-native-r3.stdout.log",
+      "stderr_log": "004-owned-absent-native-r3.stderr.log"
+    },
+    {
+      "name": "write-set-readback",
+      "argv": [
+        "git",
+        "status",
+        "--short",
+        "--untracked-files=normal"
+      ],
+      "pid": 70986,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.115,
+      "stdout_log": "005-write-set-readback.stdout.log",
+      "stderr_log": "005-write-set-readback.stderr.log"
+    }
+  ],
+  "scope": "final native-r3/input/owned-resource readback",
+  "owned_processes_stopped": true
+}

@@ -150,13 +150,13 @@ pub(super) async fn local_claim(path: &Path, write: bool) -> Result<Claim> {
     }
     let mut components: Vec<_> = canonical
         .components()
-        .map(|c| c.as_os_str().to_string_lossy().to_lowercase())
+        .map(|c| keelshell_platform::filename_alias(&c.as_os_str().to_string_lossy()))
         .collect();
     components.extend(
         missing
             .into_iter()
             .rev()
-            .map(|s| s.to_string_lossy().to_lowercase()),
+            .map(|s| keelshell_platform::filename_alias(&s.to_string_lossy())),
     );
     Ok(Claim {
         path: components,
@@ -657,6 +657,72 @@ mod tests {
                 .await
                 .is_err()
         );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components() -> Result<()> {
+        let temporary = tempfile::tempdir()?;
+        for (first, second) in [("STRASSE.bin", "straße.bin"), ("σ.bin", "ς.bin")] {
+            let one = local_claim(&temporary.path().join(first), true).await?;
+            let two = local_claim(&temporary.path().join(second), true).await?;
+            assert!(overlap(&one, &two), "{first} / {second}");
+            let one = local_claim(&temporary.path().join(first).join("child"), true).await?;
+            let two = local_claim(&temporary.path().join(second).join("CHILD"), false).await?;
+            assert!(overlap(&one, &two), "missing ancestor: {first} / {second}");
+        }
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging()
+    -> Result<()> {
+        let options = crate::SshOptions {
+            host: "reservation-fixture.invalid".into(),
+            port: 22,
+            username: "fixture".into(),
+            proxy: None,
+            expected_host_key: None,
+            auth: crate::SshAuth::Password(zeroize::Zeroizing::new("fixture-only".into())),
+            timeout: Duration::from_secs(3),
+        };
+        let first_owner = Arc::new(TransferReservations::new(&options));
+        let second_owner = Arc::new(TransferReservations::new(&options));
+        for (first, second) in [("STRASSE.bin", "straße.bin"), ("σ.bin", "ς.bin")] {
+            let temporary = tempfile::tempdir()?;
+            let destination = temporary.path().join(first);
+            let stage = temporary.path().join(".fixture-staging");
+            let claims = ResourceClaims {
+                local: vec![
+                    local_claim(&destination, true).await?,
+                    local_claim(&stage, true).await?,
+                ],
+                remote: Vec::new(),
+            };
+            let Admission::Ready(ticket) =
+                TransferReservations::admit_resources(&first_owner, &claims)
+            else {
+                return Err(SessionError::Invalid("isolated fixture admission failed"));
+            };
+            // A real retained staging object precedes the production registry's
+            // unknown disposition. This does not simulate a Windows syscall.
+            std::fs::write(&stage, b"unverified fixture content")?;
+            ticket.finish(false);
+            let alias = ResourceClaims {
+                local: vec![local_claim(&temporary.path().join(second), true).await?],
+                remote: Vec::new(),
+            };
+            assert!(matches!(
+                TransferReservations::admit_resources(&second_owner, &alias),
+                Admission::Quarantined
+            ));
+            assert!(matches!(
+                TransferReservations::admit_resources(&second_owner, &claims),
+                Admission::Quarantined
+            ));
+            assert!(!destination.exists());
+            assert_eq!(std::fs::read(&stage)?, b"unverified fixture content");
+        }
         Ok(())
     }
 }

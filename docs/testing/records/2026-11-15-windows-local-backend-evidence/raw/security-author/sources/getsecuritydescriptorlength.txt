@@ -1,0 +1,73 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+GetSecurityDescriptorLength function (securitybaseapi.h)
+Feedback
+Summarize this article for me
+In this article
+The GetSecurityDescriptorLength function returns the length, in bytes, of a structurally valid security descriptor. The length includes the length of all associated structures.
+Syntax
+DWORD GetSecurityDescriptorLength(
+[in] PSECURITY_DESCRIPTOR pSecurityDescriptor
+);
+Parameters
+[in] pSecurityDescriptor
+A pointer to the
+SECURITY_DESCRIPTOR structure whose length the function returns. The pointer is assumed to be valid.
+Return value
+If the function succeeds, the function returns the length, in bytes, of the SECURITY_DESCRIPTOR structure.
+If the SECURITY_DESCRIPTOR structure is not valid, the return value is undefined.
+Remarks
+The minimum length of a security descriptor is SECURITY_DESCRIPTOR_MIN_LENGTH. A security descriptor of this length has no associated
+security identifiers (SIDs) or
+access control lists (ACLs).
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps | UWP apps]
+Minimum supported server
+Windows Server 2003 [desktop apps | UWP apps]
+Target Platform
+Windows
+Header
+securitybaseapi.h (include Windows.h)
+Library
+Advapi32.lib
+DLL
+Advapi32.dll
+See also
+GetSecurityDescriptorControl
+GetSecurityDescriptorDacl
+GetSecurityDescriptorGroup
+GetSecurityDescriptorOwner
+GetSecurityDescriptorSacl
+IsValidSecurityDescriptor
+Low-level Access Control
+Low-level Access Control Functions
+SECURITY_DESCRIPTOR
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2024-02-22

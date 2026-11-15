@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "/usr/bin/curl",
+    "-q",
+    "--fail",
+    "--silent",
+    "--show-error",
+    "--location",
+    "--connect-timeout",
+    "8",
+    "--max-time",
+    "50",
+    "--proto",
+    "=https",
+    "--proto-redir",
+    "=https",
+    "--output",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/downloads/xwin-0.6.5-aarch64-apple-darwin.tar.gz.sha256",
+    "https://github.com/Jake-Shadle/xwin/releases/download/0.6.5/xwin-0.6.5-aarch64-apple-darwin.tar.gz.sha256"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk",
+  "pid": 5146,
+  "started_utc": "2026-11-15T12:30:56.378979+00:00",
+  "finished_utc": "2026-11-15T12:30:57.291149+00:00",
+  "seconds": 0.912,
+  "timeout_seconds": 55.0,
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/logs/xwin-0.6.5-aarch64-apple-darwin.tar.gz.sha256.log",
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

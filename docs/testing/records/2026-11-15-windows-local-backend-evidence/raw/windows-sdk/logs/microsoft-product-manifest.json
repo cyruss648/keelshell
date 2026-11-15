@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "/usr/bin/curl",
+    "-q",
+    "--fail",
+    "--silent",
+    "--show-error",
+    "--location",
+    "--connect-timeout",
+    "5",
+    "--max-time",
+    "35",
+    "--proto",
+    "=https",
+    "--proto-redir",
+    "=https",
+    "--output",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/downloads/VisualStudio.vsman",
+    "https://download.visualstudio.microsoft.com/download/pr/95995f57-8355-4ff5-8d90-a7e1669fb3b3/da49c304df0fff4e75c20849171840a06840e845ce814104d709dfb5cd461668/VisualStudio.vsman"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk",
+  "pid": 7389,
+  "started_utc": "2026-11-15T12:33:11.103108+00:00",
+  "finished_utc": "2026-11-15T12:33:46.118180+00:00",
+  "seconds": 35.015,
+  "timeout_seconds": 40.0,
+  "exit_code": 28,
+  "timed_out": false,
+  "reaped": true,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/logs/microsoft-product-manifest.log",
+  "log_sha256": "8980e98214f8f9e0beb59d308adb9cc33344eeaf1ba3ec1a3dac06126ba1ffbb"
+}

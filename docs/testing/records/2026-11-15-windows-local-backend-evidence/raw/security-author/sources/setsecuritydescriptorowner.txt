@@ -1,0 +1,80 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+SetSecurityDescriptorOwner function (securitybaseapi.h)
+Feedback
+Summarize this article for me
+In this article
+The SetSecurityDescriptorOwner function sets the owner information of an absolute-format security descriptor. It replaces any owner information already present in the security descriptor.
+Syntax
+BOOL SetSecurityDescriptorOwner(
+[in, out]      PSECURITY_DESCRIPTOR pSecurityDescriptor,
+[in, optional] PSID                 pOwner,
+[in]           BOOL                 bOwnerDefaulted
+);
+Parameters
+[in, out] pSecurityDescriptor
+A pointer to the
+SECURITY_DESCRIPTOR structure whose owner is set by this function. The function replaces any existing owner with the new owner.
+[in, optional] pOwner
+A pointer to a
+SID structure for the security descriptor's new primary owner. The SID structure is referenced by, not copied into, the security descriptor. If this parameter is NULL, the function clears the security descriptor's owner information. This marks the security descriptor as having no owner.
+[in] bOwnerDefaulted
+Indicates whether the owner information is derived from a default mechanism. If this value is TRUE, it is default information. The function stores this value as the SE_OWNER_DEFAULTED flag in the
+SECURITY_DESCRIPTOR_CONTROL structure. If this parameter is zero, the SE_OWNER_DEFAULTED flag is cleared.
+Return value
+If the function succeeds, the return value is nonzero.
+If the function fails, the return value is zero. To get extended error information, call
+GetLastError.
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps | UWP apps]
+Minimum supported server
+Windows Server 2003 [desktop apps | UWP apps]
+Target Platform
+Windows
+Header
+securitybaseapi.h (include Windows.h)
+Library
+Advapi32.lib
+DLL
+Advapi32.dll
+See also
+GetSecurityDescriptorOwner
+InitializeSecurityDescriptor
+IsValidSecurityDescriptor
+Low-level Access Control
+Low-level Access Control Functions
+SECURITY_DESCRIPTOR
+SECURITY_DESCRIPTOR_CONTROL
+SID
+SetSecurityDescriptorDacl
+SetSecurityDescriptorGroup
+SetSecurityDescriptorSacl
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2021-10-13

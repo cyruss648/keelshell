@@ -4547,12 +4547,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "keelshell-platform"
+version = "0.1.0"
+dependencies = [
+ "tempfile",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "keelshell-session"
 version = "0.1.0"
 dependencies = [
  "base64 0.23.1",
  "calcifer-macos-acl",
  "keelshell-core",
+ "keelshell-platform",
  "rand 0.10.3",
  "russh",
  "russh-sftp",

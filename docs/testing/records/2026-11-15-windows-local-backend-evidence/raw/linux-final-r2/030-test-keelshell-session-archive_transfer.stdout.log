@@ -1,0 +1,23 @@
+
+running 18 tests
+test archive_new_sources_and_late_remote_destinations_require_a_fresh_review_before_any_write ... ok
+test archive_rechecks_full_source_digest_even_when_length_identity_and_mtime_are_restored ... ok
+test archive_rechecks_sources_after_staging_and_before_standard_rename ... ok
+test archive_rejects_source_symlinks_hard_links_parent_links_roots_and_traversal ... ok
+test archive_review_is_bound_to_the_exact_ssh_connection_and_current_authority ... ok
+test archive_revocation_during_pending_write_retains_quarantine_and_never_publishes ... ok
+test corrupt_and_traversing_archives_never_reach_review_or_create_local_output ... ok
+test extraction_rechecks_all_remote_bytes_and_preserves_a_late_local_destination ... ok
+test lost_standard_rename_acknowledgement_is_unknown_even_when_remote_bytes_were_published ... ok
+test archive_overall_deadline_preserves_a_pending_write_as_unknown ... ok
+test sftp_fixture::canonical_path_gate_tests::exact_path_hold_survives_clones_and_releases_on_owner_drop ... ok
+test sftp_fixture::canonical_path_gate_tests::expired_reply_stays_owned_until_drop_and_cannot_rearm_silently ... ok
+test sftp_fixture::canonical_path_gate_tests::release_before_poll_and_old_handler_do_not_consume_new_hold ... ok
+test sftp_fixture::transfer_write_gate_tests::a_missing_release_expires_as_failure_instead_of_admitting_a_write ... ok
+test sftp_fixture::transfer_write_gate_tests::first_write_unrelated_targets_and_release_before_poll_are_never_held ... ok
+test sftp_fixture::transfer_write_gate_tests::guard_unwind_releases_an_entered_write_and_rearming_does_not_retrap_it ... ok
+test standard_sftp_rename_refuses_a_destination_created_at_the_publication_boundary ... ok
+test reviewed_archive_binary_multiselect_roundtrip_uses_private_exclusive_staging_and_standard_rename ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.50s
+

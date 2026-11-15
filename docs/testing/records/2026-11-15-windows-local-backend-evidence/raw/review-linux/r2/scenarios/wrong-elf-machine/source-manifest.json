@@ -1,0 +1,10 @@
+{
+  "files": {
+    "Cargo.toml": "434e102c861f994d2aace9114d392dbc162190e00be8fe357d472150ca439614",
+    "Cargo.lock": "127e6d8888482022d00e7daddbd7e6d52d50f97417aea788e62fd1f0e243c1b5"
+  },
+  "file_count": 2,
+  "manifest_sha256": "051e8183aebe5feeb7ec0b53813fc7db64cbdcf5eb2497f079ee7f327764ace9",
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "archive_sha256": "20813720b4a14f15b18ec520099ef223b75c1880e8bf3aeac4fadfe75ffa404e"
+}

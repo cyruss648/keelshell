@@ -1,0 +1,3 @@
+?? crates/keelshell-platform/
+?? scripts/run_linux_local_backend.py
+?? scripts/test_linux_local_backend.py

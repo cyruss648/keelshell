@@ -1,0 +1,115 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+GetSecurityInfo function (aclapi.h)
+Feedback
+Summarize this article for me
+In this article
+The GetSecurityInfo function retrieves a copy of the security descriptor for an object specified by a handle.
+Syntax
+DWORD GetSecurityInfo(
+[in]            HANDLE               handle,
+[in]            SE_OBJECT_TYPE       ObjectType,
+[in]            SECURITY_INFORMATION SecurityInfo,
+[out, optional] PSID                 *ppsidOwner,
+[out, optional] PSID                 *ppsidGroup,
+[out, optional] PACL                 *ppDacl,
+[out, optional] PACL                 *ppSacl,
+[out, optional] PSECURITY_DESCRIPTOR *ppSecurityDescriptor
+);
+Parameters
+[in] handle
+A handle to the object from which to retrieve security information.
+[in] ObjectType
+SE_OBJECT_TYPE enumeration value that indicates the type of object.
+[in] SecurityInfo
+A set of
+bit flags that indicate the type of security information to retrieve. This parameter can be a combination of the
+SECURITY_INFORMATION bit flags.
+[out, optional] ppsidOwner
+A pointer to a variable that receives a pointer to the owner SID in the security descriptor returned in ppSecurityDescriptor. The returned pointer is valid only if you set the OWNER_SECURITY_INFORMATION flag. This parameter can be NULL if you do not need the owner SID.
+[out, optional] ppsidGroup
+A pointer to a variable that receives a pointer to the primary group SID in the returned security descriptor. The returned pointer is valid only if you set the GROUP_SECURITY_INFORMATION flag. This parameter can be NULL if you do not need the group SID.
+[out, optional] ppDacl
+A pointer to a variable that receives a pointer to the DACL in the returned security descriptor. The returned pointer is valid only if you set the DACL_SECURITY_INFORMATION flag. This parameter can be NULL if you do not need the DACL.
+[out, optional] ppSacl
+A pointer to a variable that receives a pointer to the SACL in the returned security descriptor. The returned pointer is valid only if you set the SACL_SECURITY_INFORMATION flag. This parameter can be NULL if you do not need the SACL.
+[out, optional] ppSecurityDescriptor
+A pointer to a variable that receives a pointer to the security descriptor of the object. When you have finished using the pointer,  free the returned buffer by calling the
+LocalFree function.
+This parameter is required if any one of the ppsidOwner, ppsidGroup, ppDacl, or ppSacl parameters is not NULL.
+Return value
+If the function succeeds, the return value is ERROR_SUCCESS.
+If the function fails, the return value is a nonzero error code defined in WinError.h.
+Remarks
+If the ppsidOwner, ppsidGroup, ppDacl, and ppSacl parameters are non-NULL, and the SecurityInfo parameter specifies that they be retrieved from the object, those parameters will point to the corresponding parameters in the security descriptor returned in ppSecurityDescriptor.
+To read the owner, group, or DACL from the object's security descriptor, the calling process must have been granted READ_CONTROL access when the handle was opened. To get READ_CONTROL access, the caller must be the owner of the object or the object's DACL must grant the access.
+To read the SACL from the security descriptor, the calling process must have been granted ACCESS_SYSTEM_SECURITY access when the handle was opened. The proper way to get this access is to enable the SE_SECURITY_NAME privilege in the caller's current token, open the handle for ACCESS_SYSTEM_SECURITY access, and then disable the privilege. For information about the security implications of enabling  privileges, see Running with Special Privileges.
+You can use the GetSecurityInfo function with the following types of objects:
+Local or remote files or directories on an NTFS file system
+Named pipes
+Local or remote printers
+Local or remote Windows services
+Network shares
+Registry keys
+Semaphores, events, mutexes, and waitable timers
+Processes, threads, jobs, and file-mapping objects
+Interactive service window stations and desktops
+Directory service objects
+This function does not handle race conditions. If your thread calls this function at the approximate time that another thread changes the object's security descriptor, then this function could fail.
+Examples
+For an example that uses this function, see
+Finding the Owner of a File Object.
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps | UWP apps]
+Minimum supported server
+Windows Server 2003 [desktop apps | UWP apps]
+Target Platform
+Windows
+Header
+aclapi.h
+Library
+Advapi32.lib
+DLL
+Advapi32.dll
+See also
+ACL
+Access Control Overview
+Basic Access Control Functions
+GetNamedSecurityInfo
+LocalFree
+Privilege Constants
+SECURITY_DESCRIPTOR
+SECURITY_INFORMATION
+SE_OBJECT_TYPE
+SID
+SetNamedSecurityInfo
+SetSecurityInfo
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2021-10-13

@@ -1,0 +1,58 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+2.4.42 FileRenameInformation
+Feedback
+Summarize this article for me
+In this article
+This information class is used to rename a file. The data
+element provided by the client takes one of two forms, depending on whether it
+is embedded within SMB or SMB2. The structure definitions are as follows:
+FILE_RENAME_INFORMATION_TYPE_1 for the SMB protocol (section 2.4.42.1).
+FILE_RENAME_INFORMATION_TYPE_2 for the SMB2 protocol (section 2.4.42.2).
+This operation returns a status code as specified in section
+2.2.
+Upon success, the status code returned by the function that processes this file
+information class is STATUS_SUCCESS. The most common error codes are listed in
+the following table.
+Error code
+Meaning
+STATUS_INVALID_PARAMETER
+0xC000000D
+An invalid parameter was passed for FileName or
+FileNameLength, or the RootDirectory field value was nonzero
+for a network operation.
+STATUS_ACCESS_DENIED
+0xC0000022
+The handle was not opened with delete access, or the
+target file was open and ReplaceIfExists is nonzero.
+STATUS_NOT_SAME_DEVICE
+0xC00000D4
+The destination file of a rename request is located on
+a different device than the source of the rename request.
+STATUS_OBJECT_NAME_INVALID
+0xC0000033
+The object name is invalid for the target file system.
+STATUS_OBJECT_NAME_COLLISION
+0xC0000035
+The specified name already exists and ReplaceIfExists
+is zero.
+STATUS_INFO_LENGTH_MISMATCH
+0xC0000004
+The specified information record length does not match
+the length that is required for the specified information class.
+Additional resources
+Last updated on
+2025-04-07

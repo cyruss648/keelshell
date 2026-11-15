@@ -1,0 +1,19 @@
+{
+  "label": "capability-boundary-probes",
+  "argv": [
+    "python3",
+    "work/windows-local-backend-20261115/review-platform/probe_capabilities.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:38:41.655711+00:00",
+  "finished_utc": "2026-11-15T12:38:41.847533+00:00",
+  "elapsed_seconds": 0.191692,
+  "pid": 13075,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/capability-boundary-probes.txt",
+  "output_sha256": "747fe1cf3cc4594bebfa7bd83b3ff27ff8673d64a199f73ab2304a5d7ed513c5"
+}

@@ -1,0 +1,53 @@
+{
+  "status": "COMPLETE",
+  "recorded_utc": "2026-11-15T13:50:59.092269+00:00",
+  "path": "work/windows-local-backend-20261115",
+  "preserved_originals": 1301,
+  "preserved_source_hashes_rechecked": true,
+  "index_audit": "index-input-binding.json",
+  "containers": {
+    "aaad3e36783af65df3d32bca40cf1a59aa71595345731e6409d55dfbb7ab8c0d": {
+      "original_receipt": "linux-final-r1/receipt.json",
+      "exists_exit": 1,
+      "absent": true
+    },
+    "38a13b7ad2e2b9dc2c3b60a74b93d1b00d224b0f9ab6d29093d575585d8a077d": {
+      "original_receipt": "linux-final-r2/receipt.json",
+      "exists_exit": 1,
+      "absent": true
+    },
+    "df0bc70daf2d5d8033b16ad4cd0eb571587d3c7dd67f28f7c93ba2555c5fbe66": {
+      "original_receipt": "linux-local/native-r1/receipt.json",
+      "exists_exit": 1,
+      "absent": true
+    },
+    "b44ac0d71bcc0ea3654f19700ba480a72451e414126320e79761e2cea5feeaa3": {
+      "original_receipt": "linux-local/native-r2/receipt.json",
+      "exists_exit": 1,
+      "absent": true
+    },
+    "090ccd648c0976c8e04611bbf5e7ba547bb9dc36a1bded5b137ed73f5c5abedb": {
+      "original_receipt": "linux-local/native-r3/receipt.json",
+      "exists_exit": 1,
+      "absent": true
+    },
+    "4d409ad05808b6e8443ede4e73a2d4a42c6f2123203fe8eb0e5360be393c3204": {
+      "original_receipt": "linux-local/preflight-r1/receipt.json",
+      "exists_exit": 1,
+      "absent": true
+    }
+  },
+  "logical_bytes_removed": 2609954825,
+  "reviewer_agents_closed": 3,
+  "new_user_chats": 0,
+  "new_worktrees": 0,
+  "new_branches": 0,
+  "retained": [
+    "work/recovery-batch-integration-20261115/target",
+    "other task worktrees, containers, state and applications"
+  ],
+  "scope": "only this batch directory, after lossless export and Git index/blob verification",
+  "batch_absent": true,
+  "unique_target_retained": true,
+  "completed_utc": "2026-11-15T13:50:59.549964+00:00"
+}

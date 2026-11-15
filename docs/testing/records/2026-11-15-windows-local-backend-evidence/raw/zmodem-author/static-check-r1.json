@@ -1,0 +1,109 @@
+{
+  "recorded_utc": "2026-11-15T12:36:23.649706+00:00",
+  "status": "STATIC_SOURCE_INVENTORY_ONLY",
+  "rust_parse_typecheck_and_behavior": "NOT_RUN",
+  "all_static_checks_pass": false,
+  "checks": {
+    "all_test_attributes_have_result_function": true,
+    "unique_test_names": true,
+    "leading_inner_test_cfg_and_windows_cfg": true,
+    "test_module_path_exists": true,
+    "no_trailing_whitespace": true,
+    "owned_text_has_final_newline": true,
+    "no_merge_conflict_markers": true,
+    "production_has_no_panic_unwrap_expect": true,
+    "production_has_no_unsafe_or_raw_handle_conversion": true,
+    "production_has_no_plain_path_file_open_or_mutation": false,
+    "production_has_no_private_handle_reopen_or_directory_from_file": true,
+    "mutation_marker_has_single_true_store_and_no_reset": true,
+    "production_has_no_directory_sync": true,
+    "tests_have_no_subprocess_threads_or_sleeps": true,
+    "existing_unix_backend_has_no_worktree_diff": true
+  },
+  "whitespace_diagnostics": {
+    "crates/keelshell-session/src/zmodem/local_windows.rs": [],
+    "crates/keelshell-session/src/zmodem/local_windows/tests.rs": [],
+    "work/windows-local-backend-20261115/zmodem-author/HANDOFF.md": []
+  },
+  "sources": [
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows.rs",
+      "bytes": 18351,
+      "sha256": "f24af54f17b6d92f1899dda7ca10f74360672f4eced6c94034eed79a12a2f306"
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "bytes": 37204,
+      "sha256": "02e2e8d6f23d8e30548d41ca47317c711aa6a1584cfbc124848ef8e366044926"
+    }
+  ],
+  "existing_unix_backend": {
+    "command": [
+      "git",
+      "diff",
+      "--exit-code",
+      "--",
+      "crates/keelshell-session/src/zmodem/local.rs",
+      "crates/keelshell-session/src/zmodem/local/tests.rs"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "",
+    "current_files": [
+      {
+        "path": "crates/keelshell-session/src/zmodem/local.rs",
+        "bytes": 22740,
+        "sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd"
+      },
+      {
+        "path": "crates/keelshell-session/src/zmodem/local/tests.rs",
+        "bytes": 17147,
+        "sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81"
+      }
+    ]
+  },
+  "untracked_whitespace_commands": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "crates/keelshell-session/src/zmodem/local_windows.rs"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "",
+      "interpretation": "no-index difference; no whitespace diagnostic emitted"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "crates/keelshell-session/src/zmodem/local_windows/tests.rs"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "",
+      "interpretation": "no-index difference; no whitespace diagnostic emitted"
+    }
+  ],
+  "author_did_not_run": [
+    "cargo",
+    "rustc",
+    "rustfmt/fmt",
+    "clippy",
+    "Rust tests",
+    "Windows runtime tests"
+  ],
+  "shared_target_used": false,
+  "committed": false,
+  "subagents_or_chats_created": false,
+  "note": "Pattern and whitespace checks do not parse or compile Rust or prove filesystem behavior. Parent platform, Cargo and controller changes are not frozen by this record."
+}

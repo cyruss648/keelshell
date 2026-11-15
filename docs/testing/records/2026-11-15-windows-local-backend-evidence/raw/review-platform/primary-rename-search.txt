@@ -1,0 +1,92 @@
+[
+  {
+    "query": "IopOpenLinkOrRenameTarget sharing FILE_SHARE_READ",
+    "results": [
+      {
+        "title": "Detect, enable, and disable SMBv1, SMBv2, and SMBv3 in Windows",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3",
+        "description": "The SMBv3 protocol was introduced in Windows 8 and Windows Server 2012. For more information about SMBv2 and SMBv3 capabilities, see the following articles: Overview of file sharing using the SMB 3 protocol in Windows Server 1.3 Overview Use PowerShell to remove SMBv1 You can use the Get-WindowsOptionalFeature, Disable-WindowsOptionalFeature, and."
+      },
+      {
+        "title": "Share and manage agents built in Agent Builder",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-builder-share-manage-agents",
+        "description": "Sharing an agent provides direct access to it for a specified set of users. While ideal for team collaboration, sharing an agent doesn't allow for deployment across the organization or integration with other channels. This article describes how to share and manage the agents you build in Agent Builder. To publish an agent across multiple channels,."
+      },
+      {
+        "title": "Migrate to Microsoft 365 Cross-Tenant Access Policy for sharing Free/Busy, Calendars, and MailTips",
+        "url": "https://learn.microsoft.com/en-us/exchange/sharing/migrate-to-m365-xtap",
+        "description": "Migrate to Microsoft 365 Cross-Tenant Access Policy for sharing Free/Busy, Calendars, and MailTips Summarize this article for me In this article Overview Microsoft 365 Cross-Tenant Access Policy is the new Microsoft standard for collaboration between Microsoft 365 tenants and replaces Organization Relationship and Sharing Policies for sharing."
+      },
+      {
+        "title": "About shared mailboxes in Microsoft 365 - Microsoft 365 admin",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/admin/email/about-shared-mailboxes",
+        "description": "About shared mailboxes in Microsoft 365 Summarize this article for me In this article This article explains what shared mailboxes are, when to use them, licensing considerations, limitations, and common troubleshooting scenarios. Use shared mailboxes when multiple people need access to the same mailbox, such as for: Company information addresses.."
+      },
+      {
+        "title": "Share agents with other users - Microsoft Copilot Studio",
+        "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/admin-share-bots",
+        "description": "Note When sharing an agent for chat, you can't share it with Microsoft 365 groups with SecurityEnabled set to false. Learn how to change this setting in Share an app with Microsoft 365 groups in the Power Apps documentation. If the agent uses a connector or agent flow that requires users to create their own connection, the users should have the."
+      }
+    ]
+  },
+  {
+    "query": "NtCreateFile relative dot directory",
+    "results": [
+      {
+        "title": "Active Directory Domain Services overview",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview",
+        "description": "Active Directory Domain Services overview Summarize this article for me In this article A directory is a hierarchical structure that stores information about objects on a network. A directory service, such as Active Directory Domain Services (AD DS), provides the methods for storing directory data and making this data available to network users."
+      },
+      {
+        "title": "Get-ChildItem (Microsoft.PowerShell.Management) - PowerShell",
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-childitem",
+        "description": "Get-ChildItem Module: Microsoft.PowerShell.Management Module Gets the items and child items in one or more specified locations. You can use the Recurse parameter to get items in all child containers and use the Depth parameter to limit the number of levels to recurse. For example, items can be a file system file or directory, registry hive, or a."
+      },
+      {
+        "title": "Naming Files, Paths, and Namespaces - Win32 apps",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file",
+        "description": "Naming Files, Paths, and Namespaces Summarize this article for me In this article The file systems supported by Windows use the concept of files and directories to access data stored on a disk or device. Fully Qualified vs. Relative Paths For Windows API functions that manipulate files, file names can often be relative to t... A file name is."
+      },
+      {
+        "title": "Active Directory Security Groups",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups",
+        "description": "Active Directory security groups Summarize this article for me In this article This article discusses default Active Directory security groups, group scope, and group functions. What is a security group in Active Directory. Active Directory has two forms of common security principals: user accounts and computer accounts. In Active Directory,."
+      },
+      {
+        "title": "New-Item (Microsoft.PowerShell.Management) - PowerShell",
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item",
+        "description": "New-Item Module: Microsoft.PowerShell.Management Module Creates a new item. Syntax pathSet (Default) - All providers nameSet - All providers pathSet (Default) - WSMan provider nameSet - WSMan provider pathSet (Default) - Alias provider nameSet - Alias provider Description The New-Item cmdlet creates a new item and sets its value. For example, in."
+      }
+    ]
+  },
+  {
+    "query": "FileRenameInformation RootDirectory sharing conflict",
+    "results": [
+      {
+        "title": "Share agents with other users - Microsoft Copilot Studio",
+        "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/admin-share-bots",
+        "description": "Then, when you finish editing the topic and attempt to save it, Copilot Studio detects a conflict. When a conflict happens, Copilot Studio prevents you from overwriting your coworker's changes by offering you two options: Select Discard changes to reload your agent with the latest changes (discarding your work). Select Save copy to save a copy of."
+      },
+      {
+        "title": "Share and manage agents built in Agent Builder",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-builder-share-manage-agents",
+        "description": "Sharing an agent provides direct access to it for a specified set of users. While ideal for team collaboration, sharing an agent doesn't allow for deployment across the organization or integration with other channels. This article describes how to share and manage the agents you build in Agent Builder. To publish an agent across multiple channels,."
+      },
+      {
+        "title": "Change the sharing settings for a site - SharePoint in Microsoft 365",
+        "url": "https://learn.microsoft.com/en-us/sharepoint/change-external-sharing-site",
+        "description": "Change the sharing settings for a site Summarize this article for me In this article You must be at least a SharePoint Administrator in Microsoft 365 to change the sharing settings for a site.  ...uding Teams) New and existing guests if the Microsoft 365 Groups setting Let group owners add people outside the organization to groups is On; otherwise."
+      },
+      {
+        "title": "Migrate to Microsoft 365 Cross-Tenant Access Policy for sharing Free/Busy, Calendars, and MailTips",
+        "url": "https://learn.microsoft.com/en-us/exchange/sharing/migrate-to-m365-xtap",
+        "description": "Migrate to Microsoft 365 Cross-Tenant Access Policy for sharing Free/Busy, Calendars, and MailTips Summarize this article for me In this article Overview Microsoft 365 Cross-Tenant Access Policy is the new Microsoft standard for collaboration between Microsoft 365 tenants and replaces Organization Relationship and Sharing Policies for sharing."
+      },
+      {
+        "title": "Can't access shared folders from File Explorer - Windows Client",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/networking/cannot-access-shared-folder-file-explorer",
+        "description": "Can't access shared folders from File Explorer in Windows 10 Summarize this article for me In this article Applies to: \u00a0 Windows 10 General troubleshooting Instead of File Explorer, access the shared folder by Command Prompt using the below command: Note For more information, see Net use. Turn on the SMB 1.0 support feature from Control Panel by."
+      }
+    ]
+  }
+]

@@ -1,0 +1,1090 @@
+{
+  "observed_at_utc": "2026-11-15T13:32:08.659090+00:00",
+  "kind": "LEXICAL_SOURCE_ASSERTION_ONLY_NOT_RUST_TESTS_NOT_CONCURRENCY_PROOF",
+  "checks_matched": 39,
+  "checks_mismatched": 0,
+  "checks": [
+    {
+      "name": "portable_fold_order",
+      "path": "crates/keelshell-platform/src/path.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 11,
+          "text": "pub fn filename_alias"
+        },
+        {
+          "line": 13,
+          "text": "flat_map(char::to_uppercase)"
+        },
+        {
+          "line": 14,
+          "text": "flat_map(char::to_lowercase)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "public_fold_reexport",
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 10,
+          "text": "WindowsPath, filename_alias, validate_windows_component"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "common_alias_delegation_platform_windows",
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 335,
+          "text": "crate::filename_alias(name)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "common_alias_delegation_zm_unix",
+      "path": "crates/keelshell-session/src/zmodem/local.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 103,
+          "text": "keelshell_platform::filename_alias(name)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "common_alias_delegation_zm_windows",
+      "path": "crates/keelshell-session/src/zmodem/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 94,
+          "text": "keelshell_platform::filename_alias(name)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "common_alias_delegation_ar_windows",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 148,
+          "text": "keelshell_platform::filename_alias(name)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "queue_canonical_and_missing_components_delegate",
+      "path": "crates/keelshell-session/src/sftp/queue.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 153,
+          "text": ".map(|c| keelshell_platform::filename_alias(&c.as_os_str().to_string_lossy()))"
+        },
+        {
+          "line": 159,
+          "text": ".map(|s| keelshell_platform::filename_alias(&s.to_string_lossy()))"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "queue_actual_unknown_after_staging_regression",
+      "path": "crates/keelshell-session/src/sftp/queue.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 678,
+          "text": "local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging"
+        },
+        {
+          "line": 709,
+          "text": "std::fs::write(&stage, b\"unverified fixture content\")?;"
+        },
+        {
+          "line": 710,
+          "text": "ticket.finish(false);"
+        },
+        {
+          "line": 717,
+          "text": "Admission::Quarantined"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "unicode_controller_asserts_no_authority_before_own_observer",
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 1272,
+          "text": "async fn zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data()"
+        },
+        {
+          "line": 1303,
+          "text": "rejected(&output, Failure::DestinationBusy);"
+        },
+        {
+          "line": 1308,
+          "text": "first.assert_no_authority_used();\n        second.assert_no_authority_used();\n        let sftp = second.session.sftp().await?;"
+        },
+        {
+          "line": 1329,
+          "text": "assert_eq!(second.observed.channels.load(Ordering::Acquire), 1);"
+        },
+        {
+          "line": 1330,
+          "text": "assert_eq!(second.observed.subsystems.load(Ordering::Acquire), 1);"
+        },
+        {
+          "line": 1331,
+          "text": "assert_eq!(second.observed.commands.load(Ordering::Acquire), 0);"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "windows_archive_module_dispatch",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 10,
+          "text": "#[cfg_attr(windows, path = \"archive_transfer/local_windows.rs\")]"
+        },
+        {
+          "line": 11,
+          "text": "mod local;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "archive_atomic_bool_shared_remote_import",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 4,
+          "text": "use std::sync::atomic::AtomicBool;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "source_capabilities_and_full_chain_retained",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 38,
+          "text": "held: Directory,"
+        },
+        {
+          "line": 52,
+          "text": "File(Arc<File>)"
+        },
+        {
+          "line": 209,
+          "text": "let chain = Directory::open_chain(parent)?;"
+        },
+        {
+          "line": 219,
+          "text": "retain_ancestor(ancestors, path.clone(), held.clone())?;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "full_content_and_digest_recheck",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 409,
+          "text": "bytes != member.bytes()"
+        },
+        {
+          "line": 410,
+          "text": "Some(digest) != entry.digest"
+        },
+        {
+          "line": 400,
+          "text": "names(&directory, stop)? != entry.children"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "literal_windows_archive_member_components",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 561,
+          "text": "for component in member.split('/')"
+        },
+        {
+          "line": 566,
+          "text": "validate_windows_component(component)?;"
+        },
+        {
+          "line": 567,
+          "text": "target.push(component);"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "implied_parents_and_budget_guard",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 629,
+          "text": "expected.len() > MAX_ENTRIES"
+        },
+        {
+          "line": 475,
+          "text": "*count <= MAX_MANIFEST"
+        },
+        {
+          "line": 599,
+          "text": "*count <= MAX_EXPANDED"
+        },
+        {
+          "line": 587,
+          "text": "member_target(&root, member.path())?;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "private_guard_armed_before_create",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 840,
+          "text": "let unverified = UnverifiedStage {"
+        },
+        {
+          "line": 843,
+          "text": "let entry = parent.create_directory(basename(staging)?)?;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "close_writer_then_metadata_baseline_and_bytes",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 906,
+          "text": "drop(child);\n        // Windows may defer last-write timestamps"
+        },
+        {
+          "line": 909,
+          "text": "let stamp = metadata(&held)?;"
+        },
+        {
+          "line": 911,
+          "text": "stamp.identity != written.identity"
+        },
+        {
+          "line": 912,
+          "text": "read_file(&held, &stamp, node.bytes.len() as u64, &worker.stop)?.0 != node.bytes"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "native_no_replace_and_final_inventory_readback",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 997,
+          "text": "parent.rename_no_replace(&stage.entry, basename(destination)?)?;"
+        },
+        {
+          "line": 1003,
+          "text": "let actual = capture_tree(published, &expected, &worker.stop)?;"
+        },
+        {
+          "line": 1004,
+          "text": "compare_tree(&stage.tree, &actual, true)?;"
+        },
+        {
+          "line": 1010,
+          "text": "verify_tree_links(&actual, &worker.stop)?;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "old_guard_always_quarantines_on_drop",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 214,
+          "text": "impl Drop for UnverifiedStage"
+        },
+        {
+          "line": 217,
+          "text": "ticket.finish(false);"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "scope_complete_before_receipt_is_observed",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 386,
+          "text": "Ok(ArchiveTransferReceipt {"
+        },
+        {
+          "line": 396,
+          "text": "scope.complete(result).await"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "native_tests_call_actual_scan_build_publish",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 231,
+          "text": "scan_blocking(vec![source.clone()], &stop)?;"
+        },
+        {
+          "line": 394,
+          "text": "let stage = build_stage("
+        },
+        {
+          "line": 405,
+          "text": "publish_stage("
+        },
+        {
+          "line": 64,
+          "text": "queue::TransferReservations::admit_resources(&owner, &claims)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "native_stage_content_test_changes_real_file",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 539,
+          "text": "std::fs::write(fixture.staging.join(\"file\"), b\"tampered\")?;"
+        },
+        {
+          "line": 506,
+          "text": "assert!(lease.quarantined());"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "native_final_shared_ticket_cannot_clear_unknown",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 649,
+          "text": "drop(unobserved);\n        lease.ticket.clone().finish(true);"
+        },
+        {
+          "line": 506,
+          "text": "assert!(lease.quarantined());"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "archive_ui_windows_enabled_and_fallback_gated",
+      "path": "crates/keelshell-app/src/files/archive.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 287,
+          "text": "!cfg!(any(target_os = \"macos\", target_os = \"linux\", windows))"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "archive_ui_unknown_hold_policy",
+      "path": "crates/keelshell-app/src/files/archive.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 37,
+          "text": "error.is_outcome_unknown()"
+        },
+        {
+          "line": 38,
+          "text": "FileFailure::Cleanup | FileFailure::IsolationUnknown"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "archive_ui_success_requires_production_receipt",
+      "path": "crates/keelshell-app/src/files/worker.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 567,
+          "text": ".execute_archive_transfer(plan.transfer, &|| !stop.load(Ordering::Acquire))"
+        },
+        {
+          "line": 571,
+          "text": "归档传输完成：{} 项，归档 {} 字节，展开 {} 字节。请刷新目标列表。"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "zmodem_ui_windows_enabled",
+      "path": "crates/keelshell-app/src/terminal_zmodem.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 630,
+          "text": "let local_supported = cfg!(any(target_os = \"linux\", target_os = \"macos\", windows));"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "window_preserves_prior_unresolved_target",
+      "path": "crates/keelshell-app/src/files.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": false,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 1489,
+          "text": ".then(|| self.isolation_target.clone());"
+        },
+        {
+          "line": 1779,
+          "text": "&& !archive::retains_close_hold(&result)"
+        },
+        {
+          "line": 1781,
+          "text": "view.isolation_target = previous;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "shared_worker_cfg_windows_or_tests",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 12,
+          "text": "#[cfg(any(windows, test))]"
+        },
+        {
+          "line": 13,
+          "text": "mod mutation_worker;"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "submit_sets_pending_before_enqueue_and_result_hook",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": "fn submit_at_boundary",
+      "scope_end": "pub(super) async fn observe_mutation",
+      "match": true,
+      "evidence": [
+        {
+          "line": 42,
+          "text": "pending.store(true, Ordering::Release);"
+        },
+        {
+          "line": 43,
+          "text": "tokio::task::spawn_blocking(move || {"
+        },
+        {
+          "line": 44,
+          "text": "let result = worker.check().and_then(|()| operation(&worker));"
+        },
+        {
+          "line": 48,
+          "text": "before_return();"
+        },
+        {
+          "line": 49,
+          "text": "result\n"
+        }
+      ],
+      "absent": [
+        {
+          "text": "pending.store(false",
+          "absent": true
+        }
+      ]
+    },
+    {
+      "name": "real_join_observation_ack_after_joinerror_early_return",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": "pub(super) async fn observe_mutation",
+      "scope_end": "#[cfg(test)]",
+      "match": true,
+      "evidence": [
+        {
+          "line": 58,
+          "text": "let result = task.await.map_err(|_| SessionError::Worker)?;"
+        },
+        {
+          "line": 59,
+          "text": "pending.store(false, Ordering::Release);"
+        },
+        {
+          "line": 60,
+          "text": "result\n"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "windows_wrapper_awaits_actual_observer",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": "async fn mutation_blocking",
+      "scope_end": "fn alias",
+      "match": true,
+      "evidence": [
+        {
+          "line": 141,
+          "text": "let mut task = submit_mutation(scope.pending.clone(), worker, operation);"
+        },
+        {
+          "line": 143,
+          "text": ".wait(observe_mutation(&scope.pending, &mut task))"
+        },
+        {
+          "line": 144,
+          "text": ".await"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "host_hook_uses_real_loopback_scope_and_mutation",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 17,
+          "text": "fixture::Fixture::start().await?"
+        },
+        {
+          "line": 31,
+          "text": "reserve_archive_transfer(&request, Some(&staging), &allowed)"
+        },
+        {
+          "line": 42,
+          "text": "let mut task = submit_at_boundary("
+        },
+        {
+          "line": 46,
+          "text": "super::super::UnverifiedStage {"
+        },
+        {
+          "line": 49,
+          "text": "std::fs::create_dir(&worker_staging)?;"
+        },
+        {
+          "line": 50,
+          "text": "std::fs::write(worker_staging.join(\"evidence.bin\"), b\"real pending output\")?;"
+        },
+        {
+          "line": 52,
+          "text": "std::fs::rename(&worker_staging, &worker_destination)?;"
+        },
+        {
+          "line": 62,
+          "text": "released.recv_timeout(WAIT).is_ok()"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "cancel_classification_measured_before_worker_handoff_release",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 68,
+          "text": "authorized.store(false, Ordering::Release);"
+        },
+        {
+          "line": 75,
+          "text": ".wait(observe_mutation(&scope.pending, &mut task))"
+        },
+        {
+          "line": 78,
+          "text": "scope.complete::<()>(Err(SessionError::Closed)).await"
+        },
+        {
+          "line": 87,
+          "text": "b\"real pending output\""
+        },
+        {
+          "line": 101,
+          "text": "queue::Admission::Busy | queue::Admission::Quarantined"
+        },
+        {
+          "line": 103,
+          "text": "release.send(())?;"
+        },
+        {
+          "line": 105,
+          "text": "drop(result);"
+        },
+        {
+          "line": 108,
+          "text": "queue::Admission::Quarantined"
+        },
+        {
+          "line": 111,
+          "text": "scope.complete::<()>(Ok(())).await"
+        },
+        {
+          "line": 112,
+          "text": "Err(SessionError::MutationUncertain)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "positive_control_uses_production_submit_observe_complete",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 137,
+          "text": "fn observed_mutation_result_acknowledges_a_stopped_worker"
+        },
+        {
+          "line": 152,
+          "text": "let mut task = submit_mutation("
+        },
+        {
+          "line": 153,
+          "text": "observe_mutation(&scope.pending, &mut task)"
+        },
+        {
+          "line": 154,
+          "text": "assert_eq!(scope.complete(observed).await?, 17);"
+        },
+        {
+          "line": 155,
+          "text": "assert!(!scope.pending.load(Ordering::Acquire));"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "native_acknowledged_stage_uses_production_observer",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 659,
+          "text": "fn windows_archive_abandoned_stage_result_keeps_isolation_after_pending_clears"
+        },
+        {
+          "line": 670,
+          "text": "observe_mutation(&pending, &mut task)"
+        },
+        {
+          "line": 673,
+          "text": "assert!(!pending.load(Ordering::Acquire));"
+        },
+        {
+          "line": 674,
+          "text": "drop(stage);"
+        },
+        {
+          "line": 675,
+          "text": "lease.ticket.clone().finish(true);"
+        },
+        {
+          "line": 676,
+          "text": "assert!(lease.quarantined());"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "native_detached_stage_preserves_pending_and_quarantine",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 686,
+          "text": "fn windows_archive_dropping_stage_await_quarantines_its_detached_worker_result"
+        },
+        {
+          "line": 712,
+          "text": "drop(task);"
+        },
+        {
+          "line": 713,
+          "text": "drop(cancel);"
+        },
+        {
+          "line": 723,
+          "text": "assert!(pending.load(Ordering::Acquire));"
+        },
+        {
+          "line": 724,
+          "text": "assert!(lease.quarantined());"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "app_production_mapping_and_hold_regression",
+      "path": "crates/keelshell-app/src/files/archive_tests.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": null,
+      "scope_end": null,
+      "match": true,
+      "evidence": [
+        {
+          "line": 8,
+          "text": "fn archive_unobserved_worker_result_keeps_the_unknown_close_hold"
+        },
+        {
+          "line": 12,
+          "text": "Err(SessionError::MutationUncertain.into())"
+        },
+        {
+          "line": 13,
+          "text": "Err(FileFailure::OutcomeUncertain(_))"
+        },
+        {
+          "line": 14,
+          "text": "archive::retains_close_hold(&result)"
+        },
+        {
+          "line": 16,
+          "text": "terminal_transfer_phase(true, &result)"
+        },
+        {
+          "line": 17,
+          "text": "Some(TransferPhase::Uncertain)"
+        }
+      ],
+      "absent": []
+    },
+    {
+      "name": "armed_publication_result_disarmed_only_after_final_authority",
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "kind": "LEXICAL_SOURCE_ASSERTION_ONLY",
+      "ordered": true,
+      "scope_start": "pub(super) async fn extract",
+      "scope_end": "#[cfg(all(test, windows))]",
+      "match": true,
+      "evidence": [
+        {
+          "line": 1046,
+          "text": "let mut unverified = mutation_blocking("
+        },
+        {
+          "line": 1056,
+          "text": ".await?;"
+        },
+        {
+          "line": 1057,
+          "text": "authority.check()?;"
+        },
+        {
+          "line": 1058,
+          "text": "unverified.ticket = None;"
+        }
+      ],
+      "absent": []
+    }
+  ],
+  "files": [
+    {
+      "path": "crates/keelshell-app/src/files.rs",
+      "sha256": "402ed3f18ae174fcc579858e2d3865e92da2770aa4ae7a00a1112832cedad6cc",
+      "r2_expected_sha256": "402ed3f18ae174fcc579858e2d3865e92da2770aa4ae7a00a1112832cedad6cc",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-app/src/files/archive.rs",
+      "sha256": "5dde71aaa11d936b80af55045091aa293029ed34efc5285050fc9c187176e9d8",
+      "r2_expected_sha256": "5dde71aaa11d936b80af55045091aa293029ed34efc5285050fc9c187176e9d8",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-app/src/files/archive_tests.rs",
+      "sha256": "cffb81956a1235b64e01bbcbb2ff47a90e4aaacb10caebcf5737a94aff2a0d26",
+      "r2_expected_sha256": "cffb81956a1235b64e01bbcbb2ff47a90e4aaacb10caebcf5737a94aff2a0d26",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-app/src/files/worker.rs",
+      "sha256": "5fe1ef62fb1eef8650f66bb54d5bb1017539beac5bf2b22df518f391a04d637a",
+      "r2_expected_sha256": "5fe1ef62fb1eef8650f66bb54d5bb1017539beac5bf2b22df518f391a04d637a",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-app/src/terminal_zmodem.rs",
+      "sha256": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "r2_expected_sha256": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "sha256": "d1786ed0c2355df19da364d913fae5a2bc6172f7ddc875e4e84091294057db76",
+      "r2_expected_sha256": "d1786ed0c2355df19da364d913fae5a2bc6172f7ddc875e4e84091294057db76",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/path.rs",
+      "sha256": "8af2fc8f87eedf3021802bd6d584480a6cdcd813df7497bd60b832cd182801c7",
+      "r2_expected_sha256": "8af2fc8f87eedf3021802bd6d584480a6cdcd813df7497bd60b832cd182801c7",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "sha256": "3aa3141173a87a1a9338aec8471c1026c6d56f11d543bc8e26f60a2c49b1f349",
+      "r2_expected_sha256": "3aa3141173a87a1a9338aec8471c1026c6d56f11d543bc8e26f60a2c49b1f349",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "sha256": "fbe10992675decfa201f8a213d4b845a8b26b94eaa9bb42781d75dd1d4b8da0e",
+      "r2_expected_sha256": "fbe10992675decfa201f8a213d4b845a8b26b94eaa9bb42781d75dd1d4b8da0e",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "sha256": "b2598247a7ae0ef2c4e987c2c96ad913dc0114e622555daf5c1cc8f57b1a0414",
+      "r2_expected_sha256": "b2598247a7ae0ef2c4e987c2c96ad913dc0114e622555daf5c1cc8f57b1a0414",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "sha256": "806877aaa91ea6aae15ee3537380c9c938d2337772f73a37a1804b33bf0c6c14",
+      "r2_expected_sha256": "806877aaa91ea6aae15ee3537380c9c938d2337772f73a37a1804b33bf0c6c14",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker.rs",
+      "sha256": "f14a37d022d7070f499f513120774c540fbcfce35ae358d91d8eb259a418951b",
+      "r2_expected_sha256": "f14a37d022d7070f499f513120774c540fbcfce35ae358d91d8eb259a418951b",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker/tests.rs",
+      "sha256": "5c371a55a43ce9a0161f57d0c81b7cc1bce971a49dca18c92694b0125ed50cec",
+      "r2_expected_sha256": "5c371a55a43ce9a0161f57d0c81b7cc1bce971a49dca18c92694b0125ed50cec",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue.rs",
+      "sha256": "abc0295ecfdce3c5859ca79e0113d3cd28a2dc3279639e814fb11301ed57e6da",
+      "r2_expected_sha256": "abc0295ecfdce3c5859ca79e0113d3cd28a2dc3279639e814fb11301ed57e6da",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local.rs",
+      "sha256": "e6472372a5ab21113457b5534ccd2be8f49451c9f85f82d7c9c823f951c81615",
+      "r2_expected_sha256": "e6472372a5ab21113457b5534ccd2be8f49451c9f85f82d7c9c823f951c81615",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows.rs",
+      "sha256": "39cd38b4bb145ed55591e63f4016e479f38b06c5b0d5e8d41ce4d8e574ec2383",
+      "r2_expected_sha256": "39cd38b4bb145ed55591e63f4016e479f38b06c5b0d5e8d41ce4d8e574ec2383",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "sha256": "1a7c7569cb3d7f6b3cb3de5669aa56acadde01a9ea202e691c59fd429e55277d",
+      "r2_expected_sha256": "1a7c7569cb3d7f6b3cb3de5669aa56acadde01a9ea202e691c59fd429e55277d",
+      "match": true
+    }
+  ],
+  "r2_manifest_sha256": "2fd531b0d874b6254204c99f89c3c18785a831091243d476e8c1e0ba22089a53",
+  "reviewer_prebuilt_host_tests": 6,
+  "independent_compilation": false,
+  "windows_compiled_inventory_verified": false,
+  "native_windows": "NOT_RUN"
+}

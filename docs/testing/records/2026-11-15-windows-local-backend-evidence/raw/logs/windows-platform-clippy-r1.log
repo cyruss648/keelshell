@@ -1,0 +1,38 @@
+    Checking windows-sys v0.61.2
+    Checking tempfile v3.27.0
+    Checking keelshell-platform v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-platform)
+error: manual implementation of `.is_multiple_of()`
+  --> crates/keelshell-platform/src/directory_records.rs:15:27
+   |
+15 |         if length == 0 || length % 2 != 0 || length > 510 {
+   |                           ^^^^^^^^^^^^^^^ help: replace with: `!length.is_multiple_of(2)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#manual_is_multiple_of
+   = note: `-D clippy::manual-is-multiple-of` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::manual_is_multiple_of)]`
+
+error: using `chunks_exact` with a constant chunk size
+  --> crates/keelshell-platform/src/directory_records.rs:22:14
+   |
+22 |             .chunks_exact(2)
+   |              ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<2>().0.iter()`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#chunks_exact_to_as_chunks
+   = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+
+error: could not compile `keelshell-platform` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: calls to `push` immediately after creation
+   --> crates/keelshell-platform/src/windows/security/tests.rs:192:5
+    |
+192 | /     let mut values = Vec::with_capacity(1);
+193 | |     values.push(original);
+194 | |     values.push(PrivateSecurity::new(false)?);
+    | |______________________________________________^ help: consider using the `vec![]` macro: `let mut values = vec![..];`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.100.0/index.html#vec_init_then_push
+    = note: `-D clippy::vec-init-then-push` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::vec_init_then_push)]`
+
+error: could not compile `keelshell-platform` (lib test) due to 3 previous errors

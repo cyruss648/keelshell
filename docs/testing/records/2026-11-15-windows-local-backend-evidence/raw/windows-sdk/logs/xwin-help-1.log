@@ -1,0 +1,58 @@
+Allows downloading and repacking the MSVC CRT and Windows SDK for cross compilation
+
+Usage: xwin [OPTIONS] <COMMAND>
+
+Commands:
+  list      Displays a summary of the packages that would be downloaded
+  download  Downloads all the selected packages that aren't already present in the download cache
+  unpack    Unpacks all of the downloaded packages to disk
+  splat     Fixes the packages to prune unneeded files and adds symlinks to address file casing
+            issues and then spalts the final artifacts into directories
+  minimize  Runs the specified build command, detecting all of the headers and libraries used by the
+            build, and generating a file that can be used to filter future splat operations, and
+            optionally move only the user files to a new directory
+  help      Print this message or the help of the given subcommand(s)
+
+Options:
+      --accept-license
+          Doesn't display the prompt to accept the license [env: XWIN_ACCEPT_LICENSE=]
+  -L, --log-level <LEVEL>
+          The log level for messages, only log messages at or above the level will be emitted
+          [default: info] [possible values: off, error, warn, info, debug, trace]
+      --json
+          Output log messages as json
+      --temp
+          If set, will use a temporary directory for all files used for creating the archive and
+          deleted upon exit, otherwise, all downloaded files are kept in the `--cache-dir` and won't
+          be retrieved again
+      --cache-dir <CACHE_DIR>
+          Specifies the cache directory used to persist downloaded items to disk. Defaults to
+          `./.xwin-cache` if not specified
+      --manifest <MANIFEST>
+          Specifies a VS manifest to use from a file, rather than downloading it from the Microsoft
+          site
+      --manifest-version <MANIFEST_VERSION>
+          The manifest version to retrieve [default: 17]
+      --channel <CHANNEL>
+          The product channel to use [default: release]
+      --sdk-version <SDK_VERSION>
+          If specified, this is the version of the SDK that the user wishes to use instead of
+          defaulting to the latest SDK available in the the manifest
+      --crt-version <CRT_VERSION>
+          If specified, this is the version of the MSVCRT that the user wishes to use instead of
+          defaulting to the latest MSVCRT available in the the manifest
+      --include-atl
+          Whether to include the Active Template Library (ATL) in the installation
+  -t, --timeout <TIMEOUT>
+          Specifies a timeout for how long a single download is allowed to take [default: 60s]
+      --https-proxy <HTTPS_PROXY>
+          An HTTPS proxy to use [env: HTTPS_PROXY=]
+      --arch <ARCH>
+          The architectures to include [default: x86_64] [possible values: x86, x86_64, aarch,
+          aarch64]
+      --variant <VARIANT>
+          The variants to include [default: desktop] [possible values: desktop, onecore, spectre]
+  -h, --help
+          Print help
+  -V, --version
+          Print version

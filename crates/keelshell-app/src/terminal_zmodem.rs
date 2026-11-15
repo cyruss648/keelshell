@@ -627,7 +627,7 @@ impl TerminalView {
             .items_center()
             .flex_wrap()
             .gap_2();
-        let local_supported = cfg!(any(target_os = "linux", target_os = "macos"));
+        let local_supported = cfg!(any(target_os = "linux", target_os = "macos", windows));
         if !local_supported {
             body = body.child(div().whitespace_normal().child(t(cx,
                 "当前平台的 Zmodem 本地文件安全后端尚未完成，可以取消本次协议请求。",

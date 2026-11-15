@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/llvm/bin/llvm-lib",
+    "--version"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "seconds": 0.125,
+  "stdout": "",
+  "stderr": "ignoring unknown argument: --version\nwarning: no input files, not writing output file\n         pass /llvmlibempty to write empty .lib file,\n         pass /ignore:emptyoutput to suppress warning\n"
+}

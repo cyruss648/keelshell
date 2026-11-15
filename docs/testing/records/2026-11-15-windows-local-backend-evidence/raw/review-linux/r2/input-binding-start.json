@@ -1,0 +1,49 @@
+{
+  "observed_utc": "2026-11-15T12:33:29.841290+00:00",
+  "baseline": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "inputs": {
+    "scripts/run_linux_local_backend.py": {
+      "sha256": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+      "expected": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+      "bytes": 30548
+    },
+    "scripts/test_linux_local_backend.py": {
+      "sha256": "660a7b8fc6347364eb6dd0be340d421ff207c708cc1da3f64ac8ad964bbef8af",
+      "expected": "660a7b8fc6347364eb6dd0be340d421ff207c708cc1da3f64ac8ad964bbef8af",
+      "bytes": 31771
+    },
+    "scripts/run_linux_file_interop.py": {
+      "sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "expected": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "bytes": 52893
+    },
+    "scripts/openssh_interop.py": {
+      "sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+      "expected": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+      "bytes": 24831
+    }
+  },
+  "author_and_native_evidence": {
+    "linux-runner-inputs-r2.json": {
+      "sha256": "187e3a1e3171abb9c5b65837f1f58f07845b5c0839e37c91b4feb82d72a55e06",
+      "bytes": 398
+    },
+    "logs/linux-runner-python-r3.json": {
+      "sha256": "0ccd260a44d157043ea46380f3afe84f9f6b593d8538b337bce16bd9f9bdc5a3",
+      "bytes": 696
+    },
+    "logs/linux-runner-python-r3.log": {
+      "sha256": "b856ae231e689f7c4ce5aca346615cbe3c1f25ce28f723c0367d08c8b52b5383",
+      "bytes": 6938
+    },
+    "linux-local/native-r3/receipt.json": {
+      "sha256": "8e2e2713d10743fd13c5eb4d425bbf9794a0afda7484089257f8adf1b148ca00",
+      "bytes": 118918
+    },
+    "linux-local/handoff.json": {
+      "sha256": "9b0d4b64be3d1c7c0aa4344523da648890dec7f76d0721169116be3304a3f78e",
+      "bytes": 3392
+    }
+  },
+  "preserved_history_file_count": 35
+}

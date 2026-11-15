@@ -1,0 +1,515 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+2.1.5.15.12 FileRenameInformation
+Feedback
+Summarize this article for me
+In this article
+InputBuffer is of type
+FILE_RENAME_INFORMATION_TYPE_1, as described in [MS-FSCC]
+section 2.4.42.1,
+for 32-bit local clients; or of type FILE_RENAME_INFORMATION_TYPE_2, as
+described in [MS-FSCC] section 2.4.42.2,
+for remote clients or 64-bit local clients. Open.FileName is the
+pre-existing file name that will be changed by this operation.
+This routine uses the following local variables:
+Unicode strings: PathName,
+RootPathName, NewLinkName, PrevFullLinkName, SourceFullLinkName,
+DestFullLinkName
+Files: SourceDirectory, DestinationDirectory
+Links: TargetLink, NewLink
+Boolean values (initialized to FALSE): TargetExistsSameFile,
+ExactCaseMatch, MoveToNewDir, OverwriteSourceLink, RemoveTargetLink,
+FoundLink, MatchedShortName
+Boolean values (initialized to TRUE): ActivelyRemoveSourceLink,
+RemoveSourceLink, AddTargetLink
+32-bit unsigned integers: FilterMatch, Action
+Pseudocode for the operation is as follows:
+If InputBufferSize is less than the size, in bytes, of the
+FILE_RENAME_INFORMATION_TYPE_1 structure (for 32-bit local clients) or the
+FILE_RENAME_INFORMATION_TYPE_2 structure (for remote clients or 64-bit local
+clients), the operation MUST be failed with STATUS_INFO_LENGTH_MISMATCH.
+If Open.GrantedAccess does not contain DELETE, as defined
+in [MS-SMB2]
+section 2.2.13.1,
+the operation MUST be failed with STATUS_ACCESS_DENIED.
+The operation MUST be failed with STATUS_INVALID_PARAMETER under
+any of the following conditions:
+If InputBuffer.FileNameLength
+is equal to zero.
+If InputBuffer.FileNameLength
+is an odd number.
+If InputBuffer.FileNameLength
+is greater than InputBufferLength minus the byte offset into the
+FILE_RENAME_INFORMATION InputBuffer of the InputBuffer.FileName
+field (that is, the total length of InputBuffer as given in InputBufferLength
+is insufficient to contain the fixed-size fields of InputBuffer plus the
+length of InputBuffer.FileName).
+If
+this operation is from a remote client, and either InputBuffer.RootDirectory
+is nonzero or the first character of InputBuffer.FileName is '\'.
+If InputBuffer.RootDirectory
+is nonzero and the first character of InputBuffer.FileName is '\'.
+If InputBuffer.RootDirectory is nonzero:
+The
+object store MUST set RootPathName to the full pathname from Open.File.Volume.RootDirectory
+to the file represented by InputBuffer.RootDirectory, in an
+implementation-specific manner.
+The
+object store MUST set DestFullLinkName to RootPathName + '\' + InputBuffer.FileName.
+Else:
+The
+object store MUST set DestFullLinkName to InputBuffer.FileName.
+EndIf
+Split DestFullLinkName into PathName and NewLinkName
+as specified in section 2.1.5.1.
+If the first character of InputBuffer.FileName is '\' or InputBuffer.RootDirectory
+is nonzero or this operation is from a remote client:
+Open
+DestinationDirectory as specified in section 2.1.5.1, setting the open
+file operation's parameters as follows:
+PathName equal to PathName.
+DesiredAccess equal to FILE_ADD_FILE|SYNCHRONIZE (if Open.File.FileType
+is DataFile) or FILE_ADD_SUBDIRECTORY (if Open.File.FileType is
+DirectoryFile).
+ShareAccess equal to
+FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE.<185>
+CreateOptions equal to FILE_OPEN_FOR_BACKUP_INTENT.
+CreateDisposition equal to FILE_OPEN.
+If
+open of DestinationDirectory fails:
+The operation MUST fail with the error returned by the open of DestinationDirectory.
+Else
+if DestinationDirectory.Volume is not equal to Open.File.Volume:
+The operation MUST be failed with STATUS_NOT_SAME_DEVICE.
+EndIf
+Else
+If InputBuffer.FileName
+contains the character '\', the object store MUST fail the operation with
+STATUS_OBJECT_NAME_INVALID.
+Set
+DestinationDirectory equal to Open.Link.ParentFile.
+EndIf
+If Open.Stream.Oplock is not empty, the object store MUST
+check for an oplock break according to the algorithm in section 2.1.4.12,
+with input values as follows:
+Open
+equal to this operation's Open.
+Oplock
+equal to Open.Stream.Oplock.
+Operation
+equal to "SET_INFORMATION".
+OpParams
+containing a member FileInformationClass containing FileRenameInformation.
+If the first character of InputBuffer.FileName is ':':
+Perform
+a stream rename according to the algorithm in section 2.1.5.15.12.1,
+setting the stream rename algorithm's parameters as follows:
+Pass in the current Open.
+ReplaceIfExists equal to InputBuffer.ReplaceIfExists.
+NewStreamName equal to InputBuffer.FileName.
+If
+the stream rename algorithm fails, the operation MUST fail with the same status
+code.
+The
+operation returns STATUS_SUCCESS at this point.
+EndIf
+If Open.Link.IsDeleted is TRUE, the operation MUST be
+failed with STATUS_ACCESS_DENIED.
+If Open.File.FileType is DirectoryFile, determine whether Open.File
+contains open files as specified in section 2.1.4.2, with input
+values as follows:
+File
+equal to Open.File.
+Open
+equal to this operation's Open.
+Operation
+equal to "SET_INFORMATION".
+OpParams
+containing a member FileInformationClass containing
+FileRenameInformation.
+If Open.File contains open files as specified in section
+2.1.4.2, the operation MUST be failed with STATUS_ACCESS_DENIED.<186>
+If InputBuffer.FileName is not valid as specified in
+[MS-FSCC] section 2.1.5,
+the operation MUST be failed with STATUS_OBJECT_NAME_INVALID.
+If DestinationDirectory is the same as Open.Link.ParentFile:
+If NewLinkName
+is a case-sensitive exact match with Open.Link.Name, the operation MUST
+return STATUS_SUCCESS at this point.
+Else
+Set
+MoveToNewDir to TRUE.
+EndIf
+If NewLinkName matches the Name or ShortName
+of any Link in DestinationDirectory.DirectoryList using
+case-sensitivity according to Open.IsCaseInsensitive:
+Set
+FoundLink to TRUE.
+Set
+TargetLink to the existing Link found in DestinationDirectory.DirectoryList.
+Because the name could have been found using a case-insensitive search (if Open.IsCaseInsensitive
+is TRUE), this preserves the case of the found name.
+If NewLinkName
+matched TargetLink.ShortName, set MatchedShortName to TRUE.
+Set
+RemoveTargetLink to TRUE.
+If TargetLink.File.FileId128
+equals Open.File.FileId128, set TargetExistsSameFile to TRUE.
+This detects a rename to another existing link to the same file.
+If
+(TargetLink.Name is a case-sensitive exact match with NewLinkName)
+or
+(MatchedShortName
+is TRUE and
+TargetLink.ShortName
+is a case-sensitive exact match with NewLinkName):
+Set ExactCaseMatch to TRUE.
+EndIf
+If TargetExistsSameFile
+is TRUE:
+If MoveToNewDir is FALSE:
+If Open.Link.ShortName is not empty and TargetLink.ShortName
+is not empty (this is the case where both the source link and the (existing)
+requested target are part of the primary link to the same file; this case
+occurs, for example, in a rename that only changes the case of the name):
+Set ActivelyRemoveSourceLink to FALSE.
+Set OverwriteSourceLink to TRUE.
+If ExactCaseMatch is TRUE, set RemoveSourceLink to
+FALSE (because this algorithm earlier succeeded upon detecting an exact match
+between the name by which the file was opened and the new requested name, this
+case only occurs when the file was opened by one half of its primary link, and
+the requested rename target is the other half; for example, opening a file by
+its short name and renaming it to its long name).
+Else If (Open.Link.Name is a case-sensitive exact match
+with TargetLink.Name) or
+(MatchedShortName
+is TRUE and
+Open.Link.Name is
+a case-sensitive exact match with TargetLink.ShortName) (this detects
+the case where the implementer is just changing the case of a single link; for
+example, given a file with links "primary", "link1",
+"link2", all in the same directory, the implementer is doing
+"ren link1 LINK1", and not "ren link1 link2"):
+Set ActivelyRemoveSourceLink to FALSE.
+Set OverwriteSourceLink to TRUE.
+EndIf
+EndIf
+If ExactCaseMatch is TRUE and
+(OverwriteSourceLink
+is FALSE or
+Open.IsCaseInsensitive
+is TRUE or
+Open.Link.ShortName
+is empty)
+Set RemoveTargetLink and AddTargetLink to FALSE.
+EndIf
+EndIf
+If RemoveTargetLink
+is TRUE:
+If TargetExistsSameFile is FALSE and InputBuffer.ReplaceIfExists
+is FALSE, the operation MUST be failed with STATUS_OBJECT_NAME_COLLISION.
+Set PrevFullLinkName to the full pathname from Open.File.Volume.RootDirectory
+to TargetLink.
+If TargetExistsSameFile is FALSE:
+The operation MUST be failed with STATUS_ACCESS_DENIED under any
+of the following conditions:
+If TargetLink.File.FileType is DirectoryFile.
+If TargetLink.File.FileAttributes.FILE_ATTRIBUTE_READONLY
+is TRUE.
+If TargetLink.IsDeleted is TRUE, the operation MUST be
+failed with STATUS_DELETE_PENDING.
+If the caller does not have DELETE access to TargetLink.File:
+If the caller does not have FILE_DELETE_CHILD access to DestinationDirectory:
+The operation MUST be failed with STATUS_ACCESS_DENIED.
+EndIf
+EndIf
+For each Stream on TargetLink.File:
+If TargetLink.File.OpenList contains an Open with a
+Stream matching the current Stream, and that Stream's Oplock
+is not empty, the object store MUST check for an oplock break according to the
+algorithm in section 2.1.4.12, with input values as follows:
+Open equal to this operation's Open.
+Oplock equal to the found Stream's Oplock.
+Operation equal to SET_INFORMATION.
+OpParams containing a member FileInformationClass
+containing FileEndOfFileInformation.
+If there was not an oplock to be broken and TargetLink.File.OpenList
+contains an Open with a Stream matching the current Stream,
+the operation MUST be failed with STATUS_ACCESS_DENIED.
+EndFor
+If TargetLink.File.LinkList contains exactly one element:
+The object store MUST delete TargetLink.File as
+specified in section 2.1.5.5; if this
+fails, the operation MUST be failed with the same status.
+Else
+The object store MUST delete TargetLink as specified in
+section 2.1.5.5; if this fails, the operation MUST be failed with the same
+status.
+The object store MUST post a USN change as specified in section 2.1.4.11
+with File equal to File, Reason equal to
+(USN_REASON_HARD_LINK_CHANGE | USN_REASON_CLOSE), and FileName equal to TargetLink.Name.
+EndIf
+Else
+The object store MUST post a USN change as specified in section 2.1.4.11
+with File equal to File, Reason equal to
+USN_REASON_RENAME_OLD_NAME, and FileName equal to TargetLink.Name.
+The object store MUST delete TargetLink as specified in
+section 2.1.5.5; if this fails, the operation MUST be failed with the same
+status.
+EndIf
+EndIf
+EndIf
+The object store MUST post a USN change as specified in section
+2.1.4.11 with File equal to File, Reason equal to
+USN_REASON_RENAME_OLD_NAME, and FileName equal to Open.Link.Name.
+If RemoveSourceLink is TRUE:
+Set
+SourceDirectory to Open.Link.ParentFile.
+If ActivelyRemoveSourceLink
+is TRUE:
+Remove Open.Link from Open.File.LinkList.
+Remove Open.Link from Open.Link.ParentFile.DirectoryList.
+A new TunnelCacheEntry object TunnelCacheEntry MUST
+be constructed and added to the Open.File.Volume.TunnelCacheList as
+follows:
+TunnelCacheEntry.EntryTime MUST be set to the current
+time.
+TunnelCacheEntry.ParentFile MUST be set to Open.Link.ParentFile.
+TunnelCacheEntry.FileName MUST be set to Open.Link.Name.
+TunnelCacheEntry.FileShortName MUST be set to Open.Link.ShortName.
+If Open.FileName matches Open.Link.ShortName, then TunnelCacheEntry.KeyByShortName
+MUST be set to TRUE, else TunnelCacheEntry.KeyByShortName MUST be set to
+FALSE.
+TunnelCacheEntry.FileCreationTime MUST be set to Open.File.CreationTime.
+TunnelCacheEntry.ObjectIdInfo.ObjectId MUST be set to Open.File.ObjectId.
+TunnelCacheEntry.ObjectIdInfo.BirthVolumeId MUST be set to
+Open.File.BirthVolumeId.
+TunnelCacheEntry.ObjectIdInfo.BirthObjectId MUST be set to
+Open.File.BirthObjectId.
+TunnelCacheEntry.ObjectIdInfo.DomainId MUST be set to Open.File.DomainId.
+EndIf
+If Open.File.FileType is DirectoryFile, then Open.File
+MUST have every TunnelCacheEntry associated with it invalidated:
+For every ExistingTunnelCacheEntry in Open.File.Volume.TunnelCacheList:
+If ExistingTunnelCacheEntry.ParentFile matches Open.File,
+then ExistingTunnelCacheEntry MUST be removed from Open.File.Volume.TunnelCacheList.
+EndFor
+EndIf
+EndIf
+Set
+SourceFullLinkName to Open.FileName.
+EndIf
+If AddTargetLink is TRUE:
+The
+operation MUST be failed with STATUS_ACCESS_DENIED if either of the following
+conditions are true:
+Open.File.FileType is DirectoryFile and the caller does
+not have FILE_ADD_SUBDIRECTORY access on DestinationDirectory.
+Open.File.FileType is DataFile and the caller does not
+have FILE_ADD_FILE access on DestinationDirectory.
+The
+object store MUST create a new Link object NewLink, initialized
+as follows:
+NewLink.File equal to Open.File.
+NewLink.ParentFile equal to DestinationDirectory.
+All other fields set to zero.
+If Open.File.FileType
+is DataFile and Open.IsCaseInsensitive is TRUE, and tunnel caching is
+implemented, the object store MUST search Open.File.Volume.TunnelCacheList
+for a TunnelCacheEntry where TunnelCacheEntry.ParentFile equals DestinationDirectory
+and either (TunnelCacheEntry.KeyByShortName is FALSE and TunnelCacheEntry.FileName
+matches NewLinkName) or (TunnelCacheEntry.KeyByShortName is TRUE
+and TunnelCacheEntry.FileShortName matches NewLinkName). If such
+an entry is found:
+Set NewLink.File.CreationTime to TunnelCacheEntry.FileCreationTime.
+Set NewLink.File.PendingNotifications.
+FILE_NOTIFY_CHANGE_CREATION to TRUE.
+If TunnelCacheEntry.ObjectIdInfo.ObjectId is not empty:
+If Open.File.ObjectId is not empty:
+The object store MUST construct a FILE_OBJECTID_INFORMATION
+structure (as specified in [MS-FSCC] section 2.4.36.1)
+ObjectIdInfo as follows:
+ObjectIdInfo.FileReference set to Open.File.FileId64.
+ObjectIdInfo.ObjectId set to TunnelCacheEntry.ObjectIdInfo.ObjectId.
+ObjectIdInfo.BirthVolumeId set to TunnelCacheEntry.ObjectIdInfo.BirthVolumeId.
+ObjectIdInfo.BirthObjectId set to TunnelCacheEntry.ObjectIdInfo.BirthObjectId.
+ObjectIdInfo.DomainId set to TunnelCacheEntry.ObjectIdInfo.DomainId.
+Send directory change notification as specified in section
+2.1.4.1, with Volume equal to Open.File.Volume, Action
+equal to FILE_ACTION_TUNNELLED_ID_COLLISION, FilterMatch equal to
+FILE_NOTIFY_CHANGE_FILE_NAME, FileName equal to
+"\$Extend\$ObjId", NotifyData equal to ObjectIdInfo,
+and NotifyDataLength equal to sizeof(FILE_OBJECTID_INFORMATION).
+Else if TunnelCacheEntry.ObjectIdInfo.ObjectId is not
+unique on Open.File.Volume:
+The object store MUST construct a FILE_OBJECTID_INFORMATION
+structure (as specified in [MS-FSCC] section 2.4.36.1) ObjectIdInfo as
+follows:
+ObjectIdInfo.FileReference set to Open.File.FileId64.
+ObjectIdInfo.ObjectId set to TunnelCacheEntry.ObjectIdInfo.ObjectId.
+ObjectIdInfo.BirthVolumeId set to TunnelCacheEntry.ObjectIdInfo.BirthVolumeId.
+ObjectIdInfo.BirthObjectId set to TunnelCacheEntry.ObjectIdInfo.BirthObjectId.
+ObjectIdInfo.DomainId set to TunnelCacheEntry.ObjectIdInfo.DomainId.
+Send directory change notification as specified in section
+2.1.4.1, with Volume equal to Open.File.Volume, Action
+equal to FILE_ACTION_ID_NOT_TUNNELLED, FilterMatch equal to
+FILE_NOTIFY_CHANGE_FILE_NAME, FileName equal to
+"\$Extend\$ObjId", NotifyData equal to ObjectIdInfo,
+and NotifyDataLength equal to sizeof(FILE_OBJECTID_INFORMATION).
+Else:
+Set NewLink.File.ObjectId to TunnelCacheEntry.ObjectIdInfo.ObjectId.
+Set NewLink.File.BirthVolumeId to TunnelCacheEntry.ObjectIdInfo.BirthVolumeId.
+Set NewLink.File.BirthObjectId to TunnelCacheEntry.ObjectIdInfo.BirthObjectId.
+Set NewLink.File.DomainId to TunnelCacheEntry.ObjectIdInfo.DomainId.
+EndIf
+EndIf
+Set NewLink.Name to TunnelCacheEntry.FileName.
+Set NewLink.ShortName to TunnelCacheEntry.FileShortName
+if that name is not already in use among all names and short names in NewLink.ParentFile.DirectoryList.
+Remove TunnelCacheEntry from NewLink.File.Volume.TunnelCacheList.
+Else:
+Set NewLink.Name to NewLinkName.
+EndIf
+If Open.Link.ShortName
+is not empty and Open.IsCaseInsensitive is TRUE and NewLink.ShortName
+is empty, then if short names are enabled, the object store MUST create a short
+name as follows:
+If NewLink.Name is 8.3-compliant as described in [MS-FSCC]
+section 2.1.5.2.1:
+Set NewLink.ShortName to NewLink.Name.
+Else:
+Generate a NewLink.ShortName that is 8.3-compliant as
+described in [MS-FSCC] section 2.1.5.2.1. The string chosen is
+implementation-specific, but MUST be unique among all names and short names
+present in DestinationDirectory.DirectoryList.
+EndIf
+EndIf
+The
+object store MUST update the duplicated information as specified in section 2.1.4.19
+with Link equal to NewLink.
+The
+object store MUST add NewLink to DestinationDirectory.DirectoryList.
+The
+object store MUST replace Open.Link with NewLink.
+If MoveToNewDir
+is TRUE:
+DestinationDirectory.LastModificationTime MUST be updated.
+DestinationDirectory.LastAccessTime MUST be updated.
+DestinationDirectory.LastChangeTime MUST be updated.
+EndIf
+EndIf
+The object store MUST change the compname component (as specified
+in [MS-FSCC] section 2.1.5) of Open.FileName to NewLinkName.
+If RemoveSourceLink is TRUE:
+SourceDirectory.LastModificationTime
+MUST be updated.
+SourceDirectory.LastAccessTime
+MUST be updated.
+SourceDirectory.LastChangeTime
+MUST be updated.
+EndIf
+The object store MUST update Open.File.LastChangeTime.<187>
+If Open.File.FileType is DataFile, the object store MUST
+set Open.File.FileAttributes.FILE_ATTRIBUTE_ARCHIVE.
+FilterMatch = 0
+If RemoveTargetLink is TRUE and OverwriteSourceLink
+is FALSE and ExactCaseMatch is FALSE:
+If TargetLink.File.FileType
+is DirectoryFile
+FilterMatch = FILE_NOTIFY_CHANGE_DIR_NAME
+Else
+FilterMatch = FILE_NOTIFY_CHANGE_FILE_NAME
+EndIf
+The
+object store MUST report a directory change notification as specified in
+section 2.1.4.1 with Volume
+equal to Open.File.Volume, Action equal to
+FILE_ACTION_REMOVED, and FileName set to PrevFullLinkName with a FilterMatch
+of FilterMatch.
+EndIf
+If RemoveSourceLink is TRUE:
+If Open.File.FileType
+is DirectoryFile
+FilterMatch = FILE_NOTIFY_CHANGE_DIR_NAME
+Else
+FilterMatch = FILE_NOTIFY_CHANGE_FILE_NAME
+EndIf
+If MoveToNewDir
+is TRUE or AddTargetLink is FALSE or RemoveTargetLink and ExactCaseMatch
+are TRUE: Action = FILE_ACTION_REMOVED
+Else
+Action = FILE_ACTION_RENAMED_OLD_NAME
+EndIf
+The
+object store MUST report a directory change notification as specified in
+section 2.1.4.1 with Volume equal to Open.File.Volume, Action
+equal to Action, and FileName set to SourceFullLinkName
+with a FilterMatch of FilterMatch.
+EndIf
+If FoundLink is FALSE or (OverwriteSourceLink is
+TRUE and ExactCaseMatch is FALSE) or (RemoveTargetLink is TRUE
+and ExactCaseMatch is FALSE):
+If MoveToNewDir
+is TRUE, set Action to FILE_ACTION_ADDED; otherwise set Action to
+FILE_ACTION_RENAMED_NEW_NAME.
+Else If RemoveTargetLink is TRUE and TargetExistsSameFile
+is FALSE:
+FilterMatch
+= FILE_NOTIFY_CHANGE_ATTRIBUTES | FILE_NOTIFY_CHANGE_SIZE |
+FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_LAST_ACCESS |
+FILE_NOTIFY_CHANGE_CREATION | FILE_NOTIFY_CHANGE_SECURITY |
+FILE_NOTIFY_CHANGE_EA
+Action
+= FILE_ACTION_MODIFIED
+EndIf
+If FilterMatch != 0:
+The
+object store MUST report a directory change notification as specified in
+section 2.1.4.1 with Volume equal to Open.File.Volume, Action
+equal to Action, and FileName set to Open.FileName with a FilterMatch
+of FilterMatch.
+EndIf
+If MoveToNewDir is TRUE:
+If
+the Oplock member of the DirectoryStream in DestinationDirectory.StreamList
+(hereinafter referred to as DestinationParentOplock) is not empty, the
+object store MUST check for an oplock break on the parent according to the
+algorithm in section 2.1.4.12, with input values as follows:
+Open equal to this operation's Open
+Oplock equal to DestinationParentOplock
+Operation equal to "SET_INFORMATION"
+OpParams containing a member FileInformationClass
+containing FileRenameInformation
+Flags equal to "PARENT_OBJECT"
+EndIf
+If the Oplock member of the DirectoryStream in Open.Link.ParentFile.StreamList
+(hereinafter referred to as SourceParentOplock) is not empty, the object
+store MUST check for an oplock break on the parent according to the algorithm
+in section 2.1.4.12, with input values as follows:
+Open
+equal to this operation's Open
+Oplock
+equal to SourceParentOplock
+Operation
+equal to "SET_INFORMATION"
+OpParams
+containing a member FileInformationClass containing FileRenameInformation
+Flags
+equal to "PARENT_OBJECT"
+The operation returns STATUS_SUCCESS.
+Additional resources
+Last updated on
+2023-04-04

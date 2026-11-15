@@ -1,0 +1,19 @@
+{
+  "label": "primary-target-sharing-search",
+  "argv": [
+    "python3",
+    "-"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:41:33.245942+00:00",
+  "finished_utc": "2026-11-15T12:41:37.321535+00:00",
+  "elapsed_seconds": 4.075422,
+  "pid": 16629,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/primary-target-sharing-search.txt",
+  "output_sha256": "089def01e42226d4f3c539c3e277c3dcd7b370f0947510acd15a837ceb22cf10"
+}

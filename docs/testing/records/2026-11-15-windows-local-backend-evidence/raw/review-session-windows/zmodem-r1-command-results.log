@@ -1,0 +1,25 @@
+Windows Zmodem independent review r1 — command result ledger
+CWD /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell
+Observed 2026-11-15T12:57:27.794992+00:00
+Read-only source review; no build/test executable was launched.
+
+Risk-relevant command results (not a count of all reading utilities):
+- pwd: exit 0; exact requested workspace.
+- Python standard-library intake (manifest SHA-256 + six file hashes + raw Git metadata read): exit 0; six of six match; HEAD a092dd5712c0a92ee4af18970fb0500fb230b760; Darwin arm64.
+- cat/nl/sed/rg source and instructions reads: normal successful reads exit 0. Preserve lookup failures below.
+- A source lookup referenced nonexistent crates/keelshell-core/src/zmodem/mod.rs: nl printed No such file; pipeline ended exit 0 at sed. Correct actual file crates/keelshell-core/src/zmodem.rs was then read. This was not a Rust/source validation failure.
+- A lookup of nonexistent crates/keelshell-session/src/sftp/mutation_gate.rs: rg command exit 2; actual queue/reservations.rs and sftp/zmodem_local.rs were then read. No source modification.
+- Official docs collector #1, Python HTTPS GET (bounded timeout): actual exec session 19427 polled/reaped exit 0. File Times=HTTP200; WriteFile=HTTP200; incorrect wdm NtCreateFile URL=HTTP404. Raw source hashes/snippets and error retained in official-api-observations JSON.
+- Official docs collector #2, corrected official DDI path: actual exec session 91314 polled/reaped exit 0. ntifs NtCreateFile=HTTP200; CreateFileW=HTTP200. Original HTTP404 preserved.
+- P2 notice writer: exit 0; exclusive new file notice-zmodem-r1-p2-01-unicode-reservation-alias.md; no overwrite.
+- Python static source audit r1: exit 0; 21 MATCH / 1 MISMATCH. Mismatch was the audit's assumed positive-cfg count=18; source actual count=17. Original JSON preserved.
+- Python static source audit correction r2: exit 0; 22 MATCH / 0 MISMATCH; derives cfg membership and records 17 positive + 1 negative cfg. Source unchanged; no Rust test was run. Inventories contain 45 Windows-local source tests (2 ignored) and 26 integration source tests (one excluded on Windows).
+- Python pre-report readback: exit 0; frozen manifest and all six inputs match; twelve supporting-context hashes unchanged.
+- This report/ledger writer: writes exclusively new report, summary and log under the authorized review directory; external command receipt is the exec tool result.
+
+Executed Rust tests: 0. Prebuilt tests executed/read: 0. Compiled inventory verified: no.
+Cargo/rustc/rustfmt/Clippy/Git commands: 0. Parent target read or write: 0.
+Windows execution: Native NOT_RUN. No Windows emulator or mirrored filesystem harness.
+No agent/chat/worktree/container created. Archive source not reviewed.
+Known platform P2s remain out of duplicate scope and are not signed here.
+Any later source repair/refreeze requires a new numbered delta report. Do not overwrite this HOLD or the original notice/failure evidence.

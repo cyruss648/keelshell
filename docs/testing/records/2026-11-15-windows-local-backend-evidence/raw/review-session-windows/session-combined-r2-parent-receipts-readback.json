@@ -1,0 +1,443 @@
+{
+  "observed_at_utc": "2026-11-15T13:25:10.562441+00:00",
+  "receipt_log_matches": 13,
+  "receipt_count": 13,
+  "receipts": [
+    {
+      "label": "unicode-reservation-red-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/unicode-reservation-red-r1.json",
+      "receipt_sha256": "3232c7fef9860380d2d4b6b447b51147de2a0fb062eeb0212123a41523708a63",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-session",
+        "--lib",
+        "--locked",
+        "--offline",
+        "local_unicode_case_aliases",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 101,
+      "seconds": 2.922,
+      "reaped": true,
+      "log_sha256": "5397e56c2be383e8e6db87ea35dcaffa163ac7fc02e95ab73dbe35e82b70adf7",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 0,
+          "failed": 2,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "unicode-controller-red-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/unicode-controller-red-r1.json",
+      "receipt_sha256": "478125881d9f39b7c04c5796a808f87f8986a1ca4b41b27620cfb0ab1f8c8d3e",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-session",
+        "--test",
+        "zmodem",
+        "--locked",
+        "--offline",
+        "zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 101,
+      "seconds": 4.307,
+      "reaped": true,
+      "log_sha256": "ed2eb1a0b5a1df49ddc56fe68a55c2dc1ef08acda2e09bd2949f9e1930045fd0",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "unicode-reservation-green-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/unicode-reservation-green-r1.json",
+      "receipt_sha256": "493edd0cd1d84ab966b07fb2cfb42812342866c3334210a9eed7d0f003fc135e",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-session",
+        "--lib",
+        "--test",
+        "zmodem",
+        "--locked",
+        "--offline",
+        "unicode",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 101,
+      "seconds": 5.885,
+      "reaped": true,
+      "log_sha256": "6915312481d7bc61a7bd6202a4d12a8edc22b5be1495c5e4d2fd5696cae4602a",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "unicode-reservation-green-r2",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/unicode-reservation-green-r2.json",
+      "receipt_sha256": "31c5fe08756d9e4f680b76f277426b565fc041b37a8ea8a43643777c41cc53ec",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-session",
+        "--lib",
+        "--test",
+        "zmodem",
+        "--locked",
+        "--offline",
+        "unicode",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "seconds": 1.177,
+      "reaped": true,
+      "log_sha256": "68b30a1e37c33e11be964bf75162562bac68e40e01ad3bfd3e6843b4c4fe3e84",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "windows-combined-clippy-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/windows-combined-clippy-r1.json",
+      "receipt_sha256": "c558c0217a473e73ec3b632108185a50d7b58d276a0c8cd27228e20e9352796c",
+      "command": [
+        "python3",
+        "work/windows-local-backend-20261115/with_windows_sdk.py",
+        "cargo",
+        "clippy",
+        "-p",
+        "keelshell-platform",
+        "-p",
+        "keelshell-session",
+        "--all-targets",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 101,
+      "seconds": 8.321,
+      "reaped": true,
+      "log_sha256": "34c32f8785d57414b12bdc8683beeb7586066f1b33009eadcf4b8c5a6ac7289e",
+      "log_matches_receipt": true,
+      "test_result_lines": [],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "windows-combined-clippy-r2",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/windows-combined-clippy-r2.json",
+      "receipt_sha256": "223e0e61df0d6cf29b55f02aa7c9950243a57b08830d56d99f0d14e214b2ef1c",
+      "command": [
+        "python3",
+        "work/windows-local-backend-20261115/with_windows_sdk.py",
+        "cargo",
+        "clippy",
+        "-p",
+        "keelshell-platform",
+        "-p",
+        "keelshell-session",
+        "--all-targets",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "seconds": 4.667,
+      "reaped": true,
+      "log_sha256": "957160f40ad5b356763881ff6d70f8d95b5637c460304049375889cfb562d214",
+      "log_matches_receipt": true,
+      "test_result_lines": [],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "full-gate-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/full-gate-r1.json",
+      "receipt_sha256": "dc9054dcb24a8090f0adf3a8176c6ce185399a3908d9897bf19135bfe9e6a560",
+      "command": [
+        "python3",
+        "scripts/check.py"
+      ],
+      "exit": -15,
+      "seconds": 208.772,
+      "reaped": true,
+      "log_sha256": "df11e9c0651bd79105dc045eb93d561d69091abd1faebdc3004f197186f738a9",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 129,
+          "failed": 0,
+          "ignored": 1
+        },
+        {
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 0,
+          "failed": 0,
+          "ignored": 4
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": true,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "archive-handoff-red-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/archive-handoff-red-r1.json",
+      "receipt_sha256": "813df74391ccb283afcbad6d0fe95dd078074ad09219760cdb36c368c75408bd",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-session",
+        "--lib",
+        "--locked",
+        "--offline",
+        "mutation_worker",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 101,
+      "seconds": 3.876,
+      "reaped": true,
+      "log_sha256": "f3c51037d7fc213c290468eed791c79701866fa3e8e75ea53593466d57d0b20c",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 1,
+          "failed": 2,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "archive-handoff-green-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/archive-handoff-green-r1.json",
+      "receipt_sha256": "c320a7c97a7aa6e481add7c5e8816dd70051d683982e0e3cb27c83d4d56d524d",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-session",
+        "--lib",
+        "--locked",
+        "--offline",
+        "mutation_worker",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "seconds": 2.2,
+      "reaped": true,
+      "log_sha256": "ce049d04f0a6d270e17588475ca40e16a73f258beea392b608a7faa7950596f4",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "archive-handoff-app-r1",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/archive-handoff-app-r1.json",
+      "receipt_sha256": "77de400e3c4f21a8d72ae2db1424cec949c01a88551169d2672fd3ca74e0b6b2",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-app",
+        "--lib",
+        "--locked",
+        "--offline",
+        "archive_unobserved_worker_result",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 101,
+      "seconds": 0.266,
+      "reaped": true,
+      "log_sha256": "dff99c2cb871f00f9947828cfad0faf1c002a4f0bd150de0b63720793dceb5c9",
+      "log_matches_receipt": true,
+      "test_result_lines": [],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "archive-handoff-app-r2",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/archive-handoff-app-r2.json",
+      "receipt_sha256": "3b46d1cf81f42957443b476e5445df9b0484658c69abb82623880b121a5790bc",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-app",
+        "--locked",
+        "--offline",
+        "archive_unobserved_worker_result",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 101,
+      "seconds": 4.172,
+      "reaped": true,
+      "log_sha256": "9fb07ffbcec4bb5cd403096fa519ec9e3c52624a93c0b49187032055f69fde1e",
+      "log_matches_receipt": true,
+      "test_result_lines": [],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "archive-handoff-app-r3",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/archive-handoff-app-r3.json",
+      "receipt_sha256": "e40537fc475619b990b4d942cd5abea86d8ef8618f5e2b6ce31cee03fa1b3f1a",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-app",
+        "--locked",
+        "--offline",
+        "archive_unobserved_worker_result",
+        "--",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "seconds": 11.59,
+      "reaped": true,
+      "log_sha256": "5b96e9fdb130d2eb73fd79293541c10f78ce99e7e1745a739297720c8deeeb2a",
+      "log_matches_receipt": true,
+      "test_result_lines": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "linker_warning_present": true,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    },
+    {
+      "label": "windows-combined-clippy-r3",
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/logs/windows-combined-clippy-r3.json",
+      "receipt_sha256": "324d431ec437a5c1a6ddd33c607bb37bdef5b657c0cf2d0dad16b6871e58cf9e",
+      "command": [
+        "python3",
+        "work/windows-local-backend-20261115/with_windows_sdk.py",
+        "cargo",
+        "clippy",
+        "-p",
+        "keelshell-platform",
+        "-p",
+        "keelshell-session",
+        "--all-targets",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "seconds": 5.138,
+      "reaped": true,
+      "log_sha256": "273526ac749e0aed71d651b46a06cb07b910c0d07f4a13bdd303a34cf33373fc",
+      "log_matches_receipt": true,
+      "test_result_lines": [],
+      "linker_warning_present": false,
+      "attribution": "PARENT_EXECUTED_REVIEWER_READONLY_READBACK"
+    }
+  ],
+  "reviewer_executed_rust_tests": 0,
+  "reviewer_compiled_inventory_verified": false,
+  "native": "NOT_RUN",
+  "target_access": false,
+  "not_native_windows_execution": true
+}

@@ -1,0 +1,42 @@
+{
+  "source": "crates/keelshell-ai/src/redact.rs",
+  "sha256": "776d6ee82e242c553ecfee3fc6edb6a0fbe9fa4c424c9b62e366cde935e37b55",
+  "markers": [
+    {
+      "line": 190,
+      "test_function": "private_key_blocks_and_unterminated_keys_are_removed",
+      "inside_cfg_test_module": true,
+      "complete_body_bytes": 23,
+      "classification": "redaction sentinel; incomplete or too short to be a private key"
+    },
+    {
+      "line": 191,
+      "test_function": "private_key_blocks_and_unterminated_keys_are_removed",
+      "inside_cfg_test_module": true,
+      "complete_body_bytes": null,
+      "classification": "redaction sentinel; incomplete or too short to be a private key"
+    },
+    {
+      "line": 224,
+      "test_function": "explicit_values_cannot_hide_credential_markers",
+      "inside_cfg_test_module": true,
+      "complete_body_bytes": null,
+      "classification": "redaction sentinel; incomplete or too short to be a private key"
+    },
+    {
+      "line": 225,
+      "test_function": "explicit_values_cannot_hide_credential_markers",
+      "inside_cfg_test_module": true,
+      "complete_body_bytes": null,
+      "classification": "redaction sentinel; incomplete or too short to be a private key"
+    },
+    {
+      "line": 231,
+      "test_function": "unrelated_pem_footer_does_not_end_private_key_redaction",
+      "inside_cfg_test_module": true,
+      "complete_body_bytes": null,
+      "classification": "redaction sentinel; incomplete or too short to be a private key"
+    }
+  ],
+  "credentials_printed_or_extracted": false
+}

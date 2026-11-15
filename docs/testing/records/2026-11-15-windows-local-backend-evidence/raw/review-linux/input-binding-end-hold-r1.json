@@ -1,0 +1,66 @@
+{
+  "signed_utc": "2026-11-15T12:30:54.778477+00:00",
+  "baseline": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "current_head_observed": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "inputs": [
+    {
+      "path": "scripts/run_linux_local_backend.py",
+      "reviewed_sha256": "b23088c77569e0ab9b745597bf30de2a706f2040c0df70e1ce7340d4cf61a299",
+      "frozen_copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/frozen-inputs/scripts/run_linux_local_backend.py",
+      "frozen_copy_sha256": "b23088c77569e0ab9b745597bf30de2a706f2040c0df70e1ce7340d4cf61a299",
+      "live_sha256_at_signing": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+      "live_matches_original_review": false
+    },
+    {
+      "path": "scripts/test_linux_local_backend.py",
+      "reviewed_sha256": "71fe6599b031e426b3a7eed410a1b079fd2c3d8d2608c9c717946b0eb6932d08",
+      "frozen_copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/frozen-inputs/scripts/test_linux_local_backend.py",
+      "frozen_copy_sha256": "71fe6599b031e426b3a7eed410a1b079fd2c3d8d2608c9c717946b0eb6932d08",
+      "live_sha256_at_signing": "71fe6599b031e426b3a7eed410a1b079fd2c3d8d2608c9c717946b0eb6932d08",
+      "live_matches_original_review": true
+    },
+    {
+      "path": "scripts/run_linux_file_interop.py",
+      "reviewed_sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "frozen_copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/frozen-inputs/scripts/run_linux_file_interop.py",
+      "frozen_copy_sha256": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "live_sha256_at_signing": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+      "live_matches_original_review": true
+    },
+    {
+      "path": "scripts/openssh_interop.py",
+      "reviewed_sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+      "frozen_copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/frozen-inputs/scripts/openssh_interop.py",
+      "frozen_copy_sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+      "live_sha256_at_signing": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+      "live_matches_original_review": true
+    },
+    {
+      "path": "work/windows-local-backend-20261115/linux-local/README.md",
+      "reviewed_sha256": "b34f87780e0c9854572260c94ec5de4fc72df73061e0748e1d332fd555bfd9a0",
+      "frozen_copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/frozen-inputs/work/windows-local-backend-20261115/linux-local/README.md",
+      "frozen_copy_sha256": "b34f87780e0c9854572260c94ec5de4fc72df73061e0748e1d332fd555bfd9a0",
+      "live_sha256_at_signing": "b34f87780e0c9854572260c94ec5de4fc72df73061e0748e1d332fd555bfd9a0",
+      "live_matches_original_review": true
+    },
+    {
+      "path": "work/windows-local-backend-20261115/linux-local/handoff.json",
+      "reviewed_sha256": "9b0d4b64be3d1c7c0aa4344523da648890dec7f76d0721169116be3304a3f78e",
+      "frozen_copy": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/frozen-inputs/work/windows-local-backend-20261115/linux-local/handoff.json",
+      "frozen_copy_sha256": "9b0d4b64be3d1c7c0aa4344523da648890dec7f76d0721169116be3304a3f78e",
+      "live_sha256_at_signing": "9b0d4b64be3d1c7c0aa4344523da648890dec7f76d0721169116be3304a3f78e",
+      "live_matches_original_review": true
+    }
+  ],
+  "git_command": {
+    "argv": [
+      "git",
+      "--no-optional-locks",
+      "rev-parse",
+      "HEAD",
+      "a092dd5712c0a92ee4af18970fb0500fb230b760^{commit}"
+    ],
+    "returncode": 0
+  },
+  "scope": "Historical HOLD of original handoff; no signature of parent fixes"
+}

@@ -1,0 +1,443 @@
+{
+  "schema": 1,
+  "scope": "native Linux Rust local filesystem and codecs; no desktop/peer acceptance",
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "owner": "ffe0365284d8469cb929233c0dec9aaa",
+  "image": "synthetic",
+  "started_unix": 1794746168.315964,
+  "budget_seconds": 60,
+  "steps": [
+    {
+      "name": "resolve-revision",
+      "argv": [
+        "git",
+        "rev-parse",
+        "--verify",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa^{commit}"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "source-git-archive",
+      "argv": [
+        "git",
+        "archive",
+        "--format=tar",
+        "--output=/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/r2/scenarios/success-then-finish-error/source.tar",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "podman-vm-architecture",
+      "argv": [
+        "podman",
+        "info",
+        "--format",
+        "{{.Host.Arch}}"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "create-container",
+      "argv": [
+        "podman",
+        "create",
+        "--pull=never",
+        "--http-proxy=false",
+        "--network=none",
+        "--label",
+        "io.keelshell.fixture=linux-local-backend",
+        "--label",
+        "io.keelshell.owner=ffe0365284d8469cb929233c0dec9aaa",
+        "--name",
+        "keelshell-linux-local-ffe0365284d8",
+        "synthetic",
+        "timeout",
+        "--kill-after=3",
+        "120",
+        "sleep",
+        "120"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "start-container",
+      "argv": [
+        "podman",
+        "start",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "linux-toolchain",
+      "argv": [
+        "podman",
+        "exec",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "15",
+        "sh",
+        "-ec",
+        "uname -sm\nrustc -vV\ncargo -V\ncc --version\ncommand -v timeout\ncommand -v readelf\nid -u\n"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "container-image-id",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type=container",
+        "--format",
+        "{{.Image}}",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "prepare-private-directories",
+      "argv": [
+        "podman",
+        "exec",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "10",
+        "mkdir",
+        "-p",
+        "/snapshot",
+        "/linux-target",
+        "/linux-cargo",
+        "/scratch"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "copy-source",
+      "argv": [
+        "podman",
+        "cp",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/r2/scenarios/success-then-finish-error/source.tar",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:/tmp/source.tar"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "copy-registry",
+      "argv": [
+        "podman",
+        "cp",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-linux/r2/scenarios/success-then-finish-error/registry.tar",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:/tmp/registry.tar"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "extract-private-inputs",
+      "argv": [
+        "podman",
+        "exec",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "60",
+        "sh",
+        "-ec",
+        "tar -xf /tmp/source.tar -C /snapshot\ntar -xf /tmp/registry.tar -C /linux-cargo\nchmod -R a-w /snapshot\nchown -R 1000:1000 /linux-target /linux-cargo /scratch\n"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "test-user",
+      "argv": [
+        "podman",
+        "exec",
+        "--user=1000:1000",
+        "--workdir=/snapshot",
+        "--env=CARGO_HOME=/linux-cargo",
+        "--env=CARGO_TARGET_DIR=/linux-target",
+        "--env=CARGO_NET_OFFLINE=true",
+        "--env=CARGO_BUILD_JOBS=4",
+        "--env=CARGO_INCREMENTAL=0",
+        "--env=HOME=/scratch",
+        "--env=TMPDIR=/scratch",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "10",
+        "id"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "compile-keelshell-session",
+      "argv": [
+        "podman",
+        "exec",
+        "--user=1000:1000",
+        "--workdir=/snapshot",
+        "--env=CARGO_HOME=/linux-cargo",
+        "--env=CARGO_TARGET_DIR=/linux-target",
+        "--env=CARGO_NET_OFFLINE=true",
+        "--env=CARGO_BUILD_JOBS=4",
+        "--env=CARGO_INCREMENTAL=0",
+        "--env=HOME=/scratch",
+        "--env=TMPDIR=/scratch",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "54",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "keelshell-session",
+        "--lib",
+        "--test=zmodem",
+        "--test=archive_transfer",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "compile-keelshell-core",
+      "argv": [
+        "podman",
+        "exec",
+        "--user=1000:1000",
+        "--workdir=/snapshot",
+        "--env=CARGO_HOME=/linux-cargo",
+        "--env=CARGO_TARGET_DIR=/linux-target",
+        "--env=CARGO_NET_OFFLINE=true",
+        "--env=CARGO_BUILD_JOBS=4",
+        "--env=CARGO_INCREMENTAL=0",
+        "--env=HOME=/scratch",
+        "--env=TMPDIR=/scratch",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "54",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "keelshell-core",
+        "--test=zmodem",
+        "--test=archive",
+        "--test=archive_pax",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "inventory-keelshell-session-keelshell_session",
+      "argv": [
+        "podman",
+        "exec",
+        "--user=1000:1000",
+        "--workdir=/snapshot",
+        "--env=CARGO_HOME=/linux-cargo",
+        "--env=CARGO_TARGET_DIR=/linux-target",
+        "--env=CARGO_NET_OFFLINE=true",
+        "--env=CARGO_BUILD_JOBS=4",
+        "--env=CARGO_INCREMENTAL=0",
+        "--env=HOME=/scratch",
+        "--env=TMPDIR=/scratch",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "15",
+        "/linux-target/debug/deps/selected-abcd",
+        "--list",
+        "--format=terse"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "binary-sha-keelshell-session-keelshell_session",
+      "argv": [
+        "podman",
+        "exec",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "10",
+        "sha256sum",
+        "/linux-target/debug/deps/selected-abcd"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "binary-elf-keelshell-session-keelshell_session",
+      "argv": [
+        "podman",
+        "exec",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "10",
+        "readelf",
+        "-h",
+        "/linux-target/debug/deps/selected-abcd"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "test-keelshell-session-keelshell_session",
+      "argv": [
+        "podman",
+        "exec",
+        "--user=1000:1000",
+        "--workdir=/snapshot",
+        "--env=CARGO_HOME=/linux-cargo",
+        "--env=CARGO_TARGET_DIR=/linux-target",
+        "--env=CARGO_NET_OFFLINE=true",
+        "--env=CARGO_BUILD_JOBS=4",
+        "--env=CARGO_INCREMENTAL=0",
+        "--env=HOME=/scratch",
+        "--env=TMPDIR=/scratch",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "120",
+        "/linux-target/debug/deps/selected-abcd",
+        "zmodem::",
+        "--format=pretty",
+        "--color=never",
+        "--test-threads=2"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    },
+    {
+      "name": "source-after-run",
+      "argv": [
+        "podman",
+        "exec",
+        "--user=1000:1000",
+        "--workdir=/snapshot",
+        "--env=CARGO_HOME=/linux-cargo",
+        "--env=CARGO_TARGET_DIR=/linux-target",
+        "--env=CARGO_NET_OFFLINE=true",
+        "--env=CARGO_BUILD_JOBS=4",
+        "--env=CARGO_INCREMENTAL=0",
+        "--env=HOME=/scratch",
+        "--env=TMPDIR=/scratch",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "timeout",
+        "--kill-after=3",
+        "15",
+        "sha256sum",
+        "--",
+        "Cargo.toml",
+        "Cargo.lock"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "owned_processes_stopped": true
+    }
+  ],
+  "suites": [
+    {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "results": {
+        "zmodem::selected_required_test": "ok"
+      },
+      "package": "keelshell-session",
+      "target": "keelshell_session",
+      "filter": "zmodem::",
+      "selected": [
+        "zmodem::selected_required_test"
+      ],
+      "step": "test-keelshell-session-keelshell_session"
+    }
+  ],
+  "status": "FAIL",
+  "host_cargo_used": false,
+  "host_target_accessed": false,
+  "network": "none",
+  "msrv_bypass": false,
+  "host_runner_inputs": {
+    "scripts/run_linux_local_backend.py": "b134be0b11b7b79b5c88baddf363a25bad3b5f4583265e1ca26ff8a35a4a55b0",
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+  },
+  "source": {
+    "file_count": 2,
+    "manifest_sha256": "051e8183aebe5feeb7ec0b53813fc7db64cbdcf5eb2497f079ee7f327764ace9",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "archive_sha256": "20813720b4a14f15b18ec520099ef223b75c1880e8bf3aeac4fadfe75ffa404e"
+  },
+  "registry": {},
+  "container_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "toolchain": {
+    "rustc": "1.98.1",
+    "host": "aarch64-unknown-linux-gnu",
+    "kernel_arch": "aarch64",
+    "vm_arch": "arm64"
+  },
+  "image_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "source_after_run_matches": true,
+  "host_runner_after_run_matches": true,
+  "execution_status": "PASS",
+  "cleanup": {
+    "container_removed": true,
+    "owned_processes_stopped": false,
+    "process_cleanup_error": "PermissionError: reviewer finish signal denied",
+    "container_filesystem_and_target_removed": true
+  },
+  "elapsed_seconds": 0.002,
+  "finished_unix": 1794746168.31796,
+  "totals": {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0
+  }
+}

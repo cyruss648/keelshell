@@ -21,7 +21,7 @@
    ```sh
    cargo clean --locked --offline \
      -p keelshell-app -p keelshell-core -p keelshell-session \
-     -p keelshell-ai -p keelshell-mcp
+     -p keelshell-ai -p keelshell-mcp -p keelshell-platform
    ```
 
    这只针对列出的项目包；不删除整个共享target、第三方缓存、工作树或运行中的应用。

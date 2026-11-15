@@ -1,0 +1,219 @@
+{
+  "artifacts": [
+    {
+      "path": "HANDOFF.md",
+      "bytes": 10566,
+      "sha256": "57b4ca0d921fa8e8d503ac50575beb4fddd36d60243db9727033b2027c9b2583"
+    },
+    {
+      "path": "handoff.json",
+      "bytes": 2114,
+      "sha256": "4dd0a109f2f57d2b6a8ed95688452bfa76aa0cb9c06d616c829fb56b3d7ca8f2"
+    },
+    {
+      "path": "sources/absolute-and-self-relative.html",
+      "bytes": 50635,
+      "sha256": "f33a652c7b38e4d6b0e3be5b7ffbc1353dfe03aa14b2cfc577772eebe78f329b"
+    },
+    {
+      "path": "sources/absolute-and-self-relative.json",
+      "bytes": 412,
+      "sha256": "5b697919e3aada11bc4e273b2372e5a1a967b0e948fff120e91435473e4df132"
+    },
+    {
+      "path": "sources/absolute-and-self-relative.txt",
+      "bytes": 2487,
+      "sha256": "24ff72dcbac109830031c4a72828928641ee72499632120fcb9137a0bc4f761a"
+    },
+    {
+      "path": "sources/accessallowedace.html",
+      "bytes": 53742,
+      "sha256": "fcb8fc624bc419e9a5f468f9744f44b60c5b569f97680e0b29dcf861fdf50000"
+    },
+    {
+      "path": "sources/accessallowedace.json",
+      "bytes": 478,
+      "sha256": "499e923e4df2cf1c819fe5de45b59e57bcd93141498f95cc7d53b4bf4f60eaec"
+    },
+    {
+      "path": "sources/accessallowedace.txt",
+      "bytes": 2981,
+      "sha256": "6993c9f2d160c75fcb7d44666bc41bb07d2f40a9bcb54ae861b16da84b7b1881"
+    },
+    {
+      "path": "sources/acl-layout.html",
+      "bytes": 53184,
+      "sha256": "e41670d882ba6b5fbfb81240d8947cc193e448d18a4e058b6577f61c11054e87"
+    },
+    {
+      "path": "sources/acl-layout.json",
+      "bytes": 344,
+      "sha256": "2e99e452a806da2952b85011ddd55d29853e7233e5cf3899671cc5e22f75bb9b"
+    },
+    {
+      "path": "sources/acl-layout.txt",
+      "bytes": 3330,
+      "sha256": "a782de4b95b9936ed2238e186d8be8afd7aebcd5c24dd9996cd1d2ce883fc672"
+    },
+    {
+      "path": "sources/addaccessallowedaceex.html",
+      "bytes": 56951,
+      "sha256": "bbabbd7304779970feeddf9299423ad7e38448e01690aaa13809923afcf693a2"
+    },
+    {
+      "path": "sources/addaccessallowedaceex.json",
+      "bytes": 551,
+      "sha256": "ff7c162b1570ea24596c0043405860c7b2d482db4f85e8e1debff1717698830b"
+    },
+    {
+      "path": "sources/addaccessallowedaceex.txt",
+      "bytes": 3700,
+      "sha256": "9988915cead24f456d3de59edf350654793d7bd90ac0a54b5aa1836750130e0a"
+    },
+    {
+      "path": "sources/getace.html",
+      "bytes": 52468,
+      "sha256": "182f0d7f4dd825de3dc11cedd3ba4504b9e419ee740429df7b60a915709969ed"
+    },
+    {
+      "path": "sources/getace.json",
+      "bytes": 491,
+      "sha256": "42d40f75164c63570836763a0cc81c335994478bcb931d9acd379d91a55ea8c7"
+    },
+    {
+      "path": "sources/getace.txt",
+      "bytes": 1745,
+      "sha256": "918a0cb02379be96d4e534ea7750547b530c69e5e489c59d4bf639b43fe55711"
+    },
+    {
+      "path": "sources/getsecuritydescriptordacl.html",
+      "bytes": 55574,
+      "sha256": "2ec965ea24ef95939ac600bf73512f37924c251f963ebb82ca663045828eeec8"
+    },
+    {
+      "path": "sources/getsecuritydescriptordacl.json",
+      "bytes": 567,
+      "sha256": "f68122ec49c58c1c5d4fdc3df560932ad93cc8d99f25a3fa7528b946eea17424"
+    },
+    {
+      "path": "sources/getsecuritydescriptordacl.txt",
+      "bytes": 3541,
+      "sha256": "fde9bae9f55e1611fe117a6b54dcdb93c8cfb18ef15f1f75673d2f3aa31b54f6"
+    },
+    {
+      "path": "sources/getsecuritydescriptorlength.html",
+      "bytes": 53725,
+      "sha256": "f68e33fb97c25d9f726f91ccfd3031784604048449ff710adf3fe640e450d4c3"
+    },
+    {
+      "path": "sources/getsecuritydescriptorlength.json",
+      "bytes": 432,
+      "sha256": "d635cc50331b2c8d4253822c2956d5ba21397dfdb6d17bd2d259c33cf9b4165c"
+    },
+    {
+      "path": "sources/getsecuritydescriptorlength.txt",
+      "bytes": 2004,
+      "sha256": "ee3a71207763f40820e8745d9d663e5e605494c6e470a3b0d11110038283c7cd"
+    },
+    {
+      "path": "sources/getsecurityinfo.html",
+      "bytes": 56900,
+      "sha256": "89082d630970c302ff1b4abe5c7ab20c0ef02d9685ea887855d3759b86530368"
+    },
+    {
+      "path": "sources/getsecurityinfo.json",
+      "bytes": 482,
+      "sha256": "6639c8b931c93809f5b26bfd6fa1bbbd66615612b4bd64e9deaae412388907a2"
+    },
+    {
+      "path": "sources/getsecurityinfo.txt",
+      "bytes": 5290,
+      "sha256": "9e8dc19ca3a9574340822631e9bfa285917c851adb796cdd68f65d9edd5cdab2"
+    },
+    {
+      "path": "sources/gettokeninformation.html",
+      "bytes": 56601,
+      "sha256": "d1c6e809f2ac0cf72f9aa34347575290ccb2a930f912700d4bb360997b6bb0c8"
+    },
+    {
+      "path": "sources/gettokeninformation.json",
+      "bytes": 543,
+      "sha256": "0e00010293056f4540746853c65ac1e62a1799adaba462871d50fe17e3e2b29e"
+    },
+    {
+      "path": "sources/gettokeninformation.txt",
+      "bytes": 3838,
+      "sha256": "5637908f8c160f118147d15ca2afe4b72cfde4cf2fb5d535493fffe25e11bab1"
+    },
+    {
+      "path": "sources/localalloc.html",
+      "bytes": 56628,
+      "sha256": "d9429524fa17fcd20fa73ba27e4744c1c486da51a9607194c847f10be7b3595e"
+    },
+    {
+      "path": "sources/localalloc.json",
+      "bytes": 467,
+      "sha256": "ea8cf745edb5ede9a49f239abdac80a8e161ee385bba86334f3f8de24c8b6fee"
+    },
+    {
+      "path": "sources/localalloc.txt",
+      "bytes": 4656,
+      "sha256": "e59f3d0a6ec0b2a9cbe4b4cf3cd1b5aba628e4e6500e8b2c01ec34042dcc7127"
+    },
+    {
+      "path": "sources/setsecuritydescriptorcontrol.html",
+      "bytes": 53991,
+      "sha256": "7e09fded42a7232b0df12e2a5c2d18881b435cd26372404e98e4205190ec7fbf"
+    },
+    {
+      "path": "sources/setsecuritydescriptorcontrol.json",
+      "bytes": 579,
+      "sha256": "80604ade9a5df1cbab16e33fc54b298120bf967327a6f3013abc0177ac548bba"
+    },
+    {
+      "path": "sources/setsecuritydescriptorcontrol.txt",
+      "bytes": 2617,
+      "sha256": "a9a685693cd86e421cb43998926ad6c390e4968055fff5b9948db951205d986d"
+    },
+    {
+      "path": "sources/setsecuritydescriptorowner.html",
+      "bytes": 54202,
+      "sha256": "7a556537da7a57d2414b533c6e7a21b37da3a59b12b44801a5a3b02c67837af2"
+    },
+    {
+      "path": "sources/setsecuritydescriptorowner.json",
+      "bytes": 571,
+      "sha256": "fd925c93ee8fdabbb690678297357beefcc9d9e14593dc3b2a1f99e376fd8b7f"
+    },
+    {
+      "path": "sources/setsecuritydescriptorowner.txt",
+      "bytes": 2598,
+      "sha256": "7134a4eb21a40422c7263af678b322a2bd9ca4d85620f23fcda864b48cefd4b7"
+    },
+    {
+      "path": "sources/windows-sys-latest.html",
+      "bytes": 38113,
+      "sha256": "8a312e6e41af5d98372d4060100e012afbbddaafd55ea815b8779664932c1c98"
+    },
+    {
+      "path": "sources/windows-sys-latest.json",
+      "bytes": 359,
+      "sha256": "ab438287e6b3f656d18ddec9da76f13883412947b509003711de8262446dcdd7"
+    },
+    {
+      "path": "static-check-final.json",
+      "bytes": 1067,
+      "sha256": "3d772c84b8bec7888951dc30e5f14376fff36cc2b2ceb55e6db3cae17109bacc"
+    },
+    {
+      "path": "static-check-r2.json",
+      "bytes": 2736,
+      "sha256": "fa7a00666313b69622c54b5e91c860484c7d2d0b18764fdf9488cb7436156e22"
+    },
+    {
+      "path": "test-inventory.json",
+      "bytes": 3206,
+      "sha256": "bcfef43f9f9de8a484b0aede3cd6a0d4f5a440ab5d9fa29bdec6a00b766309cf"
+    }
+  ]
+}

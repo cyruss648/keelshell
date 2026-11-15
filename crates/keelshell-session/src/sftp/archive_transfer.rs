@@ -7,7 +7,10 @@ use keelshell_core::{ArchiveBundle, ArchiveFormat, ArchiveMember, MAX_ARCHIVE_BY
 
 use super::*;
 
+#[cfg_attr(windows, path = "archive_transfer/local_windows.rs")]
 mod local;
+#[cfg(any(windows, test))]
+mod mutation_worker;
 mod remote;
 
 /// An archive operation whose complete contents must be reviewed before execution.
@@ -162,6 +165,7 @@ impl Authority<'_> {
         result
     }
 
+    #[cfg(not(windows))]
     async fn io<T>(&self, operation: impl Future<Output = std::io::Result<T>>) -> Result<T> {
         self.wait(async { operation.await.map_err(Into::into) })
             .await
@@ -183,6 +187,7 @@ impl Authority<'_> {
         self.wait(scope.remote(operation)).await
     }
 
+    #[cfg(not(windows))]
     async fn local_mutation<T>(
         &self,
         scope: &FileMutationScope<'_>,

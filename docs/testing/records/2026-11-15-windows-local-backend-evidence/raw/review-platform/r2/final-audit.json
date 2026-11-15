@@ -1,0 +1,21 @@
+{
+  "verified_utc": "2026-11-15T13:03:01.647792+00:00",
+  "retained_r1_files_verified": 9,
+  "retained_r2_files_verified": 9,
+  "r2_added_windows_tests": [
+    "directory_rename_buffers_cover_one_and_255_utf16_unit_names",
+    "file_rename_buffers_cover_one_and_255_utf16_unit_names",
+    "private_file_sharing_allows_readback_and_rejects_other_writers_and_delete_openers",
+    "publication_into_a_retained_private_target_directory_supports_files_and_directories"
+  ],
+  "report_links_checked": 27,
+  "report_links_all_exist_and_lines_valid": true,
+  "own_targets_absent": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2/target"
+  ],
+  "combined_engineering_commands": 8,
+  "r1_decision": "HOLD",
+  "r2_decision": "APPROVE_SOURCE_CONTRACT_ONLY",
+  "windows_native": "NOT_RUN"
+}

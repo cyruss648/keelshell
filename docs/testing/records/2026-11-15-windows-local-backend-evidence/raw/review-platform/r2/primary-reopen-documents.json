@@ -1,0 +1,19 @@
+{
+  "label": "primary-reopen-documents",
+  "argv": [
+    "python3",
+    "work/windows-local-backend-20261115/review-platform/r2/fetch_reopen_docs.py"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:55:20.878736+00:00",
+  "finished_utc": "2026-11-15T12:55:21.695754+00:00",
+  "elapsed_seconds": 0.816944,
+  "pid": 40254,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r2/primary-reopen-documents.txt",
+  "output_sha256": "a5d383db1e36431788080979c9b89b6dbe895360af3bfecf4f79e05756069e96"
+}

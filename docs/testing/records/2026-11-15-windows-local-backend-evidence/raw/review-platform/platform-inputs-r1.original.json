@@ -1,0 +1,16 @@
+{
+  "baseline": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "files": {
+    "crates/keelshell-platform/Cargo.toml": "7f99c1d3beeaa9cc8aa70d4835ef5376e9a26340af3abfde6e7adf6c2749aa90",
+    "crates/keelshell-platform/src/directory_records.rs": "ad7b4d896fbe2cf3ae955bdd69590a1228b48e0b97db7ab38e87720ec54557f8",
+    "crates/keelshell-platform/src/lib.rs": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+    "crates/keelshell-platform/src/path.rs": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+    "crates/keelshell-platform/src/windows/mod.rs": "e44c71c65dd9c8662f58999024b51c184a9100ded6a2b21d79955928d479d61a",
+    "crates/keelshell-platform/src/windows/native.rs": "60cc0d303e66a25d949d224ee4bf26bcc733d0cc13a797557941e60bce44a46e",
+    "crates/keelshell-platform/src/windows/security/tests.rs": "ea706dac54a2eae75f489a89966f331b420e0af192b234c575c56c6bc72e2dce",
+    "crates/keelshell-platform/src/windows/security.rs": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+    "crates/keelshell-platform/src/windows/tests.rs": "ac59162fc4cd1dc304ee58f080b10c7a7f1135f2d3adc4e4d04911d6f1e09aa6"
+  },
+  "windows_cross_clippy": "logs/windows-platform-clippy-r2.json",
+  "native_status": "NOT_RUN"
+}

@@ -1,0 +1,14 @@
+{
+  "executable": "/linux-target/debug/deps/selected-abcd",
+  "sha256sum": "0000000000000000000000000000000000000000000000000000000000000000  /linux-target/debug/deps/selected-abcd\n",
+  "elf_header": "ELF Header:\n  Class: ELF64\n  Data: 2's complement, little endian\n  Type: DYN (Position-Independent Executable file)\n  Machine: AArch64\n",
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "inventory": [
+    "zmodem::selected_required_test"
+  ],
+  "verified_native_binary": {
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "elf_class": "ELF64",
+    "machine": "AArch64"
+  }
+}

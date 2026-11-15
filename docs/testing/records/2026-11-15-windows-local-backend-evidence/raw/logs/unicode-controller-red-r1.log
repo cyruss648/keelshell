@@ -1,0 +1,19 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.86s
+     Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/32494f010339b390/out/zmodem-32494f010339b390)
+
+running 1 test
+
+thread 'zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data' (8060126) panicked at crates/keelshell-session/tests/zmodem.rs:421:5:
+[]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data ... FAILED
+
+failures:
+
+failures:
+    zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p keelshell-session --test zmodem`

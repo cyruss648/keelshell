@@ -1,0 +1,7 @@
+
+running 2 tests
+test sftp::queue::tests::local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components ... ok
+test sftp::queue::tests::local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 192 filtered out; finished in 0.00s
+

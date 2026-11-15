@@ -6,6 +6,8 @@ publish.workspace = true
 
 [dependencies]
 keelshell-core = { path = "../keelshell-core" }
+# Portable local-name exclusion plus the isolated Windows native boundary.
+keelshell-platform = { path = "../keelshell-platform" }
 thiserror.workspace = true
 tokio = { workspace = true, features = ["signal"] }
 russh.workspace = true

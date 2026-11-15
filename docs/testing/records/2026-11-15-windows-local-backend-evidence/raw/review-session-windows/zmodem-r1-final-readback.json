@@ -1,0 +1,182 @@
+{
+  "observed_at_utc": "2026-11-15T12:58:00.162947+00:00",
+  "status": "READBACK_MATCH / REVIEW_HOLD",
+  "head_sha": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "manifest_sha256": "8fb6ea161f2ce4d4ba0d882901ff867b9cf44f1cfcb19138af6d088a9ed01075",
+  "freeze": [
+    {
+      "path": "crates/keelshell-session/src/zmodem.rs",
+      "expected": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+      "current": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows.rs",
+      "expected": "68ebb6fc05cf61c7b3fd8a64138038c981c03a469d99f7a9c6ca7456ba0f842f",
+      "current": "68ebb6fc05cf61c7b3fd8a64138038c981c03a469d99f7a9c6ca7456ba0f842f",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "expected": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+      "current": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/Cargo.toml",
+      "expected": "61e707d92be30616f67f5171034d99c70168edb55167313bcb5d67b31b4eac3f",
+      "current": "61e707d92be30616f67f5171034d99c70168edb55167313bcb5d67b31b4eac3f",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-app/src/terminal_zmodem.rs",
+      "expected": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "current": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "expected": "67a196d6a429258f13e137919d2dece286704746ff6a74a20a5e1b450c1ed8de",
+      "current": "67a196d6a429258f13e137919d2dece286704746ff6a74a20a5e1b450c1ed8de",
+      "match": true
+    }
+  ],
+  "supporting_context": [
+    {
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "first_observed": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "current": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/path.rs",
+      "first_observed": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "current": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "first_observed": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63",
+      "current": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/native.rs",
+      "first_observed": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+      "current": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security.rs",
+      "first_observed": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "current": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/zmodem_local.rs",
+      "first_observed": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+      "current": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue.rs",
+      "first_observed": "8552e1034cfec8c125d2c27a1ac432516c80e9ed004b44d342c56a29694fc613",
+      "current": "8552e1034cfec8c125d2c27a1ac432516c80e9ed004b44d342c56a29694fc613",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue/reservations.rs",
+      "first_observed": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+      "current": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/tests.rs",
+      "first_observed": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+      "current": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-session/tests/support/zmodem_fixture.rs",
+      "first_observed": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+      "current": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-core/src/zmodem.rs",
+      "first_observed": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+      "current": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+      "match": true
+    },
+    {
+      "path": "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "first_observed": "4d98fb161d6d67a6227505532bd7c68f9b3484d4ee6ddf09ae72c5fb5fb39aff",
+      "current": "4d98fb161d6d67a6227505532bd7c68f9b3484d4ee6ddf09ae72c5fb5fb39aff",
+      "match": true
+    }
+  ],
+  "report_hash_matches_summary": true,
+  "artifacts_before_this_receipt": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/notice-zmodem-r1-p2-01-unicode-reservation-alias.md",
+      "bytes": 4464,
+      "sha256": "d6dcc221639d10209fbe0b1a8c076841e33aba1a3b5fbe8ae96b3c54bd4c3c42"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-r1-20261115T124545Z-intake.json",
+      "bytes": 3489,
+      "sha256": "baf1dffb203a7a95f0b484d736e87d37bd4b63a25e6e5513f1e9bf61e262d7d6"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-r1-command-results.log",
+      "bytes": 2962,
+      "sha256": "e837d89eccfb931baef13fc9ae51892cc0baa179fa18fbac9bc4269fdae44671"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-r1-official-api-observations.json",
+      "bytes": 12552,
+      "sha256": "803dc27565220640fa6af1024248e429a97fc9b363342523ba888bdf237d2df5"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-r1-official-share-observations.json",
+      "bytes": 13778,
+      "sha256": "401ef0c808d7bfaeeb84c31deabdbab13fb74bcfce536b7e46b86728ee5f3b69"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-r1-pre-report-readback.json",
+      "bytes": 5502,
+      "sha256": "0f12c5c296692dba0e1e1c10788343bec41d6e79c52d2f9bc8f0b4e7b89d1a90"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-r1-static-source-checks-r2.json",
+      "bytes": 26942,
+      "sha256": "f6845c44977985d8792708840713cf6ab86285523ff7909dda449af91544fa6f"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-r1-static-source-checks.json",
+      "bytes": 24029,
+      "sha256": "71a91d1135ef393e2ecfc98ab4364addfca814a4c9d74fd54facbaf9f02f2e05"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-review-r1.json",
+      "bytes": 2161,
+      "sha256": "4d55d1a7b002af7b16e6c5391d41dfe689f6140ee641040a2151d4ebf7fde56e"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-session-windows/zmodem-review-r1.md",
+      "bytes": 14803,
+      "sha256": "eae806a289939e64fef2656d07d54225b17937627360f73dfbfde96269c97e61"
+    }
+  ],
+  "new_open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0
+  },
+  "native": "NOT_RUN",
+  "rust_tests_executed": 0,
+  "cargo_rustc_format_git_commands": 0,
+  "parent_target_accessed": false,
+  "archive_review": "NOT_STARTED"
+}

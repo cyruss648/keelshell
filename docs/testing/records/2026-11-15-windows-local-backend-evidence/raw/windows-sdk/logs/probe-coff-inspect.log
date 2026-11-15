@@ -1,0 +1,17 @@
+
+File: /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.obj
+Format: COFF-x86-64
+Arch: x86_64
+AddressSize: 64bit
+ImageFileHeader {
+  Machine: IMAGE_FILE_MACHINE_AMD64 (0x8664)
+  SectionCount: 8
+  TimeDateStamp: 2026-11-15 12:35:27 (0x6AF9A70F)
+  PointerToSymbolTable: 0x30E
+  SymbolCount: 25
+  StringTableSize: 124
+  OptionalHeaderSize: 0
+  Characteristics [ (0x0)
+  ]
+}
+/opt/homebrew/opt/llvm/bin/llvm-readobj: error: '/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.dll': No such file or directory

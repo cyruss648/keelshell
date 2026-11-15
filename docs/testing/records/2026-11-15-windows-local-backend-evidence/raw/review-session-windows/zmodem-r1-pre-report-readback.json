@@ -1,0 +1,120 @@
+{
+  "observed_at_utc": "2026-11-15T12:53:39.666521+00:00",
+  "manifest_sha256": "8fb6ea161f2ce4d4ba0d882901ff867b9cf44f1cfcb19138af6d088a9ed01075",
+  "freeze": [
+    {
+      "path": "crates/keelshell-session/src/zmodem.rs",
+      "frozen_sha256": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+      "current_sha256": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+      "matches": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows.rs",
+      "frozen_sha256": "68ebb6fc05cf61c7b3fd8a64138038c981c03a469d99f7a9c6ca7456ba0f842f",
+      "current_sha256": "68ebb6fc05cf61c7b3fd8a64138038c981c03a469d99f7a9c6ca7456ba0f842f",
+      "matches": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "frozen_sha256": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+      "current_sha256": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+      "matches": true
+    },
+    {
+      "path": "crates/keelshell-session/Cargo.toml",
+      "frozen_sha256": "61e707d92be30616f67f5171034d99c70168edb55167313bcb5d67b31b4eac3f",
+      "current_sha256": "61e707d92be30616f67f5171034d99c70168edb55167313bcb5d67b31b4eac3f",
+      "matches": true
+    },
+    {
+      "path": "crates/keelshell-app/src/terminal_zmodem.rs",
+      "frozen_sha256": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "current_sha256": "1db9316e87b83db1ed04ab1468c59a69a7d469c88ed76e6edb1faf0b9d973c54",
+      "matches": true
+    },
+    {
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "frozen_sha256": "67a196d6a429258f13e137919d2dece286704746ff6a74a20a5e1b450c1ed8de",
+      "current_sha256": "67a196d6a429258f13e137919d2dece286704746ff6a74a20a5e1b450c1ed8de",
+      "matches": true
+    }
+  ],
+  "supporting_context": [
+    {
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "first_observed_sha256": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "current_sha256": "9f877f5e65b66155342f28b53ef586bb74b37f346e9defb8d9b64b369fc68db1",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/path.rs",
+      "first_observed_sha256": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "current_sha256": "bd300d0eaf9635871ef7c98d3d06328a95805fe58adf5f07a9a72a0aa52b45fe",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "first_observed_sha256": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63",
+      "current_sha256": "533d235c9d3b1ed2f261acec26552e6ff60c34b76ce262ed9b45b74068531f63",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/native.rs",
+      "first_observed_sha256": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+      "current_sha256": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security.rs",
+      "first_observed_sha256": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "current_sha256": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/zmodem_local.rs",
+      "first_observed_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+      "current_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue.rs",
+      "first_observed_sha256": "8552e1034cfec8c125d2c27a1ac432516c80e9ed004b44d342c56a29694fc613",
+      "current_sha256": "8552e1034cfec8c125d2c27a1ac432516c80e9ed004b44d342c56a29694fc613",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue/reservations.rs",
+      "first_observed_sha256": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+      "current_sha256": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/tests.rs",
+      "first_observed_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+      "current_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-session/tests/support/zmodem_fixture.rs",
+      "first_observed_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+      "current_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-core/src/zmodem.rs",
+      "first_observed_sha256": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+      "current_sha256": "9d2869fcd829292a1b25194701a9d84b28016baedcfea31d4a4cd98fd44b33ea",
+      "unchanged": true
+    },
+    {
+      "path": "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "first_observed_sha256": "4d98fb161d6d67a6227505532bd7c68f9b3484d4ee6ddf09ae72c5fb5fb39aff",
+      "current_sha256": "4d98fb161d6d67a6227505532bd7c68f9b3484d4ee6ddf09ae72c5fb5fb39aff",
+      "unchanged": true
+    }
+  ],
+  "native_status": "NOT_RUN",
+  "rust_tests_run": 0,
+  "cargo_rustc_format_git_commands": 0,
+  "parent_target_accessed": false
+}

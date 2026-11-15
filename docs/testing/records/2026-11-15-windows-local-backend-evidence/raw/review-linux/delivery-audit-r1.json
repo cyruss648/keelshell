@@ -1,0 +1,128 @@
+{
+  "status": "FAIL",
+  "error": "AssertionError: Binary receipt SHA mismatch",
+  "checks": [
+    {
+      "name": "host-inputs",
+      "status": "PASS",
+      "detail": {
+        "sha256": {
+          "scripts/run_linux_local_backend.py": "b23088c77569e0ab9b745597bf30de2a706f2040c0df70e1ce7340d4cf61a299",
+          "scripts/test_linux_local_backend.py": "71fe6599b031e426b3a7eed410a1b079fd2c3d8d2608c9c717946b0eb6932d08",
+          "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+          "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+        },
+        "drift": false
+      }
+    },
+    {
+      "name": "evidence-manifest",
+      "status": "PASS",
+      "detail": {
+        "files": 401,
+        "bytes": 7073210,
+        "manifest_sha256": "f4c697a75dd1e53424ca9e2224e5b5806852b8c114538e7be9f60ca614529117"
+      }
+    },
+    {
+      "name": "git-archive",
+      "status": "PASS",
+      "detail": {
+        "baseline": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+        "current_head_observed": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+        "files": 573,
+        "archive_sha256": "1588c0927d10cecf45839b30639ac14a54d5dc6e8f26aee82e97d99128236a3c",
+        "manifest_sha256": "3263de3f6412d10570cf68dcb281ee5301110d902db4e8ff95ba8eb95e8522fe",
+        "compressed_sha256": "df4dcc055cfc4f86eff7dbbfb921f62b897fc43670eb71bf15e6c1dade2c5957",
+        "exact_blob_matches": 573,
+        "worktree_source_read_or_copied": false
+      }
+    },
+    {
+      "name": "registry-receipts",
+      "status": "PASS",
+      "detail": {
+        "official_locked": 978,
+        "cached_lock_checksums": 949,
+        "missing_archives": 29,
+        "unique_index_paths": 855,
+        "bundle_sha256": "4d22edf25fc5268f59c7d6d0b5a92d7cf48e3c16f6f79b05798ee32e7ef0378c",
+        "transport_tar_retained": false,
+        "cached_payloads_reopened_by_reviewer": false
+      }
+    },
+    {
+      "name": "native-runtime-and-cleanup",
+      "status": "PASS",
+      "detail": {
+        "steps": 46,
+        "all_waited_reaped": true,
+        "toolchain": {
+          "rustc": "1.98.1",
+          "host": "aarch64-unknown-linux-gnu",
+          "kernel_arch": "aarch64",
+          "vm_arch": "arm64"
+        },
+        "container_id": "090ccd648c0976c8e04611bbf5e7ba547bb9dc36a1bded5b137ed73f5c5abedb",
+        "image_id": "17156b215e21a0b10b1d7576ee47b656ef76bb4f59575f396adcf59320dc6d8a",
+        "container_identity_readbacks": 4,
+        "source_after_matches": 573,
+        "cleanup": {
+          "container_removed": true,
+          "owned_processes_stopped": true,
+          "container_created": true,
+          "container_id": "090ccd648c0976c8e04611bbf5e7ba547bb9dc36a1bded5b137ed73f5c5abedb",
+          "container_filesystem_and_target_removed": true
+        }
+      }
+    }
+  ],
+  "git_commands": [
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "rev-parse",
+        "HEAD",
+        "a092dd5712c0a92ee4af18970fb0500fb230b760^{commit}"
+      ],
+      "returncode": 0,
+      "stdout_bytes": 82,
+      "stdout_sha256": "bd27fd4cbb8a59aa5b50ca86584600bae5909c547e644fc4cbe2941093764828",
+      "stderr_bytes": 0,
+      "elapsed_seconds": 0.011
+    },
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "ls-tree",
+        "-rz",
+        "--full-tree",
+        "a092dd5712c0a92ee4af18970fb0500fb230b760",
+        "--",
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates"
+      ],
+      "returncode": 0,
+      "stdout_bytes": 59621,
+      "stdout_sha256": "70ebfacd6aadd7374cdf3e294b1ca4975ac3edec94ed65dfb3a66228a8a5753b",
+      "stderr_bytes": 0,
+      "elapsed_seconds": 0.013
+    },
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "cat-file",
+        "--batch"
+      ],
+      "returncode": 0,
+      "stdout_bytes": 11294933,
+      "stdout_sha256": "df5381d5e3dfcd3035fff26d4c03f9b5aefc85be804d7ae00faaa5ab477f149d",
+      "stderr_bytes": 0,
+      "elapsed_seconds": 0.03
+    }
+  ]
+}

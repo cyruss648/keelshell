@@ -47,11 +47,20 @@ ZFIN、所有当前文件审核和保存均已处理、精确回复写出已确�
 有序的成功退出可提前结束等待，失败或未知退出不能转成此警告。
 它不增加保存回执，不清除未知隔离，也不重放占用期间被拒绝的旧输入。
 
-目前本地文件观察和安全发布后端实现面向 macOS/Linux；本批没有验证 Linux
-本地 Rust 文件后端。Windows 后端显式返回
-`Unsupported`，不能把协议编译、错误分支或 headless 检查表示为 Windows
-文件传输已完成。Windows 安全后端与三平台桌面、IME、辅助技术及发行验收
-继续列入路线图。
+本地文件观察和安全发布现已接入 macOS、Linux 与 Windows 后端。Windows
+使用完整祖先与来源句柄、实际对象身份、创建时私有 DACL、无覆盖发布及完整
+内容读回；仅接纳满足这些契约的本地 drive 文件系统。UNC、设备路径、重解析、
+多硬链接及不可移植名称均拒绝。文件选择入口已启用；Windows 原生运行仍为
+`NOT_RUN`，不能把交叉检查、PE 链接或测试定义表示为 Windows 文件传输验收。
+Linux 本地 Rust 后端的实际运行、最终源码范围与 Windows 原生缺口分别见
+[本地后端记录](../testing/records/2026-11-15-windows-local-backend.md)与
+[ADR 0138](../adr/0138-windows-handle-local-files.md)。
+三平台桌面、IME、辅助技术及发行验收继续列入路线图。
+
+Zmodem 与 SFTP 共用保守的 Unicode 文件名比较规则，包括 `STRASSE/straße`
+和普通/词尾 sigma。目标不存在时也保留全部路径分量的别名互斥；旧未知写入
+造成的隔离不会因大小写拼写或新会话而解除。这是应用的排斥策略，不是对文件系统
+原生大小写规则或 Unicode 规范化的推断。
 
 本批实际观察到 Debian `sz 0.12.21rc` 和 macOS lrzsz `0.13.1` 直接连接 PTY 时，
 部分下载在完整保存之后、收到 ZFIN 之后退出 `0`，但应用没有收到最终 `OO`。此时单文件

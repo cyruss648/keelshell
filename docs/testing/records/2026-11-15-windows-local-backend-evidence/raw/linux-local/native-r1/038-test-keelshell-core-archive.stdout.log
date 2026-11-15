@@ -1,0 +1,45 @@
+
+running 40 tests
+test both_decoders_reject_oversized_encoded_input_before_parsing ... ok
+test both_decoders_reject_empty_and_unrelated_data ... ok
+test both_formats_roundtrip_an_empty_manifest ... ok
+test both_formats_roundtrip_binary_unicode_and_explicit_empty_directories ... ok
+test both_formats_roundtrip_maximum_paths_and_directory_suffixes ... ok
+test constructor_bounds_apply_to_utf8_bytes_and_path_depth ... ok
+test constructors_reject_nonportable_or_escaping_paths ... ok
+test decoding_enforces_entry_and_full_manifest_limits_in_both_formats ... ok
+test exact_explicit_parent_is_allowed_after_an_implicit_parent ... ok
+test file_constructor_rejects_actual_payload_over_expanded_limit ... ok
+test gzip_rejects_concatenated_members_and_trailing_compressed_bytes ... ok
+test gzip_trailer_is_verified_after_tar_iteration_would_have_stopped ... ok
+test manifest_accepts_entry_limit_and_rejects_one_more ... ok
+test manifest_counts_directory_suffixes_at_the_exact_manifest_bound ... ok
+test manifest_counts_full_paths_instead_of_only_leaf_names ... ok
+test manifest_rejects_duplicates_aliases_and_file_ancestors_in_either_order ... ok
+test public_bounds_match_the_archive_contract ... ok
+test reencoding_discards_dangerous_incoming_permissions_and_ownership ... ok
+test tar_rejects_declared_expansion_and_truncated_payload_or_padding ... ok
+test tar_rejects_directory_payload_and_nonempty_link_fields_on_regular_files ... ok
+test tar_rejects_duplicate_names_and_aliased_implicit_parents ... ok
+test tar_rejects_header_corruption_and_nul_hidden_path_suffixes ... ok
+test tar_rejects_links_devices_sparse_and_unhandled_extensions ... ok
+test tar_rejects_raw_invalid_utf8_and_unsafe_paths ... ok
+test tar_rejects_unsafe_or_orphaned_gnu_long_names ... ok
+test tar_rejects_unsafe_ustar_prefixes ... ok
+test tar_requires_two_end_blocks_and_zero_aligned_trailing_padding ... ok
+test tar_streaming_budget_also_bounds_zero_padding_bombs ... ok
+test zip_accepts_stored_deflated_and_data_descriptor_members ... ok
+test zip_rejects_actual_expansion_beyond_the_declared_size ... ok
+test zip_rejects_crc_corruption_and_unconsumed_deflate_bytes ... ok
+test zip_rejects_declared_expansion_over_limit_before_inflating ... ok
+test zip_rejects_duplicate_raw_names_and_case_aliased_parents ... ok
+test zip_rejects_encryption_and_unsupported_compression ... ok
+test zip_rejects_links_special_modes_and_directory_payloads ... ok
+test zip_rejects_raw_invalid_utf8_and_dangerous_names ... ok
+test zip_rejects_regular_mode_on_a_directory_name ... ok
+test zip_rejects_truncated_archives_and_mismatched_local_names ... ok
+test zip_rejects_unlisted_local_headers_and_overlapping_offsets ... ok
+test both_encoders_bound_incompressible_output_during_compression ... ok
+
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.13s
+

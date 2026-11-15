@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="generator" content="docs.rs 0.0.0 (4835d725db00d8e7bc2fefbdb7f49f3ea9fbb583 2026-11-12 )"><link rel="canonical" href="https://docs.rs/crate/windows-sys/latest" /><link rel="stylesheet" href="/-/static/v/c6adc0736ae17c7d/vendored.css" media="all" />
+        <link rel="stylesheet" href="/-/static/v/c6adc0736ae17c7d/style.css" media="all" />
+        <link rel="stylesheet" href="/-/static/v/c6adc0736ae17c7d/font-awesome.css" media="all" />
+
+        <link rel="search" href="/-/static/v/c6adc0736ae17c7d/opensearch.xml" type="application/opensearchdescription+xml" title="Docs.rs" />
+
+        <title>windows-sys 0.61.2 - Docs.rs</title><script nonce="tW6nhSg3VqBla1IQS4AYAYmDyF1xrTBn7M9VzlUYQUmh1mo/">(function() {
+    function applyTheme(theme) {
+        if (theme) {
+            document.documentElement.dataset.docsRsTheme = theme;
+        }
+    }
+
+    window.addEventListener("storage", ev => {
+        if (ev.key === "rustdoc-theme") {
+            applyTheme(ev.newValue);
+        }
+    });
+
+    // see ./storage-change-detection.html for details
+    window.addEventListener("message", ev => {
+        if (ev.data && ev.data.storage && ev.data.storage.key === "rustdoc-theme") {
+            applyTheme(ev.data.storage.value);
+        }
+    });
+
+    applyTheme(window.localStorage.getItem("rustdoc-theme"));
+})();</script><script defer type="text/javascript" nonce="tW6nhSg3VqBla1IQS4AYAYmDyF1xrTBn7M9VzlUYQUmh1mo/" src="/-/static/v/c6adc0736ae17c7d/menu.js"></script>
+        <script defer type="text/javascript" nonce="tW6nhSg3VqBla1IQS4AYAYmDyF1xrTBn7M9VzlUYQUmh1mo/" src="/-/static/v/c6adc0736ae17c7d/index.js"></script>
+    </head>
+
+    <body class="">
+<div class="nav-container">
+    <div class="container">
+        <div class="pure-menu pure-menu-horizontal" role="navigation" aria-label="Main navigation">
+            <form action="/releases/search"
+                  method="GET"
+                  id="nav-search-form"
+                  class="landing-search-form-nav  ">
+
+                
+                <a href="/" class="pure-menu-heading pure-menu-link docsrs-logo" aria-label="Docs.rs">
+                    <span title="Docs.rs"><span class="fa fa-solid fa-cubes " aria-hidden="true"></span></span>
+                    <span class="title">Docs.rs</span>
+                </a><ul class="pure-menu-list">
+    <script id="crate-metadata" type="application/json">
+        
+        {
+            "name": "windows-sys",
+            "version": "0.61.2"
+        }
+    </script><li class="pure-menu-item">
+            <a href="/crate/windows-sys/latest" class="pure-menu-link crate-name" title="Rust for Windows">
+                <span class="fa fa-solid fa-cube " aria-hidden="true"></span>
+                <span class="title">windows-sys-0.61.2</span>
+            </a>
+        </li><li class="pure-menu-item pure-menu-has-children">
+                <a href="#" class="pure-menu-link" aria-label="Platform">
+                    <span class="fa fa-solid fa-gears " aria-hidden="true"></span>
+                    <span class="title">Platform</span>
+                </a>
+
+                
+                <ul class="pure-menu-children" id="platforms" data-url="/crate/windows-sys/latest/menus/platforms/"><li class="pure-menu-item">
+            <a href="/windows-sys/latest/windows_sys/" class="pure-menu-link" data-fragment="retain" rel="">x86_64-pc-windows-msvc</a>
+        </li></ul>
+            </li><li class="pure-menu-item">
+                <a href="/crate/windows-sys/latest/features" title="Browse available feature flags of windows-sys-0.61.2" class="pure-menu-link">
+                    <span class="fa fa-solid fa-flag " aria-hidden="true"></span>
+                    <span class="title">Feature flags</span>
+                </a>
+            </li>
+        
+    
+    <li id="crate-warnings" class="pure-menu-item hidden" data-url="/-/partial/crate-warnings/windows-sys/"></li>
+</ul><div class="spacer"></div>
+                
+                <div id="abnormalities" class="hidden"></div>
+
+                <ul class="pure-menu-list">
+                    <li class="pure-menu-item pure-menu-has-children">
+                        <a href="#" class="pure-menu-link" aria-label="docs.rs">docs.rs</a>
+                        <ul class="pure-menu-children aligned-icons"><li class="pure-menu-item"><a class="pure-menu-link" href="/about"><span class="fa fa-solid fa-circle-info " aria-hidden="true"></span> About docs.rs</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="/about/badges"><span class="fa fa-brands fa-fonticons " aria-hidden="true"></span> Badges</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="/about/builds"><span class="fa fa-solid fa-gears " aria-hidden="true"></span> Builds</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="/about/metadata"><span class="fa fa-solid fa-table " aria-hidden="true"></span> Metadata</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="/about/redirections"><span class="fa fa-solid fa-road " aria-hidden="true"></span> Shorthand URLs</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="/about/download"><span class="fa fa-solid fa-download " aria-hidden="true"></span> Download</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="/about/rustdoc-json"><span class="fa fa-solid fa-file-code " aria-hidden="true"></span> Rustdoc JSON</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="/releases/queue"><span class="fa fa-solid fa-gears " aria-hidden="true"></span> Build queue</a></li><li class="pure-menu-item"><a class="pure-menu-link" href="https://foundation.rust-lang.org/policies/privacy-policy/#docs.rs" target="_blank"><span class="fa fa-solid fa-shield-halved " aria-hidden="true"></span> Privacy policy</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="pure-menu-list"><li class="pure-menu-item pure-menu-has-children">
+                        <a href="#" class="pure-menu-link" aria-label="Rust">Rust</a>
+                        <ul class="pure-menu-children">
+                            <li class="pure-menu-item"><a class="pure-menu-link" href="https://www.rust-lang.org/" target="_blank">Rust website</a></li>
+                            <li class="pure-menu-item"><a class="pure-menu-link" href="https://doc.rust-lang.org/book/" target="_blank">The Book</a></li>
+
+                            <li class="pure-menu-item"><a class="pure-menu-link" href="https://doc.rust-lang.org/std/" target="_blank">Standard Library API Reference</a></li>
+
+                            <li class="pure-menu-item"><a class="pure-menu-link" href="https://doc.rust-lang.org/rust-by-example/" target="_blank">Rust by Example</a></li>
+
+                            <li class="pure-menu-item"><a class="pure-menu-link" href="https://doc.rust-lang.org/cargo/guide/" target="_blank">The Cargo Guide</a></li>
+
+                            <li class="pure-menu-item"><a class="pure-menu-link" href="https://doc.rust-lang.org/nightly/clippy" target="_blank">Clippy Documentation</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div id="search-input-nav">
+                    <label for="nav-search">
+                        <span class="fa fa-solid fa-magnifying-glass " aria-hidden="true"></span>
+                    </label>
+
+                    
+                    
+                    <input id="nav-search" name="query" type="text" aria-label="Find crate by search query" tabindex="-1"
+                        placeholder="Find crate"
+                        >
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div id="alerts" class="hidden"></div>
+    
+    <div class="docsrs-package-container">
+        <div class="container">
+            <div class="description-container">
+                
+
+                
+                <h1 id="crate-title">
+                    windows-sys 0.61.2
+                    <span id="clipboard" class="svg-clipboard" title="Copy crate name and version information"></span>
+                </h1>
+
+                
+                <div class="description">Rust for Windows</div>
+
+
+                <div class="pure-menu pure-menu-horizontal">
+                    <ul class="pure-menu-list">
+                        
+                        <li class="pure-menu-item"><a href="/crate/windows-sys/latest"
+                                class="pure-menu-link pure-menu-active">
+                                <span class="fa fa-solid fa-cube " aria-hidden="true"></span>
+                                <span class="title"> Crate</span>
+                            </a>
+                        </li>
+
+                        
+                        <li class="pure-menu-item">
+                            <a href="/crate/windows-sys/latest/source/"
+                                class="pure-menu-link">
+                                <span class="fa fa-regular fa-folder-open " aria-hidden="true"></span>
+                                <span class="title"> Source</span>
+                            </a>
+                        </li>
+
+                        
+                        <li class="pure-menu-item">
+                            <a href="/crate/windows-sys/latest/builds"
+                                class="pure-menu-link">
+                                <span class="fa fa-solid fa-gears " aria-hidden="true"></span>
+                                <span class="title"> Builds</span>
+                            </a>
+                        </li>
+
+                        
+                        <li class="pure-menu-item">
+                            <a href="/crate/windows-sys/latest/features"
+                               class="pure-menu-link">
+                                <span class="fa fa-solid fa-flag " aria-hidden="true"></span>
+                                <span class="title">Feature flags</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div><a href="/windows-sys/latest/windows_sys/" class="doc-link">
+                    <span class="fa fa-solid fa-book " aria-hidden="true"></span> Documentation
+                </a></div>
+    </div>
+<div class="container package-page-container">
+        <div class="pure-g">
+            <div class="pure-u-1 pure-u-sm-7-24 pure-u-md-5-24">
+                <div class="pure-menu package-menu">
+                    <ul class="pure-menu-list">
+                            
+                            
+                            <li class="pure-menu-heading">Coverage</li>
+                            <li class="pure-menu-item text-center"><b>100%</b><br>
+                                <span class="documented-info"><b>3</b> out of <b>3</b> items documented</span><span class="documented-info"><b>0</b> out of <b>14280</b> items with examples</span></li><li class="pure-menu-heading">Size</li>
+                            <li class="pure-menu-item">
+                                <span class="documented-info">Source code size: 18.2 MB
+                                    <span class="size" tabindex=0><span class="fa fa-solid fa-circle-info " aria-hidden="true"></span><span class="info">This is the summed size of all the files inside the crates.io package for this release.</span>
+                                    </span>
+                                </span>
+                            </li><li class="pure-menu-item">
+                                    <span class="documented-info">Documentation size: 1.2 GB
+                                        <span class="size" tabindex=0><span class="fa fa-solid fa-circle-info " aria-hidden="true"></span><span class="info">This is the summed size of all files generated by rustdoc for all configured targets</span>
+                                        </span>
+                                    </span>
+                                </li><li class="pure-menu-heading">Ø build duration</li><li class="pure-menu-item">
+                                    <span class="documented-info">this release: 4m 17s
+                                        <span class="size" tabindex=0><span class="fa fa-solid fa-circle-info " aria-hidden="true"></span><span class="info">Average build duration of <b>successful</b> builds.</span>
+                                        </span>
+                                    </span>
+                                </li><li class="pure-menu-item">
+                                    <span class="documented-info">all releases: 4m 38s
+                                        <span class="size" tabindex=0><span class="fa fa-solid fa-circle-info " aria-hidden="true"></span><span class="info">Average build duration of <b>successful</b> builds in releases after 2024-10-23.</span>
+                                        </span>
+                                    </span>
+                                </li><li class="pure-menu-heading">Links</li>
+                        <li class="pure-menu-item">
+                                <a href="https://github.com/microsoft/windows-rs" class="pure-menu-link">
+                                    
+                                    <span class="fa fa-solid fa-code-branch " aria-hidden="true"></span>
+                                        
+                                            microsoft/windows-rs
+                                        
+                                        <br>
+                                        <span class="fa fa-solid fa-star left-margin" aria-hidden="true"></span> 12920
+                                        <span class="fa fa-solid fa-code-branch " aria-hidden="true"></span> 696
+                                        <span class="fa fa-solid fa-circle-exclamation " aria-hidden="true"></span> 39
+
+                                    </a>
+                            </li>
+                        <li class="pure-menu-item">
+                            <a href="https://crates.io/crates/windows-sys" class="pure-menu-link"
+                                title="See windows-sys on crates.io">
+                                <span class="fa fa-solid fa-cube " aria-hidden="true"></span> crates.io
+                            </a>
+                        </li>
+
+                        <li class="pure-menu-heading">Dependencies</li>
+                        <li class="pure-menu-item">
+                            <div class="pure-menu pure-menu-scrollable sub-menu">
+                                <ul class="pure-menu-list">
+                                    
+                                    <li class="pure-menu-item"><a href="/crate/windows-link/^0.2.1" class="pure-menu-link">
+                windows-link ^0.2.1
+                
+                    <i class="dependencies normal">normal</i>
+                    
+                
+            </a>
+        </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="pure-menu-heading">Versions</li>
+                        <li class="pure-menu-item">
+                            <div class="pure-menu pure-menu-scrollable sub-menu">
+                                <ul class="pure-menu-list">
+                                    
+                                    
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.61.2"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.61.2</b> (2025-10-06)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.61.1"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.61.1</b> (2025-09-25)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.61.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.61.0</b> (2025-09-04)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.60.2"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.60.2</b> (2025-06-12)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.60.1"
+                
+                rel="nofollow"
+                class="pure-menu-link warn"
+                 title="windows-sys-0.60.1 is yanked"
+                
+            ><span class="fa fa-solid fa-triangle-exclamation " aria-hidden="true"></span><b>0.60.1</b> (2025-06-11)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.60.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.60.0</b> (2025-06-11)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.59.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.59.0</b> (2024-07-30)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.52.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.52.0</b> (2023-11-15)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.48.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.48.0</b> (2023-03-31)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.45.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.45.0</b> (2023-01-21)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.42.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.42.0</b> (2022-09-27)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.36.1"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.36.1</b> (2022-04-27)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.36.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.36.0</b> (2022-04-26)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.35.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.35.0</b> (2022-04-05)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.34.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.34.0</b> (2022-03-15)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.33.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.33.0</b> (2022-02-24)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.32.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.32.0</b> (2022-02-03)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.31.0"
+                
+                rel="nofollow"
+                class="pure-menu-link warn"
+                 title="windows-sys-0.31.0 is yanked"
+                
+            ><span class="fa fa-solid fa-triangle-exclamation " aria-hidden="true"></span><b>0.31.0</b> (2022-02-03)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.30.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.30.0</b> (2022-01-13)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.29.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.29.0</b> (2021-12-17)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.28.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.28.0</b> (2021-11-17)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.27.0"
+                
+                rel="nofollow"
+                class="pure-menu-link"
+                
+                
+            ><b>0.27.0</b> (2021-11-15)</a>
+        </li>
+        
+         
+        <li class="pure-menu-item">
+            <a
+                href="/crate/windows-sys/0.0.0"
+                
+                rel="nofollow"
+                class="pure-menu-link warn"
+                 title="windows-sys-0.0.0 is not a library"
+                
+            ><span class="fa fa-solid fa-triangle-exclamation " aria-hidden="true"></span><b>0.0.0</b> (2021-10-18)</a>
+        </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        
+                        <li class="pure-menu-heading">Owners</li>
+                        <li class="pure-menu-item"><a href="https://crates.io/users/kennykerr">
+                                    <img src="https://avatars.githubusercontent.com/u/9845234?v=4" alt="kennykerr" class="owner">
+                                </a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pure-u-1 pure-u-sm-17-24 pure-u-md-19-24 package-details" id="main">
+                <h2>windows-sys</h2>
+<p>The <code>windows-sys</code> crate is a zero-overhead fallback for the most demanding situations and primarily where the absolute best compile time is essential. It only includes function declarations (externs), structs, and constants. No convenience helpers, traits, or wrappers are provided.</p>
+<ul>
+<li><a href="https://kennykerr.ca/rust-getting-started/">Getting started</a></li>
+<li><a href="https://github.com/microsoft/windows-rs/tree/master/crates/samples">Samples</a></li>
+<li><a href="https://github.com/microsoft/windows-rs/releases">Releases</a></li>
+<li><a href="https://microsoft.github.io/windows-rs/features">Feature search</a></li>
+</ul>
+<p>Start by adding the following to your Cargo.toml file:</p>
+<pre><code class="language-toml"><span class="syntax-source syntax-toml"><span class="syntax-punctuation syntax-definition syntax-table syntax-begin syntax-toml">[</span><span class="syntax-meta syntax-tag syntax-table syntax-toml"><span class="syntax-entity syntax-name syntax-table syntax-toml">dependencies</span><span class="syntax-punctuation syntax-separator syntax-table syntax-toml">.</span><span class="syntax-entity syntax-name syntax-table syntax-toml">windows-sys</span></span><span class="syntax-punctuation syntax-definition syntax-table syntax-end syntax-toml">]</span>
+<span class="syntax-meta syntax-tag syntax-key syntax-toml"><span class="syntax-entity syntax-name syntax-tag syntax-toml">version</span></span> <span class="syntax-punctuation syntax-definition syntax-key-value syntax-toml">=</span> <span class="syntax-string syntax-quoted syntax-double syntax-basic syntax-toml"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-toml">&quot;</span>&gt;=0.59, &lt;=0.61<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-toml">&quot;</span></span>
+<span class="syntax-meta syntax-tag syntax-key syntax-toml"><span class="syntax-entity syntax-name syntax-tag syntax-toml">features</span></span> <span class="syntax-punctuation syntax-definition syntax-key-value syntax-toml">=</span> <span class="syntax-punctuation syntax-definition syntax-array syntax-begin syntax-toml">[</span>
+    <span class="syntax-string syntax-quoted syntax-double syntax-basic syntax-toml"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-toml">&quot;</span>Win32_Security<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-toml">&quot;</span></span><span class="syntax-punctuation syntax-separator syntax-array syntax-toml">,</span>
+    <span class="syntax-string syntax-quoted syntax-double syntax-basic syntax-toml"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-toml">&quot;</span>Win32_System_Threading<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-toml">&quot;</span></span><span class="syntax-punctuation syntax-separator syntax-array syntax-toml">,</span>
+    <span class="syntax-string syntax-quoted syntax-double syntax-basic syntax-toml"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-toml">&quot;</span>Win32_UI_WindowsAndMessaging<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-toml">&quot;</span></span><span class="syntax-punctuation syntax-separator syntax-array syntax-toml">,</span>
+<span class="syntax-punctuation syntax-definition syntax-array syntax-end syntax-toml">]</span>
+</span></code></pre>
+<p>Using a range instead of the <a href="https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#caret-requirements">default Caret requirements</a> helps avoid duplicate versions in downstream graphs and improves resolver flexibility.</p>
+<p>Make use of any Windows APIs as needed:</p>
+<pre><code class="language-rust"><span class="syntax-source syntax-rust"><span class="syntax-keyword syntax-other syntax-rust">use</span> <span class="syntax-meta syntax-path syntax-rust">windows_sys<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-meta syntax-block syntax-rust"><span class="syntax-punctuation syntax-section syntax-block syntax-begin syntax-rust">{</span>
+    <span class="syntax-meta syntax-path syntax-rust">core<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-keyword syntax-operator syntax-arithmetic syntax-rust">*</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-meta syntax-path syntax-rust">Win32<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-meta syntax-path syntax-rust">Foundation<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-keyword syntax-operator syntax-arithmetic syntax-rust">*</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-meta syntax-path syntax-rust">Win32<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-meta syntax-path syntax-rust">System<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-meta syntax-path syntax-rust">Threading<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-keyword syntax-operator syntax-arithmetic syntax-rust">*</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-meta syntax-path syntax-rust">Win32<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-constant syntax-other syntax-rust">UI</span><span class="syntax-meta syntax-path syntax-rust"><span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-meta syntax-path syntax-rust">WindowsAndMessaging<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-keyword syntax-operator syntax-arithmetic syntax-rust">*</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span>
+</span><span class="syntax-meta syntax-block syntax-rust"><span class="syntax-punctuation syntax-section syntax-block syntax-end syntax-rust">}</span></span><span class="syntax-punctuation syntax-terminator syntax-rust">;</span>
+
+<span class="syntax-storage syntax-modifier syntax-rust">unsafe</span> <span class="syntax-meta syntax-block syntax-rust"><span class="syntax-punctuation syntax-section syntax-block syntax-begin syntax-rust">{</span>
+    <span class="syntax-storage syntax-type syntax-rust">let</span> event <span class="syntax-keyword syntax-operator syntax-assignment syntax-rust">=</span> CreateEventW<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span><span class="syntax-meta syntax-path syntax-rust">std<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-meta syntax-path syntax-rust">ptr<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span>null<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-constant syntax-numeric syntax-integer syntax-decimal syntax-rust">1</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-constant syntax-numeric syntax-integer syntax-decimal syntax-rust">0</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-meta syntax-path syntax-rust">std<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span><span class="syntax-meta syntax-path syntax-rust">ptr<span class="syntax-punctuation syntax-accessor syntax-rust">::</span></span>null<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-terminator syntax-rust">;</span>
+    SetEvent<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span>event</span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-terminator syntax-rust">;</span>
+    WaitForSingleObject<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span>event<span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-constant syntax-numeric syntax-integer syntax-decimal syntax-rust">0</span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-terminator syntax-rust">;</span>
+    CloseHandle<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span>event</span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-terminator syntax-rust">;</span>
+
+    MessageBoxA<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span><span class="syntax-constant syntax-numeric syntax-integer syntax-decimal syntax-rust">0</span> <span class="syntax-keyword syntax-operator syntax-rust">as</span> <span class="syntax-keyword syntax-operator syntax-rust">_</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-support syntax-macro syntax-rust">s!</span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span><span class="syntax-string syntax-quoted syntax-double syntax-rust"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-rust">&quot;</span>Ansi<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-rust">&quot;</span></span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-support syntax-macro syntax-rust">s!</span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span><span class="syntax-string syntax-quoted syntax-double syntax-rust"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-rust">&quot;</span>Caption<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-rust">&quot;</span></span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-constant syntax-other syntax-rust">MB_OK</span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-terminator syntax-rust">;</span>
+    MessageBoxW<span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span><span class="syntax-constant syntax-numeric syntax-integer syntax-decimal syntax-rust">0</span> <span class="syntax-keyword syntax-operator syntax-rust">as</span> <span class="syntax-keyword syntax-operator syntax-rust">_</span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-support syntax-macro syntax-rust">w!</span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span><span class="syntax-string syntax-quoted syntax-double syntax-rust"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-rust">&quot;</span>Wide<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-rust">&quot;</span></span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-support syntax-macro syntax-rust">w!</span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-begin syntax-rust">(</span><span class="syntax-string syntax-quoted syntax-double syntax-rust"><span class="syntax-punctuation syntax-definition syntax-string syntax-begin syntax-rust">&quot;</span>Caption<span class="syntax-punctuation syntax-definition syntax-string syntax-end syntax-rust">&quot;</span></span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-separator syntax-rust">,</span> <span class="syntax-constant syntax-other syntax-rust">MB_OK</span></span><span class="syntax-meta syntax-group syntax-rust"><span class="syntax-punctuation syntax-section syntax-group syntax-end syntax-rust">)</span></span><span class="syntax-punctuation syntax-terminator syntax-rust">;</span>
+</span><span class="syntax-meta syntax-block syntax-rust"><span class="syntax-punctuation syntax-section syntax-block syntax-end syntax-rust">}</span></span>
+</span></code></pre>
+
+
+                </div>
+        </div>
+    </div></body>
+</html>

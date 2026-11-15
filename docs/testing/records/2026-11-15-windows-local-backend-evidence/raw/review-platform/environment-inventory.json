@@ -1,0 +1,19 @@
+{
+  "label": "environment-inventory",
+  "argv": [
+    "python3",
+    "-"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:34:45.220177+00:00",
+  "finished_utc": "2026-11-15T12:34:45.352447+00:00",
+  "elapsed_seconds": 0.132123,
+  "pid": 9265,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/environment-inventory.txt",
+  "output_sha256": "119b3f5479be81eed41500de481b77636a526c734ce87de8ae5dd64c5c3e4f9d"
+}

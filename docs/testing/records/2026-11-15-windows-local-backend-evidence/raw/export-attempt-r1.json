@@ -1,0 +1,48 @@
+{
+  "status": "STOPPED_BEFORE_MANIFEST_OR_CLEANUP",
+  "reason": "private-key marker in source archive requires classification without exposing body",
+  "candidate": "linux-final-r1/source.tar",
+  "partial_raw_artifacts": true,
+  "findings": [
+    {
+      "path": "crates/keelshell-ai/src/redact.rs",
+      "line": 190,
+      "header_type": "OPENSSH PRIVATE KEY",
+      "matching_end_present": true,
+      "characters_to_matching_end": 23,
+      "production_file": true
+    },
+    {
+      "path": "crates/keelshell-ai/src/redact.rs",
+      "line": 191,
+      "header_type": "RSA PRIVATE KEY",
+      "matching_end_present": false,
+      "characters_to_matching_end": null,
+      "production_file": true
+    },
+    {
+      "path": "crates/keelshell-ai/src/redact.rs",
+      "line": 224,
+      "header_type": "PRIVATE KEY",
+      "matching_end_present": false,
+      "characters_to_matching_end": null,
+      "production_file": true
+    },
+    {
+      "path": "crates/keelshell-ai/src/redact.rs",
+      "line": 225,
+      "header_type": "PRIVATE KEY",
+      "matching_end_present": false,
+      "characters_to_matching_end": null,
+      "production_file": true
+    },
+    {
+      "path": "crates/keelshell-ai/src/redact.rs",
+      "line": 231,
+      "header_type": "RSA PRIVATE KEY",
+      "matching_end_present": false,
+      "characters_to_matching_end": null,
+      "production_file": true
+    }
+  ]
+}

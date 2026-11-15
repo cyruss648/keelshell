@@ -1,0 +1,59 @@
+test_process_identity_failure_is_persisted_as_failure_before_container_creation (test_linux_local_backend.TopLevelFailureContracts.test_process_identity_failure_is_persisted_as_failure_before_container_creation) ... ERROR
+test_subprocess_observation_timeout_is_persisted_as_failure (test_linux_local_backend.TopLevelFailureContracts.test_subprocess_observation_timeout_is_persisted_as_failure) ... ERROR
+
+======================================================================
+ERROR: test_process_identity_failure_is_persisted_as_failure_before_container_creation (test_linux_local_backend.TopLevelFailureContracts.test_process_identity_failure_is_persisted_as_failure_before_container_creation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_local_backend.py", line 408, in test_process_identity_failure_is_persisted_as_failure_before_container_creation
+    self.failed_run(backend.fixture.ownership.InteropFailure("identity unavailable"))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_local_backend.py", line 397, in failed_run
+    result = backend.execute(args)
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/linux-local/native-r2/host-runner-inputs/run_linux_local_backend.py", line 393, in execute
+    _, object_id = commands.run("resolve-revision", [
+                   ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+        "git", "rev-parse", "--verify", args.revision + "^{commit}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ])
+    ^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+openssh_interop.InteropFailure: identity unavailable
+
+======================================================================
+ERROR: test_subprocess_observation_timeout_is_persisted_as_failure (test_linux_local_backend.TopLevelFailureContracts.test_subprocess_observation_timeout_is_persisted_as_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_local_backend.py", line 411, in test_subprocess_observation_timeout_is_persisted_as_failure
+    self.failed_run(subprocess.TimeoutExpired(["ps"], 0.01))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/scripts/test_linux_local_backend.py", line 397, in failed_run
+    result = backend.execute(args)
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/linux-local/native-r2/host-runner-inputs/run_linux_local_backend.py", line 393, in execute
+    _, object_id = commands.run("resolve-revision", [
+                   ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+        "git", "rev-parse", "--verify", args.revision + "^{commit}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ])
+    ^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+subprocess.TimeoutExpired: Command '['ps']' timed out after 0.01 seconds
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.005s
+
+FAILED (errors=2)

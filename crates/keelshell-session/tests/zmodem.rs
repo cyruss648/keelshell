@@ -3,7 +3,7 @@
 //! The wire fixtures below use the pure codec. They verify integration and
 //! publication invariants, not interoperability with an independent rz/sz peer.
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
@@ -11,9 +11,9 @@ use std::sync::atomic::Ordering;
 use keelshell_core::zmodem::{
     FrameEnd, FrameType, Header, HeaderFormat, encode_data, encode_header,
 };
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 use keelshell_session::zmodem::ZmodemDirection as Direction;
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 use keelshell_session::{SessionError, sftp::TransferSpec};
 use keelshell_session::{
     SessionEvent, SshAuth, SshOptions, SshSession,
@@ -22,7 +22,7 @@ use keelshell_session::{
         ZmodemOutput as Output, ZmodemState as State, ZmodemUiEvent as Ui,
     },
 };
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
@@ -193,7 +193,7 @@ async fn zmodem_missing_farewell_cannot_end_an_unfinished_receive_or_review() ->
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_missing_farewell_grace_preserves_saved_bytes_prompt_and_older_unknown() -> TestResult
 {
@@ -402,7 +402,7 @@ fn download_offer(output: &Output) -> TestResult<(Uuid, Uuid)> {
         .ok_or_else(|| format!("missing download offer: {:?}", output.events).into())
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 fn review(output: &Output) -> TestResult<Uuid> {
     output
         .events
@@ -438,7 +438,7 @@ fn root() -> TestResult<(tempfile::TempDir, PathBuf)> {
     Ok((temp, root))
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 async fn prepare_receive(
     fixture: &Fixture,
     controller: &mut Controller,
@@ -667,7 +667,7 @@ async fn zmodem_controller_ui_events_support_session_event_clone_and_equality_wi
     Ok(())
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_upload_reviews_complete_digests_before_releasing_any_source_bytes()
 -> TestResult {
@@ -732,7 +732,7 @@ async fn zmodem_controller_upload_reviews_complete_digests_before_releasing_any_
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_upload_confirmation_rejects_same_length_source_edits_and_consumes_review()
 -> TestResult {
@@ -794,7 +794,7 @@ async fn zmodem_controller_upload_confirmation_rejects_same_length_source_edits_
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_changed_upload_selection_invalidates_previous_review() -> TestResult {
     let fixture = Fixture::start().await?;
@@ -856,7 +856,7 @@ async fn zmodem_controller_changed_upload_selection_invalidates_previous_review(
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no_replace_readback()
 -> TestResult {
@@ -912,7 +912,7 @@ async fn zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_empty_receive_still_requires_review_publication_and_readback()
 -> TestResult {
@@ -944,7 +944,7 @@ async fn zmodem_controller_empty_receive_still_requires_review_publication_and_r
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_existing_local_target_is_preserved_without_consuming_offer() -> TestResult
 {
@@ -991,7 +991,7 @@ async fn zmodem_controller_existing_local_target_is_preserved_without_consuming_
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_target_created_after_review_rejects_confirmation_without_accepting_data()
 -> TestResult {
@@ -1015,7 +1015,7 @@ async fn zmodem_controller_target_created_after_review_rejects_confirmation_with
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_target_created_after_accept_is_preserved_without_saved_ack() -> TestResult
 {
@@ -1055,7 +1055,7 @@ async fn zmodem_controller_target_created_after_accept_is_preserved_without_save
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_review_authority()
 -> TestResult {
@@ -1145,7 +1145,7 @@ async fn zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_revie
     fixture.finish().await
 }
 
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 #[tokio::test]
 async fn zmodem_controller_local_claims_exclude_other_connections_and_existing_sftp_scopes()
 -> TestResult {
@@ -1235,7 +1235,7 @@ async fn zmodem_controller_local_claims_exclude_other_connections_and_existing_s
     second.finish().await
 }
 
-#[cfg(not(any(target_os = "linux", target_os = "macos")))]
+#[cfg(not(any(target_os = "linux", target_os = "macos", windows)))]
 #[tokio::test]
 async fn zmodem_controller_unverified_local_backend_is_explicitly_unsupported_without_file_writes()
 -> TestResult {
@@ -1265,4 +1265,73 @@ async fn zmodem_controller_unverified_local_backend_is_explicitly_unsupported_wi
         .await;
     fixture.assert_no_authority_used();
     fixture.finish().await
+}
+
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
+#[tokio::test]
+async fn zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data() -> TestResult {
+    for (first_name, second_name) in [("STRASSE.bin", "straße.bin"), ("σ.bin", "ς.bin")] {
+        let first = Fixture::start().await?;
+        let second = Fixture::start().await?;
+        let (_temporary, directory) = root()?;
+        let first_target = directory.join(first_name);
+        let second_target = directory.join(second_name);
+        let mut one = Controller::new(first.session.clone(), "first Unicode claim");
+        let mut two = Controller::new(second.session.clone(), "second Unicode claim");
+        let (first_id, _, first_review) =
+            prepare_receive(&first, &mut one, "first.bin", 3, &first_target).await?;
+        one.control(
+            &first.session,
+            Control::Confirm {
+                transfer: first_id,
+                review: first_review,
+            },
+        )
+        .await;
+        assert_eq!(one.state(), State::Receiving);
+        let (second_id, _, second_review) =
+            prepare_receive(&second, &mut two, "second.bin", 3, &second_target).await?;
+        let output = two
+            .control(
+                &second.session,
+                Control::Confirm {
+                    transfer: second_id,
+                    review: second_review,
+                },
+            )
+            .await;
+        rejected(&output, Failure::DestinationBusy);
+        assert!(
+            output.writes.is_empty(),
+            "busy aliases must not accept data"
+        );
+        first.assert_no_authority_used();
+        second.assert_no_authority_used();
+        let sftp = second.session.sftp().await?;
+        assert!(matches!(
+            sftp.reserve_directory_sync(&TransferSpec::download("/", &second_target), &|| true)
+                .await,
+            Err(SessionError::MutationBusy)
+        ));
+        one.control(&first.session, Control::Cancel { transfer: first_id })
+            .await;
+        two.control(
+            &second.session,
+            Control::Cancel {
+                transfer: second_id,
+            },
+        )
+        .await;
+        assert!(!first_target.exists() && !second_target.exists());
+        assert_eq!(std::fs::read_dir(&directory)?.count(), 0);
+        first.assert_no_authority_used();
+        // Only the explicit SFTP observer above may open a remote channel.
+        assert_eq!(second.observed.channels.load(Ordering::Acquire), 1);
+        assert_eq!(second.observed.subsystems.load(Ordering::Acquire), 1);
+        assert_eq!(second.observed.commands.load(Ordering::Acquire), 0);
+        sftp.close().await?;
+        first.finish().await?;
+        second.finish().await?;
+    }
+    Ok(())
 }

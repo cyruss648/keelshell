@@ -1,0 +1,131 @@
+[
+  {
+    "query": "IopOpenLinkOrRenameTarget",
+    "url": "https://learn.microsoft.com/api/search?search=IopOpenLinkOrRenameTarget&locale=en-us&%24top=10",
+    "sha256": "ed9147a34d344739320eeb78a35153276ae0a3ab13b0e1fcdeb28b430fdb67b3",
+    "total": 1,
+    "results": [
+      {
+        "title": "FILE_RENAME_INFORMATION (ntifs.h) - Windows drivers",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information",
+        "description": "FILE_RENAME_INFORMATION structure (ntifs.h) Summarize this article for me In this article The FILE_RENAME_INFORMATION structure is used to rename a file. Set to FALSE if the rename... RootDirectory A handle that IopOpenLinkOrRenameTarget uses to open the target directory. If the file is not being moved to a different directory, or if the FileName."
+      }
+    ]
+  },
+  {
+    "query": "\"FILE_RENAME_INFORMATION\" \"ShareAccess\"",
+    "url": "https://learn.microsoft.com/api/search?search=%22FILE_RENAME_INFORMATION%22+%22ShareAccess%22&locale=en-us&%24top=10",
+    "sha256": "9f79dbbfa241b559dc556bcc271ae3bc0edead6616336875265a6aaca3a4ce14",
+    "total": 111,
+    "results": [
+      {
+        "title": "[MS-FSA]: FileRenameInformation",
+        "url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fsa/87f86c9b-6c2a-4803-84b7-131a74a434fa",
+        "description": "2.1.5.15.12 FileRenameInformation Summarize this article for me In this article InputBuffer is of type FILE_RENAME_INFORMATION_TYPE_1, as described in [MS-FSCC] section 2.4.42.1, for 32-bit local clients; or of type FILE_RENAME_INFORMATION_TYPE_2, as described in [MS-FSCC] section 2.4.42.2, for remote clients or 64-bit local clients. ShareAccess."
+      },
+      {
+        "title": "FILE_RENAME_INFORMATION (ntifs.h) - Windows drivers",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information",
+        "description": "FILE_RENAME_INFORMATION structure (ntifs.h) Summarize this article for me In this article The FILE_RENAME_INFORMATION structure is used to rename a file. Syntax Members DUMMYUNIONNAME DUMMYUNIONNAME.ReplaceIfExists Set to TRUE to specify that if a file with the given name already exists, it should be replaced with the given file. Remarks The."
+      },
+      {
+        "title": "[MS-FSCC]: FileRenameInformation",
+        "url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/1d2673a8-8fb9-4868-920a-775ccaa30cf8",
+        "description": "2.4.42 FileRenameInformation Summarize this article for me In this article This information class is used to rename a file. The data element provided by the client takes one of two forms, depending on whether it is embedded within SMB or SMB2. The structure definitions are as follows: FILE_RENAME_INFORMATION_TYPE_1 for the SMB protocol (section."
+      },
+      {
+        "title": "[MS-RDPEFS]: RDP_FILE_RENAME_INFORMATION",
+        "url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpefs/ae902739-950b-4549-8a11-ce0f487b3c14",
+        "description": "2.2.3.3.9.1 RDP_FILE_RENAME_INFORMATION Summarize this article for me In this article RDP_FILE_RENAME_INFORMATION is a structure representing FileRenameInformation as a possible value of the FsInformationClass field. All fields have the same meaning as in FILE_RENAME_INFORMATION in [MS-FSCC] section 2.4.41. FileName (var...."
+      },
+      {
+        "title": "SetFileInformationByHandle FileRenameInfo returns WinError 87 for same-parent rename - Microsoft Q&A",
+        "url": "https://learn.microsoft.com/en-us/answers/questions/6055920/setfileinformationbyhandle-filerenameinfo-returns",
+        "description": "I'm investigating a Windows Win32 file-rename operation using Python 3.13 ctypes. with (class 3) returns 0, with immediate cached Windows error 87 ( ). ... Captured arguments: : 576, opened with File sharing: : 3 : 544, an open handle to the destination's parent directory Directory requested access: ( ) Directory sharing: : FALSE : 180 bytes (90."
+      },
+      {
+        "title": "NtSetInformationFile function (ntifs.h) - Windows drivers",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/nf-ntifs-ntsetinformationfile",
+        "description": "NtSetInformationFile function (ntifs.h) Summarize this article for me In this article The NtSetInformationFile routine changes various kinds of information about a file object. Syntax Parameters [in] FileHandle Handle to the file object... The caller must have opened the file with the FILE_WRITE_ATTRIBUTES flag set in the DesiredAccess parameter.."
+      },
+      {
+        "title": "FltSetInformationFile function (fltkernel.h) - Windows drivers",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/fltkernel/nf-fltkernel-fltsetinformationfile",
+        "description": "FltSetInformationFile function (fltkernel.h) Summarize this article for me In this article FltSetInformationFile sets information for a given file. Syntax Parameters [in] Instance Opaque instance pointer for the caller. FilePositionInformation Set FILE_POSITION_INFORMATION for the file. FileRenameInformation Set FILE_RENAME_INFORMATION for the."
+      },
+      {
+        "title": "NtCreateFile function (winternl.h) - Win32 apps",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntcreatefile",
+        "description": "An application that uses the FILE_OPEN_REQUIRING_OPLOCK flag must request an oplock on the file ... Note\u00a0\u00a0The FILE_OPEN_REQUIRING_OPLOCK flag is available in Windows\u00a07, Windows Server\u00a02008\u00a0R2 and later operating systems for the following file systems: NTFS,. To use it, you must complete the following steps: Issue a create request with."
+      },
+      {
+        "title": "FLT_PARAMETERS for IRP_MJ_SET_INFORMATION Union - Windows drivers",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ifs/flt-parameters-for-irp-mj-set-information",
+        "description": "FLT_PARAMETERS for IRP_MJ_SET_INFORMATION union Summarize this article for me In this article Union component used when the MajorFunction field of the FLT_IO_PARAMETER_BLOCK structure for the operation is IRP_MJ_SET_INFORMATION. Syntax Members SetFileInformation: Structure containing the ... FilePositionInformation Set FILE_POSITION_INFORMATION."
+      },
+      {
+        "title": "FILE_INFORMATION_CLASS (wdm.h) - Windows drivers",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ne-wdm-_file_information_class",
+        "description": "FILE_INFORMATION_CLASS enumeration (wdm.h) Summarize this article for me In this article A FILE_INFORMATION_CLASS value specifies which structure to use to query or set information for a file object. Syntax Constants FileDirectoryInformationValue: 1A FILE_DIRECTORY_INFORMATION structure. FileFullDirectoryInformationValue: 2A."
+      }
+    ]
+  },
+  {
+    "query": "\"OpenTargetDirectory\" \"share\"",
+    "url": "https://learn.microsoft.com/api/search?search=%22OpenTargetDirectory%22+%22share%22&locale=en-us&%24top=10",
+    "sha256": "272a0a39bf73f80882a567b9948112d676283842f918cd7c12d0ef39ce57d7cf",
+    "total": 558220,
+    "results": [
+      {
+        "title": "Microsoft 365 admin center help",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/admin/",
+        "description": "Microsoft 365 admin center help Explore resources for working in the Microsoft 365 admin center. Email and calendars Manage email settings, distribution groups, and security settings, and set up shared mailboxes. Subscriptions and billing Manage bills, subscriptions, and product licenses, update payment methods... Work with customers Share."
+      },
+      {
+        "title": "Share and manage agents built in Agent Builder",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-builder-share-manage-agents",
+        "description": "So, if the user doesn. You can select which SharePoint folders and files to share. Sharing only works when the owner of the agent already has permissions to share or to update the sharing permissions. File sensitivity labels applied to files in SharePoint or OneDrive are respected. If the sharing on a file or folder fails, the agent is still."
+      },
+      {
+        "title": "About shared mailboxes in Microsoft 365 - Microsoft 365 admin",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/admin/email/about-shared-mailboxes",
+        "description": "About shared mailboxes in Microsoft 365 Summarize this article for me In this article This article explains what shared mailboxes are, when to use them, licensing considerations, limitations, and common troubleshooting scenarios. Use shared mailboxes when multiple people need access to the same mailbox, such as for: Company information addresses.."
+      },
+      {
+        "title": "Migrate to Microsoft 365 Cross-Tenant Access Policy for sharing Free/Busy, Calendars, and MailTips",
+        "url": "https://learn.microsoft.com/en-us/exchange/sharing/migrate-to-m365-xtap",
+        "description": "Migrate to Microsoft 365 Cross-Tenant Access Policy for sharing Free/Busy, Calendars, and MailTips Summarize this article for me In this article Overview Microsoft 365 Cross-Tenant Access Policy is the new Microsoft standard for collaboration between Microsoft 365 tenants and replaces Organization Relationship and Sharing Policies for sharing."
+      },
+      {
+        "title": "Share agents with other users - Microsoft Copilot Studio",
+        "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/admin-share-bots",
+        "description": "Learn more about enabling this security role in your single or group environment. Share an agent's evaluations Use the Agent Viewer role in Copilot Studio to give evaluators access to an agent's evaluations without letting them change the agent. What is the agent viewer role. The agent viewer role is a sharing role that grants access to... Suggest."
+      },
+      {
+        "title": "Shared responsibility in the cloud - Microsoft Azure",
+        "url": "https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility",
+        "description": "Shared responsibility in the cloud Summarize this article for me In this article As you consider and evaluate public cloud services, it's critical to understand the shared responsibility model and which security tasks the cloud provider handles and which tasks you handle. Workload responsibilities vary depending on whether the workload is hosted."
+      },
+      {
+        "title": "Share a cloud flow - Power Automate",
+        "url": "https://learn.microsoft.com/en-us/power-automate/create-team-flows",
+        "description": "Tip The Power Platform admin center analytics and the Power Platform Center of Excellence Starter Kit dashboards can show trends, like how many flows each user runs, or how many flows each environment has. Use these to detect if ... Related information Training: Share a cloud flow with Power Automate (module) Training: Share and collaborate with."
+      },
+      {
+        "title": "Can't access shared folders from File Explorer - Windows Client",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/networking/cannot-access-shared-folder-file-explorer",
+        "description": "Can't access shared folders from File Explorer in Windows 10 Summarize this article for me In this article Applies to: \u00a0 Windows 10 General troubleshooting Instead of File Explorer, access the shared folder by Command Prompt using the below command: Note For more information, see Net use. You may receive these error messages: You do not have."
+      },
+      {
+        "title": "Create a shared mailbox - Microsoft 365 admin",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/admin/email/create-a-shared-mailbox",
+        "description": "Create a shared mailbox Summarize this article for me In this article Note If your organization uses a hybrid Exchange environment, you should use the on-premises Exchange admin center to create and manage shared mailboxes. Create shared mailboxes so a group of people can monitor and send email from a common email addresses, like info@contoso.com.."
+      },
+      {
+        "title": "Messages sent from a shared mailbox aren't saved to the Sent Items folder - Exchange",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/exchange/user-and-shared-mailboxes/sent-mail-is-not-saved",
+        "description": "Messages sent from a shared mailbox aren't saved to the Sent Items folder Summarize this article for me In this article Symptoms Assume that you're using Microsoft Outlook 2016 or a later version, and you've been delegated permission to send email messages as another user or on behalf of another user from a shared mailbox. However, when you send a."
+      }
+    ]
+  }
+]

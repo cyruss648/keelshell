@@ -1,0 +1,54 @@
+{
+  "recorded_at": "2026-11-15T12:07:16.231693+00:00",
+  "kind": "static-text-and-official-binding-symbol-check-only",
+  "host_os": "Darwin",
+  "prior_probe": "First symbol lookup used src/ instead of src/Windows/ and exited 1 with FileNotFoundError; corrected here, no production change was needed.",
+  "compiler_or_rustfmt_invoked": false,
+  "test_processes_run": 0,
+  "results": [
+    {
+      "file": "crates/keelshell-platform/src/windows/security.rs",
+      "import_symbols_checked": 52,
+      "missing_symbols": [],
+      "forbidden_production_patterns": [],
+      "sha256": "0424b14fdc10dc95f7f0ef933c369f6203197a17d4bf3b3c441bef596404dac3",
+      "named_tests": []
+    },
+    {
+      "file": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "import_symbols_checked": 20,
+      "missing_symbols": [],
+      "forbidden_production_patterns": [],
+      "sha256": "6f56a712f76321ff59f2fa65d360629abaf64aca2f65fef2741d187892c9d4e2",
+      "named_tests": [
+        "private_file_is_verified_before_the_first_content_write",
+        "private_directory_is_protected_with_object_and_container_inheritance",
+        "creation_descriptor_retains_sid_and_acl_ownership_across_moves",
+        "private_creation_does_not_inherit_a_broad_parent_dacl",
+        "verify_private_rejects_an_additional_everyone_allow_entry",
+        "verify_private_rejects_a_single_everyone_allow_entry",
+        "verify_private_rejects_a_null_dacl",
+        "verify_private_rejects_an_empty_dacl",
+        "verify_private_rejects_an_unprotected_dacl",
+        "verify_private_rejects_insufficient_owner_rights",
+        "verify_private_rejects_a_real_deny_ace",
+        "verify_private_rejects_a_directory_without_inheritance_flags",
+        "observation_is_stable_across_requeries_and_duplicated_handles",
+        "security_queries_require_read_control_on_the_actual_handle",
+        "observation_detects_real_dacl_rights_changes",
+        "observation_detects_real_dacl_protection_changes",
+        "observation_remains_bound_to_the_handle_after_path_replacement",
+        "private_snapshot_rejects_an_owner_mismatch",
+        "private_snapshot_rejects_unknown_ace_types",
+        "private_snapshot_rejects_inherited_and_inherit_only_flags",
+        "private_snapshot_rejects_a_truncated_or_extended_allow_entry",
+        "observation_encoding_detects_owner_and_group_sid_changes",
+        "observation_encoding_distinguishes_absent_null_and_empty_dacls",
+        "bounded_sid_parser_rejects_truncation_revision_and_subauthority_overflow",
+        "observation_encoding_rejects_excessive_entry_bytes",
+        "observation_excludes_sacl_and_pointer_representation_control_bits",
+        "observation_excludes_acl_free_space"
+      ]
+    }
+  ]
+}

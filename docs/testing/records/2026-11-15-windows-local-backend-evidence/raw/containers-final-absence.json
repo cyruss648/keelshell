@@ -1,0 +1,36 @@
+{
+  "containers": [
+    {
+      "receipt": "linux-final-r1/receipt.json",
+      "id": "aaad3e36783af65df3d32bca40cf1a59aa71595345731e6409d55dfbb7ab8c0d",
+      "exists_exit": 1,
+      "absent": true
+    },
+    {
+      "receipt": "linux-final-r2/receipt.json",
+      "id": "38a13b7ad2e2b9dc2c3b60a74b93d1b00d224b0f9ab6d29093d575585d8a077d",
+      "exists_exit": 1,
+      "absent": true
+    },
+    {
+      "receipt": "linux-local/native-r2/receipt.json",
+      "id": "b44ac0d71bcc0ea3654f19700ba480a72451e414126320e79761e2cea5feeaa3",
+      "exists_exit": 1,
+      "absent": true
+    },
+    {
+      "receipt": "linux-local/native-r3/receipt.json",
+      "id": "090ccd648c0976c8e04611bbf5e7ba547bb9dc36a1bded5b137ed73f5c5abedb",
+      "exists_exit": 1,
+      "absent": true
+    },
+    {
+      "receipt": "linux-local/preflight-r1/receipt.json",
+      "id": "4d409ad05808b6e8443ede4e73a2d4a42c6f2123203fe8eb0e5360be393c3204",
+      "exists_exit": 1,
+      "absent": true
+    }
+  ],
+  "all_absent": true,
+  "no_container_removed_by_this_readback": true
+}

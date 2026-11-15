@@ -1,0 +1,6 @@
+{
+  "container_removed": true,
+  "owned_processes_stopped": false,
+  "process_cleanup_error": "PermissionError: reviewer finish signal denied",
+  "container_filesystem_and_target_removed": true
+}

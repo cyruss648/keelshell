@@ -1,0 +1,96 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+GetTokenInformation function (securitybaseapi.h)
+Feedback
+Summarize this article for me
+In this article
+The GetTokenInformation function retrieves a specified type of information about an access token. The calling process must have appropriate access rights to obtain the information.
+To determine if a user is a member of a specific group, use the
+CheckTokenMembership function. To determine group membership for app container tokens, use the CheckTokenMembershipEx function.
+Syntax
+BOOL GetTokenInformation(
+[in]            HANDLE                  TokenHandle,
+[in]            TOKEN_INFORMATION_CLASS TokenInformationClass,
+[out, optional] LPVOID                  TokenInformation,
+[in]            DWORD                   TokenInformationLength,
+[out]           PDWORD                  ReturnLength
+);
+Parameters
+[in] TokenHandle
+A handle to an access token from which information is retrieved. If TokenInformationClass specifies TokenSource, the handle must have TOKEN_QUERY_SOURCE access. For all other TokenInformationClass values, the handle must have TOKEN_QUERY access.
+[in] TokenInformationClass
+Specifies a value from the
+TOKEN_INFORMATION_CLASS enumerated type to identify the type of information the function retrieves. Any callers who check the TokenIsAppContainer and have it return 0 should also verify that the caller token is not an identify level impersonation token. If the current token is not an app container but is an identity level token, you should return AccessDenied.
+[out, optional] TokenInformation
+A pointer to a buffer the function fills with the requested information. The structure put into this buffer depends upon the type of information specified by the TokenInformationClass parameter.
+[in] TokenInformationLength
+Specifies the size, in bytes, of the buffer pointed to by the TokenInformation parameter. If TokenInformation is NULL, this parameter must be zero.
+[out] ReturnLength
+A pointer to a variable that receives the number of bytes needed for the buffer pointed to by the TokenInformation parameter. If this value is larger than the value specified in the TokenInformationLength parameter, the function fails and stores no data in the buffer.
+If the value of the TokenInformationClass parameter is TokenDefaultDacl and the token has no default DACL, the function sets the variable pointed to by ReturnLength to sizeof(TOKEN_DEFAULT_DACL) and sets the DefaultDacl member of the TOKEN_DEFAULT_DACL structure to NULL.
+Return value
+If the function succeeds, the return value is nonzero.
+If the function fails, the return value is zero. To get extended error information, call
+GetLastError.
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps | UWP apps]
+Minimum supported server
+Windows Server 2003 [desktop apps | UWP apps]
+Target Platform
+Windows
+Header
+securitybaseapi.h (include Windows.h)
+Library
+Advapi32.lib
+DLL
+Advapi32.dll
+See also
+Access Control Overview
+AdjustTokenGroups
+AdjustTokenPrivileges
+Basic Access Control Functions
+CheckTokenMembership
+OpenProcessToken
+OpenThreadToken
+SECURITY_IMPERSONATION_LEVEL
+SetTokenInformation
+TOKEN_DEFAULT_DACL
+TOKEN_GROUPS
+TOKEN_GROUPS_AND_PRIVILEGES
+TOKEN_INFORMATION_CLASS
+TOKEN_OWNER
+TOKEN_PRIMARY_GROUP
+TOKEN_PRIVILEGES
+TOKEN_SOURCE
+TOKEN_STATISTICS
+TOKEN_TYPE
+TOKEN_USER
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2021-10-13

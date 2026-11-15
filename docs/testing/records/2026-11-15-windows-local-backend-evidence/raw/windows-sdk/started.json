@@ -1,0 +1,6 @@
+{
+  "started_utc": "2026-11-15T12:29:48Z",
+  "write_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk",
+  "deadline_seconds": 600,
+  "scope": "portable MSVC C SDK only; no Cargo/rustc/shared target/config changes"
+}

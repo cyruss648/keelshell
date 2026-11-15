@@ -1,0 +1,27 @@
+{
+  "command": [
+    "python3",
+    "work/windows-local-backend-20261115/with_windows_sdk.py",
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-platform",
+    "--target",
+    "x86_64-pc-windows-msvc",
+    "--locked",
+    "--offline",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "windows-platform-link-r1",
+  "pid": 38281,
+  "started_utc": "2026-11-15T12:53:56.910779+00:00",
+  "finished_utc": "2026-11-15T12:53:58.856211+00:00",
+  "seconds": 1.945,
+  "exit": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log_sha256": "352441a64d8bb63e4da353c567726e7df97ec9f7bee0077113af0c55c13075a1",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

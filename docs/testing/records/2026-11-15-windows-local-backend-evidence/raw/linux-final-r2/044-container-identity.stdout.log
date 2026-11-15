@@ -1,0 +1,1 @@
+{"Id":"38a13b7ad2e2b9dc2c3b60a74b93d1b00d224b0f9ab6d29093d575585d8a077d","Name":"keelshell-linux-local-65231814245d","Labels":{"io.keelshell.fixture":"linux-local-backend","io.keelshell.owner":"65231814245d4a98ab4e98e796cdc0a2","org.opencontainers.image.source":"https://github.com/rust-lang/docker-rust"}}

@@ -1,0 +1,39 @@
+{
+  "observed_at_utc": "2026-11-15T13:20:46.511867+00:00",
+  "status": "PROVISIONAL_FIX_REVIEW_AWAIT_NEW_FREEZE",
+  "files": [
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "sha256": "fbe10992675decfa201f8a213d4b845a8b26b94eaa9bb42781d75dd1d4b8da0e",
+      "bytes": 16307
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker.rs",
+      "sha256": "f14a37d022d7070f499f513120774c540fbcfce35ae358d91d8eb259a418951b",
+      "bytes": 2012
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/mutation_worker/tests.rs",
+      "sha256": "5c371a55a43ce9a0161f57d0c81b7cc1bce971a49dca18c92694b0125ed50cec",
+      "bytes": 5455
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "sha256": "b2598247a7ae0ef2c4e987c2c96ad913dc0114e622555daf5c1cc8f57b1a0414",
+      "bytes": 37037
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "sha256": "806877aaa91ea6aae15ee3537380c9c938d2337772f73a37a1804b33bf0c6c14",
+      "bytes": 28118
+    },
+    {
+      "path": "crates/keelshell-app/src/files/archive_tests.rs",
+      "sha256": "2c8329d0e58d05b2179c2dd3b7053507aa090cea1b27f8645025741255667bce",
+      "bytes": 20046
+    }
+  ],
+  "native": "NOT_RUN",
+  "reviewer_rust_commands": 0,
+  "target_access": false
+}

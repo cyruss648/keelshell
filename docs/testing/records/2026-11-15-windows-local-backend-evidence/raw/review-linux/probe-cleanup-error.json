@@ -1,0 +1,5 @@
+{
+  "raised": "PermissionError: Synthetic cleanup signal denied",
+  "receipt_exists": false,
+  "cleanup_receipt_exists": false
+}

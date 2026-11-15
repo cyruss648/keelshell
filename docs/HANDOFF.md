@@ -1,5 +1,53 @@
 # KeelShell 当前交接 — 2026-11-15
 
+## 当前批次：Windows 文件后端与 Linux 专项，工程门禁通过
+
+基线为本地 `a092dd5712c0a92ee4af18970fb0500fb230b760`，当前
+`AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / WINDOWS_NATIVE_NOT_RUN`。
+仍只本地提交，不 push。唯一父 target 为
+`work/recovery-batch-integration-20261115/target`，源码归属没有切换。
+正式提交、原件导出及清理收口从
+[本批记录](testing/records/2026-11-15-windows-local-backend.md)和
+[证据入口](testing/records/2026-11-15-windows-local-backend-evidence/README.md)接续。
+
+1301 份原件已无损导出；全部 602 项工程输入及原件经 Git index/blob 读回一致。
+三个 reviewer 均已关闭，六个自有容器再次按完整 ID 确认 absent；
+批次目录、SDK/registry payload、稳定测试副本等 `2,609,954,825` 字节临时
+内容已回收。唯一有效 target、其他任务资源及原始失败保持。清理见
+[最终回执](testing/records/2026-11-15-windows-local-backend-evidence/cleanup-final.json)。
+
+Windows 平台安全接口、Zmodem 来源/保存、归档来源/私有树发布、UI capability
+及条件测试已接入。`keelshell-platform` 仅在 Windows 模块允许有说明的 ABI；
+旧 crate 继续 forbid unsafe。实现及限制见
+[ADR 0138](adr/0138-windows-handle-local-files.md)。最终 r2 为 `588 + 14`
+工程输入，SHA-256
+`1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9`。
+完整门禁 `full-gate-r2` 实际 `exit 0 / 632.963s / reaped`：
+普通 Rust `2958/0/35 ignored`、rustdoc `14/0`、Python `187 run / 1 skipped`，
+格式、严格 all-target Clippy、x.y 策略和三组 AI controller 全通过。
+全部 23 项新增默认 Rust 逐名通过，工程摘要与完整路径集合零漂移。
+
+Windows platform+session strict cross Clippy r3、四个测试 target 的 AMD64
+PE32+ 链接通过，143 个选定新描述符字节匹配；不是 Windows --list 或运行。
+正常 macOS GUI/MCP 构建通过，不签新窗口验收。Windows native 实际运行 0。
+平台 r3 SOURCE_CONTRACT APPROVE、Linux runner r2 及最终运行证据 r3 APPROVE，
+各范围零开放 P0–P3。session r2 最终差分也 APPROVE：两项 P2 已关闭，
+三个范围共关闭六项 P2。Unicode reservation 与归档 worker 结果交接均有真实
+红/绿回归；六项预构建专项由非作者独立执行通过，保留非独立重编译限制。
+原 gate r1 因新发现实际停止/reap，exit -15；原 HOLD/notice/失败全部保留。
+
+最终 Linux 是验证专用快照 `f945c4c780010067aee664bf7ccbf6caace4eea5` 的
+588 文件 Git 归档，使用 Rust/Cargo 1.98.1、原生 arm64、UID 1000、
+network none、独立离线 target/Cargo home：`252/0/0 / 59.797s`。
+六个 ELF/逐名库存、实际结果及容器/进程回收已独立核验。
+共享 worker 3 项只在 Linux 库存中，不计入其选集；由宿主门禁另行通过。
+旧基线 251、旧 r1 的 252 和漂移 notice 不改签当前输入。
+
+本机 Rust/Cargo 1.100.0、默认 stable，无项目 toolchain pin；两轮在线全量
+最新依赖检查均超时，不能签全部最新。SDK 的清单摘要/签名限制保留。
+后续优先真实 Windows 文件系统与原生流程、三平台完整桌面/IME/辅助技术、
+direct PTY strict peer `HOLD/PARTIAL` 和发行。完整产品与 FILE-05/M4 仍 active。
+
 ## 2026-11-15 有界 Zmodem 收尾：集中门禁与非作者复核通过
 
 本批基线为本地 `b66ec7e564e97c3cc8261b447288377ac1ffccc2`，当前状态为

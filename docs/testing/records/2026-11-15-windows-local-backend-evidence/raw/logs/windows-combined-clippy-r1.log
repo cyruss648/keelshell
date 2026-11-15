@@ -1,0 +1,120 @@
+    Checking cfg-if v1.0.5
+    Checking windows-link v0.2.1
+    Checking fastrand v2.5.0
+    Checking getrandom v0.4.3
+    Checking crc32fast v1.5.5
+    Checking windows-sys v0.61.2
+    Checking crypto-common v0.2.2
+    Checking crypto-bigint v0.7.11
+    Checking windows-strings v0.5.1
+    Checking windows-result v0.4.1
+    Checking windows-core v0.62.2
+    Checking digest v0.11.3
+    Checking cipher v0.5.2
+    Checking universal-hash v0.6.1
+    Checking hmac v0.13.0
+    Checking sha2 v0.11.1
+    Checking aead v0.6.1
+    Checking polyval v0.7.3
+    Checking ghash v0.6.0
+    Checking pbkdf2 v0.13.0
+    Checking aes v0.9.4
+    Checking ctr v0.10.1
+    Checking salsa20 v0.11.0
+    Checking aes-gcm v0.11.1
+    Checking scrypt v0.12.0
+    Checking cbc v0.2.1
+    Checking signature v3.0.0
+    Checking pkcs5 v0.8.1
+    Checking hkdf v0.13.0
+    Checking chacha20 v0.10.2
+    Checking primefield v0.14.0
+    Checking pkcs8 v0.11.0
+    Checking rfc6979 v0.6.0
+    Checking wnaf v0.14.1
+    Checking elliptic-curve v0.14.3
+    Checking poly1305 v0.9.1
+    Checking phc v0.6.1
+    Checking rand v0.10.3
+    Checking password-hash v0.6.1
+    Checking ssh-encoding v0.3.0
+    Checking primeorder v0.14.0
+    Checking ecdsa v0.17.0
+    Checking blake2 v0.11.0
+    Checking mio v1.2.5
+    Checking socket2 v0.6.5
+    Checking windows-threading v0.2.1
+    Checking keccak v0.2.2
+    Checking windows-future v0.3.2
+    Checking argon2 v0.6.0
+    Checking tokio v1.54.1
+    Checking ed25519 v3.0.0
+    Checking crypto-primes v0.7.2
+    Checking blowfish v0.10.0
+    Checking curve25519-dalek v5.0.0
+    Checking windows-collections v0.3.2
+    Checking windows-numerics v0.3.1
+    Checking flate2 v1.1.11
+    Checking ed25519-dalek v3.0.0
+    Checking windows v0.62.2
+    Checking bcrypt-pbkdf v0.11.0
+    Checking shake v0.1.0
+    Checking sha3 v0.12.0
+    Checking p521 v0.14.0
+    Checking rsa v0.10.0-rc.18
+    Checking p384 v0.14.0
+    Checking p256 v0.14.0
+    Checking tempfile v3.27.0
+    Checking dirs-sys v0.5.0
+    Checking ssh-cipher v0.3.0
+    Checking sha1 v0.11.0
+    Checking kem v0.3.0
+    Checking parking_lot_core v0.9.12
+    Checking filetime v0.2.29
+    Checking tar v0.4.46
+    Checking dashmap v6.2.1
+    Checking ml-kem v0.3.4
+    Checking directories v6.0.0
+    Checking tokio-util v0.7.20
+    Checking russh-util v0.52.0
+    Checking zip v9.5.1
+    Checking russh-cryptovec v0.62.0
+    Checking num-bigint v0.5.1
+    Checking ssh-key v0.7.0-rc.11
+    Checking chacha20poly1305 v0.11.0
+    Checking pageant v0.2.5
+    Checking uuid v1.29.2
+    Checking chrono v0.4.45
+    Checking keelshell-platform v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-platform)
+    Checking russh v0.65.1
+    Checking keelshell-core v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core)
+    Checking russh-sftp v3.0.1
+    Checking keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+error[E0433]: cannot find type `AtomicBool` in this scope
+   --> crates/keelshell-session/src/sftp/archive_transfer/remote.rs:222:19
+    |
+222 |     let created = AtomicBool::new(false);
+    |                   ^^^^^^^^^^ use of undeclared type `AtomicBool`
+    |
+    = note: type alias `crate::sftp::mutation::mirror::AtomicBool` exists but is inaccessible
+help: consider importing this type alias
+    |
+  2 + use std::sync::atomic::AtomicBool;
+    |
+
+error[E0433]: cannot find type `AtomicBool` in this scope
+   --> crates/keelshell-session/src/sftp/archive_transfer/remote.rs:222:19
+    |
+222 |     let created = AtomicBool::new(false);
+    |                   ^^^^^^^^^^ use of undeclared type `AtomicBool`
+    |
+    = note: type alias `crate::zmodem::tests::AtomicBool` exists but is inaccessible
+help: consider importing this type alias
+    |
+  2 + use std::sync::atomic::AtomicBool;
+    |
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `keelshell-session` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `keelshell-session` (lib test) due to 1 previous error

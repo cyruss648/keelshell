@@ -1,0 +1,93 @@
+{
+  "steps": [
+    {
+      "name": "exact-git-tree",
+      "argv": [
+        "git",
+        "ls-tree",
+        "-r",
+        "-z",
+        "a092dd5712c0a92ee4af18970fb0500fb230b760",
+        "--",
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates"
+      ],
+      "pid": 63229,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.116,
+      "stdout_log": "001-exact-git-tree.stdout.log",
+      "stderr_log": "001-exact-git-tree.stderr.log"
+    },
+    {
+      "name": "archive-commit-id",
+      "argv": [
+        "git",
+        "get-tar-commit-id"
+      ],
+      "pid": 63234,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.107,
+      "stdout_log": "002-archive-commit-id.stdout.log",
+      "stderr_log": "002-archive-commit-id.stderr.log"
+    },
+    {
+      "name": "owned-absent-preflight-r1",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "4d409ad05808b6e8443ede4e73a2d4a42c6f2123203fe8eb0e5360be393c3204"
+      ],
+      "pid": 63239,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.175,
+      "stdout_log": "003-owned-absent-preflight-r1.stdout.log",
+      "stderr_log": "003-owned-absent-preflight-r1.stderr.log"
+    },
+    {
+      "name": "owned-absent-native-r1",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "df0bc70daf2d5d8033b16ad4cd0eb571587d3c7dd67f28f7c93ba2555c5fbe66"
+      ],
+      "pid": 63246,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.108,
+      "stdout_log": "004-owned-absent-native-r1.stdout.log",
+      "stderr_log": "004-owned-absent-native-r1.stderr.log"
+    },
+    {
+      "name": "owned-absent-native-r2",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "b44ac0d71bcc0ea3654f19700ba480a72451e414126320e79761e2cea5feeaa3"
+      ],
+      "pid": 63251,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.109,
+      "stdout_log": "005-owned-absent-native-r2.stdout.log",
+      "stderr_log": "005-owned-absent-native-r2.stderr.log"
+    }
+  ],
+  "scope": "owned Linux-local resources and immutable source binding"
+}

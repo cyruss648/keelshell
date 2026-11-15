@@ -1,0 +1,10 @@
+{
+  "name": "windows-sys-latest",
+  "url": "https://docs.rs/crate/windows-sys/latest",
+  "retrieved_at": "2026-11-15T11:53:00.543721+00:00",
+  "status": 200,
+  "final_url": "https://docs.rs/crate/windows-sys/latest",
+  "bytes": 38113,
+  "sha256": "8a312e6e41af5d98372d4060100e012afbbddaafd55ea815b8779664932c1c98",
+  "title": "windows-sys 0.61.2 - Docs.rs"
+}

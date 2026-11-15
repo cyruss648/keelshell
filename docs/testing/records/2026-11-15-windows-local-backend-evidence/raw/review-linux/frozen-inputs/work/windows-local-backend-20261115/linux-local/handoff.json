@@ -1,0 +1,93 @@
+{
+  "status": "AUTHOR_LINUX_LOCAL_PASS / PARENT_INTEGRATION_REVIEW_PENDING",
+  "revision": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "native_run": "native-r3",
+  "rust_tests": {
+    "passed": 251,
+    "failed": 0,
+    "ignored": 0
+  },
+  "python_tests": {
+    "passed": 32,
+    "failed": 0,
+    "skipped": 0,
+    "run": "python-r2"
+  },
+  "native_elapsed_seconds": 55.609,
+  "source": {
+    "file_count": 573,
+    "manifest_sha256": "3263de3f6412d10570cf68dcb281ee5301110d902db4e8ff95ba8eb95e8522fe",
+    "revision": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+    "archive_sha256": "1588c0927d10cecf45839b30639ac14a54d5dc6e8f26aee82e97d99128236a3c"
+  },
+  "compressed_source": "source-a092dd5712c0a92ee4af18970fb0500fb230b760.tar.gz",
+  "compressed_source_sha256": "df4dcc055cfc4f86eff7dbbfb921f62b897fc43670eb71bf15e6c1dade2c5957",
+  "toolchain": {
+    "rustc": "1.98.1",
+    "host": "aarch64-unknown-linux-gnu",
+    "kernel_arch": "aarch64",
+    "vm_arch": "arm64"
+  },
+  "image": "docker.io/library/rust:1.98.1-slim-bookworm",
+  "image_id": "17156b215e21a0b10b1d7576ee47b656ef76bb4f59575f396adcf59320dc6d8a",
+  "host_inputs": {
+    "scripts/run_linux_local_backend.py": "b23088c77569e0ab9b745597bf30de2a706f2040c0df70e1ce7340d4cf61a299",
+    "scripts/test_linux_local_backend.py": "71fe6599b031e426b3a7eed410a1b079fd2c3d8d2608c9c717946b0eb6932d08",
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+  },
+  "binaries": [
+    {
+      "path": "native-r3/keelshell-core-archive-binary.json",
+      "sha256": "84201a646425727c7943561743c784ab21ac1761a66e6c2cd93403580756970a",
+      "inventory_count": 40
+    },
+    {
+      "path": "native-r3/keelshell-core-archive_pax-binary.json",
+      "sha256": "2dcec8dc6b999ad31071bf2ec8e175b09b2842d769cf15e47280c5db32cc49a0",
+      "inventory_count": 40
+    },
+    {
+      "path": "native-r3/keelshell-core-zmodem-binary.json",
+      "sha256": "0e0e055f825c1c804dfb6e88875866d32f81b7970997652219b624e89589cd5b",
+      "inventory_count": 102
+    },
+    {
+      "path": "native-r3/keelshell-session-archive_transfer-binary.json",
+      "sha256": "0e4c74cc8f45f151867104c193518a66e73a8bc7973ca5a1e6134693cc81be92",
+      "inventory_count": 18
+    },
+    {
+      "path": "native-r3/keelshell-session-keelshell_session-binary.json",
+      "sha256": "53f70e824b9b48841e3f2d78651160d7a06b6da4bf5a313ead4dba90e260f3e9",
+      "inventory_count": 187
+    },
+    {
+      "path": "native-r3/keelshell-session-zmodem-binary.json",
+      "sha256": "9469452608a57c14e2d4f0ab37ccfc19352fa0fbf46e8b7dd67ca2c1a8e4e6af",
+      "inventory_count": 25
+    }
+  ],
+  "source_input_drift": false,
+  "host_input_drift": false,
+  "new_linux_target_per_run": true,
+  "committed": false,
+  "push_attempted": false,
+  "host_cargo_or_fmt_run": false,
+  "mac_target_accessed": false,
+  "write_set": [
+    "scripts/run_linux_local_backend.py",
+    "scripts/test_linux_local_backend.py",
+    "work/windows-local-backend-20261115/linux-local/"
+  ],
+  "cleanup_receipt": "cleanup-evidence-final.json",
+  "reclaimed_bytes": 733409280,
+  "acceptance_exclusions": [
+    "Linux desktop/GPUI",
+    "Linux x64",
+    "Windows",
+    "independent rz/sz peer",
+    "complete ACL/permission matrix",
+    "whole product/release"
+  ]
+}

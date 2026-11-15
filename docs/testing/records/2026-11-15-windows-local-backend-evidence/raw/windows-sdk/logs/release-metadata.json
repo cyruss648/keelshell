@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/curl",
+    "-q",
+    "--fail",
+    "--location",
+    "--connect-timeout",
+    "8",
+    "--max-time",
+    "25",
+    "--proto",
+    "=https",
+    "--output",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/downloads/xwin-release.json",
+    "https://api.github.com/repos/Jake-Shadle/xwin/releases/latest"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "seconds": 0.497,
+  "stdout": "",
+  "stderr": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r 80 15593   80 12470    0     0  25822      0 --:--:-- --:--:-- --:--:-- 25817\r100 15593  100 15593    0     0  32171      0 --:--:-- --:--:-- --:--:-- 32150\n"
+}

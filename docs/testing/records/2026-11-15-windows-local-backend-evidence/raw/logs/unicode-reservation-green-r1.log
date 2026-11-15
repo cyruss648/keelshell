@@ -1,0 +1,32 @@
+   Compiling keelshell-platform v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-platform)
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.96s
+     Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e2d86a6a6d9452c5/out/keelshell_session-e2d86a6a6d9452c5)
+
+running 4 tests
+test completion::tests::literal_validation_preserves_unicode_and_shell_metacharacters ... ok
+test monitor::disk::tests::malformed_duplicate_unicode_controls_and_unsupported_layouts_are_refused ... ok
+test sftp::queue::tests::local_unicode_case_aliases_cover_missing_leaf_and_ancestor_components ... ok
+test sftp::queue::tests::local_unicode_case_aliases_preserve_real_unknown_reservations_after_staging ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 187 filtered out; finished in 0.01s
+
+     Running tests/zmodem.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/61a3d760ee481ac2/out/zmodem-61a3d760ee481ac2)
+
+running 1 test
+
+thread 'zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data' (8078353) panicked at crates/keelshell-session/tests/support/zmodem_fixture.rs:223:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data ... FAILED
+
+failures:
+
+failures:
+    zmodem_controller_unicode_alias_is_busy_before_accepting_any_receive_data
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p keelshell-session --test zmodem`

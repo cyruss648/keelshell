@@ -1,0 +1,23 @@
+{
+  "finished_utc": "2026-11-15T13:14:07.294744+00:00",
+  "evidence_verified_before_deletion": true,
+  "retained_frozen_inputs_verified": 9,
+  "host_source_inventory_and_executed_names_verified": 16,
+  "captured_receipts_verified": [
+    "host-parser-inventory.json",
+    "host-parser-tests.json",
+    "windows-cross-clippy.json"
+  ],
+  "retained_compiler_evidence_files": 18,
+  "removed": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/r3/target",
+      "file_count": 199,
+      "logical_bytes": 30320405,
+      "exists_after": false
+    }
+  ],
+  "all_historical_targets_absent": true,
+  "parent_target_accessed": false,
+  "deletion_scope": "exact non-symlink r3/target direct child after verifying all descendants non-symlink"
+}

@@ -1,0 +1,87 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+GetSecurityDescriptorDacl function (securitybaseapi.h)
+Feedback
+Summarize this article for me
+In this article
+The GetSecurityDescriptorDacl function retrieves a pointer to the discretionary access control list (DACL) in a specified security descriptor.
+Syntax
+BOOL GetSecurityDescriptorDacl(
+[in]  PSECURITY_DESCRIPTOR pSecurityDescriptor,
+[out] LPBOOL               lpbDaclPresent,
+[out] PACL                 *pDacl,
+[out] LPBOOL               lpbDaclDefaulted
+);
+Parameters
+[in] pSecurityDescriptor
+A pointer to the
+SECURITY_DESCRIPTOR structure that contains the DACL. The function retrieves a pointer to it.
+[out] lpbDaclPresent
+A pointer to a value that indicates the presence of a DACL in the specified security descriptor. If lpbDaclPresent is TRUE, the security descriptor contains a DACL, and the remaining output parameters in this function receive valid values. If lpbDaclPresent is FALSE, the security descriptor does not contain a DACL, and the remaining output parameters do not receive valid values.
+A value of TRUE for lpbDaclPresent does not mean that pDacl is not NULL.  That is, lpbDaclPresent can be TRUE while pDacl is NULL, meaning that a NULL DACL is in effect.   A NULL DACL implicitly allows all access to an object and is not the same as an empty DACL. An empty DACL permits no access to an object.  For information about creating a proper DACL, see Creating a DACL.
+[out] pDacl
+A pointer to a pointer to an
+access control list (ACL). If a DACL exists, the function sets the pointer pointed to by pDacl to the address of the security descriptor's DACL. If a DACL does not exist, no value is stored.
+If the function stores a NULL value in the pointer pointed to by pDacl, the security descriptor has a NULL DACL. A NULL DACL implicitly allows all access to an object.
+If an application expects a non-NULL DACL but encounters a NULL DACL, the application should fail securely and not allow access.
+[out] lpbDaclDefaulted
+A pointer to a flag set to the value of the SE_DACL_DEFAULTED flag in the
+SECURITY_DESCRIPTOR_CONTROL structure if a DACL exists for the security descriptor. If this flag is TRUE, the DACL was retrieved by a default mechanism; if FALSE, the DACL was explicitly specified by a user.
+Return value
+If the function succeeds, the function returns nonzero.
+If the function fails, it returns zero. To get extended error information, call
+GetLastError.
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps | UWP apps]
+Minimum supported server
+Windows Server 2003 [desktop apps | UWP apps]
+Target Platform
+Windows
+Header
+securitybaseapi.h (include Windows.h)
+Library
+Advapi32.lib
+DLL
+Advapi32.dll
+See also
+GetSecurityDescriptorControl
+GetSecurityDescriptorGroup
+GetSecurityDescriptorLength
+GetSecurityDescriptorOwner
+GetSecurityDescriptorSacl
+InitializeSecurityDescriptor
+IsValidSecurityDescriptor
+Low-level Access Control
+Low-level Access Control Functions
+SECURITY_DESCRIPTOR
+SECURITY_DESCRIPTOR_CONTROL
+SetSecurityDescriptorDacl
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2021-10-13

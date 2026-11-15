@@ -1,0 +1,2 @@
+CLEANUP_ERROR_OBSERVED {"raised": "PermissionError: Synthetic cleanup signal denied", "receipt_exists": false, "cleanup_receipt_exists": false}
+ALL_IGNORED_OBSERVED {"exit": 0, "status": "PASS", "totals": {"passed": 0, "failed": 0, "ignored": 8}}

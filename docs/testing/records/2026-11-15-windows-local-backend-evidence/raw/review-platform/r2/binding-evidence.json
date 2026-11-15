@@ -1,0 +1,54 @@
+{
+  "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/windows-sys-0.61.2/src/Windows/Win32/Storage/FileSystem/mod.rs",
+  "sha256": "b44686d7dcd877df4e539d2a5152a3ec212757efb111139cb0a108c8bad7624a",
+  "package": "windows-sys 0.61.2",
+  "selected": [
+    {
+      "line": 325,
+      "text": "windows_link::link!(\"kernel32.dll\" \"system\" fn ReOpenFile(horiginalfile : super::super::Foundation:: HANDLE, dwdesiredaccess : u32, dwsharemode : FILE_SHARE_MODE, dwflagsandattributes : FILE_FLAGS_AND_ATTRIBUTES) -> super::super::Foundation:: HANDLE);"
+    },
+    {
+      "line": 1119,
+      "text": "pub const DELETE: FILE_ACCESS_RIGHTS = 65536u32;"
+    },
+    {
+      "line": 1496,
+      "text": "pub const FILE_FLAG_BACKUP_SEMANTICS: FILE_FLAGS_AND_ATTRIBUTES = 33554432u32;"
+    },
+    {
+      "line": 1501,
+      "text": "pub const FILE_FLAG_OPEN_REPARSE_POINT: FILE_FLAGS_AND_ATTRIBUTES = 2097152u32;"
+    },
+    {
+      "line": 1502,
+      "text": "pub const FILE_FLAG_OVERLAPPED: FILE_FLAGS_AND_ATTRIBUTES = 1073741824u32;"
+    },
+    {
+      "line": 1535,
+      "text": "pub const FILE_GENERIC_READ: FILE_ACCESS_RIGHTS = 1179785u32;"
+    },
+    {
+      "line": 1820,
+      "text": "pub const FILE_SHARE_DELETE: FILE_SHARE_MODE = 4u32;"
+    },
+    {
+      "line": 1822,
+      "text": "pub const FILE_SHARE_NONE: FILE_SHARE_MODE = 0u32;"
+    },
+    {
+      "line": 1823,
+      "text": "pub const FILE_SHARE_READ: FILE_SHARE_MODE = 1u32;"
+    },
+    {
+      "line": 1824,
+      "text": "pub const FILE_SHARE_WRITE: FILE_SHARE_MODE = 2u32;"
+    },
+    {
+      "line": 3772,
+      "text": "pub const SYNCHRONIZE: FILE_ACCESS_RIGHTS = 1048576u32;"
+    }
+  ],
+  "abi_conclusion": "system ABI; HANDLE -> three 32-bit parameters -> HANDLE; imported binding not handwritten extern",
+  "raw_flags": "0x02200000 = BACKUP_SEMANTICS | OPEN_REPARSE_POINT; OVERLAPPED absent",
+  "file_generic_read": "1179785 includes SYNCHRONIZE; no WRITE_DATA, APPEND_DATA, DELETE"
+}

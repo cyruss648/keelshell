@@ -1,0 +1,10 @@
+{
+  "name": "getsecuritydescriptordacl",
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsecuritydescriptordacl",
+  "retrieved_at": "2026-11-15T11:53:01.851937+00:00",
+  "status": 200,
+  "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-getsecuritydescriptordacl",
+  "bytes": 55574,
+  "sha256": "2ec965ea24ef95939ac600bf73512f37924c251f963ebb82ca663045828eeec8",
+  "title": "GetSecurityDescriptorDacl function (securitybaseapi.h) - Win32 apps | Microsoft Learn"
+}

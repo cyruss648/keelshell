@@ -1,0 +1,27 @@
+{
+  "command": [
+    "cargo",
+    "clippy",
+    "-p",
+    "keelshell-platform",
+    "--all-targets",
+    "--target",
+    "x86_64-pc-windows-msvc",
+    "--locked",
+    "--offline",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "windows-platform-clippy-r2",
+  "pid": 91589,
+  "started_utc": "2026-11-15T12:25:58.028519+00:00",
+  "finished_utc": "2026-11-15T12:25:58.307734+00:00",
+  "seconds": 0.279,
+  "exit": 0,
+  "timed_out": false,
+  "reaped": true,
+  "log_sha256": "6c0b9072b777ae9ae40ff7f128b802851ffbfe79dc7a1fd020faf5c9f626e2b7",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

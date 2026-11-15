@@ -1,0 +1,121 @@
+{
+  "observed_at_utc": "2026-11-15T13:09:07.563311+00:00",
+  "status": "PROVISIONAL_SOURCE_OBSERVATION / FINAL_FREEZE_PENDING",
+  "head_sha": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "files": [
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer.rs",
+      "sha256": "d53b0f0d41a92bc19743be323c98684007db1cf8d08cb67748b28ab43f3c1b77",
+      "bytes": 16280,
+      "lines": 437
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "sha256": "3d2a16199f53c0e96f26139716fb939a9914f9bb08d9838558bcacb3ff2c21a9",
+      "bytes": 38041,
+      "lines": 1095
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "sha256": "9bc3d82a11dd5b66e6b2e31116d48aa46f5b017f521556c37e0e3dd79b5504ba",
+      "bytes": 28119,
+      "lines": 831
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/archive_transfer/local.rs",
+      "sha256": "e8f8486f26d4b65bcc0550c540a1e689afd6638875d16d052d0bf3da83ee069f",
+      "bytes": 26196,
+      "lines": 735
+    },
+    {
+      "path": "crates/keelshell-session/tests/archive_transfer.rs",
+      "sha256": "07ac4b82b6330ebd29ab46aeee1286c1d008a01b370474bc27d7c99fad19acb6",
+      "bytes": 29733,
+      "lines": 885
+    },
+    {
+      "path": "crates/keelshell-app/src/files/archive.rs",
+      "sha256": "5dde71aaa11d936b80af55045091aa293029ed34efc5285050fc9c187176e9d8",
+      "bytes": 14789,
+      "lines": 368
+    },
+    {
+      "path": "crates/keelshell-app/src/files/archive_tests.rs",
+      "sha256": "48c20ba23b1ee92be0aa8e8d1e7d7e900e5255f1c6757a7828278d82b64550ab",
+      "bytes": 19642,
+      "lines": 545
+    },
+    {
+      "path": "crates/keelshell-platform/src/path.rs",
+      "sha256": "8af2fc8f87eedf3021802bd6d584480a6cdcd813df7497bd60b832cd182801c7",
+      "bytes": 7641,
+      "lines": 234
+    },
+    {
+      "path": "crates/keelshell-platform/src/lib.rs",
+      "sha256": "d1786ed0c2355df19da364d913fae5a2bc6172f7ddc875e4e84091294057db76",
+      "bytes": 813,
+      "lines": 21
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/mod.rs",
+      "sha256": "3aa3141173a87a1a9338aec8471c1026c6d56f11d543bc8e26f60a2c49b1f349",
+      "bytes": 12283,
+      "lines": 343
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/native.rs",
+      "sha256": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+      "bytes": 14872,
+      "lines": 400
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security.rs",
+      "sha256": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "bytes": 25583,
+      "lines": 626
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue.rs",
+      "sha256": "abc0295ecfdce3c5859ca79e0113d3cd28a2dc3279639e814fb11301ed57e6da",
+      "bytes": 28382,
+      "lines": 728
+    },
+    {
+      "path": "crates/keelshell-session/src/sftp/queue/reservations.rs",
+      "sha256": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+      "bytes": 21876,
+      "lines": 607
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local.rs",
+      "sha256": "e6472372a5ab21113457b5534ccd2be8f49451c9f85f82d7c9c823f951c81615",
+      "bytes": 22673,
+      "lines": 670
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local_windows.rs",
+      "sha256": "39cd38b4bb145ed55591e63f4016e479f38b06c5b0d5e8d41ce4d8e574ec2383",
+      "bytes": 18377,
+      "lines": 522
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem.rs",
+      "sha256": "b61d348d414995e328ea6844f38d71408dd3251d2b726babe2fcb824abf15bff",
+      "bytes": 53005,
+      "lines": 1402
+    },
+    {
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "sha256": "1a7c7569cb3d7f6b3cb3de5669aa56acadde01a9ea202e691c59fd429e55277d",
+      "bytes": 45615,
+      "lines": 1337
+    }
+  ],
+  "nested_instructions": [],
+  "parent_reported_ws_zm_01": "three red regressions confirmed failing; two queue green; SSH controller green path failed active_channels 1 vs 0 in fixture.stop; pending investigation, do not waive",
+  "native": "NOT_RUN",
+  "target_accessed": false,
+  "cargo_rustc_format_git_commands": 0,
+  "prior_review_and_notices_preserved": true
+}

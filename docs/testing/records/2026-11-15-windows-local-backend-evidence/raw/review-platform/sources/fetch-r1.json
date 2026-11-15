@@ -1,0 +1,37 @@
+[
+  {
+    "name": "zwcreatefile",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/windows-driver-docs-ddi/staging/wdk-ddi-src/content/wdm/nf-wdm-zwcreatefile.md",
+    "status": 200,
+    "sha256": "6b2b38873c4edaf93af2d5a34a88b606ac70a8dae69ad31092ade2a23584cbbf",
+    "bytes": 26025
+  },
+  {
+    "name": "ntquerydirectoryfile",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/windows-driver-docs-ddi/staging/wdk-ddi-src/content/ntifs/nf-ntifs-ntquerydirectoryfile.md",
+    "status": 200,
+    "sha256": "2523d1b824752c1313bf32dfddad7ed9266a3faf81ed600c9440fb9ee882667d",
+    "bytes": 11260
+  },
+  {
+    "name": "ntsetinformationfile",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/windows-driver-docs-ddi/staging/wdk-ddi-src/content/ntifs/nf-ntifs-ntsetinformationfile.md",
+    "status": 200,
+    "sha256": "c88dd43ed0a3ada81d357494d1dfc4b5a7f3eddcbc8a7ad174c69267ddb78750",
+    "bytes": 11454
+  },
+  {
+    "name": "file-rename-information",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/windows-driver-docs-ddi/staging/wdk-ddi-src/content/ntifs/ns-ntifs-_file_rename_information.md",
+    "status": 200,
+    "sha256": "93e6f6fb30e42537b6f55f9210ee8c8822dda4f1be231d2caabda1809fecf73d",
+    "bytes": 11380
+  },
+  {
+    "name": "ntqueryvolumeinformationfile",
+    "url": "https://raw.githubusercontent.com/MicrosoftDocs/windows-driver-docs-ddi/staging/wdk-ddi-src/content/ntifs/nf-ntifs-ntqueryvolumeinformationfile.md",
+    "status": 200,
+    "sha256": "8ef98794894f322e0480d2e9f98c1bc3259745e00dd181bf444aa7bef34246c2",
+    "bytes": 8397
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "rg",
+    "--files",
+    "--hidden",
+    "--no-ignore",
+    "-g",
+    "xwin",
+    "-g",
+    "windows.h",
+    "-g",
+    "Windows.h",
+    "-g",
+    "vcruntime.h",
+    "-g",
+    "*xwin*.tar*",
+    "-g",
+    "!target/**",
+    "-g",
+    "!.git/**",
+    "/Users/hdh/.cache",
+    "/Users/hdh/Library/Caches",
+    "/Users/hdh/.cargo/bin"
+  ],
+  "exit_code": 1,
+  "timed_out": false,
+  "reaped": true,
+  "seconds": 0.056,
+  "stdout": "",
+  "stderr": ""
+}

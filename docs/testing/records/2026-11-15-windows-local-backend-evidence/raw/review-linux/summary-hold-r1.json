@@ -1,0 +1,53 @@
+{
+  "status": "HOLD",
+  "historical_report": true,
+  "signed_at_asia_shanghai": "2026-11-15T20:30:54.778477+08:00",
+  "baseline": "a092dd5712c0a92ee4af18970fb0500fb230b760",
+  "reviewed_host_inputs": {
+    "scripts/run_linux_local_backend.py": "b23088c77569e0ab9b745597bf30de2a706f2040c0df70e1ce7340d4cf61a299",
+    "scripts/test_linux_local_backend.py": "71fe6599b031e426b3a7eed410a1b079fd2c3d8d2608c9c717946b0eb6932d08",
+    "scripts/run_linux_file_interop.py": "a58176da6d9fb3ae2f902dd5ee7bfcdb4289ae1ee082ab7138b566550312916e",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+  },
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 0
+  },
+  "findings": [
+    {
+      "id": "LINUX-RUNNER-P2-001",
+      "line": 503,
+      "notice": "notice-001-required-tests-ignored.md"
+    },
+    {
+      "id": "LINUX-RUNNER-P2-002",
+      "line": 530,
+      "notice": "notice-002-cleanup-error-loses-receipt.md"
+    }
+  ],
+  "independent_python": {
+    "run": 34,
+    "passed": 32,
+    "failed": 2,
+    "skipped": 0
+  },
+  "independent_rust_tests_executed": 0,
+  "retained_author_native_tests_verified": {
+    "run": 251,
+    "passed": 251,
+    "failed": 0,
+    "ignored": 0
+  },
+  "retained_evidence_audit": {
+    "status": "PASS",
+    "checks": 7
+  },
+  "live_input_drift_paths_at_signing": [
+    "scripts/run_linux_local_backend.py"
+  ],
+  "parent_fixes_reviewed": false,
+  "writes": "Only work/windows-local-backend-20261115/review-linux/",
+  "cargo_rustc_container_agent_chat_worktree_commands_executed": 0
+}

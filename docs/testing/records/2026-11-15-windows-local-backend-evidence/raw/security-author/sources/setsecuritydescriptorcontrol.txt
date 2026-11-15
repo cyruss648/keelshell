@@ -1,0 +1,84 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+SetSecurityDescriptorControl function (securitybaseapi.h)
+Feedback
+Summarize this article for me
+In this article
+The SetSecurityDescriptorControl function sets the control bits of a security descriptor. The function can set only the control bits that relate to automatic inheritance of ACEs. To set the other control bits of a security descriptor, use the functions, such as
+SetSecurityDescriptorDacl, for modifying the components of a security descriptor.
+Syntax
+BOOL SetSecurityDescriptorControl(
+[in] PSECURITY_DESCRIPTOR        pSecurityDescriptor,
+[in] SECURITY_DESCRIPTOR_CONTROL ControlBitsOfInterest,
+[in] SECURITY_DESCRIPTOR_CONTROL ControlBitsToSet
+);
+Parameters
+[in] pSecurityDescriptor
+A pointer to a
+SECURITY_DESCRIPTOR structure whose control and revision information are set.
+[in] ControlBitsOfInterest
+A
+SECURITY_DESCRIPTOR_CONTROL mask that indicates the control bits to set.
+[in] ControlBitsToSet
+A
+SECURITY_DESCRIPTOR_CONTROL mask that indicates the new values for the control bits specified by the ControlBitsOfInterest mask.
+Return value
+If the function succeeds, the return value is nonzero.
+If the function fails, the return value is zero. To get extended error information, call GetLastError.
+Remarks
+The SetSecurityDescriptorControl function specifies the control bit or bits to modify, and whether the bits are on or off.
+Examples
+The following example marks the DACL on the security descriptor as protected.
+SetSecurityDescriptorControl( &SecDesc,
+SE_DACL_PROTECTED, SE_DACL_PROTECTED );
+The following example marks the DACL as not protected.
+SetSecurityDescriptorControl( &SecDesc,
+SE_DACL_PROTECTED, 0 );
+Requirements
+Requirement
+Value
+Minimum supported client
+Windows XP [desktop apps | UWP apps]
+Minimum supported server
+Windows Server 2003 [desktop apps | UWP apps]
+Target Platform
+Windows
+Header
+securitybaseapi.h (include Windows.h)
+Library
+Advapi32.lib
+DLL
+Advapi32.dll
+See also
+Access Control Overview
+Basic Access Control Functions
+GetSecurityDescriptorControl
+SECURITY_DESCRIPTOR
+SECURITY_DESCRIPTOR_CONTROL
+SetSecurityDescriptorDacl
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2021-10-13

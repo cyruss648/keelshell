@@ -1,0 +1,5 @@
+lld-link: error: undefined symbol: __declspec(dllimport) malloc
+>>> referenced by /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.obj:(sdk_probe)
+
+lld-link: error: undefined symbol: __declspec(dllimport) free
+>>> referenced by /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.obj:(sdk_probe)

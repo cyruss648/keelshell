@@ -1,0 +1,19 @@
+{
+  "label": "primary-nt-documents",
+  "argv": [
+    "python3",
+    "-"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target_dir": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+  "cargo_incremental": "0",
+  "started_utc": "2026-11-15T12:30:26.816162+00:00",
+  "finished_utc": "2026-11-15T12:30:27.580347+00:00",
+  "elapsed_seconds": 0.76409,
+  "pid": 1500,
+  "exit_code": 0,
+  "timed_out": false,
+  "waited_and_reaped": true,
+  "output_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/primary-nt-documents.txt",
+  "output_sha256": "e2f52883e32d541c54fc9fbe199b4a02fb0fabf74c8a4c8dc1151cf59dab7dec"
+}

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/llvm/bin/llvm-readobj",
+    "--file-headers",
+    "--coff-imports",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.obj",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.dll",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.lib"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk",
+  "pid": 10927,
+  "started_utc": "2026-11-15T12:36:04.797349+00:00",
+  "finished_utc": "2026-11-15T12:36:05.238410+00:00",
+  "seconds": 0.441,
+  "timeout_seconds": 25.0,
+  "exit_code": 1,
+  "timed_out": false,
+  "reaped": true,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/logs/probe-coff-inspect.log",
+  "log_sha256": "b0f828a12636e85aaf9e7c3ac1b703e41df33dd7626e7c9b1358ecb8d88cf9cf"
+}

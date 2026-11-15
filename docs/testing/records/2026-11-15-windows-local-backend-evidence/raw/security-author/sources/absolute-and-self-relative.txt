@@ -1,0 +1,36 @@
+Table of contents
+Exit editor mode
+Ask Learn
+Ask Learn
+Reading mode
+Table of contents
+Read in English
+Add
+Add to Plans
+Edit
+Copy Markdown
+Print
+Note
+Access to this page requires authorization. You can try signing in or changing directories.
+Access to this page requires authorization. You can try changing directories.
+Absolute and Self-Relative Security Descriptors
+Feedback
+Summarize this article for me
+In this article
+A security descriptor can be in either absolute or self-relative format. In absolute format, a security descriptor contains pointers to its information, not the information itself. In self-relative format, a security descriptor stores a SECURITY_DESCRIPTOR structure and associated security information in a contiguous block of memory. To determine whether a security descriptor is self-relative or absolute, call the GetSecurityDescriptorControl function and check the SE_SELF_RELATIVE flag of the SECURITY_DESCRIPTOR_CONTROL parameter. You can use the MakeSelfRelativeSD and MakeAbsoluteSD functions for converting between these two formats.
+The absolute format is useful when you are building a security descriptor and have pointers to all of the components, for example, when default settings for the owner, group, and discretionary ACL are available. In this case, you can call the InitializeSecurityDescriptor function to initialize a SECURITY_DESCRIPTOR structure, and then call functions such as SetSecurityDescriptorDacl to assign ACL and SID pointers to the security descriptor.
+In self-relative format, a security descriptor always begins with a SECURITY_DESCRIPTOR structure, but the other components of the security descriptor can follow the structure in any order. Instead of using memory addresses, the security descriptor's components are identified by offsets from the beginning of the descriptor. This format is useful when a security descriptor must be stored on disk, transmitted by means of a communications protocol, or copied in memory.
+Except for MakeAbsoluteSD, all functions that return a security descriptor do so using the self-relative format. Security descriptors passed as arguments to a function can be either self-relative or absolute form. For more information, refer to the documentation for the function.
+Feedback
+Was this page helpful?
+Yes
+No
+No
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?
+Ask Learn
+Ask Learn
+Suggest a fix?
+Additional resources
+Last updated on
+2021-01-07

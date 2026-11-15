@@ -1,0 +1,34 @@
+Windows session combined r2 independent review — command/result ledger
+Observed UTC: 2026-11-15T13:42:37.578076+00:00
+CWD: /Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell
+Scope: read-only source review, parent receipt/log readback, and user-authorized parent-prebuilt copy execution.
+
+Reviewer commands/results, distinct from parent commands:
+- Python standard-library r2 intake: exit0; session manifest SHA 2fd531b0d874b6254204c99f89c3c18785a831091243d476e8c1e0ba22089a53, 34/34 matching; combined manifest SHA 1fb9b4b343d25634fed4bc6cf9ec15d12ac7049562fd83f977960d9d0b78e1c9, 588+14=602/602 matching. Exact r1 delta: 2 added/4 changed/0 removed.
+- Read-only source/instruction reads via rg/Python: reviewed source ownership, Result/Drop/async cancellation, Windows cfg, real hook operations, and exact source line anchors. Prior lookup errors are not silently treated as test failures: a previous lookup included nonexistent terminal_tests.rs, corrected through actual module declarations. No source mutation.
+- Historical r1 lexical audit produced 26 MATCH/2 false MISMATCH due to global first-match ordering; corrected forward-scoped audit produced 28/0. Both original artifacts preserved. These are scripts, not Rust tests.
+- New r2 lexical source audit: exit0; 39 MATCH/0 MISMATCH; 17 anchor files match r2. Not a semantic or concurrency proof.
+- New r2 lexical test source inventory: exit0; Windows local Zmodem45 (2 ignored), archive29 (1 ignored); integration Zmodem27/archive12 definitions with cfg exclusions; app archive11; terminal Zmodem18; shared worker3. Source inventory is not Windows compiled inventory.
+- Parent binary receipt readback + copy hashes: exit0. Receipt SHA af22cf3be08ea51c6e0244c84537ee66bd8a925f3e6d20b73d6011b6cb82fb16 binds full r2; origin strings were read only as receipt data. Origin target was never accessed.
+- Direct copied session --list: exit0/reaped, 0.006s, 30s outer timeout;194 tests. stdout matches parent inventory bytes.
+- Direct copied app --list: exit0/reaped,0.015s,30s outer timeout;1239 tests. stdout matches parent inventory bytes.
+- Direct copied session mutation_worker --nocapture: exit0/reaped,0.019s,45s outer timeout;3 passed/0 failed/0 ignored,191 filtered out.
+- Direct copied session local_unicode_case_aliases --nocapture: exit0/reaped,0.007s,45s outer timeout;2 passed/0 failed/0 ignored,192 filtered out.
+- Direct copied app archive_unobserved_worker_result --nocapture: exit0/reaped,0.014s,45s outer timeout;1 passed/0 failed/0 ignored,1238 filtered out.
+- Binary execution raw stdout/stderr saved under this review directory. All six tests pass; all binary hashes unchanged before/after. These are parent prebuilt Darwin arm64 copies, not independently compiled or Windows-native executables.
+- Parent receipts readback:13/13 log SHA matches in session-combined-r2-parent-receipts-readback.json; no corresponding Cargo command was launched by reviewer.
+- New full-gate-r2 readback: exit0; receipt/log SHA match, summary agrees; independently parsed94 Rust result suites yields2958/0/35ignored ordinary and14/0 rustdoc; Python log187run/1skip=186pass; exact23 new default Rust case names matched ok lines in raw log. Parent full gate632.963s exit0/reaped. Parent summary zero drift/path set match; reviewer independently rehashed all602 frozen inputs.
+- Pre-signature raw metadata read: exit0; baseline HEAD a092dd5712c0a92ee4af18970fb0500fb230b760; no Git command. Original4 report/notices unchanged, previous13 receipts unchanged.
+- Final artifact writer and final readback: writes only exclusively new report/log artifacts under authorized review directory; rehashes manifests,602 source/script inputs, originals, receipts and copied binaries; independent test reruns not repeated. Tool receipt is the external command's actual exit result.
+
+Historical parent failures preserved and attributed:
+- Unicode queue red exit101,0pass/2fail; controller red exit101,0pass/1fail.
+- Unicode green-r1 exit101:lib4pass, integration1fail due to fixture's own SFTP open; corrected green-r2 exit0/reaped,lib4/integration1 pass.
+- Windows strict Clippy-r1 exit101 missing AtomicBool import; r2 exit0/reaped4.667s; r3 exit0/reaped5.138s. These are crosschecks, no Windows execution.
+- full-gate-r1 explicitly terminated:exit -15/reaped208.772s; not a passing gate.
+- Archive handoff red-r1 exit101,1pass/2fail; green-r1 exit0/reaped3/3.
+- app-r1 exit101 due to --lib on bin-only package;app-r2 exit101 missing test imports;app-r3 exit0/reaped1/1 with existing macOS linker __eh_frame warning. No false executed-test counts for compile failures.
+
+Late parent-only evidence not independently read back here: Windows link-r1 exit0/reaped17.507s,4 AMD64 PE32+ binaries and143 selected descriptor-name byte matches bound to r2; normal macOS GUI/MCP build exit0/reaped8.416s. No PE execution or native --list; not a native acceptance claim. Platform/runner review closure is parent-reported, not re-reviewed within session scope.
+
+Reviewer test executions:6 parent-prebuilt host tests;5 direct binary commands including2 inventory commands. Independent compilation:0. Cargo/rustc/Clippy/rustfmt/format/Git commands launched by reviewer:0. Parent target read/write:0. Windows native/PE execution:0, Native NOT_RUN. No new agent/chat/worktree/container. Historical reports/notice/failing receipts untouched. Final recommendation:APPROVE exact frozen r2 for session source scope, closed2P2, openP0/P1/P2/P3 all0.

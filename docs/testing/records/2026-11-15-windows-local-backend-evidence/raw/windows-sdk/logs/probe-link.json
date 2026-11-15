@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/lld-link",
+    "/nologo",
+    "/dll",
+    "/noentry",
+    "/machine:x64",
+    "/manifest:no",
+    "/out:/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.dll",
+    "/libpath:/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/crt/lib/x86_64",
+    "/libpath:/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/lib/um/x86_64",
+    "/libpath:/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/sysroot/sdk/lib/ucrt/x86_64",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/probes/sdk_probe.obj",
+    "kernel32.lib"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk",
+  "pid": 10922,
+  "started_utc": "2026-11-15T12:36:04.694798+00:00",
+  "finished_utc": "2026-11-15T12:36:04.723919+00:00",
+  "seconds": 0.029,
+  "timeout_seconds": 25.0,
+  "exit_code": 1,
+  "timed_out": false,
+  "reaped": true,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/windows-sdk/logs/probe-link.log",
+  "log_sha256": "50650df5a9711693529c30f7f96fcf695fd826b11b6b0af645a34517daf53b9b"
+}

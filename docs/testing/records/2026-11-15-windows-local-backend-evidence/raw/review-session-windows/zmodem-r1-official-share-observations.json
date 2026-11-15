@@ -1,0 +1,98 @@
+{
+  "observed_at_utc": "2026-11-15T12:48:20.235486+00:00",
+  "method": "HTTPS GET official Microsoft docs only; no Windows execution",
+  "results": [
+    {
+      "name": "ntcreatefile",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/nf-ntifs-ntcreatefile",
+      "http_status": 200,
+      "raw_sha256": "b9a3a7df4676a2b95305824af5cc06181777a44001f5e010e109853bf0c9d5b0",
+      "snippets": [
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": ". [in] ShareAccess Type of share access, which is specified as zero or any combination of the following flags. ShareAccess flag Allows other threads to do this FILE_SHARE_READ Read the file FILE_SHARE_WRITE Write the file FILE_SHARE_DELETE Delete the file Device and intermediate drivers usually set ShareAccess to zero, which gives the caller exclusive access to the open file. [in] CreateDisposition Specifies the action to perform if the file does or does not exist. CreateDisposition can be one of the values in the following table. CreateDisposition value Action if file exists Action if file does not"
+        },
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": ". Provided that both callers have the appropriate access privileges, the file can be successfully opened and shared. If the original caller of NtCreateFile does not specify FILE_SHARE_READ, FILE_SHARE_WRITE, or FILE_SHARE_DELETE, no other caller can open the file—that is, the original caller is granted exclusive access. To successfully open a shared file, the DesiredAccess flags must be compatible with the DesiredAccess and ShareAccess flags of all the previous open operations that have not yet been released through . That is, the DesiredAccess specified to NtCreateFile for a given file must not con"
+        },
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": "he following: The caller must have write access to the file, rather than delete access. This implies that, if the file has already been opened by another thread, it opened the file with the FILE_SHARE_WRITE flag set in the input ShareAccess . The specified file attributes are logically ORed with those already on the file. This implies that, if the file has already been opened by another thread, a subsequent caller of NtCreateFile cannot disable existing FileAttributes flags but can enable additional flags for the same file. Note that this style of overwriting files is consistent with MS-DOS, Microso"
+        },
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": "complete the following steps: Issue a create request with CreateOptions of FILE_RESERVE_OPFILTER, DesiredAccess of exactly FILE_READ_ATTRIBUTES, and ShareAccess of exactly FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE. If there are already open handles, the create request fails with STATUS_OPLOCK_NOT_GRANTED, and the next requested oplock also fails. If you open with more access or less sharing will also cause a failure of STATUS_OPLOCK_NOT_GRANTED. If the create request succeeds, request an oplock. Open another handle to the file to do I/O. Step 3 makes this practical only for Filter oploc"
+        },
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": " access, which is specified as zero or any combination of the following flags. ShareAccess flag Allows other threads to do this FILE_SHARE_READ Read the file FILE_SHARE_WRITE Write the file FILE_SHARE_DELETE Delete the file Device and intermediate drivers usually set ShareAccess to zero, which gives the caller exclusive access to the open file. [in] CreateDisposition Specifies the action to perform if the file does or does not exist. CreateDisposition can be one of the values in the following table. CreateDisposition value Action if file exists Action if file does not exist FILE_SUPERSEDE Replace the"
+        },
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": "callers have the appropriate access privileges, the file can be successfully opened and shared. If the original caller of NtCreateFile does not specify FILE_SHARE_READ, FILE_SHARE_WRITE, or FILE_SHARE_DELETE, no other caller can open the file—that is, the original caller is granted exclusive access. To successfully open a shared file, the DesiredAccess flags must be compatible with the DesiredAccess and ShareAccess flags of all the previous open operations that have not yet been released through . That is, the DesiredAccess specified to NtCreateFile for a given file must not conflict with the accesse"
+        },
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": "ctively deletes that file, and then recreates it. This implies that, if the file has already been opened by another thread, it opened the file by specifying a ShareAccess parameter with the FILE_SHARE_DELETE flag set. Note that this type of disposition is consistent with the POSIX style of overwriting files. The CreateDisposition values FILE_OVERWRITE_IF and FILE_SUPERSEDE are similar. If NtCreateFile is called with an existing file and either of these CreateDisposition values, the file will be replaced. Overwriting a file is semantically equivalent to a supersede operation, except for the following:"
+        },
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": "ing steps: Issue a create request with CreateOptions of FILE_RESERVE_OPFILTER, DesiredAccess of exactly FILE_READ_ATTRIBUTES, and ShareAccess of exactly FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE. If there are already open handles, the create request fails with STATUS_OPLOCK_NOT_GRANTED, and the next requested oplock also fails. If you open with more access or less sharing will also cause a failure of STATUS_OPLOCK_NOT_GRANTED. If the create request succeeds, request an oplock. Open another handle to the file to do I/O. Step 3 makes this practical only for Filter oplocks. The handle opene"
+        },
+        {
+          "term": "share access",
+          "text": "d FILE_ATTRIBUTE_ XXX flags, see the CreateFile routine in the Microsoft Windows SDK documentation. If no file is created or overwritten, FileAttributes is ignored. [in] ShareAccess Type of share access, which is specified as zero or any combination of the following flags. ShareAccess flag Allows other threads to do this FILE_SHARE_READ Read the file FILE_SHARE_WRITE Write the file FILE_SHARE_DELETE Delete the file Device and intermediate drivers usually set ShareAccess to zero, which gives the caller exclusive access to the open file. [in] CreateDisposition Specifies the action to perform if th"
+        }
+      ]
+    },
+    {
+      "name": "createfilew",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+      "http_status": 200,
+      "raw_sha256": "f11856c32e649e8959c8d4c3f56f0cde1e23559e0b133a7ba7fd7138773f59c0",
+      "snippets": [
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": "until that handle is closed, regardless of process context. Value Meaning 0 0x00000000 Prevents subsequent open operations on a file or device if they request delete, read, or write access. FILE_SHARE_DELETE 0x00000004 Enables subsequent open operations on a file or device to request delete access. Otherwise, no process can open the file or device if it requests delete access. If this flag is not specified, but the file or device has been opened for delete access, the function fails. Note Delete access allows both delete and rename operations. FILE_SHARE_READ 0x00000001 Enables subsequent open operat"
+        },
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": "s are closed, which includes the specified handle and any other open or duplicated handles. If there are existing open handles to a file, the call fails unless they were all opened with the FILE_SHARE_DELETE share mode. Subsequent open requests for the file fail, unless the FILE_SHARE_DELETE share mode is specified. FILE_FLAG_NO_BUFFERING 0x20000000 The file or device is being opened with no system caching for data reads and writes. This flag does not affect hard disk caching or memory mapped files. There are strict requirements for successfully working with files opened with CreateFile using the FIL"
+        },
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": "ndles. If there are existing open handles to a file, the call fails unless they were all opened with the FILE_SHARE_DELETE share mode. Subsequent open requests for the file fail, unless the FILE_SHARE_DELETE share mode is specified. FILE_FLAG_NO_BUFFERING 0x20000000 The file or device is being opened with no system caching for data reads and writes. This flag does not affect hard disk caching or memory mapped files. There are strict requirements for successfully working with files opened with CreateFile using the FILE_FLAG_NO_BUFFERING flag, for details see File Buffering . FILE_FLAG_OPEN_NO_RECALL 0"
+        },
+        {
+          "term": "FILE_SHARE_DELETE",
+          "text": " computer when the value of the dwDesiredAccess parameter is the DELETE access flag (0x00010000) OR 'ed with any other access flag, and the remote file or directory has not been opened with FILE_SHARE_DELETE . To avoid the sharing violation in this scenario, open the remote file or directory with the DELETE access right only, or call DeleteFile without first opening the file or directory for deletion. Some file systems, such as the NTFS file system, support compression or encryption for individual files and directories. On volumes that have a mounted file system with this support, a new file inherits"
+        },
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": "ess. Otherwise, no process can open the file or device if it requests read access. If this flag is not specified, but the file or device has been opened for read access, the function fails. FILE_SHARE_WRITE 0x00000002 Enables subsequent open operations on a file or device to request write access. Otherwise, no process can open the file or device if it requests write access. If this flag is not specified, but the file or device has been opened for write access or has a file mapping with write access, the function fails. [in, optional] lpSecurityAttributes A pointer to a SECURITY_ATTRIBUTES structure "
+        },
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": "on, see Running with Special Privileges . The dwCreationDisposition parameter must have the OPEN_EXISTING flag. When opening a volume or floppy disk, the dwShareMode parameter must have the FILE_SHARE_WRITE flag. Note The dwDesiredAccess parameter can be zero, allowing the application to query device attributes without accessing a device. This is useful for an application to determine the size of a floppy disk drive and the formats it supports without requiring a floppy disk in a drive, for instance. It can also be used for reading statistics without requiring higher-level data read/write permission"
+        },
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": "Handle . dwDesiredAccess GENERIC_READ | GENERIC_WRITE is preferred, but either one can limit access. dwShareMode When opening CONIN$, specify FILE_SHARE_READ . When opening CONOUT$, specify FILE_SHARE_WRITE . If the calling process inherits the console, or if a child process should be able to access the console, this parameter must be FILE_SHARE_READ | FILE_SHARE_WRITE . lpSecurityAttributes If you want the console to be inherited, the bInheritHandle member of the SECURITY_ATTRIBUTES structure must be TRUE . dwCreationDisposition You should specify OPEN_EXISTING when using CreateFile to open the con"
+        },
+        {
+          "term": "FILE_SHARE_WRITE",
+          "text": "opening CONOUT$, specify FILE_SHARE_WRITE . If the calling process inherits the console, or if a child process should be able to access the console, this parameter must be FILE_SHARE_READ | FILE_SHARE_WRITE . lpSecurityAttributes If you want the console to be inherited, the bInheritHandle member of the SECURITY_ATTRIBUTES structure must be TRUE . dwCreationDisposition You should specify OPEN_EXISTING when using CreateFile to open the console. dwFlagsAndAttributes Ignored. hTemplateFile Ignored. The following table shows various settings of dwDesiredAccess and lpFileName . lpFileName dwDesiredAccess "
+        },
+        {
+          "term": "sharing violation",
+          "text": "t can have wider influence on things like sharing the file or device and committing data to disk. Specifics are noted within this topic as appropriate. Windows Server 2003 and Windows XP: A sharing violation occurs if an attempt is made to open a file or directory for deletion on a remote computer when the value of the dwDesiredAccess parameter is the DELETE access flag (0x00010000) OR 'ed with any other access flag, and the remote file or directory has not been opened with FILE_SHARE_DELETE . To avoid the sharing violation in this scenario, open the remote file or directory with the DELETE access ri"
+        },
+        {
+          "term": "sharing violation",
+          "text": "wDesiredAccess parameter is the DELETE access flag (0x00010000) OR 'ed with any other access flag, and the remote file or directory has not been opened with FILE_SHARE_DELETE . To avoid the sharing violation in this scenario, open the remote file or directory with the DELETE access right only, or call DeleteFile without first opening the file or directory for deletion. Some file systems, such as the NTFS file system, support compression or encryption for individual files and directories. On volumes that have a mounted file system with this support, a new file inherits the compression and encryption a"
+        }
+      ]
+    }
+  ]
+}

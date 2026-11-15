@@ -1,0 +1,35 @@
+{
+  "finished_utc": "2026-11-15T12:54:04.713864+00:00",
+  "evidence_verified_before_deletion": true,
+  "retained_r1_source_files_verified": 9,
+  "captured_receipts_verified": [
+    "capability-boundary-probes.json",
+    "environment-inventory.json",
+    "host-parser-inventory.json",
+    "host-parser-tests.json",
+    "primary-fsa-rename.json",
+    "primary-fsa-sharing-appendix.json",
+    "primary-nt-documents.json",
+    "primary-rename-search.json",
+    "primary-target-sharing-search.json",
+    "rename-buffer-layout.json",
+    "windows-cross-clippy.json"
+  ],
+  "retained_compiler_evidence_files": 18,
+  "removed": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/target",
+      "file_count": 200,
+      "logical_bytes": 30096259,
+      "exists_after": false
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-local-backend-20261115/review-platform/source-lines",
+      "file_count": 9,
+      "logical_bytes": 112961,
+      "exists_after": false
+    }
+  ],
+  "deletion_scope": "exact two non-symlink direct children of review-platform",
+  "parent_target_touched": false
+}

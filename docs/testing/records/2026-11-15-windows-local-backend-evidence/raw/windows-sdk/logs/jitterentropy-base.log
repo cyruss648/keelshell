@@ -1,0 +1,3 @@
+clang-cl: warning: '/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/aws-lc-sys-0.47.0/aws-lc/third_party/jitterentropy/jitterentropy-library/src/jitterentropy-base.c' treated as the '/U' option [-Wslash-u-filename]
+clang-cl: note: use '--' to treat subsequent arguments as filenames
+clang-cl: error: no input files

@@ -1,0 +1,26 @@
+{
+  "reviewers": [
+    {
+      "id": "01a1df23-7d73-7be1-9a4e-49b69b6c39bf",
+      "scope": "linux runner and final native evidence",
+      "close_agent_completed": true,
+      "previous_status": "completed"
+    },
+    {
+      "id": "01a1df2c-66c5-7011-b59f-1391367e707c",
+      "scope": "Windows platform",
+      "close_agent_completed": true,
+      "previous_status": "completed"
+    },
+    {
+      "id": "01a1df3c-fc83-7380-b08d-1d41684cf652",
+      "scope": "session combination",
+      "close_agent_completed": true,
+      "previous_status": "completed"
+    }
+  ],
+  "implementation_authors": "completed and closed before final integration; author original handoffs retained",
+  "new_user_chats": 0,
+  "new_worktrees": 0,
+  "new_branches": 0
+}

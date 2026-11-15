@@ -1,0 +1,33 @@
+{
+  "kind": "STATIC_TEXT_AND_OFFICIAL_BINDING_SYMBOL_CHECK_ONLY",
+  "recorded_at": "2026-11-15T12:11:14.823697+00:00",
+  "host_os": "Darwin",
+  "rust_commands_run": [],
+  "native_test_processes_run": 0,
+  "source_checks": [
+    {
+      "path": "crates/keelshell-platform/src/windows/security.rs",
+      "sha256": "d3c86ccac0ef241e1b3a199f0c2fa82ecc979ddfa202fba85ac36b878eff0f28",
+      "bytes": 25479,
+      "import_symbols_checked": 52,
+      "missing_symbols": [],
+      "forbidden_production_patterns": []
+    },
+    {
+      "path": "crates/keelshell-platform/src/windows/security/tests.rs",
+      "sha256": "6f56a712f76321ff59f2fa65d360629abaf64aca2f65fef2741d187892c9d4e2",
+      "bytes": 22643,
+      "import_symbols_checked": 20,
+      "missing_symbols": [],
+      "forbidden_production_patterns": []
+    }
+  ],
+  "test_inventory_count": 27,
+  "self_relative_readback_required": true,
+  "compilation": "NOT_RUN",
+  "formatting": "NOT_RUN",
+  "clippy": "NOT_RUN",
+  "windows_tests": "NOT_RUN",
+  "git_commit_created": false,
+  "shared_target_touched": false
+}

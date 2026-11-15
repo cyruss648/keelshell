@@ -1,0 +1,1 @@
+Error: template: inspect:1:24: executing "inspect" at <.Id>: can't evaluate field Id in type interface {}
