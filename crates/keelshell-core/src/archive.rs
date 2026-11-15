@@ -2,8 +2,9 @@
 //!
 //! Decoding never extracts files or retains ownership, timestamps, or permissions.
 //! ZIP accepts single-disk ZIP32 with stored or deflated members. TAR.GZ accepts
-//! regular files, directories, and bounded GNU long-name metadata in one gzip
-//! stream; links, sparse files, and PAX metadata are deliberately unsupported.
+//! regular files, directories, bounded GNU long names, and a strict POSIX PAX
+//! metadata subset in one gzip stream; links, sparse files, and other extensions
+//! are deliberately unsupported.
 
 use std::collections::BTreeMap;
 use std::io::{self, Cursor, Read, Seek, SeekFrom, Write};
@@ -32,6 +33,12 @@ const MAX_TAR_STREAM_BYTES: u64 = MAX_ARCHIVE_EXPANDED_BYTES
     + MAX_ARCHIVE_MANIFEST_BYTES as u64 * 2
     + 1024;
 const BLOCK_BYTES: usize = 512;
+// PAX is metadata, not file payload. Bound its allocation and aggregate work
+// separately without increasing the existing whole-stream allowance.
+const MAX_PAX_HEADER_BYTES: u64 = MAX_ARCHIVE_PATH_BYTES as u64 * 2;
+const MAX_PAX_METADATA_BYTES: u64 =
+    MAX_ARCHIVE_MANIFEST_BYTES as u64 + MAX_ARCHIVE_ENTRIES as u64 * 1024;
+const MAX_PAX_HEADERS: usize = MAX_ARCHIVE_ENTRIES * 2;
 
 /// An archive representation supported by the bounded codec.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -206,6 +213,10 @@ impl ArchiveBundle {
     /// UTF-8 names, header consistency, CRCs, and exact deflate termination.
     /// TAR validates headers, payloads, padding, two end blocks, and the gzip
     /// trailer. Trailing compressed streams or nonzero TAR tails are rejected.
+    /// PAX supports `path`, `size`, and validated but discarded time/owner fields.
+    /// Local metadata overrides global defaults, then the ordinary header.
+    /// Duplicate keys, deletions, unknown keys, and mixed local extensions fail
+    /// closed; overridden ordinary paths and sizes retain their safety checks.
     pub fn decode(format: ArchiveFormat, bytes: &[u8]) -> Result<Self, ArchiveError> {
         if bytes.len() as u64 > MAX_ARCHIVE_BYTES {
             return Err(ArchiveError::ArchiveTooLarge);
@@ -614,13 +625,22 @@ fn decode_tar_gz(bytes: &[u8]) -> Result<ArchiveBundle, ArchiveError> {
     let mut members = Vec::new();
     let mut manifest = Manifest::default();
     let mut long_name: Option<Vec<u8>> = None;
+    let mut pax_global = PaxMetadata::default();
+    let mut pax_local: Option<PaxMetadata> = None;
+    let mut pax_budget = PaxBudget::default();
+    let mut pending_global = false;
+    let mut raw_expanded_bytes = 0u64;
     loop {
         let mut block = [0; BLOCK_BYTES];
         reader.read_exact(&mut block)?;
         if block.iter().all(|byte| *byte == 0) {
             reader.read_exact(&mut block)?;
-            if block.iter().any(|byte| *byte != 0) || long_name.is_some() {
-                return Err(ArchiveError::Corrupt("TAR end blocks or orphan long name"));
+            if block.iter().any(|byte| *byte != 0)
+                || long_name.is_some()
+                || pax_local.is_some()
+                || pending_global
+            {
+                return Err(ArchiveError::Corrupt("TAR end blocks or orphan metadata"));
             }
             // Reading through EOF verifies the gzip CRC and size trailer.
             // Remaining TAR record padding is allowed only when it is zero.
@@ -663,10 +683,50 @@ fn decode_tar_gz(bytes: &[u8]) -> Result<ArchiveBundle, ArchiveError> {
         {
             return Err(ArchiveError::UnsupportedFormat);
         }
+        if !matches!(
+            header.entry_type(),
+            tar::EntryType::Regular
+                | tar::EntryType::Directory
+                | tar::EntryType::GNULongName
+                | tar::EntryType::XHeader
+                | tar::EntryType::XGlobalHeader
+        ) {
+            // Reject special semantics before tar::Header::size attempts to
+            // interpret GNU sparse layout or another unsupported extension.
+            return Err(ArchiveError::UnsupportedEntry);
+        }
         let name = tar_path(&header)?;
-        let size = header.size()?;
+        let size = tar_size(&block)?;
+        if block[157..257].iter().any(|byte| *byte != 0) {
+            return Err(ArchiveError::UnsupportedEntry);
+        }
+        if header.entry_type().is_pax_local_extensions()
+            || header.entry_type().is_pax_global_extensions()
+        {
+            if long_name.is_some() || pax_local.is_some() {
+                return Err(ArchiveError::Corrupt("stacked TAR local extensions"));
+            }
+            // Python and POSIX writers use leading ./ in metadata-only names.
+            // These headers never become members; traversal is still forbidden.
+            let metadata_name =
+                std::str::from_utf8(&name).map_err(|_| ArchiveError::InvalidUtf8)?;
+            validate_path(metadata_name.trim_start_matches("./"))?;
+            let metadata = pax_budget.read(&mut reader, size)?;
+            if header.entry_type().is_pax_global_extensions() {
+                pax_global.update(metadata);
+                pending_global = true;
+            } else {
+                pax_local = Some(metadata);
+            }
+            continue;
+        }
         if header.entry_type() == tar::EntryType::GNULongName {
-            if long_name.is_some() || size == 0 || size > MAX_ARCHIVE_PATH_BYTES as u64 + 2 {
+            if long_name.is_some()
+                || pax_local.is_some()
+                || pax_global.path.is_some()
+                || size == 0
+                || size > MAX_ARCHIVE_PATH_BYTES as u64 + 2
+            {
                 return Err(ArchiveError::Corrupt("invalid TAR long-name metadata"));
             }
             if name != b"././@LongLink" {
@@ -685,22 +745,185 @@ fn decode_tar_gz(bytes: &[u8]) -> Result<ArchiveBundle, ArchiveError> {
             tar::EntryType::Directory => ArchiveEntryKind::Directory,
             _ => return Err(ArchiveError::UnsupportedEntry),
         };
-        if block[157..257].iter().any(|byte| *byte != 0) {
-            return Err(ArchiveError::UnsupportedEntry);
-        }
         // Even an overridden short name must not carry a dangerous alternate
-        // path for consumers that do not understand GNU long-name metadata.
+        // path for consumers that do not understand extended metadata.
         member_path(&name, kind)?;
-        let raw = long_name.take().unwrap_or(name);
+        if kind == ArchiveEntryKind::Directory && size != 0 {
+            return Err(ArchiveError::Corrupt("directory has a payload"));
+        }
+        raw_expanded_bytes = raw_expanded_bytes
+            .checked_add(size)
+            .filter(|total| *total <= MAX_ARCHIVE_EXPANDED_BYTES)
+            .ok_or(ArchiveError::ExpandedTooLarge)?;
+        let local = pax_local.take().unwrap_or_default();
+        let size = local.size.or(pax_global.size).unwrap_or(size);
+        let raw = local
+            .path
+            .or_else(|| pax_global.path.clone())
+            .or_else(|| long_name.take())
+            .unwrap_or(name);
         let path = member_path(&raw, kind)?.to_owned();
         manifest.add(&path, kind, size)?;
         let payload = read_tar_payload(&mut reader, size)?;
+        pending_global = false;
         members.push(ArchiveMember {
             path,
             kind,
             bytes: payload,
         });
     }
+}
+
+#[derive(Default)]
+struct PaxBudget {
+    headers: usize,
+    bytes: u64,
+}
+
+impl PaxBudget {
+    fn read(&mut self, reader: &mut impl Read, size: u64) -> Result<PaxMetadata, ArchiveError> {
+        if size == 0 || size > MAX_PAX_HEADER_BYTES {
+            return Err(ArchiveError::Corrupt("invalid PAX metadata size"));
+        }
+        self.headers += 1;
+        self.bytes += size;
+        if self.headers > MAX_PAX_HEADERS || self.bytes > MAX_PAX_METADATA_BYTES {
+            return Err(ArchiveError::Corrupt("PAX metadata exceeds its allowance"));
+        }
+        PaxMetadata::parse(&read_tar_payload(reader, size)?)
+    }
+}
+
+#[derive(Default)]
+struct PaxMetadata {
+    path: Option<Vec<u8>>,
+    size: Option<u64>,
+}
+
+impl PaxMetadata {
+    fn parse(mut bytes: &[u8]) -> Result<Self, ArchiveError> {
+        let mut metadata = Self::default();
+        let mut seen = 0u16;
+        while !bytes.is_empty() {
+            let space = bytes
+                .iter()
+                .position(|byte| *byte == b' ')
+                .ok_or(ArchiveError::Corrupt("missing PAX record length"))?;
+            let digits = &bytes[..space];
+            if digits.first() == Some(&b'0') {
+                return Err(ArchiveError::Corrupt("noncanonical PAX record length"));
+            }
+            let length = usize::try_from(pax_unsigned(digits)?)
+                .map_err(|_| ArchiveError::Corrupt("PAX record length overflow"))?;
+            let record = bytes
+                .get(..length)
+                .filter(|record| record.len() >= 5 && record.last() == Some(&b'\n'))
+                .ok_or(ArchiveError::Corrupt(
+                    "invalid PAX record length or newline",
+                ))?;
+            let body = record
+                .get(space + 1..length - 1)
+                .ok_or(ArchiveError::Corrupt("invalid PAX record framing"))?;
+            let equals = body
+                .iter()
+                .position(|byte| *byte == b'=')
+                .ok_or(ArchiveError::Corrupt("missing PAX record assignment"))?;
+            let key = &body[..equals];
+            let bit = match key {
+                b"path" => 1,
+                b"size" => 2,
+                b"mtime" => 4,
+                b"atime" => 8,
+                b"ctime" => 16,
+                b"uid" => 32,
+                b"gid" => 64,
+                b"uname" => 128,
+                b"gname" => 256,
+                // Unknown records can redefine encoding or content (notably
+                // sparse maps). Ignoring them would change archive semantics.
+                _ => return Err(ArchiveError::UnsupportedEntry),
+            };
+            if seen & bit != 0 {
+                return Err(ArchiveError::Corrupt("duplicate PAX keyword"));
+            }
+            seen |= bit;
+            let value = &body[equals + 1..];
+            let text = std::str::from_utf8(value).map_err(|_| ArchiveError::InvalidUtf8)?;
+            if text.is_empty() {
+                // POSIX empty values delete attributes, including inherited
+                // ones. This slice deliberately does not implement deletion.
+                return Err(ArchiveError::UnsupportedEntry);
+            }
+            match key {
+                b"path" => {
+                    // The effective kind is only known at the ordinary header.
+                    // Allow one directory suffix here, then revalidate by kind.
+                    member_path(value, ArchiveEntryKind::Directory)?;
+                    metadata.path = Some(value.to_vec());
+                }
+                b"size" => {
+                    let size = pax_unsigned(value)?;
+                    if size > MAX_ARCHIVE_EXPANDED_BYTES {
+                        return Err(ArchiveError::ExpandedTooLarge);
+                    }
+                    metadata.size = Some(size);
+                }
+                b"uid" | b"gid" => {
+                    pax_unsigned(value)?;
+                }
+                b"mtime" | b"atime" | b"ctime" => validate_pax_time(text)?,
+                _ => {
+                    if text.chars().any(char::is_control) {
+                        return Err(ArchiveError::Corrupt("invalid PAX owner name"));
+                    }
+                }
+            }
+            bytes = &bytes[length..];
+        }
+        Ok(metadata)
+    }
+
+    fn update(&mut self, newer: Self) {
+        // Global updates persist; missing keys retain their previous defaults.
+        // Duplicate keys inside any one header are rejected before this merge.
+        if newer.path.is_some() {
+            self.path = newer.path;
+        }
+        if newer.size.is_some() {
+            self.size = newer.size;
+        }
+    }
+}
+
+fn pax_unsigned(bytes: &[u8]) -> Result<u64, ArchiveError> {
+    if bytes.is_empty() || !bytes.iter().all(u8::is_ascii_digit) {
+        return Err(ArchiveError::Corrupt("invalid PAX unsigned decimal"));
+    }
+    bytes.iter().try_fold(0u64, |number, digit| {
+        number
+            .checked_mul(10)
+            .and_then(|number| number.checked_add(u64::from(*digit - b'0')))
+            .ok_or(ArchiveError::Corrupt("PAX unsigned decimal overflow"))
+    })
+}
+
+fn validate_pax_time(value: &str) -> Result<(), ArchiveError> {
+    let (seconds, fraction) = value
+        .split_once('.')
+        .map_or((value, None), |(seconds, fraction)| {
+            (seconds, Some(fraction))
+        });
+    let digits = seconds.strip_prefix('-').unwrap_or(seconds).as_bytes();
+    if digits.is_empty()
+        || !digits.iter().all(u8::is_ascii_digit)
+        || seconds.parse::<i64>().is_err()
+        || fraction.is_some_and(|fraction| {
+            fraction.is_empty() || !fraction.as_bytes().iter().all(u8::is_ascii_digit)
+        })
+    {
+        return Err(ArchiveError::Corrupt("invalid PAX timestamp"));
+    }
+    Ok(())
 }
 
 fn tar_path(header: &tar::Header) -> Result<Vec<u8>, ArchiveError> {
@@ -729,6 +952,44 @@ fn tar_string(field: &[u8]) -> Result<&[u8], ArchiveError> {
         ));
     }
     Ok(&field[..length])
+}
+
+fn tar_size(block: &[u8; BLOCK_BYTES]) -> Result<u64, ArchiveError> {
+    let field = &block[124..136];
+    let invalid = || ArchiveError::Corrupt("invalid TAR size encoding");
+    if field[0] & 0x80 != 0 {
+        // The dependency retains only the low 64 bits of a 12-byte binary
+        // field. Validate its full width first: positive u64 values have just
+        // the marker bit in the first four bytes; negatives and overflow fail.
+        if field[..4] != [0x80, 0, 0, 0] {
+            return Err(invalid());
+        }
+        return Ok(field[4..]
+            .iter()
+            .fold(0u64, |value, byte| (value << 8) | u64::from(*byte)));
+    }
+
+    let mut value = 0u64;
+    let mut seen_digit = false;
+    let mut padding = false;
+    for byte in field {
+        match byte {
+            b'0'..=b'7' if !padding => {
+                seen_digit = true;
+                value = value
+                    .checked_mul(8)
+                    .and_then(|value| value.checked_add(u64::from(*byte - b'0')))
+                    .ok_or_else(invalid)?;
+            }
+            b' ' if !seen_digit => {}
+            0 | b' ' if seen_digit => padding = true,
+            _ => return Err(invalid()),
+        }
+    }
+    if !seen_digit {
+        return Err(invalid());
+    }
+    Ok(value)
 }
 
 fn read_tar_payload(reader: &mut impl Read, size: u64) -> Result<Vec<u8>, ArchiveError> {

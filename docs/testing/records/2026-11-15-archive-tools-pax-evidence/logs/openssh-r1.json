@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/opt/homebrew/opt/python@3.15/bin/python3.15",
+    "-B",
+    "scripts/openssh_interop.py",
+    "--output",
+    "work/archive-tools-pax-20261115/openssh-r1",
+    "--timeout",
+    "300"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "openssh-r1",
+  "pid": 59688,
+  "started_utc": "2026-11-15T04:59:03.207082+00:00",
+  "finished_utc": "2026-11-15T04:59:10.071452+00:00",
+  "seconds": 6.864,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "5de47d7dfe85fafaceb3be494b4d33cb3d5a7adb25cdcc471f6a6a9634b33bb1",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

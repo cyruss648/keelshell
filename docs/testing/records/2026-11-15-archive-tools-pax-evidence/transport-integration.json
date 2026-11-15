@@ -1,0 +1,17 @@
+[
+  {
+    "path": "crates/keelshell-session/src/archive_tools.rs",
+    "sha256": "756183bb5b340800435af774e23bb4025e681e481abc15f949c0795701cad986",
+    "bytes": 19426
+  },
+  {
+    "path": "crates/keelshell-session/tests/archive_tools.rs",
+    "sha256": "ef300f26e878194b8ca5e2b3c20a3df22f63a965eb6fed01ad71a302b3ec8afa",
+    "bytes": 21654
+  },
+  {
+    "path": "crates/keelshell-session/src/lib.rs",
+    "sha256": "dc06d76158e2e31b59405ead29b55b4ecba141dfb733614a05fbfffd04d39afb",
+    "bytes": 1302
+  }
+]

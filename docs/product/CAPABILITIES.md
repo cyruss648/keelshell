@@ -1,5 +1,43 @@
 # Capability ledger
 
+## 2026-11-15: archive tool observations and bounded PAX compatibility
+
+Status: `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`. The file panel adds an explicit
+review of the current SSH host and complete fixed command before one PATH
+inspection of tar, gzip, zip, unzip, python3, rz and sz. The named tools are not
+executed. Found, missing and unverified resolutions remain distinct; finding
+an absolute path proves no version, feature or interoperability. Each inspection
+uses a fresh owned channel and a ten-second envelope, bounded combined output
+and strict complete records. Actual connection identity binds review and reply.
+Failed refreshes retire old successes; observations remain in memory and never
+grant authority to another operation.
+
+The tar.gz decoder additionally admits bounded ordinary PAX metadata. Effective
+path/size values retain original and overridden safety checks; owner/time values
+are validated then discarded. Vendor, sparse, link and encoding extensions,
+duplicate keys, deletions and ambiguous extension chains remain unsupported.
+This is a conservative subset: Python Unicode `?` fallback paths remain rejected
+under the portable-path policy even when the PAX path itself is valid.
+See the [inspection guide](ARCHIVE_TOOL_INSPECTION.md),
+[archive guide](ARCHIVE_TRANSFERS.md) and
+[PAX decision](../adr/0134-bounded-pax-archive-metadata.md).
+
+The final combined gate passed 2675 ordinary Rust tests, 14 doctests and Python
+131 run / 1 skipped, with formatting, strict workspace all-targets Clippy,
+dependency policy and all three AI controller groups passing. All 74 new default
+cases were present and passed: 40 PAX, 12 protocol parser, 16 SSH inspection and
+6 actual GPUI controller tests. These are included in the ordinary total.
+The PAX review found one P2 involving truncated raw TAR sizes; actual failing
+regressions confirmed it, complete size validation fixed it, and the independent
+delta review closed it. Both final reviewers approved with zero open P0–P3.
+They independently executed verified parent-built binaries, without rebuilding.
+Real localhost OpenSSH passed 14 cases; the normal GUI/MCP build also passed,
+with identical production inputs across the final test-only literal correction.
+See the [integration record](../testing/records/2026-11-15-archive-tools-pax-integration.md)
+for frozen inputs, original reports and retained failures. Server-side packing,
+version/feature verification, Zmodem, relay, Windows extraction and full
+native/platform acceptance remain open.
+
 ## 2026-11-15: reviewed client-side archive transfers
 
 The file panel prepares ZIP/tar.gz uploads from up to 32 selected local files or
@@ -21,7 +59,8 @@ transfer recovery journal.
 The codec rejects unsafe or nonportable paths, duplicate or case-alias members,
 links, special entries, corrupt streams and oversized input. It admits
 single-disk ZIP32 stored/deflate and regular TAR members with bounded GNU long
-names. ZIP64, multidisk ZIP and PAX metadata are not admitted; archived executable
+names. That frozen batch did not admit PAX; the increment above tracks its strict
+subset. ZIP64 and multidisk ZIP remain unsupported; archived executable
 bits, ownership and special modes are not restored. Limits are 64 MiB encoded,
 128 MiB expanded, 2048 members, 32 levels, 4096 bytes per path and 48 KiB of
 accumulated member names.
@@ -37,7 +76,7 @@ localhost OpenSSH interoperability passed 13 cases. Complete provenance and the
 prebuilt-review limitation are tracked in the
 [test record](../testing/records/2026-11-15-reviewed-archive-transfer.md).
 Native archive interactions on macOS/Windows/Linux, IME/accessibility and release
-acceptance remain open. Server-side packing/capability detection, Zmodem and relay
+acceptance remain open. Server-side packing, version/feature verification, Zmodem and relay
 acceleration remain separate work; this slice does not complete FILE-05.
 See the [guide](ARCHIVE_TRANSFERS.md) and
 [ADR 0132](../adr/0132-reviewed-client-archive-transfer.md).

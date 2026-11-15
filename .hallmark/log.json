@@ -1,5 +1,26 @@
 [
   {
+    "date": "2026-11-15",
+    "scope": "app",
+    "shape": "existing native file archive disclosure with server-tool observations",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "signature": "one complete current-host command review followed by ephemeral PATH observations",
+    "material": "actual authenticated SSH replies only; no invented tool or version claims",
+    "preserve": "semantic registry, Palette, Kit controls, bilingual fixed review actions, current connection authority and unknown-result isolation",
+    "introduce": [
+      "explicit review of one fixed read-only command",
+      "distinct found, missing and unverified observations",
+      "bounded optional seven-row detail region"
+    ],
+    "sweep": "focused GPUI 6/6 covers three families x light/dark x two languages; final combined gate exit 0 and independent source reviews APPROVE with zero open P0-P3; reviewers independently executed verified parent-built binaries without rebuilding; web render not applicable to native Rust/GPUI",
+    "native_evidence": "docs/testing/records/2026-11-15-archive-tools-pax-integration.md",
+    "finish_review": "AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED for source and engineering scope; native/platform matrix remains open"
+  },
+  {
     "date": "2026-11-06",
     "scope": "app",
     "shape": "existing native remote text review and protocol diagnostics",

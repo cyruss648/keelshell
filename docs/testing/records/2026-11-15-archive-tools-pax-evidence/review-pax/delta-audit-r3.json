@@ -1,0 +1,49 @@
+{
+  "recorded_utc": "2026-11-15T05:20:31.347819+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "old_pax_test_count": 34,
+  "new_pax_test_count": 40,
+  "added_names": [
+    "pax_accepts_small_nonnegative_base256_sizes_for_all_admitted_headers",
+    "pax_accepts_unambiguous_octal_size_padding",
+    "pax_base256_sizes_preserve_full_u64_and_existing_budget_limits",
+    "pax_rejects_full_width_base256_sizes_in_every_admitted_header_kind",
+    "pax_rejects_hidden_or_malformed_octal_sizes_even_with_overrides",
+    "pax_size_cannot_hide_a_full_width_invalid_ordinary_size"
+  ],
+  "removed_names": [],
+  "original_34_tests_and_fixture_bytes_unchanged_after_removing_added_block": true,
+  "executable_header_size_calls_remaining": [],
+  "parent_receipts": [
+    {
+      "label": "pax-size-reproduction-r1",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/logs/pax-size-reproduction-r1.log",
+      "log_sha256": "9f1afc4f6721dc8a1b3f861522e6c0d97b2d070f010443986c103d4e13effa8d",
+      "receipt_sha256": "c421232791959b3d4bf395ab6441f3713a48cbef3f8512082ff7cacf344a567a",
+      "claimed_log_sha256": "9f1afc4f6721dc8a1b3f861522e6c0d97b2d070f010443986c103d4e13effa8d",
+      "log_matches_receipt": true,
+      "exit": 101,
+      "independently_executed": false
+    },
+    {
+      "label": "core-archive-size-fix-r1",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/logs/core-archive-size-fix-r1.log",
+      "log_sha256": "57fe0a5756ecc0f6cc298d45c24219466687b67cc46b4b28022b941f2154eecf",
+      "receipt_sha256": "f10165e193c695a203c4a79e207a5993e0efb6a60e2b4ed919522f42af433ecc",
+      "claimed_log_sha256": "57fe0a5756ecc0f6cc298d45c24219466687b67cc46b4b28022b941f2154eecf",
+      "log_matches_receipt": true,
+      "exit": 0,
+      "independently_executed": false
+    },
+    {
+      "label": "full-gate-r3",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/logs/full-gate-r3.log",
+      "log_sha256": "14814dfb122b5efe279e8ad911bfd87042af8cc2437d3a646756567ce3513ecf",
+      "receipt_sha256": "2922e68249de75166045d917393a73d82ccb574246d34fa9534ebf0a300dd8f0",
+      "claimed_log_sha256": "14814dfb122b5efe279e8ad911bfd87042af8cc2437d3a646756567ce3513ecf",
+      "log_matches_receipt": true,
+      "exit": 1,
+      "independently_executed": false
+    }
+  ]
+}

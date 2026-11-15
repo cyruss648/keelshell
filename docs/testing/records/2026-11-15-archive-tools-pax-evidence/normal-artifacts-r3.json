@@ -1,0 +1,20 @@
+{
+  "recorded_utc": "2026-11-15T05:19:54.127742+00:00",
+  "build_receipt": "logs/gui-mcp-build-r3.json",
+  "build_freeze": "frozen-inputs-r3.json",
+  "current_freeze": "frozen-inputs-r4.json",
+  "production_changes_from_build_to_current": [],
+  "artifacts": {
+    "keelshell-app": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "bytes": 194751504,
+      "sha256": "175e1612e5b149b06627616feff6ae1bbc7d4f6b339f39c7b066c48be9848f05"
+    },
+    "keelshell-mcp": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "bytes": 14566512,
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88"
+    }
+  },
+  "boundary": "normal arm64 macOS debug artifacts; not native archive interactions, packaging, signing or installation"
+}

@@ -1,0 +1,19 @@
+{
+  "recorded_utc": "2026-11-15T05:08:55.306205+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cases": [
+    {
+      "case": "overflow_positive",
+      "raw_size_field_hex": "80000001000000000000000d",
+      "full_size": 18446744073709551629,
+      "tar_0_4_46_low_64_result": 13
+    },
+    {
+      "case": "negative_high_bits",
+      "raw_size_field_hex": "ffffffff000000000000000d",
+      "full_size": -18446744073709551603,
+      "tar_0_4_46_low_64_result": 13
+    }
+  ],
+  "kind": "supplemental raw-header arithmetic and independent Python parser; Rust decoder not executed"
+}

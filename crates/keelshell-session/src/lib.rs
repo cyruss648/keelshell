@@ -4,6 +4,7 @@
 //! sessions are remote SSH channels; this crate does not launch local shells.
 #![deny(missing_docs)]
 
+pub mod archive_tools;
 pub mod batch;
 pub mod completion;
 mod error;

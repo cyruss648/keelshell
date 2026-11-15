@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-11-15T05:37:53.716263+00:00",
+  "reason": "Raw unified diff context lines intentionally contain a single space. Initial staged diff whitespace check reported seven such lines; lossless gzip preserves their exact bytes without treating archived patches as new source whitespace. No source or test changes.",
+  "files": [
+    {
+      "source": "review-pax/r1-r2-test-literals.diff",
+      "archived": "review-pax/r1-r2-test-literals.diff.gz",
+      "original_sha256": "f744e59b4db518e24ec291ad72838a25720a79f565cd52f3c08c5a2d2509987a"
+    },
+    {
+      "source": "review-pax/r2-r3-production.diff",
+      "archived": "review-pax/r2-r3-production.diff.gz",
+      "original_sha256": "f881d186d56dfd5250354c2fc1ede029b78469d40cb865d64445aa0d5c03b9ba"
+    },
+    {
+      "source": "review-pax/r2-r3-tests.diff",
+      "archived": "review-pax/r2-r3-tests.diff.gz",
+      "original_sha256": "ffb2c423c51454e7ab52c3febc00c810319dd075c57c1040578b80c46f332a8b"
+    },
+    {
+      "source": "review-pax/r3-r4-test-escapes.diff",
+      "archived": "review-pax/r3-r4-test-escapes.diff.gz",
+      "original_sha256": "500621caff3bfc9ec20b710667e278fc8c190e7f496bd9f539be3de0b33b7683"
+    }
+  ]
+}

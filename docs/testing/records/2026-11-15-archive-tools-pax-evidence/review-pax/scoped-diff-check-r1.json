@@ -1,0 +1,17 @@
+{
+  "phase": "scoped_git_diff_check",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "e97705c3d773ea6919d76441685c5064e641ca86",
+    "--",
+    "crates/keelshell-core/src/archive.rs",
+    "crates/keelshell-core/tests/archive.rs"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "note": "New untracked archive_pax.rs reviewed and hash-bound separately; no formatting command was run."
+}

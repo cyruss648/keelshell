@@ -74,6 +74,8 @@ ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝
 
 [客户端归档传输](docs/product/ARCHIVE_TRANSFERS.md)将本地多选打包为 ZIP/tar.gz 后上传，或将一个远端归档下载并解包到新的本地目录。全部成员、路径和大小先审核，确认时重新核验源，已有目标保留。归档有格式与大小限制；本地安全解包后端面向 macOS/Linux，Windows 暂停用解包并显示原因，打包上传仍可用。工程验证、真实 OpenSSH 联调和原生验收分别记录在[归档测试记录](docs/testing/records/2026-11-15-reviewed-archive-transfer.md)。
 
+[服务端归档工具观察](docs/product/ARCHIVE_TOOL_INSPECTION.md)先审核完整固定命令，再查询当前 SSH 环境中七个工具名称的 PATH 解析；找到路径仅是观察，不验证版本、功能或互通。tar.gz 增加[有界 PAX 子集](docs/adr/0134-bounded-pax-archive-metadata.md)，仍检查原始与有效路径及完整原始大小。两项增量已通过集中工程门禁、真实 OpenSSH 联调和非作者源码复核，原生平台交互仍开放，见[本批记录](docs/testing/records/2026-11-15-archive-tools-pax-integration.md)。
+
 [本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；[多选整批删除](docs/product/KNOWLEDGE_BULK_MANAGEMENT.md)最多32条，审核包含筛选隐藏项，取消不写入，确认只保存一次。管理选择与[显式加入 Ask](docs/product/AI_KNOWLEDGE_CONTEXT.md)分别维护；发送前仍须核对历史来源和完整请求，保存开始就撤销受影响的旧审核。工程验证和新包原生验收见[本轮记录](docs/testing/records/2026-11-06-resource-knowledge-integration.md)。
 
 [主机资源趋势](docs/product/HOST_RESOURCE_TRENDS.md)复用当前认证会话的Linux采样，显示最近五分钟、最多60点的CPU和内存历史。缺失值不作零值，暂停、错误或计数异常会断段；显示和切换主题不增加远端命令。历史仅保存在对应会话内存中，真实采样与原生平台覆盖按本轮记录分别验收。

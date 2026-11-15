@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dd89ff795559e915/out/keelshell_app-dd89ff795559e915",
+    "--list"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "pid": 61636,
+  "started_utc": "2026-11-15T05:00:32.940913+00:00",
+  "finished_utc": "2026-11-15T05:00:32.958151+00:00",
+  "seconds": 0.017,
+  "timeout_seconds": 50,
+  "exit": 0,
+  "timed_out": false,
+  "signals_sent": [],
+  "wait_reaped": true,
+  "binary_sha256_before": "529b06bc710fb00ba38dae13f49b08deb264b4e5cb59a905e78bf2e1f608bf12",
+  "binary_sha256_after": "529b06bc710fb00ba38dae13f49b08deb264b4e5cb59a905e78bf2e1f608bf12",
+  "log_sha256": "fa89d1746f7d82aba2aa64250783a7ab76d11d795514b8de49cef5a37e69019e",
+  "expected_names": [
+    "files::transfer_tests::archive_inspection_tests::archive_tool_cancel_and_retry_need_separate_explicit_reviews",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_failed_refresh_retires_the_previous_success",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_late_reply_cannot_attach_to_a_replacement_connection",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_observations_render_in_all_themes_and_languages_without_reprobing",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_review_rejects_a_replaced_connection_without_token_change",
+    "files::transfer_tests::archive_inspection_tests::archive_tools_require_complete_review_and_run_once_without_sftp"
+  ],
+  "observed_names": [
+    "files::transfer_tests::archive_inspection_tests::archive_tool_cancel_and_retry_need_separate_explicit_reviews",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_failed_refresh_retires_the_previous_success",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_late_reply_cannot_attach_to_a_replacement_connection",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_observations_render_in_all_themes_and_languages_without_reprobing",
+    "files::transfer_tests::archive_inspection_tests::archive_tool_review_rejects_a_replaced_connection_without_token_change",
+    "files::transfer_tests::archive_inspection_tests::archive_tools_require_complete_review_and_run_once_without_sftp"
+  ],
+  "inventory_matches": true,
+  "total_listed": 1201,
+  "passed": null,
+  "failed": null,
+  "ignored": null,
+  "filtered": null,
+  "temporary_directory": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/review-tools/tmp-app-list",
+  "uses_parent_build_without_independent_recompilation": true
+}

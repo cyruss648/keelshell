@@ -1,0 +1,48 @@
+"""Archive a completed batch without replacing earlier evidence."""
+from pathlib import Path
+import datetime, gzip, hashlib, json
+root=Path(__file__).resolve().parents[2]
+source=Path(__file__).resolve().parent
+dest=root/'docs/testing/records/2026-11-15-archive-tools-pax-evidence'
+if dest.exists():
+    raise SystemExit('refusing to replace an evidence directory')
+summary=json.loads((source/'validation-summary-r4.json').read_text())
+if summary['gate_exit']!=0 or any(r['mismatches'] for r in summary['integrity_after_gate'].values()):
+    raise SystemExit('final successful input binding required')
+for path in ['review-tools/report-r1.md','review-pax/report-r3.md']:
+    if not (source/path).exists():
+        raise SystemExit('missing independent report: '+path)
+files=[]
+for p in sorted(source.rglob('*')):
+    if not p.is_file():continue
+    rel=p.relative_to(source)
+    if 'tmp' in rel.parts or p.suffix=='.py':continue
+    if p.suffix not in ['.json','.jsonl','.log','.md','.diff']:continue
+    files.append((p,rel))
+for original,name in [('run.py','command-runner.py.txt'),('summarize.py','validation-parser.py.txt')]:
+    files.append((source/original,Path(name)))
+for original,name in [
+    ('review-pax/tmp/r1-src-archive.rs','review-pax/snapshots/r2-production-archive.rs.txt'),
+    ('review-pax/tmp/r1-tests-archive_pax.rs','review-pax/snapshots/r1-archive-pax-tests.rs.txt'),
+    ('review-pax/tmp/pax-metadata-base256-overflow-r1.tar.gz','review-pax/fixtures/pax-metadata-base256-overflow-r1.tar.gz'),
+]:
+    files.append((source/original,Path(name)))
+dest.mkdir()
+manifest=[]
+for original,relative in files:
+    data=original.read_bytes()
+    target=dest/relative
+    compressed=relative.suffix=='.log'
+    if compressed:
+        target=target.with_name(target.name+'.gz')
+        saved=gzip.compress(data,mtime=0)
+    else:saved=data
+    target.parent.mkdir(parents=True,exist_ok=True)
+    if target.exists():raise SystemExit('duplicate archive target: '+str(relative))
+    target.write_bytes(saved)
+    verified=gzip.decompress(target.read_bytes()) if compressed else target.read_bytes()
+    if verified!=data:raise SystemExit('archive verification failed: '+str(relative))
+    manifest.append({'source':str(original.relative_to(source)),'archived':str(target.relative_to(dest)),'original_bytes':len(data),'original_sha256':hashlib.sha256(data).hexdigest(),'saved_bytes':len(saved),'saved_sha256':hashlib.sha256(saved).hexdigest(),'gzip':compressed})
+record={'recorded_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source_directory':str(source),'files':manifest,'boundary':'Preserved raw attempts, including failing and conditional reviewer reports; gzip is lossless and does not rewrite their claims.'}
+(dest/'archive-manifest.json').write_text(json.dumps(record,indent=2)+'\n')
+print(json.dumps({'directory':str(dest),'archived_files':len(manifest),'original_bytes':sum(r['original_bytes'] for r in manifest),'saved_bytes':sum(r['saved_bytes'] for r in manifest)},indent=2))

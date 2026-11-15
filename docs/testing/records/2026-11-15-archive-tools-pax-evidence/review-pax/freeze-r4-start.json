@@ -1,0 +1,19 @@
+{
+  "recorded_utc": "2026-11-15T05:19:32.723948+00:00",
+  "phase": "r4_start",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "freeze_sha256": "96bb5b3bded14516e3167d8281adee35901711cbca6ba9f41f91215afa179aef",
+  "input_count": 538,
+  "script_count": 10,
+  "changes_vs_r3": [
+    {
+      "section": "inputs",
+      "path": "crates/keelshell-core/tests/archive_pax.rs",
+      "r3": "4e8e6011f9e51bd82cc1f40bf4ea8ece2d2e9ff1ccebd127a2459a332b4ae335",
+      "r4": "7ae59ddfdc1b03709edbe3394bd893c76f44c2ae1cac46e67860d68606d20e96"
+    }
+  ],
+  "mismatches": [],
+  "nul_escape_replacement_count": 2,
+  "equivalent_escapes_only": true
+}

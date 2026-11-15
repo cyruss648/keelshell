@@ -1,0 +1,45 @@
+{
+  "recorded_utc": "2026-11-15T05:28:45.802706+00:00",
+  "scope": "this batch only",
+  "implementation_agents_closed": [
+    "01a1dd80-fec8-7752-9e06-5d3eccb2d877",
+    "01a1dd81-39f4-7a40-bb0d-75ca67beeb9d"
+  ],
+  "independent_review_agents_closed": [
+    "01a1dd92-28dd-7773-9c7e-df0524991cab",
+    "01a1dd92-68e4-7571-9f9a-f1e0e6a1dc05"
+  ],
+  "managed_implementation_worktrees": {
+    "archive-pax-20261115": {
+      "checkout_exists": false,
+      "method": "managed archive_worktree after source integration and agent closure"
+    },
+    "archive-tool-probe-20261115": {
+      "checkout_exists": false,
+      "method": "managed archive_worktree after source integration and agent closure"
+    }
+  },
+  "temporary_containers_created": 0,
+  "openssh_runs": {
+    "openssh-r1": {
+      "observed_processes_stopped": true,
+      "ancestry_unverified": [],
+      "owned_processes_stopped": true,
+      "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+      "tracked_process_identities": 61,
+      "temporary_directory_removed": true
+    },
+    "openssh-r3": {
+      "observed_processes_stopped": true,
+      "ancestry_unverified": [],
+      "owned_processes_stopped": true,
+      "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+      "tracked_process_identities": 77,
+      "temporary_directory_removed": true
+    }
+  },
+  "protected_and_other_task_checkouts": "preserved; no cleanup attempted",
+  "retained_valid_cargo_target": "work/recovery-batch-integration-20261115/target",
+  "current_gate": "full-gate-r4",
+  "runtime_work_directory_cleanup": "pending durable evidence verification"
+}

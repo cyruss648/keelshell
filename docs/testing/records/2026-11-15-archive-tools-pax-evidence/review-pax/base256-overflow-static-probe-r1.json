@@ -1,0 +1,22 @@
+{
+  "recorded_utc": "2026-11-15T05:04:48.252771+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "fixture": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/review-pax/tmp/pax-metadata-base256-overflow-r1.tar.gz",
+  "fixture_sha256": "029e6e6b92c608681a8e7ec56e959817b860c410968d3e6a62045af318973bd4",
+  "gzip_bytes": 135,
+  "tar_bytes": 2560,
+  "raw_size_field_hex": "80000001000000000000000d",
+  "full_positive_base256_size": 18446744073709551629,
+  "python_TarInfo_size": 18446744073709551629,
+  "tar_0_4_46_numeric_extended_from_last_8_bytes": 13,
+  "pax_payload_bytes": 13,
+  "pax_payload": "13 path=safe\n",
+  "header_checksum_valid": true,
+  "evidence_kind": "byte fixture and local dependency source analysis; NOT executed through Rust ArchiveBundle::decode",
+  "source_chain": [
+    "crates/keelshell-core/src/archive.rs:699",
+    "crates/keelshell-core/src/archive.rs:714",
+    "crates/keelshell-core/src/archive.rs:785",
+    "tar-0.4.46/src/header.rs:1536-1551"
+  ]
+}

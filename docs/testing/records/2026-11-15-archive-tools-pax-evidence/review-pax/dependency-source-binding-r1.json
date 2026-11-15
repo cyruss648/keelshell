@@ -1,0 +1,23 @@
+{
+  "recorded_utc": "2026-11-15T05:07:12.118866+00:00",
+  "dependency": "tar",
+  "version": "0.4.46",
+  "crate_path": "/Users/hdh/.cargo/registry/cache/rsproxy.cn-e3de039b2554c837/tar-0.4.46.crate",
+  "crate_sha256": "3f6221d9a6003c78398e3b239969f352578258df48c8eb051caadae0015bc840",
+  "Cargo_lock_package_checksum": "3f6221d9a6003c78398e3b239969f352578258df48c8eb051caadae0015bc840",
+  "files": [
+    {
+      "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/tar-0.4.46/src/header.rs",
+      "source_sha256": "b359f43e5540879b1e95e382be963cfc6e5a51a45713e5c615e10c0b1a9cd0c5",
+      "packaged_sha256": "b359f43e5540879b1e95e382be963cfc6e5a51a45713e5c615e10c0b1a9cd0c5",
+      "equal": true
+    },
+    {
+      "path": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/tar-0.4.46/src/entry_type.rs",
+      "source_sha256": "bdc7655918b97492f9f5204e9c4eee4e2c3268da398c7786342e6f993a6469c7",
+      "packaged_sha256": "bdc7655918b97492f9f5204e9c4eee4e2c3268da398c7786342e6f993a6469c7",
+      "equal": true
+    }
+  ],
+  "earlier_attempt": "Registry .cargo-checksum.json absent; previous combined inspection exited 1 after writing the valid fixture audit. This direct .crate comparison replaces that unavailable check."
+}

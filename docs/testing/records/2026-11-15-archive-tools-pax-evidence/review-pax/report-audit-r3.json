@@ -1,0 +1,19 @@
+{
+  "recorded_utc": "2026-11-15T05:25:54.071869+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "checks": {
+    "no_link_or_freeze_error": true,
+    "report_matches_receipt": true,
+    "review_artifacts_unchanged": true,
+    "r1_preserved": true,
+    "binary_hashes_match_executions": true,
+    "head_unchanged": true,
+    "two_nul_transformations_displayed_correctly": true
+  },
+  "failures": [],
+  "input_count": 538,
+  "script_count": 10,
+  "report": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/review-pax/report-r3.md",
+  "report_sha256": "d6c461acb57780374a9470985426cae246ab98440fded5e49fda0ec44908e133",
+  "receipt_sha256": "5c8bbfe4392d63e9d506f74e29f81cd19e12fafcbb690716139253908decd6ce"
+}

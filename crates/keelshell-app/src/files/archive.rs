@@ -361,6 +361,7 @@ impl FilesPanel {
                     "Safe new-folder publication is pending on this platform. Extraction is unavailable; packed uploads remain available.",
                 )))
             })
+            .child(self.archive_inspection_view(cx))
             .test_support()
             .into_any_element()
     }

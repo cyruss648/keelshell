@@ -5,6 +5,45 @@
 原始回执 UTC 保持。上一阶段完整过程保存在
 [原生收口前交接](history/2026-11-06-handoff-before-editor-native-closeout.md)。
 
+## 2026-11-15 已完成批次：服务端工具观察与 PAX 兼容
+
+在本地已提交的 `e97705c3d773ea6919d76441685c5064e641ca86` 上继续开发。
+本批状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`，
+仅代表本批工程与源码复核范围。
+两个独立实现 agent 已交付 SSH 工具检测和有界 PAX 解码；主线程集成原生
+审核卡片、会话绑定及实际 GPUI 回归。实现 agent 不执行 Cargo，主线程独占
+同一主树的有效 target，集成后集中完整验证、修复和新的非作者复核。
+
+工具观察需要审核完整固定命令，只有当前真实 SSH 连接可确认；取消、连接
+替换及迟到回复不能产生新授权。PAX 仅接纳严格普通元数据子集，原始/有效
+路径都继续检查，Python Unicode `?` 备用路径等限制明确保留。
+设计见 [ADR 0133](adr/0133-reviewed-server-archive-tool-inspection.md)、
+[ADR 0134](adr/0134-bounded-pax-archive-metadata.md)。
+本次在线依赖检查 60 秒超时，没有版本报告。仍只本地提交，不 push。
+
+最终 r4 完整门禁退出 `0`，耗时 `647.902s`：普通 Rust `2675/0/26 ignored`、
+rustdoc `14/0`、Python `131 run / 1 skipped`；fmt、严格 workspace all-targets
+Clippy、`x.y` 依赖策略和三组 AI controller 全部通过。538 个 Rust/Cargo 输入、
+10 个 gate 脚本在门禁后仍与最终冻结一致；app 清单 1201 项，74 个本批新增
+默认用例逐项存在且通过，不叠加专项或 reviewer 的重复执行。
+
+PAX 首轮非作者复核发现完整 TAR size 可能被底层 base-256 解析截断的 P2，
+两项实际 Rust 红回归已确认。修复对所有允许头完整解析原始 size，再进入预算和
+PAX 覆盖；6 项新增边界回归纳入 40 项 PAX 测试。新的差分复核关闭 P2，
+工具/UI 与 PAX reviewer 最终均 APPROVE、零 P0–P3。两者使用核对摘要及清单
+的父预构建 binary，分别独立执行 `6 + 16` 和 `40 + 40`，没有独立重编译。
+原始报告签署时尚无最终 gate 回执；父随后核对相同最终输入的 exit `0`，
+满足其工程条件，未改写原报告或此前失败证据。
+
+r3 真实 localhost OpenSSH `14/14`，正常 GUI/MCP arm64 Mach-O 构建通过；
+r3→r4 仅两处等价测试转义变化，生产输入一致。实现及复核 agent 已关闭，
+两个实现 worktree 已受管归档，OpenSSH 自有进程与临时目录已回收；本批未创建
+容器。命令、冻结、失败、复核和边界见
+[集中验证记录](testing/records/2026-11-15-archive-tools-pax-integration.md)及
+[持久证据](testing/records/2026-11-15-archive-tools-pax-evidence/README.md)。
+服务端实际打包、版本/功能验证、Zmodem、中继、Windows 安全解包、三平台原生
+交互、IME/完整辅助技术和发行验收仍开放，FILE-05/M4 与产品总目标继续进行。
+
 ## 2026-11-15 已完成批次：审核式客户端归档传输
 
 本批在 FILE-05 下实现本地多选打包上传和远端归档下载后安全解包，

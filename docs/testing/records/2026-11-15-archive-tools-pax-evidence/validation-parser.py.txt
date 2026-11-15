@@ -1,0 +1,73 @@
+from pathlib import Path
+import collections, datetime, hashlib, json, re, sys
+root=Path(__file__).resolve().parents[2]
+out=Path(__file__).resolve().parent
+revision=sys.argv[1] if len(sys.argv)>1 else 'r4'
+freeze_name=f'frozen-inputs-{revision}.json'
+freeze_path=out/freeze_name
+freeze=json.loads(freeze_path.read_text())
+receipt_path=out/f'logs/full-gate-{revision}.json'
+receipt=json.loads(receipt_path.read_text())
+if receipt['exit'] != 0 or receipt['timed_out']:
+    raise SystemExit('final gate has not passed')
+log=out/f'logs/full-gate-{revision}.log'
+if hashlib.sha256(log.read_bytes()).hexdigest()!=receipt['log_sha256']:
+    raise SystemExit('gate log digest differs from its receipt')
+suites=[]
+phase=None
+current=None
+doc_context=None
+commands=[]
+for line in log.read_text().splitlines():
+    text=line.strip()
+    if text.startswith('Running:'):
+        commands.append(text)
+        phase='workspace' if 'cargo test --workspace' in text else 'other'
+    if phase!='workspace':
+        continue
+    if text.startswith('Running ') and '(' in text:
+        doc_context=None
+        match=re.search(r'/build/(keelshell-[^/]+)/',text)
+        if not match:
+            raise SystemExit('unknown suite package: '+text)
+        current=dict(kind='ordinary',package=match[1],suite=text,passed_case_names=[])
+    elif text.startswith('Doc-tests '):
+        doc_context=text
+        current=dict(kind='rustdoc',package=text.split()[-1].replace('_','-'),suite=text,passed_case_names=[])
+    elif text.startswith('running ') and current is None and doc_context is not None:
+        current=dict(kind='rustdoc',package=doc_context.split()[-1].replace('_','-'),suite=doc_context+' (additional compile-fail group)',passed_case_names=[])
+    elif current and (match:=re.search(r'\btest (.+) \.\.\. ok$',text)):
+        current['passed_case_names'].append(match[1])
+    elif text.startswith('test result:'):
+        match=re.search(r'(\d+) passed; (\d+) failed; (\d+) ignored;',text)
+        if not match or not current:
+            raise SystemExit('unbound result: '+text)
+        current.update(zip(['passed','failed','ignored'],map(int,match.groups())))
+        if len(current['passed_case_names'])!=current['passed']:
+            raise SystemExit('test names do not match count: '+current['suite'])
+        suites.append(current)
+        current=None
+sums={kind:{key:sum(s[key] for s in suites if s['kind']==kind) for key in ['passed','failed','ignored']} for kind in ['ordinary','rustdoc']}
+by_package={p:{key:sum(s[key] for s in suites if s['kind']=='ordinary' and s['package']==p) for key in ['passed','failed','ignored']} for p in sorted({s['package'] for s in suites})}
+integrity={group:{'count':len(freeze[group]),'mismatches':[p for p,h in freeze[group].items() if hashlib.sha256((root/p).read_bytes()).hexdigest()!=h]} for group in ['inputs','scripts']}
+if any(v['mismatches'] for v in integrity.values()):
+    raise SystemExit('frozen inputs changed')
+app_suite=next(s for s in suites if s['package']=='keelshell-app' and s['kind']=='ordinary')
+app_path=root/app_suite['suite'].split('(',1)[1].rstrip(')')
+inventory=(out/'logs/app-inventory-r1.log').read_text()
+app_names=[line.removesuffix(': test') for line in inventory.splitlines() if line.endswith(': test')]
+new_cases={
+ 'app_inspection':[n for n in app_suite['passed_case_names'] if '::archive_inspection_tests::' in n],
+ 'session_parser':[n for s in suites if s['package']=='keelshell-session' for n in s['passed_case_names'] if n.startswith('archive_tools::tests::')],
+ 'session_ssh':[n for s in suites if 'Running tests/archive_tools.rs ' in s['suite'] for n in s['passed_case_names']],
+ 'pax':[n for s in suites if 'Running tests/archive_pax.rs ' in s['suite'] for n in s['passed_case_names']],
+}
+if {key:len(value) for key,value in new_cases.items()}!={'app_inspection':6,'session_parser':12,'session_ssh':16,'pax':(34 if revision=='r2' else 40)}:
+    raise SystemExit('new case inventory mismatch')
+if not all(n in app_names for n in new_cases['app_inspection']):
+    raise SystemExit('app discovery inventory missing new cases')
+r=dict(recorded_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),freeze=freeze_name,freeze_sha256=hashlib.sha256(freeze_path.read_bytes()).hexdigest(),integrity_after_gate=integrity,gate_receipt=f'logs/full-gate-{revision}.json',gate_exit=receipt['exit'],gate_seconds=receipt['seconds'],gate_log_sha256=receipt['log_sha256'],ordinary=sums['ordinary'],ordinary_by_package=by_package,rustdoc=sums['rustdoc'],python={'run':131,'skipped':1,'passed':130,'failed':0},commands=commands,app_test_inventory=len(app_names),app_test_binary=str(app_path),app_test_binary_sha256=hashlib.sha256(app_path.read_bytes()).hexdigest(),new_cases=new_cases,suites=suites,ordinary_excludes='rustdoc, controller repetitions, independent focused runs, and separately run ignored OpenSSH cases')
+path=out/f'validation-summary-{revision}.json'
+path.write_text(json.dumps(r,indent=2)+'\n')
+print(json.dumps({key:r[key] for key in ['ordinary','ordinary_by_package','rustdoc','app_test_inventory','gate_seconds']},indent=2))
+print('New cases:',{key:len(value) for key,value in new_cases.items()})

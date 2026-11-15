@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-15T05:01:00.437371+00:00",
+  "r1_sha256": "9153a94c3551829a4030e90f6e3ffc801815f4fb1ad392646bf868d032d87a93",
+  "r2_sha256": "b648c546c07a09d0ef5abf0d2f461917528c265019a7afefe583abcab6b42353",
+  "r1_to_r2_changes": {
+    "inputs": [
+      "crates/keelshell-core/tests/archive_pax.rs"
+    ],
+    "scripts": []
+  },
+  "r2_inputs": 538,
+  "r2_scripts": 10,
+  "mismatches": []
+}

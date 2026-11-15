@@ -1,0 +1,307 @@
+{
+  "recorded_utc": "2026-11-15T05:06:54.501274+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "fixtures": [
+    {
+      "fixture": "PYTHON_PAX_TAR_GZ",
+      "encoded_bytes": 500,
+      "sha256": "4c067a76d9bfeb5906da809707afb95ae64a79cdfc52b5f1bbd006b1b25df552",
+      "tar_bytes": 10240,
+      "physical_headers": [
+        {
+          "offset": 0,
+          "name": "././@PaxHeader",
+          "type": "g",
+          "size": 88,
+          "pax_records": [
+            [
+              "uid",
+              "1099511627776"
+            ],
+            [
+              "gid",
+              "2199023255552"
+            ],
+            [
+              "uname",
+              "archive-owner"
+            ],
+            [
+              "gname",
+              "archive-group"
+            ]
+          ]
+        },
+        {
+          "offset": 1024,
+          "name": "././@PaxHeader",
+          "type": "x",
+          "size": 76,
+          "pax_records": [
+            [
+              "atime",
+              "1735689601.000000001"
+            ],
+            [
+              "ctime",
+              "1735689602.5"
+            ],
+            [
+              "mtime",
+              "1735689600.125"
+            ]
+          ]
+        },
+        {
+          "offset": 2048,
+          "name": "records",
+          "type": "5",
+          "size": 0,
+          "pax_records": []
+        },
+        {
+          "offset": 2560,
+          "name": "././@PaxHeader",
+          "type": "x",
+          "size": 199,
+          "pax_records": [
+            [
+              "size",
+              "600"
+            ],
+            [
+              "path",
+              "records/long-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bin"
+            ],
+            [
+              "uname",
+              "archive-所有者"
+            ],
+            [
+              "mtime",
+              "1735689603.75"
+            ]
+          ]
+        },
+        {
+          "offset": 3584,
+          "name": "records/long-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "0",
+          "size": 600,
+          "pax_records": []
+        },
+        {
+          "offset": 5120,
+          "name": "././@PaxHeader",
+          "type": "x",
+          "size": 23,
+          "pax_records": [
+            [
+              "mtime",
+              "1735689604.25"
+            ]
+          ]
+        },
+        {
+          "offset": 6144,
+          "name": "records/short.txt",
+          "type": "0",
+          "size": 11,
+          "pax_records": []
+        },
+        {
+          "offset": 7168,
+          "name": "././@PaxHeader",
+          "type": "x",
+          "size": 22,
+          "pax_records": [
+            [
+              "mtime",
+              "1735689605.5"
+            ]
+          ]
+        },
+        {
+          "offset": 8192,
+          "name": "empty",
+          "type": "5",
+          "size": 0,
+          "pax_records": []
+        }
+      ],
+      "logical_members": [
+        {
+          "name": "records",
+          "type": "5",
+          "size": 0,
+          "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "uid": 1099511627776,
+          "gid": 2199023255552,
+          "mode": "0o7777",
+          "pax_headers": {
+            "uid": "1099511627776",
+            "gid": "2199023255552",
+            "uname": "archive-owner",
+            "gname": "archive-group",
+            "atime": "1735689601.000000001",
+            "ctime": "1735689602.5",
+            "mtime": "1735689600.125"
+          }
+        },
+        {
+          "name": "records/long-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bin",
+          "type": "0",
+          "size": 600,
+          "payload_sha256": "c8d354656d340543cc550b8cb0a990ef8ec7bbc319d8a352b6fe767378e091ce",
+          "uid": 1099511627776,
+          "gid": 2199023255552,
+          "mode": "0o7777",
+          "pax_headers": {
+            "uid": "1099511627776",
+            "gid": "2199023255552",
+            "uname": "archive-所有者",
+            "gname": "archive-group",
+            "size": "600",
+            "path": "records/long-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bin",
+            "mtime": "1735689603.75"
+          }
+        },
+        {
+          "name": "records/short.txt",
+          "type": "0",
+          "size": 11,
+          "payload_sha256": "c30a92f9ef889c07c781a7cf99f5b71415d4d1289e84473d1b9e6f01feffc62d",
+          "uid": 1099511627776,
+          "gid": 2199023255552,
+          "mode": "0o644",
+          "pax_headers": {
+            "uid": "1099511627776",
+            "gid": "2199023255552",
+            "uname": "archive-owner",
+            "gname": "archive-group",
+            "mtime": "1735689604.25"
+          }
+        },
+        {
+          "name": "empty",
+          "type": "5",
+          "size": 0,
+          "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "uid": 1099511627776,
+          "gid": 2199023255552,
+          "mode": "0o644",
+          "pax_headers": {
+            "uid": "1099511627776",
+            "gid": "2199023255552",
+            "uname": "archive-owner",
+            "gname": "archive-group",
+            "mtime": "1735689605.5"
+          }
+        }
+      ],
+      "zero_tail_bytes": 1536
+    },
+    {
+      "fixture": "MACOS_PAX_TAR_GZ",
+      "encoded_bytes": 291,
+      "sha256": "b6ecf96f4e687a57ab718ab292412185c80eb69c1741b90c54c71115bd1e0795",
+      "tar_bytes": 10240,
+      "physical_headers": [
+        {
+          "offset": 0,
+          "name": "PaxHeader/posix",
+          "type": "x",
+          "size": 84,
+          "pax_records": [
+            [
+              "ctime",
+              "1735689602.000000001"
+            ],
+            [
+              "atime",
+              "1735689601.987654321"
+            ],
+            [
+              "mtime",
+              "1735689600.125"
+            ]
+          ]
+        },
+        {
+          "offset": 1024,
+          "name": "posix",
+          "type": "5",
+          "size": 0,
+          "pax_records": []
+        },
+        {
+          "offset": 1536,
+          "name": "posix/PaxHeader/data.bin",
+          "type": "x",
+          "size": 84,
+          "pax_records": [
+            [
+              "ctime",
+              "1735689602.000000001"
+            ],
+            [
+              "atime",
+              "1735689601.987654321"
+            ],
+            [
+              "mtime",
+              "1735689600.125"
+            ]
+          ]
+        },
+        {
+          "offset": 2560,
+          "name": "posix/data.bin",
+          "type": "0",
+          "size": 16,
+          "pax_records": []
+        }
+      ],
+      "logical_members": [
+        {
+          "name": "posix",
+          "type": "5",
+          "size": 0,
+          "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "uid": 501,
+          "gid": 20,
+          "mode": "0o7777",
+          "pax_headers": {
+            "ctime": "1735689602.000000001",
+            "atime": "1735689601.987654321",
+            "mtime": "1735689600.125"
+          }
+        },
+        {
+          "name": "posix/data.bin",
+          "type": "0",
+          "size": 16,
+          "payload_sha256": "9fb77f72fbbe2335f055a293731606bb05d4b1b2b91adca578dde8cbeee10460",
+          "uid": 501,
+          "gid": 20,
+          "mode": "0o7777",
+          "pax_headers": {
+            "ctime": "1735689602.000000001",
+            "atime": "1735689601.987654321",
+            "mtime": "1735689600.125"
+          }
+        }
+      ],
+      "zero_tail_bytes": 6656
+    }
+  ],
+  "python_unicode_fallback": {
+    "effective_name": "资料.txt",
+    "ordinary_fallback_ascii": "??.txt",
+    "incompatible_character": "?",
+    "rust_validation_evidence": "archive.rs:305-309 and archive.rs:750; tests/archive_pax.rs:457-470",
+    "rust_decoder_executed_for_generated_case": false
+  },
+  "filesystem_extraction": false,
+  "fixture_provenance_limit": "Fixture bytes and metadata inspected independently. Original author generation commands were not rerun; writer version comments were not independently attested."
+}

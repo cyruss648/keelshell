@@ -25,6 +25,9 @@ use crate::files::sftp_test_filesystem as filesystem;
 #[path = "test_server_identity_tests.rs"]
 mod identity_tests;
 
+#[path = "archive_tools_fixture.rs"]
+pub(super) mod archive_tools_fixture;
+
 #[path = "pause_handoff_fixture.rs"]
 pub(crate) mod pause_handoff_fixture;
 
@@ -50,6 +53,7 @@ struct Peer {
     filesystem: filesystem::Filesystem,
     active: Arc<AtomicUsize>,
     jobs: JoinSet<()>,
+    archive_tools: Arc<archive_tools_fixture::Fixture>,
 }
 impl server::Handler for Peer {
     type Error = russh::Error;
@@ -97,11 +101,58 @@ impl server::Handler for Peer {
         });
         Ok(())
     }
+
+    async fn exec_request(
+        &mut self,
+        id: ChannelId,
+        command: &[u8],
+        session: &mut server::Session,
+    ) -> Result<(), Self::Error> {
+        if command != keelshell_session::archive_tools::probe_command().as_bytes() {
+            session.channel_failure(id)?;
+            session.close(id)?;
+            return Ok(());
+        }
+        let Some(mut channel) = self.channels.remove(&id) else {
+            return Err(russh::Error::Disconnect);
+        };
+        let (response, hold) = self.archive_tools.reply();
+        session.channel_success(id)?;
+        self.jobs.spawn(async move {
+            if let Some(mut hold) = hold {
+                tokio::select! {
+                    _ = &mut hold => {}
+                    _ = tokio::time::sleep(Duration::from_secs(7)) => {
+                        let _ = channel.close().await;
+                        return;
+                    }
+                    _ = async {
+                        // Exec and other request notifications may already
+                        // be queued. Only closure retires the held reply.
+                        while let Some(message) = channel.wait().await {
+                            if matches!(message, russh::ChannelMsg::Close) {
+                                break;
+                            }
+                        }
+                    } => {
+                        let _ = channel.close().await;
+                        return;
+                    }
+                }
+            }
+            let _ = channel.data(&response[..]).await;
+            let _ = channel.exit_status(0).await;
+            let _ = channel.eof().await;
+            let _ = channel.close().await;
+        });
+        Ok(())
+    }
 }
 
 pub(crate) struct Server {
     pub(crate) filesystem: filesystem::Filesystem,
     pub(crate) active: Arc<AtomicUsize>,
+    pub(super) archive_tools: Arc<archive_tools_fixture::Fixture>,
     address: std::net::SocketAddr,
     fingerprint: String,
     task: JoinHandle<()>,
@@ -137,6 +188,8 @@ impl Server {
         let active = Arc::new(AtomicUsize::new(0));
         let shared_fs = filesystem.clone();
         let shared_active = active.clone();
+        let archive_tools = Arc::new(archive_tools_fixture::Fixture::default());
+        let shared_archive_tools = archive_tools.clone();
         let (listener_handoff, mut handoff_request) =
             oneshot::channel::<oneshot::Sender<TcpListener>>();
         let task = runtime.spawn(async move {
@@ -159,6 +212,7 @@ impl Server {
                             filesystem: shared_fs.clone(),
                             active: shared_active.clone(),
                             jobs: JoinSet::new(),
+                            archive_tools: shared_archive_tools.clone(),
                         };
                         clients.spawn(async move {
                             if let Ok(client) = server::run_stream(config, socket, peer).await {
@@ -176,6 +230,7 @@ impl Server {
         Self {
             filesystem,
             active,
+            archive_tools,
             address,
             fingerprint,
             task,

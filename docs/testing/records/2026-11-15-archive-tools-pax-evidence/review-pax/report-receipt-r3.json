@@ -1,0 +1,81 @@
+{
+  "recorded_utc": "2026-11-15T05:25:13.860525+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "report": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/review-pax/report-r3.md",
+  "report_sha256": "d6c461acb57780374a9470985426cae246ab98440fded5e49fda0ec44908e133",
+  "recommendation": "APPROVE",
+  "open_findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "closed_findings": [
+    "P2-01"
+  ],
+  "baseline": "e97705c3d773ea6919d76441685c5064e641ca86",
+  "signing_freeze": "r4",
+  "r3_freeze_sha256": "e90687d5fb0f2932ec7f4d754180980a798c85cc7e05d42d708b63385e710ec8",
+  "r4_freeze_sha256": "96bb5b3bded14516e3167d8281adee35901711cbca6ba9f41f91215afa179aef",
+  "executed_parent_prebuilt_revision": "r3",
+  "independent_recompilation": false,
+  "r3_to_r4_difference": "Exactly two semantically equivalent test NUL escapes; production unchanged",
+  "executed_passed": 80,
+  "executed_failed": 0,
+  "executed_ignored": 0,
+  "binary_commands": 4,
+  "artifacts": {
+    "freeze-r3-start.json": "f42f885cea618f0239d0c2e7238d335b3234956b74a5a3d8d12483301df5a95c",
+    "freeze-r4-start.json": "5d3eb1ee2d0ada09fc58cb5e1696ab1e87c9a89038e3c59765961dc6b87fa2c4",
+    "freeze-r4-end.json": "2d3b8d3503db1ec0099928fbb6c2443dd60cba92e55243123d985aea130a8657",
+    "delta-audit-r3.json": "0ef31aba57af85faf47e6d0b5dd16335eebc1091284016a35dd4e70e28c54013",
+    "commands-r3.jsonl": "0c1cd401451a89c7fd9e04e522fb188e435575bf3bf7abc2b566fe8da5e81502",
+    "pax-list-r3.log": "ee36ae6b8d4a4e195c8666801e5d7db88ed11a05c4ce7065b5daff070f5e7770",
+    "archive-list-r3.log": "175631a462faa6f25362e573ce82146c0c8a37e47a5089abb9e2cf970a429f7a",
+    "pax-execute-r3.log": "380d8c83d8d1703c7aad757f9c14fee7cf136a2809713f38c1cf89a5bcef6181",
+    "archive-execute-r3.log": "298b80833b5887c84d53085ec07f9e6fd0ff37086b1244a582a30c9dd3b3a7a2",
+    "pax-inventory-r3.json": "8448eab52ae1cc0d1f1139612ec1a5f33d1ddad4d4601095f0b7748c86cbe2ae",
+    "archive-inventory-r3.json": "dbce606a2d6b0e3af5cb7091a622ad0f1c1a74747e633270a405c9ad457ba2b3",
+    "r2-r3-production.diff": "f881d186d56dfd5250354c2fc1ede029b78469d40cb865d64445aa0d5c03b9ba",
+    "r2-r3-tests.diff": "ffb2c423c51454e7ab52c3febc00c810319dd075c57c1040578b80c46f332a8b",
+    "r3-r4-test-escapes.diff": "500621caff3bfc9ec20b710667e278fc8c190e7f496bd9f539be3de0b33b7683"
+  },
+  "binaries": {
+    "pax": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6f1f933af327b943/out/archive_pax-6f1f933af327b943",
+      "current_sha256": "650f6852fb207b01136b89d822592a000b940536edf9775cdd5c6ab8ef917d67",
+      "executed_sha256": "650f6852fb207b01136b89d822592a000b940536edf9775cdd5c6ab8ef917d67",
+      "matches_executed": true
+    },
+    "archive": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/86ed372bc283f58c/out/archive-86ed372bc283f58c",
+      "current_sha256": "aa30b8f14c5c611966b2e7fd7dcb902d2d0a04d3f79e2ffcf6c7c806081b2733",
+      "executed_sha256": "aa30b8f14c5c611966b2e7fd7dcb902d2d0a04d3f79e2ffcf6c7c806081b2733",
+      "matches_executed": true
+    }
+  },
+  "original_r1_artifacts": {
+    "report-r1.md": {
+      "sha256": "352ddd7dbc3aacff4c4f2a0eff73c3403cde958f7cece165b9383906c041b248",
+      "unchanged": true
+    },
+    "report-receipt-r1.json": {
+      "sha256": "b7c4f7ec9fd3538d37fe427bb26ef2cd9a0caa5861ce1c7718eaef0d0f72de96",
+      "unchanged": true
+    },
+    "notice-p2-01-r1.md": {
+      "sha256": "7cc48067f876b2a0c15b95b10ea648d29ab8a353837b2ea87b9e45e1581975f2",
+      "unchanged": true
+    },
+    "base256-overflow-static-probe-r1.json": {
+      "sha256": "9dcd55d2a88f9e22204b8d6f86306a7cb0b286c37a80cc249844b3eb0079c9f7",
+      "unchanged": true
+    },
+    "tmp/pax-metadata-base256-overflow-r1.tar.gz": {
+      "sha256": "029e6e6b92c608681a8e7ec56e959817b860c410968d3e6a62045af318973bd4",
+      "unchanged": true
+    }
+  },
+  "parent_full_gate_r4_signed": false,
+  "native_acceptance": false
+}

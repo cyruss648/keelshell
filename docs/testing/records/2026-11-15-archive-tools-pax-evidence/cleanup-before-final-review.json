@@ -1,0 +1,34 @@
+{
+  "recorded_utc": "2026-11-15T05:11:55.044447+00:00",
+  "scope": "this batch only",
+  "implementation_agents_closed": [
+    "01a1dd80-fec8-7752-9e06-5d3eccb2d877",
+    "01a1dd81-39f4-7a40-bb0d-75ca67beeb9d"
+  ],
+  "review_agents_closed": [
+    "01a1dd92-28dd-7773-9c7e-df0524991cab"
+  ],
+  "pax_review": "pending",
+  "worktrees": {
+    "archive-pax-20261115": {
+      "checkout_exists": false,
+      "method": "managed archive_worktree after source integration and agent closure"
+    },
+    "archive-tool-probe-20261115": {
+      "checkout_exists": false,
+      "method": "managed archive_worktree after source integration and agent closure"
+    }
+  },
+  "temporary_containers_created": 0,
+  "openssh_cleanup": {
+    "observed_processes_stopped": true,
+    "ancestry_unverified": [],
+    "owned_processes_stopped": true,
+    "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+    "tracked_process_identities": 61,
+    "temporary_directory_removed": true
+  },
+  "protected_and_other_task_checkouts": "preserved; no cleanup attempted",
+  "active_target": "work/recovery-batch-integration-20261115/target",
+  "gate_receipt": "logs/full-gate-r2.json"
+}

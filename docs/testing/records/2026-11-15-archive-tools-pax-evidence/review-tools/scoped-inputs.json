@@ -1,0 +1,72 @@
+{
+  "crates/keelshell-session/src/archive_tools.rs": {
+    "sha256": "756183bb5b340800435af774e23bb4025e681e481abc15f949c0795701cad986",
+    "bytes": 19426,
+    "in_freeze": true
+  },
+  "crates/keelshell-session/tests/archive_tools.rs": {
+    "sha256": "ef300f26e878194b8ca5e2b3c20a3df22f63a965eb6fed01ad71a302b3ec8afa",
+    "bytes": 21654,
+    "in_freeze": true
+  },
+  "crates/keelshell-session/src/lib.rs": {
+    "sha256": "dc06d76158e2e31b59405ead29b55b4ecba141dfb733614a05fbfffd04d39afb",
+    "bytes": 1302,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files.rs": {
+    "sha256": "d9120936e18591b4ad82d644fbffa22d1cd96579d647cbce91cd3cf59cf300bb",
+    "bytes": 141566,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files/archive_inspection.rs": {
+    "sha256": "92c2c36c6019cfa01c79ebf77ac48d3f67547cb2582e8d5a8276fb16e21eba87",
+    "bytes": 11495,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files/archive_inspection_tests.rs": {
+    "sha256": "eb7b2dd9d9198dc2061d91d9abf44217a2d2070b008fbd6ba18a0336be62a27b",
+    "bytes": 8433,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files/archive_tools_fixture.rs": {
+    "sha256": "e28433ee726362c50ae8d1600daeee71ec0a4168acef27aac871e2f8e2d8e436",
+    "bytes": 1903,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files/worker.rs": {
+    "sha256": "a773bedf65a66309cd1dab40959cc19aa37f26b80674c7bb52b274607ac17f4d",
+    "bytes": 40945,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files/test_server.rs": {
+    "sha256": "2b86ca8233a661d91153e83da49a8970ca8a8482aa6e81a3e7d8217005ce2010",
+    "bytes": 8991,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files/transfer_tests.rs": {
+    "sha256": "e8ab87e2b248b47515535eadda591fea82e676dac2e6a095fb3c30671c2f0f0a",
+    "bytes": 70507,
+    "in_freeze": true
+  },
+  "crates/keelshell-app/src/files/archive.rs": {
+    "sha256": "4a7f2c27db8cad22fbf915333d33ad00ac3d268e764e5a147733e1864af78499",
+    "bytes": 14666,
+    "in_freeze": true
+  },
+  "crates/keelshell-session/tests/openssh_interop.rs": {
+    "sha256": "19ec16ff2553b4ea02d8899a059e5872ad529f8c536b2ceba836d82665700c61",
+    "bytes": 46653,
+    "in_freeze": true
+  },
+  "docs/adr/0133-reviewed-server-archive-tool-inspection.md": {
+    "sha256": "fc506196d029d1bf3e3220c0f5b76406f9095b71d79b83c1ece50b3467ec5e3d",
+    "bytes": 2395,
+    "in_freeze": false
+  },
+  "docs/product/ARCHIVE_TOOL_INSPECTION.md": {
+    "sha256": "3ede6ac74519c448e31908f33e08d623911acd2c3a6b131e8c68e910cdec6894",
+    "bytes": 2706,
+    "in_freeze": false
+  }
+}

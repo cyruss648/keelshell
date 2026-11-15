@@ -21,6 +21,8 @@ use super::{
 
 #[path = "action_view_tests.rs"]
 mod action_view_tests;
+#[path = "archive_inspection_tests.rs"]
+mod archive_inspection_tests;
 #[path = "archive_tests.rs"]
 mod archive_tests;
 #[path = "batch_tests.rs"]
@@ -249,7 +251,9 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
         | "archive-format-zip"
         | "archive-format-tar-gz"
         | "review-archive-upload"
-        | "review-archive-extract" => Some("toggle-file-transfer-settings"),
+        | "review-archive-extract"
+        | "review-archive-tool-inspection"
+        | "toggle-archive-tool-details" => Some("toggle-file-transfer-settings"),
         _ => None,
     };
     if window

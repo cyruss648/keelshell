@@ -1,0 +1,13 @@
+{
+  "recorded_utc": "2026-11-15T05:03:08.851728+00:00",
+  "phase": "archive_output_parse_correction",
+  "binary_returncode": 0,
+  "initial_wrapper_returncode": 1,
+  "initial_wrapper_failure": "strict exact-line parser missed expected ZipWriter::drop stderr concatenated before ok; binary itself passed",
+  "original_log_preserved": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/review-pax/archive-execute-r1.log",
+  "tests_passed": 40,
+  "tests_failed": 0,
+  "tests_ignored": 0,
+  "missing_names": [],
+  "rerun": false
+}

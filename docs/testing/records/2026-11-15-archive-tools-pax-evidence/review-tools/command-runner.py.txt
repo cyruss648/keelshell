@@ -1,0 +1,151 @@
+"""Read-only, bounded execution of the two explicitly authorized test binaries."""
+import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import sys
+import time
+
+ROOT = Path("/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell")
+OUT = Path(__file__).resolve().parent
+TARGET = ROOT / "work/recovery-batch-integration-20261115/target/debug/build"
+BINARIES = {
+    "app": TARGET / "keelshell-app/dd89ff795559e915/out/keelshell_app-dd89ff795559e915",
+    "session": TARGET / "keelshell-session/eb1796ec9fab9e9c/out/archive_tools-eb1796ec9fab9e9c",
+}
+SOURCES = {
+    "app": ROOT / "crates/keelshell-app/src/files/archive_inspection_tests.rs",
+    "session": ROOT / "crates/keelshell-session/tests/archive_tools.rs",
+}
+PREFIX = "files::transfer_tests::archive_inspection_tests::"
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def expected_names(kind):
+    source = SOURCES[kind].read_text()
+    names = re.findall(
+        r"#\[(?:gpui_kit::test|tokio::test(?:\([^\]]*\))?|test)\]"
+        r"\s*(?:async\s+)?fn\s+([a-zA-Z0-9_]+)",
+        source,
+    )
+    if kind == "app":
+        names = [PREFIX + name for name in names]
+    assert len(names) == {"app": 6, "session": 16}[kind], names
+    return sorted(names)
+
+
+def main():
+    kind, action = sys.argv[1:]
+    assert kind in BINARIES and action in ("list", "tests")
+    label = kind + "-" + action
+    log_path = OUT / (label + ".log")
+    receipt_path = OUT / (label + ".json")
+    assert not log_path.exists() and not receipt_path.exists(), "preserve earlier evidence"
+    expected = expected_names(kind)
+    if action == "tests":
+        listing = json.loads((OUT / (kind + "-list.json")).read_text())
+        assert listing["exit"] == 0 and listing["inventory_matches"]
+        assert listing["binary_sha256_after"] == digest(BINARIES[kind])
+    args = (
+        ["--list"]
+        if action == "list"
+        else ([PREFIX, "--test-threads=4"] if kind == "app" else ["--test-threads=4"])
+    )
+    command = [str(BINARIES[kind]), *args]
+    isolated = OUT / ("tmp-" + label)
+    isolated.mkdir()
+    env = dict(os.environ)
+    env.update(
+        TMPDIR=str(isolated) + "/",
+        TMP=str(isolated),
+        TEMP=str(isolated),
+        KEELSHELL_DATA_DIR=str(isolated / "app-data"),
+        PYTHONDONTWRITEBYTECODE="1",
+    )
+    before = digest(BINARIES[kind])
+    started = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    start = time.monotonic()
+    timed_out = False
+    signals_sent = []
+    with log_path.open("xb") as log:
+        proc = subprocess.Popen(
+            command,
+            cwd=ROOT,
+            env=env,
+            stdin=subprocess.DEVNULL,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        try:
+            code = proc.wait(timeout=50)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            os.killpg(proc.pid, signal.SIGTERM)
+            signals_sent.append("SIGTERM")
+            try:
+                code = proc.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                os.killpg(proc.pid, signal.SIGKILL)
+                signals_sent.append("SIGKILL")
+                code = proc.wait(timeout=3)
+    text = log_path.read_text(errors="replace")
+    if action == "list":
+        listed = sorted(re.findall(r"^(.+): test$", text, re.MULTILINE))
+        relevant = [name for name in listed if kind != "app" or name.startswith(PREFIX)]
+        passed = failed = ignored = filtered = None
+        matches = relevant == expected
+    else:
+        relevant = sorted(re.findall(r"^test (.+) \.\.\. ok$", text, re.MULTILINE))
+        summary = re.search(
+            r"test result: \w+\. (\d+) passed; (\d+) failed; (\d+) ignored;"
+            r" \d+ measured; (\d+) filtered out;",
+            text,
+        )
+        passed, failed, ignored, filtered = (
+            map(int, summary.groups()) if summary else (None, None, None, None)
+        )
+        listed = []
+        matches = relevant == expected
+    record = {
+        "command": command,
+        "cwd": str(ROOT),
+        "pid": proc.pid,
+        "started_utc": started,
+        "finished_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "seconds": round(time.monotonic() - start, 3),
+        "timeout_seconds": 50,
+        "exit": code,
+        "timed_out": timed_out,
+        "signals_sent": signals_sent,
+        "wait_reaped": proc.returncode is not None,
+        "binary_sha256_before": before,
+        "binary_sha256_after": digest(BINARIES[kind]),
+        "log_sha256": digest(log_path),
+        "expected_names": expected,
+        "observed_names": relevant,
+        "inventory_matches": matches,
+        "total_listed": len(listed) if action == "list" else None,
+        "passed": passed,
+        "failed": failed,
+        "ignored": ignored,
+        "filtered": filtered,
+        "temporary_directory": str(isolated),
+        "uses_parent_build_without_independent_recompilation": True,
+    }
+    receipt_path.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n")
+    print(json.dumps(record, ensure_ascii=False, indent=2), flush=True)
+    if action == "tests":
+        print(text[-5000:], flush=True)
+    return 0 if code == 0 and matches and not timed_out else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

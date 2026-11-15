@@ -1,0 +1,13 @@
+{
+  "utc": "2026-11-15T05:05:06.394450+00:00",
+  "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/tests/archive_pax.rs",
+  "reverse_replacement_counts": {
+    "xg": 7,
+    "05": 1
+  },
+  "current_sha256": "f7dd1aeb19caa6c6772122e0d164bc7ff473c93795a6158594772ffb309dd828",
+  "matches_r2": true,
+  "reconstructed_r1_sha256": "dbc8f6d41afdab27805e29aa2cb3112f283439c6f9beef3f4fccbb5121d75a39",
+  "matches_r1": true,
+  "method": "in-memory reverse substitution of seven *b\"xg\" and one *b\"05\"; no source file written"
+}

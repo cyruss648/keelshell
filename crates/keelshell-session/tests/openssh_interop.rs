@@ -17,6 +17,57 @@ type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
 #[tokio::test]
 #[ignore = "requires the disposable pinned OpenSSH loopback runner"]
+async fn openssh_archive_tool_inspection_observes_path_and_preserves_the_connection() -> TestResult
+{
+    use keelshell_session::archive_tools::{ArchiveTool, ArchiveToolAvailability};
+    use std::sync::atomic::AtomicBool;
+
+    tokio::time::timeout(Duration::from_secs(25), async {
+        let fixture = Fixture::connect().await?;
+        let report = fixture
+            .ssh
+            .inspect_archive_tools(&AtomicBool::new(false))
+            .await?;
+        assert_eq!(report.tools.len(), ArchiveTool::ALL.len());
+        for (observation, tool) in report.tools.iter().zip(ArchiveTool::ALL) {
+            assert_eq!(observation.tool, tool);
+            match observation.availability {
+                ArchiveToolAvailability::Found => {
+                    assert!(observation.path.as_deref().is_some_and(|path| {
+                        path.starts_with('/') && !path.chars().any(char::is_control)
+                    }));
+                }
+                ArchiveToolAvailability::Missing => assert!(observation.path.is_none()),
+                ArchiveToolAvailability::Unverified => {}
+            }
+        }
+        // The supported POSIX runner resolves its shell utility. No archive
+        // tool's presence or optional feature is inferred from this receipt.
+        assert!(
+            report.tools.iter().any(|item| {
+                item.tool == ArchiveTool::Tar && item.availability == ArchiveToolAvailability::Found
+            }),
+            "the owned OpenSSH test host must expose its installed tar"
+        );
+        assert!(
+            fixture
+                .ssh
+                .inspect_archive_tools(&AtomicBool::new(true))
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            fixture.ssh.exec("printf inspection-survives").await?.stdout,
+            b"inspection-survives"
+        );
+        assert!(fixture.sftp.list(&fixture.directory).await.is_ok());
+        fixture.close(&[], &[]).await
+    })
+    .await?
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable pinned OpenSSH loopback runner"]
 async fn openssh_reviewed_archives_pack_and_extract_zip_and_tar_gz_exactly() -> TestResult {
     use keelshell_core::{ArchiveBundle, ArchiveFormat};
     use keelshell_session::sftp::ArchiveTransferRequest;

@@ -387,6 +387,17 @@ async fn operate_inner(
     journal: Option<&super::sync::journal::SharedJournal>,
     recovery_context: Option<(Arc<TransferRecoveryStore>, TransferRecoveryClaim)>,
 ) -> Result<Outcome, FileFailure> {
+    if let Operation::InspectArchiveTools(probe) = &operation {
+        if !probe.matches_session(&session) {
+            return Err(FileFailure::CancelledBeforeStart);
+        }
+        let report = tokio::select! {
+            biased;
+            _ = cancellation(&stop) => return Err(FileFailure::CancelledBeforeStart),
+            result = session.inspect_archive_tools(&stop) => result?,
+        };
+        return Ok(Outcome::ArchiveTools(probe.clone(), report));
+    }
     let sftp = tokio::select! {
         biased;
         _ = cancellation(&stop) => return Err(FileFailure::CancelledBeforeStart),
@@ -536,6 +547,7 @@ async fn operate_inner(
                 )))
             }
             Operation::TransferBatch(_) => Err(FileFailure::WorkerStopped),
+            Operation::InspectArchiveTools(_) => Err(FileFailure::WorkerStopped),
             Operation::DiscardPersistedRecoveryBatch(_) => Err(FileFailure::WorkerStopped),
             Operation::TransferFile(plan) => {
                 let direction = plan.direction();

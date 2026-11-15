@@ -36,6 +36,7 @@ use std::{
 
 mod action_view;
 mod archive;
+mod archive_inspection;
 mod batch;
 mod browser;
 mod editor_language;
@@ -101,6 +102,7 @@ enum Operation {
     TransferBatch(Box<batch::BatchPlan>),
     PlanArchive(archive::ArchiveRequest),
     TransferArchive(Box<archive::ArchivePlan>),
+    InspectArchiveTools(archive_inspection::Probe),
     TransferFile(FileTransferPlan),
     TransferDirectory(DirectoryTransferPlan),
     PlanResume(TransferSpec, bool),
@@ -150,6 +152,10 @@ enum Outcome {
     PlannedDirectory(DirectoryTransferPlan),
     PlannedBatch(Box<batch::BatchPlan>),
     PlannedArchive(Box<archive::ArchivePlan>),
+    ArchiveTools(
+        archive_inspection::Probe,
+        keelshell_session::archive_tools::ArchiveToolReport,
+    ),
     PlannedFileResume(FileResumePlan),
     PlannedDirectoryResume(DirectoryResumePlan),
     PlannedPersistedFileResume {
@@ -221,6 +227,7 @@ pub struct FilesPanel {
     local: Entity<InputState>,
     archive_name: Entity<InputState>,
     archive_format: keelshell_core::ArchiveFormat,
+    archive_inspection: archive_inspection::State,
     local_browser: local_browser::LocalBrowser,
     remote_sort: browser::BrowserSort,
     remote_selection: selection::Selection<String>,
@@ -1042,6 +1049,7 @@ impl FilesPanel {
                 cx,
             ),
             archive_format: keelshell_core::ArchiveFormat::Zip,
+            archive_inspection: archive_inspection::State::default(),
             local_browser: local_browser::LocalBrowser::new(window, cx),
             remote_sort: browser::BrowserSort::default(),
             remote_selection: selection::Selection::default(),
@@ -1249,6 +1257,7 @@ impl FilesPanel {
         self.suspended = true;
         self.session = None;
         self.session_token = uuid::Uuid::new_v4();
+        self.archive_inspection = archive_inspection::State::default();
         self.recovery = None;
         self.revoke_recovery_review();
         self.recovery_claim_requests.clear();
@@ -1438,6 +1447,19 @@ impl FilesPanel {
             cx.notify();
             return;
         }
+        let archive_probe = if let Operation::InspectArchiveTools(probe) = &operation {
+            if !self.archive_probe_is_current(probe) {
+                self.status = Message::new(
+                    "检测所审核的 SSH 会话已变化，请重新审核。",
+                    "The reviewed inspection session changed. Review a new inspection.",
+                );
+                cx.notify();
+                return;
+            }
+            Some(probe.clone())
+        } else {
+            None
+        };
         if operation.transfer_status().is_some() {
             self.run_queued_transfer(operation, window, cx);
             return;
@@ -1475,6 +1497,7 @@ impl FilesPanel {
             &operation,
             Operation::PlanResume(..)
                 | Operation::PlanPersistedRecovery { .. }
+                | Operation::InspectArchiveTools(_)
                 | Operation::InspectFileQuarantine(_)
                 | Operation::InspectQuarantine(_)
                 | Operation::AcknowledgeQuarantine(_)
@@ -1485,7 +1508,9 @@ impl FilesPanel {
         }
         if !matches!(
             &operation,
-            Operation::Compare(..) | Operation::PlanDirectorySync(..)
+            Operation::Compare(..)
+                | Operation::PlanDirectorySync(..)
+                | Operation::InspectArchiveTools(_)
         ) {
             self.comparison = None;
         }
@@ -1516,6 +1541,9 @@ impl FilesPanel {
             self.selected = None;
             self.withdraw_browser_review();
         }
+        if archive_probe.is_some() {
+            self.begin_archive_probe();
+        }
         self.busy = true;
         self.pending = None;
         self.confirmation_expanded = false;
@@ -1527,6 +1555,7 @@ impl FilesPanel {
             &operation,
             Operation::PlanResume(..)
                 | Operation::PlanPersistedRecovery { .. }
+                | Operation::InspectArchiveTools(_)
                 | Operation::InspectFileQuarantine(_)
                 | Operation::InspectQuarantine(_)
                 | Operation::AcknowledgeQuarantine(_)
@@ -1547,6 +1576,10 @@ impl FilesPanel {
             Operation::TransferArchive(_) => Message::new(
                 "正在重新校验归档源并发布新目标…",
                 "Revalidating archive sources and publishing the new destination…",
+            ),
+            Operation::InspectArchiveTools(_) => Message::new(
+                "正在只读检测当前 SSH 会话的工具 PATH…",
+                "Inspecting tool resolution in the current SSH session PATH…",
             ),
             Operation::TransferDirectory(_) => Message::new(
                 "正在复核已审核的目录…",
@@ -1636,6 +1669,9 @@ impl FilesPanel {
             self.operation_stop = None;
             self.operation_id = None;
             self.transfer_pause = None;
+            if archive_probe.is_some() {
+                self.fail_archive_probe();
+            }
             if let Some(previous) = archive_previous_isolation {
                 self.isolation_target = previous;
             }
@@ -1705,6 +1741,9 @@ impl FilesPanel {
                 view.operation_stop = None;
                 view.operation_id = None;
                 view.transfer_pause = None;
+                if let Some(probe) = &archive_probe {
+                    view.finish_archive_probe(probe, result.is_err());
+                }
                 if let Some(previous) = archive_previous_isolation
                     && !archive::retains_close_hold(&result)
                 {
@@ -1863,6 +1902,9 @@ impl FilesPanel {
                         } else {
                             view.status = archive::expired_message();
                         }
+                    }
+                    Ok(Outcome::ArchiveTools(probe, report)) => {
+                        view.receive_archive_tools(probe, report, cx);
                     }
                     Ok(Outcome::PlannedDirectory(plan)) => {
                         view.status = Message::new("扫描完成，请审核目录传输", "Scan complete; review the directory transfer");
@@ -2471,6 +2513,7 @@ impl Operation {
                     | Self::PlanDirectory(_)
                     | Self::PlanBatch(_)
                     | Self::PlanArchive(_)
+                    | Self::InspectArchiveTools(_)
                     | Self::TransferBatch(_)
                     | Self::PlanResume(..)
                     | Self::PlanPersistedRecovery { .. }
@@ -2559,6 +2602,7 @@ impl Operation {
             | Self::TransferBatch(_)
             | Self::PlanArchive(_)
             | Self::TransferArchive(_)
+            | Self::InspectArchiveTools(_)
             | Self::PlanResume(..)
             | Self::PlanPersistedRecovery { .. }
             | Self::DiscardPersistedRecoveryBatch(_)

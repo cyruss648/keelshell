@@ -1,0 +1,76 @@
+{
+  "utc": "2026-11-15T05:05:06.539076+00:00",
+  "root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "head": "e97705c3d773ea6919d76441685c5064e641ca86",
+  "r1_freeze_sha256": "9153a94c3551829a4030e90f6e3ffc801815f4fb1ad392646bf868d032d87a93",
+  "r2_freeze_sha256": "b648c546c07a09d0ef5abf0d2f461917528c265019a7afefe583abcab6b42353",
+  "inputs": 538,
+  "scripts": 10,
+  "mismatches": [],
+  "inventory_added": [],
+  "inventory_missing": [],
+  "inventory_definition": "crates/**/*.rs and all application Cargo.toml/Cargo.lock; excludes historical .rs exhibits under docs/testing/records",
+  "scope_changed_since_snapshot": [],
+  "binaries": {
+    "app": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/dd89ff795559e915/out/keelshell_app-dd89ff795559e915",
+      "sha256": "529b06bc710fb00ba38dae13f49b08deb264b4e5cb59a905e78bf2e1f608bf12",
+      "matches_independently_executed_bytes": true,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 1195
+    },
+    "session": {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/eb1796ec9fab9e9c/out/archive_tools-eb1796ec9fab9e9c",
+      "sha256": "1766d22c914348e630a92214bdad35c34027f2073f7eefd3a1b647a8dfc61a48",
+      "matches_independently_executed_bytes": true,
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    }
+  },
+  "independent_binary_commands": 4,
+  "independent_tests_passed": 22,
+  "parent_evidence_not_independent_execution": {
+    "full-gate-r1": {
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/logs/full-gate-r1.json",
+      "receipt_sha256": "933dec6cf8a306e2999323d7697ebf752588b423e1d8ddc10a6152fbdb3b65b0",
+      "exit": 1,
+      "seconds": 11.506,
+      "timed_out": false
+    },
+    "full-gate-r2": {
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/logs/full-gate-r2.json",
+      "state": "NO_EXIT_RECEIPT_AT_REVIEW_SNAPSHOT"
+    },
+    "openssh-r1": {
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/logs/openssh-r1.json",
+      "receipt_sha256": "598efe252d64a84234a35ae0e943aa1aa1df870dfdfeca7b0a32849f9fce8f68",
+      "exit": 0,
+      "seconds": 6.864,
+      "timed_out": false
+    },
+    "gui-mcp-build-r1": {
+      "receipt": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/archive-tools-pax-20261115/logs/gui-mcp-build-r1.json",
+      "receipt_sha256": "3b8b777a98084fff77b21cc58aaeadf52fff363eb4f8527e2f0cd86bd6778645",
+      "exit": 0,
+      "seconds": 7.58,
+      "timed_out": false
+    },
+    "openssh-result": {
+      "outcome": "passed",
+      "passed_tests": 14,
+      "boundary": "Disposable localhost OpenSSH SFTP and exec interoperability; not production or target-native desktop acceptance",
+      "cleanup": {
+        "observed_processes_stopped": true,
+        "ancestry_unverified": [],
+        "owned_processes_stopped": true,
+        "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+        "tracked_process_identities": 61,
+        "temporary_directory_removed": true
+      }
+    }
+  }
+}

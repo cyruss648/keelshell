@@ -1,0 +1,12 @@
+[
+  {
+    "path": "crates/keelshell-core/src/archive.rs",
+    "sha256": "ee466bc6006bf41f0a18f4a86bfcd268cbbe487d1e0b84b928c96a739827dc71",
+    "bytes": 40122
+  },
+  {
+    "path": "crates/keelshell-core/tests/archive_pax.rs",
+    "sha256": "dbc8f6d41afdab27805e29aa2cb3112f283439c6f9beef3f4fccbb5121d75a39",
+    "bytes": 32735
+  }
+]

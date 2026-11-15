@@ -1,0 +1,14 @@
+{
+  "recorded_utc": "2026-11-15T05:36:24.689204+00:00",
+  "copied_original_files": 127,
+  "archive_verification_mismatches": [],
+  "frozen_inputs": 538,
+  "gate_scripts": 10,
+  "current_input_mismatches": [],
+  "r2_to_r4_changed_inputs": [
+    "crates/keelshell-core/src/archive.rs",
+    "crates/keelshell-core/tests/archive_pax.rs"
+  ],
+  "r3_r4_production_inputs_identical": true,
+  "review_condition_resolution": "Tools/UI source is identical to reviewed r2; PAX delta report independently binds r4; final gate r4 exit 0 and all frozen input hashes match. Original conditional reports remain unchanged."
+}

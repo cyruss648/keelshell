@@ -2,8 +2,9 @@
 
 客户端实现已接入；集中工程验证、真实 OpenSSH 协议测试及独立复核结果见
 [测试记录](../testing/records/2026-11-15-reviewed-archive-transfer.md)。
-这项能力属于 FILE-05 的客户端部分，服务端打包与能力探测、Zmodem、
-中继加速和三平台完整原生验收另行追踪。
+这项能力属于 FILE-05 的客户端部分。[服务端工具观察](ARCHIVE_TOOL_INSPECTION.md)
+另行审核；服务端实际打包、版本与功能验证、Zmodem、中继加速和三平台完整
+原生验收另行追踪。
 
 ## 打包上传
 
@@ -39,7 +40,18 @@
 压缩与解包在客户端完成，不需要远端安装 ZIP 或 tar。
 这不表示服务器端压缩加速已经实现。
 ZIP 支持单盘 ZIP32 的 stored/deflate 成员，不接纳 ZIP64 和多盘格式。
-tar.gz 支持普通成员及有界 GNU 长名称，PAX 元数据和其它扩展暂不接纳。
+tar.gz 支持普通成员、有界 GNU 长名称及严格 PAX 元数据子集。
+PAX 允许 `path`、`size` 和验证后丢弃的时间/所有者字段；不恢复这些元数据。
+单个 PAX 头最多 8 KiB，累计元数据最多 2 MiB + 48 KiB，元数据头最多
+4096 个。整体 tar 流上限不增加。局部属性优先于全局默认，再到普通头。
+完整原始大小先解析并校验，拒绝负值、溢出高位或终止符后隐藏的数值。
+重复键、空值删除、字符集/厂商/稀疏扩展、链接和歧义扩展链均拒绝。
+普通备用路径同样需要满足可移植规则，因此 Python 以 `?` 替换 Unicode
+普通头的归档仍可能拒绝；合法 UTF-8 PAX path 搭配安全备用路径可以接纳。
+设计见 [ADR 0134](../adr/0134-bounded-pax-archive-metadata.md)；本次增量的集中
+门禁和非作者源码复核已通过，原始 size 截断 P2 已修复并复核关闭。
+实际结果及原生边界见
+[集中验证记录](../testing/records/2026-11-15-archive-tools-pax-integration.md)。
 
 审核绑定会话、浏览目录、选择、格式和路径草稿；任何变化均需重新准备。
 进行中的操作保留原目标与真实结果。取消或断线后，应按状态检查新目标；
@@ -68,10 +80,24 @@ review. Inspect the destination after interruption or an unknown publication
 result; operations are never replayed automatically. Prepare again after restart.
 Verified completion releases the archive's own window-close hold while preserving
 any older unresolved destination and quarantine.
-Server-side packing and capability detection, Zmodem, relay acceleration and full
-native platform acceptance remain separate open work.
+Server-side packing, version/feature verification, Zmodem, relay acceleration
+and full native platform acceptance remain separate open work.
 Extraction currently requires the macOS/Linux no-replace directory backend.
 Windows extraction is disabled with an explicit explanation pending a safe
 publication and permissions backend; packed uploads remain available. The codec
 admits single-disk ZIP32 stored/deflate and regular TAR members with bounded GNU
-long names. ZIP64, multidisk ZIP and PAX metadata are not admitted.
+long names and a strict PAX subset. ZIP64 and multidisk ZIP are not admitted.
+PAX accepts `path`, `size` and validated but discarded time/owner fields, with
+local values overriding global defaults and the ordinary header. Each metadata
+header is limited to 8 KiB, cumulative payloads to 2 MiB + 48 KiB, and metadata
+headers to 4096, within the existing whole-stream allowance.
+The complete raw size is checked before overrides or budgets; negative values,
+overflowing high bits and hidden digits after a terminator are rejected.
+Duplicate keys, empty-value deletions, vendor/encoding/sparse extensions, links
+and ambiguous extension chains fail closed. Ordinary fallback paths must remain portable;
+Python archives whose Unicode fallback contains `?` can therefore be rejected
+even with a valid PAX path. Safe fallbacks with UTF-8 PAX paths are supported.
+The current increment passed the combined gate and independent source review;
+the raw-size truncation P2 was fixed and independently closed. See the
+[integration record](../testing/records/2026-11-15-archive-tools-pax-integration.md)
+for executed results and the remaining native acceptance boundaries.
