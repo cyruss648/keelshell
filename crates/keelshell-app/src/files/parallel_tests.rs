@@ -330,6 +330,174 @@ async fn persisted_recovery_batch_enters_one_independent_review_and_cancel_clear
     });
 }
 
+async fn wait_for_persisted_resume_review(h: &Harness, id: uuid::Uuid, cx: &mut TestAppContext) {
+    cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+        let panel = h.panel.read(cx);
+        !panel.recovery_loading
+            && panel.recovery_writes.is_empty()
+            && panel.recovery_claim_requests.is_empty()
+            && panel.operation_id.is_none()
+            && panel.pending.as_ref().is_some_and(|(_, operation)| {
+                matches!(operation, Operation::ResumePersistedFile(current, _) if *current == id)
+            })
+    })
+    .await;
+}
+
+async fn assert_persisted_worker_start_failure_recovers(cx: &mut TestAppContext, count: usize) {
+    let directory = tempfile::TempDir::new().expect("worker start recovery fixture");
+    let source = directory.path().join("worker-start.bin");
+    std::fs::write(&source, b"0123456789").expect("write worker start source");
+    let store = Arc::new(TransferRecoveryStore::new(
+        directory.path().join("transfer-recovery.json"),
+    ));
+    let connection_id = uuid::Uuid::new_v4();
+    let ids: Vec<_> = (0..count).map(|_| uuid::Uuid::new_v4()).collect();
+    let remotes: Vec<_> = (0..count)
+        .map(|index| format!("/worker-start-{index}.bin"))
+        .collect();
+    for (id, remote) in ids.iter().zip(&remotes) {
+        persist_recovery_fixture(&store, *id, connection_id, &source, remote);
+    }
+    let h = mount_recovery_harness(cx, store.clone(), Some(connection_id));
+    h.idle(cx).await;
+    for remote in &remotes {
+        h.seed(remote, b"01");
+    }
+    cx.wait_for(h.window, Duration::from_secs(5), |_, cx| {
+        !h.panel.read(cx).recovery_loading
+    })
+    .await;
+    open_recovery_queue(&h, cx);
+    for id in &ids {
+        click_recovery_checkbox(&h, *id, cx);
+    }
+    h.click(cx, "queue-selected-persisted-transfers");
+    h.click(cx, "review-next-persisted-transfer");
+    wait_for_persisted_resume_review(&h, ids[0], cx).await;
+    let rejected_review_id = h.panel.update(cx, |panel, _| {
+        panel.reject_next_queued_worker_start = true;
+        panel.pending_review_id
+    });
+    h.click(cx, "confirm-file-operation");
+
+    h.panel.read_with(cx, |panel, _| {
+        assert_eq!(
+            panel
+                .recovery_review_queue
+                .iter()
+                .copied()
+                .collect::<Vec<_>>(),
+            ids,
+            "worker rejection must restore the reviewed head before the remaining records"
+        );
+        assert_eq!(panel.recovery_review_session, Some(panel.session_token));
+        assert!(panel.recovery_review_active.is_none());
+        assert!(panel.active_recovery_id.is_none());
+        assert!(panel.recovery_claim.is_none());
+        assert!(panel.pending.is_none());
+        assert!(!panel.busy);
+        assert!(!panel.reject_next_queued_worker_start);
+        assert_eq!(panel.transfer_jobs.len(), 1);
+        assert_eq!(panel.transfer_jobs[0].status.phase, TransferPhase::Failed);
+    });
+    assert_eq!(
+        store.load().expect("retained after worker rejection").len(),
+        count
+    );
+    for (id, remote) in ids.iter().zip(&remotes) {
+        let claim = store
+            .claim(*id)
+            .expect("unstarted worker released its claim");
+        drop(claim);
+        assert_eq!(
+            h.read(remote),
+            b"01",
+            "start rejection must not write a target"
+        );
+    }
+
+    // Retrying only returns to a new review. The injected rejection is consumed
+    // by this panel, and every successful continuation still needs a fresh click.
+    for (index, id) in ids.iter().enumerate() {
+        h.click(cx, "review-next-persisted-transfer");
+        wait_for_persisted_resume_review(&h, *id, cx).await;
+        h.panel.read_with(cx, |panel, _| {
+            assert_eq!(panel.recovery_review_active, Some(*id));
+            assert_eq!(panel.transfer_jobs.len(), index + 1);
+            assert_ne!(panel.pending_review_id, rejected_review_id);
+        });
+        assert_eq!(h.read(&remotes[index]), b"01");
+        h.click(cx, "confirm-file-operation");
+        h.idle(cx).await;
+        cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
+            let panel = h.panel.read(cx);
+            !panel.recovery_loading && !panel.recovery_records.iter().any(|record| record.id == *id)
+        })
+        .await;
+        assert_eq!(h.read(&remotes[index]), b"0123456789");
+        h.panel.read_with(cx, |panel, _| {
+            assert_eq!(
+                panel
+                    .recovery_review_queue
+                    .iter()
+                    .copied()
+                    .collect::<Vec<_>>(),
+                ids[index + 1..]
+            );
+            assert_eq!(
+                panel.recovery_review_session,
+                (index + 1 < count).then_some(panel.session_token)
+            );
+            assert!(panel.recovery_review_active.is_none());
+            assert!(panel.recovery_claim_requests.is_empty());
+            assert!(panel.pending.is_none());
+            assert!(panel.operation_id.is_none());
+            assert_eq!(panel.transfer_jobs.len(), index + 2);
+            assert_eq!(
+                panel
+                    .transfer_jobs
+                    .last()
+                    .expect("confirmed job")
+                    .status
+                    .phase,
+                TransferPhase::Completed
+            );
+        });
+        for waiting in index + 1..count {
+            let claim = store
+                .claim(ids[waiting])
+                .expect("next record is not auto-claimed");
+            drop(claim);
+            assert_eq!(
+                h.read(&remotes[waiting]),
+                b"01",
+                "next record is not auto-run"
+            );
+        }
+    }
+    assert!(
+        store
+            .load()
+            .expect("all explicit retries completed")
+            .is_empty()
+    );
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_worker_spawn_failure_restores_order_and_retries_explicitly(
+    cx: &mut TestAppContext,
+) {
+    assert_persisted_worker_start_failure_recovers(cx, 2).await;
+}
+
+#[gpui_kit::test]
+async fn persisted_recovery_batch_worker_spawn_failure_preserves_the_last_session(
+    cx: &mut TestAppContext,
+) {
+    assert_persisted_worker_start_failure_recovers(cx, 1).await;
+}
+
 #[gpui_kit::test]
 async fn persisted_recovery_batch_close_rejects_late_claim_and_old_session_entry(
     cx: &mut TestAppContext,

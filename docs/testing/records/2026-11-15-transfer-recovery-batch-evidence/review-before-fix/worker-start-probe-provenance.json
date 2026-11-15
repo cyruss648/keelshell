@@ -1,0 +1,14 @@
+{
+  "source": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell/crates/keelshell-app/src/files/parallel.rs",
+  "source_sha256": "544c8d5692081c764e8a5e4099ea5862ffa486ecc508ecd076a2490bacca9cea",
+  "helper_lines": [
+    790,
+    799
+  ],
+  "pre_spawn_transition_lines": [
+    477,
+    482
+  ],
+  "kind": "source-extracted reduced-state diagnostic, not an app test or native acceptance",
+  "Uuid_model": "u128 equality-only value; no UUID or transport behavior exercised"
+}

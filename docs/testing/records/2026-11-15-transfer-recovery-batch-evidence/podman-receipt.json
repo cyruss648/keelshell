@@ -1,0 +1,120 @@
+{
+  "started_utc": "2026-11-15T00:58:07.103431+00:00",
+  "token": "keelshell-recovery-20261115-e9ba507d",
+  "commands": [
+    {
+      "label": "machine-before",
+      "exit": 0,
+      "seconds": 0.014
+    },
+    {
+      "label": "machine-start-controlled",
+      "exit": 0,
+      "seconds": 10.443
+    },
+    {
+      "label": "engine",
+      "exit": 0,
+      "seconds": 0.087
+    },
+    {
+      "label": "container-before",
+      "exit": 0,
+      "seconds": 0.056
+    },
+    {
+      "label": "client-key",
+      "exit": 0,
+      "seconds": 0.01
+    },
+    {
+      "label": "wrong-key",
+      "exit": 0,
+      "seconds": 0.006
+    },
+    {
+      "label": "base-pull",
+      "exit": 125,
+      "seconds": 123.349
+    },
+    {
+      "label": "remove-container",
+      "exit": 0,
+      "seconds": 0.063
+    },
+    {
+      "label": "remove-network",
+      "exit": 1,
+      "seconds": 0.063
+    },
+    {
+      "label": "remove-image",
+      "exit": 1,
+      "seconds": 0.067
+    },
+    {
+      "label": "container-absent",
+      "exit": 1,
+      "seconds": 0.06
+    },
+    {
+      "label": "network-absent",
+      "exit": 1,
+      "seconds": 0.059
+    },
+    {
+      "label": "image-absent",
+      "exit": 1,
+      "seconds": 0.057
+    },
+    {
+      "label": "machine-stop",
+      "exit": 0,
+      "seconds": 1.032
+    },
+    {
+      "label": "machine-after",
+      "exit": 0,
+      "seconds": 0.015
+    }
+  ],
+  "cleanup": [
+    {
+      "label": "remove-container",
+      "exit": 0
+    },
+    {
+      "label": "remove-network",
+      "exit": 1
+    },
+    {
+      "label": "remove-image",
+      "exit": 1
+    },
+    {
+      "kind": "container",
+      "absent": true,
+      "exit": 1
+    },
+    {
+      "kind": "network",
+      "absent": true,
+      "exit": 1
+    },
+    {
+      "kind": "image",
+      "absent": true,
+      "exit": 1
+    }
+  ],
+  "tests": [
+    "openssh_checked_content_reads_inspect_regular_files_and_refuse_truncation",
+    "openssh_file_resume_revalidates_content_and_works_on_a_new_connection",
+    "openssh_directory_resume_fills_partial_trees_in_both_directions",
+    "openssh_acknowledged_pause_stops_writes_and_cancel_preserves_the_session",
+    "openssh_batch_exec_preserves_results_policy_and_unknown_timeout"
+  ],
+  "result": "FAIL",
+  "error": "base-pull failed with exit 125",
+  "completed_utc": "2026-11-15T01:00:22.490414+00:00"
+}

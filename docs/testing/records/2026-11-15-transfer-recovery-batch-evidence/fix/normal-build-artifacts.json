@@ -1,0 +1,16 @@
+{
+  "normal_binaries": {
+    "keelshell-app": {
+      "sha256": "474eb40d66a17eb0037e496083160a10f13b66548b6cf430962f645ba968572b",
+      "bytes": 192200784,
+      "file_type": "Mach-O 64-bit executable arm64"
+    },
+    "keelshell-mcp": {
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "bytes": 14566512,
+      "file_type": "Mach-O 64-bit executable arm64"
+    }
+  },
+  "source_manifest_sha256": "f8d1acaa5dffdbf27fa0207dbceb03774cc154ffa84adde7f55b9befc98df724",
+  "scope": "normal build only; no native launch, package, installation or release acceptance"
+}

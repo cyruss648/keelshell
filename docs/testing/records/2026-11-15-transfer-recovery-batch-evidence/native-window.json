@@ -1,0 +1,20 @@
+{
+  "installed" : false,
+  "isolated_data" : true,
+  "onscreen_windows" : [
+    {
+      "kCGWindowBounds" : {
+        "Height" : 933,
+        "Width" : 1440,
+        "X" : 144,
+        "Y" : 126
+      },
+      "kCGWindowIsOnscreen" : true,
+      "kCGWindowName" : "KeelShell",
+      "kCGWindowNumber" : 1088
+    }
+  ],
+  "owned_process_stopped" : true,
+  "pid" : 78670,
+  "running_after_observation" : true
+}

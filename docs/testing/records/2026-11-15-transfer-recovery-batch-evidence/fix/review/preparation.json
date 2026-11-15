@@ -1,0 +1,15 @@
+{
+  "base_sha": "5cdbc9617164d6cfbd5e7a9a022539934221ee75",
+  "created_utc": "2026-11-15T01:43:53.393379+00:00",
+  "review_root": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+  "copied_files": [
+    "crates/keelshell-app/src/files.rs",
+    "crates/keelshell-app/src/files/parallel.rs",
+    "crates/keelshell-app/src/files/parallel_tests.rs"
+  ],
+  "matched_rust_cargo_inputs": 524,
+  "frozen_manifest_sha256": "f8d1acaa5dffdbf27fa0207dbceb03774cc154ffa84adde7f55b9befc98df724",
+  "mismatches": [],
+  "source_is_uncommitted_frozen_candidate": true
+}

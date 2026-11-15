@@ -268,6 +268,8 @@ pub struct FilesPanel {
     selected_transfer: Option<uuid::Uuid>,
     transfer_queue: Arc<tokio::sync::OnceCell<Arc<keelshell_session::sftp::TransferQueue>>>,
     queue_parallelism: Arc<std::sync::atomic::AtomicUsize>,
+    #[cfg(test)]
+    reject_next_queued_worker_start: bool,
     // Tests retain setup admission in the actual entity, after queue ownership.
     #[cfg(test)]
     fixture_group: Option<Arc<fixture_group::FixtureGroup>>,
@@ -1088,6 +1090,8 @@ impl FilesPanel {
             selected_transfer: None,
             transfer_queue: Arc::new(tokio::sync::OnceCell::new()),
             queue_parallelism: Arc::new(std::sync::atomic::AtomicUsize::new(2)),
+            #[cfg(test)]
+            reject_next_queued_worker_start: false,
             #[cfg(test)]
             fixture_group,
         };

@@ -293,6 +293,23 @@ impl FilesPanel {
         );
         cx.notify();
     }
+    fn spawn_queued_transfer_worker(
+        &mut self,
+        owner: EntityId,
+        stop: Arc<AtomicBool>,
+        worker: impl FnOnce() -> Result<(), String> + Send + 'static,
+    ) -> std::io::Result<()> {
+        // A panel-local rejection exercises the real start-error path without
+        // exhausting OS threads or changing the shared registry for other tests.
+        #[cfg(test)]
+        if std::mem::take(&mut self.reject_next_queued_worker_start) {
+            return Err(std::io::Error::other(
+                "injected queued worker start rejection",
+            ));
+        }
+        crate::terminal::spawn_owned_transport_worker(owner, "keelshell-queued-sftp", stop, worker)
+    }
+
     pub(super) fn run_queued_transfer(
         &mut self,
         operation: Operation,
@@ -474,12 +491,6 @@ impl FilesPanel {
         self.pending = None;
         self.busy = true;
         self.active_recovery_id = Some(recovery_id);
-        if self.recovery_review_active == Some(recovery_id) {
-            self.recovery_review_active = None;
-            if self.recovery_review_queue.is_empty() {
-                self.recovery_review_session = None;
-            }
-        }
         self.status = Message::new(
             "已加入传输队列；可继续审核加入其它任务。",
             "Added to the transfer queue; review and add more jobs while it runs.",
@@ -494,63 +505,22 @@ impl FilesPanel {
         let (sender, receiver) = mpsc::sync_channel(16);
         #[cfg(test)]
         let fixture_group = self.fixture_group.clone();
-        if let Err(error) = crate::terminal::spawn_owned_transport_worker(
-            cx.entity_id(),
-            "keelshell-queued-sftp",
-            stop,
-            move || {
-                let (result, recovery_warning) = runtime.block_on(async {
-                    if worker_stop.load(Ordering::Acquire) {
-                        return (Err(FileFailure::CancelledBeforeStart), None);
-                    }
-                    let mut recovery_writer = TransferRecoveryWriter::new(
-                        recovery_store,
-                        recovery_record_for_worker,
-                        recovery_claim_for_worker,
-                    );
-                    if let Err(error) = recovery_writer.start() {
-                        return (Err(error), None);
-                    }
-                    let queue = tokio::select! {
-                        biased;
-                        _ = cancellation(&worker_stop) => {
-                            let result = Err(FileFailure::CancelledBeforeStart);
-                            recovery_writer.finish(&result, 0, None);
-                            let warning = recovery_writer
-                                .take_error()
-                                .map(super::recovery_finish_warning);
-                            return (result, warning);
-                        }
-                        result = queue_cell.get_or_try_init(|| async {
-                            let sftp = Arc::new(session.sftp().await?);
-                            let queue = Arc::new(sftp.transfer_queue());
-                            queue.set_parallelism(parallelism.load(Ordering::Acquire))?;
-                            Ok::<_, SessionError>(queue)
-                        }) => match result {
-                            Ok(queue) => queue.clone(),
-                            Err(error) => {
-                                let result = Err(FileFailure::from(error));
-                                recovery_writer.finish(&result, 0, None);
-                                let warning = recovery_writer
-                                    .take_error()
-                                    .map(super::recovery_finish_warning);
-                                return (result, warning);
-                            }
-                        },
-                    };
-                    #[cfg(test)]
-                    if let Some(group) = &fixture_group {
-                        group.retain_queue(&runtime, &queue);
-                    }
-                    if let Err(error) = queue.set_parallelism(parallelism.load(Ordering::Acquire)) {
-                        let result = Err(FileFailure::from(error));
-                        recovery_writer.finish(&result, 0, None);
-                        let warning = recovery_writer
-                            .take_error()
-                            .map(super::recovery_finish_warning);
-                        return (result, warning);
-                    }
-                    if worker_stop.load(Ordering::Acquire) {
+        if let Err(error) = self.spawn_queued_transfer_worker(cx.entity_id(), stop, move || {
+            let (result, recovery_warning) = runtime.block_on(async {
+                if worker_stop.load(Ordering::Acquire) {
+                    return (Err(FileFailure::CancelledBeforeStart), None);
+                }
+                let mut recovery_writer = TransferRecoveryWriter::new(
+                    recovery_store,
+                    recovery_record_for_worker,
+                    recovery_claim_for_worker,
+                );
+                if let Err(error) = recovery_writer.start() {
+                    return (Err(error), None);
+                }
+                let queue = tokio::select! {
+                    biased;
+                    _ = cancellation(&worker_stop) => {
                         let result = Err(FileFailure::CancelledBeforeStart);
                         recovery_writer.finish(&result, 0, None);
                         let warning = recovery_writer
@@ -558,36 +528,72 @@ impl FilesPanel {
                             .map(super::recovery_finish_warning);
                         return (result, warning);
                     }
-                    let result = queued_operation(
-                        &queue,
-                        operation,
-                        worker_stop,
-                        pause_receiver,
-                        &sender,
-                        Some(&mut recovery_writer),
-                    )
-                    .await;
+                    result = queue_cell.get_or_try_init(|| async {
+                        let sftp = Arc::new(session.sftp().await?);
+                        let queue = Arc::new(sftp.transfer_queue());
+                        queue.set_parallelism(parallelism.load(Ordering::Acquire))?;
+                        Ok::<_, SessionError>(queue)
+                    }) => match result {
+                        Ok(queue) => queue.clone(),
+                        Err(error) => {
+                            let result = Err(FileFailure::from(error));
+                            recovery_writer.finish(&result, 0, None);
+                            let warning = recovery_writer
+                                .take_error()
+                                .map(super::recovery_finish_warning);
+                            return (result, warning);
+                        }
+                    },
+                };
+                #[cfg(test)]
+                if let Some(group) = &fixture_group {
+                    group.retain_queue(&runtime, &queue);
+                }
+                if let Err(error) = queue.set_parallelism(parallelism.load(Ordering::Acquire)) {
+                    let result = Err(FileFailure::from(error));
                     recovery_writer.finish(&result, 0, None);
                     let warning = recovery_writer
                         .take_error()
                         .map(super::recovery_finish_warning);
-                    (result, warning)
-                });
-                let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
-                let _ = sender.send(WorkerMessage::Result {
-                    result: Box::new(result),
-                    recovery_warning,
-                });
-                #[cfg(test)]
-                {
-                    // Release the captured cell before the final group owner;
-                    // cleanup then unwraps and joins the actual queue scheduler.
-                    drop(queue_cell);
-                    drop(fixture_group);
+                    return (result, warning);
                 }
-                completion
-            },
-        ) {
+                if worker_stop.load(Ordering::Acquire) {
+                    let result = Err(FileFailure::CancelledBeforeStart);
+                    recovery_writer.finish(&result, 0, None);
+                    let warning = recovery_writer
+                        .take_error()
+                        .map(super::recovery_finish_warning);
+                    return (result, warning);
+                }
+                let result = queued_operation(
+                    &queue,
+                    operation,
+                    worker_stop,
+                    pause_receiver,
+                    &sender,
+                    Some(&mut recovery_writer),
+                )
+                .await;
+                recovery_writer.finish(&result, 0, None);
+                let warning = recovery_writer
+                    .take_error()
+                    .map(super::recovery_finish_warning);
+                (result, warning)
+            });
+            let completion = result.as_ref().map(|_| ()).map_err(ToString::to_string);
+            let _ = sender.send(WorkerMessage::Result {
+                result: Box::new(result),
+                recovery_warning,
+            });
+            #[cfg(test)]
+            {
+                // Release the captured cell before the final group owner;
+                // cleanup then unwraps and joins the actual queue scheduler.
+                drop(queue_cell);
+                drop(fixture_group);
+            }
+            completion
+        }) {
             if let Some(job) = self.transfer_jobs.iter_mut().find(|job| job.id == id) {
                 job.status.phase = TransferPhase::Failed;
                 job.result = Some(Message::detail(
@@ -605,6 +611,14 @@ impl FilesPanel {
             }
             cx.notify();
             return;
+        }
+        // Only consume the review after a worker owns it. A start rejection must
+        // retain the active/session markers so the current item can be requeued.
+        if self.recovery_review_active == Some(recovery_id) {
+            self.recovery_review_active = None;
+            if self.recovery_review_queue.is_empty() {
+                self.recovery_review_session = None;
+            }
         }
         let executor = cx.background_executor().clone();
         cx.spawn_in(window, async move |this, cx| {

@@ -1,0 +1,40 @@
+{
+  "inventory": 1184,
+  "parallel": 27,
+  "batch": [
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_busy_claim_fails_closed_and_keeps_record_available",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_close_rejects_late_claim_and_old_session_entry",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_discard_confirms_once_and_retains_busy_record",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_discard_retains_record_changed_after_confirmation",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_discard_unknown_worker_result_reloads_actual_store",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_enters_one_independent_review_and_cancel_clears_queue",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_record_disappearance_clears_waiting_queue",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_selection_counts_and_preserves_record_order"
+  ],
+  "all_eight_executed": true,
+  "keelshell_app": {
+    "dep_info_files": 0,
+    "absolute_source_paths": 0,
+    "outside_fixed_checkout": []
+  },
+  "keelshell_core": {
+    "dep_info_files": 0,
+    "absolute_source_paths": 0,
+    "outside_fixed_checkout": []
+  },
+  "keelshell_ai": {
+    "dep_info_files": 0,
+    "absolute_source_paths": 0,
+    "outside_fixed_checkout": []
+  },
+  "keelshell_mcp": {
+    "dep_info_files": 0,
+    "absolute_source_paths": 0,
+    "outside_fixed_checkout": []
+  },
+  "keelshell_session": {
+    "dep_info_files": 0,
+    "absolute_source_paths": 0,
+    "outside_fixed_checkout": []
+  }
+}

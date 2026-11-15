@@ -1,0 +1,254 @@
+{
+  "source_sha": "5cdbc9617164d6cfbd5e7a9a022539934221ee75",
+  "recommendation": "REQUEST_CHANGES",
+  "findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0
+  },
+  "project_tests": {
+    "passed": 38,
+    "failed": 0,
+    "ignored": 0
+  },
+  "app_inventory": 1184,
+  "batch_cases_in_inventory_and_passed": 8,
+  "project_verification_commands": 7,
+  "diagnostic_commands": 2,
+  "source_extracted_state_probe": {
+    "passed": 2,
+    "failed": 1,
+    "exit": 101,
+    "is_project_or_native_test": false
+  },
+  "commands": {
+    "app-inventory": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-app",
+        "--locked",
+        "--offline",
+        "--",
+        "--list"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:21:31.551256+00:00",
+      "finished_at_utc": "2026-11-15T01:22:08.221540+00:00",
+      "seconds": 36.67,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "app-parallel-tests": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-app",
+        "--locked",
+        "--offline",
+        "--",
+        "parallel_tests",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:22:32.860344+00:00",
+      "finished_at_utc": "2026-11-15T01:22:44.920583+00:00",
+      "seconds": 12.06,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "core-recovery-unit": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-core",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "transfer_recovery",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:23:10.970979+00:00",
+      "finished_at_utc": "2026-11-15T01:23:17.817393+00:00",
+      "seconds": 6.846,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "core-recovery-integration": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "keelshell-core",
+        "--test",
+        "transfer_recovery",
+        "--locked",
+        "--offline"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:24:06.616459+00:00",
+      "finished_at_utc": "2026-11-15T01:24:09.648754+00:00",
+      "seconds": 3.032,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "app-core-clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "keelshell-app",
+        "-p",
+        "keelshell-core",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:24:58.835116+00:00",
+      "finished_at_utc": "2026-11-15T01:25:12.767252+00:00",
+      "seconds": 13.932,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "fmt-check": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:26:03.147927+00:00",
+      "finished_at_utc": "2026-11-15T01:26:04.912657+00:00",
+      "seconds": 1.765,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "first-parent-diff-check": {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "858e7f158fec80a7e784f3d66159bb12733bc6cd",
+        "5cdbc9617164d6cfbd5e7a9a022539934221ee75"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:25:24.697584+00:00",
+      "finished_at_utc": "2026-11-15T01:25:24.710294+00:00",
+      "seconds": 0.013,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "worker-start-probe-compile": {
+      "command": [
+        "rustc",
+        "--edition=2024",
+        "--test",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/worker_start_state_probe.rs",
+        "-o",
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/worker-start-state-probe"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:27:23.562134+00:00",
+      "finished_at_utc": "2026-11-15T01:27:23.685543+00:00",
+      "seconds": 0.123,
+      "exit": 0,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    "worker-start-probe-result": {
+      "command": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/worker-start-state-probe",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+      "started_at_utc": "2026-11-15T01:27:30.057923+00:00",
+      "finished_at_utc": "2026-11-15T01:27:30.456806+00:00",
+      "seconds": 0.399,
+      "exit": 101,
+      "environment_overrides": {
+        "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+        "CARGO_BUILD_JOBS": "4",
+        "CARGO_NET_OFFLINE": "true",
+        "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/tmp/",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    }
+  },
+  "source_after": {
+    "checked_at_utc": "2026-11-15T01:28:31.066372+00:00",
+    "head": "5cdbc9617164d6cfbd5e7a9a022539934221ee75",
+    "status": "",
+    "tracked_files_hashed": 1139,
+    "changed_tracked_bytes": [],
+    "head_unchanged": true,
+    "tracked_diff_exit": 0
+  }
+}

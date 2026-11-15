@@ -1,0 +1,16 @@
+{
+  "checked_at_utc": "2026-11-15T01:31:25.347631+00:00",
+  "head": "5cdbc9617164d6cfbd5e7a9a022539934221ee75",
+  "source_worktree_clean": true,
+  "source_status": "",
+  "report": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/final-review.md",
+  "report_bytes": 18584,
+  "report_sha256": "ef893adc490cf9eccc8c331c27fd692295fd7cdc1b4db6eb541288a1c27703f5",
+  "recommendation": "REQUEST_CHANGES",
+  "findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0
+  }
+}

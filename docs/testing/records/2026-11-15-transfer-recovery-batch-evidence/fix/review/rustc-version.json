@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "rustc",
+    "-vV"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+  "environment_overrides": {
+    "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_NET_OFFLINE": "true",
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp/",
+    "TMP": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp",
+    "TEMP": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp",
+    "GIT_OPTIONAL_LOCKS": "0",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "started_at_utc": "2026-11-15T01:46:17.958635+00:00",
+  "finished_at_utc": "2026-11-15T01:46:18.011448+00:00",
+  "elapsed_seconds": 0.053,
+  "exit_code": 0,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/rustc-version.log",
+  "log_sha256": "408acb044ad9f92dcbaeb61386ef4dc1c39dd1c92d20b02c82b694a783c4b809"
+}

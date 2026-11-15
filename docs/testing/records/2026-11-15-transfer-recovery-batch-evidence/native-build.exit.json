@@ -1,0 +1,19 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--locked",
+    "--offline",
+    "-p",
+    "keelshell-app",
+    "-p",
+    "keelshell-mcp"
+  ],
+  "exit": 0,
+  "seconds": 28.798,
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/full-gate-dependency-refresh-20261115/target",
+  "binaries": {
+    "keelshell-app": "d0fc2f815b1f831f1225cde0dded6a6f7f35e6ff82e963d26143eca0d7a55563",
+    "keelshell-mcp": "3134c5ac0ff605d74f6499dd860c9a67b3b5b0fbd98ccecda82e04c4f20d810c"
+  }
+}

@@ -7,9 +7,14 @@
 开发中的受影响包编译与行为专项由实现 agent 执行，整仓门禁、真实协议
 联调与新的独立代码/功能复核由主线程统一组织。
 
-当前状态：`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。
-集中门禁、真实本机 OpenSSH 和限定 macOS 窗口启动短验已完成；独立复核和
-最终资源清理仍待收口。本记录会补齐最终源码 SHA 与复核回执。
+当前状态：`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。
+固定 `5cdbc96` 的独立复核发现的 worker 创建失败回队 P2 已修复，新增真实
+GPUI 一条/两条故障回归先红后绿。最终完整门禁和新的独立 delta 复核均通过，
+普通 Rust `2533/0/23 ignored`、rustdoc `14/0`，独立队列专项 `29/29`，
+P0–P3 均为 `0`。下文保留原有门禁、真实本机 OpenSSH 和限定 macOS 窗口
+短验的修复前源码归属。本地修复前集成提交为
+`5cdbc9617164d6cfbd5e7a9a022539934221ee75`，保留实现提交为其第二父节点。
+提交后的 524 个 Rust/Cargo 文件已与通过门禁的冻结输入逐项核对一致。
 公司内网不可用，当前仅本地提交，不推送。
 
 ## 验证计划
@@ -27,6 +32,10 @@
 ## 资源与证据
 
 本批主线程日志位于 `work/recovery-batch-integration-20261115/logs/`。
+关键回执、524 项输入摘要、逐 suite 计数、正常程序/窗口和协议证据已归档到
+[持久证据目录](2026-11-15-transfer-recovery-batch-evidence/)。
+`full-gate.log.gz` 与原始门禁日志解压后逐字节一致，文件校验摘要在
+`sha256.json`，不会因后续清理可重建 target 而丢失测试原件。
 共享第三方缓存可以保留，但重新验证时必须确认项目包产物来自当前源码；
 切换 checkout 的 target 先按
 [共享 target 指南](../SHARED_TARGET.md)使项目产物失效。
@@ -34,7 +43,87 @@
 自有临时容器、网络、镜像、密钥、target、已结束 agent 和完成的工作树
 在证据归档后清理；其它任务拥有的 WIP 和共享基础镜像保留。
 
-## 已完成的源码清单与真实协议联调
+## 独立复核发现与 worker 启动失败修复
+
+第一次独立复核固定 `5cdbc9617164d6cfbd5e7a9a022539934221ee75`，
+结果为 `REQUEST_CHANGES`，P0/P1/P2/P3 为 `0/0/1/0`。
+[原始报告](2026-11-15-transfer-recovery-batch-review-before-fix-raw.md)
+与独立日志保存在证据目录的 `review-before-fix/`；收口后的报告已重新复制并
+逐字节核对，失败状态诊断 `2 passed / 1 failed` 也保留。
+
+P2 的触发条件是逐条确认恢复记录后，OS worker 创建返回错误。在旧实现中，
+`run_queued_transfer` 在调用 worker 前已经清空当前 active 标记，最后一条还
+清空 session；错误分支的回队 helper 因此无法恢复当前项。持久日志没有丢失，
+但单条队列变空，多条队列丢失当前队首。
+
+修复只在 worker 成功创建后消费 active/session。面板局部、仅测试编译的启动
+拒绝开关使完整 GPUI 确认路径确定地进入既有错误分支；不耗尽系统线程，也不
+修改共享 worker registry。关闭未启动 closure 会真实释放其捕获的 claim。
+
+作者先执行两个新增真实 GPUI 用例，修复前 `0 passed / 2 failed`，两者都在
+队首恢复断言失败。修复后最终专项 `2/2`，完整 `parallel_tests` 为 `29/29`。
+它们检查一条/两条记录的有序回队、session 保留、未写入目标、claim 可重新获取，
+然后重新进入新的审核并逐条明确确认，实际完成 SFTP 续传和持久记录删除；
+等待中的下一条没有被自动 claim 或执行。对应前缀分别为
+`fix/worker-start-before-fix`、`fix/worker-start-after-fix-r4` 和
+`fix/app-parallel-after-fix`。
+
+中间 `worker-start-after-fix` 的两项失败来自测试读取全局 status，而错误实际
+保存在任务结果行；`r2` 读取私有字段和 `r3` 错改既有测试的 context 参数造成
+编译失败。最终测试删除不相关的全局 status 断言并恢复既有 context，没有修改
+错误显示逻辑、放宽队列次序/claim/传输断言或改写失败日志。
+
+最终候选冻结 524 个 Rust/Cargo 输入及 10 个 gate Python 脚本，清单为
+`fix/frozen-inputs.json`，SHA-256
+`f8d1acaa5dffdbf27fa0207dbceb03774cc154ffa84adde7f55b9befc98df724`。
+作者完整门禁与新的独立 delta 复核并行完成；两者使用不同 target。
+复核源码显式为 `5cdbc96` 加三文件未提交候选，524 个输入与冻结逐项匹配；
+不把基线 HEAD 当成包含修复。正式提交须在门禁和复核完成后绑定相同字节。
+最终 `python3 -B scripts/check.py` 实际退出 `0`，耗时 `608.170s`；524 个输入
+和 10 个 gate 脚本结束后逐字节匹配。所有 10 个批量用例在完整门禁中为 `ok`，
+app 实际清单为 `1186`。回执为 `fix/full-gate-after-fix.json`，完整日志
+SHA-256 为 `d29aa437a3563e1fd8df104014c418e5e35412a7201f3349fa2b818be756fb82`。
+
+| 最终作者检查 | 实际结果 |
+| --- | --- |
+| Python | 131 run / 1 skipped |
+| app 普通 Rust | 1184 passed / 0 failed / 2 ignored |
+| core 普通 Rust | 644 passed / 0 failed / 0 ignored |
+| AI 普通 Rust | 194 passed / 0 failed / 5 ignored |
+| session 普通 Rust | 434 passed / 0 failed / 16 ignored |
+| MCP 普通 Rust | 77 passed / 0 failed / 0 ignored |
+| 普通 Rust 合计 | 2533 passed / 0 failed / 23 ignored |
+| workspace rustdoc | 14 passed / 0 failed |
+| `x.y`、fmt、workspace strict Clippy、三组 AI controller | 全部通过 |
+
+Rust 总通过 `2547`，其中 rustdoc `14` 不重复计入普通测试。
+逐 suite 汇总为 `fix/validation-summary.json`；首次修复前结果独立保留在旧
+`logs/validation-summary.json`，没有覆盖。
+
+新的非作者独立 delta 复核结论为 `APPROVE`，原 P2 关闭，P0/P1/P2/P3
+均为 `0`。[独立修复复核原文](2026-11-15-transfer-recovery-batch-review-final-raw.md)
+和 `fix/review/` 的原始命令日志、源码完整性、编译归属及回执均归档。
+其独立重编译清单为 `1186`，全部 10 个批量用例在清单及实际测试中；
+实际传输队列专项为 `29 passed / 0 failed / 0 ignored`，app strict Clippy、
+fmt 与 diff 检查均退出 `0`。清单、重复专项和作者结果没有重复累计。
+开始/结束 524 个 Rust/Cargo 输入、1139 个 tracked 文件、HEAD、索引和原三文件
+未提交状态均不变；不把此快照描述为已经存在的修复提交。
+正式提交之后由父线程核对相同冻结字节，绑定回执另行归档。
+
+最终源码另执行正常程序构建：
+
+```text
+CARGO_TARGET_DIR=work/recovery-batch-integration-20261115/target \
+CARGO_BUILD_JOBS=4 cargo build -p keelshell-app -p keelshell-mcp --locked --offline
+```
+
+退出 `0`，耗时 `24.691s`。两个输出均为真实 macOS arm64 Mach-O，
+GUI SHA-256 `474eb40d66a17eb0037e496083160a10f13b66548b6cf430962f645ba968572b`，
+MCP SHA-256 `cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88`。
+回执为 `fix/normal-build-after-fix.json` 和 `normal-build-artifacts.json`。
+本次没有重复原生启动、打包或安装；旧窗口回执仍只归属修复前源码。
+
+## 修复前集成门禁与真实协议联调
 
 实现提交为 `c2040bbe03ea6f545ee4a9688d1994bd18cbcc7a`，已在维护 checkout
 叠加到依赖刷新与集中验证基线。本批 524 个 Rust/Cargo 输入的摘要保存在
@@ -152,6 +241,18 @@ CoreGraphics 按新实例 PID `78670` 读到一个可见的 KeelShell 窗口：
 
 该短验只确认正常可执行文件、包结构和可见窗口启动，不包含本批恢复控件的
 原生交互、真实主题切换、IME、完整辅助技术或其它平台窗口验收。
+
+## 已完成的资源清理
+
+实现 agent 完成后已关闭。其专用 target 由实现 agent 清理；主线程保留并
+逐字节核对了 34 份聚焦测试/失败日志，再删除已合入的开发 worktree 与
+`feature/persisted-recovery-batch-review-20261115` 分支。实现提交仍是集成
+提交的祖先，不依赖临时分支保持可达。
+
+真实 OpenSSH 的进程与临时密钥已按 runner 回执清理。Podman 自有资源核验
+不存在，VM 保持 stopped；未改动原有业务容器。限定 macOS 实例已退出，
+临时 package、隔离数据、Swift module cache 与两份临时 runner 脚本已删除。
+独立 reviewer 及其独占 target/工作树仍在使用，待报告归档后统一收口。
 
 ## 验收边界
 

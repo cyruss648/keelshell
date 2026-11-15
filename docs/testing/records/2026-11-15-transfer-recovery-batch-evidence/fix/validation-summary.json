@@ -1,0 +1,932 @@
+{
+  "ordinary": {
+    "packages": {
+      "keelshell-ai": [
+        194,
+        0,
+        5
+      ],
+      "keelshell-app": [
+        1184,
+        0,
+        2
+      ],
+      "keelshell-core": [
+        644,
+        0,
+        0
+      ],
+      "keelshell-mcp": [
+        77,
+        0,
+        0
+      ],
+      "keelshell-session": [
+        434,
+        0,
+        16
+      ]
+    },
+    "total": [
+      2533,
+      0,
+      23
+    ]
+  },
+  "doctest": {
+    "packages": {
+      "keelshell-ai": [
+        5,
+        0,
+        0
+      ],
+      "keelshell-core": [
+        7,
+        0,
+        0
+      ],
+      "keelshell-mcp": [
+        1,
+        0,
+        0
+      ],
+      "keelshell-session": [
+        1,
+        0,
+        0
+      ]
+    },
+    "total": [
+      14,
+      0,
+      0
+    ]
+  },
+  "all_rust_passed": 2547,
+  "app_inventory": 1186,
+  "python": {
+    "run": 131,
+    "skipped": 1
+  },
+  "full_gate_exit": {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/check.py"
+    ],
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "started_utc": "2026-11-15T01:43:12.777623+00:00",
+    "seconds": 608.17,
+    "exit": 0,
+    "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+    "offline": true,
+    "log_sha256": "d29aa437a3563e1fd8df104014c418e5e35412a7201f3349fa2b818be756fb82"
+  },
+  "new_batch_cases_passed": [
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_busy_claim_fails_closed_and_keeps_record_available",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_close_rejects_late_claim_and_old_session_entry",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_discard_confirms_once_and_retains_busy_record",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_discard_retains_record_changed_after_confirmation",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_discard_unknown_worker_result_reloads_actual_store",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_enters_one_independent_review_and_cancel_clears_queue",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_record_disappearance_clears_waiting_queue",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_selection_counts_and_preserves_record_order",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_worker_spawn_failure_preserves_the_last_session",
+    "files::transfer_tests::parallel_tests::persisted_recovery_batch_worker_spawn_failure_restores_order_and_retries_explicitly"
+  ],
+  "frozen_input_files": 524,
+  "frozen_scripts": 10,
+  "changed_inputs_after": [],
+  "suites": [
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/50ac3b81bb7f6304/out/keelshell_ai-50ac3b81bb7f6304)",
+      "counts": [
+        129,
+        0,
+        1
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running tests/discovery_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/cde86858806b4804/out/discovery_http-cde86858806b4804)",
+      "counts": [
+        20,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running tests/header_name_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/416f9434392ad260/out/header_name_secrets_http-416f9434392ad260)",
+      "counts": [
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running tests/known_secrets_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/27548ce1aa5fe1ba/out/known_secrets_http-27548ce1aa5fe1ba)",
+      "counts": [
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running tests/local_agent_cli.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/6cb13e5572180480/out/local_agent_cli-6cb13e5572180480)",
+      "counts": [
+        0,
+        0,
+        4
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running tests/local_environment_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/2b0b548e67a72bcc/out/local_environment_independent-2b0b548e67a72bcc)",
+      "counts": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running tests/provider_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/849df446cb6a7c35/out/provider_http-849df446cb6a7c35)",
+      "counts": [
+        17,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-ai",
+      "heading": "Running tests/request_options_http.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/00d3bd5743f55614/out/request_options_http-00d3bd5743f55614)",
+      "counts": [
+        18,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-app",
+      "heading": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/ae49e21ee6a97bff/out/keelshell_app-ae49e21ee6a97bff)",
+      "counts": [
+        1184,
+        0,
+        2
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/64281299a81fab86/out/keelshell_core-64281299a81fab86)",
+      "counts": [
+        222,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/ai_inference.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/74fb44222b4b9e99/out/ai_inference-74fb44222b4b9e99)",
+      "counts": [
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/ai_profile_storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/4e049beb481cb7b5/out/ai_profile_storage-4e049beb481cb7b5)",
+      "counts": [
+        14,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/batch_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/7e796109be2a8146/out/batch_audit-7e796109be2a8146)",
+      "counts": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/batch_parameters.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/8c16fcfdd3c30a1c/out/batch_parameters-8c16fcfdd3c30a1c)",
+      "counts": [
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/batch_workflow.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/1e5da785b53c0f04/out/batch_workflow-1e5da785b53c0f04)",
+      "counts": [
+        3,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/completion_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3133c9eff45f1497/out/completion_shell-3133c9eff45f1497)",
+      "counts": [
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/configuration_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/4a67818a0463d6fa/out/configuration_recovery-4a67818a0463d6fa)",
+      "counts": [
+        24,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/connection_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/fbe8adcb6c9b164b/out/connection_library-fbe8adcb6c9b164b)",
+      "counts": [
+        22,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/connection_library_batch.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/35ffa42962026f7e/out/connection_library_batch-35ffa42962026f7e)",
+      "counts": [
+        9,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/directory_compare.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/fec36d026ebe11ec/out/directory_compare-fec36d026ebe11ec)",
+      "counts": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/directory_mirror.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0aa832d056617322/out/directory_mirror-0aa832d056617322)",
+      "counts": [
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/directory_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d1e9d2e009abff43/out/directory_sync-d1e9d2e009abff43)",
+      "counts": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/host_keys.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0dd684df262de5b9/out/host_keys-0dd684df262de5b9)",
+      "counts": [
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/22f573e3ff4540f5/out/independent_workflow_audit-22f573e3ff4540f5)",
+      "counts": [
+        3,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/knowledge_context.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/bf06c5b250f9b513/out/knowledge_context-bf06c5b250f9b513)",
+      "counts": [
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/knowledge_library.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/dd5670ffea3677e1/out/knowledge_library-dd5670ffea3677e1)",
+      "counts": [
+        19,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/knowledge_persistence.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/460d4dfa3c289cf2/out/knowledge_persistence-460d4dfa3c289cf2)",
+      "counts": [
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/openssh.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/e71a29b53832af4d/out/openssh-e71a29b53832af4d)",
+      "counts": [
+        7,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/pane_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f27b55066b96c142/out/pane_layout-f27b55066b96c142)",
+      "counts": [
+        20,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/afeec1fd44e46434/out/profile_sync-afeec1fd44e46434)",
+      "counts": [
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/profile_sync_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/06f5aaaa1e01be36/out/profile_sync_independent-06f5aaaa1e01be36)",
+      "counts": [
+        10,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/profile_sync_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/cc4480e445564455/out/profile_sync_review-cc4480e445564455)",
+      "counts": [
+        11,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/profiles.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/3b4730e623f19d28/out/profiles-3b4730e623f19d28)",
+      "counts": [
+        13,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/proxies.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/f3442a70948f5c0d/out/proxies-f3442a70948f5c0d)",
+      "counts": [
+        19,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/reconnect.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/003849787438e451/out/reconnect-003849787438e451)",
+      "counts": [
+        18,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/recursive_mirror_final_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/7ec9e3cef0f793b6/out/recursive_mirror_final_review-7ec9e3cef0f793b6)",
+      "counts": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/routes.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/33fac0f8eb6fcbec/out/routes-33fac0f8eb6fcbec)",
+      "counts": [
+        27,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/scheduled_workflow_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/16b8047d54e1ff57/out/scheduled_workflow_review-16b8047d54e1ff57)",
+      "counts": [
+        6,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/snippet_template_shell.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/a5310a4c6126cdd8/out/snippet_template_shell-a5310a4c6126cdd8)",
+      "counts": [
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/snippet_templates.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/dcc779b856622b93/out/snippet_templates-dcc779b856622b93)",
+      "counts": [
+        20,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/snippets.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/68f61d0429c5301c/out/snippets-68f61d0429c5301c)",
+      "counts": [
+        13,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/storage.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/63e709719a82ffeb/out/storage-63e709719a82ffeb)",
+      "counts": [
+        18,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/theme_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6eda7f5dcec5f0ad/out/theme_preferences-6eda7f5dcec5f0ad)",
+      "counts": [
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/transfer_recovery.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/52378f937cc5565e/out/transfer_recovery-52378f937cc5565e)",
+      "counts": [
+        3,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/tunnel_rules.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/81cc63667742ff8d/out/tunnel_rules-81cc63667742ff8d)",
+      "counts": [
+        10,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/tunnel_runtime.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/0d9f0ee641f5168d/out/tunnel_runtime-0d9f0ee641f5168d)",
+      "counts": [
+        10,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/update_preferences.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/afed9d8a60d987ce/out/update_preferences-afed9d8a60d987ce)",
+      "counts": [
+        7,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/vault.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/6b0f601ce2c14be5/out/vault-6b0f601ce2c14be5)",
+      "counts": [
+        33,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/be093578a0ebe684/out/workflow_audit-be093578a0ebe684)",
+      "counts": [
+        7,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/workflow_audit_profile_sync.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/7dd88241f3271093/out/workflow_audit_profile_sync-7dd88241f3271093)",
+      "counts": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/workflow_audit_schema.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/bd0c3208d3e6d8b0/out/workflow_audit_schema-bd0c3208d3e6d8b0)",
+      "counts": [
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/workflow_audit_wire_compatibility.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/07bf20c8867be884/out/workflow_audit_wire_compatibility-07bf20c8867be884)",
+      "counts": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-core",
+      "heading": "Running tests/workspace_layout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/d3cb6c65ee23117e/out/workspace_layout-d3cb6c65ee23117e)",
+      "counts": [
+        12,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-mcp",
+      "heading": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/eea92bd5a76d0993/out/keelshell_mcp-eea92bd5a76d0993)",
+      "counts": [
+        23,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-mcp",
+      "heading": "Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/9cfb119c7fd5d530/out/keelshell_mcp-9cfb119c7fd5d530)",
+      "counts": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-mcp",
+      "heading": "Running tests/authority.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/42d2bdfd51778375/out/authority-42d2bdfd51778375)",
+      "counts": [
+        19,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-mcp",
+      "heading": "Running tests/ipc_transport.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/b9083de129ee38ba/out/ipc_transport-b9083de129ee38ba)",
+      "counts": [
+        16,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-mcp",
+      "heading": "Running tests/startup_eof.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/c2ddcb085304a571/out/startup_eof-c2ddcb085304a571)",
+      "counts": [
+        3,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-mcp",
+      "heading": "Running tests/stdio_process.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/bc54a2d57e0884f9/out/stdio_process-bc54a2d57e0884f9)",
+      "counts": [
+        11,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-mcp",
+      "heading": "Running tests/stream_protocol.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-mcp/a112071752f6d2d1/out/stream_protocol-a112071752f6d2d1)",
+      "counts": [
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e9ee587be80f38ac/out/keelshell_session-e9ee587be80f38ac)",
+      "counts": [
+        130,
+        0,
+        4
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/batch_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/00d4be2ea6426932/out/batch_exec-00d4be2ea6426932)",
+      "counts": [
+        14,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/disk_monitor.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/90c17deac72a8660/out/disk_monitor-90c17deac72a8660)",
+      "counts": [
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/disk_monitor_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/da8660b1cab81ef1/out/disk_monitor_independent-da8660b1cab81ef1)",
+      "counts": [
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/independent_workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/1220f4b8b4c78382/out/independent_workflow_audit-1220f4b8b4c78382)",
+      "counts": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/openssh_interop.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/e16dd7d19c089c9b/out/openssh_interop-e16dd7d19c089c9b)",
+      "counts": [
+        0,
+        0,
+        11
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/remote_completion.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/f6e69d526b1d4e40/out/remote_completion-f6e69d526b1d4e40)",
+      "counts": [
+        14,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/remote_only.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/6fc81f21db72c06a/out/remote_only-6fc81f21db72c06a)",
+      "counts": [
+        5,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/ssh_loopback.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/4b576febaca65819/out/ssh_loopback-4b576febaca65819)",
+      "counts": [
+        154,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/transfer_idle_eof_independent.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/2cdd6194919ee346/out/transfer_idle_eof_independent-2cdd6194919ee346)",
+      "counts": [
+        8,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/transfer_idle_eof_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/13264b0224ae36b8/out/transfer_idle_eof_review-13264b0224ae36b8)",
+      "counts": [
+        8,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/transfer_idle_metadata_negative_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/3f8df4ac81029f76/out/transfer_idle_metadata_negative_review-3f8df4ac81029f76)",
+      "counts": [
+        9,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/transfer_idle_metadata_positive_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/271bcc5d0ddef967/out/transfer_idle_metadata_positive_review-271bcc5d0ddef967)",
+      "counts": [
+        7,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/transfer_idle_metadata_review.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/a505645df8531cc7/out/transfer_idle_metadata_review-a505645df8531cc7)",
+      "counts": [
+        8,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/transfer_idle_timeout.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/3eb8dbd756a63957/out/transfer_idle_timeout-3eb8dbd756a63957)",
+      "counts": [
+        13,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/transfer_metadata_idle.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/26b08e12195970ed/out/transfer_metadata_idle-26b08e12195970ed)",
+      "counts": [
+        43,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/workflow_audit.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/f271f50290e30cdd/out/workflow_audit-f271f50290e30cdd)",
+      "counts": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "ordinary",
+      "package": "keelshell-session",
+      "heading": "Running tests/workflow_exec.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/d5541a812b8c0e37/out/workflow_exec-d5541a812b8c0e37)",
+      "counts": [
+        12,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "doctest",
+      "package": "keelshell-ai",
+      "heading": "Doc-tests keelshell_ai",
+      "counts": [
+        3,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "doctest",
+      "package": "keelshell-ai",
+      "heading": "Doc-tests keelshell_ai",
+      "counts": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "doctest",
+      "package": "keelshell-core",
+      "heading": "Doc-tests keelshell_core",
+      "counts": [
+        7,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "doctest",
+      "package": "keelshell-mcp",
+      "heading": "Doc-tests keelshell_mcp",
+      "counts": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "doctest",
+      "package": "keelshell-session",
+      "heading": "Doc-tests keelshell_session",
+      "counts": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

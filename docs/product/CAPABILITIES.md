@@ -17,10 +17,18 @@ review state while confirmed transfers retain their original ownership.
 The controls share the Frost, Graphite and Lavender registry and semantic tokens,
 with bilingual labels and accessible compact layouts.
 
-The integrated author gate passed 2531 ordinary Rust tests, 14 doctests and
-Python 131 run / 1 skipped; the independent non-author review is pending.
-An isolated real localhost OpenSSH server passed 11 transport checks, and the
-normal macOS executable created a visible window in an isolated launch smoke.
+Independent review of `5cdbc96` found one P2: a rejected worker start dropped the
+current queue item. The fix consumes review state only after a worker starts;
+actual GPUI single-/multi-record regressions prove ordered requeue, claim release
+and freshly reviewed explicit retries without automatically starting later items.
+The final author gate passed 2533 ordinary Rust tests, 14 doctests and
+Python 131 run / 1 skipped. A new independent delta review approved the frozen
+candidate, with 29 actual queue tests passing and zero P0–P3 findings. It
+independently rebuilt the 1186-test inventory, including all 10 batch regressions.
+The frozen inputs will be bound to the formal local commit.
+The pre-fix source also passed 11 checks against an isolated real localhost
+OpenSSH server, and its normal macOS executable created a visible window in an
+isolated launch smoke; those receipts are not reissued for the final app fix.
 Container interoperability and live latest-version checks were network-blocked;
 native recovery interactions, other desktop platforms and release acceptance
 remain open.

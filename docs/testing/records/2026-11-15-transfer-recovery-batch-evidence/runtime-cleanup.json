@@ -1,0 +1,9 @@
+{
+  "native_package_data_and_swift_cache_removed": true,
+  "removed_temporary_scripts": [
+    "podman_acceptance.py",
+    "native_smoke.swift"
+  ],
+  "podman_private_directories_remaining": 0,
+  "openssh_private_directory_removed": true
+}

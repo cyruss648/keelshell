@@ -1,8 +1,9 @@
 # 持久化传输恢复批量整理 / Persisted transfer recovery batch review
 
-状态：本地实现切片；专项工程验证记录见
+状态：已集成，最终作者门禁与独立修复复核通过；完整结果与原生/网络边界见
+[集中验证记录](../testing/records/2026-11-15-transfer-recovery-batch-integration.md)。
+最初实现专项见
 [测试记录](../testing/records/2026-11-15-persisted-transfer-recovery-batch-review.md)。
-整体合入与全量验收由主线程集中完成。
 
 ## 入口与顺序
 
@@ -15,6 +16,10 @@ SSH session；它没有任何传输或连接权限。
 原有的 Inspect → Review → Confirm 流程。保存连接必须匹配；未绑定的记录
 先要求用户确认当前 SSH 主机，再开始当前会话的只读计划。审核通过后仍需
 单独确认本条传输。进入下一条必须再次点击，不会自动连接、检查下一条或执行。
+
+工作线程创建失败或传输队列已满时，当前记录回到待审核队首，其余顺序不变；
+未启动的 claim 释放。单条队列也保留当前会话归属。用户重新进入本条时必须
+完成新的检查、审核和明确确认，失败不会自动重试或启动后面的任务。
 
 取消审核、取消待审核队列、离开详情、导航撤销、会话退休、记录消失或过期
 回调均撤销旧待审核状态。已经明确确认并发出的传输继续使用原任务的所有权、
@@ -51,6 +56,12 @@ current list order. Selection order grants no authority. Review one by one
 claims only the next record and reuses the existing Inspect → Review → Confirm
 flow, including current SSH host/connection binding and a fresh read-only plan.
 Every next record requires another explicit action.
+
+If the transfer worker cannot start or the transfer queue is full, the current
+record returns to the review queue head without reordering the other records.
+The unstarted claim is released and the current session binding is retained,
+including for a single-record queue. Retrying requires a fresh review and
+explicit confirmation; neither the current nor a later record starts automatically.
 
 Cancellation, navigation, leaving the recovery details, retired sessions,
 missing records and stale callbacks invalidate pending review state.

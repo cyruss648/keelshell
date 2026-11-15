@@ -14,12 +14,19 @@
 记录变化、Busy 和失败保留未处理项，未知结果重新读取持久存储。
 
 采用阶段集中验证：实现 agent 只做受影响包编译和风险专项，主线程统一
-集成、全仓门禁、真实协议联调与新的独立复核。当前状态为
-`AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_PENDING`。完整门禁退出 `0`：
-普通 Rust `2531/0/23 ignored`、rustdoc `14/0`、Python `131 run / 1 skipped`；
-fmt、整仓严格 Clippy、依赖策略和三组 AI controller 通过。新 app 清单为
-`1184` 项，8 个新增回归均实际执行通过。独立本机 OpenSSH `11/11`，
-macOS 正常程序创建一个可见窗口并完成隔离启动短验。
+集成、全仓门禁、真实协议联调与新的独立复核。固定 `5cdbc96` 的独立复核发现
+worker 创建失败时当前记录不能回到待审核队首的 P2，现已修复：只有 worker
+成功创建后才消费 active/session。新增单条/两条真实 GPUI 故障回归先复现失败，
+再验证回队、claim 释放、新审核后逐条显式续传成功及后续项不自动执行。
+当前状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。
+最终完整门禁退出 `0`，耗时 `608.170s`：普通 Rust `2533/0/23 ignored`、
+rustdoc `14/0`、Python `131 run / 1 skipped`；fmt、整仓严格 Clippy、依赖策略和
+三组 AI controller 通过。最终 app 清单 `1186` 项，10 个批量回归均实际通过。
+新的非作者复核独立重编译清单、通过传输队列 `29/29` 及相关门禁，P0–P3 均为
+`0`，原 P2 关闭。冻结的 524 个 Rust/Cargo 输入及 10 个 gate 脚本前后相同，
+复核使用另一 target 的相同冻结候选，正式提交后逐项绑定源码字节。
+修复前源码另有独立本机 OpenSSH `11/11` 和 macOS 可见窗口隔离启动短验；
+本次状态修复不把旧正常程序或原生短验改签为最终源码。
 
 Podman 引擎已成功读回，但 Docker Hub 拉取超时，容器联调未开始；自有资源
 已核验不存在，VM 已停止。官方依赖在线检查因请求无响应/HTTPS `403`

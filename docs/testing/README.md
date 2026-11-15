@@ -10,7 +10,7 @@
 
 | 日期（Asia/Shanghai） | 记录与范围 |
 | --- | --- |
-| 2026-11-15 | [恢复记录批量整理集中验证](records/2026-11-15-transfer-recovery-batch-integration.md)：有序逐条审核、显式批量丢弃、快照/claim/旧回调及三主题双语紧凑布局；作者完整门禁普通 `2531/23 ignored`、rustdoc `14`、Python `131/1 skipped` 通过，真实本机 OpenSSH `11/11`，macOS 可见窗口短验通过；独立复核待收口。Podman 与在线依赖检查网络受阻，历史 rustdoc 重复分类已校正。 |
+| 2026-11-15 | [恢复记录批量整理集中验证](records/2026-11-15-transfer-recovery-batch-integration.md)：有序逐条审核、显式批量丢弃、快照/claim/旧回调及三主题双语紧凑布局；worker 启动失败回队 P2 已修复，两项 GPUI 先红后绿，传输队列 `29/29`。最终完整门禁普通 `2533/23 ignored`、rustdoc `14`、Python `131/1 skipped` 通过；新独立复核批准冻结修复，P0–P3 均为零。修复前真实本机 OpenSSH `11/11` 与 macOS 可见窗口短验保留原归属；Podman 与在线依赖检查网络受阻，历史 rustdoc 重复分类已校正。 |
 | 2026-11-14 | [连接状态灯审查修复](records/2026-11-14-connection-indicator-review-fix.md)：`9363485` 修复首轮独立 P2；完整门禁 ordinary `2442/23 ignored`、app `1134/2 ignored`、doctest `14` 通过，新冻结源码复核 `APPROVE`（P0–P3 全 0），独立预构建回归 `36` 项通过，519 个提交输入与冻结摘要一致；原生仍 `HOLD`。 |
 | 2026-11-14 | [依赖官方复查与升级](records/2026-11-14-dependency-refresh.md)：`98f8f9d` 八个直接包升级，官方 `33/103/5` 版本检查与 Rust 1.100.0 完整门禁通过；ordinary `2440/23 ignored`、doctest `14`、app 清单 `1134`；首轮 `E0514` 原件保留，独立复核发现 UI 状态灯 P2，依赖输入无待修发现。 |
 | 2026-11-14 | [响应式工作台紧凑修复](records/2026-11-14-responsive-workbench-follow-up.md)：`a33e4c3b154867e4ef542cd9ef6a1193aee31c19` 收口紧凑 AI/磁盘布局、stale Edit 与 session-tab reveal 修复；Rust 1.100.0 完整门禁通过，文档提交 `251a8ee` 的独立复核返回 `APPROVE`（P0/P1/P2/P3 均为 0）；原生桌面和真实联调边界保持开放。 |

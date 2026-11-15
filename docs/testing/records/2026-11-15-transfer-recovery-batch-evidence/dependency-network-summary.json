@@ -1,0 +1,22 @@
+{
+  "source": "observed command results in this integration run",
+  "freshness_command": [
+    "python3",
+    "-B",
+    "scripts/check_dependencies.py",
+    "--timeout",
+    "30",
+    "--jobs",
+    "4"
+  ],
+  "freshness_exit": 130,
+  "freshness_output": "Dependency check: interrupted",
+  "reason": "Official registry requests remained unresponsive; interrupted the owned process after more than seven minutes.",
+  "https_probe": {
+    "url": "https://crates.io/api/v1/crates/gpui-kit",
+    "configured_proxy_http_status": 403,
+    "direct_http_status": 403
+  },
+  "conclusion": "LATEST_VERSION_UNVERIFIED_IN_THIS_RUN",
+  "manifests_and_lock_changed_by_check": false
+}

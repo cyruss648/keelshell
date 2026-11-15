@@ -1,0 +1,10 @@
+{
+  "commit": "5cdbc9617164d6cfbd5e7a9a022539934221ee75",
+  "parents": [
+    "858e7f158fec80a7e784f3d66159bb12733bc6cd",
+    "c2040bbe03ea6f545ee4a9688d1994bd18cbcc7a"
+  ],
+  "rust_cargo_inputs_verified": 524,
+  "full_gate_exit": 0,
+  "normal_gui_sha256": "d0fc2f815b1f831f1225cde0dded6a6f7f35e6ff82e963d26143eca0d7a55563"
+}

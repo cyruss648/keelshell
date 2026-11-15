@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cargo",
+    "clippy",
+    "--version"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+  "environment_overrides": {
+    "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_NET_OFFLINE": "true",
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp/",
+    "TMP": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp",
+    "TEMP": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp",
+    "GIT_OPTIONAL_LOCKS": "0",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "started_at_utc": "2026-11-15T01:46:18.068419+00:00",
+  "finished_at_utc": "2026-11-15T01:46:18.141054+00:00",
+  "elapsed_seconds": 0.073,
+  "exit_code": 0,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/clippy-version.log",
+  "log_sha256": "66cf4e4ade0fef24fbb1d8bf1c2ee9af26c19d857a6b678e2c3f8f6d412636b0"
+}

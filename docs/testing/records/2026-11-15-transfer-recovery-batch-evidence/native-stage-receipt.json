@@ -1,0 +1,17 @@
+[
+  {
+    "label": "native-package",
+    "exit": 0,
+    "seconds": 0.44
+  },
+  {
+    "label": "native-inspection",
+    "exit": 0,
+    "seconds": 0.979
+  },
+  {
+    "label": "native-window",
+    "exit": 0,
+    "seconds": 13.086
+  }
+]

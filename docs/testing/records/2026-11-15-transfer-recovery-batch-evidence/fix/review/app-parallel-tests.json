@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-app",
+    "--locked",
+    "--offline",
+    "--",
+    "parallel_tests",
+    "--test-threads=1"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/transfer-recovery-final-review-v3-20261115/keelshell",
+  "environment_overrides": {
+    "CARGO_TARGET_DIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/review/target",
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_NET_OFFLINE": "true",
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp/",
+    "TMP": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp",
+    "TEMP": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/tmp",
+    "GIT_OPTIONAL_LOCKS": "0",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "started_at_utc": "2026-11-15T01:47:21.857729+00:00",
+  "finished_at_utc": "2026-11-15T01:47:38.633719+00:00",
+  "elapsed_seconds": 16.776,
+  "exit_code": 0,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/fix/review/app-parallel-tests.log",
+  "log_sha256": "bcd3a4b4b48bc72c8a88892ba7642bb4a7e3fd0cb1f4ec76ebec0c21829e019d"
+}
