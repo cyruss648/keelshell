@@ -18,8 +18,9 @@
   real-peer 用例不叠加；完整库存另见各 `*-inventory-r3.txt`。
 - [正常程序构建](normal-artifacts-r1.json)：arm64 GUI/MCP 产物、大小与 SHA；
   只证明正常原生二进制构建，不代表桌面交互或安装。
-- 源码提交之后由 `commit-input-binding.json` 绑定 Git blob、冻结与当前字节，
-  HANDOFF 和 ROADMAP 记录准确本地 source SHA。
+- 本地源码为 `71450f07638aec657e7412ec330592618a5350e1`，
+  [commit-input-binding.json](commit-input-binding.json)绑定 `570 + 12` 个 Git blob、
+  冻结与当前字节，零 mismatch。
 
 ## 非作者复核
 
@@ -63,6 +64,10 @@ manifest SHA-256 为
 `linux-author/` 保留 Linux 实现来源的必要 receipt、peer 来源与许可证。
 原报告中的旧绝对路径是原始执行位置；工作目录清理后，按本目录相同后缀查找，
 日志增加 `.gz` 后缀，不修改原始报告链接或签署事实。
+局部 `.gitattributes` 让带原始空白的上游文档、HTTP headers 和原 review 按
+binary 保存。首个本地提交的 staged 检查失败与三份 headers 换行归一化见
+[保存失败原件](git-evidence-preservation-r1.json)；后续仅恢复原字节、补证据和
+文档，最终 747 份持久原件的 Git blob 均需与本 manifest 相同。
 
 [实现清理回执](implementation-cleanup-r2.json)记录三份受管实现 worktree 和本地
 分支已回收、七个 agent 已关闭、会话归档及各 fixture 的真实退出/清理状态。

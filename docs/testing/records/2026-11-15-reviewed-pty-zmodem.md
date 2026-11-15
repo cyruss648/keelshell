@@ -3,6 +3,9 @@
 状态：`AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
 基线：`721bad2157da8d3a0bc11a1eab5ac59b6616aa9c`。
 本批只本地提交，不 push；完整产品、FILE-05/M4 保持进行中。
+本地源码提交为 `71450f07638aec657e7412ec330592618a5350e1`；
+[提交绑定](2026-11-15-reviewed-pty-zmodem-evidence/commit-input-binding.json)
+逐项核对 `570 + 12` 冻结、Git blob 与当前文件，零 mismatch。
 
 ## 输入与职责
 
@@ -157,6 +160,14 @@ session 实现 worktree 已受管归档。core 与 Linux fixture 曾被活动任
 654,860,244 字节，包含稳定测试副本及临时 GPL peer。
 [最终清理](2026-11-15-reviewed-pty-zmodem-evidence/cleanup-final.json)
 记录实际删除范围、路径不存在及有效 target 身份保持，保留其他任务 WIP 与受保护工作树。
+
+源码提交时，staged diff 检查发现原始上游文字和报告的空白格式，检查退出 2；
+外层 shell 随后仍执行了本地 commit。Git 将三份 HTTP headers 的 CRLF 归一化，
+工作目录原件与原始 manifest 仍相同。原始失败和修正原因保存在
+[Git 原件保存记录](2026-11-15-reviewed-pty-zmodem-evidence/git-evidence-preservation-r1.json)。
+后续为对应原件设置局部 binary 属性、重新暂存原字节，逐项核对 747 份原件的
+Git blob；不修改原报告、源码或测试冻结，不以修剪空白伪造原件相同。
+正式提交检查改为在同一 checked subprocess 流程中失败即停止。
 
 Windows 安全文件后端与解包、直接 PTY 缺 OO 兼容、Linux 本地 Rust 后端、旧
 Python runtime、中继性能收益、三平台真实桌面、IME/完整辅助技术、签名、安装

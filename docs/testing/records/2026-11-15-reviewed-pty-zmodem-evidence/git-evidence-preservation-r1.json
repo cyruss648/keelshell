@@ -1,0 +1,220 @@
+{
+  "source_commit": "71450f07638aec657e7412ec330592618a5350e1",
+  "cached_diff_check_failed_before_commit": true,
+  "commit_was_created_after_shell_continued": "git commit ran after Python check failed; corrective evidence-only follow-up preserves source SHA",
+  "diff_check_exit": 2,
+  "format_findings": [
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/homebrew-lrzsz.rb.headers.txt",
+      "line": 3,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/homebrew-lrzsz.rb.headers.txt",
+      "line": 28,
+      "problem": "new blank line at EOF."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/lrzsz-0.13.1.tar.gz.headers.txt",
+      "line": 3,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/lrzsz-0.13.1.tar.gz.headers.txt",
+      "line": 15,
+      "problem": "new blank line at EOF."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/AUTHORS",
+      "line": 3,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/AUTHORS",
+      "line": 5,
+      "problem": "new blank line at EOF."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 328,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 358,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 482,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 594,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 597,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 633,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 696,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 701,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/peer/NEWS",
+      "line": 710,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 18,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 22,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 24,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 26,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 36,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 39,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 46,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 90,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 102,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 154,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 176,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 178,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 183,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 192,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 208,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 220,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 222,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 239,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 243,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 245,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 246,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 254,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html",
+      "line": 261,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html.headers.txt",
+      "line": 3,
+      "problem": "trailing whitespace."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html.headers.txt",
+      "line": 13,
+      "problem": "new blank line at EOF."
+    },
+    {
+      "path": "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/review-core-session-r2/report.md",
+      "line": 91,
+      "problem": "new blank line at EOF."
+    }
+  ],
+  "git_normalized_evidence": [
+    "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/homebrew-lrzsz.rb.headers.txt",
+    "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/lrzsz-0.13.1.tar.gz.headers.txt",
+    "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html.headers.txt"
+  ],
+  "working_evidence_still_matches_archive_manifest": true,
+  "remediation": "Scope binary attributes to original HTTP headers and upstream documents; stage their exact working bytes and verify Git blobs against original manifest before follow-up commit."
+}

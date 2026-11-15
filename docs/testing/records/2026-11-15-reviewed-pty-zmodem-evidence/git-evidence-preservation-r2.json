@@ -1,0 +1,44 @@
+{
+  "recorded_utc": "2026-11-15T09:35:45.180111+00:00",
+  "scope": "evidence and documentation only; frozen engineering inputs unchanged",
+  "source_commit": "71450f07638aec657e7412ec330592618a5350e1",
+  "prior_failure": "git-evidence-preservation-r1.json",
+  "manifest": {
+    "artifact": "archive-manifest.json",
+    "sha256": "2de4a6e9a79744962bbbcbfd874fe75f20f7d291e54f4adbf4cf330a95090d3f",
+    "artifacts": 747
+  },
+  "index_artifact_hashes_verified": 747,
+  "decoded_original_hashes_verified": 747,
+  "mismatches": [],
+  "restored_header_blobs": [
+    "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/homebrew-lrzsz.rb.headers.txt",
+    "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/lrzsz-0.13.1.tar.gz.headers.txt",
+    "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence/linux-author/native-macos-r1/upstream.html.headers.txt"
+  ],
+  "attributes": "Scoped binary attributes preserve original line endings and whitespace; reports and upstream documents are not rewritten.",
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c"
+      ],
+      "exit": 0,
+      "output": ""
+    }
+  ],
+  "next_action": "Commit only after checks pass; read back committed artifact and source blobs.",
+  "delivery": "local only; no push; existing source commit retained"
+}

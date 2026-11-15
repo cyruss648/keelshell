@@ -1,0 +1,6 @@
+# Original evidence must keep its exact bytes, including line endings and spaces.
+linux-author/native-macos-r1/*.headers.txt binary
+linux-author/native-macos-r1/upstream.html binary
+linux-author/native-macos-r1/peer/AUTHORS binary
+linux-author/native-macos-r1/peer/NEWS binary
+review-core-session-r2/report.md binary

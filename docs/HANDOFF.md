@@ -2,7 +2,10 @@
 
 ## 当前批次：审核式 PTY Zmodem 候选，工程门禁与源码复核通过
 
-基线为 `721bad2157da8d3a0bc11a1eab5ac59b6616aa9c`，本批尚未提交。
+基线为 `721bad2157da8d3a0bc11a1eab5ac59b6616aa9c`。
+本地源码提交为 `71450f07638aec657e7412ec330592618a5350e1`；
+[提交绑定](testing/records/2026-11-15-reviewed-pty-zmodem-evidence/commit-input-binding.json)
+逐项核对 `570 + 12` 输入的冻结、Git blob 与当前文件，零 mismatch。
 当前为 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
 core 协议、session 文件审核、安全发布、单一 PTY 写入通道和原生审核已集成；
 仍只本地提交，不 push，完整产品与 FILE-05/M4 保持开放。
@@ -45,6 +48,9 @@ Windows Zmodem 文件选择显式停用，Python 3.8 runtime 不可用。
 747 份原件已无损导出并校验，随后回收本批重复运行目录、稳定测试副本与临时
 peer，共 654,860,244 字节；[最终清理](testing/records/2026-11-15-reviewed-pty-zmodem-evidence/cleanup-final.json)
 保留唯一有效 target、其他任务 WIP、受保护 worktree 和容器。
+收口时另修正三份原始 HTTP headers 的 Git 换行归一化；受影响原件使用局部
+binary 属性保存，不修剪原报告或上游文字，最终 Git blob 与持久清单逐项核对。
+后续为证据与文档提交，工程输入不变，历史检查失败另存回执。
 下一步优先定位两版真实 peer 在直接 PTY 下缺最终 OO 的原因，再以新冻结和
 明确的直接 PTY 结果验收；relay 对照不替代该项，Windows 安全后端和原生矩阵单列。
 
