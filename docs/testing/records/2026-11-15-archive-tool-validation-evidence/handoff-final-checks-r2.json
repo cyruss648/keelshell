@@ -1,0 +1,15 @@
+{
+  "recorded_utc": "2026-11-15T15:18:24.859046+00:00",
+  "source_commit": "df363691fa4ee238bdd1db826f83c916c7d18194",
+  "documentation_only_changes": [
+    "docs/HANDOFF.md",
+    "docs/ROADMAP.md",
+    "docs/testing/records/2026-11-15-archive-tool-validation-evidence/README.md",
+    "docs/testing/records/2026-11-15-archive-tool-validation.md"
+  ],
+  "existing_local_links_checked": 238,
+  "engineering_inputs_match": 607,
+  "rust_gate_rerun": "Not required; engineering inputs unchanged",
+  "source_commit_binding": "commit-input-binding.json",
+  "batch_directory_absent": true
+}

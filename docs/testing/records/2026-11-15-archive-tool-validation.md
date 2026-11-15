@@ -7,6 +7,9 @@
 当前唯一有效 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 归属没有切换，没有并发使用 Cargo。作者 worktree 不运行 Cargo；父在主工作树
 统一集成与验证。最终冻结前的命令只证明各自输入的范围。
+本地功能提交为 `df363691fa4ee238bdd1db826f83c916c7d18194`；
+[精确提交绑定](2026-11-15-archive-tool-validation-evidence/commit-input-binding.json)
+核对其 Git blob、607 项最终输入、156 份原件与当前文件，零 mismatch。
 
 设计见 [ADR 0139](../../adr/0139-reviewed-archive-tool-validation.md)，操作和
 限制见[工具指南](../../product/ARCHIVE_TOOL_INSPECTION.md)。七项版本观察与

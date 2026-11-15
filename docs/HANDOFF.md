@@ -7,6 +7,10 @@
 后端在受管 worktree 并行开发，父负责原生界面、集成及集中验证。
 设计见 [ADR 0139](adr/0139-reviewed-archive-tool-validation.md)，使用入口见
 [工具指南](product/ARCHIVE_TOOL_INSPECTION.md)。
+本地源码提交为 `df363691fa4ee238bdd1db826f83c916c7d18194`；
+[提交绑定](testing/records/2026-11-15-archive-tool-validation-evidence/commit-input-binding.json)
+已逐项核对其 Git blob、最终冻结和当前文件：607 项工程输入及 156 份原件零 mismatch。
+后续仅补文档与回执，不重跑输入未变的 Rust 门禁；没有 push。
 
 最终 r2 共 607 项 Rust/Cargo/Python 输入，集合 SHA-256
 `523506564206cbeca415ae2bc9a82ed670cdb210705ba49f3173a84250bd4c17`。

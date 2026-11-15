@@ -67,6 +67,10 @@ Git index/blob 读回一致，见 [index-input-binding.json](index-input-binding
 Podman 的 `--rm` 同时移除了 cidfile，不以缺少 cidfile 推断容器已不存在。
 
 index、精确提交和最终清理回执放在本目录根部；不覆盖 `raw/` 的原件。
+本地源码提交 `df363691fa4ee238bdd1db826f83c916c7d18194` 已逐项核对 607 个
+工程输入、156 份原件和当前文件，零 mismatch，见
+[commit-input-binding.json](commit-input-binding.json)。后续仅补该绑定与交接文档，
+没有改变工程输入或复用历史门禁签署新源码。
 本批没有新建用户 chat，已释放的四个 agent 在当前 registry 读回为 not_found；
 这不声称永久删除了历史会话。只本地提交，不 push。
 
