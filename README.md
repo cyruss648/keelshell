@@ -96,6 +96,11 @@ Shift_JIS 和 Windows-1252。选项只用于下一次打开，当前文档保持
 原始字节备份、完整目标读回和脏草稿重读审核继续保留。工程、真实 OpenSSH、
 独立复核及原生范围见[本批记录](docs/testing/records/2026-11-15-legacy-editor-encodings.md)。
 
+远程编辑器的草稿区域支持 macOS `Cmd+S` / `Cmd+F`，Windows/Linux
+`Ctrl+S` / `Ctrl+F`：保存只展开完整审核，仍须单独确认；查找聚焦本地草稿搜索。
+终端和其他输入保持各自快捷键。UTF-16 保存审核的末尾 LF/CR 按最终字符显示。
+工程、真实键盘和完整字节读回范围见[本批记录](docs/testing/records/2026-11-16-editor-keyboard-native.md)。
+
 [审核式 traceroute](docs/product/TRACEROUTE_DIAGNOSTICS.md)支持显式选择 UDP/ICMP、IPv4/IPv6 和有界探测参数，确认前展示完整目标与命令。缺失跳和星号保持未知；同包真实SSH UI已取得UDP双栈回环的一跳回复。限定原生、未完成的合并验收与底部操作可达性问题见[原生记录](docs/testing/records/2026-11-06-editor-traceroute-native.md)；完整工程见[组合记录](docs/testing/records/2026-11-06-editor-traceroute-integration.md)。
 
 文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。文件审核可以展开，确认与取消保持可见；草稿和差异输入提供明确的编辑入口。操作说明见[审核与编辑](docs/product/FILE_REVIEW_AND_FOCUS.md)和[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；macOS 自有 SSH/SFTP 的两次草稿与保存流程已完成完整内容读回，完整界面与跨平台验收继续进行，见[限定原生记录](docs/testing/records/2026-10-07-text-merge-patch-native.md)。

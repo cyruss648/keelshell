@@ -1,0 +1,17 @@
+[
+  {
+    "path": "previews/baseline-utf16-review.png",
+    "source_artifact": "raw/baseline/13-utf16-expanded-review.png.gz",
+    "sha256": "ad3d85948f17a1d663138ea961ce1895c4e0683a1a4d12523362c0a2f58a5ed4"
+  },
+  {
+    "path": "previews/utf16-review-frost.png",
+    "source_artifact": "raw/candidate-frost-r2/02-utf16-resumed-review.png.gz",
+    "sha256": "7b1c34087917f81b735d58966fc2feaf4ee537a457b1045d4d2c236aec79a991"
+  },
+  {
+    "path": "previews/gbk-review-english.png",
+    "source_artifact": "raw/candidate-frost-r2/03-gbk-english-review.png.gz",
+    "sha256": "87275a137390a1385e1e1a396483c390aefd85d60db3cef6a75fb9664e258cde"
+  }
+]

@@ -368,13 +368,20 @@ class EvidenceTests(unittest.TestCase):
             binary.write_text("#!" + sys.executable + "\nprint('0 tests, 0 benchmarks')\n")
             binary.chmod(0o700)
             output = root / "failed"
+            arguments = self.cli(output, binary, lab.process_lab.digest(binary))
+            # Reach the real inventory child after the genuine source guard;
+            # a historical commit would fail earlier as this project advances.
+            arguments[arguments.index("--source-sha") + 1] = lab.subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=lab.ROOT, text=True, timeout=5
+            ).strip()
             with redirect_stdout(io.StringIO()), patch.object(lab.interop, "executable", return_value="unused"):
-                result_code = lab.main(self.cli(output, binary, lab.process_lab.digest(binary)))
+                result_code = lab.main(arguments)
             result = json.loads((output / "result.json").read_text())
             self.assertEqual(result_code, 1)
             self.assertEqual(result["failure"]["type"], "PrebuiltInventoryMismatch")
             self.assertEqual(result["resources"], [])
             self.assertTrue(result["cleanup"]["confirmed"])
+            self.assertTrue(result["cleanup"]["processes"])
             self.assertTrue(all(row["reaped"] for row in result["cleanup"]["processes"]))
 
     def test_bad_cli_never_launches_a_child(self):

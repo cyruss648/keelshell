@@ -1,5 +1,38 @@
 # Capability ledger
 
+## 2026-11-16: focused editor keyboard and final-character review
+
+The visible draft area and its controls offer macOS Cmd+S/Cmd+F or
+Windows/Linux Ctrl+S/Ctrl+F. Save expands the existing complete review and
+requires separate confirmation; repeats and Enter do not approve it. Find
+reveals the draft and focuses the sole local search. Other inputs and terminal
+keys keep their own routes. Busy, pending, suspended, unmounted and stale
+identity boundaries remain conservative.
+
+UTF-16 reviews describe final LF/CR characters after lossless decoding, without
+confusing code-unit bytes with line breaks. All 11 new named regressions and
+the 300-case file suite passed. Independent source review and a separate
+Python fixture-only narrow review approved their scopes. The final full gate
+passed 3168 ordinary Rust tests with 48 ignored, 14 doctests, Python 284 run /
+1 skipped, helper Python 25/25, formatting, strict Clippy, x.y policy and three
+controller groups. All 715 engineering inputs stayed unchanged after the gate.
+The separate scoped native review approved the observed Frost sequences only.
+Exact results and retained failures are tracked in the
+[batch record](../testing/records/2026-11-16-editor-keyboard-native.md).
+Frost macOS observations include two reviewed saves with complete target and
+original-backup readback. Early native failures and Graphite HOLD remain;
+full desktop, IME/accessibility and the whole product are not signed complete.
+
+## 2026-11-16: remote macOS monitoring and Linux capability recovery
+
+Remote Darwin sampling now reports CPU, total and actually free memory pages,
+uptime, load and interface counters, with optional filesystem and read-only
+process observations. Unsupported estimates and mutations remain unavailable.
+Linux tool failures are isolated, negatively cached and explicitly rechecked.
+The separate completed engineering, real SSH and controlled Linux scopes are
+recorded in the [monitor batch](../testing/records/2026-11-16-host-monitor.md);
+they do not establish native desktop acceptance on every platform.
+
 ## 2026-11-15: explicit legacy editor encodings
 
 The remote file header offers Unicode auto, GBK, GB18030, Big5, Shift_JIS and

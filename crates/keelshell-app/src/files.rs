@@ -41,6 +41,9 @@ mod archive_validation;
 mod batch;
 mod browser;
 mod editor_encoding;
+mod editor_keyboard;
+#[cfg(test)]
+mod editor_keyboard_tests;
 mod editor_language;
 mod editor_search;
 #[cfg(test)]
@@ -237,6 +240,7 @@ pub struct FilesPanel {
     editor_find: Entity<InputState>,
     editor_replace: Entity<InputState>,
     editor_match: Option<usize>,
+    editor_keyboard_focus: FocusHandle,
     confirmation_scroll: ScrollHandle,
     confirmation_expanded: bool,
     review_focus: FocusHandle,
@@ -1008,6 +1012,7 @@ impl FilesPanel {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
+        editor_keyboard::bind_keys(cx);
         #[cfg(test)]
         let fixture_group = fixture_group::for_app(cx);
         let mut panel = Self {
@@ -1074,6 +1079,7 @@ impl FilesPanel {
             editor_find: field(t(cx, "查找", "Find"), "", window, cx),
             editor_replace: field(t(cx, "替换为", "Replace with"), "", window, cx),
             editor_match: None,
+            editor_keyboard_focus: cx.focus_handle().tab_stop(false),
             confirmation_scroll: ScrollHandle::new(),
             confirmation_expanded: false,
             review_focus: cx.focus_handle(),

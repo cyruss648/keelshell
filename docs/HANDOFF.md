@@ -1,5 +1,42 @@
 # KeelShell 当前交接 — 2026-11-16
 
+## 当前批次：编辑器键盘与原生文本流程（集中门禁与限定复核通过）
+
+基线 `92c8ddaab84d19a1044a5803d73a0495d0b89354`。按用户要求集中实现后统一
+集成、专项修复、非作者复核和最终完整门禁，只做本地提交。独立作者在受管
+worktree 实现限定焦点的保存审核/查找快捷键，不运行 Cargo；父负责真实 macOS
+文件与编码操作、集成和验证。唯一 target 归属没有切换。
+限定焦点的 Cmd/Ctrl+S 只展开完整保存审核，Cmd/Ctrl+F 展开草稿并聚焦唯一查找框；
+重复按键或 Enter 不确认，终端和其他输入保留原路由。另修 UTF-16 审核把编码末字节
+误当末尾 LF/CR 的显示问题，精确出站字节与备份/保存合同不变。
+
+最终冻结 715 项工程输入，SHA-256
+`a17d4a12b9187755a59af96f99afa5f0998498b0de1a980de0bb9c13f2916c3c`。
+完整门禁 r2 实际 `exit 0 / reaped / 698.707s`：普通 Rust `3168/0/48 ignored`、
+rustdoc `14/0`、工程 Python `284 run / 1 skipped`、helper `25/25`，格式、严格
+Clippy、x.y 政策和三组 controller 通过。11 个新增默认 Rust 名逐项通过，门禁后
+完整路径及字节零漂移。r1 的历史 SHA fixture 失败保留；只修测试为真实读取 HEAD，
+生产来源/库存 guard 不变。三份新非作者报告分别批准源码、Python 窄差分及限定
+原生证据，累计一个 P2 已关闭，各范围开放 P0–P3 为 0，四个 agent 均已释放。
+Rust 复核使用核对后的父预构建程序，没有独立重新编译；原报告待门禁条件由最终
+成功回执另行绑定，不改写原报告。
+
+真实 macOS Frost 接续操作完成 UTF-16 LE 与 GBK 两份审核保存：正文/Enter、
+Cmd+F 焦点、Cmd+S 展开、重复不确认、取消不写、各一次确认后的完整目标及唯一
+原始备份读回。早期 r1–r7 失败保留，不能由最终接续成功反推完整脚本成功。
+部分键盘投递仍 HOLD，Graphite 未到达新增快捷键，Lavender 本批原生 NOT_RUN；
+保存结果提示 PNG 可见但 AX 缺文本，UTF-16 补发保存无单列事件回执。
+12 个受管根进程已结束，181 条 birth 身份无匹配、八次结束端口关闭、四个私有
+目录 absent；作者受管 worktree 已归档且路径和 Git 记录 absent。没有新建用户
+chat 或容器。正常 arm64 GUI/MCP 构建及暂存包结构检查通过，没有安装或发行。
+
+从[本批记录](testing/records/2026-11-16-editor-keyboard-native.md)和
+[持久证据](testing/records/2026-11-16-editor-keyboard-native-evidence/README.md)接续；
+本地源码提交与自有临时目录清理待 Git 绑定后完成。后续只改文档不重复运行
+工程输入未变的门禁。Rust/Cargo 实测 `1.100.0`、默认 stable，无 toolchain pin、
+rust-version 或新增依赖；官方最新版本查询超时并 reap，不签全部依赖最新。
+三主题共用 registry/Palette/token；完整产品、三平台桌面、IME/辅助技术与发行保持开放。
+
 ## 当前批次：macOS 资源监控与 Linux 能力恢复（集中验证收口）
 
 基线为本地 `539c172389b4450570026f023ff89d50df90f910`。两个独立作者并行实现

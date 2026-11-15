@@ -369,6 +369,10 @@ impl FilesPanel {
             }
         };
         let description = text_format_description(format);
+        // The review describes characters. UTF-16 code-unit bytes can either
+        // hide a real LF/CR or resemble one at the end of another character.
+        let final_lf = text.ends_with('\n');
+        let final_cr = text.ends_with('\r');
         let mode = snapshot
             .entry
             .permissions
@@ -381,16 +385,8 @@ impl FilesPanel {
             snapshot.content.len(),
             content.len(),
             description.0,
-            if content.ends_with(b"\n") {
-                "有"
-            } else {
-                "无"
-            },
-            if content.ends_with(b"\r") {
-                "有"
-            } else {
-                "无"
-            },
+            if final_lf { "有" } else { "无" },
+            if final_cr { "有" } else { "无" },
         );
         let details_en = format!(
             "{}\n{} → {} bytes\n{}; mode: {mode}; modified (UTC): {modified}; final LF: {}; final CR: {}\n",
@@ -398,16 +394,8 @@ impl FilesPanel {
             snapshot.content.len(),
             content.len(),
             description.1,
-            if content.ends_with(b"\n") {
-                "yes"
-            } else {
-                "no"
-            },
-            if content.ends_with(b"\r") {
-                "yes"
-            } else {
-                "no"
-            },
+            if final_lf { "yes" } else { "no" },
+            if final_cr { "yes" } else { "no" },
         );
         self.confirm(Message::new(format!("审核最终全文并保存？\n{details_zh}先复核原文件内容与元数据，发布前再复核；原子替换后完整读回。仅保留普通 rwx 权限，不保留所有者、ACL 或特殊模式。SFTP 不提供远端比较交换锁；不自动重试。\n── 最终全文 ──\n{text}"),format!("Review the complete result and save?\n{details_en}Recheck original content/metadata before staging and publication; read back all published bytes. Only ordinary rwx permissions are preserved, excluding ownership, ACLs and special modes. SFTP has no remote compare-and-swap lock; no automatic retry.\n── Complete result ──\n{text}")),Operation::Save{path:snapshot.entry.path.clone(),reviewed:snapshot,format,content},cx);
     }

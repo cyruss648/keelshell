@@ -1,5 +1,6 @@
 //! File review and editing surfaces change presentation, never approval authority.
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::component::scroll::{ScrollableElement, ScrollbarAxis};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -269,7 +270,7 @@ impl FilesPanel {
             ),
             EditorSurface::Merge => return self.merge_surface(cx),
         };
-        div()
+        let editor = div()
             .id("file-editor-expanded")
             .size_full()
             .min_w_0()
@@ -377,6 +378,9 @@ impl FilesPanel {
                                         view.focus_editor(other, window, cx)
                                     })),
                             )
+                            .when(surface == EditorSurface::Draft, |el| {
+                                el.child(self.editor_find_button(cx))
+                            })
                             .when(surface == EditorSurface::Patch, |el| {
                                 el.child(
                                     Button::new("apply-text-patch")
@@ -404,6 +408,12 @@ impl FilesPanel {
                                     .disabled(self.suspended || self.busy || self.pending.is_some())
                                     .icon(IconName::Save)
                                     .label(t(cx, "审核并保存", "Review save"))
+                                    .when(surface == EditorSurface::Draft, |button| {
+                                        button.localized_tooltip(
+                                            editor_keyboard::SAVE_TOOLTIP_ZH,
+                                            editor_keyboard::SAVE_TOOLTIP_EN,
+                                        )
+                                    })
                                     .on_click(cx.listener(|view, _, _, cx| view.request_save(cx))),
                             ),
                     )
@@ -413,9 +423,14 @@ impl FilesPanel {
                         el.child(self.editor_search_controls(cx))
                     }),
             )
-            .child(self.editor_status(cx))
-            .test_support()
-            .into_any_element()
+            .child(self.editor_status(cx));
+        if surface == EditorSurface::Draft {
+            self.editor_keyboard_scope(editor, cx)
+        } else {
+            editor
+        }
+        .test_support()
+        .into_any_element()
     }
     pub(super) fn editor_status(&self, cx: &App) -> AnyElement {
         div()

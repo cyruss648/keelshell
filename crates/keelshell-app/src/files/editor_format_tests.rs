@@ -101,6 +101,76 @@ fn utf16_with_bom(body: &str, little_endian: bool) -> Vec<u8> {
     bytes
 }
 
+async fn assert_utf16_review_final_characters(little_endian: bool, cx: &mut TestAppContext) {
+    let h = Harness::new(cx);
+    h.idle(cx).await;
+    let original = utf16_with_bom("base", little_endian);
+    for (index, (body, final_body, final_lf, final_cr)) in [
+        ("changed\n", "changed\n", true, false),
+        ("changed\r", "changed\r", false, true),
+        // A baseline without line breaks uses LF for inserted line endings.
+        ("changed\r\n", "changed\n", true, false),
+        ("changed", "changed", false, false),
+        ("", "", false, false),
+        // These code points end in LF/CR bytes in one UTF-16 byte order.
+        ("changed\u{0a00}", "changed\u{0a00}", false, false),
+        ("changed\u{0d00}", "changed\u{0d00}", false, false),
+        ("changed\u{100a}", "changed\u{100a}", false, false),
+        ("changed\u{100d}", "changed\u{100d}", false, false),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let path = format!("/final-characters-{little_endian}-{index}.txt");
+        open(&h, &path, &original, body, cx).await;
+        h.click(cx, "save-remote-file");
+        assert_eq!(
+            reviewed_bytes(&h, cx),
+            (original.clone(), utf16_with_bom(final_body, little_endian))
+        );
+        h.panel.read_with(cx, |panel, _| {
+            let (zh, en) = panel
+                .pending
+                .as_ref()
+                .checked_option("complete Unicode save review")
+                .0
+                .translations();
+            for (review, lf, cr) in [
+                (
+                    zh,
+                    format!("末尾 LF：{}", if final_lf { "有" } else { "无" }),
+                    format!("末尾 CR：{}", if final_cr { "有" } else { "无" }),
+                ),
+                (
+                    en,
+                    format!("final LF: {}", if final_lf { "yes" } else { "no" }),
+                    format!("final CR: {}", if final_cr { "yes" } else { "no" }),
+                ),
+            ] {
+                assert!(review.contains(&lf), "case {index}: {review}");
+                assert!(review.contains(&cr), "case {index}: {review}");
+            }
+        });
+        h.click(cx, "cancel-file-operation");
+        assert_eq!(h.read(&path), original);
+        assert_eq!(h.server.filesystem.atomic_writes_started(), 0);
+    }
+}
+
+#[gpui_kit::test]
+async fn editor_format_utf16_le_review_uses_final_characters_not_encoded_bytes(
+    cx: &mut TestAppContext,
+) {
+    assert_utf16_review_final_characters(true, cx).await;
+}
+
+#[gpui_kit::test]
+async fn editor_format_utf16_be_review_uses_final_characters_not_encoded_bytes(
+    cx: &mut TestAppContext,
+) {
+    assert_utf16_review_final_characters(false, cx).await;
+}
+
 #[gpui_kit::test]
 async fn independent_editor_format_r1_late_save_rebases_new_bom_once(cx: &mut TestAppContext) {
     let h = Harness::new(cx);

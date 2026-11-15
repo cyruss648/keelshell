@@ -83,3 +83,11 @@ backup remains and the original file keeps its existing isolation rules. If anot
 The candidate's source and prepared regressions are not native acceptance. New
 macOS pixels, minimum-window operation, full keyboard navigation, VoiceOver and
 Windows/Linux desktop checks remain open; see the linked design and test record.
+## 2026-11-16 编辑器键盘
+
+在远程草稿、它的查找/替换与编辑动作区域中，macOS 使用 `Cmd+S` 展开完整保存
+审核，`Cmd+F` 展开草稿并聚焦本地查找；Windows/Linux 对应 `Ctrl+S` / `Ctrl+F`。
+保存仍需单独点击确认，重复快捷键或按住按键不能确认。待审、忙碌、隐藏编辑区、
+没有实际会话或上一会话快照不能创建新操作。终端、路径和其他输入不经过此键盘
+区域，保留它们自己的行为。未应用的 patch 和未采用的合并不能通过快捷键保存。
+实际状态和键盘验证见[本批记录](../testing/records/2026-11-16-editor-keyboard-native.md)。

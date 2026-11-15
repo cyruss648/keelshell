@@ -1,5 +1,21 @@
 # 开发路线 — 2026-11-16
 
+## 2026-11-16 编辑器键盘与原生文本流程（集中门禁与限定复核通过）
+
+已集成限定焦点的保存审核/查找快捷键与 UTF-16 末尾字符显示修复。
+两项编码回归取得有效红绿，9 项键盘分发与文件模块 `300/0/0` 专项通过，
+正常 GUI/MCP 构建和暂存包检查通过。最终完整门禁 r2 实际
+`exit 0 / reaped / 698.707s`，Rust `3168/0/48 ignored`、rustdoc `14/0`、
+工程 Python `284 run / 1 skipped`、helper `25/25`，格式、严格 Clippy、x.y
+政策与三组 controller 通过；715 项完整输入门禁后零漂移，11 个新增默认名通过。
+源码、Python 测试窄差分与限定原生证据三份新非作者报告均批准，开放 P0–P3 为 0。
+Frost UTF-16/GBK 明确接续片段及完整目标/唯一原始备份读回通过；
+早期失败、Graphite HOLD、Lavender NOT_RUN 与三平台/IME/辅助技术开放项保持。
+四个 agent 已关闭，作者受管 worktree 已回收；本地提交与临时目录清理接续 Git 绑定，
+不签完整产品。
+见[设计](adr/0144-focused-editor-keyboard.md)与
+[本批记录](testing/records/2026-11-16-editor-keyboard-native.md)。
+
 ## 2026-11-16 macOS 资源监控与 Linux 能力恢复（集中门禁与限定复核通过）
 
 补远端 macOS CPU、内存总量/实际空闲页、连续运行时间、负载、接口字节、

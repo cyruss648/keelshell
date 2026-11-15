@@ -117,17 +117,31 @@ impl FilesPanel {
             .gap_1()
             .child(
                 div()
+                    .id("editor-find-input")
                     .w(px(96.))
                     .min_w_0()
                     .flex_shrink(1.)
-                    .child(Input::new(&self.editor_find).h(px(28.)).text_xs()),
+                    .child(
+                        Input::new(&self.editor_find)
+                            .h(px(28.))
+                            .text_xs()
+                            .aria_label(t(cx, "查找草稿文本", "Find draft text")),
+                    )
+                    .test_support(),
             )
             .child(
                 div()
+                    .id("editor-replace-input")
                     .w(px(96.))
                     .min_w_0()
                     .flex_shrink(1.)
-                    .child(Input::new(&self.editor_replace).h(px(28.)).text_xs()),
+                    .child(
+                        Input::new(&self.editor_replace)
+                            .h(px(28.))
+                            .text_xs()
+                            .aria_label(t(cx, "替换草稿文本", "Replace draft text")),
+                    )
+                    .test_support(),
             )
             .child(
                 Button::new("find-editor-text")

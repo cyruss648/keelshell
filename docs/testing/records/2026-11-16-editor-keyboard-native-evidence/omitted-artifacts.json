@@ -1,0 +1,92 @@
+[
+  {
+    "path": "__pycache__/native_flow.cpython-315.pyc",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 5255,
+    "sha256": "e96e5851aadb6d338be3cf42840bd27ce83766453fde6f697d7e62236a26ce36"
+  },
+  {
+    "path": "__pycache__/observe.cpython-315.pyc",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 6109,
+    "sha256": "90303b7c72a199e3f0c09017e6de2fa241683f7dc9613be137662122bcd16c40"
+  },
+  {
+    "path": "native_ax",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 156024,
+    "sha256": "066f7ec9b165b86c5d2f25e95eef09b7980f989e457ab7bb816104a23051f96f"
+  },
+  {
+    "path": "package-baseline/KeelShell.app/Contents/Info.plist",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 993,
+    "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70"
+  },
+  {
+    "path": "package-baseline/KeelShell.app/Contents/MacOS/keelshell-app",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 198914576,
+    "sha256": "b416941aec8152d71460fe6d38ac970d3c84967e8d505d20912660c74ffe7e85"
+  },
+  {
+    "path": "package-baseline/KeelShell.app/Contents/MacOS/keelshell-mcp",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 14548464,
+    "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816"
+  },
+  {
+    "path": "package-baseline/KeelShell.app/Contents/PkgInfo",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 8,
+    "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  {
+    "path": "package-baseline/KeelShell.app/Contents/Resources/KeelShell.icns",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 995855,
+    "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425"
+  },
+  {
+    "path": "package-baseline/package-manifest.json",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 1048,
+    "sha256": "46a86c8c58c11239b0e0d6e87c2924463cafa569852da5bf5b83717d0755b23d"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/Info.plist",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 993,
+    "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-app",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 198960496,
+    "sha256": "ec0a4c3d538a9997c528495207d966bc58ebeb4633baebe61b3bb97b64dcbf1e"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-mcp",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 14548464,
+    "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/PkgInfo",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 8,
+    "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/Resources/KeelShell.icns",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 995855,
+    "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425"
+  },
+  {
+    "path": "package-r1/package-manifest.json",
+    "reason": "derived package, compiled helper or temporary fixture/cache",
+    "bytes": 1048,
+    "sha256": "18c38b69cd733f1156f81f3cb4323786aaa4666a4f5f0c0c82c479f24a910f01"
+  }
+]

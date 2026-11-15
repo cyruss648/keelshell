@@ -1,5 +1,6 @@
 //! Remote browser layout and explicit file-operation controls.
 use super::*;
+use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::component::checkbox::Checkbox;
 use gpui_kit::component::scroll::ScrollableElement;
 
@@ -483,15 +484,20 @@ impl Render for FilesPanel {
                                     cx.listener(|view, _, _, cx| view.toggle_diff_preview(cx)),
                                 ),
                         )
+                        .child(self.editor_find_button(cx))
                         .child(self.text_actions(cx))
                         .child(
                             Button::new("save-remote-file")
-                                .disabled(self.suspended)
+                                .disabled(self.suspended || self.busy || self.pending.is_some())
                                 .icon(IconName::Save)
                                 .primary()
                                 .compact()
                                 .rounded(px(crate::design::components(cx).control_radius))
                                 .label(t(cx, "审核并保存", "Review save"))
+                                .localized_tooltip(
+                                    editor_keyboard::SAVE_TOOLTIP_ZH,
+                                    editor_keyboard::SAVE_TOOLTIP_EN,
+                                )
                                 .on_click(cx.listener(|view, _, _, cx| {
                                     view.request_save(cx);
                                 })),
@@ -507,7 +513,7 @@ impl Render for FilesPanel {
                     cx,
                 ));
             }
-            editor_card = Some(editor_panel.test_support());
+            editor_card = Some(self.editor_keyboard_scope(editor_panel, cx).test_support());
         }
         if let Some(card) = self.patch_card(cx) {
             tools = tools.child(card);
