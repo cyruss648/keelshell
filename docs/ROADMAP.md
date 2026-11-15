@@ -21,6 +21,11 @@ GUI/MCP arm64 Mach-O 构建通过。两名非作者原范围均无开放 P0–P3
 原 gate 失败已由确定性真实文件系统红/绿回归定位修复，旧失败保留。
 两个实现 agent 已关闭，自有受管 worktree 已归档且路径/Git 记录 absent。
 只本地提交、不 push；三平台原生、IME/辅助技术及完整产品目标保持开放。
+源码提交 `eb6869d7f78684de5a978e12ba333d48200d31ec` 已与 612 项冻结及全部 286
+份原件完成 Git blob/当前文件核验。随后回收本批临时目录与六个测试副本共
+`420,086,551` 字节，四个 agent 已关闭，唯一有效 target 与其他任务资源保留。
+接续从[持久证据](testing/records/2026-11-15-legacy-editor-encodings-evidence/README.md)
+读取，后续仅补文档回执。
 参见 [ADR 0140](adr/0140-explicit-legacy-editor-encodings.md)、
 [文本指南](product/REMOTE_TEXT_FORMAT.md)和
 [本批记录](testing/records/2026-11-15-legacy-editor-encodings.md)。

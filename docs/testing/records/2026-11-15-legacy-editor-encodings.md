@@ -1,7 +1,10 @@
 # 显式远程文本旧编码 — 2026-11-15
 
-状态：`AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_SCOPES_APPROVED`。本批尚未提交；
-仅本地提交，不 push。完整产品目标保持进行中。
+状态：`AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_SCOPES_APPROVED`。本地源码提交为
+`eb6869d7f78684de5a978e12ba333d48200d31ec`，没有 push。
+[提交绑定](2026-11-15-legacy-editor-encodings-evidence/commit-input-binding.json)
+从该提交 Git blob 和当前文件双向核验 612 项工程输入及 286 份原件，零 mismatch。
+后续仅补文档回执，完整产品目标保持进行中。
 
 基线为 `2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24`。
 core 与 session 作者使用两个隔离受管 worktree，不运行 Cargo；
@@ -126,9 +129,13 @@ Kit popover，r7 新专项 `14/14`；之后的最终 r4 全仓也逐项通过全
 读取审核只在成功建立新 review identity 时捕获上下文，旧确认、迟到和撤权
 不能刷新或继承新权限。完整合同与具体新名见最终库存和原始报告。
 
-补充复核、无损封存与 Git index/blob 核验已完成。源码本地提交后，与同一冻结
-和原件逐项绑定，再清理可重建副本。仅清理本批自有资源，保留唯一有效 target
-和其他任务资源。清理及提交回执待实际执行后补充。
+补充复核、无损封存、Git index/blob 及精确源码提交绑定已完成，随后核对临时目录
+全部 292 份文件与保存清单逐项一致，再移除重复目录和六个可重建测试副本，共回收
+`420,086,551` 字节。四个实现/复核 agent 已关闭，两个作者 worktree 及匹配本地
+分支 absent。本批没有新建用户 chat 或 Podman 容器；真实 SSH fixture 已自行回收。
+唯一有效 target、正常程序和其他任务资源保留。详见
+[最终清理](2026-11-15-legacy-editor-encodings-evidence/cleanup-final.json)。
+源提交后的文档更新没有改变已验证工程输入，不重复运行同一 Rust 全仓门禁。
 
 ## 边界
 

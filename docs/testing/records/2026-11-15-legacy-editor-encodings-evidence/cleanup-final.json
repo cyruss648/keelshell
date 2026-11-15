@@ -1,0 +1,20 @@
+{
+  "recorded_utc": "2026-11-15T16:54:19.474478+00:00",
+  "source_commit": "eb6869d7f78684de5a978e12ba333d48200d31ec",
+  "originals_losslessly_archived_and_commit_blob_verified": 286,
+  "deleted_batch": "work/legacy-editor-batch-20261115",
+  "deleted_batch_absent": true,
+  "deleted_file_count": 292,
+  "removed_bytes": 420086551,
+  "regenerable_test_copies_removed": 6,
+  "regenerable_test_copy_bytes": 411456064,
+  "valid_cargo_target_preserved": "work/recovery-batch-integration-20261115/target",
+  "normal_binaries_preserved": true,
+  "all_four_author_and_reviewer_agents_closed": true,
+  "post_close_reviewer_wait": "not_found for both reviewers",
+  "author_worktrees_and_matching_branches_absent": true,
+  "new_user_chats": 0,
+  "new_podman_containers": 0,
+  "other_task_resources_untouched": true,
+  "pushed": false
+}

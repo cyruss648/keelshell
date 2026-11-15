@@ -27,12 +27,18 @@ Python 红/绿对照；原报告和 610 项不变证据保留。最终全仓 `fu
 `e8029ecb7eea9a28e76d4c47f8d4d280afa57de4356049f2d83ab39020749ce6`；
 相对 r3 仅归档 helper 和其测试变化，其他 610 项不变。
 286 份原件已无损封存到[持久证据](testing/records/2026-11-15-legacy-editor-encodings-evidence/README.md)，
-612 项工程输入及全部原件已通过 Git index/blob 逐项核验。本批尚未本地提交；
-提交绑定后再清理 `work/legacy-editor-batch-20261115/`。
+612 项工程输入及全部原件已通过 Git index/blob 逐项核验。本地源码提交为
+`eb6869d7f78684de5a978e12ba333d48200d31ec`；
+[提交绑定](testing/records/2026-11-15-legacy-editor-encodings-evidence/commit-input-binding.json)
+已核对精确 Git blob 与当前文件，零 mismatch。没有 push。
 最终真实 disposable localhost OpenSSH r2 `17/17`，91 个跟踪身份及私有目录已回收，
 父另查目录 absent、原端口拒绝连接。正常 GUI/MCP arm64 Mach-O 构建通过；
 不是本批原生桌面、键盘、IME 或辅助技术验收。两名 reviewer 报告已收取且已关闭，
-封存已完成，本地提交与最终清理待收口。
+四个实现/复核 agent 已释放，两个作者 worktree 和匹配分支 absent。提交绑定后，
+本批重复目录及六个测试副本共 `420,086,551` 字节已回收；
+[清理回执](testing/records/2026-11-15-legacy-editor-encodings-evidence/cleanup-final.json)
+保留唯一有效 target、正常程序和其他任务资源。本批没有新建用户 chat 或容器。
+后续仅补文档与回执，不重跑工程输入未变的门禁。
 
 唯一 Cargo target 保持 `work/recovery-batch-integration-20261115/target`，归属未切换。
 Rust/Cargo 实测 `1.100.0`、默认 stable，无 toolchain pin 或新 MSRV。
