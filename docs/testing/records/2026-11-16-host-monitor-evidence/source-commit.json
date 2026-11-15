@@ -1,0 +1,9 @@
+{
+  "recorded_utc": "2026-11-15T21:28:16.072950+00:00",
+  "source_commit": "c5ad5dca621207644e39aa28f21f7f20a3116cdf",
+  "branch": "feature/editor-unicode-codec-20261114",
+  "local_only": true,
+  "push_attempted": false,
+  "baseline": "539c172389b4450570026f023ff89d50df90f910",
+  "full_gate": "raw/full-gate-r3.json.gz"
+}

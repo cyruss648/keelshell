@@ -27,7 +27,14 @@ UNKNOWN 和未完成回执原样保留，见[本批记录](testing/records/2026-
 自有容器/网络/镜像和私有数据已回收，完整 ID/name 再读回 absent，正常程序
 摘要、共享 base 与唯一 target 保持。旧工具 helper UNKNOWN 的恢复依据为原 CLI 子进程
 实际 reap/exit 0 和新 owner/full-ID/tag，不能从后来 absent 推断旧创建已完成。
-文档、持久证据、Git blob 及提交绑定完成后再删除本批临时目录。
+本地源码提交 `c5ad5dca621207644e39aa28f21f7f20a3116cdf`。
+1035 份原件已无损封存到[持久证据](testing/records/2026-11-16-host-monitor-evidence/README.md)；
+713 项工程输入及所有原件已通过 Git index/blob、精确源码提交和清理后重新绑定，
+零 mismatch。随后回收本批 1053 个临时文件、逻辑 `898,623,036` 字节；
+正常程序、唯一 target、共享 base 和其他任务资源保留。后续只补文档回执，
+不重跑工程输入未变的完整门禁。
+Rust/Cargo 实测 `1.100.0`、默认 stable，无 toolchain pin；无新增依赖。
+本批官方最新版本检查 45 秒超时并 reap，不签全部依赖最新。
 只本地提交、不 push；三主题继续共用 registry/Palette/token。
 完整产品、三平台桌面、IME/辅助技术与签名发行仍开放。
 

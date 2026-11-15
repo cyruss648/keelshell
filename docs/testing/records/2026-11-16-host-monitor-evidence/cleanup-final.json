@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-15T21:28:32.314386+00:00",
+  "source_commit": "c5ad5dca621207644e39aa28f21f7f20a3116cdf",
+  "removed_directory": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/host-monitor-20261116",
+  "directory_absent": true,
+  "files_removed": 1053,
+  "logical_bytes_removed": 898623036,
+  "raw_originals_committed": 1035,
+  "omitted_rebuildable_files": 18,
+  "all_batch_files_matched_sealed_hashes_before_removal": true,
+  "normal_binaries": [
+    {
+      "name": "keelshell-mcp",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816",
+      "bytes": 14548464,
+      "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp: Mach-O 64-bit executable arm64"
+    },
+    {
+      "name": "keelshell-app",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "sha256": "b416941aec8152d71460fe6d38ac970d3c84967e8d505d20912660c74ffe7e85",
+      "bytes": 198914576,
+      "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app: Mach-O 64-bit executable arm64"
+    }
+  ],
+  "normal_binaries_preserved": true,
+  "only_valid_target_preserved": true,
+  "owned_resource_readback": "raw/cleanup-resource-readback-r4.json.gz",
+  "author_worktrees_absent": true,
+  "source_authors_and_reviewers_closed": 7,
+  "no_user_chat_created": true,
+  "no_other_task_resource_touched": true,
+  "original_failure_and_unknown_evidence_preserved_in_git": true
+}

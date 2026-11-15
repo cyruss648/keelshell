@@ -21,6 +21,11 @@ rustdoc `14/0`、工程 Python `284 run / 1 skipped`、helper `25/25`，
 格式、严格 Clippy、x.y 和三组 controller 全通过。52 个新默认 Rust 名逐项通过，
 完整路径、字节和摘要零漂移。当前 `AUTHOR_GATE_PASS / ALL_SOURCE_SCOPES_APPROVED`，
 不代签完整产品或桌面验收；只本地提交，不 push。
+源码本地提交 `c5ad5dca621207644e39aa28f21f7f20a3116cdf` 已与 713 项工程输入及
+1035 份无损原件完成 Git blob/当前文件绑定，清理后复核仍零 mismatch。
+本批 1053 个临时文件、逻辑 `898,623,036` 字节已回收；正常程序、唯一有效 target、
+共享 base 与其他任务资源保留，七个作者/复核 agent 已关闭。
+后续仅文档回执，不重跑输入未变的门禁。
 见[设计](adr/0143-darwin-resource-monitoring.md)和
 [本批记录](testing/records/2026-11-16-host-monitor.md)。
 

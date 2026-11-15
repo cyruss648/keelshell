@@ -1,7 +1,8 @@
 # 2026-11-16：macOS 资源监控与 Linux 能力恢复
 
 基线：本地 `539c172389b4450570026f023ff89d50df90f910`。
-状态：`AUTHOR_GATE_PASS / ALL_NON_AUTHOR_SOURCE_SCOPES_APPROVED / NATIVE_DESKTOP_NOT_RUN`。
+状态：`AUTHOR_GATE_PASS / ALL_NON_AUTHOR_SOURCE_SCOPES_APPROVED / LOCAL_FEATURE_COMMITTED / CLEANUP_CONFIRMED`。
+本批新卡片的完整原生桌面验收仍为 `NOT_RUN`。
 只做本地提交，不 push。设计见 [ADR 0143](../../adr/0143-darwin-resource-monitoring.md)。
 
 ## 归属与执行
@@ -140,7 +141,16 @@ Darwin 的 alarm API 缺失模拟为 `16 passed / 14 expected skipped / 0 errors
 - 1035 份原件已无损封存到[持久证据](2026-11-16-host-monitor-evidence/README.md)，
   713 项工程输入与全部 gzip/解压原文已通过 Git index/blob 逐项核对，零 mismatch。
   原文 `13,722,596` 字节、压缩 `5,539,192` 字节；18 个可重建省略件仅保留摘要。
-- 本地源码提交后绑定精确 SHA；能力、设计、接续与策略文档已同批更新。
-- 绑定完成后回收本批临时目录与稳定测试副本，保留唯一有效 target 和其他任务资源。
+- 本地源码提交为 `c5ad5dca621207644e39aa28f21f7f20a3116cdf`，没有 push。
+  [提交绑定](2026-11-16-host-monitor-evidence/commit-input-binding.json)逐项核对精确
+  Git blob 与当前文件，713 项输入、1035 份原件全部匹配。
+- 完成绑定后回收本批 1053 个临时文件及稳定测试副本，逻辑 `898,623,036` 字节；
+  18 个可重建省略件包含在删除数中，原失败、UNKNOWN 和来源摘要全部留在 Git。
+  [清理回执](2026-11-16-host-monitor-evidence/cleanup-final.json)确认本批目录 absent，
+  正常程序摘要、唯一有效 target、共享 base 与其他任务资源保留。
+- [清理后绑定](2026-11-16-host-monitor-evidence/post-cleanup-commit-binding.json)
+  再次核对同一源码提交、完整路径集合及全部原件，零 mismatch。
+  两个作者、五个 reviewer、自有受管 worktree 与匹配分支均已清理，没有新建用户 chat。
+  后续仅补文档回执，不重复输入未变的 Rust 门禁。
 
 三平台完整桌面、IME/辅助技术、签名发行及完整产品目标继续开放。

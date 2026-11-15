@@ -3,7 +3,8 @@
 状态：五份限定非作者报告已批准，开放 P0–P3 为 0；最终门禁 r3 实际
 `exit 0 / reaped / 680.172s`。1035 份原件已无损封存，
 713 项工程输入及全部 gzip/解压原文已通过 Git index/blob 逐项核对，零 mismatch。
-精确本地提交绑定和临时目录清理另留回执。
+本地源码提交为 `c5ad5dca621207644e39aa28f21f7f20a3116cdf`，没有 push。
+同一提交、当前文件和所有原件的清理后绑定也通过，零 mismatch。
 
 普通 Rust `3157/0/48 ignored`、rustdoc `14/0`、工程 Python
 `284 run / 1 skipped`、helper Python `25/25`，格式、严格 Clippy、x.y 政策与
@@ -39,6 +40,18 @@
 本地源码提交后使用 `--commit <完整 SHA>` 再绑定同一输入；通过前不删除本批目录。
 提交身份、清理和清理后绑定另有独立回执，纯文档收尾不重跑输入未变的 Rust 门禁。
 [暂存区核验回执](index-input-binding.json)记录实际逐项检查结果。
+
+| 交付回执 | 实际结果 |
+| --- | --- |
+| [本地源码身份](source-commit.json) | 精确 feature SHA、分支和 local-only；未尝试 push |
+| [提交绑定](commit-input-binding.json) | 713 项输入、1035 份原件与源码 Git blob/当前文件逐项匹配 |
+| [删除前绑定](pre-cleanup-commit-binding.json) | 删除前再核对相同提交及全部原件 |
+| [最终清理](cleanup-final.json) | 删除 1053 个临时文件、逻辑 `898,623,036` 字节；目录 absent |
+| [清理后绑定](post-cleanup-commit-binding.json) | 持久原件可独立于 work 目录核对，完整路径及字节零 mismatch |
+
+七个作者/复核 agent 已关闭，作者受管 worktree 和匹配分支已清理；
+正常 GUI/MCP、唯一有效 Cargo target、共享 base 与其他任务资源保留。
+后续纯文档收尾不重跑相同工程输入的完整门禁。
 
 原失败、中断、UNKNOWN 和 reviewer 检查构造错误全部保持，不由后来 absent 观察
 倒推旧创建完成。真实 Mac SSH、Linux 容器、headless GPUI 与原生桌面分别记账；
