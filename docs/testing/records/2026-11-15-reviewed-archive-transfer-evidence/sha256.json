@@ -1,5 +1,5 @@
 {
-  "README.md": "b71eeb89dc2701dc23d209b349e3c7930da8041f61511ea83824c8353a210570",
+  "README.md": "2f00b2aab4f260bd84c991f40023e89829cc77e005f7ae9b115c0b7245bcb277",
   "app-r3-inventory.json": "e57b7c07acbc9f77727af8e8c80bdbc16f452d5ee593716641465785f8269bb1",
   "app-r3-inventory.log.gz": "e7e13bca06feeedfcda5a0930bb590b133ca44edda877fa77602d605f5fdc412",
   "archive-manifest.json": "d3e153e5246e30ebb918dfc56be29b634ee48d4e0c091871beebec669c40e4b2",
@@ -7,7 +7,9 @@
   "cleanup-progress.json": "044ba4c2093c479c107c1b5fa1fb747d99e11c97a55d434dd30c868d551e4895",
   "codec-integration.json": "6c894756e537f44979a32400bb397a80129deee12433d5c482dcd779309be922",
   "command-runner.py.txt": "a876b62a7e2aa5a1d5f9a61b71d2a264eda4e0e1ecc4ae7f35ad6edd30505692",
+  "commit-input-binding.json": "9216a166493d3e028d499cd943d1650512328932ff23e8670af55047e61b4325",
   "dependency-boundary.json": "df311b3885c1e3393dc16b00128949a04dc935aa89458132a265f63d07b62bb3",
+  "documentation-checks-post-binding.json": "c2552aaf7f2d24263e45c009516b76fe14727e0197aaa80020d2df44c3362e0f",
   "documentation-checks.json": "4b70754160ab3c3ecfae794ac201db25828c4c707ebce6a5629ef191c1911e56",
   "frozen-inputs-r1.json": "86c3fd6035402e0ee1b43c51351890230a2c399e9380eb285c1fe88c6482be13",
   "frozen-inputs-r2.json": "1facaaa0024025cb2c6e840c3d9f2fff57af9764c8812fea61d31dc0d56ab64f",

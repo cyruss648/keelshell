@@ -21,6 +21,11 @@
 设计见 [ADR 0132](../../adr/0132-reviewed-client-archive-transfer.md)，
 用户流程见[归档指南](../../product/ARCHIVE_TRANSFERS.md)。
 
+正式本地功能提交为 `9b7b96442f422908b89ab3a2769b1c932f22d787`。
+[提交与冻结绑定](2026-11-15-reviewed-archive-transfer-evidence/commit-input-binding.json)
+从 Git blob 和当前文件两侧核对 532 个输入和 10 个脚本，全部相同。
+其后的文档绑定提交不改变 Rust/Cargo/gate 脚本，不重复运行无关全仓测试。
+
 ## 最终集中门禁
 
 主线程在同一有效 target 上执行并实际等待回收：

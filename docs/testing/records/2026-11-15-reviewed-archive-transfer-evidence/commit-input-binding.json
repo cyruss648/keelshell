@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-11-15T04:13:30.055231+00:00",
+  "source_commit": "9b7b96442f422908b89ab3a2769b1c932f22d787",
+  "source_parent": "dfbc95904ec841fae64701181de4802959c5fb34",
+  "branch": "feature/editor-unicode-codec-20261114",
+  "source_freeze": "frozen-inputs-r3.json",
+  "source_freeze_sha256": "2b768eaeeb9a57498cdcc881ce142cd778227711aaed405d70c82b15082c71c2",
+  "git_object_inputs_matched": 532,
+  "git_object_scripts_matched": 10,
+  "working_tree_inputs_matched": 532,
+  "working_tree_scripts_matched": 10,
+  "mismatches": [],
+  "final_gate_exit": 0,
+  "final_gate_seconds": 588.762,
+  "final_gate_log_sha256": "7f030127fd915aefa976e0df801a61df8e2e40aa8187d94310b63add4c526731",
+  "normal_build_exit": 0,
+  "review_reports": {
+    "independent-review-r1.md": "9f0afd56a39046b34c2cab63c5df36f273af38ddaac3440a96c909114fb0fc2d",
+    "independent-review-r3.md": "4c15f437401bb54ed64294d23c10c60890c54f89324dabcefea3930f8fe11acc"
+  },
+  "independent_review": "source delta approved; original P2 findings closed; subsequent unchanged-freeze gate receipt satisfies the report engineering condition",
+  "independent_execution_boundary": "9 app regressions on verified parent-built binary; no independent rebuild",
+  "native_archive_acceptance": "NOT_RUN",
+  "local_only": true,
+  "push_attempted": false
+}

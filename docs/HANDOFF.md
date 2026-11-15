@@ -26,7 +26,9 @@ Python `131 run / 1 skipped`，fmt、workspace all-targets strict Clippy、`x.y`
 依赖策略和三组 AI controller 全部通过。532 个 Rust/Cargo 输入和 10 个脚本
 在门禁、复核及正常程序构建后均匹配 r3 冻结。当前源码的真实 localhost
 OpenSSH `13/13`，临时服务与目录已回收；GUI/MCP 正常 arm64 Mach-O 构建通过。
-源码提交及冻结绑定见本批证据目录的 `commit-input-binding.json`。
+本地源码提交为 `9b7b96442f422908b89ab3a2769b1c932f22d787`；
+[提交绑定](testing/records/2026-11-15-reviewed-archive-transfer-evidence/commit-input-binding.json)
+已从 Git blob 和当前文件两侧逐项核对 532 个输入及 10 个脚本，零 mismatch。
 
 Windows 安全解包后端尚待实现，界面明确停用解包，打包上传保留；Windows
 strict gate 和 Linux 运行没有在本机执行。在线最新依赖检查 75s 超时，不能

@@ -3,8 +3,9 @@
 入口为[测试记录](../2026-11-15-reviewed-archive-transfer.md)。
 最终源码绑定 `frozen-inputs-r3.json`，532 个 Rust/Cargo 输入和 10 个 gate 脚本。
 作者最终门禁为 `logs/full-gate-r3.json`，逐 suite 计数及实际名称为
-`validation-summary-r3.json`。源码提交后另记录 `commit-input-binding.json`；
-它不是在源码提交正文中自引用。
+`validation-summary-r3.json`。[提交绑定](commit-input-binding.json)核对本地源码提交
+`9b7b96442f422908b89ab3a2769b1c932f22d787` 的 Git blob 和当前文件；
+它由后续文档提交保存，不在源码提交正文中自引用。
 
 `archive-manifest.json` 记录从本批工作目录复制的 51 份原件及其原始摘要。
 `.log.gz` 解压后与原始日志字节相同；其他文件按原字节复制。

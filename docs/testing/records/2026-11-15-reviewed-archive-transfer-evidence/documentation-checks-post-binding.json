@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-11-15T04:14:40.301408+00:00",
+  "source_commit": "9b7b96442f422908b89ab3a2769b1c932f22d787",
+  "added_binding_links_checked": [
+    {
+      "document": "docs/HANDOFF.md",
+      "target": "testing/records/2026-11-15-reviewed-archive-transfer-evidence/commit-input-binding.json",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer-evidence/README.md",
+      "target": "commit-input-binding.json",
+      "exists": true
+    },
+    {
+      "document": "docs/testing/records/2026-11-15-reviewed-archive-transfer.md",
+      "target": "2026-11-15-reviewed-archive-transfer-evidence/commit-input-binding.json",
+      "exists": true
+    }
+  ],
+  "missing": [],
+  "unchanged_rust_cargo_inputs": 532,
+  "unchanged_gate_scripts": 10,
+  "original_archive_entries_still_identical": 51,
+  "rust_gate_repeated_for_documentation": false
+}
