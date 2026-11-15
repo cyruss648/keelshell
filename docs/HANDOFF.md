@@ -13,6 +13,10 @@
 服务器压缩并发布新的同级归档。完成后可另行下载或解包，不自动串联操作。
 不是工具 PATH 观察的替代界面。
 
+本地源码提交为 `2726b6466e68508037ff81b1daf01fcf2c91b6e5`；
+[提交绑定](testing/records/2026-11-15-server-archive-evidence/commit-input-binding.json)
+逐项核验最终 `553 + 10` 输入、Git blob 和当前文件，零 mismatch。
+
 core/Python 与 session 由两个独立实现 agent 在受管 worktree 并行开发，
 父负责原生 UI、集成和唯一 Cargo target
 `work/recovery-batch-integration-20261115/target`。集成后集中验证，没有切换
@@ -39,6 +43,10 @@ P2 已修正方法、导入和字段的 cfg，r4→r5 仅两个测试文件变�
 提交绑定及清理从
 [集中验证记录](testing/records/2026-11-15-server-archive-integration.md)接续。
 设计见 [ADR 0135](adr/0135-reviewed-server-archive-packing.md)。
+248 份原件已逐字或无损压缩保存并校验，随后删除本批重复运行目录与稳定测试
+二进制，回收约 332 MB；[最终清理](testing/records/2026-11-15-server-archive-evidence/cleanup-final.json)
+记录所有实现/复核 agent 已关闭、两个实现 checkout/分支不存在、自有 SSH 回收，
+保留唯一有效 target、其他任务 WIP 和受保护 worktree。
 
 只本地提交、不推送；产品总目标和 FILE-05/M4 继续开放。远端 Linux 文件系统
 权限与 Python 3.8 运行、Windows 安全解包、Zmodem、中继、三平台原生交互、

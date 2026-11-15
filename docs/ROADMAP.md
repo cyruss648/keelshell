@@ -24,6 +24,10 @@ rustdoc `14/0`、Python `131 run / 1 skipped`，格式、严格 Clippy、依赖�
 [集中验证记录](testing/records/2026-11-15-server-archive-integration.md)。
 仅本地提交；本轮在线最新依赖检查超时。Windows 安全解包、Zmodem、中继、
 Linux/旧 Python 运行及三平台原生验收继续开放，FILE-05/M4 没有整体完成。
+本地源码为 `2726b6466e68508037ff81b1daf01fcf2c91b6e5`，最终 `553 + 10` 输入
+已与 Git blob 及当前文件绑定，零 mismatch。248 份原件校验后，本批重复运行
+目录与测试二进制已删除；所有实现/复核 agent 和两个实现 worktree/分支已回收。
+持久证据和边界见[本批入口](testing/records/2026-11-15-server-archive-evidence/README.md)。
 
 ## 2026-11-15 归档工具观察与 PAX 元数据兼容：集中门禁与复核通过
 

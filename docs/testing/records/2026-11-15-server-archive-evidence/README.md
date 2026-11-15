@@ -24,8 +24,9 @@
 - [最终 app 库存](app-inventory-r5.txt)实际 `1208` 项；
   [输入差分](final-input-delta-r1.json)与
   [独立最终绑定](review-session-ui/final-binding-r3.json)保留逐项核验。
-- 源码功能提交后的 `commit-input-binding.json` 将逐项绑定最终冻结、
-  Git blob 和当前文件；最终交接记录该本地提交，不执行 push。
+- [源码提交绑定](commit-input-binding.json)逐项绑定本地
+  `2726b6466e68508037ff81b1daf01fcf2c91b6e5` 的最终冻结、Git blob 和当前
+  `553 + 10` 文件，零 mismatch。不执行 push。
 
 ## 保留的失败与修复
 
@@ -58,8 +59,11 @@ app fixture 访问域和新按钮定位失败，以及首轮 Clippy 测试断言
 fixture 的符号链接和 socket 等特殊对象只记录元数据，绝不跟随或重新创建；
 ACL 事实来自原始命令输出和回执，不将归档目录权限当成历史 ACL 快照。
 临时目录及稳定预构建二进制不保存，摘要和实际清单保留。
-`cleanup-before-archive.json` 是历史阶段的 pending 观察，交付后的
-`cleanup-final.json` 单独记录最终资源收口。`sha256.json` 索引本目录除其自身外
+`cleanup-before-archive.json` 是历史阶段的 pending 观察，
+[cleanup-final.json](cleanup-final.json)单独记录最终资源收口。
+源码提交/绑定和原件校验后，本批自有运行目录、稳定预构建副本及重复日志已删除，
+回收约 332 MB；删除前检查没有打开文件或存活的自有命令进程组。
+`sha256.json` 索引本目录除其自身外
 全部持久文件；新增提交绑定和清理回执后重新生成索引。
 
 仅清理本批自有运行目录和重复产物；保留唯一有效 Cargo target、其他任务 WIP

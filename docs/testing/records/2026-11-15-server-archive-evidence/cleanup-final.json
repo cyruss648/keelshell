@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-11-15T07:11:58.316526+00:00",
+  "source_commit": "2726b6466e68508037ff81b1daf01fcf2c91b6e5",
+  "removed_owned_runtime": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/server-archive-20261115",
+  "runtime_exists_after_cleanup": false,
+  "removed_regular_files": 253,
+  "removed_regular_file_bytes": 331600809,
+  "verified_original_evidence_files": 248,
+  "implementation_worktrees": {
+    "server-archive-helper-20261115": {
+      "exists": false,
+      "managed_status": "archived"
+    },
+    "server-archive-transport-20261115": {
+      "exists": false,
+      "managed_status": "archived"
+    }
+  },
+  "implementation_local_branches": [],
+  "closed_agents": [
+    "01a1ddbd-6aba-7c72-9b0f-b51c278bbc73",
+    "01a1ddbf-3d2a-76d1-b8d4-4fbdb1b21cd5",
+    "01a1ddd5-9b6a-7260-8eff-593004d1232f",
+    "01a1ddd7-27aa-73d0-9328-cafc179f7415"
+  ],
+  "kept_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "kept_target_exists": true,
+  "unrelated_and_protected_worktrees_preserved": true,
+  "no_containers_created": true,
+  "owned_openssh_processes_and_temporary_directories_removed": true,
+  "scope": "Only this batch runtime, stable prebuilt copies, repeated logs and owned test fixtures. Durable raw evidence and current Cargo cache retained."
+}

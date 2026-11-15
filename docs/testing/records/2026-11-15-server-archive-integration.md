@@ -5,6 +5,10 @@
 关闭。以下保留各阶段失败、被终止门禁和原始条件性结论，不沿用上一批结果。
 仅本地提交，不推送。
 
+源码功能提交：`2726b6466e68508037ff81b1daf01fcf2c91b6e5`。
+[提交输入绑定](2026-11-15-server-archive-evidence/commit-input-binding.json)
+逐项核对 Git blob、最终冻结和当前 `553 + 10` 文件，零 mismatch。
+
 基线为 `9112e232b6f0e022d299cba9e8498088c77b3d3f`。
 实现按 core/Python、session 和原生 UI 拆分；两个实现 agent 不执行 Cargo，
 父独占当前主树的 `work/recovery-batch-integration-20261115/target`。
@@ -141,3 +145,10 @@ Rust 数量。session/UI 独立预构建执行 `40 + 11 + 7 + 9 = 67/67`，未�
 原生交互。实际 Windows 编译、Linux 文件系统权限和 default ACL、Python 3.8
 运行、三平台原生 UI、IME/辅助技术、安装和发行验收仍开放，FILE-05/M4 与产品
 总目标继续进行。本机编译器 probe 或模拟 syscall 返回不能替这些边界补签。
+
+248 份原件已按 manifest 逐字或无损压缩校验，随后在本地源码提交和绑定后清理
+本批自有运行目录、稳定预构建副本和重复日志，约 332 MB。所有实现/复核 agent
+已关闭，两个实现 worktree 已受管归档且本地分支不存在，自有 OpenSSH 回收，
+未创建容器。保留唯一有效 target、其他任务 WIP 与受保护 worktree；
+最终事实见[清理回执](2026-11-15-server-archive-evidence/cleanup-final.json)，
+原阶段性 pending 观察保留，不覆盖。

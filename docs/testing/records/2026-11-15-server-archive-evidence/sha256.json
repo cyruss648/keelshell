@@ -1,5 +1,5 @@
 {
-  "README.md": "de4cc2600d4d3fc64c75f14bab539977c359a6c80e0bbfe4207f28de5a76f61f",
+  "README.md": "25b63fde56ee8b1a3a1863b9cd227a6f7f29e36903d56dbf332efb2e9256ef35",
   "acl-red-tests.rs.txt": "a95d4d297e6f5ca10c75d8349cbf2bd8a6cf5a516c130bd27b56a52fc264113d",
   "acl-syntax-r1.json": "fc7dcd7e5da3ce467f6ac56603a649eeda4de6ee8f740dcc3558d67d65ad4186",
   "acl_check.py.txt": "27bb2cd30787705b8815ee411ec7d3916c81e2e5b8804854c71b9b93a56be623",
@@ -13,6 +13,9 @@
   "archive-manifest.json": "e13d99234d798507fde16de8248fe45821ae11919521308604e4ef10af4b360b",
   "bind_commit.py.txt": "c934e679bc182cb571ccc5af977078aa5ff59d622904b5044a01aee2e9775888",
   "cleanup-before-archive.json": "745c7b619a0d5a84ecba4448e4c6ccd3128b75192dd059fb34b595a481bb4524",
+  "cleanup-final.json": "1c911acf20d298045b1cd3e2a9d7f57ab381bb20ad4cd794cbc5127273efb1c4",
+  "cleanup-removal-preflight.json": "75d8bb436ce22c3eac5d039f88268822fddd8a30635090ea38c5b907660bd07c",
+  "commit-input-binding.json": "0efe3d396c5c767d42dd677355e302ddda2f54457a89299ca571db9393c68348",
   "core-binary-r1.json": "8517bbeea7b5668777c13ceed28316f4381ccf447e03d5db5549b94f591ffd59",
   "core-binary-r4.json": "322ed8cb29518e3c6eecf1ac476f6050ca678d01bd002e29af972cd0499bc94e",
   "core-import-r1.json": "3275dc36e8dd251276701d5e9e438fed4bcabf33abb3ab37ddf7742efdee11e8",
