@@ -133,9 +133,10 @@ impl FilesPanel {
                     .as_ref()
                     .and_then(|(_, operation)| operation.persisted_recovery_id())
                     .is_some()
+                    || !view.recovery_review_queue.is_empty()
+                    || view.recovery_review_active.is_some()
                 {
-                    view.recovery_claim = None;
-                    view.active_recovery_id = None;
+                    view.revoke_recovery_review();
                 }
                 view.pending = None;
                 view.confirmation_expanded = false;

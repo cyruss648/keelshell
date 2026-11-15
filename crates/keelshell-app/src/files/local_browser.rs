@@ -103,6 +103,7 @@ impl FilesPanel {
             self.recovery_claim = None;
             self.active_recovery_id = None;
         }
+        self.clear_recovery_review_queue();
         self.pending = None;
         self.confirmation_expanded = false;
         self.browser_review_revision = uuid::Uuid::new_v4();

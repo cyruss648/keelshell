@@ -312,8 +312,13 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
     {
         return;
     }
+    let scroll_surface = if window.try_find("file-transfer-queue-details").is_some() {
+        "file-transfer-queue-details"
+    } else {
+        "file-tools-scroll"
+    };
     for _ in 0..6 {
-        let outer = window.find("file-tools-scroll").bounds();
+        let outer = window.find(scroll_surface).bounds();
         let queue_control = ["select-transfer-", "cancel-transfer-", "pause-transfer-"]
             .iter()
             .any(|prefix| id.starts_with(prefix));
@@ -372,7 +377,7 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
         );
         window.render_frame(cx);
     }
-    let viewport = window.find("file-tools-scroll").bounds();
+    let viewport = window.find(scroll_surface).bounds();
     let target = window.find(gpui_kit::SharedString::from(id.to_owned()));
     assert!(
         target.visible()

@@ -1,8 +1,11 @@
 //! Multiple reviewed jobs share one queue and the original authenticated session.
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
-use gpui_kit::component::scroll::ScrollableElement;
+use gpui_kit::component::{checkbox::Checkbox, scroll::ScrollableElement};
 use keelshell_session::sftp::{MAX_QUEUED_TRANSFERS, TransferQueue};
+use std::collections::VecDeque;
+
+type RecoveryDiscardOutcome = (uuid::Uuid, Result<(), String>);
 
 pub(super) struct QueuedTransfer {
     pub(super) id: uuid::Uuid,
@@ -60,6 +63,9 @@ impl FilesPanel {
         // surfaces changes neither browser drafts nor the pending approval.
         if self.session_token != expected_session {
             return;
+        }
+        if !visible && self.recovery_review_session.is_some() {
+            self.cancel_recovery_review_queue(cx);
         }
         self.queue_details_visible = visible;
         cx.notify();
@@ -297,6 +303,7 @@ impl FilesPanel {
         let recovery_claim = if let Some(id) = persisted_id {
             let claim = self.recovery_claim.take();
             if self.active_recovery_id != Some(id) {
+                self.revoke_recovery_review();
                 self.status = Message::new(
                     "恢复审核已失效，请重新检查该传输记录。",
                     "The recovery review is stale; inspect the transfer record again.",
@@ -304,6 +311,7 @@ impl FilesPanel {
                 return;
             }
             let Some(claim) = claim else {
+                self.revoke_recovery_review();
                 self.status = Message::new(
                     "无法确认恢复记录的独占审核权，已拒绝继续。",
                     "The recovery record is not exclusively claimed; continuation was refused.",
@@ -311,6 +319,7 @@ impl FilesPanel {
                 return;
             };
             if claim.id() != id {
+                self.revoke_recovery_review();
                 self.status = Message::new(
                     "恢复记录审核权与目标不一致，已拒绝继续。",
                     "The recovery claim does not match the reviewed target; continuation was refused.",
@@ -322,6 +331,9 @@ impl FilesPanel {
             None
         };
         let Some(session) = self.session.clone().filter(|_| !self.suspended) else {
+            if persisted_id.is_some() {
+                self.revoke_recovery_review();
+            }
             return;
         };
         let Some(status) = operation.transfer_status() else {
@@ -334,6 +346,7 @@ impl FilesPanel {
         let persisted_progress = super::persisted_recovery_progress(&operation);
         let recovery_record = if let Some(id) = persisted_id {
             let Some(record) = self.recovery_records.iter().find(|record| record.id == id) else {
+                self.revoke_recovery_review();
                 self.status = Message::new(
                     "重启后的传输记录已消失，请重新加载文件面板后再检查。",
                     "The post-restart transfer record is gone; reload the file panel before inspecting it again.",
@@ -350,6 +363,7 @@ impl FilesPanel {
                 || record.remote_path != spec.remote
                 || record.directory != directory
             {
+                self.revoke_recovery_review();
                 self.status = Message::new(
                     "恢复记录与当前审核目标不一致，已拒绝继续。",
                     "The recovery record does not match the reviewed target; continuation was refused.",
@@ -358,6 +372,7 @@ impl FilesPanel {
                 return;
             }
             if !recovery_connection_matches(record, self.connection_id) {
+                self.revoke_recovery_review();
                 self.status = Message::new(
                     "恢复记录绑定了另一条保存连接，已拒绝继续。",
                     "The recovery record belongs to another saved connection; continuation was refused.",
@@ -373,6 +388,7 @@ impl FilesPanel {
                     total_bytes,
                 )
             {
+                self.revoke_recovery_review();
                 self.status = Message::new(
                     format!("恢复计划进度无效：{error}"),
                     format!("The recovery plan progress is invalid: {error}"),
@@ -407,6 +423,11 @@ impl FilesPanel {
             .count()
             >= MAX_QUEUED_TRANSFERS
         {
+            if let Some(recovery_id) = persisted_id {
+                self.requeue_failed_recovery_review_item(recovery_id);
+                self.recovery_claim = None;
+                self.active_recovery_id = None;
+            }
             self.status = Message::new(
                 "传输队列已满（最多 32 个未结束任务），请等待或取消后再加入。",
                 "Transfer queue is full (32 unfinished jobs); wait or cancel before adding another.",
@@ -453,6 +474,12 @@ impl FilesPanel {
         self.pending = None;
         self.busy = true;
         self.active_recovery_id = Some(recovery_id);
+        if self.recovery_review_active == Some(recovery_id) {
+            self.recovery_review_active = None;
+            if self.recovery_review_queue.is_empty() {
+                self.recovery_review_session = None;
+            }
+        }
         self.status = Message::new(
             "已加入传输队列；可继续审核加入其它任务。",
             "Added to the transfer queue; review and add more jobs while it runs.",
@@ -572,6 +599,7 @@ impl FilesPanel {
             self.busy = self.has_active_transfers();
             self.select_job(id);
             if persisted_id.is_some() {
+                self.requeue_failed_recovery_review_item(recovery_id);
                 self.recovery_claim = None;
                 self.active_recovery_id = None;
             }
@@ -727,9 +755,191 @@ impl FilesPanel {
         }
     }
 
+    pub(super) fn clear_recovery_review_queue(&mut self) {
+        self.recovery_selection.clear();
+        self.recovery_review_queue.clear();
+        self.recovery_review_session = None;
+        self.recovery_review_active = None;
+        self.recovery_review_revision = self.recovery_review_revision.wrapping_add(1);
+    }
+
+    fn cancel_recovery_review_queue(&mut self, cx: &mut Context<Self>) {
+        if self
+            .pending
+            .as_ref()
+            .and_then(|(_, operation)| operation.persisted_recovery_id())
+            .is_some()
+        {
+            self.pending = None;
+            self.confirmation_expanded = false;
+        }
+        self.revoke_recovery_review();
+        self.status = Message::new(
+            "已清空恢复待审核队列；未审核记录保留，未执行传输。",
+            "Cleared the recovery review queue; unreviewed records were retained and no transfer ran.",
+        );
+        cx.notify();
+    }
+
+    pub(super) fn revoke_recovery_review(&mut self) {
+        self.clear_recovery_review_queue();
+        self.recovery_claim = None;
+        self.active_recovery_id = None;
+    }
+
+    fn requeue_failed_recovery_review_item(&mut self, id: uuid::Uuid) {
+        if self.recovery_review_active == Some(id) {
+            if self.recovery_review_session == Some(self.session_token)
+                && !self.recovery_review_queue.contains(&id)
+            {
+                self.recovery_review_queue.push_front(id);
+            }
+            self.recovery_review_active = None;
+        }
+    }
+
+    pub(super) fn recovery_review_queue_is_current(&self) -> bool {
+        self.recovery_review_session == Some(self.session_token)
+            && self
+                .recovery_review_queue
+                .iter()
+                .all(|id| self.recovery_records.iter().any(|record| record.id == *id))
+    }
+
+    fn queue_selected_persisted_recoveries(&mut self, cx: &mut Context<Self>) {
+        if self.recovery_review_session.is_some() && !self.recovery_review_queue_is_current() {
+            self.revoke_recovery_review();
+            cx.notify();
+            return;
+        }
+        if self.suspended
+            || self.recovery_loading
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || !self.recovery_writes.is_empty()
+            || !self.recovery_claim_requests.is_empty()
+            || self.recovery_review_active.is_some()
+            || !self.recovery_review_queue.is_empty()
+        {
+            return;
+        }
+        let selected_count = self.recovery_selection.len();
+        if selected_count == 0 {
+            self.status = Message::new(
+                "请先选择至少一条恢复记录。",
+                "Select at least one recovery record first.",
+            );
+            cx.notify();
+            return;
+        }
+        let queue: Vec<_> = self
+            .recovery_records
+            .iter()
+            .filter(|record| self.recovery_selection.contains(&record.id))
+            .map(|record| record.id)
+            .collect();
+        if queue.len() != selected_count {
+            self.revoke_recovery_review();
+            self.status = Message::new(
+                "恢复列表已变化，已清空选择和待审核队列；请重新选择。",
+                "The recovery list changed; selection and the review queue were cleared. Select again.",
+            );
+            cx.notify();
+            return;
+        }
+        self.recovery_review_queue = VecDeque::from(queue);
+        self.recovery_review_session = Some(self.session_token);
+        self.recovery_selection.clear();
+        self.status = Message::new(
+            format!(
+                "已建立 {} 条有序待审核队列；不会自动连接或执行。",
+                selected_count
+            ),
+            format!(
+                "Queued {selected_count} records in stable order; nothing will connect or execute automatically."
+            ),
+        );
+        cx.notify();
+    }
+
+    fn selected_recovery_ids_in_order(&self) -> Vec<uuid::Uuid> {
+        self.recovery_records
+            .iter()
+            .filter(|record| self.recovery_selection.contains(&record.id))
+            .map(|record| record.id)
+            .collect()
+    }
+
+    fn toggle_recovery_selection(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
+        if self.suspended
+            || self.recovery_loading
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || !self.recovery_writes.is_empty()
+            || !self.recovery_claim_requests.is_empty()
+            || self.recovery_review_active.is_some()
+            || !self.recovery_review_queue.is_empty()
+        {
+            return;
+        }
+        let visible: Vec<_> = self
+            .recovery_records
+            .iter()
+            .map(|record| record.id)
+            .collect();
+        if !self.recovery_selection.click(&id, &visible, true, false) {
+            self.status = Message::new(
+                "最多同时整理 32 条恢复记录。",
+                "Select at most 32 recovery records at once.",
+            );
+        }
+        cx.notify();
+    }
+
+    fn review_next_persisted_recovery(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.suspended
+            || self.recovery_loading
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || !self.recovery_writes.is_empty()
+            || !self.recovery_claim_requests.is_empty()
+            || self.recovery_review_active.is_some()
+        {
+            return;
+        }
+        if !self.recovery_review_queue_is_current() {
+            self.revoke_recovery_review();
+            self.status = Message::new(
+                "待审核队列已失效；请重新选择恢复记录。",
+                "The pending review queue is stale; select the recovery records again.",
+            );
+            cx.notify();
+            return;
+        }
+        let Some(id) = self.recovery_review_queue.front().copied() else {
+            self.status = Message::new(
+                "待审核队列已完成；没有自动执行任何记录。",
+                "The review queue is complete; no record was executed automatically.",
+            );
+            cx.notify();
+            return;
+        };
+        self.request_persisted_recovery_inner(id, true, window, cx);
+    }
+
     pub(super) fn request_persisted_recovery(
         &mut self,
         id: uuid::Uuid,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.request_persisted_recovery_inner(id, false, window, cx);
+    }
+
+    fn request_persisted_recovery_inner(
+        &mut self,
+        id: uuid::Uuid,
+        queued: bool,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -738,14 +948,35 @@ impl FilesPanel {
             || self.pending.is_some()
             || self.operation_id.is_some()
             || self.recovery_writes.contains(&id)
-            || self.recovery_claim_requests.contains(&id)
+            || !self.recovery_claim_requests.is_empty()
         {
             return;
         }
+        if !queued {
+            self.revoke_recovery_review();
+        }
+        if queued
+            && (self.recovery_review_session != Some(self.session_token)
+                || self.recovery_review_queue.front().copied() != Some(id))
+        {
+            self.revoke_recovery_review();
+            self.status = Message::new(
+                "待审核队列已失效，已拒绝旧入口；请重新选择。",
+                "The review queue is stale; the old entry was refused. Select again.",
+            );
+            cx.notify();
+            return;
+        }
         let Some(record) = self.recovery_records.iter().find(|record| record.id == id) else {
+            if queued {
+                self.revoke_recovery_review();
+            }
             return;
         };
         if !recovery_connection_matches(record, self.connection_id) {
+            if queued {
+                self.revoke_recovery_review();
+            }
             self.status = Message::new(
                 "恢复记录绑定了另一条保存连接；请在原连接标签中检查。",
                 "This recovery record belongs to another saved connection; inspect it from the original connection tab.",
@@ -756,26 +987,55 @@ impl FilesPanel {
         let spec = super::transfer_spec_from_recovery(record);
         let directory = record.directory;
         let connection_bound = record.connection_id.is_some();
+        let expected_record = record.clone();
         self.recovery_claim_requests.insert(id);
         let store = self.recovery_store.clone();
         let runtime = self.runtime.clone();
         let executor = cx.background_executor().clone();
         let expected_session = self.session_token;
+        let expected_revision = self.recovery_review_revision;
         let task = crate::runtime_bridge::spawn(&runtime, executor, async move {
-            tokio::task::spawn_blocking(move || store.claim(id))
-                .await
-                .map_err(|error| format!("transfer recovery claim worker stopped: {error}"))?
-                .map_err(|error| error.to_string())
+            tokio::task::spawn_blocking(move || {
+                let claim = store.claim(id).map_err(|error| error.to_string())?;
+                let records = store.load().map_err(|error| error.to_string())?;
+                if !records.contains(&expected_record) {
+                    return Err(
+                        "the recovery record changed; reload and inspect it again".to_owned()
+                    );
+                }
+                Ok(claim)
+            })
+            .await
+            .map_err(|error| format!("transfer recovery claim worker stopped: {error}"))?
         });
         cx.spawn_in(window, async move |this, cx| {
             let result = task.await;
             let _ = this.update_in(cx, |view, window, cx| {
+                if view.session_token != expected_session {
+                    return;
+                }
                 view.recovery_claim_requests.remove(&id);
-                if view.session_token != expected_session || view.suspended {
+                if view.suspended || view.recovery_review_revision != expected_revision {
+                    cx.notify();
                     return;
                 }
                 match result {
                     Ok(Ok(claim)) => {
+                        if queued
+                            && (!view.recovery_review_queue_is_current()
+                                || view.recovery_review_queue.front().copied() != Some(id))
+                        {
+                            view.revoke_recovery_review();
+                            view.status = Message::new(
+                                "待审核队列在占用记录期间已变化；未采用这条 claim。",
+                                "The review queue changed while claiming the record; the claim was not adopted.",
+                            );
+                            return;
+                        }
+                        if queued {
+                            view.recovery_review_queue.pop_front();
+                            view.recovery_review_active = Some(id);
+                        }
                         view.active_recovery_id = Some(id);
                         let operation = Operation::PlanPersistedRecovery {
                             id,
@@ -797,12 +1057,18 @@ impl FilesPanel {
                         }
                     }
                     Ok(Err(error)) => {
+                        if queued {
+                            view.revoke_recovery_review();
+                        }
                         view.status = Message::new(
                             format!("无法占用传输恢复记录：{error}"),
                             format!("Unable to claim the transfer recovery record: {error}"),
                         );
                     }
                     Err(error) => {
+                        if queued {
+                            view.revoke_recovery_review();
+                        }
                         view.status = Message::new(
                             format!("无法占用传输恢复记录：{error}"),
                             format!("Unable to claim the transfer recovery record: {error}"),
@@ -813,6 +1079,247 @@ impl FilesPanel {
             });
         })
         .detach();
+    }
+
+    fn batch_discard_review_message(&self, ids: &[uuid::Uuid]) -> Message {
+        let mut zh = format!(
+            "即将逐条占用并丢弃 {} 条本地传输恢复记录。\n这一步只删除本地恢复日志，不连接 SSH、不执行远端检查、不重放传输。每条记录都必须独立获得 claim；Busy、记录消失或其它错误会保留未处理记录并报告。请明确确认：\n",
+            ids.len()
+        );
+        let mut en = format!(
+            "This will claim and discard {} local transfer recovery records one by one.\nThis only removes local recovery metadata; it does not connect SSH, inspect a remote target, or replay a transfer. Each record needs its own claim; Busy, missing-record and other errors retain the unprocessed record and are reported. Confirm explicitly:\n",
+            ids.len()
+        );
+        for (index, id) in ids.iter().enumerate() {
+            let Some(record) = self.recovery_records.iter().find(|record| record.id == *id) else {
+                continue;
+            };
+            let (direction_zh, direction_en, source, destination) = match record.direction {
+                TransferRecoveryDirection::Upload => (
+                    "上传",
+                    "Upload",
+                    record.local_path.display().to_string(),
+                    record.remote_path.clone(),
+                ),
+                TransferRecoveryDirection::Download => (
+                    "下载",
+                    "Download",
+                    record.remote_path.clone(),
+                    record.local_path.display().to_string(),
+                ),
+            };
+            zh.push_str(&format!(
+                "{}. {direction_zh} · {source} → {destination}\n",
+                index + 1
+            ));
+            en.push_str(&format!(
+                "{}. {direction_en} · {source} → {destination}\n",
+                index + 1
+            ));
+        }
+        Message::new(zh, en)
+    }
+
+    fn request_batch_discard(&mut self, cx: &mut Context<Self>) {
+        if self.suspended
+            || self.recovery_loading
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || !self.recovery_writes.is_empty()
+            || !self.recovery_claim_requests.is_empty()
+            || self.recovery_review_active.is_some()
+            || !self.recovery_review_queue.is_empty()
+        {
+            return;
+        }
+        let selected_count = self.recovery_selection.len();
+        if selected_count == 0 {
+            self.status = Message::new(
+                "请先选择要丢弃的恢复记录。",
+                "Select recovery records to discard first.",
+            );
+            cx.notify();
+            return;
+        }
+        let ids = self.selected_recovery_ids_in_order();
+        if ids.len() != selected_count {
+            self.revoke_recovery_review();
+            self.status = Message::new(
+                "恢复列表已变化，已清空选择；请重新选择后再丢弃。",
+                "The recovery list changed; selection was cleared. Select again before discarding.",
+            );
+            cx.notify();
+            return;
+        }
+        let candidates: Vec<_> = ids
+            .iter()
+            .filter_map(|id| {
+                self.recovery_records
+                    .iter()
+                    .find(|record| record.id == *id)
+                    .map(|record| RecoveryDiscardCandidate {
+                        id: *id,
+                        record: record.clone(),
+                    })
+            })
+            .collect();
+        if candidates.len() != selected_count {
+            self.revoke_recovery_review();
+            self.status = Message::new(
+                "恢复列表已变化，已清空选择；请重新选择后再丢弃。",
+                "The recovery list changed; selection was cleared. Select again before discarding.",
+            );
+            cx.notify();
+            return;
+        }
+        self.replace_pending_review(
+            self.batch_discard_review_message(&ids),
+            Operation::DiscardPersistedRecoveryBatch(candidates),
+        );
+        cx.notify();
+    }
+
+    pub(super) fn start_batch_discard(
+        &mut self,
+        candidates: Vec<RecoveryDiscardCandidate>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let ids: Vec<_> = candidates.iter().map(|candidate| candidate.id).collect();
+        if self.suspended
+            || self.recovery_loading
+            || self.operation_id.is_some()
+            || candidates.is_empty()
+            || candidates.iter().any(|candidate| {
+                !self
+                    .recovery_records
+                    .iter()
+                    .any(|record| record.id == candidate.id)
+            })
+        {
+            self.status = Message::new(
+                "恢复列表已变化，批量丢弃已拒绝；原记录保留。",
+                "The recovery list changed; batch discard was refused and records were retained.",
+            );
+            cx.notify();
+            return;
+        }
+        self.recovery_writes.extend(ids.iter().copied());
+        self.recovery_selection.clear();
+        let store = self.recovery_store.clone();
+        let runtime = self.runtime.clone();
+        let executor = cx.background_executor().clone();
+        let expected_session = self.session_token;
+        let worker_candidates = candidates.clone();
+        let task = crate::runtime_bridge::spawn(&runtime, executor, async move {
+            tokio::task::spawn_blocking(move || {
+                worker_candidates
+                    .into_iter()
+                    .map(|candidate| {
+                        let id = candidate.id;
+                        let result = match store.claim(id) {
+                            Ok(claim) => match store.load() {
+                                Ok(records) if records.contains(&candidate.record) => store
+                                    .remove_with_claim(&claim)
+                                    .map_err(|error| error.to_string()),
+                                Ok(_) => {
+                                    Err("the record changed after confirmation; it was retained"
+                                        .to_owned())
+                                }
+                                Err(error) => Err(error.to_string()),
+                            },
+                            Err(error) => Err(error.to_string()),
+                        };
+                        (id, result)
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .await
+            .map_err(|error| format!("transfer recovery discard worker stopped: {error}"))
+        });
+        cx.spawn_in(window, async move |this, cx| {
+            let result = match task.await {
+                Ok(result) => result,
+                Err(error) => Err(error.to_string()),
+            };
+            let _ = this.update_in(cx, |view, window, cx| {
+                view.apply_batch_discard_result(ids, expected_session, result, window, cx);
+            });
+        })
+        .detach();
+        self.status = Message::new(
+            "正在逐条处理恢复记录；未处理项会保留。",
+            "Discarding recovery records one by one; unprocessed items are retained.",
+        );
+        cx.notify();
+    }
+
+    pub(super) fn apply_batch_discard_result(
+        &mut self,
+        ids: Vec<uuid::Uuid>,
+        expected_session: uuid::Uuid,
+        result: Result<Vec<RecoveryDiscardOutcome>, String>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.session_token != expected_session {
+            return;
+        }
+        for id in &ids {
+            self.recovery_writes.remove(id);
+        }
+        let outcomes = result.unwrap_or_else(|error| {
+            ids.iter()
+                .copied()
+                .map(|id| (id, Err(error.clone())))
+                .collect()
+        });
+        let successful: Vec<_> = outcomes
+            .iter()
+            .filter_map(|(id, result)| result.is_ok().then_some(*id))
+            .collect();
+        let failed: Vec<_> = outcomes
+            .iter()
+            .filter_map(|(id, result)| result.as_ref().err().map(|error| (*id, error.clone())))
+            .collect();
+        self.advance_recovery_mutation_generation();
+        self.recovery_records
+            .retain(|record| !successful.contains(&record.id));
+        // The worker may have removed some records before an overall error or
+        // an unknown return. Reload the authoritative store in every outcome
+        // so a stale UI snapshot cannot hide or resurrect retained records.
+        self.load_recovery_records(window, cx);
+        self.recovery_selection.clear();
+        let visible: Vec<_> = self
+            .recovery_records
+            .iter()
+            .map(|record| record.id)
+            .collect();
+        for (id, _) in &failed {
+            let _ = self.recovery_selection.click(id, &visible, true, false);
+        }
+        let mut zh = format!(
+            "批量丢弃完成：确认删除 {} 条，另有 {} 条未确认删除；保留仍存在的记录并重新读取实际列表。",
+            successful.len(),
+            failed.len()
+        );
+        let mut en = format!(
+            "Batch discard finished: {} confirmed discarded, {} not confirmed; remaining records are retained and the actual list is reloaded.",
+            successful.len(),
+            failed.len()
+        );
+        for (id, error) in failed {
+            let path = self
+                .recovery_records
+                .iter()
+                .find(|record| record.id == id)
+                .map(|record| record.remote_path.as_str())
+                .unwrap_or("record");
+            zh.push_str(&format!("\n未确认删除：{path}（{error}）"));
+            en.push_str(&format!("\nNot confirmed discarded: {path} ({error})"));
+        }
+        self.status = Message::new(zh, en);
+        cx.notify();
     }
 
     fn discard_persisted_recovery(
@@ -979,6 +1486,134 @@ impl FilesPanel {
                 )
                 .into_any_element();
         }
+        let expected_session = self.session_token;
+        let selected_count = self.recovery_selection.len();
+        let queued_count = self.recovery_review_queue.len();
+        let selection_disabled = self.suspended
+            || self.recovery_loading
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || !self.recovery_writes.is_empty()
+            || !self.recovery_claim_requests.is_empty()
+            || self.recovery_review_active.is_some()
+            || !self.recovery_review_queue.is_empty();
+        let queue_button_disabled = selection_disabled || selected_count == 0;
+        let review_next_disabled = self.suspended
+            || self.recovery_loading
+            || self.pending.is_some()
+            || self.operation_id.is_some()
+            || !self.recovery_writes.is_empty()
+            || !self.recovery_claim_requests.is_empty()
+            || self.recovery_review_active.is_some()
+            || self.recovery_review_queue.is_empty();
+        let discard_button_disabled = selection_disabled || selected_count == 0;
+        let selected_label =
+            SharedString::from(format!("{}: {selected_count}", t(cx, "已选择", "Selected")));
+        let mut controls = div()
+            .id("persisted-transfer-recovery-batch-controls")
+            .test_support()
+            .flex()
+            .flex_wrap()
+            .items_center()
+            .gap_1()
+            .child(
+                div()
+                    .id("persisted-transfer-recovery-selection-count")
+                    .test_support()
+                    .text_color(rgb(visual.accent))
+                    .role(accesskit::Role::Label)
+                    .aria_label(selected_label.clone())
+                    .child(selected_label),
+            )
+            .child(
+                Button::new("queue-selected-persisted-transfers")
+                    .compact()
+                    .ghost()
+                    .disabled(queue_button_disabled)
+                    .label(t(cx, "建立审核队列", "Build review queue"))
+                    .accessibility_label(t(
+                        cx,
+                        "按当前列表顺序建立恢复记录审核队列",
+                        "Build an ordered recovery review queue from the current list",
+                    ))
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        if view.session_token != expected_session {
+                            view.revoke_recovery_review();
+                            return;
+                        }
+                        view.queue_selected_persisted_recoveries(cx);
+                    })),
+            )
+            .child(
+                Button::new("review-next-persisted-transfer")
+                    .compact()
+                    .primary()
+                    .disabled(review_next_disabled)
+                    .label(t(cx, "逐条进入审核", "Review one by one"))
+                    .accessibility_label(t(
+                        cx,
+                        "进入下一条恢复记录的独立检查和审核",
+                        "Enter the next recovery record's independent inspection and review",
+                    ))
+                    .on_click(cx.listener(move |view, _, window, cx| {
+                        if view.session_token != expected_session {
+                            view.revoke_recovery_review();
+                            return;
+                        }
+                        view.review_next_persisted_recovery(window, cx);
+                    })),
+            )
+            .child(
+                Button::new("discard-selected-persisted-transfers")
+                    .compact()
+                    .ghost()
+                    .disabled(discard_button_disabled)
+                    .label(t(cx, "批量丢弃", "Discard selected"))
+                    .accessibility_label(t(
+                        cx,
+                        "逐条占用并丢弃选中的恢复记录，需要再次确认",
+                        "Claim and discard selected recovery records one by one; confirmation required",
+                    ))
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        if view.session_token != expected_session {
+                            view.revoke_recovery_review();
+                            return;
+                        }
+                        view.request_batch_discard(cx);
+                    })),
+            );
+        if queued_count > 0 {
+            let queued_label =
+                SharedString::from(format!("{}: {queued_count}", t(cx, "待审核", "Queued")));
+            controls = controls.child(
+                div()
+                    .id("persisted-transfer-recovery-queue-count")
+                    .test_support()
+                    .text_color(rgb(visual.warning))
+                    .role(accesskit::Role::Label)
+                    .aria_label(queued_label.clone())
+                    .child(queued_label),
+            );
+        }
+        if self.recovery_review_session.is_some() {
+            controls = controls.child(
+                Button::new("cancel-persisted-transfer-review-queue")
+                    .compact()
+                    .ghost()
+                    .label(t(cx, "取消待审核", "Cancel review queue"))
+                    .accessibility_label(t(
+                        cx,
+                        "清空待审核队列并保留未审核的恢复记录",
+                        "Clear the review queue and retain unreviewed recovery records",
+                    ))
+                    .on_click(cx.listener(move |view, _, _, cx| {
+                        if view.session_token == expected_session {
+                            view.cancel_recovery_review_queue(cx);
+                        }
+                    })),
+            );
+        }
+        card = card.child(controls);
         for record in &self.recovery_records {
             let id = record.id;
             let spec = super::transfer_spec_from_recovery(record);
@@ -1016,7 +1651,9 @@ impl FilesPanel {
                 || self.pending.is_some()
                 || self.operation_id.is_some()
                 || self.recovery_writes.contains(&id)
-                || self.recovery_claim_requests.contains(&id);
+                || self.recovery_claim_requests.contains(&id)
+                || self.recovery_review_session.is_some();
+            let selected = self.recovery_selection.contains(&id);
             card = card.child(
                 div()
                     .id(SharedString::from(format!(
@@ -1027,6 +1664,27 @@ impl FilesPanel {
                     .flex_wrap()
                     .items_center()
                     .gap_1()
+                    .child(
+                        Checkbox::new(SharedString::from(format!(
+                            "select-persisted-transfer-{id}"
+                        )))
+                        .small()
+                        .checked(selected)
+                        .disabled(selection_disabled)
+                        .accessibility_label(format!(
+                            "{} {}",
+                            t(cx, "选择恢复记录", "Select recovery record"),
+                            summary
+                        ))
+                        .on_click(cx.listener(move |view, _, _, cx| {
+                            cx.stop_propagation();
+                            if view.session_token != expected_session {
+                                view.revoke_recovery_review();
+                                return;
+                            }
+                            view.toggle_recovery_selection(id, cx);
+                        })),
+                    )
                     .child(div().flex_1().min_w_0().text_ellipsis().child(summary))
                     .child(
                         Button::new(SharedString::from(format!(
