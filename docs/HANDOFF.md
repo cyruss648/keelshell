@@ -9,10 +9,16 @@
 
 当前维护 checkout 为
 `/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell`，
-分支 `feature/editor-unicode-codec-20261114`，当前 exact HEAD 为
-`e2b00af3cb8bcae67d54cbf69cf04e8baab2b7cd`
-（`fix(files): refresh recovery records after mutations`）。公司内网不可用，
-当前只允许本地 commit，不执行 push。
+分支 `feature/editor-unicode-codec-20261114`，本批已提交的依赖基线为
+`59c59a8`（`chore(deps): refresh nix direct requirement`）；传输恢复实现基线为
+`e2b00af3cb8bcae67d54cbf69cf04e8baab2b7cd`。公司内网不可用，当前只允许本地
+commit，不执行 push。
+
+用户在 2026-11-15 要求缩短开发周期，本批开始采用
+[阶段集中验证](testing/STRATEGY.md#阶段集中验证)：开发中保留必要编译和风险专项，
+子任务集成后集中跑完整 gate、真实联调及新的独立复核，修复先做受影响回归。
+不再为每个小改动重复执行全仓 gate 或创建多轮文档专属 reviewer；最终提交仍需
+完整成功门禁和非作者复核。正在开发的切片保持未完成状态，不沿用上一片通过结果。
 
 本片修复了恢复列表在旧异步 load 与 Discard/计划进度 mutation 交错时的 stale
 snapshot 风险。成功 mutation 会推进 `recovery_mutation_generation` 并启动新的
@@ -46,7 +52,7 @@ reviewer worktree、独立 target、日志和临时报告已清理。
 CI runner 的 active toolchain；项目没有把本机版本误写成 MSRV。直接依赖继续使用
 `x.y`，Cargo.lock 保留 patch 解析结果。2026-11-15 已完成官方依赖复查并将
 `keelshell-ai` 的 Unix 目标直接 `nix` requirement 更新为 `0.32`；由于
-`process-wrap 10.0.0` 仍要求 `nix ^0.31.1`，锁文件同时保留 `0.31.3` 与
+`process-wrap 10.0.1` 仍要求 `nix ^0.31.1`，锁文件同时保留 `0.31.3` 与
 `0.32.0`。证据见[依赖复查记录](testing/records/2026-11-15-dependency-refresh.md)。
 原生三平台、真实 SSH/SFTP、Podman、IME/辅助技术、签名公证、安装
 升级和发布验收仍需单独完成。不要把 headless GPUI、loopback 或作者门禁写成

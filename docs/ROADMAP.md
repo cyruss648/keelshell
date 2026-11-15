@@ -3,6 +3,10 @@
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 
+2026-11-15 起采用[阶段集中验证](testing/STRATEGY.md#阶段集中验证)：可以独立开发的
+功能集中集成、全量验证、修复及非作者复核，开发过程中保留编译与关键专项。正式
+功能提交前完成本批门禁和评审，减少重复全仓运行和文档专属评审循环。
+
 ## 2026-11-15 恢复列表 mutation 刷新与最终复核
 
 源码实现提交为
@@ -31,7 +35,7 @@ macOS/Windows/Linux 原生桌面、真实客户 SSH/SFTP、Podman 长流程、IM
 
 官方依赖复查发现 `keelshell-ai` 的 Unix 目标直接 `nix` requirement 需要从
 `0.31` 更新为 `0.32`；Cargo.lock 保留 `nix 0.31.3` 供
-`process-wrap 10.0.0` 使用，同时锁定直接边 `nix 0.32.0`。`103` 项直接依赖
+`process-wrap 10.0.1` 使用，同时锁定直接边 `nix 0.32.0`。`103` 项直接依赖
 检查和 `keelshell-ai` `129 passed / 0 failed / 1 ignored` 已通过。详细命令、
 失败证据和边界见[依赖复查记录](testing/records/2026-11-15-dependency-refresh.md)。
 
