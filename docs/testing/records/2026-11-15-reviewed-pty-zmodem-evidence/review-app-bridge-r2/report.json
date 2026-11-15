@@ -1,0 +1,390 @@
+{
+  "schema": 1,
+  "review_id": "review-app-bridge-r2",
+  "reviewer_role": "same non-author strictly read-only reviewer; no implementation writes",
+  "generated_utc": "2026-11-15T09:06:52.390409+00:00",
+  "source_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "baseline_head": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "freeze_manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/frozen-inputs-r2.json",
+  "freeze_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+  "recommendation": "APPROVE",
+  "recommendation_scope": "Candidate-scoped source and focused prebuilt execution approval for r2 app/SSH bridge/native review UI delta, carrying forward unchanged r1 Linux fixture source review only. This does not approve product acceptance or claim direct-PTY interoperability success.",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "findings": [],
+  "closed_prior_findings": [
+    {
+      "id": "APP-BRIDGE-R1-001",
+      "previous_severity": "P2",
+      "status": "CLOSED",
+      "title": "Pre-offer terminal outcomes now request exact input handoff",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "line_start": 392,
+      "line_end": 436,
+      "reason": "end_zmodem queues ResumeInput for every terminal UUID even when current is absent or different. A bounded de-duplicated queue retains backpressured handoffs; only the unchanged bridge can release the matching ended lease after writes drain. Unrelated terminal IDs do not replace the current offer.",
+      "tests": [
+        "terminal::zmodem::tests::zmodem_preoffer_cancelled_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_failed_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_finished_requests_exact_handoff",
+        "terminal::zmodem::tests::zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids",
+        "terminal::zmodem::tests::zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer"
+      ],
+      "test_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "test_line_start": 256,
+      "test_line_end": 449
+    },
+    {
+      "id": "APP-BRIDGE-R1-002",
+      "previous_severity": "P2",
+      "status": "CLOSED",
+      "title": "Shell completion retains the bounded tail/exit drain owner",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/ssh_bridge.rs",
+      "line_start": 159,
+      "line_end": 180,
+      "secondary_lines": [
+        [
+          224,
+          239
+        ],
+        [
+          298,
+          348
+        ]
+      ],
+      "reason": "Written, ShellEnded and Stopped are distinct. Only Written acknowledges protocol completion. ShellEnded returns to pump with completion_seen, preserving the shell and draining ordered Data/Exited under normal queue backpressure, without dequeuing new writes or replaying an interrupted prefix.",
+      "tests": [
+        "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+        "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion"
+      ],
+      "tail_repeats": {
+        "runs": 5,
+        "passed": 5,
+        "failed": 0
+      }
+    },
+    {
+      "id": "APP-BRIDGE-R1-003",
+      "previous_severity": "P2",
+      "status": "CLOSED",
+      "title": "Duplicate cancellation and post-terminal rejections no longer revive the card",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "line_start": 360,
+      "line_end": 381,
+      "secondary_lines": [
+        [
+          443,
+          475
+        ],
+        [
+          697,
+          706
+        ]
+      ],
+      "reason": "Successful cancellation enters Cancelling, blocks retained/double callbacks and disables the control. Review, Progress, InputRejected and ActionRejected ignore Cancelling/Ended. Ended state/result cannot be restored by a late stale refusal.",
+      "tests": [
+        "terminal::zmodem::tests::zmodem_cancel_submits_once_while_waiting_for_its_terminal_event",
+        "terminal::zmodem::tests::zmodem_late_stale_rejection_preserves_each_terminal_result"
+      ],
+      "test_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "test_line_start": 451,
+      "test_line_end": 558
+    },
+    {
+      "id": "APP-BRIDGE-R1-004",
+      "previous_severity": "P3",
+      "status": "CLOSED",
+      "title": "Verified save receipts survive transient feedback, next offers and completion",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "line_start": 310,
+      "line_end": 329,
+      "secondary_lines": [
+        [
+          98,
+          123
+        ],
+        [
+          710,
+          727
+        ]
+      ],
+      "reason": "VerifiedSave retains exact UUID/path/byte count/SHA256 independently of the current card. Duplicate deliveries do not evict records; the latest 32 complete receipts are retained and the retention limit is labelled in both languages. Explicit dismissal hides the card while retaining history for later offers.",
+      "tests": [
+        "terminal::zmodem::tests::zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound",
+        "terminal::zmodem::tests::zmodem_verified_saves_survive_next_offer_finished_and_dismissal"
+      ],
+      "test_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "test_line_start": 561,
+      "test_line_end": 772
+    }
+  ],
+  "scope": {
+    "reviewed_changed_files": [
+      "crates/keelshell-app/src/ssh_bridge.rs",
+      "crates/keelshell-app/src/terminal_zmodem.rs",
+      "crates/keelshell-app/src/terminal_zmodem_tests.rs"
+    ],
+    "cross_boundary_checks": [
+      "Unchanged ssh_bridge_zmodem single lane, lease release and actual-final-write guard",
+      "Session lease and event semantics relevant to the app; full session/publication review remains separate"
+    ],
+    "session_delta_not_fully_reviewed_here": [
+      "crates/keelshell-session/src/zmodem.rs",
+      "crates/keelshell-session/src/zmodem/tests.rs",
+      "crates/keelshell-session/tests/zmodem_openssh.rs"
+    ],
+    "scripts": "All 12 script digests unchanged from r1; no r2 Python re-execution and no extra fixture mutations."
+  },
+  "freeze": {
+    "start": {
+      "checked_utc": "2026-11-15T09:00:56.442596+00:00",
+      "manifest_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+      "expected_manifest_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+      "base_sha": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+      "checks": {
+        "inputs": {
+          "count": 570,
+          "mismatches": []
+        },
+        "scripts": {
+          "count": 12,
+          "mismatches": []
+        }
+      }
+    },
+    "end": {
+      "checked_utc": "2026-11-15T09:04:43.255762+00:00",
+      "manifest_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+      "checks": {
+        "inputs": {
+          "count": 570,
+          "mismatches": []
+        },
+        "scripts": {
+          "count": 12,
+          "mismatches": []
+        }
+      }
+    },
+    "delta": {
+      "actual": {
+        "inputs": [
+          "crates/keelshell-app/src/ssh_bridge.rs",
+          "crates/keelshell-app/src/terminal_zmodem.rs",
+          "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+          "crates/keelshell-session/src/zmodem.rs",
+          "crates/keelshell-session/src/zmodem/tests.rs",
+          "crates/keelshell-session/tests/zmodem_openssh.rs"
+        ],
+        "scripts": []
+      },
+      "supplied": {
+        "inputs": [
+          "crates/keelshell-app/src/ssh_bridge.rs",
+          "crates/keelshell-app/src/terminal_zmodem.rs",
+          "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+          "crates/keelshell-session/src/zmodem/tests.rs",
+          "crates/keelshell-session/src/zmodem.rs",
+          "crates/keelshell-session/tests/zmodem_openssh.rs"
+        ],
+        "scripts": []
+      },
+      "exact_match": true
+    },
+    "head": {
+      "head_sha": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+      "method": "Read git pointer, HEAD and branch ref only; no Git command invoked"
+    }
+  },
+  "binary": {
+    "checked_utc": "2026-11-15T09:02:18.344007+00:00",
+    "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+    "sha256": "8afd5978df434493edfb24f6b50bb5c3343d747245e1bdc7da04edb165368222",
+    "metadata_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/app-binary-r2.json",
+    "metadata_sha256": "972295c06b6bb6f925da6c62c3f8eced651d111e6cf030f92aaf40604a1328ea",
+    "inventory_sha256": "612aee50434b14eba3c0c238458a26f8c22802917497a02d8c623bb39f062001",
+    "inventory_exact_match": true,
+    "test_count": 1227,
+    "metadata_test_names_exact_match": true,
+    "independent_recompile": false,
+    "built_by": "app-zmodem-r2",
+    "freeze": "frozen-inputs-r2.json"
+  },
+  "testing": {
+    "runs": [
+      {
+        "name": "app-zmodem-r2",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+          "zmodem",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.908,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/app-zmodem-r2.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "app-bridge-r2",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+          "ssh_bridge::tests::",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.139,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/app-bridge-r2.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "app-tail-repeat-1",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+          "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+          "--exact",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.05,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/app-tail-repeat-1.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "app-tail-repeat-2",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+          "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+          "--exact",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.04,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/app-tail-repeat-2.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "app-tail-repeat-3",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+          "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+          "--exact",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.041,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/app-tail-repeat-3.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "app-tail-repeat-4",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+          "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+          "--exact",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.041,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/app-tail-repeat-4.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "app-tail-repeat-5",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+          "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+          "--exact",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.04,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/app-tail-repeat-5.log",
+        "independent_recompile": false
+      }
+    ],
+    "new_gpui_test_names": [
+      "terminal::zmodem::tests::zmodem_cancel_submits_once_while_waiting_for_its_terminal_event",
+      "terminal::zmodem::tests::zmodem_late_stale_rejection_preserves_each_terminal_result",
+      "terminal::zmodem::tests::zmodem_preoffer_cancelled_requests_exact_handoff",
+      "terminal::zmodem::tests::zmodem_preoffer_failed_requests_exact_handoff",
+      "terminal::zmodem::tests::zmodem_preoffer_finished_requests_exact_handoff",
+      "terminal::zmodem::tests::zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids",
+      "terminal::zmodem::tests::zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer",
+      "terminal::zmodem::tests::zmodem_unknown_acknowledgement_waits_for_the_real_publication_latch",
+      "terminal::zmodem::tests::zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound",
+      "terminal::zmodem::tests::zmodem_verified_saves_survive_next_offer_finished_and_dismissal"
+    ],
+    "new_gpui_tests_executed": 10,
+    "zmodem": {
+      "tests": 19,
+      "passed": 19,
+      "failed": 0,
+      "exit": 0
+    },
+    "bridge": {
+      "tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "exit": 0
+    },
+    "tail_extra_repetitions": {
+      "tests_per_run": 1,
+      "runs": 5,
+      "passed": 5,
+      "failed": 0,
+      "each_exit": 0
+    },
+    "unique_tests": {
+      "count": 22,
+      "passed": 22,
+      "failed": 0
+    },
+    "overlap_zmodem_bridge": 3,
+    "executions_including_overlap_and_repetitions": {
+      "count": 30,
+      "passed": 30,
+      "failed": 0
+    },
+    "independent_recompile": false,
+    "new_reviewer_tests_compiled": false,
+    "python_tests_rerun": 0
+  },
+  "invariant_checks": {
+    "final_write": "Only WriteOutcome::Written calls write_completed. ShellEnded cannot turn a missing final OO write into Finished. Existing final-write test passed.",
+    "uncertainty": "Separate unresolved map/epoch retained across success; publication_running, active and unread uncertainty still prevent acknowledgement. New real-control test passed.",
+    "ui": "OSC-independent endpoint, Windows Unsupported choice disabling and fixed action footer preserved. Updated theme regression checks reachable long receipts, stable footer geometry and confirm/cancel in 3 families x 2 modes x 2 languages.",
+    "lease": "Queue retains exact UUID handoffs, bridge remains the sole release authority; no UI write to active=false was introduced in production. Tests simulate bridge latch release explicitly."
+  },
+  "external_acceptance": {
+    "direct_pty": "HOLD / PARTIAL / OPEN",
+    "macos_real_pty_r6": {
+      "passed": 6,
+      "failed": 1,
+      "wrapper_exit": 1,
+      "test_binary_exit": 101,
+      "failed_test": "real_sz_sends_binary_unicode_content_over_crc32",
+      "observations": "Parent reports complete FileSaved, valid ZFIN and peer exit 0, but no OO with macOS lrzsz 0.13.1. Reviewer read r6 failure summary/receipt, did not rerun or diagnose the peer.",
+      "result_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r6/result.json"
+    },
+    "linux_latest_user_report": "r3 4/7, OO closure incomplete; no Linux acceptance claimed",
+    "full_gate_r2": "Parent-owned, still running as last reported; not certified by this review",
+    "pipe_or_r5_success": "Does not substitute for current direct-PTY result. Prior r1/r5 evidence remains historical.",
+    "product_total": "NOT ACCEPTED; FILE-05/roadmap/native acceptance not signed"
+  },
+  "limitations": [
+    "Independent execution uses parent app-r2 from app-zmodem-r2 build; no independent rebuild or full gate.",
+    "GPUI tests drive actual controls/mailbox with deterministic events and simulated latch transitions; they are not native OS or full production peer acceptance.",
+    "No reviewer Cargo, fmt, Git commands, shared-target changes or resource cleanup. Writes only in review-app-bridge-r2 including isolated test temporary files; r1 preserved.",
+    "Three session changes, actual lrzsz missing-OO behavior, native macOS/Windows/Linux, IME, accessibility, packaging and release acceptance are outside this scoped approval."
+  ]
+}

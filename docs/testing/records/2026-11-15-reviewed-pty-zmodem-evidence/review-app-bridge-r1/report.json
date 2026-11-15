@@ -1,0 +1,368 @@
+{
+  "schema": 1,
+  "review_id": "review-app-bridge-r1",
+  "reviewer_role": "fresh non-author, strictly read-only",
+  "generated_utc": "2026-11-15T08:46:39.231640+00:00",
+  "source_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "baseline_head": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "head_verification": "Read .git pointer, HEAD and branch ref; no git command invoked.",
+  "recommendation": "REQUEST_CHANGES",
+  "severity_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 3,
+    "P3": 1
+  },
+  "findings": [
+    {
+      "id": "APP-BRIDGE-R1-001",
+      "severity": "P2",
+      "title": "No-offer receive terminal result never requests the exact input handoff",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "line_start": 369,
+      "line_end": 400,
+      "trigger": "Deliver valid ZRQINIT in one PTY event, then peer cancellation or a protocol failure in a later event, before the first ZFILE offer. The connection itself stays open.",
+      "evidence": [
+        "session zmodem.rs:585-618 starts a receive lease but emits no UI event",
+        "ssh_bridge_zmodem.rs:181-189 captures that lease and sets safety.active",
+        "terminal_zmodem.rs:369-400 only requests ResumeInput for a matching current card; no-offer certain terminal outcomes fall through",
+        "ssh_bridge_zmodem.rs:152-178 clears active only after exact ResumeInput and flushed writes"
+      ],
+      "impact": "Ordinary input remains rejected and tab/window close remains blocked indefinitely; there is no current transfer card from which the user can cancel or recover.",
+      "verification": "Source-level control-flow proof, not independently recompiled or dynamically reproduced in production.",
+      "recommended_change": "Track the bridge lease independently of whether a file-offer card exists; a terminal event for that lease must schedule exact ResumeInput even if there has been no offer. Provide a cancellable receive-negotiation state without granting file authority.",
+      "status": "OPEN"
+    },
+    {
+      "id": "APP-BRIDGE-R1-002",
+      "severity": "P2",
+      "title": "Shell completion during a blocked write drops queued terminal tail and exit",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/ssh_bridge.rs",
+      "line_start": 306,
+      "line_end": 315,
+      "trigger": "Remote sends final bytes plus exit_status/close while an ordinary SSH write is suspended by flow control.",
+      "impact": "write_and_drain returns false as soon as the lifecycle watch ends; pump and run_with_protocol drop the byte queues instead of draining final terminal output/Exited to the UI.",
+      "evidence": {
+        "binary": "stable-tests/app-r1",
+        "test": "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+        "group_result": "5 passed, 1 failed; exit 101",
+        "isolated_repeats": "5/5 failed; exit 101 each",
+        "diagnostic": "bridge lost tail",
+        "logs": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-ssh-bridge-r1.log",
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-results.json"
+        ]
+      },
+      "verification": "Independently executed parent prebuilt stable binary, matching SHA256/inventory; no independent recompile.",
+      "recommended_change": "Stop the admitted write without restarting it, publish lifecycle completion, then retain the shell/output drain owner through ordered delivery of the queued terminal tail and exit event. Keep cancellation and backpressure bounded.",
+      "status": "OPEN"
+    },
+    {
+      "id": "APP-BRIDGE-R1-003",
+      "severity": "P2",
+      "title": "A duplicate cancel rejection reopens an ended UI transfer",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "line_start": 334,
+      "line_end": 357,
+      "trigger": "Submit Cancel(id) twice while processing. Cancel remains enabled for Stage::Running. Controller emits Cancelled(id), then ActionRejected(id, Stale), since the first cancel removed its lease.",
+      "impact": "The late rejection resets Stage::Ended to Upload/Download; ordinary input and close stay blocked by the resurrected UI card although the bridge lease has ended. Re-prepare/re-cancel is stale and cannot end the resurrected card.",
+      "evidence": [
+        "terminal_zmodem.rs:421 admits a second Cancel for the same current UUID, regardless of Stage",
+        "terminal_zmodem.rs:647-655 leaves cancel enabled in Running",
+        "session zmodem.rs:485-487 rejects a stale second cancel after end clears transfer",
+        "terminal_zmodem.rs:334-357 does not reject post-terminal ActionRejected notifications"
+      ],
+      "verification": "Source-level control-flow proof only; no new test compiled.",
+      "recommended_change": "Ignore stale ActionRejected/Progress/Review notifications after the same transfer has ended, and prevent duplicate pending cancellations from reviving the UI state. Preserve unread uncertainty and exact input handoff.",
+      "status": "OPEN"
+    },
+    {
+      "id": "APP-BRIDGE-R1-004",
+      "severity": "P3",
+      "title": "Verified download receipts are overwritten at protocol completion or next offer",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "line_start": 278,
+      "line_end": 306,
+      "trigger": "Successful download emits FileSaved, then Finished, or a following DownloadOffered; both may be processed in one foreground poll.",
+      "impact": "The only saved-file path/byte count/SHA256 receipt is replaced by generic completion text or the next offer. A user cannot inspect or retain the verified saved-file receipt after completion; it may never be painted. Batch downloads also lose every preceding saved-file receipt.",
+      "evidence": [
+        "FileSaved stores data only in current.feedback at terminal_zmodem.rs:290-299",
+        "Finished calls end_zmodem and overwrites that field at terminal_zmodem.rs:379-381",
+        "DownloadOffered replaces the entire current Transfer at terminal_zmodem.rs:188-208",
+        "State/Transfer contain no saved receipt collection and render only the current summary/feedback and unresolved results"
+      ],
+      "verification": "Source-level data-flow proof; no new test compiled.",
+      "recommended_change": "Keep verified per-file receipts in a bounded transfer receipt collection, separate from transient feedback, and retain them through final protocol status and later file offers.",
+      "status": "OPEN"
+    }
+  ],
+  "freeze": {
+    "start": {
+      "checked_utc": "2026-11-15T08:38:25.092248+00:00",
+      "manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+      "expected_manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+      "baseline": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+      "checks": {
+        "inputs": {
+          "count": 570,
+          "mismatches": []
+        },
+        "scripts": {
+          "count": 12,
+          "mismatches": []
+        }
+      },
+      "verification_method": "file bytes SHA256; read .git pointer/HEAD/ref without invoking git"
+    },
+    "end": {
+      "checked_utc": "2026-11-15T08:44:49.269190+00:00",
+      "manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+      "checks": {
+        "inputs": {
+          "count": 570,
+          "mismatches": [
+            {
+              "path": "crates/keelshell-session/tests/zmodem_openssh.rs",
+              "expected": "7a7ee3b4dd063776d84f5cd462ebbbebf574bd9d630a751363128bfb3490cf6d",
+              "actual": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1"
+            }
+          ]
+        },
+        "scripts": {
+          "count": 12,
+          "mismatches": []
+        }
+      }
+    },
+    "reviewed_scope_unchanged": true,
+    "qualification": "Final global freeze has one changed session interoperability test outside the requested app/bridge/tool source scope; conclusions and prebuilt executions remain pinned to r1."
+  },
+  "binary": {
+    "utc": "2026-11-15T08:41:00.366255+00:00",
+    "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+    "sha256": "f93d0070b572a1208b3c21e43804803d940834070f5afd7705faeb46279d4046",
+    "expected": "f93d0070b572a1208b3c21e43804803d940834070f5afd7705faeb46279d4046",
+    "inventory_exact_match": true,
+    "inventory_returncode": 0,
+    "listed_tests": 1217,
+    "independent_recompile": false
+  },
+  "testing": {
+    "independent_recompile": false,
+    "parent_build": "full-gate-r1; metadata matches frozen-inputs-r1.json; parent log contains Compiling keelshell-app for this source root",
+    "runs": [
+      {
+        "name": "app-zmodem-r1",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+          "zmodem",
+          "--test-threads=1"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 0.231,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-zmodem-r1.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "app-ssh-bridge-r1",
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+          "ssh_bridge::tests::",
+          "--test-threads=1"
+        ],
+        "returncode": 101,
+        "timed_out": false,
+        "elapsed_seconds": 0.123,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-ssh-bridge-r1.log",
+        "independent_recompile": false
+      },
+      {
+        "name": "python-linux-fixture-r1",
+        "argv": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "scripts",
+          "-p",
+          "test_linux_file_interop.py",
+          "-v"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "elapsed_seconds": 1.274,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/python-linux-fixture-r1.log",
+        "independent_recompile": false
+      }
+    ],
+    "python_openssh": {
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_openssh_interop.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "elapsed_seconds": 0.062,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/python-openssh-helper-r1.log"
+    },
+    "tail_repeat": {
+      "argv": [
+        "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+        "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+        "--exact",
+        "--test-threads=1"
+      ],
+      "runs": [
+        {
+          "iteration": 1,
+          "returncode": 101,
+          "elapsed_seconds": 0.027,
+          "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-1.log"
+        },
+        {
+          "iteration": 2,
+          "returncode": 101,
+          "elapsed_seconds": 0.027,
+          "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-2.log"
+        },
+        {
+          "iteration": 3,
+          "returncode": 101,
+          "elapsed_seconds": 0.027,
+          "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-3.log"
+        },
+        {
+          "iteration": 4,
+          "returncode": 101,
+          "elapsed_seconds": 0.027,
+          "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-4.log"
+        },
+        {
+          "iteration": 5,
+          "returncode": 101,
+          "elapsed_seconds": 0.027,
+          "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-5.log"
+        }
+      ]
+    },
+    "deduplicated_rust": {
+      "unique_tests": 12,
+      "passed": 11,
+      "failed": 1
+    },
+    "python": {
+      "tests": 16,
+      "passed": 16,
+      "failed": 0
+    },
+    "rust_invocations_including_overlap_and_repeats": {
+      "test_executions": 20,
+      "passed_executions": 14,
+      "failed_executions": 6
+    },
+    "existing_zmodem_group": {
+      "tests": 9,
+      "passed": 9,
+      "failed": 0
+    },
+    "bridge_group": {
+      "tests": 6,
+      "passed": 5,
+      "failed": 1
+    },
+    "new_reviewer_tests_written": 0
+  },
+  "coverage": [
+    {
+      "area": "Single PTY write lane and ordinary-write interruption",
+      "evidence": [
+        "ssh_bridge.rs:159-174, 295-330",
+        "app-zmodem-r1.log"
+      ],
+      "result": "The same retained write future is polled while output drains; no replay on interruption. Terminal-tail loss remains finding 002."
+    },
+    {
+      "area": "Queue bounds, terminal states and UUID ResumeInput",
+      "evidence": [
+        "ssh_bridge_zmodem.rs:14-16, 152-245",
+        "terminal_zmodem.rs:369-400"
+      ],
+      "result": "Protocol/UI queues bounded and mismatched ResumeInput ignored; missing no-offer handoff and post-terminal rejection remain findings 001/003."
+    },
+    {
+      "area": "ZFIN/OO actual write completion",
+      "evidence": [
+        "ssh_bridge_zmodem.rs:194-199, 238-245",
+        "ssh_bridge_tests.rs:505-547"
+      ],
+      "result": "Finished held through pending writes and the in-flight write, and final-write failure publishes uncertainty. Focused existing test passed; this test manually drives completion callbacks rather than running an independent native peer."
+    },
+    {
+      "area": "Unknown outcomes and publication_running acknowledgement",
+      "evidence": [
+        "terminal_zmodem.rs:18-80, 369-400, 530-555",
+        "terminal_zmodem_tests.rs:234-289"
+      ],
+      "result": "Unknown results retain a separate collection/epoch across success; acknowledgement checks active, actual publication worker and unread epoch. No additional proven bypass found. No reviewer-owned blocked-publication race test was added."
+    },
+    {
+      "area": "Close, reconnect and endpoint display",
+      "evidence": [
+        "workspace.rs:1156-1163, 1455-1462",
+        "workspace/window_lifecycle.rs:120-125, 389-404",
+        "terminal_lifecycle.rs:42-49",
+        "workspace/reconnect.rs:452-456, 762-770"
+      ],
+      "result": "Tab/window close and history replacement check transfer safety. Endpoint comes from captured connection endpoint, independent of OSC title; focused test passed."
+    },
+    {
+      "area": "Native review controls, Windows Unsupported, three themes and bilingual tokens",
+      "evidence": [
+        "terminal_zmodem.rs:225-257, 559-718",
+        "terminal_zmodem_tests.rs:291-325"
+      ],
+      "result": "Full reviews use scroll body and fixed actions, palette tokens and shared components. Test covers 3 registered families x 2 modes x 2 languages. Unsupported local backends disable source/destination buttons. No physical/native acceptance inferred; receipt persistence remains finding 004."
+    },
+    {
+      "area": "OpenSSH branch and Linux fixture ownership",
+      "evidence": [
+        "scripts/openssh_interop.py:342-357, 421-439",
+        "scripts/run_linux_file_interop.py:86-140, 143-250, 672-778, 810-1045",
+        "python-linux-fixture-r1.log",
+        "python-openssh-helper-r1.log"
+      ],
+      "result": "PTY is explicit; command args quote filenames, key trust is pinned, command/process/container cleanup checks ownership, and Linux lrzsz reference is labelled fixture-only. 16 unit tests pass; no reviewer container or live SSH fixture was started."
+    }
+  ],
+  "parent_evidence_read_only": {
+    "real_pty_r5": {
+      "outcome": "passed",
+      "passed_tests": 7,
+      "independently_rerun": false,
+      "boundary": "Disposable localhost OpenSSH transport interoperability; not production or target-native desktop acceptance"
+    },
+    "strict_clippy": "Parent reports exit 0; not independently rerun.",
+    "full_workspace_gate": "Parent running; no final pass claimed.",
+    "linux_cycle": "Parent owns new complete fixture cycle; not duplicated or certified here."
+  },
+  "limitations": [
+    "Findings 001/003/004 are source control-flow/data-flow proofs and require targeted production regressions; no newly compiled reproduction was run.",
+    "Stable app binary SHA256 and exact 1217-name inventory verified; no independent rebuild, Cargo, fmt, Clippy or shared-target operation performed.",
+    "Headless GPUI checks do not establish native macOS/Windows/Linux interaction, IME, accessibility or release acceptance.",
+    "Real-PTY r5 7/7 is parent evidence reviewed, not independently rerun; r1-r4 failures remain preserved and were not replaced by success.",
+    "Core/session internals inspected only where required to establish app contracts; no full protocol or local-publication-security review claimed.",
+    "Final freeze drift must be reconciled with a new candidate before approval."
+  ],
+  "writes": "Only review-app-bridge-r1 reports, logs and isolated test temporary files; no source/Git/shared-target/resource cleanup mutation by reviewer."
+}

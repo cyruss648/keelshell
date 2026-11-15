@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "started_utc": "2026-11-15T07:58:12.670245+00:00",
+  "steps": [
+    {
+      "name": "podman-api-once",
+      "argv": [
+        "podman",
+        "ps",
+        "--format",
+        "{{.ID}}\t{{.Names}}\t{{.Status}}"
+      ],
+      "pid": 28306,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.177,
+      "stdout_log": "001-podman-api-once.stdout.log",
+      "stderr_log": "001-podman-api-once.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 28312,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.118,
+      "stdout_log": "002-container-identity.stdout.log",
+      "stderr_log": "002-container-identity.stderr.log"
+    },
+    {
+      "name": "remove-owned-container",
+      "argv": [
+        "podman",
+        "rm",
+        "--force",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 28317,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 10.27,
+      "stdout_log": "003-remove-owned-container.stdout.log",
+      "stderr_log": "003-remove-owned-container.stderr.log"
+    },
+    {
+      "name": "confirm-owned-container-absent",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 28561,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.103,
+      "stdout_log": "004-confirm-owned-container-absent.stdout.log",
+      "stderr_log": "004-confirm-owned-container-absent.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e"
+      ],
+      "pid": 28565,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.103,
+      "stdout_log": "005-container-identity.stdout.log",
+      "stderr_log": "005-container-identity.stderr.log"
+    },
+    {
+      "name": "remove-owned-container",
+      "argv": [
+        "podman",
+        "rm",
+        "--force",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e"
+      ],
+      "pid": 28570,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 10.211,
+      "stdout_log": "006-remove-owned-container.stdout.log",
+      "stderr_log": "006-remove-owned-container.stderr.log"
+    },
+    {
+      "name": "confirm-owned-container-absent",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e"
+      ],
+      "pid": 28786,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.103,
+      "stdout_log": "007-confirm-owned-container-absent.stdout.log",
+      "stderr_log": "007-confirm-owned-container-absent.stderr.log"
+    }
+  ],
+  "api_rechecks": 1,
+  "containers": [
+    {
+      "container_id": "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+      "name": "keelshell-file-interop-504212acd132",
+      "owner": "504212acd1324ac694dd5ba1e2cf1950",
+      "identity_verified": true,
+      "removed": true,
+      "state": "absent"
+    },
+    {
+      "container_id": "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e",
+      "name": "keelshell-file-interop-618e6bfd6e38",
+      "owner": "618e6bfd6e384bc882a696297c201ecc",
+      "identity_verified": true,
+      "removed": true,
+      "state": "absent"
+    }
+  ],
+  "shared_repairs_attempted": false,
+  "cargo_invoked": false,
+  "new_fixture_created": false,
+  "api": {
+    "returncode": 0,
+    "timed_out": false,
+    "elapsed_seconds": 0.177,
+    "healthy": true
+  },
+  "observed_host_processes_stopped": true,
+  "outcome": "cleaned",
+  "finished_utc": "2026-11-15T07:58:33.971033+00:00",
+  "elapsed_seconds": 21.3
+}

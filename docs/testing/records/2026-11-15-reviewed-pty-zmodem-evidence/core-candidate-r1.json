@@ -1,0 +1,15 @@
+{
+  "recorded_utc": "2026-11-15T07:53:14.835069+00:00",
+  "base": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "source": "/Users/hdh/.codex/worktrees/zmodem-codec-20261115/keelshell",
+  "copied_inputs": {
+    "crates/keelshell-core/src/lib.rs": "d22c1a1776b05031689c0d97499c6ffd723fe685c106abcc8c45d69ce01f6bb4",
+    "crates/keelshell-core/src/zmodem.rs": "13cc83836ebc0f964f37c9506cb491e93abaa474b4a452ebd1342e06a57d94cb",
+    "crates/keelshell-core/src/zmodem/codec.rs": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4",
+    "crates/keelshell-core/src/zmodem/detector.rs": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+    "crates/keelshell-core/src/zmodem/receiver.rs": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d",
+    "crates/keelshell-core/src/zmodem/sender.rs": "ce07158ccd9c9fd9ec1bd3c1d5959b76b8198e3419f626b254a6bc09f07a04e1",
+    "crates/keelshell-core/tests/zmodem.rs": "dc2595be824488d84fa3aa7832900e2810b2f338be81a5c2c46c8f21b24a84c6"
+  },
+  "status": "unvalidated candidate; centralized compile/tests pending"
+}

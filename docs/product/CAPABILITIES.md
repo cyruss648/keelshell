@@ -1,5 +1,36 @@
 # Capability ledger
 
+## 2026-11-15: reviewed Zmodem on the existing SSH PTY
+
+Status: `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`.
+Candidate source review: `APPROVE`; direct-PTY interoperability acceptance:
+`HOLD/PARTIAL`. The bounded protocol, source/destination reviews, per-file safe
+publication and native review share the current authenticated SSH PTY. Ordinary
+input is excluded during the lease and queued old input is never replayed.
+Each received file needs its own new destination and confirmation. Verified
+local saves remain available as the latest 32 complete path/size/digest receipts,
+independently of subsequent offers or batch handshake completion.
+
+New nonauthor reviews closed four P2 findings and one P3 with no open P0–P3.
+They used verified parent-built test artifacts without independent rebuilding.
+The final r3 engineering gate exited 0 in 613.125 seconds: 2876 ordinary Rust
+tests passed with 34 ignored, 14 doctests passed, and Python ran 141 tests with
+one skipped. Formatting, strict workspace Clippy, dependency policy and the three
+controller groups passed. All 129 new default cases were individually matched
+to the executed inventory and are included in those totals. All 570 engineering
+inputs and 12 scripts still match the final freeze. The parent verified the
+completed gate after the reviews; the original reports retain their signing-time
+gate conditions. The normal arm64 GUI/MCP build also passed.
+Current direct-PTY results remain 6/7 on macOS and 5/7 then 4/7 on Debian:
+some verified downloads lack the final OO despite a clean peer exit.
+The strict completion criteria remain intact. A complete Linux fixture cycle
+passed 17 archive/ACL probes, independent reference transfer and 7 application
+cases with a temporary pipe relay, followed by verified owned cleanup.
+Relay results do not establish direct-TTY, Linux Rust local-backend or native
+desktop acceptance. Windows file selection is disabled pending its safe backend.
+See the [guide](ZMODEM.md), [decision](../adr/0136-reviewed-pty-zmodem.md) and
+[test record](../testing/records/2026-11-15-reviewed-pty-zmodem.md).
+
 ## 2026-11-15: reviewed server-side archive packing
 
 Status: `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`. This batch implements actual

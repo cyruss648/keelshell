@@ -339,6 +339,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", help="New receipt directory; it must not already exist")
     parser.add_argument("--timeout", type=float, default=300, help="Total seconds including cleanup (15–300, default 300)")
+    parser.add_argument("--zmodem", action="store_true",
+                        help="Run real raw-PTY Zmodem tests; requires KEELSHELL_ZMODEM_RZ and KEELSHELL_ZMODEM_SZ")
     arguments = parser.parse_args()
     if platform.system() not in ("Darwin", "Linux"):
         parser.error("OpenSSH interoperability is supported only on macOS and Linux; Windows is not supported")
@@ -350,14 +352,17 @@ def main():
     import pwd
 
     start = time.monotonic()
+    test_command = list(TEST_COMMAND)
+    if arguments.zmodem:
+        test_command[test_command.index("openssh_interop")] = "zmodem_openssh"
     overall_deadline = start + arguments.timeout
     os.umask(0o077)
     output = create_output(arguments.output)
     receipt = {
         "schema": 1, "started_utc": utc_now(), "platform": platform.system(),
         "timeout_seconds": arguments.timeout, "outcome": "failed", "steps": [],
-        "processes": [], "command": TEST_COMMAND, "cleanup": {},
-        "boundary": "Disposable localhost OpenSSH SFTP and exec interoperability; not production or target-native desktop acceptance",
+        "processes": [], "command": test_command, "cleanup": {},
+        "boundary": "Disposable localhost OpenSSH transport interoperability; not production or target-native desktop acceptance",
     }
     print(f"OpenSSH interoperability receipt: {output}", flush=True)
     scratch = None
@@ -413,7 +418,7 @@ def main():
                     "StrictModes yes", "UseDNS no", "PermitRootLogin prohibit-password",
                     "PermitUserEnvironment no", "AllowAgentForwarding no",
                     "AllowTcpForwarding no", "AllowStreamLocalForwarding no", "PermitTunnel no",
-                    "X11Forwarding no", "PermitTTY no", "LoginGraceTime 10", "MaxAuthTries 2",
+                    "X11Forwarding no", "PermitTTY " + ("yes" if arguments.zmodem else "no"), "LoginGraceTime 10", "MaxAuthTries 2",
                     "MaxSessions 8", "LogLevel ERROR", "Subsystem sftp internal-sftp", "",
                 ]), encoding="utf-8")
                 runner.run("validate-sshd-config", [sshd, "-t", "-f", str(config)])
@@ -427,7 +432,7 @@ def main():
                     "KEELSHELL_OPENSSH_CLIENT_KEY": str(scratch / "client"),
                     "KEELSHELL_OPENSSH_ROOT": str(scratch),
                 })
-                tests = runner.start("tests", [cargo, *TEST_COMMAND[1:]], environment)
+                tests = runner.start("tests", [cargo, *test_command[1:]], environment)
                 runner.wait("tests", tests, server)
                 summary = re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;", (output / "tests.log").read_text(encoding="utf-8", errors="replace"))
                 if summary is None or int(summary.group(1)) < 6:

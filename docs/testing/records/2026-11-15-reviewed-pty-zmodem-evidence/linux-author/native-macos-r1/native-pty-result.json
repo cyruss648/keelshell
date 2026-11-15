@@ -1,0 +1,168 @@
+{
+  "acceptance_boundary": "Native external macOS lrzsz peer smoke tests only; not application/Rust/OpenSSH/Linux/desktop acceptance",
+  "passed": 1,
+  "results": [
+    {
+      "binaries": {
+        "lrz": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008",
+        "lsz": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+      },
+      "commands": [
+        [
+          "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz",
+          "-q",
+          "-b",
+          "-Z",
+          "--",
+          "binary-all-bytes.bin"
+        ],
+        [
+          "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+          "-q",
+          "-b",
+          "-Z",
+          "--syslog=off"
+        ]
+      ],
+      "exit_codes": [
+        0,
+        0
+      ],
+      "name": "binary-crc32",
+      "process_cleanup": [
+        {
+          "exit_code": 0,
+          "identities": {
+            "37905": [
+              37895,
+              37905,
+              [
+                "darwin",
+                1794730186,
+                528747
+              ],
+              "R"
+            ]
+          },
+          "pid": 37905,
+          "stopped": true
+        },
+        {
+          "exit_code": 0,
+          "identities": {
+            "37906": [
+              37895,
+              37906,
+              [
+                "darwin",
+                1794730186,
+                531234
+              ],
+              "R"
+            ]
+          },
+          "pid": 37906,
+          "stopped": true
+        }
+      ],
+      "received": {
+        "binary-all-bytes.bin": {
+          "bytes": 262156,
+          "sha256": "67a361ed3d5941e4a0bddecd317aaf99728f0989e6d1a1612c2ffa3b570c0b2a"
+        }
+      },
+      "seconds": 0.083,
+      "source": {
+        "binary-all-bytes.bin": {
+          "bytes": 262156,
+          "sha256": "67a361ed3d5941e4a0bddecd317aaf99728f0989e6d1a1612c2ffa3b570c0b2a"
+        }
+      },
+      "status": "passed",
+      "temporary_data_removed": true,
+      "transport": "two actual macOS raw local PTYs; no SSH in this probe",
+      "wire_bytes": {
+        "receiver_to_sender": 652,
+        "sender_to_receiver": 271025
+      }
+    },
+    {
+      "binaries": {
+        "lrz": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008",
+        "lsz": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+      },
+      "commands": [
+        [
+          "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz",
+          "-q",
+          "-b",
+          "-Z",
+          "-o",
+          "--",
+          "binary-all-bytes.bin"
+        ],
+        [
+          "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+          "-q",
+          "-b",
+          "-Z",
+          "--syslog=off"
+        ]
+      ],
+      "error": "TimeoutError: Native raw PTY probe exceeded 20 seconds",
+      "name": "binary-crc16",
+      "process_cleanup": [
+        {
+          "exit_code": 0,
+          "identities": {
+            "37911": [
+              37895,
+              37911,
+              [
+                "darwin",
+                1794730186,
+                610446
+              ],
+              "R"
+            ]
+          },
+          "pid": 37911,
+          "stopped": true
+        },
+        {
+          "exit_code": 143,
+          "identities": {
+            "37912": [
+              37895,
+              37912,
+              [
+                "darwin",
+                1794730186,
+                612143
+              ],
+              "R"
+            ]
+          },
+          "pid": 37912,
+          "stopped": true
+        }
+      ],
+      "seconds": 20.091,
+      "source": {
+        "binary-all-bytes.bin": {
+          "bytes": 262156,
+          "sha256": "67a361ed3d5941e4a0bddecd317aaf99728f0989e6d1a1612c2ffa3b570c0b2a"
+        }
+      },
+      "status": "failed",
+      "temporary_data_removed": true,
+      "transport": "two actual macOS raw local PTYs; no SSH in this probe",
+      "wire_bytes": {
+        "receiver_to_sender": 692,
+        "sender_to_receiver": 270499
+      }
+    }
+  ],
+  "status": "failed",
+  "total_planned": 3
+}

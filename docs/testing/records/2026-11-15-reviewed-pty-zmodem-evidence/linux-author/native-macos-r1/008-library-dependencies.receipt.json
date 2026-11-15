@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/usr/bin/otool",
+    "-L",
+    "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+    "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+  "exit_code": 0,
+  "pid": 36565,
+  "reaped": true,
+  "seconds": 0.022,
+  "stderr": "008-library-dependencies.stderr.log",
+  "stdout": "008-library-dependencies.stdout.log",
+  "timed_out": false
+}

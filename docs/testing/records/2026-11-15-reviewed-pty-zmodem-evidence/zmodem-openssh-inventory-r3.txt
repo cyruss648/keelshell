@@ -1,0 +1,9 @@
+real_rz_cancel_before_source_review_does_not_create_files: test
+real_rz_receives_a_reviewed_empty_file: test
+real_rz_receives_reviewed_binary_and_unicode_batch: test
+real_sz_existing_local_destination_is_preserved_and_peer_cancelled: test
+real_sz_sends_an_individually_reviewed_empty_file: test
+real_sz_sends_binary_content_over_crc16: test
+real_sz_sends_binary_unicode_content_over_crc32: test
+
+7 tests, 0 benchmarks

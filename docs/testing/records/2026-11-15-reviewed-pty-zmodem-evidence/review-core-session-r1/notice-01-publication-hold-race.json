@@ -1,0 +1,13 @@
+{
+  "id": "KS-ZM-CS-001",
+  "severity": "P2",
+  "title": "A late unknown publication can be erased from the mutation_pending handle by a newer successful publication",
+  "notified_utc": "2026-11-15T08:48:42.179122+00:00",
+  "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem.rs",
+  "line_start": 1149,
+  "line_end": 1150,
+  "evidence_type": "source interleaving proof; not independently rebuilt",
+  "backend_quarantine_bypass_proven": false,
+  "native_close_bypass_proven": false,
+  "status": "OPEN"
+}

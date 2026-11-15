@@ -1,0 +1,63 @@
+{
+  "recorded_utc": "2026-11-15T09:29:34.058547+00:00",
+  "role": "parent verification after signed nonauthor reviews; not a replacement review",
+  "status": "AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN",
+  "freeze": {
+    "artifact": "frozen-inputs-r3.json",
+    "sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+    "inputs": 570,
+    "scripts": 12,
+    "current_mismatches": []
+  },
+  "full_gate": {
+    "receipt": "logs/full-gate-r3.json",
+    "summary": "validation-summary-r3.json",
+    "exit": 0,
+    "seconds": 613.125,
+    "reaped": true,
+    "log_sha256": "2970e3d39c8d8644a45a7357849f291188ab015389e2d92f41fdcbf9057f15dd"
+  },
+  "new_default_cases": {
+    "count": 129,
+    "missing_from_passed_gate": [],
+    "binding": "new-case-binding-r3.json",
+    "not_additive_to_ordinary_total": true
+  },
+  "nonauthor_reports": {
+    "review-core-session-r2/report.json": "e6b1991eab5792458cb3c803e2d1889e77ad7958456a9107b7370f6cbf4f537d",
+    "review-core-session-r2/report.md": "16812e335ebd6e4b61ab54fee8ea9698c9b15db1d956e36ec3e9f22e3b8fc3fe",
+    "review-app-bridge-r2/report.json": "ae448a2239eb313f2146ca9e9b483712c2c44248a8f402eeff5e4051dae0d456",
+    "review-app-bridge-r2/report.md": "579348e6d48c985b5b513fed8d87067316165cafc86dea92d4dfbcd0beb9f1d0",
+    "review-app-bridge-r2/r3-delta-approval.json": "6e89b38d9c35d30c673f0171ac55e2616f0388b9fe15df9eb5d9cadc46ef10e3"
+  },
+  "source_review": {
+    "core_session": "APPROVE",
+    "app_bridge": "APPROVE",
+    "r3_delta": "APPROVE",
+    "open_P0": 0,
+    "open_P1": 0,
+    "open_P2": 0,
+    "open_P3": 0,
+    "independent_recompile": false
+  },
+  "conditions_satisfied": [
+    "Same r3 freeze completed its required engineering gate; original reports keep their signing-time pending gate state.",
+    "Original direct-PTY failures remain HOLD/PARTIAL; historical and relay successes do not supersede them.",
+    "Verified per-file saves stay separate from Finished; product and native boundaries remain open."
+  ],
+  "acceptance": {
+    "direct_pty": "OPEN / HOLD / PARTIAL",
+    "macos_current_direct_cases": "6/7",
+    "debian_direct_cases": [
+      "5/7",
+      "4/7"
+    ],
+    "relay_diagnostic": "7/7 only",
+    "windows_safe_backend": "UNSUPPORTED",
+    "native_desktop": "NOT RUN in this batch",
+    "product_total": "OPEN"
+  },
+  "normal_build_artifacts_reverified": true,
+  "original_review_files_unchanged": true,
+  "delivery": "local commits only; no push"
+}

@@ -1,0 +1,13 @@
+{
+  "recorded_utc": "2026-11-15T08:51:21.056201+00:00",
+  "evidence": "linux-cycle-r3/022-parent-command.stdout.log final incoming chunk",
+  "wire_hex": "2a2a184230383030303030303030303232640d8a",
+  "decoded_frame_type": 8,
+  "decoded_position": 0,
+  "wire_crc16": "022d",
+  "independent_python_crc16": "022d",
+  "crc_matches": true,
+  "line_ending_after_parity_strip": "0d0a",
+  "contains_ascii_OO": false,
+  "boundary": "Checks the final logged header only, not a full peer stream or an execution of the Rust decoder."
+}

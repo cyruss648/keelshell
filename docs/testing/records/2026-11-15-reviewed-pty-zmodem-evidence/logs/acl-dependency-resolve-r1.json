@@ -1,0 +1,22 @@
+{
+  "command": [
+    "env",
+    "CARGO_NET_OFFLINE=false",
+    "CARGO_HTTP_TIMEOUT=20",
+    "CARGO_NET_RETRY=1",
+    "cargo",
+    "update",
+    "-p",
+    "keelshell-session"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "acl-dependency-resolve-r1",
+  "pid": 41947,
+  "started_utc": "2026-11-15T08:17:21.537142+00:00",
+  "finished_utc": "2026-11-15T08:17:27.203736+00:00",
+  "seconds": 5.666,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "01cbcbda5433ba0fec32bf716b28283842cb8013f74366381912cbb7f26bc614",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

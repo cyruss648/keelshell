@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/usr/bin/make",
+    "-j",
+    "4"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/build",
+  "exit_code": 0,
+  "pid": 36449,
+  "reaped": true,
+  "seconds": 0.415,
+  "stderr": "005-make.stderr.log",
+  "stdout": "005-make.stdout.log",
+  "timed_out": false
+}

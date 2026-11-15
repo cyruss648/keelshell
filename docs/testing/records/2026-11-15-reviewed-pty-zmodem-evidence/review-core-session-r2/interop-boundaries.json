@@ -1,0 +1,108 @@
+{
+  "recorded_utc": "2026-11-15T09:07:30.715436+00:00",
+  "status": "HOLD_PARTIAL",
+  "direct_pty_handshake_acceptance": "OPEN",
+  "scope": "MacOS application to actual SSH start_shell raw PTY; peer failures observed with both Debian lrzsz 0.12.21rc and macOS lrzsz 0.13.1",
+  "runs": [
+    {
+      "label": "real-pty-r5",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r5/tests.log",
+      "log_sha256": "c0c5ab57d68b04bdb2bda10c804eef2d1ce5bed061ad5a52ffc1e0f2db4044ab",
+      "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r5/result.json",
+      "result_sha256": "6fd47f195840aa8947b0a39f37d235a8ee0a51c7c32cc89969fb0751d4445038",
+      "passed": 7,
+      "failed": 0,
+      "independently_executed_by_reviewer": false,
+      "final_r2_candidate_run": false
+    },
+    {
+      "label": "linux-cycle-r2",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r2/025-parent-command.stdout.log",
+      "log_sha256": "7092407cf28093a6a9cf559818128fa8c2cfdf5d32a4a358fbe3aa3c0ec3e47e",
+      "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r2/result.json",
+      "result_sha256": "704012875be18a80f3427104ce847ecb86a90487d7df91fbad24c0700e6ca9a1",
+      "passed": 5,
+      "failed": 2,
+      "independently_executed_by_reviewer": false,
+      "final_r2_candidate_run": false
+    },
+    {
+      "label": "linux-cycle-r3",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r3/022-parent-command.stdout.log",
+      "log_sha256": "197a63bb445f70f78817d38f50708f790884a5b453a2a216fc9f15a85be0179e",
+      "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r3/result.json",
+      "result_sha256": "a814ff4506f8627798d2d9dde96c09d59a287cefb7b285a7a386498d5f7cfd3d",
+      "passed": 4,
+      "failed": 3,
+      "independently_executed_by_reviewer": false,
+      "final_r2_candidate_run": false
+    },
+    {
+      "label": "linux-pipe-diagnostic-r1",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-pipe-diagnostic-r1/022-parent-command.stdout.log",
+      "log_sha256": "5312905ecd76c51398bd1c1d143f96572d69b81094f160ec282bb4652a5eb62a",
+      "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-pipe-diagnostic-r1/result.json",
+      "result_sha256": "84aaf0483731c7d68199f9ae228caa7db03709d15e15cf36c6fe0340a45cfd45",
+      "passed": 7,
+      "failed": 0,
+      "independently_executed_by_reviewer": false,
+      "final_r2_candidate_run": false
+    },
+    {
+      "label": "real-pty-r6",
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r6/tests.log",
+      "log_sha256": "c2f0e45f78d0340d895c4a27720d010eb9df886d7749e0bc57c11b2011b0f6b8",
+      "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r6/result.json",
+      "result_sha256": "914fa8e8b0663d641c31505195f73679d3f782e7d757673361e6e8aaf9ce2853",
+      "passed": 6,
+      "failed": 1,
+      "independently_executed_by_reviewer": false,
+      "final_r2_candidate_run": true
+    }
+  ],
+  "latest_r6": {
+    "harness_exit": 1,
+    "test_exit": 101,
+    "failed_test": "real_sz_sends_binary_unicode_content_over_crc32",
+    "verified_saved_bytes": 262156,
+    "verified_saved_sha256": "41fb26520c4a149eb60ab75a50a51d8c72228549629e2a32d1fe7a74cc10715c",
+    "controller_state": "Receiving",
+    "observed_final_chunk_hex": "2a2a184230383030303030303030303232640d8a",
+    "peer_exit": 0,
+    "cleanup": {
+      "observed_processes_stopped": true,
+      "ancestry_unverified": [],
+      "owned_processes_stopped": true,
+      "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+      "tracked_process_identities": 41,
+      "temporary_directory_removed": true
+    },
+    "diagnostic_capture_limit": "Only first 96 bytes of each of the most recent 6 Data chunks were logged; final 20-byte FIN chunk is fully represented. This is not a complete packet capture."
+  },
+  "paired_linux_pipe_diagnostic": {
+    "same_stable_application_binary_r2": true,
+    "peer_version": "sz (lrzsz) 0.12.21rc",
+    "application_binary_sha256": "6e5280b94a04aa0119bc3016ede8e6082aa0ed3970b3656acd5bf7a6b824529b",
+    "shim_source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/pipe_peer.py",
+    "shim_source_sha256": "1bb35b9d049268ec6e17304b39fe39b7ca4b4dce44c8dfd65090b5dacfe76994",
+    "embedded_peer_wrapper_sha256": "eec1246db6b2095db23cb57ba84cb2224d29599f71e44fbba18a575b8e95f959",
+    "artifact_hashes_checked": 59,
+    "artifact_mismatches": [],
+    "cleanup": {
+      "owned_host_processes_stopped": true,
+      "owned_container_absent": true,
+      "temporary_keys_removed": true
+    },
+    "interpretation": "Byte-forwarding pipes change the peer stdio/TTY lifecycle. Their 7/7 supports further TTY-path investigation but proves neither tcflush causation nor direct-PTY acceptance."
+  },
+  "strict_completion_boundary": {
+    "FileSaved": "verified no-replace publication and complete readback only",
+    "Finished": "only actual protocol completion after required ZFIN/OO; no success synthesized from peer exit 0 or peer diagnostic strings",
+    "receipt_ui": "targeted source check confirms a separate bounded 32-record in-memory receipt history; no restart persistence or native acceptance claim"
+  },
+  "supersession": "real-pty-r5 7/7 is retained as historical evidence and cannot sign the current r2 candidate after real-pty-r6 6/7 failure",
+  "proposed_limited_outcome": "ReceiveClosedWithoutFarewell is a design proposal only, absent from this r2 freeze; it is not used to close the current direct-PTY acceptance gap",
+  "root_cause": "NOT_ESTABLISHED",
+  "final_source_binding": "r3 production inputs identical to r2; r6 direct-PTY failure remains relevant",
+  "final_freeze_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882"
+}

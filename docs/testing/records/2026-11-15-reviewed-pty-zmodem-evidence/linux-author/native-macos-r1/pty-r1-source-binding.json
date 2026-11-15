@@ -1,0 +1,14 @@
+{
+  "script_snapshot": "verify_native_peer-r1.py.txt",
+  "files": {
+    "verify_native_peer-r1.py.txt": "9b86d2034a6ee300c32a842c5867e30aca048092e5a7646ddbfa847fb5394eff",
+    "native-pty-result.json": "1949cde315f1b3ea4300b1caf9113a1dd88ccdb29c086d8607c56fddc9193105",
+    "binary-crc32.json": "f4f3ca7aadaaaa9cfd0c2691639653919bebfa0e9769e4814274ae465f339a2c",
+    "binary-crc16.json": "80affe7081bee37976d095891a04bdc0cb91cbeefce7b3ed5cc4b01f9e5997b7",
+    "binary-crc32-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "binary-crc32-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "binary-crc16-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "binary-crc16-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "status": "failure_preserved"
+}

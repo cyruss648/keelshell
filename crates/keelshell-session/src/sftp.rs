@@ -32,7 +32,11 @@ pub use mutation::FileMutationScope;
 mod server_archive;
 pub use server_archive::{ServerArchivePlan, ServerArchiveTransferReceipt};
 mod queue;
+mod zmodem_local;
 use control::{TransferContext, TransferControl, local_io, remote_io};
+pub(crate) use zmodem_local::ZmodemLocalReservation;
+#[cfg(target_os = "macos")]
+pub(crate) use zmodem_local::private_file_acl as zmodem_private_file_acl;
 
 /// Observe a completed SFTP setup reply if an owning transfer is being polled.
 /// Setup/admission deadlines remain separate and this does not resolve writes.

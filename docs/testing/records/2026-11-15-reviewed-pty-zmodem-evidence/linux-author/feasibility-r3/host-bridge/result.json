@@ -1,0 +1,105 @@
+{
+  "steps": [
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e"
+      ],
+      "pid": 9690,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.197,
+      "stdout_log": "001-container-identity.stdout.log",
+      "stderr_log": "001-container-identity.stderr.log"
+    },
+    {
+      "name": "alpine-release",
+      "argv": [
+        "podman",
+        "exec",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e",
+        "cat",
+        "/etc/alpine-release"
+      ],
+      "pid": 9696,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.258,
+      "stdout_log": "002-alpine-release.stdout.log",
+      "stderr_log": "002-alpine-release.stderr.log"
+    },
+    {
+      "name": "alpine-architecture",
+      "argv": [
+        "podman",
+        "exec",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e",
+        "apk",
+        "--print-arch"
+      ],
+      "pid": 9703,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.264,
+      "stdout_log": "003-alpine-architecture.stdout.log",
+      "stderr_log": "003-alpine-architecture.stderr.log"
+    },
+    {
+      "name": "alpine-bridge-repositories",
+      "argv": [
+        "podman",
+        "exec",
+        "-i",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e",
+        "sh",
+        "-ec",
+        "cat > /etc/apk/repositories"
+      ],
+      "pid": 10337,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.348,
+      "stdout_log": "004-alpine-bridge-repositories.stdout.log",
+      "stderr_log": "004-alpine-bridge-repositories.stderr.log"
+    },
+    {
+      "name": "install-tools-host-bridge",
+      "argv": [
+        "podman",
+        "exec",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e",
+        "timeout",
+        "40",
+        "apk",
+        "add",
+        "--no-cache",
+        "python3",
+        "openssh-server",
+        "openssh-sftp-server",
+        "lrzsz",
+        "acl"
+      ],
+      "pid": 10349,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 1.998,
+      "stdout_log": "005-install-tools-host-bridge.stdout.log",
+      "stderr_log": "005-install-tools-host-bridge.stderr.log"
+    }
+  ],
+  "host_processes_stopped": true
+}

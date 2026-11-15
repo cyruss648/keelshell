@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""Build a verified external lrzsz peer without installing it on the host."""
+
+import datetime
+import hashlib
+import json
+import os
+from pathlib import Path, PurePosixPath
+import shutil
+import signal
+import subprocess
+import tarfile
+import time
+
+
+ROOT = Path(__file__).resolve().parent
+ENV = {
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "LC_ALL": "C",
+    "CC": "/usr/bin/clang",
+    # This flag is the workaround in the independently fetched public formula.
+    "CFLAGS": "-O2 -Wno-implicit-int",
+    "TMPDIR": str(ROOT / "tmp"),
+}
+
+
+def now():
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_json(path, value):
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def run(name, command, cwd, timeout=120):
+    start = time.monotonic()
+    stdout = ROOT / (name + ".stdout.log")
+    stderr = ROOT / (name + ".stderr.log")
+    with stdout.open("wb") as out, stderr.open("wb") as err:
+        process = subprocess.Popen(
+            command, cwd=cwd, env=ENV, stdin=subprocess.DEVNULL,
+            stdout=out, stderr=err, start_new_session=True,
+        )
+        timed_out = False
+        try:
+            code = process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            os.killpg(process.pid, signal.SIGKILL)
+            code = process.wait(timeout=3)
+    result = {
+        "command": command, "cwd": str(cwd), "exit_code": code,
+        "seconds": round(time.monotonic() - start, 3),
+        "timed_out": timed_out, "pid": process.pid, "reaped": True,
+        "stdout": stdout.name, "stderr": stderr.name,
+    }
+    write_json(ROOT / (name + ".receipt.json"), result)
+    print(json.dumps({"step": name, **result}), flush=True)
+    return result
+
+
+def checked(name, command, cwd, timeout=120):
+    result = run(name, command, cwd, timeout)
+    if result["exit_code"] != 0:
+        raise RuntimeError(name + " failed; retained logs and receipt")
+    return result
+
+
+def main():
+    receipt = {
+        "status": "started", "started_at": now(), "environment": ENV,
+        "host_install": False, "patches_applied": [],
+        "cargo_invoked": False, "shared_target_accessed": False,
+        "commands": [],
+    }
+    result = ROOT / "build-result.json"
+    if result.exists():
+        raise RuntimeError("Refusing to overwrite numbered build receipt")
+    try:
+        verification = json.loads((ROOT / "source-verification.json").read_text())
+        inspection = json.loads((ROOT / "archive-inspection.json").read_text())
+        if verification["status"] != "verified_before_extraction":
+            raise RuntimeError("Public source verification has not passed")
+        archive = ROOT / verification["tarball"]["body"]
+        actual = digest(archive)
+        if (
+            actual != verification["checksum_expected"]
+            or actual != inspection["sha256"]
+            or inspection["status"] != "inspected_safe_before_extraction"
+        ):
+            raise RuntimeError("Source changed after checksum/inspection")
+        receipt["source_verification"] = "source-verification.json"
+        receipt["archive_sha256"] = actual
+        version = verification["selected_release"]
+        source_parent = ROOT / "external-source"
+        build = ROOT / "build"
+        peer = ROOT / "peer"
+        for path in (source_parent, build, peer, ROOT / "tmp"):
+            path.mkdir(exist_ok=False)
+        source_name = "lrzsz-" + version
+        # Extract only validated ordinary directories/files from the verified archive.
+        with tarfile.open(archive, "r:gz") as tf:
+            members = tf.getmembers()
+            names = [member.name for member in members]
+            if len(names) != len(set(names)):
+                raise RuntimeError("Duplicate archive member")
+            for member in members:
+                parts = PurePosixPath(member.name).parts
+                if (
+                    not parts or parts[0] != source_name
+                    or PurePosixPath(member.name).is_absolute()
+                    or ".." in parts or not (member.isdir() or member.isfile())
+                ):
+                    raise RuntimeError("Archive member is not an ordinary owned path")
+            for member in members:
+                target = source_parent.joinpath(*PurePosixPath(member.name).parts)
+                if member.isdir():
+                    target.mkdir(parents=True, exist_ok=True)
+                else:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    with tf.extractfile(member) as data, target.open("xb") as out:
+                        shutil.copyfileobj(data, out)
+                    target.chmod(0o755 if member.mode & 0o111 else 0o644)
+                os.utime(target, (member.mtime, member.mtime))
+        source = source_parent / source_name
+        receipt["source_directory"] = str(source)
+        receipt["extracted_at"] = now()
+        source_files = {
+            str(path.relative_to(source)): digest(path)
+            for path in sorted(source.rglob("*")) if path.is_file()
+        }
+        write_json(ROOT / "source-files-before-build.json", source_files)
+        receipt["commands"].append(checked(
+            "001-clang-version", ["/usr/bin/clang", "--version"], ROOT, 10
+        ))
+        receipt["commands"].append(checked(
+            "002-macos-version", ["/usr/bin/sw_vers"], ROOT, 10
+        ))
+        receipt["commands"].append(checked(
+            "003-host-kernel", ["/usr/bin/uname", "-a"], ROOT, 10
+        ))
+        receipt["commands"].append(checked(
+            "004-configure",
+            [str(source / "configure"), "--disable-nls", "--prefix=" + str(peer)],
+            build, 120,
+        ))
+        receipt["commands"].append(checked(
+            "005-make", ["/usr/bin/make", "-j", "4"], build, 120
+        ))
+        binaries = {}
+        (peer / "bin").mkdir()
+        for name in ("lrz", "lsz"):
+            compiled = build / "src" / name
+            copied = peer / "bin" / name
+            shutil.copy2(compiled, copied)
+            copied.chmod(0o755)
+            version_result = checked(
+                "006-" + name + "-version", [str(copied), "--version"], ROOT, 5
+            )
+            receipt["commands"].append(version_result)
+            output = (ROOT / version_result["stdout"]).read_text()
+            if version not in output:
+                raise RuntimeError(name + " did not report the verified version")
+            binaries[name] = {
+                "path": str(copied), "sha256": digest(copied),
+                "bytes": copied.stat().st_size, "version_output": output.strip(),
+            }
+        for alias, target in (("rz", "lrz"), ("sz", "lsz")):
+            (peer / "bin" / alias).symlink_to(target)
+        for name in ("COPYING", "AUTHORS", "README", "NEWS"):
+            shutil.copy2(source / name, peer / name)
+        receipt["commands"].append(checked(
+            "007-binary-file", ["/usr/bin/file", *[
+                binaries[name]["path"] for name in ("lrz", "lsz")
+            ]], ROOT, 5,
+        ))
+        receipt["commands"].append(checked(
+            "008-library-dependencies", ["/usr/bin/otool", "-L", *[
+                binaries[name]["path"] for name in ("lrz", "lsz")
+            ]], ROOT, 5,
+        ))
+        current_files = {
+            str(path.relative_to(source)): digest(path)
+            for path in sorted(source.rglob("*")) if path.is_file()
+        }
+        receipt["source_files_unchanged"] = source_files == current_files
+        if not receipt["source_files_unchanged"]:
+            raise RuntimeError("External source files changed during the build")
+        receipt["binaries"] = binaries
+        receipt["license"] = {
+            "file": str(peer / "COPYING"), "sha256": digest(peer / "COPYING"),
+            "spdx_from_formula": "GPL-2.0-or-later",
+        }
+        receipt["peer_directory"] = str(peer)
+        receipt["version"] = version
+        receipt["status"] = "native_peer_built"
+    except Exception as error:
+        receipt["status"] = "failed"
+        receipt["error"] = str(error)
+    finally:
+        receipt["finished_at"] = now()
+        write_json(result, receipt)
+    print(json.dumps(receipt, indent=2, sort_keys=True), flush=True)
+    return 0 if receipt["status"] == "native_peer_built" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/sw_vers"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+  "exit_code": 0,
+  "pid": 34840,
+  "reaped": true,
+  "seconds": 0.008,
+  "stderr": "002-macos-version.stderr.log",
+  "stdout": "002-macos-version.stdout.log",
+  "timed_out": false
+}

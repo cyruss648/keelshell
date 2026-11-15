@@ -1,0 +1,30 @@
+[
+  {
+    "name": "alpine-cdn",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/aarch64/APKINDEX.tar.gz",
+    "exit": 0,
+    "metrics": "200 501470 744063",
+    "seconds": 0.686
+  },
+  {
+    "name": "alpine-tuna",
+    "url": "https://mirrors.tuna.tsinghua.edu.cn/alpine/v3.22/main/aarch64/APKINDEX.tar.gz",
+    "exit": 0,
+    "metrics": "200 501470 1670731",
+    "seconds": 0.312
+  },
+  {
+    "name": "debian-https",
+    "url": "https://deb.debian.org/debian/dists/bookworm/Release",
+    "exit": 0,
+    "metrics": "200 149266 421593",
+    "seconds": 0.364
+  },
+  {
+    "name": "debian-tuna",
+    "url": "https://mirrors.tuna.tsinghua.edu.cn/debian/dists/bookworm/Release",
+    "exit": 0,
+    "metrics": "200 149266 724588",
+    "seconds": 0.214
+  }
+]

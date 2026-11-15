@@ -1,0 +1,48 @@
+"""Diagnostic only: relay an untouched Debian sz through pipes and the SSH PTY."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+PEER = r'''#!/usr/bin/python3
+import os, select, subprocess, sys, time
+p = subprocess.Popen(["/usr/bin/sz", *sys.argv[1:]], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+deadline = time.monotonic() + 50
+total = 0
+try:
+    while time.monotonic() < deadline:
+        ready, _, _ = select.select([0, p.stdout.fileno()], [], [], .1)
+        for fd in ready:
+            data = os.read(fd, 4096)
+            if not data:
+                if fd == p.stdout.fileno():
+                    raise SystemExit(p.wait(timeout=2))
+                raise SystemExit(125)
+            total += len(data)
+            if total > 16 * 1024 * 1024:
+                raise SystemExit(126)
+            target = 1 if fd == p.stdout.fileno() else p.stdin.fileno()
+            while data:
+                written = os.write(target, data)
+                data = data[written:]
+    raise SystemExit(124)
+finally:
+    if p.poll() is None:
+        p.kill()
+        p.wait(timeout=2)
+'''
+
+config = os.environ["KEELSHELL_LINUX_SSH_CONFIG"]
+root = os.environ["KEELSHELL_OPENSSH_ROOT"]
+path = root + "/pipe-sz"
+command = ["ssh", "-F", config, "-T", "fixture",
+           "umask 077; cat > " + path + " && chmod 700 " + path]
+subprocess.run(command, input=PEER.encode(), check=True, timeout=10)
+print(json.dumps({"diagnostic": "unchanged sz with pipe stdio relayed through actual SSH PTY",
+                  "peer_wrapper_sha256": hashlib.sha256(PEER.encode()).hexdigest(),
+                  "boundary": "does not establish direct-TTY peer acceptance"}), flush=True)
+environment = dict(os.environ, KEELSHELL_ZMODEM_SZ=path)
+result = subprocess.run(sys.argv[1:], env=environment, timeout=90)
+raise SystemExit(result.returncode)

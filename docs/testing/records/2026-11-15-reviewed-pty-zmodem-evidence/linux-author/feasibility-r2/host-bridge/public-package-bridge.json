@@ -1,0 +1,115 @@
+{
+  "requests": [
+    {
+      "url": "https://deb.debian.org/debian/dists/bookworm/InRelease",
+      "bytes": 151075,
+      "sha256": "77737fa4b34f2693e982cc9ee35736816c35a7778fc2d326cc1bbf5b301fe1aa",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/dists/bookworm-updates/InRelease",
+      "bytes": 55403,
+      "sha256": "bba8a97e96f40ee3a3c57934da5b38bbfc9b086fb4e30159a376c3caf7a38d12",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/dists/bookworm-security/InRelease",
+      "bytes": 34770,
+      "sha256": "de1e6ddcadda28915b74a69ff7736ae0547423cc5acfff636612a6fbd2bab38b",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/dists/bookworm/main/binary-arm64/by-hash/SHA256/2ddb1737692e8c45c53e8d57c0ce4cd21c78c5703b830c3226b1423566a06c00",
+      "bytes": 8689464,
+      "sha256": "2ddb1737692e8c45c53e8d57c0ce4cd21c78c5703b830c3226b1423566a06c00",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/dists/bookworm-updates/main/binary-arm64/by-hash/SHA256/5dfd52317071685ad6e58c4ef0720128b7db68624079f83be02bdf55f07ac070",
+      "bytes": 6936,
+      "sha256": "5dfd52317071685ad6e58c4ef0720128b7db68624079f83be02bdf55f07ac070",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/dists/bookworm-security/main/binary-arm64/by-hash/SHA256/df9bc2a1e2ea298766020f9af6a92d3347d043385078c37fb87583a0755e63ed",
+      "bytes": 368832,
+      "sha256": "df9bc2a1e2ea298766020f9af6a92d3347d043385078c37fb87583a0755e63ed",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libb/libbsd/libbsd0_0.11.7-2_arm64.deb",
+      "bytes": 115116,
+      "sha256": "ef00f132ddd268ee67d756998723ee18543db27ab34930c0a9f1cff75cf55382",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libe/libedit/libedit2_3.1-20221030-2_arm64.deb",
+      "bytes": 88140,
+      "sha256": "6ca1e355586ebfcfe8122b4d317fcaad4a9a10ca455c6a9bbd36f55bf4be85d3",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/n/ncurses/libncursesw6_6.4-4_arm64.deb",
+      "bytes": 121688,
+      "sha256": "cf32cb6751718872c6def448b82211eec494f688e2f1a3e6c71bfdaf6b0722c5",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/p/procps/libproc2-0_4.0.2-3_arm64.deb",
+      "bytes": 60116,
+      "sha256": "d2d31e0f862dd60a813e245024d00cf47deb6465fd42122543824652487224be",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/p/procps/procps_4.0.2-3_arm64.deb",
+      "bytes": 698228,
+      "sha256": "94414d947f009b55d50e2adf19d92038998bf7fa9ec553b1b6167fb02b5c1855",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/d/dh-runit/runit-helper_2.15.2_all.deb",
+      "bytes": 6520,
+      "sha256": "fd08121947a1ea340d07e1b523591035419552ac151dfe6e241e8a748e15c36b",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/t/tcp-wrappers/libwrap0_7.6.q-32_arm64.deb",
+      "bytes": 54652,
+      "sha256": "c5f02a234b481e7016d10188822b8d84420cc5978db19c0d253eb222452cffe7",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/m/media-types/media-types_10.0.0_all.deb",
+      "bytes": 26136,
+      "sha256": "aaa46dcb3b39948ae2e0fdb72cfcb2f48c0b59f19785a3da8045c05eb19955dd",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/r/readline/readline-common_8.2-1.3_all.deb",
+      "bytes": 68988,
+      "sha256": "69317523fe56429aa361545416ad339d138c1500e5a604856a80dd9074b4e35c",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/r/readline/libreadline8_8.2-1.3_arm64.deb",
+      "bytes": 154776,
+      "sha256": "f3b162b7c1e05430607e792ebdbfc417cbd1f1d32cf83664133ae63d811a72d2",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/a/acl/acl_2.3.1-3_arm64.deb",
+      "bytes": 60076,
+      "sha256": "e3d48025d130ba782e2753ba97b3b288d8781a036081d401ce151d5f11e673fd",
+      "status": 200
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/l/lrzsz/lrzsz_0.12.21-10_arm64.deb",
+      "bytes": 83520,
+      "sha256": "e2935271e50ca6d53cd6b6daa2a7251aad136e8b2b193aedbf4570eaf3dc5c31",
+      "status": 200
+    }
+  ],
+  "listener_closed": true,
+  "thread_stopped": true,
+  "signature_policy": "Normal apt trusted-key and package hash verification, no allow-unauthenticated"
+}

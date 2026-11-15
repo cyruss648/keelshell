@@ -1,0 +1,54 @@
+{
+  "steps": [
+    {
+      "name": "podman-readback",
+      "argv": [
+        "podman",
+        "ps",
+        "--format",
+        "{{.ID}}\t{{.Names}}\t{{.Status}}"
+      ],
+      "returncode": 125,
+      "seconds": 2.725
+    },
+    {
+      "name": "unit-tests",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_linux_file_interop.py",
+        "-v"
+      ],
+      "returncode": 0,
+      "seconds": 1.269
+    },
+    {
+      "name": "diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "returncode": 0,
+      "seconds": 0.017
+    },
+    {
+      "name": "worktree-status",
+      "argv": [
+        "git",
+        "status",
+        "--short",
+        "--untracked-files=all"
+      ],
+      "returncode": 0,
+      "seconds": 0.016
+    }
+  ],
+  "python38_grammar_only": true
+}

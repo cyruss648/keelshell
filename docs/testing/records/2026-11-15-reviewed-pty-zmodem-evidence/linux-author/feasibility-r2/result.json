@@ -1,0 +1,42 @@
+{
+  "owner": "504212acd1324ac694dd5ba1e2cf1950",
+  "container": "keelshell-file-interop-504212acd132",
+  "steps": [
+    {
+      "command": [
+        "podman",
+        "run",
+        "--pull=never",
+        "--http-proxy=false",
+        "--label",
+        "io.keelshell.fixture=linux-file-interop",
+        "--label",
+        "io.keelshell.owner=504212acd1324ac694dd5ba1e2cf1950",
+        "--name",
+        "keelshell-file-interop-504212acd132",
+        "--detach",
+        "--publish",
+        "127.0.0.1::2222",
+        "--entrypoint",
+        "sleep",
+        "17156b215e21",
+        "infinity"
+      ],
+      "exit": 0,
+      "seconds": 0.175,
+      "log": "00.log"
+    },
+    {
+      "command": [
+        "podman",
+        "exec",
+        "keelshell-file-interop-504212acd132",
+        "sh",
+        "-c",
+        "cat /etc/os-release; apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=8 -o Acquire::https::Timeout=8 -o Acquire::Languages=none update"
+      ],
+      "timeout_seconds": 45,
+      "log": "01.log"
+    }
+  ]
+}

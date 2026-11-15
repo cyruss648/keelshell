@@ -1,0 +1,18 @@
+{
+  "checked_utc": "2026-11-15T09:11:55.778240+00:00",
+  "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local/tests.rs",
+  "r2_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+  "current_sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81",
+  "exact_delta": "Prepend #![cfg(test)] plus one blank line; removing this exact prefix restores r2 bytes and SHA256",
+  "prefix_removed_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+  "current_lines": 492,
+  "source_review": "APPROVE_TEST_CFG_GUARD",
+  "production_inputs_changed": false,
+  "test_binary_rebuilt_by_reviewer": false,
+  "existing_binary_result_binding": "Previously executed session-lib-r2 remains bound to original r2 test bytes; no claim of execution from this later prefix change",
+  "additional_P0_P3_findings": 0,
+  "final_freeze_matches_current_tree": false,
+  "comparison_manifest_at_detection": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/frozen-inputs-r2.json",
+  "resolved_by_r3_manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/frozen-inputs-r3.json",
+  "r3_manifest_matches_current_tree": true
+}

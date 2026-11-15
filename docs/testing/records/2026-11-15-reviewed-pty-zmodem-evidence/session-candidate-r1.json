@@ -1,0 +1,39 @@
+{
+  "base": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "files": [
+    {
+      "path": "crates/keelshell-session/src/zmodem.rs",
+      "sha256": "1c1ce173d51a0f4d40dad10357b5f17e53dda1973a97639f9ddffa37bd1b36d6"
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local.rs",
+      "sha256": "13472ac48d38b4440361cee2046e6cfc8495be390bcf9f983f78f3eaaa41174f"
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/tests.rs",
+      "sha256": "50dc65aa0e22bc729453f555f6f4becbf00408440d2e8a5d384a289f53e52a42"
+    },
+    {
+      "path": "crates/keelshell-session/src/zmodem/local/tests.rs",
+      "sha256": "61884c77456bac7c491f56dda868d74befb1605eead8d2d3748ceff8be340889"
+    },
+    {
+      "path": "crates/keelshell-session/tests/zmodem.rs",
+      "sha256": "4c039aa06df0012ffbe910ca14657a25a2b6687fad51a8eea968103d55e14517"
+    },
+    {
+      "path": "crates/keelshell-session/tests/support/zmodem_fixture.rs",
+      "sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a"
+    },
+    {
+      "path": "crates/keelshell-session/src/lib.rs",
+      "sha256": "fd09baa16cba20b7b64370f0905501c56f3443f95b00b39e25b4d8e4322e8ecb"
+    },
+    {
+      "path": "crates/keelshell-session/src/events.rs",
+      "sha256": "423ab762022a5080b695acf74532b8a2cae3cdb97ffeaa9eea56247b6b85cb5d"
+    }
+  ],
+  "source": "/Users/hdh/.codex/worktrees/zmodem-session-20261115/keelshell",
+  "equal": true
+}

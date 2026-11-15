@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+    "--version"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+  "exit_code": 0,
+  "pid": 36560,
+  "reaped": true,
+  "seconds": 0.263,
+  "stderr": "006-lrz-version.stderr.log",
+  "stdout": "006-lrz-version.stdout.log",
+  "timed_out": false
+}

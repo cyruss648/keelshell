@@ -1,0 +1,13 @@
+{
+  "dependency": "calcifer-macos-acl 0.1.0",
+  "archive_sha256": "d623f1bbaccbe0d1c6a9e4d2366feef6e179ac4e235aa86342601caf29358df4",
+  "lock_checksum_match": true,
+  "source_files_compared": [
+    ".cargo_vcs_info.json",
+    "Cargo.lock",
+    "Cargo.toml",
+    "Cargo.toml.orig",
+    "src/lib.rs"
+  ],
+  "mismatches": []
+}

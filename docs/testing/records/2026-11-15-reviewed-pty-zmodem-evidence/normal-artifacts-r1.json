@@ -1,0 +1,21 @@
+{
+  "freeze": "frozen-inputs-r3.json",
+  "build": "logs/normal-build-r1.json",
+  "artifacts": [
+    {
+      "name": "keelshell-app",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "bytes": 197284160,
+      "sha256": "96b5133efc6463357184bfed3b72e604a8c33aa33a1ef6859bc38f5790927d99",
+      "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app: Mach-O 64-bit executable arm64"
+    },
+    {
+      "name": "keelshell-mcp",
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "bytes": 14566512,
+      "sha256": "cf89dbc2b7fb77958d16c225d7d94c536970aca4c3f7675e544696a8a5811c88",
+      "file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp: Mach-O 64-bit executable arm64"
+    }
+  ],
+  "boundary": "normal native Mach-O build only; no native desktop interaction or installation performed"
+}

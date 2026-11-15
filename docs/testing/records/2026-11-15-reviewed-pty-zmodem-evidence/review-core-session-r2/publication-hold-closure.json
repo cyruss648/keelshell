@@ -1,0 +1,36 @@
+{
+  "id": "KS-ZM-CS-001",
+  "severity": "P2",
+  "status": "CLOSED_IN_R2",
+  "closed_utc": "2026-11-15T09:07:30.715436+00:00",
+  "original_notice": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/notice-01-publication-hold-race.md",
+  "original_notice_json": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/notice-01-publication-hold-race.json",
+  "original_source_sha256": "1c1ce173d51a0f4d40dad10357b5f17e53dda1973a97639f9ddffa37bd1b36d6",
+  "original_lines": [
+    1149,
+    1150
+  ],
+  "current_file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem.rs",
+  "current_source_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+  "current_test_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+  "reviewed_fix_lines": {
+    "ticket_registration": 1196,
+    "locked_pending_projection": 1177,
+    "backend_disposition_outside_lock": 1215,
+    "idempotent_disposition": 1209,
+    "poison_sticky_unknown": 1171
+  },
+  "reason": "active ticket count, sticky unresolved state and pending publication now update under one mutex; an old unobserved result stays counted until disposition; later known results cannot clear an older unknown; backend disposition remains outside the hold lock",
+  "overflow_underflow_and_poison": "fail closed; sticky unresolved",
+  "reviewer_executed_new_regressions": 5,
+  "reviewer_executed_lib_zmodem": 27,
+  "reviewer_executed_integration": 18,
+  "session_test_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-test-results.json",
+  "independent_rebuild": false,
+  "backend_quarantine_bypass_proven_in_original": false,
+  "native_close_bypass_proven_in_original": false,
+  "original_notice_preserved": true,
+  "revalidated_on_r3": true,
+  "r3_freeze_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+  "test_only_prefix_delta_does_not_reopen_original_finding": true
+}

@@ -1,0 +1,1534 @@
+{
+  "file_count": 381,
+  "files": {
+    "FINAL_HANDOFF.json": {
+      "bytes": 27026,
+      "sha256": "566760c591a558646f59129710164bbc1a73f7ca5d833889008dd4e3087c58b4"
+    },
+    "README.md": {
+      "bytes": 14776,
+      "sha256": "f7012c96878718a106fc70288f7acd0e85ade3fb9081714a6e77303e7e5760ee"
+    },
+    "cleanup-attempt-r1/001-container-identity.stderr.log": {
+      "bytes": 1635,
+      "sha256": "8ec68a9e6af6fd78915cdb0556c212253f6c42cb5afefefa84877b625f9d6556"
+    },
+    "cleanup-attempt-r1/001-container-identity.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cleanup-attempt-r1/002-container-identity.stderr.log": {
+      "bytes": 1635,
+      "sha256": "1b854b7204372bdf41d5352df9dcd19f27156c3033cd07e76b784928dee53048"
+    },
+    "cleanup-attempt-r1/002-container-identity.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cleanup-attempt-r1/progress.json": {
+      "bytes": 1384,
+      "sha256": "cb6da74c13299e46ee158459d11c149c7b95f4f64dc1edd29a599b2e43b84c4f"
+    },
+    "cleanup-attempt-r1/result.json": {
+      "bytes": 1879,
+      "sha256": "c70f03165ef136225a1448ff3bb52df5ef09ee2508c54179e3d865da7f9822e9"
+    },
+    "feasibility-r1/00.log": {
+      "bytes": 65,
+      "sha256": "cb14523a2541548fe9dbba983a2ad29120621ab8d5bcefdb007de0fc93dbebbe"
+    },
+    "feasibility-r1/01.log": {
+      "bytes": 427,
+      "sha256": "5f8b72ad42a596f8e25ea84345842dc42c2e3b3b871b9f4d2fb01d88bf19521b"
+    },
+    "feasibility-r1/02.log": {
+      "bytes": 484,
+      "sha256": "9908c2e18be89442b0b8539bf90e197a63ee94606e2cdd08431c1268bbb41490"
+    },
+    "feasibility-r1/03.log": {
+      "bytes": 500,
+      "sha256": "5b70db731934fa0d45e14130bd93cdb33661d9259239d19fbf627ffecc087ebe"
+    },
+    "feasibility-r1/result.json": {
+      "bytes": 2235,
+      "sha256": "86dad0994c7ec3144a576a49233e89ec5eaee09c76821720528a97064731f5de"
+    },
+    "feasibility-r2/00.log": {
+      "bytes": 65,
+      "sha256": "fb475568e5b921423a284d3e581c326ef49774daf0e037377cad9df9b7c6c0ac"
+    },
+    "feasibility-r2/01.log": {
+      "bytes": 558,
+      "sha256": "5bed1166abf76d28ba23eab384abaad7a526f5a43c9043a9e49a4989cd3370a5"
+    },
+    "feasibility-r2/02-status.log": {
+      "bytes": 1097,
+      "sha256": "2d2df35ebfbdb46ef480d8f9c1746e34cf6510454c2d463b5aa30cc17a3e0e8d"
+    },
+    "feasibility-r2/host-bridge-r2/001-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge-r2/001-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "feasibility-r2/host-bridge-r2/002-debian-bridge-repositories.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge-r2/002-debian-bridge-repositories.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge-r2/003-apt-index-host-bridge.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge-r2/003-apt-index-host-bridge.stdout.log": {
+      "bytes": 816,
+      "sha256": "144ea45ca5ecdd91d649a1a7daf29f8307ce1babb1ac27c43538b828f6047d09"
+    },
+    "feasibility-r2/host-bridge-r2/004-install-tools-host-bridge.stderr.log": {
+      "bytes": 74,
+      "sha256": "f77216c41aadf6c667ac1a602069951966cea350daab793ffe11ae0de1225ddc"
+    },
+    "feasibility-r2/host-bridge-r2/004-install-tools-host-bridge.stdout.log": {
+      "bytes": 14050,
+      "sha256": "4316ffc2db79b674bda76a2f11dce6eeac88ac4fcedeb81e2819c0aedc15bda7"
+    },
+    "feasibility-r2/host-bridge-r2/005-create-fixture-user.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge-r2/005-create-fixture-user.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge-r2/progress.json": {
+      "bytes": 3503,
+      "sha256": "80cbc5b33fb9d17f25718b3c3ea032270f0edbd97075ceef1d9ebdc1744dbe07"
+    },
+    "feasibility-r2/host-bridge-r2/public-package-bridge.json": {
+      "bytes": 8618,
+      "sha256": "469c4ef807a4d9b3487180060eb56bcf13d411905b778329e688e40d1e1e83bc"
+    },
+    "feasibility-r2/host-bridge-r2/result.json": {
+      "bytes": 3698,
+      "sha256": "95fe244d9151c1b23dfa858fef07481ebbd326b363fcc6a66bdb63701201d83c"
+    },
+    "feasibility-r2/host-bridge/001-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge/001-container-identity.stdout.log": {
+      "bytes": 13108,
+      "sha256": "42e6db491921d1bebc7b4d27e6c731c8ea00b44021693233481e2842080e17b3"
+    },
+    "feasibility-r2/host-bridge/002-debian-bridge-repositories.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge/002-debian-bridge-repositories.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge/003-apt-index-host-bridge.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r2/host-bridge/003-apt-index-host-bridge.stdout.log": {
+      "bytes": 816,
+      "sha256": "97ab5d9d78398d5c565660cd2fb664a522ea2b9b2b0b86fda465d8bfeac2db1c"
+    },
+    "feasibility-r2/host-bridge/004-install-tools-host-bridge.stderr.log": {
+      "bytes": 3456,
+      "sha256": "956ba4ef7c4bc2d43fa647d9208348179515f67bd119b9d6b9f5828eec0e67ee"
+    },
+    "feasibility-r2/host-bridge/004-install-tools-host-bridge.stdout.log": {
+      "bytes": 6077,
+      "sha256": "8377646a8176506b66410862050bdad0f835b5ce6d4d9268e46635cfd3b057c8"
+    },
+    "feasibility-r2/host-bridge/progress.json": {
+      "bytes": 2737,
+      "sha256": "f51f9843ad6a809b5f20ba8dfc165909fc3e863ce223c57e50a84970edefb15f"
+    },
+    "feasibility-r2/host-bridge/public-package-bridge.json": {
+      "bytes": 4570,
+      "sha256": "cd2b8354a579225af0cfb3f147d08a00f42a5614f5658ee4f919b84d1bfcb460"
+    },
+    "feasibility-r2/host-bridge/result.json": {
+      "bytes": 2771,
+      "sha256": "be406afafc41c3cb9fce2a7fab6ea6096b269f9b5637ad15e712e73f083826b7"
+    },
+    "feasibility-r2/result.json": {
+      "bytes": 1034,
+      "sha256": "9f5f12cb77a5c2c10a093b363fcf753ee2a7af62ba838fb9366581e1b047c3ca"
+    },
+    "feasibility-r2/status-current.log": {
+      "bytes": 384,
+      "sha256": "867e1225f46738128a691a4068a987efb3e2e6064601543f8f24ec4b8b5ccf76"
+    },
+    "feasibility-r3/00.log": {
+      "bytes": 65,
+      "sha256": "cb3b807f092012d67d0fd252de5ca493879745bab45b7889b45fa808b7fd91b1"
+    },
+    "feasibility-r3/01.log": {
+      "bytes": 163,
+      "sha256": "368438b18193431929ccab4e26ae276e4fdd7d5fda5b34f102f7aff7dbdbabeb"
+    },
+    "feasibility-r3/host-bridge/001-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r3/host-bridge/001-container-identity.stdout.log": {
+      "bytes": 12596,
+      "sha256": "4debfea1ea36762713a652aee323a0eaa8cb092ccdfc6b40375276d8052f948e"
+    },
+    "feasibility-r3/host-bridge/002-alpine-release.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r3/host-bridge/002-alpine-release.stdout.log": {
+      "bytes": 7,
+      "sha256": "e758029138089636b1bf6186a6a3af9496489bb1509f9a125a5d29ac759f5898"
+    },
+    "feasibility-r3/host-bridge/003-alpine-architecture.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r3/host-bridge/003-alpine-architecture.stdout.log": {
+      "bytes": 8,
+      "sha256": "5121ae59314a84da7b4d9587374398f1afa2000b243b3e54f491adefaac54f92"
+    },
+    "feasibility-r3/host-bridge/004-alpine-bridge-repositories.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r3/host-bridge/004-alpine-bridge-repositories.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "feasibility-r3/host-bridge/005-install-tools-host-bridge.stderr.log": {
+      "bytes": 91,
+      "sha256": "0c5b0c5e4aff7e5c56e440a2a8e400d068908a6a78a4fdd48cfd4c61ee62cef8"
+    },
+    "feasibility-r3/host-bridge/005-install-tools-host-bridge.stdout.log": {
+      "bytes": 217,
+      "sha256": "39462ea6df1ef74348b6401bced62f184bd30a5e3457ed61b7a3ba2e20b79fdb"
+    },
+    "feasibility-r3/host-bridge/progress.json": {
+      "bytes": 2775,
+      "sha256": "d9b779b7777fde79f9ae78b211aeb56ec0ae17f717131f5674dd2037c4f6be6a"
+    },
+    "feasibility-r3/host-bridge/public-package-bridge.json": {
+      "bytes": 621,
+      "sha256": "18810779e760b3f147be332476e70070f77ca722aa21caa64aa88bda255b3bbd"
+    },
+    "feasibility-r3/host-bridge/result.json": {
+      "bytes": 2809,
+      "sha256": "324bbbb1e41dc17a1234639f3cbdcee4d951ea3471d7afd3188a83e3bf7ee2c6"
+    },
+    "feasibility-r3/result.json": {
+      "bytes": 1061,
+      "sha256": "7f3ad3e42f0dbe77b26304e33276df6b4ebbbceb1d1eb3378a356b49006ca677"
+    },
+    "feasibility-r3/status-current.log": {
+      "bytes": 487,
+      "sha256": "5f11791b309676e107135df776c076ceef7f45205ea631ff012dc61dd5dda23a"
+    },
+    "final-checks-r1/diff-check.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-checks-r1/diff-check.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-checks-r1/final-git-status.log": {
+      "bytes": 75,
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    "final-checks-r1/podman-readback.stderr.log": {
+      "bytes": 2475,
+      "sha256": "1047ce8315fa479329671303eda917f187a711c15261c4110ff59ce2bcdcadf7"
+    },
+    "final-checks-r1/podman-readback.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-checks-r1/result.json": {
+      "bytes": 926,
+      "sha256": "67c027097a683473f752f34d2fec6be0399638fdb972f79cce80709392d88899"
+    },
+    "final-checks-r1/run_linux_file_interop.py.txt": {
+      "bytes": 52042,
+      "sha256": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0"
+    },
+    "final-checks-r1/runner-help.log": {
+      "bytes": 3436,
+      "sha256": "61af8d0b1ff6e30848bb2011bef8ded69655fd8abe652664eff4e49edbbe9e8e"
+    },
+    "final-checks-r1/source-binding.json": {
+      "bytes": 1020,
+      "sha256": "a296996fab889cecf18e16658be9864f2179698b622c2677fbf541a4398037f5"
+    },
+    "final-checks-r1/test_linux_file_interop.py.txt": {
+      "bytes": 8663,
+      "sha256": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9"
+    },
+    "final-checks-r1/unit-tests.stderr.log": {
+      "bytes": 1629,
+      "sha256": "4ae748c548370f9bcf855bb0d42cb128bc39c8e4aa1c3cd487eb461f6198d746"
+    },
+    "final-checks-r1/unit-tests.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-checks-r1/worktree-status.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-checks-r1/worktree-status.stdout.log": {
+      "bytes": 75,
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    "final-followup-r1/001-podman-api-once.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/001-podman-api-once.stdout.log": {
+      "bytes": 126,
+      "sha256": "c345f1a45df2326e0c7df20d9901a0f0f1c3f59876b645e36297a169720df889"
+    },
+    "final-followup-r1/002-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/002-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "final-followup-r1/003-remove-owned-container.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/003-remove-owned-container.stdout.log": {
+      "bytes": 65,
+      "sha256": "fb475568e5b921423a284d3e581c326ef49774daf0e037377cad9df9b7c6c0ac"
+    },
+    "final-followup-r1/004-confirm-owned-container-absent.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/004-confirm-owned-container-absent.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/005-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/005-container-identity.stdout.log": {
+      "bytes": 12596,
+      "sha256": "4debfea1ea36762713a652aee323a0eaa8cb092ccdfc6b40375276d8052f948e"
+    },
+    "final-followup-r1/006-remove-owned-container.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/006-remove-owned-container.stdout.log": {
+      "bytes": 65,
+      "sha256": "cb3b807f092012d67d0fd252de5ca493879745bab45b7889b45fa808b7fd91b1"
+    },
+    "final-followup-r1/007-confirm-owned-container-absent.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/007-confirm-owned-container-absent.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-followup-r1/durability.json": {
+      "bytes": 958,
+      "sha256": "89e0cd81a2b0c401c021e2ceea09e88261fbba0d1c9da7b0d1daa33e4762df2f"
+    },
+    "final-followup-r1/final-git-status.log": {
+      "bytes": 75,
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    "final-followup-r1/progress.json": {
+      "bytes": 4110,
+      "sha256": "3b85a6c7f29dd33a5a1b8741c6b6e8573102ffe3e983ceb4f498a11caf96a2ea"
+    },
+    "final-followup-r1/result.json": {
+      "bytes": 4545,
+      "sha256": "5c83738e02b3ed3aa73576acbb71bfc07d1900e0c9138ec75495c5838d8291cf"
+    },
+    "linux-r1/001-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/001-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "linux-r1/002-generate-host.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/002-generate-host.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/003-generate-client.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/003-generate-client.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/004-copy-key-file.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/004-copy-key-file.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/005-copy-key-file.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/005-copy-key-file.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/006-sshd-config.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/006-sshd-config.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/007-start-sshd.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/007-start-sshd.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/008-ssh-port.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/008-ssh-port.stdout.log": {
+      "bytes": 16,
+      "sha256": "4d7eef26aab95fe4ff35fd43a92b1ee4e2ab24ac286ca24e4cf0842da4e10f82"
+    },
+    "linux-r1/009-ssh-authentication.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/009-ssh-authentication.stdout.log": {
+      "bytes": 21,
+      "sha256": "ec077c6a253ed7486702b17c246a96a81116f6e38a91c854116cf9eec9d74798"
+    },
+    "linux-r1/010-copy-archive-source.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/010-copy-archive-source.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/011-readable-archive-source.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/011-readable-archive-source.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/012-private-fixture-files.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/012-private-fixture-files.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/013-tool-availability.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/013-tool-availability.stdout.log": {
+      "bytes": 953,
+      "sha256": "1a57187c610cca76949323988ef53913834a134e4e9cc8abadc18113467e68be"
+    },
+    "linux-r1/014-linux-archive-probes-python3.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/014-linux-archive-probes-python3.stdout.log": {
+      "bytes": 5021,
+      "sha256": "bf2fdf393113c3ddd3454065951912d7b2621909c42722352f1a4db99349e25a"
+    },
+    "linux-r1/015-zmodem-source.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/015-zmodem-source.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/016-zmodem-readback.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/016-zmodem-readback.stdout.log": {
+      "bytes": 96,
+      "sha256": "23c0c856fd6bb207f7cdbf7b8ccb923936109f08a0a1641f0d02c25bc94cc224"
+    },
+    "linux-r1/017-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/017-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "linux-r1/018-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/018-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "linux-r1/019-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/019-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "linux-r1/020-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/020-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "linux-r1/021-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/021-container-identity.stdout.log": {
+      "bytes": 13015,
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    "linux-r1/022-container-identity.stderr.log": {
+      "bytes": 1743,
+      "sha256": "36ced66bb0ef351ea07024c1139ef5f6282de66693d7102f28c0593298ac3576"
+    },
+    "linux-r1/022-container-identity.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/023-container-identity.stderr.log": {
+      "bytes": 2475,
+      "sha256": "635027800bf256a34c47efc646cd1e12cfbad9fd77359bbcd9d0654743809728"
+    },
+    "linux-r1/023-container-identity.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/archive-python3.json": {
+      "bytes": 6445,
+      "sha256": "8ed0f32969d19598e6dcae60412ba8d883d156b6d2191623fcaeb014089c487e"
+    },
+    "linux-r1/lease.json": {
+      "bytes": 263,
+      "sha256": "e45ae5d0b0bed56f6f73a1fe2dde11d4dcdf32e669d094b10e20bb9036d847ac"
+    },
+    "linux-r1/progress.json": {
+      "bytes": 14988,
+      "sha256": "cfab80afe9782b2aa0c4483aba5bd9f2d14cf5f7fcf6262c48f09ee3e27c993d"
+    },
+    "linux-r1/readiness.json": {
+      "bytes": 2434,
+      "sha256": "f15879659e19155249369f7c2e1b6f5dde4d60ed06318822debcc4cb1e2bec1c"
+    },
+    "linux-r1/result.json": {
+      "bytes": 23266,
+      "sha256": "d69676e914a7cbc759b01397ecf4af75915fac7ce3bb8f53420a33b3a745d700"
+    },
+    "linux-r1/rz-help.log": {
+      "bytes": 2475,
+      "sha256": "2cc70d5ccdbeb8dacf05717a8d9ed94aa8d8e6762c78f3ede8d9132708f53067"
+    },
+    "linux-r1/source-snapshot/crates__keelshell-core__src__server_archive.py.txt": {
+      "bytes": 28798,
+      "sha256": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+    },
+    "linux-r1/source-snapshot/scripts__openssh_interop.py.txt": {
+      "bytes": 24482,
+      "sha256": "c0e0db7d8a8b48ea57cb6486f0136b93a3d8936a98b3841a93a5fc1514f95ec2"
+    },
+    "linux-r1/source-snapshot/scripts__run_linux_file_interop.py.txt": {
+      "bytes": 49654,
+      "sha256": "1f1db6d48be947a572e90a6be58e0c2a6487657d180456543444979433241837"
+    },
+    "linux-r1/sz-help.log": {
+      "bytes": 2475,
+      "sha256": "cdb55bc7739f8e72cc73ff7e2e1513727ab1ac410a8a5925745cf0c5d711f3d7"
+    },
+    "linux-r1/tools.json": {
+      "bytes": 1171,
+      "sha256": "0673267bee8453fafa0311ad81baf8fef4c0fa7ee73643242319c5fd3b890579"
+    },
+    "linux-r1/zmodem-receiver.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "linux-r1/zmodem-reference.json": {
+      "bytes": 588,
+      "sha256": "865b9bf282e6efc338e707cc8878a9afe2aee655db2c811091d2296b85ad2185"
+    },
+    "linux-r1/zmodem-sender.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/001-clang-version.receipt.json": {
+      "bytes": 373,
+      "sha256": "bee13f1de5b43006e28f077cd50ed498bc762f3a042c750f95df3a3f7b04b1b5"
+    },
+    "native-macos-r1/001-clang-version.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/001-clang-version.stdout.log": {
+      "bytes": 200,
+      "sha256": "ce403379b194079b66c357f092406ba3c976e92f75e4a332c2580339788ba1b1"
+    },
+    "native-macos-r1/002-macos-version.receipt.json": {
+      "bytes": 359,
+      "sha256": "39ee694cdc1156682e0311ff8549ac8eff4c77f67b0ca554f938cfd06ae59d12"
+    },
+    "native-macos-r1/002-macos-version.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/002-macos-version.stdout.log": {
+      "bytes": 66,
+      "sha256": "9a0ac4f6ff4ef7fb704c66da4bcc1b59033e6b94e239443d95910eeaa9bb8d45"
+    },
+    "native-macos-r1/003-host-kernel.receipt.json": {
+      "bytes": 363,
+      "sha256": "ca981986021d68f79e79c920459c62436484eb9624ceb0f2f75e51179ecab1e7"
+    },
+    "native-macos-r1/003-host-kernel.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/003-host-kernel.stdout.log": {
+      "bytes": 145,
+      "sha256": "78b3e86fb056974758438001b4844fe7737013973987ae69ec2cd3d444d2a303"
+    },
+    "native-macos-r1/004-configure.receipt.json": {
+      "bytes": 659,
+      "sha256": "346a6d5819ae21373e9fbb3aa237e331ebe3d94d0c17a8ccb8f0e161c5c50254"
+    },
+    "native-macos-r1/004-configure.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/004-configure.stdout.log": {
+      "bytes": 7390,
+      "sha256": "1a958d9eef0f4928ac35fd6e19b166ec64fa2c69cdebce61a2ba766d2bba7f0a"
+    },
+    "native-macos-r1/005-make.receipt.json": {
+      "bytes": 363,
+      "sha256": "6ce3e34b4a89df1513d72601f4fe540835d85bc5c7032f320a670c9aedec8c9b"
+    },
+    "native-macos-r1/005-make.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/005-make.stdout.log": {
+      "bytes": 37123,
+      "sha256": "19de8754c8b4d60be59fa90b89b0138a0a9642207f2e8dd085fa8ee4b0ca964d"
+    },
+    "native-macos-r1/006-lrz-version.receipt.json": {
+      "bytes": 487,
+      "sha256": "a8cfbc004083d85d820f53df5abd80cc1d633a7f620ef511c5cdfc94f396cb88"
+    },
+    "native-macos-r1/006-lrz-version.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/006-lrz-version.stdout.log": {
+      "bytes": 23,
+      "sha256": "da24e2119111821df2ed6059bfd1913e9a2b326402ec1cce7efbe3cdf8acc230"
+    },
+    "native-macos-r1/006-lsz-version.receipt.json": {
+      "bytes": 487,
+      "sha256": "792d6208be72f3ea5b5581661cc2c50ec644675692570ceb8148927b9a73f837"
+    },
+    "native-macos-r1/006-lsz-version.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/006-lsz-version.stdout.log": {
+      "bytes": 19,
+      "sha256": "859267b945084869e9552ef0f0d49c1e2f98ec60ce27bdf4349e32bcb90a1862"
+    },
+    "native-macos-r1/007-binary-file.receipt.json": {
+      "bytes": 629,
+      "sha256": "571e79a62910dd84e273927cb024463afc395a0c3075a3e3db8ec07971127721"
+    },
+    "native-macos-r1/007-binary-file.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/007-binary-file.stdout.log": {
+      "bytes": 328,
+      "sha256": "62ff08b09298d817b5ba6d2b2629b1623963ec5a9b2fdd79f26dc8c222aec2fa"
+    },
+    "native-macos-r1/008-library-dependencies.receipt.json": {
+      "bytes": 659,
+      "sha256": "09726ffdfd3271b1fcaf32c9d184ba0801997360b038e52937c4c361e527aad7"
+    },
+    "native-macos-r1/008-library-dependencies.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/008-library-dependencies.stdout.log": {
+      "bytes": 436,
+      "sha256": "a3be34fba33bef5813347e740e2a7ce8b1fc54e7894e6f9aa3465bd8a04fba67"
+    },
+    "native-macos-r1/archive-inspection.json": {
+      "bytes": 1246,
+      "sha256": "03fb16cdcf4612a9a50a7974f1cdc11303f1b7346f672a2c0c546a3dc77e7579"
+    },
+    "native-macos-r1/binary-crc16-0.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/binary-crc16-1.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/binary-crc16.json": {
+      "bytes": 1726,
+      "sha256": "80affe7081bee37976d095891a04bdc0cb91cbeefce7b3ed5cc4b01f9e5997b7"
+    },
+    "native-macos-r1/binary-crc32-0.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/binary-crc32-1.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/binary-crc32.json": {
+      "bytes": 1841,
+      "sha256": "f4f3ca7aadaaaa9cfd0c2691639653919bebfa0e9769e4814274ae465f339a2c"
+    },
+    "native-macos-r1/build-result.json": {
+      "bytes": 7005,
+      "sha256": "ff5374264d333b61068428fa3189b083de1ec862feff5decbd0765e13ea71fbe"
+    },
+    "native-macos-r1/build/Makefile": {
+      "bytes": 34171,
+      "sha256": "f031119fc5be837818950d6ae2fceadfdbfa95b551c72af678a1545b4945104b"
+    },
+    "native-macos-r1/build/Specfile": {
+      "bytes": 2441,
+      "sha256": "cee53cd2899f6c96de100176aaf80b4c720964c25ee004824a90bacd9c4f8b14"
+    },
+    "native-macos-r1/build/config.h": {
+      "bytes": 6381,
+      "sha256": "d9ee9e1d58a1459d02fad5f5780198d5db2bdff52beb5ca7e6a5b164eadf55dd"
+    },
+    "native-macos-r1/build/config.log": {
+      "bytes": 57609,
+      "sha256": "b0e58a0c78c0e643e41d76da94125992de34ef87e740b95a6cbd7ca6d7b59a56"
+    },
+    "native-macos-r1/build/config.status": {
+      "bytes": 43410,
+      "sha256": "4d17eeaad032a7e50d334c5f94fe5a2a1d4eec0b81788d23ebc81c5086a8309e"
+    },
+    "native-macos-r1/build/man/Makefile": {
+      "bytes": 18872,
+      "sha256": "6cbdd446fdba4c7cbd0a10460d4c9966cde37ebae3488c3b340e2927f044d635"
+    },
+    "native-macos-r1/build/po/Makefile": {
+      "bytes": 27324,
+      "sha256": "c78718e95a586603d4f4c68943e18e7ab6c8b0e4efff3c438dee769df25cbc48"
+    },
+    "native-macos-r1/build/po/Makefile.in": {
+      "bytes": 21034,
+      "sha256": "87af89314f243596b3df6517421ef2696f0b8b8ebecb48207eb23ad8c1a9122d"
+    },
+    "native-macos-r1/build/po/POTFILES": {
+      "bytes": 996,
+      "sha256": "f7aa669761a5d32f53e4318b73861fb62187d2eb70187346dbdb2c2aa40e7855"
+    },
+    "native-macos-r1/build/src/.deps/canit.Po": {
+      "bytes": 39769,
+      "sha256": "6ffb8388f1fc33addada1843b3382fc0485983fe0357f51727afb164b1474995"
+    },
+    "native-macos-r1/build/src/.deps/crctab.Po": {
+      "bytes": 731,
+      "sha256": "5e1f5c69e6250781b6cf8d630f8a0fa23d340302ffb146b736f86c0f1607402d"
+    },
+    "native-macos-r1/build/src/.deps/linesimulator.Po": {
+      "bytes": 29222,
+      "sha256": "a9fc33bc10a429551d674b199c0d5df7958768bdc36e5bd94b508b6e358fffe8"
+    },
+    "native-macos-r1/build/src/.deps/lrz.Po": {
+      "bytes": 48590,
+      "sha256": "a7939c36d67137e1bf05a01b4b5370c2b9c060c90a29e4aa69f024c8b1cb2a6b"
+    },
+    "native-macos-r1/build/src/.deps/lsyslog.Po": {
+      "bytes": 46584,
+      "sha256": "b0abd7c850145c51436ff3bd5b980391eca8c1c4ce91f0e352495333abc8818c"
+    },
+    "native-macos-r1/build/src/.deps/lsz.Po": {
+      "bytes": 48355,
+      "sha256": "c47e0bba6c7916c684bec028f637483374822e6bf1ef6a0b4968b0d09558d619"
+    },
+    "native-macos-r1/build/src/.deps/protname.Po": {
+      "bytes": 39297,
+      "sha256": "26dab7d12cf24dfdd764e63354a8b10b616d5f977dac958d76b4518c3f501459"
+    },
+    "native-macos-r1/build/src/.deps/rbsb.Po": {
+      "bytes": 39767,
+      "sha256": "a4416d5d084c0939668bc4712f5a4a029a43f5c7b81e6d8ef1b3079cbc7eb330"
+    },
+    "native-macos-r1/build/src/.deps/stats.Po": {
+      "bytes": 46584,
+      "sha256": "cf90c0e03d7e1c1a86bfc7ac1bd7807d6a6a4a1104cd0f79bf4276d61e42c8fc"
+    },
+    "native-macos-r1/build/src/.deps/timestamp.Po": {
+      "bytes": 11644,
+      "sha256": "feb7164842942e0b56e899d241e50a10d9f29d7ffaedcefef5fbe408fefbf185"
+    },
+    "native-macos-r1/build/src/.deps/timing.Po": {
+      "bytes": 39620,
+      "sha256": "a633b9b48e41cdab2a41f50ee40edafd58249f375e37c18613d725e2c4f476b9"
+    },
+    "native-macos-r1/build/src/.deps/util.Po": {
+      "bytes": 43817,
+      "sha256": "2a1f7d0419ba4bf87c8baa4469fd60681312da811705a90be0febb7fdd88a33e"
+    },
+    "native-macos-r1/build/src/.deps/zm.Po": {
+      "bytes": 39285,
+      "sha256": "8dd9527185b23158a29391692d1782d54684cb71bab979cabcc13cb8cb1c3fc1"
+    },
+    "native-macos-r1/build/src/.deps/zmodemfuzz.Po": {
+      "bytes": 31465,
+      "sha256": "3fb51cf51096a9cf24a0aafd95df0773e12f4080e27bfaf10e6f81c274b3ceb3"
+    },
+    "native-macos-r1/build/src/.deps/zmodemsnif.Po": {
+      "bytes": 28742,
+      "sha256": "3c17535d8c0bc62d5a59e2b44e35c125092db47af351ee567fdee6869e198927"
+    },
+    "native-macos-r1/build/src/.deps/zperr.Po": {
+      "bytes": 46584,
+      "sha256": "1bcb520a4e994e4a0c421d53ca88678114454d43d93e772e3c6772207ef5c0ca"
+    },
+    "native-macos-r1/build/src/.deps/zreadline.Po": {
+      "bytes": 46592,
+      "sha256": "4035e62ed22d5978c85283b825cc8e7c685d4839903ba54a0a985f3db755329d"
+    },
+    "native-macos-r1/build/src/Makefile": {
+      "bytes": 29268,
+      "sha256": "823071067fa6056368f0c9e85a8b4ce761050529f9cef60bffab301fd1191657"
+    },
+    "native-macos-r1/build/src/canit.o": {
+      "bytes": 5312,
+      "sha256": "74c844ea2ac4027810bbda9d8382d32a418b599c1d1dfdef5d42ad38ba33c9cd"
+    },
+    "native-macos-r1/build/src/crctab.o": {
+      "bytes": 5200,
+      "sha256": "fd69e0d359c707e01ecdc75afc9c8a3ba7c5186b7a7d0cfc5c3df9b6ef282b34"
+    },
+    "native-macos-r1/build/src/linesimulator": {
+      "bytes": 35776,
+      "sha256": "649f4843222859700708bb0b08b419e379c04b0bad144552a4eedc96409a21a5"
+    },
+    "native-macos-r1/build/src/linesimulator.o": {
+      "bytes": 39704,
+      "sha256": "26e1a491209e63831212185cef849a6016b3a89a4060f5c2a8792ccd8a2da4bc"
+    },
+    "native-macos-r1/build/src/lrz": {
+      "bytes": 121920,
+      "sha256": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008"
+    },
+    "native-macos-r1/build/src/lrz.o": {
+      "bytes": 105712,
+      "sha256": "8889805245ef263cfbd13c02726f7fdce5fff897f4b1a541c31da59fabfef37d"
+    },
+    "native-macos-r1/build/src/lsyslog.o": {
+      "bytes": 6952,
+      "sha256": "496e584fb61e5f3f65ef33c6c20a1e70aacb21841e4913434ee9beb6274a61cc"
+    },
+    "native-macos-r1/build/src/lsz": {
+      "bytes": 123280,
+      "sha256": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+    },
+    "native-macos-r1/build/src/lsz.o": {
+      "bytes": 112816,
+      "sha256": "7dfca8557ad65bd960d14496ee4197868d1a57dbc109225b1d5ad1d741c91821"
+    },
+    "native-macos-r1/build/src/protname.o": {
+      "bytes": 3472,
+      "sha256": "b944d53e4a4364842a261a2fe41e91823f53cb9485bb08211eec984aad6d8880"
+    },
+    "native-macos-r1/build/src/rbsb.o": {
+      "bytes": 14432,
+      "sha256": "e38f8ad5b8ac0e1956df2fb801b44c4fcbd0060a8cf01a64f7632ee1c6ab1e60"
+    },
+    "native-macos-r1/build/src/stats.o": {
+      "bytes": 24568,
+      "sha256": "ff6578342c786d1ef54ead12e770dab6a3c50b448efcba72bf5b42c4e2bf9623"
+    },
+    "native-macos-r1/build/src/timestamp": {
+      "bytes": 33976,
+      "sha256": "40d1485ddf4463c117108f662ccb85bfa7dcd5ac9fd5dd1d91ea76674231ae95"
+    },
+    "native-macos-r1/build/src/timestamp.o": {
+      "bytes": 4400,
+      "sha256": "56c00da07ccf9f200f0c8c9aec778081d756e90242e794700f056ee2ab2d7d94"
+    },
+    "native-macos-r1/build/src/timing.o": {
+      "bytes": 6024,
+      "sha256": "c004f7b5f76e63b81c8af5768ba5c818c6ec0b7cabc874d4ea7d71b4a55a75f3"
+    },
+    "native-macos-r1/build/src/util.o": {
+      "bytes": 30280,
+      "sha256": "0d5eab8c1e9242219c4c4d060e7b9fb96f6025f83ef999a412038631c2a99dbd"
+    },
+    "native-macos-r1/build/src/zm.o": {
+      "bytes": 52880,
+      "sha256": "c77c16fdf44b6735c97a183c936ba8ee6fa00cb92b0c58fcfea414dc28aaab42"
+    },
+    "native-macos-r1/build/src/zmodemfuzz": {
+      "bytes": 74936,
+      "sha256": "c36efd329ae65db2049dfa2f2c2003e223716abe4659fc483fe814164765e56f"
+    },
+    "native-macos-r1/build/src/zmodemfuzz.o": {
+      "bytes": 136384,
+      "sha256": "a15eca57b8ddcb0505932ea0553d4b0d65397274ad4ce3036bdbe3c65545761e"
+    },
+    "native-macos-r1/build/src/zmodemsnif": {
+      "bytes": 36216,
+      "sha256": "58a26c07670ab0402b33aebb657bab8256b987ee3bf90ffebcdb58152fb07b2f"
+    },
+    "native-macos-r1/build/src/zmodemsnif.o": {
+      "bytes": 47528,
+      "sha256": "a597c792f8024f276019ab7b180aad4c8595e9eb223eece6a7982392026aa742"
+    },
+    "native-macos-r1/build/src/zperr.o": {
+      "bytes": 7064,
+      "sha256": "e19ad23be551ea0107c6ceb41819fdac054f1d33cf35cbe655abb3a39f1d3834"
+    },
+    "native-macos-r1/build/src/zreadline.o": {
+      "bytes": 12392,
+      "sha256": "8c1644b94a7932195b5250835157489ec6ea1d7161586ca308c95bdd8ccc026d"
+    },
+    "native-macos-r1/build/stamp-h1": {
+      "bytes": 23,
+      "sha256": "24fdde0aee1f49666fc7a5bd7f422dc0118e4db128bc1f606f7f047c9b245bb4"
+    },
+    "native-macos-r1/build_peer.py": {
+      "bytes": 8500,
+      "sha256": "e38cd70f359a33904446c15f1ff76b7d64a1ad18830948abc72628f532a30eb0"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/ABOUT-NLS": {
+      "bytes": 67,
+      "sha256": "fbe8681a07eab3934d302edb4db8fbcea014b460232e3638e7f4cdb7da53e5aa"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/AUTHORS": {
+      "bytes": 250,
+      "sha256": "5d7c37714d00beaa2ae1e9e6e5620c2ea87478de9ef506d87348f1fa1ec92ea3"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/COMPATABILITY": {
+      "bytes": 1368,
+      "sha256": "5f44908d522acbf6a8813030605245e308cefe56a9c9f103b63f5c3178d8c8d2"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/COPYING": {
+      "bytes": 18007,
+      "sha256": "dcc100d4161cc0b7177545ab6e47216f84857cda3843847c792a25289852dcaa"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/ChangeLog": {
+      "bytes": 42041,
+      "sha256": "d51ecc2470664192d24e2cd86779c324f45768dbf7c27f2c8b2b0c5c8304b059"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/INSTALL": {
+      "bytes": 10193,
+      "sha256": "5e7eff8c565244aee8164669de86fe83e0ed52e1771f97e76cfd003aad83867c"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/Makefile.am": {
+      "bytes": 4668,
+      "sha256": "67aacf186a18ed785f91781e63939a026de6e6b5a39a5b966fe11cf8d5405b96"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/Makefile.in": {
+      "bytes": 31464,
+      "sha256": "b8b8079b8293a43201f4c3e3d8190f55395efe7f74c7c7a8b95c4afb552595a4"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/NEWS": {
+      "bytes": 29757,
+      "sha256": "f53d959b1c0b2ed6c26c93de59e6ed3a40b15efb9ab0e3fc7d685c9014e1195d"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/README": {
+      "bytes": 703,
+      "sha256": "8cf519f7693d1675f4578a367b9b6fbec383af9d460e455144e3249df0faf9f3"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/README.cvs": {
+      "bytes": 647,
+      "sha256": "26693e7ea2e05b662796f5b11bfd04e54a73012e608ef3a55261ff3af4c9d8c9"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/README.isdn4linux": {
+      "bytes": 769,
+      "sha256": "cb4481dcbead7d193f7396d298bd77d0ee57c8bea032a80929646922ce094636"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/README.tests": {
+      "bytes": 4173,
+      "sha256": "903ebce1fb75779061052f6040a0b2a99a38d4863c3892b8ff07f017a8116f6f"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/Specfile.in": {
+      "bytes": 2450,
+      "sha256": "e571f522a37931a9fe92abd6ffec4f2ffb9236aaf4f95c6c758bcd9f85611ed5"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/THANKS": {
+      "bytes": 178,
+      "sha256": "aa6ac6093b42e292259468265070679d2fde0502ccf2c571de4b815d17ab31ee"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/TODO": {
+      "bytes": 7290,
+      "sha256": "011dc2f2512f0adc680448a5ded029bddb118508f1bbbc50ad55a3395f6dc20d"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/aclocal.m4": {
+      "bytes": 49167,
+      "sha256": "831549dfe85df1981a57ab323571e26f702e75c82a65efcaa3c14a02c110edfc"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/check.lrzsz": {
+      "bytes": 90509,
+      "sha256": "49d500a3ee7a4fdcc0bc10cdca307c69886ca148ccd167a474650d6aa199bcb5"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/compile": {
+      "bytes": 7621,
+      "sha256": "07089708e9aba8bcd58d7d4b150a6a7d9f6669dda23a169e6609a448332b9800"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/config.guess": {
+      "bytes": 50743,
+      "sha256": "e3d148130e9151735f8b9a8e69a70d06890ece51468a9762eb7ac0feddddcc2f"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/config.h.in": {
+      "bytes": 6064,
+      "sha256": "76c01a326dfefa871472c3de4ddac76e05849fac4087731921aa7a19f30d032d"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/config.rpath": {
+      "bytes": 20196,
+      "sha256": "46e05ef0ed1805729438662c040e85b0abdeba5fbedd448c4d79a3f0f3af6250"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/config.sub": {
+      "bytes": 39713,
+      "sha256": "11c54f55c3ac99e5d2c3dc2bb0bcccbf69f8223cc68f6b2438daa806cf0d16d8"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/configure": {
+      "bytes": 381426,
+      "sha256": "e751b5def14cdf3817b9eda13d9c1c018788ca9d35cd474dbce004d633d686c9"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/configure.ac": {
+      "bytes": 8956,
+      "sha256": "b499faf7badaa22fd87540b8e7671f95696ca9e53ecb405ea9edccaa617b641e"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/depcomp": {
+      "bytes": 23695,
+      "sha256": "62cde010a373e569b5921b8ef1ef34e1f47f2c7b62086c7e8b4a67e4737b79c2"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/doc/README": {
+      "bytes": 1155,
+      "sha256": "00cd2425483ab46342a87f7df1d870bf2cf900f248baf06d471503915839f8e5"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/doc/zmodem-forsberg.txt": {
+      "bytes": 104047,
+      "sha256": "24dc81099c747c794f58896c4a627ca67f798c47eca185f1d94d28645564c007"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/doc/zmodem-wip.txt": {
+      "bytes": 60927,
+      "sha256": "6ddf96d7272ed54865188e45f0e6d364c9be70b33d7e03444698517d3bb1cb8f"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/doc/zmodem-zmtx-zmrx.txt": {
+      "bytes": 37474,
+      "sha256": "cb80ca3e7bf61fcf06a5dd4bd7065cee156373398a32ff6d9e3a85641ac20b4e"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/doc/zmodemsnif.txt": {
+      "bytes": 2163,
+      "sha256": "4fb069afeed5863cdcab0e3aef85be8575599d82a17a1d289ca0c18bf54617da"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/install-sh": {
+      "bytes": 15437,
+      "sha256": "250865025dcfc1b511e3899a16f793a7d7717d3ac2af1bdea8af9171bf1dc9ff"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/ChangeLog": {
+      "bytes": 567,
+      "sha256": "5fe268a6d03e18f3d5815df9fa9c218c87e793b8beccf81c592f143d9551d3ef"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/ax_append_compile_flags.m4": {
+      "bytes": 1765,
+      "sha256": "ecbcac20f9872c57e7615d57874b3798b809288a48602b790b2977446e272323"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/ax_append_flag.m4": {
+      "bytes": 1552,
+      "sha256": "392cb0e965351b1d6a9847cf165dc4092fb1853fd63dbe010ac8b21c286f5e16"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/ax_check_compile_flag.m4": {
+      "bytes": 2480,
+      "sha256": "be21ce9e7bdc5826e00709d4163cd7bf46faff8a0fae3fcfa86b1ee17a18ea6e"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/ax_compiler_flags_cflags.m4": {
+      "bytes": 5785,
+      "sha256": "d2ae243e93a556b9e81e6f4027996a2b2aeca3b4480d0bb78c2cf32305e5d2d1"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/ax_require_defined.m4": {
+      "bytes": 1218,
+      "sha256": "d870b21e817747c6a61a9dd72e06ea45f87e012c7a1a9aa5ff90cd3af89b3774"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/build-to-host.m4": {
+      "bytes": 9242,
+      "sha256": "8307c1f05ec9d5b8da3e3e5af369ed91b9209e517c632d8a95c7c2aa32650ec5"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/gettext.m4": {
+      "bytes": 14990,
+      "sha256": "791f7bb934ad202a7a7624da2042073316449657bd6bfbb970c395137fae62bb"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/host-cpu-c-abi.m4": {
+      "bytes": 17194,
+      "sha256": "73f20b40965b3668719502fe1264aa3a37d48ed99612e855a090a067e51ae715"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/iconv.m4": {
+      "bytes": 11052,
+      "sha256": "dfb9b8007e8e699b1633ad7ed23ffb71b5bc211a0389d91335a6335ff51a2a90"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/intlmacosx.m4": {
+      "bytes": 3560,
+      "sha256": "85fadf4b8dd2374d2e804f1516ba7cc6607b04e1d2c6c60f8729f73675566718"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/lib-ld.m4": {
+      "bytes": 5440,
+      "sha256": "083fac15a131fa7c3a40dbb86caba82821fc76271d0dd2ea991fd9cb226f7744"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/lib-link.m4": {
+      "bytes": 35796,
+      "sha256": "a70f24ecbaa65fa2ed415ecf30db5abbd464436046f6579c0122ef3a7d721109"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/lib-prefix.m4": {
+      "bytes": 12582,
+      "sha256": "bcc517c7e2e3d67e82a5dc4c58e81174f5aa766c820fb8c0381e2ae5351beedb"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/nls.m4": {
+      "bytes": 1236,
+      "sha256": "421f67f14db75dc9529baab642dd951fb3fd1358d0a29afa283da621a5ededa5"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/po.m4": {
+      "bytes": 19013,
+      "sha256": "fa3041b174ad0e9f6ca23745214cdffe1ca3c9556da67b3fad722527dd683075"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/m4/progtest.m4": {
+      "bytes": 3091,
+      "sha256": "6a8297736873c61922265b4367223b91377cc2ebd5d2a148a937dd102851e099"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/man/Makefile.am": {
+      "bytes": 137,
+      "sha256": "3378b25bd174bb015181b5df97b8b748f571542efa94de209b099eeba5e08708"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/man/Makefile.in": {
+      "bytes": 16136,
+      "sha256": "f9a5dc719aef5a9c6c2ff8675397c9a9801283fbb230658345515c36a536ba69"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/man/lrz.1": {
+      "bytes": 16236,
+      "sha256": "37ddddf83a8ee99cbcec2123cebcb654c0830e81f558afb3a6a3e03d644534b1"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/man/lsz.1": {
+      "bytes": 19817,
+      "sha256": "bbd5e27df9f4414ac862768f8e2cb22f55cacbc3fa49294beb35931c2beabd1c"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/missing": {
+      "bytes": 7728,
+      "sha256": "1509d72c676d3b757ab9a0b251cb4c2ff5f1391d694839e71091358cb5e18f69"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/mkinstalldirs": {
+      "bytes": 3660,
+      "sha256": "b6320dda6e14f0a2251df86aa812298a8098ead37d506ed65f62f27eeae9de2c"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/ChangeLog": {
+      "bytes": 5681,
+      "sha256": "b059711eeeb9b145e614354acf00123556a2723780cd8aeb61dac30b619bc6df"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/LINGUAS": {
+      "bytes": 238,
+      "sha256": "dfb7415a70b42e2d9b1115ff48e0693c06d2958edab7fd069b5558c1b3a221f0"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/Makefile.in.in": {
+      "bytes": 20250,
+      "sha256": "8a276dda7a246d267add6fa33ad8c7c26af4d0ee6f7094c78f264bd75a82ee50"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/Makevars": {
+      "bytes": 2866,
+      "sha256": "d8b638eede805e1fbe1b9690963b2daff60a3dcbd957e12d7bee7b7bd3bd2931"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/POTFILES.in": {
+      "bytes": 68,
+      "sha256": "53f3b908be87bcd09b362425e915fc1c56200837185acea90dc6653e1f8392c3"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/Rules-quot": {
+      "bytes": 2483,
+      "sha256": "ff0938a507a30899173bb116bcdf44f961ee810fb0d28d48b1be0a89f2f37351"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/boldquot.sed": {
+      "bytes": 717,
+      "sha256": "c109dbd6b520bb784590fe4b3bbec28d4877b0e8618e180d0f53d695bee43fc7"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/en@boldquot.header": {
+      "bytes": 1771,
+      "sha256": "80b9c9513f18b49d75e23f0e54e7a331a2ebda50eb0b28f82d48b012340ff5f7"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/en@quot.header": {
+      "bytes": 1633,
+      "sha256": "b277bf95b5e1c56f5d860ed3d479a20c37a41d3f965d0954531a8e907bb2f960"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/insert-header.sed": {
+      "bytes": 1019,
+      "sha256": "120513c5348e88d0f9f0381da50dfb5f2dc6557581f8ac76125f2f4d84ab0f45"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/lrzsz.pot": {
+      "bytes": 13704,
+      "sha256": "889a7cdd594157d9b5c5d0581b676b61642c82fe3500be696f877a0cdddbcb0d"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/quot.sed": {
+      "bytes": 608,
+      "sha256": "a2a83b6f6c4d6a0c28828c81ff621f1d7cb703ed07b56d83bdafe86dcb4d316f"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/remove-potcdate.sed": {
+      "bytes": 720,
+      "sha256": "d582513385c800f75224f4041fbff207053d4229be6038c6810af382420ac362"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/po/stamp-po": {
+      "bytes": 10,
+      "sha256": "2cd8ec3de6a07e1fd39676100db57ba62372e820c19812fee55899f65746e192"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/remote-build-check.sh": {
+      "bytes": 266,
+      "sha256": "fe30e48c8b0c901859e92560c017bae06a4b14718864348f3f57fb1c7893d9b8"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/Makefile.am": {
+      "bytes": 2557,
+      "sha256": "d48189923c161f1ab3c1940237e110cfd875434449785d4e1db008f4acdaf1d6"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/Makefile.in": {
+      "bytes": 26720,
+      "sha256": "e70538a73274c81c78df39297bc2f575786abb571c32a7e7b1d32134dd87d7ce"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/canit.c": {
+      "bytes": 1684,
+      "sha256": "030998a70f56b8dac67ecabb437f687eb3ae0adb9b09c5e5a9e939551c190d69"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/crctab.c": {
+      "bytes": 9099,
+      "sha256": "d156e680435a9a92b3caaa335a25e079238b11a6e29d09c7e92791d8365a971a"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/crctab.h": {
+      "bytes": 392,
+      "sha256": "ebd570941e3af804dc98d3a1fe9799419a82d9a1157966d547bdf8cc0914482b"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/linesimulator.c": {
+      "bytes": 29403,
+      "sha256": "703b6c3670457e36a7e6686371404fb1fce12a2ea440f6606850904e159b6abe"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/lrz.c": {
+      "bytes": 71127,
+      "sha256": "741dccf765ddc00820c42e36a36b79ca8b8a487e4f3a38d7826d40ae72df0e2b"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/lsyslog.c": {
+      "bytes": 1895,
+      "sha256": "fddf6faca3a618581564986a890ff79fa1f9a2cd09db930a39699c7c1a39925d"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/lsz.c": {
+      "bytes": 75721,
+      "sha256": "7e67f3108760b1b9c31d2652b3a01ed88fff369fb42099161995852bd2cea000"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/protname.c": {
+      "bytes": 1109,
+      "sha256": "93fdc4d095a4836415ad117b4ae8b1cac54233a1cdeb29d0fecb3558aa22418d"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/rbsb.c": {
+      "bytes": 6837,
+      "sha256": "3e76bf2b71b2f8ac7c6aaa6458aa9ef2df3ede1afa6eb3092c183d2f49d0d777"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/stats.c": {
+      "bytes": 9960,
+      "sha256": "323a0f1918e1c52236f9d9d69b688f489c401fe62f025c6d40110f0ca5145ba3"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/stats.h": {
+      "bytes": 3363,
+      "sha256": "798d915d171650550e39af6f535e7dfd47e37cce1ac2f0054c71ce661917c117"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/timestamp.c": {
+      "bytes": 338,
+      "sha256": "77ea78ea45bbaf65ef332298a0a5adc711acecac2165e7baabf5e73ca7b74e6a"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/timing.c": {
+      "bytes": 1890,
+      "sha256": "c9bb76603372c229f777229d2d0045e2bab0361ce8ff6e0f72e145f0b4d8bb15"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/timing.h": {
+      "bytes": 140,
+      "sha256": "90201af30c9c285d68f330bcad6d88e0429fdc68a7ac0a50f3f9392c1d5e8dbc"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/util.c": {
+      "bytes": 12156,
+      "sha256": "c7052f5a753265fc76f8d884e685260b6a43669dcf1a4d7dbe8827816495e0bd"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/util.h": {
+      "bytes": 4442,
+      "sha256": "1354f8d76228156ef3ea3f326010bc441cd146c2d25e3f0a6cdbc5075ae386b6"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/zglobal.h": {
+      "bytes": 6855,
+      "sha256": "eb6420df0ee2707df6f6ba1b8b93cb560a07686446c26478aa057d7734caf380"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/zm.c": {
+      "bytes": 24630,
+      "sha256": "cc368ae19dd1d360b63358cf5f389e5800e3c0e10d10b7563c209b409ac245c2"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/zmodem.h": {
+      "bytes": 5729,
+      "sha256": "5f395b92863866da35702324fe3d6c339558a9e5b6778bdb69e8876f16c3c0ea"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/zmodemfuzz.c": {
+      "bytes": 92705,
+      "sha256": "06f37be836f943b9200248f5948f345d49d72d40e5ae08830f8de5999a28400f"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/zmodemsnif.c": {
+      "bytes": 31231,
+      "sha256": "3488bc064807c195ebed1a1e4af832e83395ffd1b721cee215468992cd2ea9cb"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/zperr.c": {
+      "bytes": 1514,
+      "sha256": "ec7ec575849b2d33014dfa18c59de34d1e421329e53332c6a460c5d432333db8"
+    },
+    "native-macos-r1/external-source/lrzsz-0.13.1/src/zreadline.c": {
+      "bytes": 3453,
+      "sha256": "f19a9f60ad5c4babd9fcfca834b23fbb8aa6352a45748fc4eda525680718b6e7"
+    },
+    "native-macos-r1/fetch_source.py": {
+      "bytes": 7590,
+      "sha256": "31590a833a6244bcd4325208d93aca2cda7d0d4576ac9f17c95c6a2ec416d3e7"
+    },
+    "native-macos-r1/final-git-status.log": {
+      "bytes": 75,
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    "native-macos-r1/final-state.json": {
+      "bytes": 4050,
+      "sha256": "0302d0f5d6f496919005ec501456c9ee345e72a763387adacc4c7504fb199bc9"
+    },
+    "native-macos-r1/homebrew-lrzsz.rb": {
+      "bytes": 1778,
+      "sha256": "f2240e680a1b02548bf7f4e7d57feef3a968f01d9fef19133f96cebf3e5b637d"
+    },
+    "native-macos-r1/homebrew-lrzsz.rb.headers.txt": {
+      "bytes": 941,
+      "sha256": "ddb3f2bf0b33ce2aae1760384acaac08275f0ff47df618cbb4b2d5eb58bc873b"
+    },
+    "native-macos-r1/homebrew-lrzsz.rb.http.txt": {
+      "bytes": 99,
+      "sha256": "5d0f6e3de6450912ad95f7830ed4acb2a5bd42b2649bd0636fdfa1058ef49f7f"
+    },
+    "native-macos-r1/homebrew-lrzsz.rb.receipt.json": {
+      "bytes": 1501,
+      "sha256": "7b41ec276d3cb356eeb93109fb8d9998987cd9c3ab58bbe44f94d046a10c2332"
+    },
+    "native-macos-r1/homebrew-lrzsz.rb.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/lrz-help.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/lrz-help.stdout.log": {
+      "bytes": 2615,
+      "sha256": "656d654451cc8ff049a07eabfc567be4c210609432512fdd68cafbeb33c3346b"
+    },
+    "native-macos-r1/lrzsz-0.13.1.tar.gz": {
+      "bytes": 483782,
+      "sha256": "112f91059fbd118e016d800c1a5c5a1702e965d8b9bfbda6015e44e20bfb93c9"
+    },
+    "native-macos-r1/lrzsz-0.13.1.tar.gz.headers.txt": {
+      "bytes": 359,
+      "sha256": "8599248605eaa1e92c8963fecaa28b5bb4b258764792a0dfe1f16aee81d653c9"
+    },
+    "native-macos-r1/lrzsz-0.13.1.tar.gz.http.txt": {
+      "bytes": 73,
+      "sha256": "338db08ec20bbdf1a1d276c69a16af4b063c4692a21c94207be53dd7a5afd173"
+    },
+    "native-macos-r1/lrzsz-0.13.1.tar.gz.receipt.json": {
+      "bytes": 1432,
+      "sha256": "677fb5302d9a52c9acdef8ac27c0504cdb33b9ec3b586b627435fc6158559ca5"
+    },
+    "native-macos-r1/lrzsz-0.13.1.tar.gz.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/lsz-help.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/lsz-help.stdout.log": {
+      "bytes": 3414,
+      "sha256": "2164620db00773151f7c4a54d75097cad7262425bbc2a0b847b24faa1e11d672"
+    },
+    "native-macos-r1/native-pty-result.json": {
+      "bytes": 4423,
+      "sha256": "1949cde315f1b3ea4300b1caf9113a1dd88ccdb29c086d8607c56fddc9193105"
+    },
+    "native-macos-r1/peer/AUTHORS": {
+      "bytes": 250,
+      "sha256": "5d7c37714d00beaa2ae1e9e6e5620c2ea87478de9ef506d87348f1fa1ec92ea3"
+    },
+    "native-macos-r1/peer/COPYING": {
+      "bytes": 18007,
+      "sha256": "dcc100d4161cc0b7177545ab6e47216f84857cda3843847c792a25289852dcaa"
+    },
+    "native-macos-r1/peer/NEWS": {
+      "bytes": 29757,
+      "sha256": "f53d959b1c0b2ed6c26c93de59e6ed3a40b15efb9ab0e3fc7d685c9014e1195d"
+    },
+    "native-macos-r1/peer/README": {
+      "bytes": 703,
+      "sha256": "8cf519f7693d1675f4578a367b9b6fbec383af9d460e455144e3249df0faf9f3"
+    },
+    "native-macos-r1/peer/bin/lrz": {
+      "bytes": 121920,
+      "sha256": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008"
+    },
+    "native-macos-r1/peer/bin/lsz": {
+      "bytes": 123280,
+      "sha256": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+    },
+    "native-macos-r1/peer/bin/rz": {
+      "bytes": 121920,
+      "sha256": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008"
+    },
+    "native-macos-r1/peer/bin/sz": {
+      "bytes": 123280,
+      "sha256": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+    },
+    "native-macos-r1/pty-r1-source-binding.json": {
+      "bytes": 898,
+      "sha256": "adcd96b2d79e924c5d33735b49b8ccfc89211e3d939850a258dc7887f01ee2cf"
+    },
+    "native-macos-r1/pty-r2/binary-crc16-0.stderr.log": {
+      "bytes": 6007,
+      "sha256": "5bdec01a544716d13dbe7f08d64e98f16cfd0e3d12c59a7a3bac2301eaa56938"
+    },
+    "native-macos-r1/pty-r2/binary-crc16-1.stderr.log": {
+      "bytes": 6369,
+      "sha256": "029d3322596c2d0a3ff5bb546622830a8a35d21977de69b011c2dcbc6052848d"
+    },
+    "native-macos-r1/pty-r2/binary-crc16.json": {
+      "bytes": 5516,
+      "sha256": "2cb13d3a0217966b8006f5a1edc0105b3dd4c069ea93cd8306e08e3588e35c62"
+    },
+    "native-macos-r1/pty-r2/multi-file-0.stderr.log": {
+      "bytes": 2295,
+      "sha256": "20ab07e5c3191e6d21b5e2c07da7b5352f47b91f13ba9c0ac9871691c3d80158"
+    },
+    "native-macos-r1/pty-r2/multi-file-1.stderr.log": {
+      "bytes": 2841,
+      "sha256": "25a932e7ab1ae98c5e46f0436ce5b93a8902707a78ae817c5ef0c251b2c95db0"
+    },
+    "native-macos-r1/pty-r2/multi-file.json": {
+      "bytes": 5081,
+      "sha256": "6c18738ffbafb61db9fff0b6a050fed57d84fa6f022e31f96179c289a43036d4"
+    },
+    "native-macos-r1/pty-r2/native-pty-result.json": {
+      "bytes": 11621,
+      "sha256": "bffbbb20b4430f82e2d997e1cd4d83ee8061400e6f89eb80c93b5d527e71c7cf"
+    },
+    "native-macos-r1/source-files-before-build.json": {
+      "bytes": 8281,
+      "sha256": "9a34c80eb8ad9e0fba164eb73072a4d823857e3c1fdaf56b339560f15fdfda90"
+    },
+    "native-macos-r1/source-verification.json": {
+      "bytes": 5669,
+      "sha256": "ab74912680d3495b8d9c60f3a9006e2120940a563264a1033441bcae5e117378"
+    },
+    "native-macos-r1/upstream.html": {
+      "bytes": 11291,
+      "sha256": "06a0ef98607bb4d1e87dab9c587547959556992664eb356e8bac9be694df1081"
+    },
+    "native-macos-r1/upstream.html.headers.txt": {
+      "bytes": 325,
+      "sha256": "87c43be759a9dce1c86f75dfafb7458c56e5506af74196157ed70bcf3866775c"
+    },
+    "native-macos-r1/upstream.html.http.txt": {
+      "bytes": 59,
+      "sha256": "0b0cb7bcddbeb83a8b354bde0ac788139c103f1477e38f4a976e9c82f2bbcd21"
+    },
+    "native-macos-r1/upstream.html.receipt.json": {
+      "bytes": 1355,
+      "sha256": "8419037b46fe3ff92603f5a8a68c174fba269f4236f9bb0fbeb588bd938e2401"
+    },
+    "native-macos-r1/upstream.html.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-macos-r1/verify_native_peer-r1.py.txt": {
+      "bytes": 7987,
+      "sha256": "9b86d2034a6ee300c32a842c5867e30aca048092e5a7646ddbfa847fb5394eff"
+    },
+    "native-macos-r1/verify_native_peer.py": {
+      "bytes": 9229,
+      "sha256": "b7007c1045d78d7d55b0b06576c3da64c4f480a16cc7ab91cfd44893fe46f23a"
+    },
+    "network-probes-r1/alpine-cdn.log": {
+      "bytes": 18,
+      "sha256": "46b453e0568659ff4fdfbb8e577a96e95000cc4731b898af7bcdf9cdb880636e"
+    },
+    "network-probes-r1/alpine-tuna.log": {
+      "bytes": 19,
+      "sha256": "38af0e8735a36f942c1ac59c879d8da23d40d2678fc0273766788df3270f5021"
+    },
+    "network-probes-r1/debian-https.log": {
+      "bytes": 18,
+      "sha256": "c0bb4cfbd93605d09ba14116ce3ddbb4901e7ad3daac3a5431e3ead6314e7745"
+    },
+    "network-probes-r1/debian-tuna.log": {
+      "bytes": 18,
+      "sha256": "024252a3c4d7976d9e97f1fe369863c0424ba6adc56d79a7aae093beec30932e"
+    },
+    "network-probes-r1/result.json": {
+      "bytes": 764,
+      "sha256": "7d8f70163bb18fb32c8b22b51c9462e97e1b2198617628a9d0845757c4fa5d9a"
+    }
+  },
+  "schema": 1,
+  "symlinks": {
+    "native-macos-r1/peer/bin/rz": "lrz",
+    "native-macos-r1/peer/bin/sz": "lsz"
+  }
+}

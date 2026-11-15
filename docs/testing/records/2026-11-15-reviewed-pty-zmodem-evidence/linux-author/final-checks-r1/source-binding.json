@@ -1,0 +1,17 @@
+{
+  "baseline": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "final_inputs": {
+    "scripts/run_linux_file_interop.py": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0",
+    "scripts/test_linux_file_interop.py": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9",
+    "scripts/openssh_interop.py": "c0e0db7d8a8b48ea57cb6486f0136b93a3d8936a98b3841a93a5fc1514f95ec2",
+    "crates/keelshell-core/src/server_archive.py": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+  },
+  "r1_runner_snapshot_sha256": "1f1db6d48be947a572e90a6be58e0c2a6487657d180456543444979433241837",
+  "embedded_linux_probes_identical_r1_to_final": true,
+  "embedded_probes_sha256": {
+    "TOOLS_PROBE": "e1c3953b73cf0b25641c1dccda0ca288e9e5752c451f2a3b9e0ce066081231b1",
+    "ARCHIVE_PROBES": "e2da021b22353f1674a1571452683b18b12c3eba8d699846d0a249db3d627cb4"
+  },
+  "final_runner_end_to_end": "NOT_RERUN_PODMAN_API_UNAVAILABLE",
+  "rust_test_executable": "NOT_SUPPLIED_NOT_DISCOVERED_NOT_RUN"
+}

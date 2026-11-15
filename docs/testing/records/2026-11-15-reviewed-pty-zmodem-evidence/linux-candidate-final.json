@@ -1,0 +1,948 @@
+{
+  "files": [
+    {
+      "path": "sha256.json",
+      "sha256": "555217c5bcc5ab81209d19f47a63c766f6c5ddc1b400c2e13c930fbd37b774c5"
+    },
+    {
+      "path": "README.md",
+      "sha256": "f7012c96878718a106fc70288f7acd0e85ade3fb9081714a6e77303e7e5760ee"
+    },
+    {
+      "path": "FINAL_HANDOFF.json",
+      "sha256": "566760c591a558646f59129710164bbc1a73f7ca5d833889008dd4e3087c58b4"
+    },
+    {
+      "path": "final-checks-r1/worktree-status.stdout.log",
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    {
+      "path": "final-checks-r1/runner-help.log",
+      "sha256": "61af8d0b1ff6e30848bb2011bef8ded69655fd8abe652664eff4e49edbbe9e8e"
+    },
+    {
+      "path": "final-checks-r1/final-git-status.log",
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    {
+      "path": "final-checks-r1/source-binding.json",
+      "sha256": "a296996fab889cecf18e16658be9864f2179698b622c2677fbf541a4398037f5"
+    },
+    {
+      "path": "final-checks-r1/result.json",
+      "sha256": "67c027097a683473f752f34d2fec6be0399638fdb972f79cce80709392d88899"
+    },
+    {
+      "path": "final-checks-r1/podman-readback.stderr.log",
+      "sha256": "1047ce8315fa479329671303eda917f187a711c15261c4110ff59ce2bcdcadf7"
+    },
+    {
+      "path": "final-checks-r1/unit-tests.stderr.log",
+      "sha256": "4ae748c548370f9bcf855bb0d42cb128bc39c8e4aa1c3cd487eb461f6198d746"
+    },
+    {
+      "path": "final-checks-r1/diff-check.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-checks-r1/test_linux_file_interop.py.txt",
+      "sha256": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9"
+    },
+    {
+      "path": "final-checks-r1/run_linux_file_interop.py.txt",
+      "sha256": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0"
+    },
+    {
+      "path": "final-checks-r1/worktree-status.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-checks-r1/unit-tests.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-checks-r1/diff-check.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-checks-r1/podman-readback.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cleanup-attempt-r1/001-container-identity.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cleanup-attempt-r1/result.json",
+      "sha256": "c70f03165ef136225a1448ff3bb52df5ef09ee2508c54179e3d865da7f9822e9"
+    },
+    {
+      "path": "cleanup-attempt-r1/002-container-identity.stderr.log",
+      "sha256": "1b854b7204372bdf41d5352df9dcd19f27156c3033cd07e76b784928dee53048"
+    },
+    {
+      "path": "cleanup-attempt-r1/progress.json",
+      "sha256": "cb6da74c13299e46ee158459d11c149c7b95f4f64dc1edd29a599b2e43b84c4f"
+    },
+    {
+      "path": "cleanup-attempt-r1/001-container-identity.stderr.log",
+      "sha256": "8ec68a9e6af6fd78915cdb0556c212253f6c42cb5afefefa84877b625f9d6556"
+    },
+    {
+      "path": "cleanup-attempt-r1/002-container-identity.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "network-probes-r1/result.json",
+      "sha256": "7d8f70163bb18fb32c8b22b51c9462e97e1b2198617628a9d0845757c4fa5d9a"
+    },
+    {
+      "path": "network-probes-r1/alpine-tuna.log",
+      "sha256": "38af0e8735a36f942c1ac59c879d8da23d40d2678fc0273766788df3270f5021"
+    },
+    {
+      "path": "network-probes-r1/debian-tuna.log",
+      "sha256": "024252a3c4d7976d9e97f1fe369863c0424ba6adc56d79a7aae093beec30932e"
+    },
+    {
+      "path": "network-probes-r1/debian-https.log",
+      "sha256": "c0bb4cfbd93605d09ba14116ce3ddbb4901e7ad3daac3a5431e3ead6314e7745"
+    },
+    {
+      "path": "network-probes-r1/alpine-cdn.log",
+      "sha256": "46b453e0568659ff4fdfbb8e577a96e95000cc4731b898af7bcdf9cdb880636e"
+    },
+    {
+      "path": "feasibility-r1/result.json",
+      "sha256": "86dad0994c7ec3144a576a49233e89ec5eaee09c76821720528a97064731f5de"
+    },
+    {
+      "path": "feasibility-r1/00.log",
+      "sha256": "cb14523a2541548fe9dbba983a2ad29120621ab8d5bcefdb007de0fc93dbebbe"
+    },
+    {
+      "path": "feasibility-r1/01.log",
+      "sha256": "5f8b72ad42a596f8e25ea84345842dc42c2e3b3b871b9f4d2fb01d88bf19521b"
+    },
+    {
+      "path": "feasibility-r1/03.log",
+      "sha256": "5b70db731934fa0d45e14130bd93cdb33661d9259239d19fbf627ffecc087ebe"
+    },
+    {
+      "path": "feasibility-r1/02.log",
+      "sha256": "9908c2e18be89442b0b8539bf90e197a63ee94606e2cdd08431c1268bbb41490"
+    },
+    {
+      "path": "native-macos-r1/source-verification.json",
+      "sha256": "ab74912680d3495b8d9c60f3a9006e2120940a563264a1033441bcae5e117378"
+    },
+    {
+      "path": "native-macos-r1/006-lsz-version.stdout.log",
+      "sha256": "859267b945084869e9552ef0f0d49c1e2f98ec60ce27bdf4349e32bcb90a1862"
+    },
+    {
+      "path": "native-macos-r1/005-make.receipt.json",
+      "sha256": "6ce3e34b4a89df1513d72601f4fe540835d85bc5c7032f320a670c9aedec8c9b"
+    },
+    {
+      "path": "native-macos-r1/001-clang-version.receipt.json",
+      "sha256": "bee13f1de5b43006e28f077cd50ed498bc762f3a042c750f95df3a3f7b04b1b5"
+    },
+    {
+      "path": "native-macos-r1/006-lrz-version.stdout.log",
+      "sha256": "da24e2119111821df2ed6059bfd1913e9a2b326402ec1cce7efbe3cdf8acc230"
+    },
+    {
+      "path": "native-macos-r1/lrz-help.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/binary-crc32.json",
+      "sha256": "f4f3ca7aadaaaa9cfd0c2691639653919bebfa0e9769e4814274ae465f339a2c"
+    },
+    {
+      "path": "native-macos-r1/005-make.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/final-git-status.log",
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    {
+      "path": "native-macos-r1/008-library-dependencies.stdout.log",
+      "sha256": "a3be34fba33bef5813347e740e2a7ce8b1fc54e7894e6f9aa3465bd8a04fba67"
+    },
+    {
+      "path": "native-macos-r1/006-lrz-version.receipt.json",
+      "sha256": "a8cfbc004083d85d820f53df5abd80cc1d633a7f620ef511c5cdfc94f396cb88"
+    },
+    {
+      "path": "native-macos-r1/003-host-kernel.receipt.json",
+      "sha256": "ca981986021d68f79e79c920459c62436484eb9624ceb0f2f75e51179ecab1e7"
+    },
+    {
+      "path": "native-macos-r1/002-macos-version.stdout.log",
+      "sha256": "9a0ac4f6ff4ef7fb704c66da4bcc1b59033e6b94e239443d95910eeaa9bb8d45"
+    },
+    {
+      "path": "native-macos-r1/native-pty-result.json",
+      "sha256": "1949cde315f1b3ea4300b1caf9113a1dd88ccdb29c086d8607c56fddc9193105"
+    },
+    {
+      "path": "native-macos-r1/upstream.html",
+      "sha256": "06a0ef98607bb4d1e87dab9c587547959556992664eb356e8bac9be694df1081"
+    },
+    {
+      "path": "native-macos-r1/007-binary-file.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/source-files-before-build.json",
+      "sha256": "9a34c80eb8ad9e0fba164eb73072a4d823857e3c1fdaf56b339560f15fdfda90"
+    },
+    {
+      "path": "native-macos-r1/fetch_source.py",
+      "sha256": "31590a833a6244bcd4325208d93aca2cda7d0d4576ac9f17c95c6a2ec416d3e7"
+    },
+    {
+      "path": "native-macos-r1/upstream.html.headers.txt",
+      "sha256": "87c43be759a9dce1c86f75dfafb7458c56e5506af74196157ed70bcf3866775c"
+    },
+    {
+      "path": "native-macos-r1/003-host-kernel.stdout.log",
+      "sha256": "78b3e86fb056974758438001b4844fe7737013973987ae69ec2cd3d444d2a303"
+    },
+    {
+      "path": "native-macos-r1/homebrew-lrzsz.rb.headers.txt",
+      "sha256": "ddb3f2bf0b33ce2aae1760384acaac08275f0ff47df618cbb4b2d5eb58bc873b"
+    },
+    {
+      "path": "native-macos-r1/001-clang-version.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/lrzsz-0.13.1.tar.gz.receipt.json",
+      "sha256": "677fb5302d9a52c9acdef8ac27c0504cdb33b9ec3b586b627435fc6158559ca5"
+    },
+    {
+      "path": "native-macos-r1/002-macos-version.receipt.json",
+      "sha256": "39ee694cdc1156682e0311ff8549ac8eff4c77f67b0ca554f938cfd06ae59d12"
+    },
+    {
+      "path": "native-macos-r1/upstream.html.http.txt",
+      "sha256": "0b0cb7bcddbeb83a8b354bde0ac788139c103f1477e38f4a976e9c82f2bbcd21"
+    },
+    {
+      "path": "native-macos-r1/lsz-help.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/homebrew-lrzsz.rb.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/pty-r1-source-binding.json",
+      "sha256": "adcd96b2d79e924c5d33735b49b8ccfc89211e3d939850a258dc7887f01ee2cf"
+    },
+    {
+      "path": "native-macos-r1/binary-crc32-1.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/archive-inspection.json",
+      "sha256": "03fb16cdcf4612a9a50a7974f1cdc11303f1b7346f672a2c0c546a3dc77e7579"
+    },
+    {
+      "path": "native-macos-r1/004-configure.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/homebrew-lrzsz.rb.http.txt",
+      "sha256": "5d0f6e3de6450912ad95f7830ed4acb2a5bd42b2649bd0636fdfa1058ef49f7f"
+    },
+    {
+      "path": "native-macos-r1/binary-crc16-1.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/004-configure.receipt.json",
+      "sha256": "346a6d5819ae21373e9fbb3aa237e331ebe3d94d0c17a8ccb8f0e161c5c50254"
+    },
+    {
+      "path": "native-macos-r1/verify_native_peer.py",
+      "sha256": "b7007c1045d78d7d55b0b06576c3da64c4f480a16cc7ab91cfd44893fe46f23a"
+    },
+    {
+      "path": "native-macos-r1/005-make.stdout.log",
+      "sha256": "19de8754c8b4d60be59fa90b89b0138a0a9642207f2e8dd085fa8ee4b0ca964d"
+    },
+    {
+      "path": "native-macos-r1/lrz-help.stdout.log",
+      "sha256": "656d654451cc8ff049a07eabfc567be4c210609432512fdd68cafbeb33c3346b"
+    },
+    {
+      "path": "native-macos-r1/002-macos-version.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/006-lsz-version.receipt.json",
+      "sha256": "792d6208be72f3ea5b5581661cc2c50ec644675692570ceb8148927b9a73f837"
+    },
+    {
+      "path": "native-macos-r1/008-library-dependencies.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/006-lsz-version.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/verify_native_peer-r1.py.txt",
+      "sha256": "9b86d2034a6ee300c32a842c5867e30aca048092e5a7646ddbfa847fb5394eff"
+    },
+    {
+      "path": "native-macos-r1/binary-crc16.json",
+      "sha256": "80affe7081bee37976d095891a04bdc0cb91cbeefce7b3ed5cc4b01f9e5997b7"
+    },
+    {
+      "path": "native-macos-r1/006-lrz-version.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/upstream.html.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/007-binary-file.stdout.log",
+      "sha256": "62ff08b09298d817b5ba6d2b2629b1623963ec5a9b2fdd79f26dc8c222aec2fa"
+    },
+    {
+      "path": "native-macos-r1/build_peer.py",
+      "sha256": "e38cd70f359a33904446c15f1ff76b7d64a1ad18830948abc72628f532a30eb0"
+    },
+    {
+      "path": "native-macos-r1/upstream.html.receipt.json",
+      "sha256": "8419037b46fe3ff92603f5a8a68c174fba269f4236f9bb0fbeb588bd938e2401"
+    },
+    {
+      "path": "native-macos-r1/lrzsz-0.13.1.tar.gz.http.txt",
+      "sha256": "338db08ec20bbdf1a1d276c69a16af4b063c4692a21c94207be53dd7a5afd173"
+    },
+    {
+      "path": "native-macos-r1/binary-crc32-0.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/lrzsz-0.13.1.tar.gz.headers.txt",
+      "sha256": "8599248605eaa1e92c8963fecaa28b5bb4b258764792a0dfe1f16aee81d653c9"
+    },
+    {
+      "path": "native-macos-r1/001-clang-version.stdout.log",
+      "sha256": "ce403379b194079b66c357f092406ba3c976e92f75e4a332c2580339788ba1b1"
+    },
+    {
+      "path": "native-macos-r1/lsz-help.stdout.log",
+      "sha256": "2164620db00773151f7c4a54d75097cad7262425bbc2a0b847b24faa1e11d672"
+    },
+    {
+      "path": "native-macos-r1/final-state.json",
+      "sha256": "0302d0f5d6f496919005ec501456c9ee345e72a763387adacc4c7504fb199bc9"
+    },
+    {
+      "path": "native-macos-r1/binary-crc16-0.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/003-host-kernel.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/008-library-dependencies.receipt.json",
+      "sha256": "09726ffdfd3271b1fcaf32c9d184ba0801997360b038e52937c4c361e527aad7"
+    },
+    {
+      "path": "native-macos-r1/lrzsz-0.13.1.tar.gz.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/homebrew-lrzsz.rb",
+      "sha256": "f2240e680a1b02548bf7f4e7d57feef3a968f01d9fef19133f96cebf3e5b637d"
+    },
+    {
+      "path": "native-macos-r1/build-result.json",
+      "sha256": "ff5374264d333b61068428fa3189b083de1ec862feff5decbd0765e13ea71fbe"
+    },
+    {
+      "path": "native-macos-r1/007-binary-file.receipt.json",
+      "sha256": "571e79a62910dd84e273927cb024463afc395a0c3075a3e3db8ec07971127721"
+    },
+    {
+      "path": "native-macos-r1/homebrew-lrzsz.rb.receipt.json",
+      "sha256": "7b41ec276d3cb356eeb93109fb8d9998987cd9c3ab58bbe44f94d046a10c2332"
+    },
+    {
+      "path": "native-macos-r1/004-configure.stdout.log",
+      "sha256": "1a958d9eef0f4928ac35fd6e19b166ec64fa2c69cdebce61a2ba766d2bba7f0a"
+    },
+    {
+      "path": "feasibility-r2/result.json",
+      "sha256": "9f5f12cb77a5c2c10a093b363fcf753ee2a7af62ba838fb9366581e1b047c3ca"
+    },
+    {
+      "path": "feasibility-r2/02-status.log",
+      "sha256": "2d2df35ebfbdb46ef480d8f9c1746e34cf6510454c2d463b5aa30cc17a3e0e8d"
+    },
+    {
+      "path": "feasibility-r2/00.log",
+      "sha256": "fb475568e5b921423a284d3e581c326ef49774daf0e037377cad9df9b7c6c0ac"
+    },
+    {
+      "path": "feasibility-r2/01.log",
+      "sha256": "5bed1166abf76d28ba23eab384abaad7a526f5a43c9043a9e49a4989cd3370a5"
+    },
+    {
+      "path": "feasibility-r2/status-current.log",
+      "sha256": "867e1225f46738128a691a4068a987efb3e2e6064601543f8f24ec4b8b5ccf76"
+    },
+    {
+      "path": "final-followup-r1/004-confirm-owned-container-absent.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/007-confirm-owned-container-absent.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/final-git-status.log",
+      "sha256": "8913f21a7c9ee64a320dd022bd74010adf8d0f6c4d9b4a2c53d483aad6df15b1"
+    },
+    {
+      "path": "final-followup-r1/001-podman-api-once.stdout.log",
+      "sha256": "c345f1a45df2326e0c7df20d9901a0f0f1c3f59876b645e36297a169720df889"
+    },
+    {
+      "path": "final-followup-r1/003-remove-owned-container.stdout.log",
+      "sha256": "fb475568e5b921423a284d3e581c326ef49774daf0e037377cad9df9b7c6c0ac"
+    },
+    {
+      "path": "final-followup-r1/result.json",
+      "sha256": "5c83738e02b3ed3aa73576acbb71bfc07d1900e0c9138ec75495c5838d8291cf"
+    },
+    {
+      "path": "final-followup-r1/006-remove-owned-container.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/002-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/005-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/001-podman-api-once.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/004-confirm-owned-container-absent.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/007-confirm-owned-container-absent.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/006-remove-owned-container.stdout.log",
+      "sha256": "cb3b807f092012d67d0fd252de5ca493879745bab45b7889b45fa808b7fd91b1"
+    },
+    {
+      "path": "final-followup-r1/003-remove-owned-container.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-followup-r1/progress.json",
+      "sha256": "3b85a6c7f29dd33a5a1b8741c6b6e8573102ffe3e983ceb4f498a11caf96a2ea"
+    },
+    {
+      "path": "final-followup-r1/durability.json",
+      "sha256": "89e0cd81a2b0c401c021e2ceea09e88261fbba0d1c9da7b0d1daa33e4762df2f"
+    },
+    {
+      "path": "final-followup-r1/002-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "final-followup-r1/005-container-identity.stdout.log",
+      "sha256": "4debfea1ea36762713a652aee323a0eaa8cb092ccdfc6b40375276d8052f948e"
+    },
+    {
+      "path": "feasibility-r3/result.json",
+      "sha256": "7f3ad3e42f0dbe77b26304e33276df6b4ebbbceb1d1eb3378a356b49006ca677"
+    },
+    {
+      "path": "feasibility-r3/00.log",
+      "sha256": "cb3b807f092012d67d0fd252de5ca493879745bab45b7889b45fa808b7fd91b1"
+    },
+    {
+      "path": "feasibility-r3/01.log",
+      "sha256": "368438b18193431929ccab4e26ae276e4fdd7d5fda5b34f102f7aff7dbdbabeb"
+    },
+    {
+      "path": "feasibility-r3/status-current.log",
+      "sha256": "5f11791b309676e107135df776c076ceef7f45205ea631ff012dc61dd5dda23a"
+    },
+    {
+      "path": "linux-r1/zmodem-reference.json",
+      "sha256": "865b9bf282e6efc338e707cc8878a9afe2aee655db2c811091d2296b85ad2185"
+    },
+    {
+      "path": "linux-r1/023-container-identity.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/015-zmodem-source.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/018-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "linux-r1/017-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "linux-r1/rz-help.log",
+      "sha256": "2cc70d5ccdbeb8dacf05717a8d9ed94aa8d8e6762c78f3ede8d9132708f53067"
+    },
+    {
+      "path": "linux-r1/004-copy-key-file.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/014-linux-archive-probes-python3.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/021-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/001-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "linux-r1/010-copy-archive-source.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/zmodem-receiver.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/result.json",
+      "sha256": "d69676e914a7cbc759b01397ecf4af75915fac7ce3bb8f53420a33b3a745d700"
+    },
+    {
+      "path": "linux-r1/003-generate-client.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/011-readable-archive-source.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/002-generate-host.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/013-tool-availability.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/tools.json",
+      "sha256": "0673267bee8453fafa0311ad81baf8fef4c0fa7ee73643242319c5fd3b890579"
+    },
+    {
+      "path": "linux-r1/005-copy-key-file.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/019-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "linux-r1/007-start-sshd.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/009-ssh-authentication.stdout.log",
+      "sha256": "ec077c6a253ed7486702b17c246a96a81116f6e38a91c854116cf9eec9d74798"
+    },
+    {
+      "path": "linux-r1/022-container-identity.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/sz-help.log",
+      "sha256": "cdb55bc7739f8e72cc73ff7e2e1513727ab1ac410a8a5925745cf0c5d711f3d7"
+    },
+    {
+      "path": "linux-r1/006-sshd-config.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/020-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/008-ssh-port.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/016-zmodem-readback.stdout.log",
+      "sha256": "23c0c856fd6bb207f7cdbf7b8ccb923936109f08a0a1641f0d02c25bc94cc224"
+    },
+    {
+      "path": "linux-r1/012-private-fixture-files.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/017-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/023-container-identity.stderr.log",
+      "sha256": "635027800bf256a34c47efc646cd1e12cfbad9fd77359bbcd9d0654743809728"
+    },
+    {
+      "path": "linux-r1/015-zmodem-source.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/readiness.json",
+      "sha256": "f15879659e19155249369f7c2e1b6f5dde4d60ed06318822debcc4cb1e2bec1c"
+    },
+    {
+      "path": "linux-r1/018-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/archive-python3.json",
+      "sha256": "8ed0f32969d19598e6dcae60412ba8d883d156b6d2191623fcaeb014089c487e"
+    },
+    {
+      "path": "linux-r1/lease.json",
+      "sha256": "e45ae5d0b0bed56f6f73a1fe2dde11d4dcdf32e669d094b10e20bb9036d847ac"
+    },
+    {
+      "path": "linux-r1/003-generate-client.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/011-readable-archive-source.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/004-copy-key-file.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/zmodem-sender.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/014-linux-archive-probes-python3.stdout.log",
+      "sha256": "bf2fdf393113c3ddd3454065951912d7b2621909c42722352f1a4db99349e25a"
+    },
+    {
+      "path": "linux-r1/progress.json",
+      "sha256": "cfab80afe9782b2aa0c4483aba5bd9f2d14cf5f7fcf6262c48f09ee3e27c993d"
+    },
+    {
+      "path": "linux-r1/021-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "linux-r1/010-copy-archive-source.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/001-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/007-start-sshd.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/009-ssh-authentication.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/019-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/022-container-identity.stderr.log",
+      "sha256": "36ced66bb0ef351ea07024c1139ef5f6282de66693d7102f28c0593298ac3576"
+    },
+    {
+      "path": "linux-r1/005-copy-key-file.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/013-tool-availability.stdout.log",
+      "sha256": "1a57187c610cca76949323988ef53913834a134e4e9cc8abadc18113467e68be"
+    },
+    {
+      "path": "linux-r1/002-generate-host.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/008-ssh-port.stdout.log",
+      "sha256": "4d7eef26aab95fe4ff35fd43a92b1ee4e2ab24ac286ca24e4cf0842da4e10f82"
+    },
+    {
+      "path": "linux-r1/020-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "linux-r1/016-zmodem-readback.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/012-private-fixture-files.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/006-sshd-config.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-r1/source-snapshot/scripts__run_linux_file_interop.py.txt",
+      "sha256": "1f1db6d48be947a572e90a6be58e0c2a6487657d180456543444979433241837"
+    },
+    {
+      "path": "linux-r1/source-snapshot/scripts__openssh_interop.py.txt",
+      "sha256": "c0e0db7d8a8b48ea57cb6486f0136b93a3d8936a98b3841a93a5fc1514f95ec2"
+    },
+    {
+      "path": "linux-r1/source-snapshot/crates__keelshell-core__src__server_archive.py.txt",
+      "sha256": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/003-alpine-architecture.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/001-container-identity.stdout.log",
+      "sha256": "4debfea1ea36762713a652aee323a0eaa8cb092ccdfc6b40375276d8052f948e"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/result.json",
+      "sha256": "324bbbb1e41dc17a1234639f3cbdcee4d951ea3471d7afd3188a83e3bf7ee2c6"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/002-alpine-release.stdout.log",
+      "sha256": "e758029138089636b1bf6186a6a3af9496489bb1509f9a125a5d29ac759f5898"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/005-install-tools-host-bridge.stdout.log",
+      "sha256": "39462ea6df1ef74348b6401bced62f184bd30a5e3457ed61b7a3ba2e20b79fdb"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/004-alpine-bridge-repositories.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/003-alpine-architecture.stdout.log",
+      "sha256": "5121ae59314a84da7b4d9587374398f1afa2000b243b3e54f491adefaac54f92"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/public-package-bridge.json",
+      "sha256": "18810779e760b3f147be332476e70070f77ca722aa21caa64aa88bda255b3bbd"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/progress.json",
+      "sha256": "d9b779b7777fde79f9ae78b211aeb56ec0ae17f717131f5674dd2037c4f6be6a"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/001-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/002-alpine-release.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/005-install-tools-host-bridge.stderr.log",
+      "sha256": "0c5b0c5e4aff7e5c56e440a2a8e400d068908a6a78a4fdd48cfd4c61ee62cef8"
+    },
+    {
+      "path": "feasibility-r3/host-bridge/004-alpine-bridge-repositories.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/003-apt-index-host-bridge.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/001-container-identity.stdout.log",
+      "sha256": "42e6db491921d1bebc7b4d27e6c731c8ea00b44021693233481e2842080e17b3"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/result.json",
+      "sha256": "be406afafc41c3cb9fce2a7fab6ea6096b269f9b5637ad15e712e73f083826b7"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/002-debian-bridge-repositories.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/004-install-tools-host-bridge.stdout.log",
+      "sha256": "8377646a8176506b66410862050bdad0f835b5ce6d4d9268e46635cfd3b057c8"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/003-apt-index-host-bridge.stdout.log",
+      "sha256": "97ab5d9d78398d5c565660cd2fb664a522ea2b9b2b0b86fda465d8bfeac2db1c"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/public-package-bridge.json",
+      "sha256": "cd2b8354a579225af0cfb3f147d08a00f42a5614f5658ee4f919b84d1bfcb460"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/progress.json",
+      "sha256": "f51f9843ad6a809b5f20ba8dfc165909fc3e863ce223c57e50a84970edefb15f"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/001-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/004-install-tools-host-bridge.stderr.log",
+      "sha256": "956ba4ef7c4bc2d43fa647d9208348179515f67bd119b9d6b9f5828eec0e67ee"
+    },
+    {
+      "path": "feasibility-r2/host-bridge/002-debian-bridge-repositories.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/003-apt-index-host-bridge.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/001-container-identity.stdout.log",
+      "sha256": "9c335f9a55db62311a1ba34bf3dfd2e8ec9a56bc4a2889449e8d924c7f1edf4d"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/result.json",
+      "sha256": "95fe244d9151c1b23dfa858fef07481ebbd326b363fcc6a66bdb63701201d83c"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/002-debian-bridge-repositories.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/004-install-tools-host-bridge.stdout.log",
+      "sha256": "4316ffc2db79b674bda76a2f11dce6eeac88ac4fcedeb81e2819c0aedc15bda7"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/005-create-fixture-user.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/003-apt-index-host-bridge.stdout.log",
+      "sha256": "144ea45ca5ecdd91d649a1a7daf29f8307ce1babb1ac27c43538b828f6047d09"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/public-package-bridge.json",
+      "sha256": "469c4ef807a4d9b3487180060eb56bcf13d411905b778329e688e40d1e1e83bc"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/progress.json",
+      "sha256": "80cbc5b33fb9d17f25718b3c3ea032270f0edbd97075ceef1d9ebdc1744dbe07"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/001-container-identity.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/004-install-tools-host-bridge.stderr.log",
+      "sha256": "f77216c41aadf6c667ac1a602069951966cea350daab793ffe11ae0de1225ddc"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/002-debian-bridge-repositories.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "feasibility-r2/host-bridge-r2/005-create-fixture-user.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native-macos-r1/pty-r2/native-pty-result.json",
+      "sha256": "bffbbb20b4430f82e2d997e1cd4d83ee8061400e6f89eb80c93b5d527e71c7cf"
+    },
+    {
+      "path": "native-macos-r1/pty-r2/binary-crc16-1.stderr.log",
+      "sha256": "029d3322596c2d0a3ff5bb546622830a8a35d21977de69b011c2dcbc6052848d"
+    },
+    {
+      "path": "native-macos-r1/pty-r2/multi-file-0.stderr.log",
+      "sha256": "20ab07e5c3191e6d21b5e2c07da7b5352f47b91f13ba9c0ac9871691c3d80158"
+    },
+    {
+      "path": "native-macos-r1/pty-r2/multi-file.json",
+      "sha256": "6c18738ffbafb61db9fff0b6a050fed57d84fa6f022e31f96179c289a43036d4"
+    },
+    {
+      "path": "native-macos-r1/pty-r2/binary-crc16.json",
+      "sha256": "2cb13d3a0217966b8006f5a1edc0105b3dd4c069ea93cd8306e08e3588e35c62"
+    },
+    {
+      "path": "native-macos-r1/pty-r2/binary-crc16-0.stderr.log",
+      "sha256": "5bdec01a544716d13dbe7f08d64e98f16cfd0e3d12c59a7a3bac2301eaa56938"
+    },
+    {
+      "path": "native-macos-r1/pty-r2/multi-file-1.stderr.log",
+      "sha256": "25a932e7ab1ae98c5e46f0436ce5b93a8902707a78ae817c5ef0c251b2c95db0"
+    },
+    {
+      "path": "native-macos-r1/peer/AUTHORS",
+      "sha256": "5d7c37714d00beaa2ae1e9e6e5620c2ea87478de9ef506d87348f1fa1ec92ea3"
+    },
+    {
+      "path": "native-macos-r1/peer/README",
+      "sha256": "8cf519f7693d1675f4578a367b9b6fbec383af9d460e455144e3249df0faf9f3"
+    },
+    {
+      "path": "native-macos-r1/peer/COPYING",
+      "sha256": "dcc100d4161cc0b7177545ab6e47216f84857cda3843847c792a25289852dcaa"
+    },
+    {
+      "path": "native-macos-r1/peer/NEWS",
+      "sha256": "f53d959b1c0b2ed6c26c93de59e6ed3a40b15efb9ab0e3fc7d685c9014e1195d"
+    },
+    {
+      "path": "native-macos-r1/peer/bin/lrz",
+      "sha256": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008"
+    },
+    {
+      "path": "native-macos-r1/peer/bin/rz",
+      "sha256": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008"
+    },
+    {
+      "path": "native-macos-r1/peer/bin/sz",
+      "sha256": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+    },
+    {
+      "path": "native-macos-r1/peer/bin/lsz",
+      "sha256": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+    }
+  ],
+  "count": 235,
+  "equal": true,
+  "recorded_utc": "2026-11-15T08:30:44.139119+00:00",
+  "protected_external_source_excluded": true
+}

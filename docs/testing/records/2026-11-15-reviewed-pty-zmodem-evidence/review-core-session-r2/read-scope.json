@@ -1,0 +1,282 @@
+{
+  "recorded_utc": "2026-11-15T09:13:31.243564+00:00",
+  "full_scope": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem.rs",
+      "lines": 417,
+      "sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f",
+      "r1_sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f",
+      "read_scope": "entire file",
+      "r2_sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f",
+      "r3_sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/codec.rs",
+      "lines": 580,
+      "sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4",
+      "r1_sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4",
+      "read_scope": "entire file",
+      "r2_sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4",
+      "r3_sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/detector.rs",
+      "lines": 119,
+      "sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+      "r1_sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+      "read_scope": "entire file",
+      "r2_sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+      "r3_sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/receiver.rs",
+      "lines": 510,
+      "sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d",
+      "r1_sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d",
+      "read_scope": "entire file",
+      "r2_sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d",
+      "r3_sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/sender.rs",
+      "lines": 458,
+      "sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006",
+      "r1_sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006",
+      "read_scope": "entire file",
+      "r2_sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006",
+      "r3_sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/tests/zmodem.rs",
+      "lines": 1268,
+      "sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79",
+      "r1_sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79",
+      "read_scope": "entire file",
+      "r2_sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79",
+      "r3_sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem.rs",
+      "lines": 1242,
+      "sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+      "r1_sha256": "1c1ce173d51a0f4d40dad10357b5f17e53dda1973a97639f9ddffa37bd1b36d6",
+      "read_scope": "entire r1 file, then all current r2 file ranges re-read; independent PublicationHold fix review",
+      "r2_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+      "r3_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local.rs",
+      "lines": 673,
+      "sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd",
+      "r1_sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd",
+      "read_scope": "entire file",
+      "r2_sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd",
+      "r3_sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local/tests.rs",
+      "lines": 492,
+      "sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81",
+      "r1_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+      "read_scope": "entire r1/r2 file and entire 492-line r3 file re-read; exact two-line prefix delta proven by reconstructing r2 hash in memory",
+      "r2_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+      "r3_sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/tests.rs",
+      "lines": 179,
+      "sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+      "r1_sha256": "50dc65aa0e22bc729453f555f6f4becbf00408440d2e8a5d384a289f53e52a42",
+      "read_scope": "entire r2 file including all five new regressions",
+      "r2_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+      "r3_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp/zmodem_local.rs",
+      "lines": 55,
+      "sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+      "r1_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+      "read_scope": "entire file",
+      "r2_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+      "r3_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/tests/zmodem.rs",
+      "lines": 957,
+      "sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179",
+      "r1_sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179",
+      "read_scope": "entire file",
+      "r2_sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179",
+      "r3_sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/tests/zmodem_openssh.rs",
+      "lines": 462,
+      "sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1",
+      "r1_sha256": "7a7ee3b4dd063776d84f5cd462ebbbebf574bd9d630a751363128bfb3490cf6d",
+      "read_scope": "entire r1 file; parent diagnostic changes and final handshake assertions independently re-read",
+      "r2_sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1",
+      "r3_sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/tests/support/zmodem_fixture.rs",
+      "lines": 250,
+      "sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+      "r1_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+      "read_scope": "entire file",
+      "r2_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+      "r3_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a"
+    }
+  ],
+  "full_scope_file_count": 14,
+  "full_scope_line_count": 7662,
+  "additional_scope": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/lib.rs",
+      "read_scope": "Zmodem export and surrounding module declarations; export line 53",
+      "sha256_at_report": "d22c1a1776b05031689c0d97499c6ffd723fe685c106abcc8c45d69ce01f6bb4",
+      "current_lines": 207,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/lib.rs",
+      "read_scope": "Zmodem export and surrounding module declarations; export line 18",
+      "sha256_at_report": "fd09baa16cba20b7b64370f0905501c56f3443f95b00b39e25b4d8e4322e8ecb",
+      "current_lines": 37,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/events.rs",
+      "read_scope": "entire file",
+      "sha256_at_report": "423ab762022a5080b695acf74532b8a2cae3cdb97ffeaa9eea56247b6b85cb5d",
+      "current_lines": 19,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/Cargo.toml",
+      "read_scope": "entire file",
+      "sha256_at_report": "dc79436a550279530dd62f91c6e8db36733e29b24afe74f6c30aa14c2aec4fbf",
+      "current_lines": 32,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/Cargo.lock",
+      "read_scope": "entire TOML structure parsed; ACL, rustix and session resolved-dependency entries manually inspected",
+      "sha256_at_report": "b7964caece668b87008bd8ce4fa563977982e075e2487197ce3a4a37b41cafa5",
+      "current_lines": 10898,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp.rs",
+      "read_scope": "lines 1-110, including reservation and ACL exports",
+      "sha256_at_report": "8e62df1cea67907aa9ef9555c6a132008a0881beeee42549e44ca25220e5803a",
+      "current_lines": 1467,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp/queue.rs",
+      "read_scope": "lines 99-167: local claims and conflicts",
+      "sha256_at_report": "8552e1034cfec8c125d2c27a1ac432516c80e9ed004b44d342c56a29694fc613",
+      "current_lines": 662,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp/queue/reservations.rs",
+      "read_scope": "lines 1-275 and 292-355: registry, disposition, unknown and quarantine",
+      "sha256_at_report": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+      "current_lines": 607,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/ssh.rs",
+      "read_scope": "lines 175-250, 580-673, 1000-1028, 1038-1142: callbacks, ordered shell reader, connection identity, shell writes and completion",
+      "sha256_at_report": "d86a3cf3f42cbc1ac06f41d5e793b1f042fe558992836730df06184e865fb79b",
+      "current_lines": 1627,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/ssh/lifecycle.rs",
+      "read_scope": "lines 1-285",
+      "sha256_at_report": "d95b77381f649066fd663700e41df41f5c59e28f3b1c3797a09656e9a6f9436e",
+      "current_lines": 378,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/ssh_bridge_zmodem.rs",
+      "read_scope": "lines 1-262; impact check only, no complete app review",
+      "sha256_at_report": "e0a33146f9f8aebe73b4fe6f7c997b0d73eec6cdea5320dff5afadc690802ca1",
+      "current_lines": 262,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+      "read_scope": "targeted Safety/close guard checks plus final r2 receipt state, FileSaved/end handlers and receipt rendering; no complete app review",
+      "sha256_at_report": "6766b9c6c6656b2bafe87ac62b4f55879ab53f57db99b56d36f97ceb5e635e8d",
+      "current_lines": 857,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "read_scope": "targeted receipt and close-hold tests read only; not executed by this reviewer",
+      "sha256_at_report": "8c271a421d7fab7871728257a817efcb6cdbb5065e028fbfe8ad465d0f3abc23",
+      "current_lines": 978,
+      "r2_frozen": true,
+      "r3_frozen": true
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/AGENTS.md",
+      "read_scope": "entire file at review start",
+      "sha256_at_report": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb",
+      "current_lines": 16,
+      "r2_frozen": false,
+      "r3_frozen": false
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/HANDOFF.md",
+      "read_scope": "first 75 lines",
+      "sha256_at_report": "f984fed1a20601212c741ba5dbe14dc5b3c26c5da6433f62bb8539d027995245",
+      "current_lines": 1468,
+      "r2_frozen": false,
+      "r3_frozen": false
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/adr/0136-reviewed-pty-zmodem.md",
+      "read_scope": "entire file at review start; private ACL and platform boundaries rechecked",
+      "sha256_at_report": "dda38d8454ef0518c9d7e0b3cc35b7f66dcc838274deb09195515bbd387170c2",
+      "current_lines": 92,
+      "r2_frozen": false,
+      "r3_frozen": false
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/product/ZMODEM.md",
+      "read_scope": "entire file at review start; publication and compatibility sections rechecked",
+      "sha256_at_report": "0115aed3c0e66be7f70fc05dccef51b94a9193b1c931d319214f013fc7c6c13a",
+      "current_lines": 63,
+      "r2_frozen": false,
+      "r3_frozen": false
+    }
+  ],
+  "outside_workspace_instruction_files": [
+    "/Users/hdh/.codex/RTK.md",
+    "/Users/hdh/.agents/skills/rust-best-practices/SKILL.md",
+    "/Users/hdh/.agents/skills/rust-engineer/SKILL.md"
+  ],
+  "third_party_dependency_review": {
+    "file": "/Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/calcifer-macos-acl-0.1.0/src/lib.rs",
+    "scope": "entire 280-line safe ACL wrapper and Cargo metadata; five cached archive files byte-matched",
+    "evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/dependency-check.json"
+  },
+  "memory_used": "MEMORY.md lines 391-392: read-only review and reporting conventions only"
+}

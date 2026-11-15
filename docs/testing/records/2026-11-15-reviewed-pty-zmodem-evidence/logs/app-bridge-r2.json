@@ -1,0 +1,22 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-app",
+    "--locked",
+    "ssh_bridge::tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "app-bridge-r2",
+  "pid": 76876,
+  "started_utc": "2026-11-15T09:00:41.242595+00:00",
+  "finished_utc": "2026-11-15T09:00:41.655323+00:00",
+  "seconds": 0.413,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "b3a8d24e6660990723f12af5072e52b670c1be69142943c3dcf45b90bcab56b2",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

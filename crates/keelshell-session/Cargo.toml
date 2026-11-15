@@ -20,6 +20,10 @@ serde_json.workspace = true
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 rustix = { version = "1.1", features = ["fs"] }
 
+[target.'cfg(target_os = "macos")'.dependencies]
+# Safe, descriptor-bound ACL access; no subprocess or pathname-based ACL probe.
+calcifer-macos-acl = "0.1"
+
 [dev-dependencies]
 tempfile.workspace = true
 rand = "0.10"

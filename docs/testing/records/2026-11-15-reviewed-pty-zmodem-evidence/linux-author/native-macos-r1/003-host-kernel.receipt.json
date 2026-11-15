@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/uname",
+    "-a"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+  "exit_code": 0,
+  "pid": 34841,
+  "reaped": true,
+  "seconds": 0.002,
+  "stderr": "003-host-kernel.stderr.log",
+  "stdout": "003-host-kernel.stdout.log",
+  "timed_out": false
+}

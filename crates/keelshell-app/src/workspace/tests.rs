@@ -809,7 +809,9 @@ fn writes(pane: &RemotePane) -> Vec<u8> {
         .try_iter()
         .filter_map(|command| match command {
             TerminalCommand::Write(bytes) => Some(bytes),
-            TerminalCommand::Resize(_, _) => None,
+            TerminalCommand::Resize(_, _)
+            | TerminalCommand::Zmodem(_)
+            | TerminalCommand::ResumeInput(_) => None,
         })
         .flatten()
         .collect()

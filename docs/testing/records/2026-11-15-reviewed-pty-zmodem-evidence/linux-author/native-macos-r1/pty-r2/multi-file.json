@@ -1,0 +1,105 @@
+{
+  "binaries": {
+    "lrz": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008",
+    "lsz": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90"
+  },
+  "commands": [
+    [
+      "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz",
+      "--debug=protocol",
+      "-q",
+      "-b",
+      "-Z",
+      "--",
+      "empty.bin",
+      "two words.txt",
+      "\u4e2d\u6587.bin"
+    ],
+    [
+      "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+      "--debug=protocol",
+      "-q",
+      "-b",
+      "-Z",
+      "--syslog=off"
+    ]
+  ],
+  "error": "TimeoutError: Native raw PTY probe exceeded 20 seconds",
+  "name": "multi-file",
+  "process_cleanup": [
+    {
+      "exit_code": 0,
+      "identities": {
+        "39097": [
+          39081,
+          39097,
+          [
+            "darwin",
+            1794730300,
+            782407
+          ],
+          "R"
+        ]
+      },
+      "pid": 39097,
+      "stopped": true
+    },
+    {
+      "exit_code": 143,
+      "identities": {
+        "39099": [
+          39081,
+          39099,
+          [
+            "darwin",
+            1794730300,
+            784337
+          ],
+          "R"
+        ]
+      },
+      "pid": 39099,
+      "stopped": true
+    }
+  ],
+  "received_before_cleanup": {
+    "empty.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "two words.txt": {
+      "bytes": 10,
+      "sha256": "49f368f7b3b3ea1a874854720db8936a6d36c47a2bd10e039e7e29a5a9b39b77"
+    },
+    "\u4e2d\u6587.bin": {
+      "bytes": 2048,
+      "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+    }
+  },
+  "seconds": 20.084,
+  "source": {
+    "empty.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "two words.txt": {
+      "bytes": 10,
+      "sha256": "49f368f7b3b3ea1a874854720db8936a6d36c47a2bd10e039e7e29a5a9b39b77"
+    },
+    "\u4e2d\u6587.bin": {
+      "bytes": 2048,
+      "sha256": "10fc3c51a152e90e5b90319b601d92ccf37290ef53c35ff92507687d8a911a08"
+    }
+  },
+  "status": "failed",
+  "temporary_data_removed": true,
+  "transport": "two actual macOS raw local PTYs; no SSH in this probe",
+  "wire_bytes": {
+    "receiver_to_sender": 232,
+    "sender_to_receiver": 2451
+  },
+  "wire_tail_hex": {
+    "receiver_to_sender": "2a2a184230313030303030303237666564340d8a112a2a184230313030303030303237666564340d8a112a2a184230393030303030303030613837630d8a112a2a184230313030303030303237666564340d8a112a2a184230393030303030303030613837630d8a112a2a184230313030303030303237666564340d8a112a2a184230393030303030303030613837630d8a1113112a2a184230333030303430303030333231320d8a13112a2a184230313030303030303237666564340d8a112a2a184230383030303030303030303232640d8a2a2a184230383030303030303030303232640d8a",
+    "sender_to_receiver": "3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f18d018d19218d39495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f18501851121853141516171858191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f18d018d19218d39495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f18501851121853141516171858191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f18d018d19218d39495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f18501851121853141516171858191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f18d018d19218d39495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff18685688d1432a18430b00080000b497e1bf2a2a184230383030303030303030303232640d8a"
+  }
+}

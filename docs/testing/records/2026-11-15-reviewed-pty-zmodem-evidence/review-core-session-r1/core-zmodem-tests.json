@@ -1,0 +1,17 @@
+{
+  "started_utc": "2026-11-15T08:40:32.623180+00:00",
+  "elapsed_seconds": 0.053329,
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/core-zmodem-r1",
+  "sha256": "48978f2b923ece687861b070a88bc3f42153213445cccd07787aadec1162554b",
+  "sha256_after": "48978f2b923ece687861b070a88bc3f42153213445cccd07787aadec1162554b",
+  "inventory_items": 65,
+  "inventory_exact_match": true,
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/core-zmodem-r1",
+    "--test-threads=1"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "independent_rebuild": false,
+  "provenance": "Parent supplied stable core-r3 build; executable digest and exact inventory independently verified."
+}

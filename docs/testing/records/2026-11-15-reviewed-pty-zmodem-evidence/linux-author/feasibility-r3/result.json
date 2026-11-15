@@ -1,0 +1,50 @@
+{
+  "owner": "618e6bfd6e384bc882a696297c201ecc",
+  "container": "keelshell-file-interop-618e6bfd6e38",
+  "steps": [
+    {
+      "command": [
+        "podman",
+        "run",
+        "--pull=never",
+        "--http-proxy=false",
+        "--label",
+        "io.keelshell.fixture=linux-file-interop",
+        "--label",
+        "io.keelshell.owner=618e6bfd6e384bc882a696297c201ecc",
+        "--name",
+        "keelshell-file-interop-618e6bfd6e38",
+        "--detach",
+        "--publish",
+        "127.0.0.1::2222",
+        "--entrypoint",
+        "sleep",
+        "062964a69725",
+        "infinity"
+      ],
+      "exit": 0,
+      "seconds": 0.118,
+      "log": "00.log"
+    },
+    {
+      "command": [
+        "podman",
+        "exec",
+        "keelshell-file-interop-618e6bfd6e38",
+        "timeout",
+        "40",
+        "apk",
+        "add",
+        "--no-cache",
+        "python3",
+        "openssh-server",
+        "openssh-sftp-server",
+        "lrzsz",
+        "acl"
+      ],
+      "exit": 143,
+      "seconds": 40.249,
+      "log": "01.log"
+    }
+  ]
+}

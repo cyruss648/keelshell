@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<style>
+	body { max-width:70em ;}
+	body > ul > li {
+		margin-block-start:1em;
+		margin-block-end:1em;
+	}
+</style>
+<title>lrzsz</title>
+</head>
+<body>
+<h3><a href="../uwe.html">Uwe Ohse</a></h3>
+<h2><a href="software.html">available software</a></h2>
+<h1>lrzsz: free x/y/zmodem implementation</h1>
+<hr>
+<i>lrzsz</i> is a unix communication package providing the 
+<a href='lrzsz/xymodem.txt'>XMODEM, YMODEM</a> and
+<a href='lrzsz/zmodem-wip-20261004.txt'>ZMODEM</a> file transfer protocols.
+<p>
+lrzsz is a heavily reworked version of the last public domain release of 
+<a href="https://web.archive.org/web/20151005025132/http://omen.com/">Omen Technologies</a> <i>rzsz</i>
+package, and is now 
+<a href="http://www.gnu.ai.mit.edu/philosophy/free-sw.html">free software</a>
+and released under the 
+<a href="http://www.gnu.ai.mit.edu/copyleft/gpl.html">
+  GNU General Public Licence</a>.
+
+<hr>
+<h2>Features of lrzsz</h2>
+<ul>
+  <li> very portable, automagically configured with GNU <i>autoconf</i>.
+  <li> crash recovery.
+  <li> up to 8KB block sizes (ZMODEM8K).
+  <li> prepared for internationalization (using GNU <i>gettext</i>). 
+  <li> far more secure than the original sources.
+  <li> high performance.
+  <li> good blocksize calculation (tries to compute an optimal 
+       blocksize based on the number of errors occured).
+  <li> It's <a href="http://www.gnu.org/philosophy/free-sw.html">
+       free software</a>.
+</ul>
+<hr>
+<h2>Downloading lrzsz</h2>
+The lastest release is 
+<a href="../releases/lrzsz-0.13.1.tar.gz">
+  lrzsz-0.13.1.tar.gz</a>  (<i>(about 480KB)</i>).
+<p>
+<hr>
+<h2>Change history</h2>
+<ul>
+  <li> Version 0.13.1 - October 2026, Uwe Ohse<br>
+	In this release one recently implemented feature (ESC8 - high
+	bit escaping) was removed after Stephen Hurd (of zmtx-zmrx)
+	informed me about its incompatibility.
+	<br>
+	A list of known incompatibilities between the 0.12 and the 0.13
+	series <a href='lrzsz/compatibility-0.13.txt'>exists</a>.
+
+  <li> Version 0.13.0 - September 2026, Uwe Ohse<br>
+	  This release fixed a number of security problems, and hardened the code base. The changes are extensive and listed in a <a href="lrzsz/NEWS-0.13.0.html">separate page</a>.<br>
+	  I recommend to update, as many of the problems found are exploitable from remote.<br>
+	  <p>
+	  This release also compiles cleanly on modern systems, and supports C99 up to C23,
+	  and POSIX.1-2008 and newer.
+	  <p>
+	  The package also contains the available ZMODEM documentations and a new <a href='zmodem-wip-20261004.txt'>work-in-progress specification</a> which documents the current state of things and deprecates dangerous, unneeded and/or incompatible features.
+	  <p>
+	  The decision to work on lrzsz again was triggered by three serious security flaws found by Tristan Madani (Talence Security). The work itself was unwillingly 'sponsored' by the users of <a href='https://naturfotografen-forum.de'>Forum für Naturfotografen</a>, which i couldn't work on for two months while working on the 0.13.0 release.
+	  <p>
+	A list of known incompatibilities between the 0.12 and the 0.13
+	series <a href='lrzsz/compatibility-0.13.txt'>exists</a>.
+
+  <li> Version 0.12.21rc - August 1999, Uwe Ohse<br>
+	  <ul>
+		  <li>IEXTEN disabled ("Enable implementation-defined input processing.").
+		  <li>the tcp inband option (--tcp) was removed.
+		  <li>lsz crashed when trying to transfer 0 byte small files with ZMODEM.
+	  </ul>
+
+  <li> Version 0.12.20 - December 1998, Uwe Ohse<br>
+  <ul>
+    <li> works on BeOS and stone-aged SCO (sco-3.2v4.2)
+    <li> pubdir-"feature" works again.
+    <li> "make rpm" creates a rpm file.
+    <li> "optimal blklen calculation" was too aggressive, it
+      now does nothing if the user demands fixed blklens.
+    <li> various smaller and medium bug fixes.
+    <li> a more or less important security bug is fixed (stupid 
+      use of /tmp in a piece of code which is rarely used).
+    <li> lrz uses umask to make files unreadable which receiving them.
+    <li> "sh systype | mail uwe-generic-counter@ohse.de"
+      sends a success report with a description of the
+      system type.
+    <li> --enable-syslog is now default
+  </ul>
+
+  <li> Version 0.12.19 - January 1998, Uwe Ohse<br>
+       (sorry, i forgot to announce that version here. -- uwe, 9.5.1998)
+
+    <ul> 
+      <li> 0.12.18 was broken, lsz crashed if receiver found an CRC error.
+      <li> lrz options "--rename" and "--escape" didn't work.
+      <li> lrz didn't implement senders "overwrite-or-skip" option.
+      <li> added dejagnu testsuite. Maybe you need a dejagnu snapshot to use it.
+    </ul>
+
+  <li> Version 0.12.18 - November 1997
+    <b> keep off - this version has a major bug </b>
+  <ul>
+    <li> syslog output now includes user name.
+    <li> new script lrzszbug, to be used for bugreports (untested)
+    <li> lots of compiler warnings (egcs -Wparanoia [many -W]) removed.
+    <li> new options --tcp-server and --tcp-client ADDRESS:PORT for both programs.
+         (this is not too much code bloat, and somewhat useful for me - but i
+         suspect nobody else will need it. Oh well)
+    <li> updated to gettext-0.10.32
+    <li> updated to automake-1.2
+  </ul>
+  <li> Version 0.12.17 - August 1997
+  <ul>
+    <li> internal cleanup.
+    <li> portability enhancements by (Philippe De Muyter &lt;phdm@info.ucl.ac.be&gt;)
+    <li> lsz has a new option "--tcp" (no shortopt implemented). lsz transmits
+         one file over normal stdin/stdout (a control file), then opens a
+         tcp connection to transmit all other files.<br>
+         That <i>might</i> be useful if your telnetd is really stupid.
+  </ul>
+    This version was _not_ put on the ftp/http servers.
+
+  <li> Version 0.12.16 - March 1997
+  <ul>
+   <li> major performance improvement (less CPU time needed - don't expect
+  faster transfers over slow lines). <i>make vcheck</i> now show about 50%
+  more throughput.
+   <li> updated to gettext-0.12.27 and automake-1.1l
+        (automake-1.1l bug: AC_SUBST in AM_PATH_PROG_WITH_TEST leads
+        to a "$1=@$1@" line in Makefile.in. I hacked around it in
+        /usr/share/aclocal/gettext.m4).
+  </ul>
+
+  <li> Version 0.12.15 - February 1997
+  <ul>
+    <li> lrzsz now compiles even with pre-ANSI-compilers (tested with
+         the HPUX 9.00 bundled compiler - what a bad program. Shame on HP).
+    <li> lrz supports a new option --o-sync, which forces it to open the
+         output file in synchronous write mode. Don't use it unless you
+         are using interrupts if update writes to the disk.
+  </ul>
+  <li> Version 0.12.14 - January 1997
+  <ul>
+    <li> lrzsz now compiles cleaner on SCO, HPUX.
+    <li> improved error reporting (i think there are still possibilities 
+         for further improvements, if anybody case spare time :-)).
+  </ul>
+  <li> Version 0.12.13 - January 1997
+  <ul>
+    <li> no user visible changes. just a maintainance release.
+    <li>updated to gettext-0.12.26.
+  </ul>
+  <li> Version 0.12.12 - January 1997
+  <ul>
+    <li> lrx and lrb (aka lsz --x/ymodem) now default to 128 byte
+      block length (to fix interoperatability problems with
+	some Xmodems [USR courier flash upload]).
+    <li> lrz didn't recognize every short option.
+    <li> minor performance tweaks.
+    <li> replace mktime() if needed.
+    <li> updated to autoconf 2.12.
+  </ul>
+  <li> Version 0.12.11 - October 1996
+  <ul>
+    <li> lsz/lrz recognize "rshell" as another name for the restricted
+         shell.
+    <li> lrz/lsz recognize a new option <i>--stop-at HH:MM</i> (stop 
+	 transmission at HH:MM), and <i>--stop-at +N</i> (stop in N seconds).
+    <li> lrz/lsz recognize a new option <i>--delay-startup N</i>: 
+	 wait <i>N</i> seconds before doing anything.
+    <li> doesn't hang anymore on BSD machines after getting a timeout
+	 (BSD restarts system calls after an interrupt - this made
+	 timeout code useless).
+    <li> SIGINT handling turned on unter linux too (i still don't 
+	 know why it was turned off under linux (and only there)).
+    <li> <i>sz -</i> now prints better transfer statistics after if
+	 reading from a pipe.
+  </ul>
+  <li> Version 0.12.10 - September 1996
+  <ul>
+    <li> lsz resends init string if it doesn't receive rz's init.
+    <li> improved "make check". By Philippe De Muyter &lt;phdm@info.ulb.ac.be&gt;
+    <li> "sz -" should work again. This will not work if sz cannot read from 
+         stdout.
+    <li> portability enhancements by Philippe De Muyter &lt;phdm@info.ulb.ac.be&gt;
+  </ul>
+  <li> Version 0.12.9 - September 1996
+  <ul>
+    <li> New options --min-bps N and --min-bps-time M: If BPS rate falls under N
+  for at least M seconds (default: 120) transmission will be stopped.
+    <li> added some missing error messages.
+    <li> updated manual pages.
+  </ul>
+  <li> Version 0.12.8 - August 1996
+  <ul>
+    <li> sz and rz now know about a new option:
+  -E, --rename: change name if target exists.
+    <li> new option -T, --turbo for sz: sz doesn't escape 4 special characters
+  if this option is given (this should not make problems with any 
+  rz, but could be problematic on certain links where this characters
+  have to be escaped).
+    <li> debugged blocksize calculation.
+    <li> -+, --append option fixed.
+  </ul>
+</ul>
+<hr>
+<h2>Future developement</h2>
+<ul>
+  <li> enhance portability.
+  <li> use VMIN code some day (it's not hard to implement. it's hard
+       to automagically check if VMIN works. It doesn't on older BSD 
+       versions).
+  <li> make argv[0]-recognition of X/Y/Z-mode work with 
+       program_name_transform.
+  <li> write a decent documentation.
+	<li>add a stronger turbo escaping, only escaping ZDLE.
+	<li>lsz: use an adaptive send window instead of streaming unbounded when the receiver advertises
+	Rxbuflen=0. The goal is the limit the damage done by one CRC
+	error in a megaybte file.
+	<li>another security sweep with a focus on endless loop. i just don't believe i caught them all.
+	<li>lsz: remove the command execution.
+	<li>lsz: remove the --full-path option.
+	<li>lrz: remove the --ascii option.
+</ul>
+<hr>
+<h2>Comments</h2>
+<ul>
+  <li>i will not say anything about the original unix zmodem sources.
+      Just look at them and you'll know (even lrzsz is still worse
+      than i like it to be). 
+  <li>the zmodem protocol is a pretty good example of a proprietary
+      protocol:
+    <ul>
+    <li> There are some proprietary, undocumented protocol 
+	 extensions made by the original author. Furthermore they
+	 are implemented in such a way that nobody else can 
+	 extend the protocol in a safe way. 
+    <li> There is no way to get extensions included into the
+	 <i>standard</i>.
+    <li> Security was not an issue to the author. The ability to
+	 let the receiver execute any command the sender tells
+	 him is nothing more then a really large security hole,
+	 and a hackers dreams come true.
+    </ul>
+  <li> On the other hand it has some really good points - especially 
+       it is high efficient, and is, if implemented correctly, usable
+       over a number of transmission channels nobody thought of at
+       the time the protocol was designed. That is quite an achievement. Most other communication protocols of that time are already forgotten.
+</ul>
+<hr>
+<p>
+Send comments to <a href="mailto:uwe@ohse.de">uwe@ohse.de</a>. 
+</body>
+</html>

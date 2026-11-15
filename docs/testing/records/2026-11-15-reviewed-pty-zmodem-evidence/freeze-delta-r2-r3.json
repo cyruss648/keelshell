@@ -1,0 +1,6 @@
+{
+  "inputs": [
+    "crates/keelshell-session/src/zmodem/local/tests.rs"
+  ],
+  "scripts": []
+}

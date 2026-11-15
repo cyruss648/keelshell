@@ -7,6 +7,36 @@
 功能集中集成、全量验证、修复及非作者复核，开发过程中保留编译与关键专项。正式
 功能提交前完成本批门禁和评审，减少重复全仓运行和文档专属评审循环。
 
+## 2026-11-15 PTY Zmodem 候选：工程门禁与源码复核通过，直接 PTY 验收开放
+
+新增 core 有界协议、session 文件审核与安全发布、原生审核及唯一 PTY 写入
+通道。普通输入在协议 lease 内拒绝，旧输入不重放；逐文件完整审核，保留新目标、
+未知隔离和最近 32 条完整已验证保存回执。Frost、Graphite、Lavender 继续共用
+registry/Palette/token。
+
+两名新非作者已关闭四项 P2 与一项 P3，限定源码结论均为 APPROVE、零开放
+P0–P3；只独立执行核对摘要和逐名库存的父预构建产物，没有独立重编译。
+最终 r3 冻结为 `570 + 12`；完整 gate r1 主动中止，r2 在新 test-only 文件缺
+inner cfg 标记的架构 guard 失败，补齐标记后专项 5/5、格式通过。最终 r3 已实际
+退出 `0 / reaped`、`613.125s`：普通 Rust `2876/0/34 ignored`、rustdoc `14/0`、
+Python `141 run / 1 skipped`，fmt、严格 Clippy、依赖策略及三组 controller
+全通过。新增 `129` 项逐名通过并包含在总数中；门禁后全部输入与冻结相同。
+父后续验证满足原 reviewer 的门禁条件，不改写其签署时仍在运行的原报告。
+正常 GUI/MCP arm64 Mach-O 构建已通过，不等于真实桌面交互验收。
+
+直接 PTY 仍为 HOLD/PARTIAL：当前本机 r6 `6/7`、Debian r2/r3 `5/7`、`4/7`；
+部分下载完整保存后缺少最终 OO，不能补签 Finished。独立 peer 的旧 7/7 和
+pipe relay 对照 7/7 不替代该边界。最终 Linux relay 完整周期退出 0，
+含 17/17 archive/ACL、独立 reference 和应用 relay 7/7，所有自有资源已回收。
+实现 agent 已关闭，三个实现 worktree 已受管归档，两个 reviewer 也已关闭。
+设计及全部失败见 [ADR 0136](adr/0136-reviewed-pty-zmodem.md)、
+[使用指南](product/ZMODEM.md)与[集中记录](testing/records/2026-11-15-reviewed-pty-zmodem.md)。
+持久回执、完整库存及保留失败从[证据入口](testing/records/2026-11-15-reviewed-pty-zmodem-evidence/README.md)接续。
+747 份原件已无损校验；本批重复目录、稳定测试副本及临时 peer 已删除，
+回收 654,860,244 字节，保留唯一有效 Cargo target 和其他任务资源。
+本批只本地提交，不 push。Windows 安全文件后端、Linux 本地后端、旧 Python、
+直接 PTY 兼容、三平台原生及发行验收与 FILE-05/M4、完整产品继续开放。
+
 ## 2026-11-15 实际服务器归档：集中门禁与独立复核通过
 
 状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`。并行实现 core/Python 编解码合同、

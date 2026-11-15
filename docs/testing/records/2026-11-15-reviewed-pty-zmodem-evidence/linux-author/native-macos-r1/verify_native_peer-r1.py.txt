@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""Exercise the external macOS peers through two real, raw local PTYs."""
+
+import errno
+import hashlib
+import json
+import os
+from pathlib import Path
+import pty
+import select
+import shutil
+import subprocess
+import sys
+import time
+import tty
+
+
+ROOT = Path(__file__).resolve().parent
+CHECKOUT = ROOT.parents[2]
+sys.path.insert(0, str(CHECKOUT / "scripts"))
+import openssh_interop as ownership
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def write_json(path, value):
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def one_case(name, files, extra_sender=()):
+    scratch = ROOT / ("probe-" + name)
+    scratch.mkdir()
+    source, destination = scratch / "send", scratch / "receive"
+    source.mkdir()
+    destination.mkdir()
+    for filename, data in files.items():
+        (source / filename).write_bytes(data)
+    processes, descriptors, error_handles, identities = [], [], [], []
+    start = time.monotonic()
+    receipt = {
+        "name": name,
+        "transport": "two actual macOS raw local PTYs; no SSH in this probe",
+        "status": "started",
+        "source": {
+            filename: {"bytes": len(data), "sha256": digest(data)}
+            for filename, data in files.items()
+        },
+        "binaries": {},
+        "wire_bytes": {"sender_to_receiver": 0, "receiver_to_sender": 0},
+        "commands": [],
+    }
+    try:
+        commands = [
+            [str(ROOT / "peer/bin/lsz"), "-q", "-b", "-Z", *extra_sender,
+             "--", *files],
+            [str(ROOT / "peer/bin/lrz"), "-q", "-b", "-Z", "--syslog=off"],
+        ]
+        for index, (command, directory) in enumerate(
+            zip(commands, (source, destination))
+        ):
+            master, slave = pty.openpty()
+            descriptors.append(master)
+            tty.setraw(slave)
+            errors = (ROOT / (name + "-" + str(index) + ".stderr.log")).open("wb")
+            error_handles.append(errors)
+            try:
+                process = subprocess.Popen(
+                    command, cwd=directory, stdin=slave, stdout=slave,
+                    stderr=errors, start_new_session=True,
+                    env={"PATH": "/usr/bin:/bin", "LC_ALL": "C"},
+                )
+                processes.append(process)
+                identities.append({})
+                identity = ownership.process_info(process.pid)
+                if identity:
+                    identities[-1][process.pid] = identity
+            finally:
+                os.close(slave)
+            os.set_blocking(master, False)
+            receipt["commands"].append(command)
+            path = Path(command[0])
+            receipt["binaries"][path.name] = digest(path.read_bytes())
+        pending = [bytearray(), bytearray()]
+        readable = {fd: index for index, fd in enumerate(descriptors)}
+        writable = dict(readable)
+        deadline = start + 20
+        while readable or any(process.poll() is None for process in processes):
+            if time.monotonic() > deadline:
+                raise TimeoutError("Native raw PTY probe exceeded 20 seconds")
+            writers = [fd for fd, index in writable.items() if pending[index]]
+            read_ready, write_ready, _ = select.select(
+                list(readable), writers, [], 0.03
+            )
+            for fd in read_ready:
+                try:
+                    data = os.read(fd, 64 * 1024)
+                except OSError as error:
+                    if error.errno == errno.EIO:
+                        data = b""
+                    elif error.errno == errno.EAGAIN:
+                        continue
+                    else:
+                        raise
+                if not data:
+                    del readable[fd]
+                    continue
+                index = readable[fd]
+                pending[1 - index].extend(data)
+                key = "sender_to_receiver" if index == 0 else "receiver_to_sender"
+                receipt["wire_bytes"][key] += len(data)
+                if sum(map(len, pending)) > 2 * 1024 * 1024:
+                    raise RuntimeError("Native probe exceeded pending-byte budget")
+            for fd in write_ready:
+                index = writable[fd]
+                try:
+                    count = os.write(fd, pending[index])
+                except OSError as error:
+                    if error.errno in (errno.EIO, errno.EPIPE):
+                        del writable[fd]
+                        pending[index].clear()
+                        continue
+                    if error.errno == errno.EAGAIN:
+                        continue
+                    raise
+                del pending[index][:count]
+        codes = [process.wait(timeout=1) for process in processes]
+        receipt["exit_codes"] = codes
+        if codes != [0, 0]:
+            raise RuntimeError("Native peers did not both exit successfully")
+        received = {
+            path.name: {"bytes": path.stat().st_size, "sha256": digest(path.read_bytes())}
+            for path in destination.iterdir() if path.is_file()
+        }
+        receipt["received"] = received
+        if received != receipt["source"]:
+            raise RuntimeError("Complete destination-file inventory/hash mismatch")
+        receipt["status"] = "passed"
+    except Exception as error:
+        receipt["status"] = "failed"
+        receipt["error"] = type(error).__name__ + ": " + str(error)
+    finally:
+        cleanup = []
+        for index, process in enumerate(processes):
+            try:
+                stopped = ownership.stop_owned(
+                    process, time.monotonic() + 5, identities[index]
+                )
+                cleanup.append({
+                    "pid": process.pid, "stopped": stopped,
+                    "exit_code": process.poll(), "identities": identities[index],
+                })
+            except Exception as error:
+                cleanup.append({"pid": process.pid, "error": str(error)})
+        for descriptor in descriptors:
+            os.close(descriptor)
+        for handle in error_handles:
+            handle.close()
+        receipt["process_cleanup"] = cleanup
+        if any(not item.get("stopped") for item in cleanup):
+            receipt["status"] = "failed"
+            receipt["cleanup_error"] = "Owned process cleanup not confirmed"
+        shutil.rmtree(scratch)
+        receipt["temporary_data_removed"] = not scratch.exists()
+        receipt["seconds"] = round(time.monotonic() - start, 3)
+        write_json(ROOT / (name + ".json"), receipt)
+    return receipt
+
+
+def main():
+    output = ROOT / "native-pty-result.json"
+    if output.exists():
+        raise RuntimeError("Refusing to overwrite numbered native PTY receipt")
+    binary = bytes(range(256)) * 1024 + b"\x18\x18\x00\xff\r\n" + "中文".encode()
+    cases = [
+        ("binary-crc32", {"binary-all-bytes.bin": binary}, ()),
+        ("binary-crc16", {"binary-all-bytes.bin": binary}, ("-o",)),
+        ("multi-file", {
+            "empty.bin": b"",
+            "two words.txt": b"spaces\r\n\x00\xff",
+            "中文.bin": bytes(range(256)) * 8,
+        }, ()),
+    ]
+    results = []
+    for name, files, flags in cases:
+        result = one_case(name, files, flags)
+        results.append(result)
+        print(json.dumps(result, ensure_ascii=False), flush=True)
+        if result["status"] != "passed":
+            break
+    receipt = {
+        "status": "passed" if len(results) == len(cases)
+        and all(result["status"] == "passed" for result in results) else "failed",
+        "passed": sum(result["status"] == "passed" for result in results),
+        "total_planned": len(cases), "results": results,
+        "acceptance_boundary": (
+            "Native external macOS lrzsz peer smoke tests only; "
+            "not application/Rust/OpenSSH/Linux/desktop acceptance"
+        ),
+    }
+    write_json(output, receipt)
+    return 0 if receipt["status"] == "passed" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

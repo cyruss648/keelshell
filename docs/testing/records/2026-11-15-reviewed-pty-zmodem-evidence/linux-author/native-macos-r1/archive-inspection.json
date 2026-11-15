@@ -1,0 +1,38 @@
+{
+  "archive": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/lrzsz-0.13.1.tar.gz",
+  "sha256": "112f91059fbd118e016d800c1a5c5a1702e965d8b9bfbda6015e44e20bfb93c9",
+  "verified_before_extraction": true,
+  "members": 101,
+  "bytes_unpacked": 1740579,
+  "top_levels": [
+    "lrzsz-0.13.1"
+  ],
+  "special_members": [],
+  "selected_texts": {
+    "configure.ac": {
+      "sha256": "b499faf7badaa22fd87540b8e7671f95696ca9e53ecb405ea9edccaa617b641e",
+      "bytes": 8956
+    },
+    "README": {
+      "sha256": "8cf519f7693d1675f4578a367b9b6fbec383af9d460e455144e3249df0faf9f3",
+      "bytes": 703
+    },
+    "NEWS": {
+      "sha256": "f53d959b1c0b2ed6c26c93de59e6ed3a40b15efb9ab0e3fc7d685c9014e1195d",
+      "bytes": 29757
+    },
+    "COPYING": {
+      "sha256": "dcc100d4161cc0b7177545ab6e47216f84857cda3843847c792a25289852dcaa",
+      "bytes": 18007
+    },
+    "src/Makefile.am": {
+      "sha256": "d48189923c161f1ab3c1940237e110cfd875434449785d4e1db008f4acdaf1d6",
+      "bytes": 2557
+    },
+    "Makefile.am": {
+      "sha256": "67aacf186a18ed785f91781e63939a026de6e6b5a39a5b966fe11cf8d5405b96",
+      "bytes": 4668
+    }
+  },
+  "status": "inspected_safe_before_extraction"
+}

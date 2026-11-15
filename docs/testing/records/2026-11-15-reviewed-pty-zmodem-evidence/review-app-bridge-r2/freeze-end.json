@@ -1,0 +1,14 @@
+{
+  "checked_utc": "2026-11-15T09:04:43.255762+00:00",
+  "manifest_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+  "checks": {
+    "inputs": {
+      "count": 570,
+      "mismatches": []
+    },
+    "scripts": {
+      "count": 12,
+      "mismatches": []
+    }
+  }
+}

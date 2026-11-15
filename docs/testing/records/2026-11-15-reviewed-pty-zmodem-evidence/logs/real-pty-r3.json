@@ -1,0 +1,22 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/openssh_interop.py",
+    "--zmodem",
+    "--output",
+    "work/zmodem-integration-20261115/real-pty-r3",
+    "--timeout",
+    "280"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "real-pty-r3",
+  "pid": 46904,
+  "started_utc": "2026-11-15T08:24:12.477211+00:00",
+  "finished_utc": "2026-11-15T08:24:19.025830+00:00",
+  "seconds": 6.548,
+  "exit": 1,
+  "timed_out": false,
+  "log_sha256": "96647180a62210c5579a927de13df412950ccaa868f8a04b296a1347d05a4a2b",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

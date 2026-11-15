@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "outcome": "failed",
+  "started_utc": "2026-11-15T08:38:06+00:00",
+  "owner": "aca08f7449b443c6b12f1798cfe1306f",
+  "container_name": "keelshell-file-interop-aca08f7449b4",
+  "steps": [
+    {
+      "name": "create-container",
+      "argv": [
+        "podman",
+        "run",
+        "--pull=never",
+        "--http-proxy=false",
+        "--label",
+        "io.keelshell.fixture=linux-file-interop",
+        "--label",
+        "io.keelshell.owner=aca08f7449b443c6b12f1798cfe1306f",
+        "--name",
+        "keelshell-file-interop-aca08f7449b4",
+        "--detach",
+        "--publish",
+        "127.0.0.1::2222",
+        "--entrypoint",
+        "sleep",
+        "docker.io/library/rust:1.98.1-slim-bookworm",
+        "infinity"
+      ],
+      "pid": 57840,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.247,
+      "stdout_log": "001-create-container.stdout.log",
+      "stderr_log": "001-create-container.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "76bba3e884a13d83aa053ddc52708e450f78cff3dd29aff0b8f5bee67c5e3938"
+      ],
+      "pid": 57847,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.106,
+      "stdout_log": "002-container-identity.stdout.log",
+      "stderr_log": "002-container-identity.stderr.log"
+    },
+    {
+      "name": "linux-release",
+      "argv": [
+        "podman",
+        "exec",
+        "76bba3e884a13d83aa053ddc52708e450f78cff3dd29aff0b8f5bee67c5e3938",
+        "cat",
+        "/etc/os-release"
+      ],
+      "pid": 57851,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.175,
+      "stdout_log": "003-linux-release.stdout.log",
+      "stderr_log": "003-linux-release.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "76bba3e884a13d83aa053ddc52708e450f78cff3dd29aff0b8f5bee67c5e3938"
+      ],
+      "pid": 58418,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.182,
+      "stdout_log": "004-container-identity.stdout.log",
+      "stderr_log": "004-container-identity.stderr.log"
+    },
+    {
+      "name": "sshd-final-log",
+      "argv": [
+        "podman",
+        "exec",
+        "76bba3e884a13d83aa053ddc52708e450f78cff3dd29aff0b8f5bee67c5e3938",
+        "cat",
+        "/fixture/sshd.log"
+      ],
+      "pid": 58424,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.178,
+      "stdout_log": "005-sshd-final-log.stdout.log",
+      "stderr_log": "005-sshd-final-log.stderr.log"
+    },
+    {
+      "name": "remove-owned-container",
+      "argv": [
+        "podman",
+        "rm",
+        "--force",
+        "76bba3e884a13d83aa053ddc52708e450f78cff3dd29aff0b8f5bee67c5e3938"
+      ],
+      "pid": 58430,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 10.219,
+      "stdout_log": "006-remove-owned-container.stdout.log",
+      "stderr_log": "006-remove-owned-container.stderr.log"
+    },
+    {
+      "name": "confirm-container-absent",
+      "argv": [
+        "podman",
+        "container",
+        "exists",
+        "76bba3e884a13d83aa053ddc52708e450f78cff3dd29aff0b8f5bee67c5e3938"
+      ],
+      "pid": 58773,
+      "returncode": 1,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.114,
+      "stdout_log": "007-confirm-container-absent.stdout.log",
+      "stderr_log": "007-confirm-container-absent.stderr.log"
+    }
+  ],
+  "cleanup": {
+    "owned_host_processes_stopped": true,
+    "owned_container_absent": true,
+    "temporary_keys_removed": true
+  },
+  "source_inputs": {
+    "scripts/run_linux_file_interop.py": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0",
+    "scripts/openssh_interop.py": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d",
+    "crates/keelshell-core/src/server_archive.py": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+  },
+  "boundary": "owned Linux SSH/lrzsz/archive helper fixture; no Cargo, GUI, packaging or all-Linux acceptance",
+  "error": "FixtureFailure: Interrupted by signal 15",
+  "finished_utc": "2026-11-15T08:38:53+00:00",
+  "elapsed_seconds": 47.07,
+  "files": {
+    "001-create-container.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "001-create-container.stdout.log": {
+      "bytes": 65,
+      "sha256": "3e4b84bc37a20003a5ddd68168012333ee82cfec31dddd0636daccd33e439b0f"
+    },
+    "002-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "002-container-identity.stdout.log": {
+      "bytes": 13048,
+      "sha256": "d6fca7d7bfa0e8e2834430701f85fb59468a7e200074fcc213f5d258259899a0"
+    },
+    "003-linux-release.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "003-linux-release.stdout.log": {
+      "bytes": 267,
+      "sha256": "59a77b5f2666d9c85c489bd1911a6eebbd91ef22fe48b90a3b75f1b21f3844d4"
+    },
+    "004-container-identity.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "004-container-identity.stdout.log": {
+      "bytes": 13048,
+      "sha256": "d6fca7d7bfa0e8e2834430701f85fb59468a7e200074fcc213f5d258259899a0"
+    },
+    "005-sshd-final-log.stderr.log": {
+      "bytes": 50,
+      "sha256": "5b3a43dc9e09fc519c0773c94259311fdc65335f2298b3f1aa1a609e49d06f9d"
+    },
+    "005-sshd-final-log.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "006-remove-owned-container.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "006-remove-owned-container.stdout.log": {
+      "bytes": 65,
+      "sha256": "3e4b84bc37a20003a5ddd68168012333ee82cfec31dddd0636daccd33e439b0f"
+    },
+    "007-confirm-container-absent.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "007-confirm-container-absent.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "progress.json": {
+      "bytes": 4627,
+      "sha256": "5cd77a179312a1f5c85a3323d3cbc198b540d85a1742ab72a1059a5c58b4bc39"
+    },
+    "public-package-bridge.json": {
+      "bytes": 178,
+      "sha256": "4cf0ee2401a5b36069bbe30101399820bcfc6980ad607038221ef022f0ca9a39"
+    },
+    "source-snapshot/crates__keelshell-core__src__server_archive.py.txt": {
+      "bytes": 28798,
+      "sha256": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+    },
+    "source-snapshot/scripts__openssh_interop.py.txt": {
+      "bytes": 24831,
+      "sha256": "78a9074e567d7ef128096ffd5dc40c5f458ed9a6db2cb635671d01da47b25a5d"
+    },
+    "source-snapshot/scripts__run_linux_file_interop.py.txt": {
+      "bytes": 52042,
+      "sha256": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0"
+    }
+  }
+}

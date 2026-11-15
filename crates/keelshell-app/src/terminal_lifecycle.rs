@@ -41,6 +41,7 @@ impl TerminalView {
     /// without its ordinary byte/time allowance just to accelerate reconnect.
     pub(crate) fn ready_to_archive(&self) -> bool {
         self.end_reason().is_some()
+            && !self.zmodem_close_busy()
             && self.output.is_drained()
             && self
                 .completion

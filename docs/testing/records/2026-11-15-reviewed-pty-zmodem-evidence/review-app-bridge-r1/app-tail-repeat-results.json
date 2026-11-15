@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+    "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+    "--exact",
+    "--test-threads=1"
+  ],
+  "runs": [
+    {
+      "iteration": 1,
+      "returncode": 101,
+      "elapsed_seconds": 0.027,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-1.log"
+    },
+    {
+      "iteration": 2,
+      "returncode": 101,
+      "elapsed_seconds": 0.027,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-2.log"
+    },
+    {
+      "iteration": 3,
+      "returncode": 101,
+      "elapsed_seconds": 0.027,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-3.log"
+    },
+    {
+      "iteration": 4,
+      "returncode": 101,
+      "elapsed_seconds": 0.027,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-4.log"
+    },
+    {
+      "iteration": 5,
+      "returncode": 101,
+      "elapsed_seconds": 0.027,
+      "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-5.log"
+    }
+  ]
+}

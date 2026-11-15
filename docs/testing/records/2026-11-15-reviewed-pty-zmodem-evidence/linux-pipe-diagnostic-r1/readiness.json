@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "owner": "aab445b582c14b2f9df066295af2d40a",
+  "container_id": "51a1ff4b21e2de65488f04d83fbf311ee9ae55c9ca61bbe447a0fb6f96f63022",
+  "endpoint": "fixture@127.0.0.1:42189",
+  "environment_file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/tmp/keelshell-linux-interop-iczeof0_/environment.json",
+  "ssh_config": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/tmp/keelshell-linux-interop-iczeof0_/ssh_config",
+  "remote_root": "/home/fixture/interop",
+  "archive_source": "/fixture/server_archive.py",
+  "archive_source_sha256": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2",
+  "release_file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-pipe-diagnostic-r1/parent-release",
+  "hold_seconds": 0,
+  "default_acl_root": true,
+  "tools": {
+    "sys_platform": "linux",
+    "os_name": "posix",
+    "python_version": "3.11.2 (main, Oct  7 2026, 12:35:07) [GCC 12.2.0]",
+    "python_executable": "/usr/bin/python3",
+    "kernel": {
+      "system": "Linux",
+      "node": "51a1ff4b21e2",
+      "release": "7.1.10-200.fc44.aarch64",
+      "version": "#1 SMP PREEMPT_DYNAMIC Sun Aug 23 16:21:29 UTC 2026",
+      "machine": "aarch64",
+      "processor": ""
+    },
+    "tools": {
+      "python3": {
+        "path": "/usr/bin/python3",
+        "version": "Python 3.11.2",
+        "returncode": 0
+      },
+      "rz": {
+        "path": "/usr/bin/rz",
+        "version": "rz (GNU lrzsz) 0.12.21rc",
+        "returncode": 0
+      },
+      "sz": {
+        "path": "/usr/bin/sz",
+        "version": "sz (lrzsz) 0.12.21rc",
+        "returncode": 0
+      },
+      "sshd": {
+        "path": "/usr/sbin/sshd",
+        "version": "OpenSSH_9.2, OpenSSL 3.0.20 7 Apr 2026",
+        "returncode": 0
+      },
+      "setfacl": {
+        "path": "/usr/bin/setfacl",
+        "version": "setfacl 2.3.1",
+        "returncode": 0
+      },
+      "getfacl": {
+        "path": "/usr/bin/getfacl",
+        "version": "getfacl 2.3.1",
+        "returncode": 0
+      }
+    },
+    "python38_available": false,
+    "python38_path": null
+  },
+  "raw_pty_receive_template": "cd /home/fixture/interop/YOUR-NEW-RECEIVE-DIR && stty raw -echo -onlcr && exec rz -b",
+  "raw_pty_send_template": "cd /home/fixture/interop/YOUR-SEND-DIR && stty raw -echo -onlcr && exec sz -b -- FILE",
+  "warning": "Keys and SSH config disappear during finally cleanup; readiness is historical after result.json exists."
+}

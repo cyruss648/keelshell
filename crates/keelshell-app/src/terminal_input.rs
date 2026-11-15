@@ -9,6 +9,8 @@ pub const WRITE_CHUNK: usize = 16 * 1024;
 pub enum TerminalCommand {
     Write(Vec<u8>),
     Resize(u16, u16),
+    Zmodem(Box<keelshell_session::zmodem::ZmodemControl>),
+    ResumeInput(uuid::Uuid),
 }
 
 /// Retains accepted bytes until the next layer accepts them. A whole paste is
@@ -18,6 +20,7 @@ pub struct InputQueue {
     writes: VecDeque<Vec<u8>>,
     bytes: usize,
     resize: Option<(u16, u16)>,
+    controls: VecDeque<TerminalCommand>,
 }
 
 impl InputQueue {
@@ -34,11 +37,18 @@ impl InputQueue {
     pub fn resize(&mut self, rows: u16, cols: u16) {
         self.resize = Some((rows, cols));
     }
+    pub fn clear_writes(&mut self) {
+        self.writes.clear();
+        self.bytes = 0;
+    }
     pub fn is_empty(&self) -> bool {
-        self.writes.is_empty() && self.resize.is_none()
+        self.writes.is_empty() && self.resize.is_none() && self.controls.is_empty()
     }
 
     pub fn pop(&mut self) -> Option<TerminalCommand> {
+        if let Some(control) = self.controls.pop_front() {
+            return Some(control);
+        }
         if let Some((rows, cols)) = self.resize.take() {
             return Some(TerminalCommand::Resize(rows, cols));
         }
@@ -56,6 +66,9 @@ impl InputQueue {
             // Preserve a more recent resize if one arrived while this was pending.
             TerminalCommand::Resize(rows, cols) => {
                 self.resize.get_or_insert((rows, cols));
+            }
+            control @ (TerminalCommand::Zmodem(_) | TerminalCommand::ResumeInput(_)) => {
+                self.controls.push_front(control);
             }
         }
     }

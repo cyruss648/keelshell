@@ -1,0 +1,13 @@
+HTTP/1.1 200 Connection established
+
+HTTP/2 200 
+access-control-allow-origin: *
+alt-svc: h3=":443"; ma=2592000
+content-type: text/html; charset=utf-8
+date: Sun, 15 Nov 2026 08:05:26 GMT
+etag: "dlxm1hwr4fau8pn-gzip"
+last-modified: Tue, 06 Oct 2026 08:25:37 GMT
+server: Caddy
+vary: Accept-Encoding
+via: 1.1 Caddy
+

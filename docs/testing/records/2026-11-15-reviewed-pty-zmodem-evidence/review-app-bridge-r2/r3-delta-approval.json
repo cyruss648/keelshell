@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-15T09:12:40.310707+00:00",
+  "reviewer_role": "same non-author strictly read-only reviewer",
+  "source_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "prior_review": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r2/report.json",
+  "prior_report_sha256": "ae448a2239eb313f2146ca9e9b483712c2c44248a8f402eeff5e4051dae0d456",
+  "prior_recommendation": "APPROVE",
+  "recommendation": "APPROVE",
+  "scope_unchanged_from_r2": true,
+  "scope": "Candidate-scoped source and focused prebuilt execution approval for r2 app/SSH bridge/native review UI delta, carrying forward unchanged r1 Linux fixture source review only. This does not approve product acceptance or claim direct-PTY interoperability success.",
+  "r2_freeze_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+  "r3_freeze": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/frozen-inputs-r3.json",
+  "r3_freeze_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+  "input_counts": {
+    "inputs": 570,
+    "scripts": 12
+  },
+  "r2_to_r3_delta": {
+    "inputs": [
+      "crates/keelshell-session/src/zmodem/local/tests.rs"
+    ],
+    "scripts": []
+  },
+  "delta_verification": {
+    "changed_file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local/tests.rs",
+    "first_line": "#![cfg(test)]",
+    "added_empty_line": true,
+    "stripping_exact_prefix_matches_r2_sha256": true,
+    "all_other_inputs_identical": true,
+    "all_production_and_app_inputs_identical": true,
+    "current_freeze_mismatches": []
+  },
+  "approval_rationale": "The only change adds an inner test-only cfg attribute and blank line to an existing session test module. No production/app input or previously reviewed source behavior changed; r2 candidate-scoped app/SSH bridge/UI APPROVE remains unchanged. This is not a full review of session code.",
+  "open_findings_in_app_review": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "tests_rerun": 0,
+  "independent_recompile": false,
+  "parent_reported_evidence": {
+    "full_gate_r2": "exit 1, reaped; sole failure was remote_only guard requiring cfg(test) on new local/tests.rs",
+    "remote_only_guard_after_attribute": "unchanged guard, focused 5/5 passed; not rerun by reviewer",
+    "full_gate_r3": "still running sequentially after normal build; no final pass claimed"
+  },
+  "direct_pty_acceptance": "OPEN; unchanged, not approved by this delta note",
+  "product_total_acceptance": "NOT APPROVED",
+  "prior_reports_preserved": true,
+  "writes": "Only this r3-delta-approval.json supplement; no Cargo/Git/fmt/shared-target operation and no full review/test repeat."
+}

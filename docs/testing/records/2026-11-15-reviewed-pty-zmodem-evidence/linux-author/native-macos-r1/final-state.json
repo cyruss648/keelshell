@@ -1,0 +1,130 @@
+{
+  "baseline": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "brew_invoked": false,
+  "cargo_invoked": false,
+  "committed": false,
+  "container_cleanup_receipt": "../final-followup-r1/result.json",
+  "further_author_test_runs": false,
+  "git_diff_check_exit_code": 0,
+  "git_status": "?? scripts/run_linux_file_interop.py\n?? scripts/test_linux_file_interop.py\n",
+  "host_installed": false,
+  "new_containers_created": false,
+  "new_podman_api_queries_during_native_build": 0,
+  "owned_containers_pending": [],
+  "owned_native_process_checks": [
+    {
+      "case": "binary-crc32",
+      "pid": 37905,
+      "reaped_exit_code": 0,
+      "receipt": "native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730186,
+        528747
+      ],
+      "same_live_process_now": false
+    },
+    {
+      "case": "binary-crc32",
+      "pid": 37906,
+      "reaped_exit_code": 0,
+      "receipt": "native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730186,
+        531234
+      ],
+      "same_live_process_now": false
+    },
+    {
+      "case": "binary-crc16",
+      "pid": 37911,
+      "reaped_exit_code": 0,
+      "receipt": "native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730186,
+        610446
+      ],
+      "same_live_process_now": false
+    },
+    {
+      "case": "binary-crc16",
+      "pid": 37912,
+      "reaped_exit_code": 143,
+      "receipt": "native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730186,
+        612143
+      ],
+      "same_live_process_now": false
+    },
+    {
+      "case": "binary-crc16",
+      "pid": 39090,
+      "reaped_exit_code": 0,
+      "receipt": "pty-r2/native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730300,
+        690840
+      ],
+      "same_live_process_now": false
+    },
+    {
+      "case": "binary-crc16",
+      "pid": 39091,
+      "reaped_exit_code": 0,
+      "receipt": "pty-r2/native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730300,
+        692958
+      ],
+      "same_live_process_now": false
+    },
+    {
+      "case": "multi-file",
+      "pid": 39097,
+      "reaped_exit_code": 0,
+      "receipt": "pty-r2/native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730300,
+        782407
+      ],
+      "same_live_process_now": false
+    },
+    {
+      "case": "multi-file",
+      "pid": 39099,
+      "reaped_exit_code": 143,
+      "receipt": "pty-r2/native-pty-result.json",
+      "recorded_birth": [
+        "darwin",
+        1794730300,
+        784337
+      ],
+      "same_live_process_now": false
+    }
+  ],
+  "owned_processes_pending": [],
+  "parent_owns_copy_hash_verification_and_later_worktree_archive": true,
+  "parent_requested_stop_obeyed": true,
+  "private_credentials_created_for_native_build": false,
+  "pushed": false,
+  "recorded_utc": "2026-11-15T08:14:02.447931+00:00",
+  "retained_until_parent_copy": {
+    "build": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/build",
+    "external_source": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/external-source/lrzsz-0.13.1",
+    "license": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/COPYING",
+    "peer": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer",
+    "source_archive": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/lrzsz-0.13.1.tar.gz",
+    "tmp": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/tmp"
+  },
+  "shared_target_accessed": false,
+  "source_files_match_prebuild_hashes": true,
+  "status": "ready_for_parent_transfer",
+  "temporary_probe_directories_remaining": []
+}

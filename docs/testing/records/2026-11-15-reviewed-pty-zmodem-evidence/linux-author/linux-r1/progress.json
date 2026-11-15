@@ -1,0 +1,496 @@
+{
+  "schema": 1,
+  "outcome": "failed",
+  "started_utc": "2026-11-15T07:41:43+00:00",
+  "owner": "504212acd1324ac694dd5ba1e2cf1950",
+  "container_name": "keelshell-file-interop-504212acd132",
+  "steps": [
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 19150,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.174,
+      "stdout_log": "001-container-identity.stdout.log",
+      "stderr_log": "001-container-identity.stderr.log"
+    },
+    {
+      "name": "generate-host",
+      "argv": [
+        "ssh-keygen",
+        "-q",
+        "-t",
+        "ed25519",
+        "-N",
+        "",
+        "-C",
+        "",
+        "-f",
+        "/private/var/folders/tr/bvcnd3j950bff4p5ffsjz8j80000gn/T/keelshell-linux-interop-eciy3trn/host"
+      ],
+      "pid": 19156,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.108,
+      "stdout_log": "002-generate-host.stdout.log",
+      "stderr_log": "002-generate-host.stderr.log"
+    },
+    {
+      "name": "generate-client",
+      "argv": [
+        "ssh-keygen",
+        "-q",
+        "-t",
+        "ed25519",
+        "-N",
+        "",
+        "-C",
+        "",
+        "-f",
+        "/private/var/folders/tr/bvcnd3j950bff4p5ffsjz8j80000gn/T/keelshell-linux-interop-eciy3trn/client"
+      ],
+      "pid": 19161,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.115,
+      "stdout_log": "003-generate-client.stdout.log",
+      "stderr_log": "003-generate-client.stderr.log"
+    },
+    {
+      "name": "copy-key-file",
+      "argv": [
+        "podman",
+        "cp",
+        "/private/var/folders/tr/bvcnd3j950bff4p5ffsjz8j80000gn/T/keelshell-linux-interop-eciy3trn/host",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b:/fixture/host"
+      ],
+      "pid": 19165,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.247,
+      "stdout_log": "004-copy-key-file.stdout.log",
+      "stderr_log": "004-copy-key-file.stderr.log"
+    },
+    {
+      "name": "copy-key-file",
+      "argv": [
+        "podman",
+        "cp",
+        "/private/var/folders/tr/bvcnd3j950bff4p5ffsjz8j80000gn/T/keelshell-linux-interop-eciy3trn/client.pub",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b:/home/fixture/.ssh/authorized_keys"
+      ],
+      "pid": 19172,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.25,
+      "stdout_log": "005-copy-key-file.stdout.log",
+      "stderr_log": "005-copy-key-file.stderr.log"
+    },
+    {
+      "name": "sshd-config",
+      "argv": [
+        "podman",
+        "exec",
+        "-i",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "sh",
+        "-ec",
+        "cat > /fixture/sshd_config; chmod 600 /fixture/host /fixture/sshd_config /home/fixture/.ssh/authorized_keys; chown fixture:fixture /home/fixture/.ssh/authorized_keys; /usr/sbin/sshd -t -f /fixture/sshd_config"
+      ],
+      "pid": 19180,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.177,
+      "stdout_log": "006-sshd-config.stdout.log",
+      "stderr_log": "006-sshd-config.stderr.log"
+    },
+    {
+      "name": "start-sshd",
+      "argv": [
+        "podman",
+        "exec",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "/usr/sbin/sshd",
+        "-f",
+        "/fixture/sshd_config",
+        "-E",
+        "/fixture/sshd.log"
+      ],
+      "pid": 19186,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.181,
+      "stdout_log": "007-start-sshd.stdout.log",
+      "stderr_log": "007-start-sshd.stderr.log"
+    },
+    {
+      "name": "ssh-port",
+      "argv": [
+        "podman",
+        "port",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "2222/tcp"
+      ],
+      "pid": 19192,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.105,
+      "stdout_log": "008-ssh-port.stdout.log",
+      "stderr_log": "008-ssh-port.stderr.log"
+    },
+    {
+      "name": "ssh-authentication",
+      "argv": [
+        "ssh",
+        "-F",
+        "/private/var/folders/tr/bvcnd3j950bff4p5ffsjz8j80000gn/T/keelshell-linux-interop-eciy3trn/ssh_config",
+        "-T",
+        "fixture",
+        "test -d /home/fixture/interop && printf fixture-authenticated"
+      ],
+      "pid": 19197,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.192,
+      "stdout_log": "009-ssh-authentication.stdout.log",
+      "stderr_log": "009-ssh-authentication.stderr.log"
+    },
+    {
+      "name": "copy-archive-source",
+      "argv": [
+        "podman",
+        "cp",
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/crates/keelshell-core/src/server_archive.py",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b:/fixture/server_archive.py"
+      ],
+      "pid": 19203,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.179,
+      "stdout_log": "010-copy-archive-source.stdout.log",
+      "stderr_log": "010-copy-archive-source.stderr.log"
+    },
+    {
+      "name": "readable-archive-source",
+      "argv": [
+        "podman",
+        "exec",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "chmod",
+        "755",
+        "/fixture"
+      ],
+      "pid": 19208,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.18,
+      "stdout_log": "011-readable-archive-source.stdout.log",
+      "stderr_log": "011-readable-archive-source.stderr.log"
+    },
+    {
+      "name": "private-fixture-files",
+      "argv": [
+        "podman",
+        "exec",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "chmod",
+        "600",
+        "/fixture/host",
+        "/fixture/sshd_config"
+      ],
+      "pid": 19214,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.176,
+      "stdout_log": "012-private-fixture-files.stdout.log",
+      "stderr_log": "012-private-fixture-files.stderr.log"
+    },
+    {
+      "name": "tool-availability",
+      "argv": [
+        "podman",
+        "exec",
+        "-i",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "python3",
+        "-"
+      ],
+      "pid": 19221,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.179,
+      "stdout_log": "013-tool-availability.stdout.log",
+      "stderr_log": "013-tool-availability.stderr.log"
+    },
+    {
+      "name": "linux-archive-probes-python3",
+      "argv": [
+        "podman",
+        "exec",
+        "-i",
+        "--user",
+        "fixture",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "timeout",
+        "40",
+        "python3",
+        "-"
+      ],
+      "pid": 19228,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.623,
+      "stdout_log": "014-linux-archive-probes-python3.stdout.log",
+      "stderr_log": "014-linux-archive-probes-python3.stderr.log"
+    },
+    {
+      "name": "zmodem-source",
+      "argv": [
+        "podman",
+        "exec",
+        "-i",
+        "--user",
+        "fixture",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "python3",
+        "-c",
+        "import sys,pathlib; a=pathlib.Path(sys.argv[1]); a.mkdir(parents=True); pathlib.Path(sys.argv[2]).mkdir(); (a/sys.argv[3]).write_bytes(sys.stdin.buffer.read())",
+        "/home/fixture/interop/zmodem-9e2a991ad7a84978875295a3a6303557/send",
+        "/home/fixture/interop/zmodem-9e2a991ad7a84978875295a3a6303557/receive",
+        "binary-all-bytes.bin"
+      ],
+      "pid": 19244,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.177,
+      "stdout_log": "015-zmodem-source.stdout.log",
+      "stderr_log": "015-zmodem-source.stderr.log"
+    },
+    {
+      "name": "zmodem-readback",
+      "argv": [
+        "podman",
+        "exec",
+        "--user",
+        "fixture",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "python3",
+        "-c",
+        "import sys,pathlib,hashlib,json; p=pathlib.Path(sys.argv[1]); b=p.read_bytes(); print(json.dumps({'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()}))",
+        "/home/fixture/interop/zmodem-9e2a991ad7a84978875295a3a6303557/receive/binary-all-bytes.bin"
+      ],
+      "pid": 19883,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.178,
+      "stdout_log": "016-zmodem-readback.stdout.log",
+      "stderr_log": "016-zmodem-readback.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 19894,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.103,
+      "stdout_log": "017-container-identity.stdout.log",
+      "stderr_log": "017-container-identity.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 19962,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.192,
+      "stdout_log": "018-container-identity.stdout.log",
+      "stderr_log": "018-container-identity.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 20027,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.193,
+      "stdout_log": "019-container-identity.stdout.log",
+      "stderr_log": "019-container-identity.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 20117,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.201,
+      "stdout_log": "020-container-identity.stdout.log",
+      "stderr_log": "020-container-identity.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 20296,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.2,
+      "stdout_log": "021-container-identity.stdout.log",
+      "stderr_log": "021-container-identity.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 20390,
+      "returncode": 125,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 2.782,
+      "stdout_log": "022-container-identity.stdout.log",
+      "stderr_log": "022-container-identity.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 20501,
+      "returncode": 125,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 2.746,
+      "stdout_log": "023-container-identity.stdout.log",
+      "stderr_log": "023-container-identity.stderr.log"
+    }
+  ],
+  "cleanup": {
+    "owned_host_processes_stopped": true
+  },
+  "source_inputs": {
+    "scripts/run_linux_file_interop.py": "1f1db6d48be947a572e90a6be58e0c2a6487657d180456543444979433241837",
+    "scripts/openssh_interop.py": "c0e0db7d8a8b48ea57cb6486f0136b93a3d8936a98b3841a93a5fc1514f95ec2",
+    "crates/keelshell-core/src/server_archive.py": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2"
+  },
+  "boundary": "owned Linux SSH/lrzsz/archive helper fixture; no Cargo, GUI, packaging or all-Linux acceptance",
+  "container_id": "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+  "archive_runs": [
+    {
+      "python": "python3",
+      "passed": 17,
+      "failed": 0,
+      "receipt": "archive-python3.json"
+    }
+  ],
+  "python38": "NOT_AVAILABLE; actual Python 3.8 runtime not accepted",
+  "zmodem_reference": {
+    "schema": 1,
+    "outcome": "passed",
+    "source_bytes": 262156,
+    "source_sha256": "67a361ed3d5941e4a0bddecd317aaf99728f0989e6d1a1612c2ffa3b570c0b2a",
+    "received": {
+      "bytes": 262156,
+      "sha256": "67a361ed3d5941e4a0bddecd317aaf99728f0989e6d1a1612c2ffa3b570c0b2a"
+    },
+    "exit_codes": [
+      0,
+      0
+    ],
+    "wire_bytes": {
+      "sender_to_receiver": 271015,
+      "receiver_to_sender": 166
+    },
+    "elapsed_seconds": 30.603,
+    "transport": "two real OpenSSH SSH PTYs with stty raw -echo -onlcr",
+    "boundary": "packaged Linux lrzsz peer interoperability, not application acceptance"
+  },
+  "error": "FixtureFailure: container-identity failed; inspect 022-container-identity logs"
+}

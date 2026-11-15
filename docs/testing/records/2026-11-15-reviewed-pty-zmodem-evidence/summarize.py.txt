@@ -1,0 +1,71 @@
+"""Summarize one completed frozen gate without adding repeated focused runs."""
+import datetime
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = Path(__file__).resolve().parent
+gate, freeze_name, output_name = sys.argv[1:]
+receipt = json.loads((OUT / "logs" / (gate + ".json")).read_text())
+freeze_path = OUT / freeze_name
+freeze = json.loads(freeze_path.read_text())
+integrity = {}
+for group in ("inputs", "scripts"):
+    integrity[group] = {
+        "count": len(freeze[group]),
+        "mismatches": [
+            name for name, expected in freeze[group].items()
+            if hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != expected
+        ],
+    }
+raw = (OUT / "logs" / (gate + ".log")).read_bytes()
+assert hashlib.sha256(raw).hexdigest() == receipt["log_sha256"]
+log = raw.decode(errors="replace")
+phase = None
+package = None
+doctest = False
+ordinary = {}
+docs = dict(passed=0, failed=0, ignored=0)
+commands = []
+for line in log.splitlines():
+    if line.startswith("Running: "):
+        commands.append(line)
+        phase = "workspace" if line.startswith("Running: cargo test --workspace ") else None
+    if phase != "workspace":
+        continue
+    match = re.match(r"\s*Running .*?\(([^)]+)\)", line)
+    if match:
+        package = re.search(r"/build/(keelshell-[^/]+)/", match[1])[1]
+        doctest = False
+    match = re.match(r"\s*Doc-tests (keelshell_\w+)", line)
+    if match:
+        package = match[1].replace("_", "-")
+        doctest = True
+    match = re.match(r"test result: \w+\. (\d+) passed; (\d+) failed; (\d+) ignored;", line)
+    if match:
+        assert package
+        counts = docs if doctest else ordinary.setdefault(package, dict(passed=0, failed=0, ignored=0))
+        for key, number in zip(("passed", "failed", "ignored"), match.groups()):
+            counts[key] += int(number)
+python = re.search(r"Ran (\d+) tests? in .*?\n\nOK(?: \(skipped=(\d+)\))?", log)
+assert python
+data = {
+    "recorded_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "freeze": freeze_name, "freeze_sha256": hashlib.sha256(freeze_path.read_bytes()).hexdigest(),
+    "integrity_after_gate": integrity,
+    "gate_receipt": "logs/" + gate + ".json", "gate_exit": receipt["exit"],
+    "gate_seconds": receipt["seconds"], "gate_log_sha256": receipt["log_sha256"],
+    "ordinary": {key: sum(row[key] for row in ordinary.values()) for key in ("passed", "failed", "ignored")},
+    "ordinary_by_package": ordinary, "rustdoc": docs,
+    "python": {"run": int(python[1]), "skipped": int(python[2] or 0)},
+    "commands": commands,
+}
+with (OUT / output_name).open("x") as stream:
+    json.dump(data, stream, indent=2)
+    stream.write("\n")
+print(json.dumps(data, indent=2))
+assert receipt["exit"] == 0 and not receipt["timed_out"]
+assert not any(value["mismatches"] for value in integrity.values())

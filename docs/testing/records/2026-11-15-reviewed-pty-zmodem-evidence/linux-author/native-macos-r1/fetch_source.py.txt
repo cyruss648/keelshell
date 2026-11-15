@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+"""Fetch public lrzsz provenance and verify the archive without extracting it."""
+
+import concurrent.futures
+import datetime
+import hashlib
+import html.parser
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import time
+import urllib.parse
+
+
+ROOT = Path(__file__).resolve().parent
+PAGE_URL = "https://ohse.de/uwe/software/lrzsz.html"
+FORMULA_URL = (
+    "https://raw.githubusercontent.com/Homebrew/homebrew-core/HEAD/Formula/l/lrzsz.rb"
+)
+
+
+def now():
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_json(path, value):
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def fetch(name, url, size_limit):
+    body = ROOT / name
+    headers = ROOT / (name + ".headers.txt")
+    stderr = ROOT / (name + ".stderr.log")
+    metadata = ROOT / (name + ".http.txt")
+    if body.exists():
+        raise RuntimeError("Refusing to overwrite fetched content: " + str(body))
+    command = [
+        "/usr/bin/curl", "-q", "--silent", "--show-error", "--location",
+        "--proto", "=https", "--proto-redir", "=https", "--max-redirs", "4",
+        "--connect-timeout", "8", "--max-time", "40",
+        "--max-filesize", str(size_limit),
+        "--dump-header", str(headers), "--output", str(body),
+        "--write-out",
+        "%{http_code}\n%{url_effective}\n%{size_download}\n%{time_total}\n",
+        url,
+    ]
+    started = now()
+    start = time.monotonic()
+    with stderr.open("wb") as errors, metadata.open("wb") as meta:
+        process = subprocess.Popen(
+            command, stdout=meta, stderr=errors, start_new_session=True
+        )
+        timed_out = False
+        try:
+            code = process.wait(timeout=43)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            # This newly created session belongs only to this fetch.
+            os.killpg(process.pid, signal.SIGKILL)
+            code = process.wait(timeout=2)
+    lines = metadata.read_text().splitlines()
+    receipt = {
+        "requested_url": url,
+        "started_at": started,
+        "finished_at": now(),
+        "seconds": round(time.monotonic() - start, 3),
+        "command": command,
+        "exit_code": code,
+        "timed_out": timed_out,
+        "http_status": lines[0] if lines else None,
+        "effective_url": lines[1] if len(lines) > 1 else None,
+        "body": body.name,
+        "body_bytes": body.stat().st_size if body.exists() else 0,
+        "sha256": digest(body) if body.exists() else None,
+        "response_headers": headers.name,
+        "stderr": stderr.name,
+        "metadata": metadata.name,
+    }
+    receipt["ok"] = (
+        code == 0 and receipt["http_status"] == "200"
+        and 0 < receipt["body_bytes"] <= size_limit
+    )
+    write_json(ROOT / (name + ".receipt.json"), receipt)
+    return receipt
+
+
+class Links(html.parser.HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.links = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() == "a":
+            for key, value in attrs:
+                if key.lower() == "href" and value is not None:
+                    self.links.append(value)
+
+
+def main():
+    receipt = {
+        "status": "started",
+        "started_at": now(),
+        "extracted": False,
+        "built": False,
+        "candidate_from_parent_is_not_evidence": True,
+        "documents": [],
+    }
+    result = ROOT / "source-verification.json"
+    if result.exists():
+        raise RuntimeError("This numbered source receipt already exists")
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [
+                pool.submit(fetch, "upstream.html", PAGE_URL, 1024 * 1024),
+                pool.submit(fetch, "homebrew-lrzsz.rb", FORMULA_URL, 1024 * 1024),
+            ]
+            documents = [future.result() for future in futures]
+        receipt["documents"] = documents
+        if not all(document["ok"] for document in documents):
+            raise RuntimeError("A required public provenance fetch failed")
+        formula = (ROOT / "homebrew-lrzsz.rb").read_text()
+        formula_url = re.search(r'^\s*url "([^"]+)"', formula, re.MULTILINE)
+        formula_hash = re.search(
+            r'^\s*sha256 "([0-9a-f]{64})"', formula, re.MULTILINE
+        )
+        if formula_url is None or formula_hash is None:
+            raise RuntimeError("Cannot parse the actual stable formula URL/hash")
+        url = formula_url.group(1)
+        parsed_url = urllib.parse.urlsplit(url)
+        version_match = re.fullmatch(
+            r"/uwe/releases/lrzsz-([0-9]+(?:\.[0-9]+)+)\.tar\.gz",
+            parsed_url.path,
+        )
+        if (
+            parsed_url.scheme != "https"
+            or parsed_url.netloc not in ("ohse.de", "www.ohse.de")
+            or parsed_url.query or parsed_url.fragment or version_match is None
+        ):
+            raise RuntimeError("Formula release URL is not a public upstream tarball")
+        page = (ROOT / "upstream.html").read_text()
+        links = Links()
+        links.feed(page)
+        releases = []
+        for href in links.links:
+            candidate = urllib.parse.urljoin(documents[0]["effective_url"], href)
+            parsed = urllib.parse.urlsplit(candidate)
+            match = re.fullmatch(
+                r"/uwe/releases/lrzsz-([0-9]+(?:\.[0-9]+)+)\.tar\.gz",
+                parsed.path,
+            )
+            if (
+                parsed.scheme == "https"
+                and parsed.netloc in ("ohse.de", "www.ohse.de")
+                and not parsed.query and not parsed.fragment and match is not None
+            ):
+                releases.append({"version": match.group(1), "url": candidate})
+        version = version_match.group(1)
+        upstream_versions = {release["version"] for release in releases}
+        receipt["upstream_release_links"] = releases
+        receipt["formula_release"] = {
+            "version": version, "url": url, "sha256": formula_hash.group(1)
+        }
+        if version not in upstream_versions:
+            raise RuntimeError("Actual upstream page does not advertise formula release")
+        newest = max(
+            upstream_versions, key=lambda value: tuple(map(int, value.split(".")))
+        )
+        if version != newest:
+            raise RuntimeError("Formula and latest actual upstream page release differ")
+        tarball = fetch(
+            "lrzsz-" + version + ".tar.gz", url, 16 * 1024 * 1024
+        )
+        receipt["tarball"] = tarball
+        receipt["checksum_expected"] = formula_hash.group(1)
+        receipt["checksum_actual"] = tarball["sha256"]
+        receipt["checksum_matches"] = tarball["sha256"] == formula_hash.group(1)
+        if not tarball["ok"] or not receipt["checksum_matches"]:
+            raise RuntimeError("Tarball fetch or advertised SHA256 verification failed")
+        receipt["selected_release"] = version
+        receipt["latest_claim_scope"] = (
+            "Release links in fetched upstream page corroborated by fetched formula"
+        )
+        receipt["status"] = "verified_before_extraction"
+    except Exception as error:
+        receipt["status"] = "failed"
+        receipt["error"] = str(error)
+    finally:
+        receipt["finished_at"] = now()
+        write_json(result, receipt)
+    print(json.dumps(receipt, indent=2, sort_keys=True))
+    return 0 if receipt["status"] == "verified_before_extraction" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,19 @@
+{
+  "requests": [
+    {
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/aarch64/APKINDEX.tar.gz",
+      "bytes": 501470,
+      "sha256": "928e3b29349d9d3e4e39251d3f1e867b4e1dc60f7c073bf1f97516d57d02d64a",
+      "status": 200
+    },
+    {
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/community/aarch64/APKINDEX.tar.gz",
+      "bytes": 2072474,
+      "sha256": "7213c3360aee0824db03715bfa0dad2c365c8942893aecf0c4f3b26a389620ba",
+      "status": 200
+    }
+  ],
+  "listener_closed": true,
+  "thread_stopped": true,
+  "signature_policy": "Normal apk trusted-key verification, no allow-untrusted"
+}

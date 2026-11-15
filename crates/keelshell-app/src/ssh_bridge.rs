@@ -14,12 +14,17 @@ use tokio::sync::watch;
 
 use crate::terminal::{TerminalCommand, TerminalView, TransportState, spawn_transport_worker};
 
+#[path = "ssh_bridge_zmodem.rs"]
+mod zmodem;
+use zmodem::Protocol;
+
 /// Open one SSH terminal entity. The connection is shared with independent SFTP
 /// and terminal consumers; closing this view closes only its shell channel.
 pub fn open(
     session: SshSession,
     runtime: Arc<Runtime>,
     title: String,
+    target: String,
     font_size: f32,
     history: usize,
     cx: &mut App,
@@ -29,9 +34,18 @@ pub fn open(
     let cancelled = Arc::new(AtomicBool::new(false));
     let worker_stop = cancelled.clone();
     let failure_output = output.clone();
+    let protocol = Protocol::new(session.clone(), target.clone());
+    let safety = protocol.safety.clone();
     let (lifecycle, state) = watch::channel(TransportState::Starting);
     let started = spawn_transport_worker("keelshell-ssh-shell", cancelled.clone(), move || {
-        runtime.block_on(run(session, commands, output, worker_stop, lifecycle))
+        runtime.block_on(run_with_protocol(
+            session,
+            commands,
+            output,
+            worker_stop,
+            lifecycle,
+            protocol,
+        ))
     });
     if let Err(error) = started {
         // TerminalView supplies the translated error label; preserve this
@@ -43,17 +57,32 @@ pub fn open(
         let mut view = TerminalView::from_transport(
             title, font_size, history, incoming, outgoing, cancelled, cx,
         );
+        view.attach_transport_target(target);
+        view.attach_zmodem_safety(safety);
         view.attach_lifecycle(state);
         view
     })
 }
 
+#[cfg(test)]
 async fn run(
     session: SshSession,
     commands: Receiver<TerminalCommand>,
     output: SyncSender<SessionEvent>,
     cancelled: Arc<AtomicBool>,
     lifecycle: watch::Sender<TransportState>,
+) -> Result<(), String> {
+    let protocol = Protocol::new(session.clone(), "controlled SSH fixture".into());
+    run_with_protocol(session, commands, output, cancelled, lifecycle, protocol).await
+}
+
+async fn run_with_protocol(
+    session: SshSession,
+    commands: Receiver<TerminalCommand>,
+    output: SyncSender<SessionEvent>,
+    cancelled: Arc<AtomicBool>,
+    lifecycle: watch::Sender<TransportState>,
+    mut protocol: Protocol,
 ) -> Result<(), String> {
     let startup = tokio::select! {
         _ = cancellation(&cancelled) => { lifecycle.send_replace(TransportState::Ended(ShellEnd::Cancelled)); return Ok(()); },
@@ -69,7 +98,17 @@ async fn run(
         }
     };
     lifecycle.send_replace(TransportState::Ready);
-    let result = pump(&mut shell, &commands, &output, &cancelled, &lifecycle).await;
+    let result = pump(
+        &mut shell,
+        &session,
+        &mut protocol,
+        &commands,
+        &output,
+        &cancelled,
+        &lifecycle,
+    )
+    .await;
+    let protocol_result = protocol.fail();
     let reason = shell.completion().unwrap_or_else(|| {
         if cancelled.load(Ordering::Acquire) {
             ShellEnd::Cancelled
@@ -84,17 +123,19 @@ async fn run(
         .await
         .map_err(|_| "SSH_SHELL_CLEANUP_TIMEOUT".to_owned())
         .and_then(|result| result.map_err(|error| error.to_string()));
-    result.and(cleanup)
+    protocol.transport_closed();
+    result.and(protocol_result).and(cleanup)
 }
 
 async fn pump(
     shell: &mut SshShell,
+    session: &SshSession,
+    protocol: &mut Protocol,
     commands: &Receiver<TerminalCommand>,
     output: &SyncSender<SessionEvent>,
     cancelled: &AtomicBool,
     lifecycle: &watch::Sender<TransportState>,
 ) -> Result<(), String> {
-    let mut pending_output = None;
     let mut completion_seen = false;
     loop {
         if cancelled.load(Ordering::Acquire) {
@@ -105,12 +146,37 @@ async fn pump(
             lifecycle.send_replace(TransportState::Ended(reason));
             completion_seen = true;
         }
-        if drain_output(shell, &mut pending_output, output)? {
+        protocol.tick()?;
+        if drain_output(shell, session, protocol, output).await? {
             return Ok(());
         }
 
         if completion_seen {
             tokio::time::sleep(Duration::from_millis(4)).await;
+            continue;
+        }
+
+        while let Some(bytes) = protocol.pop_write() {
+            match write_and_drain(
+                shell,
+                session,
+                protocol,
+                ShellWrite::Protocol(&bytes),
+                output,
+                cancelled,
+                lifecycle,
+            )
+            .await?
+            {
+                WriteOutcome::Written => protocol.write_completed()?,
+                WriteOutcome::ShellEnded => {
+                    completion_seen = true;
+                    break;
+                }
+                WriteOutcome::Stopped => return Ok(()),
+            }
+        }
+        if completion_seen {
             continue;
         }
 
@@ -122,9 +188,22 @@ async fn pump(
             match commands.try_recv() {
                 Ok(TerminalCommand::Resize(rows, cols)) => resize = Some((rows, cols)),
                 Ok(TerminalCommand::Write(bytes)) => {
-                    write = Some(bytes);
+                    if protocol.input_blocked() {
+                        protocol.reject_input()?;
+                    } else {
+                        write = Some(bytes);
+                        break;
+                    }
+                }
+                Ok(TerminalCommand::Zmodem(control)) => {
+                    tokio::select! {
+                        biased;
+                        _ = cancellation(cancelled) => return Ok(()),
+                        result = protocol.control(session, *control) => result?,
+                    }
                     break;
                 }
+                Ok(TerminalCommand::ResumeInput(id)) => protocol.resume_input(id),
                 Err(TryRecvError::Empty) => break,
                 Err(TryRecvError::Disconnected) => return Ok(()),
             }
@@ -143,56 +222,43 @@ async fn pump(
             }
         }
         if let Some(bytes) = write {
-            // A timeout may have written a prefix, so the bridge reports failure
-            // instead of replaying bytes and risking a duplicate command.
-            let writer = shell.writer();
-            let writing = writer.write(&bytes);
-            let mut completion = shell.subscribe_completion();
-            tokio::pin!(writing);
-            loop {
-                // SSH flow control may suspend input until remote output is
-                // consumed. Drain independently while preserving this one
-                // write future: cancelling/restarting it could duplicate bytes.
-                tokio::select! {
-                    biased;
-                    _ = cancellation(cancelled) => return Ok(()),
-                    reason = shell_end(&mut completion) => {
-                        lifecycle.send_replace(TransportState::Ended(reason));
-                        completion_seen = true;
-                        break;
-                    },
-                    result = &mut writing => {
-                        if let Some(reason) = shell.completion() {
-                            lifecycle.send_replace(TransportState::Ended(reason));
-                            completion_seen = true;
-                        } else {
-                            result.map_err(|error| error.to_string())?;
-                        }
-                        break;
-                    },
-                    _ = tokio::time::sleep(Duration::from_millis(4)) => {
-                        if let Some(reason) = shell.completion() {
-                            lifecycle.send_replace(TransportState::Ended(reason));
-                            completion_seen = true;
-                            break;
-                        }
-                        if drain_output(shell, &mut pending_output, output)? { return Ok(()); }
-                    }
-                }
+            match write_and_drain(
+                shell,
+                session,
+                protocol,
+                ShellWrite::Ordinary(&bytes),
+                output,
+                cancelled,
+                lifecycle,
+            )
+            .await?
+            {
+                WriteOutcome::Written => {}
+                WriteOutcome::ShellEnded => completion_seen = true,
+                WriteOutcome::Stopped => return Ok(()),
             }
         }
         tokio::time::sleep(Duration::from_millis(4)).await;
     }
 }
 
-fn drain_output(
+async fn drain_output(
     shell: &mut SshShell,
-    pending: &mut Option<SessionEvent>,
+    session: &SshSession,
+    protocol: &mut Protocol,
     output: &SyncSender<SessionEvent>,
 ) -> Result<bool, String> {
     // One retained event plus two bounded queues provide output backpressure.
     for _ in 0..64 {
-        let Some(event) = pending.take().or_else(|| shell.try_recv()) else {
+        let event = if let Some(event) = protocol.output.pop_front() {
+            event
+        } else if protocol.wants_input() {
+            let Some(event) = shell.try_recv() else {
+                break;
+            };
+            protocol.feed(session, event).await?;
+            continue;
+        } else {
             break;
         };
         let completed = matches!(event, SessionEvent::Exited { .. });
@@ -212,13 +278,75 @@ fn drain_output(
                 }
             }
             Err(TrySendError::Full(event)) => {
-                *pending = Some(event);
+                protocol.output.push_front(event);
                 break;
             }
             Err(TrySendError::Disconnected(_)) => return Ok(true),
         }
     }
     Ok(false)
+}
+
+/// Preserve one write future while draining output. A failed or interrupted
+/// write can have sent a prefix; it is never restarted or replayed.
+#[derive(Clone, Copy)]
+enum ShellWrite<'a> {
+    Ordinary(&'a [u8]),
+    Protocol(&'a [u8]),
+}
+
+enum WriteOutcome {
+    Written,
+    // Completion is independent of the bounded output queue. Keep draining
+    // that queue, but never acknowledge this interrupted write as completed.
+    ShellEnded,
+    Stopped,
+}
+
+async fn write_and_drain(
+    shell: &mut SshShell,
+    session: &SshSession,
+    protocol: &mut Protocol,
+    write: ShellWrite<'_>,
+    output: &SyncSender<SessionEvent>,
+    cancelled: &AtomicBool,
+    lifecycle: &watch::Sender<TransportState>,
+) -> Result<WriteOutcome, String> {
+    let (ShellWrite::Ordinary(bytes) | ShellWrite::Protocol(bytes)) = write;
+    let writer = shell.writer();
+    let writing = writer.write(bytes);
+    let mut completion = shell.subscribe_completion();
+    tokio::pin!(writing);
+    loop {
+        tokio::select! {
+            biased;
+            _ = cancellation(cancelled) => return Ok(WriteOutcome::Stopped),
+            reason = shell_end(&mut completion) => {
+                lifecycle.send_replace(TransportState::Ended(reason));
+                return Ok(WriteOutcome::ShellEnded);
+            },
+            result = &mut writing => {
+                if let Some(reason) = shell.completion() {
+                    lifecycle.send_replace(TransportState::Ended(reason));
+                    return Ok(WriteOutcome::ShellEnded);
+                }
+                return result.map(|()| WriteOutcome::Written).map_err(|error| error.to_string());
+            },
+            _ = tokio::time::sleep(Duration::from_millis(4)) => {
+                if drain_output(shell, session, protocol, output).await? {
+                    return Ok(WriteOutcome::Stopped);
+                }
+                if matches!(write, ShellWrite::Ordinary(_)) && protocol.input_blocked() {
+                    // A remote peer can begin Zmodem while SSH flow control
+                    // suspends an already admitted ordinary write. Stop polling
+                    // that future at the ownership boundary: its unknown prefix
+                    // cannot be replayed or mixed with protocol negotiation.
+                    protocol.interrupt_ordinary_write();
+                    return Err("SSH_ZMODEM_INPUT_HANDOFF_INTERRUPTED".into());
+                }
+            }
+        }
+    }
 }
 
 async fn cancellation(cancelled: &AtomicBool) {

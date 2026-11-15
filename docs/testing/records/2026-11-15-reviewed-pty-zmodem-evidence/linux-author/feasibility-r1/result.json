@@ -1,0 +1,82 @@
+{
+  "owner": "97f5cd562d6340e798da55acf2ca1cd7",
+  "container": "keelshell-file-interop-97f5cd562d63",
+  "steps": [
+    {
+      "command": [
+        "podman",
+        "run",
+        "--pull=never",
+        "--http-proxy=false",
+        "--label",
+        "io.keelshell.fixture=linux-file-interop",
+        "--label",
+        "io.keelshell.owner=97f5cd562d6340e798da55acf2ca1cd7",
+        "--name",
+        "keelshell-file-interop-97f5cd562d63",
+        "--detach",
+        "--publish",
+        "127.0.0.1::2222",
+        "490aa88f39f7",
+        "sleep",
+        "infinity"
+      ],
+      "exit": 0,
+      "seconds": 0.163,
+      "log": "00.log"
+    },
+    {
+      "command": [
+        "podman",
+        "exec",
+        "keelshell-file-interop-97f5cd562d63",
+        "sh",
+        "-c",
+        "cat /etc/os-release; for tool in python3 rz sz sshd setfacl getfacl apt-get; do command -v \"$tool\" || true; done"
+      ],
+      "exit": 0,
+      "seconds": 0.085,
+      "log": "01.log"
+    },
+    {
+      "command": [
+        "podman",
+        "exec",
+        "keelshell-file-interop-97f5cd562d63",
+        "sh",
+        "-c",
+        "export DEBIAN_FRONTEND=noninteractive; apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=10 -o Acquire::https::Timeout=10 update"
+      ],
+      "timeout_seconds": 45,
+      "log": "02.log"
+    },
+    {
+      "command": [
+        "podman",
+        "run",
+        "--pull=never",
+        "--http-proxy=false",
+        "--rm",
+        "--name",
+        "keelshell-file-tools-97f5cd562d63",
+        "--label",
+        "io.keelshell.fixture=linux-file-interop",
+        "--label",
+        "io.keelshell.owner=97f5cd562d6340e798da55acf2ca1cd7",
+        "--entrypoint",
+        "sh",
+        "b4943e65a979",
+        "-c",
+        "cat /etc/os-release; for x in python3 python3.8 rz sz sshd setfacl getfacl curl wget apt-get; do command -v \"$x\" || true; done; ls /var/cache/apt/archives/*.deb 2>/dev/null || true; cat /etc/resolv.conf"
+      ],
+      "exit": 0,
+      "seconds": 0.176,
+      "log": "03.log"
+    }
+  ],
+  "cleanup": {
+    "verified_identity": "9d0eeb5335d2c36162a41335ed69b05d43d593002e317228c6fcd079a9d4cb50 97f5cd562d6340e798da55acf2ca1cd7",
+    "exit": 0,
+    "removed": true
+  }
+}

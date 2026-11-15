@@ -117,6 +117,12 @@ impl Workspace {
                 "A cleanup result is unknown. Acknowledge it before reviewing close again.",
             ));
         }
+        if self.tabs.iter().any(|tab| tab.read(cx).zmodem_close_busy()) {
+            return Some(Message::new(
+                "请先在终端完成或取消 Zmodem，并核对每个未知结果。",
+                "Finish or cancel Zmodem in the terminal and inspect every unknown outcome first.",
+            ));
+        }
         if self.saving
             || self.state_reloading
             || !self

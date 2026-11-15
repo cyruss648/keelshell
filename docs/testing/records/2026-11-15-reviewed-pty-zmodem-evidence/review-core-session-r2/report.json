@@ -1,0 +1,702 @@
+{
+  "schema": 2,
+  "recorded_utc": "2026-11-15T09:13:31.243564+00:00",
+  "reviewer_role": "independent nonauthor; strictly read-only core/session review",
+  "source_root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "baseline_head": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "source_review": "APPROVE",
+  "candidate_merge_recommendation": "APPROVE_AS_CANDIDATE_SUBJECT_TO_CURRENT_REQUIRED_GATE",
+  "interop_acceptance": "HOLD_PARTIAL",
+  "direct_pty_handshake_acceptance": "OPEN",
+  "product_complete": false,
+  "native_acceptance": "NOT_PERFORMED",
+  "final_full_gate": {
+    "status": "FULL_GATE_R3_RUNNING_AS_LAST_REPORTED_BY_PARENT",
+    "reviewer_claims_pass": false,
+    "full_gate_r1": "SIGTERM and reap exit -15 after 360s; incomplete",
+    "full_gate_r2": "Reaped exit 1; remote_only guard rejected external local/tests.rs lacking its own inner cfg(test), though included by a cfg(test) module. Parent added only the two-line prefix, preserving the guard.",
+    "targeted_followup": "Parent reports remote-only-r1 5/5 and format-r8 pass; not independently executed by this reviewer.",
+    "full_gate_r3": "Sequential run in progress following normal build; no successful completion claimed."
+  },
+  "severity_counts": {
+    "original_r1": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 1,
+      "P3": 0
+    },
+    "open_on_final_r2": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 0,
+      "P3": 0
+    },
+    "closed_on_r2": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 1,
+      "P3": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "KS-ZM-CS-001",
+      "severity": "P2",
+      "status": "CLOSED_IN_R2",
+      "closed_utc": "2026-11-15T09:07:30.715436+00:00",
+      "original_notice": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/notice-01-publication-hold-race.md",
+      "original_notice_json": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/notice-01-publication-hold-race.json",
+      "original_source_sha256": "1c1ce173d51a0f4d40dad10357b5f17e53dda1973a97639f9ddffa37bd1b36d6",
+      "original_lines": [
+        1149,
+        1150
+      ],
+      "current_file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem.rs",
+      "current_source_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+      "current_test_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+      "reviewed_fix_lines": {
+        "ticket_registration": 1196,
+        "locked_pending_projection": 1177,
+        "backend_disposition_outside_lock": 1215,
+        "idempotent_disposition": 1209,
+        "poison_sticky_unknown": 1171
+      },
+      "reason": "active ticket count, sticky unresolved state and pending publication now update under one mutex; an old unobserved result stays counted until disposition; later known results cannot clear an older unknown; backend disposition remains outside the hold lock",
+      "overflow_underflow_and_poison": "fail closed; sticky unresolved",
+      "reviewer_executed_new_regressions": 5,
+      "reviewer_executed_lib_zmodem": 27,
+      "reviewer_executed_integration": 18,
+      "session_test_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-test-results.json",
+      "independent_rebuild": false,
+      "backend_quarantine_bypass_proven_in_original": false,
+      "native_close_bypass_proven_in_original": false,
+      "original_notice_preserved": true,
+      "revalidated_on_r3": true,
+      "r3_freeze_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+      "test_only_prefix_delta_does_not_reopen_original_finding": true
+    }
+  ],
+  "additional_findings": [],
+  "freeze": {
+    "checked_utc": "2026-11-15T09:13:31.243564+00:00",
+    "manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/frozen-inputs-r3.json",
+    "manifest_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+    "r1_manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+    "r2_manifest_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+    "groups": {
+      "inputs": 570,
+      "scripts": 12
+    },
+    "checked": 582,
+    "mismatches": [],
+    "r2_r3_delta": [
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-session/src/zmodem/local/tests.rs",
+        "r2_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+        "r3_sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81"
+      }
+    ],
+    "r1_r3_delta": [
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-app/src/ssh_bridge.rs",
+        "r1_sha256": "a71ab98f3a8d1bb31a9acc0e6d7372e47ad7966f8d53422d5b8951a0997c20e1",
+        "r3_sha256": "967204fa4546bf2420240c86900539a09e505ddfc14341a0e3e3df11dd9da3b6"
+      },
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-app/src/terminal_zmodem.rs",
+        "r1_sha256": "d4ea72faccf859df9efe36ccd77ab1e872dbbc953c4739a62530fe642488a338",
+        "r3_sha256": "6766b9c6c6656b2bafe87ac62b4f55879ab53f57db99b56d36f97ceb5e635e8d"
+      },
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+        "r1_sha256": "9f864b6ebb04ac001f356f495cd029e43c85353a1cd70bdfe319b284316cc68d",
+        "r3_sha256": "8c271a421d7fab7871728257a817efcb6cdbb5065e028fbfe8ad465d0f3abc23"
+      },
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-session/src/zmodem/local/tests.rs",
+        "r1_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+        "r3_sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81"
+      },
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-session/src/zmodem/tests.rs",
+        "r1_sha256": "50dc65aa0e22bc729453f555f6f4becbf00408440d2e8a5d384a289f53e52a42",
+        "r3_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd"
+      },
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-session/src/zmodem.rs",
+        "r1_sha256": "1c1ce173d51a0f4d40dad10357b5f17e53dda1973a97639f9ddffa37bd1b36d6",
+        "r3_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d"
+      },
+      {
+        "group": "inputs",
+        "path": "crates/keelshell-session/tests/zmodem_openssh.rs",
+        "r1_sha256": "7a7ee3b4dd063776d84f5cd462ebbbebf574bd9d630a751363128bfb3490cf6d",
+        "r3_sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1"
+      }
+    ],
+    "exact_test_delta_proven": "Only prepend #![cfg(test)] and one blank line; remove those bytes in memory and SHA exactly matches r2",
+    "core_unchanged_from_r1": true,
+    "scripts_unchanged_from_r1": true,
+    "production_inputs_unchanged_from_r2": true,
+    "session_fix_source_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+    "session_fix_tests_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+    "head_resolved": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+    "head_read_method": "HEAD/ref file text read for r2; no git process",
+    "final_gate_complete": false
+  },
+  "read_scope": {
+    "full_file_count": 14,
+    "full_line_count": 7662,
+    "full_files": [
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem.rs",
+        "lines": 417,
+        "sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f",
+        "r1_sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f",
+        "read_scope": "entire file",
+        "r2_sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f",
+        "r3_sha256": "ad38a919668157d80616d86360d9aa2c3af86c41d2aae6907777bd829c2fa17f"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/codec.rs",
+        "lines": 580,
+        "sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4",
+        "r1_sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4",
+        "read_scope": "entire file",
+        "r2_sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4",
+        "r3_sha256": "95daad80ce862db34b07334ade839806a951899ee4c0624156c3c752136555f4"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/detector.rs",
+        "lines": 119,
+        "sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+        "r1_sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+        "read_scope": "entire file",
+        "r2_sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1",
+        "r3_sha256": "158d2ad432f0c1fcbc9ea26d591c71e0070ab177564b12b074255494c4c162d1"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/receiver.rs",
+        "lines": 510,
+        "sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d",
+        "r1_sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d",
+        "read_scope": "entire file",
+        "r2_sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d",
+        "r3_sha256": "0efce93e04c0af6f9f112b3ef405a7bf98b0bd15f40a986f2d467f7e6da0c23d"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/zmodem/sender.rs",
+        "lines": 458,
+        "sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006",
+        "r1_sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006",
+        "read_scope": "entire file",
+        "r2_sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006",
+        "r3_sha256": "bca68e5e7e27f57f8337439d46397f92926191e25b55bb5a2d6e4d78854bf006"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/tests/zmodem.rs",
+        "lines": 1268,
+        "sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79",
+        "r1_sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79",
+        "read_scope": "entire file",
+        "r2_sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79",
+        "r3_sha256": "eec80e839070cd23f161851c780770873b9a0246ddfe7128a23f5087645dbc79"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem.rs",
+        "lines": 1242,
+        "sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+        "r1_sha256": "1c1ce173d51a0f4d40dad10357b5f17e53dda1973a97639f9ddffa37bd1b36d6",
+        "read_scope": "entire r1 file, then all current r2 file ranges re-read; independent PublicationHold fix review",
+        "r2_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+        "r3_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local.rs",
+        "lines": 673,
+        "sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd",
+        "r1_sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd",
+        "read_scope": "entire file",
+        "r2_sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd",
+        "r3_sha256": "68190c0b2f75933b3d2429a184a10e32fe38d8e4f8fc3cd1537fb2a694624dcd"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/local/tests.rs",
+        "lines": 492,
+        "sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81",
+        "r1_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+        "read_scope": "entire r1/r2 file and entire 492-line r3 file re-read; exact two-line prefix delta proven by reconstructing r2 hash in memory",
+        "r2_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+        "r3_sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/zmodem/tests.rs",
+        "lines": 179,
+        "sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+        "r1_sha256": "50dc65aa0e22bc729453f555f6f4becbf00408440d2e8a5d384a289f53e52a42",
+        "read_scope": "entire r2 file including all five new regressions",
+        "r2_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+        "r3_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp/zmodem_local.rs",
+        "lines": 55,
+        "sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+        "r1_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+        "read_scope": "entire file",
+        "r2_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30",
+        "r3_sha256": "cc58995f4e0eaaaf8d41f366fb6867da92946a1e4f74a6f05de7d9c16be3be30"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/tests/zmodem.rs",
+        "lines": 957,
+        "sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179",
+        "r1_sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179",
+        "read_scope": "entire file",
+        "r2_sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179",
+        "r3_sha256": "3381ef61043eac11940cefdf21bfad7b6c3f28b45a945cb268d90b4f05f91179"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/tests/zmodem_openssh.rs",
+        "lines": 462,
+        "sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1",
+        "r1_sha256": "7a7ee3b4dd063776d84f5cd462ebbbebf574bd9d630a751363128bfb3490cf6d",
+        "read_scope": "entire r1 file; parent diagnostic changes and final handshake assertions independently re-read",
+        "r2_sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1",
+        "r3_sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/tests/support/zmodem_fixture.rs",
+        "lines": 250,
+        "sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+        "r1_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+        "read_scope": "entire file",
+        "r2_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a",
+        "r3_sha256": "13d6c0eb892fcf8f492c2f3d89dac65bdeecd03591aa24fe6c500e2e34d3468a"
+      }
+    ],
+    "additional_scope": [
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core/src/lib.rs",
+        "read_scope": "Zmodem export and surrounding module declarations; export line 53",
+        "sha256_at_report": "d22c1a1776b05031689c0d97499c6ffd723fe685c106abcc8c45d69ce01f6bb4",
+        "current_lines": 207,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/lib.rs",
+        "read_scope": "Zmodem export and surrounding module declarations; export line 18",
+        "sha256_at_report": "fd09baa16cba20b7b64370f0905501c56f3443f95b00b39e25b4d8e4322e8ecb",
+        "current_lines": 37,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/events.rs",
+        "read_scope": "entire file",
+        "sha256_at_report": "423ab762022a5080b695acf74532b8a2cae3cdb97ffeaa9eea56247b6b85cb5d",
+        "current_lines": 19,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/Cargo.toml",
+        "read_scope": "entire file",
+        "sha256_at_report": "dc79436a550279530dd62f91c6e8db36733e29b24afe74f6c30aa14c2aec4fbf",
+        "current_lines": 32,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/Cargo.lock",
+        "read_scope": "entire TOML structure parsed; ACL, rustix and session resolved-dependency entries manually inspected",
+        "sha256_at_report": "b7964caece668b87008bd8ce4fa563977982e075e2487197ce3a4a37b41cafa5",
+        "current_lines": 10898,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp.rs",
+        "read_scope": "lines 1-110, including reservation and ACL exports",
+        "sha256_at_report": "8e62df1cea67907aa9ef9555c6a132008a0881beeee42549e44ca25220e5803a",
+        "current_lines": 1467,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp/queue.rs",
+        "read_scope": "lines 99-167: local claims and conflicts",
+        "sha256_at_report": "8552e1034cfec8c125d2c27a1ac432516c80e9ed004b44d342c56a29694fc613",
+        "current_lines": 662,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/sftp/queue/reservations.rs",
+        "read_scope": "lines 1-275 and 292-355: registry, disposition, unknown and quarantine",
+        "sha256_at_report": "1e37150311fcc4d643d2405d7d3f682f99f760f8001bde28f7dce91ad923472c",
+        "current_lines": 607,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/ssh.rs",
+        "read_scope": "lines 175-250, 580-673, 1000-1028, 1038-1142: callbacks, ordered shell reader, connection identity, shell writes and completion",
+        "sha256_at_report": "d86a3cf3f42cbc1ac06f41d5e793b1f042fe558992836730df06184e865fb79b",
+        "current_lines": 1627,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session/src/ssh/lifecycle.rs",
+        "read_scope": "lines 1-285",
+        "sha256_at_report": "d95b77381f649066fd663700e41df41f5c59e28f3b1c3797a09656e9a6f9436e",
+        "current_lines": 378,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/ssh_bridge_zmodem.rs",
+        "read_scope": "lines 1-262; impact check only, no complete app review",
+        "sha256_at_report": "e0a33146f9f8aebe73b4fe6f7c997b0d73eec6cdea5320dff5afadc690802ca1",
+        "current_lines": 262,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+        "read_scope": "targeted Safety/close guard checks plus final r2 receipt state, FileSaved/end handlers and receipt rendering; no complete app review",
+        "sha256_at_report": "6766b9c6c6656b2bafe87ac62b4f55879ab53f57db99b56d36f97ceb5e635e8d",
+        "current_lines": 857,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem_tests.rs",
+        "read_scope": "targeted receipt and close-hold tests read only; not executed by this reviewer",
+        "sha256_at_report": "8c271a421d7fab7871728257a817efcb6cdbb5065e028fbfe8ad465d0f3abc23",
+        "current_lines": 978,
+        "r2_frozen": true,
+        "r3_frozen": true
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/AGENTS.md",
+        "read_scope": "entire file at review start",
+        "sha256_at_report": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb",
+        "current_lines": 16,
+        "r2_frozen": false,
+        "r3_frozen": false
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/HANDOFF.md",
+        "read_scope": "first 75 lines",
+        "sha256_at_report": "f984fed1a20601212c741ba5dbe14dc5b3c26c5da6433f62bb8539d027995245",
+        "current_lines": 1468,
+        "r2_frozen": false,
+        "r3_frozen": false
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/adr/0136-reviewed-pty-zmodem.md",
+        "read_scope": "entire file at review start; private ACL and platform boundaries rechecked",
+        "sha256_at_report": "dda38d8454ef0518c9d7e0b3cc35b7f66dcc838274deb09195515bbd387170c2",
+        "current_lines": 92,
+        "r2_frozen": false,
+        "r3_frozen": false
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/product/ZMODEM.md",
+        "read_scope": "entire file at review start; publication and compatibility sections rechecked",
+        "sha256_at_report": "0115aed3c0e66be7f70fc05dccef51b94a9193b1c931d319214f013fc7c6c13a",
+        "current_lines": 63,
+        "r2_frozen": false,
+        "r3_frozen": false
+      }
+    ],
+    "manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/read-scope.json"
+  },
+  "verification": {
+    "test_runs": 3,
+    "binary_invocations": 6,
+    "inventory_invocations": 3,
+    "complete_inventory_names_checked": 268,
+    "executed_tests": 110,
+    "passed": 110,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 158,
+    "independent_rebuild": false,
+    "commands": [
+      {
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/core-zmodem-r1",
+          "--list"
+        ],
+        "purpose": "verify all 65 core inventory names",
+        "executed_by_reviewer": true,
+        "exit_code": 0,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/core-zmodem-list.log"
+      },
+      {
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/core-zmodem-r1",
+          "--test-threads=1"
+        ],
+        "purpose": "execute all 65 core tests",
+        "executed_by_reviewer": true,
+        "exit_code": 0,
+        "timeout_seconds": 60,
+        "counts": {
+          "passed": 65,
+          "failed": 0,
+          "ignored": 0,
+          "filtered_out": 0
+        },
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/core-zmodem-tests.log"
+      },
+      {
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-lib-r2",
+          "--list"
+        ],
+        "purpose": "verify all 185 exact inventory names",
+        "executed_by_reviewer": true,
+        "exit_code": 0,
+        "timeout_seconds": 15,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-lib-r2-list.log"
+      },
+      {
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-lib-r2",
+          "zmodem::",
+          "--test-threads=1"
+        ],
+        "purpose": "execute 27 authorized Zmodem tests",
+        "executed_by_reviewer": true,
+        "exit_code": 0,
+        "timeout_seconds": 60,
+        "environment_overrides": {
+          "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/tmp-session-lib-r2/"
+        },
+        "counts": {
+          "passed": 27,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 158
+        },
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-lib-r2-tests.log"
+      },
+      {
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-zmodem-r2",
+          "--list"
+        ],
+        "purpose": "verify all 18 exact inventory names",
+        "executed_by_reviewer": true,
+        "exit_code": 0,
+        "timeout_seconds": 15,
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-zmodem-r2-list.log"
+      },
+      {
+        "argv": [
+          "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-zmodem-r2",
+          "--test-threads=1"
+        ],
+        "purpose": "execute 18 authorized Zmodem tests",
+        "executed_by_reviewer": true,
+        "exit_code": 0,
+        "timeout_seconds": 60,
+        "environment_overrides": {
+          "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/tmp-session-zmodem-r2/"
+        },
+        "counts": {
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-zmodem-r2-tests.log"
+      }
+    ],
+    "core_binary_sha256": "48978f2b923ece687861b070a88bc3f42153213445cccd07787aadec1162554b",
+    "session_binaries": [
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-lib-r2",
+        "sha256": "6c44842fd3a9f5a90ad1137737f2b4cdf95219c46ef202aef42d2ce227889611"
+      },
+      {
+        "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-zmodem-r2",
+        "sha256": "7c0a2eaaad3ea3d5c0e1a769c364b2cc93ddabce273a2200f5978780e2640a26"
+      }
+    ],
+    "provenance": "Parent-built stable copies; reviewer verified executable hashes, source/freeze hashes, complete exact test inventories and actual selected executions. The reviewer did not independently rebuild or cryptographically attest the producer build pipeline.",
+    "core_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/core-zmodem-tests.json",
+    "session_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-test-results.json",
+    "dependency_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/dependency-check.json",
+    "read_only_commands": "rg / numbered file reads, Python hashlib/json/tomllib/tarfile checks and HEAD/ref text reads; no git process",
+    "read_only_dependency_lookup_note": "one missing .cargo-checksum.json read failed in r1; corrected by matching the locked crate archive checksum and five extracted members; no current acceptance inferred from the failed lookup",
+    "source_binding_boundary_r3": {
+      "core": "Core source and inventory unchanged from r1 through r3; existing 65-test execution remains directly applicable to the same core inputs.",
+      "session": "The 27+18 executions used exact r2 stable binaries and source bytes. r3 adds only an inner cfg(test) plus a blank line to the already test-only local/tests.rs; no production input, assertion or test inventory logic changes. The reviewer proved and reviewed the delta but did not rebuild or execute a binary built from the later two-line prefix.",
+      "exact_delta_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/post-freeze-test-cfg-delta.json"
+    }
+  },
+  "interop": {
+    "recorded_utc": "2026-11-15T09:07:30.715436+00:00",
+    "status": "HOLD_PARTIAL",
+    "direct_pty_handshake_acceptance": "OPEN",
+    "scope": "macOS application to actual SSH start_shell raw PTY; observed failures with both Debian lrzsz 0.12.21rc and macOS lrzsz 0.13.1. r3 production inputs match the r2 candidate used in current r6 failure.",
+    "runs": [
+      {
+        "label": "real-pty-r5",
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r5/tests.log",
+        "log_sha256": "c0c5ab57d68b04bdb2bda10c804eef2d1ce5bed061ad5a52ffc1e0f2db4044ab",
+        "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r5/result.json",
+        "result_sha256": "6fd47f195840aa8947b0a39f37d235a8ee0a51c7c32cc89969fb0751d4445038",
+        "passed": 7,
+        "failed": 0,
+        "independently_executed_by_reviewer": false,
+        "final_r2_candidate_run": false
+      },
+      {
+        "label": "linux-cycle-r2",
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r2/025-parent-command.stdout.log",
+        "log_sha256": "7092407cf28093a6a9cf559818128fa8c2cfdf5d32a4a358fbe3aa3c0ec3e47e",
+        "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r2/result.json",
+        "result_sha256": "704012875be18a80f3427104ce847ecb86a90487d7df91fbad24c0700e6ca9a1",
+        "passed": 5,
+        "failed": 2,
+        "independently_executed_by_reviewer": false,
+        "final_r2_candidate_run": false
+      },
+      {
+        "label": "linux-cycle-r3",
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r3/022-parent-command.stdout.log",
+        "log_sha256": "197a63bb445f70f78817d38f50708f790884a5b453a2a216fc9f15a85be0179e",
+        "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-cycle-r3/result.json",
+        "result_sha256": "a814ff4506f8627798d2d9dde96c09d59a287cefb7b285a7a386498d5f7cfd3d",
+        "passed": 4,
+        "failed": 3,
+        "independently_executed_by_reviewer": false,
+        "final_r2_candidate_run": false
+      },
+      {
+        "label": "linux-pipe-diagnostic-r1",
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-pipe-diagnostic-r1/022-parent-command.stdout.log",
+        "log_sha256": "5312905ecd76c51398bd1c1d143f96572d69b81094f160ec282bb4652a5eb62a",
+        "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/linux-pipe-diagnostic-r1/result.json",
+        "result_sha256": "84aaf0483731c7d68199f9ae228caa7db03709d15e15cf36c6fe0340a45cfd45",
+        "passed": 7,
+        "failed": 0,
+        "independently_executed_by_reviewer": false,
+        "final_r2_candidate_run": false
+      },
+      {
+        "label": "real-pty-r6",
+        "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r6/tests.log",
+        "log_sha256": "c2f0e45f78d0340d895c4a27720d010eb9df886d7749e0bc57c11b2011b0f6b8",
+        "result": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/real-pty-r6/result.json",
+        "result_sha256": "914fa8e8b0663d641c31505195f73679d3f782e7d757673361e6e8aaf9ce2853",
+        "passed": 6,
+        "failed": 1,
+        "independently_executed_by_reviewer": false,
+        "final_r2_candidate_run": true
+      }
+    ],
+    "latest_r6": {
+      "harness_exit": 1,
+      "test_exit": 101,
+      "failed_test": "real_sz_sends_binary_unicode_content_over_crc32",
+      "verified_saved_bytes": 262156,
+      "verified_saved_sha256": "41fb26520c4a149eb60ab75a50a51d8c72228549629e2a32d1fe7a74cc10715c",
+      "controller_state": "Receiving",
+      "observed_final_chunk_hex": "2a2a184230383030303030303030303232640d8a",
+      "peer_exit": 0,
+      "cleanup": {
+        "observed_processes_stopped": true,
+        "ancestry_unverified": [],
+        "owned_processes_stopped": true,
+        "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+        "tracked_process_identities": 41,
+        "temporary_directory_removed": true
+      },
+      "diagnostic_capture_limit": "Only first 96 bytes of each of the most recent 6 Data chunks were logged; final 20-byte FIN chunk is fully represented. This is not a complete packet capture."
+    },
+    "paired_linux_pipe_diagnostic": {
+      "same_stable_application_binary_r2": true,
+      "peer_version": "sz (lrzsz) 0.12.21rc",
+      "application_binary_sha256": "6e5280b94a04aa0119bc3016ede8e6082aa0ed3970b3656acd5bf7a6b824529b",
+      "shim_source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/pipe_peer.py",
+      "shim_source_sha256": "1bb35b9d049268ec6e17304b39fe39b7ca4b4dce44c8dfd65090b5dacfe76994",
+      "embedded_peer_wrapper_sha256": "eec1246db6b2095db23cb57ba84cb2224d29599f71e44fbba18a575b8e95f959",
+      "artifact_hashes_checked": 59,
+      "artifact_mismatches": [],
+      "cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      },
+      "interpretation": "Byte-forwarding pipes change the peer stdio/TTY lifecycle. Their 7/7 supports further TTY-path investigation but proves neither tcflush causation nor direct-PTY acceptance."
+    },
+    "strict_completion_boundary": {
+      "FileSaved": "verified no-replace publication and complete readback only",
+      "Finished": "only actual protocol completion after required ZFIN/OO; no success synthesized from peer exit 0 or peer diagnostic strings",
+      "receipt_ui": "targeted source check confirms a separate bounded 32-record in-memory receipt history; no restart persistence or native acceptance claim"
+    },
+    "supersession": "real-pty-r5 7/7 is retained as historical evidence and cannot sign the current r2 candidate after real-pty-r6 6/7 failure",
+    "proposed_limited_outcome": "ReceiveClosedWithoutFarewell is a design proposal only, absent from this r2 freeze; it is not used to close the current direct-PTY acceptance gap",
+    "root_cause": "NOT_ESTABLISHED"
+  },
+  "platform_boundaries": {
+    "macos": "Actual selected local backend/ACL tests executed on this host; parent r6 actual raw-PTY 6/7 fails handshake. No native GPUI/IME/accessibility/package/release acceptance.",
+    "linux": "Source/cfg reviewed. Parent Debian remote peer direct-PTY failures and pipe diagnostic are server-peer evidence, not Linux desktop or Linux local Zmodem backend execution by this reviewer. Parent 17 archive ACL tests and two independent reference probes belong to different acceptance scopes.",
+    "windows": "Local safe backend explicitly Unsupported. No Windows build/runtime/native file-transfer acceptance.",
+    "ui_receipts": "Only targeted source review. Bounded most-recent-32 in-memory history survives transfer feedback; no app binary executed by this reviewer, no restart persistence claim.",
+    "protocol_security": "CRC is corruption detection rather than authentication; uploads do not establish remote target/overwrite policy or durable readback.",
+    "future_limited_outcome": "ReceiveClosedWithoutFarewell proposal is absent from frozen r2 and outside this approval; its conditions and new inventory would need separate review."
+  },
+  "mutations": {
+    "source_edits": 0,
+    "format_runs": 0,
+    "cargo_commands": 0,
+    "git_commands": 0,
+    "shared_target_changes": 0,
+    "unrelated_cleanup": 0,
+    "writes": "Only own reports/logs and test-owned temporary data in review-core-session-r1/ and newly authorized review-core-session-r2/. Original notice unchanged."
+  },
+  "merge_conditions": [
+    "Complete and honestly report current full-gate-r3 before the feature commit/merge. full-gate-r2 exited 1; this reviewer did not execute or sign the full gate.",
+    "Retain actual direct-PTY failures and report handshake acceptance OPEN/PARTIAL for both observed peer versions. Do not replace those failures with relay or historical passes.",
+    "Keep verified per-file publication receipts separate from Finished and keep native/cross-platform acceptance explicitly open."
+  ],
+  "evidence_artifacts": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/read-scope.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/freeze-check-r2.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/publication-hold-closure.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-inventory-verification.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/session-test-results.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/interop-boundaries.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/notice-01-publication-hold-race.md",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r1/core-zmodem-tests.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/freeze-check-r3.json",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/post-freeze-test-cfg-delta.json"
+  ],
+  "report_notes": [
+    "This report replaces the r1 finding status only for the two exact r2 source hashes; the original notice is retained for audit.",
+    "Source APPROVE and interop HOLD are separate conclusions. No new P0-P3 code defect was established after the accepted P2 fix.",
+    "No online protocol-specification verification is claimed; source-level invariants, independent wire-vector tests and retained actual peer evidence support this review.",
+    "Final approval is bound to r3; the exact r2-to-r3 test-only cfg prefix was reviewed, and r2 stable binary provenance is retained without claiming an independent rebuild."
+  ],
+  "binding_revision": "frozen-inputs-r3",
+  "freeze_end_evidence": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/freeze-check-end-r3.json",
+  "report_verified_utc": "2026-11-15T09:14:05.580914+00:00"
+}

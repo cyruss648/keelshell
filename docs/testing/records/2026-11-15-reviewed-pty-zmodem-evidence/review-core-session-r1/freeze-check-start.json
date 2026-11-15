@@ -1,0 +1,14 @@
+{
+  "checked_utc": "2026-11-15T08:38:16.684516+00:00",
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+  "expected_manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+  "base_sha": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "groups": {
+    "inputs": 570,
+    "scripts": 12
+  },
+  "mismatches": [],
+  "head_raw": "ref: refs/heads/feature/editor-unicode-codec-20261114",
+  "head_resolved": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c"
+}

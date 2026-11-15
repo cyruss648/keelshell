@@ -1,0 +1,48 @@
+{
+  "sys_platform": "linux",
+  "os_name": "posix",
+  "python_version": "3.11.2 (main, Oct  7 2026, 12:35:07) [GCC 12.2.0]",
+  "python_executable": "/usr/bin/python3",
+  "kernel": {
+    "system": "Linux",
+    "node": "0e6a7e3b1e7e",
+    "release": "7.1.10-200.fc44.aarch64",
+    "version": "#1 SMP PREEMPT_DYNAMIC Sun Aug 23 16:21:29 UTC 2026",
+    "machine": "aarch64",
+    "processor": ""
+  },
+  "tools": {
+    "python3": {
+      "path": "/usr/bin/python3",
+      "version": "Python 3.11.2",
+      "returncode": 0
+    },
+    "rz": {
+      "path": "/usr/bin/rz",
+      "version": "rz (GNU lrzsz) 0.12.21rc",
+      "returncode": 0
+    },
+    "sz": {
+      "path": "/usr/bin/sz",
+      "version": "sz (lrzsz) 0.12.21rc",
+      "returncode": 0
+    },
+    "sshd": {
+      "path": "/usr/sbin/sshd",
+      "version": "OpenSSH_9.2, OpenSSL 3.0.20 7 Apr 2026",
+      "returncode": 0
+    },
+    "setfacl": {
+      "path": "/usr/bin/setfacl",
+      "version": "setfacl 2.3.1",
+      "returncode": 0
+    },
+    "getfacl": {
+      "path": "/usr/bin/getfacl",
+      "version": "getfacl 2.3.1",
+      "returncode": 0
+    }
+  },
+  "python38_available": false,
+  "python38_path": null
+}

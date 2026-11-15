@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/usr/bin/file",
+    "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+    "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+  "exit_code": 0,
+  "pid": 36564,
+  "reaped": true,
+  "seconds": 0.01,
+  "stderr": "007-binary-file.stderr.log",
+  "stdout": "007-binary-file.stdout.log",
+  "timed_out": false
+}

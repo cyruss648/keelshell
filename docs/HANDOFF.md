@@ -1,5 +1,53 @@
 # KeelShell 当前交接 — 2026-11-15
 
+## 当前批次：审核式 PTY Zmodem 候选，工程门禁与源码复核通过
+
+基线为 `721bad2157da8d3a0bc11a1eab5ac59b6616aa9c`，本批尚未提交。
+当前为 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
+core 协议、session 文件审核、安全发布、单一 PTY 写入通道和原生审核已集成；
+仍只本地提交，不 push，完整产品与 FILE-05/M4 保持开放。
+设计见 [ADR 0136](adr/0136-reviewed-pty-zmodem.md)及[使用限制](product/ZMODEM.md)。
+最终输入为[持久冻结](testing/records/2026-11-15-reviewed-pty-zmodem-evidence/frozen-inputs-r3.json)，`570 + 12`，
+SHA-256 `14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882`。
+
+作者实际通过 core `65/65`、session lib `27/27`、session integration `18/18`、
+app Zmodem `19/19`、完整 bridge `6/6`；app 两组有重叠，不叠加计数。
+两名新非作者已经关闭四项 P2 与一项 P3，当前均 APPROVE、零开放 P0–P3，
+并绑定 r3 的 `582/582` 输入；其执行使用父预构建稳定副本，没有独立重编译。
+原始失败、notice 与限定结论均保留；源码批准不等于互操作或完整产品验收。
+所有实现与复核 agent 均已关闭、会话已归档。三个实现 worktree 已受管归档，
+core/Linux 的早期活动任务保护拒绝保持原件，后续已成功且路径实际不存在。
+没有绕过保护或清理其他任务 WIP。
+
+完整 gate r1 主动停止/reap `exit -15`，r2 `exit 1` 于 remote_only 架构 guard：
+新 test-only 文件缺少首行 inner cfg 标记。补齐标记后 guard `5/5`、fmt 通过；
+r2→r3 仅该属性与空行，所有生产输入相同。最终 `full-gate-r3` 已实际取回
+`exit 0 / 613.125s / reaped`：普通 Rust `2876/0/34 ignored`、rustdoc `14/0`、
+Python `141 run / 1 skipped`，fmt、严格 workspace all-targets Clippy、`x.y`
+策略及三组 AI controller 全部通过。新增 `129` 项逐名存在并在最终 gate 通过，
+已经包含于总数；门禁后 `570 + 12` 输入零 drift。原 reviewer 签署时门禁仍在
+运行，父已核验相同冻结的成功终态，满足其工程条件，未改写原报告。
+唯一 Cargo target 一直属于本主树。
+正常 GUI/MCP arm64 Mach-O 已实际构建通过，9.632s；没有新原生桌面交互验收。
+
+直接 PTY 继续 `HOLD/PARTIAL`：本机最终生产输入 r6 `6/7`，Debian r2/r3
+`5/7`、`4/7`；部分完整 FileSaved 后收到 ZFIN、peer 退出 0，却缺最终 OO。
+不以旧 r5 `7/7` 或 pipe 对照补签 Finished。最终 Linux relay 完整周期
+`exit 0 / 95.217s`，包含真实 archive/ACL `17/17`、独立 reference、应用 relay
+`7/7` 和清理；它不签直接 PTY、Linux Rust 本地文件后端或 Linux 桌面。
+所有自有 fixture 容器、进程和临时密钥已按身份核验回收，其他任务资源保留。
+Windows Zmodem 文件选择显式停用，Python 3.8 runtime 不可用。
+
+继续从[本批记录](testing/records/2026-11-15-reviewed-pty-zmodem.md)和
+[持久证据](testing/records/2026-11-15-reviewed-pty-zmodem-evidence/README.md)
+的回执、逐名库存、原始 review 与保留失败接续。源码、工程、单文件保存、
+批次握手及三平台原生分别验收；没有新的模型/用户权限自动授予或远端写入重放。
+747 份原件已无损导出并校验，随后回收本批重复运行目录、稳定测试副本与临时
+peer，共 654,860,244 字节；[最终清理](testing/records/2026-11-15-reviewed-pty-zmodem-evidence/cleanup-final.json)
+保留唯一有效 target、其他任务 WIP、受保护 worktree 和容器。
+下一步优先定位两版真实 peer 在直接 PTY 下缺最终 OO 的原因，再以新冻结和
+明确的直接 PTY 结果验收；relay 对照不替代该项，Windows 安全后端和原生矩阵单列。
+
 先读[AGENTS](../AGENTS.md)、本页、[路线图](ROADMAP.md)及
 [共享 Cargo 指南](testing/SHARED_TARGET.md)。时间使用 Asia/Shanghai，
 原始回执 UTC 保持。上一阶段完整过程保存在

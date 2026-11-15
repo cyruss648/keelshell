@@ -1,0 +1,17 @@
+{
+  "id": "APP-BRIDGE-R1-001",
+  "severity": "P2",
+  "title": "No-offer receive terminal result never requests the exact input handoff",
+  "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+  "line_start": 369,
+  "line_end": 400,
+  "trigger": "Deliver valid ZRQINIT in one PTY event, then peer cancellation or a protocol failure in a later event, before the first ZFILE offer. The connection itself stays open.",
+  "evidence": [
+    "session zmodem.rs:585-618 starts a receive lease but emits no UI event",
+    "ssh_bridge_zmodem.rs:181-189 captures that lease and sets safety.active",
+    "terminal_zmodem.rs:369-400 only requests ResumeInput for a matching current card; no-offer certain terminal outcomes fall through",
+    "ssh_bridge_zmodem.rs:152-178 clears active only after exact ResumeInput and flushed writes"
+  ],
+  "impact": "Ordinary input remains rejected and tab/window close remains blocked indefinitely; there is no current transfer card from which the user can cancel or recover.",
+  "verification": "Source-level control-flow proof, not independently recompiled or dynamically reproduced in production."
+}

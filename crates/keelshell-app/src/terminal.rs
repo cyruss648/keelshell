@@ -35,9 +35,12 @@ pub(crate) use lifecycle::TransportState;
 mod text_input_tests;
 #[path = "terminal_workers.rs"]
 mod workers;
+#[path = "terminal_zmodem.rs"]
+mod zmodem;
 pub use input::TerminalCommand;
 use input::{Composition, InputQueue};
 use output::{FRAME_ANSI_EVENTS, FRAME_BYTES, FRAME_TRANSPORT_EVENTS, OutputQueue, PARSER_CHUNK};
+pub(crate) use zmodem::Safety as ZmodemSafety;
 
 actions!(terminal, [QuitTerminalApp]);
 
@@ -127,6 +130,11 @@ type InputSelectionHandler = Box<dyn Fn(&mut App)>;
 pub struct TerminalView {
     lifecycle: lifecycle::Lifecycle,
     pub title: String,
+    // The authenticated route target is separate from the remote-controlled OSC
+    // window title. File-transfer reviews must never trust a title as identity.
+    transport_target: Option<String>,
+    zmodem: zmodem::State,
+    zmodem_focus: FocusHandle,
     pub status: Message,
     pub emulator: Emulator,
     focus: FocusHandle,
@@ -226,6 +234,9 @@ impl TerminalView {
         Self {
             lifecycle: lifecycle::Lifecycle::default(),
             title,
+            transport_target: None,
+            zmodem: zmodem::State::default(),
+            zmodem_focus: cx.focus_handle().tab_stop(false),
             status: Message::new("未连接", "Not connected"),
             emulator,
             focus: cx.focus_handle(),
@@ -266,11 +277,17 @@ impl TerminalView {
         palette
     }
 
+    pub(crate) fn attach_transport_target(&mut self, target: String) {
+        self.transport_target = Some(target);
+    }
+
     fn poll(&mut self, cx: &mut Context<Self>) {
         // Hidden terminals can receive OSC queries before their next render.
         self.sync_default_colors(cx);
         let started = Instant::now();
         let mut changed = self.poll_lifecycle();
+        self.poll_zmodem(cx);
+        self.retry_zmodem_resume();
         changed |= !self.exited && !self.pending.is_empty();
         if self.search_found && !self.emulator.has_search_match() {
             self.invalidate_search_feedback();
@@ -340,6 +357,7 @@ impl TerminalView {
                         self.status = Message::new("已连接", "Connected");
                     }
                 }
+                SessionEvent::Zmodem(event) => self.zmodem_event(event, cx),
                 SessionEvent::Exited { code, .. } if !self.lifecycle_managed() => {
                     self.status =
                         Message::new(format!("会话已退出（{code}）"), format!("Exited ({code})"));
@@ -383,6 +401,9 @@ impl TerminalView {
         if !self.is_open() {
             return;
         }
+        if self.zmodem_input_blocked() {
+            self.pending.clear_writes();
+        }
         for _ in 0..64 {
             let Some(command) = self.pending.pop() else {
                 break;
@@ -406,6 +427,15 @@ impl TerminalView {
         }
     }
     fn enqueue(&mut self, bytes: Vec<u8>, scroll: bool) {
+        if self.zmodem_input_blocked() {
+            if scroll {
+                self.status = Message::new(
+                    "Zmodem 占用终端，普通输入未发送。",
+                    "Zmodem owns the terminal. Ordinary input was not sent.",
+                );
+            }
+            return;
+        }
         if !self.is_open() {
             self.status = Message::new(
                 "终端已关闭，输入未发送",
@@ -450,6 +480,7 @@ impl TerminalView {
     pub(crate) fn owns_input_focus(&self, window: &Window, cx: &App) -> bool {
         self.focus.is_focused(window)
             || (self.search_open && self.search_focus.contains_focused(window, cx))
+            || self.zmodem_focus.contains_focused(window, cx)
     }
     pub(crate) fn is_open(&self) -> bool {
         !self.cancelled.load(Ordering::Acquire)
@@ -466,6 +497,12 @@ impl TerminalView {
 
     /// Admit a complete user command; success means queued, not remotely executed.
     pub fn try_write(&mut self, bytes: Vec<u8>) -> Result<(), Message> {
+        if self.zmodem_input_blocked() {
+            return Err(Message::new(
+                "Zmodem 占用当前终端，命令未被接收。",
+                "Zmodem owns this terminal. The command was not accepted.",
+            ));
+        }
         if !self.is_open() {
             return Err(Message::new(
                 "远程终端已关闭，命令未被接收",
@@ -1099,6 +1136,7 @@ impl Render for TerminalView {
             .overflow_hidden()
             .child(surface)
             .when_some(self.search_bar(cx), |element, bar| element.child(bar))
+            .when_some(self.zmodem_bar(cx), |element, bar| element.child(bar))
     }
 }
 

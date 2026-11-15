@@ -942,6 +942,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd17eb909a8c6a894926bfcc3400a4bb0e732f5a57d37b1f14e8b29e329bace8"
 
 [[package]]
+name = "calcifer-macos-acl"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d623f1bbaccbe0d1c6a9e4d2366feef6e179ac4e235aa86342601caf29358df4"
+
+[[package]]
 name = "calloop"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4545,6 +4551,7 @@ name = "keelshell-session"
 version = "0.1.0"
 dependencies = [
  "base64 0.23.1",
+ "calcifer-macos-acl",
  "keelshell-core",
  "rand 0.10.3",
  "russh",

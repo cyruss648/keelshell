@@ -1,0 +1,17 @@
+{
+  "id": "APP-BRIDGE-R1-004",
+  "severity": "P3",
+  "title": "Verified download receipts are overwritten at protocol completion or next offer",
+  "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+  "line_start": 278,
+  "line_end": 306,
+  "trigger": "Successful download emits FileSaved, then Finished, or a following DownloadOffered; both may be processed in one foreground poll.",
+  "impact": "The only saved-file path/byte count/SHA256 receipt is replaced by generic completion text or the next offer. A user cannot inspect or retain the verified saved-file receipt after completion; it may never be painted. Batch downloads also lose every preceding saved-file receipt.",
+  "evidence": [
+    "FileSaved stores data only in current.feedback at terminal_zmodem.rs:290-299",
+    "Finished calls end_zmodem and overwrites that field at terminal_zmodem.rs:379-381",
+    "DownloadOffered replaces the entire current Transfer at terminal_zmodem.rs:188-208",
+    "State/Transfer contain no saved receipt collection and render only the current summary/feedback and unresolved results"
+  ],
+  "verification": "Source-level data-flow proof; no new test compiled."
+}

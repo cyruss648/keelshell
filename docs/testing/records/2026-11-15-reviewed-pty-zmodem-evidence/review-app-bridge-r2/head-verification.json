@@ -1,0 +1,4 @@
+{
+  "head_sha": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "method": "Read git pointer, HEAD and branch ref only; no Git command invoked"
+}

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "scripts",
+    "-p",
+    "test_openssh_interop.py",
+    "-v"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "elapsed_seconds": 0.062,
+  "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/python-openssh-helper-r1.log"
+}

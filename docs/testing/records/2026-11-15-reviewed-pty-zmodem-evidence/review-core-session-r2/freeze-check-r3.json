@@ -1,0 +1,74 @@
+{
+  "checked_utc": "2026-11-15T09:13:31.243564+00:00",
+  "manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/frozen-inputs-r3.json",
+  "manifest_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+  "r1_manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+  "r2_manifest_sha256": "5119d1724074afb5332148f5002b4614767f6ec2837acd6af62a596b0d8ebfb1",
+  "groups": {
+    "inputs": 570,
+    "scripts": 12
+  },
+  "checked": 582,
+  "mismatches": [],
+  "r2_r3_delta": [
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-session/src/zmodem/local/tests.rs",
+      "r2_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+      "r3_sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81"
+    }
+  ],
+  "r1_r3_delta": [
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/ssh_bridge.rs",
+      "r1_sha256": "a71ab98f3a8d1bb31a9acc0e6d7372e47ad7966f8d53422d5b8951a0997c20e1",
+      "r3_sha256": "967204fa4546bf2420240c86900539a09e505ddfc14341a0e3e3df11dd9da3b6"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/terminal_zmodem.rs",
+      "r1_sha256": "d4ea72faccf859df9efe36ccd77ab1e872dbbc953c4739a62530fe642488a338",
+      "r3_sha256": "6766b9c6c6656b2bafe87ac62b4f55879ab53f57db99b56d36f97ceb5e635e8d"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+      "r1_sha256": "9f864b6ebb04ac001f356f495cd029e43c85353a1cd70bdfe319b284316cc68d",
+      "r3_sha256": "8c271a421d7fab7871728257a817efcb6cdbb5065e028fbfe8ad465d0f3abc23"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-session/src/zmodem/local/tests.rs",
+      "r1_sha256": "1addb28eeb5cae0ec18798fe2632b4cb2ae9294ccfefa6326f08601db43c60f4",
+      "r3_sha256": "4038c0432d04ab4aede6a3b50ba658de5a5f7bbb94c9dfcef55a8280dc26ca81"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-session/src/zmodem/tests.rs",
+      "r1_sha256": "50dc65aa0e22bc729453f555f6f4becbf00408440d2e8a5d384a289f53e52a42",
+      "r3_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-session/src/zmodem.rs",
+      "r1_sha256": "1c1ce173d51a0f4d40dad10357b5f17e53dda1973a97639f9ddffa37bd1b36d6",
+      "r3_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d"
+    },
+    {
+      "group": "inputs",
+      "path": "crates/keelshell-session/tests/zmodem_openssh.rs",
+      "r1_sha256": "7a7ee3b4dd063776d84f5cd462ebbbebf574bd9d630a751363128bfb3490cf6d",
+      "r3_sha256": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1"
+    }
+  ],
+  "exact_test_delta_proven": "Only prepend #![cfg(test)] and one blank line; remove those bytes in memory and SHA exactly matches r2",
+  "core_unchanged_from_r1": true,
+  "scripts_unchanged_from_r1": true,
+  "production_inputs_unchanged_from_r2": true,
+  "session_fix_source_sha256": "034ebc6dfa3a2c512ee5a0106f9554c80a23b836235dda60c4fec8b5496c4f6d",
+  "session_fix_tests_sha256": "aa0d3b1baf5ff639e4928128d7910b3eb1cc70521e8ced18dc8f2090bb9dbcdd",
+  "head_resolved": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "head_read_method": "HEAD/ref file text read for r2; no git process",
+  "final_gate_complete": false
+}

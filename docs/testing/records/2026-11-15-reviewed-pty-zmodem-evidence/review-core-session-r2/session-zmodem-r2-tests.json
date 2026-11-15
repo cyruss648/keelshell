@@ -1,0 +1,28 @@
+{
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-zmodem-r2",
+  "sha256_before": "7c0a2eaaad3ea3d5c0e1a769c364b2cc93ddabce273a2200f5978780e2640a26",
+  "sha256_after": "7c0a2eaaad3ea3d5c0e1a769c364b2cc93ddabce273a2200f5978780e2640a26",
+  "started_utc": "2026-11-15T09:01:19.444228+00:00",
+  "elapsed_seconds": 0.166883,
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-zmodem-r2",
+    "--test-threads=1"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "environment_overrides": {
+    "TMPDIR": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-core-session-r2/tmp-session-zmodem-r2/"
+  },
+  "timeout_seconds": 60,
+  "exit_code": 0,
+  "timed_out": false,
+  "counts": {
+    "passed": 18,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered_out": 0
+  },
+  "executed_exact_inventory": true,
+  "independent_rebuild": false,
+  "parent_build_metadata": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/session-zmodem-binary-r2.json"
+}

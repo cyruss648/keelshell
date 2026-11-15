@@ -1153,6 +1153,14 @@ impl Workspace {
         let Some(index) = self.tabs.iter().position(|tab| tab.entity_id() == id) else {
             return;
         };
+        if self.tabs[index].read(cx).zmodem_close_busy() {
+            self.status = Message::new(
+                "请先在该终端完成或取消 Zmodem，并核对未知结果。",
+                "Finish or cancel Zmodem in that terminal and inspect unknown outcomes first.",
+            );
+            cx.notify();
+            return;
+        }
         let closed_active = self.tabs.get(self.active).map(Entity::entity_id) == Some(id);
         let closed_restored = self.restored_tabs.contains_key(&id);
         if self
@@ -1448,6 +1456,7 @@ impl Workspace {
             session.clone(),
             self.runtime.clone(),
             title,
+            host.clone(),
             self.state.settings.font_size,
             self.state.settings.scrollback_lines,
             cx,

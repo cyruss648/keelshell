@@ -1,0 +1,17 @@
+{
+  "checked_utc": "2026-11-15T08:38:25.092248+00:00",
+  "manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+  "expected_manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+  "baseline": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "checks": {
+    "inputs": {
+      "count": 570,
+      "mismatches": []
+    },
+    "scripts": {
+      "count": 12,
+      "mismatches": []
+    }
+  },
+  "verification_method": "file bytes SHA256; read .git pointer/HEAD/ref without invoking git"
+}

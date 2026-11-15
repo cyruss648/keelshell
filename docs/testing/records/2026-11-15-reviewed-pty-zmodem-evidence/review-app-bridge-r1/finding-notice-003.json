@@ -1,0 +1,17 @@
+{
+  "id": "APP-BRIDGE-R1-003",
+  "severity": "P2",
+  "title": "A duplicate cancel rejection reopens an ended UI transfer",
+  "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/terminal_zmodem.rs",
+  "line_start": 334,
+  "line_end": 357,
+  "trigger": "Submit Cancel(id) twice while processing. Cancel remains enabled for Stage::Running. Controller emits Cancelled(id), then ActionRejected(id, Stale), since the first cancel removed its lease.",
+  "impact": "The late rejection resets Stage::Ended to Upload/Download; ordinary input and close stay blocked by the resurrected UI card although the bridge lease has ended. Re-prepare/re-cancel is stale and cannot end the resurrected card.",
+  "evidence": [
+    "terminal_zmodem.rs:421 admits a second Cancel for the same current UUID, regardless of Stage",
+    "terminal_zmodem.rs:647-655 leaves cancel enabled in Running",
+    "session zmodem.rs:485-487 rejects a stale second cancel after end clears transfer",
+    "terminal_zmodem.rs:334-357 does not reject post-terminal ActionRejected notifications"
+  ],
+  "verification": "Source-level control-flow proof only; no new test compiled."
+}

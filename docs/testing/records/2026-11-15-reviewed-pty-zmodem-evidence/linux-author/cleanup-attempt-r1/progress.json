@@ -1,0 +1,49 @@
+{
+  "steps": [
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 23528,
+      "returncode": 125,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 2.887,
+      "stdout_log": "001-container-identity.stdout.log",
+      "stderr_log": "001-container-identity.stderr.log"
+    },
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "013138d70686a25b2a4b90897e7d6a8206d9825cdb9a56dbd29c4e097579200e"
+      ],
+      "pid": 23586,
+      "returncode": 125,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 2.924,
+      "stdout_log": "002-container-identity.stdout.log",
+      "stderr_log": "002-container-identity.stderr.log"
+    }
+  ],
+  "resources": [
+    {
+      "container_id": "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+      "name": "keelshell-file-interop-504212acd132",
+      "owner": "504212acd1324ac694dd5ba1e2cf1950",
+      "removed": false,
+      "error": "FixtureFailure: container-identity failed; inspect 001-container-identity logs"
+    }
+  ]
+}

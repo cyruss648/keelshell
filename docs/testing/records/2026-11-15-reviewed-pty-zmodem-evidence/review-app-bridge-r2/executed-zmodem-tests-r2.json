@@ -1,0 +1,21 @@
+[
+  "ssh_bridge::tests::zmodem_bridge_rejects_queued_input_and_requires_exact_post_cancel_handoff",
+  "ssh_bridge::tests::zmodem_detected_during_flow_control_stops_the_inflight_ordinary_write",
+  "ssh_bridge::tests::zmodem_final_oo_is_acknowledged_only_after_actual_write_completion",
+  "terminal::zmodem::tests::zmodem_cancel_submits_once_while_waiting_for_its_terminal_event",
+  "terminal::zmodem::tests::zmodem_complete_reviews_keep_actions_visible_across_registered_themes",
+  "terminal::zmodem::tests::zmodem_completion_requests_exact_input_handoff_without_replaying_old_bytes",
+  "terminal::zmodem::tests::zmodem_late_stale_rejection_preserves_each_terminal_result",
+  "terminal::zmodem::tests::zmodem_live_lease_blocks_input_before_its_ui_notification_is_read",
+  "terminal::zmodem::tests::zmodem_preoffer_cancelled_requests_exact_handoff",
+  "terminal::zmodem::tests::zmodem_preoffer_failed_requests_exact_handoff",
+  "terminal::zmodem::tests::zmodem_preoffer_finished_requests_exact_handoff",
+  "terminal::zmodem::tests::zmodem_preoffer_handoffs_survive_backpressure_and_stale_ids",
+  "terminal::zmodem::tests::zmodem_retained_confirm_cannot_authorize_a_replaced_offer",
+  "terminal::zmodem::tests::zmodem_review_binds_the_actual_endpoint_despite_remote_osc_titles",
+  "terminal::zmodem::tests::zmodem_stale_terminal_ids_cannot_end_or_unlock_the_current_offer",
+  "terminal::zmodem::tests::zmodem_unknown_acknowledgement_waits_for_the_real_publication_latch",
+  "terminal::zmodem::tests::zmodem_unknown_result_survives_later_success_and_rejects_unread_acknowledgement",
+  "terminal::zmodem::tests::zmodem_verified_save_history_preserves_complete_recent_receipts_with_a_bound",
+  "terminal::zmodem::tests::zmodem_verified_saves_survive_next_offer_finished_and_dismissal"
+]

@@ -1,0 +1,67 @@
+"""Losslessly preserve this batch's text evidence, excluding binaries and temp data."""
+import gzip
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+TARGET = ROOT / "docs/testing/records/2026-11-15-reviewed-pty-zmodem-evidence"
+SOURCES = (
+    (ROOT / "work/zmodem-integration-20261115", ""),
+    (ROOT / "work/zmodem-linux-interop-20261115", "linux-author"),
+)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    TARGET.mkdir(exist_ok=True)
+    manifest = {}
+    for source, prefix in SOURCES:
+        for path in sorted(source.rglob("*")):
+            if not path.is_file() or path.is_symlink():
+                continue
+            relative = path.relative_to(source)
+            if any(
+                part in ("tmp", "stable-tests", "bin", "__pycache__") or part.startswith("tmp-")
+                for part in relative.parts
+            ):
+                continue
+            if path.suffix not in (".json", ".log", ".txt", ".md", ".py", ".out", ".html", ".rb") and path.name not in ("COPYING", "AUTHORS", "README", "NEWS"):
+                continue
+            data = path.read_bytes()
+            key = str(Path(prefix) / relative)
+            name = key + (".txt" if path.suffix == ".py" else "")
+            compressed = path.suffix in (".log", ".out")
+            if compressed:
+                name += ".gz"
+                saved = gzip.compress(data, mtime=0)
+            else:
+                saved = data
+            destination = TARGET / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            if destination.exists():
+                if destination.read_bytes() != saved:
+                    raise SystemExit("refusing to replace changed evidence: " + name)
+            else:
+                destination.write_bytes(saved)
+            restored = gzip.decompress(destination.read_bytes()) if compressed else destination.read_bytes()
+            if restored != data:
+                raise SystemExit("lossless verification failed: " + key)
+            manifest[key] = {
+                "source_bytes": len(data), "source_sha256": sha(data),
+                "artifact": name, "artifact_bytes": len(saved),
+                "artifact_sha256": sha(saved), "verified_lossless": True,
+            }
+    document = json.dumps({"files": manifest, "count": len(manifest)}, ensure_ascii=False, indent=2) + "\n"
+    path = TARGET / "archive-manifest.json"
+    if path.exists() and path.read_text() != document:
+        raise SystemExit("manifest exists; use a new output directory for different inputs")
+    path.write_text(document)
+    print(json.dumps({"files": len(manifest), "manifest_sha256": sha(document.encode())}))
+
+
+if __name__ == "__main__":
+    main()

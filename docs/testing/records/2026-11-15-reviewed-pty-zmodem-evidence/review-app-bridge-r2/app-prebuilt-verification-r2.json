@@ -1,0 +1,14 @@
+{
+  "checked_utc": "2026-11-15T09:02:18.344007+00:00",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r2",
+  "sha256": "8afd5978df434493edfb24f6b50bb5c3343d747245e1bdc7da04edb165368222",
+  "metadata_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/app-binary-r2.json",
+  "metadata_sha256": "972295c06b6bb6f925da6c62c3f8eced651d111e6cf030f92aaf40604a1328ea",
+  "inventory_sha256": "612aee50434b14eba3c0c238458a26f8c22802917497a02d8c623bb39f062001",
+  "inventory_exact_match": true,
+  "test_count": 1227,
+  "metadata_test_names_exact_match": true,
+  "independent_recompile": false,
+  "built_by": "app-zmodem-r2",
+  "freeze": "frozen-inputs-r2.json"
+}

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-session",
+    "--test",
+    "zmodem_openssh",
+    "--locked",
+    "--no-run"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "interop-compile-r3",
+  "pid": 63713,
+  "started_utc": "2026-11-15T08:43:46.388861+00:00",
+  "finished_utc": "2026-11-15T08:43:46.988810+00:00",
+  "seconds": 0.6,
+  "exit": 0,
+  "timed_out": false,
+  "log_sha256": "bcfb1229ef8b8d87a6163c4dd935a64441939423d18d9b77dc850e832275951a",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

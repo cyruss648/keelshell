@@ -1,0 +1,174 @@
+{
+  "archive_sha256": "112f91059fbd118e016d800c1a5c5a1702e965d8b9bfbda6015e44e20bfb93c9",
+  "binaries": {
+    "lrz": {
+      "bytes": 121920,
+      "path": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+      "sha256": "8ae7357c579d181fafa209132d4b6f40fff4eaaa00c8178b828f8d8b490d1008",
+      "version_output": "lrz (GNU lrzsz) 0.13.1"
+    },
+    "lsz": {
+      "bytes": 123280,
+      "path": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz",
+      "sha256": "5e7c1c83b7a211f2c1bea5a30037fcfb20ca37c25d71d4d290ce14a954f1ad90",
+      "version_output": "lsz (lrzsz) 0.13.1"
+    }
+  },
+  "cargo_invoked": false,
+  "commands": [
+    {
+      "command": [
+        "/usr/bin/clang",
+        "--version"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+      "exit_code": 0,
+      "pid": 34839,
+      "reaped": true,
+      "seconds": 0.01,
+      "stderr": "001-clang-version.stderr.log",
+      "stdout": "001-clang-version.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/usr/bin/sw_vers"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+      "exit_code": 0,
+      "pid": 34840,
+      "reaped": true,
+      "seconds": 0.008,
+      "stderr": "002-macos-version.stderr.log",
+      "stdout": "002-macos-version.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/usr/bin/uname",
+        "-a"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+      "exit_code": 0,
+      "pid": 34841,
+      "reaped": true,
+      "seconds": 0.002,
+      "stderr": "003-host-kernel.stderr.log",
+      "stdout": "003-host-kernel.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/external-source/lrzsz-0.13.1/configure",
+        "--disable-nls",
+        "--prefix=/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/build",
+      "exit_code": 0,
+      "pid": 34842,
+      "reaped": true,
+      "seconds": 5.874,
+      "stderr": "004-configure.stderr.log",
+      "stdout": "004-configure.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/usr/bin/make",
+        "-j",
+        "4"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/build",
+      "exit_code": 0,
+      "pid": 36449,
+      "reaped": true,
+      "seconds": 0.415,
+      "stderr": "005-make.stderr.log",
+      "stdout": "005-make.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+        "--version"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+      "exit_code": 0,
+      "pid": 36560,
+      "reaped": true,
+      "seconds": 0.263,
+      "stderr": "006-lrz-version.stderr.log",
+      "stdout": "006-lrz-version.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz",
+        "--version"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+      "exit_code": 0,
+      "pid": 36562,
+      "reaped": true,
+      "seconds": 0.263,
+      "stderr": "006-lsz-version.stderr.log",
+      "stdout": "006-lsz-version.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/usr/bin/file",
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+      "exit_code": 0,
+      "pid": 36564,
+      "reaped": true,
+      "seconds": 0.01,
+      "stderr": "007-binary-file.stderr.log",
+      "stdout": "007-binary-file.stdout.log",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/usr/bin/otool",
+        "-L",
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lrz",
+        "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/bin/lsz"
+      ],
+      "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+      "exit_code": 0,
+      "pid": 36565,
+      "reaped": true,
+      "seconds": 0.022,
+      "stderr": "008-library-dependencies.stderr.log",
+      "stdout": "008-library-dependencies.stdout.log",
+      "timed_out": false
+    }
+  ],
+  "environment": {
+    "CC": "/usr/bin/clang",
+    "CFLAGS": "-O2 -Wno-implicit-int",
+    "LC_ALL": "C",
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "TMPDIR": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/tmp"
+  },
+  "extracted_at": "2026-11-15T08:07:25.401853+00:00",
+  "finished_at": "2026-11-15T08:07:32.284838+00:00",
+  "host_install": false,
+  "license": {
+    "file": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer/COPYING",
+    "sha256": "dcc100d4161cc0b7177545ab6e47216f84857cda3843847c792a25289852dcaa",
+    "spdx_from_formula": "GPL-2.0-or-later"
+  },
+  "patches_applied": [],
+  "peer_directory": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer",
+  "shared_target_accessed": false,
+  "source_directory": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/external-source/lrzsz-0.13.1",
+  "source_files_unchanged": true,
+  "source_verification": "source-verification.json",
+  "started_at": "2026-11-15T08:07:25.389894+00:00",
+  "status": "native_peer_built",
+  "version": "0.13.1"
+}

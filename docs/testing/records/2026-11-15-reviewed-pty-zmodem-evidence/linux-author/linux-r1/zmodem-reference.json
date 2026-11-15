@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "outcome": "passed",
+  "source_bytes": 262156,
+  "source_sha256": "67a361ed3d5941e4a0bddecd317aaf99728f0989e6d1a1612c2ffa3b570c0b2a",
+  "received": {
+    "bytes": 262156,
+    "sha256": "67a361ed3d5941e4a0bddecd317aaf99728f0989e6d1a1612c2ffa3b570c0b2a"
+  },
+  "exit_codes": [
+    0,
+    0
+  ],
+  "wire_bytes": {
+    "sender_to_receiver": 271015,
+    "receiver_to_sender": 166
+  },
+  "elapsed_seconds": 30.603,
+  "transport": "two real OpenSSH SSH PTYs with stty raw -echo -onlcr",
+  "boundary": "packaged Linux lrzsz peer interoperability, not application acceptance"
+}

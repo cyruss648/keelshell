@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/external-source/lrzsz-0.13.1/configure",
+    "--disable-nls",
+    "--prefix=/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/peer"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1/build",
+  "exit_code": 0,
+  "pid": 34842,
+  "reaped": true,
+  "seconds": 5.874,
+  "stderr": "004-configure.stderr.log",
+  "stdout": "004-configure.stdout.log",
+  "timed_out": false
+}

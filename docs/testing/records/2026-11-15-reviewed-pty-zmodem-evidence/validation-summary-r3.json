@@ -1,0 +1,69 @@
+{
+  "recorded_utc": "2026-11-15T09:22:44.916809+00:00",
+  "freeze": "frozen-inputs-r3.json",
+  "freeze_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+  "integrity_after_gate": {
+    "inputs": {
+      "count": 570,
+      "mismatches": []
+    },
+    "scripts": {
+      "count": 12,
+      "mismatches": []
+    }
+  },
+  "gate_receipt": "logs/full-gate-r3.json",
+  "gate_exit": 0,
+  "gate_seconds": 613.125,
+  "gate_log_sha256": "2970e3d39c8d8644a45a7357849f291188ab015389e2d92f41fdcbf9057f15dd",
+  "ordinary": {
+    "passed": 2876,
+    "failed": 0,
+    "ignored": 34
+  },
+  "ordinary_by_package": {
+    "keelshell-ai": {
+      "passed": 194,
+      "failed": 0,
+      "ignored": 5
+    },
+    "keelshell-app": {
+      "passed": 1225,
+      "failed": 0,
+      "ignored": 2
+    },
+    "keelshell-core": {
+      "passed": 803,
+      "failed": 0,
+      "ignored": 0
+    },
+    "keelshell-mcp": {
+      "passed": 77,
+      "failed": 0,
+      "ignored": 0
+    },
+    "keelshell-session": {
+      "passed": 577,
+      "failed": 0,
+      "ignored": 27
+    }
+  },
+  "rustdoc": {
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0
+  },
+  "python": {
+    "run": 141,
+    "skipped": 1
+  },
+  "commands": [
+    "Running: /opt/homebrew/opt/python@3.15/bin/python3.15 -m unittest discover -s scripts -p test_*.py",
+    "Running: cargo fmt --all --check",
+    "Running: cargo clippy --workspace --all-targets --locked -- -D warnings",
+    "Running: cargo test --workspace --locked -- --test-threads=4",
+    "Running: cargo test -p keelshell-ai --test local_agent_process --locked -- --readiness-error-tests",
+    "Running: cargo test -p keelshell-ai --test local_agent_directory_process --locked -- --observer-io-error-tests",
+    "Running: cargo test -p keelshell-ai --test local_agent_process --locked -- --controller-small-stack"
+  ]
+}

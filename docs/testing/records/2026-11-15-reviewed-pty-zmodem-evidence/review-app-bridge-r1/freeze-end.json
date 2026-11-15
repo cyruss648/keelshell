@@ -1,0 +1,20 @@
+{
+  "checked_utc": "2026-11-15T08:44:49.269190+00:00",
+  "manifest_sha256": "0fb6bc9d7c1a845583c56c803796c92ccc73b0c590c9f3b29bcd83f292ca63d5",
+  "checks": {
+    "inputs": {
+      "count": 570,
+      "mismatches": [
+        {
+          "path": "crates/keelshell-session/tests/zmodem_openssh.rs",
+          "expected": "7a7ee3b4dd063776d84f5cd462ebbbebf574bd9d630a751363128bfb3490cf6d",
+          "actual": "819e4ae15f9779268f26094eaf8645644fb1abf9b8a5abe8c0d84a877498f7f1"
+        }
+      ]
+    },
+    "scripts": {
+      "count": 12,
+      "mismatches": []
+    }
+  }
+}

@@ -764,6 +764,7 @@ impl Workspace {
             session.clone(),
             self.runtime.clone(),
             title,
+            host.clone(),
             self.state.settings.font_size,
             self.state.settings.scrollback_lines,
             cx,

@@ -1,0 +1,27 @@
+{
+  "source": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/32494f010339b390/out/zmodem-32494f010339b390",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/session-zmodem-r2",
+  "sha256": "7c0a2eaaad3ea3d5c0e1a769c364b2cc93ddabce273a2200f5978780e2640a26",
+  "built_by": "session-integration-r4",
+  "inventory_sha256": "e39a1a336aa793671c6244bd0e34cb288c074d5b2ca64d8983b8b1ae948023b3",
+  "tests": [
+    "zmodem_controller_acquires_a_unique_lease_only_after_complete_valid_detection",
+    "zmodem_controller_cannot_rebind_review_to_a_different_authenticated_connection",
+    "zmodem_controller_changed_upload_selection_invalidates_previous_review",
+    "zmodem_controller_empty_receive_still_requires_review_publication_and_readback",
+    "zmodem_controller_existing_local_target_is_preserved_without_consuming_offer",
+    "zmodem_controller_local_claims_exclude_other_connections_and_existing_sftp_scopes",
+    "zmodem_controller_new_local_file_is_acknowledged_only_after_complete_no_replace_readback",
+    "zmodem_controller_next_file_gets_a_distinct_offer_and_no_previous_review_authority",
+    "zmodem_controller_old_lease_actions_cannot_cancel_a_new_request",
+    "zmodem_controller_preserves_fragmented_lookalikes_without_file_or_channel_authority",
+    "zmodem_controller_remote_command_frames_fail_closed_without_exec",
+    "zmodem_controller_stale_offer_cannot_select_a_destination",
+    "zmodem_controller_target_created_after_accept_is_preserved_without_saved_ack",
+    "zmodem_controller_target_created_after_review_rejects_confirmation_without_accepting_data",
+    "zmodem_controller_ui_events_support_session_event_clone_and_equality_without_file_bytes",
+    "zmodem_controller_unreviewed_data_cannot_create_a_file",
+    "zmodem_controller_upload_confirmation_rejects_same_length_source_edits_and_consumes_review",
+    "zmodem_controller_upload_reviews_complete_digests_before_releasing_any_source_bytes"
+  ]
+}

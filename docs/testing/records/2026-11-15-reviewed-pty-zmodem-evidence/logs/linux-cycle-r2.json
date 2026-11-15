@@ -1,0 +1,27 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/run_linux_file_interop.py",
+    "--host-package-bridge",
+    "--default-acl-root",
+    "--output",
+    "work/zmodem-integration-20261115/linux-cycle-r2",
+    "--command-timeout",
+    "180",
+    "--",
+    "work/zmodem-integration-20261115/stable-tests/zmodem-openssh-r1",
+    "--ignored",
+    "--test-threads=1"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "label": "linux-cycle-r2",
+  "pid": 59372,
+  "started_utc": "2026-11-15T08:39:27.792408+00:00",
+  "finished_utc": "2026-11-15T08:41:03.954932+00:00",
+  "seconds": 96.162,
+  "exit": 1,
+  "timed_out": false,
+  "log_sha256": "566f1e08eb6d5913f7bc28fc3d967dfbd8836eb4c1efca2f3517bf386a654c76",
+  "target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target"
+}

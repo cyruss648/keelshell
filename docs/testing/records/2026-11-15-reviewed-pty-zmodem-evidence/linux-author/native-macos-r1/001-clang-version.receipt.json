@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/clang",
+    "--version"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell/work/zmodem-linux-interop-20261115/native-macos-r1",
+  "exit_code": 0,
+  "pid": 34839,
+  "reaped": true,
+  "seconds": 0.01,
+  "stderr": "001-clang-version.stderr.log",
+  "stdout": "001-clang-version.stdout.log",
+  "timed_out": false
+}

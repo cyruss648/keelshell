@@ -1,0 +1,15 @@
+HTTP/1.1 200 Connection established
+
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+alt-svc: h3=":443"; ma=2592000
+content-type: application/gzip
+date: Sun, 15 Nov 2026 08:05:27 GMT
+etag: "dlw0coqq1qv4adae"
+last-modified: Sun, 04 Oct 2026 11:13:10 GMT
+server: Caddy
+vary: Accept-Encoding
+via: 1.1 Caddy
+content-length: 483782
+

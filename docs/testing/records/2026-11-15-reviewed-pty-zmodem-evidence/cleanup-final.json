@@ -1,0 +1,110 @@
+{
+  "recorded_utc": "2026-11-15T09:31:29.387480+00:00",
+  "scope": "only this Zmodem batch duplicate run directories, stable test copies and temporary peer binaries",
+  "persistent_manifest": {
+    "artifact": "archive-manifest.json",
+    "sha256": "2de4a6e9a79744962bbbcbfd874fe75f20f7d291e54f4adbf4cf330a95090d3f",
+    "count": 747,
+    "all_artifact_and_decoded_hashes_verified": true,
+    "all_nontemporary_source_files_checked_before_removal": true
+  },
+  "removed": [
+    {
+      "path": "work/zmodem-integration-20261115",
+      "file_count_before": 534,
+      "bytes_before": 653568657,
+      "absent_after": true
+    },
+    {
+      "path": "work/zmodem-linux-interop-20261115",
+      "file_count_before": 235,
+      "bytes_before": 1291587,
+      "absent_after": true
+    }
+  ],
+  "total_removed_bytes": 654860244,
+  "effective_cargo_target": {
+    "path": "work/recovery-batch-integration-20261115/target",
+    "exists": true,
+    "directory_identity_preserved": true,
+    "source_owner": "current checkout throughout this batch"
+  },
+  "implementation_worktree_paths_exist": {
+    "/Users/hdh/.codex/worktrees/zmodem-codec-20261115/keelshell": false,
+    "/Users/hdh/.codex/worktrees/zmodem-session-20261115/keelshell": false,
+    "/Users/hdh/.codex/worktrees/zmodem-linux-interop-20261115/keelshell": false
+  },
+  "local_feature_zmodem_branches": [],
+  "closed_agents": [
+    "01a1de16-dac4-7040-a7f3-130074a03cf2",
+    "01a1de1a-22a0-78b2-809d-e3c3bd8437bc",
+    "01a1de17-1d1c-7273-b349-caf2cee4a1e7",
+    "01a1de64-5b73-7d93-9855-061f44ddaedc",
+    "01a1de66-a7c7-7d30-9446-f8f9e041fa13",
+    "01a1de5a-7733-7590-89c5-f3c70b0f51ef",
+    "01a1de5a-b38a-7e21-b994-af507f519a79"
+  ],
+  "agents_evidence": "implementation-cleanup-r2.json; all seven already closed; no new agents during closeout",
+  "chat_state": "closed helper agents and archived helper chats; not a permanent deletion claim; unrelated chats preserved",
+  "fixture_cleanup": {
+    "real-pty-r6": {
+      "outcome": "failed",
+      "cleanup": {
+        "observed_processes_stopped": true,
+        "ancestry_unverified": [],
+        "owned_processes_stopped": true,
+        "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+        "tracked_process_identities": 41,
+        "temporary_directory_removed": true
+      }
+    },
+    "linux-cycle-r1": {
+      "outcome": "failed",
+      "cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      }
+    },
+    "linux-cycle-r2": {
+      "outcome": "failed",
+      "cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      }
+    },
+    "linux-cycle-r3": {
+      "outcome": "failed",
+      "cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      }
+    },
+    "linux-pipe-diagnostic-r1": {
+      "outcome": "passed",
+      "cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      }
+    },
+    "linux-final-relay-r1": {
+      "outcome": "passed",
+      "cleanup": {
+        "owned_host_processes_stopped": true,
+        "owned_container_absent": true,
+        "temporary_keys_removed": true
+      }
+    }
+  },
+  "owned_batch_process_matches_before_removal": [],
+  "full_gate": {
+    "receipt": "logs/full-gate-r3.json",
+    "exit": 0,
+    "reaped": true
+  },
+  "preserved": "current source checkout, sole effective Cargo target, unrelated WIP/worktrees/containers; historical failed receipts and original signed reviews",
+  "git_delivery": "not pushed; pending local candidate feature commit and input binding"
+}

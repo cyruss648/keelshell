@@ -5,6 +5,8 @@
 pub enum SessionEvent {
     /// Raw remote terminal bytes, including ANSI sequences and partial UTF-8.
     Data(Vec<u8>),
+    /// Reviewed Zmodem state for the existing remote PTY, without file contents.
+    Zmodem(crate::zmodem::ZmodemUiEvent),
     /// The remote process reported an exit status through its SSH channel.
     Exited {
         /// Exit status reported by the remote SSH server.

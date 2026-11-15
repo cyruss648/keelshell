@@ -1,0 +1,4 @@
+200
+https://raw.githubusercontent.com/Homebrew/homebrew-core/HEAD/Formula/l/lrzsz.rb
+1778
+0.624510

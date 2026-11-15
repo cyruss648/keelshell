@@ -1,0 +1,48 @@
+[
+  {
+    "name": "app-zmodem-r1",
+    "argv": [
+      "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+      "zmodem",
+      "--test-threads=1"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "elapsed_seconds": 0.231,
+    "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-zmodem-r1.log",
+    "independent_recompile": false
+  },
+  {
+    "name": "app-ssh-bridge-r1",
+    "argv": [
+      "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+      "ssh_bridge::tests::",
+      "--test-threads=1"
+    ],
+    "returncode": 101,
+    "timed_out": false,
+    "elapsed_seconds": 0.123,
+    "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-ssh-bridge-r1.log",
+    "independent_recompile": false
+  },
+  {
+    "name": "python-linux-fixture-r1",
+    "argv": [
+      "python3",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "scripts",
+      "-p",
+      "test_linux_file_interop.py",
+      "-v"
+    ],
+    "returncode": 0,
+    "timed_out": false,
+    "elapsed_seconds": 1.274,
+    "log": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/python-linux-fixture-r1.log",
+    "independent_recompile": false
+  }
+]

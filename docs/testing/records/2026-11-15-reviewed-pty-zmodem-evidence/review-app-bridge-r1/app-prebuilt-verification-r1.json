@@ -1,0 +1,10 @@
+{
+  "utc": "2026-11-15T08:41:00.366255+00:00",
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/stable-tests/app-r1",
+  "sha256": "f93d0070b572a1208b3c21e43804803d940834070f5afd7705faeb46279d4046",
+  "expected": "f93d0070b572a1208b3c21e43804803d940834070f5afd7705faeb46279d4046",
+  "inventory_exact_match": true,
+  "inventory_returncode": 0,
+  "listed_tests": 1217,
+  "independent_recompile": false
+}

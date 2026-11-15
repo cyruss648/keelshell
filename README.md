@@ -76,6 +76,8 @@ ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝
 
 [服务器归档](docs/product/SERVER_ARCHIVES.md)将远端同级多选生成新的 ZIP/tar.gz。先确认完整只读扫描命令，再单独审核全部成员、摘要、打包命令和标准输入；完整读回核验后才报告完成，下载或解包需要另行选择。需要远端 macOS/Linux、Python 3.8+ 和可验证的私有权限；已有目标保留，未知结果保持隔离，不自动重试。工程、评审及原生验收范围分别见[服务器归档记录](docs/testing/records/2026-11-15-server-archive-integration.md)。
 
+[终端 Zmodem](docs/product/ZMODEM.md)在现有 SSH PTY 上处理 `rz` / `sz`，上传先审核完整路径、大小和摘要，下载逐文件选择新目标并审核。协议占用期间拒绝普通输入，已有本地目标保留；单文件已验证保存与整批握手结果分别显示。本地安全文件后端面向 macOS/Linux，Windows 暂停用文件选择。macOS/Linux peer 直接 PTY 的最终 `OO` 缺失、三平台原生交互仍有独立验收缺口；真实联调与工程范围见[测试记录](docs/testing/records/2026-11-15-reviewed-pty-zmodem.md)。
+
 [服务端归档工具观察](docs/product/ARCHIVE_TOOL_INSPECTION.md)先审核完整固定命令，再查询当前 SSH 环境中七个工具名称的 PATH 解析；找到路径仅是观察，不验证版本、功能或互通。tar.gz 增加[有界 PAX 子集](docs/adr/0134-bounded-pax-archive-metadata.md)，仍检查原始与有效路径及完整原始大小。两项增量已通过集中工程门禁、真实 OpenSSH 联调和非作者源码复核，原生平台交互仍开放，见[本批记录](docs/testing/records/2026-11-15-archive-tools-pax-integration.md)。
 
 [本地知识库](docs/product/AI_KNOWLEDGE_LIBRARY.md)用于整理用户明确审核的终端摘要。修改和删除先预览后确认；[多选整批删除](docs/product/KNOWLEDGE_BULK_MANAGEMENT.md)最多32条，审核包含筛选隐藏项，取消不写入，确认只保存一次。管理选择与[显式加入 Ask](docs/product/AI_KNOWLEDGE_CONTEXT.md)分别维护；发送前仍须核对历史来源和完整请求，保存开始就撤销受影响的旧审核。工程验证和新包原生验收见[本轮记录](docs/testing/records/2026-11-06-resource-knowledge-integration.md)。

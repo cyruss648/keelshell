@@ -1,0 +1,11 @@
+{
+  "inputs": [
+    "crates/keelshell-app/src/ssh_bridge.rs",
+    "crates/keelshell-app/src/terminal_zmodem.rs",
+    "crates/keelshell-app/src/terminal_zmodem_tests.rs",
+    "crates/keelshell-session/src/zmodem/tests.rs",
+    "crates/keelshell-session/src/zmodem.rs",
+    "crates/keelshell-session/tests/zmodem_openssh.rs"
+  ],
+  "scripts": []
+}

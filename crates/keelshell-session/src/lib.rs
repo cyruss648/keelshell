@@ -15,6 +15,7 @@ pub mod network_diagnostic;
 pub mod sftp;
 pub mod ssh;
 pub mod workflow;
+pub mod zmodem;
 
 pub use batch::{
     BatchError, BatchEvent, BatchHandle, BatchNotStartedReason, BatchOptions, BatchOutcome,

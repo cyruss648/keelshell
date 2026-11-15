@@ -50,6 +50,7 @@ mod updates;
 mod vault;
 mod workflow_audit;
 mod workspace_layout;
+pub mod zmodem;
 
 pub use ai_backends::{AiBackend, AiLocalAgent, AiLocalAgentLimits, AiLocalAgentWorkingDirectory};
 pub use ai_knowledge::{

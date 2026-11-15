@@ -1,0 +1,123 @@
+{
+  "steps": [
+    {
+      "name": "container-identity",
+      "argv": [
+        "podman",
+        "inspect",
+        "--type",
+        "container",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b"
+      ],
+      "pid": 18166,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.187,
+      "stdout_log": "001-container-identity.stdout.log",
+      "stderr_log": "001-container-identity.stderr.log"
+    },
+    {
+      "name": "debian-bridge-repositories",
+      "argv": [
+        "podman",
+        "exec",
+        "-i",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "sh",
+        "-ec",
+        "cat > /etc/apt/sources.list.d/debian.sources"
+      ],
+      "pid": 18473,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.266,
+      "stdout_log": "002-debian-bridge-repositories.stdout.log",
+      "stderr_log": "002-debian-bridge-repositories.stderr.log"
+    },
+    {
+      "name": "apt-index-host-bridge",
+      "argv": [
+        "podman",
+        "exec",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "timeout",
+        "--kill-after=3",
+        "40",
+        "apt-get",
+        "-o",
+        "Acquire::Retries=0",
+        "-o",
+        "Acquire::http::Timeout=8",
+        "-o",
+        "Acquire::Languages=none",
+        "update"
+      ],
+      "pid": 18480,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 2.031,
+      "stdout_log": "003-apt-index-host-bridge.stdout.log",
+      "stderr_log": "003-apt-index-host-bridge.stderr.log"
+    },
+    {
+      "name": "install-tools-host-bridge",
+      "argv": [
+        "podman",
+        "exec",
+        "--env",
+        "DEBIAN_FRONTEND=noninteractive",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "timeout",
+        "--kill-after=3",
+        "40",
+        "apt-get",
+        "-o",
+        "Acquire::Retries=0",
+        "-o",
+        "Acquire::http::Timeout=8",
+        "-o",
+        "Acquire::Languages=none",
+        "install",
+        "--no-install-recommends",
+        "-y",
+        "python3",
+        "openssh-server",
+        "lrzsz",
+        "acl"
+      ],
+      "pid": 18527,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 7.545,
+      "stdout_log": "004-install-tools-host-bridge.stdout.log",
+      "stderr_log": "004-install-tools-host-bridge.stderr.log"
+    },
+    {
+      "name": "create-fixture-user",
+      "argv": [
+        "podman",
+        "exec",
+        "8fe260493f5bff36406c62dd116ddb23801f9c169867065a02bb98a61ec6e33b",
+        "sh",
+        "-ec",
+        "useradd --create-home --shell /bin/sh fixture; passwd -d fixture >/dev/null; mkdir -p /fixture /run/sshd /home/fixture/.ssh /home/fixture/interop; chmod 700 /fixture /home/fixture /home/fixture/.ssh /home/fixture/interop; chown -R fixture:fixture /home/fixture"
+      ],
+      "pid": 18738,
+      "returncode": 0,
+      "timed_out": false,
+      "interrupted": false,
+      "owned_processes_stopped": true,
+      "elapsed_seconds": 0.175,
+      "stdout_log": "005-create-fixture-user.stdout.log",
+      "stderr_log": "005-create-fixture-user.stderr.log"
+    }
+  ]
+}

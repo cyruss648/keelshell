@@ -1,0 +1,6 @@
+{
+  "requests": [],
+  "listener_closed": true,
+  "thread_stopped": true,
+  "signature_policy": "Normal apt trusted-key and package hash verification, no allow-unauthenticated"
+}

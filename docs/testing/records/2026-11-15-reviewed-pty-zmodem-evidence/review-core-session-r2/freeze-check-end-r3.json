@@ -1,0 +1,14 @@
+{
+  "checked_utc": "2026-11-15T09:14:05.580914+00:00",
+  "manifest": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/frozen-inputs-r3.json",
+  "manifest_sha256": "14b353ecbf84d9684b20dd7bafa0ffc090644b452fe199e4d32f1c2745e8e882",
+  "checked_inputs": 570,
+  "checked_scripts": 12,
+  "mismatches": [],
+  "report_json_parsed": true,
+  "report_file_links_missing": [],
+  "test_counts_consistent": true,
+  "r1_notice_preserved": true,
+  "r2_to_r3_test_only_delta_reviewed": true,
+  "full_gate_claimed_pass": false
+}

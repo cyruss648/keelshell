@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "finished_utc": "2026-11-15T08:00:59.362141+00:00",
+  "baseline": "721bad2157da8d3a0bc11a1eab5ac59b6616aa9c",
+  "scripts_unchanged_since_10_passing_unit_tests": true,
+  "scripts": {
+    "scripts/run_linux_file_interop.py": {
+      "sha256": "79e9fdaafd1a1723994ef0ad7bd46e9304f3121189a2099d2df10514cb4fc2c0",
+      "bytes": 52042
+    },
+    "scripts/test_linux_file_interop.py": {
+      "sha256": "9e436f2bfa9eb72bf86768cbeb4d742cb0c1d469fc7ea68dff3868eccdac64e9",
+      "bytes": 8663
+    }
+  },
+  "temporary_credential_directory_absent": true,
+  "owned_command_processes_stopped": true,
+  "pending_owned_containers": [],
+  "pending_owned_host_processes": [],
+  "new_fixture_created": false,
+  "cargo_invoked": false,
+  "shared_target_accessed": false,
+  "shared_api_storage_vm_repair_attempted": false,
+  "committed": false,
+  "pushed": false,
+  "historical_linux_r1_failure_preserved": true,
+  "final_runner_provisioning_rerun": false
+}

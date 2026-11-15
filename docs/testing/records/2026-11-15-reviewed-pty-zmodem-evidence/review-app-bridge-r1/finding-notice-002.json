@@ -1,0 +1,22 @@
+{
+  "id": "APP-BRIDGE-R1-002",
+  "severity": "P2",
+  "title": "Shell completion during a blocked write drops queued terminal tail and exit",
+  "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/ssh_bridge.rs",
+  "line_start": 307,
+  "line_end": 320,
+  "trigger": "Remote sends final bytes plus exit_status/close while an ordinary SSH write is suspended by flow control.",
+  "impact": "write_and_drain returns false as soon as the lifecycle watch ends; pump and run_with_protocol drop the byte queues instead of draining final terminal output/Exited to the UI.",
+  "evidence": {
+    "binary": "stable-tests/app-r1",
+    "test": "ssh_bridge::tests::blocked_input_preserves_tail_and_exit_when_write_fails",
+    "group_result": "5 passed, 1 failed; exit 101",
+    "isolated_repeats": "5/5 failed; exit 101 each",
+    "diagnostic": "bridge lost tail",
+    "logs": [
+      "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-ssh-bridge-r1.log",
+      "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/zmodem-integration-20261115/review-app-bridge-r1/app-tail-repeat-results.json"
+    ]
+  },
+  "verification": "Independently executed parent prebuilt stable binary, matching SHA256/inventory; no independent recompile."
+}

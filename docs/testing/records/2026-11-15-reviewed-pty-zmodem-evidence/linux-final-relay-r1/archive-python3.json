@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "sys_platform": "linux",
+  "os_name": "posix",
+  "python": "3.11.2 (main, Oct  7 2026, 12:35:07) [GCC 12.2.0]",
+  "python_executable": "/usr/bin/python3",
+  "euid": 1000,
+  "kernel": {
+    "system": "Linux",
+    "node": "f15cb0adb4ff",
+    "release": "7.1.10-200.fc44.aarch64",
+    "version": "#1 SMP PREEMPT_DYNAMIC Sun Aug 23 16:21:29 UTC 2026",
+    "machine": "aarch64",
+    "processor": ""
+  },
+  "source_sha256": "c38955fe645d7ab26af8a5538d63911af87dda24db0af125e361eb49976f3df2",
+  "filesystem": "overlayfs",
+  "cases": [
+    {
+      "name": "plain-zip",
+      "passed": true,
+      "detail": {
+        "member_count": 4,
+        "archive_sha256": "c647b51544da64c54d3e08bbb9878a20e9e2b29fd15a6c93d425629343b356ee",
+        "archive_bytes": 741,
+        "destination_mode": "0o600",
+        "parent_acl": "user::rwx\nuser:nobody:rwx\t#effective:---\ngroup::r-x\t#effective:---\nmask::---\nother::---\ndefault:user::rwx\ndefault:user:nobody:rwx\ndefault:group::r-x\ndefault:mask::rwx\ndefault:other::---\n\n",
+        "destination_acl": "user::rw-\ngroup::---\nother::---\n\n",
+        "stage_absent": true,
+        "cli_returncode": 0
+      }
+    },
+    {
+      "name": "default-acl-zip",
+      "passed": true,
+      "detail": {
+        "member_count": 4,
+        "archive_sha256": "c647b51544da64c54d3e08bbb9878a20e9e2b29fd15a6c93d425629343b356ee",
+        "archive_bytes": 741,
+        "destination_mode": "0o600",
+        "parent_acl": "user::rwx\nuser:nobody:rwx\t#effective:---\ngroup::r-x\t#effective:---\nmask::---\nother::---\ndefault:user::rwx\ndefault:user:nobody:rwx\ndefault:group::r-x\ndefault:mask::rwx\ndefault:other::---\n\n",
+        "destination_acl": "user::rw-\ngroup::---\nother::---\n\n",
+        "stage_absent": true,
+        "cli_returncode": 0
+      }
+    },
+    {
+      "name": "source-change-zip",
+      "passed": true,
+      "detail": {
+        "cli_returncode": 65,
+        "no_stage_created": true,
+        "target_preserved": true
+      }
+    },
+    {
+      "name": "destination-race-zip",
+      "passed": true,
+      "detail": {
+        "cli_returncode": 65,
+        "no_stage_created": true,
+        "target_preserved": true
+      }
+    },
+    {
+      "name": "late-acl-stage-zip",
+      "passed": true,
+      "detail": {
+        "injected_acl": "user::rwx\ngroup::---\nother::---\ndefault:user::rwx\ndefault:user:nobody:rwx\ndefault:group::r-x\ndefault:mask::rwx\ndefault:other::---\n\n",
+        "destination_absent": true,
+        "quarantine_stage_retained": true,
+        "probe_kind": "observational wrapper around exact helper; real kernel ACL mutation"
+      }
+    },
+    {
+      "name": "late-acl-payload-zip",
+      "passed": true,
+      "detail": {
+        "injected_acl": "user::rw-\nuser:nobody:r--\t#effective:---\ngroup::---\nmask::---\nother::---\n\n",
+        "destination_absent": true,
+        "quarantine_stage_retained": true,
+        "probe_kind": "observational wrapper around exact helper; real kernel ACL mutation"
+      }
+    },
+    {
+      "name": "plain-tar.gz",
+      "passed": true,
+      "detail": {
+        "member_count": 4,
+        "archive_sha256": "567e394116cc64b47570912a4be1da82015f2ea3a8163f83da2105b73b4caaf8",
+        "archive_bytes": 509,
+        "destination_mode": "0o600",
+        "parent_acl": "user::rwx\nuser:nobody:rwx\t#effective:---\ngroup::r-x\t#effective:---\nmask::---\nother::---\ndefault:user::rwx\ndefault:user:nobody:rwx\ndefault:group::r-x\ndefault:mask::rwx\ndefault:other::---\n\n",
+        "destination_acl": "user::rw-\ngroup::---\nother::---\n\n",
+        "stage_absent": true,
+        "cli_returncode": 0
+      }
+    },
+    {
+      "name": "default-acl-tar.gz",
+      "passed": true,
+      "detail": {
+        "member_count": 4,
+        "archive_sha256": "567e394116cc64b47570912a4be1da82015f2ea3a8163f83da2105b73b4caaf8",
+        "archive_bytes": 509,
+        "destination_mode": "0o600",
+        "parent_acl": "user::rwx\nuser:nobody:rwx\t#effective:---\ngroup::r-x\t#effective:---\nmask::---\nother::---\ndefault:user::rwx\ndefault:user:nobody:rwx\ndefault:group::r-x\ndefault:mask::rwx\ndefault:other::---\n\n",
+        "destination_acl": "user::rw-\ngroup::---\nother::---\n\n",
+        "stage_absent": true,
+        "cli_returncode": 0
+      }
+    },
+    {
+      "name": "source-change-tar.gz",
+      "passed": true,
+      "detail": {
+        "cli_returncode": 65,
+        "no_stage_created": true,
+        "target_preserved": true
+      }
+    },
+    {
+      "name": "destination-race-tar.gz",
+      "passed": true,
+      "detail": {
+        "cli_returncode": 65,
+        "no_stage_created": true,
+        "target_preserved": true
+      }
+    },
+    {
+      "name": "late-acl-stage-tar.gz",
+      "passed": true,
+      "detail": {
+        "injected_acl": "user::rwx\ngroup::---\nother::---\ndefault:user::rwx\ndefault:user:nobody:rwx\ndefault:group::r-x\ndefault:mask::rwx\ndefault:other::---\n\n",
+        "destination_absent": true,
+        "quarantine_stage_retained": true,
+        "probe_kind": "observational wrapper around exact helper; real kernel ACL mutation"
+      }
+    },
+    {
+      "name": "late-acl-payload-tar.gz",
+      "passed": true,
+      "detail": {
+        "injected_acl": "user::rw-\nuser:nobody:r--\t#effective:---\ngroup::---\nmask::---\nother::---\n\n",
+        "destination_absent": true,
+        "quarantine_stage_retained": true,
+        "probe_kind": "observational wrapper around exact helper; real kernel ACL mutation"
+      }
+    },
+    {
+      "name": "fd-inherited-access-default-acl-clear",
+      "passed": true,
+      "detail": {
+        "before": {
+          "inherited-stage": [
+            "system.posix_acl_access",
+            "system.posix_acl_default",
+            "security.selinux"
+          ],
+          "inherited-payload": [
+            "security.selinux",
+            "system.posix_acl_access"
+          ]
+        },
+        "after": {
+          "inherited-stage": [
+            "security.selinux"
+          ],
+          "inherited-payload": [
+            "security.selinux"
+          ]
+        }
+      }
+    },
+    {
+      "name": "unknown-acl-family-fail-closed",
+      "passed": true,
+      "detail": {
+        "unknown_acl_family_rejected": true,
+        "unknown_xattr_preserved": true
+      }
+    },
+    {
+      "name": "unsafe-symlink",
+      "passed": true,
+      "detail": {
+        "cli_returncode": 65,
+        "destination_absent": true
+      }
+    },
+    {
+      "name": "unsafe-hardlink",
+      "passed": true,
+      "detail": {
+        "cli_returncode": 65,
+        "destination_absent": true
+      }
+    },
+    {
+      "name": "unsafe-fifo",
+      "passed": true,
+      "detail": {
+        "cli_returncode": 65,
+        "destination_absent": true
+      }
+    }
+  ],
+  "passed": 17,
+  "failed": 0,
+  "boundary": "actual container Linux helper and ACL probes; no Rust or native GUI acceptance"
+}
