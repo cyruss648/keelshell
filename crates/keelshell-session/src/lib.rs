@@ -13,6 +13,7 @@ mod events;
 pub mod forwarding;
 pub mod monitor;
 pub mod network_diagnostic;
+pub mod path_comparison;
 pub mod sftp;
 pub mod ssh;
 pub mod workflow;
@@ -30,7 +31,8 @@ pub use events::SessionEvent;
 pub use ssh::{
     ConnectionEnd, ConnectionState, ExecOutput, KeyboardInteractiveChallenge,
     KeyboardInteractivePrompt, ProxyCredentials, ProxyError, ProxyKind, RetryPolicy, ShellEnd,
-    SshAuth, SshOptions, SshProxy, SshSession, SshShell, SshShellWriter,
+    SshAuth, SshConnectionInfo, SshOptions, SshProxy, SshProxyInfo, SshSession, SshShell,
+    SshShellWriter,
 };
 pub use workflow::{
     WorkflowBinding, WorkflowError, WorkflowEvent, WorkflowHandle, WorkflowOptions,

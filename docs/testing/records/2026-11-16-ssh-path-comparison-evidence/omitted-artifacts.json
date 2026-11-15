@@ -1,0 +1,71 @@
+{
+  "count": 13,
+  "bytes": 690793648,
+  "files": {
+    "bins-r3/keelshell-app": {
+      "bytes": 269397024,
+      "sha256": "bdf047b9f8ecf1550da5a97e195389e1ef6ed8b019abe96f08a0b0f9db420883",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "bins-r3/keelshell_session": {
+      "bytes": 40240288,
+      "sha256": "b618591af2e12357c3d8fa5164bab30e362c4c40339ff0ab484f847e8f526d0b",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "bins-r3/ssh_loopback": {
+      "bytes": 41261696,
+      "sha256": "ddd1be368d0294d308550f4c8b2c2e7047a22e73c8696e9305c0e18b64068db8",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "bins-r3/ssh_path_interop": {
+      "bytes": 18062000,
+      "sha256": "c8fdcf0925cdd098044152714635ccb3581f2cc7dede6bdcc5b90e3b3407551c",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "bins-session-r1/keelshell_session": {
+      "bytes": 40210784,
+      "sha256": "bbe1003dcf1b51623add94105b18b5e4270e92fa7efe651c83da2a6e571e1bdd",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "bins-session-r1/ssh_loopback": {
+      "bytes": 41261696,
+      "sha256": "620266e0e5445aa6cf3bca6d386f8f536fe94b59d5dc8d4e015d22179d8389a5",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "bins-session-r1/ssh_path_interop": {
+      "bytes": 18062000,
+      "sha256": "addf834b8494035145f5c1eb1ee201f874f4342ec2d666bbdc5cd307359c7e51",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "review-session/prebuilt-interop-inventory-r3/parent-prebuilt-test": {
+      "bytes": 18062000,
+      "sha256": "c8fdcf0925cdd098044152714635ccb3581f2cc7dede6bdcc5b90e3b3407551c",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "review-session/prebuilt-malformed-r2/parent-prebuilt-test": {
+      "bytes": 41261696,
+      "sha256": "620266e0e5445aa6cf3bca6d386f8f536fe94b59d5dc8d4e015d22179d8389a5",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "review-session/prebuilt-routes-r2/parent-prebuilt-test": {
+      "bytes": 41261696,
+      "sha256": "620266e0e5445aa6cf3bca6d386f8f536fe94b59d5dc8d4e015d22179d8389a5",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "review-session/prebuilt-routes-r3/parent-prebuilt-test": {
+      "bytes": 41261696,
+      "sha256": "ddd1be368d0294d308550f4c8b2c2e7047a22e73c8696e9305c0e18b64068db8",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "review-session/prebuilt-unit-r2/parent-prebuilt-test": {
+      "bytes": 40210784,
+      "sha256": "bbe1003dcf1b51623add94105b18b5e4270e92fa7efe651c83da2a6e571e1bdd",
+      "reason": "Rebuildable compiled test copy"
+    },
+    "review-session/prebuilt-unit-r3/parent-prebuilt-test": {
+      "bytes": 40240288,
+      "sha256": "b618591af2e12357c3d8fa5164bab30e362c4c40339ff0ab484f847e8f526d0b",
+      "reason": "Rebuildable compiled test copy"
+    }
+  }
+}

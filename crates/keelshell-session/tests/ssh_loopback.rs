@@ -63,6 +63,9 @@ mod jump_transport;
 #[path = "fixtures/upstream_proxy.rs"]
 mod upstream_proxy;
 
+#[path = "fixtures/path_comparison.rs"]
+mod path_comparison;
+
 #[derive(Default)]
 struct Fixture {
     channels: HashMap<ChannelId, Channel<server::Msg>>,

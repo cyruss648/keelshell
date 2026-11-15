@@ -1,7 +1,7 @@
 //! Real TCP upstream proxies, independently authenticated target SSH and cleanup.
 use super::jump_fixture;
 #[path = "upstream_proxy_server.rs"]
-mod proxy_fixture;
+pub(super) mod proxy_fixture;
 
 use jump_fixture::wait_until;
 use keelshell_session::{

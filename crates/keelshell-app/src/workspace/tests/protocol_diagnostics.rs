@@ -212,6 +212,73 @@ pub(crate) fn independent_reconnect_pending_reply_fixture(
     (fixture.window, monitor, fixture.workspace)
 }
 
+/// Real SSH transports in a production workspace; terminal surfaces here are
+/// controlled input fixtures, not independently accepted native terminals.
+pub(crate) fn path_comparison_fixture(
+    first: SshSession,
+    second: SshSession,
+    runtime: Arc<tokio::runtime::Runtime>,
+    cx: &mut TestAppContext,
+) -> (
+    AnyWindowHandle,
+    Entity<crate::monitor::MonitorPanel>,
+    Entity<Workspace>,
+) {
+    let profiles = [
+        Connection::new("path A", "path-a.fixture.invalid", "fixture"),
+        Connection::new("path B", "path-b.fixture.invalid", "fixture"),
+    ];
+    let ids = profiles.each_ref().map(|profile| profile.id);
+    let fixture = mount_sized(cx, profiles.into(), 900., 580.);
+    let panes = attach_remote_panes(&fixture, cx);
+    let monitor = cx
+        .update_window(fixture.window, |_, window, cx| {
+            fixture.workspace.update(cx, |view, cx| {
+                for ((pane, session), id) in panes.iter().zip([&first, &second]).zip(ids) {
+                    let tab = pane.terminal.entity_id();
+                    view.remote_sessions.insert(tab, session.clone());
+                    view.remote_hosts.insert(tab, format!("route {id}"));
+                    let route = view.state.connection_route(id).checked("path route");
+                    view.bind_remote_tab(tab, route);
+                }
+                view._reconnect_poll = gpui_kit::Task::ready(());
+                let tab = panes[0].terminal.entity_id();
+                let monitor = cx.new(|cx| {
+                    crate::monitor::MonitorPanel::new(first, "path A".into(), runtime, window, cx)
+                });
+                let workspace = cx.weak_entity();
+                monitor.update(cx, |panel, cx| {
+                    panel.bind_protocol_authority(workspace, tab, cx)
+                });
+                view.panels.entry(tab).or_default().monitor = Some(monitor.clone());
+                view.select_session_tab(0, window, cx);
+                view.show_connections = false;
+                view.show_assistant = false;
+                monitor
+            })
+        })
+        .checked("install two authenticated comparison transports");
+    (fixture.window, monitor, fixture.workspace)
+}
+
+/// Change the second route without invoking its later retirement poll. Confirm
+/// and reply adoption must independently reject this newly stale authority.
+pub(crate) fn change_path_comparison_candidate(
+    view: &mut Workspace,
+    action: &str,
+    cx: &mut gpui_kit::Context<Workspace>,
+) {
+    match action {
+        "route" => view.state.connections[1].host = "changed-b.fixture.invalid".into(),
+        "removed" => {
+            let id = view.tabs[1].entity_id();
+            view.remote_sessions.remove(&id);
+        }
+        "retire" => view.revoke_stale_protocol_diagnostics(cx),
+        _ => unreachable!("finite comparison authority mutation"),
+    }
+}
+
 /// Mutate authority from its owning test module without widening production
 /// visibility. Each mutation intentionally omits the later retirement poll.
 pub(crate) fn independent_mutate_pending_authority(

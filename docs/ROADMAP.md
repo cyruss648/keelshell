@@ -1,5 +1,20 @@
 # 开发路线 — 2026-11-16
 
+## 2026-11-16 审核式 SSH 路径比较（集中门禁通过）
+
+NET-03 增加同一逻辑目标的两条真实连接、固定内存载荷、交替采样和原始结果，
+通过现有原生监控入口审核执行。实际中继仍使用每跳独立认证的用户 SSH 路线。
+最终 r3 共 669 项输入，完整门禁 `exit 0 / reaped / 698.757s`：
+普通 Rust `3103/0/40 ignored`、rustdoc `14/0`、工程 Python `203 run/1 skipped`、
+helper Python `25/25`，26 项新默认 Rust 逐名通过，门禁后零漂移。
+最终真实 OpenSSH 三场景各 18 样本与正常 GUI/MCP 构建通过；app 非作者范围批准，
+三个发现关闭、零开放 P0–P3，11 项独立预构建通过，没有独立重编译。
+传输/runner 非作者 r3 也批准，15 项独立预构建通过；本批累计一个 P1、四个 P2、
+一个 P3 全部关闭，各范围零开放 P0–P3。两名 reviewer 已关闭，两个作者 worktree
+与三个自有容器均 absent；不把受控流延迟当 IP 丢包，也不把一次吞吐差异写成普遍加速。
+见 [设计](adr/0141-reviewed-ssh-path-comparison.md)与
+[批次记录](testing/records/2026-11-16-ssh-path-comparison.md)。原生与 M4 继续开放。
+
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
 

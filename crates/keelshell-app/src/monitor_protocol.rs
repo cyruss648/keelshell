@@ -428,8 +428,8 @@ impl ProtocolPanel {
 }
 
 impl MonitorPanel {
-    pub(crate) fn window_worker_owners(&self, _cx: &App) -> [EntityId; 1] {
-        [self.protocol.entity_id()]
+    pub(crate) fn window_worker_owners(&self, _cx: &App) -> [EntityId; 2] {
+        [self.protocol.entity_id(), self.path_comparison.entity_id()]
     }
 
     pub(crate) fn window_close_busy(&self, cx: &App) -> bool {
@@ -438,6 +438,7 @@ impl MonitorPanel {
             || (self.busy && !self.refresh_in_flight)
             || protocol.cancel.is_some()
             || protocol.cleanup_unknown
+            || self.path_comparison.read(cx).busy()
     }
 
     /// Match the child's captured connection, rather than comparing the current
@@ -457,17 +458,24 @@ impl MonitorPanel {
         tab: EntityId,
         cx: &mut Context<Self>,
     ) {
-        self.protocol
-            .update(cx, |panel, _| panel.authority = Some((workspace, tab)));
+        self.protocol.update(cx, |panel, _| {
+            panel.authority = Some((workspace.clone(), tab))
+        });
+        self.path_comparison
+            .update(cx, |panel, _| panel.bind(workspace, tab));
     }
     /// Revoke diagnostics synchronously when saved route/trust metadata changes.
     pub(crate) fn revoke_protocol_authority(&mut self, cx: &mut Context<Self>) {
         self.protocol.update(cx, |panel, cx| panel.suspend(cx));
+        self.path_comparison
+            .update(cx, |panel, cx| panel.suspend(cx));
     }
 
     /// Retain the connection while withdrawing selection-scoped consent.
     pub(crate) fn invalidate_protocol_selection(&mut self, cx: &mut Context<Self>) {
         self.protocol
+            .update(cx, |panel, cx| panel.invalidate_selection(cx));
+        self.path_comparison
             .update(cx, |panel, cx| panel.invalidate_selection(cx));
     }
 }

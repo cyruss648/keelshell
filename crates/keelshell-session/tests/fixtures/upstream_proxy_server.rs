@@ -12,7 +12,7 @@ use tokio::{
 };
 
 #[derive(Clone, Copy, Default)]
-pub(super) enum Mode {
+pub(crate) enum Mode {
     #[default]
     Tunnel,
     Reject,
@@ -20,7 +20,7 @@ pub(super) enum Mode {
     Delay(Duration),
 }
 #[derive(Default)]
-pub(super) struct Observed {
+pub(crate) struct Observed {
     pub accepted: AtomicUsize,
     pub closed: AtomicUsize,
     pub stage: AtomicUsize,
@@ -36,7 +36,7 @@ impl Drop for Closed {
         self.0.closed.fetch_add(1, Ordering::Release);
     }
 }
-pub(super) struct ProxyServer {
+pub(crate) struct ProxyServer {
     pub address: std::net::SocketAddr,
     pub observed: Arc<Observed>,
     task: JoinHandle<()>,

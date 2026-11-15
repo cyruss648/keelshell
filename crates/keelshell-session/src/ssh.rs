@@ -2,11 +2,15 @@
 
 mod batch;
 mod channel;
+mod connection_info;
+pub use connection_info::{SshConnectionInfo, SshProxyInfo};
 mod lifecycle;
 pub use lifecycle::{ConnectionEnd, ConnectionState, ShellEnd};
 use lifecycle::{ConnectionMonitor, ShellMonitor};
 mod proxy;
 pub use proxy::{ProxyCredentials, ProxyError, ProxyKind, SshProxy};
+#[path = "path_comparison/transport.rs"]
+pub(crate) mod path_comparison_transport;
 mod transport;
 #[cfg(test)]
 mod write_barrier_tests;
@@ -294,6 +298,7 @@ pub struct SshSession {
     transport: Arc<TransportControl>,
     state: ConnectionMonitor,
     pub(crate) transfer_reservations: Arc<crate::sftp::TransferReservations>,
+    connection_info: Arc<SshConnectionInfo>,
 }
 
 struct ConnectionLifecycle {
@@ -433,7 +438,13 @@ impl SshSession {
             let stream =
                 proxy::negotiate(stream, options.proxy.as_ref(), &options.host, options.port)
                     .await?;
-            Self::authenticate_stream(options, stream, transport).await
+            Self::authenticate_stream(
+                options,
+                stream,
+                transport,
+                Some(jump.connection_info.clone()),
+            )
+            .await
         })
         .await
         .map_err(|_| SessionError::Timeout("SSH jump connect/authenticate"))?
@@ -454,7 +465,7 @@ impl SshSession {
             let stream =
                 proxy::negotiate(stream, options.proxy.as_ref(), &options.host, options.port)
                     .await?;
-            Self::authenticate_stream(options, stream, transport).await
+            Self::authenticate_stream(options, stream, transport, None).await
         })
         .await
     }
@@ -463,6 +474,7 @@ impl SshSession {
         options: &SshOptions,
         stream: R,
         transport: Arc<TransportControl>,
+        jump: Option<Arc<SshConnectionInfo>>,
     ) -> Result<Self>
     where
         R: AsyncRead + AsyncWrite + Unpin + Send + 'static,
@@ -560,6 +572,19 @@ impl SshSession {
         if !accepted {
             return Err(SessionError::Authentication);
         }
+        // The callback rejects missing or changed pins before any authentication.
+        // Snapshot only here: options/profile data alone cannot create an identity.
+        let verified_host_key = options
+            .expected_host_key
+            .clone()
+            .ok_or(SessionError::Invalid(
+                "authenticated SSH host key is missing",
+            ))?;
+        let connection_info = Arc::new(SshConnectionInfo::authenticated(
+            options,
+            verified_host_key,
+            jump,
+        ));
         let handle = Arc::new(handle);
         let lifecycle = Arc::new(ConnectionLifecycle {
             state: state.clone(),
@@ -577,6 +602,7 @@ impl SshSession {
             transport,
             state,
             transfer_reservations: Arc::new(crate::sftp::TransferReservations::new(options)),
+            connection_info,
         })
     }
 
@@ -1018,6 +1044,12 @@ impl SshSession {
     /// Callers can use this when revalidating an ephemeral human review.
     pub fn same_connection(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.handle, &other.handle)
+    }
+
+    /// Immutable endpoint and actual route sealed after verified authentication.
+    /// This performs no network I/O and never reads a mutable saved profile.
+    pub fn connection_info(&self) -> &SshConnectionInfo {
+        &self.connection_info
     }
 
     /// Abnormal channel cleanup cannot abandon an unconfirmed remote resource.

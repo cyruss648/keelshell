@@ -314,6 +314,7 @@ impl Fixture {
                 gate: peer.client_gate.clone(),
             },
             peer.client_control.clone(),
+            None,
         )
         .await?;
         let shell = session.start_shell(24, 80).await?;

@@ -251,6 +251,7 @@ impl Workspace {
         for panel in retired {
             panel.update(cx, |panel, cx| panel.revoke_protocol_authority(cx));
         }
+        self.revoke_stale_path_comparisons(cx);
     }
 
     pub(super) fn reconnect_ticket_current(&self, ticket: Ticket) -> bool {
@@ -785,6 +786,7 @@ impl Workspace {
         });
         self.suspend_panels(ticket.tab, cx);
         self.remote_sessions.remove(&ticket.tab);
+        self.revoke_stale_path_comparisons(cx);
         let connection_id = self.remote_connection_ids.remove(&ticket.tab);
         // Cancellation cannot wait for an emitted panel event or a timer after
         // the captured connection is retired. The replacement gets no grant.

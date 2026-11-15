@@ -1,5 +1,6 @@
 # 测试索引
 
+- [审核式 SSH 路径比较](records/2026-11-16-ssh-path-comparison.md)：两条真实连接的审核、交替内存样本、严格协议与取消、三主题双语和真实 localhost OpenSSH 流延迟/限速实验；原生与 IP 丢包分别验收。
 - [显式远程文本旧编码](records/2026-11-15-legacy-editor-encodings.md)：五种严格编码、原生 Kit 选择器、保存/冲突/迟到、固定向量 OpenSSH、最终集中门禁与非作者复核。
 
 当前状态以[开发交接](../HANDOFF.md)为入口；

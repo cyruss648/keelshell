@@ -6,6 +6,8 @@ mod capabilities;
 mod disk;
 #[path = "monitor_history.rs"]
 mod history;
+#[path = "monitor_path_comparison.rs"]
+pub(crate) mod path_comparison;
 #[path = "monitor_protocol.rs"]
 mod protocol;
 #[cfg(test)]
@@ -81,6 +83,7 @@ enum Outcome {
 /// actions. No process is stopped merely by selecting it.
 pub struct MonitorPanel {
     protocol: Entity<protocol::ProtocolPanel>,
+    path_comparison: Entity<path_comparison::PathComparisonPanel>,
     monitor: Option<LinuxMonitor>,
     capabilities: MonitorCapabilities,
     suspended: bool,
@@ -143,8 +146,11 @@ impl MonitorPanel {
         let protocol = cx.new(|cx| {
             protocol::ProtocolPanel::new(session.clone(), host.clone(), runtime.clone(), window, cx)
         });
+        let path_comparison =
+            cx.new(|_| path_comparison::PathComparisonPanel::new(session.clone(), runtime.clone()));
         let mut panel = Self {
             protocol,
+            path_comparison,
             monitor: Some(LinuxMonitor::new(session)),
             capabilities: MonitorCapabilities::default(),
             suspended: false,
@@ -212,6 +218,8 @@ impl MonitorPanel {
         }
         self.monitor = None;
         self.protocol.update(cx, |panel, cx| panel.suspend(cx));
+        self.path_comparison
+            .update(cx, |panel, cx| panel.suspend(cx));
         if let Some(cancel) = &self.worker_cancel {
             cancel.store(true, Ordering::Release);
         }
@@ -221,6 +229,7 @@ impl MonitorPanel {
     /// Redraw labels without restarting collection or changing the selected process.
     pub fn refresh_locale(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
         self.protocol.update(cx, |_, cx| cx.notify());
+        self.path_comparison.update(cx, |_, cx| cx.notify());
         cx.notify();
     }
 
@@ -1611,6 +1620,7 @@ impl Render for MonitorPanel {
             .child(self.disk_view(cx))
             .child(networks)
             .child(self.protocol.clone())
+            .child(self.path_comparison.clone())
             .child(sockets)
             .child(disks)
             .child(self.capabilities_view(cx));

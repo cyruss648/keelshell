@@ -1,5 +1,30 @@
 # KeelShell 当前交接 — 2026-11-16
 
+## 当前批次：审核式 SSH 路径比较，集中门禁通过
+
+基线 `162d883460a98cd03056731fd8d4be76a41d5c15`。继续按独立功能并行实现、
+同批集成、集中验证修复、新非作者复核、本地提交的节奏推进。传输与真实实验
+在两个受管 worktree 开发，父负责原生监控入口及双连接授权。作者不运行 Cargo；
+唯一 target 仍为 `work/recovery-batch-integration-20261115/target`，归属未切换。
+设计见 [ADR 0141](adr/0141-reviewed-ssh-path-comparison.md)，
+记录见 [本批记录](testing/records/2026-11-16-ssh-path-comparison.md)。
+最终 r3 为 669 项工程输入，集合 SHA-256
+`066d7835e75d09895ae7a97f5b83863904a8dcbb0419bb1d8e865f89b7a047e0`。
+完整 `full-gate-r1` 实际 `exit 0 / reaped / 698.757s`：普通 Rust `3103/0/40 ignored`、
+rustdoc `14/0`、工程 Python `203 run / 1 skipped`、helper Python `25/25`，
+fmt、严格 Clippy、x.y 策略与三组 controller 通过。26 个新默认 Rust 名逐项通过，
+门禁后输入零漂移；原编译、app 测试与伪 DuplicateAck fixture 失败保持原件。
+最终真实 OpenSSH r2 五次 opt-in 测试通过，三场景各 18 个样本，正常 GUI/MCP
+arm64 Mach-O 构建通过。两轮 197 条 birth identity、16 次端口及私有目录均回收。
+两个新非作者 r3 分别批准 app 与传输/runner 范围，累计一个 P1、四个 P2、一个 P3
+全部关闭，各范围开放 P0–P3 为 0；独立预构建执行 `11 + 15`，没有独立重编译。
+原签署时门禁/正常构建条件均已由父在相同冻结满足，原报告不改写；
+两名 reviewer 已实际关闭。两个作者 worktree 和三个自有探查容器均再次确认 absent。
+原件从[持久证据](testing/records/2026-11-16-ssh-path-comparison-evidence/README.md)接续；
+完成 Git index/blob 读回后形成本地提交并回收本批重复目录与测试副本。
+新增依赖为零；本轮官方最新版本检查 45 秒超时，已终止并 reap，未签署全部最新。
+只本地提交，不 push。三平台原生、签名发行、IP 丢包网络实验及完整 M4 保持开放。
+
 ## 当前批次：显式远程文本旧编码，工程门禁通过
 
 基线 `2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24`。core 与 session

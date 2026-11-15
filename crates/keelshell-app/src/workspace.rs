@@ -40,6 +40,7 @@ use navigation::NavigationPanel;
 mod openssh_review;
 mod pane_sessions;
 mod pane_view;
+mod path_comparison;
 mod profile_sync;
 mod protocol_selection;
 mod reconnect;
@@ -1206,8 +1207,12 @@ impl Workspace {
         self.remote_hosts.remove(&terminal.entity_id());
         self.remote_connection_ids.remove(&terminal.entity_id());
         if let Some(panels) = self.panels.remove(&terminal.entity_id()) {
+            if let Some(monitor) = &panels.monitor {
+                monitor.update(cx, |monitor, cx| monitor.revoke_protocol_authority(cx));
+            }
             self.retired_window_panels.push(panels);
         }
+        self.revoke_stale_path_comparisons(cx);
         self.retire_tunnel_owners(cx);
         // Retiring a tab can leave an independent file,
         // monitor, tunnel or agent worker using the captured
