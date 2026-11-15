@@ -1,10 +1,10 @@
 {
-  "recorded_utc": "2026-11-15T05:38:23.090513+00:00",
+  "recorded_utc": "2026-11-15T05:40:43.590959+00:00",
   "scope": "all durable evidence files except this index itself; original runtime records are immutable",
   "files": {
     "README.md": {
-      "bytes": 3812,
-      "sha256": "11b5b697e26036215fc5c9a37505923506af3551e07815f5fbd60816133b3c11"
+      "bytes": 4281,
+      "sha256": "5a715be8cd2c4745b48398557505693bb7a0da89d91e7edcf984a8b184e7efab"
     },
     "archive-manifest.json": {
       "bytes": 47653,
@@ -18,9 +18,17 @@
       "bytes": 1290,
       "sha256": "4a1f7230d248a7eee1c06f8eb78dcfe926bc6d7e238a755187b5ec1472fc8f26"
     },
+    "cleanup-final.json": {
+      "bytes": 1603,
+      "sha256": "79bd38e849e291147357832800d0e89d16783ce9fcedba6f049b2f452253810a"
+    },
     "command-runner.py.txt": {
       "bytes": 1933,
       "sha256": "a876b62a7e2aa5a1d5f9a61b71d2a264eda4e0e1ecc4ae7f35ad6edd30505692"
+    },
+    "commit-input-binding.json": {
+      "bytes": 56537,
+      "sha256": "6333d0e4e33efd33472666d0f67d0c1ae6a77dc1310a243f17ce8dd1de192cad"
     },
     "diff-archive-adjustment.json": {
       "bytes": 1207,

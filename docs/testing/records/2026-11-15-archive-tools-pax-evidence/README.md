@@ -19,6 +19,9 @@
 - [真实 OpenSSH r3](openssh-r3/result.json)与
   [正常程序输入绑定](normal-artifacts-r3.json)：OpenSSH `14/14`、GUI/MCP 构建成功；
   r3/r4 的生产输入相同，最终测试冻结为 r4。
+- [源码提交绑定](commit-input-binding.json)：本地
+  `0f4719d72b83238ecaa7bb244c5ba913a7448224` 的 538 个输入及 10 个脚本 Git blob
+  与最终冻结、当前工作文件逐字相同，工程清单零缺失、零额外项。
 
 ## 失败与修复
 
@@ -45,12 +48,14 @@
 
 命令包装器、汇总解析器及 reviewer 运行器以 `.py.txt` 归档，便于后续审计，
 不会加入 Python 测试发现。`cleanup-before-archive.json` 保留阶段性 pending，
-最终回收和提交绑定另存新回执。`sha256.json` 覆盖本目录除摘要文件自身之外的
+最终回收和提交绑定另存[新回执](cleanup-final.json)。`sha256.json` 覆盖本目录除摘要文件自身之外的
 完整持久文件清单；新增交付回执后重新生成该索引，不替换原始运行证据。
 
 不保存工作 target 或测试临时目录。唯一有效 Cargo target 保留，两个实现
 worktree 已受管归档，agent 已关闭；自有 OpenSSH 进程及目录已回收，本批未创建
 容器。其他任务及受保护 worktree 保留。
+提交绑定和 127 份原件校验完成后，已确认本批工作目录没有打开文件并将其删除；
+两个实现本地分支均不存在，四个已关闭 agent 的再次查询均为 not_found。
 
 服务端实际打包、版本/功能验证、Zmodem、中继、Windows 安全解包、三平台原生
 交互、IME/完整辅助技术、签名安装与发行验收仍开放。在线依赖检查超时，没有

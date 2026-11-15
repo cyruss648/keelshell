@@ -22,6 +22,9 @@ size 高位截断 P2 已由真实红回归确认、修复并独立复核关闭�
 [PAX 决策](adr/0134-bounded-pax-archive-metadata.md)，完整证据见
 [集中验证记录](testing/records/2026-11-15-archive-tools-pax-integration.md)。
 实现及复核 agent 已关闭、实现 worktree 已受管归档、SSH 临时资源已回收。
+源码本地提交为 `0f4719d72b83238ecaa7bb244c5ba913a7448224`，Git blob 与
+538 个输入及 10 个脚本的最终冻结逐项相同。持久证据校验后已删除本批重复
+工作日志与 tmp；保留唯一有效 target、其他任务和受保护 worktree。
 本次在线最新依赖检查超时，保留失败回执；只本地提交，不推送。
 服务端实际打包、Zmodem、中继、Windows 安全解包和原生矩阵继续开放。
 

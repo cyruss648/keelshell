@@ -10,6 +10,10 @@
 在本地已提交的 `e97705c3d773ea6919d76441685c5064e641ca86` 上继续开发。
 本批状态为 `AUTHOR_GATE_PASS / NON_AUTHOR_REVIEW_APPROVED`，
 仅代表本批工程与源码复核范围。
+本地源码提交为 `0f4719d72b83238ecaa7bb244c5ba913a7448224`；
+[提交绑定](testing/records/2026-11-15-archive-tools-pax-evidence/commit-input-binding.json)
+逐项核对 538 个 Rust/Cargo 输入及 10 个脚本的 Git blob、冻结和当前文件，
+零 mismatch。后续绑定提交仅更新文档与回执，不重跑无关 Rust 门禁。
 两个独立实现 agent 已交付 SSH 工具检测和有界 PAX 解码；主线程集成原生
 审核卡片、会话绑定及实际 GPUI 回归。实现 agent 不执行 Cargo，主线程独占
 同一主树的有效 target，集成后集中完整验证、修复和新的非作者复核。
@@ -41,6 +45,10 @@ r3→r4 仅两处等价测试转义变化，生产输入一致。实现及复核
 容器。命令、冻结、失败、复核和边界见
 [集中验证记录](testing/records/2026-11-15-archive-tools-pax-integration.md)及
 [持久证据](testing/records/2026-11-15-archive-tools-pax-evidence/README.md)。
+127 份原件已逐字或无损压缩保存并验证，随后删除本批重复工作日志与 tmp；
+[最终清理回执](testing/records/2026-11-15-archive-tools-pax-evidence/cleanup-final.json)
+确认两个实现 checkout/本地分支均不存在、四个 agent 已关闭后不再可查。
+保留当前有效 target、其他任务 WIP 和受保护 review worktree。
 服务端实际打包、版本/功能验证、Zmodem、中继、Windows 安全解包、三平台原生
 交互、IME/完整辅助技术和发行验收仍开放，FILE-05/M4 与产品总目标继续进行。
 

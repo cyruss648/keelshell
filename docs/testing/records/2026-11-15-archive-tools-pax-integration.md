@@ -4,6 +4,10 @@
 完整门禁、独立复核和原生验收分别记录。唯一 Cargo owner 为父线程，
 主工作树和 target 的实际路径记录在命令回执；
 本地基线 `e97705c3d773ea6919d76441685c5064e641ca86`。仅本地提交，不推送。
+源码本地提交为 `0f4719d72b83238ecaa7bb244c5ba913a7448224`，
+[提交绑定](2026-11-15-archive-tools-pax-evidence/commit-input-binding.json)
+从该提交 Git blob 和当前工作文件两侧核对 538 个输入及 10 个 gate 脚本，
+逐字匹配最终冻结，零 mismatch、零缺失或额外工程输入。后续仅更新文档与回执。
 
 ## 集成与输入
 
@@ -133,7 +137,10 @@ APPROVE、零 P0–P3，原 P2-01 CLOSED，独立执行 `40 + 40`，没有重复
 临时目录已删除；本批创建容器为 0。保留唯一有效
 `work/recovery-batch-integration-20261115/target`。受保护的旧 review worktree
 及其他任务 WIP 未清理。阶段性清理回执与最终清理状态分别保存，
-不覆盖原先 pending。完成持久证据和提交绑定后回收本批重复工作日志与 tmp。
+不覆盖原先 pending。完成 127 份持久原件校验和提交绑定、确认目录没有打开文件
+后，已回收本批重复工作日志与 tmp；两个实现 checkout 和本地分支均不存在，
+四个已关闭 agent 的再次查询均为 not_found。详见
+[最终清理回执](2026-11-15-archive-tools-pax-evidence/cleanup-final.json)。
 只本地提交，不 push。
 
 ## 未验边界

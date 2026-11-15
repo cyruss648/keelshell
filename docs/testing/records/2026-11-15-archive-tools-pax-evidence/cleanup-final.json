@@ -1,0 +1,45 @@
+{
+  "recorded_utc": "2026-11-15T05:39:40.878162+00:00",
+  "source_commit": "0f4719d72b83238ecaa7bb244c5ba913a7448224",
+  "scope": "this batch owned temporary resources only",
+  "runtime_directory": "work/archive-tools-pax-20261115",
+  "runtime_directory_removed": true,
+  "files_removed": 129,
+  "bytes_removed": 3036667,
+  "originals_verified_before_removal": 127,
+  "open_file_check": {
+    "command": [
+      "lsof",
+      "-nP",
+      "+D",
+      "work/archive-tools-pax-20261115",
+      "-Fpcfn"
+    ],
+    "exit": 1,
+    "stdout_empty": true,
+    "stderr_empty": true,
+    "meaning": "no open files observed before removal",
+    "elapsed_seconds": 0.245
+  },
+  "managed_implementation_worktrees": {
+    "archive-pax-20261115": {
+      "checkout_exists": false,
+      "branch_exists": false
+    },
+    "archive-tool-probe-20261115": {
+      "checkout_exists": false,
+      "branch_exists": false
+    }
+  },
+  "agents": {
+    "01a1dd80-fec8-7752-9e06-5d3eccb2d877": "not_found after recorded closure",
+    "01a1dd81-39f4-7a40-bb0d-75ca67beeb9d": "not_found after recorded closure",
+    "01a1dd92-28dd-7773-9c7e-df0524991cab": "not_found after recorded closure",
+    "01a1dd92-68e4-7571-9f9a-f1e0e6a1dc05": "not_found after recorded closure"
+  },
+  "temporary_containers_created": 0,
+  "retained_valid_cargo_target": "work/recovery-batch-integration-20261115/target",
+  "protected_and_other_task_worktrees": "preserved; no cleanup attempted",
+  "openssh_cleanup": "both recorded runs confirm owned processes stopped and temporary directories removed; original receipts retained",
+  "pushed": false
+}
