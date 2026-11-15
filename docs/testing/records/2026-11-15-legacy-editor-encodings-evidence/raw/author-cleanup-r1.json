@@ -1,0 +1,32 @@
+{
+  "observed_utc": "2026-11-15T15:52:24.468697+00:00",
+  "agents_closed": [
+    "01a1dfd1-a71a-7bb2-8365-35f9a4637aa8",
+    "01a1dfd1-a781-7022-ab49-23fc35c34457"
+  ],
+  "archive_attempts": [
+    {
+      "root": "/Users/hdh/.codex/worktrees/legacy-text-codecs-20261115/keelshell",
+      "first_error": "The task's primary checkout cannot be removed.",
+      "resolved_by": "reattach parent integration worktree; managed archive queued"
+    },
+    {
+      "root": "/Users/hdh/.codex/worktrees/legacy-editor-sftp-20261115/keelshell",
+      "managed_archive": "queued"
+    }
+  ],
+  "worktrees": [
+    {
+      "root": "/Users/hdh/.codex/worktrees/legacy-text-codecs-20261115/keelshell",
+      "path_absent": true,
+      "git_worktree_absent": true
+    },
+    {
+      "root": "/Users/hdh/.codex/worktrees/legacy-editor-sftp-20261115/keelshell",
+      "path_absent": true,
+      "git_worktree_absent": true
+    }
+  ],
+  "shared_target_preserved": true,
+  "new_user_chats": 0
+}

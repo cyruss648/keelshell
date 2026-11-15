@@ -1,0 +1,19 @@
+{
+  "recorded_utc": "2026-11-15T16:08:15.654289+00:00",
+  "review_kind": "independent read-only app/OpenSSH source review",
+  "root": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "baseline": "2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24",
+  "head": "2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24",
+  "freeze": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/legacy-editor-batch-20261115/frozen-inputs-r3.json",
+  "freeze_file_sha256": "a8392637a51b626c96c16561be3afeb7f557ae480faa94fe4989b476aa110678",
+  "expected_count": 612,
+  "actual_count": 612,
+  "expected_aggregate_sha256": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "actual_aggregate_sha256": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "file_mismatches": [],
+  "extra_paths": [],
+  "missing_paths": [],
+  "full_input_path_set_equal": true,
+  "all_hashes_equal": true,
+  "no_cargo_build_clean_or_target_mutation": true
+}

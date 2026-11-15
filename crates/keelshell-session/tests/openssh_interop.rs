@@ -15,6 +15,9 @@ use russh::keys::{HashAlg, PublicKey};
 
 type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
+#[path = "support/openssh_editor_encoding.rs"]
+mod editor_encoding;
+
 #[tokio::test]
 #[ignore = "requires the disposable pinned OpenSSH loopback runner"]
 async fn openssh_archive_tool_validation_checks_streams_without_creating_files() -> TestResult {

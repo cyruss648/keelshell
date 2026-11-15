@@ -466,8 +466,12 @@ async fn operate_inner(
             }
             Operation::Read(entry) => {
                 let snapshot = sftp.read_regular_snapshot(&entry.path, 1024 * 1024).await?;
-                let document =
-                    TextDocument::decode(&snapshot.content).map_err(FileFailure::TextDocument)?;
+                let document = editor_encoding::decode_read(&snapshot.content, None)?;
+                Ok(Outcome::Read(snapshot, document))
+            }
+            Operation::ReadEncoded(entry, encoding) => {
+                let snapshot = sftp.read_regular_snapshot(&entry.path, 1024 * 1024).await?;
+                let document = editor_encoding::decode_read(&snapshot.content, Some(encoding))?;
                 Ok(Outcome::Read(snapshot, document))
             }
             Operation::ReadMerge {
@@ -857,9 +861,12 @@ async fn operate_inner(
                     return merge_outcome(current, reviewed.content, format, draft);
                 }
                 let backup = sftp
-                    .write_editor_reviewed_authorized(&reviewed, &content, &|| {
-                        !stop.load(Ordering::Acquire)
-                    })
+                    .write_editor_reviewed_with_format_authorized(
+                        &reviewed,
+                        &content,
+                        format,
+                        &|| !stop.load(Ordering::Acquire),
+                    )
                     .await?;
                 let saved = sftp
                     .read_regular_snapshot(&path, 1024 * 1024)
@@ -868,7 +875,7 @@ async fn operate_inner(
                 if saved.content != content {
                     return Err(FileFailure::SavedReadback("saved contents differ from the acknowledged review; inspect the remote file".into()));
                 }
-                let observed = TextDocument::decode(&saved.content)
+                let observed = editor_encoding::decode_observation(&saved.content, format)
                     .map_err(|error| FileFailure::SavedReadback(error.to_string()))?;
                 let format = format.with_line_ending(observed.format().line_ending());
                 let body = format
@@ -1000,16 +1007,23 @@ fn merge_outcome(
         .decode_body(&base)
         .map_err(FileFailure::TextDocument)?;
     let remote_document =
-        TextDocument::decode(&snapshot.content).map_err(FileFailure::TextDocument)?;
+        editor_encoding::decode_observation(&snapshot.content, format).map_err(|error| {
+            if format.encoding().is_legacy() {
+                FileFailure::EditorFormatChanged
+            } else {
+                FileFailure::TextDocument(error)
+            }
+        })?;
     if !format.is_compatible_with(remote_document.format()) {
         return Err(FileFailure::EditorFormatChanged);
     }
     let plan = keelshell_core::merge_text(&original, &draft, remote_document.body())
         .map_err(FileFailure::TextEdit)?;
-    Ok(Outcome::MergeLoaded {
+    Ok(Outcome::MergeLoaded(merge::MergeObservation {
         snapshot,
         plan,
         base,
         draft,
-    })
+        format,
+    }))
 }

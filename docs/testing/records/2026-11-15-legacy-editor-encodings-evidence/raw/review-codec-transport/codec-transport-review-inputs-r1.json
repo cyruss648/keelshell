@@ -1,0 +1,28 @@
+{
+  "base_sha": "2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24",
+  "scope_files": {
+    "Cargo.toml": "2dcece565d611723d9298a1c197e19ef5b2c8d84ed5bbd6e3b88e215f1257db0",
+    "Cargo.lock": "776c8e5f5fb9b23dc05d2521f79f2f8fa5574d9e1dbb1eba95fb8ccc8797d937",
+    "crates/keelshell-core/Cargo.toml": "fd51c21807c3cfd465337f430277ae7a07db7606e19707effae770afef8b88bc",
+    "crates/keelshell-core/src/text_document.rs": "f9381cf61633437cf9e722b00062c4a85009c9f66a10791acfc93160d3b0b7c4",
+    "crates/keelshell-core/src/text_document/legacy_tests.rs": "d856683beb4c06d8cbaa71bfc689cdb091523e4020d5ca073129e1bb2f6b1a8e",
+    "crates/keelshell-session/src/sftp.rs": "ca9120d91ae81ee4ccaa75a17e44038f2d3bca5bbd9b3e01a819cc82787c60a0",
+    "crates/keelshell-session/src/sftp/editor_encoding_tests.rs": "2cb8ae13585e7596ec7939f74dcc8b7aa5733a12a77733f83f7c74a7c5ef00e3"
+  },
+  "verified_parent_binaries": {
+    "core-text-tests-r1": {
+      "source": "work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/a54f33ee8a518a64/out/keelshell_core-a54f33ee8a518a64",
+      "copy": "work/legacy-editor-batch-20261115/review-binaries/keelshell_core-a54f33ee8a518a64",
+      "sha256": "d47cc0aaea401eebd9af162f97db8426ec1b3f0c5e0ce684b62e267adddc6679",
+      "inventory_sha256": "d86f9f0b169e392a8295cd203da145f0beb372bae6388f5c7e651a1bebed9581"
+    },
+    "session-encoding-tests-r1": {
+      "source": "work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/fa7c45e79deaf5f4/out/keelshell_session-fa7c45e79deaf5f4",
+      "copy": "work/legacy-editor-batch-20261115/review-binaries/keelshell_session-fa7c45e79deaf5f4",
+      "sha256": "1dbfba00762db7c6466f0f17159bee6328fa09101247139ba7a628ae97c08d8b",
+      "inventory_sha256": "dea317f0f4a39af02ee382280fb3d785a11ee292af06f0c6eedf5d89a5ca46a5"
+    }
+  },
+  "independent_recompilation": false,
+  "source_status": "read_only_frozen_for_review"
+}

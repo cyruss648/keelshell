@@ -1,4 +1,4 @@
-# 开发路线 — 2026-11-15
+# 开发路线 — 2026-11-16
 
 完整产品目标保持进行中。精确SHA、执行会话和Cargo归属从[当前交接](HANDOFF.md)接续；
 [历史路线](history/2026-11-06-roadmap-before-editor-traceroute.md)保留上轮冻结状态。
@@ -6,6 +6,24 @@
 2026-11-15 起采用[阶段集中验证](testing/STRATEGY.md#阶段集中验证)：可以独立开发的
 功能集中集成、全量验证、修复及非作者复核，开发过程中保留编译与关键专项。正式
 功能提交前完成本批门禁和评审，减少重复全仓运行和文档专属评审循环。
+
+## 2026-11-15 显式远程文本旧编码
+
+状态 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_SCOPES_APPROVED`。五种旧编码已接入严格
+编解码、审核式 SFTP 保存及原生读取入口；当前文档保存格式不受下次读取选择影响。
+最终 r4 的 612 项输入完整门禁 `exit 0 / reaped / 696.329s`：普通 Rust
+`3077/0/37 ignored`、rustdoc `14/0`、Python `187 run / 1 skipped`，
+fmt、严格 Clippy、x.y 策略和三组 controller 通过。84 个新增默认 Rust 逐名通过；
+6 个另 target 复用 fixture 不算新增行为。真实 OpenSSH r2 `17/17`、正常
+GUI/MCP arm64 Mach-O 构建通过。两名非作者原范围均无开放 P0–P3，使用父预构建
+独立执行，没有独立重编译；归档两文件窄修复的补充 r3 签署也已批准，
+独立 Python 红/绿回归通过，开放 P0–P3 为 0；两名 reviewer 已关闭。
+原 gate 失败已由确定性真实文件系统红/绿回归定位修复，旧失败保留。
+两个实现 agent 已关闭，自有受管 worktree 已归档且路径/Git 记录 absent。
+只本地提交、不 push；三平台原生、IME/辅助技术及完整产品目标保持开放。
+参见 [ADR 0140](adr/0140-explicit-legacy-editor-encodings.md)、
+[文本指南](product/REMOTE_TEXT_FORMAT.md)和
+[本批记录](testing/records/2026-11-15-legacy-editor-encodings.md)。
 
 ## 2026-11-15 工具版本与流式自测
 

@@ -1,0 +1,25 @@
+{
+  "recorded_utc": "2026-11-15T16:20:08.514638+00:00",
+  "report_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/legacy-editor-batch-20261115/review-app/report-r1.md",
+  "report_sha256": "bb8c7e31f18ac8e4a6815ac902f431da09f869a1377ddd85241c0362cebd4c2c",
+  "report_links_and_line_references_checked": 61,
+  "final_complete_path_set_equal": true,
+  "final_count": 612,
+  "final_aggregate_sha256": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "reviewed_source_hashes_equal": 11,
+  "historical_artifacts_preserved": 16,
+  "app_compiler_source_paths": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app/src/main.rs"
+  ],
+  "regression_groups": {
+    "files::transfer_tests::conflict_merge_tests::": 33,
+    "files::transfer_tests::review_viewport_tests::": 12,
+    "files::transfer_tests::action_view_tests::": 3,
+    "files::editor_search_tests::": 3
+  },
+  "independent_test_count": 68,
+  "source_or_manifest_writes_by_reviewer": false,
+  "current_git_status_sha256": "030162277a862cb5b6c0e4687967ca99a0b8b768e45343f3ed65957a6396b4d6",
+  "full_gate_at_signature": "PENDING; exact same freeze success may satisfy condition without a status-only review",
+  "native_desktop": "NOT_RUN"
+}

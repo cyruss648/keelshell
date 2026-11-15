@@ -1,0 +1,24 @@
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+error[E0433]: cannot find type `Popover` in this scope
+   --> crates/keelshell-app/src/files/editor_encoding.rs:170:9
+    |
+170 |         Popover::new("file-read-encoding-popover")
+    |         ^^^^^^^ use of undeclared type `Popover`
+
+error[E0599]: no method named `overflow_y_scroll` found for struct `gpui_kit::Div` in the current scope
+   --> crates/keelshell-app/src/files/editor_encoding.rs:193:22
+    |
+190 |                 div()
+191 |                     .w(px(360.).min((window.viewport_size().width - px(48.)).max(px(100.))))
+192 |                     .max_h(px(240.).min((window.viewport_size().height - px(80.)).max(px(100.))))
+193 |                     .overflow_y_scroll()
+    |                      ^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `overflow_y_scrollbar` with a similar name
+    |
+193 |                     .overflow_y_scrollbar()
+    |                                       +++
+
+Some errors have detailed explanations: E0433, E0599.
+For more information about an error, try `rustc --explain E0433`.
+error: could not compile `keelshell-app` (bin "keelshell-app" test) due to 2 previous errors

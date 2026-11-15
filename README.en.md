@@ -90,6 +90,14 @@ The [local knowledge library](docs/product/AI_KNOWLEDGE_LIBRARY.md) organizes ex
 
 [Text-format preservation](docs/product/REMOTE_TEXT_FORMAT.md) retains one leading UTF-8 BOM and the original uniform LF/CRLF policy; mixed or CR-only drafts stay verbatim. Review and complete target readback compare exact bytes without forcing a final newline. Incompatible format changes require a new read and review. The new package has scoped macOS observations of BOM/CRLF cancel and confirmed saving; see the [format record](docs/testing/records/2026-11-06-editor-format.md) for full scope.
 
+[Explicit read encodings](docs/product/REMOTE_TEXT_FORMAT.md) add GBK, GB18030,
+Big5, Shift_JIS and Windows-1252. The choice affects the next open; the current
+document retains its save format. Reads and saves require exact lossless round
+trips, rejecting unmappable characters and silent best-fit substitutions before
+writing. Original byte backups, complete target readback and dirty-draft reread
+approval remain. Engineering, real OpenSSH, independent review and native scopes
+are tracked in the [batch record](docs/testing/records/2026-11-15-legacy-editor-encodings.md).
+
 [Reviewed traceroute](docs/product/TRACEROUTE_DIAGNOSTICS.md) exposes explicit UDP/ICMP, IPv4/IPv6 and bounded probe options with complete target and command review. Missing hops and stars remain unknown. The same package's real SSH UI returned one-hop replies for UDP loopback in both IP families. Scoped native coverage, incomplete merge acceptance and the footer-action accessibility issue are tracked in the [native record](docs/testing/records/2026-11-06-editor-traceroute-native.md); engineering evidence is in the [combined record](docs/testing/records/2026-11-06-editor-traceroute-integration.md).
 
 Text merging and patches first produce a local draft. Saving remotely requires complete review and a fresh baseline check. File reviews can expand while keeping confirmation and cancellation visible; drafts and patch inputs have explicit editing controls. See [review and editing](docs/product/FILE_REVIEW_AND_FOCUS.md) and the [text merge guide](docs/product/TEXT_CONFLICT_MERGE.md). Two macOS draft/save sequences against an owned SSH/SFTP fixture completed with full-content readback; complete UI and cross-platform acceptance remain open in the [limited native record](docs/testing/records/2026-10-07-text-merge-patch-native.md).

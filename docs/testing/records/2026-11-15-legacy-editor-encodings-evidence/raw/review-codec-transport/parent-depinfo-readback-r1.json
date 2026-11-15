@@ -1,0 +1,30 @@
+[
+  {
+    "binary": "core-text-tests-r1",
+    "depinfo": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-core/a54f33ee8a518a64/out/keelshell_core-a54f33ee8a518a64.d",
+    "sha256": "48c9f235c1888911df6e3251fba0098e65f9274041b092ae58d6230b5fb293d9",
+    "relevant_dependency_paths": [
+      "crates/keelshell-core/src/text_document.rs",
+      "crates/keelshell-core/src/text_document/legacy_tests.rs"
+    ],
+    "expected_path_fragments_present": {
+      "text_document.rs": true,
+      "text_document/legacy_tests.rs": true
+    }
+  },
+  {
+    "binary": "session-encoding-tests-r1",
+    "depinfo": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/fa7c45e79deaf5f4/out/keelshell_session-fa7c45e79deaf5f4.d",
+    "sha256": "dacdab7377ecbcfa95dfb5f2fcfb8b8d902c8908d8e2b2fcff71b3d57f4a8a9a",
+    "relevant_dependency_paths": [
+      "crates/keelshell-session/src/sftp.rs",
+      "crates/keelshell-session/src/sftp/../../tests/fixtures/sftp.rs",
+      "crates/keelshell-session/src/sftp/editor_encoding_tests.rs"
+    ],
+    "expected_path_fragments_present": {
+      "src/sftp.rs": true,
+      "sftp/editor_encoding_tests.rs": true,
+      "tests/fixtures/sftp.rs": true
+    }
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_dependencies.py",
+    "--timeout",
+    "5",
+    "--json-report",
+    "work/legacy-editor-batch-20261115/dependency-report-r2.json"
+  ],
+  "started_utc": "2026-11-15T15:44:10.786179+00:00",
+  "finished_utc": "2026-11-15T15:45:20.793282+00:00",
+  "elapsed_seconds": 70.007,
+  "exit_code": -15,
+  "timeout_or_interrupt": true,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

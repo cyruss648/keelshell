@@ -531,6 +531,7 @@ import sys
 import tarfile
 import tempfile
 import unittest
+from unittest import mock
 import uuid
 import zipfile
 
@@ -577,6 +578,82 @@ class HelperTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(result.stdout, b"")
         self.assertEqual(result.stderr, ERROR)
+
+    def anchor_race(self, change):
+        helper = {"__name__": "library"}
+        exec(compile(HELPER, "helper", "exec"), helper)
+        anchor = self.root / "anchor-race"
+        anchor.mkdir(mode=0o700)
+        original = os.open
+        observations = []
+
+        def changed_open(name, flags, *args, **kwargs):
+            if name != anchor.name or "dir_fd" not in kwargs:
+                return original(name, flags, *args, **kwargs)
+            parent = kwargs["dir_fd"]
+            before = helper["snapshot"](os.stat(name, dir_fd=parent,
+                                                 follow_symlinks=False))
+            if change in ("replace", "symlink"):
+                os.rename(name, "anchor-before", src_dir_fd=parent, dst_dir_fd=parent)
+                if change == "replace":
+                    os.mkdir(name, mode=0o700, dir_fd=parent)
+                else:
+                    os.symlink("anchor-before", name, dir_fd=parent)
+            descriptor = original(name, flags, *args, **kwargs)
+            if change == "create":
+                os.mkdir("unrelated-child", mode=0o700, dir_fd=descriptor)
+            elif change == "remove":
+                os.rmdir("unrelated-child", dir_fd=descriptor)
+            elif change == "mode":
+                os.fchmod(descriptor, 0o750)
+            current = helper["snapshot"](os.fstat(descriptor))
+            observations.append((before, current))
+            return descriptor
+
+        if change == "remove":
+            (anchor / "unrelated-child").mkdir()
+        with mock.patch.object(os, "open", side_effect=changed_open):
+            if change in ("create", "remove"):
+                with helper["anchored_parent"](str(anchor)) as (descriptor, _):
+                    self.assertEqual(os.fstat(descriptor).st_ino, anchor.stat().st_ino)
+                self.assertEqual(len(observations), 1)
+                before, current = observations[0]
+                self.assertNotEqual(before, current, "the real directory must actually change")
+                self.assertEqual(helper["identity"](before), helper["identity"](current))
+            else:
+                with self.assertRaises((helper["Rejected"], OSError)):
+                    with helper["anchored_parent"](str(anchor)):
+                        self.fail("changed directory authority must not be yielded")
+                if change != "symlink":
+                    self.assertEqual(len(observations), 1)
+                    before, current = observations[0]
+                    self.assertNotEqual(helper["identity"](before), helper["identity"](current))
+
+    def test_ancestor_open_accepts_unrelated_child_creation(self):
+        self.anchor_race("create")
+
+    def test_ancestor_open_accepts_unrelated_child_removal(self):
+        self.anchor_race("remove")
+
+    def test_ancestor_open_rejects_permission_change(self):
+        self.anchor_race("mode")
+
+    def test_ancestor_open_rejects_directory_replacement(self):
+        self.anchor_race("replace")
+
+    def test_ancestor_open_rejects_symlink_replacement(self):
+        self.anchor_race("symlink")
+
+    def test_selected_directory_keeps_full_snapshot_validation(self):
+        helper = {"__name__": "library"}
+        exec(compile(HELPER, "helper", "exec"), helper)
+        descriptor = os.open(self.root, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            with self.assertRaises(helper["Rejected"]):
+                with helper["opened"](self.source.name, descriptor, True):
+                    (self.source / "unreviewed-child").mkdir()
+        finally:
+            os.close(descriptor)
 
     def test_zip_and_gnu_tar_pack_binary_unicode_quotes_and_empty_directories(self):
         long_name = "界" * 65

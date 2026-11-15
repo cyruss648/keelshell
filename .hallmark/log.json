@@ -2,6 +2,27 @@
   {
     "date": "2026-11-15",
     "scope": "app",
+    "shape": "existing remote header trigger with a window-bounded Kit popover",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "signature": "next-read choice separated from the open document save format",
+    "material": "actual explicitly selected codec and checked file observations",
+    "preserve": "registry, Palette, Kit controls, unchanged draft on selection, fixed review actions and real browsing row",
+    "introduce": [
+      "six explicit read options",
+      "lossless read and save feedback",
+      "review-bound dirty reread and stale-result rejection"
+    ],
+    "sweep": "PASS: final r4 full engineering gate, all 14 new GPUI names, exact byte-bound read/save/merge/stale guards, real OpenSSH 17/17, normal arm64 GUI/MCP builds; independent original app scope 68/68 on verified parent-built binaries without rebuilding. The r4 archive helper delta is tracked separately. Web render does not apply to native Rust/GPUI.",
+    "native_evidence": "NOT_RUN for this batch",
+    "finish_review": "APP_SOURCE_APPROVED; native desktop, keyboard, IME and accessibility finish NOT_RUN"
+  },
+  {
+    "date": "2026-11-15",
+    "scope": "app",
     "shape": "existing server tools disclosure with separate version and stream checks",
     "theme": [
       "frost",

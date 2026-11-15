@@ -1,0 +1,11 @@
+{
+  "base_sha": "2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24",
+  "batch": "explicit legacy remote editor encodings",
+  "target": "work/recovery-batch-integration-20261115/target",
+  "cargo_owner_changed": false,
+  "delivery": "local_only_no_push",
+  "native_desktop": "NOT_RUN",
+  "encoding_rs_official_docs": "https://docs.rs/encoding_rs/0.8.44/encoding_rs/",
+  "encoding_rs_declared": "0.8",
+  "encoding_rs_existing_lock": "0.8.44"
+}

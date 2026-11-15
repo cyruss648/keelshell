@@ -1,5 +1,31 @@
 # Capability ledger
 
+## 2026-11-15: explicit legacy editor encodings
+
+The remote file header offers Unicode auto, GBK, GB18030, Big5, Shift_JIS and
+Windows-1252 in a native Kit popover. The transient selection affects the next
+explicit open and leaves the current draft and save format intact. Dirty reread
+approval and asynchronous reads bind the exact document, choice and actual SSH
+connection. Legacy decoding must reproduce every original byte; saving rejects
+unmappable and silent best-fit mappings before review or mutation. Unicode
+BOM/EOL handling, original raw backups, authorization, quarantine and complete
+target readback remain. No encoding is guessed and MCP keeps its 64 KiB bound.
+
+The final 612-input gate passed 3077 ordinary Rust tests with 37 ignored,
+14 doctests, Python 187 run / 1 skipped, formatting, strict Clippy, dependency
+policy and three AI controller groups. All 84 new default names passed; six
+reused fixture cases in another target are not new product behaviors.
+Real disposable localhost OpenSSH passed 17/17 with owned cleanup, and normal
+arm64 GUI/MCP builds passed. Two independent original scope reviews found no
+open P0-P3; the two-file archive ancestor-race fix has a supplemental scoped
+approval with independent Python red/green verification and zero open P0-P3.
+Rust review execution used verified parent-built binaries without independent
+recompilation. Native desktops on all platforms, IME/accessibility and the
+complete product remain open. See the
+[format guide](REMOTE_TEXT_FORMAT.md),
+[decision](../adr/0140-explicit-legacy-editor-encodings.md) and
+[batch record](../testing/records/2026-11-15-legacy-editor-encodings.md).
+
 ## 2026-11-15: Windows local file backends and native Linux backend tests
 
 Status: `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / WINDOWS_NATIVE_NOT_RUN`.

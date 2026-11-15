@@ -55,6 +55,7 @@ struct Peer {
     channels: HashMap<ChannelId, Channel<server::Msg>>,
     filesystem: filesystem::Filesystem,
     active: Arc<AtomicUsize>,
+    sftp_requests: Arc<AtomicUsize>,
     jobs: JoinSet<()>,
     archive_tools: Arc<archive_tools_fixture::Fixture>,
     archive_validation: Arc<archive_tools_fixture::Fixture>,
@@ -98,6 +99,7 @@ impl server::Handler for Peer {
             return Err(russh::Error::Disconnect);
         };
         session.channel_success(id)?;
+        self.sftp_requests.fetch_add(1, Ordering::AcqRel);
         self.active.fetch_add(1, Ordering::AcqRel);
         let guard = LiveSubsystem(self.active.clone());
         let filesystem = self.filesystem.clone();
@@ -176,6 +178,7 @@ impl server::Handler for Peer {
 pub(crate) struct Server {
     pub(crate) filesystem: filesystem::Filesystem,
     pub(crate) active: Arc<AtomicUsize>,
+    pub(super) sftp_requests: Arc<AtomicUsize>,
     pub(super) archive_tools: Arc<archive_tools_fixture::Fixture>,
     pub(super) archive_validation: Arc<archive_tools_fixture::Fixture>,
     pub(super) exec_requests: Arc<AtomicUsize>,
@@ -222,6 +225,8 @@ impl Server {
         let shared_archive_validation = archive_validation.clone();
         let exec_requests = Arc::new(AtomicUsize::new(0));
         let shared_exec_requests = exec_requests.clone();
+        let sftp_requests = Arc::new(AtomicUsize::new(0));
+        let shared_sftp_requests = sftp_requests.clone();
         let server_archives = Arc::new(server_archive_fixture::Fixture::default());
         let shared_server_archives = server_archives.clone();
         let (listener_handoff, mut handoff_request) =
@@ -245,6 +250,7 @@ impl Server {
                             channels: HashMap::new(),
                             filesystem: shared_fs.clone(),
                             active: shared_active.clone(),
+                            sftp_requests: shared_sftp_requests.clone(),
                             jobs: JoinSet::new(),
                             archive_tools: shared_archive_tools.clone(),
                             archive_validation: shared_archive_validation.clone(),
@@ -270,6 +276,7 @@ impl Server {
             archive_tools,
             archive_validation,
             exec_requests,
+            sftp_requests,
             #[cfg(unix)]
             server_archives,
             address,

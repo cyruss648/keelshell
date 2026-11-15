@@ -1,0 +1,2 @@
+# Provenance bytes must not be changed by line-ending normalization.
+raw/** binary

@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--check",
+    "2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24",
+    "--",
+    "Cargo.toml",
+    "Cargo.lock",
+    "crates/keelshell-core/Cargo.toml",
+    "crates/keelshell-core/src/text_document.rs",
+    "crates/keelshell-core/src/text_document/legacy_tests.rs",
+    "crates/keelshell-session/src/sftp.rs",
+    "crates/keelshell-session/src/sftp/editor_encoding_tests.rs"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "note": "Two new untracked test files are inspected directly; Git diff check only covers tracked changes."
+}

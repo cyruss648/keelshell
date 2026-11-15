@@ -1,0 +1,15 @@
+{
+  "report": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/legacy-editor-batch-20261115/review-codec-transport/report-r1.md",
+  "report_sha256": "9e49a336527f4088da90cff2beb15178112ae40bedc84cd94db5fddd775c2449",
+  "report_bytes": 42669,
+  "report_lines": 206,
+  "absolute_file_link_checks": 72,
+  "complete_executed_name_count": 99,
+  "frozen_source_files_still_match": 7,
+  "stable_binaries_still_match": 2,
+  "errors": [],
+  "verdict": "APPROVE_SCOPED / FULL_GATE_PENDING",
+  "full_repository_gate": "PENDING",
+  "app_review": "OUT_OF_SCOPE",
+  "independent_recompilation": false
+}

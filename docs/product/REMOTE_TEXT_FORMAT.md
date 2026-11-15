@@ -1,4 +1,59 @@
-# 远程文本 Unicode 编码、BOM 与换行保持
+# 远程文本编码、BOM 与换行保持
+
+## 显式旧编码读取 — 2026-11-15
+
+文件区远程标题旁的**读取编码**提供 Unicode 自动、GBK、GB18030、Big5、
+Shift_JIS 和 Windows-1252。选择后，再明确点击文件的编辑入口。
+Unicode 自动只接受 UTF-8，以及带 BOM 的 UTF-16 LE/BE；不会猜测旧编码。
+选项不写入连接配置，不发起网络请求，也不修改已经打开的正文、草稿或保存格式。
+当前文档实际保持的编码单独显示。
+
+重新打开脏草稿先审核放弃草稿，取消保留正文、完整原始字节和格式。
+审核后文档、草稿、编码选择或实际连接变化，旧确认失效；读取期间发生变化时
+迟到结果也不能覆盖当前文档。更改下一次读取选项不会将已打开的文件转码。
+
+| 显式选择 | 读取及保存合同 |
+| --- | --- |
+| GBK、GB18030、Big5、Shift_JIS、Windows-1252 | 无替换解码，同编码重新编码必须逐字节等于完整输入；保存继续使用该编码 |
+| 任意旧编码遇到 Unicode BOM、非法序列或不能严格往返的字节别名 | 拒绝打开，保留当前草稿，不猜测、不写回 |
+| 草稿包含所选编码无法无损表示的字符 | 在生成保存审核前拒绝；保留草稿，不创建备份或远端临时文件 |
+| 编码器会静默近似映射的字符 | 回解必须与规范化草稿完全相同，否则拒绝，例如 Shift_JIS 的日元/反斜杠近似映射 |
+
+旧编码使用 `encoding_rs` 的 WHATWG 映射，不承诺全部历史厂商扩展或国家标准
+修订版本。不存在有损保存、自动猜测、数字字符引用替代或自动转码。
+查找/替换、diff、patch 和冲突合并处理解码后的 Unicode 正文；
+保存仍审核同一格式产生的精确出站字节，并保留原始字节备份。
+远端旧编码观察出现非法序列或 Unicode BOM 时，锁定显式重读要求；
+远端恢复原字节不会自动解锁。无 BOM 的字节无法可靠证明远端改用了另一编码，
+因此不宣称自动检测编码变化。
+
+原始字节、解码后 UTF-8 正文及最终字节分别最多 1 MiB；保存最多 4096 行，
+包括 CRLF 和编码扩张。空内容、无换行版本及连续保存保持当前文档的编码和已知
+插入策略。明确重新打开后才采用新观察到的策略。
+
+本片工程、真实 OpenSSH、独立复核和三平台原生验收分别记录在
+[旧编码批次记录](../testing/records/2026-11-15-legacy-editor-encodings.md)；
+源码接入不等于原生桌面验收。设计见
+[ADR 0140](../adr/0140-explicit-legacy-editor-encodings.md)。
+
+### Explicit legacy reads
+
+The file header offers Unicode auto, GBK, GB18030, Big5, Shift_JIS and
+Windows-1252 for the next explicit open. Changing this transient choice sends
+no request and leaves the current document, draft and save format intact.
+Reopening a dirty draft needs a new discard review bound to the exact document,
+draft, read choice and authenticated connection.
+
+Legacy reads must decode without replacement and reproduce every source byte.
+Saves must decode back to the exact normalized Unicode draft; unmappable and
+silent best-fit mappings are rejected before approval or mutation.
+These are `encoding_rs` WHATWG mappings, not a claim of all vendor extensions.
+Unicode BOMs are never reinterpreted as legacy text. There is no automatic
+encoding detection or lossy conversion. Byte, decoded-body and save-line
+budgets, original backups, isolation and complete target readback remain.
+The original Unicode transport API and MCP's 64 KiB limit are unchanged.
+
+## Unicode 验收历史
 
 日期：2026-11-06。r3/538输入的源码候选已导入开发分支，逐项匹配作者冻结；
 组合工程、新包与原生验收分别记录，不把源码候选视为已发布功能。
@@ -13,7 +68,7 @@ inline合并操作可达性待修，其他格式与跨平台原生仍待验，�
 
 ## 可用行为
 
-远程编辑仍使用当前已认证 SSH 的 SFTP 通道，只接受完整、检查过的常规 Unicode
+远程编辑仍使用当前已认证 SSH 的 SFTP 通道。默认 Unicode 自动只接受完整、检查过的常规 Unicode
 文本文件。类型、路径、句柄、元数据、无效文本、NUL 与读取上限的既有拒绝规则
 保持。UTF-8 可带或不带 BOM；UTF-16 只接受明确的 UTF-16 LE/BE BOM，不猜测
 无 BOM 的 UTF-16，也不转换 UTF-32。错误不回显文件正文。
@@ -86,7 +141,8 @@ BOM/EOL 时，保留草稿、撤销旧合并与保存路径，必须显式成功
 
 ## 验收与范围
 
-本片不增加其他编码转换、格式菜单、新依赖、备份历史或自动重试。
+2026-11-06 的 Unicode 片没有增加其他编码、格式菜单、新依赖、备份历史或自动重试；
+2026-11-15 的显式旧编码读取范围以上方当前合同为准。
 r2专项去重42条通过、含新增21条的历史保留；独立审三项P2先由三条新增GPUI回归
 实际复现，再修复通过。r3另增一条core策略回归，受影响专项去重37条通过，
 累计新增源码用例25条。r3新的完整门禁2338 ordinary passed/23 ignored、

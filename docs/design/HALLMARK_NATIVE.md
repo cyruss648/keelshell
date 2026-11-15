@@ -73,6 +73,22 @@ Frost、Graphite、Lavender 从同一 registry、Palette 和 Kit 控件获取颜
 
 ## Native mapping
 
+### 2026-11-15 显式读取编码
+
+文件标题旁使用原生 Kit popover 提供 Unicode 自动与五种显式旧编码。
+选择器限制在窗口视口中，避免占用紧凑文件区的固定高度；当前文档的编码说明
+与「下一次读取」选择分开。切换选择不联网、不改草稿或保存格式；放弃脏草稿
+仍使用完整审核和固定确认/取消。选择、开始审核或启动操作时收起浮层。
+
+Frost、Graphite、Lavender 继续使用 registry、语义 Palette、共享 Kit 控件及组件
+token，没有按主题 ID 新增业务分支、字面颜色或字体。最终工程门禁中全部 14 项
+新 GPUI 用例通过，覆盖三主题、浅/深、双语及 900×580/1440×900；非作者对
+不变 app 范围独立执行去重 68 项，使用核验的父预构建，没有独立重编译。
+真实 OpenSSH 与正常构建另行记录；本批桌面截图、原生键盘、IME 与辅助技术
+仍为 `NOT_RUN`，不以 headless 布局签署原生 finish。参见
+[ADR 0140](../adr/0140-explicit-legacy-editor-encodings.md)与
+[集中记录](../testing/records/2026-11-15-legacy-editor-encodings.md)。
+
 ### 2026-11-15 工具版本与流式自测
 
 既有工具观察区增加独立的「版本与自测」操作，PATH 与版本/功能分别显示来源。

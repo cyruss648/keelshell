@@ -1,0 +1,41 @@
+{
+  "files": [
+    {
+      "path": "final-review-binaries/keelshell_app-bb7e65d3f7e183e9",
+      "bytes": 267369936,
+      "sha256": "14133b094ead0ca9d0d2dce7f094713e9fc8419efd9834c07527f85ba3c35e3b",
+      "reason": "Regenerable parent-built test copy; exact source binding, inventory and execution originals retained"
+    },
+    {
+      "path": "final-review-binaries/keelshell_core-d048304bbec322b2",
+      "bytes": 16302576,
+      "sha256": "e1c23428bdc487f79bcc816a6de19e328a892c648a1371a60c1b0381b8da0730",
+      "reason": "Regenerable parent-built test copy; exact source binding, inventory and execution originals retained"
+    },
+    {
+      "path": "final-review-binaries/keelshell_session-3d79ad765c25c763",
+      "bytes": 40102720,
+      "sha256": "893441946f417dc736a92091b42601f0b18b7ece66c362d75064801d97a2284b",
+      "reason": "Regenerable parent-built test copy; exact source binding, inventory and execution originals retained"
+    },
+    {
+      "path": "final-review-binaries/openssh_interop-f544c20314903785",
+      "bytes": 32121680,
+      "sha256": "f9fc593f39e594234e54463ed6dd6510016c3146c151d3aa520c943b8be46881",
+      "reason": "Regenerable parent-built test copy; exact source binding, inventory and execution originals retained"
+    },
+    {
+      "path": "review-binaries/keelshell_core-a54f33ee8a518a64",
+      "bytes": 15843216,
+      "sha256": "d47cc0aaea401eebd9af162f97db8426ec1b3f0c5e0ce684b62e267adddc6679",
+      "reason": "Regenerable parent-built test copy; exact source binding, inventory and execution originals retained"
+    },
+    {
+      "path": "review-binaries/keelshell_session-fa7c45e79deaf5f4",
+      "bytes": 39715936,
+      "sha256": "1dbfba00762db7c6466f0f17159bee6328fa09101247139ba7a628ae97c08d8b",
+      "reason": "Regenerable parent-built test copy; exact source binding, inventory and execution originals retained"
+    }
+  ],
+  "total_bytes": 411456064
+}

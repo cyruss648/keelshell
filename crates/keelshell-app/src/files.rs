@@ -11,9 +11,9 @@ use gpui_kit::{
 };
 use keelshell_core::{
     DirectoryCompareReport, DirectoryEntryKind, DirectoryEntrySnapshot, DirectoryEntryStatus,
-    DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextDocument, TextFormat,
-    TextLineEnding, TransferRecoveryClaim, TransferRecoveryDirection, TransferRecoveryRecord,
-    TransferRecoveryState, TransferRecoveryStore,
+    DirectorySyncDeletePolicy, DirectorySyncDirection, DirectorySyncPlan, TextDocument,
+    TextEncoding, TextFormat, TextLineEnding, TransferRecoveryClaim, TransferRecoveryDirection,
+    TransferRecoveryRecord, TransferRecoveryState, TransferRecoveryStore,
 };
 use keelshell_session::{
     SessionError, SshSession,
@@ -40,6 +40,7 @@ mod archive_inspection;
 mod archive_validation;
 mod batch;
 mod browser;
+mod editor_encoding;
 mod editor_language;
 mod editor_search;
 #[cfg(test)]
@@ -82,6 +83,7 @@ enum Operation {
     AcknowledgeQuarantine(TransferQuarantineReview),
     List(String),
     Read(RemoteEntry),
+    ReadEncoded(RemoteEntry, TextEncoding),
     ReadMerge {
         path: String,
         base: Vec<u8>,
@@ -145,12 +147,7 @@ enum Outcome {
         format: TextFormat,
         body: String,
     },
-    MergeLoaded {
-        snapshot: RegularFileSnapshot,
-        plan: keelshell_core::TextMergePlan,
-        base: Vec<u8>,
-        draft: String,
-    },
+    MergeLoaded(merge::MergeObservation),
     PatchApplied(String, String, String),
     Done(Message),
     PlannedDirectory(DirectoryTransferPlan),
@@ -255,6 +252,11 @@ pub struct FilesPanel {
     editing: Option<(String, Vec<u8>)>,
     editor_snapshot: Option<RegularFileSnapshot>,
     editor_format: Option<TextFormat>,
+    // A choice for the next explicit read never changes an open document's envelope.
+    editor_read_encoding: Option<TextEncoding>,
+    editor_read_revision: uuid::Uuid,
+    editor_encoding_open: bool,
+    editor_read_review: Option<editor_encoding::ReadContext>,
     // Once an incompatible remote format was observed, only an explicit
     // successful reopen may establish a new save/merge baseline.
     editor_reload_required: bool,
@@ -848,8 +850,8 @@ impl FileFailure {
                 "Operation cancelled before opening SFTP",
             ),
             Self::InvalidEditor => Message::new(
-                "编辑器仅支持不超过 1 MiB 的受支持 Unicode 文本文件",
-                "The editor accepts supported Unicode text files up to 1 MiB",
+                "编辑器仅支持不超过 1 MiB 的严格解码文本；旧编码需要显式选择",
+                "The editor accepts strictly decoded text up to 1 MiB; select legacy encodings explicitly",
             ),
             Self::TextDocument(error) => Message::detail(
                 "文本格式准备未通过，保留原文件和草稿",
@@ -1087,6 +1089,10 @@ impl FilesPanel {
             editing: None,
             editor_snapshot: None,
             editor_format: None,
+            editor_read_encoding: None,
+            editor_read_revision: uuid::Uuid::new_v4(),
+            editor_encoding_open: false,
+            editor_read_review: None,
             editor_reload_required: false,
             merge_review: None,
             patch: cx.new(|cx| TextareaState::new(window, cx)),
@@ -1442,6 +1448,7 @@ impl FilesPanel {
             self.run_batch(*plan, window, cx);
             return;
         }
+        self.editor_encoding_open = false;
         if let Operation::TransferArchive(plan) = &operation
             && !self.archive_plan_is_current(plan, cx)
         {
@@ -1474,6 +1481,12 @@ impl FilesPanel {
         } else {
             None
         };
+        let editor_read_binding = matches!(
+            &operation,
+            Operation::Read(_) | Operation::ReadEncoded(..) | Operation::ReadMerge { .. }
+        )
+        .then(|| editor_encoding::ReadContext::capture(self, cx))
+        .flatten();
         if operation.transfer_status().is_some() {
             self.run_queued_transfer(operation, window, cx);
             return;
@@ -1818,6 +1831,16 @@ impl FilesPanel {
                     return;
                 }
                 let succeeded = result.is_ok();
+                if let Some(binding) = &editor_read_binding
+                    && !binding.is_current(view, cx)
+                {
+                    view.status = Message::new(
+                        "读取时文档、草稿或基线已变化，或编码选择及 SSH 连接已变化；保留当前草稿，请重新读取。",
+                        "The document, draft, baseline, read encoding or SSH connection changed; draft retained. Read the file again.",
+                    );
+                    cx.notify();
+                    return;
+                }
                 let keeps_recovery_claim = matches!(
                     &result,
                     Ok(
@@ -1905,8 +1928,8 @@ impl FilesPanel {
                             };
                         }
                     }
-                    Ok(Outcome::MergeLoaded {snapshot, plan, base, draft}) => {
-                        view.receive_merge(snapshot, plan, base, draft, window, cx);
+                    Ok(Outcome::MergeLoaded(observation)) => {
+                        view.receive_merge(observation, window, cx);
                     }
                     Ok(Outcome::PatchApplied(path, original, result)) => {
                         if view.editing.as_ref().is_some_and(|(current,_)| current == &path)
@@ -2134,20 +2157,37 @@ impl FilesPanel {
         self.remote_child(&name)
     }
     fn request_read(&mut self, entry: RemoteEntry, window: &mut Window, cx: &mut Context<Self>) {
+        let operation = self.editor_read_encoding.map_or_else(
+            || Operation::Read(entry.clone()),
+            |encoding| Operation::ReadEncoded(entry.clone(), encoding),
+        );
         let dirty = self.editing.as_ref().is_some_and(|(_, original)| {
             !self.draft_matches_bytes(&self.editor.read(cx).value(), original)
         });
         if dirty {
+            let previous_review = self.pending_review_id;
+            let encoding = editor_encoding::choice_name(self.editor_read_encoding, cx);
             self.confirm(
                 Message::new(
-                    format!("放弃未保存的编辑并打开 {}？", entry.path),
-                    format!("Discard unsaved edits and open {}?", entry.path),
+                    format!("放弃未保存的编辑，以 {encoding} 重新读取 {}？", entry.path),
+                    format!(
+                        "Discard unsaved edits and reread {} using {encoding}?",
+                        entry.path
+                    ),
                 ),
-                Operation::Read(entry),
+                operation,
                 cx,
             );
+            if self.pending_review_id != previous_review
+                && matches!(
+                    &self.pending,
+                    Some((_, Operation::Read(_) | Operation::ReadEncoded(..)))
+                )
+            {
+                self.editor_read_review = editor_encoding::ReadContext::capture(self, cx);
+            }
         } else {
-            self.run(Operation::Read(entry), window, cx);
+            self.run(operation, window, cx);
         }
     }
     fn confirm(&mut self, message: Message, operation: Operation, cx: &mut Context<Self>) {
@@ -2175,6 +2215,8 @@ impl FilesPanel {
             self.revoke_recovery_review();
         }
         self.pending_review_id = uuid::Uuid::new_v4();
+        self.editor_read_review = None;
+        self.editor_encoding_open = false;
         self.confirmation_scroll.set_offset(point(px(0.), px(0.)));
         self.confirmation_expanded = false;
         self.editor_surface = None;
@@ -2205,7 +2247,26 @@ impl FilesPanel {
             cx.notify();
             return;
         }
+        if matches!(
+            &self.pending,
+            Some((_, Operation::Read(_) | Operation::ReadEncoded(..)))
+        ) && self
+            .editor_read_review
+            .as_ref()
+            .is_some_and(|review| !review.is_current(self, cx))
+        {
+            self.pending = None;
+            self.editor_read_review = None;
+            self.confirmation_expanded = false;
+            self.status = Message::new(
+                "重新读取审核的文档、草稿或连接已变化；内容已保留，请重新审核。",
+                "The document, draft or connection changed after reread review; contents retained. Review again.",
+            );
+            cx.notify();
+            return;
+        }
         if let Some((_, operation)) = self.pending.take() {
+            self.editor_read_review = None;
             self.confirmation_expanded = false;
             if let Operation::DiscardPersistedRecoveryBatch(candidates) = operation {
                 self.start_batch_discard(candidates, window, cx);
@@ -2550,6 +2611,7 @@ impl Operation {
                     | Self::AcknowledgeQuarantine(_)
                     | Self::List(_)
                     | Self::Read(_)
+                    | Self::ReadEncoded(..)
                     | Self::ReadMerge { .. }
                     | Self::ApplyPatchToDraft { .. }
                     | Self::PlanDirectory(_)
@@ -2634,6 +2696,7 @@ impl Operation {
             | Self::AcknowledgeQuarantine(_)
             | Self::List(_)
             | Self::Read(_)
+            | Self::ReadEncoded(..)
             | Self::ReadMerge { .. }
             | Self::ApplyPatchToDraft { .. }
             | Self::Mkdir(_)

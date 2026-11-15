@@ -1,0 +1,4 @@
+{"function": "require", "line": 48}
+{"function": "anchored_parent", "line": 284, "before": {"dev": 16777233, "ino": 273641651, "mode": 16832, "nlink": 7, "size": 224, "mtime_ns": 1794759951754694549, "ctime_ns": 1794759951754694549, "uid": 501, "gid": 20, "flags": 0}, "current": {"dev": 16777233, "ino": 273641651, "mode": 16832, "nlink": 6, "size": 192, "mtime_ns": 1794759951754747174, "ctime_ns": 1794759951754747174, "uid": 501, "gid": 20, "flags": 0}}
+{"function": "main", "line": 700}
+{"function": "<module>", "line": 716}

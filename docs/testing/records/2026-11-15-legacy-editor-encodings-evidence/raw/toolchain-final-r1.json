@@ -1,0 +1,36 @@
+{
+  "observed_utc": "2026-11-15T16:37:41.465644+00:00",
+  "commands": [
+    {
+      "command": [
+        "rustc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "cargo",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "cargo 1.100.0 (3acc79c0c 2026-11-05)",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rustup",
+        "show",
+        "active-toolchain"
+      ],
+      "exit_code": 0,
+      "stdout": "stable-aarch64-apple-darwin (default)",
+      "stderr": ""
+    }
+  ],
+  "ancestor_toolchain_files": [],
+  "root_rust_version": null,
+  "explicit_project_rustup_override_checked_by_active_toolchain": true
+}

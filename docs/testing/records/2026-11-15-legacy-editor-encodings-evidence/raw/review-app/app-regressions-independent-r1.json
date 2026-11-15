@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/legacy-editor-batch-20261115/final-review-binaries/keelshell_app-bb7e65d3f7e183e9",
+    "files::transfer_tests::conflict_merge_tests::",
+    "files::transfer_tests::review_viewport_tests::",
+    "files::transfer_tests::action_view_tests::",
+    "files::editor_search_tests::",
+    "files::transfer_tests::suspended_editor",
+    "files::transfer_tests::suspension_discards_successful_late_read",
+    "files::transfer_tests::late_save_acknowledges_remote_commit",
+    "--test-threads=4"
+  ],
+  "started_utc": "2026-11-15T16:10:59.662379+00:00",
+  "finished_utc": "2026-11-15T16:11:35.228113+00:00",
+  "elapsed_seconds": 35.565,
+  "exit_code": 0,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "freeze_before": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "freeze_after": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "binary_sha256_before": "14133b094ead0ca9d0d2dce7f094713e9fc8419efd9834c07527f85ba3c35e3b",
+  "binary_sha256_after": "14133b094ead0ca9d0d2dce7f094713e9fc8419efd9834c07527f85ba3c35e3b",
+  "binary_unchanged": true,
+  "log_sha256": "df6ec6fc3187f7cba9f9f39dbf564f3565be739c1aef66b14267bfe94fa753c7",
+  "independent_execution": true,
+  "independent_recompilation": false,
+  "cargo_or_shared_target_write": false
+}

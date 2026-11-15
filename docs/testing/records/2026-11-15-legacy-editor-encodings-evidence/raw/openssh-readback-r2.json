@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-11-15T16:13:00.700629+00:00",
+  "notice": "The first parent derived readback requested openssh-r1/receipt.json; the runner writes result.json. That lookup raised FileNotFoundError and was not treated as success. The actual unchanged result.json is read here.",
+  "correct_receipt": "openssh-r1/result.json",
+  "correct_receipt_sha256": "01392598add4bbe64cc8aee42737f54d1dba3e521a1f9b3d11630d143f113682",
+  "freeze_sha256": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "freeze_unchanged_before_gate": true,
+  "openssh_passed": 17,
+  "runner_exit_code": 0,
+  "owned_cleanup_passed": true,
+  "gate_status_at_readback": "RUNNING"
+}

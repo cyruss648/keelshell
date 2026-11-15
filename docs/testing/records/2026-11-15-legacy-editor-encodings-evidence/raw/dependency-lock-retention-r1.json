@@ -1,0 +1,65 @@
+{
+  "restored_unrelated_transitive_versions": true,
+  "method": "retain exact baseline package records except Cargo-generated zip/rand records, core encoding edge and exact rand edge references",
+  "new_registry_versions": {
+    "zip": "9.6.0",
+    "rand": "0.10.4",
+    "encoding_rs": "0.8.44"
+  },
+  "additional_package_keys": [
+    [
+      "rand",
+      "0.10.4"
+    ],
+    [
+      "zip",
+      "9.6.0"
+    ]
+  ],
+  "removed_package_keys": [
+    [
+      "rand",
+      "0.10.3"
+    ],
+    [
+      "zip",
+      "9.5.1"
+    ]
+  ],
+  "existing_package_records_changed": [
+    [
+      "keelshell-core",
+      "0.1.0"
+    ],
+    [
+      "keelshell-mcp",
+      "0.1.0"
+    ],
+    [
+      "keelshell-session",
+      "0.1.0"
+    ],
+    [
+      "num-bigint",
+      "0.5.1"
+    ],
+    [
+      "pageant",
+      "0.2.5"
+    ],
+    [
+      "proptest",
+      "1.12.0"
+    ],
+    [
+      "quinn-proto",
+      "0.11.19"
+    ],
+    [
+      "russh",
+      "0.65.1"
+    ]
+  ],
+  "result_sha256": "297f8bd7d3353461d81631ab3733ef804270b28fc06b4d16060563f26037cb77",
+  "validation": "PENDING Cargo --locked validation"
+}

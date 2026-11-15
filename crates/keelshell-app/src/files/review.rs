@@ -139,6 +139,7 @@ impl FilesPanel {
                     view.revoke_recovery_review();
                 }
                 view.pending = None;
+                view.editor_read_review = None;
                 view.confirmation_expanded = false;
                 cx.notify();
             }))

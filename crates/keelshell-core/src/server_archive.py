@@ -281,7 +281,11 @@ def anchored_parent(parent):
                                  dir_fd=descriptors[-1])
             descriptors.append(descriptor)
             current = snapshot(os.fstat(descriptor))
-            require(current == before)
+            # Unselected ancestors can gain or lose unrelated children during
+            # open. Their timestamps, size and link count are not authority.
+            # Require the same inode and security metadata, as at final recheck;
+            # opened() and scan() still compare full selected-tree snapshots.
+            require(identity(current) == identity(before))
             chain.append(current)
         yield descriptors[-1], chain
         # Our stage and publication change parent timestamps/link count. The

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/legacy-editor-batch-20261115/final-review-binaries/keelshell_app-bb7e65d3f7e183e9",
+    "legacy_editor",
+    "--test-threads=4"
+  ],
+  "started_utc": "2026-11-15T16:10:26.709020+00:00",
+  "finished_utc": "2026-11-15T16:10:39.765042+00:00",
+  "elapsed_seconds": 13.056,
+  "exit_code": 0,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "freeze_before": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "freeze_after": "bab1cc3f38f1d84e5ea5a9e2e93d8cad77fe9d06e4707e37c8bd84e54c2dadd3",
+  "binary_sha256_before": "14133b094ead0ca9d0d2dce7f094713e9fc8419efd9834c07527f85ba3c35e3b",
+  "binary_sha256_after": "14133b094ead0ca9d0d2dce7f094713e9fc8419efd9834c07527f85ba3c35e3b",
+  "binary_unchanged": true,
+  "log_sha256": "7b9bc9d16f04a09801298a9ea82e925a2bc56d4785db142a787ad65d6b7636bc",
+  "independent_execution": true,
+  "independent_recompilation": false,
+  "cargo_or_shared_target_write": false
+}

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-app",
+    "--locked",
+    "--",
+    "files::transfer_tests::",
+    "--test-threads=4"
+  ],
+  "started_utc": "2026-11-15T15:51:16.153646+00:00",
+  "finished_utc": "2026-11-15T15:53:52.024434+00:00",
+  "elapsed_seconds": 155.87,
+  "exit_code": 101,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "85d1ce2587095bf3b7ccd57bca38d4dff5f1066392ceb635130fa0e8bc829e62"
+}

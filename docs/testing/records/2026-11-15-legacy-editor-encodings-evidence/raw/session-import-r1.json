@@ -1,0 +1,12 @@
+{
+  "author_agent": "01a1dfd1-a781-7022-ab49-23fc35c34457",
+  "base_sha": "2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24",
+  "files": {
+    "crates/keelshell-session/src/sftp.rs": "ca9120d91ae81ee4ccaa75a17e44038f2d3bca5bbd9b3e01a819cc82787c60a0",
+    "crates/keelshell-session/src/sftp/editor_encoding_tests.rs": "2cb8ae13585e7596ec7939f74dcc8b7aa5733a12a77733f83f7c74a7c5ef00e3"
+  },
+  "copy_verified": true,
+  "cargo_owner_changed": false,
+  "author_cargo_execution": "NOT_RUN",
+  "author_report": "30 new tests;6 reused filesystem fixture tests register in an additional target"
+}

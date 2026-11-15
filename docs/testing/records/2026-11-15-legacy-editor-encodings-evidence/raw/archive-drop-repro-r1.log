@@ -1,0 +1,9 @@
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.39s
+     Running tests/server_archive.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/0d60f9b46cb77d8b/out/server_archive-0d60f9b46cb77d8b)
+
+running 1 test
+test server_archive_dropped_dispatched_future_retains_quarantine_and_unrelated_ssh ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.08s
+

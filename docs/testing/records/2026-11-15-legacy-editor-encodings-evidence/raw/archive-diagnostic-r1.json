@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "work/legacy-editor-batch-20261115/diagnose_archive.py"
+  ],
+  "started_utc": "2026-11-15T16:25:42.845621+00:00",
+  "finished_utc": "2026-11-15T16:25:53.172306+00:00",
+  "elapsed_seconds": 10.327,
+  "exit_code": 0,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "217f7f7c5e3b46fc23afe7790a14931b20ed52a87632ad231abae94430e0ba1d"
+}

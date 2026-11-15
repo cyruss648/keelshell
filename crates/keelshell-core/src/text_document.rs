@@ -1,4 +1,6 @@
-//! Unicode document envelopes for bounded, explicitly reviewed remote saves.
+//! Lossless document envelopes for bounded, explicitly reviewed remote saves.
+
+use encoding_rs::{DecoderResult, EncoderResult, Encoding};
 
 use crate::{MAX_TEXT_EDIT_BYTES, MAX_TEXT_EDIT_LINES};
 
@@ -6,7 +8,10 @@ const UTF8_BOM: &[u8] = b"\xef\xbb\xbf";
 const UTF16_LE_BOM: &[u8] = b"\xff\xfe";
 const UTF16_BE_BOM: &[u8] = b"\xfe\xff";
 
-/// A checked document encoding; UTF-16 requires an explicit byte-order mark.
+/// A checked document encoding; legacy encodings require explicit selection.
+///
+/// UTF-16 requires a byte-order mark. Legacy encodings use the WHATWG mappings
+/// from `encoding_rs` and accept only byte sequences that round-trip exactly.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TextEncoding {
     /// UTF-8, with or without a leading signature.
@@ -15,6 +20,16 @@ pub enum TextEncoding {
     Utf16Le,
     /// UTF-16 in big-endian byte order, with its original signature.
     Utf16Be,
+    /// GBK, selected explicitly without a Unicode signature.
+    Gbk,
+    /// GB18030, selected explicitly without a Unicode signature.
+    Gb18030,
+    /// Big5, selected explicitly without a Unicode signature.
+    Big5,
+    /// Shift_JIS, selected explicitly without a Unicode signature.
+    ShiftJis,
+    /// Windows-1252, selected explicitly without a Unicode signature.
+    Windows1252,
 }
 
 impl TextEncoding {
@@ -24,6 +39,27 @@ impl TextEncoding {
             Self::Utf8 => "UTF-8",
             Self::Utf16Le => "UTF-16 LE",
             Self::Utf16Be => "UTF-16 BE",
+            Self::Gbk => "GBK",
+            Self::Gb18030 => "GB18030",
+            Self::Big5 => "Big5",
+            Self::ShiftJis => "Shift_JIS",
+            Self::Windows1252 => "Windows-1252",
+        }
+    }
+
+    /// Whether decoding this encoding requires an explicit legacy selection.
+    pub fn is_legacy(self) -> bool {
+        self.legacy_codec().is_some()
+    }
+
+    fn legacy_codec(self) -> Option<&'static Encoding> {
+        match self {
+            Self::Utf8 | Self::Utf16Le | Self::Utf16Be => None,
+            Self::Gbk => Some(encoding_rs::GBK),
+            Self::Gb18030 => Some(encoding_rs::GB18030),
+            Self::Big5 => Some(encoding_rs::BIG5),
+            Self::ShiftJis => Some(encoding_rs::SHIFT_JIS),
+            Self::Windows1252 => Some(encoding_rs::WINDOWS_1252),
         }
     }
 }
@@ -53,10 +89,10 @@ pub struct TextFormat {
     line_ending: TextLineEnding,
 }
 
-/// One checked Unicode body, excluding exactly one leading signature BOM.
+/// One checked Unicode body, excluding its encoding's leading signature BOM.
 ///
-/// UTF-16 raw files are decoded strictly into this editable body. Their byte
-/// order and BOM remain in the format for subsequent saves.
+/// Raw files are decoded strictly into this editable body. Their encoding,
+/// byte order and BOM remain in the format for subsequent saves.
 /// Callers retain the original raw file snapshot for conflict and backup checks.
 #[derive(Clone, PartialEq, Eq)]
 pub struct TextDocument {
@@ -73,6 +109,15 @@ pub enum TextDocumentError {
     /// UTF-16 input has an odd byte count or malformed surrogate sequence.
     #[error("document is not valid UTF-16")]
     InvalidUtf16,
+    /// Input is malformed in the explicitly selected legacy encoding.
+    #[error("document is not valid in the selected legacy encoding")]
+    InvalidLegacyEncoding,
+    /// Decodable legacy bytes cannot be reproduced exactly by the same codec.
+    #[error("document bytes do not round-trip in the selected legacy encoding")]
+    NonCanonicalEncoding,
+    /// The draft has an unmappable character or would change when decoded.
+    #[error("document cannot be represented losslessly in the selected encoding")]
+    Unrepresentable,
     /// An unsupported signature, including UTF-32, was supplied.
     #[error("document has an unsupported encoding signature")]
     UnsupportedEncoding,
@@ -128,6 +173,44 @@ impl TextDocument {
         })
     }
 
+    /// Decode complete raw bytes using an explicitly selected exact encoding.
+    ///
+    /// Unicode selections retain [`Self::decode`]'s BOM rules: UTF-8 accepts an
+    /// optional signature, and UTF-16 requires the selected byte order's BOM.
+    /// A different detected encoding is rejected, without conversion.
+    ///
+    /// Legacy selections reject leading Unicode BOMs and never sniff another
+    /// encoding. Decoding must succeed without replacement, and re-encoding
+    /// must reproduce every original byte. Both raw bytes and the decoded
+    /// UTF-8 body must fit within 1 MiB; the save-only line bound is unchanged.
+    ///
+    /// # Errors
+    /// Rejects mismatched or unsupported signatures, malformed input, legacy
+    /// bytes that do not round-trip, NUL, and either size limit.
+    /// Errors never contain document contents.
+    pub fn decode_with_encoding(
+        bytes: &[u8],
+        encoding: TextEncoding,
+    ) -> Result<Self, TextDocumentError> {
+        if let Some(codec) = encoding.legacy_codec() {
+            let body = decode_legacy(bytes, codec)?;
+            let line_ending = line_ending(&body);
+            return Ok(Self {
+                body,
+                format: TextFormat {
+                    encoding,
+                    bom: false,
+                    line_ending,
+                },
+            });
+        }
+        let document = Self::decode(bytes)?;
+        if document.format.encoding != encoding {
+            return Err(TextDocumentError::UnsupportedEncoding);
+        }
+        Ok(document)
+    }
+
     /// Exact editable body, with internal U+FEFF and all line terminators retained.
     pub fn body(&self) -> &str {
         &self.body
@@ -147,7 +230,8 @@ impl TextFormat {
 
     /// Whether the raw file has its encoding's leading signature.
     ///
-    /// This is always true for UTF-16 and optional for UTF-8.
+    /// This is always true for UTF-16, optional for UTF-8 and false for legacy
+    /// encodings.
     pub fn has_bom(self) -> bool {
         self.bom
     }
@@ -170,15 +254,18 @@ impl TextFormat {
 
     /// Decode bytes using this already observed format.
     ///
-    /// This differs from [`TextDocument::decode`] only for an important UTF-8
-    /// edge case: a BOM-less document may legitimately begin with U+FEFF as
+    /// For Unicode formats, this differs from [`TextDocument::decode`] for an
+    /// important UTF-8 edge case: a BOM-less document may begin with U+FEFF as
     /// editable content, whose bytes are indistinguishable from a UTF-8 BOM.
     /// The observed format is authoritative, so a BOM-less UTF-8 format keeps
     /// that leading character in the returned body.
+    /// A known legacy format rejects Unicode BOMs and requires the same strict
+    /// byte round-trip as [`TextDocument::decode_with_encoding`].
     ///
     /// # Errors
     /// Rejects bytes whose encoding signature does not match this format,
-    /// malformed text, NUL, and either the raw or decoded-body size limit.
+    /// malformed text, legacy bytes that do not round-trip, NUL, and either
+    /// the raw or decoded-body size limit.
     pub fn decode_body(self, bytes: &[u8]) -> Result<String, TextDocumentError> {
         if bytes.len() > MAX_TEXT_EDIT_BYTES {
             return Err(TextDocumentError::Limit);
@@ -210,6 +297,12 @@ impl TextFormat {
                     .strip_prefix(UTF16_BE_BOM)
                     .ok_or(TextDocumentError::UnsupportedEncoding)?;
                 decode_utf16(bytes, false)
+            }
+            encoding => {
+                let codec = encoding
+                    .legacy_codec()
+                    .ok_or(TextDocumentError::UnsupportedEncoding)?;
+                decode_legacy(bytes, codec)
             }
         }
     }
@@ -256,7 +349,10 @@ impl TextFormat {
     ///
     /// # Errors
     /// Rejects NUL, over 4096 LF-delimited lines, a UTF-8 draft over 1 MiB, or
-    /// final raw bytes over 1 MiB including BOM, CRLF and UTF-16 expansion.
+    /// final raw bytes over 1 MiB including BOM, CRLF and encoding expansion.
+    /// Legacy output must also decode to the exact normalized Unicode draft,
+    /// whose UTF-8 size is independently bounded. Unmappable characters and
+    /// lossy mappings are rejected, without replacement or character references.
     /// It never returns a truncated result.
     pub fn prepare_save(self, draft: &str) -> Result<Vec<u8>, TextDocumentError> {
         self.encode(draft, true)
@@ -277,12 +373,34 @@ impl TextFormat {
         if draft.contains('\0') {
             return Err(TextDocumentError::Binary);
         }
+        if let Some(codec) = self.encoding.legacy_codec() {
+            if self.bom {
+                return Err(TextDocumentError::UnsupportedEncoding);
+            }
+            // Use the existing line policy before encoding so the final
+            // losslessness check covers the complete normalized Unicode draft.
+            let normalized = Self {
+                encoding: TextEncoding::Utf8,
+                ..self
+            }
+            .encode(draft, check_lines)?;
+            let normalized =
+                std::str::from_utf8(&normalized).map_err(|_| TextDocumentError::InvalidUtf8)?;
+            let result = encode_legacy_body(normalized, codec)?;
+            // Some codecs best-fit characters without reporting an unmappable
+            // character (notably Shift_JIS yen, overline and minus mappings).
+            if decode_legacy_body(&result, codec)? != normalized {
+                return Err(TextDocumentError::Unrepresentable);
+            }
+            return Ok(result);
+        }
         let mut result = Vec::with_capacity(draft.len().saturating_add(3).min(MAX_TEXT_EDIT_BYTES));
         if self.bom {
             let signature = match self.encoding {
                 TextEncoding::Utf8 => UTF8_BOM,
                 TextEncoding::Utf16Le => UTF16_LE_BOM,
                 TextEncoding::Utf16Be => UTF16_BE_BOM,
+                _ => return Err(TextDocumentError::UnsupportedEncoding),
             };
             extend(&mut result, signature)?;
         }
@@ -311,6 +429,68 @@ impl TextFormat {
             }
         }
         Ok(result)
+    }
+}
+
+fn decode_legacy(bytes: &[u8], codec: &'static Encoding) -> Result<String, TextDocumentError> {
+    let body = decode_legacy_body(bytes, codec)?;
+    match encode_legacy_body(&body, codec) {
+        Ok(encoded) if encoded == bytes => Ok(body),
+        _ => Err(TextDocumentError::NonCanonicalEncoding),
+    }
+}
+
+fn decode_legacy_body(bytes: &[u8], codec: &'static Encoding) -> Result<String, TextDocumentError> {
+    if bytes.len() > MAX_TEXT_EDIT_BYTES {
+        return Err(TextDocumentError::Limit);
+    }
+    if bytes.starts_with(UTF8_BOM)
+        || bytes.starts_with(UTF16_LE_BOM)
+        || bytes.starts_with(UTF16_BE_BOM)
+        || bytes.starts_with(b"\x00\x00\xfe\xff")
+    {
+        return Err(TextDocumentError::UnsupportedEncoding);
+    }
+    let mut decoder = codec.new_decoder_without_bom_handling();
+    let mut remaining = bytes;
+    let mut body = String::with_capacity(bytes.len());
+    let mut buffer = [0_u8; 4096];
+    loop {
+        let (result, read, written) =
+            decoder.decode_to_utf8_without_replacement(remaining, &mut buffer, true);
+        let decoded = std::str::from_utf8(&buffer[..written])
+            .map_err(|_| TextDocumentError::InvalidLegacyEncoding)?;
+        if body.len().saturating_add(decoded.len()) > MAX_TEXT_EDIT_BYTES {
+            return Err(TextDocumentError::Limit);
+        }
+        if decoded.contains('\0') {
+            return Err(TextDocumentError::Binary);
+        }
+        body.push_str(decoded);
+        remaining = &remaining[read..];
+        match result {
+            DecoderResult::InputEmpty => return Ok(body),
+            DecoderResult::OutputFull => {}
+            DecoderResult::Malformed(_, _) => return Err(TextDocumentError::InvalidLegacyEncoding),
+        }
+    }
+}
+
+fn encode_legacy_body(text: &str, codec: &'static Encoding) -> Result<Vec<u8>, TextDocumentError> {
+    let mut encoder = codec.new_encoder();
+    let mut remaining = text;
+    let mut output = Vec::with_capacity(text.len());
+    let mut buffer = [0_u8; 4096];
+    loop {
+        let (result, read, written) =
+            encoder.encode_from_utf8_without_replacement(remaining, &mut buffer, true);
+        extend(&mut output, &buffer[..written])?;
+        remaining = &remaining[read..];
+        match result {
+            EncoderResult::InputEmpty => return Ok(output),
+            EncoderResult::OutputFull => {}
+            EncoderResult::Unmappable(_) => return Err(TextDocumentError::Unrepresentable),
+        }
     }
 }
 
@@ -358,6 +538,7 @@ fn extend_text(
             }
             Ok(())
         }
+        _ => Err(TextDocumentError::UnsupportedEncoding),
     }
 }
 
@@ -395,6 +576,9 @@ fn line_ending(text: &str) -> TextLineEnding {
 }
 
 #[cfg(test)]
+mod legacy_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -415,6 +599,7 @@ mod tests {
                 .copied()
                 .chain(body.encode_utf16().flat_map(u16::to_be_bytes))
                 .collect(),
+            _ => panic!("raw_with_bom is a Unicode-only fixture"),
         }
     }
 

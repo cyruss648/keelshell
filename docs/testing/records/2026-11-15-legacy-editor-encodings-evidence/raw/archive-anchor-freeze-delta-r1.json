@@ -1,0 +1,10 @@
+{
+  "before": "frozen-inputs-r3.json",
+  "after": "frozen-inputs-r4.json",
+  "changed": [
+    "crates/keelshell-core/src/server_archive.py",
+    "crates/keelshell-core/tests/server_archive.rs"
+  ],
+  "new_python_tests": 6,
+  "production_delta": "ancestor identity and security metadata at open; full selected snapshots unchanged"
+}

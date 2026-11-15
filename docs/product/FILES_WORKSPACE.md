@@ -1,5 +1,19 @@
 # 文件工作区 / Files workspace
 
+## 2026-11-15 远程文本读取编码
+
+远程文件标题旁提供读取编码，展开后选择 Unicode 自动或五种旧编码，
+再明确打开文件。选项只影响下一次读取，当前草稿、原始字节和保存格式保持；
+脏草稿重读先审核放弃，取消不改变内容。保存前严格验证无损编码，
+完整审核与确认/取消继续使用原固定动作区，三主题共用 Palette 和组件 token。
+参见[文本编码合同](REMOTE_TEXT_FORMAT.md)及
+[本批记录](../testing/records/2026-11-15-legacy-editor-encodings.md)。
+
+The remote header exposes a next-read encoding disclosure. Explicit selection
+does not send requests or reinterpret an open draft. Reopening dirty text needs
+review; exact encoding and complete target readback govern saving. The existing
+fixed approval controls and three registered theme families are retained.
+
 ## 2026-11-15 客户端归档批次
 
 传输设置新增 ZIP/tar.gz 归档区域，本地多选可准备打包上传，单个远端归档可

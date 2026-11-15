@@ -1,0 +1,24 @@
+#!/opt/homebrew/opt/python@3.15/bin/python3.15
+import json, os, sys
+from pathlib import Path
+target = Path(os.environ['KEELSHELL_DIAGNOSTIC_TRACE']) / (str(os.getpid()) + '.jsonl')
+def trace(frame, event, arg):
+    if event == 'exception' and frame.f_code.co_filename == '<string>':
+        kind, error, _ = arg
+        if kind.__name__ == 'Rejected':
+            record = {'function':frame.f_code.co_name, 'line':frame.f_lineno}
+            # Record only numeric stat fields, never command, paths or contents.
+            if frame.f_code.co_name == 'anchored_parent':
+                for key in ('before', 'current', 'named'):
+                    value = frame.f_locals.get(key)
+                    if isinstance(value, dict) and all(type(v) is int for v in value.values()):
+                        record[key] = value
+            with target.open('a') as output:
+                output.write(json.dumps(record) + '\n')
+    return trace
+if len(sys.argv) < 3 or sys.argv[1] != '-c':
+    raise SystemExit('unexpected diagnostic invocation')
+code = sys.argv[2]
+sys.argv = ['-c', *sys.argv[3:]]
+sys.settrace(trace)
+exec(compile(code, '<string>', 'exec'), {'__name__':'__main__'})

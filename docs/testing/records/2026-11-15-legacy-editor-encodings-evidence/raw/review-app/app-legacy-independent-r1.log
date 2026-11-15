@@ -1,0 +1,19 @@
+
+running 14 tests
+test files::transfer_tests::editor_encoding_tests::legacy_editor_changed_readback_retains_the_old_baseline_and_raw_backup ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_default_rejects_non_utf8_and_explicit_read_enables_lossless_save ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_choice_is_local_and_does_not_reinterpret_or_save_the_open_draft ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_all_explicit_codecs_keep_exact_review_backup_and_readback ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_dirty_reread_cancel_then_confirm_preserves_and_replaces_exact_format ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_empty_and_no_break_saves_keep_encoding_and_crlf_policy ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_encoding_controls_and_reviews_fit_all_themes_languages_and_sizes ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_incompatible_remote_bytes_require_explicit_reread_even_after_reversion ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_late_reads_reject_replaced_connection_choice_and_document ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_late_save_keeps_newer_draft_and_the_exact_save_encoding ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_merge_and_diff_use_unicode_and_save_with_the_original_encoding ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_old_choice_callbacks_cannot_change_a_new_choice_or_pending_review ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_reread_review_rejects_newer_draft_and_changed_document_metadata ... ok
+test files::transfer_tests::editor_encoding_tests::legacy_editor_unrepresentable_and_best_fit_drafts_fail_before_review_or_write ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 1246 filtered out; finished in 12.87s
+

@@ -1,0 +1,41 @@
+{
+  "checks": [
+    {
+      "crate": "zip",
+      "version": "9.6.0",
+      "official_checksum": "80cc68510ea7553c30a69c732de5278e94183f68765af6c642dbccefd6ec777e",
+      "cached_archives": [
+        {
+          "registry_cache": "rsproxy.cn-e3de039b2554c837",
+          "sha256": "80cc68510ea7553c30a69c732de5278e94183f68765af6c642dbccefd6ec777e",
+          "official_checksum_matches": true
+        }
+      ]
+    },
+    {
+      "crate": "rand",
+      "version": "0.10.4",
+      "official_checksum": "8f6fa277c67e6ea590466f04c3fe82cb509f0864fe470643e5570de9514a9b11",
+      "cached_archives": [
+        {
+          "registry_cache": "rsproxy.cn-e3de039b2554c837",
+          "sha256": "8f6fa277c67e6ea590466f04c3fe82cb509f0864fe470643e5570de9514a9b11",
+          "official_checksum_matches": true
+        }
+      ]
+    },
+    {
+      "crate": "encoding_rs",
+      "version": "0.8.44",
+      "official_checksum": "89253175e704ab869b04f9db224d38630e0211a53841a79181deae0889e169f5",
+      "cached_archives": [
+        {
+          "registry_cache": "rsproxy.cn-e3de039b2554c837",
+          "sha256": "89253175e704ab869b04f9db224d38630e0211a53841a79181deae0889e169f5",
+          "official_checksum_matches": true
+        }
+      ]
+    }
+  ],
+  "status": "passed"
+}

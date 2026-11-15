@@ -90,6 +90,12 @@ ICMP 候选仅接纳远端 Linux 的 iputils 20240117；工具报告的发送尝
 
 [文本格式保持](docs/product/REMOTE_TEXT_FORMAT.md)保留一个UTF-8文件头BOM与原有单一LF/CRLF策略，混合换行或仅CR草稿原样保存。审核和目标完整读回比较精确字节，不强制文件末尾换行；格式发生不兼容变化时需重新读取并审核。新包已有BOM/CRLF取消与确认保存的限定macOS观察，完整范围见[格式记录](docs/testing/records/2026-11-06-editor-format.md)。
 
+[显式读取编码](docs/product/REMOTE_TEXT_FORMAT.md)支持 GBK、GB18030、Big5、
+Shift_JIS 和 Windows-1252。选项只用于下一次打开，当前文档保持原保存格式；
+读取和保存都要求严格无损往返，无法表示或会近似替换的草稿在写入前拒绝。
+原始字节备份、完整目标读回和脏草稿重读审核继续保留。工程、真实 OpenSSH、
+独立复核及原生范围见[本批记录](docs/testing/records/2026-11-15-legacy-editor-encodings.md)。
+
 [审核式 traceroute](docs/product/TRACEROUTE_DIAGNOSTICS.md)支持显式选择 UDP/ICMP、IPv4/IPv6 和有界探测参数，确认前展示完整目标与命令。缺失跳和星号保持未知；同包真实SSH UI已取得UDP双栈回环的一跳回复。限定原生、未完成的合并验收与底部操作可达性问题见[原生记录](docs/testing/records/2026-11-06-editor-traceroute-native.md)；完整工程见[组合记录](docs/testing/records/2026-11-06-editor-traceroute-integration.md)。
 
 文本合并和 patch 先生成本地草稿，远端保存需要完整审阅并重新核对基线。文件审核可以展开，确认与取消保持可见；草稿和差异输入提供明确的编辑入口。操作说明见[审核与编辑](docs/product/FILE_REVIEW_AND_FOCUS.md)和[文本合并指南](docs/product/TEXT_CONFLICT_MERGE.md)；macOS 自有 SSH/SFTP 的两次草稿与保存流程已完成完整内容读回，完整界面与跨平台验收继续进行，见[限定原生记录](docs/testing/records/2026-10-07-text-merge-patch-native.md)。

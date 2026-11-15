@@ -1,4 +1,48 @@
-# KeelShell 当前交接 — 2026-11-15
+# KeelShell 当前交接 — 2026-11-16
+
+## 当前批次：显式远程文本旧编码，工程门禁通过
+
+基线 `2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24`。core 与 session
+两个并行作者已完成并经逐文件 SHA256 导入，作者已关闭，受管 worktree 已归档，
+实际路径和 Git worktree 记录均 absent。父继续集成原生界面与真实联调。
+当前实现 GBK、GB18030、Big5、Shift_JIS、Windows-1252，默认 Unicode 不扩大；
+读取意图与打开格式分离，保存拒绝任何有损映射。
+设计见 [ADR 0140](adr/0140-explicit-legacy-editor-encodings.md)，
+接续见 [本批记录](testing/records/2026-11-15-legacy-editor-encodings.md)。
+
+core 文本 `63/63`（新增 40）、session 专项 `36/36`（新增 30、复用 6）、
+app 新专项 `14/14` 与真实 disposable localhost OpenSSH `17/17` 已通过。
+两名新非作者范围复核均无开放 P0–P3；独立执行使用父预构建副本，没有独立重编译。
+`full-gate-r1` 实际退出 `1 / reaped / 513.085s`，服务器归档为 `39/1`。
+已用有界诊断复现：祖先目录在 stat/open 之间因旁支创建/删除而变更链接数和时间，
+完整 stat 比较误拒绝。现只对祖先比较设备/inode/mode/uid/gid/flags，所选树完整
+快照及新建对象 ACL 合同保持。六项新真实文件系统回归先取得 `31 run / 2 errors /
+1 skipped` 的红证据，修后 `31 run / 1 skipped` 通过；core/session 归档 `14+40`
+项通过。非作者 `report-r3` 已批准这两文件窄差分、零开放 P0–P3，并独立运行
+Python 红/绿对照；原报告和 610 项不变证据保留。最终全仓 `full-gate-r2` 已实际
+`exit 0 / reaped / 696.329s`：普通 Rust `3077/0/37 ignored`、rustdoc `14/0`、
+工程 Python `187 run / 1 skipped`，格式、严格 Clippy、x.y 策略和三组 controller
+通过。全部 84 个新默认 Rust 名实际通过，6 个复用 fixture 不算新增行为。
+此前 app 失败、本次失败和诊断原件均保留。最终 r4 冻结为 612 项、集合 SHA256
+`e8029ecb7eea9a28e76d4c47f8d4d280afa57de4356049f2d83ab39020749ce6`；
+相对 r3 仅归档 helper 和其测试变化，其他 610 项不变。
+286 份原件已无损封存到[持久证据](testing/records/2026-11-15-legacy-editor-encodings-evidence/README.md)，
+612 项工程输入及全部原件已通过 Git index/blob 逐项核验。本批尚未本地提交；
+提交绑定后再清理 `work/legacy-editor-batch-20261115/`。
+最终真实 disposable localhost OpenSSH r2 `17/17`，91 个跟踪身份及私有目录已回收，
+父另查目录 absent、原端口拒绝连接。正常 GUI/MCP arm64 Mach-O 构建通过；
+不是本批原生桌面、键盘、IME 或辅助技术验收。两名 reviewer 报告已收取且已关闭，
+封存已完成，本地提交与最终清理待收口。
+
+唯一 Cargo target 保持 `work/recovery-batch-integration-20261115/target`，归属未切换。
+Rust/Cargo 实测 `1.100.0`、默认 stable，无 toolchain pin 或新 MSRV。
+新增 `encoding_rs = "0.8"`；依保存的官方 metadata 升级 zip 至 `9.6.0`、
+rand 至 `0.10.4`。两轮在线超时原件保留；后续 37 包官方响应采集窗口为
+`2026-11-15T15:58:55Z`–`15:59:07Z`，同一快照重算 112 项声明全部通过，
+不是第二次联网查询。不相关传递包版本保留，依赖图已由非作者独立核对。
+仍仅本地提交，不 push。
+三主题通过 registry/Palette/token 保持，三平台原生、strict peer `HOLD/PARTIAL`、
+用户中继、性能收益、FILE-05/M4 与完整产品总目标继续开放。
 
 ## 当前批次：服务端工具版本与流式自测，工程门禁与限定复核通过
 

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "-c",
+    "from pathlib import Path; import subprocess,sys; source=Path(\"crates/keelshell-core/tests/server_archive.rs\").read_text(); suite=source.split(\"const PYTHON_SUITE: &str = r####\\\"\",1)[1].split(\"\\\"####;\",1)[0]; result=subprocess.run([sys.executable,\"-B\",\"-c\",suite,Path(\"crates/keelshell-core/src/server_archive.py\").read_text()]); raise SystemExit(result.returncode)"
+  ],
+  "started_utc": "2026-11-15T16:28:04.195761+00:00",
+  "finished_utc": "2026-11-15T16:28:08.669719+00:00",
+  "elapsed_seconds": 4.474,
+  "exit_code": 1,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "44eb5a46a44078503c0768d96b4c8b39ce20d87e95eb9acafb4d802da2b871a6"
+}

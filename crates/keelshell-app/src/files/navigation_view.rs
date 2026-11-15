@@ -91,6 +91,7 @@ impl FilesPanel {
                             .text_color(rgb(visual.muted))
                             .child(t(cx, "远程文件", "Remote files")),
                     )
+                    .child(self.editor_encoding_button(cx))
                     .child(self.remote_directory_actions(cx)),
             );
         }

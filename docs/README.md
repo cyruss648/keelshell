@@ -1,5 +1,7 @@
 # 文档索引
 
+- [显式远程文本旧编码](product/REMOTE_TEXT_FORMAT.md)、[ADR 0140](adr/0140-explicit-legacy-editor-encodings.md)与[测试记录](testing/records/2026-11-15-legacy-editor-encodings.md)：下一次读取选择、严格无损保存、真实 OpenSSH 与独立复核范围。
+
 继续开发先读[当前交接](HANDOFF.md)和[路线图](ROADMAP.md)；精确SHA、CI执行会话及资源所有权只在交接入口维护。
 
 - [远程文本格式](product/REMOTE_TEXT_FORMAT.md)、[ADR0111](adr/0111-utf8-editor-format-envelope.md)与[测试记录](testing/records/2026-11-06-editor-format.md)：r3三项P2关闭；父最终543输入门禁、新包和限定BOM/CRLF原生观察分别记录。

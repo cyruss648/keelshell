@@ -1,0 +1,17 @@
+ Downgrading naga v30.0.2 -> v30.0.1
+ Downgrading naga-types v30.0.2 -> v30.0.1
+ Downgrading notify-rust v4.19.0 -> v4.18.2
+ Downgrading webpki-root-certs v1.0.12 -> v1.0.11
+ Downgrading wgpu-core v30.0.2 -> v30.0.1
+ Downgrading wgpu-core-deps-apple v30.0.2 -> v30.0.1
+ Downgrading wgpu-core-deps-emscripten v30.0.2 -> v30.0.1
+ Downgrading wgpu-core-deps-wasm v30.0.2 -> v30.0.1
+ Downgrading wgpu-core-deps-windows-linux-android v30.0.2 -> v30.0.1
+ Downgrading wgpu-hal v30.0.2 -> v30.0.1
+ Downgrading wgpu-naga-bridge v30.0.2 -> v30.0.1
+ Downgrading wgpu-types v30.0.2 -> v30.0.1
+    Removing zbus v6.3.0
+    Removing zbus_macros v6.3.0
+    Removing zbus_utils v6.1.0
+    Updating zip v9.5.1 -> v9.6.0
+    Removing zruntime v0.2.3

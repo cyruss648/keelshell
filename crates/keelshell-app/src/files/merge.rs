@@ -10,6 +10,16 @@ enum MergeVersion {
     Remote,
     Result,
 }
+
+/// One complete merge result retains the format used to decode its inputs.
+pub(super) struct MergeObservation {
+    pub(super) snapshot: RegularFileSnapshot,
+    pub(super) plan: TextMergePlan,
+    pub(super) base: Vec<u8>,
+    pub(super) draft: String,
+    pub(super) format: TextFormat,
+}
+
 pub(super) struct MergeReview {
     /// Binds every rendered merge action to the observation that produced it.
     ///
@@ -18,6 +28,7 @@ pub(super) struct MergeReview {
     /// replaced this review.
     pub(super) review_id: Uuid,
     snapshot: RegularFileSnapshot,
+    format: TextFormat,
     pub(super) plan: TextMergePlan,
     draft: String,
     base: String,
@@ -65,16 +76,21 @@ impl FilesPanel {
 
     pub(super) fn receive_merge(
         &mut self,
-        snapshot: RegularFileSnapshot,
-        plan: TextMergePlan,
-        base: Vec<u8>,
-        draft: String,
+        observation: MergeObservation,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        let MergeObservation {
+            snapshot,
+            plan,
+            base,
+            draft,
+            format,
+        } = observation;
         if self.editing.as_ref().is_none_or(|(path, current_base)| {
             path != &snapshot.entry.path || current_base != &base
-        }) || !self.draft_matches_text(&self.editor.read(cx).value(), &draft)
+        }) || self.editor_format != Some(format)
+            || !self.draft_matches_text(&self.editor.read(cx).value(), &draft)
         {
             self.status = Message::new(
                 "读取期间草稿、文件或基线已变化，保留当前草稿；请重新读取并合并。",
@@ -114,6 +130,7 @@ impl FilesPanel {
         self.merge_review = Some(MergeReview {
             review_id: Uuid::new_v4(),
             snapshot,
+            format,
             base,
             overview: None,
             choices: vec![None; plan.conflicts().len()],
@@ -264,17 +281,16 @@ impl FilesPanel {
         match review.plan.resolve(&review.choices) {
             Ok(text) => {
                 let snapshot = review.snapshot.clone();
-                let original = match TextDocument::decode(&snapshot.content) {
-                    Ok(document) => document,
-                    Err(error) => {
-                        self.status = FileFailure::TextDocument(error).message();
-                        cx.notify();
-                        return;
-                    }
-                };
-                let format = original
-                    .format()
-                    .retain_insertion_policy(self.editor_format.unwrap_or(original.format()));
+                let original =
+                    match editor_encoding::decode_observation(&snapshot.content, review.format) {
+                        Ok(document) => document,
+                        Err(error) => {
+                            self.status = FileFailure::TextDocument(error).message();
+                            cx.notify();
+                            return;
+                        }
+                    };
+                let format = original.format().retain_insertion_policy(review.format);
                 self.editor
                     .update(cx, |input, cx| input.set_value(text, window, cx));
                 self.editing = Some((snapshot.entry.path.clone(), snapshot.content.clone()));
@@ -585,13 +601,10 @@ impl FilesPanel {
                 ),
                 MergeVersion::Remote => (
                     t(cx, "已校验当前远端全文", "Checked current remote contents"),
-                    self.editor_format
-                        .and_then(|format| format.decode_body(&review.snapshot.content).ok())
-                        .unwrap_or_else(|| {
-                            TextDocument::decode(&review.snapshot.content)
-                                .map(|document| document.body().to_owned())
-                                .unwrap_or_else(|error| error.to_string())
-                        }),
+                    review
+                        .format
+                        .decode_body(&review.snapshot.content)
+                        .unwrap_or_else(|error| error.to_string()),
                 ),
                 MergeVersion::Result => (
                     t(

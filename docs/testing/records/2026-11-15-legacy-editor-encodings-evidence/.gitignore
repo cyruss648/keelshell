@@ -1,0 +1,2 @@
+# Root patterns ignore logs and Python cache-shaped names; preserve exact originals.
+!raw/**

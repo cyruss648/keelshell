@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/openssh_interop.py",
+    "--output",
+    "work/legacy-editor-batch-20261115/openssh-r1",
+    "--timeout",
+    "300"
+  ],
+  "started_utc": "2026-11-15T16:08:11.842251+00:00",
+  "finished_utc": "2026-11-15T16:08:26.787583+00:00",
+  "elapsed_seconds": 14.945,
+  "exit_code": 0,
+  "timeout_or_interrupt": false,
+  "reaped": true,
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "log_sha256": "ec41da2e6598b729a3967496715a782129a684cd799f2f2032e5c746c76b30b1"
+}

@@ -1,0 +1,38 @@
+{
+  "binary": "work/recovery-batch-integration-20261115/target/debug/build/keelshell-session/0d60f9b46cb77d8b/out/server_archive-0d60f9b46cb77d8b",
+  "binary_sha256": "84735eeb5b5400d11728e078dea03ad126b699448290667dd7fcfeb2f9526625",
+  "diagnostic_only": true,
+  "runs": [
+    {
+      "run": 0,
+      "exit": 0,
+      "log_sha256": "5574ac60814c873836d1e8d69f596206e32e88994c9219c3b7eef86bd6266a4e"
+    },
+    {
+      "run": 1,
+      "exit": 0,
+      "log_sha256": "4dc435659cac83b1d02522601839d9994e764cedf61e848e986d612973f3330b"
+    },
+    {
+      "run": 2,
+      "exit": 0,
+      "log_sha256": "b0881ddde452f37f33ca95ba57ace0848675e24ef526778f21e9f5b12130aa63"
+    },
+    {
+      "run": 3,
+      "exit": 0,
+      "log_sha256": "8a7900c7a8b9f97ac3b2e1e86b1003c5a1f4d8d0e644f50e5ac3b4b70a82b08b"
+    },
+    {
+      "run": 4,
+      "exit": 0,
+      "log_sha256": "a88fb0ac77f6155d4d0e98a0740e64cb9f89a655c9143eee79b07d100d43c796"
+    },
+    {
+      "run": 5,
+      "exit": 101,
+      "log_sha256": "90d7b9b0999f08899544c19b3a32a4b801e419114c9f33694a4e8207137a1c7d"
+    }
+  ],
+  "temporary_directory_removed": true
+}

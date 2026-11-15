@@ -23,6 +23,8 @@ mod archive_transfer;
 mod control;
 pub use archive_transfer::{ArchiveTransferPlan, ArchiveTransferReceipt, ArchiveTransferRequest};
 mod directory;
+#[cfg(test)]
+mod editor_encoding_tests;
 mod file_resume;
 mod file_transfer;
 pub use file_transfer::{FileTransferPlan, MAX_REVIEWED_FILE_BYTES};
@@ -609,6 +611,8 @@ impl SftpSession {
     /// Authorization is checked before each mutation; unknown results retain the
     /// existing shared target quarantine. This does not expand MCP's 64 KiB limit.
     /// SFTP supplies observations rather than an atomic compare-and-swap lock.
+    /// This compatibility entry point accepts only Unicode; explicitly selected
+    /// legacy formats require [`Self::write_editor_reviewed_with_format_authorized`].
     pub async fn write_editor_reviewed_authorized(
         &self,
         reviewed: &RegularFileSnapshot,
@@ -632,6 +636,78 @@ impl SftpSession {
                 "editor replacement encoding differs from the reviewed file",
             ));
         }
+        self.write_editor_backup_then_replace(reviewed, data, authorized)
+            .await
+    }
+
+    /// Replace a reviewed editor file using its explicitly selected text format.
+    ///
+    /// The supplied encoding, BOM and line-ending policy govern both the exact
+    /// reviewed bytes and the replacement; neither is guessed or converted.
+    /// A BOM-less UTF-8 format therefore retains a leading U+FEFF as body text.
+    /// Before any backup or other remote mutation, the source must round-trip
+    /// exactly and the decoded replacement must prepare to exactly `data`.
+    /// Raw bytes, decoded bodies and final bytes are bounded to 1 MiB. The
+    /// 4096-line save bound applies to the replacement, not the unchanged source.
+    ///
+    /// Returns the acknowledged backup path containing the original raw bytes.
+    /// Authority checks, complete snapshot revalidation, shared mutation
+    /// quarantine and mandatory POSIX rename follow the Unicode editor path.
+    /// The caller still needs a complete target readback to verify the result;
+    /// SFTP cannot atomically compare the target against the review.
+    ///
+    /// # Errors
+    /// Returns a content-free [`SessionError::Invalid`] for invalid, lossy or
+    /// mismatched text/format, and [`SessionError::OutputLimit`] for oversized
+    /// raw input. Backup, authorization and replacement failures retain the
+    /// existing typed transport and mutation errors.
+    pub async fn write_editor_reviewed_with_format_authorized(
+        &self,
+        reviewed: &RegularFileSnapshot,
+        data: &[u8],
+        format: keelshell_core::TextFormat,
+        authorized: &(dyn Fn() -> bool + Sync),
+    ) -> Result<String> {
+        if reviewed.content.len() > keelshell_core::MAX_TEXT_EDIT_BYTES
+            || data.len() > keelshell_core::MAX_TEXT_EDIT_BYTES
+        {
+            return Err(SessionError::OutputLimit(
+                keelshell_core::MAX_TEXT_EDIT_BYTES,
+            ));
+        }
+        let source_body = format.decode_body(&reviewed.content).map_err(|_| {
+            SessionError::Invalid("reviewed editor bytes do not match the supplied text format")
+        })?;
+        // An unchanged observation may exceed the save line bound. It must
+        // still reproduce every byte under the supplied format's EOL policy.
+        if !format.matches_bytes(&source_body, &reviewed.content) {
+            return Err(SessionError::Invalid(
+                "reviewed editor bytes do not round-trip under the supplied text format",
+            ));
+        }
+        let replacement_body = format.decode_body(data).map_err(|_| {
+            SessionError::Invalid("editor replacement is invalid under the supplied text format")
+        })?;
+        let prepared = format.prepare_save(&replacement_body).map_err(|_| {
+            SessionError::Invalid(
+                "editor replacement cannot be saved under the supplied text format",
+            )
+        })?;
+        if prepared != data {
+            return Err(SessionError::Invalid(
+                "editor replacement bytes differ from the supplied text format's save result",
+            ));
+        }
+        self.write_editor_backup_then_replace(reviewed, data, authorized)
+            .await
+    }
+
+    async fn write_editor_backup_then_replace(
+        &self,
+        reviewed: &RegularFileSnapshot,
+        data: &[u8],
+        authorized: &(dyn Fn() -> bool + Sync),
+    ) -> Result<String> {
         inspection::inspection_path(&reviewed.entry.path)?;
         let (parent, name) = reviewed
             .entry

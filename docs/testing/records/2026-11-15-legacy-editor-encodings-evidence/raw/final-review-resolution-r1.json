@@ -1,0 +1,18 @@
+{
+  "recorded_utc": "2026-11-15T16:50:26.455777+00:00",
+  "final_freeze": "frozen-inputs-r4.json",
+  "status": "AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_SCOPES_APPROVED",
+  "report_files": {
+    "review-codec-transport/report-r2.md": "a140bd8535a3f8ab406688727da0baccb2f8f4c0852dd541f7056d408cdafa00",
+    "review-codec-transport/report-r3.md": "5864077e036147e4ab5a35cf2004670ac2ad32de33d25ee608852ee8d8e38797",
+    "review-app/report-r1.md": "bb8c7e31f18ac8e4a6815ac902f431da09f869a1377ddd85241c0362cebd4c2c"
+  },
+  "reviewers_closed": [
+    "01a1dfe8-598d-7532-8f1f-3b7bb224ca3a",
+    "01a1dff6-0c9c-7b91-921b-b03eec471325"
+  ],
+  "post_close_wait_status": "not_found for both agents",
+  "archive_reviewer_close_previous_status": "running; signed report and final verification already persisted; no additional work required",
+  "native": "NOT_RUN",
+  "combination_boundary": "Original r3 scope signatures and conditions retained verbatim. The r4 two-file delta, unchanged other 610 inputs and r4 successful gate establish the final parent integration decision."
+}

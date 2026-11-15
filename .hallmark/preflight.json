@@ -56,5 +56,27 @@
     ],
     "status": "AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / NATIVE_DESKTOP_NOT_RUN",
     "evidence": "docs/testing/records/2026-11-15-archive-tool-validation.md"
+  },
+  "legacy_editor_20261115": {
+    "base_sha": "2cfe0deb732db78f43a9b76d9e2c7e5c214a1f24",
+    "scope": "existing native FilesPanel next-read encoding component",
+    "preserve": [
+      "Frost/Graphite/Lavender registry",
+      "Palette and shared Kit controls",
+      "current document encoding and byte-bound approvals",
+      "fixed review actions and real file browsing"
+    ],
+    "introduce": [
+      "transient explicit read choices in a native Kit popover",
+      "separate opened-document encoding description",
+      "strict lossless failure feedback"
+    ],
+    "source_evidence": [
+      "crates/keelshell-app/src/files/editor_encoding.rs",
+      "crates/keelshell-app/src/files/navigation_view.rs",
+      "docs/adr/0140-explicit-legacy-editor-encodings.md"
+    ],
+    "status": "AUTHOR_GATE_PASS / UI_SOURCE_APPROVED / NATIVE_DESKTOP_NOT_RUN",
+    "evidence": "docs/testing/records/2026-11-15-legacy-editor-encodings.md"
   }
 }

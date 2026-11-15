@@ -35,6 +35,8 @@ mod browser_tests;
 mod conflict_merge_tests;
 #[path = "drop_tests.rs"]
 mod drop_tests;
+#[path = "editor_encoding_tests.rs"]
+mod editor_encoding_tests;
 #[path = "fixture_isolation_tests.rs"]
 mod fixture_isolation_tests;
 #[path = "mirror_independent_tests.rs"]
@@ -325,6 +327,7 @@ fn reveal_file_control(window: &mut gpui_kit::Window, cx: &mut gpui_kit::App, id
                 | "clear-file-selection"
                 | "toggle-file-actions"
                 | "toggle-file-transfer-settings"
+                | "file-read-encoding"
         )
         || (id == "cancel-active-file-operation" && window.try_find("file-transfer-card").is_none())
     {
