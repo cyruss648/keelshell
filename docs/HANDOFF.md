@@ -21,7 +21,13 @@ arm64 Mach-O 构建通过。两轮 197 条 birth identity、16 次端口及私�
 原签署时门禁/正常构建条件均已由父在相同冻结满足，原报告不改写；
 两名 reviewer 已实际关闭。两个作者 worktree 和三个自有探查容器均再次确认 absent。
 原件从[持久证据](testing/records/2026-11-16-ssh-path-comparison-evidence/README.md)接续；
-完成 Git index/blob 读回后形成本地提交并回收本批重复目录与测试副本。
+源码已本地提交 `030835a2e53ebaab86f582b3041c0354ca78c5d0`，
+[提交绑定](testing/records/2026-11-16-ssh-path-comparison-evidence/commit-input-binding.json)
+核对 669 项工程输入与 258 份原件的精确 Git blob/当前文件，零 mismatch。
+随后回收本批重复目录与 13 个测试副本，共 `698,350,238` 字节；
+[最终清理](testing/records/2026-11-16-ssh-path-comparison-evidence/cleanup-final.json)
+确认目录 absent、正常程序摘要保持、唯一 target 与其他任务资源保留。
+后续只补文档与回执，不重跑工程输入未变的门禁。
 新增依赖为零；本轮官方最新版本检查 45 秒超时，已终止并 reap，未签署全部最新。
 只本地提交，不 push。三平台原生、签名发行、IP 丢包网络实验及完整 M4 保持开放。
 

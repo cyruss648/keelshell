@@ -123,7 +123,15 @@ OpenSSH lab 或门禁。原报告签署时正常 build 待父收口，父现已�
 两名 reviewer 均已实际关闭。`final-review-resolution-r1.json` 保留原报告摘要、
 关闭回执及相同冻结的门禁/正常构建对应关系，不改写旧失败或原签署条件。
 两个作者 worktree、三个自有 Podman 探查容器均再次确认 absent，没有新建用户 chat。
-后续只形成本地功能提交；无损封存与 Git index/blob 读回完成后再删除重复副本。
+
+源码已本地提交 **`030835a2e53ebaab86f582b3041c0354ca78c5d0`**，没有 push。
+258 份原件共 `7,556,590` 字节均无损压缩封存；提交前 index 与提交后精确 Git blob
+分别读回，669 项工程输入与所有原件零 mismatch。见
+[提交绑定](2026-11-16-ssh-path-comparison-evidence/commit-input-binding.json)。
+确认后删除本批重复目录和 13 个编译测试副本，共回收 `698,350,238` 字节；
+唯一有效 target、正常程序和其他任务资源保持，正常程序 SHA-256 再次相等。
+详见[最终清理](2026-11-16-ssh-path-comparison-evidence/cleanup-final.json)。
+后续文档与回执提交不改变工程输入，不重复 Rust 门禁。
 
 ## 保持开放的边界
 

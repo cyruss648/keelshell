@@ -56,9 +56,13 @@ SHA-256、导出路径与压缩后的 SHA-256。每份 `raw/` 原件都可 gzip 
 
 [verify_binding.py](verify_binding.py) 同时校验完整工程路径集合、当前文件、
 冻结摘要、Git index 或精确 commit 的 blob，以及每份 gzip 原件和解压字节。
-`index-binding-r1.json` 为提交前读回；`commit-input-binding.json` 绑定精确本地
-源码提交。后续文档回执提交不修改工程输入，不重复运行相同 Rust 门禁。
+[index-binding-r1.json](index-binding-r1.json) 为提交前读回；
+[commit-input-binding.json](commit-input-binding.json) 绑定精确本地源码提交
+`030835a2e53ebaab86f582b3041c0354ca78c5d0`。669 项输入和全部 258 份原件均
+从 Git blob 与当前文件核对一致。后续文档回执提交不修改工程输入，不重复运行
+相同 Rust 门禁。
 
-只有完成上述核验后才删除批次临时目录和二进制副本。最终资源与回收字节从
-`cleanup-final.json` 读取；唯一有效 Cargo target、正常程序、其他任务的
+完成上述核验后已删除批次临时目录和 13 个二进制副本，共回收 `698,350,238`
+字节。最终资源与回收明细从[cleanup-final.json](cleanup-final.json)读取；
+唯一有效 Cargo target、正常程序、其他任务的
 worktree/容器/共享镜像保持。没有新建用户 chat。

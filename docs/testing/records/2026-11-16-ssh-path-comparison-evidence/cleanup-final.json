@@ -1,0 +1,47 @@
+{
+  "recorded_utc": "2026-11-15T18:11:42.376290+00:00",
+  "source_commit": "030835a2e53ebaab86f582b3041c0354ca78c5d0",
+  "batch_directory": "work/ssh-path-comparison-20261116",
+  "directory_absent": true,
+  "removed_files": 271,
+  "recovered_bytes": 698350238,
+  "compiled_copies_removed": 13,
+  "compiled_copy_bytes": 690793648,
+  "lossless_originals_preserved": 258,
+  "exact_commit_and_current_inputs_verified_before_removal": true,
+  "reviewer_agents_closed": [
+    "01a1e03c-d764-7591-87a8-fcd3c6632310",
+    "01a1e041-9987-7ef3-b994-58e56cb20b2e"
+  ],
+  "owned_worktrees_absent": [
+    "/Users/hdh/.codex/worktrees/ssh-path-transport-20261116/keelshell",
+    "/Users/hdh/.codex/worktrees/ssh-path-lab-20261116/keelshell"
+  ],
+  "containers": [
+    {
+      "name": "keelshell-path-capability-1b91845c3f",
+      "exists_exit": 1,
+      "reaped": true,
+      "absent": true
+    },
+    {
+      "name": "keelshell-path-capability-8c60777576",
+      "exists_exit": 1,
+      "reaped": true,
+      "absent": true
+    },
+    {
+      "name": "keelshell-path-capability-1a6915d090",
+      "exists_exit": 1,
+      "reaped": true,
+      "absent": true
+    }
+  ],
+  "preserved_target": "work/recovery-batch-integration-20261115/target",
+  "target_owner_unchanged": true,
+  "normal_programs_preserved_and_sha256_checked": true,
+  "other_task_resources_modified": false,
+  "new_user_chats_created": 0,
+  "new_local_branches_created": 0,
+  "pushed": false
+}

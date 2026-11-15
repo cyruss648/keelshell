@@ -12,6 +12,9 @@ helper Python `25/25`，26 项新默认 Rust 逐名通过，门禁后零漂移�
 传输/runner 非作者 r3 也批准，15 项独立预构建通过；本批累计一个 P1、四个 P2、
 一个 P3 全部关闭，各范围零开放 P0–P3。两名 reviewer 已关闭，两个作者 worktree
 与三个自有容器均 absent；不把受控流延迟当 IP 丢包，也不把一次吞吐差异写成普遍加速。
+本地源码提交 `030835a2e53ebaab86f582b3041c0354ca78c5d0` 已完成 669 项输入与
+258 份原件的 Git blob/当前文件绑定，零 mismatch；回收本批目录与 13 个测试副本
+共 `698,350,238` 字节，保留有效 target/正常程序及其他任务资源，没有 push。
 见 [设计](adr/0141-reviewed-ssh-path-comparison.md)与
 [批次记录](testing/records/2026-11-16-ssh-path-comparison.md)。原生与 M4 继续开放。
 
