@@ -14,9 +14,10 @@ pub(super) fn reason_text(reason: CapabilityReason) -> (&'static str, &'static s
             ("响应格式无效或不支持", "Invalid or unsupported output")
         }
         CapabilityReason::CommandFailed => ("命令失败，原因未知", "Command failed; cause unknown"),
-        CapabilityReason::UnsupportedPlatform => {
-            ("仅支持 Linux 远端", "Only Linux targets supported")
-        }
+        CapabilityReason::UnsupportedPlatform => (
+            "目标系统不支持此项能力",
+            "Facility unsupported on target platform",
+        ),
         CapabilityReason::Transport => ("SSH 采集失败", "SSH collection failed"),
     }
 }
@@ -71,8 +72,8 @@ impl MonitorPanel {
             .label(t(cx, "重新检测", "Recheck"))
             .accessibility_label(t(
                 cx,
-                "重新检测 Linux 监控能力",
-                "Recheck Linux monitoring capabilities",
+                "重新检测主机监控能力",
+                "Recheck host monitoring capabilities",
             ))
             .on_click(cx.listener(|panel, _, _, cx| {
                 if panel.pending.is_none() {
@@ -85,19 +86,15 @@ impl MonitorPanel {
         let visual = crate::design::palette(cx);
         let mut view = section(
             cx,
-            t(cx, "Linux 监控能力", "Linux capabilities"),
+            t(cx, "主机监控能力", "Host capabilities"),
             IconName::Activity,
         )
         .id("monitor-capabilities")
         .test_support()
         .role(accesskit::Role::Group)
-        .aria_label(t(cx, "Linux 监控能力", "Linux capabilities"));
+        .aria_label(t(cx, "主机监控能力", "Host capabilities"));
         for (index, (capability, zh, en)) in [
-            (
-                Capability::Resources,
-                "核心资源 /proc",
-                "Core resources /proc",
-            ),
+            (Capability::Resources, "核心资源", "Core resources"),
             (
                 Capability::Filesystems,
                 "磁盘容量 df",

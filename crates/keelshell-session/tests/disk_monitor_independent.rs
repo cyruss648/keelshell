@@ -247,6 +247,14 @@ async fn optional_collector_does_not_renew_exec_deadline_on_partial_data()
         .split_once("\"#;")
         .ok_or("collector end")?
         .0;
-    assert_eq!(commands[0], expected.as_bytes());
+    // Platform selection is part of the same bounded SSH exec. Keep the
+    // exact Linux collector assertion without freezing the former OS wrapper.
+    let linux = std::str::from_utf8(&commands[0])?
+        .rsplit_once("\n;;\nLinux)\n")
+        .ok_or("Linux collector branch")?
+        .1
+        .strip_suffix("\n;;\n*) exit 64 ;;\nesac\n")
+        .ok_or("platform collector terminator")?;
+    assert_eq!(linux, expected);
     Ok(())
 }

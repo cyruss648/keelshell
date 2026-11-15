@@ -1,6 +1,8 @@
 //! Real SSH process responses arriving after the panel has retired its authority.
 #[path = "monitor_tests/capabilities.rs"]
 mod capabilities;
+#[path = "monitor_tests/darwin.rs"]
+mod darwin;
 #[path = "monitor_tests/independent_disk_monitor.rs"]
 mod independent_disk_monitor;
 use super::{Job, MonitorPanel};
@@ -33,6 +35,7 @@ impl<T, E: std::fmt::Debug> Checked<T> for Result<T, E> {
     }
 }
 struct Control {
+    darwin: AtomicBool,
     commands: AtomicUsize,
     sockets: AtomicUsize,
     probes: AtomicUsize,
@@ -60,6 +63,7 @@ struct Control {
 impl Default for Control {
     fn default() -> Self {
         Self {
+            darwin: AtomicBool::new(false),
             commands: AtomicUsize::new(0),
             sockets: AtomicUsize::new(0),
             probes: AtomicUsize::new(0),
@@ -167,6 +171,14 @@ impl server::Handler for Peer {
                 .map_err(|_| russh::Error::Disconnect)?;
             permit.forget();
             (String::new(), 0)
+        } else if command.contains("cat /proc/stat") && self.0.darwin.load(Ordering::Acquire) {
+            let sample = self.0.disk_samples.fetch_add(1, Ordering::AcqRel);
+            let collecting_df = command.contains("df -Pk");
+            if self.0.fail_resources.load(Ordering::Acquire) {
+                (String::new(), 66)
+            } else {
+                (darwin::resources(sample, collecting_df), 0)
+            }
         } else if command.contains("cat /proc/stat") {
             if self.0.hold_resources.load(Ordering::Acquire) {
                 self.0
@@ -268,6 +280,10 @@ impl Drop for Harness {
 }
 impl Harness {
     fn new(cx: &mut TestAppContext) -> Self {
+        Self::with_control(cx, Arc::new(Control::default()))
+    }
+
+    fn with_control(cx: &mut TestAppContext, control: Arc<Control>) -> Self {
         let runtime = Arc::new(
             tokio::runtime::Builder::new_multi_thread()
                 .worker_threads(2)
@@ -275,7 +291,6 @@ impl Harness {
                 .build()
                 .checked("monitor runtime"),
         );
-        let control = Arc::new(Control::default());
         let listener = runtime
             .block_on(TcpListener::bind("127.0.0.1:0"))
             .checked("monitor fixture listener");

@@ -10,10 +10,10 @@ use std::{
 
 use super::{ExecOutput, MonitorError, MonitorResult};
 
-/// One independently collected Linux monitoring facility.
+/// One independently collected host monitoring facility.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Capability {
-    /// Core CPU, memory, uptime and network counters from `/proc`.
+    /// Core CPU, memory, uptime and network counters from the host kernel.
     Resources,
     /// Mounted-filesystem capacity from `df -Pk`.
     Filesystems,
@@ -26,7 +26,7 @@ pub enum Capability {
 impl std::fmt::Display for Capability {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
-            Self::Resources => "Linux /proc resources",
+            Self::Resources => "host resources",
             Self::Filesystems => "filesystem capacity",
             Self::Processes => "process listing",
             Self::Sockets => "listening sockets",
@@ -49,7 +49,7 @@ pub enum CapabilityReason {
     InvalidOutput,
     /// A command failed without evidence sufficient for a more specific cause.
     CommandFailed,
-    /// The target did not identify itself as Linux.
+    /// This facility has no supported collector for the target platform.
     UnsupportedPlatform,
     /// SSH failed; this is transient and is not cached as a missing capability.
     Transport,
@@ -63,7 +63,7 @@ impl std::fmt::Display for CapabilityReason {
             Self::PermissionDenied => "permission was denied",
             Self::InvalidOutput => "command output has an unsupported or invalid format",
             Self::CommandFailed => "command failed; the cause is unknown",
-            Self::UnsupportedPlatform => "only Linux targets are supported",
+            Self::UnsupportedPlatform => "this facility is unsupported on the target platform",
             Self::Transport => "SSH collection did not complete",
         })
     }
@@ -93,7 +93,7 @@ pub struct CapabilityObservation {
 /// Independent observations belonging to one `LinuxMonitor` and its SSH session.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct MonitorCapabilities {
-    /// Core `/proc` collection.
+    /// Core kernel resource collection.
     pub resources: CapabilityObservation,
     /// Optional `df` collection.
     pub filesystems: CapabilityObservation,

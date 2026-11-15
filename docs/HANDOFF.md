@@ -1,5 +1,36 @@
 # KeelShell 当前交接 — 2026-11-16
 
+## 当前批次：macOS 资源监控与 Linux 能力恢复（集中验证收口）
+
+基线为本地 `539c172389b4450570026f023ff89d50df90f910`。两个独立作者并行实现
+Darwin 内核采集/严格解析、Linux 真实能力恢复实验，父负责模型、原生 UI 与集成。
+唯一 Cargo target 继续属于父 checkout，没有切换来源；不重复作者全仓编译。
+实际 session monitor `81/0`、app monitor `70/0`、Mac disposable SSH `6/6`、
+Linux 恢复 `2/2 opt-in` 及正常 arm64 GUI/MCP 构建通过。三份主要非作者、测试
+lint 与最后三文件测试兼容窄审共五份报告均批准，六项 P2 全部关闭。
+
+首轮完整门禁在测试 lint 失败，r2 在旧磁盘脚本 guard 失败；随后集中 session
+包专项定位另一处旧正文比较与外部测试缺 inner cfg。只修测试的局部 lint、
+精确正文/包装断言及首行 cfg，生产代码和安全/数值/超时断言保持。
+最后格式、remote-only `5/0/0`、session monitor `81/0/0` 通过；原失败、
+UNKNOWN 和未完成回执原样保留，见[本批记录](testing/records/2026-11-16-host-monitor.md)。
+最终 r6 为 713 项工程输入，SHA-256
+`e0b6ae274c4fad8d1246df5cba5c21b779b8afa6341385818a99b0a2264effd3`；
+相对 r2 仅三个测试文件变化，其余 710 项不变。最终完整门禁 r3 实际
+`exit 0 / reaped / 680.172s`：普通 Rust `3157/0/48 ignored`、rustdoc `14/0`、
+工程 Python `284 run / 1 skipped`、helper `25/25`，格式、严格 Clippy、x.y
+政策和三组 controller 通过。52 个新默认 Rust 名逐项通过，713 项完整路径、
+字节和摘要零漂移；五份原报告的 PENDING 条件另由最终成功回执绑定，不改写原件。
+
+设计见 [ADR 0143](adr/0143-darwin-resource-monitoring.md)。两个作者受管 worktree、
+匹配分支及本批七个作者/复核 agent 均已清理。
+自有容器/网络/镜像和私有数据已回收，完整 ID/name 再读回 absent，正常程序
+摘要、共享 base 与唯一 target 保持。旧工具 helper UNKNOWN 的恢复依据为原 CLI 子进程
+实际 reap/exit 0 和新 owner/full-ID/tag，不能从后来 absent 推断旧创建已完成。
+文档、持久证据、Git blob 及提交绑定完成后再删除本批临时目录。
+只本地提交、不 push；三主题继续共用 registry/Palette/token。
+完整产品、三平台桌面、IME/辅助技术与签名发行仍开放。
+
 ## 当前批次：原生流程与真实 IP 网络实验，集中门禁与限定复核通过
 
 基线 `5a6b30a2b9cca6d89aea551409738145608ac689`。继续按并行实现、集中集成验证

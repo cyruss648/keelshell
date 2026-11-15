@@ -107,7 +107,8 @@ impl ResourceHistory {
                 .last_at
                 .is_some_and(|last| at.duration_since(last) <= MAX_JOIN_INTERVAL)
             && previous.is_some_and(|old| {
-                old.boot_time == snapshot.boot_time
+                old.platform == snapshot.platform
+                    && old.boot_time == snapshot.boot_time
                     && old.uptime_seconds.is_finite()
                     && snapshot.uptime_seconds > old.uptime_seconds
                     && self.last_at.is_some_and(|last| {
@@ -349,6 +350,7 @@ mod tests {
 
     fn snapshot(n: u64) -> Snapshot {
         Snapshot {
+            platform: keelshell_session::monitor::MonitorPlatform::Linux,
             boot_time: 1,
             uptime_seconds: n as f64,
             load_average: [0.; 3],
@@ -356,6 +358,7 @@ mod tests {
                 ticks: [n, 0, 0, n, 0, 0, 0, 0],
             },
             memory: MemorySnapshot {
+                free_bytes: None,
                 total_bytes: 100,
                 available_bytes: Some(50),
                 swap_total_bytes: None,
@@ -365,6 +368,35 @@ mod tests {
             filesystems: Vec::new(),
             disk_io: Err(DiskIoError::MissingData),
         }
+    }
+
+    #[test]
+    fn platform_change_breaks_cpu_history_and_darwin_free_memory_is_not_used() {
+        let start = Instant::now();
+        let mut history = ResourceHistory::default();
+        let linux = snapshot(10);
+        assert!(history.record(&linux, None, start, start).is_ok());
+        let mut darwin = snapshot(15);
+        darwin.platform = keelshell_session::monitor::MonitorPlatform::Darwin;
+        darwin.memory.available_bytes = None;
+        darwin.memory.free_bytes = Some(25);
+        let at = start + Duration::from_secs(5);
+        assert_eq!(history.record(&darwin, Some(&linux), at, at), Ok(None));
+        assert!(history.points[1].break_before);
+        assert!(history.points[1].memory.is_none());
+        let mut next = darwin.clone();
+        next.uptime_seconds = 20.;
+        next.cpu.ticks = [20, 0, 0, 20, 0, 0, 0, 0];
+        let at = at + Duration::from_secs(5);
+        assert_eq!(history.record(&next, Some(&darwin), at, at), Ok(Some(50.)));
+        assert!(!history.points[2].break_before);
+        assert!(
+            history
+                .vertices(Series::Memory, at)
+                .iter()
+                .all(|v| !v.connect)
+        );
+        assert!(history.points[2].memory.is_none());
     }
 
     #[test]

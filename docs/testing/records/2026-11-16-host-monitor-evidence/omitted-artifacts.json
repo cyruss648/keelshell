@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "count": 18,
+  "bytes": 884900440,
+  "files": [
+    {
+      "path": "bins/app-r1",
+      "bytes": 269756304,
+      "sha256": "43832bdcb4a27a4272b34f961161aa4bbe2d2e4a44600bcc46eb5e5112da89dd",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/app-r2",
+      "bytes": 269788592,
+      "sha256": "282cae510800e260a68af1abf612307dabe2008f3c223f45c9f00e0650d6074c",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/darwin_monitor_interop-r1",
+      "bytes": 17663704,
+      "sha256": "70839ce493ccbe5900aa4cfcaa0c4279ad7231d8676c4baff6972b087a66f3ee",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/darwin_monitor_interop-r2",
+      "bytes": 17842856,
+      "sha256": "e3d656c17f3b70d474e6af63092e11a54c4d8e4c8aa930d8c2861f6b968ace99",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/darwin_monitor_interop-r3",
+      "bytes": 17679128,
+      "sha256": "0b31c49711e659827fab534c62133cac3ede09434d09f5e2342607cb4e65b669",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/darwin_monitor_interop-r4",
+      "bytes": 17679128,
+      "sha256": "3de3559101fa1b8f0521540ef2ed0f58f700170f45ec35f53bfcb4296a34c0f5",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/disk-independent-r5",
+      "bytes": 19021576,
+      "sha256": "1b8a6c6fe719da88c09c25ab5297026a92aa923a751ff728a8c6e4a2c1c2898e",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/disk-monitor-r3",
+      "bytes": 18929376,
+      "sha256": "9f2459129eb883a0cd83771b70138fca2942ea4adc2ce61dc6a85cdcf53a3604",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/disk-monitor-r4",
+      "bytes": 18929376,
+      "sha256": "bf58bf29895d7c83f036281d83dafe91aebb92383ed6f2397ba7dde297ef0123",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/keelshell_session-r2",
+      "bytes": 40533600,
+      "sha256": "53d56e642071cdbec02f19427f6fbf1806aec4718ef8c577dcfbc8a3f9e1b727",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/keelshell_session-r3",
+      "bytes": 40233424,
+      "sha256": "9907eee3fb2ee6c1b933cefb9f278368c3838b7d958b6e2e7728f91fcb53a178",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/keelshell_session-r4",
+      "bytes": 40236032,
+      "sha256": "d45b07a984babf9b767956c494e11fb2566168186655fa18fe6a1b70612751a3",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/monitor_interop-r2",
+      "bytes": 18047664,
+      "sha256": "b57c0159aaf72b8e02679cc1276de6b78b202ef121cc7e1653065356a511f7f0",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/monitor_interop-r3",
+      "bytes": 18047696,
+      "sha256": "f41a394163fd75a198af1a2af5c70b0cc2aa90c6fb76afa198680009713047a0",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/monitor_interop-r4",
+      "bytes": 18047712,
+      "sha256": "d1ccd581b937904227bdbea49238bc75db2ffacecbfd133b975627c34de4b570",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "bins/session-lib-r1",
+      "bytes": 40198512,
+      "sha256": "e1abff7ca01a182fbc8ac9bb21acfff46a0296e6834f7b265772760dd4ad87fa",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "darwin-author/rustc-live-driver",
+      "bytes": 784720,
+      "sha256": "920e5b928fc8f1cba7ea88784dee000ec8fec915b1b30ae5452a97974f8d9fe0",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    },
+    {
+      "path": "darwin-author/rustc-stub-tests",
+      "bytes": 1481040,
+      "sha256": "2760c80348d5805832da8f97b5bc94a20249984f0f51f94b6b0833c9765c336b",
+      "reason": "Rebuildable binary/cache/package member; provenance and manifests retained"
+    }
+  ]
+}

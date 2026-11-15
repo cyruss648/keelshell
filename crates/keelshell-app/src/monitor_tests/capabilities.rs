@@ -623,9 +623,9 @@ async fn compact_capability_reasons_ages_and_recheck_are_keyboard_accessible(
                     assert_eq!(
                         recheck.label(),
                         Some(if language == Language::En {
-                            "Recheck Linux monitoring capabilities"
+                            "Recheck host monitoring capabilities"
                         } else {
-                            "重新检测 Linux 监控能力"
+                            "重新检测主机监控能力"
                         })
                     );
                     assert!(recheck.visible());
@@ -647,8 +647,8 @@ async fn compact_capability_reasons_ages_and_recheck_are_keyboard_accessible(
                     for (index, (capability, zh, en)) in [
                         (
                             Capability::Resources,
-                            "核心资源 /proc：可用",
-                            "Core resources /proc: Available",
+                            "核心资源：可用",
+                            "Core resources: Available",
                         ),
                         (
                             Capability::Filesystems,
@@ -776,8 +776,8 @@ async fn monitor_hierarchy_and_narrow_controls_keep_bilingual_actions_reachable(
         ),
         (
             "monitor-capabilities",
-            "Linux 监控能力",
-            "Linux capabilities",
+            "主机监控能力",
+            "Host capabilities",
             true,
         ),
     ];
@@ -791,8 +791,8 @@ async fn monitor_hierarchy_and_narrow_controls_keep_bilingual_actions_reachable(
         ("refresh-sockets", "读取监听端口", "Read listening sockets"),
         (
             "redetect-monitor",
-            "重新检测 Linux 监控能力",
-            "Recheck Linux monitoring capabilities",
+            "重新检测主机监控能力",
+            "Recheck host monitoring capabilities",
         ),
     ];
 
@@ -927,9 +927,9 @@ async fn monitor_hierarchy_and_narrow_controls_keep_bilingual_actions_reachable(
                         .unwrap_or_else(|| panic!("capability state AX label"));
                     assert!(
                         label.contains(if language == Language::En {
-                            "Core resources /proc: Available"
+                            "Core resources: Available"
                         } else {
-                            "核心资源 /proc：可用"
+                            "核心资源：可用"
                         }),
                         "{family_id}/{mode:?}/{language:?}: {label}"
                     );

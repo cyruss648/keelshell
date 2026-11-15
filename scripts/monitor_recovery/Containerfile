@@ -1,0 +1,10 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+# Offline derivation only. ss is optional here so its real absence can be
+# reported by the experiment, rather than replaced with fabricated socket rows.
+RUN test -x /usr/bin/python3 && test -x /usr/sbin/sshd \
+    && command -v ssh-keygen && command -v df && command -v ps \
+    && useradd --create-home --shell /bin/sh --password x ksmonitor
+COPY fixture.py tool.py /opt/keelshell-monitor/
+RUN chmod 755 /opt/keelshell-monitor/tool.py
+ENTRYPOINT ["/usr/bin/python3", "-u", "/opt/keelshell-monitor/fixture.py"]

@@ -1,4 +1,4 @@
-//! Linux resource and process inspection using bounded, explicit SSH commands.
+//! Host resource and process inspection using bounded, explicit SSH commands.
 //!
 //! CPU fields follow <https://docs.kernel.org/filesystems/proc.html>: guest time
 //! is already included in user/nice, so it is not added twice. Network rates use
@@ -18,6 +18,7 @@ pub use capabilities::{
     MonitorCapabilities,
 };
 use capabilities::{CapabilityCache, cached_reason, command_text, error_state, failure_reason};
+mod darwin;
 mod disk;
 pub use disk::{
     DiskCounters, DiskDevice, DiskIoError, DiskIoRates, DiskIoSnapshot, DiskRate,
@@ -56,8 +57,27 @@ if [ -r /proc/diskstats ]; then
 fi
 printf '\n@@KS:end@@\n'
 "#;
+const PLATFORM_SELECTOR: &str = r#"ks_uname=''
+for ks_candidate in /usr/bin/uname /bin/uname; do
+  if [ -f "$ks_candidate" ] && [ -x "$ks_candidate" ]; then ks_uname="$ks_candidate"; break; fi
+done
+[ -n "$ks_uname" ] || exit 66
+"#;
 const PROCESSES_SCRIPT: &str = r#"LC_ALL=C; export LC_ALL
-if [ "$(uname -s)" != Linux ]; then exit 64; fi
+ks_uname=''
+for ks_candidate in /usr/bin/uname /bin/uname; do
+  if [ -f "$ks_candidate" ] && [ -x "$ks_candidate" ]; then ks_uname="$ks_candidate"; break; fi
+done
+[ -n "$ks_uname" ] || exit 66
+case "$("$ks_uname" -s)" in
+  Linux) ;;
+  Darwin)
+    [ -x /bin/ps ] || exit 66
+    /bin/ps -ww -axo pid=,user=,pcpu=,pmem=,args= || exit 65
+    exit 0
+    ;;
+  *) exit 64 ;;
+esac
 command -v ps >/dev/null 2>&1 || exit 66
 ps -ww -eo pid=,user=,pcpu=,pmem=,args= || exit 65
 "#;
@@ -119,10 +139,21 @@ pub enum MonitorError {
 /// Result of resource/process inspection.
 pub type MonitorResult<T> = std::result::Result<T, MonitorError>;
 
-/// Aggregate CPU counters from `/proc/stat`, measured in kernel clock ticks.
+/// Provenance of a validated resource collection, never the local application's OS.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MonitorPlatform {
+    /// Linux `/proc` counters with optional fixed system commands.
+    Linux,
+    /// macOS Mach counters, sysctl and fixed system commands.
+    Darwin,
+}
+
+/// Aggregate CPU counters, measured in the remote kernel's clock ticks.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CpuCounters {
     /// user, nice, system, idle, iowait, irq, softirq and steal counters.
+    /// Darwin supplies its four Mach states in the first four slots; the last
+    /// four have no Darwin equivalent and are excluded from iowait reporting.
     pub ticks: [u64; 8],
 }
 
@@ -133,6 +164,9 @@ pub struct MemorySnapshot {
     pub total_bytes: u64,
     /// Kernel estimate of available memory, or `None` on kernels without it.
     pub available_bytes: Option<u64>,
+    /// Free physical pages in bytes when supplied by the kernel. Free pages
+    /// are not a reclaimable-memory estimate and never populate `available_bytes`.
+    pub free_bytes: Option<u64>,
     /// Total configured swap, if reported.
     pub swap_total_bytes: Option<u64>,
     /// Unused swap, if reported.
@@ -174,10 +208,12 @@ pub struct FilesystemSnapshot {
     pub used_percent: u32,
 }
 
-/// A single real Linux collection. A snapshot alone has no CPU/network rate.
+/// A single real host collection. A snapshot alone has no CPU/network rate.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Snapshot {
-    /// Unix boot timestamp from `/proc/stat`, used to reject cross-reboot deltas.
+    /// Remote operating system and counter provenance.
+    pub platform: MonitorPlatform,
+    /// Unix boot timestamp, used to reject cross-reboot deltas.
     pub boot_time: u64,
     /// Seconds since boot, from the target kernel.
     pub uptime_seconds: f64,
@@ -232,6 +268,9 @@ impl Snapshot {
         if input.len() > MAX_OUTPUT {
             return Err(MonitorError::InvalidData("snapshot exceeds 2 MiB"));
         }
+        if input.starts_with("@@KS:darwin@@\n") {
+            return darwin::parse(input, stderr);
+        }
         let sections = sections(input)?;
         if required(&sections, "platform")?.trim() != "Linux" {
             return Err(MonitorError::Unsupported(
@@ -272,6 +311,7 @@ impl Snapshot {
         let (filesystems, capacity) = parse_capacity(&sections, stderr);
         Ok((
             Self {
+                platform: MonitorPlatform::Linux,
                 boot_time,
                 uptime_seconds,
                 load_average,
@@ -299,13 +339,17 @@ impl Snapshot {
                     current.rates_since(
                         previous.disk_io.as_ref().ok(),
                         elapsed,
-                        self.boot_time == previous.boot_time,
+                        self.platform == previous.platform && self.boot_time == previous.boot_time,
                     )
                 },
             ),
             ..SampleRates::default()
         };
-        if self.boot_time != previous.boot_time || !elapsed.is_finite() || elapsed <= 0.0 {
+        if self.platform != previous.platform
+            || self.boot_time != previous.boot_time
+            || !elapsed.is_finite()
+            || elapsed <= 0.0
+        {
             return result;
         }
         let deltas: Option<Vec<u64>> = self
@@ -323,7 +367,9 @@ impl Snapshot {
                 let idle = deltas[3].saturating_add(deltas[4]);
                 result.cpu_busy_percent =
                     Some((total.saturating_sub(idle)) as f64 / total as f64 * 100.0);
-                result.cpu_iowait_percent = Some(deltas[4] as f64 / total as f64 * 100.0);
+                if self.platform == MonitorPlatform::Linux {
+                    result.cpu_iowait_percent = Some(deltas[4] as f64 / total as f64 * 100.0);
+                }
             }
         }
         result.networks = self
@@ -348,7 +394,7 @@ impl Snapshot {
     }
 }
 
-/// A process row from Linux `ps`; percentages are ps's reported values, not interval CPU samples.
+/// A process row from `ps`; percentages are ps's reported values, not interval CPU samples.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProcessInfo {
     /// Numeric process identifier.
@@ -416,7 +462,11 @@ impl ProcessIdentity {
     }
 }
 
-/// Read-only Linux collection with a separate, explicit SIGTERM operation.
+/// Read-only host collection with a separate Linux-only SIGTERM operation.
+///
+/// The historical name remains source-compatible. Resource collection accepts
+/// Linux and Darwin; socket inspection and reviewed process termination retain
+/// their Linux-specific contracts.
 #[derive(Clone)]
 pub struct LinuxMonitor {
     session: SshSession,
@@ -463,25 +513,32 @@ impl LinuxMonitor {
         self.capabilities.invalidate_pending();
     }
 
-    /// Execute the fixed read-only `/proc` collector and optional `df -Pk`.
+    /// Execute the fixed read-only collector and optional `df -Pk`.
     ///
     /// A failed capacity command is skipped until explicit redetection. Its
     /// failure does not discard CPU, memory, network or block-device counters.
     pub async fn snapshot(&self) -> MonitorResult<Snapshot> {
         let (revision, resources) = self.capabilities.begin(Capability::Resources).await;
-        if resources == CapabilityState::Unavailable(CapabilityReason::UnsupportedPlatform) {
+        if let CapabilityState::Unavailable(
+            reason @ (CapabilityReason::UnsupportedPlatform | CapabilityReason::CommandMissing),
+        ) = resources
+        {
             return Err(MonitorError::CapabilityUnavailable {
                 capability: Capability::Resources,
-                reason: CapabilityReason::UnsupportedPlatform,
+                reason,
             });
         }
         let (_, capacity) = self.capabilities.begin(Capability::Filesystems).await;
         let skip_capacity = cached_reason(capacity).is_some();
-        let script = if skip_capacity {
+        let linux_script = if skip_capacity {
             SNAPSHOT_SCRIPT.replace(DF_COLLECTION, "printf '\\n@@KS:df-status@@\\ncached\\n'")
         } else {
             SNAPSHOT_SCRIPT.to_owned()
         };
+        let script = format!(
+            "{PLATFORM_SELECTOR}case \"$(\"$ks_uname\" -s)\" in\nDarwin)\n{}\n;;\nLinux)\n{linux_script}\n;;\n*) exit 64 ;;\nesac\n",
+            darwin::script(skip_capacity)
+        );
         let result = async {
             let output = self.session.exec_limited(&script, MAX_OUTPUT).await?;
             let ExecOutput {
@@ -489,13 +546,13 @@ impl LinuxMonitor {
                 stderr,
                 exit_status,
             } = output;
-            let text = checked_text(
+            let text = command_text(
                 ExecOutput {
                     stdout,
-                    stderr: Vec::new(),
+                    stderr: stderr.clone(),
                     exit_status,
                 },
-                "resource collection",
+                Capability::Resources,
             )?;
             Snapshot::parse_with_capacity(&text, &stderr)
         }
@@ -791,7 +848,7 @@ fn shell_literal(value: &str) -> String {
 fn checked_text(output: ExecOutput, operation: &'static str) -> MonitorResult<String> {
     if output.exit_status == Some(64) {
         return Err(MonitorError::Unsupported(
-            "only Linux targets are supported",
+            "this monitoring facility is unsupported on the target",
         ));
     }
     if output.exit_status != Some(0) {
@@ -905,6 +962,7 @@ fn parse_memory(input: &str) -> MonitorResult<MemorySnapshot> {
     Ok(MemorySnapshot {
         total_bytes,
         available_bytes,
+        free_bytes: None,
         swap_total_bytes: values.get("SwapTotal").copied(),
         swap_free_bytes: values.get("SwapFree").copied(),
     })
@@ -1110,6 +1168,66 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)]
+    fn platform_selector_supports_bin_only_uname_and_reports_both_paths_missing()
+    -> Result<(), Box<dyn std::error::Error>> {
+        use std::os::unix::fs::PermissionsExt;
+        let private = tempfile::tempdir()?;
+        let binary = private.path().join("bin-uname");
+        std::fs::write(&binary, "#!/bin/sh\nprintf 'Linux\\n'\n")?;
+        std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700))?;
+        let missing = private.path().join("missing");
+        assert!(PROCESSES_SCRIPT.contains(PLATFORM_SELECTOR));
+        for (second, code, output) in [
+            (&binary, 0, b"Linux\n".as_slice()),
+            (&missing, 66, b"".as_slice()),
+        ] {
+            let selector = PLATFORM_SELECTOR
+                .replace("/usr/bin/uname", &shell_literal(&missing.to_string_lossy()))
+                .replace("/bin/uname", &shell_literal(&second.to_string_lossy()));
+            let mut child = std::process::Command::new("/bin/sh")
+                .args(["-c", &format!("{selector}\"$ks_uname\" -s")])
+                .env_clear()
+                .env("PATH", private.path())
+                .stdin(std::process::Stdio::null())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .spawn()?;
+            let deadline = std::time::Instant::now() + Duration::from_secs(2);
+            while child.try_wait()?.is_none() {
+                if std::time::Instant::now() >= deadline {
+                    child.kill()?;
+                    child.wait()?;
+                    return Err("platform selection exceeded deadline".into());
+                }
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            let result = child.wait_with_output()?;
+            assert_eq!(result.status.code(), Some(code));
+            assert_eq!(result.stdout, output);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn platform_change_invalidates_rates_and_darwin_has_no_iowait() -> MonitorResult<()> {
+        let linux = Snapshot::parse(SAMPLE)?;
+        let mut darwin = linux.clone();
+        darwin.platform = MonitorPlatform::Darwin;
+        darwin.uptime_seconds += 5.;
+        darwin.cpu.ticks = [200, 20, 60, 600, 0, 0, 0, 0];
+        assert_eq!(darwin.rates_since(&linux), SampleRates::default());
+        let mut next = darwin.clone();
+        next.uptime_seconds += 5.;
+        next.cpu.ticks[0] += 20;
+        next.cpu.ticks[3] += 20;
+        let rates = next.rates_since(&darwin);
+        assert_eq!(rates.cpu_busy_percent, Some(50.));
+        assert_eq!(rates.cpu_iowait_percent, None);
+        Ok(())
+    }
+
+    #[test]
     fn missing_available_memory_is_not_confused_with_free_memory() -> MonitorResult<()> {
         let sample = Snapshot::parse(&SAMPLE.replace("MemAvailable: 256 kB", "MemFree: 128 kB"))?;
         assert_eq!(sample.memory.used_bytes(), None);
@@ -1285,7 +1403,7 @@ mod tests {
             session.channel_success(channel)?;
             let (text, status) = if self.unsupported {
                 (String::new(), 64)
-            } else if command == SNAPSHOT_SCRIPT {
+            } else if command.starts_with(PLATFORM_SELECTOR) && command.contains(SNAPSHOT_SCRIPT) {
                 (SAMPLE.to_owned(), 0)
             } else if command == PROCESSES_SCRIPT {
                 (PROCESS_ROWS.to_owned(), 0)

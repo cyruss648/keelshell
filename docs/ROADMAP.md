@@ -1,5 +1,29 @@
 # 开发路线 — 2026-11-16
 
+## 2026-11-16 macOS 资源监控与 Linux 能力恢复（集中门禁与限定复核通过）
+
+补远端 macOS CPU、内存总量/实际空闲页、连续运行时间、负载、接口字节、
+可选文件系统容量和只读进程列表；Darwin 已用内存估计、swap、iowait、
+磁盘 I/O 和进程终止保持不支持/未知。并行补真实 Linux 工具缺失、缓存、
+显式重新检测和新连接隔离实验。真实 Mac SSH `6/6`、Linux 恢复 `2/2 opt-in`
+及正常 GUI/MCP 构建通过；三个非作者范围与补充测试 lint 窄审均批准，
+六项 P2 全部关闭。首轮门禁 Clippy 断言 lint 失败已保留，仅两个 cfg(test)
+模块增加局部 expect 理由，生产代码与断言不变。
+门禁 r2 在旧磁盘脚本 guard 误判固定 Darwin 子进程清理时失败，原件保持；
+仅修该测试的精确正文排除，全部周围 shell 及磁盘行为断言保持。
+后续 session 包集中专项又闭合旧完整正文比较与外部测试首行 cfg 两处问题，
+原生产/数值/超时/只读断言保持。最后非作者三文件窄审已批准；
+本批五份报告各自开放 P0–P3 为 0，七个作者/复核 agent 均已关闭。
+最终 r6 为 713 项，SHA-256
+`e0b6ae274c4fad8d1246df5cba5c21b779b8afa6341385818a99b0a2264effd3`；
+最终门禁 r3 实际 `exit 0 / reaped / 680.172s`：普通 Rust `3157/0/48 ignored`、
+rustdoc `14/0`、工程 Python `284 run / 1 skipped`、helper `25/25`，
+格式、严格 Clippy、x.y 和三组 controller 全通过。52 个新默认 Rust 名逐项通过，
+完整路径、字节和摘要零漂移。当前 `AUTHOR_GATE_PASS / ALL_SOURCE_SCOPES_APPROVED`，
+不代签完整产品或桌面验收；只本地提交，不 push。
+见[设计](adr/0143-darwin-resource-monitoring.md)和
+[本批记录](testing/records/2026-11-16-host-monitor.md)。
+
 ## 2026-11-16 原生流程与真实 IP 网络实验（集中门禁与限定复核通过）
 
 推进已有开放项：独立配置下的 macOS arm64 原生窗口、三主题与审核式路径比较；

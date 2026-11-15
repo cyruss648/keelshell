@@ -172,9 +172,18 @@ async fn authenticated_snapshot_reads_exact_optional_counters_without_mutations(
             command.contains("cat /proc/diskstats")
                 && command.contains("cat /proc/sys/kernel/random/boot_id")
         );
-        assert!(
-            !command.contains("kill") && !command.contains("sudo") && !command.contains("install")
-        );
+        // The exact Darwin payload kills only its own bounded Popen child.
+        // Keep the mutation guard on every byte of the surrounding shell,
+        // including the Linux branch, without mistaking that cleanup for a
+        // monitored-process action. No other embedded payload is excluded.
+        let (prefix, suffix) = command
+            .split_once(include_str!("../src/monitor/darwin.py"))
+            .ok_or("fixed Darwin collector is absent")?;
+        for shell in [prefix, suffix] {
+            assert!(
+                !shell.contains("kill") && !shell.contains("sudo") && !shell.contains("install")
+            );
+        }
         fixture.session.close().await?;
         Ok::<_, Box<dyn std::error::Error>>(())
     })

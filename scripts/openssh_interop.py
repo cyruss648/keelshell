@@ -339,11 +339,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", help="New receipt directory; it must not already exist")
     parser.add_argument("--timeout", type=float, default=300, help="Total seconds including cleanup (15–300, default 300)")
-    parser.add_argument("--zmodem", action="store_true",
+    suite = parser.add_mutually_exclusive_group()
+    suite.add_argument("--zmodem", action="store_true",
                         help="Run real raw-PTY Zmodem tests; requires KEELSHELL_ZMODEM_RZ and KEELSHELL_ZMODEM_SZ")
+    suite.add_argument("--monitor-darwin", action="store_true",
+                       help="Run resource/process monitoring tests against this macOS host")
     arguments = parser.parse_args()
     if platform.system() not in ("Darwin", "Linux"):
         parser.error("OpenSSH interoperability is supported only on macOS and Linux; Windows is not supported")
+    if arguments.monitor_darwin and platform.system() != "Darwin":
+        parser.error("--monitor-darwin requires a macOS host")
     if not 15 <= arguments.timeout <= 300:
         parser.error("--timeout must be between 15 and 300 seconds, including cleanup")
 
@@ -355,6 +360,8 @@ def main():
     test_command = list(TEST_COMMAND)
     if arguments.zmodem:
         test_command[test_command.index("openssh_interop")] = "zmodem_openssh"
+    if arguments.monitor_darwin:
+        test_command[test_command.index("openssh_interop")] = "darwin_monitor_interop"
     overall_deadline = start + arguments.timeout
     os.umask(0o077)
     output = create_output(arguments.output)

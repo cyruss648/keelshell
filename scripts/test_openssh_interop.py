@@ -15,6 +15,25 @@ import openssh_interop as interop
 
 
 class ProcessInventoryTests(unittest.TestCase):
+    def test_darwin_monitor_suite_rejects_linux_before_creating_resources(self):
+        with patch.object(sys, "argv", ["openssh_interop.py", "--monitor-darwin"]), \
+                patch.object(interop.platform, "system", return_value="Linux"), \
+                patch.object(interop, "create_output") as create, \
+                contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as failure:
+                interop.main()
+        self.assertEqual(failure.exception.code, 2)
+        create.assert_not_called()
+
+    def test_monitor_and_zmodem_suites_cannot_share_an_acceptance_run(self):
+        with patch.object(sys, "argv", ["openssh_interop.py", "--monitor-darwin", "--zmodem"]), \
+                patch.object(interop, "create_output") as create, \
+                contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as failure:
+                interop.main()
+        self.assertEqual(failure.exception.code, 2)
+        create.assert_not_called()
+
     def test_loaded_host_has_a_bounded_three_second_probe(self):
         result = subprocess.CompletedProcess([], 0, stdout="101\n")
         identity = (1, 101, ("kernel", 7), "R")

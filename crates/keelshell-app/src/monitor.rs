@@ -1,4 +1,4 @@
-//! Live Linux monitoring, with a separately confirmed SIGTERM workflow.
+//! Live host monitoring, with a separately confirmed Linux SIGTERM workflow.
 
 #[path = "monitor_capabilities.rs"]
 mod capabilities;
@@ -35,8 +35,8 @@ use keelshell_session::{
     SshSession,
     monitor::{
         Capability, CapabilityReport, CapabilityState, DiskDevice, LinuxMonitor,
-        MonitorCapabilities, MonitorError, MonitorResult, ProcessIdentity, ProcessInfo,
-        SampleRates, Snapshot, SocketInfo, TcpProbeResult,
+        MonitorCapabilities, MonitorError, MonitorPlatform, MonitorResult, ProcessIdentity,
+        ProcessInfo, SampleRates, Snapshot, SocketInfo, TcpProbeResult,
     },
 };
 
@@ -112,7 +112,7 @@ pub struct MonitorPanel {
 }
 
 impl MonitorPanel {
-    /// Start a Linux panel with an immutable, authenticated connection label.
+    /// Start a host panel with an immutable, authenticated connection label.
     ///
     /// Workers belong to the application registry. Closing the panel cancels work
     /// that has not started; an already sent SIGTERM is awaited, never retried.
@@ -195,10 +195,7 @@ impl MonitorPanel {
                 .as_millis()
                 .min(u64::MAX as u128) as u64,
             cpu_percent: self.rates.cpu_busy_percent,
-            memory_used_bytes: snapshot
-                .memory
-                .available_bytes
-                .map(|available| snapshot.memory.total_bytes.saturating_sub(available)),
+            memory_used_bytes: snapshot.memory.used_bytes(),
             memory_total_bytes: Some(snapshot.memory.total_bytes),
         })
     }
@@ -541,14 +538,26 @@ impl MonitorPanel {
         if self.busy {
             return;
         }
+        if (matches!(&job, Job::Inspect(_) | Job::Terminate(_))
+            && !self.linux_process_actions_available())
+            || (matches!(&job, Job::Sockets | Job::Probe(_)) && self.is_darwin())
+        {
+            self.pending = None;
+            self.status = Message::new(
+                "目标系统不支持此项操作；macOS 当前仅支持资源采样和只读进程列表。",
+                "This operation is unsupported on the target; macOS supports resource samples and read-only process listing.",
+            );
+            cx.notify();
+            return;
+        }
         self.busy = true;
         let generation = (!matches!(&job, Job::Terminate(_))).then_some(self.sample_generation);
         self.refresh_in_flight = matches!(&job, Job::Refresh | Job::Redetect);
         self.status = match &job {
             Job::Refresh => Message::new("正在刷新主机状态…", "Refreshing from the host…"),
             Job::Redetect => Message::new(
-                "正在重新检测 Linux 监控能力…",
-                "Rechecking Linux monitoring capabilities…",
+                "正在重新检测主机监控能力…",
+                "Rechecking host monitoring capabilities…",
             ),
             Job::Sockets => Message::new("正在读取监听端口…", "Reading listening sockets…"),
             Job::Probe(_) => Message::new(
@@ -632,6 +641,18 @@ impl MonitorPanel {
             });
         }));
         cx.notify();
+    }
+
+    fn is_darwin(&self) -> bool {
+        self.snapshot
+            .as_ref()
+            .is_some_and(|snapshot| snapshot.platform == MonitorPlatform::Darwin)
+    }
+
+    fn linux_process_actions_available(&self) -> bool {
+        self.snapshot
+            .as_ref()
+            .is_some_and(|snapshot| snapshot.platform == MonitorPlatform::Linux)
     }
 }
 
@@ -736,7 +757,7 @@ fn age(sample: Option<Instant>, cx: &App) -> String {
 fn error_text(error: &MonitorError) -> (String, String) {
     let zh = match error {
         MonitorError::Session(error) => format!("SSH 通信失败：{error}"),
-        MonitorError::Unsupported(_) => "目标不支持此功能，需要 Linux 与相应系统命令。".into(),
+        MonitorError::Unsupported(_) => "目标系统不支持此项功能或所需系统命令。".into(),
         MonitorError::CapabilityUnavailable { reason, .. } => {
             capabilities::reason_text(*reason).0.into()
         }
@@ -1040,13 +1061,21 @@ impl Render for MonitorPanel {
                     )
                     .child(
                         Button::new("refresh-sockets")
-                            .disabled(self.suspended)
+                            .disabled(self.suspended || self.is_darwin())
                             .icon(IconName::Network)
                             .ghost()
                             .compact()
                             .rounded(px(components.control_radius))
                             .label(t(cx, "端口", "Sockets"))
-                            .accessibility_label(t(cx, "读取监听端口", "Read listening sockets"))
+                            .accessibility_label(if self.is_darwin() {
+                                t(
+                                    cx,
+                                    "监听端口：macOS 暂不支持",
+                                    "Listening sockets: unavailable on macOS",
+                                )
+                            } else {
+                                t(cx, "读取监听端口", "Read listening sockets")
+                            })
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if panel.pending.is_none() {
                                     panel.run(Job::Sockets, cx);
@@ -1163,6 +1192,34 @@ impl Render for MonitorPanel {
                 swap_ratio,
                 visual.warning,
             ));
+        if self.is_darwin() {
+            resources = resources
+                .child(metric(
+                    cx,
+                    t(cx, "总内存", "Total memory"),
+                    memory.map(|m| bytes(m.total_bytes)).unwrap_or_else(|| "—".into()),
+                    None,
+                    visual.success,
+                ))
+                .child(metric(
+                    cx,
+                    t(cx, "空闲内存", "Free memory"),
+                    memory.and_then(|m| m.free_bytes).map(bytes).unwrap_or_else(|| "—".into()),
+                    None,
+                    visual.success,
+                ))
+                .child(
+                    div()
+                        .id("monitor-darwin-memory-note")
+                        .test_support()
+                        .role(accesskit::Role::Label)
+                        .aria_label(t(cx, "空闲页不等于可用内存；已用内存估计不可用。", "Free pages are not available memory; used-memory estimate unavailable."))
+                        .text_xs()
+                        .text_color(rgb(visual.muted))
+                        .whitespace_normal()
+                        .child(t(cx, "空闲页不等于可用内存；已用内存估计不可用。", "Free pages are not available memory; used-memory estimate unavailable.")),
+                );
+        }
         let load = self
             .snapshot
             .as_ref()
@@ -1492,8 +1549,16 @@ impl Render for MonitorPanel {
             .aria_label(t(cx, "进程", "Processes"))
             .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
-                "按 CPU 排序 · 生命周期均值",
-                "CPU order · lifetime average",
+                if self.is_darwin() {
+                    "macOS · 按 CPU 排序 · 只读列表，不支持终止"
+                } else {
+                    "按 CPU 排序 · 生命周期均值"
+                },
+                if self.is_darwin() {
+                    "macOS · CPU order · Read-only list; stopping unavailable"
+                } else {
+                    "CPU order · lifetime average"
+                },
             )));
         processes = processes.child(
             div()
@@ -1539,7 +1604,7 @@ impl Render for MonitorPanel {
                         .truncate()
                         .child(format!("{} {}", process.pid, process.command)),
                 );
-            if process.pid > 1 {
+            if process.pid > 1 && self.linux_process_actions_available() {
                 row = row.child(
                     Button::new(("review-process", process.pid as usize))
                         .text_color(rgb(visual.danger))

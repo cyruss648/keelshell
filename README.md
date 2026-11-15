@@ -59,7 +59,7 @@ KeelShell 面向需要连接服务器、查看日志和处理远程文件的开�
 | **远程终端** | 多会话与逐叶标签、嵌套分屏、显式布局保存和单窗启动恢复、ANSI/VT 终端、滚动区搜索、选择、粘贴与中文输入；原标签手动重连及可选的有界自动重连 |
 | **远程文件** | SFTP 浏览、文件和递归目录传输、暂停与内容校验续传；审核式 ZIP/tar.gz 打包上传、服务器打包及下载解包；权限修改、文本编辑、逐项冲突选择的三方合并与严格 patch 草稿；目录比较、内容校验、双向合并及逐项审核的目录镜像 |
 | **命令与任务** | 会话历史、命令片段、显式参数、远端命令与路径补全；逐目标批量命令、依赖工作流、有限定时与只读任务记录 |
-| **监控与网络** | Linux 主机和逐设备磁盘 I/O 状态、按项能力说明与显式复查；监听端口、远程 DNS / TLS / HTTP(S) HEAD 诊断；显式审核的有界 [ICMP ping 候选](docs/product/ICMP_DIAGNOSTICS.md)；本地及远端 TCP 转发、回环 SOCKS5 隧道；[命名规则的审核式增改删和停止](docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md)；[用户 SSH 中继与审核式路径比较](docs/product/SSH_RELAY.md)，真实网络条件和原生验收分别记录 |
+| **监控与网络** | Linux 主机和逐设备磁盘 I/O 状态、macOS 只读资源与进程列表；[按项能力、未知值和显式复查](docs/product/MONITOR_CAPABILITIES.md)；Linux 监听端口、远程 DNS / TLS / HTTP(S) HEAD 诊断；显式审核的有界 [ICMP ping 候选](docs/product/ICMP_DIAGNOSTICS.md)；本地及远端 TCP 转发、回环 SOCKS5 隧道；[命名规则的审核式增改删和停止](docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md)；[用户 SSH 中继与审核式路径比较](docs/product/SSH_RELAY.md)，真实网络条件和原生验收分别记录 |
 | **AI 助手** | 命名模型 API / Codex CLI / Claude Code 配置；模型发现与连接测试、明确上下文、完整请求预览、回答、诊断建议及逐轮审核的有限 Agent 工作流；来源绑定的本地知识保存、搜索与分类、审核式编辑及多选整批删除 |
 | **对外 MCP** | 外部智能体读取明确授权的会话信息、终端片段、SFTP 与监控；命令和文件修改先提交提案，在桌面应用中审阅后执行 |
 | **配置恢复** | 保存前轮转保留最多八份本机配置备份；恢复影响预览、明确确认、原件保留与并发变化拒绝；凭据库独立管理 |

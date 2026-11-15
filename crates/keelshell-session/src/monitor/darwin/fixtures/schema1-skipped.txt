@@ -1,0 +1,29 @@
+@@KS:darwin@@
+schema	1
+platform	Darwin
+units	bytes seconds ticks pages nanoseconds
+boot_time	1794787200
+boot_time_usec	0
+mach_ticks	24000000000
+timebase_numer	125
+timebase_denom	3
+uptime_ns	1000000000000
+page_size	16384
+sysconf_page_size	16384
+memory_total_bytes	17179869184
+memory_free_pages	65536
+memory_free_bytes	1073741824
+cpu_user	1000
+cpu_nice	10
+cpu_system	500
+cpu_idle	8000
+load_1	1.25
+load_5	1.5
+load_15	1.75
+network_count	1
+network	en0	100000	200000
+df_status	skipped
+df_bytes	0
+@@KS:df@@
+
+@@KS:end@@
