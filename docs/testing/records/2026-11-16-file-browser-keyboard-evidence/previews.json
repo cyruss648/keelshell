@@ -1,0 +1,17 @@
+[
+  {
+    "path": "previews/remote-list-last-row.png",
+    "source_artifact": "raw/native-frost-r2/r2-19-end.png.gz",
+    "sha256": "f4b6a0ded2fb617fd521351fdce7ad0baba9a8f41841a76240555a6f5ecbf2da"
+  },
+  {
+    "path": "previews/rename-review.png",
+    "source_artifact": "raw/native-frost-r2/r3-36-review-again.png.gz",
+    "sha256": "df43c3c2978c3bff0d29881f041ac113ec92d88942d40d49288683ff1f711149"
+  },
+  {
+    "path": "previews/delete-review.png",
+    "source_artifact": "raw/native-frost-r2/r4-42-delete-review.png.gz",
+    "sha256": "a8da788cef163629c721833ba8578f437ad74515bf4fad6fe40b5dd1573442cb"
+  }
+]

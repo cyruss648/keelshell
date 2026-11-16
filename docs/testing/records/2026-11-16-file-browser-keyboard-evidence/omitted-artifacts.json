@@ -1,0 +1,86 @@
+[
+  {
+    "path": "author-selection/r1/selection-tests",
+    "reason": "compiled helper or prebuilt test copy; build and identity receipts retained",
+    "bytes": 1791472,
+    "sha256": "a301f2e60d1313eeb125a832fb8c354881668f3c705de869c368bbf719ed6faa"
+  },
+  {
+    "path": "native_ax",
+    "reason": "compiled helper or prebuilt test copy; build and identity receipts retained",
+    "bytes": 174680,
+    "sha256": "69735a2b3b1ce7bdae01e30d9f50f8c49a9ce266a791a1fb9da8cdbe4e96c372"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/Info.plist",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 993,
+    "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-app",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 199098288,
+    "sha256": "9d3647be525947ed526267d19bd391d788a267e8579f19c208a2114bc62c4aeb"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-mcp",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 14548464,
+    "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/PkgInfo",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 8,
+    "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/Resources/KeelShell.icns",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 995855,
+    "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425"
+  },
+  {
+    "path": "package-r2/KeelShell.app/Contents/Info.plist",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 993,
+    "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70"
+  },
+  {
+    "path": "package-r2/KeelShell.app/Contents/MacOS/keelshell-app",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 199098288,
+    "sha256": "5ae23593849a5027e71f1a9461dd0fe3129d7adc54b1f22b110694d67464ca9b"
+  },
+  {
+    "path": "package-r2/KeelShell.app/Contents/MacOS/keelshell-mcp",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 14548464,
+    "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816"
+  },
+  {
+    "path": "package-r2/KeelShell.app/Contents/PkgInfo",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 8,
+    "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  {
+    "path": "package-r2/KeelShell.app/Contents/Resources/KeelShell.icns",
+    "reason": "reproducible staged application; complete manifest retained as raw evidence",
+    "bytes": 995855,
+    "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425"
+  },
+  {
+    "path": "review-app-tests-r1",
+    "reason": "compiled helper or prebuilt test copy; build and identity receipts retained",
+    "bytes": 271594912,
+    "sha256": "889c51d1a3f7bb9ba0ade1ac8a154af378a82e0be38503f98bfd7f4fd66a1f0d"
+  },
+  {
+    "path": "review-app-tests-r2",
+    "reason": "compiled helper or prebuilt test copy; build and identity receipts retained",
+    "bytes": 271609088,
+    "sha256": "721fc08a87f4a715d032f616d52c6e830048ea5dc4aab03ecd21c09d8610613b"
+  }
+]

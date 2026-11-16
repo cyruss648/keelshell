@@ -26,14 +26,22 @@ fmt、严格 Clippy、x.y 政策和三组 controller 通过。42 个新增默认
 正常 GUI/MCP arm64 构建、暂存包及包内完整摘要检查通过。
 
 真实 macOS Frost Light 中文窗口已观察浏览/范围/翻页、末行可见、F2 审核、
-重复键和取消不写、分别确认后的完整改名/删除读回、本地目录/路径及正向 Tab。
+重命名取消与两类重复键后的字节保持、分别确认后的完整改名/删除读回、
+本地目录/路径及正向 Tab。
 原生反向 Tab 没有到达列表，保持 HOLD；Home 首次投递和夹具路径等失败保留，
 不把接续观察代签成完整脚本成功。Graphite/Lavender 本批原生 NOT_RUN，
 Windows/Linux、IME/VoiceOver、完整焦点/尺寸矩阵和发行继续开放。
 两原生回合 147 条 birth 身份零活匹配、六个根进程停止、四次端口关闭、
 两个私有目录 absent；作者受管 worktree 已归档。唯一 Cargo target 归属未切换。
+第二个新非作者已限定批准原生证据，新增开放 P0–P3 为 0，亲自查看六张 PNG；
+没有重放原生或执行测试，反向 Tab、删除取消与审核横向滚动仍未签署。
+作者和两个 reviewer 均已关闭，无活动本批 agent 或新建用户 chat。
+源码提交 `6d80c259b9a80facbf0f2fdeea986e18978c714f` 已推到当前功能分支，
+本地/tracking/远端一致；此前 159 项离线提交也已推送。491 份原件与三个未修改
+预览已封存到[持久证据](testing/records/2026-11-16-file-browser-keyboard-evidence/README.md)；
+源码提交与归档文档树分开，使用 verifier 同时核对两树的 717 项工程 blob。
 从[本批记录](testing/records/2026-11-16-file-browser-keyboard.md)接续。
-完整产品目标保持 active；归档、原生证据复核及交付回执仍按实际结果更新。
+完整产品目标保持 active；归档提交、绑定与临时产物回收按实际回执更新。
 
 ## 当前批次：编辑器键盘与原生文本流程（集中门禁与限定复核通过）
 

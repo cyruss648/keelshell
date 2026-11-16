@@ -20,7 +20,11 @@ helper `25/25`，fmt、严格 Clippy、x.y 政策和三组 controller 通过；
 Frost 实际原生浏览、两种审核/独立确认和完整文件读回、本地路径与正向 Tab 已观察，
 反向原生 Tab HOLD、其他主题/平台/IME/VoiceOver 继续开放；失败原件保持。
 作者 worktree、两个原生回合的进程/端口和私有目录已回收。
-归档、原生证据复核和提交推送以
+第二个新非作者限定批准原生证据，新增开放 P0–P3 为 0，两个 reviewer 均已关闭；
+删除取消、审核横向滚动和反向 Tab 未签署。源码 `6d80c25` 已推送并三方读回一致，
+此前 159 项离线提交也已推送。491 份原件及三个未修改预览已封存到
+[持久证据](testing/records/2026-11-16-file-browser-keyboard-evidence/README.md)；
+归档提交、源码/归档两树绑定和重复临时产物清理以
 [本批记录](testing/records/2026-11-16-file-browser-keyboard.md)为准。
 
 ## 2026-11-16 编辑器键盘与原生文本流程（集中门禁与限定复核通过）
