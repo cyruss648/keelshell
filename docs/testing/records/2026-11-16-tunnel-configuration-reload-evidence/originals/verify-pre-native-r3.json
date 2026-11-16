@@ -1,0 +1,26 @@
+{
+  "observed_exit": 1,
+  "controller_exit": 1,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "python3",
+    "-B",
+    "docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/verify.py"
+  ],
+  "seconds": 0.17249729100149125,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 552,
+  "log_sha256": "911d5f672846b572d2f00cb2023c880e196b6365375c205d2e37d01a6802b368"
+}

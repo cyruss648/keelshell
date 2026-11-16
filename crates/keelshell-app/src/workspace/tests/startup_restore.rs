@@ -116,6 +116,7 @@ fn assert_inert(workspace: &Workspace, cx: &App) {
     assert!(workspace.terminal_observers.is_empty());
     assert!(workspace.terminal_focus.is_empty());
     assert!(workspace.tunnel_subscriptions.is_empty());
+    assert!(workspace.tunnel_reload_subscriptions.is_empty());
     assert!(workspace.tunnel_owners.is_empty());
     assert!(workspace.command_histories.is_empty());
     assert!(workspace.command_target.is_none());

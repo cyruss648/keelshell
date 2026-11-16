@@ -6,6 +6,10 @@ use super::*;
 #[path = "management_tests.rs"]
 mod tests;
 
+#[cfg(test)]
+#[path = "reload_tests.rs"]
+mod reload_tests;
+
 /// One confirmed metadata change. The workspace validates it again before I/O.
 #[derive(Clone, PartialEq)]
 pub(crate) struct TunnelRuleEvent {
@@ -65,7 +69,7 @@ impl TunnelsPanel {
     }
 
     fn inspect_recovery_candidate(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
-        if self.suspended {
+        if self.suspended || self.rule_reload_pending.is_some() {
             return;
         }
         if self
@@ -150,6 +154,7 @@ impl TunnelsPanel {
     fn confirm_recovery_start(&mut self, token: TunnelRecoveryReviewToken, cx: &mut Context<Self>) {
         if self.suspended
             || self.rule_configuration_busy
+            || self.rule_reload_pending.is_some()
             || self.rule_store_blocked
             || self.rule_mutation.is_some()
         {
@@ -238,6 +243,7 @@ impl TunnelsPanel {
     fn discard_recovery_candidate(&mut self, id: uuid::Uuid, cx: &mut Context<Self>) {
         if self.suspended
             || self.rule_configuration_busy
+            || self.rule_reload_pending.is_some()
             || self.rule_store_blocked
             || self.recovery_discard_pending.is_some()
         {
@@ -278,6 +284,11 @@ impl TunnelsPanel {
     pub(super) fn rule_feedback(&self) -> Message {
         if self.rule_mutation.is_some() {
             Message::new("正在保存命名规则…", "Saving named tunnel rule…")
+        } else if self.rule_reload_pending.is_some() {
+            Message::new(
+                "正在重新加载配置，草稿已保留，旧审核已撤销…",
+                "Reloading configuration; draft retained and previous reviews expired…",
+            )
         } else if self.rule_configuration_busy {
             Message::new(
                 "配置正在保存或重新加载，请稍候…",
@@ -285,13 +296,13 @@ impl TunnelsPanel {
             )
         } else if self.rule_store_blocked {
             Message::new(
-                "规则保存失败或结果未知。草稿已保留，请重新打开应用或重新加载配置后再编辑。",
-                "Rule saving failed or its outcome is unknown. Draft retained; reopen the app or reload configuration before editing.",
+                "配置已变化或写入结果未知。草稿已保留，请使用本面板的“重新加载”后重新审核。",
+                "Configuration changed or a write outcome is unknown. Draft retained; use Reload in this panel before reviewing again.",
             )
         } else if self.rule_state.is_none() {
             Message::new(
-                "配置快照不可用，请重新打开应用。",
-                "Configuration snapshot unavailable. Reopen the app.",
+                "配置快照不可用，请使用本面板的“重新加载”。",
+                "Configuration snapshot unavailable. Use Reload in this panel.",
             )
         } else {
             self.rule_status.clone()
@@ -303,12 +314,14 @@ impl TunnelsPanel {
             && !self.rule_configuration_busy
             && self.rule_epoch == epoch
             && self.rule_mutation.is_none()
+            && self.rule_reload_pending.is_none()
     }
 
     fn editor_matches(&self, identity: uuid::Uuid) -> bool {
         !self.suspended
             && !self.rule_configuration_busy
             && self.rule_mutation.is_none()
+            && self.rule_reload_pending.is_none()
             && self
                 .rule_editor
                 .as_ref()
@@ -514,6 +527,7 @@ impl TunnelsPanel {
     fn confirm_rule_change(&mut self, operation: uuid::Uuid, cx: &mut Context<Self>) {
         if self.suspended
             || self.rule_configuration_busy
+            || self.rule_reload_pending.is_some()
             || self.rule_mutation.is_some()
             || self.rule_store_blocked
         {
@@ -570,24 +584,35 @@ impl TunnelsPanel {
     pub(super) fn clear_change_review(&mut self, cx: &mut Context<Self>) {
         self.rule_epoch = uuid::Uuid::new_v4();
         self.rule_change_review = None;
+        self.sync_rule_editor_disabled(cx);
+    }
+
+    pub(super) fn sync_rule_editor_disabled(&mut self, cx: &mut Context<Self>) {
+        let disabled = self.suspended
+            || self.rule_configuration_busy
+            || self.rule_mutation.is_some()
+            || self.rule_reload_pending.is_some()
+            || self.rule_change_review.is_some();
         if let Some(editor) = &mut self.rule_editor {
-            editor.set_disabled(self.suspended || self.rule_mutation.is_some(), cx);
+            editor.set_disabled(disabled, cx);
         }
     }
 
     pub(crate) fn set_rule_configuration_busy(&mut self, busy: bool, cx: &mut Context<Self>) {
         self.rule_configuration_busy = busy;
+        self.sync_rule_editor_disabled(cx);
         cx.notify();
     }
 
     pub(crate) fn mark_rule_store_uncertain(&mut self, cx: &mut Context<Self>) {
         self.rule_store_blocked = true;
+        self.rule_reload_pending = None;
         self.rule_epoch = uuid::Uuid::new_v4();
         self.rule_plan = None;
         self.clear_change_review(cx);
         self.rule_status = Message::new(
-            "规则保存失败或结果未知；请重新打开应用或重新加载配置后，再编辑或启动命名规则。",
-            "Rule saving failed or its outcome is unknown. Reopen the app or reload configuration before editing or starting named rules.",
+            "配置已变化或写入结果未知；草稿已保留，请使用本面板的“重新加载”后重新审核。",
+            "Configuration changed or a write outcome is unknown. Draft retained; use Reload in this panel before reviewing again.",
         );
         cx.notify();
     }
@@ -597,6 +622,7 @@ impl TunnelsPanel {
         !self.suspended
             && !self.rule_store_blocked
             && !self.rule_configuration_busy
+            && self.rule_reload_pending.is_none()
             && self.connection_id == Some(event.rule.connection_id)
             && self.rule_mutation.as_ref().is_some_and(|pending| {
                 pending == event && pending.expected_state.snapshot == event.expected_state.snapshot
@@ -685,6 +711,7 @@ impl TunnelsPanel {
         cx: &mut Context<Self>,
     ) {
         if self.suspended
+            || self.rule_reload_pending.is_some()
             || self.rule_epoch != epoch
             || workers.is_empty()
             || self.rule_workers(id) != workers
@@ -712,7 +739,7 @@ impl TunnelsPanel {
         else {
             return;
         };
-        if self.suspended {
+        if self.suspended || self.rule_reload_pending.is_some() {
             return;
         }
         let valid = self.runtime_owner == review.owner
@@ -1083,6 +1110,7 @@ impl TunnelsPanel {
                         .min_h(px(32.))
                         .disabled(
                             self.rule_configuration_busy
+                                || self.rule_reload_pending.is_some()
                                 || self.rule_store_blocked
                                 || assessment.is_some(),
                         )
@@ -1124,7 +1152,9 @@ impl TunnelsPanel {
                     Button::new("confirm-tunnel-rule-change")
                         .primary()
                         .min_h(px(32.))
-                        .disabled(self.rule_configuration_busy)
+                        .disabled(
+                            self.rule_configuration_busy || self.rule_reload_pending.is_some(),
+                        )
                         .label(t(cx, "确认", "Confirm"))
                         .on_click(cx.listener(move |view, _, _, cx| {
                             view.confirm_rule_change(operation, cx)
@@ -1199,6 +1229,7 @@ impl TunnelsPanel {
                     Button::new("confirm-tunnel-rule-stop")
                         .primary()
                         .min_h(px(32.))
+                        .disabled(self.rule_reload_pending.is_some())
                         .label(t(cx, "确认停止", "Confirm stop"))
                         .on_click(
                             cx.listener(move |view, _, _, cx| view.confirm_rule_stop(token, cx)),
@@ -1363,6 +1394,7 @@ impl TunnelsPanel {
                                 .compact()
                                 .icon(IconName::Eye)
                                 .label(t(cx, "Inspect", "Inspect"))
+                                .disabled(self.rule_reload_pending.is_some())
                                 .accessibility_label(format!(
                                     "{}: {}",
                                     t(cx, "检查恢复候选", "Inspect recovery candidate"),
@@ -1383,6 +1415,7 @@ impl TunnelsPanel {
                                         || self.suspended
                                         || self.rule_store_blocked
                                         || self.rule_configuration_busy
+                                        || self.rule_reload_pending.is_some()
                                         || self.recovery_discard_pending.is_some(),
                                 )
                                 .accessibility_label(format!(
@@ -1404,6 +1437,7 @@ impl TunnelsPanel {
                                     self.suspended
                                         || self.rule_store_blocked
                                         || self.rule_configuration_busy
+                                        || self.rule_reload_pending.is_some()
                                         || self.recovery_discard_pending.is_some(),
                                 )
                                 .accessibility_label(format!(
@@ -1496,8 +1530,11 @@ impl TunnelsPanel {
     pub(super) fn rule_editor_view(&self, cx: &mut Context<Self>) -> Option<RuleManagementView> {
         let editor = self.rule_editor.as_ref()?;
         let visual = crate::design::palette(cx);
-        let disabled =
-            self.suspended || self.rule_mutation.is_some() || self.rule_change_review.is_some();
+        let disabled = self.suspended
+            || self.rule_configuration_busy
+            || self.rule_reload_pending.is_some()
+            || self.rule_mutation.is_some()
+            || self.rule_change_review.is_some();
         let identity = editor.identity;
         let title = if editor.id.is_some() {
             t(cx, "编辑命名规则", "Edit named rule")

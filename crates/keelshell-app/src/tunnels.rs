@@ -26,6 +26,8 @@ use tokio::runtime::Runtime;
 
 use crate::i18n::{LocalizedTooltipExt, Message, t};
 
+mod reload;
+pub(crate) use reload::TunnelRuleReloadEvent;
 mod rules;
 pub(crate) use rules::TunnelRuleEvent;
 use rules::{RuleChangeReview, RuleEditor, RuleStopReview, RuntimeRecoveryReview};
@@ -262,6 +264,7 @@ pub struct TunnelsPanel {
     recovery_review: Option<RuntimeRecoveryReview>,
     recovery_discard_pending: Option<(uuid::Uuid, uuid::Uuid)>,
     rule_mutation: Option<TunnelRuleEvent>,
+    rule_reload_pending: Option<TunnelRuleReloadEvent>,
     rule_store_blocked: bool,
     rule_configuration_busy: bool,
     direction: Direction,
@@ -328,6 +331,7 @@ impl TunnelsPanel {
             recovery_review: None,
             recovery_discard_pending: None,
             rule_mutation: None,
+            rule_reload_pending: None,
             rule_store_blocked: false,
             rule_configuration_busy: false,
             direction: Direction::Local,
@@ -391,6 +395,7 @@ impl TunnelsPanel {
         }
         self.rule_state = state;
         self.connection_id = connection_id;
+        self.rule_reload_pending = None;
         self.rule_epoch = uuid::Uuid::new_v4();
         self.selected_rule = None;
         self.rule_plan = None;
@@ -498,6 +503,7 @@ impl TunnelsPanel {
     fn start_named_rule(&mut self, token: TunnelRuleReviewToken, cx: &mut Context<Self>) {
         if self.suspended
             || self.rule_configuration_busy
+            || self.rule_reload_pending.is_some()
             || self.rule_store_blocked
             || self.rule_mutation.is_some()
             || self.rule_editor.is_some()
@@ -592,6 +598,7 @@ impl TunnelsPanel {
         self.suspended = true;
         self.session = None;
         self.runtime_owner = self.runtime_owner.replaced();
+        self.rule_reload_pending = None;
         self.rule_epoch = uuid::Uuid::new_v4();
         self.rule_plan = None;
         self.rule_stop_review = None;
@@ -987,7 +994,10 @@ impl TunnelsPanel {
     }
 
     fn schedule_runtime_event(&mut self, row_id: usize, cx: &mut Context<Self>) {
-        if self.rule_store_blocked || self.rule_configuration_busy {
+        if self.rule_store_blocked
+            || self.rule_configuration_busy
+            || self.rule_reload_pending.is_some()
+        {
             return;
         }
         let Some(index) = self.rows.iter().position(|row| row.id == row_id) else {
@@ -1136,6 +1146,7 @@ impl TunnelsPanel {
         if self.suspended
             || self.rule_store_blocked
             || self.rule_configuration_busy
+            || self.rule_reload_pending.is_some()
             || self
                 .rule_state
                 .as_ref()
@@ -1365,6 +1376,7 @@ impl TunnelsPanel {
                             .disabled(
                                 self.suspended
                                     || self.rule_mutation.is_some()
+                                    || self.rule_reload_pending.is_some()
                                     || self.rule_configuration_busy
                                     || self.rule_store_blocked,
                             )
@@ -1388,6 +1400,7 @@ impl TunnelsPanel {
                             .disabled(
                                 self.suspended
                                     || self.rule_mutation.is_some()
+                                    || self.rule_reload_pending.is_some()
                                     || self.rule_configuration_busy
                                     || self.rule_store_blocked,
                             )
@@ -1403,6 +1416,7 @@ impl TunnelsPanel {
                             .disabled(
                                 self.suspended
                                     || self.rule_mutation.is_some()
+                                    || self.rule_reload_pending.is_some()
                                     || self.rule_configuration_busy
                                     || self.rule_store_blocked
                                     || active,
@@ -1419,15 +1433,11 @@ impl TunnelsPanel {
                     ),
             );
         }
-        let mut named_rule_section = div()
-            .px_3()
-            .py_2()
-            .flex_shrink_0()
+        let mut named_rule_actions = div()
             .flex()
+            .flex_wrap()
             .items_center()
             .gap_2()
-            .border_b_1()
-            .border_color(rgb(visual.border))
             .child(
                 div()
                     .text_color(rgb(visual.muted))
@@ -1440,8 +1450,8 @@ impl TunnelsPanel {
                     .font_weight(FontWeight::SEMIBOLD)
                     .child(t(cx, "命名规则", "Named rules")),
             )
-            .child(named_rules)
-            .child(div().flex_1())
+            .child(named_rules.flex_1().min_w_0())
+            .child(self.rule_reload_button(cx))
             .child(
                 Button::new("new-tunnel-rule")
                     .ghost()
@@ -1450,6 +1460,7 @@ impl TunnelsPanel {
                     .disabled(
                         self.suspended
                             || self.rule_mutation.is_some()
+                            || self.rule_reload_pending.is_some()
                             || self.connection_id.is_none()
                             || self.rule_state.is_none()
                             || self.rule_configuration_busy
@@ -1461,7 +1472,7 @@ impl TunnelsPanel {
                     })),
             );
         if let Some(token) = self.rule_plan.as_ref().map(|plan| plan.review_token()) {
-            named_rule_section = named_rule_section.child(
+            named_rule_actions = named_rule_actions.child(
                 Button::new("review-start-named-tunnel")
                     .primary()
                     .compact()
@@ -1469,6 +1480,7 @@ impl TunnelsPanel {
                     .disabled(
                         self.suspended
                             || self.rule_configuration_busy
+                            || self.rule_reload_pending.is_some()
                             || self.rule_store_blocked
                             || self.rule_mutation.is_some(),
                     )
@@ -1476,10 +1488,25 @@ impl TunnelsPanel {
                     .on_click(cx.listener(move |view, _, _, cx| view.start_named_rule(token, cx))),
             );
         }
-        named_rule_section =
-            named_rule_section.child(div().max_w(px(460.)).text_color(rgb(visual.muted)).child(
-                tunnel_text("tunnel-rule-feedback", self.rule_feedback().render(cx)),
-            ));
+        let named_rule_section = div()
+            .px_3()
+            .py_2()
+            .flex_shrink_0()
+            .flex()
+            .flex_col()
+            .gap_2()
+            .border_b_1()
+            .border_color(rgb(visual.border))
+            .child(named_rule_actions)
+            .child(
+                div()
+                    .min_w_0()
+                    .text_color(rgb(visual.muted))
+                    .child(tunnel_text(
+                        "tunnel-rule-feedback",
+                        self.rule_feedback().render(cx),
+                    )),
+            );
         let recovery_section = self.recovery_section(cx);
         let mut rows = div().id("tunnels-list").test_support().flex().flex_col();
         for (index, row) in self.rows.iter().enumerate() {
@@ -1562,7 +1589,11 @@ impl TunnelsPanel {
                         .ghost()
                         .compact()
                         .rounded(px(6.))
-                        .disabled(stopping || cleanup_unconfirmed)
+                        .disabled(
+                            stopping
+                                || cleanup_unconfirmed
+                                || (rule_id.is_some() && self.rule_reload_pending.is_some()),
+                        )
                         .accessibility_label(format!(
                             "{}\n{}",
                             if row.rule_id.is_some() {
@@ -1683,6 +1714,8 @@ impl TunnelsPanel {
             .when(self.suspended, |panel| panel.child(div().px_3().py_1().flex_shrink_0().text_color(rgb(visual.muted)).child(t(cx, "上一会话隧道记录，不会自动重建", "Previous session tunnels. Never restarted automatically"))))
             .child(rows);
         div()
+            .id("tunnels-panel")
+            .test_support()
             .h_full()
             .min_h_0()
             .flex()
@@ -1751,8 +1784,12 @@ impl Render for TunnelsPanel {
                         .border_color(rgb(visual.border))
                         .bg(rgb(visual.canvas))
                         .flex()
+                        .flex_wrap()
                         .items_center()
+                        .gap_2()
                         .justify_end()
+                        .child(self.rule_reload_button(cx))
+                        .child(div().flex_1())
                         .child(content.footer),
                 )
                 .child(
@@ -1841,6 +1878,7 @@ async fn cancellation(cancelled: &AtomicBool) {
 }
 
 impl EventEmitter<TunnelRuleEvent> for TunnelsPanel {}
+impl EventEmitter<TunnelRuleReloadEvent> for TunnelsPanel {}
 impl EventEmitter<TunnelRuntimeEvent> for TunnelsPanel {}
 
 #[cfg(test)]

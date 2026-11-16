@@ -1,0 +1,54 @@
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+warning: unused variable: `workspace`
+   --> crates/keelshell-app/src/tunnels/workspace_reload_tests.rs:102:43
+    |
+102 |             fixture.workspace.update(cx, |workspace, cx| {
+    |                                           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_workspace`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `workspace`
+   --> crates/keelshell-app/src/tunnels/workspace_reload_tests.rs:236:43
+    |
+236 |             fixture.workspace.update(cx, |workspace, cx| {
+    |                                           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_workspace`
+
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 3 warnings (run `cargo fix --bin "keelshell-app" -p keelshell-app --tests` to apply 2 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.06s
+     Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/e9828e40142b11cd/out/keelshell_app-e9828e40142b11cd)
+
+running 14 tests
+test tunnels::rules::reload_tests::reload_authoritative_identical_snapshot_retires_pending_token ... ok
+test tunnels::rules::reload_tests::reload_button_ax_and_feedback_fit_registered_themes_languages_and_sizes ... FAILED
+test tunnels::rules::reload_tests::reload_button_emits_one_exact_request_without_snapshot_or_binding ... ok
+test tunnels::rules::reload_tests::reload_busy_and_suspension_reject_new_requests_and_retire_pending ... ok
+test tunnels::rules::reload_tests::reload_button_tooltip_retranslates_while_hovered ... ok
+test tunnels::rules::reload_tests::reload_finish_accepts_busy_exact_token_without_clearing_storage_block ... ok
+test tunnels::rules::reload_tests::reload_old_painted_epoch_cannot_reload_replacement_configuration ... ok
+test tunnels::rules::reload_tests::reload_refresh_retires_changed_state_or_connection_but_keeps_identical_refresh ... ok
+test tunnels::rules::reload_tests::reload_preserves_draft_snapshot_and_expires_metadata_review ... ok
+test tunnels::rules::reload_tests::reload_expires_named_start_and_recovery_reviews_without_starting_workers ... ok
+test tunnels::rules::reload_tests::reload_refuses_an_inflight_metadata_mutation ... ok
+test tunnels::rules::reload_tests::reload_rejection_clears_matching_expired_epoch_but_preserves_replacement ... ok
+test tunnels::rules::reload_tests::reload_uncertainty_retires_pending_without_leaving_a_busy_panel ... ok
+test tunnels::rules::reload_tests::reload_retires_stop_review_and_retains_original_live_listener ... ok
+
+failures:
+
+---- tunnels::rules::reload_tests::reload_button_ax_and_feedback_fit_registered_themes_languages_and_sizes stdout ----
+
+thread 'tunnels::rules::reload_tests::reload_button_ax_and_feedback_fit_registered_themes_languages_and_sizes' (5191277) panicked at /Users/hdh/.cargo/registry/src/rsproxy.cn-e3de039b2554c837/gpui-kit-0.10.0/src/test.rs:142:9:
+missing ElementId Name("tunnels-panel") in scope []. Registered paths: [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("delete-tunnel-rule-49abfba9-e031-4088-ab28-a385fbcf348d")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("delete-tunnel-rule-666239f9-44da-4e57-88f4-2e922cefd245")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("edit-tunnel-rule-49abfba9-e031-4088-ab28-a385fbcf348d")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("edit-tunnel-rule-666239f9-44da-4e57-88f4-2e922cefd245")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("named-tunnel-rule-49abfba9-e031-4088-ab28-a385fbcf348d")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("named-tunnel-rule-666239f9-44da-4e57-88f4-2e922cefd245")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("new-tunnel-rule")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("reload-tunnel-configuration")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("start-tunnel")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("tunnel-dynamic")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("tunnel-local")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::button::button::Button"), Name("gpui_base::button::Button"), Name("tunnel-remote")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967298), View(EntityId(2v1)), Name("input-state")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967298)], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967300), View(EntityId(4v1)), Name("input-state")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967300)], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967302), View(EntityId(6v1)), Name("input-state")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967302)], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967304), View(EntityId(8v1)), Name("input-state")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("gpui_component::input::input::Input"), NamedInteger("input", 4294967304)], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("tunnel-rule-feedback")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("tunnel-ssh-target")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll"), Name("tunnels-list")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-management-scroll")], [View(EntityId(10v1)), Name("gpui_component::window_border::WindowBorder"), Name("window-backdrop"), Name("root"), View(EntityId(1v1)), Name("tunnel-runtime-summary")]. Check the ID, observation, and completed frame.
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tunnels::rules::reload_tests::reload_button_ax_and_feedback_fit_registered_themes_languages_and_sizes
+
+test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 1350 filtered out; finished in 0.27s
+
+error: test failed, to rerun pass `-p keelshell-app --bin keelshell-app`

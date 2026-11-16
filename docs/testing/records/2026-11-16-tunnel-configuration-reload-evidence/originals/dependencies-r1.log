@@ -1,0 +1,4 @@
+Dependency check: failed
+  keelshell-app/russh: direct_lock_not_latest
+  keelshell-session/russh: direct_lock_not_latest
+Checked 113 Rust declarations/uses at 2026-11-16T15:02:12Z

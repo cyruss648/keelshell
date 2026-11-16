@@ -110,7 +110,9 @@ impl Workspace {
             self.revoke_stale_protocol_diagnostics(cx);
             self.maintain_mcp(cx);
             self.maintain_agent(cx);
-            self.set_tunnel_rule_configuration_busy(true, cx);
+            // A stale catalog needs an explicit read, not a permanent busy
+            // state that would disable the panel's recovery entry point.
+            self.mark_tunnel_rule_store_uncertain(cx);
             self.status = Message::new(
                 "另一窗口已提交配置；本窗草稿和现有 SSH 保留。请显式重新加载配置，再重新审核配置操作。",
                 "Another window committed configuration. Drafts and live SSH are retained. Explicitly reload configuration, then review configuration actions again.",
@@ -284,9 +286,19 @@ impl Workspace {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        self.begin_window_configuration_reload(None, window, cx);
+    }
+
+    pub(super) fn begin_window_configuration_reload(
+        &mut self,
+        origin: Option<tunnel_reload::TunnelReloadOrigin>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> bool {
         if self.saving
             || self.state_reloading
             || self.closing.is_some()
+            || self.active_modal().is_some()
             || self.connecting
             || self.connect_route.is_some()
             || self.vault_settings.is_some()
@@ -299,9 +311,8 @@ impl Workspace {
                 .lock()
                 .is_ok_and(|gate| gate.available())
         {
-            return;
+            return false;
         }
-        self.state_reloading = true;
         let store = self.store.clone();
         let gate = self.app_windows.read(cx).gate.clone();
         // A read occupies the same slot as writes: it may not race a committed
@@ -309,24 +320,47 @@ impl Workspace {
         let owner = self.window_id;
         let reload = match ConfigurationGate::begin_reload_lease(&gate, owner) {
             Ok(reload) => reload,
-            Err(_) => {
-                self.state_reloading = false;
-                return;
-            }
+            Err(_) => return false,
         };
-        let task = cx.background_executor().spawn(async move {
-            let result = store.load();
-            reload.finish(result.as_ref().ok());
-            result
-        });
+        self.state_reloading = true;
+        self.set_tunnel_rule_configuration_busy(true, cx);
+        self.status = Message::new("正在重新加载本机配置…", "Reloading local configuration…");
+        let task = cx.background_executor().spawn(async move { store.load() });
         cx.spawn_in(window, async move |this, cx| {
             let result = task.await;
             let _ = this.update_in(cx, |view, window, cx| {
                 view.state_reloading = false;
+                view.set_tunnel_rule_configuration_busy(false, cx);
+                if view.closing.is_some()
+                    || origin.as_ref().is_some_and(|origin| !view.tunnel_reload_current(origin, cx))
+                {
+                    // Dropping the unfinished lease keeps the shared store
+                    // uncertain. A retired panel must not authorize adoption
+                    // or clear the replacement owner's write barrier.
+                    drop(reload);
+                    view.configuration_invalidated = true;
+                    view.mark_tunnel_rule_store_uncertain(cx);
+                    view.app_windows.update(cx, |shared, cx| shared.changed(cx));
+                    view.status = Message::new(
+                        "配置读取已结束，但原面板已失效；请从当前面板重新加载。",
+                        "Configuration reading ended, but the original panel expired. Reload from the current panel.",
+                    );
+                    cx.notify();
+                    return;
+                }
+                // Retain the lease through foreground adoption. Releasing it
+                // in the worker would let a sibling write between this read
+                // and adoption of its authority token.
+                reload.finish(result.as_ref().ok());
                 match result {
                     Ok(state) => {
+                        if let Some(origin) = &origin {
+                            view.finish_tunnel_reload(origin, Message::new(
+                                "配置已重新加载；草稿保留，请重新审核。",
+                                "Configuration reloaded. Draft retained; review again.",
+                            ), cx);
+                        }
                         view.accept_reloaded_knowledge_state(state, window, cx);
-                        view.shared_commit_completed(cx);
                         view.status = Message::new(
                             "配置已重新加载；草稿与现有 SSH 保留，请重新审核。",
                             "Configuration reloaded. Drafts and live SSH are retained; review again.",
@@ -334,6 +368,14 @@ impl Workspace {
                     }
                     Err(error) => {
                         view.configuration_invalidated = true;
+                        if let Some(origin) = &origin {
+                            view.finish_tunnel_reload(origin, Message::new(
+                                "配置读取失败；草稿保留，请修复配置后重试。",
+                                "Configuration reload failed. Draft retained; repair the configuration and retry.",
+                            ), cx);
+                        }
+                        view.mark_tunnel_rule_store_uncertain(cx);
+                        view.app_windows.update(cx, |shared, cx| shared.changed(cx));
                         view.status = Message::detail("配置读取失败，草稿保留", "Configuration reload failed; drafts retained", error);
                     }
                 }
@@ -341,5 +383,6 @@ impl Workspace {
             });
         }).detach();
         cx.notify();
+        true
     }
 }

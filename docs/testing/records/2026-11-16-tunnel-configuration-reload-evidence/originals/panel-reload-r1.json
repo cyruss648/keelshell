@@ -1,0 +1,31 @@
+{
+  "observed_exit": 101,
+  "controller_exit": 101,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-app",
+    "--locked",
+    "tunnels::rules::reload_tests",
+    "--",
+    "--test-threads=4"
+  ],
+  "seconds": 7.985345500004769,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 10530,
+  "log_sha256": "69af68d8502319ddf6b02501b6b20f07f9afe6ded4f867b7058f59be75a22462"
+}

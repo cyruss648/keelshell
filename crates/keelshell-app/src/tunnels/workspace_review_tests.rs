@@ -13,6 +13,9 @@ use gpui_kit::{Context, Window};
 use keelshell_session::{ConnectionState, SshSession};
 use std::{cell::RefCell, rc::Rc, sync::atomic::Ordering};
 
+#[path = "workspace_reload_tests.rs"]
+mod reload_regressions;
+
 struct TunnelTab {
     panel: Entity<TunnelsPanel>,
     _output: mpsc::SyncSender<keelshell_session::SessionEvent>,

@@ -1,0 +1,32 @@
+{
+  "observed_at_utc": "2026-11-16T15:35:55.877288+00:00",
+  "agents": [
+    {
+      "id": "01a1e4e1-2e6e-7c93-99cb-d112a34cedf9",
+      "nickname": "Rawls",
+      "role": "panel implementation",
+      "status_before_close": "completed",
+      "closed": true
+    },
+    {
+      "id": "01a1e4f0-841b-73e0-acfa-ad4a857698c8",
+      "nickname": "Socrates",
+      "role": "independent source review",
+      "status_before_close": "completed",
+      "closed": true,
+      "report_sha256": "dd873661f3bc5cbf30a10c3e65a8f4cddbd307a1d1009e98f345459996bc41cb"
+    },
+    {
+      "id": "01a1e4f6-2173-75e2-bf10-2514ca64d335",
+      "nickname": "Ptolemy",
+      "role": "independent function review",
+      "status_before_close": "completed",
+      "closed": true,
+      "report_sha256": "e37a8f098dba06cc6f6f08bc5e5bb72add870319409951179ea97378a03283b5"
+    }
+  ],
+  "user_chats_created": 0,
+  "worktrees_created": 0,
+  "branches_created": 0,
+  "containers_created": 0
+}

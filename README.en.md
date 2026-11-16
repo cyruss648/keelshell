@@ -53,6 +53,8 @@ Both lists support [keyboard browsing](docs/product/FILE_BROWSER_KEYBOARD.md): a
 
 Single-window startup restoration now restores the saved active window's pane layout, tab order and selection, with disconnected, unsaved and missing-connection states. Only an explicit Connect action authenticates using the current profile. Startup does not replay commands, transfers, tunnels or AI actions. Focused checks have passed; the full gate and new-package native checks are tracked in the [restoration record](docs/testing/records/2026-11-05-workspace-startup-restore.md). OS window positioning, multiple native windows, compact OS geometry and the complete platform matrix remain open. Commit, push and exact CI outcomes are recorded separately.
 
+The tunnel panel provides an explicit local configuration reload to recover rule management after a conflict. Drafts, live SSH and running tunnels are retained, while old reviews expire. Failed reads keep writes blocked and allow a retry after repair. Engineering and native acceptance are tracked in the [reload record](docs/testing/records/2026-11-16-tunnel-configuration-reload.md).
+
 ## Features
 
 | Workflow | Capabilities |

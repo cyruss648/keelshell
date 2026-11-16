@@ -1,0 +1,63 @@
+   Compiling block-buffer v0.12.1
+   Compiling getrandom v0.3.4
+   Compiling digest v0.11.3
+   Compiling cipher v0.5.2
+   Compiling sha2 v0.11.1
+   Compiling hmac v0.13.0
+   Compiling pbkdf2 v0.13.0
+   Compiling aes v0.9.4
+   Compiling ctr v0.10.1
+   Compiling salsa20 v0.11.0
+   Compiling aes-gcm v0.11.1
+   Compiling scrypt v0.12.0
+   Compiling cbc v0.2.1
+   Compiling pkcs5 v0.8.1
+   Compiling chacha20 v0.10.2
+   Compiling signature v3.0.0
+   Compiling pkcs8 v0.11.0
+   Compiling hkdf v0.13.0
+   Compiling elliptic-curve v0.14.3
+   Compiling tempfile v3.27.0
+   Compiling rfc6979 v0.6.0
+   Compiling cbindgen v0.28.0
+   Compiling ecdsa v0.17.0
+   Compiling primeorder v0.14.0
+   Compiling rand v0.10.4
+   Compiling blake2 v0.11.0
+   Compiling ssh-encoding v0.3.0
+   Compiling argon2 v0.6.0
+   Compiling curve25519-dalek v5.0.0
+   Compiling gpui-pre-apple v0.3.12
+   Compiling rust-embed-utils v8.14.0
+   Compiling chacha20poly1305 v0.11.0
+   Compiling ed25519 v3.0.0
+   Compiling blowfish v0.10.0
+   Compiling pkcs1 v0.8.0
+   Compiling rsa v0.10.0
+   Compiling bcrypt-pbkdf v0.11.0
+   Compiling ed25519-dalek v3.0.0
+   Compiling rust-embed v8.14.0
+   Compiling shake v0.1.0
+   Compiling sha3 v0.12.0
+   Compiling ssh-cipher v0.3.0
+   Compiling p384 v0.14.0
+   Compiling p521 v0.14.0
+   Compiling p256 v0.14.0
+   Compiling sha1 v0.11.0
+   Compiling rmcp v3.10.0
+   Compiling ssh-key v0.7.0-rc.12
+   Compiling gpui-pre-macos v0.3.12
+   Compiling ml-kem v0.3.4
+   Compiling num-bigint v0.5.1
+   Compiling gpui-kit-assets v0.10.0
+   Compiling russh-cryptovec v0.62.0
+   Compiling russh v0.65.2
+   Compiling gpui-component v0.10.0
+   Compiling keelshell-core v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-core)
+   Compiling gpui-pre-platform v0.3.12
+   Compiling keelshell-mcp v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-mcp)
+   Compiling keelshell-session v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-session)
+   Compiling keelshell-ai v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-ai)
+   Compiling gpui-kit v0.10.0
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+    Finished `release` profile [optimized] target(s) in 3m 03s

@@ -1,0 +1,115 @@
+   Compiling keelshell-app v0.1.0 (/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/crates/keelshell-app)
+warning: unused variable: `workspace`
+   --> crates/keelshell-app/src/tunnels/workspace_reload_tests.rs:102:43
+    |
+102 |             fixture.workspace.update(cx, |workspace, cx| {
+    |                                           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_workspace`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `workspace`
+   --> crates/keelshell-app/src/tunnels/workspace_reload_tests.rs:236:43
+    |
+236 |             fixture.workspace.update(cx, |workspace, cx| {
+    |                                           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_workspace`
+
+warning: linker stderr: ld: __eh_frame section too large (max 16MB) to encode dwarf unwind offsets in compact unwind table, performance of exception handling might be affected
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `keelshell-app` (bin "keelshell-app" test) generated 3 warnings (run `cargo fix --bin "keelshell-app" -p keelshell-app --tests` to apply 2 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.13s
+     Running unittests src/main.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/e9828e40142b11cd/out/keelshell_app-e9828e40142b11cd)
+
+running 63 tests
+test tunnels::integration_tests::dynamic_bind_validation_is_loopback_only_and_bilingual ... ok
+test tunnels::rules::reload_tests::reload_authoritative_identical_snapshot_retires_pending_token ... ok
+test tunnels::rules::reload_tests::reload_busy_and_suspension_reject_new_requests_and_retire_pending ... ok
+test tunnels::rules::reload_tests::reload_button_emits_one_exact_request_without_snapshot_or_binding ... ok
+test tunnels::integration_tests::suspended_tunnels_wait_for_cleanup_close_owned_streams_and_never_restart ... ok
+test tunnels::rules::reload_tests::reload_button_tooltip_retranslates_while_hovered ... ok
+test tunnels::rules::reload_tests::reload_finish_accepts_busy_exact_token_without_clearing_storage_block ... ok
+test tunnels::rules::reload_tests::reload_expires_named_start_and_recovery_reviews_without_starting_workers ... ok
+test tunnels::rules::reload_tests::reload_old_painted_epoch_cannot_reload_replacement_configuration ... ok
+test tunnels::rules::reload_tests::reload_preserves_draft_snapshot_and_expires_metadata_review ... ok
+test tunnels::rules::reload_tests::reload_refresh_retires_changed_state_or_connection_but_keeps_identical_refresh ... ok
+test tunnels::rules::reload_tests::reload_rejection_clears_matching_expired_epoch_but_preserves_replacement ... ok
+test tunnels::rules::reload_tests::reload_refuses_an_inflight_metadata_mutation ... ok
+test tunnels::integration_tests::dynamic_panel_starts_real_proxy_copies_address_switches_language_and_stops ... ok
+test tunnels::rules::reload_tests::reload_uncertainty_retires_pending_without_leaving_a_busy_panel ... ok
+test tunnels::rules::tests::authoritative_identical_reload_expires_mutation_review_and_normal_refresh_stays_blocked ... ok
+test tunnels::rules::reload_tests::reload_retires_stop_review_and_retains_original_live_listener ... ok
+test tunnels::rules::tests::edit_and_confirmation_bind_state_rule_connection_and_draft ... ok
+test tunnels::rules::tests::editor_validates_all_modes_without_starting_a_listener ... ok
+test tunnels::rules::tests::authoritative_identical_reload_expires_runtime_stop_review ... ok
+test tunnels::rules::tests::painted_delete_and_start_reject_replacement_rules_and_reviews ... ok
+test tunnels::rules::tests::painted_save_and_cancel_cannot_act_on_replacement_reviews ... ok
+test tunnels::rules::tests::rejected_cancel_lifecycle_observer_does_not_keep_original_session_alive ... ok
+test tunnels::rules::tests::rule_review_footer_stays_visible_in_bounded_tool_area ... ok
+test tunnels::rules::tests::named_editor_labels_follow_language_and_preserve_typed_draft ... ok
+test tunnels::rules::tests::rule_specific_edit_labels_open_the_matching_rule_in_each_language ... ok
+test tunnels::rules::tests::assigned_endpoints_remain_accessible_in_stop_reviews_and_stopped_rows ... ok
+test tunnels::rules::tests::session_replacement_rotates_tunnel_owner_and_clears_stop_review ... ok
+test tunnels::rules::tests::stale_editor_and_suspended_panel_cannot_save_or_retarget ... ok
+test tunnels::rules::tests::runtime_events_preserve_pending_and_failed_rule_save_feedback ... ok
+test tunnels::rules::tests::temporary_endpoint_labels_retain_values_when_language_changes ... ok
+test tunnels::rules::tests::unresolved_cleanup_ignores_worker_exit_and_closing_until_original_watch_is_closed ... ok
+test tunnels::tests::named_rule_adapter_preserves_forwarding_mode_and_blocks_missing_targets ... ok
+test tunnels::tests::stopped_and_failed_tunnel_messages_follow_current_language ... ok
+test tunnels::rules::tests::stop_review_rejects_instances_started_after_the_preview ... ok
+test tunnels::rules::tests::rule_stop_preserves_other_workers_and_original_ownership_after_edit ... ok
+test workspace::tunnel_rule_tests::changed_rule_keeps_candidate_and_blocks_review_start ... ok
+test tunnels::rules::reload_tests::reload_button_ax_and_feedback_fit_registered_themes_languages_and_sizes ... ok
+test workspace::tunnel_rule_tests::mismatched_current_connection_keeps_candidate_visible_and_blocks_review ... ok
+test workspace::tunnel_rule_tests::crash_candidate_is_read_only_until_explicit_review_and_confirm ... ok
+test workspace::tunnel_rule_tests::confirmed_normal_stop_removes_the_persisted_runtime_candidate ... ok
+test workspace::tunnel_rule_tests::recovery_discard_is_explicit_and_persisted_through_workspace_worker ... ok
+test workspace::tunnel_rule_tests::review_regressions::capture_reload_propagates_busy_and_failure ... ok
+test workspace::tunnel_rule_tests::review_regressions::capture_reload_propagates_busy_and_success ... ok
+test workspace::tunnel_rule_tests::review_regressions::authoritative_removal_of_rule_metadata_keeps_live_rows_stoppable ... ok
+test workspace::tunnel_rule_tests::review_regressions::closing_tab_guards_deletion_until_remote_cleanup_ack_and_releases_owner ... ok
+test workspace::tunnel_rule_tests::review_regressions::configuration_recovery_clears_uncertainty_before_a_new_tunnel_panel ... ok
+test workspace::tunnel_rule_tests::review_regressions::library_reload_propagates_busy_and_failure ... ok
+test workspace::tunnel_rule_tests::review_regressions::conflict_blocks_new_workspace_panels_until_authoritative_reload ... ok
+test workspace::tunnel_rule_tests::review_regressions::library_reload_propagates_busy_and_success ... ok
+test workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_failure_keeps_existing_and_new_panels_blocked_then_retries ... ok
+test workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_rejects_competing_lease_without_leaking_busy ... FAILED
+test workspace::tunnel_rule_tests::review_regressions::rejected_remote_cancel_retains_owner_until_original_transport_closes ... ok
+test workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_recovers_conflict_retains_draft_and_requires_new_review ... FAILED
+test workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_retains_running_tunnel_and_original_ssh ... ok
+test workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_unchanged_snapshot_invalidates_sibling_start_review ... ok
+test workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_retired_origin_cannot_unblock_replacement ... ok
+test workspace::tunnel_rule_tests::review_regressions::reload_regressions::stale_window_configuration_can_reload_from_tunnel_panel ... FAILED
+test workspace::tunnel_rule_tests::review_regressions::uncertainty_without_open_panels_survives_refresh_and_identical_reload_clears_it ... ok
+test workspace::tunnel_rule_tests::tunnel_rule_delete_rechecks_active_owners_in_other_tabs ... ok
+test workspace::tunnel_rule_tests::tunnel_rule_external_conflict_retains_external_bytes_and_requires_reload ... ok
+test workspace::tunnel_rule_tests::unconfirmed_cleanup_retains_candidate_and_blocks_recovery ... ok
+test workspace::tunnel_rule_tests::tunnel_rule_crud_round_trips_through_workspace_background_store ... ok
+
+failures:
+
+---- workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_rejects_competing_lease_without_leaking_busy stdout ----
+
+thread 'workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_rejects_competing_lease_without_leaking_busy' (5215155) panicked at crates/keelshell-app/src/tunnels/workspace_reload_tests.rs:208:9:
+assertion failed: fixture.workspace.read(cx).state_reloading
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_recovers_conflict_retains_draft_and_requires_new_review stdout ----
+
+thread 'workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_recovers_conflict_retains_draft_and_requires_new_review' (5215146) panicked at crates/keelshell-app/src/tunnels/workspace_reload_tests.rs:45:9:
+assertion failed: fixture.workspace.read(cx).state_reloading
+
+---- workspace::tunnel_rule_tests::review_regressions::reload_regressions::stale_window_configuration_can_reload_from_tunnel_panel stdout ----
+
+thread 'workspace::tunnel_rule_tests::review_regressions::reload_regressions::stale_window_configuration_can_reload_from_tunnel_panel' (5215174) panicked at crates/keelshell-app/src/tunnels/workspace_reload_tests.rs:361:9:
+assertion failed: fixture.workspace.read(cx).state_reloading
+
+
+failures:
+    workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_recovers_conflict_retains_draft_and_requires_new_review
+    workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_rejects_competing_lease_without_leaking_busy
+    workspace::tunnel_rule_tests::review_regressions::reload_regressions::stale_window_configuration_can_reload_from_tunnel_panel
+
+test result: FAILED. 60 passed; 3 failed; 0 ignored; 0 measured; 1301 filtered out; finished in 5.16s
+
+error: test failed, to rerun pass `-p keelshell-app --bin keelshell-app`

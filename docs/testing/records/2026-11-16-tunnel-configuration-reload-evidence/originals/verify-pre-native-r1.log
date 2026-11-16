@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/verify.py", line 128, in <module>
+    main()
+    ~~~~^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/verify.py", line 86, in main
+    assert len(summaries) == 1, header[1]
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError: Running unittests src/lib.rs (work/recovery-batch-integration-20261115/target/debug/build/keelshell-ai/1e3725ca791a77d9/out/keelshell_ai-1e3725ca791a77d9)

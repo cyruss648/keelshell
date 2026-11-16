@@ -1,0 +1,3 @@
+# Test originals may contain CRLF or deliberate trailing blank lines.
+# Keep their exact recorded bytes in Git and omit whitespace-only diff lint.
+originals/** -text -diff

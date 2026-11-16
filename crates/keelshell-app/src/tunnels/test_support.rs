@@ -119,6 +119,15 @@ impl SshFixture {
     }
 
     pub fn mount(&self, cx: &mut TestAppContext) -> (AnyWindowHandle, Entity<TunnelsPanel>) {
+        self.mount_sized(1400., 900., cx)
+    }
+
+    pub(crate) fn mount_sized(
+        &self,
+        width: f32,
+        height: f32,
+        cx: &mut TestAppContext,
+    ) -> (AnyWindowHandle, Entity<TunnelsPanel>) {
         cx.update(|cx| {
             gpui_kit::init(cx);
             crate::i18n::set_language(Language::En, cx);
@@ -126,7 +135,7 @@ impl SshFixture {
                 WindowOptions {
                     window_bounds: Some(WindowBounds::Windowed(Bounds::new(
                         point(px(0.), px(0.)),
-                        size(px(1400.), px(900.)),
+                        size(px(width), px(height)),
                     ))),
                     ..Default::default()
                 },

@@ -1,0 +1,71 @@
+{
+  "observed_at_utc": "2026-11-16T15:34:30.656686+00:00",
+  "conclusion": "APPROVE - frozen parent binary and scoped headless functional review only",
+  "findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "tests": {
+    "passed": 63,
+    "failed": 0,
+    "ignored": 0,
+    "new_passed": 21,
+    "existing_regression_passed": 42,
+    "filtered_out": 1301
+  },
+  "report": {
+    "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-r1.md",
+    "bytes": 17760,
+    "sha256": "e37a8f098dba06cc6f6f08bc5e5bb72add870319409951179ea97378a03283b5"
+  },
+  "artifacts": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-final-integrity-r1.json",
+      "bytes": 5959,
+      "sha256": "4e81ba3e4b43f6905c90b3f3e2744c80bc43372b28627e3b2ebda0dfa1c1f575"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-inputs-r1.json",
+      "bytes": 2201,
+      "sha256": "494005116cc620d4b304666c7497f19d3a44dfa4cac24efe334c599bb51fdfb2"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-inventory-r1.json",
+      "bytes": 7098,
+      "sha256": "f5268bc64b2b29da0531d1010b35ddf4d03acd87ee5c63066a9c5cbd66a6a272"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-list-r1.json",
+      "bytes": 912,
+      "sha256": "f94cc4f1944da3652386c25befa29ee837923674f042d8ce50fb94324619b5f2"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-list-r1.log",
+      "bytes": 145504,
+      "sha256": "b73b69e647aa682d86779eb037c033684d2260a4acba0e7f7f8e9a75f4f18765"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-r1.md",
+      "bytes": 17760,
+      "sha256": "e37a8f098dba06cc6f6f08bc5e5bb72add870319409951179ea97378a03283b5"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-results-r1.json",
+      "bytes": 3337,
+      "sha256": "ff0b4b8ced3fea90c7da587288551eefd29e000bb8faf80ebc4b9234925e3294"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-tunnel-r1.json",
+      "bytes": 932,
+      "sha256": "056cd541bbf57b349ea8f6c04278d0447f32fed0c7819b6d93b6c929a4ada094"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/function-review-tunnel-r1.log",
+      "bytes": 7066,
+      "sha256": "942d0f2120c3391a712ac765fa3c186f228c41f9b89bb088b812ebbc479119e5"
+    }
+  ],
+  "index_excludes_itself": true
+}

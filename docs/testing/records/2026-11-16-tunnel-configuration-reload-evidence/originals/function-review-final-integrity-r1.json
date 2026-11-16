@@ -1,0 +1,103 @@
+{
+  "observed_at_utc": "2026-11-16T15:31:37.516619+00:00",
+  "head": "c81f718ccc3ee5d6a8cce6b7988b1cbcab8ea694",
+  "input_count": 721,
+  "input_mismatches": [],
+  "aggregate_sha256": "442393e019c51a19b8fe49d5040813e44a06b5a77cc3a7eb4c9b162701a979f2",
+  "aggregate_matches_initial_and_expected": true,
+  "freeze_file_sha256_unchanged": true,
+  "binary_manifest_sha256_unchanged": true,
+  "binary_sha256": "1f3ac5387026afaad1d36717faaa3a976e179503562aea04bea2537e5a7cef6e",
+  "binary_bytes": 273326016,
+  "binary_matches_initial_and_expected": true,
+  "review_documents_changed": {},
+  "local_tests": 14,
+  "workspace_tests": 7,
+  "source_new_names_match_binary": true,
+  "source_new_names": [
+    "tunnels::rules::reload_tests::reload_authoritative_identical_snapshot_retires_pending_token",
+    "tunnels::rules::reload_tests::reload_busy_and_suspension_reject_new_requests_and_retire_pending",
+    "tunnels::rules::reload_tests::reload_button_ax_and_feedback_fit_registered_themes_languages_and_sizes",
+    "tunnels::rules::reload_tests::reload_button_emits_one_exact_request_without_snapshot_or_binding",
+    "tunnels::rules::reload_tests::reload_button_tooltip_retranslates_while_hovered",
+    "tunnels::rules::reload_tests::reload_expires_named_start_and_recovery_reviews_without_starting_workers",
+    "tunnels::rules::reload_tests::reload_finish_accepts_busy_exact_token_without_clearing_storage_block",
+    "tunnels::rules::reload_tests::reload_old_painted_epoch_cannot_reload_replacement_configuration",
+    "tunnels::rules::reload_tests::reload_preserves_draft_snapshot_and_expires_metadata_review",
+    "tunnels::rules::reload_tests::reload_refresh_retires_changed_state_or_connection_but_keeps_identical_refresh",
+    "tunnels::rules::reload_tests::reload_refuses_an_inflight_metadata_mutation",
+    "tunnels::rules::reload_tests::reload_rejection_clears_matching_expired_epoch_but_preserves_replacement",
+    "tunnels::rules::reload_tests::reload_retires_stop_review_and_retains_original_live_listener",
+    "tunnels::rules::reload_tests::reload_uncertainty_retires_pending_without_leaving_a_busy_panel",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_failure_keeps_existing_and_new_panels_blocked_then_retries",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_recovers_conflict_retains_draft_and_requires_new_review",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_rejects_competing_lease_without_leaking_busy",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_retains_running_tunnel_and_original_ssh",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_retired_origin_cannot_unblock_replacement",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_unchanged_snapshot_invalidates_sibling_start_review",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::stale_window_configuration_can_reload_from_tunnel_panel"
+  ],
+  "current_git_status": " M Cargo.lock\n M README.en.md\n M README.md\n M crates/keelshell-app/src/tunnels.rs\n M crates/keelshell-app/src/tunnels/rules.rs\n M crates/keelshell-app/src/tunnels/test_support.rs\n M crates/keelshell-app/src/tunnels/workspace_review_tests.rs\n M crates/keelshell-app/src/workspace.rs\n M crates/keelshell-app/src/workspace/tests/startup_restore.rs\n M crates/keelshell-app/src/workspace/window_configuration.rs\n M docs/HANDOFF.md\n M docs/ROADMAP.md\n M docs/design/HALLMARK_NATIVE.md\n M docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md\n?? crates/keelshell-app/src/tunnels/reload.rs\n?? crates/keelshell-app/src/tunnels/reload_tests.rs\n?? crates/keelshell-app/src/tunnels/workspace_reload_tests.rs\n?? crates/keelshell-app/src/workspace/tunnel_reload.rs\n?? docs/adr/0151-tunnel-configuration-reload.md\n?? docs/testing/records/2026-11-16-tunnel-configuration-reload.md\n",
+  "preserved_parent_artifacts": {
+    "app-inventory-r1.log": {
+      "bytes": 2981,
+      "sha256": "0bc3fb2dcc2a3ee6d2d4c8af1a24a3a87d4704d904fb9489f5dee8d7a19095a5"
+    },
+    "app-inventory-r2.log": {
+      "bytes": 147291,
+      "sha256": "525b8a4c654aff017ed026ab6e6a3ab367c08613e09f0c5f316e7b8a0033fb44"
+    },
+    "app-inventory-r3.log": {
+      "bytes": 146169,
+      "sha256": "3e89fd92cea4202eb86b27a18496634e64c82f987894dfa0fccaf80f936fea22"
+    },
+    "panel-reload-r1.log": {
+      "bytes": 10530,
+      "sha256": "69af68d8502319ddf6b02501b6b20f07f9afe6ded4f867b7058f59be75a22462"
+    },
+    "tunnel-integration-r1.log": {
+      "bytes": 10447,
+      "sha256": "b95303044f8d3f298a80554e697f7f396f75b8c01e775ad512e2c693e9376519"
+    },
+    "workspace-reload-r2.log": {
+      "bytes": 2589,
+      "sha256": "5983b5c4571d4a2e68cf4c3fd14ea6e64f5975ea8de044ca9e43cddc9972fd3c"
+    },
+    "inputs-freeze-r1.json": {
+      "bytes": 132777,
+      "sha256": "da99e78fb01d27e0c5a1dba73335bcb02b7e41b68c27429cadf0a20d45fa0925"
+    },
+    "inputs-freeze-r2.json": {
+      "bytes": 132777,
+      "sha256": "217a3e8960fc9a720fb9194cb76837ea75d3abbe1424da9a04dd28ca78436129"
+    },
+    "app-binary-r3.json": {
+      "bytes": 149699,
+      "sha256": "799e7e4bfd5ce9abc80fa250d92054fdf6d07c75a2f880e8b08faef4f0b1da94"
+    },
+    "native-availability-r1.json": {
+      "bytes": 306,
+      "sha256": "4906fe20a8df5bd28cdfd844787b67771421383e7140acf2b637807a069a23f9"
+    },
+    "run_command.py": {
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    }
+  },
+  "reviewer_execution": {
+    "cargo": 0,
+    "fmt": 0,
+    "build": 0,
+    "git_mutation": 0,
+    "target_cleanup": 0,
+    "new_chats": 0,
+    "new_worktrees": 0,
+    "containers": 0,
+    "native_app_launches": 0,
+    "gui_actions": 0,
+    "screenshots": 0,
+    "direct_binary_list_commands": 1,
+    "direct_binary_test_commands": 1
+  },
+  "verified": true
+}

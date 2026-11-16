@@ -48,6 +48,7 @@ mod reconnect_editor;
 mod remote_completion;
 mod routing;
 mod startup_restore;
+mod tunnel_reload;
 mod workflow_audit;
 mod workflow_commands;
 use library::{DestinationPrompt, DestinationTarget, FolderForm, LibraryFilter};
@@ -473,6 +474,7 @@ pub struct Workspace {
     terminal_observers: HashMap<EntityId, Subscription>,
     terminal_focus: HashMap<EntityId, Subscription>,
     tunnel_subscriptions: HashMap<EntityId, Subscription>,
+    tunnel_reload_subscriptions: HashMap<EntityId, Subscription>,
     tunnel_runtime_subscriptions: HashMap<EntityId, Subscription>,
     // Keep runtime owners reachable after tab/archive removal until cleanup.
     tunnel_owners: HashMap<EntityId, Entity<crate::tunnels::TunnelsPanel>>,
@@ -1083,6 +1085,7 @@ impl Workspace {
             terminal_observers: HashMap::new(),
             terminal_focus: HashMap::new(),
             tunnel_subscriptions: HashMap::new(),
+            tunnel_reload_subscriptions: HashMap::new(),
             tunnel_runtime_subscriptions: HashMap::new(),
             tunnel_owners: HashMap::new(),
             tunnel_rule_store_blocked: false,
@@ -1198,6 +1201,8 @@ impl Workspace {
         self.forget_reconnect(terminal.entity_id(), window, cx);
         self.remote_sessions.remove(&terminal.entity_id());
         self.tunnel_subscriptions.remove(&terminal.entity_id());
+        self.tunnel_reload_subscriptions
+            .remove(&terminal.entity_id());
         self.tunnel_runtime_subscriptions
             .remove(&terminal.entity_id());
         self.knowledge_source_ids.remove(&terminal.entity_id());
@@ -3438,6 +3443,13 @@ impl Workspace {
                         view.handle_tunnel_runtime_event(panel, event, window, cx)
                     },
                 );
+                let reload_subscription = cx.subscribe_in(
+                    &panel,
+                    window,
+                    |view, panel, event: &crate::tunnels::TunnelRuleReloadEvent, window, cx| {
+                        view.handle_tunnel_rule_reload(panel, event, window, cx)
+                    },
+                );
                 panel.update(cx, |panel, cx| {
                     panel.set_rule_configuration_busy(self.saving || self.state_reloading, cx);
                     if self.tunnel_rule_store_blocked {
@@ -3446,6 +3458,8 @@ impl Workspace {
                 });
                 self.tunnel_owners.insert(panel.entity_id(), panel.clone());
                 self.tunnel_subscriptions.insert(id, subscription);
+                self.tunnel_reload_subscriptions
+                    .insert(id, reload_subscription);
                 self.tunnel_runtime_subscriptions
                     .insert(id, runtime_subscription);
                 self.panels.entry(id).or_default().tunnels = Some(panel);

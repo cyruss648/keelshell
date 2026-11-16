@@ -1,0 +1,2336 @@
+{
+  "schema_version": 1,
+  "checked_at_utc": "2026-11-16T15:02:12Z",
+  "status": "failed",
+  "rust": [
+    {
+      "owner": "workspace",
+      "alias": "gpui-kit",
+      "package": "gpui-kit",
+      "requirement": "0.10",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/gpui-kit",
+      "latest_stable_versions": [
+        "0.10.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "rust-embed",
+      "package": "rust-embed",
+      "requirement": "8.14",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/rust-embed",
+      "latest_stable_versions": [
+        "8.14.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "8.14",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "image",
+      "package": "image",
+      "requirement": "0.25",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/image",
+      "latest_stable_versions": [
+        "0.25.10"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.25",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "serde",
+      "package": "serde",
+      "requirement": "1.0",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/serde",
+      "latest_stable_versions": [
+        "1.0.229"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "serde_json",
+      "package": "serde_json",
+      "requirement": "1.0",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/serde_json",
+      "latest_stable_versions": [
+        "1.0.154"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "encoding_rs",
+      "package": "encoding_rs",
+      "requirement": "0.8",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/encoding_rs",
+      "latest_stable_versions": [
+        "0.8.44"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.8",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "thiserror",
+      "package": "thiserror",
+      "requirement": "2.0",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/thiserror",
+      "latest_stable_versions": [
+        "2.0.21"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "argon2",
+      "package": "argon2",
+      "requirement": "0.6",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/argon2",
+      "latest_stable_versions": [
+        "0.6.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.6",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "base64",
+      "package": "base64",
+      "requirement": "0.23",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/base64",
+      "latest_stable_versions": [
+        "0.23.1"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.23",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "chacha20poly1305",
+      "package": "chacha20poly1305",
+      "requirement": "0.11",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/chacha20poly1305",
+      "latest_stable_versions": [
+        "0.11.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "rand",
+      "package": "rand",
+      "requirement": "0.10",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/rand",
+      "latest_stable_versions": [
+        "0.10.4"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "uuid",
+      "package": "uuid",
+      "requirement": "1.29",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/uuid",
+      "latest_stable_versions": [
+        "1.29.2"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.29",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "directories",
+      "package": "directories",
+      "requirement": "6.0",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/directories",
+      "latest_stable_versions": [
+        "6.0.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "6.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "tempfile",
+      "package": "tempfile",
+      "requirement": "3.27",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/tempfile",
+      "latest_stable_versions": [
+        "3.27.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.27",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "chrono",
+      "package": "chrono",
+      "requirement": "0.4",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/chrono",
+      "latest_stable_versions": [
+        "0.4.45"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.4",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "alacritty_terminal",
+      "package": "alacritty_terminal",
+      "requirement": "0.26",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/alacritty_terminal",
+      "latest_stable_versions": [
+        "0.26.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.26",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "tokio",
+      "package": "tokio",
+      "requirement": "1.54",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/tokio",
+      "latest_stable_versions": [
+        "1.54.1"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.54",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "reqwest",
+      "package": "reqwest",
+      "requirement": "0.13",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/reqwest",
+      "latest_stable_versions": [
+        "0.13.5"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.13",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "russh",
+      "package": "russh",
+      "requirement": "0.65",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/russh",
+      "latest_stable_versions": [
+        "0.65.2"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.65",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "russh-sftp",
+      "package": "russh-sftp",
+      "requirement": "3.0",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/russh-sftp",
+      "latest_stable_versions": [
+        "3.0.1"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "url",
+      "package": "url",
+      "requirement": "2.5",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/url",
+      "latest_stable_versions": [
+        "2.5.8"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.5",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "zeroize",
+      "package": "zeroize",
+      "requirement": "1.9",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/zeroize",
+      "latest_stable_versions": [
+        "1.9.1"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.9",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "sha2",
+      "package": "sha2",
+      "requirement": "0.11",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/sha2",
+      "latest_stable_versions": [
+        "0.11.1"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "flate2",
+      "package": "flate2",
+      "requirement": "1.1",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/flate2",
+      "latest_stable_versions": [
+        "1.1.11"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.1",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "tar",
+      "package": "tar",
+      "requirement": "0.4",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/tar",
+      "latest_stable_versions": [
+        "0.4.46"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.4",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "zip",
+      "package": "zip",
+      "requirement": "9.6",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/zip",
+      "latest_stable_versions": [
+        "9.6.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "9.6",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "rmcp",
+      "package": "rmcp",
+      "requirement": "3.10",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/rmcp",
+      "latest_stable_versions": [
+        "3.10.0"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "workspace",
+      "alias": "tokio-util",
+      "package": "tokio-util",
+      "requirement": "0.7",
+      "kind": "workspace.dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/tokio-util",
+      "latest_stable_versions": [
+        "0.7.20"
+      ],
+      "locked_versions": [],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.7",
+      "requirement_accepts_latest": true,
+      "lock_scope": "declaration_only"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "reqwest",
+      "package": "reqwest",
+      "requirement": "0.13",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/reqwest",
+      "latest_stable_versions": [
+        "0.13.5"
+      ],
+      "locked_versions": [
+        "0.13.5"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.13",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "serde",
+      "package": "serde",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde",
+      "latest_stable_versions": [
+        "1.0.229"
+      ],
+      "locked_versions": [
+        "1.0.229"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "serde_json",
+      "package": "serde_json",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde_json",
+      "latest_stable_versions": [
+        "1.0.154"
+      ],
+      "locked_versions": [
+        "1.0.154"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "thiserror",
+      "package": "thiserror",
+      "requirement": "2.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/thiserror",
+      "latest_stable_versions": [
+        "2.0.21"
+      ],
+      "locked_versions": [
+        "2.0.21"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "url",
+      "package": "url",
+      "requirement": "2.5",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/url",
+      "latest_stable_versions": [
+        "2.5.8"
+      ],
+      "locked_versions": [
+        "2.5.8"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.5",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "zeroize",
+      "package": "zeroize",
+      "requirement": "1.9",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/zeroize",
+      "latest_stable_versions": [
+        "1.9.1"
+      ],
+      "locked_versions": [
+        "1.9.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.9",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "uuid",
+      "package": "uuid",
+      "requirement": "1.29",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/uuid",
+      "latest_stable_versions": [
+        "1.29.2"
+      ],
+      "locked_versions": [
+        "1.29.2"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.29",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "tokio",
+      "package": "tokio",
+      "requirement": "1.54",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio",
+      "latest_stable_versions": [
+        "1.54.1"
+      ],
+      "locked_versions": [
+        "1.54.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.54",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "sha2",
+      "package": "sha2",
+      "requirement": "0.11",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/sha2",
+      "latest_stable_versions": [
+        "0.11.1"
+      ],
+      "locked_versions": [
+        "0.11.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "base64",
+      "package": "base64",
+      "requirement": "0.23",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/base64",
+      "latest_stable_versions": [
+        "0.23.1"
+      ],
+      "locked_versions": [
+        "0.23.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.23",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "tempfile",
+      "package": "tempfile",
+      "requirement": "3.27",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tempfile",
+      "latest_stable_versions": [
+        "3.27.0"
+      ],
+      "locked_versions": [
+        "3.27.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.27",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "toml",
+      "package": "toml",
+      "requirement": "1.2",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/toml",
+      "latest_stable_versions": [
+        "1.2.1+spec-1.1.0"
+      ],
+      "locked_versions": [
+        "1.2.1+spec-1.1.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.2",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "process-wrap",
+      "package": "process-wrap",
+      "requirement": "10.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/process-wrap",
+      "latest_stable_versions": [
+        "10.0.1"
+      ],
+      "locked_versions": [
+        "10.0.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "10.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "nix",
+      "package": "nix",
+      "requirement": "0.32",
+      "kind": "dependencies",
+      "target_specific": true,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/nix",
+      "latest_stable_versions": [
+        "0.32.0"
+      ],
+      "locked_versions": [
+        "0.32.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.32",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-ai",
+      "alias": "win32job",
+      "package": "win32job",
+      "requirement": "2.1",
+      "kind": "dependencies",
+      "target_specific": true,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/win32job",
+      "latest_stable_versions": [
+        "2.1.0"
+      ],
+      "locked_versions": [
+        "2.1.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.1",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "base64",
+      "package": "base64",
+      "requirement": "0.23",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/base64",
+      "latest_stable_versions": [
+        "0.23.1"
+      ],
+      "locked_versions": [
+        "0.23.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.23",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "gpui-kit",
+      "package": "gpui-kit",
+      "requirement": "0.10",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/gpui-kit",
+      "latest_stable_versions": [
+        "0.10.0"
+      ],
+      "locked_versions": [
+        "0.10.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "rust-embed",
+      "package": "rust-embed",
+      "requirement": "8.14",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/rust-embed",
+      "latest_stable_versions": [
+        "8.14.0"
+      ],
+      "locked_versions": [
+        "8.14.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "8.14",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "alacritty_terminal",
+      "package": "alacritty_terminal",
+      "requirement": "0.26",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/alacritty_terminal",
+      "latest_stable_versions": [
+        "0.26.0"
+      ],
+      "locked_versions": [
+        "0.26.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.26",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "zeroize",
+      "package": "zeroize",
+      "requirement": "1.9",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/zeroize",
+      "latest_stable_versions": [
+        "1.9.1"
+      ],
+      "locked_versions": [
+        "1.9.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.9",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "serde",
+      "package": "serde",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde",
+      "latest_stable_versions": [
+        "1.0.229"
+      ],
+      "locked_versions": [
+        "1.0.229"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "serde_json",
+      "package": "serde_json",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde_json",
+      "latest_stable_versions": [
+        "1.0.154"
+      ],
+      "locked_versions": [
+        "1.0.154"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "reqwest",
+      "package": "reqwest",
+      "requirement": "0.13",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/reqwest",
+      "latest_stable_versions": [
+        "0.13.5"
+      ],
+      "locked_versions": [
+        "0.13.5"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.13",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "sha2",
+      "package": "sha2",
+      "requirement": "0.11",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/sha2",
+      "latest_stable_versions": [
+        "0.11.1"
+      ],
+      "locked_versions": [
+        "0.11.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "flate2",
+      "package": "flate2",
+      "requirement": "1.1",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/flate2",
+      "latest_stable_versions": [
+        "1.1.11"
+      ],
+      "locked_versions": [
+        "1.1.11"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.1",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "tar",
+      "package": "tar",
+      "requirement": "0.4",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tar",
+      "latest_stable_versions": [
+        "0.4.46"
+      ],
+      "locked_versions": [
+        "0.4.46"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.4",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "tempfile",
+      "package": "tempfile",
+      "requirement": "3.27",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tempfile",
+      "latest_stable_versions": [
+        "3.27.0"
+      ],
+      "locked_versions": [
+        "3.27.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.27",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "thiserror",
+      "package": "thiserror",
+      "requirement": "2.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/thiserror",
+      "latest_stable_versions": [
+        "2.0.21"
+      ],
+      "locked_versions": [
+        "2.0.21"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "tokio",
+      "package": "tokio",
+      "requirement": "1.54",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio",
+      "latest_stable_versions": [
+        "1.54.1"
+      ],
+      "locked_versions": [
+        "1.54.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.54",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "uuid",
+      "package": "uuid",
+      "requirement": "1.29",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/uuid",
+      "latest_stable_versions": [
+        "1.29.2"
+      ],
+      "locked_versions": [
+        "1.29.2"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.29",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "zip",
+      "package": "zip",
+      "requirement": "9.6",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/zip",
+      "latest_stable_versions": [
+        "9.6.0"
+      ],
+      "locked_versions": [
+        "9.6.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "9.6",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "chrono",
+      "package": "chrono",
+      "requirement": "0.4",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/chrono",
+      "latest_stable_versions": [
+        "0.4.45"
+      ],
+      "locked_versions": [
+        "0.4.45"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.4",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "winresource",
+      "package": "winresource",
+      "requirement": "0.1",
+      "kind": "build-dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/winresource",
+      "latest_stable_versions": [
+        "0.1.34"
+      ],
+      "locked_versions": [
+        "0.1.34"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.1",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "tokio-util",
+      "package": "tokio-util",
+      "requirement": "0.7",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio-util",
+      "latest_stable_versions": [
+        "0.7.20"
+      ],
+      "locked_versions": [
+        "0.7.20"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.7",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "gpui-kit",
+      "package": "gpui-kit",
+      "requirement": "0.10",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/gpui-kit",
+      "latest_stable_versions": [
+        "0.10.0"
+      ],
+      "locked_versions": [
+        "0.10.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "russh",
+      "package": "russh",
+      "requirement": "0.65",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/russh",
+      "latest_stable_versions": [
+        "0.65.2"
+      ],
+      "locked_versions": [
+        "0.65.1"
+      ],
+      "errors": [
+        "direct_lock_not_latest"
+      ],
+      "status": "failed",
+      "latest_requirement": "0.65",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "russh-sftp",
+      "package": "russh-sftp",
+      "requirement": "3.0",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/russh-sftp",
+      "latest_stable_versions": [
+        "3.0.1"
+      ],
+      "locked_versions": [
+        "3.0.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-app",
+      "alias": "image",
+      "package": "image",
+      "requirement": "0.25",
+      "kind": "dependencies",
+      "target_specific": true,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/image",
+      "latest_stable_versions": [
+        "0.25.10"
+      ],
+      "locked_versions": [
+        "0.25.10"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.25",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "argon2",
+      "package": "argon2",
+      "requirement": "0.6",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/argon2",
+      "latest_stable_versions": [
+        "0.6.0"
+      ],
+      "locked_versions": [
+        "0.6.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.6",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "base64",
+      "package": "base64",
+      "requirement": "0.23",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/base64",
+      "latest_stable_versions": [
+        "0.23.1"
+      ],
+      "locked_versions": [
+        "0.23.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.23",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "chacha20poly1305",
+      "package": "chacha20poly1305",
+      "requirement": "0.11",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/chacha20poly1305",
+      "latest_stable_versions": [
+        "0.11.0"
+      ],
+      "locked_versions": [
+        "0.11.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "rand",
+      "package": "rand",
+      "requirement": "0.10",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/rand",
+      "latest_stable_versions": [
+        "0.10.4"
+      ],
+      "locked_versions": [
+        "0.10.4"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "serde",
+      "package": "serde",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde",
+      "latest_stable_versions": [
+        "1.0.229"
+      ],
+      "locked_versions": [
+        "1.0.229"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "serde_json",
+      "package": "serde_json",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde_json",
+      "latest_stable_versions": [
+        "1.0.154"
+      ],
+      "locked_versions": [
+        "1.0.154"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "uuid",
+      "package": "uuid",
+      "requirement": "1.29",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/uuid",
+      "latest_stable_versions": [
+        "1.29.2"
+      ],
+      "locked_versions": [
+        "1.29.2"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.29",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "directories",
+      "package": "directories",
+      "requirement": "6.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/directories",
+      "latest_stable_versions": [
+        "6.0.0"
+      ],
+      "locked_versions": [
+        "6.0.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "6.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "encoding_rs",
+      "package": "encoding_rs",
+      "requirement": "0.8",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/encoding_rs",
+      "latest_stable_versions": [
+        "0.8.44"
+      ],
+      "locked_versions": [
+        "0.8.44"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.8",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "thiserror",
+      "package": "thiserror",
+      "requirement": "2.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/thiserror",
+      "latest_stable_versions": [
+        "2.0.21"
+      ],
+      "locked_versions": [
+        "2.0.21"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "tempfile",
+      "package": "tempfile",
+      "requirement": "3.27",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tempfile",
+      "latest_stable_versions": [
+        "3.27.0"
+      ],
+      "locked_versions": [
+        "3.27.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.27",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "url",
+      "package": "url",
+      "requirement": "2.5",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/url",
+      "latest_stable_versions": [
+        "2.5.8"
+      ],
+      "locked_versions": [
+        "2.5.8"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.5",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "zeroize",
+      "package": "zeroize",
+      "requirement": "1.9",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/zeroize",
+      "latest_stable_versions": [
+        "1.9.1"
+      ],
+      "locked_versions": [
+        "1.9.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.9",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "sha2",
+      "package": "sha2",
+      "requirement": "0.11",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/sha2",
+      "latest_stable_versions": [
+        "0.11.1"
+      ],
+      "locked_versions": [
+        "0.11.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "flate2",
+      "package": "flate2",
+      "requirement": "1.1",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/flate2",
+      "latest_stable_versions": [
+        "1.1.11"
+      ],
+      "locked_versions": [
+        "1.1.11"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.1",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "tar",
+      "package": "tar",
+      "requirement": "0.4",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tar",
+      "latest_stable_versions": [
+        "0.4.46"
+      ],
+      "locked_versions": [
+        "0.4.46"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.4",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-core",
+      "alias": "zip",
+      "package": "zip",
+      "requirement": "9.6",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/zip",
+      "latest_stable_versions": [
+        "9.6.0"
+      ],
+      "locked_versions": [
+        "9.6.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "9.6",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "rmcp",
+      "package": "rmcp",
+      "requirement": "3.10",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/rmcp",
+      "latest_stable_versions": [
+        "3.10.0"
+      ],
+      "locked_versions": [
+        "3.10.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "serde",
+      "package": "serde",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde",
+      "latest_stable_versions": [
+        "1.0.229"
+      ],
+      "locked_versions": [
+        "1.0.229"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "serde_json",
+      "package": "serde_json",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde_json",
+      "latest_stable_versions": [
+        "1.0.154"
+      ],
+      "locked_versions": [
+        "1.0.154"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "thiserror",
+      "package": "thiserror",
+      "requirement": "2.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/thiserror",
+      "latest_stable_versions": [
+        "2.0.21"
+      ],
+      "locked_versions": [
+        "2.0.21"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "tokio",
+      "package": "tokio",
+      "requirement": "1.54",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio",
+      "latest_stable_versions": [
+        "1.54.1"
+      ],
+      "locked_versions": [
+        "1.54.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.54",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "tokio-util",
+      "package": "tokio-util",
+      "requirement": "0.7",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio-util",
+      "latest_stable_versions": [
+        "0.7.20"
+      ],
+      "locked_versions": [
+        "0.7.20"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.7",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "uuid",
+      "package": "uuid",
+      "requirement": "1.29",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/uuid",
+      "latest_stable_versions": [
+        "1.29.2"
+      ],
+      "locked_versions": [
+        "1.29.2"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.29",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "sha2",
+      "package": "sha2",
+      "requirement": "0.11",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/sha2",
+      "latest_stable_versions": [
+        "0.11.1"
+      ],
+      "locked_versions": [
+        "0.11.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "hmac",
+      "package": "hmac",
+      "requirement": "0.13",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/hmac",
+      "latest_stable_versions": [
+        "0.13.0"
+      ],
+      "locked_versions": [
+        "0.13.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.13",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "rand",
+      "package": "rand",
+      "requirement": "0.10",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/rand",
+      "latest_stable_versions": [
+        "0.10.4"
+      ],
+      "locked_versions": [
+        "0.10.4"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "zeroize",
+      "package": "zeroize",
+      "requirement": "1.9",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/zeroize",
+      "latest_stable_versions": [
+        "1.9.1"
+      ],
+      "locked_versions": [
+        "1.9.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.9",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "chacha20poly1305",
+      "package": "chacha20poly1305",
+      "requirement": "0.11",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/chacha20poly1305",
+      "latest_stable_versions": [
+        "0.11.0"
+      ],
+      "locked_versions": [
+        "0.11.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-mcp",
+      "alias": "tokio",
+      "package": "tokio",
+      "requirement": "1.54",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio",
+      "latest_stable_versions": [
+        "1.54.1"
+      ],
+      "locked_versions": [
+        "1.54.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.54",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-platform",
+      "alias": "tempfile",
+      "package": "tempfile",
+      "requirement": "3.27",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tempfile",
+      "latest_stable_versions": [
+        "3.27.0"
+      ],
+      "locked_versions": [
+        "3.27.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.27",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-platform",
+      "alias": "windows-sys",
+      "package": "windows-sys",
+      "requirement": "0.61",
+      "kind": "dependencies",
+      "target_specific": true,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/windows-sys",
+      "latest_stable_versions": [
+        "0.61.2"
+      ],
+      "locked_versions": [
+        "0.61.2"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.61",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "thiserror",
+      "package": "thiserror",
+      "requirement": "2.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/thiserror",
+      "latest_stable_versions": [
+        "2.0.21"
+      ],
+      "locked_versions": [
+        "2.0.21"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "2.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "tokio",
+      "package": "tokio",
+      "requirement": "1.54",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio",
+      "latest_stable_versions": [
+        "1.54.1"
+      ],
+      "locked_versions": [
+        "1.54.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.54",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "russh",
+      "package": "russh",
+      "requirement": "0.65",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/russh",
+      "latest_stable_versions": [
+        "0.65.2"
+      ],
+      "locked_versions": [
+        "0.65.1"
+      ],
+      "errors": [
+        "direct_lock_not_latest"
+      ],
+      "status": "failed",
+      "latest_requirement": "0.65",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "russh-sftp",
+      "package": "russh-sftp",
+      "requirement": "3.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/russh-sftp",
+      "latest_stable_versions": [
+        "3.0.1"
+      ],
+      "locked_versions": [
+        "3.0.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "zeroize",
+      "package": "zeroize",
+      "requirement": "1.9",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/zeroize",
+      "latest_stable_versions": [
+        "1.9.1"
+      ],
+      "locked_versions": [
+        "1.9.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.9",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "uuid",
+      "package": "uuid",
+      "requirement": "1.29",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/uuid",
+      "latest_stable_versions": [
+        "1.29.2"
+      ],
+      "locked_versions": [
+        "1.29.2"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.29",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "sha2",
+      "package": "sha2",
+      "requirement": "0.11",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/sha2",
+      "latest_stable_versions": [
+        "0.11.1"
+      ],
+      "locked_versions": [
+        "0.11.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.11",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "base64",
+      "package": "base64",
+      "requirement": "0.23",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/base64",
+      "latest_stable_versions": [
+        "0.23.1"
+      ],
+      "locked_versions": [
+        "0.23.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.23",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "serde",
+      "package": "serde",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde",
+      "latest_stable_versions": [
+        "1.0.229"
+      ],
+      "locked_versions": [
+        "1.0.229"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "serde_json",
+      "package": "serde_json",
+      "requirement": "1.0",
+      "kind": "dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/serde_json",
+      "latest_stable_versions": [
+        "1.0.154"
+      ],
+      "locked_versions": [
+        "1.0.154"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.0",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "tempfile",
+      "package": "tempfile",
+      "requirement": "3.27",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tempfile",
+      "latest_stable_versions": [
+        "3.27.0"
+      ],
+      "locked_versions": [
+        "3.27.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "3.27",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "rand",
+      "package": "rand",
+      "requirement": "0.10",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/rand",
+      "latest_stable_versions": [
+        "0.10.4"
+      ],
+      "locked_versions": [
+        "0.10.4"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.10",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "tokio",
+      "package": "tokio",
+      "requirement": "1.54",
+      "kind": "dev-dependencies",
+      "target_specific": false,
+      "inherited": true,
+      "url": "https://crates.io/api/v1/crates/tokio",
+      "latest_stable_versions": [
+        "1.54.1"
+      ],
+      "locked_versions": [
+        "1.54.1"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.54",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "rustix",
+      "package": "rustix",
+      "requirement": "1.1",
+      "kind": "dependencies",
+      "target_specific": true,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/rustix",
+      "latest_stable_versions": [
+        "1.1.6"
+      ],
+      "locked_versions": [
+        "1.1.6"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "1.1",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    },
+    {
+      "owner": "keelshell-session",
+      "alias": "calcifer-macos-acl",
+      "package": "calcifer-macos-acl",
+      "requirement": "0.1",
+      "kind": "dependencies",
+      "target_specific": true,
+      "inherited": false,
+      "url": "https://crates.io/api/v1/crates/calcifer-macos-acl",
+      "latest_stable_versions": [
+        "0.1.0"
+      ],
+      "locked_versions": [
+        "0.1.0"
+      ],
+      "errors": [],
+      "status": "passed",
+      "latest_requirement": "0.1",
+      "requirement_accepts_latest": true,
+      "lock_scope": "direct"
+    }
+  ],
+  "errors": [],
+  "counts": {
+    "registry_packages": 37,
+    "requirements": 113,
+    "local_packages": 6,
+    "workspace_members": 6
+  },
+  "completed_at_utc": "2026-11-16T15:02:28Z"
+}

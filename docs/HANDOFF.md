@@ -5,6 +5,19 @@
 旧计数不覆盖当前授权。旧入口可从 `2f29744:docs/HANDOFF.md` 的 Git blob 读取；
 更早原文见[交接历史](HANDOFF_HISTORY_2026-11-16.md)与[路线历史](ROADMAP_HISTORY_2026-11-16.md)。
 
+当前新功能批为隧道面板内显式配置重新加载，按钮／原请求身份、后台读取和冲突
+恢复已完成。基线 `c81f718`，721 输入 r2 冻结；21 新例、独立隧道 63 项通过，
+源码与功能两位新非作者均限定 APPROVE、P0–P3 全 0，三个自有 agent 均已关闭。
+集中 `full-gate-r1` 已 `0/reaped/834.958s`：普通 Rust `3246/0/48 ignored`、
+app `1362/0/2 ignored`、rustdoc 14，Python 主 discovery 293/2 skipped、
+archive helper 另列 30；1364 app 库存与逐名执行相等。
+官方 russh `0.65.2` 已更新、113 项复查通过，manifest 保留 `0.65`，
+session library `288/0/4 ignored`、真实 OpenSSH 17/17；Mac 仍锁屏、GUI 0。
+按[本批记录](testing/records/2026-11-16-tunnel-configuration-reload.md)接续，
+正常 release build `0/reaped/183.646s`，提交前包结构／arm64／minos 15.0 检查通过，
+未启动或安装；准备普通提交推送，随后绑定精确提交与正常包。不要重复本轮全量测试
+或封存前批 CI。唯一槽仍为下文 target，不切换归属。
+
 ## 不变的实现与交付约束
 
 - 真实原生 GPUI Kit，覆盖 macOS、Windows、Linux；只管理远程 SSH。

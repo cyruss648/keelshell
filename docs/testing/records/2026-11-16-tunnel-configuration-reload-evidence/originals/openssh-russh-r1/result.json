@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "started_utc": "2026-11-16T15:10:29+00:00",
+  "platform": "Darwin",
+  "timeout_seconds": 300.0,
+  "outcome": "passed",
+  "steps": [
+    {
+      "name": "openssh-version",
+      "returncode": 0
+    },
+    {
+      "name": "generate-host-key",
+      "returncode": 0
+    },
+    {
+      "name": "generate-client-key",
+      "returncode": 0
+    },
+    {
+      "name": "validate-sshd-config",
+      "returncode": 0
+    },
+    {
+      "name": "tests",
+      "returncode": 0
+    }
+  ],
+  "processes": [
+    {
+      "name": "openssh-version",
+      "pid": 80010
+    },
+    {
+      "name": "generate-host-key",
+      "pid": 80014
+    },
+    {
+      "name": "generate-client-key",
+      "pid": 80017
+    },
+    {
+      "name": "validate-sshd-config",
+      "pid": 80020
+    },
+    {
+      "name": "sshd",
+      "pid": 80023
+    },
+    {
+      "name": "tests",
+      "pid": 80029
+    }
+  ],
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "keelshell-session",
+    "--test",
+    "openssh_interop",
+    "--locked",
+    "--",
+    "--ignored",
+    "--test-threads=1"
+  ],
+  "cleanup": {
+    "observed_processes_stopped": true,
+    "ancestry_unverified": [],
+    "owned_processes_stopped": true,
+    "ownership_boundary": "Cumulative ancestry observations with kernel birth identity checks; an unexpected daemon exit cannot certify descendants that detached entirely between observations",
+    "tracked_process_identities": 88,
+    "temporary_directory_removed": true
+  },
+  "boundary": "Disposable localhost OpenSSH transport interoperability; not production or target-native desktop acceptance",
+  "temporary_directory": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/.openssh-private/run-67fukwsm",
+  "sshd": "/usr/sbin/sshd",
+  "listen": "127.0.0.1:64312",
+  "passed_tests": 17,
+  "finished_utc": "2026-11-16T15:10:41+00:00",
+  "elapsed_seconds": 11.777,
+  "logs": {
+    "generate-client-key.log": 0,
+    "generate-host-key.log": 0,
+    "openssh-version.log": 31,
+    "sshd.log": 1743,
+    "tests.log": 1951,
+    "validate-sshd-config.log": 0
+  }
+}

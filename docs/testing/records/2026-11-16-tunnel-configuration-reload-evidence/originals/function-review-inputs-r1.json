@@ -1,0 +1,33 @@
+{
+  "observed_at_utc": "2026-11-16T15:26:46.468117+00:00",
+  "base": "c81f718ccc3ee5d6a8cce6b7988b1cbcab8ea694",
+  "head": "c81f718ccc3ee5d6a8cce6b7988b1cbcab8ea694",
+  "freeze_file": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/tunnel-configuration-reload-20261116/inputs-freeze-r2.json",
+  "freeze_sha256": "217a3e8960fc9a720fb9194cb76837ea75d3abbe1424da9a04dd28ca78436129",
+  "count": 721,
+  "unique_paths": 721,
+  "input_mismatches": [],
+  "aggregate_encoding": "UTF-8 concatenated path + NUL + lowercase sha256 + newline in listed order",
+  "aggregate_sha256": "442393e019c51a19b8fe49d5040813e44a06b5a77cc3a7eb4c9b162701a979f2",
+  "expected_aggregate_sha256": "442393e019c51a19b8fe49d5040813e44a06b5a77cc3a7eb4c9b162701a979f2",
+  "unlisted_inputs": [],
+  "extra_inputs": [],
+  "binary": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/build/keelshell-app/e9828e40142b11cd/out/keelshell_app-e9828e40142b11cd",
+  "binary_bytes": 273326016,
+  "binary_sha256": "1f3ac5387026afaad1d36717faaa3a976e179503562aea04bea2537e5a7cef6e",
+  "expected_binary_sha256": "1f3ac5387026afaad1d36717faaa3a976e179503562aea04bea2537e5a7cef6e",
+  "binary_stat_unchanged_during_hash": true,
+  "binary_manifest_sha256": "799e7e4bfd5ce9abc80fa250d92054fdf6d07c75a2f880e8b08faef4f0b1da94",
+  "parent_inventory_count": 1364,
+  "parent_inventory_unique_count": 1364,
+  "parent_inventory_exact_order_equal": true,
+  "review_documents_sha256": {
+    "AGENTS.md": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb",
+    "docs/HANDOFF.md": "4ceafcc5bf7597bf80a1d714255ed9c2820d6f855de3e7e77bbb04640224555b",
+    "docs/adr/0151-tunnel-configuration-reload.md": "f9789ccda294ec4e42d8752c567e99905fff679cd14188eebd62aae83bf3e2b3",
+    "docs/testing/SHARED_TARGET.md": "49762c249b1d2fc13981f65d3b8f8602954ba9eecde537156390c009fc8a6955",
+    "docs/product/NAMED_TUNNEL_RULE_MANAGEMENT.md": "7447493f1c7a1fac90ffe224a7614f72dbd8d6126d9400954a5ebb5c4244bd76",
+    "work/tunnel-configuration-reload-20261116/run_command.py": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+  },
+  "verified": true
+}

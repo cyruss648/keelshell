@@ -1,0 +1,65 @@
+{
+  "expected_count": 63,
+  "announced_counts": [
+    "63"
+  ],
+  "result_count": 63,
+  "unique_result_count": 63,
+  "passed": 63,
+  "failed": 0,
+  "ignored": 0,
+  "measured": 0,
+  "filtered_out": 1301,
+  "missing": [],
+  "extra": [],
+  "duplicates": [],
+  "new_count": 21,
+  "new_passed": 21,
+  "new_results": {
+    "tunnels::rules::reload_tests::reload_authoritative_identical_snapshot_retires_pending_token": "ok",
+    "tunnels::rules::reload_tests::reload_busy_and_suspension_reject_new_requests_and_retire_pending": "ok",
+    "tunnels::rules::reload_tests::reload_button_ax_and_feedback_fit_registered_themes_languages_and_sizes": "ok",
+    "tunnels::rules::reload_tests::reload_button_emits_one_exact_request_without_snapshot_or_binding": "ok",
+    "tunnels::rules::reload_tests::reload_button_tooltip_retranslates_while_hovered": "ok",
+    "tunnels::rules::reload_tests::reload_expires_named_start_and_recovery_reviews_without_starting_workers": "ok",
+    "tunnels::rules::reload_tests::reload_finish_accepts_busy_exact_token_without_clearing_storage_block": "ok",
+    "tunnels::rules::reload_tests::reload_old_painted_epoch_cannot_reload_replacement_configuration": "ok",
+    "tunnels::rules::reload_tests::reload_preserves_draft_snapshot_and_expires_metadata_review": "ok",
+    "tunnels::rules::reload_tests::reload_refresh_retires_changed_state_or_connection_but_keeps_identical_refresh": "ok",
+    "tunnels::rules::reload_tests::reload_refuses_an_inflight_metadata_mutation": "ok",
+    "tunnels::rules::reload_tests::reload_rejection_clears_matching_expired_epoch_but_preserves_replacement": "ok",
+    "tunnels::rules::reload_tests::reload_retires_stop_review_and_retains_original_live_listener": "ok",
+    "tunnels::rules::reload_tests::reload_uncertainty_retires_pending_without_leaving_a_busy_panel": "ok",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_failure_keeps_existing_and_new_panels_blocked_then_retries": "ok",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_recovers_conflict_retains_draft_and_requires_new_review": "ok",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_rejects_competing_lease_without_leaking_busy": "ok",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_retains_running_tunnel_and_original_ssh": "ok",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_retired_origin_cannot_unblock_replacement": "ok",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::panel_reload_unchanged_snapshot_invalidates_sibling_start_review": "ok",
+    "workspace::tunnel_rule_tests::review_regressions::reload_regressions::stale_window_configuration_can_reload_from_tunnel_panel": "ok"
+  },
+  "existing_regression_count": 42,
+  "existing_regression_passed": 42,
+  "summary": [
+    [
+      "ok",
+      "63",
+      "0",
+      "0",
+      "0",
+      "1301",
+      "5.11"
+    ]
+  ],
+  "receipt_terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "outer_seconds": 5.192736375000095,
+  "log_sha256": "942d0f2120c3391a712ac765fa3c186f228c41f9b89bb088b812ebbc479119e5",
+  "verified": true
+}

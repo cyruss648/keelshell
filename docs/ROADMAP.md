@@ -86,6 +86,14 @@
 
 ## 接续顺序
 
+0. 当前功能批：已实现隧道面板内配置重新加载，覆盖冲突／失败重试、草稿与活动
+   owner 保留、跨面板 busy 和迟到结果边界；russh 锁版本更新至 `0.65.2`。
+   21 新例、独立 63 项及两位非作者限定批准；最终完整门禁 `0/reaped/834.958s`，
+   普通 Rust `3246/0/48 ignored`、app `1362/0/2 ignored`、rustdoc 14。
+   正常 build 和本机包结构通过，普通 push／精确提交包／新 CI 按
+   [本批记录](testing/records/2026-11-16-tunnel-configuration-reload.md)接续；
+   原生桌面仍待验，前批成功不移签。
+
 1. `ee3ad73` 的 `43880245383` 三平台完整 gate、Windows 293 项 Python／七类真实 tree／Job barrier，
    以及 macOS／Ubuntu OpenSSH 均已收齐终态，证据窄复核批准、副本清理完成；
    后续继续下列产品／桌面／发行验收。

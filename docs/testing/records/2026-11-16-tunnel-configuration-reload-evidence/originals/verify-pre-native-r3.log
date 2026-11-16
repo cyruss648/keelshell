@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/verify.py", line 150, in <module>
+    main()
+    ~~~~^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/verify.py", line 122, in main
+    assert re.findall(r"Ran (\d+) tests? in", full) == ["293"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
