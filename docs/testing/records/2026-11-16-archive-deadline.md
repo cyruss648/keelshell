@@ -100,3 +100,21 @@ GUI 仍为上批字节
 Quality `43806549649 / attempt 1` 当前仍在运行，Windows 八项旧缺审失败
 根因尚未由新日志确认。此片不替代 Windows 修复、原生 GUI、IME/辅助技术、
 严格 Zmodem peer、完整产品或发行验收。
+
+## 交付与清理
+
+源码与 63 份无损原件已在
+`bc9ebd6cf4f213b9330c04380f866ead9133fb0a` 提交并推送
+`feature/archive-deadline-clock-20261116`；本地分支、tracking 和远端 SHA
+实际相等。新精确 Quality `43809777642 / attempt 1` 首次快照 in_progress。
+原分支远端暂留 `5c23396`，防止取消诊断 run `43806549649`；后者 macOS、
+Ubuntu 已 success，Windows 仍运行。两个 run、源码与结果不混用。
+后续取齐诊断后同步原功能分支并清理自有临时分支。
+
+Git index、精确源码/证据树及清理后完整绑定均零 mismatch。
+20 份额外交付/旧 CI 查询原件由 `delivery-command-manifest.json` 绑定；
+首次错误仓库标识的 GET 失败也保留，正确仓库来自实际 Git remote。
+已回收 83 文件、1,297,657 字节；两个旧目录 absent，唯一 target 与活动 Windows
+调查目录保留。reviewer 已关闭，没有新增用户 chat 或额外 worktree。
+实际回执见本批证据的 `source-delivery-readback.json`、`source-ci-initial.json`
+和 `cleanup.json`，不把这些后续回执自称为已包含在较早源码提交中。

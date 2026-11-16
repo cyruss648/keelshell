@@ -1,0 +1,22 @@
+{
+  "source_commit": "bc9ebd6cf4f213b9330c04380f866ead9133fb0a",
+  "current_branch": "feature/editor-unicode-codec-20261114",
+  "current_head": "bc9ebd6cf4f213b9330c04380f866ead9133fb0a",
+  "parallel_branch": "feature/archive-deadline-clock-20261116",
+  "parallel_local": "bc9ebd6cf4f213b9330c04380f866ead9133fb0a",
+  "parallel_tracking": "bc9ebd6cf4f213b9330c04380f866ead9133fb0a",
+  "parallel_remote": "bc9ebd6cf4f213b9330c04380f866ead9133fb0a",
+  "original_tracking": "5c23396c3cfcc6dd021fb870a7007373c25475d1",
+  "original_remote": "5c23396c3cfcc6dd021fb870a7007373c25475d1",
+  "working_tree_clean": true,
+  "git_blob_binding": {
+    "source": "bc9ebd6cf4f213b9330c04380f866ead9133fb0a",
+    "evidence": "bc9ebd6cf4f213b9330c04380f866ead9133fb0a",
+    "originals": 63,
+    "engineering_inputs": 718,
+    "previews": 0,
+    "mismatches": [],
+    "checked_current_bytes": true
+  },
+  "original_branch_push_deferred_for_exact_windows_diagnostics": true
+}

@@ -37,3 +37,14 @@ gzip 字节 `252,632`。`archive-manifest.json` 逐项绑定压缩及解压字�
 源码 Git blob；本批没有预览，`previews.json` 明确为空。
 以后源码变化时，旧冻结只用于旧精确提交，不放宽或移签。
 提交、远端读回和清理回执在观察到结果后另行追加，不自称已包含在较早源码提交中。
+
+源码及以上 63 原件已在 `bc9ebd6cf4f213b9330c04380f866ead9133fb0a` 提交推送到
+`feature/archive-deadline-clock-20261116`，本地/tracking/远端相等；
+`source-delivery-readback.json` 保留精确源码/证据与现源绑定零 mismatch。
+`delivery-command-manifest.json` 和 `delivery-raw/` 另保存 20 份交付及旧 CI
+查询原件，包含错误仓库 GET 的失败及正确 remote 的成功读取。
+`source-ci-initial.json` 绑定新 Quality `43809777642 / attempt1`，
+它不替代原分支旧诊断 run `43806549649`；当前原分支 push 延后以保留 Windows
+诊断，macOS/Ubuntu 已 success。
+`cleanup.json` 记录 83 文件/1,297,657 字节回收、两个旧目录 absent；
+唯一 target、活动 Windows 调查和仍需使用的临时 CI 分支保留。

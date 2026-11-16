@@ -1,0 +1,24 @@
+{
+  "reclaimed": [
+    {
+      "path": "work/archive-deadline-integration-20261116",
+      "files": 74,
+      "bytes": 1260705,
+      "absent": true
+    },
+    {
+      "path": "work/archive-diagnostics-ci-20261116",
+      "files": 9,
+      "bytes": 36952,
+      "absent": true
+    }
+  ],
+  "files": 83,
+  "bytes": 1297657,
+  "all_originals_preserved": true,
+  "reviewer_closed": true,
+  "windows_ci_agent_still_active": true,
+  "active_parallel_ci_branch_preserved": "feature/archive-deadline-clock-20261116",
+  "unchanged_cargo_target": "work/recovery-batch-integration-20261115/target",
+  "next_command_directory": "work/archive-deadline-delivery-20261116"
+}
