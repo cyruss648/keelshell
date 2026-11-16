@@ -1,0 +1,234 @@
+{
+  "schema": "keelshell.kit010-native-ci.seal-verification.v1",
+  "status": "PASS",
+  "completed_at": "2026-11-16T10:06:21.559241+00:00",
+  "source_commit": "3c331c1cc3cc428c33c606b9af578057325871b9",
+  "archive": {
+    "members": 111,
+    "bytes": 5571935,
+    "sha256": "8b9413c275b33a845855e7bc841ea5d1c5c94ac89be167a5ebb9d57c49a3de97",
+    "member_bytes": 14753322,
+    "prefix_counts": {
+      "delivery": 40,
+      "native-review": 3,
+      "native": 63,
+      "windows-inventory": 5
+    },
+    "member_and_original_byte_mismatches": 0
+  },
+  "actual_existing_verifier_exit": 0,
+  "actual_existing_verifier_direct_reaped": true,
+  "actual_existing_verifier_output": {
+    "source": "3c331c1cc3cc428c33c606b9af578057325871b9",
+    "members": 111,
+    "engineering_inputs": 719,
+    "source_mismatches": 0,
+    "archive_mismatches": 0,
+    "builds_or_tests_replayed": 0
+  },
+  "command_runs": [
+    {
+      "label": "audit-command-r1",
+      "receipt_sha256": "e3d1ae99b53c4df65407bfa7f977090b53dd41823b130147338645eb5b6af9d5",
+      "receipt": {
+        "schema": "keelshell.kit010-seal.command.v1",
+        "command": [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-B",
+          "work/kit010-seal-20261116/audit_originals.py"
+        ],
+        "started_at": "2026-11-16T10:01:36.454321+00:00",
+        "completed_at": "2026-11-16T10:01:36.934592+00:00",
+        "observed_exit": 1,
+        "controller_exit": 1,
+        "direct_reaped": true,
+        "pipes_drained": true,
+        "timed_out": false,
+        "seconds": 0.48014441700070165,
+        "log": "work/kit010-seal-20261116/audit-command-r1.log",
+        "log_bytes": 824,
+        "log_sha256": "a68784a94e341491341b992c1d008f041c671561b70fa4805e5b0dfa2159e148",
+        "script_sha256": "227f453d78fbd13199583d3ea6e4b3f519ccdf7f5973bf76c5fbaee4ceacb885",
+        "builds_or_tests_replayed": 0
+      },
+      "log_utf8": "Traceback (most recent call last):\n  File \"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/kit010-seal-20261116/audit_originals.py\", line 447, in <module>\n    main()\n    ~~~~^^\n  File \"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/kit010-seal-20261116/audit_originals.py\", line 331, in main\n    require(declared[\"missing\"] == declared[\"unexpected\"] == declared[\"duplicates\"] == [],\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            \"inventory mismatch declared\")\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/kit010-seal-20261116/audit_originals.py\", line 22, in require\n    raise ValueError(message)\nValueError: inventory mismatch declared\n"
+    },
+    {
+      "label": "audit-command-r2",
+      "receipt_sha256": "fab573ab71cbecae82dec3be79c54772466e17501c8df584ba60b1de3a15513b",
+      "receipt": {
+        "schema": "keelshell.kit010-seal.command.v1",
+        "command": [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-B",
+          "work/kit010-seal-20261116/audit_originals.py"
+        ],
+        "started_at": "2026-11-16T10:02:03.663916+00:00",
+        "completed_at": "2026-11-16T10:02:04.184102+00:00",
+        "observed_exit": 0,
+        "controller_exit": 0,
+        "direct_reaped": true,
+        "pipes_drained": true,
+        "timed_out": false,
+        "seconds": 0.5192731249990175,
+        "log": "work/kit010-seal-20261116/audit-command-r2.log",
+        "log_bytes": 163,
+        "log_sha256": "024017166d557efb1b5508ecbca30d890485e6bd52b4ce7f7299623a21c9de3b",
+        "script_sha256": "154188696330388ae7041f44ffa420fe60317a5e74421631c5e9f490f751996a",
+        "builds_or_tests_replayed": 0
+      },
+      "log_utf8": "{\"status\": \"PASS\", \"members\": 111, \"engineering_inputs\": 719, \"receipt_log_pairs\": 18, \"windows_libtest_rows\": 1565, \"screenshots\": 19, \"ax\": 21, \"mismatches\": 0}\n"
+    },
+    {
+      "label": "seal-command-r1",
+      "receipt_sha256": "9c36f0560f559dc87699cdc58bf836e17a4f36d19fbfe18cbcf1c461c513bfd8",
+      "receipt": {
+        "schema": "keelshell.kit010-seal.command.v1",
+        "command": [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-B",
+          "work/kit010-seal-20261116/seal_native_ci.py"
+        ],
+        "started_at": "2026-11-16T10:02:11.360427+00:00",
+        "completed_at": "2026-11-16T10:02:11.571669+00:00",
+        "observed_exit": 0,
+        "controller_exit": 0,
+        "direct_reaped": true,
+        "pipes_drained": true,
+        "timed_out": false,
+        "seconds": 0.21105170900045778,
+        "log": "work/kit010-seal-20261116/seal-command-r1.log",
+        "log_bytes": 159,
+        "log_sha256": "840350d452e7d0cd7aeb9c99be0bb810eff49425707f8a6c00c466bae6aaf225",
+        "script_sha256": "98a48140354ddd81458af41575a7f2662d9b2b34e01578ab46e5466b9e7b32da",
+        "builds_or_tests_replayed": 0
+      },
+      "log_utf8": "{\"count\": 111, \"archive_bytes\": 5571935, \"archive_sha256\": \"8b9413c275b33a845855e7bc841ea5d1c5c94ac89be167a5ebb9d57c49a3de97\", \"uncompressed_bytes\": 14753322}\n"
+    },
+    {
+      "label": "verify-command-r1",
+      "receipt_sha256": "7d354206c94e1112fa76c42c2a6e05f7f186e90072684b54e293956fd855796a",
+      "receipt": {
+        "schema": "keelshell.kit010-seal.command.v1",
+        "command": [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-B",
+          "docs/testing/records/2026-11-16-kit010-native-ci-evidence/verify.py"
+        ],
+        "started_at": "2026-11-16T10:02:15.641406+00:00",
+        "completed_at": "2026-11-16T10:02:15.797319+00:00",
+        "observed_exit": 0,
+        "controller_exit": 0,
+        "direct_reaped": true,
+        "pipes_drained": true,
+        "timed_out": false,
+        "seconds": 0.15573429099822533,
+        "log": "work/kit010-seal-20261116/verify-command-r1.log",
+        "log_bytes": 178,
+        "log_sha256": "794dd58ddd0120ae5b3a412dd2fede07aca7eff43dd1e2adb9f7b772181899cf",
+        "script_sha256": "3c64de4ca2523ba0226a07c5a271d13f4d7fa7793ef5dff5fea6afa991b1188b",
+        "builds_or_tests_replayed": 0
+      },
+      "log_utf8": "{\"source\": \"3c331c1cc3cc428c33c606b9af578057325871b9\", \"members\": 111, \"engineering_inputs\": 719, \"source_mismatches\": 0, \"archive_mismatches\": 0, \"builds_or_tests_replayed\": 0}\n"
+    }
+  ],
+  "preseal_audit": {
+    "path": "docs/testing/records/2026-11-16-kit010-native-ci-evidence/seal-audit-r1.json",
+    "bytes": 51889,
+    "sha256": "1fcded721cef6d732ebb693981961cd7da74cdbaa8e9056ef5dd719a75df3be7"
+  },
+  "artifacts": [
+    {
+      "path": "docs/testing/records/2026-11-16-kit010-native-ci-evidence/originals.tar.gz",
+      "bytes": 5571935,
+      "sha256": "8b9413c275b33a845855e7bc841ea5d1c5c94ac89be167a5ebb9d57c49a3de97"
+    },
+    {
+      "path": "docs/testing/records/2026-11-16-kit010-native-ci-evidence/manifest.json",
+      "bytes": 33776,
+      "sha256": "ce64f1ceffe4e32dd1a553ae55faaaa6de339daa487ee36e339960a2385c9456"
+    },
+    {
+      "path": "docs/testing/records/2026-11-16-kit010-native-ci-evidence/README.md",
+      "bytes": 6751,
+      "sha256": "e609504f24a6ac3bbcf767b90f356763101911bd908a907002106d89e6ffe2e5"
+    },
+    {
+      "path": "docs/testing/records/2026-11-16-kit010-native-ci-evidence/verify.py",
+      "bytes": 5019,
+      "sha256": "3c64de4ca2523ba0226a07c5a271d13f4d7fa7793ef5dff5fea6afa991b1188b"
+    },
+    {
+      "path": "docs/testing/records/2026-11-16-kit010-native-ci-evidence/seal-audit-r1.json",
+      "bytes": 51889,
+      "sha256": "1fcded721cef6d732ebb693981961cd7da74cdbaa8e9056ef5dd719a75df3be7"
+    },
+    {
+      "path": "docs/testing/records/2026-11-16-kit010-native-ci.md",
+      "bytes": 7960,
+      "sha256": "a461df6436d8b8fa815f501cbf438b5b99379f1b87b35973e1627a3283012372"
+    }
+  ],
+  "original_helper_unmodified": true,
+  "original_verifier_unmodified": true,
+  "all_111_selected_sources_unchanged": true,
+  "historical_source_readback_equal": true,
+  "historical_failures": [
+    "delivery/seal-readiness-r1.json: exit 2/reaped",
+    "delivery/ci-fetch-r1.json: first Windows log fetch exit 1, empty original retained",
+    "native-review/summary-r1.json: invalid PNG dimensions; IN_PROGRESS history only",
+    "delivery/source-ci-final-r1.json: exact CI failure, four Windows app failures",
+    "native/native-app-r1.json: SIGTERM 241/reaped",
+    "delivery/source-ci-watch-r1.json: exit 1/reaped",
+    "own audit-command-r1: exit 1/reaped; empty-mapping/list checker error; audit-command-r2 corrected and exit 0/reaped"
+  ],
+  "boundaries": {
+    "windows_preflight": [
+      70,
+      0,
+      0
+    ],
+    "windows_app": [
+      1325,
+      4,
+      2
+    ],
+    "macos_app": [
+      1340,
+      0,
+      2
+    ],
+    "ubuntu_app": [
+      1341,
+      0,
+      2
+    ],
+    "native_review_findings": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 1,
+      "P3": 0
+    },
+    "native_termination": "SIGTERM 241/reaped",
+    "complete_windows_gate": "HOLD",
+    "complete_native_acceptance": "HOLD",
+    "release_acceptance": "HOLD",
+    "subsequent_parent_changes": "NOT_COVERED"
+  },
+  "operations": {
+    "cargo": 0,
+    "builds": 0,
+    "tests": 0,
+    "gui_actions": 0,
+    "network": 0,
+    "commits": 0,
+    "pushes": 0,
+    "cleanup": 0
+  },
+  "allowed_writes": [
+    "docs/testing/records/2026-11-16-kit010-native-ci.md",
+    "docs/testing/records/2026-11-16-kit010-native-ci-evidence/",
+    "work/kit010-seal-20261116/"
+  ],
+  "archive_members_exclude_seal_metadata": true
+}

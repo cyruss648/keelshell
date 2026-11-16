@@ -206,3 +206,28 @@ Windows 预期 70 项与八项旧 app 归档失败的名称清单均只是待验
 未改源码或评审结论；第二轮预检、实际封存及 current 绑定均实际 0/reaped。
 两轮预检原件保留于包内，工具字段适配不算工程测试失败或重新签署。
 index、精确源码树绑定和后续推送使用各自真实交付回执。
+
+## 已推送与接续验证
+
+源码及 237 份持久成员已在 `3c331c1cc3cc428c33c606b9af578057325871b9`
+提交推送；本地、tracking、远端三方实际相等，读回时工作区干净。
+current、index、精确源码/证据树及清理后绑定均实际 0/reaped，零 mismatch。
+
+Quality `43834927464 / attempt 1` 绑定该精确源码，后续已终态 failure。
+三平台完整原日志已收取，Windows 70 项 preflight 逐名全过、app 四败，
+原八项归档七过一败；macOS/Ubuntu success。精确结果和限定正常包观察见
+[接续记录](2026-11-16-kit010-native-ci.md)，不回写旧本机门禁或评审原件。
+Windows job `133189079055` 的 filesystem preflight 实际 completed/success；
+Ubuntu/macOS job 分别为 `133189079006`、`133189079924`。
+完整原日志与预期 70 名逐项相同；原八项 app 归档七过一败，不签全部通过。
+后续完整 CI 使用新终态回执；本机完整门禁不重复。
+
+本批原活动目录、前批游标目录与 Kit 作者目录的全部必要原件逐字节核对后，
+已清理三目录共 5,200 文件/43,290,303 字节；可再生第三方 payload 的各目录
+数量/长度符合保全的删除计划。另有 5 份本轮自有 crash 原报告按 SHA 核对后
+移除，故障线程原件已保存；两处自有调试临时目录已经 absent。没有清理共享
+Cargo target、活动原生构建、CI 回执或其他 worktree。本批作者及评审均已关闭。
+当前交付回执位于 `work/windows-directory-rename-delivery-20261116/`，新 Kit
+正常 macOS app/MCP 构建和限定原生观察位于 `work/kit010-native-20261116/`，
+已完成；应用、容器、镜像、私钥及运行态已回收，必要原件已持久封存于
+[111 成员归档](2026-11-16-kit010-native-ci-evidence/README.md)，原目录待提交绑定后清理。

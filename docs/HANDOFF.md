@@ -8,8 +8,8 @@
 
 - 用户已确认远端恢复，完成的功能批次及时提交并推送，读取本地、tracking、
   远端 SHA；不强推。当前分支为 `feature/editor-unicode-codec-20261114`。
-  最近已实际读回三方相等的提交是
-  `4d72e1e592bdd6194f6eadca3a6a760192b5fe82`。
+  最近已实际读回三方相等的源码提交是
+  `3c331c1cc3cc428c33c606b9af578057325871b9`，读回时工作区干净。
   `origin/main` 另有独立状态文档，不能直接覆盖。
 - 本批源码及证据已在 `878f13b` 推送原功能分支；临时
   `feature/archive-deadline-clock-20261116` 已删除，本地/tracking/远端均 absent。
@@ -30,7 +30,27 @@
 - 用户已授权提交推送、标签触发跨平台 Release、本地 Podman 联调；不含覆盖
   安装现有应用、遥测上传或跳过尚未完成的发行验证。
 
-## 活动批次：Windows 目录发布短期句柄与 Kit 0.10
+## 活动批次：Windows 文件回归与英文工具栏
+
+源码 `3c331c1` 的精确 Quality `43834927464 / attempt 1` 已 failure：
+macOS/Ubuntu success，app 分别 `1340/0/2 ignored`、`1341/0/2 ignored`；
+两平台真实 OpenSSH 步骤成功。Windows preflight `70/0/0`，70 名与预期逐项
+相等，原四项目录发布失败已过；app `1325/4/2 ignored`，原八项归档七过一败。
+唯一归档失败在确认后读取 `nested/data.bin` 返回 NotFound/code 3；
+其他三项为下载续传和 fixture 隔离回归，具体修复由当前作者继续。
+新的非作者库存复核仅批准准确执行证据，完整 Windows gate HOLD，已关闭。
+
+正常 release 包从 `3c331c1` 真正构建，并完成霜白中文、曜石中文、雾紫英文的
+限定 macOS 原生观察，包含自有真实 SSH/SFTP、文件草稿、AI 表单/请求头及
+规则编辑/取消；没有模型请求或隧道启动。英文顶栏实际被裁切，父正在修复。
+连接编辑器下方控件可经键盘切换，但本轮没有确认可视滚动，范围保持开放。
+应用以核实身份的 SIGTERM 结束，241/reaped；容器、镜像、私钥及运行态已回收。
+19 图、21 AX、三平台完整 CI 及两份非作者结果已形成
+[111 成员持久归档](testing/records/2026-11-16-kit010-native-ci-evidence/README.md)，
+精确 Git 树/成员/回执核对实际 0/reaped、零 mismatch。库存和原生证据 reviewer
+及封存 agent 均已关闭。详见[精确 CI 与原生记录](testing/records/2026-11-16-kit010-native-ci.md)。
+
+## 已交付：Windows 目录发布短期句柄与 Kit 0.10
 
 基线为已推送的 `4d72e1e592bdd6194f6eadca3a6a760192b5fe82`。
 其 Quality `43822369487 / attempt 1` 的 Windows job `133148170879`
@@ -72,10 +92,19 @@ Clippy、x.y 与三组 AI controller 均过。app `1340/0/2`，1,342 名与重�
 新非作者隧道增量及 r6 组合静态批准，P0–P3 全 0；独立执行 0，已核对并绑定
 父最终门禁。其余历史批准/HOLD 保持原范围，全部 agents 已关闭。
 [237 份持久成员](testing/records/2026-11-16-windows-directory-rename-evidence/README.md)
-已形成并完成 current 绑定，包含 232 份原件与 5 份明确标记的派生说明；
-尚待 index/精确 Git 树绑定和普通推送，真实 Windows 尚待新 CI。
-当前活动目录为 `work/windows-directory-rename-integration-20261116/`；历史冻结、
-失败、作者与各窄范围评审均保持。详见[本批记录](testing/records/2026-11-16-windows-directory-rename.md)。
+已随源码提交推送，包含 232 份原件与 5 份明确标记的派生说明；current、index、
+精确源码/证据 Git 树及清理后绑定均实际 0/reaped、零 mismatch。
+精确 Quality `43834927464 / attempt 1`，源码 `3c331c1`，已收取三平台完整原日志；
+Windows filesystem preflight 70 名逐项全过，完整 app 仍有四败，其他两平台
+终态 success。原失败与未运行边界见上方活动批次，不签完整 Windows。
+
+三处原候选目录已逐字节核对持久原件后回收：本批、前批游标及 Kit 作者，合计
+5,200 文件/43,290,303 字节；另清理 5 份本轮自有 crash 原报告，故障线程与原 SHA
+已保全；两处自有调试临时目录此前已 absent。当前只使用
+`work/windows-directory-rename-delivery-20261116/` 保存推送/CI/清理回执，
+`work/kit010-native-20261116/` 已完成正常包构建和限定原生检查，运行资源已回收，
+必要原件已持久封存。原目录待本次归档提交绑定后回收。历史冻结、失败、作者与各窄范围评审均保持，见
+[本批记录](testing/records/2026-11-16-windows-directory-rename.md)。
 
 ## 已交付：Windows 独立目录游标修复
 
@@ -238,11 +267,12 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 
 ## 接续顺序与资源归属
 
-1. r6 实现、专项、完整门禁和新非作者复核已完成；完成证据 index/精确 Git 树
-   绑定后立即推送，不重复运行已成功的完整门禁。旧失败及历史静态范围保持。
-2. 及时推送当前原功能分支，读取三方 SHA 和新精确 CI；
-   核对真实 Windows 预检、原四项目录发布回归及八项 app 归档。
-   不得放宽原安全断言、原生权限或将 app 未运行范围改成成功。
+1. 精确 Quality `43834927464` 已终态失败，70 项预检及原八项归档已逐名核对；
+   接续修复四项 app 失败和本轮实际观察的英文工具栏裁切。
+   作者不运行 Cargo，共享 target 的构建由父串行集中执行。
+2. 新修订专项、一次最终完整门禁和新非作者复核后及时推送当前原功能分支，
+   读取三方 SHA 并跟进新精确 CI；旧失败及签署范围保持。
+   不得放宽安全断言、原生权限或将 app 未运行范围改成成功。
 3. 更新本批记录/路线、归档必要原件，完成 feature commit 和普通 push，
    实际读回本地、tracking 和远端 SHA。当前源码/归档提交身份分别绑定。
 4. 及时关闭自有 agents，回收已持久化的重复临时文件；不清理其他任务的
@@ -253,11 +283,13 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。归属没有切换，不反复 clean。
 换 checkout/源码副本前必须遵循[共享 target 合同](testing/SHARED_TARGET.md)。
-正常 GUI 仍为上批摘要；门禁后 MCP 字节已变化，实测
-`3e9270c84f3aad14f331b06cb3f15e77f2d2a40602dcd61e90dd39b5b939ed4b`。
-不能再用 target 中 MCP 代签上一批程序；当前不签新正常包或新桌面验收。
-当前批次目录为 `work/windows-directory-rename-integration-20261116/`；
-游标批次目录仍有本次交付及 CI 原件，归档核对以前保持。
+最近正常 GUI 来自 `3c331c1` 的独立打包 app，SHA-256
+`f78cdfd3446bea3a40e3b390c4aa29af1d480c2a45c452118fc81f480971b790`；
+包内 MCP 为 `5166352519c48c15f2d02db8986c4d9301ccd8e0d055c736cf9471bd88ce584b`。
+所测三主题/macOS 范围见新记录；不能用该包代签后续工作区修订。
+本批与游标批次原目录已在持久归档和精确 Git 树绑定后回收，不能再依赖。
+当前交付/CI 在 `work/windows-directory-rename-delivery-20261116/`，原生包构建在
+`work/kit010-native-20261116/`；二者必要原件已持久归档，待本次提交绑定后清理。
 旧 `work/windows-native-phases-integration-20261116/` 已回收。
 前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 的 11 文件、
 23,386 字节已在 `878f13b` 归档后回收。

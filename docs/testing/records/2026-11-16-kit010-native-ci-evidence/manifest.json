@@ -1,0 +1,806 @@
+{
+  "schema": "keelshell.kit010-native-ci.evidence.v1",
+  "source_commit": "3c331c1cc3cc428c33c606b9af578057325871b9",
+  "engineering_sha256": "f0f64a6629b2441d63eef1e801189eaef69dd848aea0039eef4d09ff143b5164",
+  "app_sha256": "f78cdfd3446bea3a40e3b390c4aa29af1d480c2a45c452118fc81f480971b790",
+  "mcp_sha256": "5166352519c48c15f2d02db8986c4d9301ccd8e0d055c736cf9471bd88ce584b",
+  "archive_bytes": 5571935,
+  "archive_sha256": "8b9413c275b33a845855e7bc841ea5d1c5c94ac89be167a5ebb9d57c49a3de97",
+  "count": 111,
+  "uncompressed_bytes": 14753322,
+  "screenshot_format": "Original JPEG bytes retained under the original .png capture filenames.",
+  "excluded": [
+    "private/",
+    "runtime/",
+    "sshd-public/",
+    "package binaries and icon"
+  ],
+  "seal_provenance": {
+    "original_helper": "work/workbench-fit-20261116/seal_native_ci.py",
+    "original_helper_sha256": "21b5f8efee683f20c27ff104b07b3a54c7b841af1bb04c8328a73bc61839e75b",
+    "copied_helper": "work/kit010-seal-20261116/seal_native_ci.py",
+    "copied_helper_sha256": "98a48140354ddd81458af41575a7f2662d9b2b34e01578ab46e5466b9e7b32da",
+    "existing_verifier_sha256": "3c64de4ca2523ba0226a07c5a271d13f4d7fa7793ef5dff5fea6afa991b1188b",
+    "preseal_audit_sha256": "1fcded721cef6d732ebb693981961cd7da74cdbaa8e9056ef5dd719a75df3be7",
+    "selection_matches_preseal_audit": true
+  },
+  "entries": [
+    {
+      "path": "delivery/ci-fetch-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/ci-fetch-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 1075,
+      "sha256": "4b82571512dcea95f721612f61bc21097cdfd38e145ac537e72add73b2078dd1"
+    },
+    {
+      "path": "delivery/ci-final-fetch-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/ci-final-fetch-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 941,
+      "sha256": "8a4e2164f3831a11026e067a402d4b73d0ccea1c971b9a0af785dc49585e7be9"
+    },
+    {
+      "path": "delivery/committed-binding-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/committed-binding-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 941,
+      "sha256": "4777aec077dac8002e3adf9e9b3a42a706457a2743b66ad3b016333254439ba1"
+    },
+    {
+      "path": "delivery/committed-binding-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/committed-binding-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 1240,
+      "sha256": "4db5a98c589c078208eaa5e87662bf9a8de076dbe4124922cfcb76a80bec8319"
+    },
+    {
+      "path": "delivery/current-binding-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/current-binding-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 828,
+      "sha256": "025932182796745eebade4c07ddbba231ade4edb6b69c1fdcd35a6bb62a39714"
+    },
+    {
+      "path": "delivery/current-binding-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/current-binding-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 1174,
+      "sha256": "f7e6625d91eb590e166262855934762fac1281a41a0eb81e4ec9179fadc36019"
+    },
+    {
+      "path": "delivery/diagnostic-cleanup-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/diagnostic-cleanup-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 1585,
+      "sha256": "e5e213ea06423ceb052d1665cfeeb96c14d2e6cb81facbfc3cfb3f02d5984717"
+    },
+    {
+      "path": "delivery/index-binding-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/index-binding-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 826,
+      "sha256": "24bdb506daa94446992c244628132616f629ab6c25d00353d0d995d4250c08e0"
+    },
+    {
+      "path": "delivery/index-binding-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/index-binding-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 1170,
+      "sha256": "44bd713025c09d5b7b22d198ad8cf2dab225e174f97359fc215ae88881ad3684"
+    },
+    {
+      "path": "delivery/macos-job-log-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/macos-job-log-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 860668,
+      "sha256": "bfc66d1d15e52d0ff15d40fff68a647de81e397750817fbf3b1d24dd0afe3f7c"
+    },
+    {
+      "path": "delivery/macos-ubuntu-results-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/macos-ubuntu-results-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 125934,
+      "sha256": "09d485861572520b02138ecf89cecada4959aa4cff3727808ea03a82a8223c8e"
+    },
+    {
+      "path": "delivery/owned-cleanup-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/owned-cleanup-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 1740245,
+      "sha256": "d735804a46170411300d4c66174be830ed11a2e08c0a600b8380a128c8b49f1e"
+    },
+    {
+      "path": "delivery/post-cleanup-binding-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/post-cleanup-binding-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 941,
+      "sha256": "57379c827c048f581948e38a9d8c9feb1797842b52dc16150476f34874dfa19e"
+    },
+    {
+      "path": "delivery/post-cleanup-binding-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/post-cleanup-binding-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 1240,
+      "sha256": "4db5a98c589c078208eaa5e87662bf9a8de076dbe4124922cfcb76a80bec8319"
+    },
+    {
+      "path": "delivery/run_command.py",
+      "source_path": "work/windows-directory-rename-delivery-20261116/run_command.py",
+      "kind": "original_receipt_or_log",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "delivery/seal-publish-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/seal-publish-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 974,
+      "sha256": "a586474636c1b49ef9f960ef2e374a9906375790e098727fea8b687559c2d7e7"
+    },
+    {
+      "path": "delivery/seal-publish-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/seal-publish-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 1784,
+      "sha256": "0acda6b648882592fa07931454805ee3d486414b46e56572490557cfad7d1af4"
+    },
+    {
+      "path": "delivery/seal-readiness-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/seal-readiness-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 995,
+      "sha256": "6d90a76d2c5f2e9fb041c802b95f0c842638a36a5926ae7b3dd9f200cf1c84e5"
+    },
+    {
+      "path": "delivery/seal-readiness-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/seal-readiness-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 113,
+      "sha256": "3fdbc5458fe1932c2e172c9b8a2f5fb7a7411262d54a4f4d111e9332aba11b91"
+    },
+    {
+      "path": "delivery/seal-readiness-r2.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/seal-readiness-r2.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 994,
+      "sha256": "24f949a4e7925495cef7ed040fd7dc483f72f52ceed2b00a2b9788e8afb61c2c"
+    },
+    {
+      "path": "delivery/seal-readiness-r2.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/seal-readiness-r2.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 1785,
+      "sha256": "c2f6f0dc6cbc3b56089f8eecbd8d75e0e1ad1a96e9209894757b46cbc6338505"
+    },
+    {
+      "path": "delivery/source-ci-final-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-final-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 7255,
+      "sha256": "2f1e558379b742879f2d23eca7616b66da673c7ac2a9cb9f9aa297f2d872cc6c"
+    },
+    {
+      "path": "delivery/source-ci-progress-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-progress-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 862,
+      "sha256": "3e934cf87cc5ee65a42589e3100c032714b5fd1815f4507fbaf430df3be22948"
+    },
+    {
+      "path": "delivery/source-ci-progress-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-progress-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 6703,
+      "sha256": "99223593331d91aaa1b0a302d77e73189d32aee75681c369d67fab4ce36a95b5"
+    },
+    {
+      "path": "delivery/source-ci-progress-r2.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-progress-r2.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 7079,
+      "sha256": "215097f88f75c42ff83545375c55411181f1f2fc888988ae3143952d6e837b57"
+    },
+    {
+      "path": "delivery/source-ci-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 978,
+      "sha256": "dd93c177037aa28069e6b84b0b55739b1c23181b5b0dfe9178a4901623022029"
+    },
+    {
+      "path": "delivery/source-ci-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 275,
+      "sha256": "2929e42ff5fcf9e258c053913ba7dcdebf14ba635382f6cf7275035bddf9853d"
+    },
+    {
+      "path": "delivery/source-ci-watch-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-watch-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 838,
+      "sha256": "26e27a52a1d18635f593cd1539213eb4f842b5a01626a6a4d981572bdf516383"
+    },
+    {
+      "path": "delivery/source-ci-watch-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-ci-watch-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 53142,
+      "sha256": "6604188e935c7ce9a96d50d9a035b2d3dd794a06c4e27e3e76ac572f80c2a2ce"
+    },
+    {
+      "path": "delivery/source-commit-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-commit-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 1546,
+      "sha256": "a9f9a9d339a5ef0aa1d59ca7ac302afad26e13af5a08369310523bb5795e951e"
+    },
+    {
+      "path": "delivery/source-commit-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-commit-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 713,
+      "sha256": "c625d1f05c4b4203682291d42fe16f1f6b4c75f37703207f399f9042c7b71af3"
+    },
+    {
+      "path": "delivery/source-push-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-push-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 779,
+      "sha256": "ca9869d19c872be08d4613ae4d4d17287b6b6c6f872e4d43effa1b6235679425"
+    },
+    {
+      "path": "delivery/source-push-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-push-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 113,
+      "sha256": "68ba3a7e226fdbb90ce623e38f80fe0820ec904bdb0da9ba8adc6985d0718b27"
+    },
+    {
+      "path": "delivery/source-readback-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/source-readback-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 215,
+      "sha256": "482ee0299a8dab51a15ff4e26dd3b58d7cac300129487a8ec1f5bd7b6da53a3b"
+    },
+    {
+      "path": "delivery/ubuntu-job-log-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/ubuntu-job-log-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 876145,
+      "sha256": "f8af20b815438c2cbb5f55dc5170ac12f6f0e5f7a6b3a9215205f8b99e87d08f"
+    },
+    {
+      "path": "delivery/windows-job-log-r1.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/windows-job-log-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "delivery/windows-job-log-r2.clean.txt",
+      "source_path": "work/windows-directory-rename-delivery-20261116/windows-job-log-r2.clean.txt",
+      "kind": "original_receipt_or_log",
+      "bytes": 1311660,
+      "sha256": "822899e109390b3c1c7245fe6977916e25ee7e7934154a4833743ccd947a8fe6"
+    },
+    {
+      "path": "delivery/windows-job-log-r2.log",
+      "source_path": "work/windows-directory-rename-delivery-20261116/windows-job-log-r2.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 1325334,
+      "sha256": "ebe06d619e5e309ee8b111c44da4e8cb67d2fc3791df23af67e59a20335174a9"
+    },
+    {
+      "path": "delivery/windows-job-r1.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/windows-job-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 3047,
+      "sha256": "d1944a13df92bcde82292440b5c7aa32c5137566c3da780c0b7e4bc43648fc8e"
+    },
+    {
+      "path": "delivery/windows-log-fetch-r2.json",
+      "source_path": "work/windows-directory-rename-delivery-20261116/windows-log-fetch-r2.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 268,
+      "sha256": "733ca4ee98d47871bf4cdf42b0c3de4541c0ccce770e940b5254ee8558a5ce7d"
+    },
+    {
+      "path": "native-review/review-r2.md",
+      "source_path": "work/kit010-native-review-20261116/review-r2.md",
+      "kind": "derived_independent_review",
+      "bytes": 30268,
+      "sha256": "79756df3d34b4344a3899120aa25fa1948fba464d0773ab6fdf7b62dae65e3b2"
+    },
+    {
+      "path": "native-review/summary-r1.json",
+      "source_path": "work/kit010-native-review-20261116/summary-r1.json",
+      "kind": "derived_independent_review",
+      "bytes": 16320,
+      "sha256": "ccda49af162b794163df9174533c6ac0e7945e6ccf3e6de3cac14961e8b8f1a4"
+    },
+    {
+      "path": "native-review/summary-r2.json",
+      "source_path": "work/kit010-native-review-20261116/summary-r2.json",
+      "kind": "derived_independent_review",
+      "bytes": 57437,
+      "sha256": "b1c692fb8e14433dc0931d7e9cba7cd73f1bc00439797f9d27179335cc2cac67"
+    },
+    {
+      "path": "native/Containerfile",
+      "source_path": "work/kit010-native-20261116/container-context/Containerfile",
+      "kind": "original_fixture_recipe",
+      "bytes": 412,
+      "sha256": "1eb8b7a745e7ffa7635b4548bf361b67096882a2dfd6e6b676b7b89514d31001"
+    },
+    {
+      "path": "native/engineering-inputs-r1.json",
+      "source_path": "work/kit010-native-20261116/engineering-inputs-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 116621,
+      "sha256": "1c61aca36a53e511452b5b6d5aed8295b0ceb0675d067f619a43095379b7a5d1"
+    },
+    {
+      "path": "native/fixture-container-r1.json",
+      "source_path": "work/kit010-native-20261116/fixture-container-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 777,
+      "sha256": "5ee7f7f0545c391e64b1d2a5107bf5202a960a1353bc9fd1de5938314bc824ed"
+    },
+    {
+      "path": "native/fixture-hostkey-r1.json",
+      "source_path": "work/kit010-native-20261116/fixture-hostkey-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 308,
+      "sha256": "ecbb95bd066ccd67ad6b6f0c4a089c70792af624ab2dc8394b220168049d2b63"
+    },
+    {
+      "path": "native/fixture-image-build-r1.json",
+      "source_path": "work/kit010-native-20261116/fixture-image-build-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 917,
+      "sha256": "ab701622b603855a635bf25aba7040514d911671a6ed23952dd327d052689b65"
+    },
+    {
+      "path": "native/fixture-image-build-r1.log",
+      "source_path": "work/kit010-native-20261116/fixture-image-build-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 2046,
+      "sha256": "a624300236eac5f2c12cb1045f89d67dc49a643ba98afb6e0dde271908dd2afa"
+    },
+    {
+      "path": "native/fixture-local.txt",
+      "source_path": "work/kit010-native-20261116/local-fixture/fixture-local.txt",
+      "kind": "original_owned_fixture",
+      "bytes": 32,
+      "sha256": "cb8315ae60b10c7ffa709dc9ba130e3667f46b86860c4de091c4478416363474"
+    },
+    {
+      "path": "native/fixture-openssh-probe-r1.json",
+      "source_path": "work/kit010-native-20261116/fixture-openssh-probe-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 1223,
+      "sha256": "bf5aa56a6d76c9f53023ffc6e33eeb8043400dcffd0239a2730399e4ff9ced6c"
+    },
+    {
+      "path": "native/fixture-openssh-probe-r1.log",
+      "source_path": "work/kit010-native-20261116/fixture-openssh-probe-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 35,
+      "sha256": "5a9fdf0e20edd4468dcc66763838e4043ab678d80aa72e2c6f74eb0aaefcebfd"
+    },
+    {
+      "path": "native/inspect-package-r1.json",
+      "source_path": "work/kit010-native-20261116/inspect-package-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 881,
+      "sha256": "31f688ae7c27a0ee899b320bc4c70a598b9d3aef9c93be8e02f4bed7a4487d8b"
+    },
+    {
+      "path": "native/inspect-package-r1.log",
+      "source_path": "work/kit010-native-20261116/inspect-package-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 3649,
+      "sha256": "f634b24f5d277057395480e436beeade6f01c7a2e2ad7f12d7aab1125f374c83"
+    },
+    {
+      "path": "native/native-app-r1.json",
+      "source_path": "work/kit010-native-20261116/native-app-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 993,
+      "sha256": "0741bf1dfcbebbcf656448dec5c9a85e1e1b70dd9a57a7282367924abd3c1568"
+    },
+    {
+      "path": "native/native-app-r1.log",
+      "source_path": "work/kit010-native-20261116/native-app-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "native/native-exit-request-r1.json",
+      "source_path": "work/kit010-native-20261116/native-exit-request-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 360,
+      "sha256": "2d983889ba8ff86ee1ddeba6f602baa94e2d36e19748882ec713db2ce52d1743"
+    },
+    {
+      "path": "native/native-process-r1.json",
+      "source_path": "work/kit010-native-20261116/native-process-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 560,
+      "sha256": "a9eb7ab1c3931bfd261bc8c3c040e83bf7381fc5b3010abc22a498e2d0a0d88b"
+    },
+    {
+      "path": "native/normal-release-build-r1.json",
+      "source_path": "work/kit010-native-20261116/normal-release-build-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 815,
+      "sha256": "824436867d19616c6a3131bcc28da702eebd21fadf01dc65864003e8018369e6"
+    },
+    {
+      "path": "native/normal-release-build-r1.log",
+      "source_path": "work/kit010-native-20261116/normal-release-build-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 18620,
+      "sha256": "e8f83455e92cd1215bf6a3310cf20fa1f0161280c0349a6edb1a897984457669"
+    },
+    {
+      "path": "native/owned-native-resource-cleanup-r1.json",
+      "source_path": "work/kit010-native-20261116/owned-native-resource-cleanup-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 1083,
+      "sha256": "0aa092f87fb12222962d25ef4da44099048744b8a46cdbca6a8bbd0448c85699"
+    },
+    {
+      "path": "native/package-manifest.json",
+      "source_path": "work/kit010-native-20261116/package-r1/package-manifest.json",
+      "kind": "original_package_manifest",
+      "bytes": 1238,
+      "sha256": "d9db870587c3bb00e84520993ba09f38c48f66f2e4650611333f5d14ad1b4aee"
+    },
+    {
+      "path": "native/package-r1.json",
+      "source_path": "work/kit010-native-20261116/package-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 1045,
+      "sha256": "f309513818b773e98b9a0ff7c997ed1bc0347d1f9ed18c4b36e033fc8691f13b"
+    },
+    {
+      "path": "native/package-r1.log",
+      "source_path": "work/kit010-native-20261116/package-r1.log",
+      "kind": "original_receipt_or_log",
+      "bytes": 209,
+      "sha256": "9593cd21f91c72294ed9d8641050da5b98ec37687b809cb36773966ef797169a"
+    },
+    {
+      "path": "native/run_command.py",
+      "source_path": "work/kit010-native-20261116/run_command.py",
+      "kind": "original_receipt_or_log",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "native/source-provenance-r1.json",
+      "source_path": "work/kit010-native-20261116/source-provenance-r1.json",
+      "kind": "original_receipt_or_log",
+      "bytes": 250,
+      "sha256": "faac33713654b351c96dfa9fa6beb85e6467e67bf162067fb77e3c76e9241936"
+    },
+    {
+      "path": "native/ui/01-hostkey-review.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/01-hostkey-review.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 736,
+      "sha256": "a7167a7c3bbfcd960f58d4d9ff995f122098f9bd257562c089649c2ce07889df"
+    },
+    {
+      "path": "native/ui/02-frost-files.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/02-frost-files.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 4999,
+      "sha256": "372c000c63713a3c1c8e4635e59e276a00778190984a03bd2da55d6f98db02e9"
+    },
+    {
+      "path": "native/ui/02-frost-files.png",
+      "source_path": "work/kit010-native-20261116/ui/02-frost-files.png",
+      "kind": "original_ui_bytes",
+      "bytes": 417239,
+      "sha256": "618293d95ccd9d0fa34aace5540367693fc958760b0be3f7882667ec158b01e8"
+    },
+    {
+      "path": "native/ui/03-frost-ai.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/03-frost-ai.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 2132,
+      "sha256": "09774f1c175df6b54c57b75323d2d9570a113d6408342f14957d3ded4df868e2"
+    },
+    {
+      "path": "native/ui/03-frost-ai.png",
+      "source_path": "work/kit010-native-20261116/ui/03-frost-ai.png",
+      "kind": "original_ui_bytes",
+      "bytes": 372143,
+      "sha256": "5026571d28355220b0e8b3178fe04b8a925a5bbca552438214e64e5b79bf6d3c"
+    },
+    {
+      "path": "native/ui/04-frost-ai-options.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/04-frost-ai-options.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 2132,
+      "sha256": "09774f1c175df6b54c57b75323d2d9570a113d6408342f14957d3ded4df868e2"
+    },
+    {
+      "path": "native/ui/04-frost-ai-options.png",
+      "source_path": "work/kit010-native-20261116/ui/04-frost-ai-options.png",
+      "kind": "original_ui_bytes",
+      "bytes": 372004,
+      "sha256": "099596707cc48293e8f1bdb95616e5387adac474db995c6be98cd69a35ed38e1"
+    },
+    {
+      "path": "native/ui/05-frost-ai-scroll.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/05-frost-ai-scroll.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 2132,
+      "sha256": "09774f1c175df6b54c57b75323d2d9570a113d6408342f14957d3ded4df868e2"
+    },
+    {
+      "path": "native/ui/05-frost-ai-scroll.png",
+      "source_path": "work/kit010-native-20261116/ui/05-frost-ai-scroll.png",
+      "kind": "original_ui_bytes",
+      "bytes": 371547,
+      "sha256": "7aeeb8def372ab025b77a37b46878ba998a6d138106314824251a02a9d0d98b3"
+    },
+    {
+      "path": "native/ui/06-frost-ai-drag.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/06-frost-ai-drag.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 2132,
+      "sha256": "09774f1c175df6b54c57b75323d2d9570a113d6408342f14957d3ded4df868e2"
+    },
+    {
+      "path": "native/ui/06-frost-ai-drag.png",
+      "source_path": "work/kit010-native-20261116/ui/06-frost-ai-drag.png",
+      "kind": "original_ui_bytes",
+      "bytes": 382907,
+      "sha256": "5238009e4713aabf05ee4a2e073f64f14a36b02c6180e6b9eaf576e89d9ce622"
+    },
+    {
+      "path": "native/ui/07-frost-ai-header.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/07-frost-ai-header.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 2391,
+      "sha256": "0f126bb2f5bc87a51801fc44afe17bb93784688e554376720fb6b07d6e9a8808"
+    },
+    {
+      "path": "native/ui/07-frost-ai-header.png",
+      "source_path": "work/kit010-native-20261116/ui/07-frost-ai-header.png",
+      "kind": "original_ui_bytes",
+      "bytes": 382472,
+      "sha256": "566188970c69ee49fb14b2102ef4af64c09e49299674a9e498cbb63dcc49340b"
+    },
+    {
+      "path": "native/ui/08-frost-tunnels.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/08-frost-tunnels.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 3952,
+      "sha256": "0c50797ea00f75031d9ebf535f3009c909d0438dbc64a059c19083c5958b2cf4"
+    },
+    {
+      "path": "native/ui/08-frost-tunnels.png",
+      "source_path": "work/kit010-native-20261116/ui/08-frost-tunnels.png",
+      "kind": "original_ui_bytes",
+      "bytes": 521630,
+      "sha256": "a7d37ff7773c9099c65d211bfe35cc0f5621de72b72d6daabe3cd9908ed7b07c"
+    },
+    {
+      "path": "native/ui/09-graphite-appearance.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/09-graphite-appearance.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 687,
+      "sha256": "336a65143883707fa341a78b8c9019b9e01d2568f383c95184b2ae0320d34e40"
+    },
+    {
+      "path": "native/ui/09-graphite-appearance.png",
+      "source_path": "work/kit010-native-20261116/ui/09-graphite-appearance.png",
+      "kind": "original_ui_bytes",
+      "bytes": 282406,
+      "sha256": "d41bc05015543009c4c3228cba35bf4b7abcad6b17c263f171588a21b5aa8346"
+    },
+    {
+      "path": "native/ui/10-graphite-tunnels.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/10-graphite-tunnels.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 3952,
+      "sha256": "0c50797ea00f75031d9ebf535f3009c909d0438dbc64a059c19083c5958b2cf4"
+    },
+    {
+      "path": "native/ui/10-graphite-tunnels.png",
+      "source_path": "work/kit010-native-20261116/ui/10-graphite-tunnels.png",
+      "kind": "original_ui_bytes",
+      "bytes": 509263,
+      "sha256": "a9a7101254e661b060f20f6f8ba0ddd97a2a4f6fbe02ac20222d7477dd4f0d55"
+    },
+    {
+      "path": "native/ui/11-graphite-files.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/11-graphite-files.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 5833,
+      "sha256": "21b5fdede5cbb4a0417b8fef60f83fd01e214f4a013cde6ca5bd61a67226f06b"
+    },
+    {
+      "path": "native/ui/11-graphite-files.png",
+      "source_path": "work/kit010-native-20261116/ui/11-graphite-files.png",
+      "kind": "original_ui_bytes",
+      "bytes": 538235,
+      "sha256": "594a52e7513e08383f0ecb644b49b98af87116bc838ac503ba619aa7939fe051"
+    },
+    {
+      "path": "native/ui/12-graphite-ai.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/12-graphite-ai.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 442,
+      "sha256": "6d90035fbb54efc099e37a617b134918ef515933a7ade23fd3868c0e1c462fd4"
+    },
+    {
+      "path": "native/ui/12-graphite-ai.png",
+      "source_path": "work/kit010-native-20261116/ui/12-graphite-ai.png",
+      "kind": "original_ui_bytes",
+      "bytes": 157757,
+      "sha256": "ae01e47b1303a1da0a13e83d0ecc6f25dfffabf0af5f86beb03ceb299b9108e2"
+    },
+    {
+      "path": "native/ui/13-graphite-ai-draft.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/13-graphite-ai-draft.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 2132,
+      "sha256": "c36f1ea690b1687df740ff00151405dbe3f87361db8010a9ca7fc97fd3313ad0"
+    },
+    {
+      "path": "native/ui/13-graphite-ai-draft.png",
+      "source_path": "work/kit010-native-20261116/ui/13-graphite-ai-draft.png",
+      "kind": "original_ui_bytes",
+      "bytes": 352660,
+      "sha256": "c226f409cf2d570bde481db2bc14cdc63f9467280868cc20d3ae0f20de327b47"
+    },
+    {
+      "path": "native/ui/14-lavender-en-appearance.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/14-lavender-en-appearance.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 706,
+      "sha256": "fee1d68fec86385c073ff753e18e997374e10a2d75ab55552306d710d3a3986e"
+    },
+    {
+      "path": "native/ui/14-lavender-en-appearance.png",
+      "source_path": "work/kit010-native-20261116/ui/14-lavender-en-appearance.png",
+      "kind": "original_ui_bytes",
+      "bytes": 323485,
+      "sha256": "1fd734f09317ac6bbcc0e74162c96806a0e351f69cae326e80947889b0f1b388"
+    },
+    {
+      "path": "native/ui/15-lavender-en-files.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/15-lavender-en-files.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 6031,
+      "sha256": "8e811683b83ec12097ce713d1a5e7615235f41e9bc78166d7534ca608ec303fd"
+    },
+    {
+      "path": "native/ui/15-lavender-en-files.png",
+      "source_path": "work/kit010-native-20261116/ui/15-lavender-en-files.png",
+      "kind": "original_ui_bytes",
+      "bytes": 591728,
+      "sha256": "43ec57976f4cf155c9263404dadf1f715417498193d1ab3d4ee44083db28ec55"
+    },
+    {
+      "path": "native/ui/16-lavender-profile-tab.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/16-lavender-profile-tab.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 837,
+      "sha256": "77066f588af823f89ad5d52d712732206b176a9af89ec569f173989f5d73fbec"
+    },
+    {
+      "path": "native/ui/16-lavender-profile-tab.png",
+      "source_path": "work/kit010-native-20261116/ui/16-lavender-profile-tab.png",
+      "kind": "original_ui_bytes",
+      "bytes": 262168,
+      "sha256": "8b72c4c603a71977d5b610b2e9c7c4120318ebcbe7e8ad5af3cf92e6eb0ece75"
+    },
+    {
+      "path": "native/ui/17-lavender-profile-auth-attempt.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/17-lavender-profile-auth-attempt.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 882,
+      "sha256": "2115eba8b01c9da34ec8b9372c63caa60114b280d22db1404f3ba8f8a68a8221"
+    },
+    {
+      "path": "native/ui/17-lavender-profile-auth-attempt.png",
+      "source_path": "work/kit010-native-20261116/ui/17-lavender-profile-auth-attempt.png",
+      "kind": "original_ui_bytes",
+      "bytes": 258639,
+      "sha256": "f35677f8945d4126c2e5af08d111bda7de90955c861340a358860ac5cab55f95"
+    },
+    {
+      "path": "native/ui/18-lavender-en-rule-editor.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/18-lavender-en-rule-editor.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 4520,
+      "sha256": "aace938196f35623589beabe2b0d0b3736958080bf82e3911ab971855975d43a"
+    },
+    {
+      "path": "native/ui/18-lavender-en-rule-editor.png",
+      "source_path": "work/kit010-native-20261116/ui/18-lavender-en-rule-editor.png",
+      "kind": "original_ui_bytes",
+      "bytes": 557166,
+      "sha256": "db6e6ff252221e38b3027af85437759dacf327e79e3ac062c093e1bfb54fa9ac"
+    },
+    {
+      "path": "native/ui/19-lavender-en-dynamic-rule.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/19-lavender-en-dynamic-rule.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 4431,
+      "sha256": "8101dfff370c359d8ee045276c2bf83d91ad98af8acff63e28d1cd1a07f79012"
+    },
+    {
+      "path": "native/ui/19-lavender-en-dynamic-rule.png",
+      "source_path": "work/kit010-native-20261116/ui/19-lavender-en-dynamic-rule.png",
+      "kind": "original_ui_bytes",
+      "bytes": 559566,
+      "sha256": "1ffdfe544ff661b82af2cc20833d3ce8468e7964c214683f271db96ad46c2963"
+    },
+    {
+      "path": "native/ui/20-lavender-en-ai-draft.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/20-lavender-en-ai-draft.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 2178,
+      "sha256": "d30f2abccfd840e80c182bfaa251583ebd23ca847bbabeaded9cab9d1a41a070"
+    },
+    {
+      "path": "native/ui/20-lavender-en-ai-draft.png",
+      "source_path": "work/kit010-native-20261116/ui/20-lavender-en-ai-draft.png",
+      "kind": "original_ui_bytes",
+      "bytes": 408081,
+      "sha256": "0b965ca0e740f051774955a8ff475c8f8398325b7d189d1d3b3ad348fb592c35"
+    },
+    {
+      "path": "native/ui/21-final-cancelled-drafts.ax.txt",
+      "source_path": "work/kit010-native-20261116/ui/21-final-cancelled-drafts.ax.txt",
+      "kind": "original_ui_bytes",
+      "bytes": 4533,
+      "sha256": "85ce8c32af6554ae7f48031b95792eff978d0443ffbfe3f0eca7fbafa7086094"
+    },
+    {
+      "path": "windows-inventory/inventory-r1.json",
+      "source_path": "work/windows-ci-inventory-20261116/inventory-r1.json",
+      "kind": "derived_independent_inventory",
+      "bytes": 393219,
+      "sha256": "0ef2c4b87a82f3f6fd6a67e430f811b4cd4a4001831e5305b5ff8b269da1ffaa"
+    },
+    {
+      "path": "windows-inventory/provenance-r1.json",
+      "source_path": "work/windows-ci-inventory-20261116/provenance-r1.json",
+      "kind": "derived_independent_inventory",
+      "bytes": 8991,
+      "sha256": "68cf681b4b7a24546bdea0b4fffc14dd1a8685b49fb6bab8d09aebd385b4734e"
+    },
+    {
+      "path": "windows-inventory/report.md",
+      "source_path": "work/windows-ci-inventory-20261116/report.md",
+      "kind": "derived_independent_inventory",
+      "bytes": 24324,
+      "sha256": "0c4e60ea526acff318f57b4d4c02eb0d83a9a8fa92d6d580647b925dcd1a4d45"
+    },
+    {
+      "path": "windows-inventory/summary-r1.json",
+      "source_path": "work/windows-ci-inventory-20261116/summary-r1.json",
+      "kind": "derived_independent_inventory",
+      "bytes": 42759,
+      "sha256": "34ea7c446644d49cfb3ba8b7cc041b556517eba259195bc59c3624c3aed528e9"
+    },
+    {
+      "path": "windows-inventory/verification-r1.json",
+      "source_path": "work/windows-ci-inventory-20261116/verification-r1.json",
+      "kind": "derived_independent_inventory",
+      "bytes": 3455,
+      "sha256": "a3d628c821fe6cea3fc0e20143f5656e0a4c55bd216659b6dcbf2774077f4872"
+    }
+  ]
+}

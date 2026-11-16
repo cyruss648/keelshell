@@ -14,7 +14,7 @@
 macOS/Ubuntu 已终态 success，app 分别 `1339/0/2`、`1340/0/2`。
 
 接续候选使用保留句柄加空 NT 相对名取得短期 DELETE lease，原长期权限和分享
-规则保持。三项新回归和本机专项已过，Windows 实际 70 项仍待新精确 CI。
+规则保持。三项新回归和本机专项已过，新精确 CI 的 Windows 70 项预检也已逐名全过。
 组合升级 Kit 到直接要求 `0.10`/锁定 `0.10.0`，补应用语言方向及真实键盘 red/green。
 最新官方检查覆盖 37 包/113 声明全部通过，旧失败和 UNKNOWN 原件保持。
 前三轮组合门禁分别发现 AI 设置、文件工具和隧道管理视图栈溢出，保留失败并
@@ -25,8 +25,19 @@ macOS/Ubuntu 已终态 success，app 分别 `1339/0/2`、`1340/0/2`。
 rustdoc `14/0`、Python `290 run / 1 skip`，app `1340/0/2` 的 1,342 名逐项匹配，
 719 项输入零漂移；fmt、严格 Clippy、x.y 与三组 controller 全过。
 最终非作者增量/组合静态批准，P0–P3 全 0，独立执行 0，并已核对父最终门禁。
-237 份成员已持久封存、current 绑定零 mismatch；完成 index/Git 树绑定后及时
-提交推送。真实 Windows、跨平台桌面和发行另行验收。
+237 份成员已随源码 `3c331c1cc3cc428c33c606b9af578057325871b9` 推送；
+current/index/精确 Git 树及清理后绑定均零 mismatch，读回三方 SHA 一致。
+精确 Quality `43834927464` 已 failure：Windows preflight `70/0/0`，
+app `1325/4/2 ignored`，原八项归档七过一败；macOS/Ubuntu success，
+app 分别 `1340/0/2`、`1341/0/2`，真实 OpenSSH 步骤均成功。
+独立库存复核已关闭，完整 Windows 仍 HOLD；四项 app 失败正在修复。
+三候选目录 5,200 文件/43,290,303 字节及 5 份自有 crash 原报告已回收。
+新 Kit 正常 macOS 包已实际观察三主题、双语及自有 SSH/SFTP、AI/隧道编辑，
+英文顶栏裁切待修；程序、容器、镜像、私钥和运行态已回收。
+19 图/21 AX、三平台完整原日志及非作者结果共 111 个成员已持久封存，
+精确源码/逐成员验证实际 0/reaped、零 mismatch，封存 agent 已关闭。
+详见[精确 CI 与限定原生记录](testing/records/2026-11-16-kit010-native-ci.md)；
+其余平台桌面、完整输入矩阵及发行仍分别验收。
 
 ## 2026-11-16 Windows 目录游标与文件回归同步
 
