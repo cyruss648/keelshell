@@ -6,7 +6,29 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
-## 2026-11-16 三平台工程门禁修复（本机完整门禁通过，真实 CI 待复验）
+## 2026-11-16 命令输入框双向焦点导航（集中门禁通过，原生路径 HOLD）
+
+已导入三文件修复与八项 GPUI 回归，实际编译红例 `4/4`，修后 `8/0/0`。
+app 实际库存 1,339 名含全部新增；718 项工程输入已冻结。
+相关 `29+11+9` 专项通过，新非作者源码批准 P0–P3 全 0，独立执行 Rust 0。
+完整门禁实际 `exit 0 / reaped / 699.865s`：Rust `3218/0/48 ignored`、
+rustdoc `14/0`、Python `290 run / 1 skipped`，归档 helper `30/30`，
+格式、严格 Clippy、x.y 与三组 controller 通过；新增名、全部库存和 718 项
+工程输入绑定。正常 GUI/MCP 与 macOS 暂存包检查通过，门禁后摘要保持。
+新包 Frost 实际连接，第一记 Shift+Tab 离开命令框，七步草稿保持；
+前台变化中止，五轮脚本均未完整成功，双向到两列表及反向 Tab 仍 HOLD。
+三个根进程、两端口、私有目录与 84 项 birth 身份已完成回收确认。
+其他主题原生、完整产品/多平台桌面边界保持。
+见[当前记录](testing/records/2026-11-16-command-composer-focus.md)和
+[决策](adr/0146-command-composer-tab-focus.md)。
+
+## 2026-11-16 三平台工程门禁修复（macOS/Linux CI 通过，Windows 归档待修）
+
+精确 `80647ed` 的 run `43797131194 / attempt 1` 已终态：macOS 和 Ubuntu
+success，Windows app `1310/8/2 ignored`；八项归档审核准备共同失败，
+具体底层原因未知。Python 与真实身份绑定控制已成功，不能以成功控制的
+winerror 1816 解释归档失败。见[精确 CI 跟进](testing/records/2026-11-16-platform-ci-followup.md)；
+以下保留原提交时的实际记录。
 
 已推送基线 `4fd1932` 的 Quality run `43789081172 / attempt 1`：
 Windows 在 Python 阶段 `262 run / 2 failures / 20 errors / 15 skipped`，

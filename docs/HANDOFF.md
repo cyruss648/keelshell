@@ -8,7 +8,39 @@
 不强推或覆盖远端其他提交。当前远端 main 另有一项项目状态文档，不能忽略它直接
 覆盖 main。交付回执在当前批次的持久证据中保存。
 
-## 当前批次：三平台工程门禁修复（本机完整门禁通过，真实 CI 待复验）
+## 当前批次：命令输入框双向焦点导航（集中门禁通过，原生路径 HOLD）
+
+基线 `892aada58a61458fea0f130ccc912036daf2804b`。独立作者交付的三文件补丁
+已按摘要导入；父取得实际编译红例 `4 pass / 4 fail`，生产修复后 `8/0/0`。
+命令框只在真实聚焦、无 active modal、无 marked text 时接管两个 Kit 缩进
+动作并沿窗口顺序导航；草稿、其他输入、编辑器和终端保持原作用域。
+实际 app 库存 1,339 名含全部八个新增名字。718 项工程冻结 SHA-256 为
+`c3fa4e8b1a8a0f11f8177334fd0c9927e2f1f45d4875cb61212987fadfc6f056`。
+新非作者只读源码批准，开放 P0–P3 为 0，没有独立执行 Rust；父相关
+`29+11+9` 专项通过。完整门禁实际 `exit 0 / reaped / 699.865s`：
+Rust `3218/0/48 ignored`、rustdoc `14/0`、Python `290 run / 1 skipped`、
+归档 helper `30/30`，fmt、严格 Clippy、x.y 与三组 controller 通过。
+八个新增名实际通过、1,339 项清单逐名匹配、718 项完整输入零漂移；
+原 reviewer PENDING 条件由相同输入成功回执另行满足，不改写原报告。
+正常 arm64 GUI/MCP 和暂存包检查通过，门禁后摘要保持，没有安装或发行。
+真实新包 Frost SSH/SFTP 指纹核对与连接完成；r3 第一记 Shift+Tab 离开命令框，
+七步保持草稿与 marker absent，随后前台变化失败，未到达两文件列表。
+五个焦点脚本均没有完整成功；**完整双向路径及反向 Tab 仍 HOLD**。
+新版临时 helper 补逐字符前台检查，不代签旧投递归属；其他主题/平台、
+IME/VoiceOver 与 raw PTY 审计未验。三个根进程、两端口和私有目录已回收，
+归一化 birth tuple 与活进程正控的 r2 回执确认 84 项零活匹配；旧错误比较
+回执保留但不可采用。原件从
+[当前记录](testing/records/2026-11-16-command-composer-focus.md)继续。
+唯一 target 仍属于当前父 checkout，没有切换归属。
+
+## 上一批次：三平台工程门禁修复（macOS/Linux CI 通过，Windows 归档待修）
+
+更新：精确 `80647ed` 的 Quality `43797131194 / attempt 1` 已终态 failure；
+macOS 与 Ubuntu success，Windows 已通过 Python 与原生身份绑定控制，
+在 app 归档共同审核准备断言出现八项失败（`1310/8/2 ignored`）。
+没有底层 errno，不能跳过或猜测本地后端原因；详细原件和下一步见
+[精确 CI 跟进](testing/records/2026-11-16-platform-ci-followup.md)。
+下面保留原推送及门禁的时点事实。
 
 基线 `4fd193227bb9e5e5e4b49ad6f1503f10741f7383` 已推送。
 精确 push 的 Quality run `43789081172 / attempt 1` 在 Windows Python 阶段失败：
@@ -55,7 +87,7 @@ x.y 政策与三组 AI controller 全通过。1,331 项 app 库存逐名匹配�
 归档、Git blob 绑定及清理以实际回执为准。本批没有重建正常 GUI/MCP 或签署新
 桌面验收，现有正常程序摘要保持。
 
-下一批命令输入框 Tab/ShiftTab 的三文件补丁和八项 GPUI 回归已由独立作者完成，
+历史接续：命令输入框 Tab/ShiftTab 的三文件补丁和八项 GPUI 回归已由独立作者完成，
 原件已逐项核对并复制到 `work/composer-focus-integration-20261116/author/`；
 尚未编译、集成、实际红绿或评审，不能计入上述 r4 门禁或批准。作者 agent 已关闭，
 受管 `composer-focus-20261116` 树已归档，路径及 Git worktree 记录 absent。

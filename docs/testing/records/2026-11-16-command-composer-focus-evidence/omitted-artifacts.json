@@ -1,0 +1,50 @@
+[
+  {
+    "path": "__pycache__/native_flow.cpython-315.pyc",
+    "bytes": 5268,
+    "sha256": "506942e5b2bf36f7eb9220e277e34b63e234ab0ad4e5c12631d2a276986ed93d",
+    "reason": "reproducible Python cache"
+  },
+  {
+    "path": "__pycache__/observe.cpython-315.pyc",
+    "bytes": 6122,
+    "sha256": "19db0f9971dade5f56338ce030df10226e11f99e19d10c3b54ae74d5dd993349",
+    "reason": "reproducible Python cache"
+  },
+  {
+    "path": "native_ax",
+    "bytes": 174680,
+    "sha256": "2ec08fbb1ca0d39c55fe18b03025c3c2256e5f824a8604ae03edddaafad8d75e",
+    "reason": "compiled native observer; sources and build receipts retained"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/Info.plist",
+    "bytes": 993,
+    "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70",
+    "reason": "reproducible staged native application; complete manifest retained"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-app",
+    "bytes": 199127040,
+    "sha256": "af2a88364650b90b5dfab4ca8a4655a8430febc4971f575c7a7fd0fde19eb9a3",
+    "reason": "reproducible staged native application; complete manifest retained"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-mcp",
+    "bytes": 14548464,
+    "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816",
+    "reason": "reproducible staged native application; complete manifest retained"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/PkgInfo",
+    "bytes": 8,
+    "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "reason": "reproducible staged native application; complete manifest retained"
+  },
+  {
+    "path": "package-r1/KeelShell.app/Contents/Resources/KeelShell.icns",
+    "bytes": 995855,
+    "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425",
+    "reason": "reproducible staged native application; complete manifest retained"
+  }
+]

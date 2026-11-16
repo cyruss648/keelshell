@@ -1,5 +1,14 @@
 # Hallmark 与原生 GPUI 界面
 
+## 2026-11-16 命令输入框焦点导航
+
+命令栏的 Tab/Shift+Tab 采用窗口实际绘制的焦点顺序，草稿保留原字节。
+仅在命令框自身聚焦且无活动模态、无组合文字时接管 Kit 缩进动作；
+运行按钮、编辑器、终端和其他输入保留原作用域。沿用三主题 registry、
+Palette、Kit 组件和既有焦点样式，没有新增布局、字面配色或主题 ID 分支。
+行为决策见 [ADR 0146](../adr/0146-command-composer-tab-focus.md)，实际验证见
+[本批记录](../testing/records/2026-11-16-command-composer-focus.md)。
+
 ## 2026-11-16 编辑器键盘与格式审核
 
 既有草稿动作区增加一个查找入口，保存和查找的双语 tooltip 说明当前平台按键。

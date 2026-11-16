@@ -1,0 +1,12 @@
+[
+  {
+    "path": "previews/native-command-draft.png",
+    "source_artifact": "raw/native-frost-r1/frost-r3-draft.png.gz",
+    "sha256": "254d1dcaaf5e73dc22dbe79bd0f154bf0d12d7b9147035a2f91d2218585581b5"
+  },
+  {
+    "path": "previews/native-first-reverse-tab.png",
+    "source_artifact": "raw/native-frost-r1/frost-r3-reverse-first.png.gz",
+    "sha256": "f5d885436e9f0a185c0cb3ab87a3971da48912a4f8af8f1541ca26a061f510dd"
+  }
+]

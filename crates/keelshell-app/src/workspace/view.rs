@@ -1335,6 +1335,26 @@ impl Workspace {
             .into_any_element()
     }
 
+    fn move_command_focus(&mut self, reverse: bool, window: &mut Window, cx: &mut Context<Self>) {
+        if self.active_modal().is_some()
+            || !self.command.read(cx).focus_handle(cx).is_focused(window)
+            || self.command.update(cx, |input, cx| {
+                input.marked_text_range(window, cx).is_some()
+            })
+        {
+            cx.propagate();
+            return;
+        }
+        // PlainText textareas consume Tab as indent/outdent, even with no edit.
+        // Only the command composer substitutes the rendered focus order.
+        if reverse {
+            window.focus_prev(cx);
+        } else {
+            window.focus_next(cx);
+        }
+        cx.stop_propagation();
+    }
+
     #[inline(never)]
     fn command_input_bar(
         &self,
@@ -1421,6 +1441,16 @@ impl Workspace {
                 }
             }))
             // Bound input actions run before raw key callbacks in GPUI.
+            .capture_action(cx.listener(
+                |view, _: &gpui_kit::component::input::IndentInline, window, cx| {
+                    view.move_command_focus(false, window, cx);
+                },
+            ))
+            .capture_action(cx.listener(
+                |view, _: &gpui_kit::component::input::OutdentInline, window, cx| {
+                    view.move_command_focus(true, window, cx);
+                },
+            ))
             .capture_action(cx.listener(
                 |view, _: &gpui_kit::component::input::MoveUp, window, cx| {
                     if !view.suggestion_action("up", window, cx) {
