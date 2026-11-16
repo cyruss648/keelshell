@@ -16,7 +16,10 @@
 app `1341/0/2 ignored`，1,343 名逐项相同、719 输入零漂移。
 新非作者静态 APPROVE、P0–P3 全 0、独立执行 0，已关闭。
 新正常包构建/检查成功；Mac 锁屏使 GUI 操作/截图均为 0，原生顶栏验收保持开放。
-自有程序及运行态已回收，包保留供解锁后检查；下一步及时推送并核对新 Windows CI。
+源码及 44 成员证据已在 `8c07d61009dba14f989dd0c00a2a370dc7a2d37b`
+推送，三方 SHA 一致、读回时工作区干净；精确 Git/归档绑定实际 0/reaped、
+零 mismatch。新 Quality `43848390542 / attempt 1` 运行中，旧四败仍待诊断。
+自有程序及运行态已回收，包保留供解锁后检查；Windows-only 私有阶段回归另批编写。
 见[本批记录](testing/records/2026-11-16-workbench-fit-and-file-diagnostics.md)。
 
 ## 2026-11-16 Windows 目录发布短期句柄与 Kit 0.10

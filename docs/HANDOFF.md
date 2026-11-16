@@ -9,7 +9,7 @@
 - 用户已确认远端恢复，完成的功能批次及时提交并推送，读取本地、tracking、
   远端 SHA；不强推。当前分支为 `feature/editor-unicode-codec-20261114`。
   最近已实际读回三方相等的源码提交是
-  `3c331c1cc3cc428c33c606b9af578057325871b9`，读回时工作区干净。
+  `8c07d61009dba14f989dd0c00a2a370dc7a2d37b`，读回时工作区干净。
   `origin/main` 另有独立状态文档，不能直接覆盖。
 - 本批源码及证据已在 `878f13b` 推送原功能分支；临时
   `feature/archive-deadline-clock-20261116` 已删除，本地/tracking/远端均 absent。
@@ -67,6 +67,12 @@ CUA 报告 Mac 锁屏，GUI 操作和截图均 0；自有进程 SIGTERM 后
 `241/reaped/62.536s`，运行态已回收，包保留供解锁后复核。
 实际英文工具栏、新精确 Windows CI 仍待验证。
 见[当前批次](testing/records/2026-11-16-workbench-fit-and-file-diagnostics.md)。
+五文件源码及 44 成员证据已在 `8c07d61` 提交推送，精确 Git 源码绑定实际
+`0/reaped/6.790s`，719 项输入/44 成员均零 mismatch。
+新 Quality `43848390542 / attempt 1` 绑定该源码，当前 in_progress；
+旧 `43834927464` 的四败保持，不移签或重试。
+新 Windows-only 私有 staging/publish 回归由单独作者编写，禁止运行 Cargo；
+父继续跟进精确 CI，不能把未提交测试候选混入已推送冻结。
 
 ## 已交付：Windows 目录发布短期句柄与 Kit 0.10
 
@@ -307,7 +313,9 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 本批与游标批次原目录已在持久归档和精确 Git 树绑定后回收，不能再依赖。
 前批交付/CI、正常包、原生复核、Windows 库存及封存目录均已持久绑定后清理。
 当前活动目录为 `work/workbench-fit-20261116/`，新非作者原件为
-`work/workbench-fit-review-20261116/`；尚无活动 agent。
+`work/workbench-fit-review-20261116/`（该 reviewer 已关闭）；
+Windows-only 作者材料为 `work/windows-extraction-stage-candidate-20261116/`。
+正常包仍保留给锁屏解除后的原生复核。
 旧 `work/windows-native-phases-integration-20261116/` 已回收。
 前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 的 11 文件、
 23,386 字节已在 `878f13b` 归档后回收。

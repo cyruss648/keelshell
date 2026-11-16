@@ -32,3 +32,8 @@ python3 -B docs/testing/records/2026-11-16-workbench-fit-evidence/verify.py
 也可使用 `--source` 加完整提交 SHA，核对精确 Git 源码。后续源码变更时，
 当前模式应失败；应核对本批的真实交付提交，不能重新签署旧冻结。
 父的首次校验实际 `0/reaped`，成员/源码 mismatch 均为 0、测试重放为 0。
+
+源码在 `8c07d61009dba14f989dd0c00a2a370dc7a2d37b` 推送后，精确 Git 树校验
+实际 `0/reaped/6.790s`，零 mismatch。原字节的 `delivery-r1.json`、
+`commit-bind-r1.json` 和 `commit-bind-r1.log` 作为交付补充件保存在本目录，
+不计入此前 44 个归档成员；该次读回三方 SHA 相同、工作区干净。
