@@ -90,3 +90,11 @@ macOS 测试调查另作下一片，不改写本批冻结和成功回执。
 
 本批持久原件、复核与交付状态从
 [证据入口](2026-11-16-archive-diagnostics-and-native-focus-evidence/README.md)读取。
+
+源码及选定证据已在 `76b8253acd9bfa62180563f482e851064bc1ea34` 提交并普通推送，
+本地、tracking、远端 SHA 实际一致，工作区干净；index 和精确提交绑定均零 mismatch。
+新精确 Quality `43806549649 / attempt 1` 已启动，首次快照 in_progress，
+不是新 Windows 或三平台通过。活动原件位于 `work/archive-diagnostics-ci-20261116/`。
+318 份原件核对后回收两个已用完目录：500 文件、逻辑 `314,582,633` 字节；
+下一片作者 13 文件已逐字节复制保留，正常二进制和唯一 target 保留。
+本批核对、源码、原生和下一片作者四个 agent 均已关闭，没有创建用户 chat 或 worktree。

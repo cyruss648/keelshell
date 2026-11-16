@@ -38,6 +38,14 @@ macOS 下一片调查并行进行，不能移签本机门禁。
 21 与官方 stable 元数据超时 UNKNOWN。接续从
 [本批记录](testing/records/2026-11-16-archive-diagnostics-and-native-focus.md)读取；
 提交、远端和最终清理以持久证据的实际回执为准。
+源码 `76b8253acd9bfa62180563f482e851064bc1ea34` 已推送、三方一致；
+318 原件和 718 工程 blob 在 index/精确提交绑定均零 mismatch。
+新 Quality `43806549649 / attempt1` 首次快照 in_progress，保留
+`work/archive-diagnostics-ci-20261116/` 跟进，不提前清理或代签。
+旧两个目录已回收 500 文件、`314,582,633` 字节；下一片 macOS 固定截止
+作者三文件候选和报告已复制到 `work/archive-deadline-integration-20261116/author/`，
+13 文件摘要相等，尚未集成/编译/独立复核。四个本批 agent 均关闭，
+正常二进制和唯一 target 保留；不要继续依赖已删除的 Windows 调查工作目录。
 
 ## 上一批次：命令输入框双向焦点导航（集中门禁通过，原生路径 HOLD）
 

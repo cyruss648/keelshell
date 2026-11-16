@@ -36,3 +36,11 @@
 它逐项验证 gzip/原字节、预览、工程路径集合及源码 Git blob。
 后续工程输入变化时，不应放宽本冻结或把本批结果移签到新输入。
 交付、推送和临时副本清理回执另行追加，不自称已存在于较早源码提交。
+
+源码及以上 318 份选定原件已在
+`76b8253acd9bfa62180563f482e851064bc1ea34` 提交推送，三方 SHA 相等；
+`source-delivery-readback.json` 保存精确提交/当前字节绑定零 mismatch。
+`delivery-command-manifest.json` 与 `delivery-raw/` 另保留五份提交、推送和读回原件。
+`source-ci-initial.json` 为精确源码的新 Quality `43806549649 / attempt1`
+首次 in_progress 快照。`cleanup.json` 记录 500 个临时文件、
+`314,582,633` 字节回收，两个旧目录 absent；下一片 13 文件和活动 CI 目录保留。

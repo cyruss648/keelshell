@@ -1,0 +1,40 @@
+{
+  "observed_at": 1794804812.47948,
+  "directories": [
+    {
+      "path": "work/windows-archive-fix-20261116",
+      "files": 447,
+      "logical_bytes": 312180729,
+      "absent": true
+    },
+    {
+      "path": "work/command-focus-ci-20261116",
+      "files": 53,
+      "logical_bytes": 2401904,
+      "absent": true
+    }
+  ],
+  "preserved_originals_verified": 318,
+  "source_commit": "76b8253acd9bfa62180563f482e851064bc1ea34",
+  "source_git_binding": {
+    "source": "76b8253acd9bfa62180563f482e851064bc1ea34",
+    "evidence": "76b8253acd9bfa62180563f482e851064bc1ea34",
+    "originals": 318,
+    "engineering_inputs": 718,
+    "previews": 4,
+    "mismatches": [],
+    "checked_current_bytes": true
+  },
+  "next_author_files_preserved": 13,
+  "new_ci_active_directory": "work/archive-diagnostics-ci-20261116",
+  "normal_target_and_binaries_retained": true,
+  "agents_closed": [
+    "Zeno",
+    "Herschel",
+    "Harvey",
+    "Popper"
+  ],
+  "user_chats_created": 0,
+  "worktrees_created": 0,
+  "native_fixture_cleanup": "raw/focus-native-r1/cleanup-readback.json.gz"
+}

@@ -19,6 +19,9 @@ CUA 在 Frost 浅色中文、双侧各一文件场景完成反向 32 步与正�
 精确 9d0f886 的 CI：Ubuntu success，macOS 固定截止测试 Elapsed，
 Windows 终态 `1318/8/2 ignored`，仍为同八项缺审失败；后续调查及远端交付从
 [本批记录](testing/records/2026-11-16-archive-diagnostics-and-native-focus.md)接续。
+源码 `76b8253` 已推送并三方匹配；新精确 Quality `43806549649/attempt1`
+in_progress。318 原件及工程 blob 绑定通过后回收 500 文件、`314,582,633` 字节；
+下一片未验证的 macOS 截止测试候选已复制保留，四个 agent 均关闭。
 
 ## 2026-11-16 命令输入框双向焦点导航（集中门禁通过，原生路径 HOLD）
 

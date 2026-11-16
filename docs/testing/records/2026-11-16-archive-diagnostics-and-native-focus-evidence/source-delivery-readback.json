@@ -1,0 +1,17 @@
+{
+  "observed_at": 1794804701.663593,
+  "local": "76b8253acd9bfa62180563f482e851064bc1ea34",
+  "tracking": "76b8253acd9bfa62180563f482e851064bc1ea34",
+  "remote": "76b8253acd9bfa62180563f482e851064bc1ea34",
+  "all_equal": true,
+  "status": "",
+  "binding": {
+    "source": "76b8253acd9bfa62180563f482e851064bc1ea34",
+    "evidence": "76b8253acd9bfa62180563f482e851064bc1ea34",
+    "originals": 318,
+    "engineering_inputs": 718,
+    "previews": 4,
+    "mismatches": [],
+    "checked_current_bytes": true
+  }
+}

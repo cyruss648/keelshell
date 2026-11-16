@@ -1,0 +1,39 @@
+{
+  "files": [
+    {
+      "path": "feature-commit-r1.json",
+      "archive": "delivery-raw/feature-commit-r1.json.gz",
+      "bytes": 796,
+      "sha256": "efde4b87b5061106c299f47adfdbfbc2f30e55558730d664ea44111def8ae3f9",
+      "gzip_sha256": "95f6ed6ebe431def5dbbb9a3becd5732f9c51470377f829ab231478e950f24e6"
+    },
+    {
+      "path": "feature-commit-r1.log",
+      "archive": "delivery-raw/feature-commit-r1.log.gz",
+      "bytes": 46632,
+      "sha256": "0d46c9ee60201a55ed8b237cc3099d867a8423c5141b5d09c72c16e0652780a7",
+      "gzip_sha256": "2ac2a2d8783989f8c8b8397dd03879c4d1484634904cc31700e3e14b7f6e57b3"
+    },
+    {
+      "path": "feature-push-r1.json",
+      "archive": "delivery-raw/feature-push-r1.json.gz",
+      "bytes": 855,
+      "sha256": "76b031c07c603d4444d5345bc421d5d37e71c0a811cd94eaad265a470a8ff8fa",
+      "gzip_sha256": "24196c4849683fa6acf3a7c9bbcbf874aa9e5e808993ac10bb0bed49b0f3ae05"
+    },
+    {
+      "path": "feature-push-r1.log",
+      "archive": "delivery-raw/feature-push-r1.log.gz",
+      "bytes": 146,
+      "sha256": "1394d297463479909348692a79b254491ddef89a961739d2c22ffdc32830841c",
+      "gzip_sha256": "9f2266bd57e456880aea07968f8f44cd029f6f73ec7552a89a77b34dc2443183"
+    },
+    {
+      "path": "feature-delivery-readback-r1.json",
+      "archive": "delivery-raw/feature-delivery-readback-r1.json.gz",
+      "bytes": 511,
+      "sha256": "f1919b19230d010723b95588bf19bf342f32fe929f4a3a3e5047de0b985faea6",
+      "gzip_sha256": "4b7c0aca5a53e7cbaa15bfdc338fc459b3157d6d01440daf7ff52bc3481353d4"
+    }
+  ]
+}
