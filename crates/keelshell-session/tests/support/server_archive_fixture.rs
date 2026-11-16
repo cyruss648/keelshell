@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 use std::error::Error;
+use std::future::Future;
 use std::io::{Read, Seek, Write};
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -60,6 +61,7 @@ pub enum Fault {
 pub struct Gate {
     armed: AtomicBool,
     entered: AtomicUsize,
+    entry: tokio::sync::Notify,
     released: tokio::sync::Notify,
 }
 
@@ -72,6 +74,17 @@ impl Gate {
         self.entered.load(Ordering::Acquire)
     }
 
+    /// Observe entry without a polling timer that could advance a paused clock.
+    pub async fn wait_for_entry(&self) {
+        loop {
+            let notification = self.entry.notified();
+            if self.entered() != 0 {
+                return;
+            }
+            notification.await;
+        }
+    }
+
     pub fn release(&self) {
         self.armed.store(false, Ordering::Release);
         self.released.notify_one();
@@ -80,6 +93,7 @@ impl Gate {
     async fn hold(&self) -> TestResult {
         if self.armed.load(Ordering::Acquire) {
             self.entered.fetch_add(1, Ordering::AcqRel);
+            self.entry.notify_one();
             tokio::time::timeout(Duration::from_secs(8), self.released.notified()).await?;
         }
         Ok(())
@@ -276,6 +290,41 @@ impl Fixture {
         .await?;
         let sftp = Arc::new(ssh.sftp().await?);
         Ok((ssh, sftp))
+    }
+
+    /// Drive real I/O with a frozen Tokio clock and a bounded wall-clock watchdog.
+    pub async fn wait_frozen<T>(
+        &self,
+        phase: &str,
+        budget: Duration,
+        operation: impl Future<Output = T>,
+    ) -> TestResult<T> {
+        let started = Instant::now();
+        tokio::pin!(operation);
+        loop {
+            if started.elapsed() >= budget {
+                return Err(format!(
+                    "server archive fixture phase={phase} exceeded wall budget {budget:?}; \
+                     inspect={} pack={} opens={} eof={} input_bytes={} dispatch_entries={} \
+                     read_entries={}",
+                    self.controls.inspect_commands.load(Ordering::Acquire),
+                    self.controls.pack_commands.load(Ordering::Acquire),
+                    self.controls.opens.load(Ordering::Acquire),
+                    self.controls.eof_count.load(Ordering::Acquire),
+                    self.controls.input_bytes.load(Ordering::Acquire),
+                    self.controls.dispatch_gate.entered(),
+                    self.controls.read_gate.entered(),
+                )
+                .into());
+            }
+            // Keep the runtime runnable so idle auto-advance cannot consume the
+            // archive deadline while sockets, files or the Python helper run.
+            tokio::select! {
+                biased;
+                output = &mut operation => return Ok(output),
+                _ = tokio::task::yield_now() => {}
+            }
+        }
     }
 
     pub fn pack_fault(&self, fault: Fault) -> TestResult {

@@ -1,5 +1,22 @@
 # Capability ledger
 
+## 2026-11-16: scoped composer-to-list focus follow-up
+
+The later macOS Frost light Chinese check, using an owned SSH/SFTP fixture with
+one file in each list, completed both forward Tab and reverse Shift+Tab from
+the composer to both list roots. Raw screenshots establish the focus outline;
+all 167 navigation AX values were independently compared as complete bytes.
+The successful 67-step subset preserved its full 149-byte draft. Initial
+larger-list attempts remain incomplete. AX setValue established the exact draft,
+so this does not establish IME input, VoiceOver, raw PTY zero-output auditing,
+other themes, sizes or platforms. The scoped nonauthor evidence review approved
+with zero open P0–P3; it did not replay the UI.
+
+This supplements the original reverse-Tab hold below without changing its
+historical result. See the
+[focus record](../testing/records/2026-11-16-archive-diagnostics-and-native-focus.md#原生焦点补验)
+and [keyboard guide](FILE_BROWSER_KEYBOARD.md).
+
 ## 2026-11-16: focused file-list keyboard and status semantics
 
 Local and remote lists have separate focus, scrolling and stable path cursors.

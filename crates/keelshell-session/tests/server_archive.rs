@@ -653,34 +653,77 @@ async fn server_archive_cancel_during_admission_releases_without_unknown_write()
     Ok(())
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "current_thread")]
 async fn server_archive_dispatch_and_readback_share_one_fixed_execution_deadline() -> TestResult {
-    let fixture = Fixture::start().await?;
-    let (ssh, sftp) = fixture.connect_timeout(Duration::from_secs(1)).await?;
-    let plan = plan(&fixture, &sftp, ArchiveFormat::Zip).await?;
+    let fixture = Fixture::start()
+        .await
+        .map_err(|error| format!("fixed deadline fixture phase=start: {error}"))?;
+    let (ssh, sftp) = fixture
+        .connect_timeout(Duration::from_secs(1))
+        .await
+        .map_err(|error| format!("fixed deadline fixture phase=connect: {error}"))?;
+    let plan = plan(&fixture, &sftp, ArchiveFormat::Zip)
+        .await
+        .map_err(|error| format!("fixed deadline fixture phase=plan: {error}"))?;
     fixture.controls.dispatch_gate.arm();
     fixture.controls.read_gate.arm();
     let owner = sftp.clone();
     let current = plan.clone();
-    let started = std::time::Instant::now();
+    // Setup uses real time. Only the execution deadline is controlled here;
+    // the real helper and transport must still reach both barriers.
+    tokio::time::pause();
+    let started = tokio::time::Instant::now();
     let execution = tokio::spawn(async move {
         owner
             .execute_server_archive(current, &AtomicBool::new(false))
             .await
     });
-    entered(|| fixture.controls.dispatch_gate.entered() != 0).await?;
-    tokio::time::sleep(Duration::from_millis(650)).await;
+    fixture
+        .wait_frozen(
+            "dispatch barrier",
+            Duration::from_secs(5),
+            fixture.controls.dispatch_gate.wait_for_entry(),
+        )
+        .await?;
+    assert_eq!(started.elapsed(), Duration::ZERO);
+    tokio::time::advance(Duration::from_millis(650)).await;
     fixture.controls.dispatch_gate.release();
-    entered(|| fixture.controls.read_gate.entered() != 0).await?;
+    fixture
+        .wait_frozen(
+            "readback barrier",
+            Duration::from_secs(5),
+            fixture.controls.read_gate.wait_for_entry(),
+        )
+        .await?;
+    assert_eq!(started.elapsed(), Duration::from_millis(650));
+    assert_eq!(fixture.controls.pack_commands.load(Ordering::Acquire), 1);
+    assert!(!execution.is_finished());
+    // Cross the original 1s deadline, allowing one millisecond for timer rounding.
+    tokio::time::advance(Duration::from_millis(351)).await;
     assert!(matches!(
-        tokio::time::timeout(Duration::from_secs(2), execution).await??,
+        fixture
+            .wait_frozen(
+                "execution deadline",
+                Duration::from_secs(2),
+                tokio::time::timeout(Duration::from_secs(2), execution),
+            )
+            .await???,
         Err(SessionError::MutationUncertain)
     ));
     assert!(started.elapsed() < Duration::from_millis(1400));
+    tokio::time::resume();
     fixture.controls.read_gate.release();
-    assert_quarantine(&sftp, &plan).await?;
-    alive(&ssh).await?;
-    sftp.close().await?;
-    ssh.close().await?;
+    assert_quarantine(&sftp, &plan)
+        .await
+        .map_err(|error| format!("fixed deadline fixture phase=quarantine: {error}"))?;
+    alive(&ssh)
+        .await
+        .map_err(|error| format!("fixed deadline fixture phase=alive: {error}"))?;
+    sftp.close()
+        .await
+        .map_err(|error| format!("fixed deadline fixture phase=sftp-close: {error}"))?;
+    ssh.close()
+        .await
+        .map_err(|error| format!("fixed deadline fixture phase=ssh-close: {error}"))?;
     Ok(())
 }

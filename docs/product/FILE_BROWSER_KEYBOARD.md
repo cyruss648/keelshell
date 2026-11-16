@@ -1,9 +1,12 @@
 # 文件列表键盘操作 / File browser keyboard
 
 状态：2026-11-16 工程门禁与非作者源码复核通过。实际 macOS Frost 中文窗口已
-观察下述浏览、审核和正向 Tab；原生反向 Tab 保持 HOLD，其他主题/平台、
-IME/VoiceOver 和完整焦点矩阵尚未验收。完成范围以
-[本批记录](../testing/records/2026-11-16-file-browser-keyboard.md)为准。
+观察下述浏览、审核和正向 Tab，见
+[本批记录](../testing/records/2026-11-16-file-browser-keyboard.md)。
+后续在两侧各一文件的同主题场景，完成从命令框正向及反向到两列表根的原生路径，
+完整草稿保持，见
+[焦点补验](../testing/records/2026-11-16-archive-diagnostics-and-native-focus.md#原生焦点补验)。
+原始多条目反向尝试仍不完整；其他主题/平台、IME/VoiceOver 和完整焦点矩阵尚未验收。
 
 点击文件行、复选框或列表空白处后，键盘焦点位于相应列表；也可使用 Tab 到达列表。
 游标边线与选中背景分别表示当前落点与选区。目录在前、当前列排序及隐藏项过滤
@@ -38,8 +41,12 @@ the retained anchor; Space toggles the cursor, Escape clears selection, and
 Cmd+A on macOS or Ctrl+A on Windows/Linux selects the whole visible set within
 the 32-entry limit. Oversized selections preserve the previous complete state.
 Engineering and independent source review have passed. Scoped macOS Frost
-observations include forward Tab; reverse native Tab remains on hold.
-Other themes/platforms, IME, VoiceOver and the complete focus matrix remain open.
+observations include browsing and forward Tab. A later Frost check with one
+file in each list completed forward and reverse native navigation from the
+composer to both list roots while preserving the full draft. See the
+[focus follow-up](../testing/records/2026-11-16-archive-diagnostics-and-native-focus.md#原生焦点补验).
+The original larger-list reverse attempt remains incomplete. Other
+themes/platforms, IME, VoiceOver and the complete focus matrix remain open.
 
 Enter opens a single remote entry, preserving dirty-draft review. In the local
 pane it browses an ordinary folder or fills a file transfer path. It never

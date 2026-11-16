@@ -6,6 +6,24 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
+## 2026-11-16 归档固定截止时间测试
+
+基线 `5c23396`，只调整 session 测试和 Tokio dev feature，生产实现不变。
+真实 SSH/helper/SFTP 流程以受控时钟验证原一秒预算，保留墙钟 watchdog、
+双路径隔离和 SSH 存活。精确候选 `1/0/0`、完整 target `40/0/0`；
+实际编译的错误续期变异被拒绝 `0/1/0`，精确恢复生产源码并重编译后 `1/0/0`。
+718 项冻结 `593459030133909451156982dbb949e53d872cccf6cfa30a18593b2411e66e21`；
+最终完整门禁实际 `exit 0 / reaped / 785.431s`：Rust `3220/0/48 ignored`、
+rustdoc `14/0`、Python `290 run / 1 skipped`；fmt、严格 Clippy、x.y 和三组
+controller 通过。app 1,341 名逐项相等，完整工程路径/字节零漂移。
+新非作者源码及文档复核 APPROVE，P0–P3 均 0，独立测试/UI 重放 0，已关闭；
+签署时的完整门禁待定条件由相同输入的最终成功回执另行满足。
+旧 macOS Elapsed 的具体阶段和生产根因仍 UNKNOWN；Windows 诊断 CI 另行跟进。
+记录见[本批测试](testing/records/2026-11-16-archive-deadline.md)。
+交接入口压缩为当前状态，旧 2,039 行
+[原文归档](HANDOFF_HISTORY_2026-11-16.md)逐字节保留；
+文件列表产品说明已同步上批限定原生焦点补验及其边界。
+
 ## 2026-11-16 归档诊断与原生焦点补验
 
 归档缺审断言补受限诊断和两项脱敏回归，Windows 根因仍 UNKNOWN。
