@@ -7,7 +7,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::{
-    CapabilityReason, CapabilityState, CpuCounters, DiskIoError, FilesystemSnapshot,
+    CapabilityReason, CapabilityState, CpuCounters, CpuSample, DiskIoError, FilesystemSnapshot,
     MemorySnapshot, MonitorError, MonitorPlatform, MonitorResult, NetworkCounters, Snapshot,
 };
 
@@ -141,8 +141,8 @@ pub(super) fn parse(input: &str, stderr: &[u8]) -> MonitorResult<(Snapshot, Capa
             platform: MonitorPlatform::Darwin,
             boot_time,
             uptime_seconds,
-            load_average,
-            cpu: CpuCounters { ticks },
+            load_average: Some(load_average),
+            cpu: CpuSample::Counters(CpuCounters { ticks }),
             memory,
             networks,
             filesystems,

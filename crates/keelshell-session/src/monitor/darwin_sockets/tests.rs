@@ -371,6 +371,7 @@ impl Reply {
 struct Control {
     reply: Mutex<Reply>,
     calls: AtomicUsize,
+    platform_calls: AtomicUsize,
     unexpected_command: AtomicBool,
     held: AtomicBool,
     entered: Notify,
@@ -411,16 +412,34 @@ impl russh::server::Handler for Peer {
         data: &[u8],
         session: &mut russh::server::Session,
     ) -> Result<(), Self::Error> {
-        self.0.calls.fetch_add(1, Ordering::SeqCst);
-        if data != SOCKETS_SCRIPT.as_bytes() {
+        let identity = data == super::super::platform::POSIX_PROBE.as_bytes();
+        if !identity && data != SOCKETS_SCRIPT.as_bytes() {
             self.0.unexpected_command.store(true, Ordering::Release);
             session.channel_failure(channel)?;
             session.close(channel)?;
             return Ok(());
         }
-        let reply = self.0.reply.lock().expect("controlled reply").clone();
+        let mut reply = self.0.reply.lock().expect("controlled reply").clone();
+        if identity {
+            self.0.platform_calls.fetch_add(1, Ordering::SeqCst);
+            let platform = if reply.stdout.starts_with(b"@@KS:linux-sockets:1@@\n") {
+                "Linux"
+            } else {
+                "Darwin"
+            };
+            reply = Reply {
+                stdout: format!(
+                    "@@KS:monitor-platform:1@@\nplatform\t{platform}\nruntime\tposix\n@@KS:end@@\n"
+                )
+                .into_bytes(),
+                stderr: Vec::new(),
+                status: Some(0),
+            };
+        } else {
+            self.0.calls.fetch_add(1, Ordering::SeqCst);
+        }
         session.channel_success(channel)?;
-        if self.0.held.load(Ordering::Acquire) {
+        if !identity && self.0.held.load(Ordering::Acquire) {
             self.0.entered.notify_one();
             if let Ok(Ok(permit)) =
                 tokio::time::timeout(Duration::from_secs(3), self.0.release.acquire()).await
@@ -472,6 +491,7 @@ async fn fixture(reply: Reply) -> Result<(Fixture, LinuxMonitor), Box<dyn std::e
     let control = Arc::new(Control {
         reply: Mutex::new(reply),
         calls: AtomicUsize::new(0),
+        platform_calls: AtomicUsize::new(0),
         unexpected_command: AtomicBool::new(false),
         held: AtomicBool::new(false),
         entered: Notify::new(),
@@ -516,6 +536,7 @@ async fn ssh_darwin_socket_warnings_are_cached_until_reset_then_recover()
         ));
     }
     assert_eq!(fixture.control.calls.load(Ordering::Acquire), 1);
+    assert_eq!(fixture.control.platform_calls.load(Ordering::Acquire), 1);
     let previous = monitor.capability_report().await;
     *fixture.control.reply.lock().unwrap() = Reply::listening();
     monitor.reset_capabilities().await;
@@ -526,6 +547,7 @@ async fn ssh_darwin_socket_warnings_are_cached_until_reset_then_recover()
     assert_eq!(current.resources.state, CapabilityState::Unknown);
     assert_eq!(current.processes.state, CapabilityState::Unknown);
     assert_eq!(fixture.control.calls.load(Ordering::Acquire), 2);
+    assert_eq!(fixture.control.platform_calls.load(Ordering::Acquire), 2);
     assert!(!fixture.control.unexpected_command.load(Ordering::Acquire));
     monitor.session.close().await?;
     Ok(())
@@ -579,12 +601,10 @@ async fn ssh_darwin_socket_reset_rejects_a_late_capability_observation()
     tokio::time::timeout(Duration::from_secs(2), fixture.control.entered.notified()).await?;
     monitor.reset_capabilities().await;
     fixture.control.release.add_permits(1);
-    assert_eq!(
-        tokio::time::timeout(Duration::from_secs(3), pending)
-            .await???
-            .len(),
-        1
-    );
+    assert!(matches!(
+        tokio::time::timeout(Duration::from_secs(3), pending).await??,
+        Err(MonitorError::Cancelled)
+    ));
     assert_eq!(
         monitor.capabilities().await.sockets.state,
         CapabilityState::Unknown
@@ -595,6 +615,59 @@ async fn ssh_darwin_socket_reset_rejects_a_late_capability_observation()
         monitor.capabilities().await.sockets.state,
         CapabilityState::Available
     );
+    assert_eq!(fixture.control.platform_calls.load(Ordering::Acquire), 2);
+    monitor.session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn ssh_socket_frame_cannot_change_the_cached_platform_identity()
+-> Result<(), Box<dyn std::error::Error>> {
+    let (fixture, monitor) = fixture(Reply::listening()).await?;
+    assert_eq!(monitor.listening_sockets().await?.len(), 1);
+    *fixture.control.reply.lock().unwrap() = Reply {
+        stdout: b"@@KS:linux-sockets:1@@\n@@KS:ss-status@@\n0\n@@KS:end@@\n".to_vec(),
+        stderr: Vec::new(),
+        status: Some(0),
+    };
+    assert!(matches!(
+        monitor.listening_sockets().await,
+        Err(MonitorError::InvalidData(
+            "socket platform differs from the validated identity"
+        ))
+    ));
+    assert_eq!(
+        monitor
+            .capabilities()
+            .await
+            .environment
+            .map(|value| value.platform),
+        Some(super::super::MonitorPlatform::Darwin)
+    );
+    assert_eq!(
+        monitor.capabilities().await.sockets.state,
+        CapabilityState::Unavailable(CapabilityReason::InvalidOutput)
+    );
+    monitor.reset_capabilities().await;
+    assert!(monitor.listening_sockets().await?.is_empty());
+    *fixture.control.reply.lock().unwrap() = Reply::listening();
+    assert!(matches!(
+        monitor.listening_sockets().await,
+        Err(MonitorError::InvalidData(
+            "socket platform differs from the validated identity"
+        ))
+    ));
+    assert_eq!(
+        monitor
+            .capabilities()
+            .await
+            .environment
+            .map(|value| value.platform),
+        Some(super::super::MonitorPlatform::Linux)
+    );
+    assert_eq!(fixture.control.platform_calls.load(Ordering::Acquire), 2);
+    assert_eq!(fixture.control.calls.load(Ordering::Acquire), 4);
+    assert!(!fixture.control.unexpected_command.load(Ordering::Acquire));
     monitor.session.close().await?;
     Ok(())
 }

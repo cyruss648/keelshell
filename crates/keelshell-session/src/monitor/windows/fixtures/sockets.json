@@ -1,0 +1,1 @@
+{"version":1,"operation":"sockets","platform":"Windows","runtime":"WindowsPowerShell","runtime_version":"5.1.26100.123","units":"bytes seconds percent","status":"ok","data":{"count":2,"sockets":[{"protocol":"tcp","address":"127.0.0.1","port":"1234","pid":"4"},{"protocol":"udp","address":"fe80::1%12","port":"65535","pid":"42"}]}}

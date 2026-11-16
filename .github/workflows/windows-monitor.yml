@@ -1,0 +1,84 @@
+name: Windows monitor integration
+on:
+  push:
+    branches: ['**']
+    paths-ignore: ['docs/**', '**/*.md']
+  pull_request:
+    paths-ignore: ['docs/**', '**/*.md']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  direct-api:
+    name: Actual collectors and independent Windows APIs
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-build
+      - name: Lab unit tests
+        run: python -m unittest discover -s scripts -p test_windows_monitor_lab.py -v
+      - name: Production collectors, owned fixtures, independent APIs
+        shell: pwsh
+        run: |
+          python scripts/windows_monitor_lab.py --mode direct --seconds 240 --output "$env:RUNNER_TEMP\keelshell-windows-monitor-direct"
+          exit $LASTEXITCODE
+      - name: Captured API frames through public authenticated routing (capture replay)
+        if: always()
+        shell: pwsh
+        env:
+          KEELSHELL_WINDOWS_MONITOR_CAPTURE_DIR: ${{ runner.temp }}\keelshell-windows-monitor-direct
+        run: |
+          $capture = $env:KEELSHELL_WINDOWS_MONITOR_CAPTURE_DIR
+          $receiptPath = Join-Path $capture 'receipt.json'
+          if (-not (Test-Path -LiteralPath $receiptPath -PathType Leaf)) {
+            Write-Output 'CAPTURE_REPLAY_HOLD: direct API receipt is absent; no Windows SSH acceptance'
+            exit 78
+          }
+          $receipt = Get-Content -Raw -LiteralPath $receiptPath | ConvertFrom-Json
+          if ($receipt.status -ne 'PASS' -or $receipt.windows_api -ne 'PASS') {
+            Write-Output "CAPTURE_REPLAY_HOLD: API=$($receipt.status) reason=$($receipt.reason); no Windows SSH acceptance"
+            exit 78
+          }
+          foreach ($name in @('probe.stdout', 'resources.stdout', 'processes.stdout', 'sockets.stdout')) {
+            if (-not (Test-Path -LiteralPath (Join-Path $capture $name) -PathType Leaf)) {
+              Write-Output "CAPTURE_REPLAY_HOLD: missing raw capture $name"
+              exit 78
+            }
+          }
+          cargo test --locked -p keelshell-session --test windows_monitor captured_windows_api_frames_are_accepted_through_authenticated_monitor_routing -- --ignored --exact --test-threads=1
+          exit $LASTEXITCODE
+      - name: Preserve raw frames and original-process cleanup receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-monitor-direct-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/keelshell-windows-monitor-direct/
+          if-no-files-found: warn
+          retention-days: 7
+  isolated-ssh:
+    name: Isolated OpenSSH prerequisites (HOLD until terminal proof)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-build
+      - name: Private keys and isolated configuration preflight
+        shell: pwsh
+        run: |
+          python scripts/windows_monitor_lab.py --mode ssh --seconds 180 --output "$env:RUNNER_TEMP\keelshell-windows-monitor-ssh"
+          # Exit 78 is an explicit HOLD, never SSH acceptance.
+          exit $LASTEXITCODE
+      - name: Preserve prerequisite and cleanup receipts, excluding all keys
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-monitor-ssh-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/keelshell-windows-monitor-ssh/
+          if-no-files-found: warn
+          retention-days: 7

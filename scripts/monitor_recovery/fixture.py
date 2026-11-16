@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Owned Linux fixture; successful collectors always execute real Linux tools.
 
-Only the three fixed monitor scripts are admitted by ForceCommand. A separate
+Only the fixed identity probe and monitor collectors are admitted by ForceCommand. A separate
 token-authenticated protocol changes df/ps/ss visibility or reads counters. Neither
 protocol is an application command or a general-purpose remote administration API.
 """
@@ -71,6 +71,15 @@ for ks_candidate in /usr/bin/uname /bin/uname; do
 done
 [ -n "$ks_uname" ] || exit 66
 """
+PLATFORM_PROBE = """LC_ALL=C; export LC_ALL
+""" + PLATFORM_SELECTOR + """ks_platform="$("$ks_uname" -s)" || exit 65
+case "$ks_platform" in
+  Linux|Darwin) ;;
+  '') exit 65 ;;
+  *) ks_platform=Unsupported ;;
+esac
+printf '@@KS:monitor-platform:1@@\\nplatform\\t%s\\nruntime\\tposix\\n@@KS:end@@\\n' "$ks_platform"
+"""
 PROCESSES = """LC_ALL=C; export LC_ALL
 """ + PLATFORM_SELECTOR + """case "$("$ks_uname" -s)" in
   Linux) ;;
@@ -104,6 +113,7 @@ ks_ss_status=$?
 printf '@@KS:ss-status@@\\n%s\\n@@KS:end@@\\n' "$ks_ss_status"
 """
 COLLECTORS = {
+    PLATFORM_PROBE: ("identity", None),
     SNAPSHOT: ("core", "df"), CACHED_SNAPSHOT: ("core", None),
     PROCESSES: ("ps", "ps"), SOCKETS: ("ss", "ss"),
 }
@@ -270,7 +280,7 @@ def prepare(owner):
     value = {
         "schema": 1, "owner": owner, "identity": identity(), "mode_changes": 0,
         "modes": {name: "real" for name in TOOLS},
-        "requests": {name: 0 for name in ("core", "ps", "ss")},
+        "requests": {name: 0 for name in ("identity", "core", "ps", "ss")},
         **{counter: dict.fromkeys(TOOLS, 0)
            for counter in ("probes", "invocations", "delegations")},
         "tools": {},

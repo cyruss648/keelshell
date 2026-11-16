@@ -1,5 +1,11 @@
 # 主机资源短期趋势
 
+2026-11-17 扩展：[Windows 只读监控](WINDOWS_MONITORING.md)的 CPU 使用提供程序
+百分比，首个有效点即可显示；未知、真实零值、时间校验和断段仍分别处理。
+Windows 与 macOS 未提供 used 内存时不绘制虚构的内存曲线，MCP 保持该字段未知。
+当前 Windows 集成和真实平台状态见[本批记录](../testing/records/2026-11-17-windows-read-only-monitor.md)，
+以下历史原生观察只属于其原 Linux 包。
+
 状态：2026-11-06源码与专项已完成，530输入组合门禁通过；
 新包已有16轮真实Linux采样及暂停/恢复断段的单窗原生观察，
 原件与限定复核见[原生记录](../testing/records/2026-11-06-resource-knowledge-native.md)，不继承旧包捕获。

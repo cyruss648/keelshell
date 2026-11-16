@@ -8,19 +8,19 @@ use std::{
     time::Instant,
 };
 
-use super::{ExecOutput, MonitorError, MonitorResult};
+use super::{ExecOutput, MonitorEnvironment, MonitorError, MonitorResult, platform::Route};
 
 /// One independently collected host monitoring facility.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Capability {
     /// Core CPU, memory, uptime and network counters from the host kernel.
     Resources,
-    /// Mounted-filesystem capacity from `df -Pk`.
+    /// Mounted-filesystem capacity from df or the platform's read-only volume API.
     Filesystems,
-    /// Fixed process columns from `ps`.
+    /// Fixed process fields from ps or the Windows process API.
     Processes,
     /// Account-visible Linux TCP/UDP rows from `ss`, or Darwin TCP LISTEN and
-    /// bound UDP rows from system `lsof`.
+    /// bound UDP rows from system `lsof`, or Windows TCP/UDP endpoint APIs.
     Sockets,
 }
 
@@ -94,9 +94,12 @@ pub struct CapabilityObservation {
 /// Independent observations belonging to one `LinuxMonitor` and its SSH session.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct MonitorCapabilities {
+    /// Platform/runtime established by a separate fixed identity probe.
+    /// Resource failure cannot erase this independently validated identity.
+    pub environment: Option<MonitorEnvironment>,
     /// Core kernel resource collection.
     pub resources: CapabilityObservation,
-    /// Optional `df` collection.
+    /// Optional filesystem or fixed-volume capacity collection.
     pub filesystems: CapabilityObservation,
     /// Process collection.
     pub processes: CapabilityObservation,
@@ -156,7 +159,14 @@ impl CapabilityReport {
 pub(super) struct CapabilityCache {
     generation: AtomicU64,
     revision: AtomicU64,
-    observations: tokio::sync::Mutex<MonitorCapabilities>,
+    observations: tokio::sync::Mutex<CacheContents>,
+    pub(super) probe_gate: tokio::sync::Mutex<()>,
+}
+
+#[derive(Clone, Copy, Default)]
+struct CacheContents {
+    facilities: MonitorCapabilities,
+    route: Option<Route>,
 }
 
 impl CapabilityCache {
@@ -168,17 +178,17 @@ impl CapabilityCache {
     pub async fn reset(&self) {
         let mut observations = self.observations.lock().await;
         self.invalidate_pending();
-        *observations = MonitorCapabilities::default();
+        *observations = CacheContents::default();
     }
 
     pub async fn report(&self) -> MonitorCapabilities {
-        *self.observations.lock().await
+        self.observations.lock().await.facilities
     }
 
     pub async fn authenticated_report(self: &Arc<Self>) -> CapabilityReport {
         let observations = self.observations.lock().await;
         CapabilityReport {
-            observations: *observations,
+            observations: observations.facilities,
             source: self.clone(),
             generation: self.generation.load(Ordering::Acquire),
             revision: self.revision.load(Ordering::Acquire),
@@ -189,8 +199,32 @@ impl CapabilityCache {
         let observations = self.observations.lock().await;
         (
             self.generation.load(Ordering::Acquire),
-            observations.observation(capability).state,
+            observations.facilities.observation(capability).state,
         )
+    }
+
+    pub(super) fn is_current(&self, generation: u64) -> bool {
+        generation == self.generation.load(Ordering::Acquire)
+    }
+
+    pub(super) async fn route(&self) -> Option<Route> {
+        self.observations.lock().await.route
+    }
+
+    pub(super) async fn record_route(&self, generation: u64, route: Route) -> bool {
+        let mut observations = self.observations.lock().await;
+        if !self.is_current(generation) {
+            return false;
+        }
+        self.revision.fetch_add(1, Ordering::AcqRel);
+        let previous = *observations;
+        observations.route = Some(route);
+        observations.facilities.environment = route.environment();
+        if !self.is_current(generation) {
+            *observations = previous;
+            return false;
+        }
+        true
     }
 
     pub async fn record(&self, generation: u64, capability: Capability, state: CapabilityState) {
@@ -199,13 +233,13 @@ impl CapabilityCache {
             // Revoke reports before changing their bytes. The second generation
             // check handles a UI invalidation racing this short critical section.
             self.revision.fetch_add(1, Ordering::AcqRel);
-            let previous = observations.observation(capability);
-            *observations.observation_mut(capability) = CapabilityObservation {
+            let previous = observations.facilities.observation(capability);
+            *observations.facilities.observation_mut(capability) = CapabilityObservation {
                 state,
                 checked_at: Some(Instant::now()),
             };
             if generation != self.generation.load(Ordering::Acquire) {
-                *observations.observation_mut(capability) = previous;
+                *observations.facilities.observation_mut(capability) = previous;
             }
         }
     }
@@ -221,6 +255,12 @@ pub(super) fn cached_reason(state: CapabilityState) -> Option<CapabilityReason> 
 }
 
 pub(super) fn error_state(error: &MonitorError) -> CapabilityState {
+    if matches!(
+        error,
+        MonitorError::EnvironmentUnconfirmed | MonitorError::Cancelled
+    ) {
+        return CapabilityState::Unknown;
+    }
     CapabilityState::Unavailable(match error {
         MonitorError::CapabilityUnavailable { reason, .. } => *reason,
         MonitorError::Session(_) => CapabilityReason::Transport,

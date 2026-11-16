@@ -14,10 +14,13 @@ async fn pausing_recheck_between_commands_cancels_unsent_ps_and_ss(cx: &mut Test
         .panel
         .read_with(cx, |panel, _| (panel.capabilities, panel.mcp_sample_id));
     let commands = h.control.commands.load(Ordering::Acquire);
+    let resources = h.control.disk_samples.load(Ordering::Acquire);
     h.control.hold_resources.store(true, Ordering::Release);
     h.panel.update(cx, |panel, cx| panel.run(Job::Redetect, cx));
     cx.wait_for(h.window, Duration::from_secs(4), |_, cx| {
-        h.control.commands.load(Ordering::Acquire) == commands + 1 && h.panel.read(cx).busy
+        h.control.disk_samples.load(Ordering::Acquire) == resources + 1
+            && h.control.commands.load(Ordering::Acquire) == commands + 2
+            && h.panel.read(cx).busy
     })
     .await;
     h.panel.update(cx, |panel, cx| {
@@ -27,7 +30,7 @@ async fn pausing_recheck_between_commands_cancels_unsent_ps_and_ss(cx: &mut Test
     h.control.hold_resources.store(false, Ordering::Release);
     h.control.resource_release.add_permits(1);
     h.idle(cx).await;
-    assert_eq!(h.control.commands.load(Ordering::Acquire), commands + 1);
+    assert_eq!(h.control.commands.load(Ordering::Acquire), commands + 2);
     h.panel.read_with(cx, |panel, _| {
         assert_eq!((panel.capabilities, panel.mcp_sample_id), before);
     });
@@ -171,7 +174,7 @@ async fn recheck_pause_aba_and_retirement_discard_held_capability_responses(
         h.control.hold_sockets.store(true, Ordering::Release);
         h.panel.update(cx, |panel, cx| panel.run(Job::Redetect, cx));
         cx.wait_for(h.window, Duration::from_secs(4), |_, cx| {
-            h.control.commands.load(Ordering::Acquire) == commands + 3 && h.panel.read(cx).busy
+            h.control.commands.load(Ordering::Acquire) == commands + 4 && h.panel.read(cx).busy
         })
         .await;
         h.panel.update(cx, |panel, cx| {
@@ -198,7 +201,7 @@ async fn recheck_pause_aba_and_retirement_discard_held_capability_responses(
             CapabilityState::Unknown,
             "retired in-flight check cannot populate the cache"
         );
-        assert_eq!(h.control.commands.load(Ordering::Acquire), commands + 3);
+        assert_eq!(h.control.commands.load(Ordering::Acquire), commands + 4);
         h.close_history_fixture(cx).await;
     }
 }
@@ -742,7 +745,7 @@ async fn compact_capability_reasons_ages_and_recheck_are_keyboard_accessible(
     })
     .checked("activate capability recheck with the keyboard");
     h.idle(cx).await;
-    assert_eq!(h.control.commands.load(Ordering::Acquire), commands + 3);
+    assert_eq!(h.control.commands.load(Ordering::Acquire), commands + 4);
     h.panel.read_with(cx, |panel, _| {
         assert!(panel.paused);
         assert!(panel.capabilities.filesystems.checked_at > previous.filesystems.checked_at);

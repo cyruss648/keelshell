@@ -21,6 +21,8 @@ use capabilities::{CapabilityCache, cached_reason, command_text, error_state, fa
 mod darwin;
 mod darwin_sockets;
 mod disk;
+mod platform;
+mod windows;
 pub use disk::{
     DiskCounters, DiskDevice, DiskIoError, DiskIoRates, DiskIoSnapshot, DiskRate,
     DiskRateUnavailable,
@@ -142,6 +144,12 @@ pub enum MonitorError {
     /// An expected proc/command output format was absent or invalid.
     #[error("invalid monitoring data: {0}")]
     InvalidData(&'static str),
+    /// Neither fixed platform probe established a supported execution environment.
+    #[error("remote monitoring platform and runtime could not be confirmed")]
+    EnvironmentUnconfirmed,
+    /// A pause, reset or retirement revoked this collection before publication.
+    #[error("monitoring collection authority was revoked")]
+    Cancelled,
     /// Process identity changed, disappeared or cannot be inspected.
     #[error("process changed or exited; refresh and review it again")]
     ProcessChanged,
@@ -166,6 +174,29 @@ pub enum MonitorPlatform {
     Linux,
     /// macOS Mach counters, sysctl and fixed system commands.
     Darwin,
+    /// Windows, collected with the explicitly observed Windows PowerShell runtime.
+    Windows,
+}
+
+/// Runtime independently observed over this authenticated connection.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MonitorRuntime {
+    /// A POSIX shell with a validated absolute-path `uname` identity probe.
+    Posix,
+    /// Desktop Windows PowerShell 5.1, including its observed version components.
+    WindowsPowerShell {
+        /// Major, minor, build and revision from the fixed identity probe.
+        version: [u32; 4],
+    },
+}
+
+/// Validated remote platform and runtime, independent of resource availability.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct MonitorEnvironment {
+    /// The remote operating system; never inferred from the application's OS.
+    pub platform: MonitorPlatform,
+    /// The execution runtime that completed a fixed identity probe.
+    pub runtime: MonitorRuntime,
 }
 
 /// Aggregate CPU counters, measured in the remote kernel's clock ticks.
@@ -175,6 +206,40 @@ pub struct CpuCounters {
     /// Darwin supplies its four Mach states in the first four slots; the last
     /// four have no Darwin equivalent and are excluded from iowait reporting.
     pub ticks: [u64; 8],
+}
+
+/// CPU measurements retain their source instead of inventing counter values.
+#[derive(Debug, Clone, PartialEq)]
+pub enum CpuSample {
+    /// The collector could not obtain a CPU measurement for this observation.
+    Unavailable,
+    /// Cumulative Linux or Darwin clock ticks, requiring two forward samples.
+    Counters(CpuCounters),
+    /// A provider-reported busy percentage, independent of local refresh timing.
+    ///
+    /// Windows uses the logical-processor-weighted `Win32_Processor`
+    /// `LoadPercentage`, whose provider reports its preceding one-second mean.
+    ReportedPercent(f64),
+}
+
+impl CpuSample {
+    /// Read kernel counters only when the source actually supplies them.
+    pub fn cumulative(&self) -> Option<&CpuCounters> {
+        match self {
+            Self::Counters(counters) => Some(counters),
+            Self::Unavailable | Self::ReportedPercent(_) => None,
+        }
+    }
+
+    /// Read a finite provider percentage, including a legitimate idle zero.
+    pub fn reported_percent(&self) -> Option<f64> {
+        match self {
+            Self::ReportedPercent(value) if value.is_finite() && (0.0..=100.0).contains(value) => {
+                Some(*value)
+            }
+            _ => None,
+        }
+    }
 }
 
 /// Physical memory and swap counters, in bytes.
@@ -211,36 +276,37 @@ pub struct NetworkCounters {
     pub transmitted_bytes: u64,
 }
 
-/// Mounted-filesystem capacity from `df -Pk`; this is not disk I/O throughput.
+/// Mounted-filesystem capacity; this is not disk I/O throughput.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FilesystemSnapshot {
-    /// Filesystem source reported by df.
+    /// Filesystem source reported by df, or a Windows fixed-volume root.
     pub source: String,
     /// Mounted directory; spaces are preserved.
     pub mount: String,
-    /// Capacity in bytes, converted from df's 1024-byte blocks.
+    /// Capacity in bytes; Unix df's 1024-byte blocks are converted explicitly.
     pub total_bytes: u64,
     /// Used bytes.
     pub used_bytes: u64,
     /// Bytes available to unprivileged users.
     pub available_bytes: u64,
-    /// Percentage printed by df; may exceed 100 for reserved-space scenarios.
+    /// Percentage printed by df, or derived from Windows total/free bytes.
+    /// Unix values may exceed 100 for reserved-space scenarios.
     pub used_percent: u32,
 }
 
-/// A single real host collection. A snapshot alone has no CPU/network rate.
+/// A single real host collection with explicit metric provenance.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Snapshot {
     /// Remote operating system and counter provenance.
     pub platform: MonitorPlatform,
     /// Unix boot timestamp, used to reject cross-reboot deltas.
     pub boot_time: u64,
-    /// Seconds since boot, from the target kernel.
+    /// Seconds since boot. Windows supplies a same-CIM-object wall-clock estimate.
     pub uptime_seconds: f64,
-    /// One-, five- and fifteen-minute load averages.
-    pub load_average: [f64; 3],
-    /// Aggregate CPU counters.
-    pub cpu: CpuCounters,
+    /// One-, five- and fifteen-minute load averages, absent on Windows.
+    pub load_average: Option<[f64; 3]>,
+    /// Aggregate CPU counters or an explicitly provider-reported percentage.
+    pub cpu: CpuSample,
     /// Memory counters.
     pub memory: MemorySnapshot,
     /// Per-interface network counters.
@@ -288,6 +354,13 @@ impl Snapshot {
         if input.len() > MAX_OUTPUT {
             return Err(MonitorError::InvalidData("snapshot exceeds 2 MiB"));
         }
+        if input.starts_with('{') {
+            return windows::parse_resources(ExecOutput {
+                stdout: input.as_bytes().to_vec(),
+                stderr: stderr.to_vec(),
+                exit_status: Some(0),
+            });
+        }
         if input.starts_with("@@KS:darwin@@\n") {
             return darwin::parse(input, stderr);
         }
@@ -334,8 +407,8 @@ impl Snapshot {
                 platform: MonitorPlatform::Linux,
                 boot_time,
                 uptime_seconds,
-                load_average,
-                cpu: CpuCounters { ticks },
+                load_average: Some(load_average),
+                cpu: CpuSample::Counters(CpuCounters { ticks }),
                 memory: parse_memory(required(&sections, "meminfo")?)?,
                 networks: parse_networks(required(&sections, "net")?)?,
                 filesystems,
@@ -352,6 +425,14 @@ impl Snapshot {
     /// counters invalidate affected rates instead of producing negative spikes.
     pub fn rates_since(&self, previous: &Self) -> SampleRates {
         let elapsed = self.uptime_seconds - previous.uptime_seconds;
+        // Windows network counters are real cumulative observations, but its
+        // wall-clock uptime estimate is not a monotonic rate denominator.
+        if self.platform == MonitorPlatform::Windows {
+            return SampleRates {
+                cpu_busy_percent: self.cpu.reported_percent(),
+                ..SampleRates::default()
+            };
+        }
         let mut result = SampleRates {
             disks: self.disk_io.as_ref().map_or_else(
                 |_| Vec::new(),
@@ -374,11 +455,15 @@ impl Snapshot {
         }
         let deltas: Option<Vec<u64>> = self
             .cpu
-            .ticks
-            .iter()
-            .zip(previous.cpu.ticks)
-            .map(|(now, before)| now.checked_sub(before))
-            .collect();
+            .cumulative()
+            .zip(previous.cpu.cumulative())
+            .and_then(|(now, before)| {
+                now.ticks
+                    .iter()
+                    .zip(before.ticks)
+                    .map(|(now, before)| now.checked_sub(before))
+                    .collect()
+            });
         if let Some(deltas) = deltas {
             let total: Option<u64> = deltas
                 .iter()
@@ -414,25 +499,30 @@ impl Snapshot {
     }
 }
 
-/// A process row from `ps`; percentages are ps's reported values, not interval CPU samples.
+/// A bounded process row from the platform's fixed read-only interface.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProcessInfo {
     /// Numeric process identifier.
     pub pid: u32,
-    /// Account name reported by ps (may be truncated by that implementation).
-    pub user: String,
+    /// Account name reported by ps (may be truncated); absent on Windows.
+    pub user: Option<String>,
     /// ps's lifetime CPU percentage; may exceed 100 on multicore workloads.
-    pub cpu_percent: f64,
-    /// ps's physical-memory percentage.
-    pub memory_percent: f64,
-    /// Command and arguments, not a string to execute.
+    /// Windows CPU seconds are not a percentage and leave this field absent.
+    pub cpu_percent: Option<f64>,
+    /// ps's physical-memory percentage, absent on Windows.
+    pub memory_percent: Option<f64>,
+    /// Observed working-set bytes, absent when not supplied or not readable.
+    pub working_set_bytes: Option<u64>,
+    /// Unix command/arguments or Windows ProcessName, never a string to execute.
     pub command: String,
 }
 
 /// A socket visible to the authenticated remote account.
 ///
 /// Linux supplies TCP/UDP rows from `ss`; Darwin supplies TCP LISTEN and bound
-/// UDP rows from system `lsof`. Neither collector proves whole-host visibility.
+/// UDP rows from system `lsof`. Windows supplies only TCP LISTEN and UDP bound
+/// endpoints through its read-only networking APIs. No collector proves
+/// whole-host visibility.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SocketInfo {
     /// Transport protocol, currently `tcp` or `udp`.
@@ -490,8 +580,8 @@ impl ProcessIdentity {
 /// Read-only host collection with a separate Linux-only SIGTERM operation.
 ///
 /// The historical name remains source-compatible. Resource collection accepts
-/// Linux and Darwin; socket inspection and reviewed process termination retain
-/// their Linux-specific contracts.
+/// Linux, Darwin and the confirmed Windows PowerShell runtime. Connect probes
+/// and reviewed process termination retain their Linux-specific contracts.
 #[derive(Clone)]
 pub struct LinuxMonitor {
     session: SshSession,
@@ -538,20 +628,32 @@ impl LinuxMonitor {
         self.capabilities.invalidate_pending();
     }
 
-    /// Execute the fixed read-only collector and optional `df -Pk`.
+    /// Execute the platform's fixed read-only collector and optional capacity API.
     ///
     /// A failed capacity command is skipped until explicit redetection. Its
     /// failure does not discard CPU, memory, network or block-device counters.
     pub async fn snapshot(&self) -> MonitorResult<Snapshot> {
         let (revision, resources) = self.capabilities.begin(Capability::Resources).await;
-        if let CapabilityState::Unavailable(
-            reason @ (CapabilityReason::UnsupportedPlatform | CapabilityReason::CommandMissing),
-        ) = resources
-        {
-            return Err(MonitorError::CapabilityUnavailable {
-                capability: Capability::Resources,
-                reason,
-            });
+        if let Some(reason) = cached_reason(resources) {
+            // Windows errors come from typed API frames and remain explicit
+            // recheck decisions. POSIX resource errors retain their existing
+            // transient retry behavior, except missing/unsupported collectors.
+            let windows = matches!(
+                self.capabilities.route().await,
+                Some(platform::Route::WindowsPowerShell(_))
+            );
+            self.ensure_current(revision)?;
+            if windows
+                || matches!(
+                    reason,
+                    CapabilityReason::UnsupportedPlatform | CapabilityReason::CommandMissing
+                )
+            {
+                return Err(MonitorError::CapabilityUnavailable {
+                    capability: Capability::Resources,
+                    reason,
+                });
+            }
         }
         let (_, capacity) = self.capabilities.begin(Capability::Filesystems).await;
         let skip_capacity = cached_reason(capacity).is_some();
@@ -565,7 +667,22 @@ impl LinuxMonitor {
             darwin::script(skip_capacity)
         );
         let result = async {
-            let output = self.session.exec_limited(&script, MAX_OUTPUT).await?;
+            let route = self.route(revision).await?;
+            self.ensure_current(revision)?;
+            if matches!(route, platform::Route::WindowsPowerShell(_)) {
+                let command = windows::command(windows::Operation::Resources { skip_capacity })?;
+                self.ensure_current(revision)?;
+                let output = self.exec_current(revision, &command, MAX_OUTPUT).await?;
+                self.ensure_current(revision)?;
+                return windows::parse_resources(output);
+            }
+            let platform::Route::Posix(expected) = route else {
+                return Err(MonitorError::Unsupported(
+                    "no resource collector for the confirmed target platform",
+                ));
+            };
+            let output = self.exec_current(revision, &script, MAX_OUTPUT).await?;
+            self.ensure_current(revision)?;
             let ExecOutput {
                 stdout,
                 stderr,
@@ -579,7 +696,13 @@ impl LinuxMonitor {
                 },
                 Capability::Resources,
             )?;
-            Snapshot::parse_with_capacity(&text, &stderr)
+            let (snapshot, capacity) = Snapshot::parse_with_capacity(&text, &stderr)?;
+            if snapshot.platform != expected {
+                return Err(MonitorError::InvalidData(
+                    "resource platform differs from the validated identity",
+                ));
+            }
+            Ok((snapshot, capacity))
         }
         .await;
         let state = result
@@ -601,7 +724,8 @@ impl LinuxMonitor {
         }
     }
 
-    /// Execute fixed ps columns and sort by descending reported CPU usage.
+    /// Read fixed ps columns or Windows process names and working-set bytes.
+    /// Unix rows sort by reported CPU usage; Windows rows sort by numeric PID.
     pub async fn processes(&self) -> MonitorResult<Vec<ProcessInfo>> {
         let (revision, state) = self.capabilities.begin(Capability::Processes).await;
         if let Some(reason) = cached_reason(state) {
@@ -611,10 +735,24 @@ impl LinuxMonitor {
             });
         }
         let result = async {
+            let route = self.route(revision).await?;
+            self.ensure_current(revision)?;
+            if matches!(route, platform::Route::WindowsPowerShell(_)) {
+                let command = windows::command(windows::Operation::Processes)?;
+                self.ensure_current(revision)?;
+                let output = self.exec_current(revision, &command, MAX_OUTPUT).await?;
+                self.ensure_current(revision)?;
+                return windows::parse_processes(output);
+            }
+            if matches!(route, platform::Route::UnsupportedPosix) {
+                return Err(MonitorError::Unsupported(
+                    "no process collector for the confirmed target platform",
+                ));
+            }
             let output = self
-                .session
-                .exec_limited(PROCESSES_SCRIPT, MAX_OUTPUT)
+                .exec_current(revision, PROCESSES_SCRIPT, MAX_OUTPUT)
                 .await?;
+            self.ensure_current(revision)?;
             parse_processes(&command_text(output, Capability::Processes)?)
         }
         .await;
@@ -645,11 +783,25 @@ impl LinuxMonitor {
             });
         }
         let result = async {
+            let route = self.route(revision).await?;
+            self.ensure_current(revision)?;
+            if matches!(route, platform::Route::WindowsPowerShell(_)) {
+                let command = windows::command(windows::Operation::Sockets)?;
+                self.ensure_current(revision)?;
+                let output = self.exec_current(revision, &command, MAX_OUTPUT).await?;
+                self.ensure_current(revision)?;
+                return windows::parse_sockets(output);
+            }
+            let platform::Route::Posix(expected) = route else {
+                return Err(MonitorError::Unsupported(
+                    "no socket collector for the confirmed target platform",
+                ));
+            };
             let output = self
-                .session
-                .exec_limited(SOCKETS_SCRIPT, MAX_OUTPUT)
+                .exec_current(revision, SOCKETS_SCRIPT, MAX_OUTPUT)
                 .await?;
-            parse_socket_collection(output)
+            self.ensure_current(revision)?;
+            parse_socket_collection(output, expected)
         }
         .await;
         let state = result
@@ -673,7 +825,10 @@ impl LinuxMonitor {
                 "only TCP listening sockets support a connect probe",
             ));
         }
+        let (generation, _) = self.capabilities.begin(Capability::Sockets).await;
+        self.require_linux(generation).await?;
         let current = self.listening_sockets().await?;
+        self.ensure_current(generation)?;
         if !current.iter().any(|candidate| candidate == socket) {
             return Err(MonitorError::SocketChanged);
         }
@@ -682,7 +837,9 @@ impl LinuxMonitor {
             "LC_ALL=C; export LC_ALL\nif [ \"$(uname -s)\" != Linux ]; then exit 64; fi\ncommand -v nc >/dev/null 2>&1 || exit 66\nstatus=0\nnc -z -w 2 {host} {port} >/dev/null 2>&1 || status=$?\nprintf '@@KS:probe@@\\n%s\\n' \"$status\"\n",
             host = shell_literal(&host)
         );
-        let output = self.session.exec_limited(&command, 4 * 1024).await?;
+        self.ensure_current(generation)?;
+        let output = self.exec_current(generation, &command, 4 * 1024).await?;
+        self.ensure_current(generation)?;
         match output.exit_status {
             Some(66) => Err(MonitorError::Unsupported(
                 "Linux nc is required for TCP connect probes",
@@ -694,11 +851,15 @@ impl LinuxMonitor {
     /// Recheck a selected row and obtain its start tick before UI confirmation.
     pub async fn inspect_process(&self, selected: &ProcessInfo) -> MonitorResult<ProcessIdentity> {
         valid_pid(selected.pid)?;
+        let (generation, _) = self.capabilities.begin(Capability::Processes).await;
+        self.require_linux(generation).await?;
         let pid = selected.pid;
         let command = format!(
             "LC_ALL=C; export LC_ALL\nif [ \"$(uname -s)\" != Linux ]; then exit 64; fi\ncat /proc/{pid}/stat || exit 65\nprintf '\\n@@KS:process@@\\n'\nps -ww -p {pid} -o pid=,user=,pcpu=,pmem=,args= || exit 65\n"
         );
-        let output = self.session.exec_limited(&command, 64 * 1024).await?;
+        self.ensure_current(generation)?;
+        let output = self.exec_current(generation, &command, 64 * 1024).await?;
+        self.ensure_current(generation)?;
         if output.exit_status == Some(65) {
             return Err(MonitorError::ProcessChanged);
         }
@@ -741,11 +902,25 @@ impl LinuxMonitor {
         if identity.inspected.elapsed() > Duration::from_secs(60) {
             return Err(MonitorError::ReviewExpired);
         }
+        let (generation, _) = self.capabilities.begin(Capability::Processes).await;
+        self.require_linux(generation).await?;
         let command = format!(
             "pid={}; expected={}\nvalue=$(cat \"/proc/$pid/stat\") || exit 65\nvalue=${{value##*) }}\nset -- $value\n[ \"$#\" -ge 20 ] || exit 65\nshift 19\n[ \"$1\" = \"$expected\" ] || exit 67\nkill -TERM \"$pid\"\n",
             identity.process.pid, identity.start_ticks
         );
-        let output = self.session.exec_limited(&command, 64 * 1024).await?;
+        // Admission can wait for a channel reply. Check again before sending,
+        // but retain the real receipt once SIGTERM has actually been sent.
+        let output = self
+            .session
+            .exec_limited_guarded(&command, 64 * 1024, || {
+                self.capabilities.is_current(generation)
+                    && identity.inspected.elapsed() <= Duration::from_secs(60)
+            })
+            .await?;
+        let Some(output) = output else {
+            self.ensure_current(generation)?;
+            return Err(MonitorError::ReviewExpired);
+        };
         if matches!(output.exit_status, Some(65 | 67)) {
             return Err(MonitorError::ProcessChanged);
         }
@@ -773,21 +948,26 @@ pub fn parse_processes(input: &str) -> MonitorResult<Vec<ProcessInfo>> {
         }
         processes.push(ProcessInfo {
             pid,
-            user: fields[1].to_owned(),
-            cpu_percent: finite_positive(fields[2], "process CPU")?,
-            memory_percent: finite_positive(fields[3], "process memory")?,
+            user: Some(fields[1].to_owned()),
+            cpu_percent: Some(finite_positive(fields[2], "process CPU")?),
+            memory_percent: Some(finite_positive(fields[3], "process memory")?),
+            working_set_bytes: None,
             command: command.to_owned(),
         });
     }
     processes.sort_by(|a, b| {
         b.cpu_percent
-            .total_cmp(&a.cpu_percent)
+            .partial_cmp(&a.cpu_percent)
+            .unwrap_or(std::cmp::Ordering::Equal)
             .then(a.pid.cmp(&b.pid))
     });
     Ok(processes)
 }
 
-fn parse_socket_collection(output: ExecOutput) -> MonitorResult<Vec<SocketInfo>> {
+fn parse_socket_collection(
+    output: ExecOutput,
+    expected: MonitorPlatform,
+) -> MonitorResult<Vec<SocketInfo>> {
     if output.stdout.len().saturating_add(output.stderr.len()) > MAX_OUTPUT {
         return Err(MonitorError::InvalidData("socket collection exceeds 2 MiB"));
     }
@@ -798,6 +978,11 @@ fn parse_socket_collection(output: ExecOutput) -> MonitorResult<Vec<SocketInfo>>
         ));
     }
     if output.stdout.starts_with(darwin_sockets::START.as_bytes()) {
+        if expected != MonitorPlatform::Darwin {
+            return Err(MonitorError::InvalidData(
+                "socket platform differs from the validated identity",
+            ));
+        }
         return darwin_sockets::parse(output);
     }
     // An absent Darwin frame must never masquerade as ss's valid empty output.
@@ -807,6 +992,11 @@ fn parse_socket_collection(output: ExecOutput) -> MonitorResult<Vec<SocketInfo>>
     let text = text
         .strip_prefix("@@KS:linux-sockets:1@@\n")
         .ok_or(MonitorError::InvalidData("missing socket collector frame"))?;
+    if expected != MonitorPlatform::Linux {
+        return Err(MonitorError::InvalidData(
+            "socket platform differs from the validated identity",
+        ));
+    }
     let (rows, status) = text
         .split_once("@@KS:ss-status@@\n")
         .ok_or(MonitorError::InvalidData("missing Linux socket status"))?;
@@ -1184,7 +1374,7 @@ mod tests {
         assert_eq!(sample.filesystems[1].mount, "/with spaces");
         assert_eq!(sample.filesystems[0].total_bytes, 1000 * 1024);
         assert_eq!(sample.networks[1].transmitted_bytes, 2000);
-        assert_eq!(sample.load_average, [1.25, 0.5, 0.25]);
+        assert_eq!(sample.load_average, Some([1.25, 0.5, 0.25]));
         Ok(())
     }
 
@@ -1223,7 +1413,10 @@ mod tests {
         let before = Snapshot::parse(SAMPLE)?;
         let mut after = before.clone();
         after.uptime_seconds += 5.0;
-        after.cpu.ticks[0] = 0;
+        let CpuSample::Counters(cpu) = &mut after.cpu else {
+            panic!("Linux counters")
+        };
+        cpu.ticks[0] = 0;
         after.networks[0].received_bytes = 0;
         let rates = after.rates_since(&before);
         assert_eq!(rates.cpu_busy_percent, None);
@@ -1237,6 +1430,37 @@ mod tests {
     fn equal_timestamps_do_not_invent_zero_utilization() -> MonitorResult<()> {
         let sample = Snapshot::parse(SAMPLE)?;
         assert_eq!(sample.rates_since(&sample), SampleRates::default());
+        Ok(())
+    }
+
+    #[test]
+    fn windows_cpu_is_a_point_observation_without_invented_counter_or_network_rates()
+    -> MonitorResult<()> {
+        let before = Snapshot::parse(SAMPLE)?;
+        let mut windows = before.clone();
+        windows.platform = MonitorPlatform::Windows;
+        windows.cpu = CpuSample::ReportedPercent(12.5);
+        windows.load_average = None;
+        windows.memory.available_bytes = None;
+        windows.filesystems.clear();
+        windows.disk_io = Err(DiskIoError::MissingData);
+        windows.uptime_seconds += 5.;
+        assert_eq!(windows.cpu.cumulative(), None);
+        assert_eq!(windows.cpu.reported_percent(), Some(12.5));
+        assert_eq!(windows.memory.used_bytes(), None);
+        let rates = windows.rates_since(&before);
+        assert_eq!(rates.cpu_busy_percent, Some(12.5));
+        assert_eq!(rates.cpu_iowait_percent, None);
+        assert!(rates.networks.is_empty() && rates.disks.is_empty());
+        let previous = windows.clone();
+        windows.cpu = CpuSample::ReportedPercent(0.);
+        windows.boot_time += 1;
+        assert_eq!(windows.rates_since(&previous).cpu_busy_percent, Some(0.));
+        windows.cpu = CpuSample::Unavailable;
+        assert_eq!(windows.rates_since(&previous).cpu_busy_percent, None);
+        for value in [-1., 100.1, f64::NAN, f64::INFINITY] {
+            assert_eq!(CpuSample::ReportedPercent(value).reported_percent(), None);
+        }
         Ok(())
     }
 
@@ -1288,12 +1512,17 @@ mod tests {
         let mut darwin = linux.clone();
         darwin.platform = MonitorPlatform::Darwin;
         darwin.uptime_seconds += 5.;
-        darwin.cpu.ticks = [200, 20, 60, 600, 0, 0, 0, 0];
+        darwin.cpu = CpuSample::Counters(CpuCounters {
+            ticks: [200, 20, 60, 600, 0, 0, 0, 0],
+        });
         assert_eq!(darwin.rates_since(&linux), SampleRates::default());
         let mut next = darwin.clone();
         next.uptime_seconds += 5.;
-        next.cpu.ticks[0] += 20;
-        next.cpu.ticks[3] += 20;
+        let CpuSample::Counters(cpu) = &mut next.cpu else {
+            panic!("Darwin counters")
+        };
+        cpu.ticks[0] += 20;
+        cpu.ticks[3] += 20;
         let rates = next.rates_since(&darwin);
         assert_eq!(rates.cpu_busy_percent, Some(50.));
         assert_eq!(rates.cpu_iowait_percent, None);
@@ -1351,7 +1580,7 @@ mod tests {
     fn ps_parser_preserves_command_spacing_and_multicore_cpu() -> MonitorResult<()> {
         let rows = parse_processes(PROCESS_ROWS)?;
         assert_eq!(rows[0].pid, 42);
-        assert_eq!(rows[0].cpu_percent, 125.0);
+        assert_eq!(rows[0].cpu_percent, Some(125.0));
         assert_eq!(rows[0].command, "worker --arg 'two  spaces'");
         Ok(())
     }
@@ -1474,7 +1703,19 @@ mod tests {
                 commands.push(command.clone());
             }
             session.channel_success(channel)?;
-            let (text, status) = if self.unsupported {
+            let (text, status) = if command == platform::POSIX_PROBE {
+                let platform = if self.unsupported {
+                    "Unsupported"
+                } else {
+                    "Linux"
+                };
+                (
+                    format!(
+                        "@@KS:monitor-platform:1@@\nplatform\t{platform}\nruntime\tposix\n@@KS:end@@\n"
+                    ),
+                    0,
+                )
+            } else if self.unsupported {
                 (String::new(), 64)
             } else if command.starts_with(PLATFORM_SELECTOR) && command.contains(SNAPSHOT_SCRIPT) {
                 (SAMPLE.to_owned(), 0)
@@ -1575,7 +1816,8 @@ mod tests {
                 .commands
                 .lock()
                 .map_err(|_| "fixture lock poisoned")?;
-            assert_eq!(commands.len(), 3);
+            assert_eq!(commands.len(), 4);
+            assert_eq!(commands[0], platform::POSIX_PROBE);
             assert!(
                 commands
                     .iter()
@@ -1588,9 +1830,9 @@ mod tests {
             .commands
             .lock()
             .map_err(|_| "fixture lock poisoned")?;
-        assert_eq!(commands.len(), 4);
-        assert!(commands[3].starts_with("pid=42; expected=12345\n"));
-        assert!(commands[3].contains("kill -TERM \"$pid\""));
+        assert_eq!(commands.len(), 5);
+        assert!(commands[4].starts_with("pid=42; expected=12345\n"));
+        assert!(commands[4].contains("kill -TERM \"$pid\""));
         Ok(())
     }
 
@@ -1613,10 +1855,11 @@ mod tests {
                 .commands
                 .lock()
                 .map_err(|_| "fixture lock poisoned")?;
-            assert_eq!(commands.len(), 2);
-            assert_eq!(commands[0], SOCKETS_SCRIPT);
-            assert!(commands[1].contains("nc -z -w 2 '127.0.0.1' 2222"));
-            assert!(!commands[1].contains("echo "));
+            assert_eq!(commands.len(), 3);
+            assert_eq!(commands[0], platform::POSIX_PROBE);
+            assert_eq!(commands[1], SOCKETS_SCRIPT);
+            assert!(commands[2].contains("nc -z -w 2 '127.0.0.1' 2222"));
+            assert!(!commands[2].contains("echo "));
         }
         let stale = SocketInfo {
             process: None,
@@ -1630,7 +1873,7 @@ mod tests {
             .commands
             .lock()
             .map_err(|_| "fixture lock poisoned")?;
-        assert_eq!(commands.len(), 3);
+        assert_eq!(commands.len(), 4);
         Ok(())
     }
 
@@ -1658,7 +1901,7 @@ mod tests {
                 .lock()
                 .map_err(|_| "fixture lock poisoned")?
                 .len(),
-            2,
+            1,
             "an observed unsupported platform is not repeatedly collected"
         );
         Ok(())
@@ -1698,7 +1941,7 @@ mod tests {
             .commands
             .lock()
             .map_err(|_| "fixture lock poisoned")?;
-        assert_eq!(commands.len(), 3);
+        assert_eq!(commands.len(), 4);
         assert!(
             commands
                 .iter()

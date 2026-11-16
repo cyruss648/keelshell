@@ -709,7 +709,30 @@ impl SshSession {
 
     /// Execute with an explicit combined stdout/stderr memory limit.
     pub async fn exec_limited(&self, command: &str, max_bytes: usize) -> Result<ExecOutput> {
+        self.exec_limited_guarded(command, max_bytes, || true)
+            .await?
+            .ok_or(SessionError::Closed)
+    }
+
+    /// Revalidate admission after channel open and immediately before exec.
+    ///
+    /// `None` means the guard revoked this unsent command. A command already
+    /// sent retains its actual outcome; closing its channel is not proof of
+    /// remote process termination.
+    pub(crate) async fn exec_limited_guarded<F>(
+        &self,
+        command: &str,
+        max_bytes: usize,
+        before_dispatch: F,
+    ) -> Result<Option<ExecOutput>>
+    where
+        F: FnOnce() -> bool + Send,
+    {
         let mut pending = deadline(self.timeout, "SSH channel open", open_session(self)).await?;
+        if !before_dispatch() {
+            pending.close().await;
+            return Ok(None);
+        }
         let channel = pending.channel.as_mut().ok_or(SessionError::Closed)?;
         let result = deadline(self.timeout, "SSH exec", async {
             channel.exec(true, command).await?;
@@ -740,7 +763,7 @@ impl SshSession {
         })
         .await;
         pending.close().await;
-        result
+        result.map(Some)
     }
 
     // Completion callers supply one absolute deadline covering every channel and

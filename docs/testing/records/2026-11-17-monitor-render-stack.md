@@ -1,7 +1,8 @@
 # 监控渲染栈边界 — 2026-11-17
 
 状态：最终r2宿主限定门禁、两位独立复核、精确Git绑定和正常来源包结构通过，已普通推送。
-完整产品、修复后跨平台CI、原生及发行仍开放。
+精确工程`bbd4eacc…`的修复后三平台CI已成功并由本地原件派生封存；
+完整产品、当前dirty Windows监控实现、原生及发行仍开放。
 基线`262a642605ffdb52ef4d6bef075aef17cc910149`；
 设计见[ADR0155](../../adr/0155-monitor-render-stack-boundaries.md)。
 
@@ -125,3 +126,56 @@ macOS133608443592及Ubuntu133608443616处于完整Rust质量门禁，均尚无�
 [交付补充](2026-11-17-monitor-render-stack-evidence/delivery/README.md)。
 43成员交付补充及731精确Git输入只读重算
 `0/reaped/2.158798s`、零mismatch，测试重放0；该封存时CI尚在运行。
+
+## 精确 CI 终态补充：本地原件纯派生
+
+Quality `43955379234` 已 `completed/success`，绑定精确工程
+`bbd4eaccfa8bba2feb487ff43e0423567428bc82`。
+Windows `133608443190`、macOS `133608443592`、Ubuntu `133608443616`
+三个 job 均 `completed/success`。既有状态快照的 `updatedAt` 为
+`2026-11-16T21:31:17Z`（北京时间 `2026-11-17 05:31:17`）；
+上段运行中快照保留其历史时点，本补充没有重新查询或下载。
+
+| 平台 | 普通 Rust passed / failed / ignored | app passed / failed / ignored | rustdoc passed / failed / ignored | Python 主 discovery run / passed / skipped |
+| --- | --- | --- | --- | --- |
+| Windows | 3312 / 0 / 56 | 1364 / 0 / 2 | 14 / 0 / 0 | 293 / 259 / 34 |
+| macOS | 3325 / 0 / 58 | 1375 / 0 / 2 | 14 / 0 / 0 | 293 / 291 / 2 |
+| Ubuntu | 3318 / 0 / 59 | 1376 / 0 / 2 | 14 / 0 / 0 | 293 / 291 / 2 |
+
+各平台 92 个普通 suite、6 个 rustdoc subrun 的声明／唯一逐名结果／摘要相等；
+app 声明分别 1366／1377／1378。普通 Rust 已包含 app，不与 rustdoc／Python 相加。
+包装 Python 独立为 57 run，Windows 53 passed／4 skipped，macOS／Ubuntu 各57 passed；
+workspace 内嵌 Python helper 在 macOS／Ubuntu 各30 passed，Windows 未报告该 subrun。
+CI 没有独立 app `--list` 或 Python 主 discovery 逐名 `-v` 库存，不补写该证据。
+
+三平台 gate 与包装步骤成功；Windows filesystem／archive codec／session backend
+三项预检成功，macOS／Ubuntu 标准 OpenSSH 和回执保存成功。
+42个步骤共32 success／10 skipped，完整步骤与时点保存在派生JSON。
+原Ubuntu失败名
+`monitor::tests::independent_disk_monitor::independent_disk_samples_survive_production_theme_buttons_and_focused_input`
+及原Windows失败名
+`monitor::tests::disk_monitor_minimum_workspace_languages_themes_scroll_and_selection_are_stable`
+均在三个app逐名ok，共六项核对。
+
+原 `collect-terminal-r1` 和 `r2` 的 exit 1、日志与脚本保持：
+r1为gh拒绝ANSI，三份输出0字节且stderr说明拒绝；
+r2已保存三平台完整原日志／suites JSON，只在外层Windows app路径反斜杠选择处
+`StopIteration`。本次新建纯派生helper，在选择app时用
+`suite.replace('\\','/')`，原parser不改，三份保存JSON与重算结果完全相等。
+原r2未保存成功聚合摘要或逐job独立下载exit／耗时回执，本补充不倒填；
+新成功回执只属于本地派生与封存验证。
+
+[37成员终态封存](2026-11-17-monitor-render-stack-evidence/ci-completion/README.md)
+保存上述原件／失败及731输入freeze、SHA-256和精确Git绑定。
+731个路径／bytes／SHA均从`bbd4eacc…`真实Git blob核对，aggregate仍为
+`2ea283af87af7e0af2fa912ebc28f9360e0c5113cd40e1111502f8cdd6d8551e`。
+freeze内`head=262a642…`只是当时基线元数据，不替代精确提交绑定。
+archive共800,304字节，SHA-256为
+`f5c06c21bbe58879d25e9e0066ee97b952d4d65f1cacfb401bf256328fdd4737`。
+纯派生`0/reaped/2.126181s`，封存后只读重算
+`0/reaped/2.147902s`，37成员／731输入零mismatch。
+本次网络、CI重跑、测试重放、Cargo及target访问均0；
+没有commit／push，不改HANDOFF／ROADMAP或现有Windows工程代码。
+最终报告与封存后验证回执留在`work/monitor-stack-ci-20261117/`，待父收取关闭。
+本补充只签精确历史工程，不移签当前HEAD `4209e272…`、
+dirty Windows代码或原生／应用包／安装／发行；最新依赖在线UNKNOWN保持。

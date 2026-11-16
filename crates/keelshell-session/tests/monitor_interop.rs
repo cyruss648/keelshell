@@ -249,7 +249,7 @@ impl Round {
             "snapshot": match &self.snapshot {
                 Ok(sample) => json!({
                     "uptime_seconds": sample.uptime_seconds, "boot_time": sample.boot_time,
-                    "cpu_ticks": sample.cpu.ticks, "memory_total_bytes": sample.memory.total_bytes,
+                    "cpu_ticks": sample.cpu.cumulative().map(|cpu| cpu.ticks), "memory_total_bytes": sample.memory.total_bytes,
                     "network_count": sample.networks.len(), "filesystem_count": sample.filesystems.len(),
                 }),
                 Err(error) => error_value(error),
@@ -272,7 +272,15 @@ impl Round {
             .as_ref()
             .map_err(|_| "Real Linux core collection failed; see saved observation")?;
         assert!(sample.uptime_seconds > 0.0);
-        assert!(sample.cpu.ticks.iter().any(|value| *value > 0));
+        assert!(
+            sample
+                .cpu
+                .cumulative()
+                .ok_or("Linux CPU counters")?
+                .ticks
+                .iter()
+                .any(|value| *value > 0)
+        );
         assert!(sample.memory.total_bytes > 0);
         assert!(!sample.networks.is_empty());
         assert_eq!(

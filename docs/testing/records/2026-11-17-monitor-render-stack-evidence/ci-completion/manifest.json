@@ -1,0 +1,198 @@
+{
+  "sealed_utc": "2026-11-16T21:55:01.366650+00:00",
+  "count": 37,
+  "archive_bytes": 800304,
+  "archive_sha256": "f5c06c21bbe58879d25e9e0066ee97b952d4d65f1cacfb401bf256328fdd4737",
+  "entries": [
+    {
+      "path": "ci-current-r1.json",
+      "bytes": 860,
+      "sha256": "185bbef361c737a1f3984dacf494e2b5b24905fd314527e9a839855cf903f4ea"
+    },
+    {
+      "path": "ci-current-r1.log",
+      "bytes": 8312,
+      "sha256": "24212048270bbcfacc9f4ffe75600d6f977aa35ac55e7a1917cc2b49054225c4"
+    },
+    {
+      "path": "collect-terminal-r1.json",
+      "bytes": 769,
+      "sha256": "525347453acada3436dfed30dd85981ba5172786d417b7af8482a05f39839ae4"
+    },
+    {
+      "path": "collect-terminal-r1.log",
+      "bytes": 1735,
+      "sha256": "94ce15cae310348f283b3ed9d5da4e7228bbeb964154851a00368f1390511390"
+    },
+    {
+      "path": "collect-terminal-r2.json",
+      "bytes": 769,
+      "sha256": "154fdbe3241585f0c3692de0e357fbc4a987c9d81e1bd961fb800f1db0fa54a8"
+    },
+    {
+      "path": "collect-terminal-r2.log",
+      "bytes": 1938,
+      "sha256": "11be54b1955ff80a909f179aaefbb87ce251fd05d0e3c15eac87ed423097c3e1"
+    },
+    {
+      "path": "derive-terminal-offline-r1.json",
+      "bytes": 750,
+      "sha256": "26d2402dc68b33609707e49030a3f99d6cc4d3e3420bb31d2b8ac6a031d68b50"
+    },
+    {
+      "path": "derive-terminal-offline-r1.log",
+      "bytes": 3257,
+      "sha256": "f243d6b9f9b71123c07c0d96a35e59270bcad05c8ce2e581b4a039ba9fd0e941"
+    },
+    {
+      "path": "derive_terminal_offline.py",
+      "bytes": 13564,
+      "sha256": "2d0e58797a45a30b7a38272618ac4b6ecdc8bfcf3c932b76f12e5d791b23060e"
+    },
+    {
+      "path": "download-diagnostics/r1/download_and_derive.py",
+      "bytes": 3804,
+      "sha256": "5020f0f552a81646ce18df91ca6f0bcdac889ef4dec82f31f52fcbe8a5de2f28"
+    },
+    {
+      "path": "download-diagnostics/r1/job-133608443190-download-stderr.log",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467"
+    },
+    {
+      "path": "download-diagnostics/r1/job-133608443190.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "download-diagnostics/r1/job-133608443592-download-stderr.log",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467"
+    },
+    {
+      "path": "download-diagnostics/r1/job-133608443592.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "download-diagnostics/r1/job-133608443616-download-stderr.log",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467"
+    },
+    {
+      "path": "download-diagnostics/r1/job-133608443616.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "download-diagnostics/r2/download_and_derive.py",
+      "bytes": 3832,
+      "sha256": "221d23e7687936220609519ada54f70517a9c8d8130f86533081e540a15be3d4"
+    },
+    {
+      "path": "download_and_derive.py",
+      "bytes": 3832,
+      "sha256": "221d23e7687936220609519ada54f70517a9c8d8130f86533081e540a15be3d4"
+    },
+    {
+      "path": "exact-source-binding-offline-r1.json",
+      "bytes": 532,
+      "sha256": "19ce0d644b472602912f040bf2062d9f94b9bbdc83c11d655926b14227b05c54"
+    },
+    {
+      "path": "inputs-freeze-r2.json",
+      "bytes": 134604,
+      "sha256": "4c1e6a006473298658bff8f06b7aca5bba2e89f3bb535ca59995a960512d2bd4"
+    },
+    {
+      "path": "job-133608443190-download-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "job-133608443190-suites.json",
+      "bytes": 505986,
+      "sha256": "72dc9d96cae509aab5c808beeb7d65841a52ad4553614f2210c245ba4a4e3c35"
+    },
+    {
+      "path": "job-133608443190.log",
+      "bytes": 993140,
+      "sha256": "dc42258316e1840a3bbd8aae00a6ca86e6aaf83692b1fa6e22e50349867df225"
+    },
+    {
+      "path": "job-133608443592-download-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "job-133608443592-suites.json",
+      "bytes": 506429,
+      "sha256": "c0ee99d7fb6c840dde9b65980a68c0a2d3ec4d0f32485dc12bbbccfe48e2780a"
+    },
+    {
+      "path": "job-133608443592.log",
+      "bytes": 864458,
+      "sha256": "10539d122ebcda1ca52edadb60dbf6e5241ad06b2fa833b58f9c46a7465c3f7c"
+    },
+    {
+      "path": "job-133608443616-download-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "job-133608443616-suites.json",
+      "bytes": 505458,
+      "sha256": "277d37e3c225c09f2bb51ef4141883f621001a95c30518ce8f3a2eef8d652d83"
+    },
+    {
+      "path": "job-133608443616.log",
+      "bytes": 885585,
+      "sha256": "428396b4fb0af679823899c92c785fd8c00ca5c667fef2e84893cef0c8635cbf"
+    },
+    {
+      "path": "original-inputs-r1.json",
+      "bytes": 5952,
+      "sha256": "6bc0eac1d52b3ca91316218f655965e2d929536633afb76af0d96a0f42029dff"
+    },
+    {
+      "path": "run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "run_offline.py",
+      "bytes": 1857,
+      "sha256": "946f6e5856500ac30309a8f6f37ebe6c631f83935e151e81031abca9b795a606"
+    },
+    {
+      "path": "scope-before-r1.json",
+      "bytes": 1792,
+      "sha256": "4273022febbd92ac3ab6efcb1f3b62ca30eb7cbc12500dba9830f69194eddc53"
+    },
+    {
+      "path": "seal_directory.py",
+      "bytes": 2490,
+      "sha256": "af5c93fe0eb8b045fd5e976d2959673fc255ba16b151e7d6c2ee66e518fb558d"
+    },
+    {
+      "path": "sealed-verifier-r1.py",
+      "bytes": 5822,
+      "sha256": "7bdf957ecf93badfa92c7c9241edcd190d077bec53a813e46a56b0dbe90434b1"
+    },
+    {
+      "path": "summarize_tests.py",
+      "bytes": 5815,
+      "sha256": "2c9dff40e07f0d4c5fd95d17bed1f0980b7bd9bfca99e7da8559a37b733f1702"
+    },
+    {
+      "path": "terminal-summary-offline-r1.json",
+      "bytes": 22079,
+      "sha256": "248c1fcaf3918d1bea9ee11641e7ceab9c0e1fb897e9be8623a2d1b986c26ce8"
+    }
+  ],
+  "excluded": [
+    "Application packages and binaries",
+    "Python bytecode",
+    "Downloaded full upstream manual; reference digest retained separately"
+  ]
+}

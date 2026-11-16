@@ -7,6 +7,8 @@ mod darwin;
 mod darwin_sockets;
 #[path = "monitor_tests/independent_disk_monitor.rs"]
 mod independent_disk_monitor;
+#[path = "monitor_tests/windows.rs"]
+mod windows;
 use super::{Job, MonitorPanel};
 use gpui_kit::{
     AnyWindowHandle, AppContext, Bounds, Entity, TestAppContext, WindowBounds, WindowOptions,
@@ -38,6 +40,12 @@ impl<T, E: std::fmt::Debug> Checked<T> for Result<T, E> {
 }
 struct Control {
     darwin: AtomicBool,
+    windows: AtomicBool,
+    environment_unconfirmed: AtomicBool,
+    platform_probes: AtomicUsize,
+    windows_probes: AtomicUsize,
+    windows_cpu_basis_points: AtomicUsize,
+    windows_empty: AtomicBool,
     commands: AtomicUsize,
     sockets: AtomicUsize,
     probes: AtomicUsize,
@@ -66,6 +74,12 @@ impl Default for Control {
     fn default() -> Self {
         Self {
             darwin: AtomicBool::new(false),
+            windows: AtomicBool::new(false),
+            environment_unconfirmed: AtomicBool::new(false),
+            platform_probes: AtomicUsize::new(0),
+            windows_probes: AtomicUsize::new(0),
+            windows_cpu_basis_points: AtomicUsize::new(2500),
+            windows_empty: AtomicBool::new(false),
             commands: AtomicUsize::new(0),
             sockets: AtomicUsize::new(0),
             probes: AtomicUsize::new(0),
@@ -124,7 +138,31 @@ impl server::Handler for Peer {
         self.0.commands.fetch_add(1, Ordering::Release);
         session.channel_success(id)?;
         let command = String::from_utf8_lossy(data);
-        let (body, status) = if command.contains("ss -H -lntup") {
+        let (body, status) = if command.contains("@@KS:monitor-platform:1@@") {
+            self.0.platform_probes.fetch_add(1, Ordering::Release);
+            if self.0.windows.load(Ordering::Acquire)
+                || self.0.environment_unconfirmed.load(Ordering::Acquire)
+            {
+                (String::new(), 64)
+            } else {
+                let platform = if self.0.darwin.load(Ordering::Acquire) {
+                    "Darwin"
+                } else {
+                    "Linux"
+                };
+                (
+                    format!(
+                        "@@KS:monitor-platform:1@@\nplatform\t{platform}\nruntime\tposix\n@@KS:end@@\n"
+                    ),
+                    0,
+                )
+            }
+        } else if let Some((operation, skip_capacity)) = windows::operation(&command) {
+            match windows::reply(&self.0, operation, skip_capacity).await? {
+                Some(reply) => reply,
+                None => return Ok(()),
+            }
+        } else if command.contains("ss -H -lntup") {
             self.0.sockets.fetch_add(1, Ordering::Release);
             if self.0.timeout_socket_once.swap(false, Ordering::AcqRel) {
                 // Leave this accepted channel silent. The production SSH exec
@@ -189,6 +227,7 @@ impl server::Handler for Peer {
                 (darwin::resources(sample, collecting_df), 0)
             }
         } else if command.contains("cat /proc/stat") {
+            let sample = self.0.disk_samples.fetch_add(1, Ordering::AcqRel);
             if self.0.hold_resources.load(Ordering::Acquire) {
                 self.0
                     .resource_release
@@ -197,7 +236,6 @@ impl server::Handler for Peer {
                     .map_err(|_| russh::Error::Disconnect)?
                     .forget();
             }
-            let sample = self.0.disk_samples.fetch_add(1, Ordering::AcqRel);
             let df_failure = self.0.df_failure.load(Ordering::Acquire);
             let collecting_df = command.contains("df -Pk");
             if collecting_df {

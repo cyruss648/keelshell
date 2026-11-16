@@ -414,7 +414,12 @@ impl MonitorPanel {
                     errors_zh.push(format!("磁盘容量：{}", capabilities::reason_text(reason).0));
                     errors_en.push(format!("Filesystem capacity: {reason}"));
                 }
-                self.status = if errors_zh.is_empty() {
+                self.status = if errors_zh.is_empty() && self.is_windows() {
+                    Message::new(
+                        "已更新 Windows 只读监控；CPU 为提供程序的一秒均值，未提供的指标保持未知。",
+                        "Windows read-only monitoring updated; CPU is the provider's one-second average. Unavailable metrics remain unknown.",
+                    )
+                } else if errors_zh.is_empty() {
                     Message::new(
                         "已更新；CPU 与网速需要两次有效采样。",
                         "Updated; CPU and network rates need two valid samples.",
@@ -498,6 +503,10 @@ impl MonitorPanel {
                 }
             }
             Outcome::Inspected(result) => match result {
+                _ if !self.linux_monitor_actions_available() => {
+                    self.pending = None;
+                    self.status = self.linux_action_requirement();
+                }
                 Ok(identity) => {
                     self.pending = Some(identity);
                     self.status = Message::new(
@@ -553,10 +562,7 @@ impl MonitorPanel {
             && !self.linux_monitor_actions_available()
         {
             self.pending = None;
-            self.status = Message::new(
-                "此操作需要当前 Linux 资源采样；macOS 支持资源、进程、TCP 监听与 UDP 端口的只读采集。",
-                "This operation requires a current Linux resource sample; macOS supports read-only resources, processes, TCP listeners and UDP sockets.",
-            );
+            self.status = self.linux_action_requirement();
             cx.notify();
             return;
         }
@@ -653,16 +659,45 @@ impl MonitorPanel {
         cx.notify();
     }
 
+    fn monitor_platform(&self) -> Option<MonitorPlatform> {
+        // Authenticated environment facts also exist for socket-first collection
+        // and failed resources. They take precedence over any retained snapshot.
+        self.capabilities
+            .environment
+            .map(|environment| environment.platform)
+            .or_else(|| self.snapshot.as_ref().map(|snapshot| snapshot.platform))
+    }
+
     fn is_darwin(&self) -> bool {
-        self.snapshot
-            .as_ref()
-            .is_some_and(|snapshot| snapshot.platform == MonitorPlatform::Darwin)
+        self.monitor_platform() == Some(MonitorPlatform::Darwin)
+    }
+
+    fn is_windows(&self) -> bool {
+        self.monitor_platform() == Some(MonitorPlatform::Windows)
+    }
+
+    fn linux_action_requirement(&self) -> Message {
+        if self.is_windows() {
+            Message::new(
+                "Windows 监控只读；不支持端口探测、进程核对或终止。",
+                "Windows monitoring is read-only; socket probing, process inspection and stopping are unavailable.",
+            )
+        } else {
+            Message::new(
+                "此操作需要当前 Linux 资源采样；macOS 支持资源、进程、TCP 监听与 UDP 端口的只读采集。",
+                "This operation requires a current Linux resource sample; macOS supports read-only resources, processes, TCP listeners and UDP sockets.",
+            )
+        }
     }
 
     fn linux_monitor_actions_available(&self) -> bool {
-        self.snapshot
-            .as_ref()
-            .is_some_and(|snapshot| snapshot.platform == MonitorPlatform::Linux)
+        self.capabilities
+            .environment
+            .is_some_and(|environment| environment.platform == MonitorPlatform::Linux)
+            && self
+                .snapshot
+                .as_ref()
+                .is_some_and(|snapshot| snapshot.platform == MonitorPlatform::Linux)
     }
 }
 
@@ -693,12 +728,13 @@ async fn execute_job(monitor: LinuxMonitor, job: Job, cancel: &AtomicBool) -> Ou
             // Timestamp the resource response, before the independent ps query
             // or UI dispatch can delay adoption and make it look fresh.
             let sampled_at = Instant::now();
-            if cancel.load(Ordering::Acquire) {
+            if cancel.load(Ordering::Acquire) || matches!(&snapshot, Err(MonitorError::Cancelled)) {
                 return Outcome::Cancelled;
             }
             let processes = monitor.processes().await;
             let process_sampled_at = Instant::now();
-            if cancel.load(Ordering::Acquire) {
+            if cancel.load(Ordering::Acquire) || matches!(&processes, Err(MonitorError::Cancelled))
+            {
                 return Outcome::Cancelled;
             }
             let sockets = if redetect {
@@ -780,8 +816,21 @@ fn error_text(error: &MonitorError) -> (String, String) {
         MonitorError::SocketChanged => "监听端口已变化，请刷新后重新探测".into(),
         MonitorError::InvalidPid => "只允许向大于 1 的有效 PID 发送终止信号".into(),
         MonitorError::ReviewExpired => "进程确认已过期，请重新核对".into(),
+        MonitorError::Cancelled => "监控采集的授权已撤销，响应未采用".into(),
+        MonitorError::EnvironmentUnconfirmed => {
+            "两个固定探针均未确认远端环境；平台与运行时未知，可重新检测。".into()
+        }
     };
-    (zh, error.to_string())
+    let en = match error {
+        MonitorError::EnvironmentUnconfirmed => {
+            "Neither fixed probe confirmed the remote environment; platform and runtime are unknown. Recheck capabilities.".into()
+        }
+        MonitorError::Cancelled => {
+            "Monitoring authority was revoked; the collection was discarded.".into()
+        }
+        _ => error.to_string(),
+    };
+    (zh, en)
 }
 
 fn socket_key(socket: &SocketInfo) -> String {

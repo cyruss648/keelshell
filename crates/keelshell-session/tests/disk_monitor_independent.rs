@@ -179,6 +179,17 @@ impl server::Handler for SlowPeer {
             .map_err(|_| russh::Error::Disconnect)?
             .push(data.to_vec());
         session.channel_success(id)?;
+        if String::from_utf8_lossy(data).contains("@@KS:monitor-platform:1@@") {
+            session.data(
+                id,
+                b"@@KS:monitor-platform:1@@\nplatform\tLinux\nruntime\tposix\n@@KS:end@@\n"
+                    .to_vec(),
+            )?;
+            session.exit_status_request(id, 0)?;
+            session.eof(id)?;
+            session.close(id)?;
+            return Ok(());
+        }
         for _ in 0..10 {
             session.data(id, b"partial".to_vec())?;
             tokio::time::sleep(Duration::from_millis(80)).await;
@@ -239,7 +250,12 @@ async fn optional_collector_does_not_renew_exec_deadline_on_partial_data()
     );
     close?;
     let commands = commands.lock().map_err(|_| "poisoned command capture")?;
-    assert_eq!(commands.len(), 1);
+    assert_eq!(
+        commands.len(),
+        2,
+        "identity probe followed by the slow collector"
+    );
+    assert!(std::str::from_utf8(&commands[0])?.contains("@@KS:monitor-platform:1@@"));
     let expected = include_str!("../src/monitor.rs")
         .split_once("const SNAPSHOT_SCRIPT: &str = r#\"")
         .ok_or("collector start")?
@@ -247,9 +263,9 @@ async fn optional_collector_does_not_renew_exec_deadline_on_partial_data()
         .split_once("\"#;")
         .ok_or("collector end")?
         .0;
-    // Platform selection is part of the same bounded SSH exec. Keep the
-    // exact Linux collector assertion without freezing the former OS wrapper.
-    let linux = std::str::from_utf8(&commands[0])?
+    // The identity probe is separate. The resource command still embeds the
+    // exact Linux collector and retains its original non-renewing deadline.
+    let linux = std::str::from_utf8(&commands[1])?
         .rsplit_once("\n;;\nLinux)\n")
         .ok_or("Linux collector branch")?
         .1

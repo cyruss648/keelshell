@@ -133,6 +133,7 @@ impl MonitorPanel {
                             .child(self.host.clone()),
                     ),
             )
+            .children(self.windows_identity_view(cx))
             .child(
                 div()
                     .id("monitor-actions")
@@ -247,6 +248,11 @@ impl MonitorPanel {
     #[inline(never)]
     pub(super) fn resources_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
+        let unknown = if self.is_windows() {
+            t(cx, "未知", "Unknown")
+        } else {
+            "—"
+        };
         let history_now = Instant::now();
         let cpu = self.rates.cpu_busy_percent;
         let memory = self.snapshot.as_ref().map(|snapshot| &snapshot.memory);
@@ -266,7 +272,7 @@ impl MonitorPanel {
                     )
                 })
             })
-            .unwrap_or_else(|| "—".into());
+            .unwrap_or_else(|| unknown.into());
         let swap = memory.and_then(|m| Some((m.swap_total_bytes?, m.swap_free_bytes?)));
         let swap_used =
             swap.and_then(|(total, free)| total.checked_sub(free).map(|used| (used, total)));
@@ -286,7 +292,7 @@ impl MonitorPanel {
                 cx,
                 t(cx, "CPU", "CPU"),
                 cpu.map(|value| format!("{value:.1}%"))
-                    .unwrap_or_else(|| "—".into()),
+                    .unwrap_or_else(|| unknown.into()),
                 cpu.map(|value| value as f32 / 100.),
                 visual.accent,
             ))
@@ -320,27 +326,27 @@ impl MonitorPanel {
                 t(cx, "交换空间", "Swap"),
                 swap_used
                     .map(|(used, total)| format!("{} / {}", bytes(used), bytes(total)))
-                    .unwrap_or_else(|| "—".into()),
+                    .unwrap_or_else(|| unknown.into()),
                 swap_ratio,
                 visual.warning,
             ));
-        if self.is_darwin() {
+        if self.is_darwin() || self.is_windows() {
             resources = resources
                 .child(metric(
                     cx,
                     t(cx, "总内存", "Total memory"),
-                    memory.map(|m| bytes(m.total_bytes)).unwrap_or_else(|| "—".into()),
+                    memory.map(|m| bytes(m.total_bytes)).unwrap_or_else(|| unknown.into()),
                     None,
                     visual.success,
                 ))
                 .child(metric(
                     cx,
                     t(cx, "空闲内存", "Free memory"),
-                    memory.and_then(|m| m.free_bytes).map(bytes).unwrap_or_else(|| "—".into()),
+                    memory.and_then(|m| m.free_bytes).map(bytes).unwrap_or_else(|| unknown.into()),
                     None,
                     visual.success,
                 ))
-                .child(
+                .children(self.is_darwin().then(|| {
                     div()
                         .id("monitor-darwin-memory-note")
                         .test_support()
@@ -349,19 +355,15 @@ impl MonitorPanel {
                         .text_xs()
                         .text_color(rgb(visual.muted))
                         .whitespace_normal()
-                        .child(t(cx, "空闲页不等于可用内存；已用内存估计不可用。", "Free pages are not available memory; used-memory estimate unavailable.")),
-                );
+                        .child(t(cx, "空闲页不等于可用内存；已用内存估计不可用。", "Free pages are not available memory; used-memory estimate unavailable."))
+                }));
         }
         let load = self
             .snapshot
             .as_ref()
-            .map(|snapshot| {
-                format!(
-                    "{:.2} / {:.2} / {:.2}",
-                    snapshot.load_average[0], snapshot.load_average[1], snapshot.load_average[2]
-                )
-            })
-            .unwrap_or_else(|| "—".into());
+            .and_then(|snapshot| snapshot.load_average)
+            .map(|load| format!("{:.2} / {:.2} / {:.2}", load[0], load[1], load[2]))
+            .unwrap_or_else(|| unknown.into());
         let uptime = self
             .snapshot
             .as_ref()
@@ -372,10 +374,14 @@ impl MonitorPanel {
                 )
                 .render(cx)
             })
-            .unwrap_or_else(|| "—".into());
+            .unwrap_or_else(|| unknown.into());
         resources = resources
             .child(
                 div()
+                    .id("monitor-load-average")
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(format!("{}: {load}", t(cx, "负载 1/5/15", "Load 1/5/15")))
                     .flex()
                     .justify_between()
                     .text_xs()
@@ -384,13 +390,78 @@ impl MonitorPanel {
             )
             .child(
                 div()
+                    .id("monitor-uptime")
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(format!("{}: {uptime}", t(cx, "运行时间", "Uptime")))
                     .flex()
                     .justify_between()
                     .text_xs()
                     .child(t(cx, "运行时间", "Uptime"))
                     .child(uptime),
-            );
+            )
+            .children(self.windows_sources_view(cx));
         resources.into_any_element()
+    }
+
+    #[inline(never)]
+    fn windows_identity_view(&self, cx: &App) -> Option<AnyElement> {
+        self.is_windows().then(|| {
+            let visual = crate::design::palette(cx);
+            let label = t(cx, "Windows · 只读监控", "Windows · Read-only monitoring");
+            div()
+                .id("monitor-windows-identity")
+                .test_support()
+                .role(accesskit::Role::Label)
+                .aria_label(label)
+                .min_w_0()
+                .text_xs()
+                .text_color(rgb(visual.muted))
+                .whitespace_normal()
+                .child(label)
+                .into_any_element()
+        })
+    }
+
+    #[inline(never)]
+    fn windows_sources_view(&self, cx: &App) -> Option<AnyElement> {
+        if !self.is_windows() {
+            return None;
+        }
+        let visual = crate::design::palette(cx);
+        let mut sources = div().min_w_0().flex().flex_col().gap_1();
+        for (id, zh, en) in [
+            (
+                "monitor-windows-cpu-source",
+                "CPU 来源：CIM Win32_Processor.LoadPercentage，提供程序的一秒均值；不是本次刷新区间的 tick 差值。",
+                "CPU source: CIM Win32_Processor.LoadPercentage, the provider's one-second average; not tick deltas over this refresh interval.",
+            ),
+            (
+                "monitor-windows-uptime-source",
+                "运行时间来源：CIM LocalDateTime − LastBootUpTime，系统墙上时钟估计，可能随校时变化。",
+                "Uptime source: CIM LocalDateTime − LastBootUpTime, a system wall-clock estimate that can change with clock adjustments.",
+            ),
+            (
+                "monitor-windows-unknown-metrics",
+                "未知：负载、可用／已用内存、交换空间、网速、CPU I/O 等待与磁盘 I/O。空闲内存不代表可用内存；网络仅显示实际累计字节。",
+                "Unknown: load, available/used memory, swap, network rates, CPU iowait and disk I/O. Free memory is not available memory; network bytes are actual cumulative counters.",
+            ),
+        ] {
+            let label = t(cx, zh, en);
+            sources = sources.child(
+                div()
+                    .id(id)
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(label)
+                    .min_w_0()
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .whitespace_normal()
+                    .child(label),
+            );
+        }
+        Some(sources.into_any_element())
     }
 
     #[inline(never)]
@@ -504,6 +575,21 @@ impl MonitorPanel {
         .test_support()
         .role(accesskit::Role::Group)
         .aria_label(t(cx, "磁盘容量", "Filesystem capacity"));
+        if self.is_windows() {
+            disks = disks.child(
+                div()
+                    .id("monitor-windows-capacity-source")
+                    .test_support()
+                    .text_xs()
+                    .whitespace_normal()
+                    .text_color(rgb(visual.muted))
+                    .child(t(
+                        cx,
+                        "来源：DriveInfo 就绪固定卷；已用容量按总容量减总空闲计算，可用容量保留账户限制。",
+                        "Source: DriveInfo ready fixed volumes; usage is total minus total free. Available capacity retains account limits.",
+                    )),
+            );
+        }
         if let Some(snapshot) = &self.snapshot {
             for filesystem in &snapshot.filesystems {
                 disks = disks
@@ -523,7 +609,12 @@ impl MonitorPanel {
                                     bytes(filesystem.total_bytes)
                                 ),
                                 format!(
-                                    "Free {} / {}",
+                                    "{} {} / {}",
+                                    if self.is_windows() {
+                                        "Available"
+                                    } else {
+                                        "Free"
+                                    },
                                     bytes(filesystem.available_bytes),
                                     bytes(filesystem.total_bytes)
                                 ),
@@ -575,14 +666,18 @@ impl MonitorPanel {
             .test_support()
             .role(accesskit::Role::Group)
             .aria_label(t(cx, "进程", "Processes"))
-            .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+            .child(div().text_xs().whitespace_normal().text_color(rgb(visual.muted)).child(t(
                 cx,
-                if self.is_darwin() {
+                if self.is_windows() {
+                    "Windows · Get-Process · PID 排序 · 只读。显示进程名与工作集；用户、CPU% 和内存% 未知。工作集不是已用内存。"
+                } else if self.is_darwin() {
                     "macOS · 按 CPU 排序 · 只读列表，不支持终止"
                 } else {
                     "按 CPU 排序 · 生命周期均值"
                 },
-                if self.is_darwin() {
+                if self.is_windows() {
+                    "Windows · Get-Process · PID order · Read-only. Process names and working sets; user, CPU% and memory% unknown. Working set is not used memory."
+                } else if self.is_darwin() {
                     "macOS · CPU order · Read-only list; stopping unavailable"
                 } else {
                     "CPU order · lifetime average"
@@ -594,9 +689,25 @@ impl MonitorPanel {
                 .gap_1()
                 .text_xs()
                 .text_color(rgb(visual.muted))
-                .child(div().w(px(42.)).child("CPU"))
-                .child(div().w(px(42.)).child(t(cx, "内存", "MEM")))
-                .child(div().flex_1().child(t(cx, "PID / 命令", "PID / Command"))),
+                .child(
+                    div()
+                        .w(px(if self.is_windows() { 50. } else { 42. }))
+                        .child("CPU"),
+                )
+                .child(
+                    div()
+                        .w(px(if self.is_windows() { 70. } else { 42. }))
+                        .child(if self.is_windows() {
+                            t(cx, "工作集", "Working set")
+                        } else {
+                            t(cx, "内存", "MEM")
+                        }),
+                )
+                .child(div().flex_1().min_w_0().child(if self.is_windows() {
+                    t(cx, "PID / 进程名", "PID / Name")
+                } else {
+                    t(cx, "PID / 命令", "PID / Command")
+                })),
         );
         for process in self
             .processes
@@ -605,7 +716,42 @@ impl MonitorPanel {
             .take(PROCESS_PAGE_SIZE)
         {
             let selected = process.clone();
+            let unknown = t(cx, "未知", "Unknown");
+            let cpu = process
+                .cpu_percent
+                .map(|value| format!("{value:.1}%"))
+                .unwrap_or_else(|| unknown.into());
+            let memory = if self.is_windows() {
+                process
+                    .working_set_bytes
+                    .map(bytes)
+                    .unwrap_or_else(|| unknown.into())
+            } else {
+                process
+                    .memory_percent
+                    .map(|value| format!("{value:.1}%"))
+                    .unwrap_or_else(|| unknown.into())
+            };
+            let user = process.user.as_deref().unwrap_or(unknown);
+            let label = if self.is_windows() {
+                Message::new(
+                    format!("PID {} · 进程名 {} · 用户 {user} · CPU {cpu} · 内存% 未知 · 工作集 {memory}", process.pid, process.command),
+                    format!("PID {} · Process name {} · User {user} · CPU {cpu} · Memory% unknown · Working set {memory}", process.pid, process.command),
+                ).render(cx)
+            } else {
+                format!(
+                    "PID {} · {} · {user} · CPU {cpu} · {} {memory}",
+                    process.pid,
+                    process.command,
+                    t(cx, "内存", "MEM")
+                )
+            };
             let mut row = div()
+                .id(("monitor-process", process.pid as usize))
+                .test_support()
+                .role(accesskit::Role::Group)
+                .aria_label(label)
+                .min_w_0()
                 .flex()
                 .items_center()
                 .gap_1()
@@ -615,15 +761,16 @@ impl MonitorPanel {
                 .text_xs()
                 .child(
                     div()
-                        .w(px(42.))
+                        .w(px(if self.is_windows() { 50. } else { 42. }))
                         .flex_shrink_0()
-                        .child(format!("{:.1}%", process.cpu_percent)),
+                        .truncate()
+                        .child(cpu),
                 )
                 .child(
                     div()
-                        .w(px(42.))
+                        .w(px(if self.is_windows() { 70. } else { 42. }))
                         .flex_shrink_0()
-                        .child(format!("{:.1}%", process.memory_percent)),
+                        .child(memory),
                 )
                 .child(
                     div()
@@ -652,11 +799,33 @@ impl MonitorPanel {
             processes = processes.child(row);
         }
         if self.processes.is_empty() {
-            processes = processes.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+            let empty = t(
                 cx,
-                "暂无进程采样",
-                "No process sample",
-            )));
+                if self.is_windows()
+                    && self.capabilities.processes.state == CapabilityState::Available
+                {
+                    "当前账户未观察到进程"
+                } else {
+                    "暂无进程采样"
+                },
+                if self.is_windows()
+                    && self.capabilities.processes.state == CapabilityState::Available
+                {
+                    "No processes visible to this account"
+                } else {
+                    "No process sample"
+                },
+            );
+            processes = processes.child(
+                div()
+                    .id("monitor-process-empty")
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(empty)
+                    .text_xs()
+                    .text_color(rgb(visual.muted))
+                    .child(empty),
+            );
         }
         let pages = self.processes.len().div_ceil(PROCESS_PAGE_SIZE).max(1);
         if pages > 1 {
@@ -705,6 +874,9 @@ impl MonitorPanel {
 
     #[inline(never)]
     pub(super) fn process_confirmation_view(&self, cx: &mut Context<Self>) -> Option<AnyElement> {
+        if !self.linux_monitor_actions_available() {
+            return None;
+        }
         let visual = crate::design::palette(cx);
         let mut confirmation = None;
         if let Some(identity) = &self.pending {
@@ -712,7 +884,7 @@ impl MonitorPanel {
             confirmation = Some(div().id("process-confirmation").max_h(px(250.)).overflow_y_scroll().m_2().p_2().bg(rgb(visual.danger_surface)).rounded(px(crate::design::components(cx).control_radius)).border_1().border_color(rgb(visual.danger_border)).flex().flex_col().gap_2()
                 .child(div().text_xs().font_weight(FontWeight::SEMIBOLD).child(t(cx, "确认终止进程", "Confirm termination")))
                 .child(div().text_xs().child(self.host.clone()))
-                .child(div().text_xs().child(format!("PID {} · {}", process.pid, process.user)))
+                .child(div().text_xs().child(format!("PID {} · {}", process.pid, process.user.as_deref().unwrap_or(t(cx, "未知", "Unknown")))))
                 .child(div().text_xs().child(process.command.clone()))
                 .child(div().text_xs().child(t(cx, "将发送 SIGTERM，可能中断任务。不会强制终止或提权；启动时间复核仍有极小的 PID 重用竞争。", "SIGTERM may interrupt work. No force kill or privilege escalation; a narrow PID reuse race remains after the start-time check.")))
                 .child(div().flex().gap_1()

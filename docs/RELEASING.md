@@ -59,7 +59,7 @@ gh workflow run release.yml --repo cyruss648/keelshell --ref main
 - 同一 ref 的发布任务串行执行，不取消正在进行的发布。草稿可在资产匹配时续传；已发布且完全一致的版本视为成功。
 - 同名不同哈希、陌生资产或标签指向变化都会阻止继续；不会自动覆盖资产、删除 Release 或移动标签。
 - 上传中途失败时保留草稿，修复实际失败原因后在 Actions 中选择 Re-run failed jobs，复用原有已经验证的构建产物。重新构建可能改变包字节与哈希，不会自动覆盖旧草稿资产；需要先人工核对旧草稿与新构建来源。先检查 run 日志与草稿，勿通过重复推送/改写标签来绕过失败。
-- 构建使用锁定 Rust 工具链和 Cargo.lock，直接 registry 依赖仍用 `x.y`。Actions 固定官方最新版本的完整 commit SHA，旁注版本，避免可移动标签悄悄改变执行代码。更新时一起核验 upstream release 和 SHA。
+- 构建使用开发环境或 CI runner 当前支持的 Rust 工具链及提交的 Cargo.lock；项目不 pin toolchain、不设 `rust-version`。直接 registry 依赖用 `x.y`。Actions 使用经核验的完整 commit SHA 并旁注版本；更新时一起核验 upstream release 和 SHA。
 
 ## 本地检查
 
@@ -71,7 +71,7 @@ python3 packaging/release.py validate-ref --tag v0.1.0
 
 `packaging/package.py` 只生成 staging；`release.py` 无网络，负责归档、哈希与集合核验；
 `publish.py` 才进行 GitHub 写入；`inspect_native.py` 在目标系统检查本机格式/桌面资源，不启动 GUI。
-本机 Python 需 3.11+；CI 使用 3.14 系列最新 patch。图标已经校验并提交，普通构建无需重新生成或安装 Pillow。
+本机 Python 需 3.11+；当前 `setup-build` 使用 3.15 系列并检查最新 patch。图标已经校验并提交，普通构建无需重新生成或安装 Pillow。
 
 ## 官方依据（2026-10-03）
 

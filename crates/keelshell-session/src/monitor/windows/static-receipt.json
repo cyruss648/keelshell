@@ -1,0 +1,153 @@
+{
+  "scope": "static assembly and fixture checks only",
+  "commands": [
+    {
+      "operation": "probe",
+      "skip_capacity": false,
+      "script_utf16_units": 1391,
+      "command_ascii_bytes": 3778,
+      "command_sha256": "8f01c9fa8ef3bfab5d005487a6d6f2108060a633b7ded6aa373630c2c7024c7a"
+    },
+    {
+      "operation": "resources",
+      "skip_capacity": false,
+      "script_utf16_units": 2958,
+      "command_ascii_bytes": 7954,
+      "command_sha256": "ca23fadd506c060f65821c5827667cf88a170519f2a66f49594dca5853e1ad81"
+    },
+    {
+      "operation": "resources",
+      "skip_capacity": true,
+      "script_utf16_units": 2957,
+      "command_ascii_bytes": 7954,
+      "command_sha256": "a6b83aba945711e072f0f758a68e0132769974d49d734b94e64b1d906c84df8b"
+    },
+    {
+      "operation": "processes",
+      "skip_capacity": false,
+      "script_utf16_units": 1622,
+      "command_ascii_bytes": 4394,
+      "command_sha256": "118cad62598807afb9036750d22ead8abc448c01a378c80edb6fdb4c713746b0"
+    },
+    {
+      "operation": "sockets",
+      "skip_capacity": false,
+      "script_utf16_units": 1760,
+      "command_ascii_bytes": 4762,
+      "command_sha256": "1c5cb595fc4d94e29910b843692f433a9c54cec1aa2ef7782a7759c3379eda6f"
+    }
+  ],
+  "fixtures": [
+    {
+      "file": "probe.json",
+      "bytes": 189,
+      "expected_exit": 0,
+      "sha256": "a4328d9e200f3b8fdc30741f1f82c85c2fdd8f37ec9390b49ea40724e7af6071"
+    },
+    {
+      "file": "processes-empty.json",
+      "bytes": 203,
+      "expected_exit": 0,
+      "sha256": "c304d30736d21b18cf6b4b005e1ad81b909cfed22b32dde352e123a2582c65e8"
+    },
+    {
+      "file": "processes.json",
+      "bytes": 324,
+      "expected_exit": 0,
+      "sha256": "2571c2d83b83ea42e002d63474cf021168ef0067f545b1f452efec4a0192b856"
+    },
+    {
+      "file": "resources-unknown.json",
+      "bytes": 413,
+      "expected_exit": 0,
+      "sha256": "117d22d8dd25d4fe80e3bd378535b626b940f1886dc120ac665cf0c0f1f12d85"
+    },
+    {
+      "file": "resources.json",
+      "bytes": 619,
+      "expected_exit": 0,
+      "sha256": "47e04f1bd30eb464ef826c7d9836a0ddcd0e639d58432a3b39a754c5bd87e26d"
+    },
+    {
+      "file": "sockets-empty.json",
+      "bytes": 199,
+      "expected_exit": 0,
+      "sha256": "5ce0a1259b4a76c7652b9c3de0f61ded1f7a7fb8067c2837df964c917578f8bf"
+    },
+    {
+      "file": "sockets-permission-denied.json",
+      "bytes": 194,
+      "expected_exit": "nonzero",
+      "sha256": "f8173ed314621fd2a90f2e086dd1a7489f247f3b0c35ce7fb888e2ce8a10ccb9"
+    },
+    {
+      "file": "sockets.json",
+      "bytes": 331,
+      "expected_exit": 0,
+      "sha256": "2e93e4e8e941474052dd98bde27fae4df325debda1926b8f880d6f256f44c967"
+    }
+  ],
+  "declared_rust_test_count": 44,
+  "rust_tests_executed": 0,
+  "powershell_commands_executed": 0,
+  "test_names": [
+    "commands_are_fixed_ascii_under_default_shell_bound",
+    "encoded_commands_round_trip_exact_production_files_without_bom",
+    "fixed_scripts_use_read_only_sources_and_both_socket_commands",
+    "probe_accepts_complete_lf_crlf_and_unterminated_json",
+    "probe_requires_actual_windows_identity_and_four_desktop_version_components",
+    "every_envelope_field_is_required_and_unknown_fields_fail_closed",
+    "duplicate_envelope_fields_are_rejected_before_value_normalization",
+    "envelope_rejects_wrong_units_versions_operations_runtime_and_types",
+    "complete_frame_rejects_banners_unrelated_whitespace_and_multiple_frames",
+    "malformed_truncated_non_utf8_and_oversize_frames_fail_closed",
+    "no_exit_or_success_stderr_never_establishes_a_collection",
+    "typed_failures_require_null_data_nonzero_exit_and_empty_stderr",
+    "malformed_error_frames_cannot_claim_a_localized_capability_reason",
+    "required_nullable_fields_accept_explicit_null_and_reject_absence",
+    "combined_output_accepts_exact_byte_bound_and_rejects_one_extra",
+    "resources_preserve_unicode_wide_counters_and_reported_cpu_provenance",
+    "unknown_cpu_available_memory_load_swap_and_disk_stay_unknown",
+    "capacity_uses_total_free_for_used_and_keeps_quota_available_distinct",
+    "capacity_percent_uses_checked_wide_integer_arithmetic",
+    "typed_capacity_failure_preserves_core_and_never_reports_empty_available",
+    "empty_successful_capacity_is_distinct_from_skipped_and_partial_failure",
+    "resources_require_every_field_including_nullable_cpu",
+    "nested_resources_reject_unknown_missing_and_duplicate_keys",
+    "resources_reject_noncanonical_overflow_and_numeric_byte_counters",
+    "resources_reject_invalid_percent_uptime_memory_and_capacity_boundaries",
+    "resources_accept_zero_uptime_and_cpu_percentage_endpoints",
+    "resources_validate_counts_duplicates_and_independent_array_bounds",
+    "exact_network_and_filesystem_limits_accept_and_one_extra_rejects",
+    "display_fields_reject_controls_escape_bidi_and_hidden_text",
+    "display_bounds_count_utf8_bytes_and_preserve_safe_unicode",
+    "processes_preserve_pid_zero_unicode_and_optional_working_set_only",
+    "processes_accept_explicit_empty_singleton_and_maximum_pid",
+    "processes_reject_duplicate_unordered_overflow_and_noncanonical_pids",
+    "processes_reject_missing_nullable_working_set_and_duplicate_record_fields",
+    "processes_reject_bad_counts_null_arrays_and_working_set_overflow",
+    "processes_accept_exact_inventory_bound_and_reject_one_extra",
+    "sockets_preserve_numeric_endpoints_and_display_only_pid_metadata",
+    "sockets_require_explicit_empty_success_and_accept_singleton_crlf",
+    "sockets_accept_ipv4_ipv6_wildcards_scopes_and_numeric_pid_boundaries",
+    "sockets_reject_names_injection_invalid_addresses_and_invalid_scopes",
+    "sockets_reject_invalid_protocol_port_and_pid_fields",
+    "sockets_reject_partial_mismatched_duplicate_and_missing_records",
+    "sockets_normalize_addresses_for_duplicates_and_keep_distinct_owners",
+    "sockets_accept_exact_inventory_bound_and_reject_one_extra"
+  ],
+  "source_sha256": {
+    "crates/keelshell-session/src/monitor/windows.rs": "67b89e608abde6e7a3d9f207803f7eb52b46f8a7b1dc3984cb95350a252aa1a9",
+    "crates/keelshell-session/src/monitor/windows/tests.rs": "36c2bb6babca42633c065ad1f8a78ad4abbeca3e1ad4fcea7f52e1045a687cb7",
+    "crates/keelshell-session/src/monitor/windows/common.ps1": "f08ce95a93bd6a38f4955934dedc7edcb28fc9da8faa0c57a0273bd164cf15d8",
+    "crates/keelshell-session/src/monitor/windows/probe.ps1": "52ab610daaabf4bdc74c392a4116fceeb6e3ac7f8ad43b56fc1f3667a3dcb9c2",
+    "crates/keelshell-session/src/monitor/windows/resources.ps1": "1417e9e4724245fdea7522498303ac8848078abe8b216aa413272459b25c1e54",
+    "crates/keelshell-session/src/monitor/windows/processes.ps1": "c3b48289177189fadc802a7d7e046863af8f14e4090d1b5c088122c821bec130",
+    "crates/keelshell-session/src/monitor/windows/sockets.ps1": "f01e786fdfa1fede950c9c865ea604749ec6710f9aab50ee3e29a10f6405d492"
+  },
+  "commands_exit": {
+    "rustfmt_check": 0,
+    "verify_static": 0
+  },
+  "recorded_at": "2026-11-17T05:31:38.032325+08:00"
+}

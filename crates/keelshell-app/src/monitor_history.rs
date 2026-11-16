@@ -116,17 +116,29 @@ impl ResourceHistory {
                         (snapshot.uptime_seconds - old.uptime_seconds - local).abs()
                             <= MAX_ADOPTION_AGE.as_secs_f64()
                     })
-                    && snapshot
-                        .cpu
-                        .ticks
-                        .iter()
-                        .zip(old.cpu.ticks)
-                        .all(|(now, old)| *now >= old)
+                    && match (snapshot.cpu.cumulative(), old.cpu.cumulative()) {
+                        (Some(current), Some(previous)) => current
+                            .ticks
+                            .iter()
+                            .zip(previous.ticks)
+                            .all(|(now, old)| *now >= old),
+                        (None, None) => true,
+                        _ => false,
+                    }
             });
-        let cpu = previous
-            .filter(|_| continuous)
-            .and_then(|old| snapshot.rates_since(old).cpu_busy_percent)
-            .and_then(valid_percent);
+        // Provider percentages are already complete observations. Their first
+        // point remains visible after a pause, error or boot change, while the
+        // same continuity rules still prevent drawing a line across the gap.
+        let cpu = snapshot
+            .cpu
+            .reported_percent()
+            .and_then(valid_percent)
+            .or_else(|| {
+                previous
+                    .filter(|_| continuous)
+                    .and_then(|old| snapshot.rates_since(old).cpu_busy_percent)
+                    .and_then(valid_percent)
+            });
         let memory = snapshot
             .memory
             .used_bytes()
@@ -346,17 +358,17 @@ pub(super) fn view(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use keelshell_session::monitor::{CpuCounters, DiskIoError, MemorySnapshot};
+    use keelshell_session::monitor::{CpuCounters, CpuSample, DiskIoError, MemorySnapshot};
 
     fn snapshot(n: u64) -> Snapshot {
         Snapshot {
             platform: keelshell_session::monitor::MonitorPlatform::Linux,
             boot_time: 1,
             uptime_seconds: n as f64,
-            load_average: [0.; 3],
-            cpu: CpuCounters {
+            load_average: Some([0.; 3]),
+            cpu: CpuSample::Counters(CpuCounters {
                 ticks: [n, 0, 0, n, 0, 0, 0, 0],
-            },
+            }),
             memory: MemorySnapshot {
                 free_bytes: None,
                 total_bytes: 100,
@@ -386,7 +398,9 @@ mod tests {
         assert!(history.points[1].memory.is_none());
         let mut next = darwin.clone();
         next.uptime_seconds = 20.;
-        next.cpu.ticks = [20, 0, 0, 20, 0, 0, 0, 0];
+        next.cpu = CpuSample::Counters(CpuCounters {
+            ticks: [20, 0, 0, 20, 0, 0, 0, 0],
+        });
         let at = at + Duration::from_secs(5);
         assert_eq!(history.record(&next, Some(&darwin), at, at), Ok(Some(50.)));
         assert!(!history.points[2].break_before);
@@ -426,7 +440,9 @@ mod tests {
         let first = snapshot(1);
         assert_eq!(history.record(&first, None, start, start), Ok(None));
         let mut second = snapshot(2);
-        second.cpu.ticks[0] = 1;
+        second.cpu = CpuSample::Counters(CpuCounters {
+            ticks: [1, 0, 0, 2, 0, 0, 0, 0],
+        });
         second.memory.available_bytes = Some(100);
         let at = start + Duration::from_secs(5);
         assert_eq!(history.record(&second, Some(&first), at, at), Ok(Some(0.)));
@@ -447,7 +463,11 @@ mod tests {
             let mut second = snapshot(20);
             match change {
                 0 => second.boot_time = 2,
-                1 => second.cpu.ticks[0] = 0,
+                1 => {
+                    second.cpu = CpuSample::Counters(CpuCounters {
+                        ticks: [0, 0, 0, 20, 0, 0, 0, 0],
+                    })
+                }
                 2 => second.uptime_seconds = 9.,
                 3 => second.uptime_seconds = 10.,
                 _ => second.uptime_seconds = 1000.,

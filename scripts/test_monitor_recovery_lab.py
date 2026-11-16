@@ -265,6 +265,17 @@ class FixtureTests(unittest.TestCase):
         self.assertNotIn("df -Pk", fixture.CACHED_SNAPSHOT)
         self.assertIn("cat /proc/stat", fixture.CACHED_SNAPSHOT)
 
+    def test_forcecommand_identity_probe_exactly_matches_production_and_cannot_append_commands(self):
+        source = (lab.ROOT / "crates/keelshell-session/src/monitor/platform.rs").read_text()
+        match = re.search(r'const POSIX_PROBE: &str = r#"(.*?)"#;', source, re.S)
+        self.assertIsNotNone(match)
+        self.assertEqual(fixture.PLATFORM_PROBE, match.group(1))
+        self.assertEqual(fixture.collector_command(fixture.PLATFORM_PROBE), fixture.PLATFORM_PROBE)
+        for command in (fixture.PLATFORM_PROBE + "id\n",
+                        fixture.PLATFORM_PROBE.replace('ks_platform=Unsupported', 'ks_platform=Linux')):
+            with self.subTest(command=command), self.assertRaises(PermissionError):
+                fixture.collector_command(command)
+
     def test_platform_wrapper_only_delegates_an_exact_known_linux_body(self):
         for body in (fixture.SNAPSHOT, fixture.CACHED_SNAPSHOT):
             command = fixture.PLATFORM_SELECTOR + 'case "$("$ks_uname" -s)" in\nDarwin)\necho ignored; arbitrary text\n;;\nLinux)\n' + body + '\n;;\n*) exit 64 ;;\nesac\n'
@@ -304,7 +315,8 @@ class FixtureTests(unittest.TestCase):
         for collector in fixture.COLLECTORS:
             self.assertNotIn(collector + "\nid\n", fixture.COLLECTORS)
         self.assertEqual(set(fixture.COLLECTORS.values()),
-                         {("core", "df"), ("core", None), ("ps", "ps"), ("ss", "ss")})
+                         {("identity", None), ("core", "df"), ("core", None),
+                          ("ps", "ps"), ("ss", "ss")})
 
     @requires_posix_runner
     def test_successful_wrapper_execs_an_existing_tool_and_error_modes_never_delegate(self):

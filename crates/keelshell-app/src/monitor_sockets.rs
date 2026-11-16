@@ -9,36 +9,37 @@ impl MonitorPanel {
     pub(super) fn sockets_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let components = crate::design::components(cx);
-        let mut sockets = section(
-            cx,
-            t(cx, "端口列表", "Socket listing"),
-            IconName::Network,
-        )
-        .id("monitor-sockets")
-        .test_support()
-        .role(accesskit::Role::Group)
-        .aria_label(t(cx, "端口列表", "Socket listing"))
-        .child(
-            div()
-                .id("monitor-sockets-note")
-                .test_support()
-                .role(accesskit::Role::Label)
-                .aria_label(t(
-                    cx,
-                    "只读采集当前账户可见的 TCP 监听与 UDP 端口。macOS 的 UDP 仅表示已绑定或已指定对端，不代表连通或服务健康。",
-                    "Read-only TCP listeners and UDP sockets visible to this account. macOS UDP labels show a bound address or specified peer, not reachability or service health.",
-                ))
-                .text_xs()
-                .whitespace_normal()
-                .text_color(rgb(visual.muted))
-                .child(t(
-                    cx,
-                    "只读采集当前账户可见的 TCP 监听与 UDP 端口。macOS 的 UDP 仅表示已绑定或已指定对端，不代表连通或服务健康。",
-                    "Read-only TCP listeners and UDP sockets visible to this account. macOS UDP labels show a bound address or specified peer, not reachability or service health.",
-                )),
-        );
+        let note = if self.is_windows() {
+            t(
+                cx,
+                "Windows 只读：Get-NetTCPConnection 的 TCP 监听与 Get-NetUDPEndpoint 的 UDP 绑定；仅当前账户可见。PID 仅作显示，不支持探测、核对或终止，不代表服务健康。",
+                "Windows read-only: TCP listeners from Get-NetTCPConnection and UDP bindings from Get-NetUDPEndpoint, visible to this account. PID is display metadata; probing, inspection and stopping are unavailable. This is not a service-health check.",
+            )
+        } else {
+            t(
+                cx,
+                "只读采集当前账户可见的 TCP 监听与 UDP 端口。macOS 的 UDP 仅表示已绑定或已指定对端，不代表连通或服务健康。",
+                "Read-only TCP listeners and UDP sockets visible to this account. macOS UDP labels show a bound address or specified peer, not reachability or service health.",
+            )
+        };
+        let mut sockets = section(cx, t(cx, "端口列表", "Socket listing"), IconName::Network)
+            .id("monitor-sockets")
+            .test_support()
+            .role(accesskit::Role::Group)
+            .aria_label(t(cx, "端口列表", "Socket listing"))
+            .child(
+                div()
+                    .id("monitor-sockets-note")
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(note)
+                    .text_xs()
+                    .whitespace_normal()
+                    .text_color(rgb(visual.muted))
+                    .child(note),
+            );
         if self.sockets.is_empty() {
-            sockets = sockets.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
+            let empty = t(
                 cx,
                 if self.capabilities.sockets.state == CapabilityState::Available {
                     "当前账户未观察到 TCP 监听或已绑定的 UDP 端口"
@@ -50,7 +51,18 @@ impl MonitorPanel {
                 } else {
                     "No socket sample; click Sockets or Recheck"
                 },
-            )));
+            );
+            sockets = sockets.child(
+                div()
+                    .id("monitor-socket-empty")
+                    .test_support()
+                    .role(accesskit::Role::Label)
+                    .aria_label(empty)
+                    .text_xs()
+                    .whitespace_normal()
+                    .text_color(rgb(visual.muted))
+                    .child(empty),
+            );
         } else {
             for (socket_index, socket) in self
                 .sockets
@@ -65,7 +77,7 @@ impl MonitorPanel {
                     ("udp", "PEER") => t(cx, "已指定对端", "Peer set"),
                     _ => socket.state.as_str(),
                 };
-                let endpoint = if socket.peer == "*:*" {
+                let endpoint = if socket.peer == "*:*" || socket.peer == "*" {
                     socket.local.clone()
                 } else {
                     format!("{} → {}", socket.local, socket.peer)
@@ -149,7 +161,9 @@ impl MonitorPanel {
                             })),
                     );
                 }
-                if let Some(probe) = self.probes.get(&probe_key) {
+                if self.linux_monitor_actions_available()
+                    && let Some(probe) = self.probes.get(&probe_key)
+                {
                     row = row.child(
                         div()
                             .id(("probe-result", socket_index))

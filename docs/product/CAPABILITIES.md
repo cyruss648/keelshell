@@ -1,5 +1,33 @@
 # Capability ledger
 
+## 2026-11-17: remote Windows read-only monitoring
+
+The session transport independently confirms the platform before routing fixed
+Windows PowerShell 5.1 collectors. Resources, ready fixed-volume capacity,
+process names and working sets, and account-visible TCP listeners / UDP
+endpoints use strict, bounded JSON frames and independent capability caches.
+CPU provider percentages remain distinct from Unix cumulative counters; absent
+metrics stay unknown. The GPUI views preserve all three registered theme
+families, both languages and cached pagination. MCP exposes only approved,
+aged cached values and never initiates collection from a context read.
+
+Windows routes do not authorize Linux probes, process inspection or termination.
+Revocation is checked again after SSH channel admission, before sending exec.
+The independent Windows lab inventories stable interfaces and volumes itself;
+missing stable resources fail, while changing or incomplete identities remain
+HOLD. Legal complete empty frames remain supported.
+
+Focused Rust / GPUI checks, real Darwin OpenSSH 15/0/0 and Linux recovery 2/0/0
+have passed within their documented scopes. The author lab suite is 111/0/0;
+both non-author reviews approved their stated scope with zero remaining
+P0-P3 findings. The final 758-input full gate passed: ordinary Rust 3407/0/59
+ignored, app 1398/0/2, 14 rustdoc, Python 405 run / 2 skipped. Independent
+compiled inventories match all 1400 app, 408 session and 10 routing results. The normal macOS arm64 package passed structure / minimum-system
+inspection, without a GUI launch. Actual Windows API / capture replay, real
+Windows OpenSSH, native desktop and release remain separate acceptance lanes.
+See [Windows monitoring](WINDOWS_MONITORING.md), [ADR 0156](../adr/0156-windows-read-only-monitor.md)
+and the [exact test record](../testing/records/2026-11-17-windows-read-only-monitor.md).
+
 ## 2026-11-17: remote macOS UDP endpoints and socket pages
 
 The port collector now reads TCP LISTEN and UDP sockets with an assigned local

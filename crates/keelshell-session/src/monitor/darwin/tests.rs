@@ -45,8 +45,10 @@ fn assert_invalid(input: &str) {
 #[test]
 fn realistic_apple_silicon_sample_uses_named_mach_cpu_states() {
     assert_eq!(
-        snapshot(SAMPLE).cpu.ticks,
-        [1000, 10, 500, 8000, 0, 0, 0, 0],
+        snapshot(SAMPLE).cpu,
+        CpuSample::Counters(CpuCounters {
+            ticks: [1000, 10, 500, 8000, 0, 0, 0, 0]
+        }),
     );
 }
 
@@ -347,6 +349,8 @@ fn cpu_words_follow_the_32_bit_mach_abi() {
     assert_eq!(
         snapshot(&replace_field(SAMPLE, "cpu_user", "4294967295"))
             .cpu
+            .cumulative()
+            .expect("Darwin Mach counters")
             .ticks[0],
         u32::MAX as u64,
     );
@@ -380,7 +384,10 @@ fn zero_load_and_free_memory_are_valid_measurements() {
     let frame = replace_field(&frame, "memory_free_bytes", "0");
     let sample = snapshot(&frame);
     assert_eq!(
-        (sample.load_average[0], sample.memory.free_bytes),
+        (
+            sample.load_average.expect("Darwin load")[0],
+            sample.memory.free_bytes
+        ),
         (0.0, Some(0))
     );
 }

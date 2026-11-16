@@ -60,6 +60,10 @@ impl MonitorPanel {
         // skipped negative check keeps its real age even if its first delivery
         // expired. Outcome and resource receipt deadlines are checked separately.
         self.capabilities = observations;
+        if !self.linux_monitor_actions_available() {
+            self.pending = None;
+            self.probes.clear();
+        }
         true
     }
 
@@ -93,14 +97,65 @@ impl MonitorPanel {
         .test_support()
         .role(accesskit::Role::Group)
         .aria_label(t(cx, "主机监控能力", "Host capabilities"));
+        let environment = match self.capabilities.environment {
+            Some(keelshell_session::monitor::MonitorEnvironment {
+                platform: MonitorPlatform::Windows,
+                runtime: keelshell_session::monitor::MonitorRuntime::WindowsPowerShell { version },
+            }) => format!(
+                "Windows PowerShell {}.{}.{}.{} · {}",
+                version[0],
+                version[1],
+                version[2],
+                version[3],
+                t(cx, "只读", "Read-only")
+            ),
+            Some(environment) => match environment.platform {
+                MonitorPlatform::Linux => "Linux · POSIX".into(),
+                MonitorPlatform::Darwin => "macOS · POSIX".into(),
+                MonitorPlatform::Windows => t(cx, "Windows · 只读", "Windows · Read-only").into(),
+            },
+            None => t(cx, "平台与运行时未知", "Platform and runtime unknown").into(),
+        };
+        view = view.child(
+            div()
+                .id("monitor-environment")
+                .test_support()
+                .role(accesskit::Role::Label)
+                .aria_label(environment.clone())
+                .min_w_0()
+                .text_xs()
+                .whitespace_normal()
+                .text_color(rgb(visual.muted))
+                .child(environment),
+        );
         for (index, (capability, zh, en)) in [
             (Capability::Resources, "核心资源", "Core resources"),
             (
                 Capability::Filesystems,
-                "磁盘容量 df",
-                "Filesystem capacity df",
+                if self.is_windows() {
+                    "磁盘容量 DriveInfo"
+                } else {
+                    "磁盘容量 df"
+                },
+                if self.is_windows() {
+                    "Filesystem capacity DriveInfo"
+                } else {
+                    "Filesystem capacity df"
+                },
             ),
-            (Capability::Processes, "进程 ps", "Processes ps"),
+            (
+                Capability::Processes,
+                if self.is_windows() {
+                    "进程 Get-Process"
+                } else {
+                    "进程 ps"
+                },
+                if self.is_windows() {
+                    "Processes Get-Process"
+                } else {
+                    "Processes ps"
+                },
+            ),
             (Capability::Sockets, "端口列表", "Socket listing"),
         ]
         .into_iter()

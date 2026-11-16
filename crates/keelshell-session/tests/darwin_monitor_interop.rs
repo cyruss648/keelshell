@@ -52,10 +52,19 @@ async fn darwin_resources_are_real_kernel_counters_with_explicit_unknowns() -> T
     assert_eq!(snapshot.platform, MonitorPlatform::Darwin);
     assert!(snapshot.boot_time > 0);
     assert!(snapshot.uptime_seconds.is_finite() && snapshot.uptime_seconds > 0.);
-    assert!(snapshot.cpu.ticks.iter().any(|ticks| *ticks > 0));
+    assert!(
+        snapshot
+            .cpu
+            .cumulative()
+            .ok_or("Darwin CPU counters")?
+            .ticks
+            .iter()
+            .any(|ticks| *ticks > 0)
+    );
     assert!(
         snapshot
             .load_average
+            .ok_or("Darwin load averages")?
             .iter()
             .all(|load| load.is_finite() && *load >= 0.)
     );
@@ -148,7 +157,8 @@ async fn darwin_ps_is_read_only_and_linux_actions_fail_closed() -> TestResult {
     assert!(
         processes
             .iter()
-            .all(|p| p.cpu_percent.is_finite() && p.memory_percent.is_finite())
+            .all(|p| p.cpu_percent.is_some_and(f64::is_finite)
+                && p.memory_percent.is_some_and(f64::is_finite))
     );
     assert!(matches!(
         monitor.inspect_process(process).await,

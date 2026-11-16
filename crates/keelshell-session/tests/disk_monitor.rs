@@ -54,6 +54,18 @@ impl server::Handler for Peer {
             .lock()
             .map_err(|_| russh::Error::Disconnect)?
             .push(data.to_vec());
+        if String::from_utf8_lossy(data).contains("@@KS:monitor-platform:1@@") {
+            session.channel_success(id)?;
+            session.data(
+                id,
+                b"@@KS:monitor-platform:1@@\nplatform\tLinux\nruntime\tposix\n@@KS:end@@\n"
+                    .to_vec(),
+            )?;
+            session.exit_status_request(id, 0)?;
+            session.eof(id)?;
+            session.close(id)?;
+            return Ok(());
+        }
         let response = self
             .responses
             .lock()
@@ -165,9 +177,14 @@ async fn authenticated_snapshot_reads_exact_optional_counters_without_mutations(
             .lock()
             .map_err(|_| "fixture commands poisoned")?
             .clone();
-        assert_eq!(commands.len(), 5);
-        assert!(commands.windows(2).all(|pair| pair[0] == pair[1]));
-        let command = std::str::from_utf8(&commands[0])?;
+        assert_eq!(
+            commands.len(),
+            6,
+            "one identity probe and five resource samples"
+        );
+        assert!(std::str::from_utf8(&commands[0])?.contains("@@KS:monitor-platform:1@@"));
+        assert!(commands[1..].windows(2).all(|pair| pair[0] == pair[1]));
+        let command = std::str::from_utf8(&commands[1])?;
         assert!(
             command.contains("cat /proc/diskstats")
                 && command.contains("cat /proc/sys/kernel/random/boot_id")
@@ -210,7 +227,7 @@ async fn malformed_utf8_and_bounded_response_are_typed_failures()
                 .lock()
                 .map_err(|_| "fixture commands poisoned")?
                 .len(),
-            2
+            3
         );
         fixture.session.close().await?;
         Ok::<_, Box<dyn std::error::Error>>(())

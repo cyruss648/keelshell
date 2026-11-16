@@ -1,0 +1,1 @@
+{"version":1,"operation":"processes","platform":"Windows","runtime":"WindowsPowerShell","runtime_version":"5.1.26100.123","units":"bytes seconds percent","status":"ok","data":{"count":2,"processes":[{"pid":"0","name":"Idle","working_set_bytes":null},{"pid":"42","name":"编辑器","working_set_bytes":"9007199254740993"}]}}

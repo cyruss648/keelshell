@@ -1,5 +1,15 @@
 # 远端监控能力与按项降级
 
+## 2026-11-17 Windows 只读适配
+
+独立平台／运行时探针与 Windows 资源、容量、进程及 TCP/UDP 读取已实现，
+当前正在集成验证。身份未知保持未知，不由一次 shell 错误推断 Windows。
+已确认 Windows 的接口负缓存等待显式重检；传输错误不按命令缺失缓存。
+Windows 的 CPU 百分比、free 内存、工作集及未提供指标有各自明确语义，
+不扩大 Linux 动作权限。详细使用说明和真实平台验收边界见
+[Windows 监控](WINDOWS_MONITORING.md)及[本批记录](../testing/records/2026-11-17-windows-read-only-monitor.md)。
+以下 macOS／Linux 分节保留其历史验收范围。
+
 ## 2026-11-17 macOS UDP 扩展
 
 端口列表已提供当前账户可见的 TCP LISTEN 和有本地端口的 UDP 对象，

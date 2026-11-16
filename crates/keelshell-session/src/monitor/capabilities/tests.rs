@@ -186,6 +186,65 @@ async fn reports_require_the_same_cache_generation_and_latest_revision() {
     assert_eq!(cache.report().await, MonitorCapabilities::default());
 }
 
+#[tokio::test]
+async fn environment_identity_shares_report_authority_and_reset_revokes_late_probes() {
+    use crate::monitor::{MonitorPlatform, MonitorRuntime};
+    let cache = Arc::new(CapabilityCache::default());
+    let (generation, _) = cache.begin(Capability::Resources).await;
+    let before = cache.authenticated_report().await;
+    assert!(
+        cache
+            .record_route(generation, Route::WindowsPowerShell([5, 1, 26100, 1]))
+            .await
+    );
+    assert!(!before.is_current_for(&cache));
+    let report = cache.authenticated_report().await;
+    let environment = report.observations().environment;
+    assert_eq!(
+        environment.map(|env| env.platform),
+        Some(MonitorPlatform::Windows)
+    );
+    assert_eq!(
+        environment.map(|env| env.runtime),
+        Some(MonitorRuntime::WindowsPowerShell {
+            version: [5, 1, 26100, 1]
+        })
+    );
+    cache.invalidate_pending();
+    assert!(!report.is_current_for(&cache));
+    assert_eq!(
+        cache.report().await.environment,
+        environment,
+        "pause preserves completed identity"
+    );
+    assert!(
+        !cache
+            .record_route(generation, Route::Posix(MonitorPlatform::Linux))
+            .await
+    );
+    let (current, _) = cache.begin(Capability::Resources).await;
+    cache.reset().await;
+    assert_eq!(cache.report().await, MonitorCapabilities::default());
+    assert_eq!(cache.route().await, None);
+    assert!(
+        !cache
+            .record_route(current, Route::WindowsPowerShell([5, 1, 26100, 1]))
+            .await
+    );
+    assert_eq!(cache.report().await.environment, None);
+}
+
+#[test]
+fn unconfirmed_environment_and_revoked_work_never_become_a_missing_command() {
+    for error in [
+        MonitorError::EnvironmentUnconfirmed,
+        MonitorError::Cancelled,
+    ] {
+        assert_eq!(error_state(&error), CapabilityState::Unknown);
+        assert_eq!(cached_reason(error_state(&error)), None);
+    }
+}
+
 #[test]
 fn cached_capacity_collector_still_collects_proc_without_invoking_df() {
     let script = super::super::SNAPSHOT_SCRIPT.replace(
