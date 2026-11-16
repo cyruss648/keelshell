@@ -1,5 +1,24 @@
 # Capability ledger
 
+## 2026-11-16: archive diagnostics and Windows preflight
+
+Exact source `8c07d61009dba14f989dd0c00a2a370dc7a2d37b`, Quality `43848390542`,
+finished with macOS and Ubuntu success, including real OpenSSH interoperability.
+Their app results were 1,341/0/2 and 1,342/0/2. Windows passed all 70 filesystem
+preflight cases but its app finished 1,326/4/2: extraction retained an unknown
+mutation hold, and three reviewed continuations failed before progress. Their
+causal relationship is unconfirmed; no complete Windows acceptance is claimed.
+
+The next tests/CI-only batch runs the private archive backend before the full
+Windows gate, checks two exact compiled names before execution, and adds fixed,
+redacted build/publish and quarantine diagnostics. Host focused tests passed
+13 app cases and one Unix publication case, with strict workspace Clippy and
+matching inventories. Windows cross-checking stopped in a C dependency because
+the host lacks the Windows SDK; native Windows execution remains pending.
+Safety, review and isolation behavior did not change. Native macOS toolbar
+observation remains blocked by the locked desktop. See the
+[batch record](../testing/records/2026-11-16-windows-archive-preflight.md).
+
 ## 2026-11-16: Windows directory scan preflight
 
 Source `4d72e1e592bdd6194f6eadca3a6a760192b5fe82` was pushed and its local,

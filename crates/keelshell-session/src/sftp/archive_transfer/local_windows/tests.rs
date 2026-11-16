@@ -8,6 +8,50 @@ use crate::sftp::queue;
 
 const WAIT: Duration = Duration::from_secs(15);
 
+enum ExtractionStage {
+    Build,
+    Publish,
+}
+
+fn extraction_stage_error(stage: ExtractionStage, error: &SessionError) {
+    let stage = match stage {
+        ExtractionStage::Build => "build-stage",
+        ExtractionStage::Publish => "publish-stage",
+    };
+    // Never format the error or its payload: even an I/O message may contain a
+    // dynamic path. inspect_err below leaves the original typed error intact.
+    let typed_error = match error {
+        SessionError::Io(_) => "Io",
+        SessionError::Ssh(_) => "Ssh",
+        SessionError::Proxy(_) => "Proxy",
+        SessionError::UnknownHostKey { .. } => "UnknownHostKey",
+        SessionError::ChangedHostKey { .. } => "ChangedHostKey",
+        SessionError::Authentication => "Authentication",
+        SessionError::Credential(_) => "Credential",
+        SessionError::Timeout(_) => "Timeout",
+        SessionError::Closed => "Closed",
+        SessionError::Invalid(_) => "Invalid",
+        SessionError::Worker => "Worker",
+        SessionError::Rejected(_) => "Rejected",
+        SessionError::Sftp(_) => "Sftp",
+        SessionError::Unsupported(_) => "Unsupported",
+        SessionError::OutputLimit(_) => "OutputLimit",
+        SessionError::EntryLimit(_) => "EntryLimit",
+        SessionError::MutationBusy => "MutationBusy",
+        SessionError::MutationQuarantined => "MutationQuarantined",
+        SessionError::MutationUncertain => "MutationUncertain",
+        SessionError::UnverifiedMutation(_) => "UnverifiedMutation",
+    };
+    let (io_kind, raw_os_error) = match error {
+        SessionError::Io(error) => (Some(error.kind()), error.raw_os_error()),
+        _ => (None, None),
+    };
+    eprintln!(
+        "windows-archive-extraction stage={stage} typed_error=SessionError::{typed_error} \
+         io_kind={io_kind:?} raw_os_error={raw_os_error:?}"
+    );
+}
+
 async fn native<T: Send + 'static>(
     operation: impl FnOnce() -> Result<T> + Send + 'static,
 ) -> Result<T> {
@@ -397,7 +441,8 @@ async fn windows_archive_private_nested_tree_publishes_after_child_creation_hand
             &fixture.destination,
             &fixture.staging,
             &worker,
-        )?;
+        )
+        .inspect_err(|error| extraction_stage_error(ExtractionStage::Build, error))?;
         let identity = metadata(stage.entry.as_file())?.identity;
         for entry in stage.tree.entries.values() {
             verify_private(entry.held.as_file(), entry.stamp.directory)?;
@@ -409,7 +454,8 @@ async fn windows_archive_private_nested_tree_publishes_after_child_creation_hand
             &fixture.destination,
             &fixture.staging,
             &worker,
-        )?;
+        )
+        .inspect_err(|error| extraction_stage_error(ExtractionStage::Publish, error))?;
         assert_eq!(
             std::fs::read(
                 fixture

@@ -222,6 +222,9 @@ pub(super) fn safe_review_status(message: &crate::i18n::Message) -> String {
             "invalid session option: local directory ancestor is a symlink or is not a directory" => {
                 "local-ancestor-rejected"
             }
+            "destination conflicts with an unknown transfer result; inspect and explicitly acknowledge its risk before a new review; reconnect does not resolve it" => {
+                "queued-mutation-quarantined"
+            }
             _ if detail.starts_with("invalid session option: ") => "session-invalid",
             _ if detail.starts_with("operation timed out: ") => "timeout",
             _ if detail.starts_with("output exceeds ") => "output-limit",
@@ -297,6 +300,12 @@ fn execution_status_diagnostics_redact_peer_and_path_text() {
             "None",
         ),
         ("SSH: fixture-peer-text", "ssh", "redacted", "None"),
+        (
+            "destination conflicts with an unknown transfer result; inspect and explicitly acknowledge its risk before a new review; reconnect does not resolve it",
+            "queued-mutation-quarantined",
+            "redacted",
+            "None",
+        ),
     ] {
         let message = crate::i18n::Message::new(
             "fixture-private-translation",

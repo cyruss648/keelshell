@@ -1,0 +1,296 @@
+{
+  "schema": "keelshell.windows-archive-preflight.evidence.v1",
+  "baseline_source": "6f0eb4c3827026807b38cb53d6f1681a64b3847c",
+  "engineering_sha256": "a86f82425764c4fcec2341c2bf47dc4e91be486039d60eb1a60c50256688606a",
+  "count": 46,
+  "archive_bytes": 852994,
+  "archive_sha256": "d6606a952df0dae9e06eb99f4a4b1735e52015c4adf7a1106f176a223905c605",
+  "uncompressed_bytes": 4890666,
+  "entries": [
+    {
+      "path": "batch/candidate-r1.diff",
+      "source_path": "work/windows-archive-preflight-integration-20261116/candidate-r1.diff",
+      "bytes": 6287,
+      "sha256": "1f8f104a4daf2acc022b8f3eaca17abc213964425a62391eefa35ac15e196ee2"
+    },
+    {
+      "path": "batch/candidate-three-files-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/candidate-three-files-r1.json",
+      "bytes": 446,
+      "sha256": "872fdfe4e29634da6d19b58d9fad862d38cf4d482fc1c3d10ef576b61882944e"
+    },
+    {
+      "path": "batch/dependencies-live-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/dependencies-live-r1.json",
+      "bytes": 864,
+      "sha256": "9408f420a7cc6bbbe06ab8fa40eabbcdf9bbeb0dfa36be40963a722f3c0a190b"
+    },
+    {
+      "path": "batch/dependencies-live-r1.log",
+      "source_path": "work/windows-archive-preflight-integration-20261116/dependencies-live-r1.log",
+      "bytes": 2224,
+      "sha256": "f474b36b3cf074ca6e2854f16b2df0c44f751a0a3979b16057aaa8658aa55558"
+    },
+    {
+      "path": "batch/dependencies-report-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/dependencies-report-r1.json",
+      "bytes": 57863,
+      "sha256": "4c1cd11e56e5b191bb9741001e85d8b892c61511d49511ccc9cddb5b75f9c56e"
+    },
+    {
+      "path": "batch/inputs-freeze-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 132291,
+      "sha256": "fda4fd6890e11d7907ff7bf8d81c72e2bb8112985b5d39a23c2f2342e3643057"
+    },
+    {
+      "path": "batch/native-access-blocked-r2.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/native-access-blocked-r2.json",
+      "bytes": 371,
+      "sha256": "6ad3c7c607604f889446a59b05fecece8e7428e49f34b0bb8e2f9679892d7a37"
+    },
+    {
+      "path": "batch/official-workflow-reference-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/official-workflow-reference-r1.json",
+      "bytes": 589,
+      "sha256": "b0f5a321c720944073ecbe31c80827220917a59e410d3322c3bb7bb02c028411"
+    },
+    {
+      "path": "batch/run_command.py",
+      "source_path": "work/windows-archive-preflight-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "batch/scoped-gate-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/scoped-gate-r1.json",
+      "bytes": 783,
+      "sha256": "6306aec5e035c350be66bb01659e568cfe6893eeda01065c6b2f7c4b3c6c854b"
+    },
+    {
+      "path": "batch/scoped-gate-r1.log",
+      "source_path": "work/windows-archive-preflight-integration-20261116/scoped-gate-r1.log",
+      "bytes": 6176,
+      "sha256": "5e6cc81e0847e060a9dd215891221438eefa508932e640980abe2ae07cdae1a9"
+    },
+    {
+      "path": "batch/scoped-summary-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/scoped-summary-r1.json",
+      "bytes": 2072,
+      "sha256": "6eb6407c9320650f579e6e14de9ae05d2dee4276c5b3cde7289d622258717555"
+    },
+    {
+      "path": "batch/scoped_gate.py",
+      "source_path": "work/windows-archive-preflight-integration-20261116/scoped_gate.py",
+      "bytes": 837,
+      "sha256": "568c65bc982c169f9e25302c98f8643f6955c9c859a1a2de692f286130a5ebe9"
+    },
+    {
+      "path": "batch/seal_evidence.py",
+      "source_path": "work/windows-archive-preflight-integration-20261116/seal_evidence.py",
+      "bytes": 2974,
+      "sha256": "4366de9c9edf38c662ea48bd610cbcb3a0796de03b148c950dbe0976c2c76962"
+    },
+    {
+      "path": "batch/source-r1/.github/workflows/ci.yml",
+      "source_path": "work/windows-archive-preflight-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 2883,
+      "sha256": "029b8b955380a86d31da88a5b6c94f82c15d532b7ca482f9b15088c3083f60ab"
+    },
+    {
+      "path": "batch/source-r1/crates/keelshell-app/src/files/archive_tests.rs",
+      "source_path": "work/windows-archive-preflight-integration-20261116/source-r1/crates/keelshell-app/src/files/archive_tests.rs",
+      "bytes": 33410,
+      "sha256": "7e195be17fdb2b03628b6cb7e7ea191e86acbc6c2399906db7824b94426a15f4"
+    },
+    {
+      "path": "batch/source-r1/crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "source_path": "work/windows-archive-preflight-integration-20261116/source-r1/crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "bytes": 30137,
+      "sha256": "48d59382ddb1096e10a7a84e458b5df01796c1567e216c52de3ef3a409b25fbb"
+    },
+    {
+      "path": "batch/windows-cross-clippy-r1.json",
+      "source_path": "work/windows-archive-preflight-integration-20261116/windows-cross-clippy-r1.json",
+      "bytes": 879,
+      "sha256": "4ff0c64cf74b4bc5d8e2f842b4d87b2d978af4b0acabf87a69bac211e77c4e44"
+    },
+    {
+      "path": "batch/windows-cross-clippy-r1.log",
+      "source_path": "work/windows-archive-preflight-integration-20261116/windows-cross-clippy-r1.log",
+      "bytes": 63569,
+      "sha256": "750ea34f5c5bfde2ab8f738571910094f6272bca3456288cfd8e44120876ea27"
+    },
+    {
+      "path": "ci/macos-job-log-r1.clean.txt",
+      "source_path": "work/workbench-fit-20261116/macos-job-log-r1.clean.txt",
+      "bytes": 847917,
+      "sha256": "a529e426036bdbdb087c203ba48e4695d9479c3230cb233c125a71b739d8476a"
+    },
+    {
+      "path": "ci/macos-job-log-r1.json",
+      "source_path": "work/workbench-fit-20261116/macos-job-log-r1.json",
+      "bytes": 808,
+      "sha256": "179fd30fb755362334fd96804126a79f8e840611d39e39d0b6bcc98a3e70bb8f"
+    },
+    {
+      "path": "ci/macos-job-log-r1.log",
+      "source_path": "work/workbench-fit-20261116/macos-job-log-r1.log",
+      "bytes": 849626,
+      "sha256": "c59bdada5fb2fcb0419981761116ba2bd08fd3d4acab012f1d0311cb46543468"
+    },
+    {
+      "path": "ci/source-ci-final-r1.json",
+      "source_path": "work/workbench-fit-20261116/source-ci-final-r1.json",
+      "bytes": 807,
+      "sha256": "bc6ee71830b4261612c68691f0cffd2620e37a95b118bb105d22ed34396dcc28"
+    },
+    {
+      "path": "ci/source-ci-final-r1.log",
+      "source_path": "work/workbench-fit-20261116/source-ci-final-r1.log",
+      "bytes": 7307,
+      "sha256": "5587f57d4066acef505c67d90ed59dcf7b10470b5d32639ec25b2c4256767029"
+    },
+    {
+      "path": "ci/source-ci-snapshot-r2.json",
+      "source_path": "work/workbench-fit-20261116/source-ci-snapshot-r2.json",
+      "bytes": 808,
+      "sha256": "f2f3acc45f49bd05e47804a71150fff44e38b81e816bf711533a4b6da85e6c37"
+    },
+    {
+      "path": "ci/source-ci-snapshot-r2.log",
+      "source_path": "work/workbench-fit-20261116/source-ci-snapshot-r2.log",
+      "bytes": 6888,
+      "sha256": "ad267f54afc73bc4123e45cc3ce19e1bd2f3af6d7ee27df92b62de0cd65eed21"
+    },
+    {
+      "path": "ci/source-ci-summary-r1.json",
+      "source_path": "work/workbench-fit-20261116/source-ci-summary-r1.json",
+      "bytes": 39181,
+      "sha256": "f99712e14f86a0c34e3869e7013595a0e2053b937bc2aa2680e4663c588741d2"
+    },
+    {
+      "path": "ci/source-ci-watch-r1.json",
+      "source_path": "work/workbench-fit-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "945144a8f50eb936425ef4ce15a5bca72e564f792d3346bddc7f2c2d519f589d"
+    },
+    {
+      "path": "ci/source-ci-watch-r1.log",
+      "source_path": "work/workbench-fit-20261116/source-ci-watch-r1.log",
+      "bytes": 102889,
+      "sha256": "950de17eb647720dfa6238113c2beba0ff0cd29be9e1f89ef32403c89ac99c35"
+    },
+    {
+      "path": "ci/ubuntu-job-log-r1.clean.txt",
+      "source_path": "work/workbench-fit-20261116/ubuntu-job-log-r1.clean.txt",
+      "bytes": 868910,
+      "sha256": "bdd8a6b5c77fd61974f5e5c6864f342fca861fefe3d8f5a3c735c1cb0d3d50c9"
+    },
+    {
+      "path": "ci/ubuntu-job-log-r1.json",
+      "source_path": "work/workbench-fit-20261116/ubuntu-job-log-r1.json",
+      "bytes": 808,
+      "sha256": "9a3db6bd0cfaadea6417aeb4a51150217509988819d932034498f07b91e6b8e4"
+    },
+    {
+      "path": "ci/ubuntu-job-log-r1.log",
+      "source_path": "work/workbench-fit-20261116/ubuntu-job-log-r1.log",
+      "bytes": 870595,
+      "sha256": "b3bad381803b6d2c7433b637ce0c74afb74245430f844d945bc6b3202d8c0e7c"
+    },
+    {
+      "path": "ci/windows-failure-summary-r1.json",
+      "source_path": "work/workbench-fit-20261116/windows-failure-summary-r1.json",
+      "bytes": 9244,
+      "sha256": "eb13259c057e49ac92874d902c134949daf64da792b03fa39a35bc86a1fcdce8"
+    },
+    {
+      "path": "ci/windows-job-log-r1.clean.txt",
+      "source_path": "work/workbench-fit-20261116/windows-job-log-r1.clean.txt",
+      "bytes": 443184,
+      "sha256": "84ae8c71e3ec2ce5351cea7e281bc10d462d356e10f7ebe4e93de180c593b857"
+    },
+    {
+      "path": "ci/windows-job-log-r1.json",
+      "source_path": "work/workbench-fit-20261116/windows-job-log-r1.json",
+      "bytes": 812,
+      "sha256": "44ffdcf9ae944a1eaa56ad44416e4ffdeb22692516d35136ee06a9903f8ad8db"
+    },
+    {
+      "path": "ci/windows-job-log-r1.log",
+      "source_path": "work/workbench-fit-20261116/windows-job-log-r1.log",
+      "bytes": 443728,
+      "sha256": "b7207f60cf393ad66c6694215992c5b7ce5190b4fc64b77d9d08761544fad00b"
+    },
+    {
+      "path": "tools/verify.py",
+      "source_path": "docs/testing/records/2026-11-16-windows-archive-preflight-evidence/verify.py",
+      "bytes": 6407,
+      "sha256": "b37bbefb24a39df52689e84b51280b5d317d8994965e099ae1e68ea425b92f07"
+    },
+    {
+      "path": "windows-archive-preflight-review-20261116/review-r1.md",
+      "source_path": "work/windows-archive-preflight-review-20261116/review-r1.md",
+      "bytes": 10951,
+      "sha256": "9333bcd9a174cbabefb7e6a059c539cf2ae58addc1cf423ebbf21457f1a5efa0"
+    },
+    {
+      "path": "windows-archive-preflight-review-20261116/static-check-attempt-r1.json",
+      "source_path": "work/windows-archive-preflight-review-20261116/static-check-attempt-r1.json",
+      "bytes": 923,
+      "sha256": "30917406eca17e4f60f70d99da5d832faeaa474e7dd0d5e673252368ab4efaf7"
+    },
+    {
+      "path": "windows-archive-preflight-review-20261116/static-receipt-r1.json",
+      "source_path": "work/windows-archive-preflight-review-20261116/static-receipt-r1.json",
+      "bytes": 17166,
+      "sha256": "bb9b1a000941c3e23e1dc6fd426d5a51ed9047755c2ee2234777b7318c8dc5ff"
+    },
+    {
+      "path": "windows-extraction-stage-candidate-20261116/REPORT.md",
+      "source_path": "work/windows-extraction-stage-candidate-20261116/REPORT.md",
+      "bytes": 5757,
+      "sha256": "5e1cce786321aa661f5166dc804e490a8d2fda40001927c4d6ecd12aa883b986"
+    },
+    {
+      "path": "windows-extraction-stage-candidate-20261116/candidate.diff",
+      "source_path": "work/windows-extraction-stage-candidate-20261116/candidate.diff",
+      "bytes": 3326,
+      "sha256": "d572fc0003a0f6218af98a55c58ff68e381429e91902f2f855e32dd0046f3856"
+    },
+    {
+      "path": "windows-extraction-stage-candidate-20261116/diff-check.log",
+      "source_path": "work/windows-extraction-stage-candidate-20261116/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "windows-extraction-stage-candidate-20261116/expected-tests.txt",
+      "source_path": "work/windows-extraction-stage-candidate-20261116/expected-tests.txt",
+      "bytes": 3314,
+      "sha256": "8504e93ec1511ea4d6d9bfc1989029099c4e95b9af6878c8852ce26d4b956180"
+    },
+    {
+      "path": "windows-extraction-stage-candidate-20261116/rustfmt-check.log",
+      "source_path": "work/windows-extraction-stage-candidate-20261116/rustfmt-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "windows-extraction-stage-candidate-20261116/static-verification.json",
+      "source_path": "work/windows-extraction-stage-candidate-20261116/static-verification.json",
+      "bytes": 2255,
+      "sha256": "34cfb130936cadd09590b9109c5b42708d8b484d3a92a6965732e7bc89d5b348"
+    }
+  ],
+  "windows_native": "NOT_RUN",
+  "prior_ci": "failure",
+  "native_ui": "BLOCKED_MAC_LOCKED",
+  "excluded": [
+    "target",
+    "application binaries",
+    "runtime",
+    "unrelated browser inventory"
+  ]
+}

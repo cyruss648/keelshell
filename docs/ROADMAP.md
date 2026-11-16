@@ -6,6 +6,20 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
+## 2026-11-16 Windows 私有归档预检
+
+源码 `8c07d61` 的精确 Quality `43848390542` 已终态 failure：macOS/Ubuntu
+success、真实 OpenSSH 成功，app 分别 `1341/0/2`、`1342/0/2`；Windows
+preflight `70/0/0`、app `1326/4/2`，解包未知隔离和三项续传失败未修复。
+三平台完整原日志已收取。本批仅增加 Windows session 后端早期库存/执行、
+测试内 build/publish 固定诊断和 app 固定 quarantine 分类。
+本机 scoped gate `0/reaped/29.208s`，fmt/x.y/严格 workspace Clippy、
+app `13/0/0`、宿主发布 `1/0/0`，14 名逐项匹配、719 输入零漂移。
+Windows cross-Clippy 因缺 SDK `windows.h` 退出 101，未完成 Windows 检查；
+本批完整产品 gate/Windows 实际执行未签。Mac 仍锁屏，原生工具栏 P2 开放。
+新非作者三文件静态批准、P0–P3 全 0，36/36 静态核验通过；独立运行 0，已关闭。
+见[本批记录](testing/records/2026-11-16-windows-archive-preflight.md)。
+
 ## 2026-11-16 工具栏宽度与文件诊断
 
 五文件候选的 719 项冻结集合为
@@ -18,7 +32,7 @@ app `1341/0/2 ignored`，1,343 名逐项相同、719 输入零漂移。
 新正常包构建/检查成功；Mac 锁屏使 GUI 操作/截图均为 0，原生顶栏验收保持开放。
 源码及 44 成员证据已在 `8c07d61009dba14f989dd0c00a2a370dc7a2d37b`
 推送，三方 SHA 一致、读回时工作区干净；精确 Git/归档绑定实际 0/reaped、
-零 mismatch。新 Quality `43848390542 / attempt 1` 运行中，旧四败仍待诊断。
+零 mismatch。其精确 Quality `43848390542 / attempt 1` 后续已 failure，终态及新诊断见上节。
 自有程序及运行态已回收，包保留供解锁后检查；Windows-only 私有阶段回归另批编写。
 见[本批记录](testing/records/2026-11-16-workbench-fit-and-file-diagnostics.md)。
 

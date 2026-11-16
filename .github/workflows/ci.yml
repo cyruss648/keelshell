@@ -32,6 +32,23 @@ jobs:
       - name: Windows native filesystem preflight
         if: runner.os == 'Windows'
         run: cargo test --locked -p keelshell-platform --lib -- --test-threads=1
+      - name: Windows archive backend preflight
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $listing = & cargo test --locked -p keelshell-session --lib sftp::archive_transfer::local::tests:: -- --list
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $listing
+          foreach ($case in @(
+            'sftp::archive_transfer::local::tests::windows_archive_private_nested_tree_publishes_after_child_creation_handles_close',
+            'sftp::archive_transfer::local::tests::windows_archive_empty_private_tree_publishes_with_exact_root_identity'
+          )) {
+            if ($listing -cnotcontains "${case}: test") {
+              throw "Required Windows archive test was not compiled: $case"
+            }
+          }
+          cargo test --locked -p keelshell-session --lib sftp::archive_transfer::local::tests:: -- --test-threads=1
+          exit $LASTEXITCODE
       - name: Rust quality gate
         run: python scripts/check.py
       - name: Prepare Linux OpenSSH interoperability server
