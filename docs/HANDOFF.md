@@ -8,7 +8,38 @@
 不强推或覆盖远端其他提交。当前远端 main 另有一项项目状态文档，不能忽略它直接
 覆盖 main。交付回执在当前批次的持久证据中保存。
 
-## 当前批次：命令输入框双向焦点导航（集中门禁通过，原生路径 HOLD）
+## 当前批次：归档诊断与原生焦点补验（本机门禁通过，远端问题开放）
+
+基线 `f4299487c132180e484008326c5b52682b3a753f`。唯一工程变更为归档测试
+的受限准备诊断，新增两项分类/脱敏回归；生产归档代码及原测试正文保持。
+Windows 八项旧失败根因仍 UNKNOWN，不能把诊断交付称为修复。
+新非作者源码批准 P0–P3 全 0，独立预构建专项 `12/0/0`。
+718 输入冻结 `e967a7619be613cca5c3fc103f4a6d3c8ad2ad746caacc32386cf169820dd1ff`；
+最终完整门禁实际 0/reaped/704.319s：Rust `3220/0/48 ignored`、rustdoc `14/0`、
+Python `290 run / 1 skip`，fmt、严格 Clippy、x.y、三组 controller 通过；
+app 1,341 名逐项相等，完整路径和字节零漂移。
+
+复用摘要不变的上批正常二进制，CUA 在 Frost 浅色中文窗口完成自有 SSH/SFTP
+连接和各一项文件的双列表原生焦点路径：反向 remote26/local32，
+正向 local29/remote35；67 步完整草稿保持，marker absent、seed 字节保持。
+原生此限定场景已观察完整；初始 38 项反向 100 步仅到 remote，仍不签整轮。
+AX summary 只报告窗口根，焦点依据原始 PNG；草稿以完整 AX 值逐字节核对。
+CUA typeText 初始漏中文，后 AX setValue 装草稿，不签 IME、其他主题/尺寸/平台
+或 raw PTY 零出站。三根进程、两端口、私有目录和 76 birth 身份已回收确认。
+新非作者原生证据复核批准 P0–P3 全 0，亲自查看四张根焦点与两张起始 PNG、
+独立核对全部 AX；没有重放 UI 或执行测试。源码与原生 reviewer 均已关闭。
+
+上一源码精确 Quality `43801985537 / attempt1`：Ubuntu success，
+macOS `server_archive` 的固定截止测试返回 Elapsed，target `39/1/0`；
+Windows 终态 failure，app `1318/8/2 ignored / 1131.09s`，仍是同八项缺审失败，
+没有底层错误码；run 已 completed/failure，没有取消或重跑。
+macOS 下一片调查并行进行，不能移签本机门禁。
+本机 Rust/Cargo 实际 1.100.0、无 pin/rust-version；37 个直接包中 16 已核实最新，
+21 与官方 stable 元数据超时 UNKNOWN。接续从
+[本批记录](testing/records/2026-11-16-archive-diagnostics-and-native-focus.md)读取；
+提交、远端和最终清理以持久证据的实际回执为准。
+
+## 上一批次：命令输入框双向焦点导航（集中门禁通过，原生路径 HOLD）
 
 基线 `892aada58a61458fea0f130ccc912036daf2804b`。独立作者交付的三文件补丁
 已按摘要导入；父取得实际编译红例 `4 pass / 4 fail`，生产修复后 `8/0/0`。

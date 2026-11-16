@@ -1,0 +1,22 @@
+[
+  {
+    "path": "previews/small-reverse-26.png",
+    "original": "focus-native-r1/cua/small-reverse-26.png",
+    "sha256": "603176c58fe3a6770af020eada4090ed7602548da8c226d0300d7deaa10aa542"
+  },
+  {
+    "path": "previews/small-reverse-32.png",
+    "original": "focus-native-r1/cua/small-reverse-32.png",
+    "sha256": "2f2acdb75c15726d314e30a66e8fe4b81d8aaaf6205ec688ddc7c722d31c6576"
+  },
+  {
+    "path": "previews/small-forward-29.png",
+    "original": "focus-native-r1/cua/small-forward-29.png",
+    "sha256": "3f4110a6de0aa1aede5c60d523e0e6b42ad3b7b6ef5f14a21f7d6aecdc8f7427"
+  },
+  {
+    "path": "previews/small-forward-35.png",
+    "original": "focus-native-r1/cua/small-forward-35.png",
+    "sha256": "603176c58fe3a6770af020eada4090ed7602548da8c226d0300d7deaa10aa542"
+  }
+]

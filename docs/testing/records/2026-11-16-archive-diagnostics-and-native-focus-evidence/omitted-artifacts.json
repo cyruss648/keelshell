@@ -1,0 +1,990 @@
+{
+  "files": [
+    {
+      "path": "focus-native-r1/cua/reverse-10.png",
+      "bytes": 580411,
+      "sha256": "08b76b804071a74ff8c41148533bc1b391f813344aedf153b5851bfd952fc5d5",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-11.png",
+      "bytes": 579272,
+      "sha256": "306f49e8dcb0cb475730428efb76d36dbfecb8a58e3045e25b9e72a0c864e419",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-12.png",
+      "bytes": 579436,
+      "sha256": "b7fbddcdede67e0650f4113e354310feb92234a38bb0d93fc396e702499fd6d6",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-13.png",
+      "bytes": 579776,
+      "sha256": "f9fbd3c723c4844bb0adef5b09f1d441a829e704d10e485bf1842c807d50fd3e",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-14.png",
+      "bytes": 579730,
+      "sha256": "af3c739a2d7e536f1e44b1d0c16e674a511f00acedf77415b73e0c505d5aac78",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-15.png",
+      "bytes": 579485,
+      "sha256": "0177d3f50b33fc249db8367c451046d1d615c30305a7c1dcfe597fb40ec0672a",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-17.png",
+      "bytes": 579648,
+      "sha256": "687be38ceb2f46511587b2ac5f0f2eef7490085c3cf72534c898a4a928f61d9b",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-18.png",
+      "bytes": 579677,
+      "sha256": "943846ec728e645f51d4a0f45893e812382a3097cf30e4e767fc9bdfbb62deb0",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-19.png",
+      "bytes": 579600,
+      "sha256": "825b7bddeff56d4e21175f806a6b22d5b967e9ec36ca1cb00bce3f70b8ab796c",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-2.png",
+      "bytes": 579182,
+      "sha256": "43e5eb5f2cf7dc310c4d697e546be876bf71f41ce6dbe4d9413219646ad14dac",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-20.png",
+      "bytes": 579339,
+      "sha256": "9fdfbe2b6760682ae91d112b26971b404ca26e8c778e6e49561834e980bae213",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-21.png",
+      "bytes": 578936,
+      "sha256": "cfdf3394a18460f9f7dd2398f18f2df7b697b485e01cc72bd63c35cf97ac1470",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-22.png",
+      "bytes": 579861,
+      "sha256": "d7435c9181f0d71ac0ac74415ca1f622db18a4a8ac8eac867257cefcb9bc7360",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-23.png",
+      "bytes": 579340,
+      "sha256": "e771621d3ff9179b6bde7ba4b6f23fc64c01cebc2b95044305ca9e23e01b6674",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-24.png",
+      "bytes": 578088,
+      "sha256": "2bc642d1a896c5658dec42768a3858b773d65200b315cd1f36b0a5f9bfb20cc8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-25.png",
+      "bytes": 578096,
+      "sha256": "68da2201b6300bfde10debb29a5067830c04bcb73a23ca826ed2a8ca4d3c24ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-26.png",
+      "bytes": 578094,
+      "sha256": "e1b7a8e1c6776d2fd5de76a47e68fd6984b2f45177ba1ddd2496bef0a049e41f",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-27.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-28.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-29.png",
+      "bytes": 578100,
+      "sha256": "b799050e2ae84fed95345a7ac7df58e3bce9096e99db6f3d254e32e10bb6fc90",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-3.png",
+      "bytes": 579847,
+      "sha256": "b1afbfcd8168ed24b0ababa4d9d6ba9cde14a57bccf3569ad5ae47649861a4ea",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-30.png",
+      "bytes": 578094,
+      "sha256": "93a63b0ca8c2209a0c459af138fe2e6ef578c3cad5164c5c2466bcfe8761d452",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-31.png",
+      "bytes": 578088,
+      "sha256": "2bc642d1a896c5658dec42768a3858b773d65200b315cd1f36b0a5f9bfb20cc8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-32.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-33.png",
+      "bytes": 578096,
+      "sha256": "68da2201b6300bfde10debb29a5067830c04bcb73a23ca826ed2a8ca4d3c24ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-34.png",
+      "bytes": 578101,
+      "sha256": "7700681942791798d37da6bd9ac2e500d25a9d656ba4504ec9e67f9eb541a2d3",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-35.png",
+      "bytes": 578096,
+      "sha256": "68da2201b6300bfde10debb29a5067830c04bcb73a23ca826ed2a8ca4d3c24ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-36.png",
+      "bytes": 578096,
+      "sha256": "68da2201b6300bfde10debb29a5067830c04bcb73a23ca826ed2a8ca4d3c24ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-37.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-38.png",
+      "bytes": 578088,
+      "sha256": "2bc642d1a896c5658dec42768a3858b773d65200b315cd1f36b0a5f9bfb20cc8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-39.png",
+      "bytes": 578101,
+      "sha256": "7700681942791798d37da6bd9ac2e500d25a9d656ba4504ec9e67f9eb541a2d3",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-4.png",
+      "bytes": 578911,
+      "sha256": "dd68db3028ea0c324e8df2063926476ce0dfe88ba812038566e69bf4578b3cd1",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-40.png",
+      "bytes": 578096,
+      "sha256": "68da2201b6300bfde10debb29a5067830c04bcb73a23ca826ed2a8ca4d3c24ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-41.png",
+      "bytes": 578101,
+      "sha256": "7700681942791798d37da6bd9ac2e500d25a9d656ba4504ec9e67f9eb541a2d3",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-42.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-43.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-44.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-45.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-46.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-47.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-48.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-49.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-5.png",
+      "bytes": 581259,
+      "sha256": "937ab3ab6e2eff36b48f27b55f3886d20c1a85d90ec8e014d0e405994f11bbd0",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-50.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-51.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-52.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-53.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-54.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-55.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-56.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-57.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-58.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-59.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-6.png",
+      "bytes": 581498,
+      "sha256": "dd3820568fe92b8ddb397ac0f80f71a6cb2f5e68a761133bc09ce23a060df803",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-60.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-61.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-62.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-63.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-64.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-65.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-66.png",
+      "bytes": 578088,
+      "sha256": "2bc642d1a896c5658dec42768a3858b773d65200b315cd1f36b0a5f9bfb20cc8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-67.png",
+      "bytes": 578088,
+      "sha256": "2bc642d1a896c5658dec42768a3858b773d65200b315cd1f36b0a5f9bfb20cc8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-68.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-69.png",
+      "bytes": 578100,
+      "sha256": "b799050e2ae84fed95345a7ac7df58e3bce9096e99db6f3d254e32e10bb6fc90",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-7.png",
+      "bytes": 580853,
+      "sha256": "f328080c4685d40cbe9b11c0781311d848c75951d97060e83a8fdaf92178130f",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-70.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-71.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-72.png",
+      "bytes": 578096,
+      "sha256": "68da2201b6300bfde10debb29a5067830c04bcb73a23ca826ed2a8ca4d3c24ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-73.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-74.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-75.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-76.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-77.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-78.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-79.png",
+      "bytes": 578084,
+      "sha256": "26b10ec1f446bbee6679255a91f56efefd9657de811554e57ffedcd269c40828",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-8.png",
+      "bytes": 579136,
+      "sha256": "266555763727fbe2a8c22244852f5e67fa5dfe20e41e86c0bcec00de2db8b676",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-80.png",
+      "bytes": 578096,
+      "sha256": "68da2201b6300bfde10debb29a5067830c04bcb73a23ca826ed2a8ca4d3c24ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-81.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-82.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-83.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-84.png",
+      "bytes": 578211,
+      "sha256": "bfa3d48b9ca3bddd62a5c4ad8c82375c0c8bb3d44f85b635c8e3e59af089f8f4",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-85.png",
+      "bytes": 578091,
+      "sha256": "d35c24cf86e435d72c07e252222ef822b7eb028131e6ffe9c5a55ca11f689497",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-86.png",
+      "bytes": 578697,
+      "sha256": "8ca4f264b3ca05e9b4d3d611675761c9147998fe9c04adb1b3719b03d5fca0df",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-87.png",
+      "bytes": 578276,
+      "sha256": "e45e364c4746a6feb0d4698a3509c294b726d951ed0597990dfc3b35ba973f48",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-88.png",
+      "bytes": 578747,
+      "sha256": "5041c5ae2f9b139b548ec69da320448df23dba84b12e5636b0fe72fe3bb5b896",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-9.png",
+      "bytes": 580974,
+      "sha256": "5b4ac36b894c06afd3cff157c240544d9bee85c1037a19176bc447e546f5fbf4",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-90.png",
+      "bytes": 578765,
+      "sha256": "cf854f45acdd6c622dbb2fd5f25465389b77ae45d682c1a7e5ce857648ae16cb",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-91.png",
+      "bytes": 578632,
+      "sha256": "9fd2c9ed85366071155701c16b55605d327bed267561e370fdb5128953e4bb09",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-92.png",
+      "bytes": 578748,
+      "sha256": "1f10a132daae03119645319a1b17d6fa5de215a652ffd1230e0b09a0b17b1088",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-93.png",
+      "bytes": 578281,
+      "sha256": "21df38d92588f9e5b847f0f189c4b1d832e4814a3924b1e85c82f18d15cee360",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-94.png",
+      "bytes": 578741,
+      "sha256": "0b94dfcf2c9b46787216104e88b9f8c7b88d3a6a47fb5b4fc741cd8f7ea8a655",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-95.png",
+      "bytes": 578197,
+      "sha256": "48cf6c57d4cb84bdd9f9a3fcd8101885808ea0fce35080d893aecb18e5d98872",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-96.png",
+      "bytes": 578725,
+      "sha256": "d371d66c790fbd43836a1383c15ad1bf2d090bcb3df2edc4a2f0847b6e88a43f",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-97.png",
+      "bytes": 578287,
+      "sha256": "94549a0738971fb1ff15c0d1c693cc159a01863a8c8687c21cd691beffa1791d",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-98.png",
+      "bytes": 578528,
+      "sha256": "22ed4eabac0a4689cfe3ad5c7598acee7ff0d90a577ae1a435d590d8fa670d9c",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-99.png",
+      "bytes": 578300,
+      "sha256": "42d41a0beb0eac5559adf1da4502bd6cd5ee8a338b2d498cec8af6bedba45b2c",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-1.png",
+      "bytes": 481239,
+      "sha256": "d1fe5b98f1fe10783c1c6ff626f316e9d47e1a3dcea6df456955cdeb51d11db4",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-10.png",
+      "bytes": 481814,
+      "sha256": "f6f7e271d6fffee28d8912a993dede9d40e59cbb9b89c145839d8607cd5cf5af",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-11.png",
+      "bytes": 482160,
+      "sha256": "60ccddf22af799cf7d9b86c539a69d6c6f35e8474fd348045e02d054066927dd",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-12.png",
+      "bytes": 482137,
+      "sha256": "a8ec4183852ac379301e31be228d49081a2a442eba39e1a5d2f506582895dcaa",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-13.png",
+      "bytes": 481978,
+      "sha256": "216c595058c1bcd607c67ae4ca05163d956b7489919fc354424b5821d0bd4e7f",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-14.png",
+      "bytes": 481995,
+      "sha256": "a50cf169ca24507d4c166c18f43504c703a7898556495ea548d6a740a6d25d0f",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-15.png",
+      "bytes": 481957,
+      "sha256": "12a5bf7bc6e1baff2b10f108a1f0305d3a78b16eee0fea9e245274ab9af5b441",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-16.png",
+      "bytes": 481946,
+      "sha256": "e4bb0582a250268a6e562db1055f838d303d05520085c3695f493fd36da6d589",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-17.png",
+      "bytes": 482725,
+      "sha256": "2e059c5059ac644a2c1bd771cef734b0d162f2d5e052c0b0aaa61e423a291df3",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-18.png",
+      "bytes": 482508,
+      "sha256": "e785a4424edc2260668e1c4ce6eacae081e036dc44d611e6de71df2a95217b44",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-19.png",
+      "bytes": 482098,
+      "sha256": "b9ab7b55ca37efa93260bb4fc9d3c814892117d9a7f677bc6fd3f928fc7799a2",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-2.png",
+      "bytes": 485944,
+      "sha256": "69457c68de5060ac6a9873fcc60f72442bf04f3bd2a9d0043ed6cb5a886619ce",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-20.png",
+      "bytes": 482110,
+      "sha256": "280a6d3bab771a81e41a384ac2027c5eb48ba0398cf809cbd7cf6641ba812ac8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-21.png",
+      "bytes": 482042,
+      "sha256": "3a7e2cec8601cbe5c289848c0ca18e49a138aedd19e4896d0a8111f2e7717c20",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-22.png",
+      "bytes": 490433,
+      "sha256": "63f2f869ad790a3b3639b8fb87c5fe2bf1036edc0e180cb329f6888fd1a85f82",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-23.png",
+      "bytes": 482702,
+      "sha256": "ca413bf2e0567442f8a36cb2ee0840cf9bd8b551e78de27eb54b943f1e8f0c7b",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-24.png",
+      "bytes": 482816,
+      "sha256": "fb43ec94f1424eb300343280219037295fc5851838c508f2039c543f0fb9738b",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-25.png",
+      "bytes": 482160,
+      "sha256": "8af771220e1677fb84201a1fc527b37ab5323c40fd364489be0383a59a059d6e",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-26.png",
+      "bytes": 483494,
+      "sha256": "b4b3da72159f623da0944fb0061be3040f67947171dfe0be0e9c6bfbaa51f177",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-27.png",
+      "bytes": 482022,
+      "sha256": "6547267ac54b6c3fc63544c1e8d6240a564e9893feda074e09e2063dea8402f3",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-28.png",
+      "bytes": 481874,
+      "sha256": "65ff4bc74ed815e5df177809720a5d2decd568434142d1cc435b8f54386b2144",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-3.png",
+      "bytes": 481743,
+      "sha256": "96a63fc90aaaf6788b3ce35f82d93e00b1ae4fe338bd3d28c4d7cf19b586af69",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-30.png",
+      "bytes": 481202,
+      "sha256": "0830e7ee2ce6eaeb0e7d796b604b4b4137bcb58cdff2276f9fe7e74b4fad31c5",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-31.png",
+      "bytes": 482041,
+      "sha256": "94a525a69f6e342b7a9a568ffc92dc765adc3f5ef58ea3c97933fcf44762e211",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-32.png",
+      "bytes": 481419,
+      "sha256": "64a089c1525dd2e668c4fe3cc69128c4680f0ec22285047afbaf7e47f12970c6",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-33.png",
+      "bytes": 481684,
+      "sha256": "ac46c2f3b1c2a20a0d903c5e3c71206263d2947ae108889bd371a00f23f862c1",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-34.png",
+      "bytes": 481764,
+      "sha256": "65ec070e12e08aa6935e01da90c572fd02f7f8bd579372b53ffe825d211046dc",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-4.png",
+      "bytes": 481770,
+      "sha256": "363e17d48caf29b161942476ac7f6c81618baa9586cab079b322a218726731e5",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-5.png",
+      "bytes": 481736,
+      "sha256": "473eb881f22a1f72563e34cf4fdccb4611666c8b0b9f07c6580d9a26e04bd2c1",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-6.png",
+      "bytes": 482030,
+      "sha256": "5b122bf246e449a903fc24aa2c756c80ecd936219c546bf01dd3ee1d66d40d7e",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-7.png",
+      "bytes": 482329,
+      "sha256": "1247382f9ac271528a5f9705a43ff6ec9e2e8d423fd2fab062526a1849d2938b",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-8.png",
+      "bytes": 482406,
+      "sha256": "fb81b4e77155c4204fabc4cb6c7d24e52f97e3d5a425cb768ef49b5683bdd199",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-9.png",
+      "bytes": 482604,
+      "sha256": "02be6eaebed694ab82f298d0fb31d40998f1db9d7a902f1a38a96ab381d223f2",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-1.png",
+      "bytes": 481281,
+      "sha256": "60ef402700bc4c1070bb3a877df444442e8b9eaf18cbff80057bb99ff2fbc150",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-10.png",
+      "bytes": 483236,
+      "sha256": "05909a0d50d7b3856ac205973e5b5fd4f1622aa6e3d0de24623bf4d09b128737",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-11.png",
+      "bytes": 482103,
+      "sha256": "5719f64e1d4886383acb1723e4e2e5b51c09894392afab7730282f6235862911",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-12.png",
+      "bytes": 482273,
+      "sha256": "905820209e7424ebb3e9bf03ade82f9bc8ff0878de33769b60916ad23260d576",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-13.png",
+      "bytes": 482607,
+      "sha256": "2d4c7a39a6d1dd0c95735d8c82bb8012adb1a81a3619503dd5e9f6fff587d3f2",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-14.png",
+      "bytes": 482559,
+      "sha256": "558e10e1d1c31d985bec835256a03197608674ca20f9e38c59c1e6105ab25829",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-15.png",
+      "bytes": 482322,
+      "sha256": "b0411f1effc83793b79b996248ce6cc1bdbed8f4f13c4f7c82f5d4855b733d27",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-16.png",
+      "bytes": 482265,
+      "sha256": "1e8d36ebcfc89b5afb1554ff2ea02f6ed621d9be93d275b5434888ff545ff465",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-17.png",
+      "bytes": 482492,
+      "sha256": "9cd30df38d91924e425ec7d9cf1c12f8910e8760a17be806ab92c2816e789bcb",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-18.png",
+      "bytes": 482514,
+      "sha256": "cdabe03fbfe16149c993a7d14b17f6d55352effe68433dac7cdcce91bef3994d",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-19.png",
+      "bytes": 482430,
+      "sha256": "4b1ef3aea6f4aa387ea45693d9583cc9021698c8205ce0b46f67a5ba141b9a3c",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-2.png",
+      "bytes": 482011,
+      "sha256": "7c85b71eb2a4fc1c15253fa463971878d0ab82e89ec9953a15852c7788ad5ff5",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-20.png",
+      "bytes": 482170,
+      "sha256": "a0bc6315528d72e6b83cde94ad28952068390db6455f3ddc7dfc22e7c2e946f2",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-21.png",
+      "bytes": 481770,
+      "sha256": "91296d71b37054578a4c8372659bb841b167ae9c6f10c30d0c568936d7e0cc62",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-22.png",
+      "bytes": 482690,
+      "sha256": "dfb639da21d3e768c0034871b8f70f560839d6d230b5011b222b02f5f222e1f3",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-23.png",
+      "bytes": 482157,
+      "sha256": "4e4b20cc5b18464da14c2ed933a69e0000255ed13078773f81c76da0eb50170b",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-24.png",
+      "bytes": 482024,
+      "sha256": "3efc669e39c77c3495a4458454cc2963a271246c660e45cb497270130564b6d8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-25.png",
+      "bytes": 481138,
+      "sha256": "b9b55404dfe6ed8c1157fc3c2614ae40395a8d2af0a1ac5b2b0c6109d953fde8",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-27.png",
+      "bytes": 481764,
+      "sha256": "a0e2de5d584b962b266ed306243f45ca2f1bd0bf99c045eedcc1ce79c8ad3583",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-28.png",
+      "bytes": 481684,
+      "sha256": "ac46c2f3b1c2a20a0d903c5e3c71206263d2947ae108889bd371a00f23f862c1",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-29.png",
+      "bytes": 481419,
+      "sha256": "64a089c1525dd2e668c4fe3cc69128c4680f0ec22285047afbaf7e47f12970c6",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-3.png",
+      "bytes": 482681,
+      "sha256": "6b7d1bbf76cb42b2491ec772eb10d70ff999ab87d05b32e33922416a5dbb0f8d",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-30.png",
+      "bytes": 482041,
+      "sha256": "94a525a69f6e342b7a9a568ffc92dc765adc3f5ef58ea3c97933fcf44762e211",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-31.png",
+      "bytes": 481202,
+      "sha256": "657f6e94ef7b75fca7c1abc7887f3027cb6d8ea7c74b1df54e80266d5e25b4ed",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-4.png",
+      "bytes": 481745,
+      "sha256": "ebee2702498526b2cbfccec306fec467dca2077d9387f150ead6c16dc9ecb6ac",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-5.png",
+      "bytes": 484307,
+      "sha256": "e8b817b758e9cc1d298da49f5b7da48dac70a22258fdb8a0e41297057f6679e1",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-6.png",
+      "bytes": 484323,
+      "sha256": "db4a14464edd53cde0bb611ebb24c4839e2c9ccaae31b15eb38f75817248d511",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-7.png",
+      "bytes": 483687,
+      "sha256": "c334d46d939e9df4ed380fc0a0e491f0c818c0871463871c423be0dd5fae53cd",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-8.png",
+      "bytes": 481972,
+      "sha256": "8a883dc5470401b78097dca8e572c17c75d25c85435b0935cd5ed511f07eecdc",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-9.png",
+      "bytes": 483798,
+      "sha256": "6b3f9a1ef0cd1796a57b479f0806d3278136c6c5ebad6b68fb3ae178bec2bd3c",
+      "reason": "routine intermediate navigation image; full AX retained, acceptance endpoints and initial failure images retained"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/Info.plist",
+      "bytes": 993,
+      "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70",
+      "reason": "rebuildable staged binary or asset; normal binary provenance recorded separately"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-app",
+      "bytes": 199127040,
+      "sha256": "af2a88364650b90b5dfab4ca8a4655a8430febc4971f575c7a7fd0fde19eb9a3",
+      "reason": "rebuildable staged binary or asset; normal binary provenance recorded separately"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/MacOS/keelshell-mcp",
+      "bytes": 14548464,
+      "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816",
+      "reason": "rebuildable staged binary or asset; normal binary provenance recorded separately"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/PkgInfo",
+      "bytes": 8,
+      "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+      "reason": "rebuildable staged binary or asset; normal binary provenance recorded separately"
+    },
+    {
+      "path": "package-r1/KeelShell.app/Contents/Resources/KeelShell.icns",
+      "bytes": 995855,
+      "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425",
+      "reason": "rebuildable staged binary or asset; normal binary provenance recorded separately"
+    }
+  ],
+  "active_scope_not_archived": "work/windows-archive-fix-20261116/macos-deadline-author",
+  "active_scope_owned_by": "Popper"
+}

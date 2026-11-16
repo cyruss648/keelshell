@@ -90,17 +90,234 @@ async fn remote_selection(h: &Harness, path: &str, cx: &mut TestAppContext) {
     .checked("select the actual remote archive");
 }
 
+fn pending_kind(pending: &Option<(crate::i18n::Message, Operation)>) -> &'static str {
+    let Some((_, operation)) = pending else {
+        return "None";
+    };
+    match operation {
+        Operation::PlanArchive(_) => "PlanArchive",
+        Operation::TransferArchive(_) => "TransferArchive",
+        // Only archive admission matters here. Never format another operation,
+        // since its payload may contain private paths or document contents.
+        _ => "Other",
+    }
+}
+
+fn display_os_error(detail: &str) -> Option<u32> {
+    detail
+        .rsplit_once("(os error ")
+        .and_then(|(_, suffix)| suffix.strip_suffix(')'))
+        .filter(|digits| {
+            !digits.is_empty()
+                && digits.len() <= 10
+                && digits.bytes().all(|byte| byte.is_ascii_digit())
+        })
+        .and_then(|digits| digits.parse::<u32>().ok())
+}
+
+fn safe_review_status(message: &crate::i18n::Message) -> String {
+    // Status details can contain paths or peer text. Only fixed classifications
+    // and an optional numeric I/O display suffix may enter a failing CI log.
+    let (_, en) = message.translations();
+    let Some(detail) = en.strip_prefix("Review incomplete; transfer not started: ") else {
+        let stage = match en {
+            "Preparing the archive and complete manifest read-only; review is required…" => {
+                "preparing"
+            }
+            "Archive prepared; review the complete manifest and new destination." => "prepared",
+            "Archive review expired: the session, folder, selection, format or path changed. Prepare again." => {
+                "archive-binding-expired"
+            }
+            "Read-only review preparation completed, but the path or selection changed; the old plan was not adopted. Prepare it again." => {
+                "browser-review-expired"
+            }
+            "Wait for or cancel the active file operation" => "active-operation-blocked",
+            "Select ordinary files or folders in the local list." => "local-selection-rejected",
+            "Enter a portable new archive name ending in .zip."
+            | "Enter a portable new archive name ending in .tar.gz." => "archive-name-rejected",
+            "Select one remote archive and enter an absolute new folder in the local transfer path." => {
+                "extraction-selection-rejected"
+            }
+            _ if en.starts_with("Unable to start file worker: ") => "worker-start-failed",
+            _ => "other-redacted",
+        };
+        let code = en
+            .strip_prefix("Unable to start file worker: ")
+            .and_then(display_os_error);
+        return format!("stage={stage} display_os_error={code:?}");
+    };
+    let (kind, reason, code) = if let Some(io) = detail.strip_prefix("I/O: ") {
+        let reason = match io {
+            "published local name changed or has a case alias" => "local-name-alias",
+            "local path must be an absolute drive path" => "absolute-drive-path-required",
+            "local name is not a portable literal component" => "nonportable-component",
+            "local name aliases a DOS device" => "dos-device-alias",
+            "local publication requires a local drive" => "nonlocal-drive",
+            "local publication requires a verified local disk volume" => "unverified-local-volume",
+            "local object is a reparse point, link alias or pending deletion" => {
+                "unsafe-local-object"
+            }
+            "invalid native directory-name response" => "native-directory-response",
+            "native open returned an unconfirmed outcome" => "native-open-unconfirmed",
+            "local destination or case alias already exists" => "local-destination-exists",
+            _ => "other-redacted",
+        };
+        ("io", reason, display_os_error(io))
+    } else {
+        let kind = match detail {
+            "session is closed" => "closed",
+            "session worker state is unavailable" => "session-worker",
+            "File worker stopped without a result" => "file-worker",
+            "Operation completed but SFTP cleanup failed" => "sftp-cleanup",
+            "File operation cancelled before SFTP initialization" => "cancelled-before-sftp",
+            "invalid session option: archive source, destination or ancestors changed; review again" => {
+                "archive-observation-changed"
+            }
+            "invalid session option: archive codec rejected invalid, unsafe or over-limit contents" => {
+                "archive-codec-rejected"
+            }
+            "invalid session option: archive rejects remote canonical path aliases" => {
+                "remote-path-alias"
+            }
+            "invalid session option: archive remote destination already exists" => {
+                "remote-destination-exists"
+            }
+            _ if detail.starts_with("invalid session option: ") => "session-invalid",
+            _ if detail.starts_with("operation timed out: ") => "timeout",
+            _ if detail.starts_with("output exceeds ") => "output-limit",
+            _ if detail.starts_with("SFTP: ") => "sftp",
+            _ if detail.starts_with("SSH: ") => "ssh",
+            _ if detail.starts_with("file target is ") => "mutation-isolation",
+            _ => "other-redacted",
+        };
+        (kind, "redacted", None)
+    };
+    // This code is parsed from the existing display string, not a retained
+    // typed io::Error or evidence of a specific failed native syscall.
+    format!("stage=review-error kind={kind} reason={reason} display_os_error={code:?}")
+}
+
+#[test]
+fn archive_review_status_diagnostics_redact_peer_and_path_text() {
+    for (detail, kind, reason, code) in [
+        (
+            "I/O: fixture-private-path (os error 5)",
+            "io",
+            "other-redacted",
+            "Some(5)",
+        ),
+        (
+            "SFTP: fixture-private-path (os error 5)",
+            "sftp",
+            "redacted",
+            "None",
+        ),
+        (
+            "I/O: fixture-private-path (os error 4294967296)",
+            "io",
+            "other-redacted",
+            "None",
+        ),
+        (
+            "I/O: fixture-private-path (os error 5)\nfixture-peer-text",
+            "io",
+            "other-redacted",
+            "None",
+        ),
+    ] {
+        let message = crate::i18n::Message::detail(
+            "fixture-private-translation",
+            "Review incomplete; transfer not started",
+            detail,
+        );
+        assert_eq!(
+            safe_review_status(&message),
+            format!("stage=review-error kind={kind} reason={reason} display_os_error={code}")
+        );
+    }
+    assert_eq!(
+        safe_review_status(&crate::i18n::Message::new("", "fixture-private-status")),
+        "stage=other-redacted display_os_error=None"
+    );
+}
+
+#[test]
+fn archive_review_status_diagnostics_distinguish_rejected_and_stale_preparation() {
+    for (text, expected) in [
+        (
+            "Review incomplete; transfer not started: I/O: published local name changed or has a case alias",
+            "stage=review-error kind=io reason=local-name-alias display_os_error=None",
+        ),
+        (
+            "Review incomplete; transfer not started: operation timed out: SFTP archive review",
+            "stage=review-error kind=timeout reason=redacted display_os_error=None",
+        ),
+        (
+            "Archive review expired: the session, folder, selection, format or path changed. Prepare again.",
+            "stage=archive-binding-expired display_os_error=None",
+        ),
+        (
+            "Unable to start file worker: fixture-private-detail (os error 1450)",
+            "stage=worker-start-failed display_os_error=Some(1450)",
+        ),
+    ] {
+        assert_eq!(
+            safe_review_status(&crate::i18n::Message::new("", text)),
+            expected,
+        );
+    }
+}
+
+#[track_caller]
 fn reviewed(h: &Harness, cx: &mut TestAppContext) -> Operation {
-    h.panel.read_with(cx, |panel, _| match &panel.pending {
+    let result = h.panel.read_with(cx, |panel, _| match &panel.pending {
         Some((message, Operation::TransferArchive(plan))) => {
             let (zh, en) = message.translations();
             assert!(zh.contains("完整成员清单"));
             assert!(en.contains("Complete member manifest"));
             assert!(!plan.transfer.members().is_empty());
-            Operation::TransferArchive(plan.clone())
+            Ok(Operation::TransferArchive(plan.clone()))
         }
-        _ => panic!("archive preparation must produce a full immutable review"),
-    })
+        _ => Err(format!(
+            "busy={} operation_id_present={} pending_kind={} session_present={} suspended={} \
+             directory_present={} local_listing_present={} local_reading={} \
+             local_selection_count={} remote_selection_count={} selected_present={} \
+             isolation_present={} close_hold={} atomic_writes_started={} status=[{}]",
+            panel.busy,
+            panel.operation_id.is_some(),
+            pending_kind(&panel.pending),
+            panel.session.is_some(),
+            panel.suspended,
+            panel.directory.is_some(),
+            panel.local_browser.listing.is_some(),
+            panel.local_browser.reading(),
+            panel.local_browser.selection.len(),
+            panel.remote_selection.len(),
+            panel.selected.is_some(),
+            panel.isolation_target.is_some(),
+            panel.window_close_busy(),
+            h.server.filesystem.atomic_writes_started(),
+            safe_review_status(&panel.status),
+        )),
+    });
+    match result {
+        Ok(operation) => operation,
+        Err(diagnostic) => {
+            let controls = cx
+                .update_window(h.window, |_, window, _| {
+                    ["review-archive-upload", "review-archive-extract"].map(|id| {
+                        window.try_find(id).map(|control| {
+                            (id, control.visible(), control.disabled(), control.bounds())
+                        })
+                    })
+                })
+                .checked("inspect archive controls after a missing review");
+            panic!(
+                "archive preparation must produce a full immutable review: \
+                 {diagnostic} controls={controls:?}"
+            )
+        }
+    }
 }
 
 #[gpui_kit::test]

@@ -1,0 +1,2554 @@
+{
+  "schema": 1,
+  "source_baseline": "f4299487c132180e484008326c5b52682b3a753f",
+  "inputs_freeze": "raw/source-inputs-r1.json.gz",
+  "count": 318,
+  "original_bytes": 13796970,
+  "gzip_bytes": 5148518,
+  "files": [
+    {
+      "path": "app-inventory-r1.json",
+      "archive": "raw/app-inventory-r1.json.gz",
+      "bytes": 826,
+      "sha256": "00d03bb9f3488338478ad53f9705ac2ce5fa9330ca30607b3c16258453bfe258",
+      "gzip_bytes": 421,
+      "gzip_sha256": "4223fb488192e0e4a087e29c0f0406d15eee79c3a2c81ad0359e55f620cbe967"
+    },
+    {
+      "path": "app-inventory-r1.log",
+      "archive": "raw/app-inventory-r1.log.gz",
+      "bytes": 143618,
+      "sha256": "012bb4d9616b30ea402a7091914802b676ec515003f3515d611c3fcb70eae10a",
+      "gzip_bytes": 31957,
+      "gzip_sha256": "0e5db272215d361357488c614047f85505490f312c6561dd79f914065ac8469a"
+    },
+    {
+      "path": "archive-tests-r1.json",
+      "archive": "raw/archive-tests-r1.json.gz",
+      "bytes": 861,
+      "sha256": "72fe8038ebeade840287d709f03a444446f50097f148cbf1ffdc970285358e85",
+      "gzip_bytes": 448,
+      "gzip_sha256": "2cc62d2229b3b836350bdd96719ecbbfe8444e96219994199cb53782bdca1919"
+    },
+    {
+      "path": "archive-tests-r1.log",
+      "archive": "raw/archive-tests-r1.log.gz",
+      "bytes": 59,
+      "sha256": "dff99c2cb871f00f9947828cfad0faf1c002a4f0bd150de0b63720793dceb5c9",
+      "gzip_bytes": 78,
+      "gzip_sha256": "bee1d14e38cb1424cb109b1c4d89098f3c8a6a07894a72e400c826a71a73e3cb"
+    },
+    {
+      "path": "archive-tests-r2.json",
+      "archive": "raw/archive-tests-r2.json.gz",
+      "bytes": 879,
+      "sha256": "e8097653149c3f7025f8d71c25167457584f3810225a204b6d5866b6fd5b2e02",
+      "gzip_bytes": 452,
+      "gzip_sha256": "31e0c30a7d1210abf943ad15253560418351ba4c2573593cf479f4809238f165"
+    },
+    {
+      "path": "archive-tests-r2.log",
+      "archive": "raw/archive-tests-r2.log.gz",
+      "bytes": 2209,
+      "sha256": "cfb90d66b185ebd6f3d8a86c21ff372feabdf255261b493b21c9cc5d77327c40",
+      "gzip_bytes": 910,
+      "gzip_sha256": "1ca30eba3e9e0d26e187cb3d2fd1d20a63dfe625b6893b923f7b85d4ffed7cdf"
+    },
+    {
+      "path": "baseline.json",
+      "archive": "raw/baseline.json.gz",
+      "bytes": 186,
+      "sha256": "e16429d5df5d2539ab467da2d8287494f9f4e7ba5b52b09a6a219f67bd518f2a",
+      "gzip_bytes": 165,
+      "gzip_sha256": "94a8016e37a5b49f324d088c694bca47e03446e19470792b988f3d4231bd7857"
+    },
+    {
+      "path": "candidate-r1.patch",
+      "archive": "raw/candidate-r1.patch.gz",
+      "bytes": 11009,
+      "sha256": "7552d8918dad1805082a4f9cb9b51e6d55783120bb9c017ae36e8175cde8a3aa",
+      "gzip_bytes": 3227,
+      "gzip_sha256": "6dbcf9278d1d29c1bc7a303f1d38349ec7259ea86d74c15190a9bedc985cfe23"
+    },
+    {
+      "path": "dependency-audit/audit.json",
+      "archive": "raw/dependency-audit/audit.json.gz",
+      "bytes": 114481,
+      "sha256": "00994101685985fad5bbbba21b19599a5c7e5bf7278b66979aff0419696b142a",
+      "gzip_bytes": 7910,
+      "gzip_sha256": "070570304f4534b8024c6bba94007055e60e707d7245b6f87ede11c4da01a91f"
+    },
+    {
+      "path": "dependency-audit/audit.py",
+      "archive": "raw/dependency-audit/audit.py.gz",
+      "bytes": 18900,
+      "sha256": "b99f03c4067cf1b70a9bf28acf658797f392c0a430256e455072760e22b90616",
+      "gzip_bytes": 7209,
+      "gzip_sha256": "dfcc577597fc26926ee67aa8206b84fbccf5f6a2c093ad9ca3ac48efd675fbb5"
+    },
+    {
+      "path": "dependency-audit/dependencies.csv",
+      "archive": "raw/dependency-audit/dependencies.csv.gz",
+      "bytes": 5137,
+      "sha256": "3d69822a817e220927c972ee46a9ef6ff04d58a2433973304768e8dd6873b12b",
+      "gzip_bytes": 1226,
+      "gzip_sha256": "4c8955ca57afcd4f1d32de4adbefdc425da7ae945f80edaf17781b8010855c9e"
+    },
+    {
+      "path": "dependency-audit/evidence-inventory.json",
+      "archive": "raw/dependency-audit/evidence-inventory.json.gz",
+      "bytes": 4724,
+      "sha256": "818edb94b7a72877ece0003fcdea428a26bbad6ed9b8496e98acd9d3fb2f146f",
+      "gzip_bytes": 1717,
+      "gzip_sha256": "2ea3e93f39318fe27ed9a92cfd6bc19a37165451f53e41464ebbeac5fd2a111b"
+    },
+    {
+      "path": "dependency-audit/local-toolchain.json",
+      "archive": "raw/dependency-audit/local-toolchain.json.gz",
+      "bytes": 1157,
+      "sha256": "dd37b0052b6486ec8269034efa8980886590bb48515f9c586160839ffd668e25",
+      "gzip_bytes": 557,
+      "gzip_sha256": "3237dc76ec3510a51d7aa9b2c2df2f4766f92f6f9a930003c55a300c03484940"
+    },
+    {
+      "path": "dependency-audit/official/alacritty_terminal.json",
+      "archive": "raw/dependency-audit/official/alacritty_terminal.json.gz",
+      "bytes": 74563,
+      "sha256": "993104eddd6276a3945a359c08449bf4407a39ab4ffb35b96344c228e8fe3147",
+      "gzip_bytes": 6444,
+      "gzip_sha256": "996d76168c7cff4b6986128b2a76f6c0f3c8a0058f8868829acf71b64c1b485e"
+    },
+    {
+      "path": "dependency-audit/official/argon2.json",
+      "archive": "raw/dependency-audit/official/argon2.json.gz",
+      "bytes": 72758,
+      "sha256": "45b0eae6c1394b9e13e71051320809777432a5d561a60a087b3936844a957bdf",
+      "gzip_bytes": 6582,
+      "gzip_sha256": "2d22633507b7be312b3fcc238b1cbeec2e809e3e00eecb923a66f6d454fddcf6"
+    },
+    {
+      "path": "dependency-audit/official/base64.json",
+      "archive": "raw/dependency-audit/official/base64.json.gz",
+      "bytes": 63799,
+      "sha256": "d0912caee2158d5126a1dfd01d083858ff59c37bf3acfdf28a8dc6236383b569",
+      "gzip_bytes": 7052,
+      "gzip_sha256": "2159cca224d984ff01fb47dec9130a80b86e0d39db32a5831b9b2af48d6b510b"
+    },
+    {
+      "path": "dependency-audit/official/calcifer-macos-acl.json",
+      "archive": "raw/dependency-audit/official/calcifer-macos-acl.json.gz",
+      "bytes": 2562,
+      "sha256": "d92a811312f8082c1f65fb4df7c2b7ad21609b8bd26330eb209de5f71d6d8bad",
+      "gzip_bytes": 832,
+      "gzip_sha256": "0c03f79264f71331bb08e1b66fdbd4a830c4ca6422ca7576b49ac6c5fe93d7a4"
+    },
+    {
+      "path": "dependency-audit/official/chacha20poly1305.json",
+      "archive": "raw/dependency-audit/official/chacha20poly1305.json.gz",
+      "bytes": 72628,
+      "sha256": "bc184bd1c124e2eff3518ba0662dc769f3fc5ac3c4704bbc5c68575c4a784b6f",
+      "gzip_bytes": 6215,
+      "gzip_sha256": "9d6ee280b333c2a725d0ce63a4f32cef9304fbc8e413b6ec71c87adee8e96199"
+    },
+    {
+      "path": "dependency-audit/official/chrono.json",
+      "archive": "raw/dependency-audit/official/chrono.json.gz",
+      "bytes": 143590,
+      "sha256": "d892da53402289735daa5082acb2b51d50a51714bf19e6607bbf50b922d3c36c",
+      "gzip_bytes": 14141,
+      "gzip_sha256": "1ef823f5f4d9b0cddeace047371a13f82cae9dd9a2b1a3f3b7886f9d5900d35b"
+    },
+    {
+      "path": "dependency-audit/official/directories.json",
+      "archive": "raw/dependency-audit/official/directories.json.gz",
+      "bytes": 63125,
+      "sha256": "312220a70d5921687d8b3b8f9f91d47d2429f54f9b5673aeb2082f0de2a9caf1",
+      "gzip_bytes": 6190,
+      "gzip_sha256": "1dda343701074405563f94d552cbb2a7e3b45dbe349ab9f1d5dfc6d64290635d"
+    },
+    {
+      "path": "dependency-audit/official/encoding_rs.json",
+      "archive": "raw/dependency-audit/official/encoding_rs.json.gz",
+      "bytes": 109700,
+      "sha256": "1db0df79d352fc0626138ce9765b9ecc429ac8517cb34bfcc2c5d795627c411f",
+      "gzip_bytes": 10334,
+      "gzip_sha256": "eb2a857877790c687c7aeae5df7dcc253eedceae0b449d64e46116a656bb01d4"
+    },
+    {
+      "path": "dependency-audit/official/flate2.json",
+      "archive": "raw/dependency-audit/official/flate2.json.gz",
+      "bytes": 130444,
+      "sha256": "a0cac91c9105d91082281bf54784dd92fac2a5fcd9a2d660cf0e548f00a6ad0e",
+      "gzip_bytes": 12004,
+      "gzip_sha256": "601a61e41a6aae545b713b41ebd0f8b26cd03579344117d24c30f554efa3312c"
+    },
+    {
+      "path": "dependency-audit/official/gpui-kit.json",
+      "archive": "raw/dependency-audit/official/gpui-kit.json.gz",
+      "bytes": 70292,
+      "sha256": "7b5c06d866693a748cb325cfe08515c9cda03cb249c3df9601516b1da3441929",
+      "gzip_bytes": 3986,
+      "gzip_sha256": "afc8956d453ad97b8d7b47618caccefdd5f0144d5946d6154db8393728ec4cdf"
+    },
+    {
+      "path": "dependency-audit/official/hmac.json",
+      "archive": "raw/dependency-audit/official/hmac.json.gz",
+      "bytes": 56087,
+      "sha256": "65e8d28cdb80276bf82d4f1a3f3b5aca3cdf41163230f4d0e7f5db93457b3954",
+      "gzip_bytes": 6156,
+      "gzip_sha256": "c311c767e58444c70f3d49c92b760d9e1c3b03e420d3dc36a8d6192c34b0b0ff"
+    },
+    {
+      "path": "dependency-audit/official/image.json",
+      "archive": "raw/dependency-audit/official/image.json.gz",
+      "bytes": 192545,
+      "sha256": "436969b247e213873a8b69a7ff07a4c2a421a15a40cff2bbd3b77d98f2d18ab0",
+      "gzip_bytes": 17358,
+      "gzip_sha256": "2c521df8e2a0d88ec12c931a7545adfcadcbb42ebbd0136b516a6f7039db369e"
+    },
+    {
+      "path": "dependency-audit/official/nix.json",
+      "archive": "raw/dependency-audit/official/nix.json.gz",
+      "bytes": 118070,
+      "sha256": "a430671f847c69bed5394fd5ea21a0f573ff85db23a37baaba721c93b929eb95",
+      "gzip_bytes": 12059,
+      "gzip_sha256": "9b41b89f8792fe0db9654a766600c8744daa351719fbba0aa5fa34a2b5b4393d"
+    },
+    {
+      "path": "dependency-audit/official/process-wrap.json",
+      "archive": "raw/dependency-audit/official/process-wrap.json.gz",
+      "bytes": 53156,
+      "sha256": "5191860c4548fba4e68cf87b6bb277ad2487df60c926ff6dcf1df0a578992a30",
+      "gzip_bytes": 4339,
+      "gzip_sha256": "3c9bfbc082312151716c37020c49e83307bedeccff571819845ac92222c95cce"
+    },
+    {
+      "path": "dependency-audit/official/rand.index.jsonl",
+      "archive": "raw/dependency-audit/official/rand.index.jsonl.gz",
+      "bytes": 123828,
+      "sha256": "f913d6eb4f997950f88467827a6321be690414bdf7dbcb5b15f22a0af4fe15c1",
+      "gzip_bytes": 8251,
+      "gzip_sha256": "0b595772a577545763f32b5e9cea2e776f0dbe341e2d6f279239731f65dbc9f1"
+    },
+    {
+      "path": "dependency-audit/official/rand.json",
+      "archive": "raw/dependency-audit/official/rand.json.gz",
+      "bytes": 105856,
+      "sha256": "eff99c5b1c3005a50af1f4b3d2d7eaa4210332f6786003798b5993054775ce4d",
+      "gzip_bytes": 10575,
+      "gzip_sha256": "56f5c5cf72f48bd5b76764db421a70c11deefba826acc1b966dd618a6f6702e5"
+    },
+    {
+      "path": "dependency-audit/official/reqwest.json",
+      "archive": "raw/dependency-audit/official/reqwest.json.gz",
+      "bytes": 104583,
+      "sha256": "1a88110038c8ac5eaf36724fca3d83fc5ae1d6c9ab5427421cb8c91d5c5ea121",
+      "gzip_bytes": 6269,
+      "gzip_sha256": "47ec4802913fbccf64b6209f9c10d2c053f03727b45320ec3815faf07f2ef97b"
+    },
+    {
+      "path": "dependency-audit/official/rmcp.json",
+      "archive": "raw/dependency-audit/official/rmcp.json.gz",
+      "bytes": 34146,
+      "sha256": "0907fd0a1945f27d2df228af7d6caaf717520e903d4a67e2a6c94cfe348db9d2",
+      "gzip_bytes": 3051,
+      "gzip_sha256": "a7526b2c1b490bb2cfb97fbae05760932dacb49bb98b5e51e04a53fe978a34ce"
+    },
+    {
+      "path": "dependency-audit/official/russh-sftp.json",
+      "archive": "raw/dependency-audit/official/russh-sftp.json.gz",
+      "bytes": 49020,
+      "sha256": "ca847a4ec9b31be458973c56c718fab356ff1a8e4d1edb755a1d9ec9b3f97952",
+      "gzip_bytes": 4783,
+      "gzip_sha256": "0ef86113cbaa30dd9d0113c6efd8a5aea22fe54a7d3964eb4e27f3f7f8b6d5d1"
+    },
+    {
+      "path": "dependency-audit/official/russh.json",
+      "archive": "raw/dependency-audit/official/russh.json.gz",
+      "bytes": 76323,
+      "sha256": "00cef9b6e2d88306778404801ba8d4f43d0ff924dea16c4913424dfce55c9b92",
+      "gzip_bytes": 6728,
+      "gzip_sha256": "9297447c482ae36fdc5a399582a342431fe3df6e8c0eac92338443f4647e6fb2"
+    },
+    {
+      "path": "dependency-audit/official/rust-embed.json",
+      "archive": "raw/dependency-audit/official/rust-embed.json.gz",
+      "bytes": 51765,
+      "sha256": "8db83e6e9b0df5835783cb6113f87af32a72f5758e0982c7d28013d23f4d4866",
+      "gzip_bytes": 4123,
+      "gzip_sha256": "6b3b028b08cb1a6d9a5116e8539a58cd8afdebaec412c184b49f3e9f60df50c0"
+    },
+    {
+      "path": "dependency-audit/official/rustix.json",
+      "archive": "raw/dependency-audit/official/rustix.json.gz",
+      "bytes": 68271,
+      "sha256": "fb1bc237233d8ea58c058b2834ca7655ed700e49b82773f62830ec2a620de5aa",
+      "gzip_bytes": 5642,
+      "gzip_sha256": "9a7ebb6ffdef7d360f8de841c1bb788e3b7a9042a1e2af658347eb53715662b6"
+    },
+    {
+      "path": "dependency-audit/official/serde.json",
+      "archive": "raw/dependency-audit/official/serde.json.gz",
+      "bytes": 34766,
+      "sha256": "5482ab4c6ffdd1c04dae4447e5f418f7ee6f4e045f4290a533e40a187f029a5e",
+      "gzip_bytes": 4322,
+      "gzip_sha256": "39c2304dac24b7465d4b58a48332732775fdfd32b62e0b9405e9cd475e1d385a"
+    },
+    {
+      "path": "dependency-audit/official/serde_json.json",
+      "archive": "raw/dependency-audit/official/serde_json.json.gz",
+      "bytes": 32154,
+      "sha256": "b85d6c4dbad928258a1b37108f6a8cbf53919fa50858df91de199580289b9c60",
+      "gzip_bytes": 3798,
+      "gzip_sha256": "55a24cf7e8ea9f5888d6e602500271fc4d36bad992a5e2fd0f06da6f69ef3f9d"
+    },
+    {
+      "path": "dependency-audit/official/sha2.json",
+      "archive": "raw/dependency-audit/official/sha2.json.gz",
+      "bytes": 32795,
+      "sha256": "ef2ae6684425b519cb6e2f38df78431fb1fe59604b23fefef06e963d4ffb8736",
+      "gzip_bytes": 3761,
+      "gzip_sha256": "6c69832875838a0f96628ab79c948be181dcb525544469eba289798c9e1646da"
+    },
+    {
+      "path": "dependency-audit/report.md",
+      "archive": "raw/dependency-audit/report.md.gz",
+      "bytes": 3984,
+      "sha256": "80f91a26571b455b6313cd7422b91c4e15619fcbaa394a0600c34107d7ec08a6",
+      "gzip_bytes": 1952,
+      "gzip_sha256": "114c21ad76cbf5c79dcb6cc714307d1996600db3b6b137140d2f4f44b4eeb54d"
+    },
+    {
+      "path": "final-gate-summary.json",
+      "archive": "raw/final-gate-summary.json.gz",
+      "bytes": 2043,
+      "sha256": "b9d3c8116fb5b71ea35451b6cb8383807259e6305a8ac1acfb87277c8fb3a47a",
+      "gzip_bytes": 914,
+      "gzip_sha256": "85ba62e4b20dfce16b69bd5684f64bf1e648d66b283461db342b1bef071dd669"
+    },
+    {
+      "path": "focus-native-r1/app.log",
+      "archive": "raw/focus-native-r1/app.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_bytes": 20,
+      "gzip_sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "path": "focus-native-r1/cleanup-readback.json",
+      "archive": "raw/focus-native-r1/cleanup-readback.json.gz",
+      "bytes": 290,
+      "sha256": "0e197c20d8cfedf0735bd1c5e82c251ab2d68c28d28c053167e906055ac4b2bc",
+      "gzip_bytes": 187,
+      "gzip_sha256": "446fca68515086d69f35db4ccbb5018dd492f0091a1607ae28a10b659cc18d55"
+    },
+    {
+      "path": "focus-native-r1/cua/draft-ax-set.ax.txt",
+      "archive": "raw/focus-native-r1/cua/draft-ax-set.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/draft.ax.txt",
+      "archive": "raw/focus-native-r1/cua/draft.ax.txt.gz",
+      "bytes": 17594,
+      "sha256": "937ddda658b0276232df0c85aa19f2d251f2d213e28ca43b14b2986fa3c9330d",
+      "gzip_bytes": 3353,
+      "gzip_sha256": "05fed29fffd0fb294bd5260a04476ae7123df95dd15f6d0676fa11bfcbf86be0"
+    },
+    {
+      "path": "focus-native-r1/cua/draft.png",
+      "archive": "raw/focus-native-r1/cua/draft.png.gz",
+      "bytes": 577934,
+      "sha256": "b44aa116320235f063cfa7eb12dc57c49b6960d6a8abc3520035074d24feb3c9",
+      "gzip_bytes": 381733,
+      "gzip_sha256": "f2188349247df4d5caa4c4546f56d25c363f1b9e22b55a6f9c2df52cc1906627"
+    },
+    {
+      "path": "focus-native-r1/cua/navigation-result.json",
+      "archive": "raw/focus-native-r1/cua/navigation-result.json.gz",
+      "bytes": 481,
+      "sha256": "f6058b243b5feba284f206c8da152865979ef1c1dcab4930f90fcc699747267a",
+      "gzip_bytes": 378,
+      "gzip_sha256": "31017324c812cf92ac8ce3bd1b246bc29324d020c09ed8ebfa19fe1d1b8c740e"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-10.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-10.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-100.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-100.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-100.png",
+      "archive": "raw/focus-native-r1/cua/reverse-100.png.gz",
+      "bytes": 585011,
+      "sha256": "54527a043e96841793842e0dd9bf88eca6bb7266b9d716d6a25c53b6237b9671",
+      "gzip_bytes": 385477,
+      "gzip_sha256": "6fbef85a3accdeaa0de02ab54463bf2a38e17d19ec7141ee80b54b932c4f4a56"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-11.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-11.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-12.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-12.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-13.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-13.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-14.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-14.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-15.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-15.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-16.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-16.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-16.png",
+      "archive": "raw/focus-native-r1/cua/reverse-16.png.gz",
+      "bytes": 579429,
+      "sha256": "5c9d6525780599d0d15f42afa52c79b1eb1e24f2a5ae55b21bdd9527cb318a06",
+      "gzip_bytes": 385810,
+      "gzip_sha256": "fd5a73212745b3451280db2ae1a28836df4778acecc1eb423aff33a9efbb4afd"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-17.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-17.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-18.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-18.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-19.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-19.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-2.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-2.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-20.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-20.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-21.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-21.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-22.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-22.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-23.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-23.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-24.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-24.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-25.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-25.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-26.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-26.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-27.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-27.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-28.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-28.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-29.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-29.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-3.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-3.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-30.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-30.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-31.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-31.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-32.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-32.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-33.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-33.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-34.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-34.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-35.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-35.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-36.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-36.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-37.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-37.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-38.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-38.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-39.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-39.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-4.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-4.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-40.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-40.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-41.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-41.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-42.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-42.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-43.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-43.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-44.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-44.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-45.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-45.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-46.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-46.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-47.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-47.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-48.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-48.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-49.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-49.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-5.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-5.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-50.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-50.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-51.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-51.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-52.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-52.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-53.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-53.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-54.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-54.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-55.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-55.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-56.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-56.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-57.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-57.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-58.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-58.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-59.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-59.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-6.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-6.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-60.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-60.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-61.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-61.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-62.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-62.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-63.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-63.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-64.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-64.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-65.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-65.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-66.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-66.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-67.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-67.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-68.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-68.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-69.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-69.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-7.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-7.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-70.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-70.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-71.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-71.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-72.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-72.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-73.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-73.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-74.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-74.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-75.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-75.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-76.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-76.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-77.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-77.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-78.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-78.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-79.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-79.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-8.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-8.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-80.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-80.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-81.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-81.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-82.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-82.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-83.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-83.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-84.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-84.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-85.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-85.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-86.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-86.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-87.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-87.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-88.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-88.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-89.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-89.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-89.png",
+      "archive": "raw/focus-native-r1/cua/reverse-89.png.gz",
+      "bytes": 578294,
+      "sha256": "2056ca3c531851d1510bfced24e087a6c5b67c8d37f50aa9f121fb1d36de5150",
+      "gzip_bytes": 384609,
+      "gzip_sha256": "60246bc35cc18d3cb56de1fb49da46f4fc644b08995d51654c23d72fc108987d"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-9.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-9.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-90.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-90.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-91.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-91.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-92.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-92.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-93.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-93.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-94.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-94.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-95.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-95.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-96.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-96.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-97.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-97.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-98.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-98.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-99.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-99.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-first.ax.txt",
+      "archive": "raw/focus-native-r1/cua/reverse-first.ax.txt.gz",
+      "bytes": 17612,
+      "sha256": "b0ae3b54604c143be31c6e9b7af56ab751b7649252d1918a4d1adabf95a0fb4b",
+      "gzip_bytes": 3367,
+      "gzip_sha256": "00814acb8c7886ef8af3e927c0b8af23378b54eff7118dd9c0a02da49eb2e83c"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-first.png",
+      "archive": "raw/focus-native-r1/cua/reverse-first.png.gz",
+      "bytes": 578445,
+      "sha256": "9022a6af8807881cc27e54d9fb25820a7bb72449ee5dcca3d9a9dc9653a30d66",
+      "gzip_bytes": 384933,
+      "gzip_sha256": "7fd1b6615b65985ae6cabc6e41a91a8b1a9c4eb028515963acc1fcb31691706a"
+    },
+    {
+      "path": "focus-native-r1/cua/reverse-walk-progress.json",
+      "archive": "raw/focus-native-r1/cua/reverse-walk-progress.json.gz",
+      "bytes": 7423,
+      "sha256": "9adf0fd79e96242e12f80202ceff05193e60da58c58873ff3fa332496243c9e8",
+      "gzip_bytes": 461,
+      "gzip_sha256": "cef4f63e181cf5b0f17a9c83b23f7370158d7d407777a4c56f1ab7eaf8c88b07"
+    },
+    {
+      "path": "focus-native-r1/cua/small-fixture-loaded.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-fixture-loaded.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-1.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-1.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-10.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-10.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-11.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-11.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-12.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-12.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-13.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-13.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-14.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-14.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-15.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-15.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-16.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-16.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-17.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-17.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-18.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-18.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-19.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-19.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-2.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-2.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-20.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-20.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-21.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-21.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-22.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-22.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-23.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-23.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-24.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-24.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-25.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-25.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-26.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-26.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-27.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-27.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-28.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-28.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-29.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-29.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-29.png",
+      "archive": "raw/focus-native-r1/cua/small-forward-29.png.gz",
+      "bytes": 484153,
+      "sha256": "3f4110a6de0aa1aede5c60d523e0e6b42ad3b7b6ef5f14a21f7d6aecdc8f7427",
+      "gzip_bytes": 299191,
+      "gzip_sha256": "25a332bfd994481c56492d36a8c226ba3650c22111b1aa3854d5b3177b909797"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-3.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-3.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-30.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-30.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-31.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-31.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-32.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-32.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-33.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-33.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-34.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-34.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-35.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-35.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-35.png",
+      "archive": "raw/focus-native-r1/cua/small-forward-35.png.gz",
+      "bytes": 488020,
+      "sha256": "603176c58fe3a6770af020eada4090ed7602548da8c226d0300d7deaa10aa542",
+      "gzip_bytes": 299239,
+      "gzip_sha256": "d17eed567f709c6f7c60de39c56399977b5a16158af040262325c81980fd7ace"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-4.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-4.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-5.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-5.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-6.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-6.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-7.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-7.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-8.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-8.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-9.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-9.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-start.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-forward-start.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-start.png",
+      "archive": "raw/focus-native-r1/cua/small-forward-start.png.gz",
+      "bytes": 484003,
+      "sha256": "424c49270bb7ffeeee6a7dcc79b6325f586939ea930723d91b500510cc97d5ff",
+      "gzip_bytes": 299831,
+      "gzip_sha256": "975dfec04e7c9f36b92f074dbd86daf02dcd0dc569f9d78c3acc7032a26d5a71"
+    },
+    {
+      "path": "focus-native-r1/cua/small-forward-steps.json",
+      "archive": "raw/focus-native-r1/cua/small-forward-steps.json.gz",
+      "bytes": 1813,
+      "sha256": "395e000cd3428203d9e3fef67eedd364b8ab7651073cb7563358796a33ec3f59",
+      "gzip_bytes": 174,
+      "gzip_sha256": "b412acbdec7171e7d1217283de94a09c36f8b8e9005f3e35065a336d18d776c4"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-1.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-1.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-10.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-10.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-11.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-11.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-12.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-12.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-13.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-13.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-14.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-14.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-15.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-15.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-16.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-16.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-17.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-17.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-18.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-18.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-19.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-19.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-2.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-2.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-20.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-20.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-21.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-21.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-22.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-22.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-23.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-23.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-24.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-24.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-25.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-25.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-26.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-26.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-26.png",
+      "archive": "raw/focus-native-r1/cua/small-reverse-26.png.gz",
+      "bytes": 488020,
+      "sha256": "603176c58fe3a6770af020eada4090ed7602548da8c226d0300d7deaa10aa542",
+      "gzip_bytes": 299239,
+      "gzip_sha256": "d17eed567f709c6f7c60de39c56399977b5a16158af040262325c81980fd7ace"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-27.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-27.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-28.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-28.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-29.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-29.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-3.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-3.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-30.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-30.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-31.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-31.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-32.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-32.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-32.png",
+      "archive": "raw/focus-native-r1/cua/small-reverse-32.png.gz",
+      "bytes": 484146,
+      "sha256": "2f2acdb75c15726d314e30a66e8fe4b81d8aaaf6205ec688ddc7c722d31c6576",
+      "gzip_bytes": 299173,
+      "gzip_sha256": "8b0e135b17d51a3707decc90ba0f0a701e0c6e40a67639fec406f7a2402fd2d7"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-4.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-4.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-5.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-5.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-6.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-6.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-7.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-7.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-8.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-8.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-9.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-9.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-start.ax.txt",
+      "archive": "raw/focus-native-r1/cua/small-reverse-start.ax.txt.gz",
+      "bytes": 5646,
+      "sha256": "1fbac0dee71ccee786b976bac3a8e97015bd0a3b13291eda673d9761fd09ef0a",
+      "gzip_bytes": 2055,
+      "gzip_sha256": "087f2563310da9f03b8bbe730d96878875e1ed15b875a6a7ae89a5715dffbfa2"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-start.png",
+      "archive": "raw/focus-native-r1/cua/small-reverse-start.png.gz",
+      "bytes": 484004,
+      "sha256": "c1752ba0e461d112121936748954970841a1bfc111dd075590bed9049ac464b4",
+      "gzip_bytes": 299830,
+      "gzip_sha256": "adbb92d3c6335d9ceef0f69cabd4276cbec5564fd3a9f8ff790d99941ab8e4e5"
+    },
+    {
+      "path": "focus-native-r1/cua/small-reverse-steps.json",
+      "archive": "raw/focus-native-r1/cua/small-reverse-steps.json.gz",
+      "bytes": 1657,
+      "sha256": "eca8666c432bd839e36e7b89d7ebdb5ad52d52bdaabad0d9c06269d070a10b8d",
+      "gzip_bytes": 166,
+      "gzip_sha256": "d6da17d17d3ec855d17129526cb5c5100596e4f3bc962e7d8c529578a28c05e5"
+    },
+    {
+      "path": "focus-native-r1/fixture-readback.json",
+      "archive": "raw/focus-native-r1/fixture-readback.json.gz",
+      "bytes": 254,
+      "sha256": "9f872edfa5694bd765e79c92acbf8fd7bee6b220f543193e357143283de434f8",
+      "gzip_bytes": 196,
+      "gzip_sha256": "2c5860f5436019869862956118b1b3808f19063b0bd3e4406925d6d01d60608a"
+    },
+    {
+      "path": "focus-native-r1/jump.log",
+      "archive": "raw/focus-native-r1/jump.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_bytes": 20,
+      "gzip_sha256": "ac73670af3abed54ac6fb4695131f4099be9fbe39d6076c5d0264a6bbdae9d83"
+    },
+    {
+      "path": "focus-native-r1/navigation-byte-verification.json",
+      "archive": "raw/focus-native-r1/navigation-byte-verification.json.gz",
+      "bytes": 38595,
+      "sha256": "6ac63f71f87cf7d2f2ceb83e91d41a706d2992157885fcf3ee3c8941ede04019",
+      "gzip_bytes": 1244,
+      "gzip_sha256": "6cd5cb0fa69af75d0f1c0311d191892b6d68876a6c7841e2a2e91821a5f7b4c8"
+    },
+    {
+      "path": "focus-native-r1/permissions.json",
+      "archive": "raw/focus-native-r1/permissions.json.gz",
+      "bytes": 67,
+      "sha256": "beff26d348804c62271ceb2fa78446ee7e16c879624c73a5101dca45957a5648",
+      "gzip_bytes": 76,
+      "gzip_sha256": "4c52e61deb27630ac111268e243789dadd9fc1a39dd1f0e6dcf33da301dc92cc"
+    },
+    {
+      "path": "focus-native-r1/session-final.json",
+      "archive": "raw/focus-native-r1/session-final.json.gz",
+      "bytes": 16309,
+      "sha256": "23d60d30bd2fb9870732b171485b78548f519dccdcbf17320083c1e8ab924155",
+      "gzip_bytes": 4089,
+      "gzip_sha256": "eaec731370b4ff6c4c5cc39898ed153ae338f3a3bc687748aeaa98f616760586"
+    },
+    {
+      "path": "focus-native-r1/session-live.json",
+      "archive": "raw/focus-native-r1/session-live.json.gz",
+      "bytes": 6388,
+      "sha256": "36bd604f7605525d73b12bca60d254001631f1246d2daf7fdb0dccafe91f2cec",
+      "gzip_bytes": 2752,
+      "gzip_sha256": "ffe763df4ff5a64f3f2ad97e6d7f271b2108dcc191714adaf67cb92b83e5bc68"
+    },
+    {
+      "path": "focus-native-r1/target.log",
+      "archive": "raw/focus-native-r1/target.log.gz",
+      "bytes": 123,
+      "sha256": "e2eb129fd9c301e60a99b9928116a1b99768a5331c39bd997cc44f390f2c4c18",
+      "gzip_bytes": 121,
+      "gzip_sha256": "7ae7265f98c6d6878d5a9683a97f35a10d9a0aaddfea8937aac07c48294a2f59"
+    },
+    {
+      "path": "format-r1.json",
+      "archive": "raw/format-r1.json.gz",
+      "bytes": 746,
+      "sha256": "96ef9b57d4e6742843245c1efb4134b01396c625aa12bf399be1b8514405d9f4",
+      "gzip_bytes": 397,
+      "gzip_sha256": "2743adc7e974704ee71f0f125149a01266712ef9d22e72811109621efdb90865"
+    },
+    {
+      "path": "format-r1.log",
+      "archive": "raw/format-r1.log.gz",
+      "bytes": 4859,
+      "sha256": "77728b4c980e881e8f03722f8b3e8bae92e5e5bdc53f7ef5c1fc2902b4cd6e20",
+      "gzip_bytes": 1280,
+      "gzip_sha256": "c4d461939af9b26918202e7830409f01a19b4d22a450bb5bbe5777531f810be8"
+    },
+    {
+      "path": "freeze.py",
+      "archive": "raw/freeze.py.gz",
+      "bytes": 910,
+      "sha256": "0a57b9f74d6d9c592459ce3a0594a96c27dffecb469717dad331ce7868494ff1",
+      "gzip_bytes": 514,
+      "gzip_sha256": "105bd79e2e1df15b119ca001c688aa1ff83f98299ae7000e50920db46083125d"
+    },
+    {
+      "path": "full-gate-r1.json",
+      "archive": "raw/full-gate-r1.json.gz",
+      "bytes": 734,
+      "sha256": "4af57cbbe94e3a7be21e50748b7f15f10e54399bc70ad68d576548a35f0a2b29",
+      "gzip_bytes": 403,
+      "gzip_sha256": "3f85bc5e193bc92fbf9e1714aef0aaee2b1e07172a1d4056e6c890ed6e8b9399"
+    },
+    {
+      "path": "full-gate-r1.log",
+      "archive": "raw/full-gate-r1.log.gz",
+      "bytes": 645081,
+      "sha256": "53415f8854c846015178e1cf94523cfcd0e63a903e15793ee2f8d638cb841c22",
+      "gzip_bytes": 102358,
+      "gzip_sha256": "2a031d74e7e69c72bae0300000b4749be07153b34e4ba45b2bad7f27e736bc61"
+    },
+    {
+      "path": "native-notes.md",
+      "archive": "raw/native-notes.md.gz",
+      "bytes": 3442,
+      "sha256": "e91f7449cf4c7bdaac41cff90622fc5d6bb1cfe643f24d66515ecdbe9affa44e",
+      "gzip_bytes": 1858,
+      "gzip_sha256": "cb8c414016abf1588684ec712a5466dabf7e27e583db854c191e6168c383bef9"
+    },
+    {
+      "path": "native_fixture.py",
+      "archive": "raw/native_fixture.py.gz",
+      "bytes": 9756,
+      "sha256": "dd8ec46fd59be814b80a5f3826fa59005c324d8acf670bad644db08233b27a75",
+      "gzip_bytes": 3595,
+      "gzip_sha256": "cae418f826cb00f014d2ebe7ad72b4bd6b9fad3542c57f467603fda7d014808b"
+    },
+    {
+      "path": "original-diagnostics.patch",
+      "archive": "raw/original-diagnostics.patch.gz",
+      "bytes": 12352,
+      "sha256": "ea240445e8c93d337d2a6b9e8bda75607433e6b19de861e72176ea97bc54f745",
+      "gzip_bytes": 3424,
+      "gzip_sha256": "1c74f0708ea88ccb9cbadc03c29780bb3e04f7fa627960dd2ebc63103f9725b9"
+    },
+    {
+      "path": "package-inspect-r1.json",
+      "archive": "raw/package-inspect-r1.json.gz",
+      "bytes": 885,
+      "sha256": "de72f237df58e8bab38bbaa0547e3abd2faa1111ab088352860a5419da130f5a",
+      "gzip_bytes": 469,
+      "gzip_sha256": "826be7302cddf3f382c99997caaa53380afe36f28ebabd97acc835c0f7f684ac"
+    },
+    {
+      "path": "package-inspect-r1.log",
+      "archive": "raw/package-inspect-r1.log.gz",
+      "bytes": 3679,
+      "sha256": "3b1e30f14999f6de7fa5e3a39678663f681fbe11930c1876e870ff9d33651790",
+      "gzip_bytes": 771,
+      "gzip_sha256": "4f67d044b789915bec3804112a596f1fb85078fbb2376de878fe14ba0c8ba9ee"
+    },
+    {
+      "path": "package-r1/package-manifest.json",
+      "archive": "raw/package-r1/package-manifest.json.gz",
+      "bytes": 1200,
+      "sha256": "ab3c69596c0c84b03f3de35a9c768ed7144774fd4462b6d8c0b761cea72f0d68",
+      "gzip_bytes": 617,
+      "gzip_sha256": "d90df4fa20301ff7638cab87d44427b038b47f458fc85ce48e6b3b170d8b97ec"
+    },
+    {
+      "path": "package-r1.json",
+      "archive": "raw/package-r1.json.gz",
+      "bytes": 1047,
+      "sha256": "129fd4e58329cbb3ee0e5e102c4ac6d36398fcf06549399d7f9c910ca0a94fc3",
+      "gzip_bytes": 485,
+      "gzip_sha256": "2c2a2bdf4eedcc8d23c2033484eeb08535e2e19d36f2d35d2e27af552077b6a9"
+    },
+    {
+      "path": "package-r1.log",
+      "archive": "raw/package-r1.log.gz",
+      "bytes": 215,
+      "sha256": "20801a4781d7442033769624e25df42f990932a74b2be3ac7d19115ea998378f",
+      "gzip_bytes": 178,
+      "gzip_sha256": "43d925a6738730bc3923bbb825f423bb2b3fe43c4b55e69c9328551c0b3c2bd3"
+    },
+    {
+      "path": "review-native-r1/report.md",
+      "archive": "raw/review-native-r1/report.md.gz",
+      "bytes": 7293,
+      "sha256": "db7419bbd138f2797cd2549cd6efe15800b79106dfada6f8cc43fc71cce781fb",
+      "gzip_bytes": 4018,
+      "gzip_sha256": "ded1f56a69ed6cdcfdbfa53b91a64c1aa7eed569e2e8add1bd6a3325b5ac4cdc"
+    },
+    {
+      "path": "review-source-r1/REPORT.md",
+      "archive": "raw/review-source-r1/REPORT.md.gz",
+      "bytes": 9256,
+      "sha256": "32bd612c747e88a48e757f0d776e158141d04f2c6ce03eb4dbb6fb8df0d143bd",
+      "gzip_bytes": 5126,
+      "gzip_sha256": "15b302264a19078ce3b58d6a2837ab1557c554add10e07225671bc7c55dc19c1"
+    },
+    {
+      "path": "review-source-r1/archive-tests.json",
+      "archive": "raw/review-source-r1/archive-tests.json.gz",
+      "bytes": 521,
+      "sha256": "827f470a01fced3a5b6a9c1941aaffe6e69187de8b9fb8ae76def6130d9ede90",
+      "gzip_bytes": 346,
+      "gzip_sha256": "12aa7d3752b1d23d85c0464b7f63aaea2e3f612dc25d43f854c2d6d65e533da4"
+    },
+    {
+      "path": "review-source-r1/archive-tests.log",
+      "archive": "raw/review-source-r1/archive-tests.log.gz",
+      "bytes": 1543,
+      "sha256": "8136b1690e0efac0b58f07e2c903a43fa15b98a0ab511db796014c6271de9510",
+      "gzip_bytes": 521,
+      "gzip_sha256": "2ca166c9012c0b84aee8a79ca5a91fc7a7933f78c1c748cbb32613a5e1df9d91"
+    },
+    {
+      "path": "review-source-r1/artifacts-sha256.json",
+      "archive": "raw/review-source-r1/artifacts-sha256.json.gz",
+      "bytes": 983,
+      "sha256": "1fea79bb534ef30c858de9e7a7df97678b82b55e55fe5df40327f9f417a02443",
+      "gzip_bytes": 548,
+      "gzip_sha256": "fc2fa6932eea7082b3ff72af0472fd86d2197865095402c273de967d96cc3ee0"
+    },
+    {
+      "path": "review-source-r1/hash-comparison.json",
+      "archive": "raw/review-source-r1/hash-comparison.json.gz",
+      "bytes": 1534,
+      "sha256": "18d6b4fbb40122600be28bf0b9e1a74a8e8c3ffe990e04e5b82378da3705c00f",
+      "gzip_bytes": 585,
+      "gzip_sha256": "0953349f62cfdcd60c7a156e0961b183544726ff5111dbaffbfd5c9079877a2d"
+    },
+    {
+      "path": "review-source-r1/live-inventory.json",
+      "archive": "raw/review-source-r1/live-inventory.json.gz",
+      "bytes": 513,
+      "sha256": "557949006e48590fdc1ed00949a7b82f5bcdf04e12bda8bc5b2e7a001f4bb727",
+      "gzip_bytes": 340,
+      "gzip_sha256": "eb55e7aa122c7d4260a7eeb2b7beaf7ff4826f15851e9fc5b89c5759ac16bfac"
+    },
+    {
+      "path": "review-source-r1/live-inventory.log",
+      "archive": "raw/review-source-r1/live-inventory.log.gz",
+      "bytes": 1377,
+      "sha256": "aa778d75b872afa2ad736c67549548d2bb69524d875ee25679b0ab8b4256e828",
+      "gzip_bytes": 464,
+      "gzip_sha256": "c7cb724c7a22e35454fa26e09f71c2fc9b98c915f4d383629248ba0b0a341bee"
+    },
+    {
+      "path": "review-source-r1/post.json",
+      "archive": "raw/review-source-r1/post.json.gz",
+      "bytes": 118838,
+      "sha256": "1bd87cfe9845488b777c7d0d906a9ac8f01dd49a7213893c6ea030e01edabbe6",
+      "gzip_bytes": 35544,
+      "gzip_sha256": "08b1c7187eeefefc6aff87a4c8507c60b41caa2d5f09ca9afa349189b984b939"
+    },
+    {
+      "path": "review-source-r1/pre.json",
+      "archive": "raw/review-source-r1/pre.json.gz",
+      "bytes": 118838,
+      "sha256": "1bd87cfe9845488b777c7d0d906a9ac8f01dd49a7213893c6ea030e01edabbe6",
+      "gzip_bytes": 35544,
+      "gzip_sha256": "08b1c7187eeefefc6aff87a4c8507c60b41caa2d5f09ca9afa349189b984b939"
+    },
+    {
+      "path": "review-source-r1/preserved-tests.json",
+      "archive": "raw/review-source-r1/preserved-tests.json.gz",
+      "bytes": 389,
+      "sha256": "e68f6adf1b5d48badc56ac738f79acae87e2f58dbabb044d4358986aac124d4d",
+      "gzip_bytes": 209,
+      "gzip_sha256": "c893015de02923482e3df7b07cf5340566580d932359ceaf724b223ec6c7ef29"
+    },
+    {
+      "path": "review-source-r1/result.json",
+      "archive": "raw/review-source-r1/result.json.gz",
+      "bytes": 599,
+      "sha256": "1f70ff57752aeea6aa1e5a50f40ed72b76a9fd607b417f7fd70c205ef38833d2",
+      "gzip_bytes": 374,
+      "gzip_sha256": "a0ea0f48312f33607cff376e3363433ae5fd5b255165e09708d39265e1e76674"
+    },
+    {
+      "path": "review-source-r1/verify_and_run.py",
+      "archive": "raw/review-source-r1/verify_and_run.py.gz",
+      "bytes": 6582,
+      "sha256": "cd0a501e92554fe88651ae4f5cf647bf6682290e8bb2c573bd97b657c003e82e",
+      "gzip_bytes": 2585,
+      "gzip_sha256": "53422086680f86fbf4fa222f3d6daf3cc36d7ead02eed5cd5e5999e5f76194c0"
+    },
+    {
+      "path": "run_command.py",
+      "archive": "raw/run_command.py.gz",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "gzip_bytes": 837,
+      "gzip_sha256": "741401fdd29bc00e25be5f2ce496b22b8d0739a7afde5d0d78994f75641bbd34"
+    },
+    {
+      "path": "source-inputs-r1.json",
+      "archive": "raw/source-inputs-r1.json.gz",
+      "bytes": 116456,
+      "sha256": "6b2035d5c4faa819889867efa76400dca56a666004b9647738b3b9549b241f9a",
+      "gzip_bytes": 34588,
+      "gzip_sha256": "70df81924f79aad4d2534b831ea55a4feb0484e587c58e21cc7cc1131a451e74"
+    },
+    {
+      "path": "toolchain-cli-r1.json",
+      "archive": "raw/toolchain-cli-r1.json.gz",
+      "bytes": 452,
+      "sha256": "1549be30ab3f89b81c5c14d6c035cf4cd90f21ba5e431625491b5250b6902878",
+      "gzip_bytes": 231,
+      "gzip_sha256": "6b52eacd317bb8d6122c594c4c513c75014ef01d3d43046f9074a3616eab0f50"
+    },
+    {
+      "path": "ci-followup/binding-input-rejection.json",
+      "archive": "raw/ci-followup/binding-input-rejection.json.gz",
+      "bytes": 466,
+      "sha256": "31fdc2db02ce2f40863826df194b6c702282b7964d50e3a91c866e8dc6c9e9cc",
+      "gzip_bytes": 322,
+      "gzip_sha256": "11b22f4da6b2abf15a8d4734660aa2f7bb0dec50917e90342b7c26f2a808aa31"
+    },
+    {
+      "path": "ci-followup/delivery-commit-binding.json",
+      "archive": "raw/ci-followup/delivery-commit-binding.json.gz",
+      "bytes": 482,
+      "sha256": "14d936886d5b0e01f190eb7c1f555e7a50c6185170b1e6663611ec990375ae84",
+      "gzip_bytes": 320,
+      "gzip_sha256": "bee97b7ee045431d6afb9262eea3a2c7965945c54bf0e3c906bea5191ac052fc"
+    },
+    {
+      "path": "ci-followup/delivery-doc-commit-r1.json",
+      "archive": "raw/ci-followup/delivery-doc-commit-r1.json.gz",
+      "bytes": 793,
+      "sha256": "462fe7f911dd0ddefba2926f80a9fa8d9c585f92ee1dded622f51c011c9d7d61",
+      "gzip_bytes": 432,
+      "gzip_sha256": "767ee1f782aae531abc19fdce5ca0f68e86cf7a275c8b3cc705daf9f4d71d008"
+    },
+    {
+      "path": "ci-followup/delivery-doc-commit-r1.log",
+      "archive": "raw/ci-followup/delivery-doc-commit-r1.log.gz",
+      "bytes": 2463,
+      "sha256": "f27f6332919110c8fcca3c6dbee3638e0bf7a434da2dc389b5010d3e74a25f5d",
+      "gzip_bytes": 356,
+      "gzip_sha256": "9cf9b4f4dde138b38df95c24a9039a9fbbe7fcc61314fc39a010dcaa87d02327"
+    },
+    {
+      "path": "ci-followup/delivery-doc-push-r1.json",
+      "archive": "raw/ci-followup/delivery-doc-push-r1.json.gz",
+      "bytes": 856,
+      "sha256": "ce1db1e45f0a8ceaaed2cdcce459872d9b7465488666e4e59cf69ae31288c652",
+      "gzip_bytes": 452,
+      "gzip_sha256": "52bb9a0117453059b8ed21a4b0163a76ac4318818acb802decc2186a9d9407ea"
+    },
+    {
+      "path": "ci-followup/delivery-doc-push-r1.log",
+      "archive": "raw/ci-followup/delivery-doc-push-r1.log.gz",
+      "bytes": 146,
+      "sha256": "d2a51574b152a980f7dd02a69af419a85414518014cbc3e2ddb5c36e9a6e1656",
+      "gzip_bytes": 124,
+      "gzip_sha256": "c21d53185b5e846e50acbc71ef60dadf5b80f6e0b8ffe02cb2a53b953a32ba49"
+    },
+    {
+      "path": "ci-followup/delivery-doc-remote-r1.json",
+      "archive": "raw/ci-followup/delivery-doc-remote-r1.json.gz",
+      "bytes": 805,
+      "sha256": "48670c35352c87d377d1d5356420ddeae21df2a050061f087d2e5983139cb195",
+      "gzip_bytes": 421,
+      "gzip_sha256": "3c80656fcf5131628d8166ca7b9544297d3ba5a0ec246de41b0ff9a218c73195"
+    },
+    {
+      "path": "ci-followup/delivery-doc-remote-r1.log",
+      "archive": "raw/ci-followup/delivery-doc-remote-r1.log.gz",
+      "bytes": 90,
+      "sha256": "41823e7291f725f7df32487db599ec52de3a0eb9554c24a23d88fbdf5b796761",
+      "gzip_bytes": 96,
+      "gzip_sha256": "cd23d89fc406ca8af79be86a7b01e18589b45746ba8c2560644e2f478e06e006"
+    },
+    {
+      "path": "ci-followup/docs-runs-r1.json",
+      "archive": "raw/ci-followup/docs-runs-r1.json.gz",
+      "bytes": 860,
+      "sha256": "04b4b6a73e4bbf11f1a1ba39981219c43d3c7b08391b5f2f016c187e9e92fe33",
+      "gzip_bytes": 482,
+      "gzip_sha256": "6b83c5f4eb04affd2fb429330ecf030519945e839e00081973e64859e2d2d6f6"
+    },
+    {
+      "path": "ci-followup/docs-runs-r1.log",
+      "archive": "raw/ci-followup/docs-runs-r1.log.gz",
+      "bytes": 36,
+      "sha256": "a2790a384d7d281e7395679000c35d27768d89dbd7052f725b8f4688beb59915",
+      "gzip_bytes": 56,
+      "gzip_sha256": "f9358120ae3b8804593a540979b6d99c2eeac05d1224d78e087186f9c98556f7"
+    },
+    {
+      "path": "ci-followup/exact-source-runs-r1.json",
+      "archive": "raw/ci-followup/exact-source-runs-r1.json.gz",
+      "bytes": 863,
+      "sha256": "524daf76a5296102c4b225b191661829e2e53880a6392d2470b392956af66faf",
+      "gzip_bytes": 485,
+      "gzip_sha256": "80552696375c66a695de2a95285234dc3463073305ff7466d16687094df45ab4"
+    },
+    {
+      "path": "ci-followup/exact-source-runs-r1.log",
+      "archive": "raw/ci-followup/exact-source-runs-r1.log.gz",
+      "bytes": 12281,
+      "sha256": "f3be6dd43180f5504c283e83c633b091e7a0b9426ca599cccf935f8c956ad7cb",
+      "gzip_bytes": 1589,
+      "gzip_sha256": "bad480bd2d983eb18af537b1fa6ed154b987f097e20d4ad514b1b7bb82d90cec"
+    },
+    {
+      "path": "ci-followup/final-commit-binding.json",
+      "archive": "raw/ci-followup/final-commit-binding.json.gz",
+      "bytes": 482,
+      "sha256": "cebb22553fe5de6ec75ee11942855ac0d5a89868b6b34ef59b3c4b7402d3c510",
+      "gzip_bytes": 321,
+      "gzip_sha256": "84f879c53d2a9090853b5d56da3af80f9a1b051f7c93f613cd7001cba9b17522"
+    },
+    {
+      "path": "ci-followup/final-delivery-readback.json",
+      "archive": "raw/ci-followup/final-delivery-readback.json.gz",
+      "bytes": 1215,
+      "sha256": "9a2b946ca28b01ff30e3a9ea8548c4dd012cab31c332fc8047399b279a708bae",
+      "gzip_bytes": 499,
+      "gzip_sha256": "a74b32deae87198625efbb9f042175dd907da0e360d49b562f6b5ce96c4d6e53"
+    },
+    {
+      "path": "ci-followup/final-doc-commit-r1.json",
+      "archive": "raw/ci-followup/final-doc-commit-r1.json.gz",
+      "bytes": 791,
+      "sha256": "2052ca654b2fe52c88bd7da437cdaeb5530d0b83e67bab61abd7f77ef5e6d124",
+      "gzip_bytes": 432,
+      "gzip_sha256": "c2221ee21ffc5270921476901265dcb491c3fa8c9ab8c038b87919a65970e577"
+    },
+    {
+      "path": "ci-followup/final-doc-commit-r1.log",
+      "archive": "raw/ci-followup/final-doc-commit-r1.log.gz",
+      "bytes": 5543,
+      "sha256": "7797ec8a2d9e1c62f488738bbc5483bcb0996f39f7004c155d4ac8ac70ac2b02",
+      "gzip_bytes": 632,
+      "gzip_sha256": "a543d5f30f40e164ca23d9ac0ad523e9cac53f92e34569b775f11e490af7aa1f"
+    },
+    {
+      "path": "ci-followup/final-doc-push-r1.json",
+      "archive": "raw/ci-followup/final-doc-push-r1.json.gz",
+      "bytes": 855,
+      "sha256": "e7bae1c012f2f1d4bdacbd6f14823fedbc65e4bad19258d12d6924357f9764ce",
+      "gzip_bytes": 452,
+      "gzip_sha256": "5bd487eb88fb91ca41ff02b2b08fb272f80078354828d26c5aefd931ec09d66a"
+    },
+    {
+      "path": "ci-followup/final-doc-push-r1.log",
+      "archive": "raw/ci-followup/final-doc-push-r1.log.gz",
+      "bytes": 146,
+      "sha256": "da21416d6e1f2d545fa4f67d5c4189ddb0b91e18b82927ab5f4a90ec864cf529",
+      "gzip_bytes": 124,
+      "gzip_sha256": "6ad9cda1ec63b6bcc1eb3521a84e93b54406997e418305271c48bbe118e327bb"
+    },
+    {
+      "path": "ci-followup/final-index-binding.json",
+      "archive": "raw/ci-followup/final-index-binding.json.gz",
+      "bytes": 443,
+      "sha256": "641b239c9eb45a771e5e1ae241a2bbfa1e3cabbe4f97ad32c30a59fafb583f5a",
+      "gzip_bytes": 296,
+      "gzip_sha256": "a08a34c3ae03779a706b9ec5127cb3fb1b37745a96ee72bf01d9535385b83566"
+    },
+    {
+      "path": "ci-followup/final-remote-r1.json",
+      "archive": "raw/ci-followup/final-remote-r1.json.gz",
+      "bytes": 805,
+      "sha256": "09af411ec79cd7cbffbf1637a0a8ce6cac0a5fbbe9ca25ebaa441621d4284ea4",
+      "gzip_bytes": 420,
+      "gzip_sha256": "8188e8679164ba4cf2d622ce6c593b2d8ac9a380ddde54a360d041357dd8b4c1"
+    },
+    {
+      "path": "ci-followup/final-remote-r1.log",
+      "archive": "raw/ci-followup/final-remote-r1.log.gz",
+      "bytes": 90,
+      "sha256": "027a9c3c46929205905c059f0a9904f23082b2e34d28b2bd0c2faa49a4d4227f",
+      "gzip_bytes": 97,
+      "gzip_sha256": "1dabafa8acc395592fc4124f735d737231edeb774cf4442eea6710a5bc850bfe"
+    },
+    {
+      "path": "ci-followup/macos-job-133084142077-logs-r1.json",
+      "archive": "raw/ci-followup/macos-job-133084142077-logs-r1.json.gz",
+      "bytes": 840,
+      "sha256": "35563ffcde4e1de27450e32485ae664d40aaf3b5700a0c493bbb59d4f65cd931",
+      "gzip_bytes": 459,
+      "gzip_sha256": "8e5a194fb64723a5506c03d57bef901a006cb5b3c3df7ef321b8fd9d327f9029"
+    },
+    {
+      "path": "ci-followup/macos-job-133084142077-logs-r1.log",
+      "archive": "raw/ci-followup/macos-job-133084142077-logs-r1.log.gz",
+      "bytes": 633182,
+      "sha256": "2215be292a2faff30cede27d402731f19305eb26a0c7ee2876039078b54b1530",
+      "gzip_bytes": 123029,
+      "gzip_sha256": "5458f6dcd004fa8d1311257ceac26e516001a96323a63d1962aa2d3e1e7845ba"
+    },
+    {
+      "path": "ci-followup/macos-job-133084142077-r1.plain.log",
+      "archive": "raw/ci-followup/macos-job-133084142077-r1.plain.log.gz",
+      "bytes": 631809,
+      "sha256": "9000ad862830dae04e8e182c1184a08a1dcc93831a8fc1bf7e1d7c5f2b3e4928",
+      "gzip_bytes": 122835,
+      "gzip_sha256": "ca0f6a53e0811b2fdd7c5e2ee90f25daaf86d9d09d4ee1a991d528aea8879de5"
+    },
+    {
+      "path": "ci-followup/remote-after-push-r1.json",
+      "archive": "raw/ci-followup/remote-after-push-r1.json.gz",
+      "bytes": 805,
+      "sha256": "5883a5dd190ee0583b396c7c58d177977ef87b4f2b767be441d8b7a9959cb8af",
+      "gzip_bytes": 421,
+      "gzip_sha256": "cb18f291dd231598df8c4c1ebcdec85a116b5c399740ffdcb015de8ae347c695"
+    },
+    {
+      "path": "ci-followup/remote-after-push-r1.log",
+      "archive": "raw/ci-followup/remote-after-push-r1.log.gz",
+      "bytes": 90,
+      "sha256": "6874b0394c7d72dbd1edb30cec46d725849e2c6c33deec7af1436b4354822f98",
+      "gzip_bytes": 97,
+      "gzip_sha256": "1bee012347522abcea48649330b79017871dd8e4a07b49b67fcb6af32e76027e"
+    },
+    {
+      "path": "ci-followup/remote-after-push-r2.json",
+      "archive": "raw/ci-followup/remote-after-push-r2.json.gz",
+      "bytes": 804,
+      "sha256": "31787feb2f1a1fa6e76f8fcb555f5b34aa3bc53413cca149442ba269628a87c7",
+      "gzip_bytes": 421,
+      "gzip_sha256": "d527b9dc31bb323c1e476ba87553c4fd2b39f96acd49f77d7c0ffc7ee4ed86e5"
+    },
+    {
+      "path": "ci-followup/remote-after-push-r2.log",
+      "archive": "raw/ci-followup/remote-after-push-r2.log.gz",
+      "bytes": 90,
+      "sha256": "423c9bafde443373e71b09884363818b18d0bcd2063e8d7dfee2b534e913a81f",
+      "gzip_bytes": 95,
+      "gzip_sha256": "5c2d4880b9e8b66de0c684c0f6fae37ca8f73f45792eaf8a8865a03bd76369e5"
+    },
+    {
+      "path": "ci-followup/run_command.py",
+      "archive": "raw/ci-followup/run_command.py.gz",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "gzip_bytes": 837,
+      "gzip_sha256": "741401fdd29bc00e25be5f2ce496b22b8d0739a7afde5d0d78994f75641bbd34"
+    },
+    {
+      "path": "ci-followup/source-commit-r1.json",
+      "archive": "raw/ci-followup/source-commit-r1.json.gz",
+      "bytes": 800,
+      "sha256": "2c5936486c62a30c528c0bf29cdbb57c13d5a0ec5973fe67a684c7821d7a25a1",
+      "gzip_bytes": 434,
+      "gzip_sha256": "3e1bdb52f73799b218a1aae46f17f2be58791f3db1a9e779396445c771e191df"
+    },
+    {
+      "path": "ci-followup/source-commit-r1.log",
+      "archive": "raw/ci-followup/source-commit-r1.log.gz",
+      "bytes": 27051,
+      "sha256": "71e60a449b30e2f97024fdc2f01ff72585181b428eed5fa71c4f2827e7a52166",
+      "gzip_bytes": 1689,
+      "gzip_sha256": "675e461baac0355b9729cffc674accf0c2487a623430296373dd5013a32d78d7"
+    },
+    {
+      "path": "ci-followup/source-jobs-r1.json",
+      "archive": "raw/ci-followup/source-jobs-r1.json.gz",
+      "bytes": 829,
+      "sha256": "5057bdaf8072698cd95d0f1cbafae572c594e1ef17f733e3500dea63da09988c",
+      "gzip_bytes": 458,
+      "gzip_sha256": "076620d5da92275ed663589a4219b9967c33db7caac138699a15ab41244f2b02"
+    },
+    {
+      "path": "ci-followup/source-jobs-r1.log",
+      "archive": "raw/ci-followup/source-jobs-r1.log.gz",
+      "bytes": 7401,
+      "sha256": "ab4caad614e2fc02debbb373071df53ed90d53c0d16e4f357508fd787bdc8c98",
+      "gzip_bytes": 956,
+      "gzip_sha256": "205e7e9a362cf1ec15e33c46441764ab61483b1b7f500c9c47be13d2f2cf7cc4"
+    },
+    {
+      "path": "ci-followup/source-jobs-r2.json",
+      "archive": "raw/ci-followup/source-jobs-r2.json.gz",
+      "bytes": 829,
+      "sha256": "27106955598c4f6cf66774ab378d6d6931975343fd80867fb27ec6056855285d",
+      "gzip_bytes": 458,
+      "gzip_sha256": "7050dc1d9a8858af0d126569bdbccb38a8306bc324c0622e50b830db51501396"
+    },
+    {
+      "path": "ci-followup/source-jobs-r2.log",
+      "archive": "raw/ci-followup/source-jobs-r2.log.gz",
+      "bytes": 7401,
+      "sha256": "ab4caad614e2fc02debbb373071df53ed90d53c0d16e4f357508fd787bdc8c98",
+      "gzip_bytes": 956,
+      "gzip_sha256": "205e7e9a362cf1ec15e33c46441764ab61483b1b7f500c9c47be13d2f2cf7cc4"
+    },
+    {
+      "path": "ci-followup/source-jobs-r3.json",
+      "archive": "raw/ci-followup/source-jobs-r3.json.gz",
+      "bytes": 829,
+      "sha256": "2bb13dd4661f3dc8a3b44c251215a72b2cba1cfc40c0e61ecdd1f951ef18c537",
+      "gzip_bytes": 458,
+      "gzip_sha256": "206e69f7b8d21934a4b9a5bc2d382c3f4f9187a645e95ca1a67121afdf0bd27b"
+    },
+    {
+      "path": "ci-followup/source-jobs-r3.log",
+      "archive": "raw/ci-followup/source-jobs-r3.log.gz",
+      "bytes": 7401,
+      "sha256": "ab4caad614e2fc02debbb373071df53ed90d53c0d16e4f357508fd787bdc8c98",
+      "gzip_bytes": 956,
+      "gzip_sha256": "205e7e9a362cf1ec15e33c46441764ab61483b1b7f500c9c47be13d2f2cf7cc4"
+    },
+    {
+      "path": "ci-followup/source-jobs-r4.json",
+      "archive": "raw/ci-followup/source-jobs-r4.json.gz",
+      "bytes": 829,
+      "sha256": "94339806f7a2595c3a6bf29c85e8c5a496b57579f3218c94b7a7b93da7f8edc8",
+      "gzip_bytes": 456,
+      "gzip_sha256": "7d17e1585e6253c66fa14ff6b903a9d3a76ad6e28fea66bb0cac62e7a8a58038"
+    },
+    {
+      "path": "ci-followup/source-jobs-r4.log",
+      "archive": "raw/ci-followup/source-jobs-r4.log.gz",
+      "bytes": 7401,
+      "sha256": "ab4caad614e2fc02debbb373071df53ed90d53c0d16e4f357508fd787bdc8c98",
+      "gzip_bytes": 956,
+      "gzip_sha256": "205e7e9a362cf1ec15e33c46441764ab61483b1b7f500c9c47be13d2f2cf7cc4"
+    },
+    {
+      "path": "ci-followup/source-jobs-r5.json",
+      "archive": "raw/ci-followup/source-jobs-r5.json.gz",
+      "bytes": 828,
+      "sha256": "1ef7ca8ae91b0793d901b11ef7545d1d64476e30b121005d6630eead1066e993",
+      "gzip_bytes": 456,
+      "gzip_sha256": "41a4bd7212be4a2afa0daaeaab0b3873445aeea778c3ee0af66e18eb64c9b30f"
+    },
+    {
+      "path": "ci-followup/source-jobs-r5.log",
+      "archive": "raw/ci-followup/source-jobs-r5.log.gz",
+      "bytes": 8223,
+      "sha256": "dfaeb31c8d4f6a2564902470769b95ccecb1c1e1334cebd8f813fa6b89aae1ca",
+      "gzip_bytes": 1121,
+      "gzip_sha256": "5e8cfc987b43d3ac7ca59d6601d8a2417b87c5817c95e076729bca4a78c82d1e"
+    },
+    {
+      "path": "ci-followup/source-jobs-r6.json",
+      "archive": "raw/ci-followup/source-jobs-r6.json.gz",
+      "bytes": 828,
+      "sha256": "b3afdf6d180d892c979c7ae0b9fd236229c81381f3748bb36a47a396700ff4a1",
+      "gzip_bytes": 456,
+      "gzip_sha256": "6f1d83c838ca2384f471d3ce0090c282f68d33f325d1e4fa25f323b76e0e186a"
+    },
+    {
+      "path": "ci-followup/source-jobs-r6.log",
+      "archive": "raw/ci-followup/source-jobs-r6.log.gz",
+      "bytes": 8634,
+      "sha256": "8844b19d1a8ed9c96b72adeb085ab7a2f1154d2d4d2add7660dbff3ecbc59b14",
+      "gzip_bytes": 1090,
+      "gzip_sha256": "fd390c953bd0f6b753658b25fe6d796055ecbe3d71572bbd49ed150cd463f46f"
+    },
+    {
+      "path": "ci-followup/source-push-r1.json",
+      "archive": "raw/ci-followup/source-push-r1.json.gz",
+      "bytes": 774,
+      "sha256": "188d9944086514eaf6c3031fad09d186d473e6cecab013b1d3200c92dd9ba0ba",
+      "gzip_bytes": 407,
+      "gzip_sha256": "420acf1d6522973c6dc10b7e4de212b42d48d6915615607b98274d130020df10"
+    },
+    {
+      "path": "ci-followup/source-push-r1.log",
+      "archive": "raw/ci-followup/source-push-r1.log.gz",
+      "bytes": 202,
+      "sha256": "38c3c0f25f754588183e31f0c5ffe153dc9826d57188ab03c3f5071d5d7d44c0",
+      "gzip_bytes": 171,
+      "gzip_sha256": "5822fccaa8a5d18d6e20db03a037e15ec7c4d4941ab108db0ca1eacf58d8fb8b"
+    },
+    {
+      "path": "ci-followup/source-push-r2.json",
+      "archive": "raw/ci-followup/source-push-r2.json.gz",
+      "bytes": 856,
+      "sha256": "ebe71366d1ecf4d36527e3c0f5907db19aaca342abc923812af1a1d495f185f4",
+      "gzip_bytes": 453,
+      "gzip_sha256": "a49d8d26852925171f7ca5fb396cce6e848c3b43cc5ac6d689c6261e0bdd11ce"
+    },
+    {
+      "path": "ci-followup/source-push-r2.log",
+      "archive": "raw/ci-followup/source-push-r2.log.gz",
+      "bytes": 146,
+      "sha256": "199f935ea469c25e30ba998908374b35418d39557992b2aa629bef5e78d72bd5",
+      "gzip_bytes": 123,
+      "gzip_sha256": "e5e863e90ff4c51755810579d81c59e551385a02a943d0cfe6321c9b983c8f5b"
+    },
+    {
+      "path": "ci-followup/source-run-r2.json",
+      "archive": "raw/ci-followup/source-run-r2.json.gz",
+      "bytes": 800,
+      "sha256": "3b0801e5ab4ae45ccb864680d111a97ae08e42609e706d6c4f27b8d3dc397c2a",
+      "gzip_bytes": 435,
+      "gzip_sha256": "05f85e3b92582de0e9eecf73f5d520ce099682e0ac58e558d99fb89edfe54fc8"
+    },
+    {
+      "path": "ci-followup/source-run-r2.log",
+      "archive": "raw/ci-followup/source-run-r2.log.gz",
+      "bytes": 12248,
+      "sha256": "ac36eec12f265c3fe99093c2ff57ce36d21a114376090d023e86e1f958762652",
+      "gzip_bytes": 1574,
+      "gzip_sha256": "b8d77c75e99d8d39eb54dee1de894704e89f395fcc9bcc04072784639dadebe4"
+    },
+    {
+      "path": "ci-followup/windows-job-133084141812-analysis-r1.json",
+      "archive": "raw/ci-followup/windows-job-133084141812-analysis-r1.json.gz",
+      "bytes": 5507,
+      "sha256": "38a9a9023f76d91a3b56d5d6e360460552341ec9e74e5848d1902db6e2f42f1a",
+      "gzip_bytes": 1323,
+      "gzip_sha256": "3c63913058b874bf34672696f7e05f63ce10d94a72ede6c5bea2e892c4091f00"
+    },
+    {
+      "path": "ci-followup/windows-job-133084141812-logs-r1.json",
+      "archive": "raw/ci-followup/windows-job-133084141812-logs-r1.json.gz",
+      "bytes": 840,
+      "sha256": "b4771c0bb199e5dafcfb5299920f0393f8d270262d99a0ddfb5f2ca6869fa7a0",
+      "gzip_bytes": 459,
+      "gzip_sha256": "24efd2cdb9062783948e9e042a8cfe6b650f064c0d545c8dc28403d3d84b1d09"
+    },
+    {
+      "path": "ci-followup/windows-job-133084141812-logs-r1.log",
+      "archive": "raw/ci-followup/windows-job-133084141812-logs-r1.log.gz",
+      "bytes": 509425,
+      "sha256": "da1da3e141c7f9784cc66123cd44c44daa9e676060ff929a26d6ca6377763af5",
+      "gzip_bytes": 94719,
+      "gzip_sha256": "f178e1b5e84816f7f5818cff096600ca7354f3ce842ecda26db080ad5e040888"
+    },
+    {
+      "path": "ci-followup/windows-job-133084141812-r1.plain.log",
+      "archive": "raw/ci-followup/windows-job-133084141812-r1.plain.log.gz",
+      "bytes": 492089,
+      "sha256": "0d2b263662057d9031ff31c5123062829f080a1f1740a0f8ddade240a95ebeb1",
+      "gzip_bytes": 92786,
+      "gzip_sha256": "ae197c8a30f304ebdcbf2f9ee3dd4b5e54607d2ebde4f5e64fc6b98bcb2ec6d2"
+    }
+  ]
+}

@@ -20,3 +20,9 @@ keyboard handling. Themes share the same behavior and semantic token system.
 实际验证边界见
 [批次记录](../testing/records/2026-11-16-command-composer-focus.md)；
 GPUI 回归不代表真实 IME、VoiceOver 或多平台桌面验收。
+
+2026-11-16 原生补验在 Frost 浅色中文 macOS 窗口、双侧各含一个文件的场景，
+已观察从命令框正向和反向到两列表根的完整路径及草稿逐字节保持。该结果使用
+原始截图核对焦点框，不代签 IME、VoiceOver、其他主题、窗口尺寸或平台。
+具体输入方式、早期未完成场景和证据限制见
+[原生补验](../testing/records/2026-11-16-archive-diagnostics-and-native-focus.md#原生焦点补验)。
