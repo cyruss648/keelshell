@@ -52,3 +52,12 @@
 `230,504,949` 字节，旧焦点工作目录 absent，正常 GUI/MCP 与有效 target 保留。
 旧 CI 原件目录因下一批归档诊断仍需读取暂留，活动新 CI 原件另位于
 `work/command-focus-ci-20261116/`；后续清理和文档交付按各单列回执读取。
+
+文档 `7df6020` 已推送并三方匹配，见 `documentation-push-readback.json`，
+docs push run 数为 0；`delivery-followup-*` 另存 11 份后补原件与摘要。
+源码/文档两树绑定的实际零 mismatch 回执包含其中。
+`cleanup-old-ci.json` 记录后续归档诊断结束后回收旧 CI 的 84 文件、
+`1,265,813` 字节，原目录 absent。未集成的
+[Windows 诊断草稿](../2026-11-16-windows-archive-diagnosis-draft/README.md)
+另存 25 份原件并回收临时副本；作者和两个 reviewer、observer 都已关闭。
+正常程序、有效 target 和仍运行的新 CI 原件目录保持。

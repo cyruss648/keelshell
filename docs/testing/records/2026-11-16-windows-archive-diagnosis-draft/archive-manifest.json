@@ -1,0 +1,158 @@
+{
+  "count": 25,
+  "files": {
+    "archive-review-diagnostics.patch": {
+      "artifact": "raw/archive-review-diagnostics.patch.gz",
+      "source_bytes": 12352,
+      "source_sha256": "ea240445e8c93d337d2a6b9e8bda75607433e6b19de861e72176ea97bc54f745",
+      "artifact_sha256": "1c74f0708ea88ccb9cbadc03c29780bb3e04f7fa627960dd2ebc63103f9725b9"
+    },
+    "base/crates/keelshell-app/src/files.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/files.rs.gz",
+      "source_bytes": 148027,
+      "source_sha256": "6fbd9dda4ef666aaa616403324609d1c6c2a3ef7ba29d1302127b1fa35d94b82",
+      "artifact_sha256": "8e8dbf6111738a2aa18247e800fca16006e12c33ad23c2f880b1f002b17c37ab"
+    },
+    "base/crates/keelshell-app/src/files/archive.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/files/archive.rs.gz",
+      "source_bytes": 14789,
+      "source_sha256": "5dde71aaa11d936b80af55045091aa293029ed34efc5285050fc9c187176e9d8",
+      "artifact_sha256": "c9a70a4ec94f728041b6c4587eb3d0563307a978d3064db82d5b11be812385c6"
+    },
+    "base/crates/keelshell-app/src/files/archive_tests.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/files/archive_tests.rs.gz",
+      "source_bytes": 20168,
+      "source_sha256": "cffb81956a1235b64e01bbcbb2ff47a90e4aaacb10caebcf5737a94aff2a0d26",
+      "artifact_sha256": "0d8f826269eb02be6644e341d49b67862d3bb45e7696a98fef21d1c3d4cdf7c5"
+    },
+    "base/crates/keelshell-app/src/files/batch.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/files/batch.rs.gz",
+      "source_bytes": 26972,
+      "source_sha256": "1ceff5b1a164193ab561da27caf791257807a6ea032e95a98209ce90b6e1492d",
+      "artifact_sha256": "d6174c60debb68e4b4d85e34fe00e351924cccf874a8ddddbe02734ee054d20d"
+    },
+    "base/crates/keelshell-app/src/files/browser.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/files/browser.rs.gz",
+      "source_bytes": 8839,
+      "source_sha256": "c6cad14c149f2983fc01cae7579f0e89862159d9289398bb9de91d7da2d8e26d",
+      "artifact_sha256": "39b8d495051a106398bee119cc7eb84455490064045d183d09fb1732062ba0ec"
+    },
+    "base/crates/keelshell-app/src/files/transfer_tests.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/files/transfer_tests.rs.gz",
+      "source_bytes": 70865,
+      "source_sha256": "7033291de562ed31ec5d6017522ac7d94b13a4c28b0df784643c3b27ec566c68",
+      "artifact_sha256": "5fe4fd67829374c88d37e49098b4b5be7eb30a1b09c13a4bec3ac7ec77969971"
+    },
+    "base/crates/keelshell-app/src/files/worker.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/files/worker.rs.gz",
+      "source_bytes": 43555,
+      "source_sha256": "9b8edebefb3ebea968355d9e090bc5253100ccfd9710e230a48e6e28c81411fc",
+      "artifact_sha256": "59b3114f4840fa26f1f8d366bc5b8388eeb415027cc5a52491c2feb26c69ab70"
+    },
+    "base/crates/keelshell-app/src/i18n.rs": {
+      "artifact": "raw/base/crates/keelshell-app/src/i18n.rs.gz",
+      "source_bytes": 7571,
+      "source_sha256": "f612a41ac2f086d429125a3c3d3812f2d28951ae40089bf4de08a3ad9991ceba",
+      "artifact_sha256": "2335e4cbc9afdaacae7823f65dca3b1b0d7bb012e5cde375657508d00a513aa8"
+    },
+    "base/crates/keelshell-platform/src/directory_records.rs": {
+      "artifact": "raw/base/crates/keelshell-platform/src/directory_records.rs.gz",
+      "source_bytes": 4400,
+      "source_sha256": "ad7b4d896fbe2cf3ae955bdd69590a1228b48e0b97db7ab38e87720ec54557f8",
+      "artifact_sha256": "107ae8c55f716fd5630c54ef6db3ce4366f1b8ad66a6dda8c200f6dcccb02082"
+    },
+    "base/crates/keelshell-platform/src/path.rs": {
+      "artifact": "raw/base/crates/keelshell-platform/src/path.rs.gz",
+      "source_bytes": 7641,
+      "source_sha256": "8af2fc8f87eedf3021802bd6d584480a6cdcd813df7497bd60b832cd182801c7",
+      "artifact_sha256": "aa9f93517c32be47ecdc4520a962268f0acd2f64702ee5ebbcefaefcf2637249"
+    },
+    "base/crates/keelshell-platform/src/windows/mod.rs": {
+      "artifact": "raw/base/crates/keelshell-platform/src/windows/mod.rs.gz",
+      "source_bytes": 12283,
+      "source_sha256": "3aa3141173a87a1a9338aec8471c1026c6d56f11d543bc8e26f60a2c49b1f349",
+      "artifact_sha256": "6ae01304ff60c872c74c5ad95875048415bdf5bf59d6aaa4d7684bb3f4baf5e0"
+    },
+    "base/crates/keelshell-platform/src/windows/native.rs": {
+      "artifact": "raw/base/crates/keelshell-platform/src/windows/native.rs.gz",
+      "source_bytes": 14872,
+      "source_sha256": "b6aab2b3d98690acba68f5101cc9f08b9302a7429c2a8610b24317d1331587de",
+      "artifact_sha256": "75d6cafd0e591cf89b42ff0fbe37aefef1ccbabc4de7f25af3feb67bacbebf15"
+    },
+    "base/crates/keelshell-platform/src/windows/security.rs": {
+      "artifact": "raw/base/crates/keelshell-platform/src/windows/security.rs.gz",
+      "source_bytes": 25583,
+      "source_sha256": "646dbca6bdd0130a1fac7a855e9c846ed9fc8b1259d3d63a7d16703fbf2ee465",
+      "artifact_sha256": "9c4bac28fdbdec9e53198a6f4a31b23d020d28a0a6e8bcbb167b81d857361a73"
+    },
+    "base/crates/keelshell-session/src/error.rs": {
+      "artifact": "raw/base/crates/keelshell-session/src/error.rs.gz",
+      "source_bytes": 5842,
+      "source_sha256": "57dfb4c367485cd4af55ea480c29bbf6ba33f8b424d58105a1b9f6e209c65309",
+      "artifact_sha256": "38dd51e17321d8f6de9bfedff3a56471a4e306587ff187da47232ea0b35de132"
+    },
+    "base/crates/keelshell-session/src/sftp/archive_transfer.rs": {
+      "artifact": "raw/base/crates/keelshell-session/src/sftp/archive_transfer.rs.gz",
+      "source_bytes": 16307,
+      "source_sha256": "fbe10992675decfa201f8a213d4b845a8b26b94eaa9bb42781d75dd1d4b8da0e",
+      "artifact_sha256": "b8aa98eb2106cc9ec438b509f4889a1c99c741bd7a02d68811fb21b834f661d6"
+    },
+    "base/crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs": {
+      "artifact": "raw/base/crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs.gz",
+      "source_bytes": 37037,
+      "source_sha256": "b2598247a7ae0ef2c4e987c2c96ad913dc0114e622555daf5c1cc8f57b1a0414",
+      "artifact_sha256": "8986c292749313399cabea1d498d488910ae7137e90db861973966788c88248c"
+    },
+    "base/crates/keelshell-session/src/sftp/archive_transfer/remote.rs": {
+      "artifact": "raw/base/crates/keelshell-session/src/sftp/archive_transfer/remote.rs.gz",
+      "source_bytes": 10122,
+      "source_sha256": "365280749fccf0540adce9b280bd923d019875dc80cc76786f2f5085927cf5dd",
+      "artifact_sha256": "75e30305033fc7b88072291ef5a092ae88d5bde42537a31cae5f69f0aa0aa54d"
+    },
+    "baseline.json": {
+      "artifact": "raw/baseline.json.gz",
+      "source_bytes": 7497,
+      "source_sha256": "8600e9828b5a63470dc900b10d32433e07422852517720c446a789764a02b513",
+      "artifact_sha256": "9a375d51f377d8521bbec55dd8630784657f97b0f4bff791336e1579a8dfae1a"
+    },
+    "candidate/crates/keelshell-app/src/files/archive_tests.rs": {
+      "artifact": "raw/candidate/crates/keelshell-app/src/files/archive_tests.rs.gz",
+      "source_bytes": 31189,
+      "source_sha256": "1020aeb7ada2b03b68cf60467a40355340e0433e937ff7063f92043fe97a8197",
+      "artifact_sha256": "850514578de3a38a5e2f7b677aea877a00b942c41f62d135c1ab936ff7fcc775"
+    },
+    "ci-excerpts.txt": {
+      "artifact": "raw/ci-excerpts.txt.gz",
+      "source_bytes": 10321,
+      "source_sha256": "acd8fa24c0b6faeeccfa6690a7ba687386a304ab7e394b8d3863f0f7b19563af",
+      "artifact_sha256": "e69c06b8addc324b6bd714abaa4ee958b33668fb6ac430577cc1ecfa6b82b23e"
+    },
+    "expected-new-tests.txt": {
+      "artifact": "raw/expected-new-tests.txt.gz",
+      "source_bytes": 213,
+      "source_sha256": "168d944be699e69d83b61701119a5ac8b8fab301f0a5f3c44027dd0675bcee83",
+      "artifact_sha256": "f1cd8d07ad2cbda5c163f3a10ddd9008c29ecdc5620f1121c05b3ca0bb4d9f6e"
+    },
+    "report.md": {
+      "artifact": "raw/report.md.gz",
+      "source_bytes": 4980,
+      "source_sha256": "b8f8b09c6e4ea59c446839f8dd1c5528e4b794f1299f55ef30b7030a6b6df2ff",
+      "artifact_sha256": "ed1a1fe99fee96df5e1a6cb51e495016eaa2c0acf6e46b126e634e1a5847ae83"
+    },
+    "sha256.json": {
+      "artifact": "raw/sha256.json.gz",
+      "source_bytes": 4537,
+      "source_sha256": "616bb7b7d2d0fc2bf62145627574d5167337efd26098c85c1a1d3ec85dece1d6",
+      "artifact_sha256": "f7a6d518b1919e4d3642704e7db2979eee8856d120d14ab9942a8f5aa1ee89d2"
+    },
+    "static-checks.json": {
+      "artifact": "raw/static-checks.json.gz",
+      "source_bytes": 4350,
+      "source_sha256": "54b9aa8a48a1116abcc4af7e155e0beeac123f421883dba18aab6f3edec3e944",
+      "artifact_sha256": "1a8e39370ff8fceb0ce7f82f6070f60154b32843c228f11b86204b6f57dad4c9"
+    }
+  },
+  "status": "DRAFT_UNVALIDATED",
+  "compiled": false,
+  "native_windows_run": false
+}

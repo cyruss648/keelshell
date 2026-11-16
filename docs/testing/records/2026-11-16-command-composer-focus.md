@@ -93,3 +93,16 @@ macOS 和 Ubuntu success，Windows app `1310 pass / 8 fail / 2 ignored`。
 精确新源码 Quality `43801985537 / attempt 1` 已实际启动，首个快照为
 in_progress，未取消旧 run。活动跟进目录为 `work/command-focus-ci-20261116/`；
 没有提前签署新 CI、反向 Tab 全路径或完整产品。
+
+后续文档 `7df6020c0bd302cd16197120e906c3bce627d44e` 已推送并三方匹配；
+精确源码/文档两树再次绑定 718 输入和 205 原件，零 mismatch。
+docs push 查询为 0 个 workflow run，源码 CI 的三个 job 首次读回仍 in_progress。
+这些快照按精确 SHA 分开保存，不代签当前或未来终态。
+
+Windows 调查作者已完成报告、诊断候选和静态文本检查后关闭，根因保持 UNKNOWN。
+其[草稿原件](2026-11-16-windows-archive-diagnosis-draft/README.md)不计入本批
+编译或测试；尚未集成。随后确认不再依赖旧目录，回收旧 CI 84 个重复文件、
+`1,265,813` 字节；25 份草稿原件核对 gzip 与 Git index 后也回收临时副本、
+`550,312` 字节。三个临时目录现在均 absent，共回收 322 个文件、逻辑
+`232,321,074` 字节。所有本批 agent 已关闭，没有新建用户 chat/worktree，
+活动新 CI 目录仍保留。

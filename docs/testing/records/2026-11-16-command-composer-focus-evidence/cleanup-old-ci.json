@@ -1,0 +1,10 @@
+{
+  "source": "work/platform-ci-followup-20261116",
+  "source_absent": true,
+  "files_removed": 84,
+  "logical_bytes_removed": 1265813,
+  "all_84_files_already_in_source_commit": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+  "complete_paths_and_original_bytes_rechecked": true,
+  "windows_diagnosis_author_finished_and_closed": true,
+  "active_new_ci_preserved": "work/command-focus-ci-20261116"
+}

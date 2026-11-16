@@ -1,0 +1,11 @@
+{
+  "files_removed": 25,
+  "logical_bytes_removed": 550312,
+  "source_absent": true,
+  "all_originals_losslessly_archived_and_git_index_blobs_matched": true,
+  "author_closed": true,
+  "compiled": false,
+  "tests_executed": 0,
+  "native_windows_run": false,
+  "formal_engineering_inputs_unchanged": true
+}

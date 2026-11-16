@@ -41,11 +41,20 @@ IME/VoiceOver 与 raw PTY 审计未验。三个根进程、两端口和私有目
 源码/原生 reviewer 与旧 CI observer 都已关闭。
 持久入口为[本批原件](testing/records/2026-11-16-command-composer-focus-evidence/README.md)。
 已回收本批 213 个临时文件、逻辑 `230,504,949` 字节，原工作目录 absent；
-正常程序与唯一 target 保留。旧 CI 目录已完整封存但仍被 Windows 归档调查
-使用，待调查结束回收。没有新建用户 chat 或多余 worktree。
+正常程序与唯一 target 保留。Windows 调查完成后又核对并回收旧 CI 的
+84 文件、`1,265,813` 字节；旧目录 absent。没有新建用户 chat 或多余 worktree。
 新源码 Quality `43801985537 / attempt 1` 已启动，首个快照 in_progress，
 活动原件在 `work/command-focus-ci-20261116/`，不能提前清理或称通过。
-下一批 Windows 归档阶段诊断在独立临时副本准备；未集成、未编译或验收。
+下一批 Windows 归档诊断候选已封存到
+[草稿原件](testing/records/2026-11-16-windows-archive-diagnosis-draft/README.md)：
+仅修改测试文件，233 行新增、4 行删除；补丁 SHA-256 为
+`ea240445e8c93d337d2a6b9e8bda75607433e6b19de861e72176ea97bc54f745`。
+根因仍 UNKNOWN；没有集成、编译、独立复核或 Windows 运行，不计入本批门禁。
+作者已关闭，25 份原件核对 Git index 后回收临时副本、`550,312` 字节；
+现在没有本批活动 agent，仍需保留新 CI 跟进目录。下一步先评估并集成诊断，
+取得真实 Windows 的准备状态，不能跳过八项归档测试或放宽安全断言。
+交付文档提交 `7df6020` 已推送并三方匹配，零 docs push run，
+没有重启源码 CI；精确源码/证据两树再次绑定零 mismatch。
 仅补交付文档时不重复工程输入未变的完整门禁。
 
 ## 上一批次：三平台工程门禁修复（macOS/Linux CI 通过，Windows 归档待修）

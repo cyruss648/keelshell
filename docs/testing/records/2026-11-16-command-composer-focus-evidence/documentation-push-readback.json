@@ -1,0 +1,75 @@
+{
+  "documentation_commit": "7df6020c0bd302cd16197120e906c3bce627d44e",
+  "local": "7df6020c0bd302cd16197120e906c3bce627d44e",
+  "tracking": "7df6020c0bd302cd16197120e906c3bce627d44e",
+  "remote": "7df6020c0bd302cd16197120e906c3bce627d44e",
+  "three_way_match": true,
+  "push_receipt": {
+    "observed_exit": 0,
+    "controller_exit": 0,
+    "timed_out": false,
+    "interrupted": false,
+    "terminal": {
+      "direct_reaped": true,
+      "active_processes": 0,
+      "pipes_drained": true,
+      "errors": []
+    },
+    "errors": [],
+    "command": [
+      "git",
+      "-c",
+      "http.version=HTTP/1.1",
+      "-c",
+      "http.postBuffer=52428800",
+      "push",
+      "origin",
+      "feature/editor-unicode-codec-20261114"
+    ],
+    "seconds": 2.1941890840007545,
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+    "cargo_owner_checkout_unchanged": true,
+    "wrapper_stdout": "",
+    "wrapper_stderr": "",
+    "log_bytes": 146,
+    "log_sha256": "d2a51574b152a980f7dd02a69af419a85414518014cbc3e2ddb5c36e9a6e1656"
+  },
+  "source_commit": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+  "source_run_id": 43801985537,
+  "source_run_attempt": 1,
+  "source_jobs_r1": [
+    {
+      "id": 133084141812,
+      "name": "native (windows-2025)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 133084142077,
+      "name": "native (macos-26)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 133084142104,
+      "name": "native (ubuntu-24.04)",
+      "status": "in_progress",
+      "conclusion": null
+    }
+  ],
+  "docs_push_workflow_count": 0,
+  "source_run_not_cancelled_by_docs": true,
+  "dual_tree_binding": {
+    "recorded_utc": "2026-11-16T04:11:54.581086+00:00",
+    "source_commit": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+    "evidence_commit": "7df6020c0bd302cd16197120e906c3bce627d44e",
+    "git_index": false,
+    "engineering_inputs": 718,
+    "engineering_sha256": "c3fa4e8b1a8a0f11f8177334fd0c9927e2f1f45d4875cb61212987fadfc6f056",
+    "raw_originals": 205,
+    "git_blobs_current_files_and_lossless_sources_match": true,
+    "complete_engineering_path_sets_match": true,
+    "mismatches": []
+  }
+}
