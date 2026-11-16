@@ -21,6 +21,13 @@ rustdoc `14/0`、Python `290 run / 1 skipped`，归档 helper `30/30`，
 其他主题原生、完整产品/多平台桌面边界保持。
 见[当前记录](testing/records/2026-11-16-command-composer-focus.md)和
 [决策](adr/0146-command-composer-tab-focus.md)。
+源码及 205 份原件已在 `9d0f886` 推送并三方匹配；index 和精确提交绑定
+零 mismatch。另一个新非作者限定批准原生片段与 r2 清理，P0–P3 全 0；
+两个 reviewer 与旧 CI observer 已关闭。本批 213 个重复临时文件、
+逻辑 `230,504,949` 字节已回收，正常程序/target 保留；旧 CI 原件因下一批
+调查仍需读取暂留。新源码精确 CI `43801985537 / attempt 1` 已启动，
+首个快照 in_progress，不代签通过。下一批 Windows 归档诊断准备中，
+未集成或验收；完整产品目标保持进行中。
 
 ## 2026-11-16 三平台工程门禁修复（macOS/Linux CI 通过，Windows 归档待修）
 

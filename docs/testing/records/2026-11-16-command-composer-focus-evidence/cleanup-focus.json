@@ -1,0 +1,12 @@
+{
+  "source": "work/composer-focus-integration-20261116",
+  "source_absent": true,
+  "files_removed": 213,
+  "logical_bytes_removed": 230504949,
+  "originals_losslessly_archived": 205,
+  "all_original_and_omitted_bytes_verified_before_removal": true,
+  "normal_gui_mcp_and_effective_target_preserved": true,
+  "other_worktrees_branches_and_new_diagnostic_work_preserved": true,
+  "old_ci_directory": "retained while Windows diagnosis agent consumes it; full byte copy already archived",
+  "active_ci_directory": "work/command-focus-ci-20261116"
+}

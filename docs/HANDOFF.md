@@ -33,6 +33,21 @@ IME/VoiceOver 与 raw PTY 审计未验。三个根进程、两端口和私有目
 [当前记录](testing/records/2026-11-16-command-composer-focus.md)继续。
 唯一 target 仍属于当前父 checkout，没有切换归属。
 
+本批源码与 205 份无损原件已在
+`9d0f886acda4e48058004a28f85ef1fa3c510d4c` 提交并推送，三方 SHA 相等。
+首次 HTTP 408 的 push 和远端仍旧值保留；单命令 HTTP/1.1 普通推送成功，
+没有永久改 Git 配置。Git index 和精确源码提交绑定均零 mismatch。
+新非作者原生证据也限定批准，P0–P3 全 0，查看两张 PNG，没有独立测试；
+源码/原生 reviewer 与旧 CI observer 都已关闭。
+持久入口为[本批原件](testing/records/2026-11-16-command-composer-focus-evidence/README.md)。
+已回收本批 213 个临时文件、逻辑 `230,504,949` 字节，原工作目录 absent；
+正常程序与唯一 target 保留。旧 CI 目录已完整封存但仍被 Windows 归档调查
+使用，待调查结束回收。没有新建用户 chat 或多余 worktree。
+新源码 Quality `43801985537 / attempt 1` 已启动，首个快照 in_progress，
+活动原件在 `work/command-focus-ci-20261116/`，不能提前清理或称通过。
+下一批 Windows 归档阶段诊断在独立临时副本准备；未集成、未编译或验收。
+仅补交付文档时不重复工程输入未变的完整门禁。
+
 ## 上一批次：三平台工程门禁修复（macOS/Linux CI 通过，Windows 归档待修）
 
 更新：精确 `80647ed` 的 Quality `43797131194 / attempt 1` 已终态 failure；

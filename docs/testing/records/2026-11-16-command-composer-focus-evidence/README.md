@@ -40,3 +40,15 @@
 718 项当前工程 blob；可另传 `--source-commit` 比较源码和证据两棵 Git 树。
 提交、推送与清理以单列实际回执为准。后续源码修改后应读取保存的绑定回执与
 精确历史提交，不应放宽本冻结的当前字节检查。
+
+源码与本目录 205 份原件已在 `9d0f886acda4e48058004a28f85ef1fa3c510d4c`
+提交并推送，`index-input-binding.json` 和 `source-commit-binding.json`
+均零 mismatch。`source-push-readback.json` 保存实际三方一致、
+首次 HTTP 408 与成功重试；`delivery-source-*` 另存 14 份无损交付命令原件
+和逐项摘要，包含精确新源码 CI `43801985537 / attempt 1` 的首次快照。
+这些后补交付回执不冒称早已位于源码提交中。
+
+`cleanup-focus.json` 记录核对归档原字节后删除 213 个临时文件、逻辑
+`230,504,949` 字节，旧焦点工作目录 absent，正常 GUI/MCP 与有效 target 保留。
+旧 CI 原件目录因下一批归档诊断仍需读取暂留，活动新 CI 原件另位于
+`work/command-focus-ci-20261116/`；后续清理和文档交付按各单列回执读取。

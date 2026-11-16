@@ -1,0 +1,106 @@
+{
+  "source_commit": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+  "branch": "feature/editor-unicode-codec-20261114",
+  "local": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+  "tracking": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+  "remote": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+  "three_way_match": true,
+  "first_push": {
+    "observed_exit": 1,
+    "controller_exit": 1,
+    "timed_out": false,
+    "interrupted": false,
+    "terminal": {
+      "direct_reaped": true,
+      "active_processes": 0,
+      "pipes_drained": true,
+      "errors": []
+    },
+    "errors": [],
+    "command": [
+      "git",
+      "push",
+      "origin",
+      "feature/editor-unicode-codec-20261114"
+    ],
+    "seconds": 48.50595537499976,
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+    "cargo_owner_checkout_unchanged": true,
+    "wrapper_stdout": "",
+    "wrapper_stderr": "",
+    "log_bytes": 202,
+    "log_sha256": "38c3c0f25f754588183e31f0c5ffe153dc9826d57188ab03c3f5071d5d7d44c0"
+  },
+  "first_push_remote_after_error": "892aada58a61458fea0f130ccc912036daf2804b",
+  "successful_push": {
+    "observed_exit": 0,
+    "controller_exit": 0,
+    "timed_out": false,
+    "interrupted": false,
+    "terminal": {
+      "direct_reaped": true,
+      "active_processes": 0,
+      "pipes_drained": true,
+      "errors": []
+    },
+    "errors": [],
+    "command": [
+      "git",
+      "-c",
+      "http.version=HTTP/1.1",
+      "-c",
+      "http.postBuffer=52428800",
+      "push",
+      "origin",
+      "feature/editor-unicode-codec-20261114"
+    ],
+    "seconds": 10.287175292000029,
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+    "cargo_owner_checkout_unchanged": true,
+    "wrapper_stdout": "",
+    "wrapper_stderr": "",
+    "log_bytes": 146,
+    "log_sha256": "199f935ea469c25e30ba998908374b35418d39557992b2aa629bef5e78d72bd5"
+  },
+  "quality": {
+    "id": 43801985537,
+    "run_attempt": 1,
+    "event": "push",
+    "head_sha": "9d0f886acda4e48058004a28f85ef1fa3c510d4c",
+    "status": "in_progress",
+    "conclusion": null
+  },
+  "ordinary_fast_forward": true,
+  "repository_http_config_unchanged": true,
+  "git_remote_readback_receipt": {
+    "observed_exit": 0,
+    "controller_exit": 0,
+    "timed_out": false,
+    "interrupted": false,
+    "terminal": {
+      "direct_reaped": true,
+      "active_processes": 0,
+      "pipes_drained": true,
+      "errors": []
+    },
+    "errors": [],
+    "command": [
+      "git",
+      "ls-remote",
+      "--heads",
+      "origin",
+      "refs/heads/feature/editor-unicode-codec-20261114"
+    ],
+    "seconds": 0.799944583000979,
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+    "cargo_owner_checkout_unchanged": true,
+    "wrapper_stdout": "",
+    "wrapper_stderr": "",
+    "log_bytes": 90,
+    "log_sha256": "423c9bafde443373e71b09884363818b18d0bcd2063e8d7dfee2b534e913a81f"
+  },
+  "completed_product_or_native_acceptance": false
+}

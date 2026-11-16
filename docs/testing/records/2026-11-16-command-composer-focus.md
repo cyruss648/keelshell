@@ -66,3 +66,30 @@ macOS 和 Ubuntu success，Windows app `1310 pass / 8 fail / 2 ignored`。
 八项均在归档审核准备的共同断言失败，底层原因未记录；原生进程身份诊断成功，
 不能把成功控制里的 winerror 1816 当失败原因。详见
 [CI 跟进](2026-11-16-platform-ci-followup.md)，不移签为本候选 CI。
+
+## 交付与接续
+
+源码、文档及 205 份无损原件已在
+`9d0f886acda4e48058004a28f85ef1fa3c510d4c` 提交并推送当前功能分支，
+本地、tracking 与远端 SHA 实际相等。首次 push 返回 HTTP 408，随后只读查询
+确认远端仍为旧 `892aada`；使用单命令 HTTP/1.1 与有界 postBuffer 的普通
+推送成功，`exit 0 / reaped / 10.287s`，没有修改仓库 HTTP 配置或强推。
+首次以 `HEAD` 调 verifier 被精确 SHA 参数校验拒绝，未生成验证输出；
+改用完整 40 位 SHA 后源码提交绑定成功，没有放宽 verifier。
+
+源码与实际原件在 Git index、精确源码提交均零 mismatch。新非作者原生证据
+复核仅批准上述限定片段和 r2 清理，开放 P0–P3 为 0，亲自查看两张 PNG，
+独立执行测试 0；最终 99 项评审输入集合 SHA-256 为
+`47bfda9a865b1aed46cfd73a514cc99cf825da9f6ebd655d5a702c7216bcba9f`。
+源码 reviewer、原生 reviewer 与旧 CI observer 都已关闭，未创建用户 chat。
+
+字节核对后回收 213 个临时文件、逻辑 `230,504,949` 字节；
+原 `work/composer-focus-integration-20261116` 已 absent。正常 GUI/MCP、
+唯一有效 target、其他任务 worktree/分支保持。旧 CI 工作目录的完整 84 文件
+副本已在本目录原件中封存；原目录因后续 Windows 归档调查仍需读取而暂留，
+调查结束再回收。交付命令原件以 `delivery-source-*` 单列，不伪装成源码
+提交前已存在的回执。
+
+精确新源码 Quality `43801985537 / attempt 1` 已实际启动，首个快照为
+in_progress，未取消旧 run。活动跟进目录为 `work/command-focus-ci-20261116/`；
+没有提前签署新 CI、反向 Tab 全路径或完整产品。
