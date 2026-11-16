@@ -297,6 +297,139 @@ fn simultaneous_enumerations_have_independent_native_scan_positions() -> io::Res
     Ok(())
 }
 
+// Return one non-dot entry without ever restarting the held native scan. The
+// fixed fixture permits at most the two dot entries before a name or EOF.
+fn next_cursor_name(cursor: &File) -> io::Result<Option<String>> {
+    use std::mem::size_of;
+    use std::os::windows::io::AsRawHandle;
+    use std::ptr;
+    use windows_sys::Wdk::Storage::FileSystem::{FileNamesInformation, NtQueryDirectoryFile};
+    use windows_sys::Win32::System::IO::IO_STATUS_BLOCK;
+
+    let mut storage = [0u64; 128];
+    for _ in 0..3 {
+        let mut status_block = IO_STATUS_BLOCK::default();
+        // SAFETY: callers supply native synchronous directory handles. The
+        // aligned 1 KiB buffer fits a complete maximum-length name record, and
+        // the initialized buffer and IOSB stay live until synchronous completion.
+        let status = unsafe {
+            NtQueryDirectoryFile(
+                cursor.as_raw_handle(),
+                ptr::null_mut(),
+                None,
+                ptr::null(),
+                &mut status_block,
+                storage.as_mut_ptr().cast(),
+                size_of::<[u64; 128]>() as u32,
+                FileNamesInformation,
+                true,
+                ptr::null(),
+                false,
+            )
+        };
+        if status == 0x8000_0006_u32 as i32 {
+            return Ok(None);
+        }
+        if status != 0 {
+            return Err(io::Error::other(format!(
+                "single-entry cursor query NTSTATUS=0x{:08x}",
+                status as u32
+            )));
+        }
+        let length = status_block.Information;
+        if length == 0 || length > size_of::<[u64; 128]>() {
+            return Err(io::Error::other("single-entry cursor response length"));
+        }
+        // SAFETY: length was checked against this initialized storage.
+        let bytes = unsafe { std::slice::from_raw_parts(storage.as_ptr().cast::<u8>(), length) };
+        let mut names = Vec::new();
+        crate::directory_records::decode(bytes, &mut names)?;
+        if let Some(name) = names.pop() {
+            assert!(
+                names.is_empty(),
+                "ReturnSingleEntry returned multiple names"
+            );
+            return Ok(Some(name));
+        }
+    }
+    Err(io::Error::other("too many dot entries in cursor fixture"))
+}
+
+fn finish_cursor(cursor: &File, mut names: Vec<String>) -> io::Result<Vec<String>> {
+    for _ in 0..5 {
+        match next_cursor_name(cursor)? {
+            Some(name) => names.push(name),
+            None => {
+                names.sort();
+                return Ok(names);
+            }
+        }
+    }
+    Err(io::Error::other("cursor fixture did not reach EOF"))
+}
+
+#[test]
+fn reopened_directory_cursors_do_not_advance_or_restart_other_live_scans() -> io::Result<()> {
+    let (_temporary, path, parent) = fixture()?;
+    let expected = ["alpha", "bravo", "文件", "🦀"];
+    for name in expected {
+        std::fs::write(path.join(name), [])?;
+    }
+    let parent_first = next_cursor_name(parent.as_file())?
+        .ok_or_else(|| io::Error::other("missing parent scan entry"))?;
+    let first = native::directory_cursor(parent.as_file())?;
+    let first_name =
+        next_cursor_name(&first)?.ok_or_else(|| io::Error::other("missing first cursor entry"))?;
+    let second = native::directory_cursor(parent.as_file())?;
+    let mut expected: Vec<String> = expected.into_iter().map(str::to_owned).collect();
+    expected.sort();
+    // All three scans are live. Exhausting the second must leave both prior
+    // positions unchanged. A DuplicateHandle-based opener fails these sets.
+    assert_eq!(finish_cursor(&second, Vec::new())?, expected);
+    assert_eq!(finish_cursor(&first, vec![first_name])?, expected);
+    assert_eq!(
+        finish_cursor(parent.as_file(), vec![parent_first])?,
+        expected
+    );
+    Ok(())
+}
+
+#[test]
+fn directory_cursor_keeps_the_held_identity_when_its_original_path_is_rebound() -> io::Result<()> {
+    let (_temporary, path, parent) = fixture()?;
+    std::fs::create_dir(path.join("held"))?;
+    std::fs::write(path.join("held/original-only"), [])?;
+    let held = parent.open_directory("held")?;
+    let original = held.stamp()?;
+    std::fs::rename(path.join("held"), path.join("moved"))?;
+    std::fs::create_dir(path.join("held"))?;
+    std::fs::write(path.join("held/replacement-only"), [])?;
+    let cursor = native::directory_cursor(held.as_file())?;
+    assert_eq!(metadata(&cursor)?.directory_stamp()?, original);
+    assert_eq!(held.entries()?, ["original-only"]);
+    assert_eq!(held.stamp()?, original);
+    assert_eq!(
+        parent.open_directory("held")?.entries()?,
+        ["replacement-only"]
+    );
+    Ok(())
+}
+
+#[test]
+fn directory_cursor_preserves_private_dacl_and_rejects_regular_files() -> io::Result<()> {
+    let (_temporary, path, parent) = fixture()?;
+    let stage = parent.create_directory("private")?;
+    let before = metadata(stage.as_file())?.directory_stamp()?;
+    let cursor = native::directory_cursor(stage.as_file())?;
+    verify_private(&cursor, true)?;
+    assert_eq!(metadata(&cursor)?.directory_stamp()?, before);
+    verify_private(stage.as_file(), true)?;
+    std::fs::write(path.join("regular"), [])?;
+    let regular = parent.open_file("regular")?;
+    assert!(native::directory_cursor(&regular).is_err());
+    Ok(())
+}
+
 #[test]
 fn directory_enumeration_continues_after_a_full_native_query_buffer() -> io::Result<()> {
     let (_temporary, path, parent) = fixture()?;

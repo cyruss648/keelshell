@@ -55,7 +55,13 @@ volume、完整对象观察及私有 DACL；不按路径重新赋予来源身份
 发布针对保留的 `PrivateEntry`，`NtSetInformationFile(FileRenameInformation)`
 传入目标目录句柄与单个名称，`ReplaceIfExists=false`。目录枚举使用独立打开
 的同步 cursor，并逐条检查有界 UTF-16 返回链；不依赖共享 scan state 的复制
-句柄。rename 缓冲满足完整固定结构加名称字节的文档最小长度，传入实际初始化
+句柄。2026-11-16 的原生预检已确认 NT `"."` 相对名在此 cursor 打开处失败。
+后续候选使用保留目录句柄加空 NT 相对名重开，并比较重开前后的
+identity/attributes/security；空名仍提供存活的 UTF-16 backing storage，
+不把其终止单元计入 UNICODE_STRING 长度。不重建路径，也不按路径回退，
+私有 child 名称的公共校验继续拒绝空分量。该机制的实际 Windows 通过状态
+由[游标记录](../testing/records/2026-11-16-windows-directory-cursor.md)单独维护。
+rename 缓冲满足完整固定结构加名称字节的文档最小长度，传入实际初始化
 的对齐缓冲长度，另测单 UTF-16 单元和 255 单元名称。目标预检查拒绝 portable
 Unicode case alias；系统调用原子拒绝现有
 目标，成功后还需完整 readback、身份、私有 DACL、父链、唯一名称及 staging

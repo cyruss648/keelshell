@@ -1589,20 +1589,43 @@ async fn ordinary_folder_transfer_pause_and_cancel_preserve_partial_tree_status(
     std::fs::create_dir(&folder).checked("ordinary source tree");
     let data = vec![0x4e; 768 * 1024];
     std::fs::write(folder.join("data.bin"), &data).checked("ordinary tree source");
-    h.server.filesystem.set_transfer_write_delay(55);
+    // Keep this directory upload incomplete until the real session receives
+    // pause. UI rendering speed must not decide whether pause can be clicked.
+    let hold = h
+        .server
+        .filesystem
+        .hold_transfer_writes_after_first("/ordinary-tree/data.bin")
+        .checked("hold the ordinary tree's second WRITE before mutation and ACK");
     h.local_input(cx, &folder);
     h.click(cx, "upload-directory");
     h.idle(cx).await;
     h.click(cx, "confirm-file-operation");
     cx.wait_for(h.window, Duration::from_secs(8), |_, cx| {
-        h.panel
-            .read(cx)
-            .transfer
-            .as_ref()
-            .is_some_and(|s| s.transferred > 0 && s.phase == TransferPhase::Running)
+        hold.entered() > 0
+            && h.panel
+                .read(cx)
+                .transfer
+                .as_ref()
+                .is_some_and(|s| s.transferred > 0 && s.phase == TransferPhase::Running)
     })
     .await;
+    let pause = h.panel.read_with(cx, |panel, _| {
+        super::test_server::pause_handoff_fixture::PauseHandoff::install(
+            panel
+                .transfer_pause
+                .as_ref()
+                .checked_option("ordinary tree's selected pause channel"),
+            false,
+        )
+    });
     h.click(cx, "pause-file-transfer");
+    cx.wait_for(h.window, Duration::from_secs(5), |_, _| pause.forwarded())
+        .await;
+    assert!(
+        !hold.expired() && !pause.expired(),
+        "ordinary tree pause must reach the real session before releasing its WRITE"
+    );
+    hold.release();
     h.phase(cx, TransferPhase::Paused).await;
     h.click(cx, "cancel-active-file-operation");
     h.idle(cx).await;

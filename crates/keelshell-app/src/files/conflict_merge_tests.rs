@@ -529,14 +529,24 @@ async fn stale_merge_frame_actions_cannot_mutate_a_replacement_review(cx: &mut T
         });
     })
     .checked("start a fresh remote merge observation");
-    // Let the worker deliver its result without painting a replacement frame;
-    // the stale-coordinate dispatch below must still exercise the previous
-    // retained listeners.
-    for _ in 0..32 {
+    // Draining ready GPUI tasks alone neither advances the result receiver's
+    // timer nor waits for the real SSH worker. Keep the existing Harness::idle
+    // ceiling, but do not explicitly repaint the retained action frame.
+    let started = Instant::now();
+    loop {
         cx.run_until_parked();
-        if cx.update(|cx| !h.panel.read(cx).busy) {
+        if cx.update(|cx| {
+            let panel = h.panel.read(cx);
+            !panel.busy && panel.operation_id.is_none()
+        }) {
             break;
         }
+        assert!(
+            started.elapsed() < Duration::from_secs(12),
+            "replacement merge worker did not complete before stale-frame dispatch"
+        );
+        std::thread::sleep(Duration::from_millis(1));
+        cx.executor().advance_clock(Duration::from_millis(1));
     }
 
     h.panel.read_with(cx, |panel, _| {

@@ -106,6 +106,9 @@ fn open(
         .checked_mul(2)
         .and_then(|n| u16::try_from(n).ok())
         .ok_or_else(|| invalid("native object name exceeds its bound"))?;
+    // Keep live backing storage even for an empty handle-relative reopen name.
+    // UNICODE_STRING counts only the name; this terminator is not included.
+    encoded.push(0);
     let object_name = UNICODE_STRING {
         Length: length,
         MaximumLength: length,
@@ -278,10 +281,20 @@ pub(super) fn metadata(file: &File) -> io::Result<FileInfo> {
     })
 }
 
+pub(super) fn directory_cursor(parent: &File) -> io::Result<File> {
+    let original = metadata(parent)?.directory_stamp()?;
+    // Use an empty NT relative name for the held object, without resolving a dot
+    // child or reconstructing its path. A new synchronous open owns its scan
+    // state; duplicating a handle does not.
+    let cursor = open_child(parent, "", true)?;
+    if metadata(&cursor)?.directory_stamp()? != original {
+        return Err(invalid("directory changed while opening its scan cursor"));
+    }
+    Ok(cursor)
+}
+
 pub(super) fn entries(parent: &File) -> io::Result<Vec<String>> {
-    // A fresh synchronous file object owns this enumeration cursor. Duplicate
-    // handles share directory scan state and would race independent observers.
-    let cursor = open_child(parent, ".", true)
+    let cursor = directory_cursor(parent)
         .map_err(|error| observe(Operation::OpenDirectoryCursor, error, None))?;
     let mut storage = vec![0u64; 8192];
     let mut names = Vec::new();

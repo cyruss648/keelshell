@@ -9,12 +9,12 @@
 - 用户已确认远端恢复，完成的功能批次及时提交并推送，读取本地、tracking、
   远端 SHA；不强推。当前分支为 `feature/editor-unicode-codec-20261114`。
   最近已实际读回三方相等的提交是
-  `878f13b4cb58a45dfe96f32fc1c389ac7799366d`。
+  `80397acc98d5881cbd177d7259a54fd7f1556c4f`。
   `origin/main` 另有独立状态文档，不能直接覆盖。
 - 本批源码及证据已在 `878f13b` 推送原功能分支；临时
   `feature/archive-deadline-clock-20261116` 已删除，本地/tracking/远端均 absent。
-  新精确 Quality 为 `43815115588 / attempt 1`。Windows 预检已失败并取得
-  原生阶段，macOS/Ubuntu 完整 gate 仍运行；不移签旧 run。
+  精确 Quality `43815115588 / attempt 1` 已终态 failure：
+  Windows 预检及 macOS app 失败，Ubuntu success；不移签旧 run。
 - 保持原生 GPUI Kit 的 UI/core/session/AI 分层，阻塞 I/O 离开 UI 线程。
   只管理远程 SSH；本地终端、RDP、串口不在范围。
 - 三主题霜白、曜石、雾紫全部保留，通过 registry、Palette、组件形状和
@@ -30,7 +30,51 @@
 - 用户已授权提交推送、标签触发跨平台 Release、本地 Podman 联调；不含覆盖
   安装现有应用、遥测上传或跳过尚未完成的发行验证。
 
-## 活动批次：Windows 原生阶段诊断与 CI 预检
+## 活动批次：Windows 独立目录游标修复
+
+基线 `80397acc98d5881cbd177d7259a54fd7f1556c4f`，最终四文件候选已经集成、
+尚未提交；Windows 生产改动为保留句柄加空 NT 相对名重开独立游标，
+校验 identity/attributes/security，并增加三项 Windows 回归。
+app 的两处测试同步处理本机目录暂停超时和远端 macOS 合并审核缺审；
+没有生产 app 补丁。作者及三名非作者均已关闭。
+[本批记录](testing/records/2026-11-16-windows-directory-cursor.md)维护完整范围。
+
+- 初始两文件冻结 719 项
+  `67337a389845e537823adf5d10671d52b9fd3ec95df43ac1634161c1b5022749`；
+  最终四文件冻结 719 项
+  `f5ab8e7180b7e8fcd90610100f496e869468bdf0605f7b073c215ec30d4ebd83`。
+- `scoped-gate-r1` 实际 0/reaped/3.213s：x.y、fmt、本机 platform `18/0/0`、
+  Windows 全 target cross-Clippy `-D warnings` 通过；Windows 实际执行仍 0。
+- `full-gate-r1` 已实际 exit 1/reaped/485.787s，app `1338/1/2 ignored`：
+  普通目录暂停/取消回归等待条件 12s 超时，具体 await 未知。已保留失败，
+  后续 target/rustdoc/controller 未运行，不能签完整通过。
+- 新非作者仅批准 Windows 两文件静态范围，P0–P3 全 0，独立运行 0，已关闭。
+  35 项静态检查中的检查器文档范围误报保持；不移签到新 app 修订。
+- 父已将目录暂停测试的 55ms 时序条件换为真实 WRITE hold + session pause
+  handoff，原安全断言保持；专项实际 `1/0/0`、0/reaped/16.627s，
+  新非作者批准、开放 P0–P3 均 0、独立执行 0，已关闭。
+  macOS 源码 `878f13b` 的 job `133125295686` 另失败于
+  `stale_merge_frame_actions_cannot_mutate_a_replacement_review`，
+  app `1338/1/2`。其候选已集成：真实线程让步并推进 GPUI 时钟，等待操作完成，
+  focused `1/0/0`、完整模块 `35/0/0`，命令均 0/reaped。
+  新非作者静态批准、P0–P3 全 0、独立执行 0，已关闭。
+  自动重绘和部分按钮禁用意味着不能签四回调独立覆盖；原断言逐字节保持。
+- 最终 `full-gate-r2` 实际 `0/reaped/727.352s`：普通 Rust `3222/0/48 ignored`、
+  rustdoc `14/0`、Python `290 run / 289 passed / 1 skipped`；fmt、严格 workspace
+  Clippy、x.y 和三组 AI controller 通过。app `1339/0/2`，1,341 名及 session
+  归档 40 名逐项匹配；719 项工程输入路径和字节零漂移。
+  首轮失败及三份窄范围批准各自保留，不扩大其签署范围。当前无活动 agent。
+- 最新官方依赖检查实际 exit 0，37 包/113 声明全部核实，UNKNOWN 0，
+  无 manifest/lock 变更。旧批 UNKNOWN 保持历史事实。
+- 旧 Windows 编译库存 64 名加三新例形成预期 67 名，未当成实际执行。
+  后续必须检查真实 Windows 预检及八项 app，未运行不算成功。
+- 当前目录 `work/windows-directory-cursor-integration-20261116/`；
+  [74 份持久原件](testing/records/2026-11-16-windows-directory-cursor-evidence/README.md)
+  已归档，当前源码绑定零 mismatch，待随本批源码提交推送。
+  原作者候选目录 24 文件/457,582 字节已核对后回收。前批诊断 64 文件/4,244,910 字节已
+  在精确归档及末次读回核对后回收，旧目录不能再依赖。
+
+## 已交付：Windows 原生阶段诊断与 CI 预检
 
 基线 `64ce892428ad67ea70c1377c21f6d361db36497d`，四个工程文件提供 test-only 的固定 native 操作标签，
 原样保留 typed `io::Error`；正常依赖库不输出诊断。没有更改访问权、FFI 参数、
@@ -146,9 +190,11 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 
 ## 接续顺序与资源归属
 
-1. 已交付诊断，收尾后续 CI/清理证据和 docs push；不因文档或摘要再跑全量。
-2. 依据真实 Windows 游标失败集成最小候选及回归；新非作者复核、集中验证后
-   及时推送。不得放宽原安全断言、原生权限或将 app 未运行范围改成成功。
+1. 最终完整门禁和全部输入/逐名库存已核对成功，不重复运行已通过的门禁。
+   完成本批证据 index 绑定和提交；首轮失败及三片静态批准保持。
+2. 及时推送当前原功能分支，读取三方 SHA 和新精确 CI；
+   核对真实 Windows 67 项、三项新例、原 16 项及八项 app 归档。
+   不得放宽原安全断言、原生权限或将 app 未运行范围改成成功。
 3. 更新本批记录/路线、归档必要原件，完成 feature commit 和普通 push，
    实际读回本地、tracking 和远端 SHA。当前源码/归档提交身份分别绑定。
 4. 及时关闭自有 agents，回收已持久化的重复临时文件；不清理其他任务的
@@ -162,7 +208,8 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 正常 GUI 仍为上批摘要；门禁后 MCP 字节已变化，实测
 `3e9270c84f3aad14f331b06cb3f15e77f2d2a40602dcd61e90dd39b5b939ed4b`。
 不能再用 target 中 MCP 代签上一批程序；当前不签新正常包或新桌面验收。
-当前批次目录为 `work/windows-native-phases-integration-20261116/`；
+当前批次目录为 `work/windows-directory-cursor-integration-20261116/`；
+旧 `work/windows-native-phases-integration-20261116/` 已回收。
 前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 的 11 文件、
 23,386 字节已在 `878f13b` 归档后回收。
 旧 Windows 调查及 CI 作者两个目录共 646 文件/6,626,866 字节已逐项核对后回收。

@@ -6,6 +6,35 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
+## 2026-11-16 Windows 目录游标与文件回归同步
+
+四文件候选已集成。Windows 游标使用保留句柄加空 NT 相对名重开，
+保持身份、安全观察、同步、禁止 reparse 和本地卷约束；新增三项 Windows 回归，
+原 64 项实际库存加三新名构成预期 67 项，尚未当作已执行。
+本机 platform `18/0/0`、Windows 全 target cross-Clippy、fmt/x.y 通过。
+
+首轮完整 gate 实际 `1/reaped/485.787s`，app `1338/1/2`，普通目录暂停/取消
+条件等待超时，具体 await 未知。改为真实 WRITE hold 与 session pause
+handoff 后专项 `1/0/0`。源 `878f13b` 的 Quality `43815115588` 也已终态 failure：
+Windows 预检失败、macOS app 缺 replacement merge review、Ubuntu success。
+macOS app `1338/1/2 /739.41s` 的原日志保持；合并测试由 ready-only 32 轮
+改为有界等待 worker、线程让步和测试时钟推进，focused `1/0/0`、
+完整合并模块 `35/0/0`。
+
+三片均有新非作者静态批准，开放 P0–P3 全 0、独立执行 0，全部作者及 reviewer
+已关闭。静态检查器的文档范围误报保持，四回调独立覆盖/变异未签。
+最终 719 项冻结
+`f5ab8e7180b7e8fcd90610100f496e869468bdf0605f7b073c215ec30d4ebd83`；
+最终 `full-gate-r2` 实际 `0/reaped/727.352s`：普通 Rust `3222/0/48 ignored`、
+rustdoc `14/0`、Python `290 run / 289 passed / 1 skipped`，fmt、严格 Clippy、
+x.y 和三组 AI controller 均通过。app `1339/0/2` 的 1,341 名及 session
+归档 40 名逐项匹配，719 项输入路径和字节零漂移。
+实时依赖查询 37 包/113 声明全部通过，UNKNOWN 0，无 manifest/lock 变更。
+74 份原件已持久归档、源码绑定零 mismatch，待随本批提交推送。
+旧诊断 64 文件、原作者 24 文件、合并作者 9 文件均核对必要原件后清理。
+详见[本批记录](testing/records/2026-11-16-windows-directory-cursor.md)；
+真实 Windows 67 项、八项 app 归档、三平台桌面及完整产品仍开放。
+
 ## 2026-11-16 Windows 原生阶段诊断与 CI 预检
 
 已确认 `76b8253` 的 Quality `43806549649` 终态 failure：macOS/Ubuntu
